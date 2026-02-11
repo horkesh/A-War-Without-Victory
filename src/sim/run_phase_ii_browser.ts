@@ -7,6 +7,8 @@
  */
 
 import type { GameState } from '../state/game_state.js';
+import { cloneGameState } from '../state/clone.js';
+import { strictCompare } from '../state/validateGameState.js';
 import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
 import { populateFactionAoRFromControl, ensureFormationHomeMunsInFactionAoR } from '../scenario/aor_init.js';
 
@@ -21,19 +23,12 @@ export interface PhaseIITurnReport {
   phase_ii_aor_init?: boolean;
 }
 
-function cloneState(state: GameState): GameState {
-  if (typeof globalThis.structuredClone === 'function') {
-    return globalThis.structuredClone(state);
-  }
-  return JSON.parse(JSON.stringify(state)) as GameState;
-}
-
 /** Build mun_id -> sorted settlement IDs from graph. Deterministic order. */
 function buildSettlementsByMunFromGraph(
   settlements: Map<string, { mun1990_id?: string; mun_code: string }>
 ): Map<string, string[]> {
   const byMun = new Map<string, string[]>();
-  const sids = Array.from(settlements.keys()).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  const sids = Array.from(settlements.keys()).sort(strictCompare);
   for (const sid of sids) {
     const rec = settlements.get(sid);
     if (!rec) continue;
@@ -43,7 +38,7 @@ function buildSettlementsByMunFromGraph(
     byMun.set(munId, list);
   }
   for (const list of byMun.values()) {
-    list.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    list.sort(strictCompare);
   }
   return byMun;
 }
@@ -56,7 +51,7 @@ export function runPhaseIITurn(
   state: GameState,
   input: PhaseIITurnInput
 ): { nextState: GameState; report: PhaseIITurnReport } {
-  const working = cloneState(state);
+  const working = cloneGameState(state);
   if (working.meta.phase !== 'phase_ii') {
     throw new Error('runPhaseIITurn: state must be in phase_ii');
   }

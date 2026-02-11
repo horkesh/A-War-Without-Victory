@@ -4,6 +4,7 @@
  */
 
 import type { GameState } from '../state/game_state.js';
+import { strictCompare } from '../state/validateGameState.js';
 
 /**
  * Populate each faction's areasOfResponsibility with settlement IDs they control (from political_controllers).
@@ -14,7 +15,7 @@ export function populateFactionAoRFromControl(
   settlementIds: Iterable<string>
 ): void {
   const pc = state.political_controllers ?? {};
-  const sidsSorted = Array.from(settlementIds).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  const sidsSorted = Array.from(settlementIds).sort(strictCompare);
   const byFaction = new Map<string, string[]>();
   for (const sid of sidsSorted) {
     const controller = pc[sid] ?? null;
@@ -39,7 +40,7 @@ export function ensureFormationHomeMunsInFactionAoR(
   settlementsByMun: Map<string, string[]>
 ): void {
   const formations = state.formations ?? {};
-  const formationIds = Object.keys(formations).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  const formationIds = Object.keys(formations).sort(strictCompare);
   for (const fid of formationIds) {
     const formation = formations[fid];
     if (!formation?.faction || formation.status !== 'active') continue;
@@ -60,7 +61,7 @@ export function ensureFormationHomeMunsInFactionAoR(
       }
     }
     if (added) {
-      faction.areasOfResponsibility = Array.from(aorSet).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+      faction.areasOfResponsibility = Array.from(aorSet).sort(strictCompare);
     }
   }
 }

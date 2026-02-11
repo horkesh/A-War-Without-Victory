@@ -7,6 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import type { Scenario, ScenarioTurn, ScenarioAction } from './scenario_types.js';
+import { strictCompare } from '../state/validateGameState.js';
 import { stableStringify } from '../utils/stable_json.js';
 
 /**
@@ -67,10 +68,6 @@ export function normalizeActions(actions: ScenarioAction[]): ScenarioAction[] {
     if (a.type !== b.type) return a.type < b.type ? -1 : 1;
     return strictCompare(stableStringify(a), stableStringify(b));
   });
-}
-
-function strictCompare(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0;
 }
 
 /**

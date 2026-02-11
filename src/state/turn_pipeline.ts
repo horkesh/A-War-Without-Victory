@@ -24,6 +24,7 @@
 
 
 import type { GameState } from './game_state.js';
+import { cloneGameState } from './clone.js';
 import { ALL_GATES_OPEN } from './phase_gates.js';
 import {
   PHASE_ORDER,
@@ -51,13 +52,6 @@ const PHASE_HANDLERS = [
   phasePersistence
 ];
 
-function cloneState(state: GameState): GameState {
-  if (typeof globalThis.structuredClone === 'function') {
-    return globalThis.structuredClone(state);
-  }
-  return JSON.parse(JSON.stringify(state)) as GameState;
-}
-
 export interface RunOneTurnResult {
   state: GameState;
   phasesExecuted: string[];
@@ -76,7 +70,7 @@ export function runOneTurn(
   inputs: TurnPipelineInput,
   gate: typeof ALL_GATES_OPEN = ALL_GATES_OPEN
 ): RunOneTurnResult {
-  let working = cloneState(state);
+  let working = cloneGameState(state);
 
   if (working.meta.phase === 'phase_0') {
     runPhase0Turn(working, {});

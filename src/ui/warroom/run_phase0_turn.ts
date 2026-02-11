@@ -6,14 +6,8 @@
  */
 
 import type { GameState } from '../../state/game_state.js';
+import { cloneGameState } from '../../state/clone.js';
 import { runPhase0Turn } from '../../phase0/turn.js';
-
-function cloneState(state: GameState): GameState {
-  if (typeof globalThis.structuredClone === 'function') {
-    return globalThis.structuredClone(state);
-  }
-  return JSON.parse(JSON.stringify(state)) as GameState;
-}
 
 /**
  * Run one Phase 0 turn: runPhase0Turn then advance meta.turn by 1.
@@ -21,7 +15,7 @@ function cloneState(state: GameState): GameState {
  * Only valid when state.meta.phase === 'phase_0'.
  */
 export function runPhase0TurnAndAdvance(state: GameState, seed: string): GameState {
-  const working = cloneState(state);
+  const working = cloneGameState(state);
   if (working.meta.phase !== 'phase_0') {
     return working;
   }

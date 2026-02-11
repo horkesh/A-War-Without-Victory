@@ -8,6 +8,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { runScenario } from './scenario_runner.js';
+import { strictCompare } from '../state/validateGameState.js';
 import { stableStringify } from '../utils/stable_json.js';
 import type { BaselineOpsScopeMode } from './scenario_runner.js';
 
@@ -63,10 +64,6 @@ export interface BaselineOpsSensitivityReport {
   meta: SensitivityReportMeta;
   per_run: PerRunMetrics[];
   checks: SensitivityChecks;
-}
-
-function strictCompare(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0;
 }
 
 function recordFromFactionKeys(obj: Record<string, number> | undefined): Record<string, number> {

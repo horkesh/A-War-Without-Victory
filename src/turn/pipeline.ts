@@ -1,4 +1,5 @@
 import { GameState } from '../state/game_state.js';
+import { cloneGameState } from '../state/clone.js';
 import { defaultSteps } from './steps.js';
 
 export type Rng = () => number;
@@ -21,7 +22,7 @@ export interface TurnOptions {
 
 export function executeTurn(state: GameState, options: TurnOptions = {}): GameState {
   const seed = options.seed ?? state.meta.seed ?? 'default-seed';
-  const workingState = cloneState(state);
+  const workingState = cloneGameState(state);
 
   workingState.meta = {
     ...workingState.meta,
@@ -62,10 +63,3 @@ function hashSeed(seed: string): number {
   return (h ^ (h >>> 16)) >>> 0;
 }
 
-function cloneState(state: GameState): GameState {
-  if (typeof globalThis.structuredClone === 'function') {
-    return globalThis.structuredClone(state);
-  }
-
-  return JSON.parse(JSON.stringify(state)) as GameState;
-}

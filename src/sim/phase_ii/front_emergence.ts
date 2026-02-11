@@ -6,16 +6,12 @@
  */
 
 import type { GameState, PhaseIIFrontDescriptor, PhaseIIFrontStability } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import { computeFrontEdges } from '../../map/front_edges.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 
 /** Turns of sustained opposing control before a front segment is considered static (Engine Invariants §6). */
 export const STABILIZATION_TURNS = 4;
-
-/** Strict comparator for deterministic ordering (Engine Invariants §11.3). */
-function strictCompare(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0;
-}
 
 /**
  * Derive front stability from segment active_streak and max_active_streak.

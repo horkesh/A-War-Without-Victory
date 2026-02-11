@@ -1,4 +1,5 @@
 import { GameState, type FactionId, type PhaseIIFrontDescriptor, type PhaseEAorMembership, type PhaseERearZoneDescriptor } from '../state/game_state.js';
+import { cloneGameState } from '../state/clone.js';
 import { EdgeRecord } from '../map/settlements.js';
 import { computeFrontEdges } from '../map/front_edges.js';
 import { computeFrontRegions } from '../map/front_regions.js';
@@ -1299,7 +1300,7 @@ const phaseIPhases: NamedPhase[] = [
 ];
 
 export async function runTurn(state: GameState, input: TurnInput): Promise<{ nextState: GameState; report: TurnReport }> {
-  const working = cloneState(state);
+  const working = cloneGameState(state);
 
   // Phase C Step 2: Phase 0 must use state pipeline; Phase I only when referendum_held and current_turn >= war_start_turn
   const phase = working.meta.phase;
@@ -1404,10 +1405,3 @@ function hashSeed(seed: string): number {
   return (h ^ (h >>> 16)) >>> 0;
 }
 
-function cloneState(state: GameState): GameState {
-  if (typeof globalThis.structuredClone === 'function') {
-    return globalThis.structuredClone(state);
-  }
-
-  return JSON.parse(JSON.stringify(state)) as GameState;
-}

@@ -7,6 +7,7 @@
 
 import type { GameState, FactionId, MunicipalityId, ControlStatus } from '../state/game_state.js';
 import type { OrganizationalPenetration } from '../state/game_state.js';
+import { strictCompare } from '../state/validateGameState.js';
 
 /** Base stability (Phase_0_Spec §4.6). */
 export const STABILITY_BASE = 50;
@@ -154,7 +155,7 @@ export function updateAllStabilityScores(
   }
 ): void {
   if (!state.municipalities) return;
-  const munIds = Object.keys(state.municipalities).slice().sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  const munIds = Object.keys(state.municipalities).slice().sort(strictCompare);
   for (const munId of munIds) {
     const mun = state.municipalities[munId];
     const controller = options?.getController?.(munId) ?? null;
