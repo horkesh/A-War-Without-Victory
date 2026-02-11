@@ -1,0 +1,235 @@
+{
+  "$schema": "awwv://schemas/data_index_v1.json",
+  "schema_version": "1.0.0",
+  "coordinate_space": "A1_TACTICAL",
+  "canonical_bbox": [
+    -5.5548,
+    -9.7906,
+    931.304,
+    905.4807
+  ],
+  "datasets": {
+    "settlements": {
+      "path": "settlements_a1_viewer.geojson",
+      "schema": "awwv://schemas/settlements_v0.json",
+      "schema_version": "0.0.0",
+      "id_field": "sid",
+      "geometry_type": "Polygon",
+      "record_count": 5823,
+      "checksum_sha256": "f0bf7403084ec1781a30126e6342700e7020aaac148a56c81e2062b19fa5b686",
+      "available": true
+    },
+    "settlements_viewer_v1": {
+      "path": "settlements_a1_viewer.geojson",
+      "schema": "awwv://schemas/settlement_geometry_viewer_v1.json",
+      "schema_version": "1.0.0",
+      "id_field": "sid",
+      "geometry_type": "Polygon",
+      "type": "geometry",
+      "record_count": 5823,
+      "checksum_sha256": "f0bf7403084ec1781a30126e6342700e7020aaac148a56c81e2062b19fa5b686",
+      "available": true
+    },
+    "mun1990_names": {
+      "path": "mun1990_names.json",
+      "schema": "awwv://schemas/mun_names_v1.json",
+      "schema_version": "1.0.0",
+      "type": "attribute_json",
+      "id_field": "by_municipality_id",
+      "record_count": 142,
+      "checksum_sha256": "dce93d9fafd79ef82e16c30e6d84db51737cdccfce2d55228cef413aa2a8c030",
+      "available": true
+    },
+    "municipalities_1990_boundaries": {
+      "path": "municipalities_1990_boundaries.geojson",
+      "schema": "awwv://schemas/mun1990_boundaries_v0.json",
+      "schema_version": "0.0.0",
+      "id_field": "mun1990_id",
+      "geometry_type": "MultiLineString",
+      "record_count": 110,
+      "checksum_sha256": "8ea5f6f09731a55eb86bea55ad65887ce435b8e8c15a3400f6fe4c6e40ba75e4",
+      "available": true
+    },
+    "political_control": {
+      "path": "political_control_data.json",
+      "schema": "awwv://schemas/political_control_v0.json",
+      "schema_version": "0.0.0",
+      "id_field": "sid",
+      "record_count": 6137,
+      "checksum_sha256": "3209b4927b7a08ccfbfe4a56581690967df2bf34681676d6d8d44877372e9115",
+      "available": true
+    },
+    "settlement_ethnicity": {
+      "path": "settlement_ethnicity_data.json",
+      "schema": "awwv://schemas/settlement_ethnicity_v0.json",
+      "schema_version": "0.0.0",
+      "id_field": "sid",
+      "record_count": 6137,
+      "checksum_sha256": "8bd0c8ccd4f1d59df75e65e30124360886037953648985791375ee07fd7e2230",
+      "available": true
+    },
+    "settlement_names": {
+      "path": "settlement_names.json",
+      "schema": "awwv://schemas/settlement_names_v1.json",
+      "schema_version": "1.0.0",
+      "type": "attribute_json",
+      "id_field": "by_census_id",
+      "record_count": 6138,
+      "checksum_sha256": "84ef4a073813b2206c70958489a2768795c744b182141e88ee16b24a13e64905",
+      "available": true
+    },
+    "graph_v3": {
+      "path": "settlement_graph_v3.json",
+      "schema": "awwv://schemas/settlement_graph_v3.json",
+      "schema_version": "0.0.0",
+      "id_field": "settlement_id",
+      "checksum_sha256": "f2e35eb58ec2968b5e8cc36a170e2fdd0c0a6dbef060a344c23795f245148877",
+      "available": true
+    },
+    "graph_continuity": {
+      "path": "settlement_continuity_graph.json",
+      "schema": "awwv://schemas/settlement_continuity_graph.json",
+      "schema_version": "0.0.0",
+      "id_field": "settlement_id",
+      "record_count": 6137,
+      "checksum_sha256": "16e7fe5de1e9f4c4ab8e8c8b57de4d6af498771cb71bacd4ebfeced9ec640ae3",
+      "available": true
+    },
+    "municipalities_viewer_v1": {
+      "path": "municipalities_viewer_v1.geojson",
+      "path_gz": "municipalities_viewer_v1.geojson.gz",
+      "schema": "awwv://schemas/municipalities_viewer_v1.json",
+      "schema_version": "1.0.0",
+      "id_field": "municipality_id",
+      "geometry_type": "Polygon",
+      "type": "geometry",
+      "record_count": 141,
+      "checksum_sha256": "af9195caeb296e5611188a642740b78aa15f1bcfa4d7e8e16f25d809da0881b7",
+      "available": true
+    },
+    "municipality_agg_post1995": {
+      "path": "municipality_agg_post1995.json",
+      "schema": "awwv://schemas/municipality_agg_post1995.json",
+      "schema_version": "1.0.0",
+      "type": "attribute_json",
+      "id_field": "by_municipality_id",
+      "record_count": 141,
+      "checksum_sha256": "1c66e799f6dcba0378717a396acf6361e5b6e4557e7db76c14739c0988a7b1d3",
+      "available": true
+    },
+    "municipality_agg_1990": {
+      "path": "municipality_agg_1990.json",
+      "schema": "awwv://schemas/municipality_agg_1990.json",
+      "schema_version": "1.0.0",
+      "type": "attribute_json",
+      "id_field": "by_mun1990_id",
+      "record_count": 110,
+      "checksum_sha256": "fa78f6225f044c9575804c612efe1f99e1b3612ceb71ef13537bd32aaac2d41c",
+      "available": true
+    },
+    "displacement_settlement_turn0": {
+      "path": "displacement_settlement_turn0.json",
+      "schema": "awwv://schemas/displacement_settlement_v0.json",
+      "schema_version": "0.0.0",
+      "id_field": "sid",
+      "record_count": 0,
+      "checksum_sha256": "",
+      "available": false
+    },
+    "displacement_municipality_turn0": {
+      "path": "displacement_municipality_turn0.json",
+      "schema": "awwv://schemas/displacement_municipality_v0.json",
+      "schema_version": "0.0.0",
+      "id_field": "municipality_id",
+      "record_count": 0,
+      "checksum_sha256": "",
+      "available": false
+    },
+    "terrain_scalars_viewer_overlay_h6_9": {
+      "path": "terrain/terrain_scalars_viewer_overlay_h6_9.json",
+      "schema": "awwv://schemas/terrain_scalars_viewer_overlay_v0.json",
+      "schema_version": "0.0.0",
+      "id_field": "sid",
+      "type": "attribute_json",
+      "record_count": 6137,
+      "checksum_sha256": "9ced677a22290aad45bf2fc96d9cd73204b17f1b9b2c9fa6832988c7c9f44b4b",
+      "available": true
+    }
+  },
+  "layers": {
+    "base_settlements": {
+      "dataset": "settlements",
+      "preferred_datasets": [
+        "settlements_viewer_v1",
+        "settlements"
+      ],
+      "style": null,
+      "z_index": 100,
+      "visibility_default": true,
+      "available": true
+    },
+    "mun1990_boundaries": {
+      "dataset": "municipalities_1990_boundaries",
+      "style": {
+        "stroke": "#333333",
+        "stroke_width": 2,
+        "stroke_opacity": 0.8
+      },
+      "z_index": 200,
+      "visibility_default": false,
+      "available": false
+    },
+    "political_control": {
+      "dataset": "political_control",
+      "style": {
+        "fill_mode": "faction_color",
+        "fill_opacity": 0.4
+      },
+      "z_index": 150,
+      "visibility_default": false,
+      "available": true
+    },
+    "ethnicity_majority": {
+      "dataset": "settlement_ethnicity",
+      "style": {
+        "fill_mode": "majority_ethnicity",
+        "fill_opacity": 0.3
+      },
+      "z_index": 140,
+      "visibility_default": false,
+      "available": true
+    },
+    "displacement_settlement": {
+      "dataset": "displacement_settlement_turn0",
+      "style": {
+        "fill_mode": "displacement_intensity",
+        "fill_opacity": 0.5
+      },
+      "z_index": 160,
+      "visibility_default": false,
+      "available": false
+    },
+    "displacement_municipality": {
+      "dataset": "displacement_municipality_turn0",
+      "style": {
+        "fill_mode": "displacement_total",
+        "fill_opacity": 0.4
+      },
+      "z_index": 155,
+      "visibility_default": false,
+      "available": false
+    },
+    "terrain_scalars": {
+      "dataset": "terrain_scalars_viewer_overlay_h6_9",
+      "style": {
+        "fill_mode": "terrain_scalar_choropleth",
+        "fill_opacity": 0.4
+      },
+      "z_index": 145,
+      "visibility_default": false,
+      "available": true
+    }
+  },
+  "continuity_graph_path": "settlement_continuity_graph.json",
+  "adjacency_viewer_data_path": "adjacency_viewer/data.json"
+}

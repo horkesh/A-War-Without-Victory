@@ -1,0 +1,1600 @@
+{
+  "totals": {
+    "municipalities": 110,
+    "settlements_input": 6138,
+    "settlements_emitted": 5823,
+    "settlements_merged": 123,
+    "missing_geometry": 0,
+    "leftover_patches": 1474
+  },
+  "intersection_failures": [
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function",
+    "TypeError: ga.intersection is not a function"
+  ],
+  "union_failures": [],
+  "difference_failures": [
+    "TypeError: ga.difference is not a function",
+    "TypeError: ga.difference is not a function",
+    "TypeError: ga.difference is not a function",
+    "TypeError: ga.difference is not a function",
+    "TypeError: ga.difference is not a function",
+    "TypeError: ga.difference is not a function",
+    "TypeError: ga.difference is not a function",
+    "TypeError: ga.difference is not a function",
+    "TypeError: ga.difference is not a function",
+    "TypeError: ga.difference is not a function",
+    "TypeError: Cannot read properties of undefined (reading 'holeOf')",
+    "TypeError: ga.difference is not a function",
+    "TypeError: ga.difference is not a function",
+    "TypeError: ga.difference is not a function",
+    "TypeError: ga.difference is not a function",
+    "TypeError: ga.difference is not a function"
+  ],
+  "unassigned_settlements": [],
+  "missing_municipalities": [],
+  "merged_settlements": [
+    {
+      "from": "S100048",
+      "into": "S200018"
+    },
+    {
+      "from": "S100072",
+      "into": "S200123"
+    },
+    {
+      "from": "S100897",
+      "into": "S101265"
+    },
+    {
+      "from": "S206148",
+      "into": "S206466"
+    },
+    {
+      "from": "S202720",
+      "into": "S202738"
+    },
+    {
+      "from": "S215180",
+      "into": "S215252"
+    },
+    {
+      "from": "S202223",
+      "into": "S202681"
+    },
+    {
+      "from": "S202347",
+      "into": "S202185"
+    },
+    {
+      "from": "S202371",
+      "into": "S202185"
+    },
+    {
+      "from": "S108316",
+      "into": "S108634"
+    },
+    {
+      "from": "S108324",
+      "into": "S108260"
+    },
+    {
+      "from": "S108561",
+      "into": "S108456"
+    },
+    {
+      "from": "S108588",
+      "into": "S108634"
+    },
+    {
+      "from": "S108758",
+      "into": "S108456"
+    },
+    {
+      "from": "S108863",
+      "into": "S108251"
+    },
+    {
+      "from": "S109274",
+      "into": "S109193"
+    },
+    {
+      "from": "S109541",
+      "into": "S109860"
+    },
+    {
+      "from": "S109762",
+      "into": "S109754"
+    },
+    {
+      "from": "S208264",
+      "into": "S208213"
+    },
+    {
+      "from": "S208272",
+      "into": "S208337"
+    },
+    {
+      "from": "S208299",
+      "into": "S208337"
+    },
+    {
+      "from": "S208302",
+      "into": "S208329"
+    },
+    {
+      "from": "S208345",
+      "into": "S208370"
+    },
+    {
+      "from": "S208353",
+      "into": "S208370"
+    },
+    {
+      "from": "S205745",
+      "into": "S205613"
+    },
+    {
+      "from": "S118613",
+      "into": "S117668"
+    },
+    {
+      "from": "S118834",
+      "into": "S118311"
+    },
+    {
+      "from": "S215635",
+      "into": "S216038"
+    },
+    {
+      "from": "S112453",
+      "into": "S120219"
+    },
+    {
+      "from": "S120367",
+      "into": "S217697"
+    },
+    {
+      "from": "S143260",
+      "into": "S143669"
+    },
+    {
+      "from": "S143596",
+      "into": "S143081"
+    },
+    {
+      "from": "S125296",
+      "into": "S125458"
+    },
+    {
+      "from": "S125385",
+      "into": "S124915"
+    },
+    {
+      "from": "S164968",
+      "into": "S170046"
+    },
+    {
+      "from": "S165026",
+      "into": "S125806"
+    },
+    {
+      "from": "S124150",
+      "into": "S166154"
+    },
+    {
+      "from": "S127043",
+      "into": "S127345"
+    },
+    {
+      "from": "S165093",
+      "into": "S127655"
+    },
+    {
+      "from": "S130265",
+      "into": "S130818"
+    },
+    {
+      "from": "S131369",
+      "into": "S131580"
+    },
+    {
+      "from": "S131610",
+      "into": "S170232"
+    },
+    {
+      "from": "S170305",
+      "into": "S132535"
+    },
+    {
+      "from": "S209295",
+      "into": "S170658"
+    },
+    {
+      "from": "S209309",
+      "into": "S170658"
+    },
+    {
+      "from": "S209317",
+      "into": "S170658"
+    },
+    {
+      "from": "S209325",
+      "into": "S170658"
+    },
+    {
+      "from": "S209333",
+      "into": "S170658"
+    },
+    {
+      "from": "S209376",
+      "into": "S170658"
+    },
+    {
+      "from": "S209392",
+      "into": "S170658"
+    },
+    {
+      "from": "S209414",
+      "into": "S170658"
+    },
+    {
+      "from": "S209473",
+      "into": "S170658"
+    },
+    {
+      "from": "S209503",
+      "into": "S209554"
+    },
+    {
+      "from": "S205206",
+      "into": "S205222"
+    },
+    {
+      "from": "S205214",
+      "into": "S205184"
+    },
+    {
+      "from": "S138312",
+      "into": "S138088"
+    },
+    {
+      "from": "S220892",
+      "into": "S221627"
+    },
+    {
+      "from": "S220906",
+      "into": "S221147"
+    },
+    {
+      "from": "S220957",
+      "into": "S221147"
+    },
+    {
+      "from": "S220973",
+      "into": "S221228"
+    },
+    {
+      "from": "S221023",
+      "into": "S221147"
+    },
+    {
+      "from": "S221031",
+      "into": "S221155"
+    },
+    {
+      "from": "S221040",
+      "into": "S221490"
+    },
+    {
+      "from": "S221066",
+      "into": "S221619"
+    },
+    {
+      "from": "S221163",
+      "into": "S220949"
+    },
+    {
+      "from": "S221210",
+      "into": "S221147"
+    },
+    {
+      "from": "S221244",
+      "into": "S221392"
+    },
+    {
+      "from": "S221279",
+      "into": "S221490"
+    },
+    {
+      "from": "S221295",
+      "into": "S221392"
+    },
+    {
+      "from": "S221317",
+      "into": "S221791"
+    },
+    {
+      "from": "S221341",
+      "into": "S221635"
+    },
+    {
+      "from": "S221449",
+      "into": "S221104"
+    },
+    {
+      "from": "S221457",
+      "into": "S221147"
+    },
+    {
+      "from": "S221546",
+      "into": "S221627"
+    },
+    {
+      "from": "S221643",
+      "into": "S221635"
+    },
+    {
+      "from": "S221678",
+      "into": "S221147"
+    },
+    {
+      "from": "S221708",
+      "into": "S221791"
+    },
+    {
+      "from": "S221716",
+      "into": "S221490"
+    },
+    {
+      "from": "S221724",
+      "into": "S221147"
+    },
+    {
+      "from": "S221759",
+      "into": "S221228"
+    },
+    {
+      "from": "S221767",
+      "into": "S221589"
+    },
+    {
+      "from": "S221783",
+      "into": "S221635"
+    },
+    {
+      "from": "S142026",
+      "into": "S141593"
+    },
+    {
+      "from": "S229725",
+      "into": "S229717"
+    },
+    {
+      "from": "S229741",
+      "into": "S229717"
+    },
+    {
+      "from": "S222658",
+      "into": "S222674"
+    },
+    {
+      "from": "S222666",
+      "into": "S222259"
+    },
+    {
+      "from": "S222704",
+      "into": "S222615"
+    },
+    {
+      "from": "S222712",
+      "into": "S222259"
+    },
+    {
+      "from": "S222968",
+      "into": "S222984"
+    },
+    {
+      "from": "S223425",
+      "into": "S223689"
+    },
+    {
+      "from": "S223468",
+      "into": "S223557"
+    },
+    {
+      "from": "S224022",
+      "into": "S223689"
+    },
+    {
+      "from": "S148911",
+      "into": "S148890"
+    },
+    {
+      "from": "S165921",
+      "into": "S112739"
+    },
+    {
+      "from": "S171018",
+      "into": "S170992"
+    },
+    {
+      "from": "S152064",
+      "into": "S152366"
+    },
+    {
+      "from": "S165565",
+      "into": "S171042"
+    },
+    {
+      "from": "S224952",
+      "into": "S225851"
+    },
+    {
+      "from": "S154954",
+      "into": "S155217"
+    },
+    {
+      "from": "S156523",
+      "into": "S156736"
+    },
+    {
+      "from": "S156728",
+      "into": "S156736"
+    },
+    {
+      "from": "S203106",
+      "into": "S203874"
+    },
+    {
+      "from": "S203246",
+      "into": "S203823"
+    },
+    {
+      "from": "S203386",
+      "into": "S203769"
+    },
+    {
+      "from": "S203394",
+      "into": "S203823"
+    },
+    {
+      "from": "S203491",
+      "into": "S203823"
+    },
+    {
+      "from": "S203793",
+      "into": "S203823"
+    },
+    {
+      "from": "S203815",
+      "into": "S203904"
+    },
+    {
+      "from": "S204005",
+      "into": "S204331"
+    },
+    {
+      "from": "S204307",
+      "into": "S203548"
+    },
+    {
+      "from": "S204358",
+      "into": "S204544"
+    },
+    {
+      "from": "S204455",
+      "into": "S204218"
+    },
+    {
+      "from": "S204498",
+      "into": "S203823"
+    },
+    {
+      "from": "S204714",
+      "into": "S203769"
+    },
+    {
+      "from": "S157490",
+      "into": "S158062"
+    },
+    {
+      "from": "S160113",
+      "into": "S160318"
+    },
+    {
+      "from": "S160300",
+      "into": "S160237"
+    },
+    {
+      "from": "S162728",
+      "into": "S162833"
+    },
+    {
+      "from": "S132616",
+      "into": "S132713"
+    },
+    {
+      "from": "S132942",
+      "into": "S162060"
+    },
+    {
+      "from": "S161586",
+      "into": "S162060"
+    },
+    {
+      "from": "S163805",
+      "into": "S162043"
+    }
+  ],
+  "muni_without_settlements": [],
+  "salvaged_municipalities": [
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100013",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100021",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100030",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100056",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100064",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100099",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100102",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100129",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100137",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100145",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100153",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100161",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100170",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100188",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100196",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100200",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S100218",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S125610",
+      "reason": "centroid_in_polygon"
+    },
+    {
+      "mun1990_id": "banovici",
+      "sid": "S164305",
+      "reason": "centroid_in_polygon"
+    }
+  ],
+  "coverage_diagnostics": [
+    {
+      "mun1990_id": "banovici",
+      "adm3_area": 188138656.626283,
+      "union_area": 188138656.626283,
+      "sum_cell_area": 188138774.112358,
+      "gap_area": 0,
+      "overlap_area": 117.486075
+    },
+    {
+      "mun1990_id": "banja_luka",
+      "adm3_area": 1210563153.606431,
+      "union_area": 1210563153.606431,
+      "sum_cell_area": 1210563330.816683,
+      "gap_area": 0,
+      "overlap_area": 177.210253
+    },
+    {
+      "mun1990_id": "bihac",
+      "adm3_area": 969908552.209082,
+      "union_area": 969908552.209082,
+      "sum_cell_area": 969909172.529833,
+      "gap_area": 0,
+      "overlap_area": 620.320751
+    },
+    {
+      "mun1990_id": "bijeljina",
+      "adm3_area": 754463351.770693,
+      "union_area": 754463351.770693,
+      "sum_cell_area": 754463548.573007,
+      "gap_area": 0,
+      "overlap_area": 196.802314
+    },
+    {
+      "mun1990_id": "bileca",
+      "adm3_area": 637207101.705596,
+      "union_area": 637207101.705596,
+      "sum_cell_area": 637207255.60522,
+      "gap_area": 0,
+      "overlap_area": 153.899625
+    },
+    {
+      "mun1990_id": "bosanska_dubica",
+      "adm3_area": 514997330.321816,
+      "union_area": 514997330.321816,
+      "sum_cell_area": 514997551.227539,
+      "gap_area": 0,
+      "overlap_area": 220.905723
+    },
+    {
+      "mun1990_id": "bosanska_gradiska",
+      "adm3_area": 752437847.044402,
+      "union_area": 752437847.044402,
+      "sum_cell_area": 752438003.219775,
+      "gap_area": 0,
+      "overlap_area": 156.175373
+    },
+    {
+      "mun1990_id": "bosanska_kostajnica",
+      "adm3_area": 92929633.231938,
+      "union_area": 92929633.231938,
+      "sum_cell_area": 92929683.059152,
+      "gap_area": 0,
+      "overlap_area": 49.827214
+    },
+    {
+      "mun1990_id": "bosanska_krupa",
+      "adm3_area": 676346976.189295,
+      "union_area": 676346976.189295,
+      "sum_cell_area": 676347039.475188,
+      "gap_area": 0,
+      "overlap_area": 63.285892
+    },
+    {
+      "mun1990_id": "bosanski_brod",
+      "adm3_area": 238844594.406398,
+      "union_area": 238844594.406398,
+      "sum_cell_area": 238844681.028084,
+      "gap_area": 0,
+      "overlap_area": 86.621686
+    },
+    {
+      "mun1990_id": "bosanski_novi",
+      "adm3_area": 474320936.955655,
+      "union_area": 474320936.955655,
+      "sum_cell_area": 474321120.709298,
+      "gap_area": 0,
+      "overlap_area": 183.753643
+    },
+    {
+      "mun1990_id": "bosanski_petrovac",
+      "adm3_area": 914209986.990023,
+      "union_area": 914209553.345457,
+      "sum_cell_area": 914209553.345457,
+      "gap_area": 433.644566,
+      "overlap_area": 0
+    },
+    {
+      "mun1990_id": "bosanski_samac",
+      "adm3_area": 237664471.676477,
+      "union_area": 237664117.475876,
+      "sum_cell_area": 237664117.475876,
+      "gap_area": 354.200601,
+      "overlap_area": 0
+    },
+    {
+      "mun1990_id": "bosansko_grahovo",
+      "adm3_area": 784626173.553309,
+      "union_area": 784626173.553309,
+      "sum_cell_area": 784626242.242193,
+      "gap_area": 0,
+      "overlap_area": 68.688884
+    },
+    {
+      "mun1990_id": "bratunac",
+      "adm3_area": 308785468.10905,
+      "union_area": 308785468.10905,
+      "sum_cell_area": 308785959.413272,
+      "gap_area": 0,
+      "overlap_area": 491.304222
+    },
+    {
+      "mun1990_id": "brcko",
+      "adm3_area": 485643447.710415,
+      "union_area": 485643447.710415,
+      "sum_cell_area": 485643605.593095,
+      "gap_area": 0,
+      "overlap_area": 157.88268
+    },
+    {
+      "mun1990_id": "breza",
+      "adm3_area": 79359241.85461,
+      "union_area": 79359241.85461,
+      "sum_cell_area": 79359286.290658,
+      "gap_area": 0,
+      "overlap_area": 44.436048
+    },
+    {
+      "mun1990_id": "bugojno",
+      "adm3_area": 380143641.548263,
+      "union_area": 380143641.548263,
+      "sum_cell_area": 380144105.592437,
+      "gap_area": 0,
+      "overlap_area": 464.044174
+    },
+    {
+      "mun1990_id": "busovaca",
+      "adm3_area": 153576935.816331,
+      "union_area": 153576935.816331,
+      "sum_cell_area": 153577015.718326,
+      "gap_area": 0,
+      "overlap_area": 79.901995
+    },
+    {
+      "mun1990_id": "cajnice",
+      "adm3_area": 287495465.137177,
+      "union_area": 287495465.137177,
+      "sum_cell_area": 287495517.402055,
+      "gap_area": 0,
+      "overlap_area": 52.264878
+    },
+    {
+      "mun1990_id": "capljina",
+      "adm3_area": 248525124.900469,
+      "union_area": 248525124.900469,
+      "sum_cell_area": 248525273.534535,
+      "gap_area": 0,
+      "overlap_area": 148.634066
+    },
+    {
+      "mun1990_id": "cazin",
+      "adm3_area": 490334430.020996,
+      "union_area": 490334430.020996,
+      "sum_cell_area": 490334555.06362,
+      "gap_area": 0,
+      "overlap_area": 125.042625
+    },
+    {
+      "mun1990_id": "celinac",
+      "adm3_area": 365726468.287494,
+      "union_area": 365726468.287494,
+      "sum_cell_area": 365726529.222671,
+      "gap_area": 0,
+      "overlap_area": 60.935176
+    },
+    {
+      "mun1990_id": "centar_sarajevo",
+      "adm3_area": 31747198.873878,
+      "union_area": 31747198.873878,
+      "sum_cell_area": 31747200.876114,
+      "gap_area": 0,
+      "overlap_area": 2.002236
+    },
+    {
+      "mun1990_id": "citluk",
+      "adm3_area": 184494258.186922,
+      "union_area": 184494258.186922,
+      "sum_cell_area": 184494291.227004,
+      "gap_area": 0,
+      "overlap_area": 33.040082
+    },
+    {
+      "mun1990_id": "derventa",
+      "adm3_area": 517070552.938195,
+      "union_area": 517070552.938195,
+      "sum_cell_area": 517070594.121021,
+      "gap_area": 0,
+      "overlap_area": 41.182826
+    },
+    {
+      "mun1990_id": "doboj",
+      "adm3_area": 743406624.921367,
+      "union_area": 743406624.921367,
+      "sum_cell_area": 743407335.5474,
+      "gap_area": 0,
+      "overlap_area": 710.626034
+    },
+    {
+      "mun1990_id": "donji_vakuf",
+      "adm3_area": 333562532.641904,
+      "union_area": 333562508.986353,
+      "sum_cell_area": 333562508.986353,
+      "gap_area": 23.655551,
+      "overlap_area": 0
+    },
+    {
+      "mun1990_id": "duvno",
+      "adm3_area": 989537621.349,
+      "union_area": 989537621.349,
+      "sum_cell_area": 989537771.005923,
+      "gap_area": 0,
+      "overlap_area": 149.656923
+    },
+    {
+      "mun1990_id": "foca",
+      "adm3_area": 1301498813.703078,
+      "union_area": 1301498813.703078,
+      "sum_cell_area": 1301499046.27343,
+      "gap_area": 0,
+      "overlap_area": 232.570353
+    },
+    {
+      "mun1990_id": "fojnica",
+      "adm3_area": 311399484.293365,
+      "union_area": 311399484.293365,
+      "sum_cell_area": 311399567.781907,
+      "gap_area": 0,
+      "overlap_area": 83.488542
+    },
+    {
+      "mun1990_id": "gacko",
+      "adm3_area": 729332786.239888,
+      "union_area": 729332614.827511,
+      "sum_cell_area": 729332614.827511,
+      "gap_area": 171.412377,
+      "overlap_area": 0
+    },
+    {
+      "mun1990_id": "glamoc",
+      "adm3_area": 1066348056.051552,
+      "union_area": 1066348056.051552,
+      "sum_cell_area": 1066348120.282764,
+      "gap_area": 0,
+      "overlap_area": 64.231211
+    },
+    {
+      "mun1990_id": "gorazde",
+      "adm3_area": 372269041.784346,
+      "union_area": 372269041.784346,
+      "sum_cell_area": 372269260.894969,
+      "gap_area": 0,
+      "overlap_area": 219.110623
+    },
+    {
+      "mun1990_id": "gornji_vakuf",
+      "adm3_area": 403559319.842582,
+      "union_area": 403559319.842582,
+      "sum_cell_area": 403559394.12978,
+      "gap_area": 0,
+      "overlap_area": 74.287198
+    },
+    {
+      "mun1990_id": "gracanica",
+      "adm3_area": 448753990.628596,
+      "union_area": 448753990.628596,
+      "sum_cell_area": 448754131.89371,
+      "gap_area": 0,
+      "overlap_area": 141.265114
+    },
+    {
+      "mun1990_id": "gradacac",
+      "adm3_area": 305520622.012209,
+      "union_area": 305520622.012209,
+      "sum_cell_area": 305520768.543164,
+      "gap_area": 0,
+      "overlap_area": 146.530955
+    },
+    {
+      "mun1990_id": "grude",
+      "adm3_area": 204070088.766966,
+      "union_area": 204070088.766966,
+      "sum_cell_area": 204070155.471243,
+      "gap_area": 0,
+      "overlap_area": 66.704277
+    },
+    {
+      "mun1990_id": "hadzici",
+      "adm3_area": 267635847.317213,
+      "union_area": 267635847.317213,
+      "sum_cell_area": 267635880.723931,
+      "gap_area": 0,
+      "overlap_area": 33.406718
+    },
+    {
+      "mun1990_id": "hanpijesak",
+      "adm3_area": 349850239.020672,
+      "union_area": 349850239.020672,
+      "sum_cell_area": 349850337.454379,
+      "gap_area": 0,
+      "overlap_area": 98.433708
+    },
+    {
+      "mun1990_id": "ilidza",
+      "adm3_area": 180790392.537606,
+      "union_area": 180790392.537606,
+      "sum_cell_area": 180790413.591666,
+      "gap_area": 0,
+      "overlap_area": 21.05406
+    },
+    {
+      "mun1990_id": "ilijas",
+      "adm3_area": 294132225.394227,
+      "union_area": 294132225.394227,
+      "sum_cell_area": 294132378.310812,
+      "gap_area": 0,
+      "overlap_area": 152.916584
+    },
+    {
+      "mun1990_id": "jablanica",
+      "adm3_area": 307678477.951159,
+      "union_area": 307678477.951159,
+      "sum_cell_area": 307678541.997638,
+      "gap_area": 0,
+      "overlap_area": 64.046479
+    },
+    {
+      "mun1990_id": "jajce",
+      "adm3_area": 393920034.323109,
+      "union_area": 393920034.323109,
+      "sum_cell_area": 393920104.309939,
+      "gap_area": 0,
+      "overlap_area": 69.98683
+    },
+    {
+      "mun1990_id": "kakanj",
+      "adm3_area": 382625570.566635,
+      "union_area": 382625570.566635,
+      "sum_cell_area": 382625770.692643,
+      "gap_area": 0,
+      "overlap_area": 200.126008
+    },
+    {
+      "mun1990_id": "kalesija",
+      "adm3_area": 274675596.569014,
+      "union_area": 274675596.569014,
+      "sum_cell_area": 274675656.37073,
+      "gap_area": 0,
+      "overlap_area": 59.801716
+    },
+    {
+      "mun1990_id": "kalinovik",
+      "adm3_area": 666192247.127876,
+      "union_area": 666192247.127876,
+      "sum_cell_area": 666192443.829974,
+      "gap_area": 0,
+      "overlap_area": 196.702099
+    },
+    {
+      "mun1990_id": "kiseljak",
+      "adm3_area": 159775103.61826,
+      "union_area": 159775103.61826,
+      "sum_cell_area": 161329887.753951,
+      "gap_area": 0,
+      "overlap_area": 1554784.135691
+    },
+    {
+      "mun1990_id": "kladanj",
+      "adm3_area": 306408727.635272,
+      "union_area": 306408727.635272,
+      "sum_cell_area": 306408803.082159,
+      "gap_area": 0,
+      "overlap_area": 75.446887
+    },
+    {
+      "mun1990_id": "kljuc",
+      "adm3_area": 882797729.507924,
+      "union_area": 882797729.507924,
+      "sum_cell_area": 882797857.33923,
+      "gap_area": 0,
+      "overlap_area": 127.831306
+    },
+    {
+      "mun1990_id": "konjic",
+      "adm3_area": 1127277786.113137,
+      "union_area": 1127277786.113137,
+      "sum_cell_area": 1127277884.498898,
+      "gap_area": 0,
+      "overlap_area": 98.38576
+    },
+    {
+      "mun1990_id": "kotor_varos",
+      "adm3_area": 556325142.401414,
+      "union_area": 556324293.934442,
+      "sum_cell_area": 556324293.934442,
+      "gap_area": 848.466972,
+      "overlap_area": 0
+    },
+    {
+      "mun1990_id": "kresevo",
+      "adm3_area": 146768119.116445,
+      "union_area": 146768119.116445,
+      "sum_cell_area": 146768167.526771,
+      "gap_area": 0,
+      "overlap_area": 48.410325
+    },
+    {
+      "mun1990_id": "kupres",
+      "adm3_area": 628267660.97866,
+      "union_area": 628267660.97866,
+      "sum_cell_area": 628267808.818956,
+      "gap_area": 0,
+      "overlap_area": 147.840296
+    },
+    {
+      "mun1990_id": "laktasi",
+      "adm3_area": 384729026.777664,
+      "union_area": 384729026.777664,
+      "sum_cell_area": 384729144.885088,
+      "gap_area": 0,
+      "overlap_area": 118.107425
+    },
+    {
+      "mun1990_id": "listica",
+      "adm3_area": 400883342.127255,
+      "union_area": 400883342.127255,
+      "sum_cell_area": 400883388.429551,
+      "gap_area": 0,
+      "overlap_area": 46.302296
+    },
+    {
+      "mun1990_id": "livno",
+      "adm3_area": 964696754.376732,
+      "union_area": 964696322.121472,
+      "sum_cell_area": 964696322.121472,
+      "gap_area": 432.25526,
+      "overlap_area": 0
+    },
+    {
+      "mun1990_id": "lopare",
+      "adm3_area": 434016524.870243,
+      "union_area": 434016524.870243,
+      "sum_cell_area": 434016641.548078,
+      "gap_area": 0,
+      "overlap_area": 116.677835
+    },
+    {
+      "mun1990_id": "lukavac",
+      "adm3_area": 343673808.663882,
+      "union_area": 343673808.663882,
+      "sum_cell_area": 343673969.610604,
+      "gap_area": 0,
+      "overlap_area": 160.946723
+    },
+    {
+      "mun1990_id": "ljubinje",
+      "adm3_area": 328767697.243293,
+      "union_area": 328767697.243293,
+      "sum_cell_area": 328767774.241699,
+      "gap_area": 0,
+      "overlap_area": 76.998405
+    },
+    {
+      "mun1990_id": "ljubuski",
+      "adm3_area": 274630014.562666,
+      "union_area": 274630014.562666,
+      "sum_cell_area": 274630156.202191,
+      "gap_area": 0,
+      "overlap_area": 141.639526
+    },
+    {
+      "mun1990_id": "maglaj",
+      "adm3_area": 303227372.17372,
+      "union_area": 303227372.17372,
+      "sum_cell_area": 303227536.138867,
+      "gap_area": 0,
+      "overlap_area": 163.965147
+    },
+    {
+      "mun1990_id": "modrica",
+      "adm3_area": 395604746.100468,
+      "union_area": 395604746.100468,
+      "sum_cell_area": 395604853.456232,
+      "gap_area": 0,
+      "overlap_area": 107.355764
+    },
+    {
+      "mun1990_id": "mostar",
+      "adm3_area": 1133385018.967572,
+      "union_area": 1133385018.967572,
+      "sum_cell_area": 1133385229.272787,
+      "gap_area": 0,
+      "overlap_area": 210.305215
+    },
+    {
+      "mun1990_id": "mrkonjic_grad",
+      "adm3_area": 656784761.09542,
+      "union_area": 656784761.09542,
+      "sum_cell_area": 656784862.511996,
+      "gap_area": 0,
+      "overlap_area": 101.416577
+    },
+    {
+      "mun1990_id": "neum",
+      "adm3_area": 212038231.420242,
+      "union_area": 212038231.420242,
+      "sum_cell_area": 212038296.210328,
+      "gap_area": 0,
+      "overlap_area": 64.790086
+    },
+    {
+      "mun1990_id": "nevesinje",
+      "adm3_area": 967242716.735827,
+      "union_area": 967242716.735827,
+      "sum_cell_area": 967242950.486541,
+      "gap_area": 0,
+      "overlap_area": 233.750714
+    },
+    {
+      "mun1990_id": "novi_grad_sarajevo",
+      "adm3_area": 40723279.792599,
+      "union_area": 40723279.792599,
+      "sum_cell_area": 40723300.364445,
+      "gap_area": 0,
+      "overlap_area": 20.571846
+    },
+    {
+      "mun1990_id": "novi_travnik",
+      "adm3_area": 244485793.761954,
+      "union_area": 244485793.761954,
+      "sum_cell_area": 244485928.887124,
+      "gap_area": 0,
+      "overlap_area": 135.12517
+    },
+    {
+      "mun1990_id": "novo_sarajevo",
+      "adm3_area": 50088882.450496,
+      "union_area": 50088882.450496,
+      "sum_cell_area": 50088900.476985,
+      "gap_area": 0,
+      "overlap_area": 18.026489
+    },
+    {
+      "mun1990_id": "odzak",
+      "adm3_area": 219850563.760021,
+      "union_area": 219850563.760021,
+      "sum_cell_area": 219850647.941796,
+      "gap_area": 0,
+      "overlap_area": 84.181775
+    },
+    {
+      "mun1990_id": "olovo",
+      "adm3_area": 396664184.187192,
+      "union_area": 396664184.187192,
+      "sum_cell_area": 396664240.635609,
+      "gap_area": 0,
+      "overlap_area": 56.448417
+    },
+    {
+      "mun1990_id": "orasje",
+      "adm3_area": 155449139.548195,
+      "union_area": 155449139.548195,
+      "sum_cell_area": 155449586.440286,
+      "gap_area": 0,
+      "overlap_area": 446.892091
+    },
+    {
+      "mun1990_id": "pale",
+      "adm3_area": 592637750.472267,
+      "union_area": 592637750.472267,
+      "sum_cell_area": 592638272.317717,
+      "gap_area": 0,
+      "overlap_area": 521.84545
+    },
+    {
+      "mun1990_id": "posusje",
+      "adm3_area": 452369386.790011,
+      "union_area": 452369386.790011,
+      "sum_cell_area": 452369487.933961,
+      "gap_area": 0,
+      "overlap_area": 101.14395
+    },
+    {
+      "mun1990_id": "prijedor",
+      "adm3_area": 805925458.898141,
+      "union_area": 805925458.898141,
+      "sum_cell_area": 805925635.114791,
+      "gap_area": 0,
+      "overlap_area": 176.21665
+    },
+    {
+      "mun1990_id": "prnjavor",
+      "adm3_area": 638558954.816991,
+      "union_area": 638558954.816991,
+      "sum_cell_area": 638559040.681039,
+      "gap_area": 0,
+      "overlap_area": 85.864048
+    },
+    {
+      "mun1990_id": "prozor",
+      "adm3_area": 472864902.681402,
+      "union_area": 472864902.681402,
+      "sum_cell_area": 472864952.125781,
+      "gap_area": 0,
+      "overlap_area": 49.444379
+    },
+    {
+      "mun1990_id": "rogatica",
+      "adm3_area": 631428854.376491,
+      "union_area": 631428854.376491,
+      "sum_cell_area": 631429177.588393,
+      "gap_area": 0,
+      "overlap_area": 323.211901
+    },
+    {
+      "mun1990_id": "rudo",
+      "adm3_area": 343382977.24507,
+      "union_area": 343382977.24507,
+      "sum_cell_area": 343383113.805965,
+      "gap_area": 0,
+      "overlap_area": 136.560895
+    },
+    {
+      "mun1990_id": "sanski_most",
+      "adm3_area": 952275237.532785,
+      "union_area": 952275237.532785,
+      "sum_cell_area": 952275375.459387,
+      "gap_area": 0,
+      "overlap_area": 137.926602
+    },
+    {
+      "mun1990_id": "sekovici",
+      "adm3_area": 246557680.323341,
+      "union_area": 246557680.323341,
+      "sum_cell_area": 246557782.891413,
+      "gap_area": 0,
+      "overlap_area": 102.568072
+    },
+    {
+      "mun1990_id": "sipovo",
+      "adm3_area": 535471002.989327,
+      "union_area": 535471002.989327,
+      "sum_cell_area": 535471164.093319,
+      "gap_area": 0,
+      "overlap_area": 161.103991
+    },
+    {
+      "mun1990_id": "skender_vakuf",
+      "adm3_area": 401993135.526647,
+      "union_area": 401993135.526647,
+      "sum_cell_area": 401994609.148277,
+      "gap_area": 0,
+      "overlap_area": 1473.62163
+    },
+    {
+      "mun1990_id": "sokolac",
+      "adm3_area": 716637806.550848,
+      "union_area": 716637806.550848,
+      "sum_cell_area": 716638367.725237,
+      "gap_area": 0,
+      "overlap_area": 561.174388
+    },
+    {
+      "mun1990_id": "srbac",
+      "adm3_area": 471012078.610852,
+      "union_area": 471012078.610852,
+      "sum_cell_area": 471012221.005873,
+      "gap_area": 0,
+      "overlap_area": 142.39502
+    },
+    {
+      "mun1990_id": "srebrenica",
+      "adm3_area": 516363479.125443,
+      "union_area": 516363479.125443,
+      "sum_cell_area": 516363625.175727,
+      "gap_area": 0,
+      "overlap_area": 146.050284
+    },
+    {
+      "mun1990_id": "srebrenik",
+      "adm3_area": 253849406.618937,
+      "union_area": 253849406.618937,
+      "sum_cell_area": 253849494.119742,
+      "gap_area": 0,
+      "overlap_area": 87.500806
+    },
+    {
+      "mun1990_id": "stari_grad_sarajevo",
+      "adm3_area": 120431425.617076,
+      "union_area": 120431425.617076,
+      "sum_cell_area": 120431452.491426,
+      "gap_area": 0,
+      "overlap_area": 26.87435
+    },
+    {
+      "mun1990_id": "stolac",
+      "adm3_area": 526931750.047354,
+      "union_area": 526931750.047354,
+      "sum_cell_area": 526931893.259707,
+      "gap_area": 0,
+      "overlap_area": 143.212353
+    },
+    {
+      "mun1990_id": "tesanj",
+      "adm3_area": 190764084.761321,
+      "union_area": 190764084.761321,
+      "sum_cell_area": 190764151.823575,
+      "gap_area": 0,
+      "overlap_area": 67.062254
+    },
+    {
+      "mun1990_id": "teslic",
+      "adm3_area": 840776020.427099,
+      "union_area": 840776020.427099,
+      "sum_cell_area": 840776158.769121,
+      "gap_area": 0,
+      "overlap_area": 138.342022
+    },
+    {
+      "mun1990_id": "titov_drvar",
+      "adm3_area": 623486315.752087,
+      "union_area": 623486315.752087,
+      "sum_cell_area": 623487070.738015,
+      "gap_area": 0,
+      "overlap_area": 754.985928
+    },
+    {
+      "mun1990_id": "travnik",
+      "adm3_area": 572350663.73334,
+      "union_area": 572350663.73334,
+      "sum_cell_area": 572350787.32066,
+      "gap_area": 0,
+      "overlap_area": 123.58732
+    },
+    {
+      "mun1990_id": "trebinje",
+      "adm3_area": 1190623674.172538,
+      "union_area": 1190623674.172538,
+      "sum_cell_area": 1190624343.315438,
+      "gap_area": 0,
+      "overlap_area": 669.1429
+    },
+    {
+      "mun1990_id": "trnovo",
+      "adm3_area": 437926592.804574,
+      "union_area": 437926592.804574,
+      "sum_cell_area": 437926749.704261,
+      "gap_area": 0,
+      "overlap_area": 156.899687
+    },
+    {
+      "mun1990_id": "tuzla",
+      "adm3_area": 286024264.536049,
+      "union_area": 286024264.536049,
+      "sum_cell_area": 286024365.805528,
+      "gap_area": 0,
+      "overlap_area": 101.269478
+    },
+    {
+      "mun1990_id": "ugljevik",
+      "adm3_area": 208654663.836793,
+      "union_area": 208654663.836793,
+      "sum_cell_area": 208654767.585867,
+      "gap_area": 0,
+      "overlap_area": 103.749074
+    },
+    {
+      "mun1990_id": "vares",
+      "adm3_area": 377044935.110994,
+      "union_area": 377044935.110994,
+      "sum_cell_area": 377045044.82682,
+      "gap_area": 0,
+      "overlap_area": 109.715827
+    },
+    {
+      "mun1990_id": "velika_kladusa",
+      "adm3_area": 356768561.044369,
+      "union_area": 356768561.044369,
+      "sum_cell_area": 356768629.347051,
+      "gap_area": 0,
+      "overlap_area": 68.302682
+    },
+    {
+      "mun1990_id": "visegrad",
+      "adm3_area": 468076878.44871,
+      "union_area": 468076878.44871,
+      "sum_cell_area": 468077272.532179,
+      "gap_area": 0,
+      "overlap_area": 394.083469
+    },
+    {
+      "mun1990_id": "visoko",
+      "adm3_area": 241124632.266615,
+      "union_area": 241124632.266615,
+      "sum_cell_area": 241124815.800466,
+      "gap_area": 0,
+      "overlap_area": 183.533851
+    },
+    {
+      "mun1990_id": "vitez",
+      "adm3_area": 155490815.4796,
+      "union_area": 155490798.927341,
+      "sum_cell_area": 155490798.927341,
+      "gap_area": 16.552259,
+      "overlap_area": 0
+    },
+    {
+      "mun1990_id": "vlasenica",
+      "adm3_area": 477301526.453745,
+      "union_area": 477301526.453745,
+      "sum_cell_area": 477301843.550716,
+      "gap_area": 0,
+      "overlap_area": 317.096971
+    },
+    {
+      "mun1990_id": "vogosca",
+      "adm3_area": 69261026.03733,
+      "union_area": 69261026.03733,
+      "sum_cell_area": 69261192.689309,
+      "gap_area": 0,
+      "overlap_area": 166.651979
+    },
+    {
+      "mun1990_id": "zavidovici",
+      "adm3_area": 596056070.633738,
+      "union_area": 596056070.633738,
+      "sum_cell_area": 596056138.214642,
+      "gap_area": 0,
+      "overlap_area": 67.580904
+    },
+    {
+      "mun1990_id": "zenica",
+      "adm3_area": 570031824.82326,
+      "union_area": 570031824.82326,
+      "sum_cell_area": 570031990.766646,
+      "gap_area": 0,
+      "overlap_area": 165.943386
+    },
+    {
+      "mun1990_id": "zepce",
+      "adm3_area": 194036727.422225,
+      "union_area": 194036727.422225,
+      "sum_cell_area": 194036827.598852,
+      "gap_area": 0,
+      "overlap_area": 100.176627
+    },
+    {
+      "mun1990_id": "zivinice",
+      "adm3_area": 287050118.768681,
+      "union_area": 287050118.768681,
+      "sum_cell_area": 287050151.916543,
+      "gap_area": 0,
+      "overlap_area": 33.147862
+    },
+    {
+      "mun1990_id": "zvornik",
+      "adm3_area": 500452753.766334,
+      "union_area": 500452753.766334,
+      "sum_cell_area": 500453040.808935,
+      "gap_area": 0,
+      "overlap_area": 287.042601
+    }
+  ]
+}

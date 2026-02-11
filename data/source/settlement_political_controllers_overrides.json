@@ -1,0 +1,18 @@
+{
+  "version": "manual_overrides_v1",
+  "notes": "Settlement-level initial control overrides applied after municipal inheritance.",
+  "overrides": {
+    "11240:104108": "RBiH",
+    "11240:104167": "RBiH",
+    "11240:104175": "RBiH",
+    "11240:104345": "RBiH",
+    "11240:104353": "RBiH",
+    "11240:104418": "RBiH",
+    "11240:104523": "RBiH",
+    "11436:105627": "RS",
+    "11509:165034": "RS",
+    "10588:130478": "HRHB",
+    "10197:108286": "HRHB",
+    "10774:138487": "HRHB"
+  }
+}

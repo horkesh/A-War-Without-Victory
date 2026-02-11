@@ -1,0 +1,9 @@
+{
+  "task": "phase_6e9_polygon_completeness",
+  "settlement_count": 6146,
+  "polygon_feature_count": 6146,
+  "count_match": true,
+  "missing_sids": [],
+  "extra_sids": [],
+  "pass": true
+}

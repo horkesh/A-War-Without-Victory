@@ -1,0 +1,39 @@
+{
+  "bbox_world": [
+    15.62429991660789,
+    42.45719021065977,
+    19.722780229024387,
+    45.37054183713614
+  ],
+  "input_crs": "EPSG:4326",
+  "output_crs": "EPSG:4326",
+  "pixel_size": [
+    0.0014974352621178,
+    0.0014970974442325
+  ],
+  "width": 2737,
+  "height": 1946,
+  "nodata_value": null,
+  "elevation": {
+    "min": 0,
+    "max": 0,
+    "mean": 0
+  },
+  "sha256": "046c3e9e29d8410c82088560d7029ca653e05053a86e36279c7d0dc83a1ff9a2",
+  "runtime": {
+    "tooling": "gdalwarp",
+    "resampling": "bilinear",
+    "compression": "LZW"
+  },
+  "toolchain": {
+    "tools": [
+      {
+        "name": "GDAL (gdalwarp)",
+        "cmd": "gdalwarp",
+        "ok": true,
+        "version": "GDAL 3.6.2, released 2023/01/02",
+        "error": null
+      }
+    ]
+  }
+}

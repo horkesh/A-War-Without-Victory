@@ -1,0 +1,13 @@
+{
+  "scenario_id": "whatif_dec1992_10w",
+  "start_phase": "phase_i",
+  "weeks": 10,
+  "init_control": "apr1992",
+  "init_formations_oob": true,
+  "formation_spawn_directive": { "kind": "both" },
+  "turns": [],
+  "use_harness_bots": true,
+  "use_smart_bots": true,
+  "rbih_hrhb_war_earliest_week": 26,
+  "prerequisites": ["apr1992_50w_bots"]
+}

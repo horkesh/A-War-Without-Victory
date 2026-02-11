@@ -1,0 +1,1574 @@
+{
+  "meta": {
+    "schema_version": 1,
+    "sources": {
+      "controllers": "data/source/municipalities_1990_initial_political_controllers.json",
+      "census": "data/source/bih_census_1991.json",
+      "mun1990_names": "data/derived/mun1990_names.json"
+    },
+    "notes": [
+      "control_status derived from Phase 0 stability score (System 11)",
+      "organizational and geographic inputs not provided; treated as defaults (0)",
+      "controller_share uses census municipality population totals aggregated to mun1990_id",
+      "control_status overrides applied for: stari_grad_sarajevo"
+    ]
+  },
+  "audit": {
+    "missing_mun1990_for_municipality_id": [],
+    "missing_population_for_mun1990_id": [
+      "milici",
+      "sarajevo"
+    ]
+  },
+  "rows": [
+    {
+      "mun1990_id": "banja_luka",
+      "controller": "RS",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5458884369315046,
+      "population": {
+        "total": 195692,
+        "bosniak": 28558,
+        "croat": 29026,
+        "serb": 106826,
+        "other": 31282
+      }
+    },
+    {
+      "mun1990_id": "bihac",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.645098959339719,
+      "population": {
+        "total": 72454,
+        "bosniak": 46740,
+        "croat": 5582,
+        "serb": 14391,
+        "other": 5741
+      }
+    },
+    {
+      "mun1990_id": "bijeljina",
+      "controller": "RS",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5917123767888811,
+      "population": {
+        "total": 96988,
+        "bosniak": 30229,
+        "croat": 492,
+        "serb": 57389,
+        "other": 8878
+      }
+    },
+    {
+      "mun1990_id": "bileca",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.8000602228244504,
+      "population": {
+        "total": 13284,
+        "bosniak": 1947,
+        "croat": 39,
+        "serb": 10628,
+        "other": 670
+      }
+    },
+    {
+      "mun1990_id": "bosanska_dubica",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.687464405492628,
+      "population": {
+        "total": 31606,
+        "bosniak": 6440,
+        "croat": 488,
+        "serb": 21728,
+        "other": 2950
+      }
+    },
+    {
+      "mun1990_id": "bosanska_gradiska",
+      "controller": "RS",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5961416613866009,
+      "population": {
+        "total": 59974,
+        "bosniak": 15851,
+        "croat": 3417,
+        "serb": 35753,
+        "other": 4953
+      }
+    },
+    {
+      "mun1990_id": "bosanska_kostajnica",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6485315358690419,
+      "population": {
+        "total": 6231,
+        "bosniak": 1707,
+        "croat": 166,
+        "serb": 4041,
+        "other": 317
+      }
+    },
+    {
+      "mun1990_id": "bosanska_krupa",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6385693571773804,
+      "population": {
+        "total": 41380,
+        "bosniak": 26424,
+        "croat": 134,
+        "serb": 13750,
+        "other": 1072
+      }
+    },
+    {
+      "mun1990_id": "bosanski_brod",
+      "controller": "HRHB",
+      "stability_score": 55,
+      "control_status": "CONTESTED",
+      "controller_share": 0.4133771929824561,
+      "population": {
+        "total": 33744,
+        "bosniak": 4087,
+        "croat": 13949,
+        "serb": 11124,
+        "other": 4584
+      }
+    },
+    {
+      "mun1990_id": "bosanski_novi",
+      "controller": "RS",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5943444149686742,
+      "population": {
+        "total": 35434,
+        "bosniak": 12333,
+        "croat": 237,
+        "serb": 21060,
+        "other": 1804
+      }
+    },
+    {
+      "mun1990_id": "bosanski_petrovac",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7486076435567506,
+      "population": {
+        "total": 15621,
+        "bosniak": 3288,
+        "croat": 48,
+        "serb": 11694,
+        "other": 591
+      }
+    },
+    {
+      "mun1990_id": "bosanski_samac",
+      "controller": "HRHB",
+      "stability_score": 55,
+      "control_status": "CONTESTED",
+      "controller_share": 0.4293976360533468,
+      "population": {
+        "total": 31642,
+        "bosniak": 2229,
+        "croat": 13587,
+        "serb": 13574,
+        "other": 2252
+      }
+    },
+    {
+      "mun1990_id": "bosansko_grahovo",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.9491035976416797,
+      "population": {
+        "total": 8311,
+        "bosniak": 12,
+        "croat": 226,
+        "serb": 7888,
+        "other": 185
+      }
+    },
+    {
+      "mun1990_id": "bratunac",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6405603973943306,
+      "population": {
+        "total": 33619,
+        "bosniak": 21535,
+        "croat": 40,
+        "serb": 11475,
+        "other": 569
+      }
+    },
+    {
+      "mun1990_id": "brcko",
+      "controller": "RBiH",
+      "stability_score": 55,
+      "control_status": "CONTESTED",
+      "controller_share": 0.4406975019115113,
+      "population": {
+        "total": 87627,
+        "bosniak": 38617,
+        "croat": 22252,
+        "serb": 18128,
+        "other": 8630
+      }
+    },
+    {
+      "mun1990_id": "breza",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7552693884622048,
+      "population": {
+        "total": 17317,
+        "bosniak": 13079,
+        "croat": 851,
+        "serb": 2122,
+        "other": 1265
+      }
+    },
+    {
+      "mun1990_id": "bugojno",
+      "controller": "HRHB",
+      "stability_score": 35,
+      "control_status": "HIGHLY_CONTESTED",
+      "controller_share": 0.34189255475697927,
+      "population": {
+        "total": 46889,
+        "bosniak": 19697,
+        "croat": 16031,
+        "serb": 8673,
+        "other": 2488
+      }
+    },
+    {
+      "mun1990_id": "busovaca",
+      "controller": "HRHB",
+      "stability_score": 55,
+      "control_status": "CONTESTED",
+      "controller_share": 0.48164627363737483,
+      "population": {
+        "total": 18879,
+        "bosniak": 8451,
+        "croat": 9093,
+        "serb": 623,
+        "other": 712
+      }
+    },
+    {
+      "mun1990_id": "cajnice",
+      "controller": "RS",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5257927646270657,
+      "population": {
+        "total": 8956,
+        "bosniak": 4024,
+        "croat": 5,
+        "serb": 4709,
+        "other": 218
+      }
+    },
+    {
+      "mun1990_id": "capljina",
+      "controller": "HRHB",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5368696650168567,
+      "population": {
+        "total": 27882,
+        "bosniak": 7672,
+        "croat": 14969,
+        "serb": 3753,
+        "other": 1488
+      }
+    },
+    {
+      "mun1990_id": "cazin",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.9754072857160637,
+      "population": {
+        "total": 80349,
+        "bosniak": 78373,
+        "croat": 144,
+        "serb": 869,
+        "other": 963
+      }
+    },
+    {
+      "mun1990_id": "celinac",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.8846256613049751,
+      "population": {
+        "total": 18713,
+        "bosniak": 1446,
+        "croat": 76,
+        "serb": 16554,
+        "other": 637
+      }
+    },
+    {
+      "mun1990_id": "centar_sarajevo",
+      "controller": "RBiH",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5014882829251066,
+      "population": {
+        "total": 79286,
+        "bosniak": 39761,
+        "croat": 5428,
+        "serb": 16631,
+        "other": 17466
+      }
+    },
+    {
+      "mun1990_id": "citluk",
+      "controller": "HRHB",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.982762049990055,
+      "population": {
+        "total": 15083,
+        "bosniak": 111,
+        "croat": 14823,
+        "serb": 19,
+        "other": 130
+      }
+    },
+    {
+      "mun1990_id": "derventa",
+      "controller": "HRHB",
+      "stability_score": 35,
+      "control_status": "HIGHLY_CONTESTED",
+      "controller_share": 0.38860663137956064,
+      "population": {
+        "total": 56489,
+        "bosniak": 7086,
+        "croat": 21952,
+        "serb": 22938,
+        "other": 4513
+      }
+    },
+    {
+      "mun1990_id": "doboj",
+      "controller": "RS",
+      "stability_score": 55,
+      "control_status": "CONTESTED",
+      "controller_share": 0.43941958887545346,
+      "population": {
+        "total": 107510,
+        "bosniak": 41076,
+        "croat": 10780,
+        "serb": 47242,
+        "other": 8412
+      }
+    },
+    {
+      "mun1990_id": "donji_vakuf",
+      "controller": "RBiH",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5542836041358936,
+      "population": {
+        "total": 24372,
+        "bosniak": 13509,
+        "croat": 682,
+        "serb": 9364,
+        "other": 817
+      }
+    },
+    {
+      "mun1990_id": "duvno",
+      "controller": "HRHB",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.8656069845712953,
+      "population": {
+        "total": 30009,
+        "bosniak": 3148,
+        "croat": 25976,
+        "serb": 576,
+        "other": 309
+      }
+    },
+    {
+      "mun1990_id": "foca",
+      "controller": "RBiH",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5133548721237083,
+      "population": {
+        "total": 40547,
+        "bosniak": 20815,
+        "croat": 94,
+        "serb": 18324,
+        "other": 1314
+      }
+    },
+    {
+      "mun1990_id": "fojnica",
+      "controller": "HRHB",
+      "stability_score": 55,
+      "control_status": "CONTESTED",
+      "controller_share": 0.4064187530682376,
+      "population": {
+        "total": 16296,
+        "bosniak": 8024,
+        "croat": 6623,
+        "serb": 157,
+        "other": 1492
+      }
+    },
+    {
+      "mun1990_id": "gacko",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6174453096032629,
+      "population": {
+        "total": 10788,
+        "bosniak": 3858,
+        "croat": 29,
+        "serb": 6661,
+        "other": 240
+      }
+    },
+    {
+      "mun1990_id": "glamoc",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7902009052648297,
+      "population": {
+        "total": 12593,
+        "bosniak": 2257,
+        "croat": 184,
+        "serb": 9951,
+        "other": 201
+      }
+    },
+    {
+      "mun1990_id": "gorazde",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6998642642322944,
+      "population": {
+        "total": 37573,
+        "bosniak": 26296,
+        "croat": 80,
+        "serb": 9843,
+        "other": 1354
+      }
+    },
+    {
+      "mun1990_id": "gornji_vakuf",
+      "controller": "RBiH",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.558476629204559,
+      "population": {
+        "total": 25181,
+        "bosniak": 14063,
+        "croat": 10706,
+        "serb": 110,
+        "other": 302
+      }
+    },
+    {
+      "mun1990_id": "gracanica",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7521850445837379,
+      "population": {
+        "total": 56635,
+        "bosniak": 42600,
+        "croat": 125,
+        "serb": 11205,
+        "other": 2705
+      }
+    },
+    {
+      "mun1990_id": "gradacac",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6395353244390539,
+      "population": {
+        "total": 52768,
+        "bosniak": 33747,
+        "croat": 8357,
+        "serb": 7935,
+        "other": 2729
+      }
+    },
+    {
+      "mun1990_id": "grude",
+      "controller": "HRHB",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.9909524391734931,
+      "population": {
+        "total": 16358,
+        "bosniak": 4,
+        "croat": 16210,
+        "serb": 9,
+        "other": 135
+      }
+    },
+    {
+      "mun1990_id": "hadzici",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6360330578512396,
+      "population": {
+        "total": 24200,
+        "bosniak": 15392,
+        "croat": 746,
+        "serb": 6362,
+        "other": 1700
+      }
+    },
+    {
+      "mun1990_id": "han_pijesak",
+      "controller": "RS",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5787649653434153,
+      "population": {
+        "total": 6348,
+        "bosniak": 2543,
+        "croat": 7,
+        "serb": 3674,
+        "other": 124
+      }
+    },
+    {
+      "mun1990_id": "ilidza",
+      "controller": "RBiH",
+      "stability_score": 55,
+      "control_status": "CONTESTED",
+      "controller_share": 0.42910848549946295,
+      "population": {
+        "total": 70756,
+        "bosniak": 30362,
+        "croat": 7033,
+        "serb": 26620,
+        "other": 6741
+      }
+    },
+    {
+      "mun1990_id": "ilijas",
+      "controller": "RS",
+      "stability_score": 55,
+      "control_status": "CONTESTED",
+      "controller_share": 0.4518308282699073,
+      "population": {
+        "total": 25016,
+        "bosniak": 10440,
+        "croat": 1736,
+        "serb": 11303,
+        "other": 1537
+      }
+    },
+    {
+      "mun1990_id": "jablanica",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.716964778189268,
+      "population": {
+        "total": 12691,
+        "bosniak": 9099,
+        "croat": 2291,
+        "serb": 504,
+        "other": 797
+      }
+    },
+    {
+      "mun1990_id": "jajce",
+      "controller": "HRHB",
+      "stability_score": 35,
+      "control_status": "HIGHLY_CONTESTED",
+      "controller_share": 0.34598040065909286,
+      "population": {
+        "total": 46124,
+        "bosniak": 18341,
+        "croat": 15958,
+        "serb": 8664,
+        "other": 3161
+      }
+    },
+    {
+      "mun1990_id": "kakanj",
+      "controller": "RBiH",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5456300268096514,
+      "population": {
+        "total": 55950,
+        "bosniak": 30528,
+        "croat": 16556,
+        "serb": 4929,
+        "other": 3937
+      }
+    },
+    {
+      "mun1990_id": "kalesija",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7925805448587625,
+      "population": {
+        "total": 41809,
+        "bosniak": 33137,
+        "croat": 35,
+        "serb": 7659,
+        "other": 978
+      }
+    },
+    {
+      "mun1990_id": "kalinovik",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6622734761120264,
+      "population": {
+        "total": 4249,
+        "bosniak": 1314,
+        "croat": 17,
+        "serb": 2814,
+        "other": 104
+      }
+    },
+    {
+      "mun1990_id": "kiseljak",
+      "controller": "HRHB",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5193676543618606,
+      "population": {
+        "total": 24164,
+        "bosniak": 9778,
+        "croat": 12550,
+        "serb": 740,
+        "other": 1096
+      }
+    },
+    {
+      "mun1990_id": "kladanj",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7596574690770694,
+      "population": {
+        "total": 15765,
+        "bosniak": 11976,
+        "croat": 35,
+        "serb": 3299,
+        "other": 455
+      }
+    },
+    {
+      "mun1990_id": "kljuc",
+      "controller": "RS",
+      "stability_score": 55,
+      "control_status": "CONTESTED",
+      "controller_share": 0.4949319354924982,
+      "population": {
+        "total": 37391,
+        "bosniak": 17696,
+        "croat": 330,
+        "serb": 18506,
+        "other": 859
+      }
+    },
+    {
+      "mun1990_id": "konjic",
+      "controller": "RBiH",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5465389481294054,
+      "population": {
+        "total": 44264,
+        "bosniak": 24192,
+        "croat": 11513,
+        "serb": 6625,
+        "other": 1934
+      }
+    },
+    {
+      "mun1990_id": "kotor_varos",
+      "controller": "HRHB",
+      "stability_score": 35,
+      "control_status": "HIGHLY_CONTESTED",
+      "controller_share": 0.29020703877567633,
+      "population": {
+        "total": 36853,
+        "bosniak": 11090,
+        "croat": 10695,
+        "serb": 14056,
+        "other": 1012
+      }
+    },
+    {
+      "mun1990_id": "kresevo",
+      "controller": "HRHB",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7003417025701976,
+      "population": {
+        "total": 6731,
+        "bosniak": 1531,
+        "croat": 4714,
+        "serb": 34,
+        "other": 452
+      }
+    },
+    {
+      "mun1990_id": "kupres",
+      "controller": "RS",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5057184445830734,
+      "population": {
+        "total": 9618,
+        "bosniak": 802,
+        "croat": 3813,
+        "serb": 4864,
+        "other": 139
+      }
+    },
+    {
+      "mun1990_id": "laktasi",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.8104049342987396,
+      "population": {
+        "total": 29832,
+        "bosniak": 408,
+        "croat": 2565,
+        "serb": 24176,
+        "other": 2683
+      }
+    },
+    {
+      "mun1990_id": "listica",
+      "controller": "HRHB",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.9891016200294551,
+      "population": {
+        "total": 27160,
+        "bosniak": 9,
+        "croat": 26864,
+        "serb": 148,
+        "other": 139
+      }
+    },
+    {
+      "mun1990_id": "livno",
+      "controller": "HRHB",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7222660098522168,
+      "population": {
+        "total": 40600,
+        "bosniak": 5793,
+        "croat": 29324,
+        "serb": 3913,
+        "other": 1570
+      }
+    },
+    {
+      "mun1990_id": "lopare",
+      "controller": "RS",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.562246051385452,
+      "population": {
+        "total": 32733,
+        "bosniak": 11990,
+        "croat": 1264,
+        "serb": 18404,
+        "other": 1075
+      }
+    },
+    {
+      "mun1990_id": "lukavac",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.675680951113477,
+      "population": {
+        "total": 56355,
+        "bosniak": 38078,
+        "croat": 2159,
+        "serb": 11463,
+        "other": 4655
+      }
+    },
+    {
+      "mun1990_id": "ljubinje",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.8983700862895494,
+      "population": {
+        "total": 4172,
+        "bosniak": 332,
+        "croat": 39,
+        "serb": 3748,
+        "other": 53
+      }
+    },
+    {
+      "mun1990_id": "ljubuski",
+      "controller": "HRHB",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.9219124911785462,
+      "population": {
+        "total": 28340,
+        "bosniak": 1592,
+        "croat": 26127,
+        "serb": 65,
+        "other": 556
+      }
+    },
+    {
+      "mun1990_id": "maglaj",
+      "controller": "RBiH",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5565880111387953,
+      "population": {
+        "total": 34115,
+        "bosniak": 18988,
+        "croat": 3596,
+        "serb": 9522,
+        "other": 2009
+      }
+    },
+    {
+      "mun1990_id": "milici",
+      "controller": null,
+      "stability_score": 35,
+      "control_status": "HIGHLY_CONTESTED",
+      "population": {
+        "total": 0,
+        "bosniak": 0,
+        "croat": 0,
+        "serb": 0,
+        "other": 0
+      }
+    },
+    {
+      "mun1990_id": "modrica",
+      "controller": "HRHB",
+      "stability_score": 35,
+      "control_status": "HIGHLY_CONTESTED",
+      "controller_share": 0.24226174516638366,
+      "population": {
+        "total": 33567,
+        "bosniak": 7632,
+        "croat": 8132,
+        "serb": 14888,
+        "other": 2915
+      }
+    },
+    {
+      "mun1990_id": "mostar",
+      "controller": "HRHB",
+      "stability_score": 35,
+      "control_status": "HIGHLY_CONTESTED",
+      "controller_share": 0.33852749154408873,
+      "population": {
+        "total": 127130,
+        "bosniak": 44335,
+        "croat": 43037,
+        "serb": 23866,
+        "other": 15892
+      }
+    },
+    {
+      "mun1990_id": "mrkonjic_grad",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.8012786361214704,
+      "population": {
+        "total": 26278,
+        "bosniak": 2311,
+        "croat": 1992,
+        "serb": 21056,
+        "other": 919
+      }
+    },
+    {
+      "mun1990_id": "neum",
+      "controller": "HRHB",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.8767630057803468,
+      "population": {
+        "total": 4325,
+        "bosniak": 190,
+        "croat": 3792,
+        "serb": 207,
+        "other": 136
+      }
+    },
+    {
+      "mun1990_id": "nevesinje",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.766566265060241,
+      "population": {
+        "total": 13944,
+        "bosniak": 2834,
+        "croat": 210,
+        "serb": 10689,
+        "other": 211
+      }
+    },
+    {
+      "mun1990_id": "novi_grad_sarajevo",
+      "controller": "RBiH",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5112595947592248,
+      "population": {
+        "total": 133797,
+        "bosniak": 68405,
+        "croat": 8790,
+        "serb": 36000,
+        "other": 20602
+      }
+    },
+    {
+      "mun1990_id": "novi_travnik",
+      "controller": "HRHB",
+      "stability_score": 35,
+      "control_status": "HIGHLY_CONTESTED",
+      "controller_share": 0.3959886692931332,
+      "population": {
+        "total": 30713,
+        "bosniak": 11625,
+        "croat": 12162,
+        "serb": 4097,
+        "other": 2829
+      }
+    },
+    {
+      "mun1990_id": "novo_sarajevo",
+      "controller": "RBiH",
+      "stability_score": 35,
+      "control_status": "HIGHLY_CONTESTED",
+      "controller_share": 0.3680345619840162,
+      "population": {
+        "total": 90967,
+        "bosniak": 33479,
+        "croat": 8755,
+        "serb": 29403,
+        "other": 19330
+      }
+    },
+    {
+      "mun1990_id": "odzak",
+      "controller": "HRHB",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5284848814148714,
+      "population": {
+        "total": 36809,
+        "bosniak": 9077,
+        "croat": 19453,
+        "serb": 6109,
+        "other": 2170
+      }
+    },
+    {
+      "mun1990_id": "olovo",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7457429866470661,
+      "population": {
+        "total": 16326,
+        "bosniak": 12175,
+        "croat": 642,
+        "serb": 3087,
+        "other": 422
+      }
+    },
+    {
+      "mun1990_id": "orasje",
+      "controller": "HRHB",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7511545105227906,
+      "population": {
+        "total": 28367,
+        "bosniak": 1893,
+        "croat": 21308,
+        "serb": 4235,
+        "other": 931
+      }
+    },
+    {
+      "mun1990_id": "pale",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6904327741308047,
+      "population": {
+        "total": 16452,
+        "bosniak": 4386,
+        "croat": 129,
+        "serb": 11359,
+        "other": 578
+      }
+    },
+    {
+      "mun1990_id": "posusje",
+      "controller": "HRHB",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.9900198435858527,
+      "population": {
+        "total": 17134,
+        "bosniak": 6,
+        "croat": 16963,
+        "serb": 9,
+        "other": 156
+      }
+    },
+    {
+      "mun1990_id": "prijedor",
+      "controller": "RBiH",
+      "stability_score": 55,
+      "control_status": "CONTESTED",
+      "controller_share": 0.43850794807318094,
+      "population": {
+        "total": 112543,
+        "bosniak": 49351,
+        "croat": 6316,
+        "serb": 47581,
+        "other": 9295
+      }
+    },
+    {
+      "mun1990_id": "prnjavor",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7121028583572415,
+      "population": {
+        "total": 47055,
+        "bosniak": 7143,
+        "croat": 1721,
+        "serb": 33508,
+        "other": 4683
+      }
+    },
+    {
+      "mun1990_id": "prozor",
+      "controller": "HRHB",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6203947368421052,
+      "population": {
+        "total": 19760,
+        "bosniak": 7225,
+        "croat": 12259,
+        "serb": 45,
+        "other": 231
+      }
+    },
+    {
+      "mun1990_id": "rogatica",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6026689822220191,
+      "population": {
+        "total": 21881,
+        "bosniak": 13187,
+        "croat": 19,
+        "serb": 8316,
+        "other": 359
+      }
+    },
+    {
+      "mun1990_id": "rudo",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7043470745830093,
+      "population": {
+        "total": 11571,
+        "bosniak": 3130,
+        "croat": 5,
+        "serb": 8150,
+        "other": 286
+      }
+    },
+    {
+      "mun1990_id": "sanski_most",
+      "controller": "RBiH",
+      "stability_score": 55,
+      "control_status": "CONTESTED",
+      "controller_share": 0.46654617208615917,
+      "population": {
+        "total": 60307,
+        "bosniak": 28136,
+        "croat": 4322,
+        "serb": 25363,
+        "other": 2486
+      }
+    },
+    {
+      "mun1990_id": "sarajevo",
+      "controller": null,
+      "stability_score": 35,
+      "control_status": "HIGHLY_CONTESTED",
+      "population": {
+        "total": 0,
+        "bosniak": 0,
+        "croat": 0,
+        "serb": 0,
+        "other": 0
+      }
+    },
+    {
+      "mun1990_id": "sekovici",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.9414322992171644,
+      "population": {
+        "total": 10347,
+        "bosniak": 326,
+        "croat": 11,
+        "serb": 9741,
+        "other": 269
+      }
+    },
+    {
+      "mun1990_id": "sipovo",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7937273823884198,
+      "population": {
+        "total": 15751,
+        "bosniak": 2965,
+        "croat": 31,
+        "serb": 12502,
+        "other": 253
+      }
+    },
+    {
+      "mun1990_id": "skender_vakuf",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6766861443993265,
+      "population": {
+        "total": 20194,
+        "bosniak": 1071,
+        "croat": 5138,
+        "serb": 13665,
+        "other": 320
+      }
+    },
+    {
+      "mun1990_id": "sokolac",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6578325563573664,
+      "population": {
+        "total": 15659,
+        "bosniak": 5162,
+        "croat": 19,
+        "serb": 10301,
+        "other": 177
+      }
+    },
+    {
+      "mun1990_id": "srbac",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.8874542124542124,
+      "population": {
+        "total": 21840,
+        "bosniak": 940,
+        "croat": 140,
+        "serb": 19382,
+        "other": 1378
+      }
+    },
+    {
+      "mun1990_id": "srebrenica",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7519773086783396,
+      "population": {
+        "total": 36666,
+        "bosniak": 27572,
+        "croat": 38,
+        "serb": 8315,
+        "other": 741
+      }
+    },
+    {
+      "mun1990_id": "srebrenik",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7464788732394366,
+      "population": {
+        "total": 40896,
+        "bosniak": 30528,
+        "croat": 2752,
+        "serb": 5308,
+        "other": 2308
+      }
+    },
+    {
+      "mun1990_id": "stari_grad_sarajevo",
+      "controller": null,
+      "stability_score": 35,
+      "control_status": "SECURE",
+      "population": {
+        "total": 54888,
+        "bosniak": 39833,
+        "croat": 1169,
+        "serb": 8668,
+        "other": 5218
+      }
+    },
+    {
+      "mun1990_id": "stolac",
+      "controller": "HRHB",
+      "stability_score": 35,
+      "control_status": "HIGHLY_CONTESTED",
+      "controller_share": 0.3312456506610995,
+      "population": {
+        "total": 18681,
+        "bosniak": 8101,
+        "croat": 6188,
+        "serb": 3917,
+        "other": 475
+      }
+    },
+    {
+      "mun1990_id": "tesanj",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7082705558568875,
+      "population": {
+        "total": 49779,
+        "bosniak": 35257,
+        "croat": 11116,
+        "serb": 1768,
+        "other": 1638
+      }
+    },
+    {
+      "mun1990_id": "teslic",
+      "controller": "RS",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5487909336496014,
+      "population": {
+        "total": 60708,
+        "bosniak": 12875,
+        "croat": 9930,
+        "serb": 33316,
+        "other": 4587
+      }
+    },
+    {
+      "mun1990_id": "titov_drvar",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.9676707348740586,
+      "population": {
+        "total": 15404,
+        "bosniak": 30,
+        "croat": 31,
+        "serb": 14906,
+        "other": 437
+      }
+    },
+    {
+      "mun1990_id": "travnik",
+      "controller": "RBiH",
+      "stability_score": 55,
+      "control_status": "CONTESTED",
+      "controller_share": 0.4546597876263023,
+      "population": {
+        "total": 69971,
+        "bosniak": 31813,
+        "croat": 25750,
+        "serb": 7375,
+        "other": 5033
+      }
+    },
+    {
+      "mun1990_id": "trebinje",
+      "controller": "RS",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.688766292424829,
+      "population": {
+        "total": 30996,
+        "bosniak": 5571,
+        "croat": 1246,
+        "serb": 21349,
+        "other": 2830
+      }
+    },
+    {
+      "mun1990_id": "trnovo",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6851666428264912,
+      "population": {
+        "total": 6991,
+        "bosniak": 4790,
+        "croat": 16,
+        "serb": 2059,
+        "other": 126
+      }
+    },
+    {
+      "mun1990_id": "tuzla",
+      "controller": null,
+      "stability_score": 35,
+      "control_status": "HIGHLY_CONTESTED",
+      "population": {
+        "total": 131402,
+        "bosniak": 62669,
+        "croat": 20397,
+        "serb": 20090,
+        "other": 28246
+      }
+    },
+    {
+      "mun1990_id": "ugljevik",
+      "controller": "RS",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5657827937673292,
+      "population": {
+        "total": 25607,
+        "bosniak": 10241,
+        "croat": 56,
+        "serb": 14488,
+        "other": 822
+      }
+    },
+    {
+      "mun1990_id": "vares",
+      "controller": null,
+      "stability_score": 35,
+      "control_status": "HIGHLY_CONTESTED",
+      "population": {
+        "total": 22203,
+        "bosniak": 6714,
+        "croat": 9016,
+        "serb": 3644,
+        "other": 2829
+      }
+    },
+    {
+      "mun1990_id": "velika_kladusa",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.9129999243970666,
+      "population": {
+        "total": 52908,
+        "bosniak": 48305,
+        "croat": 740,
+        "serb": 2266,
+        "other": 1597
+      }
+    },
+    {
+      "mun1990_id": "visegrad",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.635454502570876,
+      "population": {
+        "total": 21199,
+        "bosniak": 13471,
+        "croat": 32,
+        "serb": 6743,
+        "other": 953
+      }
+    },
+    {
+      "mun1990_id": "visoko",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.7446490467937609,
+      "population": {
+        "total": 46160,
+        "bosniak": 34373,
+        "croat": 1872,
+        "serb": 7471,
+        "other": 2444
+      }
+    },
+    {
+      "mun1990_id": "vitez",
+      "controller": "HRHB",
+      "stability_score": 55,
+      "control_status": "CONTESTED",
+      "controller_share": 0.4549696686887541,
+      "population": {
+        "total": 27859,
+        "bosniak": 11514,
+        "croat": 12675,
+        "serb": 1501,
+        "other": 2169
+      }
+    },
+    {
+      "mun1990_id": "vlasenica",
+      "controller": "RBiH",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5479435712368398,
+      "population": {
+        "total": 33529,
+        "bosniak": 18372,
+        "croat": 39,
+        "serb": 14301,
+        "other": 817
+      }
+    },
+    {
+      "mun1990_id": "vogosca",
+      "controller": "RS",
+      "stability_score": 35,
+      "control_status": "HIGHLY_CONTESTED",
+      "controller_share": 0.35756887247940927,
+      "population": {
+        "total": 24647,
+        "bosniak": 12499,
+        "croat": 1071,
+        "serb": 8813,
+        "other": 2264
+      }
+    },
+    {
+      "mun1990_id": "zavidovici",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.6419175623818706,
+      "population": {
+        "total": 52379,
+        "bosniak": 33623,
+        "croat": 3429,
+        "serb": 11626,
+        "other": 3701
+      }
+    },
+    {
+      "mun1990_id": "zenica",
+      "controller": "RBiH",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5481402154116901,
+      "population": {
+        "total": 146603,
+        "bosniak": 80359,
+        "croat": 22511,
+        "serb": 23512,
+        "other": 20221
+      }
+    },
+    {
+      "mun1990_id": "zepce",
+      "controller": "HRHB",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5452885317750182,
+      "population": {
+        "total": 32856,
+        "bosniak": 11676,
+        "croat": 17916,
+        "serb": 2398,
+        "other": 866
+      }
+    },
+    {
+      "mun1990_id": "zivinice",
+      "controller": "RBiH",
+      "stability_score": 75,
+      "control_status": "SECURE",
+      "controller_share": 0.80347918149791,
+      "population": {
+        "total": 54783,
+        "bosniak": 44017,
+        "croat": 3976,
+        "serb": 3525,
+        "other": 3265
+      }
+    },
+    {
+      "mun1990_id": "zvornik",
+      "controller": "RBiH",
+      "stability_score": 65,
+      "control_status": "SECURE",
+      "controller_share": 0.5916969063288026,
+      "population": {
+        "total": 81295,
+        "bosniak": 48102,
+        "croat": 122,
+        "serb": 30863,
+        "other": 2208
+      }
+    }
+  ]
+}

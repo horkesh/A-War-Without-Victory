@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWWV Map Viewer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; overflow: hidden; height: 100vh; }
+    #canvas-container { position: relative; width: 100vw; height: 100vh; }
+    #canvas { display: block; cursor: grab; background: #f5f5f5; }
+    #canvas.dragging { cursor: grabbing; }
+    #controls {
+      position: absolute; top: 10px; left: 10px;
+      background: white; padding: 12px; border: 1px solid #ccc;
+      border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      z-index: 10; max-width: 320px; max-height: 90vh; overflow-y: auto; font-size: 12px;
+    }
+    #settlement-panel {
+      position: absolute; top: 10px; right: 10px;
+      background: white; padding: 16px; border: 1px solid #ccc;
+      border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      z-index: 10; width: 320px; max-height: 90vh; overflow-y: auto; font-size: 12px;
+      display: none;
+    }
+    #settlement-panel.visible { display: block; }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+    .panel-title { font-weight: bold; font-size: 14px; }
+    .panel-close { cursor: pointer; font-size: 18px; color: #666; }
+    .panel-close:hover { color: #000; }
+    .panel-row { margin-bottom: 8px; }
+    .panel-label { font-weight: 500; color: #666; font-size: 11px; }
+    .panel-value { margin-top: 2px; font-size: 12px; }
+    .panel-value.missing { color: #dc3545; font-style: italic; }
+    .panel-value.unknown { color: #999; }
+    .panel-button { margin-top: 12px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 11px; width: 100%; }
+    .panel-button:hover { background: #0056b3; }
+    .control-group { margin-bottom: 12px; }
+    .control-group:last-child { margin-bottom: 0; }
+    label { display: block; margin-bottom: 4px; font-weight: 500; }
+    input[type="checkbox"], input[type="text"] { margin-right: 6px; }
+    input[type="text"] { width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 3px; font-size: 12px; }
+    button { padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; width: 100%; }
+    button:hover { background: #0056b3; }
+    .legend { margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd; }
+    .legend-item { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; }
+    .legend-color { display: inline-block; width: 16px; height: 16px; margin-right: 6px; border: 1px solid #333; vertical-align: middle; }
+    .tooltip {
+      position: absolute; background: rgba(0, 0, 0, 0.85); color: white;
+      padding: 8px; border-radius: 4px; font-size: 11px; pointer-events: none;
+      z-index: 1000; max-width: 250px; display: none;
+    }
+    .tooltip-line { margin-bottom: 2px; }
+    .tooltip-line:last-child { margin-bottom: 0; }
+    .error-box {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: white; padding: 24px; border: 2px solid #dc3545;
+      border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 10000; max-width: 500px; font-size: 14px;
+    }
+    .error-box h2 { color: #dc3545; margin-bottom: 12px; font-size: 18px; }
+    .error-box p { margin-bottom: 8px; line-height: 1.5; }
+    .error-box code { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+    .debug-overlay {
+      position: absolute; bottom: 10px; left: 10px;
+      background: rgba(0, 0, 0, 0.7); color: white; padding: 8px;
+      border-radius: 4px; font-family: monospace; font-size: 10px;
+      display: none; z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container">
+    <canvas id="canvas"></canvas>
+    <div id="tooltip" class="tooltip"></div>
+    <div id="controls">
+      <div class="control-group">
+        <label><strong>Layers:</strong></label>
+        <label><input type="checkbox" id="layer-settlements" checked> Settlements (base)</label>
+        <label><input type="checkbox" id="layer-mun1990"> Municipality 1990 boundaries</label>
+        <label><input type="checkbox" id="layer-political-control"> Political control</label>
+        <label><input type="checkbox" id="layer-ethnicity"> Ethnicity majority</label>
+      </div>
+      <div class="control-group">
+        <label><strong>Filters:</strong></label>
+        <label><input type="checkbox" id="filter-unknown-control"> Unknown control only</label>
+        <label><input type="checkbox" id="highlight-missing-control"> Highlight missing control</label>
+        <label><input type="checkbox" id="highlight-normalized-control"> Highlight municipality-normalized control</label>
+        <label>SID substring:</label>
+        <input type="text" id="filter-sid" placeholder="(empty for all)">
+      </div>
+      <div class="control-group">
+        <label>Go to SID or name:</label>
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="goto-sid" placeholder="e.g. S170666 or Sarajevo" style="flex:1;">
+          <button id="goto-btn">Go</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <button id="reset-view">Reset View</button>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div id="settlement-panel">
+      <div class="panel-header">
+        <span class="panel-title">Settlement Info</span>
+        <span class="panel-close" id="panel-close">&times;</span>
+      </div>
+      <div id="panel-content"></div>
+    </div>
+    <div id="debug-overlay" class="debug-overlay"></div>
+    <div id="error-box" class="error-box" style="display: none;"></div>
+  </div>
+  <script src="./viewer.js"></script>
+</body>
+</html>

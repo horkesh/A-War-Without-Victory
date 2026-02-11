@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "image_dimensions": {
+    "width": 2048,
+    "height": 1152
+  },
+  "regions": [
+    {
+      "id": "national_crest",
+      "type": "sprite_overlay",
+      "bounds": {
+        "x": 936,
+        "y": 32,
+        "width": 164,
+        "height": 173
+      },
+      "action": "open_faction_overview",
+      "hover_style": "red_outline",
+      "cursor": "pointer",
+      "tooltip": "Faction Overview",
+      "layer": "wall"
+    },
+    {
+      "id": "wall_map",
+      "type": "dynamic_render",
+      "bounds": {
+        "x": 607,
+        "y": 276,
+        "width": 822,
+        "height": 434
+      },
+      "action": "map_zoom_in",
+      "hover_style": "magnifying_glass_cursor",
+      "cursor": "zoom-in",
+      "tooltip": "Click to zoom",
+      "layer": "wall"
+    },
+    {
+      "id": "wall_calendar",
+      "type": "dynamic_render",
+      "bounds": {
+        "x": 1633,
+        "y": 155,
+        "width": 249,
+        "height": 328
+      },
+      "action": "advance_turn",
+      "hover_style": "red_outline",
+      "cursor": "pointer",
+      "tooltip": "advance_turn",
+      "layer": "wall"
+    },
+    {
+      "id": "red_telephone",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 100,
+        "y": 640,
+        "width": 380,
+        "height": 214
+      },
+      "action": "open_diplomacy_panel",
+      "hover_style": "red_outline",
+      "cursor": "pointer",
+      "tooltip": "Diplomacy (Phase II+)",
+      "layer": "desk"
+    },
+    {
+      "id": "newspaper_current",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 550,
+        "y": 700,
+        "width": 324,
+        "height": 165
+      },
+      "action": "open_newspaper_modal",
+      "hover_style": "red_outline",
+      "cursor": "pointer",
+      "tooltip": "Today's Newspaper (T-1 events)",
+      "layer": "desk"
+    },
+    {
+      "id": "magazine",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 950,
+        "y": 650,
+        "width": 202,
+        "height": 251
+      },
+      "action": "open_magazine_modal",
+      "hover_style": "red_outline",
+      "cursor": "pointer",
+      "tooltip": "Monthly Review",
+      "layer": "desk"
+    },
+    {
+      "id": "report_stack",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 1210,
+        "y": 710,
+        "width": 316,
+        "height": 203
+      },
+      "action": "open_reports_modal",
+      "hover_style": "red_outline",
+      "cursor": "pointer",
+      "tooltip": "Situation Reports",
+      "layer": "desk"
+    },
+    {
+      "id": "transistor_radio",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 1540,
+        "y": 630,
+        "width": 304,
+        "height": 177
+      },
+      "action": "transistor_radio",
+      "hover_style": "red_outline",
+      "cursor": "pointer",
+      "tooltip": "International News Ticker",
+      "layer": "desk"
+    }
+  ]
+}

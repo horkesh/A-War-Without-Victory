@@ -1,0 +1,22 @@
+{
+  "formations": [
+    {
+      "id": "arbih_1st_corps",
+      "faction": "RBiH",
+      "name": "1st Corps (Sarajevo)",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_krajina_corps",
+      "faction": "RS",
+      "name": "1st Krajina Corps",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_herzegovina",
+      "faction": "HRHB",
+      "name": "Southeast Herzegovina OZ",
+      "kind": "brigade"
+    }
+  ]
+}

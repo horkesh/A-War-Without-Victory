@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Political Control (Phase G3 contract-first)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; overflow: hidden; height: 100vh; background: #1a1a1a; color: #ccc; }
+    #canvas-container { position: relative; width: 100vw; height: 100vh; }
+    #canvas { display: block; cursor: grab; background: #0a0a0a; }
+    #canvas.dragging { cursor: grabbing; }
+    #controls {
+      position: absolute; top: 10px; left: 10px;
+      background: #2a2a2a; padding: 12px; border: 1px solid #444; border-radius: 4px;
+      z-index: 10; max-width: 280px; font-size: 12px;
+    }
+    .control-group { margin-bottom: 12px; }
+    label { display: block; margin-bottom: 4px; }
+    input[type="checkbox"] { margin-right: 6px; }
+    button { padding: 6px 12px; background: #444; color: white; border: 1px solid #666; border-radius: 3px; cursor: pointer; font-size: 12px; width: 100%; }
+    button:hover { background: #555; }
+    .legend { margin-top: 12px; padding-top: 12px; border-top: 1px solid #444; }
+    .legend-item { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; }
+    .legend-color { display: inline-block; width: 16px; height: 16px; margin-right: 6px; border: 1px solid #666; vertical-align: middle; }
+    .tooltip {
+      position: absolute; background: rgba(0,0,0,0.9); color: white; padding: 8px; border-radius: 4px;
+      font-size: 11px; pointer-events: none; z-index: 1000; max-width: 250px; display: none;
+    }
+    #error-box {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      background: #2a2a2a; padding: 24px; border: 2px solid #c00; border-radius: 8px; z-index: 10000;
+    }
+    #error-box h2 { color: #f66; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <div id="canvas-container">
+    <canvas id="canvas"></canvas>
+    <div id="tooltip" class="tooltip"></div>
+    <div id="controls">
+      <div class="control-group">
+        <label><input type="checkbox" id="color-by-controller" checked> Color by political controller</label>
+      </div>
+      <div class="control-group">
+        <label>Filter mun1990_id:</label>
+        <select id="filter-mun1990" style="width:100%;margin-top:4px;padding:4px;background:#333;color:#ccc;border:1px solid #555;">
+          <option value="">(all)</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label><input type="checkbox" id="show-null-only"> Show only null</label>
+      </div>
+      <div class="control-group">
+        <label><input type="checkbox" id="highlight-unknown-only"> Highlight unknown only (dims others)</label>
+      </div>
+      <div class="control-group">
+        <button id="reset-view">Reset View</button>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div id="error-box" style="display: none;"></div>
+  </div>
+  <script src="./political_control.js"></script>
+</body>
+</html>

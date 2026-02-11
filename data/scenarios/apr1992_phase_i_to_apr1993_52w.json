@@ -1,0 +1,10 @@
+{
+  "scenario_id": "apr1992_phase_i_to_apr1993_52w",
+  "start_phase": "phase_i",
+  "weeks": 52,
+  "init_control": "apr1992",
+  "init_formations": "apr1992",
+  "formation_spawn_directive": { "kind": "both" },
+  "turns": [],
+  "use_harness_bots": true
+}

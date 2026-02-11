@@ -1,0 +1,15 @@
+H5.2 Contact Graph Coverage Audit
+
+GLOBAL
+  total_settlements_in_substrate: 6137
+  total_nodes_in_contact_graph: 6137
+  missing_from_graph_count: 0
+  percent_missing: 0%
+
+MUNICIPALITIES FULLY MISSING (in_graph==0, substrate>0)
+
+HAN_PIJESAK
+  settlement_count_substrate: 26
+  settlement_count_in_graph: 26
+  missing_count: 0
+  missing_sids: 

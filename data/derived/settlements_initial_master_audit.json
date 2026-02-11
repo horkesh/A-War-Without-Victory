@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "settlements_total": 6101,
+    "registry_path": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\source\\municipalities_1990_registry_110.json",
+    "registry_count": 110
+  },
+  "missing": {
+    "mun1990_id": [],
+    "political_controller": [],
+    "control_status": [],
+    "ethnicity": [],
+    "settlement_name": []
+  }
+}

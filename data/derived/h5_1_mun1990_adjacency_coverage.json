@@ -1,0 +1,668 @@
+{
+  "awwv_meta": {
+    "role": "h5_1_mun1990_adjacency_coverage",
+    "version": "h5_1"
+  },
+  "by_mun1990_id": {
+    "banovici": {
+      "settlement_count_substrate": 20,
+      "settlement_count_in_graph": 20,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "banja_luka": {
+      "settlement_count_substrate": 54,
+      "settlement_count_in_graph": 54,
+      "adjacency_edge_count": 8,
+      "is_isolated": false
+    },
+    "bihac": {
+      "settlement_count_substrate": 59,
+      "settlement_count_in_graph": 59,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "bijeljina": {
+      "settlement_count_substrate": 67,
+      "settlement_count_in_graph": 67,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "bileca": {
+      "settlement_count_substrate": 60,
+      "settlement_count_in_graph": 60,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "bosanska_dubica": {
+      "settlement_count_substrate": 61,
+      "settlement_count_in_graph": 61,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "bosanska_gradiska": {
+      "settlement_count_substrate": 68,
+      "settlement_count_in_graph": 68,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "bosanska_kostajnica": {
+      "settlement_count_substrate": 12,
+      "settlement_count_in_graph": 12,
+      "adjacency_edge_count": 2,
+      "is_isolated": false
+    },
+    "bosanska_krupa": {
+      "settlement_count_substrate": 49,
+      "settlement_count_in_graph": 49,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "bosanski_brod": {
+      "settlement_count_substrate": 23,
+      "settlement_count_in_graph": 23,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "bosanski_novi": {
+      "settlement_count_substrate": 48,
+      "settlement_count_in_graph": 48,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "bosanski_petrovac": {
+      "settlement_count_substrate": 41,
+      "settlement_count_in_graph": 41,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "bosanski_samac": {
+      "settlement_count_substrate": 26,
+      "settlement_count_in_graph": 26,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "bosansko_grahovo": {
+      "settlement_count_substrate": 35,
+      "settlement_count_in_graph": 35,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "bratunac": {
+      "settlement_count_substrate": 50,
+      "settlement_count_in_graph": 50,
+      "adjacency_edge_count": 3,
+      "is_isolated": false
+    },
+    "brcko": {
+      "settlement_count_substrate": 59,
+      "settlement_count_in_graph": 59,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "breza": {
+      "settlement_count_substrate": 28,
+      "settlement_count_in_graph": 28,
+      "adjacency_edge_count": 3,
+      "is_isolated": false
+    },
+    "bugojno": {
+      "settlement_count_substrate": 78,
+      "settlement_count_in_graph": 78,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "busovaca": {
+      "settlement_count_substrate": 47,
+      "settlement_count_in_graph": 47,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "cajnice": {
+      "settlement_count_substrate": 36,
+      "settlement_count_in_graph": 36,
+      "adjacency_edge_count": 3,
+      "is_isolated": false
+    },
+    "capljina": {
+      "settlement_count_substrate": 32,
+      "settlement_count_in_graph": 32,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "cazin": {
+      "settlement_count_substrate": 61,
+      "settlement_count_in_graph": 61,
+      "adjacency_edge_count": 3,
+      "is_isolated": false
+    },
+    "celinac": {
+      "settlement_count_substrate": 30,
+      "settlement_count_in_graph": 30,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "centar_sarajevo": {
+      "settlement_count_substrate": 6,
+      "settlement_count_in_graph": 6,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "citluk": {
+      "settlement_count_substrate": 21,
+      "settlement_count_in_graph": 21,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "derventa": {
+      "settlement_count_substrate": 57,
+      "settlement_count_in_graph": 57,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "doboj": {
+      "settlement_count_substrate": 91,
+      "settlement_count_in_graph": 91,
+      "adjacency_edge_count": 10,
+      "is_isolated": false
+    },
+    "donji_vakuf": {
+      "settlement_count_substrate": 68,
+      "settlement_count_in_graph": 68,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "duvno": {
+      "settlement_count_substrate": 60,
+      "settlement_count_in_graph": 60,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "foca": {
+      "settlement_count_substrate": 133,
+      "settlement_count_in_graph": 133,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "fojnica": {
+      "settlement_count_substrate": 55,
+      "settlement_count_in_graph": 55,
+      "adjacency_edge_count": 7,
+      "is_isolated": false
+    },
+    "gacko": {
+      "settlement_count_substrate": 71,
+      "settlement_count_in_graph": 71,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "glamoc": {
+      "settlement_count_substrate": 55,
+      "settlement_count_in_graph": 55,
+      "adjacency_edge_count": 7,
+      "is_isolated": false
+    },
+    "gorazde": {
+      "settlement_count_substrate": 205,
+      "settlement_count_in_graph": 205,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "gornji_vakuf": {
+      "settlement_count_substrate": 52,
+      "settlement_count_in_graph": 52,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "gracanica": {
+      "settlement_count_substrate": 30,
+      "settlement_count_in_graph": 30,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "gradacac": {
+      "settlement_count_substrate": 45,
+      "settlement_count_in_graph": 45,
+      "adjacency_edge_count": 7,
+      "is_isolated": false
+    },
+    "grude": {
+      "settlement_count_substrate": 13,
+      "settlement_count_in_graph": 13,
+      "adjacency_edge_count": 3,
+      "is_isolated": false
+    },
+    "hadzici": {
+      "settlement_count_substrate": 62,
+      "settlement_count_in_graph": 62,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "han_pijesak": {
+      "settlement_count_substrate": 26,
+      "settlement_count_in_graph": 26,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "ilidza": {
+      "settlement_count_substrate": 17,
+      "settlement_count_in_graph": 17,
+      "adjacency_edge_count": 8,
+      "is_isolated": false
+    },
+    "ilijas": {
+      "settlement_count_substrate": 74,
+      "settlement_count_in_graph": 74,
+      "adjacency_edge_count": 10,
+      "is_isolated": false
+    },
+    "jablanica": {
+      "settlement_count_substrate": 33,
+      "settlement_count_in_graph": 33,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "jajce": {
+      "settlement_count_substrate": 69,
+      "settlement_count_in_graph": 69,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "kakanj": {
+      "settlement_count_substrate": 106,
+      "settlement_count_in_graph": 106,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "kalesija": {
+      "settlement_count_substrate": 44,
+      "settlement_count_in_graph": 44,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "kalinovik": {
+      "settlement_count_substrate": 71,
+      "settlement_count_in_graph": 71,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "kiseljak": {
+      "settlement_count_substrate": 82,
+      "settlement_count_in_graph": 82,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "kladanj": {
+      "settlement_count_substrate": 48,
+      "settlement_count_in_graph": 48,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "kljuc": {
+      "settlement_count_substrate": 70,
+      "settlement_count_in_graph": 70,
+      "adjacency_edge_count": 7,
+      "is_isolated": false
+    },
+    "konjic": {
+      "settlement_count_substrate": 168,
+      "settlement_count_in_graph": 168,
+      "adjacency_edge_count": 10,
+      "is_isolated": false
+    },
+    "kotor_varos": {
+      "settlement_count_substrate": 43,
+      "settlement_count_in_graph": 43,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "kresevo": {
+      "settlement_count_substrate": 27,
+      "settlement_count_in_graph": 27,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "kupres": {
+      "settlement_count_substrate": 40,
+      "settlement_count_in_graph": 40,
+      "adjacency_edge_count": 8,
+      "is_isolated": false
+    },
+    "laktasi": {
+      "settlement_count_substrate": 37,
+      "settlement_count_in_graph": 37,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "listica": {
+      "settlement_count_substrate": 34,
+      "settlement_count_in_graph": 34,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "livno": {
+      "settlement_count_substrate": 58,
+      "settlement_count_in_graph": 58,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "lopare": {
+      "settlement_count_substrate": 55,
+      "settlement_count_in_graph": 55,
+      "adjacency_edge_count": 7,
+      "is_isolated": false
+    },
+    "lukavac": {
+      "settlement_count_substrate": 44,
+      "settlement_count_in_graph": 44,
+      "adjacency_edge_count": 8,
+      "is_isolated": false
+    },
+    "ljubinje": {
+      "settlement_count_substrate": 21,
+      "settlement_count_in_graph": 21,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "ljubuski": {
+      "settlement_count_substrate": 35,
+      "settlement_count_in_graph": 35,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "maglaj": {
+      "settlement_count_substrate": 40,
+      "settlement_count_in_graph": 40,
+      "adjacency_edge_count": 7,
+      "is_isolated": false
+    },
+    "modrica": {
+      "settlement_count_substrate": 24,
+      "settlement_count_in_graph": 24,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "mostar": {
+      "settlement_count_substrate": 63,
+      "settlement_count_in_graph": 63,
+      "adjacency_edge_count": 8,
+      "is_isolated": false
+    },
+    "mrkonjic_grad": {
+      "settlement_count_substrate": 38,
+      "settlement_count_in_graph": 38,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "neum": {
+      "settlement_count_substrate": 27,
+      "settlement_count_in_graph": 27,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "nevesinje": {
+      "settlement_count_substrate": 56,
+      "settlement_count_in_graph": 56,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "novi_grad_sarajevo": {
+      "settlement_count_substrate": 22,
+      "settlement_count_in_graph": 22,
+      "adjacency_edge_count": 9,
+      "is_isolated": false
+    },
+    "novi_travnik": {
+      "settlement_count_substrate": 51,
+      "settlement_count_in_graph": 51,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "novo_sarajevo": {
+      "settlement_count_substrate": 3,
+      "settlement_count_in_graph": 3,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "odzak": {
+      "settlement_count_substrate": 26,
+      "settlement_count_in_graph": 26,
+      "adjacency_edge_count": 3,
+      "is_isolated": false
+    },
+    "olovo": {
+      "settlement_count_substrate": 45,
+      "settlement_count_in_graph": 45,
+      "adjacency_edge_count": 9,
+      "is_isolated": false
+    },
+    "orasje": {
+      "settlement_count_substrate": 20,
+      "settlement_count_in_graph": 20,
+      "adjacency_edge_count": 3,
+      "is_isolated": false
+    },
+    "pale": {
+      "settlement_count_substrate": 77,
+      "settlement_count_in_graph": 77,
+      "adjacency_edge_count": 7,
+      "is_isolated": false
+    },
+    "posusje": {
+      "settlement_count_substrate": 20,
+      "settlement_count_in_graph": 20,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "prijedor": {
+      "settlement_count_substrate": 71,
+      "settlement_count_in_graph": 71,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "prnjavor": {
+      "settlement_count_substrate": 63,
+      "settlement_count_in_graph": 63,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "prozor": {
+      "settlement_count_substrate": 56,
+      "settlement_count_in_graph": 56,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "rogatica": {
+      "settlement_count_substrate": 118,
+      "settlement_count_in_graph": 118,
+      "adjacency_edge_count": 8,
+      "is_isolated": false
+    },
+    "rudo": {
+      "settlement_count_substrate": 89,
+      "settlement_count_in_graph": 88,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "sanski_most": {
+      "settlement_count_substrate": 91,
+      "settlement_count_in_graph": 91,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "sekovici": {
+      "settlement_count_substrate": 38,
+      "settlement_count_in_graph": 38,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "sipovo": {
+      "settlement_count_substrate": 46,
+      "settlement_count_in_graph": 46,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "skender_vakuf": {
+      "settlement_count_substrate": 38,
+      "settlement_count_in_graph": 38,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "sokolac": {
+      "settlement_count_substrate": 96,
+      "settlement_count_in_graph": 96,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "srbac": {
+      "settlement_count_substrate": 39,
+      "settlement_count_in_graph": 39,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "srebrenica": {
+      "settlement_count_substrate": 81,
+      "settlement_count_in_graph": 81,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "srebrenik": {
+      "settlement_count_substrate": 49,
+      "settlement_count_in_graph": 49,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "stari_grad_sarajevo": {
+      "settlement_count_substrate": 16,
+      "settlement_count_in_graph": 16,
+      "adjacency_edge_count": 7,
+      "is_isolated": false
+    },
+    "stolac": {
+      "settlement_count_substrate": 46,
+      "settlement_count_in_graph": 46,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "tesanj": {
+      "settlement_count_substrate": 54,
+      "settlement_count_in_graph": 54,
+      "adjacency_edge_count": 3,
+      "is_isolated": false
+    },
+    "teslic": {
+      "settlement_count_substrate": 57,
+      "settlement_count_in_graph": 57,
+      "adjacency_edge_count": 9,
+      "is_isolated": false
+    },
+    "titov_drvar": {
+      "settlement_count_substrate": 28,
+      "settlement_count_in_graph": 28,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "travnik": {
+      "settlement_count_substrate": 90,
+      "settlement_count_in_graph": 90,
+      "adjacency_edge_count": 9,
+      "is_isolated": false
+    },
+    "trebinje": {
+      "settlement_count_substrate": 195,
+      "settlement_count_in_graph": 195,
+      "adjacency_edge_count": 3,
+      "is_isolated": false
+    },
+    "trnovo": {
+      "settlement_count_substrate": 80,
+      "settlement_count_in_graph": 80,
+      "adjacency_edge_count": 7,
+      "is_isolated": false
+    },
+    "tuzla": {
+      "settlement_count_substrate": 66,
+      "settlement_count_in_graph": 66,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "ugljevik": {
+      "settlement_count_substrate": 35,
+      "settlement_count_in_graph": 35,
+      "adjacency_edge_count": 3,
+      "is_isolated": false
+    },
+    "vares": {
+      "settlement_count_substrate": 85,
+      "settlement_count_in_graph": 85,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "velika_kladusa": {
+      "settlement_count_substrate": 49,
+      "settlement_count_in_graph": 49,
+      "adjacency_edge_count": 1,
+      "is_isolated": false
+    },
+    "visegrad": {
+      "settlement_count_substrate": 163,
+      "settlement_count_in_graph": 163,
+      "adjacency_edge_count": 3,
+      "is_isolated": false
+    },
+    "visoko": {
+      "settlement_count_substrate": 88,
+      "settlement_count_in_graph": 88,
+      "adjacency_edge_count": 7,
+      "is_isolated": false
+    },
+    "vitez": {
+      "settlement_count_substrate": 34,
+      "settlement_count_in_graph": 34,
+      "adjacency_edge_count": 5,
+      "is_isolated": false
+    },
+    "vlasenica": {
+      "settlement_count_substrate": 92,
+      "settlement_count_in_graph": 92,
+      "adjacency_edge_count": 8,
+      "is_isolated": false
+    },
+    "vogosca": {
+      "settlement_count_substrate": 21,
+      "settlement_count_in_graph": 21,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "zavidovici": {
+      "settlement_count_substrate": 47,
+      "settlement_count_in_graph": 47,
+      "adjacency_edge_count": 8,
+      "is_isolated": false
+    },
+    "zenica": {
+      "settlement_count_substrate": 83,
+      "settlement_count_in_graph": 83,
+      "adjacency_edge_count": 8,
+      "is_isolated": false
+    },
+    "zepce": {
+      "settlement_count_substrate": 41,
+      "settlement_count_in_graph": 41,
+      "adjacency_edge_count": 4,
+      "is_isolated": false
+    },
+    "zivinice": {
+      "settlement_count_substrate": 29,
+      "settlement_count_in_graph": 29,
+      "adjacency_edge_count": 6,
+      "is_isolated": false
+    },
+    "zvornik": {
+      "settlement_count_substrate": 81,
+      "settlement_count_in_graph": 81,
+      "adjacency_edge_count": 8,
+      "is_isolated": false
+    }
+  }
+}

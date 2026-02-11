@@ -1,0 +1,21 @@
+{
+  "formations": [
+    {"id": "arbih_1st_corps", "faction": "RBiH", "name": "1st Corps (Sarajevo)", "kind": "brigade"},
+    {"id": "arbih_2nd_corps", "faction": "RBiH", "name": "2nd Corps (Tuzla)", "kind": "brigade"},
+    {"id": "arbih_3rd_corps", "faction": "RBiH", "name": "3rd Corps (Zenica)", "kind": "brigade"},
+    {"id": "arbih_4th_corps", "faction": "RBiH", "name": "4th Corps (Mostar)", "kind": "brigade"},
+    {"id": "arbih_5th_corps", "faction": "RBiH", "name": "5th Corps (Bihać)", "kind": "brigade"},
+    {"id": "arbih_6th_corps", "faction": "RBiH", "name": "6th Corps (Konjic)", "kind": "brigade"},
+    {"id": "arbih_7th_corps", "faction": "RBiH", "name": "7th Corps (Travnik)", "kind": "brigade"},
+    {"id": "hvo_central_bosnia", "faction": "HRHB", "name": "Central Bosnia OZ", "kind": "brigade"},
+    {"id": "hvo_herzegovina", "faction": "HRHB", "name": "Southeast Herzegovina OZ", "kind": "brigade"},
+    {"id": "hvo_northwest_bosnia", "faction": "HRHB", "name": "Northwest Bosnia OZ (Posavina)", "kind": "brigade"},
+    {"id": "hvo_tomislavgrad", "faction": "HRHB", "name": "Tomislavgrad OZ", "kind": "brigade"},
+    {"id": "vrs_1st_krajina_corps", "faction": "RS", "name": "1st Krajina Corps", "kind": "brigade"},
+    {"id": "vrs_2nd_krajina_corps", "faction": "RS", "name": "2nd Krajina Corps", "kind": "brigade"},
+    {"id": "vrs_drina_corps", "faction": "RS", "name": "Drina Corps", "kind": "brigade"},
+    {"id": "vrs_east_bosnian_corps", "faction": "RS", "name": "East Bosnian Corps", "kind": "brigade"},
+    {"id": "vrs_herzegovina_corps", "faction": "RS", "name": "Herzegovina Corps", "kind": "brigade"},
+    {"id": "vrs_sarajevo_romanija_corps", "faction": "RS", "name": "Sarajevo-Romanija Corps", "kind": "brigade"}
+  ]
+}

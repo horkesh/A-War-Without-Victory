@@ -1,0 +1,20 @@
+{
+  "scenario_id": "apr1994_start",
+  "weeks": 52,
+  "turns": [
+    {
+      "week_index": 0,
+      "actions": [
+        {
+          "type": "note",
+          "text": "April 1994: The Croatian government and Krajina Serbs begin implementing a cease-fire; fighting intensifies around the Gorazde safe area."
+        },
+        {
+          "type": "note",
+          "text": "10-11 April: NATO conducts its first airstrikes against Serb positions near Gorazde; UN and NATO issue pullback orders and seek a cease-fire."
+        },
+        { "type": "baseline_ops", "enabled": true, "intensity": 1.0 }
+      ]
+    }
+  ]
+}

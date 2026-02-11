@@ -1,0 +1,114 @@
+SETTLEMENT ADJACENCY GRAPH AUDIT (v3: Robust Boundary Detection)
+=================================================================
+
+ALGORITHM:
+  v3 uses Hausdorff-distance segment matching to detect shared borders
+  between settlements with independently digitized boundaries.
+  Unlike v1/v2 (exact colinearity), v3 handles parallel boundaries
+  within digitization tolerance.
+
+TOLERANCE PARAMETERS:
+  Distance tolerance: 0.000078
+  Parallel threshold: 0.985
+  Min overlap length: 0.0004873099999999999
+
+COUNTS:
+  Nodes: 5822
+  Edges: 17116
+  Isolated settlements: 1
+  Isolation rate: 0.0%
+
+DEGREE STATISTICS:
+  Min: 0
+  Median (p50): 6
+  p90: 8
+  Max: 15
+
+TOP DEGREE SETTLEMENTS (top 20):
+  S217727: degree 15
+  S137901: degree 14
+  S210366: degree 14
+  S113786: degree 13
+  S210692: degree 13
+  S114995: degree 12
+  S120308: degree 12
+  S122335: degree 12
+  S135810: degree 12
+  S149284: degree 12
+  S162825: degree 12
+  S210196: degree 12
+  S210358: degree 12
+  S214965: degree 12
+  S219401: degree 12
+  S100170: degree 11
+  S108987: degree 11
+  S119385: degree 11
+  S121452: degree 11
+  S130125: degree 11
+
+TOP SHARED BORDER EDGES (top 50 by length):
+  S203696 <-> S221155: 0.287749
+  S135747 <-> S222682: 0.273305
+  S205893 <-> S210366: 0.256551
+  S105635 <-> S151572: 0.235869
+  S123137 <-> S157635: 0.203772
+  S165948 <-> S214647: 0.146494
+  S229709 <-> S230065: 0.145500
+  S213926 <-> S214027: 0.144100
+  S209724 <-> S209872: 0.143834
+  S136131 <-> S136263: 0.142371
+  S205524 <-> S206105: 0.138487
+  S214868 <-> S215040: 0.136758
+  S116971 <-> S116980: 0.135805
+  S126365 <-> S169625: 0.133477
+  S208477 <-> S216445: 0.132707
+  S113638 <-> S130842: 0.132430
+  S170224 <-> S217735: 0.130073
+  S210668 <-> S211516: 0.129028
+  S100854 <-> S101087: 0.128370
+  S117382 <-> S219401: 0.128007
+  S205893 <-> S205966: 0.126820
+  S218898 <-> S224316: 0.124357
+  S165140 <-> S214752: 0.123599
+  S108618 <-> S112810: 0.122097
+  S165140 <-> S170143: 0.121072
+  S217662 <-> S217727: 0.119306
+  S209732 <-> S209945: 0.118700
+  S104248 <-> S104400: 0.118596
+  S105732 <-> S105899: 0.118146
+  S170119 <-> S219231: 0.117625
+  S105678 <-> S126390: 0.117313
+  S219231 <-> S219401: 0.115093
+  S200450 <-> S218120: 0.112326
+  S105970 <-> S135909: 0.112209
+  S162230 <-> S166251: 0.110464
+  S170429 <-> S222739: 0.109802
+  S210579 <-> S211931: 0.108562
+  S105538 <-> S105635: 0.108220
+  S170470 <-> S171158: 0.107748
+  S100820 <-> S101176: 0.106638
+  S208256 <-> S213802: 0.106487
+  S136069 <-> S166600: 0.106168
+  S126691 <-> S127370: 0.105575
+  S165557 <-> S169617: 0.105553
+  S205524 <-> S205885: 0.104820
+  S114065 <-> S137995: 0.103746
+  S208582 <-> S208728: 0.103282
+  S120839 <-> S129984: 0.103221
+  S206458 <-> S217760: 0.102863
+  S100919 <-> S100927: 0.102689
+
+ISOLATED SETTLEMENTS (1):
+  S228427
+
+ANOMALIES:
+  Missing SID features: 0
+  Non-polygon features: 0
+  Segment pairs checked: 531512
+  Matches found: 32062
+
+NOTE:
+  Adjacency is defined as shared boundary segments only (contiguity).
+  Point-touch does not create edges. No terrain inference performed.
+  v3 handles independently digitized boundaries within tolerance.
+  No geometry modification or invention performed.

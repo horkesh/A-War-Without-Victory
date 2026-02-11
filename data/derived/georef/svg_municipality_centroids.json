@@ -1,0 +1,662 @@
+[
+  {
+    "mun1990_id": "banovici",
+    "display_name": "Banovići",
+    "x": 658.8570838852199,
+    "y": 285.4910987059685
+  },
+  {
+    "mun1990_id": "banja_luka",
+    "display_name": "Banja Luka",
+    "x": 325.2532798259814,
+    "y": 168.08682674506653
+  },
+  {
+    "mun1990_id": "bihac",
+    "display_name": "Bihać",
+    "x": 59.32836465589161,
+    "y": 174.5278430384105
+  },
+  {
+    "mun1990_id": "bijeljina",
+    "display_name": "Bijeljina",
+    "x": 827.3363947186034,
+    "y": 165.11428120514262
+  },
+  {
+    "mun1990_id": "bileca",
+    "display_name": "Bileća",
+    "x": 636.0044343048902,
+    "y": 773.4933338945757
+  },
+  {
+    "mun1990_id": "bosanska_dubica",
+    "display_name": "Bosanska Dubica",
+    "x": 255.57673458264134,
+    "y": 34.59545097040255
+  },
+  {
+    "mun1990_id": "bosanska_gradiska",
+    "display_name": "Bosanska Gradiška",
+    "x": 363.3942942004673,
+    "y": 60.86406602900725
+  },
+  {
+    "mun1990_id": "bosanska_kostajnica",
+    "display_name": "Bosanska Kostajnica",
+    "x": 203.9914223923879,
+    "y": 21.634636382151086
+  },
+  {
+    "mun1990_id": "bosanska_krupa",
+    "display_name": "Bosanska Krupa",
+    "x": 119.70406134973463,
+    "y": 118.15709673964531
+  },
+  {
+    "mun1990_id": "bosanski_brod",
+    "display_name": "Bosanski Brod",
+    "x": 557.1117536761583,
+    "y": 61.14253134239352
+  },
+  {
+    "mun1990_id": "bosanski_novi",
+    "display_name": "Bosanski Novi",
+    "x": 173.0660648258994,
+    "y": 76.22094988004649
+  },
+  {
+    "mun1990_id": "bosanski_petrovac",
+    "display_name": "Bosanski Petrovac",
+    "x": 153.9384738442907,
+    "y": 225.16078410705845
+  },
+  {
+    "mun1990_id": "bosanski_samac",
+    "display_name": "Bosanski Šamac",
+    "x": 664.2545584767519,
+    "y": 80.02910344045834
+  },
+  {
+    "mun1990_id": "bosansko_grahovo",
+    "display_name": "Bosansko Grahovo",
+    "x": 167.71415126008148,
+    "y": 364.8167259426201
+  },
+  {
+    "mun1990_id": "bratunac",
+    "display_name": "Bratunac",
+    "x": 870.6908829982586,
+    "y": 361.61818352061937
+  },
+  {
+    "mun1990_id": "brcko",
+    "display_name": "Brčko",
+    "x": 724.3395000067604,
+    "y": 143.34193748952467
+  },
+  {
+    "mun1990_id": "breza",
+    "display_name": "Breza",
+    "x": 614.847401577392,
+    "y": 416.9405734401793
+  },
+  {
+    "mun1990_id": "bugojno",
+    "display_name": "Bugojno",
+    "x": 421.76046336217627,
+    "y": 401.2918747015886
+  },
+  {
+    "mun1990_id": "busovaca",
+    "display_name": "Busovača",
+    "x": 524.3206332932327,
+    "y": 390.32493704324924
+  },
+  {
+    "mun1990_id": "cajnice",
+    "display_name": "Čajniče",
+    "x": 814.8709636030503,
+    "y": 561.9178223765039
+  },
+  {
+    "mun1990_id": "capljina",
+    "display_name": "Čapljina",
+    "x": 479.2480386949843,
+    "y": 726.0229502399839
+  },
+  {
+    "mun1990_id": "cazin",
+    "display_name": "Cazin",
+    "x": 48.55208079394913,
+    "y": 79.66527604863606
+  },
+  {
+    "mun1990_id": "celinac",
+    "display_name": "Čelinac",
+    "x": 400.78932347322274,
+    "y": 177.5868659902399
+  },
+  {
+    "mun1990_id": "centar_sarajevo",
+    "display_name": "Centar Sarajevo",
+    "x": 648.4490685516087,
+    "y": 454.84590476461375
+  },
+  {
+    "mun1990_id": "citluk",
+    "display_name": "Čitluk",
+    "x": 470.6164572250648,
+    "y": 682.5946206550843
+  },
+  {
+    "mun1990_id": "derventa",
+    "display_name": "Derventa",
+    "x": 530.3986172203639,
+    "y": 100.80577925478039
+  },
+  {
+    "mun1990_id": "doboj",
+    "display_name": "Doboj",
+    "x": 561.434336527124,
+    "y": 165.32272282857733
+  },
+  {
+    "mun1990_id": "donji_vakuf",
+    "display_name": "Donji Vakuf",
+    "x": 402.0948532402576,
+    "y": 365.2057039396075
+  },
+  {
+    "mun1990_id": "duvno",
+    "display_name": "Duvno",
+    "x": 346.936565122894,
+    "y": 534.2421790248701
+  },
+  {
+    "mun1990_id": "foca",
+    "display_name": "Foča",
+    "x": 735.7033071179709,
+    "y": 587.8506595350683
+  },
+  {
+    "mun1990_id": "fojnica",
+    "display_name": "Fojnica",
+    "x": 525.5002431246872,
+    "y": 433.3361120124002
+  },
+  {
+    "mun1990_id": "gacko",
+    "display_name": "Gacko",
+    "x": 674.4180161686401,
+    "y": 695.7595385524094
+  },
+  {
+    "mun1990_id": "glamoc",
+    "display_name": "Glamoč",
+    "x": 270.6723173916775,
+    "y": 397.1827906842377
+  },
+  {
+    "mun1990_id": "gorazde",
+    "display_name": "Goražde",
+    "x": 772.1120437275757,
+    "y": 537.3074430644895
+  },
+  {
+    "mun1990_id": "gornji_vakuf",
+    "display_name": "Gornji Vakuf",
+    "x": 449.48083694076774,
+    "y": 447.531562316444
+  },
+  {
+    "mun1990_id": "gracanica",
+    "display_name": "Gračanica",
+    "x": 624.0236025815632,
+    "y": 187.36108390657733
+  },
+  {
+    "mun1990_id": "gradacac",
+    "display_name": "Gradačac",
+    "x": 656.8829076084526,
+    "y": 131.51435453272325
+  },
+  {
+    "mun1990_id": "grude",
+    "display_name": "Grude",
+    "x": 391.1336775059547,
+    "y": 644.3374261300879
+  },
+  {
+    "mun1990_id": "hadzici",
+    "display_name": "Hadžići",
+    "x": 580.7556670322778,
+    "y": 491.8854766285887
+  },
+  {
+    "mun1990_id": "han_pijesak",
+    "display_name": "Han-Pijesak",
+    "x": 774.4065861860088,
+    "y": 396.0707511412037
+  },
+  {
+    "mun1990_id": "ilidza",
+    "display_name": "Ilidža",
+    "x": 615.7258337130122,
+    "y": 479.120262880166
+  },
+  {
+    "mun1990_id": "ilijas",
+    "display_name": "Ilijaš",
+    "x": 648.1784484611129,
+    "y": 420.0774129651187
+  },
+  {
+    "mun1990_id": "jablanica",
+    "display_name": "Jablanica",
+    "x": 486.3618856776419,
+    "y": 535.6916472893927
+  },
+  {
+    "mun1990_id": "jajce",
+    "display_name": "Jajce",
+    "x": 373.9110816206193,
+    "y": 307.5234958621434
+  },
+  {
+    "mun1990_id": "kakanj",
+    "display_name": "Kakanj",
+    "x": 575.7442214691303,
+    "y": 374.2154597704762
+  },
+  {
+    "mun1990_id": "kalesija",
+    "display_name": "Kalesija",
+    "x": 760.5286688069503,
+    "y": 276.20485812253713
+  },
+  {
+    "mun1990_id": "kalinovik",
+    "display_name": "Kalinovik",
+    "x": 644.8836743827225,
+    "y": 596.271956925106
+  },
+  {
+    "mun1990_id": "kiseljak",
+    "display_name": "Kiseljak",
+    "x": 562.5857619473986,
+    "y": 437.892214122529
+  },
+  {
+    "mun1990_id": "kladanj",
+    "display_name": "Kladanj",
+    "x": 717.5944682558089,
+    "y": 332.75219518340975
+  },
+  {
+    "mun1990_id": "kljuc",
+    "display_name": "Ključ",
+    "x": 253.57490124644957,
+    "y": 238.72143514948542
+  },
+  {
+    "mun1990_id": "konjic",
+    "display_name": "Konjic",
+    "x": 542.1068534514843,
+    "y": 534.7835894300649
+  },
+  {
+    "mun1990_id": "kotor_varos",
+    "display_name": "Kotor Varoš",
+    "x": 412.8108423868479,
+    "y": 231.42961609709042
+  },
+  {
+    "mun1990_id": "kresevo",
+    "display_name": "Kreševo",
+    "x": 558.8027808261718,
+    "y": 466.04833004157405
+  },
+  {
+    "mun1990_id": "kupres",
+    "display_name": "Kupres",
+    "x": 364.3677502167646,
+    "y": 431.7103581674842
+  },
+  {
+    "mun1990_id": "laktasi",
+    "display_name": "Laktaši",
+    "x": 387.41825974330527,
+    "y": 122.24420289219422
+  },
+  {
+    "mun1990_id": "listica",
+    "display_name": "Lištica",
+    "x": 437.9155905656986,
+    "y": 631.2061518224265
+  },
+  {
+    "mun1990_id": "livno",
+    "display_name": "Livno",
+    "x": 278.50845141231514,
+    "y": 478.2912550445617
+  },
+  {
+    "mun1990_id": "lopare",
+    "display_name": "Lopare",
+    "x": 740.4373315046621,
+    "y": 196.2106202142448
+  },
+  {
+    "mun1990_id": "lukavac",
+    "display_name": "Lukavac",
+    "x": 655.5652253680207,
+    "y": 242.0549810227161
+  },
+  {
+    "mun1990_id": "ljubinje",
+    "display_name": "Ljubinje",
+    "x": 570.2018861984449,
+    "y": 778.0115504871226
+  },
+  {
+    "mun1990_id": "ljubuski",
+    "display_name": "Ljubuški",
+    "x": 425.66469593522055,
+    "y": 689.2459361766048
+  },
+  {
+    "mun1990_id": "maglaj",
+    "display_name": "Maglaj",
+    "x": 574.1137659488845,
+    "y": 239.87527981570855
+  },
+  {
+    "mun1990_id": "modrica",
+    "display_name": "Modriča",
+    "x": 616.572100984962,
+    "y": 109.49716687545413
+  },
+  {
+    "mun1990_id": "mostar",
+    "display_name": "Mostar",
+    "x": 506.8048810649006,
+    "y": 644.1102501567124
+  },
+  {
+    "mun1990_id": "mrkonjic_grad",
+    "display_name": "Mrkonjić Grad",
+    "x": 310.0430867873624,
+    "y": 285.89053260000196
+  },
+  {
+    "mun1990_id": "neum",
+    "display_name": "Neum",
+    "x": 488.23272780759646,
+    "y": 777.3755984612798
+  },
+  {
+    "mun1990_id": "nevesinje",
+    "display_name": "Nevesinje",
+    "x": 589.7155488098152,
+    "y": 669.2599992522179
+  },
+  {
+    "mun1990_id": "novi_grad_sarajevo",
+    "display_name": "Novi Grad Sarajevo",
+    "x": 615.5980511912852,
+    "y": 459.2185048793896
+  },
+  {
+    "mun1990_id": "novi_travnik",
+    "display_name": "Novi Travnik",
+    "x": 461.35416074060697,
+    "y": 377.31407180261783
+  },
+  {
+    "mun1990_id": "novo_sarajevo",
+    "display_name": "Novo Sarajevo",
+    "x": 642.1190151746032,
+    "y": 476.08995256084654
+  },
+  {
+    "mun1990_id": "odzak",
+    "display_name": "Odžak",
+    "x": 621.4124449785954,
+    "y": 73.04994654423342
+  },
+  {
+    "mun1990_id": "olovo",
+    "display_name": "Olovo",
+    "x": 691.0112854536247,
+    "y": 370.70624384676256
+  },
+  {
+    "mun1990_id": "orasje",
+    "display_name": "Orašje",
+    "x": 706.4771437354507,
+    "y": 89.27689118057893
+  },
+  {
+    "mun1990_id": "pale",
+    "display_name": "Pale",
+    "x": 711.7554815264091,
+    "y": 488.9300380303806
+  },
+  {
+    "mun1990_id": "posusje",
+    "display_name": "Posušje",
+    "x": 386.7656182670651,
+    "y": 587.9329878858225
+  },
+  {
+    "mun1990_id": "prijedor",
+    "display_name": "Prijedor",
+    "x": 242.91423551113073,
+    "y": 97.90337646818865
+  },
+  {
+    "mun1990_id": "prnjavor",
+    "display_name": "Prnjavor",
+    "x": 456.4218840258971,
+    "y": 125.81286232908721
+  },
+  {
+    "mun1990_id": "prozor",
+    "display_name": "Prozor",
+    "x": 454.68457993761007,
+    "y": 494.41987888312775
+  },
+  {
+    "mun1990_id": "rogatica",
+    "display_name": "Rogatica",
+    "x": 797.5777296446369,
+    "y": 479.27212692696486
+  },
+  {
+    "mun1990_id": "rudo",
+    "display_name": "Rudo",
+    "x": 874.6223074112652,
+    "y": 538.1060258779503
+  },
+  {
+    "mun1990_id": "sanski_most",
+    "display_name": "Sanski Most",
+    "x": 208.71368069336336,
+    "y": 154.8310050800608
+  },
+  {
+    "mun1990_id": "sekovici",
+    "display_name": "Šekovići",
+    "x": 756.2077435423989,
+    "y": 317.1314589459906
+  },
+  {
+    "mun1990_id": "sipovo",
+    "display_name": "Šipovo",
+    "x": 327.785437447577,
+    "y": 343.5373066245114
+  },
+  {
+    "mun1990_id": "skender_vakuf",
+    "display_name": "Skender Vakuf",
+    "x": 400.7019869254578,
+    "y": 273.2187886540625
+  },
+  {
+    "mun1990_id": "sokolac",
+    "display_name": "Sokolac",
+    "x": 734.5888862703652,
+    "y": 429.4194258343379
+  },
+  {
+    "mun1990_id": "srbac",
+    "display_name": "Srbac",
+    "x": 437.46786414228643,
+    "y": 68.30463207010406
+  },
+  {
+    "mun1990_id": "srebrenica",
+    "display_name": "Srebrenica",
+    "x": 876.6824984032282,
+    "y": 400.8946996410764
+  },
+  {
+    "mun1990_id": "srebrenik",
+    "display_name": "Srebrenik",
+    "x": 669.3348553805045,
+    "y": 189.87339814683597
+  },
+  {
+    "mun1990_id": "stari_grad_sarajevo",
+    "display_name": "Stari Grad Sarajevo",
+    "x": 661.4420828051582,
+    "y": 464.361360701709
+  },
+  {
+    "mun1990_id": "stolac",
+    "display_name": "Stolac",
+    "x": 541.4243240268894,
+    "y": 726.9027807841962
+  },
+  {
+    "mun1990_id": "tesanj",
+    "display_name": "Tešanj",
+    "x": 540.942985971498,
+    "y": 203.7856908886533
+  },
+  {
+    "mun1990_id": "teslic",
+    "display_name": "Teslić",
+    "x": 502.9597711373121,
+    "y": 225.67565909213178
+  },
+  {
+    "mun1990_id": "titov_drvar",
+    "display_name": "Titov Drvar",
+    "x": 177.99730840511538,
+    "y": 302.77935834974636
+  },
+  {
+    "mun1990_id": "travnik",
+    "display_name": "Travnik",
+    "x": 462.4493558628044,
+    "y": 337.4554641869762
+  },
+  {
+    "mun1990_id": "trebinje",
+    "display_name": "Trebinje",
+    "x": 601.3507628305455,
+    "y": 843.3770998714278
+  },
+  {
+    "mun1990_id": "trnovo",
+    "display_name": "Trnovo",
+    "x": 652.1570139512468,
+    "y": 528.9065602802264
+  },
+  {
+    "mun1990_id": "tuzla",
+    "display_name": "Tuzla",
+    "x": 705.3511987016242,
+    "y": 237.17506913540677
+  },
+  {
+    "mun1990_id": "ugljevik",
+    "display_name": "Ugljevik",
+    "x": 789.4515370697569,
+    "y": 205.03998282038143
+  },
+  {
+    "mun1990_id": "vares",
+    "display_name": "Vareš",
+    "x": 631.7260566319526,
+    "y": 377.21419448826543
+  },
+  {
+    "mun1990_id": "velika_kladusa",
+    "display_name": "Velika Kladuša",
+    "x": 44.87314069248342,
+    "y": 28.221542179716863
+  },
+  {
+    "mun1990_id": "visegrad",
+    "display_name": "Višegrad",
+    "x": 860.4910425241198,
+    "y": 491.4327321756588
+  },
+  {
+    "mun1990_id": "visoko",
+    "display_name": "Visoko",
+    "x": 584.019833689379,
+    "y": 420.47854438230365
+  },
+  {
+    "mun1990_id": "vitez",
+    "display_name": "Vitez",
+    "x": 497.67022248764926,
+    "y": 367.4674126981664
+  },
+  {
+    "mun1990_id": "vlasenica",
+    "display_name": "Vlasenica",
+    "x": 797.7798681109998,
+    "y": 359.4781760144599
+  },
+  {
+    "mun1990_id": "vogosca",
+    "display_name": "Vogošća",
+    "x": 633.3119214044792,
+    "y": 449.79960633854387
+  },
+  {
+    "mun1990_id": "zavidovici",
+    "display_name": "Zavidovići",
+    "x": 602.686980508789,
+    "y": 283.81560080443336
+  },
+  {
+    "mun1990_id": "zenica",
+    "display_name": "Zenica",
+    "x": 533.2380799840968,
+    "y": 341.311311152894
+  },
+  {
+    "mun1990_id": "zepce",
+    "display_name": "Žepče",
+    "x": 557.8605402193025,
+    "y": 273.72035169054936
+  },
+  {
+    "mun1990_id": "zivinice",
+    "display_name": "Živinice",
+    "x": 707.7786524436088,
+    "y": 284.2161581233062
+  },
+  {
+    "mun1990_id": "zvornik",
+    "display_name": "Zvornik",
+    "x": 803.9447934680861,
+    "y": 268.66318269340627
+  }
+]

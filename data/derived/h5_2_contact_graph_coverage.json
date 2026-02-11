@@ -1,0 +1,816 @@
+{
+  "awwv_meta": {
+    "role": "h5_2_contact_graph_coverage",
+    "version": "h5_2"
+  },
+  "contact_graph_path": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\settlement_contact_graph.json",
+  "node_key_type": "S-prefixed string (e.g. S228036)",
+  "node_roster_source": "Phase 1: nodes array + edge endpoints from substrate",
+  "global": {
+    "total_settlements_in_substrate": 6137,
+    "total_nodes_in_contact_graph": 6137,
+    "missing_from_graph_count": 0,
+    "missing_from_graph_sids_first_50": [],
+    "percent_missing": 0
+  },
+  "by_mun1990_id": {
+    "banja_luka": {
+      "settlement_count_substrate": 54,
+      "settlement_count_in_graph": 54,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "bihac": {
+      "settlement_count_substrate": 59,
+      "settlement_count_in_graph": 59,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "bijeljina": {
+      "settlement_count_substrate": 67,
+      "settlement_count_in_graph": 67,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "bileca": {
+      "settlement_count_substrate": 60,
+      "settlement_count_in_graph": 60,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "bosanska_dubica": {
+      "settlement_count_substrate": 61,
+      "settlement_count_in_graph": 61,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "bosanska_gradiska": {
+      "settlement_count_substrate": 68,
+      "settlement_count_in_graph": 68,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "bosanska_kostajnica": {
+      "settlement_count_substrate": 12,
+      "settlement_count_in_graph": 12,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "bosanska_krupa": {
+      "settlement_count_substrate": 49,
+      "settlement_count_in_graph": 49,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "bosanski_brod": {
+      "settlement_count_substrate": 23,
+      "settlement_count_in_graph": 23,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "bosanski_novi": {
+      "settlement_count_substrate": 48,
+      "settlement_count_in_graph": 48,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "bosanski_petrovac": {
+      "settlement_count_substrate": 41,
+      "settlement_count_in_graph": 41,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "bosanski_samac": {
+      "settlement_count_substrate": 26,
+      "settlement_count_in_graph": 26,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "bosansko_grahovo": {
+      "settlement_count_substrate": 35,
+      "settlement_count_in_graph": 35,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "bratunac": {
+      "settlement_count_substrate": 50,
+      "settlement_count_in_graph": 50,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "brcko": {
+      "settlement_count_substrate": 59,
+      "settlement_count_in_graph": 59,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "breza": {
+      "settlement_count_substrate": 28,
+      "settlement_count_in_graph": 28,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "bugojno": {
+      "settlement_count_substrate": 78,
+      "settlement_count_in_graph": 78,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "busovaca": {
+      "settlement_count_substrate": 47,
+      "settlement_count_in_graph": 47,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "cajnice": {
+      "settlement_count_substrate": 36,
+      "settlement_count_in_graph": 36,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "capljina": {
+      "settlement_count_substrate": 32,
+      "settlement_count_in_graph": 32,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "cazin": {
+      "settlement_count_substrate": 61,
+      "settlement_count_in_graph": 61,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "celinac": {
+      "settlement_count_substrate": 30,
+      "settlement_count_in_graph": 30,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "centar_sarajevo": {
+      "settlement_count_substrate": 6,
+      "settlement_count_in_graph": 6,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "citluk": {
+      "settlement_count_substrate": 21,
+      "settlement_count_in_graph": 21,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "derventa": {
+      "settlement_count_substrate": 57,
+      "settlement_count_in_graph": 57,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "doboj": {
+      "settlement_count_substrate": 91,
+      "settlement_count_in_graph": 91,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "donji_vakuf": {
+      "settlement_count_substrate": 68,
+      "settlement_count_in_graph": 68,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "duvno": {
+      "settlement_count_substrate": 60,
+      "settlement_count_in_graph": 60,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "foca": {
+      "settlement_count_substrate": 133,
+      "settlement_count_in_graph": 133,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "fojnica": {
+      "settlement_count_substrate": 55,
+      "settlement_count_in_graph": 55,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "gacko": {
+      "settlement_count_substrate": 71,
+      "settlement_count_in_graph": 71,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "glamoc": {
+      "settlement_count_substrate": 55,
+      "settlement_count_in_graph": 55,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "gorazde": {
+      "settlement_count_substrate": 205,
+      "settlement_count_in_graph": 205,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "gornji_vakuf": {
+      "settlement_count_substrate": 52,
+      "settlement_count_in_graph": 52,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "gracanica": {
+      "settlement_count_substrate": 30,
+      "settlement_count_in_graph": 30,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "gradacac": {
+      "settlement_count_substrate": 45,
+      "settlement_count_in_graph": 45,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "grude": {
+      "settlement_count_substrate": 13,
+      "settlement_count_in_graph": 13,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "hadzici": {
+      "settlement_count_substrate": 62,
+      "settlement_count_in_graph": 62,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "han_pijesak": {
+      "settlement_count_substrate": 26,
+      "settlement_count_in_graph": 26,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "ilidza": {
+      "settlement_count_substrate": 17,
+      "settlement_count_in_graph": 17,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "ilijas": {
+      "settlement_count_substrate": 74,
+      "settlement_count_in_graph": 74,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "jablanica": {
+      "settlement_count_substrate": 33,
+      "settlement_count_in_graph": 33,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "jajce": {
+      "settlement_count_substrate": 69,
+      "settlement_count_in_graph": 69,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "kakanj": {
+      "settlement_count_substrate": 106,
+      "settlement_count_in_graph": 106,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "kalesija": {
+      "settlement_count_substrate": 44,
+      "settlement_count_in_graph": 44,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "kalinovik": {
+      "settlement_count_substrate": 71,
+      "settlement_count_in_graph": 71,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "kiseljak": {
+      "settlement_count_substrate": 82,
+      "settlement_count_in_graph": 82,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "kladanj": {
+      "settlement_count_substrate": 48,
+      "settlement_count_in_graph": 48,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "kljuc": {
+      "settlement_count_substrate": 70,
+      "settlement_count_in_graph": 70,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "konjic": {
+      "settlement_count_substrate": 168,
+      "settlement_count_in_graph": 168,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "kotor_varos": {
+      "settlement_count_substrate": 43,
+      "settlement_count_in_graph": 43,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "kresevo": {
+      "settlement_count_substrate": 27,
+      "settlement_count_in_graph": 27,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "kupres": {
+      "settlement_count_substrate": 40,
+      "settlement_count_in_graph": 40,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "laktasi": {
+      "settlement_count_substrate": 37,
+      "settlement_count_in_graph": 37,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "listica": {
+      "settlement_count_substrate": 34,
+      "settlement_count_in_graph": 34,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "livno": {
+      "settlement_count_substrate": 58,
+      "settlement_count_in_graph": 58,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "lopare": {
+      "settlement_count_substrate": 55,
+      "settlement_count_in_graph": 55,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "lukavac": {
+      "settlement_count_substrate": 44,
+      "settlement_count_in_graph": 44,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "ljubinje": {
+      "settlement_count_substrate": 21,
+      "settlement_count_in_graph": 21,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "ljubuski": {
+      "settlement_count_substrate": 35,
+      "settlement_count_in_graph": 35,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "maglaj": {
+      "settlement_count_substrate": 40,
+      "settlement_count_in_graph": 40,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "modrica": {
+      "settlement_count_substrate": 24,
+      "settlement_count_in_graph": 24,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "mostar": {
+      "settlement_count_substrate": 63,
+      "settlement_count_in_graph": 63,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "mrkonjic_grad": {
+      "settlement_count_substrate": 38,
+      "settlement_count_in_graph": 38,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "neum": {
+      "settlement_count_substrate": 27,
+      "settlement_count_in_graph": 27,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "nevesinje": {
+      "settlement_count_substrate": 56,
+      "settlement_count_in_graph": 56,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "novi_grad_sarajevo": {
+      "settlement_count_substrate": 22,
+      "settlement_count_in_graph": 22,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "novi_travnik": {
+      "settlement_count_substrate": 51,
+      "settlement_count_in_graph": 51,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "novo_sarajevo": {
+      "settlement_count_substrate": 3,
+      "settlement_count_in_graph": 3,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "odzak": {
+      "settlement_count_substrate": 26,
+      "settlement_count_in_graph": 26,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "olovo": {
+      "settlement_count_substrate": 45,
+      "settlement_count_in_graph": 45,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "orasje": {
+      "settlement_count_substrate": 20,
+      "settlement_count_in_graph": 20,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "pale": {
+      "settlement_count_substrate": 77,
+      "settlement_count_in_graph": 77,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "posusje": {
+      "settlement_count_substrate": 20,
+      "settlement_count_in_graph": 20,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "prijedor": {
+      "settlement_count_substrate": 71,
+      "settlement_count_in_graph": 71,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "prnjavor": {
+      "settlement_count_substrate": 63,
+      "settlement_count_in_graph": 63,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "prozor": {
+      "settlement_count_substrate": 56,
+      "settlement_count_in_graph": 56,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "rogatica": {
+      "settlement_count_substrate": 118,
+      "settlement_count_in_graph": 118,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "rudo": {
+      "settlement_count_substrate": 89,
+      "settlement_count_in_graph": 89,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "sanski_most": {
+      "settlement_count_substrate": 91,
+      "settlement_count_in_graph": 91,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "sekovici": {
+      "settlement_count_substrate": 38,
+      "settlement_count_in_graph": 38,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "sipovo": {
+      "settlement_count_substrate": 46,
+      "settlement_count_in_graph": 46,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "skender_vakuf": {
+      "settlement_count_substrate": 38,
+      "settlement_count_in_graph": 38,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "sokolac": {
+      "settlement_count_substrate": 96,
+      "settlement_count_in_graph": 96,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "srbac": {
+      "settlement_count_substrate": 39,
+      "settlement_count_in_graph": 39,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "srebrenica": {
+      "settlement_count_substrate": 81,
+      "settlement_count_in_graph": 81,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "srebrenik": {
+      "settlement_count_substrate": 49,
+      "settlement_count_in_graph": 49,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "stari_grad_sarajevo": {
+      "settlement_count_substrate": 16,
+      "settlement_count_in_graph": 16,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "stolac": {
+      "settlement_count_substrate": 46,
+      "settlement_count_in_graph": 46,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "tesanj": {
+      "settlement_count_substrate": 54,
+      "settlement_count_in_graph": 54,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "teslic": {
+      "settlement_count_substrate": 57,
+      "settlement_count_in_graph": 57,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "titov_drvar": {
+      "settlement_count_substrate": 28,
+      "settlement_count_in_graph": 28,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "travnik": {
+      "settlement_count_substrate": 90,
+      "settlement_count_in_graph": 90,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "trebinje": {
+      "settlement_count_substrate": 195,
+      "settlement_count_in_graph": 195,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "trnovo": {
+      "settlement_count_substrate": 80,
+      "settlement_count_in_graph": 80,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "tuzla": {
+      "settlement_count_substrate": 66,
+      "settlement_count_in_graph": 66,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "ugljevik": {
+      "settlement_count_substrate": 35,
+      "settlement_count_in_graph": 35,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "vares": {
+      "settlement_count_substrate": 85,
+      "settlement_count_in_graph": 85,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "velika_kladusa": {
+      "settlement_count_substrate": 49,
+      "settlement_count_in_graph": 49,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "visegrad": {
+      "settlement_count_substrate": 163,
+      "settlement_count_in_graph": 163,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "visoko": {
+      "settlement_count_substrate": 88,
+      "settlement_count_in_graph": 88,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "vitez": {
+      "settlement_count_substrate": 34,
+      "settlement_count_in_graph": 34,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "vlasenica": {
+      "settlement_count_substrate": 92,
+      "settlement_count_in_graph": 92,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "vogosca": {
+      "settlement_count_substrate": 21,
+      "settlement_count_in_graph": 21,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "zavidovici": {
+      "settlement_count_substrate": 47,
+      "settlement_count_in_graph": 47,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "zenica": {
+      "settlement_count_substrate": 83,
+      "settlement_count_in_graph": 83,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "zepce": {
+      "settlement_count_substrate": 41,
+      "settlement_count_in_graph": 41,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "zivinice": {
+      "settlement_count_substrate": 29,
+      "settlement_count_in_graph": 29,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    },
+    "zvornik": {
+      "settlement_count_substrate": 81,
+      "settlement_count_in_graph": 81,
+      "missing_count": 0,
+      "missing_sids_first_20": [],
+      "is_fully_missing": false
+    }
+  },
+  "han_pijesak_focus": {
+    "settlement_count_substrate": 26,
+    "settlement_count_in_graph": 26,
+    "missing_count": 0,
+    "missing_sids_full_list": [],
+    "missing_details": [],
+    "in_contact_graph_nodes_array": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  }
+}

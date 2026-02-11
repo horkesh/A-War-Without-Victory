@@ -1,0 +1,14 @@
+OSM Terrain Snapshot H6.2 Audit
+bbox_world: 15.62429991660789, 42.45719021065977, 19.722780229024387, 45.37054183713614
+roads_total: 280087
+roads_by_highway (top 30): {"residential":96452,"service":76335,"track":38831,"unclassified":18067,"footway":17598,"path":7961,"primary":6286,"living_street":5486,"tertiary":4585,"secondary":4497,"motorway":766,"primary_link":668,"pedestrian":598,"cycleway":537,"motorway_link":459,"trunk":218,"services":216,"secondary_link":95,"trunk_link":74,"corridor":66,"raceway":64,"planned":62,"tertiary_link":60,"bridleway":41,"rest_area":26,"via_ferrata":23,"road":10,"bus_stop":3,"platform":2,"escape":1}
+waterways_total: 11431
+waterways_by_type: {"river":1275,"stream":7916,"canal":669,"drain":565,"ditch":1006}
+tag_coverage: {"roads_name_pct":11.8,"roads_ref_pct":4.1,"roads_maxspeed_pct":3.8,"waterways_name_pct":40.4}
+sha256 roads geojson: 4f4add204b72b587ad99c5082919f8374bc96d45e409d8fa51dc4fb15e5dcd91
+sha256 roads gz: 78166a1b377a69af291c1bc7c9fab17a873a1b7120fb21966d3b523ef6feec15
+sha256 waterways geojson: ccfec40582f1659186542a37a3f4c51c1b1e6b8cb0b7fe021a42f0965277e298
+sha256 waterways gz: b2dc93aac2dfa1573c2e7d120f20bb03e6d0f698ea48fcf50b1a9ad880b65df1
+content_checksum roads: 7995932bfb19a522e4e41ac7b3161124693878fec3afd4aa2b3ee4ffa126b152
+content_checksum waterways: 14e52761ea6ed52985018447849a8fd654ad62c1119e5f4a80e9c210f48f7151
+tooling: osmium (extract, tags-filter, export)

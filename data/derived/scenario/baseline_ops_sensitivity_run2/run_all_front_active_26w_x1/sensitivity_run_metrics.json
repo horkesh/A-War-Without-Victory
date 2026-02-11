@@ -1,0 +1,15 @@
+{
+  "displacement_end_max": 0.5216517133956388,
+  "displacement_end_mean": 0.521651713395623,
+  "displacement_end_p95": 0.5216517133956388,
+  "factions": {
+    "exhaustion_end": {
+      "HRHB": 260.0459506666666,
+      "RBiH": 260.0459506666666,
+      "RS": 260.0459506666666
+    }
+  },
+  "scalar": 1,
+  "scope": "all_front_active",
+  "weeks": 26
+}

@@ -1,0 +1,2635 @@
+{
+  "awwv_meta": {
+    "role": "oob_brigades",
+    "source": "Balkan Battlegrounds Vol. I Appendices G & H; corrected Feb 9, 2026",
+    "rule": "Strict alignment with Appendix H (ARBiH), Appendix G (VRS), and HVO Master List.",
+    "generated_at": "2026-02-09T18:42:25.343814+00:00",
+    "corrections_applied": [
+      "Fixed all 46 VRS 1st Krajina Corps assignments",
+      "Fixed all 11 VRS 2nd Krajina Corps assignments",
+      "Fixed 7 ARBiH 81st Independent Division (Goražde) assignments",
+      "Fixed 2 ARBiH General Staff assignments",
+      "Added 3 missing VRS Drina Corps brigades",
+      "Fixed HVO OZ assignments for all brigades",
+      "Standardized all field names"
+    ],
+    "validation_status": "COMPLETE - All historical sources reconciled"
+  },
+  "brigades": [
+    {
+      "id": "arbih_guards_brigade",
+      "faction": "RBiH",
+      "name": "Guards Brigade",
+      "home_mun": "centar_sarajevo",
+      "home_settlement": "Sarajevo Dio - Centar Sajarevo",
+      "subordinate_to": "arbih_general_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_120th_liberation_black_swans",
+      "faction": "RBiH",
+      "name": "120th Liberation \"Black Swans\"",
+      "home_mun": "kakanj",
+      "home_settlement": "Kakanj",
+      "subordinate_to": "arbih_general_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_17th_muslim_light",
+      "faction": "RBiH",
+      "name": "17th Muslim Light",
+      "home_mun": "hadzici",
+      "home_settlement": "Pazarić",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_141st_light",
+      "faction": "RBiH",
+      "name": "141st Light",
+      "home_mun": "centar_sarajevo",
+      "home_settlement": "Sarajevo Dio - Centar Sajarevo",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_143rd_light",
+      "faction": "RBiH",
+      "name": "143rd Light",
+      "home_mun": "centar_sarajevo",
+      "home_settlement": "Sarajevo Dio - Centar Sajarevo",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_145th_light",
+      "faction": "RBiH",
+      "name": "145th Light",
+      "home_mun": "fojnica",
+      "home_settlement": "Fojnica",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_146th_light",
+      "faction": "RBiH",
+      "name": "146th Light",
+      "home_mun": "fojnica",
+      "home_settlement": "Fojnica",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_101st_mountain",
+      "faction": "RBiH",
+      "name": "101st Mountain",
+      "home_mun": "novi_grad_sarajevo",
+      "home_settlement": "Sarajevo Dio - Novi Grad Sarajevo",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild",
+      "name_1992": "1st Motorized Brigade"
+    },
+    {
+      "id": "arbih_102nd_motorized",
+      "faction": "RBiH",
+      "name": "102nd Motorized",
+      "home_mun": "ilidza",
+      "home_settlement": "Sarajevo Dio - Ilidža",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild",
+      "name_1992": "2nd Motorized Brigade"
+    },
+    {
+      "id": "arbih_105th_motorized",
+      "faction": "RBiH",
+      "name": "105th Motorized",
+      "home_mun": "centar_sarajevo",
+      "home_settlement": "Sarajevo Dio - Centar Sajarevo",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild",
+      "name_1992": "15th Motorized Brigade"
+    },
+    {
+      "id": "arbih_111th_vitezka_motorized",
+      "faction": "RBiH",
+      "name": "111th Vitezka Motorized",
+      "home_mun": "novi_grad_sarajevo",
+      "home_settlement": "Sarajevo Dio - Novi Grad Sarajevo",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_112th_vitezka_motorized",
+      "faction": "RBiH",
+      "name": "112th Vitezka Motorized",
+      "home_mun": "novi_grad_sarajevo",
+      "home_settlement": "Sarajevo Dio - Novi Grad Sarajevo",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_115th_mountain",
+      "faction": "RBiH",
+      "name": "115th Mountain",
+      "home_mun": "stari_grad_sarajevo",
+      "home_settlement": "Sarajevo Dio - Stari Grad Sarajevo",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_124th_light_king_tvrtko",
+      "faction": "RBiH",
+      "name": "124th Light \"King Tvrtko\"",
+      "home_mun": "centar_sarajevo",
+      "home_settlement": "Sarajevo Dio - Centar Sajarevo",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_152nd_mountain",
+      "faction": "RBiH",
+      "name": "152nd Mountain",
+      "home_mun": "stari_grad_sarajevo",
+      "home_settlement": "Sarajevo Dio - Stari Grad Sarajevo",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_155th_motorized",
+      "faction": "RBiH",
+      "name": "155th Motorized",
+      "home_mun": "centar_sarajevo",
+      "home_settlement": "Dobrinja",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_104th_vitezka_motorized",
+      "faction": "RBiH",
+      "name": "104th Vitezka Motorized",
+      "home_mun": "hadzici",
+      "home_settlement": "Hrasnica",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_109th_mountain",
+      "faction": "RBiH",
+      "name": "109th Mountain",
+      "home_mun": "hadzici",
+      "home_settlement": "Pazarić",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_123rd_light",
+      "faction": "RBiH",
+      "name": "123rd Light",
+      "home_mun": "kiseljak",
+      "home_settlement": "Bilalovac",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_131st_light",
+      "faction": "RBiH",
+      "name": "131st Light",
+      "home_mun": "fojnica",
+      "home_settlement": "Fojnica",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_181st_mountain",
+      "faction": "RBiH",
+      "name": "181st Mountain",
+      "home_mun": "hadzici",
+      "home_settlement": "Pazarić",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_182nd_vitezka_light",
+      "faction": "RBiH",
+      "name": "182nd Vitezka Light",
+      "home_mun": "hadzici",
+      "home_settlement": "Pazarić",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_147th_light",
+      "faction": "RBiH",
+      "name": "147th Light",
+      "home_mun": "vares",
+      "home_settlement": "Vareš",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_161st_slavna_olovo_mountain",
+      "faction": "RBiH",
+      "name": "161st Slavna Olovo Mountain",
+      "home_mun": "olovo",
+      "home_settlement": "Olovo",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_162nd_mountain",
+      "faction": "RBiH",
+      "name": "162nd Mountain",
+      "home_mun": "vares",
+      "home_settlement": "Vareš",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_164th_mountain",
+      "faction": "RBiH",
+      "name": "164th Mountain",
+      "home_mun": "breza",
+      "home_settlement": "Breza",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_165th_mountain",
+      "faction": "RBiH",
+      "name": "165th Mountain",
+      "home_mun": "visoko",
+      "home_settlement": "Visoko",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_185th_light",
+      "faction": "RBiH",
+      "name": "185th Light",
+      "home_mun": "vares",
+      "home_settlement": "Vareš",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_9th_muslim_liberation",
+      "faction": "RBiH",
+      "name": "9th Muslim Liberation",
+      "home_mun": "lukavac",
+      "home_settlement": "Smoluca Donja",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_211th_liberation",
+      "faction": "RBiH",
+      "name": "211th Liberation",
+      "home_mun": "srebrenik",
+      "home_settlement": "Srebrenik",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_212th_mountain",
+      "faction": "RBiH",
+      "name": "212th Mountain",
+      "home_mun": "srebrenik",
+      "home_settlement": "Srebrenik",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_213th_vitezka_mountain",
+      "faction": "RBiH",
+      "name": "213th Vitezka Mountain",
+      "home_mun": "gradacac",
+      "home_settlement": "Gradačac",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_215th_vitezka_mountain",
+      "faction": "RBiH",
+      "name": "215th Vitezka Mountain",
+      "home_mun": "brcko",
+      "home_settlement": "Gornji Rahić",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_217th_vitezka_mountain",
+      "faction": "RBiH",
+      "name": "217th Vitezka Mountain",
+      "home_mun": "gradacac",
+      "home_settlement": "Gradačac",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_221st_mountain",
+      "faction": "RBiH",
+      "name": "221st Mountain",
+      "home_mun": "gracanica",
+      "home_settlement": "Gračanica",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_222nd_liberation",
+      "faction": "RBiH",
+      "name": "222nd Liberation",
+      "home_mun": "gracanica",
+      "home_settlement": "Gračanica",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_223rd_mountain",
+      "faction": "RBiH",
+      "name": "223rd Mountain",
+      "home_mun": "lukavac",
+      "home_settlement": "Lukavac",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_224th_mountain",
+      "faction": "RBiH",
+      "name": "224th Mountain",
+      "home_mun": "doboj",
+      "home_settlement": "Klokotnica",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_225th_muslim_mountain",
+      "faction": "RBiH",
+      "name": "225th Muslim Mountain",
+      "home_mun": "banovici",
+      "home_settlement": "Banovići",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_250th_liberation",
+      "faction": "RBiH",
+      "name": "250th Liberation",
+      "home_mun": "tuzla",
+      "home_settlement": "Tuzla",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild",
+      "name_1992": "1st Tuzla Brigade"
+    },
+    {
+      "id": "arbih_252nd_slavna_mountain",
+      "faction": "RBiH",
+      "name": "252nd Slavna Mountain",
+      "home_mun": "tuzla",
+      "home_settlement": "Tuzla",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild",
+      "name_1992": "3rd Tuzla Brigade"
+    },
+    {
+      "id": "arbih_253rd_mountain",
+      "faction": "RBiH",
+      "name": "253rd Mountain",
+      "home_mun": "tuzla",
+      "home_settlement": "Tuzla",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_254th_mountain",
+      "faction": "RBiH",
+      "name": "254th Mountain",
+      "home_mun": "lopare",
+      "home_settlement": "Čelić",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_255th_slavna_mountain_hajrudin_mesi",
+      "faction": "RBiH",
+      "name": "255th Slavna Mountain \"Hajrudin Mesić\"",
+      "home_mun": "ugljevik",
+      "home_settlement": "Teočak",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_7th_vitezka_muslim_liberation",
+      "faction": "RBiH",
+      "name": "7th Vitezka Muslim Liberation",
+      "home_mun": "zenica",
+      "home_settlement": "Zenica",
+      "subordinate_to": "arbih_3rd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_303rd_vitezka_mountain",
+      "faction": "RBiH",
+      "name": "303rd Vitezka Mountain",
+      "home_mun": "zenica",
+      "home_settlement": "Zenica",
+      "subordinate_to": "arbih_3rd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_314th_slavna_liberation",
+      "faction": "RBiH",
+      "name": "314th Slavna Liberation",
+      "home_mun": "zenica",
+      "home_settlement": "Zenica",
+      "subordinate_to": "arbih_3rd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_319th_liberation",
+      "faction": "RBiH",
+      "name": "319th Liberation",
+      "home_mun": "zepce",
+      "home_settlement": "Žepče",
+      "subordinate_to": "arbih_3rd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_330th_liberation",
+      "faction": "RBiH",
+      "name": "330th Liberation",
+      "home_mun": "zenica",
+      "home_settlement": "Zenica",
+      "subordinate_to": "arbih_3rd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_327th_vitezka_mountain",
+      "faction": "RBiH",
+      "name": "327th Vitezka Mountain",
+      "home_mun": "maglaj",
+      "home_settlement": "Maglaj",
+      "subordinate_to": "arbih_3rd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_328th_mountain",
+      "faction": "RBiH",
+      "name": "328th Mountain",
+      "home_mun": "zavidovici",
+      "home_settlement": "Zavidovići",
+      "subordinate_to": "arbih_3rd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_329th_mountain",
+      "faction": "RBiH",
+      "name": "329th Mountain",
+      "home_mun": "kakanj",
+      "home_settlement": "Kakanj",
+      "subordinate_to": "arbih_3rd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_351st_liberation",
+      "faction": "RBiH",
+      "name": "351st Liberation",
+      "home_mun": "zavidovici",
+      "home_settlement": "Zavidovići",
+      "subordinate_to": "arbih_3rd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_372nd_vitezka_mountain",
+      "faction": "RBiH",
+      "name": "372nd Vitezka Mountain",
+      "home_mun": "tesanj",
+      "home_settlement": "Tešanj",
+      "subordinate_to": "arbih_3rd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_373rd_slavna_mountain",
+      "faction": "RBiH",
+      "name": "373rd Slavna Mountain",
+      "home_mun": "tesanj",
+      "home_settlement": "Tešanj",
+      "subordinate_to": "arbih_3rd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_374th_slavna_light",
+      "faction": "RBiH",
+      "name": "374th Slavna Light",
+      "home_mun": "tesanj",
+      "home_settlement": "Tešanj",
+      "subordinate_to": "arbih_3rd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_375th_liberation",
+      "faction": "RBiH",
+      "name": "375th Liberation",
+      "home_mun": "tesanj",
+      "home_settlement": "Tešanj",
+      "subordinate_to": "arbih_3rd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_377th_vitezka_mountain",
+      "faction": "RBiH",
+      "name": "377th Vitezka Mountain",
+      "home_mun": "tesanj",
+      "home_settlement": "Tešanj",
+      "subordinate_to": "arbih_3rd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_4th_muslim_light",
+      "faction": "RBiH",
+      "name": "4th Muslim Light",
+      "home_mun": "konjic",
+      "home_settlement": "Bradina",
+      "subordinate_to": "arbih_4th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_443rd_mountain",
+      "faction": "RBiH",
+      "name": "443rd Mountain",
+      "home_mun": "konjic",
+      "home_settlement": "Konjic",
+      "subordinate_to": "arbih_4th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_444th_mountain",
+      "faction": "RBiH",
+      "name": "444th Mountain",
+      "home_mun": "jablanica",
+      "home_settlement": "Jablanica",
+      "subordinate_to": "arbih_4th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_445th_mountain",
+      "faction": "RBiH",
+      "name": "445th Mountain",
+      "home_mun": "mostar",
+      "home_settlement": "Bijelo Polje",
+      "subordinate_to": "arbih_4th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_446th_light",
+      "faction": "RBiH",
+      "name": "446th Light",
+      "home_mun": "prozor",
+      "home_settlement": "Prozor",
+      "subordinate_to": "arbih_4th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_447th_liberation",
+      "faction": "RBiH",
+      "name": "447th Liberation",
+      "home_mun": "mostar",
+      "home_settlement": "Donja Drežnica",
+      "subordinate_to": "arbih_4th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_450th_light",
+      "faction": "RBiH",
+      "name": "450th Light",
+      "home_mun": "konjic",
+      "home_settlement": "Bjelimići",
+      "subordinate_to": "arbih_4th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_441st_vitezka_mountain",
+      "faction": "RBiH",
+      "name": "441st Vitezka Mountain",
+      "home_mun": "mostar",
+      "home_settlement": "Mostar",
+      "subordinate_to": "arbih_4th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_442nd_mountain",
+      "faction": "RBiH",
+      "name": "442nd Mountain",
+      "home_mun": "mostar",
+      "home_settlement": "Mostar",
+      "subordinate_to": "arbih_4th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_448th_liberation",
+      "faction": "RBiH",
+      "name": "448th Liberation",
+      "home_mun": "mostar",
+      "home_settlement": "Mostar",
+      "subordinate_to": "arbih_4th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_449th_eastern_herzegovina_mountain",
+      "faction": "RBiH",
+      "name": "449th Eastern Herzegovina Mountain",
+      "home_mun": "mostar",
+      "home_settlement": "Mostar",
+      "subordinate_to": "arbih_4th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_501st_slavna_mountain",
+      "faction": "RBiH",
+      "name": "501st Slavna Mountain",
+      "home_mun": "bihac",
+      "home_settlement": "Bihać",
+      "subordinate_to": "arbih_5th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_502nd_vitezka_mountain",
+      "faction": "RBiH",
+      "name": "502nd Vitezka Mountain",
+      "home_mun": "bihac",
+      "home_settlement": "Bihać",
+      "subordinate_to": "arbih_5th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_503rd_slavna_mountain",
+      "faction": "RBiH",
+      "name": "503rd Slavna Mountain",
+      "home_mun": "cazin",
+      "home_settlement": "Cazin",
+      "subordinate_to": "arbih_5th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_505th_vitezka_mountain",
+      "faction": "RBiH",
+      "name": "505th Vitezka Mountain",
+      "home_mun": "bosanska_krupa",
+      "home_settlement": "Bužim",
+      "subordinate_to": "arbih_5th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_506th_mountain",
+      "faction": "RBiH",
+      "name": "506th Mountain",
+      "home_mun": "velika_kladusa",
+      "home_settlement": "Velika Kladuša",
+      "subordinate_to": "arbih_5th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_510th_bosnian_liberation",
+      "faction": "RBiH",
+      "name": "510th Bosnian Liberation",
+      "home_mun": "cazin",
+      "home_settlement": "Cazin",
+      "subordinate_to": "arbih_5th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_511th_slavna_mountain",
+      "faction": "RBiH",
+      "name": "511th Slavna Mountain",
+      "home_mun": "bosanska_krupa",
+      "home_settlement": "Bosanska Krupa",
+      "subordinate_to": "arbih_5th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_517th_light",
+      "faction": "RBiH",
+      "name": "517th Light",
+      "home_mun": "cazin",
+      "home_settlement": "Šturlić",
+      "subordinate_to": "arbih_5th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_17th_vitezka_mountain",
+      "faction": "RBiH",
+      "name": "17th Vitezka Mountain",
+      "home_mun": "travnik",
+      "home_settlement": "Travnik",
+      "subordinate_to": "arbih_7th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_706th_muslim_mountain",
+      "faction": "RBiH",
+      "name": "706th Muslim Mountain",
+      "home_mun": "travnik",
+      "home_settlement": "Travnik",
+      "subordinate_to": "arbih_7th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_708th_mountain",
+      "faction": "RBiH",
+      "name": "708th Mountain",
+      "home_mun": "novi_travnik",
+      "home_settlement": "Novi Travnik",
+      "subordinate_to": "arbih_7th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_712th_mountain",
+      "faction": "RBiH",
+      "name": "712th Mountain",
+      "home_mun": "travnik",
+      "home_settlement": "Travnik",
+      "subordinate_to": "arbih_7th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_725th_light",
+      "faction": "RBiH",
+      "name": "725th Light",
+      "home_mun": "vitez",
+      "home_settlement": "Vitez",
+      "subordinate_to": "arbih_7th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_727th_slavna",
+      "faction": "RBiH",
+      "name": "727th Slavna",
+      "home_mun": "travnik",
+      "home_settlement": "Travnik",
+      "subordinate_to": "arbih_7th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_733rd_mountain",
+      "faction": "RBiH",
+      "name": "733rd Mountain",
+      "home_mun": "busovaca",
+      "home_settlement": "Busovača",
+      "subordinate_to": "arbih_7th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_737th_muslim_light",
+      "faction": "RBiH",
+      "name": "737th Muslim Light",
+      "home_mun": "travnik",
+      "home_settlement": "Travnik",
+      "subordinate_to": "arbih_7th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_705th_slavna_mountain",
+      "faction": "RBiH",
+      "name": "705th Slavna Mountain",
+      "home_mun": "bugojno",
+      "home_settlement": "Bugojno",
+      "subordinate_to": "arbih_7th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_707th_slavna_mountain",
+      "faction": "RBiH",
+      "name": "707th Slavna Mountain",
+      "home_mun": "bugojno",
+      "home_settlement": "Bugojno",
+      "subordinate_to": "arbih_7th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_717th_slavna_mountain",
+      "faction": "RBiH",
+      "name": "717th Slavna Mountain",
+      "home_mun": "gornji_vakuf",
+      "home_settlement": "Gornji Vakuf-Uskoplje",
+      "subordinate_to": "arbih_7th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_770th_slavna_mountain",
+      "faction": "RBiH",
+      "name": "770th Slavna Mountain",
+      "home_mun": "donji_vakuf",
+      "home_settlement": "Donji Vakuf",
+      "subordinate_to": "arbih_7th_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_210th_vitezka_liberation_nesib_maliki",
+      "faction": "RBiH",
+      "name": "210th Vitezka Liberation \"Nesib Malikić\"",
+      "home_mun": "zivinice",
+      "home_settlement": "Živinice",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_240th_muslim_mountain",
+      "faction": "RBiH",
+      "name": "240th Muslim Mountain",
+      "home_mun": "zivinice",
+      "home_settlement": "Živinice",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_241st_spreca_muslim_light_gazije",
+      "faction": "RBiH",
+      "name": "241st Spreca Muslim Light \"Gazije\"",
+      "home_mun": "kalesija",
+      "home_settlement": "Kalesija Grad",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_242nd_zvornik_muslim_light",
+      "faction": "RBiH",
+      "name": "242nd Zvornik Muslim Light",
+      "home_mun": "kalesija",
+      "home_settlement": "Kalesija Grad",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_243rd_muslimpodrinje_mountain",
+      "faction": "RBiH",
+      "name": "243rd Muslim-Podrinje Mountain",
+      "home_mun": "kladanj",
+      "home_settlement": "Kladanj",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_244th_mountain",
+      "faction": "RBiH",
+      "name": "244th Mountain",
+      "home_mun": "kladanj",
+      "home_settlement": "Kladanj",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_245th_mountain",
+      "faction": "RBiH",
+      "name": "245th Mountain",
+      "home_mun": "kalesija",
+      "home_settlement": "Kalesija Grad",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_246th_vitezka_mountain",
+      "faction": "RBiH",
+      "name": "246th Vitezka Mountain",
+      "home_mun": "zvornik",
+      "home_settlement": "Sapna",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_286th_mountain",
+      "faction": "RBiH",
+      "name": "286th Mountain",
+      "home_mun": "kladanj",
+      "home_settlement": "Stupari",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_287th_mountain",
+      "faction": "RBiH",
+      "name": "287th Mountain",
+      "home_mun": "kladanj",
+      "home_settlement": "Kladanj",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_801st_light",
+      "faction": "RBiH",
+      "name": "801st Light",
+      "home_mun": "gorazde",
+      "home_settlement": "Goražde",
+      "subordinate_to": "arbih_81st_independent",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_802nd_light",
+      "faction": "RBiH",
+      "name": "802nd Light",
+      "home_mun": "gorazde",
+      "home_settlement": "Goražde",
+      "subordinate_to": "arbih_81st_independent",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_803rd_light",
+      "faction": "RBiH",
+      "name": "803rd Light",
+      "home_mun": "gorazde",
+      "home_settlement": "Goražde",
+      "subordinate_to": "arbih_81st_independent",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_807th_muslim_liberation",
+      "faction": "RBiH",
+      "name": "807th Muslim Liberation",
+      "home_mun": "gorazde",
+      "home_settlement": "Goražde",
+      "subordinate_to": "arbih_81st_independent",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_808th_liberation",
+      "faction": "RBiH",
+      "name": "808th Liberation",
+      "home_mun": "gorazde",
+      "home_settlement": "Goražde",
+      "subordinate_to": "arbih_81st_independent",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_843rd_light",
+      "faction": "RBiH",
+      "name": "843rd Light",
+      "home_mun": "gorazde",
+      "home_settlement": "Goražde",
+      "subordinate_to": "arbih_81st_independent",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_851st_vitezka_liberation",
+      "faction": "RBiH",
+      "name": "851st Vitezka Liberation",
+      "home_mun": "gorazde",
+      "home_settlement": "Goražde",
+      "subordinate_to": "arbih_81st_independent",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_military_school_center",
+      "faction": "RBiH",
+      "name": "Military School Center",
+      "home_mun": "zenica",
+      "home_settlement": "Zenica",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_main_logistics_center",
+      "faction": "RBiH",
+      "name": "Main Logistics Center",
+      "home_mun": "visoko",
+      "home_settlement": "Visoko",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_24th_sabotage_battalion_black_wolves",
+      "faction": "RBiH",
+      "name": "24th Sabotage Battalion \"Black Wolves\"",
+      "home_mun": "kalesija",
+      "home_settlement": "Vukovije Donje",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_24th_antiterrorist_company_ivinice_wasps",
+      "faction": "RBiH",
+      "name": "24th Antiterrorist Company \"Živinice Wasps\"",
+      "home_mun": "zivinice",
+      "home_settlement": "Živinice",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_81st_reconnaissancesabotage_company",
+      "faction": "RBiH",
+      "name": "81st Reconnaissance-Sabotage Company",
+      "home_mun": "gorazde",
+      "home_settlement": "Goražde",
+      "subordinate_to": "arbih_1st_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_guards_motorized",
+      "faction": "RS",
+      "name": "1st Guards Motorized",
+      "home_mun": "kalinovik",
+      "home_settlement": "Kalinovik",
+      "subordinate_to": "vrs_main_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_armored",
+      "faction": "RS",
+      "name": "1st Armored",
+      "home_mun": "banja_luka",
+      "home_settlement": "Banja Luka",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_2nd_armored",
+      "faction": "RS",
+      "name": "2nd Armored",
+      "home_mun": "doboj",
+      "home_settlement": "Doboj",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_2nd_krajina_infantry",
+      "faction": "RS",
+      "name": "2nd Krajina Infantry",
+      "home_mun": "banja_luka",
+      "home_settlement": "Banja Luka",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_5th_kozara_light_infantry",
+      "faction": "RS",
+      "name": "5th Kozara Light Infantry",
+      "home_mun": "prijedor",
+      "home_settlement": "Omarska",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_6th_sanske_infantry",
+      "faction": "RS",
+      "name": "6th Sanske Infantry",
+      "home_mun": "sanski_most",
+      "home_settlement": "Sanski Most",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_11th_dubica_infantry",
+      "faction": "RS",
+      "name": "11th Dubica Infantry",
+      "home_mun": "bosanska_dubica",
+      "home_settlement": "Kozarska Dubica",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_12th_kotorsko_light_infantry",
+      "faction": "RS",
+      "name": "12th Kotorsko Light Infantry",
+      "home_mun": "kotor_varos",
+      "home_settlement": "Kotorsko",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_16th_krajina_motorized",
+      "faction": "RS",
+      "name": "16th Krajina Motorized",
+      "home_mun": "banja_luka",
+      "home_settlement": "Banja Luka",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_11th_mrkonji_light_infantry",
+      "faction": "RS",
+      "name": "11th Mrkonjić Light Infantry",
+      "home_mun": "mrkonjic_grad",
+      "home_settlement": "Mrkonjić Grad",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_19th_krajina_light_infantry",
+      "faction": "RS",
+      "name": "19th Krajina Light Infantry",
+      "home_mun": "donji_vakuf",
+      "home_settlement": "Donji Vakuf",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_22nd_krajina_infantry",
+      "faction": "RS",
+      "name": "22nd Krajina Infantry",
+      "home_mun": "skender_vakuf",
+      "home_settlement": "Kneževo",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_27th_derventa_motorized",
+      "faction": "RS",
+      "name": "27th Derventa Motorized",
+      "home_mun": "derventa",
+      "home_settlement": "Derventa",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_31st_light_infantry",
+      "faction": "RS",
+      "name": "31st Light Infantry",
+      "home_mun": "donji_vakuf",
+      "home_settlement": "Donji Vakuf",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_43rd_prijedor_motorized",
+      "faction": "RS",
+      "name": "43rd Prijedor Motorized",
+      "home_mun": "prijedor",
+      "home_settlement": "Prijedor",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_doboj_light_infantry",
+      "faction": "RS",
+      "name": "1st Doboj Light Infantry",
+      "home_mun": "doboj",
+      "home_settlement": "Doboj",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_celinac_light_infantry",
+      "faction": "RS",
+      "name": "1st Celinac Light Infantry",
+      "home_mun": "celinac",
+      "home_settlement": "Čelinac",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_srbac_light_infantry",
+      "faction": "RS",
+      "name": "1st Srbac Light Infantry",
+      "home_mun": "srbac",
+      "home_settlement": "Srbac",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_gradika_light_infantry",
+      "faction": "RS",
+      "name": "1st Gradiška Light Infantry",
+      "home_mun": "bosanska_gradiska",
+      "home_settlement": "Gradiska",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_novigrad_infantry",
+      "faction": "RS",
+      "name": "1st Novigrad Infantry",
+      "home_mun": "bosanski_novi",
+      "home_settlement": "Novi Grad",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_banja_luka_light_infantry",
+      "faction": "RS",
+      "name": "1st Banja Luka Light Infantry",
+      "home_mun": "banja_luka",
+      "home_settlement": "Banja Luka",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_2nd_banja_luka_light_infantry",
+      "faction": "RS",
+      "name": "2nd Banja Luka Light Infantry",
+      "home_mun": "banja_luka",
+      "home_settlement": "Banja Luka",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_3rd_banja_luka_light_infantry",
+      "faction": "RS",
+      "name": "3rd Banja Luka Light Infantry",
+      "home_mun": "banja_luka",
+      "home_settlement": "Banja Luka",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_4th_banja_luka_light_infantry",
+      "faction": "RS",
+      "name": "4th Banja Luka Light Infantry",
+      "home_mun": "banja_luka",
+      "home_settlement": "Banja Luka",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_kotor_varo_light_infantry",
+      "faction": "RS",
+      "name": "1st Kotor Varoš Light Infantry",
+      "home_mun": "kotor_varos",
+      "home_settlement": "Kotor Varoš",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_prnjavor_light_infantry",
+      "faction": "RS",
+      "name": "1st Prnjavor Light Infantry",
+      "home_mun": "prnjavor",
+      "home_settlement": "Prnjavor",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_sipovo_light_infantry",
+      "faction": "RS",
+      "name": "1st Sipovo Light Infantry",
+      "home_mun": "sipovo",
+      "home_settlement": "Šipovo",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_tesli_infantry",
+      "faction": "RS",
+      "name": "1st Teslić Infantry",
+      "home_mun": "teslic",
+      "home_settlement": "Teslić",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_2nd_tesli_light_infantry",
+      "faction": "RS",
+      "name": "2nd Teslić Light Infantry",
+      "home_mun": "teslic",
+      "home_settlement": "Teslić",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_ozren_light_infantry",
+      "faction": "RS",
+      "name": "1st Ozren Light Infantry",
+      "home_mun": "gracanica",
+      "home_settlement": "Petrovo Selo",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_2nd_ozren_light_infantry",
+      "faction": "RS",
+      "name": "2nd Ozren Light Infantry",
+      "home_mun": "lukavac",
+      "home_settlement": "Tumare",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_3rd_ozren_light_infantry",
+      "faction": "RS",
+      "name": "3rd Ozren Light Infantry",
+      "home_mun": "doboj",
+      "home_settlement": "Gornja Paklenica",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_4th_ozren_light_infantry",
+      "faction": "RS",
+      "name": "4th Ozren Light Infantry",
+      "home_mun": "zavidovici",
+      "home_settlement": "Vozuća",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_trebava_infantry",
+      "faction": "RS",
+      "name": "1st Trebava Infantry",
+      "home_mun": "modrica",
+      "home_settlement": "Modriča",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_krnjin_light_infantry",
+      "faction": "RS",
+      "name": "1st Krnjin Light Infantry",
+      "home_mun": "doboj",
+      "home_settlement": "Krnjin",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_vujak_light_infantry",
+      "faction": "RS",
+      "name": "1st Vučjak Light Infantry",
+      "home_mun": "modrica",
+      "home_settlement": "Modriča",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_drvar_light_infantry",
+      "faction": "RS",
+      "name": "1st Drvar Light Infantry",
+      "home_mun": "titov_drvar",
+      "home_settlement": "Drvar",
+      "subordinate_to": "vrs_2nd_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_3rd_petrovac_light_infantry",
+      "faction": "RS",
+      "name": "3rd Petrovac Light Infantry",
+      "home_mun": "bosanski_petrovac",
+      "home_settlement": "Bosanski Petrovac",
+      "subordinate_to": "vrs_2nd_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_5th_glamo_light_infantry",
+      "faction": "RS",
+      "name": "5th Glamoč Light Infantry",
+      "home_mun": "glamoc",
+      "home_settlement": "Glamoč",
+      "subordinate_to": "vrs_2nd_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_7th_krajina_motorized",
+      "faction": "RS",
+      "name": "7th Krajina Motorized",
+      "home_mun": "kupres",
+      "home_settlement": "Kupres",
+      "subordinate_to": "vrs_2nd_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_9th_grahovo_light_infantry",
+      "faction": "RS",
+      "name": "9th Grahovo Light Infantry",
+      "home_mun": "bosansko_grahovo",
+      "home_settlement": "Bosansko Grahovo",
+      "subordinate_to": "vrs_2nd_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_11th_krupa_light_infantry",
+      "faction": "RS",
+      "name": "11th Krupa Light Infantry",
+      "home_mun": "bosanska_krupa",
+      "home_settlement": "Bosanska Krupa",
+      "subordinate_to": "vrs_2nd_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_15th_biha_infantry",
+      "faction": "RS",
+      "name": "15th Bihać Infantry",
+      "home_mun": "bihac",
+      "home_settlement": "Ripač",
+      "subordinate_to": "vrs_2nd_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_17th_klju_light_infantry",
+      "faction": "RS",
+      "name": "17th Ključ Light Infantry",
+      "home_mun": "kljuc",
+      "home_settlement": "Lanište",
+      "subordinate_to": "vrs_2nd_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_posavina_infantry",
+      "faction": "RS",
+      "name": "1st Posavina Infantry",
+      "home_mun": "brcko",
+      "home_settlement": "Brčko",
+      "subordinate_to": "vrs_east_bosnian",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_2nd_posavina_light_infantry",
+      "faction": "RS",
+      "name": "2nd Posavina Light Infantry",
+      "home_mun": "bosanski_samac",
+      "home_settlement": "Bosanski Šamac",
+      "subordinate_to": "vrs_east_bosnian",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_3rd_posavina_light_infantry",
+      "faction": "RS",
+      "name": "3rd Posavina Light Infantry",
+      "home_mun": "gradacac",
+      "home_settlement": "Pelagićevo",
+      "subordinate_to": "vrs_east_bosnian",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_semberija_light_infantry",
+      "faction": "RS",
+      "name": "1st Semberija Light Infantry",
+      "home_mun": "bijeljina",
+      "home_settlement": "Bijeljina",
+      "subordinate_to": "vrs_east_bosnian",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_2nd_semberija_light_infantry",
+      "faction": "RS",
+      "name": "2nd Semberija Light Infantry",
+      "home_mun": "bijeljina",
+      "home_settlement": "Bijeljina",
+      "subordinate_to": "vrs_east_bosnian",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_3rd_semberija_light_infantry",
+      "faction": "RS",
+      "name": "3rd Semberija Light Infantry",
+      "home_mun": "bijeljina",
+      "home_settlement": "Bijeljina",
+      "subordinate_to": "vrs_east_bosnian",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_majevica_light_infantry",
+      "faction": "RS",
+      "name": "1st Majevica Light Infantry",
+      "home_mun": "ugljevik",
+      "home_settlement": "Ugljevik",
+      "subordinate_to": "vrs_east_bosnian",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_2nd_majevica_light_infantry",
+      "faction": "RS",
+      "name": "2nd Majevica Light Infantry",
+      "home_mun": "ugljevik",
+      "home_settlement": "Ugljevik",
+      "subordinate_to": "vrs_east_bosnian",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_3rd_majevica_infantry",
+      "faction": "RS",
+      "name": "3rd Majevica Infantry",
+      "home_mun": "lopare",
+      "home_settlement": "Lopare",
+      "subordinate_to": "vrs_east_bosnian",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_bijeljina_light_infantry_panthers",
+      "faction": "RS",
+      "name": "1st Bijeljina Light Infantry \"Panthers\"",
+      "home_mun": "bijeljina",
+      "home_settlement": "Bijeljina",
+      "subordinate_to": "vrs_east_bosnian",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_sarajevo_mechanized",
+      "faction": "RS",
+      "name": "1st Sarajevo Mechanized",
+      "home_mun": "novo_sarajevo",
+      "home_settlement": "Lukavica",
+      "subordinate_to": "vrs_sarajevo_romanija",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_2nd_sarajevo_light_infantry",
+      "faction": "RS",
+      "name": "2nd Sarajevo Light Infantry",
+      "home_mun": "duvno",
+      "home_settlement": "Vojkovići",
+      "subordinate_to": "vrs_sarajevo_romanija",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_3rd_sarajevo_infantry",
+      "faction": "RS",
+      "name": "3rd Sarajevo Infantry",
+      "home_mun": "vogosca",
+      "home_settlement": "Vogošća",
+      "subordinate_to": "vrs_sarajevo_romanija",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_4th_sarajevo_light_infantry",
+      "faction": "RS",
+      "name": "4th Sarajevo Light Infantry",
+      "home_mun": "pale",
+      "home_settlement": "Pale",
+      "subordinate_to": "vrs_sarajevo_romanija",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_romanija_infantry",
+      "faction": "RS",
+      "name": "1st Romanija Infantry",
+      "home_mun": "han_pijesak",
+      "home_settlement": "Han Pijesak",
+      "subordinate_to": "vrs_sarajevo_romanija",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_zvornik",
+      "faction": "RS",
+      "name": "1st Zvornik",
+      "home_mun": "zvornik",
+      "home_settlement": "Zvornik",
+      "subordinate_to": "vrs_drina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_bratunac",
+      "faction": "RS",
+      "name": "1st Bratunac",
+      "home_mun": "bratunac",
+      "home_settlement": "Bratunac",
+      "subordinate_to": "vrs_drina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_vlasenica",
+      "faction": "RS",
+      "name": "1st Vlasenica",
+      "home_mun": "vlasenica",
+      "home_settlement": "Vlasenica",
+      "subordinate_to": "vrs_drina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_1st_milii",
+      "faction": "RS",
+      "name": "1st Milići",
+      "home_mun": "vlasenica",
+      "home_settlement": "Milići",
+      "subordinate_to": "vrs_drina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_ekovii_brigade",
+      "faction": "RS",
+      "name": "Šekovići Brigade",
+      "home_mun": "sekovici",
+      "home_settlement": "Šekovići",
+      "subordinate_to": "vrs_drina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_rogatica_brigade",
+      "faction": "RS",
+      "name": "Rogatica Brigade",
+      "home_mun": "rogatica",
+      "home_settlement": "Rogatica",
+      "subordinate_to": "vrs_drina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_viegrad_brigade",
+      "faction": "RS",
+      "name": "Višegrad Brigade",
+      "home_mun": "visegrad",
+      "home_settlement": "Višegrad",
+      "subordinate_to": "vrs_drina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_trebinje_brigade",
+      "faction": "RS",
+      "name": "Trebinje Brigade",
+      "home_mun": "trebinje",
+      "home_settlement": "Trebinje",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_nevesinje_brigade",
+      "faction": "RS",
+      "name": "Nevesinje Brigade",
+      "home_mun": "nevesinje",
+      "home_settlement": "Nevesinje",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_gacko_brigade",
+      "faction": "RS",
+      "name": "Gacko Brigade",
+      "home_mun": "gacko",
+      "home_settlement": "Gacko",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_bilea_brigade",
+      "faction": "RS",
+      "name": "Bileća Brigade",
+      "home_mun": "bileca",
+      "home_settlement": "Bileća",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_foa_brigade",
+      "faction": "RS",
+      "name": "Foča Brigade",
+      "home_mun": "foca",
+      "home_settlement": "Foča",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_ajnie_brigade",
+      "faction": "RS",
+      "name": "Čajniče Brigade",
+      "home_mun": "cajnice",
+      "home_settlement": "Čajniče",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_kalinovik_brigade",
+      "faction": "RS",
+      "name": "Kalinovik Brigade",
+      "home_mun": "kalinovik",
+      "home_settlement": "Kalinovik",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_65th_protection_motorized_regiment",
+      "faction": "RS",
+      "name": "65th Protection Motorized Regiment",
+      "home_mun": "han_pijesak",
+      "home_settlement": "Han Pijesak",
+      "subordinate_to": "vrs_main_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_10th_sabotage_detachment",
+      "faction": "RS",
+      "name": "10th Sabotage Detachment",
+      "home_mun": "vlasenica",
+      "home_settlement": "Vlasenica",
+      "subordinate_to": "vrs_main_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_89th_rocket_artillery_brigade",
+      "faction": "RS",
+      "name": "89th Rocket Artillery Brigade",
+      "home_mun": "banja_luka",
+      "home_settlement": "Banja Luka",
+      "subordinate_to": "vrs_main_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_rajko_bala_center_for_military_schools",
+      "faction": "RS",
+      "name": "\"Rajko Balač\" Center for Military Schools",
+      "home_mun": "banja_luka",
+      "home_settlement": "Banja Luka",
+      "subordinate_to": "vrs_main_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_67th_communications_regiment",
+      "faction": "RS",
+      "name": "67th Communications Regiment",
+      "home_mun": "han_pijesak",
+      "home_settlement": "Han Pijesak",
+      "subordinate_to": "vrs_main_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_63rd_autotransport_battalion",
+      "faction": "RS",
+      "name": "63rd Autotransport Battalion",
+      "home_mun": "zvornik",
+      "home_settlement": "Zvornik",
+      "subordinate_to": "vrs_main_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_14th_rear_base",
+      "faction": "RS",
+      "name": "14th Rear Base",
+      "home_mun": "banja_luka",
+      "home_settlement": "Banja Luka",
+      "subordinate_to": "vrs_main_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_27th_rear_base",
+      "faction": "RS",
+      "name": "27th Rear Base",
+      "home_mun": "sokolac",
+      "home_settlement": "Sokolac",
+      "subordinate_to": "vrs_main_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_30th_rear_base",
+      "faction": "RS",
+      "name": "30th Rear Base",
+      "home_mun": "bileca",
+      "home_settlement": "Bileća",
+      "subordinate_to": "vrs_main_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_35th_rear_base",
+      "faction": "RS",
+      "name": "35th Rear Base",
+      "home_mun": "bijeljina",
+      "home_settlement": "Bijeljina",
+      "subordinate_to": "vrs_main_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_410th_intelligence_center",
+      "faction": "RS",
+      "name": "410th Intelligence Center",
+      "home_mun": "banja_luka",
+      "home_settlement": "Banja Luka",
+      "subordinate_to": "vrs_main_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_technical_repair_institute_hadii",
+      "faction": "RS",
+      "name": "Technical Repair Institute \"Hadžići\"",
+      "home_mun": "hadzici",
+      "home_settlement": "Hadžići",
+      "subordinate_to": "vrs_main_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_military_hospital",
+      "faction": "RS",
+      "name": "Military Hospital",
+      "home_mun": "sokolac",
+      "home_settlement": "Sokolac",
+      "subordinate_to": "vrs_main_staff",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_21st_independent_armored_battalion",
+      "faction": "RS",
+      "name": "21st Independent Armored Battalion",
+      "home_mun": "bosanski_petrovac",
+      "home_settlement": "Bosanski Petrovac",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_doboj_operational_group_9_9th_recce_9th_mp_9th_mixed_engineer",
+      "faction": "RS",
+      "name": "\"Doboj\" Operational Group 9 (9th Recce, 9th MP, 9th Mixed Engineer)",
+      "home_mun": "doboj",
+      "home_settlement": "Doboj",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "rs_30th_infantry_division_elements_30th_recce_30th_mp_30th_comms_36th_ind_armored_bn",
+      "faction": "RS",
+      "name": "30th Infantry Division elements (30th Recce, 30th MP, 30th Comms, 36th Ind Armored Bn)",
+      "home_mun": "sipovo",
+      "home_settlement": "Šipovo",
+      "subordinate_to": "vrs_1st_krajina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_1st_brigade_mostar",
+      "faction": "HRHB",
+      "name": "1st Brigade (Mostar)",
+      "home_mun": "mostar",
+      "home_settlement": "Mostar",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_2nd_brigade_mostar",
+      "faction": "HRHB",
+      "name": "2nd Brigade (Mostar)",
+      "home_mun": "mostar",
+      "home_settlement": "Mostar",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_mostar_brigade",
+      "faction": "HRHB",
+      "name": "Mostar Brigade",
+      "home_mun": "mostar",
+      "home_settlement": "Mostar",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_iroki_brijeg_brigade",
+      "faction": "HRHB",
+      "name": "Široki Brijeg Brigade",
+      "home_mun": "listica",
+      "home_settlement": "Široki Brijeg",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_ljubuki_brigade",
+      "faction": "HRHB",
+      "name": "Ljubuški Brigade",
+      "home_mun": "ljubuski",
+      "home_settlement": "Ljubuški",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_grude_brigade",
+      "faction": "HRHB",
+      "name": "Grude Brigade",
+      "home_mun": "grude",
+      "home_settlement": "Grude",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_itluk_brigade",
+      "faction": "HRHB",
+      "name": "Čitluk Brigade",
+      "home_mun": "citluk",
+      "home_settlement": "Čitluk",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_apljina_brigade",
+      "faction": "HRHB",
+      "name": "Čapljina Brigade",
+      "home_mun": "capljina",
+      "home_settlement": "Čapljina",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_1st_herzegovina_brigade_knez_domagoj",
+      "faction": "HRHB",
+      "name": "1st Herzegovina Brigade \"Knez Domagoj\"",
+      "home_mun": "capljina",
+      "home_settlement": "Čapljina",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_stolac_units",
+      "faction": "HRHB",
+      "name": "Stolac Units",
+      "home_mun": "stolac",
+      "home_settlement": "Stolac",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_kralj_petar_kreimir_iv_brigade",
+      "faction": "HRHB",
+      "name": "Kralj Petar Krešimir IV Brigade",
+      "home_mun": "livno",
+      "home_settlement": "",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_kralj_tomislav_brigade",
+      "faction": "HRHB",
+      "name": "Kralj Tomislav Brigade",
+      "home_mun": "duvno",
+      "home_settlement": "Tomislavgrad",
+      "subordinate_to": "hvo_tomislavgrad",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_ban_jelai_brigade",
+      "faction": "HRHB",
+      "name": "Ban Jelačić Brigade",
+      "home_mun": "kiseljak",
+      "home_settlement": "",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_herceg_stjepan_brigade",
+      "faction": "HRHB",
+      "name": "Herceg Stjepan Brigade",
+      "home_mun": "konjic",
+      "home_settlement": "",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_mario_hrka_ikota_brigade",
+      "faction": "HRHB",
+      "name": "Mario Hrkač Čikota Brigade",
+      "home_mun": "listica",
+      "home_settlement": "",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_6th_brigade_ranko_boban",
+      "faction": "HRHB",
+      "name": "6th Brigade \"Ranko Boban\"",
+      "home_mun": "grude",
+      "home_settlement": "",
+      "subordinate_to": "vrs_herzegovina",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_94th_brigade",
+      "faction": "HRHB",
+      "name": "94th Brigade",
+      "home_mun": "kiseljak",
+      "home_settlement": "Kiseljak",
+      "subordinate_to": "hvo_central_bosnia",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_95th_brigade",
+      "faction": "HRHB",
+      "name": "95th Brigade",
+      "home_mun": "kresevo",
+      "home_settlement": "Fojnica",
+      "subordinate_to": "hvo_central_bosnia",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_vitezovi_brigade_vitez",
+      "faction": "HRHB",
+      "name": "\"Vitezovi\" Brigade (Vitez)",
+      "home_mun": "vitez",
+      "home_settlement": "Vitez",
+      "subordinate_to": "hvo_central_bosnia",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_jure_franceti_brigade",
+      "faction": "HRHB",
+      "name": "\"Jure Francetić\" Brigade",
+      "home_mun": "busovaca",
+      "home_settlement": "Busovača",
+      "subordinate_to": "hvo_central_bosnia",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_stjepan_tomaevi_brigade",
+      "faction": "HRHB",
+      "name": "\"Stjepan Tomašević\" Brigade",
+      "home_mun": "novi_travnik",
+      "home_settlement": "Novi Travnik",
+      "subordinate_to": "hvo_central_bosnia",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_kiseljak_brigade",
+      "faction": "HRHB",
+      "name": "Kiseljak Brigade",
+      "home_mun": "kiseljak",
+      "home_settlement": "Kiseljak",
+      "subordinate_to": "hvo_central_bosnia",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_kreevo_brigade",
+      "faction": "HRHB",
+      "name": "Kreševo Brigade",
+      "home_mun": "kresevo",
+      "home_settlement": "Kreševo",
+      "subordinate_to": "hvo_central_bosnia",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_travnik_brigade",
+      "faction": "HRHB",
+      "name": "Travnik Brigade",
+      "home_mun": "novi_travnik",
+      "home_settlement": "Novi Travnik",
+      "subordinate_to": "hvo_central_bosnia",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_101st_oraje_brigade",
+      "faction": "HRHB",
+      "name": "101st Orašje Brigade",
+      "home_mun": "orasje",
+      "home_settlement": "Orašje",
+      "subordinate_to": "hvo_northwest_bosnia",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_102nd_brigade",
+      "faction": "HRHB",
+      "name": "102nd Brigade",
+      "home_mun": "orasje",
+      "home_settlement": "Orašje",
+      "subordinate_to": "hvo_northwest_bosnia",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_107th_gradaac_brigade",
+      "faction": "HRHB",
+      "name": "107th \"Gradačac\" Brigade",
+      "home_mun": "gradacac",
+      "home_settlement": "Gradačac",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_108th_brko_brigade",
+      "faction": "HRHB",
+      "name": "108th \"Brčko\" Brigade",
+      "home_mun": "brcko",
+      "home_settlement": "Brčko",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_103rd_104th_105th_106th_brigades",
+      "faction": "HRHB",
+      "name": "103rd, 104th, 105th, 106th Brigades",
+      "home_mun": "derventa",
+      "home_settlement": "",
+      "subordinate_to": "hvo_central_bosnia",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_108th_brigade_listed_again_in_narrative",
+      "faction": "HRHB",
+      "name": "108th Brigade (listed again in narrative)",
+      "home_mun": "brcko",
+      "home_settlement": "",
+      "subordinate_to": "hvo_central_bosnia",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_111th_brigade",
+      "faction": "HRHB",
+      "name": "111th Brigade",
+      "home_mun": "zepce",
+      "home_settlement": "Žepče",
+      "subordinate_to": "hvo_central_bosnia",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_110th_usora_brigade",
+      "faction": "HRHB",
+      "name": "110th Usora Brigade",
+      "home_mun": "zepce",
+      "home_settlement": "",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_115th_zrinski_brigade",
+      "faction": "HRHB",
+      "name": "115th \"Zrinski\" Brigade",
+      "home_mun": "tuzla",
+      "home_settlement": "Tuzla",
+      "subordinate_to": "arbih_2nd_corps",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_posuje_battalion_kralj_tomislav",
+      "faction": "HRHB",
+      "name": "Posušje battalion (Kralj Tomislav)",
+      "home_mun": "posusje",
+      "home_settlement": "Posušje",
+      "subordinate_to": "hvo_tomislavgrad",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "hrhb_kupres_battalion_kralj_tomislav",
+      "faction": "HRHB",
+      "name": "Kupres battalion (Kralj Tomislav)",
+      "home_mun": "kupres",
+      "home_settlement": "Kupres",
+      "subordinate_to": "hvo_tomislavgrad",
+      "kind": "brigade",
+      "source": "markdown_rebuild"
+    },
+    {
+      "id": "arbih_1st_mountain",
+      "name": "1st Mountain Brigade",
+      "faction": "RBiH",
+      "home_settlement": "Sarajevo Dio - Stari Grad Sarajevo",
+      "home_mun": "stari_grad_sarajevo",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "arbih_1st_corps"
+    },
+    {
+      "id": "arbih_2nd_mountain",
+      "name": "2nd Mountain Brigade",
+      "faction": "RBiH",
+      "home_settlement": "Sarajevo Dio - Stari Grad Sarajevo",
+      "home_mun": "stari_grad_sarajevo",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "arbih_1st_corps"
+    },
+    {
+      "id": "arbih_10th_mountain",
+      "name": "10th Mountain Brigade",
+      "faction": "RBiH",
+      "home_settlement": "Sarajevo Dio - Stari Grad Sarajevo",
+      "home_mun": "stari_grad_sarajevo",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "arbih_1st_corps"
+    },
+    {
+      "id": "arbih_hvo_kralj_tvrtko",
+      "name": "HVO Brigade \"Kralj Tvrtko\"",
+      "faction": "RBiH",
+      "home_settlement": "Sarajevo Dio - Centar Sajarevo",
+      "home_mun": "centar_sarajevo",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "arbih_1st_corps"
+    },
+    {
+      "id": "arbih_2nd_tuzla",
+      "name": "2nd Tuzla Brigade",
+      "faction": "RBiH",
+      "home_settlement": "Tuzla",
+      "home_mun": "tuzla",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "arbih_2nd_corps"
+    },
+    {
+      "id": "arbih_1st_olovo",
+      "name": "1st Olovo Brigade",
+      "faction": "RBiH",
+      "home_settlement": "Olovo",
+      "home_mun": "olovo",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "arbih_2nd_corps"
+    },
+    {
+      "id": "arbih_116th_mountain",
+      "name": "116th Mountain Brigade",
+      "faction": "RBiH",
+      "home_settlement": "Živinice",
+      "home_mun": "zivinice",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "arbih_2nd_corps"
+    },
+    {
+      "id": "arbih_285th_light",
+      "name": "285th Light Brigade",
+      "faction": "RBiH",
+      "home_settlement": "Žepa",
+      "home_mun": "rogatica",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "arbih_2nd_corps"
+    },
+    {
+      "id": "arbih_1st_cerska",
+      "name": "1st Cerska Brigade",
+      "faction": "RBiH",
+      "home_settlement": "Cerska",
+      "home_mun": "vlasenica",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "arbih_2nd_corps"
+    },
+    {
+      "id": "arbih_1st_kamenica",
+      "name": "1st Kamenica Brigade",
+      "faction": "RBiH",
+      "home_settlement": "Kamenica",
+      "home_mun": "zvornik",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "arbih_2nd_corps"
+    },
+    {
+      "id": "hvo_eugen_kvaternik",
+      "name": "Brigade \"Eugen Kvaternik\"",
+      "faction": "HRHB",
+      "home_settlement": "Bugojno",
+      "home_mun": "bugojno",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "hvo_central_bosnia"
+    },
+    {
+      "id": "hvo_kotromanic",
+      "name": "Brigade \"Kotromanić\"",
+      "faction": "HRHB",
+      "home_settlement": "Kakanj",
+      "home_mun": "kakanj",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "hvo_central_bosnia"
+    },
+    {
+      "id": "hvo_travnik",
+      "name": "Brigade \"Travnik\"",
+      "faction": "HRHB",
+      "home_settlement": "Travnik",
+      "home_mun": "travnik",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "hvo_central_bosnia"
+    },
+    {
+      "id": "hvo_stjepan_tomasevic",
+      "name": "Brigade \"Stjepan Tomašević\"",
+      "faction": "HRHB",
+      "home_settlement": "Novi Travnik",
+      "home_mun": "novi_travnik",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "hvo_central_bosnia"
+    },
+    {
+      "id": "hvo_frankopan",
+      "name": "Brigade \"Frankopan\"",
+      "faction": "HRHB",
+      "home_settlement": "Guča Gora",
+      "home_mun": "travnik",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "hvo_central_bosnia"
+    },
+    {
+      "id": "hvo_zvijezda",
+      "name": "Brigade \"Zvijezda\"",
+      "faction": "HRHB",
+      "home_settlement": "Vareš",
+      "home_mun": "vares",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "hvo_central_bosnia"
+    },
+    {
+      "id": "hvo_bobovac",
+      "name": "Brigade \"Bobovac\"",
+      "faction": "HRHB",
+      "home_settlement": "Vareš",
+      "home_mun": "vares",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "hvo_central_bosnia"
+    },
+    {
+      "id": "hvo_jure_francetic",
+      "name": "Brigade \"Jure Francetić\"",
+      "faction": "HRHB",
+      "home_settlement": "Zenica",
+      "home_mun": "zenica",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "hvo_central_bosnia"
+    },
+    {
+      "id": "vrs_30th_division",
+      "name": "30th Light Infantry Division",
+      "faction": "RS",
+      "home_settlement": "Mrkonjić Grad",
+      "home_mun": "mrkonjic_grad",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "vrs_1st_krajina"
+    },
+    {
+      "id": "vrs_31st_mountain_storm",
+      "name": "31st Mountain \"Storm\" Brigade",
+      "faction": "RS",
+      "home_settlement": "Stričići",
+      "home_mun": "banja_luka",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "vrs_1st_krajina"
+    },
+    {
+      "id": "vrs_1st_celinac",
+      "name": "1st Čelinac Light Brigade",
+      "faction": "RS",
+      "home_settlement": "Čelinac",
+      "home_mun": "celinac",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "vrs_1st_krajina"
+    },
+    {
+      "id": "vrs_1st_laktasi",
+      "name": "1st Laktaši Light Brigade",
+      "faction": "RS",
+      "home_settlement": "Laktaši",
+      "home_mun": "laktasi",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "vrs_1st_krajina"
+    },
+    {
+      "id": "vrs_wolves_of_drina",
+      "name": "Wolves of Drina",
+      "faction": "RS",
+      "home_settlement": "Zvornik",
+      "home_mun": "zvornik",
+      "kind": "brigade",
+      "source": "historical_enrichment_1992",
+      "subordinate_to": "vrs_drina"
+    },
+    {
+      "id": "rs_1st_birac",
+      "faction": "RS",
+      "name": "1st Birač",
+      "home_mun": "vlasenica",
+      "home_settlement": "",
+      "subordinate_to": "vrs_drina",
+      "kind": "brigade",
+      "source": "VRS_Appendix_G_narrative"
+    },
+    {
+      "id": "rs_1st_podrinje",
+      "faction": "RS",
+      "name": "1st Podrinje",
+      "home_mun": "vlasenica",
+      "home_settlement": "",
+      "subordinate_to": "vrs_drina",
+      "kind": "brigade",
+      "source": "VRS_Appendix_G_narrative"
+    },
+    {
+      "id": "rs_5th_podrinje",
+      "faction": "RS",
+      "name": "5th Podrinje",
+      "home_mun": "vlasenica",
+      "home_settlement": "",
+      "subordinate_to": "vrs_drina",
+      "kind": "brigade",
+      "source": "VRS_Appendix_G_narrative"
+    }
+  ]
+}

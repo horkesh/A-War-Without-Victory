@@ -1,0 +1,258 @@
+{
+  "scenario_count": 6,
+  "scenarios": [
+    {
+      "aor_total": 0,
+      "classification": "A_missing_inputs",
+      "control_flips_total": 0,
+      "displacement_municipality_end": 7.600000000000006,
+      "displacement_settlement_end": 111.99999999999797,
+      "displacement_trigger_max": 1400,
+      "exhaustion_end": {
+        "HRHB": 0,
+        "RBiH": 0,
+        "RS": 0
+      },
+      "exhaustion_start": {
+        "HRHB": 0,
+        "RBiH": 0,
+        "RS": 0
+      },
+      "formations_added_count": 0,
+      "formations_final_total": 3,
+      "formations_initial_total": 3,
+      "front_active_max": 1400,
+      "phase": "phase_ii",
+      "phase_i_ran": false,
+      "phase_ii_ran": true,
+      "pressure_eligible_max": 1694,
+      "run_dir": "data\\derived\\scenario\\sweeps\\h2_4\\h2_4_sweep\\apr1992_4w",
+      "run_id": "apr1992_4w__3d0ff006ce51ae06__w4",
+      "scenario_id": "apr1992_4w",
+      "scenario_path": "data/scenarios/apr1992_4w.json",
+      "supply_pressure_end": {
+        "HRHB": 100,
+        "RBiH": 100,
+        "RS": 100
+      },
+      "supply_pressure_start": {
+        "HRHB": 100,
+        "RBiH": 100,
+        "RS": 100
+      },
+      "war_started": true,
+      "weeks": 4
+    },
+    {
+      "aor_total": 0,
+      "classification": "A_missing_inputs",
+      "control_flips_total": 0,
+      "displacement_municipality_end": 7.383299975757559,
+      "displacement_settlement_end": 110.34823333333216,
+      "displacement_trigger_max": 1375,
+      "exhaustion_end": {
+        "HRHB": 0.006964666666666666,
+        "RBiH": 0.006964666666666666,
+        "RS": 0.006964666666666666
+      },
+      "exhaustion_start": {
+        "HRHB": 0.0017411666666666665,
+        "RBiH": 0.0017411666666666665,
+        "RS": 0.0017411666666666665
+      },
+      "formations_added_count": 0,
+      "formations_final_total": 0,
+      "formations_initial_total": 0,
+      "front_active_max": 1375,
+      "phase": "phase_ii",
+      "phase_i_ran": false,
+      "phase_ii_ran": true,
+      "pressure_eligible_max": 1649,
+      "run_dir": "data\\derived\\scenario\\sweeps\\h2_4\\h2_4_sweep\\baseline_ops_4w",
+      "run_id": "baseline_ops_4w__e5f478f75692aede__w4",
+      "scenario_id": "baseline_ops_4w",
+      "scenario_path": "data/scenarios/baseline_ops_4w.json",
+      "supply_pressure_end": {
+        "HRHB": 100,
+        "RBiH": 100,
+        "RS": 100
+      },
+      "supply_pressure_start": {
+        "HRHB": 100,
+        "RBiH": 100,
+        "RS": 100
+      },
+      "war_started": true,
+      "weeks": 4
+    },
+    {
+      "aor_total": 0,
+      "classification": "A_missing_inputs",
+      "control_flips_total": 0,
+      "displacement_municipality_end": 23.920000000000037,
+      "displacement_settlement_end": 357.49999999999307,
+      "displacement_trigger_max": 1375,
+      "exhaustion_end": {
+        "HRHB": 0,
+        "RBiH": 0,
+        "RS": 0
+      },
+      "exhaustion_start": {
+        "HRHB": 0,
+        "RBiH": 0,
+        "RS": 0
+      },
+      "formations_added_count": 0,
+      "formations_final_total": 0,
+      "formations_initial_total": 0,
+      "front_active_max": 1375,
+      "phase": "phase_ii",
+      "phase_i_ran": false,
+      "phase_ii_ran": true,
+      "pressure_eligible_max": 1649,
+      "run_dir": "data\\derived\\scenario\\sweeps\\h2_4\\h2_4_sweep\\noop_13w",
+      "run_id": "noop_13w__f9819d53ebb3e53d__w13",
+      "scenario_id": "noop_13w",
+      "scenario_path": "data/scenarios/noop_13w.json",
+      "supply_pressure_end": {
+        "HRHB": 100,
+        "RBiH": 100,
+        "RS": 100
+      },
+      "supply_pressure_start": {
+        "HRHB": 100,
+        "RBiH": 100,
+        "RS": 100
+      },
+      "war_started": true,
+      "weeks": 13
+    },
+    {
+      "aor_total": 0,
+      "classification": "A_missing_inputs",
+      "control_flips_total": 0,
+      "displacement_municipality_end": 7.360000000000006,
+      "displacement_settlement_end": 109.99999999999801,
+      "displacement_trigger_max": 1375,
+      "exhaustion_end": {
+        "HRHB": 0,
+        "RBiH": 0,
+        "RS": 0
+      },
+      "exhaustion_start": {
+        "HRHB": 0,
+        "RBiH": 0,
+        "RS": 0
+      },
+      "formations_added_count": 0,
+      "formations_final_total": 0,
+      "formations_initial_total": 0,
+      "front_active_max": 1375,
+      "phase": "phase_ii",
+      "phase_i_ran": false,
+      "phase_ii_ran": true,
+      "pressure_eligible_max": 1649,
+      "run_dir": "data\\derived\\scenario\\sweeps\\h2_4\\h2_4_sweep\\noop_4w",
+      "run_id": "noop_4w__785a4bd598aba9de__w4",
+      "scenario_id": "noop_4w",
+      "scenario_path": "data/scenarios/noop_4w.json",
+      "supply_pressure_end": {
+        "HRHB": 100,
+        "RBiH": 100,
+        "RS": 100
+      },
+      "supply_pressure_start": {
+        "HRHB": 100,
+        "RBiH": 100,
+        "RS": 100
+      },
+      "war_started": true,
+      "weeks": 4
+    },
+    {
+      "aor_total": 0,
+      "classification": "A_missing_inputs",
+      "control_flips_total": 0,
+      "displacement_municipality_end": 7.383299975757559,
+      "displacement_settlement_end": 110.34823333333216,
+      "displacement_trigger_max": 1375,
+      "exhaustion_end": {
+        "HRHB": 0.006964666666666666,
+        "RBiH": 0.006964666666666666,
+        "RS": 0.006964666666666666
+      },
+      "exhaustion_start": {
+        "HRHB": 0.0017411666666666665,
+        "RBiH": 0.0017411666666666665,
+        "RS": 0.0017411666666666665
+      },
+      "formations_added_count": 0,
+      "formations_final_total": 0,
+      "formations_initial_total": 0,
+      "front_active_max": 1375,
+      "phase": "phase_ii",
+      "phase_i_ran": false,
+      "phase_ii_ran": true,
+      "pressure_eligible_max": 1649,
+      "run_dir": "data\\derived\\scenario\\sweeps\\h2_4\\h2_4_sweep\\noop_4w_bots",
+      "run_id": "noop_4w_bots__4ab01c925ac5958e__w4",
+      "scenario_id": "noop_4w_bots",
+      "scenario_path": "data/scenarios/noop_4w_bots.json",
+      "supply_pressure_end": {
+        "HRHB": 100,
+        "RBiH": 100,
+        "RS": 100
+      },
+      "supply_pressure_start": {
+        "HRHB": 100,
+        "RBiH": 100,
+        "RS": 100
+      },
+      "war_started": true,
+      "weeks": 4
+    },
+    {
+      "aor_total": 0,
+      "classification": "A_missing_inputs",
+      "control_flips_total": 0,
+      "displacement_municipality_end": 7.360000000000006,
+      "displacement_settlement_end": 109.99999999999801,
+      "displacement_trigger_max": 1375,
+      "exhaustion_end": {
+        "HRHB": 0,
+        "RBiH": 0,
+        "RS": 0
+      },
+      "exhaustion_start": {
+        "HRHB": 0,
+        "RBiH": 0,
+        "RS": 0
+      },
+      "formations_added_count": 0,
+      "formations_final_total": 0,
+      "formations_initial_total": 0,
+      "front_active_max": 1375,
+      "phase": "phase_ii",
+      "phase_i_ran": false,
+      "phase_ii_ran": true,
+      "pressure_eligible_max": 1649,
+      "run_dir": "data\\derived\\scenario\\sweeps\\h2_4\\h2_4_sweep\\noop_4w_probe_intent",
+      "run_id": "noop_4w_probe_intent__ac18dee0cff67c54__w4",
+      "scenario_id": "noop_4w_probe_intent",
+      "scenario_path": "data/scenarios/noop_4w_probe_intent.json",
+      "supply_pressure_end": {
+        "HRHB": 100,
+        "RBiH": 100,
+        "RS": 100
+      },
+      "supply_pressure_start": {
+        "HRHB": 100,
+        "RBiH": 100,
+        "RS": 100
+      },
+      "war_started": true,
+      "weeks": 4
+    }
+  ],
+  "sweep_id": "h2_4_sweep"
+}

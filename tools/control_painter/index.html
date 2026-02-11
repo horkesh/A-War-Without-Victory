@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scenario Control Painter (Paradox)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            display: flex;
+        }
+
+        #sidebar {
+            width: 320px;
+            background: #252525;
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        #main {
+            flex: 1;
+            position: relative;
+            background: #111;
+            overflow: hidden;
+        }
+
+        #canvas {
+            display: block;
+            cursor: grab;
+        }
+
+        #canvas.dragging {
+            cursor: grabbing;
+        }
+
+        h1 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #fff;
+            border-bottom: 2px solid #444;
+            padding-bottom: 8px;
+        }
+
+        h2 {
+            font-size: 14px;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 8px 12px;
+            background: #3a3a3a;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            width: 100%;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #4a4a4a;
+        }
+
+        button:active {
+            background: #2a2a2a;
+        }
+
+        button.primary {
+            background: #2c5282;
+            border-color: #4299e1;
+        }
+
+        button.primary:hover {
+            background: #3182ce;
+        }
+
+        input[type="file"] {
+            font-size: 12px;
+            color: #999;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .palette {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .palette-btn {
+            display: flex;
+            align-items: center;
+            padding: 6px;
+            border: 2px solid transparent;
+            background: #333;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .palette-btn:hover {
+            background: #444;
+        }
+
+        .palette-btn.active {
+            border-color: #fff;
+            background: #444;
+        }
+
+        .swatch {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            border-radius: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .info-box {
+            font-size: 12px;
+            color: #888;
+            background: #1a1a1a;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            margin-bottom: 8px;
+        }
+
+        #tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            border: 1px solid #555;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .color-rbih {
+            background: #2e7d32;
+        }
+
+        .color-rs {
+            background: #c62828;
+        }
+
+        .color-hrhb {
+            background: #1565c0;
+        }
+
+        .color-hv {
+            background: #0277bd;
+        }
+
+        .color-apzb {
+            background: #f9a825;
+        }
+
+        .color-jna {
+            background: #b71c1c;
+        }
+
+        .color-null {
+            background: #424242;
+        }
+
+        #status {
+            font-size: 11px;
+            color: #666;
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="sidebar">
+        <h1>Control Painter</h1>
+
+        <div class="section">
+            <h2>1. Load Map Geometry</h2>
+            <div class="info-box">Load <code>settlements_a1_viewer.geojson</code>. This may take a few seconds.</div>
+            <input type="file" id="file-geo" accept=".geojson,.json">
+            <div id="geo-status" style="font-size:11px; color:#da5">Waiting for map...</div>
+        </div>
+
+        <div class="section">
+            <h2>2. Load Existing Control</h2>
+            <div class="info-box">Optional: Load <code>jan1993.json</code> or similar.</div>
+            <input type="file" id="file-control" accept=".json">
+        </div>
+
+        <div class="section">
+            <h2>3. Layers</h2>
+            <div class="info-box">Load <code>adm3.geojson</code> for modern borders.</div>
+            <input type="file" id="file-modern-borders" accept=".geojson" style="margin-top:8px;">
+            <label
+                style="display:flex; align-items:center; margin-top:4px; cursor:pointer; font-size:12px; color:#aaa;">
+                <input type="checkbox" id="chk-show-modern-borders" checked style="width:auto; margin-right:8px;">
+                Modern
+                Borders (Blue)
+            </label>
+        </div>
+
+        <div class="section">
+            <h2>4. Paint Mode</h2>
+            <div style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:#aaa;">
+                <label style="cursor:pointer;"><input type="radio" name="paintmode" value="settlement" checked>
+                    <b>Settlement</b> (Click)</label>
+                <label style="cursor:pointer;"><input type="radio" name="paintmode" value="municipality">
+                    <b>Municipality</b> (Flood Fill)</label>
+            </div>
+            <div class="info-box" style="margin-top:8px;">Tip: Hold <b>Ctrl</b> to temporarily switch to Municipality
+                mode.</div>
+        </div>
+
+        <div class="section">
+            <h2>5. Painting Palette</h2>
+            <div class="palette" id="palette">
+                <div class="palette-btn active" data-faction="RBiH">
+                    <div class="swatch color-rbih"></div>RBiH
+                </div>
+                <div class="palette-btn" data-faction="RS">
+                    <div class="swatch color-rs"></div>RS
+                </div>
+                <div class="palette-btn" data-faction="HRHB">
+                    <div class="swatch color-hrhb"></div>HRHB
+                </div>
+                <div class="palette-btn" data-faction="null">
+                    <div class="swatch color-null"></div>Clear (Null)
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>6. Actions</h2>
+            <button id="btn-export" class="primary">Export JSON</button>
+            <button id="btn-reset-view">Reset View</button>
+        </div>
+
+        <div id="status">Ready.</div>
+    </div>
+
+    <div id="main">
+        <canvas id="canvas"></canvas>
+        <div id="tooltip"></div>
+    </div>
+
+    <script src="./lookup.js"></script>
+    <script src="./painter.js"></script>
+</body>
+
+</html>

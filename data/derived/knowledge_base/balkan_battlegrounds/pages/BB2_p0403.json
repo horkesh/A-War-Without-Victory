@@ -1,0 +1,14 @@
+{
+  "volume_id": "BB2",
+  "page_number": 403,
+  "raw_text": "1\n1\n1\n1\n1\n1\n1\n1\n7\n1\n1\n1\n.\n1\n.\n1",
+  "clean_text": "1\n1\n1\n1\n1\n1\n1\n1\n7\n1\n1\n1\n.\n1\n.\n1",
+  "ocr_applied": false,
+  "text_hash": "fb301ba4a4068a2aff6d8b083bcb9f3d01e4064108858708ed996cdd593bb614",
+  "clean_text_hash": "fb301ba4a4068a2aff6d8b083bcb9f3d01e4064108858708ed996cdd593bb614",
+  "layout_blocks": [],
+  "tables": [],
+  "figures": [],
+  "map_regions": [],
+  "notes": []
+}

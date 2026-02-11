@@ -1,0 +1,68 @@
+{
+  "orient": {
+    "svg_settlement_space": "arbitrary pixel space (settlements_substrate.geojson coordinates)",
+    "adm3_crs": "EPSG:4326 (bih_adm3_1990.geojson lon/lat)",
+    "existing_georef_artifacts": [
+      "georef/ (dir present)"
+    ]
+  },
+  "anchor_counts": {
+    "world_adm3": 110,
+    "svg_municipalities": 110
+  },
+  "match_rates": {
+    "total_mun1990": 110,
+    "matched": 110,
+    "ambiguous": 0,
+    "unmatched": 0
+  },
+  "residual_distribution": {
+    "min": 3.72722215653831e-9,
+    "max": 4.67788661069875e-8,
+    "mean": 1.7358360867196624e-8,
+    "rmse": 2.0249334977025997e-8
+  },
+  "top10_worst_residuals": [
+    {
+      "mun1990_id": "cazin",
+      "residual_m": 4.67788661069875e-8
+    },
+    {
+      "mun1990_id": "ljubinje",
+      "residual_m": 4.674408760319247e-8
+    },
+    {
+      "mun1990_id": "bileca",
+      "residual_m": 4.492765780452566e-8
+    },
+    {
+      "mun1990_id": "cajnice",
+      "residual_m": 4.0710792505342476e-8
+    },
+    {
+      "mun1990_id": "trebinje",
+      "residual_m": 3.820697308370196e-8
+    },
+    {
+      "mun1990_id": "visegrad",
+      "residual_m": 3.733387244939226e-8
+    },
+    {
+      "mun1990_id": "bosanska_kostajnica",
+      "residual_m": 3.678464282889024e-8
+    },
+    {
+      "mun1990_id": "prijedor",
+      "residual_m": 3.582813139388409e-8
+    },
+    {
+      "mun1990_id": "bosanska_krupa",
+      "residual_m": 3.452712607986851e-8
+    },
+    {
+      "mun1990_id": "gacko",
+      "residual_m": 3.4358113618479174e-8
+    }
+  ],
+  "note_svg_authoritative": "SVG remains authoritative; world coordinates and transform are observational only."
+}

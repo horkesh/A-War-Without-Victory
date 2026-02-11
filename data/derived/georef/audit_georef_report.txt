@@ -1,0 +1,37 @@
+Phase H6.0 — Georeferencing audit report
+======================================
+
+Orient:
+  SVG settlement space: arbitrary pixel space (settlements_substrate.geojson coordinates)
+  ADM3 CRS: EPSG:4326 (bih_adm3_1990.geojson lon/lat)
+  Existing georef artifacts: georef/ (dir present)
+
+Anchor counts:
+  World ADM3: 110
+  SVG municipalities: 110
+
+Match rates:
+  total_mun1990: 110
+  matched: 110
+  ambiguous: 0
+  unmatched: 0
+
+Residual distribution (m):
+  min: 0.00
+  max: 0.00
+  mean: 0.00
+  rmse: 0.00
+
+Top 10 worst residuals:
+  cazin: 0.00 m
+  ljubinje: 0.00 m
+  bileca: 0.00 m
+  cajnice: 0.00 m
+  trebinje: 0.00 m
+  visegrad: 0.00 m
+  bosanska_kostajnica: 0.00 m
+  prijedor: 0.00 m
+  bosanska_krupa: 0.00 m
+  gacko: 0.00 m
+
+Note: SVG remains authoritative; world coordinates and transform are observational only.

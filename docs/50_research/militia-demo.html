@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Militia System Demo - Municipal TO & Settlement Detail</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #4a9eff;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #888;
+            margin-bottom: 30px;
+        }
+        
+        .panel-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .panel h2 {
+            color: #4a9eff;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #444;
+            padding-bottom: 8px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-box {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 12px;
+        }
+        
+        .stat-label {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            color: #4a9eff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .municipality-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .municipality-item {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .municipality-item:hover {
+            background: #333;
+            border-color: #4a9eff;
+        }
+        
+        .municipality-item.selected {
+            background: #2a4060;
+            border-color: #4a9eff;
+        }
+        
+        .mun-name {
+            font-weight: bold;
+            color: #4a9eff;
+            margin-bottom: 5px;
+        }
+        
+        .mun-stats {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .quality-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        
+        .quality-exceptional { background: #2a7d2a; color: #fff; }
+        .quality-organized { background: #4a9eff; color: #fff; }
+        .quality-poor { background: #b8860b; color: #fff; }
+        .quality-chaotic { background: #8b0000; color: #fff; }
+        
+        .faction-rbih { color: #4a9eff; }
+        .faction-rs { color: #ff4a4a; }
+        .faction-hvo { color: #ffa500; }
+        
+        .detail-panel {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .settlement-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .settlement-item {
+            background: #2a2a2a;
+            border-left: 3px solid #444;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .settlement-item.organized {
+            border-left-color: #4a9eff;
+        }
+        
+        .settlement-item.exceptional {
+            border-left-color: #2a7d2a;
+        }
+        
+        .settlement-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .settlement-stats {
+            color: #888;
+            font-size: 11px;
+        }
+        
+        .test-cases {
+            background: #2a2a2a;
+            border: 2px solid #4a9eff;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .test-case {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .test-case h3 {
+            color: #4a9eff;
+            margin-bottom: 10px;
+        }
+        
+        .test-result {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .result-item {
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .result-label {
+            color: #888;
+            font-size: 12px;
+        }
+        
+        .result-value {
+            color: #4a9eff;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .match-indicator {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .match-yes {
+            background: #2a7d2a;
+            color: #fff;
+        }
+        
+        .match-no {
+            background: #8b0000;
+            color: #fff;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ðŸŽ–ï¸ Settlement Militia System Demo</h1>
+        <p class="subtitle">Municipal Territorial Defense (TO) Units + Settlement Detail View</p>
+        
+        <div id="loading" class="loading">
+            Loading census data and calculating militia strengths...
+        </div>
+        
+        <div id="content" style="display: none;">
+            <!-- Summary Stats -->
+            <div class="panel">
+                <h2>System Overview</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">Settlement Militias</div>
+                        <div class="stat-value" id="totalMilitias">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Municipal TOs</div>
+                        <div class="stat-value" id="totalTOs">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Total ARBiH Fighters</div>
+                        <div class="stat-value faction-rbih" id="totalARBiH">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Total VRS Fighters</div>
+                        <div class="stat-value faction-rs" id="totalVRS">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Total HVO Fighters</div>
+                        <div class="stat-value faction-hvo" id="totalHVO">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Grid -->
+            <div class="panel-grid">
+                <!-- Municipal TO List -->
+                <div class="panel">
+                    <h2>Municipal TOs (Select to View Detail)</h2>
+                    <div id="municipalityList" class="municipality-list"></div>
+                </div>
+                
+                <!-- Detail View -->
+                <div class="panel">
+                    <h2>Detail View</h2>
+                    <div id="detailView">
+                        <p style="color: #888; text-align: center; padding: 40px;">
+                            Select a municipal TO to view settlement breakdown
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Historical Validation -->
+            <div class="test-cases">
+                <h2>ðŸ“Š Historical Validation Tests</h2>
+                <div id="testResults"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Simple game state stub
+        const gameState = {
+            municipalities: {},
+            settlements: {},
+            turn: 1
+        };
+        
+        // Simple SettlementSystem stub for demo
+        const SettlementSystem = {
+            settlements: {},
+            
+            async initialize() {
+                try {
+                    await this.loadCensusData();
+                } catch (error) {
+                    console.error("Error loading census data:", error);
+                    alert("Error loading census data. Please ensure mz_1991_census_mz_level.csv is in the same directory as this HTML file.\n\nError: " + error.message);
+                    throw error;
+                }
+            },
+            
+            async loadCensusData() {
+                let csvText;
+                
+                // Try to load from same directory
+                try {
+                    const response = await fetch('./mz_1991_census_mz_level.csv');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    csvText = await response.text();
+                } catch (e) {
+                    console.error("Fetch failed:", e);
+                    throw new Error("Could not load CSV file. Make sure mz_1991_census_mz_level.csv is in the same folder.");
+                }
+                const lines = csvText.split('\n');
+                const headers = lines[0].split(',');
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    
+                    const values = this.parseCSVLine(lines[i]);
+                    const row = {};
+                    headers.forEach((h, idx) => row[h.trim()] = values[idx]);
+                    
+                    const settlementId = row.mz_id;
+                    const population = parseInt(row.total);
+                    
+                    this.settlements[settlementId] = {
+                        id: settlementId,
+                        name: row.mz,
+                        municipalityId: row.municipality_id,
+                        municipality: row.municipality,
+                        urban: population >= 3000,
+                        isCapital: false,
+                        population: population,
+                        ethnicComposition: {
+                            bosniak: parseFloat(row.muslims_pct) || 0,
+                            serb: parseFloat(row.serbs_pct) || 0,
+                            croat: parseFloat(row.croats_pct) || 0
+                        },
+                        absoluteNumbers: {
+                            bosniak: parseInt(row.muslims) || 0,
+                            serb: parseInt(row.serbs) || 0,
+                            croat: parseInt(row.croats) || 0
+                        },
+                        majorityGroup: row.majority_group,
+                        majorityPct: parseFloat(row.majority_pct) || 0,
+                        controller: this.determineController(row.majority_group),
+                        contested: parseFloat(row.majority_pct) < 60,
+                        frontLine: Math.random() < 0.2,
+                        organization: this.generateOrganization(row, population)
+                    };
+                }
+                
+                console.log(`Loaded ${Object.keys(this.settlements).length} settlements`);
+            },
+            
+            determineController(majorityGroup) {
+                const group = (majorityGroup || '').toLowerCase();
+                if (group === 'muslims' || group === 'bosniaks') return 'rbih';
+                if (group === 'serbs') return 'rs';
+                if (group === 'croats') return 'hvo';
+                return 'contested';
+            },
+            
+            generateOrganization(row, population) {
+                const majority = row.majority_group;
+                const majorityPct = parseFloat(row.majority_pct);
+                
+                // Strong organization if urban + high majority
+                let toStrength = 'absent';
+                let partyStrength = 'absent';
+                
+                if (population >= 3000 && majorityPct >= 70) {
+                    toStrength = 'strong';
+                    partyStrength = 'strong';
+                } else if (population >= 1000 && majorityPct >= 60) {
+                    toStrength = 'present';
+                    partyStrength = 'present';
+                } else if (majorityPct >= 50) {
+                    toStrength = 'present';
+                    partyStrength = 'present';
+                }
+                
+                return {
+                    to: toStrength,
+                    police: majorityPct >= 60 ? majority : 'mixed',
+                    sda: majority === 'bosniaks' ? partyStrength : 'absent',
+                    sds: majority === 'serbs' ? partyStrength : 'absent',
+                    hdz: majority === 'croats' ? partyStrength : 'absent'
+                };
+            },
+            
+            parseCSVLine(line) {
+                const result = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let char of line) {
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        result.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                result.push(current.trim());
+                return result;
+            }
+        };
+    </script>
+    
+    <script src="militia-system.js"></script>
+    
+    <script>
+        let selectedMunTO = null;
+        
+        async function initialize() {
+            // Load settlement system
+            await SettlementSystem.initialize();
+            
+            // Initialize militia system
+            MilitiaSystem.initialize();
+            
+            // Show content
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            
+            // Display summary stats
+            displaySummaryStats();
+            
+            // Display municipal TOs
+            displayMunicipalTOs();
+            
+            // Run historical tests
+            runHistoricalTests();
+        }
+        
+        function displaySummaryStats() {
+            const militias = Object.values(MilitiaSystem.settlementMilitias);
+            const tos = Object.values(MilitiaSystem.municipalTOs);
+            
+            const arbihFighters = militias
+                .filter(m => m.controller === 'rbih')
+                .reduce((sum, m) => sum + m.size, 0);
+            
+            const vrsFighters = militias
+                .filter(m => m.controller === 'rs')
+                .reduce((sum, m) => sum + m.size, 0);
+            
+            const hvoFighters = militias
+                .filter(m => m.controller === 'hvo')
+                .reduce((sum, m) => sum + m.size, 0);
+            
+            document.getElementById('totalMilitias').textContent = militias.length.toLocaleString();
+            document.getElementById('totalTOs').textContent = tos.length;
+            document.getElementById('totalARBiH').textContent = arbihFighters.toLocaleString();
+            document.getElementById('totalVRS').textContent = vrsFighters.toLocaleString();
+            document.getElementById('totalHVO').textContent = hvoFighters.toLocaleString();
+        }
+        
+        function displayMunicipalTOs() {
+            const list = document.getElementById('municipalityList');
+            const tos = Object.values(MilitiaSystem.municipalTOs)
+                .sort((a, b) => b.totalStrength - a.totalStrength);
+            
+            list.innerHTML = tos.map(to => `
+                <div class="municipality-item" onclick="selectMunicipalTO('${to.id}')">
+                    <div class="mun-name">
+                        <span class="faction-${to.faction}">${to.municipalityName}</span>
+                        <span class="quality-badge quality-${to.overallQuality}">${to.overallQuality}</span>
+                    </div>
+                    <div class="mun-stats">
+                        <strong>${to.totalStrength}</strong> fighters 
+                        (${to.organizedStrength} organized, ${to.disorganizedStrength} chaotic)
+                        â€¢ ${to.settlementCount} settlements
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function selectMunicipalTO(toId) {
+            selectedMunTO = MilitiaSystem.municipalTOs[toId];
+            
+            // Update selection UI
+            document.querySelectorAll('.municipality-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.target.closest('.municipality-item').classList.add('selected');
+            
+            // Display detail
+            displayTODetail(selectedMunTO);
+        }
+        
+        function displayTODetail(to) {
+            const detailView = document.getElementById('detailView');
+            
+            // Get settlement militias
+            const settlements = to.militias.sort((a, b) => b.size - a.size);
+            
+            detailView.innerHTML = `
+                <div class="detail-panel">
+                    <h3><span class="faction-${to.faction}">${to.municipalityName} TO (${to.faction.toUpperCase()})</span></h3>
+                    
+                    <div class="stats-grid" style="margin: 15px 0;">
+                        <div class="stat-box">
+                            <div class="stat-label">Total Fighters</div>
+                            <div class="stat-value">${to.totalStrength}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Organized Core</div>
+                            <div class="stat-value">${to.organizedStrength}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Overall Quality</div>
+                            <div class="stat-value" style="font-size: 18px;">${to.overallQuality}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Defensive Strength</div>
+                            <div class="stat-value">${to.defensiveStrength}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <strong>Quality Breakdown:</strong><br>
+                        <span class="quality-badge quality-exceptional">Exceptional: ${to.qualityBreakdown.exceptional}</span>
+                        <span class="quality-badge quality-organized">Organized: ${to.qualityBreakdown.organized}</span>
+                        <span class="quality-badge quality-poor">Poor: ${to.qualityBreakdown.poor}</span>
+                        <span class="quality-badge quality-chaotic">Chaotic: ${to.qualityBreakdown.chaotic}</span>
+                    </div>
+                </div>
+                
+                <div class="detail-panel">
+                    <h3>Settlement Breakdown (${settlements.length} settlements)</h3>
+                    <div class="settlement-list">
+                        ${settlements.map(s => `
+                            <div class="settlement-item ${s.quality}">
+                                <div class="settlement-name">
+                                    ${s.settlementName} 
+                                    <span class="quality-badge quality-${s.quality}">${s.quality}</span>
+                                </div>
+                                <div class="settlement-stats">
+                                    ${s.size} fighters (${s.militaryAgeMales} military-age males Ã— ${(s.mobilizationRate * 100).toFixed(0)}% mobilization)
+                                    â€¢ Defensive: ${s.defensiveStrength} â€¢ Morale: ${s.morale}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function runHistoricalTests() {
+            const results = document.getElementById('testResults');
+            
+            // Test Case 1: Kozarac
+            const kozarac = Object.values(MilitiaSystem.settlementMilitias)
+                .find(m => m.settlementName === 'Kozarac');
+            
+            // Test Case 2: Sapna
+            const sapna = Object.values(MilitiaSystem.settlementMilitias)
+                .find(m => m.settlementName === 'Sapna');
+            
+            // Test Case 3: TeoÄak
+            const teocak = Object.values(MilitiaSystem.settlementMilitias)
+                .find(m => m.settlementName && m.settlementName.toLowerCase().includes('teoÄak'));
+            
+            // Test Case 4: VozuÄ‡a (VRS pocket)
+            const vozuca = Object.values(MilitiaSystem.settlementMilitias)
+                .find(m => m.settlementName && m.settlementName.toLowerCase().includes('vozuÄ‡a'));
+            
+            results.innerHTML = `
+                ${kozarac ? `
+                    <div class="test-case">
+                        <h3>Test 1: Kozarac (Should Fall in ~3 Days)</h3>
+                        <p>Historical: 3,314 pop, 90% Bosniak, ~450 militia â†’ Fell in 3 days to 2,500 VRS</p>
+                        <div class="test-result">
+                            <div class="result-item">
+                                <div class="result-label">System Prediction</div>
+                                <div class="result-value">${kozarac.size} militia</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Historical Actual</div>
+                                <div class="result-value">~450 militia</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Quality</div>
+                                <div class="result-value">${kozarac.quality}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Match</div>
+                                <div class="result-value">
+                                    ${Math.abs(kozarac.size - 450) < 100 ? 
+                                        '<span class="match-yes">âœ“ YES</span>' : 
+                                        '<span class="match-no">âœ— NO</span>'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${sapna ? `
+                    <div class="test-case">
+                        <h3>Test 2: Sapna (Should Survive Entire War)</h3>
+                        <p>Historical: 3,152 pop, 98% Bosniak, survived as enclave 1992-1995</p>
+                        <div class="test-result">
+                            <div class="result-item">
+                                <div class="result-label">Militia Size</div>
+                                <div class="result-value">${sapna.size}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Quality</div>
+                                <div class="result-value">${sapna.quality}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Defensive Strength</div>
+                                <div class="result-value">${sapna.defensiveStrength}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Survival Chance</div>
+                                <div class="result-value">
+                                    ${sapna.defensiveStrength > 200 ? 
+                                        '<span class="match-yes">HIGH</span>' : 
+                                        '<span class="match-no">LOW</span>'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${teocak ? `
+                    <div class="test-case">
+                        <h3>Test 3: TeoÄak (Should Survive Entire War)</h3>
+                        <p>Historical: 2,633 pop, 96% Bosniak, survived as enclave 1992-1995</p>
+                        <div class="test-result">
+                            <div class="result-item">
+                                <div class="result-label">Militia Size</div>
+                                <div class="result-value">${teocak.size}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Quality</div>
+                                <div class="result-value">${teocak.quality}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Defensive Strength</div>
+                                <div class="result-value">${teocak.defensiveStrength}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Survival Chance</div>
+                                <div class="result-value">
+                                    ${teocak.defensiveStrength > 150 ? 
+                                        '<span class="match-yes">HIGH</span>' : 
+                                        '<span class="match-no">LOW</span>'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${vozuca ? `
+                    <div class="test-case">
+                        <h3>Test 4: VozuÄ‡a VRS Pocket (Should Survive)</h3>
+                        <p>Historical: VRS enclave in RBiH territory, survived 1992-1995</p>
+                        <div class="test-result">
+                            <div class="result-item">
+                                <div class="result-label">VRS Militia Size</div>
+                                <div class="result-value">${vozuca.size}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Quality</div>
+                                <div class="result-value">${vozuca.quality}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Controller</div>
+                                <div class="result-value faction-${vozuca.controller}">${vozuca.controller.toUpperCase()}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Survival Chance</div>
+                                <div class="result-value">
+                                    ${vozuca.defensiveStrength > 80 ? 
+                                        '<span class="match-yes">HIGH</span>' : 
+                                        '<span class="match-no">LOW</span>'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        }
+        
+        // Initialize on load
+        initialize();
+    </script>
+</body>
+</html>

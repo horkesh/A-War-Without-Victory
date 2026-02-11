@@ -1,0 +1,4746 @@
+{
+  "awwv_meta": {
+    "role": "municipality_agg_post1995",
+    "version": "h4_1",
+    "source": [
+      "settlements_substrate",
+      "political_control_data",
+      "mun1990_names",
+      "post1995_to_mun1990"
+    ]
+  },
+  "by_municipality_id": {
+    "10014": {
+      "mun1990_id": "banovici",
+      "display_name": "Banovići",
+      "post1995_municipality_ids": [
+        "10014"
+      ],
+      "settlement_count_total": 20,
+      "settlement_count_in_graph": 20,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 20,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 17
+        },
+        {
+          "majority": "serb",
+          "count": 3
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10049": {
+      "mun1990_id": "bihac",
+      "display_name": "Bihać",
+      "post1995_municipality_ids": [
+        "10049"
+      ],
+      "settlement_count_total": 59,
+      "settlement_count_in_graph": 59,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 59,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 30
+        },
+        {
+          "majority": "bosniak",
+          "count": 25
+        },
+        {
+          "majority": "croat",
+          "count": 4
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10146": {
+      "mun1990_id": "bosansko_grahovo",
+      "display_name": "Bosansko Grahovo",
+      "post1995_municipality_ids": [
+        "10146"
+      ],
+      "settlement_count_total": 35,
+      "settlement_count_in_graph": 35,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 35,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 33
+        },
+        {
+          "majority": "croat",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10189": {
+      "mun1990_id": "breza",
+      "display_name": "Breza",
+      "post1995_municipality_ids": [
+        "10189"
+      ],
+      "settlement_count_total": 28,
+      "settlement_count_in_graph": 28,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 28,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 25
+        },
+        {
+          "majority": "serb",
+          "count": 2
+        },
+        {
+          "majority": "croat",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10197": {
+      "mun1990_id": "bugojno",
+      "display_name": "Bugojno",
+      "post1995_municipality_ids": [
+        "10197"
+      ],
+      "settlement_count_total": 78,
+      "settlement_count_in_graph": 78,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 78,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 39
+        },
+        {
+          "majority": "serb",
+          "count": 20
+        },
+        {
+          "majority": "croat",
+          "count": 19
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10219": {
+      "mun1990_id": "busovaca",
+      "display_name": "Busovača",
+      "post1995_municipality_ids": [
+        "10219"
+      ],
+      "settlement_count_total": 47,
+      "settlement_count_in_graph": 47,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 47,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 23
+        },
+        {
+          "majority": "croat",
+          "count": 22
+        },
+        {
+          "majority": "serb",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10227": {
+      "mun1990_id": "cazin",
+      "display_name": "Cazin",
+      "post1995_municipality_ids": [
+        "10227"
+      ],
+      "settlement_count_total": 61,
+      "settlement_count_in_graph": 54,
+      "settlement_count_ungraphed": 7,
+      "control_counts": {
+        "RBiH": 61,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 61
+        }
+      ],
+      "flags": {
+        "any_ungraphed": true,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10243": {
+      "mun1990_id": "capljina",
+      "display_name": "Čapljina",
+      "post1995_municipality_ids": [
+        "10243"
+      ],
+      "settlement_count_total": 32,
+      "settlement_count_in_graph": 32,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 32,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 20
+        },
+        {
+          "majority": "bosniak",
+          "count": 9
+        },
+        {
+          "majority": "serb",
+          "count": 3
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10260": {
+      "mun1990_id": "citluk",
+      "display_name": "Čitluk",
+      "post1995_municipality_ids": [
+        "10260"
+      ],
+      "settlement_count_total": 21,
+      "settlement_count_in_graph": 21,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 21,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 21
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10294": {
+      "mun1990_id": "donji_vakuf",
+      "display_name": "Donji Vakuf",
+      "post1995_municipality_ids": [
+        "10294"
+      ],
+      "settlement_count_total": 68,
+      "settlement_count_in_graph": 68,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 68,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 39
+        },
+        {
+          "majority": "bosniak",
+          "count": 26
+        },
+        {
+          "majority": "croat",
+          "count": 3
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10308": {
+      "mun1990_id": "duvno",
+      "display_name": "Duvno",
+      "post1995_municipality_ids": [
+        "10308"
+      ],
+      "settlement_count_total": 60,
+      "settlement_count_in_graph": 60,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 60,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 55
+        },
+        {
+          "majority": "bosniak",
+          "count": 3
+        },
+        {
+          "majority": "serb",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10324": {
+      "mun1990_id": "fojnica",
+      "display_name": "Fojnica",
+      "post1995_municipality_ids": [
+        "10324"
+      ],
+      "settlement_count_total": 55,
+      "settlement_count_in_graph": 55,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 55,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 29
+        },
+        {
+          "majority": "croat",
+          "count": 25
+        },
+        {
+          "majority": "other",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10359": {
+      "mun1990_id": "glamoc",
+      "display_name": "Glamoč",
+      "post1995_municipality_ids": [
+        "10359"
+      ],
+      "settlement_count_total": 55,
+      "settlement_count_in_graph": 55,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 55,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 47
+        },
+        {
+          "majority": "bosniak",
+          "count": 8
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10375": {
+      "mun1990_id": "gornji_vakuf",
+      "display_name": "Gornji Vakuf",
+      "post1995_municipality_ids": [
+        "10375"
+      ],
+      "settlement_count_total": 52,
+      "settlement_count_in_graph": 52,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 52,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 30
+        },
+        {
+          "majority": "croat",
+          "count": 22
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10391": {
+      "mun1990_id": "gradacac",
+      "display_name": "Gradačac",
+      "post1995_municipality_ids": [
+        "10391"
+      ],
+      "settlement_count_total": 34,
+      "settlement_count_in_graph": 34,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 34,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 20
+        },
+        {
+          "majority": "serb",
+          "count": 8
+        },
+        {
+          "majority": "croat",
+          "count": 6
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10405": {
+      "mun1990_id": "grude",
+      "display_name": "Grude",
+      "post1995_municipality_ids": [
+        "10405"
+      ],
+      "settlement_count_total": 13,
+      "settlement_count_in_graph": 13,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 13,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 13
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10421": {
+      "mun1990_id": "jablanica",
+      "display_name": "Jablanica",
+      "post1995_municipality_ids": [
+        "10421"
+      ],
+      "settlement_count_total": 33,
+      "settlement_count_in_graph": 33,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 33,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 30
+        },
+        {
+          "majority": "croat",
+          "count": 3
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10448": {
+      "mun1990_id": "kakanj",
+      "display_name": "Kakanj",
+      "post1995_municipality_ids": [
+        "10448"
+      ],
+      "settlement_count_total": 106,
+      "settlement_count_in_graph": 106,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 106,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 68
+        },
+        {
+          "majority": "croat",
+          "count": 28
+        },
+        {
+          "majority": "serb",
+          "count": 10
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10472": {
+      "mun1990_id": "kiseljak",
+      "display_name": "Kiseljak",
+      "post1995_municipality_ids": [
+        "10472"
+      ],
+      "settlement_count_total": 82,
+      "settlement_count_in_graph": 82,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 82,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 45
+        },
+        {
+          "majority": "bosniak",
+          "count": 35
+        },
+        {
+          "majority": "serb",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10499": {
+      "mun1990_id": "kladanj",
+      "display_name": "Kladanj",
+      "post1995_municipality_ids": [
+        "10499"
+      ],
+      "settlement_count_total": 48,
+      "settlement_count_in_graph": 45,
+      "settlement_count_ungraphed": 3,
+      "control_counts": {
+        "RBiH": 48,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 33
+        },
+        {
+          "majority": "serb",
+          "count": 15
+        }
+      ],
+      "flags": {
+        "any_ungraphed": true,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10529": {
+      "mun1990_id": "konjic",
+      "display_name": "Konjic",
+      "post1995_municipality_ids": [
+        "10529"
+      ],
+      "settlement_count_total": 168,
+      "settlement_count_in_graph": 168,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 168,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 110
+        },
+        {
+          "majority": "croat",
+          "count": 40
+        },
+        {
+          "majority": "serb",
+          "count": 18
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10545": {
+      "mun1990_id": "kresevo",
+      "display_name": "Kreševo",
+      "post1995_municipality_ids": [
+        "10545"
+      ],
+      "settlement_count_total": 27,
+      "settlement_count_in_graph": 27,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 27,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 21
+        },
+        {
+          "majority": "bosniak",
+          "count": 6
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10570": {
+      "mun1990_id": "listica",
+      "display_name": "Lištica",
+      "post1995_municipality_ids": [
+        "10570"
+      ],
+      "settlement_count_total": 34,
+      "settlement_count_in_graph": 34,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 34,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 34
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10588": {
+      "mun1990_id": "livno",
+      "display_name": "Livno",
+      "post1995_municipality_ids": [
+        "10588"
+      ],
+      "settlement_count_total": 58,
+      "settlement_count_in_graph": 57,
+      "settlement_count_ungraphed": 1,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 58,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 47
+        },
+        {
+          "majority": "serb",
+          "count": 10
+        },
+        {
+          "majority": "bosniak",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": true,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10600": {
+      "mun1990_id": "lukavac",
+      "display_name": "Lukavac",
+      "post1995_municipality_ids": [
+        "10600"
+      ],
+      "settlement_count_total": 44,
+      "settlement_count_in_graph": 44,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 44,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 27
+        },
+        {
+          "majority": "serb",
+          "count": 15
+        },
+        {
+          "majority": "croat",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10626": {
+      "mun1990_id": "ljubuski",
+      "display_name": "Ljubuški",
+      "post1995_municipality_ids": [
+        "10626"
+      ],
+      "settlement_count_total": 35,
+      "settlement_count_in_graph": 35,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 35,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 34
+        },
+        {
+          "majority": "bosniak",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10634": {
+      "mun1990_id": "maglaj",
+      "display_name": "Maglaj",
+      "post1995_municipality_ids": [
+        "10634"
+      ],
+      "settlement_count_total": 40,
+      "settlement_count_in_graph": 40,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 40,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 19
+        },
+        {
+          "majority": "serb",
+          "count": 15
+        },
+        {
+          "majority": "croat",
+          "count": 6
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10685": {
+      "mun1990_id": "neum",
+      "display_name": "Neum",
+      "post1995_municipality_ids": [
+        "10685"
+      ],
+      "settlement_count_total": 27,
+      "settlement_count_in_graph": 27,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 27,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 25
+        },
+        {
+          "majority": "serb",
+          "count": 1
+        },
+        {
+          "majority": "bosniak",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10715": {
+      "mun1990_id": "olovo",
+      "display_name": "Olovo",
+      "post1995_municipality_ids": [
+        "10715"
+      ],
+      "settlement_count_total": 45,
+      "settlement_count_in_graph": 45,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 45,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 29
+        },
+        {
+          "majority": "serb",
+          "count": 14
+        },
+        {
+          "majority": "croat",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10731": {
+      "mun1990_id": "posusje",
+      "display_name": "Posušje",
+      "post1995_municipality_ids": [
+        "10731"
+      ],
+      "settlement_count_total": 20,
+      "settlement_count_in_graph": 20,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 20,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 18
+        },
+        {
+          "majority": "bosniak",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10766": {
+      "mun1990_id": "prozor",
+      "display_name": "Prozor",
+      "post1995_municipality_ids": [
+        "10766"
+      ],
+      "settlement_count_total": 56,
+      "settlement_count_in_graph": 56,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 56,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 31
+        },
+        {
+          "majority": "bosniak",
+          "count": 25
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10774": {
+      "mun1990_id": "novi_travnik",
+      "display_name": "Novi Travnik",
+      "post1995_municipality_ids": [
+        "10774"
+      ],
+      "settlement_count_total": 51,
+      "settlement_count_in_graph": 50,
+      "settlement_count_ungraphed": 1,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 51,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 29
+        },
+        {
+          "majority": "croat",
+          "count": 20
+        },
+        {
+          "majority": "serb",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": true,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10839": {
+      "mun1990_id": "centar_sarajevo",
+      "display_name": "Centar Sarajevo",
+      "post1995_municipality_ids": [
+        "10839"
+      ],
+      "settlement_count_total": 6,
+      "settlement_count_in_graph": 6,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 6,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 4
+        },
+        {
+          "majority": "bosniak",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10847": {
+      "mun1990_id": "hadzici",
+      "display_name": "Hadžići",
+      "post1995_municipality_ids": [
+        "10847"
+      ],
+      "settlement_count_total": 62,
+      "settlement_count_in_graph": 62,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 62,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 44
+        },
+        {
+          "majority": "serb",
+          "count": 15
+        },
+        {
+          "majority": "other",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10863": {
+      "mun1990_id": "ilijas",
+      "display_name": "Ilijaš",
+      "post1995_municipality_ids": [
+        "10863"
+      ],
+      "settlement_count_total": 74,
+      "settlement_count_in_graph": 74,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 74,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 36
+        },
+        {
+          "majority": "bosniak",
+          "count": 32
+        },
+        {
+          "majority": "croat",
+          "count": 6
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10871": {
+      "mun1990_id": "novi_grad_sarajevo",
+      "display_name": "Novi Grad Sarajevo",
+      "post1995_municipality_ids": [
+        "10871"
+      ],
+      "settlement_count_total": 3,
+      "settlement_count_in_graph": 3,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 3,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 2
+        },
+        {
+          "majority": "bosniak",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10928": {
+      "mun1990_id": "vogosca",
+      "display_name": "Vogošća",
+      "post1995_municipality_ids": [
+        "10928"
+      ],
+      "settlement_count_total": 21,
+      "settlement_count_in_graph": 21,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 21,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 11
+        },
+        {
+          "majority": "bosniak",
+          "count": 9
+        },
+        {
+          "majority": "croat",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "10987": {
+      "mun1990_id": "srebrenik",
+      "display_name": "Srebrenik",
+      "post1995_municipality_ids": [
+        "10987"
+      ],
+      "settlement_count_total": 49,
+      "settlement_count_in_graph": 49,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 49,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 38
+        },
+        {
+          "majority": "serb",
+          "count": 7
+        },
+        {
+          "majority": "croat",
+          "count": 4
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11045": {
+      "mun1990_id": "tesanj",
+      "display_name": "Tešanj",
+      "post1995_municipality_ids": [
+        "11045"
+      ],
+      "settlement_count_total": 41,
+      "settlement_count_in_graph": 41,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 41,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 36
+        },
+        {
+          "majority": "croat",
+          "count": 5
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11061": {
+      "mun1990_id": "travnik",
+      "display_name": "Travnik",
+      "post1995_municipality_ids": [
+        "11061"
+      ],
+      "settlement_count_total": 90,
+      "settlement_count_in_graph": 90,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 90,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 45
+        },
+        {
+          "majority": "croat",
+          "count": 37
+        },
+        {
+          "majority": "serb",
+          "count": 8
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11088": {
+      "mun1990_id": "tuzla",
+      "display_name": "Tuzla",
+      "post1995_municipality_ids": [
+        "11088"
+      ],
+      "settlement_count_total": 66,
+      "settlement_count_in_graph": 66,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 66,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 30
+        },
+        {
+          "majority": "bosniak",
+          "count": 24
+        },
+        {
+          "majority": "serb",
+          "count": 10
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11100": {
+      "mun1990_id": "vares",
+      "display_name": "Vareš",
+      "post1995_municipality_ids": [
+        "11100"
+      ],
+      "settlement_count_total": 85,
+      "settlement_count_in_graph": 85,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 85,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 36
+        },
+        {
+          "majority": "serb",
+          "count": 27
+        },
+        {
+          "majority": "bosniak",
+          "count": 21
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11118": {
+      "mun1990_id": "velika_kladusa",
+      "display_name": "Velika Kladuša",
+      "post1995_municipality_ids": [
+        "11118"
+      ],
+      "settlement_count_total": 49,
+      "settlement_count_in_graph": 49,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 49,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 45
+        },
+        {
+          "majority": "serb",
+          "count": 3
+        },
+        {
+          "majority": "croat",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11126": {
+      "mun1990_id": "visoko",
+      "display_name": "Visoko",
+      "post1995_municipality_ids": [
+        "11126"
+      ],
+      "settlement_count_total": 88,
+      "settlement_count_in_graph": 88,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 88,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 68
+        },
+        {
+          "majority": "serb",
+          "count": 15
+        },
+        {
+          "majority": "croat",
+          "count": 5
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11142": {
+      "mun1990_id": "vitez",
+      "display_name": "Vitez",
+      "post1995_municipality_ids": [
+        "11142"
+      ],
+      "settlement_count_total": 34,
+      "settlement_count_in_graph": 34,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 34,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 16
+        },
+        {
+          "majority": "croat",
+          "count": 16
+        },
+        {
+          "majority": "serb",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11177": {
+      "mun1990_id": "zavidovici",
+      "display_name": "Zavidovići",
+      "post1995_municipality_ids": [
+        "11177"
+      ],
+      "settlement_count_total": 47,
+      "settlement_count_in_graph": 47,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 47,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 28
+        },
+        {
+          "majority": "serb",
+          "count": 17
+        },
+        {
+          "majority": "croat",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11185": {
+      "mun1990_id": "zenica",
+      "display_name": "Zenica",
+      "post1995_municipality_ids": [
+        "11185"
+      ],
+      "settlement_count_total": 83,
+      "settlement_count_in_graph": 83,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 83,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 64
+        },
+        {
+          "majority": "serb",
+          "count": 14
+        },
+        {
+          "majority": "croat",
+          "count": 5
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11207": {
+      "mun1990_id": "zepce",
+      "display_name": "Žepče",
+      "post1995_municipality_ids": [
+        "11207"
+      ],
+      "settlement_count_total": 41,
+      "settlement_count_in_graph": 41,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 41,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 30
+        },
+        {
+          "majority": "bosniak",
+          "count": 9
+        },
+        {
+          "majority": "serb",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11215": {
+      "mun1990_id": "zivinice",
+      "display_name": "Živinice",
+      "post1995_municipality_ids": [
+        "11215"
+      ],
+      "settlement_count_total": 29,
+      "settlement_count_in_graph": 29,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 29,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 26
+        },
+        {
+          "majority": "serb",
+          "count": 2
+        },
+        {
+          "majority": "croat",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11231": {
+      "mun1990_id": "lopare",
+      "display_name": "Lopare",
+      "post1995_municipality_ids": [
+        "11231"
+      ],
+      "settlement_count_total": 20,
+      "settlement_count_in_graph": 20,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 20,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 10
+        },
+        {
+          "majority": "serb",
+          "count": 8
+        },
+        {
+          "majority": "croat",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11258": {
+      "mun1990_id": "doboj",
+      "display_name": "Doboj",
+      "post1995_municipality_ids": [
+        "11258"
+      ],
+      "settlement_count_total": 6,
+      "settlement_count_in_graph": 6,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 6,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 6
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11266": {
+      "mun1990_id": "doboj",
+      "display_name": "Doboj",
+      "post1995_municipality_ids": [
+        "11266"
+      ],
+      "settlement_count_total": 2,
+      "settlement_count_in_graph": 2,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 2,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11274": {
+      "mun1990_id": "skender_vakuf",
+      "display_name": "Skender Vakuf",
+      "post1995_municipality_ids": [
+        "11274"
+      ],
+      "settlement_count_total": 18,
+      "settlement_count_in_graph": 18,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 18,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 18
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11282": {
+      "mun1990_id": "bosanski_samac",
+      "display_name": "Bosanski Šamac",
+      "post1995_municipality_ids": [
+        "11282"
+      ],
+      "settlement_count_total": 5,
+      "settlement_count_in_graph": 5,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 5,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 4
+        },
+        {
+          "majority": "serb",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11304": {
+      "mun1990_id": "trebinje",
+      "display_name": "Trebinje",
+      "post1995_municipality_ids": [
+        "11304"
+      ],
+      "settlement_count_total": 54,
+      "settlement_count_in_graph": 54,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 54,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 30
+        },
+        {
+          "majority": "bosniak",
+          "count": 14
+        },
+        {
+          "majority": "croat",
+          "count": 10
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11312": {
+      "mun1990_id": "zvornik",
+      "display_name": "Zvornik",
+      "post1995_municipality_ids": [
+        "11312"
+      ],
+      "settlement_count_total": 13,
+      "settlement_count_in_graph": 13,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 13,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 9
+        },
+        {
+          "majority": "serb",
+          "count": 4
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11339": {
+      "mun1990_id": "ugljevik",
+      "display_name": "Ugljevik",
+      "post1995_municipality_ids": [
+        "11339"
+      ],
+      "settlement_count_total": 10,
+      "settlement_count_in_graph": 10,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 10,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 7
+        },
+        {
+          "majority": "serb",
+          "count": 2
+        },
+        {
+          "majority": "other",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11410": {
+      "mun1990_id": "mostar",
+      "display_name": "Mostar",
+      "post1995_municipality_ids": [
+        "11410"
+      ],
+      "settlement_count_total": 60,
+      "settlement_count_in_graph": 60,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 60,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 25
+        },
+        {
+          "majority": "bosniak",
+          "count": 22
+        },
+        {
+          "majority": "serb",
+          "count": 13
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11428": {
+      "mun1990_id": "bosanska_krupa",
+      "display_name": "Bosanska Krupa",
+      "post1995_municipality_ids": [
+        "11428"
+      ],
+      "settlement_count_total": 37,
+      "settlement_count_in_graph": 37,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 37,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 23
+        },
+        {
+          "majority": "bosniak",
+          "count": 14
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11436": {
+      "mun1990_id": "bosanski_petrovac",
+      "display_name": "Bosanski Petrovac",
+      "post1995_municipality_ids": [
+        "11436"
+      ],
+      "settlement_count_total": 35,
+      "settlement_count_in_graph": 35,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 35,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 32
+        },
+        {
+          "majority": "bosniak",
+          "count": 3
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11444": {
+      "mun1990_id": "foca",
+      "display_name": "Foča",
+      "post1995_municipality_ids": [
+        "11444"
+      ],
+      "settlement_count_total": 32,
+      "settlement_count_in_graph": 32,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 32,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 23
+        },
+        {
+          "majority": "serb",
+          "count": 9
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11452": {
+      "mun1990_id": "gorazde",
+      "display_name": "Goražde",
+      "post1995_municipality_ids": [
+        "11452"
+      ],
+      "settlement_count_total": 144,
+      "settlement_count_in_graph": 144,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 144,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 111
+        },
+        {
+          "majority": "serb",
+          "count": 33
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11479": {
+      "mun1990_id": "gracanica",
+      "display_name": "Gračanica",
+      "post1995_municipality_ids": [
+        "11479"
+      ],
+      "settlement_count_total": 23,
+      "settlement_count_in_graph": 23,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 23,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 19
+        },
+        {
+          "majority": "serb",
+          "count": 4
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11487": {
+      "mun1990_id": "jajce",
+      "display_name": "Jajce",
+      "post1995_municipality_ids": [
+        "11487"
+      ],
+      "settlement_count_total": 58,
+      "settlement_count_in_graph": 58,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 58,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 23
+        },
+        {
+          "majority": "croat",
+          "count": 22
+        },
+        {
+          "majority": "serb",
+          "count": 13
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11495": {
+      "mun1990_id": "kalesija",
+      "display_name": "Kalesija",
+      "post1995_municipality_ids": [
+        "11495"
+      ],
+      "settlement_count_total": 28,
+      "settlement_count_in_graph": 28,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 28,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 23
+        },
+        {
+          "majority": "serb",
+          "count": 5
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11509": {
+      "mun1990_id": "kljuc",
+      "display_name": "Ključ",
+      "post1995_municipality_ids": [
+        "11509"
+      ],
+      "settlement_count_total": 41,
+      "settlement_count_in_graph": 41,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 41,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 22
+        },
+        {
+          "majority": "serb",
+          "count": 19
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11517": {
+      "mun1990_id": "kupres",
+      "display_name": "Kupres",
+      "post1995_municipality_ids": [
+        "11517"
+      ],
+      "settlement_count_total": 36,
+      "settlement_count_in_graph": 36,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 36,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 17
+        },
+        {
+          "majority": "croat",
+          "count": 16
+        },
+        {
+          "majority": "bosniak",
+          "count": 3
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11525": {
+      "mun1990_id": "odzak",
+      "display_name": "Odžak",
+      "post1995_municipality_ids": [
+        "11525"
+      ],
+      "settlement_count_total": 14,
+      "settlement_count_in_graph": 14,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 14,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 10
+        },
+        {
+          "majority": "serb",
+          "count": 2
+        },
+        {
+          "majority": "bosniak",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11533": {
+      "mun1990_id": "orasje",
+      "display_name": "Orašje",
+      "post1995_municipality_ids": [
+        "11533"
+      ],
+      "settlement_count_total": 14,
+      "settlement_count_in_graph": 13,
+      "settlement_count_ungraphed": 1,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 13,
+        "null": 1
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 10
+        },
+        {
+          "majority": "serb",
+          "count": 2
+        },
+        {
+          "majority": "bosniak",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": true,
+        "any_null_control": true,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11541": {
+      "mun1990_id": "sanski_most",
+      "display_name": "Sanski Most",
+      "post1995_municipality_ids": [
+        "11541"
+      ],
+      "settlement_count_total": 67,
+      "settlement_count_in_graph": 67,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 67,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 38
+        },
+        {
+          "majority": "bosniak",
+          "count": 25
+        },
+        {
+          "majority": "croat",
+          "count": 4
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11550": {
+      "mun1990_id": "ilidza",
+      "display_name": "Ilidža",
+      "post1995_municipality_ids": [
+        "11550"
+      ],
+      "settlement_count_total": 12,
+      "settlement_count_in_graph": 12,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 12,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 8
+        },
+        {
+          "majority": "bosniak",
+          "count": 3
+        },
+        {
+          "majority": "croat",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11568": {
+      "mun1990_id": "novo_sarajevo",
+      "display_name": "Novo Sarajevo",
+      "post1995_municipality_ids": [
+        "11568"
+      ],
+      "settlement_count_total": 3,
+      "settlement_count_in_graph": 3,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 1,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 2
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 2
+        },
+        {
+          "majority": "bosniak",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": true,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11576": {
+      "mun1990_id": "pale",
+      "display_name": "Pale",
+      "post1995_municipality_ids": [
+        "11576"
+      ],
+      "settlement_count_total": 15,
+      "settlement_count_in_graph": 15,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 15,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 12
+        },
+        {
+          "majority": "serb",
+          "count": 3
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11584": {
+      "mun1990_id": "stari_grad_sarajevo",
+      "display_name": "Stari Grad Sarajevo",
+      "post1995_municipality_ids": [
+        "11584"
+      ],
+      "settlement_count_total": 8,
+      "settlement_count_in_graph": 8,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 8,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 6
+        },
+        {
+          "majority": "bosniak",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11592": {
+      "mun1990_id": "trnovo",
+      "display_name": "Trnovo",
+      "post1995_municipality_ids": [
+        "11592"
+      ],
+      "settlement_count_total": 55,
+      "settlement_count_in_graph": 55,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 55,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 35
+        },
+        {
+          "majority": "serb",
+          "count": 20
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11606": {
+      "mun1990_id": "stolac",
+      "display_name": "Stolac",
+      "post1995_municipality_ids": [
+        "11606"
+      ],
+      "settlement_count_total": 26,
+      "settlement_count_in_graph": 26,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 26,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 12
+        },
+        {
+          "majority": "bosniak",
+          "count": 11
+        },
+        {
+          "majority": "serb",
+          "count": 3
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11614": {
+      "mun1990_id": "titov_drvar",
+      "display_name": "Titov Drvar",
+      "post1995_municipality_ids": [
+        "11614"
+      ],
+      "settlement_count_total": 25,
+      "settlement_count_in_graph": 25,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 25,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 24
+        },
+        {
+          "majority": "bosniak",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "11622": {
+      "mun1990_id": "tesanj",
+      "display_name": "Tešanj",
+      "post1995_municipality_ids": [
+        "11622"
+      ],
+      "settlement_count_total": 13,
+      "settlement_count_in_graph": 13,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 13,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 8
+        },
+        {
+          "majority": "bosniak",
+          "count": 5
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20010": {
+      "mun1990_id": "banja_luka",
+      "display_name": "Banja Luka",
+      "post1995_municipality_ids": [
+        "20010"
+      ],
+      "settlement_count_total": 54,
+      "settlement_count_in_graph": 54,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 54,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 39
+        },
+        {
+          "majority": "croat",
+          "count": 12
+        },
+        {
+          "majority": "bosniak",
+          "count": 3
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20028": {
+      "mun1990_id": "stolac",
+      "display_name": "Stolac",
+      "post1995_municipality_ids": [
+        "20028"
+      ],
+      "settlement_count_total": 20,
+      "settlement_count_in_graph": 19,
+      "settlement_count_ungraphed": 1,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 19,
+        "null": 1
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 10
+        },
+        {
+          "majority": "bosniak",
+          "count": 6
+        },
+        {
+          "majority": "croat",
+          "count": 4
+        }
+      ],
+      "flags": {
+        "any_ungraphed": true,
+        "any_null_control": true,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20036": {
+      "mun1990_id": "bijeljina",
+      "display_name": "Bijeljina",
+      "post1995_municipality_ids": [
+        "20036"
+      ],
+      "settlement_count_total": 67,
+      "settlement_count_in_graph": 67,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 67,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 62
+        },
+        {
+          "majority": "bosniak",
+          "count": 5
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20044": {
+      "mun1990_id": "bileca",
+      "display_name": "Bileća",
+      "post1995_municipality_ids": [
+        "20044"
+      ],
+      "settlement_count_total": 60,
+      "settlement_count_in_graph": 59,
+      "settlement_count_ungraphed": 1,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 59,
+        "HRHB": 0,
+        "null": 1
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 52
+        },
+        {
+          "majority": "bosniak",
+          "count": 8
+        }
+      ],
+      "flags": {
+        "any_ungraphed": true,
+        "any_null_control": true,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20052": {
+      "mun1990_id": "bratunac",
+      "display_name": "Bratunac",
+      "post1995_municipality_ids": [
+        "20052"
+      ],
+      "settlement_count_total": 50,
+      "settlement_count_in_graph": 50,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 50,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 27
+        },
+        {
+          "majority": "bosniak",
+          "count": 23
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20079": {
+      "mun1990_id": "bosanski_brod",
+      "display_name": "Bosanski Brod",
+      "post1995_municipality_ids": [
+        "20079"
+      ],
+      "settlement_count_total": 23,
+      "settlement_count_in_graph": 23,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 23,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 11
+        },
+        {
+          "majority": "croat",
+          "count": 10
+        },
+        {
+          "majority": "bosniak",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20087": {
+      "mun1990_id": "visegrad",
+      "display_name": "Višegrad",
+      "post1995_municipality_ids": [
+        "20087"
+      ],
+      "settlement_count_total": 163,
+      "settlement_count_in_graph": 163,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 163,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 99
+        },
+        {
+          "majority": "serb",
+          "count": 64
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20095": {
+      "mun1990_id": "vlasenica",
+      "display_name": "Vlasenica",
+      "post1995_municipality_ids": [
+        "20095"
+      ],
+      "settlement_count_total": 38,
+      "settlement_count_in_graph": 38,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 38,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 21
+        },
+        {
+          "majority": "bosniak",
+          "count": 17
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20109": {
+      "mun1990_id": "odzak",
+      "display_name": "Odžak",
+      "post1995_municipality_ids": [
+        "20109"
+      ],
+      "settlement_count_total": 12,
+      "settlement_count_in_graph": 12,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 12,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 5
+        },
+        {
+          "majority": "croat",
+          "count": 5
+        },
+        {
+          "majority": "serb",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20117": {
+      "mun1990_id": "gacko",
+      "display_name": "Gacko",
+      "post1995_municipality_ids": [
+        "20117"
+      ],
+      "settlement_count_total": 71,
+      "settlement_count_in_graph": 71,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 71,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 43
+        },
+        {
+          "majority": "bosniak",
+          "count": 28
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20125": {
+      "mun1990_id": "bosanska_gradiska",
+      "display_name": "Bosanska Gradiška",
+      "post1995_municipality_ids": [
+        "20125"
+      ],
+      "settlement_count_total": 68,
+      "settlement_count_in_graph": 68,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 68,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 55
+        },
+        {
+          "majority": "bosniak",
+          "count": 7
+        },
+        {
+          "majority": "croat",
+          "count": 5
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20133": {
+      "mun1990_id": "derventa",
+      "display_name": "Derventa",
+      "post1995_municipality_ids": [
+        "20133"
+      ],
+      "settlement_count_total": 57,
+      "settlement_count_in_graph": 57,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 57,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 31
+        },
+        {
+          "majority": "serb",
+          "count": 21
+        },
+        {
+          "majority": "bosniak",
+          "count": 5
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20141": {
+      "mun1990_id": "doboj",
+      "display_name": "Doboj",
+      "post1995_municipality_ids": [
+        "20141"
+      ],
+      "settlement_count_total": 83,
+      "settlement_count_in_graph": 83,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 83,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 54
+        },
+        {
+          "majority": "bosniak",
+          "count": 20
+        },
+        {
+          "majority": "croat",
+          "count": 9
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20150": {
+      "mun1990_id": "orasje",
+      "display_name": "Orašje",
+      "post1995_municipality_ids": [
+        "20150"
+      ],
+      "settlement_count_total": 6,
+      "settlement_count_in_graph": 6,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 6,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 4
+        },
+        {
+          "majority": "croat",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20168": {
+      "mun1990_id": "zvornik",
+      "display_name": "Zvornik",
+      "post1995_municipality_ids": [
+        "20168"
+      ],
+      "settlement_count_total": 68,
+      "settlement_count_in_graph": 68,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 68,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 37
+        },
+        {
+          "majority": "serb",
+          "count": 31
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20176": {
+      "mun1990_id": "ilidza",
+      "display_name": "Ilidža",
+      "post1995_municipality_ids": [
+        "20176"
+      ],
+      "settlement_count_total": 5,
+      "settlement_count_in_graph": 5,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 5,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 5
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20184": {
+      "mun1990_id": "titov_drvar",
+      "display_name": "Titov Drvar",
+      "post1995_municipality_ids": [
+        "20184"
+      ],
+      "settlement_count_total": 3,
+      "settlement_count_in_graph": 2,
+      "settlement_count_ungraphed": 1,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 3,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 3
+        }
+      ],
+      "flags": {
+        "any_ungraphed": true,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20192": {
+      "mun1990_id": "mostar",
+      "display_name": "Mostar",
+      "post1995_municipality_ids": [
+        "20192"
+      ],
+      "settlement_count_total": 3,
+      "settlement_count_in_graph": 3,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 3,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 2
+        },
+        {
+          "majority": "serb",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20206": {
+      "mun1990_id": "novi_grad_sarajevo",
+      "display_name": "Novi Grad Sarajevo",
+      "post1995_municipality_ids": [
+        "20206"
+      ],
+      "settlement_count_total": 19,
+      "settlement_count_in_graph": 19,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 15,
+        "RS": 4,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 11
+        },
+        {
+          "majority": "bosniak",
+          "count": 8
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20214": {
+      "mun1990_id": "stari_grad_sarajevo",
+      "display_name": "Stari Grad Sarajevo",
+      "post1995_municipality_ids": [
+        "20214"
+      ],
+      "settlement_count_total": 8,
+      "settlement_count_in_graph": 8,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 6,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 2
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 7
+        },
+        {
+          "majority": "bosniak",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": true,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20222": {
+      "mun1990_id": "jajce",
+      "display_name": "Jajce",
+      "post1995_municipality_ids": [
+        "20222"
+      ],
+      "settlement_count_total": 11,
+      "settlement_count_in_graph": 11,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 11,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 7
+        },
+        {
+          "majority": "bosniak",
+          "count": 3
+        },
+        {
+          "majority": "croat",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20249": {
+      "mun1990_id": "kalinovik",
+      "display_name": "Kalinovik",
+      "post1995_municipality_ids": [
+        "20249"
+      ],
+      "settlement_count_total": 71,
+      "settlement_count_in_graph": 71,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 71,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 36
+        },
+        {
+          "majority": "serb",
+          "count": 35
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20257": {
+      "mun1990_id": "skender_vakuf",
+      "display_name": "Skender Vakuf",
+      "post1995_municipality_ids": [
+        "20257"
+      ],
+      "settlement_count_total": 20,
+      "settlement_count_in_graph": 20,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 20,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 19
+        },
+        {
+          "majority": "croat",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20265": {
+      "mun1990_id": "bosanska_dubica",
+      "display_name": "Bosanska Dubica",
+      "post1995_municipality_ids": [
+        "20265"
+      ],
+      "settlement_count_total": 61,
+      "settlement_count_in_graph": 61,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 61,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 60
+        },
+        {
+          "majority": "bosniak",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20273": {
+      "mun1990_id": "bosanska_kostajnica",
+      "display_name": "Bosanska Kostajnica",
+      "post1995_municipality_ids": [
+        "20273"
+      ],
+      "settlement_count_total": 12,
+      "settlement_count_in_graph": 12,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 12,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 12
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20281": {
+      "mun1990_id": "kotor_varos",
+      "display_name": "Kotor Varoš",
+      "post1995_municipality_ids": [
+        "20281"
+      ],
+      "settlement_count_total": 43,
+      "settlement_count_in_graph": 43,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 43,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 17
+        },
+        {
+          "majority": "bosniak",
+          "count": 14
+        },
+        {
+          "majority": "croat",
+          "count": 12
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20290": {
+      "mun1990_id": "bosanska_krupa",
+      "display_name": "Bosanska Krupa",
+      "post1995_municipality_ids": [
+        "20290"
+      ],
+      "settlement_count_total": 12,
+      "settlement_count_in_graph": 12,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 12,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 9
+        },
+        {
+          "majority": "bosniak",
+          "count": 3
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20303": {
+      "mun1990_id": "kupres",
+      "display_name": "Kupres",
+      "post1995_municipality_ids": [
+        "20303"
+      ],
+      "settlement_count_total": 4,
+      "settlement_count_in_graph": 4,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 4,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 3
+        },
+        {
+          "majority": "bosniak",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20311": {
+      "mun1990_id": "laktasi",
+      "display_name": "Laktaši",
+      "post1995_municipality_ids": [
+        "20311"
+      ],
+      "settlement_count_total": 37,
+      "settlement_count_in_graph": 37,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 37,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 36
+        },
+        {
+          "majority": "croat",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20320": {
+      "mun1990_id": "lopare",
+      "display_name": "Lopare",
+      "post1995_municipality_ids": [
+        "20320"
+      ],
+      "settlement_count_total": 35,
+      "settlement_count_in_graph": 35,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 35,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 28
+        },
+        {
+          "majority": "bosniak",
+          "count": 7
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20338": {
+      "mun1990_id": "ljubinje",
+      "display_name": "Ljubinje",
+      "post1995_municipality_ids": [
+        "20338"
+      ],
+      "settlement_count_total": 21,
+      "settlement_count_in_graph": 21,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 21,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 18
+        },
+        {
+          "majority": "bosniak",
+          "count": 2
+        },
+        {
+          "majority": "croat",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20346": {
+      "mun1990_id": "vlasenica",
+      "display_name": "Vlasenica",
+      "post1995_municipality_ids": [
+        "20346"
+      ],
+      "settlement_count_total": 54,
+      "settlement_count_in_graph": 54,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 54,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 38
+        },
+        {
+          "majority": "bosniak",
+          "count": 16
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20354": {
+      "mun1990_id": "modrica",
+      "display_name": "Modriča",
+      "post1995_municipality_ids": [
+        "20354"
+      ],
+      "settlement_count_total": 24,
+      "settlement_count_in_graph": 24,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 24,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 11
+        },
+        {
+          "majority": "croat",
+          "count": 10
+        },
+        {
+          "majority": "bosniak",
+          "count": 3
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20362": {
+      "mun1990_id": "mrkonjic_grad",
+      "display_name": "Mrkonjić Grad",
+      "post1995_municipality_ids": [
+        "20362"
+      ],
+      "settlement_count_total": 38,
+      "settlement_count_in_graph": 38,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 38,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 34
+        },
+        {
+          "majority": "bosniak",
+          "count": 2
+        },
+        {
+          "majority": "croat",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20389": {
+      "mun1990_id": "nevesinje",
+      "display_name": "Nevesinje",
+      "post1995_municipality_ids": [
+        "20389"
+      ],
+      "settlement_count_total": 56,
+      "settlement_count_in_graph": 56,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 56,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 45
+        },
+        {
+          "majority": "bosniak",
+          "count": 10
+        },
+        {
+          "majority": "croat",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20397": {
+      "mun1990_id": "bosanski_novi",
+      "display_name": "Bosanski Novi",
+      "post1995_municipality_ids": [
+        "20397"
+      ],
+      "settlement_count_total": 48,
+      "settlement_count_in_graph": 48,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 48,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 40
+        },
+        {
+          "majority": "bosniak",
+          "count": 8
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20419": {
+      "mun1990_id": "gorazde",
+      "display_name": "Goražde",
+      "post1995_municipality_ids": [
+        "20419"
+      ],
+      "settlement_count_total": 61,
+      "settlement_count_in_graph": 61,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 61,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 48
+        },
+        {
+          "majority": "serb",
+          "count": 13
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20427": {
+      "mun1990_id": "kalesija",
+      "display_name": "Kalesija",
+      "post1995_municipality_ids": [
+        "20427"
+      ],
+      "settlement_count_total": 16,
+      "settlement_count_in_graph": 16,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 16,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 9
+        },
+        {
+          "majority": "bosniak",
+          "count": 7
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20435": {
+      "mun1990_id": "sanski_most",
+      "display_name": "Sanski Most",
+      "post1995_municipality_ids": [
+        "20435"
+      ],
+      "settlement_count_total": 24,
+      "settlement_count_in_graph": 24,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 24,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 17
+        },
+        {
+          "majority": "croat",
+          "count": 4
+        },
+        {
+          "majority": "bosniak",
+          "count": 3
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20443": {
+      "mun1990_id": "pale",
+      "display_name": "Pale",
+      "post1995_municipality_ids": [
+        "20443"
+      ],
+      "settlement_count_total": 62,
+      "settlement_count_in_graph": 62,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 62,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 51
+        },
+        {
+          "majority": "bosniak",
+          "count": 11
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20451": {
+      "mun1990_id": "gradacac",
+      "display_name": "Gradačac",
+      "post1995_municipality_ids": [
+        "20451"
+      ],
+      "settlement_count_total": 11,
+      "settlement_count_in_graph": 11,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 11,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 7
+        },
+        {
+          "majority": "serb",
+          "count": 3
+        },
+        {
+          "majority": "bosniak",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20460": {
+      "mun1990_id": "bosanski_petrovac",
+      "display_name": "Bosanski Petrovac",
+      "post1995_municipality_ids": [
+        "20460"
+      ],
+      "settlement_count_total": 6,
+      "settlement_count_in_graph": 6,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 6,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 3
+        },
+        {
+          "majority": "serb",
+          "count": 3
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20478": {
+      "mun1990_id": "gracanica",
+      "display_name": "Gračanica",
+      "post1995_municipality_ids": [
+        "20478"
+      ],
+      "settlement_count_total": 7,
+      "settlement_count_in_graph": 7,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 7,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 7
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20486": {
+      "mun1990_id": "prijedor",
+      "display_name": "Prijedor",
+      "post1995_municipality_ids": [
+        "20486"
+      ],
+      "settlement_count_total": 71,
+      "settlement_count_in_graph": 71,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 71,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 42
+        },
+        {
+          "majority": "bosniak",
+          "count": 20
+        },
+        {
+          "majority": "croat",
+          "count": 9
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20494": {
+      "mun1990_id": "prnjavor",
+      "display_name": "Prnjavor",
+      "post1995_municipality_ids": [
+        "20494"
+      ],
+      "settlement_count_total": 63,
+      "settlement_count_in_graph": 63,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 63,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 51
+        },
+        {
+          "majority": "bosniak",
+          "count": 7
+        },
+        {
+          "majority": "other",
+          "count": 4
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20508": {
+      "mun1990_id": "kljuc",
+      "display_name": "Ključ",
+      "post1995_municipality_ids": [
+        "20508"
+      ],
+      "settlement_count_total": 29,
+      "settlement_count_in_graph": 27,
+      "settlement_count_ungraphed": 2,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 29,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 24
+        },
+        {
+          "majority": "bosniak",
+          "count": 5
+        }
+      ],
+      "flags": {
+        "any_ungraphed": true,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20516": {
+      "mun1990_id": "rogatica",
+      "display_name": "Rogatica",
+      "post1995_municipality_ids": [
+        "20516"
+      ],
+      "settlement_count_total": 118,
+      "settlement_count_in_graph": 118,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 118,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 64
+        },
+        {
+          "majority": "serb",
+          "count": 54
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20524": {
+      "mun1990_id": "rudo",
+      "display_name": "Rudo",
+      "post1995_municipality_ids": [
+        "20524"
+      ],
+      "settlement_count_total": 89,
+      "settlement_count_in_graph": 89,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 89,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 57
+        },
+        {
+          "majority": "bosniak",
+          "count": 32
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20532": {
+      "mun1990_id": "sokolac",
+      "display_name": "Sokolac",
+      "post1995_municipality_ids": [
+        "20532"
+      ],
+      "settlement_count_total": 96,
+      "settlement_count_in_graph": 96,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 96,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 58
+        },
+        {
+          "majority": "bosniak",
+          "count": 38
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20559": {
+      "mun1990_id": "srbac",
+      "display_name": "Srbac",
+      "post1995_municipality_ids": [
+        "20559"
+      ],
+      "settlement_count_total": 39,
+      "settlement_count_in_graph": 39,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 39,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 38
+        },
+        {
+          "majority": "bosniak",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20567": {
+      "mun1990_id": "srebrenica",
+      "display_name": "Srebrenica",
+      "post1995_municipality_ids": [
+        "20567"
+      ],
+      "settlement_count_total": 81,
+      "settlement_count_in_graph": 81,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 81,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 58
+        },
+        {
+          "majority": "serb",
+          "count": 23
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20575": {
+      "mun1990_id": "teslic",
+      "display_name": "Teslić",
+      "post1995_municipality_ids": [
+        "20575"
+      ],
+      "settlement_count_total": 57,
+      "settlement_count_in_graph": 57,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 57,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 30
+        },
+        {
+          "majority": "bosniak",
+          "count": 16
+        },
+        {
+          "majority": "croat",
+          "count": 11
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20583": {
+      "mun1990_id": "trebinje",
+      "display_name": "Trebinje",
+      "post1995_municipality_ids": [
+        "20583"
+      ],
+      "settlement_count_total": 141,
+      "settlement_count_in_graph": 140,
+      "settlement_count_ungraphed": 1,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 140,
+        "HRHB": 0,
+        "null": 1
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 122
+        },
+        {
+          "majority": "bosniak",
+          "count": 17
+        },
+        {
+          "majority": "croat",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": true,
+        "any_null_control": true,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20591": {
+      "mun1990_id": "trnovo",
+      "display_name": "Trnovo",
+      "post1995_municipality_ids": [
+        "20591"
+      ],
+      "settlement_count_total": 25,
+      "settlement_count_in_graph": 25,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 25,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 20
+        },
+        {
+          "majority": "serb",
+          "count": 5
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20605": {
+      "mun1990_id": "ugljevik",
+      "display_name": "Ugljevik",
+      "post1995_municipality_ids": [
+        "20605"
+      ],
+      "settlement_count_total": 25,
+      "settlement_count_in_graph": 25,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 25,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 17
+        },
+        {
+          "majority": "bosniak",
+          "count": 8
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20613": {
+      "mun1990_id": "foca",
+      "display_name": "Foča",
+      "post1995_municipality_ids": [
+        "20613"
+      ],
+      "settlement_count_total": 101,
+      "settlement_count_in_graph": 101,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 101,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "bosniak",
+          "count": 61
+        },
+        {
+          "majority": "serb",
+          "count": 39
+        },
+        {
+          "majority": "other",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20621": {
+      "mun1990_id": "han_pijesak",
+      "display_name": "Han-Pijesak",
+      "post1995_municipality_ids": [
+        "20621"
+      ],
+      "settlement_count_total": 26,
+      "settlement_count_in_graph": 26,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 26,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 17
+        },
+        {
+          "majority": "bosniak",
+          "count": 9
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20630": {
+      "mun1990_id": "cajnice",
+      "display_name": "Čajniče",
+      "post1995_municipality_ids": [
+        "20630"
+      ],
+      "settlement_count_total": 36,
+      "settlement_count_in_graph": 36,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 36,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 20
+        },
+        {
+          "majority": "bosniak",
+          "count": 16
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20648": {
+      "mun1990_id": "celinac",
+      "display_name": "Čelinac",
+      "post1995_municipality_ids": [
+        "20648"
+      ],
+      "settlement_count_total": 30,
+      "settlement_count_in_graph": 30,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 30,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 27
+        },
+        {
+          "majority": "bosniak",
+          "count": 2
+        },
+        {
+          "majority": "other",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20656": {
+      "mun1990_id": "bosanski_samac",
+      "display_name": "Bosanski Šamac",
+      "post1995_municipality_ids": [
+        "20656"
+      ],
+      "settlement_count_total": 21,
+      "settlement_count_in_graph": 21,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 21,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 10
+        },
+        {
+          "majority": "croat",
+          "count": 9
+        },
+        {
+          "majority": "bosniak",
+          "count": 2
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20664": {
+      "mun1990_id": "sekovici",
+      "display_name": "Šekovići",
+      "post1995_municipality_ids": [
+        "20664"
+      ],
+      "settlement_count_total": 38,
+      "settlement_count_in_graph": 38,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 38,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 37
+        },
+        {
+          "majority": "bosniak",
+          "count": 1
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "20672": {
+      "mun1990_id": "sipovo",
+      "display_name": "Šipovo",
+      "post1995_municipality_ids": [
+        "20672"
+      ],
+      "settlement_count_total": 46,
+      "settlement_count_in_graph": 46,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 0,
+        "RS": 46,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "serb",
+          "count": 37
+        },
+        {
+          "majority": "bosniak",
+          "count": 9
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    },
+    "30163": {
+      "mun1990_id": "brcko",
+      "display_name": "Brčko",
+      "post1995_municipality_ids": [
+        "30163"
+      ],
+      "settlement_count_total": 59,
+      "settlement_count_in_graph": 59,
+      "settlement_count_ungraphed": 0,
+      "control_counts": {
+        "RBiH": 59,
+        "RS": 0,
+        "HRHB": 0,
+        "null": 0
+      },
+      "ethnic_majority_top3": [
+        {
+          "majority": "croat",
+          "count": 22
+        },
+        {
+          "majority": "serb",
+          "count": 22
+        },
+        {
+          "majority": "bosniak",
+          "count": 15
+        }
+      ],
+      "flags": {
+        "any_ungraphed": false,
+        "any_null_control": false,
+        "any_mun1990_missing": false,
+        "any_conflict": false
+      }
+    }
+  }
+}

@@ -1,0 +1,501 @@
+/* War Planning Map: overlay (legacy) or full-screen scene content inside #map-scene */
+
+.war-planning-map-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.war-planning-map-overlay.war-planning-map-visible {
+    pointer-events: auto;
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Map scene: map is sole content, full viewport; no backdrop */
+#map-scene .war-planning-map-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+#map-scene .war-planning-map-backdrop {
+    display: none;
+}
+#map-scene .war-planning-map-frame {
+    margin: 0;
+    max-width: 100%;
+    max-height: 100%;
+    flex: 1 1 auto;
+    border-radius: 0;
+}
+
+.war-planning-map-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+.war-planning-map-frame {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    max-width: calc(100vw - 48px);
+    max-height: calc(100vh - 48px);
+    margin: 24px;
+    background: #2a2520;
+    border: 3px solid #4a4238;
+    border-radius: 4px;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 0 0 2px rgba(0, 0, 0, 0.3),
+        0 8px 32px rgba(0, 0, 0, 0.5);
+    /* Map-like corner marks (L-shaped) */
+    --corner-size: 24px;
+    --corner-stroke: 3px;
+}
+
+.war-planning-map-frame::before,
+.war-planning-map-frame::after {
+    content: '';
+    position: absolute;
+    width: var(--corner-size);
+    height: var(--corner-size);
+    border-color: #6a6258;
+    border-style: solid;
+    border-width: 0;
+    pointer-events: none;
+}
+
+.war-planning-map-frame::before {
+    top: 0;
+    left: 0;
+    border-top-width: var(--corner-stroke);
+    border-left-width: var(--corner-stroke);
+    border-top-left-radius: 2px;
+}
+
+.war-planning-map-frame::after {
+    top: 0;
+    right: 0;
+    border-top-width: var(--corner-stroke);
+    border-right-width: var(--corner-stroke);
+    border-top-right-radius: 2px;
+}
+
+.war-planning-map-area {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 400px;
+    min-height: 300px;
+    background: #e8dec2;
+    cursor: pointer;
+}
+
+.war-planning-map-area canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.war-planning-map-turn {
+    position: absolute;
+    top: 8px;
+    left: 16px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    color: #333;
+    background: rgba(232, 222, 194, 0.9);
+    border: 1px solid #4a4238;
+    z-index: 10;
+}
+
+.war-planning-map-zoom-pill {
+    position: absolute;
+    top: 8px;
+    right: 48px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+.war-planning-map-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    font-size: 24px;
+    line-height: 1;
+    color: #ddd;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.war-planning-map-close:hover {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+/* Floating layer toggle panel (P1.1) */
+
+.war-planning-map-layer-panel {
+    position: absolute;
+    top: 8px;
+    right: 90px;
+    z-index: 10;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.war-planning-map-layer-toggle-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    font-size: 18px;
+    color: #ddd;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.war-planning-map-layer-toggle-btn:hover {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.war-planning-map-layer-panel-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px;
+    margin-left: 4px;
+    background: rgba(30, 28, 26, 0.95);
+    border: 1px solid #4a4238;
+    border-radius: 4px;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.war-planning-map-layer-panel.collapsed .war-planning-map-layer-panel-body {
+    display: none;
+}
+
+.war-planning-map-phase-badge {
+    color: #6a6258;
+    font-size: 10px;
+}
+
+/* Zoom buttons (P1.3) */
+
+.war-planning-map-zoom-controls {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.war-planning-map-zoom-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 1;
+    color: #ddd;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.war-planning-map-zoom-btn:hover {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.war-planning-map-side-panel {
+    width: 220px;
+    flex-shrink: 0;
+    padding: 16px;
+    background: rgba(30, 28, 26, 0.95);
+    border-left: 1px solid #4a4238;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.war-planning-map-layers-title {
+    font-size: 12px;
+    font-weight: bold;
+    color: #c4b8a8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+}
+
+.war-planning-map-layer-row {
+    display: block;
+    font-size: 13px;
+    color: #e0d8cc;
+    cursor: pointer;
+}
+
+.war-planning-map-layer-row input {
+    margin-right: 8px;
+}
+
+.war-planning-map-layer-placeholder {
+    color: #6a6258;
+    cursor: default;
+    font-style: italic;
+}
+
+/* Settlement Info Panel — right-side sliding panel (P0.1) */
+
+.settlement-info-panel-wrapper {
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: width 200ms ease-out;
+}
+
+.settlement-info-panel-wrapper.closed {
+    width: 0;
+}
+
+.settlement-info-panel-wrapper.open {
+    width: 340px;
+}
+
+.settlement-info-panel {
+    width: 340px;
+    flex-shrink: 0;
+    position: relative;
+    padding: 16px;
+    padding-top: 48px;
+    background: rgb(35, 35, 30);
+    border-left: 3px solid #4a4238;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: width 150ms ease-in, opacity 150ms ease-in;
+}
+
+.settlement-info-panel .settlement-info-panel-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 20px;
+    line-height: 1;
+    color: #ddd;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #555;
+    cursor: pointer;
+}
+
+.settlement-info-panel .settlement-info-panel-close:hover {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.settlement-info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.settlement-info-section-header {
+    font-size: 11px;
+    font-weight: bold;
+    color: #c4b8a8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.settlement-info-section-body {
+    font-size: 13px;
+    color: #e0d8cc;
+    line-height: 1.5;
+}
+
+.settlement-info-field {
+    margin: 2px 0;
+}
+
+.settlement-info-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    vertical-align: middle;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.settlement-info-badge {
+    color: #6a6258;
+    font-weight: normal;
+    font-style: italic;
+}
+
+.settlement-info-placeholder {
+    color: #6a6258;
+    font-style: italic;
+}
+
+.settlement-info-ethnicity {
+    display: flex;
+    flex-direction: column;
+}
+
+.settlement-info-provenance {
+    font-size: 11px;
+    color: #8a8278;
+}
+
+/* Minimap (P2.2) */
+
+.war-planning-map-minimap {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    width: 150px;
+    height: 100px;
+    z-index: 10;
+    border: 1px solid #555;
+    cursor: pointer;
+}
+
+/* Legend (P2.4) */
+
+.war-planning-map-legend {
+    position: absolute;
+    bottom: 60px;
+    right: 16px;
+    z-index: 10;
+}
+
+.war-planning-map-legend-toggle {
+    padding: 4px 8px;
+    font-size: 11px;
+    color: #ddd;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.war-planning-map-legend-body {
+    margin-top: 4px;
+    padding: 8px;
+    background: rgba(30, 28, 26, 0.95);
+    border: 1px solid #4a4238;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #e0d8cc;
+}
+
+.war-planning-map-legend.collapsed .war-planning-map-legend-body {
+    display: none;
+}
+
+.war-planning-map-legend-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+/* Search (P2.3) */
+
+.war-planning-map-search {
+    position: absolute;
+    top: 48px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    min-width: 240px;
+}
+
+.war-planning-map-search.closed {
+    display: none;
+}
+
+.war-planning-map-search.open {
+    display: flex;
+}
+
+.war-planning-map-search-input {
+    padding: 8px 12px;
+    font-size: 14px;
+    background: rgba(35, 35, 30, 0.95);
+    border: 1px solid #555;
+    color: #e0d8cc;
+}
+
+.war-planning-map-search-results {
+    max-height: 200px;
+    overflow-y: auto;
+    background: rgba(35, 35, 30, 0.95);
+    border: 1px solid #555;
+    border-top: none;
+}
+
+.war-planning-map-search-result {
+    display: block;
+    width: 100%;
+    padding: 6px 12px;
+    text-align: left;
+    font-size: 13px;
+    color: #e0d8cc;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.war-planning-map-search-result:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.settlement-info-order-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #6a6258;
+    background: rgba(60, 60, 55, 0.8);
+    border: 1px solid #555;
+    cursor: not-allowed;
+    opacity: 0.7;
+}

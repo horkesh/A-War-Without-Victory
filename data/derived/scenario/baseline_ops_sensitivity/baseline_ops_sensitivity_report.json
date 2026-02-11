@@ -1,0 +1,107 @@
+{
+  "checks": {
+    "intensity_ordering": {
+      "counterexamples": [],
+      "pass": true
+    },
+    "monotonicity": {
+      "pass": true
+    }
+  },
+  "meta": {
+    "deterministic_note": "No timestamps; stable sort by (scope, weeks, scalar).",
+    "scalars": [
+      0.25,
+      0.5,
+      1,
+      2,
+      4
+    ],
+    "scenarios": [
+      "baseline_ops_*w (all_front_active)"
+    ],
+    "scope_modes": [
+      "all_front_active"
+    ],
+    "weeks": [
+      26
+    ]
+  },
+  "per_run": [
+    {
+      "displacement_end_max": 0.52041292834891,
+      "displacement_end_mean": 0.5204129283489144,
+      "displacement_end_p95": 0.52041292834891,
+      "factions": {
+        "exhaustion_end": {
+          "HRHB": 260.0114876666666,
+          "RBiH": 260.0114876666666,
+          "RS": 260.0114876666666
+        }
+      },
+      "scalar": 0.25,
+      "scope": "all_front_active",
+      "weeks": 26
+    },
+    {
+      "displacement_end_max": 0.5208258566978192,
+      "displacement_end_mean": 0.5208258566978069,
+      "displacement_end_p95": 0.5208258566978192,
+      "factions": {
+        "exhaustion_end": {
+          "HRHB": 260.02297533333314,
+          "RBiH": 260.02297533333314,
+          "RS": 260.02297533333314
+        }
+      },
+      "scalar": 0.5,
+      "scope": "all_front_active",
+      "weeks": 26
+    },
+    {
+      "displacement_end_max": 0.5216517133956388,
+      "displacement_end_mean": 0.521651713395623,
+      "displacement_end_p95": 0.5216517133956388,
+      "factions": {
+        "exhaustion_end": {
+          "HRHB": 260.0459506666666,
+          "RBiH": 260.0459506666666,
+          "RS": 260.0459506666666
+        }
+      },
+      "scalar": 1,
+      "scope": "all_front_active",
+      "weeks": 26
+    },
+    {
+      "displacement_end_max": 0.5233034267912776,
+      "displacement_end_mean": 0.523303426791275,
+      "displacement_end_p95": 0.5233034267912776,
+      "factions": {
+        "exhaustion_end": {
+          "HRHB": 260.09190133333334,
+          "RBiH": 260.09190133333334,
+          "RS": 260.09190133333334
+        }
+      },
+      "scalar": 2,
+      "scope": "all_front_active",
+      "weeks": 26
+    },
+    {
+      "displacement_end_max": 0.5266068535825549,
+      "displacement_end_mean": 0.5266068535825448,
+      "displacement_end_p95": 0.5266068535825549,
+      "factions": {
+        "exhaustion_end": {
+          "HRHB": 260.1838026666667,
+          "RBiH": 260.1838026666667,
+          "RS": 260.1838026666667
+        }
+      },
+      "scalar": 4,
+      "scope": "all_front_active",
+      "weeks": 26
+    }
+  ]
+}

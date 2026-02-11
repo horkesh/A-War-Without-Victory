@@ -1,0 +1,10 @@
+{
+  "final_state_hash": "570b719264312503",
+  "run_id": "noop_4w_probe_intent__ac18dee0cff67c54__w4",
+  "scenario_id": "noop_4w_probe_intent",
+  "summary": {
+    "final_turn": 4,
+    "phase": "phase_ii"
+  },
+  "weeks": 4
+}

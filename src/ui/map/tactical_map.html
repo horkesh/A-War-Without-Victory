@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tactical Map — AWWV</title>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%231e1c18' width='32' height='32'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='%23e0d8cc'>T</text></svg>">
+  <link rel="stylesheet" href="./styles/tactical-map.css">
+</head>
+
+<body>
+  <div id="map-root">
+    <!-- Toolbar -->
+    <div class="tm-toolbar">
+      <span class="tm-zoom-pill" id="zoom-pill" aria-live="polite">STRATEGIC</span>
+      <button type="button" class="tm-toolbar-btn" id="zoom-out" aria-label="Zoom out">&minus;</button>
+      <button type="button" class="tm-toolbar-btn" id="zoom-in" aria-label="Zoom in">+</button>
+      <button type="button" class="tm-toolbar-btn" id="btn-legend" aria-label="Toggle legend">Legend</button>
+      <button type="button" class="tm-toolbar-btn" id="btn-oob" aria-label="Toggle Order of Battle">OOB</button>
+      <button type="button" class="tm-toolbar-btn" id="btn-search" aria-label="Search settlement">Search</button>
+      <span class="tm-turn-display" id="turn-display">Turn 0 — Sep 1991</span>
+    </div>
+
+    <!-- Main content area -->
+    <div class="tm-main">
+      <!-- OOB Sidebar (left) -->
+      <aside class="tm-oob-sidebar closed" id="oob-sidebar" role="complementary" aria-label="Order of Battle"
+        aria-hidden="true">
+        <div class="tm-oob-header">
+          <span>ORDER OF BATTLE</span>
+          <button type="button" class="tm-oob-close" id="oob-close" aria-label="Close OOB">&times;</button>
+        </div>
+        <div class="tm-oob-content" id="oob-content">
+          <p class="tm-muted">Load a game state to view formations.</p>
+        </div>
+      </aside>
+
+      <!-- Map canvas area -->
+      <div class="tm-map-wrap" id="map-wrap">
+        <canvas id="map-canvas" tabindex="0" role="img" aria-label="Tactical map of Bosnia and Herzegovina"></canvas>
+
+        <!-- Minimap -->
+        <canvas class="tm-minimap" id="minimap" width="180" height="120" aria-label="Minimap overview"></canvas>
+
+        <!-- Zoom controls (on-canvas) -->
+        <div class="tm-zoom-controls">
+          <button type="button" id="zoom-in-map" aria-label="Zoom in">+</button>
+          <button type="button" id="zoom-out-map" aria-label="Zoom out">&minus;</button>
+        </div>
+
+        <!-- Legend (content swapped when Color by changes) -->
+        <div class="tm-legend" id="legend">
+          <div id="legend-content"></div>
+        </div>
+
+        <!-- Layer panel -->
+        <div class="tm-layer-panel" id="layer-panel">
+          <div class="tm-layer-header" id="layer-panel-toggle" role="button" tabindex="0"
+            aria-label="Toggle layer panel">
+            <span>&#9776; Layers</span>
+          </div>
+          <div class="tm-layer-body" id="layer-panel-body">
+            <div class="tm-layer-row"><label><input type="checkbox" id="layer-control" checked> Political
+                control</label></div>
+            <div class="tm-layer-row"><label><input type="checkbox" id="layer-contested" checked> Contested
+                zones</label></div>
+            <div class="tm-layer-row"><label><input type="checkbox" id="layer-frontlines" checked> Front lines</label>
+            </div>
+            <div class="tm-layer-row"><label><input type="checkbox" id="layer-labels" checked> Settlement labels</label>
+            </div>
+            <div class="tm-layer-row"><label><input type="checkbox" id="layer-mun-borders"> Municipality borders</label>
+            </div>
+            <div class="tm-layer-row"><label><input type="checkbox" id="layer-minimap" checked> Minimap</label></div>
+            <div class="tm-layer-row"><label><input type="checkbox" id="layer-formations" disabled> Formations
+                (OOB)</label></div>
+            <div class="tm-layer-row"><label><input type="checkbox" id="layer-brigade-aor" disabled> Brigade AoR
+                (selected)</label></div>
+            <hr class="tm-layer-sep">
+            <div class="tm-layer-row">
+              <label for="settlement-fill-mode">Color by:</label>
+              <select id="settlement-fill-mode" aria-label="Settlement fill mode">
+                <option value="political_control">Political control</option>
+                <option value="ethnic_majority">Ethnic majority (1991)</option>
+              </select>
+            </div>
+            <div class="tm-layer-row">
+              <label for="control-dataset">Dataset:</label>
+              <select id="control-dataset" aria-label="Control dataset">
+                <option value="baseline">Baseline (Apr 1992)</option>
+                <option value="sep1992">September 1992</option>
+                <option value="jan1993">January 1993</option>
+              </select>
+            </div>
+            <div class="tm-layer-row">
+              <button type="button" class="tm-load-state-btn" id="btn-load-state">Load State...</button>
+              <input type="file" id="file-input" accept=".json" style="display:none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Search overlay -->
+        <div class="tm-search-overlay closed" id="search-overlay" role="search">
+          <input type="text" class="tm-search-input" id="search-input" placeholder="Search settlement..."
+            aria-label="Search settlement">
+          <div class="tm-search-results" id="search-results"></div>
+        </div>
+
+        <!-- Tooltip -->
+        <div class="tm-tooltip" id="tooltip" role="tooltip" style="display:none"></div>
+      </div>
+
+      <!-- Settlement panel (right) -->
+      <aside class="tm-panel closed" id="settlement-panel" role="region" aria-label="Settlement details"
+        aria-hidden="true">
+        <div class="tm-panel-header" id="panel-header">
+          <div class="tm-panel-summary">
+            <div class="tm-panel-name" id="panel-name"></div>
+            <div class="tm-panel-subtitle" id="panel-subtitle"></div>
+          </div>
+          <button type="button" class="tm-panel-close" id="panel-close" aria-label="Close panel">&times;</button>
+        </div>
+        <nav class="tm-panel-tabs" id="panel-tabs" role="tablist"></nav>
+        <div class="tm-panel-content" id="panel-content" role="tabpanel"></div>
+      </aside>
+    </div>
+
+    <!-- Status bar -->
+    <div class="tm-status" id="status">Loading map data...</div>
+  </div>
+
+  <script type="module" src="./main.ts"></script>
+</body>
+
+</html>

@@ -1,0 +1,662 @@
+[
+  {
+    "adm3_id": "banovici",
+    "name": "Banovići",
+    "lon": 18.462794783380964,
+    "lat": 44.39576533651759
+  },
+  {
+    "adm3_id": "banja_luka",
+    "name": "Banja Luka",
+    "lon": 17.071584226114357,
+    "lat": 44.71282999476439
+  },
+  {
+    "adm3_id": "bihac",
+    "name": "Bihać",
+    "lon": 16.034232521765617,
+    "lat": 44.667722501675044
+  },
+  {
+    "adm3_id": "bijeljina",
+    "name": "Bijeljina",
+    "lon": 19.15455568929496,
+    "lat": 44.745026716240034
+  },
+  {
+    "adm3_id": "bileca",
+    "name": "Bileća",
+    "lon": 18.347492065035322,
+    "lat": 42.98400835995188
+  },
+  {
+    "adm3_id": "bosanska_dubica",
+    "name": "Bosanska Dubica",
+    "lon": 16.81498799164006,
+    "lat": 45.1480239204239
+  },
+  {
+    "adm3_id": "bosanska_gradiska",
+    "name": "Bosanska Gradiška",
+    "lon": 17.172225858954967,
+    "lat": 45.07110145141817
+  },
+  {
+    "adm3_id": "bosanska_kostajnica",
+    "name": "Bosanska Kostajnica",
+    "lon": 16.559808054140003,
+    "lat": 45.17684904519021
+  },
+  {
+    "adm3_id": "bosanska_krupa",
+    "name": "Bosanska Krupa",
+    "lon": 16.201432976678966,
+    "lat": 44.89413482091888
+  },
+  {
+    "adm3_id": "bosanski_brod",
+    "name": "Bosanski Brod",
+    "lon": 18.051204279678018,
+    "lat": 45.060833575908006
+  },
+  {
+    "adm3_id": "bosanski_novi",
+    "name": "Bosanski Novi",
+    "lon": 16.434133081185756,
+    "lat": 44.99368636064605
+  },
+  {
+    "adm3_id": "bosanski_petrovac",
+    "name": "Bosanski Petrovac",
+    "lon": 16.36047054250055,
+    "lat": 44.59979193284204
+  },
+  {
+    "adm3_id": "bosanski_samac",
+    "name": "Bosanski Šamac",
+    "lon": 18.509654291398643,
+    "lat": 45.008678077242024
+  },
+  {
+    "adm3_id": "bosansko_grahovo",
+    "name": "Bosansko Grahovo",
+    "lon": 16.449248371231654,
+    "lat": 44.14996443348062
+  },
+  {
+    "adm3_id": "bratunac",
+    "name": "Bratunac",
+    "lon": 19.363597068699423,
+    "lat": 44.13789300728783
+  },
+  {
+    "adm3_id": "brcko",
+    "name": "Brčko",
+    "lon": 18.743550038090685,
+    "lat": 44.8242179676327
+  },
+  {
+    "adm3_id": "breza",
+    "name": "Breza",
+    "lon": 18.29877485419123,
+    "lat": 44.01799901606999
+  },
+  {
+    "adm3_id": "bugojno",
+    "name": "Bugojno",
+    "lon": 17.473505614848165,
+    "lat": 44.019877540959925
+  },
+  {
+    "adm3_id": "busovaca",
+    "name": "Busovača",
+    "lon": 17.905150907436948,
+    "lat": 44.0705470043665
+  },
+  {
+    "adm3_id": "cajnice",
+    "name": "Čajniče",
+    "lon": 19.094050964209345,
+    "lat": 43.57579191603126
+  },
+  {
+    "adm3_id": "capljina",
+    "name": "Čapljina",
+    "lon": 17.747392054724088,
+    "lat": 43.109464486453916
+  },
+  {
+    "adm3_id": "cazin",
+    "name": "Cazin",
+    "lon": 15.948864499838471,
+    "lat": 45.008902905388084
+  },
+  {
+    "adm3_id": "celinac",
+    "name": "Čelinac",
+    "lon": 17.410444379502664,
+    "lat": 44.72195540039479
+  },
+  {
+    "adm3_id": "centar_sarajevo",
+    "name": "Centar Sarajevo",
+    "lon": 18.42757988424202,
+    "lat": 43.89569766557716
+  },
+  {
+    "adm3_id": "citluk",
+    "name": "Čitluk",
+    "lon": 17.687181225926317,
+    "lat": 43.21730167015324
+  },
+  {
+    "adm3_id": "derventa",
+    "name": "Derventa",
+    "lon": 17.939011732374617,
+    "lat": 44.94352281398013
+  },
+  {
+    "adm3_id": "doboj",
+    "name": "Doboj",
+    "lon": 18.03562052744565,
+    "lat": 44.79392036239905
+  },
+  {
+    "adm3_id": "donji_vakuf",
+    "name": "Donji Vakuf",
+    "lon": 17.374267711692905,
+    "lat": 44.15845532610932
+  },
+  {
+    "adm3_id": "duvno",
+    "name": "Duvno",
+    "lon": 17.228481348613716,
+    "lat": 43.67554739551925
+  },
+  {
+    "adm3_id": "foca",
+    "name": "Foča",
+    "lon": 18.795030529943475,
+    "lat": 43.463273018097304
+  },
+  {
+    "adm3_id": "fojnica",
+    "name": "Fojnica",
+    "lon": 17.882153475978082,
+    "lat": 43.94365909427505
+  },
+  {
+    "adm3_id": "gacko",
+    "name": "Gacko",
+    "lon": 18.458707495155615,
+    "lat": 43.188430491253285
+  },
+  {
+    "adm3_id": "glamoc",
+    "name": "Glamoč",
+    "lon": 16.829948226397278,
+    "lat": 44.09128200175229
+  },
+  {
+    "adm3_id": "gorazde",
+    "name": "Goražde",
+    "lon": 18.926332942369093,
+    "lat": 43.65046808048703
+  },
+  {
+    "adm3_id": "gornji_vakuf",
+    "name": "Gornji Vakuf",
+    "lon": 17.63776277308295,
+    "lat": 43.92013025510107
+  },
+  {
+    "adm3_id": "gracanica",
+    "name": "Gračanica",
+    "lon": 18.2840723926817,
+    "lat": 44.6957966472385
+  },
+  {
+    "adm3_id": "gradacac",
+    "name": "Gradačac",
+    "lon": 18.47469456473231,
+    "lat": 44.84289760658582
+  },
+  {
+    "adm3_id": "grude",
+    "name": "Grude",
+    "lon": 17.36833656612265,
+    "lat": 43.35104564263071
+  },
+  {
+    "adm3_id": "hadzici",
+    "name": "Hadžići",
+    "lon": 18.144930069295476,
+    "lat": 43.768428868002154
+  },
+  {
+    "adm3_id": "hanpijesak",
+    "name": "Han-Pijesak",
+    "lon": 18.946820359413525,
+    "lat": 44.05026849084109
+  },
+  {
+    "adm3_id": "ilidza",
+    "name": "Ilidža",
+    "lon": 18.28744340204544,
+    "lat": 43.81025930179455
+  },
+  {
+    "adm3_id": "ilijas",
+    "name": "Ilijaš",
+    "lon": 18.402491711465373,
+    "lat": 43.991303063788926
+  },
+  {
+    "adm3_id": "jablanica",
+    "name": "Jablanica",
+    "lon": 17.705097270904393,
+    "lat": 43.64688473095227
+  },
+  {
+    "adm3_id": "jajce",
+    "name": "Jajce",
+    "lon": 17.269762707593838,
+    "lat": 44.333712944307905
+  },
+  {
+    "adm3_id": "kakanj",
+    "name": "Kakanj",
+    "lon": 18.140141098360854,
+    "lat": 44.14780364564367
+  },
+  {
+    "adm3_id": "kalesija",
+    "name": "Kalesija",
+    "lon": 18.879644247664707,
+    "lat": 44.42872011896947
+  },
+  {
+    "adm3_id": "kalinovik",
+    "name": "Kalinovik",
+    "lon": 18.411941283788973,
+    "lat": 43.458758529179306
+  },
+  {
+    "adm3_id": "kiseljak",
+    "name": "Kiseljak",
+    "lon": 18.06494819918835,
+    "lat": 43.93442674625793
+  },
+  {
+    "adm3_id": "kladanj",
+    "name": "Kladanj",
+    "lon": 18.688485295877808,
+    "lat": 44.26750910176835
+  },
+  {
+    "adm3_id": "kljuc",
+    "name": "Ključ",
+    "lon": 16.79733673011901,
+    "lat": 44.51156372539527
+  },
+  {
+    "adm3_id": "konjic",
+    "name": "Konjic",
+    "lon": 18.012270625062413,
+    "lat": 43.6681351020212
+  },
+  {
+    "adm3_id": "kotor_varos",
+    "name": "Kotor Varoš",
+    "lon": 17.50326243310355,
+    "lat": 44.52956709844217
+  },
+  {
+    "adm3_id": "kresevo",
+    "name": "Kreševo",
+    "lon": 18.018780607195072,
+    "lat": 43.852190684535685
+  },
+  {
+    "adm3_id": "kupres",
+    "name": "Kupres",
+    "lon": 17.23313982216655,
+    "lat": 43.947481128263135
+  },
+  {
+    "adm3_id": "laktasi",
+    "name": "Laktaši",
+    "lon": 17.344238884826442,
+    "lat": 44.890636312909834
+  },
+  {
+    "adm3_id": "listica",
+    "name": "Lištica",
+    "lon": 17.552452809863592,
+    "lat": 43.38401091915435
+  },
+  {
+    "adm3_id": "livno",
+    "name": "Livno",
+    "lon": 16.864897626921586,
+    "lat": 43.855787781002974
+  },
+  {
+    "adm3_id": "lopare",
+    "name": "Lopare",
+    "lon": 18.80980711064929,
+    "lat": 44.65495789709147
+  },
+  {
+    "adm3_id": "lukavac",
+    "name": "Lukavac",
+    "lon": 18.445737100686017,
+    "lat": 44.53089385400795
+  },
+  {
+    "adm3_id": "ljubinje",
+    "name": "Ljubinje",
+    "lon": 18.12024652930843,
+    "lat": 42.958074034583696
+  },
+  {
+    "adm3_id": "ljubuski",
+    "name": "Ljubuški",
+    "lon": 17.50279176020708,
+    "lat": 43.22877401907121
+  },
+  {
+    "adm3_id": "maglaj",
+    "name": "Maglaj",
+    "lon": 18.11614744900405,
+    "lat": 44.53032263742032
+  },
+  {
+    "adm3_id": "modrica",
+    "name": "Modriča",
+    "lon": 18.278867341222227,
+    "lat": 44.931068176821924
+  },
+  {
+    "adm3_id": "mostar",
+    "name": "Mostar",
+    "lon": 17.78542980591596,
+    "lat": 43.408899417061605
+  },
+  {
+    "adm3_id": "mrkonjic_grad",
+    "name": "Mrkonjić Grad",
+    "lon": 17.03818284833487,
+    "lat": 44.40783186128284
+  },
+  {
+    "adm3_id": "neum",
+    "name": "Neum",
+    "lon": 17.77437687887796,
+    "lat": 42.95464241534326
+  },
+  {
+    "adm3_id": "nevesinje",
+    "name": "Nevesinje",
+    "lon": 18.198967708894216,
+    "lat": 43.26403589693941
+  },
+  {
+    "adm3_id": "novi_grad_sarajevo",
+    "name": "Novi Grad Sarajevo",
+    "lon": 18.316565180380916,
+    "lat": 43.864404567365945
+  },
+  {
+    "adm3_id": "novi_travnik",
+    "name": "Novi Travnik",
+    "lon": 17.67001094276532,
+    "lat": 44.08875485498637
+  },
+  {
+    "adm3_id": "novo_sarajevo",
+    "name": "Novo Sarajevo",
+    "lon": 18.409752938530666,
+    "lat": 43.81474994227274
+  },
+  {
+    "adm3_id": "odzak",
+    "name": "Odžak",
+    "lon": 18.29253046169284,
+    "lat": 45.05411482735931
+  },
+  {
+    "adm3_id": "olovo",
+    "name": "Olovo",
+    "lon": 18.54955018075884,
+    "lat": 44.19307508648876
+  },
+  {
+    "adm3_id": "orasje",
+    "name": "Orašje",
+    "lon": 18.683134269825395,
+    "lat": 44.993683499100854
+  },
+  {
+    "adm3_id": "pale",
+    "name": "Pale",
+    "lon": 18.697797971977774,
+    "lat": 43.788983492427384
+  },
+  {
+    "adm3_id": "posusje",
+    "name": "Posušje",
+    "lon": 17.378304271089846,
+    "lat": 43.51354713029547
+  },
+  {
+    "adm3_id": "prijedor",
+    "name": "Prijedor",
+    "lon": 16.76530019339737,
+    "lat": 44.945293071807725
+  },
+  {
+    "adm3_id": "prnjavor",
+    "name": "Prnjavor",
+    "lon": 17.621307128835653,
+    "lat": 44.87388773124274
+  },
+  {
+    "adm3_id": "prozor",
+    "name": "Prozor",
+    "lon": 17.612149115425957,
+    "lat": 43.778648131557226
+  },
+  {
+    "adm3_id": "rogatica",
+    "name": "Rogatica",
+    "lon": 19.047276925986086,
+    "lat": 43.84829813885882
+  },
+  {
+    "adm3_id": "rudo",
+    "name": "Rudo",
+    "lon": 19.380267850487208,
+    "lat": 43.598612093808
+  },
+  {
+    "adm3_id": "sanski_most",
+    "name": "Sanski Most",
+    "lon": 16.635563332520114,
+    "lat": 44.76265288030631
+  },
+  {
+    "adm3_id": "sekovici",
+    "name": "Šekovići",
+    "lon": 18.897430602608555,
+    "lat": 44.30145631615066
+  },
+  {
+    "adm3_id": "sipovo",
+    "name": "Šipovo",
+    "lon": 17.102415900526566,
+    "lat": 44.22436861019532
+  },
+  {
+    "adm3_id": "skender_vakuf",
+    "name": "Skender Vakuf",
+    "lon": 17.377739394239267,
+    "lat": 44.47496564168283
+  },
+  {
+    "adm3_id": "sokolac",
+    "name": "Sokolac",
+    "lon": 18.80142390903689,
+    "lat": 43.945618670300355
+  },
+  {
+    "adm3_id": "srbac",
+    "name": "Srbac",
+    "lon": 17.534081420288505,
+    "lat": 45.02226060545976
+  },
+  {
+    "adm3_id": "srebrenica",
+    "name": "Srebrenica",
+    "lon": 19.361933251940016,
+    "lat": 44.03981028506538
+  },
+  {
+    "adm3_id": "srebrenik",
+    "name": "Srebrenik",
+    "lon": 18.518228572988924,
+    "lat": 44.69369108155238
+  },
+  {
+    "adm3_id": "stari_grad_sarajevo",
+    "name": "Stari Grad Sarajevo",
+    "lon": 18.48740311830206,
+    "lat": 43.892016087594214
+  },
+  {
+    "adm3_id": "stolac",
+    "name": "Stolac",
+    "lon": 17.99021859399651,
+    "lat": 43.0926277326412
+  },
+  {
+    "adm3_id": "tesanj",
+    "name": "Tešanj",
+    "lon": 18.00324839783308,
+    "lat": 44.63596170975693
+  },
+  {
+    "adm3_id": "teslic",
+    "name": "Teslić",
+    "lon": 17.735368871404493,
+    "lat": 44.56779242781356
+  },
+  {
+    "adm3_id": "titov_drvar",
+    "name": "Titov Drvar",
+    "lon": 16.50159971680938,
+    "lat": 44.359552477693015
+  },
+  {
+    "adm3_id": "travnik",
+    "name": "Travnik",
+    "lon": 17.616661107437505,
+    "lat": 44.265770432478966
+  },
+  {
+    "adm3_id": "trebinje",
+    "name": "Trebinje",
+    "lon": 18.229565030432326,
+    "lat": 42.77150651246929
+  },
+  {
+    "adm3_id": "trnovo",
+    "name": "Trnovo",
+    "lon": 18.37644698348895,
+    "lat": 43.67274750823175
+  },
+  {
+    "adm3_id": "tuzla",
+    "name": "Tuzla",
+    "lon": 18.669766473158013,
+    "lat": 44.55995472047065
+  },
+  {
+    "adm3_id": "ugljevik",
+    "name": "Ugljevik",
+    "lon": 18.996583734465986,
+    "lat": 44.65589740925384
+  },
+  {
+    "adm3_id": "vares",
+    "name": "Vareš",
+    "lon": 18.366431799702596,
+    "lat": 44.147679400832246
+  },
+  {
+    "adm3_id": "velika_kladusa",
+    "name": "Velika Kladuša",
+    "lon": 15.93685885568413,
+    "lat": 45.13345336896323
+  },
+  {
+    "adm3_id": "visegrad",
+    "name": "Višegrad",
+    "lon": 19.28745242671169,
+    "lat": 43.80087285333807
+  },
+  {
+    "adm3_id": "visoko",
+    "name": "Visoko",
+    "lon": 18.1626009544881,
+    "lat": 44.009507637376984
+  },
+  {
+    "adm3_id": "vitez",
+    "name": "Vitez",
+    "lon": 17.79264879611858,
+    "lat": 44.1246720638888
+  },
+  {
+    "adm3_id": "vlasenica",
+    "name": "Vlasenica",
+    "lon": 19.028383902750566,
+    "lat": 44.1641676019394
+  },
+  {
+    "adm3_id": "vogosca",
+    "name": "Vogošća",
+    "lon": 18.373358925191734,
+    "lat": 43.92260683736014
+  },
+  {
+    "adm3_id": "zavidovici",
+    "name": "Zavidovići",
+    "lon": 18.251231435545346,
+    "lat": 44.382224602587115
+  },
+  {
+    "adm3_id": "zenica",
+    "name": "Zenica",
+    "lon": 17.92391076151942,
+    "lat": 44.26266664672338
+  },
+  {
+    "adm3_id": "zepce",
+    "name": "Žepče",
+    "lon": 18.017695383674692,
+    "lat": 44.3965061128297
+  },
+  {
+    "adm3_id": "zivinice",
+    "name": "Živinice",
+    "lon": 18.6693800514839,
+    "lat": 44.40578298355999
+  },
+  {
+    "adm3_id": "zvornik",
+    "name": "Zvornik",
+    "lon": 19.057447507295915,
+    "lat": 44.40688331334279
+  }
+]

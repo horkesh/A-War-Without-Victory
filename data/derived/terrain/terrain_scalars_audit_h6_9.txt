@@ -1,0 +1,17 @@
+Phase H6.9 — Terrain scalars viewer overlay audit
+================================================
+
+Inputs: settlements_terrain_scalars.json, terrain_scalars_audit_h6_8.json
+
+Output overlay: terrain_scalars_viewer_overlay_h6_9.json (6137 settlements)
+
+Distribution summaries (min / max / mean / p25 / p50 / p75):
+  road_access_index: min=0 max=1 mean=0.734 p25=0.44 p50=1 p75=1
+  river_crossing_penalty: min=0 max=1 mean=0.156 p25=0 p50=0 p75=0.19
+  elevation_mean_m: min=0 max=1774 mean=648.949 p25=340.8 p50=634.2 p75=921.3
+  elevation_stddev_m: min=0 max=614.9 mean=86.081 p25=39.3 p50=72.7 p75=116.2
+  slope_index: min=0 max=1 mean=0.463 p25=0.313 p50=0.47 p75=0.609
+  terrain_friction_index: min=0 max=1 mean=0.463 p25=0.313 p50=0.47 p75=0.609
+
+Normalization [0,1] sanity: PASS (applicable scalars in range)
+Missing/NaN counts: 0

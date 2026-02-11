@@ -1,0 +1,1096 @@
+{
+  "formations": [
+    {
+      "id": "hvo_101st_orasje",
+      "faction": "HRHB",
+      "name": "101st Orašje Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_102nd",
+      "faction": "HRHB",
+      "name": "102nd Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_107th_gradacac",
+      "faction": "HRHB",
+      "name": "107th HVO Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_108th_brcko",
+      "faction": "HRHB",
+      "name": "108th HVO Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_110th_usora",
+      "faction": "HRHB",
+      "name": "110th Usora Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_usora",
+      "faction": "HRHB",
+      "name": "110th Usora Brigade Tešanj/Doboj",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_zepce",
+      "faction": "HRHB",
+      "name": "111th XP Brigade Žepče",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_111th_zepce",
+      "faction": "HRHB",
+      "name": "111th Žepče Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_115th_zrinski",
+      "faction": "HRHB",
+      "name": "115th Brigade Zrinski",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_115th_tuzla",
+      "faction": "HRHB",
+      "name": "115th Zrinski Brigade Tuzla",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_1st_mostar",
+      "faction": "HRHB",
+      "name": "1st Brigade Mostar",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_1st_herzegovina_capljina",
+      "faction": "HRHB",
+      "name": "1st Herzegovina Brigade Knez Domagoj",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_2nd_mostar",
+      "faction": "HRHB",
+      "name": "2nd Brigade Mostar",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_94th_kiseljak",
+      "faction": "HRHB",
+      "name": "94th Brigade Kiseljak",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_95th_kresevo",
+      "faction": "HRHB",
+      "name": "95th Brigade Kreševo-Fojnica",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_ban_jelacic",
+      "faction": "HRHB",
+      "name": "Ban Jelačić Brigade Kiseljak",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_bobovac",
+      "faction": "HRHB",
+      "name": "Bobovac Brigade Vares",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_capljina",
+      "faction": "HRHB",
+      "name": "Čapljina Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_citluk",
+      "faction": "HRHB",
+      "name": "Čitluk Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_eugen_kvaternik",
+      "faction": "HRHB",
+      "name": "Eugen Kvaternik Brigade Bugojno",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_eugen_kvaternik_tg",
+      "faction": "HRHB",
+      "name": "Eugen Kvaternik Brigade Tomislavgrad",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_frankopan",
+      "faction": "HRHB",
+      "name": "Frankopan Brigade Travnik",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_grude",
+      "faction": "HRHB",
+      "name": "Grude Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_hrvoje_vukcic",
+      "faction": "HRHB",
+      "name": "Hrvoje Vukčić Hrvatinić Brigade Jajce",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_busovaca",
+      "faction": "HRHB",
+      "name": "Jure Francetić Brigade Busovača",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_kiseljak",
+      "faction": "HRHB",
+      "name": "Kiseljak Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_komusina",
+      "faction": "HRHB",
+      "name": "Komušina Brigade Teslić",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_kralj_tomislav",
+      "faction": "HRHB",
+      "name": "Kralj Tomislav Brigade Tomislavgrad",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_kralj_tvrtko",
+      "faction": "HRHB",
+      "name": "Kralj Tvrtko Brigade Sarajevo",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_kresevo",
+      "faction": "HRHB",
+      "name": "Kreševo Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_ljubuski",
+      "faction": "HRHB",
+      "name": "Ljubuški Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_mostar",
+      "faction": "HRHB",
+      "name": "Mostar Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_nikola_subic",
+      "faction": "HRHB",
+      "name": "Nikola Šubić Zrinski Brigade Busovača",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_petar_kresimir",
+      "faction": "HRHB",
+      "name": "Petar Krešimir IV Brigade Livno",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_rama",
+      "faction": "HRHB",
+      "name": "Rama Brigade Prozor",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_novi_travnik",
+      "faction": "HRHB",
+      "name": "Stjepan Tomašević Brigade Novi Travnik",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_stjepan_tomas",
+      "faction": "HRHB",
+      "name": "Stjepan Tomašević Brigade Novi Travnik",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_siroki_brijeg",
+      "faction": "HRHB",
+      "name": "Široki Brijeg Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_vitez",
+      "faction": "HRHB",
+      "name": "Vitezovi Brigade Vitez",
+      "kind": "brigade"
+    },
+    {
+      "id": "hvo_vitezovi",
+      "faction": "HRHB",
+      "name": "Vitezovi Brigade Vitez",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_107th_gradacac",
+      "faction": "RBiH",
+      "name": "107th Gradačac Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_108th_brcko",
+      "faction": "RBiH",
+      "name": "108th Brčko Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_10th_mountain",
+      "faction": "RBiH",
+      "name": "10th Mountain Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_115th_zrinski",
+      "faction": "RBiH",
+      "name": "115th Zrinski Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_121st_mountain",
+      "faction": "RBiH",
+      "name": "121st Mountain Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_17th_krajina",
+      "faction": "RBiH",
+      "name": "17th Krajina Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_1st_muslim_podrinje",
+      "faction": "RBiH",
+      "name": "1st Muslim Podrinje Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_201st_maglaj",
+      "faction": "RBiH",
+      "name": "201st Maglaj Chivalrous Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_202nd_tesanj",
+      "faction": "RBiH",
+      "name": "202nd Tesanj Chivalrous Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_203rd_doboj",
+      "faction": "RBiH",
+      "name": "203rd Doboj Bosna Motorized Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_204th_teslic",
+      "faction": "RBiH",
+      "name": "204th Teslić Famous Hill Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_205th_kalesija",
+      "faction": "RBiH",
+      "name": "205th Kalesija Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_206th_zvornik",
+      "faction": "RBiH",
+      "name": "206th Zvornik Chivalrous Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_207th_tesanj",
+      "faction": "RBiH",
+      "name": "207th Tesanj Pousorska Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_208th_cale",
+      "faction": "RBiH",
+      "name": "208th Cale Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_210th_zivinice",
+      "faction": "RBiH",
+      "name": "210th Zivinice Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_211th_liberation",
+      "faction": "RBiH",
+      "name": "211th Liberation Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_212th_bosanska",
+      "faction": "RBiH",
+      "name": "212th Bosanska Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_243rd_mountain",
+      "faction": "RBiH",
+      "name": "243rd Mountain Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_244th_mountain",
+      "faction": "RBiH",
+      "name": "244th Mountain Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_301st_zenica",
+      "faction": "RBiH",
+      "name": "301st Zenica Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_303rd_zenica",
+      "faction": "RBiH",
+      "name": "303rd Zenica Chivalrous Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_304th_breza",
+      "faction": "RBiH",
+      "name": "304th Breza Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_306th_bugojno",
+      "faction": "RBiH",
+      "name": "306th Bugojno Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_307th",
+      "faction": "RBiH",
+      "name": "307th Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_309th_kakanj",
+      "faction": "RBiH",
+      "name": "309th Kakanj Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_311th_kakanj",
+      "faction": "RBiH",
+      "name": "311th Kakanj Light Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_318th_zavidovici",
+      "faction": "RBiH",
+      "name": "318th Zavidovici Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_319th_zepce",
+      "faction": "RBiH",
+      "name": "319th Zepce Liberation Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_325th_vitez",
+      "faction": "RBiH",
+      "name": "325th Vitez Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_333rd_busovaca",
+      "faction": "RBiH",
+      "name": "333rd Busovaca Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_370th_donji_vakuf",
+      "faction": "RBiH",
+      "name": "370th Donji Vakuf Mountain Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_443rd_konjic",
+      "faction": "RBiH",
+      "name": "443rd Konjic Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_445th_jablanica",
+      "faction": "RBiH",
+      "name": "445th Jablanica Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_450th_bjelimici",
+      "faction": "RBiH",
+      "name": "450th Bjelimici Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_mostar",
+      "faction": "RBiH",
+      "name": "4th Corps Mostar Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_501st_bihac",
+      "faction": "RBiH",
+      "name": "501st Bihać Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_502nd_cazin",
+      "faction": "RBiH",
+      "name": "502nd Cazin Mountain Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_503rd_cazin",
+      "faction": "RBiH",
+      "name": "503rd Cazin Famous Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_505th_buzim",
+      "faction": "RBiH",
+      "name": "505th Buzim Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_506th_kljuc",
+      "faction": "RBiH",
+      "name": "506th Kljuc Liberation Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_510th_cazin",
+      "faction": "RBiH",
+      "name": "510th Cazin Liberation Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_511th_buzim",
+      "faction": "RBiH",
+      "name": "511th Bužim Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_517th_sanska",
+      "faction": "RBiH",
+      "name": "517th Sanska Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_konjic",
+      "faction": "RBiH",
+      "name": "6th Corps Konjic Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_707th_mountain",
+      "faction": "RBiH",
+      "name": "707th Mountain Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_708th_light",
+      "faction": "RBiH",
+      "name": "708th Light Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_712th_mountain",
+      "faction": "RBiH",
+      "name": "712th Mountain Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_717th_mountain",
+      "faction": "RBiH",
+      "name": "717th Mountain Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_7th_muslim",
+      "faction": "RBiH",
+      "name": "7th Muslim Mountain Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_808th_muslim",
+      "faction": "RBiH",
+      "name": "808th Muslim Liberation Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_81st_gorazde",
+      "faction": "RBiH",
+      "name": "81st Gorazde Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_82nd_foca",
+      "faction": "RBiH",
+      "name": "82nd Foca Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_9th_muslim_liberation",
+      "faction": "RBiH",
+      "name": "9th Muslim Liberation Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_gorazde",
+      "faction": "RBiH",
+      "name": "Goražde Enclave Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "arbih_srebrenica",
+      "faction": "RBiH",
+      "name": "Srebrenica Enclave Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_11th_dubica",
+      "faction": "RS",
+      "name": "11th Dubica Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_11th_krupa",
+      "faction": "RS",
+      "name": "11th Krupa Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_11th_mrkonjic",
+      "faction": "RS",
+      "name": "11th Mrkonjić Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_12th_kotorsko",
+      "faction": "RS",
+      "name": "12th Kotorsko Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_15th_bihac",
+      "faction": "RS",
+      "name": "15th Bihać Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_16th_krajina_motorized",
+      "faction": "RS",
+      "name": "16th Krajina Motorized Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_17th_kljuc",
+      "faction": "RS",
+      "name": "17th Ključ Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_19th_krajina",
+      "faction": "RS",
+      "name": "19th Krajina Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_armored",
+      "faction": "RS",
+      "name": "1st Armored Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_banja_luka",
+      "faction": "RS",
+      "name": "1st Banja Luka Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_bijeljina",
+      "faction": "RS",
+      "name": "1st Bijeljina Light Infantry Brigade Panthers",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_bratunac",
+      "faction": "RS",
+      "name": "1st Bratunac Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_celinac",
+      "faction": "RS",
+      "name": "1st Celinac Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_doboj",
+      "faction": "RS",
+      "name": "1st Doboj Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_drvar",
+      "faction": "RS",
+      "name": "1st Drvar Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_gradiska",
+      "faction": "RS",
+      "name": "1st Gradiška Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_guards_motorized",
+      "faction": "RS",
+      "name": "1st Guards Motorized Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_kotor_varos",
+      "faction": "RS",
+      "name": "1st Kotor Varoš Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_krnjin",
+      "faction": "RS",
+      "name": "1st Krnjin Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_majevica",
+      "faction": "RS",
+      "name": "1st Majevica Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_novigrad",
+      "faction": "RS",
+      "name": "1st Novigrad Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_ozren",
+      "faction": "RS",
+      "name": "1st Ozren Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_posavina",
+      "faction": "RS",
+      "name": "1st Posavina Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_prnjavor",
+      "faction": "RS",
+      "name": "1st Prnjavor Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_romanija",
+      "faction": "RS",
+      "name": "1st Romanija Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_sarajevo_mechanized",
+      "faction": "RS",
+      "name": "1st Sarajevo Mechanized Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_semberija",
+      "faction": "RS",
+      "name": "1st Semberija Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_sipovo",
+      "faction": "RS",
+      "name": "1st Sipovo Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_srbac",
+      "faction": "RS",
+      "name": "1st Srbac Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_teslic",
+      "faction": "RS",
+      "name": "1st Teslić Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_trebava",
+      "faction": "RS",
+      "name": "1st Trebava Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_vlasenica",
+      "faction": "RS",
+      "name": "1st Vlasenica Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_vucjak",
+      "faction": "RS",
+      "name": "1st Vučjak Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_1st_zvornik",
+      "faction": "RS",
+      "name": "1st Zvornik Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_22nd_krajina",
+      "faction": "RS",
+      "name": "22nd Krajina Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_27th_derventa",
+      "faction": "RS",
+      "name": "27th Derventa Motorized Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_2nd_armored",
+      "faction": "RS",
+      "name": "2nd Armored Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_2nd_banja_luka",
+      "faction": "RS",
+      "name": "2nd Banja Luka Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_2nd_krajina",
+      "faction": "RS",
+      "name": "2nd Krajina Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_2nd_majevica",
+      "faction": "RS",
+      "name": "2nd Majevica Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_2nd_ozren",
+      "faction": "RS",
+      "name": "2nd Ozren Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_2nd_posavina",
+      "faction": "RS",
+      "name": "2nd Posavina Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_2nd_sarajevo",
+      "faction": "RS",
+      "name": "2nd Sarajevo Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_2nd_semberija",
+      "faction": "RS",
+      "name": "2nd Semberija Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_2nd_teslic",
+      "faction": "RS",
+      "name": "2nd Teslić Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_31st_light_infantry",
+      "faction": "RS",
+      "name": "31st Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_3rd_banja_luka",
+      "faction": "RS",
+      "name": "3rd Banja Luka Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_3rd_majevica",
+      "faction": "RS",
+      "name": "3rd Majevica Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_3rd_ozren",
+      "faction": "RS",
+      "name": "3rd Ozren Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_3rd_petrovac",
+      "faction": "RS",
+      "name": "3rd Petrovac Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_3rd_posavina",
+      "faction": "RS",
+      "name": "3rd Posavina Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_3rd_sarajevo",
+      "faction": "RS",
+      "name": "3rd Sarajevo Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_3rd_semberija",
+      "faction": "RS",
+      "name": "3rd Semberija Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_43rd_prijedor",
+      "faction": "RS",
+      "name": "43rd Prijedor Motorized Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_4th_banja_luka",
+      "faction": "RS",
+      "name": "4th Banja Luka Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_4th_ozren",
+      "faction": "RS",
+      "name": "4th Ozren Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_4th_sarajevo",
+      "faction": "RS",
+      "name": "4th Sarajevo Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_5th_glamoc",
+      "faction": "RS",
+      "name": "5th Glamoč Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_5th_kozara",
+      "faction": "RS",
+      "name": "5th Kozara Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_5th_podrinje",
+      "faction": "RS",
+      "name": "5th Podrinje Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_65th_protection",
+      "faction": "RS",
+      "name": "65th Protection Motorized Regiment",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_6th_sana",
+      "faction": "RS",
+      "name": "6th Sana Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_6th_sanska",
+      "faction": "RS",
+      "name": "6th Sanske Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_7th_krajina_motorized",
+      "faction": "RS",
+      "name": "7th Krajina Motorized Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_8th_nevesinje",
+      "faction": "RS",
+      "name": "8th Nevesinje Motorized Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_9th_grahovo",
+      "faction": "RS",
+      "name": "9th Grahovo Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_bileca",
+      "faction": "RS",
+      "name": "Bileća Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_birac",
+      "faction": "RS",
+      "name": "Birač Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_cajnice",
+      "faction": "RS",
+      "name": "Čajniče Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_foca",
+      "faction": "RS",
+      "name": "Foča Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_gacko",
+      "faction": "RS",
+      "name": "Gacko Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_ilidza",
+      "faction": "RS",
+      "name": "Ilidža Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_ilijas",
+      "faction": "RS",
+      "name": "Ilijas Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_kalinovik_herzegovina",
+      "faction": "RS",
+      "name": "Kalinovik Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_kosevo",
+      "faction": "RS",
+      "name": "Koševo Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_kozarac",
+      "faction": "RS",
+      "name": "Kozarac Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_milici",
+      "faction": "RS",
+      "name": "Milići Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_nevesinje",
+      "faction": "RS",
+      "name": "Nevesinje Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_osaka",
+      "faction": "RS",
+      "name": "Oseka Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_rajlovac",
+      "faction": "RS",
+      "name": "Rajlovac Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_rogatica",
+      "faction": "RS",
+      "name": "Rogatica Light Infantry Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_sekovici",
+      "faction": "RS",
+      "name": "Šekovići Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_trebinje",
+      "faction": "RS",
+      "name": "Trebinje Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_visegrad",
+      "faction": "RS",
+      "name": "Višegrad Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_vogosca",
+      "faction": "RS",
+      "name": "Vogošća Brigade",
+      "kind": "brigade"
+    },
+    {
+      "id": "vrs_zvornik_infantry",
+      "faction": "RS",
+      "name": "Zvornik Infantry Brigade",
+      "kind": "brigade"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "scenario_id": "apr1992_104w_bots",
+  "weeks": 104,
+  "init_control": "apr1992",
+  "init_formations": "apr1992",
+  "turns": [],
+  "use_harness_bots": true
+}

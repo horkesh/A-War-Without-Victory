@@ -1,0 +1,54 @@
+# Log files
+*.log
+
+# Python cache
+tools/**/__pycache__/
+*.pyc
+
+# Save files (individual saves, but keep saves/ directory tracked)
+saves/save_*.json
+
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Generated audit/debug artifacts (do not track)
+data/derived/_debug/
+
+# Viewer geometry (presentation-only, not committed - Phase H3.7, H4.2, H4.5)
+data/derived/settlements_viewer_v1.geojson
+data/derived/settlements_viewer_v1.geojson.gz
+data/derived/municipalities_viewer_v1.geojson
+data/derived/municipalities_viewer_v1.geojson.gz
+data/derived/municipalities_mun1990_viewer_v1.geojson
+data/derived/municipalities_mun1990_viewer_v1.geojson.gz
+docs/cleanup/cleanup_audit.json
+docs/cleanup/cleanup_audit.md
+
+# Phase H6.2 terrain snapshot temp files
+data/derived/terrain/_tmp/
+
+# Phase H1.1 scenario determinism test temp dirs
+.tmp_scenario_test_a/
+.tmp_scenario_test_b/
+
+# Repo cleanup 2026: run outputs and temp dirs (do not track)
+runs/
+.tmp_*/
+runs_ops_compare/
+runs_probe/
+
+# IDE
+.vscode/
+.cursor/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

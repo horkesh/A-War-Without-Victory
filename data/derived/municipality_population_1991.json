@@ -1,0 +1,2681 @@
+{
+  "awwv_meta": {
+    "role": "municipality_population_1991",
+    "version": "h4_7",
+    "source": [
+      "data/source/bih_census_1991.json",
+      "data/source/municipalities_1990_registry (canonical)",
+      "data/derived/municipality_agg_post1995.json",
+      "data/derived/mun1990_names.json"
+    ]
+  },
+  "by_municipality_id": {
+    "10014": {
+      "total": 26590,
+      "breakdown": {
+        "total": 26590,
+        "bosniak": 19162,
+        "serb": 4514,
+        "croat": 550,
+        "other": 2364
+      },
+      "mun1990_id": "banovici"
+    },
+    "10049": {
+      "total": 72454,
+      "breakdown": {
+        "total": 72454,
+        "bosniak": 46740,
+        "serb": 14391,
+        "croat": 5582,
+        "other": 5741
+      },
+      "mun1990_id": "bihac"
+    },
+    "10146": {
+      "total": 8311,
+      "breakdown": {
+        "total": 8311,
+        "bosniak": 12,
+        "serb": 7888,
+        "croat": 226,
+        "other": 185
+      },
+      "mun1990_id": "bosansko_grahovo"
+    },
+    "10189": {
+      "total": 17317,
+      "breakdown": {
+        "total": 17317,
+        "bosniak": 13079,
+        "serb": 2122,
+        "croat": 851,
+        "other": 1265
+      },
+      "mun1990_id": "breza"
+    },
+    "10197": {
+      "total": 46889,
+      "breakdown": {
+        "total": 46889,
+        "bosniak": 19697,
+        "serb": 8673,
+        "croat": 16031,
+        "other": 2488
+      },
+      "mun1990_id": "bugojno"
+    },
+    "10219": {
+      "total": 18879,
+      "breakdown": {
+        "total": 18879,
+        "bosniak": 8451,
+        "serb": 623,
+        "croat": 9093,
+        "other": 712
+      },
+      "mun1990_id": "busovaca"
+    },
+    "10227": {
+      "total": 63409,
+      "breakdown": {
+        "total": 63409,
+        "bosniak": 61693,
+        "serb": 778,
+        "croat": 139,
+        "other": 799
+      },
+      "mun1990_id": "cazin"
+    },
+    "10243": {
+      "total": 27882,
+      "breakdown": {
+        "total": 27882,
+        "bosniak": 7672,
+        "serb": 3753,
+        "croat": 14969,
+        "other": 1488
+      },
+      "mun1990_id": "capljina"
+    },
+    "10260": {
+      "total": 15083,
+      "breakdown": {
+        "total": 15083,
+        "bosniak": 111,
+        "serb": 19,
+        "croat": 14823,
+        "other": 130
+      },
+      "mun1990_id": "citluk"
+    },
+    "10294": {
+      "total": 24372,
+      "breakdown": {
+        "total": 24372,
+        "bosniak": 13509,
+        "serb": 9364,
+        "croat": 682,
+        "other": 817
+      },
+      "mun1990_id": "donji_vakuf"
+    },
+    "10308": {
+      "total": 30009,
+      "breakdown": {
+        "total": 30009,
+        "bosniak": 3148,
+        "serb": 576,
+        "croat": 25976,
+        "other": 309
+      },
+      "mun1990_id": "duvno"
+    },
+    "10324": {
+      "total": 16296,
+      "breakdown": {
+        "total": 16296,
+        "bosniak": 8024,
+        "serb": 157,
+        "croat": 6623,
+        "other": 1492
+      },
+      "mun1990_id": "fojnica"
+    },
+    "10359": {
+      "total": 12593,
+      "breakdown": {
+        "total": 12593,
+        "bosniak": 2257,
+        "serb": 9951,
+        "croat": 184,
+        "other": 201
+      },
+      "mun1990_id": "glamoc"
+    },
+    "10375": {
+      "total": 25181,
+      "breakdown": {
+        "total": 25181,
+        "bosniak": 14063,
+        "serb": 110,
+        "croat": 10706,
+        "other": 302
+      },
+      "mun1990_id": "gornji_vakuf"
+    },
+    "10391": {
+      "total": 42373,
+      "breakdown": {
+        "total": 42373,
+        "bosniak": 33704,
+        "serb": 3758,
+        "croat": 2834,
+        "other": 2077
+      },
+      "mun1990_id": "gradacac"
+    },
+    "10405": {
+      "total": 16358,
+      "breakdown": {
+        "total": 16358,
+        "bosniak": 4,
+        "serb": 9,
+        "croat": 16210,
+        "other": 135
+      },
+      "mun1990_id": "grude"
+    },
+    "10421": {
+      "total": 12691,
+      "breakdown": {
+        "total": 12691,
+        "bosniak": 9099,
+        "serb": 504,
+        "croat": 2291,
+        "other": 797
+      },
+      "mun1990_id": "jablanica"
+    },
+    "10448": {
+      "total": 55950,
+      "breakdown": {
+        "total": 55950,
+        "bosniak": 30528,
+        "serb": 4929,
+        "croat": 16556,
+        "other": 3937
+      },
+      "mun1990_id": "kakanj"
+    },
+    "10472": {
+      "total": 24164,
+      "breakdown": {
+        "total": 24164,
+        "bosniak": 9778,
+        "serb": 740,
+        "croat": 12550,
+        "other": 1096
+      },
+      "mun1990_id": "kiseljak"
+    },
+    "10499": {
+      "total": 15765,
+      "breakdown": {
+        "total": 15765,
+        "bosniak": 11976,
+        "serb": 3299,
+        "croat": 35,
+        "other": 455
+      },
+      "mun1990_id": "kladanj"
+    },
+    "10529": {
+      "total": 44264,
+      "breakdown": {
+        "total": 44264,
+        "bosniak": 24192,
+        "serb": 6625,
+        "croat": 11513,
+        "other": 1934
+      },
+      "mun1990_id": "konjic"
+    },
+    "10545": {
+      "total": 6731,
+      "breakdown": {
+        "total": 6731,
+        "bosniak": 1531,
+        "serb": 34,
+        "croat": 4714,
+        "other": 452
+      },
+      "mun1990_id": "kresevo"
+    },
+    "10570": {
+      "total": 27160,
+      "breakdown": {
+        "total": 27160,
+        "bosniak": 9,
+        "serb": 148,
+        "croat": 26864,
+        "other": 139
+      },
+      "mun1990_id": "listica"
+    },
+    "10588": {
+      "total": 40600,
+      "breakdown": {
+        "total": 40600,
+        "bosniak": 5793,
+        "serb": 3913,
+        "croat": 29324,
+        "other": 1570
+      },
+      "mun1990_id": "livno"
+    },
+    "10600": {
+      "total": 56355,
+      "breakdown": {
+        "total": 56355,
+        "bosniak": 38078,
+        "serb": 11463,
+        "croat": 2159,
+        "other": 4655
+      },
+      "mun1990_id": "lukavac"
+    },
+    "10626": {
+      "total": 28340,
+      "breakdown": {
+        "total": 28340,
+        "bosniak": 1592,
+        "serb": 65,
+        "croat": 26127,
+        "other": 556
+      },
+      "mun1990_id": "ljubuski"
+    },
+    "10634": {
+      "total": 34115,
+      "breakdown": {
+        "total": 34115,
+        "bosniak": 18988,
+        "serb": 9522,
+        "croat": 3596,
+        "other": 2009
+      },
+      "mun1990_id": "maglaj"
+    },
+    "10685": {
+      "total": 4325,
+      "breakdown": {
+        "total": 4325,
+        "bosniak": 190,
+        "serb": 207,
+        "croat": 3792,
+        "other": 136
+      },
+      "mun1990_id": "neum"
+    },
+    "10715": {
+      "total": 16326,
+      "breakdown": {
+        "total": 16326,
+        "bosniak": 12175,
+        "serb": 3087,
+        "croat": 642,
+        "other": 422
+      },
+      "mun1990_id": "olovo"
+    },
+    "10731": {
+      "total": 17134,
+      "breakdown": {
+        "total": 17134,
+        "bosniak": 6,
+        "serb": 9,
+        "croat": 16963,
+        "other": 156
+      },
+      "mun1990_id": "posusje"
+    },
+    "10766": {
+      "total": 19760,
+      "breakdown": {
+        "total": 19760,
+        "bosniak": 7225,
+        "serb": 45,
+        "croat": 12259,
+        "other": 231
+      },
+      "mun1990_id": "prozor"
+    },
+    "10774": {
+      "total": 30713,
+      "breakdown": {
+        "total": 30713,
+        "bosniak": 11625,
+        "serb": 4097,
+        "croat": 12162,
+        "other": 2829
+      },
+      "mun1990_id": "novi_travnik"
+    },
+    "10839": {
+      "total": 79286,
+      "breakdown": {
+        "total": 79286,
+        "bosniak": 39761,
+        "serb": 16631,
+        "croat": 5428,
+        "other": 17466
+      },
+      "mun1990_id": "centar_sarajevo"
+    },
+    "10847": {
+      "total": 24200,
+      "breakdown": {
+        "total": 24200,
+        "bosniak": 15392,
+        "serb": 6362,
+        "croat": 746,
+        "other": 1700
+      },
+      "mun1990_id": "hadzici"
+    },
+    "10863": {
+      "total": 25016,
+      "breakdown": {
+        "total": 25016,
+        "bosniak": 10440,
+        "serb": 11303,
+        "croat": 1736,
+        "other": 1537
+      },
+      "mun1990_id": "ilijas"
+    },
+    "10871": {
+      "total": 133797,
+      "breakdown": {
+        "total": 133797,
+        "bosniak": 68405,
+        "serb": 36000,
+        "croat": 8790,
+        "other": 20602
+      },
+      "mun1990_id": "novi_grad_sarajevo"
+    },
+    "10928": {
+      "total": 24647,
+      "breakdown": {
+        "total": 24647,
+        "bosniak": 12499,
+        "serb": 8813,
+        "croat": 1071,
+        "other": 2264
+      },
+      "mun1990_id": "vogosca"
+    },
+    "10987": {
+      "total": 40896,
+      "breakdown": {
+        "total": 40896,
+        "bosniak": 30528,
+        "serb": 5308,
+        "croat": 2752,
+        "other": 2308
+      },
+      "mun1990_id": "srebrenik"
+    },
+    "11045": {
+      "total": 41146,
+      "breakdown": {
+        "total": 41146,
+        "bosniak": 34500,
+        "serb": 1663,
+        "croat": 3649,
+        "other": 1334
+      },
+      "mun1990_id": "tesanj"
+    },
+    "11061": {
+      "total": 69971,
+      "breakdown": {
+        "total": 69971,
+        "bosniak": 31813,
+        "serb": 7375,
+        "croat": 25750,
+        "other": 5033
+      },
+      "mun1990_id": "travnik"
+    },
+    "11088": {
+      "total": 131402,
+      "breakdown": {
+        "total": 131402,
+        "bosniak": 62669,
+        "serb": 20090,
+        "croat": 20397,
+        "other": 28246
+      },
+      "mun1990_id": "tuzla"
+    },
+    "11100": {
+      "total": 22203,
+      "breakdown": {
+        "total": 22203,
+        "bosniak": 6714,
+        "serb": 3644,
+        "croat": 9016,
+        "other": 2829
+      },
+      "mun1990_id": "vares"
+    },
+    "11118": {
+      "total": 52908,
+      "breakdown": {
+        "total": 52908,
+        "bosniak": 48305,
+        "serb": 2266,
+        "croat": 740,
+        "other": 1597
+      },
+      "mun1990_id": "velika_kladusa"
+    },
+    "11126": {
+      "total": 46160,
+      "breakdown": {
+        "total": 46160,
+        "bosniak": 34373,
+        "serb": 7471,
+        "croat": 1872,
+        "other": 2444
+      },
+      "mun1990_id": "visoko"
+    },
+    "11142": {
+      "total": 27859,
+      "breakdown": {
+        "total": 27859,
+        "bosniak": 11514,
+        "serb": 1501,
+        "croat": 12675,
+        "other": 2169
+      },
+      "mun1990_id": "vitez"
+    },
+    "11177": {
+      "total": 52379,
+      "breakdown": {
+        "total": 52379,
+        "bosniak": 33623,
+        "serb": 11626,
+        "croat": 3429,
+        "other": 3701
+      },
+      "mun1990_id": "zavidovici"
+    },
+    "11185": {
+      "total": 146603,
+      "breakdown": {
+        "total": 146603,
+        "bosniak": 80359,
+        "serb": 23512,
+        "croat": 22511,
+        "other": 20221
+      },
+      "mun1990_id": "zenica"
+    },
+    "11207": {
+      "total": 32856,
+      "breakdown": {
+        "total": 32856,
+        "bosniak": 11676,
+        "serb": 2398,
+        "croat": 17916,
+        "other": 866
+      },
+      "mun1990_id": "zepce"
+    },
+    "11215": {
+      "total": 54783,
+      "breakdown": {
+        "total": 54783,
+        "bosniak": 44017,
+        "serb": 3525,
+        "croat": 3976,
+        "other": 3265
+      },
+      "mun1990_id": "zivinice"
+    },
+    "11231": {
+      "total": 12445,
+      "breakdown": {
+        "total": 12445,
+        "bosniak": 9399,
+        "serb": 1572,
+        "croat": 1206,
+        "other": 268
+      },
+      "mun1990_id": "lopare"
+    },
+    "11258": {
+      "total": 9038,
+      "breakdown": {
+        "total": 9038,
+        "bosniak": 8828,
+        "serb": 90,
+        "croat": 7,
+        "other": 113
+      },
+      "mun1990_id": "doboj"
+    },
+    "11266": {
+      "total": 3259,
+      "breakdown": {
+        "total": 3259,
+        "bosniak": 3045,
+        "serb": 19,
+        "croat": 97,
+        "other": 98
+      },
+      "mun1990_id": "doboj"
+    },
+    "11274": {
+      "total": 4790,
+      "breakdown": {
+        "total": 4790,
+        "bosniak": 3,
+        "serb": 6,
+        "croat": 4720,
+        "other": 61
+      },
+      "mun1990_id": "skender_vakuf"
+    },
+    "11282": {
+      "total": 6343,
+      "breakdown": {
+        "total": 6343,
+        "bosniak": 8,
+        "serb": 307,
+        "croat": 5918,
+        "other": 110
+      },
+      "mun1990_id": "bosanski_samac"
+    },
+    "11304": {
+      "total": 1795,
+      "breakdown": {
+        "total": 1795,
+        "bosniak": 21,
+        "serb": 937,
+        "croat": 804,
+        "other": 33
+      },
+      "mun1990_id": "trebinje"
+    },
+    "11312": {
+      "total": 14078,
+      "breakdown": {
+        "total": 14078,
+        "bosniak": 10317,
+        "serb": 3609,
+        "croat": 15,
+        "other": 137
+      },
+      "mun1990_id": "zvornik"
+    },
+    "11339": {
+      "total": 7777,
+      "breakdown": {
+        "total": 7777,
+        "bosniak": 7314,
+        "serb": 42,
+        "croat": 4,
+        "other": 417
+      },
+      "mun1990_id": "ugljevik"
+    },
+    "11410": {
+      "total": 126612,
+      "breakdown": {
+        "total": 126612,
+        "bosniak": 44037,
+        "serb": 23779,
+        "croat": 42907,
+        "other": 15889
+      },
+      "mun1990_id": "mostar"
+    },
+    "11428": {
+      "total": 38476,
+      "breakdown": {
+        "total": 38476,
+        "bosniak": 26343,
+        "serb": 10944,
+        "croat": 129,
+        "other": 1060
+      },
+      "mun1990_id": "bosanska_krupa"
+    },
+    "11436": {
+      "total": 15232,
+      "breakdown": {
+        "total": 15232,
+        "bosniak": 3288,
+        "serb": 11306,
+        "croat": 48,
+        "other": 590
+      },
+      "mun1990_id": "bosanski_petrovac"
+    },
+    "11444": {
+      "total": 5158,
+      "breakdown": {
+        "total": 5158,
+        "bosniak": 3632,
+        "serb": 1457,
+        "croat": 1,
+        "other": 68
+      },
+      "mun1990_id": "foca"
+    },
+    "11452": {
+      "total": 32858,
+      "breakdown": {
+        "total": 32858,
+        "bosniak": 22682,
+        "serb": 8823,
+        "croat": 76,
+        "other": 1277
+      },
+      "mun1990_id": "gorazde"
+    },
+    "11479": {
+      "total": 47485,
+      "breakdown": {
+        "total": 47485,
+        "bosniak": 42518,
+        "serb": 2592,
+        "croat": 77,
+        "other": 2298
+      },
+      "mun1990_id": "gracanica"
+    },
+    "11487": {
+      "total": 43975,
+      "breakdown": {
+        "total": 43975,
+        "bosniak": 17587,
+        "serb": 7503,
+        "croat": 15790,
+        "other": 3095
+      },
+      "mun1990_id": "jajce"
+    },
+    "11495": {
+      "total": 34464,
+      "breakdown": {
+        "total": 34464,
+        "bosniak": 29417,
+        "serb": 4081,
+        "croat": 30,
+        "other": 936
+      },
+      "mun1990_id": "kalesija"
+    },
+    "11509": {
+      "total": 28284,
+      "breakdown": {
+        "total": 28284,
+        "bosniak": 17657,
+        "serb": 9517,
+        "croat": 323,
+        "other": 787
+      },
+      "mun1990_id": "kljuc"
+    },
+    "11517": {
+      "total": 8836,
+      "breakdown": {
+        "total": 8836,
+        "bosniak": 802,
+        "serb": 4091,
+        "croat": 3812,
+        "other": 131
+      },
+      "mun1990_id": "kupres"
+    },
+    "11525": {
+      "total": 28568,
+      "breakdown": {
+        "total": 28568,
+        "bosniak": 5953,
+        "serb": 4768,
+        "croat": 16062,
+        "other": 1785
+      },
+      "mun1990_id": "odzak"
+    },
+    "11533": {
+      "total": 24229,
+      "breakdown": {
+        "total": 24229,
+        "bosniak": 1879,
+        "serb": 1519,
+        "croat": 19971,
+        "other": 860
+      },
+      "mun1990_id": "orasje"
+    },
+    "11541": {
+      "total": 54762,
+      "breakdown": {
+        "total": 54762,
+        "bosniak": 27858,
+        "serb": 21355,
+        "croat": 3227,
+        "other": 2322
+      },
+      "mun1990_id": "sanski_most"
+    },
+    "11550": {
+      "total": 62144,
+      "breakdown": {
+        "total": 62144,
+        "bosniak": 28421,
+        "serb": 20768,
+        "croat": 6833,
+        "other": 6122
+      },
+      "mun1990_id": "ilidza"
+    },
+    "11568": {
+      "total": 90967,
+      "breakdown": {
+        "total": 90967,
+        "bosniak": 33479,
+        "serb": 29403,
+        "croat": 8755,
+        "other": 19330
+      },
+      "mun1990_id": "novo_sarajevo"
+    },
+    "11576": {
+      "total": 1972,
+      "breakdown": {
+        "total": 1972,
+        "bosniak": 1374,
+        "serb": 579,
+        "croat": 4,
+        "other": 15
+      },
+      "mun1990_id": "pale"
+    },
+    "11584": {
+      "total": 49550,
+      "breakdown": {
+        "total": 49550,
+        "bosniak": 39325,
+        "serb": 4065,
+        "croat": 1120,
+        "other": 5040
+      },
+      "mun1990_id": "stari_grad_sarajevo"
+    },
+    "11592": {
+      "total": 3090,
+      "breakdown": {
+        "total": 3090,
+        "bosniak": 2513,
+        "serb": 529,
+        "croat": 1,
+        "other": 47
+      },
+      "mun1990_id": "trnovo"
+    },
+    "11606": {
+      "total": 15187,
+      "breakdown": {
+        "total": 15187,
+        "bosniak": 7397,
+        "serb": 1802,
+        "croat": 5551,
+        "other": 437
+      },
+      "mun1990_id": "stolac"
+    },
+    "11614": {
+      "total": 15343,
+      "breakdown": {
+        "total": 15343,
+        "bosniak": 29,
+        "serb": 14846,
+        "croat": 31,
+        "other": 437
+      },
+      "mun1990_id": "titov_drvar"
+    },
+    "11622": {
+      "total": 8633,
+      "breakdown": {
+        "total": 8633,
+        "bosniak": 757,
+        "serb": 105,
+        "croat": 7467,
+        "other": 304
+      },
+      "mun1990_id": "tesanj"
+    },
+    "20010": {
+      "total": 195692,
+      "breakdown": {
+        "total": 195692,
+        "bosniak": 28558,
+        "serb": 106826,
+        "croat": 29026,
+        "other": 31282
+      },
+      "mun1990_id": "banja_luka"
+    },
+    "20028": {
+      "total": 3494,
+      "breakdown": {
+        "total": 3494,
+        "bosniak": 704,
+        "serb": 2115,
+        "croat": 637,
+        "other": 38
+      },
+      "mun1990_id": "stolac"
+    },
+    "20036": {
+      "total": 96988,
+      "breakdown": {
+        "total": 96988,
+        "bosniak": 30229,
+        "serb": 57389,
+        "croat": 492,
+        "other": 8878
+      },
+      "mun1990_id": "bijeljina"
+    },
+    "20044": {
+      "total": 13284,
+      "breakdown": {
+        "total": 13284,
+        "bosniak": 1947,
+        "serb": 10628,
+        "croat": 39,
+        "other": 670
+      },
+      "mun1990_id": "bileca"
+    },
+    "20052": {
+      "total": 33619,
+      "breakdown": {
+        "total": 33619,
+        "bosniak": 21535,
+        "serb": 11475,
+        "croat": 40,
+        "other": 569
+      },
+      "mun1990_id": "bratunac"
+    },
+    "20079": {
+      "total": 33744,
+      "breakdown": {
+        "total": 33744,
+        "bosniak": 4087,
+        "serb": 11124,
+        "croat": 13949,
+        "other": 4584
+      },
+      "mun1990_id": "bosanski_brod"
+    },
+    "20087": {
+      "total": 21199,
+      "breakdown": {
+        "total": 21199,
+        "bosniak": 13471,
+        "serb": 6743,
+        "croat": 32,
+        "other": 953
+      },
+      "mun1990_id": "visegrad"
+    },
+    "20095": {
+      "total": 17810,
+      "breakdown": {
+        "total": 17810,
+        "bosniak": 10939,
+        "serb": 6318,
+        "croat": 32,
+        "other": 521
+      },
+      "mun1990_id": "vlasenica"
+    },
+    "20109": {
+      "total": 8241,
+      "breakdown": {
+        "total": 8241,
+        "bosniak": 3124,
+        "serb": 1341,
+        "croat": 3391,
+        "other": 385
+      },
+      "mun1990_id": "odzak"
+    },
+    "20117": {
+      "total": 10788,
+      "breakdown": {
+        "total": 10788,
+        "bosniak": 3858,
+        "serb": 6661,
+        "croat": 29,
+        "other": 240
+      },
+      "mun1990_id": "gacko"
+    },
+    "20125": {
+      "total": 59974,
+      "breakdown": {
+        "total": 59974,
+        "bosniak": 15851,
+        "serb": 35753,
+        "croat": 3417,
+        "other": 4953
+      },
+      "mun1990_id": "bosanska_gradiska"
+    },
+    "20133": {
+      "total": 56489,
+      "breakdown": {
+        "total": 56489,
+        "bosniak": 7086,
+        "serb": 22938,
+        "croat": 21952,
+        "other": 4513
+      },
+      "mun1990_id": "derventa"
+    },
+    "20141": {
+      "total": 95213,
+      "breakdown": {
+        "total": 95213,
+        "bosniak": 29203,
+        "serb": 47133,
+        "croat": 10676,
+        "other": 8201
+      },
+      "mun1990_id": "doboj"
+    },
+    "20150": {
+      "total": 4138,
+      "breakdown": {
+        "total": 4138,
+        "bosniak": 14,
+        "serb": 2716,
+        "croat": 1337,
+        "other": 71
+      },
+      "mun1990_id": "orasje"
+    },
+    "20168": {
+      "total": 67217,
+      "breakdown": {
+        "total": 67217,
+        "bosniak": 37785,
+        "serb": 27254,
+        "croat": 107,
+        "other": 2071
+      },
+      "mun1990_id": "zvornik"
+    },
+    "20176": {
+      "total": 8612,
+      "breakdown": {
+        "total": 8612,
+        "bosniak": 1941,
+        "serb": 5852,
+        "croat": 200,
+        "other": 619
+      },
+      "mun1990_id": "ilidza"
+    },
+    "20184": {
+      "total": 61,
+      "breakdown": {
+        "total": 61,
+        "bosniak": 1,
+        "serb": 60,
+        "croat": 0,
+        "other": 0
+      },
+      "mun1990_id": "titov_drvar"
+    },
+    "20192": {
+      "total": 518,
+      "breakdown": {
+        "total": 518,
+        "bosniak": 298,
+        "serb": 87,
+        "croat": 130,
+        "other": 3
+      },
+      "mun1990_id": "mostar"
+    },
+    "20206": {
+      "total": 1362,
+      "breakdown": {
+        "total": 1362,
+        "bosniak": 230,
+        "serb": 1107,
+        "croat": 6,
+        "other": 19
+      },
+      "mun1990_id": "novi_grad_sarajevo"
+    },
+    "20214": {
+      "total": 4122,
+      "breakdown": {
+        "total": 4122,
+        "bosniak": 423,
+        "serb": 3496,
+        "croat": 43,
+        "other": 160
+      },
+      "mun1990_id": "stari_grad_sarajevo"
+    },
+    "20222": {
+      "total": 2149,
+      "breakdown": {
+        "total": 2149,
+        "bosniak": 754,
+        "serb": 1161,
+        "croat": 168,
+        "other": 66
+      },
+      "mun1990_id": "jajce"
+    },
+    "20249": {
+      "total": 4249,
+      "breakdown": {
+        "total": 4249,
+        "bosniak": 1314,
+        "serb": 2814,
+        "croat": 17,
+        "other": 104
+      },
+      "mun1990_id": "kalinovik"
+    },
+    "20257": {
+      "total": 15404,
+      "breakdown": {
+        "total": 15404,
+        "bosniak": 1068,
+        "serb": 13659,
+        "croat": 418,
+        "other": 259
+      },
+      "mun1990_id": "skender_vakuf"
+    },
+    "20265": {
+      "total": 31606,
+      "breakdown": {
+        "total": 31606,
+        "bosniak": 6440,
+        "serb": 21728,
+        "croat": 488,
+        "other": 2950
+      },
+      "mun1990_id": "bosanska_dubica"
+    },
+    "20273": {
+      "total": 6231,
+      "breakdown": {
+        "total": 6231,
+        "bosniak": 1707,
+        "serb": 4041,
+        "croat": 166,
+        "other": 317
+      },
+      "mun1990_id": "bosanska_kostajnica"
+    },
+    "20281": {
+      "total": 36853,
+      "breakdown": {
+        "total": 36853,
+        "bosniak": 11090,
+        "serb": 14056,
+        "croat": 10695,
+        "other": 1012
+      },
+      "mun1990_id": "kotor_varos"
+    },
+    "20290": {
+      "total": 2904,
+      "breakdown": {
+        "total": 2904,
+        "bosniak": 81,
+        "serb": 2806,
+        "croat": 5,
+        "other": 12
+      },
+      "mun1990_id": "bosanska_krupa"
+    },
+    "20303": {
+      "total": 782,
+      "breakdown": {
+        "total": 782,
+        "bosniak": 0,
+        "serb": 773,
+        "croat": 1,
+        "other": 8
+      },
+      "mun1990_id": "kupres"
+    },
+    "20311": {
+      "total": 29832,
+      "breakdown": {
+        "total": 29832,
+        "bosniak": 408,
+        "serb": 24176,
+        "croat": 2565,
+        "other": 2683
+      },
+      "mun1990_id": "laktasi"
+    },
+    "20320": {
+      "total": 20288,
+      "breakdown": {
+        "total": 20288,
+        "bosniak": 2591,
+        "serb": 16832,
+        "croat": 58,
+        "other": 807
+      },
+      "mun1990_id": "lopare"
+    },
+    "20338": {
+      "total": 4172,
+      "breakdown": {
+        "total": 4172,
+        "bosniak": 332,
+        "serb": 3748,
+        "croat": 39,
+        "other": 53
+      },
+      "mun1990_id": "ljubinje"
+    },
+    "20346": {
+      "total": 15719,
+      "breakdown": {
+        "total": 15719,
+        "bosniak": 7433,
+        "serb": 7983,
+        "croat": 7,
+        "other": 296
+      },
+      "mun1990_id": "vlasenica"
+    },
+    "20354": {
+      "total": 33567,
+      "breakdown": {
+        "total": 33567,
+        "bosniak": 7632,
+        "serb": 14888,
+        "croat": 8132,
+        "other": 2915
+      },
+      "mun1990_id": "modrica"
+    },
+    "20362": {
+      "total": 26278,
+      "breakdown": {
+        "total": 26278,
+        "bosniak": 2311,
+        "serb": 21056,
+        "croat": 1992,
+        "other": 919
+      },
+      "mun1990_id": "mrkonjic_grad"
+    },
+    "20389": {
+      "total": 13944,
+      "breakdown": {
+        "total": 13944,
+        "bosniak": 2834,
+        "serb": 10689,
+        "croat": 210,
+        "other": 211
+      },
+      "mun1990_id": "nevesinje"
+    },
+    "20397": {
+      "total": 35434,
+      "breakdown": {
+        "total": 35434,
+        "bosniak": 12333,
+        "serb": 21060,
+        "croat": 237,
+        "other": 1804
+      },
+      "mun1990_id": "bosanski_novi"
+    },
+    "20419": {
+      "total": 4715,
+      "breakdown": {
+        "total": 4715,
+        "bosniak": 3614,
+        "serb": 1020,
+        "croat": 4,
+        "other": 77
+      },
+      "mun1990_id": "gorazde"
+    },
+    "20427": {
+      "total": 7345,
+      "breakdown": {
+        "total": 7345,
+        "bosniak": 3720,
+        "serb": 3578,
+        "croat": 5,
+        "other": 42
+      },
+      "mun1990_id": "kalesija"
+    },
+    "20435": {
+      "total": 5545,
+      "breakdown": {
+        "total": 5545,
+        "bosniak": 278,
+        "serb": 4008,
+        "croat": 1095,
+        "other": 164
+      },
+      "mun1990_id": "sanski_most"
+    },
+    "20443": {
+      "total": 14480,
+      "breakdown": {
+        "total": 14480,
+        "bosniak": 3012,
+        "serb": 10780,
+        "croat": 125,
+        "other": 563
+      },
+      "mun1990_id": "pale"
+    },
+    "20451": {
+      "total": 10395,
+      "breakdown": {
+        "total": 10395,
+        "bosniak": 43,
+        "serb": 4177,
+        "croat": 5523,
+        "other": 652
+      },
+      "mun1990_id": "gradacac"
+    },
+    "20460": {
+      "total": 389,
+      "breakdown": {
+        "total": 389,
+        "bosniak": 0,
+        "serb": 388,
+        "croat": 0,
+        "other": 1
+      },
+      "mun1990_id": "bosanski_petrovac"
+    },
+    "20478": {
+      "total": 9150,
+      "breakdown": {
+        "total": 9150,
+        "bosniak": 82,
+        "serb": 8613,
+        "croat": 48,
+        "other": 407
+      },
+      "mun1990_id": "gracanica"
+    },
+    "20486": {
+      "total": 112543,
+      "breakdown": {
+        "total": 112543,
+        "bosniak": 49351,
+        "serb": 47581,
+        "croat": 6316,
+        "other": 9295
+      },
+      "mun1990_id": "prijedor"
+    },
+    "20494": {
+      "total": 47055,
+      "breakdown": {
+        "total": 47055,
+        "bosniak": 7143,
+        "serb": 33508,
+        "croat": 1721,
+        "other": 4683
+      },
+      "mun1990_id": "prnjavor"
+    },
+    "20508": {
+      "total": 9107,
+      "breakdown": {
+        "total": 9107,
+        "bosniak": 39,
+        "serb": 8989,
+        "croat": 7,
+        "other": 72
+      },
+      "mun1990_id": "kljuc"
+    },
+    "20516": {
+      "total": 21881,
+      "breakdown": {
+        "total": 21881,
+        "bosniak": 13187,
+        "serb": 8316,
+        "croat": 19,
+        "other": 359
+      },
+      "mun1990_id": "rogatica"
+    },
+    "20524": {
+      "total": 11571,
+      "breakdown": {
+        "total": 11571,
+        "bosniak": 3130,
+        "serb": 8150,
+        "croat": 5,
+        "other": 286
+      },
+      "mun1990_id": "rudo"
+    },
+    "20532": {
+      "total": 15513,
+      "breakdown": {
+        "total": 15513,
+        "bosniak": 5017,
+        "serb": 10301,
+        "croat": 19,
+        "other": 176
+      },
+      "mun1990_id": "sokolac"
+    },
+    "20559": {
+      "total": 21840,
+      "breakdown": {
+        "total": 21840,
+        "bosniak": 940,
+        "serb": 19382,
+        "croat": 140,
+        "other": 1378
+      },
+      "mun1990_id": "srbac"
+    },
+    "20567": {
+      "total": 36666,
+      "breakdown": {
+        "total": 36666,
+        "bosniak": 27572,
+        "serb": 8315,
+        "croat": 38,
+        "other": 741
+      },
+      "mun1990_id": "srebrenica"
+    },
+    "20575": {
+      "total": 60708,
+      "breakdown": {
+        "total": 60708,
+        "bosniak": 12875,
+        "serb": 33316,
+        "croat": 9930,
+        "other": 4587
+      },
+      "mun1990_id": "teslic"
+    },
+    "20583": {
+      "total": 29201,
+      "breakdown": {
+        "total": 29201,
+        "bosniak": 5550,
+        "serb": 20412,
+        "croat": 442,
+        "other": 2797
+      },
+      "mun1990_id": "trebinje"
+    },
+    "20591": {
+      "total": 3901,
+      "breakdown": {
+        "total": 3901,
+        "bosniak": 2277,
+        "serb": 1530,
+        "croat": 15,
+        "other": 79
+      },
+      "mun1990_id": "trnovo"
+    },
+    "20605": {
+      "total": 17830,
+      "breakdown": {
+        "total": 17830,
+        "bosniak": 2927,
+        "serb": 14446,
+        "croat": 52,
+        "other": 405
+      },
+      "mun1990_id": "ugljevik"
+    },
+    "20613": {
+      "total": 35389,
+      "breakdown": {
+        "total": 35389,
+        "bosniak": 17183,
+        "serb": 16867,
+        "croat": 93,
+        "other": 1246
+      },
+      "mun1990_id": "foca"
+    },
+    "20621": {
+      "total": 6348,
+      "breakdown": {
+        "total": 6348,
+        "bosniak": 2543,
+        "serb": 3674,
+        "croat": 7,
+        "other": 124
+      },
+      "mun1990_id": "han_pijesak"
+    },
+    "20630": {
+      "total": 8956,
+      "breakdown": {
+        "total": 8956,
+        "bosniak": 4024,
+        "serb": 4709,
+        "croat": 5,
+        "other": 218
+      },
+      "mun1990_id": "cajnice"
+    },
+    "20648": {
+      "total": 18713,
+      "breakdown": {
+        "total": 18713,
+        "bosniak": 1446,
+        "serb": 16554,
+        "croat": 76,
+        "other": 637
+      },
+      "mun1990_id": "celinac"
+    },
+    "20656": {
+      "total": 25299,
+      "breakdown": {
+        "total": 25299,
+        "bosniak": 2221,
+        "serb": 13267,
+        "croat": 7669,
+        "other": 2142
+      },
+      "mun1990_id": "bosanski_samac"
+    },
+    "20664": {
+      "total": 10347,
+      "breakdown": {
+        "total": 10347,
+        "bosniak": 326,
+        "serb": 9741,
+        "croat": 11,
+        "other": 269
+      },
+      "mun1990_id": "sekovici"
+    },
+    "20672": {
+      "total": 15751,
+      "breakdown": {
+        "total": 15751,
+        "bosniak": 2965,
+        "serb": 12502,
+        "croat": 31,
+        "other": 253
+      },
+      "mun1990_id": "sipovo"
+    },
+    "30163": {
+      "total": 87627,
+      "breakdown": {
+        "total": 87627,
+        "bosniak": 38617,
+        "serb": 18128,
+        "croat": 22252,
+        "other": 8630
+      },
+      "mun1990_id": "brcko"
+    }
+  },
+  "by_mun1990_id": {
+    "banja_luka": {
+      "total": 195692,
+      "breakdown": {
+        "total": 195692,
+        "bosniak": 28558,
+        "serb": 106826,
+        "croat": 29026,
+        "other": 31282
+      }
+    },
+    "banovici": {
+      "total": 26590,
+      "breakdown": {
+        "total": 26590,
+        "bosniak": 19162,
+        "serb": 4514,
+        "croat": 550,
+        "other": 2364
+      }
+    },
+    "bihac": {
+      "total": 72454,
+      "breakdown": {
+        "total": 72454,
+        "bosniak": 46740,
+        "serb": 14391,
+        "croat": 5582,
+        "other": 5741
+      }
+    },
+    "bijeljina": {
+      "total": 96988,
+      "breakdown": {
+        "total": 96988,
+        "bosniak": 30229,
+        "serb": 57389,
+        "croat": 492,
+        "other": 8878
+      }
+    },
+    "bileca": {
+      "total": 13284,
+      "breakdown": {
+        "total": 13284,
+        "bosniak": 1947,
+        "serb": 10628,
+        "croat": 39,
+        "other": 670
+      }
+    },
+    "bosanska_dubica": {
+      "total": 31606,
+      "breakdown": {
+        "total": 31606,
+        "bosniak": 6440,
+        "serb": 21728,
+        "croat": 488,
+        "other": 2950
+      }
+    },
+    "bosanska_gradiska": {
+      "total": 59974,
+      "breakdown": {
+        "total": 59974,
+        "bosniak": 15851,
+        "serb": 35753,
+        "croat": 3417,
+        "other": 4953
+      }
+    },
+    "bosanska_kostajnica": {
+      "total": 6231,
+      "breakdown": {
+        "total": 6231,
+        "bosniak": 1707,
+        "serb": 4041,
+        "croat": 166,
+        "other": 317
+      }
+    },
+    "bosanska_krupa": {
+      "total": 41380,
+      "breakdown": {
+        "total": 41380,
+        "bosniak": 26424,
+        "serb": 13750,
+        "croat": 134,
+        "other": 1072
+      }
+    },
+    "bosanski_brod": {
+      "total": 33744,
+      "breakdown": {
+        "total": 33744,
+        "bosniak": 4087,
+        "serb": 11124,
+        "croat": 13949,
+        "other": 4584
+      }
+    },
+    "bosanski_novi": {
+      "total": 35434,
+      "breakdown": {
+        "total": 35434,
+        "bosniak": 12333,
+        "serb": 21060,
+        "croat": 237,
+        "other": 1804
+      }
+    },
+    "bosanski_petrovac": {
+      "total": 15621,
+      "breakdown": {
+        "total": 15621,
+        "bosniak": 3288,
+        "serb": 11694,
+        "croat": 48,
+        "other": 591
+      }
+    },
+    "bosanski_samac": {
+      "total": 31642,
+      "breakdown": {
+        "total": 31642,
+        "bosniak": 2229,
+        "serb": 13574,
+        "croat": 13587,
+        "other": 2252
+      }
+    },
+    "bosansko_grahovo": {
+      "total": 8311,
+      "breakdown": {
+        "total": 8311,
+        "bosniak": 12,
+        "serb": 7888,
+        "croat": 226,
+        "other": 185
+      }
+    },
+    "bratunac": {
+      "total": 33619,
+      "breakdown": {
+        "total": 33619,
+        "bosniak": 21535,
+        "serb": 11475,
+        "croat": 40,
+        "other": 569
+      }
+    },
+    "brcko": {
+      "total": 87627,
+      "breakdown": {
+        "total": 87627,
+        "bosniak": 38617,
+        "serb": 18128,
+        "croat": 22252,
+        "other": 8630
+      }
+    },
+    "breza": {
+      "total": 17317,
+      "breakdown": {
+        "total": 17317,
+        "bosniak": 13079,
+        "serb": 2122,
+        "croat": 851,
+        "other": 1265
+      }
+    },
+    "bugojno": {
+      "total": 46889,
+      "breakdown": {
+        "total": 46889,
+        "bosniak": 19697,
+        "serb": 8673,
+        "croat": 16031,
+        "other": 2488
+      }
+    },
+    "busovaca": {
+      "total": 18879,
+      "breakdown": {
+        "total": 18879,
+        "bosniak": 8451,
+        "serb": 623,
+        "croat": 9093,
+        "other": 712
+      }
+    },
+    "cajnice": {
+      "total": 8956,
+      "breakdown": {
+        "total": 8956,
+        "bosniak": 4024,
+        "serb": 4709,
+        "croat": 5,
+        "other": 218
+      }
+    },
+    "capljina": {
+      "total": 27882,
+      "breakdown": {
+        "total": 27882,
+        "bosniak": 7672,
+        "serb": 3753,
+        "croat": 14969,
+        "other": 1488
+      }
+    },
+    "cazin": {
+      "total": 63409,
+      "breakdown": {
+        "total": 63409,
+        "bosniak": 61693,
+        "serb": 778,
+        "croat": 139,
+        "other": 799
+      }
+    },
+    "celinac": {
+      "total": 18713,
+      "breakdown": {
+        "total": 18713,
+        "bosniak": 1446,
+        "serb": 16554,
+        "croat": 76,
+        "other": 637
+      }
+    },
+    "centar_sarajevo": {
+      "total": 79286,
+      "breakdown": {
+        "total": 79286,
+        "bosniak": 39761,
+        "serb": 16631,
+        "croat": 5428,
+        "other": 17466
+      }
+    },
+    "citluk": {
+      "total": 15083,
+      "breakdown": {
+        "total": 15083,
+        "bosniak": 111,
+        "serb": 19,
+        "croat": 14823,
+        "other": 130
+      }
+    },
+    "derventa": {
+      "total": 56489,
+      "breakdown": {
+        "total": 56489,
+        "bosniak": 7086,
+        "serb": 22938,
+        "croat": 21952,
+        "other": 4513
+      }
+    },
+    "doboj": {
+      "total": 107510,
+      "breakdown": {
+        "total": 107510,
+        "bosniak": 41076,
+        "serb": 47242,
+        "croat": 10780,
+        "other": 8412
+      }
+    },
+    "donji_vakuf": {
+      "total": 24372,
+      "breakdown": {
+        "total": 24372,
+        "bosniak": 13509,
+        "serb": 9364,
+        "croat": 682,
+        "other": 817
+      }
+    },
+    "duvno": {
+      "total": 30009,
+      "breakdown": {
+        "total": 30009,
+        "bosniak": 3148,
+        "serb": 576,
+        "croat": 25976,
+        "other": 309
+      }
+    },
+    "foca": {
+      "total": 40547,
+      "breakdown": {
+        "total": 40547,
+        "bosniak": 20815,
+        "serb": 18324,
+        "croat": 94,
+        "other": 1314
+      }
+    },
+    "fojnica": {
+      "total": 16296,
+      "breakdown": {
+        "total": 16296,
+        "bosniak": 8024,
+        "serb": 157,
+        "croat": 6623,
+        "other": 1492
+      }
+    },
+    "gacko": {
+      "total": 10788,
+      "breakdown": {
+        "total": 10788,
+        "bosniak": 3858,
+        "serb": 6661,
+        "croat": 29,
+        "other": 240
+      }
+    },
+    "glamoc": {
+      "total": 12593,
+      "breakdown": {
+        "total": 12593,
+        "bosniak": 2257,
+        "serb": 9951,
+        "croat": 184,
+        "other": 201
+      }
+    },
+    "gorazde": {
+      "total": 37573,
+      "breakdown": {
+        "total": 37573,
+        "bosniak": 26296,
+        "serb": 9843,
+        "croat": 80,
+        "other": 1354
+      }
+    },
+    "gornji_vakuf": {
+      "total": 25181,
+      "breakdown": {
+        "total": 25181,
+        "bosniak": 14063,
+        "serb": 110,
+        "croat": 10706,
+        "other": 302
+      }
+    },
+    "gracanica": {
+      "total": 56635,
+      "breakdown": {
+        "total": 56635,
+        "bosniak": 42600,
+        "serb": 11205,
+        "croat": 125,
+        "other": 2705
+      }
+    },
+    "gradacac": {
+      "total": 52768,
+      "breakdown": {
+        "total": 52768,
+        "bosniak": 33747,
+        "serb": 7935,
+        "croat": 8357,
+        "other": 2729
+      }
+    },
+    "grude": {
+      "total": 16358,
+      "breakdown": {
+        "total": 16358,
+        "bosniak": 4,
+        "serb": 9,
+        "croat": 16210,
+        "other": 135
+      }
+    },
+    "hadzici": {
+      "total": 24200,
+      "breakdown": {
+        "total": 24200,
+        "bosniak": 15392,
+        "serb": 6362,
+        "croat": 746,
+        "other": 1700
+      }
+    },
+    "han_pijesak": {
+      "total": 6348,
+      "breakdown": {
+        "total": 6348,
+        "bosniak": 2543,
+        "serb": 3674,
+        "croat": 7,
+        "other": 124
+      }
+    },
+    "ilidza": {
+      "total": 70756,
+      "breakdown": {
+        "total": 70756,
+        "bosniak": 30362,
+        "serb": 26620,
+        "croat": 7033,
+        "other": 6741
+      }
+    },
+    "ilijas": {
+      "total": 25016,
+      "breakdown": {
+        "total": 25016,
+        "bosniak": 10440,
+        "serb": 11303,
+        "croat": 1736,
+        "other": 1537
+      }
+    },
+    "jablanica": {
+      "total": 12691,
+      "breakdown": {
+        "total": 12691,
+        "bosniak": 9099,
+        "serb": 504,
+        "croat": 2291,
+        "other": 797
+      }
+    },
+    "jajce": {
+      "total": 46124,
+      "breakdown": {
+        "total": 46124,
+        "bosniak": 18341,
+        "serb": 8664,
+        "croat": 15958,
+        "other": 3161
+      }
+    },
+    "kakanj": {
+      "total": 55950,
+      "breakdown": {
+        "total": 55950,
+        "bosniak": 30528,
+        "serb": 4929,
+        "croat": 16556,
+        "other": 3937
+      }
+    },
+    "kalesija": {
+      "total": 41809,
+      "breakdown": {
+        "total": 41809,
+        "bosniak": 33137,
+        "serb": 7659,
+        "croat": 35,
+        "other": 978
+      }
+    },
+    "kalinovik": {
+      "total": 4249,
+      "breakdown": {
+        "total": 4249,
+        "bosniak": 1314,
+        "serb": 2814,
+        "croat": 17,
+        "other": 104
+      }
+    },
+    "kiseljak": {
+      "total": 24164,
+      "breakdown": {
+        "total": 24164,
+        "bosniak": 9778,
+        "serb": 740,
+        "croat": 12550,
+        "other": 1096
+      }
+    },
+    "kladanj": {
+      "total": 15765,
+      "breakdown": {
+        "total": 15765,
+        "bosniak": 11976,
+        "serb": 3299,
+        "croat": 35,
+        "other": 455
+      }
+    },
+    "kljuc": {
+      "total": 37391,
+      "breakdown": {
+        "total": 37391,
+        "bosniak": 17696,
+        "serb": 18506,
+        "croat": 330,
+        "other": 859
+      }
+    },
+    "konjic": {
+      "total": 44264,
+      "breakdown": {
+        "total": 44264,
+        "bosniak": 24192,
+        "serb": 6625,
+        "croat": 11513,
+        "other": 1934
+      }
+    },
+    "kotor_varos": {
+      "total": 36853,
+      "breakdown": {
+        "total": 36853,
+        "bosniak": 11090,
+        "serb": 14056,
+        "croat": 10695,
+        "other": 1012
+      }
+    },
+    "kresevo": {
+      "total": 6731,
+      "breakdown": {
+        "total": 6731,
+        "bosniak": 1531,
+        "serb": 34,
+        "croat": 4714,
+        "other": 452
+      }
+    },
+    "kupres": {
+      "total": 9618,
+      "breakdown": {
+        "total": 9618,
+        "bosniak": 802,
+        "serb": 4864,
+        "croat": 3813,
+        "other": 139
+      }
+    },
+    "laktasi": {
+      "total": 29832,
+      "breakdown": {
+        "total": 29832,
+        "bosniak": 408,
+        "serb": 24176,
+        "croat": 2565,
+        "other": 2683
+      }
+    },
+    "listica": {
+      "total": 27160,
+      "breakdown": {
+        "total": 27160,
+        "bosniak": 9,
+        "serb": 148,
+        "croat": 26864,
+        "other": 139
+      }
+    },
+    "livno": {
+      "total": 40600,
+      "breakdown": {
+        "total": 40600,
+        "bosniak": 5793,
+        "serb": 3913,
+        "croat": 29324,
+        "other": 1570
+      }
+    },
+    "lopare": {
+      "total": 32733,
+      "breakdown": {
+        "total": 32733,
+        "bosniak": 11990,
+        "serb": 18404,
+        "croat": 1264,
+        "other": 1075
+      }
+    },
+    "lukavac": {
+      "total": 56355,
+      "breakdown": {
+        "total": 56355,
+        "bosniak": 38078,
+        "serb": 11463,
+        "croat": 2159,
+        "other": 4655
+      }
+    },
+    "ljubinje": {
+      "total": 4172,
+      "breakdown": {
+        "total": 4172,
+        "bosniak": 332,
+        "serb": 3748,
+        "croat": 39,
+        "other": 53
+      }
+    },
+    "ljubuski": {
+      "total": 28340,
+      "breakdown": {
+        "total": 28340,
+        "bosniak": 1592,
+        "serb": 65,
+        "croat": 26127,
+        "other": 556
+      }
+    },
+    "maglaj": {
+      "total": 34115,
+      "breakdown": {
+        "total": 34115,
+        "bosniak": 18988,
+        "serb": 9522,
+        "croat": 3596,
+        "other": 2009
+      }
+    },
+    "modrica": {
+      "total": 33567,
+      "breakdown": {
+        "total": 33567,
+        "bosniak": 7632,
+        "serb": 14888,
+        "croat": 8132,
+        "other": 2915
+      }
+    },
+    "mostar": {
+      "total": 127130,
+      "breakdown": {
+        "total": 127130,
+        "bosniak": 44335,
+        "serb": 23866,
+        "croat": 43037,
+        "other": 15892
+      }
+    },
+    "mrkonjic_grad": {
+      "total": 26278,
+      "breakdown": {
+        "total": 26278,
+        "bosniak": 2311,
+        "serb": 21056,
+        "croat": 1992,
+        "other": 919
+      }
+    },
+    "neum": {
+      "total": 4325,
+      "breakdown": {
+        "total": 4325,
+        "bosniak": 190,
+        "serb": 207,
+        "croat": 3792,
+        "other": 136
+      }
+    },
+    "nevesinje": {
+      "total": 13944,
+      "breakdown": {
+        "total": 13944,
+        "bosniak": 2834,
+        "serb": 10689,
+        "croat": 210,
+        "other": 211
+      }
+    },
+    "novi_grad_sarajevo": {
+      "total": 135159,
+      "breakdown": {
+        "total": 135159,
+        "bosniak": 68635,
+        "serb": 37107,
+        "croat": 8796,
+        "other": 20621
+      }
+    },
+    "novi_travnik": {
+      "total": 30713,
+      "breakdown": {
+        "total": 30713,
+        "bosniak": 11625,
+        "serb": 4097,
+        "croat": 12162,
+        "other": 2829
+      }
+    },
+    "odzak": {
+      "total": 36809,
+      "breakdown": {
+        "total": 36809,
+        "bosniak": 9077,
+        "serb": 6109,
+        "croat": 19453,
+        "other": 2170
+      }
+    },
+    "olovo": {
+      "total": 16326,
+      "breakdown": {
+        "total": 16326,
+        "bosniak": 12175,
+        "serb": 3087,
+        "croat": 642,
+        "other": 422
+      }
+    },
+    "orasje": {
+      "total": 28367,
+      "breakdown": {
+        "total": 28367,
+        "bosniak": 1893,
+        "serb": 4235,
+        "croat": 21308,
+        "other": 931
+      }
+    },
+    "pale": {
+      "total": 16452,
+      "breakdown": {
+        "total": 16452,
+        "bosniak": 4386,
+        "serb": 11359,
+        "croat": 129,
+        "other": 578
+      }
+    },
+    "posusje": {
+      "total": 17134,
+      "breakdown": {
+        "total": 17134,
+        "bosniak": 6,
+        "serb": 9,
+        "croat": 16963,
+        "other": 156
+      }
+    },
+    "prijedor": {
+      "total": 112543,
+      "breakdown": {
+        "total": 112543,
+        "bosniak": 49351,
+        "serb": 47581,
+        "croat": 6316,
+        "other": 9295
+      }
+    },
+    "prnjavor": {
+      "total": 47055,
+      "breakdown": {
+        "total": 47055,
+        "bosniak": 7143,
+        "serb": 33508,
+        "croat": 1721,
+        "other": 4683
+      }
+    },
+    "prozor": {
+      "total": 19760,
+      "breakdown": {
+        "total": 19760,
+        "bosniak": 7225,
+        "serb": 45,
+        "croat": 12259,
+        "other": 231
+      }
+    },
+    "rogatica": {
+      "total": 21881,
+      "breakdown": {
+        "total": 21881,
+        "bosniak": 13187,
+        "serb": 8316,
+        "croat": 19,
+        "other": 359
+      }
+    },
+    "rudo": {
+      "total": 11571,
+      "breakdown": {
+        "total": 11571,
+        "bosniak": 3130,
+        "serb": 8150,
+        "croat": 5,
+        "other": 286
+      }
+    },
+    "sanski_most": {
+      "total": 60307,
+      "breakdown": {
+        "total": 60307,
+        "bosniak": 28136,
+        "serb": 25363,
+        "croat": 4322,
+        "other": 2486
+      }
+    },
+    "novo_sarajevo": {
+      "total": 90967,
+      "breakdown": {
+        "total": 90967,
+        "bosniak": 33479,
+        "serb": 29403,
+        "croat": 8755,
+        "other": 19330
+      }
+    },
+    "sekovici": {
+      "total": 10347,
+      "breakdown": {
+        "total": 10347,
+        "bosniak": 326,
+        "serb": 9741,
+        "croat": 11,
+        "other": 269
+      }
+    },
+    "sipovo": {
+      "total": 15751,
+      "breakdown": {
+        "total": 15751,
+        "bosniak": 2965,
+        "serb": 12502,
+        "croat": 31,
+        "other": 253
+      }
+    },
+    "skender_vakuf": {
+      "total": 20194,
+      "breakdown": {
+        "total": 20194,
+        "bosniak": 1071,
+        "serb": 13665,
+        "croat": 5138,
+        "other": 320
+      }
+    },
+    "sokolac": {
+      "total": 15513,
+      "breakdown": {
+        "total": 15513,
+        "bosniak": 5017,
+        "serb": 10301,
+        "croat": 19,
+        "other": 176
+      }
+    },
+    "srbac": {
+      "total": 21840,
+      "breakdown": {
+        "total": 21840,
+        "bosniak": 940,
+        "serb": 19382,
+        "croat": 140,
+        "other": 1378
+      }
+    },
+    "srebrenica": {
+      "total": 36666,
+      "breakdown": {
+        "total": 36666,
+        "bosniak": 27572,
+        "serb": 8315,
+        "croat": 38,
+        "other": 741
+      }
+    },
+    "srebrenik": {
+      "total": 40896,
+      "breakdown": {
+        "total": 40896,
+        "bosniak": 30528,
+        "serb": 5308,
+        "croat": 2752,
+        "other": 2308
+      }
+    },
+    "stari_grad_sarajevo": {
+      "total": 53672,
+      "breakdown": {
+        "total": 53672,
+        "bosniak": 39748,
+        "serb": 7561,
+        "croat": 1163,
+        "other": 5200
+      }
+    },
+    "stolac": {
+      "total": 18681,
+      "breakdown": {
+        "total": 18681,
+        "bosniak": 8101,
+        "serb": 3917,
+        "croat": 6188,
+        "other": 475
+      }
+    },
+    "tesanj": {
+      "total": 49779,
+      "breakdown": {
+        "total": 49779,
+        "bosniak": 35257,
+        "serb": 1768,
+        "croat": 11116,
+        "other": 1638
+      }
+    },
+    "teslic": {
+      "total": 60708,
+      "breakdown": {
+        "total": 60708,
+        "bosniak": 12875,
+        "serb": 33316,
+        "croat": 9930,
+        "other": 4587
+      }
+    },
+    "titov_drvar": {
+      "total": 15404,
+      "breakdown": {
+        "total": 15404,
+        "bosniak": 30,
+        "serb": 14906,
+        "croat": 31,
+        "other": 437
+      }
+    },
+    "travnik": {
+      "total": 69971,
+      "breakdown": {
+        "total": 69971,
+        "bosniak": 31813,
+        "serb": 7375,
+        "croat": 25750,
+        "other": 5033
+      }
+    },
+    "trebinje": {
+      "total": 30996,
+      "breakdown": {
+        "total": 30996,
+        "bosniak": 5571,
+        "serb": 21349,
+        "croat": 1246,
+        "other": 2830
+      }
+    },
+    "trnovo": {
+      "total": 6991,
+      "breakdown": {
+        "total": 6991,
+        "bosniak": 4790,
+        "serb": 2059,
+        "croat": 16,
+        "other": 126
+      }
+    },
+    "tuzla": {
+      "total": 131402,
+      "breakdown": {
+        "total": 131402,
+        "bosniak": 62669,
+        "serb": 20090,
+        "croat": 20397,
+        "other": 28246
+      }
+    },
+    "ugljevik": {
+      "total": 25607,
+      "breakdown": {
+        "total": 25607,
+        "bosniak": 10241,
+        "serb": 14488,
+        "croat": 56,
+        "other": 822
+      }
+    },
+    "vares": {
+      "total": 22203,
+      "breakdown": {
+        "total": 22203,
+        "bosniak": 6714,
+        "serb": 3644,
+        "croat": 9016,
+        "other": 2829
+      }
+    },
+    "velika_kladusa": {
+      "total": 52908,
+      "breakdown": {
+        "total": 52908,
+        "bosniak": 48305,
+        "serb": 2266,
+        "croat": 740,
+        "other": 1597
+      }
+    },
+    "visegrad": {
+      "total": 21199,
+      "breakdown": {
+        "total": 21199,
+        "bosniak": 13471,
+        "serb": 6743,
+        "croat": 32,
+        "other": 953
+      }
+    },
+    "visoko": {
+      "total": 46160,
+      "breakdown": {
+        "total": 46160,
+        "bosniak": 34373,
+        "serb": 7471,
+        "croat": 1872,
+        "other": 2444
+      }
+    },
+    "vitez": {
+      "total": 27859,
+      "breakdown": {
+        "total": 27859,
+        "bosniak": 11514,
+        "serb": 1501,
+        "croat": 12675,
+        "other": 2169
+      }
+    },
+    "vlasenica": {
+      "total": 33529,
+      "breakdown": {
+        "total": 33529,
+        "bosniak": 18372,
+        "serb": 14301,
+        "croat": 39,
+        "other": 817
+      }
+    },
+    "vogosca": {
+      "total": 24647,
+      "breakdown": {
+        "total": 24647,
+        "bosniak": 12499,
+        "serb": 8813,
+        "croat": 1071,
+        "other": 2264
+      }
+    },
+    "zavidovici": {
+      "total": 52379,
+      "breakdown": {
+        "total": 52379,
+        "bosniak": 33623,
+        "serb": 11626,
+        "croat": 3429,
+        "other": 3701
+      }
+    },
+    "zenica": {
+      "total": 146603,
+      "breakdown": {
+        "total": 146603,
+        "bosniak": 80359,
+        "serb": 23512,
+        "croat": 22511,
+        "other": 20221
+      }
+    },
+    "zepce": {
+      "total": 32856,
+      "breakdown": {
+        "total": 32856,
+        "bosniak": 11676,
+        "serb": 2398,
+        "croat": 17916,
+        "other": 866
+      }
+    },
+    "zivinice": {
+      "total": 54783,
+      "breakdown": {
+        "total": 54783,
+        "bosniak": 44017,
+        "serb": 3525,
+        "croat": 3976,
+        "other": 3265
+      }
+    },
+    "zvornik": {
+      "total": 81295,
+      "breakdown": {
+        "total": 81295,
+        "bosniak": 48102,
+        "serb": 30863,
+        "croat": 122,
+        "other": 2208
+      }
+    }
+  },
+  "meta": {
+    "coverage": {
+      "municipality_ids_total": 141,
+      "municipality_ids_with_population": 141,
+      "mun1990_ids_total": 110,
+      "mun1990_ids_with_population": 110
+    },
+    "missing_municipality_ids": [],
+    "notes": [
+      "Population data directly from bih_census_1991.json municipalities section",
+      "mun1990_id totals are rolled up from post-1995 municipality_id populations",
+      "by_mun1990_id initialized with all 110 canonical registry keys (zero if no census data)"
+    ]
+  }
+}

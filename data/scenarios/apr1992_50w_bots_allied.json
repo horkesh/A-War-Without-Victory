@@ -1,0 +1,20 @@
+{
+  "scenario_id": "apr1992_50w_bots_allied",
+  "start_phase": "phase_i",
+  "weeks": 50,
+  "init_control": "apr1992",
+  "init_formations": "apr1992",
+  "init_formations_oob": true,
+  "formation_spawn_directive": { "kind": "both" },
+  "turns": [],
+  "use_harness_bots": true,
+  "use_smart_bots": true,
+  "rbih_hrhb_war_earliest_week": 26,
+  "init_alliance_rbih_hrhb": 1,
+  "enable_rbih_hrhb_dynamics": false,
+  "coercion_pressure_by_municipality": {
+    "prijedor": 0.9,
+    "zvornik": 0.85,
+    "foca": 0.85
+  }
+}

@@ -1,0 +1,10 @@
+import { readFileSync } from 'node:fs';
+const data = JSON.parse(readFileSync('data/derived/A1_BASE_MAP.geojson', 'utf-8'));
+const roles = [...new Set(data.features.map(f => f.properties.role))];
+console.log('Roles:', roles);
+const roadNato = [...new Set(data.features.filter(f => f.properties.role === 'road').map(f => f.properties.nato_class))];
+console.log('Road NATO classes:', roadNato);
+const settlementNato = [...new Set(data.features.filter(f => f.properties.role === 'settlement').map(f => f.properties.nato_class))];
+console.log('Settlement NATO classes:', settlementNato);
+const msrs = data.features.filter(f => f.properties.nato_class === 'MSR').length;
+console.log('MSR count:', msrs);
