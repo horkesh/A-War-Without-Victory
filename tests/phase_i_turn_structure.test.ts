@@ -10,15 +10,26 @@ import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
+/** Phase I step order (Phase_I_Spec §5; pipeline phaseIPhases). */
 const EXPECTED_PHASE_I_ORDER = [
+  'evaluate-events',
   'phase-i-militia-emergence',
   'phase-i-pool-population',
+  'phase-i-minority-militia-decay',
+  'phase-i-brigade-reinforcement',
   'phase-i-formation-spawn',
+  'phase-i-alliance-update',
+  'phase-i-ceasefire-check',
+  'phase-i-washington-check',
+  'phase-i-capability-update',
   'phase-i-control-flip',
+  'phase-i-bilateral-flip-count',
   'phase-i-displacement-hooks',
+  'phase-i-displacement-apply',
   'phase-i-control-strain',
   'phase-i-authority-update',
-  'phase-i-jna-transition'
+  'phase-i-jna-transition',
+  'phase-i-minority-erosion'
 ];
 
 function statePhaseI(): GameState {
@@ -105,8 +116,9 @@ test('Phase I report contains only Phase I phase names (no Phase II front phases
   const names = report.phases.map((p) => p.name);
   const forbidden = ['commitment', 'front_pressure', 'formation_fatigue', 'formation_lifecycle'];
   for (const n of names) {
-    const isPhaseI = n.startsWith('phase-i-');
-    assert.ok(isPhaseI, `Phase I turn must only run Phase I phases; got "${n}"`);
+    const allowed =
+      n === 'evaluate-events' || n.startsWith('phase-i-');
+    assert.ok(allowed, `Phase I turn must only run Phase I phases; got "${n}"`);
   }
   for (const key of forbidden) {
     const hasKey = names.some((n) => n.includes(key));

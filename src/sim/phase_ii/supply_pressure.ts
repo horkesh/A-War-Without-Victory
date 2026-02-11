@@ -5,6 +5,7 @@
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import { computeFrontEdges } from '../../map/front_edges.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import type { SupplyStateDerivationReport } from '../../state/supply_state_derivation.js';
@@ -20,11 +21,6 @@ const PRESSURE_PER_STRAINED = 2;
 
 /** Cap supply pressure at 100. */
 const PRESSURE_CAP = 100;
-
-/** Strict comparator for deterministic ordering (Engine Invariants §11.3). */
-function strictCompare(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0;
-}
 
 /**
  * Update phase_ii_supply_pressure from overextension and optional supply report.

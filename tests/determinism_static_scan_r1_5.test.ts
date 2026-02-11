@@ -30,6 +30,8 @@ const IGNORE_DIRS = new Set([
 
 /** Path segment that excludes warroom UI from scan (display-only; not simulation pipeline). */
 const WARROOM_UI_DIR = 'warroom';
+/** Tactical map UI (display-only; uses Date for calendar formatting). */
+const MAP_UI_DIR = 'map';
 
 function isUnderWarroom(path: string): boolean {
   const normalized = path.replace(/\\/g, '/');
@@ -50,6 +52,7 @@ async function collectFiles(dir: string, files: string[] = []): Promise<string[]
     if (entry.isDirectory()) {
       if (IGNORE_DIRS.has(entry.name)) continue;
       if (entry.name === WARROOM_UI_DIR && dir.endsWith('ui')) continue;
+      if (entry.name === MAP_UI_DIR && dir.replace(/\\/g, '/').endsWith('ui')) continue;
       await collectFiles(join(dir, entry.name), files);
       continue;
     }

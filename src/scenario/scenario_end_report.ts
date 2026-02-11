@@ -4,6 +4,7 @@
  */
 
 import type { GameState } from '../state/game_state.js';
+import { strictCompare } from '../state/validateGameState.js';
 import type { LoadedSettlementGraph } from '../map/settlements.js';
 import type { WeeklyReportRow, WeeklyActivityCounts } from './scenario_reporting.js';
 import type { VictoryEvaluation } from './victory_conditions.js';
@@ -195,10 +196,10 @@ export function computeFormationDelta(
 
   const formations_added = Object.keys(finalFormations)
     .filter((id) => !initialIds.has(id))
-    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    .sort(strictCompare);
   const formations_removed = Object.keys(initialKinds)
     .filter((id) => !finalIds.has(id))
-    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    .sort(strictCompare);
 
   function countByKind(ids: string[], getKind: (id: string) => string): Record<string, number> {
     const counts: Record<string, number> = {};
@@ -206,7 +207,7 @@ export function computeFormationDelta(
       const k = getKind(id);
       counts[k] = (counts[k] ?? 0) + 1;
     }
-    const keys = Object.keys(counts).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    const keys = Object.keys(counts).sort(strictCompare);
     const out: Record<string, number> = {};
     for (const k of keys) out[k] = counts[k];
     return out;

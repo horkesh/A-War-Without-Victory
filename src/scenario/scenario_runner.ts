@@ -14,6 +14,7 @@ import { loadSettlementEthnicityData } from '../data/settlement_ethnicity.js';
 import type { MunicipalityPopulation1991 } from '../sim/turn_pipeline.js';
 import { CURRENT_SCHEMA_VERSION } from '../state/game_state.js';
 import type { GameState } from '../state/game_state.js';
+import { strictCompare } from '../state/validateGameState.js';
 import { prepareNewGameState } from '../state/initialize_new_game_state.js';
 import { seedOrganizationalPenetrationFromControl } from '../state/seed_organizational_penetration_from_control.js';
 import { serializeState } from '../state/serialize.js';
@@ -275,7 +276,7 @@ function settlementIdsFromFrontDescriptors(
       }
     }
   }
-  return Array.from(set).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return Array.from(set).sort(strictCompare);
 }
 
 /**
@@ -540,7 +541,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     }
 
     if (scenario.coercion_pressure_by_municipality && Object.keys(scenario.coercion_pressure_by_municipality).length > 0) {
-      const keys = Object.keys(scenario.coercion_pressure_by_municipality).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+      const keys = Object.keys(scenario.coercion_pressure_by_municipality).sort(strictCompare);
       state.coercion_pressure_by_municipality = {};
       for (const munId of keys) {
         state.coercion_pressure_by_municipality![munId] = scenario.coercion_pressure_by_municipality[munId]!;
@@ -572,7 +573,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     // Phase H2.2: snapshot initial formations (id -> kind) for formation_delta at end-of-run.
     const initialFormationsSnapshot: Record<string, string> = {};
     const initialFormationFatigue: Record<string, number> = {};
-    for (const id of Object.keys(state.formations ?? {}).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
+    for (const id of Object.keys(state.formations ?? {}).sort(strictCompare)) {
       const f = state.formations![id];
       initialFormationsSnapshot[id] = (f.kind as string) ?? 'brigade';
       const ops = (f as { ops?: { fatigue?: number } }).ops;
@@ -961,7 +962,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     await writeFile(formationDeltaPath, stableStringify(formationDelta, 2), 'utf8');
 
     let formationFatigueSummary: FormationFatigueSummary | null = null;
-    const formationIds = Object.keys(finalFormations).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    const formationIds = Object.keys(finalFormations).sort(strictCompare);
     if (formationIds.length > 0) {
       let total_fatigue_initial = 0;
       let total_fatigue_final = 0;

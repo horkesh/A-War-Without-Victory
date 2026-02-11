@@ -15,6 +15,7 @@
 - Update napkin after significant changes or discoveries; do not wait until end of session.
 
 ## Patterns That Work
+- Refactor: single `cloneGameState` in `src/state/clone.ts` used by all turn pipelines and browser runners; avoids six duplicate polyfills.
 - P1 doc consolidations: REPO_MAP ↔ PIPELINE_ENTRYPOINTS cross-refs; DETERMINISM_* add-ons; pre-commit checklist in PIPELINE_ENTRYPOINTS.
 - War Planning Map: #warroom-scene and #map-scene (only one visible); openWarPlanningMap → scene-open then map.show(); closeCallback → showWarroomScene().
 - Voronoi: allocate cells by stable order, subtract prior masks to remove overlaps; area-based coverage diagnostics avoid boolean failure noise.

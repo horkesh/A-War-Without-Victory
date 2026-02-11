@@ -4,6 +4,7 @@
  */
 
 import type { GameState } from '../state/game_state.js';
+import { strictCompare } from '../state/validateGameState.js';
 
 /** Phase H1.7: Per-week activity diagnostics (counts only; derived reporting). */
 export interface WeeklyActivityCounts {
@@ -28,7 +29,7 @@ export interface WeeklyReportRow {
 }
 
 function sortedKeys(obj: Record<string, unknown>): string[] {
-  return Object.keys(obj).slice().sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return Object.keys(obj).slice().sort(strictCompare);
 }
 
 /**
@@ -47,7 +48,7 @@ export function buildWeeklyReport(
     id: f.id,
     exhaustion: f.profile?.exhaustion ?? 0,
     supply_pressure: state.phase_ii_supply_pressure?.[f.id]
-  })).sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  })).sort((a, b) => strictCompare(a.id, b.id));
 
   const control_counts: Record<string, number> = {};
   const pc = state.political_controllers ?? {};

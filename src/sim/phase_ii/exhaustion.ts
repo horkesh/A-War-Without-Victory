@@ -8,6 +8,7 @@ import type { PhaseIIFrontDescriptor } from '../../state/game_state.js';
 import { getExhaustionExternalModifier } from '../../state/patron_pressure.js';
 import { getFactionLegitimacyAverages } from '../../state/legitimacy.js';
 import { EXHAUSTION_LEGITIMACY_MULTIPLIER } from '../../state/exhaustion.js';
+import { strictCompare } from '../../state/validateGameState.js';
 
 /** Exhaustion per static front (Engine Invariants §6, §8). */
 const EXHAUSTION_PER_STATIC_FRONT = 2;
@@ -17,11 +18,6 @@ const EXHAUSTION_PER_SUPPLY_PRESSURE_POINT = 0.1;
 
 /** Cap exhaustion delta per turn per faction (bounded growth). */
 const MAX_DELTA_PER_TURN = 10;
-
-/** Strict comparator for deterministic ordering (Engine Invariants §11.3). */
-function strictCompare(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0;
-}
 
 /**
  * Update phase_ii_exhaustion from static fronts and supply pressure.

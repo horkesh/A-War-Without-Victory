@@ -6,6 +6,7 @@
  */
 
 import type { GameState } from '../state/game_state.js';
+import { cloneGameState } from '../state/clone.js';
 import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
 import { updateMilitiaEmergence, type MilitiaEmergenceReport } from './phase_i/militia_emergence.js';
 import { runPoolPopulation, type PoolPopulationReport } from './phase_i/pool_population.js';
@@ -48,13 +49,6 @@ export interface PhaseITurnReport {
   phase_i_jna_transition?: JNATransitionReport;
 }
 
-function cloneState(state: GameState): GameState {
-  if (typeof globalThis.structuredClone === 'function') {
-    return globalThis.structuredClone(state);
-  }
-  return JSON.parse(JSON.stringify(state)) as GameState;
-}
-
 function isPhaseIAllowed(state: GameState): boolean {
   const meta = state.meta;
   if (!meta.referendum_held) return false;
@@ -80,7 +74,7 @@ export async function runPhaseITurn(
   state: GameState,
   input: PhaseITurnInput
 ): Promise<{ nextState: GameState; report: PhaseITurnReport }> {
-  const working = cloneState(state);
+  const working = cloneGameState(state);
   if (working.meta.phase !== 'phase_i') {
     throw new Error('runPhaseITurn: state must be in phase_i');
   }

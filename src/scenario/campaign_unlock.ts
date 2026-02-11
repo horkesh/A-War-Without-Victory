@@ -3,6 +3,8 @@
  * Deterministic: sorted arrays, no randomness.
  */
 
+import { strictCompare } from '../state/validateGameState.js';
+
 /**
  * Return scenario_ids that are playable: either no prerequisites or all prerequisites are in completedIds.
  * Result is sorted for deterministic output.
@@ -22,7 +24,7 @@ export function getPlayableScenarioIds(
     const allMet = prereqs.every((p) => completedIds.has(p));
     if (allMet) playable.push(id);
   }
-  return playable.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return playable.sort(strictCompare);
 }
 
 /**
@@ -34,7 +36,7 @@ export async function writeCompletedScenarioIds(
   completedIds: Set<string>
 ): Promise<void> {
   const { writeFile } = await import('node:fs/promises');
-  const ids = Array.from(completedIds).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  const ids = Array.from(completedIds).sort(strictCompare);
   await writeFile(filePath, JSON.stringify(ids, null, 2), 'utf8');
 }
 

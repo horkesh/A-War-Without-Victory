@@ -5,6 +5,7 @@
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import { computeFrontEdges } from '../../map/front_edges.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 
@@ -16,11 +17,6 @@ const FRICTION_PER_FRONT_EDGE = 0.02;
 
 /** Maximum multiplier (cap so deltas remain bounded). */
 const MAX_MULTIPLIER = 10;
-
-/** Strict comparator for deterministic ordering (Engine Invariants §11.3). */
-function strictCompare(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0;
-}
 
 /**
  * Compute command friction multiplier for a faction in Phase II.

@@ -10,7 +10,7 @@ import type {
   MunicipalityId,
   MilitiaPoolState
 } from './game_state.js';
-
+import { strictCompare } from './validateGameState.js';
 
 /**
  * Phase I.0: Formation lifecycle state management.
@@ -55,7 +55,7 @@ const AUTHORITY_FRAGMENTED = 0.2;
 export function deriveMunicipalityAuthorityMap(state: GameState): Map<MunicipalityId, number> {
   const out = new Map<MunicipalityId, number>();
   const muns = state.municipalities ?? {};
-  const munIds = Object.keys(muns).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  const munIds = Object.keys(muns).sort(strictCompare);
   for (const munId of munIds) {
     const control = muns[munId]?.control;
     const value =

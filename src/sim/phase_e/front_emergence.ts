@@ -11,16 +11,11 @@
 
 
 import type { GameState, PhaseIIFrontDescriptor } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import { computeFrontEdges } from '../../map/front_edges.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { isPressureEligible } from './pressure_eligibility.js';
 import { deriveFrontStability } from '../phase_ii/front_emergence.js';
-
-
-/** Strict comparator for deterministic ordering (Engine Invariants §11.3). */
-function strictCompare(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0;
-}
 
 /**
  * Derive Phase II fronts from pressure-eligible edges (front-active settlement edges only).
