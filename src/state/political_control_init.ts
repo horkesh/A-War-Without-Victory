@@ -14,6 +14,11 @@ import { resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import type { GameState, FactionId, SettlementId } from './game_state.js';
 import type { LoadedSettlementGraph, SettlementRecord } from '../map/settlements.js';
+import {
+  loadSettlementEthnicityData,
+  majorityToFaction,
+  type SettlementEthnicityEntry
+} from '../data/settlement_ethnicity.js';
 
 /** Map Phase 0 control_status to authority state (consolidated/contested/fragmented) for pool and spawn. */
 function controlStatusToAuthority(
@@ -407,12 +412,153 @@ export interface PoliticalControlInitResult {
   counts?: { total: number; RBiH: number; RS: number; HRHB: number; null: number };
 }
 
+/** Options for ethnic/hybrid init modes (additive to canon; scenario-configured). */
+export interface PoliticalControlInitOptions {
+  init_control_mode?: 'institutional' | 'ethnic_1991' | 'hybrid_1992';
+  ethnic_override_threshold?: number;
+}
+
 /**
  * Detect if parsed JSON is a mun1990-only control file (controllers_by_mun1990_id, no settlements array).
  * Used to choose init path when mappingPath is provided (Option A scenario-specific control).
  */
 function isMun1990OnlyControlFile(parsed: unknown): parsed is { controllers_by_mun1990_id: Record<string, unknown> } {
   return isRecord(parsed) && isRecord(parsed.controllers_by_mun1990_id) && !Array.isArray(parsed.settlements);
+}
+
+/**
+ * Initialize political control from 1991 ethnic majority per settlement (ethnic_1991 mode).
+ * Deterministic: stable SID ordering. Unknown/other → null, then enforceNonNullStartControllers.
+ */
+async function initializePoliticalControllersFromEthnic1991(
+  state: GameState,
+  settlementGraph: LoadedSettlementGraph
+): Promise<PoliticalControlInitResult> {
+  const ethnicityData = await loadSettlementEthnicityData();
+  const bySid = ethnicityData.by_settlement_id ?? {};
+  const settlementIds = Array.from(settlementGraph.settlements.keys()).sort((a, b) => a.localeCompare(b));
+  const controllersRecord: Record<SettlementId, PoliticalControllerId> = {};
+  const contestedRecord: Record<SettlementId, boolean> = {};
+  const municipalityStatus = new Map<string, 'SECURE' | 'CONTESTED' | 'HIGHLY_CONTESTED'>();
+
+  for (const sid of settlementIds) {
+    const settlement = settlementGraph.settlements.get(sid)!;
+    const mun1990Id = settlement.mun1990_id ?? settlement.mun_code;
+    const entry = bySid[sid] as SettlementEthnicityEntry | undefined;
+    const controller = entry ? majorityToFaction(entry.majority) : null;
+    controllersRecord[sid] = controller;
+    contestedRecord[sid] = false;
+    municipalityStatus.set(mun1990Id, 'SECURE');
+  }
+  const coercion = enforceNonNullStartControllers(settlementGraph, controllersRecord);
+
+  state.political_controllers = controllersRecord;
+  state.contested_control = contestedRecord;
+  if (!state.municipalities) state.municipalities = {};
+  const sortedMunicipalities = Array.from(municipalityStatus.entries()).sort(([a], [b]) => a.localeCompare(b));
+  for (const [munId, control_status] of sortedMunicipalities) {
+    if (!state.municipalities[munId]) state.municipalities[munId] = {};
+    state.municipalities[munId].control_status = control_status;
+    state.municipalities[munId].control = controlStatusToAuthority(control_status);
+  }
+
+  const audit = computePoliticalControlAudit(controllersRecord);
+  const counts = {
+    total: audit.total,
+    RBiH: audit.by_controller.RBiH ?? 0,
+    RS: audit.by_controller.RS ?? 0,
+    HRHB: audit.by_controller.HRHB ?? 0,
+    null: audit.by_controller.null ?? 0
+  };
+  if (coercion.coerced_from_null > 0 && typeof process !== 'undefined' && process.stdout) {
+    process.stdout.write(
+      `[E5][INFO] Coerced ${coercion.coerced_from_null} null start controllers (ethnic_1991 mode; defaults=${coercion.defaulted_to_fallback}).\n`
+    );
+  }
+  if (typeof process !== 'undefined' && process.stdout) {
+    process.stdout.write(
+      `[E5] Political control initialized (ethnic_1991): ${counts.total} settlements, RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}\n`
+    );
+  }
+  return { applied: true, counts };
+}
+
+/**
+ * Initialize political control hybrid: institutional baseline + ethnic overrides when settlement majority
+ * differs from mun controller AND majority share >= threshold (default 0.70).
+ */
+async function initializePoliticalControllersFromHybrid1992(
+  state: GameState,
+  settlementGraph: LoadedSettlementGraph,
+  mappingPath: string,
+  ethnicOverrideThreshold: number
+): Promise<PoliticalControlInitResult> {
+  const [mapping, ethnicityData] = await Promise.all([
+    loadInitialMunicipalityControllers1990(mappingPath),
+    loadSettlementEthnicityData()
+  ]);
+  const bySid = ethnicityData.by_settlement_id ?? {};
+  const settlementIds = Array.from(settlementGraph.settlements.keys()).sort((a, b) => a.localeCompare(b));
+  const controllersRecord: Record<SettlementId, PoliticalControllerId> = {};
+  const contestedRecord: Record<SettlementId, boolean> = {};
+  const municipalityStatus = new Map<string, 'SECURE' | 'CONTESTED' | 'HIGHLY_CONTESTED'>();
+
+  for (const sid of settlementIds) {
+    const settlement = settlementGraph.settlements.get(sid)!;
+    const mun1990Id = settlement.mun1990_id ?? settlement.mun_code;
+    const munController = mapping[mun1990Id];
+    if (munController === undefined) {
+      throw new Error(
+        `Scenario init (hybrid_1992): mun1990_id ${mun1990Id} (settlement ${sid}) not in control file.`
+      );
+    }
+    const entry = bySid[sid] as SettlementEthnicityEntry | undefined;
+    let controller: PoliticalControllerId = munController;
+    if (entry) {
+      const ethnicFaction = majorityToFaction(entry.majority);
+      if (ethnicFaction !== null && ethnicFaction !== munController) {
+        const key = entry.majority === 'unknown' ? 'other' : entry.majority;
+        const majorityShare = (entry.composition as Record<string, number>)[key] ?? 0;
+        if (majorityShare >= ethnicOverrideThreshold) {
+          controller = ethnicFaction;
+        }
+      }
+    }
+    controllersRecord[sid] = controller;
+    contestedRecord[sid] = false;
+    municipalityStatus.set(mun1990Id, 'SECURE');
+  }
+  const coercion = enforceNonNullStartControllers(settlementGraph, controllersRecord);
+
+  state.political_controllers = controllersRecord;
+  state.contested_control = contestedRecord;
+  if (!state.municipalities) state.municipalities = {};
+  const sortedMunicipalities = Array.from(municipalityStatus.entries()).sort(([a], [b]) => a.localeCompare(b));
+  for (const [munId, control_status] of sortedMunicipalities) {
+    if (!state.municipalities[munId]) state.municipalities[munId] = {};
+    state.municipalities[munId].control_status = control_status;
+    state.municipalities[munId].control = controlStatusToAuthority(control_status);
+  }
+
+  const audit = computePoliticalControlAudit(controllersRecord);
+  const counts = {
+    total: audit.total,
+    RBiH: audit.by_controller.RBiH ?? 0,
+    RS: audit.by_controller.RS ?? 0,
+    HRHB: audit.by_controller.HRHB ?? 0,
+    null: audit.by_controller.null ?? 0
+  };
+  if (coercion.coerced_from_null > 0 && typeof process !== 'undefined' && process.stdout) {
+    process.stdout.write(
+      `[E5][INFO] Coerced ${coercion.coerced_from_null} null start controllers (hybrid_1992; defaults=${coercion.defaulted_to_fallback}).\n`
+    );
+  }
+  if (typeof process !== 'undefined' && process.stdout) {
+    process.stdout.write(
+      `[E5] Political control initialized (hybrid_1992, threshold=${ethnicOverrideThreshold}): ${counts.total} settlements, RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}\n`
+    );
+  }
+  return { applied: true, counts };
 }
 
 /**
@@ -490,11 +636,13 @@ async function initializePoliticalControllersFromMun1990Only(
  * Phase E2: Idempotent. If all settlements already have political_controller set, returns applied:false.
  * Mixed (some set, some undefined) throws. Requires mun1990_id on every settlement when applying.
  * When mappingPath is provided and file has controllers_by_mun1990_id (no settlements array), uses mun1990-only path (Option A).
+ * When initOptions.init_control_mode is ethnic_1991 or hybrid_1992, uses ethnicity-based init (additive to canon).
  */
 export async function initializePoliticalControllers(
   state: GameState,
   settlementGraph: LoadedSettlementGraph,
-  mappingPath?: string
+  mappingPath?: string,
+  initOptions?: PoliticalControlInitOptions
 ): Promise<PoliticalControlInitResult> {
   const settlementIds = Array.from(settlementGraph.settlements.keys()).sort((a, b) => a.localeCompare(b));
   const existing = state.political_controllers ?? {};
@@ -516,6 +664,16 @@ export async function initializePoliticalControllers(
   }
   if (definedCount === settlementIds.length) {
     return { applied: false, reason_if_not_applied: 'already_initialized' };
+  }
+
+  const mode = initOptions?.init_control_mode;
+  if (mode === 'ethnic_1991') {
+    return initializePoliticalControllersFromEthnic1991(state, settlementGraph);
+  }
+  if (mode === 'hybrid_1992') {
+    const threshold = initOptions?.ethnic_override_threshold ?? 0.70;
+    const path = mappingPath ?? resolve('data/source/municipalities_1990_initial_political_controllers_apr1992.json');
+    return initializePoliticalControllersFromHybrid1992(state, settlementGraph, path, threshold);
   }
 
   if (mappingPath) {

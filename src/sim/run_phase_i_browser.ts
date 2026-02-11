@@ -17,7 +17,11 @@ import {
 import { runControlFlip, type ControlFlipReport } from './phase_i/control_flip.js';
 import { runAuthorityDegradation, type AuthorityDegradationReport } from './phase_i/authority_degradation.js';
 import { runControlStrain, buildSettlementsByMun, type ControlStrainReport } from './phase_i/control_strain.js';
-import { runDisplacementHooks, type DisplacementHooksReport } from './phase_i/displacement_hooks.js';
+import {
+  runDisplacementHooks,
+  type DisplacementHooksReport,
+  type MunicipalityPopulation1991Map
+} from './phase_i/displacement_hooks.js';
 import { runJNATransition, type JNATransitionReport } from './phase_i/jna_transition.js';
 import {
   updatePhaseIOpposingEdgesStreak,
@@ -27,6 +31,8 @@ import {
 export interface PhaseITurnInput {
   seed: string;
   settlementGraph: LoadedSettlementGraph;
+  /** Optional 1991 census by mun for displacement hook trigger (Hostile_Population_Share > 0.30). */
+  municipalityPopulation1991?: MunicipalityPopulation1991Map;
 }
 
 export interface PhaseITurnReport {
@@ -131,7 +137,8 @@ export async function runPhaseITurn(
       flips: [],
       municipalities_evaluated: 0,
       control_events: []
-    }
+    },
+    input.municipalityPopulation1991
   );
 
   const byMun = buildSettlementsByMun(graph.settlements);

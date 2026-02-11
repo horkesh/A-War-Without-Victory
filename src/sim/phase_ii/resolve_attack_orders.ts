@@ -66,7 +66,7 @@ export function resolveAttackOrders(
   const brigadeAor = state.brigade_aor ?? {};
 
   const orderEntries = (Object.entries(orders) as [FormationId, SettlementId | null][])
-    .filter(([, target]) => target != null && target !== '')
+    .filter((entry): entry is [FormationId, SettlementId] => entry[1] != null && entry[1] !== '')
     .sort((a, b) => strictCompare(a[0], b[0]));
 
   for (const [formationId, targetSid] of orderEntries) {
@@ -91,13 +91,13 @@ export function resolveAttackOrders(
       report.flips_applied += 1;
       // Casualties (Brigade Realism §3.2): deterministic personnel loss
       const attackerFormation = formations[formationId];
-      const defenderBrigadeId = brigadeAor[targetSid];
+      const defenderBrigadeId: FormationId | undefined = brigadeAor[targetSid] ?? undefined;
       if (attackerFormation && typeof attackerFormation.personnel === 'number') {
         const loss = Math.min(CASUALTY_PER_FLIP_ATTACKER, Math.max(0, attackerFormation.personnel - MIN_BRIGADE_SPAWN));
         (attackerFormation as { personnel: number }).personnel -= loss;
         report.casualty_attacker += loss;
       }
-      if (defenderBrigadeId) {
+      if (defenderBrigadeId != null) {
         const defFormation = formations[defenderBrigadeId];
         if (defFormation && typeof defFormation.personnel === 'number') {
           const loss = Math.min(CASUALTY_PER_FLIP_DEFENDER, Math.max(0, defFormation.personnel - MIN_BRIGADE_SPAWN));

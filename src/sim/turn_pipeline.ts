@@ -165,10 +165,16 @@ export interface TurnInput {
   applyNegotiation?: boolean; // Phase 11B: apply accepted negotiation offers
   /** When provided, pool population is weighted by eligible population (RBiH=bosniak, RS=serb, HRHB=croat) so brigade counts reflect demographics. */
   municipalityPopulation1991?: MunicipalityPopulation1991;
+  /** When provided, holdout resistance scales by settlement population (deterministic). */
+  settlementPopulationBySid?: Record<string, number>;
   /** When provided, emergent brigades get hq_sid from this map (mun1990_id -> sid) for map placement. */
   municipalityHqSettlement?: Record<string, string>;
   /** When provided, emergent brigade names use historical OOB name for (faction, mun_id, ordinal). */
   historicalNameLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
+  /** When provided, Phase I wave flip uses ethnicity for holdout decisions (avoids 0/0 → all flips). */
+  settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }>;
+  /** Experimental scenario gate: disable Phase I control-flip step for A/B testing military-action-only behavior. */
+  disablePhaseIControlFlip?: boolean;
 }
 
 export interface TurnReport {
@@ -1197,13 +1203,24 @@ const phaseIPhases: NamedPhase[] = [
     run: async (context) => {
       // Canon: In Phase II, control changes only from military actions (breach-driven). Phase I flip runs in Phase I only.
       if (context.state.meta.phase !== 'phase_i') return;
+      if (context.input.disablePhaseIControlFlip === true) {
+        context.report.phase_i_control_flip = {
+          flips: [],
+          municipalities_evaluated: 0,
+          control_events: [],
+          settlement_events: []
+        };
+        return;
+      }
       const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
       const edges = context.input.settlementEdges ?? graph.edges;
       context.report.phase_i_control_flip = runControlFlip({
         state: context.state,
         turn: context.state.meta.turn,
         settlements: graph.settlements,
-        edges
+        edges,
+        settlementDataRaw: context.input.settlementDataRaw,
+        settlementPopulationBySid: context.input.settlementPopulationBySid
       });
     }
   },
@@ -1226,7 +1243,8 @@ const phaseIPhases: NamedPhase[] = [
       context.report.phase_i_displacement_hooks = runDisplacementHooks(
         context.state,
         context.state.meta.turn,
-        controlFlipReport
+        controlFlipReport,
+        context.input.municipalityPopulation1991
       );
     }
   },

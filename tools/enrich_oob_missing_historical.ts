@@ -1,8 +1,8 @@
-
+import { fileURLToPath } from 'url';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const ROOT = 'c:/Users/User/OneDrive - United Nations Development Programme/Documents/Personal/Wargame/AWWV';
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OOB_PATH = path.join(ROOT, 'data/source/oob_brigades.json');
 
 // Define the missing units directly

@@ -9,7 +9,8 @@ import type { GameState } from './game_state.js';
 import type { LoadedSettlementGraph } from '../map/settlements.js';
 import {
   initializePoliticalControllers,
-  type PoliticalControlInitResult
+  type PoliticalControlInitResult,
+  type PoliticalControlInitOptions
 } from './political_control_init.js';
 
 
@@ -23,9 +24,10 @@ import {
 export async function prepareNewGameState(
   state: GameState,
   settlementGraph: LoadedSettlementGraph,
-  mappingPath?: string
+  mappingPath?: string,
+  initOptions?: PoliticalControlInitOptions
 ): Promise<PoliticalControlInitResult> {
-  const result = await initializePoliticalControllers(state, settlementGraph, mappingPath);
+  const result = await initializePoliticalControllers(state, settlementGraph, mappingPath, initOptions);
   const pc = state.political_controllers;
   if (!pc) {
     throw new Error(

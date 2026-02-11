@@ -14,6 +14,10 @@ import type { EdgeRecord } from '../map/settlements.js';
 import { computeFrontBreaches, type FrontBreach } from './front_breaches.js';
 import { computeFrontEdges } from '../map/front_edges.js';
 import { getEffectiveSettlementSide } from './control_effective.js';
+import {
+  getFactionAlignedPopulationShare,
+  type MunicipalityPopulation1991Map
+} from './population_share.js';
 
 // Displacement trigger constants
 const UNSUPPLIED_PRESSURE_TURNS = 3; // N consecutive turns without supply
@@ -479,12 +483,6 @@ function routeDisplacedPopulation(
   return routing;
 }
 
-/** 1991 census per mun for splitting displaced by ethnicity (Bosniak→RBiH, Serb→RS, Croat→HRHB). */
-export type MunicipalityPopulation1991Map = Record<
-  string,
-  { total: number; bosniak: number; serb: number; croat: number; other: number }
->;
-
 /** One-time displacement fraction for Phase I flip when no 1991 census (Phase I §4.4). */
 export const PHASE_I_DISPLACEMENT_FRACTION_NO_CENSUS = 0.15;
 
@@ -497,25 +495,6 @@ export interface PhaseIDisplacementFlipInfo {
 
 export interface PhaseIDisplacementHooksInfo {
   by_mun: Array<{ mun_id: MunicipalityId; initiated_turn: number }>;
-}
-
-/**
- * Get losing faction's population share in mun from 1991 census (for Phase I displacement amount).
- * Returns fraction in [0,1]; when no census or no entry, returns PHASE_I_DISPLACEMENT_FRACTION_NO_CENSUS.
- */
-function getLosingFactionShare(
-  munId: MunicipalityId,
-  fromFaction: FactionId | null,
-  population1991ByMun?: MunicipalityPopulation1991Map
-): number {
-  if (!fromFaction || !population1991ByMun) return PHASE_I_DISPLACEMENT_FRACTION_NO_CENSUS;
-  const entry = population1991ByMun[munId];
-  if (!entry || entry.total <= 0) return PHASE_I_DISPLACEMENT_FRACTION_NO_CENSUS;
-  const total = entry.total;
-  if (fromFaction === 'RBiH') return (entry.bosniak + entry.other) / total;
-  if (fromFaction === 'RS') return entry.serb / total;
-  if (fromFaction === 'HRHB') return entry.croat / total;
-  return PHASE_I_DISPLACEMENT_FRACTION_NO_CENSUS;
 }
 
 /**
@@ -555,7 +534,12 @@ export function applyPhaseIDisplacementFromFlips(
       dispState.original_population - dispState.displaced_out - dispState.lost_population;
     if (remainingPopulation <= 0) continue;
 
-    const share = getLosingFactionShare(munId, fromFaction, population1991ByMun);
+    const share = getFactionAlignedPopulationShare(
+      munId,
+      fromFaction,
+      population1991ByMun,
+      PHASE_I_DISPLACEMENT_FRACTION_NO_CENSUS
+    );
     const displacementAmount = Math.min(
       Math.floor(dispState.original_population * share),
       remainingPopulation

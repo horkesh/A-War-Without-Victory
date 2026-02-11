@@ -11,7 +11,7 @@ This workflow defines the primary communication channel when starting new work o
 
 1. **Orchestrator Invocation**: 
    - Every new high-level request or phase transition MUST first be processed by the Orchestrator persona.
-   - Ref: [.cursor/agents/orchestrator.md](file:///c:/Users/User/OneDrive%20-%20United%20Nations%20Development%20Programme/Documents/Personal/Wargame/AWWV/.cursor/agents/orchestrator.md)
+   - Ref: [.cursor/agents/orchestrator.md](../../.cursor/agents/orchestrator.md)
 
 2. **State Analysis**:
    - The Orchestrator assesses the "State of the Game" against the roadmap and ledger.
@@ -19,8 +19,8 @@ This workflow defines the primary communication channel when starting new work o
 
 3. **Product Manager Supervision**:
    - The Product Manager (deputy) takes the Orchestrator's direction and oversees the detailed team execution.
-   - Ref: [.cursor/agents/product-manager.md](file:///c:/Users/User/OneDrive%20-%20United%20Nations%20Development%20Programme/Documents/Personal/Wargame/AWWV/.cursor/agents/product-manager.md)
+   - Ref: [.cursor/agents/product-manager.md](../../.cursor/agents/product-manager.md)
 
 4. **Wargame Consultation**:
    - For any system design related to simulation, the Wargame Specialist MUST be consulted.
-   - Ref: [.cursor/agents/wargame-specialist.md](file:///c:/Users/User/OneDrive%20-%20United%20Nations%20Development%20Programme/Documents/Personal/Wargame/AWWV/.cursor/agents/wargame-specialist.md)
+   - Ref: [.cursor/agents/wargame-specialist.md](../../.cursor/agents/wargame-specialist.md)

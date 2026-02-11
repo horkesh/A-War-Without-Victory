@@ -1,0 +1,16 @@
+{
+  "awwv_meta": {
+    "role": "equipment_class_templates",
+    "source": "recruitment_system_design_note.md §3.1",
+    "description": "Maps equipment class to starting BrigadeComposition and equipment point cost."
+  },
+  "templates": {
+    "mechanized":     { "infantry": 800, "tanks": 12, "artillery": 6, "aa_systems": 2, "equipment_cost": 40 },
+    "motorized":      { "infantry": 850, "tanks": 4,  "artillery": 4, "aa_systems": 1, "equipment_cost": 20 },
+    "mountain":       { "infantry": 800, "tanks": 0,  "artillery": 2, "aa_systems": 0, "equipment_cost": 5 },
+    "light_infantry": { "infantry": 800, "tanks": 0,  "artillery": 1, "aa_systems": 0, "equipment_cost": 0 },
+    "garrison":       { "infantry": 600, "tanks": 0,  "artillery": 2, "aa_systems": 1, "equipment_cost": 5 },
+    "police":         { "infantry": 500, "tanks": 0,  "artillery": 0, "aa_systems": 0, "equipment_cost": 0 },
+    "special":        { "infantry": 400, "tanks": 0,  "artillery": 0, "aa_systems": 0, "equipment_cost": 5 }
+  }
+}

@@ -4,6 +4,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { applyWaveFlip, processHoldoutCleanup, buildSettlementAdjacency } from '../src/sim/phase_i/settlement_control.js';
+import type { HoldoutScalingContext } from '../src/sim/phase_i/settlement_control.js';
 import type { GameState, FactionId, SettlementId, MunicipalityId } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import type { SettlementRecord, EdgeRecord } from '../src/map/settlements.js';
@@ -78,11 +79,9 @@ describe('applyWaveFlip', () => {
     expect(result.flipped).toContain('S1');
     expect(result.flipped).toContain('S3');
 
-    // S2 should be a holdout (bosniak majority, serb share 0.35 >= 0.30 threshold but < bosniak)
-    // Actually S2: serb=0.35 >= 0.30 threshold, and 0.35 < 0.55 so NOT >= defenderShare
-    // BUT the condition is: attackerShare >= WAVE_FLIP_ETHNIC_THRESHOLD (0.30) OR attackerShare >= defenderShare
-    // 0.35 >= 0.30 is true, so it WILL flip
-    expect(result.flipped).toContain('S2');
+    // S2 should remain a holdout because attacker share does not beat defender share.
+    expect(result.flipped).not.toContain('S2');
+    expect(result.holdouts).toContain('S2');
   });
 
   it('creates holdouts for settlements where attacker has very low ethnic share', () => {
@@ -109,8 +108,9 @@ describe('applyWaveFlip', () => {
     // S1 should have holdout state
     expect(state.settlement_holdouts?.['S1']?.holdout).toBe(true);
     expect(state.settlement_holdouts?.['S1']?.holdout_faction).toBe('RBiH');
-    // Political controller of S1 should still be changed (political authority shifts)
-    expect(state.political_controllers?.['S1']).toBe('RS');
+    expect(state.settlement_holdouts?.['S1']?.occupying_faction).toBe('RS');
+    // Holdouts keep prior control until military cleanup/surrender resolves them.
+    expect(state.political_controllers?.['S1']).toBe('RBiH');
   });
 
   it('skips settlements already controlled by new controller', () => {
@@ -161,6 +161,36 @@ describe('applyWaveFlip', () => {
     expect(holdoutEvents.length).toBe(1);
     expect(holdoutEvents[0].settlement_id).toBe('S2');
   });
+
+  it('scales holdout resistance by population and degree when scalingContext provided', () => {
+    const state = makeState({
+      political_controllers: { S1: 'RBiH', S2: 'RBiH' }
+    });
+    const settlementsByMun = new Map<MunicipalityId, SettlementId[]>();
+    settlementsByMun.set('mun1', ['S1', 'S2']);
+    const settlementData = makeSettlementData([
+      { sid: 'S1', serb: 0.05, bosniak: 0.90 },
+      { sid: 'S2', serb: 0.05, bosniak: 0.90 },
+    ]);
+    const scalingContext: HoldoutScalingContext = {
+      sidToPopulation: new Map([['S1', 500], ['S2', 50000]]),
+      sidToDegree: new Map([['S1', 2], ['S2', 12]]),
+    };
+    const resultNoScale = applyWaveFlip(state, 'mun1', 'RS', 'RBiH', settlementsByMun, settlementData, 10);
+    const state2 = makeState({ political_controllers: { S1: 'RBiH', S2: 'RBiH' } });
+    const resultWithScale = applyWaveFlip(state2, 'mun1', 'RS', 'RBiH', settlementsByMun, settlementData, 10, scalingContext);
+    expect(resultNoScale.holdouts).toContain('S1');
+    expect(resultNoScale.holdouts).toContain('S2');
+    expect(resultWithScale.holdouts).toContain('S1');
+    expect(resultWithScale.holdouts).toContain('S2');
+    const res1 = state.settlement_holdouts?.['S1']?.holdout_resistance ?? 0;
+    const res2 = state.settlement_holdouts?.['S2']?.holdout_resistance ?? 0;
+    const res1Scaled = state2.settlement_holdouts?.['S1']?.holdout_resistance ?? 0;
+    const res2Scaled = state2.settlement_holdouts?.['S2']?.holdout_resistance ?? 0;
+    expect(res1Scaled).toBeGreaterThan(res1);
+    expect(res2Scaled).toBeGreaterThan(res2);
+    expect(res2Scaled).toBeGreaterThan(res1Scaled);
+  });
 });
 
 describe('processHoldoutCleanup', () => {
@@ -175,6 +205,7 @@ describe('processHoldoutCleanup', () => {
         S1: {
           holdout: true,
           holdout_faction: 'RBiH',
+          occupying_faction: 'RS',
           holdout_resistance: 30,
           holdout_since_turn: 8,
           isolated_turns: 0
@@ -225,6 +256,7 @@ describe('processHoldoutCleanup', () => {
         S1: {
           holdout: true,
           holdout_faction: 'RBiH',
+          occupying_faction: 'RS',
           holdout_resistance: 80,
           holdout_since_turn: 5,
           isolated_turns: 3  // Will become 4 → surrender
@@ -255,6 +287,7 @@ describe('processHoldoutCleanup', () => {
         S1: {
           holdout: true,
           holdout_faction: 'RBiH',
+          occupying_faction: 'RS',
           holdout_resistance: 80,
           holdout_since_turn: 5,
           isolated_turns: 2

@@ -63,23 +63,40 @@ export function buildWeeklyReport(
 
   let settlement_displacement_count = 0;
   let settlement_displacement_total = 0;
-  const sd = state.settlement_displacement ?? {};
-  for (const sid of sortedKeys(sd as Record<string, unknown>)) {
-    const v = sd[sid];
-    if (typeof v === 'number' && v > 0) {
-      settlement_displacement_count += 1;
-      settlement_displacement_total += v;
-    }
-  }
-
   let municipality_displacement_count = 0;
   let municipality_displacement_total = 0;
-  const md = state.municipality_displacement ?? {};
-  for (const mid of sortedKeys(md as Record<string, unknown>)) {
-    const v = md[mid];
-    if (typeof v === 'number' && v > 0) {
-      municipality_displacement_count += 1;
-      municipality_displacement_total += v;
+
+  if (state.meta?.phase === 'phase_i' && state.displacement_state && typeof state.displacement_state === 'object') {
+    // Phase I: derive from displacement_state (displaced_out + lost_population)
+    const ds = state.displacement_state;
+    for (const munId of sortedKeys(ds as Record<string, unknown>)) {
+      const d = ds[munId] as { displaced_out?: number; lost_population?: number } | undefined;
+      const out = typeof d?.displaced_out === 'number' ? d.displaced_out : 0;
+      const lost = typeof d?.lost_population === 'number' ? d.lost_population : 0;
+      const total = out + lost;
+      if (total > 0) {
+        municipality_displacement_count += 1;
+        municipality_displacement_total += total;
+        settlement_displacement_total += total; // Phase I has no per-settlement; use mun total as proxy
+      }
+    }
+    settlement_displacement_count = municipality_displacement_count; // 1:1 proxy for Phase I
+  } else {
+    const sd = state.settlement_displacement ?? {};
+    for (const sid of sortedKeys(sd as Record<string, unknown>)) {
+      const v = sd[sid];
+      if (typeof v === 'number' && v > 0) {
+        settlement_displacement_count += 1;
+        settlement_displacement_total += v;
+      }
+    }
+    const md = state.municipality_displacement ?? {};
+    for (const mid of sortedKeys(md as Record<string, unknown>)) {
+      const v = md[mid];
+      if (typeof v === 'number' && v > 0) {
+        municipality_displacement_count += 1;
+        municipality_displacement_total += v;
+      }
     }
   }
 

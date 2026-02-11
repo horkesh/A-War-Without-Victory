@@ -5,6 +5,7 @@
  */
 
 import type { GameState, FactionId, MunicipalityId, SettlementId } from '../../state/game_state.js';
+import type { HoldoutScalingContext } from './settlement_control.js';
 import type { SettlementRecord } from '../../map/settlements.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -69,11 +70,23 @@ export interface ControlFlipInput {
   settlements?: Map<string, SettlementRecord>;
   edges?: EdgeRecord[];
   /** Optional: raw settlement data with ethnicity for settlement-level control. */
-  settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> } }>;
+  settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }>;
+  /** Optional: settlement population by sid for holdout resistance scaling. */
+  settlementPopulationBySid?: Record<string, number>;
 }
 
 /** Brigade offensive amplification factor (brigades amplify militia in Phase I). */
 const BRIGADE_ATTACK_AMPLIFIER = 0.5;
+
+/** Build sid -> edge degree (deterministic; for holdout proximity scaling). */
+function buildSidToDegree(edges: EdgeRecord[]): Map<string, number> {
+  const deg = new Map<string, number>();
+  for (const e of edges) {
+    deg.set(e.a, (deg.get(e.a) ?? 0) + 1);
+    deg.set(e.b, (deg.get(e.b) ?? 0) + 1);
+  }
+  return deg;
+}
 
 /**
  * Build municipality id -> settlement ids from graph. Uses mun1990_id ?? mun_code as MunicipalityId.
@@ -299,7 +312,8 @@ function applyFlip(
   previousController: FactionId | null,
   turn: number,
   settlementsByMun: Map<MunicipalityId, SettlementId[]>,
-  settlementData: Map<string, { ethnicity?: { composition?: Record<string, number> } }>
+  settlementData: Map<string, { ethnicity?: { composition?: Record<string, number> }; population?: number }>,
+  scalingContext?: HoldoutScalingContext
 ): SettlementFlipEvent[] {
   // Use settlement-level wave flip
   const waveResult = applyWaveFlip(
@@ -309,7 +323,8 @@ function applyFlip(
     previousController,
     settlementsByMun,
     settlementData,
-    turn
+    turn,
+    scalingContext
   );
 
   // Consolidation and militia updates (same as before)
@@ -339,7 +354,7 @@ function applyFlip(
  * Does not modify faction authority (control/authority distinction preserved).
  */
 export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
-  const { state, turn, settlements, edges, settlementDataRaw } = input;
+  const { state, turn, settlements, edges, settlementDataRaw, settlementPopulationBySid } = input;
   const report: ControlFlipReport = { flips: [], municipalities_evaluated: 0, control_events: [] };
   const allSettlementEvents: SettlementFlipEvent[] = [];
 
@@ -357,11 +372,32 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
     munAdjacency = buildMunAdjacency(settlements, edges);
   }
 
-  // Build settlement ethnicity data map for wave flips
-  const settlementData = new Map<string, { ethnicity?: { composition?: Record<string, number> } }>();
+  // Build settlement data (ethnicity + population) for wave flips and holdout scaling
+  const settlementData = new Map<string, { ethnicity?: { composition?: Record<string, number> }; population?: number }>();
   if (settlementDataRaw) {
     for (const rec of settlementDataRaw) {
       settlementData.set(rec.sid, rec);
+    }
+  }
+  if (settlementPopulationBySid) {
+    for (const [sid, pop] of Object.entries(settlementPopulationBySid)) {
+      const existing = settlementData.get(sid);
+      if (existing) existing.population = pop;
+      else settlementData.set(sid, { population: pop });
+    }
+  }
+
+  // Holdout scaling: population + degree (proximity)
+  let scalingContext: HoldoutScalingContext | undefined;
+  if (edges && (settlementPopulationBySid || settlementData.size > 0)) {
+    const sidToDegree = buildSidToDegree(edges);
+    const sidToPopulation = new Map<string, number>();
+    for (const [sid, data] of settlementData) {
+      const p = data.population;
+      if (p != null && p > 0) sidToPopulation.set(sid, p);
+    }
+    if (sidToPopulation.size > 0 || sidToDegree.size > 0) {
+      scalingContext = { sidToPopulation: sidToPopulation.size > 0 ? sidToPopulation : undefined, sidToDegree };
     }
   }
 
@@ -426,7 +462,7 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
     // Settlement-level wave flip (replaces bulk mun flip)
     const waveEvents = applyFlip(
       state, munId, toFaction, fromFaction, turn,
-      settlementsByMun, settlementData
+      settlementsByMun, settlementData, scalingContext
     );
     report.flips.push({ mun_id: munId, from_faction: fromFaction, to_faction: toFaction });
     allSettlementEvents.push(...waveEvents);

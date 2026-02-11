@@ -229,6 +229,8 @@ Militia Growth per Turn = Base_Organizational_Strength × 0.10
 - RS with JNA support: +1 strength/turn
 - HRHB with Croatian support: +0.8 strength/turn
 
+**Implementation-note (recruitment mode):** Scenario may set `recruitment_mode` to `"player_choice"` (three-resource brigade activation at Phase I entry) or `"auto_oob"` (legacy OOB auto-spawn when `init_formations_oob: true`). See `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md` §10 and `docs/40_reports/recruitment_system_implementation_report.md`.
+
 ---
 
 ### 4.3 Control Flip System

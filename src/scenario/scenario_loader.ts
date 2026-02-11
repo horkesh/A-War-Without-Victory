@@ -107,6 +107,23 @@ function normalizeCoercionPressure(raw: unknown): Scenario['coercion_pressure_by
   return Object.keys(out).length > 0 ? out : undefined;
 }
 
+/**
+ * Normalize a Record<string, number> resource map (e.g. recruitment_capital, equipment_points).
+ * Returns undefined if empty/invalid. Sorted keys for determinism.
+ */
+function normalizeResourceRecord(raw: unknown): Record<string, number> | undefined {
+  if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  const o = raw as Record<string, unknown>;
+  const out: Record<string, number> = {};
+  for (const key of Object.keys(o).sort(strictCompare)) {
+    if (key.trim().length === 0) continue;
+    const v = o[key];
+    if (typeof v !== 'number' || !Number.isFinite(v)) continue;
+    out[key.trim()] = Math.max(0, Math.round(v));
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
 function normalizeVictoryConditions(raw: unknown): Scenario['victory_conditions'] {
   if (raw == null || typeof raw !== 'object') return undefined;
   const o = raw as Record<string, unknown>;
@@ -197,6 +214,14 @@ export function normalizeScenario(raw: unknown): Scenario {
 
   const use_harness_bots = o.use_harness_bots === true;
   const init_control = typeof o.init_control === 'string' && o.init_control.trim() !== '' ? o.init_control.trim() : undefined;
+  const init_control_mode =
+    o.init_control_mode === 'institutional' || o.init_control_mode === 'ethnic_1991' || o.init_control_mode === 'hybrid_1992'
+      ? o.init_control_mode
+      : undefined;
+  const ethnic_override_threshold =
+    typeof o.ethnic_override_threshold === 'number' && Number.isFinite(o.ethnic_override_threshold)
+      ? Math.max(0.45, Math.min(1, o.ethnic_override_threshold))
+      : undefined;
   const init_formations = typeof o.init_formations === 'string' && o.init_formations.trim() !== '' ? o.init_formations.trim() : undefined;
   const init_formations_oob = o.init_formations_oob === true || (typeof o.init_formations_oob === 'string' && o.init_formations_oob.trim() !== '') ? (o.init_formations_oob as boolean | string) : undefined;
 
@@ -236,9 +261,15 @@ export function normalizeScenario(raw: unknown): Scenario {
 
   // B4: Coercion pressure by municipality (mun1990_id → [0, 1]). Sorted keys for determinism.
   const coercion_pressure_by_municipality = normalizeCoercionPressure(o.coercion_pressure_by_municipality);
+  const disable_phase_i_control_flip = o.disable_phase_i_control_flip === true;
 
   // B2: Campaign branching — prerequisites (scenario_ids that must be completed before playable).
   const prerequisites = normalizePrerequisites(o.prerequisites);
+
+  // Recruitment system fields
+  const recruitment_mode = o.recruitment_mode === 'player_choice' ? 'player_choice' as const : undefined;
+  const recruitment_capital = normalizeResourceRecord(o.recruitment_capital);
+  const equipment_points = normalizeResourceRecord(o.equipment_points);
 
   // Phase H2.4: When use_harness_bots is true, ensure every week has at least one baseline_ops action (deterministic; uses existing baseline_ops only).
   if (use_harness_bots && weeks > 0) {
@@ -275,6 +306,8 @@ export function normalizeScenario(raw: unknown): Scenario {
       turns: normalizedTurns,
       use_harness_bots,
       init_control,
+      init_control_mode,
+      ethnic_override_threshold,
       init_formations,
       init_formations_oob,
       formation_spawn_directive,
@@ -287,7 +320,11 @@ export function normalizeScenario(raw: unknown): Scenario {
       enable_rbih_hrhb_dynamics,
       rbih_hrhb_war_earliest_week,
       coercion_pressure_by_municipality,
-      prerequisites
+      disable_phase_i_control_flip: disable_phase_i_control_flip || undefined,
+      prerequisites,
+      recruitment_mode,
+      recruitment_capital,
+      equipment_points
     };
   }
 
@@ -301,6 +338,8 @@ export function normalizeScenario(raw: unknown): Scenario {
     turns,
     use_harness_bots: use_harness_bots || undefined,
     init_control,
+    init_control_mode,
+    ethnic_override_threshold,
     init_formations,
     init_formations_oob,
     formation_spawn_directive,
@@ -313,7 +352,11 @@ export function normalizeScenario(raw: unknown): Scenario {
     enable_rbih_hrhb_dynamics,
     rbih_hrhb_war_earliest_week,
     coercion_pressure_by_municipality,
-    prerequisites
+    disable_phase_i_control_flip: disable_phase_i_control_flip || undefined,
+    prerequisites,
+    recruitment_mode,
+    recruitment_capital,
+    equipment_points
   };
 }
 

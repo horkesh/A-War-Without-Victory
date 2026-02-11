@@ -1,8 +1,8 @@
-
+import { fileURLToPath } from 'url';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const ROOT = 'c:/Users/User/OneDrive - United Nations Development Programme/Documents/Personal/Wargame/AWWV';
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 const FILES: Record<string, string> = {
     'RBiH': 'docs/knowledge/ARBIH_APPENDIX_H_FULL_BRIGADE_LIST.md',

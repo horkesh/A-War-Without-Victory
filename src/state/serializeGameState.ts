@@ -76,7 +76,9 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
   'settlement_displacement_started_turn',
   'municipality_displacement',
   // Formation spawn directive (FORAWWV H2.4)
-  'formation_spawn_directive'
+  'formation_spawn_directive',
+  // Recruitment system (player_choice mode)
+  'recruitment_state'
 ]);
 
 /**

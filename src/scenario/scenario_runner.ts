@@ -10,6 +10,7 @@ import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
 import { loadSettlementGraph } from '../map/settlements.js';
+import { loadSettlementEthnicityData } from '../data/settlement_ethnicity.js';
 import type { MunicipalityPopulation1991 } from '../sim/turn_pipeline.js';
 import { CURRENT_SCHEMA_VERSION } from '../state/game_state.js';
 import type { GameState } from '../state/game_state.js';
@@ -31,6 +32,12 @@ import {
   createOobFormationsAtPhaseIEntry,
   buildSidToMunFromSettlements
 } from './oob_phase_i_entry.js';
+import {
+  initializeRecruitmentResources,
+  runBotRecruitment
+} from '../sim/recruitment_engine.js';
+import { runPoolPopulation } from '../sim/phase_i/pool_population.js';
+import { updateMilitiaEmergence } from '../sim/phase_i/militia_emergence.js';
 import type { Scenario, ScenarioAction } from './scenario_types.js';
 import { buildWeeklyReport } from './scenario_reporting.js';
 import type { WeeklyReportRow, WeeklyActivityCounts } from './scenario_reporting.js';
@@ -95,8 +102,13 @@ export { populateFactionAoRFromControl, ensureFormationHomeMunsInFactionAoR };
  * municipality controller mapping (data/source/municipality_political_controllers.json or
  * 1990 mapping when graph has mun1990_id) to exist.
  * When controlPath is set (Option A), uses that file for initial political control (mun1990-only format).
+ * When initOptions provided (ethnic_1991, hybrid_1992), uses ethnicity-based init per scenario.
  */
-async function createInitialGameState(seed: string, controlPath?: string): Promise<GameState> {
+async function createInitialGameState(
+  seed: string,
+  controlPath?: string,
+  initOptions?: { init_control_mode?: 'institutional' | 'ethnic_1991' | 'hybrid_1992'; ethnic_override_threshold?: number }
+): Promise<GameState> {
   const graph = await loadSettlementGraph();
   const state: GameState = {
     schema_version: CURRENT_SCHEMA_VERSION,
@@ -124,8 +136,8 @@ async function createInitialGameState(seed: string, controlPath?: string): Promi
       negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
     };
   });
-  await prepareNewGameState(state, graph, controlPath);
-  if (controlPath) {
+  await prepareNewGameState(state, graph, controlPath, initOptions);
+  if (controlPath || initOptions?.init_control_mode) {
     seedOrganizationalPenetrationFromControl(state, graph.settlements);
   }
   return state;
@@ -266,6 +278,54 @@ function settlementIdsFromFrontDescriptors(
   return Array.from(set).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
+/**
+ * Create OOB formations at Phase I entry via recruitment or legacy auto-spawn.
+ * Shared helper to avoid duplication across startup and Phase 0→I transitions.
+ */
+function createOobFormations(
+  state: GameState,
+  scenario: Scenario,
+  oobCorps: OobCorps[],
+  oobBrigades: OobBrigade[],
+  settlements: Map<string, import('../map/settlements.js').SettlementRecord>,
+  municipalityHqSettlement: Record<string, string>,
+  sidToMun: Map<string, string>,
+  municipalityPopulation1991: MunicipalityPopulation1991 | undefined
+): void {
+  if (scenario.recruitment_mode === 'player_choice' && oobBrigades.length > 0) {
+    // Ensure phase_i militia strength exists before deriving pool availability.
+    if (!state.phase_i_militia_strength || Object.keys(state.phase_i_militia_strength).length === 0) {
+      updateMilitiaEmergence(state);
+    }
+    // Recruitment spends from militia pools; seed them first at Phase I entry.
+    if (!state.militia_pools || Object.keys(state.militia_pools).length === 0) {
+      runPoolPopulation(state, settlements, municipalityPopulation1991);
+    }
+    const factionIds = (state.factions ?? []).map(f => f.id);
+    const resources = initializeRecruitmentResources(
+      factionIds, scenario.recruitment_capital, scenario.equipment_points
+    );
+    state.recruitment_state = resources;
+    const report = runBotRecruitment(state, oobCorps, oobBrigades, resources, sidToMun, municipalityHqSettlement);
+    console.log(
+      `[Recruitment] Mandatory: ${report.mandatory_recruited}, ` +
+      `Elective: ${report.elective_recruited}, ` +
+      `Skipped: control=${report.brigades_skipped_no_control} ` +
+      `manpower=${report.brigades_skipped_no_manpower} ` +
+      `capital=${report.brigades_skipped_no_capital} ` +
+      `equipment=${report.brigades_skipped_no_equipment}`
+    );
+    for (const faction of factionIds) {
+      console.log(
+        `  ${faction}: capital=${report.remaining_capital[faction] ?? 0} ` +
+        `equipment=${report.remaining_equipment[faction] ?? 0}`
+      );
+    }
+  } else if (scenario.init_formations_oob) {
+    createOobFormationsAtPhaseIEntry(state, oobCorps, oobBrigades, municipalityHqSettlement, sidToMun, municipalityPopulation1991);
+  }
+}
+
 export async function runScenario(options: RunScenarioOptions): Promise<RunScenarioResult> {
   const {
     scenarioPath,
@@ -319,6 +379,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     // (moved to inside loop or handled by checking scenario.use_smart_bots later)
 
     let municipalityPopulation1991: MunicipalityPopulation1991 | undefined;
+    let settlementPopulationBySid: Record<string, number> | undefined;
     try {
       const popPath = join(baseDir, 'data/derived/municipality_population_1991.json');
       const popRaw = JSON.parse(await readFile(popPath, 'utf8')) as {
@@ -340,10 +401,45 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     } catch {
       municipalityPopulation1991 = undefined;
     }
+    try {
+      const censusPath = join(baseDir, 'data/derived/census_rolled_up_wgs84.json');
+      const censusRaw = JSON.parse(await readFile(censusPath, 'utf8')) as {
+        by_sid?: Record<string, { p?: number[] }>;
+      };
+      const bySid = censusRaw.by_sid ?? {};
+      const popBySid: Record<string, number> = {};
+      for (const [sid, v] of Object.entries(bySid)) {
+        const p = v?.p;
+        if (Array.isArray(p) && p.length > 0 && typeof p[0] === 'number' && p[0] > 0) {
+          popBySid[sid] = p[0];
+        }
+      }
+      settlementPopulationBySid = Object.keys(popBySid).length > 0 ? popBySid : undefined;
+    } catch {
+      settlementPopulationBySid = undefined;
+    }
+    let settlementDataRaw: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }> | undefined;
+    try {
+      const ethnicityData = await loadSettlementEthnicityData(join(baseDir, 'data/derived/settlement_ethnicity_data.json'));
+      const sids = Array.from(graph.settlements.keys()).sort((a, b) => a.localeCompare(b));
+      const raw: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }> = [];
+      for (const sid of sids) {
+        const entry = ethnicityData.by_settlement_id?.[sid];
+        const pop = settlementPopulationBySid?.[sid];
+        raw.push({
+          sid,
+          ...(entry?.composition ? { ethnicity: { composition: entry.composition } } : {}),
+          ...(pop != null ? { population: pop } : {})
+        });
+      }
+      settlementDataRaw = raw.length > 0 ? raw : undefined;
+    } catch {
+      settlementDataRaw = undefined;
+    }
     let oobBrigades: OobBrigade[] = [];
     let oobCorps: OobCorps[] = [];
     let municipalityHqSettlement: Record<string, string> = {};
-    if (scenario.init_formations_oob) {
+    if (scenario.init_formations_oob || scenario.recruitment_mode === 'player_choice') {
       oobBrigades = await loadOobBrigades(baseDir);
       oobCorps = await loadOobCorps(baseDir);
       municipalityHqSettlement = await loadMunicipalityHqSettlement(baseDir);
@@ -371,7 +467,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         : undefined;
     const sidToMun = buildSidToMunFromSettlements(graph.settlements);
 
-    let state = await createInitialGameState('harness-seed', controlPath);
+    const initOptions =
+      scenario.init_control_mode
+        ? {
+            init_control_mode: scenario.init_control_mode,
+            ethnic_override_threshold: scenario.ethnic_override_threshold
+          }
+        : undefined;
+    let state = await createInitialGameState('harness-seed', controlPath, initOptions);
 
     // When init_formations_oob is true, OOB creates formations at Phase I entry; do not load placeholder init_formations.
     if (formationsPath && !scenario.init_formations_oob) {
@@ -445,10 +548,20 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     }
 
     let oobCreated = false;
-    if (!scenario.init_formations_oob) oobCreated = true;
-    // Create OOB formations at Phase I start so turn-0 flip and initial save see them (historical fidelity: JNA/early RS).
-    if (scenario.init_formations_oob && scenario.start_phase === 'phase_i' && !oobCreated) {
-      createOobFormationsAtPhaseIEntry(state, oobCorps, oobBrigades, municipalityHqSettlement, sidToMun, municipalityPopulation1991);
+    if (!scenario.init_formations_oob && scenario.recruitment_mode !== 'player_choice') oobCreated = true;
+
+    // Create OOB formations at Phase I start (recruitment or legacy auto-spawn)
+    if (scenario.start_phase === 'phase_i' && !oobCreated) {
+      createOobFormations(
+        state,
+        scenario,
+        oobCorps,
+        oobBrigades,
+        graph.settlements,
+        municipalityHqSettlement,
+        sidToMun,
+        municipalityPopulation1991
+      );
       oobCreated = true;
     }
 
@@ -584,22 +697,44 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
           phase_f_displacement: undefined,
           phase_ii_front_emergence: []
         } as Awaited<ReturnType<typeof runTurn>>['report'];
-        if (scenario.init_formations_oob && !oobCreated && state.meta.phase === 'phase_i') {
-          createOobFormationsAtPhaseIEntry(state, oobCorps, oobBrigades, municipalityHqSettlement, sidToMun, municipalityPopulation1991);
+        if (!oobCreated && state.meta.phase === 'phase_i') {
+          createOobFormations(
+            state,
+            scenario,
+            oobCorps,
+            oobBrigades,
+            graph.settlements,
+            municipalityHqSettlement,
+            sidToMun,
+            municipalityPopulation1991
+          );
           oobCreated = true;
         }
       } else {
         const runResult = await runTurn(state, {
           seed: state.meta.seed,
+          settlementGraph: graph,
           settlementEdges: graph.edges,
+          disablePhaseIControlFlip: scenario.disable_phase_i_control_flip === true,
           municipalityPopulation1991,
+          settlementPopulationBySid,
+          settlementDataRaw,
           municipalityHqSettlement: Object.keys(municipalityHqSettlement).length > 0 ? municipalityHqSettlement : undefined,
           historicalNameLookup
         });
         state = runResult.nextState;
         turnReport = runResult.report;
-        if (scenario.init_formations_oob && !oobCreated && state.meta.phase === 'phase_i') {
-          createOobFormationsAtPhaseIEntry(state, oobCorps, oobBrigades, municipalityHqSettlement, sidToMun, municipalityPopulation1991);
+        if (!oobCreated && state.meta.phase === 'phase_i') {
+          createOobFormations(
+            state,
+            scenario,
+            oobCorps,
+            oobBrigades,
+            graph.settlements,
+            municipalityHqSettlement,
+            sidToMun,
+            municipalityPopulation1991
+          );
           oobCreated = true;
         }
 

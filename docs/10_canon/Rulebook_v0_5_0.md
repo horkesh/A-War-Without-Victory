@@ -74,6 +74,8 @@ A settlement may override municipal authority only if all conditions are met: ov
 
 A settlement may initialize with political_controller = null only if no faction plausibly exercises authority, institutional collapse is immediate, and the situation is historically plausible. Null authority does not imply contestation or instability by itself.
 
+**Implementation-note (scenario-configured init):** Initial political control may be set per scenario via `init_control_mode`: *institutional* (default—municipal authority from init_control file), *ethnic_1991* (1991 census majority per settlement), or *hybrid_1992* (institutional baseline with ethnic overrides where settlement majority differs from municipal controller and exceeds threshold). This does not change the definition of political control for dynamics after Turn 0. The assumption that only municipal institutional init exists is deprecated; ethnic and hybrid modes are additive scenario options.
+
 ### 4.3 Stability and change
 
 Political control is stable by default. Political control does not change due to absence of brigade presence, lack of supply, demographic composition, or time passing. Rear settlements may remain politically controlled indefinitely without military garrisons.

@@ -1,0 +1,14 @@
+SCENARIO RUN FAILED
+run_id: _tmp_player_choice_recruitment_4w__acc3c9d910eb73d8__w4
+scenario: _tmp_player_choice_recruitment_4w
+weeks: 4
+error_name: Error
+error_message: serializeGameState: unexpected top-level key "recruitment_state" (possible wrapper; pass GameState only, not { state, phasesExecuted })
+stack:
+Error: serializeGameState: unexpected top-level key "recruitment_state" (possible wrapper; pass GameState only, not { state, phasesExecuted })
+    at assertNoWrapper (F:\A-War-Without-Victory\src\state\serializeGameState.ts:134:13)
+    at toSerializableGameState (F:\A-War-Without-Victory\src\state\serializeGameState.ts:146:3)
+    at serializeGameState (F:\A-War-Without-Victory\src\state\serializeGameState.ts:164:24)
+    at serializeState (F:\A-War-Without-Victory\src\state\serialize.ts:26:10)
+    at runScenario (F:\A-War-Without-Victory\src\scenario\scenario_runner.ts:530:38)
+    at async main (F:\A-War-Without-Victory\tools\scenario_runner\run_scenario.ts:49:18)

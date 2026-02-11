@@ -42,7 +42,7 @@ Political control represents the exercise of recognized authority over a settlem
 
 Each settlement has a **political controller** defined as the faction that currently exercises accepted authority over that settlement. Political control is distinct from brigade presence, Areas of Responsibility, fronts, and pressure application.
 
-**Initialization:** At game start, political control is initialized deterministically before any fronts or military interactions exist. Each municipality has a default political controller representing pre-war institutional authority. All settlements inherit their municipality's political controller unless explicitly overridden.
+**Initialization:** At game start, political control is initialized deterministically before any fronts or military interactions exist. Each municipality has a default political controller representing pre-war institutional authority. All settlements inherit their municipality's political controller unless explicitly overridden. Implementation-note: Scenario may set `init_control_mode` to *institutional* (default), *ethnic_1991* (1991 census majority per settlement), or *hybrid_1992* (institutional + ethnic overrides).
 
 Settlement-level overrides may occur only if all conditions are met: overwhelming demographic dominance by a single faction, geographic or administrative separation from municipal centers, and historically weak or absent municipal reach. Overrides are rare, deterministic, precomputed, and fixed at initialization.
 
@@ -194,6 +194,8 @@ Displacement permanently reduces recruitment and authority. Refugee concentratio
 Recruitment originates at the settlement level and aggregates upward.
 
 Militia emerge early with low cohesion. Formation of organized brigades requires time, authority, supply, and training.
+
+**Brigade activation at Phase I entry:** Scenario may set `recruitment_mode` to select how brigades are created. When `recruitment_mode` is `"player_choice"`, brigade activation uses three resources: manpower (from militia pools), recruitment capital, and equipment points (scenario-supplied per faction). The player or bot chooses which OOB brigades to activate and at which equipment class; only activated brigades are created. When `recruitment_mode` is `"auto_oob"` or absent, legacy behavior applies: all OOB slots are created at Phase I entry when `init_formations_oob: true`, then filled from pools. Implementation and design: `docs/40_reports/recruitment_system_implementation_report.md`, `docs/40_reports/recruitment_system_design_note.md`; formation design: `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md` §10.
 
 Desertion increases under exhaustion, legitimacy collapse, and command degradation.
 
