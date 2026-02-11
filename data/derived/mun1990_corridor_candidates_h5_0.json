@@ -1,0 +1,465 @@
+{
+  "awwv_meta": {
+    "role": "mun1990_corridor_candidates",
+    "version": "h5_0",
+    "source": "mun1990_adjacency_graph.json"
+  },
+  "articulation_municipalities": [
+    "cazin"
+  ],
+  "bridge_edges": [
+    {
+      "a": "cazin",
+      "b": "velika_kladusa"
+    }
+  ],
+  "per_node": {
+    "banovici": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "banja_luka": {
+      "degree": 8,
+      "is_articulation": false
+    },
+    "bihac": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "bijeljina": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "bileca": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "bosanska_dubica": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "bosanska_gradiska": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "bosanska_kostajnica": {
+      "degree": 2,
+      "is_articulation": false
+    },
+    "bosanska_krupa": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "bosanski_brod": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "bosanski_novi": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "bosanski_petrovac": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "bosanski_samac": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "bosansko_grahovo": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "bratunac": {
+      "degree": 3,
+      "is_articulation": false
+    },
+    "brcko": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "breza": {
+      "degree": 3,
+      "is_articulation": false
+    },
+    "bugojno": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "busovaca": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "cajnice": {
+      "degree": 3,
+      "is_articulation": false
+    },
+    "capljina": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "cazin": {
+      "degree": 3,
+      "is_articulation": true
+    },
+    "celinac": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "centar_sarajevo": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "citluk": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "derventa": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "doboj": {
+      "degree": 10,
+      "is_articulation": false
+    },
+    "donji_vakuf": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "duvno": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "foca": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "fojnica": {
+      "degree": 7,
+      "is_articulation": false
+    },
+    "gacko": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "glamoc": {
+      "degree": 7,
+      "is_articulation": false
+    },
+    "gorazde": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "gornji_vakuf": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "gracanica": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "gradacac": {
+      "degree": 7,
+      "is_articulation": false
+    },
+    "grude": {
+      "degree": 3,
+      "is_articulation": false
+    },
+    "hadzici": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "han_pijesak": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "ilidza": {
+      "degree": 8,
+      "is_articulation": false
+    },
+    "ilijas": {
+      "degree": 10,
+      "is_articulation": false
+    },
+    "jablanica": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "jajce": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "kakanj": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "kalesija": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "kalinovik": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "kiseljak": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "kladanj": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "kljuc": {
+      "degree": 7,
+      "is_articulation": false
+    },
+    "konjic": {
+      "degree": 10,
+      "is_articulation": false
+    },
+    "kotor_varos": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "kresevo": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "kupres": {
+      "degree": 8,
+      "is_articulation": false
+    },
+    "laktasi": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "listica": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "livno": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "lopare": {
+      "degree": 7,
+      "is_articulation": false
+    },
+    "lukavac": {
+      "degree": 8,
+      "is_articulation": false
+    },
+    "ljubinje": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "ljubuski": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "maglaj": {
+      "degree": 7,
+      "is_articulation": false
+    },
+    "modrica": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "mostar": {
+      "degree": 8,
+      "is_articulation": false
+    },
+    "mrkonjic_grad": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "neum": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "nevesinje": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "novi_grad_sarajevo": {
+      "degree": 9,
+      "is_articulation": false
+    },
+    "novi_travnik": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "novo_sarajevo": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "odzak": {
+      "degree": 3,
+      "is_articulation": false
+    },
+    "olovo": {
+      "degree": 9,
+      "is_articulation": false
+    },
+    "orasje": {
+      "degree": 3,
+      "is_articulation": false
+    },
+    "pale": {
+      "degree": 7,
+      "is_articulation": false
+    },
+    "posusje": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "prijedor": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "prnjavor": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "prozor": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "rogatica": {
+      "degree": 8,
+      "is_articulation": false
+    },
+    "rudo": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "sanski_most": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "sekovici": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "sipovo": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "skender_vakuf": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "sokolac": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "srbac": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "srebrenica": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "srebrenik": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "stari_grad_sarajevo": {
+      "degree": 7,
+      "is_articulation": false
+    },
+    "stolac": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "tesanj": {
+      "degree": 3,
+      "is_articulation": false
+    },
+    "teslic": {
+      "degree": 9,
+      "is_articulation": false
+    },
+    "titov_drvar": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "travnik": {
+      "degree": 9,
+      "is_articulation": false
+    },
+    "trebinje": {
+      "degree": 3,
+      "is_articulation": false
+    },
+    "trnovo": {
+      "degree": 7,
+      "is_articulation": false
+    },
+    "tuzla": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "ugljevik": {
+      "degree": 3,
+      "is_articulation": false
+    },
+    "vares": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "velika_kladusa": {
+      "degree": 1,
+      "is_articulation": false
+    },
+    "visegrad": {
+      "degree": 3,
+      "is_articulation": false
+    },
+    "visoko": {
+      "degree": 7,
+      "is_articulation": false
+    },
+    "vitez": {
+      "degree": 5,
+      "is_articulation": false
+    },
+    "vlasenica": {
+      "degree": 8,
+      "is_articulation": false
+    },
+    "vogosca": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "zavidovici": {
+      "degree": 8,
+      "is_articulation": false
+    },
+    "zenica": {
+      "degree": 8,
+      "is_articulation": false
+    },
+    "zepce": {
+      "degree": 4,
+      "is_articulation": false
+    },
+    "zivinice": {
+      "degree": 6,
+      "is_articulation": false
+    },
+    "zvornik": {
+      "degree": 8,
+      "is_articulation": false
+    }
+  },
+  "meta": {
+    "node_count": 110,
+    "edge_count": 302,
+    "component_count": 1,
+    "articulation_count": 1,
+    "bridge_count": 1
+  }
+}

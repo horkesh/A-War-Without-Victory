@@ -1,0 +1,16 @@
+{
+  "scenario_id": "apr1995_start",
+  "weeks": 52,
+  "init_control": "apr1995",
+  "init_formations": "apr1995",
+  "turns": [
+    {
+      "week_index": 0,
+      "actions": [
+        {"type": "note", "text": "April 1995: Contact Group officials push to extend the Bosnian cease-fire; UN and Bosnian Serb generals agree to protect the Sarajevo supply route."},
+        {"type": "note", "text": "Mid-April: French peacekeepers are killed by snipers in Sarajevo; the UNSC urges restraint and negotiations, but cease-fire renewal stalls."},
+        {"type": "baseline_ops", "enabled": true, "intensity": 1}
+      ]
+    }
+  ]
+}

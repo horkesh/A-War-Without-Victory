@@ -1,0 +1,19 @@
+{
+  "phase": "h5_4",
+  "registry_file": "municipalities_1990_registry_110.json",
+  "registry_count": 110,
+  "mapping_count": 110,
+  "missing_in_registry": [],
+  "unused_in_mapping": [],
+  "banovici": {
+    "post1995_codes": [
+      "10014"
+    ],
+    "rows": [
+      {
+        "post1995_code": "10014",
+        "mun1990_name": "Banovići"
+      }
+    ]
+  }
+}

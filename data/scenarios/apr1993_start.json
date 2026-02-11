@@ -1,0 +1,20 @@
+{
+  "scenario_id": "apr1993_start",
+  "weeks": 52,
+  "turns": [
+    {
+      "week_index": 0,
+      "actions": [
+        {
+          "type": "note",
+          "text": "April 1993: WEU offers to help enforce sanctions by patrolling the Danube; UNSC Resolution 817 admits the Former Yugoslav Republic of Macedonia to the UN."
+        },
+        {
+          "type": "note",
+          "text": "Mid-April: NATO begins air patrols enforcing the no-fly zone; UNSC Resolution 820 tightens sanctions on Serbia-Montenegro; Vance and Owen convene Athens talks late April."
+        },
+        { "type": "baseline_ops", "enabled": true, "intensity": 1.0 }
+      ]
+    }
+  ]
+}

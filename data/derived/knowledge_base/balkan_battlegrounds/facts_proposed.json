@@ -1,0 +1,380 @@
+[
+  {
+    "fact_id": "fact_BB2_p0509_force_0",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 700,
+    "unit": "men",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 509,
+        "evidence_span": "12 Bosnian Army casualties numbered at least 600 to 700 men killed",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "12 Bosnian Army casualties numbered at least 600 to 700 men killed",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0519_force_0",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 6000,
+    "unit": "troops",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 519,
+        "evidence_span": "probably numbered about 5,500 to 6,000 troops. Both   The Bosnian Serb reaction was prompt and typically",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "probably numbered about 5,500 to 6,000 troops. Both   The Bosnian Serb reaction was prompt and typically",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0529_force_0",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 300,
+    "unit": "troops",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 529,
+        "evidence_span": "about 300 troops.",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "about 300 troops.",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0532_force_0",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 10000,
+    "unit": "troops",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 532,
+        "evidence_span": "as many as 10,000 troops with a handful of tanks and",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "as many as 10,000 troops with a handful of tanks and",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0540_force_0",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 5500,
+    "unit": "troops",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 540,
+        "evidence_span": "try Brigade—about 5,000 to 5,500 troops — would",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "try Brigade—about 5,000 to 5,500 troops — would",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0541_force_0",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 15000,
+    "unit": "troops",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 541,
+        "evidence_span": "the 5th Corps mustered about 15,000 troops for the",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "the 5th Corps mustered about 15,000 troops for the",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0543_force_0",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 26,
+    "unit": "fighters",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 543,
+        "evidence_span": "26 fighters and that another 50 had been wounded ...following",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "26 fighters and that another 50 had been wounded ...following",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0548_force_0",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 6500,
+    "unit": "personnel",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 548,
+        "evidence_span": "eventually grew from an initial 6,500 personnel to",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "eventually grew from an initial 6,500 personnel to",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0548_force_1",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 14000,
+    "unit": "troops",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 548,
+        "evidence_span": "some 14,000 troops with strong armor and artillery",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "some 14,000 troops with strong armor and artillery",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0550_force_0",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 2000,
+    "unit": "troops",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 550,
+        "evidence_span": "two — the planned destruction of the 5th Corps.   two tactical groups ( some 2,000 troops ) , one each",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "two — the planned destruction of the 5th Corps.   two tactical groups ( some 2,000 troops ) , one each",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0550_force_1",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 500,
+    "unit": "troops",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 550,
+        "evidence_span": "SDG—probably about 500 troops combined — were to   SVK. Once 5th Corps had been defeated on Grabez,",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "SDG—probably about 500 troops combined — were to   SVK. Once 5th Corps had been defeated on Grabez,",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0550_force_2",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 6500,
+    "unit": "troops",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 550,
+        "evidence_span": "The SVK also contributed about 6,500 troops drawn   time, the VRS was to open a new attack axis, crossing",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "The SVK also contributed about 6,500 troops drawn   time, the VRS was to open a new attack axis, crossing",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0550_force_3",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 4500,
+    "unit": "troops",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 550,
+        "evidence_span": "Stevo Sevo's 15th Lika Corps - about 4,500 troops",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "Stevo Sevo's 15th Lika Corps - about 4,500 troops",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0552_force_0",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 500,
+    "unit": "men",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 552,
+        "evidence_span": "Bihac Brigade — some 500 men—in the Croat villages",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "Bihac Brigade — some 500 men—in the Croat villages",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0552_force_1",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 2,
+    "unit": "troops",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 552,
+        "evidence_span": "Meanwhile, to the west, TG -2 troops also had pushed",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "Meanwhile, to the west, TG -2 troops also had pushed",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0560_force_0",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 1100,
+    "unit": "troops",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 560,
+        "evidence_span": "1,100  troops",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "1,100  troops",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0560_force_1",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 2553,
+    "unit": "troops",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 560,
+        "evidence_span": "2,553  troops",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "2,553  troops",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  },
+  {
+    "fact_id": "fact_BB2_p0560_force_2",
+    "fact_type": "force_size",
+    "subject_id": "unknown",
+    "object_id": "unknown",
+    "value": 1450,
+    "unit": "troops",
+    "date": "unknown",
+    "date_precision": "unknown",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 560,
+        "evidence_span": "1,450  troops",
+        "block_type": "narrative"
+      }
+    ],
+    "quote": "1,450  troops",
+    "confidence": "low",
+    "notes": "Auto-extracted candidate; requires review."
+  }
+]

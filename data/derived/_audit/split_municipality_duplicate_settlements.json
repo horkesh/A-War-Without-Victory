@@ -1,0 +1,3107 @@
+{
+  "schema_version": "1",
+  "generated_by": "audit_split_municipality_duplicate_settlements.ts",
+  "split_mun_count": 31,
+  "total_merge_pairs": 192,
+  "by_mun1990": [
+    {
+      "mun1990_id": "bosanska_krupa",
+      "post1995_codes": [
+        {
+          "code": "11428",
+          "name": "Bosanska Krupa"
+        },
+        {
+          "code": "20290",
+          "name": "Krupa na Uni"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Gornji Bušević",
+          "from_sid": "S212016",
+          "from_census_id": "212016",
+          "from_mun": "Krupa na Uni",
+          "into_sid": "S164534",
+          "into_census_id": "164534",
+          "into_mun": "Bosanska Krupa"
+        },
+        {
+          "settlement_name": "Hašani",
+          "from_sid": "S212024",
+          "from_census_id": "212024",
+          "from_mun": "Krupa na Uni",
+          "into_sid": "S164542",
+          "into_census_id": "164542",
+          "into_mun": "Bosanska Krupa"
+        },
+        {
+          "settlement_name": "Otoka",
+          "from_sid": "S212067",
+          "from_census_id": "212067",
+          "from_mun": "Krupa na Uni",
+          "into_sid": "S169579",
+          "into_census_id": "169579",
+          "into_mun": "Bosanska Krupa"
+        },
+        {
+          "settlement_name": "Potkalinje",
+          "from_sid": "S212075",
+          "from_census_id": "212075",
+          "from_mun": "Krupa na Uni",
+          "into_sid": "S169587",
+          "into_census_id": "169587",
+          "into_mun": "Bosanska Krupa"
+        },
+        {
+          "settlement_name": "Srednji Bušević",
+          "from_sid": "S212083",
+          "from_census_id": "212083",
+          "from_mun": "Krupa na Uni",
+          "into_sid": "S164569",
+          "into_census_id": "164569",
+          "into_mun": "Bosanska Krupa"
+        },
+        {
+          "settlement_name": "Srednji Dubovik",
+          "from_sid": "S212091",
+          "from_census_id": "212091",
+          "from_mun": "Krupa na Uni",
+          "into_sid": "S164577",
+          "into_census_id": "164577",
+          "into_mun": "Bosanska Krupa"
+        },
+        {
+          "settlement_name": "Veliki Dubovik",
+          "from_sid": "S212105",
+          "from_census_id": "212105",
+          "from_mun": "Krupa na Uni",
+          "into_sid": "S169595",
+          "into_census_id": "169595",
+          "into_mun": "Bosanska Krupa"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "bosanski_petrovac",
+      "post1995_codes": [
+        {
+          "code": "11436",
+          "name": "Bosanski Petrovac"
+        },
+        {
+          "code": "20460",
+          "name": "Petrovac"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Bravski Vaganac",
+          "from_sid": "S217590",
+          "from_census_id": "217590",
+          "from_mun": "Petrovac",
+          "into_sid": "S169609",
+          "into_census_id": "169609",
+          "into_mun": "Bosanski Petrovac"
+        },
+        {
+          "settlement_name": "Bukovača",
+          "from_sid": "S217603",
+          "from_census_id": "217603",
+          "from_mun": "Petrovac",
+          "into_sid": "S166286",
+          "into_census_id": "166286",
+          "into_mun": "Bosanski Petrovac"
+        },
+        {
+          "settlement_name": "Bunara",
+          "from_sid": "S217611",
+          "from_census_id": "217611",
+          "from_mun": "Petrovac",
+          "into_sid": "S169617",
+          "into_census_id": "169617",
+          "into_mun": "Bosanski Petrovac"
+        },
+        {
+          "settlement_name": "Drinić",
+          "from_sid": "S217620",
+          "from_census_id": "217620",
+          "from_mun": "Petrovac",
+          "into_sid": "S164585",
+          "into_census_id": "164585",
+          "into_mun": "Bosanski Petrovac"
+        },
+        {
+          "settlement_name": "Klenovac",
+          "from_sid": "S217638",
+          "from_census_id": "217638",
+          "from_mun": "Petrovac",
+          "into_sid": "S169625",
+          "into_census_id": "169625",
+          "into_mun": "Bosanski Petrovac"
+        },
+        {
+          "settlement_name": "Podsrnetica",
+          "from_sid": "S217646",
+          "from_census_id": "217646",
+          "from_mun": "Petrovac",
+          "into_sid": "S169641",
+          "into_census_id": "169641",
+          "into_mun": "Bosanski Petrovac"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "bosanski_samac",
+      "post1995_codes": [
+        {
+          "code": "11282",
+          "name": "Domaljevac-Šamac"
+        },
+        {
+          "code": "20656",
+          "name": "Šamac"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Brvnik",
+          "from_sid": "S229091",
+          "from_census_id": "229091",
+          "from_mun": "Šamac",
+          "into_sid": "S165697",
+          "into_census_id": "165697",
+          "into_mun": "Domaljevac-Šamac"
+        },
+        {
+          "settlement_name": "Grebnice",
+          "from_sid": "S229156",
+          "from_census_id": "229156",
+          "from_mun": "Šamac",
+          "into_sid": "S171158",
+          "into_census_id": "171158",
+          "into_mun": "Domaljevac-Šamac"
+        },
+        {
+          "settlement_name": "Tišina",
+          "from_sid": "S229261",
+          "from_census_id": "229261",
+          "from_mun": "Šamac",
+          "into_sid": "S165719",
+          "into_census_id": "165719",
+          "into_mun": "Domaljevac-Šamac"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "doboj",
+      "post1995_codes": [
+        {
+          "code": "11258",
+          "name": "Doboj-Istok"
+        },
+        {
+          "code": "11266",
+          "name": "Doboj-Jug"
+        },
+        {
+          "code": "20141",
+          "name": "Doboj"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Lukavica Rijeka",
+          "from_sid": "S207667",
+          "from_census_id": "207667",
+          "from_mun": "Doboj",
+          "into_sid": "S171131",
+          "into_census_id": "171131",
+          "into_mun": "Doboj-Istok"
+        },
+        {
+          "settlement_name": "Sjenina Rijeka",
+          "from_sid": "S207861",
+          "from_census_id": "207861",
+          "from_mun": "Doboj",
+          "into_sid": "S112615",
+          "into_census_id": "112615",
+          "into_mun": "Doboj-Istok"
+        },
+        {
+          "settlement_name": "Stanić Rijeka",
+          "from_sid": "S207870",
+          "from_census_id": "207870",
+          "from_mun": "Doboj",
+          "into_sid": "S171140",
+          "into_census_id": "171140",
+          "into_mun": "Doboj-Istok"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "foca",
+      "post1995_codes": [
+        {
+          "code": "11444",
+          "name": "Foča"
+        },
+        {
+          "code": "20613",
+          "name": "Foča"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Borovinići",
+          "from_sid": "S227676",
+          "from_census_id": "227676",
+          "from_mun": "Foča",
+          "into_sid": "S164607",
+          "into_census_id": "164607",
+          "into_mun": "Foča"
+        },
+        {
+          "settlement_name": "Brajići",
+          "from_sid": "S227668",
+          "from_census_id": "227668",
+          "from_mun": "Foča",
+          "into_sid": "S164615",
+          "into_census_id": "164615",
+          "into_mun": "Foča"
+        },
+        {
+          "settlement_name": "Bujakovina",
+          "from_sid": "S227757",
+          "from_census_id": "227757",
+          "from_mun": "Foča",
+          "into_sid": "S164623",
+          "into_census_id": "164623",
+          "into_mun": "Foča"
+        },
+        {
+          "settlement_name": "Cvilin",
+          "from_sid": "S227579",
+          "from_census_id": "227579",
+          "from_mun": "Foča",
+          "into_sid": "S169676",
+          "into_census_id": "169676",
+          "into_mun": "Foča"
+        },
+        {
+          "settlement_name": "Filipovići",
+          "from_sid": "S227960",
+          "from_census_id": "227960",
+          "from_mun": "Foča",
+          "into_sid": "S166537",
+          "into_census_id": "166537",
+          "into_mun": "Foča"
+        },
+        {
+          "settlement_name": "Glušca",
+          "from_sid": "S227978",
+          "from_census_id": "227978",
+          "from_mun": "Foča",
+          "into_sid": "S166308",
+          "into_census_id": "166308",
+          "into_mun": "Foča"
+        },
+        {
+          "settlement_name": "Gostičaj",
+          "from_sid": "S227994",
+          "from_census_id": "227994",
+          "from_mun": "Foča",
+          "into_sid": "S166316",
+          "into_census_id": "166316",
+          "into_mun": "Foča"
+        },
+        {
+          "settlement_name": "Kolun",
+          "from_sid": "S227935",
+          "from_census_id": "227935",
+          "from_mun": "Foča",
+          "into_sid": "S166324",
+          "into_census_id": "166324",
+          "into_mun": "Foča"
+        },
+        {
+          "settlement_name": "Marevo",
+          "from_sid": "S227129",
+          "from_census_id": "227129",
+          "from_mun": "Foča",
+          "into_sid": "S166545",
+          "into_census_id": "166545",
+          "into_mun": "Foča"
+        },
+        {
+          "settlement_name": "Prisoje",
+          "from_sid": "S227048",
+          "from_census_id": "227048",
+          "from_mun": "Foča",
+          "into_sid": "S169706",
+          "into_census_id": "169706",
+          "into_mun": "Foča"
+        },
+        {
+          "settlement_name": "Rodijelj",
+          "from_sid": "S227358",
+          "from_census_id": "227358",
+          "from_mun": "Foča",
+          "into_sid": "S166553",
+          "into_census_id": "166553",
+          "into_mun": "Foča"
+        },
+        {
+          "settlement_name": "Sorlaci",
+          "from_sid": "S227471",
+          "from_census_id": "227471",
+          "from_mun": "Foča",
+          "into_sid": "S170160",
+          "into_census_id": "170160",
+          "into_mun": "Foča"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "gorazde",
+      "post1995_codes": [
+        {
+          "code": "11452",
+          "name": "Novo Goražde"
+        },
+        {
+          "code": "20419",
+          "name": "Novo Goražde"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Blagojevići",
+          "from_sid": "S215619",
+          "from_census_id": "215619",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S166561",
+          "into_census_id": "166561",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Bučje",
+          "from_sid": "S215660",
+          "from_census_id": "215660",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S166570",
+          "into_census_id": "166570",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Donje Selo",
+          "from_sid": "S215678",
+          "from_census_id": "215678",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S169749",
+          "into_census_id": "169749",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Dragolji",
+          "from_sid": "S215686",
+          "from_census_id": "215686",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S166588",
+          "into_census_id": "166588",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Hubjeri",
+          "from_sid": "S215791",
+          "from_census_id": "215791",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S169757",
+          "into_census_id": "169757",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Karauzovići",
+          "from_sid": "S215821",
+          "from_census_id": "215821",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S166596",
+          "into_census_id": "166596",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Karovići",
+          "from_sid": "S215830",
+          "from_census_id": "215830",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S164755",
+          "into_census_id": "164755",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Milanovići",
+          "from_sid": "S215937",
+          "from_census_id": "215937",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S169765",
+          "into_census_id": "169765",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Odžak",
+          "from_sid": "S215961",
+          "from_census_id": "215961",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S164771",
+          "into_census_id": "164771",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Podhomara",
+          "from_sid": "S215970",
+          "from_census_id": "215970",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S164780",
+          "into_census_id": "164780",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Podkozara Donja",
+          "from_sid": "S215988",
+          "from_census_id": "215988",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S164798",
+          "into_census_id": "164798",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Radići",
+          "from_sid": "S216046",
+          "from_census_id": "216046",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S169781",
+          "into_census_id": "169781",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Radijevići",
+          "from_sid": "S216054",
+          "from_census_id": "216054",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S164801",
+          "into_census_id": "164801",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Sopotnica",
+          "from_sid": "S216135",
+          "from_census_id": "216135",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S164810",
+          "into_census_id": "164810",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Šućurići",
+          "from_sid": "S216160",
+          "from_census_id": "216160",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S169790",
+          "into_census_id": "169790",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Uhotići",
+          "from_sid": "S216186",
+          "from_census_id": "216186",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S169803",
+          "into_census_id": "169803",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Žigovi",
+          "from_sid": "S216305",
+          "from_census_id": "216305",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S169811",
+          "into_census_id": "169811",
+          "into_mun": "Novo Goražde"
+        },
+        {
+          "settlement_name": "Žuželo",
+          "from_sid": "S216330",
+          "from_census_id": "216330",
+          "from_mun": "Novo Goražde",
+          "into_sid": "S164828",
+          "into_census_id": "164828",
+          "into_mun": "Novo Goražde"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "gradacac",
+      "post1995_codes": [
+        {
+          "code": "10391",
+          "name": "Gradačac"
+        },
+        {
+          "code": "20451",
+          "name": "Pelagićevo"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Blaževac",
+          "from_sid": "S217476",
+          "from_census_id": "217476",
+          "from_mun": "Pelagićevo",
+          "into_sid": "S164844",
+          "into_census_id": "164844",
+          "into_mun": "Gradačac"
+        },
+        {
+          "settlement_name": "Donja Tramošnica",
+          "from_sid": "S217484",
+          "from_census_id": "217484",
+          "from_mun": "Pelagićevo",
+          "into_sid": "S164852",
+          "into_census_id": "164852",
+          "into_mun": "Gradačac"
+        },
+        {
+          "settlement_name": "Donje Ledenice",
+          "from_sid": "S230529",
+          "from_census_id": "230529",
+          "from_mun": "Pelagićevo",
+          "into_sid": "S169838",
+          "into_census_id": "169838",
+          "into_mun": "Gradačac"
+        },
+        {
+          "settlement_name": "Gornja Tramošnica",
+          "from_sid": "S217506",
+          "from_census_id": "217506",
+          "from_mun": "Pelagićevo",
+          "into_sid": "S164887",
+          "into_census_id": "164887",
+          "into_mun": "Gradačac"
+        },
+        {
+          "settlement_name": "Gornje Ledenice",
+          "from_sid": "S217514",
+          "from_census_id": "217514",
+          "from_mun": "Pelagićevo",
+          "into_sid": "S169854",
+          "into_census_id": "169854",
+          "into_mun": "Gradačac"
+        },
+        {
+          "settlement_name": "Porebrice",
+          "from_sid": "S217565",
+          "from_census_id": "217565",
+          "from_mun": "Pelagićevo",
+          "into_sid": "S164909",
+          "into_census_id": "164909",
+          "into_mun": "Gradačac"
+        },
+        {
+          "settlement_name": "Samarevac",
+          "from_sid": "S217573",
+          "from_census_id": "217573",
+          "from_mun": "Pelagićevo",
+          "into_sid": "S164917",
+          "into_census_id": "164917",
+          "into_mun": "Gradačac"
+        },
+        {
+          "settlement_name": "Turić",
+          "from_sid": "S217581",
+          "from_census_id": "217581",
+          "from_mun": "Pelagićevo",
+          "into_sid": "S164925",
+          "into_census_id": "164925",
+          "into_mun": "Gradačac"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "ilidza",
+      "post1995_codes": [
+        {
+          "code": "11550",
+          "name": "Ilidža"
+        },
+        {
+          "code": "20176",
+          "name": "Istočna Ilidža"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Krupac",
+          "from_sid": "S209210",
+          "from_census_id": "209210",
+          "from_mun": "Istočna Ilidža",
+          "into_sid": "S165301",
+          "into_census_id": "165301",
+          "into_mun": "Ilidža"
+        },
+        {
+          "settlement_name": "Sarajevo Dio - Ilidža",
+          "from_sid": "S209171",
+          "from_census_id": "209171",
+          "from_mun": "Istočna Ilidža",
+          "into_sid": "S170607",
+          "into_census_id": "170607",
+          "into_mun": "Ilidža"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "jajce",
+      "post1995_codes": [
+        {
+          "code": "11487",
+          "name": "Jajce"
+        },
+        {
+          "code": "20222",
+          "name": "Jezero"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Barevo",
+          "from_sid": "S209589",
+          "from_census_id": "209589",
+          "from_mun": "Jezero",
+          "into_sid": "S171476",
+          "into_census_id": "171476",
+          "into_mun": "Jajce"
+        },
+        {
+          "settlement_name": "Borci",
+          "from_sid": "S209597",
+          "from_census_id": "209597",
+          "from_mun": "Jezero",
+          "into_sid": "S166081",
+          "into_census_id": "166081",
+          "into_mun": "Jajce"
+        },
+        {
+          "settlement_name": "Bravnice",
+          "from_sid": "S209619",
+          "from_census_id": "209619",
+          "from_mun": "Jezero",
+          "into_sid": "S169927",
+          "into_census_id": "169927",
+          "into_mun": "Jajce"
+        },
+        {
+          "settlement_name": "Drenov Do",
+          "from_sid": "S209635",
+          "from_census_id": "209635",
+          "from_mun": "Jezero",
+          "into_sid": "S169943",
+          "into_census_id": "169943",
+          "into_mun": "Jajce"
+        },
+        {
+          "settlement_name": "Jezero",
+          "from_sid": "S209651",
+          "from_census_id": "209651",
+          "from_mun": "Jezero",
+          "into_sid": "S164941",
+          "into_census_id": "164941",
+          "into_mun": "Jajce"
+        },
+        {
+          "settlement_name": "Prisoje",
+          "from_sid": "S209694",
+          "from_census_id": "209694",
+          "from_mun": "Jezero",
+          "into_sid": "S169960",
+          "into_census_id": "169960",
+          "into_mun": "Jajce"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "kalesija",
+      "post1995_codes": [
+        {
+          "code": "11495",
+          "name": "Kalesija"
+        },
+        {
+          "code": "20427",
+          "name": "Osmaci"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Bulatovci",
+          "from_sid": "S216364",
+          "from_census_id": "216364",
+          "from_mun": "Osmaci",
+          "into_sid": "S170003",
+          "into_census_id": "170003",
+          "into_mun": "Kalesija"
+        },
+        {
+          "settlement_name": "Gojčin",
+          "from_sid": "S216399",
+          "from_census_id": "216399",
+          "from_mun": "Osmaci",
+          "into_sid": "S170011",
+          "into_census_id": "170011",
+          "into_mun": "Kalesija"
+        },
+        {
+          "settlement_name": "Osmaci",
+          "from_sid": "S216461",
+          "from_census_id": "216461",
+          "from_mun": "Osmaci",
+          "into_sid": "S164950",
+          "into_census_id": "164950",
+          "into_mun": "Kalesija"
+        },
+        {
+          "settlement_name": "Zelina",
+          "from_sid": "S216518",
+          "from_census_id": "216518",
+          "from_mun": "Osmaci",
+          "into_sid": "S170038",
+          "into_census_id": "170038",
+          "into_mun": "Kalesija"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "kljuc",
+      "post1995_codes": [
+        {
+          "code": "11509",
+          "name": "Ključ"
+        },
+        {
+          "code": "20508",
+          "name": "Ribnik"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Donje Ratkovo",
+          "from_sid": "S219274",
+          "from_census_id": "219274",
+          "from_mun": "Ribnik",
+          "into_sid": "S170054",
+          "into_census_id": "170054",
+          "into_mun": "Ključ"
+        },
+        {
+          "settlement_name": "Donje Sokolovo",
+          "from_sid": "S219282",
+          "from_census_id": "219282",
+          "from_mun": "Ribnik",
+          "into_sid": "S170064",
+          "into_census_id": "170064",
+          "into_mun": "Ključ"
+        },
+        {
+          "settlement_name": "Dubočani",
+          "from_sid": "S219347",
+          "from_census_id": "219347",
+          "from_mun": "Ribnik",
+          "into_sid": "S170089",
+          "into_census_id": "170089",
+          "into_mun": "Ključ"
+        },
+        {
+          "settlement_name": "Gornje Ratkovo",
+          "from_sid": "S219371",
+          "from_census_id": "219371",
+          "from_mun": "Ribnik",
+          "into_sid": "S165034",
+          "into_census_id": "165034",
+          "into_mun": "Ključ"
+        },
+        {
+          "settlement_name": "Gornje Sokolovo",
+          "from_sid": "S219380",
+          "from_census_id": "219380",
+          "from_mun": "Ribnik",
+          "into_sid": "S165042",
+          "into_census_id": "165042",
+          "into_mun": "Ključ"
+        },
+        {
+          "settlement_name": "Hasići",
+          "from_sid": "S219410",
+          "from_census_id": "219410",
+          "from_mun": "Ribnik",
+          "into_sid": "S170119",
+          "into_census_id": "170119",
+          "into_mun": "Ključ"
+        },
+        {
+          "settlement_name": "Jarice",
+          "from_sid": "S219428",
+          "from_census_id": "219428",
+          "from_mun": "Ribnik",
+          "into_sid": "S170127",
+          "into_census_id": "170127",
+          "into_mun": "Ključ"
+        },
+        {
+          "settlement_name": "Ljubine",
+          "from_sid": "S219436",
+          "from_census_id": "219436",
+          "from_mun": "Ribnik",
+          "into_sid": "S166430",
+          "into_census_id": "166430",
+          "into_mun": "Ključ"
+        },
+        {
+          "settlement_name": "Velečevo",
+          "from_sid": "S219509",
+          "from_census_id": "219509",
+          "from_mun": "Ribnik",
+          "into_sid": "S170135",
+          "into_census_id": "170135",
+          "into_mun": "Ključ"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "kupres",
+      "post1995_codes": [
+        {
+          "code": "11517",
+          "name": "Kupres"
+        },
+        {
+          "code": "20303",
+          "name": "Kupres"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Mrđanovci",
+          "from_sid": "S212113",
+          "from_census_id": "212113",
+          "from_mun": "Kupres",
+          "into_sid": "S165158",
+          "into_census_id": "165158",
+          "into_mun": "Kupres"
+        },
+        {
+          "settlement_name": "Novo Selo",
+          "from_sid": "S212121",
+          "from_census_id": "212121",
+          "from_mun": "Kupres",
+          "into_sid": "S165166",
+          "into_census_id": "165166",
+          "into_mun": "Kupres"
+        },
+        {
+          "settlement_name": "Rastičevo",
+          "from_sid": "S212130",
+          "from_census_id": "212130",
+          "from_mun": "Kupres",
+          "into_sid": "S170208",
+          "into_census_id": "170208",
+          "into_mun": "Kupres"
+        },
+        {
+          "settlement_name": "Šemenovci",
+          "from_sid": "S212148",
+          "from_census_id": "212148",
+          "from_mun": "Kupres",
+          "into_sid": "S165174",
+          "into_census_id": "165174",
+          "into_mun": "Kupres"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "lopare",
+      "post1995_codes": [
+        {
+          "code": "11231",
+          "name": "Čelić"
+        },
+        {
+          "code": "20320",
+          "name": "Lopare"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Brusnica",
+          "from_sid": "S212598",
+          "from_census_id": "212598",
+          "from_mun": "Lopare",
+          "into_sid": "S165611",
+          "into_census_id": "165611",
+          "into_mun": "Čelić"
+        },
+        {
+          "settlement_name": "Čelić",
+          "from_sid": "S212601",
+          "from_census_id": "212601",
+          "from_mun": "Lopare",
+          "into_sid": "S171107",
+          "into_census_id": "171107",
+          "into_mun": "Čelić"
+        },
+        {
+          "settlement_name": "Jablanica",
+          "from_sid": "S212610",
+          "from_census_id": "212610",
+          "from_mun": "Lopare",
+          "into_sid": "S165620",
+          "into_census_id": "165620",
+          "into_mun": "Čelić"
+        },
+        {
+          "settlement_name": "Lopare Selo",
+          "from_sid": "S212695",
+          "from_census_id": "212695",
+          "from_mun": "Lopare",
+          "into_sid": "S165638",
+          "into_census_id": "165638",
+          "into_mun": "Čelić"
+        },
+        {
+          "settlement_name": "Lukavica",
+          "from_sid": "S212709",
+          "from_census_id": "212709",
+          "from_mun": "Lopare",
+          "into_sid": "S171115",
+          "into_census_id": "171115",
+          "into_mun": "Čelić"
+        },
+        {
+          "settlement_name": "Mirosavci",
+          "from_sid": "S212733",
+          "from_census_id": "212733",
+          "from_mun": "Lopare",
+          "into_sid": "S165646",
+          "into_census_id": "165646",
+          "into_mun": "Čelić"
+        },
+        {
+          "settlement_name": "Nahvioci",
+          "from_sid": "S212903",
+          "from_census_id": "212903",
+          "from_mun": "Lopare",
+          "into_sid": "S131148",
+          "into_census_id": "131148",
+          "into_mun": "Čelić"
+        },
+        {
+          "settlement_name": "Piperi",
+          "from_sid": "S212768",
+          "from_census_id": "212768",
+          "from_mun": "Lopare",
+          "into_sid": "S165654",
+          "into_census_id": "165654",
+          "into_mun": "Čelić"
+        },
+        {
+          "settlement_name": "Pukiš",
+          "from_sid": "S212806",
+          "from_census_id": "212806",
+          "from_mun": "Lopare",
+          "into_sid": "S165662",
+          "into_census_id": "165662",
+          "into_mun": "Čelić"
+        },
+        {
+          "settlement_name": "Ratkovići",
+          "from_sid": "S212822",
+          "from_census_id": "212822",
+          "from_mun": "Lopare",
+          "into_sid": "S166260",
+          "into_census_id": "166260",
+          "into_mun": "Čelić"
+        },
+        {
+          "settlement_name": "Visori",
+          "from_sid": "S212873",
+          "from_census_id": "212873",
+          "from_mun": "Lopare",
+          "into_sid": "S166278",
+          "into_census_id": "166278",
+          "into_mun": "Čelić"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "mostar",
+      "post1995_codes": [
+        {
+          "code": "11410",
+          "name": "Grad Mostar"
+        },
+        {
+          "code": "20192",
+          "name": "Grad Mostar"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Kamena",
+          "from_sid": "S209252",
+          "from_census_id": "209252",
+          "from_mun": "Grad Mostar",
+          "into_sid": "S165930",
+          "into_census_id": "165930",
+          "into_mun": "Grad Mostar"
+        },
+        {
+          "settlement_name": "Kokorina",
+          "from_sid": "S209279",
+          "from_census_id": "209279",
+          "from_mun": "Grad Mostar",
+          "into_sid": "S171433",
+          "into_census_id": "171433",
+          "into_mun": "Grad Mostar"
+        },
+        {
+          "settlement_name": "Zijemlje",
+          "from_sid": "S209287",
+          "from_census_id": "209287",
+          "from_mun": "Grad Mostar",
+          "into_sid": "S165956",
+          "into_census_id": "165956",
+          "into_mun": "Grad Mostar"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "novo_sarajevo",
+      "post1995_codes": [
+        {
+          "code": "11568",
+          "name": "Novo Sarajevo"
+        },
+        {
+          "code": "20214",
+          "name": "Istočno Novo Sarajevo"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Lukavica",
+          "from_sid": "S209520",
+          "from_census_id": "209520",
+          "from_mun": "Istočno Novo Sarajevo",
+          "into_sid": "S165336",
+          "into_census_id": "165336",
+          "into_mun": "Novo Sarajevo"
+        },
+        {
+          "settlement_name": "Miljevići",
+          "from_sid": "S209538",
+          "from_census_id": "209538",
+          "from_mun": "Istočno Novo Sarajevo",
+          "into_sid": "S165354",
+          "into_census_id": "165354",
+          "into_mun": "Novo Sarajevo"
+        },
+        {
+          "settlement_name": "Sarajevo Dio - Novo Sarajevo",
+          "from_sid": "S209490",
+          "from_census_id": "209490",
+          "from_mun": "Istočno Novo Sarajevo",
+          "into_sid": "S170666",
+          "into_census_id": "170666",
+          "into_mun": "Novo Sarajevo"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "odzak",
+      "post1995_codes": [
+        {
+          "code": "11525",
+          "name": "Odžak"
+        },
+        {
+          "code": "20109",
+          "name": "Vukosavlje"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Ada",
+          "from_sid": "S205257",
+          "from_census_id": "205257",
+          "from_mun": "Vukosavlje",
+          "into_sid": "S170321",
+          "into_census_id": "170321",
+          "into_mun": "Odžak"
+        },
+        {
+          "settlement_name": "Novo Selo",
+          "from_sid": "S205281",
+          "from_census_id": "205281",
+          "from_mun": "Vukosavlje",
+          "into_sid": "S170348",
+          "into_census_id": "170348",
+          "into_mun": "Odžak"
+        },
+        {
+          "settlement_name": "Potočani",
+          "from_sid": "S205290",
+          "from_census_id": "205290",
+          "from_mun": "Vukosavlje",
+          "into_sid": "S170364",
+          "into_census_id": "170364",
+          "into_mun": "Odžak"
+        },
+        {
+          "settlement_name": "Vrbovac",
+          "from_sid": "S205311",
+          "from_census_id": "205311",
+          "from_mun": "Vukosavlje",
+          "into_sid": "S170372",
+          "into_census_id": "170372",
+          "into_mun": "Odžak"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "orasje",
+      "post1995_codes": [
+        {
+          "code": "11533",
+          "name": "Orašje"
+        },
+        {
+          "code": "20150",
+          "name": "Donji Žabar"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Čović Polje",
+          "from_sid": "S208400",
+          "from_census_id": "208400",
+          "from_mun": "Donji Žabar",
+          "into_sid": "S165239",
+          "into_census_id": "165239",
+          "into_mun": "Orašje"
+        },
+        {
+          "settlement_name": "Jenjić",
+          "from_sid": "S208426",
+          "from_census_id": "208426",
+          "from_mun": "Donji Žabar",
+          "into_sid": "S165247",
+          "into_census_id": "165247",
+          "into_mun": "Orašje"
+        },
+        {
+          "settlement_name": "Lepnica",
+          "from_sid": "S208434",
+          "from_census_id": "208434",
+          "from_mun": "Donji Žabar",
+          "into_sid": "S166456",
+          "into_census_id": "166456",
+          "into_mun": "Orašje"
+        },
+        {
+          "settlement_name": "Oštra Luka",
+          "from_sid": "S208469",
+          "from_census_id": "208469",
+          "from_mun": "Donji Žabar",
+          "into_sid": "S170470",
+          "into_census_id": "170470",
+          "into_mun": "Orašje"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "pale",
+      "post1995_codes": [
+        {
+          "code": "11576",
+          "name": "Pale"
+        },
+        {
+          "code": "20443",
+          "name": "Pale"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Brdarići",
+          "from_sid": "S217271",
+          "from_census_id": "217271",
+          "from_mun": "Pale",
+          "into_sid": "S170674",
+          "into_census_id": "170674",
+          "into_mun": "Pale"
+        },
+        {
+          "settlement_name": "Donja Vinča",
+          "from_sid": "S217344",
+          "from_census_id": "217344",
+          "from_mun": "Pale",
+          "into_sid": "S165352",
+          "into_census_id": "165352",
+          "into_mun": "Pale"
+        },
+        {
+          "settlement_name": "Kamenica",
+          "from_sid": "S216976",
+          "from_census_id": "216976",
+          "from_mun": "Pale",
+          "into_sid": "S165379",
+          "into_census_id": "165379",
+          "into_mun": "Pale"
+        },
+        {
+          "settlement_name": "Prača",
+          "from_sid": "S216801",
+          "from_census_id": "216801",
+          "from_mun": "Pale",
+          "into_sid": "S170704",
+          "into_census_id": "170704",
+          "into_mun": "Pale"
+        },
+        {
+          "settlement_name": "Srednje",
+          "from_sid": "S216992",
+          "from_census_id": "216992",
+          "from_mun": "Pale",
+          "into_sid": "S165387",
+          "into_census_id": "165387",
+          "into_mun": "Pale"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "sanski_most",
+      "post1995_codes": [
+        {
+          "code": "11541",
+          "name": "Sanski Most"
+        },
+        {
+          "code": "20435",
+          "name": "Oštra Luka"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Batkovci",
+          "from_sid": "S216526",
+          "from_census_id": "216526",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S165255",
+          "into_census_id": "165255",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Donja Kozica",
+          "from_sid": "S216542",
+          "from_census_id": "216542",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S165263",
+          "into_census_id": "165263",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Donja Tramošnja",
+          "from_sid": "S216569",
+          "from_census_id": "216569",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S170488",
+          "into_census_id": "170488",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Gornja Kozica",
+          "from_sid": "S216593",
+          "from_census_id": "216593",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S170496",
+          "into_census_id": "170496",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Gornja Tramošnja",
+          "from_sid": "S216607",
+          "from_census_id": "216607",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S165271",
+          "into_census_id": "165271",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Hadrovci",
+          "from_sid": "S216615",
+          "from_census_id": "216615",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S170500",
+          "into_census_id": "170500",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Koprivna",
+          "from_sid": "S216640",
+          "from_census_id": "216640",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S170518",
+          "into_census_id": "170518",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Mrkalji",
+          "from_sid": "S216666",
+          "from_census_id": "216666",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S170534",
+          "into_census_id": "170534",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Podvidača",
+          "from_sid": "S216704",
+          "from_census_id": "216704",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S170542",
+          "into_census_id": "170542",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Sasina",
+          "from_sid": "S216712",
+          "from_census_id": "216712",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S170569",
+          "into_census_id": "170569",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Slatina",
+          "from_sid": "S216739",
+          "from_census_id": "216739",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S165280",
+          "into_census_id": "165280",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Stara Rijeka",
+          "from_sid": "S216747",
+          "from_census_id": "216747",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S165298",
+          "into_census_id": "165298",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Škrljevita",
+          "from_sid": "S216755",
+          "from_census_id": "216755",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S170577",
+          "into_census_id": "170577",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Trnova",
+          "from_sid": "S216763",
+          "from_census_id": "216763",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S170585",
+          "into_census_id": "170585",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Usorci",
+          "from_sid": "S216771",
+          "from_census_id": "216771",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S165999",
+          "into_census_id": "165999",
+          "into_mun": "Sanski Most"
+        },
+        {
+          "settlement_name": "Zenkovići",
+          "from_sid": "S216780",
+          "from_census_id": "216780",
+          "from_mun": "Oštra Luka",
+          "into_sid": "S170593",
+          "into_census_id": "170593",
+          "into_mun": "Sanski Most"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "stari_grad_sarajevo",
+      "post1995_codes": [
+        {
+          "code": "11584",
+          "name": "Stari Grad Sarajevo"
+        },
+        {
+          "code": "20206",
+          "name": "Istočni Stari Grad"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Donje Biosko",
+          "from_sid": "S209341",
+          "from_census_id": "209341",
+          "from_mun": "Istočni Stari Grad",
+          "into_sid": "S166472",
+          "into_census_id": "166472",
+          "into_mun": "Stari Grad Sarajevo"
+        },
+        {
+          "settlement_name": "Faletići",
+          "from_sid": "S209350",
+          "from_census_id": "209350",
+          "from_mun": "Istočni Stari Grad",
+          "into_sid": "S170755",
+          "into_census_id": "170755",
+          "into_mun": "Stari Grad Sarajevo"
+        },
+        {
+          "settlement_name": "Gornje Biosko",
+          "from_sid": "S209368",
+          "from_census_id": "209368",
+          "from_mun": "Istočni Stari Grad",
+          "into_sid": "S170763",
+          "into_census_id": "170763",
+          "into_mun": "Stari Grad Sarajevo"
+        },
+        {
+          "settlement_name": "Hreša",
+          "from_sid": "S209384",
+          "from_census_id": "209384",
+          "from_mun": "Istočni Stari Grad",
+          "into_sid": "S166073",
+          "into_census_id": "166073",
+          "into_mun": "Stari Grad Sarajevo"
+        },
+        {
+          "settlement_name": "Sarajevo Dio - Stari Grad Sarajevo",
+          "from_sid": "S209422",
+          "from_census_id": "209422",
+          "from_mun": "Istočni Stari Grad",
+          "into_sid": "S166499",
+          "into_census_id": "166499",
+          "into_mun": "Stari Grad Sarajevo"
+        },
+        {
+          "settlement_name": "Vučja Luka",
+          "from_sid": "S209406",
+          "from_census_id": "209406",
+          "from_mun": "Istočni Stari Grad",
+          "into_sid": "S165409",
+          "into_census_id": "165409",
+          "into_mun": "Stari Grad Sarajevo"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "stolac",
+      "post1995_codes": [
+        {
+          "code": "11606",
+          "name": "Stolac"
+        },
+        {
+          "code": "20028",
+          "name": "Berkovići"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Barane",
+          "from_sid": "S200603",
+          "from_census_id": "200603",
+          "from_mun": "Berkovići",
+          "into_sid": "S170909",
+          "into_census_id": "170909",
+          "into_mun": "Stolac"
+        },
+        {
+          "settlement_name": "Brštanik",
+          "from_sid": "S200638",
+          "from_census_id": "200638",
+          "from_mun": "Berkovići",
+          "into_sid": "S170917",
+          "into_census_id": "170917",
+          "into_mun": "Stolac"
+        },
+        {
+          "settlement_name": "Burmazi",
+          "from_sid": "S200646",
+          "from_census_id": "200646",
+          "from_mun": "Berkovići",
+          "into_sid": "S170925",
+          "into_census_id": "170925",
+          "into_mun": "Stolac"
+        },
+        {
+          "settlement_name": "Do",
+          "from_sid": "S200662",
+          "from_census_id": "200662",
+          "from_mun": "Berkovići",
+          "into_sid": "S165484",
+          "into_census_id": "165484",
+          "into_mun": "Stolac"
+        },
+        {
+          "settlement_name": "Hodovo",
+          "from_sid": "S200697",
+          "from_census_id": "200697",
+          "from_mun": "Berkovići",
+          "into_sid": "S170933",
+          "into_census_id": "170933",
+          "into_mun": "Stolac"
+        },
+        {
+          "settlement_name": "Hrgud",
+          "from_sid": "S200719",
+          "from_census_id": "200719",
+          "from_mun": "Berkovići",
+          "into_sid": "S165492",
+          "into_census_id": "165492",
+          "into_mun": "Stolac"
+        },
+        {
+          "settlement_name": "Ljubljenica",
+          "from_sid": "S200727",
+          "from_census_id": "200727",
+          "from_mun": "Berkovići",
+          "into_sid": "S165506",
+          "into_census_id": "165506",
+          "into_mun": "Stolac"
+        },
+        {
+          "settlement_name": "Poplat",
+          "from_sid": "S200751",
+          "from_census_id": "200751",
+          "from_mun": "Berkovići",
+          "into_sid": "S170950",
+          "into_census_id": "170950",
+          "into_mun": "Stolac"
+        },
+        {
+          "settlement_name": "Žegulja",
+          "from_sid": "S200816",
+          "from_census_id": "200816",
+          "from_mun": "Berkovići",
+          "into_sid": "S165522",
+          "into_census_id": "165522",
+          "into_mun": "Stolac"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "tesanj",
+      "post1995_codes": [
+        {
+          "code": "11045",
+          "name": "Tešanj"
+        },
+        {
+          "code": "11622",
+          "name": "Usora"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Kraševo",
+          "from_sid": "S166707",
+          "from_census_id": "166707",
+          "from_mun": "Usora",
+          "into_sid": "S151114",
+          "into_census_id": "151114",
+          "into_mun": "Tešanj"
+        },
+        {
+          "settlement_name": "Lončari",
+          "from_sid": "S166715",
+          "from_census_id": "166715",
+          "from_mun": "Usora",
+          "into_sid": "S171000",
+          "into_census_id": "171000",
+          "into_mun": "Tešanj"
+        },
+        {
+          "settlement_name": "Miljanovci",
+          "from_sid": "S166006",
+          "from_census_id": "166006",
+          "from_mun": "Usora",
+          "into_sid": "S166197",
+          "into_census_id": "166197",
+          "into_mun": "Tešanj"
+        },
+        {
+          "settlement_name": "Novi Miljanovci",
+          "from_sid": "S166014",
+          "from_census_id": "166014",
+          "from_mun": "Usora",
+          "into_sid": "S151211",
+          "into_census_id": "151211",
+          "into_mun": "Tešanj"
+        },
+        {
+          "settlement_name": "Tešanjka",
+          "from_sid": "S166022",
+          "from_census_id": "166022",
+          "from_mun": "Usora",
+          "into_sid": "S151378",
+          "into_census_id": "151378",
+          "into_mun": "Tešanj"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "titov_drvar",
+      "post1995_codes": [
+        {
+          "code": "11614",
+          "name": "Drvar"
+        },
+        {
+          "code": "20184",
+          "name": "Istočni Drvar"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Potoci",
+          "from_sid": "S209228",
+          "from_census_id": "209228",
+          "from_mun": "Istočni Drvar",
+          "into_sid": "S165557",
+          "into_census_id": "165557",
+          "into_mun": "Drvar"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "trebinje",
+      "post1995_codes": [
+        {
+          "code": "11304",
+          "name": "Ravno"
+        },
+        {
+          "code": "20583",
+          "name": "Trebinje"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Baonine",
+          "from_sid": "S224863",
+          "from_census_id": "224863",
+          "from_mun": "Trebinje",
+          "into_sid": "S165727",
+          "into_census_id": "165727",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Cerovac",
+          "from_sid": "S225002",
+          "from_census_id": "225002",
+          "from_mun": "Trebinje",
+          "into_sid": "S165735",
+          "into_census_id": "165735",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Diklići",
+          "from_sid": "S225053",
+          "from_census_id": "225053",
+          "from_mun": "Trebinje",
+          "into_sid": "S165743",
+          "into_census_id": "165743",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Gola Glavica",
+          "from_sid": "S225266",
+          "from_census_id": "225266",
+          "from_mun": "Trebinje",
+          "into_sid": "S165751",
+          "into_census_id": "165751",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Grmljani",
+          "from_sid": "S225398",
+          "from_census_id": "225398",
+          "from_mun": "Trebinje",
+          "into_sid": "S165760",
+          "into_census_id": "165760",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Klikovići",
+          "from_sid": "S225479",
+          "from_census_id": "225479",
+          "from_mun": "Trebinje",
+          "into_sid": "S165778",
+          "into_census_id": "165778",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Kotezi",
+          "from_sid": "S225517",
+          "from_census_id": "225517",
+          "from_mun": "Trebinje",
+          "into_sid": "S165964",
+          "into_census_id": "165964",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Krajkovići",
+          "from_sid": "S225541",
+          "from_census_id": "225541",
+          "from_mun": "Trebinje",
+          "into_sid": "S165785",
+          "into_census_id": "165785",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Lušnica",
+          "from_sid": "S225657",
+          "from_census_id": "225657",
+          "from_mun": "Trebinje",
+          "into_sid": "S165972",
+          "into_census_id": "165972",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Mrnjići",
+          "from_sid": "S225746",
+          "from_census_id": "225746",
+          "from_mun": "Trebinje",
+          "into_sid": "S165794",
+          "into_census_id": "165794",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Orašje Popovo",
+          "from_sid": "S225797",
+          "from_census_id": "225797",
+          "from_mun": "Trebinje",
+          "into_sid": "S165808",
+          "into_census_id": "165808",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Poljice Čičevo",
+          "from_sid": "S225908",
+          "from_census_id": "225908",
+          "from_mun": "Trebinje",
+          "into_sid": "S166669",
+          "into_census_id": "166669",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Rapti Bobani",
+          "from_sid": "S225959",
+          "from_census_id": "225959",
+          "from_mun": "Trebinje",
+          "into_sid": "S165816",
+          "into_census_id": "165816",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Sedlari",
+          "from_sid": "S225983",
+          "from_census_id": "225983",
+          "from_mun": "Trebinje",
+          "into_sid": "S165824",
+          "into_census_id": "165824",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Slivnica Površ",
+          "from_sid": "S226009",
+          "from_census_id": "226009",
+          "from_mun": "Trebinje",
+          "into_sid": "S171204",
+          "into_census_id": "171204",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Strujići",
+          "from_sid": "S226025",
+          "from_census_id": "226025",
+          "from_mun": "Trebinje",
+          "into_sid": "S165832",
+          "into_census_id": "165832",
+          "into_mun": "Ravno"
+        },
+        {
+          "settlement_name": "Veličani",
+          "from_sid": "S226203",
+          "from_census_id": "226203",
+          "from_mun": "Trebinje",
+          "into_sid": "S165859",
+          "into_census_id": "165859",
+          "into_mun": "Ravno"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "trnovo",
+      "post1995_codes": [
+        {
+          "code": "11592",
+          "name": "Trnovo"
+        },
+        {
+          "code": "20591",
+          "name": "Trnovo"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Bašci",
+          "from_sid": "S226637",
+          "from_census_id": "226637",
+          "from_mun": "Trnovo",
+          "into_sid": "S170771",
+          "into_census_id": "170771",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Bistročaj",
+          "from_sid": "S226408",
+          "from_census_id": "226408",
+          "from_mun": "Trnovo",
+          "into_sid": "S166502",
+          "into_census_id": "166502",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Bogatići",
+          "from_sid": "S226475",
+          "from_census_id": "226475",
+          "from_mun": "Trnovo",
+          "into_sid": "S165417",
+          "into_census_id": "165417",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Boljanovići",
+          "from_sid": "S226629",
+          "from_census_id": "226629",
+          "from_mun": "Trnovo",
+          "into_sid": "S170780",
+          "into_census_id": "170780",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Divčići",
+          "from_sid": "S226491",
+          "from_census_id": "226491",
+          "from_mun": "Trnovo",
+          "into_sid": "S170798",
+          "into_census_id": "170798",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Donja Presjenica",
+          "from_sid": "S226483",
+          "from_census_id": "226483",
+          "from_mun": "Trnovo",
+          "into_sid": "S170801",
+          "into_census_id": "170801",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Godinja",
+          "from_sid": "S226548",
+          "from_census_id": "226548",
+          "from_mun": "Trnovo",
+          "into_sid": "S170810",
+          "into_census_id": "170810",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Govedovići",
+          "from_sid": "S226572",
+          "from_census_id": "226572",
+          "from_mun": "Trnovo",
+          "into_sid": "S170828",
+          "into_census_id": "170828",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Grab",
+          "from_sid": "S226599",
+          "from_census_id": "226599",
+          "from_mun": "Trnovo",
+          "into_sid": "S165425",
+          "into_census_id": "165425",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Gračanica",
+          "from_sid": "S226602",
+          "from_census_id": "226602",
+          "from_mun": "Trnovo",
+          "into_sid": "S170836",
+          "into_census_id": "170836",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Ilovice",
+          "from_sid": "S226505",
+          "from_census_id": "226505",
+          "from_mun": "Trnovo",
+          "into_sid": "S170844",
+          "into_census_id": "170844",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Kozija Luka",
+          "from_sid": "S226386",
+          "from_census_id": "226386",
+          "from_mun": "Trnovo",
+          "into_sid": "S165433",
+          "into_census_id": "165433",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Milje",
+          "from_sid": "S226513",
+          "from_census_id": "226513",
+          "from_mun": "Trnovo",
+          "into_sid": "S165441",
+          "into_census_id": "165441",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Slavljevići",
+          "from_sid": "S226564",
+          "from_census_id": "226564",
+          "from_mun": "Trnovo",
+          "into_sid": "S170879",
+          "into_census_id": "170879",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Trnovo",
+          "from_sid": "S226467",
+          "from_census_id": "226467",
+          "from_mun": "Trnovo",
+          "into_sid": "S165450",
+          "into_census_id": "165450",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Vrbovnik",
+          "from_sid": "S226416",
+          "from_census_id": "226416",
+          "from_mun": "Trnovo",
+          "into_sid": "S170887",
+          "into_census_id": "170887",
+          "into_mun": "Trnovo"
+        },
+        {
+          "settlement_name": "Zabojska",
+          "from_sid": "S226394",
+          "from_census_id": "226394",
+          "from_mun": "Trnovo",
+          "into_sid": "S170895",
+          "into_census_id": "170895",
+          "into_mun": "Trnovo"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "ugljevik",
+      "post1995_codes": [
+        {
+          "code": "11339",
+          "name": "Teočak"
+        },
+        {
+          "code": "20605",
+          "name": "Ugljevik"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Bilalići",
+          "from_sid": "S226661",
+          "from_census_id": "226661",
+          "from_mun": "Ugljevik",
+          "into_sid": "S171344",
+          "into_census_id": "171344",
+          "into_mun": "Teočak"
+        },
+        {
+          "settlement_name": "Gornja Krčina",
+          "from_sid": "S226718",
+          "from_census_id": "226718",
+          "from_mun": "Ugljevik",
+          "into_sid": "S165905",
+          "into_census_id": "165905",
+          "into_mun": "Teočak"
+        },
+        {
+          "settlement_name": "Jasenje",
+          "from_sid": "S226742",
+          "from_census_id": "226742",
+          "from_mun": "Ugljevik",
+          "into_sid": "S171352",
+          "into_census_id": "171352",
+          "into_mun": "Teočak"
+        },
+        {
+          "settlement_name": "Jasikovac",
+          "from_sid": "S226769",
+          "from_census_id": "226769",
+          "from_mun": "Ugljevik",
+          "into_sid": "S171397",
+          "into_census_id": "171397",
+          "into_mun": "Teočak"
+        },
+        {
+          "settlement_name": "Tursunovo Brdo",
+          "from_sid": "S226858",
+          "from_census_id": "226858",
+          "from_mun": "Ugljevik",
+          "into_sid": "S171417",
+          "into_census_id": "171417",
+          "into_mun": "Teočak"
+        }
+      ]
+    },
+    {
+      "mun1990_id": "zvornik",
+      "post1995_codes": [
+        {
+          "code": "11312",
+          "name": "Sapna"
+        },
+        {
+          "code": "20168",
+          "name": "Zvornik"
+        }
+      ],
+      "duplicate_pairs": [
+        {
+          "settlement_name": "Baljkovica",
+          "from_sid": "S208523",
+          "from_census_id": "208523",
+          "from_mun": "Zvornik",
+          "into_sid": "S165867",
+          "into_census_id": "165867",
+          "into_mun": "Sapna"
+        },
+        {
+          "settlement_name": "Gornji Lokanj",
+          "from_sid": "S208647",
+          "from_census_id": "208647",
+          "from_mun": "Zvornik",
+          "into_sid": "S165875",
+          "into_census_id": "165875",
+          "into_mun": "Sapna"
+        },
+        {
+          "settlement_name": "Kiseljak",
+          "from_sid": "S208752",
+          "from_census_id": "208752",
+          "from_mun": "Zvornik",
+          "into_sid": "S165883",
+          "into_census_id": "165883",
+          "into_mun": "Sapna"
+        },
+        {
+          "settlement_name": "Vitinica",
+          "from_sid": "S209104",
+          "from_census_id": "209104",
+          "from_mun": "Zvornik",
+          "into_sid": "S171328",
+          "into_census_id": "171328",
+          "into_mun": "Sapna"
+        }
+      ]
+    }
+  ],
+  "all_pairs": [
+    {
+      "from_sid": "S205257",
+      "into_sid": "S170321",
+      "name": "Ada"
+    },
+    {
+      "from_sid": "S208523",
+      "into_sid": "S165867",
+      "name": "Baljkovica"
+    },
+    {
+      "from_sid": "S224863",
+      "into_sid": "S165727",
+      "name": "Baonine"
+    },
+    {
+      "from_sid": "S200603",
+      "into_sid": "S170909",
+      "name": "Barane"
+    },
+    {
+      "from_sid": "S209589",
+      "into_sid": "S171476",
+      "name": "Barevo"
+    },
+    {
+      "from_sid": "S226637",
+      "into_sid": "S170771",
+      "name": "Bašci"
+    },
+    {
+      "from_sid": "S216526",
+      "into_sid": "S165255",
+      "name": "Batkovci"
+    },
+    {
+      "from_sid": "S226661",
+      "into_sid": "S171344",
+      "name": "Bilalići"
+    },
+    {
+      "from_sid": "S226408",
+      "into_sid": "S166502",
+      "name": "Bistročaj"
+    },
+    {
+      "from_sid": "S215619",
+      "into_sid": "S166561",
+      "name": "Blagojevići"
+    },
+    {
+      "from_sid": "S217476",
+      "into_sid": "S164844",
+      "name": "Blaževac"
+    },
+    {
+      "from_sid": "S226475",
+      "into_sid": "S165417",
+      "name": "Bogatići"
+    },
+    {
+      "from_sid": "S226629",
+      "into_sid": "S170780",
+      "name": "Boljanovići"
+    },
+    {
+      "from_sid": "S209597",
+      "into_sid": "S166081",
+      "name": "Borci"
+    },
+    {
+      "from_sid": "S227676",
+      "into_sid": "S164607",
+      "name": "Borovinići"
+    },
+    {
+      "from_sid": "S227668",
+      "into_sid": "S164615",
+      "name": "Brajići"
+    },
+    {
+      "from_sid": "S209619",
+      "into_sid": "S169927",
+      "name": "Bravnice"
+    },
+    {
+      "from_sid": "S217590",
+      "into_sid": "S169609",
+      "name": "Bravski Vaganac"
+    },
+    {
+      "from_sid": "S217271",
+      "into_sid": "S170674",
+      "name": "Brdarići"
+    },
+    {
+      "from_sid": "S200638",
+      "into_sid": "S170917",
+      "name": "Brštanik"
+    },
+    {
+      "from_sid": "S212598",
+      "into_sid": "S165611",
+      "name": "Brusnica"
+    },
+    {
+      "from_sid": "S229091",
+      "into_sid": "S165697",
+      "name": "Brvnik"
+    },
+    {
+      "from_sid": "S215660",
+      "into_sid": "S166570",
+      "name": "Bučje"
+    },
+    {
+      "from_sid": "S227757",
+      "into_sid": "S164623",
+      "name": "Bujakovina"
+    },
+    {
+      "from_sid": "S217603",
+      "into_sid": "S166286",
+      "name": "Bukovača"
+    },
+    {
+      "from_sid": "S216364",
+      "into_sid": "S170003",
+      "name": "Bulatovci"
+    },
+    {
+      "from_sid": "S217611",
+      "into_sid": "S169617",
+      "name": "Bunara"
+    },
+    {
+      "from_sid": "S200646",
+      "into_sid": "S170925",
+      "name": "Burmazi"
+    },
+    {
+      "from_sid": "S225002",
+      "into_sid": "S165735",
+      "name": "Cerovac"
+    },
+    {
+      "from_sid": "S227579",
+      "into_sid": "S169676",
+      "name": "Cvilin"
+    },
+    {
+      "from_sid": "S212601",
+      "into_sid": "S171107",
+      "name": "Čelić"
+    },
+    {
+      "from_sid": "S208400",
+      "into_sid": "S165239",
+      "name": "Čović Polje"
+    },
+    {
+      "from_sid": "S225053",
+      "into_sid": "S165743",
+      "name": "Diklići"
+    },
+    {
+      "from_sid": "S226491",
+      "into_sid": "S170798",
+      "name": "Divčići"
+    },
+    {
+      "from_sid": "S200662",
+      "into_sid": "S165484",
+      "name": "Do"
+    },
+    {
+      "from_sid": "S216542",
+      "into_sid": "S165263",
+      "name": "Donja Kozica"
+    },
+    {
+      "from_sid": "S226483",
+      "into_sid": "S170801",
+      "name": "Donja Presjenica"
+    },
+    {
+      "from_sid": "S217484",
+      "into_sid": "S164852",
+      "name": "Donja Tramošnica"
+    },
+    {
+      "from_sid": "S216569",
+      "into_sid": "S170488",
+      "name": "Donja Tramošnja"
+    },
+    {
+      "from_sid": "S217344",
+      "into_sid": "S165352",
+      "name": "Donja Vinča"
+    },
+    {
+      "from_sid": "S209341",
+      "into_sid": "S166472",
+      "name": "Donje Biosko"
+    },
+    {
+      "from_sid": "S230529",
+      "into_sid": "S169838",
+      "name": "Donje Ledenice"
+    },
+    {
+      "from_sid": "S219274",
+      "into_sid": "S170054",
+      "name": "Donje Ratkovo"
+    },
+    {
+      "from_sid": "S215678",
+      "into_sid": "S169749",
+      "name": "Donje Selo"
+    },
+    {
+      "from_sid": "S219282",
+      "into_sid": "S170064",
+      "name": "Donje Sokolovo"
+    },
+    {
+      "from_sid": "S215686",
+      "into_sid": "S166588",
+      "name": "Dragolji"
+    },
+    {
+      "from_sid": "S209635",
+      "into_sid": "S169943",
+      "name": "Drenov Do"
+    },
+    {
+      "from_sid": "S217620",
+      "into_sid": "S164585",
+      "name": "Drinić"
+    },
+    {
+      "from_sid": "S219347",
+      "into_sid": "S170089",
+      "name": "Dubočani"
+    },
+    {
+      "from_sid": "S209350",
+      "into_sid": "S170755",
+      "name": "Faletići"
+    },
+    {
+      "from_sid": "S227960",
+      "into_sid": "S166537",
+      "name": "Filipovići"
+    },
+    {
+      "from_sid": "S227978",
+      "into_sid": "S166308",
+      "name": "Glušca"
+    },
+    {
+      "from_sid": "S226548",
+      "into_sid": "S170810",
+      "name": "Godinja"
+    },
+    {
+      "from_sid": "S216399",
+      "into_sid": "S170011",
+      "name": "Gojčin"
+    },
+    {
+      "from_sid": "S225266",
+      "into_sid": "S165751",
+      "name": "Gola Glavica"
+    },
+    {
+      "from_sid": "S216593",
+      "into_sid": "S170496",
+      "name": "Gornja Kozica"
+    },
+    {
+      "from_sid": "S226718",
+      "into_sid": "S165905",
+      "name": "Gornja Krčina"
+    },
+    {
+      "from_sid": "S217506",
+      "into_sid": "S164887",
+      "name": "Gornja Tramošnica"
+    },
+    {
+      "from_sid": "S216607",
+      "into_sid": "S165271",
+      "name": "Gornja Tramošnja"
+    },
+    {
+      "from_sid": "S209368",
+      "into_sid": "S170763",
+      "name": "Gornje Biosko"
+    },
+    {
+      "from_sid": "S217514",
+      "into_sid": "S169854",
+      "name": "Gornje Ledenice"
+    },
+    {
+      "from_sid": "S219371",
+      "into_sid": "S165034",
+      "name": "Gornje Ratkovo"
+    },
+    {
+      "from_sid": "S219380",
+      "into_sid": "S165042",
+      "name": "Gornje Sokolovo"
+    },
+    {
+      "from_sid": "S212016",
+      "into_sid": "S164534",
+      "name": "Gornji Bušević"
+    },
+    {
+      "from_sid": "S208647",
+      "into_sid": "S165875",
+      "name": "Gornji Lokanj"
+    },
+    {
+      "from_sid": "S227994",
+      "into_sid": "S166316",
+      "name": "Gostičaj"
+    },
+    {
+      "from_sid": "S226572",
+      "into_sid": "S170828",
+      "name": "Govedovići"
+    },
+    {
+      "from_sid": "S226599",
+      "into_sid": "S165425",
+      "name": "Grab"
+    },
+    {
+      "from_sid": "S226602",
+      "into_sid": "S170836",
+      "name": "Gračanica"
+    },
+    {
+      "from_sid": "S229156",
+      "into_sid": "S171158",
+      "name": "Grebnice"
+    },
+    {
+      "from_sid": "S225398",
+      "into_sid": "S165760",
+      "name": "Grmljani"
+    },
+    {
+      "from_sid": "S216615",
+      "into_sid": "S170500",
+      "name": "Hadrovci"
+    },
+    {
+      "from_sid": "S219410",
+      "into_sid": "S170119",
+      "name": "Hasići"
+    },
+    {
+      "from_sid": "S212024",
+      "into_sid": "S164542",
+      "name": "Hašani"
+    },
+    {
+      "from_sid": "S200697",
+      "into_sid": "S170933",
+      "name": "Hodovo"
+    },
+    {
+      "from_sid": "S209384",
+      "into_sid": "S166073",
+      "name": "Hreša"
+    },
+    {
+      "from_sid": "S200719",
+      "into_sid": "S165492",
+      "name": "Hrgud"
+    },
+    {
+      "from_sid": "S215791",
+      "into_sid": "S169757",
+      "name": "Hubjeri"
+    },
+    {
+      "from_sid": "S226505",
+      "into_sid": "S170844",
+      "name": "Ilovice"
+    },
+    {
+      "from_sid": "S212610",
+      "into_sid": "S165620",
+      "name": "Jablanica"
+    },
+    {
+      "from_sid": "S219428",
+      "into_sid": "S170127",
+      "name": "Jarice"
+    },
+    {
+      "from_sid": "S226742",
+      "into_sid": "S171352",
+      "name": "Jasenje"
+    },
+    {
+      "from_sid": "S226769",
+      "into_sid": "S171397",
+      "name": "Jasikovac"
+    },
+    {
+      "from_sid": "S208426",
+      "into_sid": "S165247",
+      "name": "Jenjić"
+    },
+    {
+      "from_sid": "S209651",
+      "into_sid": "S164941",
+      "name": "Jezero"
+    },
+    {
+      "from_sid": "S209252",
+      "into_sid": "S165930",
+      "name": "Kamena"
+    },
+    {
+      "from_sid": "S216976",
+      "into_sid": "S165379",
+      "name": "Kamenica"
+    },
+    {
+      "from_sid": "S215821",
+      "into_sid": "S166596",
+      "name": "Karauzovići"
+    },
+    {
+      "from_sid": "S215830",
+      "into_sid": "S164755",
+      "name": "Karovići"
+    },
+    {
+      "from_sid": "S208752",
+      "into_sid": "S165883",
+      "name": "Kiseljak"
+    },
+    {
+      "from_sid": "S217638",
+      "into_sid": "S169625",
+      "name": "Klenovac"
+    },
+    {
+      "from_sid": "S225479",
+      "into_sid": "S165778",
+      "name": "Klikovići"
+    },
+    {
+      "from_sid": "S209279",
+      "into_sid": "S171433",
+      "name": "Kokorina"
+    },
+    {
+      "from_sid": "S227935",
+      "into_sid": "S166324",
+      "name": "Kolun"
+    },
+    {
+      "from_sid": "S216640",
+      "into_sid": "S170518",
+      "name": "Koprivna"
+    },
+    {
+      "from_sid": "S225517",
+      "into_sid": "S165964",
+      "name": "Kotezi"
+    },
+    {
+      "from_sid": "S226386",
+      "into_sid": "S165433",
+      "name": "Kozija Luka"
+    },
+    {
+      "from_sid": "S225541",
+      "into_sid": "S165785",
+      "name": "Krajkovići"
+    },
+    {
+      "from_sid": "S166707",
+      "into_sid": "S151114",
+      "name": "Kraševo"
+    },
+    {
+      "from_sid": "S209210",
+      "into_sid": "S165301",
+      "name": "Krupac"
+    },
+    {
+      "from_sid": "S208434",
+      "into_sid": "S166456",
+      "name": "Lepnica"
+    },
+    {
+      "from_sid": "S166715",
+      "into_sid": "S171000",
+      "name": "Lončari"
+    },
+    {
+      "from_sid": "S212695",
+      "into_sid": "S165638",
+      "name": "Lopare Selo"
+    },
+    {
+      "from_sid": "S209520",
+      "into_sid": "S165336",
+      "name": "Lukavica"
+    },
+    {
+      "from_sid": "S212709",
+      "into_sid": "S171115",
+      "name": "Lukavica"
+    },
+    {
+      "from_sid": "S207667",
+      "into_sid": "S171131",
+      "name": "Lukavica Rijeka"
+    },
+    {
+      "from_sid": "S225657",
+      "into_sid": "S165972",
+      "name": "Lušnica"
+    },
+    {
+      "from_sid": "S219436",
+      "into_sid": "S166430",
+      "name": "Ljubine"
+    },
+    {
+      "from_sid": "S200727",
+      "into_sid": "S165506",
+      "name": "Ljubljenica"
+    },
+    {
+      "from_sid": "S227129",
+      "into_sid": "S166545",
+      "name": "Marevo"
+    },
+    {
+      "from_sid": "S215937",
+      "into_sid": "S169765",
+      "name": "Milanovići"
+    },
+    {
+      "from_sid": "S166006",
+      "into_sid": "S166197",
+      "name": "Miljanovci"
+    },
+    {
+      "from_sid": "S226513",
+      "into_sid": "S165441",
+      "name": "Milje"
+    },
+    {
+      "from_sid": "S209538",
+      "into_sid": "S165354",
+      "name": "Miljevići"
+    },
+    {
+      "from_sid": "S212733",
+      "into_sid": "S165646",
+      "name": "Mirosavci"
+    },
+    {
+      "from_sid": "S212113",
+      "into_sid": "S165158",
+      "name": "Mrđanovci"
+    },
+    {
+      "from_sid": "S216666",
+      "into_sid": "S170534",
+      "name": "Mrkalji"
+    },
+    {
+      "from_sid": "S225746",
+      "into_sid": "S165794",
+      "name": "Mrnjići"
+    },
+    {
+      "from_sid": "S212903",
+      "into_sid": "S131148",
+      "name": "Nahvioci"
+    },
+    {
+      "from_sid": "S166014",
+      "into_sid": "S151211",
+      "name": "Novi Miljanovci"
+    },
+    {
+      "from_sid": "S205281",
+      "into_sid": "S170348",
+      "name": "Novo Selo"
+    },
+    {
+      "from_sid": "S212121",
+      "into_sid": "S165166",
+      "name": "Novo Selo"
+    },
+    {
+      "from_sid": "S215961",
+      "into_sid": "S164771",
+      "name": "Odžak"
+    },
+    {
+      "from_sid": "S225797",
+      "into_sid": "S165808",
+      "name": "Orašje Popovo"
+    },
+    {
+      "from_sid": "S216461",
+      "into_sid": "S164950",
+      "name": "Osmaci"
+    },
+    {
+      "from_sid": "S208469",
+      "into_sid": "S170470",
+      "name": "Oštra Luka"
+    },
+    {
+      "from_sid": "S212067",
+      "into_sid": "S169579",
+      "name": "Otoka"
+    },
+    {
+      "from_sid": "S212768",
+      "into_sid": "S165654",
+      "name": "Piperi"
+    },
+    {
+      "from_sid": "S215970",
+      "into_sid": "S164780",
+      "name": "Podhomara"
+    },
+    {
+      "from_sid": "S215988",
+      "into_sid": "S164798",
+      "name": "Podkozara Donja"
+    },
+    {
+      "from_sid": "S217646",
+      "into_sid": "S169641",
+      "name": "Podsrnetica"
+    },
+    {
+      "from_sid": "S216704",
+      "into_sid": "S170542",
+      "name": "Podvidača"
+    },
+    {
+      "from_sid": "S225908",
+      "into_sid": "S166669",
+      "name": "Poljice Čičevo"
+    },
+    {
+      "from_sid": "S200751",
+      "into_sid": "S170950",
+      "name": "Poplat"
+    },
+    {
+      "from_sid": "S217565",
+      "into_sid": "S164909",
+      "name": "Porebrice"
+    },
+    {
+      "from_sid": "S212075",
+      "into_sid": "S169587",
+      "name": "Potkalinje"
+    },
+    {
+      "from_sid": "S209228",
+      "into_sid": "S165557",
+      "name": "Potoci"
+    },
+    {
+      "from_sid": "S205290",
+      "into_sid": "S170364",
+      "name": "Potočani"
+    },
+    {
+      "from_sid": "S216801",
+      "into_sid": "S170704",
+      "name": "Prača"
+    },
+    {
+      "from_sid": "S209694",
+      "into_sid": "S169960",
+      "name": "Prisoje"
+    },
+    {
+      "from_sid": "S227048",
+      "into_sid": "S169706",
+      "name": "Prisoje"
+    },
+    {
+      "from_sid": "S212806",
+      "into_sid": "S165662",
+      "name": "Pukiš"
+    },
+    {
+      "from_sid": "S216046",
+      "into_sid": "S169781",
+      "name": "Radići"
+    },
+    {
+      "from_sid": "S216054",
+      "into_sid": "S164801",
+      "name": "Radijevići"
+    },
+    {
+      "from_sid": "S225959",
+      "into_sid": "S165816",
+      "name": "Rapti Bobani"
+    },
+    {
+      "from_sid": "S212130",
+      "into_sid": "S170208",
+      "name": "Rastičevo"
+    },
+    {
+      "from_sid": "S212822",
+      "into_sid": "S166260",
+      "name": "Ratkovići"
+    },
+    {
+      "from_sid": "S227358",
+      "into_sid": "S166553",
+      "name": "Rodijelj"
+    },
+    {
+      "from_sid": "S217573",
+      "into_sid": "S164917",
+      "name": "Samarevac"
+    },
+    {
+      "from_sid": "S209171",
+      "into_sid": "S170607",
+      "name": "Sarajevo Dio - Ilidža"
+    },
+    {
+      "from_sid": "S209490",
+      "into_sid": "S170666",
+      "name": "Sarajevo Dio - Novo Sarajevo"
+    },
+    {
+      "from_sid": "S209422",
+      "into_sid": "S166499",
+      "name": "Sarajevo Dio - Stari Grad Sarajevo"
+    },
+    {
+      "from_sid": "S216712",
+      "into_sid": "S170569",
+      "name": "Sasina"
+    },
+    {
+      "from_sid": "S225983",
+      "into_sid": "S165824",
+      "name": "Sedlari"
+    },
+    {
+      "from_sid": "S207861",
+      "into_sid": "S112615",
+      "name": "Sjenina Rijeka"
+    },
+    {
+      "from_sid": "S216739",
+      "into_sid": "S165280",
+      "name": "Slatina"
+    },
+    {
+      "from_sid": "S226564",
+      "into_sid": "S170879",
+      "name": "Slavljevići"
+    },
+    {
+      "from_sid": "S226009",
+      "into_sid": "S171204",
+      "name": "Slivnica Površ"
+    },
+    {
+      "from_sid": "S216135",
+      "into_sid": "S164810",
+      "name": "Sopotnica"
+    },
+    {
+      "from_sid": "S227471",
+      "into_sid": "S170160",
+      "name": "Sorlaci"
+    },
+    {
+      "from_sid": "S216992",
+      "into_sid": "S165387",
+      "name": "Srednje"
+    },
+    {
+      "from_sid": "S212083",
+      "into_sid": "S164569",
+      "name": "Srednji Bušević"
+    },
+    {
+      "from_sid": "S212091",
+      "into_sid": "S164577",
+      "name": "Srednji Dubovik"
+    },
+    {
+      "from_sid": "S207870",
+      "into_sid": "S171140",
+      "name": "Stanić Rijeka"
+    },
+    {
+      "from_sid": "S216747",
+      "into_sid": "S165298",
+      "name": "Stara Rijeka"
+    },
+    {
+      "from_sid": "S226025",
+      "into_sid": "S165832",
+      "name": "Strujići"
+    },
+    {
+      "from_sid": "S212148",
+      "into_sid": "S165174",
+      "name": "Šemenovci"
+    },
+    {
+      "from_sid": "S216755",
+      "into_sid": "S170577",
+      "name": "Škrljevita"
+    },
+    {
+      "from_sid": "S216160",
+      "into_sid": "S169790",
+      "name": "Šućurići"
+    },
+    {
+      "from_sid": "S166022",
+      "into_sid": "S151378",
+      "name": "Tešanjka"
+    },
+    {
+      "from_sid": "S229261",
+      "into_sid": "S165719",
+      "name": "Tišina"
+    },
+    {
+      "from_sid": "S216763",
+      "into_sid": "S170585",
+      "name": "Trnova"
+    },
+    {
+      "from_sid": "S226467",
+      "into_sid": "S165450",
+      "name": "Trnovo"
+    },
+    {
+      "from_sid": "S217581",
+      "into_sid": "S164925",
+      "name": "Turić"
+    },
+    {
+      "from_sid": "S226858",
+      "into_sid": "S171417",
+      "name": "Tursunovo Brdo"
+    },
+    {
+      "from_sid": "S216186",
+      "into_sid": "S169803",
+      "name": "Uhotići"
+    },
+    {
+      "from_sid": "S216771",
+      "into_sid": "S165999",
+      "name": "Usorci"
+    },
+    {
+      "from_sid": "S219509",
+      "into_sid": "S170135",
+      "name": "Velečevo"
+    },
+    {
+      "from_sid": "S226203",
+      "into_sid": "S165859",
+      "name": "Veličani"
+    },
+    {
+      "from_sid": "S212105",
+      "into_sid": "S169595",
+      "name": "Veliki Dubovik"
+    },
+    {
+      "from_sid": "S212873",
+      "into_sid": "S166278",
+      "name": "Visori"
+    },
+    {
+      "from_sid": "S209104",
+      "into_sid": "S171328",
+      "name": "Vitinica"
+    },
+    {
+      "from_sid": "S205311",
+      "into_sid": "S170372",
+      "name": "Vrbovac"
+    },
+    {
+      "from_sid": "S226416",
+      "into_sid": "S170887",
+      "name": "Vrbovnik"
+    },
+    {
+      "from_sid": "S209406",
+      "into_sid": "S165409",
+      "name": "Vučja Luka"
+    },
+    {
+      "from_sid": "S226394",
+      "into_sid": "S170895",
+      "name": "Zabojska"
+    },
+    {
+      "from_sid": "S216518",
+      "into_sid": "S170038",
+      "name": "Zelina"
+    },
+    {
+      "from_sid": "S216780",
+      "into_sid": "S170593",
+      "name": "Zenkovići"
+    },
+    {
+      "from_sid": "S209287",
+      "into_sid": "S165956",
+      "name": "Zijemlje"
+    },
+    {
+      "from_sid": "S200816",
+      "into_sid": "S165522",
+      "name": "Žegulja"
+    },
+    {
+      "from_sid": "S216305",
+      "into_sid": "S169811",
+      "name": "Žigovi"
+    },
+    {
+      "from_sid": "S216330",
+      "into_sid": "S164828",
+      "name": "Žuželo"
+    }
+  ]
+}

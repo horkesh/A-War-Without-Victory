@@ -1,0 +1,819 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>AWWV Phase A1 Base Map Viewer (NATO Style)</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #333;
+      color: white;
+    }
+
+    .bar {
+      padding: 10px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      background: #222;
+      border-bottom: 1px solid #444;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    canvas {
+      display: block;
+      background: #ffffff;
+      cursor: crosshair;
+    }
+
+    .small {
+      color: #aaa;
+      font-size: 12px;
+    }
+
+    #info {
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      font-size: 11px;
+    }
+
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border: 1px solid #000;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .panel {
+      position: fixed;
+      top: 50px;
+      right: 10px;
+      width: 280px;
+      max-height: calc(100vh - 60px);
+      overflow-y: auto;
+      background: #222;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 12px;
+      z-index: 20;
+      display: none;
+    }
+
+    .panel.visible {
+      display: block;
+    }
+
+    .panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      border-bottom: 1px solid #444;
+      padding-bottom: 6px;
+    }
+
+    .panel-row {
+      margin-bottom: 8px;
+    }
+
+    .panel-label {
+      color: #aaa;
+    }
+
+    .panel-value {
+      color: #fff;
+      margin-top: 2px;
+    }
+
+    .panel-close {
+      float: right;
+      cursor: pointer;
+      color: #888;
+      font-size: 18px;
+    }
+
+    .panel-close:hover {
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bar">
+    <span>A1 NATO Base Map</span>
+    <button id="fit">Fit View</button>
+    <label style="display:flex;align-items:center;gap:4px;">Go to: <input type="text" id="goto-input"
+        placeholder="SID or name" style="width:120px;padding:2px 6px;"></label>
+    <button id="goto-btn">Go</button>
+    <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="layer-control" checked>
+      Control</label>
+    <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="layer-ethnicity">
+      Ethnicity</label>
+    <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="layer-settlement-borders">
+      Settlement borders</label>
+    <div class="legend">
+      <span><span class="swatch" style="background:#A0A0A0"></span> MSR</span>
+      <span><span class="swatch" style="background:#D0D0D0"></span> Secondary</span>
+      <span><span class="swatch" style="background:rgb(100,150,200)"></span> Rivers</span>
+      <span><span class="swatch" style="background:rgb(180,50,50)"></span> Cities</span>
+    </div>
+    <span class="small" id="stats">Loading...</span>
+    <span class="small" id="info"></span>
+  </div>
+  <canvas id="c"></canvas>
+  <div id="side-panel" class="panel">
+    <span class="panel-close" id="panel-close">&times;</span>
+    <h3>Settlement</h3>
+    <div id="panel-content"></div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d");
+    const stats = document.getElementById("stats");
+    const info = document.getElementById("info");
+
+    let geojson = null;
+    let view = { scale: 1, tx: 0, ty: 0 };
+    let bounds = null;
+
+    /* NATO Tactical Aesthetic v1.0 — match src/map/nato_tokens.ts */
+    const NATO_COLORS = {
+      MSR: '#A0A0A0',
+      SECONDARY: '#D0D0D0',
+      RIVER: 'rgb(100, 150, 200)',
+      PAPER: '#ebe1cd',
+      CITY: 'rgb(180, 50, 50)',
+      RS: 'rgba(180, 50, 50, 0.15)',
+      RBiH: 'rgba(70, 120, 80, 0.15)',
+      HRHB: 'rgba(60, 100, 140, 0.15)',
+      BORDERS: {
+        RS: 'rgba(180, 50, 50, 0.4)',
+        RBiH: 'rgba(70, 120, 80, 0.4)',
+        HRHB: 'rgba(60, 100, 140, 0.4)'
+      }
+    };
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight - 50;
+      draw();
+    }
+    window.addEventListener('resize', resize);
+
+    function computeBounds(gj) {
+      // Find MSR bounds for initial operational focus
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      const msrFeatures = gj.features.filter(f => f.properties.role === 'road' && f.properties.nato_class === 'MSR');
+      const targetFeatures = msrFeatures.length > 0 ? msrFeatures : gj.features;
+
+      targetFeatures.forEach(f => {
+        if (!f.geometry) return;
+        const type = f.geometry.type;
+        const coords = f.geometry.coordinates;
+        const visit = (pt) => {
+          if (!pt || typeof pt[0] !== 'number') return;
+          const x = pt[0], y = pt[1];
+          if (Math.abs(x) > 10000 || Math.abs(y) > 10000) return;
+          if (x < minX) minX = x; if (y < minY) minY = y;
+          if (x > maxX) maxX = x; if (y > maxY) maxY = y;
+        };
+
+        if (type === "Point") visit(coords);
+        else if (type === "LineString") coords.forEach(visit);
+        else if (type === "MultiLineString" || type === "Polygon") coords.forEach(ring => ring.forEach(visit));
+        else if (type === "MultiPolygon") coords.forEach(poly => poly.forEach(ring => ring.forEach(visit)));
+      });
+      return { minX, minY, maxX, maxY };
+    }
+
+    function fitToCanvas() {
+      if (!bounds || bounds.minX === Infinity) return;
+      const pad = 80;
+      const w = canvas.width - pad * 2;
+      const h = canvas.height - pad * 2;
+      const bw = bounds.maxX - bounds.minX;
+      const bh = bounds.maxY - bounds.minY;
+      view.scale = Math.min(w / bw, h / bh);
+
+      view.tx = (canvas.width - bw * view.scale) / 2 - bounds.minX * view.scale;
+      view.ty = (canvas.height - bh * view.scale) / 2 - bounds.minY * view.scale;
+      draw();
+    }
+
+    function w2s(x, y) {
+      const sx = view.tx + x * view.scale;
+      const sy = view.ty + y * view.scale;
+      return [sx, sy];
+    }
+    function s2w(sx, sy) {
+      return { x: (sx - view.tx) / view.scale, y: (sy - view.ty) / view.scale };
+    }
+
+    function pointInRing(wx, wy, ring) {
+      let inside = false;
+      const n = ring.length;
+      for (let i = 0, j = n - 1; i < n; j = i++) {
+        const xi = ring[i][0], yi = ring[i][1];
+        const xj = ring[j][0], yj = ring[j][1];
+        if (((yi > wy) !== (yj > wy)) && (wx < (xj - xi) * (wy - yi) / (yj - yi) + xi)) inside = !inside;
+      }
+      return inside;
+    }
+    function pointInPolygon(wx, wy, coords) {
+      if (!coords || !coords[0]) return false;
+      const exterior = coords[0];
+      if (!pointInRing(wx, wy, exterior)) return false;
+      for (let h = 1; h < coords.length; h++) {
+        if (pointInRing(wx, wy, coords[h])) return false;
+      }
+      return true;
+    }
+
+    let censusData = null;
+    let mun1990Names = null;
+
+    function findSettlementAt(screenX, screenY) {
+      if (!geojson) return null;
+      const rect = canvas.getBoundingClientRect();
+      const cx = screenX - rect.left;
+      const cy = screenY - rect.top;
+      const world = s2w(cx, cy);
+      const settlements = geojson.features.filter(f => f.properties.role === 'settlement');
+      const hitRadiusWorld = Math.max(80, 100 / view.scale);
+      for (let i = settlements.length - 1; i >= 0; i--) {
+        const f = settlements[i];
+        const geom = f.geometry;
+        if (geom.type === 'Point') {
+          const dx = world.x - geom.coordinates[0];
+          const dy = world.y - geom.coordinates[1];
+          if (dx * dx + dy * dy <= hitRadiusWorld * hitRadiusWorld) return f;
+        } else if (geom.type === 'Polygon') {
+          if (pointInPolygon(world.x, world.y, geom.coordinates)) return f;
+        } else if (geom.type === 'MultiPolygon') {
+          for (let p = 0; p < geom.coordinates.length; p++) {
+            if (pointInPolygon(world.x, world.y, geom.coordinates[p])) return f;
+          }
+        }
+      }
+      return null;
+    }
+
+    function showSettlementPanel(feature) {
+      const panel = document.getElementById('side-panel');
+      const content = document.getElementById('panel-content');
+      if (!feature) {
+        panel.classList.remove('visible');
+        return;
+      }
+      const sid = feature.properties?.sid || '';
+      const name = feature.properties?.name || censusData?.by_sid?.[sid]?.n || sid || '—';
+      const pop = feature.properties?.pop;
+      let munName = '—';
+      let total = pop != null ? Number(pop) : null;
+      const p = censusData?.by_sid?.[sid]?.p;
+      if (censusData && censusData.by_sid && censusData.by_sid[sid]) {
+        const rec = censusData.by_sid[sid];
+        if (total == null && Array.isArray(rec.p) && rec.p[0] != null) total = rec.p[0];
+        const slug = rec.m;
+        if (mun1990Names && mun1990Names.by_mun1990_id && slug && mun1990Names.by_mun1990_id[slug]) {
+          munName = mun1990Names.by_mun1990_id[slug].display_name || slug;
+        } else if (slug) munName = slug;
+      }
+      const totalStr = total != null ? total.toLocaleString() : '—';
+      const labels = ['Total', 'Bosniaks', 'Croats', 'Serbs', 'Others'];
+      let popRows = '';
+      if (Array.isArray(p) && p.length >= 5) {
+        labels.forEach((lbl, idx) => { popRows += `<div class="panel-row"><span class="panel-label">${lbl}</span><span class="panel-value">${(p[idx] != null ? p[idx] : 0).toLocaleString()}</span></div>`; });
+      } else {
+        popRows = `<div class="panel-row"><span class="panel-label">Total</span><span class="panel-value">${totalStr}</span></div>`;
+      }
+      content.innerHTML = `
+        <div class="panel-row"><span class="panel-label">SID</span><span class="panel-value">${String(sid).replace(/</g, '&lt;') || '—'}</span></div>
+        <div class="panel-row"><span class="panel-label">Settlement</span><span class="panel-value">${String(name).replace(/</g, '&lt;')}</span></div>
+        <div class="panel-row"><span class="panel-label">Municipality</span><span class="panel-value">${String(munName).replace(/</g, '&lt;')}</span></div>
+        <div class="panel-row"><span class="panel-label">Population</span><span class="panel-value">${totalStr}</span></div>
+        <div class="panel-row" style="margin-top:8px;"><span class="panel-label">By ethnicity</span></div>
+        ${popRows}
+      `;
+      panel.classList.add('visible');
+    }
+
+    function drawLine(coords, color, width) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      coords.forEach((pt, i) => {
+        const [sx, sy] = w2s(pt[0], pt[1]);
+        if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+      });
+      ctx.stroke();
+    }
+
+    function drawPaperGrain() {
+      ctx.save();
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
+      // Static noise spots
+      for (let i = 0; i < 3000; i++) {
+        const x = (i * 131) % canvas.width;
+        const y = (i * 197) % canvas.height;
+        ctx.fillRect(x, y, 1, 1);
+      }
+      // Subtle cross-hatch
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.01)';
+      ctx.lineWidth = 0.3;
+      ctx.beginPath();
+      for (let i = 0; i < canvas.width; i += 10) {
+        ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height);
+      }
+      for (let i = 0; i < canvas.height; i += 10) {
+        ctx.moveTo(0, i); ctx.lineTo(canvas.width, i);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!geojson) return;
+
+      const boundaryFeatures = geojson.features.filter(f => f.properties.role === 'boundary');
+
+      // --- 1. CLIPPING MASK (BiH Boundary) ---
+      if (boundaryFeatures.length > 0) {
+        ctx.save();
+        ctx.beginPath();
+        boundaryFeatures.forEach(f => {
+          const type = f.geometry.type;
+          const coords = f.geometry.coordinates;
+          const polys = type === 'Polygon' ? [coords] : (type === 'MultiPolygon' ? coords : []);
+          polys.forEach(rings => {
+            rings.forEach(ring => {
+              ring.forEach((pt, i) => {
+                const [sx, sy] = w2s(pt[0], pt[1]);
+                if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+              });
+              ctx.closePath();
+            });
+          });
+        });
+
+        // Fill the inside with Paper base
+        ctx.fillStyle = NATO_COLORS.PAPER;
+        ctx.fill();
+        ctx.clip();
+      }
+
+      drawPaperGrain();
+
+      // --- 1b. CONTROL REGIONS (Faction Overlays) - optional, no dashed borders ---
+      const showControl = document.getElementById('layer-control') && document.getElementById('layer-control').checked;
+      if (showControl) {
+        geojson.features.filter(f => f.properties.role === 'control_region').forEach(f => {
+          const faction = f.properties.controller;
+          if (!faction || !NATO_COLORS[faction]) return;
+
+          ctx.fillStyle = NATO_COLORS[faction];
+          const type = f.geometry.type;
+          const coords = f.geometry.coordinates;
+          const polys = type === 'Polygon' ? [coords] : (type === 'MultiPolygon' ? coords : []);
+
+          polys.forEach(rings => {
+            ctx.beginPath();
+            rings.forEach(ring => {
+              ring.forEach((p, i) => {
+                const [sx, sy] = w2s(p[0], p[1]);
+                if (i === 0) ctx.moveTo(sx, sy);
+                else ctx.lineTo(sx, sy);
+              });
+              ctx.closePath();
+            });
+            ctx.fill();
+          });
+        });
+      }
+
+      // 1c. ETHNICITY OVERLAY (settlement fill by majority when layer on)
+      const showEthnicity = document.getElementById('layer-ethnicity') && document.getElementById('layer-ethnicity').checked;
+      const ETHNICITY_FILL = { bosniak: 'rgba(46,125,50,0.25)', serb: 'rgba(198,40,40,0.25)', croat: 'rgba(21,101,192,0.25)', other: 'rgba(109,109,109,0.2)', unknown: 'rgba(189,189,189,0.15)' };
+      if (showEthnicity) {
+        geojson.features.filter(f => f.properties.role === 'settlement').forEach(f => {
+          const majority = (f.properties.majority_ethnicity || 'unknown').toLowerCase();
+          const fill = ETHNICITY_FILL[majority] || ETHNICITY_FILL.unknown;
+          const type = f.geometry.type;
+          const coords = f.geometry.coordinates;
+          if (type === 'Point') return;
+          ctx.fillStyle = fill;
+          const polys = type === 'Polygon' ? [coords] : (type === 'MultiPolygon' ? coords : []);
+          polys.forEach(rings => {
+            ctx.beginPath();
+            rings.forEach(ring => {
+              ring.forEach((p, i) => {
+                const [sx, sy] = w2s(p[0], p[1]);
+                if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+              });
+              ctx.closePath();
+            });
+            ctx.fill();
+          });
+        });
+      }
+
+      // 1d. URBAN AREAS - Tactical Red
+      geojson.features.filter(f => f.properties.role === 'settlement' && f.properties.nato_class !== 'SETTLEMENT').forEach(f => {
+        const type = f.geometry.type;
+        const coords = f.geometry.coordinates;
+        if (type === 'Point') return;
+
+        ctx.fillStyle = 'rgba(180, 50, 50, 0.1)';
+        const polys = type === 'Polygon' ? [coords] : (type === 'MultiPolygon' ? coords : []);
+        polys.forEach(rings => {
+          ctx.beginPath();
+          rings.forEach(ring => {
+            ring.forEach((p, i) => {
+              const [sx, sy] = w2s(p[0], p[1]);
+              if (i === 0) ctx.moveTo(sx, sy);
+              else ctx.lineTo(sx, sy);
+            });
+            ctx.closePath();
+          });
+          ctx.fill();
+        });
+      });
+
+      // 1e. SETTLEMENT BORDERS (polygon outlines when layer on)
+      const showSettlementBorders = document.getElementById('layer-settlement-borders') && document.getElementById('layer-settlement-borders').checked;
+      if (showSettlementBorders) {
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)';
+        ctx.lineWidth = 0.6 * view.scale;
+        geojson.features.filter(f => f.properties.role === 'settlement').forEach(f => {
+          const type = f.geometry.type;
+          const coords = f.geometry.coordinates;
+          if (type === 'Point') return;
+          const polys = type === 'Polygon' ? [coords] : (type === 'MultiPolygon' ? coords : []);
+          polys.forEach(rings => {
+            rings.forEach(ring => {
+              ctx.beginPath();
+              ring.forEach((p, i) => {
+                const [sx, sy] = w2s(p[0], p[1]);
+                if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+              });
+              ctx.closePath();
+              ctx.stroke();
+            });
+          });
+        });
+      }
+
+      // 2. Rivers
+      geojson.features.filter(f => f.properties.role === 'river').forEach(f => {
+        const coords = f.geometry.coordinates;
+        if (f.geometry.type === 'LineString') drawLine(coords, NATO_COLORS.RIVER, 1.2 * view.scale);
+        else coords.forEach(l => drawLine(l, NATO_COLORS.RIVER, 1.2 * view.scale));
+      });
+
+      // 3. Roads
+      geojson.features.filter(f => f.properties.role === 'road').forEach(f => {
+        const props = f.properties;
+        const color = props.nato_class === 'MSR' ? NATO_COLORS.MSR : NATO_COLORS.SECONDARY;
+        const width = (props.nato_class === 'MSR' ? 1.2 : 0.4) * view.scale;
+        const coords = f.geometry.coordinates;
+        if (f.geometry.type === 'LineString') drawLine(coords, color, width);
+        else coords.forEach(l => drawLine(l, color, width));
+      });
+
+      if (boundaryFeatures.length > 0) {
+        ctx.restore();
+
+        // Stroke the boundary itself
+        ctx.strokeStyle = 'rgba(100, 90, 80, 0.4)';
+        ctx.lineWidth = 1.5 * view.scale;
+        boundaryFeatures.forEach(f => {
+          const type = f.geometry.type;
+          const coords = f.geometry.coordinates;
+          const polys = type === 'Polygon' ? [coords] : (type === 'MultiPolygon' ? coords : []);
+          polys.forEach(rings => {
+            rings.forEach(ring => {
+              ctx.beginPath();
+              ring.forEach((pt, i) => {
+                const [sx, sy] = w2s(pt[0], pt[1]);
+                if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+              });
+              ctx.stroke();
+            });
+          });
+        });
+      }
+
+      // 4. Labels (Consolidated Sarajevo + Major Cities > 20k) - Rendered AFTER restore to prevent cutoff
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'center';
+      ctx.font = '400 ' + (12 * Math.max(0.6, Math.min(1.2, view.scale))) + 'px "Inter", sans-serif';
+
+      const citiesMap = new Map();
+      geojson.features.filter(f => f.properties.role === 'settlement' && (f.properties.pop || 0) > 20000).forEach(s => {
+        let name = s.properties.name;
+        const pop = s.properties.pop || 0;
+        let coords = s.geometry.coordinates;
+        if (s.geometry.type !== 'Point') {
+          coords = s.geometry.type === 'Polygon' ? coords[0][0] : coords[0][0][0];
+        }
+        if (!coords) return;
+
+        const lowerName = name.toLowerCase();
+        if (lowerName.includes('sarajevo') || lowerName === 'ilidža' || lowerName === 'ilidza') {
+          name = 'Sarajevo';
+        } else if (lowerName.includes('mostar')) {
+          name = 'Mostar';
+        }
+
+        if (!citiesMap.has(name) || pop > citiesMap.get(name).pop) {
+          citiesMap.set(name, { name, pop, coords });
+        }
+      });
+
+      citiesMap.forEach(city => {
+        const [sx, sy] = w2s(city.coords[0], city.coords[1]);
+
+        // Text Halo
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 3;
+        ctx.strokeText(city.name, sx, sy - 15);
+
+        ctx.fillStyle = '#444';
+        ctx.fillText(city.name, sx, sy - 15);
+      });
+
+
+      // --- Grid Lines ---
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.lineWidth = 0.5;
+      const gridSpacing = 100;
+
+      if (bounds) {
+        const gMinX = Math.floor((bounds.minX - 1000) / gridSpacing) * gridSpacing;
+        const gMaxX = Math.ceil((bounds.maxX + 1000) / gridSpacing) * gridSpacing;
+        const gMinY = Math.floor((bounds.minY - 1000) / gridSpacing) * gridSpacing;
+        const gMaxY = Math.ceil((bounds.maxY + 1000) / gridSpacing) * gridSpacing;
+
+        ctx.beginPath();
+        for (let x = gMinX; x <= gMaxX; x += gridSpacing) {
+          const [sx, sy] = w2s(x, 0);
+          ctx.moveTo(sx, 0); ctx.lineTo(sx, canvas.height);
+        }
+        for (let y = gMinY; y <= gMaxY; y += gridSpacing) {
+          const [sx, sy] = w2s(0, y);
+          ctx.moveTo(0, sy); ctx.lineTo(canvas.width, sy);
+        }
+        ctx.stroke();
+
+        // Grid Labels
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.font = '600 10px monospace';
+        for (let x = gMinX; x <= gMaxX; x += gridSpacing) {
+          const [sx, sy] = w2s(x, 0);
+          if (sx > 0 && sx < canvas.width) ctx.fillText(x.toString(), sx + 4, 12);
+        }
+        for (let y = gMinY; y <= gMaxY; y += gridSpacing) {
+          const [sx, sy] = w2s(0, y);
+          if (sy > 0 && sy < canvas.height) ctx.fillText(y.toString(), 2, sy - 4);
+        }
+      }
+
+      stats.textContent = `Features: ${geojson.features.length} | Scale: ${view.scale.toFixed(4)}`;
+    }
+
+    // Pan/Zoom and click-for-settlement
+    let dragging = false, lastX = 0, lastY = 0, downX = 0, downY = 0;
+    canvas.onmousedown = (e) => {
+      dragging = true;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      downX = e.clientX;
+      downY = e.clientY;
+    };
+    window.onmouseup = (e) => {
+      if (dragging && Math.abs(e.clientX - downX) < 4 && Math.abs(e.clientY - downY) < 4) {
+        const hit = findSettlementAt(e.clientX, e.clientY);
+        showSettlementPanel(hit);
+      }
+      dragging = false;
+    };
+    window.onmousemove = (e) => {
+      if (!dragging) return;
+      view.tx += (e.clientX - lastX);
+      view.ty += (e.clientY - lastY);
+      lastX = e.clientX; lastY = e.clientY;
+      draw();
+    };
+    canvas.onwheel = (e) => {
+      e.preventDefault();
+      const zoom = Math.exp(-e.deltaY * 0.001);
+      const mx = e.offsetX, my = e.offsetY;
+      view.tx = mx - (mx - view.tx) * zoom;
+      view.ty = my - (my - view.ty) * zoom;
+      view.scale *= zoom;
+      draw();
+    };
+
+    function getFeatureBounds(f) {
+      const g = f.geometry;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      const visit = (pt) => {
+        if (pt && typeof pt[0] === 'number') {
+          minX = Math.min(minX, pt[0]); minY = Math.min(minY, pt[1]);
+          maxX = Math.max(maxX, pt[0]); maxY = Math.max(maxY, pt[1]);
+        }
+      };
+      if (g.type === 'Polygon' && g.coordinates) g.coordinates.forEach(r => r.forEach(visit));
+      else if (g.type === 'MultiPolygon' && g.coordinates) g.coordinates.forEach(p => p.forEach(r => r.forEach(visit)));
+      return minX !== Infinity ? { minX, minY, maxX, maxY } : null;
+    }
+    function findFeatureBySidOrName(q) {
+      if (!geojson || !q) return null;
+      const qq = String(q).trim().toLowerCase();
+      if (!qq) return null;
+      const sidMatch = qq.startsWith('s') ? qq : ('s' + qq);
+      const settlements = geojson.features.filter(f => f.properties.role === 'settlement');
+      for (const f of settlements) {
+        const sid = String(f.properties?.sid || '').toLowerCase();
+        const name = String(f.properties?.name || '').toLowerCase();
+        if (sid === sidMatch || sid.includes(qq) || sid.includes(sidMatch) || name.includes(qq)) return f;
+      }
+      return null;
+    }
+    function focusOnFeature(f) {
+      const b = getFeatureBounds(f);
+      if (b) {
+        const pad = 80;
+        const w = canvas.width - pad * 2, h = canvas.height - pad * 2;
+        const bw = b.maxX - b.minX, bh = b.maxY - b.minY;
+        view.scale = Math.min(w / bw, h / bh);
+        view.tx = (canvas.width - bw * view.scale) / 2 - b.minX * view.scale;
+        view.ty = (canvas.height - bh * view.scale) / 2 - b.minY * view.scale;
+      }
+      showSettlementPanel(f);
+      draw();
+    }
+    document.getElementById("fit").onclick = fitToCanvas;
+    document.getElementById("goto-btn").onclick = () => {
+      const q = document.getElementById("goto-input")?.value?.trim();
+      const f = findFeatureBySidOrName(q);
+      if (f) focusOnFeature(f);
+    };
+    const layerControl = document.getElementById("layer-control");
+    const layerEthnicity = document.getElementById("layer-ethnicity");
+    const layerSettlementBorders = document.getElementById("layer-settlement-borders");
+    if (layerControl) layerControl.addEventListener("change", draw);
+    if (layerEthnicity) layerEthnicity.addEventListener("change", draw);
+    if (layerSettlementBorders) layerSettlementBorders.addEventListener("change", draw);
+    const panelClose = document.getElementById("panel-close");
+    if (panelClose) panelClose.addEventListener("click", () => showSettlementPanel(null));
+
+    (async function init() {
+      if (window.location.protocol === "file:") {
+        stats.textContent = "file:// not supported";
+        info.innerHTML = "Run from a local server: <code>npx http-server -p 8080</code> then open <code>http://localhost:8080/data/derived/A1_viewer.html</code>";
+        return;
+      }
+      resize();
+      try {
+        const resp = await fetch("./A1_BASE_MAP.geojson");
+        if (!resp.ok) throw new Error("A1_BASE_MAP.geojson not found.");
+        geojson = await resp.json();
+        bounds = computeBounds(geojson);
+        fitToCanvas();
+        try {
+          const [cr, mn, ctrl] = await Promise.all([
+            fetch("./census_rolled_up_wgs84.json").then(r => r.ok ? r.json() : null),
+            fetch("./mun1990_names.json").then(r => r.ok ? r.json() : null),
+            fetch("../scenarios/jan_93/control.json").then(r => r.ok ? r.json() : null)
+          ]);
+          censusData = cr || null;
+          mun1990Names = mn || null;
+          if (ctrl) {
+            let missing = 0;
+            geojson.features.forEach(f => {
+              const sid = f.properties.sid;
+              if (sid) {
+                if (ctrl[sid]) {
+                  f.properties.controller = ctrl[sid];
+                } else {
+                  missing++;
+                  // console.warn('Missing control for:', sid, f.properties.name);
+                }
+              }
+            });
+            // Re-draw to reflect changes
+            draw();
+            stats.textContent += " | Jan 93 SCENARIO Loaded (" + (scenario.formations?.length || 0) + " formations)";
+            if (missing > 0) stats.textContent += ` | Missing Control: ${missing}`;
+          }
+
+          if (scenario.formations) {
+            const formations = scenario.formations;
+            const originalDraw = draw;
+            // Override draw to include formations
+            window.draw = function () {
+              originalDraw(); // draw map first
+              if (!scenario.formations) return;
+              const ctx = document.getElementById("c").getContext("2d");
+              ctx.save();
+              ctx.textAlign = "center";
+              ctx.textBaseline = "middle";
+              ctx.font = "bold 10px sans-serif";
+
+              // Group formations by settlement to avoid stacking overlap
+              const bySettlement = {};
+              scenario.formations.forEach(fmt => {
+                const locSid = fmt.home_settlement_sid || fmt.home_settlement; // Try explicit SID first, then name if needed? 
+                // Wait, home_settlement in oob_brigades.json is a NAME ("Orašje"). 
+                // We need to look up the settlement feature by NAME if SID is missing.
+                // But 'findFeatureBySidOrName' logic can help here.
+
+                // Let's find the feature:
+                let f = null;
+                // Try to find by name from home_settlement
+                if (fmt.home_settlement) {
+                  // Check if it's an SID
+                  if (fmt.home_settlement.startsWith('S')) {
+                    f = geojson.features.find(x => x.properties.sid === fmt.home_settlement);
+                  }
+                  if (!f) {
+                    // Find by name (case insensitive)
+                    const search = fmt.home_settlement.toLowerCase();
+                    f = geojson.features.find(x => (x.properties.name || '').toLowerCase() === search);
+                  }
+                }
+
+                if (f) {
+                  const sid = f.properties.sid;
+                  if (!bySettlement[sid]) bySettlement[sid] = { f, formations: [] };
+                  bySettlement[sid].formations.push(fmt);
+                } else {
+                  console.warn('Could not locate formation:', fmt.id, fmt.home_settlement);
+                }
+              });
+
+              Object.values(bySettlement).forEach(group => {
+                const f = group.f;
+                const fmts = group.formations;
+
+                // Compute centroid
+                let cx = 0, cy = 0, n = 0;
+                const visit = (pt) => { cx += pt[0]; cy += pt[1]; n++; };
+                if (f.geometry.type === 'Point') visit(f.geometry.coordinates);
+                else if (f.geometry.type === 'Polygon') f.geometry.coordinates[0].forEach(visit);
+                else if (f.geometry.type === 'MultiPolygon') f.geometry.coordinates[0][0].forEach(visit);
+
+                if (n > 0) {
+                  cx /= n; cy /= n;
+                  let [sx, sy] = w2s(cx, cy);
+
+                  // Draw Stack
+                  fmts.forEach((fmt, idx) => {
+                    const offset = (idx - (fmts.length - 1) / 2) * 8;
+                    const drawX = sx + offset;
+                    const drawY = sy - 10; // slightly above
+
+                    ctx.fillStyle = fmt.faction === 'RS' ? 'rgba(200,50,50,0.9)' :
+                      fmt.faction === 'RBiH' ? 'rgba(50,150,50,0.9)' :
+                        fmt.faction === 'HRHB' ? 'rgba(50,50,200,0.9)' : '#888';
+
+                    // NATO Unit Symbol Box
+                    ctx.beginPath();
+                    ctx.rect(drawX - 6, drawY - 4, 12, 8);
+                    ctx.fill();
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    // XX for Division, X for Brigade (we assume mostly brigades)
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText("X", drawX, drawY - 6);
+                  });
+                }
+              });
+
+              ctx.restore();
+            };
+            draw(); // Trigger initial draw with formations
+          }
+        } catch (_) { /* sidebar may show limited info */ }
+      } catch (err) {
+        stats.textContent = "Error: " + err.message;
+      }
+    })();
+  </script>
+</body>
+
+</html>

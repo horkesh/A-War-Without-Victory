@@ -1,0 +1,14 @@
+{
+  "volume_id": "BB1",
+  "page_number": 517,
+  "raw_text": "1\n2\n1\nI\nI\n1\n1\n1",
+  "clean_text": "1\n2\n1\nI\nI\n1\n1\n1",
+  "ocr_applied": false,
+  "text_hash": "5a07734cadfb275571a04d710c21e52b05709558f6c8bf98eaca1eb3a80c9df8",
+  "clean_text_hash": "5a07734cadfb275571a04d710c21e52b05709558f6c8bf98eaca1eb3a80c9df8",
+  "layout_blocks": [],
+  "tables": [],
+  "figures": [],
+  "map_regions": [],
+  "notes": []
+}

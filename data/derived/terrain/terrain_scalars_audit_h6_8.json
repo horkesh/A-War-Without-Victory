@@ -1,0 +1,35 @@
+{
+  "phase": "h6_8",
+  "inputs": {
+    "osm_roads_snapshot_h6_2_geojson": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\terrain\\osm_roads_snapshot_h6_2.geojson",
+    "osm_waterways_snapshot_h6_2_geojson": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\terrain\\osm_waterways_snapshot_h6_2.geojson",
+    "dem_clip_h6_2_tif": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\terrain\\dem_clip_h6_2.tif",
+    "osm_snapshot_audit_h6_2_json": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\terrain\\osm_snapshot_audit_h6_2.json",
+    "dem_snapshot_audit_h6_2_json": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\terrain\\dem_snapshot_audit_h6_2.json",
+    "settlements_substrate_geojson": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\settlements_substrate.geojson",
+    "svg_to_world_transform_json": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\georef\\svg_to_world_transform.json"
+  },
+  "georef": {
+    "artifact": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\georef\\svg_to_world_transform.json",
+    "method": "svg_to_world"
+  },
+  "outputs": {
+    "settlements_terrain_scalars_json": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\terrain\\settlements_terrain_scalars.json",
+    "terrain_scalars_audit_h6_8_json": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\terrain\\terrain_scalars_audit_h6_8.json",
+    "terrain_scalars_audit_h6_8_txt": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\terrain\\terrain_scalars_audit_h6_8.txt"
+  },
+  "scalar_field_list": [
+    "road_access_index",
+    "river_crossing_penalty",
+    "elevation_mean_m",
+    "elevation_stddev_m",
+    "slope_index",
+    "terrain_friction_index"
+  ],
+  "coverage": {
+    "settlements_populated": 6137,
+    "zero_roads_count": 524,
+    "zero_waterways_count": 3933,
+    "zero_dem_pixels_count": 1
+  }
+}

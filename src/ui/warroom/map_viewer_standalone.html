@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>War Planning Map — AWWV</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%231a1a2e' width='32' height='32'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='%23eee'>W</text></svg>">
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #1a1a2e; font-family: Arial, sans-serif; color: #eee; }
+        #app { position: fixed; inset: 0; display: flex; flex-direction: column; }
+        #toolbar {
+            flex: 0 0 auto; display: flex; align-items: center; gap: 12px; padding: 8px 12px;
+            background: rgb(35, 35, 30); border-bottom: 1px solid #4a4238;
+        }
+        #toolbar .zoom-pill { padding: 4px 10px; background: #3a3530; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        #toolbar button { padding: 6px 12px; background: #4a4238; color: #eee; border: 1px solid #5a5248; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        #toolbar button:hover { background: #5a5248; }
+        #toolbar .turn-display { margin-left: auto; font-size: 12px; color: #aaa; }
+        #main { flex: 1 1 auto; display: flex; min-height: 0; position: relative; }
+        #map-wrap { flex: 1 1 auto; position: relative; background: #1e1c18; }
+        #map-wrap canvas { display: block; width: 100%; height: 100%; cursor: pointer; }
+        .zoom-buttons-map { position: absolute; bottom: 44px; right: 12px; display: flex; gap: 4px; z-index: 2; }
+        .zoom-buttons-map button { width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.7); color: #eee; border: 1px solid #5a5248; cursor: pointer; font-size: 18px; line-height: 1; }
+        .zoom-buttons-map button:hover { background: rgba(0,0,0,0.85); }
+        #legend {
+            position: absolute; bottom: 12px; left: 12px; padding: 8px 12px;
+            background: rgba(0,0,0,0.75); border-radius: 4px; font-size: 11px; z-index: 2;
+        }
+        #legend.hidden { display: none; }
+        #legend .row { margin: 2px 0; }
+        #legend .swatch { display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: middle; border-radius: 1px; }
+        #layer-panel {
+            position: absolute; top: 12px; right: 12px; z-index: 10;
+            background: rgb(35, 35, 30); border: 1px solid #4a4238; border-radius: 4px;
+            min-width: 32px; max-width: 280px; transition: max-width 0.2s ease;
+        }
+        #layer-panel.collapsed { max-width: 40px; }
+        #layer-panel .layer-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; cursor: pointer; }
+        #layer-panel .layer-panel-header span { font-size: 12px; }
+        #layer-panel .layer-panel-body { padding: 8px 12px; border-top: 1px solid #4a4238; overflow: hidden; }
+        #layer-panel.collapsed .layer-panel-body { display: none; }
+        #layer-panel .layer-row { margin: 4px 0; font-size: 12px; }
+        #layer-panel .layer-row.phase-ii { color: #666; }
+        #layer-panel .layer-row .phase-badge { font-size: 10px; color: #888; margin-left: 4px; }
+        #layer-panel select { width: 100%; padding: 4px 6px; background: #2a2824; color: #eee; border: 1px solid #4a4238; border-radius: 4px; font-size: 12px; }
+        #panel {
+            width: 340px; flex: 0 0 340px; background: rgb(35, 35, 30);
+            border-left: 4px solid #5a5248; padding: 0; overflow-y: auto; display: none;
+        }
+        #panel.open { display: block; }
+        #panel .panel-section { border-bottom: 1px solid #3a3530; }
+        #panel .panel-section-header { padding: 8px 12px; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+        #panel .panel-section-header::before { content: '■'; }
+        #panel .panel-section-body { padding: 8px 12px 12px 12px; font-size: 12px; }
+        #panel .panel-section.collapsed .panel-section-body { display: none; }
+        #panel .panel-section-body p { margin: 4px 0; }
+        #panel .close-panel { margin: 12px; padding: 8px 12px; cursor: pointer; background: #4a4238; border: none; color: #eee; border-radius: 4px; width: calc(100% - 24px); }
+        #panel .panel-phase { margin-top: 8px; padding: 6px 0; font-size: 11px; color: #888; border-top: 1px solid #3a3530; }
+        #status { padding: 12px; text-align: center; color: #888; font-size: 14px; }
+        #status.error { color: #c66; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="toolbar">
+            <span class="zoom-pill" id="zoom-pill">STRATEGIC</span>
+            <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+            <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+            <button type="button" id="legend-toggle" aria-label="Toggle legend">Legend</button>
+            <button type="button" id="load-state" aria-label="Load scenario state">Load state…</button>
+            <input type="file" id="load-state-input" accept=".json" style="display: none" />
+            <span class="turn-display" id="turn-display">Turn 0 — Sep 1991</span>
+        </div>
+        <div id="main">
+            <div id="map-wrap">
+                <canvas id="map-canvas"></canvas>
+                <div class="zoom-buttons-map">
+                    <button type="button" id="zoom-out-map" aria-label="Zoom out">−</button>
+                    <button type="button" id="zoom-in-map" aria-label="Zoom in">+</button>
+                </div>
+                <div id="legend">
+                    <div class="row"><span class="swatch" style="background:rgb(27,94,32)"></span> RBiH</div>
+                    <div class="row"><span class="swatch" style="background:rgb(226,74,74)"></span> RS</div>
+                    <div class="row"><span class="swatch" style="background:rgb(74,144,226)"></span> HRHB</div>
+                    <div class="row"><span class="swatch" style="background:rgb(100,100,100)"></span> Neutral</div>
+                    <div class="row">— Contested (hatch)</div>
+                </div>
+                <div id="layer-panel" class="collapsed">
+                    <div class="layer-panel-header" id="layer-panel-toggle" title="Layers (L)" role="button" tabindex="0" aria-label="Toggle layer panel">
+                        <span id="layer-panel-label">☰ Layers</span>
+                    </div>
+                    <div class="layer-panel-body">
+                        <div class="layer-row"><label for="control-dataset">Control:</label></div>
+                        <div class="layer-row">
+                            <select id="control-dataset" aria-label="Control dataset">
+                                <option value="baseline">Baseline</option>
+                                <option value="sep1992">September 1992</option>
+                            </select>
+                        </div>
+                        <div class="layer-row"><label><input type="checkbox" id="layer-control" checked> Political control</label></div>
+                        <div class="layer-row"><label><input type="checkbox" id="layer-contested" checked> Contested zones</label></div>
+                        <div class="layer-row"><label><input type="checkbox" id="layer-formations" checked> Formations (when state loaded)</label></div>
+                        <div class="layer-row phase-ii">Command Structure <span class="phase-badge">[II]</span></div>
+                        <div class="layer-row phase-ii">Supply <span class="phase-badge">[II]</span></div>
+                        <div class="layer-row phase-ii">Exhaustion <span class="phase-badge">[I+]</span></div>
+                        <div class="layer-row phase-ii">Stability <span class="phase-badge">[0+]</span></div>
+                        <div class="layer-row phase-ii">Displacement <span class="phase-badge">[I+]</span></div>
+                        <div class="layer-row phase-ii">Ethnicity (1991)</div>
+                        <div class="layer-row phase-ii">Municipality borders</div>
+                    </div>
+                </div>
+            </div>
+            <aside id="panel">
+                <div id="panel-sections"></div>
+                <button type="button" class="close-panel" id="close-panel">Close</button>
+            </aside>
+        </div>
+        <div id="status">Loading map data…</div>
+    </div>
+    <script type="module" src="./map_viewer_app.ts"></script>
+</body>
+</html>

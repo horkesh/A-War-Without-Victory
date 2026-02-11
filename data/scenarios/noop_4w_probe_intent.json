@@ -1,0 +1,10 @@
+{
+  "scenario_id": "noop_4w_probe_intent",
+  "weeks": 4,
+  "turns": [
+    {
+      "week_index": 0,
+      "actions": [{ "type": "probe_intent", "enabled": true }]
+    }
+  ]
+}

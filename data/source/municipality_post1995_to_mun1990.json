@@ -1,0 +1,866 @@
+{
+  "schema_version": "v0.2.7",
+  "generator_script": "scripts/data/extract_municipality_remap_1990_from_xlsx.ts",
+  "generator_commit": "c9edf0e988525369bcae7af2ac5ab7e66f4094b2",
+  "rows": [
+    {
+      "post1995_code": "10014",
+      "post1995_name": "Banovići",
+      "mun1990_name": "Banovići"
+    },
+    {
+      "post1995_code": "10049",
+      "post1995_name": "Bihać",
+      "mun1990_name": "Bihać"
+    },
+    {
+      "post1995_code": "10146",
+      "post1995_name": "Bosansko Grahovo",
+      "mun1990_name": "Bosansko Grahovo"
+    },
+    {
+      "post1995_code": "10189",
+      "post1995_name": "Breza",
+      "mun1990_name": "Breza"
+    },
+    {
+      "post1995_code": "10197",
+      "post1995_name": "Bugojno",
+      "mun1990_name": "Bugojno"
+    },
+    {
+      "post1995_code": "10219",
+      "post1995_name": "Busovača",
+      "mun1990_name": "Busovača"
+    },
+    {
+      "post1995_code": "10227",
+      "post1995_name": "Cazin",
+      "mun1990_name": "Cazin"
+    },
+    {
+      "post1995_code": "10243",
+      "post1995_name": "Čapljina",
+      "mun1990_name": "Čapljina"
+    },
+    {
+      "post1995_code": "10260",
+      "post1995_name": "Čitluk",
+      "mun1990_name": "Čitluk"
+    },
+    {
+      "post1995_code": "10294",
+      "post1995_name": "Donji Vakuf",
+      "mun1990_name": "Donji Vakuf"
+    },
+    {
+      "post1995_code": "10308",
+      "post1995_name": "Tomislavgrad",
+      "mun1990_name": "Duvno"
+    },
+    {
+      "post1995_code": "10324",
+      "post1995_name": "Fojnica",
+      "mun1990_name": "Fojnica"
+    },
+    {
+      "post1995_code": "10359",
+      "post1995_name": "Glamoč",
+      "mun1990_name": "Glamoč"
+    },
+    {
+      "post1995_code": "10375",
+      "post1995_name": "Gornji Vakuf-Uskoplje",
+      "mun1990_name": "Gornji Vakuf"
+    },
+    {
+      "post1995_code": "10391",
+      "post1995_name": "Gradačac",
+      "mun1990_name": "Gradačac"
+    },
+    {
+      "post1995_code": "10405",
+      "post1995_name": "Grude",
+      "mun1990_name": "Grude"
+    },
+    {
+      "post1995_code": "10421",
+      "post1995_name": "Jablanica",
+      "mun1990_name": "Jablanica"
+    },
+    {
+      "post1995_code": "10448",
+      "post1995_name": "Kakanj",
+      "mun1990_name": "Kakanj"
+    },
+    {
+      "post1995_code": "10472",
+      "post1995_name": "Kiseljak",
+      "mun1990_name": "Kiseljak"
+    },
+    {
+      "post1995_code": "10499",
+      "post1995_name": "Kladanj",
+      "mun1990_name": "Kladanj"
+    },
+    {
+      "post1995_code": "10529",
+      "post1995_name": "Konjic",
+      "mun1990_name": "Konjic"
+    },
+    {
+      "post1995_code": "10545",
+      "post1995_name": "Kreševo",
+      "mun1990_name": "Kreševo"
+    },
+    {
+      "post1995_code": "10570",
+      "post1995_name": "Široki Brijeg",
+      "mun1990_name": "Lištica"
+    },
+    {
+      "post1995_code": "10588",
+      "post1995_name": "Livno",
+      "mun1990_name": "Livno"
+    },
+    {
+      "post1995_code": "10600",
+      "post1995_name": "Lukavac",
+      "mun1990_name": "Lukavac"
+    },
+    {
+      "post1995_code": "10626",
+      "post1995_name": "Ljubuški",
+      "mun1990_name": "Ljubuški"
+    },
+    {
+      "post1995_code": "10634",
+      "post1995_name": "Maglaj",
+      "mun1990_name": "Maglaj"
+    },
+    {
+      "post1995_code": "10685",
+      "post1995_name": "Neum",
+      "mun1990_name": "Neum"
+    },
+    {
+      "post1995_code": "10715",
+      "post1995_name": "Olovo",
+      "mun1990_name": "Olovo"
+    },
+    {
+      "post1995_code": "10731",
+      "post1995_name": "Posušje",
+      "mun1990_name": "Posušje"
+    },
+    {
+      "post1995_code": "10766",
+      "post1995_name": "Prozor-Rama",
+      "mun1990_name": "Prozor"
+    },
+    {
+      "post1995_code": "10774",
+      "post1995_name": "Novi Travnik",
+      "mun1990_name": "Novi Travnik"
+    },
+    {
+      "post1995_code": "10839",
+      "post1995_name": "Centar Sarajevo",
+      "mun1990_name": "Centar Sarajevo"
+    },
+    {
+      "post1995_code": "10847",
+      "post1995_name": "Hadžići",
+      "mun1990_name": "Hadžići"
+    },
+    {
+      "post1995_code": "10863",
+      "post1995_name": "Ilijaš",
+      "mun1990_name": "Ilijaš"
+    },
+    {
+      "post1995_code": "10871",
+      "post1995_name": "Novi Grad Sarajevo",
+      "mun1990_name": "Novi Grad Sarajevo"
+    },
+    {
+      "post1995_code": "10928",
+      "post1995_name": "Vogosca",
+      "mun1990_name": "Vogošća"
+    },
+    {
+      "post1995_code": "10987",
+      "post1995_name": "Srebrenik",
+      "mun1990_name": "Srebrenik"
+    },
+    {
+      "post1995_code": "11045",
+      "post1995_name": "Tešanj",
+      "mun1990_name": "Tešanj"
+    },
+    {
+      "post1995_code": "11061",
+      "post1995_name": "Travnik",
+      "mun1990_name": "Travnik"
+    },
+    {
+      "post1995_code": "11088",
+      "post1995_name": "Tuzla",
+      "mun1990_name": "Tuzla"
+    },
+    {
+      "post1995_code": "11100",
+      "post1995_name": "Vareš",
+      "mun1990_name": "Vareš"
+    },
+    {
+      "post1995_code": "11118",
+      "post1995_name": "Velika Kladuša",
+      "mun1990_name": "Velika Kladuša"
+    },
+    {
+      "post1995_code": "11126",
+      "post1995_name": "Visoko",
+      "mun1990_name": "Visoko"
+    },
+    {
+      "post1995_code": "11142",
+      "post1995_name": "Vitez",
+      "mun1990_name": "Vitez"
+    },
+    {
+      "post1995_code": "11177",
+      "post1995_name": "Zavidovići",
+      "mun1990_name": "Zavidovići"
+    },
+    {
+      "post1995_code": "11185",
+      "post1995_name": "Zenica",
+      "mun1990_name": "Zenica"
+    },
+    {
+      "post1995_code": "11207",
+      "post1995_name": "Žepče",
+      "mun1990_name": "Žepče"
+    },
+    {
+      "post1995_code": "11215",
+      "post1995_name": "Živinice",
+      "mun1990_name": "Živinice"
+    },
+    {
+      "post1995_code": "11231",
+      "post1995_name": "Čelić",
+      "mun1990_name": "Lopare"
+    },
+    {
+      "post1995_code": "11240",
+      "post1995_name": "Bužim",
+      "mun1990_name": "Cazin"
+    },
+    {
+      "post1995_code": "11258",
+      "post1995_name": "Doboj-Istok",
+      "mun1990_name": "Doboj"
+    },
+    {
+      "post1995_code": "11266",
+      "post1995_name": "Doboj-Jug",
+      "mun1990_name": "Doboj"
+    },
+    {
+      "post1995_code": "11274",
+      "post1995_name": "Dobretići",
+      "mun1990_name": "Skender Vakuf"
+    },
+    {
+      "post1995_code": "11282",
+      "post1995_name": "Domaljevac-Šamac",
+      "mun1990_name": "Bosanski Šamac"
+    },
+    {
+      "post1995_code": "11304",
+      "post1995_name": "Ravno",
+      "mun1990_name": "Trebinje"
+    },
+    {
+      "post1995_code": "11312",
+      "post1995_name": "Sapna",
+      "mun1990_name": "Zvornik"
+    },
+    {
+      "post1995_code": "11339",
+      "post1995_name": "Teočak",
+      "mun1990_name": "Ugljevik"
+    },
+    {
+      "post1995_code": "11410",
+      "post1995_name": "Grad Mostar",
+      "mun1990_name": "Mostar"
+    },
+    {
+      "post1995_code": "11428",
+      "post1995_name": "Bosanska Krupa",
+      "mun1990_name": "Bosanska Krupa"
+    },
+    {
+      "post1995_code": "11436",
+      "post1995_name": "Bosanski Petrovac",
+      "mun1990_name": "Bosanski Petrovac"
+    },
+    {
+      "post1995_code": "11444",
+      "post1995_name": "Foča",
+      "mun1990_name": "Foča"
+    },
+    {
+      "post1995_code": "11452",
+      "post1995_name": "Novo Goražde",
+      "mun1990_name": "Goražde"
+    },
+    {
+      "post1995_code": "11479",
+      "post1995_name": "Gračanica",
+      "mun1990_name": "Gračanica"
+    },
+    {
+      "post1995_code": "11487",
+      "post1995_name": "Jajce",
+      "mun1990_name": "Jajce"
+    },
+    {
+      "post1995_code": "11495",
+      "post1995_name": "Kalesija",
+      "mun1990_name": "Kalesija"
+    },
+    {
+      "post1995_code": "11509",
+      "post1995_name": "Ključ",
+      "mun1990_name": "Ključ"
+    },
+    {
+      "post1995_code": "11517",
+      "post1995_name": "Kupres",
+      "mun1990_name": "Kupres"
+    },
+    {
+      "post1995_code": "11525",
+      "post1995_name": "Odžak",
+      "mun1990_name": "Odžak"
+    },
+    {
+      "post1995_code": "11533",
+      "post1995_name": "Orašje",
+      "mun1990_name": "Orašje"
+    },
+    {
+      "post1995_code": "11541",
+      "post1995_name": "Sanski Most",
+      "mun1990_name": "Sanski Most"
+    },
+    {
+      "post1995_code": "11550",
+      "post1995_name": "Ilidža",
+      "mun1990_name": "Ilidža"
+    },
+    {
+      "post1995_code": "11568",
+      "post1995_name": "Novo Sarajevo",
+      "mun1990_name": "Novo Sarajevo"
+    },
+    {
+      "post1995_code": "11576",
+      "post1995_name": "Pale",
+      "mun1990_name": "Pale"
+    },
+    {
+      "post1995_code": "11584",
+      "post1995_name": "Stari Grad Sarajevo",
+      "mun1990_name": "Stari Grad Sarajevo"
+    },
+    {
+      "post1995_code": "11592",
+      "post1995_name": "Trnovo",
+      "mun1990_name": "Trnovo"
+    },
+    {
+      "post1995_code": "11606",
+      "post1995_name": "Stolac",
+      "mun1990_name": "Stolac"
+    },
+    {
+      "post1995_code": "11614",
+      "post1995_name": "Drvar",
+      "mun1990_name": "Titov Drvar"
+    },
+    {
+      "post1995_code": "11622",
+      "post1995_name": "Usora",
+      "mun1990_name": "Tešanj"
+    },
+    {
+      "post1995_code": "20010",
+      "post1995_name": "Banja Luka",
+      "mun1990_name": "Banja Luka"
+    },
+    {
+      "post1995_code": "20028",
+      "post1995_name": "Berkovići",
+      "mun1990_name": "Stolac"
+    },
+    {
+      "post1995_code": "20036",
+      "post1995_name": "Bijeljina",
+      "mun1990_name": "Bijeljina"
+    },
+    {
+      "post1995_code": "20044",
+      "post1995_name": "Bileća",
+      "mun1990_name": "Bileća"
+    },
+    {
+      "post1995_code": "20052",
+      "post1995_name": "Bratunac",
+      "mun1990_name": "Bratunac"
+    },
+    {
+      "post1995_code": "20079",
+      "post1995_name": "Brod",
+      "mun1990_name": "Bosanski Brod"
+    },
+    {
+      "post1995_code": "20087",
+      "post1995_name": "Višegrad",
+      "mun1990_name": "Višegrad"
+    },
+    {
+      "post1995_code": "20095",
+      "post1995_name": "Vlasenica",
+      "mun1990_name": "Vlasenica"
+    },
+    {
+      "post1995_code": "20109",
+      "post1995_name": "Vukosavlje",
+      "mun1990_name": "Odžak"
+    },
+    {
+      "post1995_code": "20117",
+      "post1995_name": "Gacko",
+      "mun1990_name": "Gacko"
+    },
+    {
+      "post1995_code": "20125",
+      "post1995_name": "Gradiška",
+      "mun1990_name": "Bosanska Gradiška"
+    },
+    {
+      "post1995_code": "20133",
+      "post1995_name": "Derventa",
+      "mun1990_name": "Derventa"
+    },
+    {
+      "post1995_code": "20141",
+      "post1995_name": "Doboj",
+      "mun1990_name": "Doboj"
+    },
+    {
+      "post1995_code": "20150",
+      "post1995_name": "Donji Žabar",
+      "mun1990_name": "Orašje"
+    },
+    {
+      "post1995_code": "20168",
+      "post1995_name": "Zvornik",
+      "mun1990_name": "Zvornik"
+    },
+    {
+      "post1995_code": "20176",
+      "post1995_name": "Istočna Ilidža",
+      "mun1990_name": "Ilidža"
+    },
+    {
+      "post1995_code": "20184",
+      "post1995_name": "Istočni Drvar",
+      "mun1990_name": "Titov Drvar"
+    },
+    {
+      "post1995_code": "20192",
+      "post1995_name": "Grad Mostar",
+      "mun1990_name": "Mostar"
+    },
+    {
+      "post1995_code": "20206",
+      "post1995_name": "Istočni Stari Grad",
+      "mun1990_name": "Stari Grad Sarajevo"
+    },
+    {
+      "post1995_code": "20214",
+      "post1995_name": "Istočno Novo Sarajevo",
+      "mun1990_name": "Novo Sarajevo"
+    },
+    {
+      "post1995_code": "20222",
+      "post1995_name": "Jezero",
+      "mun1990_name": "Jajce"
+    },
+    {
+      "post1995_code": "20249",
+      "post1995_name": "Kalinovik",
+      "mun1990_name": "Kalinovik"
+    },
+    {
+      "post1995_code": "20257",
+      "post1995_name": "Kneževo",
+      "mun1990_name": "Skender Vakuf"
+    },
+    {
+      "post1995_code": "20265",
+      "post1995_name": "Kozarska Dubica",
+      "mun1990_name": "Bosanska Dubica"
+    },
+    {
+      "post1995_code": "20273",
+      "post1995_name": "Kostajnica",
+      "mun1990_name": "Bosanska Kostajnica"
+    },
+    {
+      "post1995_code": "20281",
+      "post1995_name": "Kotor Varoš",
+      "mun1990_name": "Kotor Varoš"
+    },
+    {
+      "post1995_code": "20290",
+      "post1995_name": "Krupa na Uni",
+      "mun1990_name": "Bosanska Krupa"
+    },
+    {
+      "post1995_code": "20303",
+      "post1995_name": "Kupres",
+      "mun1990_name": "Kupres"
+    },
+    {
+      "post1995_code": "20311",
+      "post1995_name": "Laktaši",
+      "mun1990_name": "Laktaši"
+    },
+    {
+      "post1995_code": "20320",
+      "post1995_name": "Lopare",
+      "mun1990_name": "Lopare"
+    },
+    {
+      "post1995_code": "20338",
+      "post1995_name": "Ljubinje",
+      "mun1990_name": "Ljubinje"
+    },
+    {
+      "post1995_code": "20346",
+      "post1995_name": "Milici",
+      "mun1990_name": "Vlasenica"
+    },
+    {
+      "post1995_code": "20354",
+      "post1995_name": "Modriča",
+      "mun1990_name": "Modriča"
+    },
+    {
+      "post1995_code": "20362",
+      "post1995_name": "Mrkonjić Grad",
+      "mun1990_name": "Mrkonjić Grad"
+    },
+    {
+      "post1995_code": "20389",
+      "post1995_name": "Nevesinje",
+      "mun1990_name": "Nevesinje"
+    },
+    {
+      "post1995_code": "20397",
+      "post1995_name": "Bosanski Novi",
+      "mun1990_name": "Bosanski Novi"
+    },
+    {
+      "post1995_code": "20397",
+      "post1995_name": "Novi Grad",
+      "mun1990_name": "Bosanski Novi"
+    },
+    {
+      "post1995_code": "20419",
+      "post1995_name": "Novo Goražde",
+      "mun1990_name": "Goražde"
+    },
+    {
+      "post1995_code": "20427",
+      "post1995_name": "Osmaci",
+      "mun1990_name": "Kalesija"
+    },
+    {
+      "post1995_code": "20435",
+      "post1995_name": "Oštra Luka",
+      "mun1990_name": "Sanski Most"
+    },
+    {
+      "post1995_code": "20443",
+      "post1995_name": "Pale",
+      "mun1990_name": "Pale"
+    },
+    {
+      "post1995_code": "20451",
+      "post1995_name": "Pelagićevo",
+      "mun1990_name": "Gradačac"
+    },
+    {
+      "post1995_code": "20460",
+      "post1995_name": "Petrovac",
+      "mun1990_name": "Bosanski Petrovac"
+    },
+    {
+      "post1995_code": "20478",
+      "post1995_name": "Petrovo",
+      "mun1990_name": "Gračanica"
+    },
+    {
+      "post1995_code": "20486",
+      "post1995_name": "Prijedor",
+      "mun1990_name": "Prijedor"
+    },
+    {
+      "post1995_code": "20494",
+      "post1995_name": "Prnjavor",
+      "mun1990_name": "Prnjavor"
+    },
+    {
+      "post1995_code": "20508",
+      "post1995_name": "Ribnik",
+      "mun1990_name": "Ključ"
+    },
+    {
+      "post1995_code": "20516",
+      "post1995_name": "Rogatica",
+      "mun1990_name": "Rogatica"
+    },
+    {
+      "post1995_code": "20524",
+      "post1995_name": "Rudo",
+      "mun1990_name": "Rudo"
+    },
+    {
+      "post1995_code": "20532",
+      "post1995_name": "Sokolac",
+      "mun1990_name": "Sokolac"
+    },
+    {
+      "post1995_code": "20559",
+      "post1995_name": "Srbac",
+      "mun1990_name": "Srbac"
+    },
+    {
+      "post1995_code": "20567",
+      "post1995_name": "Srebrenica",
+      "mun1990_name": "Srebrenica"
+    },
+    {
+      "post1995_code": "20575",
+      "post1995_name": "Teslić",
+      "mun1990_name": "Teslić"
+    },
+    {
+      "post1995_code": "20583",
+      "post1995_name": "Trebinje",
+      "mun1990_name": "Trebinje"
+    },
+    {
+      "post1995_code": "20591",
+      "post1995_name": "Trnovo",
+      "mun1990_name": "Trnovo"
+    },
+    {
+      "post1995_code": "20605",
+      "post1995_name": "Ugljevik",
+      "mun1990_name": "Ugljevik"
+    },
+    {
+      "post1995_code": "20613",
+      "post1995_name": "Foča",
+      "mun1990_name": "Foča"
+    },
+    {
+      "post1995_code": "20621",
+      "post1995_name": "Han Pijesak",
+      "mun1990_name": "Han-Pijesak"
+    },
+    {
+      "post1995_code": "20630",
+      "post1995_name": "Čajniče",
+      "mun1990_name": "Čajniče"
+    },
+    {
+      "post1995_code": "20648",
+      "post1995_name": "Čelinac",
+      "mun1990_name": "Čelinac"
+    },
+    {
+      "post1995_code": "20656",
+      "post1995_name": "Šamac",
+      "mun1990_name": "Bosanski Šamac"
+    },
+    {
+      "post1995_code": "20664",
+      "post1995_name": "Šekovići",
+      "mun1990_name": "Šekovići"
+    },
+    {
+      "post1995_code": "20672",
+      "post1995_name": "Šipovo",
+      "mun1990_name": "Šipovo"
+    },
+    {
+      "post1995_code": "30163",
+      "post1995_name": "Brčko",
+      "mun1990_name": "Brčko"
+    }
+  ],
+  "index_by_post1995_code": {
+    "10014": "Banovići",
+    "10049": "Bihać",
+    "10146": "Bosansko Grahovo",
+    "10189": "Breza",
+    "10197": "Bugojno",
+    "10219": "Busovača",
+    "10227": "Cazin",
+    "10243": "Čapljina",
+    "10260": "Čitluk",
+    "10294": "Donji Vakuf",
+    "10308": "Duvno",
+    "10324": "Fojnica",
+    "10359": "Glamoč",
+    "10375": "Gornji Vakuf",
+    "10391": "Gradačac",
+    "10405": "Grude",
+    "10421": "Jablanica",
+    "10448": "Kakanj",
+    "10472": "Kiseljak",
+    "10499": "Kladanj",
+    "10529": "Konjic",
+    "10545": "Kreševo",
+    "10570": "Lištica",
+    "10588": "Livno",
+    "10600": "Lukavac",
+    "10626": "Ljubuški",
+    "10634": "Maglaj",
+    "10685": "Neum",
+    "10715": "Olovo",
+    "10731": "Posušje",
+    "10766": "Prozor",
+    "10774": "Novi Travnik",
+    "10839": "Centar Sarajevo",
+    "10847": "Hadžići",
+    "10863": "Ilijaš",
+    "10871": "Novi Grad Sarajevo",
+    "10928": "Vogošća",
+    "10987": "Srebrenik",
+    "11045": "Tešanj",
+    "11061": "Travnik",
+    "11088": "Tuzla",
+    "11100": "Vareš",
+    "11118": "Velika Kladuša",
+    "11126": "Visoko",
+    "11142": "Vitez",
+    "11177": "Zavidovići",
+    "11185": "Zenica",
+    "11207": "Žepče",
+    "11215": "Živinice",
+    "11231": "Lopare",
+    "11240": "Cazin",
+    "11258": "Doboj",
+    "11266": "Doboj",
+    "11274": "Skender Vakuf",
+    "11282": "Bosanski Šamac",
+    "11304": "Trebinje",
+    "11312": "Zvornik",
+    "11339": "Ugljevik",
+    "11410": "Mostar",
+    "11428": "Bosanska Krupa",
+    "11436": "Bosanski Petrovac",
+    "11444": "Foča",
+    "11452": "Goražde",
+    "11479": "Gračanica",
+    "11487": "Jajce",
+    "11495": "Kalesija",
+    "11509": "Ključ",
+    "11517": "Kupres",
+    "11525": "Odžak",
+    "11533": "Orašje",
+    "11541": "Sanski Most",
+    "11550": "Ilidža",
+    "11568": "Novo Sarajevo",
+    "11576": "Pale",
+    "11584": "Stari Grad Sarajevo",
+    "11592": "Trnovo",
+    "11606": "Stolac",
+    "11614": "Titov Drvar",
+    "11622": "Tešanj",
+    "20010": "Banja Luka",
+    "20028": "Stolac",
+    "20036": "Bijeljina",
+    "20044": "Bileća",
+    "20052": "Bratunac",
+    "20079": "Bosanski Brod",
+    "20087": "Višegrad",
+    "20095": "Vlasenica",
+    "20109": "Odžak",
+    "20117": "Gacko",
+    "20125": "Bosanska Gradiška",
+    "20133": "Derventa",
+    "20141": "Doboj",
+    "20150": "Orašje",
+    "20168": "Zvornik",
+    "20176": "Ilidža",
+    "20184": "Titov Drvar",
+    "20192": "Mostar",
+    "20206": "Stari Grad Sarajevo",
+    "20214": "Novo Sarajevo",
+    "20222": "Jajce",
+    "20249": "Kalinovik",
+    "20257": "Skender Vakuf",
+    "20265": "Bosanska Dubica",
+    "20273": "Bosanska Kostajnica",
+    "20281": "Kotor Varoš",
+    "20290": "Bosanska Krupa",
+    "20303": "Kupres",
+    "20311": "Laktaši",
+    "20320": "Lopare",
+    "20338": "Ljubinje",
+    "20346": "Vlasenica",
+    "20354": "Modriča",
+    "20362": "Mrkonjić Grad",
+    "20389": "Nevesinje",
+    "20397": "Bosanski Novi",
+    "20419": "Goražde",
+    "20427": "Kalesija",
+    "20435": "Sanski Most",
+    "20443": "Pale",
+    "20451": "Gradačac",
+    "20460": "Bosanski Petrovac",
+    "20478": "Gračanica",
+    "20486": "Prijedor",
+    "20494": "Prnjavor",
+    "20508": "Ključ",
+    "20516": "Rogatica",
+    "20524": "Rudo",
+    "20532": "Sokolac",
+    "20559": "Srbac",
+    "20567": "Srebrenica",
+    "20575": "Teslić",
+    "20583": "Trebinje",
+    "20591": "Trnovo",
+    "20605": "Ugljevik",
+    "20613": "Foča",
+    "20621": "Han-Pijesak",
+    "20630": "Čajniče",
+    "20648": "Čelinac",
+    "20656": "Bosanski Šamac",
+    "20664": "Šekovići",
+    "20672": "Šipovo",
+    "30163": "Brčko"
+  }
+}

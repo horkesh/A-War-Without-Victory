@@ -1,0 +1,552 @@
+[
+  {
+    "mun1990_id": "banovici",
+    "adm3_id": "banovici",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "banja_luka",
+    "adm3_id": "banja_luka",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "bihac",
+    "adm3_id": "bihac",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "bijeljina",
+    "adm3_id": "bijeljina",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "bileca",
+    "adm3_id": "bileca",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "bosanska_dubica",
+    "adm3_id": "bosanska_dubica",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "bosanska_gradiska",
+    "adm3_id": "bosanska_gradiska",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "bosanska_kostajnica",
+    "adm3_id": "bosanska_kostajnica",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "bosanska_krupa",
+    "adm3_id": "bosanska_krupa",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "bosanski_brod",
+    "adm3_id": "bosanski_brod",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "bosanski_novi",
+    "adm3_id": "bosanski_novi",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "bosanski_petrovac",
+    "adm3_id": "bosanski_petrovac",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "bosanski_samac",
+    "adm3_id": "bosanski_samac",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "bosansko_grahovo",
+    "adm3_id": "bosansko_grahovo",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "bratunac",
+    "adm3_id": "bratunac",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "brcko",
+    "adm3_id": "brcko",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "breza",
+    "adm3_id": "breza",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "bugojno",
+    "adm3_id": "bugojno",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "busovaca",
+    "adm3_id": "busovaca",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "cajnice",
+    "adm3_id": "cajnice",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "capljina",
+    "adm3_id": "capljina",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "cazin",
+    "adm3_id": "cazin",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "celinac",
+    "adm3_id": "celinac",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "centar_sarajevo",
+    "adm3_id": "centar_sarajevo",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "citluk",
+    "adm3_id": "citluk",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "derventa",
+    "adm3_id": "derventa",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "doboj",
+    "adm3_id": "doboj",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "donji_vakuf",
+    "adm3_id": "donji_vakuf",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "duvno",
+    "adm3_id": "duvno",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "foca",
+    "adm3_id": "foca",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "fojnica",
+    "adm3_id": "fojnica",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "gacko",
+    "adm3_id": "gacko",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "glamoc",
+    "adm3_id": "glamoc",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "gorazde",
+    "adm3_id": "gorazde",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "gornji_vakuf",
+    "adm3_id": "gornji_vakuf",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "gracanica",
+    "adm3_id": "gracanica",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "gradacac",
+    "adm3_id": "gradacac",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "grude",
+    "adm3_id": "grude",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "hadzici",
+    "adm3_id": "hadzici",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "han_pijesak",
+    "adm3_id": "hanpijesak",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "ilidza",
+    "adm3_id": "ilidza",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "ilijas",
+    "adm3_id": "ilijas",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "jablanica",
+    "adm3_id": "jablanica",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "jajce",
+    "adm3_id": "jajce",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "kakanj",
+    "adm3_id": "kakanj",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "kalesija",
+    "adm3_id": "kalesija",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "kalinovik",
+    "adm3_id": "kalinovik",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "kiseljak",
+    "adm3_id": "kiseljak",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "kladanj",
+    "adm3_id": "kladanj",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "kljuc",
+    "adm3_id": "kljuc",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "konjic",
+    "adm3_id": "konjic",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "kotor_varos",
+    "adm3_id": "kotor_varos",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "kresevo",
+    "adm3_id": "kresevo",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "kupres",
+    "adm3_id": "kupres",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "laktasi",
+    "adm3_id": "laktasi",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "listica",
+    "adm3_id": "listica",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "livno",
+    "adm3_id": "livno",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "lopare",
+    "adm3_id": "lopare",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "lukavac",
+    "adm3_id": "lukavac",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "ljubinje",
+    "adm3_id": "ljubinje",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "ljubuski",
+    "adm3_id": "ljubuski",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "maglaj",
+    "adm3_id": "maglaj",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "modrica",
+    "adm3_id": "modrica",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "mostar",
+    "adm3_id": "mostar",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "mrkonjic_grad",
+    "adm3_id": "mrkonjic_grad",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "neum",
+    "adm3_id": "neum",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "nevesinje",
+    "adm3_id": "nevesinje",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "novi_grad_sarajevo",
+    "adm3_id": "novi_grad_sarajevo",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "novi_travnik",
+    "adm3_id": "novi_travnik",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "novo_sarajevo",
+    "adm3_id": "novo_sarajevo",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "odzak",
+    "adm3_id": "odzak",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "olovo",
+    "adm3_id": "olovo",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "orasje",
+    "adm3_id": "orasje",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "pale",
+    "adm3_id": "pale",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "posusje",
+    "adm3_id": "posusje",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "prijedor",
+    "adm3_id": "prijedor",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "prnjavor",
+    "adm3_id": "prnjavor",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "prozor",
+    "adm3_id": "prozor",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "rogatica",
+    "adm3_id": "rogatica",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "rudo",
+    "adm3_id": "rudo",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "sanski_most",
+    "adm3_id": "sanski_most",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "sekovici",
+    "adm3_id": "sekovici",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "sipovo",
+    "adm3_id": "sipovo",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "skender_vakuf",
+    "adm3_id": "skender_vakuf",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "sokolac",
+    "adm3_id": "sokolac",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "srbac",
+    "adm3_id": "srbac",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "srebrenica",
+    "adm3_id": "srebrenica",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "srebrenik",
+    "adm3_id": "srebrenik",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "stari_grad_sarajevo",
+    "adm3_id": "stari_grad_sarajevo",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "stolac",
+    "adm3_id": "stolac",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "tesanj",
+    "adm3_id": "tesanj",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "teslic",
+    "adm3_id": "teslic",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "titov_drvar",
+    "adm3_id": "titov_drvar",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "travnik",
+    "adm3_id": "travnik",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "trebinje",
+    "adm3_id": "trebinje",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "trnovo",
+    "adm3_id": "trnovo",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "tuzla",
+    "adm3_id": "tuzla",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "ugljevik",
+    "adm3_id": "ugljevik",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "vares",
+    "adm3_id": "vares",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "velika_kladusa",
+    "adm3_id": "velika_kladusa",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "visegrad",
+    "adm3_id": "visegrad",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "visoko",
+    "adm3_id": "visoko",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "vitez",
+    "adm3_id": "vitez",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "vlasenica",
+    "adm3_id": "vlasenica",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "vogosca",
+    "adm3_id": "vogosca",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "zavidovici",
+    "adm3_id": "zavidovici",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "zenica",
+    "adm3_id": "zenica",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "zepce",
+    "adm3_id": "zepce",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "zivinice",
+    "adm3_id": "zivinice",
+    "reason": "exact"
+  },
+  {
+    "mun1990_id": "zvornik",
+    "adm3_id": "zvornik",
+    "reason": "exact"
+  }
+]

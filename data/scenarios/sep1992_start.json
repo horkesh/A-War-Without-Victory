@@ -1,0 +1,20 @@
+{
+  "scenario_id": "sep1992_start",
+  "weeks": 52,
+  "turns": [
+    {
+      "week_index": 0,
+      "actions": [
+        {
+          "type": "note",
+          "text": "September 1992: The International Conference on Former Yugoslavia convenes in Geneva under Vance and Owen, restarting the diplomatic track."
+        },
+        {
+          "type": "note",
+          "text": "Late September: CSCE states offer sanctions-assistance personnel; Croatia and the FRY agree to recognize borders, allow refugee returns, and demilitarize the Prevlaka Peninsula."
+        },
+        { "type": "baseline_ops", "enabled": true, "intensity": 1.0 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+H5.4 Registry vs Mapping mun1990 Coverage
+========================================
+
+Registry file: municipalities_1990_registry_110.json
+Registry count: 110
+Mapping unique mun1990 slugs: 110
+
+Missing in registry (mapping references these but registry does not):
+  (none)
+
+Unused in mapping (registry has these but mapping does not use):
+  (none)
+
+Banovići focus:
+  post1995 codes mapping to banovici: 10014
+  - 10014: mun1990_name="Banovići"

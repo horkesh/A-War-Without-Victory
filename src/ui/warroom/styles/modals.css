@@ -1,0 +1,409 @@
+/* Modal System Styles for Warroom GUI */
+
+/* Modal Backdrop */
+.modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-backdrop.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Modal Content Container */
+.modal-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    overflow: auto;
+    background: white;
+    border: 2px solid #333;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Close Button */
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    background: rgba(200, 20, 20, 0.9);
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 26px;
+    text-align: center;
+    z-index: 1001;
+    transition: background 0.2s;
+}
+
+.modal-close:hover {
+    background: rgba(220, 40, 40, 1);
+}
+
+.modal-close:active {
+    background: rgba(180, 10, 10, 1);
+}
+
+/* Tooltip */
+.warroom-tooltip {
+    display: none;
+    position: fixed;
+    background: rgba(40, 40, 40, 0.95);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 2000;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.warroom-tooltip.active {
+    display: block;
+}
+
+/* Faction Overview Panel Specific Styles */
+.faction-overview-panel {
+    width: 800px;
+    height: 600px;
+    background: rgba(40, 40, 40, 0.95);
+    color: white;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.faction-overview-header {
+    text-align: center;
+    border-bottom: 2px solid white;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.faction-overview-header h2 {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+    text-transform: uppercase;
+}
+
+.faction-overview-header .meta {
+    font-size: 16px;
+    color: #ccc;
+}
+
+.faction-overview-quadrants {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 20px;
+    height: 380px;
+}
+
+.quadrant {
+    background: rgba(60, 60, 60, 0.8);
+    border: 1px solid #666;
+    padding: 15px;
+    border-radius: 4px;
+}
+
+.quadrant h3 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    color: #ffd700;
+    border-bottom: 1px solid #666;
+    padding-bottom: 8px;
+}
+
+.quadrant .stat {
+    margin: 10px 0;
+}
+
+.quadrant .stat-label {
+    font-size: 12px;
+    color: #aaa;
+    text-transform: uppercase;
+}
+
+.quadrant .stat-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+}
+
+.faction-overview-warnings {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(80, 20, 20, 0.8);
+    border: 1px solid #a00;
+    border-radius: 4px;
+}
+
+.faction-overview-warnings h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #ff6666;
+}
+
+.faction-overview-warnings ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.faction-overview-warnings li {
+    margin: 5px 0;
+    color: #ffcccc;
+}
+
+/* Newspaper Modal Specific Styles */
+.newspaper-modal {
+    width: 1200px;
+    height: 1600px;
+    background: #ebe1cd;
+    padding: 50px 80px;
+    font-family: 'Times New Roman', serif;
+    overflow-y: auto;
+}
+
+.newspaper-masthead {
+    text-align: center;
+    font-family: 'Franklin Gothic', Arial, sans-serif;
+    font-size: 48px;
+    font-weight: bold;
+    border-bottom: 4px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.newspaper-date {
+    text-align: right;
+    font-size: 18px;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.newspaper-headline {
+    text-align: center;
+    font-family: 'Franklin Gothic', Arial, sans-serif;
+    font-size: 54px;
+    font-weight: bold;
+    line-height: 1.1;
+    margin-bottom: 15px;
+    color: #000;
+}
+
+.newspaper-subhead {
+    text-align: center;
+    font-style: italic;
+    font-size: 24px;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.newspaper-photo {
+    width: 600px;
+    height: 450px;
+    background: #ccc;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #999;
+}
+
+.newspaper-caption {
+    font-style: italic;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 30px;
+    width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.newspaper-columns {
+    columns: 3;
+    column-gap: 30px;
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: justify;
+    color: #000;
+}
+
+/* Magazine Modal Specific Styles */
+.magazine-modal {
+    width: 900px;
+    height: 1200px;
+    background: linear-gradient(180deg, #3a4a5a 0%, #5a6a7a 100%);
+    padding: 60px 80px;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.magazine-title {
+    text-align: center;
+    font-size: 42px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+.magazine-month-year {
+    text-align: center;
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 40px;
+}
+
+.magazine-map-preview {
+    width: 600px;
+    height: 450px;
+    margin: 0 auto 40px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+}
+
+.magazine-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 40px;
+}
+
+.magazine-stat-box {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    width: 210px;
+}
+
+.magazine-stat-label {
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #ccc;
+    margin-bottom: 10px;
+}
+
+.magazine-stat-value {
+    font-size: 54px;
+    font-weight: bold;
+    color: white;
+}
+
+.magazine-toc {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 20px 30px;
+    border-radius: 4px;
+}
+
+.magazine-toc h3 {
+    margin: 0 0 15px 0;
+    font-size: 20px;
+    text-transform: uppercase;
+}
+
+.magazine-toc ul {
+    margin: 0;
+    padding-left: 20px;
+    list-style: none;
+}
+
+.magazine-toc li {
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+.magazine-toc li:before {
+    content: "• ";
+    color: #ffd700;
+    font-weight: bold;
+}
+
+/* Reports Modal Specific Styles */
+.reports-modal {
+    width: 1000px;
+    height: 1400px;
+    background: rgba(240, 235, 220, 0.95);
+    padding: 80px 100px;
+    font-family: 'Courier New', monospace;
+    color: #000;
+    position: relative;
+}
+
+.report-classification-top {
+    position: absolute;
+    top: 20px;
+    left: 80px;
+    color: rgb(200, 20, 20);
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.report-classification-bottom {
+    position: absolute;
+    bottom: 20px;
+    right: 100px;
+    color: rgb(200, 20, 20);
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.report-header {
+    margin-bottom: 40px;
+}
+
+.report-field {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.report-field-label {
+    font-weight: bold;
+}
+
+.report-body {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+    white-space: pre-wrap;
+}
+
+.report-signature {
+    text-align: right;
+    margin-top: 60px;
+}

@@ -1,0 +1,527 @@
+# Extracted from UI_Design_Research_And_Recommendations.md.pdf (17 pages)
+
+--- Page 1 ---
+Strategic Wargame UI Analysis & Recommendations
+TIER 1: Primary Influences
+AGEOD System (Civil War II, Wars of Napoleon)
+Architecture:
+Main map with zoom levels (strategic → operational → tactical)
+Left sidebar: "Decision Pack" with expandable sections
+Right sidebar: Unit/region details
+Bottom bar: Turn controls, time, resources
+Floating windows: Reports, diplomacy, production
+Key Innovations:
+Decision Pack Cards : Collapsible sections for different domains
+Military (corps, armies, units)
+Economic (production, resources)
+Diplomatic (relations, treaties)
+Intelligence (enemy movements)
+Unit Detail Panel : Shows full unit composition, supply, morale, entrenchment
+Chain of Command Visualization : Corps → Division → Brigade hierarchy
+Region Details : Population, loyalty, resources, garrison requirements
+What to Adopt:   ✅   Decision Pack card system (perfect for our tabs)   ✅   Detailed unit composition view   ✅
+Supply line visualization on map   ✅   Separate "military operations" vs "strategic overview" views
+Hearts of Iron IV
+Architecture:
+Central map (dominant)
+Top bar: Resources, factories, political power
+Left sidebar (toggleable): Tech tree, focus tree, production
+Right sidebar: Selected unit/territory info
+Bottom: Theatre/army management, battle planner
+Key Innovations:
+Theatre System : Group multiple armies under theatres
+
+--- Page 2 ---
+Battle Plan Painter : Draw offensive lines, fallback lines
+Division Designer : Template-based unit creation
+Supply Map Mode : Dedicated layer showing supply hub ranges
+Air Wings Panel : Separate management for air assets
+What to Adopt:   ✅   Supply map mode (show supply propagation visually)   ✅   Battle planner concept (for
+tactical group operations)   ✅   Division template idea (for brigade type standardization)   ❌   Too much
+automation (contradicts our constraint philosophy)
+Gary Grigsby's War in the East
+Architecture:
+Hex map (primary)
+Left panel: Unit list (hierarchical tree)
+Right panel: Detailed hex info
+Bottom: Multi-tab command interface
+Modal windows: Combat resolution, logistics, reports
+Key Innovations:
+Hierarchical Unit Tree : Army Group → Army → Corps → Division
+Expandable/collapsible
+Shows supply state, readiness, HQ attachment
+Logistics Detail Screen : Dedicated view for supply network
+Commander Details : Leader traits affect subordinate units
+Combat Prediction : Shows odds before committing
+End Turn Resolution : Detailed phase-by-phase display
+What to Adopt:   ✅   Hierarchical unit tree (perfect for corps → brigades)   ✅   Logistics detail screen (for
+supply/corridor management)   ✅   Combat prediction (exhaustion cost preview)   ✅   Detailed turn resolution
+phases
+TIER 2: Supporting Influences
+Unity of Command II
+Best Feature :   Objective-Based Operations
+Assign units to operational objectives
+
+--- Page 3 ---
+Visual clarity: clean, readable map
+Supply dependency shown via HQ links
+"Prestige points" limit what you can do (similar to our exhaustion)
+Adopt:   ✅   Objective markers (directives visualized on map)   ✅   HQ link visualization (supply chains)   ✅
+Action point economy (exhaustion as limiting factor)
+Decisive Campaigns: Barbarossa
+Best Feature :   Decision Cards System
+Turn starts with "decisions" to make
+Each decision has trade-offs
+Affects morale, politics, logistics
+Some decisions locked based on game state
+Adopt:   ✅   Start-of-turn decision phase (issue directives)   ✅   Trade-off visualization (exhaustion vs. gains)   ✅
+State-dependent options (early war vs. main war)
+Shadow Empire
+Best Feature :   Multi-Layer Territory Management
+Strategic map → Operational map → Tactical map
+Different information at each zoom level
+Region cards show: population, production, unrest, assets
+Supply network explicitly modeled with logistics units
+Adopt:   ✅   Region card concept (municipality detail cards)   ✅   Multi-layer information (don't show everything
+at once)   ✅   Explicit supply network visualization
+Command: Modern Operations
+Best Feature :   Mission-Based Orders
+Units assigned to missions (patrol, strike, support)
+Mission parameters define behavior
+Detailed sensor/weapons management
+Adopt:   ✅   Mission concept for tactical groups (assault, relief, defense)   ❌   Too much micromanagement for
+our scope
+
+--- Page 4 ---
+SYNTHESIS: Recommended UI Architecture
+Core Philosophy
+"Map as reference, panels as workspace"
+Like AGEOD and Grigsby, the map is always visible but   panels are where decisions happen .
+RECOMMENDED UI SYSTEM
+Layout: Fixed 3-Panel + Modal Overlays
+LEFT PANEL: "Decision Layers" (AGEOD-inspired)
+Expandable card system with   5 primary layers :
+1. Strategic Overview   🎯
+┌────────────────────────────────────────────────────────────────┐
+│ TOP BAR: Date | Turn | Phase | Exhaustion | IVP | Resources   │
+├──────────┬─────────────────────────────────┬───────────────────┤
+│   │   │   │
+│ LEFT   │   MAP AREA   │   RIGHT   │
+│ 300px   │   (Always Visible)   │   350px   │
+│   │   │   │
+│ Decision │   Map Modes: [Control] [Supply]│ Context Panel   │
+│ Layers │   [Pressure] [Pop]   │ (Changes based   │
+│   │   │   on selection)   │
+│   │   + Floating Action Modals   │   │
+│   │   (appear when needed)   │   │
+│   │   │   │
+└──────────┴─────────────────────────────────┴───────────────────┘
+
+--- Page 5 ---
+2. Military Command   🎖
+When expanded (Grigsby-style tree):
+┌─────────────────────────┐
+│ ▼ STRATEGIC OVERVIEW   │
+├─────────────────────────┤
+│ Phase: Early War   │
+│ Date: Sept 1991   │
+│ Turn: 1   │
+│   │
+│ Exhaustion [ ━━━ ░░] 30% │
+│ IVP   [ ━ ░░░░] 12   │
+│   │
+│ Active Directive:   │
+│ → None   │
+│ [Issue Directive]   │
+│   │
+│ Critical Situations:   │
+│   ⚠   Sarajevo Under Press.│
+│   ⚠   Posavina Threatened │
+└─────────────────────────┘
+┌─────────────────────────┐
+│ ▼ MILITARY COMMAND   │
+├─────────────────────────┤
+│ Corps: [All ▼]   │
+│   │
+│ ├─ 5th Corps (Bihać)   │
+│ │ Brigades: 8   │
+│ │ TGs Active: 1   │
+│ │ [Expand]   │
+│ │   │
+│ ├─ 1st Corps (Sarajevo)│
+│ │ Brigades: 12   │
+│ │ TGs Active: 0   │
+│ │ [Expand]   │
+│   │
+│ [Form Tactical Group]   │
+│ [View All Brigades]   │
+└─────────────────────────┘
+
+--- Page 6 ---
+3. Territory   🗺
+4. Population & Refugees   👥
+┌─────────────────────────┐
+│ ▼ 5th Corps (Bihać)   │
+├─────────────────────────┤
+│ ├─ 1st Cazin Bde   │
+│ │ CR: 65% [ ━━━ ░░]   │
+│ │ State: Fixed   │
+│ │ Slices: 0/3   │
+│ │ [Select]   │
+│ │   │
+│ ├─ 5th Bihać Bde   │
+│ │ CR: 70% [ ━━━━ ░]   │
+│ │ State: Strained   │
+│ │ Slices: 1/3   ⚠   │
+│ │ [Select]   │
+│   │
+│ └─ TG-5 "Relief"   │
+│   Target: Kljuc   │
+│   Endurance: 2/4   │
+│   [Manage]   │
+└─────────────────────────┘
+┌─────────────────────────┐
+│ ▼ TERRITORY   │
+├─────────────────────────┤
+│ Filter: [All ▼]   │
+│ Sort: [Supply State ▼] │
+│   │
+│   🔴   Goražde   (Critical) │
+│   🟡   Tuzla   (Strained) │
+│   🟢   Cazin   (Adequate) │
+│   🟢   Zenica   (Adequate) │
+│   │
+│ [Show Map Filter]   │
+│   │
+│ Corridors:   │
+│ ├─ Posavina: Open   ✓   │
+│ └─ [Details]   │
+└─────────────────────────┘
+
+--- Page 7 ---
+5. Diplomacy & Events   📰
+RIGHT PANEL: Context Detail   (changes based on selection)
+When Nothing Selected:
+┌─────────────────────────┐
+│ ▼ POPULATION   │
+├─────────────────────────┤
+│ Controlled Pop: 2.1M   │
+│ Displaced: 45K   │
+│   │
+│ Recent Displacement:   │
+│ • Prijedor → Tuzla   │
+│   2,400 people   │
+│   │
+│ Refugee Concentrations: │
+│ • Tuzla: 12K (Prijedor) │
+│   [Form Refugee Bde]   │
+│   │
+│ Hollowed Municipalities:│
+│   ⚠   Prijedor (-15%)   │
+│   ⚠   Foča (-8%)   │
+└─────────────────────────┘
+┌─────────────────────────┐
+│ ▼ DIPLOMACY & EVENTS   │
+├─────────────────────────┤
+│ IVP: 12 [ ━ ░░░░]   │
+│ Recent:   │
+│ • Prijedor shock (+5)   │
+│ • Sarajevo siege (+2)   │
+│   │
+│ Patron Status:   │
+│ Pressure: Low   │
+│ Next Check: Turn 5   │
+│   │
+│ Peace Initiatives:   │
+│ None available   │
+│   │
+│ RSK Stability: Stable   │
+└─────────────────────────┘
+
+--- Page 8 ---
+When Municipality Selected:   (as designed earlier)
+Shows: Control, population, brigade, special status, actions
+When Brigade Selected:   (as designed earlier)
+Shows: Stats, composition, detachment status, actions
+When Corps Selected:
+┌─────────────────────────┐
+│ SITUATION REPORT   │
+├─────────────────────────┤
+│ Turn Summary:   │
+│ • 3 TGs active   │
+│ • 2 municipalities   │
+│   under pressure   │
+│ • 1 brigade formed   │
+│   │
+│ Warnings:   │
+│   ⚠   Goražde supply crit. │
+│   ⚠   5th Corps exhausted │
+│   │
+│ [View Detailed Report] │
+└─────────────────────────┘
+
+--- Page 9 ---
+MAP MODES   (HOI4-inspired, buttons above map)
+Not tabs - these change map visualization only:
+1.   Effective Control   (default) - Standard political map
+2.   Supply State   - Color by adequate/strained/critical
+3.   Pressure   - Heat map of frontline pressure (0-100%)
+4.   Population   - Ethnic composition
+5.   Claims   - Overlapping claims visualization
+MODAL WINDOWS   (Grigsby-inspired, appear over map)
+Turn Resolution Modal   (Grigsby War in the East style)
+┌─────────────────────────┐
+│ 5TH CORPS   │
+│ HQ: Bihać   │
+├─────────────────────────┤
+│ Commander: [Name]   │
+│ Subordinate Brigades: 8 │
+│   │
+│ Corps Status:   │
+│ Exhaustion: 35%   │
+│ Supply: Adequate   │
+│ Morale: Good   │
+│   │
+│ Active Operations:   │
+│ • TG-5 → Ključ   │
+│   Status: In progress   │
+│   [View Details]   │
+│   │
+│ Available Actions:   │
+│ [Form Tactical Group]   │
+│ [View Sector]   │
+│ [Transfer Brigade]   │
+└─────────────────────────┘
+
+--- Page 10 ---
+Form Tactical Group Modal   (Unity of Command inspired)
+┌─────────────────────────────────────────────┐
+│ TURN RESOLUTION: Oct 1991 → Nov 1991   │
+├─────────────────────────────────────────────┤
+│ Phase 1: Operations   │
+│   ✓   TG-5 advanced on Ključ [View]   │
+│   ✓   Defensive operations completed   │
+│   │
+│ Phase 2: Supply Calculation   │
+│   ⚠   Goražde: Adequate → Critical   │
+│   ✓   Posavina: Open (maintained)   │
+│   │
+│ Phase 3: Displacement   │
+│ • Prijedor: 2,400 → Tuzla region   │
+│   │
+│ Phase 4: Exhaustion Update   │
+│ ARBiH: +0.3 (2.1 total)   │
+│ Reason: Active TG operations   │
+│   │
+│ Phase 5: Events   │
+│   ⚠   CIVILIAN SHOCK: Prijedor   │
+│   Global IVP: 7 → 12 (+5)   │
+│   [View Event Details]   │
+│   │
+│ [◄ Previous Phase]   [Next Phase ►]   │
+│   [Complete Turn]   │
+└─────────────────────────────────────────────┘
+
+--- Page 11 ---
+Issue Directive Modal   (Decisive Campaigns inspired)
+┌─────────────────────────────────────────────┐
+│ FORM TACTICAL GROUP - 5th Corps   │
+├─────────────────────────────────────────────┤
+│ Step 1: Select Brigades   │
+│   │
+│ Available Brigades:   │
+│   ☐   1st Cazin [Fixed] 0/3 slices   │
+│   Cost: +5% exhaustion if deployed   │
+│   │
+│   ☐   5th Bihać [Strained] 1/3 slices   ⚠   │
+│   Cost: +8% exhaustion (already strained)   │
+│   │
+│   ☐   3rd V.Kladuša [Fixed] 0/3 slices   │
+│   Cost: +5% exhaustion if deployed   │
+│   │
+│ Selected: 0 slices (min 2 required)   │
+│   │
+│ Step 2: Mission Parameters   │
+│ Target: [Select on map...]   │
+│ Type: ○ Assault ○ Relief ○ Defense   │
+│   │
+│ Predicted Outcome:   │
+│ Success Chance: [Calculating...]   │
+│ Exhaustion Cost: [Calculating...]   │
+│   │
+│ [Cancel]   [◄ Back]   [Form Group →] │
+└─────────────────────────────────────────────┘
+
+--- Page 12 ---
+INTERACTION PATTERNS
+Pattern 1: Municipality-Centric Operations
+1.   Click municipality on map → Right panel shows details
+┌─────────────────────────────────────────────┐
+│ ISSUE STRATEGIC DIRECTIVE   │
+├─────────────────────────────────────────────┤
+│ Current: None   │
+│   │
+│ Available Directives:   │
+│   │
+│ ┌─────────────────────────────────────────┐ │
+│ │ ○ SARAJEVO DEFENSE PRIORITY   │ │
+│ │ "All efforts focused on capital"   │ │
+│ │   │ │
+│ │ Effects:   │ │
+│ │ + Sarajevo supply priority   │ │
+│ │ + Relief operations easier   │ │
+│ │ - Other fronts receive less support   │ │
+│ │ - Exhaustion +0.1/turn elsewhere   │ │
+│ │   │ │
+│ │ [Select this Directive]   │ │
+│ └─────────────────────────────────────────┘ │
+│   │
+│ ┌─────────────────────────────────────────┐ │
+│ │ ○ CORRIDOR PROTECTION   │ │
+│ │ "Secure Posavina corridor"   │ │
+│ │   │ │
+│ │ Effects:   │ │
+│ │ + Corridor municipalities reinforced   │ │
+│ │ + Early warning of pressure   │ │
+│ │ - Offensive operations restricted   │ │
+│ │ - Cannot form TGs away from corridor   │ │
+│ │   │ │
+│ │ [Select this Directive]   │ │
+│ └─────────────────────────────────────────┘ │
+│   │
+│   ⚠   Directives are binding for 3 turns min   │
+│   ⚠   Non-compliance increases exhaustion   │
+│   │
+│ [Cancel]   [Issue Directive] │
+└─────────────────────────────────────────────┘
+
+--- Page 13 ---
+2.   Want to form brigade? → Click "Form Brigade" → Modal opens
+3.   Form brigade → Returns to map, brigade appears in Military Command layer
+4.   Click brigade in layer → Right panel switches to brigade view
+Pattern 2: Brigade Management
+1.   Open Military Command layer
+2.   Expand corps tree
+3.   Click brigade → Right panel shows details, map highlights municipality
+4.   Want to detach? → "Provide Slice" button → Modal for TG formation
+Pattern 3: Strategic Planning
+1.   Open Strategic Overview
+2.   See warning "Posavina Threatened"
+3.   Click warning → Map focuses on corridor, municipalities highlight
+4.   Click "Issue Directive" → Modal opens
+5.   Select "Corridor Protection" → Directive active, affects valid actions
+Pattern 4: Turn Flow
+1.   Review situation in Overview
+2.   Make decisions (form TGs, issue directives, form brigades)
+3.   Click "End Turn" button (prominent, top bar)
+4.   Turn Resolution modal appears
+5.   Step through phases (Operations → Supply → Displacement → Exhaustion → Events)
+6.   Click "Complete Turn"
+7.   Map updates, new turn begins
+KEY DESIGN DECISIONS
+✅   ADOPT FROM AGEOD:
+Collapsible decision layers (not tabs, cards that expand)
+Rich detail panels
+Supply line visualization on map
+✅   ADOPT FROM GRIGSBY:
+Hierarchical unit tree (Corps → Brigades)
+
+--- Page 14 ---
+Detailed turn resolution phases
+Combat/operation prediction
+Logistics screen
+✅   ADOPT FROM HOI4:
+Map modes (supply, pressure, etc.)
+Theatre concept (Corps in our case)
+Battle planner (for TG operations)
+✅   ADOPT FROM UNITY OF COMMAND:
+Objective markers on map
+Clean visual language
+Action point economy (exhaustion)
+✅   ADOPT FROM DECISIVE CAMPAIGNS:
+Start-of-turn decision cards
+Trade-off visualization
+Event system
+❌   AVOID:
+Too much automation (contradicts constraints)
+Real-time elements (we're turn-based)
+Excessive micromanagement (Command MGRS)
+Hidden mechanics (transparency is key)
+IMPLEMENTATION PRIORITY
+Phase 1 (Foundation):   ✅   DONE
+Basic game state
+Municipality data structure
+Phase 2 (Core UI): NEXT
+Left panel decision layers
+Right context panel
+
+--- Page 15 ---
+Map mode switching
+Click interactions
+Phase 3 (Military):
+Corps/brigade tree
+Brigade detail view
+TG formation modal
+Phase 4 (Operations):
+Turn resolution system
+Supply calculation
+Exhaustion updates
+Event system
+Phase 5 (Polish):
+Directive system
+Advanced visualizations
+Tooltips and help
+Keyboard shortcuts
+TECHNICAL IMPLEMENTATION NOTES
+Panel System:
+Context Panel (React-like pattern):
+javascript
+// Collapsible card system (AGEOD-style)
+const   decisionLayers   =   {
+strategic :   {   expanded :   true ,   content :   StrategicOverviewComponent   } ,
+military :   {   expanded :   false ,   content :   MilitaryCommandComponent   } ,
+territory :   {   expanded :   false ,   content :   TerritoryComponent   } ,
+population :   {   expanded :   false ,   content :   PopulationComponent   } ,
+diplomacy :   {   expanded :   false ,   content :   DiplomacyComponent   }
+} ;
+javascript
+
+--- Page 16 ---
+Modal Stack:
+Map Modes:
+FINAL RECOMMENDATION
+Use a hybrid approach:
+AGEOD's collapsible decision layers   for the left panel
+Grigsby's hierarchical trees   for military organization
+HOI4's map modes   for visualization
+Decisive Campaigns' decision cards   for directives
+Unity of Command's clarity   for visual design
+This gives you:
+// Right panel changes based on selection
+function   renderContextPanel ( )   {
+if   ( gameState . selectedBrigade )   return   BrigadeDetailView ( ) ;
+if   ( gameState . selectedMunicipality )   return   MunicipalityDetailView ( ) ;
+if   ( gameState . selectedCorps )   return   CorpsDetailView ( ) ;
+return   SituationReportView ( ) ;
+}
+javascript
+// Modals appear over map, can be stacked
+const   modalStack   =   [ ] ;
+function   openModal ( type ,   data )   {
+modalStack . push ( {   type ,   data   } ) ;
+renderModal ( modalStack [ modalStack . length   -   1 ] ) ;
+}
+javascript
+// Map visualization modes
+const   mapModes   =   {
+control :   ( mun )   =>   getControlColor ( mun . politicalControl ) ,
+supply :   ( mun )   =>   getSupplyColor ( mun . supplyState ) ,
+pressure :   ( mun )   =>   getPressureColor ( mun . pressureLevel ) ,
+population :   ( mun )   =>   getEthnicColor ( mun . population . ethnic )
+} ;
+
+--- Page 17 ---
+Depth   without overwhelming
+Efficiency   for experienced players
+Clarity   for new players
+Respect   for the rulebook's constraint systems

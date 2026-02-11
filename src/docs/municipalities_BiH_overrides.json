@@ -1,0 +1,11 @@
+{
+  "meta": {
+    "purpose": "Explicit conflict resolutions for municipalities_BiH.xlsx duplicate municipalities",
+    "source": "src/docs/municipalities_BiH.xlsx",
+    "rule": "Overrides are required only when XLSX has conflicting controller assignments for the same pre-1995 municipality"
+  },
+  "overrides_by_pre1995_name": {
+    "Banja Luka": "RS",
+    "Cazin": "RBiH"
+  }
+}

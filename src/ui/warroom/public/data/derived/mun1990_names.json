@@ -1,0 +1,1023 @@
+{
+  "meta": {
+    "total_municipalities": 110,
+    "source": "data/source/municipalities_1990_registry (canonical)",
+    "keys": [
+      "municipality_id",
+      "mun1990_id",
+      "display_name"
+    ]
+  },
+  "by_municipality_id": {
+    "10014": {
+      "mun1990_id": "banovici",
+      "display_name": "Banovići"
+    },
+    "10049": {
+      "mun1990_id": "bihac",
+      "display_name": "Bihać"
+    },
+    "10146": {
+      "mun1990_id": "bosansko_grahovo",
+      "display_name": "Bosansko Grahovo"
+    },
+    "10189": {
+      "mun1990_id": "breza",
+      "display_name": "Breza"
+    },
+    "10197": {
+      "mun1990_id": "bugojno",
+      "display_name": "Bugojno"
+    },
+    "10219": {
+      "mun1990_id": "busovaca",
+      "display_name": "Busovača"
+    },
+    "10227": {
+      "mun1990_id": "cazin",
+      "display_name": "Cazin"
+    },
+    "10243": {
+      "mun1990_id": "capljina",
+      "display_name": "Čapljina"
+    },
+    "10260": {
+      "mun1990_id": "citluk",
+      "display_name": "Čitluk"
+    },
+    "10294": {
+      "mun1990_id": "donji_vakuf",
+      "display_name": "Donji Vakuf"
+    },
+    "10308": {
+      "mun1990_id": "duvno",
+      "display_name": "Duvno"
+    },
+    "10324": {
+      "mun1990_id": "fojnica",
+      "display_name": "Fojnica"
+    },
+    "10359": {
+      "mun1990_id": "glamoc",
+      "display_name": "Glamoč"
+    },
+    "10375": {
+      "mun1990_id": "gornji_vakuf",
+      "display_name": "Gornji Vakuf"
+    },
+    "10391": {
+      "mun1990_id": "gradacac",
+      "display_name": "Gradačac"
+    },
+    "10405": {
+      "mun1990_id": "grude",
+      "display_name": "Grude"
+    },
+    "10421": {
+      "mun1990_id": "jablanica",
+      "display_name": "Jablanica"
+    },
+    "10448": {
+      "mun1990_id": "kakanj",
+      "display_name": "Kakanj"
+    },
+    "10472": {
+      "mun1990_id": "kiseljak",
+      "display_name": "Kiseljak"
+    },
+    "10499": {
+      "mun1990_id": "kladanj",
+      "display_name": "Kladanj"
+    },
+    "10529": {
+      "mun1990_id": "konjic",
+      "display_name": "Konjic"
+    },
+    "10545": {
+      "mun1990_id": "kresevo",
+      "display_name": "Kreševo"
+    },
+    "10570": {
+      "mun1990_id": "listica",
+      "display_name": "Lištica"
+    },
+    "10588": {
+      "mun1990_id": "livno",
+      "display_name": "Livno"
+    },
+    "10600": {
+      "mun1990_id": "lukavac",
+      "display_name": "Lukavac"
+    },
+    "10626": {
+      "mun1990_id": "ljubuski",
+      "display_name": "Ljubuški"
+    },
+    "10634": {
+      "mun1990_id": "maglaj",
+      "display_name": "Maglaj"
+    },
+    "10685": {
+      "mun1990_id": "neum",
+      "display_name": "Neum"
+    },
+    "10715": {
+      "mun1990_id": "olovo",
+      "display_name": "Olovo"
+    },
+    "10731": {
+      "mun1990_id": "posusje",
+      "display_name": "Posušje"
+    },
+    "10766": {
+      "mun1990_id": "prozor",
+      "display_name": "Prozor"
+    },
+    "10774": {
+      "mun1990_id": "novi_travnik",
+      "display_name": "Novi Travnik"
+    },
+    "10839": {
+      "mun1990_id": "centar_sarajevo",
+      "display_name": "Centar Sarajevo"
+    },
+    "10847": {
+      "mun1990_id": "hadzici",
+      "display_name": "Hadžići"
+    },
+    "10863": {
+      "mun1990_id": "ilijas",
+      "display_name": "Ilijaš"
+    },
+    "10871": {
+      "mun1990_id": "novi_grad_sarajevo",
+      "display_name": "Novi Grad Sarajevo"
+    },
+    "10928": {
+      "mun1990_id": "vogosca",
+      "display_name": "Vogošća"
+    },
+    "10987": {
+      "mun1990_id": "srebrenik",
+      "display_name": "Srebrenik"
+    },
+    "11045": {
+      "mun1990_id": "tesanj",
+      "display_name": "Tešanj"
+    },
+    "11061": {
+      "mun1990_id": "travnik",
+      "display_name": "Travnik"
+    },
+    "11088": {
+      "mun1990_id": "tuzla",
+      "display_name": "Tuzla"
+    },
+    "11100": {
+      "mun1990_id": "vares",
+      "display_name": "Vareš"
+    },
+    "11118": {
+      "mun1990_id": "velika_kladusa",
+      "display_name": "Velika Kladuša"
+    },
+    "11126": {
+      "mun1990_id": "visoko",
+      "display_name": "Visoko"
+    },
+    "11142": {
+      "mun1990_id": "vitez",
+      "display_name": "Vitez"
+    },
+    "11177": {
+      "mun1990_id": "zavidovici",
+      "display_name": "Zavidovići"
+    },
+    "11185": {
+      "mun1990_id": "zenica",
+      "display_name": "Zenica"
+    },
+    "11207": {
+      "mun1990_id": "zepce",
+      "display_name": "Žepče"
+    },
+    "11215": {
+      "mun1990_id": "zivinice",
+      "display_name": "Živinice"
+    },
+    "11231": {
+      "mun1990_id": "lopare",
+      "display_name": "Lopare"
+    },
+    "11240": {
+      "mun1990_id": "cazin",
+      "display_name": "Cazin"
+    },
+    "11258": {
+      "mun1990_id": "doboj",
+      "display_name": "Doboj"
+    },
+    "11266": {
+      "mun1990_id": "doboj",
+      "display_name": "Doboj"
+    },
+    "11274": {
+      "mun1990_id": "skender_vakuf",
+      "display_name": "Skender Vakuf"
+    },
+    "11282": {
+      "mun1990_id": "bosanski_samac",
+      "display_name": "Bosanski Šamac"
+    },
+    "11304": {
+      "mun1990_id": "trebinje",
+      "display_name": "Trebinje"
+    },
+    "11312": {
+      "mun1990_id": "zvornik",
+      "display_name": "Zvornik"
+    },
+    "11339": {
+      "mun1990_id": "ugljevik",
+      "display_name": "Ugljevik"
+    },
+    "11410": {
+      "mun1990_id": "mostar",
+      "display_name": "Mostar"
+    },
+    "11428": {
+      "mun1990_id": "bosanska_krupa",
+      "display_name": "Bosanska Krupa"
+    },
+    "11436": {
+      "mun1990_id": "bosanski_petrovac",
+      "display_name": "Bosanski Petrovac"
+    },
+    "11444": {
+      "mun1990_id": "foca",
+      "display_name": "Foča"
+    },
+    "11452": {
+      "mun1990_id": "gorazde",
+      "display_name": "Goražde"
+    },
+    "11479": {
+      "mun1990_id": "gracanica",
+      "display_name": "Gračanica"
+    },
+    "11487": {
+      "mun1990_id": "jajce",
+      "display_name": "Jajce"
+    },
+    "11495": {
+      "mun1990_id": "kalesija",
+      "display_name": "Kalesija"
+    },
+    "11509": {
+      "mun1990_id": "kljuc",
+      "display_name": "Ključ"
+    },
+    "11517": {
+      "mun1990_id": "kupres",
+      "display_name": "Kupres"
+    },
+    "11525": {
+      "mun1990_id": "odzak",
+      "display_name": "Odžak"
+    },
+    "11533": {
+      "mun1990_id": "orasje",
+      "display_name": "Orašje"
+    },
+    "11541": {
+      "mun1990_id": "sanski_most",
+      "display_name": "Sanski Most"
+    },
+    "11550": {
+      "mun1990_id": "ilidza",
+      "display_name": "Ilidža"
+    },
+    "11568": {
+      "mun1990_id": "novo_sarajevo",
+      "display_name": "Novo Sarajevo"
+    },
+    "11576": {
+      "mun1990_id": "pale",
+      "display_name": "Pale"
+    },
+    "11584": {
+      "mun1990_id": "stari_grad_sarajevo",
+      "display_name": "Stari Grad Sarajevo"
+    },
+    "11592": {
+      "mun1990_id": "trnovo",
+      "display_name": "Trnovo"
+    },
+    "11606": {
+      "mun1990_id": "stolac",
+      "display_name": "Stolac"
+    },
+    "11614": {
+      "mun1990_id": "titov_drvar",
+      "display_name": "Titov Drvar"
+    },
+    "11622": {
+      "mun1990_id": "tesanj",
+      "display_name": "Tešanj"
+    },
+    "20010": {
+      "mun1990_id": "banja_luka",
+      "display_name": "Banja Luka"
+    },
+    "20028": {
+      "mun1990_id": "stolac",
+      "display_name": "Stolac"
+    },
+    "20036": {
+      "mun1990_id": "bijeljina",
+      "display_name": "Bijeljina"
+    },
+    "20044": {
+      "mun1990_id": "bileca",
+      "display_name": "Bileća"
+    },
+    "20052": {
+      "mun1990_id": "bratunac",
+      "display_name": "Bratunac"
+    },
+    "20079": {
+      "mun1990_id": "bosanski_brod",
+      "display_name": "Bosanski Brod"
+    },
+    "20087": {
+      "mun1990_id": "visegrad",
+      "display_name": "Višegrad"
+    },
+    "20095": {
+      "mun1990_id": "vlasenica",
+      "display_name": "Vlasenica"
+    },
+    "20109": {
+      "mun1990_id": "odzak",
+      "display_name": "Odžak"
+    },
+    "20117": {
+      "mun1990_id": "gacko",
+      "display_name": "Gacko"
+    },
+    "20125": {
+      "mun1990_id": "bosanska_gradiska",
+      "display_name": "Bosanska Gradiška"
+    },
+    "20133": {
+      "mun1990_id": "derventa",
+      "display_name": "Derventa"
+    },
+    "20141": {
+      "mun1990_id": "doboj",
+      "display_name": "Doboj"
+    },
+    "20150": {
+      "mun1990_id": "orasje",
+      "display_name": "Orašje"
+    },
+    "20168": {
+      "mun1990_id": "zvornik",
+      "display_name": "Zvornik"
+    },
+    "20176": {
+      "mun1990_id": "ilidza",
+      "display_name": "Ilidža"
+    },
+    "20184": {
+      "mun1990_id": "titov_drvar",
+      "display_name": "Titov Drvar"
+    },
+    "20192": {
+      "mun1990_id": "mostar",
+      "display_name": "Mostar"
+    },
+    "20206": {
+      "mun1990_id": "stari_grad_sarajevo",
+      "display_name": "Stari Grad Sarajevo"
+    },
+    "20214": {
+      "mun1990_id": "novo_sarajevo",
+      "display_name": "Novo Sarajevo"
+    },
+    "20222": {
+      "mun1990_id": "jajce",
+      "display_name": "Jajce"
+    },
+    "20249": {
+      "mun1990_id": "kalinovik",
+      "display_name": "Kalinovik"
+    },
+    "20257": {
+      "mun1990_id": "skender_vakuf",
+      "display_name": "Skender Vakuf"
+    },
+    "20265": {
+      "mun1990_id": "bosanska_dubica",
+      "display_name": "Bosanska Dubica"
+    },
+    "20273": {
+      "mun1990_id": "bosanska_kostajnica",
+      "display_name": "Bosanska Kostajnica"
+    },
+    "20281": {
+      "mun1990_id": "kotor_varos",
+      "display_name": "Kotor Varoš"
+    },
+    "20290": {
+      "mun1990_id": "bosanska_krupa",
+      "display_name": "Bosanska Krupa"
+    },
+    "20303": {
+      "mun1990_id": "kupres",
+      "display_name": "Kupres"
+    },
+    "20311": {
+      "mun1990_id": "laktasi",
+      "display_name": "Laktaši"
+    },
+    "20320": {
+      "mun1990_id": "lopare",
+      "display_name": "Lopare"
+    },
+    "20338": {
+      "mun1990_id": "ljubinje",
+      "display_name": "Ljubinje"
+    },
+    "20346": {
+      "mun1990_id": "vlasenica",
+      "display_name": "Vlasenica"
+    },
+    "20354": {
+      "mun1990_id": "modrica",
+      "display_name": "Modriča"
+    },
+    "20362": {
+      "mun1990_id": "mrkonjic_grad",
+      "display_name": "Mrkonjić Grad"
+    },
+    "20389": {
+      "mun1990_id": "nevesinje",
+      "display_name": "Nevesinje"
+    },
+    "20397": {
+      "mun1990_id": "bosanski_novi",
+      "display_name": "Bosanski Novi"
+    },
+    "20419": {
+      "mun1990_id": "gorazde",
+      "display_name": "Goražde"
+    },
+    "20427": {
+      "mun1990_id": "kalesija",
+      "display_name": "Kalesija"
+    },
+    "20435": {
+      "mun1990_id": "sanski_most",
+      "display_name": "Sanski Most"
+    },
+    "20443": {
+      "mun1990_id": "pale",
+      "display_name": "Pale"
+    },
+    "20451": {
+      "mun1990_id": "gradacac",
+      "display_name": "Gradačac"
+    },
+    "20460": {
+      "mun1990_id": "bosanski_petrovac",
+      "display_name": "Bosanski Petrovac"
+    },
+    "20478": {
+      "mun1990_id": "gracanica",
+      "display_name": "Gračanica"
+    },
+    "20486": {
+      "mun1990_id": "prijedor",
+      "display_name": "Prijedor"
+    },
+    "20494": {
+      "mun1990_id": "prnjavor",
+      "display_name": "Prnjavor"
+    },
+    "20508": {
+      "mun1990_id": "kljuc",
+      "display_name": "Ključ"
+    },
+    "20516": {
+      "mun1990_id": "rogatica",
+      "display_name": "Rogatica"
+    },
+    "20524": {
+      "mun1990_id": "rudo",
+      "display_name": "Rudo"
+    },
+    "20532": {
+      "mun1990_id": "sokolac",
+      "display_name": "Sokolac"
+    },
+    "20559": {
+      "mun1990_id": "srbac",
+      "display_name": "Srbac"
+    },
+    "20567": {
+      "mun1990_id": "srebrenica",
+      "display_name": "Srebrenica"
+    },
+    "20575": {
+      "mun1990_id": "teslic",
+      "display_name": "Teslić"
+    },
+    "20583": {
+      "mun1990_id": "trebinje",
+      "display_name": "Trebinje"
+    },
+    "20591": {
+      "mun1990_id": "trnovo",
+      "display_name": "Trnovo"
+    },
+    "20605": {
+      "mun1990_id": "ugljevik",
+      "display_name": "Ugljevik"
+    },
+    "20613": {
+      "mun1990_id": "foca",
+      "display_name": "Foča"
+    },
+    "20621": {
+      "mun1990_id": "han_pijesak",
+      "display_name": "Han-Pijesak"
+    },
+    "20630": {
+      "mun1990_id": "cajnice",
+      "display_name": "Čajniče"
+    },
+    "20648": {
+      "mun1990_id": "celinac",
+      "display_name": "Čelinac"
+    },
+    "20656": {
+      "mun1990_id": "bosanski_samac",
+      "display_name": "Bosanski Šamac"
+    },
+    "20664": {
+      "mun1990_id": "sekovici",
+      "display_name": "Šekovići"
+    },
+    "20672": {
+      "mun1990_id": "sipovo",
+      "display_name": "Šipovo"
+    },
+    "30163": {
+      "mun1990_id": "brcko",
+      "display_name": "Brčko"
+    }
+  },
+  "by_mun1990_id": {
+    "banovici": {
+      "municipality_id": "10014",
+      "display_name": "Banovići"
+    },
+    "banja_luka": {
+      "municipality_id": "20010",
+      "display_name": "Banja Luka"
+    },
+    "bihac": {
+      "municipality_id": "10049",
+      "display_name": "Bihać"
+    },
+    "bijeljina": {
+      "municipality_id": "20036",
+      "display_name": "Bijeljina"
+    },
+    "bileca": {
+      "municipality_id": "20044",
+      "display_name": "Bileća"
+    },
+    "bosanska_dubica": {
+      "municipality_id": "20265",
+      "display_name": "Bosanska Dubica"
+    },
+    "bosanska_gradiska": {
+      "municipality_id": "20125",
+      "display_name": "Bosanska Gradiška"
+    },
+    "bosanska_kostajnica": {
+      "municipality_id": "20273",
+      "display_name": "Bosanska Kostajnica"
+    },
+    "bosanska_krupa": {
+      "municipality_id": "11428",
+      "display_name": "Bosanska Krupa"
+    },
+    "bosanski_brod": {
+      "municipality_id": "20079",
+      "display_name": "Bosanski Brod"
+    },
+    "bosanski_novi": {
+      "municipality_id": "20397",
+      "display_name": "Bosanski Novi"
+    },
+    "bosanski_petrovac": {
+      "municipality_id": "11436",
+      "display_name": "Bosanski Petrovac"
+    },
+    "bosanski_samac": {
+      "municipality_id": "11282",
+      "display_name": "Bosanski Šamac"
+    },
+    "bosansko_grahovo": {
+      "municipality_id": "10146",
+      "display_name": "Bosansko Grahovo"
+    },
+    "bratunac": {
+      "municipality_id": "20052",
+      "display_name": "Bratunac"
+    },
+    "brcko": {
+      "municipality_id": "30163",
+      "display_name": "Brčko"
+    },
+    "breza": {
+      "municipality_id": "10189",
+      "display_name": "Breza"
+    },
+    "bugojno": {
+      "municipality_id": "10197",
+      "display_name": "Bugojno"
+    },
+    "busovaca": {
+      "municipality_id": "10219",
+      "display_name": "Busovača"
+    },
+    "cajnice": {
+      "municipality_id": "20630",
+      "display_name": "Čajniče"
+    },
+    "capljina": {
+      "municipality_id": "10243",
+      "display_name": "Čapljina"
+    },
+    "cazin": {
+      "municipality_id": "10227",
+      "display_name": "Cazin"
+    },
+    "celinac": {
+      "municipality_id": "20648",
+      "display_name": "Čelinac"
+    },
+    "centar_sarajevo": {
+      "municipality_id": "10839",
+      "display_name": "Centar Sarajevo"
+    },
+    "citluk": {
+      "municipality_id": "10260",
+      "display_name": "Čitluk"
+    },
+    "derventa": {
+      "municipality_id": "20133",
+      "display_name": "Derventa"
+    },
+    "doboj": {
+      "municipality_id": "11258",
+      "display_name": "Doboj"
+    },
+    "donji_vakuf": {
+      "municipality_id": "10294",
+      "display_name": "Donji Vakuf"
+    },
+    "duvno": {
+      "municipality_id": "10308",
+      "display_name": "Duvno"
+    },
+    "foca": {
+      "municipality_id": "11444",
+      "display_name": "Foča"
+    },
+    "fojnica": {
+      "municipality_id": "10324",
+      "display_name": "Fojnica"
+    },
+    "gacko": {
+      "municipality_id": "20117",
+      "display_name": "Gacko"
+    },
+    "glamoc": {
+      "municipality_id": "10359",
+      "display_name": "Glamoč"
+    },
+    "gorazde": {
+      "municipality_id": "11452",
+      "display_name": "Goražde"
+    },
+    "gornji_vakuf": {
+      "municipality_id": "10375",
+      "display_name": "Gornji Vakuf"
+    },
+    "gracanica": {
+      "municipality_id": "11479",
+      "display_name": "Gračanica"
+    },
+    "gradacac": {
+      "municipality_id": "10391",
+      "display_name": "Gradačac"
+    },
+    "grude": {
+      "municipality_id": "10405",
+      "display_name": "Grude"
+    },
+    "hadzici": {
+      "municipality_id": "10847",
+      "display_name": "Hadžići"
+    },
+    "han_pijesak": {
+      "municipality_id": "20621",
+      "display_name": "Han-Pijesak"
+    },
+    "ilidza": {
+      "municipality_id": "11550",
+      "display_name": "Ilidža"
+    },
+    "ilijas": {
+      "municipality_id": "10863",
+      "display_name": "Ilijaš"
+    },
+    "jablanica": {
+      "municipality_id": "10421",
+      "display_name": "Jablanica"
+    },
+    "jajce": {
+      "municipality_id": "11487",
+      "display_name": "Jajce"
+    },
+    "kakanj": {
+      "municipality_id": "10448",
+      "display_name": "Kakanj"
+    },
+    "kalesija": {
+      "municipality_id": "11495",
+      "display_name": "Kalesija"
+    },
+    "kalinovik": {
+      "municipality_id": "20249",
+      "display_name": "Kalinovik"
+    },
+    "kiseljak": {
+      "municipality_id": "10472",
+      "display_name": "Kiseljak"
+    },
+    "kladanj": {
+      "municipality_id": "10499",
+      "display_name": "Kladanj"
+    },
+    "kljuc": {
+      "municipality_id": "11509",
+      "display_name": "Ključ"
+    },
+    "konjic": {
+      "municipality_id": "10529",
+      "display_name": "Konjic"
+    },
+    "kotor_varos": {
+      "municipality_id": "20281",
+      "display_name": "Kotor Varoš"
+    },
+    "kresevo": {
+      "municipality_id": "10545",
+      "display_name": "Kreševo"
+    },
+    "kupres": {
+      "municipality_id": "11517",
+      "display_name": "Kupres"
+    },
+    "laktasi": {
+      "municipality_id": "20311",
+      "display_name": "Laktaši"
+    },
+    "listica": {
+      "municipality_id": "10570",
+      "display_name": "Lištica"
+    },
+    "livno": {
+      "municipality_id": "10588",
+      "display_name": "Livno"
+    },
+    "lopare": {
+      "municipality_id": "11231",
+      "display_name": "Lopare"
+    },
+    "lukavac": {
+      "municipality_id": "10600",
+      "display_name": "Lukavac"
+    },
+    "ljubinje": {
+      "municipality_id": "20338",
+      "display_name": "Ljubinje"
+    },
+    "ljubuski": {
+      "municipality_id": "10626",
+      "display_name": "Ljubuški"
+    },
+    "maglaj": {
+      "municipality_id": "10634",
+      "display_name": "Maglaj"
+    },
+    "modrica": {
+      "municipality_id": "20354",
+      "display_name": "Modriča"
+    },
+    "mostar": {
+      "municipality_id": "11410",
+      "display_name": "Mostar"
+    },
+    "mrkonjic_grad": {
+      "municipality_id": "20362",
+      "display_name": "Mrkonjić Grad"
+    },
+    "neum": {
+      "municipality_id": "10685",
+      "display_name": "Neum"
+    },
+    "nevesinje": {
+      "municipality_id": "20389",
+      "display_name": "Nevesinje"
+    },
+    "novi_grad_sarajevo": {
+      "municipality_id": "10871",
+      "display_name": "Novi Grad Sarajevo"
+    },
+    "novi_travnik": {
+      "municipality_id": "10774",
+      "display_name": "Novi Travnik"
+    },
+    "novo_sarajevo": {
+      "municipality_id": "11568",
+      "display_name": "Novo Sarajevo"
+    },
+    "odzak": {
+      "municipality_id": "11525",
+      "display_name": "Odžak"
+    },
+    "olovo": {
+      "municipality_id": "10715",
+      "display_name": "Olovo"
+    },
+    "orasje": {
+      "municipality_id": "11533",
+      "display_name": "Orašje"
+    },
+    "pale": {
+      "municipality_id": "11576",
+      "display_name": "Pale"
+    },
+    "posusje": {
+      "municipality_id": "10731",
+      "display_name": "Posušje"
+    },
+    "prijedor": {
+      "municipality_id": "20486",
+      "display_name": "Prijedor"
+    },
+    "prnjavor": {
+      "municipality_id": "20494",
+      "display_name": "Prnjavor"
+    },
+    "prozor": {
+      "municipality_id": "10766",
+      "display_name": "Prozor"
+    },
+    "rogatica": {
+      "municipality_id": "20516",
+      "display_name": "Rogatica"
+    },
+    "rudo": {
+      "municipality_id": "20524",
+      "display_name": "Rudo"
+    },
+    "sanski_most": {
+      "municipality_id": "11541",
+      "display_name": "Sanski Most"
+    },
+    "sekovici": {
+      "municipality_id": "20664",
+      "display_name": "Šekovići"
+    },
+    "sipovo": {
+      "municipality_id": "20672",
+      "display_name": "Šipovo"
+    },
+    "skender_vakuf": {
+      "municipality_id": "11274",
+      "display_name": "Skender Vakuf"
+    },
+    "sokolac": {
+      "municipality_id": "20532",
+      "display_name": "Sokolac"
+    },
+    "srbac": {
+      "municipality_id": "20559",
+      "display_name": "Srbac"
+    },
+    "srebrenica": {
+      "municipality_id": "20567",
+      "display_name": "Srebrenica"
+    },
+    "srebrenik": {
+      "municipality_id": "10987",
+      "display_name": "Srebrenik"
+    },
+    "stari_grad_sarajevo": {
+      "municipality_id": "11584",
+      "display_name": "Stari Grad Sarajevo"
+    },
+    "stolac": {
+      "municipality_id": "11606",
+      "display_name": "Stolac"
+    },
+    "tesanj": {
+      "municipality_id": "11045",
+      "display_name": "Tešanj"
+    },
+    "teslic": {
+      "municipality_id": "20575",
+      "display_name": "Teslić"
+    },
+    "titov_drvar": {
+      "municipality_id": "11614",
+      "display_name": "Titov Drvar"
+    },
+    "travnik": {
+      "municipality_id": "11061",
+      "display_name": "Travnik"
+    },
+    "trebinje": {
+      "municipality_id": "11304",
+      "display_name": "Trebinje"
+    },
+    "trnovo": {
+      "municipality_id": "11592",
+      "display_name": "Trnovo"
+    },
+    "tuzla": {
+      "municipality_id": "11088",
+      "display_name": "Tuzla"
+    },
+    "ugljevik": {
+      "municipality_id": "11339",
+      "display_name": "Ugljevik"
+    },
+    "vares": {
+      "municipality_id": "11100",
+      "display_name": "Vareš"
+    },
+    "velika_kladusa": {
+      "municipality_id": "11118",
+      "display_name": "Velika Kladuša"
+    },
+    "visegrad": {
+      "municipality_id": "20087",
+      "display_name": "Višegrad"
+    },
+    "visoko": {
+      "municipality_id": "11126",
+      "display_name": "Visoko"
+    },
+    "vitez": {
+      "municipality_id": "11142",
+      "display_name": "Vitez"
+    },
+    "vlasenica": {
+      "municipality_id": "20095",
+      "display_name": "Vlasenica"
+    },
+    "vogosca": {
+      "municipality_id": "10928",
+      "display_name": "Vogošća"
+    },
+    "zavidovici": {
+      "municipality_id": "11177",
+      "display_name": "Zavidovići"
+    },
+    "zenica": {
+      "municipality_id": "11185",
+      "display_name": "Zenica"
+    },
+    "zepce": {
+      "municipality_id": "11207",
+      "display_name": "Žepče"
+    },
+    "zivinice": {
+      "municipality_id": "11215",
+      "display_name": "Živinice"
+    },
+    "zvornik": {
+      "municipality_id": "11312",
+      "display_name": "Zvornik"
+    }
+  }
+}

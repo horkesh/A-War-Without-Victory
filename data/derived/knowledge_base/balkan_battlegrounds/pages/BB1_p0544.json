@@ -1,0 +1,14 @@
+{
+  "volume_id": "BB1",
+  "page_number": 544,
+  "raw_text": "Stantord\nUniversity\nLibraries\n3\nLlos\n112\n244\nblb",
+  "clean_text": "Stantord\nUniversity\nLibraries\n3\nLlos\n112\n244\nblb",
+  "ocr_applied": false,
+  "text_hash": "fba94480a9a4c5c96f85b1c4319636fb52ffba1f01e3dbed6c8225e8d82e4d43",
+  "clean_text_hash": "fba94480a9a4c5c96f85b1c4319636fb52ffba1f01e3dbed6c8225e8d82e4d43",
+  "layout_blocks": [],
+  "tables": [],
+  "figures": [],
+  "map_regions": [],
+  "notes": []
+}

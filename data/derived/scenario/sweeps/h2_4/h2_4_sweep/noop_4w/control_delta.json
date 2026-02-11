@@ -1,0 +1,43 @@
+{
+  "flips": [],
+  "flips_by_direction": [],
+  "flips_by_municipality": [],
+  "net_control_count_delta": [],
+  "net_control_counts_after": [
+    {
+      "controller": "HRHB",
+      "count": 1161
+    },
+    {
+      "controller": "RBiH",
+      "count": 2708
+    },
+    {
+      "controller": "RS",
+      "count": 2065
+    },
+    {
+      "controller": null,
+      "count": 167
+    }
+  ],
+  "net_control_counts_before": [
+    {
+      "controller": "HRHB",
+      "count": 1161
+    },
+    {
+      "controller": "RBiH",
+      "count": 2708
+    },
+    {
+      "controller": "RS",
+      "count": 2065
+    },
+    {
+      "controller": null,
+      "count": 167
+    }
+  ],
+  "total_flips": 0
+}

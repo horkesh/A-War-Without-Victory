@@ -1,0 +1,98 @@
+{
+  "awwv_meta": {
+    "role": "initial_formations",
+    "source": "OOB brigades + corps for April 1992 test; all formations pre-formed with tags and hq_sid."
+  },
+  "formations": [
+    {
+      "id": "arbih_3rd_corps",
+      "faction": "RBiH",
+      "name": "3rd Corps",
+      "kind": "corps_asset",
+      "tags": ["mun:zenica"],
+      "personnel": 0,
+      "hq_sid": "S162973"
+    },
+    {
+      "id": "arbih_7th_muslim",
+      "faction": "RBiH",
+      "name": "7th Muslim Mountain Brigade",
+      "kind": "brigade",
+      "tags": ["mun:zenica", "corps:arbih_3rd_corps"],
+      "personnel": 1000,
+      "hq_sid": "S162973"
+    },
+    {
+      "id": "hvo_herzegovina",
+      "faction": "HRHB",
+      "name": "HVO Herzegovina",
+      "kind": "corps_asset",
+      "tags": ["mun:mostar"],
+      "personnel": 0,
+      "hq_sid": "S166090"
+    },
+    {
+      "id": "hvo_mostar_brigade",
+      "faction": "HRHB",
+      "name": "Mostar Brigade",
+      "kind": "brigade",
+      "tags": ["mun:mostar", "corps:hvo_herzegovina"],
+      "personnel": 1000,
+      "hq_sid": "S166090"
+    },
+    {
+      "id": "vrs_16th_krajina_motorized",
+      "faction": "RS",
+      "name": "16th Krajina Motorized Brigade",
+      "kind": "brigade",
+      "tags": ["mun:banja_luka", "corps:vrs_1st_krajina"],
+      "personnel": 1000,
+      "hq_sid": "S200026"
+    },
+    {
+      "id": "vrs_1st_krajina",
+      "faction": "RS",
+      "name": "1st Krajina Corps",
+      "kind": "corps_asset",
+      "tags": ["mun:banja_luka"],
+      "personnel": 0,
+      "hq_sid": "S200026"
+    },
+    {
+      "id": "vrs_2nd_krajina",
+      "faction": "RS",
+      "name": "2nd Krajina Corps",
+      "kind": "corps_asset",
+      "tags": ["mun:titov_drvar"],
+      "personnel": 0,
+      "hq_sid": "S151742"
+    },
+    {
+      "id": "vrs_5th_kozara",
+      "faction": "RS",
+      "name": "5th Kozara Light Infantry Brigade",
+      "kind": "brigade",
+      "tags": ["mun:prijedor", "corps:vrs_1st_krajina"],
+      "personnel": 1000,
+      "hq_sid": "S218375"
+    },
+    {
+      "id": "vrs_6th_sanska",
+      "faction": "RS",
+      "name": "6th Sanska Light Infantry Brigade",
+      "kind": "brigade",
+      "tags": ["mun:sanski_most", "corps:vrs_1st_krajina"],
+      "personnel": 1000,
+      "hq_sid": "S141909"
+    },
+    {
+      "id": "vrs_drina",
+      "faction": "RS",
+      "name": "Drina Corps",
+      "kind": "corps_asset",
+      "tags": ["mun:vlasenica"],
+      "personnel": 0,
+      "hq_sid": "S205176"
+    }
+  ]
+}

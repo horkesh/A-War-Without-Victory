@@ -1,0 +1,270 @@
+/**
+ * Phase A1.1: Canonical GameState shape validation (foundation-only).
+ * Lightweight validator: no derived state, political_controller presence, weekly turn invariant.
+ * Engine Invariants §9.1, §11, §13.
+ */
+
+
+import type { GameState, PhaseName } from './game_state.js';
+
+
+/** Known phase names (must match PhaseName in game_state.ts). */
+const KNOWN_PHASES: readonly PhaseName[] = ['phase_0', 'phase_i', 'phase_ii'];
+
+/**
+ * Strict comparator for deterministic ordering (Engine Invariants §11.3).
+ * No localeCompare; avoids locale-dependent behavior.
+ */
+export function strictCompare(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+/**
+ * Stable key ordering for records/maps (Engine Invariants §11.3).
+ * Use when producing arrays from Record<Id, T> for output or deterministic comparison.
+ */
+export function sortedKeysForRecord<K extends string>(record: Record<K, unknown>): K[] {
+  return (Object.keys(record) as K[]).slice().sort(strictCompare);
+}
+
+/**
+ * Top-level keys that must NOT appear in GameState (derived state; Engine Invariants §13.1).
+ * Conservative denylist: do not serialize these; they must be recomputed each turn.
+ */
+const DERIVED_STATE_DENYLIST: readonly string[] = [
+  'fronts',
+  'corridors',
+  'derived',
+  'cache',
+  // Phase E: AoR and rear zone are derived each turn; must not be serialized (Engine Invariants §13.1).
+  'phase_e_aor_membership',
+  'phase_e_aor_influence',
+  'phase_e_rear_zone'
+];
+
+export type ValidateGameStateShapeResult =
+  | { ok: true }
+  | { ok: false; errors: string[] };
+
+/**
+ * Validates Phase A1.1 canonical GameState shape (foundation-only).
+ * - current_turn (meta.turn) is integer >= 0
+ * - phase (if present) is one of known PhaseName
+ * - Every settlement in political_controllers has political_controller defined (value may be null)
+ * - No denylisted derived-state keys at top level
+ */
+export function validateGameStateShape(state: unknown): ValidateGameStateShapeResult {
+  const errors: string[] = [];
+
+  if (state == null || typeof state !== 'object') {
+    return { ok: false, errors: ['State must be an object'] };
+  }
+
+  const s = state as Record<string, unknown>;
+
+  // Denylist: no derived-state keys at top level
+  for (const key of DERIVED_STATE_DENYLIST) {
+    if (Object.prototype.hasOwnProperty.call(s, key)) {
+      errors.push(`Top-level key "${key}" is denylisted (derived state must not be stored; Engine Invariants §13.1)`);
+    }
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(s, 'meta')) {
+    errors.push('Missing required field: meta');
+  } else {
+    const meta = s.meta;
+    if (meta == null || typeof meta !== 'object') {
+      errors.push('meta must be an object');
+    } else {
+      const m = meta as Record<string, unknown>;
+      if (!('turn' in m)) {
+        errors.push('meta.turn is required');
+      } else {
+        const turn = m.turn;
+        if (typeof turn !== 'number' || !Number.isInteger(turn) || turn < 0) {
+          errors.push('meta.turn must be a non-negative integer (weeks)');
+        }
+      }
+      if ('phase' in m && m.phase !== undefined) {
+        const phase = m.phase;
+        if (typeof phase !== 'string' || !KNOWN_PHASES.includes(phase as PhaseName)) {
+          errors.push(`meta.phase must be one of: ${KNOWN_PHASES.join(', ')}`);
+        }
+      }
+      // Phase 0: Referendum and war-start fields (optional; validate type when present)
+      if ('referendum_held' in m && m.referendum_held !== undefined && typeof m.referendum_held !== 'boolean') {
+        errors.push('meta.referendum_held must be boolean when present');
+      }
+      if ('referendum_turn' in m && m.referendum_turn !== undefined && m.referendum_turn !== null && (typeof m.referendum_turn !== 'number' || !Number.isInteger(m.referendum_turn) || m.referendum_turn < 0)) {
+        errors.push('meta.referendum_turn must be null or a non-negative integer when present');
+      }
+      if ('war_start_turn' in m && m.war_start_turn !== undefined && m.war_start_turn !== null && (typeof m.war_start_turn !== 'number' || !Number.isInteger(m.war_start_turn) || m.war_start_turn < 0)) {
+        errors.push('meta.war_start_turn must be null or a non-negative integer when present');
+      }
+      if ('referendum_eligible_turn' in m && m.referendum_eligible_turn !== undefined && m.referendum_eligible_turn !== null && (typeof m.referendum_eligible_turn !== 'number' || !Number.isInteger(m.referendum_eligible_turn) || m.referendum_eligible_turn < 0)) {
+        errors.push('meta.referendum_eligible_turn must be null or a non-negative integer when present');
+      }
+      if ('referendum_deadline_turn' in m && m.referendum_deadline_turn !== undefined && m.referendum_deadline_turn !== null && (typeof m.referendum_deadline_turn !== 'number' || !Number.isInteger(m.referendum_deadline_turn) || m.referendum_deadline_turn < 0)) {
+        errors.push('meta.referendum_deadline_turn must be null or a non-negative integer when present');
+      }
+      if ('game_over' in m && m.game_over !== undefined && typeof m.game_over !== 'boolean') {
+        errors.push('meta.game_over must be boolean when present');
+      }
+      if ('outcome' in m && m.outcome !== undefined && m.outcome !== null && typeof m.outcome !== 'string') {
+        errors.push('meta.outcome must be string or null when present');
+      }
+      // D0.9.1: Phase I opposing-edges streak (optional; non-negative integer when present)
+      if (
+        'phase_i_opposing_edges_streak' in m &&
+        m.phase_i_opposing_edges_streak !== undefined &&
+        (typeof m.phase_i_opposing_edges_streak !== 'number' ||
+          !Number.isInteger(m.phase_i_opposing_edges_streak) ||
+          m.phase_i_opposing_edges_streak < 0)
+      ) {
+        errors.push('meta.phase_i_opposing_edges_streak must be a non-negative integer when present');
+      }
+      if (
+        'rbih_hrhb_war_earliest_turn' in m &&
+        m.rbih_hrhb_war_earliest_turn !== undefined &&
+        m.rbih_hrhb_war_earliest_turn !== null &&
+        (typeof m.rbih_hrhb_war_earliest_turn !== 'number' ||
+          !Number.isInteger(m.rbih_hrhb_war_earliest_turn) ||
+          m.rbih_hrhb_war_earliest_turn < 0)
+      ) {
+        errors.push('meta.rbih_hrhb_war_earliest_turn must be null or a non-negative integer when present');
+      }
+    }
+  }
+
+  // Phase I: optional top-level Phase I state (validate type when present)
+  if ('phase_i_jna' in s && s.phase_i_jna !== undefined) {
+    const jna = s.phase_i_jna;
+    if (jna !== null && typeof jna === 'object') {
+      const j = jna as Record<string, unknown>;
+      if (typeof j.transition_begun !== 'boolean') {
+        errors.push('phase_i_jna.transition_begun must be boolean when present');
+      }
+      if (typeof j.withdrawal_progress !== 'number' || j.withdrawal_progress < 0 || j.withdrawal_progress > 1) {
+        errors.push('phase_i_jna.withdrawal_progress must be a number in [0, 1] when present');
+      }
+      if (typeof j.asset_transfer_rs !== 'number' || j.asset_transfer_rs < 0 || j.asset_transfer_rs > 1) {
+        errors.push('phase_i_jna.asset_transfer_rs must be a number in [0, 1] when present');
+      }
+    } else {
+      errors.push('phase_i_jna must be an object when present');
+    }
+  }
+  if ('phase_i_alliance_rbih_hrhb' in s && s.phase_i_alliance_rbih_hrhb !== undefined) {
+    const v = s.phase_i_alliance_rbih_hrhb;
+    if (typeof v !== 'number' || v < -1 || v > 1) {
+      errors.push('phase_i_alliance_rbih_hrhb must be a number in [-1, 1] when present');
+    }
+  }
+
+  // Phase II: optional supply pressure and exhaustion (validate type when present)
+  if ('phase_ii_supply_pressure' in s && s.phase_ii_supply_pressure !== undefined) {
+    const pp = s.phase_ii_supply_pressure;
+    if (pp !== null && typeof pp === 'object' && !Array.isArray(pp)) {
+      for (const [fid, val] of Object.entries(pp)) {
+        if (typeof val !== 'number' || val < 0 || val > 100) {
+          errors.push(`phase_ii_supply_pressure.${fid} must be a number in [0, 100] when present`);
+        }
+      }
+    } else {
+      errors.push('phase_ii_supply_pressure must be an object (Record<FactionId, number>) when present');
+    }
+  }
+  if ('phase_ii_exhaustion' in s && s.phase_ii_exhaustion !== undefined) {
+    const ex = s.phase_ii_exhaustion;
+    if (ex !== null && typeof ex === 'object' && !Array.isArray(ex)) {
+      for (const [fid, val] of Object.entries(ex)) {
+        if (typeof val !== 'number' || val < 0 || !Number.isFinite(val)) {
+          errors.push(`phase_ii_exhaustion.${fid} must be a non-negative finite number when present`);
+        }
+      }
+    } else {
+      errors.push('phase_ii_exhaustion must be an object (Record<FactionId, number>) when present');
+    }
+  }
+  if ('phase_ii_exhaustion_local' in s && s.phase_ii_exhaustion_local !== undefined) {
+    const loc = s.phase_ii_exhaustion_local;
+    if (loc !== null && typeof loc === 'object' && !Array.isArray(loc)) {
+      for (const [sid, val] of Object.entries(loc)) {
+        if (typeof val !== 'number' || val < 0 || !Number.isFinite(val)) {
+          errors.push(`phase_ii_exhaustion_local.${sid} must be a non-negative finite number when present`);
+        }
+      }
+    } else {
+      errors.push('phase_ii_exhaustion_local must be an object (Record<SettlementId, number>) when present');
+    }
+  }
+
+  // Phase F: displacement state (stored; monotonic [0, 1]; missing maps treated as empty)
+  if ('settlement_displacement' in s && s.settlement_displacement !== undefined) {
+    const sd = s.settlement_displacement;
+    if (sd !== null && typeof sd === 'object' && !Array.isArray(sd)) {
+      for (const [sid, val] of Object.entries(sd)) {
+        if (typeof val !== 'number' || val < 0 || val > 1 || !Number.isFinite(val)) {
+          errors.push(`settlement_displacement.${sid} must be a number in [0, 1] when present`);
+        }
+      }
+    } else {
+      errors.push('settlement_displacement must be an object (Record<SettlementId, number>) when present');
+    }
+  }
+  if ('settlement_displacement_started_turn' in s && s.settlement_displacement_started_turn !== undefined) {
+    const st = s.settlement_displacement_started_turn;
+    if (st !== null && typeof st === 'object' && !Array.isArray(st)) {
+      for (const [sid, val] of Object.entries(st)) {
+        if (!Number.isInteger(val) || val < 0) {
+          errors.push(`settlement_displacement_started_turn.${sid} must be a non-negative integer when present`);
+        }
+      }
+    } else {
+      errors.push('settlement_displacement_started_turn must be an object (Record<SettlementId, number>) when present');
+    }
+  }
+  if ('municipality_displacement' in s && s.municipality_displacement !== undefined) {
+    const md = s.municipality_displacement;
+    if (md !== null && typeof md === 'object' && !Array.isArray(md)) {
+      for (const [munId, val] of Object.entries(md)) {
+        if (typeof val !== 'number' || val < 0 || val > 1 || !Number.isFinite(val)) {
+          errors.push(`municipality_displacement.${munId} must be a number in [0, 1] when present`);
+        }
+      }
+    } else {
+      errors.push('municipality_displacement must be an object (Record<MunicipalityId, number>) when present');
+    }
+  }
+
+  // political_controllers: every entry must have value defined (can be null)
+  if (Object.prototype.hasOwnProperty.call(s, 'political_controllers')) {
+    const pc = s.political_controllers;
+    if (pc !== null && typeof pc === 'object' && !Array.isArray(pc)) {
+      for (const [sid, val] of Object.entries(pc)) {
+        if (val !== null && typeof val !== 'string') {
+          errors.push(`Settlement ${sid}: political_controller must be FactionId or null, got ${typeof val}`);
+        }
+      }
+    }
+  }
+
+  // contested_control: boolean flag per settlement
+  if (Object.prototype.hasOwnProperty.call(s, 'contested_control')) {
+    const cc = s.contested_control;
+    if (cc !== null && typeof cc === 'object' && !Array.isArray(cc)) {
+      for (const [sid, val] of Object.entries(cc)) {
+        if (typeof val !== 'boolean') {
+          errors.push(`Settlement ${sid}: contested_control must be boolean, got ${typeof val}`);
+        }
+      }
+    } else if (cc !== undefined) {
+      errors.push('contested_control must be an object (Record<SettlementId, boolean>) when present');
+    }
+  }
+
+  if (errors.length > 0) {
+    return { ok: false, errors };
+  }
+  return { ok: true };
+}

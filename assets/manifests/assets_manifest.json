@@ -1,0 +1,24 @@
+{
+  "assets": [
+    {
+      "asset_id": "hq_base_stable_v1",
+      "created_at": "v1",
+      "derived_paths": [],
+      "family": "hq",
+      "generator": "sora",
+      "notes": "Raw Sora output; not yet curated into assets/sources.",
+      "params": {
+        "height": 1024,
+        "style_refs": [],
+        "transparent": false,
+        "width": 1536
+      },
+      "prompt": null,
+      "raw_path": "assets/raw_sora/hq_base_stable_v1.png",
+      "sha256_derived": null,
+      "sha256_source": "086297d78a5aa6bfa8e9a62cb23e623933241863779cb28068919d2433e00c49",
+      "source_path": null
+    }
+  ],
+  "schema_version": 1
+}

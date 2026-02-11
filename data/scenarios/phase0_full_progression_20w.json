@@ -1,0 +1,12 @@
+{
+  "scenario_id": "phase0_full_progression_20w",
+  "start_phase": "phase_0",
+  "weeks": 20,
+  "phase_0_referendum_turn": 0,
+  "phase_0_war_start_turn": 4,
+  "init_control": "apr1992",
+  "init_formations": "apr1992",
+  "formation_spawn_directive": { "kind": "both" },
+  "turns": [],
+  "use_harness_bots": true
+}

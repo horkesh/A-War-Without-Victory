@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AWWV Map Calibrator</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #controls {
+            padding: 10px;
+            background: #eee;
+            border-bottom: 1px solid #ccc;
+        }
+
+        #container {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+            cursor: crosshair;
+        }
+
+        #map-image {
+            display: block;
+        }
+
+        .marker {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: red;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        #output {
+            margin-top: 10px;
+            white-space: pre;
+            background: #f0f0f0;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="controls">
+        <input type="file" id="file-input" accept="image/*">
+        <span>Click 3 points on the map corresponding to known settlements.</span>
+        <button id="reset-btn">Reset Points</button>
+        <button id="export-btn">Export JSON</button>
+    </div>
+    <div id="container">
+        <img id="map-image" src="" alt="Load a map to begin outside">
+    </div>
+    <div id="output"></div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const img = document.getElementById('map-image');
+        const container = document.getElementById('container');
+        const output = document.getElementById('output');
+        const resetBtn = document.getElementById('reset-btn');
+        const exportBtn = document.getElementById('export-btn');
+
+        let points = [];
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                img.src = url;
+                renderPoints(); // Clear points visually but keep array? No clear.
+                points = [];
+                output.innerText = "";
+            }
+        });
+
+        img.addEventListener('click', (e) => {
+            const rect = img.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Map to original image coordinates (if css scaled)
+            // Currently img is displayed native size or constrained?
+            // "display: block" inside overflow auto means native size usually.
+            // Let's assume naturalWidth/Height are used.
+            const scaleX = img.naturalWidth / rect.width;
+            const scaleY = img.naturalHeight / rect.height;
+
+            const pixelX = Math.round(x * scaleX);
+            const pixelY = Math.round(y * scaleY);
+
+            const name = prompt(`Enter Settlement Name for Point ${points.length + 1} at (${pixelX}, ${pixelY}):`, "");
+            if (name) {
+                points.push({ pixel: [pixelX, pixelY], name: name });
+                renderPoints();
+                updateOutput();
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            points = [];
+            renderPoints();
+            output.innerText = "";
+        });
+
+        exportBtn.addEventListener('click', () => {
+            if (points.length < 3) {
+                alert("Need at least 3 points for calibration.");
+                return;
+            }
+            const data = {
+                image_file: fileInput.files[0] ? fileInput.files[0].name : "unknown",
+                points: points
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = data.image_file.split('.')[0] + '_calibration.json';
+            a.click();
+        });
+
+        function renderPoints() {
+            // Remove existing markers
+            document.querySelectorAll('.marker').forEach(el => el.remove());
+
+            points.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'marker';
+                // We need to place marker relative to image
+                // But since container scrolls, we can place absolute in container?
+                // Wait, if we place in container, it scrolls with image?
+                // container is relative. img is child.
+                // We should append to container.
+                // Coordinates need to be scaled back to display size.
+
+                // Re-calculate display/natural ratio
+                // This is tricky if image resizes. 
+                // Let's just trust naturalWidth for now if not resized by CSS.
+                // If CSS resizes, this breaks.
+                // Simplified: Assume 1:1 or use percentages?
+
+                // Let's use pixel coordinates relative to image natural size
+                // And simple style: left: (px/naturalW)*100 %, top: ...
+
+                const left = (p.pixel[0] / img.naturalWidth) * 100;
+                const top = (p.pixel[1] / img.naturalHeight) * 100;
+
+                div.style.left = left + '%';
+                div.style.top = top + '%';
+                container.appendChild(div);
+            });
+        }
+
+        function updateOutput() {
+            output.innerText = JSON.stringify(points, null, 2);
+        }
+    </script>
+</body>
+
+</html>

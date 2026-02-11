@@ -1,0 +1,9 @@
+{
+  "scenario_id": "apr1992_all_brigades_4w",
+  "start_phase": "phase_i",
+  "weeks": 4,
+  "init_control": "apr1992",
+  "init_formations": "apr1992_all_brigades",
+  "turns": [],
+  "use_harness_bots": true
+}

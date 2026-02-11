@@ -1,0 +1,32 @@
+[
+  {
+    "map_id": "map_BB2_p0544",
+    "volume_id": "BB2",
+    "page_number": 544,
+    "caption": "maps",
+    "image_path": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\knowledge_base\\balkan_battlegrounds\\maps\\BB2_p0544.png",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 544,
+        "evidence_span": "maps",
+        "block_type": "map_caption"
+      }
+    ]
+  },
+  {
+    "map_id": "map_BB2_p0557",
+    "volume_id": "BB2",
+    "page_number": 557,
+    "caption": "1 / 50,000 scale maps using Sarajevo Radio, Belgrade Tanjug, SRNA,",
+    "image_path": "C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\knowledge_base\\balkan_battlegrounds\\maps\\BB2_p0557.png",
+    "sources": [
+      {
+        "volume_id": "BB2",
+        "page_number": 557,
+        "evidence_span": "1 / 50,000 scale maps using Sarajevo Radio, Belgrade Tanjug, SRNA,",
+        "block_type": "map_caption"
+      }
+    ]
+  }
+]

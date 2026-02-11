@@ -1,0 +1,8 @@
+{
+  "error_message": "UNKNOWN: unknown error, open 'C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\scenario\\_baseline_tmp\\baseline_ops_4w\\final_save.json'",
+  "error_name": "Error",
+  "run_id": "baseline_ops_4w__e5f478f75692aede__w4",
+  "scenario_id": "baseline_ops_4w",
+  "stack": "Error: UNKNOWN: unknown error, open 'C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\data\\derived\\scenario\\_baseline_tmp\\baseline_ops_4w\\final_save.json'\n    at async open (node:internal/fs/promises:637:25)\n    at async writeFile (node:internal/fs/promises:1239:14)\n    at async runScenario (C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\src\\scenario\\scenario_runner.ts:349:5)\n    at async runScenarioAndHash (C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\tools\\scenario_runner\\run_baseline_regression.ts:79:18)\n    at async compareAgainstBaselines (C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\tools\\scenario_runner\\run_baseline_regression.ts:131:46)\n    at async main (C:\\Users\\User\\OneDrive - United Nations Development Programme\\Documents\\Personal\\Wargame\\AWWV\\tools\\scenario_runner\\run_baseline_regression.ts:223:3)",
+  "weeks": 4
+}

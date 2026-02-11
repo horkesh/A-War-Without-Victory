@@ -1,0 +1,6 @@
+{
+  "scenario_id": "noop_4w_bots",
+  "weeks": 4,
+  "turns": [],
+  "use_harness_bots": true
+}

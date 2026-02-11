@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWWV - Warroom</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%231a1a2e' width='32' height='32'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='%23eee'>W</text></svg>">
+    <link rel="stylesheet" href="./styles/modals.css">
+    <link rel="stylesheet" href="./styles/ticker.css">
+    <link rel="stylesheet" href="./styles/war-planning-map.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+        }
+        #warroom-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            image-rendering: pixelated;
+        }
+        #ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            pointer-events: none;
+        }
+        /* Scene swap: only one visible at a time */
+        #warroom-scene, #map-scene {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+        #warroom-scene.warroom-scene-hidden {
+            display: none;
+        }
+        #map-scene.map-scene-hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Warroom scene: canvas, desk, modals. Only one of warroom-scene / map-scene visible at a time. -->
+    <div id="warroom-scene">
+        <div id="warroom-container">
+            <canvas id="warroom-canvas"></canvas>
+        </div>
+        <div id="ui-overlay">
+            <div>PHASE: <span id="val-phase">--</span></div>
+            <div>TURN: <span id="val-turn">--</span></div>
+        </div>
+
+        <!-- Modal System -->
+        <div id="modal-backdrop" class="modal-backdrop">
+            <div id="modal-content-container" class="modal-content">
+                <!-- Dynamic modal content will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Tooltip -->
+        <div id="warroom-tooltip" class="warroom-tooltip"></div>
+    </div>
+
+    <!-- Map scene: full-screen War Planning Map (sole content; injected by warroom) -->
+    <div id="map-scene" class="map-scene-hidden" aria-hidden="true">
+        <!-- WarPlanningMap container appended here by warroom.ts -->
+    </div>
+
+    <script type="module" src="./warroom.ts"></script>
+</body>
+</html>

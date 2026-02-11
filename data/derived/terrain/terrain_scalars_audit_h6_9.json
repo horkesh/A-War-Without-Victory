@@ -1,0 +1,101 @@
+{
+  "phase": "h6_9",
+  "input_scalars": "settlements_terrain_scalars.json",
+  "input_audit_h6_8": "terrain_scalars_audit_h6_8.json",
+  "record_count": 6137,
+  "distributions": {
+    "road_access_index": {
+      "min": 0,
+      "max": 1,
+      "mean": 0.7343850415512462,
+      "p25": 0.44,
+      "p50": 1,
+      "p75": 1,
+      "count": 6137,
+      "missing_count": 0,
+      "nan_count": 0
+    },
+    "river_crossing_penalty": {
+      "min": 0,
+      "max": 1,
+      "mean": 0.15582662538699696,
+      "p25": 0,
+      "p50": 0,
+      "p75": 0.19,
+      "count": 6137,
+      "missing_count": 0,
+      "nan_count": 0
+    },
+    "elevation_mean_m": {
+      "min": 0,
+      "max": 1774,
+      "mean": 648.9488675248488,
+      "p25": 340.8,
+      "p50": 634.2,
+      "p75": 921.3,
+      "count": 6137,
+      "missing_count": 0,
+      "nan_count": 0
+    },
+    "elevation_stddev_m": {
+      "min": 0,
+      "max": 614.9,
+      "mean": 86.08135897018096,
+      "p25": 39.3,
+      "p50": 72.7,
+      "p75": 116.2,
+      "count": 6137,
+      "missing_count": 0,
+      "nan_count": 0
+    },
+    "slope_index": {
+      "min": 0,
+      "max": 1,
+      "mean": 0.4630518168486233,
+      "p25": 0.313,
+      "p50": 0.47,
+      "p75": 0.609,
+      "count": 6137,
+      "missing_count": 0,
+      "nan_count": 0
+    },
+    "terrain_friction_index": {
+      "min": 0,
+      "max": 1,
+      "mean": 0.4630518168486233,
+      "p25": 0.313,
+      "p50": 0.47,
+      "p75": 0.609,
+      "count": 6137,
+      "missing_count": 0,
+      "nan_count": 0
+    }
+  },
+  "scalar_bounds": {
+    "road_access_index": {
+      "min": 0,
+      "max": 1
+    },
+    "river_crossing_penalty": {
+      "min": 0,
+      "max": 1
+    },
+    "elevation_mean_m": {
+      "min": 0,
+      "max": 1774
+    },
+    "elevation_stddev_m": {
+      "min": 0,
+      "max": 614.9
+    },
+    "slope_index": {
+      "min": 0,
+      "max": 1
+    },
+    "terrain_friction_index": {
+      "min": 0,
+      "max": 1
+    }
+  },
+  "normalization_checks": "PASS"
+}

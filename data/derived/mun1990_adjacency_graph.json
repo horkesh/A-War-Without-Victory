@@ -1,0 +1,2240 @@
+{
+  "awwv_meta": {
+    "role": "mun1990_adjacency_graph",
+    "version": "h5_0",
+    "source": [
+      "settlement_contact_graph.json",
+      "municipality_agg_post1995.json",
+      "settlements_substrate.geojson",
+      "municipalities_1990_registry (canonical)"
+    ]
+  },
+  "nodes": [
+    "banovici",
+    "banja_luka",
+    "bihac",
+    "bijeljina",
+    "bileca",
+    "bosanska_dubica",
+    "bosanska_gradiska",
+    "bosanska_kostajnica",
+    "bosanska_krupa",
+    "bosanski_brod",
+    "bosanski_novi",
+    "bosanski_petrovac",
+    "bosanski_samac",
+    "bosansko_grahovo",
+    "bratunac",
+    "brcko",
+    "breza",
+    "bugojno",
+    "busovaca",
+    "cajnice",
+    "capljina",
+    "cazin",
+    "celinac",
+    "centar_sarajevo",
+    "citluk",
+    "derventa",
+    "doboj",
+    "donji_vakuf",
+    "duvno",
+    "foca",
+    "fojnica",
+    "gacko",
+    "glamoc",
+    "gorazde",
+    "gornji_vakuf",
+    "gracanica",
+    "gradacac",
+    "grude",
+    "hadzici",
+    "han_pijesak",
+    "ilidza",
+    "ilijas",
+    "jablanica",
+    "jajce",
+    "kakanj",
+    "kalesija",
+    "kalinovik",
+    "kiseljak",
+    "kladanj",
+    "kljuc",
+    "konjic",
+    "kotor_varos",
+    "kresevo",
+    "kupres",
+    "laktasi",
+    "listica",
+    "livno",
+    "lopare",
+    "lukavac",
+    "ljubinje",
+    "ljubuski",
+    "maglaj",
+    "modrica",
+    "mostar",
+    "mrkonjic_grad",
+    "neum",
+    "nevesinje",
+    "novi_grad_sarajevo",
+    "novi_travnik",
+    "novo_sarajevo",
+    "odzak",
+    "olovo",
+    "orasje",
+    "pale",
+    "posusje",
+    "prijedor",
+    "prnjavor",
+    "prozor",
+    "rogatica",
+    "rudo",
+    "sanski_most",
+    "sekovici",
+    "sipovo",
+    "skender_vakuf",
+    "sokolac",
+    "srbac",
+    "srebrenica",
+    "srebrenik",
+    "stari_grad_sarajevo",
+    "stolac",
+    "tesanj",
+    "teslic",
+    "titov_drvar",
+    "travnik",
+    "trebinje",
+    "trnovo",
+    "tuzla",
+    "ugljevik",
+    "vares",
+    "velika_kladusa",
+    "visegrad",
+    "visoko",
+    "vitez",
+    "vlasenica",
+    "vogosca",
+    "zavidovici",
+    "zenica",
+    "zepce",
+    "zivinice",
+    "zvornik"
+  ],
+  "edges": [
+    {
+      "a": "banovici",
+      "b": "kladanj",
+      "type": "distance_contact",
+      "contact_weight": 163308,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "banovici",
+      "b": "lukavac",
+      "type": "distance_contact",
+      "contact_weight": 73078,
+      "supporting_pairs_count": 14
+    },
+    {
+      "a": "banovici",
+      "b": "olovo",
+      "type": "distance_contact",
+      "contact_weight": 63,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "banovici",
+      "b": "zavidovici",
+      "type": "distance_contact",
+      "contact_weight": 2052,
+      "supporting_pairs_count": 15
+    },
+    {
+      "a": "banovici",
+      "b": "zivinice",
+      "type": "distance_contact",
+      "contact_weight": 65212,
+      "supporting_pairs_count": 12
+    },
+    {
+      "a": "banja_luka",
+      "b": "bosanska_gradiska",
+      "type": "distance_contact",
+      "contact_weight": 955,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "banja_luka",
+      "b": "celinac",
+      "type": "distance_contact",
+      "contact_weight": 1105,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "banja_luka",
+      "b": "kljuc",
+      "type": "distance_contact",
+      "contact_weight": 1838,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "banja_luka",
+      "b": "laktasi",
+      "type": "distance_contact",
+      "contact_weight": 338990,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "banja_luka",
+      "b": "mrkonjic_grad",
+      "type": "distance_contact",
+      "contact_weight": 1599,
+      "supporting_pairs_count": 10
+    },
+    {
+      "a": "banja_luka",
+      "b": "prijedor",
+      "type": "point_touch",
+      "contact_weight": 4085,
+      "supporting_pairs_count": 12
+    },
+    {
+      "a": "banja_luka",
+      "b": "sanski_most",
+      "type": "distance_contact",
+      "contact_weight": 823,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "banja_luka",
+      "b": "skender_vakuf",
+      "type": "distance_contact",
+      "contact_weight": 2620,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "bihac",
+      "b": "bosanska_krupa",
+      "type": "distance_contact",
+      "contact_weight": 13492,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "bihac",
+      "b": "bosanski_petrovac",
+      "type": "distance_contact",
+      "contact_weight": 524235,
+      "supporting_pairs_count": 18
+    },
+    {
+      "a": "bihac",
+      "b": "bosansko_grahovo",
+      "type": "distance_contact",
+      "contact_weight": 217,
+      "supporting_pairs_count": 3
+    },
+    {
+      "a": "bihac",
+      "b": "cazin",
+      "type": "distance_contact",
+      "contact_weight": 412887,
+      "supporting_pairs_count": 18
+    },
+    {
+      "a": "bihac",
+      "b": "titov_drvar",
+      "type": "distance_contact",
+      "contact_weight": 528,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "bijeljina",
+      "b": "brcko",
+      "type": "distance_contact",
+      "contact_weight": 1783,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "bijeljina",
+      "b": "lopare",
+      "type": "distance_contact",
+      "contact_weight": 318,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "bijeljina",
+      "b": "ugljevik",
+      "type": "distance_contact",
+      "contact_weight": 450955,
+      "supporting_pairs_count": 18
+    },
+    {
+      "a": "bijeljina",
+      "b": "zvornik",
+      "type": "distance_contact",
+      "contact_weight": 375808,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "bileca",
+      "b": "gacko",
+      "type": "shared_border",
+      "contact_weight": 282963,
+      "supporting_pairs_count": 13
+    },
+    {
+      "a": "bileca",
+      "b": "ljubinje",
+      "type": "distance_contact",
+      "contact_weight": 1374,
+      "supporting_pairs_count": 8
+    },
+    {
+      "a": "bileca",
+      "b": "nevesinje",
+      "type": "distance_contact",
+      "contact_weight": 919,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "bileca",
+      "b": "stolac",
+      "type": "distance_contact",
+      "contact_weight": 1490,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "bileca",
+      "b": "trebinje",
+      "type": "distance_contact",
+      "contact_weight": 3039,
+      "supporting_pairs_count": 13
+    },
+    {
+      "a": "bosanska_dubica",
+      "b": "bosanska_gradiska",
+      "type": "distance_contact",
+      "contact_weight": 415787,
+      "supporting_pairs_count": 8
+    },
+    {
+      "a": "bosanska_dubica",
+      "b": "bosanska_kostajnica",
+      "type": "distance_contact",
+      "contact_weight": 466005,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "bosanska_dubica",
+      "b": "bosanski_novi",
+      "type": "distance_contact",
+      "contact_weight": 268,
+      "supporting_pairs_count": 3
+    },
+    {
+      "a": "bosanska_dubica",
+      "b": "prijedor",
+      "type": "distance_contact",
+      "contact_weight": 2242,
+      "supporting_pairs_count": 17
+    },
+    {
+      "a": "bosanska_gradiska",
+      "b": "laktasi",
+      "type": "distance_contact",
+      "contact_weight": 1145,
+      "supporting_pairs_count": 8
+    },
+    {
+      "a": "bosanska_gradiska",
+      "b": "prijedor",
+      "type": "distance_contact",
+      "contact_weight": 619,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "bosanska_gradiska",
+      "b": "srbac",
+      "type": "distance_contact",
+      "contact_weight": 242942,
+      "supporting_pairs_count": 17
+    },
+    {
+      "a": "bosanska_kostajnica",
+      "b": "bosanski_novi",
+      "type": "distance_contact",
+      "contact_weight": 284,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "bosanska_krupa",
+      "b": "bosanski_novi",
+      "type": "point_touch",
+      "contact_weight": 596094,
+      "supporting_pairs_count": 17
+    },
+    {
+      "a": "bosanska_krupa",
+      "b": "bosanski_petrovac",
+      "type": "distance_contact",
+      "contact_weight": 321093,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "bosanska_krupa",
+      "b": "cazin",
+      "type": "distance_contact",
+      "contact_weight": 8596,
+      "supporting_pairs_count": 14
+    },
+    {
+      "a": "bosanska_krupa",
+      "b": "sanski_most",
+      "type": "distance_contact",
+      "contact_weight": 555088,
+      "supporting_pairs_count": 12
+    },
+    {
+      "a": "bosanski_brod",
+      "b": "derventa",
+      "type": "distance_contact",
+      "contact_weight": 2977,
+      "supporting_pairs_count": 17
+    },
+    {
+      "a": "bosanski_brod",
+      "b": "doboj",
+      "type": "distance_contact",
+      "contact_weight": 1212,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "bosanski_brod",
+      "b": "modrica",
+      "type": "distance_contact",
+      "contact_weight": 640,
+      "supporting_pairs_count": 3
+    },
+    {
+      "a": "bosanski_brod",
+      "b": "odzak",
+      "type": "shared_border",
+      "contact_weight": 1132936,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "bosanski_novi",
+      "b": "prijedor",
+      "type": "distance_contact",
+      "contact_weight": 121802,
+      "supporting_pairs_count": 15
+    },
+    {
+      "a": "bosanski_novi",
+      "b": "sanski_most",
+      "type": "distance_contact",
+      "contact_weight": 693,
+      "supporting_pairs_count": 8
+    },
+    {
+      "a": "bosanski_petrovac",
+      "b": "kljuc",
+      "type": "distance_contact",
+      "contact_weight": 175428,
+      "supporting_pairs_count": 12
+    },
+    {
+      "a": "bosanski_petrovac",
+      "b": "sanski_most",
+      "type": "distance_contact",
+      "contact_weight": 124557,
+      "supporting_pairs_count": 12
+    },
+    {
+      "a": "bosanski_petrovac",
+      "b": "titov_drvar",
+      "type": "distance_contact",
+      "contact_weight": 146438,
+      "supporting_pairs_count": 14
+    },
+    {
+      "a": "bosanski_samac",
+      "b": "gradacac",
+      "type": "distance_contact",
+      "contact_weight": 381003,
+      "supporting_pairs_count": 13
+    },
+    {
+      "a": "bosanski_samac",
+      "b": "modrica",
+      "type": "shared_border",
+      "contact_weight": 26293785,
+      "supporting_pairs_count": 8
+    },
+    {
+      "a": "bosanski_samac",
+      "b": "odzak",
+      "type": "distance_contact",
+      "contact_weight": 572019,
+      "supporting_pairs_count": 16
+    },
+    {
+      "a": "bosanski_samac",
+      "b": "orasje",
+      "type": "distance_contact",
+      "contact_weight": 90183,
+      "supporting_pairs_count": 10
+    },
+    {
+      "a": "bosansko_grahovo",
+      "b": "glamoc",
+      "type": "distance_contact",
+      "contact_weight": 4219,
+      "supporting_pairs_count": 8
+    },
+    {
+      "a": "bosansko_grahovo",
+      "b": "livno",
+      "type": "distance_contact",
+      "contact_weight": 2238,
+      "supporting_pairs_count": 4
+    },
+    {
+      "a": "bosansko_grahovo",
+      "b": "titov_drvar",
+      "type": "distance_contact",
+      "contact_weight": 103227,
+      "supporting_pairs_count": 15
+    },
+    {
+      "a": "bratunac",
+      "b": "srebrenica",
+      "type": "distance_contact",
+      "contact_weight": 714912,
+      "supporting_pairs_count": 43
+    },
+    {
+      "a": "bratunac",
+      "b": "vlasenica",
+      "type": "distance_contact",
+      "contact_weight": 299717,
+      "supporting_pairs_count": 10
+    },
+    {
+      "a": "bratunac",
+      "b": "zvornik",
+      "type": "distance_contact",
+      "contact_weight": 247537,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "brcko",
+      "b": "gradacac",
+      "type": "distance_contact",
+      "contact_weight": 225691,
+      "supporting_pairs_count": 12
+    },
+    {
+      "a": "brcko",
+      "b": "lopare",
+      "type": "distance_contact",
+      "contact_weight": 569660,
+      "supporting_pairs_count": 17
+    },
+    {
+      "a": "brcko",
+      "b": "orasje",
+      "type": "distance_contact",
+      "contact_weight": 15205,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "brcko",
+      "b": "srebrenik",
+      "type": "distance_contact",
+      "contact_weight": 32318,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "breza",
+      "b": "ilijas",
+      "type": "distance_contact",
+      "contact_weight": 857826,
+      "supporting_pairs_count": 22
+    },
+    {
+      "a": "breza",
+      "b": "vares",
+      "type": "distance_contact",
+      "contact_weight": 139251,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "breza",
+      "b": "visoko",
+      "type": "distance_contact",
+      "contact_weight": 69816,
+      "supporting_pairs_count": 12
+    },
+    {
+      "a": "bugojno",
+      "b": "donji_vakuf",
+      "type": "distance_contact",
+      "contact_weight": 350573,
+      "supporting_pairs_count": 28
+    },
+    {
+      "a": "bugojno",
+      "b": "gornji_vakuf",
+      "type": "distance_contact",
+      "contact_weight": 199177,
+      "supporting_pairs_count": 18
+    },
+    {
+      "a": "bugojno",
+      "b": "kupres",
+      "type": "distance_contact",
+      "contact_weight": 4735,
+      "supporting_pairs_count": 13
+    },
+    {
+      "a": "bugojno",
+      "b": "novi_travnik",
+      "type": "distance_contact",
+      "contact_weight": 360330,
+      "supporting_pairs_count": 13
+    },
+    {
+      "a": "bugojno",
+      "b": "travnik",
+      "type": "distance_contact",
+      "contact_weight": 25,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "busovaca",
+      "b": "fojnica",
+      "type": "distance_contact",
+      "contact_weight": 38574,
+      "supporting_pairs_count": 10
+    },
+    {
+      "a": "busovaca",
+      "b": "kakanj",
+      "type": "distance_contact",
+      "contact_weight": 472851,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "busovaca",
+      "b": "kiseljak",
+      "type": "distance_contact",
+      "contact_weight": 4055,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "busovaca",
+      "b": "visoko",
+      "type": "distance_contact",
+      "contact_weight": 313,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "busovaca",
+      "b": "vitez",
+      "type": "distance_contact",
+      "contact_weight": 631839,
+      "supporting_pairs_count": 16
+    },
+    {
+      "a": "busovaca",
+      "b": "zenica",
+      "type": "distance_contact",
+      "contact_weight": 407156,
+      "supporting_pairs_count": 19
+    },
+    {
+      "a": "cajnice",
+      "b": "foca",
+      "type": "distance_contact",
+      "contact_weight": 77,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "cajnice",
+      "b": "gorazde",
+      "type": "shared_border",
+      "contact_weight": 10723384,
+      "supporting_pairs_count": 26
+    },
+    {
+      "a": "cajnice",
+      "b": "rudo",
+      "type": "distance_contact",
+      "contact_weight": 1855,
+      "supporting_pairs_count": 12
+    },
+    {
+      "a": "capljina",
+      "b": "citluk",
+      "type": "distance_contact",
+      "contact_weight": 2438,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "capljina",
+      "b": "ljubuski",
+      "type": "distance_contact",
+      "contact_weight": 1509,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "capljina",
+      "b": "mostar",
+      "type": "distance_contact",
+      "contact_weight": 232,
+      "supporting_pairs_count": 5
+    },
+    {
+      "a": "capljina",
+      "b": "neum",
+      "type": "distance_contact",
+      "contact_weight": 49348,
+      "supporting_pairs_count": 8
+    },
+    {
+      "a": "capljina",
+      "b": "stolac",
+      "type": "distance_contact",
+      "contact_weight": 2334,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "cazin",
+      "b": "velika_kladusa",
+      "type": "point_touch",
+      "contact_weight": 483726,
+      "supporting_pairs_count": 24
+    },
+    {
+      "a": "celinac",
+      "b": "kotor_varos",
+      "type": "distance_contact",
+      "contact_weight": 3423,
+      "supporting_pairs_count": 17
+    },
+    {
+      "a": "celinac",
+      "b": "laktasi",
+      "type": "distance_contact",
+      "contact_weight": 1006,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "celinac",
+      "b": "prnjavor",
+      "type": "distance_contact",
+      "contact_weight": 1306,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "celinac",
+      "b": "skender_vakuf",
+      "type": "distance_contact",
+      "contact_weight": 287,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "celinac",
+      "b": "teslic",
+      "type": "distance_contact",
+      "contact_weight": 205,
+      "supporting_pairs_count": 4
+    },
+    {
+      "a": "centar_sarajevo",
+      "b": "ilijas",
+      "type": "distance_contact",
+      "contact_weight": 89,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "centar_sarajevo",
+      "b": "novi_grad_sarajevo",
+      "type": "distance_contact",
+      "contact_weight": 164399,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "centar_sarajevo",
+      "b": "novo_sarajevo",
+      "type": "distance_contact",
+      "contact_weight": 366599,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "centar_sarajevo",
+      "b": "stari_grad_sarajevo",
+      "type": "distance_contact",
+      "contact_weight": 574587,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "centar_sarajevo",
+      "b": "vogosca",
+      "type": "distance_contact",
+      "contact_weight": 13058,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "citluk",
+      "b": "listica",
+      "type": "distance_contact",
+      "contact_weight": 135426,
+      "supporting_pairs_count": 12
+    },
+    {
+      "a": "citluk",
+      "b": "ljubuski",
+      "type": "distance_contact",
+      "contact_weight": 15564,
+      "supporting_pairs_count": 10
+    },
+    {
+      "a": "citluk",
+      "b": "mostar",
+      "type": "distance_contact",
+      "contact_weight": 1258,
+      "supporting_pairs_count": 12
+    },
+    {
+      "a": "derventa",
+      "b": "doboj",
+      "type": "distance_contact",
+      "contact_weight": 424117,
+      "supporting_pairs_count": 29
+    },
+    {
+      "a": "derventa",
+      "b": "modrica",
+      "type": "distance_contact",
+      "contact_weight": 164786,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "derventa",
+      "b": "prnjavor",
+      "type": "distance_contact",
+      "contact_weight": 1317,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "derventa",
+      "b": "srbac",
+      "type": "distance_contact",
+      "contact_weight": 370,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "doboj",
+      "b": "gracanica",
+      "type": "distance_contact",
+      "contact_weight": 1481298,
+      "supporting_pairs_count": 24
+    },
+    {
+      "a": "doboj",
+      "b": "gradacac",
+      "type": "distance_contact",
+      "contact_weight": 151452,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "doboj",
+      "b": "lukavac",
+      "type": "distance_contact",
+      "contact_weight": 31418,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "doboj",
+      "b": "maglaj",
+      "type": "distance_contact",
+      "contact_weight": 293832,
+      "supporting_pairs_count": 19
+    },
+    {
+      "a": "doboj",
+      "b": "modrica",
+      "type": "distance_contact",
+      "contact_weight": 766806,
+      "supporting_pairs_count": 16
+    },
+    {
+      "a": "doboj",
+      "b": "prnjavor",
+      "type": "distance_contact",
+      "contact_weight": 466739,
+      "supporting_pairs_count": 8
+    },
+    {
+      "a": "doboj",
+      "b": "tesanj",
+      "type": "distance_contact",
+      "contact_weight": 960025,
+      "supporting_pairs_count": 25
+    },
+    {
+      "a": "doboj",
+      "b": "teslic",
+      "type": "distance_contact",
+      "contact_weight": 127145,
+      "supporting_pairs_count": 10
+    },
+    {
+      "a": "donji_vakuf",
+      "b": "jajce",
+      "type": "distance_contact",
+      "contact_weight": 773004,
+      "supporting_pairs_count": 18
+    },
+    {
+      "a": "donji_vakuf",
+      "b": "kupres",
+      "type": "distance_contact",
+      "contact_weight": 68792,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "donji_vakuf",
+      "b": "sipovo",
+      "type": "distance_contact",
+      "contact_weight": 326690,
+      "supporting_pairs_count": 5
+    },
+    {
+      "a": "donji_vakuf",
+      "b": "travnik",
+      "type": "distance_contact",
+      "contact_weight": 363830,
+      "supporting_pairs_count": 13
+    },
+    {
+      "a": "duvno",
+      "b": "jablanica",
+      "type": "distance_contact",
+      "contact_weight": 134,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "duvno",
+      "b": "kupres",
+      "type": "distance_contact",
+      "contact_weight": 38199,
+      "supporting_pairs_count": 16
+    },
+    {
+      "a": "duvno",
+      "b": "livno",
+      "type": "distance_contact",
+      "contact_weight": 2820,
+      "supporting_pairs_count": 15
+    },
+    {
+      "a": "duvno",
+      "b": "posusje",
+      "type": "distance_contact",
+      "contact_weight": 40931,
+      "supporting_pairs_count": 17
+    },
+    {
+      "a": "duvno",
+      "b": "prozor",
+      "type": "distance_contact",
+      "contact_weight": 1694,
+      "supporting_pairs_count": 3
+    },
+    {
+      "a": "foca",
+      "b": "gacko",
+      "type": "distance_contact",
+      "contact_weight": 1009,
+      "supporting_pairs_count": 4
+    },
+    {
+      "a": "foca",
+      "b": "gorazde",
+      "type": "point_touch",
+      "contact_weight": 236410,
+      "supporting_pairs_count": 33
+    },
+    {
+      "a": "foca",
+      "b": "kalinovik",
+      "type": "distance_contact",
+      "contact_weight": 353478,
+      "supporting_pairs_count": 18
+    },
+    {
+      "a": "foca",
+      "b": "pale",
+      "type": "distance_contact",
+      "contact_weight": 307730,
+      "supporting_pairs_count": 8
+    },
+    {
+      "a": "foca",
+      "b": "trnovo",
+      "type": "distance_contact",
+      "contact_weight": 61227,
+      "supporting_pairs_count": 12
+    },
+    {
+      "a": "fojnica",
+      "b": "gornji_vakuf",
+      "type": "distance_contact",
+      "contact_weight": 66861,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "fojnica",
+      "b": "kiseljak",
+      "type": "distance_contact",
+      "contact_weight": 684146,
+      "supporting_pairs_count": 24
+    },
+    {
+      "a": "fojnica",
+      "b": "konjic",
+      "type": "distance_contact",
+      "contact_weight": 993,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "fojnica",
+      "b": "kresevo",
+      "type": "distance_contact",
+      "contact_weight": 1280,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "fojnica",
+      "b": "novi_travnik",
+      "type": "distance_contact",
+      "contact_weight": 79041,
+      "supporting_pairs_count": 3
+    },
+    {
+      "a": "fojnica",
+      "b": "vitez",
+      "type": "distance_contact",
+      "contact_weight": 84,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "gacko",
+      "b": "kalinovik",
+      "type": "distance_contact",
+      "contact_weight": 772,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "gacko",
+      "b": "nevesinje",
+      "type": "distance_contact",
+      "contact_weight": 7404,
+      "supporting_pairs_count": 13
+    },
+    {
+      "a": "glamoc",
+      "b": "kljuc",
+      "type": "distance_contact",
+      "contact_weight": 5178,
+      "supporting_pairs_count": 3
+    },
+    {
+      "a": "glamoc",
+      "b": "kupres",
+      "type": "distance_contact",
+      "contact_weight": 476203,
+      "supporting_pairs_count": 10
+    },
+    {
+      "a": "glamoc",
+      "b": "livno",
+      "type": "distance_contact",
+      "contact_weight": 76622,
+      "supporting_pairs_count": 24
+    },
+    {
+      "a": "glamoc",
+      "b": "mrkonjic_grad",
+      "type": "distance_contact",
+      "contact_weight": 1001399,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "glamoc",
+      "b": "sipovo",
+      "type": "distance_contact",
+      "contact_weight": 1041372,
+      "supporting_pairs_count": 17
+    },
+    {
+      "a": "glamoc",
+      "b": "titov_drvar",
+      "type": "distance_contact",
+      "contact_weight": 274279,
+      "supporting_pairs_count": 3
+    },
+    {
+      "a": "gorazde",
+      "b": "pale",
+      "type": "distance_contact",
+      "contact_weight": 452196,
+      "supporting_pairs_count": 21
+    },
+    {
+      "a": "gorazde",
+      "b": "rogatica",
+      "type": "distance_contact",
+      "contact_weight": 232651,
+      "supporting_pairs_count": 22
+    },
+    {
+      "a": "gorazde",
+      "b": "rudo",
+      "type": "distance_contact",
+      "contact_weight": 24,
+      "supporting_pairs_count": 3
+    },
+    {
+      "a": "gornji_vakuf",
+      "b": "konjic",
+      "type": "distance_contact",
+      "contact_weight": 60756,
+      "supporting_pairs_count": 5
+    },
+    {
+      "a": "gornji_vakuf",
+      "b": "kupres",
+      "type": "distance_contact",
+      "contact_weight": 11,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "gornji_vakuf",
+      "b": "novi_travnik",
+      "type": "shared_border",
+      "contact_weight": 34206,
+      "supporting_pairs_count": 5
+    },
+    {
+      "a": "gornji_vakuf",
+      "b": "prozor",
+      "type": "distance_contact",
+      "contact_weight": 4829,
+      "supporting_pairs_count": 17
+    },
+    {
+      "a": "gracanica",
+      "b": "gradacac",
+      "type": "distance_contact",
+      "contact_weight": 436041,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "gracanica",
+      "b": "lukavac",
+      "type": "distance_contact",
+      "contact_weight": 193003,
+      "supporting_pairs_count": 10
+    },
+    {
+      "a": "gracanica",
+      "b": "maglaj",
+      "type": "distance_contact",
+      "contact_weight": 30954,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "gracanica",
+      "b": "srebrenik",
+      "type": "distance_contact",
+      "contact_weight": 1503,
+      "supporting_pairs_count": 10
+    },
+    {
+      "a": "gradacac",
+      "b": "modrica",
+      "type": "point_touch",
+      "contact_weight": 534503,
+      "supporting_pairs_count": 15
+    },
+    {
+      "a": "gradacac",
+      "b": "orasje",
+      "type": "distance_contact",
+      "contact_weight": 318,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "gradacac",
+      "b": "srebrenik",
+      "type": "distance_contact",
+      "contact_weight": 858057,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "grude",
+      "b": "listica",
+      "type": "distance_contact",
+      "contact_weight": 581,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "grude",
+      "b": "ljubuski",
+      "type": "distance_contact",
+      "contact_weight": 36809,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "grude",
+      "b": "posusje",
+      "type": "distance_contact",
+      "contact_weight": 775,
+      "supporting_pairs_count": 5
+    },
+    {
+      "a": "hadzici",
+      "b": "ilidza",
+      "type": "distance_contact",
+      "contact_weight": 33742,
+      "supporting_pairs_count": 10
+    },
+    {
+      "a": "hadzici",
+      "b": "kiseljak",
+      "type": "point_touch",
+      "contact_weight": 631710,
+      "supporting_pairs_count": 15
+    },
+    {
+      "a": "hadzici",
+      "b": "konjic",
+      "type": "distance_contact",
+      "contact_weight": 60074,
+      "supporting_pairs_count": 12
+    },
+    {
+      "a": "hadzici",
+      "b": "kresevo",
+      "type": "distance_contact",
+      "contact_weight": 350141,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "hadzici",
+      "b": "trnovo",
+      "type": "distance_contact",
+      "contact_weight": 17615,
+      "supporting_pairs_count": 4
+    },
+    {
+      "a": "han_pijesak",
+      "b": "kladanj",
+      "type": "distance_contact",
+      "contact_weight": 812589,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "han_pijesak",
+      "b": "olovo",
+      "type": "distance_contact",
+      "contact_weight": 197515,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "han_pijesak",
+      "b": "rogatica",
+      "type": "distance_contact",
+      "contact_weight": 469204,
+      "supporting_pairs_count": 10
+    },
+    {
+      "a": "han_pijesak",
+      "b": "sokolac",
+      "type": "distance_contact",
+      "contact_weight": 124863,
+      "supporting_pairs_count": 17
+    },
+    {
+      "a": "han_pijesak",
+      "b": "vlasenica",
+      "type": "distance_contact",
+      "contact_weight": 489401,
+      "supporting_pairs_count": 21
+    },
+    {
+      "a": "ilidza",
+      "b": "ilijas",
+      "type": "distance_contact",
+      "contact_weight": 1011,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "ilidza",
+      "b": "kiseljak",
+      "type": "distance_contact",
+      "contact_weight": 846,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "ilidza",
+      "b": "novi_grad_sarajevo",
+      "type": "distance_contact",
+      "contact_weight": 610889,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "ilidza",
+      "b": "novo_sarajevo",
+      "type": "distance_contact",
+      "contact_weight": 276890,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "ilidza",
+      "b": "stari_grad_sarajevo",
+      "type": "distance_contact",
+      "contact_weight": 612,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "ilidza",
+      "b": "trnovo",
+      "type": "distance_contact",
+      "contact_weight": 212250,
+      "supporting_pairs_count": 13
+    },
+    {
+      "a": "ilidza",
+      "b": "visoko",
+      "type": "distance_contact",
+      "contact_weight": 1057,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "ilijas",
+      "b": "novi_grad_sarajevo",
+      "type": "distance_contact",
+      "contact_weight": 648123,
+      "supporting_pairs_count": 14
+    },
+    {
+      "a": "ilijas",
+      "b": "olovo",
+      "type": "distance_contact",
+      "contact_weight": 703,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "ilijas",
+      "b": "sokolac",
+      "type": "distance_contact",
+      "contact_weight": 76592,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "ilijas",
+      "b": "stari_grad_sarajevo",
+      "type": "distance_contact",
+      "contact_weight": 312,
+      "supporting_pairs_count": 5
+    },
+    {
+      "a": "ilijas",
+      "b": "vares",
+      "type": "distance_contact",
+      "contact_weight": 395573,
+      "supporting_pairs_count": 13
+    },
+    {
+      "a": "ilijas",
+      "b": "visoko",
+      "type": "distance_contact",
+      "contact_weight": 517314,
+      "supporting_pairs_count": 18
+    },
+    {
+      "a": "ilijas",
+      "b": "vogosca",
+      "type": "distance_contact",
+      "contact_weight": 948794,
+      "supporting_pairs_count": 20
+    },
+    {
+      "a": "jablanica",
+      "b": "konjic",
+      "type": "distance_contact",
+      "contact_weight": 25342,
+      "supporting_pairs_count": 15
+    },
+    {
+      "a": "jablanica",
+      "b": "mostar",
+      "type": "point_touch",
+      "contact_weight": 92799,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "jablanica",
+      "b": "posusje",
+      "type": "distance_contact",
+      "contact_weight": 42,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "jablanica",
+      "b": "prozor",
+      "type": "distance_contact",
+      "contact_weight": 470127,
+      "supporting_pairs_count": 20
+    },
+    {
+      "a": "jajce",
+      "b": "mrkonjic_grad",
+      "type": "distance_contact",
+      "contact_weight": 897300,
+      "supporting_pairs_count": 12
+    },
+    {
+      "a": "jajce",
+      "b": "sipovo",
+      "type": "distance_contact",
+      "contact_weight": 787804,
+      "supporting_pairs_count": 13
+    },
+    {
+      "a": "jajce",
+      "b": "skender_vakuf",
+      "type": "distance_contact",
+      "contact_weight": 351263,
+      "supporting_pairs_count": 21
+    },
+    {
+      "a": "jajce",
+      "b": "travnik",
+      "type": "distance_contact",
+      "contact_weight": 1269,
+      "supporting_pairs_count": 4
+    },
+    {
+      "a": "kakanj",
+      "b": "vares",
+      "type": "distance_contact",
+      "contact_weight": 102582,
+      "supporting_pairs_count": 15
+    },
+    {
+      "a": "kakanj",
+      "b": "visoko",
+      "type": "point_touch",
+      "contact_weight": 883007,
+      "supporting_pairs_count": 27
+    },
+    {
+      "a": "kakanj",
+      "b": "zavidovici",
+      "type": "distance_contact",
+      "contact_weight": 499,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "kakanj",
+      "b": "zenica",
+      "type": "distance_contact",
+      "contact_weight": 6395,
+      "supporting_pairs_count": 30
+    },
+    {
+      "a": "kalesija",
+      "b": "lopare",
+      "type": "distance_contact",
+      "contact_weight": 868781,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "kalesija",
+      "b": "sekovici",
+      "type": "distance_contact",
+      "contact_weight": 52224,
+      "supporting_pairs_count": 14
+    },
+    {
+      "a": "kalesija",
+      "b": "tuzla",
+      "type": "distance_contact",
+      "contact_weight": 1627,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "kalesija",
+      "b": "zivinice",
+      "type": "distance_contact",
+      "contact_weight": 2087,
+      "supporting_pairs_count": 14
+    },
+    {
+      "a": "kalesija",
+      "b": "zvornik",
+      "type": "distance_contact",
+      "contact_weight": 374310,
+      "supporting_pairs_count": 29
+    },
+    {
+      "a": "kalinovik",
+      "b": "konjic",
+      "type": "distance_contact",
+      "contact_weight": 2403925,
+      "supporting_pairs_count": 33
+    },
+    {
+      "a": "kalinovik",
+      "b": "nevesinje",
+      "type": "distance_contact",
+      "contact_weight": 334869,
+      "supporting_pairs_count": 23
+    },
+    {
+      "a": "kalinovik",
+      "b": "trnovo",
+      "type": "shared_border",
+      "contact_weight": 6882299,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "kiseljak",
+      "b": "kresevo",
+      "type": "distance_contact",
+      "contact_weight": 615703,
+      "supporting_pairs_count": 25
+    },
+    {
+      "a": "kiseljak",
+      "b": "visoko",
+      "type": "distance_contact",
+      "contact_weight": 2606435,
+      "supporting_pairs_count": 39
+    },
+    {
+      "a": "kladanj",
+      "b": "olovo",
+      "type": "distance_contact",
+      "contact_weight": 109380,
+      "supporting_pairs_count": 23
+    },
+    {
+      "a": "kladanj",
+      "b": "sekovici",
+      "type": "distance_contact",
+      "contact_weight": 1225297,
+      "supporting_pairs_count": 27
+    },
+    {
+      "a": "kladanj",
+      "b": "vlasenica",
+      "type": "distance_contact",
+      "contact_weight": 232774,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "kladanj",
+      "b": "zivinice",
+      "type": "point_touch",
+      "contact_weight": 27063,
+      "supporting_pairs_count": 16
+    },
+    {
+      "a": "kljuc",
+      "b": "mrkonjic_grad",
+      "type": "distance_contact",
+      "contact_weight": 2786,
+      "supporting_pairs_count": 20
+    },
+    {
+      "a": "kljuc",
+      "b": "sanski_most",
+      "type": "distance_contact",
+      "contact_weight": 42571,
+      "supporting_pairs_count": 24
+    },
+    {
+      "a": "kljuc",
+      "b": "sipovo",
+      "type": "distance_contact",
+      "contact_weight": 111,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "kljuc",
+      "b": "titov_drvar",
+      "type": "distance_contact",
+      "contact_weight": 410614,
+      "supporting_pairs_count": 5
+    },
+    {
+      "a": "konjic",
+      "b": "kresevo",
+      "type": "distance_contact",
+      "contact_weight": 1249,
+      "supporting_pairs_count": 5
+    },
+    {
+      "a": "konjic",
+      "b": "mostar",
+      "type": "distance_contact",
+      "contact_weight": 215623,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "konjic",
+      "b": "nevesinje",
+      "type": "distance_contact",
+      "contact_weight": 1797663,
+      "supporting_pairs_count": 14
+    },
+    {
+      "a": "konjic",
+      "b": "prozor",
+      "type": "distance_contact",
+      "contact_weight": 809363,
+      "supporting_pairs_count": 22
+    },
+    {
+      "a": "konjic",
+      "b": "trnovo",
+      "type": "distance_contact",
+      "contact_weight": 302149,
+      "supporting_pairs_count": 16
+    },
+    {
+      "a": "kotor_varos",
+      "b": "skender_vakuf",
+      "type": "distance_contact",
+      "contact_weight": 240962,
+      "supporting_pairs_count": 25
+    },
+    {
+      "a": "kotor_varos",
+      "b": "teslic",
+      "type": "distance_contact",
+      "contact_weight": 2036,
+      "supporting_pairs_count": 16
+    },
+    {
+      "a": "kotor_varos",
+      "b": "travnik",
+      "type": "distance_contact",
+      "contact_weight": 665759,
+      "supporting_pairs_count": 8
+    },
+    {
+      "a": "kotor_varos",
+      "b": "zenica",
+      "type": "distance_contact",
+      "contact_weight": 177598,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "kupres",
+      "b": "livno",
+      "type": "distance_contact",
+      "contact_weight": 146,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "kupres",
+      "b": "prozor",
+      "type": "distance_contact",
+      "contact_weight": 138100,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "kupres",
+      "b": "sipovo",
+      "type": "distance_contact",
+      "contact_weight": 105452,
+      "supporting_pairs_count": 10
+    },
+    {
+      "a": "laktasi",
+      "b": "prnjavor",
+      "type": "distance_contact",
+      "contact_weight": 910,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "laktasi",
+      "b": "srbac",
+      "type": "distance_contact",
+      "contact_weight": 308,
+      "supporting_pairs_count": 5
+    },
+    {
+      "a": "listica",
+      "b": "ljubuski",
+      "type": "distance_contact",
+      "contact_weight": 18,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "listica",
+      "b": "mostar",
+      "type": "distance_contact",
+      "contact_weight": 39383,
+      "supporting_pairs_count": 15
+    },
+    {
+      "a": "listica",
+      "b": "posusje",
+      "type": "distance_contact",
+      "contact_weight": 4365,
+      "supporting_pairs_count": 8
+    },
+    {
+      "a": "lopare",
+      "b": "srebrenik",
+      "type": "distance_contact",
+      "contact_weight": 772,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "lopare",
+      "b": "tuzla",
+      "type": "shared_border",
+      "contact_weight": 905837,
+      "supporting_pairs_count": 32
+    },
+    {
+      "a": "lopare",
+      "b": "ugljevik",
+      "type": "distance_contact",
+      "contact_weight": 1014066,
+      "supporting_pairs_count": 20
+    },
+    {
+      "a": "lopare",
+      "b": "zvornik",
+      "type": "distance_contact",
+      "contact_weight": 7921,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "lukavac",
+      "b": "maglaj",
+      "type": "distance_contact",
+      "contact_weight": 329570,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "lukavac",
+      "b": "srebrenik",
+      "type": "distance_contact",
+      "contact_weight": 52553,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "lukavac",
+      "b": "tuzla",
+      "type": "distance_contact",
+      "contact_weight": 3468,
+      "supporting_pairs_count": 14
+    },
+    {
+      "a": "lukavac",
+      "b": "zavidovici",
+      "type": "distance_contact",
+      "contact_weight": 77,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "lukavac",
+      "b": "zivinice",
+      "type": "distance_contact",
+      "contact_weight": 3570,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "ljubinje",
+      "b": "neum",
+      "type": "distance_contact",
+      "contact_weight": 168946,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "ljubinje",
+      "b": "stolac",
+      "type": "distance_contact",
+      "contact_weight": 17667,
+      "supporting_pairs_count": 13
+    },
+    {
+      "a": "ljubinje",
+      "b": "trebinje",
+      "type": "distance_contact",
+      "contact_weight": 166197,
+      "supporting_pairs_count": 27
+    },
+    {
+      "a": "maglaj",
+      "b": "tesanj",
+      "type": "distance_contact",
+      "contact_weight": 254801,
+      "supporting_pairs_count": 16
+    },
+    {
+      "a": "maglaj",
+      "b": "teslic",
+      "type": "distance_contact",
+      "contact_weight": 770299,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "maglaj",
+      "b": "zavidovici",
+      "type": "distance_contact",
+      "contact_weight": 628,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "maglaj",
+      "b": "zepce",
+      "type": "distance_contact",
+      "contact_weight": 354195,
+      "supporting_pairs_count": 23
+    },
+    {
+      "a": "modrica",
+      "b": "odzak",
+      "type": "point_touch",
+      "contact_weight": 254171,
+      "supporting_pairs_count": 15
+    },
+    {
+      "a": "mostar",
+      "b": "nevesinje",
+      "type": "shared_border",
+      "contact_weight": 22178469,
+      "supporting_pairs_count": 20
+    },
+    {
+      "a": "mostar",
+      "b": "posusje",
+      "type": "distance_contact",
+      "contact_weight": 829,
+      "supporting_pairs_count": 3
+    },
+    {
+      "a": "mostar",
+      "b": "stolac",
+      "type": "distance_contact",
+      "contact_weight": 295659,
+      "supporting_pairs_count": 11
+    },
+    {
+      "a": "mrkonjic_grad",
+      "b": "sipovo",
+      "type": "distance_contact",
+      "contact_weight": 1160,
+      "supporting_pairs_count": 15
+    },
+    {
+      "a": "mrkonjic_grad",
+      "b": "skender_vakuf",
+      "type": "distance_contact",
+      "contact_weight": 208,
+      "supporting_pairs_count": 3
+    },
+    {
+      "a": "neum",
+      "b": "stolac",
+      "type": "distance_contact",
+      "contact_weight": 1871,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "neum",
+      "b": "trebinje",
+      "type": "point_touch",
+      "contact_weight": 50784,
+      "supporting_pairs_count": 5
+    },
+    {
+      "a": "nevesinje",
+      "b": "stolac",
+      "type": "distance_contact",
+      "contact_weight": 125559,
+      "supporting_pairs_count": 12
+    },
+    {
+      "a": "novi_grad_sarajevo",
+      "b": "novo_sarajevo",
+      "type": "distance_contact",
+      "contact_weight": 367369,
+      "supporting_pairs_count": 4
+    },
+    {
+      "a": "novi_grad_sarajevo",
+      "b": "olovo",
+      "type": "distance_contact",
+      "contact_weight": 94269,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "novi_grad_sarajevo",
+      "b": "pale",
+      "type": "distance_contact",
+      "contact_weight": 108105,
+      "supporting_pairs_count": 14
+    },
+    {
+      "a": "novi_grad_sarajevo",
+      "b": "sokolac",
+      "type": "point_touch",
+      "contact_weight": 4629,
+      "supporting_pairs_count": 14
+    },
+    {
+      "a": "novi_grad_sarajevo",
+      "b": "stari_grad_sarajevo",
+      "type": "distance_contact",
+      "contact_weight": 1302049,
+      "supporting_pairs_count": 29
+    },
+    {
+      "a": "novi_grad_sarajevo",
+      "b": "vogosca",
+      "type": "distance_contact",
+      "contact_weight": 398910,
+      "supporting_pairs_count": 8
+    },
+    {
+      "a": "novi_travnik",
+      "b": "travnik",
+      "type": "distance_contact",
+      "contact_weight": 686629,
+      "supporting_pairs_count": 24
+    },
+    {
+      "a": "novi_travnik",
+      "b": "vitez",
+      "type": "distance_contact",
+      "contact_weight": 1909,
+      "supporting_pairs_count": 14
+    },
+    {
+      "a": "novo_sarajevo",
+      "b": "stari_grad_sarajevo",
+      "type": "distance_contact",
+      "contact_weight": 1317257,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "novo_sarajevo",
+      "b": "vogosca",
+      "type": "distance_contact",
+      "contact_weight": 7,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "olovo",
+      "b": "sokolac",
+      "type": "distance_contact",
+      "contact_weight": 516336,
+      "supporting_pairs_count": 17
+    },
+    {
+      "a": "olovo",
+      "b": "vares",
+      "type": "distance_contact",
+      "contact_weight": 62436,
+      "supporting_pairs_count": 20
+    },
+    {
+      "a": "olovo",
+      "b": "vlasenica",
+      "type": "distance_contact",
+      "contact_weight": 17203,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "olovo",
+      "b": "zavidovici",
+      "type": "distance_contact",
+      "contact_weight": 99429,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "pale",
+      "b": "rogatica",
+      "type": "distance_contact",
+      "contact_weight": 688222,
+      "supporting_pairs_count": 19
+    },
+    {
+      "a": "pale",
+      "b": "sokolac",
+      "type": "distance_contact",
+      "contact_weight": 251603,
+      "supporting_pairs_count": 19
+    },
+    {
+      "a": "pale",
+      "b": "stari_grad_sarajevo",
+      "type": "distance_contact",
+      "contact_weight": 210,
+      "supporting_pairs_count": 3
+    },
+    {
+      "a": "pale",
+      "b": "trnovo",
+      "type": "distance_contact",
+      "contact_weight": 538529,
+      "supporting_pairs_count": 20
+    },
+    {
+      "a": "prijedor",
+      "b": "sanski_most",
+      "type": "distance_contact",
+      "contact_weight": 1843,
+      "supporting_pairs_count": 19
+    },
+    {
+      "a": "prnjavor",
+      "b": "srbac",
+      "type": "distance_contact",
+      "contact_weight": 444455,
+      "supporting_pairs_count": 15
+    },
+    {
+      "a": "prnjavor",
+      "b": "teslic",
+      "type": "point_touch",
+      "contact_weight": 531,
+      "supporting_pairs_count": 4
+    },
+    {
+      "a": "rogatica",
+      "b": "rudo",
+      "type": "distance_contact",
+      "contact_weight": 17,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "rogatica",
+      "b": "sokolac",
+      "type": "shared_border",
+      "contact_weight": 2610307,
+      "supporting_pairs_count": 25
+    },
+    {
+      "a": "rogatica",
+      "b": "srebrenica",
+      "type": "distance_contact",
+      "contact_weight": 197,
+      "supporting_pairs_count": 4
+    },
+    {
+      "a": "rogatica",
+      "b": "visegrad",
+      "type": "distance_contact",
+      "contact_weight": 543388,
+      "supporting_pairs_count": 34
+    },
+    {
+      "a": "rogatica",
+      "b": "vlasenica",
+      "type": "distance_contact",
+      "contact_weight": 3150,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "rudo",
+      "b": "visegrad",
+      "type": "distance_contact",
+      "contact_weight": 1664635,
+      "supporting_pairs_count": 41
+    },
+    {
+      "a": "sekovici",
+      "b": "vlasenica",
+      "type": "distance_contact",
+      "contact_weight": 12090,
+      "supporting_pairs_count": 18
+    },
+    {
+      "a": "sekovici",
+      "b": "zivinice",
+      "type": "distance_contact",
+      "contact_weight": 4991,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "sekovici",
+      "b": "zvornik",
+      "type": "distance_contact",
+      "contact_weight": 1413,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "skender_vakuf",
+      "b": "travnik",
+      "type": "distance_contact",
+      "contact_weight": 830490,
+      "supporting_pairs_count": 16
+    },
+    {
+      "a": "srebrenica",
+      "b": "visegrad",
+      "type": "distance_contact",
+      "contact_weight": 348427,
+      "supporting_pairs_count": 4
+    },
+    {
+      "a": "srebrenica",
+      "b": "vlasenica",
+      "type": "distance_contact",
+      "contact_weight": 1575011,
+      "supporting_pairs_count": 24
+    },
+    {
+      "a": "srebrenik",
+      "b": "tuzla",
+      "type": "distance_contact",
+      "contact_weight": 51159,
+      "supporting_pairs_count": 7
+    },
+    {
+      "a": "stari_grad_sarajevo",
+      "b": "trnovo",
+      "type": "distance_contact",
+      "contact_weight": 1243,
+      "supporting_pairs_count": 4
+    },
+    {
+      "a": "tesanj",
+      "b": "teslic",
+      "type": "distance_contact",
+      "contact_weight": 2298798,
+      "supporting_pairs_count": 33
+    },
+    {
+      "a": "teslic",
+      "b": "travnik",
+      "type": "distance_contact",
+      "contact_weight": 146167,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "teslic",
+      "b": "zenica",
+      "type": "distance_contact",
+      "contact_weight": 224408,
+      "supporting_pairs_count": 5
+    },
+    {
+      "a": "teslic",
+      "b": "zepce",
+      "type": "distance_contact",
+      "contact_weight": 78363,
+      "supporting_pairs_count": 3
+    },
+    {
+      "a": "travnik",
+      "b": "vitez",
+      "type": "distance_contact",
+      "contact_weight": 306214,
+      "supporting_pairs_count": 9
+    },
+    {
+      "a": "travnik",
+      "b": "zenica",
+      "type": "distance_contact",
+      "contact_weight": 58485,
+      "supporting_pairs_count": 13
+    },
+    {
+      "a": "tuzla",
+      "b": "zivinice",
+      "type": "distance_contact",
+      "contact_weight": 722599,
+      "supporting_pairs_count": 20
+    },
+    {
+      "a": "tuzla",
+      "b": "zvornik",
+      "type": "distance_contact",
+      "contact_weight": 17,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "ugljevik",
+      "b": "zvornik",
+      "type": "distance_contact",
+      "contact_weight": 477392,
+      "supporting_pairs_count": 14
+    },
+    {
+      "a": "vares",
+      "b": "visoko",
+      "type": "distance_contact",
+      "contact_weight": 28571,
+      "supporting_pairs_count": 4
+    },
+    {
+      "a": "vares",
+      "b": "zavidovici",
+      "type": "distance_contact",
+      "contact_weight": 0,
+      "supporting_pairs_count": 1
+    },
+    {
+      "a": "vitez",
+      "b": "zenica",
+      "type": "distance_contact",
+      "contact_weight": 7555,
+      "supporting_pairs_count": 13
+    },
+    {
+      "a": "vlasenica",
+      "b": "zvornik",
+      "type": "distance_contact",
+      "contact_weight": 1376,
+      "supporting_pairs_count": 6
+    },
+    {
+      "a": "zavidovici",
+      "b": "zenica",
+      "type": "distance_contact",
+      "contact_weight": 15158,
+      "supporting_pairs_count": 2
+    },
+    {
+      "a": "zavidovici",
+      "b": "zepce",
+      "type": "distance_contact",
+      "contact_weight": 151348,
+      "supporting_pairs_count": 20
+    },
+    {
+      "a": "zenica",
+      "b": "zepce",
+      "type": "distance_contact",
+      "contact_weight": 13104,
+      "supporting_pairs_count": 12
+    }
+  ]
+}

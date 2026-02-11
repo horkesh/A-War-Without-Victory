@@ -1,0 +1,26 @@
+{
+  "image_file": "master-gmd-gmd6m-g6841m-g6841sm-gct00210-cs000009.jpg",
+  "points": [
+    {
+      "pixel": [
+        4163,
+        3528
+      ],
+      "name": "Modriča"
+    },
+    {
+      "pixel": [
+        6564,
+        2825
+      ],
+      "name": "Orašje"
+    },
+    {
+      "pixel": [
+        7279,
+        4198
+      ],
+      "name": "Brčko"
+    }
+  ]
+}

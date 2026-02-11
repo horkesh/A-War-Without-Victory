@@ -1,0 +1,18 @@
+Phase H4.3 Mun1990 Mapping Anomalies Report
+
+Summary:
+  total post1995 municipalities: 142
+  distinct mun1990_ids: 110
+  anomaly count: 0
+
+Anomalies (exact ids and current mappings):
+
+Key mappings (Sanski Most / Oštra Luka):
+  11541 (Sanski Most) -> mun1990_name="Sanski Most"
+  20435 (Oštra Luka) -> mun1990_name="Sanski Most"
+  -> Both map to same mun1990 (OK).
+
+Milići / Vlasenica:
+  20346 (Milici) -> mun1990_name="Vlasenica"
+  20095 (Vlasenica) -> mun1990_name="Vlasenica"
+  Registry has Milići as separate mun1990: NO

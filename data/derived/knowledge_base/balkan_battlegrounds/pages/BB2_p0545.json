@@ -1,0 +1,14 @@
+{
+  "volume_id": "BB2",
+  "page_number": 545,
+  "raw_text": "1\n1\n1\n1\n1\n1\n1",
+  "clean_text": "1\n1\n1\n1\n1\n1\n1",
+  "ocr_applied": false,
+  "text_hash": "a8f5a85d44f85cc203514991cb27cf73d8aacfaf3bb3af859ec9ce1898c3b972",
+  "clean_text_hash": "a8f5a85d44f85cc203514991cb27cf73d8aacfaf3bb3af859ec9ce1898c3b972",
+  "layout_blocks": [],
+  "tables": [],
+  "figures": [],
+  "map_regions": [],
+  "notes": []
+}

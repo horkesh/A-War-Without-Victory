@@ -1,0 +1,12 @@
+{
+  "scenario_id": "baseline_ops_26w",
+  "weeks": 26,
+  "turns": [
+    {
+      "week_index": 0,
+      "actions": [
+        { "type": "baseline_ops", "enabled": true, "intensity": 1.0 }
+      ]
+    }
+  ]
+}
