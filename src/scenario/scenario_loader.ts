@@ -262,6 +262,16 @@ export function normalizeScenario(raw: unknown): Scenario {
   // B4: Coercion pressure by municipality (mun1990_id → [0, 1]). Sorted keys for determinism.
   const coercion_pressure_by_municipality = normalizeCoercionPressure(o.coercion_pressure_by_municipality);
   const disable_phase_i_control_flip = o.disable_phase_i_control_flip === true;
+  const phase_i_military_action_attack_scale =
+    typeof o.phase_i_military_action_attack_scale === 'number' &&
+    Number.isFinite(o.phase_i_military_action_attack_scale)
+      ? Math.max(0.1, Math.min(2.0, o.phase_i_military_action_attack_scale))
+      : undefined;
+  const phase_i_military_action_stability_buffer_factor =
+    typeof o.phase_i_military_action_stability_buffer_factor === 'number' &&
+    Number.isFinite(o.phase_i_military_action_stability_buffer_factor)
+      ? Math.max(0.0, Math.min(1.0, o.phase_i_military_action_stability_buffer_factor))
+      : undefined;
 
   // B2: Campaign branching — prerequisites (scenario_ids that must be completed before playable).
   const prerequisites = normalizePrerequisites(o.prerequisites);
@@ -321,6 +331,8 @@ export function normalizeScenario(raw: unknown): Scenario {
       rbih_hrhb_war_earliest_week,
       coercion_pressure_by_municipality,
       disable_phase_i_control_flip: disable_phase_i_control_flip || undefined,
+      phase_i_military_action_attack_scale,
+      phase_i_military_action_stability_buffer_factor,
       prerequisites,
       recruitment_mode,
       recruitment_capital,
@@ -353,6 +365,8 @@ export function normalizeScenario(raw: unknown): Scenario {
     rbih_hrhb_war_earliest_week,
     coercion_pressure_by_municipality,
     disable_phase_i_control_flip: disable_phase_i_control_flip || undefined,
+    phase_i_military_action_attack_scale,
+    phase_i_military_action_stability_buffer_factor,
     prerequisites,
     recruitment_mode,
     recruitment_capital,

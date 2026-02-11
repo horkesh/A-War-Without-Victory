@@ -1,0 +1,21 @@
+{
+  "scenario_id": "_tmp_grid_player_choice_a0p8_b0p1",
+  "start_phase": "phase_i",
+  "weeks": 12,
+  "turns": [],
+  "init_control": "apr1992",
+  "disable_phase_i_control_flip": true,
+  "phase_i_military_action_attack_scale": 0.8,
+  "phase_i_military_action_stability_buffer_factor": 0.1,
+  "recruitment_mode": "player_choice",
+  "recruitment_capital": {
+    "HRHB": 100,
+    "RBiH": 150,
+    "RS": 250
+  },
+  "equipment_points": {
+    "HRHB": 120,
+    "RBiH": 60,
+    "RS": 300
+  }
+}

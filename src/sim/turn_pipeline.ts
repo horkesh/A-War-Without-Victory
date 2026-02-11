@@ -175,6 +175,10 @@ export interface TurnInput {
   settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }>;
   /** Experimental scenario gate: disable Phase I control-flip step for A/B testing military-action-only behavior. */
   disablePhaseIControlFlip?: boolean;
+  /** Experimental military-action tuning (when disablePhaseIControlFlip is true). */
+  phaseIMilitaryActionAttackScale?: number;
+  /** Experimental military-action tuning (when disablePhaseIControlFlip is true). */
+  phaseIMilitaryActionStabilityBufferFactor?: number;
 }
 
 export interface TurnReport {
@@ -1203,15 +1207,6 @@ const phaseIPhases: NamedPhase[] = [
     run: async (context) => {
       // Canon: In Phase II, control changes only from military actions (breach-driven). Phase I flip runs in Phase I only.
       if (context.state.meta.phase !== 'phase_i') return;
-      if (context.input.disablePhaseIControlFlip === true) {
-        context.report.phase_i_control_flip = {
-          flips: [],
-          municipalities_evaluated: 0,
-          control_events: [],
-          settlement_events: []
-        };
-        return;
-      }
       const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
       const edges = context.input.settlementEdges ?? graph.edges;
       context.report.phase_i_control_flip = runControlFlip({
@@ -1220,7 +1215,10 @@ const phaseIPhases: NamedPhase[] = [
         settlements: graph.settlements,
         edges,
         settlementDataRaw: context.input.settlementDataRaw,
-        settlementPopulationBySid: context.input.settlementPopulationBySid
+        settlementPopulationBySid: context.input.settlementPopulationBySid,
+        militaryActionOnly: context.input.disablePhaseIControlFlip === true,
+        militaryActionAttackScale: context.input.phaseIMilitaryActionAttackScale,
+        militaryActionStabilityBufferFactor: context.input.phaseIMilitaryActionStabilityBufferFactor
       });
     }
   },
