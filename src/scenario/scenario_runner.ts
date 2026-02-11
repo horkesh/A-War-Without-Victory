@@ -716,6 +716,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
           settlementGraph: graph,
           settlementEdges: graph.edges,
           disablePhaseIControlFlip: scenario.disable_phase_i_control_flip === true,
+          phaseIMilitaryActionAttackScale: scenario.phase_i_military_action_attack_scale,
+          phaseIMilitaryActionStabilityBufferFactor: scenario.phase_i_military_action_stability_buffer_factor,
           municipalityPopulation1991,
           settlementPopulationBySid,
           settlementDataRaw,

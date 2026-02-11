@@ -73,6 +73,10 @@ export interface Scenario {
   coercion_pressure_by_municipality?: Record<string, number>;
   /** Experimental: disables Phase I control-flip step; useful for A/B testing military-action-only control change behavior. */
   disable_phase_i_control_flip?: boolean;
+  /** Experimental military-action Phase I tuning (used only when disable_phase_i_control_flip = true). */
+  phase_i_military_action_attack_scale?: number;
+  /** Experimental military-action Phase I stability buffer factor (used only when disable_phase_i_control_flip = true). */
+  phase_i_military_action_stability_buffer_factor?: number;
   /** B2: Scenario IDs that must be completed before this scenario is playable. Empty or omitted = no prerequisites. */
   prerequisites?: string[];
   /**

@@ -1,0 +1,16 @@
+{
+  "scenario_id": "_tmp_attack_scale_hybrid_a0p7",
+  "start_phase": "phase_i",
+  "weeks": 12,
+  "turns": [],
+  "init_control": "apr1992",
+  "init_control_mode": "hybrid_1992",
+  "ethnic_override_threshold": 0.7,
+  "init_formations": "apr1992",
+  "formation_spawn_directive": {
+    "kind": "both"
+  },
+  "disable_phase_i_control_flip": true,
+  "phase_i_military_action_attack_scale": 0.7,
+  "phase_i_military_action_stability_buffer_factor": 0.2
+}

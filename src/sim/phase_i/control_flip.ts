@@ -73,10 +73,20 @@ export interface ControlFlipInput {
   settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }>;
   /** Optional: settlement population by sid for holdout resistance scaling. */
   settlementPopulationBySid?: Record<string, number>;
+  /** Experimental: resolve Phase I control with military-action weighting (formation-led) instead of militia-pressure thresholds. */
+  militaryActionOnly?: boolean;
+  /** Experimental military-action tuning override. */
+  militaryActionAttackScale?: number;
+  /** Experimental military-action tuning override. */
+  militaryActionStabilityBufferFactor?: number;
 }
 
 /** Brigade offensive amplification factor (brigades amplify militia in Phase I). */
 const BRIGADE_ATTACK_AMPLIFIER = 0.5;
+/** Experimental military-action mode: adjacent brigade pressure scale. */
+const MILITARY_ACTION_ATTACK_SCALE = 1.0;
+/** Experimental military-action mode: stability contributes a defensive buffer. */
+const MILITARY_ACTION_STABILITY_BUFFER_FACTOR = 0.2;
 
 /** Build sid -> edge degree (deterministic; for holdout proximity scaling). */
 function buildSidToDegree(edges: EdgeRecord[]): Map<string, number> {
@@ -285,6 +295,37 @@ function getStrongestAdjacentAttacker(
   return best;
 }
 
+/** Get strongest adjacent attacker by brigade presence only (experimental military-action mode). */
+function getStrongestAdjacentBrigadeAttacker(
+  munId: MunicipalityId,
+  currentController: FactionId | null,
+  munAdjacency: Map<MunicipalityId, Set<MunicipalityId>>,
+  state: GameState,
+  settlementsByMun: Map<MunicipalityId, SettlementId[]>
+): { faction: FactionId; strength: number } | null {
+  const neighbors = munAdjacency.get(munId);
+  if (!neighbors) return null;
+  let best: { faction: FactionId; strength: number } | null = null;
+  const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 26;
+  const beforeEarliestWar = state.meta.turn < earliestTurn;
+  const rbihHrhbAllied = beforeEarliestWar || areRbihHrhbAllied(state);
+  const ceasefireActive = state.rbih_hrhb_state?.ceasefire_active === true;
+  for (const neighborMun of neighbors) {
+    const sids = settlementsByMun.get(neighborMun);
+    if (!sids?.length) continue;
+    const neighborController = getMunicipalityController(state, sids);
+    if (neighborController === null || neighborController === currentController) continue;
+    if ((currentController === 'RBiH' && neighborController === 'HRHB') ||
+      (currentController === 'HRHB' && neighborController === 'RBiH')) {
+      if (rbihHrhbAllied || ceasefireActive) continue;
+    }
+    const str = getFormationStrengthInMun(state, neighborMun, neighborController);
+    if (str <= 0) continue;
+    if (best === null || str > best.strength) best = { faction: neighborController, strength: str };
+  }
+  return best;
+}
+
 /** Current stability for mun (Phase I §4.3.2): base + militia defense bonus + control_status adjustment. */
 function getCurrentStability(state: GameState, munId: MunicipalityId, controller: FactionId | null): number {
   const mun = state.municipalities?.[munId];
@@ -354,9 +395,22 @@ function applyFlip(
  * Does not modify faction authority (control/authority distinction preserved).
  */
 export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
-  const { state, turn, settlements, edges, settlementDataRaw, settlementPopulationBySid } = input;
+  const {
+    state,
+    turn,
+    settlements,
+    edges,
+    settlementDataRaw,
+    settlementPopulationBySid,
+    militaryActionOnly,
+    militaryActionAttackScale,
+    militaryActionStabilityBufferFactor
+  } = input;
   const report: ControlFlipReport = { flips: [], municipalities_evaluated: 0, control_events: [] };
   const allSettlementEvents: SettlementFlipEvent[] = [];
+  const actionAttackScale = militaryActionAttackScale ?? MILITARY_ACTION_ATTACK_SCALE;
+  const actionStabilityBufferFactor =
+    militaryActionStabilityBufferFactor ?? MILITARY_ACTION_STABILITY_BUFFER_FACTOR;
 
   const warStart = state.meta.war_start_turn;
   if (typeof warStart !== 'number' || turn < warStart) return report;
@@ -412,11 +466,15 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
     const strengthByMun = state.phase_i_militia_strength ?? {};
     const byFaction = strengthByMun[munId] ?? {};
     const defensiveMilitia = controller ? (byFaction[controller] ?? 0) : 0;
-    if (defensiveMilitia >= FLIP_ELIGIBLE_MILITIA_THRESHOLD) continue;
-    if (isLargeSettlementMun(munId) && defensiveMilitia === 0) continue;
+    if (!militaryActionOnly) {
+      if (defensiveMilitia >= FLIP_ELIGIBLE_MILITIA_THRESHOLD) continue;
+      if (isLargeSettlementMun(munId) && defensiveMilitia === 0) continue;
+    }
     if (!munAdjacency || !settlementsByMun) continue;
     if (!hasAdjacentHostile(munId, controller, munAdjacency, state, settlementsByMun)) continue;
-    const attacker = getStrongestAdjacentAttacker(munId, controller, munAdjacency, state, settlementsByMun);
+    const attacker = militaryActionOnly
+      ? getStrongestAdjacentBrigadeAttacker(munId, controller, munAdjacency, state, settlementsByMun)
+      : getStrongestAdjacentAttacker(munId, controller, munAdjacency, state, settlementsByMun);
     if (!attacker || attacker.strength <= 0) continue;
     const currentStability = getCurrentStability(state, munId, controller);
     // Phase I §4.8: Allied defense bonus when RS attacks a mixed municipality
@@ -427,23 +485,31 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
     if (controller !== null) {
       effectiveDefense += getFormationStrengthInMun(state, munId, controller);
     }
-    // Brigade offensive amplification: attacking brigades in adjacent muns project pressure
     const attackingBrigadeStr = getAdjacentBrigadeAttackStrength(
       munId, attacker.faction, munAdjacency, state, settlementsByMun
     );
-    const totalAttackerStrength = attacker.strength + attackingBrigadeStr * BRIGADE_ATTACK_AMPLIFIER;
-    // Capability-weighted flip
+    const totalAttackerStrength = militaryActionOnly
+      ? attackingBrigadeStr * actionAttackScale
+      : attacker.strength + attackingBrigadeStr * BRIGADE_ATTACK_AMPLIFIER;
+    if (militaryActionOnly && totalAttackerStrength <= 0) continue;
+    // Capability-weighted control decision
     const attackerMod = getFactionCapabilityModifier(state, attacker.faction, ATTACKER_DOCTRINE);
     const scaledAttackerStrength = totalAttackerStrength * attackerMod;
     const defenderMod = controller !== null
       ? getFactionCapabilityModifier(state, controller, getDefenderDoctrine(controller))
       : 1;
     const scaledDefense = effectiveDefense * defenderMod;
-    // B4: Coercion pressure reduces threshold
+    // B4: Coercion pressure reduces threshold (unused in militaryActionOnly branch)
     const coercionPressure = Math.min(1, Math.max(0, state.coercion_pressure_by_municipality?.[munId] ?? 0));
     const coercionReduction = coercionPressure * COERCION_THRESHOLD_REDUCTION_MAX;
-    const flipThreshold = FLIP_THRESHOLD_BASE - coercionReduction + scaledAttackerStrength * FLIP_ATTACKER_FACTOR;
-    if (currentStability + scaledDefense >= flipThreshold) continue;
+    if (militaryActionOnly) {
+      // Formation-led contest: attacker must beat formation defense plus a stability buffer.
+      const stabilityBuffer = currentStability * actionStabilityBufferFactor;
+      if (scaledAttackerStrength <= scaledDefense + stabilityBuffer) continue;
+    } else {
+      const flipThreshold = FLIP_THRESHOLD_BASE - coercionReduction + scaledAttackerStrength * FLIP_ATTACKER_FACTOR;
+      if (currentStability + scaledDefense >= flipThreshold) continue;
+    }
     candidates.push([munId, controller, attacker.faction, totalAttackerStrength, currentStability, defensiveMilitia]);
   }
 

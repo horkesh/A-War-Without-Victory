@@ -1,0 +1,14 @@
+{
+  "scenario_id": "_tmp_attack_scale_ethnic_a1p2",
+  "start_phase": "phase_i",
+  "weeks": 12,
+  "turns": [],
+  "init_control_mode": "ethnic_1991",
+  "init_formations": "apr1992",
+  "formation_spawn_directive": {
+    "kind": "both"
+  },
+  "disable_phase_i_control_flip": true,
+  "phase_i_military_action_attack_scale": 1.2,
+  "phase_i_military_action_stability_buffer_factor": 0.2
+}
