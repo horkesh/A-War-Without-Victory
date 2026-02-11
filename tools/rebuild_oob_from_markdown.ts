@@ -1,9 +1,8 @@
-
+import { fileURLToPath } from 'url';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Absolute Paths
-const ROOT = 'c:/Users/User/OneDrive - United Nations Development Programme/Documents/Personal/Wargame/AWWV';
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FILES = {
     'RBiH': 'docs/knowledge/ARBIH_APPENDIX_H_FULL_BRIGADE_LIST.md',
     'RS': 'docs/knowledge/VRS_APPENDIX_G_FULL_UNIT_LIST.md',

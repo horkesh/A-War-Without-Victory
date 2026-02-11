@@ -28,6 +28,7 @@
  * - Phase 21/22 displacement and sustainability types
  */
 import type { ArmyLabel } from './identity.js';
+import type { RecruitmentResourceState } from './recruitment_types.js';
 
 export const CURRENT_SCHEMA_VERSION = 1 as const;
 
@@ -118,6 +119,8 @@ export interface OGActivationOrder {
 export interface SettlementHoldoutState {
   holdout: boolean;
   holdout_faction: FactionId;
+  /** Attacker currently attempting to clear the holdout (may not yet control settlement). */
+  occupying_faction?: FactionId;
   holdout_resistance: number;
   holdout_since_turn: number;
   /** Turns without supply connection to same-faction territory. */
@@ -966,4 +969,8 @@ export interface GameState {
   og_orders?: OGActivationOrder[];
   /** Settlement holdout state (Phase I settlement-level control). Key: SettlementId. */
   settlement_holdouts?: Record<SettlementId, SettlementHoldoutState>;
+
+  // --- Recruitment system state (recruitment_system_design_note.md) ---
+  /** Recruitment resources: capital pools, equipment pools, recruited brigade tracking. */
+  recruitment_state?: RecruitmentResourceState;
 }

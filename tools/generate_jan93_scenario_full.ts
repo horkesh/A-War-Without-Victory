@@ -1,8 +1,8 @@
-
+import { fileURLToPath } from 'url';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const ROOT = 'c:/Users/User/OneDrive - United Nations Development Programme/Documents/Personal/Wargame/AWWV';
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SETTLEMENTS_PATH = path.join(ROOT, 'data/derived/settlements_a1_viewer.geojson');
 const CONTROL_PATH = path.join(ROOT, 'data/scenarios/jan_93/control.json');
 const INITIAL_FORMATIONS_PATH = path.join(ROOT, 'data/scenarios/initial_formations/initial_formations_jan1993.json');

@@ -41,8 +41,12 @@ export interface Scenario {
   turns?: ScenarioTurn[];
   /** Phase H2.4: When true, harness injects baseline_ops for each week that has none (harness-only; off by default). */
   use_harness_bots?: boolean;
-  /** Option A: scenario date key (e.g. apr1992) or path to mun1990-only control file. When set, harness uses it for initial political control. */
+  /** Option A: scenario date key (e.g. apr1992) or path to mun1990-only control file. When set, harness uses it for initial political control. Deprecated in favor of init_control_mode when ethnic/hybrid; kept for backward compat. */
   init_control?: string;
+  /** Initial political control mode: institutional (mun1990 file from init_control), ethnic_1991 (1991 census majority per settlement), hybrid_1992 (institutional + ethnic overrides above threshold). Default: institutional when init_control set; else uses default municipal mapping. */
+  init_control_mode?: 'institutional' | 'ethnic_1991' | 'hybrid_1992';
+  /** For hybrid_1992: ethnic override applies when settlement majority ethnicity share >= this threshold and differs from municipal controller. Default 0.70. */
+  ethnic_override_threshold?: number;
   /** Option A: scenario date key (e.g. apr1992) or path to initial formations JSON. When set, harness loads and merges formations at start. */
   init_formations?: string;
   /** When true or a key (e.g. "default"), at Phase I entry create OOB formations from data/source/oob_brigades.json and oob_corps.json, gated by control. */
@@ -67,6 +71,17 @@ export interface Scenario {
   rbih_hrhb_war_earliest_week?: number;
   /** B4: Coercion pressure [0, 1] per municipality (mun1990_id). When set, applied to state at init; reduces Phase I flip threshold in those muns. E.g. Prijedor, Zvornik, Foča. */
   coercion_pressure_by_municipality?: Record<string, number>;
+  /** Experimental: disables Phase I control-flip step; useful for A/B testing military-action-only control change behavior. */
+  disable_phase_i_control_flip?: boolean;
   /** B2: Scenario IDs that must be completed before this scenario is playable. Empty or omitted = no prerequisites. */
   prerequisites?: string[];
+  /**
+   * Recruitment mode: "player_choice" = setup-phase recruitment from OOB catalog;
+   * "auto_oob" = legacy behavior (init_formations_oob: true auto-spawns all). Default: "auto_oob".
+   */
+  recruitment_mode?: 'player_choice' | 'auto_oob';
+  /** Per-faction recruitment capital (organizational readiness). Only used when recruitment_mode = "player_choice". */
+  recruitment_capital?: Record<string, number>;
+  /** Per-faction equipment points (heavy weapons/vehicles). Only used when recruitment_mode = "player_choice". */
+  equipment_points?: Record<string, number>;
 }

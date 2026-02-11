@@ -37,8 +37,14 @@ export const MIN_BRIGADE_SPAWN = 800;
 /** Minimum 1991 population (faction-eligible) in a municipality to assign historical brigade name or allow emergent spawn (demographic gating). Below this: OOB brigades get generic name; emergent spawn is skipped. */
 export const MIN_ELIGIBLE_POPULATION_FOR_BRIGADE = 500;
 
-/** Brigade can grow from pool up to this size; only then do we form a second brigade (if pool still has ≥ MIN_BRIGADE_SPAWN). Tuned for historical personnel band (~1k per brigade nominal). */
-export const MAX_BRIGADE_PERSONNEL = 1_000;
+/** Brigade can grow from pool up to this size; only then do we form a second brigade (if pool still has ≥ MIN_BRIGADE_SPAWN). Tuned for historical personnel band (~3k per brigade at full strength). */
+export const MAX_BRIGADE_PERSONNEL = 3_000;
+
+/** Max personnel absorbed per turn from home municipality militia pool (recruitment_system_design_note §5.1). */
+export const REINFORCEMENT_RATE = 200;
+
+/** Half rate under active combat: brigade in attack posture or under pressure (recruitment_system_design_note §5.3). */
+export const COMBAT_REINFORCEMENT_RATE = 100;
 
 /**
  * Single nominal brigade size (troops per formation) for all factions.

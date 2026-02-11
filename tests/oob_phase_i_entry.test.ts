@@ -8,6 +8,12 @@ import {
   createOobFormationsAtPhaseIEntry
 } from '../src/scenario/oob_phase_i_entry.js';
 import type { OobBrigade, OobCorps } from '../src/scenario/oob_loader.js';
+import { RECRUITMENT_DEFAULTS } from '../src/state/recruitment_types.js';
+
+/** Helper to create a minimal OobBrigade with recruitment defaults. */
+function makeBrigade(partial: Pick<OobBrigade, 'id' | 'faction' | 'name' | 'home_mun' | 'kind'> & Partial<OobBrigade>): OobBrigade {
+  return { ...RECRUITMENT_DEFAULTS, ...partial };
+}
 
 test('factionHasPresenceInMun returns false for fragmented mun', () => {
   const state: GameState = {
@@ -77,7 +83,7 @@ test('createOobFormationsAtPhaseIEntry is idempotent and only creates when prese
   const hq: Record<string, string> = { zenica: 'sid_zenica', mostar: 'sid_mostar' };
   const corps: OobCorps[] = [{ id: 'arbih_3rd_corps', faction: 'RBiH', name: '3rd Corps', hq_mun: 'zenica' }];
   const brigades: OobBrigade[] = [
-    { id: 'arbih_7th_muslim', faction: 'RBiH', name: '7th Muslim', home_mun: 'zenica', kind: 'brigade', corps: 'arbih_3rd_corps' }
+    makeBrigade({ id: 'arbih_7th_muslim', faction: 'RBiH', name: '7th Muslim', home_mun: 'zenica', kind: 'brigade', corps: 'arbih_3rd_corps' })
   ];
 
   const r1 = createOobFormationsAtPhaseIEntry(state, corps, brigades, hq, sidToMun);

@@ -30,7 +30,7 @@ When conflicts arise between documents, this is the resolution order. See **`doc
 
 **Current Location:** Canon docs in `docs/10_canon/`. Engineering (code canon, pipelines, determinism) in `docs/20_engineering/`.
 
-**Implementation references:** Brigade Operations: [BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md](../40_reports/BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md) — canon has been updated to reflect it (Phase II, Systems Manual, Engine Invariants, Phase I).
+**Implementation references:** Brigade Operations: [BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md](../40_reports/BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md) — canon has been updated to reflect it (Phase II, Systems Manual, Engine Invariants, Phase I). Recruitment system: [recruitment_system_implementation_report.md](../40_reports/recruitment_system_implementation_report.md) — three-resource brigade activation at Phase I entry; canon updated in Systems Manual §13, Phase I implementation-note, MILITIA_BRIGADE_FORMATION_DESIGN §10.
 
 ### Canon v0.5 implementation-notes policy
 

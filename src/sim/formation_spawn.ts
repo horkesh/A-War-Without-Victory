@@ -10,7 +10,9 @@ import {
   getBatchSizeForFaction,
   MAX_BRIGADE_PERSONNEL,
   MIN_BRIGADE_SPAWN,
-  MIN_ELIGIBLE_POPULATION_FOR_BRIGADE
+  MIN_ELIGIBLE_POPULATION_FOR_BRIGADE,
+  REINFORCEMENT_RATE,
+  COMBAT_REINFORCEMENT_RATE
 } from '../state/formation_constants.js';
 import { militiaPoolKey } from '../state/militia_pool_key.js';
 import { getEligiblePopulationCount } from './phase_i/pool_population.js';
@@ -18,6 +20,7 @@ import type { MunicipalityPopulation1991Map } from './phase_i/pool_population.js
 import { resolveFormationName } from '../state/formation_naming.js';
 import { computeBaseCohesion } from '../state/formation_lifecycle.js';
 import { strictCompare } from '../state/validateGameState.js';
+import { isEmergentFormationSuppressed } from './recruitment_engine.js';
 
 export interface SpawnFormationsOptions {
   /** If set, used for all factions; if omitted, per-faction nominal size from OOB is used (RBiH 1000, RS 2500, HRHB 1500). */
@@ -102,9 +105,15 @@ export interface ReinforceBrigadesReport {
 }
 
 /**
- * Reinforce existing brigades from militia pools up to MAX_BRIGADE_PERSONNEL (2500).
- * Run before spawn so that we fill existing brigades first; only then spawn new when pool still has ≥1000.
- * Deterministic: formations sorted by id; each brigade takes from its (mun, faction) pool until 2500 or pool empty.
+ * Reinforce existing brigades from militia pools up to MAX_BRIGADE_PERSONNEL (3000).
+ * Run before spawn so that we fill existing brigades first; only then spawn new when pool still has ≥ MIN_BRIGADE_SPAWN.
+ *
+ * Rate-limited: each brigade absorbs at most REINFORCEMENT_RATE (200) per turn,
+ * or COMBAT_REINFORCEMENT_RATE (100) if in active combat (posture 'attack' or disrupted).
+ *
+ * Readiness-gated: brigades that are 'degraded' do not reinforce (recruitment_system_design_note §5.3).
+ *
+ * Deterministic: formations sorted by id; each brigade takes from its (mun, faction) pool.
  */
 export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesReport {
   const report: ReinforceBrigadesReport = {
@@ -131,6 +140,11 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
     const faction = f.faction;
     if (!mun_id || !faction) continue;
 
+    // Readiness gate: degraded brigades do not reinforce
+    if (f.readiness === 'degraded') continue;
+    // Forming brigades also skip reinforcement (must reach 'active' first)
+    if (f.readiness === 'forming') continue;
+
     const current = f.personnel ?? MIN_BRIGADE_SPAWN;
     if (current >= MAX_BRIGADE_PERSONNEL) continue;
 
@@ -138,7 +152,11 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
     const pool = pools[key];
     if (!pool || pool.available <= 0) continue;
 
-    const need = MAX_BRIGADE_PERSONNEL - current;
+    // Rate limit: combat brigades get half rate
+    const inCombat = f.posture === 'attack' || f.disrupted === true;
+    const rate = inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
+
+    const need = Math.min(MAX_BRIGADE_PERSONNEL - current, rate);
     const transfer = Math.min(need, pool.available);
 
     if (transfer <= 0) continue;
@@ -192,6 +210,8 @@ export function spawnFormationsFromPools(
     if (state.municipalities?.[mun_id]?.control === 'fragmented') continue;
     if (factionFilter !== null && pool.faction !== factionFilter) continue;
     if (munFilter !== null && mun_id !== munFilter) continue;
+    // Suppress emergent formation if a recruited OOB brigade already covers this (mun, faction)
+    if (isEmergentFormationSuppressed(state, mun_id, pool.faction)) continue;
     if (population1991ByMun != null) {
       const eligiblePop = getEligiblePopulationCount(population1991ByMun, mun_id, pool.faction);
       if (eligiblePop < MIN_ELIGIBLE_POPULATION_FOR_BRIGADE) continue;

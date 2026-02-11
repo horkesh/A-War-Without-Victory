@@ -1,9 +1,8 @@
-
+import { fileURLToPath } from 'url';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Absolute Paths (Fixed)
-const ROOT = 'c:/Users/User/OneDrive - United Nations Development Programme/Documents/Personal/Wargame/AWWV';
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MD_PATH = path.join(ROOT, 'docs/knowledge/ARBIH_APPENDIX_H_FULL_BRIGADE_LIST.md');
 const OOB_PATH = path.join(ROOT, 'data/source/oob_brigades.json');
 const MUN_REGISTRY_PATH = path.join(ROOT, 'data/source/municipalities_1990_registry_110.json');
