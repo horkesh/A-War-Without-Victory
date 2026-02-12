@@ -306,7 +306,12 @@ function createOobFormations(
     }
     const factionIds = (state.factions ?? []).map(f => f.id);
     const resources = initializeRecruitmentResources(
-      factionIds, scenario.recruitment_capital, scenario.equipment_points
+      factionIds,
+      scenario.recruitment_capital,
+      scenario.equipment_points,
+      scenario.recruitment_capital_trickle,
+      scenario.equipment_points_trickle,
+      scenario.max_recruits_per_faction_per_turn
     );
     state.recruitment_state = resources;
     const report = runBotRecruitment(state, oobCorps, oobBrigades, resources, sidToMun, municipalityHqSettlement);

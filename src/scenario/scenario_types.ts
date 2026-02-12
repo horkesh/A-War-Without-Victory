@@ -86,6 +86,12 @@ export interface Scenario {
   recruitment_mode?: 'player_choice' | 'auto_oob';
   /** Per-faction recruitment capital (organizational readiness). Only used when recruitment_mode = "player_choice". */
   recruitment_capital?: Record<string, number>;
+  /** Optional per-turn recruitment-capital accrual baseline by faction. */
+  recruitment_capital_trickle?: Record<string, number>;
   /** Per-faction equipment points (heavy weapons/vehicles). Only used when recruitment_mode = "player_choice". */
   equipment_points?: Record<string, number>;
+  /** Optional per-turn equipment-point accrual baseline by faction. */
+  equipment_points_trickle?: Record<string, number>;
+  /** Optional deterministic cap of elective recruits per faction per turn (default 1). */
+  max_recruits_per_faction_per_turn?: number;
 }

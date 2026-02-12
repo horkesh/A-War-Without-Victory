@@ -279,7 +279,13 @@ export function normalizeScenario(raw: unknown): Scenario {
   // Recruitment system fields
   const recruitment_mode = o.recruitment_mode === 'player_choice' ? 'player_choice' as const : undefined;
   const recruitment_capital = normalizeResourceRecord(o.recruitment_capital);
+  const recruitment_capital_trickle = normalizeResourceRecord(o.recruitment_capital_trickle);
   const equipment_points = normalizeResourceRecord(o.equipment_points);
+  const equipment_points_trickle = normalizeResourceRecord(o.equipment_points_trickle);
+  const max_recruits_per_faction_per_turn =
+    typeof o.max_recruits_per_faction_per_turn === 'number' && Number.isInteger(o.max_recruits_per_faction_per_turn)
+      ? Math.max(0, o.max_recruits_per_faction_per_turn)
+      : undefined;
 
   // Phase H2.4: When use_harness_bots is true, ensure every week has at least one baseline_ops action (deterministic; uses existing baseline_ops only).
   if (use_harness_bots && weeks > 0) {
@@ -336,7 +342,10 @@ export function normalizeScenario(raw: unknown): Scenario {
       prerequisites,
       recruitment_mode,
       recruitment_capital,
-      equipment_points
+      recruitment_capital_trickle,
+      equipment_points,
+      equipment_points_trickle,
+      max_recruits_per_faction_per_turn
     };
   }
 
@@ -370,7 +379,10 @@ export function normalizeScenario(raw: unknown): Scenario {
     prerequisites,
     recruitment_mode,
     recruitment_capital,
-    equipment_points
+    recruitment_capital_trickle,
+    equipment_points,
+    equipment_points_trickle,
+    max_recruits_per_faction_per_turn
   };
 }
 

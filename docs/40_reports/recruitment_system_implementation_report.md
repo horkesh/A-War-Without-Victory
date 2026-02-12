@@ -2,7 +2,7 @@
 
 ## Overview
 
-Three-resource recruitment system replacing the legacy auto-spawn of all 261 OOB brigades. Players (and bot AI) now spend **manpower**, **recruitment capital**, and **equipment points** to activate brigades from the OOB catalog, creating force structure trade-offs and the "coverage problem" described in the design note.
+Three-resource recruitment system replacing the legacy auto-spawn of all 261 OOB brigades. Players (and bot AI) spend **manpower**, **recruitment capital**, and **equipment points** to activate brigades from the OOB catalog, creating force structure trade-offs and the "coverage problem" described in the design note. The system now includes deterministic **ongoing Phase II accrual + recruitment**, not just setup-only activation.
 
 Backward compatible: existing scenarios using `init_formations_oob: true` are unaffected.
 
@@ -15,14 +15,22 @@ Scenario JSON
   recruitment_mode: "player_choice"    <-- new field
   recruitment_capital: { RS: 250, ... }
   equipment_points: { RS: 300, ... }
+  recruitment_capital_trickle: { ... }   <-- optional
+  equipment_points_trickle: { ... }      <-- optional
+  max_recruits_per_faction_per_turn: 1   <-- optional (default 1)
         |
         v
 scenario_runner.ts
   if recruitment_mode === "player_choice":
     initializeRecruitmentResources()   <-- creates per-faction pools
-    runBotRecruitment()                <-- greedy scored algorithm
+    runBotRecruitment()                <-- greedy scored algorithm (setup)
   else:
     createOobFormationsAtPhaseIEntry() <-- legacy path (unchanged)
+
+turn_pipeline.ts (phase_ii only)
+  phase-ii-recruitment:
+    accrueRecruitmentResources()       <-- per-turn deterministic capital/equipment income
+    runOngoingRecruitment()            <-- capped ongoing OOB recruitment
 ```
 
 ### Three Resources
@@ -64,12 +72,16 @@ Auto-downgrade chain when equipment scarce: mechanized -> motorized -> mountain 
 |------|---------|
 | `src/state/formation_constants.ts` | `MAX_BRIGADE_PERSONNEL`: 1000 -> 3000. Added `REINFORCEMENT_RATE` (200/turn), `COMBAT_REINFORCEMENT_RATE` (100/turn) |
 | `src/state/game_state.ts` | Added `recruitment_state?: RecruitmentResourceState` to `GameState` |
-| `src/scenario/scenario_types.ts` | Added `recruitment_mode`, `recruitment_capital`, `equipment_points` to `Scenario` |
-| `src/scenario/scenario_loader.ts` | Parses new recruitment fields with `normalizeResourceRecord()` |
+| `src/state/recruitment_types.ts` | Extended `RecruitmentResourceState` with optional trickles and per-turn recruit cap |
+| `src/scenario/scenario_types.ts` | Added ongoing recruitment config fields (`recruitment_capital_trickle`, `equipment_points_trickle`, `max_recruits_per_faction_per_turn`) |
+| `src/scenario/scenario_loader.ts` | Parses and normalizes ongoing recruitment config fields |
 | `src/scenario/oob_loader.ts` | Extended `OobBrigade` with 7 recruitment cost fields (backward-compatible defaults) |
 | `src/sim/formation_spawn.ts` | Rate-limited reinforcement (200/turn, 100 in combat), readiness gating, emergent formation suppression |
 | `src/scenario/scenario_runner.ts` | Integrated recruitment path at Phase I entry and Phase 0 -> Phase I transitions |
+| `src/sim/recruitment_turn.ts` | New per-turn accrual and ongoing recruitment integration helpers |
+| `src/sim/turn_pipeline.ts` | Added `phase-ii-recruitment` step (accrual + ongoing recruitment) |
 | `tests/oob_phase_i_entry.test.ts` | Updated test fixtures for new `OobBrigade` shape |
+| `tests/recruitment_turn.test.ts` | Added deterministic per-turn accrual and ongoing-recruitment tests |
 
 ## Bot AI Algorithm
 
@@ -188,4 +200,3 @@ All changes verified with clean `tsc --noEmit` and all tests passing:
 - **Pre-war phase linkage**: Define and wire pre-war phase output to recruitment resources when Phase 0 mechanics are implemented
 - **Player UI**: `recruitBrigade()` API is ready for human player integration; bot AI currently handles all factions
 - **Per-brigade max_personnel**: `max_personnel` field on OOB entries is loaded but reinforcement currently uses the global `MAX_BRIGADE_PERSONNEL` constant
-- **Equipment trickle**: Per-turn equipment income from patron states (not yet implemented)

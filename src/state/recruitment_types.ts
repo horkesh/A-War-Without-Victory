@@ -76,6 +76,12 @@ export interface EquipmentPool {
 export interface RecruitmentResourceState {
   recruitment_capital: Record<FactionId, RecruitmentCapital>;
   equipment_pools: Record<FactionId, EquipmentPool>;
+  /** Optional fixed per-turn accrual by faction (scenario-configured). */
+  recruitment_capital_trickle?: Record<FactionId, number>;
+  /** Optional fixed per-turn equipment trickle by faction (scenario-configured). */
+  equipment_points_trickle?: Record<FactionId, number>;
+  /** Deterministic cap for elective recruits per faction per turn. */
+  max_recruits_per_faction_per_turn?: number;
   /** Brigade IDs that have been recruited (activated from catalog). */
   recruited_brigade_ids: string[];
 }

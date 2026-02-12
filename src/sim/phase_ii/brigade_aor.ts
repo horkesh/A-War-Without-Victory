@@ -18,9 +18,11 @@ import type {
 } from '../../state/game_state.js';
 import type { EdgeRecord, SettlementRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { BRIGADE_OPERATIONAL_AOR_HARD_CAP } from '../../state/formation_constants.js';
-import { getMaxBrigadesPerMun } from '../../state/formation_constants.js';
-import { computeBrigadeOperationalCoverageCapFromFormation } from '../../state/brigade_operational_cap.js';
+import { BRIGADE_OPERATIONAL_AOR_HARD_CAP, getMaxBrigadesPerMun } from '../../state/formation_constants.js';
+import {
+  computeBrigadeOperationalCoverageCapFromFormation,
+  getFormationHomeMunFromTags
+} from '../../state/brigade_operational_cap.js';
 
 // --- Types ---
 
@@ -110,6 +112,10 @@ export function expandFrontActiveWithDepth(
 
 // --- Brigade collection ---
 
+function isActiveBrigade(f: FormationState | null | undefined): f is FormationState {
+  return !!f && f.status === 'active' && (f.kind ?? 'brigade') === 'brigade';
+}
+
 /** Get active brigades for a faction, sorted by ID. */
 function getActiveBrigades(state: GameState, faction: FactionId): FormationState[] {
   const formations = state.formations ?? {};
@@ -117,10 +123,7 @@ function getActiveBrigades(state: GameState, faction: FactionId): FormationState
   const ids = Object.keys(formations).sort(strictCompare);
   for (const id of ids) {
     const f = formations[id];
-    if (!f) continue;
-    if (f.faction !== faction) continue;
-    if (f.status !== 'active') continue;
-    if ((f.kind ?? 'brigade') !== 'brigade') continue;
+    if (!f || f.faction !== faction || !isActiveBrigade(f)) continue;
     result.push(f);
   }
   return result;
@@ -198,7 +201,7 @@ function ensureBrigadeMunicipalityAssignment(
   // Keep valid existing assignments for active brigades.
   for (const formationId of Object.keys(formations).sort(strictCompare)) {
     const f = formations[formationId];
-    if (!f || f.status !== 'active' || (f.kind ?? 'brigade') !== 'brigade') continue;
+    if (!isActiveBrigade(f)) continue;
     const raw = existing[formationId] ?? [];
     if (!Array.isArray(raw)) continue;
     const clean = uniqueSortedMunicipalities(
@@ -212,7 +215,7 @@ function ensureBrigadeMunicipalityAssignment(
   for (const [sid, brigadeId] of Object.entries(currentAoR)) {
     if (!brigadeId) continue;
     const f = formations[brigadeId];
-    if (!f || f.status !== 'active' || (f.kind ?? 'brigade') !== 'brigade') continue;
+    if (!isActiveBrigade(f)) continue;
     const mun = resolveMunicipalityForSid(sid as SettlementId, sidToMun);
     const list = normalized[brigadeId] ?? [];
     list.push(mun);
@@ -250,15 +253,25 @@ function ensureBrigadeMunicipalityAssignment(
   // Final fallback: use brigade HQ municipality.
   for (const formationId of Object.keys(formations).sort(strictCompare)) {
     const f = formations[formationId];
-    if (!f || f.status !== 'active' || (f.kind ?? 'brigade') !== 'brigade') continue;
-    if ((normalized[formationId]?.length ?? 0) > 0) continue;
+    if (!isActiveBrigade(f) || (normalized[formationId]?.length ?? 0) > 0) continue;
     const hq = f.hq_sid;
     if (!hq) continue;
     if (pc[hq] && pc[hq] !== f.faction) continue;
     normalized[formationId] = [resolveMunicipalityForSid(hq, sidToMun)];
   }
 
-  // Ensure every front-active (faction, municipality) has at least one brigade assignment.
+  // Ensure every front-active (faction, municipality) has at least one brigade assignment
+  // only for municipalities that have a brigade (home) in them — i.e. mun is the home municipality
+  // of at least one active brigade of that faction. We do not assign random uncovered muns to brigades.
+  const homeMunsByFaction = new Map<FactionId, Set<MunicipalityId>>();
+  for (const f of Object.values(formations)) {
+    if (!isActiveBrigade(f)) continue;
+    const homeMun = getFormationHomeMunFromTags(f.tags);
+    if (!homeMun) continue;
+    const set = homeMunsByFaction.get(f.faction) ?? new Set<MunicipalityId>();
+    set.add(homeMun);
+    homeMunsByFaction.set(f.faction, set);
+  }
   const coveredFactionMun = new Set<string>();
   for (const [formationId, munIds] of Object.entries(normalized)) {
     const faction = formations[formationId]?.faction;
@@ -271,6 +284,8 @@ function ensureBrigadeMunicipalityAssignment(
     const munId = resolveMunicipalityForSid(sid, sidToMun);
     const key = `${faction}::${munId}`;
     if (coveredFactionMun.has(key)) continue;
+    const homeMuns = homeMunsByFaction.get(faction);
+    if (!homeMuns || !homeMuns.has(munId)) continue;
     const candidates = getActiveBrigades(state, faction).sort((a, b) => {
       const ca = normalized[a.id]?.length ?? 0;
       const cb = normalized[b.id]?.length ?? 0;
@@ -287,13 +302,11 @@ function ensureBrigadeMunicipalityAssignment(
 
   // Same-HQ robustness: if a brigade still has no municipality, transfer one from largest same-faction donor.
   for (const brigade of Object.values(formations).sort((a, b) => strictCompare(a.id, b.id))) {
-    if (!brigade || brigade.status !== 'active' || (brigade.kind ?? 'brigade') !== 'brigade') continue;
-    if ((normalized[brigade.id]?.length ?? 0) > 0) continue;
+    if (!isActiveBrigade(brigade) || (normalized[brigade.id]?.length ?? 0) > 0) continue;
     const donors = Object.values(formations)
       .filter((f) => {
         if (!f || f.id === brigade.id) return false;
-        if (f.status !== 'active' || (f.kind ?? 'brigade') !== 'brigade') return false;
-        if (f.faction !== brigade.faction) return false;
+        if (!isActiveBrigade(f) || f.faction !== brigade.faction) return false;
         return (normalized[f.id]?.length ?? 0) > 1;
       })
       .sort((a, b) => {
@@ -321,7 +334,7 @@ function ensureBrigadeMunicipalityAssignment(
     frontActiveMunsByFaction.set(faction, set);
   }
   for (const brigade of Object.values(formations).sort((a, b) => strictCompare(a.id, b.id))) {
-    if (!brigade || brigade.status !== 'active' || (brigade.kind ?? 'brigade') !== 'brigade') continue;
+    if (!isActiveBrigade(brigade)) continue;
     const frontMuns = frontActiveMunsByFaction.get(brigade.faction);
     if (!frontMuns || frontMuns.size === 0) continue;
     const own = normalized[brigade.id] ?? [];
@@ -329,8 +342,7 @@ function ensureBrigadeMunicipalityAssignment(
     const donors = Object.values(formations)
       .filter((f) => {
         if (!f || f.id === brigade.id) return false;
-        if (f.status !== 'active' || (f.kind ?? 'brigade') !== 'brigade') return false;
-        if (f.faction !== brigade.faction) return false;
+        if (!isActiveBrigade(f) || f.faction !== brigade.faction) return false;
         const donorMuns = normalized[f.id] ?? [];
         const frontOwned = donorMuns.filter((mun) => frontMuns.has(mun));
         return frontOwned.length > 1;
@@ -688,8 +700,7 @@ function deriveBrigadeAoRFromMunicipalities(
     const candidateBrigades = Object.keys(assignments)
       .filter((formationId) => {
         const f = forms[formationId];
-        if (!f || f.status !== 'active' || (f.kind ?? 'brigade') !== 'brigade') return false;
-        if (f.faction !== faction) return false;
+        if (!isActiveBrigade(f) || f.faction !== faction) return false;
         return (assignments[formationId] ?? []).includes(mun);
       })
       .sort(strictCompare);
@@ -750,14 +761,14 @@ export function applyBrigadeMunicipalityOrders(
   };
   for (const [formationId, munIds] of Object.entries(assignments)) {
     const f = forms[formationId];
-    if (!f || f.status !== 'active' || (f.kind ?? 'brigade') !== 'brigade') continue;
+    if (!isActiveBrigade(f)) continue;
     for (const munId of munIds) inc(munId, f.faction, 1);
   }
 
   const orderEntries = Object.entries(orders).sort((a, b) => strictCompare(a[0], b[0]));
   for (const [formationId, raw] of orderEntries) {
     const f = forms[formationId];
-    if (!f || f.status !== 'active' || (f.kind ?? 'brigade') !== 'brigade') {
+    if (!isActiveBrigade(f)) {
       report.orders_rejected += 1;
       report.rejected_reasons.push(`${formationId}: invalid brigade`);
       continue;
@@ -827,7 +838,7 @@ export function syncBrigadeMunicipalityAssignmentFromAoR(
   for (const [sid, brigadeId] of Object.entries(brigadeAor)) {
     if (!brigadeId) continue;
     const f = forms[brigadeId];
-    if (!f || f.status !== 'active' || (f.kind ?? 'brigade') !== 'brigade') continue;
+    if (!isActiveBrigade(f)) continue;
     const munId = resolveMunicipalityForSid(sid as SettlementId, sidToMun);
     const list = next[brigadeId] ?? [];
     list.push(munId);

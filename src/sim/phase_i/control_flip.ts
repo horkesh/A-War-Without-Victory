@@ -30,8 +30,10 @@ const FLIP_ATTACKER_FACTOR = 1.5;
 /** B4: Coercion pressure reduces threshold (max reduction per mun). */
 const COERCION_THRESHOLD_REDUCTION_MAX = 15;
 
-/** Phase I §4.3.5: Base consolidation duration (turns). */
-const CONSOLIDATION_BASE_TURNS = 4;
+/** Phase I §4.3.5: Base consolidation duration (turns).
+ * Increased from 4 to 8 to dampen oscillation: recently-flipped municipalities
+ * need more time to stabilize before becoming flip-eligible again. */
+const CONSOLIDATION_BASE_TURNS = 8;
 
 /** Phase I §4.3.4: Post-flip stability lockdown. */
 const POST_FLIP_STABILITY = 100;

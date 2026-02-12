@@ -104,6 +104,14 @@ import {
   populateFactionAoRFromControl,
   ensureFormationHomeMunsInFactionAoR
 } from '../scenario/scenario_runner.js';
+import {
+  loadOobBrigades,
+  loadOobCorps,
+  loadMunicipalityHqSettlement,
+  type OobBrigade,
+  type OobCorps
+} from '../scenario/oob_loader.js';
+import { buildSidToMunFromSettlements } from '../scenario/oob_phase_i_entry.js';
 import { evaluateEvents } from './events/evaluate_events.js';
 import { runDisplacementHooks, type DisplacementHooksReport } from './phase_i/displacement_hooks.js';
 import { runJNATransition, type JNATransitionReport } from './phase_i/jna_transition.js';
@@ -153,6 +161,7 @@ import {
   ensureProductionFacilities,
   calculateFactionProductionBonus
 } from '../state/production_facilities.js';
+import { accrueRecruitmentResources, runOngoingRecruitment } from './recruitment_turn.js';
 
 
 export type Rng = () => number;
@@ -273,6 +282,14 @@ export interface TurnReport {
   capability_update?: { factions: number };
   doctrine_update?: { formations: number };
   equipment_update?: { formations: number };
+  /** Phase II: recruitment resource accrual + ongoing OOB recruitment. */
+  phase_ii_recruitment?: {
+    accrual_by_faction: Record<FactionId, { capital_delta: number; equipment_delta: number }>;
+    recruited_actions: number;
+    recruited_by_faction: Record<FactionId, number>;
+    remaining_capital: Record<FactionId, number>;
+    remaining_equipment: Record<FactionId, number>;
+  };
 }
 
 export interface TurnContext {
@@ -287,6 +304,34 @@ export type PhaseHandler = (context: TurnContext) => void | Promise<void>;
 interface NamedPhase {
   name: string;
   run: PhaseHandler;
+}
+
+interface RecruitmentCatalogCache {
+  base_dir: string;
+  brigades: OobBrigade[];
+  corps: OobCorps[];
+  municipality_hq_settlement: Record<string, string>;
+}
+
+let recruitmentCatalogCache: RecruitmentCatalogCache | null = null;
+
+async function loadRecruitmentCatalog(): Promise<RecruitmentCatalogCache | null> {
+  const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
+  if (!baseDir) return null;
+  if (recruitmentCatalogCache && recruitmentCatalogCache.base_dir === baseDir) {
+    return recruitmentCatalogCache;
+  }
+  try {
+    const [brigades, corps, municipality_hq_settlement] = await Promise.all([
+      loadOobBrigades(baseDir),
+      loadOobCorps(baseDir),
+      loadMunicipalityHqSettlement(baseDir)
+    ]);
+    recruitmentCatalogCache = { base_dir: baseDir, brigades, corps, municipality_hq_settlement };
+    return recruitmentCatalogCache;
+  } catch {
+    return null;
+  }
 }
 
 const phases: NamedPhase[] = [
@@ -419,14 +464,19 @@ const phases: NamedPhase[] = [
     run: async (context) => {
       if (context.state.meta.phase !== 'phase_ii') return;
       if (!context.state.brigade_aor) return;
-      let edges = context.input.settlementEdges;
-      if (!edges || edges.length === 0) {
-        const graph = await loadSettlementGraph();
-        edges = graph.edges;
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
+        ? context.input.settlementEdges
+        : graph.edges;
+      // Build sid-to-municipality map for strategic target selection
+      const sidToMun = new Map<string, string>();
+      for (const [sid, rec] of graph.settlements.entries()) {
+        const munId = rec.mun1990_id ?? rec.mun_code;
+        if (munId) sidToMun.set(sid, munId);
       }
       // All factions are bot-controlled in auto-run mode
       const factions = (context.state.factions ?? []).map(f => f.id);
-      generateAllBotOrders(context.state, edges, factions);
+      generateAllBotOrders(context.state, edges, factions, sidToMun);
     }
   },
   {
@@ -1023,6 +1073,70 @@ const phases: NamedPhase[] = [
       // Load settlement graph to get settlements map
       const graph = await loadSettlementGraph();
       context.report.sustainability = updateSustainability(context.state, graph.settlements, edges);
+    }
+  },
+  {
+    name: 'phase-ii-recruitment',
+    run: async (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      if (!context.state.recruitment_state) return;
+
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      const accrualReport = accrueRecruitmentResources(
+        context.state,
+        graph.settlements,
+        context.report.supply_resolution?.local_production
+      );
+
+      const factions = (context.state.factions ?? []).map((f) => f.id).sort(strictCompare);
+      const accrual_by_faction: Record<FactionId, { capital_delta: number; equipment_delta: number }> = {} as Record<
+        FactionId,
+        { capital_delta: number; equipment_delta: number }
+      >;
+      for (const factionId of factions) {
+        accrual_by_faction[factionId] = { capital_delta: 0, equipment_delta: 0 };
+      }
+      for (const row of accrualReport?.by_faction ?? []) {
+        accrual_by_faction[row.faction_id] = {
+          capital_delta: row.capital_delta,
+          equipment_delta: row.equipment_delta
+        };
+      }
+
+      let recruited_actions = 0;
+      const recruited_by_faction: Record<FactionId, number> = {} as Record<FactionId, number>;
+      for (const factionId of factions) recruited_by_faction[factionId] = 0;
+
+      const catalog = await loadRecruitmentCatalog();
+      if (catalog) {
+        const sidToMun = buildSidToMunFromSettlements(graph.settlements);
+        const ongoingReport = runOngoingRecruitment(
+          context.state,
+          catalog.corps,
+          catalog.brigades,
+          sidToMun,
+          catalog.municipality_hq_settlement
+        );
+        recruited_actions = ongoingReport?.actions.length ?? 0;
+        for (const action of ongoingReport?.actions ?? []) {
+          recruited_by_faction[action.faction] = (recruited_by_faction[action.faction] ?? 0) + 1;
+        }
+      }
+
+      const remaining_capital: Record<FactionId, number> = {} as Record<FactionId, number>;
+      const remaining_equipment: Record<FactionId, number> = {} as Record<FactionId, number>;
+      for (const factionId of factions) {
+        remaining_capital[factionId] = context.state.recruitment_state.recruitment_capital[factionId]?.points ?? 0;
+        remaining_equipment[factionId] = context.state.recruitment_state.equipment_pools[factionId]?.points ?? 0;
+      }
+
+      context.report.phase_ii_recruitment = {
+        accrual_by_faction,
+        recruited_actions,
+        recruited_by_faction,
+        remaining_capital,
+        remaining_equipment
+      };
     }
   },
   {
