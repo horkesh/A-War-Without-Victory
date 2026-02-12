@@ -184,11 +184,30 @@ function buildRecruitedFormation(
 // Initialize recruitment resources
 // ---------------------------------------------------------------------------
 
+function normalizeTrickleByFaction(
+  factions: FactionId[],
+  source: Record<string, number> | undefined
+): Record<FactionId, number> | undefined {
+  if (!source) return undefined;
+  const out: Record<FactionId, number> = {};
+  let anyPositive = false;
+  for (const faction of factions) {
+    const raw = source[faction];
+    const value = typeof raw === 'number' && Number.isFinite(raw) ? Math.max(0, Math.round(raw)) : 0;
+    out[faction] = value;
+    if (value > 0) anyPositive = true;
+  }
+  return anyPositive ? out : undefined;
+}
+
 /** Initialize recruitment state from scenario config. */
 export function initializeRecruitmentResources(
   factions: FactionId[],
   capitalByFaction?: Record<string, number>,
-  equipmentByFaction?: Record<string, number>
+  equipmentByFaction?: Record<string, number>,
+  capitalTrickleByFaction?: Record<string, number>,
+  equipmentTrickleByFaction?: Record<string, number>,
+  maxRecruitsPerFactionPerTurn?: number
 ): RecruitmentResourceState {
   const recruitment_capital: Record<FactionId, RecruitmentCapital> = {};
   const equipment_pools: Record<FactionId, EquipmentPool> = {};
@@ -213,6 +232,11 @@ export function initializeRecruitmentResources(
   return {
     recruitment_capital,
     equipment_pools,
+    recruitment_capital_trickle: normalizeTrickleByFaction(factions, capitalTrickleByFaction),
+    equipment_points_trickle: normalizeTrickleByFaction(factions, equipmentTrickleByFaction),
+    ...(typeof maxRecruitsPerFactionPerTurn === 'number' && Number.isFinite(maxRecruitsPerFactionPerTurn)
+      ? { max_recruits_per_faction_per_turn: Math.max(0, Math.floor(maxRecruitsPerFactionPerTurn)) }
+      : {}),
     recruited_brigade_ids: []
   };
 }
@@ -331,6 +355,12 @@ export function applyRecruitment(
 // Bot AI: full setup-phase recruitment
 // ---------------------------------------------------------------------------
 
+export interface RunBotRecruitmentOptions {
+  includeCorps?: boolean;
+  includeMandatory?: boolean;
+  maxElectivePerFaction?: number;
+}
+
 /**
  * Run bot recruitment for all factions. Deterministic greedy algorithm.
  *
@@ -344,7 +374,8 @@ export function runBotRecruitment(
   oobBrigades: OobBrigade[],
   resources: RecruitmentResourceState,
   sidToMun: Map<SettlementId, MunicipalityId>,
-  municipalityHqSettlement: Record<string, string>
+  municipalityHqSettlement: Record<string, string>,
+  options?: RunBotRecruitmentOptions
 ): SetupPhaseRecruitmentReport {
   const report: SetupPhaseRecruitmentReport = {
     actions: [],
@@ -359,25 +390,30 @@ export function runBotRecruitment(
   };
 
   const currentTurn = state.meta.turn;
+  const includeCorps = options?.includeCorps !== false;
+  const includeMandatory = options?.includeMandatory !== false;
+  const maxElectivePerFaction = options?.maxElectivePerFaction;
 
   // Step 0: Create corps formations (always free, same as legacy)
   if (!state.formations) state.formations = {};
-  for (const c of oobCorps) {
-    if (state.formations[c.id]) continue;
-    if (!factionHasPresenceInMun(state, c.faction, c.hq_mun, sidToMun)) continue;
-    const hq_sid = municipalityHqSettlement[c.hq_mun];
-    state.formations[c.id] = {
-      id: c.id as FormationId,
-      faction: c.faction,
-      name: c.name,
-      created_turn: currentTurn,
-      status: 'active',
-      assignment: null,
-      tags: [`mun:${c.hq_mun}`],
-      kind: 'corps_asset',
-      personnel: 0,
-      ...(hq_sid ? { hq_sid } : {})
-    };
+  if (includeCorps) {
+    for (const c of oobCorps) {
+      if (state.formations[c.id]) continue;
+      if (!factionHasPresenceInMun(state, c.faction, c.hq_mun, sidToMun)) continue;
+      const hq_sid = municipalityHqSettlement[c.hq_mun];
+      state.formations[c.id] = {
+        id: c.id as FormationId,
+        faction: c.faction,
+        name: c.name,
+        created_turn: currentTurn,
+        status: 'active',
+        assignment: null,
+        tags: [`mun:${c.hq_mun}`],
+        kind: 'corps_asset',
+        personnel: 0,
+        ...(hq_sid ? { hq_sid } : {})
+      };
+    }
   }
 
   // Process factions in deterministic order
@@ -387,9 +423,12 @@ export function runBotRecruitment(
     const factionBrigades = oobBrigades.filter(b => b.faction === faction);
 
     // Step 1: Recruit mandatory formations first (zero cost for capital/equipment)
-    const mandatoryBrigades = factionBrigades
-      .filter(b => b.mandatory)
-      .sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id));
+    const mandatoryBrigades = includeMandatory
+      ? factionBrigades
+          .filter(b => b.mandatory)
+          .filter(b => b.available_from <= currentTurn)
+          .sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id))
+      : [];
 
     for (const brigade of mandatoryBrigades) {
       if (resources.recruited_brigade_ids.includes(brigade.id)) continue;
@@ -440,7 +479,8 @@ export function runBotRecruitment(
 
     // Step 2: Score and recruit elective formations
     const electiveBrigades = factionBrigades
-      .filter(b => !b.mandatory && !resources.recruited_brigade_ids.includes(b.id));
+      .filter(b => !b.mandatory && !resources.recruited_brigade_ids.includes(b.id))
+      .filter(b => b.available_from <= currentTurn);
 
     // Score each brigade
     const scored = electiveBrigades.map(b => ({
@@ -455,8 +495,12 @@ export function runBotRecruitment(
       return a.brigade.id.localeCompare(b.brigade.id);
     });
 
+    let electiveRecruitedForFaction = 0;
     // Greedy spend
     for (const { brigade } of scored) {
+      if (typeof maxElectivePerFaction === 'number' && maxElectivePerFaction >= 0 && electiveRecruitedForFaction >= maxElectivePerFaction) {
+        break;
+      }
       if (resources.recruited_brigade_ids.includes(brigade.id)) continue;
 
       // Determine best affordable equipment class
@@ -473,6 +517,7 @@ export function runBotRecruitment(
         applyRecruitment(state, result, resources);
         if (result.action) report.actions.push(result.action);
         report.elective_recruited++;
+        electiveRecruitedForFaction++;
       } else {
         switch (result.reason) {
           case 'no_control': report.brigades_skipped_no_control++; break;

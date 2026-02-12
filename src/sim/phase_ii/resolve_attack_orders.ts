@@ -11,6 +11,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { areRbihHrhbAllied } from '../phase_i/alliance_update.js';
 import { MIN_BRIGADE_SPAWN } from '../../state/formation_constants.js';
 import { getBrigadeAoRSettlements, getSettlementGarrison } from './brigade_aor.js';
+import { computeEquipmentMultiplier } from './equipment_effects.js';
 
 export interface ResolveAttackOrdersReport {
   orders_processed: number;
@@ -80,8 +81,21 @@ export function resolveAttackOrders(
     const aorSettlements = getBrigadeAoRSettlements(state, formationId);
     const neighbors = adjacency.get(targetSid) ?? [];
     const frontlineSids = aorSettlements.filter((sid) => neighbors.includes(sid));
-    const attackerStrength = frontlineSids.reduce((sum, sid) => sum + getSettlementGarrison(state, sid, edges), 0);
-    const defenderStrength = getSettlementGarrison(state, targetSid, edges);
+    const rawAttackerStrength = frontlineSids.reduce((sum, sid) => sum + getSettlementGarrison(state, sid, edges), 0);
+    const rawDefenderStrength = getSettlementGarrison(state, targetSid, edges);
+
+    // Defender brigade lookup (used for equipment multiplier + casualties)
+    const defenderBrigadeId: FormationId | undefined = brigadeAor[targetSid] ?? undefined;
+    const defenderFormation = defenderBrigadeId != null ? formations[defenderBrigadeId] : undefined;
+
+    // Apply equipment multipliers: tanks/artillery amplify combat effectiveness
+    const attackerEquipMult = computeEquipmentMultiplier(formation, formation.posture ?? 'attack');
+    const defenderEquipMult = defenderFormation
+      ? computeEquipmentMultiplier(defenderFormation, defenderFormation.posture ?? 'defend')
+      : 1.0;
+
+    const attackerStrength = rawAttackerStrength * attackerEquipMult;
+    const defenderStrength = rawDefenderStrength * defenderEquipMult;
 
     const attackerWon = defenderStrength <= 0 ? attackerStrength > 0 : attackerStrength > defenderStrength * ATTACKER_ADVANTAGE_RATIO;
     report.orders_processed += 1;
@@ -100,20 +114,15 @@ export function resolveAttackOrders(
       (state.political_controllers as Record<SettlementId, FactionId>)[targetSid] = attackerFaction;
       report.flips_applied += 1;
       // Casualties (Brigade Realism §3.2): deterministic personnel loss
-      const attackerFormation = formations[formationId];
-      const defenderBrigadeId: FormationId | undefined = brigadeAor[targetSid] ?? undefined;
-      if (attackerFormation && typeof attackerFormation.personnel === 'number') {
-        const loss = Math.min(CASUALTY_PER_FLIP_ATTACKER, Math.max(0, attackerFormation.personnel - MIN_BRIGADE_SPAWN));
-        (attackerFormation as { personnel: number }).personnel -= loss;
+      if (formation && typeof formation.personnel === 'number') {
+        const loss = Math.min(CASUALTY_PER_FLIP_ATTACKER, Math.max(0, formation.personnel - MIN_BRIGADE_SPAWN));
+        (formation as { personnel: number }).personnel -= loss;
         report.casualty_attacker += loss;
       }
-      if (defenderBrigadeId != null) {
-        const defFormation = formations[defenderBrigadeId];
-        if (defFormation && typeof defFormation.personnel === 'number') {
-          const loss = Math.min(CASUALTY_PER_FLIP_DEFENDER, Math.max(0, defFormation.personnel - MIN_BRIGADE_SPAWN));
-          (defFormation as { personnel: number }).personnel -= loss;
-          report.casualty_defender += loss;
-        }
+      if (defenderFormation && typeof defenderFormation.personnel === 'number') {
+        const loss = Math.min(CASUALTY_PER_FLIP_DEFENDER, Math.max(0, defenderFormation.personnel - MIN_BRIGADE_SPAWN));
+        (defenderFormation as { personnel: number }).personnel -= loss;
+        report.casualty_defender += loss;
       }
     }
   }

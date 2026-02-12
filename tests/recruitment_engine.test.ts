@@ -64,6 +64,20 @@ describe('initializeRecruitmentResources', () => {
     assert.strictEqual(resources.equipment_pools.RBiH.points, 100);
     assert.strictEqual(resources.equipment_pools.RS.points, 400);
   });
+
+  test('stores per-turn trickles and per-turn recruit cap', () => {
+    const resources = initializeRecruitmentResources(
+      ['RBiH', 'RS'],
+      undefined,
+      undefined,
+      { RBiH: 2, RS: 1 },
+      { RBiH: 3, RS: 4 },
+      1
+    );
+    assert.strictEqual(resources.recruitment_capital_trickle?.RBiH, 2);
+    assert.strictEqual(resources.equipment_points_trickle?.RS, 4);
+    assert.strictEqual(resources.max_recruits_per_faction_per_turn, 1);
+  });
 });
 
 describe('recruitBrigade', () => {
@@ -268,6 +282,60 @@ describe('runBotRecruitment', () => {
     assert.ok(action);
     assert.strictEqual(action!.equipment_class, 'light_infantry');
     assert.strictEqual(action!.equipment_spent, 0);
+  });
+
+  test('respects available_from turn gate', () => {
+    const poolKey = militiaPoolKey('zenica', 'RBiH');
+    const state = makeState({
+      meta: { turn: 4, seed: 'test' },
+      political_controllers: { s1: 'RBiH' },
+      militia_pools: {
+        [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 5000, committed: 0, exhausted: 0, updated_turn: 4 }
+      }
+    });
+    const sidToMun = new Map([['s1', 'zenica']]);
+    const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 200 }, { RBiH: 100 });
+    const report = runBotRecruitment(
+      state,
+      [],
+      [
+        makeBrigade({ id: 'b_early', faction: 'RBiH', name: 'Early', home_mun: 'zenica', available_from: 0, priority: 1 }),
+        makeBrigade({ id: 'b_late', faction: 'RBiH', name: 'Late', home_mun: 'zenica', available_from: 8, priority: 2 })
+      ],
+      resources,
+      sidToMun,
+      { zenica: 's1' }
+    );
+    assert.ok(state.formations['b_early']);
+    assert.ok(!state.formations['b_late']);
+    assert.strictEqual(report.elective_recruited, 1);
+  });
+
+  test('respects per-faction elective recruit cap', () => {
+    const poolKey = militiaPoolKey('zenica', 'RBiH');
+    const state = makeState({
+      political_controllers: { s1: 'RBiH' },
+      militia_pools: {
+        [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 10000, committed: 0, exhausted: 0, updated_turn: 0 }
+      }
+    });
+    const sidToMun = new Map([['s1', 'zenica']]);
+    const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 500 }, { RBiH: 500 });
+    const report = runBotRecruitment(
+      state,
+      [],
+      [
+        makeBrigade({ id: 'b1', faction: 'RBiH', name: 'One', home_mun: 'zenica', priority: 1 }),
+        makeBrigade({ id: 'b2', faction: 'RBiH', name: 'Two', home_mun: 'zenica', priority: 2 }),
+        makeBrigade({ id: 'b3', faction: 'RBiH', name: 'Three', home_mun: 'zenica', priority: 3 })
+      ],
+      resources,
+      sidToMun,
+      { zenica: 's1' },
+      { includeCorps: false, includeMandatory: false, maxElectivePerFaction: 1 }
+    );
+    assert.strictEqual(report.elective_recruited, 1);
+    assert.strictEqual(report.actions.length, 1);
   });
 });
 

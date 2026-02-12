@@ -19,8 +19,9 @@ import type {
 } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { getBrigadeAoRSettlements, computeBrigadeDensity } from './brigade_aor.js';
+import { getBrigadeAoRSettlements, computeBrigadeDensity, getSettlementGarrison } from './brigade_aor.js';
 import { canAdoptPosture } from './brigade_posture.js';
+import { FACTION_STRATEGIES, isCorridorMunicipality } from './bot_strategy.js';
 
 // --- Types ---
 
@@ -37,12 +38,28 @@ export interface BotOrdersResult {
 const MAX_RESHAPE_ORDERS_PER_FACTION = 3;
 
 /** Coverage ratio thresholds (personnel / settlement_count). */
-const COVERAGE_OVERSTAFFED = 200;
 const COVERAGE_UNDERSTAFFED = 50;
 const COVERAGE_SURPLUS = 150;
 
 /** Pressure imbalance threshold for triggering reinforcement reshaping. */
 const PRESSURE_IMBALANCE_THRESHOLD = 2;
+
+// --- Target scoring constants ---
+
+/** Score bonus for attacking undefended settlements (garrison = 0). */
+const SCORE_UNDEFENDED = 100;
+
+/** Score bonus for attacking settlements in corridor priority municipalities. */
+const SCORE_CORRIDOR_OBJECTIVE = 90;
+
+/** Score bonus for recapturing home municipality settlements. */
+const SCORE_HOME_RECAPTURE = 60;
+
+/** Max score bonus for weak garrisons (scales linearly down from this). */
+const SCORE_WEAK_GARRISON_MAX = 50;
+
+/** Garrison threshold below which weakness bonus kicks in. */
+const GARRISON_WEAKNESS_THRESHOLD = 100;
 
 // --- Helpers ---
 
@@ -163,6 +180,9 @@ function findTransferCandidates(
   const brigadeAor = state.brigade_aor ?? {};
   const fromSettlements = getBrigadeAoRSettlements(state, fromBrigade);
 
+  // Must leave at least 1 settlement in from_brigade
+  if (fromSettlements.length <= 1) return [];
+
   const candidates: SettlementId[] = [];
 
   for (const sid of fromSettlements) {
@@ -181,12 +201,82 @@ function findTransferCandidates(
     }
   }
 
-  // Must leave at least 1 settlement in from_brigade
-  if (fromSettlements.length <= 1) {
-    return [];
+  return candidates.sort(strictCompare);
+}
+
+/**
+ * Extract home municipality from formation tags.
+ */
+function getFormationHomeMun(formation: FormationState): string | null {
+  if (!formation.tags) return null;
+  for (const tag of formation.tags) {
+    if (tag.startsWith('mun:')) return tag.slice(4);
+  }
+  return null;
+}
+
+/**
+ * Score a target settlement for attack priority.
+ * Higher score = higher priority. Deterministic.
+ */
+function scoreTarget(
+  state: GameState,
+  targetSid: SettlementId,
+  brigade: FormationState,
+  faction: FactionId,
+  edges: EdgeRecord[],
+  sidToMun: Map<SettlementId, string> | null
+): number {
+  let score = 0;
+
+  // 1. Undefended settlements (garrison = 0) are easy wins
+  const garrison = getSettlementGarrison(state, targetSid, edges);
+  if (garrison === 0) {
+    score += SCORE_UNDEFENDED;
+  } else if (garrison < GARRISON_WEAKNESS_THRESHOLD) {
+    // Weaker garrisons get higher score (linear scale)
+    score += Math.round(SCORE_WEAK_GARRISON_MAX * (1 - garrison / GARRISON_WEAKNESS_THRESHOLD));
   }
 
-  return candidates.sort(strictCompare);
+  // 2. Corridor objective + 3. Home municipality recapture (both need sidToMun)
+  if (sidToMun) {
+    const targetMun = sidToMun.get(targetSid);
+    if (isCorridorMunicipality(targetMun, faction)) {
+      score += SCORE_CORRIDOR_OBJECTIVE;
+    }
+    const homeMun = getFormationHomeMun(brigade);
+    if (homeMun && targetMun === homeMun) {
+      score += SCORE_HOME_RECAPTURE;
+    }
+  }
+
+  return score;
+}
+
+/**
+ * Check if a brigade is in a corridor municipality (for forced defend posture).
+ */
+function isBrigadeInCorridor(
+  state: GameState,
+  brigade: FormationState,
+  faction: FactionId,
+  sidToMun: Map<SettlementId, string> | null
+): boolean {
+  const strategy = FACTION_STRATEGIES[faction];
+  if (!strategy.defend_critical_territory) return false;
+  if (!sidToMun) return false;
+
+  // Check if the brigade's HQ settlement is in a corridor municipality
+  if (brigade.hq_sid) {
+    const munId = sidToMun.get(brigade.hq_sid);
+    if (isCorridorMunicipality(munId, faction)) return true;
+  }
+
+  // Check home municipality from tags
+  const homeMun = getFormationHomeMun(brigade);
+  if (isCorridorMunicipality(homeMun, faction)) return true;
+
+  return false;
 }
 
 // --- Public API ---
@@ -196,15 +286,19 @@ function findTransferCandidates(
  *
  * Logic:
  * 1. Compute coverage ratio for each brigade and generate posture orders.
+ *    - Faction-specific thresholds and attack share limits.
+ *    - Corridor brigades forced to defend when defend_critical_territory is set.
  * 2. Identify high-pressure sectors and generate reshape orders to reinforce.
- * 3. Limit reshape orders to MAX_RESHAPE_ORDERS_PER_FACTION per turn.
+ * 3. Strategic target selection: score targets by garrison, corridor, home recapture.
+ * 4. Limit reshape orders to MAX_RESHAPE_ORDERS_PER_FACTION per turn.
  *
  * All iteration is in sorted order for determinism.
  */
 export function generateBotBrigadeOrders(
   state: GameState,
   edges: EdgeRecord[],
-  faction: FactionId
+  faction: FactionId,
+  sidToMun?: Map<SettlementId, string> | null
 ): BotOrdersResult {
   const result: BotOrdersResult = {
     reshape_orders: [],
@@ -218,12 +312,24 @@ export function generateBotBrigadeOrders(
   const adj = buildAdjacency(edges);
   const brigadeAor = state.brigade_aor ?? {};
   const frontPressure = state.front_pressure ?? {};
+  const strategy = FACTION_STRATEGIES[faction];
+  const munLookup = sidToMun ?? null;
 
-  // --- Step 1: Posture decisions based on coverage ratio ---
+  // --- Step 1: Posture decisions based on coverage ratio + faction strategy ---
+
+  // Count how many brigades are already in attack/probe posture (for share limiting)
+  let attackPostureCount = 0;
+  for (const brigade of brigades) {
+    const p = brigade.posture ?? 'defend';
+    if (p === 'attack' || p === 'probe') attackPostureCount++;
+  }
+  const maxAttackBrigades = Math.max(1, Math.floor(brigades.length * strategy.max_attack_posture_share));
+
   for (const brigade of brigades) {
     const density = computeBrigadeDensity(state, brigade.id);
     const hasFront = hasFrontActiveSettlements(state, brigade, adj);
     const currentPosture: BrigadePosture = brigade.posture ?? 'defend';
+    const inCorridor = isBrigadeInCorridor(state, brigade, faction, munLookup);
 
     let targetPosture: BrigadePosture | null = null;
 
@@ -232,9 +338,14 @@ export function generateBotBrigadeOrders(
       if (currentPosture !== 'defend') {
         targetPosture = 'defend';
       }
-    } else if (density >= COVERAGE_OVERSTAFFED && currentPosture === 'defend') {
-      // Overstaffed and defending: can afford to probe
-      targetPosture = 'probe';
+    } else if (inCorridor && currentPosture !== 'defend') {
+      // Corridor brigades: force defend posture to hold critical territory
+      targetPosture = 'defend';
+    } else if (density >= strategy.attack_coverage_threshold && currentPosture === 'defend') {
+      // Overstaffed and defending: can afford to probe/attack (if below share limit)
+      if (attackPostureCount < maxAttackBrigades) {
+        targetPosture = strategy.preferred_posture_when_overstaffed;
+      }
     } else if (density < COVERAGE_UNDERSTAFFED) {
       // Understaffed: fall back to elastic defense
       if (currentPosture !== 'elastic_defense' && currentPosture !== 'defend') {
@@ -249,6 +360,11 @@ export function generateBotBrigadeOrders(
           brigade_id: brigade.id,
           posture: targetPosture
         });
+        // Track attack posture count changes
+        const wasAttack = currentPosture === 'attack' || currentPosture === 'probe';
+        const willAttack = targetPosture === 'attack' || targetPosture === 'probe';
+        if (willAttack && !wasAttack) attackPostureCount++;
+        if (wasAttack && !willAttack) attackPostureCount--;
       }
     }
   }
@@ -322,6 +438,7 @@ export function generateBotBrigadeOrders(
     // Simplified: just pick the surplus brigade with highest density, sorted by ID for ties
     let bestDonor: FormationId | null = null;
     let bestDonorDensity = 0;
+    let bestCandidates: SettlementId[] = [];
 
     for (const brigade of brigades) {
       if (brigade.id === threatenedBrigade) continue;
@@ -337,39 +454,54 @@ export function generateBotBrigadeOrders(
       if (density > bestDonorDensity || (density === bestDonorDensity && (!bestDonor || strictCompare(brigade.id, bestDonor) < 0))) {
         bestDonor = brigade.id;
         bestDonorDensity = density;
+        bestCandidates = candidates;
       }
     }
 
-    if (bestDonor) {
+    if (bestDonor && bestCandidates.length > 0) {
       // Pick the first candidate settlement (sorted, deterministic)
-      const candidates = findTransferCandidates(state, bestDonor, threatenedBrigade, adj);
-      if (candidates.length > 0) {
-        result.reshape_orders.push({
-          settlement_id: candidates[0],
-          from_brigade: bestDonor,
-          to_brigade: threatenedBrigade
-        });
-        usedDonors.add(bestDonor);
-        reshapeCount++;
-      }
+      result.reshape_orders.push({
+        settlement_id: bestCandidates[0],
+        from_brigade: bestDonor,
+        to_brigade: threatenedBrigade
+      });
+      usedDonors.add(bestDonor);
+      reshapeCount++;
     }
   }
 
-  // --- Step 3: Attack orders — one target per brigade when posture is attack or probe and has front contact ---
+  // --- Step 3: Attack orders — strategic target selection ---
   const frontEdgeDataForAttack = getFactionFrontEdges(state, edges, faction);
   for (const brigade of brigades) {
     const posture = brigade.posture ?? 'defend';
     if (posture !== 'attack' && posture !== 'probe') continue;
     const aorSids = getBrigadeAoRSettlements(state, brigade.id);
     const ourSidsSet = new Set(aorSids);
-    const enemyAdjacent: SettlementId[] = [];
+
+    // Collect unique enemy-adjacent settlements
+    const enemyAdjacentSet = new Set<SettlementId>();
     for (const fe of frontEdgeDataForAttack) {
       if (!ourSidsSet.has(fe.our_sid)) continue;
-      enemyAdjacent.push(fe.enemy_sid);
+      enemyAdjacentSet.add(fe.enemy_sid);
     }
-    if (enemyAdjacent.length === 0) continue;
-    enemyAdjacent.sort(strictCompare);
-    result.attack_orders[brigade.id] = enemyAdjacent[0];
+    if (enemyAdjacentSet.size === 0) continue;
+
+    // Score each target and pick the best
+    const scoredTargets: Array<{ sid: SettlementId; score: number }> = [];
+    for (const sid of enemyAdjacentSet) {
+      scoredTargets.push({
+        sid,
+        score: scoreTarget(state, sid, brigade, faction, edges, munLookup)
+      });
+    }
+
+    // Sort by score descending, then by settlement ID for deterministic tie-breaking
+    scoredTargets.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return strictCompare(a.sid, b.sid);
+    });
+
+    result.attack_orders[brigade.id] = scoredTargets[0].sid;
   }
 
   return result;
@@ -384,13 +516,14 @@ export function generateBotBrigadeOrders(
 export function generateAllBotOrders(
   state: GameState,
   edges: EdgeRecord[],
-  botFactions: FactionId[]
+  botFactions: FactionId[],
+  sidToMun?: Map<SettlementId, string> | null
 ): void {
   const sortedFactions = [...botFactions].sort(strictCompare);
 
   const attackOrdersAccum: Record<FormationId, SettlementId | null> = {};
   for (const faction of sortedFactions) {
-    const orders = generateBotBrigadeOrders(state, edges, faction);
+    const orders = generateBotBrigadeOrders(state, edges, faction, sidToMun);
 
     if (!state.brigade_aor_orders) state.brigade_aor_orders = [];
     if (!state.brigade_posture_orders) state.brigade_posture_orders = [];

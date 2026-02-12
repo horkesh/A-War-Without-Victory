@@ -356,15 +356,17 @@ A dedicated phase before Turn 0:
 
 No turn pipeline changes needed. The setup phase is a one-shot allocation.
 
-### 8.2 Extended recruitment window (optional future enhancement)
+### 8.2 Extended recruitment window (implemented)
 
-For the first N turns (e.g., turns 0--4, representing April--May 1992):
-- Player can still spend remaining capital/equipment to activate additional brigades.
+During Phase II turns:
+- Sides can spend accumulated resources to activate additional OOB brigades after setup.
 - Newly activated brigades start at `readiness: 'forming'` (reduced effectiveness for 1--2 turns).
-- Capital does not regenerate -- it's a fixed pool from pre-war.
-- Equipment points may trickle in (e.g., HRHB receives +5/turn from Croatia pipeline).
+- Capital and equipment can accrue deterministically each turn:
+  - `equipment`: production facilities under control x local production capacity x embargo scaling, plus optional scenario trickle.
+  - `capital`: organizational base from militia pools, scaled by authority/legitimacy/displacement, plus optional scenario trickle.
+- Recruitment remains eligibility-gated (`available_from`, control in home municipality, manpower/capital/equipment checks).
 
-This models the historical reality that mobilization was staggered, not instantaneous. But it adds complexity to the turn pipeline and bot AI, so defer until after setup-phase-only is working.
+The turn pipeline keeps this deterministic by stable ordering across factions, facilities, municipalities, and brigade IDs.
 
 ---
 
@@ -377,7 +379,7 @@ A brigade can be recruited only if:
 3. **Sufficient capital** (`faction.recruitment_capital.points >= capital_cost`).
 4. **Sufficient equipment** (`faction.equipment_pool.points >= equipment_cost` for chosen class).
 5. **Not already recruited** (each catalog entry can only be activated once).
-6. **`available_from` check** (if using extended recruitment window).
+6. **`available_from` check** (always enforced).
 
 No separate "force pool limit" needed. The combination of manpower (demographic), capital (organizational), and equipment (material) constraints naturally limits what can be raised where and how.
 

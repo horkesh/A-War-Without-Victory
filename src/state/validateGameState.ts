@@ -278,6 +278,42 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
     }
   }
 
+  if ('recruitment_state' in s && s.recruitment_state !== undefined) {
+    const recruitment = s.recruitment_state;
+    if (recruitment !== null && typeof recruitment === 'object' && !Array.isArray(recruitment)) {
+      const r = recruitment as Record<string, unknown>;
+      const capital = r.recruitment_capital;
+      const equipment = r.equipment_pools;
+      const recruited = r.recruited_brigade_ids;
+      if (capital == null || typeof capital !== 'object' || Array.isArray(capital)) {
+        errors.push('recruitment_state.recruitment_capital must be an object when recruitment_state is present');
+      }
+      if (equipment == null || typeof equipment !== 'object' || Array.isArray(equipment)) {
+        errors.push('recruitment_state.equipment_pools must be an object when recruitment_state is present');
+      }
+      if (!Array.isArray(recruited)) {
+        errors.push('recruitment_state.recruited_brigade_ids must be string[] when recruitment_state is present');
+      }
+      const capTrickle = r.recruitment_capital_trickle;
+      if (capTrickle !== undefined && (capTrickle == null || typeof capTrickle !== 'object' || Array.isArray(capTrickle))) {
+        errors.push('recruitment_state.recruitment_capital_trickle must be an object when present');
+      }
+      const equipTrickle = r.equipment_points_trickle;
+      if (equipTrickle !== undefined && (equipTrickle == null || typeof equipTrickle !== 'object' || Array.isArray(equipTrickle))) {
+        errors.push('recruitment_state.equipment_points_trickle must be an object when present');
+      }
+      const maxPerTurn = r.max_recruits_per_faction_per_turn;
+      if (
+        maxPerTurn !== undefined &&
+        (typeof maxPerTurn !== 'number' || !Number.isInteger(maxPerTurn) || maxPerTurn < 0)
+      ) {
+        errors.push('recruitment_state.max_recruits_per_faction_per_turn must be a non-negative integer when present');
+      }
+    } else {
+      errors.push('recruitment_state must be an object when present');
+    }
+  }
+
   // political_controllers: every entry must have value defined (can be null)
   if (Object.prototype.hasOwnProperty.call(s, 'political_controllers')) {
     const pc = s.political_controllers;

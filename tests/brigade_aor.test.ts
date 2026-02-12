@@ -418,16 +418,23 @@ describe('validateBrigadeAoR', () => {
     }
   });
 
-  it('assigns newly front-active settlements', () => {
+  it('assigns newly front-active settlements when mun is a brigade home', () => {
     const { state, edges } = makeLinearScenario();
-    initializeBrigadeAoR(state, edges);
+    // S1-S4 = m1, S5-S8 = m2, S9-S12 = m3 so municipality is meaningful
+    const settlements = makeSettlementsMap([
+      ...[1, 2, 3, 4].map((i) => ({ sid: `S${i}`, mun: 'm1' })),
+      ...[5, 6, 7, 8].map((i) => ({ sid: `S${i}`, mun: 'm2' })),
+      ...[9, 10, 11, 12].map((i) => ({ sid: `S${i}`, mun: 'm3' }))
+    ]);
+    (state.formations['rs-brig-1'] as FormationState).tags = ['mun:m2'];
+    initializeBrigadeAoR(state, edges, settlements);
 
-    // Simulate S5 flipping from RBiH to RS → S6 becomes new front-active
+    // Simulate S5 flipping from RBiH to RS → S5 in m2 is now RS; m2 is rs-brig-1 home so ensure step applies
     (state.political_controllers as Record<string, string>)['S5'] = 'RS';
 
-    validateBrigadeAoR(state, edges);
+    validateBrigadeAoR(state, edges, settlements);
 
-    // S5 should now be assigned to an RS brigade
+    // S5 should now be assigned to rs-brig-1 (only RS brigade with home mun m2)
     const s5Assigned = state.brigade_aor?.['S5'];
     expect(s5Assigned).toBe('rs-brig-1');
   });
