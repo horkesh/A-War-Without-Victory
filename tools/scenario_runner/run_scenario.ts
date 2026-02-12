@@ -3,19 +3,29 @@
  * Phase H1.1: Headless scenario harness CLI.
  * Run N weekly turns; emit final_save.json, weekly_report.jsonl, replay.jsonl, run_summary.json.
  * Phase H1.2: Fails early if data prerequisites are missing (same remediation as sim:data:check).
+ * --map: copy final_save.json to data/derived/latest_run_final_save.json and print tactical map instructions.
  */
 
+import { copyFile, mkdir } from 'node:fs/promises';
+import { join } from 'node:path';
 
 import { checkDataPrereqs, formatMissingRemediation } from '../../src/data_prereq/check_data_prereqs.js';
 import { runScenario } from '../../src/scenario/scenario_runner.js';
 
 
-function parseArgs(): { scenario: string; weeks?: number; out: string; postureAllPushAndApplyBreaches: boolean } {
+function parseArgs(): {
+  scenario: string;
+  weeks?: number;
+  out: string;
+  postureAllPushAndApplyBreaches: boolean;
+  map: boolean;
+} {
   const args = process.argv.slice(2);
   let scenario = '';
   let weeks: number | undefined;
   let out = 'runs';
   let postureAllPushAndApplyBreaches = false;
+  let map = false;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--scenario' && args[i + 1]) {
       scenario = args[++i];
@@ -25,19 +35,21 @@ function parseArgs(): { scenario: string; weeks?: number; out: string; postureAl
       out = args[++i];
     } else if (args[i] === '--posture-all-push' || args[i] === '--all-attack') {
       postureAllPushAndApplyBreaches = true;
+    } else if (args[i] === '--map') {
+      map = true;
     }
   }
   if (!scenario) {
     process.stderr.write(
-      'Usage: run_scenario.ts --scenario <path> [--weeks <n>] [--out <dir>] [--posture-all-push]\n'
+      'Usage: run_scenario.ts --scenario <path> [--weeks <n>] [--out <dir>] [--posture-all-push] [--map]\n'
     );
     process.exit(1);
   }
-  return { scenario, weeks, out, postureAllPushAndApplyBreaches };
+  return { scenario, weeks, out, postureAllPushAndApplyBreaches, map };
 }
 
 async function main(): Promise<void> {
-  const { scenario, weeks, out, postureAllPushAndApplyBreaches } = parseArgs();
+  const { scenario, weeks, out, postureAllPushAndApplyBreaches, map: enableMap } = parseArgs();
 
   const prereqResult = checkDataPrereqs();
   if (!prereqResult.ok) {
@@ -64,6 +76,20 @@ async function main(): Promise<void> {
   process.stdout.write(`       ${result.paths.control_events}\n`);
   process.stdout.write(`       ${result.paths.formation_delta}\n`);
   process.stdout.write(`final_state_hash: ${result.final_state_hash}\n`);
+
+  if (enableMap) {
+    const derivedDir = join(process.cwd(), 'data', 'derived');
+    await mkdir(derivedDir, { recursive: true });
+    const destPath = join(derivedDir, 'latest_run_final_save.json');
+    await copyFile(result.paths.final_save, destPath);
+    process.stdout.write('\n--- Tactical map viewer ---\n');
+    process.stdout.write('Final state copied to: data/derived/latest_run_final_save.json\n');
+    process.stdout.write('To view on map:\n');
+    process.stdout.write('  1) npm run dev:map\n');
+    process.stdout.write('  2) Open http://localhost:3001/tactical_map.html\n');
+    process.stdout.write('  3) In "Dataset" choose "Latest run" or use "Load state file" and select the file above.\n');
+    process.stdout.write('---\n');
+  }
 }
 
 main().catch((err: unknown) => {

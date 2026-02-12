@@ -5,6 +5,7 @@
 
 import type { MunicipalityId } from './game_state.js';
 import { MAX_BRIGADES_OVERRIDE } from './max_brigades_per_mun_data.js';
+import { LARGE_URBAN_MUN_IDS } from './large_urban_mun_data.js';
 
 /** Municipalities that count as "large" for control flip: never fall in one turn without resistance when defender has no formation. */
 export const LARGE_SETTLEMENT_MUN_IDS: readonly MunicipalityId[] = [
@@ -15,9 +16,15 @@ export const LARGE_SETTLEMENT_MUN_IDS: readonly MunicipalityId[] = [
 ] as const;
 
 const LARGE_SET = new Set<string>(LARGE_SETTLEMENT_MUN_IDS);
+const LARGE_URBAN_SET = new Set<string>(LARGE_URBAN_MUN_IDS);
 
 export function isLargeSettlementMun(mun_id: MunicipalityId): boolean {
   return LARGE_SET.has(mun_id);
+}
+
+/** Municipalities treated as large urban centers (1991 pop >= 60k). */
+export function isLargeUrbanSettlementMun(mun_id: MunicipalityId): boolean {
+  return LARGE_URBAN_SET.has(mun_id);
 }
 
 /** Default max brigades per municipality. Overrides from 1991 census (large/mixed) in max_brigades_per_mun_data.ts. */
@@ -39,6 +46,13 @@ export const MIN_ELIGIBLE_POPULATION_FOR_BRIGADE = 500;
 
 /** Brigade can grow from pool up to this size; only then do we form a second brigade (if pool still has ≥ MIN_BRIGADE_SPAWN). Tuned for historical personnel band (~3k per brigade at full strength). */
 export const MAX_BRIGADE_PERSONNEL = 3_000;
+
+/**
+ * Phase II hard operational frontage cap (settlements) per brigade.
+ * AoR ownership may exceed this, but only this many settlements are treated as actively
+ * covered by a brigade for garrison/pressure/attack computations each turn.
+ */
+export const BRIGADE_OPERATIONAL_AOR_HARD_CAP = 48;
 
 /** Max personnel absorbed per turn from home municipality militia pool (recruitment_system_design_note §5.1). */
 export const REINFORCEMENT_RATE = 200;

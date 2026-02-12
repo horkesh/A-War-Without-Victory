@@ -18,7 +18,7 @@ import type {
 } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { computeBrigadeDensity, getBrigadeAoRSettlements } from './brigade_aor.js';
+import { computeBrigadeDensity } from './brigade_aor.js';
 import { computeEquipmentMultiplier } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
 
@@ -63,10 +63,11 @@ function edgeId(a: SettlementId, b: SettlementId): string {
  */
 export function computeBrigadeRawPressure(
   state: GameState,
-  brigade: FormationState
+  brigade: FormationState,
+  edges?: EdgeRecord[]
 ): number {
   const posture = brigade.posture ?? 'defend';
-  const density = computeBrigadeDensity(state, brigade.id);
+  const density = computeBrigadeDensity(state, brigade.id, edges);
   const postureMult = POSTURE_PRESSURE_MULT[posture];
   const readinessMult = READINESS_MULT[brigade.readiness ?? 'active'] ?? 1.0;
   const cohesionFactor = (brigade.cohesion ?? 60) / 100;
@@ -87,10 +88,11 @@ export function computeBrigadeRawPressure(
 export function computeBrigadeDefense(
   state: GameState,
   brigade: FormationState,
-  activeStreak: number
+  activeStreak: number,
+  edges?: EdgeRecord[]
 ): number {
   const posture = brigade.posture ?? 'defend';
-  const density = computeBrigadeDensity(state, brigade.id);
+  const density = computeBrigadeDensity(state, brigade.id, edges);
   const defenseMult = POSTURE_DEFENSE_MULT[posture];
   const readinessMult = READINESS_MULT[brigade.readiness ?? 'active'] ?? 1.0;
   const cohesionFactor = (brigade.cohesion ?? 60) / 100;
@@ -113,7 +115,8 @@ export function computeBrigadeDefense(
  */
 export function computeBrigadePressureByEdge(
   state: GameState,
-  frontEdges: Array<{ a: SettlementId; b: SettlementId }>
+  frontEdges: Array<{ a: SettlementId; b: SettlementId }>,
+  allEdges?: EdgeRecord[]
 ): BrigadePressureResult {
   const result: BrigadePressureResult = { edge_pressure: {}, brigade_pressure: {} };
   const brigadeAor = state.brigade_aor ?? {};
@@ -143,8 +146,8 @@ export function computeBrigadePressureByEdge(
       if (brig) {
         if (!brigadeCache.has(brigadeA)) {
           brigadeCache.set(brigadeA, {
-            pressure: computeBrigadeRawPressure(state, brig),
-            defense: computeBrigadeDefense(state, brig, streak)
+            pressure: computeBrigadeRawPressure(state, brig, allEdges),
+            defense: computeBrigadeDefense(state, brig, streak, allEdges)
           });
         }
         sideAPressure = brigadeCache.get(brigadeA)!.pressure;
@@ -159,8 +162,8 @@ export function computeBrigadePressureByEdge(
       if (brig) {
         if (!brigadeCache.has(brigadeB)) {
           brigadeCache.set(brigadeB, {
-            pressure: computeBrigadeRawPressure(state, brig),
-            defense: computeBrigadeDefense(state, brig, streak)
+            pressure: computeBrigadeRawPressure(state, brig, allEdges),
+            defense: computeBrigadeDefense(state, brig, streak, allEdges)
           });
         }
         sideBPressure = brigadeCache.get(brigadeB)!.pressure;
@@ -201,7 +204,7 @@ export function applyBrigadePressureToState(
     }
   }
 
-  const pressureResult = computeBrigadePressureByEdge(state, frontEdges);
+  const pressureResult = computeBrigadePressureByEdge(state, frontEdges, edges);
 
   // Update front_pressure state
   if (!state.front_pressure) state.front_pressure = {};

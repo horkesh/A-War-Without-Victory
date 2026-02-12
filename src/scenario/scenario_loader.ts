@@ -211,10 +211,13 @@ export function normalizeScenario(raw: unknown): Scenario {
 
   const use_harness_bots = o.use_harness_bots === true;
   const init_control = typeof o.init_control === 'string' && o.init_control.trim() !== '' ? o.init_control.trim() : undefined;
-  const init_control_mode =
+  const init_control_mode_raw =
     o.init_control_mode === 'institutional' || o.init_control_mode === 'ethnic_1991' || o.init_control_mode === 'hybrid_1992'
       ? o.init_control_mode
       : undefined;
+  // Scenario default: when init_control is provided and mode is omitted, use hybrid_1992.
+  // This avoids silently falling back to legacy municipality-only initialization.
+  const init_control_mode = init_control_mode_raw ?? (init_control ? 'hybrid_1992' : undefined);
   const ethnic_override_threshold =
     typeof o.ethnic_override_threshold === 'number' && Number.isFinite(o.ethnic_override_threshold)
       ? Math.max(0.45, Math.min(1, o.ethnic_override_threshold))

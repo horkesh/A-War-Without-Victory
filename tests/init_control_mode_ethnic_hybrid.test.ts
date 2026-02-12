@@ -88,6 +88,18 @@ test('normalizeScenario preserves init_control_mode and ethnic_override_threshol
   const s2 = normalizeScenario(raw2);
   assert.strictEqual(s2.init_control_mode, 'hybrid_1992');
   assert.strictEqual(s2.ethnic_override_threshold, 0.75);
+
+  const raw3 = {
+    scenario_id: 'test3',
+    weeks: 4,
+    init_control: 'apr1992'
+  };
+  const s3 = normalizeScenario(raw3);
+  assert.strictEqual(
+    s3.init_control_mode,
+    'hybrid_1992',
+    'init_control without explicit mode should default to hybrid_1992'
+  );
 });
 
 test('ethnic_1991 init yields deterministic control (no null)', async () => {

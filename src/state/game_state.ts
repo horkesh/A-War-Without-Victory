@@ -72,6 +72,9 @@ export interface BrigadeAoROrder {
   to_brigade: FormationId;
 }
 
+/** Brigade municipality movement order: replace brigade municipality assignment for this turn. */
+export type BrigadeMunicipalityOrder = Record<FormationId, MunicipalityId[] | null>;
+
 /** Brigade posture order: set a brigade's posture. */
 export interface BrigadePostureOrder {
   brigade_id: FormationId;
@@ -953,6 +956,10 @@ export interface GameState {
   municipality_displacement?: Record<MunicipalityId, number>;
 
   // --- Brigade Operations System state ---
+  /** Per-brigade municipality supra-layer assignment (Phase II). Brigades may share municipalities. */
+  brigade_municipality_assignment?: Record<FormationId, MunicipalityId[]>;
+  /** Pending brigade municipality movement orders (consumed once per turn). */
+  brigade_mun_orders?: BrigadeMunicipalityOrder;
   /** Per-settlement brigade AoR assignment (Phase II). null = rear settlement (no brigade). */
   brigade_aor?: Record<SettlementId, FormationId | null>;
   /** Pending AoR reshape orders (consumed once per turn). */

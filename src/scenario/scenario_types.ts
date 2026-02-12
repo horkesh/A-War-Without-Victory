@@ -43,7 +43,7 @@ export interface Scenario {
   use_harness_bots?: boolean;
   /** Option A: scenario date key (e.g. apr1992) or path to mun1990-only control file. When set, harness uses it for initial political control. Deprecated in favor of init_control_mode when ethnic/hybrid; kept for backward compat. */
   init_control?: string;
-  /** Initial political control mode: institutional (mun1990 file from init_control), ethnic_1991 (1991 census majority per settlement), hybrid_1992 (institutional + ethnic overrides above threshold). Default: institutional when init_control set; else uses default municipal mapping. */
+  /** Initial political control mode: institutional (mun1990 file from init_control), ethnic_1991 (1991 census majority per settlement), hybrid_1992 (institutional + ethnic overrides above threshold). Default: hybrid_1992 when init_control is set; else uses default municipal mapping. */
   init_control_mode?: 'institutional' | 'ethnic_1991' | 'hybrid_1992';
   /** For hybrid_1992: ethnic override applies when settlement majority ethnicity share >= this threshold and differs from municipal controller. Default 0.70. */
   ethnic_override_threshold?: number;

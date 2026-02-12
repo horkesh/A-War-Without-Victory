@@ -108,7 +108,11 @@ import { evaluateEvents } from './events/evaluate_events.js';
 import { runDisplacementHooks, type DisplacementHooksReport } from './phase_i/displacement_hooks.js';
 import { runJNATransition, type JNATransitionReport } from './phase_i/jna_transition.js';
 import { detectPhaseIIFronts } from './phase_ii/front_emergence.js';
-import { validateBrigadeAoR } from './phase_ii/brigade_aor.js';
+import {
+  applyBrigadeMunicipalityOrders,
+  syncBrigadeMunicipalityAssignmentFromAoR,
+  validateBrigadeAoR
+} from './phase_ii/brigade_aor.js';
 import { applyReshapeOrders } from './phase_ii/aor_reshaping.js';
 import { applyPostureOrders, applyPostureCosts } from './phase_ii/brigade_posture.js';
 import { generateAllBotOrders } from './phase_ii/bot_brigade_ai.js';
@@ -125,6 +129,7 @@ import {
   updatePhaseIOpposingEdgesStreak
 } from './phase_transitions/phase_i_to_phase_ii.js';
 import { runFormationHqRelocation, type FormationHqRelocationReport } from './formation_hq_relocation.js';
+import { strictCompare } from '../state/validateGameState.js';
 import {
   diffusePressure,
   type PhaseEPressureDiffusionReport
@@ -209,7 +214,7 @@ export interface TurnReport {
   phase_i_brigade_reinforcement?: ReinforceBrigadesReport; // Phase C Step 3.5b: fill brigades to 2.5k before spawn
   phase_i_formation_spawn?: SpawnFormationsReport; // Phase C Step 3.6: spawn formations when directive active (FORAWWV H2.4)
   phase_i_control_flip?: ControlFlipReport; // Phase C Step 4: early war control change
-  formation_hq_relocation?: FormationHqRelocationReport; // Phase II: relocate HQs in enemy territory
+  formation_hq_relocation?: FormationHqRelocationReport; // Phase II: relocate HQs for safety and AoR depth sync
   phase_i_authority?: AuthorityDegradationReport; // Phase C Step 5: authority degradation
   phase_i_control_strain?: ControlStrainReport; // Phase C Step 6: control strain
   phase_i_displacement_hooks?: DisplacementHooksReport; // Phase C Step 7: displacement initiation hooks
@@ -388,12 +393,25 @@ const phases: NamedPhase[] = [
     run: async (context) => {
       if (context.state.meta.phase !== 'phase_ii') return;
       if (!context.state.brigade_aor) return;
-      let edges = context.input.settlementEdges;
-      if (!edges || edges.length === 0) {
-        const graph = await loadSettlementGraph();
-        edges = graph.edges;
-      }
-      validateBrigadeAoR(context.state, edges);
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
+        ? context.input.settlementEdges
+        : graph.edges;
+      validateBrigadeAoR(context.state, edges, graph.settlements);
+    }
+  },
+  {
+    name: 'apply-municipality-orders',
+    run: async (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      if (!context.state.brigade_mun_orders || Object.keys(context.state.brigade_mun_orders).length === 0) return;
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
+        ? context.input.settlementEdges
+        : graph.edges;
+      applyBrigadeMunicipalityOrders(context.state, edges, graph.settlements);
+      // Keep settlement-level AoR synchronized after municipality movement.
+      validateBrigadeAoR(context.state, edges, graph.settlements);
     }
   },
   {
@@ -416,12 +434,33 @@ const phases: NamedPhase[] = [
     run: async (context) => {
       if (context.state.meta.phase !== 'phase_ii') return;
       if (!context.state.brigade_aor_orders?.length) return;
-      let edges = context.input.settlementEdges;
-      if (!edges || edges.length === 0) {
-        const graph = await loadSettlementGraph();
-        edges = graph.edges;
-      }
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
+        ? context.input.settlementEdges
+        : graph.edges;
       applyReshapeOrders(context.state, edges);
+      // Keep municipality assignment layer consistent with any applied settlement reshapes.
+      syncBrigadeMunicipalityAssignmentFromAoR(context.state, graph.settlements);
+    }
+  },
+  {
+    name: 'formation-hq-aor-depth-sync',
+    run: async (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      if (!context.state.brigade_aor) return;
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      const report = runFormationHqRelocation(context.state, graph.settlements, graph.edges);
+      if (report.relocated <= 0) return;
+      const existing = context.report.formation_hq_relocation;
+      if (!existing) {
+        context.report.formation_hq_relocation = report;
+        return;
+      }
+      const merged = Array.from(new Set([...existing.formation_ids, ...report.formation_ids])).sort(strictCompare);
+      context.report.formation_hq_relocation = {
+        relocated: merged.length,
+        formation_ids: merged
+      };
     }
   },
   {
@@ -1332,7 +1371,7 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
     if (edges.length > 0) {
       updatePhaseIOpposingEdgesStreak(working, edges);
     }
-    applyPhaseIToPhaseIITransition(context.state, edges);
+    applyPhaseIToPhaseIITransition(context.state, edges, context.input.settlementGraph?.settlements);
     return { nextState: context.state, report };
   }
 

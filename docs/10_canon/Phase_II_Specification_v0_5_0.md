@@ -80,7 +80,7 @@ Phase II receives Phase I hand-off implicitly via state: control map stable, pha
 
 When brigade operations are enabled, the following state is persisted (serialized):
 
-- **GameState**: brigade_aor (Record<SettlementId, FormationId | null>), brigade_aor_orders, brigade_posture_orders, corps_command, army_stance, og_orders, settlement_holdouts.
+- **GameState**: brigade_municipality_assignment (Record<FormationId, MunicipalityId[]>), brigade_mun_orders, brigade_aor (Record<SettlementId, FormationId | null>), brigade_aor_orders, brigade_posture_orders, corps_command, army_stance, og_orders, settlement_holdouts.
 - **FormationState** (per formation): posture, corps_id, composition, disrupted.
 
 For full type definitions and interfaces (BrigadePosture, CorpsStance, ArmyStance, EquipmentCondition, BrigadeComposition, BrigadeAoROrder, BrigadePostureOrder, CorpsOperation, CorpsCommandState, OGActivationOrder, SettlementHoldoutState), see docs/40_reports/BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md §5.
@@ -94,16 +94,17 @@ Phase II logic runs inside the sim turn pipeline (src/sim/turn_pipeline.ts):
 - **When**: Only when meta.phase === "phase_ii". For meta.phase === "phase_i", Phase I phases run and Phase II consolidation is skipped; for phase_0, the state pipeline is used.
 - **Where**: After "phase-ii-aor-init" (when present), the following brigade operations phases run in order, then "phase-ii-consolidation":
   1. validate-brigade-aor
-  2. generate-bot-brigade-orders
-  3. apply-aor-reshaping
-  4. apply-brigade-posture
-  5. update-corps-effects
-  6. advance-corps-operations
-  7. activate-operational-groups
-  8. equipment-degradation
-  9. apply-posture-costs
-  10. compute-brigade-pressure
-  11. update-og-lifecycle
+  2. apply-municipality-orders
+  3. generate-bot-brigade-orders
+  4. apply-aor-reshaping
+  5. apply-brigade-posture
+  6. update-corps-effects
+  7. advance-corps-operations
+  8. activate-operational-groups
+  9. equipment-degradation
+  10. apply-posture-costs
+  11. compute-brigade-pressure
+  12. update-og-lifecycle
 
 Then phase-ii-consolidation runs. Order within consolidation:
   1. Detect fronts: detectPhaseIIFronts(state, edges).
@@ -140,7 +141,12 @@ When **edges** are provided to the transition, it initializes brigade AoR and co
 
 ### 7.1 Brigade AoR at Phase II entry
 
-When the Phase I → Phase II transition runs with **edges** provided, brigade AoR is initialized: multi-source BFS from brigade HQ settlements on the same-faction subgraph; the first brigade to reach a settlement claims it; tie-break by formation ID. The front-active set may include 1-hop rear depth for operational buffer. Every front-active settlement is assigned to exactly one brigade; rear settlements have null AoR. See Systems_Manual_v0_5_0.md §2.1 and §6; implementation: src/sim/phase_ii/brigade_aor.ts.
+When the Phase I → Phase II transition runs with **edges** provided, brigade deployment initializes in two layers:
+
+1. **Municipality assignment layer** (`brigade_municipality_assignment`): active brigades are assigned to one or more municipalities (multiple brigades may share a municipality).
+2. **Settlement AoR layer** (`brigade_aor`): front-active settlements (plus optional 1-hop rear depth) are deterministically derived from municipality assignments; each settlement is assigned to exactly one brigade or null (rear).
+
+Within a municipality shared by multiple brigades of the same faction, settlement split is deterministic (stable ordering + deterministic graph traversal/tie-break). Municipality movement orders (`brigade_mun_orders`) apply before pressure and attack resolution; settlement-level reshape orders (`brigade_aor_orders`) remain available as fine-grain adjustment. See Systems_Manual_v0_5_0.md §2.1 and §6; implementation: src/sim/phase_ii/brigade_aor.ts and src/sim/turn_pipeline.ts.
 
 ---
 

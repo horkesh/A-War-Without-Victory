@@ -8,6 +8,7 @@
 import type { GameState, FactionId, FormationId, SettlementId } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { areRbihHrhbAllied } from '../phase_i/alliance_update.js';
 import { MIN_BRIGADE_SPAWN } from '../../state/formation_constants.js';
 import { getBrigadeAoRSettlements, getSettlementGarrison } from './brigade_aor.js';
 
@@ -79,14 +80,23 @@ export function resolveAttackOrders(
     const aorSettlements = getBrigadeAoRSettlements(state, formationId);
     const neighbors = adjacency.get(targetSid) ?? [];
     const frontlineSids = aorSettlements.filter((sid) => neighbors.includes(sid));
-    const attackerStrength = frontlineSids.reduce((sum, sid) => sum + getSettlementGarrison(state, sid), 0);
-    const defenderStrength = getSettlementGarrison(state, targetSid);
+    const attackerStrength = frontlineSids.reduce((sum, sid) => sum + getSettlementGarrison(state, sid, edges), 0);
+    const defenderStrength = getSettlementGarrison(state, targetSid, edges);
 
     const attackerWon = defenderStrength <= 0 ? attackerStrength > 0 : attackerStrength > defenderStrength * ATTACKER_ADVANTAGE_RATIO;
     report.orders_processed += 1;
     report.details.push({ brigade_id: formationId, target_sid: targetSid, attacker_won: attackerWon });
 
-    if (attackerWon) {
+    // Phase I §4.8 (historical fidelity): no RBiH–HRHB control change before rbih_hrhb_war_earliest_turn (e.g. Oct 1992).
+    const isRbihVsHrhb =
+      (attackerFaction === 'RBiH' && defenderFaction === 'HRHB') ||
+      (attackerFaction === 'HRHB' && defenderFaction === 'RBiH');
+    const earliestTurn = state.meta?.rbih_hrhb_war_earliest_turn ?? 26;
+    const beforeEarliestWar = (state.meta?.turn ?? 0) < earliestTurn;
+    const rbihHrhbAllied = beforeEarliestWar || areRbihHrhbAllied(state);
+    const blockAlliedFlip = attackerWon && isRbihVsHrhb && rbihHrhbAllied;
+
+    if (attackerWon && !blockAlliedFlip) {
       (state.political_controllers as Record<SettlementId, FactionId>)[targetSid] = attackerFaction;
       report.flips_applied += 1;
       // Casualties (Brigade Realism §3.2): deterministic personnel loss

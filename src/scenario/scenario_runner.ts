@@ -39,6 +39,8 @@ import {
 } from '../sim/recruitment_engine.js';
 import { runPoolPopulation } from '../sim/phase_i/pool_population.js';
 import { updateMilitiaEmergence } from '../sim/phase_i/militia_emergence.js';
+import { initializeBrigadeAoR } from '../sim/phase_ii/brigade_aor.js';
+import { initializeCorpsCommand } from '../sim/phase_ii/corps_command.js';
 import type { Scenario, ScenarioAction } from './scenario_types.js';
 import { buildWeeklyReport } from './scenario_reporting.js';
 import type { WeeklyReportRow, WeeklyActivityCounts } from './scenario_reporting.js';
@@ -536,6 +538,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       }
     }
 
+    if (scenario.start_phase === 'phase_ii') {
+      state.meta.phase = 'phase_ii';
+      state.meta.turn = 0;
+      state.meta.referendum_held = true;
+      state.meta.referendum_turn = 0;
+      state.meta.war_start_turn = 0;
+    }
+
     if (scenario.formation_spawn_directive) {
       state.formation_spawn_directive = scenario.formation_spawn_directive;
     }
@@ -551,8 +561,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     let oobCreated = false;
     if (!scenario.init_formations_oob && scenario.recruitment_mode !== 'player_choice') oobCreated = true;
 
-    // Create OOB formations at Phase I start (recruitment or legacy auto-spawn)
-    if (scenario.start_phase === 'phase_i' && !oobCreated) {
+    // Create OOB formations at Phase I or Phase II start (recruitment or legacy auto-spawn)
+    if ((scenario.start_phase === 'phase_i' || scenario.start_phase === 'phase_ii') && !oobCreated) {
       createOobFormations(
         state,
         scenario,
@@ -564,6 +574,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         municipalityPopulation1991
       );
       oobCreated = true;
+    }
+
+    // Phase II entry: initialize brigade AoR and corps command (same as Phase I→II transition)
+    if (scenario.start_phase === 'phase_ii' && graph.edges.length > 0) {
+      initializeBrigadeAoR(state, graph.edges, graph.settlements);
+      initializeCorpsCommand(state);
     }
 
     const initialSavePath = join(outDir, 'initial_save.json');
