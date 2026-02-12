@@ -5,7 +5,12 @@
       "Bash(npx tsc:*)",
       "Bash(npx vitest:*)",
       "Bash(node:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "WebFetch(domain:pbs.twimg.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(claude /plugin marketplace add obra/superpowers-marketplace)",
+      "Bash(npx tsx:*)",
+      "Bash(npm test)"
     ]
   }
 }
