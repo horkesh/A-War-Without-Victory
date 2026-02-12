@@ -6,7 +6,7 @@
 
 import type { GameState } from '../../state/game_state.js';
 import { computeFrontEdges } from '../../map/front_edges.js';
-import type { EdgeRecord } from '../../map/settlements.js';
+import type { EdgeRecord, SettlementRecord } from '../../map/settlements.js';
 import { initializeBrigadeAoR } from '../phase_ii/brigade_aor.js';
 import { initializeCorpsCommand } from '../phase_ii/corps_command.js';
 
@@ -76,7 +76,11 @@ export function isPhaseIITransitionEligible(state: GameState): boolean {
  * Idempotent when already phase_ii; no-op when not eligible. Mutates state in place; returns same state reference.
  * Deterministic, one-way (no reverting to phase_i).
  */
-export function applyPhaseIToPhaseIITransition(state: GameState, edges?: EdgeRecord[]): GameState {
+export function applyPhaseIToPhaseIITransition(
+  state: GameState,
+  edges?: EdgeRecord[],
+  settlements?: Map<string, SettlementRecord>
+): GameState {
   if (state.meta.phase === 'phase_ii') return state;
   if (!isPhaseIITransitionEligible(state)) return state;
 
@@ -94,7 +98,7 @@ export function applyPhaseIToPhaseIITransition(state: GameState, edges?: EdgeRec
 
   // Initialize brigade AoR (Voronoi BFS from brigade HQs)
   if (edges && edges.length > 0) {
-    initializeBrigadeAoR(state, edges);
+    initializeBrigadeAoR(state, edges, settlements);
   }
 
   // Initialize corps command state

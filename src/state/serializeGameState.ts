@@ -63,6 +63,8 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
   'phase_ii_exhaustion',
   'phase_ii_exhaustion_local',
   // Brigade Operations System state (Phase II)
+  'brigade_municipality_assignment',
+  'brigade_mun_orders',
   'brigade_aor',
   'brigade_aor_orders',
   'brigade_posture_orders',

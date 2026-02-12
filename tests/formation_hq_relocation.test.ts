@@ -167,3 +167,69 @@ test('formation without hq_sid is skipped', () => {
   const report = runFormationHqRelocation(state, settlements, []);
   assert.strictEqual(report.relocated, 0);
 });
+
+test('phase II brigade HQ moves to depth-2 settlement behind front within AoR', () => {
+  const formations: GameState['formations'] = {
+    b1: {
+      id: 'b1' as FormationId,
+      faction: 'RBiH',
+      name: 'Brigade 1',
+      created_turn: 1,
+      status: 'active',
+      assignment: null,
+      kind: 'brigade',
+      hq_sid: 's4'
+    }
+  };
+  const state = minimalState(formations, { s1: 'RBiH', s2: 'RBiH', s3: 'RBiH', s4: 'RBiH', s5: 'RS' });
+  state.brigade_aor = { s1: 'b1', s2: 'b1', s3: 'b1', s4: 'b1', s5: null };
+  const settlements = settlementsMap([
+    { sid: 's1', mun: 'M1', mun_code: 'M1', mun1990_id: 'M1' },
+    { sid: 's2', mun: 'M1', mun_code: 'M1', mun1990_id: 'M1' },
+    { sid: 's3', mun: 'M1', mun_code: 'M1', mun1990_id: 'M1' },
+    { sid: 's4', mun: 'M1', mun_code: 'M1', mun1990_id: 'M1' },
+    { sid: 's5', mun: 'M2', mun_code: 'M2', mun1990_id: 'M2' }
+  ]);
+  const edges: EdgeRecord[] = [
+    { a: 's1', b: 's2' },
+    { a: 's2', b: 's3' },
+    { a: 's3', b: 's4' },
+    { a: 's4', b: 's5' }
+  ];
+
+  const report = runFormationHqRelocation(state, settlements, edges);
+  assert.strictEqual(report.relocated, 1);
+  assert.deepStrictEqual(report.formation_ids, ['b1']);
+  assert.strictEqual(state.formations!.b1!.hq_sid, 's2');
+});
+
+test('phase II brigade HQ uses deepest available fallback when depth-2 not present', () => {
+  const formations: GameState['formations'] = {
+    b1: {
+      id: 'b1' as FormationId,
+      faction: 'RBiH',
+      name: 'Brigade 1',
+      created_turn: 1,
+      status: 'active',
+      assignment: null,
+      kind: 'brigade',
+      hq_sid: 's2'
+    }
+  };
+  const state = minimalState(formations, { s1: 'RBiH', s2: 'RBiH', s3: 'RS' });
+  state.brigade_aor = { s1: 'b1', s2: 'b1', s3: null };
+  const settlements = settlementsMap([
+    { sid: 's1', mun: 'M1', mun_code: 'M1', mun1990_id: 'M1' },
+    { sid: 's2', mun: 'M1', mun_code: 'M1', mun1990_id: 'M1' },
+    { sid: 's3', mun: 'M2', mun_code: 'M2', mun1990_id: 'M2' }
+  ]);
+  const edges: EdgeRecord[] = [
+    { a: 's1', b: 's2' },
+    { a: 's2', b: 's3' }
+  ];
+
+  const report = runFormationHqRelocation(state, settlements, edges);
+  assert.strictEqual(report.relocated, 1);
+  assert.deepStrictEqual(report.formation_ids, ['b1']);
+  assert.strictEqual(state.formations!.b1!.hq_sid, 's1');
+});

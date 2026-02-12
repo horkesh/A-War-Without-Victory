@@ -22,7 +22,11 @@ Edges may be Open, Contested, or Interdicted. Municipalities store population, a
 
 ### 2.1 Settlement assignment and Areas of Responsibility
 
-Each brigade owns one Area of Responsibility (AoR), defined as a contiguous set of front-active settlements. AoRs may include limited rear depth within the front-active zone to preserve cohesion and prevent instantaneous rupture. Rear depth prevents single-settlement loss from producing instantaneous operational rupture and provides space for cohesion recovery and internal redistribution.
+Brigade deployment in Phase II uses a two-layer model:
+- **Municipality layer:** brigades are assigned to one or more municipalities (`brigade_municipality_assignment`); multiple brigades may share a municipality.
+- **Settlement AoR layer:** front-active settlements are deterministically derived from municipality assignments into exactly one brigade per settlement (`brigade_aor`) or null (rear).
+
+AoRs may include limited rear depth within the front-active zone to preserve cohesion and prevent instantaneous rupture. Rear depth prevents single-settlement loss from producing instantaneous operational rupture and provides space for cohesion recovery and internal redistribution.
 
 **AoR Scope:** AoRs apply only to front-active settlements—settlements where opposing factions' coercive forces may interact through adjacency, pressure eligibility conditions exist, or supply corridors, encirclement risk, or fragmentation dynamics are present.
 
@@ -32,7 +36,7 @@ Settlements that are politically controlled but not exposed to active or imminen
 
 **Control stability:** Settlement control does not change due to lack of brigade presence. Control change may occur only when opposing brigade pressure is applied and sustained under eligibility rules, or internal authority collapse triggers fragmentation or realignment. Rear Political Control Zones are stable by default but vulnerable to expansion of fronts or internal systemic failure.
 
-**AoR assignment (Phase II):** Assignment is by multi-source BFS from brigade HQ settlements on the same-faction subgraph; the first brigade to reach a settlement claims it; tie-break by formation ID. **Density** = personnel / max(1, aor_settlement_count), and is the core metric for pressure. Front-active expansion may add 1-hop rear depth for operational buffer. **State:** brigade_aor: Record<SettlementId, FormationId | null> on GameState; rear settlements have null.
+**AoR assignment (Phase II):** Settlement AoR is derived from municipality assignments and front-active settlements. In shared municipalities (same-faction multi-brigade co-presence), settlement ownership is split deterministically (stable ordering and deterministic traversal/tie-break) while preserving the invariant of exactly one brigade per settlement. **Density** = personnel / max(1, aor_settlement_count), and is the core metric for pressure. Front-active expansion may add 1-hop rear depth for operational buffer. **State:** `brigade_municipality_assignment`, `brigade_mun_orders`, `brigade_aor`.
 
 Corps and Operational Groups do not own settlements and do not maintain AoRs. They operate as command layers and coordination overlays only.
 
@@ -101,9 +105,13 @@ Each brigade maintains a posture state chosen by the player. Posture governs int
 
 ### 6.2 AoR reshaping and concentration
 
-Players may reshape AoRs by transferring settlements between adjacent brigades' AoRs, subject to contiguity and assignment invariants. AoR reshaping resolves over time and generates cohesion loss, exhaustion increase, and temporary disruption.
+Players may reposition brigades at municipality level and may also reshape settlement AoR boundaries:
+- **Municipality movement orders:** replace a brigade's municipality assignment for the turn (`brigade_mun_orders`), subject to deterministic adjacency and per-(municipality,faction) concentration limits.
+- **Settlement reshape orders:** transfer settlements between adjacent brigades' AoRs (`brigade_aor_orders`) for fine-grain adjustments.
 
-**Validation:** Same faction, active brigades, donor adjacent to target AoR, donor retains ≥ 1 settlement after transfer. **Costs:** receiving brigade −3 cohesion; donating brigade −2 cohesion; both brigades set disrupted (halves pressure next turn). **State:** brigade_aor_orders.
+Both flows resolve deterministically and preserve the single-owner-per-settlement invariant.
+
+**Validation (settlement reshape):** Same faction, active brigades, donor adjacent to target AoR, donor retains ≥ 1 settlement after transfer. **Costs:** receiving brigade −3 cohesion; donating brigade −2 cohesion; both brigades set disrupted (halves pressure next turn). **State:** brigade_aor_orders.
 
 Shrinking an AoR increases battalion density and offensive potential. Expanding an AoR reduces battalion density and increases failure risk.
 

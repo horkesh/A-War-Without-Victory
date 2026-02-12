@@ -13,6 +13,11 @@ import { ZOOM_LABELS, ZOOM_FACTORS, NATO_TOKENS, SIDE_COLORS, SIDE_SOLID_COLORS,
 import { controlKey, censusIdFromSid, buildControlLookup, buildStatusLookup } from './data/ControlLookup.js';
 import { parseGameState } from './data/GameStateAdapter.js';
 import { normalizeForSearch } from './data/DataLoader.js';
+import {
+  computeBrigadeOperationalCoverageCapFromFormation,
+  getFormationHomeMunFromTags
+} from '../../state/brigade_operational_cap.js';
+import { isLargeUrbanSettlementMun } from '../../state/formation_constants.js';
 import type { PolygonCoords, Position } from './types.js';
 
 export class MapApp {
@@ -986,6 +991,14 @@ export class MapApp {
     document.getElementById('btn-legend')?.addEventListener('click', () => {
       document.getElementById('legend')?.classList.toggle('hidden');
     });
+    document.getElementById('btn-ethnic')?.addEventListener('click', () => {
+      const current = this.state.snapshot.settlementFillMode;
+      const next = current === 'political_control' ? 'ethnic_majority' : 'political_control';
+      this.state.setSettlementFillMode(next);
+      const fillModeEl = document.getElementById('settlement-fill-mode') as HTMLSelectElement | null;
+      if (fillModeEl) fillModeEl.value = next;
+      this.updateLegendContent();
+    });
 
     // OOB toggle
     document.getElementById('btn-oob')?.addEventListener('click', () => this.toggleOOB());
@@ -1063,6 +1076,38 @@ export class MapApp {
             statusEl.textContent = `Error loading Jan 1993: ${err instanceof Error ? err.message : String(err)}`;
             statusEl.classList.remove('hidden');
           }
+        }
+      } else if (value === 'latest_run') {
+        try {
+          const base = window.location.origin;
+          const res = await fetch(`${base}/data/derived/latest_run_final_save.json`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const json = await res.json();
+          const loaded = parseGameState(json);
+          this.state.loadGameState(loaded);
+          this.activeControlLookup = buildControlLookup(loaded.controlBySettlement);
+          this.activeStatusLookup = buildStatusLookup(loaded.statusBySettlement);
+          this.state.setControlDataset('latest_run');
+          const turnDisplay = document.getElementById('turn-display');
+          if (turnDisplay) turnDisplay.textContent = loaded.label;
+          const formCheckbox = document.getElementById('layer-formations') as HTMLInputElement | null;
+          if (formCheckbox) {
+            formCheckbox.disabled = false;
+            formCheckbox.checked = true;
+            this.state.setLayer('formations', true);
+          }
+          const brigadeAorCheckbox = document.getElementById('layer-brigade-aor') as HTMLInputElement | null;
+          if (brigadeAorCheckbox) brigadeAorCheckbox.disabled = false;
+          this.updateOOBSidebar(loaded);
+          this.baseLayerCache = null;
+        } catch (err) {
+          console.error('Failed to load latest run:', err);
+          const statusEl = document.getElementById('status');
+          if (statusEl) {
+            statusEl.textContent = 'No latest run. Run a scenario with --map first.';
+            statusEl.classList.remove('hidden');
+          }
+          if (datasetEl) datasetEl.value = 'baseline';
         }
       } else if (value === 'baseline') {
         this.activeControlLookup = { ...this.baselineControlLookup };
@@ -1372,6 +1417,25 @@ export class MapApp {
 
     const aorSids = gs.brigadeAorByFormationId[f.id] ?? f.aorSettlementIds ?? [];
     const aorCount = aorSids.length;
+    const potentialCap = computeBrigadeOperationalCoverageCapFromFormation({
+      personnel: f.personnel,
+      readiness: f.readiness,
+      posture: f.posture,
+      status: f.status,
+      kind: f.kind,
+      tags: f.tags
+    });
+    // Effective cap cannot exceed currently assigned AoR footprint.
+    const cap = Math.min(aorCount, potentialCap);
+    const coveredCount = Math.min(aorCount, cap);
+    const overflowCount = Math.max(0, aorCount - coveredCount);
+    const homeMun = getFormationHomeMunFromTags(f.tags);
+    const fortressActive = Boolean(
+      homeMun &&
+      isLargeUrbanSettlementMun(homeMun) &&
+      (f.posture === 'defend' || f.posture === 'elastic_defense') &&
+      potentialCap === 1
+    );
 
     let html = `<div class="tm-panel-section"><div class="tm-panel-section-header">BRIGADE</div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">ID</span><span class="tm-panel-field-value">${this.escapeHtml(f.id)}</span></div>
@@ -1394,6 +1458,13 @@ export class MapApp {
       html += `<div class="tm-panel-placeholder" style="margin-top:6px;font-size:10px">${aorSids.slice(0, 30).map(sid => this.escapeHtml(sid)).join(', ')} … +${aorSids.length - 30} more</div>`;
     }
     html += `</div>`;
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">OPERATIONAL COVERAGE</div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Dynamic cap</span><span class="tm-panel-field-value">${cap}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Potential cap</span><span class="tm-panel-field-value">${potentialCap}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Covered</span><span class="tm-panel-field-value">${coveredCount}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Overflow</span><span class="tm-panel-field-value">${overflowCount}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Urban fortress</span><span class="tm-panel-field-value">${fortressActive ? 'Active' : 'No'}</span></div>
+    </div>`;
 
     contentEl.innerHTML = html;
   }

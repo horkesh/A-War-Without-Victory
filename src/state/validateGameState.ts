@@ -199,6 +199,47 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
     }
   }
 
+  // Phase II: municipality supra-layer (optional)
+  if ('brigade_municipality_assignment' in s && s.brigade_municipality_assignment !== undefined) {
+    const assignment = s.brigade_municipality_assignment;
+    if (assignment !== null && typeof assignment === 'object' && !Array.isArray(assignment)) {
+      for (const [formationId, munIds] of Object.entries(assignment)) {
+        if (!Array.isArray(munIds)) {
+          errors.push(`brigade_municipality_assignment.${formationId} must be MunicipalityId[] when present`);
+          continue;
+        }
+        for (const munId of munIds) {
+          if (typeof munId !== 'string' || munId.length === 0) {
+            errors.push(`brigade_municipality_assignment.${formationId} must contain non-empty municipality ids`);
+            break;
+          }
+        }
+      }
+    } else {
+      errors.push('brigade_municipality_assignment must be an object (Record<FormationId, MunicipalityId[]>) when present');
+    }
+  }
+  if ('brigade_mun_orders' in s && s.brigade_mun_orders !== undefined) {
+    const orders = s.brigade_mun_orders;
+    if (orders !== null && typeof orders === 'object' && !Array.isArray(orders)) {
+      for (const [formationId, munIdsOrNull] of Object.entries(orders)) {
+        if (munIdsOrNull === null) continue;
+        if (!Array.isArray(munIdsOrNull)) {
+          errors.push(`brigade_mun_orders.${formationId} must be MunicipalityId[] | null when present`);
+          continue;
+        }
+        for (const munId of munIdsOrNull) {
+          if (typeof munId !== 'string' || munId.length === 0) {
+            errors.push(`brigade_mun_orders.${formationId} must contain non-empty municipality ids`);
+            break;
+          }
+        }
+      }
+    } else {
+      errors.push('brigade_mun_orders must be an object (Record<FormationId, MunicipalityId[] | null>) when present');
+    }
+  }
+
   // Phase F: displacement state (stored; monotonic [0, 1]; missing maps treated as empty)
   if ('settlement_displacement' in s && s.settlement_displacement !== undefined) {
     const sd = s.settlement_displacement;

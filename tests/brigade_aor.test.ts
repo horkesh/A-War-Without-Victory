@@ -6,12 +6,16 @@ import { describe, it, expect } from 'vitest';
 import {
   initializeBrigadeAoR,
   validateBrigadeAoR,
+  applyBrigadeMunicipalityOrders,
   getBrigadeAoRSettlements,
   computeBrigadeDensity,
-  identifyFrontActiveSettlements
+  identifyFrontActiveSettlements,
+  getSettlementGarrison,
+  computeBrigadeOperationalCoverageCap
 } from '../src/sim/phase_ii/brigade_aor.js';
 import type { GameState, FormationState, FactionId, SettlementId } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
+import { BRIGADE_OPERATIONAL_AOR_HARD_CAP } from '../src/state/formation_constants.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 
 function makeFormation(id: string, faction: FactionId, hq: string, personnel: number = 1000): FormationState {
@@ -73,6 +77,20 @@ function makeLinearScenario(): { state: GameState; edges: EdgeRecord[] } {
   } as GameState;
 
   return { state, edges };
+}
+
+function makeSettlementsMap(items: Array<{ sid: string; mun: string }>): Map<string, any> {
+  const m = new Map<string, any>();
+  for (const it of items) {
+    m.set(it.sid, {
+      sid: it.sid,
+      source_id: it.sid,
+      mun_code: it.mun,
+      mun: it.mun,
+      mun1990_id: it.mun
+    });
+  }
+  return m;
 }
 
 describe('identifyFrontActiveSettlements', () => {
@@ -142,6 +160,240 @@ describe('initializeBrigadeAoR', () => {
     const overlap = brig1Sids.filter(s => brig2Sids.includes(s));
     expect(overlap.length).toBe(0);
   });
+
+  it('assigns AoR to both brigades when they share the same HQ (same home municipality)', () => {
+    const edges: EdgeRecord[] = [
+      { a: 'S1', b: 'S2' },
+      { a: 'S2', b: 'S3' },
+      { a: 'S3', b: 'S4' },
+      { a: 'S4', b: 'S5' },
+      { a: 'S5', b: 'S6' },
+    ];
+    const pc: Record<string, FactionId> = {
+      S1: 'RS', S2: 'RS', S3: 'RS', S4: 'RS', S5: 'RBiH', S6: 'RBiH',
+    };
+
+    const state: GameState = {
+      schema_version: CURRENT_SCHEMA_VERSION,
+      meta: { turn: 20, seed: 'aor-same-hq', phase: 'phase_ii' } as any,
+      factions: [
+        { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+        { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+      ] as any,
+      formations: {
+        'rs-brig-a': makeFormation('rs-brig-a', 'RS', 'S2'),
+        'rs-brig-b': makeFormation('rs-brig-b', 'RS', 'S2'),
+      },
+      front_segments: {},
+      front_posture: {},
+      front_posture_regions: {},
+      front_pressure: {},
+      militia_pools: {},
+      political_controllers: pc
+    } as GameState;
+
+    initializeBrigadeAoR(state, edges);
+
+    const aSids = getBrigadeAoRSettlements(state, 'rs-brig-a');
+    const bSids = getBrigadeAoRSettlements(state, 'rs-brig-b');
+
+    expect(aSids.length).toBeGreaterThan(0);
+    expect(bSids.length).toBeGreaterThan(0);
+    const overlap = aSids.filter((s) => bSids.includes(s));
+    expect(overlap.length).toBe(0);
+  });
+
+  it('assigns AoR to active brigade without hq_sid via deterministic fallback seed', () => {
+    const edges: EdgeRecord[] = [
+      { a: 'S1', b: 'S2' },
+      { a: 'S2', b: 'S3' },
+      { a: 'S3', b: 'S4' },
+      { a: 'S4', b: 'S5' },
+      { a: 'S5', b: 'S6' },
+    ];
+    const pc: Record<string, FactionId> = {
+      S1: 'RS', S2: 'RS', S3: 'RS', S4: 'RS', S5: 'RBiH', S6: 'RBiH',
+    };
+    const state: GameState = {
+      schema_version: CURRENT_SCHEMA_VERSION,
+      meta: { turn: 20, seed: 'aor-missing-hq', phase: 'phase_ii' } as any,
+      factions: [
+        { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+        { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+      ] as any,
+      formations: {
+        'rs-brig-b': {
+          ...makeFormation('rs-brig-b', 'RS', 'S2'),
+          hq_sid: undefined
+        },
+      },
+      front_segments: {},
+      front_posture: {},
+      front_posture_regions: {},
+      front_pressure: {},
+      militia_pools: {},
+      political_controllers: pc
+    } as GameState;
+
+    initializeBrigadeAoR(state, edges);
+    const bSids = getBrigadeAoRSettlements(state, 'rs-brig-b');
+    expect(bSids.length).toBeGreaterThan(0);
+  });
+
+  it('uses corps lookup for rear brigades to keep sector assignment coherent', () => {
+    const edges: EdgeRecord[] = [
+      { a: 'S1', b: 'S2' },
+      { a: 'S2', b: 'S3' },
+      { a: 'S3', b: 'S4' },
+      { a: 'S4', b: 'S5' },
+      { a: 'S5', b: 'S6' },
+      { a: 'S6', b: 'S7' },
+      { a: 'S7', b: 'S8' },
+      { a: 'S8', b: 'S9' },
+      { a: 'S9', b: 'S10' },
+      { a: 'S1', b: 'E1' },
+      { a: 'S10', b: 'E2' },
+    ];
+
+    const pc: Record<string, FactionId> = {
+      S1: 'RS', S2: 'RS', S3: 'RS', S4: 'RS', S5: 'RS', S6: 'RS', S7: 'RS', S8: 'RS', S9: 'RS', S10: 'RS',
+      E1: 'RBiH', E2: 'RBiH',
+    };
+
+    const state: GameState = {
+      schema_version: CURRENT_SCHEMA_VERSION,
+      meta: { turn: 20, seed: 'aor-corps-fallback', phase: 'phase_ii' } as any,
+      factions: [
+        { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+        { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+      ] as any,
+      formations: {
+        'corps-a': {
+          id: 'corps-a', faction: 'RS', name: 'Corps A', created_turn: 0, status: 'active',
+          assignment: null, kind: 'corps_asset', tags: [], personnel: 0, hq_sid: 'S2'
+        } as FormationState,
+        'corps-b': {
+          id: 'corps-b', faction: 'RS', name: 'Corps B', created_turn: 0, status: 'active',
+          assignment: null, kind: 'corps_asset', tags: [], personnel: 0, hq_sid: 'S9'
+        } as FormationState,
+        'rs-brig-a': {
+          ...makeFormation('rs-brig-a', 'RS', 'S8'),
+          tags: ['corps:corps-a']
+        },
+        // Rear-positioned brigade with corps-b tag; without corps lookup this tends to claim the wrong side.
+        'rs-brig-b': {
+          ...makeFormation('rs-brig-b', 'RS', 'S3'),
+          tags: ['corps:corps-b']
+        },
+      },
+      front_segments: {},
+      front_posture: {},
+      front_posture_regions: {},
+      front_pressure: {},
+      militia_pools: {},
+      political_controllers: pc
+    } as GameState;
+
+    initializeBrigadeAoR(state, edges);
+
+    // Left front side should stay with corps-a brigade.
+    expect(state.brigade_aor?.['S1']).toBe('rs-brig-a');
+    // Right front side should be assigned using corps-b lookup despite rear HQ bias.
+    expect(state.brigade_aor?.['S9']).toBe('rs-brig-b');
+    expect(state.brigade_aor?.['S10']).toBe('rs-brig-b');
+  });
+
+  it('splits settlement coverage deterministically when brigades share one municipality', () => {
+    const edges: EdgeRecord[] = [
+      { a: 'A1', b: 'A2' },
+      { a: 'A2', b: 'A3' },
+      { a: 'A3', b: 'B1' }
+    ];
+    const settlements = makeSettlementsMap([
+      { sid: 'A1', mun: 'm_shared' },
+      { sid: 'A2', mun: 'm_shared' },
+      { sid: 'A3', mun: 'm_shared' },
+      { sid: 'B1', mun: 'm_enemy' }
+    ]);
+    const state: GameState = {
+      schema_version: CURRENT_SCHEMA_VERSION,
+      meta: { turn: 20, seed: 'aor-shared-mun', phase: 'phase_ii' } as any,
+      factions: [
+        { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+        { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+      ] as any,
+      formations: {
+        'rbih-a': makeFormation('rbih-a', 'RBiH', 'A1'),
+        'rbih-b': makeFormation('rbih-b', 'RBiH', 'A3')
+      },
+      front_segments: {},
+      front_posture: {},
+      front_posture_regions: {},
+      front_pressure: {},
+      militia_pools: {},
+      political_controllers: { A1: 'RBiH', A2: 'RBiH', A3: 'RBiH', B1: 'RS' },
+      brigade_municipality_assignment: {
+        'rbih-a': ['m_shared'],
+        'rbih-b': ['m_shared']
+      }
+    } as GameState;
+
+    initializeBrigadeAoR(state, edges, settlements);
+    const a = getBrigadeAoRSettlements(state, 'rbih-a');
+    const b = getBrigadeAoRSettlements(state, 'rbih-b');
+    expect(a.length).toBeGreaterThan(0);
+    expect(b.length).toBeGreaterThan(0);
+    expect(a.filter((sid) => b.includes(sid)).length).toBe(0);
+  });
+});
+
+describe('applyBrigadeMunicipalityOrders', () => {
+  it('moves brigade assignment to adjacent municipality deterministically', () => {
+    const edges: EdgeRecord[] = [
+      { a: 'T1', b: 'S1' },
+      { a: 'S1', b: 'S2' },
+      { a: 'S2', b: 'S3' },
+      { a: 'S3', b: 'S4' },
+      { a: 'S4', b: 'E1' }
+    ];
+    const settlements = makeSettlementsMap([
+      { sid: 'T1', mun: 'm3' },
+      { sid: 'S1', mun: 'm1' },
+      { sid: 'S2', mun: 'm1' },
+      { sid: 'S3', mun: 'm2' },
+      { sid: 'S4', mun: 'm2' },
+      { sid: 'E1', mun: 'm_enemy' }
+    ]);
+    const state: GameState = {
+      schema_version: CURRENT_SCHEMA_VERSION,
+      meta: { turn: 20, seed: 'mun-orders', phase: 'phase_ii' } as any,
+      factions: [
+        { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+        { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+      ] as any,
+      formations: {
+        'rs-a': makeFormation('rs-a', 'RS', 'T1'),
+        'rs-b': makeFormation('rs-b', 'RS', 'S2')
+      },
+      front_segments: {},
+      front_posture: {},
+      front_posture_regions: {},
+      front_pressure: {},
+      militia_pools: {},
+      political_controllers: { T1: 'RS', S1: 'RS', S2: 'RS', S3: 'RS', S4: 'RS', E1: 'RBiH' },
+      brigade_municipality_assignment: {
+        'rs-a': ['m1'],
+        'rs-b': ['m1']
+      },
+      brigade_mun_orders: {
+        'rs-b': ['m3']
+      }
+    } as GameState;
+
+    const report = applyBrigadeMunicipalityOrders(state, edges, settlements);
+    expect(report.orders_applied).toBe(1);
+    expect(state.brigade_municipality_assignment?.['rs-b']).toEqual(['m3']);
+  });
 });
 
 describe('validateBrigadeAoR', () => {
@@ -197,5 +449,111 @@ describe('computeBrigadeDensity', () => {
     const { state, edges } = makeLinearScenario();
     initializeBrigadeAoR(state, edges);
     expect(computeBrigadeDensity(state, 'nonexistent')).toBe(0);
+  });
+
+  it('applies dynamic operational coverage cap for oversized AoR', () => {
+    const formationId = 'rs-brig-cap';
+    const pc: Record<string, FactionId> = {};
+    const brigadeAor: Record<string, string> = {};
+    const formations: Record<string, FormationState> = {
+      [formationId]: makeFormation(formationId, 'RS', 'S001', 3000)
+    };
+
+    for (let i = 1; i <= 100; i++) {
+      const sid = `S${String(i).padStart(3, '0')}`;
+      pc[sid] = 'RS';
+      brigadeAor[sid] = formationId;
+    }
+
+    const state: GameState = {
+      schema_version: CURRENT_SCHEMA_VERSION,
+      meta: { turn: 20, seed: 'aor-cap-test', phase: 'phase_ii' } as any,
+      factions: [
+        { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+      ] as any,
+      formations,
+      front_segments: {},
+      front_posture: {},
+      front_posture_regions: {},
+      front_pressure: {},
+      militia_pools: {},
+      political_controllers: pc,
+      brigade_aor: brigadeAor
+    } as GameState;
+
+    const cap = computeBrigadeOperationalCoverageCap(state, formationId);
+    const density = computeBrigadeDensity(state, formationId);
+    expect(cap).toBeGreaterThan(0);
+    expect(cap).toBeLessThanOrEqual(BRIGADE_OPERATIONAL_AOR_HARD_CAP);
+    expect(density).toBeCloseTo(3000 / cap, 6);
+
+    // First settlements are in deterministic covered subset.
+    expect(getSettlementGarrison(state, 'S001')).toBeCloseTo(density, 6);
+    // Overflow settlement is assigned in AoR but not operationally covered.
+    expect(getSettlementGarrison(state, 'S100')).toBe(0);
+  });
+
+  it('supports urban fortress concentration for large urban municipalities', () => {
+    const formationId = 'rbih-sarajevo-brig';
+    const formation = makeFormation(formationId, 'RBiH', 'S001', 3000);
+    formation.tags = ['mun:centar_sarajevo'];
+    formation.posture = 'defend';
+    const pc: Record<string, FactionId> = {};
+    const brigadeAor: Record<string, string> = {};
+    for (let i = 1; i <= 30; i++) {
+      const sid = `S${String(i).padStart(3, '0')}`;
+      pc[sid] = 'RBiH';
+      brigadeAor[sid] = formationId;
+    }
+    const state: GameState = {
+      schema_version: CURRENT_SCHEMA_VERSION,
+      meta: { turn: 20, seed: 'sarajevo-cap-test', phase: 'phase_ii' } as any,
+      factions: [
+        { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+      ] as any,
+      formations: { [formationId]: formation },
+      front_segments: {},
+      front_posture: {},
+      front_posture_regions: {},
+      front_pressure: {},
+      militia_pools: {},
+      political_controllers: pc,
+      brigade_aor: brigadeAor
+    } as GameState;
+
+    expect(computeBrigadeOperationalCoverageCap(state, formationId)).toBe(1);
+    expect(getSettlementGarrison(state, 'S001')).toBeGreaterThan(0);
+    expect(getSettlementGarrison(state, 'S002')).toBe(0);
+  });
+
+  it('does not collapse to one-settlement fortress for non-large-urban municipalities', () => {
+    const formationId = 'rbih-non-urban-brig';
+    const formation = makeFormation(formationId, 'RBiH', 'S001', 3000);
+    formation.tags = ['mun:kiseljak']; // mixed override exists, but not in large-urban >=60k list
+    formation.posture = 'defend';
+    const pc: Record<string, FactionId> = {};
+    const brigadeAor: Record<string, string> = {};
+    for (let i = 1; i <= 30; i++) {
+      const sid = `S${String(i).padStart(3, '0')}`;
+      pc[sid] = 'RBiH';
+      brigadeAor[sid] = formationId;
+    }
+    const state: GameState = {
+      schema_version: CURRENT_SCHEMA_VERSION,
+      meta: { turn: 20, seed: 'non-urban-cap-test', phase: 'phase_ii' } as any,
+      factions: [
+        { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+      ] as any,
+      formations: { [formationId]: formation },
+      front_segments: {},
+      front_posture: {},
+      front_posture_regions: {},
+      front_pressure: {},
+      militia_pools: {},
+      political_controllers: pc,
+      brigade_aor: brigadeAor
+    } as GameState;
+
+    expect(computeBrigadeOperationalCoverageCap(state, formationId)).toBeGreaterThan(1);
   });
 });
