@@ -33,6 +33,18 @@ function baseState(): GameState {
   };
 }
 
+function defaultSpawnOptions() {
+  return {
+    batchSize: null,
+    factionFilter: null,
+    munFilter: null,
+    maxPerMun: null,
+    customTags: [],
+    applyChanges: true,
+    formationKind: 'brigade' as const
+  };
+}
+
 test('spawn at 800: pool with 800 available spawns one brigade with personnel 800', () => {
   const state = baseState();
   state.formation_spawn_directive = { kind: 'brigade' };
@@ -47,15 +59,7 @@ test('spawn at 800: pool with 800 available spawns one brigade with personnel 80
   };
   state.municipalities!['MUN_X'] = { control: 'consolidated' };
 
-  const report = spawnFormationsFromPools(state, {
-    batchSize: null,
-    factionFilter: null,
-    munFilter: null,
-    maxPerMun: null,
-    customTags: [],
-    applyChanges: true,
-    formationKind: 'brigade'
-  });
+  const report = spawnFormationsFromPools(state, defaultSpawnOptions());
 
   assert.strictEqual(report.formations_created, 1);
   const formation = Object.values(state.formations!)[0] as any;
@@ -78,15 +82,7 @@ test('fragmented mun never spawns', () => {
   };
   state.municipalities!['MUN_FRAG'] = { control: 'fragmented' };
 
-  const report = spawnFormationsFromPools(state, {
-    batchSize: null,
-    factionFilter: null,
-    munFilter: null,
-    maxPerMun: null,
-    customTags: [],
-    applyChanges: true,
-    formationKind: 'brigade'
-  });
+  const report = spawnFormationsFromPools(state, defaultSpawnOptions());
 
   assert.strictEqual(report.formations_created, 0, 'fragmented mun must not spawn');
 });
@@ -173,4 +169,37 @@ test('reinforce uses MIN_BRIGADE_SPAWN (800) when personnel absent', () => {
   const f = state.formations!['F1'] as any;
   assert.ok(f.personnel !== undefined);
   assert.ok(f.personnel >= MIN_BRIGADE_SPAWN && f.personnel <= 2500);
+});
+
+test('spawn priority: reinforcement reserves one spawn batch when directive is active', () => {
+  const state = baseState();
+  state.formation_spawn_directive = { kind: 'brigade' };
+  state.formations!['F1'] = {
+    id: 'F1',
+    faction: 'RBiH',
+    name: 'Existing Zenica Brigade',
+    created_turn: 0,
+    status: 'active',
+    assignment: null,
+    kind: 'brigade',
+    readiness: 'active',
+    personnel: 1000,
+    tags: ['mun:zenica']
+  } as any;
+  state.municipalities!['zenica'] = { control: 'consolidated' };
+  state.militia_pools![militiaPoolKey('zenica', 'RBiH')] = {
+    mun_id: 'zenica',
+    faction: 'RBiH',
+    available: 850,
+    committed: 0,
+    exhausted: 0,
+    updated_turn: 10
+  };
+
+  const reinforce = reinforceBrigadesFromPools(state);
+  assert.strictEqual(reinforce.manpower_added, 50, 'reinforcement should keep 800 reserved for spawn');
+
+  const spawn = spawnFormationsFromPools(state, defaultSpawnOptions());
+  assert.strictEqual(spawn.formations_created, 1, 'reserved manpower should allow one new brigade spawn');
+  assert.strictEqual(Object.keys(state.formations ?? {}).length, 2, 'existing + newly spawned brigade expected');
 });

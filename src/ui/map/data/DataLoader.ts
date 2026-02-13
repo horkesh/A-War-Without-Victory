@@ -106,7 +106,7 @@ export async function loadAllData(
     loadJsonOptional<{ by_census_id?: Record<string, { name: string; mun_code: string }> }>(
       `${base}/data/derived/settlement_names.json`
     ),
-    loadJsonOptional<{ by_municipality_id?: Record<string, { display_name: string; mun1990_id: string }> }>(
+    loadJsonOptional<{ by_municipality_id?: Record<string, { display_name: string; mun1990_id: string }>; by_mun1990_id?: Record<string, { display_name: string }> }>(
       `${base}/data/derived/mun1990_names.json`
     ),
     loadJsonOptional<SettlementEthnicityData>(
@@ -211,6 +211,7 @@ export async function loadAllData(
   };
   const mun1990Names: Mun1990NamesData = {
     by_municipality_id: munRes?.by_municipality_id ?? {},
+    by_mun1990_id: munRes?.by_mun1990_id,
   };
 
   // Key municipality centroids by mun1990_id so formations (tag mun:xxx) resolve to a position.

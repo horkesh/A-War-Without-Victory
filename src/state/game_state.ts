@@ -29,6 +29,7 @@
  */
 import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
+import type { CasualtyLedger } from './casualty_ledger.js';
 
 export const CURRENT_SCHEMA_VERSION = 1 as const;
 
@@ -980,4 +981,8 @@ export interface GameState {
   // --- Recruitment system state (recruitment_system_design_note.md) ---
   /** Recruitment resources: capital pools, equipment pools, recruited brigade tracking. */
   recruitment_state?: RecruitmentResourceState;
+
+  // --- Battle resolution & casualty tracking ---
+  /** Cumulative casualty ledger (killed, wounded, missing/captured) per faction and formation. */
+  casualty_ledger?: CasualtyLedger;
 }

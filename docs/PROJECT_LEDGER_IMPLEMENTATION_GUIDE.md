@@ -145,3 +145,11 @@
 - `docs/PROJECT_LEDGER_IMPLEMENTATION_GUIDE.md` — this guide
 
 Next step: Phase 1 tagging of existing ledger entries.
+
+---
+
+## 9. Subsequent reorganization (2026-02-13)
+
+- **Second pass:** Orchestrator ran knowledge-base update per this guide (Phase 3–4 style): migrated content from PROJECT_LEDGER.md and .agent/napkin.md for 2026-02-10 through 2026-02-13 into PROJECT_LEDGER_KNOWLEDGE.md; updated PROJECT_LEDGER_TAGGING_INDEX.md with new date range and decision chains; appended ledger entry for the reorganization.
+- **No file moves;** thematic doc and tagging index are additive only. Main ledger remains append-only.
+- **Next time:** Repeat Phase 3 (migrate by theme) and Phase 4 (validation + ledger entry) at phase boundaries or when a substantial run of new entries has accumulated; optionally refresh tagging index with recent dates.

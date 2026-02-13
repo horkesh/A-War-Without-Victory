@@ -22,6 +22,7 @@
       <button type="button" class="tm-toolbar-btn" id="btn-oob" aria-label="Toggle Order of Battle">OOB</button>
       <button type="button" class="tm-toolbar-btn" id="btn-search" aria-label="Search settlement">Search</button>
       <span class="tm-turn-display" id="turn-display">Turn 0 — Sep 1991</span>
+      <span class="tm-army-strength" id="army-strength" aria-live="polite"></span>
     </div>
 
     <!-- Main content area -->
@@ -65,8 +66,6 @@
           <div class="tm-layer-body" id="layer-panel-body">
             <div class="tm-layer-row"><label><input type="checkbox" id="layer-control" checked> Political
                 control</label></div>
-            <div class="tm-layer-row"><label><input type="checkbox" id="layer-contested" checked> Contested
-                zones</label></div>
             <div class="tm-layer-row"><label><input type="checkbox" id="layer-frontlines" checked> Front lines</label>
             </div>
             <div class="tm-layer-row"><label><input type="checkbox" id="layer-labels" checked> Settlement labels</label>
@@ -80,16 +79,9 @@
                 (selected)</label></div>
             <hr class="tm-layer-sep">
             <div class="tm-layer-row">
-              <label for="settlement-fill-mode">Color by:</label>
-              <select id="settlement-fill-mode" aria-label="Settlement fill mode">
-                <option value="political_control">Political control</option>
-                <option value="ethnic_majority">Ethnic majority (1991)</option>
-              </select>
-            </div>
-            <div class="tm-layer-row">
               <label for="control-dataset">Dataset:</label>
               <select id="control-dataset" aria-label="Control dataset">
-                <option value="baseline">Baseline (Apr 1992)</option>
+                <option value="baseline">Baseline (Apr 1992, from ethnicity)</option>
                 <option value="sep1992">September 1992</option>
                 <option value="jan1993">January 1993</option>
                 <option value="latest_run">Latest run</option>
@@ -98,6 +90,19 @@
             <div class="tm-layer-row">
               <button type="button" class="tm-load-state-btn" id="btn-load-state">Load State...</button>
               <input type="file" id="file-input" accept=".json" style="display:none">
+            </div>
+            <div class="tm-layer-row">
+              <button type="button" class="tm-load-state-btn" id="btn-load-replay">Load Replay...</button>
+              <input type="file" id="replay-file-input" accept=".json" style="display:none">
+            </div>
+            <div class="tm-layer-row">
+              <button type="button" class="tm-load-state-btn" id="btn-replay-play">Play replay</button>
+            </div>
+            <div class="tm-layer-row">
+              <button type="button" class="tm-load-state-btn" id="btn-replay-export">Export replay</button>
+            </div>
+            <div class="tm-layer-row">
+              <span class="tm-muted" id="replay-status">Replay: not loaded</span>
             </div>
           </div>
         </div>

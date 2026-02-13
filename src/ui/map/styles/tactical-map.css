@@ -28,6 +28,7 @@ body, html {
 }
 .tm-toolbar-btn:hover { background: #5a5248; }
 .tm-turn-display { margin-left: auto; font-size: 11px; color: #8a8278; }
+.tm-army-strength { margin-left: 12px; font-size: 11px; color: #8a8278; white-space: nowrap; }
 
 /* ─── Main Layout ─────────────────────────────────── */
 .tm-main {

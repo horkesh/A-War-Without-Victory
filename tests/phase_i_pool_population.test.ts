@@ -59,9 +59,11 @@ test('runPoolPopulation creates pools with composite key from phase_i_militia_st
   assert.strictEqual(poolA_RBiH.faction, 'RBiH');
   assert.strictEqual(poolA_RS.mun_id, 'MUN_A');
   assert.strictEqual(poolA_RS.faction, 'RS');
-  // strength 30 * POOL_SCALE * FACTION_POOL_SCALE 1.2, strength 50 * 0.88
-  assert.ok(poolA_RBiH.available >= 3000);
-  assert.ok(poolA_RS.available >= 4000);
+  // Current calibration: floor(strength * 38 * faction_scale), consolidated authority.
+  // RBiH: floor(30 * 38 * 1.32) = 1504
+  // RS:   floor(50 * 38 * 1.08) = 2052
+  assert.ok(poolA_RBiH.available >= 1504);
+  assert.ok(poolA_RS.available >= 2052);
 });
 
 test('runPoolPopulation is deterministic (same state -> same pools)', () => {

@@ -151,6 +151,9 @@ test('acceptance gating: enforceability check', () => {
   const acceptance = checkOfferAcceptance(state, offer, derivedFrontEdges, edges, undefined, undefined);
 
   strictEqual(acceptance.accepted, false);
+  strictEqual(acceptance.decision, 'counter');
+  ok(acceptance.counter_offer);
+  strictEqual(acceptance.counter_offer?.kind, 'local_freeze');
   ok(acceptance.reasons.some((r) => r.includes('enforceability_failed')));
 });
 
@@ -183,6 +186,8 @@ test('acceptance gating: symmetry check', () => {
   const acceptance = checkOfferAcceptance(state, offer, derivedFrontEdges, edges, undefined, undefined);
 
   strictEqual(acceptance.accepted, false);
+  strictEqual(acceptance.decision, 'counter');
+  ok(acceptance.counter_offer);
   ok(acceptance.reasons.some((r) => r.includes('symmetry_failed')));
 });
 
@@ -215,6 +220,8 @@ test('acceptance gating: supply sanity check', () => {
   const acceptance = checkOfferAcceptance(state, offer, derivedFrontEdges, edges, undefined, undefined);
 
   strictEqual(acceptance.accepted, false);
+  strictEqual(acceptance.decision, 'counter');
+  ok(acceptance.counter_offer);
   ok(acceptance.reasons.some((r) => r.includes('supply_sanity_failed')));
 });
 
@@ -245,8 +252,49 @@ test('acceptance gating: all checks pass', () => {
   const acceptance = checkOfferAcceptance(state, offer, derivedFrontEdges, edges, undefined, undefined);
 
   strictEqual(acceptance.accepted, true);
+  strictEqual(acceptance.decision, 'accept');
+  strictEqual(acceptance.counter_offer, null);
   ok(acceptance.enforcement_package);
   strictEqual(acceptance.enforcement_package?.freeze_edges.length, 2);
+});
+
+test('counter-offer determinism: repeated rejection yields identical counter id and terms', () => {
+  const state1 = createTestState();
+  const state2 = createTestState();
+  state1.factions[1].negotiation!.pressure = 5;
+  state2.factions[1].negotiation!.pressure = 5;
+  const offer: Offer = {
+    id: 'OFF_5_ceasefire_GLOBAL',
+    turn: 5,
+    kind: 'ceasefire',
+    scope: { kind: 'global' },
+    rationale: {
+      pressure_trigger: 10,
+      exhaustion_snapshot: {},
+      instability_snapshot: { breaches_total: 0 },
+      supply_snapshot: { unsupplied_formations: 0, unsupplied_militia_pools: 0 }
+    },
+    terms: {
+      duration_turns: 'indefinite',
+      freeze_edges: ['edge1', 'edge2']
+    }
+  };
+  const derivedFrontEdges: FrontEdge[] = [
+    { edge_id: 'edge1', a: 'sid1', b: 'sid3', side_a: 'faction_a', side_b: 'faction_b' },
+    { edge_id: 'edge2', a: 'sid2', b: 'sid4', side_a: 'faction_a', side_b: 'faction_b' }
+  ];
+  const edges: EdgeRecord[] = createTestEdges();
+
+  const a1 = checkOfferAcceptance(state1, offer, derivedFrontEdges, edges, undefined, undefined);
+  const a2 = checkOfferAcceptance(state2, offer, derivedFrontEdges, edges, undefined, undefined);
+
+  strictEqual(a1.decision, 'counter');
+  strictEqual(a2.decision, 'counter');
+  strictEqual(a1.counter_offer?.id, a2.counter_offer?.id);
+  strictEqual(
+    JSON.stringify(a1.counter_offer?.terms.freeze_edges ?? []),
+    JSON.stringify(a2.counter_offer?.terms.freeze_edges ?? [])
+  );
 });
 
 test('apply enforcement package: mutates state correctly', () => {

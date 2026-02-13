@@ -54,6 +54,12 @@ export const MAX_BRIGADE_PERSONNEL = 3_000;
  */
 export const BRIGADE_OPERATIONAL_AOR_HARD_CAP = 48;
 
+/**
+ * Max municipalities a single brigade can be assigned in ensureBrigadeMunicipalityAssignment.
+ * Prevents one brigade from receiving all uncovered (faction, home_mun) pairs and ending up with 200+ settlements.
+ */
+export const MAX_MUNICIPALITIES_PER_BRIGADE = 8;
+
 /** Max personnel absorbed per turn from home municipality militia pool (recruitment_system_design_note §5.1). */
 export const REINFORCEMENT_RATE = 200;
 

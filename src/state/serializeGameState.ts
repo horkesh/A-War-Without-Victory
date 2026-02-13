@@ -28,6 +28,7 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
   'negotiation_status',
   'ceasefire',
   'negotiation_ledger',
+  'casualty_ledger',
   'control_overrides',
   'control_recognition',
   'supply_rights',

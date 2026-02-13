@@ -31,6 +31,9 @@ export const SIDE_LABELS: Record<string, string> = {
   null: 'Neutral',
 };
 
+/** Deterministic order for OOB sidebar and army strength display. */
+export const FACTION_DISPLAY_ORDER: readonly string[] = ['RBiH', 'RS', 'HRHB'];
+
 /** Ethnicity fill colors (1991 census majority) — same hue as factions for consistency. Keys lowercase. */
 export const ETHNICITY_COLORS: Record<string, string> = {
   bosniak: factionFill('RBiH', 0.55),
@@ -105,9 +108,6 @@ export const BASE_LAYER_WIDTHS = {
   roadSecondary: 0.8,
   controlRegion: 1,
 } as const;
-
-/** Contested crosshatch pattern size in pixels. */
-export const HATCH_SIZE = 12;
 
 /** Front line rendering. */
 export const FRONT_LINE = {

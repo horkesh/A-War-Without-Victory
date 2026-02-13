@@ -212,3 +212,54 @@ test('B4 coercion: coercion_pressure_by_municipality reduces flip threshold so f
   assert.ok(flipsWithout.length !== flipsWith.length, 'Coercion must change flip outcome for MUN_A');
   assert.strictEqual(reportWith.municipalities_evaluated, 2);
 });
+
+test('disable_phase_i_control_flip semantics: militaryActionOnly disables militia-only flips without adjacent brigades', () => {
+  const state: GameState = {
+    schema_version: CURRENT_SCHEMA_VERSION,
+    meta: { turn: 10, seed: 'military-action-only-fixture', phase: 'phase_i', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
+    factions: [
+      { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 0 },
+      { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 0 },
+      { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 0 }
+    ],
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    political_controllers: { s_a: 'RBiH', s_b: 'RS' },
+    municipalities: {
+      MUN_A: { stability_score: 20 },
+      MUN_B: { stability_score: 70 }
+    },
+    phase_i_consolidation_until: {},
+    phase_i_militia_strength: {
+      MUN_A: { RBiH: 0, RS: 0, HRHB: 0 },
+      MUN_B: { RBiH: 0, RS: 90, HRHB: 0 }
+    }
+  };
+  const settlements = new Map([
+    ['s_a', { sid: 's_a', mun1990_id: 'MUN_A', mun_code: 'MUN_A' } as any],
+    ['s_b', { sid: 's_b', mun1990_id: 'MUN_B', mun_code: 'MUN_B' } as any]
+  ]);
+  const edges = [{ a: 's_a', b: 's_b' }];
+
+  const militiaDriven = runControlFlip({ state: structuredClone(state), turn: 10, settlements, edges });
+  assert.ok(
+    militiaDriven.flips.some((f) => f.mun_id === ('MUN_A' as MunicipalityId)),
+    'baseline militia-pressure branch should flip MUN_A in this fixture'
+  );
+
+  const militaryActionOnly = runControlFlip({
+    state: structuredClone(state),
+    turn: 10,
+    settlements,
+    edges,
+    militaryActionOnly: true
+  });
+  assert.ok(
+    !militaryActionOnly.flips.some((f) => f.mun_id === ('MUN_A' as MunicipalityId)),
+    'military-action-only branch should not flip without adjacent brigade attack strength'
+  );
+});

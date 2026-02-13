@@ -11,6 +11,7 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { isLargeSettlementMun } from '../../state/formation_constants.js';
 import { getFactionCapabilityModifier } from '../../state/capability_progression.js';
+import { isMunicipalityAlignedToRbih } from '../../state/rbih_aligned_municipalities.js';
 import { areRbihHrhbAllied } from './alliance_update.js';
 import { computeAlliedDefense, isMixedMunicipality } from './mixed_municipality.js';
 import { applyWaveFlip, processHoldoutCleanup } from './settlement_control.js';
@@ -386,6 +387,19 @@ function applyFlip(
       byFaction[fid] = fid === newController ? POST_FLIP_CONTROLLER_STRENGTH : POST_FLIP_LOST_STRENGTH;
     }
     state.phase_i_militia_strength[munId] = byFaction;
+  }
+
+  // RBiH-aligned municipalities: when flip winner would be HRHB, treat as RBiH (HVO subordinate to ARBiH).
+  if (isMunicipalityAlignedToRbih(munId) && newController === 'HRHB') {
+    const sids = settlementsByMun.get(munId) ?? [];
+    for (const sid of sids) {
+      if (state.political_controllers) state.political_controllers[sid] = 'RBiH';
+    }
+    const byFaction = state.phase_i_militia_strength?.[munId];
+    if (byFaction) {
+      (byFaction as Record<string, number>)['RBiH'] = POST_FLIP_CONTROLLER_STRENGTH;
+      (byFaction as Record<string, number>)['HRHB'] = POST_FLIP_LOST_STRENGTH;
+    }
   }
 
   return waveResult.events;

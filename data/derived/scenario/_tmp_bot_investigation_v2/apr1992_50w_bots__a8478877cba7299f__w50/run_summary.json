@@ -1,0 +1,92 @@
+{
+  "bot_benchmark_evaluation": {
+    "evaluated": 3,
+    "failed": 1,
+    "not_reached": 3,
+    "passed": 2,
+    "results": [
+      {
+        "actual_control_share": 0.155101,
+        "deviation": 0.005101,
+        "expected_control_share": 0.15,
+        "faction": "HRHB",
+        "objective": "secure_herzegovina_core",
+        "passed": true,
+        "status": "evaluated",
+        "tolerance": 0.08,
+        "turn": 26
+      },
+      {
+        "actual_control_share": 0.365167,
+        "deviation": 0.165167,
+        "expected_control_share": 0.2,
+        "faction": "RBiH",
+        "objective": "hold_core_centers",
+        "passed": false,
+        "status": "evaluated",
+        "tolerance": 0.1,
+        "turn": 26
+      },
+      {
+        "actual_control_share": 0.479732,
+        "deviation": 0.029732,
+        "expected_control_share": 0.45,
+        "faction": "RS",
+        "objective": "early_territorial_expansion",
+        "passed": true,
+        "status": "evaluated",
+        "tolerance": 0.15,
+        "turn": 26
+      },
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 0.18,
+        "faction": "HRHB",
+        "objective": "hold_central_bosnia_nodes",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0.1,
+        "turn": 52
+      },
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 0.25,
+        "faction": "RBiH",
+        "objective": "preserve_survival_corridors",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0.12,
+        "turn": 52
+      },
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 0.5,
+        "faction": "RS",
+        "objective": "consolidate_gains",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0.15,
+        "turn": 52
+      }
+    ]
+  },
+  "final_state_hash": "41b5a09d55395045",
+  "phase_ii_attack_resolution": {
+    "casualty_attacker": 11320,
+    "casualty_defender": 4859,
+    "flips_applied": 1035,
+    "orders_processed": 2240,
+    "weeks_with_orders": 31,
+    "weeks_with_phase_ii": 32
+  },
+  "run_id": "apr1992_50w_bots__a8478877cba7299f__w50",
+  "scenario_id": "apr1992_50w_bots",
+  "summary": {
+    "final_turn": 50,
+    "phase": "phase_ii"
+  },
+  "weeks": 50
+}

@@ -21,7 +21,7 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getBrigadeAoRSettlements, computeBrigadeDensity, getSettlementGarrison } from './brigade_aor.js';
 import { canAdoptPosture } from './brigade_posture.js';
-import { FACTION_STRATEGIES, isCorridorMunicipality } from './bot_strategy.js';
+import { FACTION_STRATEGIES, isCorridorMunicipality, isOffensiveObjective, isDefensivePriority } from './bot_strategy.js';
 
 // --- Types ---
 
@@ -60,6 +60,9 @@ const SCORE_WEAK_GARRISON_MAX = 50;
 
 /** Garrison threshold below which weakness bonus kicks in. */
 const GARRISON_WEAKNESS_THRESHOLD = 100;
+
+/** Score bonus for attacking settlements in strategic offensive objective municipalities. */
+const SCORE_OFFENSIVE_OBJECTIVE = 70;
 
 // --- Helpers ---
 
@@ -238,11 +241,14 @@ function scoreTarget(
     score += Math.round(SCORE_WEAK_GARRISON_MAX * (1 - garrison / GARRISON_WEAKNESS_THRESHOLD));
   }
 
-  // 2. Corridor objective + 3. Home municipality recapture (both need sidToMun)
+  // 2. Corridor objective + 3. Strategic offensive objective + 4. Home municipality recapture
   if (sidToMun) {
     const targetMun = sidToMun.get(targetSid);
     if (isCorridorMunicipality(targetMun, faction)) {
       score += SCORE_CORRIDOR_OBJECTIVE;
+    }
+    if (isOffensiveObjective(targetMun, faction)) {
+      score += SCORE_OFFENSIVE_OBJECTIVE;
     }
     const homeMun = getFormationHomeMun(brigade);
     if (homeMun && targetMun === homeMun) {
@@ -331,6 +337,11 @@ export function generateBotBrigadeOrders(
     const currentPosture: BrigadePosture = brigade.posture ?? 'defend';
     const inCorridor = isBrigadeInCorridor(state, brigade, faction, munLookup);
 
+    // Check if brigade HQ is in an offensive objective municipality
+    const homeMun = getFormationHomeMun(brigade);
+    const hqMun = munLookup?.get(brigade.hq_sid ?? '') ?? null;
+    const inOffensiveZone = isOffensiveObjective(homeMun, faction) || isOffensiveObjective(hqMun, faction);
+
     let targetPosture: BrigadePosture | null = null;
 
     if (!hasFront) {
@@ -345,6 +356,11 @@ export function generateBotBrigadeOrders(
       // Overstaffed and defending: can afford to probe/attack (if below share limit)
       if (attackPostureCount < maxAttackBrigades) {
         targetPosture = strategy.preferred_posture_when_overstaffed;
+      }
+    } else if (inOffensiveZone && density >= COVERAGE_UNDERSTAFFED && currentPosture === 'defend') {
+      // Brigades in strategic offensive zones probe at lower density threshold
+      if (attackPostureCount < maxAttackBrigades) {
+        targetPosture = 'probe';
       }
     } else if (density < COVERAGE_UNDERSTAFFED) {
       // Understaffed: fall back to elastic defense
@@ -471,9 +487,15 @@ export function generateBotBrigadeOrders(
   }
 
   // --- Step 3: Attack orders — strategic target selection ---
+  // Build effective posture map: pending orders override current posture
+  const pendingPosture = new Map<FormationId, BrigadePosture>();
+  for (const order of result.posture_orders) {
+    pendingPosture.set(order.brigade_id, order.posture);
+  }
+
   const frontEdgeDataForAttack = getFactionFrontEdges(state, edges, faction);
   for (const brigade of brigades) {
-    const posture = brigade.posture ?? 'defend';
+    const posture = pendingPosture.get(brigade.id) ?? brigade.posture ?? 'defend';
     if (posture !== 'attack' && posture !== 'probe') continue;
     const aorSids = getBrigadeAoRSettlements(state, brigade.id);
     const ourSidsSet = new Set(aorSids);

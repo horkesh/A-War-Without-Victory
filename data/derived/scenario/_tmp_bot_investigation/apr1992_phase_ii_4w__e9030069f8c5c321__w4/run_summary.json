@@ -1,0 +1,92 @@
+{
+  "bot_benchmark_evaluation": {
+    "evaluated": 0,
+    "failed": 0,
+    "not_reached": 6,
+    "passed": 0,
+    "results": [
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 0.15,
+        "faction": "HRHB",
+        "objective": "secure_herzegovina_core",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0.08,
+        "turn": 26
+      },
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 0.2,
+        "faction": "RBiH",
+        "objective": "hold_core_centers",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0.1,
+        "turn": 26
+      },
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 0.45,
+        "faction": "RS",
+        "objective": "early_territorial_expansion",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0.15,
+        "turn": 26
+      },
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 0.18,
+        "faction": "HRHB",
+        "objective": "hold_central_bosnia_nodes",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0.1,
+        "turn": 52
+      },
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 0.25,
+        "faction": "RBiH",
+        "objective": "preserve_survival_corridors",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0.12,
+        "turn": 52
+      },
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 0.5,
+        "faction": "RS",
+        "objective": "consolidate_gains",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0.15,
+        "turn": 52
+      }
+    ]
+  },
+  "final_state_hash": "4d2cbb37e752568d",
+  "phase_ii_attack_resolution": {
+    "casualty_attacker": 0,
+    "casualty_defender": 0,
+    "flips_applied": 0,
+    "orders_processed": 0,
+    "weeks_with_orders": 0,
+    "weeks_with_phase_ii": 4
+  },
+  "run_id": "apr1992_phase_ii_4w__e9030069f8c5c321__w4",
+  "scenario_id": "apr1992_phase_ii_4w",
+  "summary": {
+    "final_turn": 4,
+    "phase": "phase_ii"
+  },
+  "weeks": 4
+}

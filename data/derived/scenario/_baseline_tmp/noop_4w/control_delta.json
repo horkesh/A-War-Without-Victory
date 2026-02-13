@@ -10,11 +10,11 @@
     },
     {
       "controller": "RBiH",
-      "count": 2739
+      "count": 2794
     },
     {
       "controller": "RS",
-      "count": 1964
+      "count": 1909
     }
   ],
   "net_control_counts_before": [
@@ -24,11 +24,11 @@
     },
     {
       "controller": "RBiH",
-      "count": 2739
+      "count": 2794
     },
     {
       "controller": "RS",
-      "count": 1964
+      "count": 1909
     }
   ],
   "total_flips": 0

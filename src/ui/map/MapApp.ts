@@ -3,13 +3,22 @@
  * Creates canvas, loads data, wires modules, and starts the render loop.
  */
 
-import type { LoadedData, SettlementFeature, ViewTransform, RenderContext, FormationView } from './types.js';
+import type {
+  LoadedData,
+  SettlementFeature,
+  ViewTransform,
+  RenderContext,
+  FormationView,
+  ReplayTimelineData,
+  ReplayControlEvent,
+  LoadedGameState
+} from './types.js';
 import { MapState } from './state/MapState.js';
 import { MapProjection } from './geo/MapProjection.js';
 import { SpatialIndex } from './geo/SpatialIndex.js';
 import { computeFeatureBBox } from './geo/MapProjection.js';
 import { loadAllData } from './data/DataLoader.js';
-import { ZOOM_LABELS, ZOOM_FACTORS, NATO_TOKENS, SIDE_COLORS, SIDE_SOLID_COLORS, SIDE_LABELS, ETHNICITY_COLORS, ETHNICITY_LABELS, HATCH_SIZE, BASE_LAYER_COLORS, BASE_LAYER_WIDTHS, FRONT_LINE, MINIMAP, formatTurnDate, FORMATION_KIND_SHAPES, FORMATION_MARKER_SIZE, FORMATION_HIT_RADIUS } from './constants.js';
+import { ZOOM_LABELS, ZOOM_FACTORS, NATO_TOKENS, SIDE_COLORS, SIDE_SOLID_COLORS, SIDE_LABELS, FACTION_DISPLAY_ORDER, ETHNICITY_COLORS, ETHNICITY_LABELS, BASE_LAYER_COLORS, BASE_LAYER_WIDTHS, FRONT_LINE, MINIMAP, formatTurnDate, FORMATION_KIND_SHAPES, FORMATION_MARKER_SIZE, FORMATION_HIT_RADIUS } from './constants.js';
 import { controlKey, censusIdFromSid, buildControlLookup, buildStatusLookup } from './data/ControlLookup.js';
 import { parseGameState } from './data/GameStateAdapter.js';
 import { normalizeForSearch } from './data/DataLoader.js';
@@ -19,6 +28,9 @@ import {
 } from '../../state/brigade_operational_cap.js';
 import { isLargeUrbanSettlementMun } from '../../state/formation_constants.js';
 import type { PolygonCoords, Position } from './types.js';
+
+const REPLAY_WEEK_INTERVAL_MS = 900;
+const REPLAY_FIRE_TTL_FRAMES = 45;
 
 export class MapApp {
   private rootId: string;
@@ -32,7 +44,6 @@ export class MapApp {
   // Cached render data
   private baseLayerCache: HTMLCanvasElement | null = null;
   private baseLayerCacheKey = '';
-  private hatchPattern: CanvasPattern | null = null;
 
   // Interaction state
   private isPanning = false;
@@ -45,6 +56,14 @@ export class MapApp {
   private hoveredFeature: SettlementFeature | null = null;
   private pendingRender = false;
   private searchVisible = false;
+  private replayFrames: unknown[] = [];
+  private replayEventsByTurn = new Map<number, ReplayControlEvent[]>();
+  private replayCurrentWeek = 0;
+  private replayTimer: ReturnType<typeof setInterval> | null = null;
+  private fireActiveBySid = new Map<string, number>();
+  private mediaRecorder: MediaRecorder | null = null;
+  private mediaChunks: Blob[] = [];
+  private isExportingReplay = false;
 
   // Baseline control data for dataset switching
   private baselineControlLookup: Record<string, string | null> = {};
@@ -94,9 +113,7 @@ export class MapApp {
     this.wireInteraction();
     this.wireUI();
 
-    // Sync Color-by select and legend to initial state
-    const fillModeSelect = document.getElementById('settlement-fill-mode') as HTMLSelectElement | null;
-    if (fillModeSelect) fillModeSelect.value = this.state.snapshot.settlementFillMode;
+    this.updateArmyStrengthDisplay(null);
     this.updateLegendContent();
 
     // Initial render
@@ -170,6 +187,7 @@ export class MapApp {
 
     // 3. Settlement polygons
     this.drawSettlements(rc);
+    this.advanceFireOverlay();
 
     // 4. Front lines
     if (rc.layers.frontLines && rc.zoomLevel >= 1) {
@@ -333,22 +351,6 @@ export class MapApp {
 
   // ─── Settlement Rendering ───────────────────────
 
-  private getHatchPattern(): CanvasPattern | null {
-    if (this.hatchPattern) return this.hatchPattern;
-    const c = document.createElement('canvas');
-    c.width = HATCH_SIZE; c.height = HATCH_SIZE;
-    const pctx = c.getContext('2d');
-    if (!pctx) return null;
-    pctx.strokeStyle = '#000';
-    pctx.lineWidth = 1;
-    pctx.beginPath();
-    pctx.moveTo(0, 0); pctx.lineTo(HATCH_SIZE, HATCH_SIZE);
-    pctx.moveTo(HATCH_SIZE, 0); pctx.lineTo(0, HATCH_SIZE);
-    pctx.stroke();
-    this.hatchPattern = this.ctx.createPattern(c, 'repeat');
-    return this.hatchPattern;
-  }
-
   private drawPolygonPath(
     ctx: CanvasRenderingContext2D,
     feature: SettlementFeature,
@@ -387,8 +389,6 @@ export class MapApp {
   private drawSettlements(rc: RenderContext): void {
     const { ctx } = rc;
     const controllers = this.activeControlLookup;
-    const controlStatus = this.activeStatusLookup;
-    const contestedPattern = rc.layers.contestedZones ? this.getHatchPattern() : null;
     const fillMode = this.state.snapshot.settlementFillMode;
 
     const sidOrder = Array.from(this.data.settlements.keys()).sort();
@@ -396,8 +396,6 @@ export class MapApp {
       const feature = this.data.settlements.get(sid)!;
       const key = controlKey(sid);
       const controller = controllers[key] ?? controllers[sid] ?? 'null';
-      const status = controlStatus[key] ?? controlStatus[sid];
-      const isContested = rc.layers.contestedZones && (status === 'CONTESTED' || status === 'HIGHLY_CONTESTED');
 
       if (!rc.layers.politicalControl) {
         ctx.fillStyle = 'rgba(120,120,120,0.2)';
@@ -409,16 +407,31 @@ export class MapApp {
       }
       this.drawPolygonPath(ctx, feature, rc.project);
       ctx.fill();
-
-      if (rc.layers.politicalControl && isContested && contestedPattern) {
-        ctx.save();
-        ctx.fillStyle = contestedPattern;
-        this.drawPolygonPath(ctx, feature, rc.project);
-        ctx.clip('evenodd');
-        ctx.fillRect(0, 0, rc.width, rc.height);
-        ctx.restore();
-      }
+      this.drawFlipFireOverlay(rc, sid, feature);
     }
+  }
+
+  private drawFlipFireOverlay(rc: RenderContext, sid: string, feature: SettlementFeature): void {
+    const ttl = this.fireActiveBySid.get(sid);
+    if (ttl === undefined || ttl <= 0) return;
+    const intensity = Math.max(0, Math.min(1, ttl / 45));
+    const alpha = 0.18 + (0.45 * intensity);
+    const warm = 185 + Math.floor(70 * intensity);
+    const hot = 60 + Math.floor(90 * intensity);
+    rc.ctx.fillStyle = `rgba(255,${warm},${hot},${alpha.toFixed(3)})`;
+    this.drawPolygonPath(rc.ctx, feature, rc.project);
+    rc.ctx.fill();
+  }
+
+  private advanceFireOverlay(): void {
+    if (this.fireActiveBySid.size === 0) return;
+    const next = new Map<string, number>();
+    for (const [sid, ttl] of this.fireActiveBySid.entries()) {
+      const n = ttl - 1;
+      if (n > 0) next.set(sid, n);
+    }
+    this.fireActiveBySid = next;
+    if (next.size > 0) this.scheduleRender();
   }
 
   // ─── Front Lines ────────────────────────────────
@@ -575,6 +588,18 @@ export class MapApp {
 
   // ─── Selection ──────────────────────────────────
 
+  /** Resolve AoR SID (may be S-prefixed or mun:census format from saved state) to a settlement feature. */
+  private getSettlementFeatureBySid(sid: string): SettlementFeature | undefined {
+    let f = this.data.settlements.get(sid);
+    if (f) return f;
+    if (sid.includes(':')) {
+      const censusPart = sid.split(':')[1];
+      if (censusPart) f = this.data.settlements.get(censusPart.startsWith('S') ? censusPart : `S${censusPart}`);
+    }
+    if (f) return f;
+    return this.data.settlements.get(sid.startsWith('S') ? sid : `S${sid}`);
+  }
+
   private drawBrigadeAoRHighlight(rc: RenderContext): void {
     const gs = this.state.snapshot.loadedGameState;
     const formationId = this.state.snapshot.selectedFormationId;
@@ -590,7 +615,7 @@ export class MapApp {
     ctx.setLineDash([4, 4]);
     ctx.fillStyle = 'rgba(128, 128, 128, 0.12)';
     for (const sid of aorSids) {
-      const feature = this.data.settlements.get(sid);
+      const feature = this.getSettlementFeatureBySid(sid);
       if (!feature) continue;
       this.drawPolygonPath(ctx, feature, rc.project);
       ctx.fill();
@@ -871,6 +896,9 @@ export class MapApp {
       if (formationAt) {
         this.state.setSelectedFormation(formationAt.id);
         this.state.setSelectedSettlement(null);
+        this.state.setLayer('brigadeAor', true);
+        const brigadeAorCheckbox = document.getElementById('layer-brigade-aor') as HTMLInputElement | null;
+        if (brigadeAorCheckbox) { brigadeAorCheckbox.disabled = false; brigadeAorCheckbox.checked = true; }
         this.openBrigadePanel(formationAt);
         return;
       }
@@ -943,6 +971,173 @@ export class MapApp {
     });
   }
 
+  private setReplayStatus(text: string): void {
+    const el = document.getElementById('replay-status');
+    if (el) el.textContent = text;
+  }
+
+  private stopReplayPlayback(): void {
+    if (this.replayTimer) {
+      clearInterval(this.replayTimer);
+      this.replayTimer = null;
+    }
+    const playBtn = document.getElementById('btn-replay-play');
+    if (playBtn) playBtn.textContent = 'Play replay';
+  }
+
+  private buildReplayEventsByTurn(events: ReplayControlEvent[]): Map<number, ReplayControlEvent[]> {
+    const byTurn = new Map<number, ReplayControlEvent[]>();
+    const sorted = [...events].sort((a, b) => {
+      if (a.turn !== b.turn) return a.turn - b.turn;
+      const mech = (a.mechanism ?? '').localeCompare(b.mechanism ?? '');
+      if (mech !== 0) return mech;
+      return (a.settlement_id ?? '').localeCompare(b.settlement_id ?? '');
+    });
+    for (const ev of sorted) {
+      const list = byTurn.get(ev.turn) ?? [];
+      list.push(ev);
+      byTurn.set(ev.turn, list);
+    }
+    return byTurn;
+  }
+
+  private applyReplayWeek(weekIndex: number): void {
+    if (weekIndex < 0 || weekIndex >= this.replayFrames.length) return;
+    const loaded = parseGameState(this.replayFrames[weekIndex]);
+    this.replayCurrentWeek = weekIndex;
+    this.state.loadGameState(loaded);
+    this.activeControlLookup = buildControlLookup(loaded.controlBySettlement);
+    this.activeStatusLookup = buildStatusLookup(loaded.statusBySettlement);
+    const turnDisplay = document.getElementById('turn-display');
+    if (turnDisplay) turnDisplay.textContent = `${loaded.label} [Replay w${weekIndex + 1}/${this.replayFrames.length}]`;
+    const formCheckbox = document.getElementById('layer-formations') as HTMLInputElement | null;
+    if (formCheckbox) {
+      formCheckbox.disabled = false;
+      formCheckbox.checked = true;
+      this.state.setLayer('formations', true);
+    }
+    const brigadeAorCheckbox = document.getElementById('layer-brigade-aor') as HTMLInputElement | null;
+    if (brigadeAorCheckbox) brigadeAorCheckbox.disabled = false;
+    this.updateOOBSidebar(loaded);
+    this.baseLayerCache = null;
+
+    const events = this.replayEventsByTurn.get(loaded.turn) ?? [];
+    if (events.length > 0) {
+      for (const ev of events) {
+        if (!ev?.settlement_id) continue;
+        this.fireActiveBySid.set(ev.settlement_id, REPLAY_FIRE_TTL_FRAMES);
+      }
+    }
+    this.setReplayStatus(
+      `Replay: week ${weekIndex + 1}/${this.replayFrames.length} (turn ${loaded.turn})` +
+      (events.length > 0 ? ` - flips this turn: ${events.length}` : '')
+    );
+    this.scheduleRender();
+  }
+
+  private loadReplayTimeline(data: ReplayTimelineData): void {
+    if (!Array.isArray(data.frames) || data.frames.length === 0) {
+      throw new Error('Replay timeline has no frames.');
+    }
+    const sortedFrames = [...data.frames]
+      .sort((a, b) => (a.week_index ?? 0) - (b.week_index ?? 0))
+      .map((f) => f.game_state);
+    this.replayFrames = sortedFrames;
+    this.replayEventsByTurn = this.buildReplayEventsByTurn(data.control_events ?? []);
+    this.fireActiveBySid.clear();
+    this.stopReplayPlayback();
+    this.applyReplayWeek(0);
+  }
+
+  private stepReplayForward(): void {
+    if (this.replayFrames.length === 0) return;
+    const next = this.replayCurrentWeek + 1;
+    if (next >= this.replayFrames.length) {
+      this.stopReplayPlayback();
+      if (this.isExportingReplay) {
+        this.stopReplayExport();
+      }
+      return;
+    }
+    this.applyReplayWeek(next);
+  }
+
+  private toggleReplayPlayback(): void {
+    if (this.replayFrames.length === 0) {
+      this.setReplayStatus('Replay: load replay_timeline.json first.');
+      return;
+    }
+    if (this.replayTimer) {
+      this.stopReplayPlayback();
+      return;
+    }
+    this.replayTimer = setInterval(() => this.stepReplayForward(), REPLAY_WEEK_INTERVAL_MS);
+    const playBtn = document.getElementById('btn-replay-play');
+    if (playBtn) playBtn.textContent = 'Pause replay';
+  }
+
+  private stopReplayExport(): void {
+    this.isExportingReplay = false;
+    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+      this.mediaRecorder.stop();
+    } else {
+      this.mediaRecorder = null;
+      this.mediaChunks = [];
+    }
+    const exportBtn = document.getElementById('btn-replay-export');
+    if (exportBtn) exportBtn.textContent = 'Export replay';
+  }
+
+  private startReplayExport(): void {
+    if (this.replayFrames.length === 0) {
+      this.setReplayStatus('Replay export: load replay_timeline.json first.');
+      return;
+    }
+    if (this.isExportingReplay) {
+      this.stopReplayExport();
+      return;
+    }
+    if (typeof MediaRecorder === 'undefined') {
+      this.setReplayStatus('Replay export: MediaRecorder is unavailable.');
+      return;
+    }
+    const preferredType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+      ? 'video/webm;codecs=vp9'
+      : (MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : '');
+    if (!preferredType) {
+      this.setReplayStatus('Replay export: WebM encoding is not supported in this browser.');
+      return;
+    }
+    const capture = this.canvas.captureStream(30);
+    this.mediaChunks = [];
+    this.mediaRecorder = new MediaRecorder(capture, { mimeType: preferredType });
+    this.mediaRecorder.ondataavailable = (ev) => {
+      if (ev.data && ev.data.size > 0) this.mediaChunks.push(ev.data);
+    };
+    this.mediaRecorder.onstop = () => {
+      const blob = new Blob(this.mediaChunks, { type: preferredType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'scenario_replay.webm';
+      a.click();
+      URL.revokeObjectURL(url);
+      this.mediaRecorder = null;
+      this.mediaChunks = [];
+      this.setReplayStatus('Replay export complete: scenario_replay.webm');
+    };
+    this.isExportingReplay = true;
+    const exportBtn = document.getElementById('btn-replay-export');
+    if (exportBtn) exportBtn.textContent = 'Stop export';
+    this.mediaRecorder.start();
+    this.applyReplayWeek(0);
+    this.stopReplayPlayback();
+    this.replayTimer = setInterval(() => this.stepReplayForward(), REPLAY_WEEK_INTERVAL_MS);
+    const playBtn = document.getElementById('btn-replay-play');
+    if (playBtn) playBtn.textContent = 'Pause replay';
+    this.setReplayStatus('Replay export running...');
+  }
+
   // ─── UI Wiring ──────────────────────────────────
 
   private wireUI(): void {
@@ -955,7 +1150,6 @@ export class MapApp {
     // Layer toggles
     const layerMap: Array<[string, keyof typeof this.state.snapshot.layers]> = [
       ['layer-control', 'politicalControl'],
-      ['layer-contested', 'contestedZones'],
       ['layer-frontlines', 'frontLines'],
       ['layer-labels', 'labels'],
       ['layer-mun-borders', 'munBorders'],
@@ -979,24 +1173,15 @@ export class MapApp {
     // Layer panel toggle
     document.getElementById('layer-panel-toggle')?.addEventListener('click', () => this.toggleLayerPanel());
 
-    // Color by (settlement fill mode)
-    const fillModeEl = document.getElementById('settlement-fill-mode') as HTMLSelectElement | null;
-    fillModeEl?.addEventListener('change', () => {
-      const mode = fillModeEl.value as 'political_control' | 'ethnic_majority';
-      this.state.setSettlementFillMode(mode);
-      this.updateLegendContent();
-    });
-
     // Legend toggle
     document.getElementById('btn-legend')?.addEventListener('click', () => {
       document.getElementById('legend')?.classList.toggle('hidden');
     });
+    // Ethnic 1991: single entry point for toggling political control vs ethnic majority fill
     document.getElementById('btn-ethnic')?.addEventListener('click', () => {
       const current = this.state.snapshot.settlementFillMode;
       const next = current === 'political_control' ? 'ethnic_majority' : 'political_control';
       this.state.setSettlementFillMode(next);
-      const fillModeEl = document.getElementById('settlement-fill-mode') as HTMLSelectElement | null;
-      if (fillModeEl) fillModeEl.value = next;
       this.updateLegendContent();
     });
 
@@ -1017,6 +1202,7 @@ export class MapApp {
     // Control dataset
     const datasetEl = document.getElementById('control-dataset') as HTMLSelectElement | null;
     datasetEl?.addEventListener('change', async () => {
+      this.stopReplayPlayback();
       const value = datasetEl.value;
       if (value === 'sep1992') {
         try {
@@ -1029,6 +1215,7 @@ export class MapApp {
           this.state.setControlDataset('sep1992');
           const turnDisplay = document.getElementById('turn-display');
           if (turnDisplay) turnDisplay.textContent = 'September 1992';
+          this.clearStatusBar();
         } catch {
           // Fallback to baseline
           this.activeControlLookup = { ...this.baselineControlLookup };
@@ -1069,8 +1256,13 @@ export class MapApp {
           this.updateOOBSidebar(loaded);
 
           this.baseLayerCache = null;
+          this.clearStatusBar();
         } catch (err) {
           console.error('Failed to load Jan 1993 scenario:', err);
+          this.activeControlLookup = { ...this.baselineControlLookup };
+          this.activeStatusLookup = { ...this.baselineStatusLookup };
+          this.state.clearGameState();
+          if (datasetEl) datasetEl.value = 'baseline';
           const statusEl = document.getElementById('status');
           if (statusEl) {
             statusEl.textContent = `Error loading Jan 1993: ${err instanceof Error ? err.message : String(err)}`;
@@ -1100,14 +1292,18 @@ export class MapApp {
           if (brigadeAorCheckbox) brigadeAorCheckbox.disabled = false;
           this.updateOOBSidebar(loaded);
           this.baseLayerCache = null;
+          this.clearStatusBar();
         } catch (err) {
           console.error('Failed to load latest run:', err);
+          this.activeControlLookup = { ...this.baselineControlLookup };
+          this.activeStatusLookup = { ...this.baselineStatusLookup };
+          this.state.clearGameState();
+          if (datasetEl) datasetEl.value = 'baseline';
           const statusEl = document.getElementById('status');
           if (statusEl) {
             statusEl.textContent = 'No latest run. Run a scenario with --map first.';
             statusEl.classList.remove('hidden');
           }
-          if (datasetEl) datasetEl.value = 'baseline';
         }
       } else if (value === 'baseline') {
         this.activeControlLookup = { ...this.baselineControlLookup };
@@ -1115,6 +1311,7 @@ export class MapApp {
         this.state.setControlDataset('baseline');
         const turnDisplay = document.getElementById('turn-display');
         if (turnDisplay) turnDisplay.textContent = 'Turn 0 — Sep 1991';
+        this.clearStatusBar();
       } else if (value.startsWith('loaded:')) {
         const gs = this.state.snapshot.loadedGameState;
         if (gs) {
@@ -1123,6 +1320,7 @@ export class MapApp {
           this.state.setControlDataset(value);
           const turnDisplay = document.getElementById('turn-display');
           if (turnDisplay) turnDisplay.textContent = gs.label;
+          this.clearStatusBar();
         }
       }
       this.baseLayerCache = null;
@@ -1133,6 +1331,7 @@ export class MapApp {
     const fileInput = document.getElementById('file-input') as HTMLInputElement | null;
     loadBtn?.addEventListener('click', () => fileInput?.click());
     fileInput?.addEventListener('change', async () => {
+      this.stopReplayPlayback();
       const file = fileInput.files?.[0];
       if (!file) return;
       try {
@@ -1166,6 +1365,7 @@ export class MapApp {
         this.updateOOBSidebar(loaded);
 
         this.baseLayerCache = null;
+        this.clearStatusBar();
       } catch (err) {
         const statusEl = document.getElementById('status');
         if (statusEl) {
@@ -1177,6 +1377,46 @@ export class MapApp {
       fileInput.value = '';
     });
 
+    // Load replay timeline bundle
+    const loadReplayBtn = document.getElementById('btn-load-replay');
+    const replayFileInput = document.getElementById('replay-file-input') as HTMLInputElement | null;
+    const replayPlayBtn = document.getElementById('btn-replay-play');
+    const replayExportBtn = document.getElementById('btn-replay-export');
+    loadReplayBtn?.addEventListener('click', () => replayFileInput?.click());
+    replayFileInput?.addEventListener('change', async () => {
+      const file = replayFileInput.files?.[0];
+      if (!file) return;
+      try {
+        this.stopReplayPlayback();
+        this.stopReplayExport();
+        const text = await file.text();
+        const trimmed = text.trim();
+        if (!trimmed) {
+          this.setReplayStatus('Replay load failed: file is empty. Use replay_timeline.json from a run with --video.');
+          replayFileInput.value = '';
+          return;
+        }
+        let json: ReplayTimelineData;
+        try {
+          json = JSON.parse(text) as ReplayTimelineData;
+        } catch (parseErr) {
+          const msg = parseErr instanceof Error ? parseErr.message : String(parseErr);
+          const hint = msg.includes('end of JSON input') || msg.includes('Unexpected token')
+            ? ' File may be truncated or not replay_timeline.json (run with --video and ensure run completed).'
+            : '';
+          this.setReplayStatus(`Replay load failed: ${msg}.${hint}`);
+          replayFileInput.value = '';
+          return;
+        }
+        this.loadReplayTimeline(json);
+      } catch (err) {
+        this.setReplayStatus(`Replay load failed: ${err instanceof Error ? err.message : String(err)}`);
+      }
+      replayFileInput.value = '';
+    });
+    replayPlayBtn?.addEventListener('click', () => this.toggleReplayPlayback());
+    replayExportBtn?.addEventListener('click', () => this.startReplayExport());
+
     // Search input
     const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
     searchInput?.addEventListener('input', () => this.updateSearchResults());
@@ -1187,6 +1427,7 @@ export class MapApp {
     // Turn display init
     const turnDisplay = document.getElementById('turn-display');
     if (turnDisplay) turnDisplay.textContent = 'Turn 0 — Sep 1991';
+    this.setReplayStatus('Replay: not loaded');
   }
 
   // ─── Hit Testing ────────────────────────────────
@@ -1275,7 +1516,6 @@ export class MapApp {
         <div class="tm-legend-row"><span class="tm-swatch" style="background:rgb(180,50,50)"></span> Serb</div>
         <div class="tm-legend-row"><span class="tm-swatch" style="background:rgb(60,100,140)"></span> Croat</div>
         <div class="tm-legend-row"><span class="tm-swatch" style="background:rgb(100,100,100)"></span> Other</div>
-        <div class="tm-legend-row">&mdash; Contested (hatch)</div>
         <div class="tm-legend-row">&mdash; &mdash; Front line (dashed)</div>`;
     } else {
       el.innerHTML = `
@@ -1283,7 +1523,6 @@ export class MapApp {
         <div class="tm-legend-row"><span class="tm-swatch" style="background:rgb(180,50,50)"></span> RS (VRS)</div>
         <div class="tm-legend-row"><span class="tm-swatch" style="background:rgb(60,100,140)"></span> HRHB (HVO)</div>
         <div class="tm-legend-row"><span class="tm-swatch" style="background:rgb(100,100,100)"></span> Neutral</div>
-        <div class="tm-legend-row">&mdash; Contested (hatch)</div>
         <div class="tm-legend-row">&mdash; &mdash; Front line (dashed)</div>`;
     }
   }
@@ -1561,25 +1800,56 @@ export class MapApp {
     return html;
   }
 
-  private renderAdminTab(sid: string, feature: SettlementFeature): string {
+  /** Normalize mun1990 slug for lookup (by_mun1990_id keys are lowercase with underscores). */
+  private static normalizeMun1990Slug(slug: string): string {
+    return slug.toLowerCase().replace(/-/g, '_').trim();
+  }
+
+  /** Resolve municipality display name and mun1990_id from feature (municipality_id or mun1990_id). */
+  private resolveMunicipalityFromFeature(feature: SettlementFeature): { displayName: string; mun1990Id: string; idForDisplay: string } {
+    const props = feature.properties as Record<string, unknown>;
     const munId = feature.properties.municipality_id;
+    const mun1990SlugRaw = props?.mun1990_id as string | undefined;
+    const mun1990Slug = mun1990SlugRaw && String(mun1990SlugRaw).trim() ? String(mun1990SlugRaw).trim() : undefined;
+    const mun1990NameOnFeature = props?.mun1990_name as string | undefined;
     const munMid = munId != null ? String(munId) : undefined;
-    const munEntry = munMid ? this.data.mun1990Names.by_municipality_id?.[munMid] : undefined;
-    const munName = munEntry?.display_name ?? munMid ?? '—';
+    const byMun = this.data.mun1990Names.by_municipality_id ?? {};
+    const byMun1990 = this.data.mun1990Names.by_mun1990_id ?? {};
+    if (munMid && byMun[munMid]) {
+      const e = byMun[munMid];
+      return { displayName: e.display_name, mun1990Id: e.mun1990_id, idForDisplay: munMid };
+    }
+    if (mun1990Slug) {
+      const normalized = MapApp.normalizeMun1990Slug(mun1990Slug);
+      const entry = byMun1990[mun1990Slug] ?? byMun1990[normalized];
+      if (entry) return { displayName: entry.display_name, mun1990Id: mun1990Slug, idForDisplay: mun1990Slug };
+      return {
+        displayName: mun1990NameOnFeature && String(mun1990NameOnFeature).trim() ? String(mun1990NameOnFeature).trim() : mun1990Slug,
+        mun1990Id: mun1990Slug,
+        idForDisplay: mun1990Slug,
+      };
+    }
+    if (munMid) return { displayName: munMid, mun1990Id: byMun[munMid]?.mun1990_id ?? '', idForDisplay: munMid };
+    return { displayName: '—', mun1990Id: '', idForDisplay: '—' };
+  }
+
+  private renderAdminTab(sid: string, feature: SettlementFeature): string {
+    const resolved = this.resolveMunicipalityFromFeature(feature);
     const natoClass = feature.properties.nato_class ?? 'SETTLEMENT';
 
-    // Count settlements in municipality
+    // Count settlements in same municipality (by resolved mun1990Id); deterministic sorted iteration
     let munSettlementCount = 0;
-    if (munId != null) {
-      for (const f of this.data.settlements.values()) {
-        if (f.properties.municipality_id === munId) munSettlementCount++;
-      }
+    const sidOrder = Array.from(this.data.settlements.keys()).sort();
+    for (const s of sidOrder) {
+      const f = this.data.settlements.get(s)!;
+      const r = this.resolveMunicipalityFromFeature(f);
+      if (r.mun1990Id && r.mun1990Id === resolved.mun1990Id) munSettlementCount++;
     }
 
     return `<div class="tm-panel-section">
       <div class="tm-panel-section-header">MUNICIPALITY</div>
-      <div class="tm-panel-field"><span class="tm-panel-field-label">Name</span><span class="tm-panel-field-value">${this.escapeHtml(munName)}</span></div>
-      <div class="tm-panel-field"><span class="tm-panel-field-label">ID</span><span class="tm-panel-field-value">${this.escapeHtml(munMid ?? '—')}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Name</span><span class="tm-panel-field-value">${this.escapeHtml(resolved.displayName)}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">ID</span><span class="tm-panel-field-value">${this.escapeHtml(resolved.idForDisplay)}</span></div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">Settlements</span><span class="tm-panel-field-value">${munSettlementCount}</span></div>
     </div>
     <div class="tm-panel-section">
@@ -1616,13 +1886,8 @@ export class MapApp {
       </div>`;
     }
 
-    // Find formations in this municipality
-    const munId = feature.properties.municipality_id;
-    const munStr = munId != null ? String(munId) : '';
-    // Match formations by mun tag — the tag stores mun1990_id (string like "banovici")
-    // We need the mun1990_id from the mun1990_names lookup
-    const munEntry = munStr ? this.data.mun1990Names.by_municipality_id?.[munStr] : undefined;
-    const mun1990Id = munEntry?.mun1990_id ?? '';
+    // Resolve municipality (municipality_id or mun1990_id) so formations/pools match by mun1990_id
+    const { mun1990Id } = this.resolveMunicipalityFromFeature(feature);
 
     const formations = gs.formations.filter(f => f.municipalityId === mun1990Id);
 
@@ -1679,7 +1944,7 @@ export class MapApp {
     sidebar.setAttribute('aria-hidden', isOpen ? 'true' : 'false');
   }
 
-  private updateOOBSidebar(gs: import('./types.js').LoadedGameState): void {
+  private updateOOBSidebar(gs: LoadedGameState): void {
     const content = document.getElementById('oob-content');
     if (!content) return;
 
@@ -1692,8 +1957,7 @@ export class MapApp {
     }
 
     let html = '';
-    const factionOrder = ['RBiH', 'RS', 'HRHB'];
-    for (const faction of factionOrder) {
+    for (const faction of FACTION_DISPLAY_ORDER) {
       const formations = byFaction.get(faction) ?? [];
       if (formations.length === 0) continue;
       const fColor = SIDE_SOLID_COLORS[faction] ?? '#888';
@@ -1738,6 +2002,8 @@ export class MapApp {
 
     content.innerHTML = html;
 
+    this.updateArmyStrengthDisplay(gs);
+
     // Wire formation row clicks → jump to municipality
     content.querySelectorAll('.tm-formation-row[data-mun]').forEach(row => {
       row.addEventListener('click', () => {
@@ -1756,7 +2022,37 @@ export class MapApp {
     });
   }
 
+  /** Update toolbar army strength line: total personnel per faction (soldiers in formations). */
+  private updateArmyStrengthDisplay(gs: LoadedGameState | null): void {
+    const el = document.getElementById('army-strength');
+    if (!el) return;
+    if (!gs?.formations?.length) {
+      el.textContent = '';
+      el.style.display = 'none';
+      return;
+    }
+    const byFaction: Record<string, number> = {};
+    for (const f of gs.formations) {
+      const fac = f.faction || '';
+      byFaction[fac] = (byFaction[fac] ?? 0) + (f.personnel ?? 0);
+    }
+    const parts = FACTION_DISPLAY_ORDER
+      .filter((f) => (byFaction[f] ?? 0) > 0)
+      .map((f) => `${SIDE_LABELS[f] ?? f} ${(byFaction[f] ?? 0).toLocaleString()}`);
+    el.textContent = parts.length > 0 ? `Army: ${parts.join(' | ')}` : '';
+    el.style.display = parts.length > 0 ? '' : 'none';
+  }
+
   // ─── Utilities ──────────────────────────────────
+
+  private clearStatusBar(): void {
+    const el = document.getElementById('status');
+    if (el) {
+      el.textContent = '';
+      el.classList.add('hidden');
+      el.classList.remove('error');
+    }
+  }
 
   private escapeHtml(s: string): string {
     const div = document.createElement('div');

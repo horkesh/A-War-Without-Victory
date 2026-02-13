@@ -302,6 +302,16 @@ export interface BotWeeklyDiagnosticsRow {
   total_reassignments: number;
 }
 
+/** Phase H2.3: Aggregate Phase II attack-resolution metrics from pipeline reports. */
+export interface PhaseIIAttackResolutionSummary {
+  weeks_with_phase_ii: number;
+  weeks_with_orders: number;
+  orders_processed: number;
+  flips_applied: number;
+  casualty_attacker: number;
+  casualty_defender: number;
+}
+
 /**
  * Compute army strengths from final state. Deterministic ordering.
  */
@@ -444,6 +454,8 @@ export interface FormatEndReportParams {
   botBenchmarkSummary?: BotBenchmarkSummary | null;
   /** Optional per-turn bot diagnostics. */
   botWeeklyDiagnostics?: BotWeeklyDiagnosticsRow[] | null;
+  /** Optional aggregate summary of phase_ii_resolve_attack_orders across run weeks. */
+  phaseIIAttackResolutionSummary?: PhaseIIAttackResolutionSummary | null;
 }
 
 /** Phase H1.7: Run-level activity diagnostics (machine-readable). */
@@ -797,6 +809,17 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
         `- ${faction}: push ${total.push}, probe ${total.probe}, hold ${total.hold}, formation reassignments ${total.formation_reassignments}`
       );
     }
+    lines.push('');
+  }
+  if (params.phaseIIAttackResolutionSummary) {
+    const a = params.phaseIIAttackResolutionSummary;
+    lines.push('## Phase II attack resolution (pipeline)');
+    lines.push('');
+    lines.push(`- Weeks in Phase II: ${a.weeks_with_phase_ii}`);
+    lines.push(`- Weeks with nonzero orders processed: ${a.weeks_with_orders}`);
+    lines.push(`- Orders processed: ${a.orders_processed}`);
+    lines.push(`- Settlement flips applied: ${a.flips_applied}`);
+    lines.push(`- Casualties (attacker / defender): ${a.casualty_attacker} / ${a.casualty_defender}`);
     lines.push('');
   }
   lines.push('## Notes on interpretation');

@@ -1,0 +1,18 @@
+{
+  "counts_added_by_kind": {
+    "brigade": 1
+  },
+  "counts_final_by_kind": {
+    "brigade": 34,
+    "corps_asset": 21
+  },
+  "counts_initial_by_kind": {
+    "brigade": 33,
+    "corps_asset": 21
+  },
+  "counts_removed_by_kind": {},
+  "formations_added": [
+    "arbih_7th_vitezka_muslim_liberation"
+  ],
+  "formations_removed": []
+}

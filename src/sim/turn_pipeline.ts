@@ -128,6 +128,7 @@ import { applyCorpsEffects, advanceOperations } from './phase_ii/corps_command.j
 import { activateOGs, updateOGLifecycle } from './phase_ii/operational_groups.js';
 import { applyBrigadePressureToState } from './phase_ii/brigade_pressure.js';
 import { resolveAttackOrders, type ResolveAttackOrdersReport } from './phase_ii/resolve_attack_orders.js';
+import { loadTerrainScalars } from '../map/terrain_scalars.js';
 import { degradeEquipment, ensureBrigadeComposition } from './phase_ii/equipment_effects.js';
 import { updatePhaseIISupplyPressure } from './phase_ii/supply_pressure.js';
 import { updatePhaseIIExhaustion } from './phase_ii/exhaustion.js';
@@ -405,6 +406,31 @@ const phases: NamedPhase[] = [
       };
     }
   },
+  // --- Formation lifecycle (before brigade AI so readiness gates are current) ---
+  {
+    name: 'update-formation-lifecycle',
+    run: async (context) => {
+      // Phase I.0: Formation lifecycle state management
+      // Runs early so brigades transition forming→active before bot AI evaluates posture.
+      const fatigueReport = context.report.formation_fatigue;
+      if (!fatigueReport) return;
+
+      // Build supplied map from fatigue report
+      const suppliedByFormation = new Map<string, boolean>();
+      for (const record of fatigueReport.by_formation) {
+        suppliedByFormation.set(record.formation_id, record.supplied_this_turn);
+      }
+
+      // Derive municipality authority from political control (consolidated/contested/fragmented)
+      const municipalityAuthorityByMun = deriveMunicipalityAuthorityMap(context.state);
+
+      context.report.formation_lifecycle = updateFormationLifecycle(
+        context.state,
+        suppliedByFormation,
+        municipalityAuthorityByMun
+      );
+    }
+  },
   // --- Brigade Operations Pipeline (Phase II only) ---
   {
     name: 'formation-hq-relocation',
@@ -584,12 +610,26 @@ const phases: NamedPhase[] = [
     name: 'phase-ii-resolve-attack-orders',
     run: async (context) => {
       if (context.state.meta.phase !== 'phase_ii') return;
-      let edges = context.input.settlementEdges;
-      if (!edges || edges.length === 0) {
-        const graph = await loadSettlementGraph();
-        edges = graph.edges;
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      const edges = context.input.settlementEdges ?? graph.edges;
+
+      // Build settlement → municipality lookup for terrain/urban defense
+      const settlementToMun = new Map<string, string>();
+      for (const [sid, rec] of graph.settlements.entries()) {
+        settlementToMun.set(sid, rec.mun1990_id ?? rec.mun_code ?? rec.mun);
       }
-      context.report.phase_ii_resolve_attack_orders = resolveAttackOrders(context.state, edges);
+
+      // Load terrain scalars (cached after first call)
+      let terrainData;
+      try {
+        terrainData = await loadTerrainScalars();
+      } catch {
+        terrainData = { by_sid: {} };
+      }
+
+      context.report.phase_ii_resolve_attack_orders = resolveAttackOrders(
+        context.state, edges, terrainData, settlementToMun
+      );
     }
   },
   {
@@ -785,29 +825,6 @@ const phases: NamedPhase[] = [
       const graph = await loadSettlementGraph();
       await updateLegitimacyState(context.state, graph);
       context.report.legitimacy_update = { settlements: Object.keys(context.state.settlements ?? {}).length };
-    }
-  },
-  {
-    name: 'update-formation-lifecycle',
-    run: async (context) => {
-      // Phase I.0: Formation lifecycle state management
-      const fatigueReport = context.report.formation_fatigue;
-      if (!fatigueReport) return;
-      
-      // Build supplied map from fatigue report
-      const suppliedByFormation = new Map<string, boolean>();
-      for (const record of fatigueReport.by_formation) {
-        suppliedByFormation.set(record.formation_id, record.supplied_this_turn);
-      }
-      
-      // Derive municipality authority from political control (consolidated/contested/fragmented)
-      const municipalityAuthorityByMun = deriveMunicipalityAuthorityMap(context.state);
-
-      context.report.formation_lifecycle = updateFormationLifecycle(
-        context.state,
-        suppliedByFormation,
-        municipalityAuthorityByMun
-      );
     }
   },
   {
@@ -1218,8 +1235,10 @@ const phases: NamedPhase[] = [
       } else {
         context.report.negotiation_acceptance = {
           accepted: false,
+          decision: 'reject',
           reasons: ['no_offer_generated'],
-          enforcement_package: null
+          enforcement_package: null,
+          counter_offer: null
         };
         context.report.negotiation_apply = {
           applied: false,

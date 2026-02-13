@@ -61,6 +61,8 @@ export interface SettlementNamesData {
 
 export interface Mun1990NamesData {
   by_municipality_id: Record<string, { display_name: string; mun1990_id: string }>;
+  /** Slug (mun1990_id) → display name; used when settlement has mun1990_id but not municipality_id. */
+  by_mun1990_id?: Record<string, { display_name: string }>;
 }
 
 export interface EthnicityEntry {
@@ -92,7 +94,6 @@ export type ZoomLevel = 0 | 1 | 2;
 
 export interface LayerVisibility {
   politicalControl: boolean;
-  contestedZones: boolean;
   frontLines: boolean;
   labels: boolean;
   roads: boolean;
@@ -134,6 +135,30 @@ export interface LoadedGameState {
   statusBySettlement: Record<string, string>;
   /** Per formation id: sorted list of settlement IDs in that formation's AoR (from state.brigade_aor). */
   brigadeAorByFormationId: Record<string, string[]>;
+}
+
+export interface ReplayControlEvent {
+  turn: number;
+  settlement_id: string;
+  from: string | null;
+  to: string | null;
+  mechanism: string;
+  mun_id: string | null;
+}
+
+export interface ReplayFrame {
+  week_index: number;
+  game_state: unknown;
+}
+
+export interface ReplayTimelineData {
+  meta?: {
+    run_id?: string;
+    scenario_id?: string;
+    weeks?: number;
+  };
+  frames: ReplayFrame[];
+  control_events?: ReplayControlEvent[];
 }
 
 export interface FormationView {

@@ -57,7 +57,8 @@ import {
   type BotControlShareRow,
   type BotWeeklyDiagnosticsRow,
   type ControlEventsSummary,
-  type FormationFatigueSummary
+  type FormationFatigueSummary,
+  type PhaseIIAttackResolutionSummary
 } from './scenario_end_report.js';
 import type { ControlEvent } from '../sim/phase_i/control_flip.js';
 import {
@@ -153,6 +154,8 @@ export interface RunScenarioOptions {
   scenarioPath: string;
   outDirBase?: string;
   emitEvery?: number;
+  /** When true, emit a weekly save every turn to support tactical-map replay/video workflows. */
+  emitWeeklySavesForVideo?: boolean;
   weeksOverride?: number;
   /** Test-only: if set, called immediately after writing run_meta.json; throw to simulate early crash. */
   injectFailureAfterRunMeta?: () => void;
@@ -189,6 +192,10 @@ export interface RunScenarioResult {
     control_events: string;
     /** Phase H2.2: formation delta (initial vs final). */
     formation_delta: string;
+    /** Optional list of deterministic weekly save paths (save_w1..save_wN). */
+    weekly_saves?: string[];
+    /** Optional replay timeline bundle for tactical-map animation playback/export. */
+    replay_timeline?: string;
     /** Optional per-week smart-bot diagnostics. */
     bot_diagnostics?: string;
   };
@@ -339,6 +346,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     scenarioPath,
     outDirBase = 'runs',
     emitEvery = 0,
+    emitWeeklySavesForVideo = false,
     weeksOverride,
     injectFailureAfterRunMeta,
     filterProbeIntent = false,
@@ -349,6 +357,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     use_smart_bots = false,
     bot_diagnostics = false
   } = options;
+  const effectiveEmitEvery = emitWeeklySavesForVideo ? Math.max(1, emitEvery) : emitEvery;
   let scenario = await loadScenario(scenarioPath);
   if (filterProbeIntent) {
     scenario = scenarioWithoutProbeIntent(scenario);
@@ -611,6 +620,16 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     let firstReportRow: WeeklyReportRow | null = null;
     let lastReportRow: WeeklyReportRow | null = null;
     const activityCountsPerWeek: WeeklyActivityCounts[] = [];
+    const weeklySavePaths: string[] = [];
+    let replayTimelinePath: string | undefined;
+    let replayTimelineStream: ReturnType<typeof createWriteStream> | null = null;
+    let replayTimelineFirstFrame = true;
+    if (emitWeeklySavesForVideo) {
+      replayTimelinePath = join(outDir, 'replay_timeline.json');
+      replayTimelineStream = createWriteStream(replayTimelinePath, { flags: 'w' });
+      const meta = { run_id, scenario_id: scenario.scenario_id, weeks };
+      replayTimelineStream.write('{"meta":' + stableStringify(meta) + ',"frames":[');
+    }
     let baseline_ops_enabled = false;
     let baseline_ops_intensity = 1;
     const engagementLevelsPerWeek: number[] = [];
@@ -622,6 +641,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     const enableBotDiagnostics = bot_diagnostics || scenario.bot_diagnostics === true;
     const botWeeklyDiagnostics: BotWeeklyDiagnosticsRow[] = [];
     const botControlTimeline: BotControlShareRow[] = [];
+    const phaseIIAttackResolutionSummary: PhaseIIAttackResolutionSummary = {
+      weeks_with_phase_ii: 0,
+      weeks_with_orders: 0,
+      orders_processed: 0,
+      flips_applied: 0,
+      casualty_attacker: 0,
+      casualty_defender: 0
+    };
 
     const botManager = (scenario.use_smart_bots || use_smart_bots)
       ? new BotManager({
@@ -762,16 +789,24 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
           oobCreated = true;
         }
 
-        if (turnReport.phase_i_control_flip?.control_events) {
-          const count = turnReport.phase_i_control_flip.control_events.length;
-          const flipCount = turnReport.phase_i_control_flip.flips.length;
-          // console.log(`[DEBUG] Turn ${week_index}: ${flipCount} flips, ${count} events reported`);
-          if (count > 0) {
-            console.log(`[DEBUG] Turn ${week_index}: Pushing ${count} events`);
+        const evs = turnReport.phase_i_control_flip?.control_events;
+        if (evs?.length) {
+          console.log(`[DEBUG] Turn ${week_index}: Pushing ${evs.length} events`);
+          events_all.push(...evs);
+        }
+      }
+
+      if (state.meta.phase === 'phase_ii') {
+        phaseIIAttackResolutionSummary.weeks_with_phase_ii += 1;
+        const phaseIIResolution = turnReport.phase_ii_resolve_attack_orders;
+        if (phaseIIResolution) {
+          phaseIIAttackResolutionSummary.orders_processed += phaseIIResolution.orders_processed ?? 0;
+          phaseIIAttackResolutionSummary.flips_applied += phaseIIResolution.flips_applied ?? 0;
+          phaseIIAttackResolutionSummary.casualty_attacker += phaseIIResolution.casualty_attacker ?? 0;
+          phaseIIAttackResolutionSummary.casualty_defender += phaseIIResolution.casualty_defender ?? 0;
+          if ((phaseIIResolution.orders_processed ?? 0) > 0) {
+            phaseIIAttackResolutionSummary.weeks_with_orders += 1;
           }
-          events_all.push(...turnReport.phase_i_control_flip.control_events);
-        } else {
-          // console.log(`[DEBUG] Turn ${week_index}: No phase_i_control_flip report`);
         }
       }
 
@@ -812,9 +847,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
           control_share_by_faction: computeControlShareByFaction(state)
         });
       }
-
-      const controlEvents = turnReport.phase_i_control_flip?.control_events ?? [];
-      for (const e of controlEvents) events_all.push(e);
 
       // Metrics derivation from active pipeline phases
       let front_active_set_size = 0;
@@ -882,9 +914,16 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       }
       replayStream.write(stableStringify(replayLine) + '\n');
 
-      if (emitEvery > 0 && (week_index + 1) % emitEvery === 0) {
+      if (effectiveEmitEvery > 0 && (week_index + 1) % effectiveEmitEvery === 0) {
         const midPath = join(outDir, `save_w${week_index + 1}.json`);
-        await writeFile(midPath, serializeState(state), 'utf8');
+        const serializedMid = serializeState(state);
+        await writeFile(midPath, serializedMid, 'utf8');
+        weeklySavePaths.push(midPath);
+        if (emitWeeklySavesForVideo && replayTimelineStream) {
+          const frameJson = '{"week_index":' + week_index + ',"game_state":' + serializedMid + '}';
+          replayTimelineStream.write((replayTimelineFirstFrame ? '' : ',') + frameJson);
+          replayTimelineFirstFrame = false;
+        }
       }
     }
 
@@ -937,6 +976,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         final_turn: state.meta.turn,
         phase: state.meta.phase
       },
+      ...(phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0
+        ? { phase_ii_attack_resolution: phaseIIAttackResolutionSummary }
+        : {}),
       ...(botBenchmarkSummary ? { bot_benchmark_evaluation: botBenchmarkSummary } : {}),
       ...(victoryEvaluation ? { victory: victoryEvaluation } : {}),
       ...(breachDiagnostic ? { breach_diagnostic: breachDiagnostic } : {})
@@ -975,6 +1017,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     await new Promise<void>((resolve, reject) => {
       controlEventsStream.on('finish', resolve).on('error', reject);
     });
+    if (emitWeeklySavesForVideo && replayTimelineStream) {
+      replayTimelineStream.write('],"control_events":' + stableStringify(events_all) + '}');
+      replayTimelineStream.end();
+      await new Promise<void>((resolve, reject) => {
+        replayTimelineStream!.on('finish', resolve).on('error', reject);
+      });
+    }
 
     // Phase H2.2: formation delta (initial vs final formations).
     const finalFormations = state.formations ?? {};
@@ -1059,7 +1108,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       armyStrengthsSummary,
       victoryEvaluation,
       botBenchmarkSummary: botBenchmarkSummary ?? null,
-      botWeeklyDiagnostics: enableBotDiagnostics ? botWeeklyDiagnostics : null
+      botWeeklyDiagnostics: enableBotDiagnostics ? botWeeklyDiagnostics : null,
+      phaseIIAttackResolutionSummary:
+        phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0 ? phaseIIAttackResolutionSummary : null
     });
     const endReportPath = join(outDir, 'end_report.md');
     await writeFile(endReportPath, endReportMd, 'utf8');
@@ -1079,6 +1130,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         activity_summary: activitySummaryPath,
         control_events: controlEventsPath,
         formation_delta: formationDeltaPath,
+        ...(weeklySavePaths.length > 0 ? { weekly_saves: weeklySavePaths } : {}),
+        ...(replayTimelinePath ? { replay_timeline: replayTimelinePath } : {}),
         ...(botDiagnosticsPath ? { bot_diagnostics: botDiagnosticsPath } : {})
       }
     };

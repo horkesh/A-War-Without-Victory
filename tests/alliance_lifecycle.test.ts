@@ -131,6 +131,8 @@ describe('alliance update', () => {
   test('updateAllianceValue detects war start', () => {
     const state = makeState({ phase_i_alliance_rbih_hrhb: 0.01 });
     ensureRbihHrhbState(state);
+    // War gating blocks hostile transition before earliest turn (default 26).
+    state.meta.turn = 30;
     // Set large patron pressure to push below 0
     const hrhbFaction = state.factions.find((f) => f.id === 'HRHB')!;
     hrhbFaction.patron_state!.patron_commitment = 1.0;
