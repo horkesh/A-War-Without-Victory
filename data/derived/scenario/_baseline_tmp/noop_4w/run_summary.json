@@ -1,5 +1,13 @@
 {
-  "final_state_hash": "08ddd5368e6d6f7a",
+  "final_state_hash": "6eb215c475c7002f",
+  "phase_ii_attack_resolution": {
+    "casualty_attacker": 0,
+    "casualty_defender": 0,
+    "flips_applied": 0,
+    "orders_processed": 0,
+    "weeks_with_orders": 0,
+    "weeks_with_phase_ii": 4
+  },
   "run_id": "noop_4w__785a4bd598aba9de__w4",
   "scenario_id": "noop_4w",
   "summary": {

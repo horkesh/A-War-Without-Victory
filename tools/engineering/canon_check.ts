@@ -8,13 +8,15 @@ import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
+type Step = { name: string; args: string[] };
+const tsxCli = join(process.cwd(), 'node_modules', 'tsx', 'dist', 'cli.mjs');
 
-
-
-type Step = { name: string; cmd: string; args: string[] };
+if (!existsSync(tsxCli)) {
+  throw new Error(`Missing tsx CLI at ${tsxCli}. Run npm install.`);
+}
 
 function runStep(step: Step): void {
-  const result = spawnSync(step.cmd, step.args, { stdio: 'inherit' });
+  const result = spawnSync(process.execPath, [tsxCli, ...step.args], { stdio: 'inherit', shell: false });
   if (result.error) {
     throw result.error;
   }
@@ -26,8 +28,7 @@ function runStep(step: Step): void {
 const steps: Step[] = [
   {
     name: 'determinism static scan',
-    cmd: 'npx',
-    args: ['tsx', '--test', 'tests/determinism_static_scan_r1_5.test.ts']
+    args: ['--test', 'tests/determinism_static_scan_r1_5.test.ts']
   }
 ];
 
@@ -37,8 +38,7 @@ const hasBaselines = existsSync(baselineManifest);
 if (hasBaselines) {
   steps.push({
     name: 'baseline regression',
-    cmd: 'npx',
-    args: ['tsx', 'tools/scenario_runner/run_baseline_regression.ts']
+    args: ['tools/scenario_runner/run_baseline_regression.ts']
   });
 } else {
   process.stdout.write('canon:check: baselines manifest missing; skipping baseline regression.\n');

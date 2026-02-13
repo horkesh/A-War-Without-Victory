@@ -1,0 +1,89 @@
+{
+  "flips": [
+    {
+      "from": "HRHB",
+      "municipality_id": "banja_luka",
+      "settlement_id": "S200034",
+      "to": "RS"
+    },
+    {
+      "from": "HRHB",
+      "municipality_id": "banja_luka",
+      "settlement_id": "S200107",
+      "to": "RS"
+    },
+    {
+      "from": "RS",
+      "municipality_id": "centar_sarajevo",
+      "settlement_id": "S142042",
+      "to": "RBiH"
+    },
+    {
+      "from": "RS",
+      "municipality_id": "centar_sarajevo",
+      "settlement_id": "S142077",
+      "to": "RBiH"
+    }
+  ],
+  "flips_by_direction": [
+    {
+      "count": 2,
+      "from": "HRHB",
+      "to": "RS"
+    },
+    {
+      "count": 2,
+      "from": "RS",
+      "to": "RBiH"
+    }
+  ],
+  "flips_by_municipality": [
+    {
+      "count": 2,
+      "municipality_id": "banja_luka"
+    },
+    {
+      "count": 2,
+      "municipality_id": "centar_sarajevo"
+    }
+  ],
+  "net_control_count_delta": [
+    {
+      "controller": "HRHB",
+      "delta": -2
+    },
+    {
+      "controller": "RBiH",
+      "delta": 2
+    }
+  ],
+  "net_control_counts_after": [
+    {
+      "controller": "HRHB",
+      "count": 1022
+    },
+    {
+      "controller": "RBiH",
+      "count": 2411
+    },
+    {
+      "controller": "RS",
+      "count": 2389
+    }
+  ],
+  "net_control_counts_before": [
+    {
+      "controller": "HRHB",
+      "count": 1024
+    },
+    {
+      "controller": "RBiH",
+      "count": 2409
+    },
+    {
+      "controller": "RS",
+      "count": 2389
+    }
+  ],
+  "total_flips": 4
+}

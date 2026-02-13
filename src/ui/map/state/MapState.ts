@@ -11,7 +11,6 @@ import type {
 
 const DEFAULT_LAYERS: LayerVisibility = {
   politicalControl: true,
-  contestedZones: true,
   frontLines: true,
   labels: true,
   roads: true,

@@ -15,6 +15,7 @@ import { loadSettlementGraph } from '../../src/map/settlements.js';
 import { prepareNewGameState } from '../../src/state/initialize_new_game_state.js';
 import { getSettlementControlStatus } from '../../src/state/settlement_control.js';
 import { loadInitialMunicipalityControllers1990 } from '../../src/state/political_control_init.js';
+import { MUN1990_IDS_ALIGNED_TO_RBIH } from '../../src/state/rbih_aligned_municipalities.js';
 import { CURRENT_SCHEMA_VERSION } from '../../src/state/game_state.js';
 import type { GameState } from '../../src/state/game_state.js';
 
@@ -170,7 +171,8 @@ async function main(): Promise<void> {
     militia_pools: {}
   };
 
-  await prepareNewGameState(state, graph);
+  // Default baseline = settlement-level control from 1991 ethnic majority (Apr 1992 begin state).
+  await prepareNewGameState(state, graph, undefined, { init_control_mode: 'ethnic_1991' });
 
   // Phase H3.10: mun1990_names for ungraphed mun1990_id lookup (mun normalizations)
   let mun1990Names: { by_municipality_id?: Record<string, { mun1990_id?: string }> } = {};
@@ -290,17 +292,19 @@ async function main(): Promise<void> {
   }
 
   // ────────────────────────────────────────────────────────────────────────────
-  // Phase H3.3 + H3.8: Municipality-scoped political control normalization (skip for scenario keys e.g. sep1992)
-  // ────────────────────────────────────────────────────────────────────────────
-  const MUN_NORMALIZATIONS: Record<string, string> = controlKeyArg ? {} : {
-    tuzla: 'RBiH',
-    vares: 'RBiH',
-    cazin: 'RBiH',
-    novi_grad_sarajevo: 'RBiH',
-    novo_sarajevo: 'RBiH',
-    stari_grad_sarajevo: 'RBiH',
-    banovici: 'RBiH',
-  };
+  // Phase H3.3 + H3.8: Municipality-scoped political control normalization (skip for scenario keys e.g. sep1992).
+  // RBiH-aligned muns (Maglaj, Bihać, Gradačac, Brčko, Tuzla, Lopare, Srebrenik, Tešanj) + other overrides.
+  const MUN_NORMALIZATIONS: Record<string, string> = controlKeyArg
+    ? {}
+    : {
+        vares: 'RBiH',
+        cazin: 'RBiH',
+        novi_grad_sarajevo: 'RBiH',
+        novo_sarajevo: 'RBiH',
+        stari_grad_sarajevo: 'RBiH',
+        banovici: 'RBiH',
+        ...Object.fromEntries(MUN1990_IDS_ALIGNED_TO_RBIH.map((m) => [m, 'RBiH'])),
+      };
 
   const rosterKeys = roster.map((e) => e.controlKey);
   const before_counts = { ...counts };

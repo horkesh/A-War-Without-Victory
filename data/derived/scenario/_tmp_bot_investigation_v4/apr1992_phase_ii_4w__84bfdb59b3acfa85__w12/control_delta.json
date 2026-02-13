@@ -1,0 +1,176 @@
+{
+  "flips": [
+    {
+      "from": "RBiH",
+      "municipality_id": "banovici",
+      "settlement_id": "S100102",
+      "to": "RS"
+    },
+    {
+      "from": "RBiH",
+      "municipality_id": "banovici",
+      "settlement_id": "S100145",
+      "to": "RS"
+    },
+    {
+      "from": "RS",
+      "municipality_id": "banovici",
+      "settlement_id": "S100218",
+      "to": "RBiH"
+    },
+    {
+      "from": "HRHB",
+      "municipality_id": "banja_luka",
+      "settlement_id": "S200034",
+      "to": "RS"
+    },
+    {
+      "from": "HRHB",
+      "municipality_id": "banja_luka",
+      "settlement_id": "S200107",
+      "to": "RS"
+    },
+    {
+      "from": "RS",
+      "municipality_id": "centar_sarajevo",
+      "settlement_id": "S142042",
+      "to": "RBiH"
+    },
+    {
+      "from": "RS",
+      "municipality_id": "centar_sarajevo",
+      "settlement_id": "S142077",
+      "to": "RBiH"
+    },
+    {
+      "from": "RS",
+      "municipality_id": "kalesija",
+      "settlement_id": "S123510",
+      "to": "RBiH"
+    },
+    {
+      "from": "RS",
+      "municipality_id": "lukavac",
+      "settlement_id": "S131601",
+      "to": "RBiH"
+    },
+    {
+      "from": "RS",
+      "municipality_id": "stari_grad_sarajevo",
+      "settlement_id": "S144959",
+      "to": "RBiH"
+    },
+    {
+      "from": "RS",
+      "municipality_id": "ugljevik",
+      "settlement_id": "S165905",
+      "to": "RBiH"
+    },
+    {
+      "from": "RS",
+      "municipality_id": "ugljevik",
+      "settlement_id": "S165913",
+      "to": "RBiH"
+    },
+    {
+      "from": "RS",
+      "municipality_id": "zvornik",
+      "settlement_id": "S165875",
+      "to": "RBiH"
+    }
+  ],
+  "flips_by_direction": [
+    {
+      "count": 2,
+      "from": "HRHB",
+      "to": "RS"
+    },
+    {
+      "count": 2,
+      "from": "RBiH",
+      "to": "RS"
+    },
+    {
+      "count": 9,
+      "from": "RS",
+      "to": "RBiH"
+    }
+  ],
+  "flips_by_municipality": [
+    {
+      "count": 3,
+      "municipality_id": "banovici"
+    },
+    {
+      "count": 2,
+      "municipality_id": "banja_luka"
+    },
+    {
+      "count": 2,
+      "municipality_id": "centar_sarajevo"
+    },
+    {
+      "count": 2,
+      "municipality_id": "ugljevik"
+    },
+    {
+      "count": 1,
+      "municipality_id": "kalesija"
+    },
+    {
+      "count": 1,
+      "municipality_id": "lukavac"
+    },
+    {
+      "count": 1,
+      "municipality_id": "stari_grad_sarajevo"
+    },
+    {
+      "count": 1,
+      "municipality_id": "zvornik"
+    }
+  ],
+  "net_control_count_delta": [
+    {
+      "controller": "HRHB",
+      "delta": -2
+    },
+    {
+      "controller": "RBiH",
+      "delta": 7
+    },
+    {
+      "controller": "RS",
+      "delta": -5
+    }
+  ],
+  "net_control_counts_after": [
+    {
+      "controller": "HRHB",
+      "count": 1022
+    },
+    {
+      "controller": "RBiH",
+      "count": 2416
+    },
+    {
+      "controller": "RS",
+      "count": 2384
+    }
+  ],
+  "net_control_counts_before": [
+    {
+      "controller": "HRHB",
+      "count": 1024
+    },
+    {
+      "controller": "RBiH",
+      "count": 2409
+    },
+    {
+      "controller": "RS",
+      "count": 2389
+    }
+  ],
+  "total_flips": 13
+}

@@ -98,6 +98,19 @@ function getMunIdFromFormation(f: FormationState): string | null {
   return null;
 }
 
+function reservedSpawnManpowerForReinforcement(
+  state: GameState,
+  mun_id: string,
+  faction: string,
+  spawnDirectiveActive: boolean
+): number {
+  if (!spawnDirectiveActive) return 0;
+  if (isEmergentFormationSuppressed(state, mun_id, faction)) return 0;
+  const hasSpawnHeadroom = countBrigadesInMun(state, mun_id, faction) < getMaxBrigadesPerMun(mun_id);
+  if (!hasSpawnHeadroom) return 0;
+  return getBatchSizeForFaction(faction);
+}
+
 export interface ReinforceBrigadesReport {
   formations_reinforced: number;
   manpower_added: number;
@@ -106,7 +119,8 @@ export interface ReinforceBrigadesReport {
 
 /**
  * Reinforce existing brigades from militia pools up to MAX_BRIGADE_PERSONNEL (3000).
- * Run before spawn so that we fill existing brigades first; only then spawn new when pool still has ≥ MIN_BRIGADE_SPAWN.
+ * Reserve manpower for potential spawn first, then reinforce with the remainder.
+ * This keeps frontage-coverage spawning prioritized over pure reinforcement.
  *
  * Rate-limited: each brigade absorbs at most REINFORCEMENT_RATE (200) per turn,
  * or COMBAT_REINFORCEMENT_RATE (100) if in active combat (posture 'attack' or disrupted).
@@ -133,6 +147,7 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
     .sort(strictCompare);
 
   const currentTurn = state.meta.turn;
+  const spawnDirectiveActive = isFormationSpawnDirectiveActive(state);
 
   for (const id of brigadeIds) {
     const f = formations[id] as FormationState;
@@ -157,7 +172,9 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
     const rate = inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
 
     const need = Math.min(MAX_BRIGADE_PERSONNEL - current, rate);
-    const transfer = Math.min(need, pool.available);
+    const reserveForSpawn = reservedSpawnManpowerForReinforcement(state, mun_id, faction, spawnDirectiveActive);
+    const availableForReinforcement = Math.max(0, pool.available - reserveForSpawn);
+    const transfer = Math.min(need, availableForReinforcement);
 
     if (transfer <= 0) continue;
 

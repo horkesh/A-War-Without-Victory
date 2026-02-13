@@ -5,6 +5,7 @@
  */
 
 import type { GameState, FactionId, MunicipalityId, OrganizationalPenetration } from '../../state/game_state.js';
+import { MUN1990_IDS_ALIGNED_TO_RBIH } from '../../state/rbih_aligned_municipalities.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 /** Militia strength domain per spec. */
@@ -180,6 +181,24 @@ export function updateMilitiaEmergence(state: GameState): MilitiaEmergenceReport
     }
 
     by_mun.push({ mun_id: munId, by_faction });
+  }
+
+  // RBiH-aligned municipalities: HRHB strength and spawns count as RBiH (HVO subordinate to ARBiH). Redirect HRHB → RBiH.
+  const alignedMuns = [...MUN1990_IDS_ALIGNED_TO_RBIH].sort(strictCompare);
+  for (const munId of alignedMuns) {
+    if (!strengthMap[munId]) continue;
+    const hrhb = strengthMap[munId]['HRHB'] ?? 0;
+    const rbih = (strengthMap[munId]['RBiH'] ?? 0) + hrhb;
+    (strengthMap[munId] as Record<string, number>)['RBiH'] = Math.min(
+      MILITIA_STRENGTH_MAX,
+      Math.max(MILITIA_STRENGTH_MIN, Math.round(rbih * 10) / 10)
+    );
+    (strengthMap[munId] as Record<string, number>)['HRHB'] = 0;
+    const byMunEntry = by_mun.find((e) => e.mun_id === munId);
+    if (byMunEntry) {
+      byMunEntry.by_faction['RBiH'] = strengthMap[munId]['RBiH'] ?? 0;
+      byMunEntry.by_faction['HRHB'] = 0;
+    }
   }
 
   return { municipalities_updated: munIds.length, by_mun };

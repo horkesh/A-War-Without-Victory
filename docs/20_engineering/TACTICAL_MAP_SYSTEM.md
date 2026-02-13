@@ -28,13 +28,14 @@ The dev server runs Vite on port 3001 with a custom middleware plugin that serve
 The tactical map is a standalone Canvas 2D application that renders ~5,800 settlement polygons across Bosnia and Herzegovina with:
 
 - **Political control coloring** — each settlement filled by its controlling faction (RS crimson, RBiH green, HRHB blue, or neutral grey)
-- **Contested zone crosshatch** — diagonal hatch overlay on contested/highly-contested settlements
 - **Base geography** — national boundary, 1,200 rivers, 17,000 road segments, and 110 municipality borders
 - **Front lines** — dashed black lines along shared polygon edges between differently-controlled settlements
 - **Settlement labels** — LOD-filtered by zoom level (URBAN_CENTER → TOWN → all)
 - **Formation markers** — faction-colored squares at municipality centroids when game state is loaded
+- **Replay timeline playback** — week-by-week animation from `replay_timeline.json` with settlement flip highlights
 - **Interactive settlement panel** — 4-tab detail view (OVER, ADMIN, CTRL, INTEL)
 - **OOB sidebar** — full formation roster grouped by faction
+- **Replay export** — in-browser WebM export via `MediaRecorder` from the tactical map canvas
 - **Minimap** — overview with viewport rectangle
 - **Search** — diacritic-insensitive fuzzy settlement search
 - **Dataset switching** — Baseline (Apr 1992), September 1992, or any loaded game state
@@ -108,6 +109,7 @@ All modules import types from `types.ts`. Data flows are unidirectional: DataLoa
 |------|---------|----------|
 | `political_control_data_sep1992.json` | Dataset dropdown → "September 1992" | Alternate control data |
 | User-selected `final_save.json` | "Load State..." button | Game state with formations, militia pools, dynamic control |
+| User-selected `replay_timeline.json` | "Load Replay..." button | Ordered weekly game-state frames + control events for map playback/animation |
 
 ### 5.3 Processing Pipeline
 
@@ -180,7 +182,6 @@ All mutable application state lives in a single `MapState` instance. Uses an imm
 | Layer | Default |
 |-------|---------|
 | `politicalControl` | on |
-| `contestedZones` | on |
 | `frontLines` | on |
 | `labels` | on |
 | `roads` | on |
@@ -216,8 +217,7 @@ Pass 2: Base Layers (offscreen cached)
 
 Pass 3: Settlement Polygons
   Iterated in sorted SID order for deterministic rendering.
-  Fill with faction color (55% alpha) or neutral grey.
-  Contested settlements get crosshatch pattern overlay.
+  Fill with faction color (55% alpha) or neutral grey (or ethnic majority when Ethnic 1991 is on).
 
 Pass 4: Front Lines
   Only at zoom >= OPERATIONAL (zoomLevel >= 1).
@@ -297,8 +297,6 @@ Each settlement polygon is:
    - If political control layer is off: `rgba(120, 120, 120, 0.2)`
 
 2. **No individual stroke** — settlement borders are not drawn. This gives a clean, smooth appearance where adjacent settlements of the same faction blend together.
-
-3. **Contested overlay** — if the settlement status is `CONTESTED` or `HIGHLY_CONTESTED` and the contested zones layer is on, a 12x12px diagonal crosshatch pattern is clipped and filled over the polygon.
 
 The polygon drawing method (`drawPolygonPath`) handles both `Polygon` and `MultiPolygon` geometries, iterating all rings and closing each path.
 
@@ -420,10 +418,15 @@ The `SpatialIndex` is a 50x50 uniform grid over the data bounds. For ~6,000 sett
 
 Top-right collapsible panel. Contains:
 
-- **Checkboxes:** Political control, Contested zones, Front lines, Settlement labels, Municipality borders, Minimap, Formations (OOB), Brigade AoR (selected)
-- **Color by:** dropdown — "Political control" (default) or "Ethnic majority (1991)". When Ethnic majority is selected, settlement polygons are filled by 1991 census majority (Bosniak/Serb/Croat/Other); legend and tooltip reflect ethnicity.
-- **Dataset selector:** dropdown with "Baseline (Apr 1992)", "September 1992", and any loaded states
+- **Checkboxes:** Political control, Front lines, Settlement labels, Municipality borders, Minimap, Formations (OOB), Brigade AoR (selected)
+- **Dataset selector:** dropdown with "Baseline (Apr 1992, from ethnicity)", "September 1992", and any loaded states (e.g. Latest run)
 - **Load State button:** triggers a hidden file input (`accept=".json"`)
+- **Load Replay button:** loads runner-produced `replay_timeline.json` and applies frame 1 immediately
+- **Play replay button:** toggles week-by-week playback (`~900ms` per week)
+- **Export replay button:** records canvas output to WebM while replay runs from week 1 to final frame
+- **Replay status label:** displays current week, turn, and flip count for the active replay turn
+
+Settlement fill mode (political control vs ethnic majority 1991) is toggled by the **Ethnic 1991** toolbar button only; legend and tooltip reflect the current mode.
 
 Note: Rivers, roads, and boundary are **not** in the layer panel — they are always-on base geography.
 
@@ -438,7 +441,7 @@ Note: Rivers, roads, and boundary are **not** in the layer panel — they are al
 | Tab | ID | Content |
 |-----|----|---------|
 | OVER | `overview` | SID, name, type, population. Ethnicity bar chart (Bosniak/Croat/Serb/Other with colored bars and percentages). Census provenance. |
-| ADMIN | `admin` | Municipality name, ID, settlement count. NATO class, urban center designation. |
+| ADMIN | `admin` | Municipality name, ID, settlement count (resolved from `municipality_id` or `mun1990_id` on the feature). NATO class, urban center designation. |
 | CTRL | `control` | Controller with faction swatch, control status (CONSOLIDATED/CONTESTED/HIGHLY_CONTESTED). Stability placeholder. |
 | INTEL | `intel` | Formations in this municipality (name, kind, readiness badge, cohesion bar). Militia pool (available/committed/exhausted stacked bar). Requires loaded game state. |
 
@@ -476,7 +479,7 @@ Centered top overlay with text input and results dropdown. Max 12 results. Diacr
 
 - **Minimap** — 180x120 canvas, bottom-left. Colored dots for settlements, white viewport rectangle. Clickable for navigation.
 - **Tooltip** — positioned near cursor on hover. Shows "Name — Controller — pop X".
-- **Legend** — bottom-left panel with faction color swatches + contested hatch + front line dash.
+- **Legend** — bottom-left panel with faction color swatches + front line dash (content depends on fill mode).
 - **Zoom pill** — top-left toolbar badge showing STRATEGIC / OPERATIONAL / TACTICAL.
 
 ---
@@ -506,6 +509,24 @@ User clicks "Load State..." → file picker → select final_save.json
 ### 14.2 GameStateAdapter
 
 `parseGameState(json)` in `data/GameStateAdapter.ts` does defensive parsing with fallback defaults. Formation IDs and militia pool keys are sorted before iteration for deterministic output.
+
+### 14.3 Replay Timeline Loading
+
+`Load Replay...` expects `replay_timeline.json` produced by `runScenario(..., emitWeeklySavesForVideo: true)` (`--video` in harness CLI). The file shape:
+
+- `meta` — optional run metadata (`run_id`, `scenario_id`, `weeks`)
+- `frames[]` — sorted by `week_index`; each frame stores a serialized game state
+- `control_events[]` — settlement flip events (`turn`, `settlement_id`, `from`, `to`, `mechanism`, `mun_id`)
+
+Playback pipeline:
+
+1. Sort frames by `week_index` (deterministic)
+2. Parse frame game state through `parseGameState`
+3. Update map control + formations for that week
+4. Lookup `control_events` for the frame's turn
+5. Apply temporary fire overlays to flipped settlements
+
+This uses existing formation rendering logic, so brigade movement appears as week-to-week marker position changes.
 
 Key field mappings from `final_save.json`:
 - `meta.turn` → `turn`
@@ -596,7 +617,6 @@ This is the **canonical color source** shared with the warroom system:
 | `BASE_LAYER_COLORS` | boundary `#333`, river `hydrography`, roads `MSR`/`secondaryRoad`, mun fill `rgba(180,170,150,0.03)`, mun stroke `rgba(80,60,40,0.35)` | Base geography colors |
 | `BASE_LAYER_WIDTHS` | boundary 2px, river 1.5px, MSR 2px, secondary 0.8px, mun 1px | Base geography line widths |
 | `FRONT_LINE` | color `#000`, width 3, dash `[6,4]` | Front line style |
-| `HATCH_SIZE` | 12 | Contested crosshatch pattern size |
 | `MINIMAP` | 180 x 120 | Minimap canvas dimensions |
 | `PANEL_WIDTH` | 340 | Settlement panel width in px |
 | `MAP_PADDING` | 40 | Canvas edge padding in px |

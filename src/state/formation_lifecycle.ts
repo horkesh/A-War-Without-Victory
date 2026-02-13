@@ -133,6 +133,13 @@ export function computeBaseCohesion(kind: FormationKind, createdTurn: number): n
  * - Authority: municipality authority >= BRIGADE_AUTHORITY_THRESHOLD (if can be derived)
  * - Supply: formation supplied this turn OR last_supplied_turn is recent
  */
+/**
+ * Maximum turns a brigade can stay in 'forming' before forced activation.
+ * Historically, military units organized even in difficult supply conditions.
+ * After this grace period, supply/authority gates are relaxed.
+ */
+export const BRIGADE_FORMATION_MAX_WAIT = 6;
+
 export function canBrigadeActivate(
   state: GameState,
   formation: FormationState,
@@ -140,25 +147,31 @@ export function canBrigadeActivate(
   municipalityAuthority: number | null
 ): boolean {
   const currentTurn = state.meta.turn;
-  
+
   // Time gate
   const turnsForming = currentTurn - formation.created_turn;
   if (turnsForming < BRIGADE_FORMATION_MIN_TURN) {
     return false;
   }
-  
+
+  // Grace period: after BRIGADE_FORMATION_MAX_WAIT turns, activate regardless
+  // of supply/authority (brigades don't stay "forming" indefinitely)
+  if (turnsForming >= BRIGADE_FORMATION_MAX_WAIT) {
+    return true;
+  }
+
   // Authority gate (if available)
   if (municipalityAuthority !== null && municipalityAuthority < BRIGADE_AUTHORITY_THRESHOLD) {
     return false;
   }
-  
+
   // Supply gate: must be supplied now OR was supplied recently
   const lastSupplied = formation.ops?.last_supplied_turn ?? null;
   const wasRecentlySupplied = lastSupplied !== null && currentTurn - lastSupplied <= 2;
   if (!supplied && !wasRecentlySupplied) {
     return false;
   }
-  
+
   return true;
 }
 

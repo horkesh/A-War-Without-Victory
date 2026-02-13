@@ -4,6 +4,7 @@
  * Run N weekly turns; emit final_save.json, weekly_report.jsonl, replay.jsonl, run_summary.json.
  * Phase H1.2: Fails early if data prerequisites are missing (same remediation as sim:data:check).
  * --map: copy final_save.json to data/derived/latest_run_final_save.json and print tactical map instructions.
+ * --video: emit weekly save artifacts and replay_timeline.json for tactical map replay/export.
  */
 
 import { copyFile, mkdir } from 'node:fs/promises';
@@ -19,6 +20,7 @@ function parseArgs(): {
   out: string;
   postureAllPushAndApplyBreaches: boolean;
   map: boolean;
+  video: boolean;
 } {
   const args = process.argv.slice(2);
   let scenario = '';
@@ -26,6 +28,7 @@ function parseArgs(): {
   let out = 'runs';
   let postureAllPushAndApplyBreaches = false;
   let map = false;
+  let video = false;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--scenario' && args[i + 1]) {
       scenario = args[++i];
@@ -37,19 +40,21 @@ function parseArgs(): {
       postureAllPushAndApplyBreaches = true;
     } else if (args[i] === '--map') {
       map = true;
+    } else if (args[i] === '--video') {
+      video = true;
     }
   }
   if (!scenario) {
     process.stderr.write(
-      'Usage: run_scenario.ts --scenario <path> [--weeks <n>] [--out <dir>] [--posture-all-push] [--map]\n'
+      'Usage: run_scenario.ts --scenario <path> [--weeks <n>] [--out <dir>] [--posture-all-push] [--map] [--video]\n'
     );
     process.exit(1);
   }
-  return { scenario, weeks, out, postureAllPushAndApplyBreaches, map };
+  return { scenario, weeks, out, postureAllPushAndApplyBreaches, map, video };
 }
 
 async function main(): Promise<void> {
-  const { scenario, weeks, out, postureAllPushAndApplyBreaches, map: enableMap } = parseArgs();
+  const { scenario, weeks, out, postureAllPushAndApplyBreaches, map: enableMap, video } = parseArgs();
 
   const prereqResult = checkDataPrereqs();
   if (!prereqResult.ok) {
@@ -62,7 +67,8 @@ async function main(): Promise<void> {
     scenarioPath: scenario,
     outDirBase: out,
     weeksOverride: weeks,
-    postureAllPushAndApplyBreaches
+    postureAllPushAndApplyBreaches,
+    emitWeeklySavesForVideo: video
   });
   process.stdout.write(`outDir: ${result.outDir}\n`);
   process.stdout.write(`paths: ${result.paths.initial_save}\n`);
@@ -75,6 +81,14 @@ async function main(): Promise<void> {
   process.stdout.write(`       ${result.paths.activity_summary}\n`);
   process.stdout.write(`       ${result.paths.control_events}\n`);
   process.stdout.write(`       ${result.paths.formation_delta}\n`);
+  if (result.paths.replay_timeline) {
+    process.stdout.write(`       ${result.paths.replay_timeline}\n`);
+  }
+  if (result.paths.weekly_saves && result.paths.weekly_saves.length > 0) {
+    for (const p of result.paths.weekly_saves) {
+      process.stdout.write(`       ${p}\n`);
+    }
+  }
   process.stdout.write(`final_state_hash: ${result.final_state_hash}\n`);
 
   if (enableMap) {
@@ -88,6 +102,9 @@ async function main(): Promise<void> {
     process.stdout.write('  1) npm run dev:map\n');
     process.stdout.write('  2) Open http://localhost:3001/tactical_map.html\n');
     process.stdout.write('  3) In "Dataset" choose "Latest run" or use "Load state file" and select the file above.\n');
+    if (video && result.paths.replay_timeline) {
+      process.stdout.write(`  4) Click "Load replay..." and choose: ${result.paths.replay_timeline}\n`);
+    }
     process.stdout.write('---\n');
   }
 }

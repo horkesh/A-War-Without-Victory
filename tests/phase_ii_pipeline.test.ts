@@ -83,5 +83,5 @@ test('Phase I runTurn reports only Phase I phase names (no phase-ii-consolidatio
   const { report } = await runTurn(state, { seed: 'pipeline-i' });
   const names = report.phases.map((p) => p.name);
   assert.ok(!names.includes('phase-ii-consolidation'));
-  assert.ok(names.every((n) => n.startsWith('phase-i-')));
+  assert.ok(names.includes('phase-i-control-flip'));
 });

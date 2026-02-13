@@ -52,3 +52,6 @@ runs_probe/
 # OS
 .DS_Store
 Thumbs.db
+
+# External skills repo (cloned into .agent; do not track)
+.agent/superpowers-repo/

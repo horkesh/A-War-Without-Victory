@@ -1,4 +1,5 @@
 {
+  "brigade_posture_orders": [],
   "contested_control": {
     "S100013": false,
     "S100021": false,
@@ -8046,6 +8047,15 @@
         "S128287",
         "S128295",
         "S128309",
+        "S130907",
+        "S130923",
+        "S130940",
+        "S130966",
+        "S130974",
+        "S131105",
+        "S131148",
+        "S131296",
+        "S131318",
         "S131334",
         "S131342",
         "S131377",
@@ -8504,6 +8514,7 @@
         "S154890",
         "S154903",
         "S154911",
+        "S154920",
         "S154946",
         "S154962",
         "S154989",
@@ -8512,8 +8523,10 @@
         "S155012",
         "S155039",
         "S155055",
+        "S155071",
         "S155080",
         "S155110",
+        "S155128",
         "S155136",
         "S155144",
         "S155152",
@@ -8526,6 +8539,8 @@
         "S155241",
         "S155250",
         "S155268",
+        "S155276",
+        "S155284",
         "S155292",
         "S155306",
         "S155314",
@@ -8541,8 +8556,10 @@
         "S155438",
         "S155446",
         "S155462",
+        "S155497",
         "S155519",
         "S155527",
+        "S155535",
         "S155543",
         "S155551",
         "S155560",
@@ -8981,7 +8998,15 @@
         "S165450",
         "S165549",
         "S165573",
+        "S165581",
+        "S165590",
         "S165603",
+        "S165611",
+        "S165620",
+        "S165638",
+        "S165646",
+        "S165654",
+        "S165662",
         "S165867",
         "S165875",
         "S165883",
@@ -8996,6 +9021,9 @@
         "S166219",
         "S166227",
         "S166235",
+        "S166243",
+        "S166260",
+        "S166278",
         "S166308",
         "S166316",
         "S166324",
@@ -9106,8 +9134,12 @@
         "S171034",
         "S171042",
         "S171069",
+        "S171077",
         "S171085",
         "S171093",
+        "S171107",
+        "S171115",
+        "S171123",
         "S171263",
         "S171280",
         "S171298",
@@ -9406,6 +9438,30 @@
         "S212008",
         "S212032",
         "S212059",
+        "S212571",
+        "S212580",
+        "S212628",
+        "S212636",
+        "S212644",
+        "S212652",
+        "S212679",
+        "S212687",
+        "S212717",
+        "S212725",
+        "S212741",
+        "S212750",
+        "S212776",
+        "S212784",
+        "S212792",
+        "S212814",
+        "S212849",
+        "S212857",
+        "S212865",
+        "S212881",
+        "S212890",
+        "S212911",
+        "S212920",
+        "S212938",
         "S213187",
         "S213195",
         "S213209",
@@ -10003,7 +10059,7 @@
         "workshop_access": 0.6799999999999999
       },
       "negotiation": {
-        "capital": 312,
+        "capital": 316,
         "last_capital_change_turn": 1,
         "last_change_turn": null,
         "pressure": 0,
@@ -10217,15 +10273,6 @@
         "S129437",
         "S129445",
         "S129453",
-        "S130907",
-        "S130923",
-        "S130940",
-        "S130966",
-        "S130974",
-        "S131105",
-        "S131148",
-        "S131296",
-        "S131318",
         "S142093",
         "S143073",
         "S143081",
@@ -10393,13 +10440,6 @@
         "S154687",
         "S154717",
         "S154725",
-        "S154920",
-        "S155071",
-        "S155128",
-        "S155276",
-        "S155284",
-        "S155497",
-        "S155535",
         "S155756",
         "S155772",
         "S155830",
@@ -10423,14 +10463,6 @@
         "S165387",
         "S165409",
         "S165557",
-        "S165581",
-        "S165590",
-        "S165611",
-        "S165620",
-        "S165638",
-        "S165646",
-        "S165654",
-        "S165662",
         "S165727",
         "S165735",
         "S165743",
@@ -10452,9 +10484,6 @@
         "S166073",
         "S166111",
         "S166120",
-        "S166243",
-        "S166260",
-        "S166278",
         "S166286",
         "S166430",
         "S166464",
@@ -10486,10 +10515,6 @@
         "S170747",
         "S170755",
         "S171026",
-        "S171077",
-        "S171107",
-        "S171115",
-        "S171123",
         "S171131",
         "S171140",
         "S171166",
@@ -11091,30 +11116,6 @@
         "S212547",
         "S212555",
         "S212563",
-        "S212571",
-        "S212580",
-        "S212628",
-        "S212636",
-        "S212644",
-        "S212652",
-        "S212679",
-        "S212687",
-        "S212717",
-        "S212725",
-        "S212741",
-        "S212750",
-        "S212776",
-        "S212784",
-        "S212792",
-        "S212814",
-        "S212849",
-        "S212857",
-        "S212865",
-        "S212881",
-        "S212890",
-        "S212911",
-        "S212920",
-        "S212938",
         "S212946",
         "S212954",
         "S212962",
@@ -12024,7 +12025,7 @@
         "workshop_access": 0.74
       },
       "negotiation": {
-        "capital": 231,
+        "capital": 226,
         "last_capital_change_turn": 1,
         "last_change_turn": null,
         "pressure": 0,
@@ -15258,24 +15259,6 @@
       "max_abs": 0,
       "value": 0
     },
-    "S123714__S165590": {
-      "edge_id": "S123714__S165590",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S123714__S212784": {
-      "edge_id": "S123714__S212784",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S123714__S212938": {
-      "edge_id": "S123714__S212938",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
     "S124303__S210196": {
       "edge_id": "S124303__S210196",
       "last_updated_turn": 4,
@@ -15962,72 +15945,6 @@
     },
     "S129453__S137995": {
       "edge_id": "S129453__S137995",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S130907__S148792": {
-      "edge_id": "S130907__S148792",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S130907__S148954": {
-      "edge_id": "S130907__S148954",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S130907__S155217": {
-      "edge_id": "S130907__S155217",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S130907__S300403": {
-      "edge_id": "S130907__S300403",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S130974__S300403": {
-      "edge_id": "S130974__S300403",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S130974__S300632": {
-      "edge_id": "S130974__S300632",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S131296__S300373": {
-      "edge_id": "S131296__S300373",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S131296__S300632": {
-      "edge_id": "S131296__S300632",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S131318__S300292": {
-      "edge_id": "S131318__S300292",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S131318__S300373": {
-      "edge_id": "S131318__S300373",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S131318__S300624": {
-      "edge_id": "S131318__S300624",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
@@ -16842,122 +16759,20 @@
       "max_abs": 0,
       "value": 0
     },
-    "S154792__S154920": {
-      "edge_id": "S154792__S154920",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S154806__S154920": {
-      "edge_id": "S154806__S154920",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S154806__S155276": {
-      "edge_id": "S154806__S155276",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S154920__S154989": {
-      "edge_id": "S154920__S154989",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S154946__S155284": {
-      "edge_id": "S154946__S155284",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S154962__S155535": {
-      "edge_id": "S154962__S155535",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S154962__S165581": {
-      "edge_id": "S154962__S165581",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S154962__S166243": {
-      "edge_id": "S154962__S166243",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S154989__S155497": {
-      "edge_id": "S154989__S155497",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S154997__S155071": {
-      "edge_id": "S154997__S155071",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S154997__S155535": {
-      "edge_id": "S154997__S155535",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S155055__S155071": {
-      "edge_id": "S155055__S155071",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S155055__S155497": {
-      "edge_id": "S155055__S155497",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S155128__S171085": {
-      "edge_id": "S155128__S171085",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S155217__S155284": {
-      "edge_id": "S155217__S155284",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S155276__S155543": {
-      "edge_id": "S155276__S155543",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S155284__S155543": {
-      "edge_id": "S155284__S155543",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S155411__S166243": {
-      "edge_id": "S155411__S166243",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S155411__S171077": {
-      "edge_id": "S155411__S171077",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
     "S155756__S171298": {
       "edge_id": "S155756__S171298",
+      "last_updated_turn": 4,
+      "max_abs": 0,
+      "value": 0
+    },
+    "S155756__S212750": {
+      "edge_id": "S155756__S212750",
+      "last_updated_turn": 4,
+      "max_abs": 0,
+      "value": 0
+    },
+    "S155756__S212792": {
+      "edge_id": "S155756__S212792",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
@@ -17264,12 +17079,6 @@
     },
     "S162850__S224286": {
       "edge_id": "S162850__S224286",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S163511__S212580": {
-      "edge_id": "S163511__S212580",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
@@ -17610,26 +17419,8 @@
       "max_abs": 0,
       "value": 0
     },
-    "S165590__S171085": {
-      "edge_id": "S165590__S171085",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
     "S165603__S224197": {
       "edge_id": "S165603__S224197",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S165662__S300322": {
-      "edge_id": "S165662__S300322",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S165662__S300624": {
-      "edge_id": "S165662__S300624",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
@@ -17646,6 +17437,12 @@
       "max_abs": 0,
       "value": 0
     },
+    "S165891__S212580": {
+      "edge_id": "S165891__S212580",
+      "last_updated_turn": 4,
+      "max_abs": 0,
+      "value": 0
+    },
     "S165905__S208604": {
       "edge_id": "S165905__S208604",
       "last_updated_turn": 4,
@@ -17654,6 +17451,18 @@
     },
     "S165913__S171298": {
       "edge_id": "S165913__S171298",
+      "last_updated_turn": 4,
+      "max_abs": 0,
+      "value": 0
+    },
+    "S165913__S212580": {
+      "edge_id": "S165913__S212580",
+      "last_updated_turn": 4,
+      "max_abs": 0,
+      "value": 0
+    },
+    "S165913__S212792": {
+      "edge_id": "S165913__S212792",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
@@ -17796,12 +17605,6 @@
       "max_abs": 0,
       "value": 0
     },
-    "S166260__S300624": {
-      "edge_id": "S166260__S300624",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
     "S166472__S170763": {
       "edge_id": "S166472__S170763",
       "last_updated_turn": 4,
@@ -17840,18 +17643,6 @@
     },
     "S166642__S230600": {
       "edge_id": "S166642__S230600",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S166693__S212580": {
-      "edge_id": "S166693__S212580",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
-    "S166693__S212784": {
-      "edge_id": "S166693__S212784",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
@@ -18294,12 +18085,6 @@
       "max_abs": 0,
       "value": 0
     },
-    "S171077__S171085": {
-      "edge_id": "S171077__S171085",
-      "last_updated_turn": 4,
-      "max_abs": 0,
-      "value": 0
-    },
     "S171093__S224286": {
       "edge_id": "S171093__S224286",
       "last_updated_turn": 4,
@@ -18312,8 +18097,14 @@
       "max_abs": 0,
       "value": 0
     },
-    "S171298__S212580": {
-      "edge_id": "S171298__S212580",
+    "S171397__S212750": {
+      "edge_id": "S171397__S212750",
+      "last_updated_turn": 4,
+      "max_abs": 0,
+      "value": 0
+    },
+    "S171409__S212750": {
+      "edge_id": "S171409__S212750",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
@@ -18650,6 +18441,12 @@
     },
     "S201278__S300179": {
       "edge_id": "S201278__S300179",
+      "last_updated_turn": 4,
+      "max_abs": 0,
+      "value": 0
+    },
+    "S201383__S212571": {
+      "edge_id": "S201383__S212571",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
@@ -20106,56 +19903,56 @@
       "max_abs": 0,
       "value": 0
     },
-    "S212571__S300411": {
-      "edge_id": "S212571__S300411",
+    "S212571__S226777": {
+      "edge_id": "S212571__S226777",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
     },
-    "S212571__S300551": {
-      "edge_id": "S212571__S300551",
+    "S212571__S226866": {
+      "edge_id": "S212571__S226866",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
     },
-    "S212636__S300233": {
-      "edge_id": "S212636__S300233",
+    "S212725__S226785": {
+      "edge_id": "S212725__S226785",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
     },
-    "S212636__S300411": {
-      "edge_id": "S212636__S300411",
+    "S212750__S226807": {
+      "edge_id": "S212750__S226807",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
     },
-    "S212636__S300616": {
-      "edge_id": "S212636__S300616",
+    "S212750__S226912": {
+      "edge_id": "S212750__S226912",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
     },
-    "S212741__S300411": {
-      "edge_id": "S212741__S300411",
+    "S212814__S226785": {
+      "edge_id": "S212814__S226785",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
     },
-    "S212849__S300314": {
-      "edge_id": "S212849__S300314",
+    "S212814__S226866": {
+      "edge_id": "S212814__S226866",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
     },
-    "S212849__S300322": {
-      "edge_id": "S212849__S300322",
+    "S212857__S226785": {
+      "edge_id": "S212857__S226785",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
     },
-    "S212849__S300616": {
-      "edge_id": "S212849__S300616",
+    "S212857__S226807": {
+      "edge_id": "S212857__S226807",
       "last_updated_turn": 4,
       "max_abs": 0,
       "value": 0
@@ -24612,39 +24409,6 @@
       "max_friction": 4,
       "since_turn": 1
     },
-    "S123714__S165590": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S123714__S165590",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S123714__S212784": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S123714__S212784",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S123714__S212938": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S123714__S212938",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
     "S124303__S210196": {
       "active": true,
       "active_streak": 4,
@@ -25904,127 +25668,6 @@
       "active_streak": 4,
       "created_turn": 1,
       "edge_id": "S129453__S137995",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S130907__S148792": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S130907__S148792",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S130907__S148954": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S130907__S148954",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S130907__S155217": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S130907__S155217",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S130907__S300403": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S130907__S300403",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S130974__S300403": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S130974__S300403",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S130974__S300632": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S130974__S300632",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S131296__S300373": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S131296__S300373",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S131296__S300632": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S131296__S300632",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S131318__S300292": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S131318__S300292",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S131318__S300373": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S131318__S300373",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S131318__S300624": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S131318__S300624",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
@@ -27516,220 +27159,33 @@
       "max_friction": 4,
       "since_turn": 1
     },
-    "S154792__S154920": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S154792__S154920",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S154806__S154920": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S154806__S154920",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S154806__S155276": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S154806__S155276",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S154920__S154989": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S154920__S154989",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S154946__S155284": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S154946__S155284",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S154962__S155535": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S154962__S155535",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S154962__S165581": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S154962__S165581",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S154962__S166243": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S154962__S166243",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S154989__S155497": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S154989__S155497",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S154997__S155071": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S154997__S155071",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S154997__S155535": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S154997__S155535",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S155055__S155071": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S155055__S155071",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S155055__S155497": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S155055__S155497",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S155128__S171085": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S155128__S171085",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S155217__S155284": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S155217__S155284",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S155276__S155543": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S155276__S155543",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S155284__S155543": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S155284__S155543",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S155411__S166243": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S155411__S166243",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S155411__S171077": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S155411__S171077",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
     "S155756__S171298": {
       "active": true,
       "active_streak": 4,
       "created_turn": 1,
       "edge_id": "S155756__S171298",
+      "friction": 4,
+      "last_active_turn": 4,
+      "max_active_streak": 4,
+      "max_friction": 4,
+      "since_turn": 1
+    },
+    "S155756__S212750": {
+      "active": true,
+      "active_streak": 4,
+      "created_turn": 1,
+      "edge_id": "S155756__S212750",
+      "friction": 4,
+      "last_active_turn": 4,
+      "max_active_streak": 4,
+      "max_friction": 4,
+      "since_turn": 1
+    },
+    "S155756__S212792": {
+      "active": true,
+      "active_streak": 4,
+      "created_turn": 1,
+      "edge_id": "S155756__S212792",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
@@ -28291,17 +27747,6 @@
       "active_streak": 4,
       "created_turn": 1,
       "edge_id": "S162850__S224286",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S163511__S212580": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S163511__S212580",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
@@ -28924,44 +28369,11 @@
       "max_friction": 4,
       "since_turn": 1
     },
-    "S165590__S171085": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S165590__S171085",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
     "S165603__S224197": {
       "active": true,
       "active_streak": 4,
       "created_turn": 1,
       "edge_id": "S165603__S224197",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S165662__S300322": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S165662__S300322",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S165662__S300624": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S165662__S300624",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
@@ -28990,6 +28402,17 @@
       "max_friction": 4,
       "since_turn": 1
     },
+    "S165891__S212580": {
+      "active": true,
+      "active_streak": 4,
+      "created_turn": 1,
+      "edge_id": "S165891__S212580",
+      "friction": 4,
+      "last_active_turn": 4,
+      "max_active_streak": 4,
+      "max_friction": 4,
+      "since_turn": 1
+    },
     "S165905__S208604": {
       "active": true,
       "active_streak": 4,
@@ -29006,6 +28429,28 @@
       "active_streak": 4,
       "created_turn": 1,
       "edge_id": "S165913__S171298",
+      "friction": 4,
+      "last_active_turn": 4,
+      "max_active_streak": 4,
+      "max_friction": 4,
+      "since_turn": 1
+    },
+    "S165913__S212580": {
+      "active": true,
+      "active_streak": 4,
+      "created_turn": 1,
+      "edge_id": "S165913__S212580",
+      "friction": 4,
+      "last_active_turn": 4,
+      "max_active_streak": 4,
+      "max_friction": 4,
+      "since_turn": 1
+    },
+    "S165913__S212792": {
+      "active": true,
+      "active_streak": 4,
+      "created_turn": 1,
+      "edge_id": "S165913__S212792",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
@@ -29265,17 +28710,6 @@
       "max_friction": 4,
       "since_turn": 1
     },
-    "S166260__S300624": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S166260__S300624",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
     "S166472__S170763": {
       "active": true,
       "active_streak": 4,
@@ -29347,28 +28781,6 @@
       "active_streak": 4,
       "created_turn": 1,
       "edge_id": "S166642__S230600",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S166693__S212580": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S166693__S212580",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
-    "S166693__S212784": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S166693__S212784",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
@@ -30178,17 +29590,6 @@
       "max_friction": 4,
       "since_turn": 1
     },
-    "S171077__S171085": {
-      "active": true,
-      "active_streak": 4,
-      "created_turn": 1,
-      "edge_id": "S171077__S171085",
-      "friction": 4,
-      "last_active_turn": 4,
-      "max_active_streak": 4,
-      "max_friction": 4,
-      "since_turn": 1
-    },
     "S171093__S224286": {
       "active": true,
       "active_streak": 4,
@@ -30211,11 +29612,22 @@
       "max_friction": 4,
       "since_turn": 1
     },
-    "S171298__S212580": {
+    "S171397__S212750": {
       "active": true,
       "active_streak": 4,
       "created_turn": 1,
-      "edge_id": "S171298__S212580",
+      "edge_id": "S171397__S212750",
+      "friction": 4,
+      "last_active_turn": 4,
+      "max_active_streak": 4,
+      "max_friction": 4,
+      "since_turn": 1
+    },
+    "S171409__S212750": {
+      "active": true,
+      "active_streak": 4,
+      "created_turn": 1,
+      "edge_id": "S171409__S212750",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
@@ -30832,6 +30244,17 @@
       "active_streak": 4,
       "created_turn": 1,
       "edge_id": "S201278__S300179",
+      "friction": 4,
+      "last_active_turn": 4,
+      "max_active_streak": 4,
+      "max_friction": 4,
+      "since_turn": 1
+    },
+    "S201383__S212571": {
+      "active": true,
+      "active_streak": 4,
+      "created_turn": 1,
+      "edge_id": "S201383__S212571",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
@@ -33500,99 +32923,99 @@
       "max_friction": 4,
       "since_turn": 1
     },
-    "S212571__S300411": {
+    "S212571__S226777": {
       "active": true,
       "active_streak": 4,
       "created_turn": 1,
-      "edge_id": "S212571__S300411",
+      "edge_id": "S212571__S226777",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
       "max_friction": 4,
       "since_turn": 1
     },
-    "S212571__S300551": {
+    "S212571__S226866": {
       "active": true,
       "active_streak": 4,
       "created_turn": 1,
-      "edge_id": "S212571__S300551",
+      "edge_id": "S212571__S226866",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
       "max_friction": 4,
       "since_turn": 1
     },
-    "S212636__S300233": {
+    "S212725__S226785": {
       "active": true,
       "active_streak": 4,
       "created_turn": 1,
-      "edge_id": "S212636__S300233",
+      "edge_id": "S212725__S226785",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
       "max_friction": 4,
       "since_turn": 1
     },
-    "S212636__S300411": {
+    "S212750__S226807": {
       "active": true,
       "active_streak": 4,
       "created_turn": 1,
-      "edge_id": "S212636__S300411",
+      "edge_id": "S212750__S226807",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
       "max_friction": 4,
       "since_turn": 1
     },
-    "S212636__S300616": {
+    "S212750__S226912": {
       "active": true,
       "active_streak": 4,
       "created_turn": 1,
-      "edge_id": "S212636__S300616",
+      "edge_id": "S212750__S226912",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
       "max_friction": 4,
       "since_turn": 1
     },
-    "S212741__S300411": {
+    "S212814__S226785": {
       "active": true,
       "active_streak": 4,
       "created_turn": 1,
-      "edge_id": "S212741__S300411",
+      "edge_id": "S212814__S226785",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
       "max_friction": 4,
       "since_turn": 1
     },
-    "S212849__S300314": {
+    "S212814__S226866": {
       "active": true,
       "active_streak": 4,
       "created_turn": 1,
-      "edge_id": "S212849__S300314",
+      "edge_id": "S212814__S226866",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
       "max_friction": 4,
       "since_turn": 1
     },
-    "S212849__S300322": {
+    "S212857__S226785": {
       "active": true,
       "active_streak": 4,
       "created_turn": 1,
-      "edge_id": "S212849__S300322",
+      "edge_id": "S212857__S226785",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
       "max_friction": 4,
       "since_turn": 1
     },
-    "S212849__S300616": {
+    "S212857__S226807": {
       "active": true,
       "active_streak": 4,
       "created_turn": 1,
-      "edge_id": "S212849__S300616",
+      "edge_id": "S212857__S226807",
       "friction": 4,
       "last_active_turn": 4,
       "max_active_streak": 4,
@@ -36641,21 +36064,6 @@
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S123714__S165590": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S123714__S212784": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S123714__S212938": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
       "S124303__S210196": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
@@ -37227,61 +36635,6 @@
         "supply_fragile": false
       },
       "S129453__S137995": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S130907__S148792": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S130907__S148954": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S130907__S155217": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S130907__S300403": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S130974__S300403": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S130974__S300632": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S131296__S300373": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S131296__S300632": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S131318__S300292": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S131318__S300373": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S131318__S300624": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
@@ -37961,102 +37314,17 @@
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S154792__S154920": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S154806__S154920": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S154806__S155276": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S154920__S154989": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S154946__S155284": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S154962__S155535": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S154962__S165581": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S154962__S166243": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S154989__S155497": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S154997__S155071": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S154997__S155535": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S155055__S155071": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S155055__S155497": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S155128__S171085": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S155217__S155284": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S155276__S155543": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S155284__S155543": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S155411__S166243": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S155411__S171077": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
       "S155756__S171298": {
+        "command_friction_worsening": true,
+        "pressure_trend": "flat",
+        "supply_fragile": false
+      },
+      "S155756__S212750": {
+        "command_friction_worsening": true,
+        "pressure_trend": "flat",
+        "supply_fragile": false
+      },
+      "S155756__S212792": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
@@ -38312,11 +37580,6 @@
         "supply_fragile": false
       },
       "S162850__S224286": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S163511__S212580": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
@@ -38601,22 +37864,7 @@
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S165590__S171085": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
       "S165603__S224197": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S165662__S300322": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S165662__S300624": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
@@ -38631,12 +37879,27 @@
         "pressure_trend": "flat",
         "supply_fragile": false
       },
+      "S165891__S212580": {
+        "command_friction_worsening": true,
+        "pressure_trend": "flat",
+        "supply_fragile": false
+      },
       "S165905__S208604": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
       },
       "S165913__S171298": {
+        "command_friction_worsening": true,
+        "pressure_trend": "flat",
+        "supply_fragile": false
+      },
+      "S165913__S212580": {
+        "command_friction_worsening": true,
+        "pressure_trend": "flat",
+        "supply_fragile": false
+      },
+      "S165913__S212792": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
@@ -38756,11 +38019,6 @@
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S166260__S300624": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
       "S166472__S170763": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
@@ -38792,16 +38050,6 @@
         "supply_fragile": false
       },
       "S166642__S230600": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S166693__S212580": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
-      "S166693__S212784": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
@@ -39171,11 +38419,6 @@
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S171077__S171085": {
-        "command_friction_worsening": true,
-        "pressure_trend": "flat",
-        "supply_fragile": false
-      },
       "S171093__S224286": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
@@ -39186,7 +38429,12 @@
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S171298__S212580": {
+      "S171397__S212750": {
+        "command_friction_worsening": true,
+        "pressure_trend": "flat",
+        "supply_fragile": false
+      },
+      "S171409__S212750": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
@@ -39467,6 +38715,11 @@
         "supply_fragile": false
       },
       "S201278__S300179": {
+        "command_friction_worsening": true,
+        "pressure_trend": "flat",
+        "supply_fragile": false
+      },
+      "S201383__S212571": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
@@ -40681,47 +39934,47 @@
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S212571__S300411": {
+      "S212571__S226777": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S212571__S300551": {
+      "S212571__S226866": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S212636__S300233": {
+      "S212725__S226785": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S212636__S300411": {
+      "S212750__S226807": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S212636__S300616": {
+      "S212750__S226912": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S212741__S300411": {
+      "S212814__S226785": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S212849__S300314": {
+      "S212814__S226866": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S212849__S300322": {
+      "S212857__S226785": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
       },
-      "S212849__S300616": {
+      "S212857__S226807": {
         "command_friction_worsening": true,
         "pressure_trend": "flat",
         "supply_fragile": false
@@ -76629,9 +75882,6 @@
         "S121967__S146099": 4,
         "S122122__S146099": 4,
         "S122122__S146269": 4,
-        "S123714__S165590": 4,
-        "S123714__S212784": 4,
-        "S123714__S212938": 4,
         "S124303__S210196": 4,
         "S124605__S142298": 4,
         "S124605__S142794": 4,
@@ -76747,17 +75997,6 @@
         "S129160__S130486": 4,
         "S129160__S130621": 4,
         "S129453__S137995": 4,
-        "S130907__S148792": 4,
-        "S130907__S148954": 4,
-        "S130907__S155217": 4,
-        "S130907__S300403": 4,
-        "S130974__S300403": 4,
-        "S130974__S300632": 4,
-        "S131296__S300373": 4,
-        "S131296__S300632": 4,
-        "S131318__S300292": 4,
-        "S131318__S300373": 4,
-        "S131318__S300624": 4,
         "S132438__S132551": 4,
         "S132438__S132853": 4,
         "S132535__S132802": 4,
@@ -76893,26 +76132,9 @@
         "S152633__S224472": 4,
         "S152773__S211966": 4,
         "S152781__S210692": 4,
-        "S154792__S154920": 4,
-        "S154806__S154920": 4,
-        "S154806__S155276": 4,
-        "S154920__S154989": 4,
-        "S154946__S155284": 4,
-        "S154962__S155535": 4,
-        "S154962__S165581": 4,
-        "S154962__S166243": 4,
-        "S154989__S155497": 4,
-        "S154997__S155071": 4,
-        "S154997__S155535": 4,
-        "S155055__S155071": 4,
-        "S155055__S155497": 4,
-        "S155128__S171085": 4,
-        "S155217__S155284": 4,
-        "S155276__S155543": 4,
-        "S155284__S155543": 4,
-        "S155411__S166243": 4,
-        "S155411__S171077": 4,
         "S155756__S171298": 4,
+        "S155756__S212750": 4,
+        "S155756__S212792": 4,
         "S155772__S165875": 4,
         "S155772__S171298": 4,
         "S155896__S156540": 4,
@@ -76964,7 +76186,6 @@
         "S162825__S224367": 4,
         "S162850__S224197": 4,
         "S162850__S224286": 4,
-        "S163511__S212580": 4,
         "S164445__S210692": 4,
         "S164593__S229709": 4,
         "S164623__S210471": 4,
@@ -77021,14 +76242,14 @@
         "S165522__S212962": 4,
         "S165549__S224723": 4,
         "S165573__S210692": 4,
-        "S165590__S171085": 4,
         "S165603__S224197": 4,
-        "S165662__S300322": 4,
-        "S165662__S300624": 4,
         "S165875__S165905": 4,
         "S165891__S171298": 4,
+        "S165891__S212580": 4,
         "S165905__S208604": 4,
         "S165913__S171298": 4,
+        "S165913__S212580": 4,
+        "S165913__S212792": 4,
         "S165930__S214663": 4,
         "S165930__S215040": 4,
         "S165948__S214647": 4,
@@ -77052,7 +76273,6 @@
         "S166219__S224774": 4,
         "S166227__S224723": 4,
         "S166227__S224774": 4,
-        "S166260__S300624": 4,
         "S166472__S170763": 4,
         "S166499__S170755": 4,
         "S166529__S208388": 4,
@@ -77060,8 +76280,6 @@
         "S166642__S229067": 4,
         "S166642__S229245": 4,
         "S166642__S230600": 4,
-        "S166693__S212580": 4,
-        "S166693__S212784": 4,
         "S169650__S230065": 4,
         "S169650__S230090": 4,
         "S169684__S209821": 4,
@@ -77135,10 +76353,10 @@
         "S171034__S224472": 4,
         "S171042__S210692": 4,
         "S171069__S210692": 4,
-        "S171077__S171085": 4,
         "S171093__S224286": 4,
         "S171093__S224472": 4,
-        "S171298__S212580": 4,
+        "S171397__S212750": 4,
+        "S171409__S212750": 4,
         "S171425__S207799": 4,
         "S171425__S208396": 4,
         "S171441__S214647": 4,
@@ -77195,6 +76413,7 @@
         "S201120__S300179": 4,
         "S201120__S300527": 4,
         "S201278__S300179": 4,
+        "S201383__S212571": 4,
         "S201383__S300527": 4,
         "S201383__S300551": 4,
         "S203050__S221651": 4,
@@ -77437,15 +76656,15 @@
         "S212059__S215392": 4,
         "S212059__S215473": 4,
         "S212059__S215554": 4,
-        "S212571__S300411": 4,
-        "S212571__S300551": 4,
-        "S212636__S300233": 4,
-        "S212636__S300411": 4,
-        "S212636__S300616": 4,
-        "S212741__S300411": 4,
-        "S212849__S300314": 4,
-        "S212849__S300322": 4,
-        "S212849__S300616": 4,
+        "S212571__S226777": 4,
+        "S212571__S226866": 4,
+        "S212725__S226785": 4,
+        "S212750__S226807": 4,
+        "S212750__S226912": 4,
+        "S212814__S226785": 4,
+        "S212814__S226866": 4,
+        "S212857__S226785": 4,
+        "S212857__S226807": 4,
         "S213241__S228133": 4,
         "S213241__S228222": 4,
         "S213349__S228133": 4,
@@ -77908,9 +77127,6 @@
         "S121967__S146099": 0,
         "S122122__S146099": 0,
         "S122122__S146269": 0,
-        "S123714__S165590": 0,
-        "S123714__S212784": 0,
-        "S123714__S212938": 0,
         "S124303__S210196": 0,
         "S124605__S142298": 0,
         "S124605__S142794": 0,
@@ -78026,17 +77242,6 @@
         "S129160__S130486": 0,
         "S129160__S130621": 0,
         "S129453__S137995": 0,
-        "S130907__S148792": 0,
-        "S130907__S148954": 0,
-        "S130907__S155217": 0,
-        "S130907__S300403": 0,
-        "S130974__S300403": 0,
-        "S130974__S300632": 0,
-        "S131296__S300373": 0,
-        "S131296__S300632": 0,
-        "S131318__S300292": 0,
-        "S131318__S300373": 0,
-        "S131318__S300624": 0,
         "S132438__S132551": 0,
         "S132438__S132853": 0,
         "S132535__S132802": 0,
@@ -78172,26 +77377,9 @@
         "S152633__S224472": 0,
         "S152773__S211966": 0,
         "S152781__S210692": 0,
-        "S154792__S154920": 0,
-        "S154806__S154920": 0,
-        "S154806__S155276": 0,
-        "S154920__S154989": 0,
-        "S154946__S155284": 0,
-        "S154962__S155535": 0,
-        "S154962__S165581": 0,
-        "S154962__S166243": 0,
-        "S154989__S155497": 0,
-        "S154997__S155071": 0,
-        "S154997__S155535": 0,
-        "S155055__S155071": 0,
-        "S155055__S155497": 0,
-        "S155128__S171085": 0,
-        "S155217__S155284": 0,
-        "S155276__S155543": 0,
-        "S155284__S155543": 0,
-        "S155411__S166243": 0,
-        "S155411__S171077": 0,
         "S155756__S171298": 0,
+        "S155756__S212750": 0,
+        "S155756__S212792": 0,
         "S155772__S165875": 0,
         "S155772__S171298": 0,
         "S155896__S156540": 0,
@@ -78243,7 +77431,6 @@
         "S162825__S224367": 0,
         "S162850__S224197": 0,
         "S162850__S224286": 0,
-        "S163511__S212580": 0,
         "S164445__S210692": 0,
         "S164593__S229709": 0,
         "S164623__S210471": 0,
@@ -78300,14 +77487,14 @@
         "S165522__S212962": 0,
         "S165549__S224723": 0,
         "S165573__S210692": 0,
-        "S165590__S171085": 0,
         "S165603__S224197": 0,
-        "S165662__S300322": 0,
-        "S165662__S300624": 0,
         "S165875__S165905": 0,
         "S165891__S171298": 0,
+        "S165891__S212580": 0,
         "S165905__S208604": 0,
         "S165913__S171298": 0,
+        "S165913__S212580": 0,
+        "S165913__S212792": 0,
         "S165930__S214663": 0,
         "S165930__S215040": 0,
         "S165948__S214647": 0,
@@ -78331,7 +77518,6 @@
         "S166219__S224774": 0,
         "S166227__S224723": 0,
         "S166227__S224774": 0,
-        "S166260__S300624": 0,
         "S166472__S170763": 0,
         "S166499__S170755": 0,
         "S166529__S208388": 0,
@@ -78339,8 +77525,6 @@
         "S166642__S229067": 0,
         "S166642__S229245": 0,
         "S166642__S230600": 0,
-        "S166693__S212580": 0,
-        "S166693__S212784": 0,
         "S169650__S230065": 0,
         "S169650__S230090": 0,
         "S169684__S209821": 0,
@@ -78414,10 +77598,10 @@
         "S171034__S224472": 0,
         "S171042__S210692": 0,
         "S171069__S210692": 0,
-        "S171077__S171085": 0,
         "S171093__S224286": 0,
         "S171093__S224472": 0,
-        "S171298__S212580": 0,
+        "S171397__S212750": 0,
+        "S171409__S212750": 0,
         "S171425__S207799": 0,
         "S171425__S208396": 0,
         "S171441__S214647": 0,
@@ -78474,6 +77658,7 @@
         "S201120__S300179": 0,
         "S201120__S300527": 0,
         "S201278__S300179": 0,
+        "S201383__S212571": 0,
         "S201383__S300527": 0,
         "S201383__S300551": 0,
         "S203050__S221651": 0,
@@ -78716,15 +77901,15 @@
         "S212059__S215392": 0,
         "S212059__S215473": 0,
         "S212059__S215554": 0,
-        "S212571__S300411": 0,
-        "S212571__S300551": 0,
-        "S212636__S300233": 0,
-        "S212636__S300411": 0,
-        "S212636__S300616": 0,
-        "S212741__S300411": 0,
-        "S212849__S300314": 0,
-        "S212849__S300322": 0,
-        "S212849__S300616": 0,
+        "S212571__S226777": 0,
+        "S212571__S226866": 0,
+        "S212725__S226785": 0,
+        "S212750__S226807": 0,
+        "S212750__S226912": 0,
+        "S212814__S226785": 0,
+        "S212814__S226866": 0,
+        "S212857__S226785": 0,
+        "S212857__S226807": 0,
         "S213241__S228133": 0,
         "S213241__S228222": 0,
         "S213349__S228133": 0,
@@ -102715,7 +101900,7 @@
     "bosanski_samac": 0.08,
     "bosansko_grahovo": 0.08,
     "bratunac": 0,
-    "brcko": 0.08000000000000002,
+    "brcko": 0.08,
     "breza": 0.08,
     "bugojno": 0.08000000000000003,
     "busovaca": 0.07999999999999999,
@@ -102759,7 +101944,7 @@
     "livno": 0.08,
     "ljubinje": 0.08,
     "ljubuski": 0,
-    "lopare": 0.07999999999999999,
+    "lopare": 0.08,
     "lukavac": 0,
     "maglaj": 0.08,
     "modrica": 0.07999999999999999,
@@ -102787,7 +101972,7 @@
     "sokolac": 0.08,
     "srbac": 0.08,
     "srebrenica": 0,
-    "srebrenik": 0.08,
+    "srebrenik": 0,
     "stari_grad_sarajevo": 0.08,
     "stolac": 0.07999999999999999,
     "tesanj": 0.08,
@@ -102796,8 +101981,8 @@
     "travnik": 0.08000000000000003,
     "trebinje": 0.08,
     "trnovo": 0.07999999999999999,
-    "tuzla": 0.08000000000000002,
-    "ugljevik": 0.08,
+    "tuzla": 0,
+    "ugljevik": 0.07999999999999999,
     "vares": 0.07999999999999999,
     "velika_kladusa": 0,
     "visegrad": 0.08000000000000002,
@@ -102809,7 +101994,7 @@
     "zenica": 0.08000000000000002,
     "zepce": 0.08000000000000003,
     "zivinice": 0,
-    "zvornik": 0.07999999999999999
+    "zvornik": 0.08
   },
   "negotiation_ledger": [
     {
@@ -102861,7 +102046,7 @@
       "turn": 1
     },
     {
-      "amount": 209,
+      "amount": 213,
       "faction_id": "RBiH",
       "id": "NLED_1_RBiH_adjust_5",
       "kind": "adjust",
@@ -102893,7 +102078,7 @@
       "turn": 1
     },
     {
-      "amount": 150,
+      "amount": 145,
       "faction_id": "RS",
       "id": "NLED_1_RS_adjust_5",
       "kind": "adjust",
@@ -104449,15 +103634,15 @@
     "S130869": "HRHB",
     "S130877": "HRHB",
     "S130885": "HRHB",
-    "S130907": "RS",
-    "S130923": "RS",
-    "S130940": "RS",
-    "S130966": "RS",
-    "S130974": "RS",
-    "S131105": "RS",
-    "S131148": "RS",
-    "S131296": "RS",
-    "S131318": "RS",
+    "S130907": "RBiH",
+    "S130923": "RBiH",
+    "S130940": "RBiH",
+    "S130966": "RBiH",
+    "S130974": "RBiH",
+    "S131105": "RBiH",
+    "S131148": "RBiH",
+    "S131296": "RBiH",
+    "S131318": "RBiH",
     "S131334": "RBiH",
     "S131342": "RBiH",
     "S131377": "RBiH",
@@ -105358,7 +104543,7 @@
     "S154890": "RBiH",
     "S154903": "RBiH",
     "S154911": "RBiH",
-    "S154920": "RS",
+    "S154920": "RBiH",
     "S154946": "RBiH",
     "S154962": "RBiH",
     "S154989": "RBiH",
@@ -105367,10 +104552,10 @@
     "S155012": "RBiH",
     "S155039": "RBiH",
     "S155055": "RBiH",
-    "S155071": "RS",
+    "S155071": "RBiH",
     "S155080": "RBiH",
     "S155110": "RBiH",
-    "S155128": "RS",
+    "S155128": "RBiH",
     "S155136": "RBiH",
     "S155144": "RBiH",
     "S155152": "RBiH",
@@ -105383,8 +104568,8 @@
     "S155241": "RBiH",
     "S155250": "RBiH",
     "S155268": "RBiH",
-    "S155276": "RS",
-    "S155284": "RS",
+    "S155276": "RBiH",
+    "S155284": "RBiH",
     "S155292": "RBiH",
     "S155306": "RBiH",
     "S155314": "RBiH",
@@ -105400,10 +104585,10 @@
     "S155438": "RBiH",
     "S155446": "RBiH",
     "S155462": "RBiH",
-    "S155497": "RS",
+    "S155497": "RBiH",
     "S155519": "RBiH",
     "S155527": "RBiH",
-    "S155535": "RS",
+    "S155535": "RBiH",
     "S155543": "RBiH",
     "S155551": "RBiH",
     "S155560": "RBiH",
@@ -105934,15 +105119,15 @@
     "S165549": "RBiH",
     "S165557": "RS",
     "S165573": "RBiH",
-    "S165581": "RS",
-    "S165590": "RS",
+    "S165581": "RBiH",
+    "S165590": "RBiH",
     "S165603": "RBiH",
-    "S165611": "RS",
-    "S165620": "RS",
-    "S165638": "RS",
-    "S165646": "RS",
-    "S165654": "RS",
-    "S165662": "RS",
+    "S165611": "RBiH",
+    "S165620": "RBiH",
+    "S165638": "RBiH",
+    "S165646": "RBiH",
+    "S165654": "RBiH",
+    "S165662": "RBiH",
     "S165689": "HRHB",
     "S165697": "HRHB",
     "S165719": "HRHB",
@@ -105987,10 +105172,10 @@
     "S166219": "RBiH",
     "S166227": "RBiH",
     "S166235": "RBiH",
-    "S166243": "RS",
+    "S166243": "RBiH",
     "S166251": "HRHB",
-    "S166260": "RS",
-    "S166278": "RS",
+    "S166260": "RBiH",
+    "S166278": "RBiH",
     "S166286": "RS",
     "S166308": "RBiH",
     "S166316": "RBiH",
@@ -106162,12 +105347,12 @@
     "S171034": "RBiH",
     "S171042": "RBiH",
     "S171069": "RBiH",
-    "S171077": "RS",
+    "S171077": "RBiH",
     "S171085": "RBiH",
     "S171093": "RBiH",
-    "S171107": "RS",
-    "S171115": "RS",
-    "S171123": "RS",
+    "S171107": "RBiH",
+    "S171115": "RBiH",
+    "S171123": "RBiH",
     "S171131": "RS",
     "S171140": "RS",
     "S171158": "HRHB",
@@ -107218,30 +106403,30 @@
     "S212547": "RS",
     "S212555": "RS",
     "S212563": "RS",
-    "S212571": "RS",
-    "S212580": "RS",
-    "S212628": "RS",
-    "S212636": "RS",
-    "S212644": "RS",
-    "S212652": "RS",
-    "S212679": "RS",
-    "S212687": "RS",
-    "S212717": "RS",
-    "S212725": "RS",
-    "S212741": "RS",
-    "S212750": "RS",
-    "S212776": "RS",
-    "S212784": "RS",
-    "S212792": "RS",
-    "S212814": "RS",
-    "S212849": "RS",
-    "S212857": "RS",
-    "S212865": "RS",
-    "S212881": "RS",
-    "S212890": "RS",
-    "S212911": "RS",
-    "S212920": "RS",
-    "S212938": "RS",
+    "S212571": "RBiH",
+    "S212580": "RBiH",
+    "S212628": "RBiH",
+    "S212636": "RBiH",
+    "S212644": "RBiH",
+    "S212652": "RBiH",
+    "S212679": "RBiH",
+    "S212687": "RBiH",
+    "S212717": "RBiH",
+    "S212725": "RBiH",
+    "S212741": "RBiH",
+    "S212750": "RBiH",
+    "S212776": "RBiH",
+    "S212784": "RBiH",
+    "S212792": "RBiH",
+    "S212814": "RBiH",
+    "S212849": "RBiH",
+    "S212857": "RBiH",
+    "S212865": "RBiH",
+    "S212881": "RBiH",
+    "S212890": "RBiH",
+    "S212911": "RBiH",
+    "S212920": "RBiH",
+    "S212938": "RBiH",
     "S212946": "RS",
     "S212954": "RS",
     "S212962": "RS",
@@ -109251,7 +108436,6 @@
     "S122939": 0.08,
     "S123056": 0.08,
     "S123137": 0.08,
-    "S123714": 0.08,
     "S124303": 0.08,
     "S124605": 0.08,
     "S124613": 0.08,
@@ -109350,10 +108534,6 @@
     "S130796": 0.08,
     "S130818": 0.08,
     "S130869": 0.08,
-    "S130907": 0.08,
-    "S130974": 0.08,
-    "S131296": 0.08,
-    "S131318": 0.08,
     "S132438": 0.08,
     "S132535": 0.08,
     "S132543": 0.08,
@@ -109494,8 +108674,6 @@
     "S146358": 0.08,
     "S146374": 0.08,
     "S146412": 0.08,
-    "S148792": 0.08,
-    "S148954": 0.08,
     "S151114": 0.08,
     "S151122": 0.08,
     "S151173": 0.08,
@@ -109538,23 +108716,6 @@
     "S152781": 0.08,
     "S154407": 0.08,
     "S154580": 0.08,
-    "S154792": 0.08,
-    "S154806": 0.08,
-    "S154920": 0.08,
-    "S154946": 0.08,
-    "S154962": 0.08,
-    "S154989": 0.08,
-    "S154997": 0.08,
-    "S155055": 0.08,
-    "S155071": 0.08,
-    "S155128": 0.08,
-    "S155217": 0.08,
-    "S155276": 0.08,
-    "S155284": 0.08,
-    "S155411": 0.08,
-    "S155497": 0.08,
-    "S155535": 0.08,
-    "S155543": 0.08,
     "S155756": 0.08,
     "S155772": 0.08,
     "S155830": 0.08,
@@ -109622,7 +108783,6 @@
     "S162850": 0.08,
     "S162892": 0.08,
     "S162922": 0.08,
-    "S163511": 0.08,
     "S163724": 0.08,
     "S163775": 0.08,
     "S163783": 0.08,
@@ -109664,10 +108824,7 @@
     "S165522": 0.08,
     "S165549": 0.08,
     "S165573": 0.08,
-    "S165581": 0.08,
-    "S165590": 0.08,
     "S165603": 0.08,
-    "S165662": 0.08,
     "S165875": 0.08,
     "S165891": 0.08,
     "S165905": 0.08,
@@ -109684,9 +108841,7 @@
     "S166197": 0.08,
     "S166219": 0.08,
     "S166227": 0.08,
-    "S166243": 0.08,
     "S166251": 0.08,
-    "S166260": 0.08,
     "S166421": 0.08,
     "S166472": 0.08,
     "S166499": 0.08,
@@ -109694,7 +108849,6 @@
     "S166600": 0.08,
     "S166634": 0.08,
     "S166642": 0.08,
-    "S166693": 0.08,
     "S169650": 0.08,
     "S169684": 0.08,
     "S169820": 0.08,
@@ -109742,11 +108896,11 @@
     "S171034": 0.08,
     "S171042": 0.08,
     "S171069": 0.08,
-    "S171077": 0.08,
-    "S171085": 0.08,
     "S171093": 0.08,
     "S171166": 0.08,
     "S171298": 0.08,
+    "S171397": 0.08,
+    "S171409": 0.08,
     "S171425": 0.08,
     "S171441": 0.08,
     "S171450": 0.08,
@@ -109942,11 +109096,11 @@
     "S212059": 0.08,
     "S212571": 0.08,
     "S212580": 0.08,
-    "S212636": 0.08,
-    "S212741": 0.08,
-    "S212784": 0.08,
-    "S212849": 0.08,
-    "S212938": 0.08,
+    "S212725": 0.08,
+    "S212750": 0.08,
+    "S212792": 0.08,
+    "S212814": 0.08,
+    "S212857": 0.08,
     "S212962": 0.08,
     "S213071": 0.08,
     "S213098": 0.08,
@@ -110151,6 +109305,11 @@
     "S224782": 0.08,
     "S226556": 0.08,
     "S226688": 0.08,
+    "S226777": 0.08,
+    "S226785": 0.08,
+    "S226807": 0.08,
+    "S226866": 0.08,
+    "S226912": 0.08,
     "S226971": 0.08,
     "S227242": 0.08,
     "S227285": 0.08,
@@ -110231,21 +109390,11 @@
     "S230600": 0.08,
     "S230618": 0.08,
     "S300179": 0.08,
-    "S300233": 0.08,
-    "S300292": 0.08,
-    "S300314": 0.08,
-    "S300322": 0.08,
-    "S300373": 0.08,
-    "S300403": 0.08,
-    "S300411": 0.08,
     "S300420": 0.08,
     "S300438": 0.08,
     "S300462": 0.08,
     "S300527": 0.08,
     "S300551": 0.08,
-    "S300616": 0.08,
-    "S300624": 0.08,
-    "S300632": 0.08,
     "S300713": 0.08,
     "S300748": 0.08
   },
@@ -110449,7 +109598,6 @@
     "S122939": 1,
     "S123056": 1,
     "S123137": 1,
-    "S123714": 1,
     "S124303": 1,
     "S124605": 1,
     "S124613": 1,
@@ -110548,10 +109696,6 @@
     "S130796": 1,
     "S130818": 1,
     "S130869": 1,
-    "S130907": 1,
-    "S130974": 1,
-    "S131296": 1,
-    "S131318": 1,
     "S132438": 1,
     "S132535": 1,
     "S132543": 1,
@@ -110692,8 +109836,6 @@
     "S146358": 1,
     "S146374": 1,
     "S146412": 1,
-    "S148792": 1,
-    "S148954": 1,
     "S151114": 1,
     "S151122": 1,
     "S151173": 1,
@@ -110736,23 +109878,6 @@
     "S152781": 1,
     "S154407": 1,
     "S154580": 1,
-    "S154792": 1,
-    "S154806": 1,
-    "S154920": 1,
-    "S154946": 1,
-    "S154962": 1,
-    "S154989": 1,
-    "S154997": 1,
-    "S155055": 1,
-    "S155071": 1,
-    "S155128": 1,
-    "S155217": 1,
-    "S155276": 1,
-    "S155284": 1,
-    "S155411": 1,
-    "S155497": 1,
-    "S155535": 1,
-    "S155543": 1,
     "S155756": 1,
     "S155772": 1,
     "S155830": 1,
@@ -110820,7 +109945,6 @@
     "S162850": 1,
     "S162892": 1,
     "S162922": 1,
-    "S163511": 1,
     "S163724": 1,
     "S163775": 1,
     "S163783": 1,
@@ -110862,10 +109986,7 @@
     "S165522": 1,
     "S165549": 1,
     "S165573": 1,
-    "S165581": 1,
-    "S165590": 1,
     "S165603": 1,
-    "S165662": 1,
     "S165875": 1,
     "S165891": 1,
     "S165905": 1,
@@ -110882,9 +110003,7 @@
     "S166197": 1,
     "S166219": 1,
     "S166227": 1,
-    "S166243": 1,
     "S166251": 1,
-    "S166260": 1,
     "S166421": 1,
     "S166472": 1,
     "S166499": 1,
@@ -110892,7 +110011,6 @@
     "S166600": 1,
     "S166634": 1,
     "S166642": 1,
-    "S166693": 1,
     "S169650": 1,
     "S169684": 1,
     "S169820": 1,
@@ -110940,11 +110058,11 @@
     "S171034": 1,
     "S171042": 1,
     "S171069": 1,
-    "S171077": 1,
-    "S171085": 1,
     "S171093": 1,
     "S171166": 1,
     "S171298": 1,
+    "S171397": 1,
+    "S171409": 1,
     "S171425": 1,
     "S171441": 1,
     "S171450": 1,
@@ -111140,11 +110258,11 @@
     "S212059": 1,
     "S212571": 1,
     "S212580": 1,
-    "S212636": 1,
-    "S212741": 1,
-    "S212784": 1,
-    "S212849": 1,
-    "S212938": 1,
+    "S212725": 1,
+    "S212750": 1,
+    "S212792": 1,
+    "S212814": 1,
+    "S212857": 1,
     "S212962": 1,
     "S213071": 1,
     "S213098": 1,
@@ -111349,6 +110467,11 @@
     "S224782": 1,
     "S226556": 1,
     "S226688": 1,
+    "S226777": 1,
+    "S226785": 1,
+    "S226807": 1,
+    "S226866": 1,
+    "S226912": 1,
     "S226971": 1,
     "S227242": 1,
     "S227285": 1,
@@ -111429,21 +110552,11 @@
     "S230600": 1,
     "S230618": 1,
     "S300179": 1,
-    "S300233": 1,
-    "S300292": 1,
-    "S300314": 1,
-    "S300322": 1,
-    "S300373": 1,
-    "S300403": 1,
-    "S300411": 1,
     "S300420": 1,
     "S300438": 1,
     "S300462": 1,
     "S300527": 1,
     "S300551": 1,
-    "S300616": 1,
-    "S300624": 1,
-    "S300632": 1,
     "S300713": 1,
     "S300748": 1
   },
@@ -129896,11 +129009,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -129908,11 +129021,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -129920,11 +129033,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -129932,11 +129045,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -129944,11 +129057,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -129956,11 +129069,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -129968,11 +129081,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -129980,11 +129093,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -129992,11 +129105,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -140806,7 +139919,7 @@
         "demographic_legitimacy": 0.5,
         "institutional_legitimacy": 0.6,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
         "legitimacy_score": 0.42,
         "stability_bonus": 0.04
@@ -140914,7 +140027,7 @@
         "demographic_legitimacy": 0.5,
         "institutional_legitimacy": 0.6,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
         "legitimacy_score": 0.42,
         "stability_bonus": 0.04
@@ -140950,7 +140063,7 @@
         "demographic_legitimacy": 0.5,
         "institutional_legitimacy": 0.6,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
         "legitimacy_score": 0.42,
         "stability_bonus": 0.04
@@ -141106,7 +140219,7 @@
         "demographic_legitimacy": 0.5,
         "institutional_legitimacy": 0.6,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
         "legitimacy_score": 0.42,
         "stability_bonus": 0.04
@@ -141118,7 +140231,7 @@
         "demographic_legitimacy": 0.5,
         "institutional_legitimacy": 0.6,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
         "legitimacy_score": 0.42,
         "stability_bonus": 0.04
@@ -141310,7 +140423,7 @@
         "demographic_legitimacy": 0.5,
         "institutional_legitimacy": 0.6,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
         "legitimacy_score": 0.42,
         "stability_bonus": 0.04
@@ -141346,7 +140459,7 @@
         "demographic_legitimacy": 0.5,
         "institutional_legitimacy": 0.6,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
         "legitimacy_score": 0.42,
         "stability_bonus": 0.04
@@ -147718,7 +146831,7 @@
         "demographic_legitimacy": 0.5,
         "institutional_legitimacy": 0.6,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
         "legitimacy_score": 0.42,
         "stability_bonus": 0.04
@@ -147730,7 +146843,7 @@
         "demographic_legitimacy": 0.5,
         "institutional_legitimacy": 0.6,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
         "legitimacy_score": 0.42,
         "stability_bonus": 0.04
@@ -147752,11 +146865,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -147764,11 +146877,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -147776,11 +146889,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -147788,11 +146901,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -147800,11 +146913,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -147812,11 +146925,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -148354,7 +147467,7 @@
         "demographic_legitimacy": 0.5,
         "institutional_legitimacy": 0.6,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
         "legitimacy_score": 0.42,
         "stability_bonus": 0.04
@@ -148376,11 +147489,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -148388,11 +147501,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -150454,7 +149567,7 @@
         "demographic_legitimacy": 0.5,
         "institutional_legitimacy": 0.6,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
         "legitimacy_score": 0.42,
         "stability_bonus": 0.04
@@ -150488,11 +149601,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -150500,11 +149613,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -150512,11 +149625,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163124,11 +162237,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163136,11 +162249,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163148,11 +162261,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163160,11 +162273,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163172,11 +162285,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163184,11 +162297,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163196,11 +162309,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163208,11 +162321,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163220,11 +162333,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163232,11 +162345,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163244,11 +162357,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163256,11 +162369,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163268,11 +162381,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163280,11 +162393,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163292,11 +162405,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163304,11 +162417,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163316,11 +162429,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163328,11 +162441,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163340,11 +162453,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163352,11 +162465,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163364,11 +162477,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163376,11 +162489,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163388,11 +162501,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },
@@ -163400,11 +162513,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
+        "institutional_legitimacy": 0.3,
         "last_control_change_turn": null,
-        "last_controller": "RS",
+        "last_controller": "RBiH",
         "last_updated_turn": 4,
-        "legitimacy_score": 0.54,
+        "legitimacy_score": 0.33,
         "stability_bonus": 0.04
       }
     },

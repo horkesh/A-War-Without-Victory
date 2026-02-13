@@ -1,0 +1,24 @@
+{
+  "metrics": {
+    "displacement_trigger_eligible_size": {
+      "max": 192,
+      "mean": 48.62,
+      "min": 0,
+      "nonzero_weeks": 31
+    },
+    "front_active_set_size": {
+      "max": 5297,
+      "mean": 2846.8,
+      "min": 0,
+      "nonzero_weeks": 31
+    },
+    "pressure_eligible_size": {
+      "max": 5071,
+      "mean": 2772.46,
+      "min": 0,
+      "nonzero_weeks": 31
+    }
+  },
+  "notes": [],
+  "weeks": 50
+}

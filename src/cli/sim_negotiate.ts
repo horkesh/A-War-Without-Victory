@@ -122,12 +122,24 @@ async function main(): Promise<void> {
         process.stdout.write(`  Duration: ${offerReport.offer.terms.duration_turns}\n`);
         process.stdout.write(`\n`);
         if (acceptanceReport) {
-          process.stdout.write(`Acceptance: ${acceptanceReport.accepted ? 'ACCEPTED' : 'REJECTED'}\n`);
+          const decisionLabel =
+            acceptanceReport.decision === 'accept'
+              ? 'ACCEPTED'
+              : acceptanceReport.decision === 'counter'
+                ? 'COUNTER'
+                : 'REJECTED';
+          process.stdout.write(`Acceptance: ${decisionLabel}\n`);
           if (acceptanceReport.reasons.length > 0) {
             process.stdout.write(`  Reasons:\n`);
             for (const reason of acceptanceReport.reasons) {
               process.stdout.write(`    - ${reason}\n`);
             }
+          }
+          if (acceptanceReport.counter_offer) {
+            process.stdout.write(`  Counter offer: ${acceptanceReport.counter_offer.id}\n`);
+            process.stdout.write(`    kind=${acceptanceReport.counter_offer.kind}\n`);
+            process.stdout.write(`    freeze_edges=${acceptanceReport.counter_offer.terms.freeze_edges.length}\n`);
+            process.stdout.write(`    duration=${acceptanceReport.counter_offer.terms.duration_turns}\n`);
           }
         }
       } else {

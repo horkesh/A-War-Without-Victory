@@ -18,7 +18,11 @@ import type {
 } from '../../state/game_state.js';
 import type { EdgeRecord, SettlementRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { BRIGADE_OPERATIONAL_AOR_HARD_CAP, getMaxBrigadesPerMun } from '../../state/formation_constants.js';
+import {
+  BRIGADE_OPERATIONAL_AOR_HARD_CAP,
+  getMaxBrigadesPerMun,
+  MAX_MUNICIPALITIES_PER_BRIGADE
+} from '../../state/formation_constants.js';
 import {
   computeBrigadeOperationalCoverageCapFromFormation,
   getFormationHomeMunFromTags
@@ -292,7 +296,10 @@ function ensureBrigadeMunicipalityAssignment(
       if (ca !== cb) return ca - cb;
       return strictCompare(a.id, b.id);
     });
-    const pick = candidates[0];
+    // Prefer brigade below municipality cap so no single brigade gets 200+ settlements.
+    const pick = candidates.find(
+      (c) => (normalized[c.id]?.length ?? 0) < MAX_MUNICIPALITIES_PER_BRIGADE
+    ) ?? candidates[0];
     if (!pick) continue;
     const list = normalized[pick.id] ?? [];
     list.push(munId);

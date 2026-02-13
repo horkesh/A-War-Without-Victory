@@ -61,8 +61,10 @@ export interface OfferGenerationReport {
 
 export interface AcceptanceReport {
   accepted: boolean;
+  decision: 'accept' | 'reject' | 'counter';
   reasons: string[]; // sorted, deterministic
   enforcement_package: EnforcementPackage | null;
+  counter_offer: Offer | null;
 }
 
 /**
@@ -252,6 +254,70 @@ function scoreOffer(
   return score;
 }
 
+function buildCounterOfferId(turn: number, baseOfferId: string, kind: OfferKind, scope: OfferScope): string {
+  const scopeHash = generateScopeHash(scope);
+  const baseHash = baseOfferId.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 16);
+  return `COFF_${turn}_${baseHash}_${kind}_${scopeHash}`;
+}
+
+function deriveCounterScope(scope: OfferScope, freezeEdges: string[]): OfferScope | null {
+  if (scope.kind === 'region') return { kind: 'region', region_id: scope.region_id };
+  if (scope.kind === 'global' || scope.kind === 'edges') {
+    const trimmed = [...freezeEdges].sort().slice(0, Math.max(1, Math.floor(freezeEdges.length / 2)));
+    return trimmed.length > 0 ? { kind: 'edges', edge_ids: trimmed } : null;
+  }
+  return null;
+}
+
+function proposeCounterOffer(state: GameState, offer: Offer, reasons: string[]): Offer | null {
+  const freezeEdges = [...offer.terms.freeze_edges].sort();
+  if (freezeEdges.length === 0) return null;
+
+  const downgradeToLocal =
+    offer.kind === 'ceasefire' ||
+    reasons.some((r) => r.startsWith('enforceability_failed'));
+  const kind: OfferKind = downgradeToLocal
+    ? 'local_freeze'
+    : offer.kind === 'local_freeze'
+      ? 'corridor_opening'
+      : 'corridor_opening';
+
+  const scope = deriveCounterScope(offer.scope, freezeEdges);
+  if (!scope) return null;
+  const counterFreezeEdges =
+    scope.kind === 'edges'
+      ? [...scope.edge_ids].sort()
+      : freezeEdges.slice(0, Math.max(1, Math.floor(freezeEdges.length / 2))).sort();
+  if (counterFreezeEdges.length === 0) return null;
+
+  const currentTurn = state.meta.turn;
+  const duration =
+    offer.terms.duration_turns === 'indefinite'
+      ? 6
+      : Math.max(2, offer.terms.duration_turns - 2);
+
+  const counter: Offer = {
+    id: buildCounterOfferId(currentTurn, offer.id, kind, scope),
+    turn: currentTurn,
+    kind,
+    scope,
+    rationale: {
+      pressure_trigger: offer.rationale.pressure_trigger,
+      exhaustion_snapshot: { ...offer.rationale.exhaustion_snapshot },
+      instability_snapshot: { breaches_total: offer.rationale.instability_snapshot.breaches_total },
+      supply_snapshot: {
+        unsupplied_formations: offer.rationale.supply_snapshot.unsupplied_formations,
+        unsupplied_militia_pools: offer.rationale.supply_snapshot.unsupplied_militia_pools
+      }
+    },
+    terms: {
+      duration_turns: duration,
+      freeze_edges: counterFreezeEdges
+    }
+  };
+  return counter;
+}
+
 /**
  * Generate negotiation offers (max 1 per turn).
  */
@@ -430,6 +496,7 @@ export function checkOfferAcceptance(
   }
 
   const accepted = enforceabilityPass && symmetryPass && supplySanityPass;
+  const counterOffer = accepted ? null : proposeCounterOffer(state, offer, reasons);
 
   let enforcementPackage: EnforcementPackage | null = null;
   if (accepted) {
@@ -447,8 +514,10 @@ export function checkOfferAcceptance(
 
   return {
     accepted,
+    decision: accepted ? 'accept' : counterOffer ? 'counter' : 'reject',
     reasons,
-    enforcement_package: enforcementPackage
+    enforcement_package: enforcementPackage,
+    counter_offer: counterOffer
   };
 }
 

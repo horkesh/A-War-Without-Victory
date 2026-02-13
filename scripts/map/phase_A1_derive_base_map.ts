@@ -282,11 +282,15 @@ async function main() {
         }
 
         if (projectedGeom) {
+            const mun1990Id = f.properties.mun1990_id ?? '';
+            const mun1990Name = f.properties.mun1990_name ?? '';
             features.push({
                 type: 'Feature',
                 properties: {
                     role: 'settlement', sid, name: f.properties.settlement_name, pop, nato_class: nato,
-                    majority_ethnicity: eth.majority || 'unknown'
+                    majority_ethnicity: eth.majority || 'unknown',
+                    ...(mun1990Id && { mun1990_id: mun1990Id }),
+                    ...(mun1990Name && { mun1990_name: mun1990Name })
                 },
                 geometry: projectedGeom
             });

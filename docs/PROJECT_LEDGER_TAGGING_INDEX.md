@@ -52,6 +52,16 @@ Entries are in chronological order (oldest first). Each row: Date | First line (
 | 2026-02-09 | Project ledger reorganization (plan and implementation guide) | process |
 | 2026-02-09 | IMPLEMENTATION: RBiH–HRHB Alliance Lifecycle | canon, implementation |
 | 2026-02-09 | Smart-bot reporting completion | implementation |
+| 2026-02-10 | (multiple 2026-02-10 entries — see ledger) | various |
+| 2026-02-11 | Brigade Realism and Military Fronts; attack orders, casualties, garrison | implementation, canon |
+| 2026-02-11 | Recruitment canon propagation; ethnic/hybrid init control; no-flip calibration | canon, implementation, process |
+| 2026-02-11 | Phase II direct-start AoR; hard/dynamic frontage cap; urban fortress; same-HQ/missing-HQ AoR fix | architecture, implementation |
+| 2026-02-11 | No-flip policy finalization; player_choice GO, ethnic/hybrid NO-GO; cloneGameState centralization | process, implementation |
+| 2026-02-11 | Municipality supra-layer; ensure step only brigade-home muns; ongoing recruitment | implementation |
+| 2026-02-12 | RBiH-aligned municipalities; battle resolution engine; tactical viewer standardization | implementation, canon |
+| 2026-02-12 | Orchestrator scenario runs handoff; recruitment spawn priority | process, implementation |
+| 2026-02-13 | Scenario-run remediation (no-flip semantics, Phase II attack summary); casualty_ledger serialization | implementation |
+| 2026-02-13 | Brigade strength/AoR investigation; MAX_MUNICIPALITIES_PER_BRIGADE; Orchestrator absorption + canon update | implementation, process, canon |
 
 ---
 
@@ -60,6 +70,8 @@ Entries are in chronological order (oldest first). Each row: Date | First line (
 1. **Geometry:** Path A (2026-01-24) → crosswalk/outline issues → union failure → drzava.js borders (2026-01-24) → adjacency/edge cancellation (2026-01-25–26) → A1/WGS84/Voronoi (2026-02-07). See PROJECT_LEDGER.md entries 2026-01-24 through 2026-02-07.
 2. **Bots:** Random/placeholder → determinism requirement → seeded RNG, strategy profiles (2026-02-09 Phase A) → time-adaptive, front-length/manpower (2026-02-09). See PROJECT_LEDGER.md 2026-02-09.
 3. **Map / control:** Tactical map canonical (2026-02-08) → formation positions, viewer data → start-control hardening, no null (2026-02-09). See PROJECT_LEDGER.md 2026-02-08–09.
+4. **Phase II combat:** Garrison-based (2026-02-11) → battle resolution engine with terrain/casualty_ledger/snap events (2026-02-12); RBiH–HRHB gate in resolve_attack_orders. See PROJECT_LEDGER.md 2026-02-11–12.
+5. **Phase I no-flip:** Stasis (2026-02-11) → military-action branch → calibration → player_choice GO only, ethnic/hybrid NO-GO (2026-02-11). See PROJECT_LEDGER.md 2026-02-11; PARADOX_PHASEI_NOFLIP_FINAL_PROPOSAL_2026_02_11.md.
 
 ---
 

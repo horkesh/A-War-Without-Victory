@@ -19,6 +19,7 @@ import {
   majorityToFaction,
   type SettlementEthnicityEntry
 } from '../data/settlement_ethnicity.js';
+import { isMunicipalityAlignedToRbih } from './rbih_aligned_municipalities.js';
 
 /** Map Phase 0 control_status to authority state (consolidated/contested/fragmented) for pool and spawn. */
 function controlStatusToAuthority(
@@ -27,6 +28,25 @@ function controlStatusToAuthority(
   if (control_status === 'SECURE') return 'consolidated';
   if (control_status === 'CONTESTED') return 'contested';
   return 'fragmented';
+}
+
+/**
+ * Apply RBiH-aligned municipality override: in these muns, control is always RBiH (settlement control
+ * and spawns do not contribute to HRHB; HVO subordinate to ARBiH). Mutates controllersRecord.
+ */
+function applyRbihAlignedMunicipalityOverrides(
+  controllersRecord: Record<SettlementId, PoliticalControllerId>,
+  settlementGraph: LoadedSettlementGraph
+): void {
+  const settlementIds = Array.from(settlementGraph.settlements.keys()).sort((a, b) => a.localeCompare(b));
+  for (const sid of settlementIds) {
+    const settlement = settlementGraph.settlements.get(sid);
+    if (!settlement) continue;
+    const mun1990Id = settlement.mun1990_id ?? settlement.mun_code ?? '';
+    if (isMunicipalityAlignedToRbih(mun1990Id)) {
+      controllersRecord[sid] = 'RBiH';
+    }
+  }
 }
 
 
@@ -450,6 +470,7 @@ async function initializePoliticalControllersFromEthnic1991(
     contestedRecord[sid] = false;
     municipalityStatus.set(mun1990Id, 'SECURE');
   }
+  applyRbihAlignedMunicipalityOverrides(controllersRecord, settlementGraph);
   const coercion = enforceNonNullStartControllers(settlementGraph, controllersRecord);
 
   state.political_controllers = controllersRecord;
@@ -528,6 +549,7 @@ async function initializePoliticalControllersFromHybrid1992(
     contestedRecord[sid] = false;
     municipalityStatus.set(mun1990Id, 'SECURE');
   }
+  applyRbihAlignedMunicipalityOverrides(controllersRecord, settlementGraph);
   const coercion = enforceNonNullStartControllers(settlementGraph, controllersRecord);
 
   state.political_controllers = controllersRecord;
@@ -595,6 +617,7 @@ async function initializePoliticalControllersFromMun1990Only(
     contestedRecord[sid] = false;
     municipalityStatus.set(mun1990Id, 'SECURE');
   }
+  applyRbihAlignedMunicipalityOverrides(controllersRecord, settlementGraph);
   const coercion = enforceNonNullStartControllers(settlementGraph, controllersRecord);
 
   state.political_controllers = controllersRecord;
@@ -744,6 +767,7 @@ export async function initializePoliticalControllers(
     controllersRecord[sid] = controller;
     contestedRecord[sid] = contested;
   }
+  applyRbihAlignedMunicipalityOverrides(controllersRecord, settlementGraph);
   const coercion = enforceNonNullStartControllers(settlementGraph, controllersRecord);
   state.political_controllers = controllersRecord;
   state.contested_control = contestedRecord;
