@@ -78,6 +78,8 @@ Formations have attributes: manpower, cohesion, readiness state, supply state, e
 
 Formations progress through readiness states: Forming, Active, Overextended, and Degraded.
 
+**Implementation-note (formation activation grace period):** Brigades that remain in Forming for at least BRIGADE_FORMATION_MAX_WAIT turns (e.g. 6) auto-activate regardless of supply or authority gates, so supply-gate cannot permanently block activation. Implementation: `docs/40_reports/BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md`.
+
 Players assign brigades to Areas of Responsibility rather than specific settlements. AoRs shape where pressure is applied and absorbed. Fronts emerge where opposing brigades' AoRs meet across adjacent settlements and where control or contestation differs.
 
 Operational Groups may be formed temporarily and dissolve automatically under cohesion loss or command degradation. This models ad-hoc wartime organization without allowing permanent force inflation.
@@ -127,9 +129,13 @@ With Corps authorization, OGs may detach battalion-equivalent manpower from dono
 
 **Corps stance:** defensive (0.7× pressure, 1.2× defense); balanced (1.0 / 1.0); offensive (1.2× pressure, 0.8× defense, plus exhaustion); reorganize (0× pressure, force defend, +2 cohesion/turn). **Army override:** general_offensive → all corps offensive; general_defensive → all defensive; total_mobilization → all reorganize. **Named operations:** planning (e.g. 3 turns, +5% defense) → execution (e.g. 4 turns, +50% pressure, −4 cohesion/turn) → recovery (e.g. 3 turns, −40% pressure, +1 cohesion/turn) → complete. **State:** corps_command (per formation), army_stance (per faction). Command span and OG slots initialized from formation tags or defaults (e.g. command span 5; 2 OG slots for large corps ≥ 6 subordinates, 1 otherwise).
 
+### 6.5 Phase II bot (brigade AI) — implementation-note
+
+When the bot controls a faction in Phase II, brigade AI generates posture orders and attack orders in a single pass. Attack-order eligibility uses the posture just decided in that pass (pending posture), not the previously applied state, so probe/attack brigades can issue attack orders in the same turn. Faction-specific strategic objectives (offensive and defensive municipality lists—e.g. RS Drina valley and Sarajevo siege ring; RBiH enclaves and central corridors; HRHB Herzegovina heartland and Lasva valley) and attack target scoring (undefended +100, corridor +90, offensive objective +70, home recapture +60, weak garrison 0–50) are applied deterministically; tie-break by settlement ID. Brigades headquartered in offensive-objective municipalities may adopt probe at a lower coverage threshold. All iteration and selection use stable ordering; no randomness. Implementation: `docs/40_reports/BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md`.
+
 ## 7. Combat interaction and pressure
 
-Combat is resolved as pressure exchange rather than discrete battles. Pressure is derived from formation strength, cohesion, supply, terrain modifiers, and support assets.
+Combat is resolved as pressure exchange rather than discrete battles. Pressure is derived from formation strength, cohesion, supply, terrain modifiers, and support assets. In Phase II, **attack orders** are additionally resolved as discrete engagements (see §7.4).
 
 **Brigade-derived pressure (Phase II):** Raw pressure = density × posture_mult × readiness_mult × cohesion_factor × supply_factor × equipment_mult × resilience_mult × disruption_mult. **Defense** uses the same factors with defense multipliers and front hardening bonus (e.g. min(0.5, active_streak × 0.05)). **Edge pressure:** per front edge, pressure delta from assigned brigades on each side, clamped (e.g. [−10, 10]). **Resilience modifier:** existential threat (control &lt; 30% → up to +30% defense), home defense (+20%), cohesion under pressure (+15%). Brigade pressure, density, and resilience modifier are computed each turn and not serialized.
 
@@ -158,6 +164,10 @@ When accumulated exhaustion persists and coincides with institutional or spatial
 Eligibility does not imply immediate failure. Collapse remains delayed, contingent, and multi-causal.
 
 *For the complete frozen specification, see Appendix C: Phase 3C Specification.*
+
+### 7.4 Phase II attack-order resolution (discrete battles)
+
+When Phase II runs, attack orders are resolved as **discrete battles** per engagement. Each engagement compares attacker and defender **combat power** (garrison × equipment × experience × cohesion × posture × supply × terrain modifier × corps stance × named operations × OG bonus × resilience × disruption). Terrain modifier applies to the defender (rivers, slope, urban/Sarajevo bonus, friction, road access). Outcome: attacker victory when power ratio ≥ 1.3 (settlement control flips); stalemate 0.8–1.3; defender victory &lt; 0.8. Personnel casualties (KIA/WIA/MIA) and equipment losses are applied per engagement; formation personnel is reduced (floor MIN_BRIGADE_SPAWN) and cumulative totals are recorded in **casualty_ledger** (per-faction and per-formation). Deterministic snap events (e.g. Ammunition Crisis, Commander Casualty, Last Stand, Surrender Cascade, Pyrrhic Victory) may apply when state conditions are met. Equipment capture occurs on surrender. Implementation: `docs/40_reports/battle_resolution_engine_report_2026_02_12.md`; state: `casualty_ledger` is canonical (serialized).
 
 ## 8. Command and control degradation
 
@@ -342,7 +352,7 @@ The following systems are canonical at v0.4. This manual provides the authoritat
 **State:** `sarajevo_state`. **Core rules:** Siege from connectivity; dual supply model; integrity floor and amplified visibility. **Constraints:** Sarajevo exceptional but not scripted.
 
 ### System 7: Negotiation Capital + Territorial Valuation
-**State:** `negotiation_state` per faction. **Core rules:** Capital from exhaustion, IVP, patron; "liabilities cheaper" asymmetry; required clauses. **Constraints:** deterministic acceptance.
+**State:** `negotiation_state` per faction. **Core rules:** Capital from exhaustion, IVP, patron; "liabilities cheaper" asymmetry; required clauses. **Constraints:** deterministic acceptance. **Acceptance report:** Implementation produces a deterministic `decision` per evaluation (`accept` | `reject` | `counter`). On reject or counter, a deterministic `counter_offer` (id and terms) is produced; repeated rejection yields identical counter id/terms for same state and proposal.
 
 ### System 8: AoR Assignment Formalization
 **State:** `brigade_aor`: Record<SettlementId, FormationId | null> on GameState (rear settlements null). **Core rules:** Front-active settlements must have exactly one brigade; rear settlements null; AoR exclusive, matches control. Assignment and validation as in §2.1 and Phase_II_Specification_v0_5_0.md §7.1. **Constraints:** prohibited in Phase I.

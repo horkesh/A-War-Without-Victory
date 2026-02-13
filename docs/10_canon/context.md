@@ -4,7 +4,7 @@
 
 **A War Without Victory (AWWV)** is a strategic-level historical simulation of the 1992-1995 Bosnian War. This is a deterministic, negative-sum war game focused on exhaustion, political collapse, and constrained agency rather than conquest.
 
-**Current Phase:** Engine implementation (Phases 3A-3D complete), dev tools operational, document reconciliation in progress.
+**Current Phase:** Post-MVP execution (Phase 6 complete); Phase II battle-resolution pipeline and scenario diagnostics are live; current focus is Phase 7 backlog closure and validation hardening.
 
 ## Authoritative Documentation Hierarchy
 
@@ -30,11 +30,11 @@ When conflicts arise between documents, this is the resolution order. See **`doc
 
 **Current Location:** Canon docs in `docs/10_canon/`. Engineering (code canon, pipelines, determinism) in `docs/20_engineering/`.
 
-**Implementation references:** Brigade Operations: [BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md](../40_reports/BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md) — canon has been updated to reflect it (Phase II, Systems Manual, Engine Invariants, Phase I). Recruitment system: [recruitment_system_implementation_report.md](../40_reports/recruitment_system_implementation_report.md) — three-resource brigade activation at Phase I entry; canon updated in Systems Manual §13, Phase I implementation-note, MILITIA_BRIGADE_FORMATION_DESIGN §10.
+**Implementation references:** Brigade Operations: [BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md](../40_reports/BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md) — canon has been updated to reflect it (Phase II, Systems Manual, Engine Invariants, Phase I). Recruitment system: [recruitment_system_implementation_report.md](../40_reports/recruitment_system_implementation_report.md) — three-resource brigade activation at Phase I entry; canon updated in Systems Manual §13, Phase I implementation-note, MILITIA_BRIGADE_FORMATION_DESIGN §10. Battle resolution (Phase II): [battle_resolution_engine_report_2026_02_12.md](../40_reports/battle_resolution_engine_report_2026_02_12.md) — multi-factor combat, terrain, casualty ledger, snap events; canon updated in Phase II §5, §12 and Systems Manual §7.4. Scenario handoff decisions (no-flip semantics, 0-flip interpretation): [ORCHESTRATOR_SCENARIO_HANDOFF_DECISIONS_2026_02_13.md](../40_reports/ORCHESTRATOR_SCENARIO_HANDOFF_DECISIONS_2026_02_13.md); Phase I implementation-note for military-action-only added 2026-02-13. Bot AI (Phase II): [BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md](../40_reports/BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md) — pipeline ordering (formation lifecycle before brigade ops), pending posture for same-pass attack orders, formation grace-period auto-activation, faction strategic objectives and attack scoring; canon updated in Phase II §5, §12 and Systems Manual §5, §6.5.
 
 ### Canon v0.5 implementation-notes policy
 
-Implementation-notes in canon (e.g. Phase I §4.3, Systems Manual) that are explicitly "non-normative unless promoted" **remain as implementation-notes in v0.5**. Promotion to normative is deferred to a future v0.6 if desired. This policy applies to coercion pressure, capability-weighted flip, formation-aware flip, OOB at Phase I start, and RBiH–HRHB war earliest week.
+Implementation-notes in canon (e.g. Phase I §4.3, Systems Manual) that are explicitly "non-normative unless promoted" **remain as implementation-notes in v0.5**. Promotion to normative is deferred to a future v0.6 if desired. This policy applies to coercion pressure, capability-weighted flip, formation-aware flip, OOB at Phase I start, RBiH–HRHB war earliest week, and military-action-only (disable_phase_i_control_flip) scenarios.
 
 ## Mandatory Workflow Guardrails
 
@@ -113,7 +113,7 @@ Refs: docs/PROJECT_LEDGER.md entry [date]
 
 **Always track:**
 - Source code changes (`src/`, `scripts/`, `tools/`)
-- Canonical documentation (`docs/*.docx`, `docs/*.md`)
+- Canonical documentation (`docs/**/*.md`)
 - Configuration (`package.json`, `tsconfig.json`)
 - Project metadata (`docs/PROJECT_LEDGER.md`, `.agent/napkin.md`)
 

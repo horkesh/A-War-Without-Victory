@@ -92,7 +92,7 @@ For full type definitions and interfaces (BrigadePosture, CorpsStance, ArmyStanc
 Phase II logic runs inside the sim turn pipeline (src/sim/turn_pipeline.ts):
 
 - **When**: Only when meta.phase === "phase_ii". For meta.phase === "phase_i", Phase I phases run and Phase II consolidation is skipped; for phase_0, the state pipeline is used.
-- **Where**: After "phase-ii-aor-init" (when present), the following brigade operations phases run in order, then "phase-ii-consolidation":
+- **Where**: After "phase-ii-aor-init" (when present), **update-formation-lifecycle** runs first (so brigades may transition forming → active before bot AI evaluates them). Then the following brigade operations phases run in order, then "phase-ii-consolidation":
   1. validate-brigade-aor
   2. apply-municipality-orders
   3. generate-bot-brigade-orders
@@ -104,9 +104,11 @@ Phase II logic runs inside the sim turn pipeline (src/sim/turn_pipeline.ts):
   9. equipment-degradation
   10. apply-posture-costs
   11. compute-brigade-pressure
-  12. update-og-lifecycle
+  12. phase-ii-resolve-attack-orders (battle resolution: terrain, casualties, control flips; see Systems Manual §7.4)
+  13. phase-ii-brigade-reinforcement (reinforce brigades from militia pools)
+  14. update-og-lifecycle
 
-Then phase-ii-consolidation runs. Order within consolidation:
+When **recruitment_state** exists, **phase-ii-recruitment** also runs in Phase II (accrual + ongoing elective recruitment; see Systems Manual §13). Then phase-ii-consolidation runs. Order within consolidation:
   1. Detect fronts: detectPhaseIIFronts(state, edges).
   2. Update supply pressure: updatePhaseIISupplyPressure(state, edges, supplyReport).
   3. Update exhaustion: updatePhaseIIExhaustion(state, fronts).
@@ -184,13 +186,20 @@ Within a municipality shared by multiple brigades of the same faction, settlemen
 
 ---
 
+## 11.1 Scenario run artifacts (diagnostics)
+
+When the scenario runner produces a run, **run_summary.json** includes a **phase_ii_attack_resolution** block (when Phase II ran): `weeks_with_phase_ii`, `weeks_with_orders`, `orders_processed`, `flips_applied`, and attacker/defender casualty counts. This supports diagnostic interpretation of 0-flip or low-activity Phase II outcomes (e.g. no orders issued, threshold not met, or RBiH–HRHB gate active).
+
+---
+
 ## 12. Stubs / Known Limitations (Implementation)
 
 - **phase_ii_exhaustion_local**: In schema but not driven by mechanics; may be used by future systems.
 - **Transition conditions**: State-driven (D0.9.1): JNA complete + opposing-control edge count >= MIN_OPPOSING_EDGES for PERSIST_TURNS consecutive turns; no fixed time offset.
 - **Command friction**: getPhaseIICommandFrictionMultipliers returns multipliers >= 1; applied to supply pressure and exhaustion increments.
 - **Supply report**: Optional; isolation is zero when not provided (e.g. when Phase II runs without supply-resolution in same run).
-- **Brigade operations (per BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md §8):** Equipment capture in Phase II exists but is not yet wired into the Phase II settlement control resolution pipeline (only Phase I flips can trigger capture). JNA equipment transfer to RS brigades is not implemented; RS brigades receive default composition from equipment_effects. Urban defense bonus (e.g. Sarajevo, Tuzla) is not yet included in the resilience module. OG donor tracking returns personnel equally to same-corps brigades at dissolution, not proportionally to original donors. Bot AI does not generate corps operations, OG activations, or army stance changes. The maintenance module is not yet integrated with the typed equipment system.
+- **Brigade operations (per BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md §8 and battle_resolution_engine_report_2026_02_12):** Phase II attack resolution is implemented as discrete battle resolution: combat power (garrison × equipment × experience × cohesion × posture × supply × terrain × corps × operations × OG × resilience × disruption), outcome threshold (≥1.3 attacker victory), terrain modifier (rivers, slope, urban/Sarajevo bonus), per-engagement and cumulative casualties (casualty_ledger), equipment losses and capture on surrender, and deterministic snap events (Ammunition Crisis, Commander Casualty, Last Stand, Surrender Cascade, Pyrrhic Victory). JNA equipment transfer to RS brigades is not implemented; RS brigades receive default composition from equipment_effects. OG donor tracking returns personnel equally to same-corps brigades at dissolution, not proportionally to original donors. The maintenance module is not yet integrated with the typed equipment system.
+- **Phase II bot brigade AI (per BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md):** Formation lifecycle runs before the brigade ops block so forming→active transition occurs before generate-bot-brigade-orders. Bot generates posture orders and attack orders in one pass; attack-order eligibility uses the posture just decided in that pass (pending posture), not the previously applied state. Brigades in forming for ≥ BRIGADE_FORMATION_MAX_WAIT (6) turns auto-activate regardless of supply/authority. Faction strategic objectives (offensive and defensive municipality lists—e.g. RS Drina/Sarajevo, RBiH enclaves/corridors, HRHB Herzegovina) and attack target scoring (undefended +100, corridor +90, offensive objective +70, home recapture +60, weak garrison 0–50) are applied deterministically; tie-break by settlement ID. Brigades in offensive-objective municipalities may use a lower coverage threshold for probe. Bot AI does not generate corps operations, OG activations, or army stance changes.
 
 ---
 
