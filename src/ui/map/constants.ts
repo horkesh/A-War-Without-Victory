@@ -72,13 +72,35 @@ export const READINESS_COLORS: Record<string, string> = {
   degraded: '#ff3d00',
 };
 
-/** Formation kind icons: inner symbol within NATO frame (infantry=bar, corps=diamond, militia=triangle). */
+/** Readiness state colors for panel UI (Material Design palette, higher contrast on dark panels). */
+const PANEL_READINESS_COLORS: Record<string, string> = {
+  active: '#4CAF50',
+  forming: '#FFC107',
+  overextended: '#FF9800',
+  degraded: '#F44336',
+};
+
+/** Look up the panel readiness color for a given readiness string (defaults to degraded/red). */
+export function panelReadinessColor(readiness: string): string {
+  return PANEL_READINESS_COLORS[readiness] ?? PANEL_READINESS_COLORS.degraded;
+}
+
+/** Formation kind icons: inner symbol within NATO frame (infantry=bar, corps=XX, militia=triangle). */
 export const FORMATION_KIND_SHAPES: Record<string, string> = {
   militia: 'triangle',
   brigade: 'square',
   territorial_defense: 'square',
   operational_group: 'diamond',
-  corps_asset: 'diamond',
+  corps_asset: 'xx',
+  corps: 'xx',
+  og: 'diamond',
+};
+
+/** Formation kinds visible at each zoom level (STRATEGIC=corps only, OPERATIONAL=corps+brigades, TACTICAL=all). */
+export const ZOOM_FORMATION_FILTER: Record<number, Set<string> | null> = {
+  0: new Set(['corps', 'corps_asset']),                            // strategic: corps-level only
+  1: null,                                                         // operational: all
+  2: null,                                                         // tactical: all
 };
 
 /** NATO-style formation marker: width and height by zoom (0=strategic, 1=operational, 2=tactical). Horizontal box: crest left, NATO symbol right. */
@@ -118,6 +140,15 @@ export const FRONT_LINE = {
   /** Glow effect: drawn as wider semi-transparent line behind the main line. */
   glowColor: 'rgba(255, 200, 100, 0.25)',
   glowWidth: 6,
+} as const;
+
+/** Brigade AoR highlight — smooth unified region with breathing glow. */
+export const AOR_HIGHLIGHT = {
+  fillAlpha: 0.15,
+  strokeWidth: 2.5,
+  glowBlurMin: 2,
+  glowBlurMax: 6,
+  glowCycleMs: 2000,
 } as const;
 
 /** Minimap dimensions. */

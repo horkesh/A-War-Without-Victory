@@ -115,6 +115,7 @@ import { buildSidToMunFromSettlements } from '../scenario/oob_phase_i_entry.js';
 import { evaluateEvents } from './events/evaluate_events.js';
 import { runDisplacementHooks, type DisplacementHooksReport } from './phase_i/displacement_hooks.js';
 import { runJNATransition, type JNATransitionReport } from './phase_i/jna_transition.js';
+import { runJNAGhostDegradation, type JNAGhostDegradationReport } from './jna_ghost_degradation.js';
 import { detectPhaseIIFronts } from './phase_ii/front_emergence.js';
 import {
   applyBrigadeMunicipalityOrders,
@@ -226,6 +227,7 @@ export interface TurnReport {
   phase_i_displacement_hooks?: DisplacementHooksReport; // Phase C Step 7: displacement initiation hooks
   phase_i_displacement_apply?: DisplacementStepReport; // Phase C Step 7b: one-time Phase I displacement from flips (Phase I §4.4)
   phase_i_jna_transition?: JNATransitionReport; // Phase C Step 8: JNA withdrawal and asset transfer
+  jna_ghost_degradation?: JNAGhostDegradationReport; // JNA ghost brigade auto-degrade/dissolve
   phase_i_alliance_update?: AllianceUpdateReport; // Phase I §4.8: RBiH–HRHB alliance value update
   phase_i_ceasefire_check?: CeasefireCheckReport; // Phase I §4.8: bilateral ceasefire evaluation
   phase_i_washington_check?: WashingtonCheckReport; // Phase I §4.8: Washington Agreement evaluation
@@ -336,6 +338,12 @@ const phases: NamedPhase[] = [
     name: 'initialize',
     run: () => {
       // placeholder: ensure deterministic setup stays inside pipeline
+    }
+  },
+  {
+    name: 'jna-ghost-degradation',
+    run: (context) => {
+      context.report.jna_ghost_degradation = runJNAGhostDegradation(context.state);
     }
   },
   {
@@ -1479,6 +1487,12 @@ const phaseIPhases: NamedPhase[] = [
     name: 'phase-i-jna-transition',
     run: (context) => {
       context.report.phase_i_jna_transition = runJNATransition(context.state);
+    }
+  },
+  {
+    name: 'jna-ghost-degradation',
+    run: (context) => {
+      context.report.jna_ghost_degradation = runJNAGhostDegradation(context.state);
     }
   },
   {

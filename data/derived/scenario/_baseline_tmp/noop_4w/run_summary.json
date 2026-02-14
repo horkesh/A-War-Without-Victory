@@ -1,13 +1,160 @@
 {
-  "final_state_hash": "6eb215c475c7002f",
+  "final_state_hash": "a426942495a08cd7",
+  "historical_alignment": {
+    "delta": [
+      {
+        "brigades_active_delta": 0,
+        "brigades_inactive_delta": 0,
+        "brigades_total_delta": 0,
+        "faction": "HRHB",
+        "negotiation_capital_delta": 159,
+        "personnel_total_delta": 0,
+        "prewar_capital_delta": 0,
+        "recruitment_capital_delta": 0
+      },
+      {
+        "brigades_active_delta": 0,
+        "brigades_inactive_delta": 0,
+        "brigades_total_delta": 0,
+        "faction": "RBiH",
+        "negotiation_capital_delta": 312,
+        "personnel_total_delta": 0,
+        "prewar_capital_delta": 0,
+        "recruitment_capital_delta": 0
+      },
+      {
+        "brigades_active_delta": 0,
+        "brigades_inactive_delta": 0,
+        "brigades_total_delta": 0,
+        "faction": "RS",
+        "negotiation_capital_delta": 231,
+        "personnel_total_delta": 0,
+        "prewar_capital_delta": 0,
+        "recruitment_capital_delta": 0
+      }
+    ],
+    "final": [
+      {
+        "brigades_active": 0,
+        "brigades_inactive": 0,
+        "brigades_total": 0,
+        "faction": "HRHB",
+        "negotiation_capital": 159,
+        "personnel_total": 0,
+        "prewar_capital": 0,
+        "recruitment_capital": 0
+      },
+      {
+        "brigades_active": 0,
+        "brigades_inactive": 0,
+        "brigades_total": 0,
+        "faction": "RBiH",
+        "negotiation_capital": 312,
+        "personnel_total": 0,
+        "prewar_capital": 0,
+        "recruitment_capital": 0
+      },
+      {
+        "brigades_active": 0,
+        "brigades_inactive": 0,
+        "brigades_total": 0,
+        "faction": "RS",
+        "negotiation_capital": 231,
+        "personnel_total": 0,
+        "prewar_capital": 0,
+        "recruitment_capital": 0
+      }
+    ],
+    "initial": [
+      {
+        "brigades_active": 0,
+        "brigades_inactive": 0,
+        "brigades_total": 0,
+        "faction": "HRHB",
+        "negotiation_capital": 0,
+        "personnel_total": 0,
+        "prewar_capital": 0,
+        "recruitment_capital": 0
+      },
+      {
+        "brigades_active": 0,
+        "brigades_inactive": 0,
+        "brigades_total": 0,
+        "faction": "RBiH",
+        "negotiation_capital": 0,
+        "personnel_total": 0,
+        "prewar_capital": 0,
+        "recruitment_capital": 0
+      },
+      {
+        "brigades_active": 0,
+        "brigades_inactive": 0,
+        "brigades_total": 0,
+        "faction": "RS",
+        "negotiation_capital": 0,
+        "personnel_total": 0,
+        "prewar_capital": 0,
+        "recruitment_capital": 0
+      }
+    ]
+  },
   "phase_ii_attack_resolution": {
     "casualty_attacker": 0,
     "casualty_defender": 0,
+    "defender_absent_battles": 0,
+    "defender_present_battles": 0,
     "flips_applied": 0,
     "orders_processed": 0,
+    "unique_attack_targets": 0,
     "weeks_with_orders": 0,
     "weeks_with_phase_ii": 4
   },
+  "phase_ii_attack_resolution_weekly": [
+    {
+      "casualty_attacker": 0,
+      "casualty_defender": 0,
+      "defender_absent_battles": 0,
+      "defender_present_battles": 0,
+      "flips_applied": 0,
+      "orders_processed": 0,
+      "turn": 1,
+      "unique_attack_targets": 0,
+      "week_index": 0
+    },
+    {
+      "casualty_attacker": 0,
+      "casualty_defender": 0,
+      "defender_absent_battles": 0,
+      "defender_present_battles": 0,
+      "flips_applied": 0,
+      "orders_processed": 0,
+      "turn": 2,
+      "unique_attack_targets": 0,
+      "week_index": 1
+    },
+    {
+      "casualty_attacker": 0,
+      "casualty_defender": 0,
+      "defender_absent_battles": 0,
+      "defender_present_battles": 0,
+      "flips_applied": 0,
+      "orders_processed": 0,
+      "turn": 3,
+      "unique_attack_targets": 0,
+      "week_index": 2
+    },
+    {
+      "casualty_attacker": 0,
+      "casualty_defender": 0,
+      "defender_absent_battles": 0,
+      "defender_present_battles": 0,
+      "flips_applied": 0,
+      "orders_processed": 0,
+      "turn": 4,
+      "unique_attack_targets": 0,
+      "week_index": 3
+    }
+  ],
   "run_id": "noop_4w__785a4bd598aba9de__w4",
   "scenario_id": "noop_4w",
   "summary": {

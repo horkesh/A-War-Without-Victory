@@ -76,6 +76,7 @@ export function parseGameState(json: unknown): LoadedGameState {
       const aorSettlementIds = brigadeAorByFormationId[id];
       const personnel = typeof f.personnel === 'number' ? f.personnel : undefined;
       const posture = typeof f.posture === 'string' && f.posture ? f.posture : undefined;
+      const corps_id = typeof f.corps_id === 'string' && f.corps_id ? f.corps_id : undefined;
 
       formations.push({
         id: id,
@@ -93,7 +94,33 @@ export function parseGameState(json: unknown): LoadedGameState {
         aorSettlementIds,
         personnel,
         posture,
+        corps_id,
       });
+    }
+  }
+
+  // Enrich corps formations with corps_command data and subordinate lists
+  const rawCorpsCommand = state.corps_command as Record<string, Record<string, unknown>> | undefined;
+  if (rawCorpsCommand) {
+    for (const fv of formations) {
+      if (fv.kind === 'corps' || fv.kind === 'corps_asset') {
+        const cc = rawCorpsCommand[fv.id];
+        if (cc) {
+          fv.corpsStance = (cc.stance as string) ?? undefined;
+          fv.corpsExhaustion = typeof cc.corps_exhaustion === 'number' ? cc.corps_exhaustion : undefined;
+          fv.corpsOgSlots = typeof cc.og_slots === 'number' ? cc.og_slots : undefined;
+          fv.corpsCommandSpan = typeof cc.command_span === 'number' ? cc.command_span : undefined;
+          const rawActiveOgs = cc.active_ogs;
+          if (Array.isArray(rawActiveOgs)) {
+            fv.corpsActiveOgIds = [...(rawActiveOgs as string[])].sort();
+          }
+        }
+        // Collect subordinates: all formations whose corps_id points to this corps
+        fv.subordinateIds = formations
+          .filter((sub) => sub.corps_id === fv.id && sub.id !== fv.id)
+          .map((sub) => sub.id)
+          .sort();
+      }
     }
   }
 

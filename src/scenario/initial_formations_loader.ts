@@ -11,11 +11,13 @@ import type {
   FormationId,
   FactionId,
   FormationKind,
-  FormationAssignment
+  FormationAssignment,
+  BrigadePosture
 } from '../state/game_state.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 const CANONICAL_KINDS: FormationKind[] = ['militia', 'territorial_defense', 'brigade', 'operational_group', 'corps_asset'];
+const CANONICAL_POSTURES: BrigadePosture[] = ['defend', 'probe', 'attack', 'elastic_defense', 'consolidation'];
 
 export interface InitialFormationRecord {
   id: string;
@@ -101,6 +103,9 @@ export async function loadInitialFormations(path: string): Promise<FormationStat
     const tags = Array.isArray(raw.tags) ? (raw.tags as string[]).filter((t): t is string => typeof t === 'string') : undefined;
     const personnel = typeof raw.personnel === 'number' && Number.isFinite(raw.personnel) ? raw.personnel : undefined;
     const hq_sid = typeof raw.hq_sid === 'string' && raw.hq_sid.trim() ? raw.hq_sid.trim() : undefined;
+    const posture: BrigadePosture | undefined = typeof raw.posture === 'string' && CANONICAL_POSTURES.includes(raw.posture as BrigadePosture)
+      ? raw.posture as BrigadePosture : undefined;
+    const corps_id = typeof raw.corps_id === 'string' && raw.corps_id.trim() ? raw.corps_id.trim() : undefined;
 
     result.push({
       id,
@@ -112,7 +117,9 @@ export async function loadInitialFormations(path: string): Promise<FormationStat
       ...(kind !== undefined && { kind }),
       ...(tags !== undefined && tags.length > 0 && { tags }),
       ...(personnel !== undefined && { personnel }),
-      ...(hq_sid !== undefined && { hq_sid })
+      ...(hq_sid !== undefined && { hq_sid }),
+      ...(posture !== undefined && { posture }),
+      ...(corps_id !== undefined && { corps_id })
     });
   }
 

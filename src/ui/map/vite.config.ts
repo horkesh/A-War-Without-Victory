@@ -9,25 +9,27 @@ const __dirname = dirname(__filename);
 const projectRootFromConfig = resolve(__dirname, '../../..');
 const projectRootFromCwd = typeof process !== 'undefined' && process.cwd ? process.cwd() : projectRootFromConfig;
 
-/** Path to crest/flag assets (used by tactical map and by Electron when serving from dist). */
-const CRESTS_SOURCE = 'assets/sources/crests';
+/** Asset source directories to copy into build (used by tactical map and Electron). */
+const ASSET_SOURCES = ['assets/sources/crests', 'assets/sources/scenarios'];
 
 /**
- * Copy crest and flag images into the build output so the app works when served from
+ * Copy asset images into the build output so the app works when served from
  * dist/tactical-map (e.g. Electron). Dev server serves /assets/ from project root.
  */
 function copyCrestsIntoBuild(): Plugin {
   return {
     name: 'copy-crests-into-build',
     closeBundle() {
-      const root = existsSync(resolve(projectRootFromCwd, CRESTS_SOURCE))
-        ? projectRootFromCwd
-        : projectRootFromConfig;
-      const src = resolve(root, CRESTS_SOURCE);
-      if (!existsSync(src)) return;
       const outDir = resolve(__dirname, '../../../dist/tactical-map');
-      const dest = resolve(outDir, CRESTS_SOURCE);
-      cpSync(src, dest, { recursive: true });
+      for (const assetDir of ASSET_SOURCES) {
+        const root = existsSync(resolve(projectRootFromCwd, assetDir))
+          ? projectRootFromCwd
+          : projectRootFromConfig;
+        const src = resolve(root, assetDir);
+        if (!existsSync(src)) continue;
+        const dest = resolve(outDir, assetDir);
+        cpSync(src, dest, { recursive: true });
+      }
     },
   };
 }

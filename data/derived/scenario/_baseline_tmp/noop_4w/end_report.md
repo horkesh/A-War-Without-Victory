@@ -7,7 +7,7 @@
 ## Control changes (most important)
 
 - Total settlements with controller change: 0
-- Net control counts (start → end): HRHB: 1119, RBiH: 2794, RS: 1909 → HRHB: 1119, RBiH: 2794, RS: 1909
+- Net control counts (start → end): HRHB: 1119, RBiH: 2739, RS: 1964 → HRHB: 1119, RBiH: 2739, RS: 1964
 
 No settlement-level control changes detected in this run.
 
@@ -23,13 +23,13 @@ Supply pressure (start → end):
   - RBiH: 100 → 100
   - RS: 100 → 100
 
-Displacement: settlement count/total (start → end): 1160/23.199999999999594 → 1160/92.79999999999838
-Displacement: municipality count/total (start → end): 92/1.8400000000000014 → 92/7.360000000000006
+Displacement: settlement count/total (start → end): 1196/23.91999999999958 → 1196/95.67999999999832
+Displacement: municipality count/total (start → end): 94/1.8800000000000014 → 94/7.520000000000006
 
 ## Activity over run
 
-- Front-active: max 1243, mean 1243, nonzero weeks 4/4
-- Pressure-eligible (edges): max 1243, mean 1243, nonzero weeks 4/4
+- Front-active: max 925, mean 925, nonzero weeks 4/4
+- Pressure-eligible (edges): max 925, mean 925, nonzero weeks 4/4
 - Displacement-trigger eligible: max 0, mean 0, nonzero weeks 0/4
 
 
@@ -55,16 +55,31 @@ Militia pools by faction (available / committed / exhausted):
 
 Areas of responsibility (settlements per faction):
   - HRHB: 1119 settlements
-  - RBiH: 2794 settlements
-  - RS: 1909 settlements
+  - RBiH: 2739 settlements
+  - RS: 1964 settlements
 
 ## Phase II attack resolution (pipeline)
 
 - Weeks in Phase II: 4
 - Weeks with nonzero orders processed: 0
 - Orders processed: 0
+- Unique attack targets (distinct SIDs): 0
 - Settlement flips applied: 0
 - Casualties (attacker / defender): 0 / 0
+- Battles with defender present / absent: 0 / 0
+
+Weekly rollup (week: orders, unique_targets, flips, casualties A/D, defender present/absent):
+  - w1: 0, 0, 0, 0/0, 0/0
+  - w2: 0, 0, 0, 0/0, 0/0
+  - w3: 0, 0, 0, 0/0, 0/0
+  - w4: 0, 0, 0, 0/0, 0/0
+
+## Historical alignment diagnostics
+
+Initial vs final by faction (personnel, brigades active/inactive/total, recruitment capital, negotiation capital, prewar capital):
+- HRHB: personnel 0→0; brigades 0/0/0→0/0/0; capital 0/0/0→0/159/0
+- RBiH: personnel 0→0; brigades 0/0/0→0/0/0; capital 0/0/0→0/312/0
+- RS: personnel 0→0; brigades 0/0/0→0/0/0; capital 0/0/0→0/231/0
 
 ## Notes on interpretation
 

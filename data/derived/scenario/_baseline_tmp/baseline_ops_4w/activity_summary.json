@@ -7,15 +7,15 @@
       "nonzero_weeks": 0
     },
     "front_active_set_size": {
-      "max": 1243,
-      "mean": 1243,
-      "min": 1243,
+      "max": 925,
+      "mean": 925,
+      "min": 925,
       "nonzero_weeks": 4
     },
     "pressure_eligible_size": {
-      "max": 1243,
-      "mean": 1243,
-      "min": 1243,
+      "max": 925,
+      "mean": 925,
+      "min": 925,
       "nonzero_weeks": 4
     }
   },

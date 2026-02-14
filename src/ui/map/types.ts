@@ -220,6 +220,20 @@ export interface FormationView {
   personnel?: number;
   /** Brigade posture: defend | probe | attack | elastic_defense. */
   posture?: string;
+  /** Parent corps formation ID (brigades only). */
+  corps_id?: string;
+  /** Corps stance: defensive | balanced | offensive | reorganize (corps only). */
+  corpsStance?: string;
+  /** Corps-level exhaustion 0..1 (corps only). */
+  corpsExhaustion?: number;
+  /** Subordinate formation IDs (corps only). Sorted for determinism. */
+  subordinateIds?: string[];
+  /** Number of OG slots available (corps only). */
+  corpsOgSlots?: number;
+  /** Active OG formation IDs (corps only). Sorted for determinism. */
+  corpsActiveOgIds?: string[];
+  /** Corps command span (corps only). */
+  corpsCommandSpan?: number;
 }
 
 export interface MilitiaPoolView {

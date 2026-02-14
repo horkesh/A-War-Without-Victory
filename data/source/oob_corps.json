@@ -4,7 +4,7 @@
     "source": "Balkan Battlegrounds Vol. I Appendices G & H; VRS/ARBiH/HVO ORDER_OF_BATTLE_MASTER",
     "rule": "Corps only (no battalions/regiments/special units). HQ at hq_mun (mun1990_id).",
     "generated_at": "2026-02-09T18:30:00.000Z",
-    "corrections": "Added missing General Staff ARBiH, 28th Independent, 81st Independent, VRS Main Staff"
+    "corrections": "Added VRS Main Staff. Removed 6th Corps, 28th/81st Independent (not field corps in Apr 1992). General Staff is command-level, above corps."
   },
   "corps": [
     {
@@ -42,30 +42,6 @@
       "faction": "RBiH",
       "name": "5th Corps",
       "hq_mun": "bihac"
-    },
-    {
-      "id": "arbih_6th_corps",
-      "faction": "RBiH",
-      "name": "6th Corps",
-      "hq_mun": "konjic"
-    },
-    {
-      "id": "arbih_7th_corps",
-      "faction": "RBiH",
-      "name": "7th Corps",
-      "hq_mun": "travnik"
-    },
-    {
-      "id": "arbih_28th_independent",
-      "faction": "RBiH",
-      "name": "28th Independent Division",
-      "hq_mun": "zivinice"
-    },
-    {
-      "id": "arbih_81st_independent",
-      "faction": "RBiH",
-      "name": "81st Independent Division",
-      "hq_mun": "gorazde"
     },
     {
       "id": "vrs_main_staff",
@@ -108,6 +84,12 @@
       "faction": "RS",
       "name": "Sarajevo-Romanija Corps",
       "hq_mun": "novo_sarajevo"
+    },
+    {
+      "id": "hvo_main_staff",
+      "faction": "HRHB",
+      "name": "Main Staff HVO",
+      "hq_mun": "mostar"
     },
     {
       "id": "hvo_southeast_herzegovina",

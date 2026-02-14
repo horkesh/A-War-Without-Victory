@@ -18,7 +18,7 @@ import { MapProjection } from './geo/MapProjection.js';
 import { SpatialIndex } from './geo/SpatialIndex.js';
 import { computeFeatureBBox } from './geo/MapProjection.js';
 import { loadAllData } from './data/DataLoader.js';
-import { ZOOM_LABELS, ZOOM_FACTORS, NATO_TOKENS, SIDE_COLORS, SIDE_SOLID_COLORS, SIDE_LABELS, FACTION_DISPLAY_ORDER, ETHNICITY_COLORS, ETHNICITY_LABELS, BASE_LAYER_COLORS, BASE_LAYER_WIDTHS, FRONT_LINE, MINIMAP, FORMATION_KIND_SHAPES, FORMATION_MARKER_SIZE, FORMATION_HIT_RADIUS, SETTLEMENT_BORDER } from './constants.js';
+import { ZOOM_LABELS, ZOOM_FACTORS, NATO_TOKENS, SIDE_COLORS, SIDE_SOLID_COLORS, SIDE_LABELS, FACTION_DISPLAY_ORDER, ETHNICITY_COLORS, ETHNICITY_LABELS, BASE_LAYER_COLORS, BASE_LAYER_WIDTHS, FRONT_LINE, MINIMAP, FORMATION_KIND_SHAPES, FORMATION_MARKER_SIZE, FORMATION_HIT_RADIUS, SETTLEMENT_BORDER, ZOOM_FORMATION_FILTER, AOR_HIGHLIGHT, panelReadinessColor } from './constants.js';
 import { controlKey, censusIdFromSid, buildControlLookup, buildStatusLookup } from './data/ControlLookup.js';
 import { parseGameState } from './data/GameStateAdapter.js';
 import { normalizeForSearch } from './data/DataLoader.js';
@@ -69,6 +69,9 @@ export class MapApp {
   private uiAudioEnabled = false;
   private selectedRecruitmentBrigadeId: string | null = null;
   private selectedRecruitmentEquipmentClass: string | null = null;
+
+  /** Pending order mode: when set, next map click resolves the order. */
+  private pendingOrderMode: { type: 'move' | 'attack'; brigadeId: string; brigadeName: string } | null = null;
 
   // Baseline control data for dataset switching
   private baselineControlLookup: Record<string, string | null> = {};
@@ -247,6 +250,9 @@ export class MapApp {
     // 5b. Brigade AoR highlight (selected formation's AoR settlements)
     if (rc.layers.brigadeAor && this.state.snapshot.loadedGameState && this.state.snapshot.selectedFormationId) {
       this.drawBrigadeAoRHighlight(rc);
+    } else if (this.aorAnimating) {
+      this.stopAoRAnimation();
+      this.aorBoundaryCache = null;
     }
 
     // 6. Selection highlight
@@ -435,12 +441,20 @@ export class MapApp {
     const { ctx } = rc;
     const controllers = this.activeControlLookup;
     const fillMode = this.state.snapshot.settlementFillMode;
+    const isStrategic = rc.zoomLevel === 0;
 
     const sidOrder = Array.from(this.data.settlements.keys()).sort();
     for (const sid of sidOrder) {
       const feature = this.data.settlements.get(sid)!;
       const key = controlKey(sid);
       const controller = controllers[key] ?? controllers[sid] ?? 'null';
+      const natoClass = feature.properties.nato_class ?? '';
+
+      // At strategic zoom, reduce alpha on minor settlements for a watercolor effect
+      const isLargeSettlement = natoClass === 'URBAN_CENTER' || natoClass === 'TOWN';
+      if (isStrategic) {
+        ctx.globalAlpha = isLargeSettlement ? 1.0 : 0.45;
+      }
 
       if (!rc.layers.politicalControl) {
         ctx.fillStyle = 'rgba(40, 40, 55, 0.4)';
@@ -453,10 +467,14 @@ export class MapApp {
       this.drawPolygonPath(ctx, feature, rc.project);
       ctx.fill();
 
-      // Subtle settlement border (grid lines)
-      ctx.strokeStyle = SETTLEMENT_BORDER.sameColor;
-      ctx.lineWidth = SETTLEMENT_BORDER.sameWidth;
-      ctx.stroke();
+      // Settlement borders: skip on small settlements at strategic zoom for cleaner look
+      if (!isStrategic || isLargeSettlement) {
+        ctx.strokeStyle = SETTLEMENT_BORDER.sameColor;
+        ctx.lineWidth = SETTLEMENT_BORDER.sameWidth;
+        ctx.stroke();
+      }
+
+      if (isStrategic) ctx.globalAlpha = 1.0;
 
       this.drawFlipFireOverlay(rc, sid, feature);
     }
@@ -650,7 +668,25 @@ export class MapApp {
     const ih = h * 0.4;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
 
-    if (shape === 'diamond') {
+    if (shape === 'xx') {
+      // NATO XX symbol for corps: two crossed lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(symbolCenterX - iw * 0.35, sy - ih * 0.6);
+      ctx.lineTo(symbolCenterX + iw * 0.35, sy + ih * 0.6);
+      ctx.moveTo(symbolCenterX + iw * 0.35, sy - ih * 0.6);
+      ctx.lineTo(symbolCenterX - iw * 0.35, sy + ih * 0.6);
+      ctx.stroke();
+      // Second X offset right
+      const xOff = iw * 0.4;
+      ctx.beginPath();
+      ctx.moveTo(symbolCenterX - iw * 0.35 + xOff, sy - ih * 0.6);
+      ctx.lineTo(symbolCenterX + iw * 0.35 + xOff, sy + ih * 0.6);
+      ctx.moveTo(symbolCenterX + iw * 0.35 + xOff, sy - ih * 0.6);
+      ctx.lineTo(symbolCenterX - iw * 0.35 + xOff, sy + ih * 0.6);
+      ctx.stroke();
+    } else if (shape === 'diamond') {
       ctx.beginPath();
       ctx.moveTo(symbolCenterX, sy - ih);
       ctx.lineTo(symbolCenterX + iw / 2, sy);
@@ -689,9 +725,12 @@ export class MapApp {
 
     const { ctx } = rc;
     const dim = FORMATION_MARKER_SIZE[rc.zoomLevel];
+    const zoomFilter = ZOOM_FORMATION_FILTER[rc.zoomLevel] ?? null;
     const formations = [...gs.formations].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 
     for (const f of formations) {
+      // At strategic zoom, show only corps; at operational/tactical, show all
+      if (zoomFilter && !zoomFilter.has(f.kind)) continue;
       const pos = this.getFormationPosition(f);
       if (!pos) continue;
       if (!this.projection.isInViewport(
@@ -803,8 +842,10 @@ export class MapApp {
     const gs = this.state.snapshot.loadedGameState;
     if (!gs || !this.state.snapshot.layers.formations) return null;
     const rc = this.getRenderContext();
+    const zoomFilter = ZOOM_FORMATION_FILTER[rc.zoomLevel] ?? null;
     const formations = [...gs.formations].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
     for (const f of formations) {
+      if (zoomFilter && !zoomFilter.has(f.kind)) continue;
       const pos = this.getFormationPosition(f);
       if (!pos) continue;
       const [sx, sy] = rc.project(pos[0], pos[1]);
@@ -829,29 +870,210 @@ export class MapApp {
     return this.data.settlements.get(sid.startsWith('S') ? sid : `S${sid}`);
   }
 
+  /** AoR boundary cache: computed outer boundary segments for the selected formation. */
+  private aorBoundaryCache: {
+    formationId: string;
+    aorKey: string;
+    zoomFactor: number;
+    segments: [number, number][][];
+  } | null = null;
+
+  /** Whether we're currently animating the AoR glow. */
+  private aorAnimating = false;
+  private aorAnimationId: number | null = null;
+
+  /** Start the AoR breathing glow animation loop. */
+  private startAoRAnimation(): void {
+    if (this.aorAnimating) return;
+    this.aorAnimating = true;
+    const loop = (): void => {
+      if (!this.aorAnimating) return;
+      this.scheduleRender();
+      this.aorAnimationId = requestAnimationFrame(loop);
+    };
+    this.aorAnimationId = requestAnimationFrame(loop);
+  }
+
+  /** Stop the AoR animation loop. */
+  private stopAoRAnimation(): void {
+    this.aorAnimating = false;
+    if (this.aorAnimationId != null) {
+      cancelAnimationFrame(this.aorAnimationId);
+      this.aorAnimationId = null;
+    }
+  }
+
   private drawBrigadeAoRHighlight(rc: RenderContext): void {
     const gs = this.state.snapshot.loadedGameState;
     const formationId = this.state.snapshot.selectedFormationId;
     if (!gs || !formationId) return;
-    const aorSids = gs.brigadeAorByFormationId[formationId];
-    if (!aorSids || aorSids.length === 0) return;
     const formation = gs.formations.find((f) => f.id === formationId);
-    const factionColor = formation ? (SIDE_SOLID_COLORS[formation.faction] ?? '#888') : '#888';
+    if (!formation) return;
+
+    // Corps: merge all subordinate brigades' AoRs into one unified highlight
+    let aorSids: string[];
+    if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
+      const merged = new Set<string>();
+      for (const subId of formation.subordinateIds ?? []) {
+        const subAor = gs.brigadeAorByFormationId[subId];
+        if (subAor) for (const sid of subAor) merged.add(sid);
+      }
+      aorSids = [...merged].sort();
+    } else {
+      aorSids = gs.brigadeAorByFormationId[formationId] ?? [];
+    }
+    if (aorSids.length === 0) return;
+
+    const factionColor = SIDE_SOLID_COLORS[formation.faction] ?? '#888';
     const { ctx } = rc;
+    const aorSet = new Set(aorSids);
+
+    // Start animation if not already running
+    if (!this.aorAnimating) this.startAoRAnimation();
+
     ctx.save();
-    ctx.strokeStyle = factionColor;
-    ctx.lineWidth = 3;
-    ctx.setLineDash([4, 4]);
-    ctx.fillStyle = 'rgba(128, 128, 128, 0.12)';
+
+    // 1. Compound fill: single path for all AoR settlement polygons
+    ctx.beginPath();
     for (const sid of aorSids) {
       const feature = this.getSettlementFeatureBySid(sid);
       if (!feature) continue;
-      this.drawPolygonPath(ctx, feature, rc.project);
-      ctx.fill();
-      ctx.stroke();
+      this.addPolygonSubpath(ctx, feature, rc.project);
     }
+    ctx.fillStyle = this.hexToRgba(factionColor, AOR_HIGHLIGHT.fillAlpha);
+    ctx.fill('evenodd');
+
+    // 2. Compute outer boundary (cached)
+    const aorKey = aorSids.join(',');
+    if (
+      !this.aorBoundaryCache ||
+      this.aorBoundaryCache.formationId !== formationId ||
+      this.aorBoundaryCache.aorKey !== aorKey ||
+      this.aorBoundaryCache.zoomFactor !== rc.zoomFactor
+    ) {
+      this.aorBoundaryCache = {
+        formationId,
+        aorKey,
+        zoomFactor: rc.zoomFactor,
+        segments: this.computeAoROuterBoundary(aorSet, rc.project),
+      };
+    }
+
+    // 3. Draw outer boundary with breathing glow
+    const t = (performance.now() % AOR_HIGHLIGHT.glowCycleMs) / AOR_HIGHLIGHT.glowCycleMs;
+    const glowIntensity = 0.5 + 0.5 * Math.sin(t * Math.PI * 2);
+    const glowBlur = AOR_HIGHLIGHT.glowBlurMin + (AOR_HIGHLIGHT.glowBlurMax - AOR_HIGHLIGHT.glowBlurMin) * glowIntensity;
+
+    ctx.beginPath();
+    for (const segment of this.aorBoundaryCache.segments) {
+      for (let i = 0; i < segment.length; i++) {
+        const [sx, sy] = segment[i];
+        if (i === 0) ctx.moveTo(sx, sy);
+        else ctx.lineTo(sx, sy);
+      }
+    }
+    ctx.strokeStyle = factionColor;
+    ctx.lineWidth = AOR_HIGHLIGHT.strokeWidth;
     ctx.setLineDash([]);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.shadowColor = factionColor;
+    ctx.shadowBlur = glowBlur;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
     ctx.restore();
+  }
+
+  /**
+   * Add settlement polygon as a subpath WITHOUT starting a new path.
+   * Used for compound fills where multiple polygons share one beginPath().
+   */
+  private addPolygonSubpath(
+    ctx: CanvasRenderingContext2D,
+    feature: SettlementFeature,
+    project: (x: number, y: number) => [number, number],
+  ): void {
+    const polys: PolygonCoords[] = feature.geometry.type === 'Polygon'
+      ? [feature.geometry.coordinates]
+      : feature.geometry.coordinates;
+    for (const poly of polys) {
+      for (const ring of poly) {
+        for (let i = 0; i < ring.length; i++) {
+          const [x, y] = ring[i];
+          const [sx, sy] = project(x, y);
+          if (i === 0) ctx.moveTo(sx, sy);
+          else ctx.lineTo(sx, sy);
+        }
+        ctx.closePath();
+      }
+    }
+  }
+
+  /**
+   * Compute the outer boundary of an AoR region.
+   * Uses sharedBorders to detect internal edges (between two AoR settlements).
+   * Returns projected screen-coordinate segments for the outer boundary only.
+   */
+  private computeAoROuterBoundary(
+    aorSet: Set<string>,
+    project: (x: number, y: number) => [number, number]
+  ): [number, number][][] {
+    // Build set of internal shared-border vertex keys
+    const internalVertexKeys = new Set<string>();
+    for (const seg of this.data.sharedBorders) {
+      if (aorSet.has(seg.a) && aorSet.has(seg.b)) {
+        for (const pt of seg.points) {
+          internalVertexKeys.add(`${pt[0]},${pt[1]}`);
+        }
+      }
+    }
+
+    // Walk each AoR settlement's outer ring, collecting non-internal edge segments
+    const segments: [number, number][][] = [];
+    for (const sid of aorSet) {
+      const feature = this.getSettlementFeatureBySid(sid);
+      if (!feature) continue;
+      const rings = this.getOuterRings(feature);
+      for (const ring of rings) {
+        let currentSegment: [number, number][] = [];
+        for (let i = 0; i < ring.length; i++) {
+          const pt = ring[i];
+          const key = `${pt[0]},${pt[1]}`;
+          const isInternal = internalVertexKeys.has(key);
+          if (!isInternal) {
+            currentSegment.push(project(pt[0], pt[1]));
+          } else {
+            if (currentSegment.length >= 2) {
+              segments.push(currentSegment);
+            }
+            currentSegment = [];
+          }
+        }
+        if (currentSegment.length >= 2) {
+          segments.push(currentSegment);
+        }
+      }
+    }
+    return segments;
+  }
+
+  /** Extract outer rings from a settlement feature (first ring of each polygon). */
+  private getOuterRings(feature: SettlementFeature): Position[][] {
+    const polys: PolygonCoords[] = feature.geometry.type === 'Polygon'
+      ? [feature.geometry.coordinates]
+      : feature.geometry.coordinates;
+    return polys.map(poly => poly[0]);
+  }
+
+  /** Convert hex color to rgba string. */
+  private hexToRgba(hex: string, alpha: number): string {
+    const match = hex.match(/^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+    if (!match) return `rgba(128,128,128,${alpha})`;
+    const r = parseInt(match[1], 16);
+    const g = parseInt(match[2], 16);
+    const b = parseInt(match[3], 16);
+    return `rgba(${r},${g},${b},${alpha})`;
   }
 
   private drawSelection(rc: RenderContext): void {
@@ -1126,6 +1348,29 @@ export class MapApp {
     // Click: select settlement (or formation HQ when over a formation icon)
     canvas.addEventListener('click', (e: MouseEvent) => {
       if (lastWasDrag) { lastWasDrag = false; return; }
+
+      // Pending order mode: intercept click to resolve MOVE/ATTACK target
+      if (this.pendingOrderMode) {
+        const mode = this.pendingOrderMode;
+        this.pendingOrderMode = null;
+        canvas.style.cursor = this.state.snapshot.zoomFactor > 1 ? 'grab' : 'default';
+
+        if (mode.type === 'attack' && this.hoveredFeature) {
+          const targetSid = this.hoveredFeature.properties.sid;
+          const targetName = this.hoveredFeature.properties.name ?? targetSid;
+          this.showStatusError(`Attack order staged: ${mode.brigadeName} → ${targetName} (${targetSid}). Advance turn to execute.`);
+        } else if (mode.type === 'move' && this.hoveredFeature) {
+          const munId = this.hoveredFeature.properties.municipality_id;
+          const targetSid = this.hoveredFeature.properties.sid;
+          const targetName = this.hoveredFeature.properties.name ?? targetSid;
+          const munLabel = munId != null ? `mun ${munId}` : targetName;
+          this.showStatusError(`Move order staged: ${mode.brigadeName} → ${munLabel}. Advance turn to execute.`);
+        } else {
+          this.showStatusError(`${mode.type === 'attack' ? 'Attack' : 'Move'} order cancelled — no target selected.`);
+        }
+        return;
+      }
+
       const rect = canvas.getBoundingClientRect();
       const canvasX = ((e.clientX - rect.left) * (canvas.width / rect.width));
       const canvasY = ((e.clientY - rect.top) * (canvas.height / rect.height));
@@ -1431,6 +1676,12 @@ export class MapApp {
       datasetEl.value = opt.value;
     }
     this.showOverlay('main-menu-overlay', false);
+    // Enable Continue button now that state is loaded
+    const continueBtn = document.getElementById('menu-close') as HTMLButtonElement | null;
+    if (continueBtn) {
+      continueBtn.style.opacity = '1';
+      continueBtn.style.cursor = 'pointer';
+    }
     if (previous) this.maybeShowAarFromStateDelta(previous, loaded);
   }
 
@@ -1438,7 +1689,8 @@ export class MapApp {
   private applyGameStateFromJson(stateJson: string): void {
     try {
       const loaded = parseGameState(JSON.parse(stateJson) as unknown);
-      this.applyLoadedGameState(loaded);
+      const datasetEl = document.getElementById('control-dataset') as HTMLSelectElement | null;
+      this.applyLoadedGameState(loaded, datasetEl);
     } catch (err) {
       this.showStatusError(`Failed to apply state: ${err instanceof Error ? err.message : String(err)}`);
     }
@@ -1450,6 +1702,13 @@ export class MapApp {
     document.getElementById('btn-main-menu')?.addEventListener('click', () => this.showOverlay('main-menu-overlay', true));
     document.getElementById('menu-close')?.addEventListener('click', () => this.showOverlay('main-menu-overlay', false));
 
+    // Continue button: disabled when no state is loaded
+    const continueBtn = document.getElementById('menu-close') as HTMLButtonElement | null;
+    if (continueBtn && !this.state.snapshot.loadedGameState) {
+      continueBtn.style.opacity = '0.4';
+      continueBtn.style.cursor = 'not-allowed';
+    }
+
     const awwvDesktop = (window as unknown as {
       awwv?: {
         startNewCampaign?: (p: { playerFaction: string }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
@@ -1459,6 +1718,12 @@ export class MapApp {
         setGameStateUpdatedCallback?: (cb: (stateJson: string) => void) => void;
       };
     }).awwv;
+
+    // In browser mode (no desktop API), relabel "New Campaign" → "Load Scenario"
+    if (!awwvDesktop?.startNewCampaign) {
+      const newCampaignBtn = document.getElementById('menu-new-campaign');
+      if (newCampaignBtn) newCampaignBtn.textContent = 'Load Scenario';
+    }
 
     document.getElementById('menu-new-campaign')?.addEventListener('click', () => {
       this.showOverlay('main-menu-overlay', false);
@@ -1471,6 +1736,13 @@ export class MapApp {
         for (const faction of FACTION_DISPLAY_ORDER) {
           const el = document.getElementById(`side-picker-flag-${faction}`) as HTMLImageElement | null;
           if (el) el.src = this.getFlagUrl(faction);
+        }
+        // Load scenario briefing image
+        const scenarioImg = document.getElementById('scenario-briefing-image') as HTMLImageElement | null;
+        if (scenarioImg) {
+          scenarioImg.src = '/assets/sources/scenarios/apr1992_briefing.png';
+          scenarioImg.style.display = '';
+          scenarioImg.onerror = () => { scenarioImg.style.display = 'none'; };
         }
         this.showOverlay('side-picker-overlay', true);
       } else {
@@ -1931,6 +2203,31 @@ export class MapApp {
     const idx = ZOOM_FACTORS.indexOf(this.state.snapshot.zoomFactor as 1 | 2.5 | 5);
     const nextIdx = Math.min(ZOOM_FACTORS.length - 1, (idx >= 0 ? idx : 0) + 1);
     this.state.setZoom(nextIdx as 0 | 1 | 2, ZOOM_FACTORS[nextIdx]);
+
+    // If a settlement or formation is selected, pan to center on it
+    const bounds = this.data.dataBounds;
+    const bw = bounds.maxX - bounds.minX;
+    const bh = bounds.maxY - bounds.minY;
+    const selectedSid = this.state.snapshot.selectedSettlementSid;
+    const selectedFid = this.state.snapshot.selectedFormationId;
+    if (selectedSid && bw > 0 && bh > 0) {
+      const centroid = this.data.settlementCentroids.get(selectedSid);
+      if (centroid) {
+        this.state.setPan((centroid[0] - bounds.minX) / bw, (centroid[1] - bounds.minY) / bh);
+      }
+    } else if (selectedFid && bw > 0 && bh > 0) {
+      const gs = this.state.snapshot.loadedGameState;
+      const fv = gs?.formations.find(f => f.id === selectedFid);
+      if (fv) {
+        // Try HQ settlement centroid first, then municipality centroid
+        let centroid: [number, number] | undefined;
+        if (fv.hq_sid) centroid = this.data.settlementCentroids.get(fv.hq_sid);
+        if (!centroid && fv.municipalityId) centroid = this.data.municipalityCentroids.get(fv.municipalityId);
+        if (centroid) {
+          this.state.setPan((centroid[0] - bounds.minX) / bw, (centroid[1] - bounds.minY) / bh);
+        }
+      }
+    }
     this.updateZoomPill();
   }
 
@@ -2038,20 +2335,12 @@ export class MapApp {
     const feature = this.data.settlements.get(sid);
     if (!feature) return;
 
-    const panel = document.getElementById('settlement-panel');
-    if (!panel) return;
-    panel.classList.remove('closed');
-    panel.classList.add('open');
-    panel.setAttribute('aria-hidden', 'false');
-
     const key = controlKey(sid);
     const controller = this.activeControlLookup[key] ?? this.activeControlLookup[sid] ?? 'null';
     const controlStatus = this.activeStatusLookup[key] ?? this.activeStatusLookup[sid] ?? 'CONSOLIDATED';
     const factionColor = SIDE_SOLID_COLORS[controller] ?? SIDE_SOLID_COLORS['null'];
 
-    // Set faction accent
-    panel.style.borderLeftColor = factionColor;
-    panel.style.setProperty('--faction-color', factionColor);
+    if (!this.showPanel(factionColor)) return;
 
     // Header
     const name = feature.properties.name ?? sid;
@@ -2075,6 +2364,18 @@ export class MapApp {
     this.buildPanelTabs(sid, feature, controller, controlStatus, factionColor);
   }
 
+  /** Open the side panel and apply the given faction accent color. Returns the panel element, or null if missing. */
+  private showPanel(factionColor: string): HTMLElement | null {
+    const panel = document.getElementById('settlement-panel');
+    if (!panel) return null;
+    panel.classList.remove('closed');
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+    panel.style.borderLeftColor = factionColor;
+    panel.style.setProperty('--faction-color', factionColor);
+    return panel;
+  }
+
   private closeSettlementPanel(): void {
     const panel = document.getElementById('settlement-panel');
     if (!panel) return;
@@ -2083,26 +2384,22 @@ export class MapApp {
     panel.setAttribute('aria-hidden', 'true');
   }
 
+  /** Enter target-selection mode for a move or attack order. Closes the panel and shows a status prompt. */
+  private enterOrderSelectionMode(type: 'move' | 'attack', brigadeId: string, brigadeName: string): void {
+    this.pendingOrderMode = { type, brigadeId, brigadeName };
+    const target = type === 'move' ? 'municipality' : 'settlement';
+    this.showStatusError(`Select target ${target} on the map for ${brigadeName} ${type} order. Click a settlement to set target.`);
+    this.closeSettlementPanel();
+  }
+
   private openBrigadePanel(f: FormationView): void {
-    const panel = document.getElementById('settlement-panel');
-    if (!panel) return;
     const gs = this.state.snapshot.loadedGameState;
     if (!gs) return;
 
-    panel.classList.remove('closed');
-    panel.classList.add('open');
-    panel.setAttribute('aria-hidden', 'false');
-
     const factionColor = SIDE_SOLID_COLORS[f.faction] ?? '#888';
-    panel.style.borderLeftColor = factionColor;
-    panel.style.setProperty('--faction-color', factionColor);
+    if (!this.showPanel(factionColor)) return;
 
     document.getElementById('panel-name')!.textContent = f.name;
-    const subtitleParts = [f.kind, f.faction];
-    if (f.personnel != null) subtitleParts.push(`${f.personnel} pers`);
-    if (f.posture) subtitleParts.push(f.posture);
-    document.getElementById('panel-subtitle')!.textContent = subtitleParts.join(' — ');
-
     const flagEl = document.getElementById('panel-flag') as HTMLImageElement;
     if (flagEl) {
       flagEl.src = this.getFlagUrl(f.faction);
@@ -2112,6 +2409,102 @@ export class MapApp {
     const tabsEl = document.getElementById('panel-tabs')!;
     const contentEl = document.getElementById('panel-content')!;
     tabsEl.innerHTML = '';
+
+    if (f.kind === 'corps' || f.kind === 'corps_asset') {
+      this.renderCorpsPanel(f, gs, contentEl);
+    } else {
+      this.renderBrigadePanel(f, gs, contentEl);
+    }
+  }
+
+  /** Render corps detail panel: command info, stance, exhaustion, subordinate OOB. */
+  private renderCorpsPanel(f: FormationView, gs: LoadedGameState, contentEl: HTMLElement): void {
+    const subtitleParts = ['corps', SIDE_LABELS[f.faction] ?? f.faction];
+    if (f.corpsStance) subtitleParts.push(f.corpsStance);
+    document.getElementById('panel-subtitle')!.textContent = subtitleParts.join(' — ');
+
+    const crestUrl = this.getCrestUrl(f.faction);
+
+    // Subordinates
+    const subIds = f.subordinateIds ?? [];
+    const subordinates = subIds
+      .map(id => gs.formations.find(sub => sub.id === id))
+      .filter((s): s is FormationView => s != null);
+    const totalPersonnel = subordinates.reduce((sum, s) => sum + (s.personnel ?? 0), 0);
+
+    let html = `<div class="tm-brigade-crest-wrap"><img class="tm-brigade-crest" src="${this.escapeHtml(crestUrl)}" alt="" /></div>`;
+
+    // Command section
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">CORPS COMMAND</div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">ID</span><span class="tm-panel-field-value">${this.escapeHtml(f.id)}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Faction</span><span class="tm-panel-field-value">${this.escapeHtml(SIDE_LABELS[f.faction] ?? f.faction)}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Stance</span><span class="tm-panel-field-value tm-stance-${this.escapeHtml(f.corpsStance ?? 'unknown')}">${this.escapeHtml(f.corpsStance ?? '—')}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Exhaustion</span><span class="tm-panel-field-value">${f.corpsExhaustion != null ? (f.corpsExhaustion * 100).toFixed(0) + '%' : '—'}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Command span</span><span class="tm-panel-field-value">${f.corpsCommandSpan ?? '—'}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Status</span><span class="tm-panel-field-value">${this.escapeHtml(f.status)}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Created (turn)</span><span class="tm-panel-field-value">${f.createdTurn}</span></div>
+    </div>`;
+
+    // Strength summary
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">STRENGTH</div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Subordinate brigades</span><span class="tm-panel-field-value">${subordinates.length}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Total personnel</span><span class="tm-panel-field-value">${totalPersonnel.toLocaleString()}</span></div>
+    </div>`;
+
+    // OG slots
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">OPERATIONAL GROUPS</div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">OG slots</span><span class="tm-panel-field-value">${f.corpsOgSlots ?? '—'}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Active OGs</span><span class="tm-panel-field-value">${f.corpsActiveOgIds?.length ?? 0}</span></div>`;
+    if (f.corpsActiveOgIds && f.corpsActiveOgIds.length > 0) {
+      for (const ogId of f.corpsActiveOgIds) {
+        const ogF = gs.formations.find(sub => sub.id === ogId);
+        html += `<div class="tm-panel-field" style="padding-left:8px"><span class="tm-panel-field-label" style="font-size:10px">${this.escapeHtml(ogId)}</span><span class="tm-panel-field-value" style="font-size:10px">${ogF ? this.escapeHtml(ogF.name) : '—'}</span></div>`;
+      }
+    }
+    html += `</div>`;
+
+    // Subordinate OOB list
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">ORDER OF BATTLE</div>`;
+    if (subordinates.length === 0) {
+      html += `<div class="tm-panel-placeholder">No subordinate formations</div>`;
+    } else {
+      for (const sub of subordinates) {
+        const readinessColor = panelReadinessColor(sub.readiness);
+        const subCrest = this.getCrestUrl(sub.faction);
+        const persStr = sub.personnel != null ? sub.personnel.toLocaleString() : '—';
+        const postureStr = sub.posture ? ` · ${sub.posture}` : '';
+        html += `<div class="tm-formation-row" data-formation-id="${this.escapeHtml(sub.id)}" style="cursor:pointer">
+          <img class="tm-formation-crest" src="${this.escapeHtml(subCrest)}" alt="" />
+          <span class="tm-formation-badge" style="background:${readinessColor}" title="${sub.readiness}"></span>
+          <span class="tm-formation-name">${this.escapeHtml(sub.name)}</span>
+          <span class="tm-formation-kind" style="opacity:0.6;font-size:10px">${persStr}${postureStr}</span>
+        </div>`;
+      }
+    }
+    html += `</div>`;
+
+    contentEl.innerHTML = html;
+
+    // Wire subordinate clicks → open that brigade's panel
+    contentEl.querySelectorAll('.tm-formation-row[data-formation-id]').forEach(row => {
+      row.addEventListener('click', () => {
+        const fid = (row as HTMLElement).dataset.formationId;
+        if (!fid) return;
+        const sub = gs.formations.find(s => s.id === fid);
+        if (sub) {
+          this.state.setSelectedFormation(fid);
+          this.openBrigadePanel(sub);
+        }
+      });
+    });
+  }
+
+  /** Render brigade/militia/TD detail panel. */
+  private renderBrigadePanel(f: FormationView, gs: LoadedGameState, contentEl: HTMLElement): void {
+    const subtitleParts = [f.kind, f.faction];
+    if (f.personnel != null) subtitleParts.push(`${f.personnel} pers`);
+    if (f.posture) subtitleParts.push(f.posture);
+    document.getElementById('panel-subtitle')!.textContent = subtitleParts.join(' — ');
 
     const aorSids = gs.brigadeAorByFormationId[f.id] ?? f.aorSettlementIds ?? [];
     const aorCount = aorSids.length;
@@ -2135,13 +2528,27 @@ export class MapApp {
       potentialCap === 1
     );
 
-    let html = `<div class="tm-panel-section"><div class="tm-panel-section-header">BRIGADE</div>
+    // Parent corps reference
+    let corpsName = '';
+    if (f.corps_id) {
+      const corpsF = gs.formations.find(c => c.id === f.corps_id);
+      corpsName = corpsF ? corpsF.name : f.corps_id;
+    }
+
+    const crestUrl = this.getCrestUrl(f.faction);
+    let html = `<div class="tm-brigade-crest-wrap"><img class="tm-brigade-crest" src="${this.escapeHtml(crestUrl)}" alt="" /></div>`;
+
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">FORMATION</div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">ID</span><span class="tm-panel-field-value">${this.escapeHtml(f.id)}</span></div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">Faction</span><span class="tm-panel-field-value">${this.escapeHtml(f.faction)}</span></div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">Kind</span><span class="tm-panel-field-value">${this.escapeHtml(f.kind)}</span></div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">Status</span><span class="tm-panel-field-value">${this.escapeHtml(f.status)}</span></div>
-      <div class="tm-panel-field"><span class="tm-panel-field-label">Created (turn)</span><span class="tm-panel-field-value">${f.createdTurn}</span></div>
-    </div>`;
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Created (turn)</span><span class="tm-panel-field-value">${f.createdTurn}</span></div>`;
+    if (corpsName) {
+      html += `<div class="tm-panel-field"><span class="tm-panel-field-label">Corps</span><span class="tm-panel-field-value tm-corps-link" data-corps-id="${this.escapeHtml(f.corps_id!)}" style="cursor:pointer;text-decoration:underline">${this.escapeHtml(corpsName)}</span></div>`;
+    }
+    html += `</div>`;
+
     html += `<div class="tm-panel-section"><div class="tm-panel-section-header">STATISTICS</div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">Personnel</span><span class="tm-panel-field-value">${f.personnel != null ? f.personnel.toLocaleString() : '—'}</span></div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">Posture</span><span class="tm-panel-field-value">${this.escapeHtml(f.posture ?? '—')}</span></div>
@@ -2163,21 +2570,54 @@ export class MapApp {
       <div class="tm-panel-field"><span class="tm-panel-field-label">Overflow</span><span class="tm-panel-field-value">${overflowCount}</span></div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">Urban fortress</span><span class="tm-panel-field-value">${fortressActive ? 'Active' : 'No'}</span></div>
     </div>`;
+    // Posture dropdown
+    const postures = ['defend', 'probe', 'attack', 'elastic_defense', 'consolidation'];
+    const currentPosture = f.posture ?? 'defend';
+    const postureOptions = postures.map(p =>
+      `<option value="${this.escapeHtml(p)}"${p === currentPosture ? ' selected' : ''}>${this.escapeHtml(p)}</option>`
+    ).join('');
+
     html += `<div class="tm-panel-section"><div class="tm-panel-section-header">ACTIONS</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button type="button" class="tm-toolbar-btn" data-brigade-action="set-posture">Set posture</button>
-        <button type="button" class="tm-toolbar-btn" data-brigade-action="move">Move</button>
-        <button type="button" class="tm-toolbar-btn" data-brigade-action="attack">Attack</button>
+      <div class="tm-panel-field">
+        <span class="tm-panel-field-label">Posture</span>
+        <select id="brigade-posture-select" class="tm-select" style="font-size:11px;padding:2px 4px;background:#1a2236;color:#c8e6c9;border:1px solid rgba(200,230,201,0.3);border-radius:3px">${postureOptions}</select>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+        <button type="button" class="tm-toolbar-btn" data-brigade-action="move" title="Select target municipality on map">Move</button>
+        <button type="button" class="tm-toolbar-btn" data-brigade-action="attack" title="Select target settlement on map">Attack</button>
       </div>
     </div>`;
 
-    const crestUrl = this.getCrestUrl(f.faction);
-    const crestBlock = `<div class="tm-brigade-crest-wrap"><img class="tm-brigade-crest" src="${this.escapeHtml(crestUrl)}" alt="" /></div>`;
-    contentEl.innerHTML = crestBlock + html;
+    contentEl.innerHTML = html;
+
+    // Wire posture dropdown
+    const postureSelect = contentEl.querySelector('#brigade-posture-select') as HTMLSelectElement | null;
+    if (postureSelect) {
+      postureSelect.addEventListener('change', () => {
+        const newPosture = postureSelect.value;
+        this.showStatusError(`Posture order staged: ${f.name} → ${newPosture}. Advance turn to execute.`);
+      });
+    }
+
+    // Wire move/attack buttons → enter target selection mode
     contentEl.querySelectorAll('[data-brigade-action]').forEach((el) => {
       el.addEventListener('click', () => {
-        const action = (el as HTMLElement).getAttribute('data-brigade-action') ?? 'action';
-        this.showStatusError(`Order staging: ${f.name} -> ${action}. Use scenario controls and turn advance to execute.`);
+        const action = (el as HTMLElement).getAttribute('data-brigade-action') as 'move' | 'attack';
+        this.enterOrderSelectionMode(action, f.id, f.name);
+      });
+    });
+
+    // Wire corps link click → navigate to parent corps panel
+    contentEl.querySelectorAll('.tm-corps-link[data-corps-id]').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const corpsId = (el as HTMLElement).dataset.corpsId;
+        if (!corpsId) return;
+        const corpsF = gs.formations.find(c => c.id === corpsId);
+        if (corpsF) {
+          this.state.setSelectedFormation(corpsId);
+          this.openBrigadePanel(corpsF);
+        }
       });
     });
   }
@@ -2194,12 +2634,12 @@ export class MapApp {
     tabsEl.innerHTML = '';
 
     const tabs: Array<{ id: string; label: string }> = [
-      { id: 'overview', label: 'OVER' },
+      { id: 'overview', label: 'OVERVIEW' },
       { id: 'admin', label: 'ADMIN' },
-      { id: 'control', label: 'CTRL' },
-      { id: 'intel', label: 'INTEL' },
+      { id: 'control', label: 'CONTROL' },
+      { id: 'intel', label: 'MILITARY' },
       { id: 'orders', label: 'ORDERS' },
-      { id: 'aar', label: 'AAR' },
+      { id: 'aar', label: 'HISTORY' },
       { id: 'events', label: 'EVENTS' },
     ];
 
@@ -2364,8 +2804,8 @@ export class MapApp {
     const gs = this.state.snapshot.loadedGameState;
     if (!gs) {
       return `<div class="tm-panel-section">
-        <div class="tm-panel-section-header">MILITARY INTEL</div>
-        <div class="tm-panel-placeholder">Load a game state to view military intel.</div>
+        <div class="tm-panel-section-header">MILITARY</div>
+        <div class="tm-panel-placeholder">Load a game state to view military information.</div>
       </div>`;
     }
 
@@ -2379,7 +2819,7 @@ export class MapApp {
       html += `<div class="tm-panel-placeholder">No formations in this municipality.</div>`;
     } else {
       for (const f of formations.slice(0, 20)) {
-        const readinessColor = f.readiness === 'active' ? '#4CAF50' : f.readiness === 'forming' ? '#FFC107' : f.readiness === 'overextended' ? '#FF9800' : '#F44336';
+        const readinessColor = panelReadinessColor(f.readiness);
         const cohesionPct = Math.round(f.cohesion);
         const intelCrestUrl = this.getCrestUrl(f.faction);
         html += `<div class="tm-formation-row">
@@ -2453,7 +2893,7 @@ export class MapApp {
   private renderAarTab(sid: string): string {
     const gs = this.state.snapshot.loadedGameState;
     if (!gs) {
-      return `<div class="tm-panel-section"><div class="tm-panel-section-header">AAR</div><div class="tm-panel-placeholder">Load a game state to inspect after-action events.</div></div>`;
+      return `<div class="tm-panel-section"><div class="tm-panel-section-header">HISTORY</div><div class="tm-panel-placeholder">Load a game state to view control change history.</div></div>`;
     }
     const recent = gs.recentControlEvents.filter((e) => e.settlementId === sid).slice(-20).reverse();
     let html = `<div class="tm-panel-section"><div class="tm-panel-section-header">CONTROL CHANGES (${recent.length})</div>`;
@@ -2586,7 +3026,7 @@ export class MapApp {
 
       // Show first 50 formations
       for (const f of formations.slice(0, 50)) {
-        const readinessColor = f.readiness === 'active' ? '#4CAF50' : f.readiness === 'forming' ? '#FFC107' : f.readiness === 'overextended' ? '#FF9800' : '#F44336';
+        const readinessColor = panelReadinessColor(f.readiness);
         const rowCrestUrl = this.getCrestUrl(f.faction);
         html += `<div class="tm-formation-row" data-mun="${this.escapeHtml(f.municipalityId ?? '')}" style="cursor:pointer">
           <img class="tm-formation-crest" src="${this.escapeHtml(rowCrestUrl)}" alt="" />
@@ -2893,10 +3333,14 @@ export class MapApp {
       const rec = byFaction.get(faction) ?? { pers: 0, count: 0 };
       html += `<div class="tm-panel-field"><span class="tm-panel-field-label">${this.escapeHtml(SIDE_LABELS[faction] ?? faction)}</span><span class="tm-panel-field-value">${rec.count} brigades | ${rec.pers.toLocaleString()} pers</span></div>`;
     }
-    html += `</div><div class="tm-panel-section"><div class="tm-panel-section-header">CONTROL EVENTS</div>
-      <div class="tm-panel-field"><span class="tm-panel-field-label">Total recorded</span><span class="tm-panel-field-value">${gs.recentControlEvents.length}</span></div>
-      <div class="tm-panel-field"><span class="tm-panel-field-label">This turn</span><span class="tm-panel-field-value">${gs.recentControlEvents.filter((e) => e.turn === gs.turn).length}</span></div>
-    </div>`;
+    html += `</div><div class="tm-panel-section"><div class="tm-panel-section-header">CONTROL EVENTS</div>`;
+    if (gs.recentControlEvents.length === 0 && gs.turn > 0) {
+      html += `<div class="tm-panel-placeholder">Control events are recorded during turn execution. Load a replay to see the full history.</div>`;
+    } else {
+      html += `<div class="tm-panel-field"><span class="tm-panel-field-label">Total recorded</span><span class="tm-panel-field-value">${gs.recentControlEvents.length}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">This turn</span><span class="tm-panel-field-value">${gs.recentControlEvents.filter((e) => e.turn === gs.turn).length}</span></div>`;
+    }
+    html += `</div>`;
     content.innerHTML = html;
     this.showOverlay('aar-modal', true);
   }

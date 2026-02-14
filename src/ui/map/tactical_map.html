@@ -177,24 +177,40 @@
   <div class="tm-modal-overlay" id="side-picker-overlay" aria-hidden="true" aria-label="Choose your side">
     <div class="tm-modal-card tm-side-picker-card">
       <div class="tm-modal-header">
-        <span>New Campaign — April 1992 Start</span>
+        <span>New Campaign</span>
         <button type="button" class="tm-oob-close" id="side-picker-close" aria-label="Close side picker">&times;</button>
       </div>
       <div class="tm-modal-content tm-side-picker-content">
-        <p class="tm-muted">Choose which side to play. Other factions run on bot AI.</p>
+        <div class="tm-scenario-briefing">
+          <div class="tm-scenario-image-wrap">
+            <img class="tm-scenario-image" id="scenario-briefing-image" src="" alt="April 1992 scenario" style="display:none">
+          </div>
+          <div class="tm-scenario-text">
+            <div class="tm-scenario-title">April 1992 — Independence</div>
+            <div class="tm-scenario-subtitle">Bosnia-Herzegovina declares independence. The JNA withdraws&mdash;leaving everything behind. Three armies emerge from the chaos. A war without victory begins.</div>
+          </div>
+        </div>
+        <div class="tm-scenario-sep"></div>
+        <p class="tm-muted">Choose your side. Other factions are controlled by AI.</p>
         <div id="side-picker-error" class="tm-side-picker-error hidden" role="alert"></div>
         <div class="tm-side-picker-options" role="group" aria-label="Faction selection">
           <button type="button" class="tm-side-picker-option" id="side-picker-RBiH" data-faction="RBiH" aria-label="Play as RBiH (ARBiH)">
             <img class="tm-side-picker-flag" id="side-picker-flag-RBiH" src="" alt="" width="80" height="53">
             <span class="tm-side-picker-label">RBiH (ARBiH)</span>
+            <span class="tm-difficulty-badge tm-difficulty-hard">HARD</span>
+            <span class="tm-side-picker-desc">Surrounded and outgunned. Defend the cities. Survive the embargo. Hold until the world notices.</span>
           </button>
           <button type="button" class="tm-side-picker-option" id="side-picker-RS" data-faction="RS" aria-label="Play as RS (VRS)">
             <img class="tm-side-picker-flag" id="side-picker-flag-RS" src="" alt="" width="80" height="53">
             <span class="tm-side-picker-label">RS (VRS)</span>
+            <span class="tm-difficulty-badge tm-difficulty-standard">STANDARD</span>
+            <span class="tm-side-picker-desc">Inherit the JNA arsenal. Seize the corridors. The clock is ticking&mdash;use your advantage before it fades.</span>
           </button>
           <button type="button" class="tm-side-picker-option" id="side-picker-HRHB" data-faction="HRHB" aria-label="Play as HRHB (HVO)">
             <img class="tm-side-picker-flag" id="side-picker-flag-HRHB" src="" alt="" width="80" height="53">
             <span class="tm-side-picker-label">HRHB (HVO)</span>
+            <span class="tm-difficulty-badge tm-difficulty-moderate">MODERATE</span>
+            <span class="tm-side-picker-desc">Backed by Zagreb but squeezed between two wars. Will the alliance hold, or will you fight alone?</span>
           </button>
         </div>
       </div>
@@ -218,8 +234,7 @@
         <button type="button" class="tm-oob-close" id="settings-close" aria-label="Close settings">&times;</button>
       </div>
       <div class="tm-modal-content">
-        <label class="tm-setting-row"><input type="checkbox" id="toggle-crt"> Enable CRT effect</label>
-        <label class="tm-setting-row"><input type="checkbox" id="toggle-audio"> Enable UI audio cues</label>
+        <p class="tm-muted" style="text-align:center;padding:16px 0">Settings coming soon.</p>
       </div>
     </div>
   </div>
@@ -227,15 +242,20 @@
   <div class="tm-modal-overlay" id="help-modal" aria-hidden="true">
     <div class="tm-modal-card">
       <div class="tm-modal-header">
-        <span>Keyboard Shortcuts</span>
+        <span>Help</span>
         <button type="button" class="tm-oob-close" id="help-close" aria-label="Close help">&times;</button>
       </div>
       <div class="tm-modal-content">
+        <p class="tm-muted" style="margin-bottom:10px">Tactical map viewer for A War Without Victory. Load a game state or replay to explore control, formations, and orders. Use the toolbar to toggle layers, search settlements, and view the order of battle.</p>
+        <div class="tm-panel-section-header" style="margin-bottom:6px">KEYBOARD SHORTCUTS</div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">+/-</span><span class="tm-panel-field-value">Zoom in/out</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">Home/F</span><span class="tm-panel-field-value">Fit map to view</span></div>
         <div class="tm-panel-field"><span class="tm-panel-field-label">Space</span><span class="tm-panel-field-value">Play/Pause replay</span></div>
         <div class="tm-panel-field"><span class="tm-panel-field-label">M</span><span class="tm-panel-field-value">Main menu</span></div>
-        <div class="tm-panel-field"><span class="tm-panel-field-label">O</span><span class="tm-panel-field-value">Toggle OOB</span></div>
-        <div class="tm-panel-field"><span class="tm-panel-field-label">R</span><span class="tm-panel-field-value">Recruitment (when available) or Load replay</span></div>
-        <div class="tm-panel-field"><span class="tm-panel-field-label">Esc</span><span class="tm-panel-field-value">Close overlays/search</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">O</span><span class="tm-panel-field-value">Toggle OOB panel</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">S</span><span class="tm-panel-field-value">Search settlements</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">R</span><span class="tm-panel-field-value">Recruitment / Load replay</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">Esc</span><span class="tm-panel-field-value">Close overlays and search</span></div>
       </div>
     </div>
   </div>

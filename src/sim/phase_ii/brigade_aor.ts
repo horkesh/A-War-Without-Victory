@@ -29,6 +29,9 @@ import {
 } from '../../state/brigade_operational_cap.js';
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
 import { areRbihHrhbAllied } from '../phase_i/alliance_update.js';
+import { assignCorpsDirectedAoR } from './corps_directed_aor.js';
+import { wouldRemainContiguous } from './aor_contiguity.js';
+import { getFormationCorpsId } from './corps_sector_partition.js';
 
 // --- Types ---
 
@@ -141,18 +144,6 @@ function getActiveBrigades(state: GameState, faction: FactionId): FormationState
   return result;
 }
 
-function getFormationCorpsId(formation: FormationState): FormationId | null {
-  if (formation.corps_id) return formation.corps_id;
-  const tags = formation.tags ?? [];
-  for (const tag of tags) {
-    if (tag.startsWith('corps:')) {
-      const id = tag.slice(6).trim();
-      if (id) return id;
-    }
-  }
-  return null;
-}
-
 function uniqueSortedMunicipalities(values: MunicipalityId[]): MunicipalityId[] {
   return Array.from(new Set(values)).sort(strictCompare);
 }
@@ -208,14 +199,16 @@ function canAssignMunicipalityToBrigade(
   return munAdj.get(hqMun)?.has(candidate) ?? false;
 }
 
-function resolveMunicipalityForSid(
+/** Resolve a settlement's municipality ID from the lookup, falling back to the SID itself. */
+export function resolveMunicipalityForSid(
   sid: SettlementId,
   sidToMun: Record<SettlementId, MunicipalityId>
 ): MunicipalityId {
   return sidToMun[sid] ?? sid;
 }
 
-function buildSidToMunMap(
+/** Build a settlement→municipality lookup from settlement records + fallback to SID. */
+export function buildSidToMunMap(
   settlementIds: Iterable<SettlementId>,
   settlements?: Map<SettlementId, SettlementRecord>
 ): Record<SettlementId, MunicipalityId> {
@@ -235,7 +228,8 @@ function hasMunicipalityMetadata(sidToMun: Record<SettlementId, MunicipalityId>)
   return Object.entries(sidToMun).some(([sid, mun]) => sid !== mun);
 }
 
-function buildMunicipalityAdjacency(
+/** Build municipality adjacency graph from settlement edges and SID→municipality lookup. */
+export function buildMunicipalityAdjacency(
   edges: EdgeRecord[],
   sidToMun: Record<SettlementId, MunicipalityId>
 ): Map<MunicipalityId, Set<MunicipalityId>> {
@@ -255,6 +249,21 @@ function buildMunicipalityAdjacency(
 }
 
 function ensureBrigadeMunicipalityAssignment(
+  state: GameState,
+  edges: EdgeRecord[],
+  sidToMun: Record<SettlementId, MunicipalityId>
+): Record<FormationId, MunicipalityId[]> {
+  // Corps-directed path: when corps_command exists (Phase II normal flow)
+  const corpsCommand = state.corps_command;
+  if (corpsCommand && Object.keys(corpsCommand).length > 0) {
+    return assignCorpsDirectedAoR(state, edges);
+  }
+  // Legacy Voronoi fallback: Phase I, tests without corps, backward compat
+  return legacyVoronoiMunicipalityAssignment(state, edges, sidToMun);
+}
+
+/** Legacy Voronoi-based municipality assignment (backward compat). */
+function legacyVoronoiMunicipalityAssignment(
   state: GameState,
   edges: EdgeRecord[],
   sidToMun: Record<SettlementId, MunicipalityId>
@@ -1305,6 +1314,10 @@ export function rebalanceBrigadeAoR(
           }
         }
         if (!targetBrigade) continue;
+
+        // Contiguity guard: skip if removal would break donor's contiguity
+        const donorSettlements = brigadeMap.get(brigadeId)!;
+        if (!wouldRemainContiguous(donorSettlements, sid, adj)) continue;
 
         // Transfer
         brigadeAor[sid] = targetBrigade;
