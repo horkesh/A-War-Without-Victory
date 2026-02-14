@@ -47,7 +47,7 @@ export type PostureLevel = 'hold' | 'probe' | 'push';
 // --- Brigade Operations System types ---
 
 /** Brigade posture (Phase II). Controls pressure output, defensive resilience, and exhaustion rate. */
-export type BrigadePosture = 'defend' | 'probe' | 'attack' | 'elastic_defense';
+export type BrigadePosture = 'defend' | 'probe' | 'attack' | 'elastic_defense' | 'consolidation';
 
 /** Equipment condition for a typed equipment category (tanks, artillery). */
 export interface EquipmentCondition {

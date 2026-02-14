@@ -56,6 +56,8 @@ A settlement may initialize with political_controller = null only if no faction 
 
 **Change mechanisms:** Political control may change only through: (1) sustained opposing military pressure applied via front-active settlements meeting pressure eligibility and duration rules, (2) internal authority collapse or fragmentation, or (3) negotiated transfer through end-state or interim agreements.
 
+**Implementation-note (2026-02-13 canonical runtime path):** Harness scenarios use a battle-driven control path: no Phase I control flips are applied, and control changes occur via Phase II attack-order resolution after deterministic initialization. Canonical historical Apr-1992 war-start scenarios keep `init_control_mode: "ethnic_1991"`; early-war territorial asymmetry is modeled through deterministic Phase II pressure calibration (including RS external-support pressure on selected municipalities), not municipal institutional pre-assignment.
+
 ## 3. Early-war and pre-frontline phase
 
 The simulation begins before coherent frontlines exist. Authority and control shift through coercion, presence, and legitimacy rather than direct combat.
@@ -65,6 +67,8 @@ Municipal authority gradients determine initial compliance. Armed presence witho
 Transition to the frontline phase occurs once sustained opposing deployments create continuous contact.
 
 During the pre-frontline phase, Areas of Responsibility are not instantiated. Settlements may be subject to coercive presence and authority shifts without brigade assignment. AoRs are created only once sustained brigade-to-brigade contact emerges.
+
+**Implementation-note (scenario runtime):** Canonical historical scenarios now start directly in `phase_ii`; pre-frontline Phase I remains available for legacy/reference fixtures but is not used for canonical war-start runs.
 
 AoRs are instantiated only once sustained opposing brigade contact produces front-active settlements.
 
@@ -103,7 +107,7 @@ Each brigade maintains a posture state chosen by the player. Posture governs int
 - **Attack:** Concentrates pressure and accelerates exhaustion while weakening rear-depth resilience
 - **Elastic Defense:** Reduces exhaustion growth by permitting controlled loss of forward settlements to preserve cohesion
 
-**Posture multipliers (pressure / defense):** Defend 0.3 / 1.5; Probe 0.7 / 1.0; Attack 1.5 / 0.5; Elastic Defense 0.2 / 1.2. **Constraints:** attack requires cohesion ≥ 40 and readiness active; probe requires cohesion ≥ 20 and active or overextended. **Per-turn cohesion costs:** attack −3; probe −1; elastic_defense −0.5 (truncated); defend +1 (capped at 80). If cohesion drops below the posture minimum, posture auto-downgrades to defend. **State:** brigade_posture_orders; posture on FormationState.
+**Posture multipliers (pressure / defense):** Defend 0.3 / 1.5; Probe 0.7 / 1.0; Attack 1.5 / 0.5; Elastic Defense 0.2 / 1.2. **Constraints:** attack requires cohesion ≥ 40 and readiness active; probe requires cohesion ≥ 20 and active or overextended. **Per-turn cohesion costs:** attack −3; probe −1; elastic_defense −0.5 (truncated); defend +1 (capped at 80). If cohesion drops below the posture minimum, posture auto-downgrades to defend. **State:** brigade_posture_orders; posture on FormationState. **Implementation-note:** A fifth posture, **Consolidation**, is used for soft fronts (rear cleanup, undefended pockets): pressure 0.6, defense 1.1, cohesion cost +0.5; brigades in consolidation posture may still issue attack orders so cleanup produces casualty-ledger updates.
 
 ### 6.2 AoR reshaping and concentration
 
@@ -131,7 +135,7 @@ With Corps authorization, OGs may detach battalion-equivalent manpower from dono
 
 ### 6.5 Phase II bot (brigade AI) — implementation-note
 
-When the bot controls a faction in Phase II, brigade AI generates posture orders and attack orders in a single pass. Attack-order eligibility uses the posture just decided in that pass (pending posture), not the previously applied state, so probe/attack brigades can issue attack orders in the same turn. Faction-specific strategic objectives (offensive and defensive municipality lists—e.g. RS Drina valley and Sarajevo siege ring; RBiH enclaves and central corridors; HRHB Herzegovina heartland and Lasva valley) and attack target scoring (undefended +100, corridor +90, offensive objective +70, home recapture +60, weak garrison 0–50) are applied deterministically; tie-break by settlement ID. Brigades headquartered in offensive-objective municipalities may adopt probe at a lower coverage threshold. All iteration and selection use stable ordering; no randomness. Implementation: `docs/40_reports/BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md`.
+When the bot controls a faction in Phase II, brigade AI generates posture orders and attack orders in a single pass. Attack-order eligibility uses the posture just decided in that pass (pending posture), not the previously applied state, so probe/attack/consolidation brigades can issue attack orders in the same turn. **Soft fronts** (adjacent enemy settlements with no or weak garrison) receive **consolidation** posture; **real fronts** are brigade-vs-brigade. Faction-specific strategic objectives (offensive and defensive municipality lists—e.g. RS Drina valley and Sarajevo siege ring; RBiH enclaves and central corridors; HRHB Herzegovina heartland and Lasva valley) and attack target scoring (undefended +100, corridor +95, offensive objective +85, home recapture +60, weak garrison 0–50, plus consolidation/breakthrough score for rear cleanup and isolated clusters) are applied deterministically; tie-break by settlement ID. Brigades headquartered in offensive-objective municipalities may adopt probe at a lower coverage threshold. All iteration and selection use stable ordering; no randomness. Implementation: `docs/40_reports/BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md`, `src/sim/consolidation_scoring.ts`.
 
 ## 7. Combat interaction and pressure
 

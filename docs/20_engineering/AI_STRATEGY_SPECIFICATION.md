@@ -22,7 +22,7 @@ This spec covers:
 - `RBiH`
   - Early-war posture: defensive survival with selective probing.
   - Late-war posture: increased local offensives where pressure improves.
-  - Priority SIDs: `S166499`, `S155551`, `S162973`.
+  - Priority SIDs: `S166499`, `S155551`, `S162973`, `S100838`, `S117994`, `S224065` (core + enclaves Srebrenica, Goražde, Bihać); `S163520` (Sapna — connected stronghold, not enclave); `S123749`, `S208019`, `S151360` (Kalesija/Teočak–Čelić, Doboj, Tešanj — RBiH stronghold regions).
   - Benchmarks:
     - Turn 26: hold core centers (`expected_control_share=0.20`, `tolerance=0.10`)
     - Turn 52: preserve survival corridors (`expected_control_share=0.25`, `tolerance=0.12`)
@@ -30,7 +30,7 @@ This spec covers:
 - `RS`
   - Early-war posture: aggressive expansion.
   - Late-war posture: consolidation-first.
-  - Priority SIDs: `S200026`, `S216984`, `S200891`.
+  - Priority SIDs: `S200026`, `S216984`, `S200891`, `S230545`, `S227897`, `S205176`, `S202258`, `S203009`, `S220469`, `S218375` (Drina/Prijedor axis); `S120154`, `S162094` (Gračanica/Petrovo, Zavidovići/Vozuća — VRS strongholds in RBiH muns); Sarajevo ring via existing SIDs.
   - Benchmarks:
     - Turn 26: early territorial expansion (`expected_control_share=0.45`, `tolerance=0.15`)
     - Turn 52: consolidate gains (`expected_control_share=0.50`, `tolerance=0.15`)
@@ -86,12 +86,24 @@ This allows behavior such as:
 - **RS 1992:** broad aggressive expansion.
 - **RS 1995:** lower broad aggression due to overextension/manpower pressure, but still able to run planned objective operations.
 
+## Consolidation and rear cleanup
+
+AI prioritizes **municipality consolidation**: cleaning hostile settlements inside owned municipalities and pushing toward isolated hostile clusters. Behavior is deterministic and produces tracked military action (casualties) rather than administrative flips.
+
+- **Phase I (legacy):** Edge scoring includes a consolidation bonus when the scenario runner supplies graph context (`consolidationContext`). Strategy profiles have `consolidation_priority_weight` (RS 0.8, RBiH 0.5, HRHB 0.4). Control-flip candidate order prefers municipalities with more attacker-controlled adjacent muns (consolidation pressure first).
+- **Phase II:** Brigades on a **soft front** (adjacent enemy settlements with no or weak garrison) adopt **consolidation** posture; they still issue attack orders so cleanup is resolved via battle resolution with casualty ledger updates. **Real fronts** = brigade-vs-brigade contact; soft fronts = rear pockets and undefended settlements.
+- **Exception data:** Connected strongholds (e.g. Sapna S163520, Teočak S123749) and isolated holdouts (e.g. Petrovo S120154, Vozuća S162094) receive scoring penalties so they persist as in history. Fast rear-cleanup municipalities (Prijedor, Banja Luka) receive a priority bonus; baseline calibration targets completion within ~4 turns.
+- **Garrison/casualties:** Cleanup engagements remain attack-order driven; undefended or weakly defended settlements still incur defender casualties (militia/rear security) so all flips produce tracked casualties.
+
+Integration: `src/sim/consolidation_scoring.ts`, `src/sim/bot/simple_general_bot.ts`, `src/sim/phase_ii/bot_brigade_ai.ts`, `src/sim/phase_i/control_flip.ts`, `src/state/game_state.ts` (BrigadePosture includes `consolidation`).
+
 ## Integration points
 
 - `src/sim/bot/bot_strategy.ts`
 - `src/sim/bot/bot_interface.ts`
 - `src/sim/bot/simple_general_bot.ts`
 - `src/sim/bot/bot_manager.ts`
+- `src/sim/consolidation_scoring.ts`
 - `src/scenario/scenario_types.ts` (`bot_difficulty`)
 - `src/scenario/scenario_loader.ts`
 - `src/scenario/scenario_runner.ts`

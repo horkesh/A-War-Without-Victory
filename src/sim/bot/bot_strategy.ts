@@ -17,6 +17,8 @@ export interface BotStrategyProfile {
   front_length_penalty_strength: number;
   manpower_sensitivity: number;
   preferred_objective_sids: string[];
+  /** Weight for consolidation scoring (rear cleanup / fast-cleanup mun). 0 = off. Deterministic. */
+  consolidation_priority_weight: number;
   benchmarks: BotBenchmarkTarget[];
 }
 
@@ -44,12 +46,13 @@ const DIFFICULTY_TUNING: Record<BotDifficulty, BotDifficultyTuning> = {
 const STRATEGY_PROFILES: Record<string, BotStrategyProfile> = {
   RBiH: {
     faction: 'RBiH',
-    early_war_aggression: 0.68,
-    late_war_aggression: 0.58,
-    planned_ops_min_aggression: 0.60,
+    early_war_aggression: 0.62,
+    late_war_aggression: 0.56,
+    planned_ops_min_aggression: 0.58,
     front_length_penalty_strength: 0.08,
     manpower_sensitivity: 0.18,
-    preferred_objective_sids: ['S166499', 'S155551', 'S162973'],
+    preferred_objective_sids: ['S166499', 'S155551', 'S162973', 'S100838', 'S117994', 'S224065', 'S163520', 'S123749', 'S208019', 'S151360'],
+    consolidation_priority_weight: 0.5,
     benchmarks: [
       { turn: 26, objective: 'hold_core_centers', expected_control_share: 0.2, tolerance: 0.1 },
       { turn: 52, objective: 'preserve_survival_corridors', expected_control_share: 0.25, tolerance: 0.12 }
@@ -57,12 +60,13 @@ const STRATEGY_PROFILES: Record<string, BotStrategyProfile> = {
   },
   RS: {
     faction: 'RS',
-    early_war_aggression: 0.58,
+    early_war_aggression: 0.64,
     late_war_aggression: 0.42,
-    planned_ops_min_aggression: 0.52,
+    planned_ops_min_aggression: 0.48,
     front_length_penalty_strength: 0.22,
     manpower_sensitivity: 0.3,
-    preferred_objective_sids: ['S200026', 'S216984', 'S200891'],
+    preferred_objective_sids: ['S200026', 'S216984', 'S200891', 'S230545', 'S227897', 'S205176', 'S202258', 'S203009', 'S220469', 'S218375', 'S120154', 'S162094'],
+    consolidation_priority_weight: 0.8,
     benchmarks: [
       { turn: 26, objective: 'early_territorial_expansion', expected_control_share: 0.45, tolerance: 0.15 },
       { turn: 52, objective: 'consolidate_gains', expected_control_share: 0.5, tolerance: 0.15 }
@@ -70,12 +74,13 @@ const STRATEGY_PROFILES: Record<string, BotStrategyProfile> = {
   },
   HRHB: {
     faction: 'HRHB',
-    early_war_aggression: 0.30,
+    early_war_aggression: 0.34,
     late_war_aggression: 0.40,
-    planned_ops_min_aggression: 0.42,
+    planned_ops_min_aggression: 0.40,
     front_length_penalty_strength: 0.26,
     manpower_sensitivity: 0.30,
     preferred_objective_sids: ['S166090', 'S120880', 'S130486'],
+    consolidation_priority_weight: 0.4,
     benchmarks: [
       { turn: 26, objective: 'secure_herzegovina_core', expected_control_share: 0.15, tolerance: 0.08 },
       { turn: 52, objective: 'hold_central_bosnia_nodes', expected_control_share: 0.18, tolerance: 0.1 }
@@ -101,6 +106,7 @@ export function getBotStrategyProfile(faction: FactionId): BotStrategyProfile {
     front_length_penalty_strength: 0.15,
     manpower_sensitivity: 0.2,
     preferred_objective_sids: [],
+    consolidation_priority_weight: 0,
     benchmarks: []
   };
 }

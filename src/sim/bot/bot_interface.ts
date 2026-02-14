@@ -1,5 +1,6 @@
 import type { GameState, FactionId } from '../../state/game_state.js';
 import type { FrontEdge } from '../../map/front_edges.js';
+import type { EdgeRecord } from '../../map/settlements.js';
 import type { BotDifficulty, BotStrategyProfile, BotTimeContext } from './bot_strategy.js';
 
 export interface BotDecisions {
@@ -9,11 +10,20 @@ export interface BotDecisions {
     formation_assignments?: Record<string, string>;
 }
 
+/** Optional graph context for consolidation-aware edge scoring (Phase I). */
+export interface ConsolidationContext {
+    edges: EdgeRecord[];
+    sidToMun: Map<string, string> | Record<string, string>;
+    settlementsByMun: Map<string, string[]>;
+}
+
 export interface BotDecisionContext {
     rng: () => number;
     difficulty: BotDifficulty;
     strategy: BotStrategyProfile;
     timeContext?: BotTimeContext;
+    /** When present, Phase I bot adds consolidation bonus to edge scores. */
+    consolidationContext?: ConsolidationContext;
 }
 
 export interface Bot {

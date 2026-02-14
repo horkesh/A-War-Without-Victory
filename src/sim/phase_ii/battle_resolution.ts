@@ -52,6 +52,9 @@ const BASE_CASUALTY_PER_INTENSITY = 20;
 
 /** Minimum personnel lost per side per engagement (no free wins). */
 const MIN_CASUALTIES_PER_BATTLE = 5;
+/** Undefended settlements still incur small defending losses (militia/rear security). */
+const UNDEFENDED_DEFENDER_CASUALTY_SCALE = 0.2;
+const MIN_UNDEFENDED_DEFENDER_CASUALTIES = 1;
 
 /** Casualty category fractions (must sum to 1). */
 const KIA_FRACTION = 0.25;
@@ -67,6 +70,7 @@ const RIVER_DEFENSE_SCALE = 0.40;
 const SLOPE_DEFENSE_SCALE = 0.30;
 const URBAN_DEFENSE_BONUS = 0.25;
 const SARAJEVO_DEFENSE_BONUS = 0.40;
+const ENCLAVE_DEFENSE_BONUS = 0.20;
 const FRICTION_DEFENSE_SCALE = 0.20;
 const ROAD_ACCESS_BASE = 0.85;
 const ROAD_ACCESS_SCALE = 0.15;
@@ -102,14 +106,16 @@ const POSTURE_PRESSURE_MULT: Record<BrigadePosture, number> = {
   defend: 0.3,
   probe: 0.7,
   attack: 1.5,
-  elastic_defense: 0.2
+  elastic_defense: 0.2,
+  consolidation: 0.6
 };
 
 const POSTURE_DEFENSE_MULT: Record<BrigadePosture, number> = {
   defend: 1.5,
   probe: 1.0,
   attack: 0.5,
-  elastic_defense: 1.2
+  elastic_defense: 1.2,
+  consolidation: 1.1
 };
 
 const READINESS_MULT: Record<string, number> = {
@@ -136,6 +142,19 @@ const CORPS_STANCE_DEFENSE: Record<CorpsStance, number> = {
 
 // Sarajevo core municipalities (extreme urban defense)
 const SARAJEVO_CORE_MUNS = new Set(LARGE_SETTLEMENT_MUN_IDS);
+const ENCLAVE_CORE_MUNS = new Set<string>(['srebrenica', 'gorazde', 'bihac']);
+const EARLY_WAR_RS_EXTERNAL_SUPPORT_END_TURN = 26;
+const RS_EXTERNAL_SUPPORT_MUNS = new Set<string>([
+  'bijeljina',
+  'zvornik',
+  'foca',
+  'vlasenica',
+  'bratunac',
+  'visegrad',
+  'rogatica',
+  'prijedor'
+]);
+const RS_EXTERNAL_SUPPORT_MULT = 1.22;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -309,6 +328,9 @@ export function computeTerrainModifier(
     } else if (isLargeUrbanSettlementMun(mun)) {
       urban = URBAN_DEFENSE_BONUS;
     }
+    if (ENCLAVE_CORE_MUNS.has(mun)) {
+      urban += ENCLAVE_DEFENSE_BONUS;
+    }
   }
 
   const friction = t.terrain_friction_index * FRICTION_DEFENSE_SCALE;
@@ -332,6 +354,20 @@ function getUrbanCasualtyMult(settlementToMun: Map<string, string>, sid: Settlem
   if (SARAJEVO_CORE_MUNS.has(mun)) return SARAJEVO_ATTACKER_CASUALTY_MULT;
   if (isLargeUrbanSettlementMun(mun)) return URBAN_ATTACKER_CASUALTY_MULT;
   return 1.0;
+}
+
+function getExternalSupportMultiplier(
+  attackerFaction: FactionId,
+  turn: number,
+  settlementToMun: Map<string, string>,
+  targetSid: SettlementId
+): number {
+  if (attackerFaction !== 'RS') return 1.0;
+  if (turn >= EARLY_WAR_RS_EXTERNAL_SUPPORT_END_TURN) return 1.0;
+  const mun = settlementToMun.get(targetSid);
+  if (!mun) return 1.0;
+  if (!RS_EXTERNAL_SUPPORT_MUNS.has(mun)) return 1.0;
+  return RS_EXTERNAL_SUPPORT_MULT;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -509,9 +545,14 @@ function computeBattleCasualties(
 ): { attacker: BattleCasualties; defender: BattleCasualties } {
   // Undefended settlement
   if (!defenderFormation || defenderPower <= 0) {
+    const undefendedIntensityFactor = Math.max(0.1, attackerPower / 800);
+    const defenderTotal = Math.max(
+      MIN_UNDEFENDED_DEFENDER_CASUALTIES,
+      Math.round(BASE_CASUALTY_PER_INTENSITY * UNDEFENDED_DEFENDER_CASUALTY_SCALE * undefendedIntensityFactor)
+    );
     return {
       attacker: { killed: 0, wounded: 2, missing_captured: 0, tanks_lost: 0, artillery_lost: 0 },
-      defender: { killed: 0, wounded: 0, missing_captured: 0, tanks_lost: 0, artillery_lost: 0 }
+      defender: splitCasualties(defenderTotal, 0.15, 0.5, 0, 0)
     };
   }
 
@@ -799,6 +840,8 @@ export function resolveBattleOrders(
     const attackerPower = computeCombatPower(
       state, formation, rawGarrison, 'attack', 1.0, 0
     );
+    const externalSupportMult = getExternalSupportMultiplier(attackerFaction, turn, settlementToMun, targetSid);
+    attackerPower.total_combat_power *= externalSupportMult;
 
     let defenderPower: CombatPowerBreakdown | null = null;
     if (defenderFormation) {

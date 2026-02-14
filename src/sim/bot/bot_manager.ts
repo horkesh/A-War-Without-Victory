@@ -1,5 +1,5 @@
 import type { GameState } from '../../state/game_state.js';
-import type { BotDecisions } from './bot_interface.js';
+import type { BotDecisions, ConsolidationContext } from './bot_interface.js';
 import { SimpleGeneralBot } from './simple_general_bot.js';
 import { FrontEdge } from '../../map/front_edges.js';
 import {
@@ -70,7 +70,7 @@ export class BotManager {
         });
     }
 
-    public runBots(state: GameState, frontEdges: FrontEdge[]): BotRunDiagnostics {
+    public runBots(state: GameState, frontEdges: FrontEdge[], consolidationContext?: ConsolidationContext): BotRunDiagnostics {
         const allDecisions: { bot: SimpleGeneralBot; decision: BotDecisions }[] = [];
         const ordered = [...this.bots].sort((a, b) => a.bot.id.localeCompare(b.bot.id));
         for (const entry of ordered) {
@@ -82,7 +82,8 @@ export class BotManager {
                     strategy: entry.strategy,
                     timeContext: {
                         global_week: this.scenarioStartWeek + state.meta.turn
-                    }
+                    },
+                    consolidationContext
                 })
             });
         }
