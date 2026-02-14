@@ -27,18 +27,22 @@ The dev server runs Vite on port 3001 with a custom middleware plugin that serve
 
 The tactical map is a standalone Canvas 2D application that renders ~5,800 settlement polygons across Bosnia and Herzegovina with:
 
-- **Political control coloring** — each settlement filled by its controlling faction (RS crimson, RBiH green, HRHB blue, or neutral grey)
-- **Base geography** — national boundary, 1,200 rivers, 17,000 road segments, and 110 municipality borders
-- **Front lines** — dashed black lines along shared polygon edges between differently-controlled settlements
+- **Visual identity** — 1990s NATO C2 ops center: dark navy canvas (`#0d0d1a`), phosphor-green accents, IBM Plex Mono typography. See [GUI_DESIGN_BLUEPRINT.md](GUI_DESIGN_BLUEPRINT.md) §1, §21 and [GUI_VISUAL_OVERHAUL_NATO_OPS_CENTER_2026_02_14.md](../40_reports/implemented/GUI_VISUAL_OVERHAUL_NATO_OPS_CENTER_2026_02_14.md).
+- **Political control coloring** — each settlement filled by its controlling faction (RS crimson, RBiH green, HRHB blue, or neutral grey); faction colors from `nato_tokens.ts` retuned for dark background
+- **Base geography** — national boundary, 1,200 rivers, 17,000 road segments, and 110 municipality borders (subdued for dark canvas)
+- **Front lines** — two-pass rendering: amber glow halo + bright white dashed line along shared polygon edges between differently-controlled settlements; visible at all zoom levels
 - **Settlement labels** — LOD-filtered by zoom level (URBAN_CENTER → TOWN → all)
-- **Formation markers** — faction-colored squares at municipality centroids when game state is loaded
-- **Replay timeline playback** — week-by-week animation from `replay_timeline.json` with settlement flip highlights
-- **Interactive settlement panel** — 4-tab detail view (OVER, ADMIN, CTRL, INTEL)
-- **OOB sidebar** — full formation roster grouped by faction
+- **Formation markers** — horizontal box with army crest + NATO symbol; posture badge (D/P/A/E) when game state loaded
+- **Order arrows** — attack (red solid) and movement (dashed, faction-colored) from `brigade_attack_orders` / `brigade_mun_orders`
+- **Replay timeline playback** — week-by-week animation from `replay_timeline.json` with settlement flip highlights; **replay scrubber** for direct week jump
+- **Interactive settlement panel** — 7-tab detail view (OVER, ADMIN, CTRL, INTEL, ORDERS, AAR, EVENTS)
+- **OOB sidebar** — WAR STATUS block (territory %, personnel, flips, pending orders, faction overview, alerts) plus full formation roster grouped by faction
 - **Replay export** — in-browser WebM export via `MediaRecorder` from the tactical map canvas
 - **Minimap** — overview with viewport rectangle
 - **Search** — diacritic-insensitive fuzzy settlement search
 - **Dataset switching** — Baseline (Apr 1992), September 1992, or any loaded game state
+- **Recruitment UI** — when loaded game state has recruitment and **player_faction** (e.g. after New Campaign): toolbar shows the player's **Capital** and **Equipment**; **Recruit** button and **R** hotkey open a modal that lists only the player's side and only brigades recruitable right now, with cost legend (C = Capital, E = Equipment, M = Manpower); confirm applies recruitment and map shows placement feedback (new formation selected for 4s). See §13.8 and [RECRUITMENT_UI_FROM_MAP_2026_02_14.md](../40_reports/implemented/RECRUITMENT_UI_FROM_MAP_2026_02_14.md).
+- **Desktop (Electron)** — when run as `npm run desktop`: main menu overlay (New Campaign / Load Save / Load Replay), Load scenario/state and Advance turn from main process, AAR modal after turn advance when control events occur, Settings/Help modals, replay scrubber; recruitment catalog and apply via IPC. **New Game:** New Campaign opens a side-selection overlay (RBiH, RS, HRHB with flags); choosing a side invokes `start-new-campaign` IPC, loads the fixed April 1992 scenario, sets `meta.player_faction`, and injects recruitment state for the toolbar/Recruit modal (§13.6, [DESKTOP_GUI_IPC_CONTRACT.md](DESKTOP_GUI_IPC_CONTRACT.md), [GUI_DESIGN_BLUEPRINT.md](GUI_DESIGN_BLUEPRINT.md) §19.2).
 
 There are no external map libraries (no Leaflet, Mapbox, Pixi.js). All rendering is done with the native Canvas 2D API.
 
@@ -46,23 +50,23 @@ There are no external map libraries (no Leaflet, Mapbox, Pixi.js). All rendering
 
 ## 3. File Inventory
 
-All source files live under `src/ui/map/` (13 files, ~3,000 total lines):
+All source files live under `src/ui/map/` (13 files, ~2,600+ total lines):
 
 | File | Lines | Role |
 |------|------:|------|
-| `tactical_map.html` | 117 | HTML entry point — full DOM structure for toolbar, canvas, panels, overlays |
+| `tactical_map.html` | ~200 | HTML entry point — toolbar, canvas, panels, overlays, main menu, AAR/settings/help modals, replay scrubber |
 | `main.ts` | 17 | Bootstrap — `DOMContentLoaded` → `new MapApp('map-root').init()` |
-| `MapApp.ts` | ~1400 | **Main orchestrator** — rendering, interaction, all UI wiring |
-| `types.ts` | 249 | All shared TypeScript interfaces and type definitions |
-| `constants.ts` | 112 | Theme tokens, zoom factors, colors, `formatTurnDate()` |
+| `MapApp.ts` | ~2640 | **Main orchestrator** — rendering, interaction, all UI wiring, order arrows, war status, tabs, desktop flow |
+| `types.ts` | ~260 | Shared TypeScript interfaces; LoadedGameState includes attackOrders, movementOrders, recentControlEvents |
+| `constants.ts` | 112 | Theme tokens, zoom factors, colors |
 | `vite.config.ts` | 101 | Vite config + custom `serveTacticalMapData` plugin |
-| `styles/tactical-map.css` | 316 | Complete dark wargame theme |
+| `styles/tactical-map.css` | ~400 | NATO ops center dark theme; IBM Plex Mono; 18 CSS custom properties; CRT scanline overlay; phosphor-green active states |
 | `state/MapState.ts` | 164 | Observable state container with pub/sub |
 | `geo/MapProjection.ts` | 182 | Data ↔ canvas coordinate transforms |
 | `geo/SpatialIndex.ts` | 102 | Uniform-grid spatial index for hit testing |
 | `data/DataLoader.ts` | 338 | Parallel data fetch, classification, search index, shared borders |
 | `data/ControlLookup.ts` | 57 | SID key normalization (dual format) |
-| `data/GameStateAdapter.ts` | 119 | Parses `final_save.json` into flat view model |
+| `data/GameStateAdapter.ts` | ~216 | Parses `final_save.json` into LoadedGameState; extracts attackOrders, movementOrders, recentControlEvents (deterministic sort) |
 
 **External dependency:** `src/map/nato_tokens.ts` — canonical color tokens shared with the warroom system.
 
@@ -103,7 +107,11 @@ All modules import types from `types.ts`. Data flows are unidirectional: DataLoa
 | `mun1990_names.json` | `/data/derived/` | No | ~23 KB | Municipality numeric ID → display_name + mun1990_id |
 | `settlement_ethnicity_data.json` | `/data/derived/` | No | varies | 1991 census ethnicity composition per settlement |
 
-### 5.2 On-Demand Data
+### 5.2 Crest and flag assets
+
+Crest and flag images are loaded from `/assets/sources/crests/` (see `assets/sources/crests/README.md` for required filenames). In **dev** the Vite plugin serves this path from the project root. For **production/Electron**, the Vite build copies `assets/sources/crests/` into `dist/tactical-map/assets/sources/crests/` so the app can serve them when run from that directory (e.g. packaged desktop app).
+
+### 5.3 On-Demand Data
 
 | File | Trigger | Contents |
 |------|---------|----------|
@@ -111,7 +119,7 @@ All modules import types from `types.ts`. Data flows are unidirectional: DataLoa
 | User-selected `final_save.json` | "Load State..." button | Game state with formations, militia pools, dynamic control |
 | User-selected `replay_timeline.json` | "Load Replay..." button | Ordered weekly game-state frames + control events for map playback/animation |
 
-### 5.3 Processing Pipeline
+### 5.4 Processing Pipeline
 
 After fetching, `DataLoader` performs:
 
@@ -208,7 +216,7 @@ The `render()` method in `MapApp.ts` draws 8 passes in painter's algorithm order
 ```
 Pass 1: Clear + Background
   ctx.clearRect(0, 0, w, h)
-  ctx.fillStyle = NATO_TOKENS.paper (#ebe1cd — aged beige)
+  ctx.fillStyle = NATO_TOKENS.paper (#0d0d1a — dark navy)
   ctx.fillRect(0, 0, w, h)
 
 Pass 2: Base Layers (offscreen cached)
@@ -217,16 +225,22 @@ Pass 2: Base Layers (offscreen cached)
 
 Pass 3: Settlement Polygons
   Iterated in sorted SID order for deterministic rendering.
-  Fill with faction color (55% alpha) or neutral grey (or ethnic majority when Ethnic 1991 is on).
+  Fill with faction color (65% alpha) or neutral grey (or ethnic majority when Ethnic 1991 is on).
+  Inter-settlement borders: same-faction (faint grid) or diff-faction (bright boundary) per constants.SETTLEMENT_BORDER.
 
 Pass 4: Front Lines
-  Only at zoom >= OPERATIONAL (zoomLevel >= 1).
-  Dashed black polylines along shared polygon borders.
+  Visible at all zoom levels. Two-pass rendering per constants.FRONT_LINE:
+  (1) Glow pass: wider amber halo (rgba(255,200,100,0.25), 6px)
+  (2) Main pass: bright white dashed line (rgba(255,255,255,0.85), 2.5px, dash [8,4])
+  Along shared polygon borders between different-faction settlements.
 
 Pass 5: Formation Markers
   Only when game state loaded and formations layer enabled.
-  Faction-colored squares at municipality centroids with count badges.
+  Horizontal box: dark translucent bg, faction-colored border, drop shadow; army crest + NATO symbol; phosphor-green posture badge (D/P/A/E) when posture present.
   If a formation’s HQ is in enemy-controlled territory, marker is drawn at a fallback position (centroid of first friendly AoR settlement).
+
+Pass 5a: Order Arrows
+  Only when game state loaded. Attack orders (red solid) from `loadedGameState.attackOrders`; movement orders (dashed, faction-colored) from `loadedGameState.movementOrders`. Drawn in deterministic order (by formation then target).
 
 Pass 6: Brigade AoR Highlight
   Only when game state loaded, brigade AoR layer on, and a formation selected.
@@ -237,12 +251,11 @@ Pass 7: Selection Highlight
   Selected: white + faction-colored double outline.
 
 Pass 8: Labels
-  LOD-filtered by zoom level.
-  Halo text (paper-colored stroke + dark fill).
+  LOD-filtered by zoom level. IBM Plex Mono. Dark halo on light text; brightness varies by settlement class.
 
 Pass 9: Minimap
-  Drawn on a separate 180x120 <canvas> element.
-  Colored dots at settlement centroids + white viewport rectangle.
+  Drawn on a separate 200×150 <canvas> element (constants.MINIMAP).
+  Dark background; colored dots at settlement centroids + white viewport rectangle.
 ```
 
 ### 8.2 Offscreen Canvas Caching
@@ -289,14 +302,14 @@ Settlements are drawn in **sorted SID order** (`Array.from(keys).sort()`) for de
 
 Each settlement polygon is:
 
-1. **Filled** (when Political control) with the controlling faction's color:
-   - RS: `rgba(180, 50, 50, 0.55)` (crimson)
-   - RBiH: `rgba(70, 120, 80, 0.55)` (forest green)
-   - HRHB: `rgba(60, 100, 140, 0.55)` (steel blue)
-   - Null/unknown: `rgba(100, 100, 100, 0.3)` (grey)
+1. **Filled** (when Political control) with the controlling faction's color from `constants.SIDE_COLORS` (nato_tokens + 65% alpha):
+   - RS: `rgba(180, 50, 50, 0.65)` (deep crimson)
+   - RBiH: `rgba(55, 140, 75, 0.65)` (forest green)
+   - HRHB: `rgba(50, 110, 170, 0.65)` (steel blue)
+   - Null/unknown: `rgba(60, 60, 70, 0.35)` (grey)
    - If political control layer is off: `rgba(120, 120, 120, 0.2)`
 
-2. **No individual stroke** — settlement borders are not drawn. This gives a clean, smooth appearance where adjacent settlements of the same faction blend together.
+2. **Inter-settlement borders** (constants.SETTLEMENT_BORDER): same-faction edges use faint stroke `rgba(60,60,80,0.3)` at 0.4px; different-faction edges use bright stroke `rgba(255,255,255,0.7)` at 2px. Reinforces front visibility on dark canvas.
 
 The polygon drawing method (`drawPolygonPath`) handles both `Polygon` and `MultiPolygon` geometries, iterating all rings and closing each path.
 
@@ -304,7 +317,7 @@ The polygon drawing method (`drawPolygonPath`) handles both `Polygon` and `Multi
 
 ## 10. Front Lines
 
-Front lines are rendered as dashed black polylines along the **actual shared border vertices** between adjacent settlements under different faction control.
+Front lines are rendered along the **actual shared border vertices** between adjacent settlements under different faction control. Two-pass rendering for visibility on dark canvas.
 
 ### 10.1 Shared Border Computation
 
@@ -319,12 +332,12 @@ This works because adjacent settlement polygons share **exact coordinate vertice
 
 ### 10.2 Rendering
 
-During `drawFrontLines()`:
+During `drawFrontLines()` (visible at all zoom levels):
 
 1. For each `SharedBorderSegment`, check if controllers of `a` and `b` are both non-null and different
-2. If so, draw a polyline through the shared `points` array
-3. Style: black (`#000000`), 3px width, dash pattern `[6, 4]`
-4. Only drawn at zoom level >= 1 (OPERATIONAL and TACTICAL)
+2. If so, draw two polylines through the shared `points` array:
+   - **Glow pass:** `constants.FRONT_LINE.glowColor` (amber `rgba(255,200,100,0.25)`), width 6px, solid
+   - **Main pass:** `constants.FRONT_LINE.color` (white `rgba(255,255,255,0.85)`), width 2.5px, dash `[8, 4]`
 
 ---
 
@@ -406,13 +419,22 @@ The `SpatialIndex` is a 50x50 uniform grid over the data bounds. For ~6,000 sett
 | `F` / `Home` | Fit entire map (zoom 1, center) |
 | Arrow keys | Pan by 0.05 |
 | `/` or `Ctrl+F` | Open search |
-| `Escape` | Close search → deselect settlement → zoom out (cascade) |
+| `Escape` | Close search → deselect settlement → close overlay/modal (cascade) |
 | `L` | Toggle layer panel |
 | `O` | Toggle OOB sidebar |
+| `Space` | (Desktop) Advance turn or play/pause replay |
+| `M` | (Desktop) Toggle main menu overlay |
+| `R` | (Desktop) Open Recruitment modal when state has recruitment; otherwise focus replay scrubber |
 
 ---
 
 ## 13. UI Components
+
+### 13.0 War Status and Replay Scrubber
+
+**War Status** — Block in the OOB sidebar (or dedicated area when OOB closed): territory share by faction, personnel, flip counts, pending orders summary, faction overview, and alerts. Updated on state load and after advance-turn (desktop).
+
+**Replay scrubber** — Slider + week label for jumping to a specific week in a loaded replay timeline. Visible when a replay is loaded; keyboard shortcut `R` focuses it (desktop).
 
 ### 13.1 Layer Panel
 
@@ -436,7 +458,7 @@ Note: Rivers, roads, and boundary are **not** in the layer panel — they are al
 
 **Header:** Settlement name, subtitle (NATO class, population, controller).
 
-**4 Tabs:**
+**7 Tabs:**
 
 | Tab | ID | Content |
 |-----|----|---------|
@@ -444,6 +466,9 @@ Note: Rivers, roads, and boundary are **not** in the layer panel — they are al
 | ADMIN | `admin` | Municipality name, ID, settlement count (resolved from `municipality_id` or `mun1990_id` on the feature). NATO class, urban center designation. |
 | CTRL | `control` | Controller with faction swatch, control status (CONSOLIDATED/CONTESTED/HIGHLY_CONTESTED). Stability placeholder. |
 | INTEL | `intel` | Formations in this municipality (name, kind, readiness badge, cohesion bar). Militia pool (available/committed/exhausted stacked bar). Requires loaded game state. |
+| ORDERS | `orders` | Attack and movement orders affecting this settlement (from loaded game state). |
+| AAR | `aar` | After-action summary for the current turn; link to open AAR modal when control events occurred. |
+| EVENTS | `events` | Recent control events (flips) for context; from `loadedGameState.recentControlEvents`. |
 
 ### 13.3 Brigade Panel
 
@@ -456,7 +481,7 @@ When the user **clicks a formation marker** on the map (with game state loaded),
 - **Statistics:** personnel, posture (defend/probe/attack/elastic_defense), fatigue, cohesion
 - **AoR:** count of settlements in the formation’s Area of Responsibility; if ≤30, a sorted list of settlement IDs
 
-When the Brigade AoR layer is on, the selected formation’s AoR settlements are highlighted on the map (light faction fill + dashed outline). Closing the panel or pressing Escape clears `selectedFormationId` and the brigade AoR highlight. Clicking a settlement still opens the settlement panel (4 tabs) as before.
+When the Brigade AoR layer is on, the selected formation’s AoR settlements are highlighted on the map (light faction fill + dashed outline). Closing the panel or pressing Escape clears `selectedFormationId` and the brigade AoR highlight. Clicking a settlement still opens the settlement panel (7 tabs) as before.
 
 ### 13.4 OOB Sidebar
 
@@ -475,7 +500,25 @@ Centered top overlay with text input and results dropdown. Max 12 results. Diacr
 2. Centers on settlement centroid
 3. Selects the settlement (opens panel)
 
-### 13.6 Other
+### 13.6 Main Menu and Modals
+
+**Main menu overlay** — (Desktop) Full-screen overlay with New Campaign / Load Save / Load Replay. Toggle with toolbar "Menu" or `M`. Escape closes. **New Campaign** (desktop only): closes the menu and shows a **side-picker overlay** (three options with faction flags: RBiH, RS, HRHB). Choosing a side calls `start-new-campaign` IPC; the app loads the fixed April 1992 scenario (`apr1992_historical_52w.json`), sets `meta.player_faction`, injects `recruitment_state`, and applies the state to the map. In browser (no desktop IPC), New Campaign falls back to triggering "Load scenario…" (file picker).
+
+**Modals** — AAR (after turn advance when control events occur), War Summary (territory and flip summary), Settings (placeholder), Help (shortcuts and links). Each modal has a backdrop and close button; Escape closes the topmost.
+
+### 13.8 Recruitment Modal
+
+When the loaded game state has `recruitment` (from `recruitment_state`) and **player_faction** is set (e.g. after New Campaign side picker), the toolbar shows the player's recruitment capital and equipment and a **Recruit** button. Clicking it or pressing **R** opens a modal that:
+
+- **Player-side only:** Only brigades of the player's side (`player_faction`) are considered. If `player_faction` is not set, the modal prompts to start a New Campaign and choose a side.
+- **Recruitable list only:** The table lists only brigades the player **can recruit right now** (not already recruited, `available_from` ≤ turn, and sufficient Capital, Equipment, and Manpower from the home municipality's militia pool). If none are recruitable, a message explains that more resources are needed.
+- **Cost legend:** Costs are shown as **C** = Capital, **E** = Equipment, **M** = Manpower (from militia pool). The resources line shows the player's current Capital and Equipment; the table column "Pool (M)" shows available manpower per brigade home.
+- **Catalog:** Loaded via `get-recruitment-catalog` IPC (desktop); in browser, a message explains that the catalog requires the desktop app.
+- **Confirm:** In desktop, **Select** chooses a brigade and enables **Activate brigade**; confirm sends `apply-recruitment` IPC; updated state is pushed to the renderer and the new formation is briefly selected (4s) for placement feedback. In browser, confirm shows that apply is desktop-only.
+
+See [RECRUITMENT_UI_FROM_MAP_2026_02_14.md](../40_reports/implemented/RECRUITMENT_UI_FROM_MAP_2026_02_14.md).
+
+### 13.7 Other
 
 - **Minimap** — 180x120 canvas, bottom-left. Colored dots for settlements, white viewport rectangle. Clickable for navigation.
 - **Tooltip** — positioned near cursor on hover. Shows "Name — Controller — pop X".
@@ -508,7 +551,13 @@ User clicks "Load State..." → file picker → select final_save.json
 
 ### 14.2 GameStateAdapter
 
-`parseGameState(json)` in `data/GameStateAdapter.ts` does defensive parsing with fallback defaults. Formation IDs and militia pool keys are sorted before iteration for deterministic output.
+`parseGameState(json)` in `data/GameStateAdapter.ts` does defensive parsing with fallback defaults. Formation IDs and militia pool keys are sorted before iteration for deterministic output. The adapter also builds:
+
+- **attackOrders** — from `state.brigade_attack_orders`; each entry has formationId, targetSid, faction; sorted by formationId then targetSid.
+- **movementOrders** — from `state.brigade_mun_orders`; each entry has formationId, fromSid, toSid, faction; sorted by formationId then toSid.
+- **recentControlEvents** — from `state.control_events` (or replay `control_events`), filtered to the current turn and sorted by settlement id for stable display.
+- **recruitment** — when `state.recruitment_state` exists: `capitalByFaction`, `equipmentByFaction` (via `pointsByFaction()` with sorted keys), and `recruitedBrigadeIds` (sorted); used by toolbar and Recruitment modal (§13.8).
+- **player_faction** — from `state.meta.player_faction` when set (desktop New Game); indicates which side the human plays (RBiH, RS, or HRHB). Used by the Recruitment modal to show only the player's brigades and only those recruitable at the moment (§13.8).
 
 ### 14.3 Replay Timeline Loading
 
@@ -540,6 +589,7 @@ Key field mappings from `final_save.json`:
 - `political_controllers` → `controlBySettlement` (via `buildControlLookup`)
 - `contested_control` → `statusBySettlement` (via `buildStatusLookup`)
 - `brigade_aor` → reverse index: for each formation ID, the sorted list of settlement IDs in that formation’s AoR is stored in `loadedGameState.brigadeAorByFormationId`; each `FormationView` also gets `aorSettlementIds` (same list for that formation).
+- `brigade_attack_orders` → `attackOrders` (AttackOrderView[]); `brigade_mun_orders` → `movementOrders` (MovementOrderView[]); `control_events` → `recentControlEvents` (RecentControlEventView[]), typically filtered to current turn.
 
 The **brigade AoR** data comes from `state.brigade_aor` (Record<SettlementId, FormationId | null>). The adapter inverts this into `brigadeAorByFormationId: Record<FormationId, SettlementId[]>` with settlement IDs sorted for deterministic display and rendering.
 
@@ -694,6 +744,12 @@ The entire UI uses a dark wargame theme (316 lines). Key decisions:
 
 ---
 
+## 21. Desktop (Electron) and IPC
+
+When the tactical map is run inside Electron (`npm run desktop`), the renderer loads the same HTML/TS bundle but the main process owns scenario loading and turn advancement. The **IPC contract** between main and renderer is specified in [DESKTOP_GUI_IPC_CONTRACT.md](DESKTOP_GUI_IPC_CONTRACT.md) (including `start-new-campaign` for New Game side picker, `get-recruitment-catalog` and `apply-recruitment` for the Recruitment UI). **New Game:** New Campaign shows the side picker; the user chooses RBiH, RS, or HRHB; `start-new-campaign` loads the fixed April 1992 scenario, sets `meta.player_faction`, and injects `recruitment_state` (see DESKTOP_GUI_IPC_CONTRACT and GUI_DESIGN_BLUEPRINT §19.2). The **playbook** for the desktop “play myself” flow (New Campaign → side picker or Load scenario/state, advance turn, AAR, replay) is in [GUI_PLAYBOOK_DESKTOP.md](GUI_PLAYBOOK_DESKTOP.md). High-level design and phased delivery are in [GUI_DESIGN_BLUEPRINT.md](GUI_DESIGN_BLUEPRINT.md). Implementation lives under `src/desktop/` (main process) and reuses `src/ui/map/` (renderer). Phase II advance in desktop runs recruitment accrual (no bot recruitment) so capital/equipment increase each turn for player-driven recruitment via the map UI.
+
+---
+
 ## Appendix: Type Reference
 
 ### Core Types
@@ -734,6 +790,16 @@ interface LoadedGameState {
   statusBySettlement: Record<string, string>;
   /** Formation ID → sorted list of settlement IDs in that formation’s AoR (from state.brigade_aor). */
   brigadeAorByFormationId: Record<string, string[]>;
+  /** Attack orders (from state.brigade_attack_orders), sorted by formationId then targetSid. */
+  attackOrders: AttackOrderView[];
+  /** Movement orders (from state.brigade_mun_orders), sorted by formationId then toSid. */
+  movementOrders: MovementOrderView[];
+  /** Control events (e.g. current turn), sorted by settlement id. */
+  recentControlEvents: RecentControlEventView[];
+  /** When state.recruitment_state exists: capital/equipment by faction (sorted keys), recruitedBrigadeIds. */
+  recruitment?: RecruitmentView;
+  /** When set (desktop New Game): which side the human plays (RBiH, RS, HRHB). From state.meta.player_faction. */
+  player_faction?: string | null;
 }
 
 interface FormationView {

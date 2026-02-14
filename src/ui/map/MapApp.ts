@@ -18,7 +18,7 @@ import { MapProjection } from './geo/MapProjection.js';
 import { SpatialIndex } from './geo/SpatialIndex.js';
 import { computeFeatureBBox } from './geo/MapProjection.js';
 import { loadAllData } from './data/DataLoader.js';
-import { ZOOM_LABELS, ZOOM_FACTORS, NATO_TOKENS, SIDE_COLORS, SIDE_SOLID_COLORS, SIDE_LABELS, FACTION_DISPLAY_ORDER, ETHNICITY_COLORS, ETHNICITY_LABELS, BASE_LAYER_COLORS, BASE_LAYER_WIDTHS, FRONT_LINE, MINIMAP, formatTurnDate, FORMATION_KIND_SHAPES, FORMATION_MARKER_SIZE, FORMATION_HIT_RADIUS } from './constants.js';
+import { ZOOM_LABELS, ZOOM_FACTORS, NATO_TOKENS, SIDE_COLORS, SIDE_SOLID_COLORS, SIDE_LABELS, FACTION_DISPLAY_ORDER, ETHNICITY_COLORS, ETHNICITY_LABELS, BASE_LAYER_COLORS, BASE_LAYER_WIDTHS, FRONT_LINE, MINIMAP, FORMATION_KIND_SHAPES, FORMATION_MARKER_SIZE, FORMATION_HIT_RADIUS, SETTLEMENT_BORDER } from './constants.js';
 import { controlKey, censusIdFromSid, buildControlLookup, buildStatusLookup } from './data/ControlLookup.js';
 import { parseGameState } from './data/GameStateAdapter.js';
 import { normalizeForSearch } from './data/DataLoader.js';
@@ -27,6 +27,7 @@ import {
   getFormationHomeMunFromTags
 } from '../../state/brigade_operational_cap.js';
 import { isLargeUrbanSettlementMun } from '../../state/formation_constants.js';
+import { getEquipmentCost } from '../../state/recruitment_types.js';
 import type { PolygonCoords, Position } from './types.js';
 
 const REPLAY_WEEK_INTERVAL_MS = 900;
@@ -64,6 +65,10 @@ export class MapApp {
   private mediaRecorder: MediaRecorder | null = null;
   private mediaChunks: Blob[] = [];
   private isExportingReplay = false;
+  private lastLoadedGameState: LoadedGameState | null = null;
+  private uiAudioEnabled = false;
+  private selectedRecruitmentBrigadeId: string | null = null;
+  private selectedRecruitmentEquipmentClass: string | null = null;
 
   // Baseline control data for dataset switching
   private baselineControlLookup: Record<string, string | null> = {};
@@ -72,6 +77,9 @@ export class MapApp {
   // Active control data (may come from loaded state or alternate dataset)
   private activeControlLookup: Record<string, string | null> = {};
   private activeStatusLookup: Record<string, string> = {};
+
+  /** Army crest images for map markers and OOB. Keyed by faction id (RBiH, RS, HRHB). */
+  private crestImages: Map<string, HTMLImageElement> = new Map();
 
   constructor(rootId: string) {
     this.rootId = rootId;
@@ -109,11 +117,15 @@ export class MapApp {
     // Wire state changes → render
     this.state.subscribe(() => this.scheduleRender());
 
+    // Load army crests (assets/sources/crests/crest_ARBiH.png etc.)
+    this.loadCrestImages();
+
     // Wire UI
     this.wireInteraction();
     this.wireUI();
 
     this.updateArmyStrengthDisplay(null);
+    this.updateRecruitmentCapitalDisplay(null);
     this.updateLegendContent();
 
     // Initial render
@@ -122,6 +134,38 @@ export class MapApp {
     this.resize();
     window.addEventListener('resize', () => this.resize());
     this.canvas.focus();
+  }
+
+  private static readonly CREST_ASSETS_BASE = '/assets/sources/crests/';
+
+  /** Crest filename by faction: RBiH → ARBiH, RS → VRS, HRHB → HVO (assets/sources/crests). */
+  private static getCrestFilename(faction: string): string {
+    if (faction === 'RBiH') return 'ARBiH';
+    if (faction === 'RS') return 'VRS';
+    if (faction === 'HRHB') return 'HVO';
+    return faction;
+  }
+
+  /** Public URL for crest image (OOB/INTEL HTML img src). Served from project root /assets/ by Vite plugin. */
+  getCrestUrl(faction: string): string {
+    const name = MapApp.getCrestFilename(faction);
+    return `${MapApp.CREST_ASSETS_BASE}crest_${name}.png`;
+  }
+
+  /** Public URL for faction flag (settlement/brigade panel). Same folder as crests. */
+  getFlagUrl(faction: string): string {
+    return `${MapApp.CREST_ASSETS_BASE}flag_${faction}.png`;
+  }
+
+  private loadCrestImages(): void {
+    for (const faction of FACTION_DISPLAY_ORDER) {
+      const name = MapApp.getCrestFilename(faction);
+      const img = new Image();
+      img.onload = () => this.scheduleRender();
+      img.onerror = () => { /* fallback: no crest drawn */ };
+      img.src = `${MapApp.CREST_ASSETS_BASE}crest_${name}.png`;
+      this.crestImages.set(faction, img);
+    }
   }
 
   // ─── Rendering ──────────────────────────────────
@@ -189,14 +233,15 @@ export class MapApp {
     this.drawSettlements(rc);
     this.advanceFireOverlay();
 
-    // 4. Front lines
-    if (rc.layers.frontLines && rc.zoomLevel >= 1) {
+    // 4. Front lines — always visible when enabled (key visual element)
+    if (rc.layers.frontLines) {
       this.drawFrontLines(rc);
     }
 
     // 5. Formation markers
     if (rc.layers.formations && this.state.snapshot.loadedGameState) {
       this.drawFormations(rc);
+      this.drawOrderArrows(rc);
     }
 
     // 5b. Brigade AoR highlight (selected formation's AoR settlements)
@@ -398,7 +443,7 @@ export class MapApp {
       const controller = controllers[key] ?? controllers[sid] ?? 'null';
 
       if (!rc.layers.politicalControl) {
-        ctx.fillStyle = 'rgba(120,120,120,0.2)';
+        ctx.fillStyle = 'rgba(40, 40, 55, 0.4)';
       } else if (fillMode === 'ethnic_majority') {
         const ethnicityKey = this.getMajorityEthnicity(sid, feature);
         ctx.fillStyle = ethnicityKey ? (ETHNICITY_COLORS[ethnicityKey] ?? ETHNICITY_COLORS.other) : ETHNICITY_COLORS.other;
@@ -407,6 +452,12 @@ export class MapApp {
       }
       this.drawPolygonPath(ctx, feature, rc.project);
       ctx.fill();
+
+      // Subtle settlement border (grid lines)
+      ctx.strokeStyle = SETTLEMENT_BORDER.sameColor;
+      ctx.lineWidth = SETTLEMENT_BORDER.sameWidth;
+      ctx.stroke();
+
       this.drawFlipFireOverlay(rc, sid, feature);
     }
   }
@@ -415,9 +466,10 @@ export class MapApp {
     const ttl = this.fireActiveBySid.get(sid);
     if (ttl === undefined || ttl <= 0) return;
     const intensity = Math.max(0, Math.min(1, ttl / 45));
-    const alpha = 0.18 + (0.45 * intensity);
-    const warm = 185 + Math.floor(70 * intensity);
-    const hot = 60 + Math.floor(90 * intensity);
+    // Brighter and more vivid on dark background
+    const alpha = 0.25 + (0.55 * intensity);
+    const warm = 160 + Math.floor(80 * intensity);
+    const hot = 40 + Math.floor(80 * intensity);
     rc.ctx.fillStyle = `rgba(255,${warm},${hot},${alpha.toFixed(3)})`;
     this.drawPolygonPath(rc.ctx, feature, rc.project);
     rc.ctx.fill();
@@ -441,6 +493,28 @@ export class MapApp {
     const { ctx } = rc;
 
     ctx.save();
+
+    // Pass 1: Glow layer (wider, semi-transparent warm glow behind the front)
+    ctx.strokeStyle = FRONT_LINE.glowColor;
+    ctx.lineWidth = FRONT_LINE.glowWidth;
+    ctx.setLineDash([]);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    for (const seg of this.data.sharedBorders) {
+      const ca = controllers[seg.a] ?? controllers[controlKey(seg.a)] ?? null;
+      const cb = controllers[seg.b] ?? controllers[controlKey(seg.b)] ?? null;
+      if (ca != null && cb != null && ca !== cb) {
+        for (let i = 0; i < seg.points.length; i++) {
+          const [sx, sy] = rc.project(seg.points[i][0], seg.points[i][1]);
+          if (i === 0) ctx.moveTo(sx, sy);
+          else ctx.lineTo(sx, sy);
+        }
+      }
+    }
+    ctx.stroke();
+
+    // Pass 2: Main front line (bright, dashed)
     ctx.strokeStyle = FRONT_LINE.color;
     ctx.lineWidth = FRONT_LINE.width;
     ctx.setLineDash(FRONT_LINE.dash);
@@ -495,8 +569,8 @@ export class MapApp {
   }
 
   /**
-   * Draw a NATO-style formation marker: rectangular frame (1.5:1) with black border and faction fill,
-   * inner symbol by kind (infantry/brigade = bar, corps/operational = diamond, militia = triangle).
+   * Draw a NATO-style formation marker: horizontal box with army crest on the left (smaller)
+   * and unit NATO designation (infantry bar, corps diamond, militia triangle) on the right.
    */
   private drawNatoFormationMarker(
     ctx: CanvasRenderingContext2D,
@@ -505,44 +579,94 @@ export class MapApp {
     w: number,
     h: number,
     shape: string,
-    color: string
+    color: string,
+    faction: string,
+    posture?: string
   ): void {
     const left = sx - w / 2;
     const top = sy - h / 2;
+    const crestW = Math.max(8, w * 0.4);
+    const symbolW = w - crestW;
 
-    // Frame: rectangle with faction fill and black outline
-    ctx.fillStyle = color;
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1.5;
+    // Drop shadow for depth on dark map
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 1;
+
+    // Frame background: dark semi-transparent
+    ctx.fillStyle = 'rgba(10, 10, 26, 0.85)';
     ctx.fillRect(left, top, w, h);
+    ctx.restore();
+
+    // Frame: faction-colored border with glow
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
     ctx.strokeRect(left, top, w, h);
 
-    // Inner symbol (centered, ~50% of frame)
-    const iw = w * 0.4;
+    // Left: dark background with crest
+    const crestLeft = left + 1;
+    const crestTop = top + 1;
+    const crestBoxW = crestW - 2;
+    const crestBoxH = h - 2;
+    ctx.fillStyle = 'rgba(20, 20, 35, 0.9)';
+    ctx.fillRect(crestLeft, crestTop, crestBoxW, crestBoxH);
+
+    const crestImg = this.crestImages.get(faction);
+    if (crestImg && crestImg.complete && crestImg.naturalWidth > 0 && crestImg.naturalHeight > 0) {
+      const nw = crestImg.naturalWidth;
+      const nh = crestImg.naturalHeight;
+      const scale = Math.min(crestBoxW / nw, crestBoxH / nh);
+      const dw = nw * scale;
+      const dh = nh * scale;
+      const dx = crestLeft + (crestBoxW - dw) / 2;
+      const dy = crestTop + (crestBoxH - dh) / 2;
+      ctx.drawImage(crestImg, 0, 0, nw, nh, dx, dy, dw, dh);
+    }
+
+    // Right: faction fill behind symbol (muted)
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.4;
+    ctx.fillRect(left + crestW + 1, top + 1, symbolW - 2, h - 2);
+    ctx.globalAlpha = 1.0;
+
+    // NATO symbol centered in right portion — bright white for contrast
+    const symbolCenterX = left + crestW + symbolW / 2;
+    const iw = symbolW * 0.4;
     const ih = h * 0.4;
-    ctx.fillStyle = '#000';
-    ctx.strokeStyle = 'none';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
 
     if (shape === 'diamond') {
       ctx.beginPath();
-      ctx.moveTo(sx, sy - ih);
-      ctx.lineTo(sx + iw / 2, sy);
-      ctx.lineTo(sx, sy + ih);
-      ctx.lineTo(sx - iw / 2, sy);
+      ctx.moveTo(symbolCenterX, sy - ih);
+      ctx.lineTo(symbolCenterX + iw / 2, sy);
+      ctx.lineTo(symbolCenterX, sy + ih);
+      ctx.lineTo(symbolCenterX - iw / 2, sy);
       ctx.closePath();
       ctx.fill();
     } else if (shape === 'triangle') {
       ctx.beginPath();
-      ctx.moveTo(sx, sy - ih);
-      ctx.lineTo(sx + iw / 2, sy + ih);
-      ctx.lineTo(sx - iw / 2, sy + ih);
+      ctx.moveTo(symbolCenterX, sy - ih);
+      ctx.lineTo(symbolCenterX + iw / 2, sy + ih);
+      ctx.lineTo(symbolCenterX - iw / 2, sy + ih);
       ctx.closePath();
       ctx.fill();
     } else {
-      // Infantry/brigade: vertical bar (NATO infantry indicator)
       const bw = Math.max(2, iw * 0.35);
       const bh = ih;
-      ctx.fillRect(sx - bw / 2, sy - bh / 2, bw, bh);
+      ctx.fillRect(symbolCenterX - bw / 2, sy - bh / 2, bw, bh);
+    }
+
+    if (posture) {
+      const p = posture === 'elastic_defense' ? 'E' : posture.charAt(0).toUpperCase();
+      ctx.fillStyle = 'rgba(10, 10, 26, 0.9)';
+      ctx.fillRect(left + w - 11, top + 1, 10, 10);
+      ctx.fillStyle = '#00e878';
+      ctx.font = 'bold 8px "IBM Plex Mono", Consolas, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(p, left + w - 6, top + 6);
     }
   }
 
@@ -565,8 +689,100 @@ export class MapApp {
       const [sx, sy] = rc.project(pos[0], pos[1]);
       const color = SIDE_SOLID_COLORS[f.faction] ?? SIDE_SOLID_COLORS['null'];
       const shape = FORMATION_KIND_SHAPES[f.kind] ?? 'square';
-      this.drawNatoFormationMarker(ctx, sx, sy, dim.w, dim.h, shape, color);
+      this.drawNatoFormationMarker(ctx, sx, sy, dim.w, dim.h, shape, color, f.faction, f.posture);
     }
+  }
+
+  private getSettlementCentroidFromSid(sid: string): [number, number] | null {
+    const f = this.getSettlementFeatureBySid(sid);
+    if (!f) return null;
+    return this.data.settlementCentroids.get(f.properties.sid) ?? null;
+  }
+
+  private drawOrderArrows(rc: RenderContext): void {
+    const gs = this.state.snapshot.loadedGameState;
+    if (!gs) return;
+    const byId = new Map(gs.formations.map((f) => [f.id, f] as const));
+    const { ctx } = rc;
+    ctx.save();
+
+    // Planned attack arrows (bright red solid with arrowhead + glow).
+    ctx.strokeStyle = '#ff4444';
+    ctx.fillStyle = '#ff4444';
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = 'rgba(255, 68, 68, 0.4)';
+    ctx.shadowBlur = 6;
+    for (const order of gs.attackOrders) {
+      const formation = byId.get(order.brigadeId);
+      if (!formation) continue;
+      const from = this.getFormationPosition(formation);
+      const to = this.getSettlementCentroidFromSid(order.targetSettlementId);
+      if (!from || !to) continue;
+      const [sx, sy] = rc.project(from[0], from[1]);
+      const [tx, ty] = rc.project(to[0], to[1]);
+      this.drawArrow(ctx, sx, sy, tx, ty, false);
+    }
+
+    // Planned movement arrows (faction colored dashed).
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.setLineDash([7, 6]);
+    for (const order of gs.movementOrders) {
+      const formation = byId.get(order.brigadeId);
+      if (!formation || !formation.faction) continue;
+      const from = this.getFormationPosition(formation);
+      const to = this.data.municipalityCentroids.get(order.targetMunicipalityId);
+      if (!from || !to) continue;
+      const [sx, sy] = rc.project(from[0], from[1]);
+      const [tx, ty] = rc.project(to[0], to[1]);
+      ctx.strokeStyle = SIDE_SOLID_COLORS[formation.faction] ?? '#999';
+      ctx.fillStyle = SIDE_SOLID_COLORS[formation.faction] ?? '#999';
+      this.drawArrow(ctx, sx, sy, tx, ty, true);
+    }
+    ctx.restore();
+  }
+
+  private drawArrow(
+    ctx: CanvasRenderingContext2D,
+    sx: number,
+    sy: number,
+    tx: number,
+    ty: number,
+    curved: boolean
+  ): void {
+    const dx = tx - sx;
+    const dy = ty - sy;
+    const len = Math.hypot(dx, dy);
+    if (len < 4) return;
+    const ux = dx / len;
+    const uy = dy / len;
+    const endX = tx - ux * 8;
+    const endY = ty - uy * 8;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    if (curved) {
+      const mx = (sx + endX) / 2;
+      const my = (sy + endY) / 2;
+      const nx = -uy;
+      const ny = ux;
+      const bend = Math.min(40, len * 0.15);
+      ctx.quadraticCurveTo(mx + nx * bend, my + ny * bend, endX, endY);
+    } else {
+      ctx.lineTo(endX, endY);
+    }
+    ctx.stroke();
+
+    const head = 7;
+    const leftX = tx - ux * head - uy * (head * 0.5);
+    const leftY = ty - uy * head + ux * (head * 0.5);
+    const rightX = tx - ux * head + uy * (head * 0.5);
+    const rightY = ty - uy * head - ux * (head * 0.5);
+    ctx.beginPath();
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(leftX, leftY);
+    ctx.lineTo(rightX, rightY);
+    ctx.closePath();
+    ctx.fill();
   }
 
   /** Return formation at canvas coords when formations layer is on; otherwise null. */
@@ -683,23 +899,31 @@ export class MapApp {
       // Use displayName at strategic/operational, full name at tactical
       const label = zoomLevel <= 1 ? entry.displayName : entry.name;
 
-      // Font sizing by class
+      // Font sizing by class — monospace for military aesthetic
       if (entry.natoClass === 'URBAN_CENTER') {
-        ctx.font = 'bold 12px Arial';
+        ctx.font = 'bold 11px "IBM Plex Mono", Consolas, monospace';
       } else if (entry.natoClass === 'TOWN') {
-        ctx.font = '10px Arial';
+        ctx.font = '9px "IBM Plex Mono", Consolas, monospace';
       } else {
-        ctx.font = '8px Arial';
+        ctx.font = '7px "IBM Plex Mono", Consolas, monospace';
       }
 
-      // Halo text
+      // Halo text — dark outline on light text for dark map background
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.strokeStyle = `rgba(235, 225, 205, 0.85)`;
+      ctx.strokeStyle = 'rgba(10, 10, 26, 0.85)';
       ctx.lineWidth = 3;
       ctx.lineJoin = 'round';
       ctx.strokeText(label, sx, sy + 4);
-      ctx.fillStyle = '#222';
+
+      // Label color by class
+      if (entry.natoClass === 'URBAN_CENTER') {
+        ctx.fillStyle = '#e0e0e8';
+      } else if (entry.natoClass === 'TOWN') {
+        ctx.fillStyle = 'rgba(200, 200, 210, 0.8)';
+      } else {
+        ctx.fillStyle = 'rgba(160, 160, 175, 0.6)';
+      }
       ctx.fillText(label, sx, sy + 4);
     }
   }
@@ -721,7 +945,7 @@ export class MapApp {
     const ox = (mw - rangeX * scale) / 2;
     const oy = (mh - rangeY * scale) / 2;
 
-    mctx.fillStyle = 'rgba(30, 28, 24, 0.9)';
+    mctx.fillStyle = 'rgba(10, 10, 26, 0.92)';
     mctx.fillRect(0, 0, mw, mh);
 
     // Draw simplified settlements
@@ -976,6 +1200,10 @@ export class MapApp {
     if (el) el.textContent = text;
   }
 
+  private formatReplayError(err: unknown): string {
+    return err instanceof Error ? err.message : String(err);
+  }
+
   private stopReplayPlayback(): void {
     if (this.replayTimer) {
       clearInterval(this.replayTimer);
@@ -1006,6 +1234,7 @@ export class MapApp {
     const loaded = parseGameState(this.replayFrames[weekIndex]);
     this.replayCurrentWeek = weekIndex;
     this.state.loadGameState(loaded);
+    this.lastLoadedGameState = loaded;
     this.activeControlLookup = buildControlLookup(loaded.controlBySettlement);
     this.activeStatusLookup = buildStatusLookup(loaded.statusBySettlement);
     const turnDisplay = document.getElementById('turn-display');
@@ -1018,7 +1247,9 @@ export class MapApp {
     }
     const brigadeAorCheckbox = document.getElementById('layer-brigade-aor') as HTMLInputElement | null;
     if (brigadeAorCheckbox) brigadeAorCheckbox.disabled = false;
+    this.updateWarStatusSection(loaded);
     this.updateOOBSidebar(loaded);
+    this.updateStatusTicker(loaded);
     this.baseLayerCache = null;
 
     const events = this.replayEventsByTurn.get(loaded.turn) ?? [];
@@ -1032,6 +1263,7 @@ export class MapApp {
       `Replay: week ${weekIndex + 1}/${this.replayFrames.length} (turn ${loaded.turn})` +
       (events.length > 0 ? ` - flips this turn: ${events.length}` : '')
     );
+    this.updateReplayScrubber();
     this.scheduleRender();
   }
 
@@ -1047,6 +1279,20 @@ export class MapApp {
     this.fireActiveBySid.clear();
     this.stopReplayPlayback();
     this.applyReplayWeek(0);
+    this.updateReplayScrubber();
+  }
+
+  /**
+   * Public API: load replay from parsed JSON (e.g. content received via Electron IPC).
+   * Same behavior as loading via file picker.
+   */
+  loadReplayFromData(data: ReplayTimelineData): void {
+    try {
+      this.loadReplayTimeline(data);
+      this.setReplayStatus(`Replay loaded: ${this.replayFrames.length} weeks.`);
+    } catch (err) {
+      this.setReplayStatus(`Replay load failed: ${this.formatReplayError(err)}`);
+    }
   }
 
   private stepReplayForward(): void {
@@ -1138,9 +1384,136 @@ export class MapApp {
     this.setReplayStatus('Replay export running...');
   }
 
+  /** Apply a loaded game state to map, OOB, and turn display. Optionally add to dataset dropdown. */
+  private applyLoadedGameState(
+    loaded: LoadedGameState,
+    datasetEl?: HTMLSelectElement | null
+  ): void {
+    const previous = this.lastLoadedGameState;
+    this.state.loadGameState(loaded);
+    this.lastLoadedGameState = loaded;
+    this.activeControlLookup = buildControlLookup(loaded.controlBySettlement);
+    this.activeStatusLookup = buildStatusLookup(loaded.statusBySettlement);
+    this.state.setControlDataset(`loaded:${loaded.label}`);
+    const turnDisplay = document.getElementById('turn-display');
+    if (turnDisplay) turnDisplay.textContent = loaded.label;
+    const formCheckbox = document.getElementById('layer-formations') as HTMLInputElement | null;
+    if (formCheckbox) {
+      formCheckbox.disabled = false;
+      formCheckbox.checked = true;
+      this.state.setLayer('formations', true);
+    }
+    const brigadeAorCheckbox = document.getElementById('layer-brigade-aor') as HTMLInputElement | null;
+    if (brigadeAorCheckbox) brigadeAorCheckbox.disabled = false;
+    this.updateWarStatusSection(loaded);
+    this.updateOOBSidebar(loaded);
+    this.updateStatusTicker(loaded);
+    this.baseLayerCache = null;
+    this.clearStatusBar();
+    if (datasetEl) {
+      const opt = document.createElement('option');
+      opt.value = `loaded:${loaded.label}`;
+      opt.textContent = `Loaded: ${loaded.label}`;
+      datasetEl.appendChild(opt);
+      datasetEl.value = opt.value;
+    }
+    this.showOverlay('main-menu-overlay', false);
+    if (previous) this.maybeShowAarFromStateDelta(previous, loaded);
+  }
+
+  /** Apply game state from JSON (IPC from Electron or after load). */
+  private applyGameStateFromJson(stateJson: string): void {
+    try {
+      const loaded = parseGameState(JSON.parse(stateJson) as unknown);
+      this.applyLoadedGameState(loaded);
+    } catch (err) {
+      this.showStatusError(`Failed to apply state: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
   // ─── UI Wiring ──────────────────────────────────
 
   private wireUI(): void {
+    document.getElementById('btn-main-menu')?.addEventListener('click', () => this.showOverlay('main-menu-overlay', true));
+    document.getElementById('menu-close')?.addEventListener('click', () => this.showOverlay('main-menu-overlay', false));
+
+    const awwvDesktop = (window as unknown as {
+      awwv?: {
+        startNewCampaign?: (p: { playerFaction: string }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
+        loadScenarioDialog?: () => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
+        loadStateDialog?: () => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
+        advanceTurn?: () => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
+        setGameStateUpdatedCallback?: (cb: (stateJson: string) => void) => void;
+      };
+    }).awwv;
+
+    document.getElementById('menu-new-campaign')?.addEventListener('click', () => {
+      this.showOverlay('main-menu-overlay', false);
+      if (awwvDesktop?.startNewCampaign) {
+        const errEl = document.getElementById('side-picker-error');
+        if (errEl) {
+          errEl.textContent = '';
+          errEl.classList.add('hidden');
+        }
+        for (const faction of FACTION_DISPLAY_ORDER) {
+          const el = document.getElementById(`side-picker-flag-${faction}`) as HTMLImageElement | null;
+          if (el) el.src = this.getFlagUrl(faction);
+        }
+        this.showOverlay('side-picker-overlay', true);
+      } else {
+        document.getElementById('btn-load-scenario')?.dispatchEvent(new Event('click'));
+      }
+    });
+    document.getElementById('side-picker-close')?.addEventListener('click', () => this.showOverlay('side-picker-overlay', false));
+    for (const faction of FACTION_DISPLAY_ORDER) {
+      document.getElementById(`side-picker-${faction}`)?.addEventListener('click', async () => {
+        if (!awwvDesktop?.startNewCampaign) return;
+        let r: { ok: boolean; error?: string; stateJson?: string } | undefined;
+        try {
+          r = await awwvDesktop.startNewCampaign({ playerFaction: faction });
+        } catch (err) {
+          this.showSidePickerError(String(err));
+          return;
+        }
+        if (r?.ok && r.stateJson) {
+          try {
+            this.applyGameStateFromJson(r.stateJson);
+            this.showOverlay('side-picker-overlay', false);
+          } catch (err) {
+            this.showSidePickerError(String(err));
+          }
+        } else if (r?.error) {
+          this.showSidePickerError(r.error);
+        }
+      });
+    }
+    document.getElementById('menu-load-state')?.addEventListener('click', () => {
+      this.showOverlay('main-menu-overlay', false);
+      document.getElementById('btn-load-state')?.dispatchEvent(new Event('click'));
+    });
+    document.getElementById('menu-load-replay')?.addEventListener('click', () => {
+      this.showOverlay('main-menu-overlay', false);
+      document.getElementById('btn-load-replay')?.dispatchEvent(new Event('click'));
+    });
+
+    document.getElementById('btn-settings')?.addEventListener('click', () => this.showOverlay('settings-modal', true));
+    document.getElementById('settings-close')?.addEventListener('click', () => this.showOverlay('settings-modal', false));
+    document.getElementById('btn-help')?.addEventListener('click', () => this.showOverlay('help-modal', true));
+    document.getElementById('help-close')?.addEventListener('click', () => this.showOverlay('help-modal', false));
+    document.getElementById('aar-close')?.addEventListener('click', () => this.showOverlay('aar-modal', false));
+    document.getElementById('btn-recruit')?.addEventListener('click', () => this.openRecruitmentModal());
+    document.getElementById('recruitment-close')?.addEventListener('click', () => this.showOverlay('recruitment-modal', false));
+
+    document.getElementById('toggle-crt')?.addEventListener('change', (e) => {
+      const enabled = (e.target as HTMLInputElement).checked;
+      document.body.classList.toggle('tm-crt-enabled', enabled);
+    });
+    document.getElementById('toggle-audio')?.addEventListener('change', (e) => {
+      this.uiAudioEnabled = (e.target as HTMLInputElement).checked;
+    });
+
+    document.getElementById('btn-war-summary')?.addEventListener('click', () => this.openWarSummaryModal());
+
     // Zoom buttons
     document.getElementById('zoom-in')?.addEventListener('click', () => this.zoomIn());
     document.getElementById('zoom-out')?.addEventListener('click', () => this.zoomOut());
@@ -1326,53 +1699,18 @@ export class MapApp {
       this.baseLayerCache = null;
     });
 
-    // Load state file
+    // Load state file (click handler set below: desktop → IPC, else → file input)
     const loadBtn = document.getElementById('btn-load-state');
     const fileInput = document.getElementById('file-input') as HTMLInputElement | null;
-    loadBtn?.addEventListener('click', () => fileInput?.click());
     fileInput?.addEventListener('change', async () => {
       this.stopReplayPlayback();
       const file = fileInput.files?.[0];
       if (!file) return;
       try {
-        const text = await file.text();
-        const json = JSON.parse(text);
-        const loaded = parseGameState(json);
-        this.state.loadGameState(loaded);
-        this.activeControlLookup = buildControlLookup(loaded.controlBySettlement);
-        this.activeStatusLookup = buildStatusLookup(loaded.statusBySettlement);
-
-        // Add to dataset dropdown
-        if (datasetEl) {
-          const opt = document.createElement('option');
-          opt.value = `loaded:${loaded.label}`;
-          opt.textContent = `Loaded: ${loaded.label}`;
-          datasetEl.appendChild(opt);
-          datasetEl.value = opt.value;
-        }
-
-        // Enable formations and brigade AoR checkboxes
-        const formCheckbox = document.getElementById('layer-formations') as HTMLInputElement | null;
-        if (formCheckbox) formCheckbox.disabled = false;
-        const brigadeAorCheckbox = document.getElementById('layer-brigade-aor') as HTMLInputElement | null;
-        if (brigadeAorCheckbox) brigadeAorCheckbox.disabled = false;
-
-        // Update turn display
-        const turnDisplay = document.getElementById('turn-display');
-        if (turnDisplay) turnDisplay.textContent = loaded.label;
-
-        // Update OOB sidebar
-        this.updateOOBSidebar(loaded);
-
-        this.baseLayerCache = null;
-        this.clearStatusBar();
+        const loaded = parseGameState(JSON.parse(await file.text()));
+        this.applyLoadedGameState(loaded, datasetEl);
       } catch (err) {
-        const statusEl = document.getElementById('status');
-        if (statusEl) {
-          statusEl.textContent = `Failed to load state: ${err instanceof Error ? err.message : String(err)}`;
-          statusEl.classList.remove('hidden');
-          statusEl.classList.add('error');
-        }
+        this.showStatusError(`Failed to load state: ${err instanceof Error ? err.message : String(err)}`);
       }
       fileInput.value = '';
     });
@@ -1382,6 +1720,8 @@ export class MapApp {
     const replayFileInput = document.getElementById('replay-file-input') as HTMLInputElement | null;
     const replayPlayBtn = document.getElementById('btn-replay-play');
     const replayExportBtn = document.getElementById('btn-replay-export');
+    const replayWeekSlider = document.getElementById('replay-week-slider') as HTMLInputElement | null;
+    const replayWeekLabel = document.getElementById('replay-week-label');
     loadReplayBtn?.addEventListener('click', () => replayFileInput?.click());
     replayFileInput?.addEventListener('change', async () => {
       const file = replayFileInput.files?.[0];
@@ -1401,21 +1741,88 @@ export class MapApp {
           json = JSON.parse(text) as ReplayTimelineData;
         } catch (parseErr) {
           const msg = parseErr instanceof Error ? parseErr.message : String(parseErr);
-          const hint = msg.includes('end of JSON input') || msg.includes('Unexpected token')
-            ? ' File may be truncated or not replay_timeline.json (run with --video and ensure run completed).'
-            : '';
+          const likelyTruncated = /end of JSON input|Unexpected token|position|truncat/i.test(msg);
+          const hint = likelyTruncated
+            ? ' Replay file may be truncated (run was interrupted). Use replay_timeline.json from a run that completed with --video.'
+            : ' Use replay_timeline.json from a run with --video and ensure the run completed.';
           this.setReplayStatus(`Replay load failed: ${msg}.${hint}`);
           replayFileInput.value = '';
           return;
         }
         this.loadReplayTimeline(json);
       } catch (err) {
-        this.setReplayStatus(`Replay load failed: ${err instanceof Error ? err.message : String(err)}`);
+        this.setReplayStatus(`Replay load failed: ${this.formatReplayError(err)}`);
       }
       replayFileInput.value = '';
     });
     replayPlayBtn?.addEventListener('click', () => this.toggleReplayPlayback());
     replayExportBtn?.addEventListener('click', () => this.startReplayExport());
+    replayWeekSlider?.addEventListener('input', () => {
+      const week = Math.max(1, Number(replayWeekSlider.value));
+      this.applyReplayWeek(week - 1);
+      if (replayWeekLabel) replayWeekLabel.textContent = `Week ${week}/${this.replayFrames.length || 1}`;
+    });
+
+    // Open last run (Electron: when awwv.getLastReplayContent is exposed, show button and load on click)
+    const awwv = (window as unknown as { awwv?: { getLastReplayContent?: () => Promise<ReplayTimelineData | null>; setReplayLoadedCallback?: (cb: (data: ReplayTimelineData) => void) => void } }).awwv;
+    const openLastReplayBtn = document.getElementById('btn-open-last-replay');
+    if (awwv?.getLastReplayContent && openLastReplayBtn) {
+      openLastReplayBtn.style.display = '';
+      openLastReplayBtn.addEventListener('click', async () => {
+        const data = await awwv.getLastReplayContent!();
+        if (data) this.loadReplayFromData(data);
+        else this.setReplayStatus('No last run replay available.');
+      });
+    }
+    if (awwv?.setReplayLoadedCallback) {
+      awwv.setReplayLoadedCallback((data: ReplayTimelineData) => this.loadReplayFromData(data));
+    }
+
+    // Play myself (desktop): Load scenario, Load state file, Advance turn
+    if (awwvDesktop?.loadScenarioDialog && awwvDesktop?.setGameStateUpdatedCallback) {
+      awwvDesktop.setGameStateUpdatedCallback((stateJson: string) => this.applyGameStateFromJson(stateJson));
+      const playSep = document.getElementById('play-myself-sep');
+      const playRow = document.getElementById('play-myself-row');
+      if (playSep) playSep.style.display = '';
+      if (playRow) playRow.style.display = '';
+      document.getElementById('btn-load-scenario')?.addEventListener('click', async () => {
+        const r = await awwvDesktop.loadScenarioDialog!();
+        if (!r.ok && r.error) this.showStatusError(r.error);
+      });
+      document.getElementById('btn-advance-turn')?.addEventListener('click', async () => {
+        const before = this.lastLoadedGameState;
+        const r = await awwvDesktop.advanceTurn!();
+        if (!r.ok && r.error) this.showStatusError(r.error);
+        if (r.ok && r.stateJson) {
+          const parsed = parseGameState(JSON.parse(r.stateJson) as unknown);
+          this.lastLoadedGameState = parsed;
+          if (this.uiAudioEnabled) {
+            const audio = new AudioContext();
+            const osc = audio.createOscillator();
+            const gain = audio.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = 440;
+            gain.gain.value = 0.03;
+            osc.connect(gain);
+            gain.connect(audio.destination);
+            osc.start();
+            osc.stop(audio.currentTime + 0.08);
+          }
+          if (before) this.maybeShowAarFromStateDelta(before, parsed);
+        }
+      });
+      // In desktop, "Load State..." can also go through main (file picker from main)
+      const loadStateBtn = document.getElementById('btn-load-state');
+      const fileInputForLoad = document.getElementById('file-input') as HTMLInputElement | null;
+      const loadStateDesktopBtn = document.getElementById('btn-load-state-desktop');
+      if (loadStateDesktopBtn && awwvDesktop.loadStateDialog) {
+        loadStateDesktopBtn.addEventListener('click', async () => {
+          const r = await awwvDesktop.loadStateDialog!();
+          if (!r.ok && r.error) this.showStatusError(r.error);
+        });
+      }
+    }
+    loadBtn?.addEventListener('click', () => fileInput?.click());
 
     // Search input
     const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
@@ -1428,6 +1835,33 @@ export class MapApp {
     const turnDisplay = document.getElementById('turn-display');
     if (turnDisplay) turnDisplay.textContent = 'Turn 0 — Sep 1991';
     this.setReplayStatus('Replay: not loaded');
+    this.updateReplayScrubber();
+    this.showOverlay('main-menu-overlay', true);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.showOverlay('main-menu-overlay', false);
+        this.showOverlay('side-picker-overlay', false);
+        this.showOverlay('settings-modal', false);
+        this.showOverlay('help-modal', false);
+        this.showOverlay('aar-modal', false);
+        this.showOverlay('recruitment-modal', false);
+        this.hideSearch();
+      } else if (e.key.toLowerCase() === 'r') {
+        if (this.lastLoadedGameState?.recruitment) {
+          this.openRecruitmentModal();
+        } else {
+          document.getElementById('btn-load-replay')?.dispatchEvent(new Event('click'));
+        }
+      } else if (e.key.toLowerCase() === 'm') {
+        this.showOverlay('main-menu-overlay', !document.getElementById('main-menu-overlay')?.classList.contains('open'));
+      } else if (e.key.toLowerCase() === 'o') {
+        this.toggleOOB();
+      } else if (e.code === 'Space') {
+        e.preventDefault();
+        this.toggleReplayPlayback();
+      }
+    });
   }
 
   // ─── Hit Testing ────────────────────────────────
@@ -1618,6 +2052,12 @@ export class MapApp {
     document.getElementById('panel-name')!.textContent = name;
     document.getElementById('panel-subtitle')!.textContent = `${natoClass} — Pop ${popStr} — ${thirdLine}`;
 
+    const flagEl = document.getElementById('panel-flag') as HTMLImageElement;
+    if (flagEl) {
+      flagEl.src = this.getFlagUrl(controller);
+      flagEl.style.display = controller && controller !== 'null' ? '' : 'none';
+    }
+
     // Build tabs
     this.buildPanelTabs(sid, feature, controller, controlStatus, factionColor);
   }
@@ -1649,6 +2089,12 @@ export class MapApp {
     if (f.personnel != null) subtitleParts.push(`${f.personnel} pers`);
     if (f.posture) subtitleParts.push(f.posture);
     document.getElementById('panel-subtitle')!.textContent = subtitleParts.join(' — ');
+
+    const flagEl = document.getElementById('panel-flag') as HTMLImageElement;
+    if (flagEl) {
+      flagEl.src = this.getFlagUrl(f.faction);
+      flagEl.style.display = '';
+    }
 
     const tabsEl = document.getElementById('panel-tabs')!;
     const contentEl = document.getElementById('panel-content')!;
@@ -1704,8 +2150,23 @@ export class MapApp {
       <div class="tm-panel-field"><span class="tm-panel-field-label">Overflow</span><span class="tm-panel-field-value">${overflowCount}</span></div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">Urban fortress</span><span class="tm-panel-field-value">${fortressActive ? 'Active' : 'No'}</span></div>
     </div>`;
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">ACTIONS</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button type="button" class="tm-toolbar-btn" data-brigade-action="set-posture">Set posture</button>
+        <button type="button" class="tm-toolbar-btn" data-brigade-action="move">Move</button>
+        <button type="button" class="tm-toolbar-btn" data-brigade-action="attack">Attack</button>
+      </div>
+    </div>`;
 
-    contentEl.innerHTML = html;
+    const crestUrl = this.getCrestUrl(f.faction);
+    const crestBlock = `<div class="tm-brigade-crest-wrap"><img class="tm-brigade-crest" src="${this.escapeHtml(crestUrl)}" alt="" /></div>`;
+    contentEl.innerHTML = crestBlock + html;
+    contentEl.querySelectorAll('[data-brigade-action]').forEach((el) => {
+      el.addEventListener('click', () => {
+        const action = (el as HTMLElement).getAttribute('data-brigade-action') ?? 'action';
+        this.showStatusError(`Order staging: ${f.name} -> ${action}. Use scenario controls and turn advance to execute.`);
+      });
+    });
   }
 
   private buildPanelTabs(
@@ -1724,6 +2185,9 @@ export class MapApp {
       { id: 'admin', label: 'ADMIN' },
       { id: 'control', label: 'CTRL' },
       { id: 'intel', label: 'INTEL' },
+      { id: 'orders', label: 'ORDERS' },
+      { id: 'aar', label: 'AAR' },
+      { id: 'events', label: 'EVENTS' },
     ];
 
     let activeTab = 'overview';
@@ -1744,6 +2208,12 @@ export class MapApp {
         contentEl.innerHTML = this.renderControlTab(sid, controller, controlStatus, factionColor);
       } else if (tabId === 'intel') {
         contentEl.innerHTML = this.renderIntelTab(sid, feature);
+      } else if (tabId === 'orders') {
+        contentEl.innerHTML = this.renderOrdersTab(sid);
+      } else if (tabId === 'aar') {
+        contentEl.innerHTML = this.renderAarTab(sid);
+      } else if (tabId === 'events') {
+        contentEl.innerHTML = this.renderEventsTab(sid);
       }
     };
 
@@ -1898,7 +2368,9 @@ export class MapApp {
       for (const f of formations.slice(0, 20)) {
         const readinessColor = f.readiness === 'active' ? '#4CAF50' : f.readiness === 'forming' ? '#FFC107' : f.readiness === 'overextended' ? '#FF9800' : '#F44336';
         const cohesionPct = Math.round(f.cohesion);
+        const intelCrestUrl = this.getCrestUrl(f.faction);
         html += `<div class="tm-formation-row">
+          <img class="tm-formation-crest" src="${this.escapeHtml(intelCrestUrl)}" alt="" />
           <span class="tm-formation-badge" style="background:${readinessColor}" title="${f.readiness}"></span>
           <span class="tm-formation-name">${this.escapeHtml(f.name)}</span>
           <span class="tm-formation-kind">${this.escapeHtml(f.kind)}</span>
@@ -1933,7 +2405,133 @@ export class MapApp {
     return html;
   }
 
+  private renderOrdersTab(sid: string): string {
+    const gs = this.state.snapshot.loadedGameState;
+    if (!gs) {
+      return `<div class="tm-panel-section"><div class="tm-panel-section-header">ORDERS</div><div class="tm-panel-placeholder">Load a game state to inspect orders.</div></div>`;
+    }
+    const attack = gs.attackOrders.filter((o) => o.targetSettlementId === sid);
+    const movement = gs.movementOrders.filter((o) => {
+      const feature = this.getSettlementFeatureBySid(sid);
+      if (!feature) return false;
+      const { mun1990Id } = this.resolveMunicipalityFromFeature(feature);
+      return mun1990Id === o.targetMunicipalityId;
+    });
+    let html = `<div class="tm-panel-section"><div class="tm-panel-section-header">PENDING ATTACK ORDERS (${attack.length})</div>`;
+    if (attack.length === 0) {
+      html += `<div class="tm-panel-placeholder">No pending attack orders for this settlement.</div>`;
+    } else {
+      for (const o of attack) {
+        html += `<div class="tm-panel-field"><span class="tm-panel-field-label">${this.escapeHtml(o.brigadeId)}</span><span class="tm-panel-field-value">ATTACK</span></div>`;
+      }
+    }
+    html += `</div><div class="tm-panel-section"><div class="tm-panel-section-header">PENDING MOVE ORDERS (${movement.length})</div>`;
+    if (movement.length === 0) {
+      html += `<div class="tm-panel-placeholder">No pending movement orders for this municipality.</div>`;
+    } else {
+      for (const o of movement) {
+        html += `<div class="tm-panel-field"><span class="tm-panel-field-label">${this.escapeHtml(o.brigadeId)}</span><span class="tm-panel-field-value">MOVE ${this.escapeHtml(o.targetMunicipalityId)}</span></div>`;
+      }
+    }
+    html += `</div>`;
+    return html;
+  }
+
+  private renderAarTab(sid: string): string {
+    const gs = this.state.snapshot.loadedGameState;
+    if (!gs) {
+      return `<div class="tm-panel-section"><div class="tm-panel-section-header">AAR</div><div class="tm-panel-placeholder">Load a game state to inspect after-action events.</div></div>`;
+    }
+    const recent = gs.recentControlEvents.filter((e) => e.settlementId === sid).slice(-20).reverse();
+    let html = `<div class="tm-panel-section"><div class="tm-panel-section-header">CONTROL CHANGES (${recent.length})</div>`;
+    if (recent.length === 0) {
+      html += `<div class="tm-panel-placeholder">No recorded control changes for this settlement.</div>`;
+    } else {
+      for (const e of recent) {
+        html += `<div class="tm-panel-field"><span class="tm-panel-field-label">Turn ${e.turn}</span><span class="tm-panel-field-value">${this.escapeHtml(e.from ?? 'null')} → ${this.escapeHtml(e.to ?? 'null')}</span></div>`;
+      }
+    }
+    html += `</div>`;
+    return html;
+  }
+
+  private renderEventsTab(sid: string): string {
+    const gs = this.state.snapshot.loadedGameState;
+    const feature = this.data.settlements.get(sid);
+    if (!gs) {
+      return `<div class="tm-panel-section"><div class="tm-panel-section-header">EVENTS</div><div class="tm-panel-placeholder">No game state loaded.</div></div>`;
+    }
+    const targetMun = feature ? this.resolveMunicipalityFromFeature(feature).mun1990Id : '';
+    const events = gs.recentControlEvents
+      .filter((e) => e.settlementId === sid || (targetMun !== '' && e.municipalityId === targetMun))
+      .slice(-30)
+      .reverse();
+    let html = `<div class="tm-panel-section"><div class="tm-panel-section-header">EVENT LOG (${events.length})</div>`;
+    if (events.length === 0) {
+      html += `<div class="tm-panel-placeholder">No events for this area yet.</div>`;
+    } else {
+      for (const e of events) {
+        html += `<div class="tm-panel-field"><span class="tm-panel-field-label">T${e.turn} ${this.escapeHtml(e.mechanism)}</span><span class="tm-panel-field-value">${this.escapeHtml(e.settlementId)}</span></div>`;
+      }
+    }
+    html += `</div>`;
+    return html;
+  }
+
   // ─── OOB Sidebar ────────────────────────────────
+
+  private updateWarStatusSection(gs: LoadedGameState): void {
+    const container = document.getElementById('war-status-content');
+    if (!container) return;
+    const totalsByFaction = new Map<string, number>();
+    const countsByFaction = new Map<string, number>();
+    const allSids = Object.keys(this.activeControlLookup).sort();
+    for (const sid of allSids) {
+      const c = this.activeControlLookup[sid];
+      if (!c) continue;
+      countsByFaction.set(c, (countsByFaction.get(c) ?? 0) + 1);
+    }
+    for (const f of gs.formations) {
+      totalsByFaction.set(f.faction, (totalsByFaction.get(f.faction) ?? 0) + (f.personnel ?? 0));
+    }
+    const totalSettlements = Math.max(1, allSids.length);
+    let html = `<div class="tm-panel-section"><div class="tm-panel-section-header">WAR STATUS</div>`;
+    for (const faction of FACTION_DISPLAY_ORDER) {
+      const count = countsByFaction.get(faction) ?? 0;
+      const pct = ((count / totalSettlements) * 100).toFixed(1);
+      const personnel = totalsByFaction.get(faction) ?? 0;
+      html += `<div class="tm-panel-field"><span class="tm-panel-field-label">${this.escapeHtml(SIDE_LABELS[faction] ?? faction)}</span><span class="tm-panel-field-value">${pct}% | ${personnel.toLocaleString()} pers</span></div>`;
+    }
+    const flipsThisTurn = gs.recentControlEvents.filter((e) => e.turn === gs.turn).length;
+    const pendingOrders = gs.attackOrders.length + gs.movementOrders.length;
+    const overextended = gs.formations.filter((f) => f.readiness === 'overextended').length;
+    const lowCohesion = gs.formations.filter((f) => f.cohesion < 40).length;
+    html += `<div class="tm-panel-field"><span class="tm-panel-field-label">Flips this turn</span><span class="tm-panel-field-value">${flipsThisTurn}</span></div>`;
+    html += `<div class="tm-panel-field"><span class="tm-panel-field-label">Pending orders</span><span class="tm-panel-field-value">${pendingOrders}</span></div>`;
+    html += `</div>`;
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">FACTION OVERVIEW</div>`;
+    for (const faction of FACTION_DISPLAY_ORDER) {
+      const formations = gs.formations.filter((f) => f.faction === faction);
+      const avgCohesion = formations.length === 0 ? 0 : Math.round(formations.reduce((s, f) => s + f.cohesion, 0) / formations.length);
+      html += `<div class="tm-panel-field"><span class="tm-panel-field-label">${this.escapeHtml(SIDE_LABELS[faction] ?? faction)}</span><span class="tm-panel-field-value">${formations.length} brigades | coh ${avgCohesion}%</span></div>`;
+    }
+    html += `</div>`;
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">ALERTS</div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Overextended brigades</span><span class="tm-panel-field-value">${overextended}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Low cohesion (&lt;40)</span><span class="tm-panel-field-value">${lowCohesion}</span></div>
+    </div>`;
+    container.innerHTML = html;
+  }
+
+  private updateStatusTicker(gs: LoadedGameState): void {
+    const status = document.getElementById('status');
+    if (!status) return;
+    const last = gs.recentControlEvents.at(-1);
+    status.textContent = last
+      ? `Turn ${gs.turn}: ${last.settlementId} ${last.from ?? 'null'} -> ${last.to ?? 'null'} via ${last.mechanism}`
+      : `Turn ${gs.turn} (${gs.phase}) ready.`;
+    status.classList.remove('hidden', 'error');
+  }
 
   private toggleOOB(): void {
     const sidebar = document.getElementById('oob-sidebar');
@@ -1963,8 +2561,10 @@ export class MapApp {
       const fColor = SIDE_SOLID_COLORS[faction] ?? '#888';
       const avgCohesion = formations.reduce((s, f) => s + f.cohesion, 0) / formations.length;
 
+      const crestUrl = this.getCrestUrl(faction);
       html += `<div class="tm-oob-faction">
         <div class="tm-oob-faction-header">
+          <img class="tm-oob-faction-crest" src="${this.escapeHtml(crestUrl)}" alt="" />
           <span class="tm-oob-faction-badge" style="background:${fColor}"></span>
           <span>${this.escapeHtml(SIDE_LABELS[faction] ?? faction)}</span>
           <span class="tm-oob-faction-count">${formations.length} formations — avg cohesion ${Math.round(avgCohesion)}%</span>
@@ -1974,7 +2574,9 @@ export class MapApp {
       // Show first 50 formations
       for (const f of formations.slice(0, 50)) {
         const readinessColor = f.readiness === 'active' ? '#4CAF50' : f.readiness === 'forming' ? '#FFC107' : f.readiness === 'overextended' ? '#FF9800' : '#F44336';
+        const rowCrestUrl = this.getCrestUrl(f.faction);
         html += `<div class="tm-formation-row" data-mun="${this.escapeHtml(f.municipalityId ?? '')}" style="cursor:pointer">
+          <img class="tm-formation-crest" src="${this.escapeHtml(rowCrestUrl)}" alt="" />
           <span class="tm-formation-badge" style="background:${readinessColor}" title="${f.readiness}"></span>
           <span class="tm-formation-name">${this.escapeHtml(f.name)}</span>
           <span class="tm-formation-kind">${this.escapeHtml(f.kind)}</span>
@@ -2003,6 +2605,7 @@ export class MapApp {
     content.innerHTML = html;
 
     this.updateArmyStrengthDisplay(gs);
+    this.updateRecruitmentCapitalDisplay(gs);
 
     // Wire formation row clicks → jump to municipality
     content.querySelectorAll('.tm-formation-row[data-mun]').forEach(row => {
@@ -2043,7 +2646,268 @@ export class MapApp {
     el.style.display = parts.length > 0 ? '' : 'none';
   }
 
+  /** Update toolbar recruitment capital: capital by faction when recruitment_state exists. */
+  private updateRecruitmentCapitalDisplay(gs: LoadedGameState | null): void {
+    const el = document.getElementById('recruitment-capital');
+    if (!el) return;
+    const rec = gs?.recruitment?.capitalByFaction;
+    if (!rec || Object.keys(rec).length === 0) {
+      el.textContent = '';
+      el.style.display = 'none';
+      return;
+    }
+    const parts = FACTION_DISPLAY_ORDER
+      .filter((f) => rec[f] !== undefined)
+      .map((f) => `${SIDE_LABELS[f] ?? f} ${Math.round(rec[f] ?? 0)}`);
+    el.textContent = parts.length > 0 ? `Capital: ${parts.join(' | ')}` : '';
+    el.style.display = parts.length > 0 ? '' : 'none';
+  }
+
+  /** Open recruitment modal; load catalog from desktop when available and render brigade list. */
+  private async openRecruitmentModal(): Promise<void> {
+    this.showOverlay('recruitment-modal', true);
+    const content = document.getElementById('recruitment-content');
+    const confirmBtn = document.getElementById('recruitment-confirm') as HTMLButtonElement | null;
+    if (!content) return;
+
+    const setMsg = (html: string) => {
+      content.innerHTML = html;
+      if (confirmBtn) confirmBtn.disabled = true;
+    };
+
+    const gs = this.lastLoadedGameState;
+    if (!gs?.recruitment) {
+      setMsg('<p class="tm-muted">Load a game state with recruitment (player_choice scenario) to see the brigade catalog.</p>');
+      return;
+    }
+
+    const awwv = (window as unknown as {
+      awwv?: {
+        getRecruitmentCatalog?: () => Promise<{ brigades?: Array<{ id: string; faction: string; name: string; home_mun: string; manpower_cost: number; capital_cost: number; default_equipment_class: string; available_from: number; mandatory: boolean }>; error?: string }>;
+        applyRecruitment?: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; error?: string; stateJson?: string; newFormationId?: string }>;
+      };
+    }).awwv;
+    if (!awwv?.getRecruitmentCatalog) {
+      setMsg('<p class="tm-muted">Run the desktop app (npm run desktop) to load the recruitment catalog and activate brigades.</p>');
+      return;
+    }
+
+    try {
+      const catalog = await awwv.getRecruitmentCatalog();
+      const allBrigades = catalog?.brigades ?? [];
+      const playerFaction = gs.player_faction ?? null;
+
+      if (allBrigades.length === 0) {
+        setMsg(`<p class="tm-muted">${catalog?.error ? this.escapeHtml(catalog.error) : 'No brigade catalog available.'}</p>`);
+        return;
+      }
+
+      if (!playerFaction) {
+        setMsg('<p class="tm-muted">Start a New Campaign and choose your side to see recruitment options.</p>');
+        return;
+      }
+
+      const rec = gs.recruitment;
+      const recruitedSet = new Set(rec.recruitedBrigadeIds ?? []);
+      const capitalByFaction = rec.capitalByFaction ?? {};
+      const equipmentByFaction = rec.equipmentByFaction ?? {};
+      const turn = gs.turn ?? 0;
+
+      const poolByKey = new Map<string, number>();
+      for (const p of gs.militiaPools ?? []) {
+        const key = `${p.munId}:${p.faction}`;
+        poolByKey.set(key, (poolByKey.get(key) ?? 0) + p.available);
+      }
+
+      type CatalogBrigade = (typeof allBrigades)[number];
+      const getEquipCost = (cls: string) => {
+        try {
+          return getEquipmentCost(cls as 'mechanized' | 'motorized' | 'mountain' | 'light_infantry' | 'garrison' | 'police' | 'special');
+        } catch {
+          return 0;
+        }
+      };
+
+      const recruitable: { b: CatalogBrigade; equipCost: number; manpowerAvail: number }[] = [];
+      for (const b of allBrigades) {
+        if (b.faction !== playerFaction) continue;
+        const equipCost = getEquipCost(b.default_equipment_class);
+        const manpowerAvail = poolByKey.get(`${b.home_mun}:${b.faction}`) ?? 0;
+        const cap = capitalByFaction[b.faction] ?? 0;
+        const eq = equipmentByFaction[b.faction] ?? 0;
+        const eligible = !recruitedSet.has(b.id) && b.available_from <= turn && cap >= b.capital_cost && eq >= equipCost && manpowerAvail >= b.manpower_cost;
+        if (eligible) recruitable.push({ b, equipCost, manpowerAvail });
+      }
+
+      const playerCap = Math.round(capitalByFaction[playerFaction] ?? 0);
+      const playerEq = Math.round(equipmentByFaction[playerFaction] ?? 0);
+      let html = '<div class="tm-recruitment-resources">';
+      html += `<span class="tm-recruitment-faction">${this.escapeHtml(SIDE_LABELS[playerFaction] ?? playerFaction)}: ${playerCap} Capital, ${playerEq} Equipment</span>`;
+      html += '</div>';
+      html += '<p class="tm-recruitment-legend tm-muted">Costs: <strong>C</strong> = Capital, <strong>E</strong> = Equipment, <strong>M</strong> = Manpower (from militia pool)</p>';
+      html += '<div class="tm-recruitment-catalog">';
+
+      if (recruitable.length === 0) {
+        html += '<p class="tm-muted">No brigades available to recruit right now. Earn more Capital, Equipment, or Manpower (militia pool) to unlock options.</p>';
+      } else {
+        html += '<table class="tm-recruitment-table"><thead><tr><th>Brigade</th><th>Home</th><th>Cost</th><th>Pool (M)</th><th></th></tr></thead><tbody>';
+        for (const { b, equipCost, manpowerAvail } of recruitable) {
+          html += `<tr class="tm-recruitment-row" data-brigade-id="${this.escapeHtml(b.id)}" data-equipment-class="${this.escapeHtml(b.default_equipment_class)}" data-capital-cost="${b.capital_cost}" data-equipment-cost="${equipCost}" data-manpower-cost="${b.manpower_cost}" data-home-mun="${this.escapeHtml(b.home_mun)}" data-brigade-name="${this.escapeHtml(b.name)}">
+          <td>${this.escapeHtml(b.name)}</td><td>${this.escapeHtml(b.home_mun)}</td><td>${b.capital_cost} C, ${equipCost} E, ${b.manpower_cost} M</td><td>${manpowerAvail.toLocaleString()}</td>
+          <td><button type="button" class="tm-recruitment-select-btn">Select</button></td></tr>`;
+        }
+        html += '</tbody></table>';
+      }
+      html += '</div>';
+      content.innerHTML = html;
+
+      if (confirmBtn) confirmBtn.disabled = true;
+      this.selectedRecruitmentBrigadeId = null;
+      this.selectedRecruitmentEquipmentClass = null;
+
+      content.querySelectorAll('.tm-recruitment-select-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const row = (btn as HTMLElement).closest('tr');
+          if (!row) return;
+          const id = row.getAttribute('data-brigade-id');
+          const eqClass = row.getAttribute('data-equipment-class');
+          if (!id || !eqClass) return;
+          content.querySelectorAll('.tm-recruitment-row').forEach((r) => r.classList.remove('tm-recruitment-selected'));
+          row.classList.add('tm-recruitment-selected');
+          this.selectedRecruitmentBrigadeId = id;
+          this.selectedRecruitmentEquipmentClass = eqClass;
+          if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = `Activate ${row.getAttribute('data-brigade-name') ?? id}`;
+          }
+        });
+      });
+
+      if (confirmBtn) {
+        const onConfirm = async () => {
+          if (!this.selectedRecruitmentBrigadeId || !this.selectedRecruitmentEquipmentClass) return;
+          const brigadeId = this.selectedRecruitmentBrigadeId;
+          const equipmentClass = this.selectedRecruitmentEquipmentClass;
+          if (awwv?.applyRecruitment) {
+            try {
+              const result = await awwv.applyRecruitment(brigadeId, equipmentClass);
+              if (result?.ok && result.stateJson != null) {
+                this.showOverlay('recruitment-modal', false);
+                this.applyGameStateFromJson(result.stateJson);
+                if (result.newFormationId) {
+                  this.state.setSelectedFormation(result.newFormationId);
+                  window.setTimeout(() => this.state.setSelectedFormation(null), 4000);
+                }
+                this.showStatusError('');
+              } else {
+                this.showStatusError(result?.error ?? 'Recruitment failed');
+              }
+            } catch (err) {
+              this.showStatusError(err instanceof Error ? err.message : String(err));
+            }
+          } else {
+            this.showOverlay('recruitment-modal', false);
+            this.showStatusError('Recruitment apply only in desktop app.');
+          }
+        };
+        const newBtn = confirmBtn.cloneNode(true) as HTMLButtonElement;
+        confirmBtn.replaceWith(newBtn);
+        newBtn.addEventListener('click', onConfirm);
+      }
+    } catch (err) {
+      setMsg(`<p class="tm-muted">Failed to load catalog: ${this.escapeHtml(err instanceof Error ? err.message : String(err))}</p>`);
+    }
+  }
+
+  private showOverlay(id: string, open: boolean): void {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('open', open);
+    el.setAttribute('aria-hidden', open ? 'false' : 'true');
+  }
+
+  private updateReplayScrubber(): void {
+    const scrubber = document.getElementById('replay-scrubber');
+    const slider = document.getElementById('replay-week-slider') as HTMLInputElement | null;
+    const label = document.getElementById('replay-week-label');
+    if (!scrubber || !slider || !label) return;
+    const hasReplay = this.replayFrames.length > 0;
+    scrubber.classList.toggle('closed', !hasReplay);
+    if (!hasReplay) return;
+    slider.min = '1';
+    slider.max = String(this.replayFrames.length);
+    slider.value = String(Math.min(this.replayFrames.length, Math.max(1, this.replayCurrentWeek + 1)));
+    label.textContent = `Week ${slider.value}/${this.replayFrames.length}`;
+  }
+
+  private maybeShowAarFromStateDelta(previous: LoadedGameState, next: LoadedGameState): void {
+    const gained = next.recentControlEvents.filter((e) => e.turn === next.turn);
+    if (gained.length === 0) return;
+    const rows = gained.slice(0, 20).map((e) => (
+      `<div class="tm-panel-field"><span class="tm-panel-field-label">T${e.turn} ${this.escapeHtml(e.mechanism)}</span><span class="tm-panel-field-value">${this.escapeHtml(e.settlementId)}: ${this.escapeHtml(e.from ?? 'null')} → ${this.escapeHtml(e.to ?? 'null')}</span></div>`
+    ));
+    const prevPersonnel = previous.formations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
+    const nextPersonnel = next.formations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
+    const delta = nextPersonnel - prevPersonnel;
+    const content = document.getElementById('aar-content');
+    if (!content) return;
+    content.innerHTML = `<div class="tm-panel-section"><div class="tm-panel-section-header">TURN ${next.turn} SUMMARY</div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Control changes</span><span class="tm-panel-field-value">${gained.length}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Personnel delta</span><span class="tm-panel-field-value">${delta >= 0 ? '+' : ''}${delta.toLocaleString()}</span></div>
+    </div>
+    <div class="tm-panel-section"><div class="tm-panel-section-header">EVENTS</div>${rows.join('')}</div>`;
+    this.showOverlay('aar-modal', true);
+  }
+
+  private openWarSummaryModal(): void {
+    const gs = this.lastLoadedGameState;
+    const content = document.getElementById('aar-content');
+    if (!content) return;
+    if (!gs) {
+      content.innerHTML = `<div class="tm-panel-section"><div class="tm-panel-section-header">WAR SUMMARY</div><div class="tm-panel-placeholder">Load a game state first.</div></div>`;
+      this.showOverlay('aar-modal', true);
+      return;
+    }
+    const byFaction = new Map<string, { pers: number; count: number }>();
+    for (const f of gs.formations) {
+      const rec = byFaction.get(f.faction) ?? { pers: 0, count: 0 };
+      rec.pers += f.personnel ?? 0;
+      rec.count += 1;
+      byFaction.set(f.faction, rec);
+    }
+    let html = `<div class="tm-panel-section"><div class="tm-panel-section-header">WAR SUMMARY (TURN ${gs.turn})</div>`;
+    for (const faction of FACTION_DISPLAY_ORDER) {
+      const rec = byFaction.get(faction) ?? { pers: 0, count: 0 };
+      html += `<div class="tm-panel-field"><span class="tm-panel-field-label">${this.escapeHtml(SIDE_LABELS[faction] ?? faction)}</span><span class="tm-panel-field-value">${rec.count} brigades | ${rec.pers.toLocaleString()} pers</span></div>`;
+    }
+    html += `</div><div class="tm-panel-section"><div class="tm-panel-section-header">CONTROL EVENTS</div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Total recorded</span><span class="tm-panel-field-value">${gs.recentControlEvents.length}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">This turn</span><span class="tm-panel-field-value">${gs.recentControlEvents.filter((e) => e.turn === gs.turn).length}</span></div>
+    </div>`;
+    content.innerHTML = html;
+    this.showOverlay('aar-modal', true);
+  }
+
   // ─── Utilities ──────────────────────────────────
+
+  private showStatusError(message: string): void {
+    const el = document.getElementById('status');
+    if (el) {
+      el.textContent = message;
+      el.classList.remove('hidden');
+      el.classList.add('error');
+    }
+  }
+
+  /** Show error in status bar and in side-picker overlay (when open). */
+  private showSidePickerError(message: string): void {
+    this.showStatusError(message);
+    const errEl = document.getElementById('side-picker-error');
+    if (errEl) {
+      errEl.textContent = message;
+      errEl.classList.remove('hidden');
+    }
+  }
 
   private clearStatusBar(): void {
     const el = document.getElementById('status');
