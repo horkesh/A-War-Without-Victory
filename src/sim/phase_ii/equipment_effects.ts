@@ -59,9 +59,10 @@ export function computeEquipmentMultiplier(
   const tankEff = comp.tanks * comp.tank_condition.operational;
   const artilleryEff = comp.artillery * comp.artillery_condition.operational;
 
-  // Tanks primarily amplify attack; reduced effect on defense
+  // Tanks primarily amplify attack; reduced effect on defense; consolidation = moderate
   const isOffensive = posture === 'attack' || posture === 'probe';
-  const tankBonus = tankEff * (isOffensive ? 0.5 : 0.2);
+  const isConsolidation = posture === 'consolidation';
+  const tankBonus = tankEff * (isOffensive ? 0.5 : isConsolidation ? 0.35 : 0.2);
   // Artillery amplifies both offense and defense
   const artilleryBonus = artilleryEff * 0.8;
 
@@ -81,7 +82,7 @@ export function degradeEquipment(
   const comp = formation.composition;
   if (!comp) return;
 
-  const tempoMult = posture === 'attack' ? 1.5 : posture === 'probe' ? 1.2 : 1.0;
+  const tempoMult = posture === 'attack' ? 1.5 : posture === 'probe' ? 1.2 : posture === 'consolidation' ? 1.05 : 1.0;
   const baseDegradation = 0.02;
 
   // Tank degradation (faster under combat tempo)

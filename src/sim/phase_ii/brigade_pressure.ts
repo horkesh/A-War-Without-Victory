@@ -28,14 +28,16 @@ const POSTURE_PRESSURE_MULT: Record<BrigadePosture, number> = {
   defend: 0.3,
   probe: 0.7,
   attack: 1.5,
-  elastic_defense: 0.2
+  elastic_defense: 0.2,
+  consolidation: 0.6
 };
 
 const POSTURE_DEFENSE_MULT: Record<BrigadePosture, number> = {
   defend: 1.5,
   probe: 1.0,
   attack: 0.5,
-  elastic_defense: 1.2
+  elastic_defense: 1.2,
+  consolidation: 1.1
 };
 
 const READINESS_MULT: Record<string, number> = {

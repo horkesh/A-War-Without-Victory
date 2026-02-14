@@ -22,6 +22,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { getBrigadeAoRSettlements, computeBrigadeDensity, getSettlementGarrison } from './brigade_aor.js';
 import { canAdoptPosture } from './brigade_posture.js';
 import { FACTION_STRATEGIES, isCorridorMunicipality, isOffensiveObjective, isDefensivePriority } from './bot_strategy.js';
+import { scoreConsolidationTarget } from '../consolidation_scoring.js';
 
 // --- Types ---
 
@@ -38,11 +39,11 @@ export interface BotOrdersResult {
 const MAX_RESHAPE_ORDERS_PER_FACTION = 3;
 
 /** Coverage ratio thresholds (personnel / settlement_count). */
-const COVERAGE_UNDERSTAFFED = 50;
-const COVERAGE_SURPLUS = 150;
+const COVERAGE_UNDERSTAFFED = 55;
+const COVERAGE_SURPLUS = 140;
 
 /** Pressure imbalance threshold for triggering reinforcement reshaping. */
-const PRESSURE_IMBALANCE_THRESHOLD = 2;
+const PRESSURE_IMBALANCE_THRESHOLD = 1.8;
 
 // --- Target scoring constants ---
 
@@ -50,7 +51,7 @@ const PRESSURE_IMBALANCE_THRESHOLD = 2;
 const SCORE_UNDEFENDED = 100;
 
 /** Score bonus for attacking settlements in corridor priority municipalities. */
-const SCORE_CORRIDOR_OBJECTIVE = 90;
+const SCORE_CORRIDOR_OBJECTIVE = 95;
 
 /** Score bonus for recapturing home municipality settlements. */
 const SCORE_HOME_RECAPTURE = 60;
@@ -59,10 +60,13 @@ const SCORE_HOME_RECAPTURE = 60;
 const SCORE_WEAK_GARRISON_MAX = 50;
 
 /** Garrison threshold below which weakness bonus kicks in. */
-const GARRISON_WEAKNESS_THRESHOLD = 100;
+const GARRISON_WEAKNESS_THRESHOLD = 120;
 
 /** Score bonus for attacking settlements in strategic offensive objective municipalities. */
-const SCORE_OFFENSIVE_OBJECTIVE = 70;
+const SCORE_OFFENSIVE_OBJECTIVE = 85;
+
+/** Weight for consolidation/breakthrough score (rear cleanup, isolated clusters, fast-cleanup muns). */
+const CONSOLIDATION_SCORE_WEIGHT = 0.15;
 
 // --- Helpers ---
 
@@ -170,6 +174,38 @@ function hasFrontActiveSettlements(
 }
 
 /**
+ * Soft front: front-active but no enemy brigade defending adjacent enemy settlements.
+ * Real fronts = two brigades face each other; soft = rear cleanup / undefended pockets.
+ */
+function hasSoftFront(
+  state: GameState,
+  brigade: FormationState,
+  adj: Map<SettlementId, Set<SettlementId>>,
+  edges: EdgeRecord[]
+): boolean {
+  const pc = state.political_controllers ?? {};
+  const brigadeSettlements = getBrigadeAoRSettlements(state, brigade.id);
+  let hasEnemyNeighbor = false;
+  let allEnemyNeighborsUndefended = true;
+
+  for (const sid of brigadeSettlements) {
+    const neighbors = adj.get(sid);
+    if (!neighbors) continue;
+    for (const neighbor of neighbors) {
+      const neighborFaction = pc[neighbor];
+      if (!neighborFaction || neighborFaction === brigade.faction) continue;
+      hasEnemyNeighbor = true;
+      const garrison = getSettlementGarrison(state, neighbor, edges);
+      if (garrison > GARRISON_WEAKNESS_THRESHOLD) {
+        allEnemyNeighborsUndefended = false;
+      }
+    }
+  }
+
+  return hasEnemyNeighbor && allEnemyNeighborsUndefended;
+}
+
+/**
  * Find settlements in a brigade's AoR that are adjacent to a target brigade's AoR.
  * These are candidate settlements for reshape transfer.
  * Returns sorted list for determinism.
@@ -219,8 +255,32 @@ function getFormationHomeMun(formation: FormationState): string | null {
 }
 
 /**
+ * Build mun_id -> settlement IDs from political_controllers and sidToMun (for consolidation scoring).
+ * Deterministic: sorted keys.
+ */
+function buildSettlementsByMunFromControl(
+  state: GameState,
+  sidToMun: Map<SettlementId, string> | null
+): Map<string, SettlementId[]> {
+  const out = new Map<string, SettlementId[]>();
+  if (!sidToMun || sidToMun.size === 0) return out;
+  const pc = state.political_controllers ?? {};
+  const sids = (Object.keys(pc) as SettlementId[]).sort(strictCompare);
+  for (const sid of sids) {
+    const mun = sidToMun instanceof Map ? sidToMun.get(sid) : (sidToMun as Record<string, string>)[sid];
+    if (!mun) continue;
+    const list = out.get(mun) ?? [];
+    list.push(sid);
+    out.set(mun, list);
+  }
+  for (const list of out.values()) list.sort(strictCompare);
+  return out;
+}
+
+/**
  * Score a target settlement for attack priority.
  * Higher score = higher priority. Deterministic.
+ * Includes consolidation/breakthrough scoring (rear cleanup, isolated clusters, fast-cleanup muns).
  */
 function scoreTarget(
   state: GameState,
@@ -228,7 +288,8 @@ function scoreTarget(
   brigade: FormationState,
   faction: FactionId,
   edges: EdgeRecord[],
-  sidToMun: Map<SettlementId, string> | null
+  sidToMun: Map<SettlementId, string> | null,
+  settlementsByMun?: Map<string, SettlementId[]>
 ): number {
   let score = 0;
 
@@ -255,6 +316,17 @@ function scoreTarget(
       score += SCORE_HOME_RECAPTURE;
     }
   }
+
+  // 5. Consolidation/breakthrough: rear cleanup, isolated clusters, fast-cleanup muns (still produces casualties)
+  const consolidationScore = scoreConsolidationTarget({
+    state,
+    targetSid,
+    attackerFaction: faction,
+    edges,
+    sidToMun,
+    settlementsByMun
+  });
+  score += Math.floor(consolidationScore * CONSOLIDATION_SCORE_WEIGHT);
 
   return score;
 }
@@ -334,6 +406,7 @@ export function generateBotBrigadeOrders(
   for (const brigade of brigades) {
     const density = computeBrigadeDensity(state, brigade.id);
     const hasFront = hasFrontActiveSettlements(state, brigade, adj);
+    const softFront = hasFront && hasSoftFront(state, brigade, adj, edges);
     const currentPosture: BrigadePosture = brigade.posture ?? 'defend';
     const inCorridor = isBrigadeInCorridor(state, brigade, faction, munLookup);
 
@@ -352,6 +425,9 @@ export function generateBotBrigadeOrders(
     } else if (inCorridor && currentPosture !== 'defend') {
       // Corridor brigades: force defend posture to hold critical territory
       targetPosture = 'defend';
+    } else if (softFront && !inCorridor && currentPosture === 'defend' && density >= COVERAGE_UNDERSTAFFED) {
+      // Soft front (no enemy brigade): consolidation to clean rear / undefended pockets
+      targetPosture = 'consolidation';
     } else if (density >= strategy.attack_coverage_threshold && currentPosture === 'defend') {
       // Overstaffed and defending: can afford to probe/attack (if below share limit)
       if (attackPostureCount < maxAttackBrigades) {
@@ -376,7 +452,7 @@ export function generateBotBrigadeOrders(
           brigade_id: brigade.id,
           posture: targetPosture
         });
-        // Track attack posture count changes
+        // Track attack posture count changes (consolidation does not count toward limit)
         const wasAttack = currentPosture === 'attack' || currentPosture === 'probe';
         const willAttack = targetPosture === 'attack' || targetPosture === 'probe';
         if (willAttack && !wasAttack) attackPostureCount++;
@@ -494,9 +570,12 @@ export function generateBotBrigadeOrders(
   }
 
   const frontEdgeDataForAttack = getFactionFrontEdges(state, edges, faction);
+  // Build settlementsByMun from political_controllers + sidToMun for consolidation scoring
+  const settlementsByMunForConsolidation = buildSettlementsByMunFromControl(state, munLookup);
+
   for (const brigade of brigades) {
     const posture = pendingPosture.get(brigade.id) ?? brigade.posture ?? 'defend';
-    if (posture !== 'attack' && posture !== 'probe') continue;
+    if (posture !== 'attack' && posture !== 'probe' && posture !== 'consolidation') continue;
     const aorSids = getBrigadeAoRSettlements(state, brigade.id);
     const ourSidsSet = new Set(aorSids);
 
@@ -513,7 +592,7 @@ export function generateBotBrigadeOrders(
     for (const sid of enemyAdjacentSet) {
       scoredTargets.push({
         sid,
-        score: scoreTarget(state, sid, brigade, faction, edges, munLookup)
+        score: scoreTarget(state, sid, brigade, faction, edges, munLookup, settlementsByMunForConsolidation)
       });
     }
 

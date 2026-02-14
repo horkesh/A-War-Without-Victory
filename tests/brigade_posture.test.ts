@@ -58,6 +58,15 @@ describe('brigade posture - canAdoptPosture', () => {
     brig.readiness = 'degraded';
     expect(canAdoptPosture(brig, 'attack')).toBe(false);
   });
+
+  it('can adopt consolidation posture (min cohesion 0, readiness active/overextended/degraded)', () => {
+    const brig = makeFormation('rs-brig-1', 'RS', 'S1');
+    brig.cohesion = 20;
+    brig.readiness = 'active';
+    expect(canAdoptPosture(brig, 'consolidation')).toBe(true);
+    brig.readiness = 'degraded';
+    expect(canAdoptPosture(brig, 'consolidation')).toBe(true);
+  });
 });
 
 describe('brigade posture - applyPostureOrders', () => {
@@ -99,6 +108,18 @@ describe('brigade posture - applyPostureOrders', () => {
 
     expect(state.brigade_posture_orders).toEqual([]);
   });
+
+  it('applies consolidation posture order', () => {
+    const state = makePostureState();
+    state.brigade_posture_orders = [
+      { brigade_id: 'rs-brig-1', posture: 'consolidation' }
+    ];
+
+    const report = applyPostureOrders(state);
+
+    expect(report.postures_changed).toBe(1);
+    expect(state.formations['rs-brig-1'].posture).toBe('consolidation');
+  });
 });
 
 describe('brigade posture - applyPostureCosts', () => {
@@ -110,6 +131,16 @@ describe('brigade posture - applyPostureCosts', () => {
     applyPostureCosts(state);
 
     expect(state.formations['rs-brig-1'].cohesion).toBe(57);
+  });
+
+  it('consolidation posture adds 0.5 cohesion per turn (soft front)', () => {
+    const state = makePostureState();
+    state.formations['rs-brig-1'].posture = 'consolidation';
+    state.formations['rs-brig-1'].cohesion = 50;
+
+    applyPostureCosts(state);
+
+    expect(state.formations['rs-brig-1'].cohesion).toBe(50); // 0.5 truncated to 0
   });
 
   it('defend posture recovers 1 cohesion per turn, capped at 80', () => {

@@ -30,7 +30,8 @@ const POSTURE_MIN_COHESION: Record<BrigadePosture, number> = {
   defend: 0,
   probe: 20,
   attack: 40,
-  elastic_defense: 0
+  elastic_defense: 0,
+  consolidation: 0
 };
 
 /** Readiness levels that are allowed for each posture. */
@@ -38,7 +39,8 @@ const POSTURE_MIN_READINESS: Record<BrigadePosture, string[]> = {
   defend: ['active', 'overextended', 'degraded', 'forming'],
   probe: ['active', 'overextended'],
   attack: ['active'],
-  elastic_defense: ['active', 'overextended', 'degraded']
+  elastic_defense: ['active', 'overextended', 'degraded'],
+  consolidation: ['active', 'overextended', 'degraded']
 };
 
 /** Per-turn cohesion cost for each posture. Negative = drain, positive = recovery. */
@@ -46,7 +48,8 @@ const POSTURE_COHESION_COST: Record<BrigadePosture, number> = {
   attack: -3,
   probe: -1,
   elastic_defense: -0.5,
-  defend: 1   // Recovery
+  defend: 1,   // Recovery
+  consolidation: 0.5  // Slight recovery (soft front)
 };
 
 /** Maximum cohesion recovery cap when in defend posture. */

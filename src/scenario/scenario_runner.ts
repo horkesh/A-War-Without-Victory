@@ -45,6 +45,7 @@ import type { Scenario, ScenarioAction } from './scenario_types.js';
 import { buildWeeklyReport } from './scenario_reporting.js';
 import type { WeeklyReportRow, WeeklyActivityCounts } from './scenario_reporting.js';
 import {
+  type ControlKey,
   extractSettlementControlSnapshot,
   computeControlDelta,
   formatEndReportMarkdown,
@@ -58,7 +59,10 @@ import {
   type BotWeeklyDiagnosticsRow,
   type ControlEventsSummary,
   type FormationFatigueSummary,
-  type PhaseIIAttackResolutionSummary
+  type PhaseIIAttackResolutionSummary,
+  type PhaseIIAttackResolutionWeekRollup,
+  type HistoricalAlignmentDiagnostics,
+  type HistoricalFactionMetrics
 } from './scenario_end_report.js';
 import type { ControlEvent } from '../sim/phase_i/control_flip.js';
 import {
@@ -219,6 +223,186 @@ function computeControlShareByFaction(state: GameState): Array<{ faction: string
       faction,
       control_share: totalSettlements > 0 ? Math.round((count / totalSettlements) * 1e6) / 1e6 : 0
     }));
+}
+
+function captureHistoricalFactionMetrics(state: GameState): HistoricalFactionMetrics[] {
+  const factions = [...(state.factions ?? [])].sort((a, b) => strictCompare(a.id, b.id));
+  const formations = state.formations ?? {};
+  const recruitment = state.recruitment_state;
+  const out: HistoricalFactionMetrics[] = [];
+  for (const faction of factions) {
+    let personnel_total = 0;
+    let brigades_active = 0;
+    let brigades_inactive = 0;
+    let brigades_total = 0;
+    for (const formationId of Object.keys(formations).sort(strictCompare)) {
+      const f = formations[formationId];
+      if (!f || f.faction !== faction.id) continue;
+      if ((f.kind ?? 'brigade') !== 'brigade') continue;
+      brigades_total += 1;
+      if (f.status === 'active') brigades_active += 1;
+      if (f.status === 'inactive') brigades_inactive += 1;
+      personnel_total += f.personnel ?? 0;
+    }
+    const recruitment_capital =
+      recruitment?.recruitment_capital?.[faction.id]?.points ?? 0;
+    const negotiation_capital = faction.negotiation?.capital ?? 0;
+    const prewar_capital = faction.prewar_capital ?? 0;
+    out.push({
+      faction: faction.id,
+      personnel_total,
+      brigades_active,
+      brigades_inactive,
+      brigades_total,
+      recruitment_capital,
+      negotiation_capital,
+      prewar_capital
+    });
+  }
+  return out;
+}
+
+function computeHistoricalAlignmentDiagnostics(
+  initial: HistoricalFactionMetrics[],
+  final: HistoricalFactionMetrics[]
+): HistoricalAlignmentDiagnostics {
+  const finalByFaction = new Map(final.map((row) => [row.faction, row]));
+  return {
+    initial,
+    final,
+    delta: initial
+      .map((row) => {
+        const end = finalByFaction.get(row.faction);
+        if (!end) return null;
+        return {
+          faction: row.faction,
+          personnel_total_delta: end.personnel_total - row.personnel_total,
+          brigades_active_delta: end.brigades_active - row.brigades_active,
+          brigades_inactive_delta: end.brigades_inactive - row.brigades_inactive,
+          brigades_total_delta: end.brigades_total - row.brigades_total,
+          recruitment_capital_delta: end.recruitment_capital - row.recruitment_capital,
+          negotiation_capital_delta: end.negotiation_capital - row.negotiation_capital,
+          prewar_capital_delta: end.prewar_capital - row.prewar_capital
+        };
+      })
+      .filter((row): row is NonNullable<typeof row> => row != null)
+      .sort((a, b) => strictCompare(a.faction, b.faction))
+  };
+}
+
+interface HistoricalControlDeltaRow {
+  controller: string;
+  reference_count: number;
+  final_count: number;
+  delta: number;
+}
+
+interface HistoricalControlAlignmentDiagnostics {
+  reference_key: string;
+  reference_total: number;
+  final_total: number;
+  counts_by_controller: HistoricalControlDeltaRow[];
+}
+
+interface HistoricalAnchorCheck {
+  anchor_type: 'municipality' | 'settlement';
+  anchor_id: string;
+  expected_controller: string;
+  actual_controller: string | null;
+  passed: boolean;
+}
+
+const HISTORICAL_ANCHORS_APR1992_TO_DEC1992: Array<{ municipality_id: string; expected_controller: string }> = [
+  { municipality_id: 'zvornik', expected_controller: 'RS' },
+  { municipality_id: 'bijeljina', expected_controller: 'RS' },
+  { municipality_id: 'srebrenica', expected_controller: 'RBiH' },
+  { municipality_id: 'bihac', expected_controller: 'RBiH' },
+  { municipality_id: 'banja_luka', expected_controller: 'RS' },
+  { municipality_id: 'tuzla', expected_controller: 'RBiH' }
+];
+const HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992: Array<{ settlement_id: string; expected_controller: string }> = [
+  { settlement_id: 'S163520', expected_controller: 'RBiH' }
+];
+
+function countControllers(snapshot: ControlKey[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const row of snapshot) {
+    if (!row.controller) continue;
+    counts.set(row.controller, (counts.get(row.controller) ?? 0) + 1);
+  }
+  return counts;
+}
+
+function computeHistoricalControlAlignmentDiagnostics(
+  final: ControlKey[],
+  reference: ControlKey[],
+  referenceKey: string
+): HistoricalControlAlignmentDiagnostics {
+  const finalCounts = countControllers(final);
+  const referenceCounts = countControllers(reference);
+  const controllers = Array.from(new Set([...finalCounts.keys(), ...referenceCounts.keys()])).sort(strictCompare);
+  return {
+    reference_key: referenceKey,
+    reference_total: reference.length,
+    final_total: final.length,
+    counts_by_controller: controllers.map((controller) => ({
+      controller,
+      reference_count: referenceCounts.get(controller) ?? 0,
+      final_count: finalCounts.get(controller) ?? 0,
+      delta: (finalCounts.get(controller) ?? 0) - (referenceCounts.get(controller) ?? 0)
+    }))
+  };
+}
+
+function deriveMunicipalityControllers(snapshot: ControlKey[]): Map<string, string | null> {
+  const byMun = new Map<string, Map<string, number>>();
+  for (const row of snapshot) {
+    if (!row.municipality_id || !row.controller) continue;
+    const entry = byMun.get(row.municipality_id) ?? new Map<string, number>();
+    entry.set(row.controller, (entry.get(row.controller) ?? 0) + 1);
+    byMun.set(row.municipality_id, entry);
+  }
+  const out = new Map<string, string | null>();
+  for (const munId of Array.from(byMun.keys()).sort(strictCompare)) {
+    const counts = byMun.get(munId)!;
+    let bestController: string | null = null;
+    let bestCount = -1;
+    for (const controller of Array.from(counts.keys()).sort(strictCompare)) {
+      const count = counts.get(controller)!;
+      if (count > bestCount) {
+        bestCount = count;
+        bestController = controller;
+      }
+    }
+    out.set(munId, bestController);
+  }
+  return out;
+}
+
+function computeHistoricalAnchorChecks(final: ControlKey[]): HistoricalAnchorCheck[] {
+  const byMun = deriveMunicipalityControllers(final);
+  const bySid = new Map(final.map((row) => [row.settlement_id, row.controller ?? null]));
+  const municipalityChecks = HISTORICAL_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
+    const actual = byMun.get(anchor.municipality_id) ?? null;
+    return {
+      anchor_type: 'municipality' as const,
+      anchor_id: anchor.municipality_id,
+      expected_controller: anchor.expected_controller,
+      actual_controller: actual,
+      passed: actual === anchor.expected_controller
+    };
+  });
+  const settlementChecks = HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
+    const actual = bySid.get(anchor.settlement_id) ?? null;
+    return {
+      anchor_type: 'settlement' as const,
+      anchor_id: anchor.settlement_id,
+      expected_controller: anchor.expected_controller,
+      actual_controller: actual,
+      passed: actual === anchor.expected_controller
+    };
+  });
+  return [...municipalityChecks, ...settlementChecks];
 }
 
 /**
@@ -558,6 +742,21 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       state.meta.referendum_held = true;
       state.meta.referendum_turn = 0;
       state.meta.war_start_turn = 0;
+      // Keep bilateral war gate and alliance state active for Phase II-start scenarios.
+      state.meta.rbih_hrhb_war_earliest_turn = scenario.rbih_hrhb_war_earliest_week ?? 26;
+      if (scenario.enable_rbih_hrhb_dynamics === false) {
+        state.meta.enable_rbih_hrhb_dynamics = false;
+      }
+      ensureRbihHrhbState(state, scenario.init_alliance_rbih_hrhb, scenario.init_mixed_municipalities);
+      if (scenario.recruitment_mode === 'player_choice' || scenario.init_formations_oob) {
+        // Phase II-start scenarios need deterministic manpower pools for reinforcement/spawn.
+        if (!state.phase_i_militia_strength || Object.keys(state.phase_i_militia_strength).length === 0) {
+          updateMilitiaEmergence(state);
+        }
+        if (!state.militia_pools || Object.keys(state.militia_pools).length === 0) {
+          runPoolPopulation(state, graph.settlements, municipalityPopulation1991);
+        }
+      }
     }
 
     if (scenario.formation_spawn_directive) {
@@ -595,6 +794,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       initializeBrigadeAoR(state, graph.edges, graph.settlements);
       initializeCorpsCommand(state);
     }
+    const historicalMetricsInitial = captureHistoricalFactionMetrics(state);
 
     const initialSavePath = join(outDir, 'initial_save.json');
     await writeFile(initialSavePath, serializeState(state), 'utf8');
@@ -647,8 +847,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       orders_processed: 0,
       flips_applied: 0,
       casualty_attacker: 0,
-      casualty_defender: 0
+      casualty_defender: 0,
+      defender_present_battles: 0,
+      defender_absent_battles: 0
     };
+    const phaseIIAttackResolutionWeekly: PhaseIIAttackResolutionWeekRollup[] = [];
 
     const botManager = (scenario.use_smart_bots || use_smart_bots)
       ? new BotManager({
@@ -724,7 +927,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       // Run smart bots once per simulated week after scenario actions and posture overrides.
       if (botManager) {
         const currentFrontEdges = computeFrontEdges(state, graph.edges);
-        const botRun = botManager.runBots(state, currentFrontEdges);
+        const consolidationContext = {
+          edges: graph.edges,
+          sidToMun,
+          settlementsByMun
+        };
+        const botRun = botManager.runBots(state, currentFrontEdges, consolidationContext);
         if (enableBotDiagnostics) {
           botWeeklyDiagnostics.push({
             week_index,
@@ -764,9 +972,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
           seed: state.meta.seed,
           settlementGraph: graph,
           settlementEdges: graph.edges,
-          disablePhaseIControlFlip: scenario.disable_phase_i_control_flip === true,
-          phaseIMilitaryActionAttackScale: scenario.phase_i_military_action_attack_scale,
-          phaseIMilitaryActionStabilityBufferFactor: scenario.phase_i_military_action_stability_buffer_factor,
           municipalityPopulation1991,
           settlementPopulationBySid,
           settlementDataRaw,
@@ -799,15 +1004,33 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       if (state.meta.phase === 'phase_ii') {
         phaseIIAttackResolutionSummary.weeks_with_phase_ii += 1;
         const phaseIIResolution = turnReport.phase_ii_resolve_attack_orders;
+        let weeklyDefenderPresentBattles = 0;
+        let weeklyDefenderAbsentBattles = 0;
+        for (const battle of phaseIIResolution?.battle_report?.battles ?? []) {
+          if (battle.defender_brigade != null) weeklyDefenderPresentBattles += 1;
+          else weeklyDefenderAbsentBattles += 1;
+        }
         if (phaseIIResolution) {
           phaseIIAttackResolutionSummary.orders_processed += phaseIIResolution.orders_processed ?? 0;
           phaseIIAttackResolutionSummary.flips_applied += phaseIIResolution.flips_applied ?? 0;
           phaseIIAttackResolutionSummary.casualty_attacker += phaseIIResolution.casualty_attacker ?? 0;
           phaseIIAttackResolutionSummary.casualty_defender += phaseIIResolution.casualty_defender ?? 0;
+          phaseIIAttackResolutionSummary.defender_present_battles += weeklyDefenderPresentBattles;
+          phaseIIAttackResolutionSummary.defender_absent_battles += weeklyDefenderAbsentBattles;
           if ((phaseIIResolution.orders_processed ?? 0) > 0) {
             phaseIIAttackResolutionSummary.weeks_with_orders += 1;
           }
         }
+        phaseIIAttackResolutionWeekly.push({
+          week_index,
+          turn: state.meta.turn,
+          orders_processed: phaseIIResolution?.orders_processed ?? 0,
+          flips_applied: phaseIIResolution?.flips_applied ?? 0,
+          casualty_attacker: phaseIIResolution?.casualty_attacker ?? 0,
+          casualty_defender: phaseIIResolution?.casualty_defender ?? 0,
+          defender_present_battles: weeklyDefenderPresentBattles,
+          defender_absent_battles: weeklyDefenderAbsentBattles
+        });
       }
 
       if (shouldApplyBreaches && adjacencyMap && state.meta.phase === 'phase_ii') {
@@ -967,6 +1190,27 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       botBenchmarkSummary = evaluateBotBenchmarks(botControlTimeline, benchmarks);
     }
     const victoryEvaluation = evaluateVictoryConditions(state, scenario.victory_conditions);
+    const historicalMetricsFinal = captureHistoricalFactionMetrics(state);
+    const historicalAlignmentDiagnostics = computeHistoricalAlignmentDiagnostics(
+      historicalMetricsInitial,
+      historicalMetricsFinal
+    );
+    const finalControlSnapshot = extractSettlementControlSnapshot(state, graph);
+    let historicalControlAlignment: HistoricalControlAlignmentDiagnostics | undefined;
+    let historicalAnchorChecks: HistoricalAnchorCheck[] | undefined;
+    if (scenario.init_control === 'apr1992' || (scenario.init_control_mode === 'ethnic_1991' && scenario.scenario_id.includes('apr1992'))) {
+      const referenceControlPath = resolveInitControlPath('data/scenarios/initial_control/jan1993.json', baseDir);
+      const historicalReferenceState = await createInitialGameState('harness-historical-reference', referenceControlPath, {
+        init_control_mode: 'institutional'
+      });
+      const historicalReferenceSnapshot = extractSettlementControlSnapshot(historicalReferenceState, graph);
+      historicalControlAlignment = computeHistoricalControlAlignmentDiagnostics(
+        finalControlSnapshot,
+        historicalReferenceSnapshot,
+        'jan1993'
+      );
+      historicalAnchorChecks = computeHistoricalAnchorChecks(finalControlSnapshot);
+    }
     const runSummary = {
       scenario_id: scenario.scenario_id,
       weeks,
@@ -976,8 +1220,18 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         final_turn: state.meta.turn,
         phase: state.meta.phase
       },
+      historical_alignment: historicalAlignmentDiagnostics,
+      ...(historicalControlAlignment
+        ? {
+            vs_historical: historicalControlAlignment,
+            anchor_checks: historicalAnchorChecks
+          }
+        : {}),
       ...(phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0
-        ? { phase_ii_attack_resolution: phaseIIAttackResolutionSummary }
+        ? {
+            phase_ii_attack_resolution: phaseIIAttackResolutionSummary,
+            phase_ii_attack_resolution_weekly: phaseIIAttackResolutionWeekly
+          }
         : {}),
       ...(botBenchmarkSummary ? { bot_benchmark_evaluation: botBenchmarkSummary } : {}),
       ...(victoryEvaluation ? { victory: victoryEvaluation } : {}),
@@ -985,8 +1239,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     };
     const runSummaryPath = join(outDir, 'run_summary.json');
     await writeFile(runSummaryPath, stableStringify(runSummary, 2), 'utf8');
-
-    const finalControlSnapshot = extractSettlementControlSnapshot(state, graph);
     const controlDelta = computeControlDelta(initialControlSnapshot, finalControlSnapshot);
     const controlDeltaPath = join(outDir, 'control_delta.json');
     await writeFile(controlDeltaPath, stableStringify(controlDelta, 2), 'utf8');
@@ -1110,7 +1362,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       botBenchmarkSummary: botBenchmarkSummary ?? null,
       botWeeklyDiagnostics: enableBotDiagnostics ? botWeeklyDiagnostics : null,
       phaseIIAttackResolutionSummary:
-        phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0 ? phaseIIAttackResolutionSummary : null
+        phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0 ? phaseIIAttackResolutionSummary : null,
+      phaseIIAttackResolutionWeekly:
+        phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0 ? phaseIIAttackResolutionWeekly : null,
+      historicalAlignmentDiagnostics
     });
     const endReportPath = join(outDir, 'end_report.md');
     await writeFile(endReportPath, endReportMd, 'utf8');

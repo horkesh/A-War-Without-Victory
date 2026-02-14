@@ -306,6 +306,9 @@ test('battle resolution: undefended settlement falls with minimal casualties', (
   assert.strictEqual(state.political_controllers!['S2'], 'RS');
   // Minimal attacker casualties for undefended
   assert.ok(report.total_attacker_casualties.killed + report.total_attacker_casualties.wounded <= 5);
+  // Rear-cleanup / undefended: defender side still gets tracked casualties (militia/rear security)
+  const defenderTotal = report.total_defender_casualties.killed + report.total_defender_casualties.wounded;
+  assert.ok(defenderTotal >= 1, `undefended defender should have at least 1 casualty tracked, got ${defenderTotal}`);
 });
 
 test('battle resolution: determinism — identical inputs produce identical outputs', () => {

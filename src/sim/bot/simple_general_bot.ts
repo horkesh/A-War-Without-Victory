@@ -2,7 +2,8 @@ import type { GameState, FactionId } from '../../state/game_state.js';
 import type { Bot, BotDecisions, BotDecisionContext } from './bot_interface.js';
 import type { FrontEdge } from '../../map/front_edges.js';
 import { getBotDifficultyTuning, resolveAggression } from './bot_strategy.js';
-import { areRbihHrhbAllied, isRbihHrhbAtWar, getAlliancePhase } from '../phase_i/alliance_update.js';
+import { areRbihHrhbAllied, isRbihHrhbAtWar } from '../phase_i/alliance_update.js';
+import { scoreConsolidationTarget } from '../consolidation_scoring.js';
 
 export class SimpleGeneralBot implements Bot {
     id: string;
@@ -64,6 +65,9 @@ export class SimpleGeneralBot implements Bot {
             broadAggression,
             Math.min(1, aggression.planned_ops_aggression - frontLengthPenalty * 0.25)
         );
+        const cc = context.consolidationContext;
+        const consolidationWeight = context.strategy.consolidation_priority_weight ?? 0;
+
         const scoredEdges = relevantEdges
             .map((edge) => {
                 const pressureValue = state.front_pressure?.[edge.edge_id]?.value ?? 0;
@@ -87,7 +91,21 @@ export class SimpleGeneralBot implements Bot {
                     const opponent = edge.side_a === this.factionId ? edge.side_b : edge.side_a;
                     if (opponent === allyFaction) confrontationBonus = 1;
                 }
-                const score = disadvantaged * 4 + objectiveBonus + pressureMagnitude + jointBonus + confrontationBonus;
+                // Consolidation: prioritize edges where enemy sid is a rear-cleanup or breakthrough target
+                let consolidationBonus = 0;
+                if (cc && consolidationWeight > 0) {
+                    const enemySid = edge.side_a === this.factionId ? edge.b : edge.a;
+                    const rawConsolidation = scoreConsolidationTarget({
+                        state,
+                        targetSid: enemySid,
+                        attackerFaction: this.factionId,
+                        edges: cc.edges,
+                        sidToMun: cc.sidToMun,
+                        settlementsByMun: cc.settlementsByMun
+                    });
+                    consolidationBonus = Math.floor(rawConsolidation * consolidationWeight / 25);
+                }
+                const score = disadvantaged * 4 + objectiveBonus + pressureMagnitude + jointBonus + confrontationBonus + consolidationBonus;
                 const isObjective =
                     context.strategy.preferred_objective_sids.includes(edge.a) ||
                     context.strategy.preferred_objective_sids.includes(edge.b);

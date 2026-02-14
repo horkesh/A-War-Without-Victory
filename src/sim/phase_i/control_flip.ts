@@ -329,6 +329,34 @@ function getStrongestAdjacentBrigadeAttacker(
   return best;
 }
 
+/** Count adjacent municipalities controlled by the given faction (consolidation pressure). */
+function countAttackerControlledNeighborMuns(
+  munId: MunicipalityId,
+  attackerFaction: FactionId,
+  munAdjacency: Map<MunicipalityId, Set<MunicipalityId>>,
+  state: GameState,
+  settlementsByMun: Map<MunicipalityId, SettlementId[]>
+): number {
+  const neighbors = munAdjacency.get(munId);
+  if (!neighbors) return 0;
+  const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 26;
+  const beforeEarliestWar = state.meta.turn < earliestTurn;
+  const rbihHrhbAllied = beforeEarliestWar || areRbihHrhbAllied(state);
+  const ceasefireActive = state.rbih_hrhb_state?.ceasefire_active === true;
+  let n = 0;
+  for (const neighborMun of neighbors) {
+    const sids = settlementsByMun.get(neighborMun);
+    if (!sids?.length) continue;
+    const neighborController = getMunicipalityController(state, sids);
+    if (neighborController !== attackerFaction) continue;
+    if ((attackerFaction === 'RBiH' || attackerFaction === 'HRHB') && (neighborController === 'RBiH' || neighborController === 'HRHB')) {
+      if (attackerFaction !== neighborController && (rbihHrhbAllied || ceasefireActive)) continue;
+    }
+    n++;
+  }
+  return n;
+}
+
 /** Current stability for mun (Phase I §4.3.2): base + militia defense bonus + control_status adjustment. */
 function getCurrentStability(state: GameState, munId: MunicipalityId, controller: FactionId | null): number {
   const mun = state.municipalities?.[munId];
@@ -471,8 +499,8 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
     }
   }
 
-  /** Flip-eligible candidates: [munId, currentController, attacker faction, attacker strength, current stability, defensive militia]. */
-  type Candidate = [MunicipalityId, FactionId | null, FactionId, number, number, number];
+  /** Flip-eligible candidates: [munId, currentController, attacker faction, attacker strength, current stability, defensive militia, attackerNeighborCount]. */
+  type Candidate = [MunicipalityId, FactionId | null, FactionId, number, number, number, number];
   const candidates: Candidate[] = [];
 
   for (const munId of munIds) {
@@ -526,13 +554,19 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
       const flipThreshold = FLIP_THRESHOLD_BASE - coercionReduction + scaledAttackerStrength * FLIP_ATTACKER_FACTOR;
       if (currentStability + scaledDefense >= flipThreshold) continue;
     }
-    candidates.push([munId, controller, attacker.faction, totalAttackerStrength, currentStability, defensiveMilitia]);
+    const attackerNeighborCount = countAttackerControlledNeighborMuns(
+      munId, attacker.faction, munAdjacency, state, settlementsByMun
+    );
+    candidates.push([munId, controller, attacker.faction, totalAttackerStrength, currentStability, defensiveMilitia, attackerNeighborCount]);
   }
 
   report.municipalities_evaluated = munIds.length;
 
-  // Phase I §9.2: Flip resolution order — Stability ASC, Municipality_ID ASC
+  // Phase I §9.2: Flip resolution order — consolidation first (attackerNeighborCount DESC), then Stability ASC, Municipality_ID ASC
   candidates.sort((a, b) => {
+    const consolidationA = a[6];
+    const consolidationB = b[6];
+    if (consolidationB !== consolidationA) return consolidationB - consolidationA;
     const stabilityA = a[4];
     const stabilityB = b[4];
     if (stabilityA !== stabilityB) return stabilityA < stabilityB ? -1 : 1;
