@@ -7,36 +7,36 @@
 ## Control changes (most important)
 
 - Total settlements with controller change: 0
-- Net control counts (start → end): HRHB: 1119, RBiH: 2794, RS: 1909 → HRHB: 1119, RBiH: 2794, RS: 1909
+- Net control counts (start → end): HRHB: 1119, RBiH: 2739, RS: 1964 → HRHB: 1119, RBiH: 2739, RS: 1964
 
 No settlement-level control changes detected in this run.
 
 ## Other key shifts
 
 Exhaustion (start → end):
-  - HRHB: 0.0014501666666666667 → 0.005800666666666667
-  - RBiH: 0.0014501666666666667 → 0.005800666666666667
-  - RS: 0.0014501666666666667 → 0.005800666666666667
+  - HRHB: 0.0010791666666666666 → 0.004316666666666667
+  - RBiH: 0.0010791666666666666 → 0.004316666666666667
+  - RS: 0.0010791666666666666 → 0.004316666666666667
 
 Supply pressure (start → end):
   - HRHB: 100 → 100
   - RBiH: 100 → 100
   - RS: 100 → 100
 
-Displacement: settlement count/total (start → end): 1160/23.272508333333715 → 1160/93.09003333333486
-Displacement: municipality count/total (start → end): 92/1.8457506609195378 → 92/7.383002643678151
+Displacement: settlement count/total (start → end): 1196/23.973958333333265 → 1196/95.89583333333306
+Displacement: municipality count/total (start → end): 94/1.8842408723522837 → 94/7.536963489409135
 
 ## Activity over run
 
-- Front-active: max 1243, mean 1243, nonzero weeks 4/4
-- Pressure-eligible (edges): max 1243, mean 1243, nonzero weeks 4/4
+- Front-active: max 925, mean 925, nonzero weeks 4/4
+- Pressure-eligible (edges): max 925, mean 925, nonzero weeks 4/4
 - Displacement-trigger eligible: max 0, mean 0, nonzero weeks 0/4
 
 
 ## Baseline ops
 
 - Intensity: 1
-- Average engagement level: 0.7250833333333333
+- Average engagement level: 0.5395833333333333
 - Produced nonzero exhaustion: yes, nonzero displacement: yes
 
 ## Control events (harness log)
@@ -61,30 +61,31 @@ Militia pools by faction (available / committed / exhausted):
 
 Areas of responsibility (settlements per faction):
   - HRHB: 1119 settlements
-  - RBiH: 2794 settlements
-  - RS: 1909 settlements
+  - RBiH: 2739 settlements
+  - RS: 1964 settlements
 
 ## Phase II attack resolution (pipeline)
 
 - Weeks in Phase II: 4
 - Weeks with nonzero orders processed: 0
 - Orders processed: 0
+- Unique attack targets (distinct SIDs): 0
 - Settlement flips applied: 0
 - Casualties (attacker / defender): 0 / 0
 - Battles with defender present / absent: 0 / 0
 
-Weekly rollup (week: orders, flips, casualties A/D, defender present/absent):
-  - w1: 0, 0, 0/0, 0/0
-  - w2: 0, 0, 0/0, 0/0
-  - w3: 0, 0, 0/0, 0/0
-  - w4: 0, 0, 0/0, 0/0
+Weekly rollup (week: orders, unique_targets, flips, casualties A/D, defender present/absent):
+  - w1: 0, 0, 0, 0/0, 0/0
+  - w2: 0, 0, 0, 0/0, 0/0
+  - w3: 0, 0, 0, 0/0, 0/0
+  - w4: 0, 0, 0, 0/0, 0/0
 
 ## Historical alignment diagnostics
 
 Initial vs final by faction (personnel, brigades active/inactive/total, recruitment capital, negotiation capital, prewar capital):
 - HRHB: personnel 0→0; brigades 0/0/0→0/0/0; capital 0/0/0→0/159/0
-- RBiH: personnel 0→0; brigades 0/0/0→0/0/0; capital 0/0/0→0/316/0
-- RS: personnel 0→0; brigades 0/0/0→0/0/0; capital 0/0/0→0/226/0
+- RBiH: personnel 0→0; brigades 0/0/0→0/0/0; capital 0/0/0→0/312/0
+- RS: personnel 0→0; brigades 0/0/0→0/0/0; capital 0/0/0→0/231/0
 
 ## Notes on interpretation
 

@@ -657,8 +657,52 @@ body.tm-crt-enabled #map-root::after {
 }
 
 /* ─── Side Picker (New Campaign) ───────────────── */
-.tm-side-picker-card { width: min(480px, calc(100vw - 40px)); }
+.tm-side-picker-card { width: min(640px, calc(100vw - 40px)); }
 .tm-side-picker-content .tm-muted { margin-bottom: 14px; display: block; }
+
+/* Scenario briefing header */
+.tm-scenario-briefing {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.tm-scenario-image-wrap {
+  flex-shrink: 0;
+  width: 140px;
+  height: 94px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border-main);
+  background: rgba(255, 255, 255, 0.02);
+}
+.tm-scenario-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tm-scenario-text { flex: 1; min-width: 0; }
+.tm-scenario-title {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.tm-scenario-subtitle {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.tm-scenario-sep {
+  height: 1px;
+  background: var(--border-main);
+  margin: 12px 0;
+}
+
 .tm-side-picker-error {
   margin-bottom: 12px; padding: 10px 12px; border-radius: 6px;
   background: rgba(180, 60, 60, 0.15); color: var(--text-primary);
@@ -675,8 +719,9 @@ body.tm-crt-enabled #map-root::after {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 16px 20px;
+  gap: 6px;
+  padding: 14px 16px 12px;
+  width: 170px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-main);
   border-radius: 6px;
@@ -704,7 +749,47 @@ body.tm-crt-enabled #map-root::after {
   border: 1px solid var(--border-main);
   border-radius: 2px;
 }
-.tm-side-picker-label { text-transform: uppercase; }
+.tm-side-picker-label { text-transform: uppercase; font-size: 11px; }
+
+/* Difficulty badges */
+.tm-difficulty-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+.tm-difficulty-hard {
+  color: #F44336;
+  border-color: rgba(244, 67, 54, 0.5);
+  background: rgba(244, 67, 54, 0.08);
+}
+.tm-difficulty-moderate {
+  color: #FF9800;
+  border-color: rgba(255, 152, 0, 0.5);
+  background: rgba(255, 152, 0, 0.08);
+}
+.tm-difficulty-standard {
+  color: #4CAF50;
+  border-color: rgba(76, 175, 80, 0.5);
+  background: rgba(76, 175, 80, 0.08);
+}
+
+/* Faction description */
+.tm-side-picker-desc {
+  font-family: var(--font-sans, sans-serif);
+  font-size: 10px;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.3px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  text-align: center;
+  text-transform: none;
+}
 
 /* ─── Modal Overlays (AAR, Settings, Help) ─────── */
 .tm-modal-overlay {

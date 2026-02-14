@@ -37,12 +37,12 @@ export interface DesktopSimAdvanceResult {
   };
 }
 
-/** Scenario file used for "New Game" (April 1992 start, Phase II, ethnic_1991). Use 4-week so createStateFromScenario completes quickly in desktop. */
-export const NEW_GAME_SCENARIO_RELATIVE = 'data/scenarios/apr1992_phase_ii_4w.json';
+/** Scenario file used for "New Game" (April 1992 definitive start, Phase II, ethnic_1991). */
+export const NEW_GAME_SCENARIO_RELATIVE = 'data/scenarios/apr1992_definitive_52w.json';
 
-/** April 1992 game start: initial recruitment capital and equipment for desktop recruitment UI (deterministic, from apr1992_phase_ii_4w). */
-const NEW_GAME_RECRUITMENT_CAPITAL: Record<string, number> = { HRHB: 100, RBiH: 150, RS: 250 };
-const NEW_GAME_EQUIPMENT_POINTS: Record<string, number> = { HRHB: 120, RBiH: 60, RS: 300 };
+/** April 1992 game start: initial recruitment capital and equipment for desktop recruitment UI (from apr1992_definitive_52w). */
+const NEW_GAME_RECRUITMENT_CAPITAL: Record<string, number> = { HRHB: 120, RBiH: 200, RS: 350 };
+const NEW_GAME_EQUIPMENT_POINTS: Record<string, number> = { HRHB: 150, RBiH: 40, RS: 500 };
 
 /** Load a scenario file and return initial GameState. */
 export async function loadScenarioFromPath(

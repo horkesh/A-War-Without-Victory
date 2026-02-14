@@ -102,7 +102,9 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
       faction,
       name: String(r.name).trim(),
       home_mun,
-      corps: typeof r.corps === 'string' && r.corps.trim() ? r.corps.trim() : undefined,
+      corps: typeof r.corps === 'string' && r.corps.trim() ? r.corps.trim()
+           : typeof r.subordinate_to === 'string' && (r.subordinate_to as string).trim() ? (r.subordinate_to as string).trim()
+           : undefined,
       kind,
       manpower_cost,
       capital_cost,

@@ -1,22 +1,221 @@
 {
   "formations": [
     {
+      "id": "arbih_general_staff",
+      "faction": "RBiH",
+      "name": "General Staff ARBiH",
+      "kind": "corps_asset",
+      "hq_sid": "S122742",
+      "personnel": 0,
+      "tags": []
+    },
+    {
       "id": "arbih_1st_corps",
       "faction": "RBiH",
       "name": "1st Corps (Sarajevo)",
-      "kind": "brigade"
+      "kind": "corps_asset",
+      "hq_sid": "S192015",
+      "personnel": 0,
+      "tags": []
     },
     {
-      "id": "vrs_1st_krajina_corps",
+      "id": "arbih_2nd_corps",
+      "faction": "RBiH",
+      "name": "2nd Corps (Tuzla)",
+      "kind": "corps_asset",
+      "hq_sid": "S155551",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "arbih_3rd_corps",
+      "faction": "RBiH",
+      "name": "3rd Corps (Zenica)",
+      "kind": "corps_asset",
+      "hq_sid": "S162973",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "arbih_4th_corps",
+      "faction": "RBiH",
+      "name": "4th Corps (Mostar)",
+      "kind": "corps_asset",
+      "hq_sid": "S121398",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "arbih_5th_corps",
+      "faction": "RBiH",
+      "name": "5th Corps (Bihać)",
+      "kind": "corps_asset",
+      "hq_sid": "S100838",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "vrs_main_staff",
+      "faction": "RS",
+      "name": "Main Staff VRS",
+      "kind": "corps_asset",
+      "hq_sid": "S228095",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "vrs_1st_krajina",
       "faction": "RS",
       "name": "1st Krajina Corps",
-      "kind": "brigade"
+      "kind": "corps_asset",
+      "hq_sid": "S200026",
+      "personnel": 0,
+      "tags": []
     },
     {
-      "id": "hvo_herzegovina",
+      "id": "vrs_2nd_krajina",
+      "faction": "RS",
+      "name": "2nd Krajina Corps",
+      "kind": "corps_asset",
+      "hq_sid": "S151742",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "vrs_drina",
+      "faction": "RS",
+      "name": "Drina Corps",
+      "kind": "corps_asset",
+      "hq_sid": "S205176",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "vrs_east_bosnian",
+      "faction": "RS",
+      "name": "East Bosnian Corps",
+      "kind": "corps_asset",
+      "hq_sid": "S200891",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "vrs_herzegovina",
+      "faction": "RS",
+      "name": "Herzegovina Corps",
+      "kind": "corps_asset",
+      "hq_sid": "S201545",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "vrs_sarajevo_romanija",
+      "faction": "RS",
+      "name": "Sarajevo-Romanija Corps",
+      "kind": "corps_asset",
+      "hq_sid": "S170666",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "hvo_main_staff",
+      "faction": "HRHB",
+      "name": "Main Staff HVO",
+      "kind": "corps_asset",
+      "hq_sid": "S166090",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "hvo_southeast_herzegovina",
       "faction": "HRHB",
       "name": "Southeast Herzegovina OZ",
-      "kind": "brigade"
+      "kind": "corps_asset",
+      "hq_sid": "S166090",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "hvo_central_bosnia",
+      "faction": "HRHB",
+      "name": "Central Bosnia OZ",
+      "kind": "corps_asset",
+      "hq_sid": "S160431",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "hvo_northwest_bosnia",
+      "faction": "HRHB",
+      "name": "Northwest Bosnia OZ",
+      "kind": "corps_asset",
+      "hq_sid": "S136000",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "hvo_tomislavgrad",
+      "faction": "HRHB",
+      "name": "Tomislavgrad OZ",
+      "kind": "corps_asset",
+      "hq_sid": "S113611",
+      "personnel": 0,
+      "tags": []
+    },
+    {
+      "id": "rs_jna_transition_banja_luka",
+      "faction": "RS",
+      "name": "JNA Transition Force (Banja Luka)",
+      "kind": "brigade",
+      "hq_sid": "S200026",
+      "personnel": 2500,
+      "posture": "attack",
+      "corps_id": "vrs_1st_krajina",
+      "tags": ["jna_legacy", "auto_degrade", "dissolve:16"]
+    },
+    {
+      "id": "rs_jna_transition_bijeljina",
+      "faction": "RS",
+      "name": "JNA Transition Force (Bijeljina)",
+      "kind": "brigade",
+      "hq_sid": "S200891",
+      "personnel": 2000,
+      "posture": "attack",
+      "corps_id": "vrs_east_bosnian",
+      "tags": ["jna_legacy", "auto_degrade", "dissolve:12"]
+    },
+    {
+      "id": "rs_jna_transition_pale",
+      "faction": "RS",
+      "name": "JNA Transition Force (Pale)",
+      "kind": "brigade",
+      "hq_sid": "S216984",
+      "personnel": 2000,
+      "posture": "attack",
+      "corps_id": "vrs_sarajevo_romanija",
+      "tags": ["jna_legacy", "auto_degrade", "dissolve:14"]
+    },
+    {
+      "id": "rs_jna_transition_doboj",
+      "faction": "RS",
+      "name": "JNA Transition Force (Doboj)",
+      "kind": "brigade",
+      "hq_sid": "S208019",
+      "personnel": 1800,
+      "posture": "attack",
+      "corps_id": "vrs_east_bosnian",
+      "tags": ["jna_legacy", "auto_degrade", "dissolve:10"]
+    },
+    {
+      "id": "rs_jna_transition_brcko",
+      "faction": "RS",
+      "name": "JNA Transition Force (Brčko)",
+      "kind": "brigade",
+      "hq_sid": "S300136",
+      "personnel": 1500,
+      "posture": "attack",
+      "corps_id": "vrs_east_bosnian",
+      "tags": ["jna_legacy", "auto_degrade", "dissolve:8"]
     }
   ]
 }
