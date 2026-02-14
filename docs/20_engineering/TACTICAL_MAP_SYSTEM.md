@@ -35,14 +35,16 @@ The tactical map is a standalone Canvas 2D application that renders ~5,800 settl
 - **Formation markers** — horizontal box with army crest + NATO symbol; posture badge (D/P/A/E) when game state loaded
 - **Order arrows** — attack (red solid) and movement (dashed, faction-colored) from `brigade_attack_orders` / `brigade_mun_orders`
 - **Replay timeline playback** — week-by-week animation from `replay_timeline.json` with settlement flip highlights; **replay scrubber** for direct week jump
-- **Interactive settlement panel** — 7-tab detail view (OVER, ADMIN, CTRL, INTEL, ORDERS, AAR, EVENTS)
+- **Interactive settlement panel** — 7-tab detail view (OVERVIEW, ADMIN, CONTROL, MILITARY, ORDERS, HISTORY, EVENTS). See [GUI_POLISH_PASS_AND_REFACTOR_2026_02_14.md](../40_reports/implemented/GUI_POLISH_PASS_AND_REFACTOR_2026_02_14.md).
+- **Formation panel** — clicking a formation opens either a **corps panel** (CORPS COMMAND, STRENGTH, OPERATIONAL GROUPS, ORDER OF BATTLE with clickable subordinates) or **brigade panel** (with parent corps link); SET POSTURE (5 options), MOVE/ATTACK enter target-selection mode; **zoom-to-selection** pans to selected settlement or formation centroid.
+- **Strategic zoom** — at zoom level 0 only corps/corps_asset markers are shown (NATO XX symbol) and clickable; small settlements rendered at reduced alpha (watercolor effect); large settlements full opacity.
 - **OOB sidebar** — WAR STATUS block (territory %, personnel, flips, pending orders, faction overview, alerts) plus full formation roster grouped by faction
 - **Replay export** — in-browser WebM export via `MediaRecorder` from the tactical map canvas
 - **Minimap** — overview with viewport rectangle
 - **Search** — diacritic-insensitive fuzzy settlement search
-- **Dataset switching** — Baseline (Apr 1992), September 1992, or any loaded game state
+- **Dataset switching** — Baseline (Apr 1992), September 1992, or any loaded game state; dropdown updates when state is loaded externally (Load State, replay, or IPC)
 - **Recruitment UI** — when loaded game state has recruitment and **player_faction** (e.g. after New Campaign): toolbar shows the player's **Capital** and **Equipment**; **Recruit** button and **R** hotkey open a modal that lists only the player's side and only brigades recruitable right now, with cost legend (C = Capital, E = Equipment, M = Manpower); confirm applies recruitment and map shows placement feedback (new formation selected for 4s). See §13.8 and [RECRUITMENT_UI_FROM_MAP_2026_02_14.md](../40_reports/implemented/RECRUITMENT_UI_FROM_MAP_2026_02_14.md).
-- **Desktop (Electron)** — when run as `npm run desktop`: main menu overlay (New Campaign / Load Save / Load Replay), Load scenario/state and Advance turn from main process, AAR modal after turn advance when control events occur, Settings/Help modals, replay scrubber; recruitment catalog and apply via IPC. **New Game:** New Campaign opens a side-selection overlay (RBiH, RS, HRHB with flags); choosing a side invokes `start-new-campaign` IPC, loads the fixed April 1992 scenario, sets `meta.player_faction`, and injects recruitment state for the toolbar/Recruit modal (§13.6, [DESKTOP_GUI_IPC_CONTRACT.md](DESKTOP_GUI_IPC_CONTRACT.md), [GUI_DESIGN_BLUEPRINT.md](GUI_DESIGN_BLUEPRINT.md) §19.2).
+- **Desktop (Electron)** — when run as `npm run desktop`: main menu overlay (New Campaign / Load Save / Load Replay), Load scenario/state and Advance turn from main process, AAR modal after turn advance when control events occur, Settings/Help modals (pruned: Settings shows "coming soon", Help shows shortcuts), replay scrubber; recruitment catalog and apply via IPC. In browser (no desktop): "New Campaign" appears as "Load Scenario"; Continue dimmed until state loaded. **New Game:** New Campaign opens a side-selection overlay (RBiH, RS, HRHB with flags); choosing a side invokes `start-new-campaign` IPC, loads the fixed April 1992 scenario, sets `meta.player_faction`, and injects recruitment state for the toolbar/Recruit modal (§13.6, [DESKTOP_GUI_IPC_CONTRACT.md](DESKTOP_GUI_IPC_CONTRACT.md), [GUI_DESIGN_BLUEPRINT.md](GUI_DESIGN_BLUEPRINT.md) §19.2).
 
 There are no external map libraries (no Leaflet, Mapbox, Pixi.js). All rendering is done with the native Canvas 2D API.
 
@@ -58,7 +60,7 @@ All source files live under `src/ui/map/` (13 files, ~2,600+ total lines):
 | `main.ts` | 17 | Bootstrap — `DOMContentLoaded` → `new MapApp('map-root').init()` |
 | `MapApp.ts` | ~2640 | **Main orchestrator** — rendering, interaction, all UI wiring, order arrows, war status, tabs, desktop flow |
 | `types.ts` | ~260 | Shared TypeScript interfaces; LoadedGameState includes attackOrders, movementOrders, recentControlEvents |
-| `constants.ts` | 112 | Theme tokens, zoom factors, colors |
+| `constants.ts` | 112 | Theme tokens, zoom factors, colors; `ZOOM_FORMATION_FILTER` (strategic zoom corps-only); `PANEL_READINESS_COLORS`, `panelReadinessColor()` |
 | `vite.config.ts` | 101 | Vite config + custom `serveTacticalMapData` plugin |
 | `styles/tactical-map.css` | ~400 | NATO ops center dark theme; IBM Plex Mono; 18 CSS custom properties; CRT scanline overlay; phosphor-green active states |
 | `state/MapState.ts` | 164 | Observable state container with pub/sub |
@@ -66,7 +68,7 @@ All source files live under `src/ui/map/` (13 files, ~2,600+ total lines):
 | `geo/SpatialIndex.ts` | 102 | Uniform-grid spatial index for hit testing |
 | `data/DataLoader.ts` | 338 | Parallel data fetch, classification, search index, shared borders |
 | `data/ControlLookup.ts` | 57 | SID key normalization (dual format) |
-| `data/GameStateAdapter.ts` | ~216 | Parses `final_save.json` into LoadedGameState; extracts attackOrders, movementOrders, recentControlEvents (deterministic sort) |
+| `data/GameStateAdapter.ts` | ~216 | Parses `final_save.json` into LoadedGameState; extracts attackOrders, movementOrders, recentControlEvents (deterministic sort); corps_command, subordinateIds, corps_id per formation for corps/brigade panels |
 
 **External dependency:** `src/map/nato_tokens.ts` — canonical color tokens shared with the warroom system.
 
@@ -244,7 +246,7 @@ Pass 5a: Order Arrows
 
 Pass 6: Brigade AoR Highlight
   Only when game state loaded, brigade AoR layer on, and a formation selected.
-  Settlement polygons in the selected formation’s AoR are drawn with faction fill (light) and dashed faction stroke. SIDs from `loadedGameState.brigadeAorByFormationId[selectedFormationId]`; draw order is deterministic (sorted SIDs).
+  SIDs from `loadedGameState.brigadeAorByFormationId[selectedFormationId]`; draw order is deterministic (sorted SIDs). **Rendering:** Single compound path (all AoR polygons as subpaths) with `fill('evenodd')` at faction color 15% opacity; outer boundary only (internal edges skipped via sharedBorders) stroked at 2.5px; optional breathing glow animation (requestAnimationFrame, shadowBlur 2–6px sinusoidal, ~2s cycle). Boundary cache invalidated on formation/AoR/zoom change. See [BRIGADE_AOR_OVERHAUL_CORPS_DIRECTED_2026_02_14.md](../40_reports/implemented/BRIGADE_AOR_OVERHAUL_CORPS_DIRECTED_2026_02_14.md) §2.6.
 
 Pass 7: Selection Highlight
   Hovered: white semi-transparent outline.
@@ -472,24 +474,23 @@ Note: Rivers, roads, and boundary are **not** in the layer panel — they are al
 
 | Tab | ID | Content |
 |-----|----|---------|
-| OVER | `overview` | SID, name, type, population. Ethnicity bar chart (Bosniak/Croat/Serb/Other with colored bars and percentages). Census provenance. |
+| OVERVIEW | `overview` | SID, name, type, population. Ethnicity bar chart (Bosniak/Croat/Serb/Other with colored bars and percentages). Census provenance. |
 | ADMIN | `admin` | Municipality name, ID, settlement count (resolved from `municipality_id` or `mun1990_id` on the feature). NATO class, urban center designation. |
-| CTRL | `control` | Controller with faction swatch, control status (CONSOLIDATED/CONTESTED/HIGHLY_CONTESTED). Stability placeholder. |
-| INTEL | `intel` | Formations in this municipality (name, kind, readiness badge, cohesion bar). Militia pool (available/committed/exhausted stacked bar). Requires loaded game state. |
+| CONTROL | `control` | Controller with faction swatch, control status (CONSOLIDATED/CONTESTED/HIGHLY_CONTESTED). Stability placeholder. |
+| MILITARY | `intel` | Formations in this municipality (name, kind, readiness badge, cohesion bar). Militia pool (available/committed/exhausted stacked bar). Requires loaded game state. |
 | ORDERS | `orders` | Attack and movement orders affecting this settlement (from loaded game state). |
-| AAR | `aar` | After-action summary for the current turn; link to open AAR modal when control events occurred. |
+| HISTORY | `aar` | After-action summary for the current turn; link to open AAR modal when control events occurred. When empty and turn > 0, shows message about loading replay for full history. |
 | EVENTS | `events` | Recent control events (flips) for context; from `loadedGameState.recentControlEvents`. |
 
-### 13.3 Brigade Panel
+### 13.3 Formation Panel (Corps and Brigade)
 
-When the user **clicks a formation marker** on the map (with game state loaded), the right panel opens as a **brigade detail panel** instead of the settlement panel. The same 340px right panel is used.
+When the user **clicks a formation marker** on the map (with game state loaded), the right panel opens as a **formation detail panel**. The same 340px right panel is used. **Corps/corps_asset** formations open a **corps panel**; all other kinds open a **brigade panel**. See [GUI_POLISH_PASS_AND_REFACTOR_2026_02_14.md](../40_reports/implemented/GUI_POLISH_PASS_AND_REFACTOR_2026_02_14.md).
 
-**Header:** Formation name; subtitle shows kind, faction, personnel, and posture.
+**Corps panel** — Sections: CORPS COMMAND (stance, exhaustion, command span, status, creation turn); STRENGTH (subordinate count, total personnel); OPERATIONAL GROUPS (OG slots, active OGs with names); ORDER OF BATTLE (clickable subordinate formation rows). At strategic zoom only corps/corps_asset markers are shown and hit-tested.
 
-**Content (no tabs):**
-- Brigade ID, faction, kind, status, created turn
-- **Statistics:** personnel, posture (defend/probe/attack/elastic_defense), fatigue, cohesion
-- **AoR:** count of settlements in the formation’s Area of Responsibility; if ≤30, a sorted list of settlement IDs
+**Brigade panel** — Header: formation name; subtitle shows kind, faction, personnel, posture. Section header "FORMATION" (generic). Content: formation ID, faction, kind, status, created turn; **Statistics:** personnel, posture (defend/probe/attack/elastic_defense/consolidation), fatigue, cohesion; **AoR:** count and list when ≤30; **Parent corps** as clickable link when present. **Actions:** SET POSTURE (dropdown: defend, probe, attack, elastic_defense, consolidation); MOVE and ATTACK enter target-selection mode (panel closes, status prompts map click; next click resolves order).
+
+**Zoom to selection:** Toolbar zoom-in (or shortcut) pans to the centroid of the selected settlement or formation (formation uses HQ settlement or municipality centroid).
 
 When the Brigade AoR layer is on, the selected formation’s AoR settlements are highlighted on the map (light faction fill + dashed outline). Closing the panel or pressing Escape clears `selectedFormationId` and the brigade AoR highlight. Clicking a settlement still opens the settlement panel (7 tabs) as before.
 
@@ -514,7 +515,7 @@ Centered top overlay with text input and results dropdown. Max 12 results. Diacr
 
 **Main menu overlay** — (Desktop) Full-screen overlay with New Campaign / Load Save / Load Replay. Toggle with toolbar "Menu" or `M`. Escape closes. **New Campaign** (desktop only): closes the menu and shows a **side-picker overlay** (three options with faction flags: RBiH, RS, HRHB). Choosing a side calls `start-new-campaign` IPC; the app loads the fixed April 1992 scenario (`apr1992_historical_52w.json`), sets `meta.player_faction`, injects `recruitment_state`, and applies the state to the map. In browser (no desktop IPC), New Campaign falls back to triggering "Load scenario…" (file picker).
 
-**Modals** — AAR (after turn advance when control events occur), War Summary (territory and flip summary), Settings (placeholder), Help (shortcuts and links). Each modal has a backdrop and close button; Escape closes the topmost.
+**Modals** — AAR (after turn advance when control events occur), War Summary (territory and flip summary), Settings ("Settings coming soon."), Help (title "Help", intro paragraph, KEYBOARD SHORTCUTS subsection). Each modal has a backdrop and close button; Escape closes the topmost.
 
 ### 13.8 Recruitment Modal
 

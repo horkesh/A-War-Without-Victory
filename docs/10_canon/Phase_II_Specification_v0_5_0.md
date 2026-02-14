@@ -150,6 +150,8 @@ When the Phase I → Phase II transition runs with **edges** provided, brigade d
 
 Within a municipality shared by multiple brigades of the same faction, settlement split is deterministic (stable ordering + deterministic graph traversal/tie-break). Municipality movement orders (`brigade_mun_orders`) apply before pressure and attack resolution; settlement-level reshape orders (`brigade_aor_orders`) remain available as fine-grain adjustment. See Systems_Manual_v0_5_0.md §2.1 and §6; implementation: src/sim/phase_ii/brigade_aor.ts and src/sim/turn_pipeline.ts.
 
+**Implementation-note (2026-02-14):** When `state.corps_command` exists and is non-empty, assignment uses the corps-directed algorithm (partition front into corps sectors, allocate brigades along each sector's frontline; home municipality plus up to two contiguous neighbor municipalities per brigade; contiguity enforced and repaired). Otherwise the legacy Voronoi BFS path is used (Phase I / tests). Rebalance step guards transfers with `wouldRemainContiguous` so the donor brigade stays contiguous. See [BRIGADE_AOR_OVERHAUL_CORPS_DIRECTED_2026_02_14.md](../40_reports/implemented/BRIGADE_AOR_OVERHAUL_CORPS_DIRECTED_2026_02_14.md).
+
 ---
 
 ## 8. Supply Pressure
