@@ -11,6 +11,7 @@ export default defineConfig({
       'tests/settlement_control.test.ts',
       'tests/corps_command.test.ts',
       'tests/aor_reshaping.test.ts',
+      'tests/bot_three_sides_validation.test.ts',
     ],
     globals: false,
   },

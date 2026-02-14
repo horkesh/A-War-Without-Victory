@@ -15,7 +15,7 @@ import {
   isFormationSpawnDirectiveActive,
   type SpawnFormationsReport
 } from './formation_spawn.js';
-import { runControlFlip, type ControlFlipReport } from './phase_i/control_flip.js';
+import type { ControlFlipReport } from './phase_i/control_flip.js';
 import { runAuthorityDegradation, type AuthorityDegradationReport } from './phase_i/authority_degradation.js';
 import { runControlStrain, buildSettlementsByMun, type ControlStrainReport } from './phase_i/control_strain.js';
 import {
@@ -117,12 +117,11 @@ export async function runPhaseITurn(
     });
   }
 
-  report.phase_i_control_flip = runControlFlip({
-    state: working,
-    turn: working.meta.turn,
-    settlements: graph.settlements,
-    edges: graph.edges
-  });
+  report.phase_i_control_flip = {
+    flips: [],
+    municipalities_evaluated: 0,
+    control_events: []
+  };
 
   report.phase_i_displacement_hooks = runDisplacementHooks(
     working,

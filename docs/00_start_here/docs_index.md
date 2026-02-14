@@ -35,6 +35,10 @@
 - [REPO_MAP.md](../20_engineering/REPO_MAP.md) — repo layout and “change X → go here”
 - [MAP_BUILD_SYSTEM.md](../20_engineering/MAP_BUILD_SYSTEM.md) — map build commands and contracts
 - [MAP_RENDERING_PIPELINE.md](../20_engineering/MAP_RENDERING_PIPELINE.md) — map rendering pipeline
+- [TACTICAL_MAP_SYSTEM.md](../20_engineering/TACTICAL_MAP_SYSTEM.md) — tactical map UI (Canvas 2D, War Status, orders/AAR/events, recruitment toolbar and modal §13.8, desktop mode; New Game side picker §13.6, §21)
+- [DESKTOP_GUI_IPC_CONTRACT.md](../20_engineering/DESKTOP_GUI_IPC_CONTRACT.md) — Electron main/renderer IPC contract for desktop "play myself" flow (start-new-campaign for New Game side picker, load-scenario-dialog, advance-turn, recruitment IPC)
+- [GUI_PLAYBOOK_DESKTOP.md](../20_engineering/GUI_PLAYBOOK_DESKTOP.md) — playbook: load scenario/state, advance turn, AAR, replay
+- [GUI_DESIGN_BLUEPRINT.md](../20_engineering/GUI_DESIGN_BLUEPRINT.md) — GUI design and phased delivery (Phases 2–4); NATO ops center dark theme implemented 2026-02-14 ([GUI_VISUAL_OVERHAUL_NATO_OPS_CENTER_2026_02_14.md](../40_reports/implemented/GUI_VISUAL_OVERHAUL_NATO_OPS_CENTER_2026_02_14.md))
 - [MILITIA_BRIGADE_FORMATION_DESIGN.md](../20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md) — militia/brigade pool semantics, formation spawn, large-settlement resistance, displaced
 - [ADR/](../20_engineering/ADR/) — architecture decision records
 - [repo/](../20_engineering/repo/) — repo policies (tracked artifacts, node_modules)
@@ -52,11 +56,12 @@
 
 ## Reports (docs/40_reports/)
 
-- Handovers and implementation: [HANDOVER_WARROOM_GUI.md](../40_reports/HANDOVER_WARROOM_GUI.md), [IMPLEMENTATION_PLAN_GUI_MVP.md](../40_reports/IMPLEMENTATION_PLAN_GUI_MVP.md), [WARROOM_GUI_IMPLEMENTATION_REPORT.md](../40_reports/WARROOM_GUI_IMPLEMENTATION_REPORT.md)
-- Phase completion reports: [PHASE_*_COMPLETION_REPORT.md](../40_reports/), [PHASE_G_UI_NOTES.md](../40_reports/PHASE_G_UI_NOTES.md)
-- Brigade Operations: [BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md](../40_reports/BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md)
-- Audits: [audit/](../40_reports/audit/) (state-of-game), [audits/](../40_reports/audits/) (phase/feature audits)
-- UI/terrain specs and cleanup: [40_reports/](../40_reports/)
+- **Entrypoint:** [40_reports/README.md](../40_reports/README.md) — master index and structure (2026-02-13).
+- **Consolidated views:** [CONSOLIDATED_IMPLEMENTED.md](../40_reports/CONSOLIDATED_IMPLEMENTED.md) (what’s done), [CONSOLIDATED_BACKLOG.md](../40_reports/CONSOLIDATED_BACKLOG.md) (what’s not yet done), [CONSOLIDATED_LESSONS_LEARNED.md](../40_reports/CONSOLIDATED_LESSONS_LEARNED.md) (patterns and corrections).
+- **Cleanup plan:** [ORCHESTRATOR_40_REPORTS_CLEANUP_AND_CONSOLIDATION_2026_02_13.md](../40_reports/ORCHESTRATOR_40_REPORTS_CLEANUP_AND_CONSOLIDATION_2026_02_13.md).
+- Subfolders: [audit/](../40_reports/audit/), [implemented/](../40_reports/implemented/), [backlog/](../40_reports/backlog/), [convenes/](../40_reports/convenes/), [handovers/](../40_reports/handovers/). Custodian: `.cursor/skills/reports-custodian/SKILL.md`.
+- **GUI design advisor handover:** [handovers/GUI_DESIGN_ADVISOR_HANDOVER_2026_02_14.md](../40_reports/handovers/GUI_DESIGN_ADVISOR_HANDOVER_2026_02_14.md) — report for expert GUI/UX advisor (what exists, what’s planned, what we need: layout, readability, panels, controls) before Phase 3/4.
+- Handovers and implementation: [handovers/HANDOVER_WARROOM_GUI.md](../40_reports/handovers/HANDOVER_WARROOM_GUI.md), [backlog/IMPLEMENTATION_PLAN_GUI_MVP.md](../40_reports/backlog/IMPLEMENTATION_PLAN_GUI_MVP.md), [implemented/WARROOM_GUI_IMPLEMENTATION_REPORT.md](../40_reports/implemented/WARROOM_GUI_IMPLEMENTATION_REPORT.md); Phase completion: [implemented/](../40_reports/implemented/) (PHASE_*_COMPLETION_REPORT, BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT, RECRUITMENT_UI_FROM_MAP_2026_02_14).
 
 ## Research (docs/50_research/)
 

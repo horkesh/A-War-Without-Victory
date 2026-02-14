@@ -97,6 +97,24 @@ AI prioritizes **municipality consolidation**: cleaning hostile settlements insi
 
 Integration: `src/sim/consolidation_scoring.ts`, `src/sim/bot/simple_general_bot.ts`, `src/sim/phase_ii/bot_brigade_ai.ts`, `src/sim/phase_i/control_flip.ts`, `src/state/game_state.ts` (BrigadePosture includes `consolidation`).
 
+## Attack target de-duplication
+
+At most **one brigade per faction per turn** may be assigned to attack a given settlement. When assigning attack orders, already-chosen targets are treated as unavailable. The only exception: a brigade may be assigned to a settlement that is already chosen **if** (1) that brigade is part of an active operational group (OG) conducting an operation toward that settlement, **and** (2) the target has **heavy resistance** (defender brigade present at the settlement or garrison at or above a defined threshold, e.g. 250). Until operation targeting exists (e.g. corps/OG orders with target_sid), the OG+operation check is a stub (no duplicate targets). Run summaries report `unique_attack_targets` (distinct SIDs targeted per turn) alongside `orders_processed` and `flips_applied` for diagnostics.
+
+## Phase II bot architecture (three-sided)
+
+Phase II bot decisions are organized in three layers, run in pipeline order:
+
+1. **Army standing orders** — historical army-level directives set `state.army_stance` per faction (e.g. RS Territorial Seizure 0–12, RBiH Survival Defense 0–12, HRHB Lasva Offensive 12–26 when at war with RBiH). Data: `FACTION_STANDING_ORDERS` in `bot_strategy.ts`.
+2. **Corps AI** — stance selection, named operations, OG activation, corridor breach. Sets corps stance and active operations before brigade AI runs.
+3. **Brigade AI** — posture, target scoring, attack orders, casualty-aversion. Reads corps stance via `getParentCorpsStance()`; offensive corps lowers attack threshold, defensive/reorganize forces defend.
+
+Shared helpers used by corps AI, brigade AI, and AoR rebalancing:
+
+- `src/sim/phase_ii/phase_ii_adjacency.ts` — `buildAdjacencyFromEdges(edges)`, `getFactionBrigades(state, faction)` (deterministic, sorted iteration).
+
+Pipeline steps: `generate-bot-corps-orders` (before) → `generate-bot-brigade-orders`. See [THREE_SIDED_BOT_AI_AND_STANDING_ORDERS_2026_02_14.md](../40_reports/implemented/THREE_SIDED_BOT_AI_AND_STANDING_ORDERS_2026_02_14.md).
+
 ## Integration points
 
 - `src/sim/bot/bot_strategy.ts`
@@ -104,6 +122,11 @@ Integration: `src/sim/consolidation_scoring.ts`, `src/sim/bot/simple_general_bot
 - `src/sim/bot/simple_general_bot.ts`
 - `src/sim/bot/bot_manager.ts`
 - `src/sim/consolidation_scoring.ts`
+- `src/sim/phase_ii/phase_ii_adjacency.ts` (shared adjacency and faction brigades)
+- `src/sim/phase_ii/bot_corps_ai.ts` (corps stance, operations, OGs, corridor breach, standing orders)
+- `src/sim/phase_ii/bot_brigade_ai.ts` (posture, target scoring, attack orders)
+- `src/sim/phase_ii/bot_strategy.ts` (Phase II faction profiles, doctrine phases, standing orders)
+- `src/sim/phase_ii/combat_estimate.ts` (read-only attack cost for casualty-aversion)
 - `src/scenario/scenario_types.ts` (`bot_difficulty`)
 - `src/scenario/scenario_loader.ts`
 - `src/scenario/scenario_runner.ts`

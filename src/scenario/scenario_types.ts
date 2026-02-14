@@ -71,12 +71,6 @@ export interface Scenario {
   rbih_hrhb_war_earliest_week?: number;
   /** B4: Coercion pressure [0, 1] per municipality (mun1990_id). When set, applied to state at init; reduces Phase I flip threshold in those muns. E.g. Prijedor, Zvornik, Foča. */
   coercion_pressure_by_municipality?: Record<string, number>;
-  /** Experimental: disables Phase I control-flip step; useful for A/B testing military-action-only control change behavior. */
-  disable_phase_i_control_flip?: boolean;
-  /** Experimental military-action Phase I tuning (used only when disable_phase_i_control_flip = true). */
-  phase_i_military_action_attack_scale?: number;
-  /** Experimental military-action Phase I stability buffer factor (used only when disable_phase_i_control_flip = true). */
-  phase_i_military_action_stability_buffer_factor?: number;
   /** B2: Scenario IDs that must be completed before this scenario is playable. Empty or omitted = no prerequisites. */
   prerequisites?: string[];
   /**

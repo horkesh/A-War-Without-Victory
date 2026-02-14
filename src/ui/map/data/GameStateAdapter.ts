@@ -4,8 +4,17 @@
  * needed by the map application.
  */
 
-import type { LoadedGameState, FormationView, MilitiaPoolView } from '../types.js';
+import type { LoadedGameState, FormationView, MilitiaPoolView, RecruitmentView } from '../types.js';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
+
+function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const fid of Object.keys(rec).sort()) {
+    const v = rec[fid];
+    out[fid] = typeof v?.points === 'number' && Number.isFinite(v.points) ? v.points : 0;
+  }
+  return out;
+}
 
 /**
  * Parse a final_save.json file content into a LoadedGameState.
@@ -123,16 +132,105 @@ export function parseGameState(json: unknown): LoadedGameState {
     statusBySettlement = buildStatusLookup(statusBySettlement);
   }
 
-  // Also check for control_status in municipalities
-  const munis = state.municipalities as Record<string, Record<string, unknown>> | undefined;
-  if (munis) {
-    for (const [, mun] of Object.entries(munis)) {
-      const cs = mun.control_status as string | undefined;
-      if (cs && cs !== 'SECURE') {
-        // Municipality-level status can inform settlement-level if not already set
-      }
+  // Extract pending attack orders (deterministic ordering by brigade id then target sid).
+  const attackOrders = (((state.brigade_attack_orders as unknown[]) ?? [])
+    .map((entry) => {
+      const rec = entry as Record<string, unknown>;
+      const brigadeId = String(rec.brigade_id ?? '');
+      const targetSettlementId = String(rec.target_settlement_id ?? '');
+      if (!brigadeId || !targetSettlementId) return null;
+      return { brigadeId, targetSettlementId };
+    })
+    .filter((v): v is { brigadeId: string; targetSettlementId: string } => v !== null))
+    .sort((a, b) => {
+      if (a.brigadeId < b.brigadeId) return -1;
+      if (a.brigadeId > b.brigadeId) return 1;
+      if (a.targetSettlementId < b.targetSettlementId) return -1;
+      if (a.targetSettlementId > b.targetSettlementId) return 1;
+      return 0;
+    });
+
+  // Extract pending municipality movement orders (deterministic ordering).
+  const movementOrders = (((state.brigade_mun_orders as unknown[]) ?? [])
+    .map((entry) => {
+      const rec = entry as Record<string, unknown>;
+      const brigadeId = String(rec.brigade_id ?? '');
+      const targetMunicipalityId = String(rec.target_mun_id ?? '');
+      if (!brigadeId || !targetMunicipalityId) return null;
+      return { brigadeId, targetMunicipalityId };
+    })
+    .filter((v): v is { brigadeId: string; targetMunicipalityId: string } => v !== null))
+    .sort((a, b) => {
+      if (a.brigadeId < b.brigadeId) return -1;
+      if (a.brigadeId > b.brigadeId) return 1;
+      if (a.targetMunicipalityId < b.targetMunicipalityId) return -1;
+      if (a.targetMunicipalityId > b.targetMunicipalityId) return 1;
+      return 0;
+    });
+
+  // Extract recent control events for panel/event ticker.
+  const recentControlEvents = (((state.control_events as unknown[]) ?? [])
+    .map((entry) => {
+      const rec = entry as Record<string, unknown>;
+      const turnRaw = Number(rec.turn ?? NaN);
+      const settlementId = String(rec.settlement_id ?? '');
+      const mechanism = String(rec.mechanism ?? 'unknown');
+      if (!Number.isFinite(turnRaw) || !settlementId) return null;
+      const fromRaw = rec.from;
+      const toRaw = rec.to;
+      const munRaw = rec.mun_id;
+      return {
+        turn: turnRaw,
+        settlementId,
+        from: fromRaw == null ? null : String(fromRaw),
+        to: toRaw == null ? null : String(toRaw),
+        mechanism,
+        municipalityId: munRaw == null ? null : String(munRaw)
+      };
+    })
+    .filter((v): v is {
+      turn: number;
+      settlementId: string;
+      from: string | null;
+      to: string | null;
+      mechanism: string;
+      municipalityId: string | null;
+    } => v !== null))
+    .sort((a, b) => {
+      if (a.turn !== b.turn) return a.turn - b.turn;
+      if (a.settlementId < b.settlementId) return -1;
+      if (a.settlementId > b.settlementId) return 1;
+      if (a.mechanism < b.mechanism) return -1;
+      if (a.mechanism > b.mechanism) return 1;
+      return 0;
+    });
+
+  // Extract recruitment state (capital and equipment by faction, deterministic key order).
+  let recruitment: RecruitmentView | undefined;
+  const rawRecruitment = state.recruitment_state as Record<string, unknown> | undefined;
+  if (rawRecruitment) {
+    const capitalByFaction = pointsByFaction(
+      (rawRecruitment.recruitment_capital as Record<string, { points?: number }> | undefined) ?? {}
+    );
+    const equipmentByFaction = pointsByFaction(
+      (rawRecruitment.equipment_pools as Record<string, { points?: number }> | undefined) ?? {}
+    );
+    const recruitedBrigadeIds = Array.isArray(rawRecruitment.recruited_brigade_ids)
+      ? [...(rawRecruitment.recruited_brigade_ids as string[])].sort()
+      : [];
+    if (Object.keys(capitalByFaction).length > 0) {
+      recruitment = {
+        capitalByFaction,
+        equipmentByFaction: Object.keys(equipmentByFaction).length > 0 ? equipmentByFaction : undefined,
+        recruitedBrigadeIds,
+      };
     }
   }
+
+  const rbih_hrhb_war_earliest_turn =
+    typeof meta?.rbih_hrhb_war_earliest_turn === 'number' ? meta.rbih_hrhb_war_earliest_turn : undefined;
+  const phase_i_alliance_rbih_hrhb =
+    typeof state.phase_i_alliance_rbih_hrhb === 'number' ? state.phase_i_alliance_rbih_hrhb : undefined;
 
   return {
     label,
@@ -143,5 +241,12 @@ export function parseGameState(json: unknown): LoadedGameState {
     controlBySettlement,
     statusBySettlement,
     brigadeAorByFormationId,
+    attackOrders,
+    movementOrders,
+    recentControlEvents,
+    recruitment,
+    player_faction: (meta.player_faction as string | null | undefined) ?? undefined,
+    rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
+    phase_i_alliance_rbih_hrhb: phase_i_alliance_rbih_hrhb ?? null,
   };
 }

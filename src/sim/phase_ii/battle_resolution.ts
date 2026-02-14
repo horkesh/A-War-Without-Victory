@@ -27,7 +27,7 @@ import type { TerrainScalarsData } from '../../map/terrain_scalars.js';
 import { getTerrainScalarsForSid } from '../../map/terrain_scalars.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { areRbihHrhbAllied } from '../phase_i/alliance_update.js';
-import { MIN_BRIGADE_SPAWN, isLargeUrbanSettlementMun, LARGE_SETTLEMENT_MUN_IDS } from '../../state/formation_constants.js';
+import { MIN_BRIGADE_SPAWN, MIN_COMBAT_PERSONNEL, isLargeUrbanSettlementMun, LARGE_SETTLEMENT_MUN_IDS } from '../../state/formation_constants.js';
 import { getBrigadeAoRSettlements, getSettlementGarrison } from './brigade_aor.js';
 import { computeEquipmentMultiplier, captureEquipment, ensureBrigadeComposition } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
@@ -573,11 +573,12 @@ function computeBattleCasualties(
   }
   defenderTotal = Math.max(MIN_CASUALTIES_PER_BATTLE, Math.round(defenderTotal));
 
-  // Cap casualties at available personnel minus floor
+  // Cap casualties at available personnel minus combat floor (not spawn floor —
+  // formations at MIN_BRIGADE_SPAWN must still be able to take losses in combat)
   const attackerPersonnel = attackerFormation.personnel ?? 0;
   const defenderPersonnel = defenderFormation.personnel ?? 0;
-  attackerTotal = Math.min(attackerTotal, Math.max(0, attackerPersonnel - MIN_BRIGADE_SPAWN));
-  defenderTotal = Math.min(defenderTotal, Math.max(0, defenderPersonnel - MIN_BRIGADE_SPAWN));
+  attackerTotal = Math.min(attackerTotal, Math.max(0, attackerPersonnel - MIN_COMBAT_PERSONNEL));
+  defenderTotal = Math.min(defenderTotal, Math.max(0, defenderPersonnel - MIN_COMBAT_PERSONNEL));
 
   // Surrender cascade: most defenders captured, few killed
   const attackerKiaFrac = KIA_FRACTION;
@@ -589,7 +590,7 @@ function computeBattleCasualties(
     defenderWiaFrac = 0.10;
     // Most become captured
     defenderTotal = Math.max(defenderTotal, Math.round(defenderPersonnel * 0.5));
-    defenderTotal = Math.min(defenderTotal, Math.max(0, defenderPersonnel - MIN_BRIGADE_SPAWN));
+    defenderTotal = Math.min(defenderTotal, Math.max(0, defenderPersonnel - MIN_COMBAT_PERSONNEL));
   }
 
   // Equipment losses
@@ -664,7 +665,11 @@ function evaluatePostBattleSnaps(
 
 function applyPersonnelLoss(formation: FormationState, loss: number): void {
   if (typeof formation.personnel !== 'number') return;
-  formation.personnel = Math.max(MIN_BRIGADE_SPAWN, formation.personnel - loss);
+  formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, formation.personnel - loss);
+  // Degrade readiness when personnel drops below spawn threshold (combat attrition)
+  if (formation.personnel < MIN_BRIGADE_SPAWN && formation.readiness === 'active') {
+    formation.readiness = 'degraded';
+  }
 }
 
 function applyEquipmentBattleLoss(formation: FormationState, tanksLost: number, artilleryLost: number): void {

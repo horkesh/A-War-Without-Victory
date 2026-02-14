@@ -69,6 +69,13 @@ export type LoadingProgress = {
   detail?: string;
 };
 
+/** Map 1991 majority ethnicity to faction for baseline control when settlement_ethnicity_data is used. */
+const ETHNIC_MAJORITY_TO_FACTION: Record<string, string> = {
+  bosniak: 'RBiH',
+  serb: 'RS',
+  croat: 'HRHB',
+};
+
 /**
  * Load all data for the Tactical Map.
  * @param onProgress Optional callback for loading progress updates.
@@ -125,8 +132,26 @@ export async function loadAllData(
   }
   if (settlements.size === 0) throw new Error('No settlement features in GeoJSON');
 
-  // Build control lookups
-  const controlLookup = buildControlLookup(controlRes.by_settlement_id ?? {});
+  // Build control lookups. When settlement_ethnicity_data is present, use it for the initial
+  // (baseline) dataset so the viewer shows ethnic-based political control by default.
+  const politicalBySettlement = controlRes.by_settlement_id ?? {};
+  const politicalLookup = buildControlLookup(politicalBySettlement);
+  let controlLookup: Record<string, string | null>;
+  const ethnicityData = ethRes ?? null;
+  if (ethnicityData?.by_settlement_id) {
+    const ethnicBySettlement: Record<string, string | null> = {};
+    for (const [sid, feature] of settlements) {
+      const entry = ethnicityData.by_settlement_id[sid];
+      const majority = (entry?.majority ?? feature.properties?.majority_ethnicity ?? '').trim().toLowerCase();
+      const faction = majority && ETHNIC_MAJORITY_TO_FACTION[majority]
+        ? ETHNIC_MAJORITY_TO_FACTION[majority]
+        : (politicalLookup[sid] ?? null);
+      ethnicBySettlement[sid] = faction ?? null;
+    }
+    controlLookup = buildControlLookup(ethnicBySettlement);
+  } else {
+    controlLookup = politicalLookup;
+  }
   const statusLookup = buildStatusLookup(controlRes.control_status_by_settlement_id ?? {});
 
   // Classify base map features
@@ -251,8 +276,6 @@ export async function loadAllData(
   for (const [mun1990Id, { sx, sy, cnt }] of byMun1990) {
     if (cnt > 0) municipalityCentroids.set(mun1990Id, [sx / cnt, sy / cnt]);
   }
-
-  const ethnicityData: SettlementEthnicityData | null = ethRes ?? null;
 
   onProgress?.({ stage: 'Ready.' });
 

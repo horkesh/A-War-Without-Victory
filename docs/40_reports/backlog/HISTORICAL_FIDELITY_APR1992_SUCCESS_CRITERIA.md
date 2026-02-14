@@ -1,17 +1,22 @@
 # Historical fidelity Apr 1992 — Success criteria checklist
 
-**Reference:** Plan `docs/40_reports/HISTORICAL_FIDELITY_APR1992_RESEARCH_PLAN.md` §11.
+**Reference:** `docs/40_reports/HISTORICAL_FIDELITY_APR1992_RESEARCH_PLAN.md` §11 and Historical Mirror Solution plan.
 
-| Criterion | Status | Evidence |
-|-----------|--------|----------|
-| (1) BB extractor exists and is used | Done | `.cursor/skills/balkan-battlegrounds-historical-extractor/SKILL.md` created; pattern report produced using extractor outputs and BB-derived docs. |
-| (2) Pattern report covers takeover, holdouts, enclaves, pockets, JNA/12 May with BB citations | Done | `data/derived/knowledge_base/balkan_battlegrounds/extractions/PATTERN_REPORT_APR1992_HISTORICAL_FIDELITY.md` with citations (BB1 pp. 496–501, p.404; OOB masters; Phase I §4.3–§4.4; System 5; Sept 1992 spec). |
-| (3) Agreed model for flip, holdouts, enclaves, pockets, early RS/JNA | Done | `docs/40_reports/HISTORICAL_FIDELITY_APR1992_MODEL_DESIGN.md`: flip = political control; Option B (init formations + formation-aware Phase I flip); holdouts via settlement-level control; enclaves/pockets per System 5. |
-| (4) Engine and data reflect model; game models history (incl. RS early heavy-brigade advantage) so player can change it | Done | Formation-aware flip + OOB at start; 30w run RBiH 43.4% at turn 26, RS 53.5%; net control RBiH/RS gain, HRHB loss; player agency via scenario/actions. |
-| (5) Every location or rule traceable to BB-derived pattern or explicit override (with ledger note) | Done | Pattern report traceability table; model design doc; ledger entry 2026-02-10. |
+| Criterion | Target | Evidence artifact |
+|-----------|--------|-------------------|
+| (1) Historical initialization | Canonical Apr 1992 scenarios use `init_control_mode: "ethnic_1991"`; asymmetry comes from deterministic battle pressure (not municipal institutional pre-assignment) | `data/scenarios/historical_mvp_apr1992_52w.json`, `data/scenarios/apr1992_50w_bots.json`, `data/scenarios/apr1992_phase_ii_4w.json`, `data/scenarios/historical_mvp_apr1992_phase_ii_20w.json`, `src/sim/phase_ii/battle_resolution.ts` |
+| (2) Historical reference snapshot | Deterministic `dec1992` reference file exists with all 110 mun1990 entries | `data/source/municipalities_1990_initial_political_controllers_dec1992.json` |
+| (3) Battle-driven trajectory diagnostics | `run_summary.json` includes `vs_historical` and `anchor_checks` blocks for Apr 1992 starts | `runs/<run_id>/run_summary.json` |
+| (4) Control-share tolerance (52w) | Final share close to Dec 1992 envelope: RS 0.65-0.75, RBiH 0.20-0.28, HRHB 0.08-0.12 | `runs/<run_id>/run_summary.json` `vs_historical.counts_by_controller` |
+| (5) Anchor pass checks | Zvornik=RS, Bijeljina=RS, Srebrenica=RBiH, Sapna=RBiH (connected stronghold), Bihac=RBiH, Banja Luka=RS, Tuzla=RBiH | `runs/<run_id>/run_summary.json` `anchor_checks` |
+| (6) Determinism gate | Same seed, same scenario, same horizon => identical final hash and `run_summary` content | Repeated run pair for `apr1992_historical_52w` |
 
-**Scenario run (30w apr1992_50w_bots, init_formations_oob: true):**
-- Turn 26: RBiH 43.4%, RS 53.5%, HRHB 3.1%.
-- Net control (start → end): RBiH 2158 → 2525; RS 2545 → 3117; HRHB 1119 → 180.
-- Historicity: RBiH holds core and gains (no wipe-out); RS territorial expansion; HRHB loss consistent with Croat–Bosniak dynamic.
-- Player agency: Scenario config (init_control, init_formations_oob), formation placement, and turn actions influence outcomes; no scripted result.
+## Acceptance run protocol
+
+1. Run `apr1992_historical_52w.json` once and archive artifacts (`run_summary.json`, `control_delta.json`, `end_report.md`, replay files).
+2. Run it a second time with identical config.
+3. Confirm:
+   - `final_state_hash` matches.
+   - `vs_historical` block present and stable.
+   - `anchor_checks` pass rate is acceptable (target: all listed anchors pass).
+4. Record final accepted run id in `docs/PROJECT_LEDGER.md`.

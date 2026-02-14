@@ -46,9 +46,9 @@ const DIFFICULTY_TUNING: Record<BotDifficulty, BotDifficultyTuning> = {
 const STRATEGY_PROFILES: Record<string, BotStrategyProfile> = {
   RBiH: {
     faction: 'RBiH',
-    early_war_aggression: 0.62,
+    early_war_aggression: 0.45,
     late_war_aggression: 0.56,
-    planned_ops_min_aggression: 0.58,
+    planned_ops_min_aggression: 0.50,
     front_length_penalty_strength: 0.08,
     manpower_sensitivity: 0.18,
     preferred_objective_sids: ['S166499', 'S155551', 'S162973', 'S100838', 'S117994', 'S224065', 'S163520', 'S123749', 'S208019', 'S151360'],
@@ -60,9 +60,9 @@ const STRATEGY_PROFILES: Record<string, BotStrategyProfile> = {
   },
   RS: {
     faction: 'RS',
-    early_war_aggression: 0.64,
+    early_war_aggression: 0.82,
     late_war_aggression: 0.42,
-    planned_ops_min_aggression: 0.48,
+    planned_ops_min_aggression: 0.52,
     front_length_penalty_strength: 0.22,
     manpower_sensitivity: 0.3,
     preferred_objective_sids: ['S200026', 'S216984', 'S200891', 'S230545', 'S227897', 'S205176', 'S202258', 'S203009', 'S220469', 'S218375', 'S120154', 'S162094'],
@@ -135,6 +135,20 @@ export function resolveAggression(profile: BotStrategyProfile, phase: PhaseName 
   } else {
     const t = clamp01((timeContext.global_week - AGGRESSION_TAPER_START_WEEK) / (AGGRESSION_TAPER_END_WEEK - AGGRESSION_TAPER_START_WEEK));
     broadBase = lerp(profile.early_war_aggression, profile.late_war_aggression, t);
+  }
+
+  // Time-phased early-war aggression boost: RS gets a significant edge in weeks 0-12,
+  // reflecting JNA equipment inheritance and early initiative. RBiH is more cautious early.
+  if (timeContext) {
+    const week = timeContext.global_week;
+    if (profile.faction === 'RS' && week < 12) {
+      // Strong early-war boost that tapers linearly to zero by week 12
+      broadBase += 0.12 * (1 - week / 12);
+    } else if (profile.faction === 'RBiH' && week < 12) {
+      // Early-war defensive caution (survival mode)
+      broadBase -= 0.08 * (1 - week / 12);
+    }
+    broadBase = clamp01(broadBase);
   }
 
   // Phase I §4.8: Alliance-aware aggression modifiers

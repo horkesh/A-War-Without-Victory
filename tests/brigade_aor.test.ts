@@ -57,7 +57,7 @@ function makeLinearScenario(): { state: GameState; edges: EdgeRecord[] } {
 
   const state: GameState = {
     schema_version: CURRENT_SCHEMA_VERSION,
-    meta: { turn: 20, seed: 'aor-test', phase: 'phase_ii' } as any,
+    meta: { turn: 20, seed: 'aor-test', phase: 'phase_ii', rbih_hrhb_war_earliest_turn: 1 } as any,
     factions: [
       { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
       { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
@@ -73,7 +73,8 @@ function makeLinearScenario(): { state: GameState; edges: EdgeRecord[] } {
     front_posture_regions: {},
     front_pressure: {},
     militia_pools: {},
-    political_controllers: pc
+    political_controllers: pc,
+    phase_i_alliance_rbih_hrhb: -0.5
   } as GameState;
 
   return { state, edges };
@@ -382,17 +383,17 @@ describe('applyBrigadeMunicipalityOrders', () => {
       militia_pools: {},
       political_controllers: { T1: 'RS', S1: 'RS', S2: 'RS', S3: 'RS', S4: 'RS', E1: 'RBiH' },
       brigade_municipality_assignment: {
-        'rs-a': ['m1'],
+        'rs-a': ['m3'],
         'rs-b': ['m1']
       },
       brigade_mun_orders: {
-        'rs-b': ['m3']
+        'rs-b': ['m1', 'm2']
       }
     } as GameState;
 
     const report = applyBrigadeMunicipalityOrders(state, edges, settlements);
     expect(report.orders_applied).toBe(1);
-    expect(state.brigade_municipality_assignment?.['rs-b']).toEqual(['m3']);
+    expect(state.brigade_municipality_assignment?.['rs-b']).toEqual(['m1', 'm2']);
   });
 });
 

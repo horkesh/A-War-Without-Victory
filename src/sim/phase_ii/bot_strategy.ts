@@ -14,7 +14,7 @@
  * Deterministic: no randomness.
  */
 
-import type { FactionId, BrigadePosture } from '../../state/game_state.js';
+import type { FactionId, BrigadePosture, ArmyStance } from '../../state/game_state.js';
 
 // --- Faction strategy profiles ---
 
@@ -33,6 +33,8 @@ export interface FactionBotStrategy {
   offensive_objectives: string[];
   /** Strategic defensive priority municipalities (brigades prefer defend posture). */
   defensive_priorities: string[];
+  /** Minimum number of brigades in probe/attack when front contact exists. Ensures faction isn't passive. */
+  min_active_brigades: number;
 }
 
 /**
@@ -163,38 +165,212 @@ const HRHB_CENTRAL_BOSNIA: string[] = [
 export const FACTION_STRATEGIES: Record<FactionId, FactionBotStrategy> = {
   RS: {
     corridor_municipalities: POSAVINA_CORRIDOR,
-    max_attack_posture_share: 0.3,
+    max_attack_posture_share: 0.4,
     preferred_posture_when_overstaffed: 'probe',
-    attack_coverage_threshold: 150,
+    attack_coverage_threshold: 120,
     defend_critical_territory: true,
-    // RS offensive goals: Drina consolidation + siege maintenance
     offensive_objectives: [...DRINA_VALLEY, ...SARAJEVO_SIEGE_RING],
-    // RS defensive priorities: Posavina corridor + Banja Luka core
     defensive_priorities: [...POSAVINA_CORRIDOR, 'banja_luka', 'prijedor'],
+    min_active_brigades: 3,
   },
   RBiH: {
     corridor_municipalities: [...SARAJEVO_CORE, ...RBIH_ENCLAVE_DEFENSE],
-    max_attack_posture_share: 0.2,
+    max_attack_posture_share: 0.12,
     preferred_posture_when_overstaffed: 'probe',
-    attack_coverage_threshold: 200,
+    attack_coverage_threshold: 240,
     defend_critical_territory: true,
-    // RBiH offensive goals: break siege, relieve enclaves, secure central corridor
     offensive_objectives: ['ilidza', 'hadzici', 'vogosca', 'ilijas', ...RBIH_CENTRAL_CORRIDOR],
-    // RBiH defensive priorities: Sarajevo + enclaves + Tuzla industrial base
     defensive_priorities: [...SARAJEVO_CORE, ...RBIH_ENCLAVE_DEFENSE, 'tuzla', 'zenica'],
+    min_active_brigades: 1,
   },
   HRHB: {
     corridor_municipalities: [...HRHB_HERZEGOVINA],
-    max_attack_posture_share: 0.25,
+    max_attack_posture_share: 0.35,
     preferred_posture_when_overstaffed: 'probe',
-    attack_coverage_threshold: 180,
+    attack_coverage_threshold: 100,
     defend_critical_territory: true,
-    // HRHB offensive goals: connect central Bosnia pockets to Herzegovina
     offensive_objectives: [...HRHB_CENTRAL_BOSNIA, 'gornji_vakuf', 'jablanica'],
-    // HRHB defensive priorities: Herzegovina heartland + Mostar
     defensive_priorities: [...HRHB_HERZEGOVINA, ...HRHB_CENTRAL_BOSNIA],
+    min_active_brigades: 2,
   },
 };
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Time-Phased Doctrine (D3)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface DoctrinePhase {
+  start_week: number;
+  end_week: number;
+  default_corps_stance: 'defensive' | 'balanced' | 'offensive';
+  max_attack_share_override: number;
+  aggression_modifier: number;
+}
+
+export const FACTION_DOCTRINE_PHASES: Record<FactionId, DoctrinePhase[]> = {
+  RS: [
+    { start_week: 0, end_week: 12, default_corps_stance: 'offensive', max_attack_share_override: 0.55, aggression_modifier: 0.15 },
+    { start_week: 12, end_week: 52, default_corps_stance: 'balanced', max_attack_share_override: 0.4, aggression_modifier: 0 },
+    { start_week: 52, end_week: 9999, default_corps_stance: 'defensive', max_attack_share_override: 0.3, aggression_modifier: -0.1 },
+  ],
+  RBiH: [
+    { start_week: 0, end_week: 12, default_corps_stance: 'defensive', max_attack_share_override: 0.08, aggression_modifier: -0.1 },
+    { start_week: 12, end_week: 40, default_corps_stance: 'balanced', max_attack_share_override: 0.15, aggression_modifier: 0 },
+    { start_week: 40, end_week: 9999, default_corps_stance: 'balanced', max_attack_share_override: 0.25, aggression_modifier: 0.1 },
+  ],
+  HRHB: [
+    { start_week: 0, end_week: 12, default_corps_stance: 'balanced', max_attack_share_override: 0.25, aggression_modifier: 0 },
+    { start_week: 12, end_week: 26, default_corps_stance: 'balanced', max_attack_share_override: 0.35, aggression_modifier: 0.05 },
+    { start_week: 26, end_week: 9999, default_corps_stance: 'balanced', max_attack_share_override: 0.3, aggression_modifier: 0 },
+  ],
+};
+
+/**
+ * Get the active doctrine phase for a faction at a given turn.
+ * Returns null if no doctrine phase applies.
+ */
+export function getActiveDoctrinePhase(faction: FactionId, turn: number): DoctrinePhase | null {
+  const phases = FACTION_DOCTRINE_PHASES[faction];
+  if (!phases) return null;
+  for (const phase of phases) {
+    if (turn >= phase.start_week && turn < phase.end_week) return phase;
+  }
+  return null;
+}
+
+/**
+ * Get effective max_attack_posture_share, accounting for early-war RS boost.
+ * RS gets 0.55 in weeks 0-12 (JNA equipment advantage), tapering to base by week 20.
+ * Deterministic: depends only on faction and turn number.
+ */
+export function getEffectiveAttackShare(faction: FactionId, turn: number): number {
+  const strategy = FACTION_STRATEGIES[faction];
+  const base = strategy.max_attack_posture_share;
+  if (faction === 'RS' && turn < 20) {
+    // Early-war boost: 0.55 at turn 0, tapering linearly to base by turn 20
+    const boost = (0.55 - base) * Math.max(0, 1 - turn / 20);
+    return base + boost;
+  }
+  return base;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Army-Wide Standing Orders
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Historical army-wide standing orders for bot factions.
+ *
+ * Standing orders set the army_stance for each faction based on time period,
+ * representing top-level strategic directives issued by army command. These
+ * override corps-level stance decisions when non-balanced.
+ *
+ * Historical grounding:
+ *   RS: VRS exploited JNA equipment for rapid territorial seizure (Apr-Jun 1992),
+ *       then consolidated gains, then shifted to strategic defense as manpower ebbed.
+ *   RBiH: ARBiH fought for survival early, reorganized through 1993, then adopted
+ *       the famous 1994 "pinprick" strategy — constant small attacks along the
+ *       entire front to stretch VRS reserves thin and prevent concentration.
+ *       Late-war counteroffensives came when the balance shifted (1995).
+ *   HRHB: HVO consolidated Herzegovina, went offensive in the Lasva Valley
+ *       during the Croat-Bosniak war (1993), then pivoted to defense and
+ *       cooperation after Washington Agreement (1994).
+ */
+export interface StandingOrder {
+  /** Human-readable name for the standing order. */
+  name: string;
+  /** First week this order applies (inclusive). */
+  start_week: number;
+  /** Last week this order applies (exclusive). */
+  end_week: number;
+  /** Army stance to set. 'balanced' means no army-level override. */
+  army_stance: ArmyStance;
+  /** Brief flavor description of the strategic intent. */
+  description: string;
+}
+
+export const FACTION_STANDING_ORDERS: Record<FactionId, StandingOrder[]> = {
+  RS: [
+    {
+      name: 'Territorial Seizure',
+      start_week: 0, end_week: 12,
+      army_stance: 'general_offensive',
+      description: 'Exploit JNA equipment handover for maximum territorial gain before international response.',
+    },
+    {
+      name: 'Consolidation',
+      start_week: 12, end_week: 52,
+      army_stance: 'balanced',
+      description: 'Secure gains, fortify corridors, maintain siege rings. No army-wide override — corps decide locally.',
+    },
+    {
+      name: 'Strategic Hold',
+      start_week: 52, end_week: 9999,
+      army_stance: 'general_defensive',
+      description: 'Manpower crisis. Hold existing territory, avoid costly offensives, wait for political settlement.',
+    },
+  ],
+  RBiH: [
+    {
+      name: 'Survival Defense',
+      start_week: 0, end_week: 12,
+      army_stance: 'general_defensive',
+      description: 'Preserve forces. No offensive operations — hold what you can, evacuate what you cannot.',
+    },
+    {
+      name: 'Active Defense',
+      start_week: 12, end_week: 40,
+      army_stance: 'balanced',
+      description: 'Reorganize into corps structure. Local counterattacks permitted — no army-wide directive.',
+    },
+    {
+      name: 'Stretch the Front',
+      start_week: 40, end_week: 80,
+      army_stance: 'general_offensive',
+      description: 'Constant pinprick attacks along the entire front. Not operational breakthroughs — probe everywhere, stretch VRS reserves, prevent enemy concentration. Death by a thousand cuts.',
+    },
+    {
+      name: 'Controlled Counteroffensive',
+      start_week: 80, end_week: 9999,
+      army_stance: 'balanced',
+      description: 'Shift from attrition to targeted counteroffensives. Corps decide where to concentrate force.',
+    },
+  ],
+  HRHB: [
+    {
+      name: 'Consolidate Herzegovina',
+      start_week: 0, end_week: 12,
+      army_stance: 'balanced',
+      description: 'Secure the Croat heartland. No army-wide override — local commanders secure their sectors.',
+    },
+    {
+      name: 'Lasva Offensive',
+      start_week: 12, end_week: 26,
+      army_stance: 'general_offensive',
+      description: 'Push into central Bosnia to connect Croat pockets. Lasva Valley is the main axis.',
+    },
+    {
+      name: 'Washington Pivot',
+      start_week: 26, end_week: 9999,
+      army_stance: 'general_defensive',
+      description: 'Post-Washington Agreement. Cease offensive operations, defend existing territory, cooperate with ARBiH.',
+    },
+  ],
+};
+
+/**
+ * Get the active standing order for a faction at a given turn.
+ * Returns null if no standing order applies (shouldn't happen with 9999 end_week).
+ * Deterministic: depends only on faction and turn number.
+ */
+export function getActiveStandingOrder(faction: FactionId, turn: number): StandingOrder | null {
+  const orders = FACTION_STANDING_ORDERS[faction];
+  if (!orders) return null;
+  for (const order of orders) {
+    if (turn >= order.start_week && turn < order.end_week) return order;
+  }
+  return null;
+}
 
 /**
  * Check if a municipality is in a faction's corridor/defensive priority zones.

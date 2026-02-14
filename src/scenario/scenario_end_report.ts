@@ -307,9 +307,53 @@ export interface PhaseIIAttackResolutionSummary {
   weeks_with_phase_ii: number;
   weeks_with_orders: number;
   orders_processed: number;
+  /** Sum of unique_attack_targets across weeks (distinct SIDs targeted per turn). */
+  unique_attack_targets: number;
   flips_applied: number;
   casualty_attacker: number;
   casualty_defender: number;
+  defender_present_battles: number;
+  defender_absent_battles: number;
+}
+
+export interface PhaseIIAttackResolutionWeekRollup {
+  week_index: number;
+  turn: number;
+  orders_processed: number;
+  unique_attack_targets: number;
+  flips_applied: number;
+  casualty_attacker: number;
+  casualty_defender: number;
+  defender_present_battles: number;
+  defender_absent_battles: number;
+}
+
+export interface HistoricalFactionMetrics {
+  faction: string;
+  personnel_total: number;
+  brigades_active: number;
+  brigades_inactive: number;
+  brigades_total: number;
+  recruitment_capital: number;
+  negotiation_capital: number;
+  prewar_capital: number;
+}
+
+export interface HistoricalFactionDelta {
+  faction: string;
+  personnel_total_delta: number;
+  brigades_active_delta: number;
+  brigades_inactive_delta: number;
+  brigades_total_delta: number;
+  recruitment_capital_delta: number;
+  negotiation_capital_delta: number;
+  prewar_capital_delta: number;
+}
+
+export interface HistoricalAlignmentDiagnostics {
+  initial: HistoricalFactionMetrics[];
+  final: HistoricalFactionMetrics[];
+  delta: HistoricalFactionDelta[];
 }
 
 /**
@@ -456,6 +500,10 @@ export interface FormatEndReportParams {
   botWeeklyDiagnostics?: BotWeeklyDiagnosticsRow[] | null;
   /** Optional aggregate summary of phase_ii_resolve_attack_orders across run weeks. */
   phaseIIAttackResolutionSummary?: PhaseIIAttackResolutionSummary | null;
+  /** Optional per-week rollup of phase_ii_resolve_attack_orders diagnostics. */
+  phaseIIAttackResolutionWeekly?: PhaseIIAttackResolutionWeekRollup[] | null;
+  /** Optional initial/final/delta historical-alignment diagnostics by faction. */
+  historicalAlignmentDiagnostics?: HistoricalAlignmentDiagnostics | null;
 }
 
 /** Phase H1.7: Run-level activity diagnostics (machine-readable). */
@@ -818,8 +866,39 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
     lines.push(`- Weeks in Phase II: ${a.weeks_with_phase_ii}`);
     lines.push(`- Weeks with nonzero orders processed: ${a.weeks_with_orders}`);
     lines.push(`- Orders processed: ${a.orders_processed}`);
+    lines.push(`- Unique attack targets (distinct SIDs): ${a.unique_attack_targets}`);
     lines.push(`- Settlement flips applied: ${a.flips_applied}`);
     lines.push(`- Casualties (attacker / defender): ${a.casualty_attacker} / ${a.casualty_defender}`);
+    lines.push(`- Battles with defender present / absent: ${a.defender_present_battles} / ${a.defender_absent_battles}`);
+    if (params.phaseIIAttackResolutionWeekly && params.phaseIIAttackResolutionWeekly.length > 0) {
+      lines.push('');
+      lines.push('Weekly rollup (week: orders, unique_targets, flips, casualties A/D, defender present/absent):');
+      for (const row of params.phaseIIAttackResolutionWeekly) {
+        lines.push(
+          `  - w${row.week_index + 1}: ${row.orders_processed}, ${row.unique_attack_targets}, ${row.flips_applied}, ` +
+          `${row.casualty_attacker}/${row.casualty_defender}, ${row.defender_present_battles}/${row.defender_absent_battles}`
+        );
+      }
+    }
+    lines.push('');
+  }
+  if (params.historicalAlignmentDiagnostics) {
+    const h = params.historicalAlignmentDiagnostics;
+    lines.push('## Historical alignment diagnostics');
+    lines.push('');
+    lines.push('Initial vs final by faction (personnel, brigades active/inactive/total, recruitment capital, negotiation capital, prewar capital):');
+    const finalByFaction = new Map(h.final.map((row) => [row.faction, row]));
+    for (const initialRow of h.initial) {
+      const finalRow = finalByFaction.get(initialRow.faction);
+      if (!finalRow) continue;
+      lines.push(
+        `- ${initialRow.faction}: personnel ${initialRow.personnel_total}→${finalRow.personnel_total}; ` +
+        `brigades ${initialRow.brigades_active}/${initialRow.brigades_inactive}/${initialRow.brigades_total}` +
+        `→${finalRow.brigades_active}/${finalRow.brigades_inactive}/${finalRow.brigades_total}; ` +
+        `capital ${initialRow.recruitment_capital}/${initialRow.negotiation_capital}/${initialRow.prewar_capital}` +
+        `→${finalRow.recruitment_capital}/${finalRow.negotiation_capital}/${finalRow.prewar_capital}`
+      );
+    }
     lines.push('');
   }
   lines.push('## Notes on interpretation');

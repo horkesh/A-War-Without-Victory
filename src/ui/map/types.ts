@@ -135,6 +135,46 @@ export interface LoadedGameState {
   statusBySettlement: Record<string, string>;
   /** Per formation id: sorted list of settlement IDs in that formation's AoR (from state.brigade_aor). */
   brigadeAorByFormationId: Record<string, string[]>;
+  /** Sorted pending attack orders for map overlays and ORDERS tab. */
+  attackOrders: AttackOrderView[];
+  /** Sorted pending municipality movement orders for map overlays and ORDERS tab. */
+  movementOrders: MovementOrderView[];
+  /** Sorted control events for EVENTS tab and lightweight AAR rendering. */
+  recentControlEvents: RecentControlEventView[];
+  /** Recruitment capital and equipment by faction (when state.recruitment_state exists). Keys in deterministic order. */
+  recruitment?: RecruitmentView;
+  /** Which side the human plays (desktop New Game). RBiH, RS, or HRHB when set. */
+  player_faction?: string | null;
+  /** Earliest turn when RBiH–HRHB war can start (for front line display). */
+  rbih_hrhb_war_earliest_turn?: number | null;
+  /** RBiH–HRHB alliance value; when > ALLIED_THRESHOLD no front between them. */
+  phase_i_alliance_rbih_hrhb?: number | null;
+}
+
+export interface RecruitmentView {
+  capitalByFaction: Record<string, number>;
+  equipmentByFaction?: Record<string, number>;
+  /** Brigade IDs already recruited (for eligibility). */
+  recruitedBrigadeIds: string[];
+}
+
+export interface AttackOrderView {
+  brigadeId: string;
+  targetSettlementId: string;
+}
+
+export interface MovementOrderView {
+  brigadeId: string;
+  targetMunicipalityId: string;
+}
+
+export interface RecentControlEventView {
+  turn: number;
+  settlementId: string;
+  from: string | null;
+  to: string | null;
+  mechanism: string;
+  municipalityId: string | null;
 }
 
 export interface ReplayControlEvent {
@@ -227,7 +267,7 @@ export interface SharedBorderSegment {
 }
 
 // ─── Settlement Panel ───────────────────────────────
-export type PanelTabId = 'overview' | 'admin' | 'control' | 'intel';
+export type PanelTabId = 'overview' | 'admin' | 'control' | 'intel' | 'orders' | 'aar' | 'events';
 
 export interface SettlementPanelData {
   sid: string;
