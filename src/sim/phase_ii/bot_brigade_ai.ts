@@ -19,10 +19,13 @@ import type {
 } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { buildAdjacencyFromEdges, getFactionBrigades } from './phase_ii_adjacency.js';
 import { getBrigadeAoRSettlements, computeBrigadeDensity, getSettlementGarrison } from './brigade_aor.js';
 import { canAdoptPosture } from './brigade_posture.js';
-import { FACTION_STRATEGIES, isCorridorMunicipality, isOffensiveObjective, isDefensivePriority } from './bot_strategy.js';
+import type { CorpsStance } from '../../state/game_state.js';
+import { FACTION_STRATEGIES, isCorridorMunicipality, isOffensiveObjective, isDefensivePriority, getEffectiveAttackShare } from './bot_strategy.js';
 import { scoreConsolidationTarget } from '../consolidation_scoring.js';
+import { estimateAttackCost } from './combat_estimate.js';
 
 // --- Types ---
 
@@ -68,23 +71,71 @@ const SCORE_OFFENSIVE_OBJECTIVE = 85;
 /** Weight for consolidation/breakthrough score (rear cleanup, isolated clusters, fast-cleanup muns). */
 const CONSOLIDATION_SCORE_WEIGHT = 0.15;
 
+/** Garrison at or above this value counts as "heavy resistance" for allowing duplicate attack targets (OG+operation exception only). */
+const HEAVY_RESISTANCE_GARRISON_THRESHOLD = 250;
+
+/** Casualty-aversion: don't attack when expected losses exceed this fraction, unless strategic target. */
+const CASUALTY_AVERSION_THRESHOLD = 0.15;
+
+/** Strategic targets: accept higher losses up to this fraction. */
+const STRATEGIC_LOSS_ACCEPTANCE = 0.25;
+
+/** Minimum win probability required to attack (unless strategic). */
+const MIN_WIN_PROBABILITY = 0.6;
+
+/** Score penalty for attacking settlements with high opposing-ethnicity concentration. */
+const ETHNIC_RESISTANCE_PENALTY = -40;
+
+/** Max brigades per faction in elastic_defense for economy of force. */
+const MAX_ELASTIC_DEFENSE_PER_FACTION = 2;
+
 // --- Helpers ---
 
 /**
- * Build adjacency map from edge list.
+ * True if the settlement has heavy resistance: defender brigade in AoR at target, or garrison >= HEAVY_RESISTANCE_GARRISON_THRESHOLD.
+ * Used to allow duplicate attack targets only when OG+operation and heavy resistance (plan: one-brigade-per-target).
  */
-function buildAdjacency(edges: EdgeRecord[]): Map<SettlementId, Set<SettlementId>> {
-  const adj = new Map<SettlementId, Set<SettlementId>>();
-  for (const edge of edges) {
-    let setA = adj.get(edge.a);
-    if (!setA) { setA = new Set(); adj.set(edge.a, setA); }
-    setA.add(edge.b);
+function hasHeavyResistance(
+  state: GameState,
+  targetSid: SettlementId,
+  edges: EdgeRecord[]
+): boolean {
+  const garrison = getSettlementGarrison(state, targetSid, edges);
+  if (garrison >= HEAVY_RESISTANCE_GARRISON_THRESHOLD) return true;
+  const brigadeAor = state.brigade_aor ?? {};
+  const defenderBrigadeId = brigadeAor[targetSid];
+  if (defenderBrigadeId == null) return false;
+  const formation = state.formations?.[defenderBrigadeId];
+  return formation != null && formation.status === 'active';
+}
 
-    let setB = adj.get(edge.b);
-    if (!setB) { setB = new Set(); adj.set(edge.b, setB); }
-    setB.add(edge.a);
-  }
-  return adj;
+/**
+ * True if the brigade is part of an active OG conducting an operation toward this settlement.
+ * Checks whether the brigade's parent corps has an active operation in execution phase
+ * with target_settlements containing the target, AND the brigade is a participant.
+ * Enables the one-brigade-per-target exception for multi-brigade convergence on
+ * heavily defended objectives (corridor breaches, major offensives).
+ */
+function isPartOfOGOperationToward(
+  state: GameState,
+  brigadeId: FormationId,
+  targetSid: SettlementId
+): boolean {
+  const formations = state.formations ?? {};
+  const brigade = formations[brigadeId];
+  if (!brigade?.corps_id || !state.corps_command) return false;
+
+  const cmd = state.corps_command[brigade.corps_id];
+  if (!cmd?.active_operation) return false;
+
+  const op = cmd.active_operation;
+  // Must be in execution phase with this brigade participating
+  if (op.phase !== 'execution') return false;
+  if (!op.participating_brigades.includes(brigadeId)) return false;
+
+  // Must have the target settlement in operation targets
+  const targets = op.target_settlements ?? [];
+  return targets.includes(targetSid);
 }
 
 /**
@@ -92,24 +143,6 @@ function buildAdjacency(edges: EdgeRecord[]): Map<SettlementId, Set<SettlementId
  */
 function edgeId(a: SettlementId, b: SettlementId): string {
   return a < b ? `${a}:${b}` : `${b}:${a}`;
-}
-
-/**
- * Get all active brigades for a faction, sorted by ID.
- */
-function getFactionBrigades(state: GameState, faction: FactionId): FormationState[] {
-  const formations = state.formations ?? {};
-  const result: FormationState[] = [];
-  const ids = Object.keys(formations).sort(strictCompare);
-  for (const id of ids) {
-    const f = formations[id];
-    if (!f) continue;
-    if (f.faction !== faction) continue;
-    if (f.status !== 'active') continue;
-    if ((f.kind ?? 'brigade') !== 'brigade') continue;
-    result.push(f);
-  }
-  return result;
 }
 
 /**
@@ -241,6 +274,15 @@ function findTransferCandidates(
   }
 
   return candidates.sort(strictCompare);
+}
+
+/**
+ * Get the parent corps stance for a brigade. Returns null if no corps assignment.
+ */
+function getParentCorpsStance(state: GameState, brigade: FormationState): CorpsStance | null {
+  if (!brigade.corps_id || !state.corps_command) return null;
+  const cmd = state.corps_command[brigade.corps_id];
+  return cmd?.stance ?? null;
 }
 
 /**
@@ -387,7 +429,7 @@ export function generateBotBrigadeOrders(
   const brigades = getFactionBrigades(state, faction);
   if (brigades.length === 0) return result;
 
-  const adj = buildAdjacency(edges);
+  const adj = buildAdjacencyFromEdges(edges);
   const brigadeAor = state.brigade_aor ?? {};
   const frontPressure = state.front_pressure ?? {};
   const strategy = FACTION_STRATEGIES[faction];
@@ -401,7 +443,9 @@ export function generateBotBrigadeOrders(
     const p = brigade.posture ?? 'defend';
     if (p === 'attack' || p === 'probe') attackPostureCount++;
   }
-  const maxAttackBrigades = Math.max(1, Math.floor(brigades.length * strategy.max_attack_posture_share));
+  const turn = state.meta?.turn ?? 0;
+  const effectiveAttackShare = getEffectiveAttackShare(faction, turn);
+  const maxAttackBrigades = Math.max(1, Math.floor(brigades.length * effectiveAttackShare));
 
   for (const brigade of brigades) {
     const density = computeBrigadeDensity(state, brigade.id);
@@ -415,6 +459,18 @@ export function generateBotBrigadeOrders(
     const hqMun = munLookup?.get(brigade.hq_sid ?? '') ?? null;
     const inOffensiveZone = isOffensiveObjective(homeMun, faction) || isOffensiveObjective(hqMun, faction);
 
+    // Corps stance modulates brigade posture decisions
+    const corpsStance = getParentCorpsStance(state, brigade);
+    const corpsForceDefend = corpsStance === 'defensive' || corpsStance === 'reorganize';
+    // Offensive corps lowers attack threshold by 30%
+    const effectiveAttackThreshold = corpsStance === 'offensive'
+      ? Math.floor(strategy.attack_coverage_threshold * 0.7)
+      : strategy.attack_coverage_threshold;
+    // Offensive corps allows more brigades in attack posture
+    const corpsMaxAttack = corpsStance === 'offensive'
+      ? Math.max(maxAttackBrigades, Math.floor(brigades.length * 0.6))
+      : maxAttackBrigades;
+
     let targetPosture: BrigadePosture | null = null;
 
     if (!hasFront) {
@@ -422,20 +478,23 @@ export function generateBotBrigadeOrders(
       if (currentPosture !== 'defend') {
         targetPosture = 'defend';
       }
+    } else if (corpsForceDefend && currentPosture !== 'defend' && currentPosture !== 'elastic_defense') {
+      // Corps in defensive/reorganize stance: force brigade to defend
+      targetPosture = 'defend';
     } else if (inCorridor && currentPosture !== 'defend') {
       // Corridor brigades: force defend posture to hold critical territory
       targetPosture = 'defend';
-    } else if (softFront && !inCorridor && currentPosture === 'defend' && density >= COVERAGE_UNDERSTAFFED) {
+    } else if (softFront && !inCorridor && !corpsForceDefend && currentPosture === 'defend' && density >= COVERAGE_UNDERSTAFFED) {
       // Soft front (no enemy brigade): consolidation to clean rear / undefended pockets
       targetPosture = 'consolidation';
-    } else if (density >= strategy.attack_coverage_threshold && currentPosture === 'defend') {
+    } else if (!corpsForceDefend && density >= effectiveAttackThreshold && currentPosture === 'defend') {
       // Overstaffed and defending: can afford to probe/attack (if below share limit)
-      if (attackPostureCount < maxAttackBrigades) {
+      if (attackPostureCount < corpsMaxAttack) {
         targetPosture = strategy.preferred_posture_when_overstaffed;
       }
-    } else if (inOffensiveZone && density >= COVERAGE_UNDERSTAFFED && currentPosture === 'defend') {
+    } else if (!corpsForceDefend && inOffensiveZone && density >= COVERAGE_UNDERSTAFFED && currentPosture === 'defend') {
       // Brigades in strategic offensive zones probe at lower density threshold
-      if (attackPostureCount < maxAttackBrigades) {
+      if (attackPostureCount < corpsMaxAttack) {
         targetPosture = 'probe';
       }
     } else if (density < COVERAGE_UNDERSTAFFED) {
@@ -457,6 +516,110 @@ export function generateBotBrigadeOrders(
         const willAttack = targetPosture === 'attack' || targetPosture === 'probe';
         if (willAttack && !wasAttack) attackPostureCount++;
         if (wasAttack && !willAttack) attackPostureCount--;
+      }
+    }
+  }
+
+  // --- Step 1b: Enforce min_active_brigades (ensure faction isn't passive) ---
+  // Build a map of effective postures (pending orders override current)
+  const pendingPostureForMinActive = new Map<FormationId, BrigadePosture>();
+  for (const order of result.posture_orders) {
+    pendingPostureForMinActive.set(order.brigade_id, order.posture);
+  }
+
+  if (attackPostureCount < strategy.min_active_brigades) {
+    // Find brigades on the front in defend posture, sorted by density descending (best candidates first)
+    const defendingFrontBrigades = brigades
+      .filter(b => {
+        const effectivePosture = pendingPostureForMinActive.get(b.id) ?? b.posture ?? 'defend';
+        return effectivePosture === 'defend' && hasFrontActiveSettlements(state, b, adj)
+          && !isBrigadeInCorridor(state, b, faction, munLookup);
+      })
+      .map(b => ({ brigade: b, density: computeBrigadeDensity(state, b.id) }))
+      .sort((a, b) => {
+        if (b.density !== a.density) return b.density - a.density;
+        return strictCompare(a.brigade.id, b.brigade.id);
+      });
+
+    for (const { brigade } of defendingFrontBrigades) {
+      if (attackPostureCount >= strategy.min_active_brigades) break;
+      if (canAdoptPosture(brigade, 'probe')) {
+        // Check if we already issued an order for this brigade — if so, override it
+        const existingIdx = result.posture_orders.findIndex(o => o.brigade_id === brigade.id);
+        if (existingIdx >= 0) {
+          result.posture_orders[existingIdx].posture = 'probe';
+        } else {
+          result.posture_orders.push({ brigade_id: brigade.id, posture: 'probe' });
+        }
+        attackPostureCount++;
+      }
+    }
+  }
+
+  // --- Step 1c: Economy of force (D4) — thin quiet sectors to concentrate for offense ---
+  let elasticDefenseCount = brigades.filter(b => {
+    const p = pendingPostureForMinActive.get(b.id) ?? b.posture ?? 'defend';
+    return p === 'elastic_defense';
+  }).length;
+
+  if (elasticDefenseCount < MAX_ELASTIC_DEFENSE_PER_FACTION) {
+    // Find the lowest-density defending brigade on a quiet sector
+    const quietDefenders = brigades
+      .filter(b => {
+        const p = pendingPostureForMinActive.get(b.id) ?? b.posture ?? 'defend';
+        return p === 'defend' && hasFrontActiveSettlements(state, b, adj)
+          && !isBrigadeInCorridor(state, b, faction, munLookup);
+      })
+      .map(b => ({ brigade: b, density: computeBrigadeDensity(state, b.id) }))
+      .sort((a, b) => {
+        if (a.density !== b.density) return a.density - b.density;
+        return strictCompare(a.brigade.id, b.brigade.id);
+      });
+
+    for (const { brigade } of quietDefenders) {
+      if (elasticDefenseCount >= MAX_ELASTIC_DEFENSE_PER_FACTION) break;
+      // Only thin out if there are attacking brigades that could benefit
+      if (attackPostureCount === 0) break;
+      if (canAdoptPosture(brigade, 'elastic_defense')) {
+        const existingIdx = result.posture_orders.findIndex(o => o.brigade_id === brigade.id);
+        if (existingIdx >= 0) {
+          result.posture_orders[existingIdx].posture = 'elastic_defense';
+        } else {
+          result.posture_orders.push({ brigade_id: brigade.id, posture: 'elastic_defense' });
+        }
+        elasticDefenseCount++;
+      }
+    }
+  }
+
+  // --- Step 1d: Feints (D5) — probe on secondary sectors during named operation planning ---
+  if (state.corps_command) {
+    const corpsCommand = state.corps_command;
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+      const cmd = corpsCommand[corpsId];
+      if (!cmd?.active_operation || cmd.active_operation.phase !== 'planning') continue;
+      const opParticipants = new Set(cmd.active_operation.participating_brigades);
+
+      // Find 1-2 non-participating brigades to set as feint probes
+      let feintCount = 0;
+      for (const brigade of brigades) {
+        if (feintCount >= 2) break;
+        if (opParticipants.has(brigade.id)) continue;
+        const p = pendingPostureForMinActive.get(brigade.id) ?? brigade.posture ?? 'defend';
+        if (p !== 'defend') continue;
+        if (!hasFrontActiveSettlements(state, brigade, adj)) continue;
+        if (isBrigadeInCorridor(state, brigade, faction, munLookup)) continue;
+
+        if (canAdoptPosture(brigade, 'probe') && attackPostureCount < maxAttackBrigades + 2) {
+          const existingIdx = result.posture_orders.findIndex(o => o.brigade_id === brigade.id);
+          if (existingIdx >= 0) {
+            result.posture_orders[existingIdx].posture = 'probe';
+          } else {
+            result.posture_orders.push({ brigade_id: brigade.id, posture: 'probe' });
+          }
+          attackPostureCount++;
+          feintCount++;
+        }
       }
     }
   }
@@ -573,6 +736,9 @@ export function generateBotBrigadeOrders(
   // Build settlementsByMun from political_controllers + sidToMun for consolidation scoring
   const settlementsByMunForConsolidation = buildSettlementsByMunFromControl(state, munLookup);
 
+  // One brigade per target per faction per turn; duplicate allowed only when OG+operation and heavy resistance (plan: one-brigade-per-target).
+  const chosenTargets = new Set<SettlementId>();
+
   for (const brigade of brigades) {
     const posture = pendingPosture.get(brigade.id) ?? brigade.posture ?? 'defend';
     if (posture !== 'attack' && posture !== 'probe' && posture !== 'consolidation') continue;
@@ -590,10 +756,25 @@ export function generateBotBrigadeOrders(
     // Score each target and pick the best
     const scoredTargets: Array<{ sid: SettlementId; score: number }> = [];
     for (const sid of enemyAdjacentSet) {
-      scoredTargets.push({
-        sid,
-        score: scoreTarget(state, sid, brigade, faction, edges, munLookup, settlementsByMunForConsolidation)
-      });
+      let score = scoreTarget(state, sid, brigade, faction, edges, munLookup, settlementsByMunForConsolidation);
+
+      // D2: Ethnic resistance penalty — penalize attacking high opposing-ethnicity settlements
+      // (simplified: use defensive priority as proxy for ethnically aligned areas the enemy controls)
+      if (munLookup) {
+        const targetMun = munLookup.get(sid);
+        const pc = state.political_controllers ?? {};
+        const defenderFaction = pc[sid] as FactionId | null;
+        if (defenderFaction && targetMun && isDefensivePriority(targetMun, defenderFaction)) {
+          const isStrategicOverride = isPartOfOGOperationToward(state, brigade.id, sid)
+            || isCorridorMunicipality(targetMun, faction)
+            || isOffensiveObjective(targetMun, faction);
+          if (!isStrategicOverride) {
+            score += ETHNIC_RESISTANCE_PENALTY;
+          }
+        }
+      }
+
+      scoredTargets.push({ sid, score });
     }
 
     // Sort by score descending, then by settlement ID for deterministic tie-breaking
@@ -602,7 +783,48 @@ export function generateBotBrigadeOrders(
       return strictCompare(a.sid, b.sid);
     });
 
-    result.attack_orders[brigade.id] = scoredTargets[0].sid;
+    // D1: Casualty-aversion — filter targets where cost is too high
+    const viableTargets: Array<{ sid: SettlementId; score: number }> = [];
+    for (const t of scoredTargets) {
+      const estimate = estimateAttackCost(state, brigade, t.sid, edges, null, munLookup ?? new Map());
+      const isStrategicTarget = munLookup && (
+        isCorridorMunicipality(munLookup.get(t.sid), faction) ||
+        isOffensiveObjective(munLookup.get(t.sid), faction) ||
+        isPartOfOGOperationToward(state, brigade.id, t.sid)
+      );
+
+      const lossThreshold = isStrategicTarget ? STRATEGIC_LOSS_ACCEPTANCE : CASUALTY_AVERSION_THRESHOLD;
+      const winThreshold = isStrategicTarget ? 0.3 : MIN_WIN_PROBABILITY;
+
+      // Undefended settlements (garrison 0) are always viable
+      const garrison = getSettlementGarrison(state, t.sid, edges);
+      if (garrison === 0 || (estimate.expected_loss_fraction <= lossThreshold || estimate.win_probability >= winThreshold)) {
+        viableTargets.push(t);
+      }
+    }
+
+    // Fall back to all targets if casualty-aversion filters everything
+    const candidateTargets = viableTargets.length > 0 ? viableTargets : scoredTargets;
+    const preferred = candidateTargets[0]?.sid;
+    if (preferred == null) continue;
+
+    let assigned: SettlementId | null = null;
+    if (!chosenTargets.has(preferred)) {
+      assigned = preferred;
+    } else if (isPartOfOGOperationToward(state, brigade.id, preferred) && hasHeavyResistance(state, preferred, edges)) {
+      assigned = preferred;
+    } else {
+      for (const t of candidateTargets) {
+        if (!chosenTargets.has(t.sid)) {
+          assigned = t.sid;
+          break;
+        }
+      }
+    }
+    if (assigned != null) {
+      result.attack_orders[brigade.id] = assigned;
+      chosenTargets.add(assigned);
+    }
   }
 
   return result;

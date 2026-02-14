@@ -82,6 +82,7 @@
 
 | Focus | Handover doc |
 |-------|----------------|
+| **Three bots (RBiH, RS, HRHB)** | [BOT_EXPERT_HANDOVER_3_SIDES.md](BOT_EXPERT_HANDOVER_3_SIDES.md) — current status, docs reorg, AI strategy, brigade consolidation; expert has repo access. |
 | **GUI creation (map-only phase)** | [GUI_MAP_ONLY_EXTERNAL_EXPERT_HANDOVER.md](GUI_MAP_ONLY_EXTERNAL_EXPERT_HANDOVER.md) — standalone map application; warroom out of scope. |
 | **War Planning Map / full scene** | [PARADOX_WAR_PLANNING_MAP_FULL_SCENE_TEAM_CONVENE.md](PARADOX_WAR_PLANNING_MAP_FULL_SCENE_TEAM_CONVENE.md), [GUI_WAR_PLANNING_MAP_EXPERT_HANDOVER.md](GUI_WAR_PLANNING_MAP_EXPERT_HANDOVER.md). |
 | **Tactical map (canonical map viewer)** | [docs/20_engineering/TACTICAL_MAP_SYSTEM.md](../20_engineering/TACTICAL_MAP_SYSTEM.md). |

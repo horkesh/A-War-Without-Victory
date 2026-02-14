@@ -475,6 +475,8 @@ export interface StateMeta {
   rbih_hrhb_war_earliest_turn?: number | null;
   /** Phase I §4.8: When false, alliance value is not updated (RBiH–HRHB remain at init_alliance_rbih_hrhb). Set from scenario.enable_rbih_hrhb_dynamics. */
   enable_rbih_hrhb_dynamics?: boolean;
+  /** Desktop GUI: which side the human plays (RBiH, RS, HRHB). Set when starting a new campaign from the app. Non-normative for simulation. */
+  player_faction?: FactionId;
 }
 
 export interface NegotiationLedgerEntry {

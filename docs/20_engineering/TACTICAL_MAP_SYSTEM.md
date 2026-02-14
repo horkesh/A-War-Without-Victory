@@ -334,10 +334,20 @@ This works because adjacent settlement polygons share **exact coordinate vertice
 
 During `drawFrontLines()` (visible at all zoom levels):
 
-1. For each `SharedBorderSegment`, check if controllers of `a` and `b` are both non-null and different
-2. If so, draw two polylines through the shared `points` array:
+1. For each `SharedBorderSegment`, call `shouldDrawFrontSegment(ca, cb)` (see §10.3)
+2. If true, draw two polylines through the shared `points` array:
    - **Glow pass:** `constants.FRONT_LINE.glowColor` (amber `rgba(255,200,100,0.25)`), width 6px, solid
    - **Main pass:** `constants.FRONT_LINE.color` (white `rgba(255,255,255,0.85)`), width 2.5px, dash `[8, 4]`
+
+### 10.3 RBiH–HRHB: no front when allied
+
+Phase I §4.8: there is no front between RBiH and HRHB until they are at war. The map does not draw RBiH–HRHB front segments when:
+
+- No game state is loaded (baseline control), or
+- Loaded game state has `turn < rbih_hrhb_war_earliest_turn` (default 26), or
+- `phase_i_alliance_rbih_hrhb > 0.2` (allied threshold; same as backend).
+
+`LoadedGameState` includes `rbih_hrhb_war_earliest_turn` and `phase_i_alliance_rbih_hrhb` (from `GameStateAdapter`); `shouldDrawFrontSegment(ca, cb)` uses them so the canvas matches sim front logic.
 
 ---
 

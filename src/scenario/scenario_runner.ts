@@ -17,7 +17,7 @@ import type { GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { prepareNewGameState } from '../state/initialize_new_game_state.js';
 import { seedOrganizationalPenetrationFromControl } from '../state/seed_organizational_penetration_from_control.js';
-import { serializeState } from '../state/serialize.js';
+import { serializeState, deserializeState } from '../state/serialize.js';
 import { runTurn } from '../sim/turn_pipeline.js';
 import { runOneTurn } from '../state/turn_pipeline.js';
 import { loadScenario, computeRunId, normalizeActions, resolveInitControlPath, resolveInitFormationsPath } from './scenario_loader.js';
@@ -111,13 +111,20 @@ export { populateFactionAoRFromControl, ensureFormationHomeMunsInFactionAoR };
  * 1990 mapping when graph has mun1990_id) to exist.
  * When controlPath is set (Option A), uses that file for initial political control (mun1990-only format).
  * When initOptions provided (ethnic_1991, hybrid_1992), uses ethnicity-based init per scenario.
+ * When baseDir is set, loadSettlementGraph uses paths under baseDir (for Electron/desktop).
  */
-async function createInitialGameState(
+export async function createInitialGameState(
   seed: string,
   controlPath?: string,
-  initOptions?: { init_control_mode?: 'institutional' | 'ethnic_1991' | 'hybrid_1992'; ethnic_override_threshold?: number }
+  initOptions?: { init_control_mode?: 'institutional' | 'ethnic_1991' | 'hybrid_1992'; ethnic_override_threshold?: number },
+  options?: { baseDir?: string }
 ): Promise<GameState> {
-  const graph = await loadSettlementGraph();
+  const graph = options?.baseDir
+    ? await loadSettlementGraph({
+        settlementsPath: join(options.baseDir, 'data/source/settlements_initial_master.json'),
+        edgesPath: join(options.baseDir, 'data/derived/settlement_edges.json')
+      })
+    : await loadSettlementGraph();
   const state: GameState = {
     schema_version: CURRENT_SCHEMA_VERSION,
     meta: { turn: 0, seed, phase: 'phase_ii' },
@@ -171,11 +178,17 @@ export interface RunScenarioOptions {
   baselineOpsScalar?: number;
   /** H1.11: override run directory (e.g. run_scope_26w_x0.5); when set, used instead of outDirBase/run_id. */
   outDirOverride?: string;
+  /** When true, append _<timestamp> to run directory so each run gets a new folder (no overwrite). */
+  uniqueRunFolder?: boolean;
   /** When true: before each turn set front_posture to push on all front edges for both sides; after each turn apply breach-based control flips. */
   postureAllPushAndApplyBreaches?: boolean;
   use_smart_bots?: boolean;
   /** Optional per-week AI diagnostics artifact (bot_diagnostics.json). */
   bot_diagnostics?: boolean;
+  /** Optional base directory for data paths (default process.cwd()). Used by desktop createStateFromScenario. */
+  baseDir?: string;
+  /** When true, build state and write initial_save only; skip week loop and end-of-run artifacts (faster for desktop New Campaign). */
+  initialStateOnly?: boolean;
 }
 
 export interface RunScenarioResult {
@@ -406,6 +419,24 @@ function computeHistoricalAnchorChecks(final: ControlKey[]): HistoricalAnchorChe
 }
 
 /**
+ * Deterministic unique run folder: read/increment a counter file under outDirBase.
+ * No Date.now() or Math.random; safe for determinism static scan.
+ */
+async function getNextRunCounter(outDirBase: string): Promise<number> {
+  const counterPath = join(outDirBase, '.run_counter');
+  let n = 0;
+  try {
+    const s = await readFile(counterPath, 'utf8');
+    n = parseInt(s, 10);
+    if (!Number.isFinite(n) || n < 0) n = 0;
+  } catch {
+    // no file or invalid
+  }
+  await writeFile(counterPath, String(n + 1), 'utf8');
+  return n;
+}
+
+/**
  * Write deterministic failure report artifacts (no timestamps).
  */
 async function writeFailureReport(
@@ -537,9 +568,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     scopeMode = 'all_front_active',
     baselineOpsScalar = 1,
     outDirOverride,
+    uniqueRunFolder = false,
     postureAllPushAndApplyBreaches = false,
     use_smart_bots = false,
-    bot_diagnostics = false
+    bot_diagnostics = false,
+    baseDir: optionsBaseDir,
+    initialStateOnly = false
   } = options;
   const effectiveEmitEvery = emitWeeklySavesForVideo ? Math.max(1, emitEvery) : emitEvery;
   let scenario = await loadScenario(scenarioPath);
@@ -552,7 +586,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
   }
   const scenarioForId = weeksOverride !== undefined ? { ...scenario, weeks } : scenario;
   const run_id = computeRunId(scenarioForId);
-  const outDir = outDirOverride ?? join(outDirBase, run_id);
+  let runDirName: string;
+  if (uniqueRunFolder) {
+    await mkdir(outDirBase, { recursive: true });
+    const counter = await getNextRunCounter(outDirBase);
+    runDirName = `${run_id}_n${counter}`;
+  } else {
+    runDirName = run_id;
+  }
+  const outDir = outDirOverride ?? join(outDirBase, runDirName);
   await mkdir(outDir, { recursive: true });
 
   const out_dir_relative = outDirOverride ?? `${outDirBase}/${run_id}`;
@@ -566,7 +608,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
   const runMetaPath = join(outDir, 'run_meta.json');
   await writeFile(runMetaPath, stableStringify(run_meta, 2), 'utf8');
 
-  const baseDir = process.cwd();
+  const baseDir = optionsBaseDir ?? process.cwd();
   const controlPath = scenario.init_control ? resolveInitControlPath(scenario.init_control, baseDir) : undefined;
   const formationsPath = scenario.init_formations ? resolveInitFormationsPath(scenario.init_formations, baseDir) : undefined;
 
@@ -574,7 +616,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     if (injectFailureAfterRunMeta) {
       injectFailureAfterRunMeta();
     }
-    const graph = await loadSettlementGraph();
+    const graph = baseDir
+      ? await loadSettlementGraph({
+          settlementsPath: join(baseDir, 'data/source/settlements_initial_master.json'),
+          edgesPath: join(baseDir, 'data/derived/settlement_edges.json')
+        })
+      : await loadSettlementGraph();
 
     // Initialize Bots if requested
     // (moved to inside loop or handled by checking scenario.use_smart_bots later)
@@ -672,10 +719,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       scenario.init_control_mode
         ? {
             init_control_mode: scenario.init_control_mode,
-            ethnic_override_threshold: scenario.ethnic_override_threshold
+            ethnic_override_threshold: scenario.ethnic_override_threshold,
+            ...(baseDir ? { ethnicity_data_path: join(baseDir, 'data/derived/settlement_ethnicity_data.json') } : {})
           }
         : undefined;
-    let state = await createInitialGameState('harness-seed', controlPath, initOptions);
+    let state = await createInitialGameState('harness-seed', controlPath, initOptions, { baseDir });
 
     // When init_formations_oob is true, OOB creates formations at Phase I entry; do not load placeholder init_formations.
     if (formationsPath && !scenario.init_formations_oob) {
@@ -797,8 +845,30 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     const historicalMetricsInitial = captureHistoricalFactionMetrics(state);
 
     const initialSavePath = join(outDir, 'initial_save.json');
-    await writeFile(initialSavePath, serializeState(state), 'utf8');
+    const serializedState = serializeState(state);
+    await writeFile(initialSavePath, serializedState, 'utf8');
     const initialControlSnapshot = extractSettlementControlSnapshot(state, graph);
+
+    if (initialStateOnly) {
+      const emptyHash = createHash('sha256').update(serializedState, 'utf8').digest('hex').slice(0, 16);
+      return {
+        outDir,
+        run_id,
+        final_state_hash: emptyHash,
+        paths: {
+          initial_save: initialSavePath,
+          final_save: initialSavePath,
+          weekly_report: join(outDir, 'weekly_report.jsonl'),
+          replay: join(outDir, 'replay.jsonl'),
+          run_summary: join(outDir, 'run_summary.json'),
+          control_delta: join(outDir, 'control_delta.json'),
+          end_report: join(outDir, 'end_report.md'),
+          activity_summary: join(outDir, 'activity_summary.json'),
+          control_events: join(outDir, 'control_events.jsonl'),
+          formation_delta: join(outDir, 'formation_delta.json')
+        }
+      };
+    }
 
     // Phase H2.2: snapshot initial formations (id -> kind) for formation_delta at end-of-run.
     const initialFormationsSnapshot: Record<string, string> = {};
@@ -845,6 +915,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       weeks_with_phase_ii: 0,
       weeks_with_orders: 0,
       orders_processed: 0,
+      unique_attack_targets: 0,
       flips_applied: 0,
       casualty_attacker: 0,
       casualty_defender: 0,
@@ -1012,6 +1083,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
         if (phaseIIResolution) {
           phaseIIAttackResolutionSummary.orders_processed += phaseIIResolution.orders_processed ?? 0;
+          phaseIIAttackResolutionSummary.unique_attack_targets += phaseIIResolution.unique_attack_targets ?? 0;
           phaseIIAttackResolutionSummary.flips_applied += phaseIIResolution.flips_applied ?? 0;
           phaseIIAttackResolutionSummary.casualty_attacker += phaseIIResolution.casualty_attacker ?? 0;
           phaseIIAttackResolutionSummary.casualty_defender += phaseIIResolution.casualty_defender ?? 0;
@@ -1025,6 +1097,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
           week_index,
           turn: state.meta.turn,
           orders_processed: phaseIIResolution?.orders_processed ?? 0,
+          unique_attack_targets: phaseIIResolution?.unique_attack_targets ?? 0,
           flips_applied: phaseIIResolution?.flips_applied ?? 0,
           casualty_attacker: phaseIIResolution?.casualty_attacker ?? 0,
           casualty_defender: phaseIIResolution?.casualty_defender ?? 0,
@@ -1502,4 +1575,27 @@ export async function runOpsCompare(options: RunOpsCompareOptions): Promise<RunO
     compareResult,
     paths: { ops_compare_json: compareJsonPath, ops_compare_md: compareMdPath }
   };
+}
+
+/**
+ * Create initial GameState from a scenario file (for desktop "Load scenario" / "New Campaign").
+ * When initialStateOnly is true (default for desktop), builds state and writes initial_save only—no week loop or end-of-run artifacts (faster).
+ * When false, runs one week then returns initial state (harness/backward compatible).
+ */
+export async function createStateFromScenario(
+  scenarioPath: string,
+  baseDir: string,
+  options?: { initialStateOnly?: boolean }
+): Promise<GameState> {
+  const initialStateOnly = options?.initialStateOnly !== false;
+  const result = await runScenario({
+    scenarioPath,
+    baseDir,
+    outDirBase: join(baseDir, 'runs'),
+    weeksOverride: 1,
+    uniqueRunFolder: true,
+    initialStateOnly
+  });
+  const content = await readFile(result.paths.initial_save, 'utf8');
+  return deserializeState(content);
 }

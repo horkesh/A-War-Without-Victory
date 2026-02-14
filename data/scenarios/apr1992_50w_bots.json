@@ -1,8 +1,8 @@
 {
   "scenario_id": "apr1992_50w_bots",
-  "start_phase": "phase_i",
+  "start_phase": "phase_ii",
   "weeks": 50,
-  "init_control": "apr1992",
+  "init_control_mode": "ethnic_1991",
   "init_formations": "apr1992",
   "init_formations_oob": true,
   "formation_spawn_directive": { "kind": "both" },

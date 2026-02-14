@@ -1,6 +1,6 @@
 /**
- * Phase 1.3: Assert init_control "apr1992" yields expected control anchors (zvornik→RS, bijeljina→RS).
- * SKIPs when data prereqs missing. Uses apr1992_4w scenario and municipalities_1990_initial_political_controllers_apr1992.json.
+ * Phase 1.3: Validate apr1992 ethnic initialization anchors for split behavior.
+ * Uses apr1992_4w (ethnic settlement init) and compares deterministic municipal majorities.
  */
 
 import assert from 'node:assert';
@@ -16,28 +16,30 @@ import { loadSettlementGraph } from '../src/map/settlements.js';
 
 const BASE_OUT = join(process.cwd(), '.tmp_scenario_init_control_apr1992');
 
+function strictCompare(a: string, b: string): number {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
 async function ensureRemoved(dir: string): Promise<void> {
   if (existsSync(dir)) {
     await rm(dir, { recursive: true });
   }
 }
 
-test('init_control apr1992: zvornik and bijeljina are RS (validation anchors)', async () => {
+test('init_control apr1992 ethnic: zvornik majority is RBiH, bijeljina majority is RS', async () => {
   const prereq = checkDataPrereqs({ baseDir: process.cwd() });
   if (!prereq.ok) {
     return;
   }
 
   const graph = await loadSettlementGraph();
-  let sidZvornik: string | null = null;
-  let sidBijeljina: string | null = null;
+  const sidToMun = new Map<string, string>();
   for (const [sid, rec] of graph.settlements) {
-    if (rec.mun1990_id === 'zvornik' && sidZvornik == null) sidZvornik = sid;
-    if (rec.mun1990_id === 'bijeljina' && sidBijeljina == null) sidBijeljina = sid;
-    if (sidZvornik != null && sidBijeljina != null) break;
+    if (!rec.mun1990_id) continue;
+    sidToMun.set(sid, rec.mun1990_id);
   }
-  assert(sidZvornik != null, 'graph should have at least one settlement in zvornik');
-  assert(sidBijeljina != null, 'graph should have at least one settlement in bijeljina');
 
   await ensureRemoved(BASE_OUT);
   const scenarioPath = join(process.cwd(), 'data', 'scenarios', 'apr1992_4w.json');
@@ -47,8 +49,39 @@ test('init_control apr1992: zvornik and bijeljina are RS (validation anchors)', 
   const initialContent = await readFile(result.paths.initial_save, 'utf8');
   const state = JSON.parse(initialContent) as { political_controllers?: Record<string, string | null> };
   const pc = state.political_controllers ?? {};
-  assert.strictEqual(pc[sidZvornik!], 'RS', 'zvornik (April 1992) should be RS');
-  assert.strictEqual(pc[sidBijeljina!], 'RS', 'bijeljina (April 1992) should be RS');
+  const expectedByMun: Record<string, string> = {
+    zvornik: 'RBiH',
+    bijeljina: 'RS'
+  };
+  const targetMuns = ['zvornik', 'bijeljina'];
+  const countsByMun = new Map<string, Map<string, number>>();
+  for (const [sid, controller] of Object.entries(pc)) {
+    if (!controller) continue;
+    const mun = sidToMun.get(sid);
+    if (!mun || !targetMuns.includes(mun)) continue;
+    const munCounts = countsByMun.get(mun) ?? new Map<string, number>();
+    munCounts.set(controller, (munCounts.get(controller) ?? 0) + 1);
+    countsByMun.set(mun, munCounts);
+  }
+  for (const mun of targetMuns) {
+    const munCounts = countsByMun.get(mun);
+    assert(munCounts != null && munCounts.size > 0, `${mun} should have initialized settlements`);
+    const sortedControllers = Array.from(munCounts.keys()).sort(strictCompare);
+    let bestController = sortedControllers[0];
+    let bestCount = munCounts.get(bestController) ?? 0;
+    for (const controller of sortedControllers) {
+      const count = munCounts.get(controller) ?? 0;
+      if (count > bestCount) {
+        bestController = controller;
+        bestCount = count;
+      }
+    }
+    assert.strictEqual(
+      bestController,
+      expectedByMun[mun],
+      `${mun} majority controller should match ethnic-init anchor`
+    );
+  }
 
   await ensureRemoved(BASE_OUT);
 });

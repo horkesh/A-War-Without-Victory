@@ -15,7 +15,7 @@ import { loadSettlementGraph } from '../../src/map/settlements.js';
 import { prepareNewGameState } from '../../src/state/initialize_new_game_state.js';
 import { getSettlementControlStatus } from '../../src/state/settlement_control.js';
 import { loadInitialMunicipalityControllers1990 } from '../../src/state/political_control_init.js';
-import { MUN1990_IDS_ALIGNED_TO_RBIH } from '../../src/state/rbih_aligned_municipalities.js';
+import { MUN1990_IDS_ALIGNED_TO_RBIH, isMunicipalityAlignedToRbih } from '../../src/state/rbih_aligned_municipalities.js';
 import { CURRENT_SCHEMA_VERSION } from '../../src/state/game_state.js';
 import type { GameState } from '../../src/state/game_state.js';
 
@@ -138,6 +138,7 @@ async function main(): Promise<void> {
   mkdirSync(derivedDir, { recursive: true });
 
   const graph = await loadSettlementGraph();
+  // Graph is keyed by S-prefixed sid (e.g. S100013). Use sid for membership and state lookup so ethnic init is applied.
   const graphKeys = new Set(graph.settlements.keys());
   const initialMunControllers = await loadInitialMunicipalityControllers1990();
 
@@ -152,7 +153,7 @@ async function main(): Promise<void> {
     roster = roster.map((e) => ({ ...e, controlKey: e.sid }));
   }
   const total_settlements_roster = roster.length;
-  const total_in_graph = roster.filter((e) => graphKeys.has(e.controlKey)).length;
+  const total_in_graph = roster.filter((e) => graphKeys.has(e.sid.startsWith('S') ? e.sid : `S${e.sid}`)).length;
   const total_ungraphed = total_settlements_roster - total_in_graph;
 
   const state: GameState = {
@@ -171,7 +172,9 @@ async function main(): Promise<void> {
     militia_pools: {}
   };
 
-  // Default baseline = settlement-level control from 1991 ethnic majority (Apr 1992 begin state).
+  // Default baseline = settlement-level control from 1991 ethnic majority (ethnic_1991), with
+  // RBiH-aligned municipality overrides (Croatian-majority in those muns → RBiH). Graph is keyed
+  // by S-prefixed sid; roster may use controlKey (mun:id) or sid—use sid for state lookup so ethnic init applies.
   await prepareNewGameState(state, graph, undefined, { init_control_mode: 'ethnic_1991' });
 
   // Phase H3.10: mun1990_names for ungraphed mun1990_id lookup (mun normalizations)
@@ -200,13 +203,14 @@ async function main(): Promise<void> {
   }
 
   for (const entry of roster) {
-    const { controlKey, sid, municipality_id, numeric_sid } = entry;
+    const { controlKey, sid, municipality_id } = entry;
+    const sidForGraph = sid.startsWith('S') ? sid : `S${sid}`;
     let value: string | null;
     let mun1990 = '';
-    if (graphKeys.has(controlKey)) {
-      const st = getSettlementControlStatus(state, controlKey);
+    if (graphKeys.has(sidForGraph)) {
+      const st = getSettlementControlStatus(state, sidForGraph);
       value = st.kind === 'unknown' ? null : st.side;
-      const rec = graph.settlements.get(controlKey);
+      const rec = graph.settlements.get(sidForGraph);
       mun1990 = rec && typeof rec === 'object' && 'mun1990_id' in rec && typeof (rec as { mun1990_id?: string }).mun1990_id === 'string'
         ? (rec as { mun1990_id: string }).mun1990_id
         : '';
@@ -317,8 +321,12 @@ async function main(): Promise<void> {
     if (mun1990 && MUN_NORMALIZATIONS[mun1990]) {
       const before_value = by_settlement_id[controlKey];
       const after_value = MUN_NORMALIZATIONS[mun1990];
-      
-      if (before_value !== after_value) {
+      // RBiH-aligned muns (Brčko, Bihać, etc.): only HRHB → RBiH; Serb-majority (RS) stays RS.
+      const onlyIfHrhb = isMunicipalityAlignedToRbih(mun1990);
+      const shouldOverride = onlyIfHrhb
+        ? before_value === 'HRHB'
+        : before_value !== after_value;
+      if (shouldOverride) {
         by_settlement_id[controlKey] = after_value;
         const before_key = before_value === null ? 'null' : before_value;
         const after_key = after_value;

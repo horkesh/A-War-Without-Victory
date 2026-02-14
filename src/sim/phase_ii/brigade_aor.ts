@@ -27,6 +27,8 @@ import {
   computeBrigadeOperationalCoverageCapFromFormation,
   getFormationHomeMunFromTags
 } from '../../state/brigade_operational_cap.js';
+import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
+import { areRbihHrhbAllied } from '../phase_i/alliance_update.js';
 
 // --- Types ---
 
@@ -61,10 +63,16 @@ export function identifyFrontActiveSettlements(
   for (const edge of edges) {
     const controlA = pc[edge.a];
     const controlB = pc[edge.b];
-    if (controlA && controlB && controlA !== controlB) {
-      frontActive.add(edge.a);
-      frontActive.add(edge.b);
+    if (!controlA || !controlB || controlA === controlB) continue;
+    const isRbihHrhbPair =
+      (controlA === 'RBiH' && controlB === 'HRHB') || (controlA === 'HRHB' && controlB === 'RBiH');
+    if (isRbihHrhbPair) {
+      const turn = state.meta?.turn ?? 0;
+      const earliestWar = state.meta?.rbih_hrhb_war_earliest_turn ?? 26;
+      if (turn < earliestWar || areRbihHrhbAllied(state)) continue;
     }
+    frontActive.add(edge.a);
+    frontActive.add(edge.b);
   }
 
   return frontActive;
@@ -149,6 +157,57 @@ function uniqueSortedMunicipalities(values: MunicipalityId[]): MunicipalityId[] 
   return Array.from(new Set(values)).sort(strictCompare);
 }
 
+function getHqMunicipality(
+  brigade: FormationState,
+  sidToMun: Record<SettlementId, MunicipalityId>
+): MunicipalityId | null {
+  const hq = brigade.hq_sid;
+  if (!hq) return null;
+  return resolveMunicipalityForSid(hq, sidToMun);
+}
+
+function normalizeMunicipalityAssignmentForBrigade(
+  brigade: FormationState,
+  values: MunicipalityId[],
+  munAdj: Map<MunicipalityId, Set<MunicipalityId>>,
+  sidToMun: Record<SettlementId, MunicipalityId>,
+  enforceHqNeighborRule: boolean
+): MunicipalityId[] {
+  const unique = uniqueSortedMunicipalities(values);
+  if (!enforceHqNeighborRule) {
+    return unique.slice(0, MAX_MUNICIPALITIES_PER_BRIGADE);
+  }
+  if (unique.length === 0) {
+    const hqMun = getHqMunicipality(brigade, sidToMun);
+    return hqMun ? [hqMun] : [];
+  }
+  const hqMun = getHqMunicipality(brigade, sidToMun);
+  if (!hqMun) return unique.slice(0, MAX_MUNICIPALITIES_PER_BRIGADE);
+  const neighbors = munAdj.get(hqMun);
+  const allowedNeighbors = unique
+    .filter((munId) => munId !== hqMun && (neighbors?.has(munId) ?? false))
+    .sort(strictCompare)
+    .slice(0, Math.max(0, MAX_MUNICIPALITIES_PER_BRIGADE - 1));
+  return [hqMun, ...allowedNeighbors];
+}
+
+function canAssignMunicipalityToBrigade(
+  brigade: FormationState,
+  current: MunicipalityId[],
+  candidate: MunicipalityId,
+  munAdj: Map<MunicipalityId, Set<MunicipalityId>>,
+  sidToMun: Record<SettlementId, MunicipalityId>,
+  enforceHqNeighborRule: boolean
+): boolean {
+  if (current.includes(candidate)) return true;
+  if (current.length >= MAX_MUNICIPALITIES_PER_BRIGADE) return false;
+  if (!enforceHqNeighborRule) return true;
+  const hqMun = getHqMunicipality(brigade, sidToMun);
+  if (!hqMun) return true;
+  if (candidate === hqMun) return true;
+  return munAdj.get(hqMun)?.has(candidate) ?? false;
+}
+
 function resolveMunicipalityForSid(
   sid: SettlementId,
   sidToMun: Record<SettlementId, MunicipalityId>
@@ -170,6 +229,10 @@ function buildSidToMunMap(
     if (!(sid in sidToMun)) sidToMun[sid] = sid as MunicipalityId;
   }
   return sidToMun;
+}
+
+function hasMunicipalityMetadata(sidToMun: Record<SettlementId, MunicipalityId>): boolean {
+  return Object.entries(sidToMun).some(([sid, mun]) => sid !== mun);
 }
 
 function buildMunicipalityAdjacency(
@@ -201,6 +264,8 @@ function ensureBrigadeMunicipalityAssignment(
   const formations = state.formations ?? {};
   const pc = state.political_controllers ?? {};
   const allFrontActive = expandFrontActiveWithDepth(identifyFrontActiveSettlements(state, edges), edges, pc, 1);
+  const munAdj = buildMunicipalityAdjacency(edges, sidToMun);
+  const enforceMunicipalityRule = hasMunicipalityMetadata(sidToMun);
 
   // Keep valid existing assignments for active brigades.
   for (const formationId of Object.keys(formations).sort(strictCompare)) {
@@ -211,7 +276,15 @@ function ensureBrigadeMunicipalityAssignment(
     const clean = uniqueSortedMunicipalities(
       raw.filter((mun): mun is MunicipalityId => typeof mun === 'string' && mun.length > 0)
     );
-    if (clean.length > 0) normalized[formationId] = clean;
+    if (clean.length > 0) {
+      normalized[formationId] = normalizeMunicipalityAssignmentForBrigade(
+        f,
+        clean,
+        munAdj,
+        sidToMun,
+        enforceMunicipalityRule
+      );
+    }
   }
 
   // Bootstrap from current brigade_aor when present.
@@ -226,7 +299,15 @@ function ensureBrigadeMunicipalityAssignment(
     normalized[brigadeId] = list;
   }
   for (const brigadeId of Object.keys(normalized)) {
-    normalized[brigadeId] = uniqueSortedMunicipalities(normalized[brigadeId]!);
+    const f = formations[brigadeId];
+    if (!isActiveBrigade(f)) continue;
+    normalized[brigadeId] = normalizeMunicipalityAssignmentForBrigade(
+      f,
+      normalized[brigadeId]!,
+      munAdj,
+      sidToMun,
+      enforceMunicipalityRule
+    );
   }
 
   // Bootstrap from Voronoi fallback when nothing exists.
@@ -250,7 +331,15 @@ function ensureBrigadeMunicipalityAssignment(
       }
     }
     for (const brigadeId of Object.keys(normalized)) {
-      normalized[brigadeId] = uniqueSortedMunicipalities(normalized[brigadeId]!);
+      const f = formations[brigadeId];
+      if (!isActiveBrigade(f)) continue;
+      normalized[brigadeId] = normalizeMunicipalityAssignmentForBrigade(
+        f,
+        normalized[brigadeId]!,
+        munAdj,
+        sidToMun,
+        enforceMunicipalityRule
+      );
     }
   }
 
@@ -261,7 +350,13 @@ function ensureBrigadeMunicipalityAssignment(
     const hq = f.hq_sid;
     if (!hq) continue;
     if (pc[hq] && pc[hq] !== f.faction) continue;
-    normalized[formationId] = [resolveMunicipalityForSid(hq, sidToMun)];
+    normalized[formationId] = normalizeMunicipalityAssignmentForBrigade(
+      f,
+      [resolveMunicipalityForSid(hq, sidToMun)],
+      munAdj,
+      sidToMun,
+      enforceMunicipalityRule
+    );
   }
 
   // Ensure every front-active (faction, municipality) has at least one brigade assignment
@@ -297,13 +392,28 @@ function ensureBrigadeMunicipalityAssignment(
       return strictCompare(a.id, b.id);
     });
     // Prefer brigade below municipality cap so no single brigade gets 200+ settlements.
-    const pick = candidates.find(
-      (c) => (normalized[c.id]?.length ?? 0) < MAX_MUNICIPALITIES_PER_BRIGADE
-    ) ?? candidates[0];
+    const pick =
+      candidates.find((c) =>
+        canAssignMunicipalityToBrigade(
+          c,
+          normalized[c.id] ?? [],
+          munId,
+          munAdj,
+          sidToMun,
+          enforceMunicipalityRule
+        )
+      ) ?? candidates[0];
     if (!pick) continue;
     const list = normalized[pick.id] ?? [];
+    if (!canAssignMunicipalityToBrigade(pick, list, munId, munAdj, sidToMun, enforceMunicipalityRule)) continue;
     list.push(munId);
-    normalized[pick.id] = uniqueSortedMunicipalities(list);
+    normalized[pick.id] = normalizeMunicipalityAssignmentForBrigade(
+      pick,
+      list,
+      munAdj,
+      sidToMun,
+      enforceMunicipalityRule
+    );
     coveredFactionMun.add(key);
   }
 
@@ -367,7 +477,26 @@ function ensureBrigadeMunicipalityAssignment(
     const pick = transferable[transferable.length - 1];
     if (!pick) continue;
     normalized[donor.id] = donorMuns.filter((mun) => mun !== pick);
-    normalized[brigade.id] = uniqueSortedMunicipalities([...(normalized[brigade.id] ?? []), pick]);
+    normalized[brigade.id] = normalizeMunicipalityAssignmentForBrigade(
+      brigade,
+      [...(normalized[brigade.id] ?? []), pick],
+      munAdj,
+      sidToMun,
+      enforceMunicipalityRule
+    );
+  }
+
+  // Hard rule: HQ municipality + up to two neighboring municipalities.
+  for (const formationId of Object.keys(formations).sort(strictCompare)) {
+    const f = formations[formationId];
+    if (!isActiveBrigade(f)) continue;
+    normalized[formationId] = normalizeMunicipalityAssignmentForBrigade(
+      f,
+      normalized[formationId] ?? [],
+      munAdj,
+      sidToMun,
+      enforceMunicipalityRule
+    );
   }
 
   state.brigade_municipality_assignment = normalized;
@@ -759,6 +888,7 @@ export function applyBrigadeMunicipalityOrders(
   const assignments = ensureBrigadeMunicipalityAssignment(state, edges, sidToMun);
   const forms = state.formations ?? {};
   const munAdj = buildMunicipalityAdjacency(edges, sidToMun);
+  const enforceMunicipalityRule = hasMunicipalityMetadata(sidToMun);
 
   const countByMunFaction = new Map<string, number>();
   const inc = (munId: MunicipalityId, faction: FactionId, delta: number): void => {
@@ -786,10 +916,22 @@ export function applyBrigadeMunicipalityOrders(
     const desired = raw == null
       ? []
       : uniqueSortedMunicipalities(raw.filter((mun): mun is MunicipalityId => typeof mun === 'string' && mun.length > 0));
+    let invalidReason: string | null = null;
+    const hqMun = getHqMunicipality(f, sidToMun);
+    if (desired.length > MAX_MUNICIPALITIES_PER_BRIGADE) {
+      invalidReason = `exceeds ${MAX_MUNICIPALITIES_PER_BRIGADE} municipalities per brigade`;
+    }
+    if (!invalidReason && enforceMunicipalityRule && hqMun && !desired.includes(hqMun)) {
+      invalidReason = `must include HQ municipality ${hqMun}`;
+    }
+    if (!invalidReason && enforceMunicipalityRule && hqMun) {
+      const neighbors = munAdj.get(hqMun) ?? new Set<MunicipalityId>();
+      const invalidTarget = desired.find((munId) => munId !== hqMun && !neighbors.has(munId));
+      if (invalidTarget) invalidReason = `${invalidTarget} is not neighboring HQ municipality ${hqMun}`;
+    }
 
     const currentSet = new Set(current);
     const accepted = new Set(current.filter((mun) => desired.includes(mun)));
-    let invalidReason: string | null = null;
 
     for (const munId of desired) {
       if (currentSet.has(munId)) continue;
@@ -822,8 +964,14 @@ export function applyBrigadeMunicipalityOrders(
       continue;
     }
 
-    assignments[formationId] = desired;
-    for (const munId of desired) inc(munId, f.faction, 1);
+    assignments[formationId] = normalizeMunicipalityAssignmentForBrigade(
+      f,
+      desired,
+      munAdj,
+      sidToMun,
+      enforceMunicipalityRule
+    );
+    for (const munId of assignments[formationId] ?? []) inc(munId, f.faction, 1);
     report.orders_applied += 1;
   }
 
@@ -1050,4 +1198,168 @@ export function getSettlementGarrison(
   const covered = new Set(getBrigadeOperationalCoverageSettlements(state, formationId, edges));
   if (!covered.has(sid)) return 0;
   return computeBrigadeDensity(state, formationId, edges);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AoR Rebalancing
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Rebalance brigade AoR sizes within each faction to reduce extreme disparities.
+ *
+ * Voronoi-based AoR derivation can produce 1028:1 settlement ratios between brigades.
+ * This pass sheds rear settlements from oversized brigades (>2x faction median) to
+ * the nearest neighbor brigade, and absorbs settlements into undersized brigades
+ * (<0.3x median) from surplus neighbors.
+ *
+ * Only transfers non-front rear settlements. Deterministic: sorted iteration.
+ */
+export function rebalanceBrigadeAoR(
+  state: GameState,
+  edges: EdgeRecord[]
+): void {
+  const brigadeAor = state.brigade_aor;
+  if (!brigadeAor) return;
+
+  const pc = state.political_controllers ?? {};
+  const formations = state.formations ?? {};
+  const adj = buildAdjacencyFromEdges(edges);
+
+  // Group settlements by brigade, grouped by faction
+  const factionBrigadeSettlements = new Map<string, Map<FormationId, SettlementId[]>>();
+  const brigadeEntries = Object.entries(brigadeAor) as [SettlementId, FormationId | null][];
+  brigadeEntries.sort((a, b) => strictCompare(a[0], b[0]));
+
+  for (const [sid, brigadeId] of brigadeEntries) {
+    if (!brigadeId) continue;
+    const formation = formations[brigadeId];
+    if (!formation) continue;
+    const faction = formation.faction;
+    if (!faction) continue;
+
+    let factionMap = factionBrigadeSettlements.get(faction);
+    if (!factionMap) { factionMap = new Map(); factionBrigadeSettlements.set(faction, factionMap); }
+    let list = factionMap.get(brigadeId);
+    if (!list) { list = []; factionMap.set(brigadeId, list); }
+    list.push(sid);
+  }
+
+  // Process each faction
+  const factionIds = [...factionBrigadeSettlements.keys()].sort(strictCompare);
+
+  for (const factionId of factionIds) {
+    const brigadeMap = factionBrigadeSettlements.get(factionId)!;
+    const brigadeIds = [...brigadeMap.keys()].sort(strictCompare);
+    if (brigadeIds.length < 2) continue;
+
+    // Compute sizes and median
+    const sizes = brigadeIds.map(bid => brigadeMap.get(bid)!.length).sort((a, b) => a - b);
+    const median = sizes[Math.floor(sizes.length / 2)];
+    if (median <= 0) continue;
+
+    const overThreshold = median * 2;
+    const underThreshold = Math.max(1, Math.floor(median * 0.3));
+
+    // Identify front settlements (adjacent to enemy-controlled)
+    const isFrontSettlement = (sid: SettlementId): boolean => {
+      const neighbors = adj.get(sid);
+      if (!neighbors) return false;
+      for (const nSid of neighbors) {
+        const neighborCtrl = pc[nSid];
+        if (neighborCtrl && neighborCtrl !== factionId) return true;
+      }
+      return false;
+    };
+
+    // Phase 1: Shed from oversized brigades
+    for (const brigadeId of brigadeIds) {
+      const settlements = brigadeMap.get(brigadeId)!;
+      if (settlements.length <= overThreshold) continue;
+
+      // Find non-front rear settlements to shed, sorted by SID
+      const rearSettlements = settlements
+        .filter(sid => !isFrontSettlement(sid))
+        .sort(strictCompare);
+
+      const excess = settlements.length - overThreshold;
+      let shed = 0;
+
+      for (const sid of rearSettlements) {
+        if (shed >= excess) break;
+        // Must keep at least overThreshold settlements
+        if (brigadeMap.get(brigadeId)!.length <= overThreshold) break;
+
+        // Find nearest neighbor brigade (adjacent settlement belongs to different brigade of same faction)
+        const neighbors = adj.get(sid);
+        if (!neighbors) continue;
+
+        let targetBrigade: FormationId | null = null;
+        for (const nSid of [...neighbors].sort(strictCompare)) {
+          const nBrigade = brigadeAor[nSid];
+          if (nBrigade && nBrigade !== brigadeId) {
+            const nFormation = formations[nBrigade];
+            if (nFormation && nFormation.faction === factionId) {
+              targetBrigade = nBrigade;
+              break;
+            }
+          }
+        }
+        if (!targetBrigade) continue;
+
+        // Transfer
+        brigadeAor[sid] = targetBrigade;
+        const fromList = brigadeMap.get(brigadeId)!;
+        const idx = fromList.indexOf(sid);
+        if (idx >= 0) fromList.splice(idx, 1);
+        brigadeMap.get(targetBrigade)!.push(sid);
+        shed++;
+      }
+    }
+
+    // Phase 2: Absorb into undersized brigades
+    for (const brigadeId of brigadeIds) {
+      const settlements = brigadeMap.get(brigadeId)!;
+      if (settlements.length >= underThreshold) continue;
+
+      const deficit = underThreshold - settlements.length;
+      let absorbed = 0;
+
+      // Find adjacent settlements from surplus neighbor brigades
+      const candidateSids = new Set<SettlementId>();
+      for (const sid of settlements) {
+        const neighbors = adj.get(sid);
+        if (!neighbors) continue;
+        for (const nSid of neighbors) {
+          const nBrigade = brigadeAor[nSid];
+          if (nBrigade && nBrigade !== brigadeId) {
+            const nFormation = formations[nBrigade];
+            if (nFormation && nFormation.faction === factionId) {
+              const donorSize = brigadeMap.get(nBrigade)?.length ?? 0;
+              // Only absorb from brigades above median (don't rob the poor)
+              if (donorSize > median && !isFrontSettlement(nSid)) {
+                candidateSids.add(nSid);
+              }
+            }
+          }
+        }
+      }
+
+      const candidates = [...candidateSids].sort(strictCompare);
+      for (const sid of candidates) {
+        if (absorbed >= deficit) break;
+        const donorBrigade = brigadeAor[sid] as FormationId;
+        if (!donorBrigade) continue;
+        // Verify donor still has enough
+        const donorList = brigadeMap.get(donorBrigade);
+        if (!donorList || donorList.length <= median) continue;
+
+        // Transfer
+        brigadeAor[sid] = brigadeId;
+        const idx = donorList.indexOf(sid);
+        if (idx >= 0) donorList.splice(idx, 1);
+        settlements.push(sid);
+        absorbed++;
+      }
+    }
+  }
 }

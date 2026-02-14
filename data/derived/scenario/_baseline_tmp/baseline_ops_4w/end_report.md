@@ -71,6 +71,20 @@ Areas of responsibility (settlements per faction):
 - Orders processed: 0
 - Settlement flips applied: 0
 - Casualties (attacker / defender): 0 / 0
+- Battles with defender present / absent: 0 / 0
+
+Weekly rollup (week: orders, flips, casualties A/D, defender present/absent):
+  - w1: 0, 0, 0/0, 0/0
+  - w2: 0, 0, 0/0, 0/0
+  - w3: 0, 0, 0/0, 0/0
+  - w4: 0, 0, 0/0, 0/0
+
+## Historical alignment diagnostics
+
+Initial vs final by faction (personnel, brigades active/inactive/total, recruitment capital, negotiation capital, prewar capital):
+- HRHB: personnel 0→0; brigades 0/0/0→0/0/0; capital 0/0/0→0/159/0
+- RBiH: personnel 0→0; brigades 0/0/0→0/0/0; capital 0/0/0→0/316/0
+- RS: personnel 0→0; brigades 0/0/0→0/0/0; capital 0/0/0→0/226/0
 
 ## Notes on interpretation
 

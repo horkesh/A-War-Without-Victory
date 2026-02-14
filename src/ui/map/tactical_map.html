@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tactical Map — AWWV</title>
   <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%231e1c18' width='32' height='32'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='%23e0d8cc'>T</text></svg>">
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%230a0a1a' width='32' height='32'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='%2300e878'>T</text></svg>">
   <link rel="stylesheet" href="./styles/tactical-map.css">
 </head>
 
@@ -14,6 +14,7 @@
   <div id="map-root">
     <!-- Toolbar -->
     <div class="tm-toolbar">
+      <button type="button" class="tm-toolbar-btn" id="btn-main-menu" aria-label="Open main menu">Menu</button>
       <span class="tm-zoom-pill" id="zoom-pill" aria-live="polite">STRATEGIC</span>
       <button type="button" class="tm-toolbar-btn" id="zoom-out" aria-label="Zoom out">&minus;</button>
       <button type="button" class="tm-toolbar-btn" id="zoom-in" aria-label="Zoom in">+</button>
@@ -21,7 +22,12 @@
       <button type="button" class="tm-toolbar-btn" id="btn-ethnic" aria-label="Toggle ethnic majority view">Ethnic 1991</button>
       <button type="button" class="tm-toolbar-btn" id="btn-oob" aria-label="Toggle Order of Battle">OOB</button>
       <button type="button" class="tm-toolbar-btn" id="btn-search" aria-label="Search settlement">Search</button>
+      <button type="button" class="tm-toolbar-btn" id="btn-war-summary" aria-label="Open war summary">Summary</button>
+      <button type="button" class="tm-toolbar-btn" id="btn-settings" aria-label="Open settings">Settings</button>
+      <button type="button" class="tm-toolbar-btn" id="btn-help" aria-label="Open keyboard shortcuts">Help</button>
+      <button type="button" class="tm-toolbar-btn" id="btn-recruit" aria-label="Open recruitment">Recruit</button>
       <span class="tm-turn-display" id="turn-display">Turn 0 — Sep 1991</span>
+      <span class="tm-recruitment-capital" id="recruitment-capital" aria-live="polite"></span>
       <span class="tm-army-strength" id="army-strength" aria-live="polite"></span>
     </div>
 
@@ -34,6 +40,9 @@
           <span>ORDER OF BATTLE</span>
           <button type="button" class="tm-oob-close" id="oob-close" aria-label="Close OOB">&times;</button>
         </div>
+        <div class="tm-war-status-content" id="war-status-content">
+          <p class="tm-muted">Load a game state to view war status.</p>
+        </div>
         <div class="tm-oob-content" id="oob-content">
           <p class="tm-muted">Load a game state to view formations.</p>
         </div>
@@ -44,7 +53,7 @@
         <canvas id="map-canvas" tabindex="0" role="img" aria-label="Tactical map of Bosnia and Herzegovina"></canvas>
 
         <!-- Minimap -->
-        <canvas class="tm-minimap" id="minimap" width="180" height="120" aria-label="Minimap overview"></canvas>
+        <canvas class="tm-minimap" id="minimap" width="200" height="150" aria-label="Minimap overview"></canvas>
 
         <!-- Zoom controls (on-canvas) -->
         <div class="tm-zoom-controls">
@@ -91,9 +100,19 @@
               <button type="button" class="tm-load-state-btn" id="btn-load-state">Load State...</button>
               <input type="file" id="file-input" accept=".json" style="display:none">
             </div>
+            <hr class="tm-layer-sep" id="play-myself-sep" style="display:none">
+            <div class="tm-layer-row" id="play-myself-row" style="display:none">
+              <span class="tm-muted" style="display:block;margin-bottom:4px">Play myself (desktop)</span>
+              <button type="button" class="tm-load-state-btn" id="btn-load-scenario">Load scenario...</button>
+              <button type="button" class="tm-load-state-btn" id="btn-load-state-desktop">Load state file...</button>
+              <button type="button" class="tm-toolbar-btn" id="btn-advance-turn">Advance turn</button>
+            </div>
             <div class="tm-layer-row">
               <button type="button" class="tm-load-state-btn" id="btn-load-replay">Load Replay...</button>
               <input type="file" id="replay-file-input" accept=".json" style="display:none">
+            </div>
+            <div class="tm-layer-row">
+              <button type="button" class="tm-load-state-btn" id="btn-open-last-replay" style="display:none">Open last run</button>
             </div>
             <div class="tm-layer-row">
               <button type="button" class="tm-load-state-btn" id="btn-replay-play">Play replay</button>
@@ -116,12 +135,19 @@
 
         <!-- Tooltip -->
         <div class="tm-tooltip" id="tooltip" role="tooltip" style="display:none"></div>
+
+        <!-- Replay scrubber -->
+        <div class="tm-replay-scrubber closed" id="replay-scrubber">
+          <input type="range" id="replay-week-slider" min="1" max="1" step="1" value="1" aria-label="Replay week">
+          <span id="replay-week-label">Week 1/1</span>
+        </div>
       </div>
 
       <!-- Settlement panel (right) -->
       <aside class="tm-panel closed" id="settlement-panel" role="region" aria-label="Settlement details"
         aria-hidden="true">
         <div class="tm-panel-header" id="panel-header">
+          <img class="tm-panel-flag" id="panel-flag" alt="" aria-hidden="true" style="display:none">
           <div class="tm-panel-summary">
             <div class="tm-panel-name" id="panel-name"></div>
             <div class="tm-panel-subtitle" id="panel-subtitle"></div>
@@ -135,6 +161,98 @@
 
     <!-- Status bar -->
     <div class="tm-status" id="status">Loading map data...</div>
+  </div>
+
+  <div class="tm-main-menu-overlay open" id="main-menu-overlay" aria-hidden="false">
+    <div class="tm-main-menu-card">
+      <h2>A War Without Victory</h2>
+      <div class="tm-menu-subtitle">Bosnia-Herzegovina, 1992&ndash;1995</div>
+      <button type="button" class="tm-load-state-btn" id="menu-new-campaign">New Campaign</button>
+      <button type="button" class="tm-load-state-btn" id="menu-load-state">Load Save</button>
+      <button type="button" class="tm-load-state-btn" id="menu-load-replay">Load Replay</button>
+      <button type="button" class="tm-load-state-btn" id="menu-close">Continue</button>
+    </div>
+  </div>
+
+  <div class="tm-modal-overlay" id="side-picker-overlay" aria-hidden="true" aria-label="Choose your side">
+    <div class="tm-modal-card tm-side-picker-card">
+      <div class="tm-modal-header">
+        <span>New Campaign — April 1992 Start</span>
+        <button type="button" class="tm-oob-close" id="side-picker-close" aria-label="Close side picker">&times;</button>
+      </div>
+      <div class="tm-modal-content tm-side-picker-content">
+        <p class="tm-muted">Choose which side to play. Other factions run on bot AI.</p>
+        <div id="side-picker-error" class="tm-side-picker-error hidden" role="alert"></div>
+        <div class="tm-side-picker-options" role="group" aria-label="Faction selection">
+          <button type="button" class="tm-side-picker-option" id="side-picker-RBiH" data-faction="RBiH" aria-label="Play as RBiH (ARBiH)">
+            <img class="tm-side-picker-flag" id="side-picker-flag-RBiH" src="" alt="" width="80" height="53">
+            <span class="tm-side-picker-label">RBiH (ARBiH)</span>
+          </button>
+          <button type="button" class="tm-side-picker-option" id="side-picker-RS" data-faction="RS" aria-label="Play as RS (VRS)">
+            <img class="tm-side-picker-flag" id="side-picker-flag-RS" src="" alt="" width="80" height="53">
+            <span class="tm-side-picker-label">RS (VRS)</span>
+          </button>
+          <button type="button" class="tm-side-picker-option" id="side-picker-HRHB" data-faction="HRHB" aria-label="Play as HRHB (HVO)">
+            <img class="tm-side-picker-flag" id="side-picker-flag-HRHB" src="" alt="" width="80" height="53">
+            <span class="tm-side-picker-label">HRHB (HVO)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tm-modal-overlay" id="aar-modal" aria-hidden="true">
+    <div class="tm-modal-card">
+      <div class="tm-modal-header">
+        <span>After Action Report</span>
+        <button type="button" class="tm-oob-close" id="aar-close" aria-label="Close after action report">&times;</button>
+      </div>
+      <div class="tm-modal-content" id="aar-content"></div>
+    </div>
+  </div>
+
+  <div class="tm-modal-overlay" id="settings-modal" aria-hidden="true">
+    <div class="tm-modal-card">
+      <div class="tm-modal-header">
+        <span>Settings</span>
+        <button type="button" class="tm-oob-close" id="settings-close" aria-label="Close settings">&times;</button>
+      </div>
+      <div class="tm-modal-content">
+        <label class="tm-setting-row"><input type="checkbox" id="toggle-crt"> Enable CRT effect</label>
+        <label class="tm-setting-row"><input type="checkbox" id="toggle-audio"> Enable UI audio cues</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="tm-modal-overlay" id="help-modal" aria-hidden="true">
+    <div class="tm-modal-card">
+      <div class="tm-modal-header">
+        <span>Keyboard Shortcuts</span>
+        <button type="button" class="tm-oob-close" id="help-close" aria-label="Close help">&times;</button>
+      </div>
+      <div class="tm-modal-content">
+        <div class="tm-panel-field"><span class="tm-panel-field-label">Space</span><span class="tm-panel-field-value">Play/Pause replay</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">M</span><span class="tm-panel-field-value">Main menu</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">O</span><span class="tm-panel-field-value">Toggle OOB</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">R</span><span class="tm-panel-field-value">Recruitment (when available) or Load replay</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">Esc</span><span class="tm-panel-field-value">Close overlays/search</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tm-modal-overlay" id="recruitment-modal" aria-hidden="true">
+    <div class="tm-modal-card tm-recruitment-modal-card">
+      <div class="tm-modal-header">
+        <span>Recruitment &amp; Mobilization</span>
+        <button type="button" class="tm-oob-close" id="recruitment-close" aria-label="Close recruitment">&times;</button>
+      </div>
+      <div class="tm-modal-content" id="recruitment-content">
+        <p class="tm-muted">Load a game state with recruitment to see brigade catalog.</p>
+      </div>
+      <div class="tm-modal-footer" id="recruitment-footer">
+        <button type="button" class="tm-toolbar-btn" id="recruitment-confirm" disabled>Activate brigade</button>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="./main.ts"></script>

@@ -1,7 +1,7 @@
 /**
- * Municipalities where settlement control and spawned units align to RBiH (ARBiH) regardless of
- * Croatian majority. HVO units spawned from these areas are treated as subordinate to ARBiH;
- * in practice we force control to RBiH and redirect HRHB militia strength to RBiH so spawns are ARBiH.
+ * Municipalities where Croat-majority (HRHB) control is treated as RBiH (HVO subordinate to ARBiH).
+ * Only HRHB → RBiH in init; Serb-majority (RS) settlements in these muns stay RS (e.g. Brčko, Bihać).
+ * Spawns and control-flip semantics still treat these muns as RBiH-aligned.
  *
  * Canonical list: Maglaj, Bihać, Gradačac, Brčko, Tuzla, Lopare, Srebrenik, Tešanj.
  * Keys are mun1990_id (lowercase, no diacritics).

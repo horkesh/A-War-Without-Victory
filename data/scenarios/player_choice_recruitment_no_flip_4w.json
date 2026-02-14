@@ -1,11 +1,10 @@
 {
   "scenario_id": "player_choice_recruitment_no_flip_4w",
-  "start_phase": "phase_i",
+  "start_phase": "phase_ii",
   "weeks": 4,
-  "init_control": "apr1992",
+  "init_control_mode": "ethnic_1991",
   "recruitment_mode": "player_choice",
   "recruitment_capital": { "RS": 250, "RBiH": 150, "HRHB": 100 },
   "equipment_points": { "RS": 300, "RBiH": 60, "HRHB": 120 },
-  "disable_phase_i_control_flip": true,
   "turns": []
 }

@@ -1,14 +1,36 @@
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vite';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, cpSync } from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const projectRootFromConfig = resolve(__dirname, '../../..');
 const projectRootFromCwd = typeof process !== 'undefined' && process.cwd ? process.cwd() : projectRootFromConfig;
+
+/** Path to crest/flag assets (used by tactical map and by Electron when serving from dist). */
+const CRESTS_SOURCE = 'assets/sources/crests';
+
+/**
+ * Copy crest and flag images into the build output so the app works when served from
+ * dist/tactical-map (e.g. Electron). Dev server serves /assets/ from project root.
+ */
+function copyCrestsIntoBuild(): Plugin {
+  return {
+    name: 'copy-crests-into-build',
+    closeBundle() {
+      const root = existsSync(resolve(projectRootFromCwd, CRESTS_SOURCE))
+        ? projectRootFromCwd
+        : projectRootFromConfig;
+      const src = resolve(root, CRESTS_SOURCE);
+      if (!existsSync(src)) return;
+      const outDir = resolve(__dirname, '../../../dist/tactical-map');
+      const dest = resolve(outDir, CRESTS_SOURCE);
+      cpSync(src, dest, { recursive: true });
+    },
+  };
+}
 
 /**
  * Serve /data/ and /assets/ from project root so the tactical map can load
@@ -76,7 +98,7 @@ function serveTacticalMapData(): Plugin {
 
 export default defineConfig({
     root: __dirname,
-    plugins: [serveTacticalMapData()],
+    plugins: [serveTacticalMapData(), copyCrestsIntoBuild()],
     server: {
         port: 3001,
         open: false,

@@ -25,12 +25,13 @@ export interface SettlementEthnicityData {
 }
 
 let cached: SettlementEthnicityData | null = null;
+let cachedPath: string | null = null;
 
 export async function loadSettlementEthnicityData(
   path?: string
 ): Promise<SettlementEthnicityData> {
-  if (cached) return cached;
   const filePath = resolve(path ?? 'data/derived/settlement_ethnicity_data.json');
+  if (cached && cachedPath === filePath) return cached;
   const content = await readFile(filePath, 'utf8');
   const parsed = JSON.parse(content) as unknown;
   if (!parsed || typeof parsed !== 'object' || !(parsed as Record<string, unknown>).by_settlement_id) {
@@ -39,6 +40,7 @@ export async function loadSettlementEthnicityData(
     );
   }
   cached = parsed as SettlementEthnicityData;
+  cachedPath = filePath;
   return cached;
 }
 

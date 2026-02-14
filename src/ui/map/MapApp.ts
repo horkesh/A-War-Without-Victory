@@ -488,6 +488,21 @@ export class MapApp {
 
   // ─── Front Lines ────────────────────────────────
 
+  /** Phase I §4.8: no front between RBiH and HRHB until war (match backend ALLIED_THRESHOLD 0.20). */
+  private shouldDrawFrontSegment(ca: string | null, cb: string | null): boolean {
+    if (ca == null || cb == null || ca === cb) return false;
+    const isRbihHrhb =
+      (ca === 'RBiH' && cb === 'HRHB') || (ca === 'HRHB' && cb === 'RBiH');
+    if (!isRbihHrhb) return true;
+    const gs = this.state.snapshot.loadedGameState;
+    if (!gs) return false;
+    const turn = gs.turn ?? 0;
+    const earliest = gs.rbih_hrhb_war_earliest_turn ?? 26;
+    const alliance = gs.phase_i_alliance_rbih_hrhb ?? 1;
+    if (turn < earliest || alliance > 0.2) return false;
+    return true;
+  }
+
   private drawFrontLines(rc: RenderContext): void {
     const controllers = this.activeControlLookup;
     const { ctx } = rc;
@@ -504,12 +519,11 @@ export class MapApp {
     for (const seg of this.data.sharedBorders) {
       const ca = controllers[seg.a] ?? controllers[controlKey(seg.a)] ?? null;
       const cb = controllers[seg.b] ?? controllers[controlKey(seg.b)] ?? null;
-      if (ca != null && cb != null && ca !== cb) {
-        for (let i = 0; i < seg.points.length; i++) {
-          const [sx, sy] = rc.project(seg.points[i][0], seg.points[i][1]);
-          if (i === 0) ctx.moveTo(sx, sy);
-          else ctx.lineTo(sx, sy);
-        }
+      if (!this.shouldDrawFrontSegment(ca, cb)) continue;
+      for (let i = 0; i < seg.points.length; i++) {
+        const [sx, sy] = rc.project(seg.points[i][0], seg.points[i][1]);
+        if (i === 0) ctx.moveTo(sx, sy);
+        else ctx.lineTo(sx, sy);
       }
     }
     ctx.stroke();
@@ -522,12 +536,11 @@ export class MapApp {
     for (const seg of this.data.sharedBorders) {
       const ca = controllers[seg.a] ?? controllers[controlKey(seg.a)] ?? null;
       const cb = controllers[seg.b] ?? controllers[controlKey(seg.b)] ?? null;
-      if (ca != null && cb != null && ca !== cb) {
-        for (let i = 0; i < seg.points.length; i++) {
-          const [sx, sy] = rc.project(seg.points[i][0], seg.points[i][1]);
-          if (i === 0) ctx.moveTo(sx, sy);
-          else ctx.lineTo(sx, sy);
-        }
+      if (!this.shouldDrawFrontSegment(ca, cb)) continue;
+      for (let i = 0; i < seg.points.length; i++) {
+        const [sx, sy] = rc.project(seg.points[i][0], seg.points[i][1]);
+        if (i === 0) ctx.moveTo(sx, sy);
+        else ctx.lineTo(sx, sy);
       }
     }
     ctx.stroke();

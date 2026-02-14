@@ -15,8 +15,8 @@ import type { SettlementRecord } from '../../map/settlements.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
-/** Scale phase_i_militia_strength [0,100] to pool available (integer). Tuned so 52w Apr1992→Apr1993 yields ~85–105k RBiH, ~85–95k RS, ~40–45k HRHB (historical band). */
-const POOL_SCALE_FACTOR = 38;
+/** Scale phase_i_militia_strength [0,100] to pool available (integer). */
+const POOL_SCALE_FACTOR = 30;
 /** Displaced_in contribution rate (design note). */
 const REINFORCEMENT_RATE = 0.05;
 /** Cap per mun per turn from displaced (design note). */
@@ -25,11 +25,11 @@ const DISPLACED_CONTRIBUTION_CAP = 2000;
 /** When population1991 is used, pool is weighted by eligible pop / this normalizer (no cap). Aim: ARBiH ~80–100 brigades at batchSize 1000. */
 const ELIGIBLE_POP_NORMALIZER = 50_000;
 
-/** Calibrated so 52w Apr1992→Apr1993 yields ~85–105k RBiH, ~85–95k RS, ~40–45k HRHB (historical band). */
+/** Faction asymmetry calibration for early-war manpower envelopes. */
 const FACTION_POOL_SCALE: Record<string, number> = {
-  RBiH: 1.32,
-  RS: 1.08,
-  HRHB: 0.78
+  RBiH: 1.18,
+  RS: 0.98,
+  HRHB: 0.58
 };
 const DEFAULT_FACTION_POOL_SCALE = 1.0;
 

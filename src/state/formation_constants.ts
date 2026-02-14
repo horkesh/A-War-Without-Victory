@@ -41,6 +41,9 @@ export function getMaxBrigadesPerMun(mun_id: MunicipalityId): number {
 /** Pool must reach this to spawn a new brigade; new brigade starts at this size (research: canFormBrigade ≥800). */
 export const MIN_BRIGADE_SPAWN = 800;
 
+/** Minimum personnel a formation can have during combat — below this the unit routes/dissolves rather than taking further casualties. Used as casualty floor instead of MIN_BRIGADE_SPAWN so defenders at 800 personnel can actually take losses. */
+export const MIN_COMBAT_PERSONNEL = 100;
+
 /** Minimum 1991 population (faction-eligible) in a municipality to assign historical brigade name or allow emergent spawn (demographic gating). Below this: OOB brigades get generic name; emergent spawn is skipped. */
 export const MIN_ELIGIBLE_POPULATION_FOR_BRIGADE = 500;
 
@@ -56,9 +59,9 @@ export const BRIGADE_OPERATIONAL_AOR_HARD_CAP = 48;
 
 /**
  * Max municipalities a single brigade can be assigned in ensureBrigadeMunicipalityAssignment.
- * Prevents one brigade from receiving all uncovered (faction, home_mun) pairs and ending up with 200+ settlements.
+ * Historical frontage rule: one HQ municipality plus up to two neighboring municipalities.
  */
-export const MAX_MUNICIPALITIES_PER_BRIGADE = 8;
+export const MAX_MUNICIPALITIES_PER_BRIGADE = 3;
 
 /** Max personnel absorbed per turn from home municipality militia pool (recruitment_system_design_note §5.1). */
 export const REINFORCEMENT_RATE = 200;

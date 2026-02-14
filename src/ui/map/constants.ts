@@ -1,5 +1,6 @@
 /**
  * Standalone Tactical Map — constants and theme tokens.
+ * Visual identity: 1990s NATO C2 ops center, dark navy, phosphor accents.
  * Imports canonical NATO tokens from src/map/nato_tokens.ts.
  */
 
@@ -7,12 +8,12 @@ import { NATO_TOKENS, factionFill } from '../../map/nato_tokens.js';
 
 export { NATO_TOKENS, factionFill };
 
-/** Faction fill colors with alpha for map polygon overlay. */
+/** Faction fill colors with alpha for map polygon overlay. Higher alpha for dark bg contrast. */
 export const SIDE_COLORS: Record<string, string> = {
-  RBiH: factionFill('RBiH', 0.55),
-  RS: factionFill('RS', 0.55),
-  HRHB: factionFill('HRHB', 0.55),
-  null: 'rgba(100, 100, 100, 0.3)',
+  RBiH: factionFill('RBiH', 0.65),
+  RS: factionFill('RS', 0.65),
+  HRHB: factionFill('HRHB', 0.65),
+  null: 'rgba(60, 60, 70, 0.35)',
 };
 
 /** Solid faction colors for panel borders, badges, etc. */
@@ -20,7 +21,7 @@ export const SIDE_SOLID_COLORS: Record<string, string> = {
   RBiH: NATO_TOKENS.RBiH,
   RS: NATO_TOKENS.RS,
   HRHB: NATO_TOKENS.HRHB,
-  null: 'rgb(100, 100, 100)',
+  null: 'rgb(80, 80, 90)',
 };
 
 /** Human-readable faction labels. */
@@ -36,10 +37,10 @@ export const FACTION_DISPLAY_ORDER: readonly string[] = ['RBiH', 'RS', 'HRHB'];
 
 /** Ethnicity fill colors (1991 census majority) — same hue as factions for consistency. Keys lowercase. */
 export const ETHNICITY_COLORS: Record<string, string> = {
-  bosniak: factionFill('RBiH', 0.55),
-  serb: factionFill('RS', 0.55),
-  croat: factionFill('HRHB', 0.55),
-  other: 'rgba(100, 100, 100, 0.3)',
+  bosniak: factionFill('RBiH', 0.65),
+  serb: factionFill('RS', 0.65),
+  croat: factionFill('HRHB', 0.65),
+  other: 'rgba(60, 60, 70, 0.35)',
 };
 
 /** Human-readable ethnicity labels for legend and tooltip. */
@@ -63,12 +64,12 @@ export const ZOOM_WHEEL_SENSITIVITY = 0.0015;
 /** Canvas padding in pixels at each edge. */
 export const MAP_PADDING = 40;
 
-/** Readiness state colors for formation markers. */
+/** Readiness state colors for formation markers (phosphor-accented). */
 export const READINESS_COLORS: Record<string, string> = {
-  active: '#4CAF50',
-  forming: '#FFC107',
+  active: '#00ff88',
+  forming: '#ffab00',
   overextended: '#FF9800',
-  degraded: '#F44336',
+  degraded: '#ff3d00',
 };
 
 /** Formation kind icons: inner symbol within NATO frame (infantry=bar, corps=diamond, militia=triangle). */
@@ -80,50 +81,63 @@ export const FORMATION_KIND_SHAPES: Record<string, string> = {
   corps_asset: 'diamond',
 };
 
-/** NATO-style formation marker: width and height by zoom (0=strategic, 1=operational, 2=tactical). 1.5:1 frame ratio. */
+/** NATO-style formation marker: width and height by zoom (0=strategic, 1=operational, 2=tactical). Horizontal box: crest left, NATO symbol right. */
 export const FORMATION_MARKER_SIZE: Readonly<{ w: number; h: number }[]> = [
-  { w: 22, h: 16 },   // strategic
-  { w: 28, h: 20 },   // operational
-  { w: 34, h: 24 },   // tactical
+  { w: 34, h: 24 },   // strategic
+  { w: 42, h: 30 },   // operational
+  { w: 52, h: 36 },   // tactical
 ] as const;
 
 /** Hit-test radius for formation markers (pixels from marker center). Should comfortably contain the largest marker. */
-export const FORMATION_HIT_RADIUS = 22;
+export const FORMATION_HIT_RADIUS = 28;
 
-/** Base map layer colors (from napkin: roads grey, rivers dusty blue). */
+/** Base map layer colors — subdued for dark background, infrastructure barely visible. */
 export const BASE_LAYER_COLORS = {
-  boundary: '#333333',
+  boundary: 'rgba(100, 100, 120, 0.6)',
   river: NATO_TOKENS.hydrography,
   roadMSR: NATO_TOKENS.MSR,
   roadSecondary: NATO_TOKENS.secondaryRoad,
-  controlRegionFill: 'rgba(180, 170, 150, 0.03)',
-  controlRegionStroke: 'rgba(80, 60, 40, 0.35)',
+  controlRegionFill: 'rgba(60, 60, 80, 0.08)',
+  controlRegionStroke: 'rgba(80, 80, 100, 0.25)',
 } as const;
 
 /** Line widths for base map features. */
 export const BASE_LAYER_WIDTHS = {
   boundary: 2,
-  river: 1.5,
-  roadMSR: 2,
-  roadSecondary: 0.8,
+  river: 1.2,
+  roadMSR: 1.5,
+  roadSecondary: 0.6,
   controlRegion: 1,
 } as const;
 
-/** Front line rendering. */
+/** Front line rendering — bright white/faction glow on dark background. */
 export const FRONT_LINE = {
-  color: '#000000',
-  width: 3,
-  dash: [6, 4] as number[],
+  color: 'rgba(255, 255, 255, 0.85)',
+  width: 2.5,
+  dash: [8, 4] as number[],
+  /** Glow effect: drawn as wider semi-transparent line behind the main line. */
+  glowColor: 'rgba(255, 200, 100, 0.25)',
+  glowWidth: 6,
 } as const;
 
 /** Minimap dimensions. */
 export const MINIMAP = {
-  width: 180,
-  height: 120,
+  width: 200,
+  height: 150,
 } as const;
 
 /** Settlement panel width. */
 export const PANEL_WIDTH = 340;
+
+/** Settlement border colors for the dark map. */
+export const SETTLEMENT_BORDER = {
+  /** Borders between same-faction settlements — barely visible grid. */
+  sameColor: 'rgba(60, 60, 80, 0.3)',
+  sameWidth: 0.4,
+  /** Borders between different-faction settlements — bright faction boundary. */
+  diffColor: 'rgba(255, 255, 255, 0.7)',
+  diffWidth: 2,
+} as const;
 
 /** Months for turn-to-date conversion. */
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

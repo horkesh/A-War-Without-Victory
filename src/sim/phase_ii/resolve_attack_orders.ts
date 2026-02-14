@@ -18,6 +18,8 @@ import { resolveBattleOrders, type BattleResolutionReport } from './battle_resol
 
 export interface ResolveAttackOrdersReport {
   orders_processed: number;
+  /** Distinct settlement IDs targeted by attack orders this turn (diagnostic: orders_processed vs unique_attack_targets vs flips_applied). */
+  unique_attack_targets: number;
   flips_applied: number;
   casualty_attacker: number;
   casualty_defender: number;
@@ -42,6 +44,7 @@ export function resolveAttackOrders(
   const terrain: TerrainScalarsData = terrainData ?? { by_sid: {} };
   const munMap: Map<string, string> = settlementToMun ?? new Map();
 
+  const orders = state.brigade_attack_orders ?? {};
   const battleReport = resolveBattleOrders(state, edges, terrain, munMap);
 
   // Backfill flat fields for backward compatibility
@@ -56,6 +59,7 @@ export function resolveAttackOrders(
 
   return {
     orders_processed: battleReport.battles_fought,
+    unique_attack_targets: new Set(Object.values(orders).filter((v): v is SettlementId => v != null)).size,
     flips_applied: battleReport.flips_applied,
     casualty_attacker: totalAttackerCas.killed + totalAttackerCas.wounded + totalAttackerCas.missing_captured,
     casualty_defender: totalDefenderCas.killed + totalDefenderCas.wounded + totalDefenderCas.missing_captured,

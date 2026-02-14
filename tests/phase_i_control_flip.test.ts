@@ -111,12 +111,13 @@ test('runControlFlip with consolidation set skips that municipality', () => {
   assert.strictEqual(report.flips.length, 0);
 });
 
-test('Phase I runTurn includes control flip phase in report', async () => {
+test('Phase I runTurn keeps control-flip phase but applies no flips', async () => {
   const state = stateWithTwoAdjacentMuns();
   const { report } = await runTurn(state, { seed: state.meta.seed });
   assert.ok(report.phase_i_control_flip);
-  assert.strictEqual(typeof report.phase_i_control_flip!.municipalities_evaluated, 'number');
-  assert.ok(Array.isArray(report.phase_i_control_flip!.flips));
+  assert.strictEqual(report.phase_i_control_flip!.municipalities_evaluated, 0);
+  assert.deepStrictEqual(report.phase_i_control_flip!.flips, []);
+  assert.deepStrictEqual(report.phase_i_control_flip!.control_events, []);
   assert.ok(report.phases.some((p) => p.name === 'phase-i-control-flip'));
 });
 
@@ -213,7 +214,7 @@ test('B4 coercion: coercion_pressure_by_municipality reduces flip threshold so f
   assert.strictEqual(reportWith.municipalities_evaluated, 2);
 });
 
-test('disable_phase_i_control_flip semantics: militaryActionOnly disables militia-only flips without adjacent brigades', () => {
+test('runControlFlip militaryActionOnly branch disables militia-only flips without adjacent brigades', () => {
   const state: GameState = {
     schema_version: CURRENT_SCHEMA_VERSION,
     meta: { turn: 10, seed: 'military-action-only-fixture', phase: 'phase_i', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },

@@ -5,6 +5,7 @@
  * Phase H1.2: Fails early if data prerequisites are missing (same remediation as sim:data:check).
  * --map: copy final_save.json to data/derived/latest_run_final_save.json and print tactical map instructions.
  * --video: emit weekly save artifacts and replay_timeline.json for tactical map replay/export.
+ * --unique: append timestamp to run directory so each run creates a new folder (no overwrite).
  */
 
 import { copyFile, mkdir } from 'node:fs/promises';
@@ -13,6 +14,8 @@ import { join } from 'node:path';
 import { checkDataPrereqs, formatMissingRemediation } from '../../src/data_prereq/check_data_prereqs.js';
 import { runScenario } from '../../src/scenario/scenario_runner.js';
 
+/** Default scenario when user asks to "run scenarios" without specifying one (historical 52w, full OOB). */
+const DEFAULT_SCENARIO = 'data/scenarios/apr1992_historical_52w.json';
 
 function parseArgs(): {
   scenario: string;
@@ -21,6 +24,7 @@ function parseArgs(): {
   postureAllPushAndApplyBreaches: boolean;
   map: boolean;
   video: boolean;
+  unique: boolean;
 } {
   const args = process.argv.slice(2);
   let scenario = '';
@@ -29,6 +33,7 @@ function parseArgs(): {
   let postureAllPushAndApplyBreaches = false;
   let map = false;
   let video = false;
+  let unique = false;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--scenario' && args[i + 1]) {
       scenario = args[++i];
@@ -42,19 +47,18 @@ function parseArgs(): {
       map = true;
     } else if (args[i] === '--video') {
       video = true;
+    } else if (args[i] === '--unique') {
+      unique = true;
     }
   }
   if (!scenario) {
-    process.stderr.write(
-      'Usage: run_scenario.ts --scenario <path> [--weeks <n>] [--out <dir>] [--posture-all-push] [--map] [--video]\n'
-    );
-    process.exit(1);
+    scenario = DEFAULT_SCENARIO;
   }
-  return { scenario, weeks, out, postureAllPushAndApplyBreaches, map, video };
+  return { scenario, weeks, out, postureAllPushAndApplyBreaches, map, video, unique };
 }
 
 async function main(): Promise<void> {
-  const { scenario, weeks, out, postureAllPushAndApplyBreaches, map: enableMap, video } = parseArgs();
+  const { scenario, weeks, out, postureAllPushAndApplyBreaches, map: enableMap, video, unique } = parseArgs();
 
   const prereqResult = checkDataPrereqs();
   if (!prereqResult.ok) {
@@ -68,7 +72,8 @@ async function main(): Promise<void> {
     outDirBase: out,
     weeksOverride: weeks,
     postureAllPushAndApplyBreaches,
-    emitWeeklySavesForVideo: video
+    emitWeeklySavesForVideo: video,
+    uniqueRunFolder: unique
   });
   process.stdout.write(`outDir: ${result.outDir}\n`);
   process.stdout.write(`paths: ${result.paths.initial_save}\n`);

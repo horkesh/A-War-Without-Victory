@@ -1,0 +1,25 @@
+{
+  "scenario_id": "historical_mvp_apr1992_52w",
+  "start_phase": "phase_ii",
+  "weeks": 52,
+  "init_control_mode": "ethnic_1991",
+  "recruitment_mode": "player_choice",
+  "recruitment_capital": { "RS": 260, "RBiH": 130, "HRHB": 110 },
+  "equipment_points": { "RS": 280, "RBiH": 100, "HRHB": 120 },
+  "recruitment_capital_trickle": { "RS": 3, "RBiH": 1, "HRHB": 2 },
+  "equipment_points_trickle": { "RS": 3, "RBiH": 1, "HRHB": 2 },
+  "max_recruits_per_faction_per_turn": 2,
+  "init_formations": "apr1992",
+  "init_formations_oob": true,
+  "formation_spawn_directive": { "kind": "both" },
+  "turns": [],
+  "use_harness_bots": true,
+  "use_smart_bots": true,
+  "init_alliance_rbih_hrhb": 0.35,
+  "rbih_hrhb_war_earliest_week": 26,
+  "coercion_pressure_by_municipality": {
+    "prijedor": 0.9,
+    "zvornik": 0.85,
+    "foca": 0.85
+  }
+}

@@ -87,7 +87,7 @@ import {
   type SpawnFormationsReport,
   type ReinforceBrigadesReport
 } from './formation_spawn.js';
-import { runControlFlip, type ControlFlipReport } from './phase_i/control_flip.js';
+import type { ControlFlipReport } from './phase_i/control_flip.js';
 import {
   updateAllianceValue,
   ensureRbihHrhbState,
@@ -119,11 +119,13 @@ import { detectPhaseIIFronts } from './phase_ii/front_emergence.js';
 import {
   applyBrigadeMunicipalityOrders,
   syncBrigadeMunicipalityAssignmentFromAoR,
-  validateBrigadeAoR
+  validateBrigadeAoR,
+  rebalanceBrigadeAoR
 } from './phase_ii/brigade_aor.js';
 import { applyReshapeOrders } from './phase_ii/aor_reshaping.js';
 import { applyPostureOrders, applyPostureCosts } from './phase_ii/brigade_posture.js';
 import { generateAllBotOrders } from './phase_ii/bot_brigade_ai.js';
+import { generateAllCorpsOrders } from './phase_ii/bot_corps_ai.js';
 import { applyCorpsEffects, advanceOperations } from './phase_ii/corps_command.js';
 import { activateOGs, updateOGLifecycle } from './phase_ii/operational_groups.js';
 import { applyBrigadePressureToState } from './phase_ii/brigade_pressure.js';
@@ -189,12 +191,6 @@ export interface TurnInput {
   historicalNameLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
   /** When provided, Phase I wave flip uses ethnicity for holdout decisions (avoids 0/0 → all flips). */
   settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }>;
-  /** Experimental scenario gate: disable Phase I control-flip step for A/B testing military-action-only behavior. */
-  disablePhaseIControlFlip?: boolean;
-  /** Experimental military-action tuning (when disablePhaseIControlFlip is true). */
-  phaseIMilitaryActionAttackScale?: number;
-  /** Experimental military-action tuning (when disablePhaseIControlFlip is true). */
-  phaseIMilitaryActionStabilityBufferFactor?: number;
 }
 
 export interface TurnReport {
@@ -472,6 +468,18 @@ const phases: NamedPhase[] = [
     }
   },
   {
+    name: 'rebalance-brigade-aor',
+    run: async (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      if (!context.state.brigade_aor) return;
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
+        ? context.input.settlementEdges
+        : graph.edges;
+      rebalanceBrigadeAoR(context.state, edges);
+    }
+  },
+  {
     name: 'apply-municipality-orders',
     run: async (context) => {
       if (context.state.meta.phase !== 'phase_ii') return;
@@ -483,6 +491,26 @@ const phases: NamedPhase[] = [
       applyBrigadeMunicipalityOrders(context.state, edges, graph.settlements);
       // Keep settlement-level AoR synchronized after municipality movement.
       validateBrigadeAoR(context.state, edges, graph.settlements);
+    }
+  },
+  {
+    name: 'generate-bot-corps-orders',
+    run: async (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      if (!context.state.corps_command) return;
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
+        ? context.input.settlementEdges
+        : graph.edges;
+      const sidToMun = new Map<string, string>();
+      for (const [sid, rec] of graph.settlements.entries()) {
+        const munId = rec.mun1990_id ?? rec.mun_code;
+        if (munId) sidToMun.set(sid, munId);
+      }
+      const factions = (context.state.factions ?? []).map(f => f.id).sort(strictCompare);
+      for (const faction of factions) {
+        generateAllCorpsOrders(context.state, faction, edges, sidToMun);
+      }
     }
   },
   {
@@ -1377,22 +1405,15 @@ const phaseIPhases: NamedPhase[] = [
   },
   {
     name: 'phase-i-control-flip',
-    run: async (context) => {
-      // Canon: In Phase II, control changes only from military actions (breach-driven). Phase I flip runs in Phase I only.
+    run: (context) => {
+      // Canonical path: Phase I no longer performs control flips.
+      // Political control changes are resolved in Phase II attack resolution only.
       if (context.state.meta.phase !== 'phase_i') return;
-      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-      const edges = context.input.settlementEdges ?? graph.edges;
-      context.report.phase_i_control_flip = runControlFlip({
-        state: context.state,
-        turn: context.state.meta.turn,
-        settlements: graph.settlements,
-        edges,
-        settlementDataRaw: context.input.settlementDataRaw,
-        settlementPopulationBySid: context.input.settlementPopulationBySid,
-        militaryActionOnly: context.input.disablePhaseIControlFlip === true,
-        militaryActionAttackScale: context.input.phaseIMilitaryActionAttackScale,
-        militaryActionStabilityBufferFactor: context.input.phaseIMilitaryActionStabilityBufferFactor
-      });
+      context.report.phase_i_control_flip = {
+        flips: [],
+        municipalities_evaluated: 0,
+        control_events: []
+      };
     }
   },
   {
