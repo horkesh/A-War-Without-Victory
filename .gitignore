@@ -1,3 +1,6 @@
+# Windows reserved names (accidental creation)
+NUL
+
 # Log files
 *.log
 
