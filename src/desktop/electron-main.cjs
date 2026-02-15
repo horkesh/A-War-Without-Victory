@@ -323,6 +323,90 @@ app.whenReady().then(() => {
     }
   });
 
+  // --- Order staging IPC handlers ---
+
+  ipcMain.handle('stage-attack-order', async (_event, payload) => {
+    const { brigadeId, targetSettlementId } = payload || {};
+    if (!currentGameStateJson || typeof brigadeId !== 'string' || typeof targetSettlementId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      if (!state.brigade_attack_orders) state.brigade_attack_orders = {};
+      state.brigade_attack_orders[brigadeId] = targetSettlementId;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-posture-order', async (_event, payload) => {
+    const { brigadeId, posture } = payload || {};
+    if (!currentGameStateJson || typeof brigadeId !== 'string' || typeof posture !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      if (!state.brigade_posture_orders) state.brigade_posture_orders = [];
+      // Replace existing order for same brigade, or append
+      const idx = state.brigade_posture_orders.findIndex(o => o.brigade_id === brigadeId);
+      const order = { brigade_id: brigadeId, posture };
+      if (idx >= 0) {
+        state.brigade_posture_orders[idx] = order;
+      } else {
+        state.brigade_posture_orders.push(order);
+      }
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-move-order', async (_event, payload) => {
+    const { brigadeId, targetMunicipalityId } = payload || {};
+    if (!currentGameStateJson || typeof brigadeId !== 'string' || typeof targetMunicipalityId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      if (!state.brigade_mun_orders) state.brigade_mun_orders = {};
+      state.brigade_mun_orders[brigadeId] = [targetMunicipalityId];
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('clear-orders', async (_event, payload) => {
+    const { brigadeId } = payload || {};
+    if (!currentGameStateJson || typeof brigadeId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      if (state.brigade_attack_orders) delete state.brigade_attack_orders[brigadeId];
+      if (state.brigade_mun_orders) delete state.brigade_mun_orders[brigadeId];
+      if (state.brigade_posture_orders) {
+        state.brigade_posture_orders = state.brigade_posture_orders.filter(o => o.brigade_id !== brigadeId);
+      }
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   createWindow();
 });
 

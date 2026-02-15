@@ -123,6 +123,7 @@ import {
   validateBrigadeAoR,
   rebalanceBrigadeAoR
 } from './phase_ii/brigade_aor.js';
+import { enforceCorpsLevelContiguity } from './phase_ii/corps_directed_aor.js';
 import { applyReshapeOrders } from './phase_ii/aor_reshaping.js';
 import { applyPostureOrders, applyPostureCosts } from './phase_ii/brigade_posture.js';
 import { generateAllBotOrders } from './phase_ii/bot_brigade_ai.js';
@@ -488,6 +489,19 @@ const phases: NamedPhase[] = [
     }
   },
   {
+    name: 'enforce-corps-aor-contiguity',
+    run: async (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      if (!context.state.brigade_aor) return;
+      if (!context.state.corps_command) return;
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
+        ? context.input.settlementEdges
+        : graph.edges;
+      enforceCorpsLevelContiguity(context.state, edges);
+    }
+  },
+  {
     name: 'apply-municipality-orders',
     run: async (context) => {
       if (context.state.meta.phase !== 'phase_ii') return;
@@ -515,7 +529,10 @@ const phases: NamedPhase[] = [
         const munId = rec.mun1990_id ?? rec.mun_code;
         if (munId) sidToMun.set(sid, munId);
       }
-      const factions = (context.state.factions ?? []).map(f => f.id).sort(strictCompare);
+      const playerFaction = context.state.meta.player_faction ?? null;
+      const factions = (context.state.factions ?? []).map(f => f.id)
+        .filter(fid => playerFaction == null || fid !== playerFaction)
+        .sort(strictCompare);
       for (const faction of factions) {
         generateAllCorpsOrders(context.state, faction, edges, sidToMun);
       }
@@ -536,8 +553,10 @@ const phases: NamedPhase[] = [
         const munId = rec.mun1990_id ?? rec.mun_code;
         if (munId) sidToMun.set(sid, munId);
       }
-      // All factions are bot-controlled in auto-run mode
-      const factions = (context.state.factions ?? []).map(f => f.id);
+      // All factions are bot-controlled in auto-run mode; exclude player faction when set
+      const playerFaction = context.state.meta.player_faction ?? null;
+      const factions = (context.state.factions ?? []).map(f => f.id)
+        .filter(fid => playerFaction == null || fid !== playerFaction);
       generateAllBotOrders(context.state, edges, factions, sidToMun);
     }
   },

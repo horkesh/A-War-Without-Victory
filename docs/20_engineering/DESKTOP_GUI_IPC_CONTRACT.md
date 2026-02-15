@@ -26,7 +26,27 @@ This document defines the Electron main <-> renderer IPC used by the tactical-ma
 
 - `advance-turn` (invoke)
   - Returns: `{ ok: boolean, error?: string, stateJson?: string, report?: { phase: string, turn: number, details?: unknown } | null }`
-  - Behavior: advances exactly one turn on current in-memory state and returns updated serialized state plus phase report metadata.
+  - Behavior: advances exactly one turn on current in-memory state using the full turn pipeline (runTurn: combat, supply, exhaustion, posture, AoR rebalance, bot AI). Returns updated serialized state plus phase report metadata.
+
+- `stage-attack-order` (invoke)
+  - Payload: `{ brigadeId: string, targetSettlementId: string }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: sets `state.brigade_attack_orders[brigadeId] = targetSettlementId`, reserializes, sends state via `game-state-updated`.
+
+- `stage-posture-order` (invoke)
+  - Payload: `{ brigadeId: string, posture: string }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: pushes or replaces entry in `state.brigade_posture_orders` for the brigade, reserializes, sends state via `game-state-updated`.
+
+- `stage-move-order` (invoke)
+  - Payload: `{ brigadeId: string, targetMunicipalityId: string }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: sets `state.brigade_mun_orders[brigadeId] = [targetMunicipalityId]`, reserializes, sends state via `game-state-updated`.
+
+- `clear-orders` (invoke)
+  - Payload: `{ brigadeId: string }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: removes brigade from `brigade_attack_orders`, `brigade_posture_orders`, and `brigade_mun_orders`, reserializes, sends state via `game-state-updated`.
 
 - `game-state-updated` (event)
   - Payload: `stateJson: string`

@@ -12,6 +12,7 @@ export default defineConfig({
       'tests/corps_command.test.ts',
       'tests/aor_reshaping.test.ts',
       'tests/bot_three_sides_validation.test.ts',
+      'tests/corps_aor_contiguity.test.ts',
     ],
     globals: false,
   },

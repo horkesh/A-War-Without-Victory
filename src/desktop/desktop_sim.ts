@@ -12,12 +12,11 @@ import { loadOobBrigades, loadMunicipalityHqSettlement } from '../scenario/oob_l
 import { buildSidToMunFromSettlements } from '../scenario/oob_phase_i_entry.js';
 import { loadSettlementGraph } from '../map/settlements.js';
 import { recruitBrigade, applyRecruitment, initializeRecruitmentResources } from '../sim/recruitment_engine.js';
-import { accrueRecruitmentResources } from '../sim/recruitment_turn.js';
 import type { EquipmentClass } from '../state/recruitment_types.js';
 import { isValidEquipmentClass } from '../state/recruitment_types.js';
 import { runPhase0TurnAndAdvance } from '../ui/warroom/run_phase0_turn.js';
 import { runPhaseITurn } from '../sim/run_phase_i_browser.js';
-import { runPhaseIITurn } from '../sim/run_phase_ii_browser.js';
+import { runTurn } from '../sim/turn_pipeline.js';
 import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
 
 function settlementGraphOptions(baseDir: string): { settlementsPath: string; edgesPath: string } {
@@ -112,10 +111,11 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
       return { state: nextState, report: { phase, turn: nextState.meta.turn, details: report } };
     }
     if (phase === 'phase_ii') {
-      if (state.recruitment_state) {
-        accrueRecruitmentResources(state, graph.settlements, undefined);
-      }
-      const { nextState, report } = runPhaseIITurn(state, { seed, settlementGraph: graphForBrowser });
+      const { nextState, report } = await runTurn(state, {
+        seed,
+        settlementGraph: graphForBrowser,
+        settlementEdges: graph.edges,
+      });
       return { state: nextState, report: { phase, turn: nextState.meta.turn, details: report } };
     }
     return { state, error: `Unknown phase: ${phase}` };

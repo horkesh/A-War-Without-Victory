@@ -44,6 +44,8 @@ import {
 import {
   checkBrigadeContiguity,
   repairContiguity,
+  checkCorpsContiguity,
+  repairCorpsContiguity,
 } from './aor_contiguity.js';
 
 // --- Helpers (locally scoped) ---
@@ -319,6 +321,9 @@ export function assignCorpsDirectedAoR(
   // Step 8: Contiguity validation and repair
   enforceContiguity(state, frontActive, adj);
 
+  // Step 9: Corps-level contiguity enforcement (enclave-aware)
+  enforceCorpsLevelContiguity(state, edges);
+
   state.brigade_municipality_assignment = allAssignments;
   return allAssignments;
 }
@@ -478,24 +483,28 @@ function enforceContiguity(
       adj
     );
 
-    // Clear orphans from this brigade
+    // Clear orphans from this brigade — prefer same-corps target, then any same-faction
+    const fCorpsId = getFormationCorpsId(f);
     for (const sid of orphans) {
-      // Find nearest adjacent brigade of same faction
       const neighbors = adj.get(sid);
-      let targetBrigade: FormationId | null = null;
+      let sameCorpsTarget: FormationId | null = null;
+      let anyFactionTarget: FormationId | null = null;
       if (neighbors) {
         for (const nSid of Array.from(neighbors).sort(strictCompare)) {
           const nBrigade = brigadeAor[nSid];
           if (nBrigade && nBrigade !== brigadeId) {
             const nf = formations[nBrigade];
             if (nf && nf.faction === f.faction) {
-              targetBrigade = nBrigade;
-              break;
+              if (!anyFactionTarget) anyFactionTarget = nBrigade;
+              if (!sameCorpsTarget && fCorpsId && getFormationCorpsId(nf) === fCorpsId) {
+                sameCorpsTarget = nBrigade;
+              }
             }
           }
         }
       }
 
+      const targetBrigade = sameCorpsTarget ?? anyFactionTarget;
       if (targetBrigade) {
         brigadeAor[sid] = targetBrigade;
       } else {
@@ -504,6 +513,66 @@ function enforceContiguity(
     }
   }
 }
+
+// --- Corps-level contiguity ---
+
+/**
+ * Enforce contiguity on corps-level AoR (union of subordinate brigade settlements).
+ *
+ * For each faction:
+ * 1. Identify enclaves (excluded from check — legitimate disconnection)
+ * 2. Build per-corps settlement sets from state.brigade_aor
+ * 3. Check contiguity; reassign orphans to adjacent brigade of a different corps
+ *
+ * Exported for use in both assignCorpsDirectedAoR (Step 9) and the turn pipeline
+ * (after rebalanceBrigadeAoR which is not corps-aware).
+ *
+ * Deterministic: sorted iteration via strictCompare.
+ */
+export function enforceCorpsLevelContiguity(
+  state: GameState,
+  edges: EdgeRecord[]
+): void {
+  const brigadeAor = state.brigade_aor;
+  if (!brigadeAor) return;
+  const formations = state.formations ?? {};
+  const pc = state.political_controllers ?? {};
+
+  const adj = buildAdjacencyFromEdges(edges);
+  const factionIds = Array.from(new Set((state.factions ?? []).map((f) => f.id))).sort(strictCompare);
+
+  for (const faction of factionIds) {
+    // Identify enclaves for this faction — their settlements are excluded from the check
+    const territories = detectDisconnectedTerritories(faction, pc, edges);
+    const enclaveSettlements = new Set<SettlementId>();
+    for (const enclave of territories.enclaves) {
+      for (const sid of enclave) enclaveSettlements.add(sid);
+    }
+
+    // Build per-corps settlement sets from brigade_aor (excluding enclaves)
+    const corpsSettlements = new Map<FormationId, SettlementId[]>();
+    for (const [sid, brigadeId] of Object.entries(brigadeAor).sort((a, b) => strictCompare(a[0], b[0]))) {
+      if (!brigadeId) continue;
+      if (enclaveSettlements.has(sid as SettlementId)) continue;
+      const brigade = formations[brigadeId];
+      if (!brigade || brigade.faction !== faction) continue;
+      const corpsId = getFormationCorpsId(brigade);
+      if (!corpsId) continue;
+      const list = corpsSettlements.get(corpsId) ?? [];
+      list.push(sid as SettlementId);
+      corpsSettlements.set(corpsId, list);
+    }
+
+    // Check and repair each corps
+    for (const [corpsId, settlements] of Array.from(corpsSettlements.entries()).sort((a, b) => strictCompare(a[0], b[0]))) {
+      const result = checkCorpsContiguity(corpsId, settlements, adj);
+      if (result.contiguous) continue;
+      repairCorpsContiguity(state, faction, corpsId, result.orphans, adj);
+    }
+  }
+}
+
+// --- Helpers ---
 
 /**
  * Find nearest corps for a brigade whose corps has no sector.

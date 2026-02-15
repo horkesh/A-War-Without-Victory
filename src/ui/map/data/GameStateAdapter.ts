@@ -4,7 +4,7 @@
  * needed by the map application.
  */
 
-import type { LoadedGameState, FormationView, MilitiaPoolView, RecruitmentView } from '../types.js';
+import type { LoadedGameState, FormationView, MilitiaPoolView, RecruitmentView, AttackOrderView, MovementOrderView } from '../types.js';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
@@ -159,41 +159,27 @@ export function parseGameState(json: unknown): LoadedGameState {
     statusBySettlement = buildStatusLookup(statusBySettlement);
   }
 
-  // Extract pending attack orders (deterministic ordering by brigade id then target sid).
-  const attackOrders = (((state.brigade_attack_orders as unknown[]) ?? [])
-    .map((entry) => {
-      const rec = entry as Record<string, unknown>;
-      const brigadeId = String(rec.brigade_id ?? '');
-      const targetSettlementId = String(rec.target_settlement_id ?? '');
-      if (!brigadeId || !targetSettlementId) return null;
-      return { brigadeId, targetSettlementId };
-    })
-    .filter((v): v is { brigadeId: string; targetSettlementId: string } => v !== null))
-    .sort((a, b) => {
-      if (a.brigadeId < b.brigadeId) return -1;
-      if (a.brigadeId > b.brigadeId) return 1;
-      if (a.targetSettlementId < b.targetSettlementId) return -1;
-      if (a.targetSettlementId > b.targetSettlementId) return 1;
-      return 0;
-    });
+  // Extract pending attack orders (Record<FormationId, SettlementId | null>).
+  const attackOrders: AttackOrderView[] = [];
+  const rawAttackOrders = state.brigade_attack_orders as Record<string, string | null> | undefined;
+  if (rawAttackOrders && typeof rawAttackOrders === 'object' && !Array.isArray(rawAttackOrders)) {
+    for (const [brigadeId, targetSid] of Object.entries(rawAttackOrders).sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)) {
+      if (targetSid) attackOrders.push({ brigadeId, targetSettlementId: targetSid });
+    }
+  }
 
-  // Extract pending municipality movement orders (deterministic ordering).
-  const movementOrders = (((state.brigade_mun_orders as unknown[]) ?? [])
-    .map((entry) => {
-      const rec = entry as Record<string, unknown>;
-      const brigadeId = String(rec.brigade_id ?? '');
-      const targetMunicipalityId = String(rec.target_mun_id ?? '');
-      if (!brigadeId || !targetMunicipalityId) return null;
-      return { brigadeId, targetMunicipalityId };
-    })
-    .filter((v): v is { brigadeId: string; targetMunicipalityId: string } => v !== null))
-    .sort((a, b) => {
-      if (a.brigadeId < b.brigadeId) return -1;
-      if (a.brigadeId > b.brigadeId) return 1;
-      if (a.targetMunicipalityId < b.targetMunicipalityId) return -1;
-      if (a.targetMunicipalityId > b.targetMunicipalityId) return 1;
-      return 0;
-    });
+  // Extract pending municipality movement orders (Record<FormationId, MunicipalityId[] | null>).
+  const movementOrders: MovementOrderView[] = [];
+  const rawMunOrders = state.brigade_mun_orders as Record<string, string[] | null> | undefined;
+  if (rawMunOrders && typeof rawMunOrders === 'object' && !Array.isArray(rawMunOrders)) {
+    for (const [brigadeId, munIds] of Object.entries(rawMunOrders).sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)) {
+      if (Array.isArray(munIds)) {
+        for (const targetMunicipalityId of munIds) {
+          if (targetMunicipalityId) movementOrders.push({ brigadeId, targetMunicipalityId });
+        }
+      }
+    }
+  }
 
   // Extract recent control events for panel/event ticker.
   const recentControlEvents = (((state.control_events as unknown[]) ?? [])

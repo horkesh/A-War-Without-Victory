@@ -71,7 +71,20 @@ export class MapApp {
   private selectedRecruitmentEquipmentClass: string | null = null;
 
   /** Pending order mode: when set, next map click resolves the order. */
-  private pendingOrderMode: { type: 'move' | 'attack'; brigadeId: string; brigadeName: string } | null = null;
+  private pendingOrderMode: {
+    type: 'move' | 'attack';
+    formation: FormationView;
+    candidateTargetSid?: string;
+  } | null = null;
+
+  /** Reverse lookup: settlement SID → defending formation. Rebuilt when game state loads. */
+  private defenderBySid: Map<string, FormationView> = new Map();
+
+  /** Municipality mun1990_id → settlement SID list. Lazily built for move-targeting overlay. */
+  private munToSidsCache: Map<string, string[]> | null = null;
+
+  /** Animation frame handle for targeting-mode pulsing highlight. */
+  private targetingAnimFrame: number | null = null;
 
   // Baseline control data for dataset switching
   private baselineControlLookup: Record<string, string | null> = {};
@@ -83,6 +96,23 @@ export class MapApp {
 
   /** Army crest images for map markers and OOB. Keyed by faction id (RBiH, RS, HRHB). */
   private crestImages: Map<string, HTMLImageElement> = new Map();
+
+  /** Get the desktop IPC bridge (awwv) if available (Electron only). */
+  private getDesktopBridge(): {
+    stageAttackOrder?: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; error?: string }>;
+    stagePostureOrder?: (brigadeId: string, posture: string) => Promise<{ ok: boolean; error?: string }>;
+    stageMoveOrder?: (brigadeId: string, targetMunicipalityId: string) => Promise<{ ok: boolean; error?: string }>;
+    clearOrders?: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
+  } | null {
+    return (window as unknown as {
+      awwv?: {
+        stageAttackOrder?: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; error?: string }>;
+        stagePostureOrder?: (brigadeId: string, posture: string) => Promise<{ ok: boolean; error?: string }>;
+        stageMoveOrder?: (brigadeId: string, targetMunicipalityId: string) => Promise<{ ok: boolean; error?: string }>;
+        clearOrders?: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
+      };
+    }).awwv ?? null;
+  }
 
   constructor(rootId: string) {
     this.rootId = rootId;
@@ -253,6 +283,11 @@ export class MapApp {
     } else if (this.aorAnimating) {
       this.stopAoRAnimation();
       this.aorBoundaryCache = null;
+    }
+
+    // 5c. Targeting overlay (dim friendly, highlight target)
+    if (this.pendingOrderMode) {
+      this.drawTargetingOverlay(rc);
     }
 
     // 6. Selection highlight
@@ -791,6 +826,27 @@ export class MapApp {
       ctx.fillStyle = SIDE_SOLID_COLORS[formation.faction] ?? '#999';
       this.drawArrow(ctx, sx, sy, tx, ty, true);
     }
+
+    // Preview arrow for attack confirmation (dashed, dimmer)
+    if (this.pendingOrderMode?.type === 'attack' && this.pendingOrderMode.candidateTargetSid) {
+      const formation = byId.get(this.pendingOrderMode.formation.id);
+      if (formation) {
+        const from = this.getFormationPosition(formation);
+        const to = this.getSettlementCentroidFromSid(this.pendingOrderMode.candidateTargetSid);
+        if (from && to) {
+          const [sx2, sy2] = rc.project(from[0], from[1]);
+          const [tx2, ty2] = rc.project(to[0], to[1]);
+          ctx.setLineDash([6, 4]);
+          ctx.strokeStyle = 'rgba(255, 68, 68, 0.7)';
+          ctx.fillStyle = 'rgba(255, 68, 68, 0.7)';
+          ctx.lineWidth = 2;
+          ctx.shadowColor = 'rgba(255, 68, 68, 0.3)';
+          ctx.shadowBlur = 4;
+          this.drawArrow(ctx, sx2, sy2, tx2, ty2, false);
+        }
+      }
+    }
+
     ctx.restore();
   }
 
@@ -1076,6 +1132,88 @@ export class MapApp {
     return `rgba(${r},${g},${b},${alpha})`;
   }
 
+  /** Draw targeting-mode visual overlay: dim friendly settlements (attack) or highlight municipality (move). */
+  private drawTargetingOverlay(rc: RenderContext): void {
+    if (!this.pendingOrderMode) return;
+    const mode = this.pendingOrderMode;
+    const { ctx } = rc;
+
+    if (mode.type === 'attack') {
+      // Dim settlements controlled by the ordering brigade's own faction
+      ctx.save();
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+      const sidOrder = Array.from(this.data.settlements.keys()).sort();
+      for (const sid of sidOrder) {
+        const controller = this.activeControlLookup[controlKey(sid)] ?? 'null';
+        if (controller === mode.formation.faction) {
+          const feature = this.data.settlements.get(sid)!;
+          this.drawPolygonPath(ctx, feature, rc.project);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+
+    if (mode.type === 'move' && this.hoveredFeature) {
+      // Highlight all settlements in the hovered municipality
+      const resolved = this.resolveMunicipalityFromFeature(this.hoveredFeature);
+      if (resolved.mun1990Id) {
+        const munSids = this.getMunToSids().get(resolved.mun1990Id);
+        if (munSids) {
+          ctx.save();
+          const color = SIDE_SOLID_COLORS[mode.formation.faction] ?? '#999';
+          ctx.fillStyle = this.hexToRgba(color, 0.12);
+          for (const sid of munSids) {
+            const feature = this.data.settlements.get(sid);
+            if (feature) {
+              this.drawPolygonPath(ctx, feature, rc.project);
+              ctx.fill();
+            }
+          }
+          ctx.restore();
+        }
+      }
+    }
+
+    // Pulsing border on hovered target
+    if (this.hoveredFeature) {
+      ctx.save();
+      const t = (performance.now() % 1500) / 1500;
+      const pulse = 0.5 + 0.5 * Math.sin(t * Math.PI * 2);
+
+      if (mode.type === 'attack') {
+        ctx.strokeStyle = `rgba(255, 68, 68, ${(0.5 + pulse * 0.5).toFixed(2)})`;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = 'rgba(255, 68, 68, 0.6)';
+        ctx.shadowBlur = 4 + pulse * 4;
+      } else {
+        const color = SIDE_SOLID_COLORS[mode.formation.faction] ?? '#999';
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 3 + pulse * 3;
+      }
+
+      this.drawPolygonPath(ctx, this.hoveredFeature, rc.project);
+      ctx.stroke();
+      ctx.restore();
+
+      // For attack with candidate: also highlight the candidate settlement if different from hover
+      if (mode.type === 'attack' && mode.candidateTargetSid) {
+        const candidateFeature = this.data.settlements.get(mode.candidateTargetSid);
+        if (candidateFeature && candidateFeature !== this.hoveredFeature) {
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255, 68, 68, 0.5)';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 3]);
+          this.drawPolygonPath(ctx, candidateFeature, rc.project);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+  }
+
   private drawSelection(rc: RenderContext): void {
     const selectedSid = this.state.snapshot.selectedSettlementSid;
     const hoveredSid = this.state.snapshot.hoveredSettlementSid;
@@ -1307,7 +1445,28 @@ export class MapApp {
       const hoveredSid = this.hoveredFeature?.properties?.sid ?? null;
       this.state.setHoveredSettlement(hoveredSid);
 
-      if (formationAt && this.hoveredFeature) {
+      // Targeting mode: override cursor + tooltip with tactical context
+      if (this.pendingOrderMode) {
+        if (this.hoveredFeature) {
+          canvas.style.cursor = this.pendingOrderMode.type === 'attack' ? 'crosshair' : 'cell';
+          const sid = this.hoveredFeature.properties.sid;
+          if (this.pendingOrderMode.type === 'attack') {
+            const name = this.hoveredFeature.properties.name ?? sid;
+            const natoClass = this.hoveredFeature.properties.nato_class ?? 'SETTLEMENT';
+            const controller = this.activeControlLookup[controlKey(sid)] ?? 'null';
+            const controllerLabel = SIDE_LABELS[controller] ?? 'Neutral';
+            const defender = this.defenderBySid.get(sid);
+            const defenderStr = defender ? `${defender.name} (${defender.posture ?? '?'})` : 'Undefended';
+            this.showTooltip(`TARGET: ${name}\n${natoClass} — ${controllerLabel}\nDefender: ${defenderStr}`, e.clientX, e.clientY);
+          } else {
+            const resolved = this.resolveMunicipalityFromFeature(this.hoveredFeature);
+            this.showTooltip(`MOVE TO: ${resolved.displayName}`, e.clientX, e.clientY);
+          }
+        } else {
+          canvas.style.cursor = 'not-allowed';
+          this.hideTooltip();
+        }
+      } else if (formationAt && this.hoveredFeature) {
         this.showTooltip(`${formationAt.name} (${formationAt.kind}) — ${formationAt.faction}`, e.clientX, e.clientY);
         canvas.style.cursor = this.state.snapshot.zoomFactor > 1 ? 'grab' : 'pointer';
       } else if (this.hoveredFeature) {
@@ -1352,21 +1511,49 @@ export class MapApp {
       // Pending order mode: intercept click to resolve MOVE/ATTACK target
       if (this.pendingOrderMode) {
         const mode = this.pendingOrderMode;
-        this.pendingOrderMode = null;
-        canvas.style.cursor = this.state.snapshot.zoomFactor > 1 ? 'grab' : 'default';
 
-        if (mode.type === 'attack' && this.hoveredFeature) {
-          const targetSid = this.hoveredFeature.properties.sid;
-          const targetName = this.hoveredFeature.properties.name ?? targetSid;
-          this.showStatusError(`Attack order staged: ${mode.brigadeName} → ${targetName} (${targetSid}). Advance turn to execute.`);
-        } else if (mode.type === 'move' && this.hoveredFeature) {
-          const munId = this.hoveredFeature.properties.municipality_id;
-          const targetSid = this.hoveredFeature.properties.sid;
-          const targetName = this.hoveredFeature.properties.name ?? targetSid;
-          const munLabel = munId != null ? `mun ${munId}` : targetName;
-          this.showStatusError(`Move order staged: ${mode.brigadeName} → ${munLabel}. Advance turn to execute.`);
-        } else {
+        // No target hovered → cancel
+        if (!this.hoveredFeature) {
+          this.cancelPendingOrder();
           this.showStatusError(`${mode.type === 'attack' ? 'Attack' : 'Move'} order cancelled — no target selected.`);
+          return;
+        }
+
+        // ATTACK: two-step confirmation
+        if (mode.type === 'attack') {
+          const targetSid = this.hoveredFeature.properties.sid;
+          // First click or re-targeting a different settlement → show confirmation
+          if (!mode.candidateTargetSid || mode.candidateTargetSid !== targetSid) {
+            mode.candidateTargetSid = targetSid;
+            this.showAttackConfirmation(mode, targetSid);
+            this.scheduleRender();
+          } else {
+            // Clicking same settlement again → confirm
+            this.executeAttackOrder(mode.formation.id, targetSid);
+          }
+          return;
+        }
+
+        // MOVE: single click, immediate staging
+        if (mode.type === 'move') {
+          const resolved = this.resolveMunicipalityFromFeature(this.hoveredFeature);
+          const mun1990Id = resolved.mun1990Id;
+          const munLabel = mun1990Id ? `${resolved.displayName} (${mun1990Id})` : (this.hoveredFeature.properties.name ?? this.hoveredFeature.properties.sid);
+          if (mun1990Id) {
+            const bridge = this.getDesktopBridge();
+            if (bridge?.stageMoveOrder) {
+              bridge.stageMoveOrder(mode.formation.id, mun1990Id).then(r => {
+                if (r.ok) this.showStatusError(`Move order staged: ${mode.formation.name} → ${munLabel}. Advance turn to execute.`);
+                else this.showStatusError(`Move order failed: ${r.error ?? 'unknown'}`);
+              }).catch(err => this.showStatusError(`Move order failed: ${err}`));
+            } else {
+              this.showStatusError(`Move order staged: ${mode.formation.name} → ${munLabel}. Advance turn to execute.`);
+            }
+          } else {
+            this.showStatusError(`Move order cancelled — target has no municipality.`);
+          }
+          this.exitTargetingMode();
+          return;
         }
         return;
       }
@@ -1401,6 +1588,7 @@ export class MapApp {
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
 
       if (e.key === 'Escape') {
+        if (this.pendingOrderMode) { this.cancelPendingOrder(); e.preventDefault(); return; }
         if (this.searchVisible) { this.hideSearch(); e.preventDefault(); return; }
         if (this.state.snapshot.selectedFormationId) {
           this.state.setSelectedFormation(null); this.closeSettlementPanel();
@@ -1652,6 +1840,9 @@ export class MapApp {
     this.lastLoadedGameState = loaded;
     this.activeControlLookup = buildControlLookup(loaded.controlBySettlement);
     this.activeStatusLookup = buildStatusLookup(loaded.statusBySettlement);
+    this.rebuildDefenderCache();
+    // Cancel targeting if game state changes mid-targeting (stale references)
+    if (this.pendingOrderMode) this.cancelPendingOrder();
     this.state.setControlDataset(`loaded:${loaded.label}`);
     const turnDisplay = document.getElementById('turn-display');
     if (turnDisplay) turnDisplay.textContent = loaded.label;
@@ -2186,6 +2377,7 @@ export class MapApp {
   private showTooltip(text: string, clientX: number, clientY: number): void {
     const el = document.getElementById('tooltip');
     if (!el) return;
+    el.style.whiteSpace = 'pre-line';
     el.textContent = text;
     el.style.display = 'block';
     el.style.left = `${Math.min(clientX + 14, window.innerWidth - 310)}px`;
@@ -2384,12 +2576,175 @@ export class MapApp {
     panel.setAttribute('aria-hidden', 'true');
   }
 
-  /** Enter target-selection mode for a move or attack order. Closes the panel and shows a status prompt. */
-  private enterOrderSelectionMode(type: 'move' | 'attack', brigadeId: string, brigadeName: string): void {
-    this.pendingOrderMode = { type, brigadeId, brigadeName };
+  /** Open the panel with a formation's header (name, flag, subtitle) and clear tabs. Returns content element, or null if panel missing. */
+  private showFormationPanelHeader(faction: string, name: string, subtitle: string): HTMLElement | null {
+    const factionColor = SIDE_SOLID_COLORS[faction] ?? '#888';
+    if (!this.showPanel(factionColor)) return null;
+    document.getElementById('panel-name')!.textContent = name;
+    document.getElementById('panel-subtitle')!.textContent = subtitle;
+    const flagEl = document.getElementById('panel-flag') as HTMLImageElement;
+    if (flagEl) { flagEl.src = this.getFlagUrl(faction); flagEl.style.display = ''; }
+    document.getElementById('panel-tabs')!.innerHTML = '';
+    return document.getElementById('panel-content')!;
+  }
+
+  /** Enter target-selection mode for a move or attack order. Shows targeting header in panel. */
+  private enterOrderSelectionMode(type: 'move' | 'attack', formation: FormationView): void {
+    this.pendingOrderMode = { type, formation };
+
     const target = type === 'move' ? 'municipality' : 'settlement';
-    this.showStatusError(`Select target ${target} on the map for ${brigadeName} ${type} order. Click a settlement to set target.`);
+    const factionColor = SIDE_SOLID_COLORS[formation.faction] ?? '#888';
+
+    // Show compact targeting header in the panel
+    const contentEl = this.showFormationPanelHeader(formation.faction, formation.name, `Selecting ${type.toUpperCase()} target…`);
+    if (contentEl) {
+      contentEl.innerHTML = `<div class="tm-panel-section" style="text-align:center;padding:16px 0">
+        <div style="font-size:12px;color:${this.escapeHtml(factionColor)};margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">
+          Select target ${this.escapeHtml(target)}
+        </div>
+        <div style="font-size:10px;color:#90a4ae;margin-bottom:12px">
+          Click a ${this.escapeHtml(target)} on the map
+        </div>
+        <button type="button" class="tm-toolbar-btn" id="cancel-targeting-btn"
+          style="background:rgba(255,61,0,0.15);border-color:#ff3d00;color:#ff8a65">
+          Cancel (Esc)
+        </button>
+      </div>`;
+      document.getElementById('cancel-targeting-btn')?.addEventListener('click', () => {
+        this.cancelPendingOrder();
+      });
+    }
+
+    this.showStatusError(`Select target ${target} on the map for ${formation.name} ${type} order. Press Esc to cancel.`);
+    this.startTargetingAnimation();
+    this.scheduleRender();
+  }
+
+  /** Tear down targeting-mode state (animation, panel, render). Does not clear status bar. */
+  private exitTargetingMode(): void {
+    this.pendingOrderMode = null;
+    this.stopTargetingAnimation();
     this.closeSettlementPanel();
+    this.scheduleRender();
+  }
+
+  /** Cancel pending order mode and clean up all targeting state. */
+  private cancelPendingOrder(): void {
+    if (!this.pendingOrderMode) return;
+    this.exitTargetingMode();
+    this.clearStatusBar();
+  }
+
+  /** Stage a confirmed attack order via the desktop bridge. */
+  private executeAttackOrder(brigadeId: string, targetSid: string): void {
+    const feature = this.data.settlements.get(targetSid);
+    const targetName = feature?.properties.name ?? targetSid;
+    const bridge = this.getDesktopBridge();
+    if (bridge?.stageAttackOrder) {
+      bridge.stageAttackOrder(brigadeId, targetSid).then(r => {
+        if (r.ok) this.showStatusError(`Attack order staged: ${targetName} (${targetSid}). Advance turn to execute.`);
+        else this.showStatusError(`Attack order failed: ${r.error ?? 'unknown'}`);
+      }).catch(err => this.showStatusError(`Attack order failed: ${err}`));
+    } else {
+      this.showStatusError(`Attack order staged: ${targetName} (${targetSid}). Advance turn to execute.`);
+    }
+    this.exitTargetingMode();
+  }
+
+  /** Show attack confirmation panel with target details + Confirm/Cancel buttons. */
+  private showAttackConfirmation(
+    mode: NonNullable<typeof this.pendingOrderMode>,
+    targetSid: string
+  ): void {
+    const feature = this.data.settlements.get(targetSid);
+    if (!feature) return;
+    const name = feature.properties.name ?? targetSid;
+    const natoClass = feature.properties.nato_class ?? 'SETTLEMENT';
+    const controller = this.activeControlLookup[controlKey(targetSid)] ?? 'null';
+    const controllerLabel = SIDE_LABELS[controller] ?? 'Neutral';
+    const defender = this.defenderBySid.get(targetSid);
+    const defenderStr = defender
+      ? `${defender.name} (${defender.posture ?? '?'})`
+      : 'Undefended';
+
+    const contentEl = this.showFormationPanelHeader(mode.formation.faction, mode.formation.name, 'CONFIRM ATTACK');
+    if (!contentEl) return;
+    contentEl.innerHTML = `
+      <div class="tm-panel-section">
+        <div class="tm-panel-section-header">ATTACK TARGET</div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">Settlement</span>
+          <span class="tm-panel-field-value">${this.escapeHtml(name)}</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">Class</span>
+          <span class="tm-panel-field-value">${this.escapeHtml(natoClass)}</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">Controller</span>
+          <span class="tm-panel-field-value">${this.escapeHtml(controllerLabel)}</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">Defender</span>
+          <span class="tm-panel-field-value">${this.escapeHtml(defenderStr)}</span></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;padding:12px 0">
+        <button type="button" class="tm-toolbar-btn" id="confirm-attack-btn"
+          style="background:rgba(255,68,68,0.2);border-color:#ff4444;color:#ff8a65">
+          Confirm Attack
+        </button>
+        <button type="button" class="tm-toolbar-btn" id="cancel-attack-btn">Cancel</button>
+      </div>
+      <div style="font-size:9px;color:#616161;text-align:center">Click target again or press Confirm</div>`;
+
+    document.getElementById('confirm-attack-btn')?.addEventListener('click', () => {
+      this.executeAttackOrder(mode.formation.id, targetSid);
+    });
+    document.getElementById('cancel-attack-btn')?.addEventListener('click', () => {
+      this.cancelPendingOrder();
+    });
+
+    this.showStatusError(`Confirm attack on ${name}. Click again, press Confirm, or Esc to cancel.`);
+  }
+
+  /** Rebuild the SID→defender reverse lookup from the loaded game state. */
+  private rebuildDefenderCache(): void {
+    this.defenderBySid.clear();
+    const gs = this.state.snapshot.loadedGameState;
+    if (!gs) return;
+    for (const fv of gs.formations) {
+      const aor = gs.brigadeAorByFormationId[fv.id];
+      if (!aor) continue;
+      for (const sid of aor) {
+        this.defenderBySid.set(sid, fv);
+      }
+    }
+  }
+
+  /** Get or build the municipality→SID list cache. */
+  private getMunToSids(): Map<string, string[]> {
+    if (this.munToSidsCache) return this.munToSidsCache;
+    const map = new Map<string, string[]>();
+    for (const [sid, feature] of this.data.settlements) {
+      const { mun1990Id } = this.resolveMunicipalityFromFeature(feature);
+      if (mun1990Id) {
+        const list = map.get(mun1990Id) ?? [];
+        list.push(sid);
+        map.set(mun1990Id, list);
+      }
+    }
+    this.munToSidsCache = map;
+    return map;
+  }
+
+  private startTargetingAnimation(): void {
+    if (this.targetingAnimFrame !== null) return;
+    const animate = () => {
+      if (!this.pendingOrderMode) { this.stopTargetingAnimation(); return; }
+      this.scheduleRender();
+      this.targetingAnimFrame = requestAnimationFrame(animate);
+    };
+    this.targetingAnimFrame = requestAnimationFrame(animate);
+  }
+
+  private stopTargetingAnimation(): void {
+    if (this.targetingAnimFrame !== null) {
+      cancelAnimationFrame(this.targetingAnimFrame);
+      this.targetingAnimFrame = null;
+    }
   }
 
   private openBrigadePanel(f: FormationView): void {
@@ -2555,36 +2910,46 @@ export class MapApp {
       <div class="tm-panel-field"><span class="tm-panel-field-label">Fatigue</span><span class="tm-panel-field-value">${f.fatigue}</span></div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">Cohesion</span><span class="tm-panel-field-value">${f.cohesion}%</span></div>
     </div>`;
-    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">AREA OF RESPONSIBILITY</div>
-      <div class="tm-panel-field"><span class="tm-panel-field-label">Settlements</span><span class="tm-panel-field-value">${aorCount}</span></div>`;
-    if (aorSids.length > 0 && aorSids.length <= 30) {
-      html += `<div class="tm-panel-placeholder" style="margin-top:6px;font-size:10px">${aorSids.slice(0, 30).map(sid => this.escapeHtml(sid)).join(', ')}</div>`;
-    } else if (aorSids.length > 30) {
-      html += `<div class="tm-panel-placeholder" style="margin-top:6px;font-size:10px">${aorSids.slice(0, 30).map(sid => this.escapeHtml(sid)).join(', ')} … +${aorSids.length - 30} more</div>`;
-    }
-    html += `</div>`;
-    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">OPERATIONAL COVERAGE</div>
-      <div class="tm-panel-field"><span class="tm-panel-field-label">Dynamic cap</span><span class="tm-panel-field-value">${cap}</span></div>
-      <div class="tm-panel-field"><span class="tm-panel-field-label">Potential cap</span><span class="tm-panel-field-value">${potentialCap}</span></div>
-      <div class="tm-panel-field"><span class="tm-panel-field-label">Covered</span><span class="tm-panel-field-value">${coveredCount}</span></div>
-      <div class="tm-panel-field"><span class="tm-panel-field-label">Overflow</span><span class="tm-panel-field-value">${overflowCount}</span></div>
-      <div class="tm-panel-field"><span class="tm-panel-field-label">Urban fortress</span><span class="tm-panel-field-value">${fortressActive ? 'Active' : 'No'}</span></div>
+    // Consolidated AoR + coverage: single compact line
+    const aorStatusParts: string[] = [`${coveredCount}/${aorCount} settlements covered`];
+    if (overflowCount > 0) aorStatusParts.push(`<span style="color:#ef9a9a">${overflowCount} overextended</span>`);
+    if (fortressActive) aorStatusParts.push(`<span style="color:#80cbc4">urban fortress</span>`);
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">AoR</div>
+      <div class="tm-panel-field"><span class="tm-panel-field-value">${aorStatusParts.join(' · ')}</span></div>
     </div>`;
-    // Posture dropdown
-    const postures = ['defend', 'probe', 'attack', 'elastic_defense', 'consolidation'];
+    // Posture dropdown with descriptions and eligibility
+    const postureInfo: Record<string, { label: string; pressure: string; defense: string; cohesionCost: string; minCoh: number; readiness: string[] }> = {
+      defend:           { label: 'Defend',           pressure: '0.3×', defense: '1.5×', cohesionCost: '+1/turn',   minCoh: 0,  readiness: ['active', 'overextended', 'degraded', 'forming'] },
+      probe:            { label: 'Probe',            pressure: '0.7×', defense: '1.0×', cohesionCost: '−1/turn',   minCoh: 20, readiness: ['active', 'overextended'] },
+      attack:           { label: 'Attack',           pressure: '1.5×', defense: '0.5×', cohesionCost: '−3/turn',   minCoh: 40, readiness: ['active'] },
+      elastic_defense:  { label: 'Elastic Defense',  pressure: '0.2×', defense: '1.2×', cohesionCost: '−0.5/turn', minCoh: 0,  readiness: ['active', 'overextended', 'degraded'] },
+      consolidation:    { label: 'Consolidation',    pressure: '0.6×', defense: '1.1×', cohesionCost: '+0.5/turn', minCoh: 0,  readiness: ['active', 'overextended', 'degraded'] },
+    };
+    const postureKeys = ['defend', 'probe', 'attack', 'elastic_defense', 'consolidation'];
     const currentPosture = f.posture ?? 'defend';
-    const postureOptions = postures.map(p =>
-      `<option value="${this.escapeHtml(p)}"${p === currentPosture ? ' selected' : ''}>${this.escapeHtml(p)}</option>`
-    ).join('');
+    const brigCohesion = f.cohesion ?? 60;
+    const brigReadiness = f.readiness ?? 'active';
+    const postureOptions = postureKeys.map(p => {
+      const pi = postureInfo[p];
+      const canAdopt = brigCohesion >= pi.minCoh && pi.readiness.includes(brigReadiness);
+      const disabledAttr = canAdopt ? '' : ' disabled';
+      const titleText = `${pi.label}: Pressure ${pi.pressure} | Defense ${pi.defense} | Cohesion ${pi.cohesionCost} | Min cohesion ${pi.minCoh} | Readiness: ${pi.readiness.join(', ')}`;
+      return `<option value="${this.escapeHtml(p)}"${p === currentPosture ? ' selected' : ''}${disabledAttr} title="${this.escapeHtml(titleText)}">${this.escapeHtml(pi.label)}</option>`;
+    }).join('');
+
+    const currentPI = postureInfo[currentPosture] ?? postureInfo['defend'];
+    const postureDesc = `Pressure ${currentPI.pressure} · Defense ${currentPI.defense} · Cohesion ${currentPI.cohesionCost}`;
 
     html += `<div class="tm-panel-section"><div class="tm-panel-section-header">ACTIONS</div>
       <div class="tm-panel-field">
         <span class="tm-panel-field-label">Posture</span>
         <select id="brigade-posture-select" class="tm-select" style="font-size:11px;padding:2px 4px;background:#1a2236;color:#c8e6c9;border:1px solid rgba(200,230,201,0.3);border-radius:3px">${postureOptions}</select>
       </div>
+      <div id="posture-description" style="font-size:10px;color:#90a4ae;margin:4px 0 2px 0">${this.escapeHtml(postureDesc)}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
         <button type="button" class="tm-toolbar-btn" data-brigade-action="move" title="Select target municipality on map">Move</button>
         <button type="button" class="tm-toolbar-btn" data-brigade-action="attack" title="Select target settlement on map">Attack</button>
+        <button type="button" class="tm-toolbar-btn" data-brigade-action="clear" title="Clear all pending orders for this brigade">Clear Orders</button>
       </div>
     </div>`;
 
@@ -2592,18 +2957,44 @@ export class MapApp {
 
     // Wire posture dropdown
     const postureSelect = contentEl.querySelector('#brigade-posture-select') as HTMLSelectElement | null;
+    const postureDescEl = contentEl.querySelector('#posture-description') as HTMLElement | null;
     if (postureSelect) {
       postureSelect.addEventListener('change', () => {
         const newPosture = postureSelect.value;
-        this.showStatusError(`Posture order staged: ${f.name} → ${newPosture}. Advance turn to execute.`);
+        // Update inline description
+        if (postureDescEl) {
+          const pi = postureInfo[newPosture] ?? postureInfo['defend'];
+          postureDescEl.textContent = `Pressure ${pi.pressure} · Defense ${pi.defense} · Cohesion ${pi.cohesionCost}`;
+        }
+        const bridge = this.getDesktopBridge();
+        if (bridge?.stagePostureOrder) {
+          bridge.stagePostureOrder(f.id, newPosture).then(r => {
+            if (r.ok) this.showStatusError(`Posture order staged: ${f.name} → ${newPosture}. Advance turn to execute.`);
+            else this.showStatusError(`Posture order failed: ${r.error ?? 'unknown'}`);
+          }).catch(err => this.showStatusError(`Posture order failed: ${err}`));
+        } else {
+          this.showStatusError(`Posture order staged: ${f.name} → ${newPosture}. Advance turn to execute.`);
+        }
       });
     }
 
-    // Wire move/attack buttons → enter target selection mode
+    // Wire move/attack/clear buttons
     contentEl.querySelectorAll('[data-brigade-action]').forEach((el) => {
       el.addEventListener('click', () => {
-        const action = (el as HTMLElement).getAttribute('data-brigade-action') as 'move' | 'attack';
-        this.enterOrderSelectionMode(action, f.id, f.name);
+        const action = (el as HTMLElement).getAttribute('data-brigade-action');
+        if (action === 'clear') {
+          const bridge = this.getDesktopBridge();
+          if (bridge?.clearOrders) {
+            bridge.clearOrders(f.id).then(r => {
+              if (r.ok) this.showStatusError(`Orders cleared for ${f.name}.`);
+              else this.showStatusError(`Clear orders failed: ${r.error ?? 'unknown'}`);
+            }).catch(err => this.showStatusError(`Clear orders failed: ${err}`));
+          } else {
+            this.showStatusError(`Orders cleared for ${f.name}. (No desktop bridge)`);
+          }
+        } else if (action === 'move' || action === 'attack') {
+          this.enterOrderSelectionMode(action, f);
+        }
       });
     });
 
