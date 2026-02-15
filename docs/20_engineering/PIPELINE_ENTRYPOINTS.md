@@ -80,7 +80,7 @@ Phase I steps: `evaluate-events` (first), `phase-i-militia-emergence`, `phase-i-
 
 **Authority derivation:** `update-formation-lifecycle` derives municipality authority via `deriveMunicipalityAuthorityMap` (formation_lifecycle.ts) from political control (consolidated/contested/fragmented); used for brigade activation gating.
 
-**AoR init:** `phase-ii-aor-init` uses `populateFactionAoRFromControl` and `ensureFormationHomeMunsInFactionAoR` from `src/scenario/aor_init.ts` (via scenario_runner re-export).
+**AoR init:** `phase-ii-aor-init` uses `populateFactionAoRFromControl` and `ensureFormationHomeMunsInFactionAoR` from `src/scenario/aor_init.ts` (via scenario_runner re-export). Phase II AoR steps: `validate-brigade-aor`, `rebalance-brigade-aor`, `enforce-corps-aor-contiguity` (when corps_command present; enclave-aware), `apply-municipality-orders`. See Phase_II_Specification_v0_5_0.md §5.
 
 ## Non-Canonical / Legacy Harnesses
 These exist for smoke and internal checks, not for authoritative runs:

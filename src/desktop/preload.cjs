@@ -19,4 +19,8 @@ contextBridge.exposeInMainWorld('awwv', {
   setGameStateUpdatedCallback: (cb) => { gameStateUpdatedCallback = typeof cb === 'function' ? cb : null; },
   getRecruitmentCatalog: () => ipcRenderer.invoke('get-recruitment-catalog'),
   applyRecruitment: (brigadeId, equipmentClass) => ipcRenderer.invoke('apply-recruitment', { brigadeId, equipmentClass }),
+  stageAttackOrder: (brigadeId, targetSettlementId) => ipcRenderer.invoke('stage-attack-order', { brigadeId, targetSettlementId }),
+  stagePostureOrder: (brigadeId, posture) => ipcRenderer.invoke('stage-posture-order', { brigadeId, posture }),
+  stageMoveOrder: (brigadeId, targetMunicipalityId) => ipcRenderer.invoke('stage-move-order', { brigadeId, targetMunicipalityId }),
+  clearOrders: (brigadeId) => ipcRenderer.invoke('clear-orders', { brigadeId }),
 });

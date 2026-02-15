@@ -94,19 +94,21 @@ Phase II logic runs inside the sim turn pipeline (src/sim/turn_pipeline.ts):
 - **When**: Only when meta.phase === "phase_ii". For meta.phase === "phase_i", Phase I phases run and Phase II consolidation is skipped; for phase_0, the state pipeline is used.
 - **Where**: After "phase-ii-aor-init" (when present), **update-formation-lifecycle** runs first (so brigades may transition forming → active before bot AI evaluates them). Then the following brigade operations phases run in order, then "phase-ii-consolidation":
   1. validate-brigade-aor
-  2. apply-municipality-orders
-  3. generate-bot-brigade-orders
-  4. apply-aor-reshaping
-  5. apply-brigade-posture
-  6. update-corps-effects
-  7. advance-corps-operations
-  8. activate-operational-groups
-  9. equipment-degradation
-  10. apply-posture-costs
-  11. compute-brigade-pressure
-  12. phase-ii-resolve-attack-orders (battle resolution: terrain, casualties, control flips; see Systems Manual §7.4)
-  13. phase-ii-brigade-reinforcement (reinforce brigades from militia pools)
-  14. update-og-lifecycle
+  2. rebalance-brigade-aor
+  3. enforce-corps-aor-contiguity (when corps_command present; enclave-aware)
+  4. apply-municipality-orders
+  5. generate-bot-brigade-orders
+  6. apply-aor-reshaping
+  7. apply-brigade-posture
+  8. update-corps-effects
+  9. advance-corps-operations
+  10. activate-operational-groups
+  11. equipment-degradation
+  12. apply-posture-costs
+  13. compute-brigade-pressure
+  14. phase-ii-resolve-attack-orders (battle resolution: terrain, casualties, control flips; see Systems Manual §7.4)
+  15. phase-ii-brigade-reinforcement (reinforce brigades from militia pools)
+  16. update-og-lifecycle
 
 When **recruitment_state** exists, **phase-ii-recruitment** also runs in Phase II (accrual + ongoing elective recruitment; see Systems Manual §13). Then phase-ii-consolidation runs. Order within consolidation:
   1. Detect fronts: detectPhaseIIFronts(state, edges).
@@ -150,7 +152,7 @@ When the Phase I → Phase II transition runs with **edges** provided, brigade d
 
 Within a municipality shared by multiple brigades of the same faction, settlement split is deterministic (stable ordering + deterministic graph traversal/tie-break). Municipality movement orders (`brigade_mun_orders`) apply before pressure and attack resolution; settlement-level reshape orders (`brigade_aor_orders`) remain available as fine-grain adjustment. See Systems_Manual_v0_5_0.md §2.1 and §6; implementation: src/sim/phase_ii/brigade_aor.ts and src/sim/turn_pipeline.ts.
 
-**Implementation-note (2026-02-14):** When `state.corps_command` exists and is non-empty, assignment uses the corps-directed algorithm (partition front into corps sectors, allocate brigades along each sector's frontline; home municipality plus up to two contiguous neighbor municipalities per brigade; contiguity enforced and repaired). Otherwise the legacy Voronoi BFS path is used (Phase I / tests). Rebalance step guards transfers with `wouldRemainContiguous` so the donor brigade stays contiguous. See [BRIGADE_AOR_OVERHAUL_CORPS_DIRECTED_2026_02_14.md](../40_reports/implemented/BRIGADE_AOR_OVERHAUL_CORPS_DIRECTED_2026_02_14.md).
+**Implementation-note (2026-02-14):** When `state.corps_command` exists and is non-empty, assignment uses the corps-directed algorithm (partition front into corps sectors, allocate brigades along each sector's frontline; home municipality plus up to two contiguous neighbor municipalities per brigade; contiguity enforced and repaired). Otherwise the legacy Voronoi BFS path is used (Phase I / tests). Rebalance step guards transfers with `wouldRemainContiguous` so the donor brigade stays contiguous. See [BRIGADE_AOR_OVERHAUL_CORPS_DIRECTED_2026_02_14.md](../40_reports/implemented/BRIGADE_AOR_OVERHAUL_CORPS_DIRECTED_2026_02_14.md). **Implementation-note (2026-02-15):** Corps-level contiguity is enforced: `checkCorpsContiguity`, `repairCorpsContiguity`, `enforceCorpsLevelContiguity` (enclave-aware; settlements in faction enclaves excluded). Step 9 in `assignCorpsDirectedAoR`; pipeline step `enforce-corps-aor-contiguity` after `rebalance-brigade-aor` (guards: phase_ii, brigade_aor, corps_command). Brigade contiguity repair prefers same-corps targets. See [CORPS_AOR_CONTIGUITY_ENFORCEMENT_2026_02_15.md](../40_reports/implemented/CORPS_AOR_CONTIGUITY_ENFORCEMENT_2026_02_15.md).
 
 ---
 

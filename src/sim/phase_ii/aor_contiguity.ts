@@ -1,14 +1,15 @@
 /**
  * AoR Contiguity Utilities.
  *
- * Reusable functions for checking and repairing brigade AoR contiguity.
+ * Reusable functions for checking and repairing brigade and corps AoR contiguity.
  * Used by corps-directed AoR assignment and rebalancing.
  *
  * Deterministic: sorted iteration via strictCompare, no randomness.
  */
 
-import type { SettlementId, FormationId } from '../../state/game_state.js';
+import type { SettlementId, FormationId, GameState, FactionId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { getFormationCorpsId } from './corps_sector_partition.js';
 
 export interface ContiguityResult {
   /** Whether the settlement set forms a single connected component. */
@@ -170,4 +171,98 @@ export function repairContiguity(
   orphans.sort(strictCompare);
 
   return { kept, orphans };
+}
+
+// --- Corps-level contiguity ---
+
+export interface CorpsContiguityResult {
+  corpsId: FormationId;
+  /** Whether the corps' non-enclave settlements form a single connected component. */
+  contiguous: boolean;
+  /** Connected components, largest first (from checkBrigadeContiguity). */
+  components: SettlementId[][];
+  /** Settlements in non-largest components (to be reassigned). */
+  orphans: SettlementId[];
+}
+
+/**
+ * Check if a corps' effective AoR (union of subordinate brigade settlements)
+ * is contiguous on the settlement adjacency graph.
+ *
+ * Delegates to checkBrigadeContiguity (generic connected-component detector).
+ * The caller is responsible for excluding enclave settlements before calling.
+ */
+export function checkCorpsContiguity(
+  corpsId: FormationId,
+  settlements: SettlementId[],
+  adj: Map<SettlementId, Set<SettlementId>>
+): CorpsContiguityResult {
+  const { contiguous, components } = checkBrigadeContiguity(settlements, adj);
+
+  if (contiguous || components.length <= 1) {
+    return { corpsId, contiguous: true, components, orphans: [] };
+  }
+
+  // Keep largest component (already sorted largest-first by checkBrigadeContiguity)
+  const orphans: SettlementId[] = [];
+  for (let i = 1; i < components.length; i++) {
+    orphans.push(...components[i]);
+  }
+  orphans.sort(strictCompare);
+
+  return { corpsId, contiguous: false, components, orphans };
+}
+
+/**
+ * Repair discontiguous corps AoR by reassigning orphan settlements to
+ * an adjacent brigade of a different corps (same faction).
+ *
+ * For each orphan settlement, searches adjacent settlements in the graph
+ * for a brigade belonging to a different corps of the same faction.
+ * Falls back to null (unassigned) if no valid target found.
+ *
+ * Mutates state.brigade_aor in place. Returns count of reassignments.
+ */
+export function repairCorpsContiguity(
+  state: GameState,
+  faction: FactionId,
+  corpsId: FormationId,
+  orphans: SettlementId[],
+  adj: Map<SettlementId, Set<SettlementId>>
+): number {
+  const brigadeAor = state.brigade_aor;
+  if (!brigadeAor) return 0;
+  const formations = state.formations ?? {};
+
+  let reassigned = 0;
+
+  for (const sid of orphans) {
+    const neighbors = adj.get(sid);
+    if (!neighbors) {
+      brigadeAor[sid] = null;
+      reassigned++;
+      continue;
+    }
+
+    let targetBrigade: FormationId | null = null;
+    for (const nSid of Array.from(neighbors).sort(strictCompare)) {
+      const nBrigade = brigadeAor[nSid];
+      if (!nBrigade) continue;
+      const nFormation = formations[nBrigade];
+      if (!nFormation || nFormation.faction !== faction) continue;
+      const nCorpsId = getFormationCorpsId(nFormation);
+      if (nCorpsId === corpsId) continue; // must be a different corps
+      targetBrigade = nBrigade;
+      break;
+    }
+
+    if (targetBrigade) {
+      brigadeAor[sid] = targetBrigade;
+    } else {
+      brigadeAor[sid] = null; // no valid target — unassign
+    }
+    reassigned++;
+  }
+
+  return reassigned;
 }
