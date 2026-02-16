@@ -46,7 +46,7 @@ export interface TargetAcceptance {
 
 /** Phase 13B.0/13B.1: Deterministic rejection diagnostics when constraints gate acceptance */
 export interface RejectionDetails {
-  constraint_type: 'require_bundle' | 'require_brcko_resolution' | 'forbid_competence' | 'forbid_holder';
+  constraint_type: 'require_bundle' | 'require_brcko_resolution' | 'require_sarajevo_resolution' | 'forbid_competence' | 'forbid_holder';
   competences?: string[];
   competence?: string;
   faction?: string;

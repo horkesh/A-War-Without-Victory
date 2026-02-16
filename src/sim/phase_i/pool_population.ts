@@ -15,8 +15,10 @@ import type { SettlementRecord } from '../../map/settlements.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
-/** Scale phase_i_militia_strength [0,100] to pool available (integer). */
-const POOL_SCALE_FACTOR = 30;
+/** Scale phase_i_militia_strength [0,100] to pool available (integer).
+ * Calibrated so April 1992 war-start produces historical manpower envelopes:
+ * ARBiH ~80-100k, VRS ~60-80k, HVO ~25-35k troops. */
+const POOL_SCALE_FACTOR = 55;
 /** Displaced_in contribution rate (design note). */
 const REINFORCEMENT_RATE = 0.05;
 /** Cap per mun per turn from displaced (design note). */
@@ -25,11 +27,15 @@ const DISPLACED_CONTRIBUTION_CAP = 2000;
 /** When population1991 is used, pool is weighted by eligible pop / this normalizer (no cap). Aim: ARBiH ~80–100 brigades at batchSize 1000. */
 const ELIGIBLE_POP_NORMALIZER = 50_000;
 
-/** Faction asymmetry calibration for early-war manpower envelopes. */
+/** Faction asymmetry calibration for early-war manpower envelopes.
+ * Reflects mobilization capacity: ARBiH largest (Bosniak plurality), VRS JNA inheritance,
+ * HVO smallest but ~30-40k historical. HRHB scale is higher because Croat population
+ * is concentrated in fewer municipalities — each HVO-controlled mun mobilized proportionally
+ * more of its population (near-total male mobilization in western Herzegovina). */
 const FACTION_POOL_SCALE: Record<string, number> = {
-  RBiH: 1.18,
-  RS: 0.98,
-  HRHB: 0.58
+  RBiH: 1.20,
+  RS: 1.05,
+  HRHB: 1.60
 };
 const DEFAULT_FACTION_POOL_SCALE = 1.0;
 

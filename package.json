@@ -61,7 +61,7 @@
     "dev:map": "vite --config src/ui/map/vite.config.ts",
     "desktop:map:build": "vite build --config src/ui/map/vite.config.ts",
     "desktop:sim:build": "node tools/desktop_bundle_sim.mjs",
-    "desktop": "npm run desktop:map:build && npm run desktop:sim:build && electron .",
+    "desktop": "npm run desktop:map:build && npm run desktop:sim:build && npm run warroom:build && electron .",
     "dev:warroom": "vite --config src/ui/warroom/vite.config.ts",
     "warroom:build": "vite build --config src/ui/warroom/vite.config.ts && tsx tools/ui/warroom_stage_assets.ts",
     "warroom:preview": "vite preview --config src/ui/warroom/vite.config.ts",

@@ -1,9 +1,14 @@
 /**
- * NewspaperModal — Displays faction-specific newspaper with T-1 events
- * Shown when clicking on the desk newspaper
+ * NewspaperModal — Displays faction-specific newspaper with T-1 events.
+ * Shown when clicking on the desk newspaper.
+ *
+ * Now uses dynamic headline templates driven by Phase 0 events.
+ * Falls back to generic content when no events are available.
  */
 
-import { GameState } from '../../../state/game_state.js';
+import type { GameState, FactionId, Phase0Event } from '../../../state/game_state.js';
+import { pickBestHeadline, fallbackHeadline, getUrgencyLevel } from '../content/headline_templates.js';
+import { turnToDateString, getPlayerFaction } from './warroom_utils.js';
 
 interface NewspaperContent {
     masthead: string;
@@ -12,13 +17,20 @@ interface NewspaperContent {
     subhead: string;
     photoCaption: string;
     bodyText: string;
+    urgency: string;
+}
+
+interface NewspaperModalOptions {
+    startBrief?: boolean;
 }
 
 export class NewspaperModal {
     private gameState: GameState;
+    private options: NewspaperModalOptions;
 
-    constructor(gameState: GameState) {
+    constructor(gameState: GameState, options?: NewspaperModalOptions) {
         this.gameState = gameState;
+        this.options = options ?? {};
     }
 
     /**
@@ -33,80 +45,90 @@ export class NewspaperModal {
         return mastheads[factionId] || 'NEWS DAILY';
     }
 
+
     /**
-     * Format turn to date string
+     * Get the last turn's events from the event log.
      */
-    private turnToDateString(turn: number): string {
-        // Starting date: September 1991 (Turn 0)
-        const startDate = new Date(1991, 8, 1);
-        const currentDate = new Date(startDate);
-        currentDate.setDate(currentDate.getDate() + (turn * 7));
-
-        const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                        'July', 'August', 'September', 'October', 'November', 'December'];
-        const day = currentDate.getDate();
-        const month = months[currentDate.getMonth()];
-        const year = currentDate.getFullYear();
-
-        return `${day} ${month} ${year}`;
+    private getLastTurnEvents(): Phase0Event[] {
+        const log = this.gameState.phase0_events_log;
+        if (!log || log.length === 0) return [];
+        return log[log.length - 1] ?? [];
     }
 
     /**
-     * Generate newspaper content
+     * Get max declaration pressure across all factions.
+     */
+    private getMaxPressure(): number {
+        let maxP = 0;
+        for (const faction of this.gameState.factions) {
+            const p = faction.declaration_pressure ?? 0;
+            if (p > maxP) maxP = p;
+        }
+        return maxP;
+    }
+
+    /**
+     * Generate newspaper content from Phase 0 events.
      */
     private generateContent(): NewspaperContent {
-        const faction = this.gameState.factions[0];
-        const factionId = faction?.id || 'Unknown';
+        const playerFaction = getPlayerFaction(this.gameState.factions);
         const turn = this.gameState.meta.turn;
         const previousTurn = Math.max(0, turn - 1);
+        if (this.options.startBrief) {
+            return {
+                masthead: `${this.getMastheadName(playerFaction)} — EXTRA EDITION`,
+                date: turnToDateString(turn),
+                headline: 'SEPTEMBER 1991: PREPARE FOR THE BREAK',
+                subhead: 'Allocate capital now. Build police, party, TO, and paramilitary networks before war begins.',
+                photoCaption: 'Political structures harden while open war still appears avoidable.',
+                bodyText: 'You are in the pre-war phase. Your immediate action is organizational investment at municipality level. Open the preparation map, target vulnerable municipalities, and spend pre-war capital deliberately. These choices feed organizational penetration, which in turn shapes militia strength, pool population, and brigade availability when the war starts. Advancing turns without investment weakens your opening position.',
+                urgency: 'high',
+            };
+        }
+        const events = this.getLastTurnEvents();
+        const maxPressure = this.getMaxPressure();
+        const urgency = getUrgencyLevel(maxPressure);
 
-        // For MVP, generate placeholder content
-        // TODO: In future, extract events from turnLog
-        const headline = turn === 0
-            ? 'TENSIONS RISE IN YUGOSLAVIA'
-            : `WEEK ${turn} SITUATION REPORT`;
+        // Try to pick the best headline from events
+        const match = pickBestHeadline(events);
 
-        const subhead = turn === 0
-            ? 'Republic declares sovereignty amid growing concerns'
-            : 'Political situation remains fluid as events unfold';
+        let headline: string;
+        let subhead: string;
+        let bodyText: string;
 
-        const bodyText = this.generatePlaceholderBody(turn, factionId);
+        if (match) {
+            headline = match.template.headline(match.event, playerFaction);
+            subhead = match.template.subhead(match.event, playerFaction);
+            bodyText = match.template.body(match.event, playerFaction);
+        } else {
+            const fb = fallbackHeadline(turn, playerFaction);
+            headline = fb.headline;
+            subhead = fb.subhead;
+            bodyText = fb.body;
+        }
 
         return {
-            masthead: this.getMastheadName(factionId),
-            date: this.turnToDateString(previousTurn),
-            headline: headline,
-            subhead: subhead,
-            photoCaption: 'Recent developments in the region',
-            bodyText: bodyText
+            masthead: this.getMastheadName(playerFaction),
+            date: turnToDateString(previousTurn),
+            headline,
+            subhead,
+            photoCaption: this.generatePhotoCaption(events),
+            bodyText,
+            urgency,
         };
     }
 
     /**
-     * Generate placeholder body text for MVP
+     * Generate a contextual photo caption from events.
      */
-    private generatePlaceholderBody(turn: number, factionId: string): string {
-        if (turn === 0) {
-            return `The political situation across the region continues to develop rapidly. ` +
-                   `Leaders from all sides are meeting to discuss the future of the republic. ` +
-                   `International observers are monitoring the situation closely.\n\n` +
-                   `Residents in major cities report increased military presence as authorities ` +
-                   `work to maintain order. Economic concerns remain at the forefront of many ` +
-                   `citizens' minds as uncertainty about the future persists.\n\n` +
-                   `Representatives have called for calm and dialogue as negotiations continue. ` +
-                   `The coming weeks will be critical in determining the path forward for all ` +
-                   `communities in the region.`;
+    private generatePhotoCaption(events: Phase0Event[]): string {
+        for (const ev of events) {
+            if (ev.type === 'declaration') return 'Assembly session during the historic vote';
+            if (ev.type === 'referendum_held') return 'Citizens queue at polling stations';
+            if (ev.type === 'stability_change') return 'Recent developments in the region';
+            if (ev.type === 'war_countdown') return 'Military positions observed near the city';
         }
-
-        // Placeholder for subsequent turns
-        return `Week ${turn} has seen continued political developments across the region. ` +
-               `Military commanders report the situation remains stable in most areas.\n\n` +
-               `Supply lines continue to function normally, with no major disruptions reported. ` +
-               `Local authorities are working to ensure essential services remain available to ` +
-               `all residents.\n\n` +
-               `[Future: This content will be dynamically generated from turn events once the ` +
-               `event logging system is implemented. For now, this serves as a placeholder to ` +
-               `demonstrate the newspaper layout and styling.]`;
+        return 'Political leaders meet to discuss the situation';
     }
 
     /**
@@ -116,7 +138,7 @@ export class NewspaperModal {
         const content = this.generateContent();
 
         const newspaper = document.createElement('div');
-        newspaper.className = 'newspaper-modal';
+        newspaper.className = `newspaper-modal newspaper-urgency-${content.urgency}`;
 
         // Masthead
         const masthead = document.createElement('div');

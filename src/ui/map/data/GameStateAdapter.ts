@@ -124,6 +124,16 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
   }
 
+  // Enrich army_hq formations: subordinates are same-faction corps (not other army_hqs)
+  for (const fv of formations) {
+    if (fv.kind === 'army_hq') {
+      fv.subordinateIds = formations
+        .filter((sub) => (sub.kind === 'corps' || sub.kind === 'corps_asset') && sub.faction === fv.faction && sub.id !== fv.id)
+        .map((sub) => sub.id)
+        .sort();
+    }
+  }
+
   // Extract militia pools
   const militiaPools: MilitiaPoolView[] = [];
   const rawPools = state.militia_pools as Record<string, Record<string, unknown>> | undefined;

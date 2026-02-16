@@ -152,7 +152,7 @@ export interface FormationOpsState {
 export type FormationReadinessState = 'forming' | 'active' | 'overextended' | 'degraded';
 
 // Phase I.0: Formation types (Systems Manual §4)
-export type FormationKind = 'militia' | 'territorial_defense' | 'brigade' | 'operational_group' | 'corps_asset' | 'corps' | 'og';
+export type FormationKind = 'militia' | 'territorial_defense' | 'brigade' | 'operational_group' | 'corps_asset' | 'corps' | 'og' | 'army_hq';
 
 export interface FormationState {
   id: FormationId;
@@ -848,6 +848,15 @@ export interface PhaseERearZoneDescriptor {
   settlement_ids: string[];
 }
 
+/** Phase 0 event (stored in phase0_events_log). */
+export interface Phase0Event {
+  type: string;
+  turn: number;
+  faction?: FactionId;
+  municipality?: MunicipalityId;
+  details: Record<string, unknown>;
+}
+
 export interface GameState {
   schema_version: number;
   meta: StateMeta;
@@ -979,6 +988,15 @@ export interface GameState {
   og_orders?: OGActivationOrder[];
   /** Settlement holdout state (Phase I settlement-level control). Key: SettlementId. */
   settlement_holdouts?: Record<SettlementId, SettlementHoldoutState>;
+
+  // --- Phase 0 event log and relationship tracking ---
+  /** Phase 0 event log: array of per-turn event arrays. Index = turn number. */
+  phase0_events_log?: Phase0Event[][];
+  /** Phase 0 relationship tracking (bilateral numeric values). */
+  phase0_relationships?: {
+    rbih_rs: number;
+    rbih_hrhb: number;
+  };
 
   // --- Recruitment system state (recruitment_system_design_note.md) ---
   /** Recruitment resources: capital pools, equipment pools, recruited brigade tracking. */

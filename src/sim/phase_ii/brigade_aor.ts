@@ -29,7 +29,7 @@ import {
 } from '../../state/brigade_operational_cap.js';
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
 import { areRbihHrhbAllied } from '../phase_i/alliance_update.js';
-import { assignCorpsDirectedAoR } from './corps_directed_aor.js';
+import { assignCorpsDirectedAoR, enforceContiguity, enforceCorpsLevelContiguity } from './corps_directed_aor.js';
 import { wouldRemainContiguous } from './aor_contiguity.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 
@@ -1029,7 +1029,18 @@ export function initializeBrigadeAoR(
   const pc = state.political_controllers ?? {};
   const sidToMun = buildSidToMunMap(Object.keys(pc), settlements);
   const assignments = ensureBrigadeMunicipalityAssignment(state, edges, sidToMun);
-  return deriveBrigadeAoRFromMunicipalities(state, edges, sidToMun, assignments);
+  const report = deriveBrigadeAoRFromMunicipalities(state, edges, sidToMun, assignments);
+
+  // Post-assignment contiguity enforcement (safety net — idempotent if corps-directed path
+  // already ran enforceContiguity at Steps 8-9; covers legacy Voronoi fallback path)
+  if (state.brigade_aor && Object.keys(state.brigade_aor).length > 0) {
+    const frontActive = identifyFrontActiveSettlements(state, edges);
+    const adj = buildAdjacencyFromEdges(edges);
+    enforceContiguity(state, frontActive, adj);
+    enforceCorpsLevelContiguity(state, edges);
+  }
+
+  return report;
 }
 
 /**

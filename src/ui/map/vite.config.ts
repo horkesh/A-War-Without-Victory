@@ -107,6 +107,7 @@ export default defineConfig({
         strictPort: true,
         host: true,
     },
+    base: './',  // Relative paths so the tactical map works both standalone (awwv://app/) and embedded (awwv://warroom/tactical-map/)
     build: {
         outDir: resolve(__dirname, '../../../dist/tactical-map'),
         emptyOutDir: true,

@@ -449,7 +449,7 @@ function assignSharedMunSettlements(
  * For any discontiguous brigade, keep the best component and transfer orphans
  * to the nearest adjacent brigade of the same faction.
  */
-function enforceContiguity(
+export function enforceContiguity(
   state: GameState,
   frontActive: Set<SettlementId>,
   adj: Map<SettlementId, Set<SettlementId>>

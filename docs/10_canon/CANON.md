@@ -55,8 +55,6 @@ Do NOT edit FORAWWV automatically.
 - `docs/PROJECT_LEDGER.md` — Append-only project changelog (docs root)
 - `docs/PROJECT_LEDGER_KNOWLEDGE.md` — Thematic knowledge base: decisions, patterns, rationale by topic (docs root)
 - `docs/10_canon/FORAWWV.md` — Validated design insights extending canon
-- `docs/40_reports/BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md` — Implementation reference for brigade operations (AoR, posture, corps, OGs, settlement-level control)
-- `docs/40_reports/recruitment_system_implementation_report.md` — Implementation reference for brigade recruitment (player_choice vs auto_oob, three resources, Phase I entry)
-- `docs/40_reports/battle_resolution_engine_report_2026_02_12.md` — Implementation reference for Phase II battle resolution (terrain, casualty ledger, snap events)
+- `docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md` — Single implementation reference: sections 1–10 cover combat/battle resolution (§1), recruitment/accrual (§2), brigade AoR/corps (§3), Phase I control/no-flip (§4), scenario runs/handoffs (§5), tactical map/viewer (§6), desktop GUI (§7), canon checkpoints (§8), other resolved (§9), Warroom/Phase 0 and systems integration (§10)
 
 One game turn equals one week.

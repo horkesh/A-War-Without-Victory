@@ -97,7 +97,8 @@ describe('accrueRecruitmentResources', () => {
     assert.strictEqual(accrual!.by_faction[0]!.capital_delta, 2);
     assert.strictEqual(accrual!.by_faction[0]!.equipment_delta, 16);
     assert.strictEqual(state.recruitment_state!.recruitment_capital.RBiH.points, 12);
-    assert.strictEqual(state.recruitment_state!.equipment_pools.RBiH.points, 26);
+    // Embargo pool ceiling: Math.round(points_initial * (1 + embargoAccess)) = Math.round(10 * 1.7) = 17
+    assert.strictEqual(state.recruitment_state!.equipment_pools.RBiH.points, 17);
   });
 });
 

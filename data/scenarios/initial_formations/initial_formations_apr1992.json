@@ -161,61 +161,6 @@
       "hq_sid": "S113611",
       "personnel": 0,
       "tags": []
-    },
-    {
-      "id": "rs_jna_transition_banja_luka",
-      "faction": "RS",
-      "name": "JNA Transition Force (Banja Luka)",
-      "kind": "brigade",
-      "hq_sid": "S200026",
-      "personnel": 2500,
-      "posture": "attack",
-      "corps_id": "vrs_1st_krajina",
-      "tags": ["jna_legacy", "auto_degrade", "dissolve:16"]
-    },
-    {
-      "id": "rs_jna_transition_bijeljina",
-      "faction": "RS",
-      "name": "JNA Transition Force (Bijeljina)",
-      "kind": "brigade",
-      "hq_sid": "S200891",
-      "personnel": 2000,
-      "posture": "attack",
-      "corps_id": "vrs_east_bosnian",
-      "tags": ["jna_legacy", "auto_degrade", "dissolve:12"]
-    },
-    {
-      "id": "rs_jna_transition_pale",
-      "faction": "RS",
-      "name": "JNA Transition Force (Pale)",
-      "kind": "brigade",
-      "hq_sid": "S216984",
-      "personnel": 2000,
-      "posture": "attack",
-      "corps_id": "vrs_sarajevo_romanija",
-      "tags": ["jna_legacy", "auto_degrade", "dissolve:14"]
-    },
-    {
-      "id": "rs_jna_transition_doboj",
-      "faction": "RS",
-      "name": "JNA Transition Force (Doboj)",
-      "kind": "brigade",
-      "hq_sid": "S208019",
-      "personnel": 1800,
-      "posture": "attack",
-      "corps_id": "vrs_east_bosnian",
-      "tags": ["jna_legacy", "auto_degrade", "dissolve:10"]
-    },
-    {
-      "id": "rs_jna_transition_brcko",
-      "faction": "RS",
-      "name": "JNA Transition Force (Brčko)",
-      "kind": "brigade",
-      "hq_sid": "S300136",
-      "personnel": 1500,
-      "posture": "attack",
-      "corps_id": "vrs_east_bosnian",
-      "tags": ["jna_legacy", "auto_degrade", "dissolve:8"]
     }
   ]
 }

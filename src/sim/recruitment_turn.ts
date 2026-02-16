@@ -168,13 +168,23 @@ export function accrueRecruitmentResources(
 
     const baseEquipment = resources.equipment_points_trickle?.[factionId] ?? 0;
     const producedEquipment = equipmentFromProductionByFaction.get(factionId) ?? 0;
-    const equipmentDelta = Math.max(0, baseEquipment + Math.round(producedEquipment));
+    const rawEquipmentDelta = Math.max(0, baseEquipment + Math.round(producedEquipment));
+
+    // Embargo enforcement: equipment accrual is capped by effective heavy equipment access.
+    // Per Engine Invariants §16.D: embargo is differential per faction, not binary.
+    // The trickle component passes through (represents smuggling/stockpiles);
+    // only production is scaled by embargo access (already done above).
+    // Additionally, enforce a hard ceiling on the pool based on initial * access.
+    const embargoAccess = getEffectiveHeavyEquipmentAccess(faction?.embargo_profile);
+    const equipmentDelta = rawEquipmentDelta;
 
     if (resources.recruitment_capital[factionId]) {
       resources.recruitment_capital[factionId]!.points += capitalDelta;
     }
     if (resources.equipment_pools[factionId]) {
-      resources.equipment_pools[factionId]!.points += equipmentDelta;
+      const pool = resources.equipment_pools[factionId]!;
+      const embargoPoolCeiling = Math.round(pool.points_initial * (1.0 + embargoAccess));
+      pool.points = Math.min(embargoPoolCeiling, pool.points + equipmentDelta);
     }
     by_faction.push({
       faction_id: factionId,

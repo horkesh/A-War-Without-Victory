@@ -17,6 +17,10 @@ export type InvestmentType = 'police' | 'to' | 'party' | 'paramilitary';
 /** Scope: single municipality or region (3–5 municipalities). */
 export type InvestmentScope = { kind: 'municipality'; mun_ids: MunicipalityId[] } | { kind: 'region'; mun_ids: MunicipalityId[] };
 
+/** Deterministic display/apply order for investment types. */
+const INVESTMENT_TYPES_ALL: readonly InvestmentType[] = ['police', 'party', 'paramilitary', 'to'] as const;
+const INVESTMENT_TYPES_NON_TO: readonly InvestmentType[] = ['police', 'party', 'paramilitary'] as const;
+
 /** Cost per type and scope (Phase_0_Spec §4.2). */
 export const INVESTMENT_COST: Readonly<Record<InvestmentType, { municipality: number; region: number }>> = {
   police: { municipality: 5, region: 15 },
@@ -25,9 +29,22 @@ export const INVESTMENT_COST: Readonly<Record<InvestmentType, { municipality: nu
   paramilitary: { municipality: 10, region: 30 }
 };
 
+/** Coordinated RBiH/HRHB action cost multiplier (Phase 0 Spec §4.3). */
+const COORDINATED_COST_MULTIPLIER = 0.8;
+
 /** TO is only available to RBiH (Phase_0_Spec §4.2.2). */
 export function isToAllowedForFaction(factionId: FactionId): boolean {
   return factionId === 'RBiH';
+}
+
+/** Available investment types for a faction, in deterministic UI order. */
+export function getInvestmentTypesForFaction(factionId: FactionId): readonly InvestmentType[] {
+  return isToAllowedForFaction(factionId) ? INVESTMENT_TYPES_ALL : INVESTMENT_TYPES_NON_TO;
+}
+
+/** Coordinated investment is only meaningful for the RBiH/HRHB relationship. */
+export function isCoordinationEligibleFaction(factionId: FactionId): boolean {
+  return factionId === 'RBiH' || factionId === 'HRHB';
 }
 
 /**
@@ -54,9 +71,10 @@ export function applyInvestment(
   factionId: FactionId,
   investmentType: InvestmentType,
   scope: InvestmentScope,
-  options?: { isHostileMajority?: IsHostileMajorityFn }
+  options?: { isHostileMajority?: IsHostileMajorityFn; coordinated?: boolean }
 ): ApplyInvestmentResult {
   const isHostileMajority = options?.isHostileMajority ?? DEFAULT_HOSTILE_MAJORITY;
+  const coordinated = options?.coordinated === true && isCoordinationEligibleFaction(factionId);
   const munIds = [...scope.mun_ids].sort(strictCompare);
 
   if (munIds.length === 0) {
@@ -73,8 +91,7 @@ export function applyInvestment(
     }
   }
 
-  const costMap = INVESTMENT_COST[investmentType];
-  const cost = scope.kind === 'region' ? costMap.region : costMap.municipality;
+  const cost = getInvestmentCostWithCoordination(investmentType, scope, coordinated);
 
   const spendResult = spendPrewarCapital(state, factionId, cost);
   if (!spendResult.ok) {
@@ -144,6 +161,17 @@ function applyInvestmentToPenetration(
 
 /** Get cost for a given type and scope (for UI/validation). */
 export function getInvestmentCost(investmentType: InvestmentType, scope: InvestmentScope): number {
+  return getInvestmentCostWithCoordination(investmentType, scope, false);
+}
+
+/** Get deterministic investment cost, optionally applying coordinated discount. */
+export function getInvestmentCostWithCoordination(
+  investmentType: InvestmentType,
+  scope: InvestmentScope,
+  coordinated: boolean
+): number {
   const cost = INVESTMENT_COST[investmentType];
-  return scope.kind === 'region' ? cost.region : cost.municipality;
+  const baseCost = scope.kind === 'region' ? cost.region : cost.municipality;
+  if (!coordinated) return baseCost;
+  return Math.ceil(baseCost * COORDINATED_COST_MULTIPLIER);
 }

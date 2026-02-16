@@ -44,6 +44,7 @@
 | **scenario-creator-runner-tester** | Historical BiH scenarios, init_control, init_formations, run outputs, ahistorical flags |
 | **systems-programmer** | Core systems, invariants, determinism, engine core, ordering, serialization |
 | **balkan-battlegrounds-historical-extractor** | Historical knowledge from BB1/BB2; control, holdouts, enclaves, JNA/VRS |
+| **modern-wargame-expert** | Advisory on modern PC grand strategy/operational wargame UI/UX and info design (EU, HoI, AGEOD); UI truthfulness, coupling, player-intent vs friction; no new mechanics |
 
 ---
 

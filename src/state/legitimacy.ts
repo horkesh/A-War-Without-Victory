@@ -3,13 +3,28 @@ import type { LoadedSettlementGraph } from '../map/settlements.js';
 import { loadInitialMunicipalityControllers1990 } from './political_control_init.js';
 import { loadMunicipalityPopulation1991, getFactionDemographicFraction } from '../data/municipality_population.js';
 
-export const DEMOGRAPHIC_WEIGHT = 0.4;
-export const INSTITUTIONAL_WEIGHT = 0.3;
-export const COERCION_PENALTY_INCREMENT = 0.2;
-export const COERCION_DECAY_RATE = 0.01;
-export const STABILITY_BONUS_RATE = 0.01;
-export const STABILITY_BONUS_CAP = 0.3;
-export const RECRUITMENT_LEGITIMACY_MIN = 0.5;
+// Re-export browser-safe utilities from legitimacy_utils so existing consumers
+// that import from this module continue to work without changes.
+export {
+  DEMOGRAPHIC_WEIGHT,
+  INSTITUTIONAL_WEIGHT,
+  COERCION_PENALTY_INCREMENT,
+  COERCION_DECAY_RATE,
+  STABILITY_BONUS_RATE,
+  STABILITY_BONUS_CAP,
+  RECRUITMENT_LEGITIMACY_MIN,
+  getFactionLegitimacyAverages
+} from './legitimacy_utils.js';
+
+// Also import constants for local use in updateLegitimacyState.
+import {
+  DEMOGRAPHIC_WEIGHT,
+  INSTITUTIONAL_WEIGHT,
+  COERCION_PENALTY_INCREMENT,
+  COERCION_DECAY_RATE,
+  STABILITY_BONUS_RATE,
+  STABILITY_BONUS_CAP,
+} from './legitimacy_utils.js';
 
 function clamp01(value: number): number {
   if (value < 0) return 0;
@@ -99,27 +114,4 @@ export async function updateLegitimacyState(
     settlementState.legitimacy_state = next;
     state.settlements[sid] = settlementState;
   }
-}
-
-export function getFactionLegitimacyAverages(state: GameState): Record<string, number> {
-  const totals: Record<string, { sum: number; count: number }> = {};
-  for (const faction of state.factions) {
-    totals[faction.id] = { sum: 0, count: 0 };
-  }
-  const controllers = state.political_controllers ?? {};
-  const settlements = state.settlements ?? {};
-  for (const [sid, controller] of Object.entries(controllers)) {
-    if (!controller) continue;
-    const leg = settlements[sid]?.legitimacy_state?.legitimacy_score;
-    if (typeof leg !== 'number') continue;
-    const bucket = totals[controller];
-    if (!bucket) continue;
-    bucket.sum += leg;
-    bucket.count += 1;
-  }
-  const averages: Record<string, number> = {};
-  for (const [fid, agg] of Object.entries(totals)) {
-    averages[fid] = agg.count > 0 ? agg.sum / agg.count : 0.5;
-  }
-  return averages;
 }

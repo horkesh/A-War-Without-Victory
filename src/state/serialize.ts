@@ -473,6 +473,9 @@ function migrateState(raw: unknown): GameState {
         candidate.municipalities = {};
       }
 
+      // Phase 0: Default event log and relationships for older saves (do not inject if absent)
+      // phase0_events_log and phase0_relationships are optional; leave undefined if not present
+
       // Phase I: Default Phase I optional state for determinism when present (do not inject for old saves).
       // When any phase_i_* key exists, ensure others have deterministic defaults for round-trip.
       const hasAnyPhaseI =

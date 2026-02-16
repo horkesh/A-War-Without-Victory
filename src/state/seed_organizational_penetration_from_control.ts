@@ -68,28 +68,30 @@ function getMajorityController(
  * Stub party/paramilitary so militia_emergence yields non-zero strength.
  */
 function opFromController(controller: FactionId | null): OrganizationalPenetration {
+  // War-start (April 1992) mobilization state: all factions have heavily mobilized
+  // their party/paramilitary structures. Values reflect full wartime mobilization.
   if (controller === 'RBiH') {
     return {
       police_loyalty: 'loyal',
       to_control: 'controlled',
-      sda_penetration: 70,
-      patriotska_liga: 40
+      sda_penetration: 85,
+      patriotska_liga: 60
     };
   }
   if (controller === 'RS') {
     return {
       police_loyalty: 'hostile',
       to_control: 'controlled',
-      sds_penetration: 70,
-      paramilitary_rs: 40
+      sds_penetration: 85,
+      paramilitary_rs: 60
     };
   }
   if (controller === 'HRHB') {
     return {
       police_loyalty: 'hostile',
       to_control: 'controlled',
-      hdz_penetration: 70,
-      paramilitary_hrhb: 40
+      hdz_penetration: 85,
+      paramilitary_hrhb: 60
     };
   }
   return {

@@ -18,6 +18,11 @@ import { runPhase0TurnAndAdvance } from '../ui/warroom/run_phase0_turn.js';
 import { runPhaseITurn } from '../sim/run_phase_i_browser.js';
 import { runTurn } from '../sim/turn_pipeline.js';
 import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
+import type { FactionId, MunicipalityId } from '../state/game_state.js';
+import type { InvestmentType, InvestmentScope } from '../phase0/investment.js';
+import { applyInvestment } from '../phase0/investment.js';
+import { strictCompare } from '../state/validateGameState.js';
+import { initializePhase0Relationships, updateAllianceAfterInvestment } from '../phase0/alliance.js';
 
 function settlementGraphOptions(baseDir: string): { settlementsPath: string; edgesPath: string } {
   return {
@@ -38,10 +43,17 @@ export interface DesktopSimAdvanceResult {
 
 /** Scenario file used for "New Game" (April 1992 definitive start, Phase II, ethnic_1991). */
 export const NEW_GAME_SCENARIO_RELATIVE = 'data/scenarios/apr1992_definitive_52w.json';
+export const SEP_1991_SCENARIO_RELATIVE = 'data/scenarios/sep_1991_phase0.json';
+export type DesktopScenarioKey = 'apr_1992' | 'sep_1991';
+const DEFAULT_DESKTOP_SCENARIO_KEY: DesktopScenarioKey = 'apr_1992';
+const SCENARIO_KEY_TO_PATH: Record<DesktopScenarioKey, string> = {
+  apr_1992: NEW_GAME_SCENARIO_RELATIVE,
+  sep_1991: SEP_1991_SCENARIO_RELATIVE,
+};
 
 /** April 1992 game start: initial recruitment capital and equipment for desktop recruitment UI (from apr1992_definitive_52w). */
-const NEW_GAME_RECRUITMENT_CAPITAL: Record<string, number> = { HRHB: 120, RBiH: 200, RS: 350 };
-const NEW_GAME_EQUIPMENT_POINTS: Record<string, number> = { HRHB: 150, RBiH: 40, RS: 500 };
+const NEW_GAME_RECRUITMENT_CAPITAL: Record<string, number> = { HRHB: 300, RBiH: 400, RS: 600 };
+const NEW_GAME_EQUIPMENT_POINTS: Record<string, number> = { HRHB: 350, RBiH: 100, RS: 800 };
 
 /** Load a scenario file and return initial GameState. */
 export async function loadScenarioFromPath(
@@ -58,9 +70,11 @@ export async function loadScenarioFromPath(
  */
 export async function startNewCampaign(
   baseDir: string,
-  playerFaction: 'RBiH' | 'RS' | 'HRHB'
+  playerFaction: 'RBiH' | 'RS' | 'HRHB',
+  scenarioKey: DesktopScenarioKey = DEFAULT_DESKTOP_SCENARIO_KEY
 ): Promise<{ state: GameState }> {
-  const scenarioPath = join(baseDir, NEW_GAME_SCENARIO_RELATIVE);
+  const key = scenarioKey in SCENARIO_KEY_TO_PATH ? scenarioKey : DEFAULT_DESKTOP_SCENARIO_KEY;
+  const scenarioPath = join(baseDir, SCENARIO_KEY_TO_PATH[key]);
   const state = await createStateFromScenario(scenarioPath, baseDir);
 
   const factionIds = (state.factions ?? []).map((f) => f.id).sort();
@@ -68,7 +82,7 @@ export async function startNewCampaign(
     return { state };
   }
 
-  if (!state.recruitment_state) {
+  if (key === 'apr_1992' && !state.recruitment_state) {
     state.recruitment_state = initializeRecruitmentResources(
       factionIds,
       NEW_GAME_RECRUITMENT_CAPITAL,
@@ -103,7 +117,8 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
 
   try {
     if (phase === 'phase_0') {
-      const next = runPhase0TurnAndAdvance(state, seed);
+      const playerFaction = state.meta?.player_faction;
+      const next = runPhase0TurnAndAdvance(state, seed, playerFaction);
       return { state: next, report: { phase, turn: next.meta.turn } };
     }
     if (phase === 'phase_i') {
@@ -122,6 +137,49 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
   } catch (err) {
     return { state, error: err instanceof Error ? err.message : String(err) };
   }
+}
+
+export interface Phase0DirectivePayload {
+  id: string;
+  factionId: FactionId;
+  investmentType: InvestmentType;
+  scope: InvestmentScope;
+  targetMunIds: MunicipalityId[];
+  coordinated?: boolean;
+}
+
+/**
+ * Apply staged Phase 0 directives in deterministic order before advancing.
+ * Returns number of directives successfully applied.
+ */
+export function applyPhase0Directives(state: GameState, directives: Phase0DirectivePayload[]): number {
+  if (!Array.isArray(directives) || directives.length === 0) return 0;
+
+  const sorted = [...directives].sort((a, b) => {
+    const byId = strictCompare(a.id, b.id);
+    if (byId !== 0) return byId;
+    const byFaction = strictCompare(a.factionId, b.factionId);
+    if (byFaction !== 0) return byFaction;
+    return strictCompare(a.investmentType, b.investmentType);
+  });
+
+  let applied = 0;
+  for (const directive of sorted) {
+    const result = applyInvestment(state, directive.factionId, directive.investmentType, directive.scope, {
+      coordinated: directive.coordinated === true,
+    });
+    if (!result.ok) continue;
+    if (!state.phase0_relationships) {
+      state.phase0_relationships = initializePhase0Relationships();
+    }
+    updateAllianceAfterInvestment(
+      state.phase0_relationships,
+      directive.factionId,
+      directive.coordinated === true
+    );
+    applied++;
+  }
+  return applied;
 }
 
 /**

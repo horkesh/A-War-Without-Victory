@@ -57,6 +57,9 @@
 ### Implementation / GUI (superseded)
 - IMPLEMENTATION_PLAN_GUI.md
 
+### 40_reports/implemented (consolidated 2026-02-15)
+- **Location:** `docs/_old/40_reports/implemented_2026_02_15/` — all 45 former implemented reports moved here when consolidated into [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md). Do not delete.
+
 ## Current doc locations
 
 Canon: `docs/10_canon/`. Engineering: `docs/20_engineering/`. Planning: `docs/30_planning/`. Reports: `docs/40_reports/`. Research: `docs/50_research/`. Entrypoint: `docs/00_start_here/docs_index.md`.

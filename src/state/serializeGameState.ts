@@ -81,7 +81,10 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
   // Formation spawn directive (FORAWWV H2.4)
   'formation_spawn_directive',
   // Recruitment system (player_choice mode)
-  'recruitment_state'
+  'recruitment_state',
+  // Phase 0: Event log and relationship tracking
+  'phase0_events_log',
+  'phase0_relationships'
 ]);
 
 /**

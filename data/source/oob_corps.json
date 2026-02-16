@@ -11,7 +11,8 @@
       "id": "arbih_general_staff",
       "faction": "RBiH",
       "name": "General Staff ARBiH",
-      "hq_mun": "kakanj"
+      "hq_mun": "kakanj",
+      "kind": "army_hq"
     },
     {
       "id": "arbih_1st_corps",
@@ -47,7 +48,8 @@
       "id": "vrs_main_staff",
       "faction": "RS",
       "name": "Main Staff VRS",
-      "hq_mun": "han_pijesak"
+      "hq_mun": "han_pijesak",
+      "kind": "army_hq"
     },
     {
       "id": "vrs_1st_krajina",
@@ -89,7 +91,8 @@
       "id": "hvo_main_staff",
       "faction": "HRHB",
       "name": "Main Staff HVO",
-      "hq_mun": "mostar"
+      "hq_mun": "mostar",
+      "kind": "army_hq"
     },
     {
       "id": "hvo_southeast_herzegovina",

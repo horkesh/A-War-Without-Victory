@@ -21,6 +21,23 @@ import {
 } from '../data/settlement_ethnicity.js';
 import { isMunicipalityAlignedToRbih } from './rbih_aligned_municipalities.js';
 
+/**
+ * Best-effort init logging. In some Electron launches stdout can be closed, which throws EPIPE.
+ * Logging must never crash campaign initialization.
+ */
+function writeInitLog(message: string): void {
+  try {
+    if (typeof process === 'undefined' || !process.stdout || typeof process.stdout.write !== 'function') return;
+    process.stdout.write(message);
+  } catch (error) {
+    const code = typeof error === 'object' && error !== null && 'code' in error
+      ? (error as { code?: unknown }).code
+      : undefined;
+    if (code === 'EPIPE') return;
+    throw error;
+  }
+}
+
 /** Map Phase 0 control_status to authority state (consolidated/contested/fragmented) for pool and spawn. */
 function controlStatusToAuthority(
   control_status: 'SECURE' | 'CONTESTED' | 'HIGHLY_CONTESTED'
@@ -510,16 +527,14 @@ async function initializePoliticalControllersFromEthnic1991(
     HRHB: audit.by_controller.HRHB ?? 0,
     null: audit.by_controller.null ?? 0
   };
-  if (coercion.coerced_from_null > 0 && typeof process !== 'undefined' && process.stdout) {
-    process.stdout.write(
+  if (coercion.coerced_from_null > 0) {
+    writeInitLog(
       `[E5][INFO] Coerced ${coercion.coerced_from_null} null start controllers (ethnic_1991 mode; defaults=${coercion.defaulted_to_fallback}).\n`
     );
   }
-  if (typeof process !== 'undefined' && process.stdout) {
-    process.stdout.write(
-      `[E5] Political control initialized (ethnic_1991): ${counts.total} settlements, RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}\n`
-    );
-  }
+  writeInitLog(
+    `[E5] Political control initialized (ethnic_1991): ${counts.total} settlements, RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}\n`
+  );
   return { applied: true, counts };
 }
 
@@ -591,16 +606,14 @@ async function initializePoliticalControllersFromHybrid1992(
     HRHB: audit.by_controller.HRHB ?? 0,
     null: audit.by_controller.null ?? 0
   };
-  if (coercion.coerced_from_null > 0 && typeof process !== 'undefined' && process.stdout) {
-    process.stdout.write(
+  if (coercion.coerced_from_null > 0) {
+    writeInitLog(
       `[E5][INFO] Coerced ${coercion.coerced_from_null} null start controllers (hybrid_1992; defaults=${coercion.defaulted_to_fallback}).\n`
     );
   }
-  if (typeof process !== 'undefined' && process.stdout) {
-    process.stdout.write(
-      `[E5] Political control initialized (hybrid_1992, threshold=${ethnicOverrideThreshold}): ${counts.total} settlements, RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}\n`
-    );
-  }
+  writeInitLog(
+    `[E5] Political control initialized (hybrid_1992, threshold=${ethnicOverrideThreshold}): ${counts.total} settlements, RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}\n`
+  );
   return { applied: true, counts };
 }
 
@@ -661,16 +674,14 @@ async function initializePoliticalControllersFromMun1990Only(
     HRHB: audit.by_controller.HRHB ?? 0,
     null: audit.by_controller.null ?? 0
   };
-  if (coercion.coerced_from_null > 0 && typeof process !== 'undefined' && process.stdout) {
-    process.stdout.write(
+  if (coercion.coerced_from_null > 0) {
+    writeInitLog(
       `[E5][INFO] Coerced ${coercion.coerced_from_null} null start controllers to non-null values (defaults=${coercion.defaulted_to_fallback}).\n`
     );
   }
-  if (typeof process !== 'undefined' && process.stdout) {
-    process.stdout.write(
-      `[E5] Political control initialized (scenario mun1990-only): ${counts.total} settlements, RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}, null=${counts.null}\n`
-    );
-  }
+  writeInitLog(
+    `[E5] Political control initialized (scenario mun1990-only): ${counts.total} settlements, RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}, null=${counts.null}\n`
+  );
   return { applied: true, counts };
 }
 
@@ -819,22 +830,20 @@ export async function initializePoliticalControllers(
   };
 
   const nullSharePct = counts.total > 0 ? (100 * counts.null) / counts.total : 0;
-  if (nullSharePct > 5 && typeof process !== 'undefined' && process.stdout) {
-    process.stdout.write(
+  if (nullSharePct > 5) {
+    writeInitLog(
       `[E5][WARN] null political control share is high: ${nullSharePct.toFixed(1)}% — review initial controller dataset\n`
     );
   }
-  if (coercion.coerced_from_null > 0 && typeof process !== 'undefined' && process.stdout) {
-    process.stdout.write(
+  if (coercion.coerced_from_null > 0) {
+    writeInitLog(
       `[E5][INFO] Coerced ${coercion.coerced_from_null} null start controllers to non-null values (defaults=${coercion.defaulted_to_fallback}).\n`
     );
   }
 
-  if (typeof process !== 'undefined' && process.stdout) {
-    process.stdout.write(
-      `[E5] Political control initialized (initial municipal substrate): ${counts.total} settlements, RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}, null=${counts.null}\n`
-    );
-  }
+  writeInitLog(
+    `[E5] Political control initialized (initial municipal substrate): ${counts.total} settlements, RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}, null=${counts.null}\n`
+  );
 
   return { applied: true, counts };
 }

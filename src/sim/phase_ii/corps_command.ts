@@ -94,7 +94,7 @@ export function initializeCorpsCommand(state: GameState): void {
   const corpsIds = Object.keys(state.formations)
     .filter((fid) => {
       const f = state.formations![fid];
-      return f.kind === 'corps' && f.status === 'active';
+      return (f.kind === 'corps' || f.kind === 'corps_asset') && f.status === 'active';
     })
     .sort(strictCompare);
 

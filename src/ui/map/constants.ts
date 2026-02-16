@@ -85,7 +85,7 @@ export function panelReadinessColor(readiness: string): string {
   return PANEL_READINESS_COLORS[readiness] ?? PANEL_READINESS_COLORS.degraded;
 }
 
-/** Formation kind icons: inner symbol within NATO frame (infantry=bar, corps=XX, militia=triangle). */
+/** Formation kind icons: inner symbol within NATO frame (infantry=bar, corps=XX, army=XXX, militia=triangle). */
 export const FORMATION_KIND_SHAPES: Record<string, string> = {
   militia: 'triangle',
   brigade: 'square',
@@ -93,25 +93,26 @@ export const FORMATION_KIND_SHAPES: Record<string, string> = {
   operational_group: 'diamond',
   corps_asset: 'xx',
   corps: 'xx',
+  army_hq: 'xxx',
   og: 'diamond',
 };
 
 /** Formation kinds visible at each zoom level (STRATEGIC=corps only, OPERATIONAL=corps+brigades, TACTICAL=all). */
 export const ZOOM_FORMATION_FILTER: Record<number, Set<string> | null> = {
-  0: new Set(['corps', 'corps_asset']),                            // strategic: corps-level only
+  0: new Set(['corps', 'corps_asset', 'army_hq']),                  // strategic: corps + army level
   1: null,                                                         // operational: all
   2: null,                                                         // tactical: all
 };
 
 /** NATO-style formation marker: width and height by zoom (0=strategic, 1=operational, 2=tactical). Horizontal box: crest left, NATO symbol right. */
 export const FORMATION_MARKER_SIZE: Readonly<{ w: number; h: number }[]> = [
-  { w: 34, h: 24 },   // strategic
-  { w: 42, h: 30 },   // operational
-  { w: 52, h: 36 },   // tactical
+  { w: 44, h: 30 },   // strategic
+  { w: 54, h: 38 },   // operational
+  { w: 66, h: 46 },   // tactical
 ] as const;
 
 /** Hit-test radius for formation markers (pixels from marker center). Should comfortably contain the largest marker. */
-export const FORMATION_HIT_RADIUS = 28;
+export const FORMATION_HIT_RADIUS = 36;
 
 /** Base map layer colors — subdued for dark background, infrastructure barely visible. */
 export const BASE_LAYER_COLORS = {
@@ -142,9 +143,10 @@ export const FRONT_LINE = {
   glowWidth: 6,
 } as const;
 
-/** Brigade AoR highlight — smooth unified region with breathing glow. */
+/** Brigade AoR highlight — smooth unified region with breathing glow + pulsing fill. */
 export const AOR_HIGHLIGHT = {
-  fillAlpha: 0.15,
+  fillAlphaMin: 0.08,
+  fillAlphaMax: 0.22,
   strokeWidth: 2.5,
   glowBlurMin: 2,
   glowBlurMax: 6,

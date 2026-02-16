@@ -56,6 +56,8 @@ test('production facilities grant deterministic bonus by controlling faction', (
 test('production bonus reduces supply-pressure growth without decreasing current pressure', () => {
   const state = makeState();
   state.phase_ii_supply_pressure = { RBiH: 10, RS: 10, HRHB: 10 };
+  // Alliance must be broken so the RBiH–HRHB edge counts as a front edge
+  state.phase_i_alliance_rbih_hrhb = -1;
   const edges: EdgeRecord[] = [{ a: 'SZ1', b: 'SV1' }];
   updatePhaseIISupplyPressure(
     state,
