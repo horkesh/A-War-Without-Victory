@@ -13,10 +13,14 @@ import { loadSettlementGraph } from '../map/settlements.js';
 import { loadSettlementEthnicityData } from '../data/settlement_ethnicity.js';
 import type { MunicipalityPopulation1991 } from '../sim/turn_pipeline.js';
 import { CURRENT_SCHEMA_VERSION } from '../state/game_state.js';
-import type { GameState } from '../state/game_state.js';
+import type { GameState, FactionId } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { prepareNewGameState } from '../state/initialize_new_game_state.js';
-import { seedOrganizationalPenetrationFromControl } from '../state/seed_organizational_penetration_from_control.js';
+import {
+  seedOrganizationalPenetrationFromControl,
+  type OrganizationalPenetrationSeedOptions,
+  type PlannedWarStartBrigadePresenceByMunicipality
+} from '../state/seed_organizational_penetration_from_control.js';
 import { serializeState, deserializeState } from '../state/serialize.js';
 import { runTurn } from '../sim/turn_pipeline.js';
 import { runOneTurn } from '../state/turn_pipeline.js';
@@ -83,6 +87,7 @@ import {
 } from '../state/control_flip_proposals.js';
 import { ensureRbihHrhbState } from '../sim/phase_i/alliance_update.js';
 import { aggregateSettlementDisplacementToMunicipalities } from '../sim/phase_f/displacement_municipality_aggregation.js';
+import { loadInitialMunicipalityControllers1990 } from '../state/political_control_init.js';
 import {
   computeEngagementLevel,
   applyBaselineOpsExhaustion,
@@ -117,7 +122,7 @@ export async function createInitialGameState(
   seed: string,
   controlPath?: string,
   initOptions?: { init_control_mode?: 'institutional' | 'ethnic_1991' | 'hybrid_1992'; ethnic_override_threshold?: number },
-  options?: { baseDir?: string }
+  options?: { baseDir?: string; organizationalPenetrationSeed?: OrganizationalPenetrationSeedOptions }
 ): Promise<GameState> {
   const graph = options?.baseDir
     ? await loadSettlementGraph({
@@ -153,7 +158,7 @@ export async function createInitialGameState(
   });
   await prepareNewGameState(state, graph, controlPath, initOptions);
   if (controlPath || initOptions?.init_control_mode) {
-    seedOrganizationalPenetrationFromControl(state, graph.settlements);
+    seedOrganizationalPenetrationFromControl(state, graph.settlements, options?.organizationalPenetrationSeed);
   }
   return state;
 }
@@ -556,6 +561,21 @@ function createOobFormations(
   }
 }
 
+function buildPlannedWarStartBrigadePresenceByMunicipality(
+  oobBrigades: OobBrigade[],
+  warStartTurn: number
+): PlannedWarStartBrigadePresenceByMunicipality | undefined {
+  const byMun: PlannedWarStartBrigadePresenceByMunicipality = {};
+  for (const brigade of oobBrigades) {
+    if (brigade.kind !== 'brigade') continue;
+    if (!Number.isFinite(brigade.available_from) || brigade.available_from > warStartTurn) continue;
+    const existing = byMun[brigade.home_mun] ?? {};
+    existing[brigade.faction] = true;
+    byMun[brigade.home_mun] = existing;
+  }
+  return Object.keys(byMun).length > 0 ? byMun : undefined;
+}
+
 export async function runScenario(options: RunScenarioOptions): Promise<RunScenarioResult> {
   const {
     scenarioPath,
@@ -718,6 +738,27 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
         : undefined;
     const sidToMun = buildSidToMunFromSettlements(graph.settlements);
+    const warStartTurnForOrgPenSeeding =
+      scenario.start_phase === 'phase_0'
+        ? (scenario.phase_0_war_start_turn ?? (scenario.phase_0_referendum_turn ?? 0) + 4)
+        : 0;
+    const plannedWarStartBrigadeByMun = buildPlannedWarStartBrigadePresenceByMunicipality(
+      oobBrigades,
+      warStartTurnForOrgPenSeeding
+    );
+    let municipalityControllerByMun: Record<string, FactionId | null> | undefined;
+    if (controlPath) {
+      try {
+        municipalityControllerByMun = await loadInitialMunicipalityControllers1990(controlPath);
+      } catch {
+        municipalityControllerByMun = undefined;
+      }
+    }
+    const organizationalPenetrationSeed: OrganizationalPenetrationSeedOptions = {
+      ...(municipalityControllerByMun ? { municipality_controller_by_mun: municipalityControllerByMun } : {}),
+      ...(municipalityPopulation1991 ? { population_1991_by_mun: municipalityPopulation1991 } : {}),
+      ...(plannedWarStartBrigadeByMun ? { planned_war_start_brigade_by_mun: plannedWarStartBrigadeByMun } : {})
+    };
 
     const initOptions =
       scenario.init_control_mode
@@ -727,7 +768,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             ...(baseDir ? { ethnicity_data_path: join(baseDir, 'data/derived/settlement_ethnicity_data.json') } : {})
           }
         : undefined;
-    let state = await createInitialGameState('harness-seed', controlPath, initOptions, { baseDir });
+    let state = await createInitialGameState('harness-seed', controlPath, initOptions, {
+      baseDir,
+      organizationalPenetrationSeed
+    });
 
     // When init_formations_oob is true, OOB creates formations at Phase I entry; do not load placeholder init_formations.
     if (formationsPath && !scenario.init_formations_oob) {

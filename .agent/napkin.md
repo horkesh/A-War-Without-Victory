@@ -110,6 +110,13 @@
 - **Phase 0 faction action visibility (2026-02-16):** In `InvestmentPanel`, filter action list by faction capability (e.g. hide `to` for non-RBiH) instead of showing disabled ineligible actions.
 - **Phase 0 action eligibility source-of-truth (2026-02-16):** Keep faction action lists centralized in `phase0/investment.ts` (`getInvestmentTypesForFaction`) and reuse in both panel rendering and map target highlighting to avoid drift between visible actions and target eligibility.
 - **Phase 0 map projection reuse (2026-02-16):** Share one `getProjection()` for rendering and hit-testing; duplicated scale/offset math can cause subtle UI divergence during later edits.
+- **Boundary ID alias trap (2026-02-16):** `municipalities_1990_boundaries.geojson` can use compact IDs (`hanpijesak`) while the rest of state/UI uses underscored IDs (`han_pijesak`). If not normalized, a municipality falls back to fragmented polygon fill and looks settlement-broken. Normalize mun ids for boundary-to-feature matching (alnum-only key).
+- **Phase 0 navigation affordance (2026-02-16):** Keep an explicit `Return to Warroom` button in the prep map (not only the close `×`) to avoid discoverability issues.
+- **Org-pen A/B/C seeding (2026-02-16):** Keep formula pure in `organizational_penetration_formula.ts` and feed it deterministic maps for A (municipality controller), B (population share), C (planned OOB presence at `available_from <= war_start_turn`); this gives non-uniform startup values while preserving determinism.
+- **Municipality key normalization across data sources (2026-02-16):** For org-pen seeding, normalize mun IDs (alnum-only) before joining controller maps, population maps, and planned brigade presence maps to avoid silent fallback to controller-majority/default paths.
+- **Phase 0->I uninvested handoff consistency (2026-02-16):** Replace fixed baseline penetration constants with formula-based fallback seeding so uninvested municipalities enter Phase I with the same org-pen model family as scenario init.
+- **Refactor-pass cleanup (2026-02-16):** Remove no-op determinism markers (dead "touch all factions" loops) and prefer explicit helper extraction for repeated tag parsing (`mun:`) to keep logic flow simple without changing behavior.
+- **Canon propagation for behavior changes (2026-02-16):** When adding a new implemented report in `docs/40_reports/implemented/`, also update consolidated §N in `IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md`, plus `CONSOLIDATED_IMPLEMENTED.md`, `40_reports/README.md`, `docs_index.md`, `context.md`, and relevant phase/spec implementation-notes in canon to keep discoverability consistent.
 
 ## Patterns That Don't Work
 - Simplify + turf fallback alone did not reduce Voronoi polyclip failures.

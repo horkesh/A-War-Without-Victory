@@ -139,4 +139,12 @@
 
 ---
 
+## 12. Deterministic org-pen initialization and Phase 0->I handoff alignment (2026-02-16)
+
+| Report | What was implemented |
+|--------|----------------------|
+| ORG_PEN_FORMULA_INIT_AND_PHASE0_HANDOFF_2026_02_16.md | Replaced uniform/controller-only organizational penetration seeds with deterministic A/B/C formula values: A = municipality controller (mayor-party proxy), B = faction-aligned 1991 population share threshold, C = planned war-start OOB brigade presence (`available_from <= war_start_turn`). Added pure formula module (`organizational_penetration_formula.ts`), refactored seeding path (`seed_organizational_penetration_from_control.ts`) with deterministic key normalization across controller/population/OOB maps, wired scenario initialization inputs in `scenario_runner.ts`, and aligned Phase 0->I uninvested handoff in `run_phase0_turn.ts` to formula-derived seeding. Added focused determinism/variance/integration tests. Canon propagation: Systems Manual implementation-note, Phase 0/I implementation-notes, context/docs index, ledger knowledge/changelog. |
+
+---
+
 *For backlog (not yet implemented), see [CONSOLIDATED_BACKLOG.md](CONSOLIDATED_BACKLOG.md). For patterns and corrections, see [CONSOLIDATED_LESSONS_LEARNED.md](CONSOLIDATED_LESSONS_LEARNED.md) and .agent/napkin.md. Original report files archived to docs/_old/40_reports/implemented_2026_02_15/.*

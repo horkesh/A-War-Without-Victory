@@ -25,7 +25,7 @@
 | Subfolder | Contents |
 |-----------|----------|
 | **audit/** | State-of-game overview, MVP backlog, state matrix (evidence-backed). |
-| **implemented/** | New report 2026-02-16: [WARROOM_RESTYLE_SCENARIO_FIX_EMBEDDED_MAP_FOG_OF_WAR_2026_02_16.md](implemented/WARROOM_RESTYLE_SCENARIO_FIX_EMBEDDED_MAP_FOG_OF_WAR_2026_02_16.md). All content also in [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) §11. Pre-2026-02-16 originals archived to docs/_old/40_reports/implemented_2026_02_15/. |
+| **implemented/** | New reports 2026-02-16: [WARROOM_RESTYLE_SCENARIO_FIX_EMBEDDED_MAP_FOG_OF_WAR_2026_02_16.md](implemented/WARROOM_RESTYLE_SCENARIO_FIX_EMBEDDED_MAP_FOG_OF_WAR_2026_02_16.md), [ORG_PEN_FORMULA_INIT_AND_PHASE0_HANDOFF_2026_02_16.md](implemented/ORG_PEN_FORMULA_INIT_AND_PHASE0_HANDOFF_2026_02_16.md). All content also in [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) §11–§12. Pre-2026-02-16 originals archived to docs/_old/40_reports/implemented_2026_02_15/. |
 | **backlog/** | Plans, designs, research, and specs not yet implemented. |
 | **convenes/** | PARADOX convenes, state-of-game meetings, orchestrator reports. |
 | **handovers/** | Expert handovers, implementation handovers, clarification requests. |

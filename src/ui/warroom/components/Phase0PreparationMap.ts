@@ -56,6 +56,10 @@ function escapeHtml(value: string): string {
     return div.innerHTML;
 }
 
+function normalizeMunKey(value: string): string {
+    return value.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
 const CONTROL_COLORS: Record<string, string> = {
     RBiH: 'rgba(62, 109, 72, 0.38)',
     RS: 'rgba(145, 67, 67, 0.36)',
@@ -131,6 +135,12 @@ export class Phase0PreparationMap {
         closeBtn.setAttribute('aria-label', 'Close map');
         this.mapArea.appendChild(closeBtn);
 
+        const returnBtn = document.createElement('button');
+        returnBtn.className = 'phase0-prep-map-return';
+        returnBtn.type = 'button';
+        returnBtn.textContent = 'Return to Warroom';
+        this.mapArea.appendChild(returnBtn);
+
         const layerPanel = document.createElement('div');
         layerPanel.className = 'phase0-prep-map-layer-panel';
         layerPanel.innerHTML = `
@@ -177,6 +187,7 @@ export class Phase0PreparationMap {
         this.container.appendChild(panelWrapper);
 
         closeBtn.addEventListener('click', () => this.close());
+        returnBtn.addEventListener('click', () => this.close());
         this.canvas.addEventListener('click', (e: MouseEvent) => this.onMapClick(e));
         this.canvas.addEventListener('mousemove', (e: MouseEvent) => this.onMapHover(e));
         this.canvas.addEventListener('mouseleave', () => this.hideHoverTooltip());
@@ -282,9 +293,25 @@ export class Phase0PreparationMap {
                 this.displayNameByMun1990.set(mun1990Id, displayName);
             }
 
+            const normalizedFeatureIds = new Map<string, string>();
+            const featureIds = Array.from(this.features.keys()).sort(strictCompare);
+            for (const mun1990Id of featureIds) {
+                const normalized = normalizeMunKey(mun1990Id);
+                if (!normalizedFeatureIds.has(normalized)) {
+                    normalizedFeatureIds.set(normalized, mun1990Id);
+                }
+            }
+
             for (const feature of boundaries.features ?? []) {
-                const mun1990Id = feature.properties?.mun1990_id;
-                if (!mun1990Id) continue;
+                const rawBoundaryId = feature.properties?.mun1990_id;
+                if (!rawBoundaryId) continue;
+                let mun1990Id = rawBoundaryId;
+                if (!this.features.has(mun1990Id)) {
+                    const normalized = normalizeMunKey(rawBoundaryId);
+                    const aliased = normalizedFeatureIds.get(normalized);
+                    if (!aliased) continue;
+                    mun1990Id = aliased;
+                }
                 this.boundaryFeatures.set(mun1990Id, feature);
                 const resolvedMid = byMun1990.get(mun1990Id);
                 if (resolvedMid && !this.municipalityIdByMun1990.has(mun1990Id)) {
