@@ -1194,7 +1194,7 @@ All audio must be togglable and volume-adjustable independently.
 
 ## 21. Typography and Color System
 
-**Implementation reference:** The Tactical Map viewer was overhauled to match this spec (2026-02-14). As-built palette and tokens live in `src/map/nato_tokens.ts` (canonical) and `src/ui/map/constants.ts`. See [GUI_VISUAL_OVERHAUL_NATO_OPS_CENTER_2026_02_14.md](../40_reports/implemented/GUI_VISUAL_OVERHAUL_NATO_OPS_CENTER_2026_02_14.md). A follow-up polish pass (tab renames OVERVIEW/CONTROL/MILITARY/HISTORY, corps panel, strategic zoom corps-only and watercolor, SET POSTURE/MOVE/ATTACK wired, zoom-to-selection, pruned Settings/Help modals, browser menu) is documented in [GUI_POLISH_PASS_AND_REFACTOR_2026_02_14.md](../40_reports/implemented/GUI_POLISH_PASS_AND_REFACTOR_2026_02_14.md).
+**Implementation reference:** The Tactical Map viewer was overhauled to match this spec (2026-02-14). As-built palette and tokens live in `src/map/nato_tokens.ts` (canonical) and `src/ui/map/constants.ts`. See [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) §6 (GUI_VISUAL_OVERHAUL_NATO_OPS_CENTER, GUI_POLISH_PASS_AND_REFACTOR).
 
 ### 21.1 Fonts
 

@@ -16,6 +16,8 @@ function getBaseDir() {
 
 /** In-memory game state for "play myself". Set by load-scenario or load-state; updated by advance-turn. */
 let currentGameStateJson = null;
+let mainWindow = null;
+let tacticalMapWindow = null;
 
 /** Lazy-load desktop sim bundle (built by desktop:sim:build). Resolve from project root so path matches build output (dist/desktop/), not src/dist/desktop/. */
 function getDesktopSim() {
@@ -27,8 +29,11 @@ function getDesktopSim() {
 }
 
 function sendGameStateToRenderer(stateJson) {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('game-state-updated', stateJson);
+  const targets = [mainWindow, tacticalMapWindow];
+  for (const win of targets) {
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('game-state-updated', stateJson);
+    }
   }
 }
 
@@ -47,6 +52,15 @@ function getMapAppDir() {
     return resourcePath('app');
   }
   return resourcePath('dist', 'tactical-map');
+}
+
+function getWarroomAppDir() {
+  if (app.isPackaged) {
+    const packagedWarroom = resourcePath('app', 'warroom');
+    if (fs.existsSync(packagedWarroom)) return packagedWarroom;
+    return resourcePath('app');
+  }
+  return resourcePath('dist', 'warroom');
 }
 
 function getDataDerivedDir() {
@@ -109,8 +123,6 @@ function showStateFileDialog(win) {
   });
 }
 
-let mainWindow = null;
-
 function createWindow() {
   const win = new BrowserWindow({
     width: 1400,
@@ -122,7 +134,7 @@ function createWindow() {
     },
   });
 
-  win.loadURL('awwv://app/tactical_map.html');
+  win.loadURL('awwv://warroom/index.html');
   const devToolsPromise = win.webContents.openDevTools({ mode: 'detach' });
   if (devToolsPromise && typeof devToolsPromise.catch === 'function') {
     devToolsPromise.catch(() => {});
@@ -160,6 +172,10 @@ function createWindow() {
           } catch (e) { console.error('Load state failed:', e); }
         }},
         { type: 'separator' },
+        { label: 'Open tactical map window', click: () => {
+          openTacticalMapWindow();
+        }},
+        { type: 'separator' },
         { label: 'Quit', role: 'quit' },
       ],
     },
@@ -170,8 +186,35 @@ function createWindow() {
   win.on('closed', () => { mainWindow = null; });
 }
 
+function openTacticalMapWindow() {
+  if (tacticalMapWindow && !tacticalMapWindow.isDestroyed()) {
+    tacticalMapWindow.focus();
+    return tacticalMapWindow;
+  }
+
+  const win = new BrowserWindow({
+    width: 1400,
+    height: 900,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  win.loadURL('awwv://app/tactical_map.html');
+  tacticalMapWindow = win;
+  win.on('closed', () => { tacticalMapWindow = null; });
+  win.webContents.on('did-finish-load', () => {
+    if (currentGameStateJson) {
+      win.webContents.send('game-state-updated', currentGameStateJson);
+    }
+  });
+  return win;
+}
+
 function registerProtocol() {
   const mapAppDir = getMapAppDir();
+  const warroomAppDir = getWarroomAppDir();
   const dataDerivedDir = getDataDerivedDir();
 
   protocol.handle('awwv', (request) => {
@@ -203,6 +246,95 @@ function registerProtocol() {
         const buf = fs.readFileSync(filePath);
         const ext = path.extname(rel).toLowerCase();
         const types = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.ico': 'image/x-icon' };
+        return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
+      } catch (e) {
+        if (e.code === 'ENOENT') return new Response('Not Found', { status: 404 });
+        throw e;
+      }
+    }
+
+    // Warroom /data/ paths: route to project-root data directories (derived, source, ui)
+    if (segs[0] === 'warroom' && segs[1] === 'data' && (segs[2] === 'derived' || segs[2] === 'source' || segs[2] === 'ui')) {
+      const dataDir = resourcePath('data', segs[2]);
+      const rel = segs.slice(3).join(path.sep);
+      const filePath = path.join(dataDir, rel);
+      if (!path.resolve(filePath).startsWith(path.resolve(dataDir))) return new Response(null, { status: 403 });
+      try {
+        const buf = fs.readFileSync(filePath);
+        const ext = path.extname(rel).toLowerCase();
+        const types = { '.json': 'application/json', '.geojson': 'application/geo+json', '.png': 'image/png' };
+        return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
+      } catch (e) {
+        if (e.code === 'ENOENT') return new Response('Not Found', { status: 404 });
+        throw e;
+      }
+    }
+
+    // Warroom /assets/ paths: first try the Vite-built warroom assets (dist/warroom/assets/)
+    // which contain the JS, CSS, and images from the Vite build. If not found there, fall
+    // back to the project root assets/ directory (crests, flags, etc. used by the embedded
+    // tactical map iframe).
+    if (segs[0] === 'warroom' && segs[1] === 'assets') {
+      const rel = segs.slice(2).join(path.sep);
+      const ext = path.extname(rel).toLowerCase();
+      const types = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json', '.geojson': 'application/geo+json', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
+
+      // 1. Try Vite-built warroom assets first (JS, CSS, hashed images)
+      const warroomAssetPath = path.join(warroomAppDir, 'assets', rel);
+      if (path.resolve(warroomAssetPath).startsWith(path.resolve(warroomAppDir))) {
+        try {
+          const buf = fs.readFileSync(warroomAssetPath);
+          return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
+        } catch (_) { /* not found in warroom build, try project assets */ }
+      }
+
+      // 2. Fall back to project root assets/ (crests, flags for embedded tactical map)
+      const assetsDir = resourcePath('assets');
+      const filePath = path.join(assetsDir, rel);
+      if (!path.resolve(filePath).startsWith(path.resolve(assetsDir))) return new Response(null, { status: 403 });
+      try {
+        const buf = fs.readFileSync(filePath);
+        return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
+      } catch (e) {
+        if (e.code === 'ENOENT') return new Response('Not Found', { status: 404 });
+        throw e;
+      }
+    }
+
+    // Warroom → tactical-map sub-route: serve tactical map files under warroom origin
+    // so the iframe is same-origin and can inherit the parent's awwv bridge.
+    if (segs[0] === 'warroom' && segs[1] === 'tactical-map') {
+      const rel = segs.slice(2).join(path.sep) || 'tactical_map.html';
+      const filePath = path.join(mapAppDir, rel);
+      if (!path.resolve(filePath).startsWith(path.resolve(mapAppDir))) return new Response(null, { status: 403 });
+      try {
+        const buf = fs.readFileSync(filePath);
+        const ext = path.extname(rel).toLowerCase();
+        const types = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json', '.geojson': 'application/geo+json', '.png': 'image/png', '.ico': 'image/x-icon' };
+        return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
+      } catch (e) {
+        if (e.code === 'ENOENT') return new Response('Not Found', { status: 404 });
+        throw e;
+      }
+    }
+
+    if (segs[0] === 'warroom') {
+      const rel = segs.slice(1).join(path.sep) || 'index.html';
+      const filePath = path.join(warroomAppDir, rel);
+      if (!path.resolve(filePath).startsWith(path.resolve(warroomAppDir))) return new Response(null, { status: 403 });
+      try {
+        const buf = fs.readFileSync(filePath);
+        const ext = path.extname(rel).toLowerCase();
+        const types = {
+          '.html': 'text/html',
+          '.js': 'application/javascript',
+          '.css': 'text/css',
+          '.json': 'application/json',
+          '.geojson': 'application/geo+json',
+          '.png': 'image/png',
+          '.ico': 'image/x-icon',
+          '.svg': 'image/svg+xml',
+        };
         return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
       } catch (e) {
         if (e.code === 'ENOENT') return new Response('Not Found', { status: 404 });
@@ -251,12 +383,16 @@ app.whenReady().then(() => {
 
   ipcMain.handle('start-new-campaign', async (_event, payload) => {
     const playerFaction = payload && payload.playerFaction;
+    const scenarioKey = payload && payload.scenarioKey;
     if (playerFaction !== 'RBiH' && playerFaction !== 'RS' && playerFaction !== 'HRHB') {
       return { ok: false, error: 'Invalid playerFaction. Use RBiH, RS, or HRHB.' };
     }
+    if (scenarioKey !== undefined && scenarioKey !== 'apr_1992' && scenarioKey !== 'sep_1991') {
+      return { ok: false, error: 'Invalid scenarioKey. Use apr_1992 or sep_1991.' };
+    }
     try {
       const sim = getDesktopSim();
-      const { state } = await sim.startNewCampaign(getBaseDir(), playerFaction);
+      const { state } = await sim.startNewCampaign(getBaseDir(), playerFaction, scenarioKey ?? 'apr_1992');
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true, stateJson: currentGameStateJson };
@@ -279,13 +415,17 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('advance-turn', async () => {
+  ipcMain.handle('advance-turn', async (_event, payload) => {
     if (!currentGameStateJson) {
       return { ok: false, error: 'No game loaded. Load a scenario or state file first.' };
     }
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
+      const phase0Directives = Array.isArray(payload?.phase0Directives) ? payload.phase0Directives : [];
+      if (state.meta?.phase === 'phase_0' && phase0Directives.length > 0 && typeof sim.applyPhase0Directives === 'function') {
+        sim.applyPhase0Directives(state, phase0Directives);
+      }
       const result = await sim.advanceTurn(state, getBaseDir());
       if (result.error) return { ok: false, error: result.error };
       currentGameStateJson = sim.serializeState(result.state);
@@ -401,6 +541,60 @@ app.whenReady().then(() => {
       }
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-corps-stance-order', async (_event, payload) => {
+    const { corpsId, stance } = payload || {};
+    if (!currentGameStateJson || typeof corpsId !== 'string' || typeof stance !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    const validStances = ['defensive', 'balanced', 'offensive', 'reorganize'];
+    if (!validStances.includes(stance)) {
+      return { ok: false, error: `Invalid stance: ${stance}` };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      if (!state.corps_command) state.corps_command = {};
+      if (!state.corps_command[corpsId]) {
+        state.corps_command[corpsId] = {
+          command_span: 5,
+          subordinate_count: 0,
+          og_slots: 1,
+          active_ogs: [],
+          corps_exhaustion: 0,
+          stance: stance,
+          active_operation: null,
+        };
+      } else {
+        state.corps_command[corpsId].stance = stance;
+      }
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('focus-warroom', async () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.show();
+      mainWindow.focus();
+      return { ok: true };
+    }
+    return { ok: false, error: 'Warroom window not available' };
+  });
+
+  ipcMain.handle('get-current-game-state', async () => currentGameStateJson);
+
+  ipcMain.handle('open-tactical-map-window', async () => {
+    try {
+      openTacticalMapWindow();
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };

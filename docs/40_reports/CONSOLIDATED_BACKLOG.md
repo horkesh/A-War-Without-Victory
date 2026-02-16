@@ -71,7 +71,7 @@
 
 | Report | Summary | Priority / owner |
 |--------|---------|-------------------|
-| [PARADOX_STATE_OF_GAME_MEETING.md](convenes/PARADOX_STATE_OF_GAME_MEETING.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md) | State-of-game meetings. | Process / reference. |
+| [PARADOX_STATE_OF_GAME_MEETING.md](convenes/PARADOX_STATE_OF_GAME_MEETING.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md) | State-of-game meetings. | Process / reference. |
 | [PARADOX_PHASE0_ORCHESTRATOR_REPORT.md](convenes/PARADOX_PHASE0_ORCHESTRATOR_REPORT.md) | Phase 0 orchestrator report. | Reference. |
 | [PARADOX_TACTICAL_MAP_CANONICAL_DEPRECATION_CONVENE.md](convenes/PARADOX_TACTICAL_MAP_CANONICAL_DEPRECATION_CONVENE.md) | Tactical map canonical deprecation convene. | Process. |
 | [PARADOX_RBIH_WIPEOUT_FIX_MEETING.md](convenes/PARADOX_RBIH_WIPEOUT_FIX_MEETING.md) | RBiH wipeout fix meeting. | Design input. |
@@ -97,6 +97,16 @@ The report [BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md](implemented/BOT_AI_
 - Operational groups not used by bot AI (LOW)
 
 Treat these as backlog items for bot/brigade AI when prioritizing.
+
+---
+
+## 8. Documented-but-unimplemented systems (canon/planning audit)
+
+| Report | Summary | Priority / owner |
+|--------|---------|-------------------|
+| [DOCUMENTED_UNIMPLEMENTED_SYSTEMS_AUDIT_2026_02_15.md](audit/DOCUMENTED_UNIMPLEMENTED_SYSTEMS_AUDIT_2026_02_15.md) | Audit of systems/mechanics described in canon (Engine Invariants, Systems Manual, Phase specs), 30_planning (missing_systems_roadmap, gap_analysis), and docs that are not yet implemented or not in an implementation plan. Includes Phase 3B/3C, phase_ii_exhaustion_local, JNA equipment transfer, OG donor return, doctrines, MCZs, command degradation, player action constraints, milestone events. | Reference; PM/Orchestrator to decide plan inclusion. |
+| [STRATEGIC_DESIGN_COUNCIL_AUDIT_2026_02_15.md](audit/STRATEGIC_DESIGN_COUNCIL_AUDIT_2026_02_15.md) | Paradox-style structural critique: genre mirror (vs EU/HoI/AGEOD), strategic honesty (illusion of control, friction, negative-sum, fragmentation, over-abstraction), UI misrepresentation (control/supply/cohesion), determinism risks, canon stress, FORAWWV addendum candidates. Diagnosis only; no new mechanics or canon edits. | Reference; design/UI when revisiting representation. |
+| [INTEGRATION_AND_SYSTEMS_HANDOVER_EXTERNAL_EXPERT_2026_02_15.md](handovers/INTEGRATION_AND_SYSTEMS_HANDOVER_EXTERNAL_EXPERT_2026_02_15.md) | **External expert handover:** Integration of Warroom/Phase 0 (WARROOM_SETUP_AND_PHASE0_EXECUTION_PROPOSAL) with documented unimplemented systems (audit). Detailed integration description, interaction matrix, instructions/examples, risk flags and pushback, implementation order. Goal: fully fleshed-out game with systems talking to each other. | Handover to implementer. |
 
 ---
 

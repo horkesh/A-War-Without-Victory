@@ -35,7 +35,7 @@ import {
   DEFAULT_FACTION_RESOURCES,
   RECRUITMENT_DEFAULTS
 } from '../state/recruitment_types.js';
-import { MIN_BRIGADE_SPAWN } from '../state/formation_constants.js';
+import { MIN_BRIGADE_SPAWN, MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
 import { factionHasPresenceInMun } from '../scenario/oob_phase_i_entry.js';
 import { militiaPoolKey } from '../state/militia_pool_key.js';
 import { BRIGADE_BASE_COHESION } from '../state/formation_lifecycle.js';
@@ -242,6 +242,44 @@ export function initializeRecruitmentResources(
 }
 
 // ---------------------------------------------------------------------------
+// HQ settlement resolution with faction-control validation
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve a valid HQ settlement for a formation in its home municipality.
+ * Uses the default municipality HQ if it's faction-controlled; otherwise falls back
+ * to the first (deterministic by SID sort) faction-controlled settlement in the mun.
+ * Returns undefined if no faction-controlled settlement exists in the municipality.
+ */
+function resolveValidHqSid(
+  state: GameState,
+  faction: string,
+  homeMun: MunicipalityId,
+  municipalityHqSettlement: Record<string, string>,
+  sidToMun: Map<SettlementId, MunicipalityId>
+): string | undefined {
+  const pc = state.political_controllers ?? {};
+  const defaultHq = municipalityHqSettlement[homeMun];
+
+  // If default HQ is controlled by this faction, use it
+  if (defaultHq && pc[defaultHq] === faction) {
+    return defaultHq;
+  }
+
+  // Fallback: find faction-controlled settlements in this municipality, pick first by SID sort
+  const candidates: SettlementId[] = [];
+  for (const [sid, mun] of sidToMun) {
+    if (mun === homeMun && pc[sid] === faction) {
+      candidates.push(sid);
+    }
+  }
+
+  if (candidates.length === 0) return undefined;
+  candidates.sort((a, b) => a.localeCompare(b));
+  return candidates[0];
+}
+
+// ---------------------------------------------------------------------------
 // Single brigade recruitment
 // ---------------------------------------------------------------------------
 
@@ -297,7 +335,7 @@ export function recruitBrigade(
   }
 
   // All checks pass -- build formation
-  const hq_sid = municipalityHqSettlement[home_mun];
+  const hq_sid = resolveValidHqSid(state, faction, home_mun, municipalityHqSettlement, sidToMun);
   const composition = buildBrigadeComposition(chosenClass);
   const formation = buildRecruitedFormation(
     brigade, chosenClass, composition.infantry, state.meta.turn, hq_sid, brigade.mandatory
@@ -400,7 +438,7 @@ export function runBotRecruitment(
     for (const c of oobCorps) {
       if (state.formations[c.id]) continue;
       if (!factionHasPresenceInMun(state, c.faction, c.hq_mun, sidToMun)) continue;
-      const hq_sid = municipalityHqSettlement[c.hq_mun];
+      const hq_sid = resolveValidHqSid(state, c.faction, c.hq_mun, municipalityHqSettlement, sidToMun);
       state.formations[c.id] = {
         id: c.id as FormationId,
         faction: c.faction,
@@ -409,7 +447,7 @@ export function runBotRecruitment(
         status: 'active',
         assignment: null,
         tags: [`mun:${c.hq_mun}`],
-        kind: 'corps_asset',
+        kind: c.kind === 'army_hq' ? 'army_hq' : 'corps_asset',
         personnel: 0,
         ...(hq_sid ? { hq_sid } : {})
       };
@@ -443,14 +481,15 @@ export function runBotRecruitment(
       const manpowerAvailable = pool ? pool.available : 0;
       const effectiveManpower = Math.min(brigade.manpower_cost, manpowerAvailable);
 
-      if (effectiveManpower < MIN_BRIGADE_SPAWN / 2) {
-        // Not enough manpower even for a skeleton crew
+      // Mandatory historical formations use a lower threshold than emergent brigades since
+      // they definitely existed — pools will reinforce them over time.
+      if (effectiveManpower < MIN_MANDATORY_SPAWN) {
         report.brigades_skipped_no_manpower++;
         continue;
       }
 
       // Build formation directly for mandatory (bypass normal cost checks)
-      const hq_sid = municipalityHqSettlement[brigade.home_mun];
+      const hq_sid = resolveValidHqSid(state, faction, brigade.home_mun, municipalityHqSettlement, sidToMun);
       const formation = buildRecruitedFormation(
         brigade, brigade.default_equipment_class, effectiveManpower, currentTurn, hq_sid, true
       );

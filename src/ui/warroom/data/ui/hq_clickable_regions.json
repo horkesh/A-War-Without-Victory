@@ -1,129 +1,560 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "image_dimensions": {
-    "width": 2048,
-    "height": 1152
+    "width": 2752,
+    "height": 1536
   },
   "regions": [
     {
-      "id": "national_crest",
-      "type": "sprite_overlay",
+      "id": "red_telephone",
+      "type": "baked_prop",
       "bounds": {
-        "x": 936,
-        "y": 32,
-        "width": 164,
-        "height": 173
+        "x": 435,
+        "y": 948,
+        "width": 312,
+        "height": 200
       },
+      "polygon": [
+        [
+          521,
+          1130
+        ],
+        [
+          562,
+          1148
+        ],
+        [
+          735,
+          1118
+        ],
+        [
+          739,
+          1100
+        ],
+        [
+          735,
+          1067
+        ],
+        [
+          703,
+          1019
+        ],
+        [
+          739,
+          1025
+        ],
+        [
+          747,
+          1005
+        ],
+        [
+          739,
+          960
+        ],
+        [
+          683,
+          948
+        ],
+        [
+          630,
+          948
+        ],
+        [
+          550,
+          956
+        ],
+        [
+          489,
+          977
+        ],
+        [
+          439,
+          999
+        ],
+        [
+          435,
+          1023
+        ],
+        [
+          437,
+          1045
+        ],
+        [
+          445,
+          1061
+        ],
+        [
+          459,
+          1063
+        ],
+        [
+          485,
+          1057
+        ],
+        [
+          483,
+          1100
+        ]
+      ],
+      "action": "open_diplomacy",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Diplomacy",
+      "layer": "desk"
+    },
+    {
+      "id": "faction_flag",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 1090,
+        "y": 274,
+        "width": 563,
+        "height": 374
+      },
+      "polygon": [
+        [
+          1090,
+          278
+        ],
+        [
+          1094,
+          648
+        ],
+        [
+          1653,
+          644
+        ],
+        [
+          1651,
+          274
+        ]
+      ],
       "action": "open_faction_overview",
-      "hover_style": "red_outline",
+      "hover_style": "glow",
       "cursor": "pointer",
       "tooltip": "Faction Overview",
       "layer": "wall"
     },
     {
-      "id": "wall_map",
-      "type": "dynamic_render",
-      "bounds": {
-        "x": 607,
-        "y": 276,
-        "width": 822,
-        "height": 434
-      },
-      "action": "map_zoom_in",
-      "hover_style": "magnifying_glass_cursor",
-      "cursor": "zoom-in",
-      "tooltip": "Click to zoom",
-      "layer": "wall"
-    },
-    {
       "id": "wall_calendar",
-      "type": "dynamic_render",
-      "bounds": {
-        "x": 1633,
-        "y": 155,
-        "width": 249,
-        "height": 328
-      },
-      "action": "advance_turn",
-      "hover_style": "red_outline",
-      "cursor": "pointer",
-      "tooltip": "advance_turn",
-      "layer": "wall"
-    },
-    {
-      "id": "red_telephone",
       "type": "baked_prop",
       "bounds": {
-        "x": 102,
-        "y": 836,
-        "width": 380,
-        "height": 214
+        "x": 2075,
+        "y": 332,
+        "width": 181,
+        "height": 229
       },
-      "action": "open_diplomacy_panel",
-      "hover_style": "red_outline",
+      "polygon": [
+        [
+          2078,
+          335
+        ],
+        [
+          2075,
+          561
+        ],
+        [
+          2251,
+          559
+        ],
+        [
+          2256,
+          332
+        ]
+      ],
+      "action": "advance_turn",
+      "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Diplomacy (Phase II+)",
-      "disabled": true,
+      "tooltip": "Calendar",
+      "layer": "wall"
+    },
+    {
+      "id": "military_hat",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 325,
+        "y": 269,
+        "width": 145,
+        "height": 213
+      },
+      "polygon": [
+        [
+          408,
+          269
+        ],
+        [
+          436,
+          282
+        ],
+        [
+          462,
+          331
+        ],
+        [
+          467,
+          357
+        ],
+        [
+          467,
+          388
+        ],
+        [
+          470,
+          425
+        ],
+        [
+          460,
+          466
+        ],
+        [
+          434,
+          482
+        ],
+        [
+          397,
+          479
+        ],
+        [
+          366,
+          464
+        ],
+        [
+          356,
+          435
+        ],
+        [
+          330,
+          401
+        ],
+        [
+          325,
+          342
+        ],
+        [
+          327,
+          311
+        ],
+        [
+          346,
+          293
+        ],
+        [
+          366,
+          269
+        ]
+      ],
+      "action": "open_magazine_modal",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Military Intelligence",
+      "layer": "wall"
+    },
+    {
+      "id": "desk_map",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 936,
+        "y": 1106,
+        "width": 899,
+        "height": 267
+      },
+      "polygon": [
+        [
+          1032,
+          1111
+        ],
+        [
+          936,
+          1373
+        ],
+        [
+          1835,
+          1360
+        ],
+        [
+          1783,
+          1106
+        ]
+      ],
+      "action": "map_zoom_in",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "War Map",
       "layer": "desk"
     },
     {
       "id": "newspaper_current",
       "type": "baked_prop",
       "bounds": {
-        "x": 548,
-        "y": 891,
-        "width": 324,
-        "height": 165
+        "x": 195,
+        "y": 1127,
+        "width": 718,
+        "height": 305
       },
+      "polygon": [
+        [
+          747,
+          1127
+        ],
+        [
+          786,
+          1155
+        ],
+        [
+          809,
+          1158
+        ],
+        [
+          809,
+          1173
+        ],
+        [
+          869,
+          1202
+        ],
+        [
+          900,
+          1212
+        ],
+        [
+          913,
+          1230
+        ],
+        [
+          913,
+          1243
+        ],
+        [
+          801,
+          1277
+        ],
+        [
+          822,
+          1365
+        ],
+        [
+          747,
+          1378
+        ],
+        [
+          719,
+          1378
+        ],
+        [
+          716,
+          1391
+        ],
+        [
+          276,
+          1432
+        ],
+        [
+          268,
+          1414
+        ],
+        [
+          224,
+          1419
+        ],
+        [
+          198,
+          1414
+        ],
+        [
+          200,
+          1396
+        ],
+        [
+          219,
+          1388
+        ],
+        [
+          260,
+          1329
+        ],
+        [
+          195,
+          1246
+        ],
+        [
+          211,
+          1243
+        ],
+        [
+          206,
+          1222
+        ],
+        [
+          226,
+          1222
+        ],
+        [
+          351,
+          1210
+        ],
+        [
+          377,
+          1173
+        ],
+        [
+          395,
+          1171
+        ],
+        [
+          465,
+          1176
+        ],
+        [
+          568,
+          1166
+        ]
+      ],
       "action": "open_newspaper_modal",
-      "hover_style": "red_outline",
+      "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Today's Newspaper (T-1 events)",
-      "layer": "desk"
-    },
-    {
-      "id": "magazine",
-      "type": "baked_prop",
-      "bounds": {
-        "x": 950,
-        "y": 778,
-        "width": 202,
-        "height": 251
-      },
-      "action": "open_magazine_modal",
-      "hover_style": "red_outline",
-      "cursor": "pointer",
-      "tooltip": "Monthly Review",
+      "tooltip": "Newspapers",
       "layer": "desk"
     },
     {
       "id": "report_stack",
       "type": "baked_prop",
       "bounds": {
-        "x": 1211,
-        "y": 913,
-        "width": 316,
-        "height": 203
+        "x": 1799,
+        "y": 1184,
+        "width": 525,
+        "height": 279
       },
+      "polygon": [
+        [
+          2312,
+          1230
+        ],
+        [
+          2306,
+          1417
+        ],
+        [
+          2324,
+          1440
+        ],
+        [
+          2309,
+          1437
+        ],
+        [
+          2299,
+          1463
+        ],
+        [
+          2120,
+          1435
+        ],
+        [
+          2047,
+          1432
+        ],
+        [
+          1869,
+          1419
+        ],
+        [
+          1858,
+          1393
+        ],
+        [
+          1830,
+          1391
+        ],
+        [
+          1850,
+          1352
+        ],
+        [
+          1799,
+          1189
+        ],
+        [
+          1931,
+          1202
+        ],
+        [
+          1941,
+          1184
+        ],
+        [
+          2068,
+          1202
+        ],
+        [
+          2159,
+          1204
+        ],
+        [
+          2166,
+          1215
+        ]
+      ],
       "action": "open_reports_modal",
-      "hover_style": "red_outline",
+      "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Situation Reports",
+      "tooltip": "Reports",
       "layer": "desk"
     },
     {
       "id": "transistor_radio",
       "type": "baked_prop",
       "bounds": {
-        "x": 1539,
-        "y": 829,
-        "width": 304,
-        "height": 177
+        "x": 2008,
+        "y": 912,
+        "width": 327,
+        "height": 215
       },
+      "polygon": [
+        [
+          2014,
+          919
+        ],
+        [
+          2008,
+          1088
+        ],
+        [
+          2296,
+          1127
+        ],
+        [
+          2319,
+          1109
+        ],
+        [
+          2324,
+          1010
+        ],
+        [
+          2332,
+          1002
+        ],
+        [
+          2335,
+          982
+        ],
+        [
+          2322,
+          979
+        ],
+        [
+          2322,
+          943
+        ],
+        [
+          2042,
+          912
+        ]
+      ],
       "action": "transistor_radio",
-      "hover_style": "red_outline",
+      "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "International News Ticker",
+      "tooltip": "Radio",
       "layer": "desk"
     }
   ]

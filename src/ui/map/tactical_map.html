@@ -14,6 +14,7 @@
   <div id="map-root">
     <!-- Toolbar -->
     <div class="tm-toolbar">
+      <button type="button" class="tm-toolbar-btn tm-hq-btn" id="btn-back-to-hq" aria-label="Return to warroom HQ" style="display:none;">&#9664; HQ</button>
       <button type="button" class="tm-toolbar-btn" id="btn-main-menu" aria-label="Open main menu">Menu</button>
       <span class="tm-zoom-pill" id="zoom-pill" aria-live="polite">STRATEGIC</span>
       <button type="button" class="tm-toolbar-btn" id="zoom-out" aria-label="Zoom out">&minus;</button>
@@ -154,8 +155,10 @@
           </div>
           <button type="button" class="tm-panel-close" id="panel-close" aria-label="Close panel">&times;</button>
         </div>
-        <nav class="tm-panel-tabs" id="panel-tabs" role="tablist"></nav>
-        <div class="tm-panel-content" id="panel-content" role="tabpanel"></div>
+        <div class="tm-panel-body">
+          <nav class="tm-panel-tabs" id="panel-tabs" role="tablist"></nav>
+          <div class="tm-panel-content" id="panel-content" role="tabpanel"></div>
+        </div>
       </aside>
     </div>
 
@@ -173,6 +176,39 @@
       <button type="button" class="tm-load-state-btn" id="menu-close">Continue</button>
     </div>
   </div>
+  <script>
+    // When embedded as iframe inside the warroom, inherit the parent's awwv bridge
+    // before MapApp initializes (so wireUI finds it and pulls game state).
+    // Override focusWarroom to message the parent for scene-swap instead of IPC.
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('embedded') === '1' && window.parent && window.parent !== window) {
+        try {
+          var parentBridge = window.parent.awwv;
+          if (parentBridge) {
+            // Shallow copy so we can override focusWarroom without mutating parent
+            var proxy = {};
+            var keys = Object.keys(parentBridge);
+            for (var i = 0; i < keys.length; i++) {
+              proxy[keys[i]] = parentBridge[keys[i]];
+            }
+            // Override: scene-swap back to warroom instead of IPC window focus
+            proxy.focusWarroom = function() {
+              window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*');
+              return Promise.resolve({ ok: true });
+            };
+            window.awwv = proxy;
+          }
+        } catch (e) { /* cross-origin — ignored */ }
+      }
+    })();
+    // In Electron (or embedded with bridge), hide the main menu immediately to avoid a flash.
+    // MapApp.init() will re-show it if no game state arrives.
+    if (window.awwv && window.awwv.getCurrentGameState) {
+      var el = document.getElementById('main-menu-overlay');
+      if (el) { el.classList.remove('open'); el.setAttribute('aria-hidden', 'true'); }
+    }
+  </script>
 
   <div class="tm-modal-overlay" id="side-picker-overlay" aria-hidden="true" aria-label="Choose your side">
     <div class="tm-modal-card tm-side-picker-card">
@@ -189,6 +225,19 @@
             <div class="tm-scenario-title">April 1992 — Independence</div>
             <div class="tm-scenario-subtitle">Bosnia-Herzegovina declares independence. The JNA withdraws&mdash;leaving everything behind. Three armies emerge from the chaos. A war without victory begins.</div>
           </div>
+        </div>
+        <div class="tm-scenario-sep"></div>
+        <div class="tm-scenario-selector" role="group" aria-label="Scenario selection">
+          <label class="tm-scenario-option">
+            <input type="radio" name="side-picker-scenario" id="side-picker-scenario-sep1991" value="sep_1991">
+            <span class="tm-scenario-option-title">September 1991 (Phase 0)</span>
+            <span class="tm-scenario-option-desc">Pre-war setup, political escalation, and transition into war.</span>
+          </label>
+          <label class="tm-scenario-option">
+            <input type="radio" name="side-picker-scenario" id="side-picker-scenario-apr1992" value="apr_1992" checked>
+            <span class="tm-scenario-option-title">April 1992</span>
+            <span class="tm-scenario-option-desc">War begins with formations in play and immediate operational pressure.</span>
+          </label>
         </div>
         <div class="tm-scenario-sep"></div>
         <p class="tm-muted">Choose your side. Other factions are controlled by AI.</p>

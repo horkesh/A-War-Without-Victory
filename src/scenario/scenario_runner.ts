@@ -632,18 +632,22 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       const popPath = join(baseDir, 'data/derived/municipality_population_1991.json');
       const popRaw = JSON.parse(await readFile(popPath, 'utf8')) as {
         by_mun1990_id?: Record<string, { total: number; breakdown?: { bosniak: number; serb: number; croat: number; other: number } }>;
+        by_municipality_id?: Record<string, { total: number; breakdown?: { bosniak: number; serb: number; croat: number; other: number }; mun1990_id?: string }>;
       };
-      const byMun = popRaw.by_mun1990_id ?? {};
+      // Support both keying schemes: by_mun1990_id (kebab-case keys) or by_municipality_id (numeric keys with mun1990_id field)
+      const byMunDirect = popRaw.by_mun1990_id;
+      const byNumericId = popRaw.by_municipality_id;
       const flat: MunicipalityPopulation1991 = {};
-      for (const [munId, v] of Object.entries(byMun)) {
+      const addEntry = (munId: string, v: { total: number; breakdown?: { bosniak: number; serb: number; croat: number; other: number } }) => {
         const b = v?.breakdown;
-        flat[munId] = {
-          total: v?.total ?? 0,
-          bosniak: b?.bosniak ?? 0,
-          serb: b?.serb ?? 0,
-          croat: b?.croat ?? 0,
-          other: b?.other ?? 0
-        };
+        flat[munId] = { total: v?.total ?? 0, bosniak: b?.bosniak ?? 0, serb: b?.serb ?? 0, croat: b?.croat ?? 0, other: b?.other ?? 0 };
+      };
+      if (byMunDirect && Object.keys(byMunDirect).length > 0) {
+        for (const [munId, v] of Object.entries(byMunDirect)) addEntry(munId, v);
+      } else if (byNumericId) {
+        for (const [_numId, v] of Object.entries(byNumericId)) {
+          if (v?.mun1990_id) addEntry(v.mun1990_id, v);
+        }
       }
       municipalityPopulation1991 = flat;
     } catch {
@@ -837,10 +841,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       oobCreated = true;
     }
 
-    // Phase II entry: initialize brigade AoR and corps command (same as Phase I→II transition)
+    // Phase II entry: initialize corps command FIRST (reads formations only), then brigade AoR
+    // (corps_command must exist so ensureBrigadeMunicipalityAssignment takes the corps-directed path
+    // which includes enforceContiguity + enforceCorpsLevelContiguity)
     if (scenario.start_phase === 'phase_ii' && graph.edges.length > 0) {
-      initializeBrigadeAoR(state, graph.edges, graph.settlements);
       initializeCorpsCommand(state);
+      initializeBrigadeAoR(state, graph.edges, graph.settlements);
     }
     const historicalMetricsInitial = captureHistoricalFactionMetrics(state);
 

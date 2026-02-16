@@ -10,12 +10,13 @@
 
 | Need | Go to |
 |------|--------|
-| **What’s already implemented** | [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md) |
+| **What’s already implemented** | [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md) → [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) (single doc; originals archived to docs/_old/40_reports/implemented_2026_02_15/) |
 | **What’s not yet implemented (backlog)** | [CONSOLIDATED_BACKLOG.md](CONSOLIDATED_BACKLOG.md) |
 | **Lessons learned and patterns** | [CONSOLIDATED_LESSONS_LEARNED.md](CONSOLIDATED_LESSONS_LEARNED.md) |
 | **Cleanup plan and subfolder policy** | [ORCHESTRATOR_40_REPORTS_CLEANUP_AND_CONSOLIDATION_2026_02_13.md](ORCHESTRATOR_40_REPORTS_CLEANUP_AND_CONSOLIDATION_2026_02_13.md) |
-| **State-of-game and MVP audits** | [audit/](audit/) |
+| **State-of-game and MVP audits** | [audit/](audit/) — incl. [DOCUMENTED_UNIMPLEMENTED_SYSTEMS_AUDIT_2026_02_15.md](audit/DOCUMENTED_UNIMPLEMENTED_SYSTEMS_AUDIT_2026_02_15.md), [STRATEGIC_DESIGN_COUNCIL_AUDIT_2026_02_15.md](audit/STRATEGIC_DESIGN_COUNCIL_AUDIT_2026_02_15.md) (genre mirror, strategic honesty, UI critique). |
 | **GUI design advisor handover** | [handovers/GUI_DESIGN_ADVISOR_HANDOVER_2026_02_14.md](handovers/GUI_DESIGN_ADVISOR_HANDOVER_2026_02_14.md) — for expert design input before Phase 3/4. |
+| **Integration + systems handover (external expert)** | [handovers/INTEGRATION_AND_SYSTEMS_HANDOVER_EXTERNAL_EXPERT_2026_02_15.md](handovers/INTEGRATION_AND_SYSTEMS_HANDOVER_EXTERNAL_EXPERT_2026_02_15.md) — Warroom/Phase 0 + documented unimplemented systems; integration, interactions, instructions, risk flags. |
 
 ---
 
@@ -24,7 +25,7 @@
 | Subfolder | Contents |
 |-----------|----------|
 | **audit/** | State-of-game overview, MVP backlog, state matrix (evidence-backed). |
-| **implemented/** | Reports whose work is done and absorbed into code/canon. |
+| **implemented/** | New report 2026-02-16: [WARROOM_RESTYLE_SCENARIO_FIX_EMBEDDED_MAP_FOG_OF_WAR_2026_02_16.md](implemented/WARROOM_RESTYLE_SCENARIO_FIX_EMBEDDED_MAP_FOG_OF_WAR_2026_02_16.md). All content also in [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) §11. Pre-2026-02-16 originals archived to docs/_old/40_reports/implemented_2026_02_15/. |
 | **backlog/** | Plans, designs, research, and specs not yet implemented. |
 | **convenes/** | PARADOX convenes, state-of-game meetings, orchestrator reports. |
 | **handovers/** | Expert handovers, implementation handovers, clarification requests. |

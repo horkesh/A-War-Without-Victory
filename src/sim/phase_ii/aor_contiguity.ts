@@ -256,11 +256,7 @@ export function repairCorpsContiguity(
       break;
     }
 
-    if (targetBrigade) {
-      brigadeAor[sid] = targetBrigade;
-    } else {
-      brigadeAor[sid] = null; // no valid target — unassign
-    }
+    brigadeAor[sid] = targetBrigade ?? null;
     reassigned++;
   }
 

@@ -1,0 +1,14 @@
+{
+  "scenario_id": "sep_1991_phase0",
+  "start_phase": "phase_0",
+  "weeks": 32,
+  "init_control": "apr1992",
+  "init_control_mode": "institutional",
+  "init_formations": "apr1992",
+  "formation_spawn_directive": { "kind": "both" },
+  "turns": [],
+  "use_harness_bots": false,
+  "init_alliance_rbih_hrhb": 0.65,
+  "enable_rbih_hrhb_dynamics": true,
+  "recruitment_mode": "auto_oob"
+}

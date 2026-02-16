@@ -41,6 +41,10 @@ export function getMaxBrigadesPerMun(mun_id: MunicipalityId): number {
 /** Pool must reach this to spawn a new brigade; new brigade starts at this size (research: canFormBrigade ≥800). */
 export const MIN_BRIGADE_SPAWN = 800;
 
+/** Minimum manpower to spawn a mandatory (historical OOB) brigade — lower than MIN_BRIGADE_SPAWN
+ * because these formations definitely existed; pools will reinforce them over time. */
+export const MIN_MANDATORY_SPAWN = 200;
+
 /** Minimum personnel a formation can have during combat — below this the unit routes/dissolves rather than taking further casualties. Used as casualty floor instead of MIN_BRIGADE_SPAWN so defenders at 800 personnel can actually take losses. */
 export const MIN_COMBAT_PERSONNEL = 100;
 

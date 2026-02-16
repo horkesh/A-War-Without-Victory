@@ -10,8 +10,10 @@ import { test } from 'node:test';
 import {
   INVESTMENT_COST,
   isToAllowedForFaction,
+  isCoordinationEligibleFaction,
   applyInvestment,
   getInvestmentCost,
+  getInvestmentCostWithCoordination,
   getPrewarCapital,
   initializePrewarCapital,
   spendPrewarCapital
@@ -94,6 +96,20 @@ test('isToAllowedForFaction: only RBiH can use TO', () => {
   assert.strictEqual(isToAllowedForFaction('HRHB'), false);
 });
 
+test('coordination eligibility limited to RBiH and HRHB', () => {
+  assert.strictEqual(isCoordinationEligibleFaction('RBiH'), true);
+  assert.strictEqual(isCoordinationEligibleFaction('HRHB'), true);
+  assert.strictEqual(isCoordinationEligibleFaction('RS'), false);
+});
+
+test('getInvestmentCostWithCoordination applies 20% discount with deterministic rounding', () => {
+  assert.strictEqual(getInvestmentCostWithCoordination('party', { kind: 'municipality', mun_ids: ['M1'] }, true), 4);
+  assert.strictEqual(getInvestmentCostWithCoordination('police', { kind: 'municipality', mun_ids: ['M1'] }, true), 4);
+  assert.strictEqual(getInvestmentCostWithCoordination('to', { kind: 'municipality', mun_ids: ['M1'] }, true), 7);
+  assert.strictEqual(getInvestmentCostWithCoordination('paramilitary', { kind: 'region', mun_ids: ['A', 'B', 'C'] }, true), 24);
+  assert.strictEqual(getInvestmentCostWithCoordination('paramilitary', { kind: 'region', mun_ids: ['A', 'B', 'C'] }, false), 30);
+});
+
 test('applyInvestment Police deducts 5 and sets police_loyalty to loyal', () => {
   const state = minimalPhase0StateWithCapital();
   const result = applyInvestment(state, 'RS', 'police', { kind: 'municipality', mun_ids: ['MUN_A'] });
@@ -116,6 +132,20 @@ test('applyInvestment TO for RBiH deducts 8 and sets to_control to controlled', 
   assert.strictEqual(result.ok, true);
   assert.strictEqual((result as { spent: number }).spent, 8);
   assert.strictEqual(state.municipalities!['MUN_B'].organizational_penetration?.to_control, 'controlled');
+});
+
+test('applyInvestment coordinated discount is applied for eligible factions', () => {
+  const state = minimalPhase0StateWithCapital();
+  const result = applyInvestment(
+    state,
+    'HRHB',
+    'police',
+    { kind: 'municipality', mun_ids: ['MUN_COORD'] },
+    { coordinated: true }
+  );
+  assert.strictEqual(result.ok, true);
+  assert.strictEqual((result as { spent: number }).spent, 4);
+  assert.strictEqual(getPrewarCapital(state, 'HRHB'), 36);
 });
 
 test('applyInvestment Party updates sds_penetration for RS', () => {

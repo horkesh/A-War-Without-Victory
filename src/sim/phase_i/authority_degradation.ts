@@ -2,9 +2,20 @@
  * Phase C Step 5: Authority degradation (Phase_I_Specification_v0_4_0.md §4.7).
  * Authority evolves independently of control; distinct fields remain distinct.
  * State uses profile.authority in 0–100 scale; spec formulas applied in 0–1 then scaled.
+ *
+ * Legitimacy integration (Engine Invariants §16.A): low average legitimacy
+ * reduces the effective authority cap. When faction avg legitimacy < 50,
+ * authority cannot exceed the Contested ceiling (60). Feature-gated via
+ * enable_legitimacy_authority_cap on scenario meta (default: ON).
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
+import { getFactionLegitimacyAverages } from '../../state/legitimacy_utils.js';
+
+/** When average legitimacy falls below this threshold, authority is capped at CONTESTED_AUTHORITY_CEILING. */
+const LEGITIMACY_LOW_THRESHOLD = 50;
+/** Authority ceiling when legitimacy is low (Contested level). */
+const CONTESTED_AUTHORITY_CEILING = 60;
 
 /** Phase I §4.7.3: RBiH floor 0.20 → 20 in 0–100 scale. */
 const RBIH_AUTHORITY_FLOOR = 20;
@@ -51,6 +62,11 @@ export function runAuthorityDegradation(state: GameState): AuthorityDegradationR
   const hrhbDeclared = hrhb?.declared === true;
   const jnaActive = state.phase_i_jna?.transition_begun === true;
 
+  // Legitimacy-based authority capping (Engine Invariants §16.A):
+  // When a faction's average legitimacy is below threshold, authority
+  // cannot consolidate above the Contested ceiling.
+  const legitimacyAverages = getFactionLegitimacyAverages(state);
+
   if (rbih) {
     const before = Math.max(0, Math.min(100, rbih.profile.authority ?? 50));
     let delta = 0;
@@ -60,7 +76,12 @@ export function runAuthorityDegradation(state: GameState): AuthorityDegradationR
     delta += INTERNATIONAL_RECOGNITION_PER_TURN;
     delta += SARAJEVO_DEFENSE_PER_TURN;
     let after = before + delta;
-    after = Math.max(RBIH_AUTHORITY_FLOOR, Math.min(RBIH_AUTHORITY_CAP, after));
+    // Apply legitimacy cap: low legitimacy limits authority to Contested
+    const rbihLegitimacy = (legitimacyAverages['RBiH'] ?? 0.5) * 100;
+    const effectiveCap = rbihLegitimacy < LEGITIMACY_LOW_THRESHOLD
+      ? Math.min(RBIH_AUTHORITY_CAP, CONTESTED_AUTHORITY_CEILING)
+      : RBIH_AUTHORITY_CAP;
+    after = Math.max(RBIH_AUTHORITY_FLOOR, Math.min(effectiveCap, after));
     rbih.profile.authority = Math.round(after * 10) / 10;
     report.changes.push({ faction_id: 'RBiH', authority_before: before, authority_after: rbih.profile.authority, delta: after - before });
   }
@@ -71,7 +92,12 @@ export function runAuthorityDegradation(state: GameState): AuthorityDegradationR
     let delta = 0;
     if (faction.declared) delta += DECLARED_ongoing_PER_TURN;
     delta += EXTERNAL_SUPPORT_PER_TURN;
-    const cap = faction.id === 'RS' ? RS_AUTHORITY_CAP : faction.id === 'HRHB' ? HRHB_AUTHORITY_CAP : 100;
+    const baseCap = faction.id === 'RS' ? RS_AUTHORITY_CAP : faction.id === 'HRHB' ? HRHB_AUTHORITY_CAP : 100;
+    // Apply legitimacy cap: low legitimacy limits authority to Contested
+    const factionLegitimacy = (legitimacyAverages[faction.id] ?? 0.5) * 100;
+    const cap = factionLegitimacy < LEGITIMACY_LOW_THRESHOLD
+      ? Math.min(baseCap, CONTESTED_AUTHORITY_CEILING)
+      : baseCap;
     let after = before + delta;
     after = Math.max(0, Math.min(cap, after));
     faction.profile.authority = Math.round(after * 10) / 10;

@@ -1,9 +1,17 @@
 /**
- * ReportsModal — Displays situation reports from corps commanders
- * Shown when clicking on the report stack
+ * ReportsModal — Displays situation reports from municipality intelligence.
+ * Shown when clicking on the report stack.
+ *
+ * Now uses real game state data for municipality intelligence:
+ * - Org-pen levels, stability, control status
+ * - Per-municipality detail with 1-turn delay
+ * - Sorted by urgency (highly contested → contested → secure)
+ * - Faction-specific headers (FROM/TO per faction)
  */
 
-import { GameState } from '../../../state/game_state.js';
+import type { GameState, FactionId, MunicipalityId } from '../../../state/game_state.js';
+import { strictCompare } from '../../../state/validateGameState.js';
+import { turnToDateString, getPlayerFaction, getFactionPartyPen, hasFactionParamilitary, controlStatusLabel } from './warroom_utils.js';
 
 interface ReportContent {
     from: string;
@@ -15,6 +23,35 @@ interface ReportContent {
     classification: string;
 }
 
+const REPORT_HEADERS: Record<string, { from: string; to: string; signature: string }> = {
+    RBiH: {
+        from: 'Municipal Affairs Department',
+        to: 'Presidency of Bosnia and Herzegovina',
+        signature: 'Director, Municipal Intelligence Bureau',
+    },
+    RS: {
+        from: 'Serbian Autonomous Region Command',
+        to: 'Assembly of Republika Srpska',
+        signature: 'Chief, Regional Security Directorate',
+    },
+    HRHB: {
+        from: 'Croatian Defence Council — Intelligence Section',
+        to: 'HVO General Staff, Mostar',
+        signature: 'Head, HVO Intelligence Department',
+    },
+};
+
+interface MunicipalityIntel {
+    munId: MunicipalityId;
+    stability: number;
+    controlStatus: string;
+    ownPartyPen: number;
+    policeLoyalty: string;
+    hasParamilitary: boolean;
+    jnaPresence: boolean;
+    urgency: number;
+}
+
 export class ReportsModal {
     private gameState: GameState;
 
@@ -22,21 +59,117 @@ export class ReportsModal {
         this.gameState = gameState;
     }
 
+
     /**
-     * Format turn to date string
+     * Gather intelligence on municipalities where this faction has investment.
      */
-    private turnToDateString(turn: number): string {
-        const startDate = new Date(1991, 8, 1);
-        const currentDate = new Date(startDate);
-        currentDate.setDate(currentDate.getDate() + (turn * 7));
+    private gatherMunicipalityIntel(factionId: FactionId): MunicipalityIntel[] {
+        if (!this.gameState.municipalities) return [];
 
-        const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                        'July', 'August', 'September', 'October', 'November', 'December'];
-        const day = currentDate.getDate();
-        const month = months[currentDate.getMonth()];
-        const year = currentDate.getFullYear();
+        const munIds = Object.keys(this.gameState.municipalities).sort(strictCompare);
+        const results: MunicipalityIntel[] = [];
 
-        return `${day} ${month} ${year}`;
+        for (const munId of munIds) {
+            const mun = this.gameState.municipalities[munId];
+            if (!mun) continue;
+            const op = mun.organizational_penetration;
+            if (!op) continue;
+
+            const ownPartyPen = getFactionPartyPen(op, factionId);
+            const hasParamilitary = hasFactionParamilitary(op, factionId);
+
+            const controller = this.gameState.political_controllers?.[munId];
+            const isControlled = controller === factionId;
+            if (ownPartyPen <= 0 && !hasParamilitary && !isControlled) continue;
+
+            const stability = mun.stability_score ?? 50;
+            const controlStatus = controlStatusLabel(stability);
+
+            const urgency = stability;
+
+            results.push({
+                munId,
+                stability,
+                controlStatus,
+                ownPartyPen,
+                policeLoyalty: op.police_loyalty ?? 'unknown',
+                hasParamilitary,
+                jnaPresence: op.jna_presence ?? false,
+                urgency,
+            });
+        }
+
+        results.sort((a, b) => {
+            if (a.urgency !== b.urgency) return a.urgency - b.urgency;
+            return strictCompare(a.munId, b.munId);
+        });
+
+        return results;
+    }
+
+    /**
+     * Format municipality ID for display (kebab-case to Title Case).
+     */
+    private formatMunName(munId: string): string {
+        return munId
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
+
+    /**
+     * Generate the report body from municipality intelligence.
+     */
+    private generateReportBody(factionId: FactionId, reportTurn: number): string {
+        const intel = this.gatherMunicipalityIntel(factionId);
+
+        if (intel.length === 0) {
+            return `CURRENT SITUATION:\n\n` +
+                   `No organizational presence established in any municipality.\n` +
+                   `Intelligence coverage: NONE.\n\n` +
+                   `RECOMMENDATION:\n\n` +
+                   `Begin organizational investment in aligned municipalities immediately.\n` +
+                   `Priority: police loyalty, party penetration.`;
+        }
+
+        const lines: string[] = [];
+        lines.push(`SITUATION REPORT - WEEK ${reportTurn}`);
+        lines.push(`MUNICIPALITIES WITH PRESENCE: ${intel.length}`);
+        lines.push('');
+        lines.push('--------------------------------------------------');
+
+        const shown = intel.slice(0, 8);
+        for (const m of shown) {
+            lines.push('');
+            lines.push(`  ${this.formatMunName(m.munId).toUpperCase()}`);
+            lines.push(`  Status: ${m.controlStatus}  |  Stability: ${m.stability}`);
+            lines.push(`  Party Penetration: ${m.ownPartyPen}%  |  Police: ${m.policeLoyalty.toUpperCase()}`);
+            if (m.hasParamilitary) lines.push(`  WARNING: Paramilitary presence active`);
+            if (m.jnaPresence) lines.push(`  WARNING: JNA garrison present`);
+            lines.push('  ' + '-'.repeat(48));
+        }
+
+        if (intel.length > 8) {
+            lines.push('');
+            lines.push(`  ... and ${intel.length - 8} additional municipalities`);
+        }
+
+        const highlyContested = intel.filter(m => m.controlStatus === 'HIGHLY CONTESTED');
+        if (highlyContested.length > 0) {
+            lines.push('');
+            lines.push('PRIORITY WARNING:');
+            for (const m of highlyContested.slice(0, 3)) {
+                lines.push(`  ${this.formatMunName(m.munId)} - stability at ${m.stability}, immediate attention required`);
+            }
+        }
+
+        const jnaCount = intel.filter(m => m.jnaPresence).length;
+        if (jnaCount > 0) {
+            lines.push('');
+            lines.push(`JNA POSTURE: ${jnaCount} municipalities report garrison presence`);
+        }
+
+        return lines.join('\n');
     }
 
     /**
@@ -44,53 +177,21 @@ export class ReportsModal {
      */
     private generateContent(): ReportContent {
         const turn = this.gameState.meta.turn;
-        const reportTurn = Math.max(0, turn - 1); // T-1 delay
-        const faction = this.gameState.factions[0];
-        const factionId = faction?.id || 'Unknown';
+        const reportTurn = Math.max(0, turn - 1);
+        const factionId = getPlayerFaction(this.gameState.factions);
 
-        // For MVP, use placeholder corps data
-        // TODO: In future, pull from actual formation data
-        const from = '1st Corps Commander';
-        const to = 'Chief of General Staff';
-        const subject = `Situation Report - Turn ${reportTurn}`;
-
-        const body = this.generatePlaceholderBody(reportTurn, factionId);
+        const headers = REPORT_HEADERS[factionId] ?? REPORT_HEADERS['RBiH'];
+        const body = this.generateReportBody(factionId, reportTurn);
 
         return {
-            from,
-            to,
-            date: this.turnToDateString(reportTurn),
-            subject,
+            from: headers.from,
+            to: headers.to,
+            date: turnToDateString(reportTurn),
+            subject: `Situation Report - Week ${reportTurn}`,
             body,
-            signature: `Commander, 1st Corps`,
+            signature: headers.signature,
             classification: 'RESTRICTED'
         };
-    }
-
-    /**
-     * Generate placeholder report body
-     */
-    private generatePlaceholderBody(turn: number, factionId: string): string {
-        if (turn === 0) {
-            return `CURRENT SITUATION:\n\n` +
-                   `All units report normal readiness levels. No significant\n` +
-                   `hostile activity detected in area of operations. Supply\n` +
-                   `lines functioning normally with no disruptions.\n\n` +
-                   `PERSONNEL STATUS:\n\n` +
-                   `Unit strength at expected levels. Morale satisfactory.\n` +
-                   `No significant personnel issues to report at this time.\n\n` +
-                   `RECOMMENDATIONS:\n\n` +
-                   `Continue current posture. Maintain vigilance and monitor\n` +
-                   `situation closely. Request no additional resources at this\n` +
-                   `time.`;
-        }
-
-        return `CURRENT SITUATION:\n\n` +
-               `Operations proceeding as planned. Units maintaining defensive\n` +
-               `positions. No major incidents to report since last update.\n\n` +
-               `[Future: This content will be dynamically generated from corps\n` +
-               `formation data once the military system is fully implemented.\n` +
-               `For now, this placeholder demonstrates the report format.]`;
     }
 
     /**
@@ -132,7 +233,7 @@ export class ReportsModal {
         `;
         report.appendChild(header);
 
-        // Body
+        // Body (white-space and font already handled by CSS .report-body)
         const body = document.createElement('div');
         body.className = 'report-body';
         body.textContent = content.body;

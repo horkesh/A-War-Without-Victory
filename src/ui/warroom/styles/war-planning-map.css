@@ -19,23 +19,30 @@
     opacity: 1;
 }
 
-/* Map scene: map is sole content, full viewport; no backdrop */
+/* Map scene: full viewport with dark overlay background.
+   When inside #map-scene, the overlay is ALWAYS visible — scene div itself handles show/hide. */
 #map-scene .war-planning-map-overlay {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     z-index: 0;
+    background: #1a1816;
+    /* Override base hidden state — scene div controls visibility */
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
 }
 #map-scene .war-planning-map-backdrop {
     display: none;
 }
 #map-scene .war-planning-map-frame {
-    margin: 0;
-    max-width: 100%;
-    max-height: 100%;
-    flex: 1 1 auto;
-    border-radius: 0;
+    margin: 20px;
+    width: calc(100% - 40px);
+    height: calc(100% - 40px);
+    max-width: calc(100% - 40px);
+    max-height: calc(100% - 40px);
+    flex: 0 0 auto;
 }
 
 .war-planning-map-backdrop {
@@ -54,44 +61,13 @@
     max-width: calc(100vw - 48px);
     max-height: calc(100vh - 48px);
     margin: 24px;
-    background: #2a2520;
-    border: 3px solid #4a4238;
+    /* Frame image is set via JS (backgroundImage from Vite import).
+       The padding creates the inset for the cork border visible in the frame. */
+    padding: 5.5% 4.5%;
+    background-color: transparent;
+    border: none;
     border-radius: 4px;
-    box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 0 0 2px rgba(0, 0, 0, 0.3),
-        0 8px 32px rgba(0, 0, 0, 0.5);
-    /* Map-like corner marks (L-shaped) */
-    --corner-size: 24px;
-    --corner-stroke: 3px;
-}
-
-.war-planning-map-frame::before,
-.war-planning-map-frame::after {
-    content: '';
-    position: absolute;
-    width: var(--corner-size);
-    height: var(--corner-size);
-    border-color: #6a6258;
-    border-style: solid;
-    border-width: 0;
-    pointer-events: none;
-}
-
-.war-planning-map-frame::before {
-    top: 0;
-    left: 0;
-    border-top-width: var(--corner-stroke);
-    border-left-width: var(--corner-stroke);
-    border-top-left-radius: 2px;
-}
-
-.war-planning-map-frame::after {
-    top: 0;
-    right: 0;
-    border-top-width: var(--corner-stroke);
-    border-right-width: var(--corner-stroke);
-    border-top-right-radius: 2px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
 }
 
 .war-planning-map-area {
@@ -101,6 +77,8 @@
     min-height: 300px;
     background: #e8dec2;
     cursor: pointer;
+    border-radius: 2px;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.15);
 }
 
 .war-planning-map-area canvas {
@@ -498,4 +476,591 @@
     border: 1px solid #555;
     cursor: not-allowed;
     opacity: 0.7;
+}
+
+/* Header tabs with active state */
+.settlement-info-tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 4px;
+}
+
+.settlement-info-tab {
+    flex: 1;
+    padding: 4px 6px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #8a8278;
+    background: rgba(40, 38, 35, 0.9);
+    border: 1px solid #3a3830;
+    cursor: pointer;
+    text-align: center;
+}
+
+.settlement-info-tab.active {
+    color: #e0d8cc;
+    background: rgba(60, 58, 52, 0.95);
+    border-bottom-color: #c4b8a8;
+}
+
+.settlement-info-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.settlement-info-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #e0d8cc;
+}
+
+/* ============================================ */
+/* Investment Panel (Phase 0 INVEST layer)      */
+/* ============================================ */
+
+.investment-panel-wrapper {
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: width 200ms ease-out;
+}
+
+.investment-panel-wrapper.closed {
+    width: 0;
+}
+
+.investment-panel-wrapper.open {
+    width: 360px;
+}
+
+.investment-panel {
+    width: 360px;
+    flex-shrink: 0;
+    position: relative;
+    padding: 14px;
+    background: rgb(30, 30, 26);
+    border-left: 3px solid #2d6a4f;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-family: Arial, sans-serif;
+    max-height: calc(100vh - 100px);
+}
+
+/* Capital header */
+.investment-panel-capital {
+    padding: 10px;
+    background: rgba(40, 38, 35, 0.95);
+    border: 1px solid #3a3830;
+    border-radius: 4px;
+}
+
+.investment-panel-capital-label {
+    font-size: 10px;
+    font-weight: bold;
+    color: #c4b8a8;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+}
+
+.investment-panel-capital-bar-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(60, 58, 52, 0.8);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.investment-panel-capital-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.investment-panel-capital-text {
+    font-size: 13px;
+    color: #e0d8cc;
+    text-align: center;
+}
+
+.investment-panel-staged-cost {
+    color: #d4a017;
+    font-size: 12px;
+}
+
+/* Instructions (no mun selected) */
+.investment-panel-instructions {
+    padding: 20px 12px;
+    text-align: center;
+}
+
+.investment-panel-instructions-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #c4b8a8;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+}
+
+.investment-panel-instructions-body {
+    font-size: 13px;
+    color: #8a8278;
+    line-height: 1.6;
+}
+
+/* Municipality header */
+.investment-panel-mun-header {
+    padding-bottom: 8px;
+    border-bottom: 1px solid #3a3830;
+}
+
+.investment-panel-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.investment-panel-mun-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #e0d8cc;
+}
+
+.investment-panel-close {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 20px;
+    line-height: 1;
+    color: #ddd;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #555;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.investment-panel-close:hover {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.investment-panel-meta {
+    font-size: 12px;
+    color: #c4b8a8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.investment-panel-controller-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border: 1px solid rgba(0,0,0,0.3);
+}
+
+.investment-panel-meta-sep {
+    color: #6a6258;
+}
+
+.investment-panel-ethnicity-note {
+    font-size: 11px;
+    color: #8a8278;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+/* Section headers */
+.investment-panel-section-header {
+    font-size: 10px;
+    font-weight: bold;
+    color: #c4b8a8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+}
+
+/* Organizational factors */
+.investment-panel-org {
+    padding: 8px 0;
+}
+
+.investment-panel-org-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.investment-panel-org-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.investment-panel-org-label {
+    font-size: 11px;
+    color: #c4b8a8;
+}
+
+.investment-panel-org-bar-container {
+    width: 100%;
+    height: 6px;
+    background: rgba(60, 58, 52, 0.8);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.investment-panel-org-bar {
+    height: 100%;
+    background: #2d6a4f;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.investment-panel-org-value {
+    font-size: 11px;
+    color: #e0d8cc;
+    text-align: right;
+}
+
+/* Investment options */
+.investment-panel-options {
+    padding: 8px 0;
+}
+
+.investment-panel-option {
+    padding: 8px;
+    margin-bottom: 6px;
+    background: rgba(40, 38, 35, 0.9);
+    border: 1px solid #3a3830;
+    border-radius: 4px;
+    transition: border-color 0.15s;
+}
+
+.investment-panel-option:hover:not(.disabled) {
+    border-color: #2d6a4f;
+}
+
+.investment-panel-option.disabled {
+    opacity: 0.5;
+}
+
+.investment-panel-option-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.investment-panel-option-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+}
+
+.investment-panel-option-text {
+    flex: 1;
+}
+
+.investment-panel-option-name {
+    font-size: 13px;
+    font-weight: bold;
+    color: #e0d8cc;
+}
+
+.investment-panel-option-desc {
+    font-size: 11px;
+    color: #8a8278;
+    margin-top: 2px;
+}
+
+.investment-panel-option-cost {
+    font-size: 14px;
+    font-weight: bold;
+    color: #d4a017;
+    flex-shrink: 0;
+}
+
+.investment-panel-invest-btn {
+    display: block;
+    width: 100%;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #e0d8cc;
+    background: #2d6a4f;
+    border: 1px solid #3a8a5f;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.investment-panel-invest-btn:hover {
+    background: #357a5f;
+}
+
+.investment-panel-option-reason {
+    font-size: 11px;
+    color: #8a6258;
+    font-style: italic;
+    padding: 2px 0;
+}
+
+.investment-panel-coordination {
+    padding: 8px;
+    background: rgba(40, 38, 35, 0.9);
+    border: 1px solid #3a3830;
+    border-radius: 4px;
+}
+
+.investment-panel-coordination-label {
+    color: #d7ccb9;
+    font-size: 12px;
+}
+
+.investment-panel-coordination-checkbox {
+    margin-right: 6px;
+}
+
+.investment-panel-coordination-note {
+    color: #9cb79d;
+    font-size: 11px;
+}
+
+/* Staged investments summary */
+.investment-panel-staged {
+    padding: 8px;
+    background: rgba(40, 38, 35, 0.9);
+    border: 1px solid #3a3830;
+    border-radius: 4px;
+}
+
+.investment-panel-staged-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.investment-panel-staged-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 6px;
+    background: rgba(50, 48, 42, 0.8);
+    border-radius: 2px;
+    font-size: 12px;
+    color: #e0d8cc;
+}
+
+.investment-panel-staged-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.investment-panel-undo-btn {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    font-size: 12px;
+    line-height: 1;
+    color: #c0392b;
+    background: none;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: 6px;
+}
+
+.investment-panel-undo-btn:hover {
+    color: #e74c3c;
+}
+
+/* INVEST layer checkbox active highlight */
+.war-planning-map-layer-row.invest-active {
+    color: #2d6a4f;
+    font-weight: bold;
+}
+
+/* ============================================ */
+/* Phase 0 Preparation Map (separate component) */
+/* ============================================ */
+
+.phase0-prep-map-root {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: row;
+    background: #1f1c19;
+}
+
+.phase0-prep-map-root.phase0-prep-map-visible {
+    display: flex;
+}
+
+.phase0-prep-map-area {
+    position: relative;
+    flex: 1 1 auto;
+    margin: 16px;
+    border: 1px solid #6f5f4d;
+    background: #e7dbc2;
+    box-shadow: inset 0 0 12px rgba(43, 35, 28, 0.22);
+}
+
+.phase0-prep-map-area canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.phase0-prep-map-title {
+    position: absolute;
+    top: 10px;
+    left: 16px;
+    font-family: 'IBM Plex Mono', 'Consolas', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #3e3328;
+    background: rgba(231, 219, 194, 0.92);
+    border: 1px solid rgba(79, 66, 52, 0.5);
+    padding: 5px 10px;
+}
+
+.phase0-prep-map-turn {
+    position: absolute;
+    top: 42px;
+    left: 16px;
+    font-size: 11px;
+    color: #4f4233;
+    background: rgba(231, 219, 194, 0.9);
+    border: 1px solid rgba(79, 66, 52, 0.45);
+    padding: 4px 8px;
+}
+
+.phase0-prep-map-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(68, 56, 43, 0.7);
+    border-radius: 2px;
+    background: rgba(231, 219, 194, 0.9);
+    color: #3f3429;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.phase0-prep-map-close:hover {
+    background: rgba(221, 205, 175, 0.96);
+}
+
+.phase0-prep-map-layer-panel {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    width: 210px;
+    background: rgba(47, 40, 33, 0.92);
+    border: 1px solid #6e5b48;
+    border-radius: 2px;
+    padding: 8px 10px;
+}
+
+.phase0-prep-map-layer-title {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #d6c7ae;
+    margin-bottom: 6px;
+}
+
+.phase0-prep-map-layer-row {
+    display: block;
+    color: #e4d7c1;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.phase0-prep-map-layer-row input {
+    margin-right: 6px;
+}
+
+.phase0-prep-map-legend {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    background: rgba(47, 40, 33, 0.9);
+    border: 1px solid #6e5b48;
+    padding: 8px 10px;
+    color: #e4d7c1;
+    font-size: 11px;
+}
+
+.phase0-prep-map-legend-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+}
+
+.phase0-prep-map-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.28);
+}
+
+.phase0-prep-map-target-marker {
+    display: inline-block;
+    width: 14px;
+    height: 3px;
+    background: #e6bc60;
+}
+
+.phase0-prep-map-investment-wrapper {
+    width: 360px;
+    border-left: 1px solid #5a4c3d;
+    background: #231f1a;
+}
+
+.phase0-prep-map-tooltip {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 30;
+    max-width: 260px;
+    pointer-events: none;
+    background: rgba(47, 40, 33, 0.95);
+    border: 1px solid #6e5b48;
+    border-radius: 2px;
+    padding: 7px 9px;
+    color: #eadfcf;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+}
+
+.phase0-prep-map-tooltip-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #f1e8d9;
+    margin-bottom: 3px;
+}
+
+.phase0-prep-map-tooltip-body {
+    font-size: 11px;
+    line-height: 1.25;
+    color: #d8c7b0;
 }

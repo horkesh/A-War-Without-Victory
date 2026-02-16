@@ -18,6 +18,7 @@ import type { CompetenceId } from './competences.js';
 export type AcceptanceConstraint =
   | { type: 'require_bundle'; competences: CompetenceId[]; reason: 'competence_bundle_incomplete' }
   | { type: 'require_brcko_resolution'; reason: 'brcko_unresolved' }
+  | { type: 'require_sarajevo_resolution'; reason: 'sarajevo_unresolved' }
   | { type: 'forbid_competence'; faction: string; competence: CompetenceId; reason: 'competence_forbidden_to_faction' }
   | { type: 'forbid_holder'; competence: CompetenceId; holder: string; reason: 'competence_forbidden_holder' };
 
@@ -32,6 +33,7 @@ export const ACCEPTANCE_CONSTRAINTS: AcceptanceConstraint[] = [
   { type: 'require_bundle', competences: ['customs', 'indirect_taxation'], reason: 'competence_bundle_incomplete' },
   { type: 'require_bundle', competences: ['defence_policy', 'armed_forces_command'], reason: 'competence_bundle_incomplete' },
   { type: 'require_brcko_resolution', reason: 'brcko_unresolved' },
+  { type: 'require_sarajevo_resolution', reason: 'sarajevo_unresolved' },
   { type: 'forbid_competence', faction: 'RS', competence: 'currency_authority', reason: 'competence_forbidden_to_faction' },
   { type: 'forbid_competence', faction: 'RS', competence: 'airspace_control', reason: 'competence_forbidden_to_faction' },
   { type: 'forbid_holder', competence: 'international_representation', holder: 'RS', reason: 'competence_forbidden_holder' }
@@ -40,6 +42,7 @@ export const ACCEPTANCE_CONSTRAINTS: AcceptanceConstraint[] = [
 export type RejectionReason =
   | 'competence_bundle_incomplete'
   | 'brcko_unresolved'
+  | 'sarajevo_unresolved'
   | 'competence_forbidden_to_faction'
   | 'competence_forbidden_holder';
 
@@ -51,10 +54,12 @@ export interface RejectionDetails {
   holder?: string;
 }
 
-/** Phase 13B.1: Context passed when applying constraints. Used for require_brcko_resolution. */
+/** Phase 13B.1: Context passed when applying constraints. Used for require_brcko_resolution and require_sarajevo_resolution. */
 export interface AcceptanceConstraintContext {
   would_trigger_peace: boolean;
   has_brcko_resolution: boolean;
+  /** True when the treaty includes provisions for Sarajevo governance (shared or joint control). */
+  has_sarajevo_resolution?: boolean;
 }
 
 export interface ConstraintCheckResult {
@@ -135,6 +140,16 @@ export function applyAcceptanceConstraints(
           violated: true,
           rejection_reason: 'brcko_unresolved',
           rejection_details: { constraint_type: 'require_brcko_resolution' }
+        };
+      }
+    }
+
+    if (c.type === 'require_sarajevo_resolution') {
+      if (context?.would_trigger_peace === true && context?.has_sarajevo_resolution === false) {
+        return {
+          violated: true,
+          rejection_reason: 'sarajevo_unresolved',
+          rejection_details: { constraint_type: 'require_sarajevo_resolution' }
         };
       }
     }

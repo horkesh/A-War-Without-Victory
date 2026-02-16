@@ -103,6 +103,7 @@ export class MapApp {
     stagePostureOrder?: (brigadeId: string, posture: string) => Promise<{ ok: boolean; error?: string }>;
     stageMoveOrder?: (brigadeId: string, targetMunicipalityId: string) => Promise<{ ok: boolean; error?: string }>;
     clearOrders?: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
+    stageCorpsStanceOrder?: (corpsId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
   } | null {
     return (window as unknown as {
       awwv?: {
@@ -110,6 +111,7 @@ export class MapApp {
         stagePostureOrder?: (brigadeId: string, posture: string) => Promise<{ ok: boolean; error?: string }>;
         stageMoveOrder?: (brigadeId: string, targetMunicipalityId: string) => Promise<{ ok: boolean; error?: string }>;
         clearOrders?: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
+        stageCorpsStanceOrder?: (corpsId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
       };
     }).awwv ?? null;
   }
@@ -170,6 +172,7 @@ export class MapApp {
   }
 
   private static readonly CREST_ASSETS_BASE = '/assets/sources/crests/';
+  private static readonly CAMPAIGN_SCENARIO_STORAGE_KEY = 'awwv.desktop.newCampaign.scenarioKey';
 
   /** Crest filename by faction: RBiH → ARBiH, RS → VRS, HRHB → HVO (assets/sources/crests). */
   private static getCrestFilename(faction: string): string {
@@ -274,6 +277,7 @@ export class MapApp {
     // 5. Formation markers
     if (rc.layers.formations && this.state.snapshot.loadedGameState) {
       this.drawFormations(rc);
+      this.drawCorpsSubordinateLines(rc);
       this.drawOrderArrows(rc);
     }
 
@@ -703,24 +707,34 @@ export class MapApp {
     const ih = h * 0.4;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
 
-    if (shape === 'xx') {
-      // NATO XX symbol for corps: two crossed lines
+    if (shape === 'xxx') {
+      // NATO XXX symbol for army-level HQ: three crossed lines
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
       ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(symbolCenterX - iw * 0.35, sy - ih * 0.6);
-      ctx.lineTo(symbolCenterX + iw * 0.35, sy + ih * 0.6);
-      ctx.moveTo(symbolCenterX + iw * 0.35, sy - ih * 0.6);
-      ctx.lineTo(symbolCenterX - iw * 0.35, sy + ih * 0.6);
-      ctx.stroke();
-      // Second X offset right
-      const xOff = iw * 0.4;
-      ctx.beginPath();
-      ctx.moveTo(symbolCenterX - iw * 0.35 + xOff, sy - ih * 0.6);
-      ctx.lineTo(symbolCenterX + iw * 0.35 + xOff, sy + ih * 0.6);
-      ctx.moveTo(symbolCenterX + iw * 0.35 + xOff, sy - ih * 0.6);
-      ctx.lineTo(symbolCenterX - iw * 0.35 + xOff, sy + ih * 0.6);
-      ctx.stroke();
+      const xSpacing = iw * 0.35;
+      for (let xi = -1; xi <= 1; xi++) {
+        const cx = symbolCenterX + xi * xSpacing;
+        ctx.beginPath();
+        ctx.moveTo(cx - iw * 0.22, sy - ih * 0.55);
+        ctx.lineTo(cx + iw * 0.22, sy + ih * 0.55);
+        ctx.moveTo(cx + iw * 0.22, sy - ih * 0.55);
+        ctx.lineTo(cx - iw * 0.22, sy + ih * 0.55);
+        ctx.stroke();
+      }
+    } else if (shape === 'xx') {
+      // NATO XX symbol for corps: two crossed lines (same loop pattern as xxx)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.lineWidth = 2;
+      const xSpacingXX = iw * 0.4;
+      for (let xi = 0; xi <= 1; xi++) {
+        const cx = symbolCenterX + xi * xSpacingXX;
+        ctx.beginPath();
+        ctx.moveTo(cx - iw * 0.35, sy - ih * 0.6);
+        ctx.lineTo(cx + iw * 0.35, sy + ih * 0.6);
+        ctx.moveTo(cx + iw * 0.35, sy - ih * 0.6);
+        ctx.lineTo(cx - iw * 0.35, sy + ih * 0.6);
+        ctx.stroke();
+      }
     } else if (shape === 'diamond') {
       ctx.beginPath();
       ctx.moveTo(symbolCenterX, sy - ih);
@@ -754,17 +768,26 @@ export class MapApp {
     }
   }
 
-  private drawFormations(rc: RenderContext): void {
-    const gs = this.state.snapshot.loadedGameState;
-    if (!gs) return;
+  /** Gap in pixels between co-located formation markers. */
+  private static readonly MARKER_STACK_GAP = 3;
 
-    const { ctx } = rc;
-    const dim = FORMATION_MARKER_SIZE[rc.zoomLevel];
+  /**
+   * Build position groups for visible formations: formations sharing an HQ settlement
+   * are grouped so they can be offset horizontally when drawn.
+   */
+  private buildFormationPositionGroups(
+    rc: RenderContext
+  ): Map<string, Array<{ f: FormationView; sx: number; sy: number }>> {
+    const gs = this.state.snapshot.loadedGameState;
+    if (!gs) return new Map();
+
+    const playerFaction = gs.player_faction ?? null;
     const zoomFilter = ZOOM_FORMATION_FILTER[rc.zoomLevel] ?? null;
     const formations = [...gs.formations].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    const groups = new Map<string, Array<{ f: FormationView; sx: number; sy: number }>>();
 
     for (const f of formations) {
-      // At strategic zoom, show only corps; at operational/tactical, show all
+      if (playerFaction && f.faction !== playerFaction) continue;
       if (zoomFilter && !zoomFilter.has(f.kind)) continue;
       const pos = this.getFormationPosition(f);
       if (!pos) continue;
@@ -774,10 +797,75 @@ export class MapApp {
       )) continue;
 
       const [sx, sy] = rc.project(pos[0], pos[1]);
-      const color = SIDE_SOLID_COLORS[f.faction] ?? SIDE_SOLID_COLORS['null'];
-      const shape = FORMATION_KIND_SHAPES[f.kind] ?? 'square';
-      this.drawNatoFormationMarker(ctx, sx, sy, dim.w, dim.h, shape, color, f.faction, f.posture);
+      // Quantize to 2px grid to group co-located formations
+      const key = `${Math.round(sx / 2) * 2},${Math.round(sy / 2) * 2}`;
+      const group = groups.get(key) ?? [];
+      group.push({ f, sx, sy });
+      groups.set(key, group);
     }
+
+    return groups;
+  }
+
+  private drawFormations(rc: RenderContext): void {
+    const gs = this.state.snapshot.loadedGameState;
+    if (!gs) return;
+
+    const { ctx } = rc;
+    const dim = FORMATION_MARKER_SIZE[rc.zoomLevel];
+    const gap = MapApp.MARKER_STACK_GAP;
+    const groups = this.buildFormationPositionGroups(rc);
+
+    for (const group of groups.values()) {
+      const count = group.length;
+      for (let i = 0; i < count; i++) {
+        const { f, sx, sy } = group[i];
+        const offsetY = count > 1 ? (i - (count - 1) / 2) * (dim.h + gap) : 0;
+        const color = SIDE_SOLID_COLORS[f.faction] ?? SIDE_SOLID_COLORS['null'];
+        const shape = FORMATION_KIND_SHAPES[f.kind] ?? 'square';
+        this.drawNatoFormationMarker(ctx, sx, sy + offsetY, dim.w, dim.h, shape, color, f.faction, f.posture);
+      }
+    }
+  }
+
+  /** When a corps or army HQ is selected, draw dashed command lines to each subordinate HQ. */
+  private drawCorpsSubordinateLines(rc: RenderContext): void {
+    const gs = this.state.snapshot.loadedGameState;
+    const selectedId = this.state.snapshot.selectedFormationId;
+    if (!gs || !selectedId) return;
+
+    const byId = new Map(gs.formations.map(f => [f.id, f] as const));
+    const corps = byId.get(selectedId);
+    if (!corps || (corps.kind !== 'corps' && corps.kind !== 'corps_asset' && corps.kind !== 'army_hq')) return;
+
+    const subIds = corps.subordinateIds ?? [];
+    if (subIds.length === 0) return;
+
+    const corpsPos = this.getFormationPosition(corps);
+    if (!corpsPos) return;
+    const [cx, cy] = rc.project(corpsPos[0], corpsPos[1]);
+
+    const { ctx } = rc;
+    ctx.save();
+    ctx.strokeStyle = '#ffffff';
+    ctx.globalAlpha = 0.60;
+    ctx.setLineDash([6, 4]);
+    ctx.lineWidth = 2;
+
+    for (const subId of subIds) {
+      const sub = byId.get(subId);
+      if (!sub) continue;
+      const subPos = this.getFormationPosition(sub);
+      if (!subPos) continue;
+      const [sx, sy] = rc.project(subPos[0], subPos[1]);
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(sx, sy);
+      ctx.stroke();
+    }
+
+    ctx.restore();
   }
 
   private getSettlementCentroidFromSid(sid: string): [number, number] | null {
@@ -789,6 +877,7 @@ export class MapApp {
   private drawOrderArrows(rc: RenderContext): void {
     const gs = this.state.snapshot.loadedGameState;
     if (!gs) return;
+    const playerFaction = gs.player_faction ?? null;
     const byId = new Map(gs.formations.map((f) => [f.id, f] as const));
     const { ctx } = rc;
     ctx.save();
@@ -802,6 +891,7 @@ export class MapApp {
     for (const order of gs.attackOrders) {
       const formation = byId.get(order.brigadeId);
       if (!formation) continue;
+      if (playerFaction && formation.faction !== playerFaction) continue;
       const from = this.getFormationPosition(formation);
       const to = this.getSettlementCentroidFromSid(order.targetSettlementId);
       if (!from || !to) continue;
@@ -817,6 +907,7 @@ export class MapApp {
     for (const order of gs.movementOrders) {
       const formation = byId.get(order.brigadeId);
       if (!formation || !formation.faction) continue;
+      if (playerFaction && formation.faction !== playerFaction) continue;
       const from = this.getFormationPosition(formation);
       const to = this.data.municipalityCentroids.get(order.targetMunicipalityId);
       if (!from || !to) continue;
@@ -898,16 +989,19 @@ export class MapApp {
     const gs = this.state.snapshot.loadedGameState;
     if (!gs || !this.state.snapshot.layers.formations) return null;
     const rc = this.getRenderContext();
-    const zoomFilter = ZOOM_FORMATION_FILTER[rc.zoomLevel] ?? null;
-    const formations = [...gs.formations].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-    for (const f of formations) {
-      if (zoomFilter && !zoomFilter.has(f.kind)) continue;
-      const pos = this.getFormationPosition(f);
-      if (!pos) continue;
-      const [sx, sy] = rc.project(pos[0], pos[1]);
-      const dx = canvasX - sx;
-      const dy = canvasY - sy;
-      if (dx * dx + dy * dy <= FORMATION_HIT_RADIUS * FORMATION_HIT_RADIUS) return f;
+    const dim = FORMATION_MARKER_SIZE[rc.zoomLevel];
+    const gap = MapApp.MARKER_STACK_GAP;
+    const groups = this.buildFormationPositionGroups(rc);
+
+    for (const group of groups.values()) {
+      const count = group.length;
+      for (let i = 0; i < count; i++) {
+        const { f, sx, sy } = group[i];
+        const offsetY = count > 1 ? (i - (count - 1) / 2) * (dim.h + gap) : 0;
+        const dx = canvasX - sx;
+        const dy = canvasY - (sy + offsetY);
+        if (dx * dx + dy * dy <= FORMATION_HIT_RADIUS * FORMATION_HIT_RADIUS) return f;
+      }
     }
     return null;
   }
@@ -966,12 +1060,23 @@ export class MapApp {
     const formation = gs.formations.find((f) => f.id === formationId);
     if (!formation) return;
 
-    // Corps: merge all subordinate brigades' AoRs into one unified highlight
+    // Collect AoR settlement IDs based on hierarchy level:
+    //   army_hq → corps → brigades; corps → brigades; brigade → direct lookup
     let aorSids: string[];
-    if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
+    if (formation.kind === 'army_hq' || formation.kind === 'corps' || formation.kind === 'corps_asset') {
+      // Collect leaf-brigade IDs: for army_hq go through corps first, for corps use subordinateIds directly
+      const brigadeIds: string[] = [];
+      if (formation.kind === 'army_hq') {
+        for (const corpsId of formation.subordinateIds ?? []) {
+          const corpsF = gs.formations.find(f => f.id === corpsId);
+          if (corpsF) brigadeIds.push(...(corpsF.subordinateIds ?? []));
+        }
+      } else {
+        brigadeIds.push(...(formation.subordinateIds ?? []));
+      }
       const merged = new Set<string>();
-      for (const subId of formation.subordinateIds ?? []) {
-        const subAor = gs.brigadeAorByFormationId[subId];
+      for (const bId of brigadeIds) {
+        const subAor = gs.brigadeAorByFormationId[bId];
         if (subAor) for (const sid of subAor) merged.add(sid);
       }
       aorSids = [...merged].sort();
@@ -989,14 +1094,19 @@ export class MapApp {
 
     ctx.save();
 
-    // 1. Compound fill: single path for all AoR settlement polygons
+    // Breathing animation: compute intensity once for both fill and glow
+    const t = (performance.now() % AOR_HIGHLIGHT.glowCycleMs) / AOR_HIGHLIGHT.glowCycleMs;
+    const glowIntensity = 0.5 + 0.5 * Math.sin(t * Math.PI * 2);
+
+    // 1. Compound fill: single path for all AoR settlement polygons (pulsing alpha)
+    const fillAlpha = AOR_HIGHLIGHT.fillAlphaMin + (AOR_HIGHLIGHT.fillAlphaMax - AOR_HIGHLIGHT.fillAlphaMin) * glowIntensity;
     ctx.beginPath();
     for (const sid of aorSids) {
       const feature = this.getSettlementFeatureBySid(sid);
       if (!feature) continue;
       this.addPolygonSubpath(ctx, feature, rc.project);
     }
-    ctx.fillStyle = this.hexToRgba(factionColor, AOR_HIGHLIGHT.fillAlpha);
+    ctx.fillStyle = this.hexToRgba(factionColor, fillAlpha);
     ctx.fill('evenodd');
 
     // 2. Compute outer boundary (cached)
@@ -1016,8 +1126,6 @@ export class MapApp {
     }
 
     // 3. Draw outer boundary with breathing glow
-    const t = (performance.now() % AOR_HIGHLIGHT.glowCycleMs) / AOR_HIGHLIGHT.glowCycleMs;
-    const glowIntensity = 0.5 + 0.5 * Math.sin(t * Math.PI * 2);
     const glowBlur = AOR_HIGHLIGHT.glowBlurMin + (AOR_HIGHLIGHT.glowBlurMax - AOR_HIGHLIGHT.glowBlurMin) * glowIntensity;
 
     ctx.beginPath();
@@ -1902,13 +2010,22 @@ export class MapApp {
 
     const awwvDesktop = (window as unknown as {
       awwv?: {
-        startNewCampaign?: (p: { playerFaction: string }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
+        startNewCampaign?: (p: { playerFaction: string; scenarioKey?: 'sep_1991' | 'apr_1992' }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
         loadScenarioDialog?: () => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
         loadStateDialog?: () => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
         advanceTurn?: () => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
         setGameStateUpdatedCallback?: (cb: (stateJson: string) => void) => void;
+        getCurrentGameState?: () => Promise<string | null>;
+        focusWarroom?: () => Promise<{ ok: boolean; error?: string }>;
       };
     }).awwv;
+
+    // "Back to HQ" button — only visible in Electron where the warroom window exists
+    const hqBtn = document.getElementById('btn-back-to-hq');
+    if (hqBtn && awwvDesktop?.focusWarroom) {
+      hqBtn.style.display = '';
+      hqBtn.addEventListener('click', () => { awwvDesktop.focusWarroom!(); });
+    }
 
     // In browser mode (no desktop API), relabel "New Campaign" → "Load Scenario"
     if (!awwvDesktop?.startNewCampaign) {
@@ -1918,7 +2035,11 @@ export class MapApp {
 
     document.getElementById('menu-new-campaign')?.addEventListener('click', () => {
       this.showOverlay('main-menu-overlay', false);
-      if (awwvDesktop?.startNewCampaign) {
+      if (awwvDesktop?.focusWarroom) {
+        // Desktop mode: redirect to warroom window which has the polished side picker
+        awwvDesktop.focusWarroom().catch((err) => console.warn('focus-warroom failed:', err));
+      } else if (awwvDesktop?.startNewCampaign) {
+        // Fallback: show local side picker if focusWarroom not available
         const errEl = document.getElementById('side-picker-error');
         if (errEl) {
           errEl.textContent = '';
@@ -1928,13 +2049,52 @@ export class MapApp {
           const el = document.getElementById(`side-picker-flag-${faction}`) as HTMLImageElement | null;
           if (el) el.src = this.getFlagUrl(faction);
         }
-        // Load scenario briefing image
         const scenarioImg = document.getElementById('scenario-briefing-image') as HTMLImageElement | null;
-        if (scenarioImg) {
-          scenarioImg.src = '/assets/sources/scenarios/apr1992_briefing.png';
-          scenarioImg.style.display = '';
-          scenarioImg.onerror = () => { scenarioImg.style.display = 'none'; };
+        const scenarioTitleEl = document.querySelector('.tm-scenario-title') as HTMLElement | null;
+        const scenarioSubtitleEl = document.querySelector('.tm-scenario-subtitle') as HTMLElement | null;
+        const updateScenarioBriefing = (scenarioKey: 'sep_1991' | 'apr_1992') => {
+          if (scenarioTitleEl && scenarioSubtitleEl) {
+            if (scenarioKey === 'sep_1991') {
+              scenarioTitleEl.textContent = 'September 1991 — Pre-War';
+              scenarioSubtitleEl.textContent = 'The conflict has not fully ignited. Build influence, manage escalation, and prepare your side before open war begins.';
+            } else {
+              scenarioTitleEl.textContent = 'April 1992 — Independence';
+              scenarioSubtitleEl.textContent = 'Bosnia-Herzegovina declares independence. The JNA withdraws—leaving everything behind. Three armies emerge from the chaos. A war without victory begins.';
+            }
+          }
+          if (scenarioImg) {
+            const src = scenarioKey === 'sep_1991'
+              ? '/assets/sources/scenarios/sep1991_briefing.png'
+              : '/assets/sources/scenarios/apr1992_briefing.png';
+            scenarioImg.src = src;
+            scenarioImg.style.display = '';
+            scenarioImg.onerror = () => { scenarioImg.style.display = 'none'; };
+          }
+        };
+        const sepScenario = document.getElementById('side-picker-scenario-sep1991') as HTMLInputElement | null;
+        const aprScenario = document.getElementById('side-picker-scenario-apr1992') as HTMLInputElement | null;
+        const persistedScenario = this.getPersistedCampaignScenarioKey();
+        if (sepScenario && aprScenario) {
+          sepScenario.checked = persistedScenario === 'sep_1991';
+          aprScenario.checked = persistedScenario === 'apr_1992';
+        } else if (aprScenario) {
+          aprScenario.checked = true;
         }
+        if (sepScenario) {
+          sepScenario.onchange = () => {
+            if (!sepScenario.checked) return;
+            this.persistCampaignScenarioKey('sep_1991');
+            updateScenarioBriefing('sep_1991');
+          };
+        }
+        if (aprScenario) {
+          aprScenario.onchange = () => {
+            if (!aprScenario.checked) return;
+            this.persistCampaignScenarioKey('apr_1992');
+            updateScenarioBriefing('apr_1992');
+          };
+        }
+        updateScenarioBriefing(persistedScenario);
         this.showOverlay('side-picker-overlay', true);
       } else {
         document.getElementById('btn-load-scenario')?.dispatchEvent(new Event('click'));
@@ -1944,9 +2104,12 @@ export class MapApp {
     for (const faction of FACTION_DISPLAY_ORDER) {
       document.getElementById(`side-picker-${faction}`)?.addEventListener('click', async () => {
         if (!awwvDesktop?.startNewCampaign) return;
+        const selectedScenario = (document.querySelector('input[name="side-picker-scenario"]:checked') as HTMLInputElement | null)?.value;
+        const scenarioKey = selectedScenario === 'sep_1991' ? 'sep_1991' : 'apr_1992';
+        this.persistCampaignScenarioKey(scenarioKey);
         let r: { ok: boolean; error?: string; stateJson?: string } | undefined;
         try {
-          r = await awwvDesktop.startNewCampaign({ playerFaction: faction });
+          r = await awwvDesktop.startNewCampaign({ playerFaction: faction, scenarioKey });
         } catch (err) {
           this.showSidePickerError(String(err));
           return;
@@ -2257,6 +2420,17 @@ export class MapApp {
     // Play myself (desktop): Load scenario, Load state file, Advance turn
     if (awwvDesktop?.loadScenarioDialog && awwvDesktop?.setGameStateUpdatedCallback) {
       awwvDesktop.setGameStateUpdatedCallback((stateJson: string) => this.applyGameStateFromJson(stateJson));
+      // Pull current state immediately (covers race where did-finish-load fires before callback is registered)
+      if (awwvDesktop.getCurrentGameState) {
+        awwvDesktop.getCurrentGameState().then((stateJson) => {
+          if (stateJson && !this.state.snapshot.loadedGameState) {
+            this.applyGameStateFromJson(stateJson);
+          } else if (!stateJson && !this.state.snapshot.loadedGameState) {
+            // No active game — show the main menu so the user can start/load one
+            this.showOverlay('main-menu-overlay', true);
+          }
+        }).catch(() => { this.showOverlay('main-menu-overlay', true); });
+      }
       const playSep = document.getElementById('play-myself-sep');
       const playRow = document.getElementById('play-myself-row');
       if (playSep) playSep.style.display = '';
@@ -2312,7 +2486,12 @@ export class MapApp {
     if (turnDisplay) turnDisplay.textContent = 'Turn 0 — Sep 1991';
     this.setReplayStatus('Replay: not loaded');
     this.updateReplayScrubber();
-    this.showOverlay('main-menu-overlay', true);
+    // In Electron, the menu is hidden by the inline script and state arrives
+    // asynchronously via getCurrentGameState. Only force the menu open in
+    // browser mode where the user must act manually.
+    if (!awwvDesktop?.getCurrentGameState) {
+      this.showOverlay('main-menu-overlay', true);
+    }
 
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
@@ -2765,11 +2944,91 @@ export class MapApp {
     const contentEl = document.getElementById('panel-content')!;
     tabsEl.innerHTML = '';
 
-    if (f.kind === 'corps' || f.kind === 'corps_asset') {
+    if (f.kind === 'army_hq') {
+      this.renderArmyHqPanel(f, gs, contentEl);
+    } else if (f.kind === 'corps' || f.kind === 'corps_asset') {
       this.renderCorpsPanel(f, gs, contentEl);
     } else {
       this.renderBrigadePanel(f, gs, contentEl);
     }
+  }
+
+  /** Render army HQ detail panel: lists subordinate corps with click-through. */
+  private renderArmyHqPanel(f: FormationView, gs: LoadedGameState, contentEl: HTMLElement): void {
+    const subtitleParts = ['army hq', SIDE_LABELS[f.faction] ?? f.faction];
+    document.getElementById('panel-subtitle')!.textContent = subtitleParts.join(' — ');
+
+    const crestUrl = this.getCrestUrl(f.faction);
+
+    // Subordinates are corps of the same faction
+    const subIds = f.subordinateIds ?? [];
+    const subordinates = subIds
+      .map(id => gs.formations.find(sub => sub.id === id))
+      .filter((s): s is FormationView => s != null);
+
+    // Total personnel across all corps (summing brigades under each corps)
+    let totalPersonnel = 0;
+    let totalBrigades = 0;
+    for (const corps of subordinates) {
+      const corpsBrigadeIds = corps.subordinateIds ?? [];
+      for (const bId of corpsBrigadeIds) {
+        const brig = gs.formations.find(b => b.id === bId);
+        if (brig) {
+          totalPersonnel += brig.personnel ?? 0;
+          totalBrigades++;
+        }
+      }
+    }
+
+    let html = `<div class="tm-brigade-crest-wrap"><img class="tm-brigade-crest" src="${this.escapeHtml(crestUrl)}" alt="" /></div>`;
+
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">ARMY COMMAND</div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">ID</span><span class="tm-panel-field-value">${this.escapeHtml(f.id)}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Faction</span><span class="tm-panel-field-value">${this.escapeHtml(SIDE_LABELS[f.faction] ?? f.faction)}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Status</span><span class="tm-panel-field-value">${this.escapeHtml(f.status)}</span></div>
+    </div>`;
+
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">STRENGTH</div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Subordinate corps</span><span class="tm-panel-field-value">${subordinates.length}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Total brigades</span><span class="tm-panel-field-value">${totalBrigades}</span></div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Total personnel</span><span class="tm-panel-field-value">${totalPersonnel.toLocaleString()}</span></div>
+    </div>`;
+
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">SUBORDINATE CORPS</div>`;
+    if (subordinates.length === 0) {
+      html += `<div class="tm-panel-placeholder">No subordinate corps</div>`;
+    } else {
+      for (const sub of subordinates) {
+        const subCrest = this.getCrestUrl(sub.faction);
+        const subBrigadeCount = (sub.subordinateIds ?? []).length;
+        const subPers = (sub.subordinateIds ?? []).reduce((sum, bId) => {
+          const brig = gs.formations.find(b => b.id === bId);
+          return sum + (brig?.personnel ?? 0);
+        }, 0);
+        const stanceStr = sub.corpsStance ? ` · ${sub.corpsStance}` : '';
+        html += `<div class="tm-formation-row" data-formation-id="${this.escapeHtml(sub.id)}" style="cursor:pointer">
+          <img class="tm-formation-crest" src="${this.escapeHtml(subCrest)}" alt="" />
+          <span class="tm-formation-name">${this.escapeHtml(sub.name)}</span>
+          <span class="tm-formation-kind" style="opacity:0.6;font-size:10px">${subBrigadeCount} bde | ${subPers.toLocaleString()} pers${stanceStr}</span>
+        </div>`;
+      }
+    }
+    html += `</div>`;
+
+    contentEl.innerHTML = html;
+
+    // Wire subordinate clicks → open that corps panel
+    contentEl.querySelectorAll('.tm-formation-row[data-formation-id]').forEach(row => {
+      row.addEventListener('click', () => {
+        const fid = (row as HTMLElement).dataset.formationId;
+        if (!fid) return;
+        const sub = gs.formations.find(s => s.id === fid);
+        if (sub) {
+          this.state.setSelectedFormation(fid);
+          this.openBrigadePanel(sub);
+        }
+      });
+    });
   }
 
   /** Render corps detail panel: command info, stance, exhaustion, subordinate OOB. */
@@ -2838,7 +3097,67 @@ export class MapApp {
     }
     html += `</div>`;
 
+    // Corps actions: stance dropdown + bulk subordinate posture
+    const stanceOptions = ['defensive', 'balanced', 'offensive', 'reorganize'];
+    const currentStance = f.corpsStance ?? 'balanced';
+    const stanceOpts = stanceOptions.map(s =>
+      `<option value="${this.escapeHtml(s)}"${s === currentStance ? ' selected' : ''}>${this.escapeHtml(s.charAt(0).toUpperCase() + s.slice(1))}</option>`
+    ).join('');
+
+    const postureOptions = ['defend', 'probe', 'attack', 'elastic_defense', 'consolidation'];
+    const postureOpts = postureOptions.map(p =>
+      `<option value="${this.escapeHtml(p)}">${this.escapeHtml(p === 'elastic_defense' ? 'Elastic Defense' : p.charAt(0).toUpperCase() + p.slice(1))}</option>`
+    ).join('');
+
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">ACTIONS</div>
+      <div class="tm-panel-field">
+        <span class="tm-panel-field-label">Corps Stance</span>
+        <select id="corps-stance-select" class="tm-select" style="font-size:11px;padding:2px 4px;background:#1a2236;color:#c8e6c9;border:1px solid rgba(200,230,201,0.3);border-radius:3px">${stanceOpts}</select>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:#90a4ae;text-transform:uppercase;letter-spacing:0.05em">Set all subordinates</div>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+        <select id="corps-bulk-posture-select" class="tm-select" style="font-size:11px;padding:2px 4px;background:#1a2236;color:#c8e6c9;border:1px solid rgba(200,230,201,0.3);border-radius:3px;flex:1">${postureOpts}</select>
+        <button type="button" class="tm-toolbar-btn" id="corps-apply-posture-btn" title="Apply posture to all subordinate brigades">Apply</button>
+      </div>
+    </div>`;
+
     contentEl.innerHTML = html;
+
+    // Wire corps stance dropdown
+    const stanceSelect = contentEl.querySelector('#corps-stance-select') as HTMLSelectElement | null;
+    if (stanceSelect) {
+      stanceSelect.addEventListener('change', () => {
+        const newStance = stanceSelect.value;
+        const bridge = this.getDesktopBridge();
+        if (bridge?.stageCorpsStanceOrder) {
+          bridge.stageCorpsStanceOrder(f.id, newStance).then((r: { ok: boolean; error?: string }) => {
+            if (r.ok) this.showStatusError(`Corps stance staged: ${f.name} → ${newStance}. Advance turn to execute.`);
+            else this.showStatusError(`Corps stance failed: ${r.error ?? 'unknown'}`);
+          }).catch((err: unknown) => this.showStatusError(`Corps stance failed: ${err}`));
+        } else {
+          this.showStatusError(`Corps stance staged: ${f.name} → ${newStance}. (No desktop bridge)`);
+        }
+      });
+    }
+
+    // Wire bulk posture apply button
+    const applyBtn = contentEl.querySelector('#corps-apply-posture-btn') as HTMLElement | null;
+    const bulkPostureSelect = contentEl.querySelector('#corps-bulk-posture-select') as HTMLSelectElement | null;
+    if (applyBtn && bulkPostureSelect) {
+      applyBtn.addEventListener('click', () => {
+        const posture = bulkPostureSelect.value;
+        const bridge = this.getDesktopBridge();
+        let staged = 0;
+        for (const subId of subIds) {
+          if (bridge?.stagePostureOrder) {
+            bridge.stagePostureOrder(subId, posture).then((r: { ok: boolean }) => {
+              if (r.ok) staged++;
+            }).catch(() => {});
+          }
+        }
+        this.showStatusError(`Posture ${posture} staged for ${subIds.length} subordinates of ${f.name}.`);
+      });
+    }
 
     // Wire subordinate clicks → open that brigade's panel
     contentEl.querySelectorAll('.tm-formation-row[data-formation-id]').forEach(row => {
@@ -3203,7 +3522,8 @@ export class MapApp {
     // Resolve municipality (municipality_id or mun1990_id) so formations/pools match by mun1990_id
     const { mun1990Id } = this.resolveMunicipalityFromFeature(feature);
 
-    const formations = gs.formations.filter(f => f.municipalityId === mun1990Id);
+    const pf = gs.player_faction;
+    const formations = gs.formations.filter(f => f.municipalityId === mun1990Id && (!pf || f.faction === pf));
 
     let html = `<div class="tm-panel-section"><div class="tm-panel-section-header">FORMATIONS (${formations.length})</div>`;
     if (formations.length === 0) {
@@ -3227,8 +3547,8 @@ export class MapApp {
     }
     html += `</div>`;
 
-    // Militia pool
-    const pool = gs.militiaPools.find(p => p.munId === mun1990Id);
+    // Militia pool (player faction only when set)
+    const pool = gs.militiaPools.find(p => p.munId === mun1990Id && (!pf || p.faction === pf));
     if (pool) {
       const total = pool.available + pool.committed + pool.exhausted;
       const aPct = total > 0 ? (pool.available / total * 100) : 0;
@@ -3254,8 +3574,12 @@ export class MapApp {
     if (!gs) {
       return `<div class="tm-panel-section"><div class="tm-panel-section-header">ORDERS</div><div class="tm-panel-placeholder">Load a game state to inspect orders.</div></div>`;
     }
-    const attack = gs.attackOrders.filter((o) => o.targetSettlementId === sid);
+    const pf = gs.player_faction;
+    const brigadeToFaction = pf ? new Map(gs.formations.map(f => [f.id, f.faction] as const)) : null;
+    const isOwn = (brigadeId: string) => !pf || brigadeToFaction?.get(brigadeId) === pf;
+    const attack = gs.attackOrders.filter((o) => o.targetSettlementId === sid && isOwn(o.brigadeId));
     const movement = gs.movementOrders.filter((o) => {
+      if (!isOwn(o.brigadeId)) return false;
       const feature = this.getSettlementFeatureBySid(sid);
       if (!feature) return false;
       const { mun1990Id } = this.resolveMunicipalityFromFeature(feature);
@@ -3327,7 +3651,11 @@ export class MapApp {
   private updateWarStatusSection(gs: LoadedGameState): void {
     const container = document.getElementById('war-status-content');
     if (!container) return;
-    const totalsByFaction = new Map<string, number>();
+
+    const pf = gs.player_faction;
+    const visibleFactions = pf ? [pf] : FACTION_DISPLAY_ORDER;
+    const ownFormations = pf ? gs.formations.filter(f => f.faction === pf) : gs.formations;
+
     const countsByFaction = new Map<string, number>();
     const allSids = Object.keys(this.activeControlLookup).sort();
     for (const sid of allSids) {
@@ -3335,31 +3663,33 @@ export class MapApp {
       if (!c) continue;
       countsByFaction.set(c, (countsByFaction.get(c) ?? 0) + 1);
     }
-    for (const f of gs.formations) {
-      totalsByFaction.set(f.faction, (totalsByFaction.get(f.faction) ?? 0) + (f.personnel ?? 0));
-    }
     const totalSettlements = Math.max(1, allSids.length);
+
     let html = `<div class="tm-panel-section"><div class="tm-panel-section-header">WAR STATUS</div>`;
-    for (const faction of FACTION_DISPLAY_ORDER) {
+    for (const faction of visibleFactions) {
       const count = countsByFaction.get(faction) ?? 0;
       const pct = ((count / totalSettlements) * 100).toFixed(1);
-      const personnel = totalsByFaction.get(faction) ?? 0;
+      const personnel = ownFormations.filter(f => f.faction === faction).reduce((s, f) => s + (f.personnel ?? 0), 0);
       html += `<div class="tm-panel-field"><span class="tm-panel-field-label">${this.escapeHtml(SIDE_LABELS[faction] ?? faction)}</span><span class="tm-panel-field-value">${pct}% | ${personnel.toLocaleString()} pers</span></div>`;
     }
     const flipsThisTurn = gs.recentControlEvents.filter((e) => e.turn === gs.turn).length;
-    const pendingOrders = gs.attackOrders.length + gs.movementOrders.length;
-    const overextended = gs.formations.filter((f) => f.readiness === 'overextended').length;
-    const lowCohesion = gs.formations.filter((f) => f.cohesion < 40).length;
+    const ownAttackOrders = pf ? gs.attackOrders.filter(o => ownFormations.some(f => f.id === o.brigadeId)) : gs.attackOrders;
+    const ownMoveOrders = pf ? gs.movementOrders.filter(o => ownFormations.some(f => f.id === o.brigadeId)) : gs.movementOrders;
+    const pendingOrders = ownAttackOrders.length + ownMoveOrders.length;
     html += `<div class="tm-panel-field"><span class="tm-panel-field-label">Flips this turn</span><span class="tm-panel-field-value">${flipsThisTurn}</span></div>`;
     html += `<div class="tm-panel-field"><span class="tm-panel-field-label">Pending orders</span><span class="tm-panel-field-value">${pendingOrders}</span></div>`;
     html += `</div>`;
-    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">FACTION OVERVIEW</div>`;
-    for (const faction of FACTION_DISPLAY_ORDER) {
-      const formations = gs.formations.filter((f) => f.faction === faction);
+
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">FORCE OVERVIEW</div>`;
+    for (const faction of visibleFactions) {
+      const formations = ownFormations.filter((f) => f.faction === faction);
       const avgCohesion = formations.length === 0 ? 0 : Math.round(formations.reduce((s, f) => s + f.cohesion, 0) / formations.length);
       html += `<div class="tm-panel-field"><span class="tm-panel-field-label">${this.escapeHtml(SIDE_LABELS[faction] ?? faction)}</span><span class="tm-panel-field-value">${formations.length} brigades | coh ${avgCohesion}%</span></div>`;
     }
     html += `</div>`;
+
+    const overextended = ownFormations.filter((f) => f.readiness === 'overextended').length;
+    const lowCohesion = ownFormations.filter((f) => f.cohesion < 40).length;
     html += `<div class="tm-panel-section"><div class="tm-panel-section-header">ALERTS</div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">Overextended brigades</span><span class="tm-panel-field-value">${overextended}</span></div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">Low cohesion (&lt;40)</span><span class="tm-panel-field-value">${lowCohesion}</span></div>
@@ -3390,6 +3720,9 @@ export class MapApp {
     const content = document.getElementById('oob-content');
     if (!content) return;
 
+    const pf = gs.player_faction;
+    const visibleFactions = pf ? [pf] : FACTION_DISPLAY_ORDER;
+
     // Group by faction
     const byFaction = new Map<string, typeof gs.formations>();
     for (const f of gs.formations) {
@@ -3399,7 +3732,7 @@ export class MapApp {
     }
 
     let html = '';
-    for (const faction of FACTION_DISPLAY_ORDER) {
+    for (const faction of visibleFactions) {
       const formations = byFaction.get(faction) ?? [];
       if (formations.length === 0) continue;
       const fColor = SIDE_SOLID_COLORS[faction] ?? '#888';
@@ -3433,13 +3766,14 @@ export class MapApp {
       html += `</div></div>`;
     }
 
-    // Militia pool summary
-    if (gs.militiaPools.length > 0) {
-      const totalAvail = gs.militiaPools.reduce((s, p) => s + p.available, 0);
-      const totalCommit = gs.militiaPools.reduce((s, p) => s + p.committed, 0);
-      const totalExhaust = gs.militiaPools.reduce((s, p) => s + p.exhausted, 0);
+    // Militia pool summary (player faction only when set)
+    const pools = pf ? gs.militiaPools.filter(p => p.faction === pf) : gs.militiaPools;
+    if (pools.length > 0) {
+      const totalAvail = pools.reduce((s, p) => s + p.available, 0);
+      const totalCommit = pools.reduce((s, p) => s + p.committed, 0);
+      const totalExhaust = pools.reduce((s, p) => s + p.exhausted, 0);
       html += `<div class="tm-panel-section" style="margin-top:12px">
-        <div class="tm-panel-section-header">MILITIA POOLS (ALL)</div>
+        <div class="tm-panel-section-header">MILITIA POOLS</div>
         <div class="tm-panel-field"><span class="tm-panel-field-label">Available</span><span class="tm-panel-field-value">${totalAvail.toLocaleString()}</span></div>
         <div class="tm-panel-field"><span class="tm-panel-field-label">Committed</span><span class="tm-panel-field-value">${totalCommit.toLocaleString()}</span></div>
         <div class="tm-panel-field"><span class="tm-panel-field-label">Exhausted</span><span class="tm-panel-field-value">${totalExhaust.toLocaleString()}</span></div>
@@ -3478,12 +3812,15 @@ export class MapApp {
       el.style.display = 'none';
       return;
     }
+    const pf = gs.player_faction;
+    const visibleFactions = pf ? [pf] : FACTION_DISPLAY_ORDER;
     const byFaction: Record<string, number> = {};
     for (const f of gs.formations) {
+      if (pf && f.faction !== pf) continue;
       const fac = f.faction || '';
       byFaction[fac] = (byFaction[fac] ?? 0) + (f.personnel ?? 0);
     }
-    const parts = FACTION_DISPLAY_ORDER
+    const parts = visibleFactions
       .filter((f) => (byFaction[f] ?? 0) > 0)
       .map((f) => `${SIDE_LABELS[f] ?? f} ${(byFaction[f] ?? 0).toLocaleString()}`);
     el.textContent = parts.length > 0 ? `Army: ${parts.join(' | ')}` : '';
@@ -3500,7 +3837,9 @@ export class MapApp {
       el.style.display = 'none';
       return;
     }
-    const parts = FACTION_DISPLAY_ORDER
+    const pf = gs?.player_faction;
+    const visibleFactions = pf ? [pf] : FACTION_DISPLAY_ORDER;
+    const parts = visibleFactions
       .filter((f) => rec[f] !== undefined)
       .map((f) => `${SIDE_LABELS[f] ?? f} ${Math.round(rec[f] ?? 0)}`);
     el.textContent = parts.length > 0 ? `Capital: ${parts.join(' | ')}` : '';
@@ -3712,26 +4051,101 @@ export class MapApp {
       this.showOverlay('aar-modal', true);
       return;
     }
+
+    const pf = gs.player_faction;
+    const visibleFactions = pf ? [pf] : FACTION_DISPLAY_ORDER;
+
+    // Build per-faction stats (player faction only when set)
     const byFaction = new Map<string, { pers: number; count: number }>();
     for (const f of gs.formations) {
+      if (f.kind === 'army_hq') continue; // skip army HQs from brigade counts
+      if (pf && f.faction !== pf) continue;
       const rec = byFaction.get(f.faction) ?? { pers: 0, count: 0 };
       rec.pers += f.personnel ?? 0;
       rec.count += 1;
       byFaction.set(f.faction, rec);
     }
-    let html = `<div class="tm-panel-section"><div class="tm-panel-section-header">WAR SUMMARY (TURN ${gs.turn})</div>`;
-    for (const faction of FACTION_DISPLAY_ORDER) {
-      const rec = byFaction.get(faction) ?? { pers: 0, count: 0 };
-      html += `<div class="tm-panel-field"><span class="tm-panel-field-label">${this.escapeHtml(SIDE_LABELS[faction] ?? faction)}</span><span class="tm-panel-field-value">${rec.count} brigades | ${rec.pers.toLocaleString()} pers</span></div>`;
+
+    // Build brigade→faction lookup for orders
+    const brigadeToFaction = new Map<string, string>();
+    for (const f of gs.formations) {
+      brigadeToFaction.set(f.id, f.faction);
     }
-    html += `</div><div class="tm-panel-section"><div class="tm-panel-section-header">CONTROL EVENTS</div>`;
-    if (gs.recentControlEvents.length === 0 && gs.turn > 0) {
-      html += `<div class="tm-panel-placeholder">Control events are recorded during turn execution. Load a replay to see the full history.</div>`;
-    } else {
-      html += `<div class="tm-panel-field"><span class="tm-panel-field-label">Total recorded</span><span class="tm-panel-field-value">${gs.recentControlEvents.length}</span></div>
-      <div class="tm-panel-field"><span class="tm-panel-field-label">This turn</span><span class="tm-panel-field-value">${gs.recentControlEvents.filter((e) => e.turn === gs.turn).length}</span></div>`;
+
+    // Per-faction attack/movement order counts (player faction only)
+    const attacksByFaction = new Map<string, number>();
+    for (const o of gs.attackOrders) {
+      const faction = brigadeToFaction.get(o.brigadeId) ?? 'unknown';
+      if (pf && faction !== pf) continue;
+      attacksByFaction.set(faction, (attacksByFaction.get(faction) ?? 0) + 1);
+    }
+    const movesByFaction = new Map<string, number>();
+    for (const o of gs.movementOrders) {
+      const faction = brigadeToFaction.get(o.brigadeId) ?? 'unknown';
+      if (pf && faction !== pf) continue;
+      movesByFaction.set(faction, (movesByFaction.get(faction) ?? 0) + 1);
+    }
+
+    // Control changes this turn (visible to all — map shows control colors)
+    const thisTurnEvents = gs.recentControlEvents.filter(e => e.turn === gs.turn);
+    const gainedByFaction = new Map<string, number>();
+    const lostByFaction = new Map<string, number>();
+    for (const e of thisTurnEvents) {
+      if (e.to) gainedByFaction.set(e.to, (gainedByFaction.get(e.to) ?? 0) + 1);
+      if (e.from) lostByFaction.set(e.from, (lostByFaction.get(e.from) ?? 0) + 1);
+    }
+
+    let html = `<div class="tm-panel-section"><div class="tm-panel-section-header">WAR SUMMARY — TURN ${gs.turn}</div>`;
+
+    // Per-faction force summary (player faction only)
+    for (const faction of visibleFactions) {
+      const rec = byFaction.get(faction) ?? { pers: 0, count: 0 };
+      const attacks = attacksByFaction.get(faction) ?? 0;
+      const moves = movesByFaction.get(faction) ?? 0;
+      const gained = gainedByFaction.get(faction) ?? 0;
+      const lost = lostByFaction.get(faction) ?? 0;
+      const fLabel = this.escapeHtml(SIDE_LABELS[faction] ?? faction);
+      html += `<div style="margin:6px 0 2px 0;font-size:11px;font-weight:600;color:${SIDE_SOLID_COLORS[faction] ?? '#888'}">${fLabel}</div>`;
+      html += `<div class="tm-panel-field"><span class="tm-panel-field-label">Formations</span><span class="tm-panel-field-value">${rec.count} | ${rec.pers.toLocaleString()} pers</span></div>`;
+      if (attacks > 0 || moves > 0) {
+        html += `<div class="tm-panel-field"><span class="tm-panel-field-label">Orders</span><span class="tm-panel-field-value">${attacks} attack · ${moves} move</span></div>`;
+      }
+      if (gained > 0 || lost > 0) {
+        html += `<div class="tm-panel-field"><span class="tm-panel-field-label">Control</span><span class="tm-panel-field-value"><span style="color:#81c784">+${gained}</span> / <span style="color:#ef9a9a">−${lost}</span></span></div>`;
+      }
     }
     html += `</div>`;
+
+    // Battles this turn
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">BATTLES THIS TURN (${thisTurnEvents.length})</div>`;
+    if (thisTurnEvents.length === 0) {
+      html += `<div class="tm-panel-placeholder">No control changes this turn.</div>`;
+    } else {
+      const maxShow = 30;
+      const eventsToShow = thisTurnEvents.slice(0, maxShow);
+      for (const e of eventsToShow) {
+        const fromLabel = e.from ? (SIDE_LABELS[e.from] ?? e.from) : '—';
+        const toLabel = e.to ? (SIDE_LABELS[e.to] ?? e.to) : '—';
+        const fromColor = e.from ? (SIDE_SOLID_COLORS[e.from] ?? '#888') : '#888';
+        const toColor = e.to ? (SIDE_SOLID_COLORS[e.to] ?? '#888') : '#888';
+        html += `<div style="font-size:10px;margin:2px 0;color:#b0bec5">
+          <span style="opacity:0.7">${this.escapeHtml(e.settlementId)}</span>
+          <span style="color:${fromColor}">${this.escapeHtml(fromLabel)}</span> →
+          <span style="color:${toColor}">${this.escapeHtml(toLabel)}</span>
+          <span style="opacity:0.5">(${this.escapeHtml(e.mechanism)})</span>
+        </div>`;
+      }
+      if (thisTurnEvents.length > maxShow) {
+        html += `<div class="tm-panel-placeholder">...and ${thisTurnEvents.length - maxShow} more</div>`;
+      }
+    }
+    html += `</div>`;
+
+    // Total control events
+    html += `<div class="tm-panel-section"><div class="tm-panel-section-header">ALL CONTROL EVENTS</div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Total recorded</span><span class="tm-panel-field-value">${gs.recentControlEvents.length}</span></div>
+    </div>`;
+
     content.innerHTML = html;
     this.showOverlay('aar-modal', true);
   }
@@ -3754,6 +4168,24 @@ export class MapApp {
     if (errEl) {
       errEl.textContent = message;
       errEl.classList.remove('hidden');
+    }
+  }
+
+  private getPersistedCampaignScenarioKey(): 'sep_1991' | 'apr_1992' {
+    try {
+      const raw = localStorage.getItem(MapApp.CAMPAIGN_SCENARIO_STORAGE_KEY);
+      if (raw === 'sep_1991' || raw === 'apr_1992') return raw;
+    } catch {
+      // localStorage can fail in hardened/private contexts; fallback to default.
+    }
+    return 'apr_1992';
+  }
+
+  private persistCampaignScenarioKey(scenarioKey: 'sep_1991' | 'apr_1992'): void {
+    try {
+      localStorage.setItem(MapApp.CAMPAIGN_SCENARIO_STORAGE_KEY, scenarioKey);
+    } catch {
+      // Ignore persistence failure; selection still works for this session.
     }
   }
 

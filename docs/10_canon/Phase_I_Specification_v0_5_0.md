@@ -229,7 +229,9 @@ Militia Growth per Turn = Base_Organizational_Strength × 0.10
 - RS with JNA support: +1 strength/turn
 - HRHB with Croatian support: +0.8 strength/turn
 
-**Implementation-note (recruitment mode):** Scenario may set `recruitment_mode` to `"player_choice"` (three-resource brigade activation at Phase I entry) or `"auto_oob"` (legacy OOB auto-spawn when `init_formations_oob: true`). See `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md` §10 and `docs/40_reports/recruitment_system_implementation_report.md`.
+**Implementation-note (recruitment mode):** Scenario may set `recruitment_mode` to `"player_choice"` (three-resource brigade activation at Phase I entry) or `"auto_oob"` (legacy OOB auto-spawn when `init_formations_oob: true`). See `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md` §10 and `docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md` §2.
+
+**Implementation-note (pool and penetration calibration 2026-02-15):** April 1992 scenario force levels use POOL_SCALE_FACTOR 55, organizational penetration seeds (party 85, paramilitary 60), and FACTION_POOL_SCALE (RBiH 1.20, RS 1.05, HRHB 1.60); mandatory brigade spawn minimum 200. See `docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md` §2.
 
 ---
 
@@ -338,7 +340,7 @@ Consolidation Duration = Base_Duration (4 turns)
 
 #### 4.3.6 Settlement-level resolution
 
-When municipality authority shifts (control flip), **settlement-level resolution** applies: settlements with attacker ethnic share ≥ threshold (e.g. 30%) flip immediately; hostile-majority settlements may become **holdouts**. Holdouts are cleared by formation cleanup (e.g. 1–2 per brigade per turn) and **isolation surrender** (e.g. after 4 turns isolated). **Brigade amplification:** brigades in adjacent municipalities may amplify Phase I attack strength (e.g. 0.5× multiplier). State: settlement_holdouts. Constants and formulas in implementation and in docs/40_reports/BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md §Stage 1A. Implementation: src/sim/phase_i/settlement_control.ts.
+When municipality authority shifts (control flip), **settlement-level resolution** applies: settlements with attacker ethnic share ≥ threshold (e.g. 30%) flip immediately; hostile-majority settlements may become **holdouts**. Holdouts are cleared by formation cleanup (e.g. 1–2 per brigade per turn) and **isolation surrender** (e.g. after 4 turns isolated). **Brigade amplification:** brigades in adjacent municipalities may amplify Phase I attack strength (e.g. 0.5× multiplier). State: settlement_holdouts. Constants and formulas in implementation and in docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md §8. Implementation: src/sim/phase_i/settlement_control.ts.
 
 ---
 
@@ -1174,7 +1176,7 @@ alliance_decay:
 
 **Implementation-note (formation-aware flip):** Implementation may include formation strength (personnel in formations whose home municipality is in an adjacent mun or in the defended mun) in the Phase I flip formula—attacker strength = militia + formation strength in adjacent muns; defender effectiveDefense = militia (+ allied) + formation strength in the defended mun. This reflects JNA/early RS historical fidelity (RS had heavy brigades from the start; RBiH holds where it has forces). Tracked as implementation detail; not normative v0.4 canon unless promoted by formal canon addendum.
 
-**Implementation-note (military-action-only / no-flip scenarios):** When a scenario sets `disable_phase_i_control_flip` (e.g. military-action-only control resolution), the militia-pressure path for Phase I control flips is disabled; only military-driven (brigade-adjacent) flips may apply. Scenario names or aliases that suggest "no flip" do not imply zero control changes—they indicate that militia-alone pressure cannot trigger flips. See docs/40_reports/ORCHESTRATOR_SCENARIO_HANDOFF_DECISIONS_2026_02_13.md and PARADOX_PHASEI_NOFLIP_FINAL_PROPOSAL_2026_02_11.md.
+**Implementation-note (military-action-only / no-flip scenarios):** When a scenario sets `disable_phase_i_control_flip` (e.g. military-action-only control resolution), the militia-pressure path for Phase I control flips is disabled; only military-driven (brigade-adjacent) flips may apply. Scenario names or aliases that suggest "no flip" do not imply zero control changes—they indicate that militia-alone pressure cannot trigger flips. See docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md §4, §5.
 
 **When persons become displaced (Phase I §4.4):** Displacement is **initiated** when a municipality flips and Hostile_Population_Share (share of population aligned with the **losing** faction) exceeds 0.30. Once initiated for that mun in that turn:
 - A one-time displacement is applied: a portion of the population aligned with the losing faction is displaced out of the municipality.

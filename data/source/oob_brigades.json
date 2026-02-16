@@ -782,7 +782,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_443rd_mountain",
@@ -794,7 +795,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_444th_mountain",
@@ -806,7 +808,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_445th_mountain",
@@ -818,7 +821,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_446th_light",
@@ -830,7 +834,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_447th_liberation",
@@ -866,7 +871,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_442nd_mountain",
@@ -878,7 +884,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_448th_liberation",

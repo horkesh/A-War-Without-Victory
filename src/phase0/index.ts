@@ -14,8 +14,11 @@ export {
 export {
   INVESTMENT_COST,
   isToAllowedForFaction,
+  getInvestmentTypesForFaction,
+  isCoordinationEligibleFaction,
   applyInvestment,
   getInvestmentCost,
+  getInvestmentCostWithCoordination,
   type InvestmentType,
   type InvestmentScope,
   type IsHostileMajorityFn,
@@ -64,3 +67,18 @@ export {
 } from './referendum.js';
 
 export { runPhase0Turn, type Phase0TurnOptions } from './turn.js';
+
+export { buildPhase0TurnOptions } from './phase0_options_builder.js';
+
+export {
+  generatePhase0Events,
+  type Phase0EventType
+} from './phase0_events.js';
+
+export {
+  initializePhase0Relationships,
+  updateAllianceAfterInvestment,
+  type Phase0Relationships
+} from './alliance.js';
+
+export { runPhase0BotInvestments } from './bot_phase0.js';

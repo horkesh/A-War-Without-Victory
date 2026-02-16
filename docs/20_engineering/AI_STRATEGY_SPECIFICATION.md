@@ -113,7 +113,7 @@ Shared helpers used by corps AI, brigade AI, and AoR rebalancing:
 
 - `src/sim/phase_ii/phase_ii_adjacency.ts` — `buildAdjacencyFromEdges(edges)`, `getFactionBrigades(state, faction)` (deterministic, sorted iteration).
 
-Pipeline steps: `generate-bot-corps-orders` (before) → `generate-bot-brigade-orders`. See [THREE_SIDED_BOT_AI_AND_STANDING_ORDERS_2026_02_14.md](../40_reports/implemented/THREE_SIDED_BOT_AI_AND_STANDING_ORDERS_2026_02_14.md).
+Pipeline steps: `generate-bot-corps-orders` (before) → `generate-bot-brigade-orders`. See [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) §6.
 
 ## Integration points
 

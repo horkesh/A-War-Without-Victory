@@ -34,6 +34,7 @@ export interface OobCorps {
   faction: FactionId;
   name: string;
   hq_mun: string;
+  kind: 'corps' | 'army_hq';
 }
 
 interface RegistryRow {
@@ -154,11 +155,13 @@ export async function loadOobCorps(baseDir: string): Promise<OobCorps[]> {
     if (!registry.has(hq_mun)) {
       throw new Error(`Invalid OOB corps ${id}: hq_mun "${hq_mun}" not in registry`);
     }
+    const corpsKind = r.kind === 'army_hq' ? 'army_hq' as const : 'corps' as const;
     result.push({
       id,
       faction,
       name: String(r.name).trim(),
       hq_mun,
+      kind: corpsKind,
     });
   }
 
