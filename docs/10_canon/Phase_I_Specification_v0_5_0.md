@@ -233,6 +233,8 @@ Militia Growth per Turn = Base_Organizational_Strength × 0.10
 
 **Implementation-note (pool and penetration calibration 2026-02-15):** April 1992 scenario force levels use POOL_SCALE_FACTOR 55, organizational penetration seeds (party 85, paramilitary 60), and FACTION_POOL_SCALE (RBiH 1.20, RS 1.05, HRHB 1.60); mandatory brigade spawn minimum 200. See `docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md` §2.
 
+**Implementation-note (org-pen init and handoff 2026-02-16):** Current implementation seeds municipality organizational penetration deterministically using A/B/C signals: A = municipality controller (mayor-party proxy), B = faction-aligned 1991 population share threshold, C = planned war-start OOB brigade presence (`available_from <= war_start_turn`). The same formula family is used at scenario/new-game initialization and at Phase 0->I handoff for uninvested municipalities. See `docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md` §12 and `docs/40_reports/implemented/ORG_PEN_FORMULA_INIT_AND_PHASE0_HANDOFF_2026_02_16.md`.
+
 ---
 
 ### 4.3 Control Flip System

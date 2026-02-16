@@ -165,3 +165,34 @@ test('Coordinated directives update alliance state deterministically', () => {
   assert.ok((stateA.phase0_relationships?.rbih_rs ?? 0) < -0.2);
 });
 
+test('Phase 0 to Phase I handoff seeds uninvested municipalities with formula values', () => {
+  const state = makePhase0State();
+  state.municipalities = {
+    TEST_MUN: {
+      stability_score: 50,
+      control: 'contested',
+      organizational_penetration: {}
+    },
+    TEST_MUN_2: {
+      stability_score: 55,
+      control: 'contested',
+      organizational_penetration: {}
+    }
+  };
+  // Handoff reads direct municipality keys when available.
+  state.political_controllers = {
+    TEST_MUN: 'RS',
+    TEST_MUN_2: 'RBiH'
+  };
+  for (const faction of state.factions) {
+    faction.prewar_capital = 0;
+  }
+
+  const next = runPhase0TurnAndAdvance(state, state.meta.seed ?? 'phase0-iv1-seed', 'RBiH');
+  const opA = next.municipalities?.TEST_MUN?.organizational_penetration;
+  const opB = next.municipalities?.TEST_MUN_2?.organizational_penetration;
+  assert.ok(opA && opB);
+  assert.ok((opA.sds_penetration ?? 0) > (opA.sda_penetration ?? 0));
+  assert.ok((opB.sda_penetration ?? 0) > (opB.sds_penetration ?? 0));
+});
+

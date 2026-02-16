@@ -22,9 +22,9 @@ import { generatePhase0Events } from '../../phase0/phase0_events.js';
 import { initializePhase0Relationships } from '../../phase0/alliance.js';
 import type { OrganizationalPenetration } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { deriveOrganizationalPenetrationFromFormula } from '../../state/organizational_penetration_formula.js';
 
-/** Baseline party penetration seeded from institutional control at Phase I handoff. */
-const BASELINE_PEN = 10;
+const FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
 /** Returns true if the org-pen object has any non-zero investment field. */
 function hasAnyOrgInvestment(op: OrganizationalPenetration): boolean {
@@ -38,6 +38,63 @@ function hasAnyOrgInvestment(op: OrganizationalPenetration): boolean {
     op.police_loyalty === 'loyal' ||
     op.to_control === 'controlled'
   );
+}
+
+function resolveMunicipalityController(state: GameState, munId: string): FactionId | null {
+  const direct = state.political_controllers?.[munId];
+  if (direct === 'RBiH' || direct === 'RS' || direct === 'HRHB') return direct;
+  const op = state.municipalities?.[munId]?.organizational_penetration;
+  if (!op) return null;
+  const partyScores: Record<FactionId, number> = {
+    RBiH: op.sda_penetration ?? 0,
+    RS: op.sds_penetration ?? 0,
+    HRHB: op.hdz_penetration ?? 0
+  };
+  let bestFaction: FactionId | null = null;
+  let bestScore = 0;
+  for (const faction of FACTIONS) {
+    const score = partyScores[faction];
+    if (score > bestScore) {
+      bestScore = score;
+      bestFaction = faction;
+    }
+  }
+  return bestScore > 0 ? bestFaction : null;
+}
+
+function getFormationHomeMunicipality(formation: { tags?: string[] }): string | null {
+  const homeMunTag = formation.tags?.find((tag) => typeof tag === 'string' && tag.startsWith('mun:'));
+  if (!homeMunTag) return null;
+  const mun = homeMunTag.slice(4);
+  return mun.length > 0 ? mun : null;
+}
+
+function buildCurrentPlannedBrigadeByFaction(state: GameState, munId: string): Partial<Record<FactionId, boolean>> {
+  const presence: Partial<Record<FactionId, boolean>> = {};
+  const formationIds = Object.keys(state.formations ?? {}).sort(strictCompare);
+  for (const formationId of formationIds) {
+    const formation = state.formations?.[formationId];
+    if (!formation) continue;
+    if ((formation.kind ?? 'brigade') !== 'brigade') continue;
+    if (getFormationHomeMunicipality(formation) !== munId) continue;
+    const faction = formation.faction;
+    if (faction !== 'RBiH' && faction !== 'RS' && faction !== 'HRHB') continue;
+    presence[faction] = true;
+  }
+  return presence;
+}
+
+function derivePhaseIHandoffOp(state: GameState, munId: string): OrganizationalPenetration {
+  const controller = resolveMunicipalityController(state, munId);
+  return deriveOrganizationalPenetrationFromFormula({
+    controller,
+    aligned_population_share_by_faction: {
+      RBiH: controller === 'RBiH' ? 1 : 0,
+      RS: controller === 'RS' ? 1 : 0,
+      HRHB: controller === 'HRHB' ? 1 : 0
+    },
+    planned_war_start_brigade_by_faction: buildCurrentPlannedBrigadeByFaction(state, munId)
+  });
 }
 
 /**
@@ -120,8 +177,8 @@ export function runPhase0TurnAndAdvance(
  * org-pen derived from their political controller (institutional control → baseline party pen).
  */
 function applyPhaseIHandoff(state: GameState): void {
-  // Seed org-pen for un-invested municipalities
-  if (state.municipalities && state.political_controllers) {
+  // Seed org-pen for un-invested municipalities using the same deterministic formula family as init.
+  if (state.municipalities) {
     const munIds = Object.keys(state.municipalities).sort(strictCompare);
     for (const munId of munIds) {
       const mun = state.municipalities[munId];
@@ -131,25 +188,7 @@ function applyPhaseIHandoff(state: GameState): void {
       if (mun.organizational_penetration && hasAnyOrgInvestment(mun.organizational_penetration)) {
         continue;
       }
-
-      // Seed baseline from political controller
-      const controller = state.political_controllers[munId] as FactionId | undefined;
-      if (!controller) continue;
-
-      if (!mun.organizational_penetration) {
-        mun.organizational_penetration = {};
-      }
-      switch (controller) {
-        case 'RS':
-          mun.organizational_penetration.sds_penetration = BASELINE_PEN;
-          break;
-        case 'RBiH':
-          mun.organizational_penetration.sda_penetration = BASELINE_PEN;
-          break;
-        case 'HRHB':
-          mun.organizational_penetration.hdz_penetration = BASELINE_PEN;
-          break;
-      }
+      mun.organizational_penetration = derivePhaseIHandoffOp(state, munId);
     }
   }
 

@@ -97,6 +97,8 @@ Initial state of:
 
 **Note:** These values are research-derived, not procedurally generated.
 
+**Implementation-note (2026-02-16, non-normative):** Current runtime initialization uses a deterministic A/B/C proxy seeding path for municipality organizational penetration (A = municipality controller, B = faction-aligned population share threshold, C = planned war-start OOB brigade presence). This is tracked as implementation detail in canon references and may be replaced by full research-derived municipality tables in a future canon update.
+
 ---
 
 ## 4. Phase 0 Systems
