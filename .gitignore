@@ -44,6 +44,7 @@ runs/
 .tmp_*/
 runs_ops_compare/
 runs_probe/
+data/derived/scenario/_baseline_tmp/
 
 # IDE
 .vscode/
