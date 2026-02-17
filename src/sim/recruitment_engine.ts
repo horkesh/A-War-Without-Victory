@@ -39,6 +39,7 @@ import { MIN_BRIGADE_SPAWN, MIN_MANDATORY_SPAWN } from '../state/formation_const
 import { factionHasPresenceInMun } from '../scenario/oob_phase_i_entry.js';
 import { militiaPoolKey } from '../state/militia_pool_key.js';
 import { BRIGADE_BASE_COHESION } from '../state/formation_lifecycle.js';
+import { getRsJnaHeavyComposition } from './phase_ii/equipment_effects.js';
 
 // ---------------------------------------------------------------------------
 // Strategic area scoring for bot AI
@@ -131,7 +132,18 @@ function computeBotScore(
 // Formation builder helpers
 // ---------------------------------------------------------------------------
 
-function buildBrigadeComposition(equipmentClass: EquipmentClass): BrigadeComposition {
+function buildBrigadeComposition(
+  equipmentClass: EquipmentClass,
+  faction: FactionId,
+  applyRsJnaOverride: boolean
+): BrigadeComposition {
+  if (
+    applyRsJnaOverride &&
+    faction === 'RS' &&
+    (equipmentClass === 'mechanized' || equipmentClass === 'motorized')
+  ) {
+    return getRsJnaHeavyComposition();
+  }
   const template = EQUIPMENT_CLASS_TEMPLATES[equipmentClass];
   const fullCondition: EquipmentCondition = { operational: 1, degraded: 0, non_operational: 0 };
   return {
@@ -174,7 +186,7 @@ function buildRecruitedFormation(
     personnel,
     readiness: isMandatory ? 'active' : 'forming',
     cohesion: isMandatory ? BRIGADE_BASE_COHESION + 10 : BRIGADE_BASE_COHESION,
-    composition: buildBrigadeComposition(equipClass),
+    composition: buildBrigadeComposition(equipClass, brigade.faction, true),
     corps_id: (brigade.corps as FormationId) ?? null,
     ...(hqSid ? { hq_sid: hqSid } : {})
   };
@@ -336,7 +348,7 @@ export function recruitBrigade(
 
   // All checks pass -- build formation
   const hq_sid = resolveValidHqSid(state, faction, home_mun, municipalityHqSettlement, sidToMun);
-  const composition = buildBrigadeComposition(chosenClass);
+  const composition = buildBrigadeComposition(chosenClass, faction, true);
   const formation = buildRecruitedFormation(
     brigade, chosenClass, composition.infantry, state.meta.turn, hq_sid, brigade.mandatory
   );

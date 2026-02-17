@@ -37,6 +37,8 @@
 | [MILITIA_BRIGADE_SYSTEM_RESEARCH_AND_REWORK_PLAN.md](backlog/MILITIA_BRIGADE_SYSTEM_RESEARCH_AND_REWORK_PLAN.md) | Research and rework plan for militia/brigade system. | Research / design. |
 | [FORMATION_BRIGADE_VS_HISTORICAL_OOB_COMPARISON.md](backlog/FORMATION_BRIGADE_VS_HISTORICAL_OOB_COMPARISON.md) | Formation vs historical OOB comparison. | Reference. |
 | [RBiH_HRHB_ALLIANCE_REDESIGN_DESIGN.md](backlog/RBiH_HRHB_ALLIANCE_REDESIGN_DESIGN.md) | RBiH–HRHB alliance redesign design. Core alliance lifecycle implemented; redesign may contain future options. | Design; partial implementation done. |
+| **Paramilitary / rear-cleanup units** | Role for cleaning undefended rear settlements; BB-grounded (cleanup, rear areas). Convene: [PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18.md](convenes/PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18.md). | Design: Game Designer (role, canon); Formation-expert (OOB, assignment). No implementation until design agreed. |
+| **Per-army flavor** | Distinct unit roles and capabilities by faction (RS JNA heavy done; RBiH light/embargo/elite; HRHB structure). Paramilitary and rear-cleanup can be faction-specific. Same convene as above. | Design: Game Designer; Formation-expert for OOB/stats. |
 
 ---
 
@@ -71,7 +73,7 @@
 
 | Report | Summary | Priority / owner |
 |--------|---------|-------------------|
-| [PARADOX_STATE_OF_GAME_MEETING.md](convenes/PARADOX_STATE_OF_GAME_MEETING.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md) | State-of-game meetings. | Process / reference. |
+| [PARADOX_STATE_OF_GAME_MEETING.md](convenes/PARADOX_STATE_OF_GAME_MEETING.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md) | State-of-game meetings. | Process / reference. |
 | [PARADOX_PHASE0_ORCHESTRATOR_REPORT.md](convenes/PARADOX_PHASE0_ORCHESTRATOR_REPORT.md) | Phase 0 orchestrator report. | Reference. |
 | [PARADOX_TACTICAL_MAP_CANONICAL_DEPRECATION_CONVENE.md](convenes/PARADOX_TACTICAL_MAP_CANONICAL_DEPRECATION_CONVENE.md) | Tactical map canonical deprecation convene. | Process. |
 | [PARADOX_RBIH_WIPEOUT_FIX_MEETING.md](convenes/PARADOX_RBIH_WIPEOUT_FIX_MEETING.md) | RBiH wipeout fix meeting. | Design input. |
@@ -88,8 +90,8 @@
 
 The report [BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md](implemented/BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md) lists **Remaining Issues (Future Work)**:
 
-- AoR extreme imbalance (HIGH)
-- RS early-war underperformance (MEDIUM)
+- AoR extreme imbalance (HIGH) — contiguity and surrounded-brigade reform done 2026-02-17; remaining imbalance may be addressed later.
+- **RS early-war underperformance (MEDIUM)** — **Implemented 2026-02-18 (priority B):** RS early-war window extended 0–12 → 0–26 (doctrine, standing orders, attack share, corps E1). [PRIORITY_B_RS_EARLY_WAR_BOT_HANDOFF_2026_02_18.md](convenes/PRIORITY_B_RS_EARLY_WAR_BOT_HANDOFF_2026_02_18.md) (scope, acceptance criteria, implementation complete; 16w comparison vs baseline optional).
 - Defender casualties at zero (MEDIUM)
 - HRHB near-passive (LOW–MEDIUM)
 - Posture orders for forming brigades (LOW)
