@@ -380,6 +380,54 @@ describe('runBotRecruitment', () => {
     assert.ok(state.formations['rs_mand_1']);
     assert.ok(!state.formations['rs_mand_2']);
   });
+
+  test('RS JNA override: RS mechanized and motorized get 40 tanks, 30 artillery', () => {
+    const rsPoolKey = militiaPoolKey('banja_luka', 'RS');
+    const state = makeState({
+      political_controllers: { s1: 'RS' },
+      militia_pools: {
+        [rsPoolKey]: { mun_id: 'banja_luka', faction: 'RS', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
+      }
+    });
+    const sidToMun = new Map([['s1', 'banja_luka']]);
+    const resources = initializeRecruitmentResources(['RS'], { RS: 0 }, { RS: 0 });
+    runBotRecruitment(
+      state,
+      [],
+      [
+        makeBrigade({
+          id: 'rs_1st_armored',
+          faction: 'RS',
+          name: '1st Armored',
+          home_mun: 'banja_luka',
+          mandatory: true,
+          default_equipment_class: 'mechanized',
+          priority: 1
+        }),
+        makeBrigade({
+          id: 'rs_1st_guards_motorized',
+          faction: 'RS',
+          name: '1st Guards Motorized',
+          home_mun: 'banja_luka',
+          mandatory: true,
+          default_equipment_class: 'motorized',
+          priority: 2
+        })
+      ],
+      resources,
+      sidToMun,
+      { banja_luka: 's1' },
+      { includeCorps: false, includeMandatory: true }
+    );
+    const mech = state.formations['rs_1st_armored'] as FormationState;
+    const mot = state.formations['rs_1st_guards_motorized'] as FormationState;
+    assert.ok(mech?.composition, 'RS mechanized should have composition');
+    assert.ok(mot?.composition, 'RS motorized should have composition');
+    assert.strictEqual(mech.composition!.tanks, 40, 'RS mechanized gets JNA heavy tanks');
+    assert.strictEqual(mech.composition!.artillery, 30, 'RS mechanized gets JNA heavy artillery');
+    assert.strictEqual(mot.composition!.tanks, 40, 'RS motorized gets JNA heavy tanks');
+    assert.strictEqual(mot.composition!.artillery, 30, 'RS motorized gets JNA heavy artillery');
+  });
 });
 
 describe('isEmergentFormationSuppressed', () => {

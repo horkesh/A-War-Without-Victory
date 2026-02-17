@@ -26,6 +26,25 @@ const DEFAULT_COMPOSITION: Record<string, Partial<BrigadeComposition>> = {
 };
 
 const DEFAULT_CONDITION: EquipmentCondition = { operational: 0.9, degraded: 0.08, non_operational: 0.02 };
+
+/** Full operational condition for newly created formations. */
+const FULL_CONDITION: EquipmentCondition = { operational: 1, degraded: 0, non_operational: 0 };
+
+/**
+ * Return RS JNA-heavy composition (40 tanks, 30 artillery) for use when creating RS mechanized/motorized
+ * formations from OOB. Single source of truth with DEFAULT_COMPOSITION.RS; used by recruitment_engine.
+ */
+export function getRsJnaHeavyComposition(): BrigadeComposition {
+  const d = DEFAULT_COMPOSITION['RS']!;
+  return {
+    infantry: d.infantry ?? 800,
+    tanks: d.tanks ?? 40,
+    artillery: d.artillery ?? 30,
+    aa_systems: d.aa_systems ?? 5,
+    tank_condition: { ...FULL_CONDITION },
+    artillery_condition: { ...FULL_CONDITION }
+  };
+}
 const ARBIH_CONDITION: EquipmentCondition = { operational: 0.6, degraded: 0.25, non_operational: 0.15 };
 
 /** Ensure formation has a composition; initialize from defaults if missing. */
