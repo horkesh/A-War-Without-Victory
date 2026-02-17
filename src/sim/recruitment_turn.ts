@@ -6,6 +6,8 @@ import type { SetupPhaseRecruitmentReport } from '../state/recruitment_types.js'
 import { strictCompare } from '../state/validateGameState.js';
 import { ensureProductionFacilities } from '../state/production_facilities.js';
 import { getEffectiveHeavyEquipmentAccess } from '../state/embargo.js';
+import { MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
+import { militiaPoolKey } from '../state/militia_pool_key.js';
 import { runBotRecruitment } from './recruitment_engine.js';
 
 export interface RecruitmentAccrualFactionDelta {
@@ -23,6 +25,12 @@ const EQUIPMENT_TYPE_WEIGHT: Readonly<Record<string, number>> = {
   small_arms: 2,
   ammunition: 1
 };
+
+/**
+ * Controlled RS-only Phase II manpower accrual for pending mandatory brigades.
+ * Prevents historical RS brigades from stalling permanently below mandatory spawn floor.
+ */
+const RS_MANDATORY_MOBILIZATION_PER_TURN = 120;
 
 function clamp01(value: number): number {
   if (value < 0) return 0;
@@ -205,10 +213,46 @@ export function runOngoingRecruitment(
 ): SetupPhaseRecruitmentReport | null {
   const resources = state.recruitment_state;
   if (!resources) return null;
-  const maxPerFaction = resources.max_recruits_per_faction_per_turn ?? 1;
+  const maxRecruitsPerFaction = resources.max_recruits_per_faction_per_turn ?? 1;
+  applyRsMandatoryMobilizationAccrual(state, oobBrigades);
   return runBotRecruitment(state, oobCorps, oobBrigades, resources, sidToMun, municipalityHqSettlement, {
     includeCorps: false,
-    includeMandatory: false,
-    maxElectivePerFaction: maxPerFaction
+    includeMandatory: true,
+    maxMandatoryPerFaction: maxRecruitsPerFaction,
+    maxElectivePerFaction: maxRecruitsPerFaction
   });
+}
+
+function applyRsMandatoryMobilizationAccrual(state: GameState, oobBrigades: OobBrigade[]): void {
+  const resources = state.recruitment_state;
+  const pools = state.militia_pools;
+  if (!resources || !pools) return;
+  const recruited = new Set(resources.recruited_brigade_ids);
+
+  const pendingMandatoryRs = oobBrigades
+    .filter(
+      (brigade) =>
+        brigade.faction === 'RS' &&
+        brigade.mandatory &&
+        brigade.available_from <= state.meta.turn &&
+        !recruited.has(brigade.id)
+    )
+    .sort((a, b) => a.priority - b.priority || strictCompare(a.id, b.id));
+
+  let budget = RS_MANDATORY_MOBILIZATION_PER_TURN;
+  for (const brigade of pendingMandatoryRs) {
+    if (budget <= 0) break;
+    const key = militiaPoolKey(brigade.home_mun, 'RS');
+    const pool = pools[key];
+    if (!pool) continue;
+    if (pool.available >= MIN_MANDATORY_SPAWN) continue;
+
+    const needed = MIN_MANDATORY_SPAWN - pool.available;
+    const transfer = Math.min(needed, budget);
+    if (transfer <= 0) continue;
+
+    pool.available += transfer;
+    pool.updated_turn = state.meta.turn;
+    budget -= transfer;
+  }
 }

@@ -9,9 +9,10 @@
 import type { GameState, FactionId } from '../../../state/game_state.js';
 import { getPrewarCapital, PREWAR_CAPITAL_INITIAL } from '../../../phase0/capital.js';
 import { strictCompare } from '../../../state/validateGameState.js';
-import { turnToMonthYear, getPlayerFaction, hasFactionPresence, STABILITY_SECURE_MIN, STABILITY_CONTESTED_MIN } from './warroom_utils.js';
+import { turnToMonthYear, getPlayerFaction, hasFactionPresence, FACTION_COLORS, factionCssClass, STABILITY_SECURE_MIN, STABILITY_CONTESTED_MIN } from './warroom_utils.js';
 
 interface MagazineContent {
+    factionId: string;
     title: string;
     monthYear: string;
     orgCoverage: number;
@@ -116,7 +117,7 @@ export class MagazineModal {
      */
     private generateContent(): MagazineContent {
         const turn = this.gameState.meta.turn;
-        const factionId = getPlayerFaction(this.gameState.factions);
+        const factionId = getPlayerFaction(this.gameState);
         const isNewIssue = turn % 4 === 0 || turn === 0;
 
         const invested = this.countInvestedMunicipalities(factionId);
@@ -139,6 +140,7 @@ export class MagazineModal {
         }
 
         return {
+            factionId,
             title: MAGAZINE_TITLES[factionId] ?? 'OPERATIONAL REVIEW',
             monthYear: turnToMonthYear(turn),
             orgCoverage,
@@ -178,11 +180,15 @@ export class MagazineModal {
         const content = this.generateContent();
 
         const magazine = document.createElement('div');
-        magazine.className = 'magazine-modal';
+        const fCss = factionCssClass(content.factionId as any);
+        magazine.className = `magazine-modal faction-${fCss}`;
+        const fc = FACTION_COLORS[content.factionId] ?? FACTION_COLORS['RBiH'];
+        magazine.style.borderTop = `3px solid ${fc.primary}`;
 
         // Title
         const title = document.createElement('div');
         title.className = 'magazine-title';
+        title.style.color = fc.primary;
         title.textContent = content.title;
         magazine.appendChild(title);
 

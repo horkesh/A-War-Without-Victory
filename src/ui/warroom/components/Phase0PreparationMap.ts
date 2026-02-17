@@ -271,12 +271,16 @@ export class Phase0PreparationMap {
             this.municipalityMetaById.clear();
             this.boundaryFeatures.clear();
 
-            const byMun1990 = new Map<string, MunicipalityId>();
+            const displayNameByMun1990 = new Map<string, string>();
             const byMid = mun1990Names?.by_municipality_id ?? {};
             const mids = Object.keys(byMid).sort(strictCompare);
             for (const mid of mids) {
                 const mun1990Id = byMid[mid]?.mun1990_id;
-                if (mun1990Id) byMun1990.set(mun1990Id, mid as MunicipalityId);
+                if (!mun1990Id) continue;
+                const displayName = byMid[mid]?.display_name;
+                if (displayName && !displayNameByMun1990.has(mun1990Id)) {
+                    displayNameByMun1990.set(mun1990Id, displayName);
+                }
             }
 
             for (const m of municipalitiesMeta) {
@@ -287,9 +291,8 @@ export class Phase0PreparationMap {
                 const mun1990Id = feature.properties?.mun1990_id;
                 if (!mun1990Id) continue;
                 this.features.set(mun1990Id, feature);
-                const resolvedMid = byMun1990.get(mun1990Id);
-                if (resolvedMid) this.municipalityIdByMun1990.set(mun1990Id, resolvedMid);
-                const displayName = feature.properties?.display_name ?? resolvedMid ?? mun1990Id;
+                this.municipalityIdByMun1990.set(mun1990Id, mun1990Id as MunicipalityId);
+                const displayName = feature.properties?.display_name ?? displayNameByMun1990.get(mun1990Id) ?? mun1990Id;
                 this.displayNameByMun1990.set(mun1990Id, displayName);
             }
 
@@ -313,14 +316,13 @@ export class Phase0PreparationMap {
                     mun1990Id = aliased;
                 }
                 this.boundaryFeatures.set(mun1990Id, feature);
-                const resolvedMid = byMun1990.get(mun1990Id);
-                if (resolvedMid && !this.municipalityIdByMun1990.has(mun1990Id)) {
-                    this.municipalityIdByMun1990.set(mun1990Id, resolvedMid);
+                if (!this.municipalityIdByMun1990.has(mun1990Id)) {
+                    this.municipalityIdByMun1990.set(mun1990Id, mun1990Id as MunicipalityId);
                 }
                 if (!this.displayNameByMun1990.has(mun1990Id)) {
                     this.displayNameByMun1990.set(
                         mun1990Id,
-                        feature.properties?.mun1990_name ?? resolvedMid ?? mun1990Id
+                        feature.properties?.mun1990_name ?? displayNameByMun1990.get(mun1990Id) ?? mun1990Id
                     );
                 }
             }
@@ -365,8 +367,9 @@ export class Phase0PreparationMap {
         if (!projection) return;
         const { project } = projection;
 
+        const normalizedLookup = this.buildNormalizedMunicipalityLookup();
         for (const featureId of featureIds) {
-            const munId = this.municipalityIdByMun1990.get(featureId) ?? null;
+            const munId = this.resolveStateMunicipalityId(featureId, normalizedLookup);
             const fill = this.getFillColor(featureId, munId);
             this.ctx.fillStyle = fill;
             if (!this.drawMunicipalityAreaPath(featureId, project)) continue;
@@ -403,7 +406,7 @@ export class Phase0PreparationMap {
             return DEMOGRAPHIC_COLORS[this.getMajorityGroup(munId)] ?? DEMOGRAPHIC_COLORS.unknown;
         }
         if (this.layerControl && munId) {
-            const controller = this.gameState?.political_controllers?.[munId] ?? 'null';
+            const controller = this.getMunicipalityController(munId) ?? 'null';
             return CONTROL_COLORS[controller] ?? CONTROL_COLORS.null;
         }
         if (this.layerStability && munId) {
@@ -453,6 +456,63 @@ export class Phase0PreparationMap {
             if (validation.valid) return true;
         }
         return false;
+    }
+
+    private buildNormalizedMunicipalityLookup(): Map<string, MunicipalityId> {
+        const out = new Map<string, MunicipalityId>();
+        const municipalityIds = Object.keys(this.gameState?.municipalities ?? {}).sort(strictCompare);
+        for (const municipalityId of municipalityIds) {
+            const normalized = normalizeMunKey(municipalityId);
+            if (!out.has(normalized)) {
+                out.set(normalized, municipalityId as MunicipalityId);
+            }
+        }
+        return out;
+    }
+
+    private resolveStateMunicipalityId(
+        featureId: string,
+        normalizedLookup?: Map<string, MunicipalityId>
+    ): MunicipalityId | null {
+        const mapped = this.municipalityIdByMun1990.get(featureId) ?? (featureId as MunicipalityId);
+        if (!this.gameState?.municipalities) {
+            return mapped;
+        }
+        if (this.gameState.municipalities[mapped]) {
+            return mapped;
+        }
+        const normalized = normalizedLookup ?? this.buildNormalizedMunicipalityLookup();
+        const byFeature = normalized.get(normalizeMunKey(featureId));
+        if (byFeature) return byFeature;
+        const byMapped = normalized.get(normalizeMunKey(String(mapped)));
+        if (byMapped) return byMapped;
+        return null;
+    }
+
+    private getMunicipalityController(munId: MunicipalityId | null): FactionId | null {
+        if (!munId || !this.gameState) return null;
+        const direct = this.gameState.political_controllers?.[munId];
+        if (direct === 'RBiH' || direct === 'RS' || direct === 'HRHB') {
+            return direct;
+        }
+        const op = this.gameState.municipalities?.[munId]?.organizational_penetration;
+        if (!op) return null;
+        const scores: Record<FactionId, number> = {
+            RBiH: op.sda_penetration ?? 0,
+            RS: op.sds_penetration ?? 0,
+            HRHB: op.hdz_penetration ?? 0
+        };
+        let bestFaction: FactionId | null = null;
+        let bestScore = 0;
+        const factions: FactionId[] = ['RBiH', 'RS', 'HRHB'];
+        for (const faction of factions) {
+            const score = scores[faction];
+            if (score > bestScore) {
+                bestScore = score;
+                bestFaction = faction;
+            }
+        }
+        return bestScore > 0 ? bestFaction : null;
     }
 
     private drawPolygonPath(feature: MunicipalityFeature, project: (x: number, y: number) => [number, number]): void {
@@ -511,8 +571,13 @@ export class Phase0PreparationMap {
         munId: MunicipalityId,
         project: (x: number, y: number) => [number, number]
     ): void {
+        const targetNormalized = normalizeMunKey(String(munId));
         const mun1990Ids = Array.from(this.municipalityIdByMun1990.entries())
-            .filter(([, mapped]) => mapped === munId)
+            .filter(([mun1990Id, mapped]) => {
+                if (mapped === munId) return true;
+                if (normalizeMunKey(String(mapped)) === targetNormalized) return true;
+                return normalizeMunKey(mun1990Id) === targetNormalized;
+            })
             .map(([mun1990Id]) => mun1990Id)
             .sort(strictCompare);
         if (mun1990Ids.length === 0) return;
@@ -614,7 +679,7 @@ export class Phase0PreparationMap {
             this.setSelectedMunicipality(null);
             return;
         }
-        const munId = this.municipalityIdByMun1990.get(featureId);
+        const munId = this.resolveStateMunicipalityId(featureId);
         if (!munId) return;
         this.selectMunicipality(munId, this.displayNameByMun1990.get(featureId) ?? String(munId));
     }
@@ -708,10 +773,10 @@ export class Phase0PreparationMap {
             this.hideHoverTooltip();
             return;
         }
-        const munId = this.municipalityIdByMun1990.get(featureId) ?? null;
+        const munId = this.resolveStateMunicipalityId(featureId);
         const munName = this.displayNameByMun1990.get(featureId) ?? (munId ? String(munId) : featureId);
         const mun = munId ? this.gameState?.municipalities?.[munId] : undefined;
-        const controller = munId ? (this.gameState?.political_controllers?.[munId] ?? null) : null;
+        const controller = this.getMunicipalityController(munId);
         const stability = mun?.stability_score ?? 50;
         const controlStatus = mun?.control_status ?? 'NEUTRAL';
         const majority = this.getMajorityGroup(munId);
@@ -768,7 +833,7 @@ export class Phase0PreparationMap {
         this.setSelectedMunicipality({
             munId,
             munName,
-            controller: this.gameState?.political_controllers?.[munId] ?? null,
+            controller: this.getMunicipalityController(munId),
             stabilityScore: mun?.stability_score ?? 50,
             controlStatus: mun?.control_status ?? 'NEUTRAL',
             orgPen: op,

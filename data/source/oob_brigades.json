@@ -16,7 +16,8 @@
       "Remapped arbih_7th_corps -> arbih_3rd_corps (12 brigades)",
       "Added default_equipment_class to all 261 brigades",
       "Added available_from turn number to all 261 brigades",
-      "Added mandatory: true for all turn-0 brigades"
+      "Added mandatory: true for all turn-0 brigades",
+      "Game design: ARBiH 6th/7th Corps do not exist; 3rd/4th Corps brigades available_from set to 0 (not late by corps)."
     ],
     "validation_status": "COMPLETE - All historical sources reconciled"
   },
@@ -629,7 +630,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_319th_liberation",
@@ -732,7 +734,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_374th_slavna_light",
@@ -744,7 +747,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_375th_liberation",
@@ -847,7 +851,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_450th_light",
@@ -859,7 +864,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_441st_vitezka_mountain",
@@ -897,7 +903,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_449th_eastern_herzegovina_mountain",
@@ -909,7 +916,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_501st_slavna_mountain",
@@ -1035,7 +1043,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_708th_mountain",
@@ -1047,7 +1056,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_712th_mountain",
@@ -1059,7 +1069,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_725th_light",
@@ -1071,7 +1082,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_727th_slavna",
@@ -1083,7 +1095,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_733rd_mountain",
@@ -1095,7 +1108,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_737th_muslim_light",
@@ -1107,7 +1121,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_705th_slavna_mountain",
@@ -1119,7 +1134,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_707th_slavna_mountain",
@@ -1131,7 +1147,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_717th_slavna_mountain",
@@ -1143,7 +1160,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_770th_slavna_mountain",
@@ -1155,7 +1173,8 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "mandatory": true
     },
     {
       "id": "arbih_210th_vitezka_liberation_nesib_maliki",
@@ -1370,71 +1389,6 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 12
-    },
-    {
-      "id": "arbih_military_school_center",
-      "faction": "RBiH",
-      "name": "Military School Center",
-      "home_mun": "zenica",
-      "home_settlement": "Zenica",
-      "subordinate_to": "arbih_1st_corps",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "arbih_main_logistics_center",
-      "faction": "RBiH",
-      "name": "Main Logistics Center",
-      "home_mun": "visoko",
-      "home_settlement": "Visoko",
-      "subordinate_to": "arbih_1st_corps",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "arbih_24th_sabotage_battalion_black_wolves",
-      "faction": "RBiH",
-      "name": "24th Sabotage Battalion \"Black Wolves\"",
-      "home_mun": "kalesija",
-      "home_settlement": "Vukovije Donje",
-      "subordinate_to": "arbih_2nd_corps",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "arbih_24th_antiterrorist_company_ivinice_wasps",
-      "faction": "RBiH",
-      "name": "24th Antiterrorist Company \"Živinice Wasps\"",
-      "home_mun": "zivinice",
-      "home_settlement": "Živinice",
-      "subordinate_to": "arbih_2nd_corps",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "arbih_81st_reconnaissancesabotage_company",
-      "faction": "RBiH",
-      "name": "81st Reconnaissance-Sabotage Company",
-      "home_mun": "gorazde",
-      "home_settlement": "Goražde",
-      "subordinate_to": "arbih_1st_corps",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
     },
     {
       "id": "rs_1st_guards_motorized",
@@ -2399,201 +2353,6 @@
       "mandatory": true
     },
     {
-      "id": "rs_10th_sabotage_detachment",
-      "faction": "RS",
-      "name": "10th Sabotage Detachment",
-      "home_mun": "vlasenica",
-      "home_settlement": "Vlasenica",
-      "subordinate_to": "vrs_main_staff",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "rs_89th_rocket_artillery_brigade",
-      "faction": "RS",
-      "name": "89th Rocket Artillery Brigade",
-      "home_mun": "banja_luka",
-      "home_settlement": "Banja Luka",
-      "subordinate_to": "vrs_main_staff",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "rs_rajko_bala_center_for_military_schools",
-      "faction": "RS",
-      "name": "\"Rajko Balač\" Center for Military Schools",
-      "home_mun": "banja_luka",
-      "home_settlement": "Banja Luka",
-      "subordinate_to": "vrs_main_staff",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "rs_67th_communications_regiment",
-      "faction": "RS",
-      "name": "67th Communications Regiment",
-      "home_mun": "han_pijesak",
-      "home_settlement": "Han Pijesak",
-      "subordinate_to": "vrs_main_staff",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "rs_63rd_autotransport_battalion",
-      "faction": "RS",
-      "name": "63rd Autotransport Battalion",
-      "home_mun": "zvornik",
-      "home_settlement": "Zvornik",
-      "subordinate_to": "vrs_main_staff",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "rs_14th_rear_base",
-      "faction": "RS",
-      "name": "14th Rear Base",
-      "home_mun": "banja_luka",
-      "home_settlement": "Banja Luka",
-      "subordinate_to": "vrs_main_staff",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "rs_27th_rear_base",
-      "faction": "RS",
-      "name": "27th Rear Base",
-      "home_mun": "sokolac",
-      "home_settlement": "Sokolac",
-      "subordinate_to": "vrs_main_staff",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "rs_30th_rear_base",
-      "faction": "RS",
-      "name": "30th Rear Base",
-      "home_mun": "bileca",
-      "home_settlement": "Bileća",
-      "subordinate_to": "vrs_main_staff",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "rs_35th_rear_base",
-      "faction": "RS",
-      "name": "35th Rear Base",
-      "home_mun": "bijeljina",
-      "home_settlement": "Bijeljina",
-      "subordinate_to": "vrs_main_staff",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "rs_410th_intelligence_center",
-      "faction": "RS",
-      "name": "410th Intelligence Center",
-      "home_mun": "banja_luka",
-      "home_settlement": "Banja Luka",
-      "subordinate_to": "vrs_main_staff",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "rs_technical_repair_institute_hadii",
-      "faction": "RS",
-      "name": "Technical Repair Institute \"Hadžići\"",
-      "home_mun": "hadzici",
-      "home_settlement": "Hadžići",
-      "subordinate_to": "vrs_main_staff",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "rs_military_hospital",
-      "faction": "RS",
-      "name": "Military Hospital",
-      "home_mun": "sokolac",
-      "home_settlement": "Sokolac",
-      "subordinate_to": "vrs_main_staff",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "rs_21st_independent_armored_battalion",
-      "faction": "RS",
-      "name": "21st Independent Armored Battalion",
-      "home_mun": "bosanski_petrovac",
-      "home_settlement": "Bosanski Petrovac",
-      "subordinate_to": "vrs_1st_krajina",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mechanized",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "rs_doboj_operational_group_9_9th_recce_9th_mp_9th_mixed_engineer",
-      "faction": "RS",
-      "name": "\"Doboj\" Operational Group 9 (9th Recce, 9th MP, 9th Mixed Engineer)",
-      "home_mun": "doboj",
-      "home_settlement": "Doboj",
-      "subordinate_to": "vrs_1st_krajina",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "rs_30th_infantry_division_elements_30th_recce_30th_mp_30th_comms_36th_ind_armored_bn",
-      "faction": "RS",
-      "name": "30th Infantry Division elements (30th Recce, 30th MP, 30th Comms, 36th Ind Armored Bn)",
-      "home_mun": "sipovo",
-      "home_settlement": "Šipovo",
-      "subordinate_to": "vrs_1st_krajina",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mechanized",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
       "id": "hrhb_1st_brigade_mostar",
       "faction": "HRHB",
       "name": "1st Brigade (Mostar)",
@@ -2952,19 +2711,6 @@
       "available_from": 8
     },
     {
-      "id": "hrhb_103rd_104th_105th_106th_brigades",
-      "faction": "HRHB",
-      "name": "103rd, 104th, 105th, 106th Brigades",
-      "home_mun": "derventa",
-      "home_settlement": "",
-      "subordinate_to": "hvo_central_bosnia",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
       "id": "hrhb_108th_brigade_listed_again_in_narrative",
       "faction": "HRHB",
       "name": "108th Brigade (listed again in narrative)",
@@ -3009,30 +2755,6 @@
       "home_mun": "tuzla",
       "home_settlement": "Tuzla",
       "subordinate_to": "arbih_2nd_corps",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 8
-    },
-    {
-      "id": "hrhb_posuje_battalion_kralj_tomislav",
-      "faction": "HRHB",
-      "name": "Posušje battalion (Kralj Tomislav)",
-      "home_mun": "posusje",
-      "home_settlement": "Posušje",
-      "subordinate_to": "hvo_tomislavgrad",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 8
-    },
-    {
-      "id": "hrhb_kupres_battalion_kralj_tomislav",
-      "faction": "HRHB",
-      "name": "Kupres battalion (Kralj Tomislav)",
-      "home_mun": "kupres",
-      "home_settlement": "Kupres",
-      "subordinate_to": "hvo_tomislavgrad",
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
@@ -3273,19 +2995,6 @@
       "mandatory": true
     },
     {
-      "id": "vrs_30th_division",
-      "name": "30th Light Infantry Division",
-      "faction": "RS",
-      "home_settlement": "Mrkonjić Grad",
-      "home_mun": "mrkonjic_grad",
-      "kind": "brigade",
-      "source": "historical_enrichment_1992",
-      "subordinate_to": "vrs_1st_krajina",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
       "id": "vrs_31st_mountain_storm",
       "name": "31st Mountain \"Storm\" Brigade",
       "faction": "RS",
@@ -3320,19 +3029,6 @@
       "kind": "brigade",
       "source": "historical_enrichment_1992",
       "subordinate_to": "vrs_1st_krajina",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true
-    },
-    {
-      "id": "vrs_wolves_of_drina",
-      "name": "Wolves of Drina",
-      "faction": "RS",
-      "home_settlement": "Zvornik",
-      "home_mun": "zvornik",
-      "kind": "brigade",
-      "source": "historical_enrichment_1992",
-      "subordinate_to": "vrs_drina",
       "default_equipment_class": "mountain",
       "available_from": 0,
       "mandatory": true

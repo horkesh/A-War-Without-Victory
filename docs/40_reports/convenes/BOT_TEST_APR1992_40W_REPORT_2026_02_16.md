@@ -2,7 +2,7 @@
 
 **Date:** 2026-02-16  
 **Request:** Run scenario 40 weeks from April 1992; report on troop strengths, control flips, and major happenings.  
-**Source run:** `apr1992_historical_52w__8f38ea4a52d0448f__w52` (canonical April 1992, phase_ii, full OOB, smart bots).  
+**Source run:** `apr1992_historical_52w__8f38ea4a52d0448f__w52` (legacy run; canonical April 1992 scenario is now **apr1992_definitive_52w** for all bot and desktop use).  
 **Note:** A dedicated 40-week run was started but takes several minutes; this report uses the existing 52-week run. Combat totals for **weeks 1–40** are summed from `phase_ii_attack_resolution_weekly`; troop strengths and control are **initial (week 0)** and **final (week 52)** to show full bot trajectory.
 
 ---
@@ -107,7 +107,7 @@ sokolac 37, vlasenica 33, kalinovik 32, kotor_varos 26, trebinje 24, doboj 22, d
 To get a run that stops at week 40 and get `run_summary.json` / `end_report.md` for that horizon:
 
 ```bash
-npm run sim:scenario:run -- --scenario data/scenarios/apr1992_historical_52w.json --weeks 40 --unique --out runs
+npm run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_52w.json --weeks 40 --unique --out runs
 ```
 
 Artifacts will be under `runs/<run_id>/` (e.g. `run_summary.json`, `end_report.md`, `final_save.json`). A 40-week run can take on the order of 5–10 minutes.

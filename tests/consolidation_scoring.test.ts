@@ -76,6 +76,23 @@ test('scoreConsolidationTarget applies fast-cleanup mun bonus', () => {
     settlementsByMun
   });
   assert.ok(score >= BONUS_FAST_CLEANUP_MUN, 'score should include fast-cleanup bonus');
+  assert.ok(score >= 130, `Prijedor fast-cleanup score should be high for quick rear cleanup, got ${score}`);
+});
+
+test('fast-cleanup bonus is RS-specific for Prijedor/Banja Luka set', () => {
+  const state = makeState({ S1: 'RBiH', S2: 'RS' });
+  const edges = [{ a: 'S1', b: 'S2' }];
+  const sidToMun = new Map<string, string>([['S1', 'prijedor'], ['S2', 'prijedor']]);
+  const settlementsByMun = new Map<string, string[]>([['prijedor', ['S1', 'S2']]]);
+  const score = scoreConsolidationTarget({
+    state,
+    targetSid: 'S2',
+    attackerFaction: 'RBiH',
+    edges,
+    sidToMun,
+    settlementsByMun
+  });
+  assert.ok(score < 130, `non-RS attacker should not receive RS fast-cleanup bonus in Prijedor, got ${score}`);
 });
 
 test('sortTargetsByConsolidationScore is deterministic (same input => same order)', () => {

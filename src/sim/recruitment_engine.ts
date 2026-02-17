@@ -396,6 +396,7 @@ export function applyRecruitment(
 export interface RunBotRecruitmentOptions {
   includeCorps?: boolean;
   includeMandatory?: boolean;
+  maxMandatoryPerFaction?: number;
   maxElectivePerFaction?: number;
 }
 
@@ -430,6 +431,7 @@ export function runBotRecruitment(
   const currentTurn = state.meta.turn;
   const includeCorps = options?.includeCorps !== false;
   const includeMandatory = options?.includeMandatory !== false;
+  const maxMandatoryPerFaction = options?.maxMandatoryPerFaction;
   const maxElectivePerFaction = options?.maxElectivePerFaction;
 
   // Step 0: Create corps formations (always free, same as legacy)
@@ -468,7 +470,15 @@ export function runBotRecruitment(
           .sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id))
       : [];
 
+    let mandatoryRecruitedForFaction = 0;
     for (const brigade of mandatoryBrigades) {
+      if (
+        typeof maxMandatoryPerFaction === 'number' &&
+        maxMandatoryPerFaction >= 0 &&
+        mandatoryRecruitedForFaction >= maxMandatoryPerFaction
+      ) {
+        break;
+      }
       if (resources.recruited_brigade_ids.includes(brigade.id)) continue;
       if (!factionHasPresenceInMun(state, faction, brigade.home_mun, sidToMun)) {
         report.brigades_skipped_no_control++;
@@ -514,6 +524,7 @@ export function runBotRecruitment(
         mandatory: true
       });
       report.mandatory_recruited++;
+      mandatoryRecruitedForFaction++;
     }
 
     // Step 2: Score and recruit elective formations
@@ -546,7 +557,6 @@ export function runBotRecruitment(
       const equipPool = resources.equipment_pools[faction];
       const availEquip = equipPool?.points ?? 0;
       const chosenClass = bestAffordableClass(brigade.default_equipment_class, availEquip);
-      const equipCost = getEquipmentCost(chosenClass);
 
       const result = recruitBrigade(
         state, brigade, chosenClass, resources, sidToMun, municipalityHqSettlement

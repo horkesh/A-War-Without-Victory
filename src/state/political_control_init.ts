@@ -622,7 +622,7 @@ async function initializePoliticalControllersFromHybrid1992(
  * Sets political_controllers from settlement graph + mapping; contested_control = false; control_status = SECURE per mun.
  * Phase F3: all settlements get a value (no undefined).
  */
-async function initializePoliticalControllersFromMun1990Only(
+export async function applyMunicipalityControllersFromMun1990Only(
   state: GameState,
   settlementGraph: LoadedSettlementGraph,
   mappingPath: string
@@ -737,7 +737,7 @@ export async function initializePoliticalControllers(
     const content = await readFile(path, 'utf8');
     const parsed = JSON.parse(content) as unknown;
     if (isMun1990OnlyControlFile(parsed)) {
-      return initializePoliticalControllersFromMun1990Only(state, settlementGraph, path);
+      return applyMunicipalityControllersFromMun1990Only(state, settlementGraph, path);
     }
   }
 

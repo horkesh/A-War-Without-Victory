@@ -1141,7 +1141,7 @@ Full-screen. Dark background with subtle topographic map texture. Center-aligned
 
 ### 19.2 New Campaign (desktop)
 
-When the user clicks **New Campaign** in the desktop app, the main menu closes and a **side-selection overlay** is shown (no scenario file picker). The overlay displays three options with faction flags: **RBiH (ARBiH)**, **RS (VRS)**, and **HRHB (HVO)**. Choosing one invokes the `start-new-campaign` IPC with that faction as `playerFaction`; the app then loads the fixed April 1992 start (`data/scenarios/apr1992_historical_52w.json`), sets `meta.player_faction`, injects recruitment state for the toolbar and Recruitment modal, and applies the state to the map. Other factions run on bot AI. Flag assets: same folder as crests (`/assets/sources/crests/`, see README there for `flag_RBiH.png`, `flag_RS.png`, `flag_HRHB.png`).
+When the user clicks **New Campaign** in the desktop app, the main menu closes and a **side-selection overlay** is shown (no scenario file picker). The overlay displays three options with faction flags: **RBiH (ARBiH)**, **RS (VRS)**, and **HRHB (HVO)**. Choosing one invokes the `start-new-campaign` IPC with that faction as `playerFaction`; the app then loads the canon April 1992 scenario (`data/scenarios/apr1992_definitive_52w.json`), sets `meta.player_faction`, injects recruitment state for the toolbar and Recruitment modal, and applies the state to the map. Other factions run on bot AI. Flag assets: same folder as crests (`/assets/sources/crests/`, see README there for `flag_RBiH.png`, `flag_RS.png`, `flag_HRHB.png`).
 
 ### 19.3 Scenario Selection Screen (Load scenario…)
 

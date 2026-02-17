@@ -96,3 +96,28 @@ test('createOobFormationsAtPhaseIEntry is idempotent and only creates when prese
   assert.strictEqual(r2.corps_created, 0);
   assert.strictEqual(r2.brigades_created, 0);
 });
+
+test('createOobFormationsAtPhaseIEntry preserves army_hq corps kind', () => {
+  const state: GameState = {
+    schema_version: CURRENT_SCHEMA_VERSION,
+    meta: { turn: 1, seed: 's' },
+    factions: [],
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    political_controllers: { sid_sarajevo: 'RBiH' },
+    municipalities: { centar_sarajevo: { control: 'consolidated' } }
+  };
+  const sidToMun = new Map([['sid_sarajevo', 'centar_sarajevo']]);
+  const hq: Record<string, string> = { centar_sarajevo: 'sid_sarajevo' };
+  const corps: OobCorps[] = [
+    { id: 'arbih_general_staff', faction: 'RBiH', name: 'General Staff', hq_mun: 'centar_sarajevo', kind: 'army_hq' }
+  ];
+
+  const report = createOobFormationsAtPhaseIEntry(state, corps, [], hq, sidToMun);
+  assert.strictEqual(report.corps_created, 1);
+  assert.strictEqual(state.formations!['arbih_general_staff']?.kind, 'army_hq');
+});

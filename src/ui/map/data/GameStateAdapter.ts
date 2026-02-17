@@ -255,6 +255,37 @@ export function parseGameState(json: unknown): LoadedGameState {
   const phase_i_alliance_rbih_hrhb =
     typeof state.phase_i_alliance_rbih_hrhb === 'number' ? state.phase_i_alliance_rbih_hrhb : undefined;
 
+  const displacementByMun: LoadedGameState['displacementByMun'] = {};
+  const rawDisplacement = state.displacement_state as Record<string, Record<string, unknown>> | undefined;
+  if (rawDisplacement && typeof rawDisplacement === 'object' && !Array.isArray(rawDisplacement)) {
+    for (const [munId, row] of Object.entries(rawDisplacement).sort((a, b) => a[0].localeCompare(b[0]))) {
+      const originalPopulation =
+        typeof row.original_population === 'number' && Number.isFinite(row.original_population)
+          ? row.original_population
+          : 0;
+      const displacedOut =
+        typeof row.displaced_out === 'number' && Number.isFinite(row.displaced_out)
+          ? row.displaced_out
+          : 0;
+      const displacedIn =
+        typeof row.displaced_in === 'number' && Number.isFinite(row.displaced_in)
+          ? row.displaced_in
+          : 0;
+      const lostPopulation =
+        typeof row.lost_population === 'number' && Number.isFinite(row.lost_population)
+          ? row.lost_population
+          : 0;
+      const currentPopulation = Math.max(0, originalPopulation - displacedOut - lostPopulation + displacedIn);
+      displacementByMun[munId] = {
+        originalPopulation,
+        displacedOut,
+        displacedIn,
+        lostPopulation,
+        currentPopulation
+      };
+    }
+  }
+
   return {
     label,
     turn,
@@ -271,5 +302,6 @@ export function parseGameState(json: unknown): LoadedGameState {
     player_faction: (meta.player_faction as string | null | undefined) ?? undefined,
     rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
     phase_i_alliance_rbih_hrhb: phase_i_alliance_rbih_hrhb ?? null,
+    displacementByMun: Object.keys(displacementByMun).length > 0 ? displacementByMun : undefined,
   };
 }

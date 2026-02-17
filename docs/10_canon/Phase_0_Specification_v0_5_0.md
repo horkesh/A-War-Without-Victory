@@ -112,10 +112,27 @@ Each faction starts with asymmetric **Pre-War Capital** pools representing organ
 - **RBiH:** 70 points (government legitimacy, demographic majority, limited preparation)
 - **HRHB:** 40 points (late formation, external dependence on Croatia, limited base)
 
-Capital is spent on Pre-War Phase actions and is NOT renewable.
+Capital is spent on Pre-War Phase actions.
+
+Default rule: capital is non-renewable.
 
 **Capital Scarcity:**
 Capital pools are insufficient to invest everywhere. Players must prioritize.
+
+#### 4.1.1 Conditional Capital Earn (Scenario-Gated)
+
+When a scenario defines scheduled referendum and war-start turns (`phase_0_scheduled_referendum_turn`, `phase_0_scheduled_war_start_turn`), factions may earn additional pre-war capital via deterministic per-turn trickle.
+
+**Earn Rule:**
+- Per turn, each faction gains a fixed `PREWAR_CAPITAL_TRICKLE_PER_TURN` amount.
+- Application order is deterministic: canonical faction order (`RBiH`, `RS`, `HRHB`).
+- Trickle is additive to `prewar_capital` and constrained by a fixed reserve cap (`PREWAR_CAPITAL_TRICKLE_MAX_BONUS`) above each faction's initial capital.
+- When scenario does NOT define scheduled Phase 0 timing, capital remains strictly non-renewable per §4.1.
+
+**Design Intent:**
+Preserve scarcity and prioritization while reducing early-exhaustion dead turns in longer pre-war scenarios (e.g. Sep 1991 -> Apr 1992).
+
+**Implementation-note (2026-02-17, non-normative):** Sep 1991 calibration runs (20w/31w) validated constants `PREWAR_CAPITAL_TRICKLE_PER_TURN=1` and `PREWAR_CAPITAL_TRICKLE_MAX_BONUS=20`; all factions reach cap by turn 20; no tuning required. See [SEP_1991_CAPITAL_TRICKLE_CALIBRATION_2026_02_17.md](../40_reports/convenes/SEP_1991_CAPITAL_TRICKLE_CALIBRATION_2026_02_17.md).
 
 ---
 

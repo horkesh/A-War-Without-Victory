@@ -35,8 +35,8 @@ function copyCrestsIntoBuild(): Plugin {
 }
 
 /**
- * Serve /data/ and /assets/ from project root so the tactical map can load
- * GeoJSON, control data, and other derived data files.
+ * Serve /data/, /assets/, and /runs/ from project root so the tactical map can load
+ * GeoJSON, control data, run results (final_save.json), and other derived data files.
  */
 function serveTacticalMapData(): Plugin {
     return {
@@ -49,7 +49,7 @@ function serveTacticalMapData(): Plugin {
                 // Skip Vite module requests
                 const isModuleRequest = query && /(?:^|&)(?:url|import)(?=&|$|=)/.test('&' + query);
                 if (isModuleRequest) return next();
-                if (!pathname.startsWith('/assets/') && !pathname.startsWith('/data/')) return next();
+                if (!pathname.startsWith('/assets/') && !pathname.startsWith('/data/') && !pathname.startsWith('/runs/')) return next();
                 // Skip source files — let Vite handle .ts/.js/.tsx/.jsx as modules
                 if (/\.(ts|js|tsx|jsx|mjs|cjs|vue|svelte)$/.test(pathname)) return next();
 
@@ -98,13 +98,34 @@ function serveTacticalMapData(): Plugin {
     };
 }
 
+/** Redirect / to /tactical_map.html so http://localhost:3002/?run=... works. */
+function redirectRootToTacticalMap(): Plugin {
+    return {
+        name: 'redirect-root-to-tactical-map',
+        configureServer(server) {
+            server.middlewares.use((req, res, next) => {
+                const url = req.url ?? '';
+                const [pathname, query = ''] = url.split('?');
+                if (pathname === '/' || pathname === '') {
+                    const q = query ? `?${query}` : '';
+                    res.statusCode = 302;
+                    res.setHeader('Location', `/tactical_map.html${q}`);
+                    res.end();
+                    return;
+                }
+                next();
+            });
+        },
+    };
+}
+
 export default defineConfig({
     root: __dirname,
-    plugins: [serveTacticalMapData(), copyCrestsIntoBuild()],
+    plugins: [redirectRootToTacticalMap(), serveTacticalMapData(), copyCrestsIntoBuild()],
     server: {
-        port: 3001,
+        port: 3002,
         open: false,
-        strictPort: true,
+        strictPort: false,
         host: true,
     },
     base: './',  // Relative paths so the tactical map works both standalone (awwv://app/) and embedded (awwv://warroom/tactical-map/)

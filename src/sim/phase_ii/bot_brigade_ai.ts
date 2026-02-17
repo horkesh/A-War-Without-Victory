@@ -51,7 +51,7 @@ const PRESSURE_IMBALANCE_THRESHOLD = 1.8;
 // --- Target scoring constants ---
 
 /** Score bonus for attacking undefended settlements (garrison = 0). */
-const SCORE_UNDEFENDED = 100;
+const SCORE_UNDEFENDED = 150;
 
 /** Score bonus for attacking settlements in corridor priority municipalities. */
 const SCORE_CORRIDOR_OBJECTIVE = 95;
@@ -60,7 +60,7 @@ const SCORE_CORRIDOR_OBJECTIVE = 95;
 const SCORE_HOME_RECAPTURE = 60;
 
 /** Max score bonus for weak garrisons (scales linearly down from this). */
-const SCORE_WEAK_GARRISON_MAX = 50;
+const SCORE_WEAK_GARRISON_MAX = 80;
 
 /** Garrison threshold below which weakness bonus kicks in. */
 const GARRISON_WEAKNESS_THRESHOLD = 120;
@@ -69,7 +69,7 @@ const GARRISON_WEAKNESS_THRESHOLD = 120;
 const SCORE_OFFENSIVE_OBJECTIVE = 85;
 
 /** Weight for consolidation/breakthrough score (rear cleanup, isolated clusters, fast-cleanup muns). */
-const CONSOLIDATION_SCORE_WEIGHT = 0.15;
+const CONSOLIDATION_SCORE_WEIGHT = 0.35;
 
 /** Garrison at or above this value counts as "heavy resistance" for allowing duplicate attack targets (OG+operation exception only). */
 const HEAVY_RESISTANCE_GARRISON_THRESHOLD = 250;

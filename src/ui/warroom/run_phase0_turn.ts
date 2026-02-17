@@ -131,6 +131,17 @@ export function runPhase0TurnAndAdvance(
 
   // 2. Build real options from current state
   const options = buildPhase0TurnOptions(working);
+  options.referendum = {
+    ...(working.meta.phase_0_scheduled_referendum_turn !== undefined && working.meta.phase_0_scheduled_referendum_turn !== null
+      ? { deadlineTurns: working.meta.phase_0_scheduled_referendum_turn + 1 }
+      : {}),
+    ...(working.meta.phase_0_scheduled_referendum_turn !== undefined && working.meta.phase_0_scheduled_referendum_turn !== null
+      ? { scheduledReferendumTurn: working.meta.phase_0_scheduled_referendum_turn }
+      : {}),
+    ...(working.meta.phase_0_scheduled_war_start_turn !== undefined && working.meta.phase_0_scheduled_war_start_turn !== null
+      ? { scheduledWarStartTurn: working.meta.phase_0_scheduled_war_start_turn }
+      : {})
+  };
 
   // 3. Run the Phase 0 engine pipeline (declaration pressure, referendum, stability, transition)
   runPhase0Turn(working, options);

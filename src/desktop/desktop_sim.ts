@@ -19,6 +19,7 @@ import { runPhaseITurn } from '../sim/run_phase_i_browser.js';
 import { runTurn } from '../sim/turn_pipeline.js';
 import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
 import type { FactionId, MunicipalityId } from '../state/game_state.js';
+import { applyMunicipalityControllersFromMun1990Only } from '../state/political_control_init.js';
 import type { InvestmentType, InvestmentScope } from '../phase0/investment.js';
 import { applyInvestment } from '../phase0/investment.js';
 import { strictCompare } from '../state/validateGameState.js';
@@ -118,7 +119,19 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
   try {
     if (phase === 'phase_0') {
       const playerFaction = state.meta?.player_faction;
+      const phaseBefore = state.meta.phase;
       const next = runPhase0TurnAndAdvance(state, seed, playerFaction);
+      if (
+        phaseBefore === 'phase_0' &&
+        next.meta.phase === 'phase_i' &&
+        next.meta.phase_0_war_start_control_path
+      ) {
+        await applyMunicipalityControllersFromMun1990Only(
+          next,
+          graphForBrowser,
+          next.meta.phase_0_war_start_control_path
+        );
+      }
       return { state: next, report: { phase, turn: next.meta.turn } };
     }
     if (phase === 'phase_i') {

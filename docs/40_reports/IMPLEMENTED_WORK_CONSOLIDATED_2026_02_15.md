@@ -58,9 +58,9 @@
 | ORCHESTRATOR_SCENARIO_RUNS_HANDOFF_2026_02_12.md, ORCHESTRATOR_SCENARIO_RUNS_HANDOFF_2026_02_13.md | Scenario run handoffs; phase_ii_attack_resolution in run_summary; no-flip semantics clarified. |
 | ORCHESTRATOR_SCENARIO_HANDOFF_DECISIONS_2026_02_13.md | Closure: 0-flips cause (orders_processed), formation count change (OOB/recruitment path), disable_phase_i_control_flip semantics. |
 | ORCHESTRATOR_ABSORPTION_AND_CANON_UPDATE_2026_02_13.md | Canon updates for Phase II pipeline, §12 stubs, Systems Manual §7, context/CANON refs. |
-| ORCHESTRATOR_APR1992_SCENARIO_CREATION_COMPREHENSIVE_REPORT_2026_02_14.md | End-to-end summary of April 1992 scenario work (Phases A–H): research, formation-aware flip, OOB cleanup (261 brigades, corps, HRHB subordination), JNA ghost mechanic, initial formations rebuild, **apr1992_definitive_52w** (player-facing, New Campaign side picker), **apr1992_historical_52w** (52w benchmark, default for `npm run sim:scenario:run:default`). Links to DEFINITIVE_APR1992, side picker, recruitment UI, regression analysis. |
+| ORCHESTRATOR_APR1992_SCENARIO_CREATION_COMPREHENSIVE_REPORT_2026_02_14.md | End-to-end summary of April 1992 scenario work (Phases A–H): research, formation-aware flip, OOB cleanup (261 brigades, corps, HRHB subordination), JNA ghost mechanic, initial formations rebuild. **Canon scenario:** **apr1992_definitive_52w** — single scenario for desktop New Campaign, bot optimization, and `npm run sim:scenario:run:default`. apr1992_historical_52w = legacy reference. Links to DEFINITIVE_APR1992, side picker, recruitment UI, regression analysis. |
 
-*Convenes (remain in convenes/):* ORCHESTRATOR_52W_VIDEO_RUN_AND_ASPECTS_REPORT_2026_02_14.md (52w run --video --map); ORCHESTRATOR_52W_REGRESSION_ANALYSIS_2026_02_14.md (regression analysis, apr1992_historical_52w for 52w fidelity).
+*Convenes (remain in convenes/):* ORCHESTRATOR_52W_VIDEO_RUN_AND_ASPECTS_REPORT_2026_02_14.md (52w run --video --map); ORCHESTRATOR_52W_REGRESSION_ANALYSIS_2026_02_14.md (regression analysis). Canon 52w scenario: apr1992_definitive_52w.
 
 ---
 
@@ -93,7 +93,7 @@
 | GUI polish pass + refactor (GUI_POLISH_PASS_AND_REFACTOR_2026_02_14.md) | Tab renames (OVERVIEW/CONTROL/MILITARY/HISTORY); strategic zoom corps-only with NATO XX markers and watercolor alpha on small settlements; corps detail panel (CORPS COMMAND/STRENGTH/OG/ORDER OF BATTLE with clickable subordinates); posture dropdown (5 options), MOVE/ATTACK target-selection mode; zoom-to-selection; pruned SETTINGS/HELP modals; browser mode Load Scenario + dimmed Continue; dataset dropdown fix; AAR 0-events message. Refactor: `panelReadinessColor()`, `showPanel()`, `enterOrderSelectionMode()` helpers. |
 | Orders pipeline and posture UX (ORDERS_PIPELINE_AND_POSTURE_UX_2026_02_15.md) | Desktop advance uses full `runTurn` pipeline (combat, supply, exhaustion, posture costs, AoR rebalance, bot AI); four IPC channels stage/clear orders so player Attack/Move/Posture persist in state and arrows appear immediately; GameStateAdapter parses orders as Records; bot AI skips `meta.player_faction`; posture picker has human labels, tooltip stats, inline description, disabled by cohesion/readiness. |
 | Order target selection UX (ORDER_TARGET_SELECTION_SYSTEM_2026_02_15.md) | Attack/Move enter targeting mode with visual overlay, pulsing borders on hover, enriched tooltips, Escape to cancel, cursor feedback, compact targeting header, two-step attack confirmation, preview dashed arrow. |
-| Definitive April 1992 scenario (DEFINITIVE_APR1992_SCENARIO_2026_02_14.md) | Fixed 15 HRHB subordination bugs, corps field mapping bug (261 brigades with corps assignments). Removed anachronistic corps; added 3 army HQs (GS ARBiH, MS VRS, MS HVO). Equipment classes, available_from, mandatory on all 261 brigades. 18 corps/staff + 5 JNA ghost brigades (tag-based `dissolve:N`, 4-turn ramp-down). `apr1992_definitive_52w.json` with calibrated economics + 17 coercion municipalities. Side-picker: scenario briefing, per-faction descriptions, HARD/STANDARD/MODERATE badges. |
+| Definitive April 1992 scenario (DEFINITIVE_APR1992_SCENARIO_2026_02_14.md) | Fixed 15 HRHB subordination bugs, corps field mapping bug (261 brigades with corps assignments). Removed anachronistic corps; added 3 army HQs (GS ARBiH, MS VRS, MS HVO). Equipment classes, available_from, mandatory on all brigades. 18 corps/staff + 5 JNA ghost brigades (tag-based `dissolve:N`, 4-turn ramp-down). `apr1992_definitive_52w.json` with calibrated economics + 17 coercion municipalities. Side-picker: scenario briefing, per-faction descriptions, HARD/STANDARD/MODERATE badges. **Update 2026-02-17:** OOB corrected to true brigades only (25 non-brigade units removed): 236 brigades total, 195 mandatory at turn 0 (RBiH 116, RS 80, HRHB 40). See MILITIA_BRIGADE_FORMATION_DESIGN §10. |
 
 ---
 
@@ -144,6 +144,115 @@
 | Report | What was implemented |
 |--------|----------------------|
 | ORG_PEN_FORMULA_INIT_AND_PHASE0_HANDOFF_2026_02_16.md | Replaced uniform/controller-only organizational penetration seeds with deterministic A/B/C formula values: A = municipality controller (mayor-party proxy), B = faction-aligned 1991 population share threshold, C = planned war-start OOB brigade presence (`available_from <= war_start_turn`). Added pure formula module (`organizational_penetration_formula.ts`), refactored seeding path (`seed_organizational_penetration_from_control.ts`) with deterministic key normalization across controller/population/OOB maps, wired scenario initialization inputs in `scenario_runner.ts`, and aligned Phase 0->I uninvested handoff in `run_phase0_turn.ts` to formula-derived seeding. Added focused determinism/variance/integration tests. Canon propagation: Systems Manual implementation-note, Phase 0/I implementation-notes, context/docs index, ledger knowledge/changelog. |
+
+---
+
+## 13. Sep 1991 Phase 0 capital trickle calibration (2026-02-17)
+
+| Report | What was validated |
+|--------|--------------------|
+| [SEP_1991_CAPITAL_TRICKLE_CALIBRATION_2026_02_17.md](convenes/SEP_1991_CAPITAL_TRICKLE_CALIBRATION_2026_02_17.md) | 20w/31w Sep 1991 runs confirm trickle constants (1/turn, max +20) reach cap by turn 20; no tuning needed. Phase_0_Spec §4.1.1 implementation-note added. |
+
+---
+
+## 14. Deferred recruitment and ARBiH corps scope (2026-02-17)
+
+| Item | What was implemented |
+|------|----------------------|
+| **Deferred recruitment** | Scenario flag `no_initial_brigade_formations` with `recruitment_mode: "player_choice"`: init creates corps/army_hq only; brigades appear only via turn-based recruitment from turn 0 onward. Same deterministic Phase 0→militia→pool path; AoR/corps init valid with zero brigades. Scenario types + loader + scenario_runner; tests: scenario_no_initial_brigades.test.ts, init_control_mode + oob_phase_i_entry. Canon: Systems Manual §13, Phase II Spec (pipeline note), MILITIA_BRIGADE_FORMATION_DESIGN §10. |
+| **ARBiH 6th/7th corps policy** | Game scope: ARBiH has five corps (1st–5th) + General Staff; 6th/7th do not exist. Historical 6th→4th, 7th→3rd in tools (enrich/rebuild); `available_from` set to 0 for all 3rd/4th corps brigades in oob_brigades.json. MILITIA_BRIGADE_FORMATION_DESIGN §10, formation-expert SKILL.md, PROJECT_LEDGER. |
+
+---
+
+---
+
+## 15. Tactical map layers UX (2026-02-17)
+
+| Item | What was implemented |
+|------|----------------------|
+| **Bottom floating layer toolbar** | Replaced the top-right collapsible "Layers" panel with a **bottom floating layer toolbar** (`.tm-layer-toolbar`) containing only layer checkboxes (Political control, Front lines, Settlement labels, Municipality borders, Minimap, Formations, Brigade AoR). Same checkbox IDs preserved for MapApp wiring. |
+| **Load/run/replay off map surface** | Load State, Load Run, Load Replay, dataset selector, and replay transport controls are no longer on the map surface; loading is via main menu (Menu → Load Save / Load Replay) or desktop IPC (`game-state-updated`). Hidden compatibility elements retained for existing IPC/file handlers. |
+| **Shortcut** | `L` (toggle layer panel) removed; no replacement (layers are always visible in the bottom toolbar). |
+
+Canon: TACTICAL_MAP_SYSTEM §2, §13.1, §14.1; keyboard table no longer lists `L`.
+
+---
+
+## 16. Tactical map GUI corrections (2026-02-17)
+
+| Item | What was implemented |
+|------|----------------------|
+| **Toolbar date** | Top-right shows single campaign date derived from phase anchor (Phase 0 = Sep 1991; Phase I/II = Apr 1992). Replaces turn/capital/army summary text. |
+| **Settlement panel 5 tabs** | Tabs consolidated to OVERVIEW, CONTROL, MILITARY, ORDERS/EVENTS, HISTORY. Overview merges identification and admin; no SID/ID/provenance; type in sentence case; Military formation rows clickable to open formation panel. |
+| **Corps panel trim** | Removed ID, Faction, Status, Created (turn). Keeps CORPS COMMAND (stance, exhaustion, command span), STRENGTH, OPERATIONAL GROUPS, ORDER OF BATTLE, ACTIONS. |
+| **Brigade panel trim** | Removed FORMATION metadata block. Chain of Command section with prominent clickable parent corps; Statistics; AoR; SET POSTURE, MOVE/ATTACK, Clear Orders; zoom-to-selection. |
+| **Recruitment modal** | Wording: "Brigades you can recruit right now" and cost legend (C/E/M). |
+
+Canon: TACTICAL_MAP_SYSTEM §2 (summary), §13, §13.2, §13.3.
+
+---
+
+## 17. Staff Map (4th zoom layer) and settlement border removal (2026-02-17)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [STAFF_MAP_4TH_ZOOM_LAYER_AND_SETTLEMENT_BORDER_REMOVAL_2026_02_17.md](implemented/STAFF_MAP_4TH_ZOOM_LAYER_AND_SETTLEMENT_BORDER_REMOVAL_2026_02_17.md) | **Staff Map:** 4th viewing layer — procedural paper-map overlay (parchment, terrain hatching, serif typography, desaturated faction fills, full-detail 100×60px formation counters, front lines, cartographic decorations). Entry: press `4` → drag rectangle (≥5 settlements) → staff map opens at 8× zoom; separate overlay canvas with 10-pass pipeline and three-tier caching; all procedural effects deterministic (detHash). **Settlement border removal:** main tactical map no longer draws inter-settlement polygon strokes; settlement fills only. Bug fixes: staff map canvas `pointer-events: none` so exit button and clicks work; staff map labels limited to URBAN_CENTER and TOWN. Canon: TACTICAL_MAP_SYSTEM §2, §7, §8, §9, §12, §13. |
+
+---
+
+## 18. Staff Map: 12 visual enhancements (2026-02-17)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [STAFF_MAP_12_VISUAL_ENHANCEMENTS_2026_02_17.md](implemented/STAFF_MAP_12_VISUAL_ENHANCEMENTS_2026_02_17.md) | **Staff Map visual polish:** (1) Faction-colored 6px sidebar stripe on formation counters. (2) Barbed-wire front lines (quadratic Bezier curves + perpendicular barb ticks). (3) AoR faction fill with diagonal crosshatch (no settlement borders). (4) Contour lines from elevation (400/800/1200m thresholds). (5) River labels (italic blue, rotated along course). (6) Fold creases on parchment. (7) Pencil crosshatch for contested zones (≥2 cross-faction neighbors). (8) Coffee stain ring on parchment. (9) Margin annotations (week/date, formations per faction). (10) Irregular vignette edge (noise-modulated strips). (11) Faction army crests at top center (ARBiH, VRS, HVO). (12) Exit button moved to top-left. All deterministic (detHash); three-tier caching unchanged. Canon: TACTICAL_MAP_SYSTEM §2 (Staff Map). |
+
+---
+
+## 19. Staff Map crest stamp and war map barbed-wire front lines (2026-02-17)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [STAFF_MAP_CREST_STAMP_AND_WARMAP_BARBED_WIRE_FRONTLINES_2026_02_17.md](implemented/STAFF_MAP_CREST_STAMP_AND_WARMAP_BARBED_WIRE_FRONTLINES_2026_02_17.md) | **(1) Staff Map crest stamp:** Replaced three faction crests with a single player-faction crest in the top-left (right of exit button), styled as a faded ink stamp (rotation ~3.4° CCW, thin border frame, 0.55 alpha). Uses `loadedGameState.player_faction` (RBiH→ARBiH, RS→VRS, HRHB→HVO); no crest if player_faction null. **(2) War map barbed-wire front lines:** Main tactical map front lines now use the same barbed-wire motif as the staff map: 3-pass (glow + solid Bézier curve + perpendicular barb ticks at 14px intervals). `detHash()` exported from `constants.ts` and shared by MapApp and StaffMapRenderer. Canon: TACTICAL_MAP_SYSTEM §2 (front lines, Staff Map). |
+
+---
+
+## 20. War map enhanced formation markers (2026-02-17)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [WARMAP_ENHANCED_FORMATION_MARKERS_2026_02_17.md](implemented/WARMAP_ENHANCED_FORMATION_MARKERS_2026_02_17.md) | **Seven changes:** (1) **Marker refactor** — `drawNatoFormationMarker()` now accepts full `FormationView` and zoomLevel; derives shape/faction/posture from f. (2) **Readiness glow** — 1px inset stroke with `panelReadinessColor(f.readiness)` (active/forming/overextended/degraded). (3) **Strength numbers** — personnel below NATO symbol (formatStrength: &lt;1000 as-is, ≥1000 as X.Xk); corps/army show subordinate count (×N); zoom-adaptive 8px/9px. (4) **Name labels** — at tactical zoom only, below marker (8px mono, truncate 18 chars, dark pill bg). (5) **AABB hit-test** — replaced circular radius with axis-aligned bounding box (dim + 4px margin); topmost match when overlapping. (6) **ResizeObserver canvas fix** — canvas wrapper observed so resize runs when sidebar/panel opens or closes. (7) **Formation dimming** — non-selected formations at globalAlpha 0.25 (war map and staff map). Dead code removed (FORMATION_HIT_RADIUS, formatCampaignDate duplicate, unused constants). Canon: TACTICAL_MAP_SYSTEM §2, §8. |
+
+---
+
+## 21. Front line defended/undefended distinction and AoR crosshatch color (2026-02-17)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [FRONT_LINE_DEFENDED_UNDEFENDED_2026_02_17.md](implemented/FRONT_LINE_DEFENDED_UNDEFENDED_2026_02_17.md) | **(1) Defended vs undefended front:** Segment is defended if at least one adjacent settlement is in any brigade AoR; otherwise undefended. Defended: solid white line, warm gold glow, barbed-wire ticks. Undefended: dashed (6/4px), dimmer white, reddish glow, no barbs. **(2) AoR crosshatch adaptive color:** When Political Control layer ON, crosshatch uses black (visible on faction fills); when OFF, white (visible on dark background). Constants: FRONT_LINE.undefendedColor, undefendedGlowColor, undefendedDash. Canon: TACTICAL_MAP_SYSTEM §2 (front lines), §8 (AoR highlight). |
+
+---
+
+## 22. War map labels, AoR auto-display, front/AoR cleanup (2026-02-17)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [WARMAP_LABELS_AOR_FRONT_CLEANUP_2026_02_17.md](implemented/WARMAP_LABELS_AOR_FRONT_CLEANUP_2026_02_17.md) | **Six changes:** (1) **Labels restricted** to URBAN_CENTER and TOWN at all zoom levels (small settlement labels removed). (2) **Labels toggle removed** — labels always on; no checkbox. (3) **Brigade AoR toggle removed** — AoR highlight automatic when any formation selected; no layer toggle. (4) Front line defended/undefended distinction (aligns with §21). (5) AoR crosshatch adaptive color (aligns with §21). (6) **Crosshatch density increased** (spacing 7→5, width 1.0→1.5, alpha 0.35→0.55) on war map and staff map. Dead code: LayerVisibility.labels and .brigadeAor, DEFAULT_LAYERS, checkbox DOM, setLayer('brigadeAor') calls, #layer-labels and #layer-brigade-aor HTML. Canon: TACTICAL_MAP_SYSTEM §2, §8, §13.1. |
+
+---
+
+## 23. Displacement refactor: shared utils (2026-02-17)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [DISPLACEMENT_REFACTOR_SHARED_UTILS_2026_02_17.md](implemented/DISPLACEMENT_REFACTOR_SHARED_UTILS_2026_02_17.md) | **Code organization (no behavior change):** New `displacement_state_utils.ts` with `getOrInitDisplacementState` and `getMunicipalityIdFromRecord`. `displacement_takeover` and `minority_flight` import from it; removed ~30 lines duplication each. Simplified `minority_flight` (redundant assignments, unused import). Canon: Systems Manual §12 implementation-note (displacement module structure). |
+
+---
+
+## 24. Dual defensive arc front lines and war map UI cleanup (2026-02-17)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [DUAL_DEFENSIVE_ARC_FRONT_LINES_2026_02_17.md](implemented/DUAL_DEFENSIVE_ARC_FRONT_LINES_2026_02_17.md) | **Dual defensive arc front lines:** Replaced single white front line with **paired faction-colored defensive arc symbols** on each side of settlement borders — arcs only where brigades are deployed (defendedByFaction from brigade AoR). Both factions with AoR → arcs both sides; one faction → arcs that side only; neither → nothing drawn. Perpendicular barb ticks toward enemy; faction colors from SIDE_RGB (RBiH green, RS crimson, HRHB blue). Old single-line system removed (undefended/dashed, FRONT_LINE.color/glowColor/barbColor, defendedSids partition). Refactor: single collection loop then glow/arc/barb draw passes. Also: AoR crosshatch adaptive color and density, labels URBAN_CENTER+TOWN only, Labels and Brigade AoR toggles removed (aligns with §22). Canon: TACTICAL_MAP_SYSTEM §2 (front lines), §8. |
 
 ---
 

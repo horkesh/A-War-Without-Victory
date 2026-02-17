@@ -11,9 +11,10 @@
 
 import type { GameState, FactionId, MunicipalityId } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
-import { turnToDateString, getPlayerFaction, getFactionPartyPen, hasFactionParamilitary, controlStatusLabel } from './warroom_utils.js';
+import { turnToDateString, getPlayerFaction, getFactionPartyPen, hasFactionParamilitary, controlStatusLabel, FACTION_COLORS, factionCssClass } from './warroom_utils.js';
 
 interface ReportContent {
+    factionId: string;
     from: string;
     to: string;
     date: string;
@@ -178,12 +179,13 @@ export class ReportsModal {
     private generateContent(): ReportContent {
         const turn = this.gameState.meta.turn;
         const reportTurn = Math.max(0, turn - 1);
-        const factionId = getPlayerFaction(this.gameState.factions);
+        const factionId = getPlayerFaction(this.gameState);
 
         const headers = REPORT_HEADERS[factionId] ?? REPORT_HEADERS['RBiH'];
         const body = this.generateReportBody(factionId, reportTurn);
 
         return {
+            factionId,
             from: headers.from,
             to: headers.to,
             date: turnToDateString(reportTurn),
@@ -201,7 +203,10 @@ export class ReportsModal {
         const content = this.generateContent();
 
         const report = document.createElement('div');
-        report.className = 'reports-modal';
+        const fCss = factionCssClass(content.factionId as any);
+        report.className = `reports-modal faction-${fCss}`;
+        const fc = FACTION_COLORS[content.factionId] ?? FACTION_COLORS['RBiH'];
+        report.style.borderTop = `3px solid ${fc.primary}`;
 
         // Classification stamps
         const classTop = document.createElement('div');

@@ -10,6 +10,7 @@ import {
   accumulateDeclarationPressure,
   holdReferendum,
   updateReferendumEligibility,
+  getPrewarCapital,
   type DeclarationPressureOptions,
   type Phase0TurnOptions
 } from '../src/phase0/index.js';
@@ -96,6 +97,19 @@ test('runPhase0Turn: runs declaration pressure when options supplied', () => {
   runPhase0Turn(state, { declarationPressure: rsSatisfyingOptions });
   const rs = state.factions.find((f) => f.id === 'RS')!;
   assert.strictEqual(rs.declaration_pressure, 10);
+});
+
+test('runPhase0Turn: applies scheduled phase_0 capital trickle', () => {
+  const state = minimalPhase0State();
+  const beforeRbih = getPrewarCapital(state, 'RBiH');
+  const beforeRs = getPrewarCapital(state, 'RS');
+  const beforeHrhb = getPrewarCapital(state, 'HRHB');
+  state.meta.phase_0_scheduled_referendum_turn = 26;
+  state.meta.phase_0_scheduled_war_start_turn = 30;
+  runPhase0Turn(state, {});
+  assert.strictEqual(getPrewarCapital(state, 'RBiH'), beforeRbih + 1);
+  assert.strictEqual(getPrewarCapital(state, 'RS'), beforeRs + 1);
+  assert.strictEqual(getPrewarCapital(state, 'HRHB'), beforeHrhb + 1);
 });
 
 test('runPhase0Turn: runs referendum eligibility when both declared', () => {

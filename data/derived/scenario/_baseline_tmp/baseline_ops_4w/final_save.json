@@ -5824,6 +5824,7 @@
     "S300730": true,
     "S300748": true
   },
+  "displacement_camp_state": {},
   "effective_posture_exposure": {
     "by_faction": {},
     "last_updated_turn": 4
@@ -28959,6 +28960,7 @@
       "since_turn": 1
     }
   },
+  "hostile_takeover_timers": {},
   "international_visibility_pressure": {
     "atrocity_visibility": 0,
     "enclave_humanitarian_pressure": 1,

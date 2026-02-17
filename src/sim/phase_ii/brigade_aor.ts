@@ -1089,6 +1089,31 @@ export function computeBrigadeOperationalCoverageCap(
   return computeBrigadeOperationalCoverageCapFromFormation(formation);
 }
 
+const SORTED_ADJACENCY_BY_EDGES = new WeakMap<EdgeRecord[], Map<SettlementId, readonly SettlementId[]>>();
+
+function getSortedAdjacency(edges: EdgeRecord[]): Map<SettlementId, readonly SettlementId[]> {
+  const cached = SORTED_ADJACENCY_BY_EDGES.get(edges);
+  if (cached) return cached;
+
+  const adjacency = new Map<SettlementId, SettlementId[]>();
+  for (const edge of edges) {
+    const listA = adjacency.get(edge.a) ?? [];
+    listA.push(edge.b);
+    adjacency.set(edge.a, listA);
+
+    const listB = adjacency.get(edge.b) ?? [];
+    listB.push(edge.a);
+    adjacency.set(edge.b, listB);
+  }
+  for (const [sid, neighbors] of adjacency.entries()) {
+    neighbors.sort(strictCompare);
+    adjacency.set(sid, neighbors);
+  }
+
+  SORTED_ADJACENCY_BY_EDGES.set(edges, adjacency);
+  return adjacency;
+}
+
 /**
  * Return the capped subset of AoR settlements treated as actively covered this turn.
  * Deterministic ordering:
@@ -1110,35 +1135,14 @@ export function getBrigadeOperationalCoverageSettlements(
   const formation = state.formations?.[formationId];
   const faction = formation?.faction;
   const aorSet = new Set(aor);
-  const adj = new Map<SettlementId, SettlementId[]>();
-  const frontSeeds = new Set<SettlementId>();
+  const fullAdj = getSortedAdjacency(edges);
 
-  for (const e of edges) {
-    if (aorSet.has(e.a) || aorSet.has(e.b)) {
-      if (aorSet.has(e.a)) {
-        const list = adj.get(e.a) ?? [];
-        if (aorSet.has(e.b)) list.push(e.b);
-        adj.set(e.a, list);
-      }
-      if (aorSet.has(e.b)) {
-        const list = adj.get(e.b) ?? [];
-        if (aorSet.has(e.a)) list.push(e.a);
-        adj.set(e.b, list);
-      }
-      if (aorSet.has(e.a) && !aorSet.has(e.b) && pc[e.a] && pc[e.b] && pc[e.a] !== pc[e.b]) {
-        frontSeeds.add(e.a);
-      }
-      if (aorSet.has(e.b) && !aorSet.has(e.a) && pc[e.a] && pc[e.b] && pc[e.a] !== pc[e.b]) {
-        frontSeeds.add(e.b);
-      }
-      if (aorSet.has(e.a) && aorSet.has(e.b) && pc[e.a] && pc[e.b] && pc[e.a] !== pc[e.b]) {
-        frontSeeds.add(e.a);
-        frontSeeds.add(e.b);
-      }
+  const frontSeeds = new Set<SettlementId>();
+  for (const sid of aor) {
+    for (const neighbor of fullAdj.get(sid) ?? []) {
+      if (pc[sid] && pc[neighbor] && pc[sid] !== pc[neighbor]) frontSeeds.add(sid);
     }
   }
-
-  for (const list of adj.values()) list.sort(strictCompare);
 
   const seedCandidates = Array.from(frontSeeds).sort(strictCompare);
   if (seedCandidates.length === 0) {
@@ -1162,7 +1166,7 @@ export function getBrigadeOperationalCoverageSettlements(
 
   while (queue.length > 0 && covered.length < cap) {
     const current = queue.shift()!;
-    const neighbors = adj.get(current) ?? [];
+    const neighbors = (fullAdj.get(current) ?? []).filter((n) => aorSet.has(n));
     for (const n of neighbors) {
       if (visited.has(n)) continue;
       if (faction && pc[n] && pc[n] !== faction) continue;
@@ -1215,9 +1219,12 @@ export function getSettlementGarrison(
   const brigadeAor = state.brigade_aor ?? {};
   const formationId = brigadeAor[sid];
   if (!formationId) return 0;
-  const covered = new Set(getBrigadeOperationalCoverageSettlements(state, formationId, edges));
-  if (!covered.has(sid)) return 0;
-  return computeBrigadeDensity(state, formationId, edges);
+  const coveredSettlements = getBrigadeOperationalCoverageSettlements(state, formationId, edges);
+  if (!coveredSettlements.includes(sid)) return 0;
+  const formation = state.formations?.[formationId];
+  if (!formation) return 0;
+  const personnel = formation.personnel ?? 1000;
+  return personnel / Math.max(1, coveredSettlements.length);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

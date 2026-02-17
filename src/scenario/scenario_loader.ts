@@ -178,8 +178,24 @@ export function normalizeScenario(raw: unknown): Scenario {
     throw new Error('Scenario must have weeks (integer >= 1)');
   }
   const start_phase = typeof o.start_phase === 'string' ? o.start_phase.trim() : undefined;
+  const phase_0_referendum_held_at_start =
+    typeof o.phase_0_referendum_held_at_start === 'boolean'
+      ? o.phase_0_referendum_held_at_start
+      : undefined;
+  const phase_0_rs_declared_at_start =
+    typeof o.phase_0_rs_declared_at_start === 'boolean'
+      ? o.phase_0_rs_declared_at_start
+      : undefined;
+  const phase_0_hrhb_declared_at_start =
+    typeof o.phase_0_hrhb_declared_at_start === 'boolean'
+      ? o.phase_0_hrhb_declared_at_start
+      : undefined;
   const phase_0_referendum_turn = typeof o.phase_0_referendum_turn === 'number' && Number.isInteger(o.phase_0_referendum_turn) ? o.phase_0_referendum_turn : undefined;
   const phase_0_war_start_turn = typeof o.phase_0_war_start_turn === 'number' && Number.isInteger(o.phase_0_war_start_turn) ? o.phase_0_war_start_turn : undefined;
+  const phase_0_war_start_control =
+    typeof o.phase_0_war_start_control === 'string' && o.phase_0_war_start_control.trim() !== ''
+      ? o.phase_0_war_start_control.trim()
+      : undefined;
   let turns: ScenarioTurn[] = Array.isArray(o.turns) ? (o.turns as ScenarioTurn[]) : [];
   turns = turns.map((t) => {
     const row = t as unknown as Record<string, unknown>;
@@ -267,6 +283,7 @@ export function normalizeScenario(raw: unknown): Scenario {
 
   // Recruitment system fields
   const recruitment_mode = o.recruitment_mode === 'player_choice' ? 'player_choice' as const : undefined;
+  const no_initial_brigade_formations = o.no_initial_brigade_formations === true;
   const recruitment_capital = normalizeResourceRecord(o.recruitment_capital);
   const recruitment_capital_trickle = normalizeResourceRecord(o.recruitment_capital_trickle);
   const equipment_points = normalizeResourceRecord(o.equipment_points);
@@ -305,8 +322,12 @@ export function normalizeScenario(raw: unknown): Scenario {
       scenario_id,
       scenario_start_week,
       start_phase,
+      phase_0_referendum_held_at_start,
+      phase_0_rs_declared_at_start,
+      phase_0_hrhb_declared_at_start,
       phase_0_referendum_turn,
       phase_0_war_start_turn,
+      phase_0_war_start_control,
       weeks,
       turns: normalizedTurns,
       use_harness_bots,
@@ -327,6 +348,7 @@ export function normalizeScenario(raw: unknown): Scenario {
       coercion_pressure_by_municipality,
       prerequisites,
       recruitment_mode,
+      no_initial_brigade_formations: no_initial_brigade_formations || undefined,
       recruitment_capital,
       recruitment_capital_trickle,
       equipment_points,
@@ -339,8 +361,12 @@ export function normalizeScenario(raw: unknown): Scenario {
     scenario_id,
     scenario_start_week,
     start_phase,
+    phase_0_referendum_held_at_start,
+    phase_0_rs_declared_at_start,
+    phase_0_hrhb_declared_at_start,
     phase_0_referendum_turn,
     phase_0_war_start_turn,
+    phase_0_war_start_control,
     weeks,
     turns,
     use_harness_bots: use_harness_bots || undefined,
@@ -361,6 +387,7 @@ export function normalizeScenario(raw: unknown): Scenario {
     coercion_pressure_by_municipality,
     prerequisites,
     recruitment_mode,
+    no_initial_brigade_formations: no_initial_brigade_formations || undefined,
     recruitment_capital,
     recruitment_capital_trickle,
     equipment_points,

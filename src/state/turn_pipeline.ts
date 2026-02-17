@@ -39,6 +39,7 @@ import {
   type TurnPipelineInput
 } from './turn_phases.js';
 import { runPhase0Turn } from '../phase0/index.js';
+import { buildPhase0TurnOptions } from '../phase0/phase0_options_builder.js';
 
 
 const PHASE_HANDLERS = [
@@ -73,7 +74,19 @@ export function runOneTurn(
   let working = cloneGameState(state);
 
   if (working.meta.phase === 'phase_0') {
-    runPhase0Turn(working, {});
+    const options = buildPhase0TurnOptions(working);
+    options.referendum = {
+      ...(working.meta.phase_0_scheduled_referendum_turn !== undefined && working.meta.phase_0_scheduled_referendum_turn !== null
+        ? { deadlineTurns: working.meta.phase_0_scheduled_referendum_turn + 1 }
+        : {}),
+      ...(working.meta.phase_0_scheduled_referendum_turn !== undefined && working.meta.phase_0_scheduled_referendum_turn !== null
+        ? { scheduledReferendumTurn: working.meta.phase_0_scheduled_referendum_turn }
+        : {}),
+      ...(working.meta.phase_0_scheduled_war_start_turn !== undefined && working.meta.phase_0_scheduled_war_start_turn !== null
+        ? { scheduledWarStartTurn: working.meta.phase_0_scheduled_war_start_turn }
+        : {})
+    };
+    runPhase0Turn(working, options);
     const nextTurn = working.meta.turn + 1;
     if (!Number.isInteger(nextTurn) || nextTurn < 0) {
       throw new Error(`Invariant: meta.turn must be non-negative integer; got ${nextTurn}`);

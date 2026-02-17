@@ -12,7 +12,8 @@ import {
   MIN_BRIGADE_SPAWN,
   MIN_ELIGIBLE_POPULATION_FOR_BRIGADE,
   REINFORCEMENT_RATE,
-  COMBAT_REINFORCEMENT_RATE
+  COMBAT_REINFORCEMENT_RATE,
+  WIA_TRICKLE_RATE
 } from '../state/formation_constants.js';
 import { militiaPoolKey } from '../state/militia_pool_key.js';
 import { getEligiblePopulationCount } from './phase_i/pool_population.js';
@@ -313,6 +314,48 @@ export function spawnFormationsFromPools(
   }
 
   report.created.sort((a, b) => a.formation_id.localeCompare(b.formation_id));
+  return report;
+}
+
+export interface WiaTricklebackReport {
+  formations_returned: number;
+  personnel_returned: number;
+}
+
+/**
+ * WIA trickleback: return wounded to formations that are out of combat.
+ * Only brigades not in attack posture and not disrupted receive personnel back.
+ * Deterministic: formations processed in sorted order by id.
+ */
+export function applyWiaTrickleback(state: GameState): WiaTricklebackReport {
+  const report: WiaTricklebackReport = {
+    formations_returned: 0,
+    personnel_returned: 0
+  };
+  const formations = state.formations ?? {};
+  const brigadeIds = (Object.keys(formations) as string[])
+    .filter((id) => (formations[id] as FormationState | undefined)?.kind === 'brigade')
+    .sort(strictCompare);
+
+  for (const id of brigadeIds) {
+    const f = formations[id] as FormationState;
+    const pending = f.wounded_pending ?? 0;
+    if (pending <= 0) continue;
+
+    if (f.posture === 'attack' || f.disrupted) continue;
+
+    const current = f.personnel ?? 0;
+    if (current >= MAX_BRIGADE_PERSONNEL) continue;
+
+    const returned = Math.min(pending, WIA_TRICKLE_RATE, MAX_BRIGADE_PERSONNEL - current);
+    if (returned <= 0) continue;
+
+    f.wounded_pending = pending - returned;
+    f.personnel = current + returned;
+    report.formations_returned += 1;
+    report.personnel_returned += returned;
+  }
+
   return report;
 }
 

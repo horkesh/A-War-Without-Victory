@@ -33,10 +33,18 @@ export interface Scenario {
   scenario_start_week?: number;
   /** When "phase_0", scenario starts at Turn 0 in Phase 0; transitions to Phase I at war_start_turn. */
   start_phase?: string;
+  /** For start_phase phase_0: whether referendum is already held at turn 0. Default: true (legacy fixtures). */
+  phase_0_referendum_held_at_start?: boolean;
+  /** For start_phase phase_0: whether RS starts already declared at turn 0. Default: true (legacy fixtures). */
+  phase_0_rs_declared_at_start?: boolean;
+  /** For start_phase phase_0: whether HRHB starts already declared at turn 0. Default: true (legacy fixtures). */
+  phase_0_hrhb_declared_at_start?: boolean;
   /** For start_phase phase_0: turn when referendum was held. War starts at referendum_turn + 4 per canon. */
   phase_0_referendum_turn?: number;
   /** For start_phase phase_0: turn when war starts (Phase I). Must be referendum_turn + 4. Default: phase_0_referendum_turn + 4. */
   phase_0_war_start_turn?: number;
+  /** For start_phase phase_0: control map key/path to apply exactly when war begins (e.g. "apr1992"). */
+  phase_0_war_start_control?: string;
   weeks: number;
   turns?: ScenarioTurn[];
   /** Phase H2.4: When true, harness injects baseline_ops for each week that has none (harness-only; off by default). */
@@ -78,6 +86,11 @@ export interface Scenario {
    * "auto_oob" = legacy behavior (init_formations_oob: true auto-spawns all). Default: "auto_oob".
    */
   recruitment_mode?: 'player_choice' | 'auto_oob';
+  /**
+   * When true with recruitment_mode "player_choice", init creates corps/army_hq only and
+   * defers brigade creation to turn-based recruitment (player or bot) from turn 0 onward.
+   */
+  no_initial_brigade_formations?: boolean;
   /** Per-faction recruitment capital (organizational readiness). Only used when recruitment_mode = "player_choice". */
   recruitment_capital?: Record<string, number>;
   /** Optional per-turn recruitment-capital accrual baseline by faction. */

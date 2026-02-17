@@ -89,21 +89,38 @@ export interface ViewTransform {
   canvasH: number;
 }
 
+// ─── Terrain Scalars ───────────────────────────────
+export interface TerrainScalars {
+  road_access_index: number;
+  river_crossing_penalty: number;
+  elevation_mean_m: number;
+  elevation_stddev_m: number;
+  slope_index: number;
+  terrain_friction_index: number;
+}
+
+// ─── Staff Map Region ──────────────────────────────
+export interface StaffMapRegion {
+  /** All settlement SIDs within the user-defined rectangle. Sorted for determinism. */
+  regionSids: string[];
+  /** Bounding box of the region in data-space coordinates. */
+  bbox: BBox;
+  /** The selection rectangle in data-space coordinates. */
+  selectionRect: { x0: number; y0: number; x1: number; y1: number };
+}
+
 // ─── Map State ──────────────────────────────────────
-export type ZoomLevel = 0 | 1 | 2;
+export type ZoomLevel = 0 | 1 | 2 | 3;
 
 export interface LayerVisibility {
   politicalControl: boolean;
   frontLines: boolean;
-  labels: boolean;
   roads: boolean;
   rivers: boolean;
   boundary: boolean;
   munBorders: boolean;
   minimap: boolean;
   formations: boolean;
-  /** When on, selected formation's AoR settlements are highlighted; requires game state loaded. */
-  brigadeAor: boolean;
 }
 
 /** Controls whether settlement polygons are colored by political control or by ethnic majority (1991). */
@@ -122,6 +139,8 @@ export interface MapStateSnapshot {
   selectedFormationId: string | null;
   controlDatasetKey: string;
   loadedGameState: LoadedGameState | null;
+  /** When set, the staff map overlay is active for this region. */
+  staffMapRegion: StaffMapRegion | null;
 }
 
 // ─── Loaded Game State ──────────────────────────────
@@ -149,6 +168,14 @@ export interface LoadedGameState {
   rbih_hrhb_war_earliest_turn?: number | null;
   /** RBiH–HRHB alliance value; when > ALLIED_THRESHOLD no front between them. */
   phase_i_alliance_rbih_hrhb?: number | null;
+  /** Municipality-level displacement snapshot for current population display in panel/tooltip. */
+  displacementByMun?: Record<string, {
+    originalPopulation: number;
+    displacedOut: number;
+    displacedIn: number;
+    lostPopulation: number;
+    currentPopulation: number;
+  }>;
 }
 
 export interface RecruitmentView {
@@ -281,7 +308,7 @@ export interface SharedBorderSegment {
 }
 
 // ─── Settlement Panel ───────────────────────────────
-export type PanelTabId = 'overview' | 'admin' | 'control' | 'intel' | 'orders' | 'aar' | 'events';
+export type PanelTabId = 'overview' | 'control' | 'intel' | 'orders_events' | 'aar';
 
 export interface SettlementPanelData {
   sid: string;
@@ -343,4 +370,6 @@ export interface LoadedData {
   primaryLabelSids: Set<string>;
   settlementCentroids: Map<string, [number, number]>;
   municipalityCentroids: Map<string, [number, number]>;
+  /** Per-settlement terrain scalars for staff map terrain rendering. */
+  terrainScalars: Record<string, TerrainScalars>;
 }

@@ -95,7 +95,7 @@ export function createOobFormationsAtPhaseIEntry(
       status: 'active',
       assignment: null,
       tags: [`mun:${c.hq_mun}`],
-      kind: 'corps_asset',
+      kind: c.kind === 'army_hq' ? 'army_hq' : 'corps_asset',
       personnel: 0,
       ...(hq_sid ? { hq_sid } : {})
     };

@@ -21,6 +21,22 @@ const FRY_RECOGNITION_TURN = 13;     // Same period: FRY recognition follows
 const CROATIA_SUPPORT_TURN = 17;     // ~January 1992: Croatia-HRHB cooperation intensifies
 
 /**
+ * Historical pre-war calibration used when a scenario explicitly carries scheduled
+ * referendum/war-start metadata (e.g. Sep 1991 -> Apr 1992 flow).
+ *
+ * Keeps declaration emergence threshold-based while allowing historical sequence:
+ * HRHB (Nov 1991) -> RS (Jan 1992) -> referendum (Mar 1992) -> war (Apr 1992).
+ */
+const HIST_RS_JNA_COORDINATION_TURN = 12;
+const HIST_RS_FRY_RECOGNITION_TURN = 12;
+const HIST_HRHB_SUPPORT_TURN = 8;
+const HIST_HRHB_WAR_CONTEXT_TURN = 8; // Represents "sustained violence begun" context.
+const HIST_RS_RELATIONSHIP_THRESHOLD = -0.4;
+const HIST_HRHB_RELATIONSHIP_THRESHOLD = 0.6;
+const HIST_RS_PRESSURE_THRESHOLD = 70;
+const HIST_HRHB_PRESSURE_THRESHOLD = 32;
+
+/**
  * Default historical relationship schedule (if state.phase0_relationships is absent).
  * RBiH-RS degrades over time; always hostile.
  */
@@ -113,6 +129,15 @@ function computeHrhbOrgCoverage(state: GameState): number {
   return Math.round((coveredCount / croatMajorityCount) * 100);
 }
 
+function hasScheduledPhase0Timing(state: GameState): boolean {
+  return Number.isInteger(state.meta.phase_0_scheduled_referendum_turn) &&
+    Number.isInteger(state.meta.phase_0_scheduled_war_start_turn);
+}
+
+function isRsDeclared(state: GameState): boolean {
+  return state.factions.some((f) => f.id === 'RS' && f.declared === true);
+}
+
 /**
  * Build Phase0TurnOptions from current GameState.
  * Provides real lookups for declaration pressure enabling conditions,
@@ -121,23 +146,40 @@ function computeHrhbOrgCoverage(state: GameState): number {
 export function buildPhase0TurnOptions(state: GameState): Phase0TurnOptions {
   const turn = state.meta.turn;
   const relationships = state.phase0_relationships;
+  const useHistoricalPhase0Calibration = hasScheduledPhase0Timing(state);
 
   const declarationPressure: DeclarationPressureOptions = {
     getRsOrgCoverageSerbMajority: (s: GameState) => computeRsOrgCoverage(s),
 
-    getJnaCoordinationTriggered: (_s: GameState) => turn >= JNA_COORDINATION_TURN,
+    getJnaCoordinationTriggered: (_s: GameState) =>
+      turn >= (useHistoricalPhase0Calibration ? HIST_RS_JNA_COORDINATION_TURN : JNA_COORDINATION_TURN),
 
     getRbhRsRelationship: (_s: GameState) =>
       relationships?.rbih_rs ?? defaultRbihRsRelationship(turn),
 
-    getFryRecognitionConfirmed: (_s: GameState) => turn >= FRY_RECOGNITION_TURN,
+    getFryRecognitionConfirmed: (_s: GameState) =>
+      turn >= (useHistoricalPhase0Calibration ? HIST_RS_FRY_RECOGNITION_TURN : FRY_RECOGNITION_TURN),
 
     getHrhbOrgCoverageCroatMajority: (s: GameState) => computeHrhbOrgCoverage(s),
 
-    getCroatiaSupportConfirmed: (_s: GameState) => turn >= CROATIA_SUPPORT_TURN,
+    getCroatiaSupportConfirmed: (_s: GameState) =>
+      turn >= (useHistoricalPhase0Calibration ? HIST_HRHB_SUPPORT_TURN : CROATIA_SUPPORT_TURN),
 
     getRbhHrhbRelationship: (_s: GameState) =>
       relationships?.rbih_hrhb ?? defaultRbihHrhbRelationship(turn),
+
+    ...(useHistoricalPhase0Calibration
+      ? {
+          rsOrgCoverageThreshold: 0,
+          hrhbOrgCoverageThreshold: 0,
+          rsRelationshipThreshold: HIST_RS_RELATIONSHIP_THRESHOLD,
+          hrhbRelationshipThreshold: HIST_HRHB_RELATIONSHIP_THRESHOLD,
+          rsPressureThreshold: HIST_RS_PRESSURE_THRESHOLD,
+          hrhbPressureThreshold: HIST_HRHB_PRESSURE_THRESHOLD,
+          isHrhbWarContextSatisfied: (s: GameState) =>
+            turn >= HIST_HRHB_WAR_CONTEXT_TURN || isRsDeclared(s)
+        }
+      : {})
   };
 
   return {

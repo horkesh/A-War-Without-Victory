@@ -188,6 +188,8 @@ export interface FormationState {
   composition?: BrigadeComposition;
   /** 1-turn disruption flag from AoR reshaping; reduces pressure output. */
   disrupted?: boolean;
+  /** WIA trickleback: wounded pending return to this formation (only return when out of combat). */
+  wounded_pending?: number;
 }
 
 export interface FrontPostureAssignment {
@@ -382,6 +384,40 @@ export interface DisplacementState {
   last_updated_turn: number; // integer, last mutation turn
 }
 
+/**
+ * Phase II: delayed hostile-takeover displacement timer.
+ * Starts on settlement control flip (when factions are at war) and matures after N turns.
+ */
+export interface HostileTakeoverTimerState {
+  mun_id: MunicipalityId;
+  from_faction: FactionId;
+  to_faction: FactionId;
+  started_turn: number;
+}
+
+/**
+ * Phase II: temporary municipality holding pool (camp simulation) prior to rerouting.
+ */
+export interface DisplacementCampState {
+  mun_id: MunicipalityId;
+  population: number;
+  started_turn: number;
+  by_faction: Partial<Record<FactionId, number>>;
+}
+
+/**
+ * Phase II: non-takeover minority flight (settlement-level).
+ * Tracks gradual (RBiH 50% over 26 turns) or completed (HRHB/RS 100% immediate).
+ * Key: SettlementId. Canon: displacement redesign 2026-02-17.
+ */
+export interface MinorityFlightStateEntry {
+  started_turn: number;
+  cumulative_fled: number;
+  target_faction: FactionId;
+  /** Initial minority population at settlement when flight started (for 50% cap). */
+  initial_minority_pop: number;
+}
+
 // Phase 22: Sustainability collapse state (per municipality)
 export interface SustainabilityState {
   mun_id: MunicipalityId;
@@ -461,6 +497,12 @@ export interface StateMeta {
   referendum_turn?: number | null;
   /** Phase 0: Turn when war starts (referendum_turn + 4). Phase I entered only at this turn. */
   war_start_turn?: number | null;
+  /** Phase 0: Optional scheduled referendum turn for deterministic historical starts when referendum is not held at turn 0. */
+  phase_0_scheduled_referendum_turn?: number | null;
+  /** Phase 0: Optional scheduled war-start turn override used with scheduled referendum starts. */
+  phase_0_scheduled_war_start_turn?: number | null;
+  /** Phase 0: Optional absolute path to a mun1990 control file to apply exactly when war starts. */
+  phase_0_war_start_control_path?: string | null;
   /** Phase 0: First turn when referendum became eligible (both RS and HRHB declared). */
   referendum_eligible_turn?: number | null;
   /** Phase 0: Deadline turn for referendum; if reached without referendum → non-war terminal. */
@@ -891,6 +933,12 @@ export interface GameState {
   end_state?: EndState;
   // Phase 21: Population displacement tracking (per municipality)
   displacement_state?: Record<MunicipalityId, DisplacementState>;
+  /** Phase II: delayed hostile takeover timers (per municipality). */
+  hostile_takeover_timers?: Record<MunicipalityId, HostileTakeoverTimerState>;
+  /** Phase II: temporary camp holding pools before rerouting (per municipality). */
+  displacement_camp_state?: Record<MunicipalityId, DisplacementCampState>;
+  /** Phase II: non-takeover minority flight state (per settlement). Canon: displacement redesign 2026-02-17. */
+  minority_flight_state?: Record<SettlementId, MinorityFlightStateEntry>;
   // Phase 22: Sustainability collapse tracking (per municipality)
   sustainability_state?: Record<MunicipalityId, SustainabilityState>;
   // Phase 3C: Collapse eligibility state (per faction, Tier-0)
@@ -1005,4 +1053,12 @@ export interface GameState {
   // --- Battle resolution & casualty tracking ---
   /** Cumulative casualty ledger (killed, wounded, missing/captured) per faction and formation. */
   casualty_ledger?: CasualtyLedger;
+
+  /** Cumulative civilian displacement casualties (killed, fled_abroad) by ethnicity-aligned faction. */
+  civilian_casualties?: CivilianCasualtiesByFaction;
+}
+
+/** Civilian casualties from displacement (killed, fled abroad) per faction (ethnicity-aligned). */
+export interface CivilianCasualtiesByFaction {
+  [factionId: string]: { killed: number; fled_abroad: number };
 }

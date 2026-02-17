@@ -206,6 +206,9 @@ function migrateState(raw: unknown): GameState {
         if (!('referendum_held' in meta) || meta.referendum_held === undefined) meta.referendum_held = false;
         if (!('referendum_turn' in meta) || meta.referendum_turn === undefined) meta.referendum_turn = null;
         if (!('war_start_turn' in meta) || meta.war_start_turn === undefined) meta.war_start_turn = null;
+        if (!('phase_0_scheduled_referendum_turn' in meta) || meta.phase_0_scheduled_referendum_turn === undefined) meta.phase_0_scheduled_referendum_turn = null;
+        if (!('phase_0_scheduled_war_start_turn' in meta) || meta.phase_0_scheduled_war_start_turn === undefined) meta.phase_0_scheduled_war_start_turn = null;
+        if (!('phase_0_war_start_control_path' in meta) || meta.phase_0_war_start_control_path === undefined) meta.phase_0_war_start_control_path = null;
         if (!('referendum_eligible_turn' in meta) || meta.referendum_eligible_turn === undefined) meta.referendum_eligible_turn = null;
         if (!('referendum_deadline_turn' in meta) || meta.referendum_deadline_turn === undefined) meta.referendum_deadline_turn = null;
         if (!('game_over' in meta) || meta.game_over === undefined) meta.game_over = false;
@@ -517,7 +520,9 @@ function migrateState(raw: unknown): GameState {
       const hasAnyPhaseII =
         (candidate as any).phase_ii_supply_pressure !== undefined ||
         (candidate as any).phase_ii_exhaustion !== undefined ||
-        (candidate as any).phase_ii_exhaustion_local !== undefined;
+        (candidate as any).phase_ii_exhaustion_local !== undefined ||
+        (candidate as any).hostile_takeover_timers !== undefined ||
+        (candidate as any).displacement_camp_state !== undefined;
       if (hasAnyPhaseII) {
         if (!('phase_ii_supply_pressure' in candidate) || (candidate as any).phase_ii_supply_pressure === undefined) {
           (candidate as any).phase_ii_supply_pressure = {};
@@ -527,6 +532,12 @@ function migrateState(raw: unknown): GameState {
         }
         if (!('phase_ii_exhaustion_local' in candidate) || (candidate as any).phase_ii_exhaustion_local === undefined) {
           (candidate as any).phase_ii_exhaustion_local = {};
+        }
+        if (!('hostile_takeover_timers' in candidate) || (candidate as any).hostile_takeover_timers === undefined) {
+          (candidate as any).hostile_takeover_timers = {};
+        }
+        if (!('displacement_camp_state' in candidate) || (candidate as any).displacement_camp_state === undefined) {
+          (candidate as any).displacement_camp_state = {};
         }
       }
 
