@@ -2,8 +2,9 @@
  * Phase B Step 2: Pre-War Capital System (Phase_0_Specification_v0_4_0.md §4.1).
  *
  * Asymmetric pools: RS=100, RBiH=70, HRHB=40.
- * Capital is non-renewable; spent via organizational investments.
- * No refunds, no regeneration.
+ * Capital is spent via organizational investments.
+ * By default it is non-renewable. Scheduled pre-war scenarios may use a
+ * deterministic trickle to avoid dead turns while preserving scarcity.
  */
 
 import type { GameState, FactionId } from '../state/game_state.js';
@@ -15,6 +16,12 @@ export const PREWAR_CAPITAL_INITIAL: Readonly<Record<FactionId, number>> = {
   RBiH: 70,
   HRHB: 40
 };
+
+/** Scenario-gated deterministic trickle amount per turn (Phase 0 §4.1.1). */
+export const PREWAR_CAPITAL_TRICKLE_PER_TURN = 1;
+
+/** Maximum additional reserve above initial capital from trickle at any moment. */
+export const PREWAR_CAPITAL_TRICKLE_MAX_BONUS = 20;
 
 /**
  * Initialize pre-war capital for all factions that do not yet have it set.
@@ -29,6 +36,54 @@ export function initializePrewarCapital(state: GameState): void {
       const initial = PREWAR_CAPITAL_INITIAL[faction.id as keyof typeof PREWAR_CAPITAL_INITIAL];
       faction.prewar_capital = typeof initial === 'number' ? initial : 0;
     }
+  }
+}
+
+export interface PrewarCapitalTrickleOptions {
+  perTurn?: number;
+  maxBonus?: number;
+}
+
+function isNonNegativeInteger(value: number): boolean {
+  return Number.isInteger(value) && value >= 0;
+}
+
+function hasScheduledPhase0Timing(state: GameState): boolean {
+  return isNonNegativeInteger(state.meta.phase_0_scheduled_referendum_turn ?? -1) &&
+    isNonNegativeInteger(state.meta.phase_0_scheduled_war_start_turn ?? -1);
+}
+
+/**
+ * Apply deterministic per-turn pre-war capital trickle for scheduled pre-war scenarios only.
+ *
+ * Gating:
+ * - state.meta.phase must be phase_0
+ * - both scheduled referendum and war-start turns must be present
+ *
+ * Deterministic:
+ * - applies in canonical faction order (RBiH, RS, HRHB)
+ * - no random/time APIs
+ */
+export function applyPrewarCapitalTrickle(
+  state: GameState,
+  options: PrewarCapitalTrickleOptions = {}
+): void {
+  if (state.meta.phase !== 'phase_0') return;
+  if (!hasScheduledPhase0Timing(state)) return;
+
+  const perTurn = options.perTurn ?? PREWAR_CAPITAL_TRICKLE_PER_TURN;
+  const maxBonus = options.maxBonus ?? PREWAR_CAPITAL_TRICKLE_MAX_BONUS;
+  if (!Number.isInteger(perTurn) || perTurn <= 0) return;
+  if (!Number.isInteger(maxBonus) || maxBonus < 0) return;
+
+  for (const factionId of PHASE0_FACTION_ORDER) {
+    const faction = state.factions.find((f) => f.id === factionId);
+    if (!faction) continue;
+    const current = faction.prewar_capital ?? 0;
+    const initial = PREWAR_CAPITAL_INITIAL[factionId] ?? 0;
+    const cap = initial + maxBonus;
+    if (current >= cap) continue;
+    faction.prewar_capital = Math.min(cap, current + perTurn);
   }
 }
 

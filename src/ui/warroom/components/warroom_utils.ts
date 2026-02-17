@@ -7,7 +7,7 @@
  * No Math.random(), no Date.now(). Pure functions only.
  */
 
-import type { FactionId, OrganizationalPenetration } from '../../../state/game_state.js';
+import type { FactionId, GameState, OrganizationalPenetration } from '../../../state/game_state.js';
 
 /** Months in title case (January, February, …). */
 const MONTHS = [
@@ -114,9 +114,23 @@ export const FACTION_DISPLAY_NAMES: Record<string, string> = {
   HRHB: 'Croatian Republic of Herzeg-Bosnia',
 };
 
+/** Faction accent colors for UI — matches tactical map faction palette. */
+export const FACTION_COLORS: Record<string, { primary: string; dim: string; bg: string }> = {
+  RBiH: { primary: 'rgb(55, 140, 75)',  dim: 'rgba(55, 140, 75, 0.3)',  bg: 'rgba(55, 140, 75, 0.08)' },
+  RS:   { primary: 'rgb(180, 50, 50)',   dim: 'rgba(180, 50, 50, 0.3)',  bg: 'rgba(180, 50, 50, 0.08)' },
+  HRHB: { primary: 'rgb(50, 110, 170)',  dim: 'rgba(50, 110, 170, 0.3)', bg: 'rgba(50, 110, 170, 0.08)' },
+};
+
+/** Get the CSS class suffix for a faction: 'rbih', 'rs', 'hrhb'. */
+export function factionCssClass(factionId: FactionId): string {
+  return factionId.toLowerCase();
+}
+
 /**
- * Get the player faction from game state (first faction in array, default RBiH).
+ * Get the player faction from game state.
+ * Reads meta.player_faction; falls back to first faction in array, then RBiH.
  */
-export function getPlayerFaction(factions: Array<{ id: string }>): FactionId {
-  return (factions[0]?.id as FactionId) || 'RBiH';
+export function getPlayerFaction(gameState: GameState): FactionId {
+  if (gameState.meta?.player_faction) return gameState.meta.player_faction;
+  return (gameState.factions[0]?.id as FactionId) || 'RBiH';
 }

@@ -100,6 +100,15 @@ test('normalizeScenario preserves init_control_mode and ethnic_override_threshol
     'hybrid_1992',
     'init_control without explicit mode should default to hybrid_1992'
   );
+
+  const raw4 = {
+    scenario_id: 'test4',
+    weeks: 1,
+    recruitment_mode: 'player_choice',
+    no_initial_brigade_formations: true
+  };
+  const s4 = normalizeScenario(raw4);
+  assert.strictEqual(s4.no_initial_brigade_formations, true);
 });
 
 test('ethnic_1991 init yields deterministic control (no null)', async () => {

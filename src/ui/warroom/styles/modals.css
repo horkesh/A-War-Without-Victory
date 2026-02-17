@@ -252,6 +252,34 @@
 
 .wr-bar-track.wr-bar-thin { height: 6px; }
 
+/* ─── Faction Color Accents ─────────────────────── */
+/* Applied to all modals via faction-{id} class */
+.faction-rbih .faction-overview-section h3,
+.faction-rbih .quadrant h3,
+.faction-rbih .faction-overview-formations h3 { color: rgb(55, 140, 75); }
+.faction-rs .faction-overview-section h3,
+.faction-rs .quadrant h3,
+.faction-rs .faction-overview-formations h3 { color: rgb(180, 50, 50); }
+.faction-hrhb .faction-overview-section h3,
+.faction-hrhb .quadrant h3,
+.faction-hrhb .faction-overview-formations h3 { color: rgb(50, 110, 170); }
+
+.faction-rbih .magazine-toc h3,
+.faction-rbih .magazine-section-header { color: rgb(55, 140, 75); }
+.faction-rs .magazine-toc h3,
+.faction-rs .magazine-section-header { color: rgb(180, 50, 50); }
+.faction-hrhb .magazine-toc h3,
+.faction-hrhb .magazine-section-header { color: rgb(50, 110, 170); }
+
+/* Faction badge — appears above panel header */
+.fo-faction-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
 /* ─── Faction Overview Panel ────────────────────── */
 .faction-overview-panel {
     width: 760px;
@@ -536,10 +564,15 @@
     color: #8888a0;
 }
 
-/* Urgency variants — subtle border glow */
+/* Urgency variants — subtle left border glow */
 .newspaper-urgency-critical { border-left: 3px solid #ff3d00; }
 .newspaper-urgency-high { border-left: 3px solid #ffab00; }
 .newspaper-urgency-normal { border-left: 3px solid #252540; }
+
+/* Faction-specific newspaper masthead separator */
+.faction-rbih .newspaper-masthead { color: rgb(55, 140, 75); }
+.faction-rs .newspaper-masthead { color: rgb(180, 50, 50); }
+.faction-hrhb .newspaper-masthead { color: rgb(50, 110, 170); }
 
 /* ─── Magazine Modal (Operational Review) ───────── */
 .magazine-modal {
@@ -759,6 +792,11 @@
     border-top: 1px solid #252540;
     padding-top: 12px;
 }
+
+/* Faction-colored field labels in reports */
+.faction-rbih .report-field-label { color: rgb(55, 140, 75); }
+.faction-rs .report-field-label { color: rgb(180, 50, 50); }
+.faction-hrhb .report-field-label { color: rgb(50, 110, 170); }
 
 /* ─── Declaration Event Modal ───────────────────── */
 .decl-overlay {

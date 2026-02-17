@@ -147,4 +147,110 @@ describe('runOngoingRecruitment', () => {
     assert.strictEqual(report!.actions.length, 1);
     assert.ok(state.formations['b1'] || state.formations['b2']);
   });
+
+  test('retries mandatory brigade recruitment during ongoing phase', () => {
+    const state = makeState();
+    const brigades: OobBrigade[] = [
+      {
+        id: 'mandatory_b1',
+        faction: 'RBiH',
+        name: 'Mandatory B1',
+        home_mun: 'zenica',
+        kind: 'brigade',
+        manpower_cost: 800,
+        capital_cost: 10,
+        default_equipment_class: 'light_infantry',
+        priority: 1,
+        mandatory: true,
+        available_from: 0,
+        max_personnel: 3000
+      }
+    ];
+    const report = runOngoingRecruitment(
+      state,
+      [],
+      brigades,
+      new Map([['s1', 'zenica']]),
+      { zenica: 's1' }
+    );
+    assert.ok(report);
+    assert.strictEqual(report!.mandatory_recruited, 1);
+    assert.strictEqual(report!.actions.length, 1);
+    assert.strictEqual(report!.actions[0]!.mandatory, true);
+    assert.ok(state.formations['mandatory_b1']);
+  });
+
+  test('applies RS mandatory mobilization accrual across turns', () => {
+    const rsPoolKey = militiaPoolKey('prijedor', 'RS');
+    const state = {
+      schema_version: CURRENT_SCHEMA_VERSION,
+      meta: { turn: 4, seed: 'test', phase: 'phase_ii' },
+      factions: [
+        {
+          id: 'RS',
+          profile: { authority: 60, legitimacy: 60, control: 50, logistics: 50, exhaustion: 0 },
+          areasOfResponsibility: [],
+          supply_sources: [],
+          embargo_profile: {
+            heavy_equipment_access: 1,
+            ammunition_resupply_rate: 1,
+            maintenance_capacity: 1,
+            smuggling_efficiency: 0,
+            external_pipeline_status: 1
+          }
+        }
+      ],
+      formations: {},
+      front_segments: {},
+      front_posture: {},
+      front_posture_regions: {},
+      front_pressure: {},
+      militia_pools: {
+        [rsPoolKey]: { mun_id: 'prijedor', faction: 'RS', available: 60, committed: 0, exhausted: 0, updated_turn: 4 }
+      },
+      political_controllers: {
+        s1: 'RS'
+      },
+      recruitment_state: initializeRecruitmentResources(['RS'], { RS: 0 }, { RS: 0 }, { RS: 0 }, { RS: 0 }, 1)
+    } as GameState;
+
+    const brigades: OobBrigade[] = [
+      {
+        id: 'rs_mandatory_1',
+        faction: 'RS',
+        name: 'RS Mandatory 1',
+        home_mun: 'prijedor',
+        kind: 'brigade',
+        manpower_cost: 800,
+        capital_cost: 10,
+        default_equipment_class: 'light_infantry',
+        priority: 1,
+        mandatory: true,
+        available_from: 0,
+        max_personnel: 3000
+      }
+    ];
+
+    const reportTurn1 = runOngoingRecruitment(
+      state,
+      [],
+      brigades,
+      new Map([['s1', 'prijedor']]),
+      { prijedor: 's1' }
+    );
+    assert.ok(reportTurn1);
+    assert.strictEqual(reportTurn1!.mandatory_recruited, 0);
+    assert.ok(!state.formations['rs_mandatory_1']);
+
+    const reportTurn2 = runOngoingRecruitment(
+      state,
+      [],
+      brigades,
+      new Map([['s1', 'prijedor']]),
+      { prijedor: 's1' }
+    );
+    assert.ok(reportTurn2);
+    assert.strictEqual(reportTurn2!.mandatory_recruited, 1);
+    assert.ok(state.formations['rs_mandatory_1']);
+  });
 });

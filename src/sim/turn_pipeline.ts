@@ -22,6 +22,11 @@ import {
   applyPhaseIDisplacementFromFlips,
   type DisplacementStepReport
 } from '../state/displacement.js';
+import {
+  processPhaseIIDisplacementTakeover,
+  type PhaseIITakeoverDisplacementReport
+} from '../state/displacement_takeover.js';
+import { processMinorityFlight, type MinorityFlightReport } from '../state/minority_flight.js';
 import { updateSustainability, SustainabilityStepReport } from '../state/sustainability.js';
 import { updateNegotiationPressure, NegotiationPressureStepReport } from '../state/negotiation_pressure.js';
 import { updateNegotiationCapital, NegotiationCapitalStepReport } from '../state/negotiation_capital.js';
@@ -83,9 +88,11 @@ import {
 import {
   spawnFormationsFromPools,
   reinforceBrigadesFromPools,
+  applyWiaTrickleback,
   isFormationSpawnDirectiveActive,
   type SpawnFormationsReport,
-  type ReinforceBrigadesReport
+  type ReinforceBrigadesReport,
+  type WiaTricklebackReport
 } from './formation_spawn.js';
 import type { ControlFlipReport } from './phase_i/control_flip.js';
 import {
@@ -254,8 +261,14 @@ phase_i_alliance_update?: AllianceUpdateReport; // Phase I §4.8: RBiH–HRHB al
   phase_ii_front_emergence?: PhaseIIFrontDescriptor[];
   /** Phase II: attack orders resolved (garrison-based flips); one target per brigade per turn */
   phase_ii_resolve_attack_orders?: ResolveAttackOrdersReport;
+  /** Phase II: delayed hostile-takeover displacement (timer + camp + reroute). */
+  phase_ii_takeover_displacement?: PhaseIITakeoverDisplacementReport;
+  /** Phase II: non-takeover minority flight (settlement-level). */
+  phase_ii_minority_flight?: MinorityFlightReport;
   /** Phase II: brigade reinforcement from militia pools after casualties */
   phase_ii_brigade_reinforcement?: ReinforceBrigadesReport;
+  /** Phase II: WIA trickleback — wounded return to formations when out of combat */
+  phase_ii_wia_trickleback?: WiaTricklebackReport;
   /** Phase E: AoR derivation — Areas of Responsibility from sustained spatial dominance (phase_ii only) */
   phase_e_aor_derivation?: PhaseEAorMembership;
   /** Phase E: rear zone derivation — Rear Political Control Zones (phase_ii only) */
@@ -681,10 +694,108 @@ const phases: NamedPhase[] = [
     }
   },
   {
+    name: 'phase-ii-hostile-takeover-displacement',
+    run: async (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      const battleReport = context.report.phase_ii_resolve_attack_orders?.battle_report;
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      context.report.phase_ii_takeover_displacement = processPhaseIIDisplacementTakeover(
+        context.state,
+        graph.settlements,
+        battleReport,
+        context.input.municipalityPopulation1991
+      );
+    }
+  },
+  {
+    name: 'phase-ii-minority-flight',
+    run: async (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      context.report.phase_ii_minority_flight = processMinorityFlight(
+        context.state,
+        graph.settlements,
+        context.input.municipalityPopulation1991,
+        context.input.settlementPopulationBySid
+      );
+    }
+  },
+  {
+    name: 'phase-ii-recruitment',
+    run: async (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      if (!context.state.recruitment_state) return;
+
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      const accrualReport = accrueRecruitmentResources(
+        context.state,
+        graph.settlements,
+        context.report.supply_resolution?.local_production
+      );
+
+      const factions = (context.state.factions ?? []).map((f) => f.id).sort(strictCompare);
+      const accrual_by_faction: Record<FactionId, { capital_delta: number; equipment_delta: number }> = {} as Record<
+        FactionId,
+        { capital_delta: number; equipment_delta: number }
+      >;
+      for (const factionId of factions) {
+        accrual_by_faction[factionId] = { capital_delta: 0, equipment_delta: 0 };
+      }
+      for (const row of accrualReport?.by_faction ?? []) {
+        accrual_by_faction[row.faction_id] = {
+          capital_delta: row.capital_delta,
+          equipment_delta: row.equipment_delta
+        };
+      }
+
+      let recruited_actions = 0;
+      const recruited_by_faction: Record<FactionId, number> = {} as Record<FactionId, number>;
+      for (const factionId of factions) recruited_by_faction[factionId] = 0;
+
+      const catalog = await loadRecruitmentCatalog();
+      if (catalog) {
+        const sidToMun = buildSidToMunFromSettlements(graph.settlements);
+        const ongoingReport = runOngoingRecruitment(
+          context.state,
+          catalog.corps,
+          catalog.brigades,
+          sidToMun,
+          catalog.municipality_hq_settlement
+        );
+        recruited_actions = ongoingReport?.actions.length ?? 0;
+        for (const action of ongoingReport?.actions ?? []) {
+          recruited_by_faction[action.faction] = (recruited_by_faction[action.faction] ?? 0) + 1;
+        }
+      }
+
+      const remaining_capital: Record<FactionId, number> = {} as Record<FactionId, number>;
+      const remaining_equipment: Record<FactionId, number> = {} as Record<FactionId, number>;
+      for (const factionId of factions) {
+        remaining_capital[factionId] = context.state.recruitment_state.recruitment_capital[factionId]?.points ?? 0;
+        remaining_equipment[factionId] = context.state.recruitment_state.equipment_pools[factionId]?.points ?? 0;
+      }
+
+      context.report.phase_ii_recruitment = {
+        accrual_by_faction,
+        recruited_actions,
+        recruited_by_faction,
+        remaining_capital,
+        remaining_equipment
+      };
+    }
+  },
+  {
     name: 'phase-ii-brigade-reinforcement',
     run: (context) => {
       if (context.state.meta.phase !== 'phase_ii') return;
       context.report.phase_ii_brigade_reinforcement = reinforceBrigadesFromPools(context.state);
+    }
+  },
+  {
+    name: 'phase-ii-wia-trickleback',
+    run: (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      context.report.phase_ii_wia_trickleback = applyWiaTrickleback(context.state);
     }
   },
   {
@@ -1138,70 +1249,6 @@ const phases: NamedPhase[] = [
       // Load settlement graph to get settlements map
       const graph = await loadSettlementGraph();
       context.report.sustainability = updateSustainability(context.state, graph.settlements, edges);
-    }
-  },
-  {
-    name: 'phase-ii-recruitment',
-    run: async (context) => {
-      if (context.state.meta.phase !== 'phase_ii') return;
-      if (!context.state.recruitment_state) return;
-
-      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-      const accrualReport = accrueRecruitmentResources(
-        context.state,
-        graph.settlements,
-        context.report.supply_resolution?.local_production
-      );
-
-      const factions = (context.state.factions ?? []).map((f) => f.id).sort(strictCompare);
-      const accrual_by_faction: Record<FactionId, { capital_delta: number; equipment_delta: number }> = {} as Record<
-        FactionId,
-        { capital_delta: number; equipment_delta: number }
-      >;
-      for (const factionId of factions) {
-        accrual_by_faction[factionId] = { capital_delta: 0, equipment_delta: 0 };
-      }
-      for (const row of accrualReport?.by_faction ?? []) {
-        accrual_by_faction[row.faction_id] = {
-          capital_delta: row.capital_delta,
-          equipment_delta: row.equipment_delta
-        };
-      }
-
-      let recruited_actions = 0;
-      const recruited_by_faction: Record<FactionId, number> = {} as Record<FactionId, number>;
-      for (const factionId of factions) recruited_by_faction[factionId] = 0;
-
-      const catalog = await loadRecruitmentCatalog();
-      if (catalog) {
-        const sidToMun = buildSidToMunFromSettlements(graph.settlements);
-        const ongoingReport = runOngoingRecruitment(
-          context.state,
-          catalog.corps,
-          catalog.brigades,
-          sidToMun,
-          catalog.municipality_hq_settlement
-        );
-        recruited_actions = ongoingReport?.actions.length ?? 0;
-        for (const action of ongoingReport?.actions ?? []) {
-          recruited_by_faction[action.faction] = (recruited_by_faction[action.faction] ?? 0) + 1;
-        }
-      }
-
-      const remaining_capital: Record<FactionId, number> = {} as Record<FactionId, number>;
-      const remaining_equipment: Record<FactionId, number> = {} as Record<FactionId, number>;
-      for (const factionId of factions) {
-        remaining_capital[factionId] = context.state.recruitment_state.recruitment_capital[factionId]?.points ?? 0;
-        remaining_equipment[factionId] = context.state.recruitment_state.equipment_pools[factionId]?.points ?? 0;
-      }
-
-      context.report.phase_ii_recruitment = {
-        accrual_by_faction,
-        recruited_actions,
-        recruited_by_faction,
-        remaining_capital,
-        remaining_equipment
-      };
     }
   },
   {

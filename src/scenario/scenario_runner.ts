@@ -87,7 +87,10 @@ import {
 } from '../state/control_flip_proposals.js';
 import { ensureRbihHrhbState } from '../sim/phase_i/alliance_update.js';
 import { aggregateSettlementDisplacementToMunicipalities } from '../sim/phase_f/displacement_municipality_aggregation.js';
-import { loadInitialMunicipalityControllers1990 } from '../state/political_control_init.js';
+import {
+  applyMunicipalityControllersFromMun1990Only,
+  loadInitialMunicipalityControllers1990
+} from '../state/political_control_init.js';
 import {
   computeEngagementLevel,
   applyBaselineOpsExhaustion,
@@ -522,7 +525,7 @@ function createOobFormations(
   sidToMun: Map<string, string>,
   municipalityPopulation1991: MunicipalityPopulation1991 | undefined
 ): void {
-  if (scenario.recruitment_mode === 'player_choice' && oobBrigades.length > 0) {
+  if (scenario.recruitment_mode === 'player_choice') {
     // Ensure phase_i militia strength exists before deriving pool availability.
     if (!state.phase_i_militia_strength || Object.keys(state.phase_i_militia_strength).length === 0) {
       updateMilitiaEmergence(state);
@@ -541,6 +544,18 @@ function createOobFormations(
       scenario.max_recruits_per_faction_per_turn
     );
     state.recruitment_state = resources;
+    if (scenario.no_initial_brigade_formations) {
+      createOobFormationsAtPhaseIEntry(
+        state,
+        oobCorps,
+        [],
+        municipalityHqSettlement,
+        sidToMun,
+        municipalityPopulation1991
+      );
+      console.log('[Recruitment] Deferred start enabled: initial setup created corps/army_hq only.');
+      return;
+    }
     const report = runBotRecruitment(state, oobCorps, oobBrigades, resources, sidToMun, municipalityHqSettlement);
     console.log(
       `[Recruitment] Mandatory: ${report.mandatory_recruited}, ` +
@@ -788,21 +803,38 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     }
 
     if (scenario.start_phase === 'phase_0') {
+      const referendumHeldAtStart = scenario.phase_0_referendum_held_at_start ?? true;
       const refTurn = scenario.phase_0_referendum_turn ?? 0;
       const warTurn = scenario.phase_0_war_start_turn ?? refTurn + 4;
+      const warStartControlPath = scenario.phase_0_war_start_control
+        ? resolveInitControlPath(scenario.phase_0_war_start_control, baseDir)
+        : undefined;
       state.meta.phase = 'phase_0';
       state.meta.turn = 0;
-      state.meta.referendum_held = true;
-      state.meta.referendum_turn = refTurn;
-      state.meta.war_start_turn = warTurn;
+      state.meta.referendum_held = referendumHeldAtStart;
+      state.meta.referendum_turn = referendumHeldAtStart ? refTurn : null;
+      state.meta.war_start_turn = referendumHeldAtStart ? warTurn : null;
+      state.meta.phase_0_scheduled_referendum_turn = referendumHeldAtStart ? null : refTurn;
+      state.meta.phase_0_scheduled_war_start_turn = referendumHeldAtStart ? null : warTurn;
+      state.meta.phase_0_war_start_control_path = warStartControlPath ?? null;
+      state.meta.referendum_eligible_turn = null;
+      state.meta.referendum_deadline_turn = null;
+      state.meta.game_over = false;
+      state.meta.outcome = undefined;
+      const rsDeclaredAtStart = scenario.phase_0_rs_declared_at_start ?? true;
+      const hrhbDeclaredAtStart = scenario.phase_0_hrhb_declared_at_start ?? true;
       for (const f of state.factions ?? []) {
         if (f.id === 'RS') (f as { prewar_capital?: number }).prewar_capital = 100;
         if (f.id === 'RBiH') (f as { prewar_capital?: number }).prewar_capital = 70;
         if (f.id === 'HRHB') (f as { prewar_capital?: number }).prewar_capital = 40;
         (f as { declaration_pressure?: number }).declaration_pressure = 0;
-        if (f.id === 'RS' || f.id === 'HRHB') {
-          (f as { declared?: boolean }).declared = true;
-          (f as { declaration_turn?: number | null }).declaration_turn = 0;
+        if (f.id === 'RS') {
+          (f as { declared?: boolean }).declared = rsDeclaredAtStart;
+          (f as { declaration_turn?: number | null }).declaration_turn = rsDeclaredAtStart ? 0 : null;
+        }
+        if (f.id === 'HRHB') {
+          (f as { declared?: boolean }).declared = hrhbDeclaredAtStart;
+          (f as { declaration_turn?: number | null }).declaration_turn = hrhbDeclaredAtStart ? 0 : null;
         }
       }
     }
@@ -813,6 +845,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       state.meta.referendum_held = true;
       state.meta.referendum_turn = 0;
       state.meta.war_start_turn = 0;
+      state.meta.phase_0_scheduled_referendum_turn = null;
+      state.meta.phase_0_scheduled_war_start_turn = null;
+      state.meta.phase_0_war_start_control_path = null;
       // Phase I §4.8 (historical fidelity): no RBiH–HRHB open war before this turn (e.g. 26 = October 1992 for April 1992 start).
       state.meta.rbih_hrhb_war_earliest_turn = scenario.rbih_hrhb_war_earliest_week ?? 26;
       if (scenario.enable_rbih_hrhb_dynamics === false) {
@@ -838,6 +873,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       state.meta.referendum_held = true;
       state.meta.referendum_turn = 0;
       state.meta.war_start_turn = 0;
+      state.meta.phase_0_scheduled_referendum_turn = null;
+      state.meta.phase_0_scheduled_war_start_turn = null;
+      state.meta.phase_0_war_start_control_path = null;
       // Keep bilateral war gate and alliance state active for Phase II-start scenarios.
       state.meta.rbih_hrhb_war_earliest_turn = scenario.rbih_hrhb_war_earliest_week ?? 26;
       if (scenario.enable_rbih_hrhb_dynamics === false) {
@@ -973,6 +1011,50 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
       defender_absent_battles: 0
     };
     const phaseIIAttackResolutionWeekly: PhaseIIAttackResolutionWeekRollup[] = [];
+    const phaseIITakeoverDisplacementSummary = {
+      weeks_with_phase_ii: 0,
+      weeks_with_activity: 0,
+      timers_started: 0,
+      timers_matured: 0,
+      camps_created: 0,
+      camps_routed: 0,
+      displaced_total: 0,
+      killed_total: 0,
+      fled_abroad_total: 0,
+      routed_total: 0
+    };
+    const phaseIITakeoverDisplacementWeekly: Array<{
+      week_index: number;
+      turn: number;
+      timers_started: number;
+      timers_matured: number;
+      camps_created: number;
+      camps_routed: number;
+      displaced_total: number;
+      killed_total: number;
+      fled_abroad_total: number;
+      routed_total: number;
+      source_municipalities: string[];
+    }> = [];
+    const phaseIIMinorityFlightSummary = {
+      weeks_with_activity: 0,
+      settlements_evaluated_total: 0,
+      settlements_displaced_total: 0,
+      displaced_total: 0,
+      killed_total: 0,
+      fled_abroad_total: 0,
+      routed_total: 0
+    };
+    const phaseIIMinorityFlightWeekly: Array<{
+      week_index: number;
+      turn: number;
+      settlements_evaluated: number;
+      settlements_displaced: number;
+      displaced_total: number;
+      killed_total: number;
+      fled_abroad_total: number;
+      routed_total: number;
+    }> = [];
 
     const botManager = (scenario.use_smart_bots || use_smart_bots)
       ? new BotManager({
@@ -1066,8 +1148,20 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
       let turnReport: Awaited<ReturnType<typeof runTurn>>['report'];
       if (state.meta.phase === 'phase_0') {
+        const phaseBeforeTurn = state.meta.phase;
         const result = runOneTurn(state, { seed: state.meta.seed });
         state = result.state;
+        if (
+          phaseBeforeTurn === 'phase_0' &&
+          state.meta.phase === 'phase_i' &&
+          state.meta.phase_0_war_start_control_path
+        ) {
+          await applyMunicipalityControllersFromMun1990Only(
+            state,
+            graph,
+            state.meta.phase_0_war_start_control_path
+          );
+        }
         turnReport = {
           seed: state.meta.seed,
           phases: result.phasesExecuted.map((name) => ({ name })),
@@ -1124,6 +1218,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
       if (state.meta.phase === 'phase_ii') {
         phaseIIAttackResolutionSummary.weeks_with_phase_ii += 1;
+        phaseIITakeoverDisplacementSummary.weeks_with_phase_ii += 1;
         const phaseIIResolution = turnReport.phase_ii_resolve_attack_orders;
         let weeklyDefenderPresentBattles = 0;
         let weeklyDefenderAbsentBattles = 0;
@@ -1154,6 +1249,70 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
           defender_present_battles: weeklyDefenderPresentBattles,
           defender_absent_battles: weeklyDefenderAbsentBattles
         });
+        const takeoverReport = turnReport.phase_ii_takeover_displacement;
+        if (takeoverReport) {
+          const hasActivity =
+            takeoverReport.timers_started > 0 ||
+            takeoverReport.timers_matured > 0 ||
+            takeoverReport.camps_created > 0 ||
+            takeoverReport.camps_routed > 0 ||
+            takeoverReport.displaced_total > 0 ||
+            takeoverReport.killed_total > 0 ||
+            takeoverReport.fled_abroad_total > 0 ||
+            takeoverReport.routed_total > 0;
+          if (hasActivity) {
+            phaseIITakeoverDisplacementSummary.weeks_with_activity += 1;
+          }
+          phaseIITakeoverDisplacementSummary.timers_started += takeoverReport.timers_started ?? 0;
+          phaseIITakeoverDisplacementSummary.timers_matured += takeoverReport.timers_matured ?? 0;
+          phaseIITakeoverDisplacementSummary.camps_created += takeoverReport.camps_created ?? 0;
+          phaseIITakeoverDisplacementSummary.camps_routed += takeoverReport.camps_routed ?? 0;
+          phaseIITakeoverDisplacementSummary.displaced_total += takeoverReport.displaced_total ?? 0;
+          phaseIITakeoverDisplacementSummary.killed_total += takeoverReport.killed_total ?? 0;
+          phaseIITakeoverDisplacementSummary.fled_abroad_total += takeoverReport.fled_abroad_total ?? 0;
+          phaseIITakeoverDisplacementSummary.routed_total += takeoverReport.routed_total ?? 0;
+          phaseIITakeoverDisplacementWeekly.push({
+            week_index,
+            turn: state.meta.turn,
+            timers_started: takeoverReport.timers_started ?? 0,
+            timers_matured: takeoverReport.timers_matured ?? 0,
+            camps_created: takeoverReport.camps_created ?? 0,
+            camps_routed: takeoverReport.camps_routed ?? 0,
+            displaced_total: takeoverReport.displaced_total ?? 0,
+            killed_total: takeoverReport.killed_total ?? 0,
+            fled_abroad_total: takeoverReport.fled_abroad_total ?? 0,
+            routed_total: takeoverReport.routed_total ?? 0,
+            source_municipalities: [...(takeoverReport.source_municipalities ?? [])].sort(strictCompare)
+          });
+        }
+        const minorityFlightReport = turnReport.phase_ii_minority_flight;
+        if (minorityFlightReport) {
+          const hasActivity =
+            minorityFlightReport.settlements_displaced > 0 ||
+            minorityFlightReport.displaced_total > 0 ||
+            minorityFlightReport.killed_total > 0 ||
+            minorityFlightReport.fled_abroad_total > 0 ||
+            minorityFlightReport.routed_total > 0;
+          if (hasActivity) {
+            phaseIIMinorityFlightSummary.weeks_with_activity += 1;
+          }
+          phaseIIMinorityFlightSummary.settlements_evaluated_total += minorityFlightReport.settlements_evaluated ?? 0;
+          phaseIIMinorityFlightSummary.settlements_displaced_total += minorityFlightReport.settlements_displaced ?? 0;
+          phaseIIMinorityFlightSummary.displaced_total += minorityFlightReport.displaced_total ?? 0;
+          phaseIIMinorityFlightSummary.killed_total += minorityFlightReport.killed_total ?? 0;
+          phaseIIMinorityFlightSummary.fled_abroad_total += minorityFlightReport.fled_abroad_total ?? 0;
+          phaseIIMinorityFlightSummary.routed_total += minorityFlightReport.routed_total ?? 0;
+          phaseIIMinorityFlightWeekly.push({
+            week_index,
+            turn: state.meta.turn,
+            settlements_evaluated: minorityFlightReport.settlements_evaluated ?? 0,
+            settlements_displaced: minorityFlightReport.settlements_displaced ?? 0,
+            displaced_total: minorityFlightReport.displaced_total ?? 0,
+            killed_total: minorityFlightReport.killed_total ?? 0,
+            fled_abroad_total: minorityFlightReport.fled_abroad_total ?? 0,
+            routed_total: minorityFlightReport.routed_total ?? 0
+          });
+        }
       }
 
       if (shouldApplyBreaches && adjacencyMap && state.meta.phase === 'phase_ii') {
@@ -1355,6 +1514,21 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             phase_ii_attack_resolution: phaseIIAttackResolutionSummary,
             phase_ii_attack_resolution_weekly: phaseIIAttackResolutionWeekly
           }
+        : {}),
+      ...(phaseIITakeoverDisplacementSummary.weeks_with_phase_ii > 0
+        ? {
+            phase_ii_takeover_displacement: phaseIITakeoverDisplacementSummary,
+            phase_ii_takeover_displacement_weekly: phaseIITakeoverDisplacementWeekly
+          }
+        : {}),
+      ...(phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0
+        ? {
+            phase_ii_minority_flight: phaseIIMinorityFlightSummary,
+            phase_ii_minority_flight_weekly: phaseIIMinorityFlightWeekly
+          }
+        : {}),
+      ...(phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0 && state.civilian_casualties
+        ? { civilian_casualties: state.civilian_casualties }
         : {}),
       ...(botBenchmarkSummary ? { bot_benchmark_evaluation: botBenchmarkSummary } : {}),
       ...(victoryEvaluation ? { victory: victoryEvaluation } : {}),

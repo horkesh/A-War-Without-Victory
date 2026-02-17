@@ -8,7 +8,10 @@ import assert from 'node:assert';
 import { test } from 'node:test';
 import {
   PREWAR_CAPITAL_INITIAL,
+  PREWAR_CAPITAL_TRICKLE_PER_TURN,
+  PREWAR_CAPITAL_TRICKLE_MAX_BONUS,
   initializePrewarCapital,
+  applyPrewarCapitalTrickle,
   spendPrewarCapital,
   getPrewarCapital,
   PHASE0_FACTION_ORDER
@@ -69,6 +72,12 @@ function minimalPhase0State(withoutPrewarCapital = false): GameState {
     militia_pools: {},
     municipalities: {}
   };
+}
+
+function withScheduledPhase0Timing(state: GameState): GameState {
+  state.meta.phase_0_scheduled_referendum_turn = 26;
+  state.meta.phase_0_scheduled_war_start_turn = 30;
+  return state;
 }
 
 test('PREWAR_CAPITAL_INITIAL has RS=100, RBiH=70, HRHB=40', () => {
@@ -145,4 +154,48 @@ test('getPrewarCapital returns 0 for missing faction or undefined capital', () =
   const state = minimalPhase0State(true);
   assert.strictEqual(getPrewarCapital(state, 'RS'), 0);
   assert.strictEqual(getPrewarCapital(state, 'UNKNOWN' as any), 0);
+});
+
+test('trickle constants are conservative and deterministic', () => {
+  assert.strictEqual(PREWAR_CAPITAL_TRICKLE_PER_TURN, 1);
+  assert.strictEqual(PREWAR_CAPITAL_TRICKLE_MAX_BONUS, 20);
+});
+
+test('applyPrewarCapitalTrickle no-ops when scenario is not scheduled phase_0', () => {
+  const state = minimalPhase0State(false);
+  applyPrewarCapitalTrickle(state);
+  assert.strictEqual(getPrewarCapital(state, 'RBiH'), 70);
+  assert.strictEqual(getPrewarCapital(state, 'RS'), 100);
+  assert.strictEqual(getPrewarCapital(state, 'HRHB'), 40);
+});
+
+test('applyPrewarCapitalTrickle no-ops outside phase_0', () => {
+  const state = withScheduledPhase0Timing(minimalPhase0State(false));
+  state.meta.phase = 'phase_i';
+  applyPrewarCapitalTrickle(state);
+  assert.strictEqual(getPrewarCapital(state, 'RBiH'), 70);
+  assert.strictEqual(getPrewarCapital(state, 'RS'), 100);
+  assert.strictEqual(getPrewarCapital(state, 'HRHB'), 40);
+});
+
+test('applyPrewarCapitalTrickle adds deterministic +1 per faction in scheduled phase_0', () => {
+  const state = withScheduledPhase0Timing(minimalPhase0State(false));
+  applyPrewarCapitalTrickle(state);
+  assert.strictEqual(getPrewarCapital(state, 'RBiH'), 71);
+  assert.strictEqual(getPrewarCapital(state, 'RS'), 101);
+  assert.strictEqual(getPrewarCapital(state, 'HRHB'), 41);
+});
+
+test('applyPrewarCapitalTrickle respects max bonus reserve cap', () => {
+  const state = withScheduledPhase0Timing(minimalPhase0State(false));
+  const rbih = state.factions.find((f) => f.id === 'RBiH')!;
+  const rs = state.factions.find((f) => f.id === 'RS')!;
+  const hrhb = state.factions.find((f) => f.id === 'HRHB')!;
+  rbih.prewar_capital = PREWAR_CAPITAL_INITIAL.RBiH + PREWAR_CAPITAL_TRICKLE_MAX_BONUS;
+  rs.prewar_capital = PREWAR_CAPITAL_INITIAL.RS + PREWAR_CAPITAL_TRICKLE_MAX_BONUS;
+  hrhb.prewar_capital = PREWAR_CAPITAL_INITIAL.HRHB + PREWAR_CAPITAL_TRICKLE_MAX_BONUS - 1;
+  applyPrewarCapitalTrickle(state);
+  assert.strictEqual(rbih.prewar_capital, PREWAR_CAPITAL_INITIAL.RBiH + PREWAR_CAPITAL_TRICKLE_MAX_BONUS);
+  assert.strictEqual(rs.prewar_capital, PREWAR_CAPITAL_INITIAL.RS + PREWAR_CAPITAL_TRICKLE_MAX_BONUS);
+  assert.strictEqual(hrhb.prewar_capital, PREWAR_CAPITAL_INITIAL.HRHB + PREWAR_CAPITAL_TRICKLE_MAX_BONUS);
 });

@@ -16,9 +16,8 @@ import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 /** Scale phase_i_militia_strength [0,100] to pool available (integer).
- * Calibrated so April 1992 war-start produces historical manpower envelopes:
- * ARBiH ~80-100k, VRS ~60-80k, HVO ~25-35k troops. */
-const POOL_SCALE_FACTOR = 55;
+ * Raised for long-horizon (52w/104w) personnel growth calibration while keeping deterministic flow. */
+const POOL_SCALE_FACTOR = 65;
 /** Displaced_in contribution rate (design note). */
 const REINFORCEMENT_RATE = 0.05;
 /** Cap per mun per turn from displaced (design note). */
@@ -34,7 +33,7 @@ const ELIGIBLE_POP_NORMALIZER = 50_000;
  * more of its population (near-total male mobilization in western Herzegovina). */
 const FACTION_POOL_SCALE: Record<string, number> = {
   RBiH: 1.20,
-  RS: 1.05,
+  RS: 1.15,
   HRHB: 1.60
 };
 const DEFAULT_FACTION_POOL_SCALE = 1.0;
@@ -73,8 +72,10 @@ export function getEligiblePopulationCount(
   return 0;
 }
 
-/** RBiH 10% rule: cap per mun per turn (design §3). */
-const RBIH_10PCT_CAP_PER_MUN = 500;
+/** RBiH cross-ethnic rule: Serbs and Croats contribute 10–15% to RBiH pool (MILITIA_BRIGADE_FORMATION_DESIGN §3). */
+const RBIH_CROSS_ETHNIC_SHARE = 0.12;
+/** RBiH cross-ethnic cap per mun per turn. */
+const RBIH_CROSS_ETHNIC_CAP_PER_MUN = 500;
 
 export interface PoolPopulationReport {
   pools_updated: number;
@@ -284,9 +285,9 @@ export function runPoolPopulation(
       const nonBosniak = entry.serb + entry.croat + entry.other;
       if (nonBosniak <= 0) continue;
       const rawContribution = Math.floor(
-        (nonBosniak / ELIGIBLE_POP_NORMALIZER) * POOL_SCALE_FACTOR * 0.1
+        (nonBosniak / ELIGIBLE_POP_NORMALIZER) * POOL_SCALE_FACTOR * RBIH_CROSS_ETHNIC_SHARE
       );
-      const contribution = Math.min(rawContribution, RBIH_10PCT_CAP_PER_MUN);
+      const contribution = Math.min(rawContribution, RBIH_CROSS_ETHNIC_CAP_PER_MUN);
       if (contribution <= 0) continue;
       const key = militiaPoolKey(munId, 'RBiH');
       const pool = pools[key];

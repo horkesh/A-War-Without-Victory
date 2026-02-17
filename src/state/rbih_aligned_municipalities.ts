@@ -3,7 +3,7 @@
  * Only HRHB → RBiH in init; Serb-majority (RS) settlements in these muns stay RS (e.g. Brčko, Bihać).
  * Spawns and control-flip semantics still treat these muns as RBiH-aligned.
  *
- * Canonical list: Bihać, Brčko, Gradačac, Lopare, Maglaj, Srebrenik, Tešanj, Tuzla, Velika Kladuša.
+ * Canonical list: Bihać, Brčko, Gradačac, Ilijaš, Lopare, Maglaj, Srebrenik, Tešanj, Tuzla, Velika Kladuša, Vogošća.
  * Keys are mun1990_id (lowercase, no diacritics).
  */
 
@@ -13,11 +13,13 @@ export const MUN1990_IDS_ALIGNED_TO_RBIH: readonly string[] = [
   'bihac',
   'gradacac',
   'brcko',
+  'ilijas',
   'tuzla',
   'lopare',
   'srebrenik',
   'tesanj',
   'velika_kladusa',
+  'vogosca',
 ].sort((a, b) => a.localeCompare(b));
 
 const SET = new Set<string>(MUN1990_IDS_ALIGNED_TO_RBIH);

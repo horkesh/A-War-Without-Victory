@@ -7,19 +7,18 @@
 import type {
   ZoomLevel, LayerVisibility, MapStateSnapshot, LoadedGameState,
   SettlementFillMode, MapEventType, MapEvent, MapEventListener,
+  StaffMapRegion,
 } from '../types.js';
 
 const DEFAULT_LAYERS: LayerVisibility = {
   politicalControl: true,
   frontLines: true,
-  labels: true,
   roads: true,
   rivers: true,
   boundary: true,
   munBorders: false,
   minimap: true,
   formations: false,
-  brigadeAor: false,
 };
 
 export class MapState {
@@ -38,6 +37,7 @@ export class MapState {
       selectedFormationId: null,
       controlDatasetKey: 'baseline',
       loadedGameState: null,
+      staffMapRegion: null,
     };
   }
 
@@ -167,6 +167,28 @@ export class MapState {
     this.emit('stateChanged');
   }
 
+  enterStaffMap(region: StaffMapRegion): void {
+    this._snapshot = {
+      ...this._snapshot,
+      staffMapRegion: region,
+      zoomLevel: 3 as ZoomLevel,
+      zoomFactor: 8,
+    };
+    this.emit('zoomChanged');
+    this.emit('stateChanged');
+  }
+
+  exitStaffMap(): void {
+    this._snapshot = {
+      ...this._snapshot,
+      staffMapRegion: null,
+      zoomLevel: 2 as ZoomLevel,
+      zoomFactor: 5,
+    };
+    this.emit('zoomChanged');
+    this.emit('stateChanged');
+  }
+
   clearGameState(): void {
     this._snapshot = {
       ...this._snapshot,
@@ -174,7 +196,7 @@ export class MapState {
       selectedFormationId: null,
       controlDatasetKey: 'baseline',
     };
-    const layers = { ...this._snapshot.layers, formations: false, brigadeAor: false };
+    const layers = { ...this._snapshot.layers, formations: false };
     this._snapshot = { ...this._snapshot, layers };
     this.emit('gameStateLoaded', null);
     this.emit('stateChanged');

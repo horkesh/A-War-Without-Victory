@@ -42,18 +42,19 @@ import {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Power ratio at or above which attacker wins and flips settlement. */
-const ATTACKER_VICTORY_THRESHOLD = 1.3;
+const ATTACKER_VICTORY_THRESHOLD = 1.2;
 
 /** Power ratio below which defender wins outright. */
-const STALEMATE_LOWER_BOUND = 0.8;
+const STALEMATE_LOWER_BOUND = 0.7;
 
-/** Baseline casualties per unit of engagement intensity (500 garrison = 1 unit). */
-const BASE_CASUALTY_PER_INTENSITY = 20;
+/** Baseline casualties per unit of engagement intensity (intensity_divisor garrison = 1 unit). */
+const BASE_CASUALTY_PER_INTENSITY = 50;
+const CASUALTY_INTENSITY_DIVISOR = 350;
 
 /** Minimum personnel lost per side per engagement (no free wins). */
-const MIN_CASUALTIES_PER_BATTLE = 5;
+const MIN_CASUALTIES_PER_BATTLE = 15;
 /** Undefended settlements still incur small defending losses (militia/rear security). */
-const UNDEFENDED_DEFENDER_CASUALTY_SCALE = 0.2;
+const UNDEFENDED_DEFENDER_CASUALTY_SCALE = 0.5;
 const MIN_UNDEFENDED_DEFENDER_CASUALTIES = 1;
 
 /** Casualty category fractions (must sum to 1). */
@@ -557,7 +558,7 @@ function computeBattleCasualties(
   }
 
   const intensity = Math.min(attackerPower, defenderPower);
-  const intensityFactor = Math.max(0.1, intensity / 500);
+  const intensityFactor = Math.max(0.1, intensity / CASUALTY_INTENSITY_DIVISOR);
   const baseCas = BASE_CASUALTY_PER_INTENSITY * intensityFactor;
 
   // Attacker casualties: inverse of power ratio (weaker attacker = more losses)
@@ -670,6 +671,11 @@ function applyPersonnelLoss(formation: FormationState, loss: number): void {
   if (formation.personnel < MIN_BRIGADE_SPAWN && formation.readiness === 'active') {
     formation.readiness = 'degraded';
   }
+}
+
+function addWoundedPending(formation: FormationState, wounded: number): void {
+  if (wounded <= 0) return;
+  formation.wounded_pending = (formation.wounded_pending ?? 0) + wounded;
 }
 
 function applyEquipmentBattleLoss(formation: FormationState, tanksLost: number, artilleryLost: number): void {
@@ -924,6 +930,10 @@ export function resolveBattleOrders(
     if (defenderFormation) {
       applyPersonnelLoss(defenderFormation, totalPersonnelLoss(casualties.defender));
     }
+
+    // WIA trickleback: record wounded for later return (only when brigade is out of combat)
+    addWoundedPending(formation, casualties.attacker.wounded);
+    if (defenderFormation) addWoundedPending(defenderFormation, casualties.defender.wounded);
 
     // Apply equipment losses
     applyEquipmentBattleLoss(formation, casualties.attacker.tanks_lost, casualties.attacker.artillery_lost);

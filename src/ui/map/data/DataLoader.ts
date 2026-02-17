@@ -8,7 +8,7 @@ import type {
   LoadedData, SettlementFeature, BaseMapFeature, ClassifiedBaseFeatures,
   PoliticalControlData, SettlementNamesData, Mun1990NamesData,
   SettlementEthnicityData, SettlementEdge, SearchIndexEntry, BBox,
-  SharedBorderSegment, PolygonCoords, Position,
+  SharedBorderSegment, PolygonCoords, Position, TerrainScalars,
 } from '../types.js';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
 import { boundsFromPolygons, expandBounds, computeFeatureCentroid, computeFeatureBBox } from '../geo/MapProjection.js';
@@ -97,6 +97,7 @@ export async function loadAllData(
     namesRes,
     munRes,
     ethRes,
+    terrainRes,
   ] = await Promise.all([
     loadJson<{ features?: SettlementFeature[]; awwv_meta?: unknown }>(
       `${base}/data/derived/settlements_a1_viewer.geojson`
@@ -118,6 +119,9 @@ export async function loadAllData(
     ),
     loadJsonOptional<SettlementEthnicityData>(
       `${base}/data/derived/settlement_ethnicity_data.json`
+    ),
+    loadJsonOptional<{ by_sid?: Record<string, TerrainScalars> }>(
+      `${base}/data/derived/terrain/settlements_terrain_scalars.json`
     ),
   ]);
 
@@ -277,6 +281,9 @@ export async function loadAllData(
     if (cnt > 0) municipalityCentroids.set(mun1990Id, [sx / cnt, sy / cnt]);
   }
 
+  // Terrain scalars for staff map terrain rendering
+  const terrainScalars: Record<string, TerrainScalars> = terrainRes?.by_sid ?? {};
+
   onProgress?.({ stage: 'Ready.' });
 
   return {
@@ -295,6 +302,7 @@ export async function loadAllData(
     primaryLabelSids,
     settlementCentroids,
     municipalityCentroids,
+    terrainScalars,
   };
 }
 

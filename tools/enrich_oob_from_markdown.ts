@@ -59,8 +59,8 @@ const CORPS_MAP: Record<string, string> = {
     '3rd': 'arbih_3rd_corps',
     '4th': 'arbih_4th_corps',
     '5th': 'arbih_5th_corps',
-    '6th': 'arbih_6th_corps',
-    '7th': 'arbih_7th_corps',
+    '6th': 'arbih_4th_corps',
+    '7th': 'arbih_3rd_corps',
     '28th Ind': 'arbih_2nd_corps',
     '81st Ind': 'arbih_1st_corps',
     'General Staff': 'arbih_1st_corps'

@@ -4,10 +4,14 @@
 
 export {
   PREWAR_CAPITAL_INITIAL,
+  PREWAR_CAPITAL_TRICKLE_PER_TURN,
+  PREWAR_CAPITAL_TRICKLE_MAX_BONUS,
   initializePrewarCapital,
+  applyPrewarCapitalTrickle,
   spendPrewarCapital,
   getPrewarCapital,
   PHASE0_FACTION_ORDER,
+  type PrewarCapitalTrickleOptions,
   type SpendPrewarCapitalResult
 } from './capital.js';
 
@@ -59,6 +63,7 @@ export {
   OUTCOME_NON_WAR_TERMINAL,
   isReferendumEligible,
   updateReferendumEligibility,
+  applyScheduledReferendum,
   holdReferendum,
   checkReferendumDeadline,
   isWarStartTurn,

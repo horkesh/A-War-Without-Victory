@@ -82,7 +82,7 @@
             max-height: 100%;
             box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
-        /* Scene swap: only one visible at a time */
+        /* Scene swap: warroom-scene stays visible when showing map/tactical; only the desk is hidden. */
         #warroom-scene, #map-scene, #tactical-map-scene {
             position: fixed;
             inset: 0;
@@ -90,6 +90,9 @@
             height: 100vh;
         }
         #warroom-scene.warroom-scene-hidden {
+            display: none;
+        }
+        #warroom-desk.warroom-desk-hidden {
             display: none;
         }
         #map-scene.map-scene-hidden {
@@ -122,39 +125,33 @@
     </style>
 </head>
 <body>
-    <!-- Warroom scene: canvas, desk, modals. Only one of warroom-scene / map-scene visible at a time. -->
-    <div id="warroom-scene">
-        <!-- Toolbar — consistent with tactical map ops center style -->
-        <div class="wr-toolbar" id="wr-toolbar">
-            <button type="button" class="wr-toolbar-btn" id="wr-btn-menu" aria-label="Open main menu">Menu</button>
-            <button type="button" class="wr-toolbar-btn wr-map-btn" id="wr-btn-map" aria-label="Open tactical map">&#9654; War Map</button>
-            <button type="button" class="wr-toolbar-btn wr-map-btn" id="wr-btn-invest" aria-label="Open pre-war investment map" style="display:none">Allocate Capital</button>
-            <button type="button" class="wr-toolbar-btn" id="wr-btn-settings" aria-label="Open settings">Settings</button>
-            <button type="button" class="wr-toolbar-btn" id="wr-btn-help" aria-label="Help">Help</button>
-            <span class="wr-turn-display" id="wr-turn-display">Turn 0 &mdash; Sep 1991</span>
-        </div>
-        <div id="warroom-container">
-            <canvas id="warroom-canvas"></canvas>
-        </div>
-        <!-- Modal System -->
-        <div id="modal-backdrop" class="modal-backdrop">
-            <div id="modal-content-container" class="modal-content">
-                <!-- Dynamic modal content will be inserted here -->
+    <!-- Warroom scene: canvas, desk, modals. Only one of warroom-scene / map-scene visible at a time.
+         Hidden by default so the main menu (central image) is the first paint; shown when overlays are dismissed. -->
+    <div id="warroom-scene" class="warroom-scene-hidden">
+        <!-- Desk (toolbar + canvas + modals): hidden when map or tactical map is shown -->
+        <div id="warroom-desk">
+            <div class="wr-toolbar" id="wr-toolbar">
+                <button type="button" class="wr-toolbar-btn" id="wr-btn-menu" aria-label="Open main menu">Menu</button>
+                <button type="button" class="wr-toolbar-btn wr-map-btn" id="wr-btn-map" aria-label="Open tactical map">&#9654; War Map</button>
+                <button type="button" class="wr-toolbar-btn wr-map-btn" id="wr-btn-invest" aria-label="Open pre-war investment map" style="display:none">Allocate Capital</button>
+                <button type="button" class="wr-toolbar-btn" id="wr-btn-settings" aria-label="Open settings">Settings</button>
+                <button type="button" class="wr-toolbar-btn" id="wr-btn-help" aria-label="Help">Help</button>
+                <span class="wr-turn-display" id="wr-turn-display">Turn 0 &mdash; Sep 1991</span>
             </div>
+            <div id="warroom-container">
+                <canvas id="warroom-canvas"></canvas>
+            </div>
+            <div id="modal-backdrop" class="modal-backdrop">
+                <div id="modal-content-container" class="modal-content">
+                    <!-- Dynamic modal content will be inserted here -->
+                </div>
+            </div>
+            <div id="warroom-tooltip" class="warroom-tooltip"></div>
         </div>
-
-        <!-- Tooltip -->
-        <div id="warroom-tooltip" class="warroom-tooltip"></div>
-    </div>
-
-    <!-- Map scene: full-screen War Planning Map (sole content; injected by warroom) -->
-    <div id="map-scene" class="map-scene-hidden" aria-hidden="true">
-        <!-- WarPlanningMap container appended here by warroom.ts -->
-    </div>
-
-    <!-- Tactical map scene: full interactive map embedded as iframe (same window, no separate BrowserWindow) -->
-    <div id="tactical-map-scene" class="tactical-map-scene-hidden" aria-hidden="true">
-        <!-- iframe src set dynamically by warroom.ts when first opened -->
+        <!-- Map scene: full-screen War Planning Map (injected by warroom.ts) -->
+        <div id="map-scene" class="map-scene-hidden" aria-hidden="true"></div>
+        <!-- Tactical map scene: full interactive map iframe (same window) -->
+        <div id="tactical-map-scene" class="tactical-map-scene-hidden" aria-hidden="true"></div>
     </div>
 
     <!-- STEP 1: Main Menu title screen -->

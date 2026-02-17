@@ -145,6 +145,19 @@ export function validateFormations(
       }
     }
 
+    // WIA trickleback: wounded_pending (if present) must be non-negative integer
+    const woundedPending = (f as any).wounded_pending;
+    if (woundedPending !== undefined && woundedPending !== null) {
+      if (!Number.isInteger(woundedPending) || woundedPending < 0) {
+        issues.push({
+          severity: 'error',
+          code: 'formations.wounded_pending.invalid',
+          path: `${basePath}.wounded_pending`,
+          message: 'wounded_pending must be a non-negative integer if present'
+        });
+      }
+    }
+
     // Phase I.0: activation_gated validation (if present)
     const activationGated = (f as any).activation_gated;
     if (activationGated !== undefined && activationGated !== null) {

@@ -13,7 +13,8 @@ import { strictCompare } from '../../../state/validateGameState.js';
 import {
     turnToWeekString, getPlayerFaction, getFactionPartyPen,
     hasFactionParamilitary, hasFactionPresence,
-    FACTION_DISPLAY_NAMES, STABILITY_SECURE_MIN, STABILITY_CONTESTED_MIN,
+    FACTION_DISPLAY_NAMES, FACTION_COLORS, factionCssClass,
+    STABILITY_SECURE_MIN, STABILITY_CONTESTED_MIN,
 } from './warroom_utils.js';
 
 interface FactionSnapshot {
@@ -82,7 +83,7 @@ export class FactionOverviewPanel {
      * Generate Phase 0 specific data snapshot.
      */
     private generatePhase0Snapshot(): Phase0Snapshot {
-        const factionId = getPlayerFaction(this.gameState.factions);
+        const factionId = getPlayerFaction(this.gameState);
         const factionName = this.getFactionDisplayName(factionId);
         const turn = this.gameState.meta.turn;
 
@@ -195,8 +196,8 @@ export class FactionOverviewPanel {
      * Generate faction snapshot from game state (Phase I+)
      */
     private generateSnapshot(): FactionSnapshot {
-        const faction = this.gameState.factions[0];
-        const factionId = faction?.id || 'Unknown';
+        const factionId = getPlayerFaction(this.gameState);
+        const faction = this.gameState.factions.find(f => f.id === factionId) ?? this.gameState.factions[0];
 
         const politicalControllers = this.gameState.political_controllers || {};
         const controlledSettlements = Object.values(politicalControllers).filter(
@@ -252,12 +253,15 @@ export class FactionOverviewPanel {
         const snap = this.generatePhase0Snapshot();
 
         const panel = document.createElement('div');
-        panel.className = 'faction-overview-panel';
+        panel.className = `faction-overview-panel faction-${factionCssClass(snap.factionId as FactionId)}`;
+        const fc = FACTION_COLORS[snap.factionId] ?? FACTION_COLORS['RBiH'];
+        panel.style.borderTop = `3px solid ${fc.primary}`;
 
         // Header
         const header = document.createElement('div');
         header.className = 'faction-overview-header';
         header.innerHTML = `
+            <div class="fo-faction-badge" style="color:${fc.primary}">${snap.factionId}</div>
             <h2>${snap.factionName}</h2>
             <div class="meta">${turnToWeekString(snap.turn)} — PRE-WAR PHASE</div>
         `;
@@ -375,12 +379,15 @@ export class FactionOverviewPanel {
         const snapshot = this.generateSnapshot();
 
         const panel = document.createElement('div');
-        panel.className = 'faction-overview-panel';
+        panel.className = `faction-overview-panel faction-${factionCssClass(snapshot.factionId as FactionId)}`;
+        const fc = FACTION_COLORS[snapshot.factionId] ?? FACTION_COLORS['RBiH'];
+        panel.style.borderTop = `3px solid ${fc.primary}`;
 
         // Header
         const header = document.createElement('div');
         header.className = 'faction-overview-header';
         header.innerHTML = `
+            <div class="fo-faction-badge" style="color:${fc.primary}">${snapshot.factionId}</div>
             <h2>${snapshot.factionName}</h2>
             <div class="meta">${turnToWeekString(snapshot.turn)}</div>
         `;

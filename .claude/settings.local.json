@@ -65,7 +65,12 @@
       "Bash(curl:*)",
       "Bash(cmd /c \"netstat -ano | findstr :3001\")",
       "Bash(cmd /c \"netstat -ano | findstr LISTENING | findstr 3001\")",
-      "Bash(cmd /c:*)"
+      "Bash(cmd /c:*)",
+      "Bash(ls \"F:\\\\A-War-Without-Victory\\\\data\\\\derived\\\\terrain\"\" 2>NUL || echo \"Directory not found \")",
+      "Bash(dir /b \"F:\\\\A-War-Without-Victory\\\\docs\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path src -Recurse -File | Select-String ''SETTLEMENT_BORDER'' | Select-Object Path, LineNumber, Line\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path src -Recurse -File -Include ''*.ts'' | Select-String ''SETTLEMENT_BORDER'' | Select-Object Path, LineNumber, Line\")",
+      "Bash(npx tsx --test:*)"
     ]
   }
 }

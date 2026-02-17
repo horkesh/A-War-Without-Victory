@@ -28,8 +28,6 @@
       <button type="button" class="tm-toolbar-btn" id="btn-help" aria-label="Open keyboard shortcuts">Help</button>
       <button type="button" class="tm-toolbar-btn" id="btn-recruit" aria-label="Open recruitment">Recruit</button>
       <span class="tm-turn-display" id="turn-display">Turn 0 — Sep 1991</span>
-      <span class="tm-recruitment-capital" id="recruitment-capital" aria-live="polite"></span>
-      <span class="tm-army-strength" id="army-strength" aria-live="polite"></span>
     </div>
 
     <!-- Main content area -->
@@ -53,6 +51,10 @@
       <div class="tm-map-wrap" id="map-wrap">
         <canvas id="map-canvas" tabindex="0" role="img" aria-label="Tactical map of Bosnia and Herzegovina"></canvas>
 
+        <!-- Staff map overlay canvas (4th zoom layer) -->
+        <canvas id="staff-map-canvas" class="tm-staff-map-canvas" tabindex="-1"
+          aria-label="Staff map detail view" style="display:none;"></canvas>
+
         <!-- Minimap -->
         <canvas class="tm-minimap" id="minimap" width="200" height="150" aria-label="Minimap overview"></canvas>
 
@@ -67,65 +69,30 @@
           <div id="legend-content"></div>
         </div>
 
-        <!-- Layer panel -->
-        <div class="tm-layer-panel" id="layer-panel">
-          <div class="tm-layer-header" id="layer-panel-toggle" role="button" tabindex="0"
-            aria-label="Toggle layer panel">
-            <span>&#9776; Layers</span>
-          </div>
-          <div class="tm-layer-body" id="layer-panel-body">
-            <div class="tm-layer-row"><label><input type="checkbox" id="layer-control" checked> Political
-                control</label></div>
-            <div class="tm-layer-row"><label><input type="checkbox" id="layer-frontlines" checked> Front lines</label>
-            </div>
-            <div class="tm-layer-row"><label><input type="checkbox" id="layer-labels" checked> Settlement labels</label>
-            </div>
-            <div class="tm-layer-row"><label><input type="checkbox" id="layer-mun-borders"> Municipality borders</label>
-            </div>
-            <div class="tm-layer-row"><label><input type="checkbox" id="layer-minimap" checked> Minimap</label></div>
-            <div class="tm-layer-row"><label><input type="checkbox" id="layer-formations" disabled> Formations
-                (OOB)</label></div>
-            <div class="tm-layer-row"><label><input type="checkbox" id="layer-brigade-aor" disabled> Brigade AoR
-                (selected)</label></div>
-            <hr class="tm-layer-sep">
-            <div class="tm-layer-row">
-              <label for="control-dataset">Dataset:</label>
-              <select id="control-dataset" aria-label="Control dataset">
-                <option value="baseline">Baseline (Apr 1992, from ethnicity)</option>
-                <option value="sep1992">September 1992</option>
-                <option value="jan1993">January 1993</option>
-                <option value="latest_run">Latest run</option>
-              </select>
-            </div>
-            <div class="tm-layer-row">
-              <button type="button" class="tm-load-state-btn" id="btn-load-state">Load State...</button>
-              <input type="file" id="file-input" accept=".json" style="display:none">
-            </div>
-            <hr class="tm-layer-sep" id="play-myself-sep" style="display:none">
-            <div class="tm-layer-row" id="play-myself-row" style="display:none">
-              <span class="tm-muted" style="display:block;margin-bottom:4px">Play myself (desktop)</span>
-              <button type="button" class="tm-load-state-btn" id="btn-load-scenario">Load scenario...</button>
-              <button type="button" class="tm-load-state-btn" id="btn-load-state-desktop">Load state file...</button>
-              <button type="button" class="tm-toolbar-btn" id="btn-advance-turn">Advance turn</button>
-            </div>
-            <div class="tm-layer-row">
-              <button type="button" class="tm-load-state-btn" id="btn-load-replay">Load Replay...</button>
-              <input type="file" id="replay-file-input" accept=".json" style="display:none">
-            </div>
-            <div class="tm-layer-row">
-              <button type="button" class="tm-load-state-btn" id="btn-open-last-replay" style="display:none">Open last run</button>
-            </div>
-            <div class="tm-layer-row">
-              <button type="button" class="tm-load-state-btn" id="btn-replay-play">Play replay</button>
-            </div>
-            <div class="tm-layer-row">
-              <button type="button" class="tm-load-state-btn" id="btn-replay-export">Export replay</button>
-            </div>
-            <div class="tm-layer-row">
-              <span class="tm-muted" id="replay-status">Replay: not loaded</span>
-            </div>
-          </div>
+        <!-- Floating layer toolbar (integrated map controls) -->
+        <div class="tm-layer-toolbar" id="layer-toolbar" role="group" aria-label="Map layers">
+          <span class="tm-layer-toolbar-title">Layers</span>
+          <label class="tm-layer-toggle"><input type="checkbox" id="layer-control" checked><span>Control</span></label>
+          <label class="tm-layer-toggle"><input type="checkbox" id="layer-frontlines" checked><span>Front</span></label>
+          <label class="tm-layer-toggle"><input type="checkbox" id="layer-mun-borders"><span>Municipalities</span></label>
+          <label class="tm-layer-toggle"><input type="checkbox" id="layer-minimap" checked><span>Minimap</span></label>
+          <label class="tm-layer-toggle"><input type="checkbox" id="layer-formations" disabled><span>Formations</span></label>
         </div>
+
+        <!-- Hidden file/dialog controls retained for keyboard/IPC compatibility -->
+        <input type="file" id="file-input" accept=".json" style="display:none">
+        <input type="file" id="replay-file-input" accept=".json" style="display:none">
+        <input type="text" id="run-folder-input" style="display:none">
+        <button type="button" id="btn-load-state" style="display:none"></button>
+        <button type="button" id="btn-load-run" style="display:none"></button>
+        <button type="button" id="btn-load-scenario" style="display:none"></button>
+        <button type="button" id="btn-load-state-desktop" style="display:none"></button>
+        <button type="button" id="btn-advance-turn" style="display:none"></button>
+        <button type="button" id="btn-load-replay" style="display:none"></button>
+        <button type="button" id="btn-open-last-replay" style="display:none"></button>
+        <button type="button" id="btn-replay-play" style="display:none"></button>
+        <button type="button" id="btn-replay-export" style="display:none"></button>
+        <span id="replay-status" style="display:none"></span>
 
         <!-- Search overlay -->
         <div class="tm-search-overlay closed" id="search-overlay" role="search">

@@ -1,0 +1,36 @@
+{
+  "schema_version": "0.1.0",
+  "description": "Deterministic motherland-preference urban routing for displacement.",
+  "routes_by_source_mun": {
+    "prijedor": {
+      "RBiH": ["travnik", "zenica", "tuzla", "gorazde"]
+    },
+    "sanski_most": {
+      "RBiH": ["travnik", "zenica", "tuzla", "gorazde"]
+    },
+    "bosanski_novi": {
+      "RBiH": ["travnik", "zenica", "tuzla", "gorazde"]
+    },
+    "zvornik": {
+      "RBiH": ["srebrenica", "tuzla", "gorazde", "zenica", "travnik"]
+    },
+    "bratunac": {
+      "RBiH": ["srebrenica", "tuzla", "gorazde", "zenica", "travnik"]
+    },
+    "srebrenica": {
+      "RBiH": ["tuzla", "gorazde", "zenica", "travnik"]
+    },
+    "vlasenica": {
+      "RBiH": ["srebrenica", "tuzla", "gorazde", "zenica", "travnik"]
+    },
+    "rogatica": {
+      "RBiH": ["gorazde", "srebrenica", "tuzla", "zenica", "travnik"]
+    },
+    "visegrad": {
+      "RBiH": ["gorazde", "srebrenica", "tuzla", "zenica", "travnik"]
+    },
+    "foca": {
+      "RBiH": ["gorazde", "srebrenica", "tuzla", "zenica", "travnik"]
+    }
+  }
+}

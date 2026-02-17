@@ -29,11 +29,12 @@ export const ISOLATED_HOLDOUT_SIDS: readonly SettlementId[] = [
   'S162094'  // Vozuća / Zavidovići
 ] as const;
 
-/** Municipalities where rear cleanup should complete in ≤4 turns (e.g. RS Prijedor/Banja Luka). */
-export const FAST_REAR_CLEANUP_MUNS: readonly string[] = [
-  'prijedor',
-  'banja_luka'
-] as const;
+/** Municipalities where rear cleanup should complete in ≤4 turns, by faction. */
+export const FAST_REAR_CLEANUP_MUNS_BY_FACTION: Readonly<Record<FactionId, readonly string[]>> = {
+  RS: ['prijedor', 'banja_luka'],
+  RBiH: [],
+  HRHB: []
+} as const;
 
 /** Municipalities with high-population holdouts (e.g. Kozarac in Prijedor) — higher resistance weight. */
 export const LARGE_POPULATION_HOLDOUT_MUNS: readonly string[] = [
@@ -42,7 +43,10 @@ export const LARGE_POPULATION_HOLDOUT_MUNS: readonly string[] = [
 
 const CONNECTED_SET = new Set<string>(CONNECTED_STRONGHOLD_SIDS);
 const ISOLATED_SET = new Set<string>(ISOLATED_HOLDOUT_SIDS);
-const FAST_CLEANUP_SET = new Set<string>(FAST_REAR_CLEANUP_MUNS);
+const FAST_CLEANUP_SET_BY_FACTION = new Map<FactionId, Set<string>>(
+  (Object.entries(FAST_REAR_CLEANUP_MUNS_BY_FACTION) as [FactionId, readonly string[]][])
+    .map(([faction, munIds]) => [faction, new Set<string>(munIds)])
+);
 const LARGE_POP_SET = new Set<string>(LARGE_POPULATION_HOLDOUT_MUNS);
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -65,7 +69,7 @@ export const PENALTY_ISOLATED_HOLDOUT = -30;
 export const PENALTY_LARGE_POP_HOLDOUT = -25;
 
 /** Bonus when municipality is in fast rear-cleanup set (prioritize for ≤4-turn completion). */
-export const BONUS_FAST_CLEANUP_MUN = 35;
+export const BONUS_FAST_CLEANUP_MUN = 60;
 
 /** Max turns for "fast" rear cleanup (e.g. one month). */
 export const FAST_CLEANUP_MAX_TURNS = 4;
@@ -82,8 +86,12 @@ export function isIsolatedHoldoutSid(sid: SettlementId): boolean {
   return ISOLATED_SET.has(sid);
 }
 
-export function isFastRearCleanupMun(munId: string | undefined | null): boolean {
-  return munId != null && FAST_CLEANUP_SET.has(munId);
+export function isFastRearCleanupMun(
+  munId: string | undefined | null,
+  attackerFaction: FactionId = 'RS'
+): boolean {
+  if (munId == null) return false;
+  return FAST_CLEANUP_SET_BY_FACTION.get(attackerFaction)?.has(munId) ?? false;
 }
 
 export function isLargePopulationHoldoutMun(munId: string | undefined | null): boolean {
@@ -104,6 +112,16 @@ function buildAdjacency(edges: EdgeRecord[]): Map<SettlementId, Set<SettlementId
     bSet.add(e.a);
   }
   return adj;
+}
+
+const ADJACENCY_CACHE_BY_EDGES = new WeakMap<EdgeRecord[], Map<SettlementId, Set<SettlementId>>>();
+
+function getCachedAdjacency(edges: EdgeRecord[]): Map<SettlementId, Set<SettlementId>> {
+  const cached = ADJACENCY_CACHE_BY_EDGES.get(edges);
+  if (cached) return cached;
+  const computed = buildAdjacency(edges);
+  ADJACENCY_CACHE_BY_EDGES.set(edges, computed);
+  return computed;
 }
 
 /**
@@ -164,6 +182,8 @@ export interface ConsolidationScoreInput {
   targetSid: SettlementId;
   attackerFaction: FactionId;
   edges: EdgeRecord[];
+  /** Optional precomputed adjacency for batch scoring in a single turn. */
+  adjacency?: Map<SettlementId, Set<SettlementId>>;
   /** Settlement ID -> municipality ID (mun1990_id or mun_code). */
   sidToMun: Map<SettlementId, string> | Record<SettlementId, string> | null;
   /** All settlement IDs per municipality (for mun controller). If absent, mun controller not used. */
@@ -191,7 +211,7 @@ export function scoreConsolidationTarget(input: ConsolidationScoreInput): number
 
   const rawMun = sidToMun == null ? null : (sidToMun instanceof Map ? sidToMun.get(targetSid) : (sidToMun as Record<string, string>)[targetSid]);
   const munId = rawMun ?? null;
-  const adj = buildAdjacency(edges);
+  const adj = input.adjacency ?? getCachedAdjacency(edges);
 
   let score = 0;
 
@@ -224,7 +244,7 @@ export function scoreConsolidationTarget(input: ConsolidationScoreInput): number
   }
 
   // 4) Fast cleanup mun bonus (prioritize so ≤4-turn completion)
-  if (isFastRearCleanupMun(munId)) {
+  if (isFastRearCleanupMun(munId, attackerFaction)) {
     score += BONUS_FAST_CLEANUP_MUN;
   }
 

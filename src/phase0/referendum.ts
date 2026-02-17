@@ -23,6 +23,10 @@ export const OUTCOME_NON_WAR_TERMINAL = 'non_war_terminal';
 export interface ReferendumEligibilityOptions {
   /** Turns from current_turn to referendum deadline when eligibility first becomes true. */
   deadlineTurns?: number;
+  /** Optional deterministic schedule turn at/after which referendum is auto-held once eligible. */
+  scheduledReferendumTurn?: number;
+  /** Optional explicit war-start turn override when scheduled referendum fires. */
+  scheduledWarStartTurn?: number;
 }
 
 function getRs(state: GameState) {
@@ -68,6 +72,26 @@ export function holdReferendum(state: GameState, turn: number): void {
   meta.referendum_held = true;
   meta.referendum_turn = turn;
   meta.war_start_turn = turn + REFERENDUM_WAR_DELAY_TURNS;
+}
+
+/**
+ * Deterministic scheduled referendum hook used by historical Phase 0 starts.
+ * Fires once referendum is eligible and the schedule turn is reached.
+ */
+export function applyScheduledReferendum(
+  state: GameState,
+  turn: number,
+  options: ReferendumEligibilityOptions = {}
+): void {
+  if (state.meta.referendum_held) return;
+  const scheduledTurn = options.scheduledReferendumTurn;
+  if (typeof scheduledTurn !== 'number' || !Number.isInteger(scheduledTurn)) return;
+  if (turn < scheduledTurn) return;
+  if (!isReferendumEligible(state)) return;
+  holdReferendum(state, turn);
+  if (Number.isInteger(options.scheduledWarStartTurn)) {
+    state.meta.war_start_turn = options.scheduledWarStartTurn!;
+  }
 }
 
 /**

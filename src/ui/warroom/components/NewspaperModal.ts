@@ -8,9 +8,10 @@
 
 import type { GameState, FactionId, Phase0Event } from '../../../state/game_state.js';
 import { pickBestHeadline, fallbackHeadline, getUrgencyLevel } from '../content/headline_templates.js';
-import { turnToDateString, getPlayerFaction } from './warroom_utils.js';
+import { turnToDateString, getPlayerFaction, FACTION_COLORS, factionCssClass } from './warroom_utils.js';
 
 interface NewspaperContent {
+    factionId: string;
     masthead: string;
     date: string;
     headline: string;
@@ -71,11 +72,12 @@ export class NewspaperModal {
      * Generate newspaper content from Phase 0 events.
      */
     private generateContent(): NewspaperContent {
-        const playerFaction = getPlayerFaction(this.gameState.factions);
+        const playerFaction = getPlayerFaction(this.gameState);
         const turn = this.gameState.meta.turn;
         const previousTurn = Math.max(0, turn - 1);
         if (this.options.startBrief) {
             return {
+                factionId: playerFaction,
                 masthead: `${this.getMastheadName(playerFaction)} — EXTRA EDITION`,
                 date: turnToDateString(turn),
                 headline: 'SEPTEMBER 1991: PREPARE FOR THE BREAK',
@@ -108,6 +110,7 @@ export class NewspaperModal {
         }
 
         return {
+            factionId: playerFaction,
             masthead: this.getMastheadName(playerFaction),
             date: turnToDateString(previousTurn),
             headline,
@@ -138,11 +141,15 @@ export class NewspaperModal {
         const content = this.generateContent();
 
         const newspaper = document.createElement('div');
-        newspaper.className = `newspaper-modal newspaper-urgency-${content.urgency}`;
+        const fCss = factionCssClass(content.factionId as any);
+        newspaper.className = `newspaper-modal newspaper-urgency-${content.urgency} faction-${fCss}`;
+        const fc = FACTION_COLORS[content.factionId] ?? FACTION_COLORS['RBiH'];
+        newspaper.style.borderTop = `3px solid ${fc.primary}`;
 
         // Masthead
         const masthead = document.createElement('div');
         masthead.className = 'newspaper-masthead';
+        masthead.style.borderBottomColor = fc.dim;
         masthead.textContent = content.masthead;
         newspaper.appendChild(masthead);
 

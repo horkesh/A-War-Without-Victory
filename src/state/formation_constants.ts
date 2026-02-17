@@ -68,10 +68,17 @@ export const BRIGADE_OPERATIONAL_AOR_HARD_CAP = 48;
 export const MAX_MUNICIPALITIES_PER_BRIGADE = 3;
 
 /** Max personnel absorbed per turn from home municipality militia pool (recruitment_system_design_note §5.1). */
-export const REINFORCEMENT_RATE = 200;
+export const REINFORCEMENT_RATE = 260;
 
 /** Half rate under active combat: brigade in attack posture or under pressure (recruitment_system_design_note §5.3). */
-export const COMBAT_REINFORCEMENT_RATE = 100;
+export const COMBAT_REINFORCEMENT_RATE = 130;
+
+/**
+ * WIA (wounded in action) trickleback: personnel returned per turn to a formation from its wounded pool.
+ * Only when the brigade is out of combat (not in attack posture, not disrupted). Realistic order of magnitude:
+ * ~80/week allows meaningful recovery over several weeks without dominating reinforcement.
+ */
+export const WIA_TRICKLE_RATE = 80;
 
 /**
  * Single nominal brigade size (troops per formation) for all factions.

@@ -101,6 +101,15 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
       if ('war_start_turn' in m && m.war_start_turn !== undefined && m.war_start_turn !== null && (typeof m.war_start_turn !== 'number' || !Number.isInteger(m.war_start_turn) || m.war_start_turn < 0)) {
         errors.push('meta.war_start_turn must be null or a non-negative integer when present');
       }
+      if ('phase_0_scheduled_referendum_turn' in m && m.phase_0_scheduled_referendum_turn !== undefined && m.phase_0_scheduled_referendum_turn !== null && (typeof m.phase_0_scheduled_referendum_turn !== 'number' || !Number.isInteger(m.phase_0_scheduled_referendum_turn) || m.phase_0_scheduled_referendum_turn < 0)) {
+        errors.push('meta.phase_0_scheduled_referendum_turn must be null or a non-negative integer when present');
+      }
+      if ('phase_0_scheduled_war_start_turn' in m && m.phase_0_scheduled_war_start_turn !== undefined && m.phase_0_scheduled_war_start_turn !== null && (typeof m.phase_0_scheduled_war_start_turn !== 'number' || !Number.isInteger(m.phase_0_scheduled_war_start_turn) || m.phase_0_scheduled_war_start_turn < 0)) {
+        errors.push('meta.phase_0_scheduled_war_start_turn must be null or a non-negative integer when present');
+      }
+      if ('phase_0_war_start_control_path' in m && m.phase_0_war_start_control_path !== undefined && m.phase_0_war_start_control_path !== null && typeof m.phase_0_war_start_control_path !== 'string') {
+        errors.push('meta.phase_0_war_start_control_path must be string or null when present');
+      }
       if ('referendum_eligible_turn' in m && m.referendum_eligible_turn !== undefined && m.referendum_eligible_turn !== null && (typeof m.referendum_eligible_turn !== 'number' || !Number.isInteger(m.referendum_eligible_turn) || m.referendum_eligible_turn < 0)) {
         errors.push('meta.referendum_eligible_turn must be null or a non-negative integer when present');
       }
@@ -275,6 +284,75 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
       }
     } else {
       errors.push('municipality_displacement must be an object (Record<MunicipalityId, number>) when present');
+    }
+  }
+  if ('hostile_takeover_timers' in s && s.hostile_takeover_timers !== undefined) {
+    const timers = s.hostile_takeover_timers;
+    if (timers !== null && typeof timers === 'object' && !Array.isArray(timers)) {
+      for (const [munId, raw] of Object.entries(timers)) {
+        if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) {
+          errors.push(`hostile_takeover_timers.${munId} must be an object when present`);
+          continue;
+        }
+        const rec = raw as Record<string, unknown>;
+        if (typeof rec.mun_id !== 'string' || rec.mun_id.length === 0) {
+          errors.push(`hostile_takeover_timers.${munId}.mun_id must be a non-empty string`);
+        }
+        if (typeof rec.from_faction !== 'string' || rec.from_faction.length === 0) {
+          errors.push(`hostile_takeover_timers.${munId}.from_faction must be a non-empty string`);
+        }
+        if (typeof rec.to_faction !== 'string' || rec.to_faction.length === 0) {
+          errors.push(`hostile_takeover_timers.${munId}.to_faction must be a non-empty string`);
+        }
+        if (
+          typeof rec.started_turn !== 'number' ||
+          !Number.isInteger(rec.started_turn) ||
+          rec.started_turn < 0
+        ) {
+          errors.push(`hostile_takeover_timers.${munId}.started_turn must be a non-negative integer`);
+        }
+      }
+    } else {
+      errors.push('hostile_takeover_timers must be an object (Record<MunicipalityId, HostileTakeoverTimerState>) when present');
+    }
+  }
+  if ('displacement_camp_state' in s && s.displacement_camp_state !== undefined) {
+    const camps = s.displacement_camp_state;
+    if (camps !== null && typeof camps === 'object' && !Array.isArray(camps)) {
+      for (const [munId, raw] of Object.entries(camps)) {
+        if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) {
+          errors.push(`displacement_camp_state.${munId} must be an object when present`);
+          continue;
+        }
+        const rec = raw as Record<string, unknown>;
+        if (typeof rec.mun_id !== 'string' || rec.mun_id.length === 0) {
+          errors.push(`displacement_camp_state.${munId}.mun_id must be a non-empty string`);
+        }
+        if (typeof rec.population !== 'number' || !Number.isFinite(rec.population) || rec.population < 0) {
+          errors.push(`displacement_camp_state.${munId}.population must be a non-negative number`);
+        }
+        if (
+          typeof rec.started_turn !== 'number' ||
+          !Number.isInteger(rec.started_turn) ||
+          rec.started_turn < 0
+        ) {
+          errors.push(`displacement_camp_state.${munId}.started_turn must be a non-negative integer`);
+        }
+        const byFaction = rec.by_faction;
+        if (byFaction !== undefined) {
+          if (byFaction == null || typeof byFaction !== 'object' || Array.isArray(byFaction)) {
+            errors.push(`displacement_camp_state.${munId}.by_faction must be an object when present`);
+          } else {
+            for (const [fid, val] of Object.entries(byFaction as Record<string, unknown>)) {
+              if (typeof val !== 'number' || !Number.isFinite(val) || val < 0) {
+                errors.push(`displacement_camp_state.${munId}.by_faction.${fid} must be a non-negative number`);
+              }
+            }
+          }
+        }
+      }
+    } else {
+      errors.push('displacement_camp_state must be an object (Record<MunicipalityId, DisplacementCampState>) when present');
     }
   }
 

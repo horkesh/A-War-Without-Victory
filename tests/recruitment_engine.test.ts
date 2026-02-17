@@ -337,6 +337,49 @@ describe('runBotRecruitment', () => {
     assert.strictEqual(report.elective_recruited, 1);
     assert.strictEqual(report.actions.length, 1);
   });
+
+  test('respects per-faction mandatory recruit cap when configured', () => {
+    const rsPoolKey = militiaPoolKey('prijedor', 'RS');
+    const state = makeState({
+      political_controllers: { s1: 'RS' },
+      militia_pools: {
+        [rsPoolKey]: { mun_id: 'prijedor', faction: 'RS', available: 2000, committed: 0, exhausted: 0, updated_turn: 0 }
+      }
+    });
+    const sidToMun = new Map([['s1', 'prijedor']]);
+    const resources = initializeRecruitmentResources(['RS'], { RS: 0 }, { RS: 0 });
+    const report = runBotRecruitment(
+      state,
+      [],
+      [
+        makeBrigade({
+          id: 'rs_mand_1',
+          faction: 'RS',
+          name: 'RS Mandatory 1',
+          home_mun: 'prijedor',
+          mandatory: true,
+          priority: 1
+        }),
+        makeBrigade({
+          id: 'rs_mand_2',
+          faction: 'RS',
+          name: 'RS Mandatory 2',
+          home_mun: 'prijedor',
+          mandatory: true,
+          priority: 2
+        })
+      ],
+      resources,
+      sidToMun,
+      { prijedor: 's1' },
+      { includeCorps: false, includeMandatory: true, maxMandatoryPerFaction: 1 }
+    );
+
+    assert.strictEqual(report.mandatory_recruited, 1);
+    assert.strictEqual(report.actions.filter((a) => a.mandatory).length, 1);
+    assert.ok(state.formations['rs_mand_1']);
+    assert.ok(!state.formations['rs_mand_2']);
+  });
 });
 
 describe('isEmergentFormationSuppressed', () => {

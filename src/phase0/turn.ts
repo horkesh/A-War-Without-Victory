@@ -7,17 +7,18 @@
  * this runner executes engine steps 4–10.
  */
 
-import type { GameState, MunicipalityId } from '../state/game_state.js';
-import type { FactionId } from '../state/game_state.js';
+import type { GameState, MunicipalityId, FactionId } from '../state/game_state.js';
 import type { GeographicInputs } from './stability.js';
 import { accumulateDeclarationPressure, type DeclarationPressureOptions } from './declaration_pressure.js';
 import {
   updateReferendumEligibility,
+  applyScheduledReferendum,
   applyPhase0ToPhaseITransition,
   checkReferendumDeadline,
   type ReferendumEligibilityOptions
 } from './referendum.js';
 import { updateAllStabilityScores } from './stability.js';
+import { applyPrewarCapitalTrickle } from './capital.js';
 
 /**
  * Options for runPhase0Turn. Pass-through for declaration pressure, referendum,
@@ -59,9 +60,14 @@ export function runPhase0Turn(state: GameState, options: Phase0TurnOptions = {})
 
   const turn = meta.turn;
 
+  // Scheduled pre-war scenarios receive deterministic limited trickle to avoid
+  // dead turns while preserving scarcity.
+  applyPrewarCapitalTrickle(state);
+
   accumulateDeclarationPressure(state, turn, options.declarationPressure ?? {});
 
   updateReferendumEligibility(state, turn, options.referendum ?? {});
+  applyScheduledReferendum(state, turn, options.referendum ?? {});
 
   updateAllStabilityScores(state, options.stability);
 
