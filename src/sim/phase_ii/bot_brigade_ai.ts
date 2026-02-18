@@ -15,17 +15,18 @@ import type {
   SettlementId,
   BrigadeAoROrder,
   BrigadePostureOrder,
-  BrigadePosture
+  BrigadePosture,
+  CorpsStance
 } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { buildAdjacencyFromEdges, getFactionBrigades } from './phase_ii_adjacency.js';
 import { getBrigadeAoRSettlements, computeBrigadeDensity, getSettlementGarrison } from './brigade_aor.js';
 import { canAdoptPosture } from './brigade_posture.js';
-import type { CorpsStance } from '../../state/game_state.js';
 import { FACTION_STRATEGIES, isCorridorMunicipality, isOffensiveObjective, isDefensivePriority, getEffectiveAttackShare } from './bot_strategy.js';
 import { scoreConsolidationTarget } from '../consolidation_scoring.js';
 import { estimateAttackCost } from './combat_estimate.js';
+import { areRbihHrhbAllied, isRbihHrhbAtWar, ALLIED_THRESHOLD, HOSTILE_THRESHOLD } from '../phase_i/alliance_update.js';
 
 // --- Types ---
 
@@ -86,10 +87,32 @@ const MIN_WIN_PROBABILITY = 0.6;
 /** Score penalty for attacking settlements with high opposing-ethnicity concentration. */
 const ETHNIC_RESISTANCE_PENALTY = -40;
 
-/** Max brigades per faction in elastic_defense for economy of force. */
-const MAX_ELASTIC_DEFENSE_PER_FACTION = 2;
+/** Max score bonus for attacking bilateral war targets (RBiH↔HRHB when at war). */
+const SCORE_BILATERAL_WAR_TARGET = 60;
+
+/** Min brigades in elastic_defense for economy of force. */
+const MIN_ELASTIC_DEFENSE = 1;
+/** Max brigades in elastic_defense for economy of force. */
+const MAX_ELASTIC_DEFENSE = 4;
+/** Ratio: 1 elastic_defense per this many front brigades. */
+const ELASTIC_DEFENSE_RATIO = 5;
 
 // --- Helpers ---
+
+/**
+ * Returns true when the two factions are RBiH↔HRHB and currently allied
+ * (alliance > ALLIED_THRESHOLD, OR ceasefire active, OR Washington signed).
+ * Used as a single checkpoint to suppress bilateral combat.
+ */
+function isBilateralAlly(state: GameState, faction: FactionId, targetFaction: FactionId): boolean {
+  const isRbihHrhb =
+    (faction === 'RBiH' && targetFaction === 'HRHB') ||
+    (faction === 'HRHB' && targetFaction === 'RBiH');
+  if (!isRbihHrhb) return false;
+  const rhs = state.rbih_hrhb_state;
+  if (rhs?.ceasefire_active || rhs?.washington_signed) return true;
+  return areRbihHrhbAllied(state);
+}
 
 /**
  * True if the settlement has heavy resistance: defender brigade in AoR at target, or garrison >= HEAVY_RESISTANCE_GARRISON_THRESHOLD.
@@ -163,11 +186,22 @@ function getFactionFrontEdges(
     const controlB = pc[edge.b];
     if (!controlA || !controlB || controlA === controlB) continue;
 
+    let our_sid: SettlementId | null = null;
+    let enemy_sid: SettlementId | null = null;
     if (controlA === faction) {
-      result.push({ edge, our_sid: edge.a, enemy_sid: edge.b });
+      our_sid = edge.a;
+      enemy_sid = edge.b;
     } else if (controlB === faction) {
-      result.push({ edge, our_sid: edge.b, enemy_sid: edge.a });
+      our_sid = edge.b;
+      enemy_sid = edge.a;
     }
+    if (!our_sid || !enemy_sid) continue;
+
+    const enemyFaction = pc[enemy_sid] as FactionId;
+    // Alliance-aware filtering: skip edges against bilateral ally
+    if (isBilateralAlly(state, faction, enemyFaction)) continue;
+
+    result.push({ edge, our_sid, enemy_sid });
   }
 
   // Sort by edge ID for determinism
@@ -370,6 +404,22 @@ function scoreTarget(
   });
   score += Math.floor(consolidationScore * CONSOLIDATION_SCORE_WEIGHT);
 
+  // 6. Bilateral war priority: when at war with RBiH/HRHB, prioritize bilateral targets
+  if (sidToMun) {
+    const targetController = (state.political_controllers ?? {})[targetSid] as FactionId | undefined;
+    if (targetController) {
+      const isRbihVsHrhb =
+        (faction === 'RBiH' && targetController === 'HRHB') ||
+        (faction === 'HRHB' && targetController === 'RBiH');
+      if (isRbihVsHrhb && isRbihHrhbAtWar(state)) {
+        // Bonus scaled by negative alliance: more negative = higher priority
+        const allianceValue = state.phase_i_alliance_rbih_hrhb ?? 1.0;
+        const bilateralBonus = Math.min(SCORE_BILATERAL_WAR_TARGET, Math.round(-allianceValue * 120));
+        score += Math.max(0, bilateralBonus);
+      }
+    }
+  }
+
   return score;
 }
 
@@ -562,7 +612,11 @@ export function generateBotBrigadeOrders(
     return p === 'elastic_defense';
   }).length;
 
-  if (elasticDefenseCount < MAX_ELASTIC_DEFENSE_PER_FACTION) {
+  // Dynamic max: scales with front brigade count (1 per 5 front brigades, min 1, max 4)
+  const frontBrigadeCount = brigades.filter(b => hasFrontActiveSettlements(state, b, adj)).length;
+  const maxElasticDefense = Math.max(MIN_ELASTIC_DEFENSE, Math.min(MAX_ELASTIC_DEFENSE, Math.floor(frontBrigadeCount / ELASTIC_DEFENSE_RATIO)));
+
+  if (elasticDefenseCount < maxElasticDefense) {
     // Find the lowest-density defending brigade on a quiet sector
     const quietDefenders = brigades
       .filter(b => {
@@ -577,7 +631,7 @@ export function generateBotBrigadeOrders(
       });
 
     for (const { brigade } of quietDefenders) {
-      if (elasticDefenseCount >= MAX_ELASTIC_DEFENSE_PER_FACTION) break;
+      if (elasticDefenseCount >= maxElasticDefense) break;
       // Only thin out if there are attacking brigades that could benefit
       if (attackPostureCount === 0) break;
       if (canAdoptPosture(brigade, 'elastic_defense')) {
@@ -736,7 +790,8 @@ export function generateBotBrigadeOrders(
   // Build settlementsByMun from political_controllers + sidToMun for consolidation scoring
   const settlementsByMunForConsolidation = buildSettlementsByMunFromControl(state, munLookup);
 
-  // One brigade per target per faction per turn; duplicate allowed only when OG+operation and heavy resistance (plan: one-brigade-per-target).
+  // Phase F: Target set restricted to front-active (enemy-adjacent from our AoR) + objective/corridor/OG; deterministic scoring and ordering.
+  // One brigade per target per faction per turn; duplicate allowed only when OG+operation and heavy resistance.
   const chosenTargets = new Set<SettlementId>();
 
   for (const brigade of brigades) {
