@@ -936,6 +936,8 @@ export interface GameState {
   brigade_movement_orders?: Record<FormationId, { destination_sids: SettlementId[] }>;
   /** Phase II (Brigade AoR Redesign Phase G): Per-brigade encirclement (AoR entirely in enclave). Used for cohesion drain, garrison penalty, movement block. */
   brigade_encircled?: Record<FormationId, boolean>;
+  /** Phase II (Brigade AoR Redesign Phase I): Per-settlement cumulative battle damage [0, 1] (exhaustion-as-terrain). */
+  battle_damage?: Record<SettlementId, number>;
   /** Formation spawn directive (FORAWWV H2.4). When set and active for current turn, formation spawn may run. */
   formation_spawn_directive?: FormationSpawnDirective;
   /** Strategic production facilities (capturable local supply contributors). */

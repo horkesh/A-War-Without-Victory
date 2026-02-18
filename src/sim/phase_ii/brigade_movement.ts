@@ -63,10 +63,17 @@ export function shortestPathThroughFriendly(
 /**
  * Transit turns for a path (path includes start and end; steps = path.length - 1).
  * Study: transit_turns = max(1, ceil(graph_distance / MOVEMENT_RATE)).
+ * Phase I: +1 turn per settlement with battle_damage > 0 in path.
  */
-export function transitTurnsForPath(path: SettlementId[]): number {
+export function transitTurnsForPath(path: SettlementId[], state?: GameState): number {
   const steps = Math.max(0, path.length - 1);
-  return Math.max(1, Math.ceil(steps / MOVEMENT_RATE));
+  let turns = Math.max(1, Math.ceil(steps / MOVEMENT_RATE));
+  if (state?.battle_damage) {
+    for (let i = 0; i < path.length; i++) {
+      if ((state.battle_damage[path[i]] ?? 0) > 0) turns += 1;
+    }
+  }
+  return turns;
 }
 
 /**
@@ -123,7 +130,7 @@ export function processBrigadeMovement(state: GameState, edges: EdgeRecord[]): v
         delete movementState[formationId];
         continue;
       }
-      const turns = transitTurnsForPath(path);
+      const turns = transitTurnsForPath(path, state);
       for (const sid of fromSids) {
         if (brigadeAor[sid] === formationId) brigadeAor[sid] = null;
       }
