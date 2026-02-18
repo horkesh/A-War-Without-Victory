@@ -138,6 +138,7 @@ import { generateAllCorpsOrders } from './phase_ii/bot_corps_ai.js';
 import { applyCorpsEffects, advanceOperations } from './phase_ii/corps_command.js';
 import { activateOGs, updateOGLifecycle } from './phase_ii/operational_groups.js';
 import { applyBrigadePressureToState } from './phase_ii/brigade_pressure.js';
+import { computeMilitiaGarrisons } from './phase_ii/militia_garrison.js';
 import { resolveAttackOrders, type ResolveAttackOrdersReport } from './phase_ii/resolve_attack_orders.js';
 import { loadTerrainScalars } from '../map/terrain_scalars.js';
 import { degradeEquipment, ensureBrigadeComposition } from './phase_ii/equipment_effects.js';
@@ -675,11 +676,15 @@ const phases: NamedPhase[] = [
       const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
       const edges = context.input.settlementEdges ?? graph.edges;
 
-      // Build settlement → municipality lookup for terrain/urban defense
+      // Build settlement → municipality lookup for terrain/urban defense and militia garrisons
       const settlementToMun = new Map<string, string>();
+      const sidToMunRecord: Record<string, string> = {};
       for (const [sid, rec] of graph.settlements.entries()) {
-        settlementToMun.set(sid, rec.mun1990_id ?? rec.mun_code ?? rec.mun);
+        const mun = rec.mun1990_id ?? rec.mun_code ?? rec.mun;
+        settlementToMun.set(sid, mun);
+        sidToMunRecord[sid] = mun;
       }
+      computeMilitiaGarrisons(context.state, sidToMunRecord);
 
       // Load terrain scalars (cached after first call)
       let terrainData;

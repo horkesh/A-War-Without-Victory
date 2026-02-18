@@ -79,6 +79,14 @@ export function getPersonnelBasedAoRCap(personnel: number): number {
   return Math.min(MAX_AOR_SETTLEMENTS, Math.max(MIN_AOR_SETTLEMENTS, n));
 }
 
+// --- Militia garrison (Brigade AoR Redesign Phase B) ---
+/** Militia cohesion for combat power (low vs brigade 60+). */
+export const MILITIA_COHESION = 30;
+/** Militia equipment multiplier (infantry only; no tanks/artillery bonus). */
+export const MILITIA_EQUIPMENT_MULT = 0;
+/** Fraction of militia pool.available used as base garrison per settlement in municipality. */
+export const MILITIA_GARRISON_FRACTION = 0.15;
+
 /**
  * Max municipalities a single brigade can be assigned in ensureBrigadeMunicipalityAssignment.
  * Historical frontage rule: one HQ municipality plus up to two neighboring municipalities.

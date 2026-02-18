@@ -27,7 +27,8 @@ import type { TerrainScalarsData } from '../../map/terrain_scalars.js';
 import { getTerrainScalarsForSid } from '../../map/terrain_scalars.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { areRbihHrhbAllied } from '../phase_i/alliance_update.js';
-import { MIN_BRIGADE_SPAWN, MIN_COMBAT_PERSONNEL, isLargeUrbanSettlementMun, LARGE_SETTLEMENT_MUN_IDS } from '../../state/formation_constants.js';
+import { MIN_BRIGADE_SPAWN, MIN_COMBAT_PERSONNEL, MILITIA_COHESION, isLargeUrbanSettlementMun, LARGE_SETTLEMENT_MUN_IDS } from '../../state/formation_constants.js';
+import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { getBrigadeAoRSettlements, getSettlementGarrison } from './brigade_aor.js';
 import { computeEquipmentMultiplier, captureEquipment, ensureBrigadeComposition } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
@@ -307,6 +308,11 @@ function getOGBonus(formation: FormationState): number {
   return (formation.kind === 'operational_group' || formation.kind === 'og') ? 1.3 : 1.0;
 }
 
+/** Militia defender power: garrison × cohesion mult × terrain (no equipment/posture/corps). Phase B. */
+function computeMilitiaDefenderPower(garrison: number, terrainMult: number): number {
+  return garrison * (MILITIA_COHESION / 100) * terrainMult;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Terrain
 // ═══════════════════════════════════════════════════════════════════════════
@@ -542,10 +548,12 @@ function computeBattleCasualties(
   terrainComposite: number,
   snapMults: PreBattleSnap,
   attackerFormation: FormationState,
-  defenderFormation: FormationState | null
+  defenderFormation: FormationState | null,
+  /** When defender is militia (no formation but garrison > 0), cap defender casualties at this value. */
+  defenderGarrisonCap?: number
 ): { attacker: BattleCasualties; defender: BattleCasualties } {
-  // Undefended settlement
-  if (!defenderFormation || defenderPower <= 0) {
+  // Truly undefended (no defender power)
+  if (defenderPower <= 0) {
     const undefendedIntensityFactor = Math.max(0.1, attackerPower / 800);
     const defenderTotal = Math.max(
       MIN_UNDEFENDED_DEFENDER_CASUALTIES,
@@ -567,48 +575,46 @@ function computeBattleCasualties(
 
   // Defender casualties: proportional to power ratio (overwhelming = more defender losses)
   let defenderTotal = baseCas * Math.min(2.0, powerRatio) * (1 / Math.max(0.8, terrainComposite)) * snapMults.defenderCasMult;
-
-  // Unsupplied defender takes extra casualties
-  if (snapMults.isAmmoCrisis) {
-    defenderTotal *= 1.5;
-  }
+  if (snapMults.isAmmoCrisis) defenderTotal *= 1.5;
   defenderTotal = Math.max(MIN_CASUALTIES_PER_BATTLE, Math.round(defenderTotal));
 
-  // Cap casualties at available personnel minus combat floor (not spawn floor —
-  // formations at MIN_BRIGADE_SPAWN must still be able to take losses in combat)
   const attackerPersonnel = attackerFormation.personnel ?? 0;
-  const defenderPersonnel = defenderFormation.personnel ?? 0;
+  const defenderPersonnel = defenderFormation
+    ? (defenderFormation.personnel ?? 0)
+    : (defenderGarrisonCap ?? 0);
   attackerTotal = Math.min(attackerTotal, Math.max(0, attackerPersonnel - MIN_COMBAT_PERSONNEL));
-  defenderTotal = Math.min(defenderTotal, Math.max(0, defenderPersonnel - MIN_COMBAT_PERSONNEL));
+  defenderTotal = Math.min(defenderTotal, Math.max(0, defenderPersonnel));
 
-  // Surrender cascade: most defenders captured, few killed
-  const attackerKiaFrac = KIA_FRACTION;
-  const attackerWiaFrac = WIA_FRACTION;
   let defenderKiaFrac = KIA_FRACTION;
   let defenderWiaFrac = WIA_FRACTION;
-  if (snapMults.isSurrenderCascade) {
+  if (snapMults.isSurrenderCascade && defenderFormation) {
     defenderKiaFrac = 0.05;
     defenderWiaFrac = 0.10;
-    // Most become captured
     defenderTotal = Math.max(defenderTotal, Math.round(defenderPersonnel * 0.5));
     defenderTotal = Math.min(defenderTotal, Math.max(0, defenderPersonnel - MIN_COMBAT_PERSONNEL));
   }
 
-  // Equipment losses
-  const attackerComp = attackerFormation.composition ?? ensureBrigadeComposition(attackerFormation);
-  const defenderComp = defenderFormation.composition ?? ensureBrigadeComposition(defenderFormation);
+  const defenderReported = defenderTotal > 0
+    ? defenderTotal
+    : Math.min(MIN_CASUALTIES_PER_BATTLE, defenderPersonnel);
 
+  const attackerComp = attackerFormation.composition ?? ensureBrigadeComposition(attackerFormation);
   const attackPostureMult = (attackerFormation.posture === 'attack') ? 1.5 : 1.0;
   const aTanksLost = Math.min(attackerComp.tanks, Math.floor(attackerComp.tanks * TANK_LOSS_RATE * intensityFactor * attackPostureMult));
   const aArtLost = Math.min(attackerComp.artillery, Math.floor(attackerComp.artillery * ARTILLERY_LOSS_RATE * intensityFactor));
 
-  const terrainProtection = 1 / Math.max(0.8, terrainComposite);
-  const dTanksLost = Math.min(defenderComp.tanks, Math.floor(defenderComp.tanks * TANK_LOSS_RATE * intensityFactor * terrainProtection));
-  const dArtLost = Math.min(defenderComp.artillery, Math.floor(defenderComp.artillery * ARTILLERY_LOSS_RATE * intensityFactor * terrainProtection));
+  let dTanksLost = 0;
+  let dArtLost = 0;
+  if (defenderFormation) {
+    const defenderComp = defenderFormation.composition ?? ensureBrigadeComposition(defenderFormation);
+    const terrainProtection = 1 / Math.max(0.8, terrainComposite);
+    dTanksLost = Math.min(defenderComp.tanks, Math.floor(defenderComp.tanks * TANK_LOSS_RATE * intensityFactor * terrainProtection));
+    dArtLost = Math.min(defenderComp.artillery, Math.floor(defenderComp.artillery * ARTILLERY_LOSS_RATE * intensityFactor * terrainProtection));
+  }
 
   return {
-    attacker: splitCasualties(attackerTotal, attackerKiaFrac, attackerWiaFrac, aTanksLost, aArtLost),
-    defender: splitCasualties(defenderTotal, defenderKiaFrac, defenderWiaFrac, dTanksLost, dArtLost)
+    attacker: splitCasualties(attackerTotal, KIA_FRACTION, WIA_FRACTION, aTanksLost, aArtLost),
+    defender: splitCasualties(defenderReported, defenderKiaFrac, defenderWiaFrac, dTanksLost, dArtLost)
   };
 }
 
@@ -807,10 +813,15 @@ export function resolveBattleOrders(
     const isRbihVsHrhb =
       (attackerFaction === 'RBiH' && defenderFaction === 'HRHB') ||
       (attackerFaction === 'HRHB' && defenderFaction === 'RBiH');
-    const earliestTurn = state.meta?.rbih_hrhb_war_earliest_turn ?? 26;
-    const beforeEarliestWar = turn < earliestTurn;
-    const rbihHrhbAllied = beforeEarliestWar || areRbihHrhbAllied(state);
-    if (isRbihVsHrhb && rbihHrhbAllied) continue;
+    if (isRbihVsHrhb) {
+      const earliestTurn = state.meta?.rbih_hrhb_war_earliest_turn ?? 26;
+      const beforeEarliestWar = turn < earliestTurn;
+      const rhs = state.rbih_hrhb_state;
+      const ceasefireActive = rhs?.ceasefire_active ?? false;
+      const washingtonSigned = rhs?.washington_signed ?? false;
+      const rbihHrhbAllied = beforeEarliestWar || areRbihHrhbAllied(state) || ceasefireActive || washingtonSigned;
+      if (rbihHrhbAllied) continue;
+    }
 
     // --- Compute attacker aggregate power ---
     const aorSettlements = getBrigadeAoRSettlements(state, formationId);
@@ -823,10 +834,11 @@ export function resolveBattleOrders(
     // --- Terrain for defending settlement ---
     const terrain = computeTerrainModifier(terrainData, targetSid, settlementToMun);
 
-    // --- Defender brigade ---
+    // --- Defender brigade or militia ---
     const defenderBrigadeId: FormationId | undefined = brigadeAor[targetSid] ?? undefined;
     const defenderFormation = defenderBrigadeId != null ? formations[defenderBrigadeId] : undefined;
     const defenderFormationOrNull = defenderFormation ?? null;
+    const defGarrison = getSettlementGarrison(state, targetSid, edges);
 
     // --- Front hardening streak ---
     let activeStreak = 0;
@@ -856,13 +868,30 @@ export function resolveBattleOrders(
 
     let defenderPower: CombatPowerBreakdown | null = null;
     if (defenderFormation) {
-      const defGarrison = getSettlementGarrison(state, targetSid, edges);
       defenderPower = computeCombatPower(
         state, defenderFormation, defGarrison, 'defend',
         terrain.composite, activeStreak
       );
-      // Apply snap modifiers to defender power
       defenderPower.total_combat_power *= preBattleSnaps.defenderPowerMult;
+    } else if (defGarrison > 0) {
+      const power = computeMilitiaDefenderPower(defGarrison, terrain.composite);
+      defenderPower = {
+        base_garrison: defGarrison,
+        equipment_mult: 1,
+        experience_mult: 1,
+        cohesion_mult: MILITIA_COHESION / 100,
+        posture_mult: 1,
+        supply_mult: 1,
+        readiness_mult: 1,
+        corps_stance_mult: 1,
+        operation_mult: 1,
+        og_bonus: 1,
+        resilience_mult: 1,
+        disruption_mult: 1,
+        terrain_mult: terrain.composite,
+        front_hardening_mult: 1,
+        total_combat_power: power
+      };
     }
 
     // --- Power ratio & outcome ---
@@ -885,7 +914,8 @@ export function resolveBattleOrders(
     const urbanCasMult = getUrbanCasualtyMult(settlementToMun, targetSid);
     const casualties = computeBattleCasualties(
       aPower, dPower, powerRatio, urbanCasMult, terrain.composite,
-      preBattleSnaps, formation, defenderFormationOrNull
+      preBattleSnaps, formation, defenderFormationOrNull,
+      defenderFormationOrNull ? undefined : (defGarrison > 0 ? defGarrison : undefined)
     );
 
     // --- Post-battle snaps ---
@@ -925,10 +955,23 @@ export function resolveBattleOrders(
       }
     }
 
-    // Apply personnel losses
+    // Apply personnel losses (defender: cap at applicable so formation never goes below MIN_COMBAT_PERSONNEL)
     applyPersonnelLoss(formation, totalPersonnelLoss(casualties.attacker));
     if (defenderFormation) {
-      applyPersonnelLoss(defenderFormation, totalPersonnelLoss(casualties.defender));
+      const defenderPersonnel = defenderFormation.personnel ?? 0;
+      const defenderApplicable = Math.max(0, defenderPersonnel - MIN_COMBAT_PERSONNEL);
+      applyPersonnelLoss(defenderFormation, Math.min(totalPersonnelLoss(casualties.defender), defenderApplicable));
+    } else if (defGarrison > 0) {
+      // Militia defender: subtract casualties from militia pool (Phase B).
+      const mun = settlementToMun.get(targetSid);
+      if (mun && state.militia_pools) {
+        const poolKey = militiaPoolKey(mun, defenderFaction!);
+        const pool = state.militia_pools[poolKey];
+        if (pool && typeof pool.available === 'number') {
+          const loss = totalPersonnelLoss(casualties.defender);
+          pool.available = Math.max(0, pool.available - loss);
+        }
+      }
     }
 
     // WIA trickleback: record wounded for later return (only when brigade is out of combat)

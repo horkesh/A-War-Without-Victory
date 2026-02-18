@@ -1206,8 +1206,8 @@ export function computeBrigadeDensity(
 }
 
 /**
- * Garrison strength at a settlement: personnel of the brigade holding it, split equally across its AoR.
- * Defender strength at that settlement = this value (Brigade Realism plan §3.3). Returns 0 if sid has no brigade assignment.
+ * Garrison strength at a settlement: brigade personnel split across AoR, or militia garrison if no brigade (Phase B).
+ * Defender strength at that settlement = this value (Brigade Realism plan §3.3).
  */
 export function getSettlementGarrison(
   state: GameState,
@@ -1216,13 +1216,17 @@ export function getSettlementGarrison(
 ): number {
   const brigadeAor = state.brigade_aor ?? {};
   const formationId = brigadeAor[sid];
-  if (!formationId) return 0;
-  const coveredSettlements = getBrigadeOperationalCoverageSettlements(state, formationId, edges);
-  if (!coveredSettlements.includes(sid)) return 0;
-  const formation = state.formations?.[formationId];
-  if (!formation) return 0;
-  const personnel = formation.personnel ?? 1000;
-  return personnel / Math.max(1, coveredSettlements.length);
+  if (formationId) {
+    const coveredSettlements = getBrigadeOperationalCoverageSettlements(state, formationId, edges);
+    if (coveredSettlements.includes(sid)) {
+      const formation = state.formations?.[formationId];
+      if (formation) {
+        const personnel = formation.personnel ?? 1000;
+        return personnel / Math.max(1, coveredSettlements.length);
+      }
+    }
+  }
+  return state.militia_garrison?.[sid] ?? 0;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

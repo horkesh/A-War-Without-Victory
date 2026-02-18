@@ -115,7 +115,7 @@ export interface OGActivationOrder {
   corps_id: FormationId;
   donors: Array<{ brigade_id: FormationId; personnel_contribution: number }>;
   focus_settlements: SettlementId[];
-  posture: 'probe' | 'attack';
+  posture: 'probe' | 'attack' | 'defend';
   max_duration: number;
 }
 
@@ -914,6 +914,8 @@ export interface GameState {
   front_pressure: Record<string, FrontPressureState>;
   /** Municipality-level militia pools. Key: MunicipalityId (legacy) or "mun_id:faction" (composite). Plan: militia_and_brigade_formation_system. */
   militia_pools: Record<string, MilitiaPoolState>;
+  /** Phase II (Brigade AoR Redesign Phase B): Per-settlement militia garrison strength. Derived from militia_pools + org penetration; settlements with a brigade use brigade garrison instead. Recomputed each turn. */
+  militia_garrison?: Record<SettlementId, number>;
   /** Formation spawn directive (FORAWWV H2.4). When set and active for current turn, formation spawn may run. */
   formation_spawn_directive?: FormationSpawnDirective;
   /** Strategic production facilities (capturable local supply contributors). */
