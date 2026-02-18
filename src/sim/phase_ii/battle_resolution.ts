@@ -24,7 +24,7 @@ import type {
 } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import type { TerrainScalarsData } from '../../map/terrain_scalars.js';
-import { getTerrainScalarsForSid } from '../../map/terrain_scalars.js';
+import { getTerrainScalarsForSid, getMaxAttackersForTarget } from '../../map/terrain_scalars.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { areRbihHrhbAllied } from '../phase_i/alliance_update.js';
 import { MIN_BRIGADE_SPAWN, MIN_COMBAT_PERSONNEL, MILITIA_COHESION, isLargeUrbanSettlementMun, LARGE_SETTLEMENT_MUN_IDS } from '../../state/formation_constants.js';
@@ -812,7 +812,7 @@ export function resolveBattleOrders(
     .filter((entry): entry is [FormationId, SettlementId] => entry[1] != null && entry[1] !== '')
     .sort((a, b) => strictCompare(a[0], b[0]));
 
-  // Group by target; for each target collect attackers with AoR adjacent to target (cap 3). Phase D.
+  // Group by target; for each target collect attackers with AoR adjacent to target. Phase D: cap 3; Phase H: terrain battle width (mountain 1, hills 2, plains 3).
   const targetToAttackers = new Map<SettlementId, FormationId[]>();
   for (const [formationId, targetSid] of orderEntries) {
     const formation = formations[formationId];
@@ -828,7 +828,9 @@ export function resolveBattleOrders(
       list = [];
       targetToAttackers.set(targetSid, list);
     }
-    if (list.length < MAX_ATTACKERS_PER_TARGET) list.push(formationId);
+    const terrainCap = getMaxAttackersForTarget(terrainData, targetSid);
+    const cap = Math.min(MAX_ATTACKERS_PER_TARGET, terrainCap);
+    if (list.length < cap) list.push(formationId);
   }
   for (const list of targetToAttackers.values()) {
     list.sort(strictCompare);
