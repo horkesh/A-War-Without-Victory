@@ -125,12 +125,12 @@ import { runJNATransition, type JNATransitionReport } from './phase_i/jna_transi
 
 import { detectPhaseIIFronts } from './phase_ii/front_emergence.js';
 import {
-  applyBrigadeMunicipalityOrders,
-  syncBrigadeMunicipalityAssignmentFromAoR,
-  validateBrigadeAoR,
-  rebalanceBrigadeAoR
+  applySurroundedBrigadeReform,
+  identifyFrontActiveSettlements,
+  validateBrigadeAoR
 } from './phase_ii/brigade_aor.js';
-import { enforceCorpsLevelContiguity } from './phase_ii/corps_directed_aor.js';
+import { enforceContiguity, enforceCorpsLevelContiguity } from './phase_ii/corps_directed_aor.js';
+import { buildAdjacencyFromEdges } from './phase_ii/phase_ii_adjacency.js';
 import { applyReshapeOrders } from './phase_ii/aor_reshaping.js';
 import { applyPostureOrders, applyPostureCosts } from './phase_ii/brigade_posture.js';
 import { generateAllBotOrders } from './phase_ii/bot_brigade_ai.js';
@@ -149,6 +149,7 @@ import {
   updatePhaseIOpposingEdgesStreak
 } from './phase_transitions/phase_i_to_phase_ii.js';
 import { runFormationHqRelocation, type FormationHqRelocationReport } from './formation_hq_relocation.js';
+import { runPhaseIBotPosture } from './phase_i/bot_phase_i.js';
 import { strictCompare } from '../state/validateGameState.js';
 import {
   diffusePressure,
@@ -313,6 +314,15 @@ export interface TurnContext {
 
 export type PhaseHandler = (context: TurnContext) => void | Promise<void>;
 
+/** Load settlement graph and edges from context (or default). Used by Phase II AoR and related steps. */
+async function getGraphAndEdges(context: TurnContext): Promise<{ graph: LoadedSettlementGraph; edges: EdgeRecord[] }> {
+  const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+  const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
+    ? context.input.settlementEdges
+    : graph.edges;
+  return { graph, edges };
+}
+
 interface NamedPhase {
   name: string;
   run: PhaseHandler;
@@ -475,23 +485,19 @@ const phases: NamedPhase[] = [
     run: async (context) => {
       if (context.state.meta.phase !== 'phase_ii') return;
       if (!context.state.brigade_aor) return;
-      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-      const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
-        ? context.input.settlementEdges
-        : graph.edges;
+      const { graph, edges } = await getGraphAndEdges(context);
       validateBrigadeAoR(context.state, edges, graph.settlements);
     }
   },
   {
-    name: 'rebalance-brigade-aor',
+    name: 'enforce-brigade-aor-contiguity',
     run: async (context) => {
       if (context.state.meta.phase !== 'phase_ii') return;
       if (!context.state.brigade_aor) return;
-      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-      const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
-        ? context.input.settlementEdges
-        : graph.edges;
-      rebalanceBrigadeAoR(context.state, edges);
+      const { edges } = await getGraphAndEdges(context);
+      const frontActive = identifyFrontActiveSettlements(context.state, edges);
+      const adj = buildAdjacencyFromEdges(edges);
+      enforceContiguity(context.state, frontActive, adj);
     }
   },
   {
@@ -500,25 +506,22 @@ const phases: NamedPhase[] = [
       if (context.state.meta.phase !== 'phase_ii') return;
       if (!context.state.brigade_aor) return;
       if (!context.state.corps_command) return;
-      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-      const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
-        ? context.input.settlementEdges
-        : graph.edges;
+      const { edges } = await getGraphAndEdges(context);
       enforceCorpsLevelContiguity(context.state, edges);
     }
   },
   {
-    name: 'apply-municipality-orders',
+    name: 'surrounded-brigade-reform',
     run: async (context) => {
       if (context.state.meta.phase !== 'phase_ii') return;
-      if (!context.state.brigade_mun_orders || Object.keys(context.state.brigade_mun_orders).length === 0) return;
-      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-      const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
-        ? context.input.settlementEdges
-        : graph.edges;
-      applyBrigadeMunicipalityOrders(context.state, edges, graph.settlements);
-      // Keep settlement-level AoR synchronized after municipality movement.
-      validateBrigadeAoR(context.state, edges, graph.settlements);
+      if (!context.state.brigade_aor) return;
+      const { graph, edges } = await getGraphAndEdges(context);
+      const sidToMun: Record<string, string> = {};
+      for (const [sid, rec] of graph.settlements.entries()) {
+        const munId = rec.mun1990_id ?? rec.mun_code;
+        if (munId) sidToMun[sid] = munId;
+      }
+      applySurroundedBrigadeReform(context.state, edges, sidToMun);
     }
   },
   {
@@ -576,8 +579,6 @@ const phases: NamedPhase[] = [
         ? context.input.settlementEdges
         : graph.edges;
       applyReshapeOrders(context.state, edges);
-      // Keep municipality assignment layer consistent with any applied settlement reshapes.
-      syncBrigadeMunicipalityAssignmentFromAoR(context.state, graph.settlements);
     }
   },
   {
@@ -1434,6 +1435,24 @@ const phaseIPhases: NamedPhase[] = [
         historicalNameLookup: context.input.historicalNameLookup ?? undefined,
         population1991ByMun: context.input.municipalityPopulation1991 ?? undefined
       });
+    }
+  },
+  {
+    name: 'phase-i-bot-posture',
+    run: async (context) => {
+      // Phase I bot: assign posture (hold/probe/push) to front edges for bot-controlled factions
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
+        ? context.input.settlementEdges
+        : graph.edges;
+      const frontEdges = computeFrontEdges(context.state, edges);
+      if (frontEdges.length === 0) return;
+      const playerFaction = context.state.meta.player_faction ?? null;
+      const botFactions = (context.state.factions ?? [])
+        .map(f => f.id)
+        .filter(fid => playerFaction == null || fid !== playerFaction)
+        .sort(strictCompare) as import('../state/game_state.js').FactionId[];
+      runPhaseIBotPosture(context.state, frontEdges, botFactions);
     }
   },
   {
