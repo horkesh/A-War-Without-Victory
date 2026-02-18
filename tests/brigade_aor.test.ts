@@ -13,9 +13,9 @@ import {
   getSettlementGarrison,
   computeBrigadeOperationalCoverageCap
 } from '../src/sim/phase_ii/brigade_aor.js';
-import type { GameState, FormationState, FactionId, SettlementId } from '../src/state/game_state.js';
+import type { GameState, FormationState, FactionId } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
-import { BRIGADE_OPERATIONAL_AOR_HARD_CAP } from '../src/state/formation_constants.js';
+import { getPersonnelBasedAoRCap, MAX_AOR_SETTLEMENTS } from '../src/state/formation_constants.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 
 function makeFormation(id: string, faction: FactionId, hq: string, personnel: number = 1000): FormationState {
@@ -109,38 +109,46 @@ describe('identifyFrontActiveSettlements', () => {
 });
 
 describe('initializeBrigadeAoR', () => {
-  it('assigns front-active settlements to brigades', () => {
+  it('assigns each brigade 1–4 contiguous settlements (personnel-based cap, BFS from HQ)', () => {
     const { state, edges } = makeLinearScenario();
     const report = initializeBrigadeAoR(state, edges);
 
     expect(report.front_active_assigned).toBeGreaterThan(0);
 
-    // S4 (front-active RS) should be assigned to rs-brig-1
-    expect(state.brigade_aor?.['S4']).toBe('rs-brig-1');
-    // S5 (front-active RBiH) should be assigned to rbih-brig-1
-    expect(state.brigade_aor?.['S5']).toBe('rbih-brig-1');
-    // S9 (front-active HRHB) should be assigned to hrhb-brig-1
-    expect(state.brigade_aor?.['S9']).toBe('hrhb-brig-1');
+    // Settlement-level redesign: each brigade gets 1–4 settlements by BFS from HQ.
+    const rs = getBrigadeAoRSettlements(state, 'rs-brig-1');
+    const rbih = getBrigadeAoRSettlements(state, 'rbih-brig-1');
+    const hrhb = getBrigadeAoRSettlements(state, 'hrhb-brig-1');
+    expect(rs.length).toBeGreaterThanOrEqual(1);
+    expect(rs.length).toBeLessThanOrEqual(MAX_AOR_SETTLEMENTS);
+    expect(rbih.length).toBeGreaterThanOrEqual(1);
+    expect(rbih.length).toBeLessThanOrEqual(MAX_AOR_SETTLEMENTS);
+    expect(hrhb.length).toBeGreaterThanOrEqual(1);
+    expect(hrhb.length).toBeLessThanOrEqual(MAX_AOR_SETTLEMENTS);
+    // HQ should be in AoR
+    expect(rs).toContain('S2');
+    expect(rbih).toContain('S6');
+    expect(hrhb).toContain('S10');
   });
 
-  it('assigns rear settlements as null', () => {
+  it('leaves most settlements unassigned (only 1–4 per brigade)', () => {
     const { state, edges } = makeLinearScenario();
     initializeBrigadeAoR(state, edges);
 
-    // S1 is deep rear (2 hops from front) - should be null
-    expect(state.brigade_aor?.['S1']).toBeNull();
-    // S12 is deep rear
-    expect(state.brigade_aor?.['S12']).toBeNull();
+    const assigned = Object.entries(state.brigade_aor ?? {}).filter(([, v]) => v != null);
+    const totalSettlements = 12;
+    const maxAssigned = 3 * MAX_AOR_SETTLEMENTS; // 3 brigades × 4
+    expect(assigned.length).toBeLessThanOrEqual(maxAssigned);
+    expect(assigned.length).toBeLessThanOrEqual(totalSettlements);
   });
 
-  it('includes 1-hop rear depth settlements', () => {
+  it('assigns contiguous settlements from HQ (BFS)', () => {
     const { state, edges } = makeLinearScenario();
     initializeBrigadeAoR(state, edges);
 
-    // S3 is 1-hop behind S4 (front) → included in expanded front-active → assigned
-    expect(state.brigade_aor?.['S3']).toBe('rs-brig-1');
-    // S6 is 1-hop behind S5 → included
-    expect(state.brigade_aor?.['S6']).toBe('rbih-brig-1');
+    const rs = getBrigadeAoRSettlements(state, 'rs-brig-1');
+    expect(rs).toContain('S2'); // HQ
+    expect(rs.length).toBeLessThanOrEqual(getPersonnelBasedAoRCap(1000));
   });
 
   it('splits front between multiple brigades', () => {
@@ -297,11 +305,14 @@ describe('initializeBrigadeAoR', () => {
 
     initializeBrigadeAoR(state, edges);
 
-    // Left front side should stay with corps-a brigade.
-    expect(state.brigade_aor?.['S1']).toBe('rs-brig-a');
-    // Right front side should be assigned using corps-b lookup despite rear HQ bias.
-    expect(state.brigade_aor?.['S9']).toBe('rs-brig-b');
-    expect(state.brigade_aor?.['S10']).toBe('rs-brig-b');
+    // Settlement-level init: each brigade gets 1–4 settlements by BFS from HQ (no corps lookup).
+    const brigA = getBrigadeAoRSettlements(state, 'rs-brig-a');
+    const brigB = getBrigadeAoRSettlements(state, 'rs-brig-b');
+    expect(brigA.length).toBeGreaterThanOrEqual(1);
+    expect(brigA.length).toBeLessThanOrEqual(MAX_AOR_SETTLEMENTS);
+    expect(brigB.length).toBeGreaterThanOrEqual(1);
+    expect(brigB.length).toBeLessThanOrEqual(MAX_AOR_SETTLEMENTS);
+    expect(brigA.every((s) => !brigB.includes(s))).toBe(true);
   });
 
   it('splits settlement coverage deterministically when brigades share one municipality', () => {
@@ -332,11 +343,7 @@ describe('initializeBrigadeAoR', () => {
       front_posture_regions: {},
       front_pressure: {},
       militia_pools: {},
-      political_controllers: { A1: 'RBiH', A2: 'RBiH', A3: 'RBiH', B1: 'RS' },
-      brigade_municipality_assignment: {
-        'rbih-a': ['m_shared'],
-        'rbih-b': ['m_shared']
-      }
+      political_controllers: { A1: 'RBiH', A2: 'RBiH', A3: 'RBiH', B1: 'RS' }
     } as GameState;
 
     initializeBrigadeAoR(state, edges, settlements);
@@ -419,25 +426,16 @@ describe('validateBrigadeAoR', () => {
     }
   });
 
-  it('assigns newly front-active settlements when mun is a brigade home', () => {
+  it('enforces contiguity and clears inactive brigade entries only (no mun-home reassignment)', () => {
     const { state, edges } = makeLinearScenario();
-    // S1-S4 = m1, S5-S8 = m2, S9-S12 = m3 so municipality is meaningful
-    const settlements = makeSettlementsMap([
-      ...[1, 2, 3, 4].map((i) => ({ sid: `S${i}`, mun: 'm1' })),
-      ...[5, 6, 7, 8].map((i) => ({ sid: `S${i}`, mun: 'm2' })),
-      ...[9, 10, 11, 12].map((i) => ({ sid: `S${i}`, mun: 'm3' }))
-    ]);
-    (state.formations['rs-brig-1'] as FormationState).tags = ['mun:m2'];
-    initializeBrigadeAoR(state, edges, settlements);
+    initializeBrigadeAoR(state, edges);
+    const before = { ...(state.brigade_aor ?? {}) };
 
-    // Simulate S5 flipping from RBiH to RS → S5 in m2 is now RS; m2 is rs-brig-1 home so ensure step applies
-    (state.political_controllers as Record<string, string>)['S5'] = 'RS';
+    validateBrigadeAoR(state, edges);
 
-    validateBrigadeAoR(state, edges, settlements);
-
-    // S5 should now be assigned to rs-brig-1 (only RS brigade with home mun m2)
-    const s5Assigned = state.brigade_aor?.['S5'];
-    expect(s5Assigned).toBe('rs-brig-1');
+    // Active brigades unchanged; no new assignment from control (settlement-level redesign).
+    const rs = getBrigadeAoRSettlements(state, 'rs-brig-1');
+    expect(rs.length).toBeGreaterThanOrEqual(1);
   });
 });
 
@@ -459,20 +457,18 @@ describe('computeBrigadeDensity', () => {
     expect(computeBrigadeDensity(state, 'nonexistent')).toBe(0);
   });
 
-  it('applies dynamic operational coverage cap for oversized AoR', () => {
+  it('uses personnel / AoR count (settlement-level: AoR is the coverage)', () => {
     const formationId = 'rs-brig-cap';
     const pc: Record<string, FactionId> = {};
     const brigadeAor: Record<string, string> = {};
     const formations: Record<string, FormationState> = {
       [formationId]: makeFormation(formationId, 'RS', 'S001', 3000)
     };
-
-    for (let i = 1; i <= 100; i++) {
+    for (let i = 1; i <= 4; i++) {
       const sid = `S${String(i).padStart(3, '0')}`;
       pc[sid] = 'RS';
       brigadeAor[sid] = formationId;
     }
-
     const state: GameState = {
       schema_version: CURRENT_SCHEMA_VERSION,
       meta: { turn: 20, seed: 'aor-cap-test', phase: 'phase_ii' } as any,
@@ -489,30 +485,19 @@ describe('computeBrigadeDensity', () => {
       brigade_aor: brigadeAor
     } as GameState;
 
-    const cap = computeBrigadeOperationalCoverageCap(state, formationId);
     const density = computeBrigadeDensity(state, formationId);
-    expect(cap).toBeGreaterThan(0);
-    expect(cap).toBeLessThanOrEqual(BRIGADE_OPERATIONAL_AOR_HARD_CAP);
-    expect(density).toBeCloseTo(3000 / cap, 6);
-
-    // First settlements are in deterministic covered subset.
-    expect(getSettlementGarrison(state, 'S001')).toBeCloseTo(density, 6);
-    // Overflow settlement is assigned in AoR but not operationally covered.
-    expect(getSettlementGarrison(state, 'S100')).toBe(0);
+    expect(density).toBeCloseTo(3000 / 4, 6);
+    expect(getSettlementGarrison(state, 'S001')).toBeCloseTo(750, 6);
+    expect(getSettlementGarrison(state, 'S004')).toBeCloseTo(750, 6);
   });
 
-  it('supports urban fortress concentration for large urban municipalities', () => {
+  it('garrison is personnel / AoR size (no separate operational cap)', () => {
     const formationId = 'rbih-sarajevo-brig';
-    const formation = makeFormation(formationId, 'RBiH', 'S001', 3000);
+    const formation = makeFormation(formationId, 'RBiH', 'S001', 1200);
     formation.tags = ['mun:centar_sarajevo'];
-    formation.posture = 'defend';
     const pc: Record<string, FactionId> = {};
-    const brigadeAor: Record<string, string> = {};
-    for (let i = 1; i <= 30; i++) {
-      const sid = `S${String(i).padStart(3, '0')}`;
-      pc[sid] = 'RBiH';
-      brigadeAor[sid] = formationId;
-    }
+    const brigadeAor: Record<string, string> = { S001: formationId };
+    pc['S001'] = 'RBiH';
     const state: GameState = {
       schema_version: CURRENT_SCHEMA_VERSION,
       meta: { turn: 20, seed: 'sarajevo-cap-test', phase: 'phase_ii' } as any,
@@ -529,9 +514,7 @@ describe('computeBrigadeDensity', () => {
       brigade_aor: brigadeAor
     } as GameState;
 
-    expect(computeBrigadeOperationalCoverageCap(state, formationId)).toBe(1);
-    expect(getSettlementGarrison(state, 'S001')).toBeGreaterThan(0);
-    expect(getSettlementGarrison(state, 'S002')).toBe(0);
+    expect(getSettlementGarrison(state, 'S001')).toBe(1200);
   });
 
   it('does not collapse to one-settlement fortress for non-large-urban municipalities', () => {

@@ -61,6 +61,24 @@ export const MAX_BRIGADE_PERSONNEL = 3_000;
  */
 export const BRIGADE_OPERATIONAL_AOR_HARD_CAP = 48;
 
+/** Personnel per settlement slot for settlement-level AoR (Brigade AoR Redesign). 400 → max 1–4 settlements. */
+export const PERSONNEL_PER_AOR_SETTLEMENT = 400;
+
+/** Maximum AoR settlements per brigade regardless of personnel (Brigade AoR Redesign). */
+export const MAX_AOR_SETTLEMENTS = 4;
+
+/** Minimum AoR settlements per brigade (Brigade AoR Redesign). */
+export const MIN_AOR_SETTLEMENTS = 1;
+
+/**
+ * Personnel-based AoR cap (Brigade AoR Redesign): max settlements a brigade can cover.
+ * Formula: min(4, max(1, floor(personnel / 400))). Deterministic.
+ */
+export function getPersonnelBasedAoRCap(personnel: number): number {
+  const n = Math.floor(personnel / PERSONNEL_PER_AOR_SETTLEMENT);
+  return Math.min(MAX_AOR_SETTLEMENTS, Math.max(MIN_AOR_SETTLEMENTS, n));
+}
+
 /**
  * Max municipalities a single brigade can be assigned in ensureBrigadeMunicipalityAssignment.
  * Historical frontage rule: one HQ municipality plus up to two neighboring municipalities.

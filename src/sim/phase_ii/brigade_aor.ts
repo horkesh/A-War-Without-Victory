@@ -21,6 +21,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import {
   BRIGADE_OPERATIONAL_AOR_HARD_CAP,
   getMaxBrigadesPerMun,
+  getPersonnelBasedAoRCap,
   MAX_MUNICIPALITIES_PER_BRIGADE
 } from '../../state/formation_constants.js';
 import {
@@ -30,8 +31,8 @@ import {
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
 import { areRbihHrhbAllied } from '../phase_i/alliance_update.js';
 import { assignCorpsDirectedAoR, enforceContiguity, enforceCorpsLevelContiguity } from './corps_directed_aor.js';
-import { wouldRemainContiguous } from './aor_contiguity.js';
-import { getFormationCorpsId } from './corps_sector_partition.js';
+import { checkBrigadeContiguity } from './aor_contiguity.js';
+import { detectDisconnectedTerritories, getFormationCorpsId } from './corps_sector_partition.js';
 
 // --- Types ---
 
@@ -989,50 +990,99 @@ export function applyBrigadeMunicipalityOrders(
   return report;
 }
 
-export function syncBrigadeMunicipalityAssignmentFromAoR(
-  state: GameState,
-  settlements?: Map<SettlementId, SettlementRecord>
-): void {
-  const brigadeAor = state.brigade_aor ?? {};
-  const forms = state.formations ?? {};
-  const pc = state.political_controllers ?? {};
-  const sidToMun = buildSidToMunMap(Object.keys(pc), settlements);
-  const next: Record<FormationId, MunicipalityId[]> = {};
+// --- Settlement-level AoR init (Brigade AoR Redesign Phase A) ---
 
-  for (const [sid, brigadeId] of Object.entries(brigadeAor)) {
-    if (!brigadeId) continue;
-    const f = forms[brigadeId];
-    if (!isActiveBrigade(f)) continue;
-    const munId = resolveMunicipalityForSid(sid as SettlementId, sidToMun);
-    const list = next[brigadeId] ?? [];
-    list.push(munId);
-    next[brigadeId] = list;
+/**
+ * Initialize brigade_aor from OOB: each active brigade gets 1–4 contiguous settlements
+ * by personnel-based cap (BFS from HQ through faction-controlled territory). Deterministic.
+ */
+function initializeBrigadeAoRSettlementLevel(
+  state: GameState,
+  edges: EdgeRecord[]
+): BrigadeAoRReport {
+  const pc = state.political_controllers ?? {};
+  const formations = state.formations ?? {};
+  const adj = buildAdjacency(edges);
+  const brigadeAor: Record<SettlementId, FormationId | null> = {};
+  const assigned = new Set<SettlementId>();
+  const brigadeCounts: Record<FormationId, number> = {};
+
+  const allSettlementIds = Object.keys(pc).sort(strictCompare) as SettlementId[];
+  const factionControlled = (sid: SettlementId, faction: FactionId) => pc[sid] === faction;
+
+  const brigades = Object.values(formations)
+    .filter((f): f is FormationState => isActiveBrigade(f))
+    .sort((a, b) => strictCompare(a.id, b.id));
+
+  for (const formation of brigades) {
+    const faction = formation.faction;
+    const maxAoR = getPersonnelBasedAoRCap(formation.personnel ?? 800);
+    if (maxAoR <= 0) continue;
+
+    let seed: SettlementId | null = null;
+    if (formation.hq_sid && factionControlled(formation.hq_sid, faction) && !assigned.has(formation.hq_sid)) {
+      seed = formation.hq_sid;
+    }
+    if (!seed) {
+      for (const sid of allSettlementIds) {
+        if (factionControlled(sid, faction) && !assigned.has(sid)) {
+          seed = sid;
+          break;
+        }
+      }
+    }
+    if (!seed) continue;
+
+    const queue: SettlementId[] = [seed];
+    const visited = new Set<SettlementId>([seed]);
+    const thisAoR: SettlementId[] = [seed];
+    assigned.add(seed);
+
+    let head = 0;
+    while (head < queue.length && thisAoR.length < maxAoR) {
+      const sid = queue[head++]!;
+      const neighbors = (adj.get(sid) ?? []).filter(
+        (n) => factionControlled(n, faction) && !assigned.has(n) && !visited.has(n)
+      );
+      neighbors.sort(strictCompare);
+      for (const n of neighbors) {
+        if (thisAoR.length >= maxAoR) break;
+        visited.add(n);
+        queue.push(n);
+        thisAoR.push(n);
+        assigned.add(n);
+      }
+    }
+
+    for (const sid of thisAoR.sort(strictCompare)) {
+      brigadeAor[sid] = formation.id;
+    }
+    brigadeCounts[formation.id] = thisAoR.length;
   }
-  for (const formationId of Object.keys(next)) {
-    next[formationId] = uniqueSortedMunicipalities(next[formationId]!);
-  }
-  state.brigade_municipality_assignment = next;
+
+  state.brigade_aor = brigadeAor;
+  const frontAssigned = Object.values(brigadeAor).filter((v) => v != null).length;
+  const rearCount = allSettlementIds.length - frontAssigned;
+  return {
+    front_active_assigned: frontAssigned,
+    rear_settlements: rearCount,
+    brigade_counts: brigadeCounts
+  };
 }
 
 // --- Public API ---
 
 /**
  * Initialize per-brigade AoR assignment at Phase II entry.
- * Each front-active settlement is assigned to exactly one brigade.
- * Rear settlements get null.
+ * Settlement-level redesign: each brigade gets 1–4 contiguous settlements (personnel-based cap).
  */
 export function initializeBrigadeAoR(
   state: GameState,
   edges: EdgeRecord[],
   settlements?: Map<SettlementId, SettlementRecord>
 ): BrigadeAoRReport {
-  const pc = state.political_controllers ?? {};
-  const sidToMun = buildSidToMunMap(Object.keys(pc), settlements);
-  const assignments = ensureBrigadeMunicipalityAssignment(state, edges, sidToMun);
-  const report = deriveBrigadeAoRFromMunicipalities(state, edges, sidToMun, assignments);
+  const report = initializeBrigadeAoRSettlementLevel(state, edges);
 
-  // Post-assignment contiguity enforcement (safety net — idempotent if corps-directed path
-  // already ran enforceContiguity at Steps 8-9; covers legacy Voronoi fallback path)
   if (state.brigade_aor && Object.keys(state.brigade_aor).length > 0) {
     const frontActive = identifyFrontActiveSettlements(state, edges);
     const adj = buildAdjacencyFromEdges(edges);
@@ -1044,19 +1094,31 @@ export function initializeBrigadeAoR(
 }
 
 /**
- * Per-turn validation and repair of brigade AoR.
- * - Reassign settlements from dissolved/inactive brigades to nearest surviving brigade.
- * - Assign newly front-active settlements to nearest brigade.
+ * Per-turn validation and repair of brigade AoR (settlement-level redesign).
+ * - Clear entries for dissolved/inactive brigades.
+ * - Enforce contiguity (repair islands).
  */
 export function validateBrigadeAoR(
   state: GameState,
   edges: EdgeRecord[],
-  settlements?: Map<SettlementId, SettlementRecord>
+  _settlements?: Map<SettlementId, SettlementRecord>
 ): void {
-  const pc = state.political_controllers ?? {};
-  const sidToMun = buildSidToMunMap(Object.keys(pc), settlements);
-  const assignments = ensureBrigadeMunicipalityAssignment(state, edges, sidToMun);
-  deriveBrigadeAoRFromMunicipalities(state, edges, sidToMun, assignments);
+  const brigadeAor = state.brigade_aor;
+  const formations = state.formations ?? {};
+  if (!brigadeAor) return;
+
+  for (const sid of Object.keys(brigadeAor).sort(strictCompare)) {
+    const formationId = brigadeAor[sid as SettlementId];
+    if (!formationId) continue;
+    const f = formations[formationId];
+    if (!isActiveBrigade(f)) {
+      brigadeAor[sid as SettlementId] = null;
+    }
+  }
+
+  const frontActive = identifyFrontActiveSettlements(state, edges);
+  const adj = buildAdjacencyFromEdges(edges);
+  enforceContiguity(state, frontActive, adj);
 }
 
 /**
@@ -1115,79 +1177,15 @@ function getSortedAdjacency(edges: EdgeRecord[]): Map<SettlementId, readonly Set
 }
 
 /**
- * Return the capped subset of AoR settlements treated as actively covered this turn.
- * Deterministic ordering:
- * - Prefer front-touching settlements, then expand inward by BFS inside the brigade AoR.
- * - Fall back to SID-sorted AoR when graph context is unavailable.
+ * Return the settlements actively covered by this brigade this turn.
+ * Settlement-level redesign: AoR IS the coverage (1–4 settlements); no separate operational cap.
  */
 export function getBrigadeOperationalCoverageSettlements(
   state: GameState,
   formationId: FormationId,
-  edges?: EdgeRecord[]
+  _edges?: EdgeRecord[]
 ): SettlementId[] {
-  const aor = getBrigadeAoRSettlements(state, formationId);
-  const cap = computeBrigadeOperationalCoverageCap(state, formationId);
-  if (cap <= 0) return [];
-  if (aor.length <= cap) return aor;
-  if (!edges || edges.length === 0) return aor.slice(0, cap);
-
-  const pc = state.political_controllers ?? {};
-  const formation = state.formations?.[formationId];
-  const faction = formation?.faction;
-  const aorSet = new Set(aor);
-  const fullAdj = getSortedAdjacency(edges);
-
-  const frontSeeds = new Set<SettlementId>();
-  for (const sid of aor) {
-    for (const neighbor of fullAdj.get(sid) ?? []) {
-      if (pc[sid] && pc[neighbor] && pc[sid] !== pc[neighbor]) frontSeeds.add(sid);
-    }
-  }
-
-  const seedCandidates = Array.from(frontSeeds).sort(strictCompare);
-  if (seedCandidates.length === 0) {
-    const hq = formation?.hq_sid;
-    if (hq && aorSet.has(hq)) seedCandidates.push(hq);
-    else seedCandidates.push(aor[0]);
-  }
-
-  const visited = new Set<SettlementId>();
-  const queue: SettlementId[] = [];
-  const covered: SettlementId[] = [];
-
-  for (const seed of seedCandidates) {
-    if (!visited.has(seed)) {
-      visited.add(seed);
-      queue.push(seed);
-      covered.push(seed);
-      if (covered.length >= cap) return covered.sort(strictCompare);
-    }
-  }
-
-  while (queue.length > 0 && covered.length < cap) {
-    const current = queue.shift()!;
-    const neighbors = (fullAdj.get(current) ?? []).filter((n) => aorSet.has(n));
-    for (const n of neighbors) {
-      if (visited.has(n)) continue;
-      if (faction && pc[n] && pc[n] !== faction) continue;
-      visited.add(n);
-      queue.push(n);
-      covered.push(n);
-      if (covered.length >= cap) break;
-    }
-  }
-
-  if (covered.length < cap) {
-    for (const sid of aor) {
-      if (covered.length >= cap) break;
-      if (!visited.has(sid)) {
-        visited.add(sid);
-        covered.push(sid);
-      }
-    }
-  }
-
-  return covered.sort(strictCompare);
+  return getBrigadeAoRSettlements(state, formationId);
 }
 
 /**
@@ -1228,168 +1226,76 @@ export function getSettlementGarrison(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// AoR Rebalancing
+// Surrounded-brigade reform (reform in home territory)
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Rebalance brigade AoR sizes within each faction to reduce extreme disparities.
+ * Detect brigades whose entire AoR is in an enclave (not main territory) and
+ * apply "reform in home territory": clear their AoR, set HQ to a faction-controlled
+ * settlement in main territory (prefer home municipality). If no main-territory
+ * settlement exists for the faction, set formation status to inactive (stranded).
  *
- * Voronoi-based AoR derivation can produce 1028:1 settlement ratios between brigades.
- * This pass sheds rear settlements from oversized brigades (>2x faction median) to
- * the nearest neighbor brigade, and absorbs settlements into undersized brigades
- * (<0.3x median) from surplus neighbors.
- *
- * Only transfers non-front rear settlements. Deterministic: sorted iteration.
+ * Deterministic: sorted iteration over factions, brigades, settlements.
  */
-export function rebalanceBrigadeAoR(
+export function applySurroundedBrigadeReform(
   state: GameState,
-  edges: EdgeRecord[]
+  edges: EdgeRecord[],
+  sidToMun: Record<SettlementId, MunicipalityId>
 ): void {
   const brigadeAor = state.brigade_aor;
+  const formations = state.formations ?? {};
+  const pc = state.political_controllers ?? {};
   if (!brigadeAor) return;
 
-  const pc = state.political_controllers ?? {};
-  const formations = state.formations ?? {};
-  const adj = buildAdjacencyFromEdges(edges);
-
-  // Group settlements by brigade, grouped by faction
-  const factionBrigadeSettlements = new Map<string, Map<FormationId, SettlementId[]>>();
-  const brigadeEntries = Object.entries(brigadeAor) as [SettlementId, FormationId | null][];
-  brigadeEntries.sort((a, b) => strictCompare(a[0], b[0]));
-
-  for (const [sid, brigadeId] of brigadeEntries) {
-    if (!brigadeId) continue;
-    const formation = formations[brigadeId];
-    if (!formation) continue;
-    const faction = formation.faction;
-    if (!faction) continue;
-
-    let factionMap = factionBrigadeSettlements.get(faction);
-    if (!factionMap) { factionMap = new Map(); factionBrigadeSettlements.set(faction, factionMap); }
-    let list = factionMap.get(brigadeId);
-    if (!list) { list = []; factionMap.set(brigadeId, list); }
-    list.push(sid);
-  }
-
-  // Process each faction
-  const factionIds = [...factionBrigadeSettlements.keys()].sort(strictCompare);
+  const factionIds = Array.from(new Set((state.factions ?? []).map((f) => f.id))).sort(strictCompare);
 
   for (const factionId of factionIds) {
-    const brigadeMap = factionBrigadeSettlements.get(factionId)!;
-    const brigadeIds = [...brigadeMap.keys()].sort(strictCompare);
-    if (brigadeIds.length < 2) continue;
+    const { mainTerritory } = detectDisconnectedTerritories(factionId, pc, edges);
+    const mainList = Array.from(mainTerritory).sort(strictCompare);
 
-    // Compute sizes and median
-    const sizes = brigadeIds.map(bid => brigadeMap.get(bid)!.length).sort((a, b) => a - b);
-    const median = sizes[Math.floor(sizes.length / 2)];
-    if (median <= 0) continue;
-
-    const overThreshold = median * 2;
-    const underThreshold = Math.max(1, Math.floor(median * 0.3));
-
-    // Identify front settlements (adjacent to enemy-controlled)
-    const isFrontSettlement = (sid: SettlementId): boolean => {
-      const neighbors = adj.get(sid);
-      if (!neighbors) return false;
-      for (const nSid of neighbors) {
-        const neighborCtrl = pc[nSid];
-        if (neighborCtrl && neighborCtrl !== factionId) return true;
-      }
-      return false;
-    };
-
-    // Phase 1: Shed from oversized brigades
-    for (const brigadeId of brigadeIds) {
-      const settlements = brigadeMap.get(brigadeId)!;
-      if (settlements.length <= overThreshold) continue;
-
-      // Find non-front rear settlements to shed, sorted by SID
-      const rearSettlements = settlements
-        .filter(sid => !isFrontSettlement(sid))
-        .sort(strictCompare);
-
-      const excess = settlements.length - overThreshold;
-      let shed = 0;
-
-      for (const sid of rearSettlements) {
-        if (shed >= excess) break;
-        // Must keep at least overThreshold settlements
-        if (brigadeMap.get(brigadeId)!.length <= overThreshold) break;
-
-        // Find nearest neighbor brigade (adjacent settlement belongs to different brigade of same faction)
-        const neighbors = adj.get(sid);
-        if (!neighbors) continue;
-
-        let targetBrigade: FormationId | null = null;
-        for (const nSid of [...neighbors].sort(strictCompare)) {
-          const nBrigade = brigadeAor[nSid];
-          if (nBrigade && nBrigade !== brigadeId) {
-            const nFormation = formations[nBrigade];
-            if (nFormation && nFormation.faction === factionId) {
-              targetBrigade = nBrigade;
-              break;
-            }
-          }
-        }
-        if (!targetBrigade) continue;
-
-        // Contiguity guard: skip if removal would break donor's contiguity
-        const donorSettlements = brigadeMap.get(brigadeId)!;
-        if (!wouldRemainContiguous(donorSettlements, sid, adj)) continue;
-
-        // Transfer
-        brigadeAor[sid] = targetBrigade;
-        const fromList = brigadeMap.get(brigadeId)!;
-        const idx = fromList.indexOf(sid);
-        if (idx >= 0) fromList.splice(idx, 1);
-        brigadeMap.get(targetBrigade)!.push(sid);
-        shed++;
-      }
+    // Brigade -> settlements in its AoR
+    const brigadeToSettlements = new Map<FormationId, SettlementId[]>();
+    for (const [sid, brigadeId] of Object.entries(brigadeAor) as [SettlementId, FormationId | null][]) {
+      if (!brigadeId) continue;
+      const f = formations[brigadeId];
+      if (!f || f.faction !== factionId || (f.kind ?? 'brigade') !== 'brigade') continue;
+      const list = brigadeToSettlements.get(brigadeId) ?? [];
+      list.push(sid);
+      brigadeToSettlements.set(brigadeId, list);
     }
 
-    // Phase 2: Absorb into undersized brigades
+    const brigadeIds = Array.from(brigadeToSettlements.keys()).sort(strictCompare);
     for (const brigadeId of brigadeIds) {
-      const settlements = brigadeMap.get(brigadeId)!;
-      if (settlements.length >= underThreshold) continue;
+      const settlements = brigadeToSettlements.get(brigadeId)!;
+      if (settlements.length === 0) continue;
 
-      const deficit = underThreshold - settlements.length;
-      let absorbed = 0;
+      const inMain = settlements.some((sid) => mainTerritory.has(sid));
+      if (inMain) continue; // at least one settlement in main → not surrounded
 
-      // Find adjacent settlements from surplus neighbor brigades
-      const candidateSids = new Set<SettlementId>();
+      // Surrounded: entire AoR is in enclave(s). Reform in home territory.
+      const formation = formations[brigadeId];
+      if (!formation) continue;
+
       for (const sid of settlements) {
-        const neighbors = adj.get(sid);
-        if (!neighbors) continue;
-        for (const nSid of neighbors) {
-          const nBrigade = brigadeAor[nSid];
-          if (nBrigade && nBrigade !== brigadeId) {
-            const nFormation = formations[nBrigade];
-            if (nFormation && nFormation.faction === factionId) {
-              const donorSize = brigadeMap.get(nBrigade)?.length ?? 0;
-              // Only absorb from brigades above median (don't rob the poor)
-              if (donorSize > median && !isFrontSettlement(nSid)) {
-                candidateSids.add(nSid);
-              }
-            }
-          }
-        }
+        brigadeAor[sid] = null;
       }
 
-      const candidates = [...candidateSids].sort(strictCompare);
-      for (const sid of candidates) {
-        if (absorbed >= deficit) break;
-        const donorBrigade = brigadeAor[sid] as FormationId;
-        if (!donorBrigade) continue;
-        // Verify donor still has enough
-        const donorList = brigadeMap.get(donorBrigade);
-        if (!donorList || donorList.length <= median) continue;
+      const homeMun = getFormationHomeMunFromTags(formation.tags) ?? (formation.hq_sid ? sidToMun[formation.hq_sid] : null);
+      // First faction-controlled in main territory, prefer home mun, by SID sort
+      let newHq: SettlementId | null = null;
+      for (const sid of mainList) {
+        if (pc[sid] !== factionId) continue;
+        if (homeMun && sidToMun[sid] === homeMun) {
+          newHq = sid;
+          break;
+        }
+        if (!newHq) newHq = sid;
+      }
 
-        // Transfer
-        brigadeAor[sid] = brigadeId;
-        const idx = donorList.indexOf(sid);
-        if (idx >= 0) donorList.splice(idx, 1);
-        settlements.push(sid);
-        absorbed++;
+      if (newHq) {
+        formation.hq_sid = newHq;
+      } else {
+        formation.status = 'inactive';
       }
     }
   }

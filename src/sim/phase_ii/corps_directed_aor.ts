@@ -525,7 +525,7 @@ export function enforceContiguity(
  * 3. Check contiguity; reassign orphans to adjacent brigade of a different corps
  *
  * Exported for use in both assignCorpsDirectedAoR (Step 9) and the turn pipeline
- * (after rebalanceBrigadeAoR which is not corps-aware).
+ * (rebalance step removed in Brigade AoR Redesign Phase A).
  *
  * Deterministic: sorted iteration via strictCompare.
  */
