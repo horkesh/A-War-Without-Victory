@@ -55,6 +55,13 @@ const DEFENDER_OUTNUMBERED_BONUS = 1.15;
 const MAX_ATTACKERS_PER_TARGET = 3;
 const LINKING_DEFENSE_BONUS = 1.1;
 
+/** Phase I (Battle Damage): casualties per 1.0 damage point; damage = combined_cas / divisor, cap 1.0. */
+const BATTLE_DAMAGE_DIVISOR = 2000;
+/** Phase I: defender power × (1 + BATTLE_DAMAGE_DEFENDER_BONUS × damage). */
+const BATTLE_DAMAGE_DEFENDER_BONUS = 0.1;
+/** Phase I: attacker power × (1 - BATTLE_DAMAGE_ATTACKER_PENALTY × damage). */
+const BATTLE_DAMAGE_ATTACKER_PENALTY = 0.1;
+
 /** Power ratio below which defender wins outright. */
 const STALEMATE_LOWER_BOUND = 0.7;
 
@@ -969,9 +976,10 @@ export function resolveBattleOrders(
       };
     }
 
-    // --- Power ratio & outcome ---
-    const aPower = attackerPower.total_combat_power;
-    const dPower = defenderPower?.total_combat_power ?? 0;
+    // --- Power ratio & outcome (Phase I: battle damage modifies power) ---
+    const battleDamage = Math.min(1, state.battle_damage?.[targetSid] ?? 0);
+    const aPower = attackerPower.total_combat_power * (1 - BATTLE_DAMAGE_ATTACKER_PENALTY * battleDamage);
+    const dPower = (defenderPower?.total_combat_power ?? 0) * (1 + BATTLE_DAMAGE_DEFENDER_BONUS * battleDamage);
     const powerRatio = dPower <= 0 ? (aPower > 0 ? 999 : 0) : aPower / dPower;
 
     let outcome: BattleOutcome;
@@ -1092,6 +1100,17 @@ export function resolveBattleOrders(
         tanks: casualties.defender.tanks_lost,
         artillery: casualties.defender.artillery_lost
       });
+    }
+
+    // Phase I: accumulate battle damage (monotonic, cap 1.0)
+    const combinedCas = totalAttackerLoss + totalPersonnelLoss(casualties.defender);
+    if (combinedCas > 0) {
+      if (!state.battle_damage) state.battle_damage = {};
+      const prev = (state.battle_damage as Record<SettlementId, number>)[targetSid] ?? 0;
+      (state.battle_damage as Record<SettlementId, number>)[targetSid] = Math.min(
+        1,
+        prev + combinedCas / BATTLE_DAMAGE_DIVISOR
+      );
     }
 
     // Build battle report

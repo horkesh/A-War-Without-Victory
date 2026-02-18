@@ -1230,7 +1230,10 @@ export function getSettlementGarrison(
       }
     }
   }
-  return state.militia_garrison?.[sid] ?? 0;
+  // Militia garrison; Phase I: reduced by battle damage at this settlement
+  const militia = state.militia_garrison?.[sid] ?? 0;
+  const damage = Math.min(1, state.battle_damage?.[sid] ?? 0);
+  return militia * (1 - damage);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
