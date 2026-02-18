@@ -1225,11 +1225,60 @@ export function getSettlementGarrison(
         let garrison = personnel / Math.max(1, coveredSettlements.length);
         const mov = state.brigade_movement_state?.[formationId]?.status;
         if (mov === 'packing' || mov === 'unpacking') garrison *= 0.5;
+        if (state.brigade_encircled?.[formationId]) garrison *= ENCIRCLED_GARRISON_MULT;
         return garrison;
       }
     }
   }
   return state.militia_garrison?.[sid] ?? 0;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Phase G: Encirclement detection (before reform)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Garrison effectiveness multiplier when brigade is encircled (Phase G). */
+export const ENCIRCLED_GARRISON_MULT = 0.8;
+
+/**
+ * Compute per-brigade encirclement: brigade is encircled when its entire AoR
+ * is in an enclave (no path to main territory). Sets state.brigade_encircled.
+ * Deterministic: sorted iteration over factions, brigades.
+ */
+export function computeBrigadeEncirclement(state: GameState, edges: EdgeRecord[]): void {
+  const formations = state.formations ?? {};
+  const brigadeAor = state.brigade_aor ?? {};
+  const pc = state.political_controllers ?? {};
+
+  if (!state.brigade_encircled) state.brigade_encircled = {};
+  const out = state.brigade_encircled;
+  const brigadeIds = Object.keys(formations).filter(
+    (id) => (formations[id]?.kind ?? 'brigade') === 'brigade'
+  ).sort(strictCompare);
+  for (const id of brigadeIds) {
+    out[id] = false;
+  }
+
+  const factionIds = Array.from(new Set((state.factions ?? []).map((f) => f.id))).sort(strictCompare);
+  for (const factionId of factionIds) {
+    const { mainTerritory } = detectDisconnectedTerritories(factionId, pc, edges);
+    const brigadeToSettlements = new Map<FormationId, SettlementId[]>();
+    for (const [sid, brigadeId] of Object.entries(brigadeAor) as [SettlementId, FormationId | null][]) {
+      if (!brigadeId) continue;
+      const f = formations[brigadeId];
+      if (!f || f.faction !== factionId || (f.kind ?? 'brigade') !== 'brigade') continue;
+      const list = brigadeToSettlements.get(brigadeId) ?? [];
+      list.push(sid);
+      brigadeToSettlements.set(brigadeId, list);
+    }
+    const ids = Array.from(brigadeToSettlements.keys()).sort(strictCompare);
+    for (const brigadeId of ids) {
+      const settlements = brigadeToSettlements.get(brigadeId)!;
+      if (settlements.length === 0) continue;
+      const inMain = settlements.some((sid) => mainTerritory.has(sid));
+      if (!inMain) out[brigadeId] = true;
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

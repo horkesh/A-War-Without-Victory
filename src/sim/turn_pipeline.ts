@@ -125,6 +125,7 @@ import { runJNATransition, type JNATransitionReport } from './phase_i/jna_transi
 
 import { detectPhaseIIFronts } from './phase_ii/front_emergence.js';
 import {
+  computeBrigadeEncirclement,
   applySurroundedBrigadeReform,
   identifyFrontActiveSettlements,
   validateBrigadeAoR
@@ -510,6 +511,15 @@ const phases: NamedPhase[] = [
       if (!context.state.corps_command) return;
       const { edges } = await getGraphAndEdges(context);
       enforceCorpsLevelContiguity(context.state, edges);
+    }
+  },
+  {
+    name: 'detect-brigade-encirclement',
+    run: async (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      if (!context.state.brigade_aor) return;
+      const { edges } = await getGraphAndEdges(context);
+      computeBrigadeEncirclement(context.state, edges);
     }
   },
   {

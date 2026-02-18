@@ -215,13 +215,14 @@ export function deriveReadinessState(formation: FormationState): FormationReadin
  * 
  * Rules:
  * - Militia: -3 cohesion per turn unsupplied (supply-sensitive)
- * - Brigade/TD: -2 cohesion per turn unsupplied
+ * - Brigade/TD: -2 cohesion per turn unsupplied (Phase G: -5 when encircled)
  * - OG/Corps: -1 cohesion per turn unsupplied (more resilient)
  * - Cohesion is clamped to [0, 100]
  */
 export function applyCohesionDegradation(
   formation: FormationState,
-  supplied: boolean
+  supplied: boolean,
+  encircled?: boolean
 ): number {
   if (supplied) return formation.cohesion ?? BRIGADE_BASE_COHESION;
   
@@ -232,7 +233,7 @@ export function applyCohesionDegradation(
   if (kind === 'militia') {
     degradation = 3; // supply-sensitive
   } else if (kind === 'brigade' || kind === 'territorial_defense') {
-    degradation = 2;
+    degradation = (encircled === true) ? 5 : 2; // Phase G: accelerated when encircled
   } else {
     degradation = 1; // OG, corps_asset more resilient
   }
@@ -357,8 +358,9 @@ export function updateFormationLifecycle(
       formation.activation_turn = null;
     }
     
-    // 4. Apply cohesion degradation (if unsupplied)
-    formation.cohesion = applyCohesionDegradation(formation, supplied);
+    // 4. Apply cohesion degradation (if unsupplied; Phase G: accelerated when encircled)
+    const encircled = state.brigade_encircled?.[formationId] === true;
+    formation.cohesion = applyCohesionDegradation(formation, supplied, encircled);
     const cohesionAfter = formation.cohesion;
     
     // 5. Derive readiness state
