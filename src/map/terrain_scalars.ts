@@ -78,6 +78,31 @@ export function getTerrainScalarsForSid(
   return data.by_sid[sid] ?? DEFAULT_TERRAIN;
 }
 
+// --- Phase H: Terrain battle width (max attacking brigades per target) ---
+
+/** slope_index above this → mountain → max 1 attacker. */
+export const BATTLE_WIDTH_SLOPE_MOUNTAIN = 0.5;
+/** slope_index above this → hills → max 2 attackers. */
+export const BATTLE_WIDTH_SLOPE_HILL = 0.35;
+/** river_crossing_penalty above this → river crossing → max 1 attacker. */
+export const BATTLE_WIDTH_RIVER_THRESHOLD = 0.5;
+
+/**
+ * Max number of attacking brigades that can engage this settlement simultaneously (Phase H).
+ * River crossing or mountain → 1; hills → 2; plains → 3.
+ * Deterministic: derived only from terrain scalars.
+ */
+export function getMaxAttackersForTarget(
+  data: TerrainScalarsData,
+  targetSid: string
+): number {
+  const t = getTerrainScalarsForSid(data, targetSid);
+  if (t.river_crossing_penalty >= BATTLE_WIDTH_RIVER_THRESHOLD) return 1;
+  if (t.slope_index >= BATTLE_WIDTH_SLOPE_MOUNTAIN) return 1;
+  if (t.slope_index >= BATTLE_WIDTH_SLOPE_HILL) return 2;
+  return 3;
+}
+
 /**
  * Inject pre-loaded terrain data into the cache (for tests / browser contexts).
  */
