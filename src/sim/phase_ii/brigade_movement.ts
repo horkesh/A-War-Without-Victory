@@ -82,10 +82,11 @@ export function processBrigadeMovement(state: GameState, edges: EdgeRecord[]): v
   const formations = state.formations ?? {};
   const pc = state.political_controllers ?? {};
 
-  // Pass 1: apply orders (set packing for this turn; brigade will advance next turn)
+  // Pass 1: apply orders (set packing for this turn; brigade will advance next turn). Phase G: encircled brigades cannot receive new movement orders.
   for (const formationId of Object.keys(movementOrders).sort(strictCompare) as FormationId[]) {
     const formation = formations[formationId];
     if (!formation || formation.faction == null || (formation.kind ?? 'brigade') !== 'brigade') continue;
+    if (state.brigade_encircled?.[formationId]) continue;
     const factionId = formation.faction as FactionId;
     const order = movementOrders[formationId];
     const dest = order?.destination_sids;

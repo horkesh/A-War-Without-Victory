@@ -81,6 +81,7 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
   'militia_garrison',
   'brigade_movement_state',
   'brigade_movement_orders',
+  'brigade_encircled',
   // Phase F (Displacement & Population Dynamics) — stored, not derived
   'settlement_displacement',
   'settlement_displacement_started_turn',
