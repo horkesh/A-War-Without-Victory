@@ -636,10 +636,11 @@ const phases: NamedPhase[] = [
   },
   {
     name: 'activate-operational-groups',
-    run: (context) => {
+    run: async (context) => {
       if (context.state.meta.phase !== 'phase_ii') return;
       if (!context.state.og_orders?.length) return;
-      activateOGs(context.state);
+      const { edges } = await getGraphAndEdges(context);
+      activateOGs(context.state, edges);
     }
   },
   {
