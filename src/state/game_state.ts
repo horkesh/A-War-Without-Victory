@@ -82,6 +82,20 @@ export interface BrigadePostureOrder {
   posture: BrigadePosture;
 }
 
+/** Brigade movement status (Brigade AoR Redesign Phase C: pack/unpack cycle). */
+export type BrigadeMovementStatus = 'deployed' | 'packing' | 'in_transit' | 'unpacking';
+
+/** Per-brigade movement state. When status is in_transit, brigade has no AoR. */
+export interface BrigadeMovementState {
+  status: BrigadeMovementStatus;
+  /** Destination settlement(s) (1–4 contiguous). Set when packing or in_transit. */
+  destination_sids?: SettlementId[];
+  /** Path through friendly territory (current segment when in_transit). Sorted for determinism. */
+  path?: SettlementId[];
+  /** Turns remaining in transit. Decremented each turn. */
+  turns_remaining?: number;
+}
+
 /** Corps standing stance (always active, modifies subordinate brigades). */
 export type CorpsStance = 'defensive' | 'balanced' | 'offensive' | 'reorganize';
 
@@ -916,6 +930,10 @@ export interface GameState {
   militia_pools: Record<string, MilitiaPoolState>;
   /** Phase II (Brigade AoR Redesign Phase B): Per-settlement militia garrison strength. Derived from militia_pools + org penetration; settlements with a brigade use brigade garrison instead. Recomputed each turn. */
   militia_garrison?: Record<SettlementId, number>;
+  /** Phase II (Brigade AoR Redesign Phase C): Per-brigade movement state (packing / in_transit / unpacking). When in_transit, brigade has no AoR. */
+  brigade_movement_state?: Record<FormationId, BrigadeMovementState>;
+  /** Phase II (Brigade AoR Redesign Phase C): Pending movement orders (consumed each turn). destination_sids = 1–4 contiguous faction-controlled settlements. */
+  brigade_movement_orders?: Record<FormationId, { destination_sids: SettlementId[] }>;
   /** Formation spawn directive (FORAWWV H2.4). When set and active for current turn, formation spawn may run. */
   formation_spawn_directive?: FormationSpawnDirective;
   /** Strategic production facilities (capturable local supply contributors). */
