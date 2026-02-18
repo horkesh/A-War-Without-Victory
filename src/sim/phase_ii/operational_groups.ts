@@ -2,6 +2,7 @@
  * Stage 6: Operational groups (OGs).
  * Temporary formations created by borrowing personnel from donor brigades.
  * Used for concentrated force projection on specific objectives.
+ * Phase E: Donor AoR cap recalculates after contribution; shed one settlement if over cap.
  * Deterministic: no randomness, no timestamps.
  */
 
@@ -10,8 +11,13 @@ import type {
   FormationId,
   FormationState,
   OGActivationOrder,
+  SettlementId,
 } from '../../state/game_state.js';
+import type { EdgeRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { getPersonnelBasedAoRCap } from '../../state/formation_constants.js';
+import { getBrigadeAoRSettlements } from './brigade_aor.js';
+import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -138,20 +144,53 @@ export function validateOGOrder(state: GameState, order: OGActivationOrder): str
 }
 
 // ---------------------------------------------------------------------------
+// Phase E: Donor AoR shed after personnel contribution
+// ---------------------------------------------------------------------------
+
+/**
+ * If donor brigade's AoR settlement count exceeds personnel-based cap, shed one settlement
+ * (prefer non-front). Deterministic: sorted iteration.
+ */
+function shedDonorAoRIfOverCap(
+  state: GameState,
+  donorId: FormationId,
+  edges: EdgeRecord[]
+): void {
+  const brigadeAor = state.brigade_aor;
+  const formations = state.formations;
+  const pc = state.political_controllers ?? {};
+  if (!brigadeAor || !formations) return;
+  const donor = formations[donorId];
+  if (!donor || donor.faction == null) return;
+  const factionId = donor.faction;
+  const settlements = getBrigadeAoRSettlements(state, donorId);
+  const cap = getPersonnelBasedAoRCap(donor.personnel ?? 0);
+  if (settlements.length <= cap) return;
+  const adj = buildAdjacencyFromEdges(edges);
+  const isFront = (sid: SettlementId) => {
+    const neighbors = adj.get(sid);
+    if (!neighbors) return false;
+    return [...neighbors].some(n => pc[n] && pc[n] !== factionId);
+  };
+  const rear = settlements.filter(sid => !isFront(sid)).sort(strictCompare);
+  const toShed = rear.length > 0 ? rear[0] : settlements.sort(strictCompare)[0];
+  if (toShed) brigadeAor[toShed] = null;
+}
+
+// ---------------------------------------------------------------------------
 // Activation
 // ---------------------------------------------------------------------------
 
 /**
  * Activate OGs from pending orders.
  * Processes orders in deterministic order (sorted by corps_id).
- * Returns a report of activated OG IDs and rejected order reasons.
+ * Phase E: When edges provided, recalc donor AoR cap and shed one settlement if over cap.
  */
-export function activateOGs(state: GameState): OGActivationReport {
+export function activateOGs(state: GameState, edges?: EdgeRecord[]): OGActivationReport {
   const report: OGActivationReport = { activated: [], rejected: [] };
   const orders = state.og_orders;
   if (!orders || orders.length === 0) return report;
 
-  // Sort orders deterministically by corps_id
   const sortedOrders = [...orders].sort((a, b) => strictCompare(a.corps_id, b.corps_id));
 
   for (const order of sortedOrders) {
@@ -163,16 +202,19 @@ export function activateOGs(state: GameState): OGActivationReport {
 
     if (!state.formations) continue;
 
-    // Create OG formation ID
     const ogId = `og-${order.corps_id}-t${state.meta.turn}`;
     const totalPersonnel = order.donors.reduce((s, d) => s + d.personnel_contribution, 0);
     const corps = state.formations[order.corps_id];
 
-    // Deduct personnel from donors and apply cohesion strain
     for (const donor of order.donors) {
       const brig = state.formations[donor.brigade_id];
       brig.personnel = (brig.personnel ?? 0) - donor.personnel_contribution;
       brig.cohesion = Math.max(0, (brig.cohesion ?? 60) - DONOR_COHESION_STRAIN);
+    }
+    if (edges?.length) {
+      for (const donor of order.donors) {
+        shedDonorAoRIfOverCap(state, donor.brigade_id, edges);
+      }
     }
 
     // Create OG formation entry
