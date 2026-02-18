@@ -45,6 +45,16 @@ import {
 /** Power ratio at or above which attacker wins and flips settlement. */
 const ATTACKER_VICTORY_THRESHOLD = 1.2;
 
+// --- Multi-brigade attack (Phase D) ---
+const MULTI_BRIGADE_EFFICIENCY_2 = 0.85;
+const MULTI_BRIGADE_EFFICIENCY_3 = 0.75;
+const SAME_CORPS_EFFICIENCY_2 = 0.9;
+const SAME_CORPS_EFFICIENCY_3 = 0.82;
+const OG_COORDINATION_BONUS = 1.1;
+const DEFENDER_OUTNUMBERED_BONUS = 1.15;
+const MAX_ATTACKERS_PER_TARGET = 3;
+const LINKING_DEFENSE_BONUS = 1.1;
+
 /** Power ratio below which defender wins outright. */
 const STALEMATE_LOWER_BOUND = 0.7;
 
@@ -802,7 +812,32 @@ export function resolveBattleOrders(
     .filter((entry): entry is [FormationId, SettlementId] => entry[1] != null && entry[1] !== '')
     .sort((a, b) => strictCompare(a[0], b[0]));
 
+  // Group by target; for each target collect attackers with AoR adjacent to target (cap 3). Phase D.
+  const targetToAttackers = new Map<SettlementId, FormationId[]>();
   for (const [formationId, targetSid] of orderEntries) {
+    const formation = formations[formationId];
+    if (!formation || formation.faction == null) continue;
+    const defenderFaction = pc[targetSid] as FactionId | null | undefined;
+    if (!defenderFaction || defenderFaction === formation.faction) continue;
+    const neighbors = adjacency.get(targetSid) ?? [];
+    const aorSettlements = getBrigadeAoRSettlements(state, formationId);
+    const adjacent = aorSettlements.some(sid => neighbors.includes(sid));
+    if (!adjacent) continue;
+    let list = targetToAttackers.get(targetSid);
+    if (!list) {
+      list = [];
+      targetToAttackers.set(targetSid, list);
+    }
+    if (list.length < MAX_ATTACKERS_PER_TARGET) list.push(formationId);
+  }
+  for (const list of targetToAttackers.values()) {
+    list.sort(strictCompare);
+  }
+
+  const targetsSorted = [...targetToAttackers.keys()].sort(strictCompare);
+  for (const targetSid of targetsSorted) {
+    const attackerIds = targetToAttackers.get(targetSid)!;
+    const formationId = attackerIds[0];
     const formation = formations[formationId];
     if (!formation || formation.faction == null) continue;
     const attackerFaction = formation.faction as FactionId;
@@ -823,13 +858,44 @@ export function resolveBattleOrders(
       if (rbihHrhbAllied) continue;
     }
 
-    // --- Compute attacker aggregate power ---
-    const aorSettlements = getBrigadeAoRSettlements(state, formationId);
     const neighbors = adjacency.get(targetSid) ?? [];
-    const frontlineSids = aorSettlements.filter(sid => neighbors.includes(sid));
-    const rawGarrison = frontlineSids.reduce(
-      (sum, sid) => sum + getSettlementGarrison(state, sid, edges), 0
-    );
+    let combinedAttackerPower = 0;
+    const sameCorps = attackerIds.length >= 2 && attackerIds.every(id => {
+      const corpsId = formations[id]?.corps_id;
+      return corpsId && formations[corpsId] && attackerIds.every(o => formations[o]?.corps_id === corpsId);
+    });
+    const hasOG = attackerIds.some(id => (formations[id]?.kind ?? 'brigade') === 'operational_group' || formations[id]?.kind === 'og');
+    const effN = attackerIds.length === 1 ? 1 : attackerIds.length === 2
+      ? (sameCorps ? SAME_CORPS_EFFICIENCY_2 : MULTI_BRIGADE_EFFICIENCY_2)
+      : (sameCorps ? SAME_CORPS_EFFICIENCY_3 : MULTI_BRIGADE_EFFICIENCY_3);
+    const ogMult = hasOG ? OG_COORDINATION_BONUS : 1;
+    for (const aid of attackerIds) {
+      const aorSettlements = getBrigadeAoRSettlements(state, aid);
+      const frontlineSids = aorSettlements.filter(sid => neighbors.includes(sid));
+      const rawGarrison = frontlineSids.reduce(
+        (sum, sid) => sum + getSettlementGarrison(state, sid, edges), 0
+      );
+      const bp = computeCombatPower(state, formations[aid]!, rawGarrison, 'attack', 1.0, 0);
+      const ext = getExternalSupportMultiplier(attackerFaction, turn, settlementToMun, targetSid);
+      combinedAttackerPower += bp.total_combat_power * ext * effN * ogMult;
+    }
+    const attackerPower = {
+      base_garrison: attackerPowers.reduce((s, x) => s + (formations[x.formationId]?.personnel ?? 0), 0) / Math.max(1, attackerPowers.length),
+      equipment_mult: 1,
+      experience_mult: 1,
+      cohesion_mult: 1,
+      posture_mult: 1,
+      supply_mult: 1,
+      readiness_mult: 1,
+      corps_stance_mult: 1,
+      operation_mult: 1,
+      og_bonus: hasOG ? OG_COORDINATION_BONUS : 1,
+      resilience_mult: 1,
+      disruption_mult: 1,
+      terrain_mult: 1,
+      front_hardening_mult: 1,
+      total_combat_power: combinedAttackerPower
+    };
 
     // --- Terrain for defending settlement ---
     const terrain = computeTerrainModifier(terrainData, targetSid, settlementToMun);
@@ -859,12 +925,19 @@ export function resolveBattleOrders(
     };
     const preBattleSnaps = evaluatePreBattleSnaps(snapCtx);
 
-    // --- Combat power ---
-    const attackerPower = computeCombatPower(
-      state, formation, rawGarrison, 'attack', 1.0, 0
-    );
-    const externalSupportMult = getExternalSupportMultiplier(attackerFaction, turn, settlementToMun, targetSid);
-    attackerPower.total_combat_power *= externalSupportMult;
+    // --- Defender outnumbered bonus (Phase D) ---
+    const outnumberedMult = attackerIds.length >= 2 ? DEFENDER_OUTNUMBERED_BONUS : 1;
+    // --- Linking: defender has another friendly brigade with AoR adjacent to target (+10%) ---
+    let linkingMult = 1;
+    if (defenderFaction) {
+      for (const nSid of neighbors) {
+        const aorOwner = brigadeAor[nSid];
+        if (aorOwner && aorOwner !== defenderBrigadeId && formations[aorOwner]?.faction === defenderFaction) {
+          linkingMult = LINKING_DEFENSE_BONUS;
+          break;
+        }
+      }
+    }
 
     let defenderPower: CombatPowerBreakdown | null = null;
     if (defenderFormation) {
@@ -872,9 +945,9 @@ export function resolveBattleOrders(
         state, defenderFormation, defGarrison, 'defend',
         terrain.composite, activeStreak
       );
-      defenderPower.total_combat_power *= preBattleSnaps.defenderPowerMult;
+      defenderPower.total_combat_power *= preBattleSnaps.defenderPowerMult * outnumberedMult * linkingMult;
     } else if (defGarrison > 0) {
-      const power = computeMilitiaDefenderPower(defGarrison, terrain.composite);
+      const power = computeMilitiaDefenderPower(defGarrison, terrain.composite) * outnumberedMult * linkingMult;
       defenderPower = {
         base_garrison: defGarrison,
         equipment_mult: 1,
@@ -943,8 +1016,6 @@ export function resolveBattleOrders(
     if (settlementFlipped) {
       (state.political_controllers as Record<SettlementId, FactionId>)[targetSid] = attackerFaction;
       report.flips_applied += 1;
-
-      // Equipment capture (standard or surrender)
       if (defenderFormation) {
         if (preBattleSnaps.isSurrenderCascade) {
           applySurrenderCapture(defenderFormation, formation);
@@ -953,38 +1024,48 @@ export function resolveBattleOrders(
           captureEquipment(defenderFormation, formation, loserAoRSize);
         }
       }
+      // Phase D: first attacker by ID claims the settlement in its AoR
+      (state.brigade_aor as Record<SettlementId, FormationId | null>)[targetSid] = formationId;
     }
 
-    // Apply personnel losses (defender: cap at applicable so formation never goes below MIN_COMBAT_PERSONNEL)
-    applyPersonnelLoss(formation, totalPersonnelLoss(casualties.attacker));
+    const totalAttackerLoss = totalPersonnelLoss(casualties.attacker);
+    const totalAttackerPersonnel = attackerIds.reduce((s, id) => s + (formations[id]?.personnel ?? 0), 0);
+    for (let i = 0; i < attackerIds.length; i++) {
+      const aid = attackerIds[i];
+      const af = formations[aid];
+      if (!af) continue;
+      const share = totalAttackerPersonnel > 0 ? (af.personnel ?? 0) / totalAttackerPersonnel : 1 / attackerIds.length;
+      const loss = Math.round(totalAttackerLoss * share);
+      applyPersonnelLoss(af, loss);
+      addWoundedPending(af, Math.round(casualties.attacker.wounded * share));
+      const tankShare = attackerIds.length === 1 ? 1 : share;
+      applyEquipmentBattleLoss(af, Math.floor(casualties.attacker.tanks_lost * tankShare), Math.floor(casualties.attacker.artillery_lost * tankShare));
+      const ledger = state.casualty_ledger!;
+      recordBattleCasualties(ledger, attackerFaction, aid, {
+        killed: Math.floor(casualties.attacker.killed * share),
+        wounded: Math.floor(casualties.attacker.wounded * share),
+        missing_captured: Math.floor(casualties.attacker.missing_captured * share)
+      });
+      recordEquipmentLoss(ledger, attackerFaction, { tanks: Math.floor(casualties.attacker.tanks_lost * tankShare), artillery: Math.floor(casualties.attacker.artillery_lost * tankShare) });
+    }
+
     if (defenderFormation) {
       const defenderPersonnel = defenderFormation.personnel ?? 0;
       const defenderApplicable = Math.max(0, defenderPersonnel - MIN_COMBAT_PERSONNEL);
       applyPersonnelLoss(defenderFormation, Math.min(totalPersonnelLoss(casualties.defender), defenderApplicable));
+      addWoundedPending(defenderFormation, casualties.defender.wounded);
+      applyEquipmentBattleLoss(defenderFormation, casualties.defender.tanks_lost, casualties.defender.artillery_lost);
     } else if (defGarrison > 0) {
-      // Militia defender: subtract casualties from militia pool (Phase B).
       const mun = settlementToMun.get(targetSid);
       if (mun && state.militia_pools) {
         const poolKey = militiaPoolKey(mun, defenderFaction!);
         const pool = state.militia_pools[poolKey];
         if (pool && typeof pool.available === 'number') {
-          const loss = totalPersonnelLoss(casualties.defender);
-          pool.available = Math.max(0, pool.available - loss);
+          pool.available = Math.max(0, pool.available - totalPersonnelLoss(casualties.defender));
         }
       }
     }
 
-    // WIA trickleback: record wounded for later return (only when brigade is out of combat)
-    addWoundedPending(formation, casualties.attacker.wounded);
-    if (defenderFormation) addWoundedPending(defenderFormation, casualties.defender.wounded);
-
-    // Apply equipment losses
-    applyEquipmentBattleLoss(formation, casualties.attacker.tanks_lost, casualties.attacker.artillery_lost);
-    if (defenderFormation) {
-      applyEquipmentBattleLoss(defenderFormation, casualties.defender.tanks_lost, casualties.defender.artillery_lost);
-    }
-
-    // Apply snap effects
     for (const snap of allSnaps) {
       if (snap.type === 'commander_casualty') {
         const affected = formations[snap.affected_formation];
@@ -998,19 +1079,8 @@ export function resolveBattleOrders(
       }
     }
 
-    // Update casualty ledger
-    const ledger = state.casualty_ledger!;
-    recordBattleCasualties(ledger, attackerFaction, formationId, {
-      killed: casualties.attacker.killed,
-      wounded: casualties.attacker.wounded,
-      missing_captured: casualties.attacker.missing_captured
-    });
-    recordEquipmentLoss(ledger, attackerFaction, {
-      tanks: casualties.attacker.tanks_lost,
-      artillery: casualties.attacker.artillery_lost
-    });
-
     if (defenderFormation && defenderBrigadeId) {
+      const ledger = state.casualty_ledger!;
       recordBattleCasualties(ledger, defenderFaction!, defenderBrigadeId, {
         killed: casualties.defender.killed,
         wounded: casualties.defender.wounded,
