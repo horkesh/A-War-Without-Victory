@@ -1207,7 +1207,7 @@ export function computeBrigadeDensity(
 
 /**
  * Garrison strength at a settlement: brigade personnel split across AoR, or militia garrison if no brigade (Phase B).
- * Defender strength at that settlement = this value (Brigade Realism plan §3.3).
+ * Phase C: when brigade is packing or unpacking, garrison is 50%.
  */
 export function getSettlementGarrison(
   state: GameState,
@@ -1222,7 +1222,10 @@ export function getSettlementGarrison(
       const formation = state.formations?.[formationId];
       if (formation) {
         const personnel = formation.personnel ?? 1000;
-        return personnel / Math.max(1, coveredSettlements.length);
+        let garrison = personnel / Math.max(1, coveredSettlements.length);
+        const mov = state.brigade_movement_state?.[formationId]?.status;
+        if (mov === 'packing' || mov === 'unpacking') garrison *= 0.5;
+        return garrison;
       }
     }
   }

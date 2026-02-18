@@ -139,6 +139,7 @@ import { applyCorpsEffects, advanceOperations } from './phase_ii/corps_command.j
 import { activateOGs, updateOGLifecycle } from './phase_ii/operational_groups.js';
 import { applyBrigadePressureToState } from './phase_ii/brigade_pressure.js';
 import { computeMilitiaGarrisons } from './phase_ii/militia_garrison.js';
+import { processBrigadeMovement } from './phase_ii/brigade_movement.js';
 import { resolveAttackOrders, type ResolveAttackOrdersReport } from './phase_ii/resolve_attack_orders.js';
 import { loadTerrainScalars } from '../map/terrain_scalars.js';
 import { degradeEquipment, ensureBrigadeComposition } from './phase_ii/equipment_effects.js';
@@ -523,6 +524,14 @@ const phases: NamedPhase[] = [
         if (munId) sidToMun[sid] = munId;
       }
       applySurroundedBrigadeReform(context.state, edges, sidToMun);
+    }
+  },
+  {
+    name: 'process-brigade-movement',
+    run: async (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      const { edges } = await getGraphAndEdges(context);
+      processBrigadeMovement(context.state, edges);
     }
   },
   {
