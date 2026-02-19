@@ -7940,3 +7940,9 @@ Determinism checks **MUST** be run:
 - **Change:** (1) turn_pipeline.ts: new step apply-municipality-orders after generate-bot-brigade-orders; calls applyBrigadeMunicipalityOrders(state, edges, settlements) when orders exist. (2) bot_brigade_ai.ts: generateAllBotOrders appends brigade_mun_orders for bot factions (sorted factions, one brigade per faction per turn; desired = current assignment + one adjacent faction-held mun; deterministic neighbor order).
 - **Determinism:** Sorted iteration (factions, brigades, neighbor muns); no RNG. Same state → same orders and same apply result.
 - **Artifacts:** src/sim/turn_pipeline.ts, src/sim/phase_ii/bot_brigade_ai.ts, docs/PROJECT_LEDGER.md.
+
+**2026-02-19** - Recruitment vs growth: max_recruits 4 in definitive 52w (52w plan Step 4)
+- **Summary:** Step 4 of 52w report remediation: allow more new brigades per turn. Scenario apr1992_definitive_52w max_recruits_per_faction_per_turn raised 2→4. reservedSpawnManpowerForReinforcement and recruitment-before-reinforcement already in pipeline (formation_spawn.ts, phase-ii-recruitment before phase-ii-brigade-reinforcement).
+- **Change:** data/scenarios/apr1992_definitive_52w.json: max_recruits_per_faction_per_turn 2 → 4. No code change.
+- **Determinism:** Scenario-only; same deterministic recruitment flow; run hashes may differ due to more brigades formed.
+- **Artifacts:** data/scenarios/apr1992_definitive_52w.json, docs/PROJECT_LEDGER.md.
