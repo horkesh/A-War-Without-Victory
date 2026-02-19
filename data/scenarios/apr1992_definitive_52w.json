@@ -17,7 +17,7 @@
   "equipment_points": { "RS": 800, "RBiH": 100, "HRHB": 350 },
   "recruitment_capital_trickle": { "RS": 6, "RBiH": 5, "HRHB": 4 },
   "equipment_points_trickle": { "RS": 5, "RBiH": 2, "HRHB": 4 },
-  "max_recruits_per_faction_per_turn": 2,
+  "max_recruits_per_faction_per_turn": 4,
   "init_alliance_rbih_hrhb": 0.35,
   "rbih_hrhb_war_earliest_week": 26,
   "coercion_pressure_by_municipality": {
