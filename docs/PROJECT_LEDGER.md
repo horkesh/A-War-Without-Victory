@@ -7946,3 +7946,9 @@ Determinism checks **MUST** be run:
 - **Change:** data/scenarios/apr1992_definitive_52w.json: max_recruits_per_faction_per_turn 2 → 4. No code change.
 - **Determinism:** Scenario-only; same deterministic recruitment flow; run hashes may differ due to more brigades formed.
 - **Artifacts:** data/scenarios/apr1992_definitive_52w.json, docs/PROJECT_LEDGER.md.
+
+**2026-02-19** - Phase II consolidation flips (Option B, 52w plan Step 5)
+- **Summary:** Step 5 of 52w report remediation: one brigade in "consolidation" posture in a municipality with no enemy brigades can flip multiple civilian/undefended settlements per turn (deterministic cap). Design choice: Option B (Phase II only); no Phase I re-enable.
+- **Change:** (1) New src/sim/phase_ii/consolidation_flips.ts: applyConsolidationFlips(state, settlements, sidToMun); CONSOLIDATION_FLIPS_CAP_PER_BRIGADE = 3; per-brigade cap, sorted formation/settlement order. (2) turn_pipeline.ts: new step phase-ii-consolidation-flips after phase-ii-resolve-attack-orders, before phase-ii-hostile-takeover-displacement; report written when flips_applied > 0.
+- **Determinism:** Sorted iteration; no RNG. Same state → same flips.
+- **Artifacts:** src/sim/phase_ii/consolidation_flips.ts, src/sim/turn_pipeline.ts, docs/PROJECT_LEDGER.md.
