@@ -31,9 +31,10 @@ const ELIGIBLE_POP_NORMALIZER = 50_000;
  * HVO smallest but ~30-40k historical. HRHB scale is higher because Croat population
  * is concentrated in fewer municipalities — each HVO-controlled mun mobilized proportionally
  * more of its population (near-total male mobilization in western Herzegovina). */
+/** 52w remediation: RS 1.20 to close personnel gap vs historical bands (plan 2026-02-18). */
 const FACTION_POOL_SCALE: Record<string, number> = {
   RBiH: 1.20,
-  RS: 1.15,
+  RS: 1.20,
   HRHB: 1.60
 };
 const DEFAULT_FACTION_POOL_SCALE = 1.0;
