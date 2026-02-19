@@ -128,7 +128,8 @@ import {
   computeBrigadeEncirclement,
   applySurroundedBrigadeReform,
   identifyFrontActiveSettlements,
-  validateBrigadeAoR
+  validateBrigadeAoR,
+  applyBrigadeMunicipalityOrders
 } from './phase_ii/brigade_aor.js';
 import { enforceContiguity, enforceCorpsLevelContiguity } from './phase_ii/corps_directed_aor.js';
 import { buildAdjacencyFromEdges } from './phase_ii/phase_ii_adjacency.js';
@@ -147,6 +148,7 @@ import { degradeEquipment, ensureBrigadeComposition } from './phase_ii/equipment
 import { updatePhaseIISupplyPressure } from './phase_ii/supply_pressure.js';
 import { updatePhaseIIExhaustion } from './phase_ii/exhaustion.js';
 import { getPhaseIICommandFrictionMultipliers } from './phase_ii/command_friction.js';
+import { updateReconIntelligence } from './phase_ii/recon_intelligence.js';
 import {
   applyPhaseIToPhaseIITransition,
   updatePhaseIOpposingEdgesStreak
@@ -590,6 +592,16 @@ const phases: NamedPhase[] = [
     }
   },
   {
+    name: 'apply-municipality-orders',
+    run: async (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      const orders = context.state.brigade_mun_orders;
+      if (!orders || typeof orders !== 'object' || Object.keys(orders).length === 0) return;
+      const { graph, edges } = await getGraphAndEdges(context);
+      applyBrigadeMunicipalityOrders(context.state, edges, graph.settlements);
+    }
+  },
+  {
     name: 'apply-aor-reshaping',
     run: async (context) => {
       if (context.state.meta.phase !== 'phase_ii') return;
@@ -875,6 +887,16 @@ const phases: NamedPhase[] = [
       }
       if (!edges || edges.length === 0) return;
       context.report.phase_ii_front_emergence = derivePhaseIIFrontsFromPressureEligible(context.state, edges);
+    }
+  },
+  {
+    name: 'phase-ii-recon-intelligence',
+    run: async (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      if (!context.state.brigade_aor) return;
+      const { edges } = await getGraphAndEdges(context);
+      if (!edges?.length) return;
+      updateReconIntelligence(context.state, edges);
     }
   },
   {

@@ -16,10 +16,13 @@ import type {
   BrigadeAoROrder,
   BrigadePostureOrder,
   BrigadePosture,
-  CorpsStance
+  CorpsStance,
+  MunicipalityId
 } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { MAX_MUNICIPALITIES_PER_BRIGADE } from '../../state/formation_constants.js';
+import { buildMunicipalityAdjacency } from './brigade_aor.js';
 import { buildAdjacencyFromEdges, getFactionBrigades } from './phase_ii_adjacency.js';
 import { getBrigadeAoRSettlements, computeBrigadeDensity, getSettlementGarrison } from './brigade_aor.js';
 import { canAdoptPosture } from './brigade_posture.js';
@@ -75,6 +78,17 @@ const CONSOLIDATION_SCORE_WEIGHT = 0.35;
 /** Garrison at or above this value counts as "heavy resistance" for allowing duplicate attack targets (OG+operation exception only). */
 const HEAVY_RESISTANCE_GARRISON_THRESHOLD = 250;
 
+/** True when the settlement is in some formation's AoR and that formation's faction is the current controller (defender brigade present). Exported for tests. */
+export function hasDefenderBrigade(state: GameState, sid: SettlementId): boolean {
+  const pc = state.political_controllers ?? {};
+  const defenderFaction = pc[sid] as FactionId | null | undefined;
+  if (!defenderFaction) return false;
+  const formationId = state.brigade_aor?.[sid];
+  if (!formationId) return false;
+  const formation = state.formations?.[formationId];
+  return formation?.faction === defenderFaction;
+}
+
 /** Casualty-aversion: don't attack when expected losses exceed this fraction, unless strategic target. */
 const CASUALTY_AVERSION_THRESHOLD = 0.15;
 
@@ -89,6 +103,9 @@ const ETHNIC_RESISTANCE_PENALTY = -40;
 
 /** Max score bonus for attacking bilateral war targets (RBiH↔HRHB when at war). */
 const SCORE_BILATERAL_WAR_TARGET = 60;
+
+/** Score bonus for attacking a settlement that has a defender brigade (set-piece battle). Set so defended targets with strategic value can outweigh SCORE_UNDEFENDED and yield a non-trivial fraction of defender-present battles. */
+const SCORE_DEFENDER_PRESENT_BONUS = 100;
 
 /** Min brigades in elastic_defense for economy of force. */
 const MIN_ELASTIC_DEFENSE = 1;
@@ -829,6 +846,9 @@ export function generateBotBrigadeOrders(
         }
       }
 
+      // Prefer some targets with defender brigade so a non-trivial fraction of attacks are defender-present (set-piece battles).
+      if (hasDefenderBrigade(state, sid)) score += SCORE_DEFENDER_PRESENT_BONUS;
+
       scoredTargets.push({ sid, score });
     }
 
@@ -914,5 +934,42 @@ export function generateAllBotOrders(
   }
   if (Object.keys(attackOrdersAccum).length > 0) {
     state.brigade_attack_orders = attackOrdersAccum;
+  }
+
+  // 52w plan Step 3: bot issuance of brigade_mun_orders (one expansion per faction per turn).
+  if (sidToMun && sidToMun.size > 0) {
+    const sidToMunRecord: Record<SettlementId, MunicipalityId> = {};
+    sidToMun.forEach((v, k) => { sidToMunRecord[k] = v as MunicipalityId; });
+    const assignment = state.brigade_municipality_assignment ?? {};
+    const munAdj = buildMunicipalityAdjacency(edges, sidToMunRecord);
+    for (const faction of sortedFactions) {
+      const brigades = getFactionBrigades(state, faction).sort(strictCompare);
+      const factionMuns = new Set<MunicipalityId>();
+      for (const bid of brigades) {
+        for (const munId of (assignment[bid] ?? [])) factionMuns.add(munId);
+      }
+      if (factionMuns.size === 0) continue;
+      let issued = false;
+      for (const bid of brigades) {
+        if (issued) break;
+        const current = assignment[bid] ?? [];
+        if (current.length >= MAX_MUNICIPALITIES_PER_BRIGADE) continue;
+        let added: MunicipalityId | null = null;
+        for (const munId of current) {
+          const neighbors = munAdj.get(munId);
+          if (!neighbors) continue;
+          const sortedNeighbors = Array.from(neighbors).sort(strictCompare);
+          for (const n of sortedNeighbors) {
+            if (factionMuns.has(n) && !current.includes(n)) { added = n; break; }
+          }
+          if (added) break;
+        }
+        if (added) {
+          if (!state.brigade_mun_orders) state.brigade_mun_orders = {};
+          state.brigade_mun_orders[bid] = [...current, added];
+          issued = true;
+        }
+      }
+    }
   }
 }
