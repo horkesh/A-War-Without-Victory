@@ -20,12 +20,13 @@ import {
   EAST_OF_SARAJEVO_MUN_IDS,
   SARAJEVO_AREA_MUN_IDS,
   HERZEGOVINA_DEST_MUN_IDS,
-  POSAVINA_CROAT_DEST_MUN_IDS
+  POSAVINA_CROAT_DEST_MUN_IDS,
+  getReceivingCapacityFraction
 } from './displacement_routing_data.js';
 import type { MunicipalityPopulation1991Map } from './population_share.js';
 import { strictCompare } from './validateGameState.js';
 import { militiaPoolKey } from './militia_pool_key.js';
-import { getMunicipalityIdFromRecord, getOrInitDisplacementState, recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
+import { factionHasBrigadeInMunicipality, getMunicipalityIdFromRecord, getOrInitDisplacementState, recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
 
 const TAKEOVER_DISPLACEMENT_DELAY_TURNS = 4;
 const CAMP_REROUTE_DELAY_TURNS = 4;
@@ -36,7 +37,6 @@ const POSAVINA_CROAT_FLEE_ABROAD = 0.70;
 // Enclave-overrun special case (historical high-lethality second displacement).
 export const ENCLAVE_OVERRUN_KILL_FRACTION = 0.35;
 
-const DISPLACEMENT_CAPACITY_FRACTION = 1.5;
 const REINFORCEMENT_RATE = 0.05;
 const DISPLACED_CONTRIBUTION_CAP = 2000;
 const RBIH_HRHB_ALLIED_THRESHOLD = 0.20;
@@ -438,6 +438,7 @@ export function processPhaseIIDisplacementTakeover(
         if (remaining <= 0) break;
         if (!friendlyMunsByFaction[factionId]?.has(targetMunId)) continue;
         if (targetMunId === sourceMunId) continue;
+        if (!factionHasBrigadeInMunicipality(state, factionId, targetMunId, settlements)) continue;
         const targetState = getOrInitDisplacementState(
           state,
           targetMunId,
@@ -447,7 +448,9 @@ export function processPhaseIIDisplacementTakeover(
           0,
           targetState.original_population + targetState.displaced_in - targetState.displaced_out - targetState.lost_population
         );
-        const targetCapacity = Math.floor(targetState.original_population * DISPLACEMENT_CAPACITY_FRACTION);
+        const targetCapacity = Math.floor(
+          targetState.original_population * getReceivingCapacityFraction(targetMunId)
+        );
         const availableCapacity = Math.max(0, targetCapacity - targetCurrent);
         if (availableCapacity <= 0) continue;
         const routed = Math.min(remaining, availableCapacity);
