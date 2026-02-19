@@ -143,6 +143,7 @@ import { applyBrigadePressureToState } from './phase_ii/brigade_pressure.js';
 import { computeMilitiaGarrisons } from './phase_ii/militia_garrison.js';
 import { processBrigadeMovement } from './phase_ii/brigade_movement.js';
 import { resolveAttackOrders, type ResolveAttackOrdersReport } from './phase_ii/resolve_attack_orders.js';
+import { applyConsolidationFlips } from './phase_ii/consolidation_flips.js';
 import { loadTerrainScalars } from '../map/terrain_scalars.js';
 import { degradeEquipment, ensureBrigadeComposition } from './phase_ii/equipment_effects.js';
 import { updatePhaseIISupplyPressure } from './phase_ii/supply_pressure.js';
@@ -729,6 +730,20 @@ const phases: NamedPhase[] = [
       context.report.phase_ii_resolve_attack_orders = resolveAttackOrders(
         context.state, edges, terrainData, settlementToMun
       );
+    }
+  },
+  {
+    name: 'phase-ii-consolidation-flips',
+    run: async (context) => {
+      if (context.state.meta.phase !== 'phase_ii') return;
+      const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+      const sidToMun: Record<string, string> = {};
+      for (const [sid, rec] of graph.settlements.entries()) {
+        const munId = rec.mun1990_id ?? rec.mun_code;
+        if (munId) sidToMun[sid] = munId;
+      }
+      const report = applyConsolidationFlips(context.state, graph.settlements, sidToMun);
+      if (report.flips_applied > 0) context.report.phase_ii_consolidation_flips = report;
     }
   },
   {
