@@ -7934,3 +7934,9 @@ Determinism checks **MUST** be run:
 - **Change:** pool_population.ts: FACTION_POOL_SCALE.RS 1.15 → 1.20. No change to POOL_SCALE_FACTOR (65), defender-present bonus, or anchor list.
 - **Determinism:** Same deterministic pool derivation; only scale constant changed; run hashes will differ.
 - **Artifacts:** src/sim/phase_i/pool_population.ts, docs/PROJECT_LEDGER.md.
+
+**2026-02-19** - Movement: apply-municipality-orders pipeline step and bot brigade_mun_orders (52w plan Step 3)
+- **Summary:** Step 3 of 52w report remediation: brigade municipality orders are now applied in bot/CLI runs. Pipeline step runs applyBrigadeMunicipalityOrders when state.brigade_mun_orders is non-empty; bot issues one expansion order per faction per turn (add one adjacent faction-held mun to one brigade).
+- **Change:** (1) turn_pipeline.ts: new step apply-municipality-orders after generate-bot-brigade-orders; calls applyBrigadeMunicipalityOrders(state, edges, settlements) when orders exist. (2) bot_brigade_ai.ts: generateAllBotOrders appends brigade_mun_orders for bot factions (sorted factions, one brigade per faction per turn; desired = current assignment + one adjacent faction-held mun; deterministic neighbor order).
+- **Determinism:** Sorted iteration (factions, brigades, neighbor muns); no RNG. Same state → same orders and same apply result.
+- **Artifacts:** src/sim/turn_pipeline.ts, src/sim/phase_ii/bot_brigade_ai.ts, docs/PROJECT_LEDGER.md.
