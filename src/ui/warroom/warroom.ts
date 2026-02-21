@@ -1,23 +1,23 @@
+import type { FactionId, GameState } from '../../state/game_state.js';
 import { deserializeState } from '../../state/serialize.js';
-import type { GameState, FactionId } from '../../state/game_state.js';
-import { WallCalendar } from './components/WallCalendar.js';
-import { TacticalMap } from './components/TacticalMap.js';
-import { WarPlanningMap } from './components/WarPlanningMap.js';
-import { Phase0PreparationMap } from './components/Phase0PreparationMap.js';
 import { ClickableRegionManager } from './ClickableRegionManager.js';
 import { HoverRenderer } from './HoverRenderer.js';
 import { ModalManager } from './components/ModalManager.js';
 import { NewspaperModal } from './components/NewspaperModal.js';
+import { Phase0PreparationMap } from './components/Phase0PreparationMap.js';
+import { TacticalMap } from './components/TacticalMap.js';
+import { WallCalendar } from './components/WallCalendar.js';
+import { WarPlanningMap } from './components/WarPlanningMap.js';
 // Asset URLs via Vite so dev server serves them from the module graph
 import bgUrl from './assets/hq_background_v3.png?url';
 // Flag assets — drawn dynamically on the wall per player faction
+import flagHrhbUrl from './assets/flag_HRHB.png?url';
 import flagRbihUrl from './assets/flag_RBiH.png?url';
 import flagRsUrl from './assets/flag_RS.png?url';
-import flagHrhbUrl from './assets/flag_HRHB.png?url';
 // Scenario briefing images
 import scnApr1992Url from './assets/scenarios/apr1992_briefing.png?url';
 import scnSep1991Url from './assets/scenarios/sep1991_briefing.png?url';
-// Main menu background
+// Main menu background (game start screen)
 import gameStartBgUrl from './assets/game start.png?url';
 
 type CampaignScenarioKey = 'sep_1991' | 'apr_1992';
@@ -63,12 +63,12 @@ class WarroomApp {
     }
 
     async init() {
-        // Apply main menu background immediately so the browser can load it in parallel with init
+        // Apply main menu background: image first, overlay gradient for readability
         const mainMenuEl = document.getElementById('main-menu');
         if (mainMenuEl) {
-            mainMenuEl.style.backgroundImage = `url(${gameStartBgUrl})`;
-            mainMenuEl.style.backgroundSize = 'cover';
-            mainMenuEl.style.backgroundPosition = 'center';
+            mainMenuEl.style.backgroundImage = `url(${gameStartBgUrl}), radial-gradient(circle at center, rgba(30, 40, 60, 0.75) 0%, rgba(5, 5, 15, 0.92) 100%)`;
+            mainMenuEl.style.backgroundSize = 'cover, auto';
+            mainMenuEl.style.backgroundPosition = 'center, center';
         }
 
         // Load background
@@ -102,6 +102,21 @@ class WarroomApp {
             mapScene.appendChild(this.phase0PreparationMap.getContainer());
             this.phase0PreparationMap.setCloseCallback(() => this.showWarroomScene());
         }
+        // Wire the 3-step campaign flow immediately for responsiveness
+        this.wireMainMenuButtons();
+        this.wireSidePickerButtons();
+        this.wireScenarioPickerButtons();
+        this.wireToolbar();
+        this.canvas.addEventListener('mousemove', (e) => this.onMouseMove(e));
+        this.canvas.addEventListener('click', (e) => this.onClick(e));
+
+        // Listen for "back to HQ" messages from the embedded tactical map iframe
+        window.addEventListener('message', (e) => {
+            if (e.data?.type === 'awwv-back-to-hq') {
+                this.showWarroomScene();
+            }
+        });
+
         await this.warPlanningMap.loadData();
         await this.phase0PreparationMap.loadData();
 
@@ -124,22 +139,6 @@ class WarroomApp {
         } else {
             this.showMainMenu();
         }
-
-        // Wire the 3-step campaign flow
-        this.wireMainMenuButtons();
-        this.wireSidePickerButtons();
-        this.wireScenarioPickerButtons();
-        this.wireToolbar();
-
-        this.canvas.addEventListener('mousemove', (e) => this.onMouseMove(e));
-        this.canvas.addEventListener('click', (e) => this.onClick(e));
-
-        // Listen for "back to HQ" messages from the embedded tactical map iframe
-        window.addEventListener('message', (e) => {
-            if (e.data?.type === 'awwv-back-to-hq') {
-                this.showWarroomScene();
-            }
-        });
 
         this.renderLoop();
     }
@@ -433,6 +432,7 @@ class WarroomApp {
     private wireToolbar(): void {
         const menuBtn = document.getElementById('wr-btn-menu');
         const mapBtn = document.getElementById('wr-btn-map');
+        const sandboxBtn = document.getElementById('wr-btn-sandbox');
         const investBtn = document.getElementById('wr-btn-invest');
         const settingsBtn = document.getElementById('wr-btn-settings');
         const helpBtn = document.getElementById('wr-btn-help');
@@ -447,8 +447,11 @@ class WarroomApp {
                     this.phase0PreparationMap.show();
                     return;
                 }
-                this.showTacticalMapScene();
+                this.showTacticalMapScene('operational');
             };
+        }
+        if (sandboxBtn) {
+            sandboxBtn.onclick = () => this.showTacticalMapScene('sandbox');
         }
         if (investBtn) {
             investBtn.onclick = () => {
@@ -479,6 +482,7 @@ class WarroomApp {
                     <h2>WARROOM CONTROLS</h2>
                     <div class="wr-dialog-body" style="text-align: left; line-height: 2;">
                         <div><strong style="color: #00e878;">Desk Map</strong> &mdash; Open tactical map</div>
+                        <div><strong style="color: #00e878;">Sandbox</strong> &mdash; Open tactical sandbox mode</div>
                         <div><strong style="color: #00e878;">Calendar</strong> &mdash; Advance turn</div>
                         <div><strong style="color: #00e878;">Telephone</strong> &mdash; Diplomacy (war only)</div>
                         <div><strong style="color: #00e878;">Flag</strong> &mdash; Faction overview</div>
@@ -501,11 +505,11 @@ class WarroomApp {
         // Sep 1991 + turn weeks
         const startDate = new Date(1991, 8, 1); // Sep 1 1991
         startDate.setDate(startDate.getDate() + turn * 7);
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const label = `${months[startDate.getMonth()]} ${startDate.getFullYear()}`;
         const phase = this.gameState.meta.phase === 'phase_0' ? 'Pre-War'
             : this.gameState.meta.phase === 'phase_i' ? 'Phase I'
-            : 'Phase II';
+                : 'Phase II';
         el.textContent = `Turn ${turn} \u2014 ${label} \u2014 ${phase}`;
         const investBtn = document.getElementById('wr-btn-invest') as HTMLButtonElement | null;
         if (investBtn) {
@@ -634,19 +638,26 @@ class WarroomApp {
 
     /**
      * Show the tactical map as a full-screen iframe layer (same window, no separate BrowserWindow).
-     * In Electron: embeds tactical_map.html via awwv:// protocol (same origin).
+     * In Electron: embeds map_operational_3d.html via awwv:// protocol (same origin).
      * In dev/browser: opens the tactical map in a new tab (cross-origin prevents iframe embedding).
      */
-    private showTacticalMapScene(): void {
+    private showTacticalMapScene(mode: 'operational' | 'sandbox' = 'operational'): void {
         const isElectron = !!(window as unknown as { awwv?: unknown }).awwv;
         if (!isElectron) {
             // Dev/browser: cross-origin prevents meaningful iframe interaction
-            window.open('http://localhost:3001', '_blank');
+            const devUrl = mode === 'sandbox'
+                ? 'http://localhost:3002/tactical_sandbox.html'
+                : 'http://localhost:3002/tactical_map.html';
+            window.open(devUrl, '_blank');
             return;
         }
 
         const tacticalScene = document.getElementById('tactical-map-scene');
         if (!tacticalScene) return;
+
+        const targetSrc = mode === 'sandbox'
+            ? 'awwv://warroom/tactical-map/tactical_sandbox.html?embedded=1'
+            : 'awwv://warroom/tactical-map/tactical_map.html?embedded=1';
 
         // Lazily create iframe on first open
         if (!this.tacticalMapIframe) {
@@ -655,7 +666,7 @@ class WarroomApp {
             iframe.setAttribute('allowfullscreen', '');
             // Serve tactical map under warroom origin so iframe is same-origin
             // and can inherit window.parent.awwv bridge for IPC
-            iframe.src = 'awwv://warroom/tactical-map/tactical_map.html?embedded=1';
+            iframe.src = targetSrc;
 
             iframe.onload = () => {
                 this.tacticalMapReady = true;
@@ -664,6 +675,9 @@ class WarroomApp {
 
             tacticalScene.appendChild(iframe);
             this.tacticalMapIframe = iframe;
+        } else if (this.tacticalMapIframe.src !== targetSrc) {
+            this.tacticalMapReady = false;
+            this.tacticalMapIframe.src = targetSrc;
         } else if (this.tacticalMapReady) {
             // Push latest game state to existing iframe
             this.injectBridgeIntoTacticalMap(this.tacticalMapIframe);
@@ -678,7 +692,7 @@ class WarroomApp {
 
     /**
      * Post-load setup for the tactical map iframe.
-     * The bridge is inherited via the inline script in tactical_map.html (?embedded=1).
+     * The bridge is inherited via the inline script in map_operational_3d.html (?embedded=1).
      * This method handles edge cases and ensures menu/button state is correct.
      */
     private injectBridgeIntoTacticalMap(iframe: HTMLIFrameElement): void {

@@ -1,9 +1,9 @@
-import type { GameState, FactionId, MunicipalityId, OrganizationalPenetration } from '../../../state/game_state.js';
 import type { InvestmentType } from '../../../phase0/investment.js';
 import { getInvestmentTypesForFaction } from '../../../phase0/investment.js';
+import type { FactionId, GameState, MunicipalityId, OrganizationalPenetration } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
-import { InvestmentPanel } from './InvestmentPanel.js';
 import type { InvestmentPanelMunInfo } from './InvestmentPanel.js';
+import { InvestmentPanel } from './InvestmentPanel.js';
 import { Phase0DirectiveState } from './Phase0DirectiveState.js';
 
 type Position = [number, number] | [number, number, number];

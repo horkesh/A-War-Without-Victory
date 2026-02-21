@@ -6,7 +6,7 @@
  */
 
 import type { GameState } from './game_state.js';
-import type { ControlStatus, ControlSide } from './political_control_types.js';
+import type { ControlSide, ControlStatus } from './political_control_types.js';
 
 
 /** Policy for when AoR fallback may apply. Default: only when controller field is missing. */
@@ -19,33 +19,33 @@ export type AorFallbackPolicy = 'never' | 'only_when_missing_controller_field' |
  * Never applies AoR fallback when controller field exists (null or side).
  */
 export function getSettlementControlStatus(
-  state: GameState,
-  settlementId: string,
-  policy: AorFallbackPolicy = 'only_when_missing_controller_field'
+    state: GameState,
+    settlementId: string,
+    policy: AorFallbackPolicy = 'only_when_missing_controller_field'
 ): ControlStatus {
-  const controller =
-    state.political_controllers && settlementId in state.political_controllers
-      ? state.political_controllers[settlementId]
-      : undefined;
+    const controller =
+        state.political_controllers && settlementId in state.political_controllers
+            ? state.political_controllers[settlementId]
+            : undefined;
 
-  const controllerFieldMissing = controller === undefined;
+    const controllerFieldMissing = controller === undefined;
 
-  if (!controllerFieldMissing) {
-    if (controller !== null) {
-      return { kind: 'known', side: controller as ControlSide };
+    if (!controllerFieldMissing) {
+        if (controller !== null) {
+            return { kind: 'known', side: controller as ControlSide };
+        }
+        return { kind: 'unknown' };
+    }
+
+    if (policy === 'never') {
+        return { kind: 'unknown' };
+    }
+    for (const faction of state.factions) {
+        if (faction.areasOfResponsibility.includes(settlementId)) {
+            return { kind: 'known', side: faction.id as ControlSide };
+        }
     }
     return { kind: 'unknown' };
-  }
-
-  if (policy === 'never') {
-    return { kind: 'unknown' };
-  }
-  for (const faction of state.factions) {
-    if (faction.areasOfResponsibility.includes(settlementId)) {
-      return { kind: 'known', side: faction.id as ControlSide };
-    }
-  }
-  return { kind: 'unknown' };
 }
 
 /**
@@ -53,10 +53,10 @@ export function getSettlementControlStatus(
  * New code should use getSettlementControlStatus and branch on status.kind.
  */
 export function getSettlementSideLegacy(
-  state: GameState,
-  settlementId: string
+    state: GameState,
+    settlementId: string
 ): ControlSide | null {
-  const status = getSettlementControlStatus(state, settlementId);
-  if (status.kind === 'known') return status.side;
-  return null;
+    const status = getSettlementControlStatus(state, settlementId);
+    if (status.kind === 'known') return status.side;
+    return null;
 }

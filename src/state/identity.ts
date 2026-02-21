@@ -13,10 +13,10 @@ export type ArmyLabel = typeof ARMY_LABELS[number];
  * Otherwise returns the input ID unchanged.
  */
 export function canonicalizePoliticalSideId(id: string): PoliticalSideId | string {
-  if (id === "ARBiH") return "RBiH";
-  if (id === "VRS") return "RS";
-  if (id === "HVO") return "HRHB";
-  return id;
+    if (id === "ARBiH") return "RBiH";
+    if (id === "VRS") return "RS";
+    if (id === "HVO") return "HRHB";
+    return id;
 }
 
 /**
@@ -27,10 +27,10 @@ export function canonicalizePoliticalSideId(id: string): PoliticalSideId | strin
  * - HRHB -> HVO
  */
 export function defaultArmyLabelForSide(side: PoliticalSideId): ArmyLabel {
-  if (side === "RBiH") return "ARBiH";
-  if (side === "RS") return "VRS";
-  if (side === "HRHB") return "HVO";
-  // TypeScript exhaustiveness check - should never reach here
-  const _exhaustive: never = side;
-  return _exhaustive;
+    if (side === "RBiH") return "ARBiH";
+    if (side === "RS") return "VRS";
+    if (side === "HRHB") return "HVO";
+    // TypeScript exhaustiveness check - should never reach here
+    const _exhaustive: never = side;
+    return _exhaustive;
 }

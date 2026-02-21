@@ -38,6 +38,7 @@
 | **orchestrator** | Strategic direction, convening team, resolving cross-role conflicts, aligning roadmap and ledger |
 | **product-manager** | Scope, priority, phased delivery, roadmap, MVP, sequencing, handoff to dev |
 | **technical-architect** | Architecture, entrypoints, ADR, CODE_CANON, REPO_MAP, new systems, refactors |
+| **architect** | Holistic product architecture: cross-system integration, UI/UX architecture, feature feasibility spanning engine+UI+data, industry research, vision documents; operates above Technical Architect |
 | **game-designer** | Design intent, mechanics, Game Bible, canon interpretation, balance, narrative |
 | **gameplay-programmer** | Phase logic, state, simulation behavior per phase specs and Systems Manual |
 | **formation-expert** | Militia spawning, brigade formation, pools, formation lifecycle, AoR, OOB |
@@ -98,6 +99,7 @@
 | **documentation-specialist** | User-facing and engineering docs; respects docs-only-ledger-handling |
 | **prompt-construction** | Drafting prompts for Cursor or subagents |
 | **awwv-make-cursor-prompt** | Generate structured prompt for Cursor or subagents |
+| **visual-explainer** | Technical diagrams, visualizations, data tables as self-contained HTML; open in browser; proactive for 4+ rows or 3+ columns; never ASCII art when loaded |
 | **reports-custodian** | docs/40_reports structure; CONSOLIDATED_* sync; archive superseded reports |
 
 ---
@@ -110,6 +112,7 @@
 | **finishing-a-development-branch** | Implementation complete, tests pass; decide merge/PR/cleanup |
 | **using-git-worktrees** | Feature work needing isolation; before executing implementation plans |
 | **scenario-harness-engineer** | Scenario runner, preflight, diagnostics, artifacts, run pipeline |
+| **scenario-report** | Run a scenario and produce a full Paradox team report with tracked metrics and per-role assessments; "everyone weighing in" |
 | **qa-engineer** | Test strategy, coverage, regression; determinism-auditor for determinism |
 | **writing-skills** | Creating, editing, verifying skills |
 | **retrospective-analyst** | Post-milestone review; what went well, gaps, spec/code discrepancies |

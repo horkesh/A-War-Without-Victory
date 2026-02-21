@@ -36,64 +36,64 @@ export const CEASEFIRE_IVP_THRESHOLD = 0.40;
 export const CEASEFIRE_PATRON_CONSTRAINT = 0.45;
 
 export interface CeasefirePreconditionResult {
-  c1_war_duration: boolean;
-  c2_hrhb_exhaustion: boolean;
-  c3_rbih_exhaustion: boolean;
-  c4_stalemate: boolean;
-  c5_ivp_momentum: boolean;
-  c6_patron_constraint: boolean;
-  all_met: boolean;
+    c1_war_duration: boolean;
+    c2_hrhb_exhaustion: boolean;
+    c3_rbih_exhaustion: boolean;
+    c4_stalemate: boolean;
+    c5_ivp_momentum: boolean;
+    c6_patron_constraint: boolean;
+    all_met: boolean;
 }
 
 export interface CeasefireCheckReport {
-  preconditions: CeasefirePreconditionResult;
-  fired: boolean;
-  already_active: boolean;
+    preconditions: CeasefirePreconditionResult;
+    fired: boolean;
+    already_active: boolean;
 }
 
 /**
  * Evaluate ceasefire preconditions. Pure function of state.
  */
 export function evaluateCeasefirePreconditions(state: GameState): CeasefirePreconditionResult {
-  const rhs = state.rbih_hrhb_state;
-  const turn = state.meta.turn;
+    const rhs = state.rbih_hrhb_state;
+    const turn = state.meta.turn;
 
-  // C1: war duration
-  const warStartedTurn = rhs?.war_started_turn ?? null;
-  const warDuration = warStartedTurn !== null ? turn - warStartedTurn : 0;
-  const c1 = warDuration >= CEASEFIRE_MIN_WAR_DURATION;
+    // C1: war duration
+    const warStartedTurn = rhs?.war_started_turn ?? null;
+    const warDuration = warStartedTurn !== null ? turn - warStartedTurn : 0;
+    const c1 = warDuration >= CEASEFIRE_MIN_WAR_DURATION;
 
-  // C2: HRHB exhaustion
-  const hrhbExhaustion = state.phase_ii_exhaustion?.['HRHB'] ?? 0;
-  const c2 = hrhbExhaustion > CEASEFIRE_HRHB_EXHAUSTION;
+    // C2: HRHB exhaustion
+    const hrhbExhaustion = state.phase_ii_exhaustion?.['HRHB'] ?? 0;
+    const c2 = hrhbExhaustion > CEASEFIRE_HRHB_EXHAUSTION;
 
-  // C3: RBiH exhaustion
-  const rbihExhaustion = state.phase_ii_exhaustion?.['RBiH'] ?? 0;
-  const c3 = rbihExhaustion > CEASEFIRE_RBIH_EXHAUSTION;
+    // C3: RBiH exhaustion
+    const rbihExhaustion = state.phase_ii_exhaustion?.['RBiH'] ?? 0;
+    const c3 = rbihExhaustion > CEASEFIRE_RBIH_EXHAUSTION;
 
-  // C4: stalemate
-  const stalemateturns = rhs?.stalemate_turns ?? 0;
-  const c4 = stalemateturns >= CEASEFIRE_STALEMATE_MIN;
+    // C4: stalemate
+    const stalemateturns = rhs?.stalemate_turns ?? 0;
+    const c4 = stalemateturns >= CEASEFIRE_STALEMATE_MIN;
 
-  // C5: IVP negotiation_momentum
-  const ivp = state.international_visibility_pressure;
-  const negotiationMomentum = ivp?.negotiation_momentum ?? 0;
-  const c5 = negotiationMomentum > CEASEFIRE_IVP_THRESHOLD;
+    // C5: IVP negotiation_momentum
+    const ivp = state.international_visibility_pressure;
+    const negotiationMomentum = ivp?.negotiation_momentum ?? 0;
+    const c5 = negotiationMomentum > CEASEFIRE_IVP_THRESHOLD;
 
-  // C6: HRHB patron constraint_severity
-  const hrhbFaction = (state.factions ?? []).find((f) => f.id === 'HRHB');
-  const constraintSeverity = hrhbFaction?.patron_state?.constraint_severity ?? 0;
-  const c6 = constraintSeverity > CEASEFIRE_PATRON_CONSTRAINT;
+    // C6: HRHB patron constraint_severity
+    const hrhbFaction = (state.factions ?? []).find((f) => f.id === 'HRHB');
+    const constraintSeverity = hrhbFaction?.patron_state?.constraint_severity ?? 0;
+    const c6 = constraintSeverity > CEASEFIRE_PATRON_CONSTRAINT;
 
-  return {
-    c1_war_duration: c1,
-    c2_hrhb_exhaustion: c2,
-    c3_rbih_exhaustion: c3,
-    c4_stalemate: c4,
-    c5_ivp_momentum: c5,
-    c6_patron_constraint: c6,
-    all_met: c1 && c2 && c3 && c4 && c5 && c6
-  };
+    return {
+        c1_war_duration: c1,
+        c2_hrhb_exhaustion: c2,
+        c3_rbih_exhaustion: c3,
+        c4_stalemate: c4,
+        c5_ivp_momentum: c5,
+        c6_patron_constraint: c6,
+        all_met: c1 && c2 && c3 && c4 && c5 && c6
+    };
 }
 
 /**
@@ -101,47 +101,47 @@ export function evaluateCeasefirePreconditions(state: GameState): CeasefirePreco
  * Must run AFTER alliance update, BEFORE Washington check.
  */
 export function checkAndApplyCeasefire(state: GameState): CeasefireCheckReport {
-  const rhs = state.rbih_hrhb_state;
-  if (!rhs) {
-    return {
-      preconditions: {
-        c1_war_duration: false,
-        c2_hrhb_exhaustion: false,
-        c3_rbih_exhaustion: false,
-        c4_stalemate: false,
-        c5_ivp_momentum: false,
-        c6_patron_constraint: false,
-        all_met: false
-      },
-      fired: false,
-      already_active: false
-    };
-  }
+    const rhs = state.rbih_hrhb_state;
+    if (!rhs) {
+        return {
+            preconditions: {
+                c1_war_duration: false,
+                c2_hrhb_exhaustion: false,
+                c3_rbih_exhaustion: false,
+                c4_stalemate: false,
+                c5_ivp_momentum: false,
+                c6_patron_constraint: false,
+                all_met: false
+            },
+            fired: false,
+            already_active: false
+        };
+    }
 
-  // Already active or Washington signed — no re-evaluation needed
-  if (rhs.ceasefire_active) {
-    return {
-      preconditions: evaluateCeasefirePreconditions(state),
-      fired: false,
-      already_active: true
-    };
-  }
-  if (rhs.washington_signed) {
-    return {
-      preconditions: evaluateCeasefirePreconditions(state),
-      fired: false,
-      already_active: false
-    };
-  }
+    // Already active or Washington signed — no re-evaluation needed
+    if (rhs.ceasefire_active) {
+        return {
+            preconditions: evaluateCeasefirePreconditions(state),
+            fired: false,
+            already_active: true
+        };
+    }
+    if (rhs.washington_signed) {
+        return {
+            preconditions: evaluateCeasefirePreconditions(state),
+            fired: false,
+            already_active: false
+        };
+    }
 
-  const preconditions = evaluateCeasefirePreconditions(state);
-  if (!preconditions.all_met) {
-    return { preconditions, fired: false, already_active: false };
-  }
+    const preconditions = evaluateCeasefirePreconditions(state);
+    if (!preconditions.all_met) {
+        return { preconditions, fired: false, already_active: false };
+    }
 
-  // Fire ceasefire
-  rhs.ceasefire_active = true;
-  rhs.ceasefire_since_turn = state.meta.turn;
+    // Fire ceasefire
+    rhs.ceasefire_active = true;
+    rhs.ceasefire_since_turn = state.meta.turn;
 
-  return { preconditions, fired: true, already_active: false };
+    return { preconditions, fired: true, already_active: false };
 }

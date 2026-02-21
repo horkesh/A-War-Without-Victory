@@ -4,27 +4,27 @@
  */
 
 import type { MunicipalityId } from './game_state.js';
-import { MAX_BRIGADES_OVERRIDE } from './max_brigades_per_mun_data.js';
 import { LARGE_URBAN_MUN_IDS } from './large_urban_mun_data.js';
+import { MAX_BRIGADES_OVERRIDE } from './max_brigades_per_mun_data.js';
 
 /** Municipalities that count as "large" for control flip: never fall in one turn without resistance when defender has no formation. */
 export const LARGE_SETTLEMENT_MUN_IDS: readonly MunicipalityId[] = [
-  'centar_sarajevo',
-  'novi_grad_sarajevo',
-  'novo_sarajevo',
-  'stari_grad_sarajevo'
+    'centar_sarajevo',
+    'novi_grad_sarajevo',
+    'novo_sarajevo',
+    'stari_grad_sarajevo'
 ] as const;
 
 const LARGE_SET = new Set<string>(LARGE_SETTLEMENT_MUN_IDS);
 const LARGE_URBAN_SET = new Set<string>(LARGE_URBAN_MUN_IDS);
 
 export function isLargeSettlementMun(mun_id: MunicipalityId): boolean {
-  return LARGE_SET.has(mun_id);
+    return LARGE_SET.has(mun_id);
 }
 
 /** Municipalities treated as large urban centers (1991 pop >= 60k). */
 export function isLargeUrbanSettlementMun(mun_id: MunicipalityId): boolean {
-  return LARGE_URBAN_SET.has(mun_id);
+    return LARGE_URBAN_SET.has(mun_id);
 }
 
 /** Default max brigades per municipality. Overrides from 1991 census (large/mixed) in max_brigades_per_mun_data.ts. */
@@ -35,7 +35,7 @@ const DEFAULT_MAX_BRIGADES_PER_MUN = 1;
  * Overrides are derived organically from 1991 census (population >= 60k or no ethnicity >= 55%).
  */
 export function getMaxBrigadesPerMun(mun_id: MunicipalityId): number {
-  return MAX_BRIGADES_OVERRIDE[mun_id] ?? DEFAULT_MAX_BRIGADES_PER_MUN;
+    return MAX_BRIGADES_OVERRIDE[mun_id] ?? DEFAULT_MAX_BRIGADES_PER_MUN;
 }
 
 /** Pool must reach this to spawn a new brigade; new brigade starts at this size (research: canFormBrigade ≥800). */
@@ -75,8 +75,19 @@ export const MIN_AOR_SETTLEMENTS = 1;
  * Formula: min(4, max(1, floor(personnel / 400))). Deterministic.
  */
 export function getPersonnelBasedAoRCap(personnel: number): number {
-  const n = Math.floor(personnel / PERSONNEL_PER_AOR_SETTLEMENT);
-  return Math.min(MAX_AOR_SETTLEMENTS, Math.max(MIN_AOR_SETTLEMENTS, n));
+    const n = Math.floor(personnel / PERSONNEL_PER_AOR_SETTLEMENT);
+    return Math.min(MAX_AOR_SETTLEMENTS, Math.max(MIN_AOR_SETTLEMENTS, n));
+}
+
+/**
+ * Effective AoR cap for a brigade: uses player/bot desired cap (1–4) when set, else personnel-based.
+ * Convene: ORCHESTRATOR_THREE_WORKSTREAMS_3D_ICONS_AOR_BRIGADE_CAP_2026_02_20.
+ */
+export function getEffectiveAoRCap(personnel: number, desiredCap: number | null | undefined): number {
+    if (typeof desiredCap === 'number' && desiredCap >= MIN_AOR_SETTLEMENTS && desiredCap <= MAX_AOR_SETTLEMENTS) {
+        return Math.floor(desiredCap);
+    }
+    return getPersonnelBasedAoRCap(personnel);
 }
 
 // --- Militia garrison (Brigade AoR Redesign Phase B) ---
@@ -117,5 +128,5 @@ const NOMINAL_BATCH_SIZE = MIN_BRIGADE_SPAWN;
  * Brigade count differentiation comes from population-weighted pool, not per-faction size.
  */
 export function getBatchSizeForFaction(_faction: string): number {
-  return NOMINAL_BATCH_SIZE;
+    return NOMINAL_BATCH_SIZE;
 }

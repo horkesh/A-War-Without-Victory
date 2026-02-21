@@ -18,11 +18,11 @@ import type { FactionId } from './game_state.js';
  * For historical names use OOB init (init_formations_oob) so formations come from oob_brigades.json.
  */
 export function resolveFormationName(
-  faction: FactionId,
-  mun_id: string,
-  kind: 'militia' | 'brigade',
-  ordinal: number
+    faction: FactionId,
+    mun_id: string,
+    kind: 'militia' | 'brigade',
+    ordinal: number
 ): string {
-  const kindLabel = kind === 'militia' ? 'Militia' : 'Brigade';
-  return `${faction} ${mun_id} ${kindLabel} ${ordinal}`;
+    const kindLabel = kind === 'militia' ? 'Militia' : 'Brigade';
+    return `${faction} ${mun_id} ${kindLabel} ${ordinal}`;
 }

@@ -9,9 +9,9 @@
  * - Faction-specific headers (FROM/TO per faction)
  */
 
-import type { GameState, FactionId, MunicipalityId } from '../../../state/game_state.js';
+import type { FactionId, GameState, MunicipalityId } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
-import { turnToDateString, getPlayerFaction, getFactionPartyPen, hasFactionParamilitary, controlStatusLabel, FACTION_COLORS, factionCssClass } from './warroom_utils.js';
+import { controlStatusLabel, FACTION_COLORS, factionCssClass, getFactionPartyPen, getPlayerFaction, hasFactionParamilitary, turnToDateString } from './warroom_utils.js';
 
 interface ReportContent {
     factionId: string;
@@ -126,11 +126,11 @@ export class ReportsModal {
 
         if (intel.length === 0) {
             return `CURRENT SITUATION:\n\n` +
-                   `No organizational presence established in any municipality.\n` +
-                   `Intelligence coverage: NONE.\n\n` +
-                   `RECOMMENDATION:\n\n` +
-                   `Begin organizational investment in aligned municipalities immediately.\n` +
-                   `Priority: police loyalty, party penetration.`;
+                `No organizational presence established in any municipality.\n` +
+                `Intelligence coverage: NONE.\n\n` +
+                `RECOMMENDATION:\n\n` +
+                `Begin organizational investment in aligned municipalities immediately.\n` +
+                `Priority: police loyalty, party penetration.`;
         }
 
         const lines: string[] = [];

@@ -44,15 +44,72 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: sets `state.brigade_mun_orders[brigadeId] = [targetMunicipalityId]`, reserializes, sends state via `game-state-updated`.
 
+- `stage-deploy-order` (invoke)
+  - Payload: `{ brigadeId: string }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: stages deploy posture transition by setting `state.brigade_deploy_orders[brigadeId] = "deploy"`, reserializes, sends state via `game-state-updated`.
+
+- `stage-undeploy-order` (invoke)
+  - Payload: `{ brigadeId: string }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: stages undeploy posture transition by setting `state.brigade_deploy_orders[brigadeId] = "undeploy"`, reserializes, sends state via `game-state-updated`.
+
+- `stage-brigade-aor-order` (invoke)
+  - Payload: `{ settlementId: string, fromBrigadeId: string, toBrigadeId: string }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: validates the AoR reshape order (same-faction, contiguity, adjacency) via settlement graph in main; if valid, appends `{ settlement_id, from_brigade, to_brigade }` to `state.brigade_aor_orders`, reserializes, sends state via `game-state-updated`. If invalid, returns `{ ok: false, error }` and does not mutate state.
+
+- `stage-brigade-movement-order` (invoke) — Phase K
+  - Payload: `{ brigadeId: string, targetSettlementIds: string[] }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: validates settlement-level movement order in main process (1–4 contiguous settlements, all same-faction, and reachable from current brigade position through friendly-only path traversal). If valid, sets `state.brigade_movement_orders[brigadeId] = { destination_sids: sorted targetSettlementIds }`, clears `brigade_mun_orders[brigadeId]`, reserializes, sends state via `game-state-updated`. If invalid, returns `{ ok: false, error }` and does not mutate state.
+
+- `stage-brigade-reposition-order` (invoke)
+  - Payload: `{ brigadeId: string, settlementIds: string[] }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: validates reposition order in main process (1–4 contiguous settlements, all same-faction). If valid, sets `state.brigade_reposition_orders[brigadeId] = { settlement_ids: sorted settlementIds }`, reserializes, sends state via `game-state-updated`. If invalid, returns `{ ok: false, error }` and does not mutate state.
+
 - `clear-orders` (invoke)
   - Payload: `{ brigadeId: string }`
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: removes brigade from `brigade_attack_orders`, `brigade_posture_orders`, and `brigade_mun_orders`, reserializes, sends state via `game-state-updated`.
+  - Behavior: removes brigade from `brigade_attack_orders`, `brigade_posture_orders`, `brigade_mun_orders`, `brigade_movement_orders`, `brigade_reposition_orders`, and `brigade_deploy_orders`; also removes any entries in `brigade_aor_orders` where `from_brigade === brigadeId` or `to_brigade === brigadeId`. Reserializes, sends state via `game-state-updated`.
 
 - `stage-corps-stance-order` (invoke)
   - Payload: `{ corpsId: string, stance: string }`
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: sets or updates corps stance (e.g. defensive/balanced/offensive/reorganize) in state (corps_command), reserializes, sends state via `game-state-updated`.
+
+### Read-only query channels (no state mutation)
+
+- `query-movement-range` (invoke)
+  - Payload: `{ brigadeId: string }`
+  - Returns: `{ ok: boolean, error?: string, start_sid?: string | null, reachable_deployed?: string[], reachable_column?: string[] }`
+  - Behavior: computes deterministic movement range preview for a brigade (deployed/combat vs column stance) from current state + graph + terrain. Does not mutate state and does not emit `game-state-updated`.
+
+- `query-movement-path` (invoke)
+  - Payload: `{ brigadeId: string, destinationSid: string }`
+  - Returns: `{ ok: boolean, error?: string, path?: string[], eta_turns?: number, terrain_costs?: number[] }`
+  - Behavior: computes deterministic friendly-path preview and ETA to destination settlement. Read-only.
+
+- `query-combat-estimate` (invoke)
+  - Payload: `{ brigadeId: string, targetSettlementId: string }`
+  - Returns: `{ ok: boolean, error?: string, expected_loss_fraction?: number, win_probability?: number, power_ratio?: number }`
+  - Behavior: reads deterministic attack estimate (`combat_estimate`) for UI preview. Read-only.
+
+- `query-supply-paths` (invoke)
+  - Payload: none
+  - Returns: `{ ok: boolean, error?: string, report?: SupplyReachabilityReport }`
+  - Behavior: computes current supply reachability report from canonical state and adjacency. Read-only.
+
+- `query-corps-sectors` (invoke)
+  - Payload: none
+  - Returns: `{ ok: boolean, error?: string, sectors?: Array<{ corps_id, faction, brigade_ids, settlement_ids }> }`
+  - Behavior: derives deterministic corps-sector settlement coverage from brigade AoR ownership and corps assignment. Read-only.
+
+- `query-battle-events` (invoke)
+  - Payload: none
+  - Returns: `{ ok: boolean, error?: string, turn?: number, events?: Array<{ turn, settlement_id, from, to, mechanism, mun_id }> }`
+  - Behavior: returns normalized and stable-sorted battle/control events for replay markers. Read-only.
 
 - `game-state-updated` (event)
   - Payload: `stateJson: string`
@@ -64,7 +121,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 
 - `open-tactical-map-window` (invoke)
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: opens/focuses a secondary BrowserWindow at `awwv://app/tactical_map.html` (optional tactical map companion window).
+  - Behavior: opens/focuses a secondary BrowserWindow at `awwv://app/map_operational_3d.html` (primary 3D tactical map companion window).
 
 - `get-recruitment-catalog` (invoke)
   - Returns: `{ brigades: Array<{ id, faction, name, home_mun, manpower_cost, capital_cost, default_equipment_class, available_from, mandatory }>, error?: string }`

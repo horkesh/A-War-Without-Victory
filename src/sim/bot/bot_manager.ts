@@ -1,12 +1,12 @@
+import { FrontEdge } from '../../map/front_edges.js';
 import type { GameState } from '../../state/game_state.js';
 import type { BotDecisions, ConsolidationContext } from './bot_interface.js';
-import { SimpleGeneralBot } from './simple_general_bot.js';
-import { FrontEdge } from '../../map/front_edges.js';
 import {
     type BotDifficulty,
     getBotStrategyProfile,
     resolveBotDifficulty
 } from './bot_strategy.js';
+import { SimpleGeneralBot } from './simple_general_bot.js';
 
 interface BotManagerOptions {
     seed?: string;

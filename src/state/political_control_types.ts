@@ -14,5 +14,5 @@ export type ControlSide = 'RBiH' | 'RS' | 'HRHB';
  * Prefer this over raw null checks to avoid accidental falsey semantics.
  */
 export type ControlStatus =
-  | { kind: 'known'; side: ControlSide }
-  | { kind: 'unknown' };
+    | { kind: 'known'; side: ControlSide }
+    | { kind: 'unknown' };

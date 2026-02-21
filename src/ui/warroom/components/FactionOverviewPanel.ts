@@ -7,14 +7,19 @@
  * Phase I+: shows territory, military, authority, population, formations.
  */
 
-import type { GameState, FactionId } from '../../../state/game_state.js';
 import { getPrewarCapital, PREWAR_CAPITAL_INITIAL } from '../../../phase0/capital.js';
+import type { FactionId, GameState } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import {
-    turnToWeekString, getPlayerFaction, getFactionPartyPen,
-    hasFactionParamilitary, hasFactionPresence,
-    FACTION_DISPLAY_NAMES, FACTION_COLORS, factionCssClass,
-    STABILITY_SECURE_MIN, STABILITY_CONTESTED_MIN,
+    FACTION_COLORS,
+    FACTION_DISPLAY_NAMES,
+    factionCssClass,
+    getFactionPartyPen,
+    getPlayerFaction,
+    hasFactionPresence,
+    STABILITY_CONTESTED_MIN,
+    STABILITY_SECURE_MIN,
+    turnToWeekString
 } from './warroom_utils.js';
 
 interface FactionSnapshot {
@@ -283,7 +288,7 @@ export class FactionOverviewPanel {
         const investSection = document.createElement('div');
         investSection.className = 'faction-overview-section';
         const investTotal = snap.investmentsByType.police + snap.investmentsByType.to +
-                           snap.investmentsByType.party + snap.investmentsByType.paramilitary;
+            snap.investmentsByType.party + snap.investmentsByType.paramilitary;
         let investRows = `
             <div class="fo-stat-row"><span class="fo-stat-label">Police Loyalty</span><span class="fo-stat-value">${snap.investmentsByType.police}</span></div>
             <div class="fo-stat-row"><span class="fo-stat-label">Party Penetration</span><span class="fo-stat-value">${snap.investmentsByType.party}</span></div>
@@ -487,7 +492,7 @@ export class FactionOverviewPanel {
     /**
      * Create a quadrant div (Phase I+)
      */
-    private createQuadrant(title: string, stats: Array<{label: string; value: string}>): HTMLElement {
+    private createQuadrant(title: string, stats: Array<{ label: string; value: string }>): HTMLElement {
         const quad = document.createElement('div');
         quad.className = 'quadrant';
 

@@ -9,7 +9,7 @@
  * enable_legitimacy_authority_cap on scenario meta (default: ON).
  */
 
-import type { GameState, FactionId } from '../../state/game_state.js';
+import type { FactionId, GameState } from '../../state/game_state.js';
 import { getFactionLegitimacyAverages } from '../../state/legitimacy_utils.js';
 
 /** When average legitimacy falls below this threshold, authority is capped at CONTESTED_AUTHORITY_CEILING. */
@@ -43,7 +43,7 @@ const DECLARED_ongoing_PER_TURN = 0.8;
 const EXTERNAL_SUPPORT_PER_TURN = 1;
 
 export interface AuthorityDegradationReport {
-  changes: Array<{ faction_id: FactionId; authority_before: number; authority_after: number; delta: number }>;
+    changes: Array<{ faction_id: FactionId; authority_before: number; authority_after: number; delta: number }>;
 }
 
 /**
@@ -52,62 +52,62 @@ export interface AuthorityDegradationReport {
  * Municipality lost/gain penalties require prior-turn snapshot; Step 5 applies only declaration, JNA, and recognition ongoing.
  */
 export function runAuthorityDegradation(state: GameState): AuthorityDegradationReport {
-  const report: AuthorityDegradationReport = { changes: [] };
-  const factions = state.factions ?? [];
-  const rbih = factions.find((f) => f.id === 'RBiH');
-  const rs = factions.find((f) => f.id === 'RS');
-  const hrhb = factions.find((f) => f.id === 'HRHB');
+    const report: AuthorityDegradationReport = { changes: [] };
+    const factions = state.factions ?? [];
+    const rbih = factions.find((f) => f.id === 'RBiH');
+    const rs = factions.find((f) => f.id === 'RS');
+    const hrhb = factions.find((f) => f.id === 'HRHB');
 
-  const rsDeclared = rs?.declared === true;
-  const hrhbDeclared = hrhb?.declared === true;
-  const jnaActive = state.phase_i_jna?.transition_begun === true;
+    const rsDeclared = rs?.declared === true;
+    const hrhbDeclared = hrhb?.declared === true;
+    const jnaActive = state.phase_i_jna?.transition_begun === true;
 
-  // Legitimacy-based authority capping (Engine Invariants §16.A):
-  // When a faction's average legitimacy is below threshold, authority
-  // cannot consolidate above the Contested ceiling.
-  const legitimacyAverages = getFactionLegitimacyAverages(state);
+    // Legitimacy-based authority capping (Engine Invariants §16.A):
+    // When a faction's average legitimacy is below threshold, authority
+    // cannot consolidate above the Contested ceiling.
+    const legitimacyAverages = getFactionLegitimacyAverages(state);
 
-  if (rbih) {
-    const before = Math.max(0, Math.min(100, rbih.profile.authority ?? 50));
-    let delta = 0;
-    if (rsDeclared) delta -= RS_DECLARED_ongoing_PER_TURN;
-    if (hrhbDeclared) delta -= HRHB_DECLARED_ongoing_PER_TURN;
-    if (jnaActive) delta -= JNA_OPPOSITION_PER_TURN;
-    delta += INTERNATIONAL_RECOGNITION_PER_TURN;
-    delta += SARAJEVO_DEFENSE_PER_TURN;
-    let after = before + delta;
-    // Apply legitimacy cap: low legitimacy limits authority to Contested
-    const rbihLegitimacy = (legitimacyAverages['RBiH'] ?? 0.5) * 100;
-    const effectiveCap = rbihLegitimacy < LEGITIMACY_LOW_THRESHOLD
-      ? Math.min(RBIH_AUTHORITY_CAP, CONTESTED_AUTHORITY_CEILING)
-      : RBIH_AUTHORITY_CAP;
-    after = Math.max(RBIH_AUTHORITY_FLOOR, Math.min(effectiveCap, after));
-    rbih.profile.authority = Math.round(after * 10) / 10;
-    report.changes.push({ faction_id: 'RBiH', authority_before: before, authority_after: rbih.profile.authority, delta: after - before });
-  }
+    if (rbih) {
+        const before = Math.max(0, Math.min(100, rbih.profile.authority ?? 50));
+        let delta = 0;
+        if (rsDeclared) delta -= RS_DECLARED_ongoing_PER_TURN;
+        if (hrhbDeclared) delta -= HRHB_DECLARED_ongoing_PER_TURN;
+        if (jnaActive) delta -= JNA_OPPOSITION_PER_TURN;
+        delta += INTERNATIONAL_RECOGNITION_PER_TURN;
+        delta += SARAJEVO_DEFENSE_PER_TURN;
+        let after = before + delta;
+        // Apply legitimacy cap: low legitimacy limits authority to Contested
+        const rbihLegitimacy = (legitimacyAverages['RBiH'] ?? 0.5) * 100;
+        const effectiveCap = rbihLegitimacy < LEGITIMACY_LOW_THRESHOLD
+            ? Math.min(RBIH_AUTHORITY_CAP, CONTESTED_AUTHORITY_CEILING)
+            : RBIH_AUTHORITY_CAP;
+        after = Math.max(RBIH_AUTHORITY_FLOOR, Math.min(effectiveCap, after));
+        rbih.profile.authority = Math.round(after * 10) / 10;
+        report.changes.push({ faction_id: 'RBiH', authority_before: before, authority_after: rbih.profile.authority, delta: after - before });
+    }
 
-  for (const faction of factions) {
-    if (faction.id === 'RBiH') continue;
-    const before = Math.max(0, Math.min(100, faction.profile.authority ?? 50));
-    let delta = 0;
-    if (faction.declared) delta += DECLARED_ongoing_PER_TURN;
-    delta += EXTERNAL_SUPPORT_PER_TURN;
-    const baseCap = faction.id === 'RS' ? RS_AUTHORITY_CAP : faction.id === 'HRHB' ? HRHB_AUTHORITY_CAP : 100;
-    // Apply legitimacy cap: low legitimacy limits authority to Contested
-    const factionLegitimacy = (legitimacyAverages[faction.id] ?? 0.5) * 100;
-    const cap = factionLegitimacy < LEGITIMACY_LOW_THRESHOLD
-      ? Math.min(baseCap, CONTESTED_AUTHORITY_CEILING)
-      : baseCap;
-    let after = before + delta;
-    after = Math.max(0, Math.min(cap, after));
-    faction.profile.authority = Math.round(after * 10) / 10;
-    report.changes.push({
-      faction_id: faction.id as FactionId,
-      authority_before: before,
-      authority_after: faction.profile.authority,
-      delta: after - before
-    });
-  }
+    for (const faction of factions) {
+        if (faction.id === 'RBiH') continue;
+        const before = Math.max(0, Math.min(100, faction.profile.authority ?? 50));
+        let delta = 0;
+        if (faction.declared) delta += DECLARED_ongoing_PER_TURN;
+        delta += EXTERNAL_SUPPORT_PER_TURN;
+        const baseCap = faction.id === 'RS' ? RS_AUTHORITY_CAP : faction.id === 'HRHB' ? HRHB_AUTHORITY_CAP : 100;
+        // Apply legitimacy cap: low legitimacy limits authority to Contested
+        const factionLegitimacy = (legitimacyAverages[faction.id] ?? 0.5) * 100;
+        const cap = factionLegitimacy < LEGITIMACY_LOW_THRESHOLD
+            ? Math.min(baseCap, CONTESTED_AUTHORITY_CEILING)
+            : baseCap;
+        let after = before + delta;
+        after = Math.max(0, Math.min(cap, after));
+        faction.profile.authority = Math.round(after * 10) / 10;
+        report.changes.push({
+            faction_id: faction.id as FactionId,
+            authority_before: before,
+            authority_after: faction.profile.authority,
+            delta: after - before
+        });
+    }
 
-  return report;
+    return report;
 }

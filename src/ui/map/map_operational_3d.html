@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operational Map — 2.5D — AWWV</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0d0d1a; }
+    #operational-3d-container { width: 100%; height: 100%; }
+    #message {
+      position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      padding: 1.5rem 2rem; background: rgba(0,0,0,0.85); color: #00e878;
+      font-family: 'IBM Plex Mono', monospace; font-size: 14px; white-space: pre-wrap;
+      border: 1px solid #00e878; border-radius: 8px; max-width: 90%; display: none;
+    }
+    #message.visible { display: block; }
+  </style>
+</head>
+<body>
+  <div id="operational-3d-container"></div>
+  <div id="message" aria-live="polite"></div>
+  <script>
+    // Embedded mode: inherit desktop bridge from warroom iframe parent.
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('embedded') === '1' && window.parent && window.parent !== window) {
+        try {
+          var parentBridge = window.parent.awwv;
+          if (parentBridge) {
+            var proxy = {};
+            var keys = Object.keys(parentBridge);
+            for (var i = 0; i < keys.length; i++) proxy[keys[i]] = parentBridge[keys[i]];
+            proxy.focusWarroom = function() {
+              window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*');
+              return Promise.resolve({ ok: true });
+            };
+            window.awwv = proxy;
+          }
+        } catch (e) { /* ignored */ }
+      }
+    })();
+  </script>
+  <script type="module" src="./map_operational_3d.ts"></script>
+</body>
+</html>

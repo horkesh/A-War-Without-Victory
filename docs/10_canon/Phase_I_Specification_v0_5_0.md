@@ -391,6 +391,8 @@ Displaced population flows to:
 2. **Distant friendly enclaves** (20% of displaced)
 3. **Refugee camps / out of play** (10% of displaced)
 
+**Receiving capacity:** Each receiving municipality has a cap equal to pre-war population × 1.5 (150%); Sarajevo-area municipalities use × 1.1 (110%) due to siege. When a receiver is at cap, overflow is routed to the next-closest urban centers in deterministic order.
+
 **Receiving Municipality Effects:**
 ```yaml
 receiving_effects:

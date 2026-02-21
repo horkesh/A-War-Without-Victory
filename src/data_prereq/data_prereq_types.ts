@@ -3,14 +3,14 @@
  */
 
 export interface DataPrereq {
-  id: string;
-  description: string;
-  /** Paths relative to repo root. */
-  required_paths: string[];
-  remediation: {
-    /** Exact commands the user should run. */
-    commands: string[];
-    /** Short bullet points; no timestamps. */
-    notes?: string[];
-  };
+    id: string;
+    description: string;
+    /** Paths relative to repo root. */
+    required_paths: string[];
+    remediation: {
+        /** Exact commands the user should run. */
+        commands: string[];
+        /** Short bullet points; no timestamps. */
+        notes?: string[];
+    };
 }

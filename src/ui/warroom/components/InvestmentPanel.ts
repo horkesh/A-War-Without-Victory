@@ -7,14 +7,14 @@
  * Wires to Phase0DirectiveState for staging/unstaging investments.
  */
 
-import type { GameState, FactionId, MunicipalityId, OrganizationalPenetration } from '../../../state/game_state.js';
+import { getPrewarCapital, PREWAR_CAPITAL_INITIAL } from '../../../phase0/capital.js';
 import type { InvestmentType } from '../../../phase0/investment.js';
 import {
+    getInvestmentCostWithCoordination,
     getInvestmentTypesForFaction,
-    isCoordinationEligibleFaction,
-    getInvestmentCostWithCoordination
+    isCoordinationEligibleFaction
 } from '../../../phase0/investment.js';
-import { getPrewarCapital, PREWAR_CAPITAL_INITIAL } from '../../../phase0/capital.js';
+import type { FactionId, GameState, MunicipalityId, OrganizationalPenetration } from '../../../state/game_state.js';
 import type { Phase0DirectiveState, StagedInvestment } from './Phase0DirectiveState.js';
 
 /** Municipality metadata for the panel. */

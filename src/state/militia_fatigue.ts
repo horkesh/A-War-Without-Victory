@@ -1,38 +1,38 @@
-import type { GameState, MunicipalityId, FactionId, MilitiaPoolState } from './game_state.js';
 import type { SettlementRecord } from '../map/settlements.js';
+import type { FactionId, GameState, MilitiaPoolState, MunicipalityId } from './game_state.js';
 import { computeSupplyReachability } from './supply_reachability.js';
 
-import { buildAdjacencyMap, type AdjacencyMap } from '../map/adjacency_map.js';
+import { buildAdjacencyMap } from '../map/adjacency_map.js';
 import type { EdgeRecord } from '../map/settlements.js';
 
 /**
  * Per-municipality militia pool fatigue update record.
  */
 export interface MilitiaFatigueRecord {
-  mun_id: MunicipalityId;
-  faction_id: FactionId | null;
-  supplied: boolean;
-  fatigue_before: number;
-  fatigue_after: number;
+    mun_id: MunicipalityId;
+    faction_id: FactionId | null;
+    supplied: boolean;
+    fatigue_before: number;
+    fatigue_after: number;
 }
 
 /**
  * Per-faction militia fatigue totals.
  */
 export interface MilitiaFatigueFactionTotals {
-  faction_id: FactionId | 'null';
-  pools_total: number;
-  pools_supplied: number;
-  pools_unsupplied: number;
-  total_fatigue: number;
+    faction_id: FactionId | 'null';
+    pools_total: number;
+    pools_supplied: number;
+    pools_unsupplied: number;
+    total_fatigue: number;
 }
 
 /**
  * Militia fatigue step report.
  */
 export interface MilitiaFatigueStepReport {
-  by_municipality: MilitiaFatigueRecord[];
-  by_faction: MilitiaFatigueFactionTotals[];
+    by_municipality: MilitiaFatigueRecord[];
+    by_faction: MilitiaFatigueFactionTotals[];
 }
 
 /**
@@ -45,30 +45,30 @@ export interface MilitiaFatigueStepReport {
  * Deterministic: iterate municipalities and settlements in sorted order.
  */
 function isMunicipalitySupplied(
-  factionId: FactionId,
-  munId: MunicipalityId,
-  settlements: Map<string, SettlementRecord>,
-  reachableSettlements: Set<string>
+    factionId: FactionId,
+    munId: MunicipalityId,
+    settlements: Map<string, SettlementRecord>,
+    reachableSettlements: Set<string>
 ): boolean {
-  // Find all settlements in this municipality
-  const munSettlements: string[] = [];
-  for (const [sid, settlement] of settlements.entries()) {
-    if ((settlement.mun1990_id ?? settlement.mun_code) === munId) {
-      munSettlements.push(sid);
+    // Find all settlements in this municipality
+    const munSettlements: string[] = [];
+    for (const [sid, settlement] of settlements.entries()) {
+        if ((settlement.mun1990_id ?? settlement.mun_code) === munId) {
+            munSettlements.push(sid);
+        }
     }
-  }
 
-  // Sort deterministically
-  munSettlements.sort();
+    // Sort deterministically
+    munSettlements.sort();
 
-  // Check if at least one settlement in the municipality is reachable
-  for (const sid of munSettlements) {
-    if (reachableSettlements.has(sid)) {
-      return true;
+    // Check if at least one settlement in the municipality is reachable
+    for (const sid of munSettlements) {
+        if (reachableSettlements.has(sid)) {
+            return true;
+        }
     }
-  }
 
-  return false;
+    return false;
 }
 
 /**
@@ -83,108 +83,108 @@ function isMunicipalitySupplied(
  *     - DO NOT use floats or proportional allocations unless fixed-point and clearly auditable
  */
 export function updateMilitiaFatigue(
-  state: GameState,
-  settlements: Map<string, SettlementRecord>,
-  settlementEdges: EdgeRecord[],
-  exhaustionDeltas: Map<FactionId, number> // faction_id -> exhaustion delta this turn
+    state: GameState,
+    settlements: Map<string, SettlementRecord>,
+    settlementEdges: EdgeRecord[],
+    exhaustionDeltas: Map<FactionId, number> // faction_id -> exhaustion delta this turn
 ): MilitiaFatigueStepReport {
-  const militiaPools = state.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
-  if (!militiaPools || typeof militiaPools !== 'object') {
-    return { by_municipality: [], by_faction: [] };
-  }
-
-  // Compute supply reachability once
-  const adjacencyMap = buildAdjacencyMap(settlementEdges);
-  const supplyReport = computeSupplyReachability(state, adjacencyMap);
-
-  // Build reachable sets by faction
-  const reachableByFaction = new Map<FactionId, Set<string>>();
-  for (const f of supplyReport.factions) {
-    reachableByFaction.set(f.faction_id, new Set(f.reachable_controlled));
-  }
-
-  const records: MilitiaFatigueRecord[] = [];
-  const factionTotals = new Map<FactionId | 'null', { pools_total: number; pools_supplied: number; pools_unsupplied: number; total_fatigue: number }>();
-
-  const poolKeys = Object.keys(militiaPools).sort(); // deterministic ordering
-  for (const key of poolKeys) {
-    const pool = militiaPools[key];
-    if (!pool || typeof pool !== 'object') continue;
-
-    const factionId = pool.faction;
-    if (factionId === null || factionId === undefined) continue; // only process pools with faction
-
-    if (typeof factionId !== 'string') continue; // defensive
-
-    const munId = typeof pool.mun_id === 'string' ? pool.mun_id : key; // support composite key "mun_id:faction"
-
-    // Ensure fatigue field exists (default to 0 if undefined or invalid)
-    const currentFatigue = pool.fatigue;
-    const fatigueBefore: number = (typeof currentFatigue === 'number' && Number.isInteger(currentFatigue) && currentFatigue >= 0)
-      ? currentFatigue
-      : 0;
-
-    const reachableSettlements = reachableByFaction.get(factionId) ?? new Set<string>();
-    const supplied = isMunicipalitySupplied(factionId, munId, settlements, reachableSettlements);
-
-    let fatigueAfter: number = fatigueBefore;
-
-    // If unsupplied: fatigue += 1 per turn
-    if (!supplied) {
-      fatigueAfter += 1;
+    const militiaPools = state.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
+    if (!militiaPools || typeof militiaPools !== 'object') {
+        return { by_municipality: [], by_faction: [] };
     }
 
-    // Additionally, if faction exhaustion increased this turn: add +1 to each pool with that faction
-    const exhaustionDelta = exhaustionDeltas.get(factionId) ?? 0;
-    if (exhaustionDelta > 0) {
-      fatigueAfter += 1;
+    // Compute supply reachability once
+    const adjacencyMap = buildAdjacencyMap(settlementEdges);
+    const supplyReport = computeSupplyReachability(state, adjacencyMap);
+
+    // Build reachable sets by faction
+    const reachableByFaction = new Map<FactionId, Set<string>>();
+    for (const f of supplyReport.factions) {
+        reachableByFaction.set(f.faction_id, new Set(f.reachable_controlled));
     }
 
-    pool.fatigue = fatigueAfter;
+    const records: MilitiaFatigueRecord[] = [];
+    const factionTotals = new Map<FactionId | 'null', { pools_total: number; pools_supplied: number; pools_unsupplied: number; total_fatigue: number }>();
 
-    records.push({
-      mun_id: munId,
-      faction_id: factionId,
-      supplied,
-      fatigue_before: fatigueBefore,
-      fatigue_after: fatigueAfter
+    const poolKeys = Object.keys(militiaPools).sort(); // deterministic ordering
+    for (const key of poolKeys) {
+        const pool = militiaPools[key];
+        if (!pool || typeof pool !== 'object') continue;
+
+        const factionId = pool.faction;
+        if (factionId === null || factionId === undefined) continue; // only process pools with faction
+
+        if (typeof factionId !== 'string') continue; // defensive
+
+        const munId = typeof pool.mun_id === 'string' ? pool.mun_id : key; // support composite key "mun_id:faction"
+
+        // Ensure fatigue field exists (default to 0 if undefined or invalid)
+        const currentFatigue = pool.fatigue;
+        const fatigueBefore: number = (typeof currentFatigue === 'number' && Number.isInteger(currentFatigue) && currentFatigue >= 0)
+            ? currentFatigue
+            : 0;
+
+        const reachableSettlements = reachableByFaction.get(factionId) ?? new Set<string>();
+        const supplied = isMunicipalitySupplied(factionId, munId, settlements, reachableSettlements);
+
+        let fatigueAfter: number = fatigueBefore;
+
+        // If unsupplied: fatigue += 1 per turn
+        if (!supplied) {
+            fatigueAfter += 1;
+        }
+
+        // Additionally, if faction exhaustion increased this turn: add +1 to each pool with that faction
+        const exhaustionDelta = exhaustionDeltas.get(factionId) ?? 0;
+        if (exhaustionDelta > 0) {
+            fatigueAfter += 1;
+        }
+
+        pool.fatigue = fatigueAfter;
+
+        records.push({
+            mun_id: munId,
+            faction_id: factionId,
+            supplied,
+            fatigue_before: fatigueBefore,
+            fatigue_after: fatigueAfter
+        });
+
+        // Update faction totals
+        const totals = factionTotals.get(factionId) ?? { pools_total: 0, pools_supplied: 0, pools_unsupplied: 0, total_fatigue: 0 };
+        totals.pools_total += 1;
+        if (supplied) {
+            totals.pools_supplied += 1;
+        } else {
+            totals.pools_unsupplied += 1;
+        }
+        totals.total_fatigue += fatigueAfter;
+        factionTotals.set(factionId, totals);
+    }
+
+    // Build sorted faction totals array
+    const byFaction: MilitiaFatigueFactionTotals[] = Array.from(factionTotals.entries())
+        .sort((a, b) => {
+            if (a[0] === 'null' && b[0] !== 'null') return 1;
+            if (a[0] !== 'null' && b[0] === 'null') return -1;
+            return a[0].localeCompare(b[0]);
+        })
+        .map(([faction_id, totals]) => ({
+            faction_id: faction_id === 'null' ? 'null' : faction_id,
+            pools_total: totals.pools_total,
+            pools_supplied: totals.pools_supplied,
+            pools_unsupplied: totals.pools_unsupplied,
+            total_fatigue: totals.total_fatigue
+        }));
+
+    // Sort records deterministically
+    records.sort((a, b) => {
+        const mc = a.mun_id.localeCompare(b.mun_id);
+        if (mc !== 0) return mc;
+        const fa = a.faction_id ?? '';
+        const fb = b.faction_id ?? '';
+        return fa.localeCompare(fb);
     });
 
-    // Update faction totals
-    const totals = factionTotals.get(factionId) ?? { pools_total: 0, pools_supplied: 0, pools_unsupplied: 0, total_fatigue: 0 };
-    totals.pools_total += 1;
-    if (supplied) {
-      totals.pools_supplied += 1;
-    } else {
-      totals.pools_unsupplied += 1;
-    }
-    totals.total_fatigue += fatigueAfter;
-    factionTotals.set(factionId, totals);
-  }
-
-  // Build sorted faction totals array
-  const byFaction: MilitiaFatigueFactionTotals[] = Array.from(factionTotals.entries())
-    .sort((a, b) => {
-      if (a[0] === 'null' && b[0] !== 'null') return 1;
-      if (a[0] !== 'null' && b[0] === 'null') return -1;
-      return a[0].localeCompare(b[0]);
-    })
-    .map(([faction_id, totals]) => ({
-      faction_id: faction_id === 'null' ? 'null' : faction_id,
-      pools_total: totals.pools_total,
-      pools_supplied: totals.pools_supplied,
-      pools_unsupplied: totals.pools_unsupplied,
-      total_fatigue: totals.total_fatigue
-    }));
-
-  // Sort records deterministically
-  records.sort((a, b) => {
-    const mc = a.mun_id.localeCompare(b.mun_id);
-    if (mc !== 0) return mc;
-    const fa = a.faction_id ?? '';
-    const fb = b.faction_id ?? '';
-    return fa.localeCompare(fb);
-  });
-
-  return { by_municipality: records, by_faction: byFaction };
+    return { by_municipality: records, by_faction: byFaction };
 }

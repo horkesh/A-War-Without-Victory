@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>TACTICAL COMMAND MAP — A War Without Victory</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d0d1a;
+      overflow: hidden;
+      font-family: 'Courier New', Courier, monospace;
+      color: #00ff88;
+    }
+
+    #canvas-container {
+      position: fixed;
+      inset: 0;
+    }
+
+    canvas { display: block; }
+
+    /* ── HUD panels ── */
+    .panel {
+      position: fixed;
+      background: rgba(12,12,26,0.85);
+      border: 1px solid #2a2a3e;
+      padding: 10px 14px;
+      pointer-events: none;
+    }
+
+    /* Top-left: title */
+    #panel-title {
+      top: 16px; left: 16px;
+      min-width: 260px;
+      border-left: 3px solid #00ff88;
+    }
+    #panel-title .header {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #00ff88;
+      text-transform: uppercase;
+    }
+    #panel-title .subheader {
+      font-size: 9px;
+      color: #8a8aaa;
+      margin-top: 2px;
+      letter-spacing: 1px;
+    }
+    #panel-title .turn-info {
+      margin-top: 8px;
+      font-size: 10px;
+      color: #ffab00;
+      letter-spacing: 2px;
+    }
+    #panel-title .classification {
+      margin-top: 6px;
+      font-size: 8px;
+      color: #ff4444;
+      letter-spacing: 3px;
+      border-top: 1px solid #2a2a3e;
+      padding-top: 5px;
+    }
+
+    /* Bottom-left: legend */
+    #panel-legend {
+      bottom: 16px; left: 16px;
+      min-width: 200px;
+    }
+    #panel-legend .legend-title {
+      font-size: 9px;
+      color: #8a8aaa;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #2a2a3e;
+      padding-bottom: 4px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+      font-size: 10px;
+      color: #c0c0d0;
+    }
+    .legend-swatch {
+      width: 12px; height: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      flex-shrink: 0;
+    }
+
+    /* Top-right: status */
+    #panel-status {
+      top: 16px; right: 16px;
+      min-width: 220px;
+      text-align: right;
+      border-right: 3px solid #ffab00;
+    }
+    #panel-status .status-title {
+      font-size: 9px;
+      color: #8a8aaa;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      margin: 3px 0;
+      color: #c0c0d0;
+    }
+    .status-val {
+      color: #00ff88;
+      font-weight: bold;
+    }
+    .status-val.warn { color: #ffab00; }
+    .status-val.danger { color: #ff4444; }
+
+    /* Bottom-right: formation list */
+    #panel-formations {
+      bottom: 130px; right: 16px;
+      min-width: 230px;
+      max-height: 240px;
+      overflow-y: auto;
+      pointer-events: auto;
+    }
+    #panel-formations .formations-title {
+      font-size: 9px;
+      color: #8a8aaa;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #2a2a3e;
+      padding-bottom: 4px;
+    }
+    .formation-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 5px 0;
+      font-size: 9px;
+    }
+    .formation-badge {
+      width: 4px;
+      height: 22px;
+      flex-shrink: 0;
+      border-radius: 1px;
+    }
+    .formation-info { flex: 1; }
+    .formation-name { color: #00ff88; font-size: 9px; letter-spacing: 1px; }
+    .formation-detail { color: #6a6a8a; font-size: 8px; margin-top: 1px; }
+    .formation-posture { font-size: 8px; margin-left: auto; letter-spacing: 1px; }
+    .posture-defend { color: #4a8aff; }
+    .posture-attack { color: #ff4444; }
+    .posture-probe  { color: #ffab00; }
+
+    /* Minimap */
+    #minimap-container {
+      position: fixed;
+      bottom: 16px; right: 16px;
+      background: rgba(12,12,26,0.9);
+      border: 1px solid #2a2a3e;
+      padding: 6px;
+    }
+    #minimap-label {
+      font-size: 8px;
+      color: #4a4a6a;
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    #minimap { display: block; }
+
+    /* Reset button */
+    #btn-reset {
+      position: fixed;
+      top: 56px; right: 16px;
+      background: rgba(12,12,26,0.9);
+      border: 1px solid #2a2a3e;
+      color: #00ff88;
+      font-family: 'Courier New', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      padding: 6px 12px;
+      cursor: pointer;
+      pointer-events: auto;
+      text-transform: uppercase;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    #btn-reset:hover {
+      border-color: #00ff88;
+      background: rgba(0,255,136,0.08);
+    }
+
+    /* Tooltip */
+    #tooltip {
+      position: fixed;
+      background: rgba(8,8,20,0.95);
+      border: 1px solid #00ff88;
+      border-left: 3px solid #00ff88;
+      padding: 8px 12px;
+      font-size: 10px;
+      pointer-events: none;
+      display: none;
+      z-index: 100;
+      min-width: 180px;
+    }
+    #tooltip .tt-name { color: #00ff88; font-size: 11px; letter-spacing: 1px; margin-bottom: 4px; }
+    #tooltip .tt-row  { color: #8a8aaa; margin: 2px 0; }
+    #tooltip .tt-val  { color: #c0c0d0; }
+
+    /* Scrollbar */
+    #panel-formations::-webkit-scrollbar { width: 4px; }
+    #panel-formations::-webkit-scrollbar-track { background: #0d0d1a; }
+    #panel-formations::-webkit-scrollbar-thumb { background: #2a2a3e; border-radius: 2px; }
+
+    /* Scanline overlay for atmosphere */
+    #scanlines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 200;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 2px,
+        rgba(0,0,0,0.04) 2px,
+        rgba(0,0,0,0.04) 4px
+      );
+    }
+
+    /* Pulsing Srebrenica dot indicator */
+    @keyframes pulse-red {
+      0%   { opacity: 1; }
+      50%  { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
+    .enclave-label { animation: pulse-red 1.8s infinite; }
+  </style>
+</head>
+<body>
+
+<!-- Canvas -->
+<div id="canvas-container"></div>
+
+<!-- Scanline CRT overlay -->
+<div id="scanlines"></div>
+
+<!-- TOP LEFT: Title panel -->
+<div class="panel" id="panel-title">
+  <div class="header">Tactical Command Map</div>
+  <div class="subheader">Republic of Bosnia &amp; Herzegovina — Theater</div>
+  <div class="turn-info">Turn 24 &mdash; Week 24 &mdash; June 1993</div>
+  <div class="classification">&#9632; Classification: Secret &#9632;</div>
+</div>
+
+<!-- BOTTOM LEFT: Legend -->
+<div class="panel" id="panel-legend">
+  <div class="legend-title">Control Zones</div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:rgba(180,50,50,0.8);"></div>
+    RS &mdash; Republika Srpska (VRS)
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:rgba(55,140,75,0.8);"></div>
+    RBiH &mdash; Armija BiH
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:rgba(50,110,170,0.8);"></div>
+    HRHB &mdash; Hrvatska Vojska (HVO)
+  </div>
+  <div class="legend-item" style="margin-top:8px; border-top:1px solid #2a2a3e; padding-top:8px;">
+    <div style="width:24px;height:2px;background:#cc2222;border-top:1px solid #ff4444; flex-shrink:0;"></div>
+    Active Front Line
+  </div>
+  <div class="legend-item">
+    <div style="width:12px;height:12px;border-radius:50%;background:#00ff88;opacity:0.9;flex-shrink:0;"></div>
+    City / Populated Centre
+  </div>
+</div>
+
+<!-- TOP RIGHT: Status panel -->
+<div class="panel" id="panel-status">
+  <div class="status-title">Operational Status — T24</div>
+  <div class="status-row"><span>Active Fronts</span>     <span class="status-val">12</span></div>
+  <div class="status-row"><span>Battles This Turn</span> <span class="status-val warn">3</span></div>
+  <div class="status-row"><span>Encircled Fmns</span>    <span class="status-val danger">2</span></div>
+  <div class="status-row"><span>Cas. This Week</span>    <span class="status-val danger">847</span></div>
+  <div class="status-row" style="margin-top:8px; border-top:1px solid #2a2a3e; padding-top:8px;">
+    <span>RS Front Strength</span>  <span class="status-val">68%</span></div>
+  <div class="status-row"><span>RBiH Front Strength</span><span class="status-val warn">41%</span></div>
+  <div class="status-row"><span>HRHB Front Strength</span><span class="status-val warn">55%</span></div>
+</div>
+
+<!-- Reset button -->
+<button id="btn-reset" style="pointer-events:auto;">&#8635; Reset View</button>
+
+<!-- BOTTOM RIGHT: Formation list -->
+<div class="panel" id="panel-formations">
+  <div class="formations-title">Formation Status</div>
+
+  <div class="formation-row">
+    <div class="formation-badge" style="background:rgb(180,50,50);"></div>
+    <div class="formation-info">
+      <div class="formation-name">1. KRAJISKI KORPUS</div>
+      <div class="formation-detail">12,400 pers &mdash; Banja Luka</div>
+    </div>
+    <span class="formation-posture posture-defend">DEFEND</span>
+  </div>
+
+  <div class="formation-row">
+    <div class="formation-badge" style="background:rgb(180,50,50);"></div>
+    <div class="formation-info">
+      <div class="formation-name">2. SANSKI KORPUS</div>
+      <div class="formation-detail">8,100 pers &mdash; East Bosnia</div>
+    </div>
+    <span class="formation-posture posture-defend">DEFEND</span>
+  </div>
+
+  <div class="formation-row">
+    <div class="formation-badge" style="background:rgb(180,50,50);"></div>
+    <div class="formation-info">
+      <div class="formation-name">EAST BOSNIA OG</div>
+      <div class="formation-detail">4,200 pers &mdash; Drina Corridor</div>
+    </div>
+    <span class="formation-posture posture-attack">ATTACK</span>
+  </div>
+
+  <div class="formation-row">
+    <div class="formation-badge" style="background:rgb(55,140,75);"></div>
+    <div class="formation-info">
+      <div class="formation-name">1. KORPUS ARBiH</div>
+      <div class="formation-detail">9,800 pers &mdash; Sarajevo</div>
+    </div>
+    <span class="formation-posture posture-defend">DEFEND</span>
+  </div>
+
+  <div class="formation-row">
+    <div class="formation-badge" style="background:rgb(55,140,75);"></div>
+    <div class="formation-info">
+      <div class="formation-name">2. KORPUS ARBiH</div>
+      <div class="formation-detail">5,600 pers &mdash; Tuzla</div>
+    </div>
+    <span class="formation-posture posture-probe">PROBE</span>
+  </div>
+
+  <div class="formation-row">
+    <div class="formation-badge" style="background:rgb(55,140,75);"></div>
+    <div class="formation-info">
+      <div class="formation-name">3. KORPUS ARBiH</div>
+      <div class="formation-detail">3,200 pers &mdash; Bihac</div>
+    </div>
+    <span class="formation-posture posture-defend">DEFEND</span>
+  </div>
+
+  <div class="formation-row">
+    <div class="formation-badge" style="background:rgb(50,110,170);"></div>
+    <div class="formation-info">
+      <div class="formation-name">HVO HERCEG-BOSNA</div>
+      <div class="formation-detail">6,700 pers &mdash; Mostar</div>
+    </div>
+    <span class="formation-posture posture-defend">DEFEND</span>
+  </div>
+
+  <div class="formation-row">
+    <div class="formation-badge" style="background:rgb(50,110,170);"></div>
+    <div class="formation-info">
+      <div class="formation-name">HVO BOSNA</div>
+      <div class="formation-detail">3,100 pers &mdash; C. Bosnia</div>
+    </div>
+    <span class="formation-posture posture-defend">DEFEND</span>
+  </div>
+</div>
+
+<!-- MINIMAP -->
+<div id="minimap-container">
+  <div id="minimap-label">Overview</div>
+  <canvas id="minimap" width="110" height="90"></canvas>
+</div>
+
+<!-- Tooltip -->
+<div id="tooltip">
+  <div class="tt-name" id="tt-name">—</div>
+  <div class="tt-row">Strength: <span class="tt-val" id="tt-strength">—</span></div>
+  <div class="tt-row">Posture: <span class="tt-val" id="tt-posture">—</span></div>
+  <div class="tt-row">Location: <span class="tt-val" id="tt-location">—</span></div>
+  <div class="tt-row">Personnel: <span class="tt-val" id="tt-personnel">—</span></div>
+</div>
+
+<script type="module">
+// ════════════════════════════════════════════════════════════════════
+//  A War Without Victory — 2.5D Tactical Map Mockup
+//  Three.js r170 (ES Module CDN)
+// ════════════════════════════════════════════════════════════════════
+
+import * as THREE from 'https://unpkg.com/three@0.170.0/build/three.module.js';
+
+// ── Constants ──────────────────────────────────────────────────────
+const W = window.innerWidth;
+const H = window.innerHeight;
+const TERRAIN_SIZE   = 200;
+const TERRAIN_SEGS   = 100;
+const DEFAULT_CAM_POS = new THREE.Vector3(0, 120, 80);
+const DEFAULT_CAM_TGT = new THREE.Vector3(0, 0, 0);
+
+// Faction colours
+const COL_RS   = new THREE.Color(0.70, 0.20, 0.20);
+const COL_RBIH = new THREE.Color(0.22, 0.55, 0.29);
+const COL_HRHB = new THREE.Color(0.20, 0.43, 0.67);
+
+// ── Scene setup ───────────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(W, H);
+renderer.setClearColor(0x0d0d1a);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0d0d1a, 0.006);
+
+const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 1000);
+camera.position.copy(DEFAULT_CAM_POS);
+camera.lookAt(DEFAULT_CAM_TGT);
+
+// ── Lighting ──────────────────────────────────────────────────────
+const ambientLight = new THREE.AmbientLight(0x1a1a3a, 1.2);
+scene.add(ambientLight);
+
+const sunLight = new THREE.DirectionalLight(0xc8b090, 1.8);
+sunLight.position.set(-60, 80, -40);   // northwest, low angle
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.width  = 2048;
+sunLight.shadow.mapSize.height = 2048;
+sunLight.shadow.camera.near = 1;
+sunLight.shadow.camera.far  = 300;
+sunLight.shadow.camera.left = sunLight.shadow.camera.bottom = -110;
+sunLight.shadow.camera.right = sunLight.shadow.camera.top   =  110;
+scene.add(sunLight);
+
+// Subtle fill from east (blue-ish)
+const fillLight = new THREE.DirectionalLight(0x2244aa, 0.4);
+fillLight.position.set(60, 40, 40);
+scene.add(fillLight);
+
+// ── Height function ───────────────────────────────────────────────
+// Layered sin/cos to mimic Dinaric Alps (west/south) + Sava plain (north)
+function terrainHeight(x, z) {
+  const nx = x / TERRAIN_SIZE;
+  const nz = z / TERRAIN_SIZE;
+
+  // Base continental tilt: mountains in south-west, plain in north
+  const tilt = -nz * 8 + nx * 4;
+
+  // Main Dinaric ridge (runs NW→SE, roughly x<-20 and z>10)
+  const dinaric = Math.exp(-Math.pow((x + 40) / 35, 2)) *
+                  Math.exp(-Math.pow((z - 20) / 50, 2)) * 28;
+
+  // Central plateau / highland
+  const central = Math.exp(-Math.pow((x + 5) / 40, 2)) *
+                  Math.exp(-Math.pow((z + 10) / 30, 2)) * 15;
+
+  // Eastern ridges (Drina valley corridor)
+  const eastern = Math.exp(-Math.pow((x - 55) / 20, 2)) *
+                  Math.exp(-Math.pow((z + 5) / 40, 2)) * 18;
+
+  // Northern Sava plain (low)
+  const plain = Math.exp(-Math.pow((z + 65) / 30, 2)) * (-8);
+
+  // High-frequency detail noise (layered sin/cos)
+  const noise =
+    Math.sin(x * 0.18) * Math.cos(z * 0.22) * 3.5 +
+    Math.sin(x * 0.32 + 1.1) * Math.cos(z * 0.28) * 2.0 +
+    Math.cos(x * 0.55) * Math.sin(z * 0.50 + 0.7) * 1.2 +
+    Math.sin(x * 0.80 + z * 0.60) * 0.8 +
+    Math.cos(x * 1.2  - z * 0.9) * 0.4;
+
+  const total = tilt + dinaric + central + eastern + plain + noise;
+  return Math.max(total, -2); // clamp below water
+}
+
+// ── Terrain mesh ──────────────────────────────────────────────────
+const terrainGeo = new THREE.PlaneGeometry(
+  TERRAIN_SIZE, TERRAIN_SIZE, TERRAIN_SEGS, TERRAIN_SEGS
+);
+terrainGeo.rotateX(-Math.PI / 2);
+
+// Apply heights and vertex colours
+const pos = terrainGeo.attributes.position;
+const vertCount = pos.count;
+const colors = new Float32Array(vertCount * 3);
+
+const colLow  = new THREE.Color(0x2a3a20);
+const colMid  = new THREE.Color(0x4a3820);
+const colHigh = new THREE.Color(0x3a3228);
+const colSnow = new THREE.Color(0x5a5050);
+const tmpCol  = new THREE.Color();
+
+for (let i = 0; i < vertCount; i++) {
+  const x = pos.getX(i);
+  const z = pos.getZ(i);
+  const h = terrainHeight(x, z);
+  pos.setY(i, h);
+
+  // Vertex colour by height
+  let t;
+  if (h < 2)       { t = 0; tmpCol.copy(colLow); }
+  else if (h < 10) { t = (h - 2) / 8; tmpCol.lerpColors(colLow, colMid, t); }
+  else if (h < 20) { t = (h - 10) / 10; tmpCol.lerpColors(colMid, colHigh, t); }
+  else             { t = Math.min((h - 20) / 10, 1); tmpCol.lerpColors(colHigh, colSnow, t); }
+
+  colors[i * 3]     = tmpCol.r;
+  colors[i * 3 + 1] = tmpCol.g;
+  colors[i * 3 + 2] = tmpCol.b;
+}
+
+terrainGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+terrainGeo.computeVertexNormals();
+
+const terrainMat = new THREE.MeshLambertMaterial({
+  vertexColors: true,
+  // Slight wireframe blend for a technical feel
+});
+const terrain = new THREE.Mesh(terrainGeo, terrainMat);
+terrain.receiveShadow = true;
+scene.add(terrain);
+
+// ── Helper: sample terrain height at (x,z) ───────────────────────
+function sampleH(x, z) { return terrainHeight(x, z); }
+
+// ── Faction control zone texture ──────────────────────────────────
+// Painted onto a canvas, mapped onto a plane above the terrain
+function buildControlZoneOverlay() {
+  const SIZE = 512;
+  const cvs  = document.createElement('canvas');
+  cvs.width = cvs.height = SIZE;
+  const ctx = cvs.getContext('2d');
+
+  // We define zone ownership per pixel (x/y → world x/z)
+  const halfS = TERRAIN_SIZE / 2; // 100
+
+  ctx.clearRect(0, 0, SIZE, SIZE);
+
+  const imgData = ctx.getImageData(0, 0, SIZE, SIZE);
+  const d = imgData.data;
+
+  for (let py = 0; py < SIZE; py++) {
+    for (let px = 0; px < SIZE; px++) {
+      // Map pixel → world
+      const wx = (px / SIZE - 0.5) * TERRAIN_SIZE;
+      const wz = (py / SIZE - 0.5) * TERRAIN_SIZE;
+
+      let r = 0, g = 0, b = 0, a = 0;
+
+      // ── RS: north half + east corridor ──────────────────────────
+      // Northern strip (wz < -10) mainly RS
+      // Eastern corridor (wx > 40) RS
+      // Western zone (wx < -35, wz < 20) RS
+      const rsNorth  = wz < -15;
+      const rsEast   = wx > 38 && wz < 30;
+      const rsWestNW = wx < -45 && wz < 5;
+      if (rsNorth || rsEast || rsWestNW) {
+        // softness near border
+        r = 180; g = 50; b = 50; a = 120;
+      }
+
+      // ── HRHB: western Herzegovina ───────────────────────────────
+      // South-west (wx < -20, wz > 15) and western strip
+      const hrhbSW = wx < -18 && wz > 10;
+      const hrhbW  = wx < -35 && wz >= 5 && wz < 30;
+      if (hrhbSW || hrhbW) {
+        r = 50; g = 110; b = 170; a = 120;
+      }
+
+      // ── RBiH: central Bosnia + enclaves ─────────────────────────
+      // Central band and north-west pocket
+      const rbihCentral = wx >= -18 && wx <= 38 && wz >= -15 && wz <= 50;
+      // Bihac enclave (NW corner)
+      const rbihBihac   = wx < -35 && wz >= 30;
+      // Srebrenica enclave (east)
+      const rbihSreb    = Math.sqrt((wx - 55) ** 2 + (wz - 15) ** 2) < 10;
+      if (rbihCentral || rbihBihac || rbihSreb) {
+        r = 55; g = 140; b = 75; a = 120;
+      }
+
+      const idx = (py * SIZE + px) * 4;
+      d[idx]   = r;
+      d[idx+1] = g;
+      d[idx+2] = b;
+      d[idx+3] = a;
+    }
+  }
+
+  ctx.putImageData(imgData, 0, 0);
+
+  // Blur for soft edges (can't do GPU blur on file:// easily, fake it)
+  ctx.filter = 'blur(8px)';
+  ctx.drawImage(cvs, 0, 0);
+  ctx.filter = 'none';
+
+  const tex = new THREE.CanvasTexture(cvs);
+  return tex;
+}
+
+const czTex = buildControlZoneOverlay();
+const czGeo = new THREE.PlaneGeometry(TERRAIN_SIZE, TERRAIN_SIZE);
+czGeo.rotateX(-Math.PI / 2);
+const czMat = new THREE.MeshBasicMaterial({
+  map: czTex,
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.NormalBlending,
+});
+const czMesh = new THREE.Mesh(czGeo, czMat);
+czMesh.position.y = 0.3;
+scene.add(czMesh);
+
+// ── Front lines ───────────────────────────────────────────────────
+// Define a few polylines (world x/z pairs) sampled at terrain height
+
+function makeGlowLine(points3D, color, mainWidth, glowWidth) {
+  // Glow (wider, transparent)
+  const glowMat = new THREE.LineBasicMaterial({
+    color: color, transparent: true, opacity: 0.18, linewidth: glowWidth, depthWrite: false
+  });
+  const mainMat = new THREE.LineBasicMaterial({
+    color: color, transparent: true, opacity: 0.85, linewidth: mainWidth
+  });
+  const geo = new THREE.BufferGeometry().setFromPoints(points3D);
+  const group = new THREE.Group();
+  group.add(new THREE.Line(geo.clone(), glowMat));
+  group.add(new THREE.Line(geo.clone(), mainMat));
+  return group;
+}
+
+function buildFrontLinePoints(segments) {
+  const pts = [];
+  segments.forEach(([x, z]) => {
+    const h = sampleH(x, z);
+    pts.push(new THREE.Vector3(x, h + 0.8, z));
+  });
+  return pts;
+}
+
+// RS / RBiH northern front (approximate east-west line across north)
+const frontNorth = buildFrontLinePoints([
+  [-100, -14], [-70, -16], [-50, -12], [-30, -15], [-10, -18],
+  [10, -16],  [30, -14],  [50, -12],  [70, -10],  [90, -8]
+]);
+
+// RS / RBiH eastern / Drina corridor
+const frontEast = buildFrontLinePoints([
+  [38, -14], [40, 0], [42, 12], [44, 24], [44, 36], [42, 50], [40, 70]
+]);
+
+// RBiH / HRHB central Bosnia
+const frontCentral = buildFrontLinePoints([
+  [-18, -14], [-17, -5], [-18, 5], [-19, 15], [-19, 25], [-18, 38], [-17, 50]
+]);
+
+// Bihac pocket perimeter
+const frontBihac = buildFrontLinePoints([
+  [-100, 30], [-90, 35], [-82, 42], [-78, 50], [-80, 60],
+  [-88, 65], [-98, 62], [-100, 52], [-100, 30]
+]);
+
+const frontLineColor = 0xcc2222;
+[frontNorth, frontEast, frontCentral, frontBihac].forEach(pts => {
+  scene.add(makeGlowLine(pts, frontLineColor, 1, 1));
+});
+
+// Tick marks along front lines (barbed wire effect)
+function addTicks(points, interval = 4, tickLen = 1.2) {
+  const geo = new THREE.BufferGeometry();
+  const verts = [];
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i], b = points[i + 1];
+    const dist = a.distanceTo(b);
+    const steps = Math.max(1, Math.round(dist / interval));
+    for (let s = 0; s <= steps; s++) {
+      const t = s / steps;
+      const p = new THREE.Vector3().lerpVectors(a, b, t);
+      const dir = new THREE.Vector3().subVectors(b, a).normalize();
+      // Perpendicular in XZ plane
+      const perp = new THREE.Vector3(-dir.z, 0, dir.x).normalize();
+      verts.push(
+        p.x + perp.x * tickLen, p.y + 0.3, p.z + perp.z * tickLen,
+        p.x - perp.x * tickLen * 0.4, p.y + 0.3, p.z - perp.z * tickLen * 0.4
+      );
+    }
+  }
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+  const mat = new THREE.LineBasicMaterial({ color: 0xaa1111, transparent: true, opacity: 0.5 });
+  scene.add(new THREE.LineSegments(geo, mat));
+}
+
+[frontNorth, frontEast, frontCentral].forEach(pts => addTicks(pts, 5));
+
+// ── Canvas texture helper (for billboards) ────────────────────────
+function makeMarkerTexture(name, strength, posture, faction) {
+  const W = 256, H = 160;
+  const cvs = document.createElement('canvas');
+  cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+
+  // Background
+  ctx.fillStyle = 'rgba(10,10,22,0.92)';
+  ctx.fillRect(0, 0, W, H);
+
+  // Faction border bar (left)
+  const fColors = {
+    RS: '#b43232', RBiH: '#37884b', HRHB: '#326eaa'
+  };
+  ctx.fillStyle = fColors[faction] || '#888';
+  ctx.fillRect(0, 0, 12, H);
+
+  // Outer border
+  ctx.strokeStyle = fColors[faction] || '#888';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(1, 1, W - 2, H - 2);
+
+  // Inner dim line
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(14, 6, W - 20, H - 12);
+
+  // Formation name
+  ctx.fillStyle = '#00ff88';
+  ctx.font = 'bold 20px "Courier New"';
+  ctx.fillText(name, 20, 40);
+
+  // Faction tag
+  ctx.fillStyle = fColors[faction];
+  ctx.font = '13px "Courier New"';
+  ctx.fillText(faction, 20, 62);
+
+  // Strength
+  const strColor = strength === 'STRONG' ? '#00ff88' :
+                   strength === 'MODERATE' ? '#ffab00' : '#ff4444';
+  ctx.fillStyle = strColor;
+  ctx.font = 'bold 16px "Courier New"';
+  ctx.fillText('STR: ' + strength, 20, 88);
+
+  // Posture
+  const posColor = posture === 'ATTACK' ? '#ff4444' :
+                   posture === 'PROBE'  ? '#ffab00' : '#4a8aff';
+  ctx.fillStyle = posColor;
+  ctx.font = '14px "Courier New"';
+  ctx.fillText('PST: ' + posture, 20, 112);
+
+  // Corner crosses (military counter style)
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 1;
+  const cx = W - 20, cy = 20, cs = 8;
+  ctx.beginPath();
+  ctx.moveTo(cx - cs, cy); ctx.lineTo(cx + cs, cy);
+  ctx.moveTo(cx, cy - cs); ctx.lineTo(cx, cy + cs);
+  ctx.stroke();
+
+  // Diagonal line (NATO combat unit symbol)
+  ctx.strokeStyle = fColors[faction];
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(14, H - 14); ctx.lineTo(W - 6, 14);
+  ctx.stroke();
+
+  const tex = new THREE.CanvasTexture(cvs);
+  return tex;
+}
+
+// ── Formation markers (billboards) ───────────────────────────────
+const formationData = [
+  { name: '1. KK',           strength: 'STRONG',   posture: 'DEFEND', faction: 'RS',
+    pos: [-45, -40],  personnel: '12,400', location: 'Banja Luka' },
+  { name: '2. SANSKI K.',    strength: 'MODERATE', posture: 'DEFEND', faction: 'RS',
+    pos: [60, -30],   personnel: '8,100',  location: 'Eastern Bosnia' },
+  { name: 'EAST BiH OG',     strength: 'WEAK',     posture: 'ATTACK', faction: 'RS',
+    pos: [60, 12],    personnel: '4,200',  location: 'Drina Corridor' },
+  { name: '1. KORPUS',       strength: 'STRONG',   posture: 'DEFEND', faction: 'RBiH',
+    pos: [5, 20],     personnel: '9,800',  location: 'Sarajevo' },
+  { name: '2. KORPUS',       strength: 'MODERATE', posture: 'PROBE',  faction: 'RBiH',
+    pos: [-5, -40],   personnel: '5,600',  location: 'Tuzla' },
+  { name: '3. KORPUS',       strength: 'WEAK',     posture: 'DEFEND', faction: 'RBiH',
+    pos: [-80, 48],   personnel: '3,200',  location: 'Bihac' },
+  { name: 'HVO HERCEG',      strength: 'MODERATE', posture: 'DEFEND', faction: 'HRHB',
+    pos: [-45, 48],   personnel: '6,700',  location: 'Mostar' },
+  { name: 'HVO BOSNA',       strength: 'WEAK',     posture: 'DEFEND', faction: 'HRHB',
+    pos: [-30, 15],   personnel: '3,100',  location: 'Central Bosnia' },
+];
+
+const markerMeshes = [];
+
+formationData.forEach(fd => {
+  const tex = makeMarkerTexture(fd.name, fd.strength, fd.posture, fd.faction);
+  const geo = new THREE.PlaneGeometry(12, 7.5);
+  const mat = new THREE.MeshBasicMaterial({
+    map: tex, transparent: true, side: THREE.DoubleSide, depthWrite: false
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+
+  const [mx, mz] = fd.pos;
+  const mh = sampleH(mx, mz);
+  mesh.position.set(mx, mh + 6, mz);
+
+  // Store data for tooltip
+  mesh.userData = { ...fd };
+
+  scene.add(mesh);
+  markerMeshes.push(mesh);
+
+  // Small stem down to terrain
+  const stemGeo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(mx, mh + 0.5, mz),
+    new THREE.Vector3(mx, mh + 2.5, mz)
+  ]);
+  const stemMat = new THREE.LineBasicMaterial({ color: 0x4a4a6a, transparent: true, opacity: 0.7 });
+  scene.add(new THREE.Line(stemGeo, stemMat));
+});
+
+// ── City markers ──────────────────────────────────────────────────
+const cities = [
+  { name: 'SARAJEVO',    wx: 5,   wz: 20,  encircled: true,  enclave: false, faction: 'RBiH' },
+  { name: 'BANJA LUKA',  wx: -55, wz: -42, encircled: false, enclave: false, faction: 'RS'   },
+  { name: 'MOSTAR',      wx: -48, wz: 58,  encircled: false, enclave: false, faction: 'HRHB' },
+  { name: 'TUZLA',       wx: -5,  wz: -45, encircled: false, enclave: false, faction: 'RBiH' },
+  { name: 'SREBRENICA',  wx: 60,  wz: 14,  encircled: false, enclave: true,  faction: 'RBiH' },
+  { name: 'BIHAC',       wx: -82, wz: 50,  encircled: false, enclave: true,  faction: 'RBiH' },
+];
+
+function makeCityLabelTexture(name, enclave) {
+  const W = 180, H = 50;
+  const cvs = document.createElement('canvas');
+  cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  // Dot
+  const dotCol = enclave ? '#ff4444' : '#00ff88';
+  ctx.fillStyle = dotCol;
+  ctx.beginPath();
+  ctx.arc(15, H / 2, 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Glow ring
+  ctx.strokeStyle = dotCol;
+  ctx.lineWidth = 1.5;
+  ctx.globalAlpha = 0.4;
+  ctx.beginPath();
+  ctx.arc(15, H / 2, 10, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // Text
+  ctx.fillStyle = enclave ? '#ff4444' : '#00ff88';
+  ctx.font = 'bold 14px "Courier New"';
+  ctx.fillText(name, 28, H / 2 + 5);
+
+  return new THREE.CanvasTexture(cvs);
+}
+
+cities.forEach(city => {
+  const tex = makeCityLabelTexture(city.name, city.enclave);
+  const geo = new THREE.PlaneGeometry(9, 2.5);
+  const mat = new THREE.MeshBasicMaterial({
+    map: tex, transparent: true, side: THREE.DoubleSide, depthWrite: false
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  const ch = sampleH(city.wx, city.wz);
+  mesh.position.set(city.wx + 2, ch + 3, city.wz);
+  scene.add(mesh);
+
+  // Encircled ring
+  if (city.encircled) {
+    const ringGeo = new THREE.RingGeometry(5, 5.4, 40);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0xff4444, side: THREE.DoubleSide, transparent: true, opacity: 0.7
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotateX(-Math.PI / 2);
+    ring.position.set(city.wx, ch + 0.4, city.wz);
+    scene.add(ring);
+
+    // Dashed look: add small radial segments
+    for (let a = 0; a < Math.PI * 2; a += 0.35) {
+      const segGeo = new THREE.RingGeometry(5, 5.5, 2, 1, a, 0.18);
+      const segMat = new THREE.MeshBasicMaterial({
+        color: 0xff6666, side: THREE.DoubleSide, transparent: true, opacity: 0.9
+      });
+      const seg = new THREE.Mesh(segGeo, segMat);
+      seg.rotateX(-Math.PI / 2);
+      seg.position.set(city.wx, ch + 0.5, city.wz);
+      scene.add(seg);
+    }
+  }
+});
+
+// ── Orbit controls (manual) ───────────────────────────────────────
+let isDragging  = false;
+let isRightDrag = false;
+let prevMouse   = { x: 0, y: 0 };
+
+// Spherical coords for orbit
+let camTheta = Math.atan2(DEFAULT_CAM_POS.x, DEFAULT_CAM_POS.z);
+let camPhi   = Math.atan2(
+  Math.sqrt(DEFAULT_CAM_POS.x ** 2 + DEFAULT_CAM_POS.z ** 2),
+  DEFAULT_CAM_POS.y
+);
+let camDist  = DEFAULT_CAM_POS.length();
+const camTarget = DEFAULT_CAM_TGT.clone();
+
+function updateCamera() {
+  const x = camDist * Math.sin(camPhi) * Math.sin(camTheta);
+  const y = camDist * Math.cos(camPhi);
+  const z = camDist * Math.sin(camPhi) * Math.cos(camTheta);
+  camera.position.set(x + camTarget.x, y + camTarget.y, z + camTarget.z);
+  camera.lookAt(camTarget);
+}
+
+const canvas = renderer.domElement;
+
+canvas.addEventListener('mousedown', e => {
+  isDragging  = true;
+  isRightDrag = e.button === 2;
+  prevMouse   = { x: e.clientX, y: e.clientY };
+});
+
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+window.addEventListener('mouseup', () => { isDragging = false; });
+
+window.addEventListener('mousemove', e => {
+  if (!isDragging) {
+    handleHover(e);
+    return;
+  }
+  const dx = e.clientX - prevMouse.x;
+  const dy = e.clientY - prevMouse.y;
+  prevMouse = { x: e.clientX, y: e.clientY };
+
+  if (isRightDrag) {
+    // Pan
+    const right = new THREE.Vector3();
+    const up    = new THREE.Vector3();
+    camera.getWorldDirection(right);
+    right.cross(camera.up).normalize();
+    up.copy(camera.up).normalize();
+    camTarget.addScaledVector(right, -dx * 0.05);
+    camTarget.addScaledVector(up,    dy * 0.05);
+  } else {
+    camTheta -= dx * 0.008;
+    camPhi   = Math.max(0.1, Math.min(Math.PI * 0.48, camPhi + dy * 0.006));
+  }
+  updateCamera();
+});
+
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  camDist = Math.max(30, Math.min(250, camDist + e.deltaY * 0.12));
+  updateCamera();
+}, { passive: false });
+
+// Reset view
+document.getElementById('btn-reset').addEventListener('click', () => {
+  camTheta = Math.atan2(DEFAULT_CAM_POS.x, DEFAULT_CAM_POS.z);
+  camPhi   = Math.atan2(
+    Math.sqrt(DEFAULT_CAM_POS.x ** 2 + DEFAULT_CAM_POS.z ** 2),
+    DEFAULT_CAM_POS.y
+  );
+  camDist = DEFAULT_CAM_POS.length();
+  camTarget.copy(DEFAULT_CAM_TGT);
+  updateCamera();
+});
+
+// ── Raycasting / hover ────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse2D   = new THREE.Vector2();
+const tooltip   = document.getElementById('tooltip');
+let   hoveredMarker = null;
+let   selectedMarker = null;
+
+function handleHover(e) {
+  mouse2D.x = (e.clientX / window.innerWidth)  * 2 - 1;
+  mouse2D.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse2D, camera);
+
+  const hits = raycaster.intersectObjects(markerMeshes);
+  if (hits.length > 0) {
+    const m = hits[0].object;
+    if (hoveredMarker !== m) {
+      if (hoveredMarker && hoveredMarker !== selectedMarker) hoveredMarker.scale.setScalar(1);
+      hoveredMarker = m;
+      m.scale.setScalar(1.12);
+    }
+    canvas.style.cursor = 'pointer';
+    const ud = m.userData;
+    document.getElementById('tt-name').textContent     = ud.name;
+    document.getElementById('tt-strength').textContent  = ud.strength;
+    document.getElementById('tt-posture').textContent   = ud.posture;
+    document.getElementById('tt-location').textContent  = ud.location;
+    document.getElementById('tt-personnel').textContent = ud.personnel;
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 16) + 'px';
+    tooltip.style.top  = (e.clientY - 20) + 'px';
+  } else {
+    if (hoveredMarker && hoveredMarker !== selectedMarker) {
+      hoveredMarker.scale.setScalar(1);
+    }
+    hoveredMarker = null;
+    canvas.style.cursor = 'default';
+    tooltip.style.display = 'none';
+  }
+}
+
+canvas.addEventListener('click', e => {
+  mouse2D.x = (e.clientX / window.innerWidth)  * 2 - 1;
+  mouse2D.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse2D, camera);
+  const hits = raycaster.intersectObjects(markerMeshes);
+  if (hits.length > 0) {
+    if (selectedMarker) selectedMarker.scale.setScalar(1);
+    selectedMarker = hits[0].object;
+    selectedMarker.scale.setScalar(1.25);
+  } else {
+    if (selectedMarker) selectedMarker.scale.setScalar(1);
+    selectedMarker = null;
+  }
+});
+
+// ── Billboard update (always face camera) ─────────────────────────
+function updateBillboards() {
+  markerMeshes.forEach(m => {
+    m.quaternion.copy(camera.quaternion);
+  });
+}
+
+// ── Minimap ───────────────────────────────────────────────────────
+const minimapCanvas  = document.getElementById('minimap');
+const minimapCtx     = minimapCanvas.getContext('2d');
+const MM_W = 110, MM_H = 90;
+
+function drawMinimap() {
+  minimapCtx.fillStyle = '#080814';
+  minimapCtx.fillRect(0, 0, MM_W, MM_H);
+
+  // Control zones (simplified)
+  const toMM = (wx, wz) => ({
+    x: (wx / TERRAIN_SIZE + 0.5) * MM_W,
+    y: (wz / TERRAIN_SIZE + 0.5) * MM_H
+  });
+
+  // RS: north
+  minimapCtx.fillStyle = 'rgba(180,50,50,0.55)';
+  minimapCtx.fillRect(0, 0, MM_W, MM_H * 0.43);
+
+  // RS: east corridor
+  minimapCtx.fillRect(MM_W * 0.69, 0, MM_W * 0.31, MM_H * 0.75);
+
+  // HRHB: SW
+  minimapCtx.fillStyle = 'rgba(50,110,170,0.55)';
+  minimapCtx.beginPath();
+  minimapCtx.moveTo(0, MM_H * 0.55);
+  minimapCtx.lineTo(MM_W * 0.41, MM_H * 0.55);
+  minimapCtx.lineTo(MM_W * 0.41, MM_H);
+  minimapCtx.lineTo(0, MM_H);
+  minimapCtx.fill();
+
+  // RBiH: central
+  minimapCtx.fillStyle = 'rgba(55,140,75,0.55)';
+  minimapCtx.fillRect(MM_W * 0.41, MM_H * 0.43, MM_W * 0.28, MM_H * 0.57);
+
+  // RBiH: Bihac enclave
+  minimapCtx.beginPath();
+  minimapCtx.arc(MM_W * 0.08, MM_H * 0.82, 7, 0, Math.PI * 2);
+  minimapCtx.fill();
+
+  // RBiH: Srebrenica enclave
+  minimapCtx.beginPath();
+  minimapCtx.arc(MM_W * 0.80, MM_H * 0.61, 5, 0, Math.PI * 2);
+  minimapCtx.fill();
+
+  // Cities
+  const cityDots = [
+    { wx: 5,   wz: 20,  col: '#00ff88', label: 'SAR' },
+    { wx: -55, wz: -42, col: '#00ff88', label: 'BL'  },
+    { wx: -48, wz: 58,  col: '#00ff88', label: 'MOS' },
+    { wx: -5,  wz: -45, col: '#00ff88', label: 'TUZ' },
+    { wx: 60,  wz: 14,  col: '#ff4444', label: 'SRB' },
+    { wx: -82, wz: 50,  col: '#00ff88', label: 'BIH' },
+  ];
+  cityDots.forEach(c => {
+    const p = toMM(c.wx, c.wz);
+    minimapCtx.fillStyle = c.col;
+    minimapCtx.beginPath();
+    minimapCtx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+    minimapCtx.fill();
+    minimapCtx.font = '6px Courier New';
+    minimapCtx.fillStyle = c.col;
+    minimapCtx.fillText(c.label, p.x + 3, p.y + 2);
+  });
+
+  // Camera frustum indicator
+  const cp = toMM(camera.position.x, camera.position.z);
+  minimapCtx.strokeStyle = 'rgba(0,255,136,0.6)';
+  minimapCtx.lineWidth = 1;
+  minimapCtx.strokeRect(cp.x - 10, cp.y - 7, 20, 14);
+
+  // Border
+  minimapCtx.strokeStyle = '#2a2a3e';
+  minimapCtx.lineWidth = 1;
+  minimapCtx.strokeRect(0, 0, MM_W, MM_H);
+}
+
+// ── Pulsing Srebrenica (enclave glow) ─────────────────────────────
+let pulseT = 0;
+const srebGeo = new THREE.RingGeometry(3, 3.3, 32);
+const srebMat = new THREE.MeshBasicMaterial({
+  color: 0xff2222, side: THREE.DoubleSide, transparent: true, opacity: 0.8
+});
+const srebRing = new THREE.Mesh(srebGeo, srebMat);
+srebRing.rotateX(-Math.PI / 2);
+const srbH = sampleH(60, 14);
+srebRing.position.set(60, srbH + 0.5, 14);
+scene.add(srebRing);
+
+// ── Resize handler ────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  const w = window.innerWidth, h = window.innerHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+
+// ── Render loop ───────────────────────────────────────────────────
+let frame = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  frame++;
+  pulseT += 0.04;
+
+  // Pulse Srebrenica ring
+  srebMat.opacity = 0.4 + 0.5 * Math.abs(Math.sin(pulseT));
+
+  // Subtle sway of markers (floating)
+  markerMeshes.forEach((m, i) => {
+    const base = sampleH(m.userData.pos[0], m.userData.pos[1]);
+    m.position.y = base + 6 + Math.sin(pulseT + i * 1.3) * 0.4;
+  });
+
+  updateBillboards();
+
+  // Update minimap every 30 frames
+  if (frame % 30 === 0) drawMinimap();
+
+  renderer.render(scene, camera);
+}
+
+// Initial camera and minimap
+updateCamera();
+drawMinimap();
+animate();
+
+</script>
+</body>
+</html>

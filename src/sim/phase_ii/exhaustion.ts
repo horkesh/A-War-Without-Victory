@@ -3,11 +3,10 @@
  * Exhaustion is irreversible (Engine Invariants §8); degrades effectiveness; does not flip control.
  */
 
-import type { GameState, FactionId } from '../../state/game_state.js';
-import type { PhaseIIFrontDescriptor } from '../../state/game_state.js';
-import { getExhaustionExternalModifier } from '../../state/patron_pressure.js';
-import { getFactionLegitimacyAverages } from '../../state/legitimacy.js';
 import { EXHAUSTION_LEGITIMACY_MULTIPLIER } from '../../state/exhaustion.js';
+import type { FactionId, GameState, PhaseIIFrontDescriptor } from '../../state/game_state.js';
+import { getFactionLegitimacyAverages } from '../../state/legitimacy.js';
+import { getExhaustionExternalModifier } from '../../state/patron_pressure.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 /** Exhaustion per static front (Engine Invariants §6, §8). */
@@ -28,44 +27,44 @@ const MAX_DELTA_PER_TURN = 10;
  * so that higher command friction (higher multiplier) increases effective exhaustion growth.
  */
 export function updatePhaseIIExhaustion(
-  state: GameState,
-  fronts: PhaseIIFrontDescriptor[] = [],
-  frictionMultipliers?: Record<FactionId, number>
+    state: GameState,
+    fronts: PhaseIIFrontDescriptor[] = [],
+    frictionMultipliers?: Record<FactionId, number>
 ): void {
-  if (state.meta.phase !== 'phase_ii') {
-    return;
-  }
+    if (state.meta.phase !== 'phase_ii') {
+        return;
+    }
 
-  const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
-  const staticFrontCount = fronts.filter((f) => f.stability === 'static').length;
-  const supplyPressure = state.phase_ii_supply_pressure ?? {};
-  const legitimacyByFaction = getFactionLegitimacyAverages(state);
-  const sarajevo = state.sarajevo_state;
+    const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
+    const staticFrontCount = fronts.filter((f) => f.stability === 'static').length;
+    const supplyPressure = state.phase_ii_supply_pressure ?? {};
+    const legitimacyByFaction = getFactionLegitimacyAverages(state);
+    const sarajevo = state.sarajevo_state;
 
-  if (!state.phase_ii_exhaustion) {
-    (state as GameState & { phase_ii_exhaustion: Record<FactionId, number> }).phase_ii_exhaustion = {};
-  }
-  const exhaustion = state.phase_ii_exhaustion!;
+    if (!state.phase_ii_exhaustion) {
+        (state as GameState & { phase_ii_exhaustion: Record<FactionId, number> }).phase_ii_exhaustion = {};
+    }
+    const exhaustion = state.phase_ii_exhaustion!;
 
-  for (const fid of factionIds) {
-    const current = typeof exhaustion[fid] === 'number' ? exhaustion[fid]! : 0;
-    const supplyContrib = (supplyPressure[fid] ?? 0) * EXHAUSTION_PER_SUPPLY_PRESSURE_POINT;
-    const staticContrib = staticFrontCount * EXHAUSTION_PER_STATIC_FRONT;
-    const delta = Math.min(MAX_DELTA_PER_TURN, supplyContrib + staticContrib);
-    const multiplier = frictionMultipliers?.[fid] ?? 1;
-    const faction = state.factions.find((f) => f.id === fid);
-    const externalMod = getExhaustionExternalModifier(faction?.patron_state, state.international_visibility_pressure);
-    const legitimacy = legitimacyByFaction[fid] ?? 0.5;
-    const legitimacyMod = (1 - legitimacy) * EXHAUSTION_LEGITIMACY_MULTIPLIER;
-    const sarajevoExtra =
-      sarajevo?.siege_status === 'BESIEGED'
-        ? fid === 'RBiH'
-          ? 3.0
-          : fid === 'RS'
-            ? 2.0
-            : 0
-        : 0;
-    const effectiveDelta = Math.min(MAX_DELTA_PER_TURN, delta * multiplier * (1 + externalMod + legitimacyMod) + sarajevoExtra);
-    exhaustion[fid] = current + effectiveDelta;
-  }
+    for (const fid of factionIds) {
+        const current = typeof exhaustion[fid] === 'number' ? exhaustion[fid]! : 0;
+        const supplyContrib = (supplyPressure[fid] ?? 0) * EXHAUSTION_PER_SUPPLY_PRESSURE_POINT;
+        const staticContrib = staticFrontCount * EXHAUSTION_PER_STATIC_FRONT;
+        const delta = Math.min(MAX_DELTA_PER_TURN, supplyContrib + staticContrib);
+        const multiplier = frictionMultipliers?.[fid] ?? 1;
+        const faction = state.factions.find((f) => f.id === fid);
+        const externalMod = getExhaustionExternalModifier(faction?.patron_state, state.international_visibility_pressure);
+        const legitimacy = legitimacyByFaction[fid] ?? 0.5;
+        const legitimacyMod = (1 - legitimacy) * EXHAUSTION_LEGITIMACY_MULTIPLIER;
+        const sarajevoExtra =
+            sarajevo?.siege_status === 'BESIEGED'
+                ? fid === 'RBiH'
+                    ? 3.0
+                    : fid === 'RS'
+                        ? 2.0
+                        : 0
+                : 0;
+        const effectiveDelta = Math.min(MAX_DELTA_PER_TURN, delta * multiplier * (1 + externalMod + legitimacyMod) + sarajevoExtra);
+        exhaustion[fid] = current + effectiveDelta;
+    }
 }

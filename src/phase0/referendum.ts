@@ -21,28 +21,28 @@ export const REFERENDUM_DEADLINE_TURNS_DEFAULT = 12;
 export const OUTCOME_NON_WAR_TERMINAL = 'non_war_terminal';
 
 export interface ReferendumEligibilityOptions {
-  /** Turns from current_turn to referendum deadline when eligibility first becomes true. */
-  deadlineTurns?: number;
-  /** Optional deterministic schedule turn at/after which referendum is auto-held once eligible. */
-  scheduledReferendumTurn?: number;
-  /** Optional explicit war-start turn override when scheduled referendum fires. */
-  scheduledWarStartTurn?: number;
+    /** Turns from current_turn to referendum deadline when eligibility first becomes true. */
+    deadlineTurns?: number;
+    /** Optional deterministic schedule turn at/after which referendum is auto-held once eligible. */
+    scheduledReferendumTurn?: number;
+    /** Optional explicit war-start turn override when scheduled referendum fires. */
+    scheduledWarStartTurn?: number;
 }
 
 function getRs(state: GameState) {
-  return state.factions.find((f) => f.id === 'RS');
+    return state.factions.find((f) => f.id === 'RS');
 }
 function getHrhb(state: GameState) {
-  return state.factions.find((f) => f.id === 'HRHB');
+    return state.factions.find((f) => f.id === 'HRHB');
 }
 
 /**
  * Referendum is eligible only when both RS and HRHB have declared (Phase_0_Spec §4.5).
  */
 export function isReferendumEligible(state: GameState): boolean {
-  const rs = getRs(state);
-  const hrhb = getHrhb(state);
-  return Boolean(rs?.declared && hrhb?.declared);
+    const rs = getRs(state);
+    const hrhb = getHrhb(state);
+    return Boolean(rs?.declared && hrhb?.declared);
 }
 
 /**
@@ -50,17 +50,17 @@ export function isReferendumEligible(state: GameState): boolean {
  * referendum_deadline_turn. Idempotent: does nothing if already eligible (eligible_turn set).
  */
 export function updateReferendumEligibility(
-  state: GameState,
-  turn: number,
-  options: ReferendumEligibilityOptions = {}
+    state: GameState,
+    turn: number,
+    options: ReferendumEligibilityOptions = {}
 ): void {
-  if (!isReferendumEligible(state)) return;
-  const meta = state.meta;
-  if (meta.referendum_eligible_turn !== undefined && meta.referendum_eligible_turn !== null) return;
+    if (!isReferendumEligible(state)) return;
+    const meta = state.meta;
+    if (meta.referendum_eligible_turn !== undefined && meta.referendum_eligible_turn !== null) return;
 
-  const deadlineTurns = options.deadlineTurns ?? REFERENDUM_DEADLINE_TURNS_DEFAULT;
-  meta.referendum_eligible_turn = turn;
-  meta.referendum_deadline_turn = turn + deadlineTurns;
+    const deadlineTurns = options.deadlineTurns ?? REFERENDUM_DEADLINE_TURNS_DEFAULT;
+    meta.referendum_eligible_turn = turn;
+    meta.referendum_deadline_turn = turn + deadlineTurns;
 }
 
 /**
@@ -68,10 +68,10 @@ export function updateReferendumEligibility(
  * and war_start_turn = referendum_turn + 4. War begins only at war_start_turn (Phase_0_Spec §4.5).
  */
 export function holdReferendum(state: GameState, turn: number): void {
-  const meta = state.meta;
-  meta.referendum_held = true;
-  meta.referendum_turn = turn;
-  meta.war_start_turn = turn + REFERENDUM_WAR_DELAY_TURNS;
+    const meta = state.meta;
+    meta.referendum_held = true;
+    meta.referendum_turn = turn;
+    meta.war_start_turn = turn + REFERENDUM_WAR_DELAY_TURNS;
 }
 
 /**
@@ -79,19 +79,19 @@ export function holdReferendum(state: GameState, turn: number): void {
  * Fires once referendum is eligible and the schedule turn is reached.
  */
 export function applyScheduledReferendum(
-  state: GameState,
-  turn: number,
-  options: ReferendumEligibilityOptions = {}
+    state: GameState,
+    turn: number,
+    options: ReferendumEligibilityOptions = {}
 ): void {
-  if (state.meta.referendum_held) return;
-  const scheduledTurn = options.scheduledReferendumTurn;
-  if (typeof scheduledTurn !== 'number' || !Number.isInteger(scheduledTurn)) return;
-  if (turn < scheduledTurn) return;
-  if (!isReferendumEligible(state)) return;
-  holdReferendum(state, turn);
-  if (Number.isInteger(options.scheduledWarStartTurn)) {
-    state.meta.war_start_turn = options.scheduledWarStartTurn!;
-  }
+    if (state.meta.referendum_held) return;
+    const scheduledTurn = options.scheduledReferendumTurn;
+    if (typeof scheduledTurn !== 'number' || !Number.isInteger(scheduledTurn)) return;
+    if (turn < scheduledTurn) return;
+    if (!isReferendumEligible(state)) return;
+    holdReferendum(state, turn);
+    if (Number.isInteger(options.scheduledWarStartTurn)) {
+        state.meta.war_start_turn = options.scheduledWarStartTurn!;
+    }
 }
 
 /**
@@ -99,25 +99,25 @@ export function applyScheduledReferendum(
  * non-war terminal outcome (BiH remains in Yugoslavia; Phase I never entered).
  */
 export function checkReferendumDeadline(state: GameState, turn: number): void {
-  const meta = state.meta;
-  if (meta.referendum_held) return;
-  const deadline = meta.referendum_deadline_turn;
-  if (deadline === undefined || deadline === null) return;
-  if (turn < deadline) return;
+    const meta = state.meta;
+    if (meta.referendum_held) return;
+    const deadline = meta.referendum_deadline_turn;
+    if (deadline === undefined || deadline === null) return;
+    if (turn < deadline) return;
 
-  meta.game_over = true;
-  meta.outcome = OUTCOME_NON_WAR_TERMINAL;
+    meta.game_over = true;
+    meta.outcome = OUTCOME_NON_WAR_TERMINAL;
 }
 
 /**
  * True when referendum was held and current turn is war_start_turn (transition to Phase I).
  */
 export function isWarStartTurn(state: GameState): boolean {
-  const meta = state.meta;
-  if (!meta.referendum_held) return false;
-  const warTurn = meta.war_start_turn;
-  if (warTurn === undefined || warTurn === null) return false;
-  return meta.turn === warTurn;
+    const meta = state.meta;
+    if (!meta.referendum_held) return false;
+    const warTurn = meta.war_start_turn;
+    if (warTurn === undefined || warTurn === null) return false;
+    return meta.turn === warTurn;
 }
 
 /**
@@ -129,10 +129,10 @@ export function isWarStartTurn(state: GameState): boolean {
  * Otherwise returns false and does not mutate state.
  */
 export function applyPhase0ToPhaseITransition(state: GameState): boolean {
-  const meta = state.meta;
-  if (meta.phase !== 'phase_0') return false;
-  if (!isWarStartTurn(state)) return false;
+    const meta = state.meta;
+    if (meta.phase !== 'phase_0') return false;
+    if (!isWarStartTurn(state)) return false;
 
-  meta.phase = 'phase_i';
-  return true;
+    meta.phase = 'phase_i';
+    return true;
 }

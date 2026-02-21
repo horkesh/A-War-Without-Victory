@@ -11,6 +11,7 @@
 - Gate: `tests/turn_pipeline_order.test.ts`
 - Gate: `tests/phase_e_pressure_determinism.test.ts`
 - Gate: `tools/scenario_runner/run_baseline_regression.ts`
+- Gate: `tests/sandbox_slice_determinism.test.ts` (slice settlements/edges/controllers canonical ordering)
 
 ### Derived state not serialized as source of truth
 - Code invariant: `src/state/serializeGameState.ts` (denylist + key ordering + wrapper rejection)
@@ -28,3 +29,10 @@
 ## Gaps (Explicit)
 - Static scan for `Date.now` / `new Date` / `Math.random`: enforced in `tests/determinism_static_scan_r1_5.test.ts` (src/ and tools/scenario_runner/ scope).
 - Explicit “no Map/Set in GameState” runtime test: covered in serializer, not a dedicated test.
+
+## Sandbox Slice Determinism
+- `src/ui/map/sandbox/sandbox_slice.ts` canonicalizes slice outputs after filtering:
+  - settlements sorted by SID
+  - edges canonicalized (`a <= b`) then sorted by `a:b`
+  - political controller keys emitted in sorted SID order
+- Gate: `tests/sandbox_slice_determinism.test.ts` (ordering + idempotence)
