@@ -95,6 +95,37 @@ function init(): void {
         renderer.setFrontEdges(pendingData.edges);
         pendingData.edges = null;
       }
+
+      // Settlement hover tooltip
+      const tooltipEl = document.createElement('div');
+      tooltipEl.className = 'hoi-tooltip';
+      tooltipEl.style.display = 'none';
+      document.body.appendChild(tooltipEl);
+
+      renderer.setHoverCallback((feature, sx, sy) => {
+        if (!feature) {
+          tooltipEl.style.display = 'none';
+          return;
+        }
+        const p = feature.properties ?? {};
+        const controlMap = renderer.getControlBySettlement();
+        const controller = controlMap[p.sid as string] ?? controlMap[p.osid as string] ?? '\u2014';
+        const constituents = (p.constituent_sids as string[] | undefined) ?? [];
+
+        tooltipEl.innerHTML = `
+          <div class="hoi-tooltip-title">${p.settlement_name ?? p.osid ?? '?'}</div>
+          <div class="hoi-tooltip-row">OSID: ${p.osid ?? '\u2014'}</div>
+          <div class="hoi-tooltip-row">SID: ${p.sid ?? '\u2014'}</div>
+          <div class="hoi-tooltip-row">Municipality: ${p.mun1990_name ?? '\u2014'}</div>
+          <div class="hoi-tooltip-row">Controller: ${controller}</div>
+          <div class="hoi-tooltip-row">Population: ${typeof p.population_total === 'number' ? p.population_total.toLocaleString() : '\u2014'}</div>
+          <div class="hoi-tooltip-row">Ethnic key: ${p.ethnic_key ?? '\u2014'}</div>
+          <div class="hoi-tooltip-row">Constituents: ${constituents.length <= 5 ? constituents.join(', ') : `${constituents.length} SIDs`}</div>
+        `;
+        tooltipEl.style.display = 'block';
+        tooltipEl.style.left = `${sx + 12}px`;
+        tooltipEl.style.top = `${sy + 12}px`;
+      });
     }
     // If WebGL failed, placeholder is already visible and loading
   };

@@ -156,6 +156,10 @@ export class HoIMapRenderer {
   private readonly FORMATION_SPRITE_BASE = 0.15;
   private readonly LABEL_ALTITUDE_MAX = 4;
   private readonly LABEL_MAJOR_ALTITUDE_MAX = 6;
+  private raycaster = new THREE.Raycaster();
+  private mouse = new THREE.Vector2();
+  private featureByMesh: Map<THREE.Mesh, GeoJSONFeature> = new Map();
+  private onHoverSettlement: ((feature: GeoJSONFeature | null, screenX: number, screenY: number) => void) | null = null;
 
   constructor(options: HoIMapRendererOptions) {
     this.container = options.container;
@@ -286,6 +290,7 @@ export class HoIMapRenderer {
       (mesh.material as THREE.Material).dispose();
     }
     this.controlMeshes = [];
+    this.featureByMesh.clear();
 
     for (const feature of this.operationalGeo.features) {
       const rings = getRings(feature);
@@ -334,6 +339,7 @@ export class HoIMapRenderer {
         });
         const mesh = new THREE.Mesh(geom, mat);
         mesh.renderOrder = 1;
+        this.featureByMesh.set(mesh, feature);
         this.scene.add(mesh);
         this.controlMeshes.push(mesh);
       }
@@ -417,6 +423,14 @@ export class HoIMapRenderer {
   setControlBySettlement(control: Record<string, string | null>): void {
     this.controlBySettlement = control;
     this.buildControlLayer();
+  }
+
+  setHoverCallback(cb: (feature: GeoJSONFeature | null, screenX: number, screenY: number) => void): void {
+    this.onHoverSettlement = cb;
+  }
+
+  getControlBySettlement(): Record<string, string | null> {
+    return this.controlBySettlement;
   }
 
   setFrontEdges(edges: FrontEdgeInput[]): void {
@@ -646,6 +660,28 @@ export class HoIMapRenderer {
     el.addEventListener('mouseleave', () => {
       if (this.isPanning) el.style.cursor = '';
       this.isPanning = false;
+    });
+
+    // Hover raycasting for settlement tooltip (separate from pan handler)
+    let hoverRafPending = false;
+    el.addEventListener('mousemove', (e) => {
+      if (this.isPanning || hoverRafPending) return;
+      hoverRafPending = true;
+      requestAnimationFrame(() => {
+        hoverRafPending = false;
+        const rect = el.getBoundingClientRect();
+        this.mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        const intersects = this.raycaster.intersectObjects(this.controlMeshes, false);
+        if (intersects.length > 0) {
+          const mesh = intersects[0]!.object as THREE.Mesh;
+          const feature = this.featureByMesh.get(mesh) ?? null;
+          this.onHoverSettlement?.(feature, e.clientX, e.clientY);
+        } else {
+          this.onHoverSettlement?.(null, 0, 0);
+        }
+      });
     });
 
     const keyHandler = (e: KeyboardEvent) => {
