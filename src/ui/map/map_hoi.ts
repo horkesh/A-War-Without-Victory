@@ -23,18 +23,24 @@ function getBridge(): AwwvBridge | undefined {
 function applyStateJson(
   state: HoIMapState,
   stateJson: string | null,
-  rendererRef: { current: HoIMapRenderer | null }
+  rendererRef: { current: HoIMapRenderer | null },
+  pendingData?: { control: Record<string, string | null> | null; edges: { a: string; b: string }[] | null }
 ): void {
   if (!stateJson) return;
   try {
     const loaded = parseGameState(JSON.parse(stateJson)) as LoadedGameState;
     const update = loadedStateToHoIMapState(loaded);
     state.setState(update);
+    const control = loaded.controlBySettlement ?? {};
+    const edges = (loaded.frontEdges ?? []).map((e) => ({ a: e.a, b: e.b }));
     const r = rendererRef.current;
     if (r) {
-      r.setControlBySettlement(loaded.controlBySettlement ?? {});
-      const edges = (loaded.frontEdges ?? []).map((e) => ({ a: e.a, b: e.b }));
+      r.setControlBySettlement(control);
       r.setFrontEdges(edges);
+    } else if (pendingData) {
+      // Renderer not ready yet — store for later application
+      pendingData.control = control;
+      pendingData.edges = edges;
     }
   } catch (e) {
     console.warn('map_hoi: failed to parse game state', e);
@@ -59,6 +65,9 @@ function init(): void {
   initMapPlaceholder(mapWrapEl);
 
   const rendererRef: { current: HoIMapRenderer | null } = { current: null };
+  // Store pending control/front data in case save loads before renderer is ready
+  const pendingData: { control: Record<string, string | null> | null; edges: { a: string; b: string }[] | null } = { control: null, edges: null };
+
   const tryWebGL = async (): Promise<void> => {
     const renderer = new HoIMapRenderer({
       container: mapWrapEl,
@@ -77,6 +86,15 @@ function init(): void {
       ro.observe(mapWrapEl);
       renderer.resize();
       requestAnimationFrame(() => renderer.resize());
+      // Apply any pending control/front data that loaded before the renderer was ready
+      if (pendingData.control) {
+        renderer.setControlBySettlement(pendingData.control);
+        pendingData.control = null;
+      }
+      if (pendingData.edges) {
+        renderer.setFrontEdges(pendingData.edges);
+        pendingData.edges = null;
+      }
     }
     // If WebGL failed, placeholder is already visible and loading
   };
@@ -89,7 +107,7 @@ function init(): void {
       const file = fileInput.files?.[0];
       if (!file) return;
       file.text().then((text) => {
-        applyStateJson(state, text, rendererRef);
+        applyStateJson(state, text, rendererRef, pendingData);
       }).catch((e) => console.warn('map_hoi: file read failed', e));
       fileInput.value = '';
     });
@@ -100,7 +118,7 @@ function init(): void {
     onAdvance: () => {
       if (bridge?.advanceTurn) {
         bridge.advanceTurn().then((r) => {
-          if (r?.stateJson) applyStateJson(state, r.stateJson, rendererRef);
+          if (r?.stateJson) applyStateJson(state, r.stateJson, rendererRef, pendingData);
         }).catch((e) => console.warn('advanceTurn failed', e));
       }
     },
@@ -125,18 +143,18 @@ function init(): void {
   state.subscribe(renderFromState);
 
   if (bridge?.setGameStateUpdatedCallback) {
-    bridge.setGameStateUpdatedCallback((stateJson) => applyStateJson(state, stateJson, rendererRef));
+    bridge.setGameStateUpdatedCallback((stateJson) => applyStateJson(state, stateJson, rendererRef, pendingData));
   }
   if (bridge?.getCurrentGameState) {
     bridge.getCurrentGameState().then((stateJson) =>
-      applyStateJson(state, stateJson ?? null, rendererRef));
+      applyStateJson(state, stateJson ?? null, rendererRef, pendingData));
   }
 
   // Auto-load latest save in standalone mode (no IPC bridge)
   if (!bridge?.getCurrentGameState) {
     fetch(`${window.location.origin}/data/derived/latest_run_final_save.json`)
       .then((r) => r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))
-      .then((text) => applyStateJson(state, text, rendererRef))
+      .then((text) => applyStateJson(state, text, rendererRef, pendingData))
       .catch((e) => console.warn('map_hoi: auto-load latest save failed', e));
   }
 

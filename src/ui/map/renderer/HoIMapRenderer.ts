@@ -137,6 +137,7 @@ export class HoIMapRenderer {
   private labelData: { major: boolean }[] = [];
   private strategicMarkers: THREE.Points[] = [];
   private enclaveRings: THREE.LineSegments[] = [];
+  private borderLines: THREE.LineSegments[] = [];
   private heightmap: HeightmapData | null = null;
   private operationalGeo: GeoJSONFC | null = null;
   private centroidBySid: Record<string, [number, number]> = {};
@@ -267,8 +268,12 @@ export class HoIMapRenderer {
       color: 0x8a7d6d,
       roughness: 0.9,
       metalness: 0,
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: 1,
     });
     const mesh = new THREE.Mesh(geometry, material);
+    mesh.renderOrder = 0;
     this.scene.add(mesh);
   }
 
@@ -284,8 +289,9 @@ export class HoIMapRenderer {
 
     for (const feature of this.operationalGeo.features) {
       const rings = getRings(feature);
-      const osid = feature.properties?.osid ?? feature.properties?.sid ?? '';
-      const controller = osid ? (this.controlBySettlement[osid] ?? null) : null;
+      const sid = (feature.properties?.sid ?? '') as string;
+      const osid = (feature.properties?.osid ?? '') as string;
+      const controller = this.controlBySettlement[sid] ?? this.controlBySettlement[osid] ?? null;
       const colorHex = controller ? (FACTION_COLORS[controller] ?? NULL_COLOR) : NULL_COLOR;
       const color = new THREE.Color(colorHex);
 
@@ -310,7 +316,7 @@ export class HoIMapRenderer {
           const [lon, lat] = lonLat[i]!;
           const elev = sampleHeight(hm, lon, lat);
           const [wx, wy, wz] = wgsToWorld(lon, lat, elev);
-          positions.push(wx, wy, wz);
+          positions.push(wx, wy + 0.01, wz);
         }
         for (const tri of triangles) {
           indices.push(tri[0]!, tri[1]!, tri[2]!);
@@ -323,13 +329,57 @@ export class HoIMapRenderer {
           color,
           transparent: true,
           opacity: 0.75,
-          depthWrite: true,
+          depthWrite: false,
+          side: THREE.DoubleSide,
         });
         const mesh = new THREE.Mesh(geom, mat);
+        mesh.renderOrder = 1;
         this.scene.add(mesh);
         this.controlMeshes.push(mesh);
       }
     }
+    this.buildBorderLines();
+  }
+
+  private buildBorderLines(): void {
+    for (const line of this.borderLines) {
+      this.scene.remove(line);
+      line.geometry.dispose();
+      (line.material as THREE.Material).dispose();
+    }
+    this.borderLines = [];
+    if (!this.heightmap || !this.operationalGeo?.features?.length) return;
+    const hm = this.heightmap;
+    const positions: number[] = [];
+
+    for (const feature of this.operationalGeo.features) {
+      const rings = getRings(feature);
+      for (const ring of rings) {
+        if (ring.length < 3) continue;
+        for (let i = 0; i < ring.length; i++) {
+          const [lonA, latA] = ring[i]!;
+          const [lonB, latB] = ring[(i + 1) % ring.length]!;
+          const elevA = sampleHeight(hm, lonA, latA);
+          const elevB = sampleHeight(hm, lonB, latB);
+          const [xA, yA, zA] = wgsToWorld(lonA, latA, elevA);
+          const [xB, yB, zB] = wgsToWorld(lonB, latB, elevB);
+          positions.push(xA, yA + 0.015, zA, xB, yB + 0.015, zB);
+        }
+      }
+    }
+
+    if (positions.length === 0) return;
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    const mat = new THREE.LineBasicMaterial({
+      color: 0x000000,
+      transparent: true,
+      opacity: 0.18,
+    });
+    const lines = new THREE.LineSegments(geom, mat);
+    lines.renderOrder = 2;
+    this.scene.add(lines);
+    this.borderLines.push(lines);
   }
 
   private computeCentroids(): void {
@@ -678,6 +728,11 @@ export class HoIMapRenderer {
       (line.material as THREE.Material).dispose();
     }
     this.enclaveRings = [];
+    for (const line of this.borderLines) {
+      line.geometry.dispose();
+      (line.material as THREE.Material).dispose();
+    }
+    this.borderLines = [];
     for (const p of this.strategicMarkers) {
       p.geometry.dispose();
       (p.material as THREE.Material).dispose();
