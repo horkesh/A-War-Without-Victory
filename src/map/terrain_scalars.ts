@@ -13,33 +13,47 @@
  * Deterministic: no randomness, cached after first load.
  */
 
-import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+// Node.js imports are lazily loaded to allow browser-safe imports
+// of the pure functions (getTerrainScalarsForSid, getMaxAttackersForTarget).
+// Only loadTerrainScalars() uses the Node.js APIs.
+let _readFile: typeof import('node:fs/promises').readFile | null = null;
+let _resolve: typeof import('node:path').resolve | null = null;
+
+async function ensureNodeImports(): Promise<void> {
+    if (!_readFile) {
+        const fs = await import('node:fs/promises');
+        _readFile = fs.readFile;
+    }
+    if (!_resolve) {
+        const path = await import('node:path');
+        _resolve = path.resolve;
+    }
+}
 
 // --- Types ---
 
 export interface TerrainScalars {
-  road_access_index: number;
-  river_crossing_penalty: number;
-  elevation_mean_m: number;
-  elevation_stddev_m: number;
-  slope_index: number;
-  terrain_friction_index: number;
+    road_access_index: number;
+    river_crossing_penalty: number;
+    elevation_mean_m: number;
+    elevation_stddev_m: number;
+    slope_index: number;
+    terrain_friction_index: number;
 }
 
 export interface TerrainScalarsData {
-  by_sid: Record<string, TerrainScalars>;
+    by_sid: Record<string, TerrainScalars>;
 }
 
 // --- Default (flat open terrain, no rivers, low elevation) ---
 
 const DEFAULT_TERRAIN: TerrainScalars = {
-  road_access_index: 0.5,
-  river_crossing_penalty: 0,
-  elevation_mean_m: 200,
-  elevation_stddev_m: 10,
-  slope_index: 0.1,
-  terrain_friction_index: 0.1
+    road_access_index: 0.5,
+    river_crossing_penalty: 0,
+    elevation_mean_m: 200,
+    elevation_stddev_m: 10,
+    slope_index: 0.1,
+    terrain_friction_index: 0.1
 };
 
 // --- Cache ---
@@ -55,16 +69,17 @@ const DEFAULT_PATH = 'data/derived/terrain/settlements_terrain_scalars.json';
  * Safe to call multiple times; subsequent calls return the cache.
  */
 export async function loadTerrainScalars(filePath?: string): Promise<TerrainScalarsData> {
-  if (cache) return cache;
+    if (cache) return cache;
 
-  const absPath = resolve(filePath ?? DEFAULT_PATH);
-  const raw = JSON.parse(await readFile(absPath, 'utf8')) as {
-    by_sid?: Record<string, TerrainScalars>;
-  };
+    await ensureNodeImports();
+    const absPath = _resolve!(filePath ?? DEFAULT_PATH);
+    const raw = JSON.parse(await _readFile!(absPath, 'utf8') as string) as {
+        by_sid?: Record<string, TerrainScalars>;
+    };
 
-  const bySid = raw.by_sid ?? {};
-  cache = { by_sid: bySid };
-  return cache;
+    const bySid = raw.by_sid ?? {};
+    cache = { by_sid: bySid };
+    return cache;
 }
 
 /**
@@ -72,10 +87,10 @@ export async function loadTerrainScalars(filePath?: string): Promise<TerrainScal
  * Returns default flat-terrain scalars if SID is not found.
  */
 export function getTerrainScalarsForSid(
-  data: TerrainScalarsData,
-  sid: string
+    data: TerrainScalarsData,
+    sid: string
 ): TerrainScalars {
-  return data.by_sid[sid] ?? DEFAULT_TERRAIN;
+    return data.by_sid[sid] ?? DEFAULT_TERRAIN;
 }
 
 // --- Phase H: Terrain battle width (max attacking brigades per target) ---
@@ -93,26 +108,26 @@ export const BATTLE_WIDTH_RIVER_THRESHOLD = 0.5;
  * Deterministic: derived only from terrain scalars.
  */
 export function getMaxAttackersForTarget(
-  data: TerrainScalarsData,
-  targetSid: string
+    data: TerrainScalarsData,
+    targetSid: string
 ): number {
-  const t = getTerrainScalarsForSid(data, targetSid);
-  if (t.river_crossing_penalty >= BATTLE_WIDTH_RIVER_THRESHOLD) return 1;
-  if (t.slope_index >= BATTLE_WIDTH_SLOPE_MOUNTAIN) return 1;
-  if (t.slope_index >= BATTLE_WIDTH_SLOPE_HILL) return 2;
-  return 3;
+    const t = getTerrainScalarsForSid(data, targetSid);
+    if (t.river_crossing_penalty >= BATTLE_WIDTH_RIVER_THRESHOLD) return 1;
+    if (t.slope_index >= BATTLE_WIDTH_SLOPE_MOUNTAIN) return 1;
+    if (t.slope_index >= BATTLE_WIDTH_SLOPE_HILL) return 2;
+    return 3;
 }
 
 /**
  * Inject pre-loaded terrain data into the cache (for tests / browser contexts).
  */
 export function setTerrainScalarsCache(data: TerrainScalarsData): void {
-  cache = data;
+    cache = data;
 }
 
 /**
  * Clear the cache (for tests).
  */
 export function clearTerrainScalarsCache(): void {
-  cache = null;
+    cache = null;
 }

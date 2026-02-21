@@ -15,10 +15,10 @@ import type { FactionId } from '../state/game_state.js';
  * Values in [-1, 1]. Negative = hostile, positive = cooperative.
  */
 export interface Phase0Relationships {
-  /** RBiH-RS relationship [-1, 1]. Always negative/hostile in historical scenarios. */
-  rbih_rs: number;
-  /** RBiH-HRHB relationship [-1, 1]. Starts positive (wartime alliance), can degrade. */
-  rbih_hrhb: number;
+    /** RBiH-RS relationship [-1, 1]. Always negative/hostile in historical scenarios. */
+    rbih_rs: number;
+    /** RBiH-HRHB relationship [-1, 1]. Starts positive (wartime alliance), can degrade. */
+    rbih_hrhb: number;
 }
 
 /** Floor for rbih_rs relationship (maximum hostility). */
@@ -45,10 +45,10 @@ const RS_INVESTMENT_DEGRADATION = -0.03;
  * RBiH-HRHB: +0.5 (cooperative alliance against common threat).
  */
 export function initializePhase0Relationships(): Phase0Relationships {
-  return {
-    rbih_rs: -0.2,
-    rbih_hrhb: 0.5,
-  };
+    return {
+        rbih_rs: -0.2,
+        rbih_hrhb: 0.5,
+    };
 }
 
 /**
@@ -61,30 +61,30 @@ export function initializePhase0Relationships(): Phase0Relationships {
  * Mutates the relationships object in place (deterministic).
  */
 export function updateAllianceAfterInvestment(
-  relationships: Phase0Relationships,
-  investingFaction: FactionId,
-  wasCoordinated: boolean
+    relationships: Phase0Relationships,
+    investingFaction: FactionId,
+    wasCoordinated: boolean
 ): void {
-  if (investingFaction === 'RS') {
-    relationships.rbih_rs = Math.max(
-      RBIH_RS_FLOOR,
-      relationships.rbih_rs + RS_INVESTMENT_DEGRADATION
-    );
-    return;
-  }
-
-  // RBiH or HRHB investment affects RBiH-HRHB alliance
-  if (investingFaction === 'RBiH' || investingFaction === 'HRHB') {
-    if (wasCoordinated) {
-      relationships.rbih_hrhb = Math.min(
-        RBIH_HRHB_CEILING,
-        relationships.rbih_hrhb + COORDINATED_IMPROVEMENT
-      );
-    } else {
-      relationships.rbih_hrhb = Math.max(
-        RBIH_HRHB_FLOOR,
-        relationships.rbih_hrhb + UNCOORDINATED_DEGRADATION
-      );
+    if (investingFaction === 'RS') {
+        relationships.rbih_rs = Math.max(
+            RBIH_RS_FLOOR,
+            relationships.rbih_rs + RS_INVESTMENT_DEGRADATION
+        );
+        return;
     }
-  }
+
+    // RBiH or HRHB investment affects RBiH-HRHB alliance
+    if (investingFaction === 'RBiH' || investingFaction === 'HRHB') {
+        if (wasCoordinated) {
+            relationships.rbih_hrhb = Math.min(
+                RBIH_HRHB_CEILING,
+                relationships.rbih_hrhb + COORDINATED_IMPROVEMENT
+            );
+        } else {
+            relationships.rbih_hrhb = Math.max(
+                RBIH_HRHB_FLOOR,
+                relationships.rbih_hrhb + UNCOORDINATED_DEGRADATION
+            );
+        }
+    }
 }

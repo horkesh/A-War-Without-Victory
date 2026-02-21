@@ -5,9 +5,9 @@
 
 /** Per-week engagement signal derived from activity counts + scenario intensity. */
 export interface EngagementSignal {
-  front_active: number;
-  pressure_edges: number;
-  intensity: number;
+    front_active: number;
+    pressure_edges: number;
+    intensity: number;
 }
 
 /** Fixed scaling constants for deterministic engagement_level in [0, 1]. */

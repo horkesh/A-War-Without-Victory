@@ -6,9 +6,9 @@
  * Falls back to generic content when no events are available.
  */
 
-import type { GameState, FactionId, Phase0Event } from '../../../state/game_state.js';
-import { pickBestHeadline, fallbackHeadline, getUrgencyLevel } from '../content/headline_templates.js';
-import { turnToDateString, getPlayerFaction, FACTION_COLORS, factionCssClass } from './warroom_utils.js';
+import type { GameState, Phase0Event } from '../../../state/game_state.js';
+import { fallbackHeadline, getUrgencyLevel, pickBestHeadline } from '../content/headline_templates.js';
+import { FACTION_COLORS, factionCssClass, getPlayerFaction, turnToDateString } from './warroom_utils.js';
 
 interface NewspaperContent {
     factionId: string;

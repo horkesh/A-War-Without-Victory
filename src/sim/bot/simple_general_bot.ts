@@ -1,9 +1,9 @@
-import type { GameState, FactionId } from '../../state/game_state.js';
-import type { Bot, BotDecisions, BotDecisionContext } from './bot_interface.js';
 import type { FrontEdge } from '../../map/front_edges.js';
-import { getBotDifficultyTuning, resolveAggression } from './bot_strategy.js';
-import { areRbihHrhbAllied, isRbihHrhbAtWar } from '../phase_i/alliance_update.js';
+import type { FactionId, GameState } from '../../state/game_state.js';
 import { scoreConsolidationTarget } from '../consolidation_scoring.js';
+import { areRbihHrhbAllied, isRbihHrhbAtWar } from '../phase_i/alliance_update.js';
+import type { Bot, BotDecisionContext, BotDecisions } from './bot_interface.js';
+import { getBotDifficultyTuning, resolveAggression } from './bot_strategy.js';
 
 export class SimpleGeneralBot implements Bot {
     id: string;
@@ -75,7 +75,7 @@ export class SimpleGeneralBot implements Bot {
                 const disadvantaged = sideSign * pressureValue < 0 ? 1 : 0;
                 const objectiveBonus =
                     context.strategy.preferred_objective_sids.includes(edge.a) ||
-                    context.strategy.preferred_objective_sids.includes(edge.b)
+                        context.strategy.preferred_objective_sids.includes(edge.b)
                         ? 2
                         : 0;
                 const pressureMagnitude = Math.min(3, Math.floor(Math.abs(pressureValue) / 5));

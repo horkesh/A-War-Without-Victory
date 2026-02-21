@@ -14,20 +14,39 @@
   <div id="map-root">
     <!-- Toolbar -->
     <div class="tm-toolbar">
-      <button type="button" class="tm-toolbar-btn tm-hq-btn" id="btn-back-to-hq" aria-label="Return to warroom HQ" style="display:none;">&#9664; HQ</button>
-      <button type="button" class="tm-toolbar-btn" id="btn-main-menu" aria-label="Open main menu">Menu</button>
-      <span class="tm-zoom-pill" id="zoom-pill" aria-live="polite">STRATEGIC</span>
-      <button type="button" class="tm-toolbar-btn" id="zoom-out" aria-label="Zoom out">&minus;</button>
-      <button type="button" class="tm-toolbar-btn" id="zoom-in" aria-label="Zoom in">+</button>
-      <button type="button" class="tm-toolbar-btn" id="btn-legend" aria-label="Toggle legend">Legend</button>
-      <button type="button" class="tm-toolbar-btn" id="btn-ethnic" aria-label="Toggle ethnic majority view">Ethnic 1991</button>
-      <button type="button" class="tm-toolbar-btn" id="btn-oob" aria-label="Toggle Order of Battle">OOB</button>
-      <button type="button" class="tm-toolbar-btn" id="btn-search" aria-label="Search settlement">Search</button>
-      <button type="button" class="tm-toolbar-btn" id="btn-war-summary" aria-label="Open war summary">Summary</button>
-      <button type="button" class="tm-toolbar-btn" id="btn-settings" aria-label="Open settings">Settings</button>
-      <button type="button" class="tm-toolbar-btn" id="btn-help" aria-label="Open keyboard shortcuts">Help</button>
-      <button type="button" class="tm-toolbar-btn" id="btn-recruit" aria-label="Open recruitment">Recruit</button>
-      <span class="tm-turn-display" id="turn-display">Turn 0 — Sep 1991</span>
+      <div class="tm-toolbar-group" role="group" aria-label="View controls">
+        <button type="button" class="tm-toolbar-btn tm-hq-btn" id="btn-back-to-hq" aria-label="Return to warroom HQ"
+          title="Return to warroom HQ" style="display:none;">&#9664; HQ</button>
+        <button type="button" class="tm-toolbar-btn" id="btn-main-menu" aria-label="Open main menu"
+          title="Open main menu (M)">Menu</button>
+        <span class="tm-zoom-pill" id="zoom-pill" aria-live="polite">STRATEGIC</span>
+        <button type="button" class="tm-toolbar-btn" id="zoom-out" aria-label="Zoom out"
+          title="Zoom out (−)">&minus;</button>
+        <button type="button" class="tm-toolbar-btn" id="zoom-in" aria-label="Zoom in" title="Zoom in (+)">+</button>
+        <button type="button" class="tm-toolbar-btn" id="btn-legend" aria-label="Toggle legend"
+          title="Toggle legend">Legend</button>
+        <button type="button" class="tm-toolbar-btn" id="btn-ethnic" aria-label="Toggle ethnic majority view"
+          title="Toggle ethnic 1991 view">Ethnic 1991</button>
+      </div>
+      <div class="tm-toolbar-group tm-toolbar-group-sep" role="group" aria-label="Tools">
+        <button type="button" class="tm-toolbar-btn" id="btn-oob" aria-label="Toggle Order of Battle"
+          title="Toggle Order of Battle (O)">OOB</button>
+        <button type="button" class="tm-toolbar-btn" id="btn-search" aria-label="Search settlement"
+          title="Search settlement (S)">Search</button>
+        <button type="button" class="tm-toolbar-btn" id="btn-war-summary" aria-label="Open war summary"
+          title="Open war summary">Summary</button>
+        <button type="button" class="tm-toolbar-btn" id="btn-settings" aria-label="Open settings"
+          title="Open settings">Settings</button>
+        <button type="button" class="tm-toolbar-btn" id="btn-help" aria-label="Open keyboard shortcuts"
+          title="Keyboard shortcuts">Help</button>
+        <button type="button" class="tm-toolbar-btn" id="btn-tour" aria-label="Show quick tour"
+          title="Show quick tour">Tour</button>
+        <button type="button" class="tm-toolbar-btn" id="btn-recruit" aria-label="Open recruitment"
+          title="Open recruitment (R)">Recruit</button>
+      </div>
+      <div class="tm-toolbar-group tm-toolbar-group-sep" role="group" aria-label="Info">
+        <span class="tm-turn-display" id="turn-display">Turn 0 — Sep 1991</span>
+      </div>
     </div>
 
     <!-- Main content area -->
@@ -37,7 +56,8 @@
         aria-hidden="true">
         <div class="tm-oob-header">
           <span>ORDER OF BATTLE</span>
-          <button type="button" class="tm-oob-close" id="oob-close" aria-label="Close OOB">&times;</button>
+          <button type="button" class="tm-oob-close" id="oob-close" aria-label="Close OOB"
+            title="Close Order of Battle">&times;</button>
         </div>
         <div class="tm-war-status-content" id="war-status-content">
           <p class="tm-muted">Load a game state to view war status.</p>
@@ -49,19 +69,31 @@
 
       <!-- Map canvas area -->
       <div class="tm-map-wrap" id="map-wrap">
-        <canvas id="map-canvas" tabindex="0" role="img" aria-label="Tactical map of Bosnia and Herzegovina"></canvas>
+        <span id="map-aria-description" aria-live="polite" aria-atomic="true" class="tm-sr-only"></span>
+        <div class="tm-map-loading" id="map-loading" aria-live="polite">
+          <div class="tm-map-loading-spinner"></div>
+          <p class="tm-map-loading-text">Loading map data…</p>
+        </div>
+        <div class="tm-map-error hidden" id="map-error" aria-live="assertive">
+          <p class="tm-map-error-text">Map data could not be loaded. Check your connection and try again.</p>
+          <button type="button" class="tm-toolbar-btn" id="map-error-retry">Retry</button>
+        </div>
+        <div id="operational-3d-container" style="position: absolute; inset: 0; z-index: 1; display: none;"></div>
+        <canvas id="map-canvas" tabindex="0" role="img"
+          aria-label="Tactical map of Bosnia and Herzegovina. Use arrow keys to move between settlements, Enter to select."
+          aria-describedby="map-aria-description"></canvas>
 
         <!-- Staff map overlay canvas (4th zoom layer) -->
-        <canvas id="staff-map-canvas" class="tm-staff-map-canvas" tabindex="-1"
-          aria-label="Staff map detail view" style="display:none;"></canvas>
+        <canvas id="staff-map-canvas" class="tm-staff-map-canvas" tabindex="-1" aria-label="Staff map detail view"
+          style="display:none;"></canvas>
 
         <!-- Minimap -->
         <canvas class="tm-minimap" id="minimap" width="200" height="150" aria-label="Minimap overview"></canvas>
 
         <!-- Zoom controls (on-canvas) -->
         <div class="tm-zoom-controls">
-          <button type="button" id="zoom-in-map" aria-label="Zoom in">+</button>
-          <button type="button" id="zoom-out-map" aria-label="Zoom out">&minus;</button>
+          <button type="button" id="zoom-in-map" aria-label="Zoom in" title="Zoom in">+</button>
+          <button type="button" id="zoom-out-map" aria-label="Zoom out" title="Zoom out">&minus;</button>
         </div>
 
         <!-- Legend (content swapped when Color by changes) -->
@@ -72,11 +104,17 @@
         <!-- Floating layer toolbar (integrated map controls) -->
         <div class="tm-layer-toolbar" id="layer-toolbar" role="group" aria-label="Map layers">
           <span class="tm-layer-toolbar-title">Layers</span>
-          <label class="tm-layer-toggle"><input type="checkbox" id="layer-control" checked><span>Control</span></label>
-          <label class="tm-layer-toggle"><input type="checkbox" id="layer-frontlines" checked><span>Front</span></label>
-          <label class="tm-layer-toggle"><input type="checkbox" id="layer-mun-borders"><span>Municipalities</span></label>
-          <label class="tm-layer-toggle"><input type="checkbox" id="layer-minimap" checked><span>Minimap</span></label>
-          <label class="tm-layer-toggle"><input type="checkbox" id="layer-formations" disabled><span>Formations</span></label>
+          <label class="tm-layer-toggle" title="Toggle 3D map"><input type="checkbox" id="layer-3d" checked><span>3D</span></label>
+          <label class="tm-layer-toggle" title="Toggle political control layer"><input type="checkbox"
+              id="layer-control" checked><span>Control</span></label>
+          <label class="tm-layer-toggle" title="Toggle front lines"><input type="checkbox" id="layer-frontlines"
+              checked><span>Front</span></label>
+          <label class="tm-layer-toggle" title="Toggle municipality borders"><input type="checkbox"
+              id="layer-mun-borders"><span>Municipalities</span></label>
+          <label class="tm-layer-toggle" title="Toggle minimap"><input type="checkbox" id="layer-minimap"
+              checked><span>Minimap</span></label>
+          <label class="tm-layer-toggle" title="Formations (when game state loaded)"><input type="checkbox"
+              id="layer-formations" disabled><span>Formations</span></label>
         </div>
 
         <!-- Hidden file/dialog controls retained for keyboard/IPC compatibility -->
@@ -120,7 +158,8 @@
             <div class="tm-panel-name" id="panel-name"></div>
             <div class="tm-panel-subtitle" id="panel-subtitle"></div>
           </div>
-          <button type="button" class="tm-panel-close" id="panel-close" aria-label="Close panel">&times;</button>
+          <button type="button" class="tm-panel-close" id="panel-close" aria-label="Close panel"
+            title="Close panel">&times;</button>
         </div>
         <div class="tm-panel-body">
           <nav class="tm-panel-tabs" id="panel-tabs" role="tablist"></nav>
@@ -147,7 +186,7 @@
     // When embedded as iframe inside the warroom, inherit the parent's awwv bridge
     // before MapApp initializes (so wireUI finds it and pulls game state).
     // Override focusWarroom to message the parent for scene-swap instead of IPC.
-    (function() {
+    (function () {
       var params = new URLSearchParams(window.location.search);
       if (params.get('embedded') === '1' && window.parent && window.parent !== window) {
         try {
@@ -160,7 +199,7 @@
               proxy[keys[i]] = parentBridge[keys[i]];
             }
             // Override: scene-swap back to warroom instead of IPC window focus
-            proxy.focusWarroom = function() {
+            proxy.focusWarroom = function () {
               window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*');
               return Promise.resolve({ ok: true });
             };
@@ -169,28 +208,29 @@
         } catch (e) { /* cross-origin — ignored */ }
       }
     })();
-    // In Electron (or embedded with bridge), hide the main menu immediately to avoid a flash.
-    // MapApp.init() will re-show it if no game state arrives.
-    if (window.awwv && window.awwv.getCurrentGameState) {
-      var el = document.getElementById('main-menu-overlay');
-      if (el) { el.classList.remove('open'); el.setAttribute('aria-hidden', 'true'); }
-    }
+    // Hide main menu overlay by default so the map is visible on load (Electron, embedded, or standalone).
+    // MapApp.init() will re-show it when needed (e.g. desktop with no game state). User can open via Menu.
+    var el = document.getElementById('main-menu-overlay');
+    if (el) { el.classList.remove('open'); el.setAttribute('aria-hidden', 'true'); }
   </script>
 
   <div class="tm-modal-overlay" id="side-picker-overlay" aria-hidden="true" aria-label="Choose your side">
     <div class="tm-modal-card tm-side-picker-card">
       <div class="tm-modal-header">
         <span>New Campaign</span>
-        <button type="button" class="tm-oob-close" id="side-picker-close" aria-label="Close side picker">&times;</button>
+        <button type="button" class="tm-oob-close" id="side-picker-close"
+          aria-label="Close side picker">&times;</button>
       </div>
       <div class="tm-modal-content tm-side-picker-content">
         <div class="tm-scenario-briefing">
           <div class="tm-scenario-image-wrap">
-            <img class="tm-scenario-image" id="scenario-briefing-image" src="" alt="April 1992 scenario" style="display:none">
+            <img class="tm-scenario-image" id="scenario-briefing-image" src="" alt="April 1992 scenario"
+              style="display:none">
           </div>
           <div class="tm-scenario-text">
             <div class="tm-scenario-title">April 1992 — Independence</div>
-            <div class="tm-scenario-subtitle">Bosnia-Herzegovina declares independence. The JNA withdraws&mdash;leaving everything behind. Three armies emerge from the chaos. A war without victory begins.</div>
+            <div class="tm-scenario-subtitle">Bosnia-Herzegovina declares independence. The JNA withdraws&mdash;leaving
+              everything behind. Three armies emerge from the chaos. A war without victory begins.</div>
           </div>
         </div>
         <div class="tm-scenario-sep"></div>
@@ -203,30 +243,37 @@
           <label class="tm-scenario-option">
             <input type="radio" name="side-picker-scenario" id="side-picker-scenario-apr1992" value="apr_1992" checked>
             <span class="tm-scenario-option-title">April 1992</span>
-            <span class="tm-scenario-option-desc">War begins with formations in play and immediate operational pressure.</span>
+            <span class="tm-scenario-option-desc">War begins with formations in play and immediate operational
+              pressure.</span>
           </label>
         </div>
         <div class="tm-scenario-sep"></div>
         <p class="tm-muted">Choose your side. Other factions are controlled by AI.</p>
         <div id="side-picker-error" class="tm-side-picker-error hidden" role="alert"></div>
         <div class="tm-side-picker-options" role="group" aria-label="Faction selection">
-          <button type="button" class="tm-side-picker-option" id="side-picker-RBiH" data-faction="RBiH" aria-label="Play as RBiH (ARBiH)">
+          <button type="button" class="tm-side-picker-option" id="side-picker-RBiH" data-faction="RBiH"
+            aria-label="Play as RBiH (ARBiH)">
             <img class="tm-side-picker-flag" id="side-picker-flag-RBiH" src="" alt="" width="80" height="53">
             <span class="tm-side-picker-label">RBiH (ARBiH)</span>
             <span class="tm-difficulty-badge tm-difficulty-hard">HARD</span>
-            <span class="tm-side-picker-desc">Surrounded and outgunned. Defend the cities. Survive the embargo. Hold until the world notices.</span>
+            <span class="tm-side-picker-desc">Surrounded and outgunned. Defend the cities. Survive the embargo. Hold
+              until the world notices.</span>
           </button>
-          <button type="button" class="tm-side-picker-option" id="side-picker-RS" data-faction="RS" aria-label="Play as RS (VRS)">
+          <button type="button" class="tm-side-picker-option" id="side-picker-RS" data-faction="RS"
+            aria-label="Play as RS (VRS)">
             <img class="tm-side-picker-flag" id="side-picker-flag-RS" src="" alt="" width="80" height="53">
             <span class="tm-side-picker-label">RS (VRS)</span>
             <span class="tm-difficulty-badge tm-difficulty-standard">STANDARD</span>
-            <span class="tm-side-picker-desc">Inherit the JNA arsenal. Seize the corridors. The clock is ticking&mdash;use your advantage before it fades.</span>
+            <span class="tm-side-picker-desc">Inherit the JNA arsenal. Seize the corridors. The clock is
+              ticking&mdash;use your advantage before it fades.</span>
           </button>
-          <button type="button" class="tm-side-picker-option" id="side-picker-HRHB" data-faction="HRHB" aria-label="Play as HRHB (HVO)">
+          <button type="button" class="tm-side-picker-option" id="side-picker-HRHB" data-faction="HRHB"
+            aria-label="Play as HRHB (HVO)">
             <img class="tm-side-picker-flag" id="side-picker-flag-HRHB" src="" alt="" width="80" height="53">
             <span class="tm-side-picker-label">HRHB (HVO)</span>
             <span class="tm-difficulty-badge tm-difficulty-moderate">MODERATE</span>
-            <span class="tm-side-picker-desc">Backed by Zagreb but squeezed between two wars. Will the alliance hold, or will you fight alone?</span>
+            <span class="tm-side-picker-desc">Backed by Zagreb but squeezed between two wars. Will the alliance hold, or
+              will you fight alone?</span>
           </button>
         </div>
       </div>
@@ -237,7 +284,8 @@
     <div class="tm-modal-card">
       <div class="tm-modal-header">
         <span>After Action Report</span>
-        <button type="button" class="tm-oob-close" id="aar-close" aria-label="Close after action report">&times;</button>
+        <button type="button" class="tm-oob-close" id="aar-close"
+          aria-label="Close after action report">&times;</button>
       </div>
       <div class="tm-modal-content" id="aar-content"></div>
     </div>
@@ -255,6 +303,22 @@
     </div>
   </div>
 
+  <div class="tm-modal-overlay" id="tutorial-overlay" aria-hidden="true" aria-label="Quick tour">
+    <div class="tm-modal-card tm-tutorial-card">
+      <div class="tm-modal-header">
+        <span>Quick tour</span>
+        <button type="button" class="tm-oob-close" id="tutorial-close" aria-label="Close tour">&times;</button>
+      </div>
+      <div class="tm-modal-content" id="tutorial-content">
+        <p id="tutorial-step-text" class="tm-tutorial-step"></p>
+      </div>
+      <div class="tm-modal-footer" style="display:flex;justify-content:space-between;gap:8px">
+        <button type="button" class="tm-toolbar-btn" id="tutorial-dismiss">Dismiss</button>
+        <button type="button" class="tm-toolbar-btn" id="tutorial-next">Next</button>
+      </div>
+    </div>
+  </div>
+
   <div class="tm-modal-overlay" id="help-modal" aria-hidden="true">
     <div class="tm-modal-card">
       <div class="tm-modal-header">
@@ -262,16 +326,30 @@
         <button type="button" class="tm-oob-close" id="help-close" aria-label="Close help">&times;</button>
       </div>
       <div class="tm-modal-content">
-        <p class="tm-muted" style="margin-bottom:10px">Tactical map viewer for A War Without Victory. Load a game state or replay to explore control, formations, and orders. Use the toolbar to toggle layers, search settlements, and view the order of battle.</p>
+        <p class="tm-muted" style="margin-bottom:10px">Tactical map viewer for A War Without Victory. Load a game state
+          or replay to explore control, formations, and orders. Use the toolbar to toggle layers, search settlements,
+          and view the order of battle.</p>
         <div class="tm-panel-section-header" style="margin-bottom:6px">KEYBOARD SHORTCUTS</div>
-        <div class="tm-panel-field"><span class="tm-panel-field-label">+/-</span><span class="tm-panel-field-value">Zoom in/out</span></div>
-        <div class="tm-panel-field"><span class="tm-panel-field-label">Home/F</span><span class="tm-panel-field-value">Fit map to view</span></div>
-        <div class="tm-panel-field"><span class="tm-panel-field-label">Space</span><span class="tm-panel-field-value">Play/Pause replay</span></div>
-        <div class="tm-panel-field"><span class="tm-panel-field-label">M</span><span class="tm-panel-field-value">Main menu</span></div>
-        <div class="tm-panel-field"><span class="tm-panel-field-label">O</span><span class="tm-panel-field-value">Toggle OOB panel</span></div>
-        <div class="tm-panel-field"><span class="tm-panel-field-label">S</span><span class="tm-panel-field-value">Search settlements</span></div>
-        <div class="tm-panel-field"><span class="tm-panel-field-label">R</span><span class="tm-panel-field-value">Recruitment / Load replay</span></div>
-        <div class="tm-panel-field"><span class="tm-panel-field-label">Esc</span><span class="tm-panel-field-value">Close overlays and search</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">+/-</span><span class="tm-panel-field-value">Zoom
+            in/out</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">Home/F</span><span
+            class="tm-panel-field-value">Fit map to view</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">Space</span><span
+            class="tm-panel-field-value">Play/Pause replay</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">M</span><span class="tm-panel-field-value">Main
+            menu</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">O</span><span class="tm-panel-field-value">Toggle
+            OOB panel</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">S</span><span class="tm-panel-field-value">Search
+            settlements</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">R</span><span
+            class="tm-panel-field-value">Recruitment / Load replay</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">Arrow keys</span><span
+            class="tm-panel-field-value">Move between settlements (when map focused)</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">Enter</span><span
+            class="tm-panel-field-value">Select settlement and open panel (when map focused)</span></div>
+        <div class="tm-panel-field"><span class="tm-panel-field-label">Esc</span><span
+            class="tm-panel-field-value">Close overlays and search</span></div>
       </div>
     </div>
   </div>
@@ -280,7 +358,8 @@
     <div class="tm-modal-card tm-recruitment-modal-card">
       <div class="tm-modal-header">
         <span>Recruitment &amp; Mobilization</span>
-        <button type="button" class="tm-oob-close" id="recruitment-close" aria-label="Close recruitment">&times;</button>
+        <button type="button" class="tm-oob-close" id="recruitment-close"
+          aria-label="Close recruitment">&times;</button>
       </div>
       <div class="tm-modal-content" id="recruitment-content">
         <p class="tm-muted">Load a game state with recruitment to see brigade catalog.</p>

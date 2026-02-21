@@ -45,6 +45,7 @@ Populate this section from the discovery checklist.
 
 ### GUI / Map UIs
 - **Tactical Map System (standalone map app):** `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` — engineering reference. Code: `src/ui/map/`. Dev server: `npm run dev:map` (port 3001). Canvas 2D; political control, contested, front lines, settlement panel, OOB sidebar, dataset switching; no Leaflet/Mapbox.
+- **3D tactical render path (integration track):** `src/ui/map/map_operational_3d.ts`, `src/ui/map/map_staff_3d.ts`, `src/ui/map/tactical_sandbox.ts`. Shared render contract type: `MapViewInput` in `src/ui/map/types.ts`.
 - **Warroom (HQ scene + map scene):** `src/ui/warroom/`. Dev server: `npm run dev:warroom`. Full-screen map scene uses WarPlanningMap; staged assets, Phase 0 turn advance. See GUI reports in `docs/40_reports/`.
 - **Phase II browser advance:** `src/sim/run_phase_ii_browser.ts` — browser-safe Phase II turn advance (no Node/fs). Used by warroom when advancing a turn in phase_ii. Increments turn; when faction AoRs empty, populates AoR from control + formation home muns via `src/scenario/aor_init.ts`. Does not run supply pressure or exhaustion; for full Phase II use Node `runTurn`.
 

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tactical Sandbox — AWWV</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0d0d1a; font-family: 'Courier New', Courier, monospace; color: #c0d8e0; }
+    #sandbox-container { width: 100%; height: 100%; position: relative; }
+    #message {
+      position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      padding: 1.5rem 2rem;
+      background: rgba(10, 10, 22, 0.95);
+      color: #00ff88;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px; white-space: pre-wrap;
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-left: 4px solid #00ff88;
+      max-width: 90%; display: none; z-index: 100;
+    }
+    #message.visible { display: block; }
+  </style>
+</head>
+<body>
+  <div id="sandbox-container"></div>
+  <div id="message" aria-live="polite"></div>
+  <script type="module" src="./tactical_sandbox.ts"></script>
+</body>
+</html>

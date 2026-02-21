@@ -54,6 +54,27 @@
 ### AoR Init (Shared)
 - `src/scenario/aor_init.ts` — `populateFactionAoRFromControl`, `ensureFormationHomeMunsInFactionAoR`. Browser-safe. Consumers: scenario_runner (re-exports), run_phase_ii_browser, turn_pipeline `phase-ii-aor-init`.
 
+### Turn Contract (Main Game)
+- Canonical turn contract for desktop and headless runs:
+  - **Input:** `GameState` + settlement edges + optional directives/orders payload.
+  - **Output:** updated `GameState` + deterministic turn report metadata.
+- Main game execution is single-owner:
+  - Main process / scenario harness runs turn advancement (`runTurn` or phase-specific runners).
+  - Tactical map views (2D/3D) are display-only clients that stage orders through IPC.
+  - Renderer-side map code must not advance canonical turns directly.
+
+### Tactical Sandbox 7-step Subset (Non-Canon)
+- `src/ui/map/sandbox/sandbox_engine.ts` intentionally runs a reduced browser-safe subset for sandbox experimentation:
+  1. apply posture orders
+  2. process brigade movement
+  3. degrade equipment
+  4. compute brigade pressure
+  5. resolve attack orders
+  6. apply WIA trickleback
+  7. advance turn counter
+- This subset is **not canon** and must not be used for canonical saves or shared campaign state.
+- Sandbox-only exceptions (for example movement pre-claim and traversal through uncontrolled settlements) stay confined to sandbox mode.
+
 ## Turn pipeline and canon systems (Phase Specifications v0.5)
 
 Canon global turn-order hooks (docs/10_canon/Phase_Specifications_v0_5_0.md) map to `src/sim/turn_pipeline.ts` step names as follows. Gaps (e.g. explicit “System 10 capability step” ordering) should be closed per PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md.
@@ -80,7 +101,7 @@ Phase I steps: `evaluate-events` (first), `phase-i-militia-emergence`, `phase-i-
 
 **Authority derivation:** `update-formation-lifecycle` derives municipality authority via `deriveMunicipalityAuthorityMap` (formation_lifecycle.ts) from political control (consolidated/contested/fragmented); used for brigade activation gating.
 
-**AoR init:** `phase-ii-aor-init` uses `populateFactionAoRFromControl` and `ensureFormationHomeMunsInFactionAoR` from `src/scenario/aor_init.ts` (via scenario_runner re-export). Phase II AoR steps: `validate-brigade-aor`, `rebalance-brigade-aor`, `enforce-corps-aor-contiguity` (when corps_command present; enclave-aware), `apply-municipality-orders`. See Phase_II_Specification_v0_5_0.md §5.
+**AoR init:** `phase-ii-aor-init` uses `populateFactionAoRFromControl` and `ensureFormationHomeMunsInFactionAoR` from `src/scenario/aor_init.ts` (via scenario_runner re-export). Phase II AoR steps: `validate-brigade-aor`, `rebalance-brigade-aor`, `enforce-brigade-aor-contiguity` (repair islands after rebalance), `enforce-corps-aor-contiguity` (when corps_command present; enclave-aware), `surrounded-brigade-reform` (reform in home territory when entire AoR in enclave), `apply-municipality-orders`. See Phase_II_Specification_v0_5_0.md §5.
 
 ## Non-Canonical / Legacy Harnesses
 These exist for smoke and internal checks, not for authoritative runs:

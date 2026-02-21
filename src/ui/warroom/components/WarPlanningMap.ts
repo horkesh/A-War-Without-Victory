@@ -4,13 +4,13 @@
  * Close via [X] or ESC. Three zoom levels (Strategic / Operational / Tactical).
  */
 
-import type { GameState, FactionId, MunicipalityId, OrganizationalPenetration } from '../../../state/game_state.js';
-import { SettlementInfoPanel } from './SettlementInfoPanel.js';
-import { InvestmentPanel } from './InvestmentPanel.js';
-import type { InvestmentPanelMunInfo } from './InvestmentPanel.js';
 import type { InvestmentType } from '../../../phase0/investment.js';
-import { Phase0DirectiveState } from './Phase0DirectiveState.js';
+import type { FactionId, GameState, MunicipalityId, OrganizationalPenetration } from '../../../state/game_state.js';
 import wallMapFrameUrl from '../assets/wall_map_frame_v1.png?url';
+import type { InvestmentPanelMunInfo } from './InvestmentPanel.js';
+import { InvestmentPanel } from './InvestmentPanel.js';
+import { Phase0DirectiveState } from './Phase0DirectiveState.js';
+import { SettlementInfoPanel } from './SettlementInfoPanel.js';
 
 /** GeoJSON Position [x, y] or [x, y, z]. */
 type Position = [number, number] | [number, number, number];

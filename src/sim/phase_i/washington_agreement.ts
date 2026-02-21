@@ -20,7 +20,7 @@
  * Canon: Phase_I_Specification_v0_4_0.md §4.8; Systems_Manual §10; Engine_Invariants §J.
  */
 
-import type { GameState, SettlementId, FactionId } from '../../state/game_state.js';
+import type { GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // ── Tunable Washington precondition thresholds ──
@@ -51,19 +51,19 @@ export const POST_WASH_HEAVY_EQUIPMENT = 0.65;
 export const POST_WASH_JOINT_PRESSURE_BONUS = 1.15;
 
 export interface WashingtonPreconditionResult {
-  w1_ceasefire_active: boolean;
-  w2_ceasefire_duration: boolean;
-  w3_ivp_momentum: boolean;
-  w4_patron_constraint: boolean;
-  w5_rs_territorial_threat: boolean;
-  w6_combined_exhaustion: boolean;
-  all_met: boolean;
+    w1_ceasefire_active: boolean;
+    w2_ceasefire_duration: boolean;
+    w3_ivp_momentum: boolean;
+    w4_patron_constraint: boolean;
+    w5_rs_territorial_threat: boolean;
+    w6_combined_exhaustion: boolean;
+    all_met: boolean;
 }
 
 export interface WashingtonCheckReport {
-  preconditions: WashingtonPreconditionResult;
-  fired: boolean;
-  already_signed: boolean;
+    preconditions: WashingtonPreconditionResult;
+    fired: boolean;
+    already_signed: boolean;
 }
 
 /**
@@ -71,103 +71,103 @@ export interface WashingtonCheckReport {
  * Deterministic: counts settlements keyed in political_controllers.
  */
 function computeRsTerritorialShare(state: GameState): number {
-  const pc = state.political_controllers;
-  if (!pc) return 0;
-  const entries = Object.values(pc);
-  if (entries.length === 0) return 0;
-  let rsCount = 0;
-  for (const controller of entries) {
-    if (controller === 'RS') rsCount++;
-  }
-  return rsCount / entries.length;
+    const pc = state.political_controllers;
+    if (!pc) return 0;
+    const entries = Object.values(pc);
+    if (entries.length === 0) return 0;
+    let rsCount = 0;
+    for (const controller of entries) {
+        if (controller === 'RS') rsCount++;
+    }
+    return rsCount / entries.length;
 }
 
 /**
  * Evaluate Washington preconditions. Pure function of state.
  */
 export function evaluateWashingtonPreconditions(state: GameState): WashingtonPreconditionResult {
-  const rhs = state.rbih_hrhb_state;
-  const turn = state.meta.turn;
+    const rhs = state.rbih_hrhb_state;
+    const turn = state.meta.turn;
 
-  // W1: ceasefire active
-  const w1 = rhs?.ceasefire_active === true;
+    // W1: ceasefire active
+    const w1 = rhs?.ceasefire_active === true;
 
-  // W2: ceasefire duration
-  const ceasefireSince = rhs?.ceasefire_since_turn ?? null;
-  const ceasefireDuration = (ceasefireSince !== null && w1) ? turn - ceasefireSince : 0;
-  const w2 = ceasefireDuration >= WASH_CEASEFIRE_DURATION;
+    // W2: ceasefire duration
+    const ceasefireSince = rhs?.ceasefire_since_turn ?? null;
+    const ceasefireDuration = (ceasefireSince !== null && w1) ? turn - ceasefireSince : 0;
+    const w2 = ceasefireDuration >= WASH_CEASEFIRE_DURATION;
 
-  // W3: IVP negotiation_momentum
-  const ivp = state.international_visibility_pressure;
-  const negotiationMomentum = ivp?.negotiation_momentum ?? 0;
-  const w3 = negotiationMomentum > WASH_IVP_THRESHOLD;
+    // W3: IVP negotiation_momentum
+    const ivp = state.international_visibility_pressure;
+    const negotiationMomentum = ivp?.negotiation_momentum ?? 0;
+    const w3 = negotiationMomentum > WASH_IVP_THRESHOLD;
 
-  // W4: HRHB patron constraint_severity
-  const hrhbFaction = (state.factions ?? []).find((f) => f.id === 'HRHB');
-  const constraintSeverity = hrhbFaction?.patron_state?.constraint_severity ?? 0;
-  const w4 = constraintSeverity > WASH_PATRON_CONSTRAINT;
+    // W4: HRHB patron constraint_severity
+    const hrhbFaction = (state.factions ?? []).find((f) => f.id === 'HRHB');
+    const constraintSeverity = hrhbFaction?.patron_state?.constraint_severity ?? 0;
+    const w4 = constraintSeverity > WASH_PATRON_CONSTRAINT;
 
-  // W5: RS territorial control share
-  const rsShare = computeRsTerritorialShare(state);
-  const w5 = rsShare > WASH_RS_THREAT_SHARE;
+    // W5: RS territorial control share
+    const rsShare = computeRsTerritorialShare(state);
+    const w5 = rsShare > WASH_RS_THREAT_SHARE;
 
-  // W6: Combined exhaustion
-  const rbihExhaustion = state.phase_ii_exhaustion?.['RBiH'] ?? 0;
-  const hrhbExhaustion = state.phase_ii_exhaustion?.['HRHB'] ?? 0;
-  const combinedExhaustion = rbihExhaustion + hrhbExhaustion;
-  const w6 = combinedExhaustion > WASH_COMBINED_EXHAUSTION;
+    // W6: Combined exhaustion
+    const rbihExhaustion = state.phase_ii_exhaustion?.['RBiH'] ?? 0;
+    const hrhbExhaustion = state.phase_ii_exhaustion?.['HRHB'] ?? 0;
+    const combinedExhaustion = rbihExhaustion + hrhbExhaustion;
+    const w6 = combinedExhaustion > WASH_COMBINED_EXHAUSTION;
 
-  return {
-    w1_ceasefire_active: w1,
-    w2_ceasefire_duration: w2,
-    w3_ivp_momentum: w3,
-    w4_patron_constraint: w4,
-    w5_rs_territorial_threat: w5,
-    w6_combined_exhaustion: w6,
-    all_met: w1 && w2 && w3 && w4 && w5 && w6
-  };
+    return {
+        w1_ceasefire_active: w1,
+        w2_ceasefire_duration: w2,
+        w3_ivp_momentum: w3,
+        w4_patron_constraint: w4,
+        w5_rs_territorial_threat: w5,
+        w6_combined_exhaustion: w6,
+        all_met: w1 && w2 && w3 && w4 && w5 && w6
+    };
 }
 
 /**
  * Apply post-Washington effects to HRHB capabilities, embargo, and alliance.
  */
 function applyWashingtonEffects(state: GameState): void {
-  const rhs = state.rbih_hrhb_state!;
+    const rhs = state.rbih_hrhb_state!;
 
-  // Lock alliance
-  state.phase_i_alliance_rbih_hrhb = WASH_ALLIANCE_LOCK_VALUE;
-  rhs.washington_signed = true;
-  rhs.washington_turn = state.meta.turn;
+    // Lock alliance
+    state.phase_i_alliance_rbih_hrhb = WASH_ALLIANCE_LOCK_VALUE;
+    rhs.washington_signed = true;
+    rhs.washington_turn = state.meta.turn;
 
-  // HRHB capability shift
-  const hrhbFaction = (state.factions ?? []).find((f) => f.id === 'HRHB');
-  if (hrhbFaction) {
-    if (hrhbFaction.capability_profile) {
-      hrhbFaction.capability_profile.equipment_access = POST_WASH_EQUIPMENT_ACCESS;
-      hrhbFaction.capability_profile.croatian_support = POST_WASH_CROATIAN_SUPPORT;
+    // HRHB capability shift
+    const hrhbFaction = (state.factions ?? []).find((f) => f.id === 'HRHB');
+    if (hrhbFaction) {
+        if (hrhbFaction.capability_profile) {
+            hrhbFaction.capability_profile.equipment_access = POST_WASH_EQUIPMENT_ACCESS;
+            hrhbFaction.capability_profile.croatian_support = POST_WASH_CROATIAN_SUPPORT;
+        }
+        // Embargo enhancement
+        if (hrhbFaction.embargo_profile) {
+            hrhbFaction.embargo_profile.external_pipeline_status = Math.max(
+                hrhbFaction.embargo_profile.external_pipeline_status,
+                POST_WASH_EXTERNAL_PIPELINE
+            );
+            hrhbFaction.embargo_profile.heavy_equipment_access = Math.max(
+                hrhbFaction.embargo_profile.heavy_equipment_access,
+                POST_WASH_HEAVY_EQUIPMENT
+            );
+        }
     }
-    // Embargo enhancement
-    if (hrhbFaction.embargo_profile) {
-      hrhbFaction.embargo_profile.external_pipeline_status = Math.max(
-        hrhbFaction.embargo_profile.external_pipeline_status,
-        POST_WASH_EXTERNAL_PIPELINE
-      );
-      hrhbFaction.embargo_profile.heavy_equipment_access = Math.max(
-        hrhbFaction.embargo_profile.heavy_equipment_access,
-        POST_WASH_HEAVY_EQUIPMENT
-      );
-    }
-  }
 
-  // Enable COORDINATED_STRIKE for HRHB formations
-  const formations = state.formations ?? {};
-  const formationIds = Object.keys(formations).sort(strictCompare);
-  for (const fid of formationIds) {
-    const f = formations[fid];
-    if (f.faction === 'HRHB' && f.doctrine_state) {
-      f.doctrine_state.eligible['COORDINATED_STRIKE'] = true;
+    // Enable COORDINATED_STRIKE for HRHB formations
+    const formations = state.formations ?? {};
+    const formationIds = Object.keys(formations).sort(strictCompare);
+    for (const fid of formationIds) {
+        const f = formations[fid];
+        if (f.faction === 'HRHB' && f.doctrine_state) {
+            f.doctrine_state.eligible['COORDINATED_STRIKE'] = true;
+        }
     }
-  }
 }
 
 /**
@@ -175,38 +175,38 @@ function applyWashingtonEffects(state: GameState): void {
  * Must run AFTER ceasefire check.
  */
 export function checkAndApplyWashington(state: GameState): WashingtonCheckReport {
-  const rhs = state.rbih_hrhb_state;
-  if (!rhs) {
-    return {
-      preconditions: {
-        w1_ceasefire_active: false,
-        w2_ceasefire_duration: false,
-        w3_ivp_momentum: false,
-        w4_patron_constraint: false,
-        w5_rs_territorial_threat: false,
-        w6_combined_exhaustion: false,
-        all_met: false
-      },
-      fired: false,
-      already_signed: false
-    };
-  }
+    const rhs = state.rbih_hrhb_state;
+    if (!rhs) {
+        return {
+            preconditions: {
+                w1_ceasefire_active: false,
+                w2_ceasefire_duration: false,
+                w3_ivp_momentum: false,
+                w4_patron_constraint: false,
+                w5_rs_territorial_threat: false,
+                w6_combined_exhaustion: false,
+                all_met: false
+            },
+            fired: false,
+            already_signed: false
+        };
+    }
 
-  if (rhs.washington_signed) {
-    return {
-      preconditions: evaluateWashingtonPreconditions(state),
-      fired: false,
-      already_signed: true
-    };
-  }
+    if (rhs.washington_signed) {
+        return {
+            preconditions: evaluateWashingtonPreconditions(state),
+            fired: false,
+            already_signed: true
+        };
+    }
 
-  const preconditions = evaluateWashingtonPreconditions(state);
-  if (!preconditions.all_met) {
-    return { preconditions, fired: false, already_signed: false };
-  }
+    const preconditions = evaluateWashingtonPreconditions(state);
+    if (!preconditions.all_met) {
+        return { preconditions, fired: false, already_signed: false };
+    }
 
-  // Fire Washington Agreement
-  applyWashingtonEffects(state);
+    // Fire Washington Agreement
+    applyWashingtonEffects(state);
 
-  return { preconditions, fired: true, already_signed: false };
+    return { preconditions, fired: true, already_signed: false };
 }

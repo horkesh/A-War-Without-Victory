@@ -9,22 +9,22 @@
 
 /** mun1990_id values for municipalities aligned to RBiH (control and formations count as RBiH/ARBiH). */
 export const MUN1990_IDS_ALIGNED_TO_RBIH: readonly string[] = [
-  'maglaj',
-  'bihac',
-  'gradacac',
-  'brcko',
-  'ilijas',
-  'tuzla',
-  'lopare',
-  'srebrenik',
-  'tesanj',
-  'velika_kladusa',
-  'vogosca',
+    'maglaj',
+    'bihac',
+    'gradacac',
+    'brcko',
+    'ilijas',
+    'tuzla',
+    'lopare',
+    'srebrenik',
+    'tesanj',
+    'velika_kladusa',
+    'vogosca',
 ].sort((a, b) => a.localeCompare(b));
 
 const SET = new Set<string>(MUN1990_IDS_ALIGNED_TO_RBIH);
 
 /** True if this mun1990_id is in the RBiH-aligned list (control and spawns → RBiH). */
 export function isMunicipalityAlignedToRbih(mun1990Id: string): boolean {
-  return SET.has(mun1990Id);
+    return SET.has(mun1990Id);
 }

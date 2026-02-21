@@ -5,7 +5,7 @@
 
 /** Run-only probe context; never stored in GameState or saves. */
 export interface ProbeContext {
-  probe_intent_enabled: boolean;
-  /** If Step A found a gating condition that was toggled: kind + location (path:line). */
-  discovered_gate: { kind: string; location: string } | null;
+    probe_intent_enabled: boolean;
+    /** If Step A found a gating condition that was toggled: kind + location (path:line). */
+    discovered_gate: { kind: string; location: string } | null;
 }

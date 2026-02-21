@@ -182,6 +182,9 @@
     "map:snapshot:osm-terrain:h6_2": "tsx scripts/map/phase_h6_2_snapshot_osm_terrain.ts",
     "map:snapshot:dem-clip:h6_2": "tsx scripts/map/phase_h6_2_snapshot_dem_clip.ts",
     "map:derive:terrain-scalars:h6_8": "tsx scripts/map/phase_h6_8_derive_terrain_scalars.ts",
+    "map:export:heightmap-3d": "tsx scripts/map/export_heightmap_for_3d_viewer.ts",
+    "map:export:municipalities-2-5d": "tsx scripts/map/export_municipalities_2_5d.ts",
+    "map:export:terrain-bg": "cd data/derived/terrain && gdaldem hillshade dem_clip_h6_2.tif hillshade_tmp.tif -z 2 -az 315 -alt 45 && gdal_translate -of PNG hillshade_tmp.tif hillshade_bg.png && del hillshade_tmp.tif",
     "map:viewer:terrain-scalars:h6_9": "tsx scripts/map/phase_h6_9_build_terrain_scalars_viewer_overlay.ts",
     "map:audit:geometry:s209422:h3_8": "tsx scripts/map/audit_settlement_geometry_s209422_h3_8.ts",
     "map:audit:municipality-layer:h4_0": "tsx scripts/map/audit_municipality_layer_h4_0.ts",
@@ -260,6 +263,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "@types/three": "^0.183.0",
     "electron": "^33.0.0",
     "electron-builder": "^25.0.0",
     "esbuild": "^0.27.3",
@@ -284,6 +288,7 @@
     "pngjs": "^7.0.0",
     "polyclip-ts": "^0.16.8",
     "svg-path-parser": "^1.1.0",
+    "three": "^0.170.0",
     "xlsx": "^0.18.5"
   }
 }

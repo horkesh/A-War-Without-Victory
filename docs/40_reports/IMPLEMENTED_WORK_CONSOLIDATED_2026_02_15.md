@@ -246,6 +246,8 @@ Canon: TACTICAL_MAP_SYSTEM §2 (summary), §13, §13.2, §13.3.
 |--------|----------------------|
 | [DISPLACEMENT_REFACTOR_SHARED_UTILS_2026_02_17.md](implemented/DISPLACEMENT_REFACTOR_SHARED_UTILS_2026_02_17.md) | **Code organization (no behavior change):** New `displacement_state_utils.ts` with `getOrInitDisplacementState` and `getMunicipalityIdFromRecord`. `displacement_takeover` and `minority_flight` import from it; removed ~30 lines duplication each. Simplified `minority_flight` (redundant assignments, unused import). Canon: Systems Manual §12 implementation-note (displacement module structure). |
 
+**Displacement receiving cap and census seeding (2026-02-18, Run Problems):** Receivers cap at pre-war × 1.5 (Sarajevo area × 1.1 due to siege); overflow beyond cap routed to next-closest urban centers (`displacement_routing_data.ts`, `displacement.ts`, `displacement_takeover.ts`). At scenario load, when census is available and start_phase is phase_i or phase_ii, `displacement_state` is seeded from 1991 census so `original_population` and map "Population (Current)" scale by real mun size (docs/20_engineering/DISPLACEMENT_CENSUS_SEEDING.md). Run summary includes `defender_present_battles` and `defender_absent_battles` (Phase II §11.1). Sarajevo hold anchor: `centar_sarajevo` expected RBiH in historical anchors (harness). Canon: Phase I §4.4.3, Phase II §15, Systems Manual §12.
+
 ---
 
 ## 24. Dual defensive arc front lines and war map UI cleanup (2026-02-17)
@@ -253,6 +255,22 @@ Canon: TACTICAL_MAP_SYSTEM §2 (summary), §13, §13.2, §13.3.
 | Report | What was implemented |
 |--------|----------------------|
 | [DUAL_DEFENSIVE_ARC_FRONT_LINES_2026_02_17.md](implemented/DUAL_DEFENSIVE_ARC_FRONT_LINES_2026_02_17.md) | **Dual defensive arc front lines:** Replaced single white front line with **paired faction-colored defensive arc symbols** on each side of settlement borders — arcs only where brigades are deployed (defendedByFaction from brigade AoR). Both factions with AoR → arcs both sides; one faction → arcs that side only; neither → nothing drawn. Perpendicular barb ticks toward enemy; faction colors from SIDE_RGB (RBiH green, RS crimson, HRHB blue). Old single-line system removed (undefended/dashed, FRONT_LINE.color/glowColor/barbColor, defendedSids partition). Refactor: single collection loop then glow/arc/barb draw passes. Also: AoR crosshatch adaptive color and density, labels URBAN_CENTER+TOWN only, Labels and Brigade AoR toggles removed (aligns with §22). Canon: TACTICAL_MAP_SYSTEM §2 (front lines), §8. |
+
+---
+
+## 25. Faction AI improvements across all phases (2026-02-18)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [FACTION_AI_IMPROVEMENTS_ALL_PHASES_2026_02_18.md](implemented/FACTION_AI_IMPROVEMENTS_ALL_PHASES_2026_02_18.md) | **Six-stage faction bot overhaul.** (1) **Phase 0 bot integration fix:** Headless runs now run Phase 0 bot investments and relationship init in `runOneTurn()` (src/state/turn_pipeline.ts), mirroring warroom logic so non-player factions invest during Phase 0. (2) **Phase II operations catalog & defensive OGs:** Six new named operations (2 per faction: sector_attack/strategic_defense); OGs can activate during strategic_defense with posture 'defend'; corridor breach donor threshold 3→2; OGActivationOrder.posture extended to 'defend'. (3) **Emergency defensive operations:** generateEmergencyDefensiveOperations() for defensive corps with no active op when sector threat > 2.0; launches strategic_defense with up to 4 brigades. (4) **Phase 0 faction-specific strategies:** FACTION_PHASE0_STRATEGIES (RS paramilitary-first/aggressive budget; RBiH TO-first/contested bonus; HRHB police/party); alliance-aware coordination (RBiH–HRHB when relationship > 0.2). (5) **Inter-corps coordination & economy of force:** coordinateMultiCorpsOffensive() pre-sets top 2 corps offensive under general_offensive; CORRIDOR_BREACH_MAX_STRIP_WIDTH 5→8; dynamic elastic defense [1, 4] scaled by front brigade count (1 per 5 front brigades) in bot_brigade_ai. (6) **Phase I bot AI (new):** src/sim/phase_i/bot_phase_i.ts — posture assignment (hold/probe/push) for bot-controlled factions; PHASE_I_PROFILES (RS 40% push + early boost; RBiH 8% push; HRHB 20%); alliance-aware edge skip; pipeline step phase-i-bot-posture in turn_pipeline.ts. Canon: Phase II Spec §5/§12 implementation-note; Systems Manual §6.5; context, docs_index, ledger. |
+
+---
+
+## 26. Tactical map UX: accessibility, visual feedback, typography, color, discoverability, missing states (2026-02-19)
+
+| Source | What was implemented |
+|--------|----------------------|
+| Warmap GUI UX plan (cursor plan), PROJECT_LEDGER 2026-02-19 | **Accessibility:** Canvas `aria-describedby` + live region (#map-aria-description) for selected/hovered settlement; Arrow keys (when map focused) move selection between settlements (deterministic sorted SID); Enter opens panel; focus-visible rings on toolbar and canvas. **Visual feedback:** Cursor pointer over settlements, crosshair otherwise; hover glow (shadowBlur 5px) and selection outline pulse (2→4px over 600ms); subtle formation marker outer glow (faction color). **Layout:** Toolbar grouped (View \| Tools \| Info) with separators; panel tabs 90px min-width, 10px font. **Typography:** Sentence case for body content; 12px body/controls, 10px labels; control status and settlement type in sentence case. **Color:** Accent green desaturated to #00d470 (--accent-green, --accent-green-rgb); subtle root gradient. **Discoverability:** Tooltips (title) on all toolbar/zoom/layer controls with shortcuts; Help modal lists Arrow/Enter. **States:** Loading spinner and text during init; error overlay with Retry on load failure; OOB "No formations deployed" and Military tab empty copy; optional first-time quick tour (Tour button, localStorage awwv.tacticalMap.tutorialDone). Canon: TACTICAL_MAP_SYSTEM §2; docs/plans/2026-02-19-warmap-figma-spec.md implementation note; PROJECT_LEDGER_KNOWLEDGE Handovers. |
 
 ---
 

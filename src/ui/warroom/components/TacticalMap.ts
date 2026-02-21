@@ -1,7 +1,7 @@
-import { GameState } from '../../../state/game_state.js';
-import { NATO_TOKENS, factionFill } from '../../../map/nato_tokens.js';
 import { computeFrontEdges } from '../../../map/front_edges.js';
+import { NATO_TOKENS, factionFill } from '../../../map/nato_tokens.js';
 import type { EdgeRecord } from '../../../map/settlements.js';
+import { GameState } from '../../../state/game_state.js';
 
 type GeoFeature = {
     properties?: { sid?: string; municipality_id?: number };

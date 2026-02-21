@@ -11,8 +11,8 @@ import type { FactionId, GameState, OrganizationalPenetration } from '../../../s
 
 /** Months in title case (January, February, …). */
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
 ] as const;
 
 /** Months in uppercase (JANUARY, FEBRUARY, …). */
@@ -26,9 +26,9 @@ const GAME_START = { year: 1991, month: 8 /* 0-indexed */, day: 1 };
  * Each turn = 1 week from the game start date.
  */
 export function turnToDateString(turn: number): string {
-  const d = new Date(GAME_START.year, GAME_START.month, GAME_START.day);
-  d.setDate(d.getDate() + turn * 7);
-  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+    const d = new Date(GAME_START.year, GAME_START.month, GAME_START.day);
+    d.setDate(d.getDate() + turn * 7);
+    return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 /**
@@ -36,45 +36,45 @@ export function turnToDateString(turn: number): string {
  * Used by monthly publications (one issue per 4 turns).
  */
 export function turnToMonthYear(turn: number): string {
-  const d = new Date(GAME_START.year, GAME_START.month, GAME_START.day);
-  d.setMonth(d.getMonth() + Math.floor(turn / 4));
-  return `${MONTHS_UPPER[d.getMonth()]} ${d.getFullYear()}`;
+    const d = new Date(GAME_START.year, GAME_START.month, GAME_START.day);
+    d.setMonth(d.getMonth() + Math.floor(turn / 4));
+    return `${MONTHS_UPPER[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 /**
  * Convert a game turn to "Week N, Month Year" format: "Week 1, September 1991".
  */
 export function turnToWeekString(turn: number): string {
-  const d = new Date(GAME_START.year, GAME_START.month, GAME_START.day);
-  d.setDate(d.getDate() + turn * 7);
-  const week = Math.floor((d.getDate() - 1) / 7) + 1;
-  return `Week ${week}, ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+    const d = new Date(GAME_START.year, GAME_START.month, GAME_START.day);
+    d.setDate(d.getDate() + turn * 7);
+    const week = Math.floor((d.getDate() - 1) / 7) + 1;
+    return `Week ${week}, ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 /**
  * Get the party penetration value for a specific faction from org-pen data.
  */
 export function getFactionPartyPen(op: OrganizationalPenetration | undefined, factionId: FactionId): number {
-  if (!op) return 0;
-  switch (factionId) {
-    case 'RS': return op.sds_penetration ?? 0;
-    case 'RBiH': return op.sda_penetration ?? 0;
-    case 'HRHB': return op.hdz_penetration ?? 0;
-    default: return 0;
-  }
+    if (!op) return 0;
+    switch (factionId) {
+        case 'RS': return op.sds_penetration ?? 0;
+        case 'RBiH': return op.sda_penetration ?? 0;
+        case 'HRHB': return op.hdz_penetration ?? 0;
+        default: return 0;
+    }
 }
 
 /**
  * Check if a faction has paramilitary presence in a municipality's org-pen.
  */
 export function hasFactionParamilitary(op: OrganizationalPenetration | undefined, factionId: FactionId): boolean {
-  if (!op) return false;
-  switch (factionId) {
-    case 'RS': return (op.paramilitary_rs ?? 0) > 0;
-    case 'RBiH': return (op.patriotska_liga ?? 0) > 0;
-    case 'HRHB': return (op.paramilitary_hrhb ?? 0) > 0;
-    default: return false;
-  }
+    if (!op) return false;
+    switch (factionId) {
+        case 'RS': return (op.paramilitary_rs ?? 0) > 0;
+        case 'RBiH': return (op.patriotska_liga ?? 0) > 0;
+        case 'HRHB': return (op.paramilitary_hrhb ?? 0) > 0;
+        default: return false;
+    }
 }
 
 /**
@@ -82,16 +82,16 @@ export function hasFactionParamilitary(op: OrganizationalPenetration | undefined
  * Includes: party penetration, paramilitary, police loyalty (when controlled), TO control.
  */
 export function hasFactionPresence(
-  op: OrganizationalPenetration | undefined,
-  factionId: FactionId,
-  isControlled: boolean
+    op: OrganizationalPenetration | undefined,
+    factionId: FactionId,
+    isControlled: boolean
 ): boolean {
-  if (!op) return false;
-  const partyPen = getFactionPartyPen(op, factionId);
-  const paramilitary = hasFactionParamilitary(op, factionId);
-  const policeLoyalty = op.police_loyalty === 'loyal' && isControlled;
-  const toControl = factionId === 'RBiH' && op.to_control === 'controlled';
-  return partyPen > 0 || paramilitary || policeLoyalty || toControl;
+    if (!op) return false;
+    const partyPen = getFactionPartyPen(op, factionId);
+    const paramilitary = hasFactionParamilitary(op, factionId);
+    const policeLoyalty = op.police_loyalty === 'loyal' && isControlled;
+    const toControl = factionId === 'RBiH' && op.to_control === 'controlled';
+    return partyPen > 0 || paramilitary || policeLoyalty || toControl;
 }
 
 /** Stability threshold constants for control status display. */
@@ -102,28 +102,28 @@ export const STABILITY_CONTESTED_MIN = 40;
  * Derive a control status label from a stability score.
  */
 export function controlStatusLabel(stability: number): string {
-  if (stability >= STABILITY_SECURE_MIN) return 'SECURE';
-  if (stability >= STABILITY_CONTESTED_MIN) return 'CONTESTED';
-  return 'HIGHLY CONTESTED';
+    if (stability >= STABILITY_SECURE_MIN) return 'SECURE';
+    if (stability >= STABILITY_CONTESTED_MIN) return 'CONTESTED';
+    return 'HIGHLY CONTESTED';
 }
 
 /** Faction display names. */
 export const FACTION_DISPLAY_NAMES: Record<string, string> = {
-  RBiH: 'Republic of Bosnia and Herzegovina',
-  RS: 'Republika Srpska',
-  HRHB: 'Croatian Republic of Herzeg-Bosnia',
+    RBiH: 'Republic of Bosnia and Herzegovina',
+    RS: 'Republika Srpska',
+    HRHB: 'Croatian Republic of Herzeg-Bosnia',
 };
 
 /** Faction accent colors for UI — matches tactical map faction palette. */
 export const FACTION_COLORS: Record<string, { primary: string; dim: string; bg: string }> = {
-  RBiH: { primary: 'rgb(55, 140, 75)',  dim: 'rgba(55, 140, 75, 0.3)',  bg: 'rgba(55, 140, 75, 0.08)' },
-  RS:   { primary: 'rgb(180, 50, 50)',   dim: 'rgba(180, 50, 50, 0.3)',  bg: 'rgba(180, 50, 50, 0.08)' },
-  HRHB: { primary: 'rgb(50, 110, 170)',  dim: 'rgba(50, 110, 170, 0.3)', bg: 'rgba(50, 110, 170, 0.08)' },
+    RBiH: { primary: 'rgb(55, 140, 75)', dim: 'rgba(55, 140, 75, 0.3)', bg: 'rgba(55, 140, 75, 0.08)' },
+    RS: { primary: 'rgb(180, 50, 50)', dim: 'rgba(180, 50, 50, 0.3)', bg: 'rgba(180, 50, 50, 0.08)' },
+    HRHB: { primary: 'rgb(50, 110, 170)', dim: 'rgba(50, 110, 170, 0.3)', bg: 'rgba(50, 110, 170, 0.08)' },
 };
 
 /** Get the CSS class suffix for a faction: 'rbih', 'rs', 'hrhb'. */
 export function factionCssClass(factionId: FactionId): string {
-  return factionId.toLowerCase();
+    return factionId.toLowerCase();
 }
 
 /**
@@ -131,6 +131,6 @@ export function factionCssClass(factionId: FactionId): string {
  * Reads meta.player_faction; falls back to first faction in array, then RBiH.
  */
 export function getPlayerFaction(gameState: GameState): FactionId {
-  if (gameState.meta?.player_faction) return gameState.meta.player_faction;
-  return (gameState.factions[0]?.id as FactionId) || 'RBiH';
+    if (gameState.meta?.player_faction) return gameState.meta.player_faction;
+    return (gameState.factions[0]?.id as FactionId) || 'RBiH';
 }

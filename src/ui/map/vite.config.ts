@@ -1,8 +1,8 @@
+import { cpSync, existsSync, readFileSync } from 'node:fs';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vite';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { readFileSync, existsSync, cpSync } from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,21 +17,21 @@ const ASSET_SOURCES = ['assets/sources/crests', 'assets/sources/scenarios'];
  * dist/tactical-map (e.g. Electron). Dev server serves /assets/ from project root.
  */
 function copyCrestsIntoBuild(): Plugin {
-  return {
-    name: 'copy-crests-into-build',
-    closeBundle() {
-      const outDir = resolve(__dirname, '../../../dist/tactical-map');
-      for (const assetDir of ASSET_SOURCES) {
-        const root = existsSync(resolve(projectRootFromCwd, assetDir))
-          ? projectRootFromCwd
-          : projectRootFromConfig;
-        const src = resolve(root, assetDir);
-        if (!existsSync(src)) continue;
-        const dest = resolve(outDir, assetDir);
-        cpSync(src, dest, { recursive: true });
-      }
-    },
-  };
+    return {
+        name: 'copy-crests-into-build',
+        closeBundle() {
+            const outDir = resolve(__dirname, '../../../dist/tactical-map');
+            for (const assetDir of ASSET_SOURCES) {
+                const root = existsSync(resolve(projectRootFromCwd, assetDir))
+                    ? projectRootFromCwd
+                    : projectRootFromConfig;
+                const src = resolve(root, assetDir);
+                if (!existsSync(src)) continue;
+                const dest = resolve(outDir, assetDir);
+                cpSync(src, dest, { recursive: true });
+            }
+        },
+    };
 }
 
 /**
@@ -98,7 +98,7 @@ function serveTacticalMapData(): Plugin {
     };
 }
 
-/** Redirect / to /tactical_map.html so http://localhost:3002/?run=... works. */
+/** Redirect / to /tactical_map.html so 2D primary. */
 function redirectRootToTacticalMap(): Plugin {
     return {
         name: 'redirect-root-to-tactical-map',
@@ -135,6 +135,11 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: resolve(__dirname, './tactical_map.html'),
+                'map_3d': resolve(__dirname, './map_3d.html'),
+                'map_2_5d': resolve(__dirname, './map_2_5d.html'),
+                'map_operational_3d': resolve(__dirname, './map_operational_3d.html'),
+                'map_staff_3d': resolve(__dirname, './map_staff_3d.html'),
+                'tactical_sandbox': resolve(__dirname, './tactical_sandbox.html'),
             },
         },
         copyPublicDir: false,

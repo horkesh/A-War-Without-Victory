@@ -13,13 +13,13 @@ import type { GameState } from './game_state.js';
 import type { PhaseGate, PhaseGateId } from './phase_gates.js';
 
 export interface TurnPipelineInput {
-  seed: string;
+    seed: string;
 }
 
 export type PhaseFn = (
-  state: GameState,
-  inputs: TurnPipelineInput,
-  gate: PhaseGate
+    state: GameState,
+    inputs: TurnPipelineInput,
+    gate: PhaseGate
 ) => GameState;
 
 /**
@@ -27,46 +27,46 @@ export type PhaseFn = (
  * Replaces localeCompare to avoid locale-dependent behavior.
  */
 export function strictCompare(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0;
+    return a < b ? -1 : a > b ? 1 : 0;
 }
 
 function stubPhase(state: GameState, _inputs: TurnPipelineInput, gate: PhaseGate, phaseId: PhaseGateId): GameState {
-  const enabled = gate[phaseId] ?? true;
-  if (!enabled) return state;
-  return state;
+    const enabled = gate[phaseId] ?? true;
+    if (!enabled) return state;
+    return state;
 }
 
 export const phaseDirectives: PhaseFn = (state, inputs, gate) =>
-  stubPhase(state, inputs, gate, 'directives');
+    stubPhase(state, inputs, gate, 'directives');
 
 export const phaseDeployments: PhaseFn = (state, inputs, gate) =>
-  stubPhase(state, inputs, gate, 'deployments');
+    stubPhase(state, inputs, gate, 'deployments');
 
 export const phaseMilitaryInteraction: PhaseFn = (state, inputs, gate) =>
-  stubPhase(state, inputs, gate, 'military_interaction');
+    stubPhase(state, inputs, gate, 'military_interaction');
 
 export const phaseFragmentationResolution: PhaseFn = (state, inputs, gate) =>
-  stubPhase(state, inputs, gate, 'fragmentation_resolution');
+    stubPhase(state, inputs, gate, 'fragmentation_resolution');
 
 export const phaseSupplyResolution: PhaseFn = (state, inputs, gate) =>
-  stubPhase(state, inputs, gate, 'supply_resolution');
+    stubPhase(state, inputs, gate, 'supply_resolution');
 
 export const phasePoliticalEffects: PhaseFn = (state, inputs, gate) =>
-  stubPhase(state, inputs, gate, 'political_effects');
+    stubPhase(state, inputs, gate, 'political_effects');
 
 export const phaseExhaustionUpdate: PhaseFn = (state, inputs, gate) =>
-  stubPhase(state, inputs, gate, 'exhaustion_update');
+    stubPhase(state, inputs, gate, 'exhaustion_update');
 
 export const phasePersistence: PhaseFn = (state, inputs, gate) =>
-  stubPhase(state, inputs, gate, 'persistence');
+    stubPhase(state, inputs, gate, 'persistence');
 
 export const PHASE_ORDER: PhaseGateId[] = [
-  'directives',
-  'deployments',
-  'military_interaction',
-  'fragmentation_resolution',
-  'supply_resolution',
-  'political_effects',
-  'exhaustion_update',
-  'persistence'
+    'directives',
+    'deployments',
+    'military_interaction',
+    'fragmentation_resolution',
+    'supply_resolution',
+    'political_effects',
+    'exhaustion_update',
+    'persistence'
 ];

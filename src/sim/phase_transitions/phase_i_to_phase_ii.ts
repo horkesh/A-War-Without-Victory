@@ -4,9 +4,9 @@
  * No randomness; no timestamps; no hard-coded historical dates.
  */
 
-import type { GameState } from '../../state/game_state.js';
 import { computeFrontEdges } from '../../map/front_edges.js';
 import type { EdgeRecord, SettlementRecord } from '../../map/settlements.js';
+import type { GameState } from '../../state/game_state.js';
 import { initializeBrigadeAoR } from '../phase_ii/brigade_aor.js';
 import { initializeCorpsCommand } from '../phase_ii/corps_command.js';
 
@@ -28,16 +28,16 @@ export const JNA_ASSET_TRANSFER_COMPLETE_THRESHOLD = 0.9;
  * If opposing-control edge count >= MIN_OPPOSING_EDGES: streak += 1; else streak = 0.
  */
 export function updatePhaseIOpposingEdgesStreak(state: GameState, settlementEdges: EdgeRecord[]): void {
-  if (state.meta.phase !== 'phase_i') return;
+    if (state.meta.phase !== 'phase_i') return;
 
-  const frontEdges = computeFrontEdges(state, settlementEdges);
-  const count = frontEdges.length;
-  const current = state.meta.phase_i_opposing_edges_streak ?? 0;
-  if (count >= MIN_OPPOSING_EDGES) {
-    state.meta = { ...state.meta, phase_i_opposing_edges_streak: current + 1 };
-  } else {
-    state.meta = { ...state.meta, phase_i_opposing_edges_streak: 0 };
-  }
+    const frontEdges = computeFrontEdges(state, settlementEdges);
+    const count = frontEdges.length;
+    const current = state.meta.phase_i_opposing_edges_streak ?? 0;
+    if (count >= MIN_OPPOSING_EDGES) {
+        state.meta = { ...state.meta, phase_i_opposing_edges_streak: current + 1 };
+    } else {
+        state.meta = { ...state.meta, phase_i_opposing_edges_streak: 0 };
+    }
 }
 
 /**
@@ -48,27 +48,27 @@ export function updatePhaseIOpposingEdgesStreak(state: GameState, settlementEdge
  * - Front-precursor persistence: phase_i_opposing_edges_streak >= PERSIST_TURNS
  */
 export function isPhaseIITransitionEligible(state: GameState): boolean {
-  const meta = state.meta;
-  if (meta.phase !== 'phase_i') return false;
-  if (!meta.referendum_held) return false;
+    const meta = state.meta;
+    if (meta.phase !== 'phase_i') return false;
+    if (!meta.referendum_held) return false;
 
-  const warStart = meta.war_start_turn;
-  if (warStart == null || typeof warStart !== 'number') return false;
+    const warStart = meta.war_start_turn;
+    if (warStart == null || typeof warStart !== 'number') return false;
 
-  const turn = meta.turn ?? 0;
-  if (turn < warStart) return false;
+    const turn = meta.turn ?? 0;
+    if (turn < warStart) return false;
 
-  const jna = state.phase_i_jna;
-  if (!jna?.transition_begun) return false;
-  if (typeof jna.withdrawal_progress !== 'number' || jna.withdrawal_progress < JNA_WITHDRAWAL_COMPLETE_THRESHOLD)
-    return false;
-  if (typeof jna.asset_transfer_rs !== 'number' || jna.asset_transfer_rs < JNA_ASSET_TRANSFER_COMPLETE_THRESHOLD)
-    return false;
+    const jna = state.phase_i_jna;
+    if (!jna?.transition_begun) return false;
+    if (typeof jna.withdrawal_progress !== 'number' || jna.withdrawal_progress < JNA_WITHDRAWAL_COMPLETE_THRESHOLD)
+        return false;
+    if (typeof jna.asset_transfer_rs !== 'number' || jna.asset_transfer_rs < JNA_ASSET_TRANSFER_COMPLETE_THRESHOLD)
+        return false;
 
-  const streak = meta.phase_i_opposing_edges_streak ?? 0;
-  if (streak < PERSIST_TURNS) return false;
+    const streak = meta.phase_i_opposing_edges_streak ?? 0;
+    if (streak < PERSIST_TURNS) return false;
 
-  return true;
+    return true;
 }
 
 /**
@@ -77,32 +77,32 @@ export function isPhaseIITransitionEligible(state: GameState): boolean {
  * Deterministic, one-way (no reverting to phase_i).
  */
 export function applyPhaseIToPhaseIITransition(
-  state: GameState,
-  edges?: EdgeRecord[],
-  settlements?: Map<string, SettlementRecord>
+    state: GameState,
+    edges?: EdgeRecord[],
+    settlements?: Map<string, SettlementRecord>
 ): GameState {
-  if (state.meta.phase === 'phase_ii') return state;
-  if (!isPhaseIITransitionEligible(state)) return state;
+    if (state.meta.phase === 'phase_ii') return state;
+    if (!isPhaseIITransitionEligible(state)) return state;
 
-  state.meta = { ...state.meta, phase: 'phase_ii' };
+    state.meta = { ...state.meta, phase: 'phase_ii' };
 
-  if (!state.phase_ii_supply_pressure) {
-    (state as GameState & { phase_ii_supply_pressure: Record<string, number> }).phase_ii_supply_pressure = {};
-  }
-  if (!state.phase_ii_exhaustion) {
-    (state as GameState & { phase_ii_exhaustion: Record<string, number> }).phase_ii_exhaustion = {};
-  }
-  if (!state.phase_ii_exhaustion_local) {
-    (state as GameState & { phase_ii_exhaustion_local: Record<string, number> }).phase_ii_exhaustion_local = {};
-  }
+    if (!state.phase_ii_supply_pressure) {
+        (state as GameState & { phase_ii_supply_pressure: Record<string, number> }).phase_ii_supply_pressure = {};
+    }
+    if (!state.phase_ii_exhaustion) {
+        (state as GameState & { phase_ii_exhaustion: Record<string, number> }).phase_ii_exhaustion = {};
+    }
+    if (!state.phase_ii_exhaustion_local) {
+        (state as GameState & { phase_ii_exhaustion_local: Record<string, number> }).phase_ii_exhaustion_local = {};
+    }
 
-  // Initialize brigade AoR (Voronoi BFS from brigade HQs)
-  if (edges && edges.length > 0) {
-    initializeBrigadeAoR(state, edges, settlements);
-  }
+    // Initialize brigade AoR (Voronoi BFS from brigade HQs)
+    if (edges && edges.length > 0) {
+        initializeBrigadeAoR(state, edges, settlements);
+    }
 
-  // Initialize corps command state
-  initializeCorpsCommand(state);
+    // Initialize corps command state
+    initializeCorpsCommand(state);
 
-  return state;
+    return state;
 }

@@ -13,10 +13,10 @@
  */
 
 
-import { strictCompare } from '../../state/validateGameState.js';
 import type { GameState, PhaseERearZoneDescriptor } from '../../state/game_state.js';
-import { getEligiblePressureEdges } from './pressure_eligibility.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import { getFrontActiveSettlements } from './aor_instantiation.js';
+import { getEligiblePressureEdges } from './pressure_eligibility.js';
 
 
 /**
@@ -35,34 +35,34 @@ import { getFrontActiveSettlements } from './aor_instantiation.js';
  * @returns PhaseERearZoneDescriptor (settlement_ids: settlements in rear)
  */
 export function deriveRearPoliticalControlZones(
-  state: GameState,
-  edges: ReadonlyArray<{ a: string; b: string }>
+    state: GameState,
+    edges: ReadonlyArray<{ a: string; b: string }>
 ): PhaseERearZoneDescriptor {
-  const result: PhaseERearZoneDescriptor = { settlement_ids: [] };
+    const result: PhaseERearZoneDescriptor = { settlement_ids: [] };
 
-  // Phase E only runs in phase_ii
-  if (state.meta?.phase !== 'phase_ii') {
+    // Phase E only runs in phase_ii
+    if (state.meta?.phase !== 'phase_ii') {
+        return result;
+    }
+
+    const pc = state.political_controllers ?? {};
+    const controlledSettlements = Object.keys(pc)
+        .filter((sid) => pc[sid] !== null && pc[sid] !== undefined)
+        .sort(strictCompare);
+
+    if (controlledSettlements.length === 0) {
+        return result;
+    }
+
+    // Get front-active settlements (on pressure-eligible edges)
+    const eligible = getEligiblePressureEdges(state, edges);
+    const frontActive = getFrontActiveSettlements(eligible);
+
+    // Rear zone = controlled settlement NOT in front-active set
+    const rearSettlements = controlledSettlements.filter((sid) => !frontActive.has(sid));
+    result.settlement_ids = rearSettlements;
+
     return result;
-  }
-
-  const pc = state.political_controllers ?? {};
-  const controlledSettlements = Object.keys(pc)
-    .filter((sid) => pc[sid] !== null && pc[sid] !== undefined)
-    .sort(strictCompare);
-
-  if (controlledSettlements.length === 0) {
-    return result;
-  }
-
-  // Get front-active settlements (on pressure-eligible edges)
-  const eligible = getEligiblePressureEdges(state, edges);
-  const frontActive = getFrontActiveSettlements(eligible);
-
-  // Rear zone = controlled settlement NOT in front-active set
-  const rearSettlements = controlledSettlements.filter((sid) => !frontActive.has(sid));
-  result.settlement_ids = rearSettlements;
-
-  return result;
 }
 
 /**
@@ -73,10 +73,10 @@ export function deriveRearPoliticalControlZones(
  * @returns true if settlement is in rear zone
  */
 export function isSettlementInRearZone(
-  settlementId: string,
-  rearZone: PhaseERearZoneDescriptor
+    settlementId: string,
+    rearZone: PhaseERearZoneDescriptor
 ): boolean {
-  return rearZone.settlement_ids.includes(settlementId);
+    return rearZone.settlement_ids.includes(settlementId);
 }
 
 /**
@@ -92,10 +92,10 @@ export function isSettlementInRearZone(
  * @returns Stabilization factor [0, 1]; lower = more stable
  */
 export function getRearZoneAuthorityStabilizationFactor(
-  settlementId: string,
-  rearZone: PhaseERearZoneDescriptor
+    settlementId: string,
+    rearZone: PhaseERearZoneDescriptor
 ): number {
-  // Rear zones have reduced authority volatility: stabilization factor 0.5 (50% reduction in degradation)
-  // Front-active zones have no stabilization: factor 1.0 (full degradation)
-  return isSettlementInRearZone(settlementId, rearZone) ? 0.5 : 1.0;
+    // Rear zones have reduced authority volatility: stabilization factor 0.5 (50% reduction in degradation)
+    // Front-active zones have no stabilization: factor 1.0 (full degradation)
+    return isSettlementInRearZone(settlementId, rearZone) ? 0.5 : 1.0;
 }

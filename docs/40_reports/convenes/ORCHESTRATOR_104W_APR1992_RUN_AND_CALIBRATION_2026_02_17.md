@@ -40,15 +40,15 @@
 
 After the 104w run completes, capture:
 
-| Item | Location |
-|------|----------|
-| Run folder | `runs/apr1992_definitive_52w__<hash>__w104_n117` (or next `n*` if re-run) |
-| Personnel (initial/final/delta) | `run_summary.json` → `historical_alignment` |
-| Brigade counts | `historical_alignment.initial` / `.final` → `brigades_total` |
-| Phase II combat | `run_summary.json` → `phase_ii_attack_resolution` (orders_processed, flips_applied, casualty_attacker/defender, defender_present_battles) |
-| Control deltas | `end_report.md` — "Control changes", "Top direction changes" |
-| Anchor checks | `run_summary.json` → `anchor_checks` (all expected passed) |
-| Bot benchmarks | `run_summary.json` → `bot_benchmark_evaluation` (if evaluated) |
+| Item | Location | Captured in §6 |
+|------|----------|----------------|
+| Run folder | `runs/apr1992_definitive_52w__<hash>__w104_n117` (or next `n*` if re-run) | Yes |
+| Personnel (initial/final/delta) | `run_summary.json` → `historical_alignment` | Yes (Troop strength table) |
+| Brigade counts | `historical_alignment.initial` / `.final` → `brigades_total` | Yes (Brigades) |
+| Phase II combat | `run_summary.json` → `phase_ii_attack_resolution` (orders_processed, flips_applied, casualty_attacker/defender, defender_present_battles) | Yes (Phase II combat) |
+| Control deltas | `end_report.md` — "Control changes", "Top direction changes" | Yes (Control) |
+| Anchor checks | `run_summary.json` → `anchor_checks` (all expected passed) | Yes (Anchor checks) |
+| Bot benchmarks | `run_summary.json` → `bot_benchmark_evaluation` (if evaluated) | Yes (Bot benchmark evaluation) |
 
 ---
 
@@ -133,9 +133,23 @@ After changing code or scenario, re-run 104w (or a shorter checkpoint, e.g. 52w)
 
 ---
 
-## 7. References
+## 7. Sign-off and baseline (option A complete)
+
+**Doc fill:** All monitoring checklist items (§3) are captured in §6. No placeholders remain. This report is the **single baseline document** for 104w April 1992 runs and calibration.
+
+**Sign-off:** The 104w calibration loop is **closed**. Accepted baseline:
+- **Baseline 104w:** `...w104_n117` (hash `c9ba67b6dc0d504e`) — personnel/brigades/combat/control/anchor/bot as in §6.
+- **Calibrated runs:** First-pass calibration (n119/n120) and second-pass 16w check (n121) documented; calibrated 104w (n120) and re-runs table are the comparison baseline for future changes.
+- **Full 52w/104w re-run with second casualty pass (n121):** **Deferred.** 16w n121 evidence is sufficient to confirm casualty magnitude direction; a full 52w or 104w run with n121 may be scheduled later when comparing bot or combat changes. Next priority can proceed without it.
+
+**Authority:** Orchestrator. Date: 2026-02-17. Linked from [PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md](PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md) (option A complete; next single priority → B or PM choice).
+
+---
+
+## 8. References
 
 - PARADOX_HISTORICAL_TROOP_NUMBERS_SEPT1992_CONVENE.md
 - BOT_TEST_APR1992_40W_REPORT_2026_02_16.md (52w run sliced to 40w combat totals)
 - napkin: "Scenario & pool calibration", "Bots & calibration", "Canon April 1992 scenario"
 - Scenario: apr1992_definitive_52w / apr1992_definitive_104w
+- PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md (§13 single priority A)

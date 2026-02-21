@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>War Map UI/UX Architecture Proposal — Visual Summary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-body: 'Crimson Pro', Georgia, serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+      --bg: #f8f9fc;
+      --surface: #ffffff;
+      --surface2: #eef0f5;
+      --surface-elevated: #fff;
+      --border: rgba(0, 0, 0, 0.08);
+      --border-bright: rgba(0, 0, 0, 0.12);
+      --text: #1a1d2e;
+      --text-dim: #5c6370;
+      --accent: #2c5282;
+      --accent-dim: rgba(44, 82, 130, 0.08);
+      --green: #276749;
+      --green-dim: rgba(39, 103, 73, 0.08);
+      --orange: #c05621;
+      --orange-dim: rgba(192, 86, 33, 0.08);
+      --red: #c53030;
+      --red-dim: rgba(197, 48, 48, 0.08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1219;
+        --surface: #161b26;
+        --surface2: #1e2433;
+        --surface-elevated: #252d3d;
+        --border: rgba(255, 255, 255, 0.07);
+        --border-bright: rgba(255, 255, 255, 0.12);
+        --text: #e2e8f0;
+        --text-dim: #94a3b8;
+        --accent: #63b3ed;
+        --accent-dim: rgba(99, 179, 237, 0.12);
+        --green: #68d391;
+        --green-dim: rgba(104, 211, 145, 0.12);
+        --orange: #f6ad55;
+        --orange-dim: rgba(246, 173, 85, 0.12);
+        --red: #fc8181;
+        --red-dim: rgba(252, 129, 129, 0.12);
+      }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      background-image: radial-gradient(ellipse at 10% 0%, var(--accent-dim) 0%, transparent 45%);
+      color: var(--text);
+      font-family: var(--font-body);
+      padding: 24px;
+      min-height: 100vh;
+      overflow-wrap: break-word;
+    }
+    .wrap {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      gap: 0 40px;
+    }
+    .main { min-width: 0; }
+    .toc {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      padding: 14px 0;
+      grid-row: 1 / -1;
+      max-height: calc(100dvh - 48px);
+      overflow-y: auto;
+    }
+    .toc-title {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+      padding: 0 0 10px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .toc a {
+      display: block;
+      font-size: 11px;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 4px 8px;
+      border-radius: 5px;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+      line-height: 1.4;
+      margin-bottom: 1px;
+    }
+    .toc a:hover { color: var(--text); background: var(--surface2); }
+    .toc a.active { color: var(--text); border-left-color: var(--accent); }
+    @media (max-width: 1000px) {
+      .wrap { grid-template-columns: 1fr; }
+      .toc {
+        position: sticky; top: 0; z-index: 200;
+        max-height: none; display: flex; gap: 4px; align-items: center;
+        overflow-x: auto; -webkit-overflow-scrolling: touch;
+        background: var(--bg); border-bottom: 1px solid var(--border);
+        padding: 10px 0; margin: 0 -24px; padding-left: 24px; padding-right: 24px;
+        grid-row: auto;
+      }
+      .toc-title { display: none; }
+      .toc a { white-space: nowrap; flex-shrink: 0; border-left: none; border-bottom: 2px solid transparent; border-radius: 4px 4px 0 0; padding: 6px 10px; font-size: 10px; }
+      .toc a.active { border-left: none; border-bottom-color: var(--accent); background: var(--surface); }
+      .main { padding-top: 20px; }
+      .sec-head { scroll-margin-top: 52px; }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card, .table-wrap { animation: fadeUp 0.35s ease-out both; animation-delay: calc(var(--i, 0) * 0.04s); }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; }
+    }
+    h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
+    .subtitle { color: var(--text-dim); font-family: var(--font-mono); font-size: 12px; margin-bottom: 28px; }
+    .sec-head {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      margin: 32px 0 16px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sec-head:first-of-type { margin-top: 0; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 22px;
+      margin-bottom: 16px;
+    }
+    .card--hero {
+      background: color-mix(in srgb, var(--surface) 94%, var(--accent) 6%);
+      border-color: color-mix(in srgb, var(--border) 50%, var(--accent) 50%);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      padding: 24px 28px;
+    }
+    .card--recessed { background: var(--surface2); box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); }
+    .card-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+    .card p { font-size: 15px; line-height: 1.65; color: var(--text); margin-bottom: 8px; }
+    .card p:last-child { margin-bottom: 0; }
+    .card ul { margin: 8px 0 0 18px; line-height: 1.7; font-size: 14px; }
+    .flow-arrow {
+      display: flex; justify-content: center; align-items: center; gap: 8px;
+      color: var(--text-dim); font-family: var(--font-mono); font-size: 11px; padding: 6px 0;
+    }
+    .flow-arrow svg { width: 18px; height: 18px; fill: none; stroke: var(--border-bright); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.5; }
+    .data-table thead { position: sticky; top: 0; z-index: 2; }
+    .data-table th {
+      background: var(--surface2);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 2px solid var(--border-bright);
+      white-space: nowrap;
+    }
+    .data-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:nth-child(even) { background: var(--accent-dim); }
+    .data-table tbody tr:hover { background: var(--border); }
+    .data-table code { font-family: var(--font-mono); font-size: 11px; background: var(--accent-dim); color: var(--accent); padding: 1px 5px; border-radius: 3px; }
+    .data-table .wide { min-width: 160px; max-width: 380px; }
+    .status { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+    .status--ok { background: var(--green-dim); color: var(--green); }
+    .status--warn { background: var(--orange-dim); color: var(--orange); }
+    .status--high { background: var(--red-dim); color: var(--red); }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="toc" id="toc">
+    <div class="toc-title">Contents</div>
+    <a href="#s1">Summary</a>
+    <a href="#s2">Vision</a>
+    <a href="#s3">Data flow</a>
+    <a href="#s4">Current state</a>
+    <a href="#s5">Gaps</a>
+    <a href="#s6">Roadmap</a>
+    <a href="#s7">Risks</a>
+    <a href="#s8">Hotkeys</a>
+  </nav>
+  <div class="main">
+    <h1>War Map UI/UX Architecture Proposal</h1>
+    <p class="subtitle">Visual summary — docs/30_planning/WARMAP_UI_UX_ARCHITECTURE_PROPOSAL.md (2026-02-20)</p>
+
+    <div id="s1" class="sec-head">1 — Executive Summary</div>
+    <div class="card card--hero" style="--i:0">
+      <div class="card-label">Key idea</div>
+      <p>Evolve the war map from a prototype tactical display into an <strong>immersive command experience</strong>: dual-layer map (Tracestrack Topo base + NATO Ops Center overlay), terrain as gameplay, information density by zoom, right-click ordering, fog of war, and “the map tells the war’s story.”</p>
+      <p><strong>Principles:</strong> Terrain is gameplay. Information density scales with zoom. Orders from right-click context. Everything available from the map. Fog of war creates tension. The map accumulates battle damage, displacement, and exhaustion.</p>
+    </div>
+
+    <div id="s2" class="sec-head">2 — Vision: Dual-Layer War Map</div>
+    <div class="card" style="--i:1">
+      <div class="card-label">Three conceptual layers</div>
+      <p><strong>Layer 3 — Military overlay:</strong> Formations, front lines, orders, fog of war (always visible).</p>
+      <p><strong>Layer 2 — Faction control:</strong> Settlement tints by controlling faction (semi-transparent on base).</p>
+      <p><strong>Layer 1 — Base terrain:</strong> Switchable Day (Tracestrack Topo) vs Night (current “Night Satellite”). Toggle <code>N</code>; crossfade 350ms. Blended mode default (~30% Topo behind night).</p>
+    </div>
+    <div class="flow-arrow" style="--i:2">
+      <svg viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12"/></svg>
+      GameState → IPC → Adapter → MapState → WarMapRenderer → layers
+    </div>
+
+    <div id="s3" class="sec-head">3 — Technical Architecture (data flow)</div>
+    <div class="card" style="--i:3">
+      <div class="card-label">Pipeline</div>
+      <p><code>GameState</code> → <code>runTurn()</code> → <code>turnReport</code> (battle_events, supply_paths, displacement_deltas) → desktop <code>advanceTurn()</code> → IPC <code>game-state-updated</code> + <code>turn-report</code> → <code>GameStateAdapter</code> → <code>MapState</code> → <code>WarMapRenderer.updateFromGameState()</code> → each layer updates Three.js objects → <code>animate()</code> → screen.</p>
+      <p>On-demand: <code>query-combat-estimate</code>, <code>query-movement-range</code>, <code>query-corps-sectors</code>, <code>query-supply-paths</code> (read-only, no state mutation).</p>
+    </div>
+
+    <div id="s4" class="sec-head">4 — Current State</div>
+    <div class="table-wrap" style="--i:4">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr><th>Component</th><th>Status</th><th>Quality</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="wide">2D Canvas tactical map (<code>MapApp.ts</code>, 5279 lines)</td><td><span class="status status--ok">Production</span></td><td>Strong — zoom tiers, panels, formations, orders</td></tr>
+            <tr><td class="wide">Operational 3D Night Satellite (<code>map_operational_3d.ts</code>, 2451 lines)</td><td><span class="status status--ok">Integrated</span></td><td>Good — terrain mesh, faction overlays, AoR crosshatch</td></tr>
+            <tr><td class="wide">Staff 3D Parchment Topo (<code>map_staff_3d.ts</code>, 1875 lines)</td><td><span class="status status--ok">Integrated</span></td><td>Good — hypsometric tints, barbed-wire front</td></tr>
+            <tr><td class="wide">Tactical Sandbox 3D (3548 lines)</td><td><span class="status status--ok">Interactive</span></td><td>Good — full order system, deploy/undeploy, battle resolution</td></tr>
+            <tr><td class="wide">GameState Adapter, MapState, Electron IPC</td><td><span class="status status--ok">Production</span></td><td>Solid bridge, full order staging</td></tr>
+            <tr><td class="wide">Heightmap, WGS84 settlements (5,823), terrain scalars</td><td><span class="status status--ok">Ready</span></td><td>DEM-derived, complete coverage</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="s5" class="sec-head">5 — What’s Missing (gaps)</div>
+    <div class="table-wrap" style="--i:5">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr><th>Gap</th><th>Impact</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="wide">No topographic base map (terrain only night/parchment)</td><td>Player cannot assess terrain’s combat impact intuitively</td></tr>
+            <tr><td class="wide">No contextual right-click ordering</td><td>Order flow requires mode switching (SELECT/ATTACK/MOVE)</td></tr>
+            <tr><td class="wide">No corps-sector visualization on live map</td><td>No operational-level boundaries</td></tr>
+            <tr><td class="wide">No fog of war, battle animation, supply lines, displacement on map</td><td>All enemy visible; battles silent; supply/displacement invisible</td></tr>
+            <tr><td class="wide">No map modes (F-key), movement range preview, attack odds preview</td><td>Single view; orders issued blind</td></tr>
+            <tr><td class="wide">No ghost counters, audio, front hardening viz, battle damage on terrain</td><td>Binary visibility; sterile experience; flat front lines</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="s6" class="sec-head">6 — Implementation Roadmap (12 phases)</div>
+    <div class="table-wrap" style="--i:6">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr><th>Phase</th><th>Weeks</th><th>Goal</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>1–2</td><td>Dual-texture terrain, Day/Night, <code>N</code> toggle, blend slider</td></tr>
+            <tr><td>2</td><td>3</td><td>Roads, rivers, labels, borders — cartographically complete</td></tr>
+            <tr><td>3</td><td>4</td><td>Settlement control layer, front lines (fluid/static/hardened)</td></tr>
+            <tr><td>4</td><td>5</td><td>NATO counters, corps coloring, <code>D</code> data mode, zoom filtering</td></tr>
+            <tr><td>5</td><td>6–7</td><td>Right-click orders, movement range preview, order queue panel</td></tr>
+            <tr><td>6</td><td>8</td><td>Attack odds preview, <code>query-combat-estimate</code></td></tr>
+            <tr><td>7</td><td>9</td><td>Fog of war, ghost counters, recon quality gradient</td></tr>
+            <tr><td>8</td><td>10</td><td>F-key map modes (F3 supply, F5 displacement, F8 command)</td></tr>
+            <tr><td>9</td><td>11</td><td>Battle visualization, battle markers, snap events</td></tr>
+            <tr><td>10</td><td>12</td><td>Command hierarchy view, chain-of-command overlay</td></tr>
+            <tr><td>11</td><td>13</td><td>Post-processing (CRT, vignette, bloom), audio</td></tr>
+            <tr><td>12</td><td>14–15</td><td>Polish, panel extraction, VCR determinism, 60fps target</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card card--recessed" style="--i:7">
+      <div class="card-label">Minimum viable (Phases 1–6)</div>
+      <p>Dual-mode terrain, control, front lines, formation counters, right-click orders, movement preview, attack odds, order queue. Phases 7–12 = premium polish.</p>
+    </div>
+
+    <div id="s7" class="sec-head">7 — Risk Assessment</div>
+    <div class="table-wrap" style="--i:8">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="wide">Texture gen too slow (8192²)</td><td><span class="status status--warn">Medium</span></td><td>Blocks startup 2–5s</td><td>4096² first, cache in IndexedDB; Low Quality preset</td></tr>
+            <tr><td class="wide">WebGL memory pressure</td><td><span class="status status--warn">Medium</span></td><td>Crashes on low VRAM</td><td>Monitor GL memory; 2048² preset</td></tr>
+            <tr><td class="wide">Post-processing on integrated GPU</td><td><span class="status status--warn">Medium</span></td><td>FPS &lt; 30</td><td>Optional, off in Performance preset</td></tr>
+            <tr><td class="wide">Determinism violation (UI mutates state)</td><td><span class="status status--high">Low/catastrophic</span></td><td>CLI vs GUI desync</td><td>All new code read-only; 52-week VCR gate</td></tr>
+            <tr><td class="wide">Scope creep (15 weeks aggressive)</td><td><span class="status status--high">High</span></td><td>Features cut or quality drop</td><td>Prioritize phases 1–6; 7–12 ship later</td></tr>
+            <tr><td class="wide">MapApp.ts complexity (5279 lines)</td><td><span class="status status--high">High</span></td><td>Refactor risk</td><td>Phase 12 extracts panels; new code in new modules</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="s8" class="sec-head">8 — Hotkey Reference</div>
+    <div class="table-wrap" style="--i:9">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr><th>Key</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>N</code></td><td>Toggle Night/Day mode</td></tr>
+            <tr><td><code>D</code></td><td>Cycle counter data (strength/cohesion/supply/posture/fatigue)</td></tr>
+            <tr><td><code>F1</code>–<code>F8</code></td><td>Map modes: political, terrain, supply, exhaustion, displacement, ethnic, intel, command</td></tr>
+            <tr><td><code>1</code>–<code>0</code>, <code>~</code>, <code>P</code></td><td>Layer toggles; chain-of-command; front pressure heat map</td></tr>
+            <tr><td><code>Space</code></td><td>Skip battle animation / Advance turn</td></tr>
+            <tr><td><code>Shift+F</code></td><td>Cycle player faction view (fog of war)</td></tr>
+            <tr><td><code>Escape</code></td><td>Deselect / Close panel</td></tr>
+            <tr><td><code>WASD</code>, Scroll</td><td>Pan camera, Zoom</td></tr>
+            <tr><td>Left-click / Right-click</td><td>Select formation or settlement; context-dependent order</td></tr>
+            <tr><td><code>Ctrl+Z</code></td><td>Undo last staged order</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card card--recessed" style="--i:10">
+      <div class="card-label">Source</div>
+      <p><strong>Full proposal:</strong> <code>docs/30_planning/WARMAP_UI_UX_ARCHITECTURE_PROPOSAL.md</strong> — Paradox Team (Architect lead), 2026-02-20. Supersedes OPERATIONAL_MAP_3D_PLAN and TACTICAL_SANDBOX_3D_POST_INTEGRATION_ROADMAP.</p>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  var toc = document.getElementById('toc');
+  var links = toc.querySelectorAll('a');
+  var sections = [];
+  links.forEach(function(link) {
+    var id = link.getAttribute('href').slice(1);
+    var el = document.getElementById(id);
+    if (el) sections.push({ id: id, el: el, link: link });
+  });
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        links.forEach(function(l) { l.classList.remove('active'); });
+        var match = sections.find(function(s) { return s.el === entry.target; });
+        if (match) {
+          match.link.classList.add('active');
+          if (window.innerWidth <= 1000) {
+            match.link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          }
+        }
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+  sections.forEach(function(s) { observer.observe(s.el); });
+  links.forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      var id = link.getAttribute('href').slice(1);
+      var el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', '#' + id);
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

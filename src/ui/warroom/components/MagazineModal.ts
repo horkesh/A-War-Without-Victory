@@ -6,10 +6,10 @@
  * and declaration pressure.
  */
 
-import type { GameState, FactionId } from '../../../state/game_state.js';
 import { getPrewarCapital, PREWAR_CAPITAL_INITIAL } from '../../../phase0/capital.js';
+import type { FactionId, GameState } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
-import { turnToMonthYear, getPlayerFaction, hasFactionPresence, FACTION_COLORS, factionCssClass, STABILITY_SECURE_MIN, STABILITY_CONTESTED_MIN } from './warroom_utils.js';
+import { FACTION_COLORS, factionCssClass, getPlayerFaction, hasFactionPresence, STABILITY_CONTESTED_MIN, STABILITY_SECURE_MIN, turnToMonthYear } from './warroom_utils.js';
 
 interface MagazineContent {
     factionId: string;

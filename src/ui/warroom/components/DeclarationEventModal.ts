@@ -8,7 +8,7 @@
  * Uses CSS classes from modals.css (decl-*) for ops-center consistent styling.
  */
 
-import type { GameState, FactionId, Phase0Event } from '../../../state/game_state.js';
+import type { FactionId, Phase0Event } from '../../../state/game_state.js';
 
 interface DeclarationDisplay {
     title: string;

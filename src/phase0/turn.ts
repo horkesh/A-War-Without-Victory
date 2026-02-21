@@ -7,18 +7,18 @@
  * this runner executes engine steps 4–10.
  */
 
-import type { GameState, MunicipalityId, FactionId } from '../state/game_state.js';
-import type { GeographicInputs } from './stability.js';
+import type { FactionId, GameState, MunicipalityId } from '../state/game_state.js';
+import { applyPrewarCapitalTrickle } from './capital.js';
 import { accumulateDeclarationPressure, type DeclarationPressureOptions } from './declaration_pressure.js';
 import {
-  updateReferendumEligibility,
-  applyScheduledReferendum,
-  applyPhase0ToPhaseITransition,
-  checkReferendumDeadline,
-  type ReferendumEligibilityOptions
+    applyPhase0ToPhaseITransition,
+    applyScheduledReferendum,
+    checkReferendumDeadline,
+    updateReferendumEligibility,
+    type ReferendumEligibilityOptions
 } from './referendum.js';
+import type { GeographicInputs } from './stability.js';
 import { updateAllStabilityScores } from './stability.js';
-import { applyPrewarCapitalTrickle } from './capital.js';
 
 /**
  * Options for runPhase0Turn. Pass-through for declaration pressure, referendum,
@@ -26,16 +26,16 @@ import { applyPrewarCapitalTrickle } from './capital.js';
  * no referendum deadline override, stub stability inputs).
  */
 export interface Phase0TurnOptions {
-  /** Passed to accumulateDeclarationPressure (RS/HRHB enabling conditions). */
-  declarationPressure?: DeclarationPressureOptions;
-  /** Passed to updateReferendumEligibility (e.g. deadlineTurns). */
-  referendum?: ReferendumEligibilityOptions;
-  /** Passed to updateAllStabilityScores (controller, demographic, geographic). */
-  stability?: {
-    getController?: (munId: MunicipalityId) => FactionId | null;
-    getControllerShare?: (munId: MunicipalityId) => number | undefined;
-    getGeographic?: (munId: MunicipalityId) => GeographicInputs | undefined;
-  };
+    /** Passed to accumulateDeclarationPressure (RS/HRHB enabling conditions). */
+    declarationPressure?: DeclarationPressureOptions;
+    /** Passed to updateReferendumEligibility (e.g. deadlineTurns). */
+    referendum?: ReferendumEligibilityOptions;
+    /** Passed to updateAllStabilityScores (controller, demographic, geographic). */
+    stability?: {
+        getController?: (munId: MunicipalityId) => FactionId | null;
+        getControllerShare?: (munId: MunicipalityId) => number | undefined;
+        getGeographic?: (munId: MunicipalityId) => GeographicInputs | undefined;
+    };
 }
 
 /**
@@ -54,24 +54,24 @@ export interface Phase0TurnOptions {
  * No-op if meta.game_over or meta.phase !== 'phase_0'.
  */
 export function runPhase0Turn(state: GameState, options: Phase0TurnOptions = {}): void {
-  const meta = state.meta;
-  if (meta.game_over) return;
-  if (meta.phase !== 'phase_0') return;
+    const meta = state.meta;
+    if (meta.game_over) return;
+    if (meta.phase !== 'phase_0') return;
 
-  const turn = meta.turn;
+    const turn = meta.turn;
 
-  // Scheduled pre-war scenarios receive deterministic limited trickle to avoid
-  // dead turns while preserving scarcity.
-  applyPrewarCapitalTrickle(state);
+    // Scheduled pre-war scenarios receive deterministic limited trickle to avoid
+    // dead turns while preserving scarcity.
+    applyPrewarCapitalTrickle(state);
 
-  accumulateDeclarationPressure(state, turn, options.declarationPressure ?? {});
+    accumulateDeclarationPressure(state, turn, options.declarationPressure ?? {});
 
-  updateReferendumEligibility(state, turn, options.referendum ?? {});
-  applyScheduledReferendum(state, turn, options.referendum ?? {});
+    updateReferendumEligibility(state, turn, options.referendum ?? {});
+    applyScheduledReferendum(state, turn, options.referendum ?? {});
 
-  updateAllStabilityScores(state, options.stability);
+    updateAllStabilityScores(state, options.stability);
 
-  applyPhase0ToPhaseITransition(state);
+    applyPhase0ToPhaseITransition(state);
 
-  checkReferendumDeadline(state, turn);
+    checkReferendumDeadline(state, turn);
 }

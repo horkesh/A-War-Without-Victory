@@ -25,24 +25,24 @@ export type HoverRegion = {
     scaledPolygon?: [number, number][];
 };
 
-import { ModalManager } from './components/ModalManager.js';
-import { FactionOverviewPanel } from './components/FactionOverviewPanel.js';
-import { NewspaperModal } from './components/NewspaperModal.js';
-import { MagazineModal } from './components/MagazineModal.js';
-import { ReportsModal } from './components/ReportsModal.js';
-import { NewsTicker } from './components/NewsTicker.js';
-import { GameState } from '../../state/game_state.js';
-import { TacticalMap } from './components/TacticalMap.js';
-import { WarPlanningMap } from './components/WarPlanningMap.js';
-import { Phase0PreparationMap } from './components/Phase0PreparationMap.js';
-import { Phase0DirectiveState, type StagedInvestment } from './components/Phase0DirectiveState.js';
-import { findCriticalEvent, checkWarTransition, showDeclarationModal, showWarBeginsModal } from './components/DeclarationEventModal.js';
-import { runPhase0TurnAndAdvance } from './run_phase0_turn.js';
+import { buildGraphFromJSON, type LoadedSettlementGraph } from '../../map/settlements_parse.js';
 import { runPhaseITurn } from '../../sim/run_phase_i_browser.js';
 import { runPhaseIITurn } from '../../sim/run_phase_ii_browser.js';
-import { buildGraphFromJSON, type LoadedSettlementGraph } from '../../map/settlements_parse.js';
 import type { FactionId, Phase0Event } from '../../state/game_state.js';
+import { GameState } from '../../state/game_state.js';
 import { deserializeState } from '../../state/serialize.js';
+import { checkWarTransition, findCriticalEvent, showDeclarationModal, showWarBeginsModal } from './components/DeclarationEventModal.js';
+import { FactionOverviewPanel } from './components/FactionOverviewPanel.js';
+import { MagazineModal } from './components/MagazineModal.js';
+import { ModalManager } from './components/ModalManager.js';
+import { NewspaperModal } from './components/NewspaperModal.js';
+import { NewsTicker } from './components/NewsTicker.js';
+import { Phase0DirectiveState, type StagedInvestment } from './components/Phase0DirectiveState.js';
+import { Phase0PreparationMap } from './components/Phase0PreparationMap.js';
+import { ReportsModal } from './components/ReportsModal.js';
+import { TacticalMap } from './components/TacticalMap.js';
+import { WarPlanningMap } from './components/WarPlanningMap.js';
+import { runPhase0TurnAndAdvance } from './run_phase0_turn.js';
 
 type DesktopBridge = {
     advanceTurn?: (payload?: { phase0Directives?: StagedInvestment[] }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;

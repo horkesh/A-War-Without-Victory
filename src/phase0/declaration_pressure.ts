@@ -5,7 +5,7 @@
  * are met and pressure accumulates. Declaration does NOT start war (war gated by referendum).
  */
 
-import type { GameState, FactionId } from '../state/game_state.js';
+import type { FactionId, GameState } from '../state/game_state.js';
 
 /** RS pressure per turn when all enabling conditions met (Phase_0_Spec §4.4.1). */
 export const RS_PRESSURE_PER_TURN = 10;
@@ -25,61 +25,61 @@ export const DECLARING_FACTIONS: readonly FactionId[] = ['RS', 'HRHB'];
  * real data; tests supply mocks.
  */
 export interface DeclarationPressureOptions {
-  /** RS §4.4.1: RS org penetration in Serb-majority municipalities coverage (0–100). Need ≥ 60. */
-  getRsOrgCoverageSerbMajority?: (state: GameState) => number;
-  /** RS §4.4.1: JNA transition triggered or imminent. */
-  getJnaCoordinationTriggered?: (state: GameState) => boolean;
-  /** RS §4.4.1: RBiH–RS relationship. Need ≤ -0.5 (hostile). */
-  getRbhRsRelationship?: (state: GameState) => number;
-  /** RS §4.4.1: FRY (Serbia) recognition confirmed. */
-  getFryRecognitionConfirmed?: (state: GameState) => boolean;
-  /** HRHB §4.4.2: HRHB org penetration in Croat-majority municipalities coverage (0–100). Need ≥ 50. */
-  getHrhbOrgCoverageCroatMajority?: (state: GameState) => number;
-  /** HRHB §4.4.2: Croatian government support confirmed. */
-  getCroatiaSupportConfirmed?: (state: GameState) => boolean;
-  /** HRHB §4.4.2: RBiH–HRHB relationship. Need ≤ +0.2 (strained or worse). */
-  getRbhHrhbRelationship?: (state: GameState) => number;
-  /** Optional RS relationship threshold override (default -0.5). */
-  rsRelationshipThreshold?: number;
-  /** Optional RS organizational coverage threshold override (default 60). */
-  rsOrgCoverageThreshold?: number;
-  /** Optional HRHB relationship threshold override (default +0.2). */
-  hrhbRelationshipThreshold?: number;
-  /** Optional HRHB organizational coverage threshold override (default 50). */
-  hrhbOrgCoverageThreshold?: number;
-  /** Optional RS declaration pressure threshold override (default 100). */
-  rsPressureThreshold?: number;
-  /** Optional HRHB declaration pressure threshold override (default 100). */
-  hrhbPressureThreshold?: number;
-  /** Optional RS pressure-per-turn override (default 10). */
-  rsPressurePerTurn?: number;
-  /** Optional HRHB pressure-per-turn override (default 8). */
-  hrhbPressurePerTurn?: number;
-  /** Optional HRHB war-context override. Default behavior requires RS declared. */
-  isHrhbWarContextSatisfied?: (state: GameState) => boolean;
+    /** RS §4.4.1: RS org penetration in Serb-majority municipalities coverage (0–100). Need ≥ 60. */
+    getRsOrgCoverageSerbMajority?: (state: GameState) => number;
+    /** RS §4.4.1: JNA transition triggered or imminent. */
+    getJnaCoordinationTriggered?: (state: GameState) => boolean;
+    /** RS §4.4.1: RBiH–RS relationship. Need ≤ -0.5 (hostile). */
+    getRbhRsRelationship?: (state: GameState) => number;
+    /** RS §4.4.1: FRY (Serbia) recognition confirmed. */
+    getFryRecognitionConfirmed?: (state: GameState) => boolean;
+    /** HRHB §4.4.2: HRHB org penetration in Croat-majority municipalities coverage (0–100). Need ≥ 50. */
+    getHrhbOrgCoverageCroatMajority?: (state: GameState) => number;
+    /** HRHB §4.4.2: Croatian government support confirmed. */
+    getCroatiaSupportConfirmed?: (state: GameState) => boolean;
+    /** HRHB §4.4.2: RBiH–HRHB relationship. Need ≤ +0.2 (strained or worse). */
+    getRbhHrhbRelationship?: (state: GameState) => number;
+    /** Optional RS relationship threshold override (default -0.5). */
+    rsRelationshipThreshold?: number;
+    /** Optional RS organizational coverage threshold override (default 60). */
+    rsOrgCoverageThreshold?: number;
+    /** Optional HRHB relationship threshold override (default +0.2). */
+    hrhbRelationshipThreshold?: number;
+    /** Optional HRHB organizational coverage threshold override (default 50). */
+    hrhbOrgCoverageThreshold?: number;
+    /** Optional RS declaration pressure threshold override (default 100). */
+    rsPressureThreshold?: number;
+    /** Optional HRHB declaration pressure threshold override (default 100). */
+    hrhbPressureThreshold?: number;
+    /** Optional RS pressure-per-turn override (default 10). */
+    rsPressurePerTurn?: number;
+    /** Optional HRHB pressure-per-turn override (default 8). */
+    hrhbPressurePerTurn?: number;
+    /** Optional HRHB war-context override. Default behavior requires RS declared. */
+    isHrhbWarContextSatisfied?: (state: GameState) => boolean;
 }
 
 function getFiniteNumberOrDefault(value: number | undefined, fallback: number): number {
-  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+    return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
 
 function getPositiveIntOrDefault(value: number | undefined, fallback: number): number {
-  if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isInteger(value) || value <= 0) {
-    return fallback;
-  }
-  return value;
+    if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isInteger(value) || value <= 0) {
+        return fallback;
+    }
+    return value;
 }
 
 function getFaction(state: GameState, factionId: FactionId) {
-  return state.factions.find((f) => f.id === factionId);
+    return state.factions.find((f) => f.id === factionId);
 }
 
 function ensureDeclarationState(state: GameState, factionId: FactionId): void {
-  const faction = getFaction(state, factionId);
-  if (!faction) return;
-  if (faction.declaration_pressure === undefined) faction.declaration_pressure = 0;
-  if (faction.declared === undefined) faction.declared = false;
-  if (faction.declaration_turn === undefined) faction.declaration_turn = null;
+    const faction = getFaction(state, factionId);
+    if (!faction) return;
+    if (faction.declaration_pressure === undefined) faction.declaration_pressure = 0;
+    if (faction.declared === undefined) faction.declared = false;
+    if (faction.declaration_turn === undefined) faction.declaration_turn = null;
 }
 
 /**
@@ -87,25 +87,25 @@ function ensureDeclarationState(state: GameState, factionId: FactionId): void {
  * Missing options are treated as condition not met.
  */
 export function areRsEnablingConditionsMet(
-  state: GameState,
-  options: DeclarationPressureOptions = {}
+    state: GameState,
+    options: DeclarationPressureOptions = {}
 ): boolean {
-  const rs = getFaction(state, 'RS');
-  if (!rs || rs.declared) return false;
+    const rs = getFaction(state, 'RS');
+    if (!rs || rs.declared) return false;
 
-  const cov = options.getRsOrgCoverageSerbMajority?.(state);
-  const rsOrgCoverageThreshold = getFiniteNumberOrDefault(options.rsOrgCoverageThreshold, 60);
-  if (cov === undefined || cov < rsOrgCoverageThreshold) return false;
+    const cov = options.getRsOrgCoverageSerbMajority?.(state);
+    const rsOrgCoverageThreshold = getFiniteNumberOrDefault(options.rsOrgCoverageThreshold, 60);
+    if (cov === undefined || cov < rsOrgCoverageThreshold) return false;
 
-  if (!options.getJnaCoordinationTriggered?.(state)) return false;
+    if (!options.getJnaCoordinationTriggered?.(state)) return false;
 
-  const rel = options.getRbhRsRelationship?.(state);
-  const rsRelationshipThreshold = getFiniteNumberOrDefault(options.rsRelationshipThreshold, -0.5);
-  if (rel === undefined || rel > rsRelationshipThreshold) return false;
+    const rel = options.getRbhRsRelationship?.(state);
+    const rsRelationshipThreshold = getFiniteNumberOrDefault(options.rsRelationshipThreshold, -0.5);
+    if (rel === undefined || rel > rsRelationshipThreshold) return false;
 
-  if (!options.getFryRecognitionConfirmed?.(state)) return false;
+    if (!options.getFryRecognitionConfirmed?.(state)) return false;
 
-  return true;
+    return true;
 }
 
 /**
@@ -114,28 +114,28 @@ export function areRsEnablingConditionsMet(
  * Missing options are treated as condition not met.
  */
 export function areHrhbEnablingConditionsMet(
-  state: GameState,
-  options: DeclarationPressureOptions = {}
+    state: GameState,
+    options: DeclarationPressureOptions = {}
 ): boolean {
-  const hrhb = getFaction(state, 'HRHB');
-  const rs = getFaction(state, 'RS');
-  if (!hrhb || hrhb.declared) return false;
-  const hasWarContext = options.isHrhbWarContextSatisfied
-    ? options.isHrhbWarContextSatisfied(state)
-    : Boolean(rs?.declared);
-  if (!hasWarContext) return false;
+    const hrhb = getFaction(state, 'HRHB');
+    const rs = getFaction(state, 'RS');
+    if (!hrhb || hrhb.declared) return false;
+    const hasWarContext = options.isHrhbWarContextSatisfied
+        ? options.isHrhbWarContextSatisfied(state)
+        : Boolean(rs?.declared);
+    if (!hasWarContext) return false;
 
-  const cov = options.getHrhbOrgCoverageCroatMajority?.(state);
-  const hrhbOrgCoverageThreshold = getFiniteNumberOrDefault(options.hrhbOrgCoverageThreshold, 50);
-  if (cov === undefined || cov < hrhbOrgCoverageThreshold) return false;
+    const cov = options.getHrhbOrgCoverageCroatMajority?.(state);
+    const hrhbOrgCoverageThreshold = getFiniteNumberOrDefault(options.hrhbOrgCoverageThreshold, 50);
+    if (cov === undefined || cov < hrhbOrgCoverageThreshold) return false;
 
-  if (!options.getCroatiaSupportConfirmed?.(state)) return false;
+    if (!options.getCroatiaSupportConfirmed?.(state)) return false;
 
-  const rel = options.getRbhHrhbRelationship?.(state);
-  const hrhbRelationshipThreshold = getFiniteNumberOrDefault(options.hrhbRelationshipThreshold, 0.2);
-  if (rel === undefined || rel > hrhbRelationshipThreshold) return false;
+    const rel = options.getRbhHrhbRelationship?.(state);
+    const hrhbRelationshipThreshold = getFiniteNumberOrDefault(options.hrhbRelationshipThreshold, 0.2);
+    if (rel === undefined || rel > hrhbRelationshipThreshold) return false;
 
-  return true;
+    return true;
 }
 
 /**
@@ -146,42 +146,42 @@ export function areHrhbEnablingConditionsMet(
  * does not start war (Phase_0_Spec §4.5, §6).
  */
 export function accumulateDeclarationPressure(
-  state: GameState,
-  turn: number,
-  options: DeclarationPressureOptions = {}
+    state: GameState,
+    turn: number,
+    options: DeclarationPressureOptions = {}
 ): void {
-  ensureDeclarationState(state, 'RS');
-  ensureDeclarationState(state, 'HRHB');
+    ensureDeclarationState(state, 'RS');
+    ensureDeclarationState(state, 'HRHB');
 
-  const rs = getFaction(state, 'RS');
-  const hrhb = getFaction(state, 'HRHB');
+    const rs = getFaction(state, 'RS');
+    const hrhb = getFaction(state, 'HRHB');
 
-  const rsPressurePerTurn = getPositiveIntOrDefault(options.rsPressurePerTurn, RS_PRESSURE_PER_TURN);
-  const hrhbPressurePerTurn = getPositiveIntOrDefault(options.hrhbPressurePerTurn, HRHB_PRESSURE_PER_TURN);
-  const rsPressureThreshold = getPositiveIntOrDefault(
-    options.rsPressureThreshold,
-    DECLARATION_PRESSURE_THRESHOLD
-  );
-  const hrhbPressureThreshold = getPositiveIntOrDefault(
-    options.hrhbPressureThreshold,
-    DECLARATION_PRESSURE_THRESHOLD
-  );
+    const rsPressurePerTurn = getPositiveIntOrDefault(options.rsPressurePerTurn, RS_PRESSURE_PER_TURN);
+    const hrhbPressurePerTurn = getPositiveIntOrDefault(options.hrhbPressurePerTurn, HRHB_PRESSURE_PER_TURN);
+    const rsPressureThreshold = getPositiveIntOrDefault(
+        options.rsPressureThreshold,
+        DECLARATION_PRESSURE_THRESHOLD
+    );
+    const hrhbPressureThreshold = getPositiveIntOrDefault(
+        options.hrhbPressureThreshold,
+        DECLARATION_PRESSURE_THRESHOLD
+    );
 
-  if (rs && !rs.declared && areRsEnablingConditionsMet(state, options)) {
-    const current = rs.declaration_pressure ?? 0;
-    rs.declaration_pressure = Math.min(current + rsPressurePerTurn, rsPressureThreshold);
-    if (rs.declaration_pressure >= rsPressureThreshold) {
-      rs.declared = true;
-      rs.declaration_turn = turn;
+    if (rs && !rs.declared && areRsEnablingConditionsMet(state, options)) {
+        const current = rs.declaration_pressure ?? 0;
+        rs.declaration_pressure = Math.min(current + rsPressurePerTurn, rsPressureThreshold);
+        if (rs.declaration_pressure >= rsPressureThreshold) {
+            rs.declared = true;
+            rs.declaration_turn = turn;
+        }
     }
-  }
 
-  if (hrhb && !hrhb.declared && areHrhbEnablingConditionsMet(state, options)) {
-    const current = hrhb.declaration_pressure ?? 0;
-    hrhb.declaration_pressure = Math.min(current + hrhbPressurePerTurn, hrhbPressureThreshold);
-    if (hrhb.declaration_pressure >= hrhbPressureThreshold) {
-      hrhb.declared = true;
-      hrhb.declaration_turn = turn;
+    if (hrhb && !hrhb.declared && areHrhbEnablingConditionsMet(state, options)) {
+        const current = hrhb.declaration_pressure ?? 0;
+        hrhb.declaration_pressure = Math.min(current + hrhbPressurePerTurn, hrhbPressureThreshold);
+        if (hrhb.declaration_pressure >= hrhbPressureThreshold) {
+            hrhb.declared = true;
+            hrhb.declaration_turn = turn;
+        }
     }
-  }
 }

@@ -10,31 +10,31 @@
  * Phase F2: Uses explicit ControlStatus API (no raw political_controller reads).
  */
 
-import type { GameState, PoliticalSideId } from './game_state.js';
+import { buildAdjacencyMap, type AdjacencyMap } from '../map/adjacency_map.js';
 import type { LoadedSettlementGraph } from '../map/settlements.js';
 import { getEffectiveSettlementSide } from './control_effective.js';
+import type { GameState, PoliticalSideId } from './game_state.js';
 import { getSettlementControlStatus } from './settlement_control.js';
-import { buildAdjacencyMap, type AdjacencyMap } from '../map/adjacency_map.js';
 
 
 export interface TerritorialValuationReport {
-  schema: 1;
-  turn: number;
-  sides: PoliticalSideId[]; // ["RBiH","RS","HRHB"]
-  per_settlement: Array<{
-    sid: string;
-    by_side: Record<PoliticalSideId, number>; // integer 0..100
-    components?: Record<string, number>; // optional, small
-  }>;
+    schema: 1;
+    turn: number;
+    sides: PoliticalSideId[]; // ["RBiH","RS","HRHB"]
+    per_settlement: Array<{
+        sid: string;
+        by_side: Record<PoliticalSideId, number>; // integer 0..100
+        components?: Record<string, number>; // optional, small
+    }>;
 }
 
 export interface ValuationOptions {
-  /**
-   * Optional hook to get homeland side for a settlement.
-   * Returns null if unknown (component will default to neutral).
-   * This is a placeholder for future census/ethnic data integration.
-   */
-  getSettlementHomelandSide?: (sid: string) => PoliticalSideId | null;
+    /**
+     * Optional hook to get homeland side for a settlement.
+     * Returns null if unknown (component will default to neutral).
+     * This is a placeholder for future census/ethnic data integration.
+     */
+    getSettlementHomelandSide?: (sid: string) => PoliticalSideId | null;
 }
 
 /**
@@ -44,76 +44,76 @@ export interface ValuationOptions {
  * Sorting: per_settlement sorted by sid asc.
  */
 export function computeSettlementValues(
-  state: GameState,
-  settlementsGraph: LoadedSettlementGraph,
-  opts: ValuationOptions = {}
+    state: GameState,
+    settlementsGraph: LoadedSettlementGraph,
+    opts: ValuationOptions = {}
 ): TerritorialValuationReport {
-  const turn = state.meta.turn;
-  const sides: PoliticalSideId[] = state.factions.map((f) => f.id).sort();
+    const turn = state.meta.turn;
+    const sides: PoliticalSideId[] = state.factions.map((f) => f.id).sort();
 
-  // Build adjacency map for contiguity and degree calculations
-  const adjacencyMap = buildAdjacencyMap(settlementsGraph.edges);
+    // Build adjacency map for contiguity and degree calculations
+    const adjacencyMap = buildAdjacencyMap(settlementsGraph.edges);
 
-  // Get all settlement IDs sorted deterministically
-  const allSids = Array.from(settlementsGraph.settlements.keys()).sort();
+    // Get all settlement IDs sorted deterministically
+    const allSids = Array.from(settlementsGraph.settlements.keys()).sort();
 
-  // Build set of effectively controlled settlements per side (for contiguity check)
-  const effectivelyControlledBySide = new Map<PoliticalSideId, Set<string>>();
-  for (const side of sides) {
-    effectivelyControlledBySide.set(side, new Set());
-  }
-  for (const sid of allSids) {
-    const effectiveSide = getEffectiveSettlementSide(state, sid);
-    if (effectiveSide) {
-      effectivelyControlledBySide.get(effectiveSide)?.add(sid);
-    }
-  }
-
-  // Build municipality mapping (for contiguity component)
-  const sidToMun = new Map<string, string>();
-  for (const [sid, record] of settlementsGraph.settlements.entries()) {
-    sidToMun.set(sid, record.mun1990_id ?? record.mun_code);
-  }
-
-  // Compute values per settlement
-  const perSettlement: TerritorialValuationReport['per_settlement'] = [];
-  for (const sid of allSids) {
-    const record = settlementsGraph.settlements.get(sid);
-    if (!record) continue;
-
-    const bySide: Record<PoliticalSideId, number> = {} as Record<PoliticalSideId, number>;
-    const components: Record<string, number> = {};
-
-    // Compute value for each side
+    // Build set of effectively controlled settlements per side (for contiguity check)
+    const effectivelyControlledBySide = new Map<PoliticalSideId, Set<string>>();
     for (const side of sides) {
-      const value = computeSettlementValueForSide(
-        sid,
-        side,
-        state,
-        settlementsGraph,
-        adjacencyMap,
-        effectivelyControlledBySide,
-        sidToMun,
-        opts
-      );
-      bySide[side] = value;
+        effectivelyControlledBySide.set(side, new Set());
+    }
+    for (const sid of allSids) {
+        const effectiveSide = getEffectiveSettlementSide(state, sid);
+        if (effectiveSide) {
+            effectivelyControlledBySide.get(effectiveSide)?.add(sid);
+        }
     }
 
-    // Optional: include component breakdown (small, for debugging)
-    // For now, we'll skip detailed components to keep output minimal
+    // Build municipality mapping (for contiguity component)
+    const sidToMun = new Map<string, string>();
+    for (const [sid, record] of settlementsGraph.settlements.entries()) {
+        sidToMun.set(sid, record.mun1990_id ?? record.mun_code);
+    }
 
-    perSettlement.push({
-      sid,
-      by_side: bySide
-    });
-  }
+    // Compute values per settlement
+    const perSettlement: TerritorialValuationReport['per_settlement'] = [];
+    for (const sid of allSids) {
+        const record = settlementsGraph.settlements.get(sid);
+        if (!record) continue;
 
-  return {
-    schema: 1,
-    turn,
-    sides,
-    per_settlement: perSettlement
-  };
+        const bySide: Record<PoliticalSideId, number> = {} as Record<PoliticalSideId, number>;
+        const components: Record<string, number> = {};
+
+        // Compute value for each side
+        for (const side of sides) {
+            const value = computeSettlementValueForSide(
+                sid,
+                side,
+                state,
+                settlementsGraph,
+                adjacencyMap,
+                effectivelyControlledBySide,
+                sidToMun,
+                opts
+            );
+            bySide[side] = value;
+        }
+
+        // Optional: include component breakdown (small, for debugging)
+        // For now, we'll skip detailed components to keep output minimal
+
+        perSettlement.push({
+            sid,
+            by_side: bySide
+        });
+    }
+
+    return {
+        schema: 1,
+        turn,
+        sides,
+        per_settlement: perSettlement
+    };
 }
 
 /**
@@ -121,42 +121,42 @@ export function computeSettlementValues(
  * Returns integer 0..100.
  */
 function computeSettlementValueForSide(
-  sid: string,
-  side: PoliticalSideId,
-  state: GameState,
-  settlementsGraph: LoadedSettlementGraph,
-  adjacencyMap: AdjacencyMap,
-  effectivelyControlledBySide: Map<PoliticalSideId, Set<string>>,
-  sidToMun: Map<string, string>,
-  opts: ValuationOptions
+    sid: string,
+    side: PoliticalSideId,
+    state: GameState,
+    settlementsGraph: LoadedSettlementGraph,
+    adjacencyMap: AdjacencyMap,
+    effectivelyControlledBySide: Map<PoliticalSideId, Set<string>>,
+    sidToMun: Map<string, string>,
+    opts: ValuationOptions
 ): number {
-  let total = 0;
+    let total = 0;
 
-  // B1) Control/heldness component (0..25)
-  const controlComponent = computeControlComponent(sid, side, state);
-  total += controlComponent;
+    // B1) Control/heldness component (0..25)
+    const controlComponent = computeControlComponent(sid, side, state);
+    total += controlComponent;
 
-  // B2) Contiguity component (0..20)
-  const contiguityComponent = computeContiguityComponent(
-    sid,
-    side,
-    settlementsGraph,
-    adjacencyMap,
-    effectivelyControlledBySide,
-    sidToMun
-  );
-  total += contiguityComponent;
+    // B2) Contiguity component (0..20)
+    const contiguityComponent = computeContiguityComponent(
+        sid,
+        side,
+        settlementsGraph,
+        adjacencyMap,
+        effectivelyControlledBySide,
+        sidToMun
+    );
+    total += contiguityComponent;
 
-  // B3) Corridor/strategic connector proxy (0..20)
-  const corridorComponent = computeCorridorComponent(sid, adjacencyMap);
-  total += corridorComponent;
+    // B3) Corridor/strategic connector proxy (0..20)
+    const corridorComponent = computeCorridorComponent(sid, adjacencyMap);
+    total += corridorComponent;
 
-  // B4) Homeland proxy component (0..35)
-  const homelandComponent = computeHomelandComponent(sid, side, opts);
-  total += homelandComponent;
+    // B4) Homeland proxy component (0..35)
+    const homelandComponent = computeHomelandComponent(sid, side, opts);
+    total += homelandComponent;
 
-  // Clamp to 0..100
-  return Math.max(0, Math.min(100, total));
+    // Clamp to 0..100
+    return Math.max(0, Math.min(100, total));
 }
 
 /**
@@ -166,15 +166,15 @@ function computeSettlementValueForSide(
  * - Else (unknown control) => +0
  */
 function computeControlComponent(sid: string, side: PoliticalSideId, state: GameState): number {
-  const effectiveControl = getEffectiveSettlementSide(state, sid);
-  if (effectiveControl === side) {
-    return 25;
-  }
+    const effectiveControl = getEffectiveSettlementSide(state, sid);
+    if (effectiveControl === side) {
+        return 25;
+    }
 
-  const status = getSettlementControlStatus(state, sid);
-  if (status.kind === 'unknown') return 0;
-  if (status.side === side) return 20;
-  return 0;
+    const status = getSettlementControlStatus(state, sid);
+    if (status.kind === 'unknown') return 0;
+    if (status.side === side) return 20;
+    return 0;
 }
 
 /**
@@ -183,51 +183,51 @@ function computeControlComponent(sid: string, side: PoliticalSideId, state: Game
  * - If also within same municipality as any effectively controlled settlement => +10
  */
 function computeContiguityComponent(
-  sid: string,
-  side: PoliticalSideId,
-  settlementsGraph: LoadedSettlementGraph,
-  adjacencyMap: AdjacencyMap,
-  effectivelyControlledBySide: Map<PoliticalSideId, Set<string>>,
-  sidToMun: Map<string, string>
+    sid: string,
+    side: PoliticalSideId,
+    settlementsGraph: LoadedSettlementGraph,
+    adjacencyMap: AdjacencyMap,
+    effectivelyControlledBySide: Map<PoliticalSideId, Set<string>>,
+    sidToMun: Map<string, string>
 ): number {
-  let score = 0;
+    let score = 0;
 
-  const controlledSet = effectivelyControlledBySide.get(side);
-  if (!controlledSet || controlledSet.size === 0) {
-    return 0;
-  }
-
-  // Check adjacency
-  const neighbors = adjacencyMap[sid] || [];
-  let hasAdjacentControlled = false;
-  for (const neighbor of neighbors) {
-    if (controlledSet.has(neighbor)) {
-      hasAdjacentControlled = true;
-      break;
+    const controlledSet = effectivelyControlledBySide.get(side);
+    if (!controlledSet || controlledSet.size === 0) {
+        return 0;
     }
-  }
 
-  if (hasAdjacentControlled) {
-    score += 10;
-
-    // Check same municipality
-    const sidMun = sidToMun.get(sid);
-    if (sidMun) {
-      let hasSameMunControlled = false;
-      for (const controlledSid of controlledSet) {
-        const controlledMun = sidToMun.get(controlledSid);
-        if (controlledMun === sidMun) {
-          hasSameMunControlled = true;
-          break;
+    // Check adjacency
+    const neighbors = adjacencyMap[sid] || [];
+    let hasAdjacentControlled = false;
+    for (const neighbor of neighbors) {
+        if (controlledSet.has(neighbor)) {
+            hasAdjacentControlled = true;
+            break;
         }
-      }
-      if (hasSameMunControlled) {
-        score += 10;
-      }
     }
-  }
 
-  return score;
+    if (hasAdjacentControlled) {
+        score += 10;
+
+        // Check same municipality
+        const sidMun = sidToMun.get(sid);
+        if (sidMun) {
+            let hasSameMunControlled = false;
+            for (const controlledSid of controlledSet) {
+                const controlledMun = sidToMun.get(controlledSid);
+                if (controlledMun === sidMun) {
+                    hasSameMunControlled = true;
+                    break;
+                }
+            }
+            if (hasSameMunControlled) {
+                score += 10;
+            }
+        }
+    }
+
+    return score;
 }
 
 /**
@@ -239,18 +239,18 @@ function computeContiguityComponent(
  * - else +0
  */
 function computeCorridorComponent(sid: string, adjacencyMap: AdjacencyMap): number {
-  const neighbors = adjacencyMap[sid] || [];
-  const degree = neighbors.length;
+    const neighbors = adjacencyMap[sid] || [];
+    const degree = neighbors.length;
 
-  if (degree >= 6) {
-    return 20;
-  } else if (degree >= 4) {
-    return 12;
-  } else if (degree >= 2) {
-    return 6;
-  }
+    if (degree >= 6) {
+        return 20;
+    } else if (degree >= 4) {
+        return 12;
+    } else if (degree >= 2) {
+        return 6;
+    }
 
-  return 0;
+    return 0;
 }
 
 /**
@@ -262,20 +262,20 @@ function computeCorridorComponent(sid: string, adjacencyMap: AdjacencyMap): numb
  * This component MUST be designed to accept better data later without rewriting the system.
  */
 function computeHomelandComponent(
-  sid: string,
-  side: PoliticalSideId,
-  opts: ValuationOptions
+    sid: string,
+    side: PoliticalSideId,
+    opts: ValuationOptions
 ): number {
-  // Use optional hook if provided
-  if (opts.getSettlementHomelandSide) {
-    const homelandSide = opts.getSettlementHomelandSide(sid);
-    if (homelandSide === side) {
-      return 35;
-    } else if (homelandSide !== null) {
-      return 10;
+    // Use optional hook if provided
+    if (opts.getSettlementHomelandSide) {
+        const homelandSide = opts.getSettlementHomelandSide(sid);
+        if (homelandSide === side) {
+            return 35;
+        } else if (homelandSide !== null) {
+            return 10;
+        }
     }
-  }
 
-  // Default: neutral (all sides get same value)
-  return 15;
+    // Default: neutral (all sides get same value)
+    return 15;
 }

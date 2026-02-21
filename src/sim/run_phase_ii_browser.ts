@@ -6,41 +6,41 @@
  * supply_state_derivation); for full Phase II simulation use runTurn in Node.
  */
 
-import type { GameState } from '../state/game_state.js';
-import { cloneGameState } from '../state/clone.js';
-import { strictCompare } from '../state/validateGameState.js';
 import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
-import { populateFactionAoRFromControl, ensureFormationHomeMunsInFactionAoR } from '../scenario/aor_init.js';
+import { ensureFormationHomeMunsInFactionAoR, populateFactionAoRFromControl } from '../scenario/aor_init.js';
+import { cloneGameState } from '../state/clone.js';
+import type { GameState } from '../state/game_state.js';
+import { strictCompare } from '../state/validateGameState.js';
 
 export interface PhaseIITurnInput {
-  seed: string;
-  settlementGraph: LoadedSettlementGraph;
+    seed: string;
+    settlementGraph: LoadedSettlementGraph;
 }
 
 export interface PhaseIITurnReport {
-  seed: string;
-  phases: { name: string }[];
-  phase_ii_aor_init?: boolean;
+    seed: string;
+    phases: { name: string }[];
+    phase_ii_aor_init?: boolean;
 }
 
 /** Build mun_id -> sorted settlement IDs from graph. Deterministic order. */
 function buildSettlementsByMunFromGraph(
-  settlements: Map<string, { mun1990_id?: string; mun_code: string }>
+    settlements: Map<string, { mun1990_id?: string; mun_code: string }>
 ): Map<string, string[]> {
-  const byMun = new Map<string, string[]>();
-  const sids = Array.from(settlements.keys()).sort(strictCompare);
-  for (const sid of sids) {
-    const rec = settlements.get(sid);
-    if (!rec) continue;
-    const munId = rec.mun1990_id ?? rec.mun_code;
-    const list = byMun.get(munId) ?? [];
-    list.push(sid);
-    byMun.set(munId, list);
-  }
-  for (const list of byMun.values()) {
-    list.sort(strictCompare);
-  }
-  return byMun;
+    const byMun = new Map<string, string[]>();
+    const sids = Array.from(settlements.keys()).sort(strictCompare);
+    for (const sid of sids) {
+        const rec = settlements.get(sid);
+        if (!rec) continue;
+        const munId = rec.mun1990_id ?? rec.mun_code;
+        const list = byMun.get(munId) ?? [];
+        list.push(sid);
+        byMun.set(munId, list);
+    }
+    for (const list of byMun.values()) {
+        list.sort(strictCompare);
+    }
+    return byMun;
 }
 
 /**
@@ -48,32 +48,32 @@ function buildSettlementsByMunFromGraph(
  * Returns new state and report; does not mutate the argument.
  */
 export function runPhaseIITurn(
-  state: GameState,
-  input: PhaseIITurnInput
+    state: GameState,
+    input: PhaseIITurnInput
 ): { nextState: GameState; report: PhaseIITurnReport } {
-  const working = cloneGameState(state);
-  if (working.meta.phase !== 'phase_ii') {
-    throw new Error('runPhaseIITurn: state must be in phase_ii');
-  }
+    const working = cloneGameState(state);
+    if (working.meta.phase !== 'phase_ii') {
+        throw new Error('runPhaseIITurn: state must be in phase_ii');
+    }
 
-  const report: PhaseIITurnReport = {
-    seed: input.seed,
-    phases: [{ name: 'phase-ii-advance' }]
-  };
+    const report: PhaseIITurnReport = {
+        seed: input.seed,
+        phases: [{ name: 'phase-ii-advance' }]
+    };
 
-  working.meta = { ...working.meta, seed: input.seed, turn: working.meta.turn + 1 };
+    working.meta = { ...working.meta, seed: input.seed, turn: working.meta.turn + 1 };
 
-  const graph = input.settlementGraph;
-  const factions = working.factions ?? [];
-  const allAoREmpty = factions.every(
-    (f) => !f.areasOfResponsibility || f.areasOfResponsibility.length === 0
-  );
-  if (allAoREmpty && graph.settlements.size > 0) {
-    populateFactionAoRFromControl(working, graph.settlements.keys());
-    const settlementsByMun = buildSettlementsByMunFromGraph(graph.settlements);
-    ensureFormationHomeMunsInFactionAoR(working, settlementsByMun);
-    report.phase_ii_aor_init = true;
-  }
+    const graph = input.settlementGraph;
+    const factions = working.factions ?? [];
+    const allAoREmpty = factions.every(
+        (f) => !f.areasOfResponsibility || f.areasOfResponsibility.length === 0
+    );
+    if (allAoREmpty && graph.settlements.size > 0) {
+        populateFactionAoRFromControl(working, graph.settlements.keys());
+        const settlementsByMun = buildSettlementsByMunFromGraph(graph.settlements);
+        ensureFormationHomeMunsInFactionAoR(working, settlementsByMun);
+        report.phase_ii_aor_init = true;
+    }
 
-  return { nextState: working, report };
+    return { nextState: working, report };
 }

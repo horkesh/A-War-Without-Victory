@@ -37,6 +37,7 @@
 | [MILITIA_BRIGADE_SYSTEM_RESEARCH_AND_REWORK_PLAN.md](backlog/MILITIA_BRIGADE_SYSTEM_RESEARCH_AND_REWORK_PLAN.md) | Research and rework plan for militia/brigade system. | Research / design. |
 | [FORMATION_BRIGADE_VS_HISTORICAL_OOB_COMPARISON.md](backlog/FORMATION_BRIGADE_VS_HISTORICAL_OOB_COMPARISON.md) | Formation vs historical OOB comparison. | Reference. |
 | [RBiH_HRHB_ALLIANCE_REDESIGN_DESIGN.md](backlog/RBiH_HRHB_ALLIANCE_REDESIGN_DESIGN.md) | RBiH–HRHB alliance redesign design. Core alliance lifecycle implemented; redesign may contain future options. | Design; partial implementation done. |
+| [RBIH_HRHB_ALLIANCE_BREAKDOWN_AND_WAR_PLAN.md](../30_planning/RBIH_HRHB_ALLIANCE_BREAKDOWN_AND_WAR_PLAN.md) | RBiH–HRHB war-within-a-war: alliance-aware targeting, endogenous degradation (refugee pressure, bilateral flips), bilateral combat, Phase 0 handoff. Phase A complete; Phases B/C not started. | Planning; Gameplay Programmer / Game Designer. |
 | **Paramilitary / rear-cleanup units** | Role for cleaning undefended rear settlements; BB-grounded (cleanup, rear areas). Convene: [PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18.md](convenes/PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18.md). | Design: Game Designer (role, canon); Formation-expert (OOB, assignment). No implementation until design agreed. |
 | **Per-army flavor** | Distinct unit roles and capabilities by faction (RS JNA heavy done; RBiH light/embargo/elite; HRHB structure). Paramilitary and rear-cleanup can be faction-specific. Same convene as above. | Design: Game Designer; Formation-expert for OOB/stats. |
 
@@ -56,6 +57,8 @@
 | [PHASED_PLAN_MAP_AND_WAR_SYSTEM.md](backlog/PHASED_PLAN_MAP_AND_WAR_SYSTEM.md) | Track A (A1–A4) and Track B war system. A1 complete; later tracks backlog. | Planning. |
 | [PHASE_E_DIRECTIVE_SPATIAL_v1.md](backlog/PHASE_E_DIRECTIVE_SPATIAL_v1.md), [PHASE_G_UI_NOTES.md](backlog/PHASE_G_UI_NOTES.md) | Phase E spatial directive v1; Phase G UI notes. | Reference. |
 | [UI_DESIGN_SPECIFICATION.md](backlog/UI_DESIGN_SPECIFICATION.md), [NATO_AESTHETIC_SPEC.md](backlog/NATO_AESTHETIC_SPEC.md) | UI design spec; NATO aesthetic spec. | Design. |
+| [BATCH_ADVANCE_TWO_WEEKS_UI_PLAN.md](../30_planning/BATCH_ADVANCE_TWO_WEEKS_UI_PLAN.md) | Batch-advance N turns (default 2 weeks) in warroom UI; loop-in-UI with existing advanceTurn(); Phase transitions and critical events halt batch. | Planning; PM / UI. |
+| **Phase 0 referendum/deadline fix (priority C)** | When scenario schedules referendum later than default 12-turn eligibility deadline, align deadlineTurns with schedule so Phase 0 does not hit non_war_terminal before referendum can fire. **Implemented 2026-02-18:** buildPhase0TurnOptions sets referendum from meta; callers use built options. Convene: [PRIORITY_C_PHASE0_REFERENDUM_DEADLINE_HANDOFF_2026_02_18.md](convenes/PRIORITY_C_PHASE0_REFERENDUM_DEADLINE_HANDOFF_2026_02_18.md). | Done 2026-02-18. |
 
 ---
 
@@ -73,7 +76,7 @@
 
 | Report | Summary | Priority / owner |
 |--------|---------|-------------------|
-| [PARADOX_STATE_OF_GAME_MEETING.md](convenes/PARADOX_STATE_OF_GAME_MEETING.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md) | State-of-game meetings. | Process / reference. |
+| [PARADOX_STATE_OF_GAME_MEETING.md](convenes/PARADOX_STATE_OF_GAME_MEETING.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md), [PRIORITY_C_PHASE0_REFERENDUM_DEADLINE_HANDOFF_2026_02_18.md](convenes/PRIORITY_C_PHASE0_REFERENDUM_DEADLINE_HANDOFF_2026_02_18.md) | State-of-game meetings; priority (C) Phase 0 referendum/deadline handoff. | Process / reference. |
 | [PARADOX_PHASE0_ORCHESTRATOR_REPORT.md](convenes/PARADOX_PHASE0_ORCHESTRATOR_REPORT.md) | Phase 0 orchestrator report. | Reference. |
 | [PARADOX_TACTICAL_MAP_CANONICAL_DEPRECATION_CONVENE.md](convenes/PARADOX_TACTICAL_MAP_CANONICAL_DEPRECATION_CONVENE.md) | Tactical map canonical deprecation convene. | Process. |
 | [PARADOX_RBIH_WIPEOUT_FIX_MEETING.md](convenes/PARADOX_RBIH_WIPEOUT_FIX_MEETING.md) | RBiH wipeout fix meeting. | Design input. |
@@ -81,6 +84,8 @@
 | [WARROOM_CLICK_ALIGNMENT_TEAM_DISCUSSION.md](backlog/WARROOM_CLICK_ALIGNMENT_TEAM_DISCUSSION.md), [WARROOM_ASSET_GENERATION_BRIEF.md](backlog/WARROOM_ASSET_GENERATION_BRIEF.md) | Warroom click alignment; asset generation brief. | Design. |
 | [HANDOVER_WARROOM_GUI.md](handovers/HANDOVER_WARROOM_GUI.md) | Warroom GUI handover. | Handoff. |
 | [REPO_CLEANUP_2026_PHASE0_DISCOVER.md](backlog/REPO_CLEANUP_2026_PHASE0_DISCOVER.md) | Repo cleanup discovery (Phase 0). | Process. |
+| `DEAD_CODE_AND_FILES_UTF8.md` (root directory) | Pending deletion of 451 dead files identified via `knip` audit. | Tech Debt. |
+| `TACTICAL_SANDBOX_3D_POST_INTEGRATION_ROADMAP.md` (docs/30_planning/) | 3D Map polishing, visual overhaul (Tracestrack Topo), combat width limits, etc. | Design / Tech Debt. |
 | [SCENARIO_RUN_WHAT_ACTUALLY_HAPPENS.md](backlog/SCENARIO_RUN_WHAT_ACTUALLY_HAPPENS.md) | What actually happens in scenario run. | Reference. |
 | [CLICKABLE_REGIONS_SPECIFICATION.md](backlog/CLICKABLE_REGIONS_SPECIFICATION.md) | Clickable regions spec. | Design. |
 
@@ -92,13 +97,13 @@ The report [BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md](implemented/BOT_AI_
 
 - AoR extreme imbalance (HIGH) — contiguity and surrounded-brigade reform done 2026-02-17; remaining imbalance may be addressed later.
 - **RS early-war underperformance (MEDIUM)** — **Implemented 2026-02-18 (priority B):** RS early-war window extended 0–12 → 0–26 (doctrine, standing orders, attack share, corps E1). [PRIORITY_B_RS_EARLY_WAR_BOT_HANDOFF_2026_02_18.md](convenes/PRIORITY_B_RS_EARLY_WAR_BOT_HANDOFF_2026_02_18.md) (scope, acceptance criteria, implementation complete; 16w comparison vs baseline optional).
-- Defender casualties at zero (MEDIUM)
-- HRHB near-passive (LOW–MEDIUM)
+- **Defender casualties at zero (MEDIUM)** — **Implemented 2026-02-18:** Battle resolution uses a reporting floor when defender personnel ≤ MIN_COMBAT_PERSONNEL so report and casualty_ledger show non-zero defender losses; application remains capped so formation never drops below floor (battle_resolution.ts, Phase II Spec §12).
+- **HRHB near-passive (LOW–MEDIUM)** — **Implemented 2026-02-18 (Candidate B):** HRHB Lasva Offensive window (weeks 12–26): higher effective attack share (0.45), non-Herzegovina corps nudged to at least balanced when avgPers ≥ 0.4 (bot_strategy.ts, bot_corps_ai.ts). [NEXT_BOT_PRIORITY_AOR_OR_HRHB_HANDOFF_2026_02_18.md](convenes/NEXT_BOT_PRIORITY_AOR_OR_HRHB_HANDOFF_2026_02_18.md) §5.
 - Posture orders for forming brigades (LOW)
 - Corps command not integrated with brigade AI (LOW)
 - Operational groups not used by bot AI (LOW)
 
-Treat these as backlog items for bot/brigade AI when prioritizing.
+Treat these as backlog items for bot/brigade AI when prioritizing. **Next single bot priority (choose one):** [NEXT_BOT_PRIORITY_AOR_OR_HRHB_HANDOFF_2026_02_18.md](convenes/NEXT_BOT_PRIORITY_AOR_OR_HRHB_HANDOFF_2026_02_18.md) — Candidate A (AoR behavioral balance, HIGH) remains open; Candidate B (HRHB activity) implemented 2026-02-18.
 
 ---
 

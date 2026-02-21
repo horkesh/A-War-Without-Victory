@@ -13,6 +13,7 @@ export default defineConfig({
       'tests/aor_reshaping.test.ts',
       'tests/bot_three_sides_validation.test.ts',
       'tests/corps_aor_contiguity.test.ts',
+      'tests/sandbox_slice_determinism.test.ts',
     ],
     globals: false,
   },

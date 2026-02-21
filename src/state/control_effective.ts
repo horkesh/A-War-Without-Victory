@@ -11,8 +11,7 @@
  */
 
 
-import type { GameState } from './game_state.js';
-import type { SettlementId, PoliticalSideId } from './game_state.js';
+import type { GameState, PoliticalSideId, SettlementId } from './game_state.js';
 import { getSettlementSideLegacy } from './settlement_control.js';
 
 
@@ -32,17 +31,17 @@ import { getSettlementSideLegacy } from './settlement_control.js';
  * (it's fine to evaluate based on current AoR, not effective control).
  */
 export function getEffectiveSettlementSide(
-  state: GameState,
-  sid: SettlementId
+    state: GameState,
+    sid: SettlementId
 ): PoliticalSideId | null {
-  // Check control overrides first (negotiated control)
-  if (state.control_overrides && typeof state.control_overrides === 'object') {
-    const override = state.control_overrides[sid];
-    if (override && typeof override === 'object' && typeof override.side === 'string') {
-      return override.side;
+    // Check control overrides first (negotiated control)
+    if (state.control_overrides && typeof state.control_overrides === 'object') {
+        const override = state.control_overrides[sid];
+        if (override && typeof override === 'object' && typeof override.side === 'string') {
+            return override.side;
+        }
     }
-  }
 
-  // Fall back to AoR-derived control
-  return getSettlementSideLegacy(state, sid);
+    // Fall back to AoR-derived control
+    return getSettlementSideLegacy(state, sid);
 }

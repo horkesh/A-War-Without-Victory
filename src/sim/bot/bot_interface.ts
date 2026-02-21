@@ -1,6 +1,6 @@
-import type { GameState, FactionId } from '../../state/game_state.js';
 import type { FrontEdge } from '../../map/front_edges.js';
 import type { EdgeRecord } from '../../map/settlements.js';
+import type { FactionId, GameState } from '../../state/game_state.js';
 import type { BotDifficulty, BotStrategyProfile, BotTimeContext } from './bot_strategy.js';
 
 export interface BotDecisions {

@@ -23,39 +23,39 @@
  */
 
 
-import type { GameState } from './game_state.js';
+import { initializePhase0Relationships, runPhase0BotInvestments, runPhase0Turn } from '../phase0/index.js';
+import { buildPhase0TurnOptions } from '../phase0/phase0_options_builder.js';
 import { cloneGameState } from './clone.js';
+import type { GameState } from './game_state.js';
 import { ALL_GATES_OPEN } from './phase_gates.js';
 import {
-  PHASE_ORDER,
-  phaseDirectives,
-  phaseDeployments,
-  phaseMilitaryInteraction,
-  phaseFragmentationResolution,
-  phaseSupplyResolution,
-  phasePoliticalEffects,
-  phaseExhaustionUpdate,
-  phasePersistence,
-  type TurnPipelineInput
+    PHASE_ORDER,
+    phaseDeployments,
+    phaseDirectives,
+    phaseExhaustionUpdate,
+    phaseFragmentationResolution,
+    phaseMilitaryInteraction,
+    phasePersistence,
+    phasePoliticalEffects,
+    phaseSupplyResolution,
+    type TurnPipelineInput
 } from './turn_phases.js';
-import { runPhase0Turn } from '../phase0/index.js';
-import { buildPhase0TurnOptions } from '../phase0/phase0_options_builder.js';
 
 
 const PHASE_HANDLERS = [
-  phaseDirectives,
-  phaseDeployments,
-  phaseMilitaryInteraction,
-  phaseFragmentationResolution,
-  phaseSupplyResolution,
-  phasePoliticalEffects,
-  phaseExhaustionUpdate,
-  phasePersistence
+    phaseDirectives,
+    phaseDeployments,
+    phaseMilitaryInteraction,
+    phaseFragmentationResolution,
+    phaseSupplyResolution,
+    phasePoliticalEffects,
+    phaseExhaustionUpdate,
+    phasePersistence
 ];
 
 export interface RunOneTurnResult {
-  state: GameState;
-  phasesExecuted: string[];
+    state: GameState;
+    phasesExecuted: string[];
 }
 
 /**
@@ -67,72 +67,68 @@ export interface RunOneTurnResult {
  * increment turn — runOneTurn increments exactly once. phasesExecuted is return-only (not stored).
  */
 export function runOneTurn(
-  state: GameState,
-  inputs: TurnPipelineInput,
-  gate: typeof ALL_GATES_OPEN = ALL_GATES_OPEN
+    state: GameState,
+    inputs: TurnPipelineInput,
+    gate: typeof ALL_GATES_OPEN = ALL_GATES_OPEN
 ): RunOneTurnResult {
-  let working = cloneGameState(state);
+    let working = cloneGameState(state);
 
-  if (working.meta.phase === 'phase_0') {
-    const options = buildPhase0TurnOptions(working);
-    options.referendum = {
-      ...(working.meta.phase_0_scheduled_referendum_turn !== undefined && working.meta.phase_0_scheduled_referendum_turn !== null
-        ? { deadlineTurns: working.meta.phase_0_scheduled_referendum_turn + 1 }
-        : {}),
-      ...(working.meta.phase_0_scheduled_referendum_turn !== undefined && working.meta.phase_0_scheduled_referendum_turn !== null
-        ? { scheduledReferendumTurn: working.meta.phase_0_scheduled_referendum_turn }
-        : {}),
-      ...(working.meta.phase_0_scheduled_war_start_turn !== undefined && working.meta.phase_0_scheduled_war_start_turn !== null
-        ? { scheduledWarStartTurn: working.meta.phase_0_scheduled_war_start_turn }
-        : {})
-    };
-    runPhase0Turn(working, options);
+    if (working.meta.phase === 'phase_0') {
+        // Ensure Phase 0 relationships are initialized (mirrors warroom logic)
+        if (!working.phase0_relationships) {
+            working.phase0_relationships = initializePhase0Relationships();
+        }
+
+        // Bot AI: non-player factions invest (mirrors warroom run_phase0_turn.ts)
+        const playerFaction = working.meta.player_faction ?? undefined;
+        runPhase0BotInvestments(working, playerFaction, `phase0-bot-t${working.meta.turn}`);
+
+        const options = buildPhase0TurnOptions(working);
+        runPhase0Turn(working, options);
+        const nextTurn = working.meta.turn + 1;
+        if (!Number.isInteger(nextTurn) || nextTurn < 0) {
+            throw new Error(`Invariant: meta.turn must be non-negative integer; got ${nextTurn}`);
+        }
+        working = {
+            ...working,
+            meta: {
+                ...working.meta,
+                turn: nextTurn,
+                seed: inputs.seed
+            }
+        };
+        return {
+            state: working,
+            phasesExecuted: ['phase_0']
+        };
+    }
+
+    if (working.meta.phase === 'phase_i' || working.meta.phase === 'phase_ii') {
+        throw new Error(
+            `runOneTurn: phase "${working.meta.phase}" not yet implemented in canonical pipeline; use sim/turn_pipeline runTurn for war phases`
+        );
+    }
+
+    for (let i = 0; i < PHASE_ORDER.length; i++) {
+        working = PHASE_HANDLERS[i](working, inputs, gate);
+    }
+
     const nextTurn = working.meta.turn + 1;
     if (!Number.isInteger(nextTurn) || nextTurn < 0) {
-      throw new Error(`Invariant: meta.turn must be non-negative integer; got ${nextTurn}`);
+        throw new Error(`Invariant: meta.turn must be non-negative integer; got ${nextTurn}`);
     }
+
     working = {
-      ...working,
-      meta: {
-        ...working.meta,
-        turn: nextTurn,
-        seed: inputs.seed
-      }
+        ...working,
+        meta: {
+            ...working.meta,
+            turn: nextTurn,
+            seed: inputs.seed
+        }
     };
+
     return {
-      state: working,
-      phasesExecuted: ['phase_0']
+        state: working,
+        phasesExecuted: [...PHASE_ORDER]
     };
-  }
-
-  if (working.meta.phase === 'phase_i' || working.meta.phase === 'phase_ii') {
-    throw new Error(
-      `runOneTurn: phase "${working.meta.phase}" not yet implemented in canonical pipeline; use sim/turn_pipeline runTurn for war phases`
-    );
-  }
-
-  for (let i = 0; i < PHASE_ORDER.length; i++) {
-    const phaseId = PHASE_ORDER[i];
-    const handler = PHASE_HANDLERS[i];
-    working = handler(working, inputs, gate);
-  }
-
-  const nextTurn = working.meta.turn + 1;
-  if (!Number.isInteger(nextTurn) || nextTurn < 0) {
-    throw new Error(`Invariant: meta.turn must be non-negative integer; got ${nextTurn}`);
-  }
-
-  working = {
-    ...working,
-    meta: {
-      ...working.meta,
-      turn: nextTurn,
-      seed: inputs.seed
-    }
-  };
-
-  return {
-    state: working,
-    phasesExecuted: [...PHASE_ORDER]
-  };
 }

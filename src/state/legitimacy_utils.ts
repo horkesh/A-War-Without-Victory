@@ -25,24 +25,24 @@ export const RECRUITMENT_LEGITIMACY_MIN = 0.5;
  * Returns faction ID → average legitimacy (0–1 scale); defaults to 0.5 for factions with no data.
  */
 export function getFactionLegitimacyAverages(state: GameState): Record<string, number> {
-  const totals: Record<string, { sum: number; count: number }> = {};
-  for (const faction of state.factions) {
-    totals[faction.id] = { sum: 0, count: 0 };
-  }
-  const controllers = state.political_controllers ?? {};
-  const settlements = state.settlements ?? {};
-  for (const [sid, controller] of Object.entries(controllers)) {
-    if (!controller) continue;
-    const leg = settlements[sid]?.legitimacy_state?.legitimacy_score;
-    if (typeof leg !== 'number') continue;
-    const bucket = totals[controller];
-    if (!bucket) continue;
-    bucket.sum += leg;
-    bucket.count += 1;
-  }
-  const averages: Record<string, number> = {};
-  for (const [fid, agg] of Object.entries(totals)) {
-    averages[fid] = agg.count > 0 ? agg.sum / agg.count : 0.5;
-  }
-  return averages;
+    const totals: Record<string, { sum: number; count: number }> = {};
+    for (const faction of state.factions) {
+        totals[faction.id] = { sum: 0, count: 0 };
+    }
+    const controllers = state.political_controllers ?? {};
+    const settlements = state.settlements ?? {};
+    for (const [sid, controller] of Object.entries(controllers)) {
+        if (!controller) continue;
+        const leg = settlements[sid]?.legitimacy_state?.legitimacy_score;
+        if (typeof leg !== 'number') continue;
+        const bucket = totals[controller];
+        if (!bucket) continue;
+        bucket.sum += leg;
+        bucket.count += 1;
+    }
+    const averages: Record<string, number> = {};
+    for (const [fid, agg] of Object.entries(totals)) {
+        averages[fid] = agg.count > 0 ? agg.sum / agg.count : 0.5;
+    }
+    return averages;
 }

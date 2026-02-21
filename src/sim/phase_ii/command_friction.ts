@@ -4,10 +4,10 @@
  * Deterministic: identical state + inputs → same multiplier; no randomness.
  */
 
-import type { GameState, FactionId } from '../../state/game_state.js';
-import { strictCompare } from '../../state/validateGameState.js';
 import { computeFrontEdges } from '../../map/front_edges.js';
 import type { EdgeRecord } from '../../map/settlements.js';
+import type { FactionId, GameState } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 
 /** Friction contribution per point of faction exhaustion. */
 const FRICTION_PER_EXHAUSTION = 0.01;
@@ -25,23 +25,23 @@ const MAX_MULTIPLIER = 10;
  * Deterministic: same state + factionId → same result.
  */
 export function getPhaseIICommandFrictionMultiplier(
-  state: GameState,
-  factionId: FactionId,
-  settlementEdges: EdgeRecord[]
+    state: GameState,
+    factionId: FactionId,
+    settlementEdges: EdgeRecord[]
 ): number {
-  if (state.meta.phase !== 'phase_ii') {
-    return 1;
-  }
+    if (state.meta.phase !== 'phase_ii') {
+        return 1;
+    }
 
-  const exhaustion = (state.phase_ii_exhaustion ?? {})[factionId] ?? 0;
-  const frontEdges = computeFrontEdges(state, settlementEdges);
-  let frontEdgeCount = 0;
-  for (const fe of frontEdges) {
-    if (fe.side_a === factionId || fe.side_b === factionId) frontEdgeCount += 1;
-  }
+    const exhaustion = (state.phase_ii_exhaustion ?? {})[factionId] ?? 0;
+    const frontEdges = computeFrontEdges(state, settlementEdges);
+    let frontEdgeCount = 0;
+    for (const fe of frontEdges) {
+        if (fe.side_a === factionId || fe.side_b === factionId) frontEdgeCount += 1;
+    }
 
-  const raw = 1 + exhaustion * FRICTION_PER_EXHAUSTION + frontEdgeCount * FRICTION_PER_FRONT_EDGE;
-  return Math.max(1, Math.min(MAX_MULTIPLIER, raw));
+    const raw = 1 + exhaustion * FRICTION_PER_EXHAUSTION + frontEdgeCount * FRICTION_PER_FRONT_EDGE;
+    return Math.max(1, Math.min(MAX_MULTIPLIER, raw));
 }
 
 /**
@@ -49,13 +49,13 @@ export function getPhaseIICommandFrictionMultiplier(
  * All returned values are >= 1; higher = more friction.
  */
 export function getPhaseIICommandFrictionMultipliers(
-  state: GameState,
-  settlementEdges: EdgeRecord[]
+    state: GameState,
+    settlementEdges: EdgeRecord[]
 ): Record<FactionId, number> {
-  const out: Record<FactionId, number> = {};
-  const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
-  for (const fid of factionIds) {
-    out[fid] = getPhaseIICommandFrictionMultiplier(state, fid, settlementEdges);
-  }
-  return out;
+    const out: Record<FactionId, number> = {};
+    const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
+    for (const fid of factionIds) {
+        out[fid] = getPhaseIICommandFrictionMultiplier(state, fid, settlementEdges);
+    }
+    return out;
 }

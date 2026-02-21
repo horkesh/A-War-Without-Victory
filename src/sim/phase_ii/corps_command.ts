@@ -6,13 +6,13 @@
  */
 
 import type {
-  GameState,
-  FactionId,
-  FormationId,
-  FormationState,
-  CorpsStance,
-  ArmyStance,
-  BrigadePosture,
+    ArmyStance,
+    BrigadePosture,
+    CorpsStance,
+    FactionId,
+    FormationId,
+    FormationState,
+    GameState,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
@@ -21,18 +21,18 @@ import { strictCompare } from '../../state/validateGameState.js';
 // ---------------------------------------------------------------------------
 
 export interface StanceModifiers {
-  pressure_mult: number;       // multiplied with brigade pressure
-  defense_mult: number;        // multiplied with brigade defense
-  exhaustion_per_turn: number; // added to brigade exhaustion each turn
-  cohesion_recovery: number;   // added to brigade cohesion per turn (reorganize)
-  force_posture?: BrigadePosture; // if set, override brigade posture
+    pressure_mult: number;       // multiplied with brigade pressure
+    defense_mult: number;        // multiplied with brigade defense
+    exhaustion_per_turn: number; // added to brigade exhaustion each turn
+    cohesion_recovery: number;   // added to brigade cohesion per turn (reorganize)
+    force_posture?: BrigadePosture; // if set, override brigade posture
 }
 
 const STANCE_MODIFIERS: Record<CorpsStance, StanceModifiers> = {
-  defensive:  { pressure_mult: 0.7, defense_mult: 1.2, exhaustion_per_turn: 0, cohesion_recovery: 0 },
-  balanced:   { pressure_mult: 1.0, defense_mult: 1.0, exhaustion_per_turn: 0, cohesion_recovery: 0 },
-  offensive:  { pressure_mult: 1.2, defense_mult: 0.8, exhaustion_per_turn: 1, cohesion_recovery: 0 },
-  reorganize: { pressure_mult: 0.0, defense_mult: 1.0, exhaustion_per_turn: 0, cohesion_recovery: 2, force_posture: 'defend' },
+    defensive: { pressure_mult: 0.7, defense_mult: 1.2, exhaustion_per_turn: 0, cohesion_recovery: 0 },
+    balanced: { pressure_mult: 1.0, defense_mult: 1.0, exhaustion_per_turn: 0, cohesion_recovery: 0 },
+    offensive: { pressure_mult: 1.2, defense_mult: 0.8, exhaustion_per_turn: 1, cohesion_recovery: 0 },
+    reorganize: { pressure_mult: 0.0, defense_mult: 1.0, exhaustion_per_turn: 0, cohesion_recovery: 2, force_posture: 'defend' },
 };
 
 // ---------------------------------------------------------------------------
@@ -40,9 +40,9 @@ const STANCE_MODIFIERS: Record<CorpsStance, StanceModifiers> = {
 // ---------------------------------------------------------------------------
 
 const OP_PHASE_DURATION: Record<'planning' | 'execution' | 'recovery', number> = {
-  planning: 3,
-  execution: 4,
-  recovery: 3,
+    planning: 3,
+    execution: 4,
+    recovery: 3,
 };
 
 // ---------------------------------------------------------------------------
@@ -50,26 +50,26 @@ const OP_PHASE_DURATION: Record<'planning' | 'execution' | 'recovery', number> =
 // ---------------------------------------------------------------------------
 
 const OP_EXECUTION_MODIFIERS: StanceModifiers = {
-  pressure_mult: 1.5,
-  defense_mult: 1.0,
-  exhaustion_per_turn: 4,
-  cohesion_recovery: -4,
+    pressure_mult: 1.5,
+    defense_mult: 1.0,
+    exhaustion_per_turn: 4,
+    cohesion_recovery: -4,
 };
 
 /** Small preparation bonus during planning phase. */
 const OP_PLANNING_MODIFIERS: StanceModifiers = {
-  pressure_mult: 1.0,
-  defense_mult: 1.05,
-  exhaustion_per_turn: 0,
-  cohesion_recovery: 0,
+    pressure_mult: 1.0,
+    defense_mult: 1.05,
+    exhaustion_per_turn: 0,
+    cohesion_recovery: 0,
 };
 
 /** Recovery penalty during recovery phase. */
 const OP_RECOVERY_MODIFIERS: StanceModifiers = {
-  pressure_mult: 0.6,
-  defense_mult: 0.9,
-  exhaustion_per_turn: 0,
-  cohesion_recovery: 1,
+    pressure_mult: 0.6,
+    defense_mult: 0.9,
+    exhaustion_per_turn: 0,
+    cohesion_recovery: 1,
 };
 
 // ---------------------------------------------------------------------------
@@ -88,54 +88,54 @@ const LARGE_CORPS_THRESHOLD = 6; // subordinate count for 2 OG slots
  * Called at Phase II entry. Idempotent: skips corps that already have state.
  */
 export function initializeCorpsCommand(state: GameState): void {
-  if (!state.formations) return;
-  if (!state.corps_command) state.corps_command = {};
+    if (!state.formations) return;
+    if (!state.corps_command) state.corps_command = {};
 
-  const corpsIds = Object.keys(state.formations)
-    .filter((fid) => {
-      const f = state.formations![fid];
-      return (f.kind === 'corps' || f.kind === 'corps_asset') && f.status === 'active';
-    })
-    .sort(strictCompare);
+    const corpsIds = Object.keys(state.formations)
+        .filter((fid) => {
+            const f = state.formations![fid];
+            return (f.kind === 'corps' || f.kind === 'corps_asset') && f.status === 'active';
+        })
+        .sort(strictCompare);
 
-  for (const cid of corpsIds) {
-    // Skip if already initialized
-    if (state.corps_command[cid]) continue;
+    for (const cid of corpsIds) {
+        // Skip if already initialized
+        if (state.corps_command[cid]) continue;
 
-    const corps = state.formations[cid];
+        const corps = state.formations[cid];
 
-    // Determine command span from tags or default
-    let commandSpan = DEFAULT_COMMAND_SPAN;
-    for (const tag of corps.tags ?? []) {
-      if (tag.startsWith('cmd_span:')) {
-        const parsed = parseInt(tag.slice(9), 10);
-        if (!isNaN(parsed) && parsed > 0) commandSpan = parsed;
-      }
+        // Determine command span from tags or default
+        let commandSpan = DEFAULT_COMMAND_SPAN;
+        for (const tag of corps.tags ?? []) {
+            if (tag.startsWith('cmd_span:')) {
+                const parsed = parseInt(tag.slice(9), 10);
+                if (!isNaN(parsed) && parsed > 0) commandSpan = parsed;
+            }
+        }
+
+        // Count subordinate brigades
+        let subordinateCount = 0;
+        const formationIds = Object.keys(state.formations).sort(strictCompare);
+        for (const fid of formationIds) {
+            const f = state.formations[fid];
+            if (f.corps_id === cid && f.kind === 'brigade' && f.status === 'active') {
+                subordinateCount++;
+            }
+        }
+
+        // OG slots: 2 for large corps, 1 otherwise
+        const ogSlots = subordinateCount >= LARGE_CORPS_THRESHOLD ? 2 : 1;
+
+        state.corps_command[cid] = {
+            command_span: commandSpan,
+            subordinate_count: subordinateCount,
+            og_slots: ogSlots,
+            active_ogs: [],
+            corps_exhaustion: 0,
+            stance: 'balanced',
+            active_operation: null,
+        };
     }
-
-    // Count subordinate brigades
-    let subordinateCount = 0;
-    const formationIds = Object.keys(state.formations).sort(strictCompare);
-    for (const fid of formationIds) {
-      const f = state.formations[fid];
-      if (f.corps_id === cid && f.kind === 'brigade' && f.status === 'active') {
-        subordinateCount++;
-      }
-    }
-
-    // OG slots: 2 for large corps, 1 otherwise
-    const ogSlots = subordinateCount >= LARGE_CORPS_THRESHOLD ? 2 : 1;
-
-    state.corps_command[cid] = {
-      command_span: commandSpan,
-      subordinate_count: subordinateCount,
-      og_slots: ogSlots,
-      active_ogs: [],
-      corps_exhaustion: 0,
-      stance: 'balanced',
-      active_operation: null,
-    };
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -147,20 +147,20 @@ export function initializeCorpsCommand(state: GameState): void {
  * Army stance 'balanced' does not override; other values force a stance.
  */
 export function getEffectiveCorpsStance(state: GameState, corpsId: FormationId): CorpsStance {
-  const corps = state.formations?.[corpsId];
-  if (!corps) return 'balanced';
+    const corps = state.formations?.[corpsId];
+    if (!corps) return 'balanced';
 
-  const armyStance = state.army_stance?.[corps.faction];
-  if (!armyStance || armyStance === 'balanced') {
+    const armyStance = state.army_stance?.[corps.faction];
+    if (!armyStance || armyStance === 'balanced') {
+        return state.corps_command?.[corpsId]?.stance ?? 'balanced';
+    }
+
+    // Army stance overrides
+    if (armyStance === 'general_offensive') return 'offensive';
+    if (armyStance === 'general_defensive') return 'defensive';
+    if (armyStance === 'total_mobilization') return 'reorganize';
+
     return state.corps_command?.[corpsId]?.stance ?? 'balanced';
-  }
-
-  // Army stance overrides
-  if (armyStance === 'general_offensive') return 'offensive';
-  if (armyStance === 'general_defensive') return 'defensive';
-  if (armyStance === 'total_mobilization') return 'reorganize';
-
-  return state.corps_command?.[corpsId]?.stance ?? 'balanced';
 }
 
 // ---------------------------------------------------------------------------
@@ -172,10 +172,10 @@ export function getEffectiveCorpsStance(state: GameState, corpsId: FormationId):
  * Returns balanced modifiers if the brigade has no corps.
  */
 export function getCorpsStanceModifiers(state: GameState, brigade: FormationState): StanceModifiers {
-  if (!brigade.corps_id) return STANCE_MODIFIERS.balanced;
+    if (!brigade.corps_id) return STANCE_MODIFIERS.balanced;
 
-  const effectiveStance = getEffectiveCorpsStance(state, brigade.corps_id);
-  return STANCE_MODIFIERS[effectiveStance];
+    const effectiveStance = getEffectiveCorpsStance(state, brigade.corps_id);
+    return STANCE_MODIFIERS[effectiveStance];
 }
 
 // ---------------------------------------------------------------------------
@@ -187,29 +187,29 @@ export function getCorpsStanceModifiers(state: GameState, brigade: FormationStat
  * Returns modifiers based on the operation phase, or null if not in any operation.
  */
 export function getOperationModifiers(state: GameState, brigadeId: FormationId): StanceModifiers | null {
-  if (!state.corps_command) return null;
+    if (!state.corps_command) return null;
 
-  const corpsIds = Object.keys(state.corps_command).sort(strictCompare);
-  for (const cid of corpsIds) {
-    const cmd = state.corps_command[cid];
-    const op = cmd.active_operation;
-    if (!op) continue;
-    if (!op.participating_brigades.includes(brigadeId)) continue;
+    const corpsIds = Object.keys(state.corps_command).sort(strictCompare);
+    for (const cid of corpsIds) {
+        const cmd = state.corps_command[cid];
+        const op = cmd.active_operation;
+        if (!op) continue;
+        if (!op.participating_brigades.includes(brigadeId)) continue;
 
-    // Found: brigade is in this operation
-    switch (op.phase) {
-      case 'execution':
-        return OP_EXECUTION_MODIFIERS;
-      case 'planning':
-        return OP_PLANNING_MODIFIERS;
-      case 'recovery':
-        return OP_RECOVERY_MODIFIERS;
-      default:
-        return null;
+        // Found: brigade is in this operation
+        switch (op.phase) {
+            case 'execution':
+                return OP_EXECUTION_MODIFIERS;
+            case 'planning':
+                return OP_PLANNING_MODIFIERS;
+            case 'recovery':
+                return OP_RECOVERY_MODIFIERS;
+            default:
+                return null;
+        }
     }
-  }
 
-  return null;
+    return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -221,27 +221,27 @@ export function getOperationModifiers(state: GameState, brigadeId: FormationId):
  * planning -> execution -> recovery -> complete (null).
  */
 export function advanceOperations(state: GameState): void {
-  if (!state.corps_command) return;
+    if (!state.corps_command) return;
 
-  const corpsIds = Object.keys(state.corps_command).sort(strictCompare);
-  for (const cid of corpsIds) {
-    const cmd = state.corps_command[cid];
-    const op = cmd.active_operation;
-    if (!op) continue;
+    const corpsIds = Object.keys(state.corps_command).sort(strictCompare);
+    for (const cid of corpsIds) {
+        const cmd = state.corps_command[cid];
+        const op = cmd.active_operation;
+        if (!op) continue;
 
-    const turnsInPhase = state.meta.turn - op.phase_started_turn;
+        const turnsInPhase = state.meta.turn - op.phase_started_turn;
 
-    if (op.phase === 'planning' && turnsInPhase >= OP_PHASE_DURATION.planning) {
-      op.phase = 'execution';
-      op.phase_started_turn = state.meta.turn;
-    } else if (op.phase === 'execution' && turnsInPhase >= OP_PHASE_DURATION.execution) {
-      op.phase = 'recovery';
-      op.phase_started_turn = state.meta.turn;
-    } else if (op.phase === 'recovery' && turnsInPhase >= OP_PHASE_DURATION.recovery) {
-      // Operation complete
-      cmd.active_operation = null;
+        if (op.phase === 'planning' && turnsInPhase >= OP_PHASE_DURATION.planning) {
+            op.phase = 'execution';
+            op.phase_started_turn = state.meta.turn;
+        } else if (op.phase === 'execution' && turnsInPhase >= OP_PHASE_DURATION.execution) {
+            op.phase = 'recovery';
+            op.phase_started_turn = state.meta.turn;
+        } else if (op.phase === 'recovery' && turnsInPhase >= OP_PHASE_DURATION.recovery) {
+            // Operation complete
+            cmd.active_operation = null;
+        }
     }
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -253,37 +253,37 @@ export function advanceOperations(state: GameState): void {
  * Iterates corps and brigades in deterministic (sorted) order.
  */
 export function applyCorpsEffects(state: GameState): void {
-  if (!state.formations || !state.corps_command) return;
+    if (!state.formations || !state.corps_command) return;
 
-  const corpsIds = Object.keys(state.corps_command).sort(strictCompare);
-  for (const cid of corpsIds) {
-    const effectiveStance = getEffectiveCorpsStance(state, cid);
-    const mods = STANCE_MODIFIERS[effectiveStance];
+    const corpsIds = Object.keys(state.corps_command).sort(strictCompare);
+    for (const cid of corpsIds) {
+        const effectiveStance = getEffectiveCorpsStance(state, cid);
+        const mods = STANCE_MODIFIERS[effectiveStance];
 
-    // Update subordinate count while we iterate
-    let subCount = 0;
+        // Update subordinate count while we iterate
+        let subCount = 0;
 
-    const formationIds = Object.keys(state.formations).sort(strictCompare);
-    for (const fid of formationIds) {
-      const f = state.formations[fid];
-      if (f.corps_id !== cid || f.kind !== 'brigade' || f.status !== 'active') continue;
-      subCount++;
+        const formationIds = Object.keys(state.formations).sort(strictCompare);
+        for (const fid of formationIds) {
+            const f = state.formations[fid];
+            if (f.corps_id !== cid || f.kind !== 'brigade' || f.status !== 'active') continue;
+            subCount++;
 
-      // Force posture override (e.g. reorganize forces defend)
-      if (mods.force_posture !== undefined) {
-        f.posture = mods.force_posture;
-      }
+            // Force posture override (e.g. reorganize forces defend)
+            if (mods.force_posture !== undefined) {
+                f.posture = mods.force_posture;
+            }
 
-      // Apply cohesion recovery
-      if (mods.cohesion_recovery !== 0) {
-        const currentCohesion = f.cohesion ?? 60;
-        f.cohesion = Math.max(0, Math.min(100, currentCohesion + mods.cohesion_recovery));
-      }
+            // Apply cohesion recovery
+            if (mods.cohesion_recovery !== 0) {
+                const currentCohesion = f.cohesion ?? 60;
+                f.cohesion = Math.max(0, Math.min(100, currentCohesion + mods.cohesion_recovery));
+            }
+        }
+
+        // Refresh subordinate count
+        state.corps_command[cid].subordinate_count = subCount;
     }
-
-    // Refresh subordinate count
-    state.corps_command[cid].subordinate_count = subCount;
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -294,6 +294,6 @@ export function applyCorpsEffects(state: GameState): void {
  * Update army stance for a faction.
  */
 export function setArmyStance(state: GameState, faction: FactionId, stance: ArmyStance): void {
-  if (!state.army_stance) state.army_stance = {};
-  state.army_stance[faction] = stance;
+    if (!state.army_stance) state.army_stance = {};
+    state.army_stance[faction] = stance;
 }
