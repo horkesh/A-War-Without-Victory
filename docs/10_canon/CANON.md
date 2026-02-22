@@ -25,6 +25,10 @@ When conflicts arise, resolve in this order:
 5. **Game Bible v0.5.0** - Defines design philosophy and constraints
 6. **context.md** - Defines process canon (workflow, ledger, mistake guards)
 
+## Industry mapping
+
+For readers used to standard game-dev documentation: **Game Bible + Rulebook + Systems Manual** together serve as the project’s Game Design Document (GDD); **Engine Invariants + Phase Specifications** are correctness and phase contracts; **context.md** is process canon. Technical implementation details (entrypoints, repo layout, ADRs) live in `docs/20_engineering/` and reference canon.
+
 ## Rules
 
 ### Code Contradiction Rule
@@ -56,5 +60,6 @@ Do NOT edit FORAWWV automatically.
 - `docs/PROJECT_LEDGER_KNOWLEDGE.md` — Thematic knowledge base: decisions, patterns, rationale by topic (docs root)
 - `docs/10_canon/FORAWWV.md` — Validated design insights extending canon
 - `docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md` — Single implementation reference: sections 1–10 cover combat/battle resolution (§1), recruitment/accrual (§2), brigade AoR/corps (§3), Phase I control/no-flip (§4), scenario runs/handoffs (§5), tactical map/viewer (§6), desktop GUI (§7), canon checkpoints (§8), other resolved (§9), Warroom/Phase 0 and systems integration (§10)
+- `docs/40_reports/audit/20260222_CANON_VS_INDUSTRY_STRUCTURE_AUDIT.md` — Canon vs industry structure audit and reorganization options
 
 One game turn equals one week.
