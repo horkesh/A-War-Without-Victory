@@ -887,6 +887,20 @@ const phases: NamedPhase[] = [
         }
     },
     {
+        name: 'phase-ii-ceasefire-check',
+        run: (context) => {
+            if (context.state.meta.phase !== 'phase_ii') return;
+            context.report.phase_i_ceasefire_check = checkAndApplyCeasefire(context.state);
+        }
+    },
+    {
+        name: 'phase-ii-washington-check',
+        run: (context) => {
+            if (context.state.meta.phase !== 'phase_ii') return;
+            context.report.phase_i_washington_check = checkAndApplyWashington(context.state);
+        }
+    },
+    {
         name: 'phase-ii-recruitment',
         run: async (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
