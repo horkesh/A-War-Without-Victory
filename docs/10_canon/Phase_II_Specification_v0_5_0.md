@@ -83,7 +83,7 @@ Phase II receives Phase I hand-off implicitly via state: control map stable, pha
 When brigade operations are enabled, the following state is persisted (serialized):
 
 - **GameState**: brigade_posture_orders, corps_command, army_stance, og_orders, settlement_holdouts. Brigade location and attack resolution state are per-formation (see below). Removed from normative brigade ops state: brigade_aor, brigade_aor_orders, brigade_mun_orders, brigade_municipality_assignment (see HoI ZoC design: docs/30_planning/20260222_HOI_BRIGADES_AND_ZONE_OF_CONTROL_DESIGN.md).
-- **FormationState** (per brigade): posture, corps_id, composition, disrupted; **location_osid** (OSID); **entrenchment_turns** (number, 0–MAX_ENTRENCHMENT); **defense_streak** (number); **disrupted_turns** (number, 0 = not disrupted); **movement_state** (deployed | packing | in_transit | unpacking).
+- **FormationState** (per brigade): posture, corps_id, composition, disrupted; **location_osid** (OSID); **entrenchment_turns** (number, 0–MAX_ENTRENCHMENT); **defense_streak** (number); **disrupted_turns** (number, 0 = not disrupted); **movement_state** (deployed | packing | in_transit | unpacking). **Entrenchment init policy:** At Phase I→II transition, brigades default to entrenchment_turns === 0. Optional scenario parameter **phase_ii_entrenchment_init_turns** (0..12) may set initial entrenchment for all brigades at transition; implementation may store it in state.meta at load. See §6 and docs/30_planning/PHASE_I_II_EDGE_CASES.md.
 - **Movement state**: brigade-level movement is represented in **movement_state**; movement orders are staged (e.g. brigade_movement_orders or attack orders) and resolved with ZoC constraints. Path validity: ZoC-constrained (in enemy ZoC, only stay, retreat, or attack ZoC source).
 
 **Movement-state contract (canonical):**
@@ -148,6 +148,10 @@ Constants: **MIN_OPPOSING_EDGES = 25**, **PERSIST_TURNS = 4**. No hard-coded his
 
 When **edges** are provided to the transition, it ensures every brigade has **location_osid** set (e.g. via backfillFormationLocationOsid) and initializes corps command state (see §7.1). No AoR is populated.
 
+**Stuck-in-Phase-I:** When the transition never fires (e.g. opposing-edge count never persists for PERSIST_TURNS, or JNA not complete), the game remains in Phase I indefinitely. Design allows a **time-based fallback** (e.g. after N Phase I turns, force transition or offer player choice) and **player-facing explanation** (e.g. "Opposing control edges not yet persistent enough"; optionally show phase_i_opposing_edges_streak vs PERSIST_TURNS). See docs/30_planning/PHASE_I_II_EDGE_CASES.md.
+
+**Entrenchment init:** Brigades entering Phase II normally start with **entrenchment_turns === 0**. An optional scenario parameter **phase_ii_entrenchment_init_turns** (0..12) may be set; when present, implementation may apply it at transition so all brigades receive that many entrenchment turns (capped by MAX_ENTRENCHMENT). Implementation can set **state.meta.phase_ii_entrenchment_init_turns** at scenario load so the transition step can read it. Default 0; see §4 and PHASE_I_II_EDGE_CASES.md.
+
 ---
 
 ## 7. Fronts (Emergent, Derived)
@@ -171,7 +175,7 @@ When the Phase I → Phase II transition runs (or when a scenario starts in Phas
 
 ## 8. Supply Pressure
 
-- **Sources**: (1) Overextension: pressure per front edge for that faction. (2) Isolation: pressure per critical/strained settlement from supply derivation report.
+- **Sources**: (1) Overextension: pressure per front edge for that faction. (2) **Isolation**: pressure per critical/strained settlement from the supply derivation report. Isolation is defined by supply state derivation: settlements (or OSIDs) that are Critical or Strained per **Systems Manual §14** (Logistics, supply, and corridors — §14.2 supply state, §14.3 corridors). When supply-resolution runs, its SupplyStateDerivationReport provides adequate/strained/critical counts per faction; isolation contribution uses those counts.
 - **Properties**: Monotonic per faction (new pressure = max(current, computed)); cap at 100. No free supply (pressure never decreased).
 - **Optional supply report**: When supply-resolution runs in the same pipeline, its report may be passed; otherwise isolation contribution is zero.
 

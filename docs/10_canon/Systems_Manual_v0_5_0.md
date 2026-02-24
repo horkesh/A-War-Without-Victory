@@ -220,11 +220,48 @@ Desertion increases under exhaustion, legitimacy collapse, and command degradati
 
 Supply is traced through settlement graphs and external corridors. Corridors are explicit objects enabling sustainment and movement.
 
-Supply states are Adequate, Strained, and Critical. Degradation reduces combat effectiveness and cohesion.
+Supply states are **Adequate**, **Strained**, and **Critical**. Degradation reduces combat effectiveness and cohesion.
 
-Corridor collapse produces cascading effects across dependent regions.
+Corridor states are **Open**, **Brittle**, or **Cut** (Engine Invariants §4). Corridor collapse can produce cascading effects across dependent regions.
 
 **Note:** Treaty-level corridor rights are deprecated. Supply and sustainment are evaluated via reachability and territorial clauses rather than granting special corridor-rights clauses.
+
+### 14.1 Sources
+
+A **supply source** is a settlement (or operational node) from which supply may originate for a faction. Typical sources include faction capital(s), major depots, or scenario-defined supply nodes. Supply resolution (pipeline step **supply-resolution**) computes reachability from these sources; see §14.2. Sources are defined per faction (e.g. `supply_sources` or equivalent in state); when operational (OSID) data is used, supply state may be defined per OSID from constituent canonical SIDs or from “supply at OSID = state at controlling settlement(s)” per implementation. **Implementation-note:** Current pipeline uses canonical settlement graph and `computeSupplyReachability`; OSID-keyed supply state derivation may be added when operational layer is authoritative for supply.
+
+### 14.2 OSID graph tracing and supply state
+
+Reachability is computed over the settlement (or operational) graph: from each faction’s sources, traverse only through nodes controlled by that faction. Result: **reachable_controlled** (supplied) vs **isolated_controlled** (not reachable). Corridor derivation then labels each traversed edge as **Open** (redundant path) or **Brittle** (bridge; single point of failure); edges that are potential links but not traversed are **Cut** (Engine Invariants §4).
+
+**Supply state per settlement (or per OSID):**
+- **Critical:** settlement/OSID is isolated (not reachable from sources).
+- **Strained:** reachable but at least one corridor on the path is Brittle.
+- **Adequate:** reachable and all corridors on the path are Open.
+
+When the operational graph (OSID) is the base layer, “supply at OSID” is the supply state at that OSID—either derived from the state at the controlling settlement(s) for that OSID or from a dedicated OSID-level trace; see Phase II Spec §8 for use in supply pressure (isolation). **Implementation-note:** Current derivation is per canonical settlement; Phase II supply pressure consumes SupplyStateDerivationReport (adequate/strained/critical counts) for isolation; OSID-level supply state for attack resolution may be derived from formation location_osid and settlement-level state until OSID-native supply is implemented.
+
+### 14.3 Corridors
+
+**Definition:** A corridor is a path or set of edges through which supply flows from sources to controlled territory. Corridors are derived per faction from dependency, capacity, and redundancy (Engine Invariants §4).
+
+**Sustainment:** Open corridors allow full sustainment (Adequate state along the path). Brittle corridors apply continuous penalties every turn; junction loss alone must not collapse a corridor unless dependency thresholds are crossed (Engine Invariants §4).
+
+**Collapse and cascade:** When a critical edge is lost (e.g. control flip), dependent regions may transition from Adequate → Strained → Critical. Full collapse cascade semantics (e.g. Posavina, Route Duck Tuzla–Zenica, Sarajevo over Igman/Bjelasnica) are design intent; see historical pattern reports and BB2 for corridor narratives. **Implementation-note:** Current pipeline derives corridor state (open/brittle/cut) and supply state (adequate/strained/critical); full cascade propagation across dependent regions is not yet fully confirmed (see DOCUMENTED_UNIMPLEMENTED_SYSTEMS_AUDIT_2026_02_15).
+
+### 14.4 Enclave supply
+
+Enclaves (e.g. Srebrenica, Žepa, Goražde, Bihać) depend on narrow corridors or airlift for supply. Enclave integrity and humanitarian pressure are in §16. Supply state for enclaves is derived by the same reachability rules: if the only path is Cut or lost, the enclave is Critical. Historical pattern reports and BB2 document enclave supply constraints; design may refine enclave-specific rules in line with §16.
+
+### 14.5 Attack resolution (supply_mult)
+
+Combat power in Phase II attack resolution (Systems Manual §7.4) uses a **supply_mult** multiplier for both attacker and defender. The intended mapping from supply state to multiplier is:
+
+- **Adequate:** supply_mult = 1.0 (attacker and defender).
+- **Strained:** supply_mult = 0.7 (attacker), 0.8 (defender) — per Attack Resolution Formula Spec.
+- **Critical:** supply_mult = 0.4 (attacker), 0.5 (defender).
+
+Supply_mult is applied to the formation’s location (or the settlement/OSID where the formation is); it reflects the supply state at that location. See docs/30_planning/20260222_ATTACK_RESOLUTION_FORMULA_SPEC.md §2.2–2.3 and Phase II Spec §8 (isolation feeds supply pressure; supply state feeds attack resolution when wired).
 
 ## 15. War economy and local production
 
