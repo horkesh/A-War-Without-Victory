@@ -101,4 +101,10 @@ export interface Scenario {
     equipment_points_trickle?: Record<string, number>;
     /** Optional deterministic cap of elective recruits per faction per turn (default 1). */
     max_recruits_per_faction_per_turn?: number;
+    /**
+     * Phase I→II transition: initial entrenchment turns (0..12) for all brigades at Phase II entry.
+     * Optional; default 0. When set, implementation may set state.meta.phase_ii_entrenchment_init_turns at load
+     * so the transition can apply it. See Phase II Spec §4, §6 and docs/30_planning/PHASE_I_II_EDGE_CASES.md.
+     */
+    phase_ii_entrenchment_init_turns?: number;
 }

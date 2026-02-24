@@ -293,6 +293,15 @@ export function normalizeScenario(raw: unknown): Scenario {
             ? Math.max(0, o.max_recruits_per_faction_per_turn)
             : undefined;
 
+    // Phase I→II: optional initial entrenchment at transition (Phase II Spec §4, §6).
+    const phase_ii_entrenchment_init_turns =
+        typeof o.phase_ii_entrenchment_init_turns === 'number' &&
+        Number.isInteger(o.phase_ii_entrenchment_init_turns) &&
+        o.phase_ii_entrenchment_init_turns >= 0 &&
+        o.phase_ii_entrenchment_init_turns <= 12
+            ? o.phase_ii_entrenchment_init_turns
+            : undefined;
+
     // Phase H2.4: When use_harness_bots is true, ensure every week has at least one baseline_ops action (deterministic; uses existing baseline_ops only).
     if (use_harness_bots && weeks > 0) {
         const turnsByWeek = new Map<number, ScenarioTurn>();
@@ -353,7 +362,8 @@ export function normalizeScenario(raw: unknown): Scenario {
             recruitment_capital_trickle,
             equipment_points,
             equipment_points_trickle,
-            max_recruits_per_faction_per_turn
+            max_recruits_per_faction_per_turn,
+            phase_ii_entrenchment_init_turns
         };
     }
 
@@ -392,7 +402,8 @@ export function normalizeScenario(raw: unknown): Scenario {
         recruitment_capital_trickle,
         equipment_points,
         equipment_points_trickle,
-        max_recruits_per_faction_per_turn
+        max_recruits_per_faction_per_turn,
+        phase_ii_entrenchment_init_turns
     };
 }
 
