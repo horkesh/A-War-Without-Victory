@@ -8338,3 +8338,9 @@ Determinism checks **MUST** be run:
 - **Known remaining issues:** Combat collapses after week ~20 (1 order/week); zero new formations during run; total casualties ~14K (historical ~40K+). These are bot AI, posture, and ongoing recruitment issues separate from mobilization.
 - **Files modified:** src/scenario/oob_phase_i_entry.ts, src/scenario/scenario_runner.ts, src/sim/phase_i/pool_population.ts, src/sim/phase_ii/ongoing_mobilization.ts, src/state/formation_constants.ts, src/sim/phase_i/minority_militia_decay.ts, src/sim/phase_i/control_strain.ts.
 - **Report:** docs/40_reports/implemented/20260224_MOBILIZATION_CALIBRATION_AND_OSID_CONTROL_FIX.md
+
+**2026-02-24** - Phase II ceasefire and Washington pipeline steps
+- **Summary:** Phase II now evaluates RBiH–HRHB ceasefire and Washington Agreement milestones each turn; previously these checks ran only in the Phase I path, so state (ceasefire_active, washington_signed) was not updated in Phase II.
+- **Change:** Added two pipeline steps in src/sim/turn_pipeline.ts immediately after phase-ii-alliance-update: phase-ii-ceasefire-check and phase-ii-washington-check. Both guard on meta.phase === 'phase_ii' and invoke the same precondition logic as Phase I (checkAndApplyCeasefire, checkAndApplyWashington). Report fields phase_i_ceasefire_check and phase_i_washington_check reused.
+- **Canon/docs:** Phase_II_Specification_v0_5_0.md §5 implementation-note updated (gap closed). PIPELINE_ENTRYPOINTS.md Phase II bullet updated with the two step names. Backlog §2.2 (docs/40_reports/backlog/20260223_PIPELINE_NEXT_WHILE_BOT_REWRITE.md) addressed.
+- **Files modified:** src/sim/turn_pipeline.ts, docs/10_canon/Phase_II_Specification_v0_5_0.md, docs/20_engineering/PIPELINE_ENTRYPOINTS.md, docs/PROJECT_LEDGER.md.

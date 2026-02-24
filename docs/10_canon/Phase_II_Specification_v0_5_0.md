@@ -129,7 +129,7 @@ When **recruitment_state** exists, **phase-ii-recruitment** runs before brigade 
 
 Command friction is computed where needed (e.g. when scaling supply pressure or exhaustion deltas) and is not a separate pipeline phase.
 
-**Implementation-note (ceasefire and Washington Agreement in Phase II):** The RBiH-HRHB bilateral ceasefire (Phase I Spec §ceasefire) and Washington Agreement (Phase I Spec §Washington) precondition checks must also run when meta.phase === "phase_ii". If preconditions are first met during Phase II (e.g. exhaustion thresholds, IVP momentum, patron constraint severity), the milestones must fire. Implementation should add shared milestone evaluation steps or Phase II-specific pipeline steps that invoke the same precondition logic. Until implemented, this is a known pipeline gap.
+**Implementation-note (ceasefire and Washington Agreement in Phase II):** Implemented: pipeline steps phase-ii-ceasefire-check and phase-ii-washington-check run when meta.phase === "phase_ii", invoking the same precondition logic as Phase I (RBiH–HRHB bilateral ceasefire and Washington Agreement). They run in the phases array immediately after phase-ii-alliance-update.
 
 ---
 
