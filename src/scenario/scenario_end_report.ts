@@ -17,13 +17,40 @@ export interface ControlKey {
 
 /**
  * Extract settlement control snapshot from state and graph. Deterministic: settlements in stable ID order.
+ *
+ * Handles both canonical-SID-keyed and OSID-keyed political_controllers.
+ * When OSID-keyed (keys like `op:<mun>:<cluster>`), iterates OSID keys directly
+ * and extracts municipality from the key format.
  */
 export function extractSettlementControlSnapshot(
     state: GameState,
     graph: LoadedSettlementGraph
 ): ControlKey[] {
-    const sids = Array.from(graph.settlements.keys()).sort((a, b) => a.localeCompare(b));
     const pc = state.political_controllers ?? {};
+    const pcKeys = Object.keys(pc);
+    const firstKey = pcKeys[0];
+
+    // Detect OSID-keyed political_controllers (keys start with 'op:')
+    if (firstKey?.startsWith('op:')) {
+        // OSID mode: iterate OSID keys directly, extract municipality from key format
+        const sortedKeys = pcKeys.sort(strictCompare);
+        const out: ControlKey[] = [];
+        for (const osid of sortedKeys) {
+            const parts = osid.split(':');
+            const municipality_id = parts.length >= 2 ? parts[1]! : null;
+            const raw = pc[osid];
+            const controller = raw === undefined || raw === null ? null : String(raw);
+            out.push({
+                settlement_id: osid,
+                municipality_id,
+                controller
+            });
+        }
+        return out;
+    }
+
+    // Canonical SID mode: iterate graph settlements
+    const sids = Array.from(graph.settlements.keys()).sort(strictCompare);
     const out: ControlKey[] = [];
     for (const sid of sids) {
         const record = graph.settlements.get(sid);
