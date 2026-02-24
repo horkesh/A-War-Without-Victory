@@ -1060,10 +1060,14 @@ const phases: NamedPhase[] = [
         name: 'phase-ii-recon-intelligence',
         run: async (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
-            if (!(context.state as GameState & LegacyBrigadeAoRState).brigade_aor) return;
             const { edges } = await getGraphAndEdges(context);
             if (!edges?.length) return;
-            updateReconIntelligence(context.state, edges);
+            const od = getOperationalData(context);
+            if (od?.opData?.operationalToCanonical && od?.edges?.length) {
+                updateReconIntelligence(context.state, edges, { operationalToCanonical: od.opData.operationalToCanonical });
+            } else if ((context.state as GameState & LegacyBrigadeAoRState).brigade_aor) {
+                updateReconIntelligence(context.state, edges);
+            }
         }
     },
     {

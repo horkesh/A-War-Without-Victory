@@ -46,9 +46,15 @@ describe('brigade posture - canAdoptPosture', () => {
         expect(canAdoptPosture(brig, 'attack')).toBe(true);
     });
 
-    it('low cohesion (30) cannot adopt attack (min 40)', () => {
+    it('low cohesion (30) cannot adopt attack (min 25; 30 is allowed)', () => {
         const brig = makeFormation('rs-brig-1', 'RS', 'S1');
         brig.cohesion = 30;
+        expect(canAdoptPosture(brig, 'attack')).toBe(true);
+    });
+
+    it('low cohesion (20) cannot adopt attack (min 25)', () => {
+        const brig = makeFormation('rs-brig-1', 'RS', 'S1');
+        brig.cohesion = 20;
         expect(canAdoptPosture(brig, 'attack')).toBe(false);
     });
 
@@ -85,7 +91,7 @@ describe('brigade posture - applyPostureOrders', () => {
 
     it('rejects invalid posture order when cohesion is too low', () => {
         const state = makePostureState();
-        state.formations['rs-brig-1'].cohesion = 30;
+        state.formations['rs-brig-1'].cohesion = 20; // below attack min 25
         state.brigade_posture_orders = [
             { brigade_id: 'rs-brig-1', posture: 'attack' }
         ];
@@ -94,7 +100,6 @@ describe('brigade posture - applyPostureOrders', () => {
 
         expect(report.postures_changed).toBe(0);
         expect(report.postures_rejected).toBe(1);
-        // Posture should remain unchanged (default is undefined which means 'defend')
         expect(state.formations['rs-brig-1'].posture).not.toBe('attack');
     });
 
@@ -133,41 +138,39 @@ describe('brigade posture - applyPostureCosts', () => {
         expect(state.formations['rs-brig-1'].cohesion).toBe(57);
     });
 
-    it('consolidation posture adds 0.5 cohesion per turn (soft front)', () => {
+    it('consolidation posture adds 1 cohesion per turn (tuned)', () => {
         const state = makePostureState();
         state.formations['rs-brig-1'].posture = 'consolidation';
         state.formations['rs-brig-1'].cohesion = 50;
 
         applyPostureCosts(state);
 
-        expect(state.formations['rs-brig-1'].cohesion).toBe(50); // 0.5 truncated to 0
+        expect(state.formations['rs-brig-1'].cohesion).toBe(51);
     });
 
-    it('defend posture recovers 1 cohesion per turn, capped at 80', () => {
+    it('defend posture recovers 2 cohesion per turn, capped at 85', () => {
         const state = makePostureState();
         state.formations['rs-brig-1'].posture = 'defend';
-        state.formations['rs-brig-1'].cohesion = 79;
+        state.formations['rs-brig-1'].cohesion = 83;
 
         applyPostureCosts(state);
 
-        // 79 + 1 = 80 (at cap)
-        expect(state.formations['rs-brig-1'].cohesion).toBe(80);
+        // 83 + 2 = 85 (at cap)
+        expect(state.formations['rs-brig-1'].cohesion).toBe(85);
 
-        // Apply again: should stay at 80
         applyPostureCosts(state);
-        expect(state.formations['rs-brig-1'].cohesion).toBe(80);
+        expect(state.formations['rs-brig-1'].cohesion).toBe(85);
     });
 
     it('auto-downgrades to defend when cohesion drops below posture minimum', () => {
         const state = makePostureState();
-        // attack requires min 40; set cohesion to 41 so after -3 drain it becomes 38 < 40
+        // attack requires min 25; set cohesion to 26 so after -3 drain it becomes 23 < 25
         state.formations['rs-brig-1'].posture = 'attack';
-        state.formations['rs-brig-1'].cohesion = 41;
+        state.formations['rs-brig-1'].cohesion = 26;
 
         applyPostureCosts(state);
 
-        // 41 - 3 = 38, below attack minimum of 40 => auto-downgrade to defend
-        expect(state.formations['rs-brig-1'].cohesion).toBe(38);
+        expect(state.formations['rs-brig-1'].cohesion).toBe(23);
         expect(state.formations['rs-brig-1'].posture).toBe('defend');
     });
 });
