@@ -42,9 +42,9 @@ const STALEMATE_FLOOR = 0.7;
 const REPULSED_FLOOR = 0.5;
 
 const MAX_ENTRENCHMENT = 12;
-const ENTRENCHMENT_PER_TURN = 0.065;
-const MAX_RESILIENCE_STREAK = 6;
-const RESILIENCE_PER_DEFENSE = 0.05;
+const ENTRENCHMENT_PER_TURN = 0.035;   // Tuned: 0.065→0.035. Max bonus 1.42× (was 1.78×).
+const MAX_RESILIENCE_STREAK = 4;        // Tuned: 6→4. Still rewards persistent defense.
+const RESILIENCE_PER_DEFENSE = 0.025;   // Tuned: 0.05→0.025. Max bonus 1.10× (was 1.30×).
 
 const BASE_ATTACKER_LOSS_RATE = 0.04;
 const BASE_DEFENDER_LOSS_RATE = 0.02;
@@ -267,7 +267,12 @@ export function buildTerrainCache(
     const osids = Array.from(reverseMap.keys()).sort(strictCompare);
     for (const osid of osids) {
         const sids = reverseMap.get(osid) ?? [];
-        let max = 1.0;
+        if (sids.length === 0) { out[osid] = 1.0; continue; }
+        // Tuned: average terrain across constituent SIDs (was: max).
+        // Max overrepresented extreme terrain — one mountaintop SID made the
+        // entire OSID (~8 canonical SIDs) as defensible as its worst-case point.
+        // Average better represents the operational-level terrain difficulty.
+        let sum = 0;
         for (const sid of sids) {
             const t = getTerrainScalarsForSid(terrainData, sid);
             let mult = 1.0;
@@ -276,9 +281,9 @@ export function buildTerrainCache(
             else if (t.slope_index >= 0.35) mult *= 1.15;
             if (t.road_access_index >= 0.6) mult *= 0.9;
             if (t.terrain_friction_index >= 0.5) mult *= 1.2;
-            if (mult > max) max = mult;
+            sum += mult;
         }
-        out[osid] = max;
+        out[osid] = sum / sids.length;
     }
     return out;
 }

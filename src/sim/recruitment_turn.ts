@@ -68,6 +68,28 @@ function municipalityControllerByMajority(
         counts.set(controller, (counts.get(controller) ?? 0) + 1);
         byMunFaction.set(mun, counts);
     }
+
+    // OSID fallback: when political_controllers are OSID-keyed (op:<mun>:<slug>)
+    // but settlements are canonical SID-keyed, the above loop finds nothing.
+    // Scan OSID keys to derive municipality controllers by prefix.
+    if (byMunFaction.size === 0) {
+        const pcKeys = Object.keys(controllers).sort(strictCompare);
+        const firstKey = pcKeys[0];
+        if (firstKey?.startsWith('op:')) {
+            for (const k of pcKeys) {
+                const c = controllers[k];
+                if (!c) continue;
+                // Extract municipality from OSID key: op:<mun>:<cluster>
+                const parts = k.split(':');
+                if (parts.length < 3) continue;
+                const mun = parts[1] as MunicipalityId;
+                const counts = byMunFaction.get(mun) ?? new Map<FactionId, number>();
+                counts.set(c, (counts.get(c) ?? 0) + 1);
+                byMunFaction.set(mun, counts);
+            }
+        }
+    }
+
     const out = new Map<MunicipalityId, FactionId | null>();
     for (const [munId, counts] of byMunFaction.entries()) {
         const ranked = Array.from(counts.entries()).sort((a, b) => {

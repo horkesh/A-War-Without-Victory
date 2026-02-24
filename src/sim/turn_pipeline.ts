@@ -9,7 +9,7 @@ import {
     type OobBrigade,
     type OobCorps
 } from '../scenario/oob_loader.js';
-import { buildSidToMunFromSettlements } from '../scenario/oob_phase_i_entry.js';
+import { buildSidToMunFromSettlements, buildOsidToMunFromReverseMap } from '../scenario/oob_phase_i_entry.js';
 import { updateCapabilityProfiles } from '../state/capability_progression.js';
 import { cloneGameState } from '../state/clone.js';
 import {
@@ -907,7 +907,20 @@ const phases: NamedPhase[] = [
 
             const catalog = await loadRecruitmentCatalog();
             if (catalog) {
-                const sidToMun = buildSidToMunFromSettlements(graph.settlements);
+                let sidToMun = buildSidToMunFromSettlements(graph.settlements);
+                // OSID-vs-SID fix: when political_controllers are OSID-keyed, rebuild sidToMun
+                // so factionHasPresenceInMun can match OSID keys to municipalities.
+                const opDataCache = getOperationalData(context);
+                if (opDataCache?.opData?.operationalToCanonical) {
+                    const pc = context.state.political_controllers ?? {};
+                    const firstKey = Object.keys(pc)[0];
+                    if (firstKey?.startsWith('op:')) {
+                        sidToMun = buildOsidToMunFromReverseMap(
+                            opDataCache.opData.operationalToCanonical,
+                            sidToMun
+                        );
+                    }
+                }
                 const ongoingReport = runOngoingRecruitment(
                     context.state,
                     catalog.corps,

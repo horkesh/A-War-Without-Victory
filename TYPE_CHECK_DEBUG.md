@@ -1,4 +1,0 @@
-﻿
-> awwv@0.1.0 typecheck
-> tsc --noEmit -p tsconfig.json
-

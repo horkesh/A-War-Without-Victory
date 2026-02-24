@@ -339,14 +339,17 @@ function scoreTargetVRS(
 
     // Penalties
     if (prediction.overextension_risk >= 3) score -= 150;
-    // Tuned: entrenchment penalty 30→15 (combat formula already accounts for entrenchment in power ratio)
-    score -= Math.floor(prediction.defender_entrenchment * 15);
+    // Tuned: entrenchment penalty 15→5. Combat formula already accounts for entrenchment
+    // in power ratio (defender gets entrenchment bonus). Score penalty was double-counting,
+    // causing ALL attacks against entrenched positions to be rejected after week ~10.
+    // Historical: VRS attacked entrenched positions throughout the war (Sarajevo, Gorazde, Bihac).
+    score -= Math.floor(prediction.defender_entrenchment * 5);
     // Tuned: casualty tolerance 10%→20%, penalty 200→150 (VRS accepted heavy losses in early offensives)
     if (prediction.attacker_casualty_percent > 0.20) score -= 150;
 
     // Time-based personality modifier
     if (turn < 26) score = Math.floor(score * 1.3);
-    else if (turn > 52) score = Math.floor(score * 0.6);
+    else if (turn > 52) score = Math.floor(score * 0.7);
 
     return score;
 }
@@ -429,9 +432,11 @@ function generateVRSOrders(
             });
 
             const isOffensiveCorps = corpsStance === 'offensive' || isOffensivePhase;
-            // Tuned: VRS attacked at unfavorable odds — stalemate for offensive corps (probing offensives),
-            // costly_victory for balanced. Combat formula already penalizes bad odds via casualties.
-            const minOutcome: PredictedOutcome = isOffensiveCorps ? 'stalemate' : 'costly_victory';
+            // Tuned: stalemate for ALL stances. VRS attacked at unfavorable odds throughout the war
+            // (Sarajevo siege, Gorazde, Bihac). The score function already penalizes bad decisions
+            // (overextension, casualties, entrenchment). The combat formula handles casualty costs.
+            // Outcome threshold just gates obvious suicide attacks (repulsed/catastrophic).
+            const minOutcome: PredictedOutcome = 'stalemate';
 
             let bestTarget: typeof scored[0] | null = null;
             for (const s of scored) {
@@ -444,9 +449,9 @@ function generateVRSOrders(
                 const isCounter = s.prediction.is_counter_attack_opportunity;
 
                 if (outcomeOk || (isCounter && isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'costly_victory'))) {
-                    // Entrenchment gate: don't attack near-max entrenchment without named operation
-                    // Tuned: 8→11. Combat formula already penalizes entrenched positions via power ratio.
-                    if (s.prediction.defender_entrenchment >= 11 && !isPartOfNamedOperation(state, brigade)) continue;
+                    // Entrenchment already penalized in score (-15 per level) and combat formula
+                    // (defender power multiplied by entrenchment). No hard gate — let score filter.
+                    // Historical: VRS attacked entrenched positions throughout the war (Sarajevo, Gorazde).
                     bestTarget = s;
                     break;
                 }
@@ -507,9 +512,10 @@ function scoreTargetARBiH(
 
     // Time-based personality
     // Tuned: ARBiH fought from day one (1st Corps defended Sarajevo, 2nd Corps around Tuzla).
-    // Reduced score (0.3×) means only high-value counter-attacks and desperate defenses get through.
-    if (turn < 12) score = Math.floor(score * 0.3);
-    else if (turn < 40) score = Math.floor(score * 0.85);
+    // 0.6× lets counter-attacks and high-value defenses through early war.
+    // Historical: ARBiH was disorganized but actively fighting from April 1992.
+    if (turn < 12) score = Math.floor(score * 0.6);
+    else if (turn < 40) score = Math.floor(score * 0.9);
     else if (turn >= 40 && turn < 80) score = Math.floor(score * 1.2); // Stretch the front
     else score = Math.floor(score * 1.1);
 
@@ -577,8 +583,9 @@ function generateARBiHOrders(
         // Rule 6: Stretch the Front (weeks 40–80) — probe everything
         if (isStretchPhase && adjEnemy.length > 0) {
             const personnel = brigade.personnel ?? 0;
-            // Exception: understrength brigades still defend
-            if (personnel < 400) {
+            // Exception: critically understrength brigades still defend
+            // Tuned: 400→200. ARBiH fought with severely understrength units throughout the war.
+            if (personnel < 200) {
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                 continue;
             }
@@ -620,16 +627,17 @@ function generateARBiHOrders(
                 if ((chosenTargets.get(s.osid) ?? 0) >= 2) continue;
                 if (s.finalScore <= 0) continue;
 
-                // Counter-attack: always if >= costly_victory
-                if (s.prediction.is_counter_attack_opportunity && isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'costly_victory')) {
+                // Counter-attack: always if >= stalemate (ARBiH counter-attacked even at poor odds)
+                if (s.prediction.is_counter_attack_opportunity && isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'stalemate')) {
                     bestTarget = s;
                     break;
                 }
-                // Regular attack: need 'costly_victory' or better
-                // Tuned: victory→costly_victory. ARBiH launched counterattacks at unfavorable odds.
-                if (isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'costly_victory')) {
-                    // Tuned: entrenchment gate 8→11 (combat formula already penalizes)
-                    if (s.prediction.defender_entrenchment >= 11) continue; // Skip near-max entrenched
+                // Regular attack: need 'stalemate' or better.
+                // Tuned: costly_victory→stalemate. ARBiH launched attacks at unfavorable odds
+                // (enclave breakouts, corridor operations, Sarajevo defense). Score function
+                // already penalizes bad outcomes (-250 for repulsed/catastrophic). The combat
+                // formula handles actual casualty costs.
+                if (isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'stalemate')) {
                     bestTarget = s;
                     break;
                 }
@@ -689,8 +697,9 @@ function scoreTargetHVO(
     // Time-based personality
     if (turn < 12) score = Math.floor(score * 0.8);
     else if (turn >= 12 && turn < 26 && isBilateralWar) score = Math.floor(score * 1.4);
-    // Tuned: 0.3→0.6. Post-Washington, HVO still fought RS. 0.3 virtually eliminated all attacks.
-    else if (turn >= 26) score = Math.floor(score * 0.6); // Post-Washington
+    // Tuned: 0.6→0.8. Post-Washington, HVO fought RS alongside RBiH. Standing order is now
+    // balanced (not defensive), so 0.8× allows counter-attacks and opportunistic probes vs RS.
+    else if (turn >= 26) score = Math.floor(score * 0.8); // Post-Washington
 
     return score;
 }
@@ -792,7 +801,7 @@ function generateHVOOrders(
                 }))
                 .sort((a, b) => b.finalScore - a.finalScore || strictCompare(a.osid, b.osid));
 
-            const best = scored.find(s => (chosenTargets.get(s.osid) ?? 0) < 2 && s.finalScore > 0 && isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'costly_victory'));
+            const best = scored.find(s => (chosenTargets.get(s.osid) ?? 0) < 2 && s.finalScore > 0 && isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'stalemate'));
             if (best) {
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
                 result.attack_orders[brigade.id] = best.osid;
@@ -823,10 +832,10 @@ function generateHVOOrders(
             const best = scored.find(s => {
                 if ((chosenTargets.get(s.osid) ?? 0) >= 2) return false;
                 if (s.finalScore <= 0) return false;
-                // Counter-attacks always allowed
-                if (s.prediction.is_counter_attack_opportunity) return isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'costly_victory');
-                // Tuned: victory→costly_victory. HVO fought aggressively in central Bosnia.
-                return isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'costly_victory');
+                // Counter-attacks: stalemate minimum (HVO counter-attacked even at unfavorable odds)
+                if (s.prediction.is_counter_attack_opportunity) return isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'stalemate');
+                // Regular attacks: stalemate minimum. Score function penalizes bad decisions.
+                return isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'stalemate');
             });
 
             if (best) {

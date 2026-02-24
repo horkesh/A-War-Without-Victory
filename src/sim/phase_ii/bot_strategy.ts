@@ -367,8 +367,8 @@ export const FACTION_STANDING_ORDERS: Record<FactionId, StandingOrder[]> = {
         {
             name: 'Washington Pivot',
             start_week: 26, end_week: 9999,
-            army_stance: 'general_defensive',
-            description: 'Post-Washington Agreement. Cease offensive operations, defend existing territory, cooperate with ARBiH.',
+            army_stance: 'balanced',
+            description: 'Post-Washington Agreement. Cease offensive ops against RBiH, defend territory, cooperate with ARBiH against VRS. Counter-attacks and probing permitted against RS.',
         },
     ],
 };

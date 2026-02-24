@@ -75,7 +75,7 @@
 | [BACKLOG_GUI_WARROOM_WAR_PLANNING_MAP.md](backlog/BACKLOG_GUI_WARROOM_WAR_PLANNING_MAP.md), [BACKLOG_UI_AND_ASSET_SPECS.md](backlog/BACKLOG_UI_AND_ASSET_SPECS.md) | Warroom click alignment, asset brief, clickable regions → themed docs above. | Design. |
 | [HANDOVER_WARROOM_GUI.md](handovers/HANDOVER_WARROOM_GUI.md) | Warroom GUI handover. | Handoff. |
 | [BACKLOG_PROCESS_AND_REFERENCE.md](backlog/BACKLOG_PROCESS_AND_REFERENCE.md) | Repo cleanup discovery; scenario run reference. Originals (2) → _old/40_reports/backlog/. | Process. |
-| `DEAD_CODE_AND_FILES_UTF8.md` (root directory) | Pending deletion of 451 dead files (knip audit). | Tech Debt. |
+| Dead-code / cleanup | **Stale knip report** (root) removed 2026-02-24. **In-repo audit** (`npm run repo:cleanup:audit`) has false positives (e.g. src/operational_data.ts, electron-main.cjs marked orphan). Only verified-safe root orphans were deleted. See [20260224_DEAD_CODE_REPORT_VERIFICATION.md](audit/20260224_DEAD_CODE_REPORT_VERIFICATION.md) §6–§7. | Tech Debt; use audit as candidate list only; verify each before delete. |
 | `TACTICAL_SANDBOX_3D_POST_INTEGRATION_ROADMAP.md` (docs/30_planning/) | 3D Map polishing, visual overhaul, combat width limits. | Design / Tech Debt. |
 
 ---

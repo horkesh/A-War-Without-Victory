@@ -176,11 +176,12 @@ describe('Three-Sided Bot AI Validation', () => {
         expect(order!.army_stance).toBe('general_offensive');
     });
 
-    it('HRHB standing order at turn 30 is Washington Pivot (general_defensive)', () => {
+    it('HRHB standing order at turn 30 is Washington Pivot (balanced)', () => {
         const order = getActiveStandingOrder('HRHB', 30);
         expect(order).not.toBeNull();
         expect(order!.name).toBe('Washington Pivot');
-        expect(order!.army_stance).toBe('general_defensive');
+        // Tuned: balanced (not general_defensive) so HRHB can counter-attack RS when allied with RBiH.
+        expect(order!.army_stance).toBe('balanced');
     });
 
     // --- Defender-present scoring (Phase 4 run problems) ---

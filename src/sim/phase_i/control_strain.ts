@@ -46,20 +46,35 @@ export function buildSettlementsByMun(settlements: Map<string, SettlementRecord>
     return byMun;
 }
 
-/** Derive current controller of a municipality from political_controllers (majority of settlements). */
-function getMunicipalityController(state: GameState, sids: SettlementId[]): FactionId | null {
+/** Derive current controller of a municipality from political_controllers (majority of settlements).
+ * Handles OSID-keyed pc via munId fallback (scans op:<munId>:* prefix). */
+function getMunicipalityController(state: GameState, sids: SettlementId[], munId?: string): FactionId | null {
+    const pc = state.political_controllers ?? {};
     const counts: Record<string, number> = {};
     for (const sid of sids) {
-        const c = state.political_controllers?.[sid] ?? null;
+        const c = pc[sid] ?? null;
         const key = c ?? '_null_';
         counts[key] = (counts[key] ?? 0) + 1;
     }
+    let entries = Object.entries(counts).filter(([k]) => k !== '_null_');
+    // OSID fallback
+    if (entries.length === 0 && munId) {
+        const prefix = `op:${munId}:`;
+        const osidCounts: Record<string, number> = {};
+        for (const k of Object.keys(pc).sort()) {
+            if (k.startsWith(prefix) && pc[k] != null) {
+                osidCounts[String(pc[k])] = (osidCounts[String(pc[k])] ?? 0) + 1;
+            }
+        }
+        entries = Object.entries(osidCounts);
+    }
+    if (entries.length === 0) return null;
     let best: string | null = null;
     let bestCount = 0;
-    for (const [key, count] of Object.entries(counts)) {
+    for (const [key, count] of entries) {
         if (count > bestCount) {
             bestCount = count;
-            best = key === '_null_' ? null : key;
+            best = key;
         }
     }
     return best as FactionId | null;
@@ -102,7 +117,7 @@ export function runControlStrain(
 
     for (const munId of munIds) {
         const sids = settlementsByMun.get(munId);
-        const controller = sids ? getMunicipalityController(state, sids) : null;
+        const controller = sids ? getMunicipalityController(state, sids, munId) : null;
         if (!controller) continue;
 
         const faction = state.factions?.find((f) => f.id === controller);
@@ -154,7 +169,7 @@ export function getFactionTotalControlStrain(
     let total = 0;
     for (const munId of Object.keys(municipalities) as MunicipalityId[]) {
         const sids = settlementsByMun.get(munId);
-        const controller = sids ? getMunicipalityController(state, sids) : null;
+        const controller = sids ? getMunicipalityController(state, sids, munId) : null;
         if (controller === factionId) total += strainByMun[munId] ?? 0;
     }
     return total;

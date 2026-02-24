@@ -148,18 +148,43 @@ export interface PoolPopulationReport {
     rbih_10pct_additions?: number;
 }
 
-/** Deterministic: majority control; tie-break by localeCompare(factionId). */
+/**
+ * Deterministic: majority control; tie-break by localeCompare(factionId).
+ * Handles both SID-keyed and OSID-keyed political_controllers.
+ * When sids are canonical (S-prefixed) but political_controllers uses OSID keys (op:<mun>:<cluster>),
+ * the optional munId enables a fallback that scans pc keys matching the OSID prefix for that mun.
+ */
 export function getMunicipalityController(
     state: GameState,
-    sids: string[]
+    sids: string[],
+    munId?: MunicipalityId
 ): FactionId | null {
+    const pc = state.political_controllers ?? {};
     const counts: Record<string, number> = {};
     for (const sid of sids) {
-        const c = state.political_controllers?.[sid] ?? null;
+        const c = pc[sid] ?? null;
         const key = c ?? '_null_';
         counts[key] = (counts[key] ?? 0) + 1;
     }
-    const entries = (Object.entries(counts) as [string, number][]).filter(([k]) => k !== '_null_');
+    let entries = (Object.entries(counts) as [string, number][]).filter(([k]) => k !== '_null_');
+
+    // OSID fallback: if no SID matches found, pc may be OSID-keyed while sids are canonical.
+    // When munId is provided, iterate pc keys matching op:<munId>:* to find the controller.
+    if (entries.length === 0 && munId) {
+        const prefix = `op:${munId}:`;
+        const osidCounts: Record<string, number> = {};
+        const pcKeys = Object.keys(pc).sort(strictCompare);
+        for (const k of pcKeys) {
+            if (k.startsWith(prefix)) {
+                const c = pc[k];
+                if (c != null) {
+                    osidCounts[String(c)] = (osidCounts[String(c)] ?? 0) + 1;
+                }
+            }
+        }
+        entries = (Object.entries(osidCounts) as [string, number][]);
+    }
+
     if (entries.length === 0) return null;
     entries.sort((a, b) => {
         if (b[1] !== a[1]) return b[1] - a[1];
@@ -248,7 +273,7 @@ export function runDisplacedAndCrossEthnicContributions(
                 }
             }
         } else {
-            const controller = getMunicipalityController(state, sids);
+            const controller = getMunicipalityController(state, sids, munId);
             if (!controller) continue;
             const contribution = Math.min(
                 Math.floor(disp.displaced_in * REINFORCEMENT_RATE),
@@ -283,7 +308,7 @@ export function runDisplacedAndCrossEthnicContributions(
         for (const munId of munIds) {
             const sids = settlementsByMun.get(munId);
             if (!sids?.length) continue;
-            const controller = getMunicipalityController(state, sids);
+            const controller = getMunicipalityController(state, sids, munId);
             if (controller !== 'RBiH') continue;
             const entry = population1991ByMun[munId];
             if (!entry) continue;

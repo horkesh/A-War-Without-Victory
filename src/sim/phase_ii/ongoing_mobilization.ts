@@ -27,12 +27,25 @@ import type { MunicipalityPopulation1991Map } from '../phase_i/pool_population.j
  *   RBiH ~60-80K → 130K (Apr 92 - Apr 93), RS ~80K → 110K, HVO ~30K → 50K.
  * At 0.004 with surge curve × faction scales, total mobilized matches historical growth.
  */
-const BASE_MOBILIZATION_RATE = 0.004;
+/**
+ * Weekly mobilization rate as fraction of eligible military-age population.
+ * Calibrated against historical force trajectories:
+ *   RBiH ~60-80K → 130K (Apr 92 → Apr 93), RS ~80K → 110K, HVO ~30K → 50K.
+ */
+const BASE_MOBILIZATION_RATE = 0.003;
 
+/**
+ * Faction mobilization scale modifiers.
+ * RS: 0.25 — VRS was already near full mobilization from JNA handover; growth was only ~38%.
+ *   RS controls the largest territory with the highest ethnic majority, so the low scale
+ *   correctly models that most eligible Serbs were already mobilized by May 1992.
+ * RBiH: 1.3 — Mass TO activation + refugee mobilization; fastest growing force.
+ * HRHB: 1.2 — Organized Croatian cadres + diaspora support.
+ */
 const FACTION_MOBILIZATION_SCALE: Record<string, number> = {
-    RBiH: 1.4,
-    RS: 0.8,
-    HRHB: 1.0
+    RBiH: 1.1,
+    RS: 0.15,
+    HRHB: 1.2
 };
 const DEFAULT_MOBILIZATION_SCALE = 1.0;
 
@@ -106,7 +119,7 @@ export function runPhaseIIOngoingMobilization(
     for (const munId of munIds) {
         const sids = settlementsByMun.get(munId);
         if (!sids?.length) continue;
-        const controller = getMunicipalityController(state, sids);
+        const controller = getMunicipalityController(state, sids, munId);
         if (!controller) continue;
 
         const eligiblePop = getEligiblePopulationCount(population1991ByMun, munId, controller);

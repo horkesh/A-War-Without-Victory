@@ -1,6 +1,6 @@
 {
   "army_stance": {
-    "HRHB": "general_defensive",
+    "HRHB": "balanced",
     "RBiH": "general_offensive",
     "RS": "general_defensive"
   },
@@ -17,18 +17,16 @@
         "op:bugojno:brizina__op:novi_travnik:ruda_2",
         "op:bugojno:gracanica__op:bugojno:rovna",
         "op:bugojno:gracanica__op:bugojno:vrpec",
-        "op:bugojno:kopcic_2__op:bugojno:vucipolje_3",
+        "op:bugojno:gracanica__op:bugojno:vucipolje_3",
         "op:bugojno:medini__op:bugojno:prijaci",
         "op:bugojno:medini__op:donji_vakuf:dolovi",
         "op:bugojno:medini__op:donji_vakuf:komar_2",
         "op:bugojno:rovna__op:gornji_vakuf:pajic_polje_2",
         "op:bugojno:rovna__op:novi_travnik:ruda_2",
-        "op:bugojno:vesela_2__op:bugojno:vucipolje_3",
-        "op:bugojno:vrpec__op:bugojno:vucipolje_3",
         "op:bugojno:vrpec__op:gornji_vakuf:pajic_polje_2"
       ],
       "front_id": "HRHB__RS__op:bugojno:brizina__op:bugojno:gracanica",
-      "length_edges": 14,
+      "length_edges": 12,
       "side_a": "HRHB",
       "side_b": "RS",
       "theatre_id": "HRHB_default"
@@ -81,17 +79,24 @@
     },
     {
       "edge_ids": [
-        "op:kakanj:bukovlje_2__op:kakanj:seoce_2",
-        "op:kakanj:poljani_2__op:kakanj:seoce_2",
-        "op:kakanj:seoce_2__op:kakanj:slapnica_2",
-        "op:kakanj:seoce_2__op:kakanj:vukanovici",
-        "op:kakanj:seoce_2__op:kakanj:zgosca",
+        "op:kakanj:seoce_2__op:vares:gornja_borovica_2",
         "op:kakanj:vukanovici__op:vares:gornja_borovica_2",
         "op:vares:gornja_borovica_2__op:zavidovici:hajderovici_2",
         "op:vares:gornja_borovica_2__op:zavidovici:vozuca_2"
       ],
-      "front_id": "HRHB__RS__op:kakanj:bukovlje_2__op:kakanj:seoce_2",
-      "length_edges": 8,
+      "front_id": "HRHB__RS__op:kakanj:seoce_2__op:vares:gornja_borovica_2",
+      "length_edges": 4,
+      "side_a": "HRHB",
+      "side_b": "RS",
+      "theatre_id": "HRHB_default"
+    },
+    {
+      "edge_ids": [
+        "op:kiseljak:bilalovac_2__op:visoko:buzic_mahala_2",
+        "op:kiseljak:gromiljak_2__op:visoko:buzic_mahala_2"
+      ],
+      "front_id": "HRHB__RS__op:kiseljak:bilalovac_2__op:visoko:buzic_mahala_2",
+      "length_edges": 2,
       "side_a": "HRHB",
       "side_b": "RS",
       "theatre_id": "HRHB_default"
@@ -159,13 +164,10 @@
         "op:banovici:seona__op:zavidovici:vozuca_2",
         "op:bosanski_samac:domaljevac_2__op:bosanski_samac:tisina",
         "op:bosanski_samac:tisina__op:gradacac:pelagicevo",
-        "op:doboj:brijesnica_velika__op:gracanica:malesici",
         "op:doboj:zelinja_gornja_2__op:gracanica:dzakule",
-        "op:doboj:zelinja_gornja_2__op:gracanica:malesici",
+        "op:gracanica:dzakule__op:gracanica:malesici",
         "op:gracanica:dzakule__op:gracanica:miricina_2",
         "op:gracanica:dzakule__op:modrica:skugric_gornji_2",
-        "op:gracanica:gracanica_2__op:gracanica:malesici",
-        "op:gracanica:malesici__op:gracanica:miricina_2",
         "op:gracanica:miricina_2__op:lukavac:dobosnica_2",
         "op:gracanica:miricina_2__op:srebrenik:sladna_2",
         "op:gradacac:gradacac_2__op:modrica:garevac_2",
@@ -178,7 +180,7 @@
         "op:zavidovici:ribnica_dio__op:zavidovici:vozuca_2"
       ],
       "front_id": "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2",
-      "length_edges": 21,
+      "length_edges": 18,
       "side_a": "RBiH",
       "side_b": "RS",
       "theatre_id": "RBiH_default"
@@ -205,9 +207,12 @@
         "op:brcko:boce_2__op:lopare:mrtvica_2",
         "op:brcko:brcko__op:brcko:potocari_2",
         "op:brcko:brka_2__op:brcko:potocari_2",
+        "op:breza:mahala__op:visoko:podvinjci_2",
         "op:breza:podgora__op:ilijas:podlugovi",
         "op:breza:podgora__op:ilijas:srednje",
         "op:breza:zupca_2__op:ilijas:podlugovi",
+        "op:busovaca:dobraljevo_2__op:kakanj:sopotnica",
+        "op:busovaca:dobraljevo_2__op:visoko:buzic_mahala_2",
         "op:centar_sarajevo:radava__op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
         "op:centar_sarajevo:radava__op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
         "op:centar_sarajevo:radava__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
@@ -229,16 +234,10 @@
         "op:ilijas:podlugovi__op:vogosca:svrake",
         "op:ilijas:sirovine__op:olovo:gurdici_2",
         "op:ilijas:srednje__op:vares:budozelje_2",
-        "op:kakanj:biljesevo__op:kakanj:sopotnica",
         "op:kakanj:biljesevo__op:zenica:janjici",
-        "op:kakanj:donja_papratnica__op:kakanj:sopotnica",
-        "op:kakanj:donja_papratnica__op:visoko:buzic_mahala_2",
         "op:kakanj:poljani_2__op:vares:budozelje_2",
-        "op:kakanj:poljani_2__op:visoko:podvinjci_2",
-        "op:kakanj:slapnica_2__op:visoko:buzic_mahala_2",
-        "op:kakanj:slapnica_2__op:visoko:podvinjci_2",
-        "op:kakanj:slapnica_2__op:visoko:podvinje_2",
-        "op:kakanj:sopotnica__op:zenica:briznik_2",
+        "op:kakanj:seoce_2__op:vares:budozelje_2",
+        "op:kakanj:sopotnica__op:zenica:janjici",
         "op:kalesija:gojcin_2__op:kalesija:seher_2",
         "op:kalesija:gojcin_2__op:sekovici:kastijelj_2",
         "op:kalesija:gojcin_2__op:sekovici:sekovici_2",
@@ -279,7 +278,13 @@
         "op:trnovo:gornja_presjenica__op:trnovo:trnovo",
         "op:trnovo:gornja_presjenica__op:trnovo:tusila",
         "op:vares:budozelje_2__op:vares:toljenak",
+        "op:vares:budozelje_2__op:visoko:podvinjci_2",
         "op:vares:ravne__op:vares:toljenak",
+        "op:visoko:bradve_2__op:visoko:buzic_mahala_2",
+        "op:visoko:bradve_2__op:visoko:podvinje_2",
+        "op:visoko:gornja_vratnica_2__op:visoko:podvinjci_2",
+        "op:visoko:podvinjci_2__op:visoko:visoko_2",
+        "op:visoko:podvinje_2__op:visoko:visoko_2",
         "op:vlasenica:bacici__op:vlasenica:vlasenica_2",
         "op:vlasenica:cerska_2__op:vlasenica:vlasenica_2",
         "op:vlasenica:cerska_2__op:zvornik:donja_kamenica",
@@ -305,7 +310,7 @@
         "op:zvornik:rastosnica_2__op:zvornik:vitinica_2"
       ],
       "front_id": "RBiH__RS__op:bratunac:pobudje_2__op:zvornik:drinjaca",
-      "length_edges": 105,
+      "length_edges": 108,
       "side_a": "RBiH",
       "side_b": "RS",
       "theatre_id": "RBiH_default"
@@ -317,18 +322,15 @@
         "op:bugojno:kopcic_2__op:bugojno:kula_2",
         "op:bugojno:kula_2__op:bugojno:prijaci",
         "op:bugojno:kula_2__op:bugojno:udurlije",
+        "op:bugojno:kula_2__op:bugojno:vucipolje_3",
         "op:bugojno:kula_2__op:donji_vakuf:jemanlici",
         "op:bugojno:kula_2__op:donji_vakuf:korenici",
         "op:bugojno:rovna__op:gornji_vakuf:drazev_dolac",
         "op:bugojno:rovna__op:novi_travnik:novi_travnik_2",
-        "op:bugojno:rovna__op:novi_travnik:senkovici_2",
-        "op:bugojno:vesela_2__op:donji_vakuf:prusac_2",
-        "op:donji_vakuf:jemanlici__op:donji_vakuf:prusac_2",
-        "op:donji_vakuf:pribraca_2__op:donji_vakuf:prusac_2",
-        "op:donji_vakuf:prusac_2__op:kupres:kupres_2"
+        "op:bugojno:rovna__op:novi_travnik:senkovici_2"
       ],
       "front_id": "RBiH__RS__op:bugojno:brizina__op:bugojno:kula_2",
-      "length_edges": 14,
+      "length_edges": 11,
       "side_a": "RBiH",
       "side_b": "RS",
       "theatre_id": "RBiH_default"
@@ -420,26 +422,27 @@
     },
     {
       "edge_ids": [
+        "op:maglaj:cobe_2__op:tesanj:novo_selo",
         "op:maglaj:cobe_2__op:teslic:vitkovci",
         "op:maglaj:donja_bocinja_2__op:maglaj:lijesnica",
         "op:maglaj:donja_bocinja_2__op:maglaj:maglaj_2",
         "op:maglaj:jablanica__op:maglaj:maglaj_2",
         "op:maglaj:jablanica__op:maglaj:misurici_2",
         "op:maglaj:kosova_2__op:maglaj:misurici_2",
-        "op:maglaj:kosova_2__op:tesanj:novo_selo",
         "op:maglaj:lijesnica__op:zavidovici:cinovici",
+        "op:maglaj:misurici_2__op:tesanj:novo_selo",
+        "op:maglaj:strupina__op:tesanj:novo_selo",
         "op:tesanj:kalosevic_2__op:tesanj:novi_miljanovci_2",
-        "op:tesanj:lepenica__op:tesanj:novo_selo",
         "op:tesanj:novi_miljanovci_2__op:tesanj:ularice_2",
         "op:tesanj:novi_miljanovci_2__op:teslic:vitkovci",
-        "op:tesanj:novo_selo__op:tesanj:sije_2",
-        "op:tesanj:novo_selo__op:tesanj:ularice_2",
+        "op:tesanj:novo_selo__op:tesanj:radusa_2",
+        "op:tesanj:novo_selo__op:tesanj:tesanj_2",
         "op:tesanj:piljuzici_2__op:tesanj:ularice_2",
         "op:tesanj:radusa_2__op:teslic:vitkovci",
         "op:tesanj:tesanj_2__op:tesanj:ularice_2"
       ],
-      "front_id": "RBiH__RS__op:maglaj:cobe_2__op:teslic:vitkovci",
-      "length_edges": 17,
+      "front_id": "RBiH__RS__op:maglaj:cobe_2__op:tesanj:novo_selo",
+      "length_edges": 18,
       "side_a": "RBiH",
       "side_b": "RS",
       "theatre_id": "RBiH_default"
@@ -501,6 +504,10 @@
     "arbih_254th_mountain": "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2",
     "arbih_285th_light": "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2",
     "arbih_2nd_tuzla": "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2",
+    "arbih_303rd_vitezka_mountain": "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2",
+    "arbih_327th_vitezka_mountain": "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2",
+    "arbih_372nd_vitezka_mountain": "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2",
+    "arbih_373rd_slavna_mountain": "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2",
     "arbih_502nd_vitezka_mountain": "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2",
     "arbih_505th_vitezka_mountain": "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2",
     "arbih_506th_mountain": "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2",
@@ -553,10 +560,12 @@
     "rs_1st_drvar_light_infantry": "HRHB__RS__op:bugojno:brizina__op:bugojno:gracanica",
     "rs_1st_gradika_light_infantry": "HRHB__RS__op:bugojno:brizina__op:bugojno:gracanica",
     "rs_1st_guards_motorized": "HRHB__RS__op:bugojno:brizina__op:bugojno:gracanica",
+    "rs_1st_kotor_varo_light_infantry": "HRHB__RS__op:bugojno:brizina__op:bugojno:gracanica",
     "rs_1st_krnjin_light_infantry": "HRHB__RS__op:bugojno:brizina__op:bugojno:gracanica",
     "rs_1st_majevica_light_infantry": "HRHB__RS__op:bugojno:brizina__op:bugojno:gracanica",
     "rs_1st_milii": "HRHB__RS__op:bugojno:brizina__op:bugojno:gracanica",
     "rs_1st_novigrad_infantry": "HRHB__RS__op:bugojno:brizina__op:bugojno:gracanica",
+    "rs_1st_ozren_light_infantry": "HRHB__RS__op:bugojno:brizina__op:bugojno:gracanica",
     "rs_1st_posavina_infantry": "HRHB__RS__op:bugojno:brizina__op:bugojno:gracanica",
     "rs_1st_prnjavor_light_infantry": "HRHB__RS__op:bugojno:brizina__op:bugojno:gracanica",
     "rs_1st_romanija_infantry": "HRHB__RS__op:bugojno:brizina__op:bugojno:gracanica",
@@ -606,24 +615,9 @@
     "vrs_31st_mountain_storm": "HRHB__RS__op:bugojno:brizina__op:bugojno:gracanica"
   },
   "brigade_movement_orders": {
-    "arbih_112th_vitezka_motorized": {
-      "destination_sids": [
-        "op:vares:budozelje_2"
-      ]
-    },
-    "arbih_147th_light": {
-      "destination_sids": [
-        "op:vares:budozelje_2"
-      ]
-    },
-    "arbih_164th_mountain": {
-      "destination_sids": [
-        "op:vares:budozelje_2"
-      ]
-    },
     "arbih_225th_muslim_mountain": {
       "destination_sids": [
-        "op:olovo:kamensko_2"
+        "op:banovici:banovici_selo_2"
       ]
     },
     "rs_1st_armored": {
@@ -672,8 +666,8 @@
         "artillery": 0,
         "tanks": 0
       },
-      "killed": 625,
-      "missing_captured": 417,
+      "killed": 698,
+      "missing_captured": 458,
       "per_formation": {
         "arbih_101st_mountain": {
           "killed": 12,
@@ -686,9 +680,9 @@
           "wounded": 7
         },
         "arbih_112th_vitezka_motorized": {
-          "killed": 21,
-          "missing_captured": 14,
-          "wounded": 51
+          "killed": 38,
+          "missing_captured": 23,
+          "wounded": 91
         },
         "arbih_115th_mountain": {
           "killed": 8,
@@ -731,9 +725,9 @@
           "wounded": 19
         },
         "arbih_210th_vitezka_liberation_nesib_maliki": {
-          "killed": 27,
-          "missing_captured": 17,
-          "wounded": 65
+          "killed": 34,
+          "missing_captured": 22,
+          "wounded": 83
         },
         "arbih_212th_mountain": {
           "killed": 8,
@@ -761,9 +755,9 @@
           "wounded": 19
         },
         "arbih_505th_vitezka_mountain": {
-          "killed": 405,
-          "missing_captured": 266,
-          "wounded": 986
+          "killed": 459,
+          "missing_captured": 299,
+          "wounded": 1112
         },
         "arbih_5th_corps": {
           "killed": 3,
@@ -780,11 +774,6 @@
           "missing_captured": 5,
           "wounded": 19
         },
-        "arbih_727th_slavna": {
-          "killed": 5,
-          "missing_captured": 6,
-          "wounded": 15
-        },
         "arbih_770th_slavna_mountain": {
           "killed": 9,
           "missing_captured": 7,
@@ -796,7 +785,7 @@
           "wounded": 9
         }
       },
-      "wounded": 1525
+      "wounded": 1694
     },
     "RS": {
       "equipment_lost": {
@@ -804,8 +793,8 @@
         "artillery": 0,
         "tanks": 0
       },
-      "killed": 2079,
-      "missing_captured": 1500,
+      "killed": 2287,
+      "missing_captured": 1647,
       "per_formation": {
         "rs_11th_dubica_infantry": {
           "killed": 16,
@@ -813,29 +802,29 @@
           "wounded": 38
         },
         "rs_11th_krupa_light_infantry": {
-          "killed": 17,
-          "missing_captured": 13,
-          "wounded": 42
+          "killed": 18,
+          "missing_captured": 14,
+          "wounded": 45
         },
         "rs_11th_mrkonji_light_infantry": {
-          "killed": 69,
-          "missing_captured": 48,
-          "wounded": 171
+          "killed": 83,
+          "missing_captured": 55,
+          "wounded": 200
         },
         "rs_12th_kotorsko_light_infantry": {
-          "killed": 93,
-          "missing_captured": 57,
-          "wounded": 224
+          "killed": 8,
+          "missing_captured": 5,
+          "wounded": 19
         },
         "rs_15th_biha_infantry": {
-          "killed": 46,
-          "missing_captured": 34,
-          "wounded": 114
+          "killed": 58,
+          "missing_captured": 41,
+          "wounded": 143
         },
         "rs_16th_krajina_motorized": {
-          "killed": 34,
-          "missing_captured": 23,
-          "wounded": 81
+          "killed": 40,
+          "missing_captured": 26,
+          "wounded": 95
         },
         "rs_17th_klju_light_infantry": {
           "killed": 25,
@@ -843,9 +832,9 @@
           "wounded": 60
         },
         "rs_19th_krajina_light_infantry": {
-          "killed": 24,
-          "missing_captured": 18,
-          "wounded": 60
+          "killed": 25,
+          "missing_captured": 20,
+          "wounded": 63
         },
         "rs_1st_armored": {
           "killed": 8,
@@ -853,49 +842,49 @@
           "wounded": 19
         },
         "rs_1st_banja_luka_light_infantry": {
-          "killed": 66,
+          "killed": 65,
           "missing_captured": 46,
           "wounded": 161
         },
         "rs_1st_birac": {
-          "killed": 16,
-          "missing_captured": 11,
-          "wounded": 39
+          "killed": 31,
+          "missing_captured": 20,
+          "wounded": 76
         },
         "rs_1st_bratunac": {
-          "killed": 63,
-          "missing_captured": 47,
-          "wounded": 156
+          "killed": 76,
+          "missing_captured": 55,
+          "wounded": 185
         },
         "rs_1st_celinac_light_infantry": {
-          "killed": 15,
-          "missing_captured": 11,
-          "wounded": 37
+          "killed": 16,
+          "missing_captured": 12,
+          "wounded": 39
         },
         "rs_1st_doboj_light_infantry": {
-          "killed": 81,
-          "missing_captured": 57,
-          "wounded": 196
+          "killed": 113,
+          "missing_captured": 76,
+          "wounded": 275
         },
         "rs_1st_drvar_light_infantry": {
-          "killed": 51,
-          "missing_captured": 34,
-          "wounded": 125
+          "killed": 60,
+          "missing_captured": 41,
+          "wounded": 148
         },
         "rs_1st_gradika_light_infantry": {
-          "killed": 88,
-          "missing_captured": 71,
-          "wounded": 207
+          "killed": 108,
+          "missing_captured": 94,
+          "wounded": 266
         },
         "rs_1st_guards_motorized": {
-          "killed": 11,
+          "killed": 12,
           "missing_captured": 12,
-          "wounded": 28
+          "wounded": 30
         },
         "rs_1st_krnjin_light_infantry": {
-          "killed": 22,
+          "killed": 24,
           "missing_captured": 16,
-          "wounded": 55
+          "wounded": 58
         },
         "rs_1st_majevica_light_infantry": {
           "killed": 15,
@@ -903,19 +892,24 @@
           "wounded": 37
         },
         "rs_1st_milii": {
-          "killed": 18,
-          "missing_captured": 15,
-          "wounded": 46
+          "killed": 29,
+          "missing_captured": 22,
+          "wounded": 73
         },
         "rs_1st_novigrad_infantry": {
           "killed": 8,
           "missing_captured": 5,
           "wounded": 19
         },
+        "rs_1st_ozren_light_infantry": {
+          "killed": 15,
+          "missing_captured": 12,
+          "wounded": 36
+        },
         "rs_1st_prnjavor_light_infantry": {
-          "killed": 30,
-          "missing_captured": 19,
-          "wounded": 71
+          "killed": 32,
+          "missing_captured": 20,
+          "wounded": 76
         },
         "rs_1st_romanija_infantry": {
           "killed": 5,
@@ -923,7 +917,7 @@
           "wounded": 12
         },
         "rs_1st_sarajevo_mechanized": {
-          "killed": 108,
+          "killed": 107,
           "missing_captured": 74,
           "wounded": 261
         },
@@ -933,14 +927,14 @@
           "wounded": 19
         },
         "rs_1st_sipovo_light_infantry": {
-          "killed": 34,
-          "missing_captured": 25,
-          "wounded": 85
+          "killed": 37,
+          "missing_captured": 27,
+          "wounded": 92
         },
         "rs_1st_srbac_light_infantry": {
-          "killed": 14,
+          "killed": 16,
           "missing_captured": 10,
-          "wounded": 34
+          "wounded": 38
         },
         "rs_1st_tesli_infantry": {
           "killed": 8,
@@ -953,14 +947,14 @@
           "wounded": 87
         },
         "rs_22nd_krajina_infantry": {
-          "killed": 44,
-          "missing_captured": 31,
-          "wounded": 108
+          "killed": 46,
+          "missing_captured": 32,
+          "wounded": 113
         },
         "rs_27th_derventa_motorized": {
-          "killed": 69,
-          "missing_captured": 46,
-          "wounded": 170
+          "killed": 92,
+          "missing_captured": 61,
+          "wounded": 223
         },
         "rs_2nd_armored": {
           "killed": 8,
@@ -983,14 +977,14 @@
           "wounded": 7
         },
         "rs_2nd_ozren_light_infantry": {
-          "killed": 32,
-          "missing_captured": 24,
-          "wounded": 79
+          "killed": 38,
+          "missing_captured": 28,
+          "wounded": 93
         },
         "rs_2nd_posavina_light_infantry": {
-          "killed": 41,
-          "missing_captured": 28,
-          "wounded": 99
+          "killed": 42,
+          "missing_captured": 29,
+          "wounded": 104
         },
         "rs_2nd_semberija_light_infantry": {
           "killed": 17,
@@ -1013,9 +1007,9 @@
           "wounded": 28
         },
         "rs_3rd_petrovac_light_infantry": {
-          "killed": 39,
-          "missing_captured": 28,
-          "wounded": 97
+          "killed": 45,
+          "missing_captured": 33,
+          "wounded": 109
         },
         "rs_3rd_sarajevo_infantry": {
           "killed": 12,
@@ -1023,14 +1017,14 @@
           "wounded": 31
         },
         "rs_3rd_semberija_light_infantry": {
-          "killed": 11,
+          "killed": 12,
           "missing_captured": 8,
           "wounded": 28
         },
         "rs_43rd_prijedor_motorized": {
-          "killed": 69,
-          "missing_captured": 61,
-          "wounded": 154
+          "killed": 103,
+          "missing_captured": 88,
+          "wounded": 257
         },
         "rs_4th_banja_luka_light_infantry": {
           "killed": 8,
@@ -1038,19 +1032,19 @@
           "wounded": 19
         },
         "rs_4th_ozren_light_infantry": {
-          "killed": 91,
-          "missing_captured": 73,
-          "wounded": 228
+          "killed": 135,
+          "missing_captured": 102,
+          "wounded": 334
         },
         "rs_4th_sarajevo_light_infantry": {
-          "killed": 74,
-          "missing_captured": 55,
-          "wounded": 182
+          "killed": 83,
+          "missing_captured": 63,
+          "wounded": 205
         },
         "rs_5th_glamo_light_infantry": {
           "killed": 21,
           "missing_captured": 15,
-          "wounded": 51
+          "wounded": 54
         },
         "rs_6th_sanske_infantry": {
           "killed": 40,
@@ -1058,67 +1052,62 @@
           "wounded": 99
         },
         "rs_7th_krajina_motorized": {
-          "killed": 34,
-          "missing_captured": 27,
-          "wounded": 87
+          "killed": 32,
+          "missing_captured": 28,
+          "wounded": 80
         },
         "rs_9th_grahovo_light_infantry": {
-          "killed": 21,
-          "missing_captured": 17,
-          "wounded": 52
+          "killed": 26,
+          "missing_captured": 20,
+          "wounded": 64
         },
         "rs_ajnie_brigade": {
           "killed": 20,
-          "missing_captured": 16,
-          "wounded": 50
+          "missing_captured": 14,
+          "wounded": 49
         },
         "rs_bilea_brigade": {
-          "killed": 35,
-          "missing_captured": 26,
-          "wounded": 88
+          "killed": 40,
+          "missing_captured": 28,
+          "wounded": 95
         },
         "rs_ekovii_brigade": {
           "killed": 14,
           "missing_captured": 10,
-          "wounded": 35
+          "wounded": 36
         },
         "rs_foa_brigade": {
-          "killed": 62,
-          "missing_captured": 42,
-          "wounded": 153
+          "killed": 66,
+          "missing_captured": 45,
+          "wounded": 161
         },
         "rs_gacko_brigade": {
-          "killed": 18,
-          "missing_captured": 14,
-          "wounded": 44
+          "killed": 20,
+          "missing_captured": 12,
+          "wounded": 48
         },
         "rs_nevesinje_brigade": {
-          "killed": 54,
-          "missing_captured": 40,
-          "wounded": 133
+          "killed": 59,
+          "missing_captured": 43,
+          "wounded": 146
         },
         "rs_rogatica_brigade": {
-          "killed": 22,
+          "killed": 24,
           "missing_captured": 18,
-          "wounded": 55
+          "wounded": 60
         },
         "rs_trebinje_brigade": {
-          "killed": 68,
-          "missing_captured": 46,
-          "wounded": 163
+          "killed": 73,
+          "missing_captured": 50,
+          "wounded": 177
         },
         "rs_viegrad_brigade": {
           "killed": 5,
           "missing_captured": 4,
           "wounded": 12
-        },
-        "vrs_1st_laktasi": {
-          "killed": 17,
-          "missing_captured": 12,
-          "wounded": 42
         }
       },
-      "wounded": 5077
+      "wounded": 5601
     }
   },
   "coercion_pressure_by_municipality": {
@@ -1907,7 +1896,7 @@
       "corps_exhaustion": 0,
       "og_slots": 2,
       "stance": "balanced",
-      "subordinate_count": 6
+      "subordinate_count": 10
     },
     "arbih_4th_corps": {
       "active_ogs": [],
@@ -1961,7 +1950,7 @@
       "corps_exhaustion": 0,
       "og_slots": 2,
       "stance": "balanced",
-      "subordinate_count": 34
+      "subordinate_count": 36
     },
     "vrs_2nd_krajina": {
       "active_ogs": [],
@@ -2929,7 +2918,7 @@
       },
       "negotiation": {
         "capital": 107,
-        "last_capital_change_turn": 16,
+        "last_capital_change_turn": 52,
         "last_change_turn": 52,
         "pressure": 5902,
         "spent_total": 0
@@ -2984,7 +2973,7 @@
         "workshop_access": 0.74
       },
       "negotiation": {
-        "capital": 128,
+        "capital": 129,
         "last_capital_change_turn": 52,
         "last_change_turn": 52,
         "pressure": 5902,
@@ -3074,7 +3063,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.8000000000001,
+      "cohesion": 66.8000000000001,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -3125,7 +3114,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1752,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -3139,7 +3128,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 1,
         "artillery": 4,
@@ -3189,7 +3178,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 2058,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -3203,7 +3192,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 1,
         "artillery": 4,
@@ -3253,7 +3242,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 800,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -3267,7 +3256,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 1,
         "artillery": 4,
@@ -3317,7 +3306,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 800,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -3331,7 +3320,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.8000000000001,
+      "cohesion": 66.8000000000001,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -3382,7 +3371,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 310,
+      "personnel": 1778,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -3396,7 +3385,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -3446,7 +3435,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 800,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -3460,7 +3449,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 1,
         "artillery": 4,
@@ -3510,7 +3499,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1606,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -3524,7 +3513,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.0000000000001,
+      "cohesion": 66.0000000000001,
       "composition": {
         "aa_systems": 1,
         "artillery": 4,
@@ -3575,7 +3564,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1314,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -3589,7 +3578,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.8000000000001,
+      "cohesion": 66.8000000000001,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -3640,7 +3629,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 768,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -3654,7 +3643,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.8000000000001,
+      "cohesion": 66.8000000000001,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -3705,7 +3694,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1160,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -3719,7 +3708,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -3783,7 +3772,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -3833,7 +3822,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 800,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -3847,7 +3836,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 65.40000000000009,
+      "cohesion": 64.40000000000009,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -3912,7 +3901,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.8000000000001,
+      "cohesion": 66.8000000000001,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -3963,7 +3952,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 768,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -3977,7 +3966,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.8000000000001,
+      "cohesion": 66.8000000000001,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4028,7 +4017,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 482,
+      "personnel": 2864,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -4042,7 +4031,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.30000000000005,
+      "cohesion": 67.20000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4107,7 +4096,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.8000000000001,
+      "cohesion": 66.8000000000001,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4158,7 +4147,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 768,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -4172,7 +4161,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4222,7 +4211,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 954,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -4236,7 +4225,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4286,7 +4275,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 2272,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -4300,7 +4289,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4407,7 +4396,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4457,7 +4446,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1610,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -4471,7 +4460,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4521,7 +4510,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 501,
+      "personnel": 2643,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -4535,7 +4524,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.8000000000001,
+      "cohesion": 66.8000000000001,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4586,7 +4575,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 856,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -4600,7 +4589,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 65.40000000000009,
+      "cohesion": 64.40000000000009,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4651,7 +4640,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 891,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -4665,7 +4654,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4715,7 +4704,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1621,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -4729,7 +4718,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.8000000000001,
+      "cohesion": 66.8000000000001,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4780,7 +4769,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1368,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -4794,7 +4783,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4844,7 +4833,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1888,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -4858,7 +4847,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4922,7 +4911,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.8000000000001,
+      "cohesion": 66.8000000000001,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -4973,7 +4962,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1368,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -4987,7 +4976,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5037,7 +5026,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1799,
+      "personnel": 2400,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -5051,7 +5040,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 63.000000000000085,
+      "cohesion": 62.000000000000085,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5102,7 +5091,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1084,
+      "personnel": 1561,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -5116,7 +5105,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5166,7 +5155,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1542,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -5180,7 +5169,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5224,7 +5213,7 @@
       "hq_sid": "op:doboj:brijesnica_velika",
       "id": "arbih_224th_mountain",
       "kind": "brigade",
-      "location_osid": "op:gracanica:malesici",
+      "location_osid": "op:gracanica:dzakule",
       "name": "224th Mountain",
       "ops": {
         "fatigue": 0,
@@ -5244,7 +5233,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.8000000000001,
+      "cohesion": 66.8000000000001,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5275,7 +5264,7 @@
           "STATIC_DEFENSE": false
         }
       },
-      "entrenchment_turns": 12,
+      "entrenchment_turns": 0,
       "equipment_state": {
         "degraded_heavy": 0,
         "last_maintenance": 52,
@@ -5289,13 +5278,13 @@
       "hq_sid": "op:banovici:banovici_2",
       "id": "arbih_225th_muslim_mountain",
       "kind": "brigade",
-      "location_osid": "op:banovici:repnik_2",
+      "location_osid": "op:olovo:kamensko_2",
       "name": "225th Muslim Mountain",
       "ops": {
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1331,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -5309,7 +5298,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.8000000000001,
+      "cohesion": 66.8000000000001,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5360,7 +5349,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 968,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -5374,7 +5363,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5424,7 +5413,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 819,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -5438,7 +5427,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5482,13 +5471,13 @@
       "hq_sid": "op:kalesija:gojcin_2",
       "id": "arbih_242nd_zvornik_muslim_light",
       "kind": "brigade",
-      "location_osid": "op:gracanica:malesici",
+      "location_osid": "op:gracanica:dzakule",
       "name": "242nd Zvornik Muslim Light",
       "ops": {
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 800,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -5502,7 +5491,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5552,7 +5541,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 874,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -5566,7 +5555,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5610,13 +5599,13 @@
       "hq_sid": "op:kalesija:gojcin_2",
       "id": "arbih_245th_mountain",
       "kind": "brigade",
-      "location_osid": "op:gracanica:malesici",
+      "location_osid": "op:gracanica:dzakule",
       "name": "245th Mountain",
       "ops": {
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 800,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -5630,7 +5619,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5680,7 +5669,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1600,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -5694,7 +5683,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5744,7 +5733,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 2000,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -5758,7 +5747,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5808,7 +5797,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 2000,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -5822,7 +5811,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5886,7 +5875,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -5993,7 +5982,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -6043,7 +6032,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1983,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -6051,6 +6040,262 @@
         "corps:arbih_2nd_corps",
         "equip:light_infantry",
         "mun:tuzla"
+      ]
+    },
+    "arbih_303rd_vitezka_mountain": {
+      "activation_gated": false,
+      "activation_turn": null,
+      "assignment": null,
+      "cohesion": 59.00000000000006,
+      "composition": {
+        "aa_systems": 0,
+        "artillery": 1,
+        "artillery_condition": {
+          "degraded": 0,
+          "non_operational": 0,
+          "operational": 1
+        },
+        "infantry": 800,
+        "tank_condition": {
+          "degraded": 0.418,
+          "non_operational": 0.06599999999999998,
+          "operational": 0.5159999999999996
+        },
+        "tanks": 0
+      },
+      "corps_id": "arbih_3rd_corps",
+      "created_turn": 8,
+      "doctrine_state": {
+        "active": null,
+        "active_turns": 0,
+        "eligible": {
+          "ARTILLERY_COUNTER": false,
+          "ATTACK": false,
+          "COORDINATED_STRIKE": false,
+          "DEFEND": false,
+          "INFILTRATE": false,
+          "STATIC_DEFENSE": false
+        }
+      },
+      "entrenchment_turns": 12,
+      "equipment_state": {
+        "degraded_heavy": 0,
+        "last_maintenance": 52,
+        "maintenance_deficit": 0.9315648,
+        "non_operational_heavy": 0,
+        "operational_heavy": 6,
+        "total_heavy": 6
+      },
+      "faction": "RBiH",
+      "hq_sid": "op:zenica:gornja_zenica_2",
+      "id": "arbih_303rd_vitezka_mountain",
+      "kind": "brigade",
+      "location_osid": "op:zenica:gornja_zenica_2",
+      "name": "303rd Vitezka Mountain",
+      "ops": {
+        "fatigue": 0,
+        "last_supplied_turn": 52
+      },
+      "personnel": 3000,
+      "posture": "defend",
+      "readiness": "active",
+      "status": "active",
+      "tags": [
+        "corps:arbih_3rd_corps",
+        "equip:light_infantry",
+        "mun:zenica"
+      ]
+    },
+    "arbih_327th_vitezka_mountain": {
+      "activation_gated": false,
+      "activation_turn": null,
+      "assignment": null,
+      "cohesion": 59.00000000000006,
+      "composition": {
+        "aa_systems": 0,
+        "artillery": 1,
+        "artillery_condition": {
+          "degraded": 0,
+          "non_operational": 0,
+          "operational": 1
+        },
+        "infantry": 800,
+        "tank_condition": {
+          "degraded": 0.418,
+          "non_operational": 0.06599999999999998,
+          "operational": 0.5159999999999996
+        },
+        "tanks": 0
+      },
+      "corps_id": "arbih_3rd_corps",
+      "created_turn": 8,
+      "doctrine_state": {
+        "active": null,
+        "active_turns": 0,
+        "eligible": {
+          "ARTILLERY_COUNTER": false,
+          "ATTACK": false,
+          "COORDINATED_STRIKE": false,
+          "DEFEND": false,
+          "INFILTRATE": false,
+          "STATIC_DEFENSE": false
+        }
+      },
+      "entrenchment_turns": 12,
+      "equipment_state": {
+        "degraded_heavy": 0,
+        "last_maintenance": 52,
+        "maintenance_deficit": 0.9315648,
+        "non_operational_heavy": 0,
+        "operational_heavy": 6,
+        "total_heavy": 6
+      },
+      "faction": "RBiH",
+      "hq_sid": "op:maglaj:cobe_2",
+      "id": "arbih_327th_vitezka_mountain",
+      "kind": "brigade",
+      "location_osid": "op:tesanj:radusa_2",
+      "name": "327th Vitezka Mountain",
+      "ops": {
+        "fatigue": 0,
+        "last_supplied_turn": 52
+      },
+      "personnel": 3000,
+      "posture": "defend",
+      "readiness": "active",
+      "status": "active",
+      "tags": [
+        "corps:arbih_3rd_corps",
+        "equip:light_infantry",
+        "mun:maglaj"
+      ]
+    },
+    "arbih_372nd_vitezka_mountain": {
+      "activation_gated": false,
+      "activation_turn": null,
+      "assignment": null,
+      "cohesion": 59.00000000000006,
+      "composition": {
+        "aa_systems": 0,
+        "artillery": 1,
+        "artillery_condition": {
+          "degraded": 0,
+          "non_operational": 0,
+          "operational": 1
+        },
+        "infantry": 800,
+        "tank_condition": {
+          "degraded": 0.418,
+          "non_operational": 0.06599999999999998,
+          "operational": 0.5159999999999996
+        },
+        "tanks": 0
+      },
+      "corps_id": "arbih_3rd_corps",
+      "created_turn": 8,
+      "doctrine_state": {
+        "active": null,
+        "active_turns": 0,
+        "eligible": {
+          "ARTILLERY_COUNTER": false,
+          "ATTACK": false,
+          "COORDINATED_STRIKE": false,
+          "DEFEND": false,
+          "INFILTRATE": false,
+          "STATIC_DEFENSE": false
+        }
+      },
+      "entrenchment_turns": 12,
+      "equipment_state": {
+        "degraded_heavy": 0,
+        "last_maintenance": 52,
+        "maintenance_deficit": 0.9315648,
+        "non_operational_heavy": 0,
+        "operational_heavy": 6,
+        "total_heavy": 6
+      },
+      "faction": "RBiH",
+      "hq_sid": "op:tesanj:novi_miljanovci_2",
+      "id": "arbih_372nd_vitezka_mountain",
+      "kind": "brigade",
+      "location_osid": "op:tesanj:novi_miljanovci_2",
+      "name": "372nd Vitezka Mountain",
+      "ops": {
+        "fatigue": 0,
+        "last_supplied_turn": 52
+      },
+      "personnel": 2008,
+      "posture": "defend",
+      "readiness": "active",
+      "status": "active",
+      "tags": [
+        "corps:arbih_3rd_corps",
+        "equip:light_infantry",
+        "mun:tesanj"
+      ]
+    },
+    "arbih_373rd_slavna_mountain": {
+      "activation_gated": false,
+      "activation_turn": null,
+      "assignment": null,
+      "cohesion": 59.00000000000006,
+      "composition": {
+        "aa_systems": 0,
+        "artillery": 1,
+        "artillery_condition": {
+          "degraded": 0,
+          "non_operational": 0,
+          "operational": 1
+        },
+        "infantry": 800,
+        "tank_condition": {
+          "degraded": 0.418,
+          "non_operational": 0.06599999999999998,
+          "operational": 0.5159999999999996
+        },
+        "tanks": 0
+      },
+      "corps_id": "arbih_3rd_corps",
+      "created_turn": 8,
+      "doctrine_state": {
+        "active": null,
+        "active_turns": 0,
+        "eligible": {
+          "ARTILLERY_COUNTER": false,
+          "ATTACK": false,
+          "COORDINATED_STRIKE": false,
+          "DEFEND": false,
+          "INFILTRATE": false,
+          "STATIC_DEFENSE": false
+        }
+      },
+      "entrenchment_turns": 12,
+      "equipment_state": {
+        "degraded_heavy": 0,
+        "last_maintenance": 52,
+        "maintenance_deficit": 0.9315648,
+        "non_operational_heavy": 0,
+        "operational_heavy": 6,
+        "total_heavy": 6
+      },
+      "faction": "RBiH",
+      "hq_sid": "op:tesanj:novi_miljanovci_2",
+      "id": "arbih_373rd_slavna_mountain",
+      "kind": "brigade",
+      "location_osid": "op:tesanj:novi_miljanovci_2",
+      "name": "373rd Slavna Mountain",
+      "ops": {
+        "fatigue": 0,
+        "last_supplied_turn": 52
+      },
+      "personnel": 491,
+      "posture": "defend",
+      "readiness": "active",
+      "status": "active",
+      "tags": [
+        "corps:arbih_3rd_corps",
+        "equip:light_infantry",
+        "mun:tesanj"
       ]
     },
     "arbih_3rd_corps": {
@@ -6143,7 +6388,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -6212,15 +6457,15 @@
         "aa_systems": 0,
         "artillery": 1,
         "artillery_condition": {
-          "degraded": 0.03499999999999999,
+          "degraded": 0.04374999999999997,
           "non_operational": 0,
-          "operational": 0.9649999999999999
+          "operational": 0.9562499999999998
         },
         "infantry": 800,
         "tank_condition": {
-          "degraded": 0.5289999999999998,
-          "non_operational": 0.09300000000000003,
-          "operational": 0.37799999999999967
+          "degraded": 0.5377499999999998,
+          "non_operational": 0.09675000000000003,
+          "operational": 0.3654999999999997
         },
         "tanks": 0
       },
@@ -6273,7 +6518,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -6337,7 +6582,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -6387,7 +6632,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 2167,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -6401,7 +6646,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -6451,7 +6696,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 2000,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -6528,7 +6773,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 51.200000000000045,
+      "cohesion": 51.10000000000005,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -6593,7 +6838,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 67.8000000000001,
+      "cohesion": 66.8000000000001,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -6644,7 +6889,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 992,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -6658,7 +6903,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.60000000000004,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -6677,7 +6922,6 @@
       },
       "corps_id": "arbih_3rd_corps",
       "created_turn": 0,
-      "defense_streak": 2,
       "doctrine_state": {
         "active": null,
         "active_turns": 0,
@@ -6699,7 +6943,6 @@
         "operational_heavy": 6,
         "total_heavy": 6
       },
-      "experience": 0.1471875,
       "faction": "RBiH",
       "hq_sid": "op:travnik:cukle_2",
       "id": "arbih_727th_slavna",
@@ -6710,7 +6953,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1174,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -6724,7 +6967,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -6788,7 +7031,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -6838,7 +7081,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1122,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -6852,7 +7095,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 51.200000000000045,
+      "cohesion": 51.10000000000005,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -6917,7 +7160,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 68.10000000000005,
+      "cohesion": 68.00000000000006,
       "composition": {
         "aa_systems": 0,
         "artillery": 1,
@@ -6967,7 +7210,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1200,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -7044,7 +7287,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -7088,13 +7331,13 @@
       "hq_sid": "op:zepce:ozimica_2",
       "id": "hrhb_111th_brigade",
       "kind": "brigade",
-      "location_osid": "op:zepce:ozimica_2",
+      "location_osid": "op:zepce:zepce_2",
       "name": "111th Brigade",
       "ops": {
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1291,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -7108,7 +7351,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 1,
         "artillery": 4,
@@ -7158,7 +7401,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 834,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -7172,7 +7415,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -7222,7 +7465,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 800,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -7236,7 +7479,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 1,
         "artillery": 4,
@@ -7286,7 +7529,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 800,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -7300,7 +7543,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -7350,7 +7593,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 800,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -7364,7 +7607,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -7414,7 +7657,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 911,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -7428,7 +7671,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -7478,7 +7721,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 286,
+      "personnel": 1806,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -7492,7 +7735,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -7542,7 +7785,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 376,
+      "personnel": 2212,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -7556,7 +7799,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -7620,7 +7863,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -7670,7 +7913,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1150,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -7684,7 +7927,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -7734,7 +7977,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1076,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -7748,7 +7991,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -7798,7 +8041,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 660,
+      "personnel": 2912,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -7812,7 +8055,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -7862,7 +8105,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1805,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -7876,7 +8119,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -7926,7 +8169,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 800,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -7940,7 +8183,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 1,
         "artillery": 4,
@@ -7990,7 +8233,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 800,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -8004,7 +8247,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -8068,7 +8311,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -8118,7 +8361,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 350,
+      "personnel": 680,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -8132,7 +8375,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -8163,7 +8406,7 @@
           "STATIC_DEFENSE": false
         }
       },
-      "entrenchment_turns": 12,
+      "entrenchment_turns": 0,
       "equipment_state": {
         "degraded_heavy": 0,
         "last_maintenance": 52,
@@ -8182,7 +8425,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 600,
+      "personnel": 2862,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -8196,7 +8439,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -8246,7 +8489,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 906,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -8260,7 +8503,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -8324,7 +8567,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -8355,7 +8598,7 @@
           "STATIC_DEFENSE": false
         }
       },
-      "entrenchment_turns": 12,
+      "entrenchment_turns": 0,
       "equipment_state": {
         "degraded_heavy": 0,
         "last_maintenance": 52,
@@ -8616,7 +8859,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 60.09999999999985,
+      "cohesion": 58.59999999999985,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -8731,7 +8974,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1549,
+      "personnel": 2521,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -8745,7 +8988,7 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 48.600000000000016,
+      "cohesion": 46.60000000000004,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -8797,7 +9040,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 795,
+      "personnel": 1378,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -8862,7 +9105,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1226,
+      "personnel": 2121,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -8874,28 +9117,27 @@
     },
     "rs_12th_kotorsko_light_infantry": {
       "activation_gated": false,
-      "activation_turn": 16,
+      "activation_turn": null,
       "assignment": null,
-      "cohesion": 16.600000000000037,
+      "cohesion": 47.60000000000002,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
         "artillery_condition": {
-          "degraded": 0.04374999999999998,
+          "degraded": 0.008749999999999997,
           "non_operational": 0,
-          "operational": 0.9562499999999998
+          "operational": 0.99125
         },
         "infantry": 800,
         "tank_condition": {
-          "degraded": 0.5377499999999998,
-          "non_operational": 0.09675,
-          "operational": 0.3654999999999997
+          "degraded": 0.5027499999999999,
+          "non_operational": 0.08175000000000002,
+          "operational": 0.41549999999999954
         },
         "tanks": 0
       },
       "corps_id": "vrs_1st_krajina",
       "created_turn": 0,
-      "disrupted_turns": 0,
       "doctrine_state": {
         "active": null,
         "active_turns": 0,
@@ -8917,7 +9159,7 @@
         "operational_heavy": 5,
         "total_heavy": 57
       },
-      "experience": 0.07604835874999999,
+      "experience": 0.034999999999999996,
       "faction": "RS",
       "hq_sid": "op:celinac:josavka_donja_2",
       "id": "rs_12th_kotorsko_light_infantry",
@@ -8928,9 +9170,9 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 3000,
+      "personnel": 1374,
       "posture": "defend",
-      "readiness": "overextended",
+      "readiness": "active",
       "status": "active",
       "tags": [
         "corps:vrs_1st_krajina",
@@ -8993,7 +9235,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 714,
+      "personnel": 1189,
       "posture": "defend",
       "readiness": "overextended",
       "status": "active",
@@ -9058,7 +9300,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1062,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -9123,7 +9365,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1290,
+      "personnel": 2111,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -9188,7 +9430,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 570,
+      "personnel": 964,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -9253,7 +9495,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 968,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -9318,7 +9560,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 727,
+      "personnel": 1531,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -9382,7 +9624,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1200,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -9447,7 +9689,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 775,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -9512,7 +9754,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 472,
+      "personnel": 924,
       "posture": "defend",
       "readiness": "forming",
       "status": "active",
@@ -9577,7 +9819,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 737,
+      "personnel": 1481,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -9591,20 +9833,20 @@
       "activation_gated": false,
       "activation_turn": 52,
       "assignment": null,
-      "cohesion": 38.60000000000004,
+      "cohesion": 38.10000000000004,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
         "artillery_condition": {
-          "degraded": 0.06999999999999994,
+          "degraded": 0.07874999999999992,
           "non_operational": 0,
-          "operational": 0.9299999999999997
+          "operational": 0.9212499999999997
         },
         "infantry": 800,
         "tank_condition": {
-          "degraded": 0.5639999999999996,
-          "non_operational": 0.10800000000000004,
-          "operational": 0.32799999999999985
+          "degraded": 0.5727499999999996,
+          "non_operational": 0.11175000000000004,
+          "operational": 0.3154999999999999
         },
         "tanks": 0
       },
@@ -9631,18 +9873,18 @@
         "operational_heavy": 5,
         "total_heavy": 57
       },
-      "experience": 0.26343730175735486,
+      "experience": 0.29382714897660117,
       "faction": "RS",
       "hq_sid": "op:doboj:boljanic_2",
       "id": "rs_1st_doboj_light_infantry",
       "kind": "brigade",
-      "location_osid": "op:doboj:boljanic_2",
+      "location_osid": "op:tesanj:lepenica",
       "name": "1st Doboj Light Infantry",
       "ops": {
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 866,
+      "personnel": 2769,
       "posture": "defend",
       "readiness": "forming",
       "status": "active",
@@ -9707,7 +9949,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 928,
+      "personnel": 1559,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -9740,7 +9982,7 @@
       },
       "corps_id": "vrs_1st_krajina",
       "created_turn": 0,
-      "defense_streak": 6,
+      "defense_streak": 4,
       "doctrine_state": {
         "active": null,
         "active_turns": 0,
@@ -9773,7 +10015,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1972,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -9839,7 +10081,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 163,
+      "personnel": 234,
       "posture": "defend",
       "readiness": "overextended",
       "status": "active",
@@ -9847,6 +10089,70 @@
         "corps:vrs_main_staff",
         "equip:motorized",
         "mun:kalinovik"
+      ]
+    },
+    "rs_1st_kotor_varo_light_infantry": {
+      "activation_gated": false,
+      "activation_turn": null,
+      "assignment": null,
+      "cohesion": 48.600000000000016,
+      "composition": {
+        "aa_systems": 0,
+        "artillery": 2,
+        "artillery_condition": {
+          "degraded": 0,
+          "non_operational": 0,
+          "operational": 1
+        },
+        "infantry": 800,
+        "tank_condition": {
+          "degraded": 0.48450000000000004,
+          "non_operational": 0.07649999999999998,
+          "operational": 0.4389999999999995
+        },
+        "tanks": 0
+      },
+      "corps_id": "vrs_1st_krajina",
+      "created_turn": 1,
+      "doctrine_state": {
+        "active": null,
+        "active_turns": 0,
+        "eligible": {
+          "ARTILLERY_COUNTER": false,
+          "ATTACK": false,
+          "COORDINATED_STRIKE": false,
+          "DEFEND": false,
+          "INFILTRATE": false,
+          "STATIC_DEFENSE": false
+        }
+      },
+      "entrenchment_turns": 0,
+      "equipment_state": {
+        "degraded_heavy": 52,
+        "last_maintenance": 52,
+        "maintenance_deficit": 0.8524218,
+        "non_operational_heavy": 0,
+        "operational_heavy": 5,
+        "total_heavy": 57
+      },
+      "faction": "RS",
+      "hq_sid": "op:celinac:josavka_donja_2",
+      "id": "rs_1st_kotor_varo_light_infantry",
+      "kind": "brigade",
+      "location_osid": "op:kotor_varos:krusevo_brdo_i",
+      "name": "1st Kotor Varoš Light Infantry",
+      "ops": {
+        "fatigue": 0,
+        "last_supplied_turn": 52
+      },
+      "personnel": 200,
+      "posture": "defend",
+      "readiness": "active",
+      "status": "active",
+      "tags": [
+        "corps:vrs_1st_krajina",
+        "equip:mountain",
+        "mun:kotor_varos"
       ]
     },
     "rs_1st_krnjin_light_infantry": {
@@ -9898,13 +10204,13 @@
       "hq_sid": "op:doboj:boljanic_2",
       "id": "rs_1st_krnjin_light_infantry",
       "kind": "brigade",
-      "location_osid": "op:doboj:klokotnica_2",
+      "location_osid": "op:doboj:brijesnica_velika",
       "name": "1st Krnjin Light Infantry",
       "ops": {
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 716,
+      "personnel": 832,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -9969,7 +10275,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 737,
+      "personnel": 1395,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -9983,7 +10289,7 @@
       "activation_gated": false,
       "activation_turn": 11,
       "assignment": null,
-      "cohesion": 7.600000000000016,
+      "cohesion": 0,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -10024,7 +10330,7 @@
         "operational_heavy": 5,
         "total_heavy": 57
       },
-      "experience": 0.1295654785909203,
+      "experience": 0.14920504106571564,
       "faction": "RS",
       "hq_sid": "op:hanpijesak:han_pijesak_2",
       "id": "rs_1st_milii",
@@ -10035,7 +10341,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 213,
+      "personnel": 460,
       "posture": "defend",
       "readiness": "degraded",
       "status": "active",
@@ -10100,7 +10406,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1502,
+      "personnel": 2447,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -10108,6 +10414,71 @@
         "corps:vrs_1st_krajina",
         "equip:mountain",
         "mun:bosanski_novi"
+      ]
+    },
+    "rs_1st_ozren_light_infantry": {
+      "activation_gated": false,
+      "activation_turn": null,
+      "assignment": null,
+      "cohesion": 42.60000000000004,
+      "composition": {
+        "aa_systems": 0,
+        "artillery": 2,
+        "artillery_condition": {
+          "degraded": 0.026249999999999992,
+          "non_operational": 0,
+          "operational": 0.9737499999999999
+        },
+        "infantry": 800,
+        "tank_condition": {
+          "degraded": 0.48225,
+          "non_operational": 0.08325000000000002,
+          "operational": 0.43449999999999966
+        },
+        "tanks": 0
+      },
+      "corps_id": "vrs_1st_krajina",
+      "created_turn": 4,
+      "doctrine_state": {
+        "active": null,
+        "active_turns": 0,
+        "eligible": {
+          "ARTILLERY_COUNTER": false,
+          "ATTACK": false,
+          "COORDINATED_STRIKE": false,
+          "DEFEND": false,
+          "INFILTRATE": false,
+          "STATIC_DEFENSE": false
+        }
+      },
+      "entrenchment_turns": 12,
+      "equipment_state": {
+        "degraded_heavy": 49,
+        "last_maintenance": 52,
+        "maintenance_deficit": 0.8524218,
+        "non_operational_heavy": 0,
+        "operational_heavy": 8,
+        "total_heavy": 57
+      },
+      "experience": 0.10317321874999999,
+      "faction": "RS",
+      "hq_sid": "op:gracanica:gracanica_2",
+      "id": "rs_1st_ozren_light_infantry",
+      "kind": "brigade",
+      "location_osid": "op:gracanica:gracanica_2",
+      "name": "1st Ozren Light Infantry",
+      "ops": {
+        "fatigue": 0,
+        "last_supplied_turn": 52
+      },
+      "personnel": 910,
+      "posture": "defend",
+      "readiness": "active",
+      "status": "active",
+      "tags": [
+        "corps:vrs_1st_krajina",
+        "equip:mountain",
+        "mun:gracanica"
       ]
     },
     "rs_1st_posavina_infantry": {
@@ -10229,7 +10600,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 2129,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -10360,7 +10731,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1228,
+      "personnel": 1229,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -10425,7 +10796,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 968,
+      "personnel": 1790,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -10490,7 +10861,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 810,
+      "personnel": 1340,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -10549,13 +10920,13 @@
       "hq_sid": "op:srbac:kobas",
       "id": "rs_1st_srbac_light_infantry",
       "kind": "brigade",
-      "location_osid": "op:doboj:klokotnica_2",
+      "location_osid": "op:doboj:brijesnica_velika",
       "name": "1st Srbac Light Infantry",
       "ops": {
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1395,
+      "personnel": 2276,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -10620,7 +10991,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1278,
+      "personnel": 2770,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -10685,7 +11056,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 829,
+      "personnel": 1439,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -10814,7 +11185,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 856,
+      "personnel": 1452,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -10828,20 +11199,20 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 41.60000000000004,
+      "cohesion": 41.10000000000004,
       "composition": {
         "aa_systems": 5,
         "artillery": 30,
         "artillery_condition": {
-          "degraded": 0.05249999999999996,
+          "degraded": 0.06124999999999996,
           "non_operational": 0,
-          "operational": 0.9474999999999998
+          "operational": 0.9387499999999998
         },
         "infantry": 800,
         "tank_condition": {
-          "degraded": 0.5464999999999998,
-          "non_operational": 0.10050000000000003,
-          "operational": 0.35299999999999976
+          "degraded": 0.5552499999999997,
+          "non_operational": 0.10425000000000004,
+          "operational": 0.3404999999999998
         },
         "tanks": 40
       },
@@ -10868,18 +11239,18 @@
         "operational_heavy": 5,
         "total_heavy": 57
       },
-      "experience": 0.2010240809663823,
+      "experience": 0.2325061595494706,
       "faction": "RS",
       "hq_sid": "op:derventa:cerani_2",
       "id": "rs_27th_derventa_motorized",
       "kind": "brigade",
-      "location_osid": "op:doboj:boljanic_2",
+      "location_osid": "op:tesanj:lepenica",
       "name": "27th Derventa Motorized",
       "ops": {
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1206,
+      "personnel": 2139,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -11153,20 +11524,20 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 41.60000000000004,
+      "cohesion": 41.10000000000004,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
         "artillery_condition": {
-          "degraded": 0.04374999999999997,
+          "degraded": 0.05249999999999995,
           "non_operational": 0,
-          "operational": 0.9562499999999998
+          "operational": 0.9474999999999998
         },
         "infantry": 800,
         "tank_condition": {
-          "degraded": 0.5377499999999997,
-          "non_operational": 0.09675000000000003,
-          "operational": 0.3654999999999997
+          "degraded": 0.5464999999999998,
+          "non_operational": 0.10050000000000003,
+          "operational": 0.35299999999999976
         },
         "tanks": 0
       },
@@ -11193,18 +11564,18 @@
         "operational_heavy": 5,
         "total_heavy": 57
       },
-      "experience": 0.16898125289199217,
+      "experience": 0.2010240809663823,
       "faction": "RS",
       "hq_sid": "op:lukavac:brijesnica_donja_2",
       "id": "rs_2nd_ozren_light_infantry",
       "kind": "brigade",
-      "location_osid": "op:gracanica:petrovo_2",
+      "location_osid": "op:gracanica:gracanica_2",
       "name": "2nd Ozren Light Infantry",
       "ops": {
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 588,
+      "personnel": 564,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -11269,7 +11640,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 767,
+      "personnel": 1366,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -11529,7 +11900,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1337,
+      "personnel": 2158,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -11658,7 +12029,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 728,
+      "personnel": 1221,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -11788,7 +12159,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1137,
+      "personnel": 1152,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -11821,7 +12192,7 @@
       },
       "corps_id": "vrs_1st_krajina",
       "created_turn": 0,
-      "defense_streak": 6,
+      "defense_streak": 4,
       "doctrine_state": {
         "active": null,
         "active_turns": 0,
@@ -11854,7 +12225,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1288,
+      "personnel": 3000,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -11933,20 +12304,20 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 3.6000000000000054,
+      "cohesion": 7.250000000000014,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
         "artillery_condition": {
-          "degraded": 0.15750000000000083,
+          "degraded": 0.2012500000000008,
           "non_operational": 0,
-          "operational": 0.8424999999999994
+          "operational": 0.7987499999999992
         },
         "infantry": 800,
         "tank_condition": {
-          "degraded": 0.6514999999999992,
-          "non_operational": 0.1455,
-          "operational": 0.20300000000000043
+          "degraded": 0.6952499999999988,
+          "non_operational": 0.16424999999999995,
+          "operational": 0.1405000000000008
         },
         "tanks": 0
       },
@@ -11974,18 +12345,18 @@
         "operational_heavy": 5,
         "total_heavy": 57
       },
-      "experience": 0.5080071600619828,
+      "experience": 0.6340665697612867,
       "faction": "RS",
       "hq_sid": "op:zavidovici:cardak_2",
       "id": "rs_4th_ozren_light_infantry",
       "kind": "brigade",
-      "location_osid": "op:kakanj:slapnica_2",
+      "location_osid": "op:kakanj:biljesevo",
       "name": "4th Ozren Light Infantry",
       "ops": {
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 305,
+      "personnel": 550,
       "posture": "defend",
       "readiness": "degraded",
       "status": "active",
@@ -12050,7 +12421,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 556,
+      "personnel": 990,
       "posture": "defend",
       "readiness": "forming",
       "status": "active",
@@ -12115,7 +12486,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 672,
+      "personnel": 1107,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -12179,7 +12550,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1600,
+      "personnel": 1885,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -12244,7 +12615,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1437,
+      "personnel": 2554,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -12256,9 +12627,9 @@
     },
     "rs_7th_krajina_motorized": {
       "activation_gated": false,
-      "activation_turn": null,
+      "activation_turn": 45,
       "assignment": null,
-      "cohesion": 1.600000000000001,
+      "cohesion": 33.60000000000004,
       "composition": {
         "aa_systems": 5,
         "artillery": 30,
@@ -12277,7 +12648,6 @@
       },
       "corps_id": "vrs_2nd_krajina",
       "created_turn": 0,
-      "disrupted_turns": 0,
       "doctrine_state": {
         "active": null,
         "active_turns": 0,
@@ -12299,7 +12669,7 @@
         "operational_heavy": 5,
         "total_heavy": 57
       },
-      "experience": 0.2386042381710148,
+      "experience": 0.26343730175735486,
       "faction": "RS",
       "hq_sid": "op:kupres:donji_malovan",
       "id": "rs_7th_krajina_motorized",
@@ -12310,9 +12680,9 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 222,
+      "personnel": 409,
       "posture": "defend",
-      "readiness": "degraded",
+      "readiness": "forming",
       "status": "active",
       "tags": [
         "corps:vrs_2nd_krajina",
@@ -12375,7 +12745,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 512,
+      "personnel": 814,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -12387,9 +12757,9 @@
     },
     "rs_ajnie_brigade": {
       "activation_gated": false,
-      "activation_turn": 24,
+      "activation_turn": 34,
       "assignment": null,
-      "cohesion": 20.600000000000037,
+      "cohesion": 26.600000000000037,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
@@ -12441,7 +12811,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 273,
+      "personnel": 426,
       "posture": "defend",
       "readiness": "overextended",
       "status": "active",
@@ -12506,7 +12876,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 662,
+      "personnel": 1112,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -12571,7 +12941,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 684,
+      "personnel": 1121,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -12636,7 +13006,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1088,
+      "personnel": 1880,
       "posture": "defend",
       "readiness": "forming",
       "status": "active",
@@ -12701,7 +13071,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 432,
+      "personnel": 712,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -12766,7 +13136,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 588,
+      "personnel": 995,
       "posture": "defend",
       "readiness": "forming",
       "status": "active",
@@ -12831,7 +13201,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 539,
+      "personnel": 906,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -12896,7 +13266,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1292,
+      "personnel": 2229,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -13082,20 +13452,20 @@
       "activation_gated": false,
       "activation_turn": null,
       "assignment": null,
-      "cohesion": 40.10000000000004,
+      "cohesion": 49.6,
       "composition": {
         "aa_systems": 0,
         "artillery": 2,
         "artillery_condition": {
-          "degraded": 0.01749999999999999,
+          "degraded": 0,
           "non_operational": 0,
-          "operational": 0.9824999999999999
+          "operational": 1
         },
         "infantry": 800,
         "tank_condition": {
-          "degraded": 0.5114999999999998,
-          "non_operational": 0.08550000000000002,
-          "operational": 0.4029999999999996
+          "degraded": 0.494,
+          "non_operational": 0.07799999999999999,
+          "operational": 0.4279999999999995
         },
         "tanks": 0
       },
@@ -13122,7 +13492,6 @@
         "operational_heavy": 5,
         "total_heavy": 57
       },
-      "experience": 0.020999999999999998,
       "faction": "RS",
       "hq_sid": "op:celinac:celinac_2",
       "id": "vrs_1st_laktasi",
@@ -13133,7 +13502,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 1693,
+      "personnel": 2851,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -13240,7 +13609,7 @@
         "fatigue": 0,
         "last_supplied_turn": 52
       },
-      "personnel": 962,
+      "personnel": 1106,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -13576,7 +13945,7 @@
     },
     "banja_luka:RS": {
       "available": 0,
-      "committed": 8162,
+      "committed": 13102,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -13594,7 +13963,7 @@
     },
     "banovici:RBiH": {
       "available": 0,
-      "committed": 1379,
+      "committed": 3048,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -13621,7 +13990,7 @@
     },
     "bihac:RS": {
       "available": 0,
-      "committed": 908,
+      "committed": 1431,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -13648,7 +14017,7 @@
     },
     "bijeljina:RS": {
       "available": 0,
-      "committed": 4384,
+      "committed": 7022,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -13675,7 +14044,7 @@
     },
     "bileca:RS": {
       "available": 0,
-      "committed": 811,
+      "committed": 1275,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -13702,7 +14071,7 @@
     },
     "bosanska_dubica:RS": {
       "available": 0,
-      "committed": 1613,
+      "committed": 2585,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -13729,7 +14098,7 @@
     },
     "bosanska_gradiska:RS": {
       "available": 0,
-      "committed": 2338,
+      "committed": 3468,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -13761,7 +14130,7 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "bosanska_kostajnica",
-      "updated_turn": 9
+      "updated_turn": 52
     },
     "bosanska_krupa:HRHB": {
       "available": 5,
@@ -13774,7 +14143,7 @@
     },
     "bosanska_krupa:RBiH": {
       "available": 0,
-      "committed": 1757,
+      "committed": 1970,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -13783,7 +14152,7 @@
     },
     "bosanska_krupa:RS": {
       "available": 0,
-      "committed": 867,
+      "committed": 1455,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -13815,7 +14184,7 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "bosanski_brod",
-      "updated_turn": 11
+      "updated_turn": 52
     },
     "bosanski_novi:HRHB": {
       "available": 6,
@@ -13837,7 +14206,7 @@
     },
     "bosanski_novi:RS": {
       "available": 0,
-      "committed": 1534,
+      "committed": 2479,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -13864,7 +14233,7 @@
     },
     "bosanski_petrovac:RS": {
       "available": 0,
-      "committed": 892,
+      "committed": 1408,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -13891,7 +14260,7 @@
     },
     "bosanski_samac:RS": {
       "available": 0,
-      "committed": 935,
+      "committed": 1541,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -13918,7 +14287,7 @@
     },
     "bosansko_grahovo:RS": {
       "available": 0,
-      "committed": 602,
+      "committed": 924,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -13945,7 +14314,7 @@
     },
     "bratunac:RS": {
       "available": 0,
-      "committed": 738,
+      "committed": 1240,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -13981,7 +14350,7 @@
     },
     "breza:RBiH": {
       "available": 0,
-      "committed": 954,
+      "committed": 3000,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -13999,7 +14368,7 @@
     },
     "bugojno:HRHB": {
       "available": 0,
-      "committed": 906,
+      "committed": 3000,
       "exhausted": 0,
       "faction": "HRHB",
       "fatigue": 52,
@@ -14022,11 +14391,11 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "bugojno",
-      "updated_turn": 11
+      "updated_turn": 52
     },
     "busovaca:HRHB": {
       "available": 0,
-      "committed": 660,
+      "committed": 2912,
       "exhausted": 0,
       "faction": "HRHB",
       "fatigue": 52,
@@ -14071,7 +14440,7 @@
     },
     "cajnice:RS": {
       "available": 0,
-      "committed": 359,
+      "committed": 509,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -14080,7 +14449,7 @@
     },
     "capljina:HRHB": {
       "available": 0,
-      "committed": 1086,
+      "committed": 4806,
       "exhausted": 0,
       "faction": "HRHB",
       "fatigue": 52,
@@ -14116,7 +14485,7 @@
     },
     "cazin:RBiH": {
       "available": 0,
-      "committed": 4167,
+      "committed": 6000,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -14152,7 +14521,7 @@
     },
     "celinac:RS": {
       "available": 0,
-      "committed": 1264,
+      "committed": 2012,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -14170,7 +14539,7 @@
     },
     "centar_sarajevo:RBiH": {
       "available": 0,
-      "committed": 2902,
+      "committed": 11916,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -14188,7 +14557,7 @@
     },
     "citluk:HRHB": {
       "available": 0,
-      "committed": 1076,
+      "committed": 3000,
       "exhausted": 0,
       "faction": "HRHB",
       "fatigue": 52,
@@ -14233,7 +14602,7 @@
     },
     "derventa:RS": {
       "available": 0,
-      "committed": 1491,
+      "committed": 2515,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -14260,7 +14629,7 @@
     },
     "doboj:RS": {
       "available": 0,
-      "committed": 3609,
+      "committed": 5763,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -14287,7 +14656,7 @@
     },
     "donji_vakuf:RS": {
       "available": 0,
-      "committed": 672,
+      "committed": 1072,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -14301,7 +14670,7 @@
       "faction": "HRHB",
       "fatigue": 52,
       "mun_id": "duvno",
-      "updated_turn": 10
+      "updated_turn": 52
     },
     "duvno:RBiH": {
       "available": 9,
@@ -14341,7 +14710,7 @@
     },
     "foca:RS": {
       "available": 0,
-      "committed": 1345,
+      "committed": 2152,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -14355,7 +14724,7 @@
       "faction": "HRHB",
       "fatigue": 52,
       "mun_id": "fojnica",
-      "updated_turn": 10
+      "updated_turn": 52
     },
     "fojnica:RBiH": {
       "available": 0,
@@ -14395,7 +14764,7 @@
     },
     "gacko:RS": {
       "available": 0,
-      "committed": 508,
+      "committed": 792,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -14422,7 +14791,7 @@
     },
     "glamoc:RS": {
       "available": 0,
-      "committed": 759,
+      "committed": 1197,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -14454,7 +14823,7 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "gorazde",
-      "updated_turn": 11
+      "updated_turn": 52
     },
     "gornji_vakuf:HRHB": {
       "available": 9,
@@ -14467,7 +14836,7 @@
     },
     "gornji_vakuf:RBiH": {
       "available": 0,
-      "committed": 1024,
+      "committed": 3032,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -14494,7 +14863,7 @@
     },
     "gracanica:RBiH": {
       "available": 0,
-      "committed": 2999,
+      "committed": 4077,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -14502,17 +14871,17 @@
       "updated_turn": 52
     },
     "gracanica:RS": {
-      "available": 9,
-      "committed": 0,
+      "available": 0,
+      "committed": 973,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "gracanica",
-      "updated_turn": 11
+      "updated_turn": 52
     },
     "gradacac:RBiH": {
       "available": 0,
-      "committed": 3288,
+      "committed": 6032,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -14530,7 +14899,7 @@
     },
     "grude:HRHB": {
       "available": 0,
-      "committed": 1176,
+      "committed": 5212,
       "exhausted": 0,
       "faction": "HRHB",
       "fatigue": 52,
@@ -14566,7 +14935,7 @@
     },
     "hadzici:RBiH": {
       "available": 0,
-      "committed": 1123,
+      "committed": 4791,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -14620,7 +14989,7 @@
     },
     "ilidza:RBiH": {
       "available": 0,
-      "committed": 2058,
+      "committed": 3000,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -14652,7 +15021,7 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "ilijas",
-      "updated_turn": 15
+      "updated_turn": 52
     },
     "jablanica:HRHB": {
       "available": 9,
@@ -14670,7 +15039,7 @@
       "faction": "RBiH",
       "fatigue": 52,
       "mun_id": "jablanica",
-      "updated_turn": 10
+      "updated_turn": 52
     },
     "jablanica:RS": {
       "available": 9,
@@ -14706,7 +15075,7 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "jajce",
-      "updated_turn": 11
+      "updated_turn": 52
     },
     "kakanj:HRHB": {
       "available": 0,
@@ -14724,7 +15093,7 @@
       "faction": "RBiH",
       "fatigue": 52,
       "mun_id": "kakanj",
-      "updated_turn": 11
+      "updated_turn": 12
     },
     "kakanj:RS": {
       "available": 8,
@@ -14733,7 +15102,7 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "kakanj",
-      "updated_turn": 11
+      "updated_turn": 52
     },
     "kalesija:HRHB": {
       "available": 1,
@@ -14746,7 +15115,7 @@
     },
     "kalesija:RBiH": {
       "available": 0,
-      "committed": 2419,
+      "committed": 9000,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -14782,7 +15151,7 @@
     },
     "kalinovik:RS": {
       "available": 0,
-      "committed": 214,
+      "committed": 288,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -14791,7 +15160,7 @@
     },
     "kiseljak:HRHB": {
       "available": 0,
-      "committed": 911,
+      "committed": 3000,
       "exhausted": 0,
       "faction": "HRHB",
       "fatigue": 52,
@@ -14827,7 +15196,7 @@
     },
     "kladanj:RBiH": {
       "available": 0,
-      "committed": 874,
+      "committed": 3000,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -14863,7 +15232,7 @@
     },
     "kljuc:RS": {
       "available": 0,
-      "committed": 1392,
+      "committed": 2213,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -14886,7 +15255,7 @@
       "faction": "RBiH",
       "fatigue": 52,
       "mun_id": "konjic",
-      "updated_turn": 11
+      "updated_turn": 52
     },
     "konjic:RS": {
       "available": 8,
@@ -14917,7 +15286,7 @@
     },
     "kotor_varos:RS": {
       "available": 0,
-      "committed": 3374,
+      "committed": 1606,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -14931,7 +15300,7 @@
       "faction": "HRHB",
       "fatigue": 52,
       "mun_id": "kresevo",
-      "updated_turn": 9
+      "updated_turn": 52
     },
     "kresevo:RBiH": {
       "available": 9,
@@ -14971,7 +15340,7 @@
     },
     "kupres:RS": {
       "available": 0,
-      "committed": 370,
+      "committed": 549,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -14998,7 +15367,7 @@
     },
     "laktasi:RS": {
       "available": 0,
-      "committed": 1764,
+      "committed": 2851,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15007,7 +15376,7 @@
     },
     "listica:HRHB": {
       "available": 0,
-      "committed": 1950,
+      "committed": 6000,
       "exhausted": 0,
       "faction": "HRHB",
       "fatigue": 52,
@@ -15057,7 +15426,7 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "livno",
-      "updated_turn": 11
+      "updated_turn": 52
     },
     "ljubinje:HRHB": {
       "available": 1,
@@ -15084,11 +15453,11 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "ljubinje",
-      "updated_turn": 9
+      "updated_turn": 52
     },
     "ljubuski:HRHB": {
       "available": 0,
-      "committed": 1805,
+      "committed": 3000,
       "exhausted": 0,
       "faction": "HRHB",
       "fatigue": 52,
@@ -15124,7 +15493,7 @@
     },
     "lopare:RS": {
       "available": 0,
-      "committed": 1385,
+      "committed": 2206,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15142,7 +15511,7 @@
     },
     "lukavac:RBiH": {
       "available": 0,
-      "committed": 2742,
+      "committed": 6000,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -15159,13 +15528,13 @@
       "updated_turn": 52
     },
     "maglaj:RBiH": {
-      "available": 9,
-      "committed": 0,
+      "available": 0,
+      "committed": 3000,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
       "mun_id": "maglaj",
-      "updated_turn": 15
+      "updated_turn": 52
     },
     "maglaj:RS": {
       "available": 9,
@@ -15196,7 +15565,7 @@
     },
     "modrica:RS": {
       "available": 0,
-      "committed": 976,
+      "committed": 1586,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15205,7 +15574,7 @@
     },
     "mostar:HRHB": {
       "available": 0,
-      "committed": 2434,
+      "committed": 9000,
       "exhausted": 0,
       "faction": "HRHB",
       "fatigue": 52,
@@ -15250,7 +15619,7 @@
     },
     "mrkonjic_grad:RS": {
       "available": 0,
-      "committed": 1514,
+      "committed": 2459,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15304,7 +15673,7 @@
     },
     "nevesinje:RS": {
       "available": 0,
-      "committed": 815,
+      "committed": 1243,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15322,7 +15691,7 @@
     },
     "novi_grad_sarajevo:RBiH": {
       "available": 0,
-      "committed": 4806,
+      "committed": 9200,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -15354,7 +15723,7 @@
       "faction": "RBiH",
       "fatigue": 52,
       "mun_id": "novi_travnik",
-      "updated_turn": 11
+      "updated_turn": 52
     },
     "novi_travnik:RS": {
       "available": 9,
@@ -15381,7 +15750,7 @@
       "faction": "RBiH",
       "fatigue": 52,
       "mun_id": "novo_sarajevo",
-      "updated_turn": 12
+      "updated_turn": 52
     },
     "novo_sarajevo:RS": {
       "available": 0,
@@ -15417,7 +15786,7 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "odzak",
-      "updated_turn": 11
+      "updated_turn": 52
     },
     "olovo:HRHB": {
       "available": 8,
@@ -15430,7 +15799,7 @@
     },
     "olovo:RBiH": {
       "available": 0,
-      "committed": 888,
+      "committed": 3032,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -15462,7 +15831,7 @@
       "faction": "RBiH",
       "fatigue": 52,
       "mun_id": "orasje",
-      "updated_turn": 11
+      "updated_turn": 52
     },
     "orasje:RS": {
       "available": 9,
@@ -15493,7 +15862,7 @@
     },
     "pale:RS": {
       "available": 0,
-      "committed": 867,
+      "committed": 1341,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15507,7 +15876,7 @@
       "faction": "HRHB",
       "fatigue": 52,
       "mun_id": "posusje",
-      "updated_turn": 10
+      "updated_turn": 52
     },
     "posusje:RBiH": {
       "available": 0,
@@ -15547,7 +15916,7 @@
     },
     "prijedor:RS": {
       "available": 0,
-      "committed": 3172,
+      "committed": 5333,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15574,7 +15943,7 @@
     },
     "prnjavor:RS": {
       "available": 0,
-      "committed": 2249,
+      "committed": 3128,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15588,7 +15957,7 @@
       "faction": "HRHB",
       "fatigue": 52,
       "mun_id": "prozor",
-      "updated_turn": 10
+      "updated_turn": 52
     },
     "prozor:RBiH": {
       "available": 8,
@@ -15628,7 +15997,7 @@
     },
     "rogatica:RS": {
       "available": 0,
-      "committed": 634,
+      "committed": 1008,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15660,7 +16029,7 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "rudo",
-      "updated_turn": 10
+      "updated_turn": 52
     },
     "sanski_most:HRHB": {
       "available": 9,
@@ -15682,7 +16051,7 @@
     },
     "sanski_most:RS": {
       "available": 0,
-      "committed": 1604,
+      "committed": 2721,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15709,7 +16078,7 @@
     },
     "sekovici:RS": {
       "available": 0,
-      "committed": 743,
+      "committed": 1181,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15736,7 +16105,7 @@
     },
     "sipovo:RS": {
       "available": 0,
-      "committed": 954,
+      "committed": 1496,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15763,7 +16132,7 @@
     },
     "skender_vakuf:RS": {
       "available": 0,
-      "committed": 1039,
+      "committed": 1643,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15795,7 +16164,7 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "sokolac",
-      "updated_turn": 10
+      "updated_turn": 52
     },
     "srbac:HRHB": {
       "available": 5,
@@ -15817,7 +16186,7 @@
     },
     "srbac:RS": {
       "available": 0,
-      "committed": 1453,
+      "committed": 2340,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15849,11 +16218,11 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "srebrenica",
-      "updated_turn": 11
+      "updated_turn": 52
     },
     "srebrenik:RBiH": {
       "available": 0,
-      "committed": 3021,
+      "committed": 6032,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -15880,7 +16249,7 @@
     },
     "stari_grad_sarajevo:RBiH": {
       "available": 0,
-      "committed": 2901,
+      "committed": 11707,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -15898,7 +16267,7 @@
     },
     "stolac:HRHB": {
       "available": 0,
-      "committed": 350,
+      "committed": 680,
       "exhausted": 0,
       "faction": "HRHB",
       "fatigue": 52,
@@ -15921,16 +16290,16 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "stolac",
-      "updated_turn": 10
+      "updated_turn": 52
     },
     "tesanj:RBiH": {
-      "available": 9,
-      "committed": 0,
+      "available": 0,
+      "committed": 2499,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
       "mun_id": "tesanj",
-      "updated_turn": 16
+      "updated_turn": 52
     },
     "tesanj:RS": {
       "available": 9,
@@ -15939,7 +16308,7 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "tesanj",
-      "updated_turn": 16
+      "updated_turn": 52
     },
     "teslic:HRHB": {
       "available": 8,
@@ -15961,7 +16330,7 @@
     },
     "teslic:RS": {
       "available": 0,
-      "committed": 2510,
+      "committed": 4002,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -15988,7 +16357,7 @@
     },
     "titov_drvar:RS": {
       "available": 0,
-      "committed": 1138,
+      "committed": 1808,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -16006,7 +16375,7 @@
     },
     "travnik:RBiH": {
       "available": 0,
-      "committed": 2322,
+      "committed": 6000,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -16042,7 +16411,7 @@
     },
     "trebinje:RS": {
       "available": 0,
-      "committed": 1569,
+      "committed": 2529,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -16065,7 +16434,7 @@
       "faction": "RBiH",
       "fatigue": 52,
       "mun_id": "trnovo",
-      "updated_turn": 9
+      "updated_turn": 10
     },
     "trnovo:RS": {
       "available": 9,
@@ -16074,11 +16443,11 @@
       "faction": "RS",
       "fatigue": 52,
       "mun_id": "trnovo",
-      "updated_turn": 9
+      "updated_turn": 52
     },
     "tuzla:RBiH": {
       "available": 0,
-      "committed": 5983,
+      "committed": 9000,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -16114,7 +16483,7 @@
     },
     "ugljevik:RS": {
       "available": 0,
-      "committed": 1106,
+      "committed": 1764,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -16123,7 +16492,7 @@
     },
     "vares:HRHB": {
       "available": 0,
-      "committed": 600,
+      "committed": 2862,
       "exhausted": 0,
       "faction": "HRHB",
       "fatigue": 52,
@@ -16182,7 +16551,7 @@
       "faction": "RBiH",
       "fatigue": 52,
       "mun_id": "visegrad",
-      "updated_turn": 10
+      "updated_turn": 52
     },
     "visegrad:RS": {
       "available": 0,
@@ -16204,7 +16573,7 @@
     },
     "visoko:RBiH": {
       "available": 0,
-      "committed": 2272,
+      "committed": 3000,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -16227,7 +16596,7 @@
       "faction": "HRHB",
       "fatigue": 52,
       "mun_id": "vitez",
-      "updated_turn": 11
+      "updated_turn": 52
     },
     "vitez:RBiH": {
       "available": 9,
@@ -16267,7 +16636,7 @@
     },
     "vlasenica:RS": {
       "available": 0,
-      "committed": 1133,
+      "committed": 3711,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -16281,7 +16650,7 @@
       "faction": "RBiH",
       "fatigue": 52,
       "mun_id": "vogosca",
-      "updated_turn": 15
+      "updated_turn": 52
     },
     "vogosca:RS": {
       "available": 0,
@@ -16312,7 +16681,7 @@
     },
     "zavidovici:RS": {
       "available": 0,
-      "committed": 697,
+      "committed": 1121,
       "exhausted": 0,
       "faction": "RS",
       "fatigue": 52,
@@ -16329,13 +16698,13 @@
       "updated_turn": 12
     },
     "zenica:RBiH": {
-      "available": 9,
-      "committed": 0,
+      "available": 0,
+      "committed": 3000,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
       "mun_id": "zenica",
-      "updated_turn": 12
+      "updated_turn": 52
     },
     "zenica:RS": {
       "available": 9,
@@ -16348,7 +16717,7 @@
     },
     "zepce:HRHB": {
       "available": 0,
-      "committed": 1291,
+      "committed": 3000,
       "exhausted": 0,
       "faction": "HRHB",
       "fatigue": 52,
@@ -16384,7 +16753,7 @@
     },
     "zivinice:RBiH": {
       "available": 0,
-      "committed": 3192,
+      "committed": 9203,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -16411,7 +16780,7 @@
     },
     "zvornik:RBiH": {
       "available": 0,
-      "committed": 3210,
+      "committed": 6000,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 52,
@@ -18704,66 +19073,66 @@
     {
       "amount": 100,
       "faction_id": "RBiH",
-      "id": "NLED_10_RBiH_adjust_1",
+      "id": "NLED_9_RBiH_adjust_1",
       "kind": "adjust",
       "reason": "base_capital",
-      "turn": 10
+      "turn": 9
     },
     {
       "amount": 10,
       "faction_id": "RBiH",
-      "id": "NLED_10_RBiH_adjust_3",
+      "id": "NLED_9_RBiH_adjust_3",
       "kind": "adjust",
       "reason": "ivp_penalty",
-      "turn": 10
+      "turn": 9
     },
     {
       "amount": 3,
       "faction_id": "RBiH",
-      "id": "NLED_10_RBiH_adjust_4",
+      "id": "NLED_9_RBiH_adjust_4",
       "kind": "adjust",
       "reason": "patron_bonus",
-      "turn": 10
+      "turn": 9
     },
     {
       "amount": 16,
       "faction_id": "RBiH",
-      "id": "NLED_10_RBiH_adjust_5",
+      "id": "NLED_9_RBiH_adjust_5",
       "kind": "adjust",
       "reason": "territorial_control_bonus",
-      "turn": 10
+      "turn": 9
     },
     {
       "amount": 100,
       "faction_id": "RS",
-      "id": "NLED_11_RS_adjust_1",
+      "id": "NLED_10_RS_adjust_1",
       "kind": "adjust",
       "reason": "base_capital",
-      "turn": 11
+      "turn": 10
     },
     {
       "amount": 10,
       "faction_id": "RS",
-      "id": "NLED_11_RS_adjust_3",
+      "id": "NLED_10_RS_adjust_3",
       "kind": "adjust",
       "reason": "ivp_penalty",
-      "turn": 11
+      "turn": 10
     },
     {
       "amount": 4,
       "faction_id": "RS",
-      "id": "NLED_11_RS_adjust_4",
+      "id": "NLED_10_RS_adjust_4",
       "kind": "adjust",
       "reason": "patron_bonus",
-      "turn": 11
+      "turn": 10
     },
     {
-      "amount": 33,
+      "amount": 32,
       "faction_id": "RS",
-      "id": "NLED_11_RS_adjust_5",
+      "id": "NLED_10_RS_adjust_5",
       "kind": "adjust",
       "reason": "territorial_control_bonus",
-      "turn": 11
+      "turn": 10
     },
     {
       "amount": 100,
@@ -18800,34 +19169,34 @@
     {
       "amount": 100,
       "faction_id": "RS",
-      "id": "NLED_14_RS_adjust_1",
+      "id": "NLED_13_RS_adjust_1",
       "kind": "adjust",
       "reason": "base_capital",
-      "turn": 14
+      "turn": 13
     },
     {
       "amount": 10,
       "faction_id": "RS",
-      "id": "NLED_14_RS_adjust_3",
+      "id": "NLED_13_RS_adjust_3",
       "kind": "adjust",
       "reason": "ivp_penalty",
-      "turn": 14
+      "turn": 13
     },
     {
       "amount": 4,
       "faction_id": "RS",
-      "id": "NLED_14_RS_adjust_4",
+      "id": "NLED_13_RS_adjust_4",
       "kind": "adjust",
       "reason": "patron_bonus",
-      "turn": 14
+      "turn": 13
     },
     {
       "amount": 33,
       "faction_id": "RS",
-      "id": "NLED_14_RS_adjust_5",
+      "id": "NLED_13_RS_adjust_5",
       "kind": "adjust",
       "reason": "territorial_control_bonus",
-      "turn": 14
+      "turn": 13
     },
     {
       "amount": 100,
@@ -18892,6 +19261,102 @@
       "kind": "adjust",
       "reason": "territorial_control_bonus",
       "turn": 16
+    },
+    {
+      "amount": 100,
+      "faction_id": "RBiH",
+      "id": "NLED_23_RBiH_adjust_1",
+      "kind": "adjust",
+      "reason": "base_capital",
+      "turn": 23
+    },
+    {
+      "amount": 10,
+      "faction_id": "RBiH",
+      "id": "NLED_23_RBiH_adjust_3",
+      "kind": "adjust",
+      "reason": "ivp_penalty",
+      "turn": 23
+    },
+    {
+      "amount": 3,
+      "faction_id": "RBiH",
+      "id": "NLED_23_RBiH_adjust_4",
+      "kind": "adjust",
+      "reason": "patron_bonus",
+      "turn": 23
+    },
+    {
+      "amount": 13,
+      "faction_id": "RBiH",
+      "id": "NLED_23_RBiH_adjust_5",
+      "kind": "adjust",
+      "reason": "territorial_control_bonus",
+      "turn": 23
+    },
+    {
+      "amount": 100,
+      "faction_id": "RS",
+      "id": "NLED_23_RS_adjust_1",
+      "kind": "adjust",
+      "reason": "base_capital",
+      "turn": 23
+    },
+    {
+      "amount": 10,
+      "faction_id": "RS",
+      "id": "NLED_23_RS_adjust_3",
+      "kind": "adjust",
+      "reason": "ivp_penalty",
+      "turn": 23
+    },
+    {
+      "amount": 4,
+      "faction_id": "RS",
+      "id": "NLED_23_RS_adjust_4",
+      "kind": "adjust",
+      "reason": "patron_bonus",
+      "turn": 23
+    },
+    {
+      "amount": 35,
+      "faction_id": "RS",
+      "id": "NLED_23_RS_adjust_5",
+      "kind": "adjust",
+      "reason": "territorial_control_bonus",
+      "turn": 23
+    },
+    {
+      "amount": 100,
+      "faction_id": "RBiH",
+      "id": "NLED_52_RBiH_adjust_1",
+      "kind": "adjust",
+      "reason": "base_capital",
+      "turn": 52
+    },
+    {
+      "amount": 10,
+      "faction_id": "RBiH",
+      "id": "NLED_52_RBiH_adjust_3",
+      "kind": "adjust",
+      "reason": "ivp_penalty",
+      "turn": 52
+    },
+    {
+      "amount": 3,
+      "faction_id": "RBiH",
+      "id": "NLED_52_RBiH_adjust_4",
+      "kind": "adjust",
+      "reason": "patron_bonus",
+      "turn": 52
+    },
+    {
+      "amount": 13,
+      "faction_id": "RBiH",
+      "id": "NLED_52_RBiH_adjust_5",
+      "kind": "adjust",
+      "reason": "territorial_control_bonus",
+      "turn": 52
     },
     {
       "amount": 100,
@@ -19484,6 +19949,8 @@
     "HRHB": [
       "op:banovici:banovici_2",
       "op:banovici:banovici_selo_2",
+      "op:banovici:repnik_2",
+      "op:banovici:seona",
       "op:bihac:brekovica_2",
       "op:bijeljina:bukovica_donja",
       "op:bijeljina:cadjavica_gornja_2",
@@ -19535,6 +20002,7 @@
       "op:busovaca:gornja_rovna",
       "op:busovaca:kacuni_2",
       "op:busovaca:polje_2",
+      "op:busovaca:putis_2",
       "op:cajnice:batotici",
       "op:cajnice:cajnice_2",
       "op:cajnice:miljeno_2",
@@ -19553,11 +20021,8 @@
       "op:derventa:luzani_bosanski",
       "op:doboj:boljanic_2",
       "op:doboj:brijesnica_velika",
-      "op:doboj:bukovica_velika_2",
-      "op:doboj:grapska_gornja_2",
       "op:doboj:klokotnica_2",
       "op:doboj:kozuhe_2",
-      "op:doboj:makljenovac",
       "op:doboj:matuzici_2",
       "op:doboj:zelinja_gornja_2",
       "op:donji_vakuf:babin_potok_2",
@@ -19587,7 +20052,6 @@
       "op:gornji_vakuf:pajic_polje_2",
       "op:gornji_vakuf:voljevac",
       "op:gornji_vakuf:zdrimci",
-      "op:gracanica:dzakule",
       "op:gracanica:gracanica_2",
       "op:gracanica:malesici",
       "op:gracanica:miricina_2",
@@ -19621,12 +20085,9 @@
       "op:jajce:jajce_3",
       "op:jajce:kruscica",
       "op:jajce:vinac_2",
-      "op:kakanj:bukovlje_2",
       "op:kakanj:donja_papratnica",
-      "op:kakanj:kakanj_2",
-      "op:kakanj:poljani_2",
-      "op:kakanj:seoce_2",
       "op:kakanj:sopotnica",
+      "op:kakanj:ticici_2",
       "op:kalesija:gojcin_2",
       "op:kalesija:kalesija_grad_2",
       "op:kalesija:kalesija_selo",
@@ -19647,7 +20108,6 @@
       "op:kladanj:kladanj_3",
       "op:kladanj:staric_2",
       "op:kladanj:tarevo_2",
-      "op:kladanj:tuholj_2",
       "op:kladanj:vucinici_2",
       "op:konjic:bijela_2",
       "op:konjic:bradina",
@@ -19687,10 +20147,7 @@
       "op:lukavac:orahovica_2",
       "op:lukavac:poljice_2",
       "op:lukavac:smoluca_donja_2",
-      "op:maglaj:donja_bocinja_2",
-      "op:maglaj:gornja_bocinja",
-      "op:maglaj:jablanica",
-      "op:maglaj:kosova_2",
+      "op:maglaj:cobe_2",
       "op:modrica:garevac_2",
       "op:modrica:modrica",
       "op:modrica:skugric_gornji_2",
@@ -19737,9 +20194,16 @@
       "op:stari_grad_sarajevo:faletici",
       "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
       "op:stolac:prenj",
-      "op:tesanj:lepenica",
+      "op:tesanj:kalosevic_2",
+      "op:tesanj:novi_miljanovci_2",
+      "op:tesanj:novo_selo",
+      "op:tesanj:piljuzici_2",
+      "op:tesanj:radusa_2",
       "op:tesanj:sije_2",
+      "op:tesanj:tesanj_2",
+      "op:tesanj:ularice_2",
       "op:teslic:blatnica_2",
+      "op:teslic:vitkovci",
       "op:travnik:gluha_bukovica",
       "op:travnik:gornje_krcevine",
       "op:travnik:podstinje",
@@ -19788,14 +20252,15 @@
       "op:vogosca:vogosca_3",
       "op:zavidovici:ribnica_dio",
       "op:zavidovici:vozuca_2",
+      "op:zenica:briznik_2",
       "op:zenica:janjici",
       "op:zenica:orahovica_2",
       "op:zenica:serici_2",
       "op:zenica:stranjani_2",
+      "op:zenica:zenica_2",
       "op:zivinice:basigovci_2",
       "op:zivinice:dubrave_gornje",
       "op:zivinice:gracanica_2",
-      "op:zivinice:zivinice_grad_2",
       "op:zvornik:drinjaca",
       "op:zvornik:gornji_sepak_2",
       "op:zvornik:kozluk_2",
@@ -19866,11 +20331,8 @@
       "op:derventa:luzani_bosanski",
       "op:doboj:boljanic_2",
       "op:doboj:brijesnica_velika",
-      "op:doboj:bukovica_velika_2",
-      "op:doboj:grapska_gornja_2",
       "op:doboj:klokotnica_2",
       "op:doboj:kozuhe_2",
-      "op:doboj:makljenovac",
       "op:doboj:matuzici_2",
       "op:doboj:zelinja_gornja_2",
       "op:donji_vakuf:babin_potok_2",
@@ -19904,6 +20366,7 @@
       "op:gornji_vakuf:voljevac",
       "op:gornji_vakuf:zdrimci",
       "op:gracanica:gracanica_2",
+      "op:gracanica:malesici",
       "op:gracanica:miricina_2",
       "op:gracanica:petrovo_2",
       "op:grude:sovici_3",
@@ -19919,12 +20382,9 @@
       "op:jajce:jajce_3",
       "op:jajce:kruscica",
       "op:jajce:vinac_2",
-      "op:kakanj:bukovlje_2",
       "op:kakanj:donja_papratnica",
-      "op:kakanj:kakanj_2",
-      "op:kakanj:poljani_2",
-      "op:kakanj:seoce_2",
-      "op:kakanj:vukanovici",
+      "op:kakanj:sopotnica",
+      "op:kakanj:ticici_2",
       "op:kalesija:seher_2",
       "op:kalinovik:golubici_2",
       "op:kalinovik:obalj",
@@ -19976,15 +20436,7 @@
       "op:lopare:mrtvica_2",
       "op:lopare:nahvioci",
       "op:lopare:priboj_2",
-      "op:lukavac:brijesnica_donja_2",
       "op:maglaj:cobe_2",
-      "op:maglaj:donja_bocinja_2",
-      "op:maglaj:gornja_bocinja",
-      "op:maglaj:jablanica",
-      "op:maglaj:kosova_2",
-      "op:maglaj:lijesnica",
-      "op:maglaj:misurici_2",
-      "op:maglaj:strupina",
       "op:modrica:garevac_2",
       "op:modrica:modrica",
       "op:modrica:skugric_gornji_2",
@@ -20005,6 +20457,7 @@
       "op:odzak:donja_dubica",
       "op:odzak:gornji_svilaj",
       "op:olovo:kamensko_2",
+      "op:olovo:milankovici_2",
       "op:olovo:slivnje",
       "op:posusje:posusje_2",
       "op:posusje:sutina_2",
@@ -20036,9 +20489,11 @@
       "op:stolac:prenj",
       "op:stolac:rotimlja_2",
       "op:stolac:stolac_2",
-      "op:tesanj:lepenica",
+      "op:tesanj:novo_selo",
       "op:tesanj:sije_2",
+      "op:tesanj:ularice_2",
       "op:teslic:blatnica_2",
+      "op:teslic:kamenica_2",
       "op:travnik:gornje_krcevine",
       "op:travnik:ovcarevo_2",
       "op:travnik:paklarevo",
@@ -20058,10 +20513,10 @@
       "op:ugljevik:ugljevik_2",
       "op:ugljevik:zabrdje_2",
       "op:vares:budozelje_2",
-      "op:vares:vares_2",
-      "op:visoko:buzic_mahala_2",
-      "op:visoko:podvinjci_2",
-      "op:visoko:podvinje_2",
+      "op:vares:gornja_borovica_2",
+      "op:vares:pobilje",
+      "op:vares:ravne",
+      "op:vares:toljenak",
       "op:vitez:kruscica",
       "op:vitez:preocica_3",
       "op:vitez:vitez_2",
@@ -20073,13 +20528,13 @@
       "op:vlasenica:pomol_2",
       "op:vlasenica:sebiocina",
       "op:vogosca:vogosca_3",
-      "op:zavidovici:cinovici",
-      "op:zavidovici:hajderovici_2",
-      "op:zavidovici:ribnica_dio",
-      "op:zavidovici:vozuca_2",
-      "op:zavidovici:zavidovici_2",
+      "op:zenica:briznik_2",
+      "op:zenica:janjici",
+      "op:zenica:orahovica_2",
+      "op:zenica:serici_2",
+      "op:zepce:ozimica_2",
       "op:zepce:viniste_2",
-      "op:zepce:zepce_2",
+      "op:zepce:zeljezno_polje_2",
       "op:zvornik:drinjaca",
       "op:zvornik:gornji_sepak_2",
       "op:zvornik:kozluk_2",
@@ -20091,6 +20546,8 @@
     "RS": [
       "op:banovici:banovici_2",
       "op:banovici:banovici_selo_2",
+      "op:banovici:repnik_2",
+      "op:banovici:seona",
       "op:bosanska_krupa:donji_dubovik_2",
       "op:bosanska_krupa:ivanjska_2",
       "op:bosanska_krupa:jasenica_2",
@@ -20139,7 +20596,6 @@
       "op:citluk:citluk_2",
       "op:citluk:krehin_gradac_2",
       "op:citluk:veliki_ogradjenik_2",
-      "op:doboj:brijesnica_velika",
       "op:doboj:zelinja_gornja_2",
       "op:donji_vakuf:dolovi",
       "op:donji_vakuf:jemanlici",
@@ -20163,8 +20619,6 @@
       "op:gornji_vakuf:pajic_polje_2",
       "op:gornji_vakuf:voljevac",
       "op:gornji_vakuf:zdrimci",
-      "op:gracanica:dzakule",
-      "op:gracanica:gracanica_2",
       "op:gracanica:malesici",
       "op:gracanica:miricina_2",
       "op:gradacac:donja_tramosnica_2",
@@ -20193,9 +20647,7 @@
       "op:ilijas:srednje",
       "op:jablanica:doljani_2",
       "op:jablanica:ostrozac_2",
-      "op:kakanj:seoce_2",
       "op:kakanj:sopotnica",
-      "op:kakanj:vukanovici",
       "op:kalesija:gojcin_2",
       "op:kalesija:kalesija_grad_2",
       "op:kalesija:kalesija_selo",
@@ -20214,7 +20666,6 @@
       "op:kladanj:kladanj_3",
       "op:kladanj:staric_2",
       "op:kladanj:tarevo_2",
-      "op:kladanj:tuholj_2",
       "op:kladanj:vucinici_2",
       "op:konjic:bijela_2",
       "op:konjic:bradina",
@@ -20257,9 +20708,6 @@
       "op:lukavac:poljice_2",
       "op:lukavac:smoluca_donja_2",
       "op:maglaj:cobe_2",
-      "op:maglaj:lijesnica",
-      "op:maglaj:misurici_2",
-      "op:maglaj:strupina",
       "op:modrica:garevac_2",
       "op:modrica:skugric_gornji_2",
       "op:mostar:blagaj_2",
@@ -20281,6 +20729,7 @@
       "op:novo_sarajevo:lukavica",
       "op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
       "op:olovo:kamensko_2",
+      "op:olovo:milankovici_2",
       "op:olovo:olovo_2",
       "op:olovo:slivnje",
       "op:orasje:donja_mahala",
@@ -20309,6 +20758,15 @@
       "op:stolac:prenj",
       "op:stolac:rotimlja_2",
       "op:stolac:stolac_2",
+      "op:tesanj:kalosevic_2",
+      "op:tesanj:novi_miljanovci_2",
+      "op:tesanj:novo_selo",
+      "op:tesanj:piljuzici_2",
+      "op:tesanj:radusa_2",
+      "op:tesanj:tesanj_2",
+      "op:tesanj:ularice_2",
+      "op:teslic:kamenica_2",
+      "op:teslic:vitkovci",
       "op:travnik:gluha_bukovica",
       "op:travnik:ovcarevo_2",
       "op:travnik:paklarevo",
@@ -20324,7 +20782,10 @@
       "op:tuzla:simin_han_2",
       "op:tuzla:tuzla_2",
       "op:vares:budozelje_2",
-      "op:vares:vares_2",
+      "op:vares:gornja_borovica_2",
+      "op:vares:pobilje",
+      "op:vares:ravne",
+      "op:vares:toljenak",
       "op:velika_kladusa:poljana_2",
       "op:velika_kladusa:vejinac_2",
       "op:velika_kladusa:velika_kladusa_2",
@@ -20342,21 +20803,19 @@
       "op:vitez:vitez_2",
       "op:vlasenica:pomol_2",
       "op:vogosca:hotonj",
-      "op:zavidovici:cinovici",
-      "op:zavidovici:hajderovici_2",
       "op:zavidovici:ribnica_dio",
       "op:zavidovici:vozuca_2",
-      "op:zavidovici:zavidovici_2",
       "op:zenica:janjici",
       "op:zenica:orahovica_2",
       "op:zenica:serici_2",
       "op:zenica:stranjani_2",
+      "op:zenica:zenica_2",
+      "op:zepce:ozimica_2",
       "op:zepce:viniste_2",
-      "op:zepce:zepce_2",
+      "op:zepce:zeljezno_polje_2",
       "op:zivinice:basigovci_2",
       "op:zivinice:dubrave_gornje",
       "op:zivinice:gracanica_2",
-      "op:zivinice:zivinice_grad_2",
       "op:zvornik:kozluk_2",
       "op:zvornik:krizevici",
       "op:zvornik:rastosnica_2",
@@ -20476,6 +20935,13 @@
       "side_b": "RS"
     },
     {
+      "a": "op:breza:mahala",
+      "b": "op:visoko:podvinjci_2",
+      "edge_id": "op:breza:mahala__op:visoko:podvinjci_2",
+      "side_a": "RBiH",
+      "side_b": "RS"
+    },
+    {
       "a": "op:breza:podgora",
       "b": "op:ilijas:podlugovi",
       "edge_id": "op:breza:podgora__op:ilijas:podlugovi",
@@ -20546,18 +21012,18 @@
       "side_b": "RS"
     },
     {
+      "a": "op:bugojno:gracanica",
+      "b": "op:bugojno:vucipolje_3",
+      "edge_id": "op:bugojno:gracanica__op:bugojno:vucipolje_3",
+      "side_a": "HRHB",
+      "side_b": "RS"
+    },
+    {
       "a": "op:bugojno:kopcic_2",
       "b": "op:bugojno:kula_2",
       "edge_id": "op:bugojno:kopcic_2__op:bugojno:kula_2",
       "side_a": "RS",
       "side_b": "RBiH"
-    },
-    {
-      "a": "op:bugojno:kopcic_2",
-      "b": "op:bugojno:vucipolje_3",
-      "edge_id": "op:bugojno:kopcic_2__op:bugojno:vucipolje_3",
-      "side_a": "RS",
-      "side_b": "HRHB"
     },
     {
       "a": "op:bugojno:kula_2",
@@ -20570,6 +21036,13 @@
       "a": "op:bugojno:kula_2",
       "b": "op:bugojno:udurlije",
       "edge_id": "op:bugojno:kula_2__op:bugojno:udurlije",
+      "side_a": "RBiH",
+      "side_b": "RS"
+    },
+    {
+      "a": "op:bugojno:kula_2",
+      "b": "op:bugojno:vucipolje_3",
+      "edge_id": "op:bugojno:kula_2__op:bugojno:vucipolje_3",
       "side_a": "RBiH",
       "side_b": "RS"
     },
@@ -20644,27 +21117,6 @@
       "side_b": "RBiH"
     },
     {
-      "a": "op:bugojno:vesela_2",
-      "b": "op:bugojno:vucipolje_3",
-      "edge_id": "op:bugojno:vesela_2__op:bugojno:vucipolje_3",
-      "side_a": "RS",
-      "side_b": "HRHB"
-    },
-    {
-      "a": "op:bugojno:vesela_2",
-      "b": "op:donji_vakuf:prusac_2",
-      "edge_id": "op:bugojno:vesela_2__op:donji_vakuf:prusac_2",
-      "side_a": "RS",
-      "side_b": "RBiH"
-    },
-    {
-      "a": "op:bugojno:vrpec",
-      "b": "op:bugojno:vucipolje_3",
-      "edge_id": "op:bugojno:vrpec__op:bugojno:vucipolje_3",
-      "side_a": "RS",
-      "side_b": "HRHB"
-    },
-    {
       "a": "op:bugojno:vrpec",
       "b": "op:gornji_vakuf:jagnjid_2",
       "edge_id": "op:bugojno:vrpec__op:gornji_vakuf:jagnjid_2",
@@ -20677,6 +21129,20 @@
       "edge_id": "op:bugojno:vrpec__op:gornji_vakuf:pajic_polje_2",
       "side_a": "RS",
       "side_b": "HRHB"
+    },
+    {
+      "a": "op:busovaca:dobraljevo_2",
+      "b": "op:kakanj:sopotnica",
+      "edge_id": "op:busovaca:dobraljevo_2__op:kakanj:sopotnica",
+      "side_a": "RBiH",
+      "side_b": "RS"
+    },
+    {
+      "a": "op:busovaca:dobraljevo_2",
+      "b": "op:visoko:buzic_mahala_2",
+      "edge_id": "op:busovaca:dobraljevo_2__op:visoko:buzic_mahala_2",
+      "side_a": "RBiH",
+      "side_b": "RS"
     },
     {
       "a": "op:cajnice:djakovici",
@@ -20826,30 +21292,9 @@
       "side_b": "RS"
     },
     {
-      "a": "op:doboj:brijesnica_velika",
-      "b": "op:gracanica:malesici",
-      "edge_id": "op:doboj:brijesnica_velika__op:gracanica:malesici",
-      "side_a": "RS",
-      "side_b": "RBiH"
-    },
-    {
       "a": "op:doboj:zelinja_gornja_2",
       "b": "op:gracanica:dzakule",
       "edge_id": "op:doboj:zelinja_gornja_2__op:gracanica:dzakule",
-      "side_a": "RS",
-      "side_b": "RBiH"
-    },
-    {
-      "a": "op:doboj:zelinja_gornja_2",
-      "b": "op:gracanica:malesici",
-      "edge_id": "op:doboj:zelinja_gornja_2__op:gracanica:malesici",
-      "side_a": "RS",
-      "side_b": "RBiH"
-    },
-    {
-      "a": "op:donji_vakuf:jemanlici",
-      "b": "op:donji_vakuf:prusac_2",
-      "edge_id": "op:donji_vakuf:jemanlici__op:donji_vakuf:prusac_2",
       "side_a": "RS",
       "side_b": "RBiH"
     },
@@ -20859,20 +21304,6 @@
       "edge_id": "op:donji_vakuf:komar_2__op:travnik:turbe_2",
       "side_a": "RS",
       "side_b": "RBiH"
-    },
-    {
-      "a": "op:donji_vakuf:pribraca_2",
-      "b": "op:donji_vakuf:prusac_2",
-      "edge_id": "op:donji_vakuf:pribraca_2__op:donji_vakuf:prusac_2",
-      "side_a": "RS",
-      "side_b": "RBiH"
-    },
-    {
-      "a": "op:donji_vakuf:prusac_2",
-      "b": "op:kupres:kupres_2",
-      "edge_id": "op:donji_vakuf:prusac_2__op:kupres:kupres_2",
-      "side_a": "RBiH",
-      "side_b": "RS"
     },
     {
       "a": "op:duvno:kongora",
@@ -20960,6 +21391,13 @@
     },
     {
       "a": "op:gracanica:dzakule",
+      "b": "op:gracanica:malesici",
+      "edge_id": "op:gracanica:dzakule__op:gracanica:malesici",
+      "side_a": "RBiH",
+      "side_b": "RS"
+    },
+    {
+      "a": "op:gracanica:dzakule",
       "b": "op:gracanica:miricina_2",
       "edge_id": "op:gracanica:dzakule__op:gracanica:miricina_2",
       "side_a": "RBiH",
@@ -20969,20 +21407,6 @@
       "a": "op:gracanica:dzakule",
       "b": "op:modrica:skugric_gornji_2",
       "edge_id": "op:gracanica:dzakule__op:modrica:skugric_gornji_2",
-      "side_a": "RBiH",
-      "side_b": "RS"
-    },
-    {
-      "a": "op:gracanica:gracanica_2",
-      "b": "op:gracanica:malesici",
-      "edge_id": "op:gracanica:gracanica_2__op:gracanica:malesici",
-      "side_a": "RS",
-      "side_b": "RBiH"
-    },
-    {
-      "a": "op:gracanica:malesici",
-      "b": "op:gracanica:miricina_2",
-      "edge_id": "op:gracanica:malesici__op:gracanica:miricina_2",
       "side_a": "RBiH",
       "side_b": "RS"
     },
@@ -21149,45 +21573,10 @@
     },
     {
       "a": "op:kakanj:biljesevo",
-      "b": "op:kakanj:sopotnica",
-      "edge_id": "op:kakanj:biljesevo__op:kakanj:sopotnica",
-      "side_a": "RS",
-      "side_b": "RBiH"
-    },
-    {
-      "a": "op:kakanj:biljesevo",
       "b": "op:zenica:janjici",
       "edge_id": "op:kakanj:biljesevo__op:zenica:janjici",
       "side_a": "RS",
       "side_b": "RBiH"
-    },
-    {
-      "a": "op:kakanj:bukovlje_2",
-      "b": "op:kakanj:seoce_2",
-      "edge_id": "op:kakanj:bukovlje_2__op:kakanj:seoce_2",
-      "side_a": "RS",
-      "side_b": "HRHB"
-    },
-    {
-      "a": "op:kakanj:donja_papratnica",
-      "b": "op:kakanj:sopotnica",
-      "edge_id": "op:kakanj:donja_papratnica__op:kakanj:sopotnica",
-      "side_a": "RS",
-      "side_b": "RBiH"
-    },
-    {
-      "a": "op:kakanj:donja_papratnica",
-      "b": "op:visoko:buzic_mahala_2",
-      "edge_id": "op:kakanj:donja_papratnica__op:visoko:buzic_mahala_2",
-      "side_a": "RS",
-      "side_b": "RBiH"
-    },
-    {
-      "a": "op:kakanj:poljani_2",
-      "b": "op:kakanj:seoce_2",
-      "edge_id": "op:kakanj:poljani_2__op:kakanj:seoce_2",
-      "side_a": "RS",
-      "side_b": "HRHB"
     },
     {
       "a": "op:kakanj:poljani_2",
@@ -21197,60 +21586,25 @@
       "side_b": "RBiH"
     },
     {
-      "a": "op:kakanj:poljani_2",
-      "b": "op:visoko:podvinjci_2",
-      "edge_id": "op:kakanj:poljani_2__op:visoko:podvinjci_2",
+      "a": "op:kakanj:seoce_2",
+      "b": "op:vares:budozelje_2",
+      "edge_id": "op:kakanj:seoce_2__op:vares:budozelje_2",
       "side_a": "RS",
       "side_b": "RBiH"
     },
     {
       "a": "op:kakanj:seoce_2",
-      "b": "op:kakanj:slapnica_2",
-      "edge_id": "op:kakanj:seoce_2__op:kakanj:slapnica_2",
-      "side_a": "HRHB",
-      "side_b": "RS"
-    },
-    {
-      "a": "op:kakanj:seoce_2",
-      "b": "op:kakanj:vukanovici",
-      "edge_id": "op:kakanj:seoce_2__op:kakanj:vukanovici",
-      "side_a": "HRHB",
-      "side_b": "RS"
-    },
-    {
-      "a": "op:kakanj:seoce_2",
-      "b": "op:kakanj:zgosca",
-      "edge_id": "op:kakanj:seoce_2__op:kakanj:zgosca",
-      "side_a": "HRHB",
-      "side_b": "RS"
-    },
-    {
-      "a": "op:kakanj:slapnica_2",
-      "b": "op:visoko:buzic_mahala_2",
-      "edge_id": "op:kakanj:slapnica_2__op:visoko:buzic_mahala_2",
+      "b": "op:vares:gornja_borovica_2",
+      "edge_id": "op:kakanj:seoce_2__op:vares:gornja_borovica_2",
       "side_a": "RS",
-      "side_b": "RBiH"
-    },
-    {
-      "a": "op:kakanj:slapnica_2",
-      "b": "op:visoko:podvinjci_2",
-      "edge_id": "op:kakanj:slapnica_2__op:visoko:podvinjci_2",
-      "side_a": "RS",
-      "side_b": "RBiH"
-    },
-    {
-      "a": "op:kakanj:slapnica_2",
-      "b": "op:visoko:podvinje_2",
-      "edge_id": "op:kakanj:slapnica_2__op:visoko:podvinje_2",
-      "side_a": "RS",
-      "side_b": "RBiH"
+      "side_b": "HRHB"
     },
     {
       "a": "op:kakanj:sopotnica",
-      "b": "op:zenica:briznik_2",
-      "edge_id": "op:kakanj:sopotnica__op:zenica:briznik_2",
-      "side_a": "RBiH",
-      "side_b": "RS"
+      "b": "op:zenica:janjici",
+      "edge_id": "op:kakanj:sopotnica__op:zenica:janjici",
+      "side_a": "RS",
+      "side_b": "RBiH"
     },
     {
       "a": "op:kakanj:vukanovici",
@@ -21321,6 +21675,20 @@
       "edge_id": "op:kalesija:seher_2__op:zvornik:vitinica_2",
       "side_a": "RS",
       "side_b": "RBiH"
+    },
+    {
+      "a": "op:kiseljak:bilalovac_2",
+      "b": "op:visoko:buzic_mahala_2",
+      "edge_id": "op:kiseljak:bilalovac_2__op:visoko:buzic_mahala_2",
+      "side_a": "HRHB",
+      "side_b": "RS"
+    },
+    {
+      "a": "op:kiseljak:gromiljak_2",
+      "b": "op:visoko:buzic_mahala_2",
+      "edge_id": "op:kiseljak:gromiljak_2__op:visoko:buzic_mahala_2",
+      "side_a": "HRHB",
+      "side_b": "RS"
     },
     {
       "a": "op:kladanj:brgule",
@@ -21499,6 +21867,13 @@
     },
     {
       "a": "op:maglaj:cobe_2",
+      "b": "op:tesanj:novo_selo",
+      "edge_id": "op:maglaj:cobe_2__op:tesanj:novo_selo",
+      "side_a": "RBiH",
+      "side_b": "RS"
+    },
+    {
+      "a": "op:maglaj:cobe_2",
       "b": "op:teslic:vitkovci",
       "edge_id": "op:maglaj:cobe_2__op:teslic:vitkovci",
       "side_a": "RBiH",
@@ -21540,16 +21915,23 @@
       "side_b": "RBiH"
     },
     {
-      "a": "op:maglaj:kosova_2",
-      "b": "op:tesanj:novo_selo",
-      "edge_id": "op:maglaj:kosova_2__op:tesanj:novo_selo",
-      "side_a": "RS",
-      "side_b": "RBiH"
-    },
-    {
       "a": "op:maglaj:lijesnica",
       "b": "op:zavidovici:cinovici",
       "edge_id": "op:maglaj:lijesnica__op:zavidovici:cinovici",
+      "side_a": "RBiH",
+      "side_b": "RS"
+    },
+    {
+      "a": "op:maglaj:misurici_2",
+      "b": "op:tesanj:novo_selo",
+      "edge_id": "op:maglaj:misurici_2__op:tesanj:novo_selo",
+      "side_a": "RBiH",
+      "side_b": "RS"
+    },
+    {
+      "a": "op:maglaj:strupina",
+      "b": "op:tesanj:novo_selo",
+      "edge_id": "op:maglaj:strupina__op:tesanj:novo_selo",
       "side_a": "RBiH",
       "side_b": "RS"
     },
@@ -21848,13 +22230,6 @@
       "side_b": "RBiH"
     },
     {
-      "a": "op:tesanj:lepenica",
-      "b": "op:tesanj:novo_selo",
-      "edge_id": "op:tesanj:lepenica__op:tesanj:novo_selo",
-      "side_a": "RS",
-      "side_b": "RBiH"
-    },
-    {
       "a": "op:tesanj:novi_miljanovci_2",
       "b": "op:tesanj:ularice_2",
       "edge_id": "op:tesanj:novi_miljanovci_2__op:tesanj:ularice_2",
@@ -21870,17 +22245,17 @@
     },
     {
       "a": "op:tesanj:novo_selo",
-      "b": "op:tesanj:sije_2",
-      "edge_id": "op:tesanj:novo_selo__op:tesanj:sije_2",
-      "side_a": "RBiH",
-      "side_b": "RS"
+      "b": "op:tesanj:radusa_2",
+      "edge_id": "op:tesanj:novo_selo__op:tesanj:radusa_2",
+      "side_a": "RS",
+      "side_b": "RBiH"
     },
     {
       "a": "op:tesanj:novo_selo",
-      "b": "op:tesanj:ularice_2",
-      "edge_id": "op:tesanj:novo_selo__op:tesanj:ularice_2",
-      "side_a": "RBiH",
-      "side_b": "RS"
+      "b": "op:tesanj:tesanj_2",
+      "edge_id": "op:tesanj:novo_selo__op:tesanj:tesanj_2",
+      "side_a": "RS",
+      "side_b": "RBiH"
     },
     {
       "a": "op:tesanj:piljuzici_2",
@@ -22009,6 +22384,13 @@
       "side_b": "RS"
     },
     {
+      "a": "op:vares:budozelje_2",
+      "b": "op:visoko:podvinjci_2",
+      "edge_id": "op:vares:budozelje_2__op:visoko:podvinjci_2",
+      "side_a": "RBiH",
+      "side_b": "RS"
+    },
+    {
       "a": "op:vares:gornja_borovica_2",
       "b": "op:zavidovici:hajderovici_2",
       "edge_id": "op:vares:gornja_borovica_2__op:zavidovici:hajderovici_2",
@@ -22084,6 +22466,41 @@
       "edge_id": "op:visegrad:velji_lug__op:visegrad:zlijeb",
       "side_a": "RBiH",
       "side_b": "RS"
+    },
+    {
+      "a": "op:visoko:bradve_2",
+      "b": "op:visoko:buzic_mahala_2",
+      "edge_id": "op:visoko:bradve_2__op:visoko:buzic_mahala_2",
+      "side_a": "RBiH",
+      "side_b": "RS"
+    },
+    {
+      "a": "op:visoko:bradve_2",
+      "b": "op:visoko:podvinje_2",
+      "edge_id": "op:visoko:bradve_2__op:visoko:podvinje_2",
+      "side_a": "RBiH",
+      "side_b": "RS"
+    },
+    {
+      "a": "op:visoko:gornja_vratnica_2",
+      "b": "op:visoko:podvinjci_2",
+      "edge_id": "op:visoko:gornja_vratnica_2__op:visoko:podvinjci_2",
+      "side_a": "RBiH",
+      "side_b": "RS"
+    },
+    {
+      "a": "op:visoko:podvinjci_2",
+      "b": "op:visoko:visoko_2",
+      "edge_id": "op:visoko:podvinjci_2__op:visoko:visoko_2",
+      "side_a": "RS",
+      "side_b": "RBiH"
+    },
+    {
+      "a": "op:visoko:podvinje_2",
+      "b": "op:visoko:visoko_2",
+      "edge_id": "op:visoko:podvinje_2__op:visoko:visoko_2",
+      "side_a": "RS",
+      "side_b": "RBiH"
     },
     {
       "a": "op:vlasenica:bacici",
@@ -22312,8 +22729,6 @@
       "op:grude:sovici_3",
       "op:jablanica:doljani_2",
       "op:jablanica:ostrozac_2",
-      "op:kakanj:seoce_2",
-      "op:kakanj:vukanovici",
       "op:kiseljak:azapovici_2",
       "op:kiseljak:borina",
       "op:kiseljak:brnjaci_2",
@@ -22340,10 +22755,6 @@
       "op:ljubuski:radisici_2",
       "op:ljubuski:studenci_2",
       "op:ljubuski:vitina_2",
-      "op:maglaj:cobe_2",
-      "op:maglaj:lijesnica",
-      "op:maglaj:misurici_2",
-      "op:maglaj:strupina",
       "op:mostar:blagaj_2",
       "op:mostar:gornja_dreznica",
       "op:mostar:hodbina_2",
@@ -22354,7 +22765,6 @@
       "op:novi_travnik:novi_travnik_2",
       "op:novi_travnik:ruda_2",
       "op:novi_travnik:trenica_2",
-      "op:olovo:kamensko_2",
       "op:posusje:posusje_2",
       "op:posusje:vir_2",
       "op:prozor:jaklici",
@@ -22369,22 +22779,13 @@
       "op:travnik:puticevo_2",
       "op:travnik:travnik_2",
       "op:travnik:turbe_2",
-      "op:vares:budozelje_2",
-      "op:vares:vares_2",
       "op:vitez:kruscica",
       "op:vitez:preocica_3",
-      "op:vitez:vitez_2",
-      "op:zavidovici:cinovici",
-      "op:zavidovici:hajderovici_2",
-      "op:zavidovici:ribnica_dio",
-      "op:zavidovici:vozuca_2",
-      "op:zavidovici:zavidovici_2",
-      "op:zepce:viniste_2",
-      "op:zepce:zepce_2"
+      "op:vitez:vitez_2"
     ],
     "RBiH": [
       "op:banovici:banovici_2",
-      "op:banovici:banovici_selo_2",
+      "op:banovici:repnik_2",
       "op:bosanski_samac:tisina",
       "op:brcko:donji_rahic",
       "op:brcko:gornji_rahic_2",
@@ -22403,12 +22804,12 @@
       "op:busovaca:gornja_rovna",
       "op:busovaca:kacuni_2",
       "op:busovaca:polje_2",
+      "op:busovaca:putis_2",
       "op:cazin:coralici",
       "op:cazin:gornja_lucka",
       "op:cazin:mrazovac",
       "op:cazin:varoska_rijeka_3",
       "op:centar_sarajevo:radava",
-      "op:doboj:brijesnica_velika",
       "op:doboj:zelinja_gornja_2",
       "op:donji_vakuf:jemanlici",
       "op:donji_vakuf:prusac_2",
@@ -22420,7 +22821,7 @@
       "op:gornji_vakuf:pajic_polje_2",
       "op:gornji_vakuf:voljevac",
       "op:gornji_vakuf:zdrimci",
-      "op:gracanica:gracanica_2",
+      "op:gracanica:malesici",
       "op:gracanica:miricina_2",
       "op:gradacac:donja_tramosnica_2",
       "op:gradacac:gradacac_2",
@@ -22455,7 +22856,6 @@
       "op:kladanj:kladanj_3",
       "op:kladanj:staric_2",
       "op:kladanj:tarevo_2",
-      "op:kladanj:tuholj_2",
       "op:kladanj:vucinici_2",
       "op:konjic:bijela_2",
       "op:konjic:bradina",
@@ -22477,6 +22877,7 @@
       "op:lukavac:orahovica_2",
       "op:lukavac:poljice_2",
       "op:lukavac:smoluca_donja_2",
+      "op:maglaj:cobe_2",
       "op:modrica:garevac_2",
       "op:modrica:skugric_gornji_2",
       "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
@@ -22503,6 +22904,16 @@
       "op:srebrenik:spionica_srednja_2",
       "op:srebrenik:tinja_gornja_2",
       "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
+      "op:tesanj:kalosevic_2",
+      "op:tesanj:novo_selo",
+      "op:tesanj:piljuzici_2",
+      "op:tesanj:tesanj_2",
+      "op:tesanj:ularice_2",
+      "op:teslic:vitkovci",
+      "op:travnik:gluha_bukovica",
+      "op:travnik:podstinje",
+      "op:travnik:puticevo_2",
+      "op:travnik:travnik_2",
       "op:trnovo:gornja_presjenica",
       "op:trnovo:kijevo_2",
       "op:trnovo:tusila",
@@ -22520,15 +22931,19 @@
       "op:visoko:stuparici_2",
       "op:visoko:visoko_2",
       "op:vitez:kruscica",
+      "op:vitez:preocica_3",
       "op:vlasenica:pomol_2",
       "op:vogosca:hotonj",
       "op:zavidovici:ribnica_dio",
       "op:zavidovici:vozuca_2",
       "op:zenica:janjici",
+      "op:zenica:orahovica_2",
+      "op:zenica:serici_2",
+      "op:zenica:stranjani_2",
+      "op:zenica:zenica_2",
       "op:zivinice:basigovci_2",
       "op:zivinice:dubrave_gornje",
       "op:zivinice:gracanica_2",
-      "op:zivinice:zivinice_grad_2",
       "op:zvornik:kozluk_2",
       "op:zvornik:krizevici",
       "op:zvornik:rastosnica_2",
@@ -22573,11 +22988,9 @@
       "op:cazin:varoska_rijeka_3",
       "op:centar_sarajevo:radava",
       "op:derventa:luzani_bosanski",
-      "op:doboj:brijesnica_velika",
-      "op:doboj:bukovica_velika_2",
-      "op:doboj:grapska_gornja_2",
+      "op:doboj:boljanic_2",
+      "op:doboj:klokotnica_2",
       "op:doboj:kozuhe_2",
-      "op:doboj:makljenovac",
       "op:doboj:matuzici_2",
       "op:doboj:zelinja_gornja_2",
       "op:donji_vakuf:babin_potok_2",
@@ -22596,8 +23009,9 @@
       "op:gorazde:kolovarice",
       "op:gorazde:slatina_2",
       "op:gorazde:ustipraca_2",
-      "op:gracanica:gracanica_2",
+      "op:gracanica:malesici",
       "op:gracanica:miricina_2",
+      "op:gracanica:petrovo_2",
       "op:hanpijesak:godjenje_2",
       "op:ilijas:medojevici",
       "op:ilijas:podlugovi",
@@ -22631,11 +23045,6 @@
       "op:lopare:lopare_selo_2",
       "op:lopare:mrtvica_2",
       "op:lopare:nahvioci",
-      "op:lukavac:brijesnica_donja_2",
-      "op:maglaj:donja_bocinja_2",
-      "op:maglaj:gornja_bocinja",
-      "op:maglaj:jablanica",
-      "op:maglaj:kosova_2",
       "op:modrica:garevac_2",
       "op:modrica:modrica",
       "op:modrica:skugric_gornji_2",
@@ -22662,8 +23071,9 @@
       "op:srebrenica:milacevici",
       "op:srebrenica:suceska",
       "op:stari_grad_sarajevo:faletici",
-      "op:tesanj:lepenica",
+      "op:tesanj:novo_selo",
       "op:tesanj:sije_2",
+      "op:tesanj:ularice_2",
       "op:teslic:blatnica_2",
       "op:travnik:gornje_krcevine",
       "op:trnovo:delijas",
@@ -22826,7 +23236,7 @@
     "op:bugojno:udurlije": "RS",
     "op:bugojno:vesela_2": "RS",
     "op:bugojno:vrpec": "RS",
-    "op:bugojno:vucipolje_3": "HRHB",
+    "op:bugojno:vucipolje_3": "RS",
     "op:busovaca:bare_2": "HRHB",
     "op:busovaca:buselji_2": "HRHB",
     "op:busovaca:busovaca_2": "HRHB",
@@ -22894,7 +23304,7 @@
     "op:donji_vakuf:kutanja": "RS",
     "op:donji_vakuf:oborci_2": "RS",
     "op:donji_vakuf:pribraca_2": "RS",
-    "op:donji_vakuf:prusac_2": "RBiH",
+    "op:donji_vakuf:prusac_2": "RS",
     "op:donji_vakuf:torlakovac_2": "RS",
     "op:duvno:dobrici": "HRHB",
     "op:duvno:kongora": "HRHB",
@@ -22964,7 +23374,7 @@
     "op:gornji_vakuf:zdrimci": "RBiH",
     "op:gracanica:dzakule": "RBiH",
     "op:gracanica:gracanica_2": "RS",
-    "op:gracanica:malesici": "RBiH",
+    "op:gracanica:malesici": "RS",
     "op:gracanica:miricina_2": "RS",
     "op:gracanica:petrovo_2": "RS",
     "op:gradacac:donja_tramosnica_2": "RBiH",
@@ -23019,9 +23429,9 @@
     "op:kakanj:donja_papratnica": "RS",
     "op:kakanj:kakanj_2": "RS",
     "op:kakanj:poljani_2": "RS",
-    "op:kakanj:seoce_2": "HRHB",
+    "op:kakanj:seoce_2": "RS",
     "op:kakanj:slapnica_2": "RS",
-    "op:kakanj:sopotnica": "RBiH",
+    "op:kakanj:sopotnica": "RS",
     "op:kakanj:ticici_2": "RS",
     "op:kakanj:trsce_2": "RS",
     "op:kakanj:vukanovici": "RS",
@@ -23308,7 +23718,7 @@
     "op:tesanj:kalosevic_2": "RS",
     "op:tesanj:lepenica": "RS",
     "op:tesanj:novi_miljanovci_2": "RBiH",
-    "op:tesanj:novo_selo": "RBiH",
+    "op:tesanj:novo_selo": "RS",
     "op:tesanj:piljuzici_2": "RBiH",
     "op:tesanj:radusa_2": "RBiH",
     "op:tesanj:sije_2": "RS",
@@ -23381,10 +23791,10 @@
     "op:visegrad:visegrad_2": "RBiH",
     "op:visegrad:zlijeb": "RS",
     "op:visoko:bradve_2": "RBiH",
-    "op:visoko:buzic_mahala_2": "RBiH",
+    "op:visoko:buzic_mahala_2": "RS",
     "op:visoko:gornja_vratnica_2": "RBiH",
-    "op:visoko:podvinjci_2": "RBiH",
-    "op:visoko:podvinje_2": "RBiH",
+    "op:visoko:podvinjci_2": "RS",
+    "op:visoko:podvinje_2": "RS",
     "op:visoko:rajcici_2": "RBiH",
     "op:visoko:stuparici_2": "RBiH",
     "op:visoko:visoko_2": "RBiH",
@@ -23720,22 +24130,28 @@
       "rs_viegrad_brigade",
       "vrs_1st_celinac",
       "vrs_1st_laktasi",
-      "vrs_31st_mountain_storm"
+      "vrs_31st_mountain_storm",
+      "rs_1st_kotor_varo_light_infantry",
+      "rs_1st_ozren_light_infantry",
+      "arbih_303rd_vitezka_mountain",
+      "arbih_327th_vitezka_mountain",
+      "arbih_372nd_vitezka_mountain",
+      "arbih_373rd_slavna_mountain"
     ],
     "recruitment_capital": {
       "HRHB": {
         "faction": "HRHB",
-        "points": 621,
+        "points": 516,
         "points_initial": 300
       },
       "RBiH": {
         "faction": "RBiH",
-        "points": 1101,
+        "points": 688,
         "points_initial": 400
       },
       "RS": {
         "faction": "RS",
-        "points": 1339,
+        "points": 932,
         "points_initial": 600
       }
     },
@@ -25369,11 +25785,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
-        "last_control_change_turn": null,
-        "last_controller": "HRHB",
+        "institutional_legitimacy": 0.3,
+        "last_control_change_turn": 17,
+        "last_controller": "RS",
         "last_updated_turn": 52,
-        "legitimacy_score": 0.8,
+        "legitimacy_score": 0.5900000000000001,
         "stability_bonus": 0.3
       }
     },
@@ -26185,11 +26601,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
-        "last_control_change_turn": null,
-        "last_controller": "RBiH",
+        "institutional_legitimacy": 0.3,
+        "last_control_change_turn": 18,
+        "last_controller": "RS",
         "last_updated_turn": 52,
-        "legitimacy_score": 0.8,
+        "legitimacy_score": 0.5900000000000001,
         "stability_bonus": 0.3
       }
     },
@@ -27025,11 +27441,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
-        "last_control_change_turn": null,
-        "last_controller": "RBiH",
+        "institutional_legitimacy": 0.3,
+        "last_control_change_turn": 9,
+        "last_controller": "RS",
         "last_updated_turn": 52,
-        "legitimacy_score": 0.8,
+        "legitimacy_score": 0.5900000000000001,
         "stability_bonus": 0.3
       }
     },
@@ -27686,8 +28102,8 @@
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
         "institutional_legitimacy": 0.3,
-        "last_control_change_turn": null,
-        "last_controller": "HRHB",
+        "last_control_change_turn": 20,
+        "last_controller": "RS",
         "last_updated_turn": 52,
         "legitimacy_score": 0.5900000000000001,
         "stability_bonus": 0.3
@@ -27709,12 +28125,12 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
-        "last_control_change_turn": null,
-        "last_controller": "RBiH",
+        "institutional_legitimacy": 0.3,
+        "last_control_change_turn": 25,
+        "last_controller": "RS",
         "last_updated_turn": 52,
-        "legitimacy_score": 0.8,
-        "stability_bonus": 0.3
+        "legitimacy_score": 0.56,
+        "stability_bonus": 0.2700000000000001
       }
     },
     "op:kakanj:ticici_2": {
@@ -31153,11 +31569,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
-        "last_control_change_turn": null,
-        "last_controller": "RBiH",
+        "institutional_legitimacy": 0.3,
+        "last_control_change_turn": 12,
+        "last_controller": "RS",
         "last_updated_turn": 52,
-        "legitimacy_score": 0.8,
+        "legitimacy_score": 0.5900000000000001,
         "stability_bonus": 0.3
       }
     },
@@ -32029,11 +32445,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
-        "last_control_change_turn": null,
-        "last_controller": "RBiH",
+        "institutional_legitimacy": 0.3,
+        "last_control_change_turn": 21,
+        "last_controller": "RS",
         "last_updated_turn": 52,
-        "legitimacy_score": 0.8,
+        "legitimacy_score": 0.5900000000000001,
         "stability_bonus": 0.3
       }
     },
@@ -32053,11 +32469,11 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
-        "last_control_change_turn": 19,
-        "last_controller": "RBiH",
+        "institutional_legitimacy": 0.3,
+        "last_control_change_turn": 22,
+        "last_controller": "RS",
         "last_updated_turn": 52,
-        "legitimacy_score": 0.8,
+        "legitimacy_score": 0.5900000000000001,
         "stability_bonus": 0.3
       }
     },
@@ -32065,12 +32481,12 @@
       "legitimacy_state": {
         "coercion_penalty": 0,
         "demographic_legitimacy": 0.5,
-        "institutional_legitimacy": 1,
-        "last_control_change_turn": null,
-        "last_controller": "RBiH",
+        "institutional_legitimacy": 0.3,
+        "last_control_change_turn": 23,
+        "last_controller": "RS",
         "last_updated_turn": 52,
-        "legitimacy_score": 0.8,
-        "stability_bonus": 0.3
+        "legitimacy_score": 0.5800000000000001,
+        "stability_bonus": 0.2900000000000001
       }
     },
     "op:visoko:rajcici_2": {

@@ -246,7 +246,7 @@ export interface FormationState {
     disrupted?: boolean;
     /** HoI ZoC / Attack Resolution: turns on current OSID without moving; resets on move; caps at MAX_ENTRENCHMENT (12). */
     entrenchment_turns?: number;
-    /** HoI: consecutive successful defenses; resets on move or attacker success; caps at MAX_RESILIENCE_STREAK (6). */
+    /** HoI: consecutive successful defenses; resets on move or attacker success; caps at MAX_RESILIENCE_STREAK (4). */
     defense_streak?: number;
     /** HoI: turns remaining disrupted (0 = not disrupted); set by push-back outcome. */
     disrupted_turns?: number;
