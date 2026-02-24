@@ -13,8 +13,8 @@ import type {
 } from '../../state/game_state.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { buildSettlementsByMun } from '../phase_i/control_strain.js';
 import {
-    buildSettlementsByMun,
     getEligiblePopulationCount,
     getMunicipalityController,
     runDisplacedAndCrossEthnicContributions
@@ -23,14 +23,7 @@ import type { MunicipalityPopulation1991Map } from '../phase_i/pool_population.j
 
 /**
  * Weekly mobilization rate as fraction of eligible military-age population.
- * Calibrated against historical force trajectories:
- *   RBiH ~60-80K → 130K (Apr 92 - Apr 93), RS ~80K → 110K, HVO ~30K → 50K.
- * At 0.004 with surge curve × faction scales, total mobilized matches historical growth.
- */
-/**
- * Weekly mobilization rate as fraction of eligible military-age population.
- * Calibrated against historical force trajectories:
- *   RBiH ~60-80K → 130K (Apr 92 → Apr 93), RS ~80K → 110K, HVO ~30K → 50K.
+ * Calibrated: RBiH ~60-80K → 130K (Apr 92–Apr 93), RS ~80K → 110K, HVO ~30K → 50K.
  */
 const BASE_MOBILIZATION_RATE = 0.003;
 
