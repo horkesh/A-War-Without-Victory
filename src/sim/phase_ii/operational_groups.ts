@@ -15,6 +15,7 @@ import type {
     OGActivationOrder,
     SettlementId,
 } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getBrigadeAoRSettlements } from './brigade_aor.js';
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
@@ -156,7 +157,7 @@ function shedDonorAoRIfOverCap(
     donorId: FormationId,
     edges: EdgeRecord[]
 ): void {
-    const brigadeAor = state.brigade_aor;
+    const brigadeAor = getLegacyAoR(state).brigade_aor;
     const formations = state.formations;
     const pc = state.political_controllers ?? {};
     if (!brigadeAor || !formations) return;
@@ -174,7 +175,7 @@ function shedDonorAoRIfOverCap(
     };
     const rear = settlements.filter(sid => !isFront(sid)).sort(strictCompare);
     const toShed = rear.length > 0 ? rear[0] : settlements.sort(strictCompare)[0];
-    if (toShed) brigadeAor[toShed] = null;
+    if (toShed) { /* AoR phase-out: do not write brigade_aor */ }
 }
 
 // ---------------------------------------------------------------------------
@@ -240,12 +241,7 @@ export function activateOGs(state: GameState, edges?: EdgeRecord[]): OGActivatio
             corpsCmd.active_ogs.push(ogId);
         }
 
-        // Assign OG to focus settlements in brigade_aor
-        if (state.brigade_aor) {
-            for (const sid of order.focus_settlements) {
-                state.brigade_aor[sid] = ogId;
-            }
-        }
+        // AoR phase-out: do not write brigade_aor
 
         report.activated.push(ogId);
     }
@@ -345,15 +341,7 @@ export function updateOGLifecycle(state: GameState): FormationId[] {
                 if (idx >= 0) ogs.splice(idx, 1);
             }
 
-            // Clear AoR assignments for this OG
-            if (state.brigade_aor) {
-                const aorKeys = Object.keys(state.brigade_aor).sort(strictCompare);
-                for (const sid of aorKeys) {
-                    if (state.brigade_aor[sid] === fid) {
-                        state.brigade_aor[sid] = null;
-                    }
-                }
-            }
+            // AoR phase-out: do not write brigade_aor
         } else {
             // OG exhaustion: attack-rate cohesion drain per turn
             f.cohesion = Math.max(0, (f.cohesion ?? OG_INITIAL_COHESION) - OG_COHESION_DRAIN_PER_TURN);
@@ -375,7 +363,8 @@ export function updateOGLifecycle(state: GameState): FormationId[] {
  * Edge ID format: "sidA:sidB".
  */
 export function computeOGPressureBonus(state: GameState, edgeId: string): number {
-    if (!state.brigade_aor || !state.formations) return 1.0;
+    const aor = getLegacyAoR(state).brigade_aor;
+    if (!aor || !state.formations) return 1.0;
 
     const separatorIdx = edgeId.indexOf(':');
     if (separatorIdx < 0) return 1.0;
@@ -383,10 +372,10 @@ export function computeOGPressureBonus(state: GameState, edgeId: string): number
     const sidA = edgeId.slice(0, separatorIdx);
     const sidB = edgeId.slice(separatorIdx + 1);
 
-    const brigA = state.brigade_aor[sidA];
+    const brigA = aor[sidA];
     if (brigA && state.formations[brigA]?.kind === 'og') return OG_COORDINATION_BONUS;
 
-    const brigB = state.brigade_aor[sidB];
+    const brigB = aor[sidB];
     if (brigB && state.formations[brigB]?.kind === 'og') return OG_COORDINATION_BONUS;
 
     return 1.0;

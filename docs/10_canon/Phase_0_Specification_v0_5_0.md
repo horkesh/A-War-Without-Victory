@@ -486,6 +486,11 @@ Phase 0 outputs become Phase I initial conditions.
 - Unchanged from Pre-War start (control does NOT flip in Pre-War Phase)
 - Serves as initial condition for Phase I contestation
 
+### 7.7 JNA Status
+- JNA transition state: transition_begun (boolean), withdrawal_progress (0.0–1.0), asset_transfer_RS (0.0–1.0)
+- Determines Phase I JNA withdrawal dynamics and RS equipment inheritance
+- Required by Phase I §3 (JNA_status)
+
 **No Values Reset:**
 All Pre-War consequences persist into Phase I. No "clean slate."
 
@@ -541,6 +546,13 @@ Phase 0 MUST produce:
     phase_0_end_turn: number,
     phase_1_start_turn: number,
     escalation_reason: string             // What triggered transition
+  },
+
+  // JNA status (required by Phase I §3)
+  JNA_status: {
+    transition_begun: boolean,            // Has JNA transition started
+    withdrawal_progress: number,          // 0.0–1.0
+    asset_transfer_RS: number             // 0.0–1.0
   }
 }
 ```

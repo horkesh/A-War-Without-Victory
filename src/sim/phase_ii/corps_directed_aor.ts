@@ -26,6 +26,7 @@ import type {
     MunicipalityId,
     SettlementId,
 } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import {
     checkBrigadeContiguity,
@@ -177,8 +178,8 @@ function assignEnclaveAoR(
 /**
  * Corps-directed AoR assignment. Replaces the Voronoi BFS approach.
  *
- * Returns the municipality assignment AND writes state.brigade_aor and
- * state.brigade_municipality_assignment.
+ * Returns the municipality assignment AND writes getLegacyAoR(state).brigade_aor and
+ * getLegacyAoR(state).brigade_municipality_assignment.
  */
 export function assignCorpsDirectedAoR(
     state: GameState,
@@ -324,7 +325,7 @@ export function assignCorpsDirectedAoR(
     // Step 9: Corps-level contiguity enforcement (enclave-aware)
     enforceCorpsLevelContiguity(state, edges);
 
-    state.brigade_municipality_assignment = allAssignments;
+    // AoR phase-out: do not write brigade_municipality_assignment
     return allAssignments;
 }
 
@@ -394,7 +395,7 @@ function deriveSettlementAoR(
         }
     }
 
-    state.brigade_aor = brigadeAor;
+    // AoR phase-out: do not write brigade_aor
 }
 
 /**
@@ -454,7 +455,7 @@ export function enforceContiguity(
     frontActive: Set<SettlementId>,
     adj: Map<SettlementId, Set<SettlementId>>
 ): void {
-    const brigadeAor = state.brigade_aor;
+    const brigadeAor = getLegacyAoR(state).brigade_aor;
     if (!brigadeAor) return;
     const formations = state.formations ?? {};
 
@@ -521,7 +522,7 @@ export function enforceContiguity(
  *
  * For each faction:
  * 1. Identify enclaves (excluded from check — legitimate disconnection)
- * 2. Build per-corps settlement sets from state.brigade_aor
+ * 2. Build per-corps settlement sets from getLegacyAoR(state).brigade_aor
  * 3. Check contiguity; reassign orphans to adjacent brigade of a different corps
  *
  * Exported for use in both assignCorpsDirectedAoR (Step 9) and the turn pipeline
@@ -533,7 +534,7 @@ export function enforceCorpsLevelContiguity(
     state: GameState,
     edges: EdgeRecord[]
 ): void {
-    const brigadeAor = state.brigade_aor;
+    const brigadeAor = getLegacyAoR(state).brigade_aor;
     if (!brigadeAor) return;
     const formations = state.formations ?? {};
     const pc = state.political_controllers ?? {};

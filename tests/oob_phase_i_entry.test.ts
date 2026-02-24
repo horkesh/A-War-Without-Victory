@@ -121,3 +121,30 @@ test('createOobFormationsAtPhaseIEntry preserves army_hq corps kind', () => {
     assert.strictEqual(report.corps_created, 1);
     assert.strictEqual(state.formations!['arbih_general_staff']?.kind, 'army_hq');
 });
+
+test('createOobFormationsAtPhaseIEntry uses faction-specific initial personnel (RS 1200, RBiH/HRHB 800)', () => {
+    const state: GameState = {
+        schema_version: CURRENT_SCHEMA_VERSION,
+        meta: { turn: 1, seed: 's' },
+        factions: [],
+        formations: {},
+        front_segments: {},
+        front_posture: {},
+        front_posture_regions: {},
+        front_pressure: {},
+        militia_pools: {},
+        political_controllers: { s_rs: 'RS', s_rbih: 'RBiH', s_hrhb: 'HRHB' },
+        municipalities: { prijedor: { control: 'consolidated' }, zenica: { control: 'consolidated' }, mostar: { control: 'consolidated' } }
+    };
+    const sidToMun = new Map([['s_rs', 'prijedor'], ['s_rbih', 'zenica'], ['s_hrhb', 'mostar']]);
+    const hq: Record<string, string> = { prijedor: 's_rs', zenica: 's_rbih', mostar: 's_hrhb' };
+    const brigades: OobBrigade[] = [
+        makeBrigade({ id: 'vrs_1st', faction: 'RS', name: '1st Krajina', home_mun: 'prijedor', kind: 'brigade' }),
+        makeBrigade({ id: 'arbih_7th', faction: 'RBiH', name: '7th', home_mun: 'zenica', kind: 'brigade' }),
+        makeBrigade({ id: 'hvo_1st', faction: 'HRHB', name: '1st', home_mun: 'mostar', kind: 'brigade' })
+    ];
+    createOobFormationsAtPhaseIEntry(state, [], brigades, hq, sidToMun);
+    assert.strictEqual((state.formations!['vrs_1st'] as { personnel?: number }).personnel, 1200, 'RS brigade starts at 1200');
+    assert.strictEqual((state.formations!['arbih_7th'] as { personnel?: number }).personnel, 800, 'RBiH brigade starts at 800');
+    assert.strictEqual((state.formations!['hvo_1st'] as { personnel?: number }).personnel, 800, 'HRHB brigade starts at 800');
+});

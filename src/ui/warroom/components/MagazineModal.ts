@@ -1,15 +1,30 @@
 /**
- * MagazineModal — Monthly operational review with real Phase 0 statistics.
+ * MagazineModal — Monthly operational review with real game statistics.
  * Triggers every 4 turns (monthly). Between issues: shows most recent.
  *
- * Now uses real game state data for organizational coverage, capital, stability,
- * and declaration pressure.
+ * Phase 0: Pre-war organizational coverage, capital, stability, declaration pressure.
+ * Phase I/II (war phases): Force strength, casualties, territory, displacement,
+ * exhaustion/supply, enemy assessment via WarDataSnapshot.
+ *
+ * No Math.random(), no Date.now().
  */
 
 import { getPrewarCapital, PREWAR_CAPITAL_INITIAL } from '../../../phase0/capital.js';
 import type { FactionId, GameState } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
-import { FACTION_COLORS, factionCssClass, getPlayerFaction, hasFactionPresence, STABILITY_CONTESTED_MIN, STABILITY_SECURE_MIN, turnToMonthYear } from './warroom_utils.js';
+import { extractWarData } from '../data/war_data_extractor.js';
+import {
+    exhaustionLabel,
+    FACTION_COLORS,
+    factionCssClass,
+    getPlayerFaction,
+    hasFactionPresence,
+    STABILITY_CONTESTED_MIN,
+    STABILITY_SECURE_MIN,
+    trendArrow,
+    turnToMonthYear,
+    turnToWeekString,
+} from './warroom_utils.js';
 
 interface MagazineContent {
     factionId: string;
@@ -174,9 +189,19 @@ export class MagazineModal {
     }
 
     /**
-     * Render the magazine modal as HTML element
+     * Phase gate: render Phase 0 or war-phase content.
      */
     render(): HTMLElement {
+        const phase = this.gameState.meta.phase ?? 'phase_0';
+        if (phase === 'phase_0') return this.renderPhase0();
+        return this.renderWarPhase();
+    }
+
+    /**
+     * Render the Phase 0 magazine modal (pre-war organizational review).
+     * This is the original render() body, preserved unchanged.
+     */
+    private renderPhase0(): HTMLElement {
         const content = this.generateContent();
 
         const magazine = document.createElement('div');
@@ -267,6 +292,200 @@ export class MagazineModal {
         magazine.appendChild(declSection);
 
         return magazine;
+    }
+
+    /**
+     * Render the war-phase magazine modal (Phase I / Phase II).
+     * Uses WarDataSnapshot for all data. Shows 6 operational sections.
+     */
+    private renderWarPhase(): HTMLElement {
+        const turn = this.gameState.meta.turn;
+        const factionId = getPlayerFaction(this.gameState);
+        const snap = extractWarData(this.gameState, factionId);
+        const isNewIssue = turn % 4 === 0;
+
+        const fc = FACTION_COLORS[factionId] ?? FACTION_COLORS['RBiH'];
+        const fCss = factionCssClass(factionId);
+
+        // Root container
+        const magazine = document.createElement('div');
+        magazine.className = `magazine-modal faction-${fCss}`;
+        magazine.style.borderTop = `3px solid ${fc.primary}`;
+
+        // Title
+        const title = document.createElement('div');
+        title.className = 'magazine-title';
+        title.style.color = fc.primary;
+        title.textContent = MAGAZINE_TITLES[factionId] ?? 'OPERATIONAL REVIEW';
+        magazine.appendChild(title);
+
+        // Month/Year + week string
+        const monthYear = document.createElement('div');
+        monthYear.className = 'magazine-month-year';
+        monthYear.textContent = turnToMonthYear(turn);
+        if (!isNewIssue) {
+            const badge = document.createElement('span');
+            badge.className = 'magazine-no-issue-badge';
+            badge.textContent = '(no new issue this week)';
+            monthYear.appendChild(badge);
+        }
+        magazine.appendChild(monthYear);
+
+        // Week reference line
+        const weekLine = document.createElement('div');
+        weekLine.className = 'magazine-month-year';
+        weekLine.style.fontSize = '0.85em';
+        weekLine.style.opacity = '0.7';
+        weekLine.textContent = turnToWeekString(turn);
+        magazine.appendChild(weekLine);
+
+        // --- Section 1: FORCE STRENGTH ---
+        magazine.appendChild(this.renderForceStrengthSection(snap));
+
+        // --- Section 2: CASUALTIES THIS MONTH ---
+        magazine.appendChild(this.renderCasualtiesSection(snap));
+
+        // --- Section 3: TERRITORIAL STATUS ---
+        magazine.appendChild(this.renderTerritorySection(snap));
+
+        // --- Section 4: POPULATION & DISPLACEMENT ---
+        magazine.appendChild(this.renderDisplacementSection(snap));
+
+        // --- Section 5: EXHAUSTION & SUPPLY ---
+        magazine.appendChild(this.renderExhaustionSupplySection(snap));
+
+        // --- Section 6: ENEMY ASSESSMENT ---
+        magazine.appendChild(this.renderEnemyAssessmentSection(snap));
+
+        return magazine;
+    }
+
+    /**
+     * Create a stat row element: label on left, value on right.
+     */
+    private createStatRow(label: string, value: string): HTMLElement {
+        const row = document.createElement('div');
+        row.className = 'fo-stat-row';
+
+        const labelEl = document.createElement('span');
+        labelEl.className = 'fo-stat-label';
+        labelEl.textContent = label;
+        row.appendChild(labelEl);
+
+        const valueEl = document.createElement('span');
+        valueEl.className = 'fo-stat-value';
+        valueEl.textContent = value;
+        row.appendChild(valueEl);
+
+        return row;
+    }
+
+    /**
+     * Create a section container with header.
+     */
+    private createSection(headerText: string): HTMLElement {
+        const section = document.createElement('div');
+        section.className = 'magazine-toc';
+
+        const header = document.createElement('h3');
+        header.className = 'magazine-section-header';
+        header.textContent = headerText;
+        section.appendChild(header);
+
+        return section;
+    }
+
+    // ----- War-phase section renderers -----
+
+    private renderForceStrengthSection(snap: import('../data/war_data_extractor.js').WarDataSnapshot): HTMLElement {
+        const section = this.createSection('FORCE STRENGTH');
+        const f = snap.ownForces;
+
+        section.appendChild(this.createStatRow('Total Personnel', f.totalPersonnel.toLocaleString()));
+        section.appendChild(this.createStatRow('Active Brigades', `${f.activeBrigades} / ${f.totalBrigades}`));
+        section.appendChild(this.createStatRow('Corps', `${f.corpsCount}`));
+        section.appendChild(this.createStatRow('Avg Cohesion', `${Math.round(f.avgCohesion)}`));
+
+        return section;
+    }
+
+    private renderCasualtiesSection(snap: import('../data/war_data_extractor.js').WarDataSnapshot): HTMLElement {
+        const section = this.createSection('CASUALTIES THIS MONTH');
+        const c = snap.ownCasualties;
+
+        section.appendChild(this.createStatRow('Killed', c.killed.toLocaleString()));
+        section.appendChild(this.createStatRow('Wounded', c.wounded.toLocaleString()));
+        section.appendChild(this.createStatRow('Missing / Captured', c.missingCaptured.toLocaleString()));
+        section.appendChild(this.createStatRow('Tanks Lost', `${c.equipmentLost.tanks}`));
+        section.appendChild(this.createStatRow('Artillery Lost', `${c.equipmentLost.artillery}`));
+        section.appendChild(this.createStatRow('AA Systems Lost', `${c.equipmentLost.aa}`));
+        section.appendChild(this.createStatRow('Wounded Pending Return', c.woundedPendingReturn.toLocaleString()));
+
+        return section;
+    }
+
+    private renderTerritorySection(snap: import('../data/war_data_extractor.js').WarDataSnapshot): HTMLElement {
+        const section = this.createSection('TERRITORIAL STATUS');
+        const t = snap.ownTerritory;
+
+        section.appendChild(this.createStatRow('Settlements Controlled', `${t.settlementsControlled} / ${t.settlementsTotal}`));
+        section.appendChild(this.createStatRow('Territory', `${Math.round(t.territoryPercent)}%`));
+
+        return section;
+    }
+
+    private renderDisplacementSection(snap: import('../data/war_data_extractor.js').WarDataSnapshot): HTMLElement {
+        const section = this.createSection('POPULATION & DISPLACEMENT');
+        const d = snap.ownDisplacement;
+
+        section.appendChild(this.createStatRow('Displaced Out', d.totalDisplacedOut.toLocaleString()));
+        section.appendChild(this.createStatRow('Displaced In', d.totalDisplacedIn.toLocaleString()));
+        section.appendChild(this.createStatRow('Civilians Killed', d.civilianKilled.toLocaleString()));
+        section.appendChild(this.createStatRow('Fled Abroad', d.civilianFledAbroad.toLocaleString()));
+        section.appendChild(this.createStatRow('Active Camps', `${d.activeCamps}`));
+        section.appendChild(this.createStatRow('Hostile Takeover Timers', `${d.activeHostileTakeoverTimers}`));
+
+        return section;
+    }
+
+    private renderExhaustionSupplySection(snap: import('../data/war_data_extractor.js').WarDataSnapshot): HTMLElement {
+        const section = this.createSection('EXHAUSTION & SUPPLY');
+        const ex = snap.ownExhaustion;
+        const su = snap.ownSupply;
+
+        section.appendChild(this.createStatRow('Exhaustion Level', `${Math.round(ex.level * 100)}% \u2014 ${exhaustionLabel(ex.level)}`));
+        section.appendChild(this.createStatRow('Exhaustion Trend', trendArrow(ex.trend)));
+        section.appendChild(this.createStatRow('Supply Adequate', `${su.adequateCount}`));
+        section.appendChild(this.createStatRow('Supply Strained', `${su.strainedCount}`));
+        section.appendChild(this.createStatRow('Supply Critical', `${su.criticalCount}`));
+        section.appendChild(this.createStatRow('Collapsed Municipalities', `${su.collapsedMunicipalities.length}`));
+
+        return section;
+    }
+
+    private renderEnemyAssessmentSection(snap: import('../data/war_data_extractor.js').WarDataSnapshot): HTMLElement {
+        const section = this.createSection('ENEMY ASSESSMENT');
+        const contacts = snap.contactedEnemyFormations;
+
+        if (contacts.length === 0) {
+            const noContact = document.createElement('div');
+            noContact.className = 'fo-stat-row';
+            noContact.style.fontStyle = 'italic';
+            noContact.style.opacity = '0.7';
+            noContact.textContent = 'No enemy forces engaged this period.';
+            section.appendChild(noContact);
+            return section;
+        }
+
+        for (const enemy of contacts) {
+            const contactLocation = enemy.contactSettlement ?? 'unknown';
+            section.appendChild(this.createStatRow(
+                enemy.name,
+                `${enemy.strengthCategory} \u2014 ${contactLocation}`
+            ));
+        }
+
+        return section;
     }
 
     /**

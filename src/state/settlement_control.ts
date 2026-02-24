@@ -60,3 +60,47 @@ export function getSettlementSideLegacy(
     if (status.kind === 'known') return status.side;
     return null;
 }
+
+/**
+ * Get political controller at OSID granularity (HoI ZoC / spawn-by-OSID).
+ * State may be OSID-keyed (operational) or canonical-SID-keyed; when OSID is not
+ * present in state, derives controller by majority vote over canonical SIDs from
+ * operationalToCanonical (reverse map). Deterministic: canonical SIDs sorted before
+ * counting so tie-break is stable.
+ */
+export function getPoliticalControllerOSID(
+    state: GameState,
+    osid: string,
+    operationalToCanonical?: Map<string, string[]>
+): ControlSide | null {
+    const pc = state.political_controllers ?? {};
+    const direct = pc[osid];
+    if (direct !== undefined && direct !== null) return direct as ControlSide;
+
+    const canonicalSids = operationalToCanonical?.get(osid);
+    if (!canonicalSids || canonicalSids.length === 0) return null;
+
+    const sorted = [...canonicalSids].sort((a, b) => a.localeCompare(b));
+    const counts = new Map<ControlSide, number>();
+    for (const sid of sorted) {
+        const c = pc[sid];
+        if (c !== undefined && c !== null) {
+            const side = c as ControlSide;
+            counts.set(side, (counts.get(side) ?? 0) + 1);
+        }
+    }
+    let maxCount = 0;
+    const tied: ControlSide[] = [];
+    for (const [side, n] of counts) {
+        if (n > maxCount) {
+            maxCount = n;
+            tied.length = 0;
+            tied.push(side);
+        } else if (n === maxCount) {
+            tied.push(side);
+        }
+    }
+    if (tied.length === 0) return null;
+    tied.sort((a, b) => a.localeCompare(b));
+    return tied[0] ?? null;
+}

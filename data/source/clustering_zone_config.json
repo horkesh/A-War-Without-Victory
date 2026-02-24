@@ -1,0 +1,43 @@
+{
+    "parameters": {
+        "TARGET_OPS_PER_MUN": 15,
+        "ETHNIC_FLEX_POP": 500,
+        "MAJORITY_THRESHOLD": 0.40,
+        "SUPERMAJORITY_THRESHOLD": 0.70
+    },
+    "pre_clustering_splits": [
+        {
+            "source_settlement_query": {
+                "sid_or_name": "mostar",
+                "mun1990_id": "mostar"
+            },
+            "split_by": "river:neretva",
+            "parts": [
+                {
+                    "name": "Mostar Zapad",
+                    "side": "west",
+                    "population_share": 0.55,
+                    "ethnic_distribution": {
+                        "croat_share": 0.55,
+                        "bosniak_share": 0.18,
+                        "serb_share": 0.14,
+                        "other_share": 0.13
+                    },
+                    "ethnic_key_override": "Cm"
+                },
+                {
+                    "name": "Mostar Istok",
+                    "side": "east",
+                    "population_share": 0.45,
+                    "ethnic_distribution": {
+                        "croat_share": 0.15,
+                        "bosniak_share": 0.52,
+                        "serb_share": 0.20,
+                        "other_share": 0.13
+                    },
+                    "ethnic_key_override": "Bm"
+                }
+            ]
+        }
+    ]
+}

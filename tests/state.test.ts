@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import { CURRENT_SCHEMA_VERSION, GameState } from '../src/state/game_state.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 
-/** Base state includes Phase 0 migration defaults so round-trip after deserialize matches (Phase B Step 1). */
+/** Base state includes all migration defaults that deserializeState adds, so round-trip matches (Phase B Step 1). */
 const baseState: GameState = {
     schema_version: CURRENT_SCHEMA_VERSION,
     meta: {
@@ -13,6 +13,9 @@ const baseState: GameState = {
         referendum_held: false,
         referendum_turn: null,
         war_start_turn: null,
+        phase_0_scheduled_referendum_turn: null,
+        phase_0_scheduled_war_start_turn: null,
+        phase_0_war_start_control_path: null,
         referendum_eligible_turn: null,
         referendum_deadline_turn: null,
         game_over: false,
@@ -47,8 +50,13 @@ const baseState: GameState = {
     ceasefire: {},
     negotiation_ledger: [],
     supply_rights: { corridors: [] },
-    municipalities: {}
-};
+    municipalities: {},
+    // Migration defaults: deserializeState adds these for backward compatibility with older saves
+    theatres: {},
+    army_theatre_assignment: {},
+    assignable_front_segments: [],
+    brigade_front_assignment: {}
+} as GameState;
 
 test('state serialization round trips cleanly', () => {
     const original = structuredClone(baseState);

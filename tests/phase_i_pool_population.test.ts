@@ -7,7 +7,7 @@
 
 import assert from 'node:assert';
 import { test } from 'node:test';
-import { runPoolPopulation } from '../src/sim/phase_i/pool_population.js';
+import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../src/sim/phase_i/pool_population.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { militiaPoolKey } from '../src/state/militia_pool_key.js';
@@ -157,4 +157,39 @@ test('runPoolPopulation RBiH 10% adds to RBiH pools when at least one RBiH briga
     assert.ok(state.militia_pools![keyA], 'RBiH pool MUN_A exists');
     assert.ok(state.militia_pools![keyB], 'RBiH pool MUN_B exists');
     assert.ok((report.rbih_10pct_additions ?? 0) > 0, 'RBiH 10%% additions reported');
+});
+
+test('applyRsJnaInheritanceBonus adds to RS pools proportionally by eligible Serb pop', () => {
+    const state = baseState();
+    state.meta.turn = 0;
+    state.militia_pools = {
+        [militiaPoolKey('MUN_A', 'RS')]: {
+            mun_id: 'MUN_A',
+            faction: 'RS',
+            available: 1000,
+            committed: 0,
+            exhausted: 0,
+            updated_turn: 0
+        },
+        [militiaPoolKey('MUN_B', 'RS')]: {
+            mun_id: 'MUN_B',
+            faction: 'RS',
+            available: 500,
+            committed: 0,
+            exhausted: 0,
+            updated_turn: 0
+        }
+    };
+    const pop1991 = {
+        MUN_A: { total: 10000, bosniak: 1000, serb: 6000, croat: 2000, other: 1000 },
+        MUN_B: { total: 8000, bosniak: 1000, serb: 4000, croat: 2000, other: 1000 }
+    };
+    const report = applyRsJnaInheritanceBonus(state, pop1991);
+    assert.ok(report.total_added > 0, 'bonus applied');
+    assert.strictEqual(report.pools_updated, 2);
+    const poolA = state.militia_pools![militiaPoolKey('MUN_A', 'RS')];
+    const poolB = state.militia_pools![militiaPoolKey('MUN_B', 'RS')];
+    assert.ok(poolA.available > 1000, 'MUN_A RS pool increased');
+    assert.ok(poolB.available > 500, 'MUN_B RS pool increased');
+    assert.ok(poolA.available - 1000 >= poolB.available - 500, 'MUN_A gets more (higher Serb pop)');
 });

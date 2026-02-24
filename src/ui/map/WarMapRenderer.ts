@@ -14,8 +14,8 @@ export class WarMapRenderer {
     private meshDay: THREE.Mesh | null = null;
     private meshNight: THREE.Mesh | null = null;
 
-    // Modes
-    public isNightMode: boolean = true;
+    // Day-only for now; night mode disabled. N key removed from host.
+    public isNightMode: boolean = false;
 
     constructor(private container: HTMLElement) {
         this.scene = new THREE.Scene();
@@ -57,13 +57,7 @@ export class WarMapRenderer {
 
     private bindEvents() {
         window.addEventListener('resize', this.onResize);
-
-        // Mode switching for phase 1
-        window.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === 'n') {
-                this.toggleMode();
-            }
-        });
+        // Day/Night (N key) is wired by the host (e.g. map_operational_3d) so messages and focus work correctly.
     }
 
     private onResize = () => {
@@ -90,30 +84,32 @@ export class WarMapRenderer {
         this.meshNight = buildTerrainMesh(hm, nightTex);
         this.meshDay = buildTerrainMesh(hm, dayTex);
 
-        // Setup initial transparency (crossfading)
+        // Day-only: day visible, night hidden. No crossfade until night mode re-enabled.
         const nightMat = (this.meshNight.material as THREE.MeshStandardMaterial);
         nightMat.transparent = true;
-        nightMat.opacity = 1.0;
+        nightMat.opacity = 0.0;
 
         const dayMat = (this.meshDay.material as THREE.MeshStandardMaterial);
         dayMat.transparent = true;
-        dayMat.opacity = 0.0;
+        dayMat.opacity = 1.0;
 
         this.scene.add(this.meshNight);
         this.scene.add(this.meshDay);
     }
 
-    private targetBlend: number = 1.0; // 1.0 = Night, 0.0 = Day
-    private currentBlend: number = 1.0;
+    private targetBlend: number = 0.0; // 1.0 = Night, 0.0 = Day (day default)
+    private currentBlend: number = 0.0;
 
+    /** No-op: night mode disabled; always day. */
     public toggleMode() {
-        this.isNightMode = !this.isNightMode;
-        this.targetBlend = this.isNightMode ? 1.0 : 0.0;
+        this.isNightMode = false;
+        this.targetBlend = 0.0;
     }
 
-    public setMode(isNight: boolean) {
-        this.isNightMode = isNight;
-        this.targetBlend = isNight ? 1.0 : 0.0;
+    /** No-op: night mode disabled; always day. */
+    public setMode(_isNight: boolean) {
+        this.isNightMode = false;
+        this.targetBlend = 0.0;
     }
 
     public setBlend(value: number) {

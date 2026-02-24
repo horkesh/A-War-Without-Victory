@@ -8,6 +8,7 @@
  */
 
 import type { FactionId, FormationId, GameState, SettlementId } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 
@@ -230,7 +231,7 @@ export function repairCorpsContiguity(
     orphans: SettlementId[],
     adj: Map<SettlementId, Set<SettlementId>>
 ): number {
-    const brigadeAor = state.brigade_aor;
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     if (!brigadeAor) return 0;
     const formations = state.formations ?? {};
 

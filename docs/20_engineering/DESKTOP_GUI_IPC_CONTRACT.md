@@ -9,6 +9,8 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - Renderer consumers: `src/ui/warroom/warroom.ts`, `src/ui/map/MapApp.ts` (via embedded iframe)
 - Sim adapter: `src/desktop/desktop_sim.ts`
 
+**State contract (front assignment and theatres):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. It includes `front_edges`, `assignable_front_segments`, `brigade_front_assignment`, `theatres`, and `army_theatre_assignment`. The 2D tactical map and 3D operational map both read these from the same payload; see [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for single-source and verification.
+
 ## Channels
 
 - `load-scenario-dialog` (invoke)
@@ -32,12 +34,12 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `stage-attack-order` (invoke)
   - Payload: `{ brigadeId: string, targetSettlementId: string }`
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: sets `state.brigade_attack_orders[brigadeId] = targetSettlementId`, reserializes, sends state via `game-state-updated`.
+  - Behavior: sets `state.brigade_attack_orders[brigadeId] = targetSettlementId`, reserializes, sends state via `game-state-updated`. The 3D operational warmap ATTACK mode and Selection panel use this via DesktopBridge `stageAttackOrder()`.
 
 - `stage-posture-order` (invoke)
   - Payload: `{ brigadeId: string, posture: string }`
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: pushes or replaces entry in `state.brigade_posture_orders` for the brigade, reserializes, sends state via `game-state-updated`.
+  - Behavior: pushes or replaces entry in `state.brigade_posture_orders` for the brigade, reserializes, sends state via `game-state-updated`. The 3D operational warmap Selection panel and mode toolbar call this via DesktopBridge `stagePostureOrder()`.
 
 - `stage-move-order` (invoke)
   - Payload: `{ brigadeId: string, targetMunicipalityId: string }`
@@ -53,6 +55,21 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Payload: `{ brigadeId: string }`
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: stages undeploy posture transition by setting `state.brigade_deploy_orders[brigadeId] = "undeploy"`, reserializes, sends state via `game-state-updated`.
+
+- `assign-brigade-to-front` (invoke)
+  - Payload: `{ brigadeId: string, frontId: string | null }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: validates brigade and front segment ID (`assignable_front_segments`), writes `state.brigade_front_assignment[brigadeId] = frontId` (`null` = reserve), reserializes, sends state via `game-state-updated`.
+
+- `rename-front-segment` (invoke)
+  - Payload: `{ frontId: string, name: string | null }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: updates optional `name` on `state.assignable_front_segments[*]`; null/empty clears the name. Reserializes and broadcasts update.
+
+- `rename-theatre` (invoke)
+  - Payload: `{ theatreId: string, name: string | null }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: updates `state.theatres[theatreId].name`; null/empty restores default `<faction> Theatre`. Reserializes and broadcasts update.
 
 - `stage-brigade-aor-order` (invoke)
   - Payload: `{ settlementId: string, fromBrigadeId: string, toBrigadeId: string }`
@@ -78,6 +95,21 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Payload: `{ corpsId: string, stance: string }`
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: sets or updates corps stance (e.g. defensive/balanced/offensive/reorganize) in state (corps_command), reserializes, sends state via `game-state-updated`.
+
+- `stage-corps-front-order` (invoke)
+  - Payload: `{ corpsId: string, edgeIds: string[] }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: validates and normalizes front edge IDs for the corps (`A__B` sorted), writes `state.corps_front_edges[corpsId] = sortedUnique(edgeIds)`, reserializes, sends state via `game-state-updated`.
+
+- `stage-corps-attack-axis-order` (invoke)
+  - Payload: `{ corpsId: string, edgeIds: string[] }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: validates and normalizes edge IDs, writes `state.corps_attack_axis_orders[corpsId] = { edge_ids: sortedUnique(edgeIds), created_turn }`, reserializes, sends state via `game-state-updated`.
+
+- `stage-og-subfront-order` (invoke)
+  - Payload: `{ ogId: string, corpsId: string, edgeIds: string[] }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: validates OG/corps linkage and edge subset intent, writes `state.og_subfront_edges[ogId] = sortedUnique(edgeIds)` (derived against corps front in main), reserializes, sends state via `game-state-updated`.
 
 ### Read-only query channels (no state mutation)
 

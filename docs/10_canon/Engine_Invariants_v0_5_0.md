@@ -43,9 +43,9 @@ Development-time validation tools may abort execution on invariant violation.
 
 ## 6. Front and Combat Invariants
 
-- Fronts may only exist where sustained opposing control meets
-- Static fronts must increase exhaustion and defensive hardness together
-- No single combat resolution may cause decisive territorial change
+- Fronts may only exist where sustained opposing control meets (hostile OSID adjacency).
+- Static fronts must increase exhaustion and defensive hardness together.
+- **No single resolution flips more than one OSID.** One attack → one target OSID; control flip at most for that OSID.
 
 ## 7. Fragmentation Invariants
 
@@ -69,13 +69,13 @@ JNA transition and withdrawal effects may increase escalation pressure but must 
 
 Every settlement must have a political control state at all times, defined as either controlled by a faction or explicitly ungoverned (null).
 
-Political control must not be inferred from military formations, Areas of Responsibility (AoRs), or fronts.
+Political control must not be inferred from military formations, brigade location (OSID), or fronts.
 
 ### 9.2 Initialization Precedence
 
 Political control must be initialized deterministically **before**:
 - Any front detection
-- Any AoR assignment
+- Any brigade location or ZoC logic
 - Any pressure, exhaustion, or supply logic
 
 Any system operating on settlements must treat political control as pre-existing state.
@@ -85,13 +85,12 @@ Any system operating on settlements must treat political control as pre-existing
 Political control exists independently of brigade presence.
 
 A settlement may be politically controlled without:
-- Brigade assignment
-- AoR inclusion
-- Adjacency to front-active space
+- Any brigade assigned to it (or to its OSID)
+- Adjacency to hostile control
 
 ### 9.4 Rear Political Control Zones
 
-Settlements outside all brigade AoRs constitute Rear Political Control Zones.
+Settlements (or OSIDs) not targeted by attack resolution and not adjacent to hostile control constitute Rear Political Control Zones.
 
 Rear Political Control Zones:
 - Retain political control
@@ -112,11 +111,12 @@ Political control is stable by default.
 ### 9.6 Authorized Control Change Mechanisms
 
 Political control may change **only** via:
-- Sustained opposing military pressure reaching the settlement
+- **Attack resolution** (Phase II): an attack order is resolved → push-back and control flip at the target OSID (per Attack Resolution Formula Spec)
+- **Corps or frontline operations** as defined in Phase II / Systems Manual
 - Internal authority collapse or fragmentation
 - Negotiated transfer through end-state or interim agreements
 
-Any other change constitutes a violation of invariants.
+**No passive pressure flip:** In the OSID model, control does not change from "sustained opposing military pressure" alone; it changes only when an attack (or corps/frontline op) is resolved. Any other change constitutes a violation of invariants.
 
 ### 9.7 Null Political Control
 
@@ -125,13 +125,9 @@ A settlement may have political_controller = null only if:
 - The condition is initialized deterministically
 - No automatic reassignment occurs without authorized mechanisms
 
-### 9.8 AoR Relationship Constraint
+### 9.8 Phase II OSID-only (AoR removed)
 
-AoR assignment must never create, imply, or override political control.
-
-When a rear settlement becomes front-active:
-- AoR assignment becomes mandatory
-- Political control remains unchanged until altered by authorized mechanisms
+In Phase II, brigade location is **location_osid** only; no AoR or settlement-level assignment. Control change only via attack resolution or corps/frontline operations. All OSID-keyed state must use stable ordering (e.g. strictCompare, sorted keys) in iteration and output.
 
 ### 9.9 Determinism and Auditability
 
@@ -215,7 +211,7 @@ Brigade pressure, density, and resilience modifier are computed each turn and mu
 
 ### 14.1 Settlement-level control
 
-Municipality control is derived from settlement-level political control. Control changes may occur at settlement level (e.g. wave flip when municipality authority shifts and settlement meets demographic threshold; holdouts when hostile-majority; holdout cleanup and isolation surrender per rules). These are part of authority/control resolution; authorized mechanisms remain §9.6 (sustained pressure, authority collapse, negotiated transfer).
+Municipality control is derived from settlement-level political control. Control changes at settlement/OSID level occur only via authorized mechanisms (§9.6): **attack resolution** or **corps/frontline operations** for Phase II; authority collapse, fragmentation, or negotiated transfer otherwise. No passive pressure flip.
 
 ### 14.2 Brigade operations determinism
 
@@ -225,21 +221,29 @@ All brigade-operations iteration must use stable (e.g. strictCompare) sorted key
 
 Formation cohesion must remain in [0, 100] after all updates.
 
-### 14.4 AoR coverage
+### 14.4 Brigade location (OSID)
 
-Every front-active settlement must be assigned to exactly one brigade. Rear settlements have null AoR.
+**Every brigade has a valid location_osid.** Control changes only via attack resolution or corps/frontline operations (no passive pressure flip).
 
-### 14.5 Equipment conservation
+### 14.5 Retreat "prefer rear" (determinism)
+
+When a defender retreats, valid destinations are chosen deterministically. **Tie-break** among valid retreat destinations: **enemy adjacency count ascending** (prefer rear), then **OSID string sort** (stable ordering). No randomness.
+
+### 14.6 Equipment conservation
 
 Capture transfers equipment from loser to winner; total equipment is conserved minus degradation (no creation or destruction except by defined degradation/capture rules).
 
-### 14.6 OG personnel conservation
+### 14.7 OG personnel conservation
 
 At Operational Group activation, personnel are deducted from donors; at dissolution, personnel are returned (implementation may specify equal return to same-corps brigades unless donor tracking is added).
 
-### 14.7 Phase gating
+### 14.8 Phase gating
 
 Brigade operations pipeline steps run only when meta.phase === "phase_ii".
+
+### 14.9 Phase II movement pipeline order
+
+**osid-column-movement** must run **before** **zoc-constrained-movement**. The ZoC step clears all brigade_movement_orders; column movement consumes only orders with stance 'column' and must process them first. Violation causes column march orders to be dropped.
 
 ## 15. Final Meta-Assertion
 
@@ -253,14 +257,10 @@ No invariant may be bypassed or relaxed for balance, usability, or player conven
 - Authority consolidation requires control and sufficient legitimacy; low legitimacy caps authority at Contested.
 - Legitimacy erosion is easier than recovery and must be gradual and deterministic.
 
-### B. AoR Assignment
-- Every **front-active** settlement must be assigned to exactly one brigade AoR.
-- Rear Political Control Zones may have no AoR and must not generate pressure.
-- AoR assignment does not confer political control.
-- AoR assignment is prohibited in Phase I.
-- AoR assignment must be exclusive (no settlement assigned to multiple brigades).
-- AoR must match political control (no opposing brigade ownership).
-- Pressure generation is invalid from settlements with no AoR.
+### B. Phase II brigade location (OSID; AoR removed)
+- Every brigade has a valid **location_osid**. No AoR or settlement-level territorial assignment.
+- Control change in Phase II only via attack resolution or corps/frontline operations; no passive pressure flip.
+- OSID-keyed state must use stable ordering in all iteration and serialization.
 
 ### C. External Patron Pressure and IVP
 - Patron state and international visibility pressure (IVP) are deterministic functions of turn index and state.

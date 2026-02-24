@@ -1,9 +1,9 @@
 # Front Assignment (HoI-Style) Proposal
 
 **Date:** 2026-02-21  
-**Status:** Draft for review (amended)  
-**Scope:** Three-tier front hierarchy (Army / Corps / Brigade); Phase I non-contiguous vs Phase II trench warfare; Operational Groups as subfronts with pooling; multi-level operations; dedicated GUI per tier.  
-**Supersedes:** Initial draft 2026-02-21; incorporates Paradox team convene.
+**Status:** Draft for review (amended per FRONT_ASSIGNMENT_PROPOSAL_REVIEW.md)  
+**Scope:** Three-tier front hierarchy (Army / Corps / Brigade); corps fronts derived initially; drawable corps fronts once auto-distribution exists; OGs as subfronts; one map with zoom-driven modes; Phase 0 holdout integration.  
+**Supersedes:** Initial draft 2026-02-21; incorporates Paradox team convene and proposal review 2026-02-21. See `docs/30_planning/FRONT_ASSIGNMENT_PROPOSAL_REVIEW.md` for the review that informed these amendments.
 
 ---
 
@@ -11,17 +11,17 @@
 
 Unlike Hearts of Iron (which has Army → Division assignment), AWWV uses a **three-tier front hierarchy**:
 
-- **Army front** — top level; combination of all corps fronts for a faction
-- **Corps front** — middle; combination of all brigade fronts in that corps
-- **Brigade front** — bottom; settlement/edge coverage for a single brigade
+- **Army front** — top level; derived as union of corps fronts (never stored)
+- **Corps front** — middle; edge_ids (front line); derived from brigade positions initially; player-drawable once auto-distribution exists
+- **Brigade front** — bottom; settlement_ids (existing `brigade_aor`); contiguous always
 
-Player and bot can edit each tier. **Phase I** allows non-contiguous brigade front coverage (enabling rear cleanup of enemy settlements without formations). **Phase II** enforces contiguous brigade fronts (trench warfare). **Operational Groups** are player/bot-created **subfronts** that can pool extra strength from brigades; otherwise OGs function per canon (temporary). **Operations and attack orders** can be planned at brigade, OG, corps, or army level, similar to HoI battle plans. Separate **GUI elements** are required for each tier.
+**Corps fronts are derived initially** (union of brigade AoR edges). Player-drawn corps fronts require an **auto-distribution engine**; without it, drawing is worse UX than manual assignment. Bot corps fronts are **always derived**; bot never draws fronts. **Phase I rear cleanup** uses the existing control_flip → wave_flip → holdout pipeline, **not** non-contiguous brigade AoR (see §4 Phase 0 Integration). **Operational Groups** are subfronts with pooling. **GUI:** one map with zoom-driven modes (Strategic / Operational / Tactical), not five separate UIs.
 
 **Goals:**
-- Hierarchical front model aligned with OOB (Army → Corps → Brigade)
-- Phase I flexibility for rear cleanup; Phase II rigidity for trench warfare
-- OGs as subfronts with pooling; multi-level operations
-- Dedicated UI per echelon; reduce micromanagement via delegation
+- Hierarchical front model aligned with OOB
+- Extend existing `brigade_aor` (do not replace); add `corps_front_edges`
+- Drawable corps fronts + auto-distribution as Phase 2 priority (HoI killer feature)
+- Phase 0 holdout integration (org penetration → holdout resistance)
 - Compatibility with Bosnia’s irregular fronts, pockets, and enclaves
 
 ---
@@ -32,20 +32,19 @@ Player and bot can edit each tier. **Phase I** allows non-contiguous brigade fro
 
 | Tier | Composition | Who Edits | Semantic |
 |------|-------------|-----------|----------|
-| **Army front** | Union of all corps fronts (faction-wide) | Player / bot | Strategic boundaries; army stance applies |
-| **Corps front** | Union of brigade fronts in that corps | Player / bot | Operational sector; corps stance, named ops |
-| **Brigade front** | Settlement/edge coverage for one brigade | Player / bot | Tactical responsibility; 1–4 settlements, personnel-capped |
+| **Army front** | Union of corps fronts; derived only, never stored | — | Strategic boundaries; army stance |
+| **Corps front** | edge_ids; derived from brigade AoR initially; player-drawable once auto-distribution exists | Player (when engine ready) | Operational sector; corps stance, named ops |
+| **Brigade front** | settlement_ids (existing brigade_aor); contiguous always | Player / bot | Tactical responsibility; 1–4 settlements, personnel-capped |
 
-**Invariant:** Brigade fronts partition the corps front; corps fronts partition the army front. Each tier is editable independently; changes propagate down (e.g. corps front shrinks → brigade fronts within it are constrained).
+**Invariant:** Brigade AoR is always contiguous. Corps front = edge_ids. Army front = union of corps fronts (derived). Corps fronts derived initially; bot never draws fronts.
 
-### 2.2 Phase I vs Phase II: Contiguity
+### 2.2 Extent Representation by Tier
 
-| Phase | Brigade front contiguity | Rationale |
-|-------|--------------------------|-----------|
-| **Phase I** | **Not required** | Fluid war; rear cleanup of undefended enemy settlements; brigades may cover scattered pockets |
-| **Phase II** | **Required** | Trench warfare; brigade fronts must be contiguous settlement clusters |
+- **Brigade** = settlement_ids (existing `brigade_aor`). Brigades operate at settlement level.
+- **Corps** = edge_ids (front line). What the player would draw; what front_edges.ts computes.
+- **Army** = derived; no state field.
 
-Phase I non-contiguity enables consolidation posture and cleanup of isolated enemy-held settlements without formations. Phase II contiguity enforces canonical “AoR = contiguous cluster” and front hardening.
+**Phase I rear cleanup** uses the existing control_flip → wave_flip → holdout pipeline, not non-contiguous brigade AoR. See §4 Phase 0 Integration.
 
 ---
 
@@ -65,7 +64,7 @@ Phase I non-contiguity enables consolidation posture and cleanup of isolated ene
 ### 3.3 Creation
 
 - Player/bot creates a subfront (OG) by selecting a subset of a corps front
-- Subfront = contiguous or non-contiguous (Phase I) set of edges/settlements within the corps front
+- Subfront = contiguous set of edges within the corps front; must be subset of one corps (canon: OGs at Corps level)
 - OG members = brigades whose brigade fronts overlap the subfront; optionally add “pool” contribution
 
 ### 3.4 Integration with Canon
@@ -74,9 +73,39 @@ Canon Rulebook §5.6 and Systems Manual §6.3: OGs do not own territory; coordin
 
 ---
 
-## 4. Multi-Level Operations and Attack Orders
+## 4. Phase 0 Integration: Holdout Resistance (Review Addition)
 
-### 4.1 HoI Analogy
+Phase I rear cleanup uses the existing control_flip → wave_flip → holdout pipeline. The proposal does **not** use non-contiguous brigade AoR. The following improve holdout outcomes and root them in Phase 0:
+
+### 4.1 Amended Holdout Formula: Org Penetration Bonus
+
+The defending faction's Phase 0 organizational penetration in the municipality amplifies holdout resistance:
+
+- `to_control == 'controlled'`: +0.4 (RBiH organized militia nucleus)
+- `patriotska_liga > 0`: +0.3 (RBiH paramilitary cadre)
+- `sda_penetration > 50`: +0.2 (RBiH political org)
+- `paramilitary_rs > 0`, `sds_penetration > 50`: +0.3 / +0.2 (RS)
+- `paramilitary_hrhb > 0`, `hdz_penetration > 50`: +0.3 / +0.2 (HRHB)
+- `police_loyalty == 'loyal'`: +0.2
+- `jna_presence` (if defending RS): +0.4
+
+### 4.2 Steeper Population Factor
+
+Replace `log10(pop)/4` with piecewise: pop &lt; 500 → 0.3; 500–2000 → 0.6; 2000–10000 → 1.0; 10000–30000 → 1.8; 30000+ → 2.5.
+
+### 4.3 Border Municipality Intervention Modifier
+
+FRY-adjacent municipalities (Bijeljina, Zvornik, Bratunac, Višegrad, Foča, Rudo): if turn &lt; RS_EARLY_WAR_END_WEEK (26), RS attack pressure += BORDER_INTERVENTION_BONUS (e.g. +15). Models FRY paramilitary intervention.
+
+### 4.4 Holdout Connectivity
+
+Existing BFS isolation and 4-turn surrender for isolated holdouts remains primary. Connected holdouts persist; isolated ones fall. Phase 0 integration is independent of front mechanics and can ship anytime.
+
+---
+
+## 5. Multi-Level Operations and Attack Orders
+
+### 5.1 HoI Analogy
 
 HoI allows battle plans at Army Group, Army, and Division level. AWWV mirrors:
 
@@ -85,14 +114,14 @@ HoI allows battle plans at Army Group, Army, and Division level. AWWV mirrors:
 - **OG level:** Subfront-specific operation (e.g. “Corridor breach,” “Emergency defensive”)
 - **Brigade level:** Posture (Defend, Probe, Attack, Elastic Defense, Consolidation); attack orders
 
-### 4.2 Attack Orders by Echelon
+### 5.2 Attack Orders by Echelon
 
 - **Brigade:** Issues attack order to one target settlement (current behavior)
 - **OG:** Issues coordinated attack; member brigades contribute; one brigade designated executor per target (canon: one brigade per target, OG exception for heavy resistance)
 - **Corps:** Named operation defines axis/targets; subordinate brigades/OGs execute
 - **Army:** Standing order influences corps behavior; no direct attack order
 
-### 4.3 Planning vs Execution
+### 5.3 Planning vs Execution
 
 - Operations have phases: planning (e.g. 3 turns, +5% defense) → execution (e.g. 4 turns, +50% pressure) → recovery → complete
 - Attack orders at brigade/OG level resolve immediately (current Phase II attack resolution)
@@ -100,43 +129,25 @@ HoI allows battle plans at Army Group, Army, and Division level. AWWV mirrors:
 
 ---
 
-## 5. Proposed State Model
+## 6. Proposed State Model
 
-### 5.1 Army Front
+### 6.1 Army Front
 
-```ts
-army_front: Record<FactionId, {
-  extent: string[];  // edge_ids or region_ids; union of corps fronts
-}>;
-```
+**Derived only, never stored.** Army front = union of corps fronts. No state field. Computed on demand for rendering.
 
-Or derived: army front = union of corps fronts; no separate state if always derived.
-
-### 5.2 Corps Front
+### 6.2 Corps Front
 
 ```ts
-corps_front: Record<FormationId, {
-  extent: string[];  // edge_ids; union of brigade fronts in this corps
-  parent_faction: FactionId;
-}>;
+corps_command[corpsId].front_edges: string[]  // edge_ids; derived or player-drawn
 ```
 
-Corps front can be manually adjusted (player draws/shrinks) or derived from brigade fronts. If edited, it constrains which edges brigades may cover.
+Add to existing `corps_command`. Corps front = edge_ids (front line). Initially derived from brigade AoR edges; player-drawable once auto-distribution engine exists. When front_edges changes, re-derive brigade_aor via auto-distribution.
 
-### 5.3 Brigade Front
+### 6.3 Brigade Front / brigade_aor
 
-```ts
-brigade_front_assignment: Record<FormationId, {
-  extent: string[];        // edge_ids or settlement_ids this brigade covers
-  parent_corps_front: string;  // corps formation id
-  coverage_count: number;  // 1–4 settlements, personnel-capped
-  contiguous_required: boolean;  // true in Phase II
-}>;
-```
+**Do not replace `brigade_aor`.** It stays as `Record<SettlementId, FormationId>`. Brigade front = settlement_ids (existing format). Always contiguous.
 
-Phase I: `extent` may be non-contiguous. Phase II: `extent` must form a contiguous cluster.
-
-### 5.4 Subfront (OG)
+### 6.4 Subfront (OG)
 
 ```ts
 og_orders: Array<{
@@ -148,71 +159,35 @@ og_orders: Array<{
 }>;
 ```
 
-### 5.5 Deriving `brigade_aor`
+### 6.5 Derivation Chain (Review)
 
-From `brigade_front_assignment.extent` → `brigade_aor[sid] = formationId` for each settlement in extent. Phase I: extent may include non-contiguous settlements (rear cleanup). Phase II: extent is contiguous.
+```
+corps_front_edges: Record<FormationId, string[]>
+  ↓ (auto-distribute)
+brigade_front_assignment (intermediate, when player draws)
+  ↓ (write)
+brigade_aor: Record<SettlementId, FormationId>  (existing, unchanged)
+```
 
----
-
-## 6. GUI Elements (Separate per Tier)
-
-### 6.1 Army Front UI
-
-- **Location:** Strategic map mode; faction-level panel
-- **Elements:** Army front boundary (thick outline); army stance selector (General Offensive / Defensive / Total Mobilization)
-- **Interaction:** Read-only boundary (derived from corps); stance is editable
-
-### 6.2 Corps Front UI
-
-- **Location:** Operational map mode; corps selection
-- **Elements:** Corps front boundary (medium outline); corps stance; named operation planner (planning / execution / recovery)
-- **Interaction:** 
-  - Draw/edit corps front extent (subset of army front)
-  - Create subfront (OG) by lassoing part of corps front
-  - Set stance and operation phase
-
-### 6.3 Brigade Front UI
-
-- **Location:** Tactical map mode; brigade panel
-- **Elements:** Brigade front highlight (settlements/edges); coverage slider (1–4); posture selector
-- **Interaction:** 
-  - Assign brigade to corps front (or subfront)
-  - Set coverage (1–4 settlements)
-  - Phase I: multi-select non-contiguous settlements for rear cleanup
-  - Phase II: contiguous assignment only
-
-### 6.4 Subfront (OG) UI
-
-- **Location:** Operational/tactical; OG creation flow
-- **Elements:** Subfront boundary (dashed); member brigades list; pool contribution sliders
-- **Interaction:** 
-  - Create subfront from corps front selection
-  - Add/remove member brigades
-  - Set pool contribution per brigade
-  - OG lifecycle: activate, monitor cohesion, dissolve
-
-### 6.5 Operations UI
-
-- **Location:** Corps/OG panel; timeline or phase indicator
-- **Elements:** Operation name; phase (Planning / Execution / Recovery / Complete); target highlights
-- **Interaction:** 
-  - Plan operation (select axis, targets)
-  - Execute (advance phase)
-  - View subordinate attack orders aligned with operation
-
-### 6.6 Summary Table
-
-| Tier | GUI Component | Primary Actions |
-|------|---------------|-----------------|
-| Army | Army front panel, strategic map | Stance |
-| Corps | Corps front editor, operational map | Extent, stance, operations, create subfront |
-| Brigade | Brigade panel, tactical map | Assignment, coverage, posture, attack |
-| OG | Subfront editor, OG panel | Extent, members, pool, lifecycle |
-| Operations | Corps/OG operation panel | Plan, execute, phase |
+All downstream consumers (pressure, attack, supply, displacement) read `brigade_aor` as before. Zero breakage.
 
 ---
 
-## 7. Paradox Team Discussion
+## 7. GUI: One Map With Zoom Levels (Review Amendment)
+
+**Replace five separate GUIs with one unified map using zoom-driven modes.** F-key infrastructure (F1..F4 in map_operational_3d.ts) already supports this.
+
+| Mode | Trigger | What You See | What You Do |
+|------|---------|--------------|-------------|
+| **Strategic** | F1 or zoomed out | Army fronts (thick outlines), corps sectors (shaded), faction stances | Click corps → set stance; click army → set standing order |
+| **Operational** | F2 or medium zoom | Corps fronts (edge lines), brigade positions (counters), named operations | Draw offensive arrows; create OG subfronts; plan operations |
+| **Tactical** | F3 or zoomed in | Brigade AoR (settlement highlights), postures, attack arrows | Click brigade → set posture; click settlement → issue orders |
+
+**Front Hierarchy Panel:** Collapsible tree (Army → Corps → Brigades; OGs as children of Corps). Click node to focus map and show that tier's extent. Single panel for drill-down across all tiers.
+
+---
+
+## 8. Paradox Team Discussion
 
 ### 7.1 Orchestrator
 
@@ -331,41 +306,49 @@ From `brigade_front_assignment.extent` → `brigade_aor[sid] = formationId` for 
 
 ---
 
-## 8. Additional Features and System Integrations
+## 9. Additional Features and System Integrations
 
-### 8.1 Supply Integration
+### 9.1 New Mechanics (from Review)
+
+- **Drawable front lines + auto-distribution (Phase 2 priority):** Player draws corps front line → engine assigns brigades along it. Killer HoI feature.
+- **Offensive arrow plans:** Player draws attack axis → engine generates multi-turn advance via named operations.
+- **Fallback lines:** Player draws secondary line behind front; brigades auto-retreat if breached.
+- **Front pressure visualization:** Render existing front_pressure on line (thick red = danger, thin green = safe).
+- **Front width mechanic:** Terrain-based width per edge; brigade density → coverage quality; overextension penalty.
+- **Pocket/enclave handling:** Auto-detect disconnected territory; auto-generate enclave mini-fronts; pocket brigades operate independently.
+
+### 9.2 Supply Integration
 
 - Corps front length → overextension component of supply pressure
 - Brigade front extent → supply responsibility (which brigade “owns” a settlement for supply trace)
 
-### 8.2 Displacement Integration
+### 9.3 Displacement Integration
 
 - Front movement (corps front advances) → displacement triggers for civilians in newly contested settlements
 - Rear cleanup (Phase I) → displacement from cleared pockets
 
-### 8.3 Exhaustion Integration
+### 9.4 Exhaustion Integration
 
 - Front length per tier → exhaustion contribution (army front total, corps front per corps)
 - Static corps front → hardening; reduces maneuver but increases exhaustion
 
-### 8.4 Negotiation Integration
+### 9.5 Negotiation Integration
 
 - Front stability (from front_segments) already feeds negotiation
 - Corps front extent could inform “control percentage” for ceasefire proposals
 
-### 8.5 Fog of War Integration
+### 9.6 Fog of War Integration
 
 - Army/corps front boundaries visible only for controlled faction (or recon-covered)
 - Enemy corps front extent could be intel estimate (fuzzy boundary)
 
-### 8.6 Scenario Init
+### 9.7 Scenario Init
 
-- Scenario can define initial corps_front extent and brigade_front_assignment
-- `init_corps_fronts`, `init_brigade_fronts` in scenario schema for historical setups
+- Scenario can define `init_corps_fronts`; brigade assignment derived via auto-distribution (no `init_brigade_fronts` needed)
 
 ---
 
-## 9. Canon Changes Required
+## 10. Canon Changes Required (Amended per Review)
 
 ### 9.1 Rulebook
 
@@ -393,20 +376,20 @@ From `brigade_front_assignment.extent` → `brigade_aor[sid] = formationId` for 
 
 ---
 
-## 10. Implementation Phases (Revised)
+## 11. Implementation Phases (Revised per Review)
 
-| Phase | Scope | GUI |
-|-------|-------|-----|
-| **2a** | Brigade front assignment; Phase I non-contiguous, Phase II contiguous; derive brigade_aor | Brigade panel: assignment, coverage |
-| **2b** | Corps front derivation and editing; display | Corps front editor, operational map |
-| **2c** | Army front display; stance | Army panel, strategic map |
-| **3a** | OGs as subfronts; pool contribution | Subfront creator, OG panel |
-| **3b** | Multi-level operations; attack at OG/corps | Operations panel |
-| **4** | Full GUI parity; front hierarchy panel | All tiers, F-key modes |
+| Phase | What | Effort | Impact |
+|-------|------|--------|--------|
+| **1: Visual front lines** | Render existing front_edges as continuous lines on 3D map; corps sectors shaded; front pressure visualization (thick/thin/color) | Small | Massive visual payoff; nearly free |
+| **2: Drawable corps fronts** | Player draws/adjusts corps front line; auto-distribution engine assigns brigades along line; fallback lines | Large | HoI killer feature; eliminates manual brigade assignment |
+| **3: Offensive arrows** | Player draws attack axis → engine generates multi-turn advance via named operations | Medium | Eliminates per-brigade per-settlement per-turn micromanagement |
+| **4: OG subfronts** | Player draws subfront region within corps front → creates OG with spatial extent and pool | Small–Medium | OGs become spatial and intuitive |
+| **5: Front width + polish** | Terrain-based front width; overextension feedback; pocket/enclave integration | Medium | Concentrate vs spread tradeoff |
+| **6: Phase 0 holdout integration** | Org penetration → holdout resistance; steeper population factor; border intervention modifier | Small | Phase 0 decisions matter; ships independently |
 
 ---
 
-## 11. Risks and Mitigations
+## 12. Risks and Mitigations
 
 | Risk | Mitigation |
 |------|-------------|
@@ -418,17 +401,17 @@ From `brigade_front_assignment.extent` → `brigade_aor[sid] = formationId` for 
 
 ---
 
-## 12. Open Questions
+## 13. Open Questions (Answers from Review)
 
-1. **Phase I pocket semantics:** Single contiguous cluster vs multiple pockets per brigade?
-2. **Corps front overlap:** Can two corps share an edge at boundary (e.g. corridor strip)?
-3. **OG subfront vs corps front:** Must subfront be subset of one corps front, or can it span corps (multi-corps OG)?
-4. **Army front storage:** Derived only or persisted?
-5. **Init from scenario:** `init_corps_fronts`, `init_brigade_fronts` schema?
+1. **Phase I pocket semantics:** Drop non-contiguous brigade AoR entirely. Rear cleanup uses control_flip → holdout pipeline.
+2. **Corps front overlap:** Yes. Two corps can share edges at boundary. Engine assigns settlements by BFS distance from brigade HQ.
+3. **OG subfront vs corps front:** Subfront must be subset of one corps front. Multi-corps OGs violate canon (Rulebook §5.6).
+4. **Army front storage:** Derived only, never stored.
+5. **Init from scenario:** Yes, `init_corps_fronts`. `init_brigade_fronts` unnecessary — brigade assignment derived from corps front via auto-distribution.
 
 ---
 
-## 13. References
+## 14. References
 
 - `docs/10_canon/Rulebook_v0_5_0.md` §5, §5.6
 - `docs/10_canon/Systems_Manual_v0_5_0.md` §6
@@ -438,3 +421,4 @@ From `brigade_front_assignment.extent` → `brigade_aor[sid] = formationId` for 
 - `docs/30_planning/WARMAP_UI_UX_ARCHITECTURE_PROPOSAL.md`
 - `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
 - HoI4 wiki: Battle plan, Unit controller, Front line
+- `docs/30_planning/FRONT_ASSIGNMENT_PROPOSAL_REVIEW.md` — review that informed these amendments

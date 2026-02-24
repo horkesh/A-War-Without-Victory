@@ -12,8 +12,10 @@ import type { EdgeRecord } from '../../../map/settlements.js';
 import type { TerrainScalarsData } from '../../../map/terrain_scalars.js';
 import type { ResolveAttackOrdersReport } from '../../../sim/phase_ii/resolve_attack_orders.js';
 import type { FormationId, GameState } from '../../../state/game_state.js';
+import { getLegacyAoR } from '../../../state/game_state.js';
 
 import { applyWiaTrickleback } from '../../../sim/formation_spawn.js';
+import { applyBrigadeRepositionOrders } from '../../../sim/phase_ii/apply_brigade_reposition.js';
 import { processBrigadeMovement } from '../../../sim/phase_ii/brigade_movement.js';
 import { applyPostureOrders } from '../../../sim/phase_ii/brigade_posture.js';
 import { applyBrigadePressureToState } from '../../../sim/phase_ii/brigade_pressure.js';
@@ -64,14 +66,17 @@ export function processDeploymentStates(
 
     for (const fid of Object.keys(deploymentStates).sort(strictCompare)) {
         const ds = deploymentStates[fid]!;
+        const phase = (state as { meta?: { phase?: string } }).meta?.phase;
+        const legacyAoR = phase === 'phase_ii' ? undefined : getLegacyAoR(state).brigade_aor;
+        const brigadeAor = (legacyAoR ?? {}) as Record<string, string | null>;
 
         if (ds.status === 'undeploying') {
-            // Transition: undeploying → undeployed
-            // Contract AoR to HQ only
-            const brigadeAor = (state as any).brigade_aor as Record<string, string | null> ?? {};
-            for (const [sid, bid] of Object.entries(brigadeAor)) {
-                if (bid === fid && sid !== ds.hq_sid) {
-                    brigadeAor[sid] = null;
+            // Transition: undeploying → undeployed (Phase II: no AoR to contract)
+            if (phase !== 'phase_ii') {
+                for (const [sid, bid] of Object.entries(brigadeAor)) {
+                    if (bid === fid && sid !== ds.hq_sid) {
+                        brigadeAor[sid] = null;
+                    }
                 }
             }
             ds.status = 'undeployed';
@@ -81,8 +86,12 @@ export function processDeploymentStates(
         } else if (ds.status === 'deploying') {
             const remaining = (ds.turns_remaining ?? 1) - 1;
             if (remaining <= 0) {
-                // Expand AoR to HQ + adjacent friendly/uncontrolled settlements
-                const brigadeAor = (state as any).brigade_aor as Record<string, string | null> ?? {};
+                // Expand AoR to HQ + adjacent (Phase II: location_osid only; skip AoR expand)
+                if (phase === 'phase_ii') {
+                    toDelete.push(fid);
+                    logs.push(`${fid}: deployed (Phase II location_osid-only)`);
+                    continue;
+                }
                 const pc = (state as any).political_controllers as Record<string, string | null> ?? {};
                 const formations = (state as any).formations as Record<string, { faction?: string; hq_sid?: string; personnel?: number }> ?? {};
                 const formation = formations[fid];
@@ -148,6 +157,7 @@ export interface SandboxTurnReport {
     turn: number;
     attackReport: ResolveAttackOrdersReport;
     movementProcessed: boolean;
+    repositionApplied: boolean;
     postureApplied: boolean;
     loadUpLogs: string[];
 }
@@ -213,6 +223,13 @@ export function advanceSandboxTurn(
         movementProcessed = true;
     }
 
+    // 2b. Apply brigade reposition orders
+    let repositionApplied = false;
+    if (state.brigade_reposition_orders && Object.keys(state.brigade_reposition_orders).length > 0) {
+        applyBrigadeRepositionOrders(state, edges);
+        repositionApplied = true;
+    }
+
     // 3. Equipment degradation (simplified: fixed maintenance=0.5)
     const formations = state.formations ?? {};
     for (const fid of Object.keys(formations).sort(strictCompare)) {
@@ -224,8 +241,9 @@ export function advanceSandboxTurn(
         degradeEquipment(f, f.posture ?? 'defend', 0.5);
     }
 
-    // 4. Compute brigade pressure
-    if (state.brigade_aor && Object.keys(state.brigade_aor).length > 0) {
+    // 4. Compute brigade pressure (Phase II: no AoR; skip)
+    const aor = getLegacyAoR(state).brigade_aor;
+    if (aor && Object.keys(aor).length > 0 && (state.meta as { phase?: string })?.phase !== 'phase_ii') {
         applyBrigadePressureToState(state, edges);
     }
 
@@ -250,6 +268,7 @@ export function advanceSandboxTurn(
         turn: turnNumber,
         attackReport,
         movementProcessed,
+        repositionApplied,
         postureApplied,
         loadUpLogs,
     };

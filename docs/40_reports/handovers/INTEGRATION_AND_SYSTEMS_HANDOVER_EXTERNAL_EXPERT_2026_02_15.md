@@ -209,7 +209,7 @@ Critical path: **A1 → A4** (visual); **B1 → B2 → B3** (Phase 0 playable). 
 
 1. This document (full).  
 2. `docs/40_reports/audit/DOCUMENTED_UNIMPLEMENTED_SYSTEMS_AUDIT_2026_02_15.md`  
-3. `docs/40_reports/backlog/WARROOM_SETUP_AND_PHASE0_EXECUTION_PROPOSAL.md`  
+3. Warroom/Phase 0: [BACKLOG_GUI_WARROOM_WAR_PLANNING_MAP.md](../backlog/BACKLOG_GUI_WARROOM_WAR_PLANNING_MAP.md) (indexes WARROOM_SETUP_AND_PHASE0_EXECUTION_PROPOSAL; full content in docs/_old/40_reports/backlog/WARROOM_SETUP_AND_PHASE0_EXECUTION_PROPOSAL.md)  
 4. `docs/10_canon/Phase_0_Specification_v0_5_0.md`  
 5. `docs/10_canon/Engine_Invariants_v0_5_0.md` (§13–17)  
 6. `docs/10_canon/Systems_Manual_v0_5_0.md` (§1–23)  

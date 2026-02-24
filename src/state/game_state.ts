@@ -73,8 +73,24 @@ export interface BrigadeAoROrder {
     to_brigade: FormationId;
 }
 
-/** Brigade municipality movement order: replace brigade municipality assignment for this turn. */
+/** Brigade municipality movement order: replace brigade municipality assignment for this turn. (Legacy; AoR removed.) */
 export type BrigadeMunicipalityOrder = Record<FormationId, MunicipalityId[] | null>;
+
+/**
+ * Legacy AoR keys: present only when loading old saves. Do not write; not serialized.
+ * Use for transition casts where code still reads during AoR phase-out.
+ */
+export interface LegacyBrigadeAoRState {
+    brigade_aor?: Record<SettlementId, FormationId | null>;
+    brigade_aor_orders?: BrigadeAoROrder[];
+    brigade_mun_orders?: BrigadeMunicipalityOrder;
+    brigade_municipality_assignment?: Record<FormationId, MunicipalityId[]>;
+}
+
+/** Cast state to include legacy AoR keys (read-only; do not assign). Used during AoR phase-out. */
+export function getLegacyAoR(state: GameState): LegacyBrigadeAoRState {
+    return state as GameState & LegacyBrigadeAoRState;
+}
 
 /** Brigade posture order: set a brigade's posture. */
 export interface BrigadePostureOrder {
@@ -217,6 +233,8 @@ export interface FormationState {
     doctrine_state?: DoctrineState;
     /** HQ settlement for map placement and clickable icon. When set, icon is drawn at this settlement; when absent, fallback to municipality centroid. */
     hq_sid?: SettlementId;
+    /** Operational settlement ID (OSID) for HoI ZoC/spawn-by-OSID. Set at creation from hq_sid via canonical_to_operational_map. */
+    location_osid?: SettlementId;
     // --- Brigade Operations System fields ---
     /** Brigade posture (Phase II). Default: 'defend'. */
     posture?: BrigadePosture;
@@ -226,6 +244,12 @@ export interface FormationState {
     composition?: BrigadeComposition;
     /** 1-turn disruption flag from AoR reshaping; reduces pressure output. */
     disrupted?: boolean;
+    /** HoI ZoC / Attack Resolution: turns on current OSID without moving; resets on move; caps at MAX_ENTRENCHMENT (12). */
+    entrenchment_turns?: number;
+    /** HoI: consecutive successful defenses; resets on move or attacker success; caps at MAX_RESILIENCE_STREAK (6). */
+    defense_streak?: number;
+    /** HoI: turns remaining disrupted (0 = not disrupted); set by push-back outcome. */
+    disrupted_turns?: number;
     /** WIA trickleback: wounded pending return to this formation (only return when out of combat). */
     wounded_pending?: number;
 }
@@ -262,6 +286,14 @@ export interface FrontPressureState {
     last_updated_turn: number;
 }
 
+export interface FrontEdgeState {
+    edge_id: string;
+    a: SettlementId;
+    b: SettlementId;
+    side_a: FactionId | null;
+    side_b: FactionId | null;
+}
+
 export interface FrontSegmentState {
     edge_id: string;
     active: boolean;
@@ -278,6 +310,31 @@ export interface FrontSegmentState {
     friction: number;
     // maximum friction ever observed (integer >= 0)
     max_friction: number;
+}
+
+/**
+ * HoI-style assignable front segment (contiguous hostile boundary component).
+ * Distinct from edge-keyed front_segments used for friction/hardening scaffolding.
+ */
+export interface AssignableFrontSegmentState {
+    front_id: string;
+    edge_ids: string[];
+    side_a: FactionId | null;
+    side_b: FactionId | null;
+    /** Deterministic proxy for segment extent (edge count for now). */
+    length_edges: number;
+    /** Optional player/scenario label (e.g. "Sarajevo line"). */
+    name?: string;
+    /** Phase 3 planned: theatre ownership for this segment. */
+    theatre_id?: string;
+}
+
+export interface TheatreState {
+    id: string;
+    name: string;
+    faction: FactionId;
+    army_ids?: FormationId[];
+    region_scope?: MunicipalityId[];
 }
 
 export interface AuthorityProfile {
@@ -557,6 +614,8 @@ export interface StateMeta {
     enable_rbih_hrhb_dynamics?: boolean;
     /** Desktop GUI: which side the human plays (RBiH, RS, HRHB). Set when starting a new campaign from the app. Non-normative for simulation. */
     player_faction?: FactionId;
+    /** Calendar date corresponding to turn 0 for this scenario. Defaults to { year: 1991, month: 8, day: 1 } (1 September 1991) when absent. Non-normative for simulation — used by UI only. */
+    scenario_start_date?: { year: number; month: number; day: number };
 }
 
 export interface NegotiationLedgerEntry {
@@ -1060,6 +1119,10 @@ export interface GameState {
     phase_ii_exhaustion?: Record<FactionId, number>;
     /** Optional local (per-settlement) exhaustion accumulator; monotonic when present. */
     phase_ii_exhaustion_local?: Record<SettlementId, number>;
+    /** OSID list in enemy ZoC per faction (for ZoC overlay). Set by zoc-computation when operational data present. */
+    phase_ii_enemy_zoc_by_faction?: Record<FactionId, string[]>;
+    /** Linked ZoC per faction: OSIDs that form a connected front between 2+ friendly brigades. Enemies cannot enter. */
+    phase_ii_linked_zoc_by_faction?: Record<FactionId, string[]>;
 
     // --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
     /** Settlement-level displacement (capacity degradation) [0, 1]. Monotonic; never decreases. */
@@ -1069,27 +1132,45 @@ export interface GameState {
     /** Municipality-level displacement (capacity degradation) [0, 1]. Monotonic; never decreases. */
     municipality_displacement?: Record<MunicipalityId, number>;
 
-    // --- Brigade Operations System state ---
-    /** Per-brigade municipality supra-layer assignment (Phase II). Brigades may share municipalities. */
-    brigade_municipality_assignment?: Record<FormationId, MunicipalityId[]>;
-    /** Pending brigade municipality movement orders (consumed once per turn). */
-    brigade_mun_orders?: BrigadeMunicipalityOrder;
-    /** Per-settlement brigade AoR assignment (Phase II). null = rear settlement (no brigade). */
-    brigade_aor?: Record<SettlementId, FormationId | null>;
-    /** Pending AoR reshape orders (consumed once per turn). */
-    brigade_aor_orders?: BrigadeAoROrder[];
-    /** Player/bot desired AoR settlement cap per brigade (1–4). When set, overrides personnel-based cap. */
+    // --- Brigade Operations System state (Phase II: OSID/ZoC only; AoR removed) ---
+    /** Canonical front-edge snapshot for GUI rendering and deterministic diagnostics. */
+    front_edges?: FrontEdgeState[];
+    /** OSID front-edge snapshot (Phase II operational view) for HoI/OSID consumers. */
+    phase_ii_front_edges_osid?: FrontEdgeState[];
+    /** HoI-style assignable front segments derived from canonical front_edges. */
+    assignable_front_segments?: AssignableFrontSegmentState[];
+    /** HoI-style brigade assignment to an assignable front segment. null = reserve. */
+    brigade_front_assignment?: Record<FormationId, string | null>;
+    /** HoI-style top-level theatre model. */
+    theatres?: Record<string, TheatreState>;
+    /** Army (army_hq) to theatre assignment map. */
+    army_theatre_assignment?: Record<FormationId, string>;
+    /**
+     * Corps front assignment (HoI-style): per-corps normalized edge_ids (e.g. "S1__S2").
+     * Army front is derived as the union of corps fronts.
+     */
+    corps_front_edges?: Record<FormationId, string[]>;
+    /** Optional fallback front lines for controlled withdrawal. */
+    corps_fallback_front_edges?: Record<FormationId, string[]>;
+    /** Player/bot desired AoR settlement cap per brigade (1–4). When set, overrides personnel-based cap. (Legacy; AoR removed.) */
     brigade_desired_aor_cap?: Record<FormationId, number>;
     /** Pending brigade posture orders (consumed once per turn). */
     brigade_posture_orders?: BrigadePostureOrder[];
     /** Attack orders: one target settlement per brigade per turn; null = no attack (Brigade Realism plan §3.4). Consumed once per turn. */
     brigade_attack_orders?: Record<FormationId, SettlementId | null>;
+    /**
+     * Corps-level attack axis orders: target geometry compressed as ordered edge_ids.
+     * Intent-only order surface; translated to brigade orders by deterministic assignment.
+     */
+    corps_attack_axis_orders?: Record<FormationId, { edge_ids: string[]; created_turn?: number }>;
     /** Corps command state. Key: corps FormationId. */
     corps_command?: Record<FormationId, CorpsCommandState>;
     /** Army-level stance per faction. */
     army_stance?: Record<FactionId, ArmyStance>;
     /** OG activation orders (consumed once per turn). */
     og_orders?: OGActivationOrder[];
+    /** Optional OG subfront extent as front edge IDs (subset of parent corps front). */
+    og_subfront_edges?: Record<FormationId, string[]>;
     /** Settlement holdout state (Phase I settlement-level control). Key: SettlementId. */
     settlement_holdouts?: Record<SettlementId, SettlementHoldoutState>;
 

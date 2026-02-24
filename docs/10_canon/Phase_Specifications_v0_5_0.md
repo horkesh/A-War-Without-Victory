@@ -9,7 +9,7 @@ Phase I Specification: docs/10_canon/Phase_I_Specification_v0_5_0.md
 
 Phase II Specification: docs/10_canon/Phase_II_Specification_v0_5_0.md
 
-Areas of Responsibility are instantiated only once sustained brigade-level adjacency contact exists between opposing factions for multiple consecutive turns, and militia-only pressure is no longer the dominant coercive mechanism. AoRs are never instantiated during Phase I.
+Phase II uses OSID location and ZoC only; no Areas of Responsibility (AoR). Brigade location is location_osid per formation; fronts derived from OSID hostile boundaries. Phase I has no brigade territorial assignment; Phase II entry sets location_osid only (see AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md).
 
 One game turn equals one week.
 
@@ -508,7 +508,7 @@ Any modification requires:
 6. **Enclaves (System 5):** detect enclaves, compute integrity, update humanitarian pressure.
 7. **Sarajevo (System 6):** update Sarajevo-specific siege state and visibility.
 8. **Negotiation Capital (System 7):** update capital and territorial valuation inputs.
-9. **AoR (System 8):** assign/validate AoR **only outside Phase I**; front-active settlements require AoR.
+9. **OSID location and ZoC (System 8):** Brigade location is location_osid only; no AoR. Front segments from phase_ii_front_edges_osid; control change only via attack resolution or corps ops.
 10. **Tactical Doctrines (System 9):** evaluate posture eligibility and apply doctrine modifiers.
 11. **Contested Control (System 11):** initialize or update control_status from stability where applicable.
 
@@ -519,20 +519,18 @@ Any modification requires:
 ### Phase I (Early War) integration
 - Apply control_status to early-war flip resistance and authority state.
 - Tactical doctrine eligibility is constrained by early-war capability and supply.
-- AoR assignment remains prohibited in Phase I.
+- No brigade territorial assignment in Phase I (no AoR; Phase II uses location_osid only).
 
 ### Phase II+ (Post-Phase I) integration
-- AoR assignment and enforcement are enabled for front-active settlements.
-- Doctrine postures interact with pressure and equipment degradation as defined in Systems Manual v0.4.
-- Front-active definition (for AoR eligibility): adjacency to opposing control, pressure-eligible edges, contested corridors, enclave membership, or contested/fragmented authority.
+- Brigade location is location_osid only; front segments from phase_ii_front_edges_osid; brigade_front_assignment (null = reserve).
+- Doctrine postures interact with equipment degradation and attack resolution as defined in Systems Manual.
+- Control change only via attack resolution or corps/frontline operations; no passive pressure flip.
 
 ### Turn-order positioning notes
 - IVP and patron updates occur before exhaustion and negotiation updates to ensure consistent downstream modifiers.
 - Capability progression updates occur before doctrine eligibility evaluation.
-- AoR validation occurs after control updates and before pressure generation.
 
 ### Validation requirements (v0.4 additions)
-- AoR invariants enforced only after Phase I.
 - Contested control thresholds enforced at Phase 0 initialization.
 - Doctrine eligibility and capability progression must be deterministic and re-evaluated per turn.
 

@@ -35,23 +35,81 @@ export function parseGameState(json: unknown): LoadedGameState {
 
     const rawMovementState = state.brigade_movement_state as Record<string, { status?: string; stance?: string }> | undefined;
 
-    // Build reverse index: formation id -> sorted list of settlement IDs in its AoR
+    // Build reverse index: formation id -> sorted list of location IDs (Phase II: OSID from location_osid; else legacy brigade_aor SIDs)
     const brigadeAorByFormationId: Record<string, string[]> = {};
-    const rawBrigadeAor = state.brigade_aor as Record<string, string | null> | undefined;
-    if (rawBrigadeAor) {
-        const sidKeys = Object.keys(rawBrigadeAor).sort();
-        for (const sid of sidKeys) {
-            const formationId = rawBrigadeAor[sid];
-            if (formationId) {
-                const list = brigadeAorByFormationId[formationId] ?? [];
-                list.push(sid);
-                brigadeAorByFormationId[formationId] = list;
+    if (phase === 'phase_ii') {
+        const rawFormations = state.formations as Record<string, Record<string, unknown>> | undefined;
+        if (rawFormations) {
+            for (const id of Object.keys(rawFormations).sort()) {
+                const loc = (rawFormations[id] as { location_osid?: string }).location_osid;
+                if (typeof loc === 'string' && loc) {
+                    brigadeAorByFormationId[id] = [loc];
+                }
             }
         }
-        // Sort each list for determinism
-        for (const fid of Object.keys(brigadeAorByFormationId)) {
-            brigadeAorByFormationId[fid].sort();
+    } else {
+        const rawBrigadeAor = state.brigade_aor as Record<string, string | null> | undefined;
+        if (rawBrigadeAor) {
+            const sidKeys = Object.keys(rawBrigadeAor).sort();
+            for (const sid of sidKeys) {
+                const formationId = rawBrigadeAor[sid];
+                if (formationId) {
+                    const list = brigadeAorByFormationId[formationId] ?? [];
+                    list.push(sid);
+                    brigadeAorByFormationId[formationId] = list;
+                }
+            }
+            for (const fid of Object.keys(brigadeAorByFormationId)) {
+                brigadeAorByFormationId[fid].sort();
+            }
         }
+    }
+
+    let brigadeFrontAssignment: LoadedGameState['brigadeFrontAssignment'] | undefined;
+    const rawFrontAssignment = state.brigade_front_assignment as Record<string, unknown> | undefined;
+    if (rawFrontAssignment && typeof rawFrontAssignment === 'object' && !Array.isArray(rawFrontAssignment)) {
+        const out: NonNullable<LoadedGameState['brigadeFrontAssignment']> = {};
+        for (const formationId of Object.keys(rawFrontAssignment).sort((a, b) => a.localeCompare(b))) {
+            const value = rawFrontAssignment[formationId];
+            out[formationId] = typeof value === 'string' ? value : null;
+        }
+        if (Object.keys(out).length > 0) brigadeFrontAssignment = out;
+    }
+
+    let armyTheatreAssignment: LoadedGameState['armyTheatreAssignment'] | undefined;
+    const rawArmyTheatreAssignment = state.army_theatre_assignment as Record<string, unknown> | undefined;
+    if (rawArmyTheatreAssignment && typeof rawArmyTheatreAssignment === 'object' && !Array.isArray(rawArmyTheatreAssignment)) {
+        const out: NonNullable<LoadedGameState['armyTheatreAssignment']> = {};
+        for (const armyId of Object.keys(rawArmyTheatreAssignment).sort((a, b) => a.localeCompare(b))) {
+            const theatreId = rawArmyTheatreAssignment[armyId];
+            if (typeof theatreId === 'string' && theatreId.length > 0) out[armyId] = theatreId;
+        }
+        if (Object.keys(out).length > 0) armyTheatreAssignment = out;
+    }
+
+    let theatres: LoadedGameState['theatres'] | undefined;
+    const rawTheatres = state.theatres as Record<string, Record<string, unknown>> | undefined;
+    if (rawTheatres && typeof rawTheatres === 'object' && !Array.isArray(rawTheatres)) {
+        const out: NonNullable<LoadedGameState['theatres']> = {};
+        for (const theatreId of Object.keys(rawTheatres).sort((a, b) => a.localeCompare(b))) {
+            const row = rawTheatres[theatreId] ?? {};
+            const faction = typeof row.faction === 'string' ? row.faction : '';
+            if (!faction) continue;
+            const armyIds = Array.isArray(row.army_ids)
+                ? row.army_ids.filter((id): id is string => typeof id === 'string' && id.length > 0).sort((a, b) => a.localeCompare(b))
+                : undefined;
+            const regionScope = Array.isArray(row.region_scope)
+                ? row.region_scope.filter((id): id is string => typeof id === 'string' && id.length > 0).sort((a, b) => a.localeCompare(b))
+                : undefined;
+            out[theatreId] = {
+                id: typeof row.id === 'string' && row.id.length > 0 ? row.id : theatreId,
+                name: typeof row.name === 'string' && row.name.length > 0 ? row.name : `${faction} Theatre`,
+                faction,
+            };
+            if (armyIds && armyIds.length > 0) out[theatreId].army_ids = armyIds;
+            if (regionScope && regionScope.length > 0) out[theatreId].region_scope = regionScope;
+        }
+        if (Object.keys(out).length > 0) theatres = out;
     }
 
     // Extract formations
@@ -75,6 +133,7 @@ export function parseGameState(json: unknown): LoadedGameState {
             const ops = f.ops as Record<string, unknown> | undefined;
 
             const hq_sid = typeof f.hq_sid === 'string' && f.hq_sid ? f.hq_sid : undefined;
+            const location_osid = typeof (f as { location_osid?: string }).location_osid === 'string' && (f as { location_osid?: string }).location_osid ? (f as { location_osid?: string }).location_osid : undefined;
             const aorSettlementIds = brigadeAorByFormationId[id];
             const personnel = typeof f.personnel === 'number' ? f.personnel : undefined;
             const posture = typeof f.posture === 'string' && f.posture ? f.posture : undefined;
@@ -98,6 +157,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                 tags,
                 municipalityId,
                 hq_sid,
+                location_osid,
                 aorSettlementIds,
                 personnel,
                 posture,
@@ -180,8 +240,15 @@ export function parseGameState(json: unknown): LoadedGameState {
 
     // Extract pending attack orders (Record<FormationId, SettlementId | null>).
     const attackOrders: AttackOrderView[] = [];
-    const rawAttackOrders = state.brigade_attack_orders as Record<string, string | null> | undefined;
-    if (rawAttackOrders && typeof rawAttackOrders === 'object' && !Array.isArray(rawAttackOrders)) {
+    const rawAttackOrders = state.brigade_attack_orders as Record<string, string | null> | Array<{ brigade_id?: string; target_settlement_id?: string }> | undefined;
+    if (Array.isArray(rawAttackOrders)) {
+        for (const row of rawAttackOrders) {
+            const brigadeId = typeof row?.brigade_id === 'string' ? row.brigade_id : '';
+            const targetSid = typeof row?.target_settlement_id === 'string' ? row.target_settlement_id : '';
+            if (brigadeId && targetSid) attackOrders.push({ brigadeId, targetSettlementId: targetSid });
+        }
+        attackOrders.sort((a, b) => a.brigadeId.localeCompare(b.brigadeId) || a.targetSettlementId.localeCompare(b.targetSettlementId));
+    } else if (rawAttackOrders && typeof rawAttackOrders === 'object') {
         for (const [brigadeId, targetSid] of Object.entries(rawAttackOrders).sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)) {
             if (targetSid) attackOrders.push({ brigadeId, targetSettlementId: targetSid });
         }
@@ -189,8 +256,15 @@ export function parseGameState(json: unknown): LoadedGameState {
 
     // Extract pending municipality movement orders (Record<FormationId, MunicipalityId[] | null>).
     const movementOrders: MovementOrderView[] = [];
-    const rawMunOrders = state.brigade_mun_orders as Record<string, string[] | null> | undefined;
-    if (rawMunOrders && typeof rawMunOrders === 'object' && !Array.isArray(rawMunOrders)) {
+    const rawMunOrders = state.brigade_mun_orders as Record<string, string[] | null> | Array<{ brigade_id?: string; target_mun_id?: string }> | undefined;
+    if (Array.isArray(rawMunOrders)) {
+        for (const row of rawMunOrders) {
+            const brigadeId = typeof row?.brigade_id === 'string' ? row.brigade_id : '';
+            const targetMunicipalityId = typeof row?.target_mun_id === 'string' ? row.target_mun_id : '';
+            if (brigadeId && targetMunicipalityId) movementOrders.push({ brigadeId, targetMunicipalityId });
+        }
+        movementOrders.sort((a, b) => a.brigadeId.localeCompare(b.brigadeId) || a.targetMunicipalityId.localeCompare(b.targetMunicipalityId));
+    } else if (rawMunOrders && typeof rawMunOrders === 'object') {
         for (const [brigadeId, munIds] of Object.entries(rawMunOrders).sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)) {
             if (Array.isArray(munIds)) {
                 for (const targetMunicipalityId of munIds) {
@@ -363,6 +437,133 @@ export function parseGameState(json: unknown): LoadedGameState {
         }
     }
 
+    const frontEdges: LoadedGameState['frontEdges'] = Array.isArray(state.front_edges)
+        ? (state.front_edges as Array<Record<string, unknown>>)
+            .map((edge) => {
+                const a = typeof edge.a === 'string' ? edge.a : '';
+                const b = typeof edge.b === 'string' ? edge.b : '';
+                if (!a || !b) return null;
+                const [na, nb] = a < b ? [a, b] : [b, a];
+                const edgeId = typeof edge.edge_id === 'string' && edge.edge_id
+                    ? edge.edge_id
+                    : `${na}__${nb}`;
+                const sideA = edge.side_a === 'RS' || edge.side_a === 'RBiH' || edge.side_a === 'HRHB'
+                    ? edge.side_a
+                    : null;
+                const sideB = edge.side_b === 'RS' || edge.side_b === 'RBiH' || edge.side_b === 'HRHB'
+                    ? edge.side_b
+                    : null;
+                return {
+                    edge_id: edgeId,
+                    a: na,
+                    b: nb,
+                    side_a: a < b ? sideA : sideB,
+                    side_b: a < b ? sideB : sideA,
+                };
+            })
+            .filter((edge): edge is NonNullable<LoadedGameState['frontEdges']>[number] => edge !== null)
+            .sort((a, b) => a.edge_id.localeCompare(b.edge_id))
+        : undefined;
+
+    const frontEdgesOsid: LoadedGameState['frontEdgesOsid'] = Array.isArray((state as Record<string, unknown>).phase_ii_front_edges_osid)
+        ? ((state as Record<string, unknown>).phase_ii_front_edges_osid as Array<Record<string, unknown>>)
+            .map((edge) => {
+                const a = typeof edge.a === 'string' ? edge.a : '';
+                const b = typeof edge.b === 'string' ? edge.b : '';
+                if (!a || !b) return null;
+                const [na, nb] = a < b ? [a, b] : [b, a];
+                const edgeId = typeof edge.edge_id === 'string' && edge.edge_id
+                    ? edge.edge_id
+                    : `${na}__${nb}`;
+                const sideA = edge.side_a === 'RS' || edge.side_a === 'RBiH' || edge.side_a === 'HRHB'
+                    ? edge.side_a
+                    : null;
+                const sideB = edge.side_b === 'RS' || edge.side_b === 'RBiH' || edge.side_b === 'HRHB'
+                    ? edge.side_b
+                    : null;
+                return {
+                    edge_id: edgeId,
+                    a: na,
+                    b: nb,
+                    side_a: a < b ? sideA : sideB,
+                    side_b: a < b ? sideB : sideA,
+                };
+            })
+            .filter((edge): edge is NonNullable<LoadedGameState['frontEdgesOsid']>[number] => edge !== null)
+            .sort((a, b) => a.edge_id.localeCompare(b.edge_id))
+        : undefined;
+
+    let assignableFrontSegments: LoadedGameState['assignableFrontSegments'] | undefined;
+    if (Array.isArray(state.assignable_front_segments)) {
+        const out: NonNullable<LoadedGameState['assignableFrontSegments']> = [];
+        for (const segment of state.assignable_front_segments as Array<Record<string, unknown>>) {
+            const frontId = typeof segment.front_id === 'string' ? segment.front_id : '';
+            const edgeIdsRaw = Array.isArray(segment.edge_ids) ? segment.edge_ids : [];
+            const edgeIds = edgeIdsRaw
+                .map((id) => (typeof id === 'string' ? id : ''))
+                .filter((id) => id.length > 0)
+                .sort((a, b) => a.localeCompare(b));
+            if (!frontId || edgeIds.length === 0) continue;
+            const sideA = segment.side_a === 'RS' || segment.side_a === 'RBiH' || segment.side_a === 'HRHB'
+                ? segment.side_a
+                : null;
+            const sideB = segment.side_b === 'RS' || segment.side_b === 'RBiH' || segment.side_b === 'HRHB'
+                ? segment.side_b
+                : null;
+            const lengthEdgesRaw = Number(segment.length_edges);
+            const lengthEdges = Number.isFinite(lengthEdgesRaw) && lengthEdgesRaw > 0
+                ? Math.floor(lengthEdgesRaw)
+                : edgeIds.length;
+            const name = typeof segment.name === 'string' && segment.name.length > 0 ? segment.name : undefined;
+            const theatreId = typeof segment.theatre_id === 'string' && segment.theatre_id.length > 0
+                ? segment.theatre_id
+                : undefined;
+            const entry: NonNullable<LoadedGameState['assignableFrontSegments']>[number] = {
+                front_id: frontId,
+                edge_ids: edgeIds,
+                side_a: sideA,
+                side_b: sideB,
+                length_edges: lengthEdges,
+            };
+            if (name) entry.name = name;
+            if (theatreId) entry.theatre_id = theatreId;
+            out.push(entry);
+        }
+        out.sort((a, b) => a.front_id.localeCompare(b.front_id));
+        if (out.length > 0) assignableFrontSegments = out;
+    }
+
+    let frontPressureByEdge: LoadedGameState['frontPressureByEdge'] | undefined;
+    const rawFrontPressure = state.front_pressure as Record<string, Record<string, unknown>> | undefined;
+    if (rawFrontPressure && typeof rawFrontPressure === 'object' && !Array.isArray(rawFrontPressure)) {
+        const out: NonNullable<LoadedGameState['frontPressureByEdge']> = {};
+        for (const key of Object.keys(rawFrontPressure).sort((a, b) => a.localeCompare(b))) {
+            const item = rawFrontPressure[key] ?? {};
+            const edgeId = typeof item.edge_id === 'string' && item.edge_id ? item.edge_id : key;
+            const value = Number(item.value ?? 0);
+            const maxAbs = Number(item.max_abs ?? Math.abs(value));
+            const lastUpdatedTurn = Number(item.last_updated_turn ?? turn);
+            out[edgeId] = {
+                edge_id: edgeId,
+                value: Number.isFinite(value) ? value : 0,
+                max_abs: Number.isFinite(maxAbs) ? Math.max(1, maxAbs) : 1,
+                last_updated_turn: Number.isFinite(lastUpdatedTurn) ? lastUpdatedTurn : turn,
+            };
+        }
+        if (Object.keys(out).length > 0) frontPressureByEdge = out;
+    }
+
+    let enemyZocByFaction: LoadedGameState['enemyZocByFaction'];
+    const rawEnemyZoc = state.phase_ii_enemy_zoc_by_faction as Record<string, string[]> | undefined;
+    if (rawEnemyZoc && typeof rawEnemyZoc === 'object' && !Array.isArray(rawEnemyZoc)) {
+        const out: Record<string, string[]> = {};
+        for (const fid of Object.keys(rawEnemyZoc).sort((a, b) => a.localeCompare(b))) {
+            const arr = rawEnemyZoc[fid];
+            if (Array.isArray(arr)) out[fid] = [...arr].sort((a, b) => a.localeCompare(b));
+        }
+        if (Object.keys(out).length > 0) enemyZocByFaction = out;
+    }
+
     return {
         label,
         turn,
@@ -372,6 +573,9 @@ export function parseGameState(json: unknown): LoadedGameState {
         controlBySettlement,
         statusBySettlement,
         brigadeAorByFormationId,
+        brigadeFrontAssignment,
+        theatres,
+        armyTheatreAssignment,
         attackOrders,
         movementOrders,
         movementOrdersSettlement: movementOrdersSettlement.length > 0 ? movementOrdersSettlement : undefined,
@@ -383,7 +587,12 @@ export function parseGameState(json: unknown): LoadedGameState {
         player_faction: playerFaction ?? undefined,
         rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
         phase_i_alliance_rbih_hrhb: phase_i_alliance_rbih_hrhb ?? null,
+        frontEdges: frontEdges && frontEdges.length > 0 ? frontEdges : undefined,
+        frontEdgesOsid: frontEdgesOsid && frontEdgesOsid.length > 0 ? frontEdgesOsid : undefined,
+        assignableFrontSegments,
+        frontPressureByEdge,
         displacementByMun: Object.keys(displacementByMun).length > 0 ? displacementByMun : undefined,
         reconIntelligence,
+        enemyZocByFaction,
     };
 }

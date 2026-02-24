@@ -18,6 +18,7 @@ import type {
     FormationState,
     GameState
 } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 
 // --- Constants ---
 
@@ -67,9 +68,10 @@ function isInHomeMun(
     formation: FormationState,
     homeMun: string | null
 ): boolean {
-    if (!homeMun || !state.brigade_aor) return false;
+    const aor = getLegacyAoR(state).brigade_aor;
+    if (!homeMun || !aor) return false;
     // Check if the brigade's HQ settlement is in its AoR
-    if (formation.hq_sid && state.brigade_aor[formation.hq_sid] === formation.id) {
+    if (formation.hq_sid && aor[formation.hq_sid] === formation.id) {
         return true;
     }
     return false;

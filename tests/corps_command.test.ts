@@ -18,7 +18,7 @@ import {
     validateOGOrder
 } from '../src/sim/phase_ii/operational_groups.js';
 import type { FactionId, FormationState, GameState, OGActivationOrder } from '../src/state/game_state.js';
-import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
+import { CURRENT_SCHEMA_VERSION, getLegacyAoR } from '../src/state/game_state.js';
 
 function makeFormation(id: string, faction: FactionId, hq: string, personnel: number = 1000): FormationState {
     return {
@@ -265,7 +265,6 @@ describe('operational groups - updateOGLifecycle', () => {
             corps_id: 'rs-corps-1'
         };
         state.corps_command!['rs-corps-1'].active_ogs = [ogId];
-        state.brigade_aor!['S3'] = ogId;
 
         const dissolved = updateOGLifecycle(state);
 
@@ -279,9 +278,6 @@ describe('operational groups - updateOGLifecycle', () => {
 
         // Removed from corps active_ogs
         expect(state.corps_command!['rs-corps-1'].active_ogs).not.toContain(ogId);
-
-        // AoR assignment cleared
-        expect(state.brigade_aor!['S3']).toBeNull();
     });
 
     it('dissolves OG when duration exceeded', () => {
@@ -338,7 +334,7 @@ describe('operational groups - computeOGPressureBonus', () => {
             posture: 'attack',
             corps_id: 'rs-corps-1'
         };
-        state.brigade_aor!['S3'] = ogId;
+        getLegacyAoR(state).brigade_aor!['S3'] = ogId;
 
         // Edge S3:S4 should have OG bonus because S3 is assigned to an OG
         const bonus = computeOGPressureBonus(state, 'S3:S4');

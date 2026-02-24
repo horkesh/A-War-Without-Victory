@@ -8,6 +8,7 @@
 import type { EdgeRecord } from '../../map/settlements.js';
 import { getTerrainScalarsForSid, type TerrainScalarsData } from '../../map/terrain_scalars.js';
 import type { FactionId, FormationId, GameState, SettlementId } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getBrigadeAoRSettlements } from './brigade_aor.js';
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
@@ -173,7 +174,7 @@ export function processBrigadeMovement(
     const movementState = { ...(state.brigade_movement_state ?? {}) };
     const movementOrders = state.brigade_movement_orders ?? {};
     const deployOrders = state.brigade_deploy_orders ?? {};
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const formations = state.formations ?? {};
     const pc = state.political_controllers ?? {};
 
@@ -291,6 +292,7 @@ export function processBrigadeMovement(
                 for (const sid of dest) {
                     brigadeAor[sid] = formationId;
                 }
+                if (dest.length > 0) formation.hq_sid = [...dest].sort(strictCompare)[0]!;
                 movementState[formationId] = {
                     status: 'unpacking',
                     stance: current.stance ?? 'combat',

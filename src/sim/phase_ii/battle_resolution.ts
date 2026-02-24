@@ -31,12 +31,14 @@ import type {
     GameState,
     SettlementId
 } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { areRbihHrhbAllied } from '../phase_i/alliance_update.js';
 import { getBrigadeAoRSettlements, getSettlementGarrison } from './brigade_aor.js';
 import { captureEquipment, computeEquipmentMultiplier, ensureBrigadeComposition } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
+import { isBrigadeAssignedToFront } from './front_assignment.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -811,12 +813,13 @@ export function resolveBattleOrders(
     const adjacency = buildAdjacency(edges);
     const pc = state.political_controllers ?? {};
     const formations = state.formations ?? {};
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const frontSegments = state.front_segments ?? {};
     const turn = state.meta.turn;
 
     const orderEntries = (Object.entries(orders) as [FormationId, SettlementId | null][])
         .filter((entry): entry is [FormationId, SettlementId] => entry[1] != null && entry[1] !== '')
+        .filter(([formationId]) => isBrigadeAssignedToFront(state, formationId))
         .sort((a, b) => strictCompare(a[0], b[0]));
 
     // Group by target; for each target collect attackers with AoR adjacent to target. Phase D: cap 3; Phase H: terrain battle width (mountain 1, hills 2, plains 3).
@@ -1034,8 +1037,7 @@ export function resolveBattleOrders(
                     captureEquipment(defenderFormation, formation, loserAoRSize);
                 }
             }
-            // Phase D: first attacker by ID claims the settlement in its AoR
-            (state.brigade_aor as Record<SettlementId, FormationId | null>)[targetSid] = formationId;
+            // AoR phase-out: do not write brigade_aor
         }
 
         const totalAttackerLoss = totalPersonnelLoss(casualties.attacker);

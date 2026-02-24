@@ -9,6 +9,7 @@
  * Design: recruitment_system_design_note.md §§3-10.
  */
 
+import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/operational_data.js';
 import type { OobBrigade, OobCorps } from '../scenario/oob_loader.js';
 import { factionHasPresenceInMun } from '../scenario/oob_phase_i_entry.js';
 import { MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
@@ -171,7 +172,8 @@ function buildRecruitedFormation(
     personnel: number,
     currentTurn: number,
     hqSid: string | undefined,
-    isMandatory: boolean
+    isMandatory: boolean,
+    locationOsid?: string
 ): FormationState {
     return {
         id: brigade.id as FormationId,
@@ -187,7 +189,8 @@ function buildRecruitedFormation(
         cohesion: isMandatory ? BRIGADE_BASE_COHESION + 10 : BRIGADE_BASE_COHESION,
         composition: buildBrigadeComposition(equipClass, brigade.faction, true),
         corps_id: (brigade.corps as FormationId) ?? null,
-        ...(hqSid ? { hq_sid: hqSid } : {})
+        ...(hqSid ? { hq_sid: hqSid } : {}),
+        ...(locationOsid != null ? { location_osid: locationOsid } : {})
     };
 }
 
@@ -311,7 +314,8 @@ export function recruitBrigade(
     chosenClass: EquipmentClass,
     resources: RecruitmentResourceState,
     sidToMun: Map<SettlementId, MunicipalityId>,
-    municipalityHqSettlement: Record<string, string>
+    municipalityHqSettlement: Record<string, string>,
+    canonicalToOperational?: CanonicalToOperationalMap
 ): RecruitBrigadeResult {
     const { faction, home_mun, id } = brigade;
 
@@ -347,9 +351,10 @@ export function recruitBrigade(
 
     // All checks pass -- build formation
     const hq_sid = resolveValidHqSid(state, faction, home_mun, municipalityHqSettlement, sidToMun);
+    const location_osid = canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined;
     const composition = buildBrigadeComposition(chosenClass, faction, true);
     const formation = buildRecruitedFormation(
-        brigade, chosenClass, composition.infantry, state.meta.turn, hq_sid, brigade.mandatory
+        brigade, chosenClass, composition.infantry, state.meta.turn, hq_sid, brigade.mandatory, location_osid
     );
 
     const action: RecruitmentAction = {
@@ -409,6 +414,8 @@ export interface RunBotRecruitmentOptions {
     includeMandatory?: boolean;
     maxMandatoryPerFaction?: number;
     maxElectivePerFaction?: number;
+    /** When set, formations get location_osid from hq_sid via canonical_to_operational_map. */
+    canonicalToOperational?: CanonicalToOperationalMap;
 }
 
 /**
@@ -452,6 +459,8 @@ export function runBotRecruitment(
             if (state.formations[c.id]) continue;
             if (!factionHasPresenceInMun(state, c.faction, c.hq_mun, sidToMun)) continue;
             const hq_sid = resolveValidHqSid(state, c.faction, c.hq_mun, municipalityHqSettlement, sidToMun);
+            const location_osid =
+                c.hq_osid ?? (options?.canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, options.canonicalToOperational) : undefined);
             state.formations[c.id] = {
                 id: c.id as FormationId,
                 faction: c.faction,
@@ -462,7 +471,8 @@ export function runBotRecruitment(
                 tags: [`mun:${c.hq_mun}`],
                 kind: c.kind === 'army_hq' ? 'army_hq' : 'corps_asset',
                 personnel: 0,
-                ...(hq_sid ? { hq_sid } : {})
+                ...(hq_sid ? { hq_sid } : {}),
+                ...(location_osid != null ? { location_osid } : {})
             };
         }
     }
@@ -511,8 +521,9 @@ export function runBotRecruitment(
 
             // Build formation directly for mandatory (bypass normal cost checks)
             const hq_sid = resolveValidHqSid(state, faction, brigade.home_mun, municipalityHqSettlement, sidToMun);
+            const location_osid = options?.canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, options.canonicalToOperational) : undefined;
             const formation = buildRecruitedFormation(
-                brigade, brigade.default_equipment_class, effectiveManpower, currentTurn, hq_sid, true
+                brigade, brigade.default_equipment_class, effectiveManpower, currentTurn, hq_sid, true, location_osid
             );
 
             state.formations[brigade.id] = formation;
@@ -570,7 +581,8 @@ export function runBotRecruitment(
             const chosenClass = bestAffordableClass(brigade.default_equipment_class, availEquip);
 
             const result = recruitBrigade(
-                state, brigade, chosenClass, resources, sidToMun, municipalityHqSettlement
+                state, brigade, chosenClass, resources, sidToMun, municipalityHqSettlement,
+                options?.canonicalToOperational
             );
 
             if (result.success) {

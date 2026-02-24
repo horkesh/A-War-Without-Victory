@@ -274,4 +274,92 @@ Canon: TACTICAL_MAP_SYSTEM §2 (summary), §13, §13.2, §13.3.
 
 ---
 
+## 27. GUI and map frontline rework + refactor (2026-02-21)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [GUI_MAP_FRONTLINE_REWORK_AND_REFACTOR_2026_02_21.md](implemented/GUI_MAP_FRONTLINE_REWORK_AND_REFACTOR_2026_02_21.md) | **Visibility and data:** `front_edges` persisted in GameState (canonical serialization); 2D map prefers canonical `frontEdges` when present and draws strategic front even without local brigade defender; 3D FrontLineLayer uses canonical edges with robust fallback. **Corps assignment UI:** Corps panel Stage Front (derive from subordinate AoR → `stage-corps-front-order`), Stage Axis (`stage-corps-attack-axis-order`), Stage OG (`stage-og-subfront-order`); IPC already present, first playable path in 2D. **Warmap fixes:** Load Save menu only when desktop has no state; Day/Night (N) in operational 3D only, message shown there. **Refactor:** MapApp single `normalizeEdgeId`; turn_pipeline `getEdgesForTurn()` shared by refreshFrontEdgeSnapshot and Phase I; FrontLineLayer single `useCanonicalEdges`. Canon: TACTICAL_MAP_SYSTEM §2, DESKTOP_GUI_IPC_CONTRACT; context.md implementation ref. |
+
+---
+
+## 28. Front system comprehensive rebuild (HoI theatres + assignable fronts) (2026-02-21)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [FRONT_SYSTEM_REBUILD_HOI_THEATRES_2026_02_21.md](implemented/FRONT_SYSTEM_REBUILD_HOI_THEATRES_2026_02_21.md) | **Phases 1–6:** (1) Contiguous assignable front segments from hostile boundary edges (`assignable_front_segments`). (2) Reserve rule: `brigade_front_assignment` (front_id \| null); reserve brigades do not apply pressure or execute attack/posture/movement until assigned. (3) Theatres and army_theatre_assignment; segment theatre linkage. (4) GUI assign-to-front, hierarchy panel Theatre → Army → Corps → Brigade. (5) Naming IPC: assign-brigade-to-front, rename-front-segment, rename-theatre. (6) Canon propagation (Game Bible, Rulebook, Systems Manual). 2D/3D single source: both maps read same GameState; verification test plan in TACTICAL_MAP_SYSTEM §10.4, §21.3; state contract in DESKTOP_GUI_IPC_CONTRACT. |
+
+---
+
+## 29. Headless corps fronts and run_summary tracking (2026-02-21)
+
+| Source | What was implemented |
+|--------|----------------------|
+| PROJECT_LEDGER 2026-02-21, refactor + pipeline | **Pipeline:** Phase II step `ensure-derived-corps-front-edges` before `apply-corps-front-orders`: calls `ensureDerivedCorpsFrontEdges(state, edges)` so headless scenario runs populate `corps_front_edges` from brigade AoR and `applyCorpsFrontAutoDistribution` can run. **Run summary:** When Phase II ran, `run_summary.json` includes `front_corps_tracking: { corps_front_edges_present: boolean, corps_count: number }` for diagnostics. Refactor: removed dead `component.length === 0` check in assignable_front_segments. |
+
+---
+
+## 30. Warmap sandbox visual & UX port (2026-02-21)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [WARMAP_SANDBOX_VISUAL_UX_PORT_2026_02_21.md](implemented/WARMAP_SANDBOX_VISUAL_UX_PORT_2026_02_21.md) | **Operational 3D warmap** — Port from tactical sandbox into `map_operational_3d.ts` (blue-steel NATO aesthetic retained). **Counters:** Two-tier formation paint — brigade 128×72 light background; corps 256×160 CRT-style (green name, strength/posture colors, corps-tint border). **Stem lines:** Vertical lines from counters to terrain with radial-gradient dots (corps green, brigade gray-blue); visibility synced with sprite LOD. **Overlays:** AoR upgrade (per-polygon hatch, perpendicular contact-edge segments); polygon-fill movement range (GeoJSON settlement shapes, dashed border, deployed/undeployed colors); settlement highlight rings (HQ blue, move green, attack red, animated). **Panels:** Right-side stack (WarMapPanelStack) — Selection (formation stats, posture dropdown, deploy/undeploy), Orders queue (pending with cancel), Battle log (turn-by-turn scrollable), Forces summary (per-faction bde count + personnel). **Modes:** SELECT/ATTACK/MOVE toolbar (1/2/3, Escape); DesktopBridge `stagePostureOrder` / `stageAttackOrder` for panel and mode flow. Map mode/Post-FX/layer toggles moved to left to avoid panel collision. Canon: TACTICAL_MAP_SYSTEM §2, §21.2; DESKTOP_GUI_IPC_CONTRACT; Systems Manual implementation-note. |
+
+---
+
+## 31. Warroom war-phase modals (2026-02-21)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [WARROOM_WAR_PHASE_MODALS_2026_02_21.md](implemented/WARROOM_WAR_PHASE_MODALS_2026_02_21.md) | **Seven desk objects + declaration events** wired to real war-phase GameState via shared extraction and three-tier fog. **Data:** `data/fog_of_war.ts` (FogTier, strength categories); `data/war_data_extractor.ts` — single entry point `extractWarData(gameState, playerFaction)` → WarDataSnapshot (12 sub-snapshots); fog enforced at extraction boundary. **Delta events:** `data/warroom_state.ts` (PreviousTurnSnapshot singleton), `data/turn_event_generator.ts` (generateTurnEvents, 11 event types); capture before advance, consume after. **Desk objects:** Flag (FactionOverviewPanel) — real personnel, casualties, 4-quadrant layout; Magazine — phase gate, 6-section war assessment, faction mastheads; Reports — 6-section intelligence brief; Telephone — new DiplomacyModal (RS/RBiH/HRHB faction-specific); Newspaper — war communique, pickBestWarHeadline, fog-framed; Ticker — dynamic war events (max 5) + ~180 scripted historical (turns 32–207); Calendar — THIS WEEK preview (pending ops, WIA, corps ops, warnings). **Declaration:** 4 war milestone events (rbih_hrhb_war_begins, ceasefire, washington, exhaustion_critical); findWarMilestoneEvent. 7 new files, 9 modified under `src/ui/warroom/`; no simulation files modified; determinism preserved (sorted iteration, no timestamps/random). |
+
+---
+
+## 32. Operational settlement merger tool & HoI map control layer rework (2026-02-22)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [20260222_OPERATIONAL_SETTLEMENT_MERGER_AND_HOI_MAP_REWORK.md](implemented/20260222_OPERATIONAL_SETTLEMENT_MERGER_AND_HOI_MAP_REWORK.md) | **Three bodies of work:** (1) **Settlement Merger Tool** — Standalone Vite page `settlement_merger.html` (7 new files under `src/ui/map/merger/`): hand-curate merge groups with visual feedback, ethnic composition, contiguity validation, cross-municipality warnings, save/load, TopoJSON export; Mostar split applied (5,823 → 5,824 displayed). (2) **Derive pipeline migration** — Replaced algorithmic clustering (Phases 2–4.6) with import of 702 hand-curated merge groups from `data/source/merge_progress.json`; **753 operational settlements** (702 merged + 51 singletons) from 5,823 canonical; OSID format `op:<mun>:<slug>`; all 5 outputs in `data/derived/operational/` (operational_settlements.geojson, canonical_to_operational_map.json, operational_contact_graph.json, operational_political_control.json, operational_initial_master.json). Political control: RBiH 372, RS 266, HRHB 115. (3) **HoI map renderer rework** — Single merged mesh with global vertex table and per-vertex colors (zero gaps/overlaps); tilt default 20°, zoom 4.5; cleanup duplicate constants. **OSID is now the canonical map unit** for simulation, rendering, and political control. |
+
+---
+
+## 33. AoR phase-out OSID/ZoC full implementation (2026-02-23)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [20260223_AOR_PHASEOUT_OSID_ZOC_FULL_IMPLEMENTATION.md](implemented/20260223_AOR_PHASEOUT_OSID_ZOC_FULL_IMPLEMENTATION.md) | **Phase II spatial model is OSID/ZoC-only.** (1) Canon + reconciliation: AoR references removed from Phase II Spec, Systems Manual, Engine Invariants, Rulebook, PIPELINE_ENTRYPOINTS, context.md; reconciliation doc `AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md`. (2) State: `brigade_aor`, `brigade_aor_orders`, `brigade_mun_orders`, `brigade_municipality_assignment` removed from GameState type and serialization; `LegacyBrigadeAoRState` + `getLegacyAoR()` for transition reads; migrateState strips legacy keys. (3) Pipeline: AoR steps removed; `phase-ii-location-osid-backfill`; `assignable_front_segments` from `phase_ii_front_edges_osid` in refreshFrontEdgeSnapshot; Phase I→II no `initializeBrigadeAoR`. (4) Scenario/run_phase_ii_browser: no AoR init; backfill only. (5) UI adapters, war_data_extractor, desktop_sim, sandbox_engine: Phase II use `location_osid` and OSID front edges. (6) Bot: `generate-bot-brigade-orders` OSID path only when operational data present; no brigade_aor gate. Known Vitest failures (AoR-related) documented; not blocking scenario runs. |
+
+---
+
+## 35. HoI map 3D tilt fix & political control texture-on-terrain (2026-02-23)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [20260223_HOI_MAP_3D_TILT_AND_TEXTURE_ON_TERRAIN.md](implemented/20260223_HOI_MAP_3D_TILT_AND_TEXTURE_ON_TERRAIN.md) | **Two-phase fix for HoI 2.5D map at steep camera tilt.** (1) **Depth/tilt:** Ortho camera far 1000→100; control layer Y 0.02→0.001, per-feature Y step removed (overlap via reverse iteration + `depthFunc: LessDepth` + polygonOffset); front ribbons Y 0.10→0.002, ZoC/assignable Y reduced; polygonOffset on all overlay layers; `t`/`T` keyboard tilt adjust (5°). (2) **Texture-on-terrain:** Political control no longer a separate floating polygon mesh; faction colors rasterized onto 2048×2048 canvas (per operational settlement polygon, 75% opacity) and applied to terrain mesh geometry (same BufferGeometry → no gaps, no terrain poke-through at any tilt). Invisible control mesh retained for raycasting (hover/click). F2 Political toggles faction overlay mesh. Report: full implementation details, verification, canon propagation. |
+
+---
+
+## 36. HoI map improvements phased (2026-02-23)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [20260223_HOI_MAP_IMPROVEMENTS_PHASED.md](implemented/20260223_HOI_MAP_IMPROVEMENTS_PHASED.md) | **All five Orchestrator convene improvements.** Phase 1: Option C layout (gap:0 .hoi-main). Phase 2: Shared terrain/heightmapSmooth.ts; HoIMapRenderer smoothHeightmap(2,2) before buildTerrainMesh. Phase 3: Orbit yaw ±30° (middle-drag, Shift+right-drag horizontal). Phase 4: Label LOD — zoom &lt; DEFAULT_ZOOM/1.4 → 256×64/18px, else 128×32/14px; rebuild on threshold cross. Phase 5: HoI front style (neutral band + center line, zoom-scaled width, asymmetric player-faction side). **Front = full hostile boundary** (no "where units" filter). Architect decisions flagged: LOD threshold 1.4×; friendly = playerFaction. TACTICAL_MAP_SYSTEM §2 updated. |
+
+---
+
+## 37. OSID terrain-weighted column movement and bot column march (2026-02-23)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [20260223_OSID_COLUMN_MOVEMENT_AND_BOT_COLUMN_MARCH.md](implemented/20260223_OSID_COLUMN_MOVEMENT_AND_BOT_COLUMN_MARCH.md) | **Part 2 — Column movement:** New `src/sim/phase_ii/osid_column_movement.ts`: terrain-weighted edge costs (road/slope/friction/uphill/river), `getOsidColumnRate()` by composition (heavy 2, light 4, mixed 3), Dijkstra through friendly OSIDs, `processOsidColumnMovement()` two-pass (advance existing transits, then process new column orders). Transit lifecycle: order with `stance: 'column'` → in_transit with path → arrive, set location_osid, clear state. **Part 4 — Bot column march:** In `bot_brigade_ai_osid.ts`: interior brigades ≥3 hops from front get column march to a front destination; in-transit brigades skipped. **Pipeline:** osid-column-movement runs BEFORE zoc-constrained-movement (ZoC step clears all brigade_movement_orders). Determinism: sorted iteration, deterministic Dijkstra tie-break, no randomness; 52-week hash verified. Canon: Phase II Spec §4–§5, Systems Manual §6.2.1/§6.5, Engine Invariants §14.9, Rulebook §5.4, Game Bible §7, context.md. |
+
+---
+
+## 41. Mobilization & Force Growth and scenario init fix (2026-02-24)
+
+| Report | What was implemented |
+|--------|----------------------|
+| [20260224_MOBILIZATION_FORCE_GROWTH_AND_SCENARIO_INIT_FULL_REPORT.md](implemented/20260224_MOBILIZATION_FORCE_GROWTH_AND_SCENARIO_INIT_FULL_REPORT.md) | **Mobilization plan (Parts 1–8):** Part 1 Phase II ongoing mobilization (ongoing_mobilization.ts, pipeline step before brigade-reinforcement); Part 2 RS JNA inheritance bonus (20k one-time at init, pool_population + scenario_runner); Part 3 VRS initial personnel (FACTION_INITIAL_PERSONNEL RS 1200, RBiH/HRHB 800); Part 4 faction initial cohesion (FACTION_INITIAL_COHESION RS 72, HRHB 62, RBiH 55); Part 5 ARBiH available_from OOB shifts (30 brigades 3rd/4th corps); Part 7a experience gain and commander exp loss in attack_resolution_osid; Part 7b cohesion drift (phase-ii-cohesion-drift after resolve-attack-orders, engaged_formation_ids, cohesion_drift.ts); Part 7c exhaustion penalty (ratio ≥0.8 / ≥0.95, cohesion_drift). **Scenario init fix:** Skip promotePoliticalControllersToOsid when political_controllers already OSID-keyed (isPoliticalControllersAlreadyOsidKeyed in political_control_init.ts); unblocks 52-week apr1992_definitive_52w run. Architect decisions: [MOBILIZATION_ARCHITECT_DECISIONS.md](backlog/MOBILIZATION_ARCHITECT_DECISIONS.md). Canon: Phase II Spec §5, Systems Manual §13. |
+
+---
+
 *For backlog (not yet implemented), see [CONSOLIDATED_BACKLOG.md](CONSOLIDATED_BACKLOG.md). For patterns and corrections, see [CONSOLIDATED_LESSONS_LEARNED.md](CONSOLIDATED_LESSONS_LEARNED.md) and .agent/napkin.md. Original report files archived to docs/_old/40_reports/implemented_2026_02_15/.*

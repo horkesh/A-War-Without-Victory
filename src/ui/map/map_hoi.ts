@@ -4,11 +4,23 @@
  */
 
 import { parseGameState } from './data/GameStateAdapter.js';
-import { HoIMapState, TopCommandBarComponent, ArmySidebarComponent, BottomStatusStripComponent } from './map_hoi/index.js';
+import { getOsidAdjacency } from './data/operationalContactGraph.js';
+import { HoIMapState, TopCommandBarComponent, ArmySidebarComponent, BottomStatusStripComponent, MapModeToolbar } from './map_hoi/index.js';
 import { loadedStateToHoIMapState } from './map_hoi/loadedStateToHoIState.js';
 import { initMapPlaceholder } from './map_hoi/MapPlaceholder.js';
 import { HoIMapRenderer } from './renderer/HoIMapRenderer.js';
-import type { LoadedGameState } from './types.js';
+import type { AssignableFrontSegmentInput, FormationMarkerInput } from './renderer/HoIMapRenderer.js';
+import type { FormationView, LoadedGameState } from './types.js';
+
+/** Pending renderer data when save loads before WebGL is ready. */
+interface PendingRendererData {
+  control: Record<string, string | null> | null;
+  edges: { a: string; b: string; side_a?: string | null; side_b?: string | null }[] | null;
+  playerFaction: string | null;
+  enemyZocByFaction: Record<string, string[]> | null;
+  assignableFrontSegments: AssignableFrontSegmentInput[] | null;
+  formations: FormationView[] | null;
+}
 
 type AwwvBridge = {
   getCurrentGameState?: () => Promise<string | null>;
@@ -20,30 +32,106 @@ function getBridge(): AwwvBridge | undefined {
   return (window as unknown as { awwv?: AwwvBridge }).awwv;
 }
 
+function isCorpsOrArmyHq(kind: string): boolean {
+  return kind === 'corps' || kind === 'corps_asset' || kind === 'army_hq';
+}
+
+function buildFormationMarkersFromFormations(
+  formations: FormationView[],
+  renderer: HoIMapRenderer
+): FormationMarkerInput[] {
+  const byId = new Map<string, FormationView>();
+  for (const f of formations) byId.set(f.id, f);
+
+  const positionById = new Map<string, [number, number, number]>();
+  for (const f of formations) {
+    const posOsid = f.location_osid ?? f.hq_sid;
+    const position = posOsid ? renderer.getWorldPositionForSettlement(posOsid) : null;
+    if (position) positionById.set(f.id, position);
+  }
+
+  for (const f of formations) {
+    if (!isCorpsOrArmyHq(f.kind) || positionById.has(f.id)) continue;
+    const subIds = f.subordinateIds ?? formations.filter((s) => s.corps_id === f.id).map((s) => s.id).sort((a, b) => a.localeCompare(b));
+    let sumX = 0, sumY = 0, sumZ = 0;
+    let n = 0;
+    for (const bid of subIds) {
+      const pos = positionById.get(bid);
+      if (!pos) continue;
+      sumX += pos[0]; sumY += pos[1]; sumZ += pos[2];
+      n++;
+    }
+    if (n > 0) positionById.set(f.id, [sumX / n, sumY / n, sumZ / n]);
+  }
+
+  const list: FormationMarkerInput[] = [];
+  for (const f of formations) {
+    const position = positionById.get(f.id);
+    if (!position) continue;
+    const isCorps = f.kind === 'corps' || f.kind === 'corps_asset';
+    list.push({
+      id: f.id,
+      position,
+      name: f.name ?? f.id,
+      faction: f.faction,
+      posture: f.posture,
+      isCorps,
+      showWhenZoomedOut: isCorpsOrArmyHq(f.kind),
+    });
+  }
+  list.sort((a, b) => a.id.localeCompare(b.id));
+  return list;
+}
+
+interface FormationSelectionRefs {
+  lastFormationsRef: { current: FormationView[] };
+  selectedFormationIdRef: { current: string | null };
+}
+
 function applyStateJson(
   state: HoIMapState,
   stateJson: string | null,
   rendererRef: { current: HoIMapRenderer | null },
-  pendingData?: { control: Record<string, string | null> | null; edges: { a: string; b: string }[] | null }
-): void {
-  if (!stateJson) return;
+  pendingData?: PendingRendererData,
+  refs?: FormationSelectionRefs
+): boolean {
+  if (!stateJson) return false;
   try {
     const loaded = parseGameState(JSON.parse(stateJson)) as LoadedGameState;
     const update = loadedStateToHoIMapState(loaded);
     state.setState(update);
     const control = loaded.controlBySettlement ?? {};
-    const edges = (loaded.frontEdges ?? []).map((e) => ({ a: e.a, b: e.b }));
+    const edges = (loaded.frontEdgesOsid ?? loaded.frontEdges ?? []).map((e) => ({ a: e.a, b: e.b, side_a: e.side_a, side_b: e.side_b }));
+    const playerFaction = loaded.player_faction ?? null;
+    const segments: AssignableFrontSegmentInput[] = (loaded.assignableFrontSegments ?? []).map((s) => ({
+      front_id: s.front_id,
+      edge_ids: [...(s.edge_ids ?? [])],
+    }));
+    if (refs) refs.lastFormationsRef.current = loaded.formations ?? [];
     const r = rendererRef.current;
     if (r) {
       r.setControlBySettlement(control);
       r.setFrontEdges(edges);
+      r.setPlayerFaction(playerFaction);
+      r.setEnemyZocByFaction(loaded.enemyZocByFaction ?? {});
+      r.setAssignableFrontSegments(segments);
+      r.setFormations(buildFormationMarkersFromFormations(loaded.formations ?? [], r));
+      if (refs) {
+        refs.selectedFormationIdRef.current = null;
+        r.setSelectionZocOsids([], null);
+      }
     } else if (pendingData) {
-      // Renderer not ready yet — store for later application
       pendingData.control = control;
       pendingData.edges = edges;
+      pendingData.playerFaction = playerFaction;
+      pendingData.enemyZocByFaction = loaded.enemyZocByFaction ?? {};
+      pendingData.assignableFrontSegments = segments;
+      pendingData.formations = loaded.formations?.length ? loaded.formations : null;
     }
+    return true;
   } catch (e) {
     console.warn('map_hoi: failed to parse game state', e);
+    return false;
   }
 }
 
@@ -53,6 +141,7 @@ function init(): void {
 
   const state = new HoIMapState();
   const bridge = getBridge();
+  let hasLoadedState = false;
 
   const topBarEl = document.getElementById('hoi-top-bar');
   const sidebarEl = document.getElementById('hoi-sidebar');
@@ -65,16 +154,32 @@ function init(): void {
   initMapPlaceholder(mapWrapEl);
 
   const rendererRef: { current: HoIMapRenderer | null } = { current: null };
-  // Store pending control/front data in case save loads before renderer is ready
-  const pendingData: { control: Record<string, string | null> | null; edges: { a: string; b: string }[] | null } = { control: null, edges: null };
+  const pendingData: PendingRendererData = {
+    control: null,
+    edges: null,
+    playerFaction: null,
+    enemyZocByFaction: null,
+    assignableFrontSegments: null,
+    formations: null,
+  };
+  const lastFormationsRef = { current: [] as FormationView[] };
+  const selectedFormationIdRef = { current: null as string | null };
+  const adjacencyRef = { current: null as Map<string, string[]> | null };
+  const formationRefs: FormationSelectionRefs = { lastFormationsRef, selectedFormationIdRef };
+  const applyState = (stateJson: string | null): boolean =>
+    applyStateJson(state, stateJson, rendererRef, pendingData, formationRefs);
 
   const tryWebGL = async (): Promise<void> => {
+    const getBaseUrl = () => (typeof window !== 'undefined' && window.location?.origin ? window.location.origin : '');
     const renderer = new HoIMapRenderer({
       container: mapWrapEl,
-      getBaseUrl: () => (typeof window !== 'undefined' && window.location?.origin ? window.location.origin : ''),
+      getBaseUrl,
     });
     const ok = await renderer.init();
     if (ok) {
+      getOsidAdjacency(getBaseUrl).then((adj) => {
+        adjacencyRef.current = adj;
+      }).catch(() => { /* optional */ });
       const placeholder = mapWrapEl.querySelector('.hoi-map-placeholder');
       if (placeholder) (placeholder as HTMLElement).style.display = 'none';
       const placeholderCanvas = mapWrapEl.querySelector('.hoi-map-placeholder-canvas');
@@ -95,18 +200,130 @@ function init(): void {
         renderer.setFrontEdges(pendingData.edges);
         pendingData.edges = null;
       }
+      if (pendingData.playerFaction !== null) {
+        renderer.setPlayerFaction(pendingData.playerFaction);
+        pendingData.playerFaction = null;
+      }
+      if (pendingData.enemyZocByFaction) {
+        renderer.setEnemyZocByFaction(pendingData.enemyZocByFaction);
+        pendingData.enemyZocByFaction = null;
+      }
+      if (pendingData.assignableFrontSegments) {
+        renderer.setAssignableFrontSegments(pendingData.assignableFrontSegments);
+        pendingData.assignableFrontSegments = null;
+      }
+      if (pendingData.formations?.length) {
+        renderer.setFormations(buildFormationMarkersFromFormations(pendingData.formations ?? [], renderer));
+        pendingData.formations = null;
+      }
 
-      // Settlement hover tooltip
+      // EU4-style map mode toolbar (layer toggle buttons, F1–F5)
+      const _toolbar = new MapModeToolbar(mapWrapEl, {
+        onToggleLayer: (layer, visible) => renderer.setLayerVisible(layer, visible),
+      });
+
+      // Settlement hover tooltip (300ms delay per napkin to avoid flicker)
+      const TOOLTIP_DELAY_MS = 300;
       const tooltipEl = document.createElement('div');
       tooltipEl.className = 'hoi-tooltip';
       tooltipEl.style.display = 'none';
       document.body.appendChild(tooltipEl);
+      let tooltipTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
       renderer.setHoverCallback((feature, sx, sy) => {
+        if (selectedFeatureRef.current) return;
+        if (tooltipTimeoutId) {
+          clearTimeout(tooltipTimeoutId);
+          tooltipTimeoutId = null;
+        }
         if (!feature) {
           tooltipEl.style.display = 'none';
           return;
         }
+        tooltipTimeoutId = setTimeout(() => {
+          tooltipTimeoutId = null;
+          showTooltip(feature, sx + 12, sy + 12);
+        }, TOOLTIP_DELAY_MS);
+      });
+
+      // Selection: click to pin tooltip and highlight borders; formation selection for ZoC/lines (Phase 2–4)
+      const selectedFeatureRef: { current: unknown } = { current: null };
+      const selectedFormationIdRef: { current: string | null } = { current: null };
+
+      renderer.setClickCallback((feature) => {
+        selectedFeatureRef.current = feature;
+        if (!feature) {
+          tooltipEl.style.display = 'none';
+          return;
+        }
+        // Pin tooltip near center of screen
+        const rect = mapWrapEl.getBoundingClientRect();
+        showTooltip(feature, rect.left + 12, rect.top + 12);
+      });
+
+      renderer.setClickFormationCallback((formationId) => {
+        selectedFormationIdRef.current = formationId;
+        if (!formationId) {
+          renderer.setSelectionZocOsids([], null);
+          renderer.setCorpsBrigadeLines([], null);
+          return;
+        }
+        const formations = lastFormationsRef.current;
+        const formation = formations.find((f) => f.id === formationId);
+        if (!formation) return;
+        const adj = adjacencyRef.current;
+
+        if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
+          const subordinateIds = formation.subordinateIds ?? formations
+            .filter((s) => s.corps_id === formation.id)
+            .map((s) => s.id)
+            .sort((a, b) => a.localeCompare(b));
+          let sumX = 0, sumY = 0, sumZ = 0;
+          let count = 0;
+          const segments: { from: [number, number, number]; to: [number, number, number] }[] = [];
+          for (const bid of subordinateIds) {
+            const b = formations.find((f) => f.id === bid);
+            if (!b || (b.kind !== 'brigade' && b.kind !== 'og')) continue;
+            const loc = b.location_osid ?? b.hq_sid;
+            if (!loc) continue;
+            const pos = renderer.getWorldPositionForSettlement(loc);
+            if (!pos) continue;
+            sumX += pos[0]; sumY += pos[1]; sumZ += pos[2];
+            count++;
+            segments.push({ from: [0, 0, 0], to: pos }); // from filled after centroid
+          }
+          const corpsPos: [number, number, number] = count > 0
+            ? [sumX / count, sumY / count, sumZ / count]
+            : [0, 0, 0];
+          for (const s of segments) s.from = corpsPos;
+          renderer.setCorpsBrigadeLines(segments, formation.faction);
+          const zocSet = new Set<string>();
+          if (adj) {
+            for (const bid of subordinateIds) {
+              const b = formations.find((f) => f.id === bid);
+              if (!b) continue;
+              const loc = b.location_osid ?? b.hq_sid;
+              if (!loc) continue;
+              for (const osid of adj.get(loc) ?? []) zocSet.add(osid);
+            }
+          }
+          const combinedOsids = Array.from(zocSet).sort((a, b) => a.localeCompare(b));
+          renderer.setSelectionZocOsids(combinedOsids, formation.faction);
+          return;
+        }
+
+        renderer.setCorpsBrigadeLines([], null);
+        const loc = formation.location_osid ?? formation.hq_sid;
+        if (!loc) {
+          renderer.setSelectionZocOsids([], null);
+          return;
+        }
+        if (!adj) return;
+        const zocOsids = (adj.get(loc) ?? []).slice().sort((a, b) => a.localeCompare(b));
+        renderer.setSelectionZocOsids(zocOsids, formation.faction);
+      });
+
+      function showTooltip(feature: { properties?: Record<string, unknown> }, left: number, top: number): void {
         const p = feature.properties ?? {};
         const controlMap = renderer.getControlBySettlement();
         const controller = controlMap[p.sid as string] ?? controlMap[p.osid as string] ?? '\u2014';
@@ -123,9 +340,9 @@ function init(): void {
           <div class="hoi-tooltip-row">Constituents: ${constituents.length <= 5 ? constituents.join(', ') : `${constituents.length} SIDs`}</div>
         `;
         tooltipEl.style.display = 'block';
-        tooltipEl.style.left = `${sx + 12}px`;
-        tooltipEl.style.top = `${sy + 12}px`;
-      });
+        tooltipEl.style.left = `${left}px`;
+        tooltipEl.style.top = `${top}px`;
+      }
     }
     // If WebGL failed, placeholder is already visible and loading
   };
@@ -138,7 +355,7 @@ function init(): void {
       const file = fileInput.files?.[0];
       if (!file) return;
       file.text().then((text) => {
-        applyStateJson(state, text, rendererRef, pendingData);
+        hasLoadedState = applyState(text) || hasLoadedState;
       }).catch((e) => console.warn('map_hoi: file read failed', e));
       fileInput.value = '';
     });
@@ -149,7 +366,9 @@ function init(): void {
     onAdvance: () => {
       if (bridge?.advanceTurn) {
         bridge.advanceTurn().then((r) => {
-          if (r?.stateJson) applyStateJson(state, r.stateJson, rendererRef, pendingData);
+          if (r?.stateJson) {
+            hasLoadedState = applyState(r.stateJson) || hasLoadedState;
+          }
         }).catch((e) => console.warn('advanceTurn failed', e));
       }
     },
@@ -174,20 +393,39 @@ function init(): void {
   state.subscribe(renderFromState);
 
   if (bridge?.setGameStateUpdatedCallback) {
-    bridge.setGameStateUpdatedCallback((stateJson) => applyStateJson(state, stateJson, rendererRef, pendingData));
+    bridge.setGameStateUpdatedCallback((stateJson) => {
+      hasLoadedState = applyState(stateJson) || hasLoadedState;
+    });
   }
   if (bridge?.getCurrentGameState) {
-    bridge.getCurrentGameState().then((stateJson) =>
-      applyStateJson(state, stateJson ?? null, rendererRef, pendingData));
-  }
-
-  // Auto-load latest save in standalone mode (no IPC bridge)
-  if (!bridge?.getCurrentGameState) {
+    bridge.getCurrentGameState().then((stateJson) => {
+      hasLoadedState = applyState(stateJson ?? null) || hasLoadedState;
+    });
+  } else {
+    // Standalone: auto-load latest scenario run for testing (e.g. copy a run's final_save.json to data/derived/latest_run_final_save.json)
     fetch(`${window.location.origin}/data/derived/latest_run_final_save.json`)
       .then((r) => r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))
-      .then((text) => applyStateJson(state, text, rendererRef, pendingData))
-      .catch((e) => console.warn('map_hoi: auto-load latest save failed', e));
+      .then((text) => {
+        hasLoadedState = applyState(text) || hasLoadedState;
+      })
+      .catch(() => { /* no latest run — user can Load Save */ });
   }
+
+  // Auto-load operational political control (OSID-keyed, April 1992 initial)
+  fetch(`${window.location.origin}/data/derived/operational/operational_political_control.json`)
+    .then((r) => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
+    .then((data: { by_settlement_id?: Record<string, string | null> }) => {
+      // Never overwrite an already loaded save's control map.
+      if (hasLoadedState) return;
+      const control = data.by_settlement_id ?? {};
+      const r = rendererRef.current;
+      if (r) {
+        r.setControlBySettlement(control);
+      } else if (pendingData) {
+        pendingData.control = control;
+      }
+    })
+    .catch((e) => console.warn('map_hoi: auto-load operational control failed', e));
 
   renderFromState();
 }

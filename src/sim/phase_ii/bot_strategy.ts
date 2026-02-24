@@ -175,13 +175,15 @@ export const FACTION_STRATEGIES: Record<FactionId, FactionBotStrategy> = {
     },
     RBiH: {
         corridor_municipalities: [...SARAJEVO_CORE, ...RBIH_ENCLAVE_DEFENSE],
-        max_attack_posture_share: 0.12,
+        // Tuned: 0.12→0.25. ARBiH had multiple corps attacking simultaneously.
+        max_attack_posture_share: 0.25,
         preferred_posture_when_overstaffed: 'probe',
         attack_coverage_threshold: 240,
         defend_critical_territory: true,
         offensive_objectives: ['ilidza', 'hadzici', 'vogosca', 'ilijas', ...RBIH_CENTRAL_CORRIDOR],
         defensive_priorities: [...SARAJEVO_CORE, ...RBIH_ENCLAVE_DEFENSE, 'tuzla', 'zenica'],
-        min_active_brigades: 1,
+        // Tuned: 1→3. ARBiH had multiple active brigades even in survival phase.
+        min_active_brigades: 3,
     },
     HRHB: {
         corridor_municipalities: [...HRHB_HERZEGOVINA],
@@ -222,9 +224,10 @@ export const FACTION_DOCTRINE_PHASES: Record<FactionId, DoctrinePhase[]> = {
         { start_week: 52, end_week: 9999, default_corps_stance: 'defensive', max_attack_share_override: 0.3, aggression_modifier: -0.1 },
     ],
     RBiH: [
-        { start_week: 0, end_week: 12, default_corps_stance: 'defensive', max_attack_share_override: 0.08, aggression_modifier: -0.1 },
-        { start_week: 12, end_week: 40, default_corps_stance: 'balanced', max_attack_share_override: 0.15, aggression_modifier: 0 },
-        { start_week: 40, end_week: 9999, default_corps_stance: 'balanced', max_attack_share_override: 0.25, aggression_modifier: 0.1 },
+        // Tuned: attack shares raised to allow counter-attacks from week 1.
+        { start_week: 0, end_week: 12, default_corps_stance: 'defensive', max_attack_share_override: 0.15, aggression_modifier: -0.1 },
+        { start_week: 12, end_week: 40, default_corps_stance: 'balanced', max_attack_share_override: 0.25, aggression_modifier: 0 },
+        { start_week: 40, end_week: 9999, default_corps_stance: 'balanced', max_attack_share_override: 0.35, aggression_modifier: 0.1 },
     ],
     HRHB: [
         { start_week: 0, end_week: 12, default_corps_stance: 'balanced', max_attack_share_override: 0.25, aggression_modifier: 0 },

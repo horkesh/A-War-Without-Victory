@@ -8,7 +8,8 @@
  * Uses CSS classes from modals.css (decl-*) for ops-center consistent styling.
  */
 
-import type { FactionId, Phase0Event } from '../../../state/game_state.js';
+import type { FactionId, GameState, Phase0Event } from '../../../state/game_state.js';
+import type { PreviousTurnSnapshot } from '../data/warroom_state.js';
 
 interface DeclarationDisplay {
     title: string;
@@ -48,6 +49,34 @@ const EVENT_DISPLAYS: Record<string, (event: Phase0Event, playerFaction: Faction
         body: 'Armed conflict has erupted across Bosnia and Herzegovina. The pre-war period is over. What follows will test every decision you have made.',
         color: '#ff3d00',
         bgOverlay: 'rgba(100, 0, 0, 0.5)',
+    }),
+    rbih_hrhb_war_begins: (_event, _pf) => ({
+        title: 'WAR BETWEEN ALLIES',
+        subtitle: 'Alliance collapses — Croat-Bosniak conflict begins',
+        body: 'The fragile alliance between Army of RBiH and HVO has shattered. Former allies now face each other across new battle lines.',
+        color: '#ff3d00',
+        bgOverlay: 'rgba(255, 0, 0, 0.08)',
+    }),
+    ceasefire_declared: (_event, _pf) => ({
+        title: 'CEASEFIRE DECLARED',
+        subtitle: 'RBiH-HRHB ceasefire takes effect',
+        body: 'After months of fighting, both sides have agreed to cease hostilities. The ceasefire marks a turning point in the conflict.',
+        color: '#00e878',
+        bgOverlay: 'rgba(0, 232, 120, 0.08)',
+    }),
+    washington_agreement: (_event, _pf) => ({
+        title: 'WASHINGTON AGREEMENT SIGNED',
+        subtitle: 'Federation of Bosnia and Herzegovina established',
+        body: 'The Washington Agreement creates a Bosniak-Croat federation, ending the war between former allies and uniting them against the VRS.',
+        color: '#00e878',
+        bgOverlay: 'rgba(0, 232, 120, 0.08)',
+    }),
+    exhaustion_critical: (_event, _pf) => ({
+        title: 'FORCES REACHING BREAKING POINT',
+        subtitle: 'Exhaustion exceeds critical threshold',
+        body: 'The sustained tempo of operations has pushed forces beyond sustainable limits. Continued fighting risks complete organizational collapse.',
+        color: '#ff3d00',
+        bgOverlay: 'rgba(255, 61, 0, 0.08)',
     }),
 };
 
@@ -227,4 +256,45 @@ export function showWarBeginsModal(playerFaction: FactionId): Promise<void> {
             overlay.style.opacity = '1';
         });
     });
+}
+
+/**
+ * Check for war-phase milestone events by comparing current state against previous snapshot.
+ * Returns the event key string if a milestone was reached, null otherwise.
+ * Priority: ceasefire/washington > alliance war > exhaustion critical > encirclement
+ */
+export function findWarMilestoneEvent(
+    state: GameState,
+    previousSnapshot: PreviousTurnSnapshot | null,
+    playerFaction: FactionId,
+): string | null {
+    if (!previousSnapshot) return null;
+
+    const rhs = state.rbih_hrhb_state;
+
+    // Washington agreement just signed
+    if (rhs?.washington_signed && !previousSnapshot.washingtonSigned) {
+        return 'washington_agreement';
+    }
+
+    // Ceasefire just started
+    if (rhs?.ceasefire_active && !previousSnapshot.ceasefireActive) {
+        return 'ceasefire_declared';
+    }
+
+    // Alliance war started (alliance crossed below 0)
+    const oldAlliance = previousSnapshot.allianceValue;
+    const newAlliance = state.phase_i_alliance_rbih_hrhb ?? null;
+    if (oldAlliance != null && newAlliance != null && oldAlliance >= 0 && newAlliance < 0) {
+        return 'rbih_hrhb_war_begins';
+    }
+
+    // Exhaustion crossed 75% for player faction
+    const oldExhaustion = (previousSnapshot.exhaustion[playerFaction] ?? 0) * 100;
+    const newExhaustion = ((state.phase_ii_exhaustion?.[playerFaction]) ?? 0) * 100;
+    if (oldExhaustion < 75 && newExhaustion >= 75) {
+        return 'exhaustion_critical';
+    }
+
+    return null;
 }

@@ -1,11 +1,15 @@
 /**
- * Phase II consolidation flips (52w plan Step 5, Option B).
+ * Consolidation flips (52w plan Step 5, Option B).
  * One brigade in "consolidation" posture in a municipality with no enemy brigades
  * can flip multiple civilian/undefended settlements in one turn (deterministic cap).
+ * Per canon: consolidation as a flip-causing mechanic is Phase I only. In Phase II
+ * this function no-ops (returns 0 flips) so control changes in Phase II remain
+ * breach-based / battle-resolution only (Phase_II_Specification §2.3).
  */
 
 import type { SettlementRecord } from '../../map/settlements.js';
 import type { FactionId, FormationId, GameState, MunicipalityId, SettlementId } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 /** Max settlements one brigade can flip per turn via consolidation (Option B cap). */
@@ -25,7 +29,7 @@ function munHasEnemyBrigade(
     ourFaction: FactionId,
     sidsInMun: SettlementId[]
 ): boolean {
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const formations = state.formations ?? {};
     for (const sid of sidsInMun) {
         const formationId = brigadeAor[sid];
@@ -38,9 +42,10 @@ function munHasEnemyBrigade(
 }
 
 /**
- * Apply Phase II consolidation flips: for each brigade in consolidation posture,
+ * Apply consolidation flips: for each brigade in consolidation posture,
  * in its assigned muns with no enemy brigade, flip up to CAP undefended non-friendly settlements.
  * Deterministic: sorted formation IDs, sorted settlement IDs.
+ * Only applies when meta.phase === 'phase_i'; in Phase II returns 0 flips (canon §2.3).
  */
 export function applyConsolidationFlips(
     state: GameState,
@@ -48,9 +53,11 @@ export function applyConsolidationFlips(
     sidToMun: Record<SettlementId, MunicipalityId>
 ): ConsolidationFlipsReport {
     const report: ConsolidationFlipsReport = { flips_applied: 0, by_formation: {} };
-    const assignment = state.brigade_municipality_assignment ?? {};
+    if (state.meta?.phase !== 'phase_i') return report;
+
+    const assignment = getLegacyAoR(state).brigade_municipality_assignment ?? {};
     const formations = state.formations ?? {};
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const pc = state.political_controllers ?? {};
     if (typeof pc !== 'object') return report;
 

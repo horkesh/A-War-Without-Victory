@@ -6,6 +6,7 @@
 
 import type { EdgeRecord } from '../../map/settlements.js';
 import type { FormationId, GameState, SettlementId } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getBrigadeAoRSettlements } from './brigade_aor.js';
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from './phase_ii_adjacency.js';
@@ -23,7 +24,7 @@ export function applyBrigadeRepositionOrders(state: GameState, edges: EdgeRecord
         state.brigade_reposition_orders = undefined;
         return;
     }
-    const brigadeAor = state.brigade_aor;
+    const brigadeAor = getLegacyAoR(state).brigade_aor;
     if (!brigadeAor) {
         state.brigade_reposition_orders = undefined;
         return;
@@ -35,13 +36,14 @@ export function applyBrigadeRepositionOrders(state: GameState, edges: EdgeRecord
 
     for (const formationId of (Object.keys(orders) as FormationId[]).sort(strictCompare)) {
         const order = orders[formationId];
-        if (!order?.settlement_ids?.length) continue;
+        const rawSids = Array.isArray(order) ? order : order?.settlement_ids;
+        if (!rawSids?.length) continue;
 
         const formation = formations[formationId];
         if (!formation || (formation.kind ?? 'brigade') !== 'brigade' || !formation.faction) continue;
 
         const factionId = formation.faction;
-        const sids = [...order.settlement_ids].sort(strictCompare);
+        const sids = [...rawSids].sort(strictCompare);
 
         if (sids.length < MIN_REPOSITION || sids.length > MAX_REPOSITION) continue;
         const allFaction = sids.every(sid => pc[sid] === factionId);
@@ -58,6 +60,8 @@ export function applyBrigadeRepositionOrders(state: GameState, edges: EdgeRecord
         for (const sid of sids) {
             brigadeAor[sid] = formationId;
         }
+
+        formation.hq_sid = sids[0]; // sync HQ to new AoR (sandbox has no formation-hq-aor-depth-sync)
     }
 
     state.brigade_reposition_orders = undefined;

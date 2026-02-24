@@ -184,6 +184,12 @@ function migrateState(raw: unknown): GameState {
             if (!('front_segments' in candidate) || candidate.front_segments === undefined) {
                 candidate.front_segments = {};
             }
+            if (!('theatres' in candidate) || candidate.theatres === undefined) {
+                candidate.theatres = {};
+            }
+            if (!('army_theatre_assignment' in candidate) || candidate.army_theatre_assignment === undefined) {
+                candidate.army_theatre_assignment = {};
+            }
             if (!('formations' in candidate) || candidate.formations === undefined) {
                 candidate.formations = {};
             }
@@ -195,6 +201,12 @@ function migrateState(raw: unknown): GameState {
             }
             if (!('front_pressure' in candidate) || candidate.front_pressure === undefined) {
                 candidate.front_pressure = {};
+            }
+            if (!('assignable_front_segments' in candidate) || candidate.assignable_front_segments === undefined) {
+                candidate.assignable_front_segments = [];
+            }
+            if (!('brigade_front_assignment' in candidate) || candidate.brigade_front_assignment === undefined) {
+                candidate.brigade_front_assignment = {};
             }
             if (!('militia_pools' in candidate) || candidate.militia_pools === undefined) {
                 candidate.militia_pools = {};
@@ -556,6 +568,12 @@ function migrateState(raw: unknown): GameState {
                     (candidate as any).municipality_displacement = {};
                 }
             }
+
+            // AoR phase-out: strip legacy keys so serialization allowlist passes (Phase II uses location_osid only)
+            delete candidate.brigade_aor;
+            delete candidate.brigade_aor_orders;
+            delete candidate.brigade_mun_orders;
+            delete candidate.brigade_municipality_assignment;
 
             return candidate as unknown as GameState;
         }

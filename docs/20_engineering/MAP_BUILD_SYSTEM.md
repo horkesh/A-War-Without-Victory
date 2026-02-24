@@ -58,6 +58,11 @@ Full list of `map:*` scripts: see `package.json` (search for `"map:`). Scripts l
 
 For full pipeline and build-process details, see [docs/_old/MAP_BUILD_SYSTEM.md](_old/MAP_BUILD_SYSTEM.md).
 
+### Operational (OSID) layer (Phase 2 B(a))
+
+- **Legacy derive:** `npm run map:derive:operational-settlements` — builds operational_settlements.geojson from canonical geometry + merge_progress (SID union per cluster). Outputs: `data/derived/operational/operational_settlements.geojson`, `canonical_to_operational_map.json`, `operational_contact_graph.json`.
+- **OSID-first derive (Phase 2):** `npm run map:derive:operational-osid-first` — reads existing operational_settlements.geojson as OSID-native source; derives canonical_to_operational_map via point-in-polygon (canonical centroids → containing OSID); derives contact graph from OSID geometry (booleanIntersects). No SID geometry used to *build* boundaries. Use after one legacy run to bootstrap, or when OSID GeoJSON is produced by Settlement Merger. Plan: [OSID_AS_BASE_LAYER_PHASE2_IMPLEMENTATION_PLAN.md](../30_planning/OSID_AS_BASE_LAYER_PHASE2_IMPLEMENTATION_PLAN.md).
+
 ---
 
 ## Map asset deprecation policy (tactical map canonical)

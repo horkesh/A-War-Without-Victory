@@ -42,7 +42,7 @@ Settlements function as spatial anchors that define connectivity, movement corri
 
 Geography matters politically because it shapes who can govern, supply, and sustain, not because it confers abstract ownership.
 
-Spatial responsibility is held at brigade level through Areas of Responsibility (AoRs). Brigades are accountable for contiguous clusters of settlements, including both contact and rear depth. Corps and temporary Operational Groups coordinate effort but never own space. This ensures control is traceable, contested, and costly, rather than a clean function of borders.
+Spatial responsibility is held at brigade level through **location**: each brigade occupies **one operational settlement (OSID)**. Multiple brigades may stack on the same OSID. A brigade projects **Zone of Control (ZoC)** to all neighboring OSIDs. Corps and temporary Operational Groups coordinate effort but never own space. **Control change** over territory occurs only when a brigade **attacks** (or through defined frontline/corps operations)—there is no passive pressure flip. Rear political control zones are those OSIDs (or canonical settlements derived from them) not currently contested by attack resolution; they remain stable unless control is changed by an authorized mechanism.
 
 ### 5.1 Political control substrate
 
@@ -50,7 +50,7 @@ Political control represents the exercise of recognized authority over a settlem
 
 Each settlement has a political controller—a faction that exercises accepted authority. This control is initialized deterministically before any military interactions and remains stable by default. Political control does not drift due to absence of military formations or passage of time.
 
-Political control may change only through sustained opposing military pressure, internal authority collapse, or negotiated transfer. This substrate is essential for modeling that wars occur within existing political space—fronts advance through governed territory; they do not create it.
+Political control may change only through **authorized mechanisms**: **attack resolution** (Phase II: attack → push-back/control flip at the target OSID), **corps or frontline operations** (as defined), internal authority collapse or fragmentation, or negotiated transfer. In the OSID model, control does not change from passive pressure alone; it changes only via attack resolution or corps/frontline ops for Phase II. This substrate is essential for modeling that wars occur within existing political space—fronts advance through governed territory; they do not create it.
 
 ## 6. Force as organized coercion
 
@@ -60,13 +60,15 @@ Only formations generate coercive pressure and combat friction. Political or adm
 
 Political control defines governance and authority. Military formations contest or replace political control through pressure and collapse mechanisms but do not generate it.
 
-## 7. Fronts as emergent phenomena
+## 7. Brigades, Zone of Control, and attack-driven control
 
-Fronts emerge dynamically from the interaction of opposing formations deployed across space. They are not drawn by the player and do not exist as independent entities.
+Brigades occupy **one OSID** (operational settlement) each; stacking on the same OSID is allowed. Each deployed brigade projects **Zone of Control (ZoC)** to all neighboring OSIDs. An enemy brigade in ZoC is **locked**: it may only stay, retreat (to an OSID not in enemy ZoC), or attack the ZoC source. Control over an OSID **changes only when a brigade attacks** (attack resolution → push-back and control flip) or through defined frontline/corps operations—there is no passive pressure flip.
 
-Over time, fronts may harden, stabilize, or fracture depending on pressure, supply, and exhaustion. Static fronts are dangerous because they accumulate strain rather than resolve conflict.
+Fronts are derived from hostile OSID adjacency: a front exists where two adjacent OSIDs have opposing controllers. Front edges are grouped into contiguous, assignable front segments. Front segments are organized within theatres (Theatre → Army → Corps → Brigade) for operational command framing.
 
-Front emergence is evaluated on the settlement graph where adjacent settlements are controlled or contested by different brigades. Players influence fronts indirectly by reshaping brigade Areas of Responsibility and selecting brigade posture, not by drawing lines or selecting settlements.
+Over time, fronts may harden (e.g. through entrenchment), stabilize, or fracture depending on supply and exhaustion. Static fronts accumulate strain rather than resolve conflict.
+
+Players do not draw geometric frontline entities directly. They assign brigades to derived front segments, optionally name those segments, and command posture, movement, and attacks through formation-level orders. Movement is ZoC-constrained; column movement allows multi-hop redeployment through friendly rear (terrain and composition affect speed). Combat is resolved by the attack-resolution formula (outcome thresholds, casualties, push-back, control flip). Unassigned brigades are reserve and do not execute attack or offensive movement until assigned.
 
 ## 8. Authority, control, and legitimacy
 
@@ -154,15 +156,11 @@ The simulation enforces several invariants: no retroactive legitimacy, no unitle
 
 **No unitless control:** Control cannot exist without formation presence and responsibility.
 
-**No settlement targeting:** Players do not issue orders to assume control, defend, or attack individual settlements. Territorial change occurs through sustained pressure within Areas of Responsibility.
+**Brigade location is one OSID:** Each brigade has a single location_osid; multiple brigades may stack. Corps and operational groups coordinate only; they do not own OSIDs.
 
-**No spatial ownership above brigade level:** Only brigades hold Areas of Responsibility. Corps and operational groups coordinate only.
+**Control change only via attack or corps ops:** Territorial (OSID) control changes only through **attack resolution** (Phase II attack → push-back/control flip) or **corps/frontline operations** as defined, or internal authority collapse or negotiated transfer. There is no passive pressure flip.
 
-**AoRs apply only to front-active settlements:** Settlements exposed to active or imminent military pressure require brigade AoR assignment. Settlements that are politically controlled but not exposed to military pressure are not required to have AoR assignment.
-
-**Rear Political Control Zones exist without AoR assignment:** These rear settlements remain under faction control without direct brigade assignment. They do not participate in pressure exchange, do not generate fronts, and do not experience control change solely due to absence of military formations.
-
-**Control change requires defined mechanisms:** Settlement control changes only when opposing brigade pressure is applied and sustained under eligibility rules, or internal authority collapse triggers fragmentation or realignment. Rear Political Control Zones are stable by default but vulnerable to expansion of fronts or internal systemic failure.
+**Rear Political Control Zones:** OSIDs (or settlements derived from them) that are not the target of attack resolution remain under faction control. They do not experience control change solely due to absence of military formations. Rear zones are stable by default but vulnerable when fronts expand via attack or corps ops.
 
 **No cost-free violence:** Military action always increases exhaustion and produces political and societal costs.
 

@@ -1,5 +1,6 @@
 
 
+import { FACTION_INITIAL_COHESION } from './formation_constants.js';
 import type {
     FactionId,
     FormationId,
@@ -107,21 +108,22 @@ export function deriveFormationKind(formation: FormationState): FormationKind {
 }
 
 /**
- * Compute base cohesion for a formation based on kind and creation context.
+ * Compute base cohesion for a formation based on kind, creation context, and optional faction.
  */
-export function computeBaseCohesion(kind: FormationKind, createdTurn: number): number {
+export function computeBaseCohesion(kind: FormationKind, createdTurn: number, faction?: FactionId | null): number {
     if (kind === 'militia') {
-        // Militia have low cohesion, slightly higher if created later (some organization)
         const lateness = Math.min(createdTurn, MILITIA_EMERGENCE_WINDOW);
-        return Math.floor(MILITIA_BASE_COHESION + lateness * 2); // max +12 if created at turn 6
+        return Math.floor(MILITIA_BASE_COHESION + lateness * 2);
     }
 
     if (kind === 'territorial_defense') {
-        // TD units: between militia and brigade
         return Math.floor((MILITIA_BASE_COHESION + BRIGADE_BASE_COHESION) / 2);
     }
 
-    // Brigade, OG, corps_asset: standard baseline
+    // Brigade, OG, corps_asset: faction-differentiated when provided
+    if (faction && FACTION_INITIAL_COHESION[faction] != null) {
+        return FACTION_INITIAL_COHESION[faction];
+    }
     return BRIGADE_BASE_COHESION;
 }
 
@@ -227,7 +229,7 @@ export function applyCohesionDegradation(
     if (supplied) return formation.cohesion ?? BRIGADE_BASE_COHESION;
 
     const kind = deriveFormationKind(formation);
-    const current = formation.cohesion ?? computeBaseCohesion(kind, formation.created_turn);
+    const current = formation.cohesion ?? computeBaseCohesion(kind, formation.created_turn, formation.faction);
 
     let degradation = 0;
     if (kind === 'militia') {
@@ -321,7 +323,7 @@ export function updateFormationLifecycle(
 
         // 2. Initialize cohesion (if not set)
         if (formation.cohesion === undefined) {
-            formation.cohesion = computeBaseCohesion(kind, formation.created_turn);
+            formation.cohesion = computeBaseCohesion(kind, formation.created_turn, formation.faction);
         }
 
         const cohesionBefore = formation.cohesion;

@@ -1,5 +1,5 @@
 import { buildAdjacencyMap } from '../map/adjacency_map.js';
-import { computeFrontEdges } from '../map/front_edges.js';
+import { computeFrontEdges, computeFrontEdgesOsid } from '../map/front_edges.js';
 import { computeFrontRegions } from '../map/front_regions.js';
 import { EdgeRecord, loadSettlementGraph, type LoadedSettlementGraph } from '../map/settlements.js';
 import {
@@ -10,10 +10,6 @@ import {
     type OobCorps
 } from '../scenario/oob_loader.js';
 import { buildSidToMunFromSettlements } from '../scenario/oob_phase_i_entry.js';
-import {
-    ensureFormationHomeMunsInFactionAoR,
-    populateFactionAoRFromControl
-} from '../scenario/scenario_runner.js';
 import { updateCapabilityProfiles } from '../state/capability_progression.js';
 import { cloneGameState } from '../state/clone.js';
 import {
@@ -40,7 +36,9 @@ import { applyFormationCommitment, CommitmentStepReport } from '../state/front_p
 import { expandRegionPostureToEdges } from '../state/front_posture_regions.js';
 import { accumulateFrontPressure, FrontPressureStepReport } from '../state/front_pressure.js';
 import { syncFrontSegments } from '../state/front_segments.js';
-import { GameState, type FactionId, type PhaseEAorMembership, type PhaseERearZoneDescriptor, type PhaseIIFrontDescriptor } from '../state/game_state.js';
+import { deriveAssignableFrontSegments } from '../state/assignable_front_segments.js';
+import { assignFrontSegmentTheatres, ensureDefaultTheatres } from '../state/theatres.js';
+import { GameState, type FactionId, type LegacyBrigadeAoRState, type PhaseEAorMembership, type PhaseERearZoneDescriptor, type PhaseIIFrontDescriptor } from '../state/game_state.js';
 import { updateHeavyEquipmentState } from '../state/heavy_equipment.js';
 import { updateLegitimacyState } from '../state/legitimacy.js';
 import { ensureMaintenanceCapacity } from '../state/maintenance.js';
@@ -61,6 +59,7 @@ import {
     updateInternationalVisibilityPressure,
     updatePatronState
 } from '../state/patron_pressure.js';
+import { migratePoliticalControllersToOsidIfNeeded } from '../state/political_control_init.js';
 import { updateSarajevoState } from '../state/sarajevo_exception.js';
 import { SustainabilityStepReport, updateSustainability } from '../state/sustainability.js';
 import {
@@ -98,6 +97,19 @@ import {
 import { updateMixedMunicipalitiesList } from './phase_i/mixed_municipality.js';
 import { runPoolPopulation, type PoolPopulationReport } from './phase_i/pool_population.js';
 import { checkAndApplyWashington, type WashingtonCheckReport } from './phase_i/washington_agreement.js';
+import {
+    applyCorpsAttackAxisOrders,
+    applyCorpsFrontAutoDistribution,
+    ensureDerivedCorpsFrontEdges
+} from './phase_ii/corps_front_assign.js';
+import {
+    runPhaseIICohesionDrift,
+    type CohesionDriftReport
+} from './phase_ii/cohesion_drift.js';
+import {
+    runPhaseIIOngoingMobilization,
+    type OngoingMobilizationReport
+} from './phase_ii/ongoing_mobilization.js';
 import {
     getEnablePhase3ADiffusion,
     runPhase3APressureDiffusion
@@ -147,7 +159,7 @@ import { evaluateDisplacementTriggers } from './phase_f/displacement_triggers.js
 import { runPhaseIBotPosture } from './phase_i/bot_phase_i.js';
 import { applyBrigadeRepositionOrders } from './phase_ii/apply_brigade_reposition.js';
 import { applyReshapeOrders } from './phase_ii/aor_reshaping.js';
-import { generateAllBotOrders } from './phase_ii/bot_brigade_ai.js';
+import { generateAllBotOrdersOsid, type OsidBotContext } from './phase_ii/bot_brigade_ai_osid.js';
 import { generateAllCorpsOrders } from './phase_ii/bot_corps_ai.js';
 import {
     applyBrigadeMunicipalityOrders,
@@ -159,6 +171,7 @@ import {
 import { processBrigadeMovement } from './phase_ii/brigade_movement.js';
 import { applyPostureCosts, applyPostureOrders } from './phase_ii/brigade_posture.js';
 import { applyBrigadePressureToState } from './phase_ii/brigade_pressure.js';
+import { ensureBrigadeFrontAssignments } from './phase_ii/front_assignment.js';
 import { getPhaseIICommandFrictionMultipliers } from './phase_ii/command_friction.js';
 import { applyConsolidationFlips, type ConsolidationFlipsReport } from './phase_ii/consolidation_flips.js';
 import { advanceOperations, applyCorpsEffects } from './phase_ii/corps_command.js';
@@ -170,7 +183,12 @@ import { computeMilitiaGarrisons } from './phase_ii/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from './phase_ii/operational_groups.js';
 import { buildAdjacencyFromEdges } from './phase_ii/phase_ii_adjacency.js';
 import { updateReconIntelligence } from './phase_ii/recon_intelligence.js';
+import { backfillFormationLocationOsid, loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
 import { resolveAttackOrders, type ResolveAttackOrdersReport } from './phase_ii/resolve_attack_orders.js';
+import { resolveAttackOrdersOsid, type AttackResolutionOsidReport } from './phase_ii/attack_resolution_osid.js';
+import { applyZocConstrainedMovement } from './phase_ii/zoc_constrained_movement.js';
+import { computeZoCState } from './phase_ii/zoc.js';
+import { processOsidColumnMovement, type OsidColumnMovementReport } from './phase_ii/osid_column_movement.js';
 import { updatePhaseIISupplyPressure } from './phase_ii/supply_pressure.js';
 import {
     applyPhaseIToPhaseIITransition,
@@ -264,12 +282,17 @@ export interface TurnReport {
     phase_ii_front_emergence?: PhaseIIFrontDescriptor[];
     /** Phase II: attack orders resolved (garrison-based flips); one target per brigade per turn */
     phase_ii_resolve_attack_orders?: ResolveAttackOrdersReport;
+    /** Phase II: OSID-based attack resolution (when operational data available) */
+    phase_ii_attack_resolution_osid?: AttackResolutionOsidReport;
+    phase_ii_cohesion_drift?: CohesionDriftReport;
     /** Phase II: control flips from consolidation posture. */
     phase_ii_consolidation_flips?: ConsolidationFlipsReport;
     /** Phase II: delayed hostile-takeover displacement (timer + camp + reroute). */
     phase_ii_takeover_displacement?: PhaseIITakeoverDisplacementReport;
     /** Phase II: non-takeover minority flight (settlement-level). */
     phase_ii_minority_flight?: MinorityFlightReport;
+    /** Phase II: ongoing mobilization (conscription + displaced + cross-ethnic) before reinforcement */
+    phase_ii_ongoing_mobilization?: OngoingMobilizationReport;
     /** Phase II: brigade reinforcement from militia pools after casualties */
     phase_ii_brigade_reinforcement?: ReinforceBrigadesReport;
     /** Phase II: WIA trickleback — wounded return to formations when out of combat */
@@ -317,6 +340,23 @@ export interface TurnContext {
 }
 
 export type PhaseHandler = (context: TurnContext) => void | Promise<void>;
+
+/** Operational data cached on TurnContext during zoc-computation step. */
+interface OperationalDataCache {
+    opData: Awaited<ReturnType<typeof loadOperationalData>>;
+    edges: Awaited<ReturnType<typeof loadOperationalEdges>>;
+    zocState: ReturnType<typeof computeZoCState>;
+}
+
+/** Type-safe accessor for operational data attached to context by zoc-computation step. */
+function getOperationalData(context: TurnContext): OperationalDataCache | undefined {
+    return (context as TurnContext & { operationalData?: OperationalDataCache }).operationalData;
+}
+
+/** Type-safe setter for operational data on context. */
+function setOperationalData(context: TurnContext, data: OperationalDataCache): void {
+    (context as TurnContext & { operationalData?: OperationalDataCache }).operationalData = data;
+}
 
 /** Load settlement graph and edges from context (or default). Used by Phase II AoR and related steps. */
 async function getGraphAndEdges(context: TurnContext): Promise<{ graph: LoadedSettlementGraph; edges: EdgeRecord[] }> {
@@ -368,6 +408,20 @@ const phases: NamedPhase[] = [
         }
     },
     {
+        name: 'migrate-political-control-osid',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'phase_i' && context.state.meta.phase !== 'phase_ii') return;
+            try {
+                const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
+                const opData = await loadOperationalData(baseDir || undefined);
+                if (opData?.operationalToCanonical)
+                    migratePoliticalControllersToOsidIfNeeded(context.state, opData.operationalToCanonical);
+            } catch {
+                // Operational data optional; skip migration when unavailable
+            }
+        }
+    },
+    {
         name: 'evaluate-events',
         run: (context) => {
             const turn = context.state.meta.turn;
@@ -382,6 +436,16 @@ const phases: NamedPhase[] = [
             if (!edges) return;
             const derivedFrontEdges = computeFrontEdges(context.state, edges);
             syncFrontSegments(context.state, derivedFrontEdges);
+            ensureDefaultTheatres(context.state);
+            const segments = deriveAssignableFrontSegments(derivedFrontEdges);
+            context.state.assignable_front_segments = assignFrontSegmentTheatres(context.state, segments);
+        }
+    },
+    {
+        name: 'ensure-brigade-front-assignment',
+        run: (context) => {
+            if (context.state.meta.phase !== 'phase_ii') return;
+            ensureBrigadeFrontAssignments(context.state);
         }
     },
     {
@@ -469,78 +533,102 @@ const phases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-aor-init',
+        name: 'phase-ii-location-osid-backfill',
         run: async (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
-            const factions = context.state.factions ?? [];
-            const allAoREmpty = factions.every(
-                (f) => !f.areasOfResponsibility || f.areasOfResponsibility.length === 0
-            );
-            if (!allAoREmpty) return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-            const pc = context.state.political_controllers ?? {};
-            populateFactionAoRFromControl(context.state, Object.keys(pc));
-            const byMun = buildSettlementsByMun(graph.settlements);
-            ensureFormationHomeMunsInFactionAoR(context.state, byMun);
-        }
-    },
-    {
-        name: 'validate-brigade-aor',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
-            if (!context.state.brigade_aor) return;
-            const { graph, edges } = await getGraphAndEdges(context);
-            validateBrigadeAoR(context.state, edges, graph.settlements);
-        }
-    },
-    {
-        name: 'enforce-brigade-aor-contiguity',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
-            if (!context.state.brigade_aor) return;
-            const { edges } = await getGraphAndEdges(context);
-            const frontActive = identifyFrontActiveSettlements(context.state, edges);
-            const adj = buildAdjacencyFromEdges(edges);
-            enforceContiguity(context.state, frontActive, adj);
-        }
-    },
-    {
-        name: 'enforce-corps-aor-contiguity',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
-            if (!context.state.brigade_aor) return;
-            if (!context.state.corps_command) return;
-            const { edges } = await getGraphAndEdges(context);
-            enforceCorpsLevelContiguity(context.state, edges);
-        }
-    },
-    {
-        name: 'detect-brigade-encirclement',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
-            if (!context.state.brigade_aor) return;
-            const { edges } = await getGraphAndEdges(context);
-            computeBrigadeEncirclement(context.state, edges);
-        }
-    },
-    {
-        name: 'surrounded-brigade-reform',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
-            if (!context.state.brigade_aor) return;
-            const { graph, edges } = await getGraphAndEdges(context);
-            const sidToMun: Record<string, string> = {};
-            for (const [sid, rec] of graph.settlements.entries()) {
-                const munId = rec.mun1990_id ?? rec.mun_code;
-                if (munId) sidToMun[sid] = munId;
+            try {
+                const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
+                const opData = await loadOperationalData(baseDir || undefined);
+                if (opData?.canonicalToOperational)
+                    backfillFormationLocationOsid(context.state, opData.canonicalToOperational);
+            } catch {
+                // Operational data optional; skip backfill when unavailable
             }
-            applySurroundedBrigadeReform(context.state, edges, sidToMun);
+        }
+    },
+    {
+        name: 'zoc-computation',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'phase_ii') return;
+            const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
+            try {
+                const [opData, edges] = await Promise.all([
+                    loadOperationalData(baseDir || undefined),
+                    loadOperationalEdges(baseDir || undefined)
+                ]);
+                const zocState = computeZoCState(context.state, edges, opData.operationalToCanonical);
+                setOperationalData(context, { opData, edges, zocState });
+                const factionIds = (context.state.factions ?? []).map(f => f.id).sort(strictCompare) as FactionId[];
+                const enemyZocByFaction: Record<string, string[]> = {};
+                for (const fid of factionIds) {
+                    const set = zocState.enemyZocByFaction.get(fid);
+                    enemyZocByFaction[fid] = set ? [...set].sort(strictCompare) : [];
+                }
+                context.state.phase_ii_enemy_zoc_by_faction = enemyZocByFaction;
+                // Serialize linked ZoC per faction (for UI/debugging)
+                const linkedZocByFaction: Record<string, string[]> = {};
+                for (const fid of factionIds) {
+                    const set = zocState.linkedZocByFaction.get(fid);
+                    linkedZocByFaction[fid] = set ? [...set].sort(strictCompare) : [];
+                }
+                context.state.phase_ii_linked_zoc_by_faction = linkedZocByFaction;
+            } catch (err) {
+                if (typeof console !== 'undefined' && console.warn) {
+                    console.warn('ZoC/computation: operational data not available, skipping OSID steps:', err instanceof Error ? err.message : String(err));
+                }
+            }
+        }
+    },
+    {
+        name: 'osid-column-movement',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'phase_ii') return;
+            const od = getOperationalData(context);
+            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+            let terrainData;
+            try {
+                terrainData = await loadTerrainScalars();
+            } catch {
+                terrainData = { by_sid: {} };
+            }
+            const report = processOsidColumnMovement(
+                context.state,
+                od.edges,
+                od.opData.operationalToCanonical,
+                terrainData
+            );
+            (context.report as TurnReport & { phase_ii_column_movement?: OsidColumnMovementReport }).phase_ii_column_movement = report;
+        }
+    },
+    {
+        name: 'zoc-constrained-movement',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'phase_ii') return;
+            const od = getOperationalData(context);
+            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+            const linkedZocByFaction = od?.zocState?.linkedZocByFaction;
+            const report = applyZocConstrainedMovement(context.state, od.edges, od.opData.operationalToCanonical, linkedZocByFaction);
+            (context.report as TurnReport & { phase_ii_zoc_movement?: typeof report }).phase_ii_zoc_movement = report;
+        }
+    },
+    {
+        name: 'derive-osid-front-segments',
+        run: (context) => {
+            if (context.state.meta.phase !== 'phase_ii') return;
+            const od = getOperationalData(context);
+            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) {
+                context.state.phase_ii_front_edges_osid = undefined;
+                return;
+            }
+            const osidFrontEdges = computeFrontEdgesOsid(context.state, od.edges, od.opData.operationalToCanonical);
+            context.state.phase_ii_front_edges_osid = osidFrontEdges;
         }
     },
     {
         name: 'process-brigade-movement',
         run: async (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
+            if (getOperationalData(context)) return;
             const { edges } = await getGraphAndEdges(context);
             let terrainData;
             try {
@@ -578,44 +666,45 @@ const phases: NamedPhase[] = [
         name: 'generate-bot-brigade-orders',
         run: async (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
-            if (!context.state.brigade_aor) return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-            const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
-                ? context.input.settlementEdges
-                : graph.edges;
-            // Build sid-to-municipality map for strategic target selection
-            const sidToMun = new Map<string, string>();
-            for (const [sid, rec] of graph.settlements.entries()) {
-                const munId = rec.mun1990_id ?? rec.mun_code;
-                if (munId) sidToMun.set(sid, munId);
-            }
-            // All factions are bot-controlled in auto-run mode; exclude player faction when set
             const playerFaction = context.state.meta.player_faction ?? null;
             const factions = (context.state.factions ?? []).map(f => f.id)
                 .filter(fid => playerFaction == null || fid !== playerFaction);
-            generateAllBotOrders(context.state, edges, factions, sidToMun);
+
+            // Phase II bot brigade orders: OSID-only (no brigade_aor). When operational data present, run OSID AI.
+            const od = getOperationalData(context);
+            if (od?.opData?.operationalToCanonical && od?.edges?.length && od?.zocState) {
+                const osidCtx: OsidBotContext = {
+                    edges: od.edges,
+                    reverseMap: od.opData.operationalToCanonical,
+                    enemyZocByFaction: od.zocState.enemyZocByFaction
+                };
+                generateAllBotOrdersOsid(context.state, factions, osidCtx);
+            }
+            // When operational data unavailable: no bot brigade orders (AoR path removed).
         }
     },
     {
-        name: 'apply-municipality-orders',
+        name: 'ensure-derived-corps-front-edges',
         run: async (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
-            const orders = context.state.brigade_mun_orders;
-            if (!orders || typeof orders !== 'object' || Object.keys(orders).length === 0) return;
-            const { graph, edges } = await getGraphAndEdges(context);
-            applyBrigadeMunicipalityOrders(context.state, edges, graph.settlements);
+            const { edges } = await getGraphAndEdges(context);
+            ensureDerivedCorpsFrontEdges(context.state, edges);
         }
     },
     {
-        name: 'apply-aor-reshaping',
-        run: async (context) => {
+        name: 'apply-corps-front-orders',
+        run: (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
-            if (!context.state.brigade_aor_orders?.length) return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-            const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
-                ? context.input.settlementEdges
-                : graph.edges;
-            applyReshapeOrders(context.state, edges);
+            if (!context.state.corps_front_edges) return;
+            applyCorpsFrontAutoDistribution(context.state);
+        }
+    },
+    {
+        name: 'apply-corps-attack-axis-orders',
+        run: (context) => {
+            if (context.state.meta.phase !== 'phase_ii') return;
+            if (!context.state.corps_attack_axis_orders) return;
+            applyCorpsAttackAxisOrders(context.state);
         }
     },
     {
@@ -631,23 +720,9 @@ const phases: NamedPhase[] = [
         }
     },
     {
-        name: 'formation-hq-aor-depth-sync',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
-            if (!context.state.brigade_aor) return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-            const report = runFormationHqRelocation(context.state, graph.settlements, graph.edges);
-            if (report.relocated <= 0) return;
-            const existing = context.report.formation_hq_relocation;
-            if (!existing) {
-                context.report.formation_hq_relocation = report;
-                return;
-            }
-            const merged = Array.from(new Set([...existing.formation_ids, ...report.formation_ids])).sort(strictCompare);
-            context.report.formation_hq_relocation = {
-                relocated: merged.length,
-                formation_ids: merged
-            };
+        name: 'formation-location-osid-sync',
+        run: () => {
+            // No-op: AoR phase-out. location_osid set by phase-ii-location-osid-backfill and formation creation.
         }
     },
     {
@@ -706,26 +781,28 @@ const phases: NamedPhase[] = [
         }
     },
     {
-        name: 'compute-brigade-pressure',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
-            if (!context.state.brigade_aor) return;
-            let edges = context.input.settlementEdges;
-            if (!edges || edges.length === 0) {
-                const graph = await loadSettlementGraph();
-                edges = graph.edges;
-            }
-            applyBrigadePressureToState(context.state, edges);
-        }
-    },
-    {
         name: 'phase-ii-resolve-attack-orders',
         run: async (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
+            const od = getOperationalData(context);
+            if (od?.opData?.operationalToCanonical && od?.edges?.length) {
+                let terrainData: Awaited<ReturnType<typeof loadTerrainScalars>> | undefined;
+                try {
+                    terrainData = await loadTerrainScalars();
+                } catch {
+                    terrainData = { by_sid: {} };
+                }
+                context.report.phase_ii_attack_resolution_osid = resolveAttackOrdersOsid(
+                    context.state,
+                    od.edges,
+                    od.opData.operationalToCanonical,
+                    terrainData
+                );
+                return;
+            }
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             const edges = context.input.settlementEdges ?? graph.edges;
 
-            // Build settlement → municipality lookup for terrain/urban defense and militia garrisons
             const settlementToMun = new Map<string, string>();
             const sidToMunRecord: Record<string, string> = {};
             for (const [sid, rec] of graph.settlements.entries()) {
@@ -735,7 +812,6 @@ const phases: NamedPhase[] = [
             }
             computeMilitiaGarrisons(context.state, sidToMunRecord);
 
-            // Load terrain scalars (cached after first call)
             let terrainData;
             try {
                 terrainData = await loadTerrainScalars();
@@ -746,6 +822,14 @@ const phases: NamedPhase[] = [
             context.report.phase_ii_resolve_attack_orders = resolveAttackOrders(
                 context.state, edges, terrainData, settlementToMun
             );
+        }
+    },
+    {
+        name: 'phase-ii-cohesion-drift',
+        run: (context) => {
+            if (context.state.meta.phase !== 'phase_ii') return;
+            const engagedIds = context.report.phase_ii_attack_resolution_osid?.engaged_formation_ids ?? [];
+            context.report.phase_ii_cohesion_drift = runPhaseIICohesionDrift(context.state, engagedIds);
         }
     },
     {
@@ -854,6 +938,18 @@ const phases: NamedPhase[] = [
         }
     },
     {
+        name: 'phase-ii-ongoing-mobilization',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'phase_ii') return;
+            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+            context.report.phase_ii_ongoing_mobilization = runPhaseIIOngoingMobilization(
+                context.state,
+                graph.settlements,
+                context.input.municipalityPopulation1991 ?? undefined
+            );
+        }
+    },
+    {
         name: 'phase-ii-brigade-reinforcement',
         run: (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
@@ -924,7 +1020,7 @@ const phases: NamedPhase[] = [
         name: 'phase-ii-recon-intelligence',
         run: async (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
-            if (!context.state.brigade_aor) return;
+            if (!(context.state as GameState & LegacyBrigadeAoRState).brigade_aor) return;
             const { edges } = await getGraphAndEdges(context);
             if (!edges?.length) return;
             updateReconIntelligence(context.state, edges);
@@ -1498,10 +1594,20 @@ const phaseIPhases: NamedPhase[] = [
     },
     {
         name: 'phase-i-formation-spawn',
-        run: (context) => {
+        run: async (context) => {
             if (!isFormationSpawnDirectiveActive(context.state)) return;
             const directive = context.state.formation_spawn_directive!;
             const kind = directive.kind === 'both' || directive.kind === 'militia' ? 'brigade' : (directive.kind ?? 'brigade');
+            let canonicalToOperational: import('../data/operational_data.js').CanonicalToOperationalMap | undefined;
+            try {
+                const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
+                if (baseDir) {
+                    const opData = await loadOperationalData(baseDir);
+                    canonicalToOperational = opData.canonicalToOperational;
+                }
+            } catch {
+                // Operational data missing; spawn without location_osid (legacy)
+            }
             context.report.phase_i_formation_spawn = spawnFormationsFromPools(context.state, {
                 factionFilter: null,
                 munFilter: null,
@@ -1511,7 +1617,8 @@ const phaseIPhases: NamedPhase[] = [
                 formationKind: kind,
                 municipalityHqSettlement: context.input.municipalityHqSettlement ?? undefined,
                 historicalNameLookup: context.input.historicalNameLookup ?? undefined,
-                population1991ByMun: context.input.municipalityPopulation1991 ?? undefined
+                population1991ByMun: context.input.municipalityPopulation1991 ?? undefined,
+                canonicalToOperational
             });
         }
     },
@@ -1656,6 +1763,34 @@ const phaseIPhases: NamedPhase[] = [
     }
 ];
 
+async function getEdgesForTurn(input: TurnInput): Promise<EdgeRecord[]> {
+    let edges = input.settlementGraph?.edges ?? input.settlementEdges;
+    if (!edges || edges.length === 0) {
+        const graph = await loadSettlementGraph();
+        edges = graph.edges;
+    }
+    return edges;
+}
+
+async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Promise<void> {
+    if (state.meta.phase !== 'phase_ii') {
+        state.phase_ii_front_edges_osid = undefined;
+    }
+    const edges = await getEdgesForTurn(input);
+    const derivedFrontEdges = computeFrontEdges(state, edges);
+    state.front_edges = derivedFrontEdges;
+    ensureDefaultTheatres(state);
+    const frontEdgesForSegments =
+        state.meta.phase === 'phase_ii' && state.phase_ii_front_edges_osid?.length
+            ? state.phase_ii_front_edges_osid
+            : derivedFrontEdges;
+    const segments = deriveAssignableFrontSegments(frontEdgesForSegments);
+    state.assignable_front_segments = assignFrontSegmentTheatres(state, segments);
+    if (state.meta.phase === 'phase_ii') {
+        ensureBrigadeFrontAssignments(state);
+    }
+}
+
 export async function runTurn(state: GameState, input: TurnInput): Promise<{ nextState: GameState; report: TurnReport }> {
     const working = cloneGameState(state);
 
@@ -1681,15 +1816,17 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
             await p.run(context);
         }
         // D0.9.1: Update opposing-edges streak (Phase I), then apply transition
-        let edges = context.input.settlementGraph?.edges ?? context.input.settlementEdges;
-        if (!edges) {
-            const graph = await loadSettlementGraph();
-            edges = graph.edges;
-        }
+        const edges = await getEdgesForTurn(context.input);
         if (edges.length > 0) {
             updatePhaseIOpposingEdgesStreak(working, edges);
         }
         applyPhaseIToPhaseIITransition(context.state, edges, context.input.settlementGraph?.settlements);
+        const derivedFrontEdges = computeFrontEdges(working, edges);
+        working.front_edges = derivedFrontEdges;
+        ensureDefaultTheatres(working);
+        const segments = deriveAssignableFrontSegments(derivedFrontEdges);
+        working.assignable_front_segments = assignFrontSegmentTheatres(working, segments);
+        ensureBrigadeFrontAssignments(working);
         return { nextState: context.state, report };
     }
 
@@ -1737,6 +1874,7 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
         await phase.run(context);
     }
 
+    await refreshFrontEdgeSnapshot(context.state, context.input);
     return { nextState: context.state, report };
 }
 

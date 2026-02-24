@@ -83,7 +83,8 @@ describe('Three-Sided Bot AI Validation', () => {
     it('RBiH doctrine phase at turn 45 allows counteroffensive', () => {
         const phase = getActiveDoctrinePhase('RBiH', 45);
         expect(phase).not.toBeNull();
-        expect(phase!.max_attack_share_override).toBe(0.25);
+        // Tuned: 0.25→0.35 for historical attack frequency calibration
+        expect(phase!.max_attack_share_override).toBe(0.35);
     });
 
     it('RS doctrine phase at turn 60 is strategic defense', () => {
@@ -191,7 +192,7 @@ describe('Three-Sided Bot AI Validation', () => {
             political_controllers: { [sid]: 'RBiH' as FactionId },
             brigade_aor: { [sid]: fid },
             formations: { [fid]: { faction: 'RBiH' as FactionId } as FormationState }
-        } as GameState;
+        } as GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState;
         expect(hasDefenderBrigade(state, sid)).toBe(true);
     });
 
@@ -200,7 +201,7 @@ describe('Three-Sided Bot AI Validation', () => {
         const state: GameState = {
             political_controllers: { [sid]: 'RS' as FactionId },
             brigade_aor: {}
-        } as GameState;
+        } as GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState;
         expect(hasDefenderBrigade(state, sid)).toBe(false);
     });
 
@@ -211,7 +212,7 @@ describe('Three-Sided Bot AI Validation', () => {
             political_controllers: { [sid]: 'RBiH' as FactionId },
             brigade_aor: { [sid]: fid },
             formations: { [fid]: { faction: 'RS' as FactionId } as FormationState }
-        } as GameState;
+        } as GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState;
         expect(hasDefenderBrigade(state, sid)).toBe(false);
     });
 });

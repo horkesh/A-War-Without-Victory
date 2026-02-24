@@ -8,7 +8,7 @@ import type { EdgeRecord } from '../src/map/settlements.js';
 import { checkCorpsContiguity, repairCorpsContiguity } from '../src/sim/phase_ii/aor_contiguity.js';
 import { enforceCorpsLevelContiguity } from '../src/sim/phase_ii/corps_directed_aor.js';
 import type { FactionId, FormationState, GameState } from '../src/state/game_state.js';
-import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
+import { CURRENT_SCHEMA_VERSION, getLegacyAoR } from '../src/state/game_state.js';
 
 // --- Helpers ---
 
@@ -182,7 +182,7 @@ describe('repairCorpsContiguity', () => {
         // S5 is adjacent to S4 (brig-b1, corps-b) — should be reassigned there
         const count = repairCorpsContiguity(state, 'RS', 'corps-a', ['S5'], adj);
         expect(count).toBe(1);
-        expect(state.brigade_aor!.S5).toBe('brig-b1');
+        expect(getLegacyAoR(state).brigade_aor!.S5).toBe('brig-b1');
     });
 
     it('unassigns orphan with no valid adjacent target', () => {
@@ -221,7 +221,7 @@ describe('repairCorpsContiguity', () => {
 
         const count = repairCorpsContiguity(state, 'RS', 'corps-a', ['S5'], adj);
         expect(count).toBe(1);
-        expect(state.brigade_aor!.S5).toBeNull();
+        expect(getLegacyAoR(state).brigade_aor!.S5).toBeNull();
     });
 
     it('does not reassign to enemy faction brigade', () => {
@@ -261,25 +261,25 @@ describe('repairCorpsContiguity', () => {
         expect(count).toBe(1);
         // S2 stays null because the only adjacent brigade is enemy
         // S1 is same corps so it gets skipped; only S3 is adjacent and that's enemy
-        expect(state.brigade_aor!.S2).toBeNull();
+        expect(getLegacyAoR(state).brigade_aor!.S2).toBeNull();
     });
 });
 
 describe('enforceCorpsLevelContiguity', () => {
     it('does not modify contiguous corps AoR', () => {
         const { state, edges } = makeContiguousState();
-        const original = { ...state.brigade_aor! };
+        const original = { ...getLegacyAoR(state).brigade_aor! };
         enforceCorpsLevelContiguity(state, edges);
-        expect(state.brigade_aor).toEqual(original);
+        expect(getLegacyAoR(state).brigade_aor).toEqual(original);
     });
 
     it('repairs discontiguous corps AoR', () => {
         const { state, edges } = makeDiscontiguousState();
         // Before: S5 belongs to brig-a2 (corps-a) but is disconnected
-        expect(state.brigade_aor!.S5).toBe('brig-a2');
+        expect(getLegacyAoR(state).brigade_aor!.S5).toBe('brig-a2');
         enforceCorpsLevelContiguity(state, edges);
         // After: S5 should be reassigned to a corps-b brigade (adjacent)
-        const newBrigade = state.brigade_aor!.S5;
+        const newBrigade = getLegacyAoR(state).brigade_aor!.S5;
         if (newBrigade) {
             const formation = state.formations![newBrigade];
             expect(formation.corps_id).toBe('corps-b');
@@ -323,18 +323,18 @@ describe('enforceCorpsLevelContiguity', () => {
             brigade_aor: { S1: 'brig-a1', S2: 'brig-a1', S3: 'brig-a1', S4: null, S5: 'brig-a2', S6: 'brig-a2' },
         } as GameState;
 
-        const original = { ...state.brigade_aor! };
+        const original = { ...getLegacyAoR(state).brigade_aor! };
         enforceCorpsLevelContiguity(state, edges);
         // Enclave settlements (S5, S6) should NOT be touched — the disconnect is legitimate
-        expect(state.brigade_aor).toEqual(original);
+        expect(getLegacyAoR(state).brigade_aor).toEqual(original);
     });
 
     it('produces identical result when run twice (determinism)', () => {
         const { state, edges } = makeDiscontiguousState();
         enforceCorpsLevelContiguity(state, edges);
-        const afterFirst = { ...state.brigade_aor! };
+        const afterFirst = { ...getLegacyAoR(state).brigade_aor! };
         enforceCorpsLevelContiguity(state, edges);
-        const afterSecond = { ...state.brigade_aor! };
+        const afterSecond = { ...getLegacyAoR(state).brigade_aor! };
         expect(afterSecond).toEqual(afterFirst);
     });
 });

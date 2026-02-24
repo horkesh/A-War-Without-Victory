@@ -1,7 +1,9 @@
 # AWWV Project Ledger — Thematic Knowledge Base
 
-**Last Updated:** 2026-02-18  
-**Purpose:** Knowledge accumulation by theme. Chronological record remains in `docs/PROJECT_LEDGER.md` (append-only).
+**Last Updated:** 2026-02-24  
+**Purpose:** Knowledge accumulation by theme.
+
+**40_reports structure (2026-02-24):** Backlog is consolidated into themed docs (BACKLOG_*.md) in docs/40_reports/backlog/; originals archived to docs/_old/40_reports/backlog/. For historical fidelity, Phase 7, mobilization, etc., use the themed doc or the archived filename in _old. See docs/_old/README.md §40_reports/backlog and CONSOLIDATED_BACKLOG. Chronological record remains in `docs/PROJECT_LEDGER.md` (append-only).
 
 Use this doc to find decisions, patterns, and rationale by topic. For full changelog and artifact lists, see PROJECT_LEDGER.md.
 
@@ -169,6 +171,9 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 **Map & visualization**
 
 - War Planning Map: `#warroom-scene` and `#map-scene`; only one visible; `openWarPlanningMap` → scene-open then `map.show()`; closeCallback → `showWarroomScene()` (napkin).
+- **Operational settlements (OSID):** As of 2026-02-22, **OSID is the canonical map unit** for simulation, rendering, and political control. 753 operational settlements (format `op:<mun>:<slug>`) from 5,823 canonical via 702 hand-curated merge groups in `data/source/merge_progress.json` + 51 singletons. Derive script: `scripts/derive_operational_settlements.ts`; outputs in `data/derived/operational/` (operational_settlements.geojson, canonical_to_operational_map.json, operational_contact_graph.json, operational_political_control.json, operational_initial_master.json). HoI map control layer: single merged mesh (global vertex table, per-vertex colors) for gap-free rendering. Report: 20260222_OPERATIONAL_SETTLEMENT_MERGER_AND_HOI_MAP_REWORK.md; IMPLEMENTED_WORK_CONSOLIDATED §32.
+- **HoI map 3D tilt and texture-on-terrain (2026-02-23):** Political control on HoI 2.5D map is no longer a floating polygon overlay; faction colors are rasterized onto a 2048×2048 texture and applied to the terrain mesh’s own geometry (same BufferGeometry → no gaps or terrain poke-through at any tilt). Ortho camera far plane 1000→100; overlay Y-offsets reduced; polygonOffset used for depth ordering; invisible control mesh retained for settlement hover/click raycasting. `t`/`T` adjust tilt (5°). Report: 20260223_HOI_MAP_3D_TILT_AND_TEXTURE_ON_TERRAIN.md; IMPLEMENTED_WORK_CONSOLIDATED §35; PROJECT_LEDGER 2026-02-23.
+- **HoI-style brigades + ZoC and Attack Resolution (2026-02-22):** Canon, data/state, engine, and bots/GUI phases implemented. One OSID per brigade; ZoC from deployed brigades; ZoC-lock (stay / retreat / attack only); control change only via attack resolution or corps ops; no single resolution flips more than one OSID. Attack resolution: formula spec (combat power, entrenchment, resilience, outcome bands, casualties, push-back); retreat tie-break: enemy-adjacency count asc then OSID sort. Pipeline: zoc-computation, zoc-constrained-movement, phase-ii-resolve-attack-orders (OSID path when operational data present). Bots: orders in OSID space; ZoC-lock behavior. Maps: brigade position from `location_osid` when set. See PROJECT_LEDGER.md 2026-02-22 "HoI-style brigades + ZoC and Attack Resolution Formula (full roadmap)"; design docs: 20260222_HOI_BRIGADES_AND_ZONE_OF_CONTROL_DESIGN.md, 20260222_ATTACK_RESOLUTION_FORMULA_SPEC.md.
 - Map viewer: derive `settlements_a1_viewer.geojson` from A1_BASE_MAP (role=settlement); use `getPoliticalControlKey()` for S-prefixed sid in political_control_data (napkin).
 - WGS84 derivation: fallback to `data/_deprecated/derived/legacy_substrate/settlements_substrate.geojson` when derived path missing (napkin).
 - Use `map:build:wgs84:from-geometry` when `settlements_wgs84_1990.geojson` exists (skips tessellation) (napkin).
@@ -205,6 +210,8 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 - **Brigade AoR overhaul (2026-02-14):** Corps-directed assignment when `state.corps_command` present: partition front into corps sectors, allocate brigades along each sector's frontline (home mun + up to 2 contiguous neighbors), derive settlement AoR, enforce contiguity (repair, orphan reassignment). Contiguity is a hard invariant; rebalance shed uses `wouldRemainContiguous` guard. Legacy Voronoi BFS when no corps (Phase I / tests). Tactical map AoR highlight: compound fill (evenodd), outer boundary only, breathing glow. Report: `docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md; archived: docs/_old/40_reports/implemented_2026_02_15/BRIGADE_AOR_OVERHAUL_CORPS_DIRECTED_2026_02_14.md`; canon: Phase II §7.1, Systems Manual §2.1/§8, TACTICAL_MAP_SYSTEM Pass 6.
 - **Phase I no-flip semantics (2026-02-13):** `disable_phase_i_control_flip` = military-action-only (militia-pressure path disabled; formation-led flips still possible). Scenario names with no_flip do not imply strict zero control changes (napkin).
 - **Scenario harness diagnostics (2026-02-13):** `run_summary.json` includes `phase_ii_attack_resolution` (weeks_with_phase_ii, orders_processed, flips_applied, casualty_attacker/defender); end_report section "Phase II attack resolution (pipeline)" for diagnosing 0-flip Phase II outcomes (napkin).
+- **Front system rebuild (2026-02-21):** assignable_front_segments, brigade_front_assignment (reserve rule), theatres, army_theatre_assignment; GUI assign-to-front and naming IPC; 2D/3D single source. TACTICAL_MAP_SYSTEM §10.4, §21.3; DESKTOP_GUI_IPC_CONTRACT state contract. IMPLEMENTED_WORK_CONSOLIDATED §28.
+- **Headless corps fronts and run_summary (2026-02-21):** Phase II pipeline step `ensure-derived-corps-front-edges` populates corps_front_edges in headless runs; run_summary includes `front_corps_tracking: { corps_front_edges_present, corps_count }` when Phase II ran. IMPLEMENTED_WORK_CONSOLIDATED §29; PROJECT_LEDGER 2026-02-21.
 - **Clone centralization (2026-02-11):** Single `cloneGameState` in `src/state/clone.ts` used by all turn pipelines and browser runners; avoids six duplicate polyfills (napkin).
 
 **Data & tooling**
@@ -257,6 +264,7 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 - **Orchestrator scenario-run handoff:** Run canonical scenarios (e.g. apr1992_phase_ii_4w, apr1992_4w, player_choice_recruitment_no_flip_4w), capture outDir/run_id and end_report paths, then create handoff doc (docs/40_reports/) for scenario-creator-runner-tester to check vs historical expected outcomes (napkin).
 - **Implemented work single source (2026-02-15, expanded 2026-02-16):** All implementation report content is in docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md (sections 1–12). Section 10 = Warroom/Phase 0 and systems integration; §11 = Warroom restyle, Apr 1992 scenario fix, embedded tactical map, fog-of-war; §12 = deterministic org-pen initialization and Phase 0->I handoff alignment (A/B/C formula seeding). New reports in `docs/40_reports/implemented/`: `WARROOM_RESTYLE_SCENARIO_FIX_EMBEDDED_MAP_FOG_OF_WAR_2026_02_16.md`, `ORG_PEN_FORMULA_INIT_AND_PHASE0_HANDOFF_2026_02_16.md`. Canon (Phase 0/I, Systems Manual, context, docs_index) and 40_reports indices reference these updates.
 - **Design cross-impact analysis as prerequisite (2026-02-18):** Before implementing any system that is tightly coupled to another planned-but-not-yet-implemented system, produce a written cross-impact analysis identifying every field, modal, event, and data structure in the downstream system that will need updating when the upstream system lands. The 2026-02-18 AoR Redesign Study vs Warroom War-Phase Modals analysis found 11 specific changes — all additive — that must be made to warroom modals when brigade AoR redesign ships. Doing this analysis before implementation prevents rework, keeps design docs in sync, and surfaces architectural surprises early. Pattern: list upstream changes in a table with downstream location, what changes, and impact class (additive/breaking/optional).
+- **Warroom war-phase modals report propagation (2026-02-21):** Report [WARROOM_WAR_PHASE_MODALS_2026_02_21.md](40_reports/implemented/WARROOM_WAR_PHASE_MODALS_2026_02_21.md) propagated as IMPLEMENTED_WORK_CONSOLIDATED §31; CONSOLIDATED_IMPLEMENTED, 40_reports README, context.md implementation references updated. Ledger 2026-02-21.
 
 *(See .agent/napkin.md Domain Notes; PROJECT_LEDGER.md for detailed changelog.)*
 
@@ -294,6 +302,16 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 
 *(See PROJECT_LEDGER.md 2026-02-09 canon update; RBiH_HRHB_ALLIANCE_REDESIGN_DESIGN.md; 2026-02-13 ORCHESTRATOR_ABSORPTION_AND_CANON_UPDATE_2026_02_13.md.)*
 
+### Known canon/spec gaps (comprehensive review 2026-02-23)
+
+Identified via Orchestrator comprehensive review convene ([ORCHESTRATOR_COMPREHENSIVE_REVIEW_CONVENE_2026_02_23.md](40_reports/convenes/ORCHESTRATOR_COMPREHENSIVE_REVIEW_CONVENE_2026_02_23.md)):
+
+- **Phase 0→I JNA_status contract gap:** Phase 0 §7/§8 do not list JNA_status (transition_begun, withdrawal_progress, asset_transfer_RS); Phase I §3 expects it. Action: extend Phase 0 output contract.
+- **Phase II ceasefire/Washington pipeline gap:** `phase-i-ceasefire-check` and `phase-i-washington-check` only run in Phase I pipeline; if preconditions first met in Phase II, milestones would not fire. Action: add steps or shared milestone evaluation for Phase II.
+- **War termination / end-game unspecified:** Canon and Rulebook are largely silent on when negotiation opens, how the game ends, and scoring/evaluation. Action: minimal war termination spec (thresholds, end state, scoring).
+- **Player action guide missing:** Rulebook is systems-first; a clear "Player's Turn Guide" or "Player Actions per Phase" section is missing. Action: add to Rulebook or linked doc.
+- **Supply spec gap:** Supply is referenced in combat, exhaustion, authority, corridors, enclave integrity — but no formal specification at attack-resolution level. Action: produce supply spec after critical path items.
+
 ### Compliance
 
 - **Engine Invariants:** Determinism, stable ordering, no timestamps/random in simulation; milestone semantics as in §J.
@@ -327,6 +345,7 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 - **Tactical map UX (2026-02-19):** Accessibility (ARIA live region, keyboard settlement navigation, focus-visible), larger click targets and 12px typography, desaturated accent #00d470, toolbar grouping, panel tabs 90px/10px, hover/selection glow and formation glow, tooltips with shortcuts, loading/error/empty states, optional quick tour. TACTICAL_MAP_SYSTEM §2; docs/plans/2026-02-19-warmap-figma-spec.md implementation note.
 - **Tactical 3D parity pass (2026-02-20):** `map_operational_3d.ts` now mirrors key tactical-map behaviors: `layer-formations` actually toggles 3D formation sprites, initial 3D view is corps-first via camera LOD (brigades on zoom-in), and formation clicks are hierarchy-aware (corps -> subordinate links + union AoR; brigade -> parent corps link + brigade AoR). Selection synchronizes with embedded MapApp state through `window.__awwvMapApp.state`.
 - **Three workstreams convene (2026-02-20):** Orchestrator convened roles for (1) 3D corps/brigade icon size and LOD, (2) AoR display in 3D to match plan §2.5/§4.5 and TACTICAL_MAP_SYSTEM Pass 6, (3) brigade AoR 1–4 canon/engine/GUI. Priority, ownership, and handoffs: [ORCHESTRATOR_THREE_WORKSTREAMS_3D_ICONS_AOR_BRIGADE_CAP_2026_02_20.md](40_reports/convenes/ORCHESTRATOR_THREE_WORKSTREAMS_3D_ICONS_AOR_BRIGADE_CAP_2026_02_20.md).
+- **Warmap sandbox visual & UX port (2026-02-21):** Operational 3D warmap (`map_operational_3d.ts`) now has two-tier formation counters (brigade light / corps CRT), stem lines to terrain, enhanced AoR and polygon movement range, settlement highlight rings, right-side panel stack (Selection, Orders, Battle log, Forces), and SELECT/ATTACK/MOVE mode toolbar (1/2/3, Escape) using DesktopBridge `stagePostureOrder`/`stageAttackOrder`. See [WARMAP_SANDBOX_VISUAL_UX_PORT_2026_02_21.md](40_reports/implemented/WARMAP_SANDBOX_VISUAL_UX_PORT_2026_02_21.md); TACTICAL_MAP_SYSTEM §2, §21.2; DESKTOP_GUI_IPC_CONTRACT; Systems Manual implementation-note.
 - **Sep 1991 Phase 0 pre-war correction (2026-02-16):** Sep 1991 now starts with referendum not yet held, uses scheduled referendum/war-start turns (26/30), and applies April 1992 mun1990 control exactly on `phase_0 -> phase_i` transition (before OOB recruitability checks). Key implementation detail: when scheduled referendum is later than default eligibility deadline, pass a schedule-aware `deadlineTurns` override or Phase 0 will terminate early as non-war. See PROJECT_LEDGER.md 2026-02-16 entry "Sep 1991 Phase 0 correction: pre-referendum start, scheduled referendum, and war-start Apr 1992 control handoff."
 - **Sep 1991 declaration-timing calibration (2026-02-16):** For undeclared-at-start scenarios, the canonical Phase 0 runner must pass full declaration options (`buildPhase0TurnOptions`) into `runPhase0Turn`; referendum-only options can leave declaration pressure inert and stall progression. For Sep 1991 historical flow, use schedule-gated threshold calibration (HRHB sustained-violence context + pressure/relationship overrides, RS threshold/relationship calibration) rather than scripted declaration dates. See PROJECT_LEDGER.md 2026-02-16 entry "Sep 1991 declaration timing calibration: undeclared start, threshold-based Nov/Jan sequence, and canonical runner wiring."
 - **Phase 0 capital trickle canon update (2026-02-16):** Capital remains non-renewable by default, but scheduled pre-war scenarios now allow deterministic limited trickle (Phase 0 §4.1.1) to reduce dead turns without removing scarcity. Runtime gate is `meta.phase === "phase_0"` plus scheduled referendum/war-start metadata; application order is canonical faction order. See PROJECT_LEDGER.md 2026-02-16 entry "Canon update + implementation: scenario-gated deterministic Phase 0 capital trickle."
@@ -404,7 +423,11 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 6. **Hostile-takeover displacement path (2026-02-17)** — Added a delayed Phase II displacement chain tied to at-war settlement flips: takeover timer (4 turns) -> camp pool (4 turns) -> deterministic motherland-ordered urban reroute with overflow. East-Bosnia Bosniak routing now prioritizes Srebrenica/Tuzla/Gorazde; enclave overrun (Srebrenica/Gorazde/Zepa) applies higher kill fraction than standard displacement. Tactical map now displays both 1991 and current population (derived from displacement state).
 7. **Displacement refactor shared utils (2026-02-17)** — Extracted `displacement_state_utils.ts` with `getOrInitDisplacementState` and `getMunicipalityIdFromRecord`; displacement_takeover and minority_flight import from it. No behavior change; code organization only. IMPLEMENTED_WORK_CONSOLIDATED §23.
 
-*(See PROJECT_LEDGER.md 2026-02-11–12, 2026-02-13; docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md; archived: docs/_old/40_reports/implemented_2026_02_15/battle_resolution_engine_report_2026_02_12.md.)*
+8. **Linked ZoC front-line system (2026-02-23)** — When two or more friendly brigades' zones of control form a connected chain through the OSID adjacency graph (brigade → zoc → zoc → brigade, max 4-node chain), intermediate ZoC OSIDs become a "linked front" blocking enemy movement. Algorithm: BFS connected components on subgraph of (brigade ∪ ZoC) OSIDs; components with 2+ brigades → all ZoC OSIDs in that component are linked. Enemies cannot enter linked ZoC (friendly-controlled territory within the chain) but CAN attack brigade positions. This models the historical reality that deployed units within mutual support range control ground between them. Effect: front lines stabilize after initial offensive phase (~17 weeks), matching Bosnian War's historical pattern of solidified fronts by mid-1992.
+
+9. **OSID terrain-weighted column movement (2026-02-23)** — Multi-hop column transit for brigade redeployment through rear areas. Terrain-weighted Dijkstra pathfinding through friendly OSIDs (road quality, slope, friction, river, uphill). Column rate by composition: heavy mech (RS) = 2/turn, light infantry (RBiH) = 4/turn, mixed (HRHB) = 3/turn. Bot AI issues column march for brigades ≥3 BFS hops from front. Transit time = ceil(path_cost / rate). Pipeline: column step runs BEFORE zoc-constrained-movement (which clears all orders). Pattern: separate order `stance` field distinguishes column orders from 1-hop combat orders.
+
+*(See PROJECT_LEDGER.md 2026-02-11–12, 2026-02-13, 2026-02-23; docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md; archived: docs/_old/40_reports/implemented_2026_02_15/battle_resolution_engine_report_2026_02_12.md.)*
 
 ### Phase I no-flip chain
 
@@ -422,6 +445,30 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 - Render pending-order intent directly on map (attack + municipality move + settlement move + reposition arrows) so staged actions are legible without opening panel details.
 
 *(See PROJECT_LEDGER.md 2026-02-20 “Brigade AoR UX pivot: settlement-select Move/Reposition + polish + docs alignment”.)*
+
+---
+
+### Map HoI and 2.5D renderer (2026-02-21)
+
+- **map_hoi** — Parallel entrypoint: HoI-style warm palette, class-based components, same IPC and GameStateAdapter; operational_settlements.geojson for placeholder or 2.5D control layer.
+- **HoIMapRenderer** — Three.js orthographic ~20° tilt; terrain; political control meshes; front ribbons; Bézier order arrows; formation sprites (zoom scaling); labels LOD; strategic points; enclave rings. WebGL fallback to 2D placeholder.
+- **Operational settlements** — `npm run map:derive:operational-settlements`; Phases 1–2 prerequisite.
+
+---
+
+### AoR/OSID/front reconciliation (comprehensive review 2026-02-23)
+
+- The comprehensive review ([ORCHESTRATOR_COMPREHENSIVE_REVIEW_CONVENE_2026_02_23.md](40_reports/convenes/ORCHESTRATOR_COMPREHENSIVE_REVIEW_CONVENE_2026_02_23.md)) confirmed that AoR, OSID (location_osid, ZoC, attack resolution), and front segments (assignable_front_segments, brigade_front_assignment) form a triple-identity that needs reconciliation. Canon and code reference them in overlapping ways.
+- AoR phase-out (2026-02-23) removed AoR from GameState and pipeline; Phase II is OSID/ZoC-only. Reconciliation plan (docs/30_planning/AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md) covers migration path and transitional state.
+- **Ownership:** Technical Architect owns the reconciliation plan; PM to sequence remaining work (front segment integration, pipeline step cleanup, adapter unification).
+
+### OSID deferreds closed (2026-02-22)
+
+- **OSID front edges snapshot** — Keep canonical `front_edges` for existing consumers and persist additive `phase_ii_front_edges_osid` for HoI/OSID rendering paths; adapters expose `frontEdgesOsid` and `map_hoi` prefers it.
+- **OSID attack snap events** — `attack_resolution_osid` now emits structured snap events and per-type counts for downstream UI/reporting (`last_stand`, `surrender_cascade`, `commander_casualty`, `ammo_crisis`, `pyrrhic_victory`).
+- **OSID terrain scalar policy** — Defender terrain multiplier is precomputed per OSID deterministically using max composite over constituent SIDs (defense-favoring, stable order).
+- **Spawn pass-through completion** — Browser and CLI spawn flows now pass `canonicalToOperational` so emergent brigades get `location_osid` where mapping exists.
+- **HoI interaction polish** — `M` key centers player-capital heuristic, double-click settlement zooms tactical-in, and map gets subtle tactile overlay.
 
 ---
 

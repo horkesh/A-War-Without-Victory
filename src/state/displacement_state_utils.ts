@@ -5,6 +5,7 @@
 
 import type { SettlementRecord } from '../map/settlements.js';
 import type { DisplacementState, FactionId, GameState, MunicipalityId } from './game_state.js';
+import { getLegacyAoR } from './game_state.js';
 
 /** 52w plan Step 6.5.2: true when the faction has at least one brigade present in the municipality (assignment or AoR). */
 export function factionHasBrigadeInMunicipality(
@@ -13,13 +14,13 @@ export function factionHasBrigadeInMunicipality(
     munId: MunicipalityId,
     settlements: Map<string, SettlementRecord>
 ): boolean {
-    const assignment = state.brigade_municipality_assignment ?? {};
+    const assignment = getLegacyAoR(state).brigade_municipality_assignment ?? {};
     const formations = state.formations ?? {};
     for (const [fid, muns] of Object.entries(assignment)) {
         const f = formations[fid];
         if (f?.faction === factionId && Array.isArray(muns) && muns.includes(munId)) return true;
     }
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     for (const [sid, rec] of settlements.entries()) {
         const recMun = (rec?.mun1990_id ?? rec?.mun_code) as string | undefined;
         if (recMun !== munId) continue;

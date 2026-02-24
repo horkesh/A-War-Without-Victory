@@ -17,6 +17,7 @@ import type {
     SettlementId
 } from '../../state/game_state.js';
 import { computeTerrainModifier } from './battle_resolution.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { getBrigadeAoRSettlements, getSettlementGarrison } from './brigade_aor.js';
 import { computeEquipmentMultiplier } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';

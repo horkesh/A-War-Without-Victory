@@ -54,7 +54,7 @@ Each settlement has a **political controller**, defined as the faction that curr
 
 political_controller ∈ {RBiH, RS, HRHB, null}
 
-Political control is distinct from brigade presence, Areas of Responsibility (AoRs), fronts, and pressure application. A settlement may have political control without any military formation assigned to it.
+Political control is distinct from brigade presence, brigade location (OSID), fronts, and pressure application. A settlement may have political control without any military formation assigned to it.
 
 ### 4.2 Initialization
 
@@ -82,27 +82,28 @@ Political control is stable by default. Political control does not change due to
 
 Political control may change only through defined mechanisms:
 
-1. **Sustained opposing military pressure** applied via front-active settlements, meeting pressure eligibility and duration rules
-2. **Internal authority collapse or fragmentation** as defined in fragmentation and exhaustion systems
-3. **Negotiated transfer** through end-state or interim agreements
+1. **Attack resolution** (Phase II): an attack order is resolved → push-back and control flip at the target OSID
+2. **Corps or frontline operations** as defined in the Phase II / Systems Manual
+3. **Internal authority collapse or fragmentation** as defined in fragmentation and exhaustion systems
+4. **Negotiated transfer** through end-state or interim agreements
 
-No other mechanism may alter political control.
+There is no passive pressure flip; control does not change from sustained pressure alone. No other mechanism may alter political control.
 
 ### 4.4 Relationship to military operations
 
 Political control exists independently of military responsibility.
 
-**Rear settlements:**
+**Rear OSIDs (or settlements derived from them):**
 - Have political control
-- Have no AoR
-- Do not participate in pressure exchange
+- Are not the target of attack resolution
+- Do not experience control change from absence of formations
 
-**Front-active settlements:**
-- Retain political control
-- Are assigned to exactly one brigade AoR
-- May experience contested pressure
+**Contested / front OSIDs:**
+- Retain political control until attack resolution or corps ops change it
+- May be occupied by one or more brigades (stacking allowed)
+- Are adjacent to hostile control or enemy brigades
 
-Fronts emerge only from interaction between opposing brigades. Political control does not create fronts. Political control is always attributable to a faction or explicitly null. There is no ambient, automatic, or unit-derived control. Military formations contest control; they do not generate it.
+Fronts emerge from hostile OSID adjacency. Political control is always attributable to a faction or explicitly null. Control changes only via attack resolution or corps/frontline operations—military formations contest control through attack; they do not generate it by passive pressure.
 
 ## 5. Military Forces
 
@@ -110,120 +111,92 @@ Fronts emerge only from interaction between opposing brigades. Political control
 
 Military forces are represented as formations such as militia, brigades, and lower-level groups. Brigades are the primary player-facing maneuver formations.
 
-Brigades are the primary maneuver formations represented on the map. They are visible, selectable, and directly commanded by the player. Brigades are the only formations that hold spatial responsibility on the settlement layer. Corps and Operational Groups coordinate brigades but do not own territory.
+Brigades are the primary maneuver formations represented on the map. They are visible, selectable, and directly commanded by the player. Each brigade has a **single location**: one **OSID** (operational settlement). Multiple brigades may **stack** on the same OSID. Corps and Operational Groups coordinate brigades but do not own OSIDs.
+
+The command hierarchy is Theatre -> Army -> Corps -> Brigade. Theatres are top-level operational partitions used for command grouping and front assignment context.
 
 Battalions exist only as internal subunits of brigades. They are not represented on the map and cannot be selected or assigned independently.
 
 Formations differ in manpower, cohesion, supply, and experience.
 
-### 5.2 Areas of Responsibility
+### 5.2 Brigade location and Zone of Control
 
-Areas of Responsibility (AoRs) define **military responsibility for active, front-relevant space**. AoRs are assigned only where organized military formations are expected to apply, absorb, or contest coercive pressure.
+**OSID location:** Each brigade occupies one OSID (`location_osid`). Stacking is allowed. Only **deployed** brigades (not in column: packing / in_transit / unpacking) project ZoC and participate in combat.
 
-AoRs are **not universal territorial ownership constructs**. They represent zones of active or potential military interaction rather than total political control.
+**Zone of Control (ZoC):** A brigade projects ZoC to all OSIDs **adjacent** to its current OSID (in the operational contact graph). An **enemy** brigade that is in the ZoC of a friendly brigade is **ZoC-locked**.
 
-**Scope of AoRs**
+**ZoC-locked options:** While in enemy ZoC, a brigade may only: **stay** on its current OSID; **retreat** to an OSID that is not in any enemy ZoC; or **attack** the OSID occupied by the ZoC-owning enemy (attack that tile). Any other move (e.g. moving to a different enemy-ZoC tile without attacking the ZoC source) is disallowed.
 
-AoRs apply **only to front-active settlements**, defined as settlements where:
-- Opposing factions' coercive forces may interact through adjacency, or
-- Pressure eligibility conditions exist, or
-- Supply corridors, encirclement risk, or fragmentation dynamics are present
+**Retreat (prefer rear):** When retreating, valid destinations are friendly-controlled OSIDs not in enemy ZoC (or, if none, friendly OSIDs in enemy ZoC—retreat under pressure). Tie-break among valid destinations: **enemy adjacency count ascending** (prefer rear), then **OSID string sort** (determinism).
 
-AoRs include both frontline settlements and limited depth settlements necessary to sustain military operations and prevent immediate rupture.
-
-Settlements that are politically controlled but **not exposed to active or imminent military pressure** are not required to be assigned to any brigade AoR.
+**Attack-only control change:** Control of an OSID does not change from passive pressure. It changes only when an **attack** is resolved (attack resolution → push-back and control flip) or through defined corps/frontline operations.
 
 ### 5.3 Rear Political Control Zones
 
-Settlements outside all brigade Areas of Responsibility constitute **Rear Political Control Zones**.
+OSIDs (or settlements derived from them) that are not the target of attack resolution constitute **Rear Political Control Zones** when they remain under faction control without being adjacent to hostile control or enemy brigades.
 
-Rear Political Control Zones:
-- Remain under faction control without direct brigade assignment
-- Do not participate in pressure exchange
-- Do not generate fronts
-- Do not require garrison presence
-- Do not experience control change solely due to the absence of military formations
+Rear zones:
+- Remain under faction control
+- Do not experience control change solely due to absence of military formations
+- Become contested when fronts expand via attack or corps ops
 
-These zones represent political, administrative, and societal space rather than active military space.
+### 5.4 Front assignment and movement
 
-**Transition Between Rear and Front Space**
+Brigades are assigned to derived front segments (`brigade_front_assignment`). `null` assignment means the brigade is in **reserve**. Reserve brigades do not execute attack or offensive movement orders until assigned to a front.
 
-A settlement transitions from Rear Political Control Zone to front-active status only when:
-- Opposing brigade pressure becomes eligible across adjacency edges
-- A supply corridor becomes contested or brittle
-- Or internal fragmentation or authority collapse conditions activate military relevance
-
-Once front-active, the settlement must be assigned to exactly one brigade's AoR.
-
-**Control Change**
-
-Settlement control does not change due to lack of brigade presence. Control change may occur only when opposing brigade pressure is applied and sustained under eligibility rules, or internal authority collapse triggers fragmentation or realignment.
-
-Rear Political Control Zones are therefore stable by default, but vulnerable to expansion of fronts or internal systemic failure.
-
-### 5.4 Reshaping AoRs
-
-Players command brigades by assigning and reshaping Areas of Responsibility rather than issuing orders to individual locations.
-
-Players may reshape AoRs by transferring settlements between adjacent brigades. AoR changes resolve over time and generate cohesion loss, exhaustion, and temporary disruption. Shrinking an AoR concentrates force and improves offensive potential. Expanding an AoR stretches force and increases risk.
-
-Players never issue orders to individual settlements. Territorial change occurs through sustained pressure within AoRs, mediated by supply, cohesion, exhaustion, and command friction.
+Movement is along the **operational contact graph** (OSID to OSID) and is **ZoC-constrained**: in enemy ZoC, only stay, retreat, or attack the ZoC source. **Column movement** allows multi-hop redeployment through friendly rear areas (terrain-weighted path, composition-dependent rate); brigades in column are in_transit and do not project ZoC or fight until they arrive. Combat is resolved by the **attack resolution** formula: outcome thresholds, casualties, push-back, and control flip at the target OSID.
 
 ### 5.5 Brigade posture
 
-Each brigade has a posture selected by the player. Posture represents operational intent and governs how internal battalions are distributed across the AoR. Posture affects pressure, defensive resilience, and exhaustion, but does not guarantee outcomes.
+Each brigade has a posture selected by the player. Posture affects attack power, defensive resilience, and exhaustion in the attack-resolution formula. Posture does not guarantee outcomes.
 
-**Postures:**
-- **Defend** (default): Prioritizes balanced coverage and minimizes exhaustion
-- **Probe**: Applies limited pressure to test weak points
-- **Attack**: Concentrates pressure at the cost of higher exhaustion and weaker rear resilience
-- **Elastic Defense**: Trades space for endurance, accepting controlled retreat to preserve cohesion
+Reserve rule: brigades in reserve (no front assignment) do not issue attack/posture/movement orders until assigned to a front segment.
+
+**Postures (summary):** Defend, Hold, Probe, Attack, Assault (per Attack Resolution Formula Spec). Posture multipliers apply to attacker and defender combat power.
 
 ### 5.6 Operational Groups
 
-Operational Groups are temporary coordination constructs authorized at Corps level. They do not own territory and do not have AoRs. They coordinate timing, posture alignment, and pressure among member brigades.
+Operational Groups are temporary coordination constructs authorized at Corps level. They do not own OSIDs. They occupy an OSID and function like a brigade for ZoC and combat; they coordinate timing and provide bonuses (e.g. og_mult) to adjacent friendly attacks during operations.
 
-With Corps authorization, an Operational Group may temporarily pull battalion-equivalent manpower from brigades. Donor brigades retain their AoRs but immediately suffer reduced coverage and increased risk. Detached subunits reinforce pressure within member brigades' AoRs only. They cannot hold settlements independently and do not create new fronts.
+With Corps authorization, an OG may temporarily pull battalion-equivalent manpower from brigades. Donor brigades retain their location_osid but suffer reduced strength. Detached manpower operates within the OG's OSID and operation scope; OGs dissolve per lifecycle rules and personnel return to donors.
 
 ## 6. Fronts and Combat
 
 ### 6.1 Front formation
 
-Fronts emerge where opposing forces apply pressure against each other. Combat is resolved as gradual pressure and attrition, not decisive battles.
+Fronts are first-class contiguous segments derived from **hostile OSID boundary edges**: adjacent OSIDs with opposing political controllers. Brigades on OSIDs adjacent to enemy control or enemy brigades define the front. Combat is resolved by **attack resolution**: discrete engagements with outcome thresholds, casualties, push-back, and control flip. There is no passive pressure flip.
 
-Frontlines harden over time as opposing Areas of Responsibility remain in sustained contact. Prolonged static contact increases exhaustion, reduces maneuver potential, and raises the cost of offensive action.
+Front assignment: a brigade assigned to a front segment is on the front; an unassigned brigade is in reserve. Theatre membership provides the top-level grouping for front segments and command panels.
 
-Early in the war, before coherent brigade fronts emerge, Areas of Responsibility are inactive. During this phase, control is exerted through coercive presence, militias, and ad hoc formations. The AoR system activates only once brigade-level fronts are established.
+### 6.2 Combat: attack resolution
 
-### 6.2 Pressure and attrition
+Combat occurs when a brigade **attacks** an adjacent OSID (enemy-controlled or occupied by enemy brigades). The **attack resolution formula** (Systems Manual §7.4; Attack Resolution Formula Spec) computes attacker and defender combat power, then:
 
-Combat is resolved as gradual pressure and attrition, not decisive battles. Static fronts become harder to break over time but increase exhaustion for both sides.
+- **Power ratio** determines outcome: decisive victory (≥2.0), victory (≥1.5), costly victory (≥1.0), stalemate (0.7–1.0), repulsed (0.5–0.7), catastrophic (<0.5).
+- **Casualties** apply to both sides; snap events may apply when state conditions are met.
+- **Push-back and control flip:** On attacker victory (decisive/victory/costly), the defender retreats, control of the target OSID flips to the attacker, and the attacker may advance into it (one OSID per attack). Retreat destination is chosen deterministically: prefer friendly OSID not in enemy ZoC, then tie-break by enemy adjacency count (ascending) then OSID string sort.
 
-### 6.3 Front hardening
+**Entrenchment** and **resilience (defense_streak)** modify defender power. Only deployed brigades participate. No single resolution flips more than one OSID.
 
-Fronts harden over time, increasing defensive value but accelerating exhaustion.
+### 6.3 Front hardening and exhaustion
+
+Fronts harden over time (e.g. entrenchment on current OSID); prolonged static contact increases exhaustion. Exhaustion does not flip control; it narrows options and drives negotiation.
 
 ### 6.4 Phase 3A: Pressure eligibility and diffusion
 
-Phase 3A allows pressure to propagate across settlement contacts using deterministic eligibility weights derived only from Phase 2 contact metrics. Each turn, eligible pressure diffuses conservatively across those contacts, smoothing local imbalances and delaying propagation across weak links without creating or destroying pressure.
-
-Diffusion is a structural substrate only: it does not itself cause exhaustion, collapse, territorial change, or negotiation effects.
+Phase 3A allows pressure to propagate across settlement contacts using deterministic eligibility weights derived only from Phase 2 contact metrics. Each turn, eligible pressure diffuses conservatively across those contacts. Diffusion is a structural substrate only: it does not itself cause control change, exhaustion, collapse, or negotiation effects. *Control change in Phase II is only via attack resolution or corps ops.*
 
 *The formal frozen specification is defined in the Systems & Mechanics Manual under "Phase 3A --- Pressure Eligibility and Diffusion (Design Freeze)".*
 
 ### 6.5 Phase 3B: Pressure and exhaustion
 
-Sustained pressure does not resolve the war directly. When pressure persists under static, constrained, or degraded conditions, it gradually converts into irreversible exhaustion.
-
-This coupling enforces the negative-sum nature of the conflict by narrowing future options rather than producing immediate collapse or territorial change. Exhaustion, not pressure itself, drives breakdown, negotiation, and war termination.
+Sustained pressure does not resolve the war directly. When pressure persists under static, constrained, or degraded conditions, it gradually converts into irreversible exhaustion. Exhaustion does not flip control.
 
 *The formal frozen specification for this mechanism is defined in the Systems & Mechanics Manual under "Phase 3B --- Pressure → Exhaustion Coupling (Design Freeze)".*
 
 ### 6.6 Phase 3C: Exhaustion and collapse eligibility
 
-Exhaustion does not automatically cause collapse. When accumulated exhaustion persists and coincides with institutional or spatial degradation, it may unlock eligibility for collapse in specific domains such as authority, command cohesion, or spatial integrity.
-
-Eligibility does not imply immediate failure. Collapse remains delayed, contingent, and multi-causal.
+Exhaustion does not automatically cause collapse. When accumulated exhaustion persists and coincides with institutional or spatial degradation, it may unlock eligibility for collapse in specific domains. Eligibility does not imply immediate failure.
 
 *The formal frozen specification for collapse gating is defined in the Systems & Mechanics Manual under "Phase 3C --- Exhaustion → Collapse Gating (Design Freeze)".*
 
@@ -333,17 +306,61 @@ Players do not have absolute control. Orders may be delayed, partially executed,
 
 Some actions are possible but carry severe long-term consequences.
 
-## 15. Victory Conditions
+## 15. Player's Turn Guide
 
-### 15.1 No total victory
+A phase-by-phase summary of player actions each turn. For system details, see the relevant sections above.
+
+### 15.1 Phase 0 (Pre-War)
+
+Each turn the player:
+1. **Reviews** the political landscape: stability scores, organizational factors, faction declarations
+2. **Allocates capital** to investments: police loyalty, TO control, organizational penetration, political pressure
+3. **Monitors** escalation: referendum timing, JNA posture, rival declarations
+4. **Ends turn** — investments resolve; escalation conditions evaluated
+
+The player cannot control military forces (none exist). Strategic choices shape starting conditions for war.
+
+### 15.2 Phase I (Early War)
+
+Each turn the player:
+1. **Reviews** the situation: control map, militia emergence, authority states, alliance status
+2. **Sets brigade postures** (when formations exist): hold, probe, push, consolidate
+3. **Issues attack orders** against adjacent enemy-controlled settlements
+4. **Monitors** JNA withdrawal, alliance strain, and Phase I→II transition conditions
+5. **Ends turn** — postures apply; battles resolve; control may flip; displacement triggers
+
+The player commands through posture and targeting, not direct unit movement. Command friction may degrade order execution.
+
+### 15.3 Phase II (Mid-War to Late-War)
+
+Each turn the player:
+1. **Reviews** reports: front status, exhaustion, supply pressure, corps operations, recent battles
+2. **Sets brigade postures** and **issues attack orders** (as in Phase I, but with ZoC constraints)
+3. **Manages corps operations**: front assignments, operational groups, attack axes
+4. **Monitors** exhaustion, recruitment, equipment degradation, alliance dynamics
+5. **Responds** to events: ceasefire conditions, Washington Agreement preconditions, enclave integrity
+6. **Ends turn** — ZoC-constrained movement resolves; attacks resolve; supply/exhaustion update; recruitment accrues
+
+Phase II adds operational depth (corps, fronts, supply) but reduces tactical flexibility (ZoC, exhaustion, friction).
+
+### 15.4 General Principles
+
+- **No undo:** Once the turn ends, consequences are permanent.
+- **Incomplete information:** Fog of war limits what the player sees; some events are revealed only after the fact.
+- **No total control:** Orders may be degraded by command friction, supply shortages, or low cohesion.
+- **Consequences accumulate:** Displacement, exhaustion, and international pressure compound over time.
+
+## 16. Victory Conditions
+
+### 16.1 No total victory
 
 There is no total victory. Success is measured by survival, leverage, and the terms under which the war ends.
 
-### 15.2 Faction-specific paths
+### 16.2 Faction-specific paths
 
 Different factions face different paths to acceptable outcomes.
 
-## 16. v0.4 Player-Facing Additions (Systems 1-11)
+## 17. v0.4 Player-Facing Additions (Systems 1-11)
 
 ### External Constraints
 - International pressure and patron constraints shape what is possible; they do not grant victory.
@@ -381,6 +398,6 @@ Different factions face different paths to acceptable outcomes.
 - Initial control can be secure, contested, or highly contested based on Phase 0 stability.
 - Highly contested areas are fragile in early war.
 
-## 17. v0.5 Canon consolidation
+## 18. v0.5 Canon consolidation
 
 This document (v0.5.0) consolidates the full Rulebook v0.3.0 with all v0.4 Player-Facing Additions. No content from v0.3 has been deleted.

@@ -28,10 +28,14 @@ function getDesktopSim() {
   return require(bundlePath);
 }
 
-function sendGameStateToRenderer(stateJson) {
+function sendGameStateToRenderer(stateJson, excludeSender) {
   const targets = [mainWindow, tacticalMapWindow];
   for (const win of targets) {
     if (win && !win.isDestroyed()) {
+      // Skip the window that initiated the IPC call — it already gets
+      // stateJson from the return value, so broadcasting to it would
+      // cause a double-apply.
+      if (excludeSender && win.webContents === excludeSender) continue;
       win.webContents.send('game-state-updated', stateJson);
     }
   }
@@ -377,14 +381,14 @@ app.whenReady().then(() => {
   });
 
   // Phase 3: Play myself — load scenario, load state, advance turn
-  ipcMain.handle('load-scenario-dialog', async () => {
+  ipcMain.handle('load-scenario-dialog', async (_event) => {
     const result = await showScenarioDialog(BrowserWindow.getFocusedWindow());
     if (result.canceled || !result.filePaths.length) return { ok: false, error: 'Canceled' };
     try {
       const sim = getDesktopSim();
       const { state } = await sim.loadScenarioFromPath(result.filePaths[0], getBaseDir());
       currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      sendGameStateToRenderer(currentGameStateJson, _event.sender);
       return { ok: true, stateJson: currentGameStateJson };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -404,21 +408,21 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const { state } = await sim.startNewCampaign(getBaseDir(), playerFaction, scenarioKey ?? 'apr_1992');
       currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      sendGameStateToRenderer(currentGameStateJson, _event.sender);
       return { ok: true, stateJson: currentGameStateJson };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }
   });
 
-  ipcMain.handle('load-state-dialog', async () => {
+  ipcMain.handle('load-state-dialog', async (_event) => {
     const result = await showStateFileDialog(BrowserWindow.getFocusedWindow());
     if (result.canceled || !result.filePaths.length) return { ok: false, error: 'Canceled' };
     try {
       const sim = getDesktopSim();
       const { state } = await sim.loadStateFromPath(result.filePaths[0]);
       currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      sendGameStateToRenderer(currentGameStateJson, _event.sender);
       return { ok: true, stateJson: currentGameStateJson };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -439,7 +443,7 @@ app.whenReady().then(() => {
       const result = await sim.advanceTurn(state, getBaseDir());
       if (result.error) return { ok: false, error: result.error };
       currentGameStateJson = sim.serializeState(result.state);
-      sendGameStateToRenderer(currentGameStateJson);
+      sendGameStateToRenderer(currentGameStateJson, _event.sender);
       return { ok: true, stateJson: currentGameStateJson, report: result.report ?? null };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -466,7 +470,7 @@ app.whenReady().then(() => {
       const result = await sim.applyPlayerRecruitment(state, getBaseDir(), brigadeId, equipmentClass);
       if (!result.ok) return { ok: false, error: result.error };
       currentGameStateJson = sim.serializeState(result.state);
-      sendGameStateToRenderer(currentGameStateJson);
+      sendGameStateToRenderer(currentGameStateJson, _event.sender);
       return { ok: true, stateJson: currentGameStateJson, newFormationId: brigadeId };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -582,6 +586,120 @@ app.whenReady().then(() => {
       }
       if (!state.brigade_aor_orders) state.brigade_aor_orders = [];
       state.brigade_aor_orders.push(order);
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('assign-brigade-to-front', async (_event, payload) => {
+    const { brigadeId, frontId } = payload || {};
+    const normalizedFrontId = frontId == null ? null : String(frontId);
+    if (!currentGameStateJson || typeof brigadeId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const result = sim.assignBrigadeToFront(state, brigadeId, normalizedFrontId);
+      if (!result.ok) return result;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('rename-front-segment', async (_event, payload) => {
+    const { frontId, name } = payload || {};
+    const normalizedName = name == null ? null : String(name);
+    if (!currentGameStateJson || typeof frontId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const result = sim.renameFrontSegment(state, frontId, normalizedName);
+      if (!result.ok) return result;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('rename-theatre', async (_event, payload) => {
+    const { theatreId, name } = payload || {};
+    const normalizedName = name == null ? null : String(name);
+    if (!currentGameStateJson || typeof theatreId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const result = sim.renameTheatre(state, theatreId, normalizedName);
+      if (!result.ok) return result;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-corps-front-order', async (_event, payload) => {
+    const { corpsId, edgeIds } = payload || {};
+    if (!currentGameStateJson || typeof corpsId !== 'string' || !Array.isArray(edgeIds)) {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const ids = edgeIds.filter((id) => typeof id === 'string');
+      const result = await sim.stageCorpsFrontOrder(state, corpsId, ids, getBaseDir());
+      if (!result.ok) return result;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-corps-attack-axis-order', async (_event, payload) => {
+    const { corpsId, edgeIds } = payload || {};
+    if (!currentGameStateJson || typeof corpsId !== 'string' || !Array.isArray(edgeIds)) {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const ids = edgeIds.filter((id) => typeof id === 'string');
+      const result = sim.stageCorpsAttackAxisOrder(state, corpsId, ids);
+      if (!result.ok) return result;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-og-subfront-order', async (_event, payload) => {
+    const { ogId, corpsId, edgeIds } = payload || {};
+    if (!currentGameStateJson || typeof ogId !== 'string' || typeof corpsId !== 'string' || !Array.isArray(edgeIds)) {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const ids = edgeIds.filter((id) => typeof id === 'string');
+      const result = sim.stageOgSubfrontOrder(state, ogId, corpsId, ids);
+      if (!result.ok) return result;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };

@@ -26,6 +26,7 @@ import type {
     MunicipalityId,
     SettlementId
 } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { areRbihHrhbAllied } from '../phase_i/alliance_update.js';
 import { assignCorpsDirectedAoR, enforceContiguity, enforceCorpsLevelContiguity } from './corps_directed_aor.js';
@@ -267,7 +268,7 @@ function legacyVoronoiMunicipalityAssignment(
     edges: EdgeRecord[],
     sidToMun: Record<SettlementId, MunicipalityId>
 ): Record<FormationId, MunicipalityId[]> {
-    const existing = state.brigade_municipality_assignment ?? {};
+    const existing = getLegacyAoR(state).brigade_municipality_assignment ?? {};
     const normalized: Record<FormationId, MunicipalityId[]> = {};
     const formations = state.formations ?? {};
     const pc = state.political_controllers ?? {};
@@ -295,8 +296,8 @@ function legacyVoronoiMunicipalityAssignment(
         }
     }
 
-    // Bootstrap from current brigade_aor when present.
-    const currentAoR = state.brigade_aor ?? {};
+    // Bootstrap from current brigade_aor when present (legacy read).
+    const currentAoR = getLegacyAoR(state).brigade_aor ?? {};
     for (const [sid, brigadeId] of Object.entries(currentAoR)) {
         if (!brigadeId) continue;
         const f = formations[brigadeId];
@@ -507,7 +508,7 @@ function legacyVoronoiMunicipalityAssignment(
         );
     }
 
-    state.brigade_municipality_assignment = normalized;
+    // AoR phase-out: do not write brigade_municipality_assignment
     return normalized;
 }
 
@@ -865,7 +866,7 @@ function deriveBrigadeAoRFromMunicipalities(
         }
     }
 
-    state.brigade_aor = brigadeAor;
+    // AoR phase-out: do not write brigade_aor
     const frontAssigned = Object.values(brigadeAor).filter((v) => v != null).length;
     const rearCount = Object.values(brigadeAor).length - frontAssigned;
     return {
@@ -885,9 +886,8 @@ export function applyBrigadeMunicipalityOrders(
         orders_rejected: 0,
         rejected_reasons: []
     };
-    const orders = state.brigade_mun_orders;
+    const orders = getLegacyAoR(state).brigade_mun_orders;
     if (!orders || typeof orders !== 'object') {
-        state.brigade_mun_orders = {};
         return report;
     }
 
@@ -983,8 +983,7 @@ export function applyBrigadeMunicipalityOrders(
         report.orders_applied += 1;
     }
 
-    state.brigade_municipality_assignment = assignments;
-    state.brigade_mun_orders = {};
+    // AoR phase-out: do not write brigade_municipality_assignment or brigade_mun_orders
     return report;
 }
 
@@ -1061,7 +1060,7 @@ function initializeBrigadeAoRSettlementLevel(
         brigadeCounts[formation.id] = thisAoR.length;
     }
 
-    state.brigade_aor = brigadeAor;
+    // AoR phase-out: do not write brigade_aor
     const frontAssigned = Object.values(brigadeAor).filter((v) => v != null).length;
     const rearCount = allSettlementIds.length - frontAssigned;
     return {
@@ -1084,7 +1083,7 @@ export function initializeBrigadeAoR(
 ): BrigadeAoRReport {
     const report = initializeBrigadeAoRSettlementLevel(state, edges);
 
-    if (state.brigade_aor && Object.keys(state.brigade_aor).length > 0) {
+    if (getLegacyAoR(state).brigade_aor && Object.keys(getLegacyAoR(state).brigade_aor!).length > 0) {
         const frontActive = identifyFrontActiveSettlements(state, edges);
         const adj = buildAdjacencyFromEdges(edges);
         enforceContiguity(state, frontActive, adj);
@@ -1104,16 +1103,18 @@ export function validateBrigadeAoR(
     edges: EdgeRecord[],
     _settlements?: Map<SettlementId, SettlementRecord>
 ): void {
-    const brigadeAor = state.brigade_aor;
+    const legacy = getLegacyAoR(state);
+    const brigadeAor = legacy.brigade_aor;
     const formations = state.formations ?? {};
     if (!brigadeAor) return;
 
+    // AoR phase-out: no mutation of legacy AoR (read-only)
     for (const sid of Object.keys(brigadeAor).sort(strictCompare)) {
         const formationId = brigadeAor[sid as SettlementId];
         if (!formationId) continue;
         const f = formations[formationId];
         if (!isActiveBrigade(f)) {
-            brigadeAor[sid as SettlementId] = null;
+            // Skip: would set brigadeAor[sid] = null; legacy not written
         }
     }
 
@@ -1129,7 +1130,7 @@ export function getBrigadeAoRSettlements(
     state: GameState,
     formationId: FormationId
 ): SettlementId[] {
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const result: SettlementId[] = [];
     for (const [sid, bid] of Object.entries(brigadeAor)) {
         if (bid === formationId) result.push(sid);
@@ -1215,7 +1216,7 @@ export function getSettlementGarrison(
     sid: SettlementId,
     edges?: EdgeRecord[]
 ): number {
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const formationId = brigadeAor[sid];
     if (formationId) {
         const coveredSettlements = getBrigadeOperationalCoverageSettlements(state, formationId, edges);
@@ -1251,7 +1252,7 @@ export const ENCIRCLED_GARRISON_MULT = 0.8;
  */
 export function computeBrigadeEncirclement(state: GameState, edges: EdgeRecord[]): void {
     const formations = state.formations ?? {};
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const pc = state.political_controllers ?? {};
 
     if (!state.brigade_encircled) state.brigade_encircled = {};
@@ -1302,7 +1303,7 @@ export function applySurroundedBrigadeReform(
     edges: EdgeRecord[],
     sidToMun: Record<SettlementId, MunicipalityId>
 ): void {
-    const brigadeAor = state.brigade_aor;
+    const brigadeAor = getLegacyAoR(state).brigade_aor;
     const formations = state.formations ?? {};
     const pc = state.political_controllers ?? {};
     if (!brigadeAor) return;

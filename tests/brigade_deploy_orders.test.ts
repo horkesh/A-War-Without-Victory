@@ -29,7 +29,7 @@ function makeState(): GameState {
         militia_pools: {},
         political_controllers: { S1: 'RBiH', S2: 'RBiH', S3: 'RBiH' } as any,
         brigade_aor: { S1: 'b1', S2: 'b1', S3: null },
-    } as GameState;
+    } as GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState;
 }
 
 const EDGES: EdgeRecord[] = [
@@ -48,8 +48,9 @@ describe('brigade deploy/undeploy staging', () => {
 
         processBrigadeMovement(state, EDGES);
 
-        expect(state.brigade_aor?.S1).toBe('b1');
-        expect(state.brigade_aor?.S2 ?? null).toBeNull();
+        const legacy = (state as import('../src/state/game_state.js').GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState);
+        expect(legacy.brigade_aor?.S1).toBe('b1');
+        expect(legacy.brigade_aor?.S2 ?? null).toBeNull();
         expect(state.brigade_movement_state?.b1?.status).toBe('packing');
         expect(state.brigade_movement_state?.b1?.stance).toBe('column');
         expect(state.brigade_movement_state?.b1?.destination_sids).toEqual(['S1']);

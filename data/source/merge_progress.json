@@ -1,0 +1,9286 @@
+{
+  "mergeGroups": [
+    {
+      "osid": "op:bosanski_petrovac:prkosi",
+      "memberSids": [
+        "S105538",
+        "S105791"
+      ]
+    },
+    {
+      "osid": "op:bosanski_petrovac:vodjenica",
+      "memberSids": [
+        "S105546",
+        "S105627",
+        "S105635",
+        "S105856",
+        "S105872"
+      ]
+    },
+    {
+      "osid": "op:bosanski_petrovac:vrtoce",
+      "memberSids": [
+        "S105589",
+        "S105767",
+        "S105899",
+        "S105902"
+      ]
+    },
+    {
+      "osid": "op:bosanski_petrovac:krnjeusa",
+      "memberSids": [
+        "S105724",
+        "S105732",
+        "S105821"
+      ]
+    },
+    {
+      "osid": "op:bosansko_grahovo:crni_lug",
+      "memberSids": [
+        "S106151",
+        "S106178",
+        "S106186",
+        "S106194",
+        "S106208",
+        "S106232",
+        "S106259",
+        "S106267",
+        "S106283",
+        "S106348",
+        "S106364",
+        "S106429",
+        "S106437",
+        "S106488"
+      ]
+    },
+    {
+      "osid": "op:bosansko_grahovo:ugarci",
+      "memberSids": [
+        "S106305",
+        "S106313",
+        "S106372",
+        "S106470"
+      ]
+    },
+    {
+      "osid": "op:banja_luka:motike",
+      "memberSids": [
+        "S200069",
+        "S200115",
+        "S200328",
+        "S200352",
+        "S200433"
+      ]
+    },
+    {
+      "osid": "op:bijeljina:bukovica_donja",
+      "memberSids": [
+        "S200948",
+        "S200956",
+        "S201120",
+        "S201278",
+        "S201286",
+        "S201294",
+        "S201383"
+      ]
+    },
+    {
+      "osid": "op:bosanska_gradiska:gornji_podgradci",
+      "memberSids": [
+        "S206113",
+        "S206385",
+        "S206458",
+        "S206598",
+        "S206725"
+      ]
+    },
+    {
+      "osid": "op:bosanska_gradiska:cerovljani",
+      "memberSids": [
+        "S206121",
+        "S206172",
+        "S206199",
+        "S206237",
+        "S206318",
+        "S206423",
+        "S206431",
+        "S206806"
+      ]
+    },
+    {
+      "osid": "op:bosanska_gradiska:grbavci",
+      "memberSids": [
+        "S206202",
+        "S206288",
+        "S206296",
+        "S206393",
+        "S206563"
+      ]
+    },
+    {
+      "osid": "op:bosanska_gradiska:orahova",
+      "memberSids": [
+        "S206326",
+        "S206415",
+        "S206601",
+        "S206652",
+        "S206741"
+      ]
+    },
+    {
+      "osid": "op:bosanska_dubica:vojskova",
+      "memberSids": [
+        "S210749",
+        "S210927",
+        "S211206",
+        "S211214",
+        "S211222",
+        "S211257",
+        "S211346"
+      ]
+    },
+    {
+      "osid": "op:bosanska_dubica:medjuvodje",
+      "memberSids": [
+        "S211044",
+        "S211052",
+        "S211087",
+        "S211117",
+        "S211133"
+      ]
+    },
+    {
+      "osid": "op:bosanska_kostajnica:petrinja",
+      "memberSids": [
+        "S211389",
+        "S211397",
+        "S211419",
+        "S211427",
+        "S211435",
+        "S211443",
+        "S211451",
+        "S211460",
+        "S211478",
+        "S211486",
+        "S211494"
+      ]
+    },
+    {
+      "osid": "op:bosanski_novi:poljavnice",
+      "memberSids": [
+        "S215139",
+        "S215376",
+        "S215406",
+        "S215422",
+        "S215481"
+      ]
+    },
+    {
+      "osid": "op:prijedor:cejreci",
+      "memberSids": [
+        "S217859",
+        "S217875",
+        "S218006",
+        "S218014",
+        "S218057",
+        "S218278",
+        "S218499"
+      ]
+    },
+    {
+      "osid": "op:prijedor:raljas",
+      "memberSids": [
+        "S217921",
+        "S218022",
+        "S218073",
+        "S218294",
+        "S218405",
+        "S218448",
+        "S218456",
+        "S218529"
+      ]
+    },
+    {
+      "osid": "op:prijedor:ljubija_2",
+      "memberSids": [
+        "S217778",
+        "S217816",
+        "S217867",
+        "S218090",
+        "S218138",
+        "S218146",
+        "S218243",
+        "S218391",
+        "S218421",
+        "S218502"
+      ]
+    },
+    {
+      "osid": "op:prijedor:kozarac_2",
+      "memberSids": [
+        "S217905",
+        "S218103",
+        "S218189",
+        "S218197",
+        "S218472"
+      ]
+    },
+    {
+      "osid": "op:prijedor:kamicani",
+      "memberSids": [
+        "S217751",
+        "S217794",
+        "S218154",
+        "S218162"
+      ]
+    },
+    {
+      "osid": "op:prijedor:brezicani",
+      "memberSids": [
+        "S217808",
+        "S217832",
+        "S217913",
+        "S217956",
+        "S217999",
+        "S218235"
+      ]
+    },
+    {
+      "osid": "op:prijedor:maricka_2",
+      "memberSids": [
+        "S217824",
+        "S218081",
+        "S218120",
+        "S218219",
+        "S218260",
+        "S218308",
+        "S218367",
+        "S218464"
+      ]
+    },
+    {
+      "osid": "op:prijedor:omarska_2",
+      "memberSids": [
+        "S217760",
+        "S217786",
+        "S218049",
+        "S218111",
+        "S218227",
+        "S218324"
+      ]
+    },
+    {
+      "osid": "op:prijedor:rasavci_2",
+      "memberSids": [
+        "S217964",
+        "S218286",
+        "S218316",
+        "S218359",
+        "S218383",
+        "S218413",
+        "S218430"
+      ]
+    },
+    {
+      "osid": "op:prijedor:prijedor_2",
+      "memberSids": [
+        "S217883",
+        "S217891",
+        "S217930",
+        "S217948",
+        "S217972",
+        "S218065",
+        "S218251",
+        "S218332",
+        "S218375"
+      ]
+    },
+    {
+      "osid": "op:banja_luka:banja_luka_2",
+      "memberSids": [
+        "S200026",
+        "S200042",
+        "S200123",
+        "S200158",
+        "S200204",
+        "S200301",
+        "S200409"
+      ]
+    },
+    {
+      "osid": "op:banja_luka:piskavica_2",
+      "memberSids": [
+        "S200085",
+        "S200174",
+        "S200379",
+        "S200395",
+        "S200450",
+        "S200484"
+      ]
+    },
+    {
+      "osid": "op:banja_luka:melina_2",
+      "memberSids": [
+        "S200093",
+        "S200212",
+        "S200310",
+        "S200336",
+        "S200492",
+        "S200573"
+      ]
+    },
+    {
+      "osid": "op:banja_luka:pavici_2",
+      "memberSids": [
+        "S200166",
+        "S200280",
+        "S200298",
+        "S200344",
+        "S200506"
+      ]
+    },
+    {
+      "osid": "op:banja_luka:rekavice_2",
+      "memberSids": [
+        "S200018",
+        "S200077",
+        "S200255",
+        "S200263",
+        "S200476"
+      ]
+    },
+    {
+      "osid": "op:banja_luka:kola",
+      "memberSids": [
+        "S200131",
+        "S200239",
+        "S200247",
+        "S200387",
+        "S200441",
+        "S200514",
+        "S200557",
+        "S200590"
+      ]
+    },
+    {
+      "osid": "op:banja_luka:dragocaj",
+      "memberSids": [
+        "S200034",
+        "S200107",
+        "S200140",
+        "S200271",
+        "S200417",
+        "S200425",
+        "S200468",
+        "S200522",
+        "S200581"
+      ]
+    },
+    {
+      "osid": "op:banja_luka:potkozarje_3",
+      "memberSids": [
+        "S200182",
+        "S200549",
+        "S200565"
+      ]
+    },
+    {
+      "osid": "op:banovici:banovici_selo_2",
+      "memberSids": [
+        "S100021",
+        "S100102",
+        "S100145",
+        "S100218",
+        "S164305"
+      ]
+    },
+    {
+      "osid": "op:banovici:seona",
+      "memberSids": [
+        "S100030",
+        "S100099",
+        "S100153",
+        "S100170",
+        "S100188",
+        "S100196"
+      ]
+    },
+    {
+      "osid": "op:banovici:repnik_2",
+      "memberSids": [
+        "S100161",
+        "S125610"
+      ]
+    },
+    {
+      "osid": "op:banovici:banovici_2",
+      "memberSids": [
+        "S100013",
+        "S100056",
+        "S100064",
+        "S100129",
+        "S100137",
+        "S100200"
+      ]
+    },
+    {
+      "osid": "op:bihac:trubar",
+      "memberSids": [
+        "S101281",
+        "S151475",
+        "S151483",
+        "S151521",
+        "S151564",
+        "S151572",
+        "S151599",
+        "S151645",
+        "S151653",
+        "S151777",
+        "S151793",
+        "S151807"
+      ]
+    },
+    {
+      "osid": "op:bihac:orasac_2",
+      "memberSids": [
+        "S100862",
+        "S100889",
+        "S100994",
+        "S101001",
+        "S101036",
+        "S101125",
+        "S101133",
+        "S101192"
+      ]
+    },
+    {
+      "osid": "op:bihac:racic",
+      "memberSids": [
+        "S100919",
+        "S100927",
+        "S100951",
+        "S101044",
+        "S101079",
+        "S101150",
+        "S101184",
+        "S101249"
+      ]
+    },
+    {
+      "osid": "op:bihac:brekovica_2",
+      "memberSids": [
+        "S100811",
+        "S100846",
+        "S100943",
+        "S100978",
+        "S100986",
+        "S101214",
+        "S101222"
+      ]
+    },
+    {
+      "osid": "op:bihac:bihac_2",
+      "memberSids": [
+        "S100820",
+        "S100838",
+        "S101010",
+        "S101095",
+        "S101109",
+        "S101117",
+        "S101141",
+        "S101257",
+        "S101273",
+        "S101311",
+        "S101320"
+      ]
+    },
+    {
+      "osid": "op:bihac:velika_gata",
+      "memberSids": [
+        "S100854",
+        "S100960",
+        "S101028",
+        "S101087",
+        "S101176",
+        "S101265",
+        "S101290",
+        "S101303"
+      ]
+    },
+    {
+      "osid": "op:bijeljina:janja_2",
+      "memberSids": [
+        "S200824",
+        "S200832",
+        "S201022",
+        "S201189",
+        "S201235",
+        "S201260",
+        "S201391",
+        "S230367",
+        "S230375"
+      ]
+    },
+    {
+      "osid": "op:bijeljina:bijeljina_2",
+      "memberSids": [
+        "S200891",
+        "S201324"
+      ]
+    },
+    {
+      "osid": "op:bijeljina:pucile_2",
+      "memberSids": [
+        "S201057",
+        "S201138",
+        "S201154",
+        "S201227",
+        "S201375",
+        "S201405"
+      ]
+    },
+    {
+      "osid": "op:bijeljina:dvorovi_2",
+      "memberSids": [
+        "S200859",
+        "S200921",
+        "S200930",
+        "S201065",
+        "S201243",
+        "S201308",
+        "S201430",
+        "S201448",
+        "S201464",
+        "S230359"
+      ]
+    },
+    {
+      "osid": "op:bijeljina:glavicice",
+      "memberSids": [
+        "S200875",
+        "S201111",
+        "S201197",
+        "S201359",
+        "S201413"
+      ]
+    },
+    {
+      "osid": "op:bijeljina:suho_polje_2",
+      "memberSids": [
+        "S200867",
+        "S200905",
+        "S201049",
+        "S201219",
+        "S201316",
+        "S201421"
+      ]
+    },
+    {
+      "osid": "op:bijeljina:cadjavica_gornja_2",
+      "memberSids": [
+        "S201006",
+        "S201014",
+        "S201081",
+        "S201251",
+        "S230316",
+        "S230332"
+      ]
+    },
+    {
+      "osid": "op:bijeljina:crnjelovo_donje",
+      "memberSids": [
+        "S200964",
+        "S200972",
+        "S201073",
+        "S201090",
+        "S201367",
+        "S230251",
+        "S230260",
+        "S230278",
+        "S230286"
+      ]
+    },
+    {
+      "osid": "op:bijeljina:velika_obarska_2",
+      "memberSids": [
+        "S200913",
+        "S201146",
+        "S201162",
+        "S201456",
+        "S230294",
+        "S230308",
+        "S230324"
+      ]
+    },
+    {
+      "osid": "op:bileca:zausje",
+      "memberSids": [
+        "S201642",
+        "S201669",
+        "S201731",
+        "S201740",
+        "S201766",
+        "S201880",
+        "S201910",
+        "S201944",
+        "S201995",
+        "S202002",
+        "S202142"
+      ]
+    },
+    {
+      "osid": "op:bileca:korita",
+      "memberSids": [
+        "S201570",
+        "S201634",
+        "S201685",
+        "S201723",
+        "S201758",
+        "S201812",
+        "S201987",
+        "S202029",
+        "S202037",
+        "S202096"
+      ]
+    },
+    {
+      "osid": "op:bileca:bileca_2",
+      "memberSids": [
+        "S201502",
+        "S201545",
+        "S201561",
+        "S201588",
+        "S201596",
+        "S201855",
+        "S201863",
+        "S201901",
+        "S201936",
+        "S201979",
+        "S202053",
+        "S202088",
+        "S202100",
+        "S202126",
+        "S202177"
+      ]
+    },
+    {
+      "osid": "op:bileca:mirilovici",
+      "memberSids": [
+        "S201529",
+        "S201553",
+        "S201626",
+        "S201715",
+        "S201774",
+        "S201847",
+        "S201871",
+        "S201928",
+        "S201952",
+        "S202061",
+        "S202169"
+      ]
+    },
+    {
+      "osid": "op:bileca:vranjska",
+      "memberSids": [
+        "S201537",
+        "S201600",
+        "S201618",
+        "S201677",
+        "S201707",
+        "S201782",
+        "S201804",
+        "S201839",
+        "S201898",
+        "S202045",
+        "S202070",
+        "S202118",
+        "S202134"
+      ]
+    },
+    {
+      "osid": "op:bosanska_dubica:knezica_2",
+      "memberSids": [
+        "S210781",
+        "S210846",
+        "S210862",
+        "S210960",
+        "S211028",
+        "S211079",
+        "S211095",
+        "S211150",
+        "S211303",
+        "S211311"
+      ]
+    },
+    {
+      "osid": "op:bosanska_dubica:donja_slabinja_2",
+      "memberSids": [
+        "S210714",
+        "S210722",
+        "S210803",
+        "S210838",
+        "S210854",
+        "S210919",
+        "S210986",
+        "S211125",
+        "S211192",
+        "S211265",
+        "S211281",
+        "S211290"
+      ]
+    },
+    {
+      "osid": "op:bosanska_dubica:aginci",
+      "memberSids": [
+        "S210706",
+        "S210790",
+        "S210978",
+        "S211036",
+        "S211141",
+        "S211168",
+        "S211176",
+        "S211273",
+        "S211320",
+        "S211338",
+        "S211354"
+      ]
+    },
+    {
+      "osid": "op:bosanska_dubica:hadzibajir_2",
+      "memberSids": [
+        "S210757",
+        "S210773",
+        "S210897",
+        "S210943",
+        "S210951",
+        "S211001",
+        "S211010",
+        "S211184",
+        "S211249"
+      ]
+    },
+    {
+      "osid": "op:bosanska_dubica:medjedja_2",
+      "memberSids": [
+        "S210811",
+        "S210820",
+        "S210889",
+        "S210935",
+        "S210994",
+        "S211109"
+      ]
+    },
+    {
+      "osid": "op:bosanska_gradiska:mackovac",
+      "memberSids": [
+        "S206253",
+        "S206334",
+        "S206407",
+        "S206571",
+        "S206644",
+        "S206679"
+      ]
+    },
+    {
+      "osid": "op:bosanska_gradiska:gradiska_3",
+      "memberSids": [
+        "S206156",
+        "S206245",
+        "S206300",
+        "S206369",
+        "S206555",
+        "S206628",
+        "S206717",
+        "S206857"
+      ]
+    },
+    {
+      "osid": "op:bosanska_gradiska:kruskik_2",
+      "memberSids": [
+        "S206130",
+        "S206229",
+        "S206482",
+        "S206776",
+        "S206849"
+      ]
+    },
+    {
+      "osid": "op:bosanska_gradiska:masici_2",
+      "memberSids": [
+        "S206261",
+        "S206580",
+        "S206610",
+        "S206695",
+        "S206709",
+        "S206750",
+        "S206768",
+        "S206784",
+        "S206822"
+      ]
+    },
+    {
+      "osid": "op:bosanska_gradiska:nova_topola_2",
+      "memberSids": [
+        "S206270",
+        "S206377",
+        "S206440",
+        "S206636",
+        "S206687",
+        "S206733",
+        "S206814"
+      ]
+    },
+    {
+      "osid": "op:bosanska_gradiska:kozinci",
+      "memberSids": [
+        "S206164",
+        "S206466",
+        "S206474",
+        "S206504",
+        "S206512",
+        "S206539",
+        "S206547",
+        "S206792"
+      ]
+    },
+    {
+      "osid": "op:bosanska_krupa:arapusa_2",
+      "memberSids": [
+        "S104612",
+        "S169552",
+        "S169595",
+        "S211974"
+      ]
+    },
+    {
+      "osid": "op:bosanska_krupa:veliki_badic",
+      "memberSids": [
+        "S104159",
+        "S104213",
+        "S104388",
+        "S104434",
+        "S104540"
+      ]
+    },
+    {
+      "osid": "op:bosanska_krupa:otoka_2",
+      "memberSids": [
+        "S104116",
+        "S104124",
+        "S104582",
+        "S169579"
+      ]
+    },
+    {
+      "osid": "op:bosanska_krupa:jezerski_2",
+      "memberSids": [
+        "S104337",
+        "S104361",
+        "S104370",
+        "S104477"
+      ]
+    },
+    {
+      "osid": "op:bosanska_krupa:ivanjska_2",
+      "memberSids": [
+        "S104221",
+        "S104302",
+        "S164534",
+        "S164569",
+        "S212059"
+      ]
+    },
+    {
+      "osid": "op:bosanska_krupa:donji_dubovik_2",
+      "memberSids": [
+        "S164577",
+        "S211982",
+        "S212008",
+        "S212032"
+      ]
+    },
+    {
+      "osid": "op:bosanska_krupa:jasenica_2",
+      "memberSids": [
+        "S104132",
+        "S104230",
+        "S104329",
+        "S104531",
+        "S104574",
+        "S164542",
+        "S169587"
+      ]
+    },
+    {
+      "osid": "op:bosanska_krupa:vranjska_2",
+      "memberSids": [
+        "S104183",
+        "S104264",
+        "S104272",
+        "S104493",
+        "S104604"
+      ]
+    },
+    {
+      "osid": "op:bosanska_krupa:gornja_suvaja",
+      "memberSids": [
+        "S104248",
+        "S104400",
+        "S104469",
+        "S104566"
+      ]
+    },
+    {
+      "osid": "op:bosanski_brod:donja_vrela",
+      "memberSids": [
+        "S202789",
+        "S202835",
+        "S202860",
+        "S202924",
+        "S202932",
+        "S202959",
+        "S202975"
+      ]
+    },
+    {
+      "osid": "op:bosanski_brod:novo_selo_2",
+      "memberSids": [
+        "S202843",
+        "S202894",
+        "S202908",
+        "S202916"
+      ]
+    },
+    {
+      "osid": "op:bosanski_novi:blagaj_japra",
+      "memberSids": [
+        "S215074",
+        "S215082",
+        "S215384"
+      ]
+    },
+    {
+      "osid": "op:bosanski_novi:novi_grad_3",
+      "memberSids": [
+        "S215112",
+        "S215147"
+      ]
+    },
+    {
+      "osid": "op:bosanski_novi:matavazi_2",
+      "memberSids": [
+        "S215155",
+        "S215171",
+        "S215236",
+        "S215279",
+        "S215392",
+        "S215473",
+        "S215490",
+        "S215554"
+      ]
+    },
+    {
+      "osid": "op:bosanski_novi:krslje_2",
+      "memberSids": [
+        "S215163",
+        "S215309",
+        "S215325",
+        "S215350",
+        "S215368",
+        "S215546"
+      ]
+    },
+    {
+      "osid": "op:bosanski_novi:suhaca_4",
+      "memberSids": [
+        "S215228",
+        "S215252",
+        "S215295",
+        "S215317",
+        "S215511"
+      ]
+    },
+    {
+      "osid": "op:bosanski_novi:svodna_2",
+      "memberSids": [
+        "S215066",
+        "S215287",
+        "S215414",
+        "S215457",
+        "S215503",
+        "S215520",
+        "S215538",
+        "S215589"
+      ]
+    },
+    {
+      "osid": "op:bosanski_novi:dobrljin_2",
+      "memberSids": [
+        "S215198",
+        "S215201",
+        "S215210",
+        "S215244",
+        "S215333",
+        "S215341",
+        "S215449",
+        "S215465",
+        "S215562"
+      ]
+    },
+    {
+      "osid": "op:bosanski_petrovac:bosanski_petrovac_2",
+      "memberSids": [
+        "S105554",
+        "S105805"
+      ]
+    },
+    {
+      "osid": "op:bosanski_petrovac:dobro_selo_2",
+      "memberSids": [
+        "S105643",
+        "S105686",
+        "S105716",
+        "S105848",
+        "S155830"
+      ]
+    },
+    {
+      "osid": "op:bosanski_petrovac:kolonic_2",
+      "memberSids": [
+        "S105520",
+        "S105708",
+        "S105759",
+        "S105813",
+        "S105864",
+        "S166286",
+        "S169633"
+      ]
+    },
+    {
+      "osid": "op:bosanski_petrovac:jasenovac_2",
+      "memberSids": [
+        "S105660",
+        "S105678",
+        "S164585",
+        "S169609",
+        "S169617",
+        "S169625",
+        "S169641"
+      ]
+    },
+    {
+      "osid": "op:bosanski_samac:samac_2",
+      "memberSids": [
+        "S229083",
+        "S229237"
+      ]
+    },
+    {
+      "osid": "op:bosanski_samac:domaljevac_2",
+      "memberSids": [
+        "S105937",
+        "S105970",
+        "S165697",
+        "S171158",
+        "S229075",
+        "S229202"
+      ]
+    },
+    {
+      "osid": "op:bosanski_samac:novo_selo_2",
+      "memberSids": [
+        "S229059",
+        "S229121",
+        "S229148",
+        "S229164",
+        "S229199"
+      ]
+    },
+    {
+      "osid": "op:bosanski_samac:crkvina_2",
+      "memberSids": [
+        "S229105",
+        "S229172",
+        "S229229",
+        "S229253",
+        "S229270"
+      ]
+    },
+    {
+      "osid": "op:bosanski_samac:tisina",
+      "memberSids": [
+        "S165719",
+        "S229067",
+        "S229113",
+        "S229130",
+        "S229245"
+      ]
+    },
+    {
+      "osid": "op:bosansko_grahovo:bosansko_grahovo_2",
+      "memberSids": [
+        "S106160",
+        "S106216",
+        "S106224",
+        "S106356",
+        "S106399",
+        "S106402",
+        "S106453",
+        "S106461",
+        "S106500",
+        "S106518",
+        "S106526"
+      ]
+    },
+    {
+      "osid": "op:bosansko_grahovo:malesevci",
+      "memberSids": [
+        "S106275",
+        "S106291",
+        "S106321",
+        "S106330",
+        "S106445",
+        "S106496"
+      ]
+    },
+    {
+      "osid": "op:bihac:ripac",
+      "memberSids": [
+        "S100935",
+        "S101052",
+        "S101168",
+        "S101206"
+      ]
+    },
+    {
+      "osid": "op:bratunac:pobudje_2",
+      "memberSids": [
+        "S202312",
+        "S202380",
+        "S202525",
+        "S202649"
+      ]
+    },
+    {
+      "osid": "op:bratunac:glogova",
+      "memberSids": [
+        "S202282",
+        "S202304",
+        "S202436",
+        "S202681"
+      ]
+    },
+    {
+      "osid": "op:bratunac:jezestica_2",
+      "memberSids": [
+        "S202363",
+        "S202410",
+        "S202479",
+        "S202495",
+        "S202614"
+      ]
+    },
+    {
+      "osid": "op:bratunac:polom",
+      "memberSids": [
+        "S202193",
+        "S202240",
+        "S202401",
+        "S202487",
+        "S202541"
+      ]
+    },
+    {
+      "osid": "op:bratunac:vranesevici",
+      "memberSids": [
+        "S202185",
+        "S202231",
+        "S202274",
+        "S202339",
+        "S202452",
+        "S202592",
+        "S202673",
+        "S202711"
+      ]
+    },
+    {
+      "osid": "op:bratunac:zapolje_2",
+      "memberSids": [
+        "S202207",
+        "S202215",
+        "S202428",
+        "S202509",
+        "S202576",
+        "S202622",
+        "S202690",
+        "S202703"
+      ]
+    },
+    {
+      "osid": "op:bratunac:bratunac_2",
+      "memberSids": [
+        "S202258",
+        "S202355",
+        "S202398",
+        "S202444",
+        "S202517",
+        "S202533",
+        "S202550",
+        "S202606",
+        "S202665"
+      ]
+    },
+    {
+      "osid": "op:bratunac:slapasnica",
+      "memberSids": [
+        "S202266",
+        "S202568",
+        "S202584",
+        "S202657"
+      ]
+    },
+    {
+      "osid": "op:brcko:krepsic",
+      "memberSids": [
+        "S300357",
+        "S300420",
+        "S300438",
+        "S300462",
+        "S300713",
+        "S300730",
+        "S300748"
+      ]
+    },
+    {
+      "osid": "op:brcko:brezovo_polje_selo_2",
+      "memberSids": [
+        "S300152",
+        "S300179",
+        "S300527",
+        "S300551",
+        "S300608",
+        "S300659"
+      ]
+    },
+    {
+      "osid": "op:brcko:potocari_2",
+      "memberSids": [
+        "S300144",
+        "S300233",
+        "S300390",
+        "S300411",
+        "S300535",
+        "S300578",
+        "S300616"
+      ]
+    },
+    {
+      "osid": "op:brcko:brka_2",
+      "memberSids": [
+        "S300187",
+        "S300195",
+        "S300250",
+        "S300497",
+        "S300675"
+      ]
+    },
+    {
+      "osid": "op:brcko:bukvik_gornji_2",
+      "memberSids": [
+        "S300217",
+        "S300225",
+        "S300349",
+        "S300721"
+      ]
+    },
+    {
+      "osid": "op:brcko:donji_rahic",
+      "memberSids": [
+        "S300209",
+        "S300284",
+        "S300381"
+      ]
+    },
+    {
+      "osid": "op:brcko:palanka",
+      "memberSids": [
+        "S300276",
+        "S300446",
+        "S300489",
+        "S300519",
+        "S300691"
+      ]
+    },
+    {
+      "osid": "op:brcko:gornji_rahic_2",
+      "memberSids": [
+        "S300268",
+        "S300292",
+        "S300365",
+        "S300373",
+        "S300632"
+      ]
+    },
+    {
+      "osid": "op:brcko:skakava_donja",
+      "memberSids": [
+        "S300586",
+        "S300667",
+        "S300683"
+      ]
+    },
+    {
+      "osid": "op:brcko:bijela_2",
+      "memberSids": [
+        "S300101",
+        "S300241",
+        "S300306",
+        "S300594"
+      ]
+    },
+    {
+      "osid": "op:brcko:boce_2",
+      "memberSids": [
+        "S300110",
+        "S300128",
+        "S300314",
+        "S300322",
+        "S300560",
+        "S300624"
+      ]
+    },
+    {
+      "osid": "op:brcko:maoca_2",
+      "memberSids": [
+        "S300403",
+        "S300454",
+        "S300543"
+      ]
+    },
+    {
+      "osid": "op:breza:mahala",
+      "memberSids": [
+        "S107735",
+        "S107743",
+        "S107778",
+        "S107816",
+        "S107891",
+        "S107921",
+        "S107930",
+        "S108014"
+      ]
+    },
+    {
+      "osid": "op:breza:koritnik",
+      "memberSids": [
+        "S107751",
+        "S107760",
+        "S107808",
+        "S107948",
+        "S107956"
+      ]
+    },
+    {
+      "osid": "op:breza:podgora",
+      "memberSids": [
+        "S107824",
+        "S107867",
+        "S107875",
+        "S107905",
+        "S107999"
+      ]
+    },
+    {
+      "osid": "op:breza:zupca_2",
+      "memberSids": [
+        "S107786",
+        "S107794",
+        "S107883",
+        "S108006",
+        "S108022"
+      ]
+    },
+    {
+      "osid": "op:bugojno:medini",
+      "memberSids": [
+        "S108286",
+        "S108308",
+        "S108529",
+        "S108553",
+        "S108707"
+      ]
+    },
+    {
+      "osid": "op:bugojno:prijaci",
+      "memberSids": [
+        "S108081",
+        "S108162",
+        "S108642",
+        "S108685",
+        "S108723",
+        "S108766"
+      ]
+    },
+    {
+      "osid": "op:bugojno:brizina",
+      "memberSids": [
+        "S108057",
+        "S108090",
+        "S108111",
+        "S108154",
+        "S108375",
+        "S108502"
+      ]
+    },
+    {
+      "osid": "op:bugojno:rovna",
+      "memberSids": [
+        "S108294",
+        "S108359",
+        "S108456",
+        "S108634",
+        "S108677",
+        "S108731",
+        "S108880"
+      ]
+    },
+    {
+      "osid": "op:bugojno:vesela_2",
+      "memberSids": [
+        "S108049",
+        "S108073",
+        "S108405",
+        "S108430",
+        "S108626",
+        "S108804",
+        "S108898"
+      ]
+    },
+    {
+      "osid": "op:bugojno:udurlije",
+      "memberSids": [
+        "S108138",
+        "S108197",
+        "S108421",
+        "S108472",
+        "S108669",
+        "S108774",
+        "S108782"
+      ]
+    },
+    {
+      "osid": "op:bugojno:vrpec",
+      "memberSids": [
+        "S108332",
+        "S108367",
+        "S108413",
+        "S108545",
+        "S108600",
+        "S108715",
+        "S108847"
+      ]
+    },
+    {
+      "osid": "op:bugojno:vucipolje_3",
+      "memberSids": [
+        "S108146",
+        "S108227",
+        "S108383",
+        "S108740",
+        "S108839",
+        "S108855"
+      ]
+    },
+    {
+      "osid": "op:bugojno:gracanica",
+      "memberSids": [
+        "S108103",
+        "S108235",
+        "S108251",
+        "S108260",
+        "S108278",
+        "S108693",
+        "S108812",
+        "S108871"
+      ]
+    },
+    {
+      "osid": "op:bugojno:kula_2",
+      "memberSids": [
+        "S108065",
+        "S108243",
+        "S108464",
+        "S108499",
+        "S108596",
+        "S108618"
+      ]
+    },
+    {
+      "osid": "op:bugojno:kopcic_2",
+      "memberSids": [
+        "S108120",
+        "S108189",
+        "S108219",
+        "S108391",
+        "S108448",
+        "S108537"
+      ]
+    },
+    {
+      "osid": "op:busovaca:gornja_rovna",
+      "memberSids": [
+        "S108995",
+        "S109126"
+      ]
+    },
+    {
+      "osid": "op:busovaca:putis_2",
+      "memberSids": [
+        "S109002",
+        "S109088",
+        "S109118",
+        "S109185",
+        "S109207",
+        "S109282",
+        "S109339",
+        "S109371"
+      ]
+    },
+    {
+      "osid": "op:busovaca:bare_2",
+      "memberSids": [
+        "S108901",
+        "S108987",
+        "S109029",
+        "S109053"
+      ]
+    },
+    {
+      "osid": "op:busovaca:polje_2",
+      "memberSids": [
+        "S108944",
+        "S109240",
+        "S109304",
+        "S109312"
+      ]
+    },
+    {
+      "osid": "op:busovaca:busovaca_2",
+      "memberSids": [
+        "S108936",
+        "S109100",
+        "S109134",
+        "S109169",
+        "S109355"
+      ]
+    },
+    {
+      "osid": "op:busovaca:buselji_2",
+      "memberSids": [
+        "S108928",
+        "S109070",
+        "S109177",
+        "S109347"
+      ]
+    },
+    {
+      "osid": "op:busovaca:kacuni_2",
+      "memberSids": [
+        "S109061",
+        "S109096",
+        "S109142",
+        "S109215",
+        "S109223",
+        "S109231",
+        "S109363",
+        "S109398"
+      ]
+    },
+    {
+      "osid": "op:busovaca:dobraljevo_2",
+      "memberSids": [
+        "S108910",
+        "S108952",
+        "S108979",
+        "S109037",
+        "S109045",
+        "S109193",
+        "S109258",
+        "S109266",
+        "S109380",
+        "S109401",
+        "S109410"
+      ]
+    },
+    {
+      "osid": "op:cajnice:batotici",
+      "memberSids": [
+        "S228338",
+        "S228354",
+        "S228397",
+        "S228443",
+        "S228460",
+        "S228508",
+        "S228516",
+        "S228613"
+      ]
+    },
+    {
+      "osid": "op:cajnice:cajnice_2",
+      "memberSids": [
+        "S228389",
+        "S228419",
+        "S228478",
+        "S228524",
+        "S228605",
+        "S228672",
+        "S228699"
+      ]
+    },
+    {
+      "osid": "op:cajnice:zaborak",
+      "memberSids": [
+        "S228320",
+        "S228435",
+        "S228567",
+        "S228630",
+        "S228702"
+      ]
+    },
+    {
+      "osid": "op:cajnice:todorovici",
+      "memberSids": [
+        "S228451",
+        "S228583",
+        "S228648",
+        "S228664"
+      ]
+    },
+    {
+      "osid": "op:cajnice:miljeno_2",
+      "memberSids": [
+        "S228311",
+        "S228346",
+        "S228362",
+        "S228486",
+        "S228494",
+        "S228532",
+        "S228575",
+        "S228591",
+        "S228621",
+        "S228656"
+      ]
+    },
+    {
+      "osid": "op:capljina:tasovcici_2",
+      "memberSids": [
+        "S110426",
+        "S110485",
+        "S110566",
+        "S110582",
+        "S110604",
+        "S110612",
+        "S110639",
+        "S110655",
+        "S110671",
+        "S110701",
+        "S110728"
+      ]
+    },
+    {
+      "osid": "op:capljina:visici_2",
+      "memberSids": [
+        "S110418",
+        "S110477",
+        "S110493",
+        "S110515",
+        "S110531",
+        "S110663",
+        "S110698",
+        "S110744"
+      ]
+    },
+    {
+      "osid": "op:capljina:capljina_2",
+      "memberSids": [
+        "S110434",
+        "S110442",
+        "S110469",
+        "S110507",
+        "S110523",
+        "S110540",
+        "S110558",
+        "S110574",
+        "S110647",
+        "S110680",
+        "S110710",
+        "S110736",
+        "S110752"
+      ]
+    },
+    {
+      "osid": "op:cazin:mrazovac",
+      "memberSids": [
+        "S104175",
+        "S104345",
+        "S104418",
+        "S109983"
+      ]
+    },
+    {
+      "osid": "op:cazin:varoska_rijeka_3",
+      "memberSids": [
+        "S104108",
+        "S104167",
+        "S104353",
+        "S104523",
+        "S109673",
+        "S109690",
+        "S109797",
+        "S109843"
+      ]
+    },
+    {
+      "osid": "op:cazin:stijena_3",
+      "memberSids": [
+        "S109428",
+        "S109711",
+        "S109827",
+        "S109894",
+        "S110019"
+      ]
+    },
+    {
+      "osid": "op:cazin:ostrozac_2",
+      "memberSids": [
+        "S109550",
+        "S109622",
+        "S109703",
+        "S109754",
+        "S109835"
+      ]
+    },
+    {
+      "osid": "op:cazin:prosici",
+      "memberSids": [
+        "S109444",
+        "S109592",
+        "S109746",
+        "S109851",
+        "S109991"
+      ]
+    },
+    {
+      "osid": "op:cazin:cazin_2",
+      "memberSids": [
+        "S109452",
+        "S109495",
+        "S109533",
+        "S109576",
+        "S109614",
+        "S109924"
+      ]
+    },
+    {
+      "osid": "op:cazin:coralici",
+      "memberSids": [
+        "S109436",
+        "S109517",
+        "S109568",
+        "S109649",
+        "S109657",
+        "S109886"
+      ]
+    },
+    {
+      "osid": "op:cazin:mutnik_2",
+      "memberSids": [
+        "S109509",
+        "S109525",
+        "S109738",
+        "S109819",
+        "S109878",
+        "S109975"
+      ]
+    },
+    {
+      "osid": "op:cazin:sturlic_2",
+      "memberSids": [
+        "S109479",
+        "S109606",
+        "S109908",
+        "S109932",
+        "S109967"
+      ]
+    },
+    {
+      "osid": "op:cazin:liskovac_2",
+      "memberSids": [
+        "S109487",
+        "S109665",
+        "S109681",
+        "S109720",
+        "S109789",
+        "S109860",
+        "S109916",
+        "S109959"
+      ]
+    },
+    {
+      "osid": "op:celinac:kablovi_2",
+      "memberSids": [
+        "S228729",
+        "S228737",
+        "S228869",
+        "S228915",
+        "S228923",
+        "S228974"
+      ]
+    },
+    {
+      "osid": "op:celinac:celinac_2",
+      "memberSids": [
+        "S228788",
+        "S228796",
+        "S228826",
+        "S228893",
+        "S228907",
+        "S228931",
+        "S228940",
+        "S228958",
+        "S229024"
+      ]
+    },
+    {
+      "osid": "op:celinac:josavka_donja_2",
+      "memberSids": [
+        "S228761",
+        "S228770",
+        "S228800",
+        "S228834",
+        "S228842",
+        "S228877",
+        "S228885",
+        "S228966"
+      ]
+    },
+    {
+      "osid": "op:citluk:veliki_ogradjenik_2",
+      "memberSids": [
+        "S111112",
+        "S111147",
+        "S111155",
+        "S111180",
+        "S111201",
+        "S111236",
+        "S111309"
+      ]
+    },
+    {
+      "osid": "op:citluk:krehin_gradac_2",
+      "memberSids": [
+        "S111082",
+        "S111104",
+        "S111139",
+        "S111171",
+        "S111210",
+        "S111228",
+        "S111252",
+        "S111295"
+      ]
+    },
+    {
+      "osid": "op:citluk:citluk_2",
+      "memberSids": [
+        "S111163",
+        "S111198",
+        "S111244",
+        "S111279",
+        "S111287",
+        "S111317"
+      ]
+    },
+    {
+      "osid": "op:derventa:derventa_2",
+      "memberSids": [
+        "S206946",
+        "S207004",
+        "S207241",
+        "S207322",
+        "S207349",
+        "S207357",
+        "S207446"
+      ]
+    },
+    {
+      "osid": "op:derventa:lug",
+      "memberSids": [
+        "S206873",
+        "S206920",
+        "S206938",
+        "S206989",
+        "S207152",
+        "S207209",
+        "S207233",
+        "S207268",
+        "S207306",
+        "S207314"
+      ]
+    },
+    {
+      "osid": "op:derventa:cerani_2",
+      "memberSids": [
+        "S206997",
+        "S207039",
+        "S207187",
+        "S207250",
+        "S207276",
+        "S207411",
+        "S207454",
+        "S207462"
+      ]
+    },
+    {
+      "osid": "op:derventa:velika_socanica_2",
+      "memberSids": [
+        "S206890",
+        "S207055",
+        "S207128",
+        "S207420"
+      ]
+    },
+    {
+      "osid": "op:derventa:luzani_bosanski",
+      "memberSids": [
+        "S206903",
+        "S206911",
+        "S207012",
+        "S207284",
+        "S207292",
+        "S207381"
+      ]
+    },
+    {
+      "osid": "op:derventa:misinci_2",
+      "memberSids": [
+        "S206865",
+        "S206881",
+        "S206962",
+        "S207047",
+        "S207136",
+        "S207144",
+        "S207195",
+        "S207365",
+        "S207390",
+        "S207403",
+        "S207438"
+      ]
+    },
+    {
+      "osid": "op:derventa:zivinice",
+      "memberSids": [
+        "S206954",
+        "S207063",
+        "S207071",
+        "S207080",
+        "S207098",
+        "S207101",
+        "S207110",
+        "S207179",
+        "S207217",
+        "S207225",
+        "S207373"
+      ]
+    },
+    {
+      "osid": "op:doboj:matuzici_2",
+      "memberSids": [
+        "S112330",
+        "S112364"
+      ]
+    },
+    {
+      "osid": "op:doboj:brijesnica_velika",
+      "memberSids": [
+        "S111988",
+        "S111996"
+      ]
+    },
+    {
+      "osid": "op:doboj:boljanic_2",
+      "memberSids": [
+        "S207683",
+        "S207756",
+        "S207764",
+        "S207772",
+        "S207896",
+        "S207918",
+        "S207926",
+        "S208019",
+        "S208213",
+        "S208329",
+        "S208337",
+        "S208361",
+        "S208370"
+      ]
+    },
+    {
+      "osid": "op:doboj:makljenovac",
+      "memberSids": [
+        "S207586",
+        "S207594",
+        "S207799",
+        "S208124",
+        "S208396"
+      ]
+    },
+    {
+      "osid": "op:doboj:kotorsko_2",
+      "memberSids": [
+        "S207632",
+        "S207730",
+        "S208027",
+        "S208094",
+        "S208191",
+        "S208205"
+      ]
+    },
+    {
+      "osid": "op:doboj:grapska_gornja_2",
+      "memberSids": [
+        "S112615",
+        "S207675",
+        "S207748",
+        "S207900",
+        "S207985",
+        "S208060"
+      ]
+    },
+    {
+      "osid": "op:doboj:klokotnica_2",
+      "memberSids": [
+        "S112216",
+        "S171131",
+        "S171140"
+      ]
+    },
+    {
+      "osid": "op:doboj:bukovica_velika_2",
+      "memberSids": [
+        "S207624",
+        "S207659",
+        "S207888",
+        "S207942",
+        "S208078",
+        "S208116",
+        "S208175",
+        "S208388"
+      ]
+    },
+    {
+      "osid": "op:doboj:cerovica_2",
+      "memberSids": [
+        "S207535",
+        "S207578",
+        "S207837",
+        "S207934",
+        "S208051",
+        "S208159"
+      ]
+    },
+    {
+      "osid": "op:doboj:stanari_2",
+      "memberSids": [
+        "S207527",
+        "S207551",
+        "S207705",
+        "S207713",
+        "S207829",
+        "S208043",
+        "S208086",
+        "S208132"
+      ]
+    },
+    {
+      "osid": "op:doboj:civcije_bukovicke",
+      "memberSids": [
+        "S207489",
+        "S207802",
+        "S207969",
+        "S207993",
+        "S208035",
+        "S208167",
+        "S208183"
+      ]
+    },
+    {
+      "osid": "op:doboj:zelinja_gornja_2",
+      "memberSids": [
+        "S207543",
+        "S207560",
+        "S208108",
+        "S208221",
+        "S208230",
+        "S208248",
+        "S208256"
+      ]
+    },
+    {
+      "osid": "op:doboj:kozuhe_2",
+      "memberSids": [
+        "S207497",
+        "S207519",
+        "S207608",
+        "S207616",
+        "S207691",
+        "S207721",
+        "S207845",
+        "S207853",
+        "S207977"
+      ]
+    },
+    {
+      "osid": "op:bosanski_brod:brod",
+      "memberSids": [
+        "S202746",
+        "S202827",
+        "S202851",
+        "S202886"
+      ]
+    },
+    {
+      "osid": "op:donji_vakuf:prusac_2",
+      "memberSids": [
+        "S112933",
+        "S112992",
+        "S113239",
+        "S113263"
+      ]
+    },
+    {
+      "osid": "op:donji_vakuf:jemanlici",
+      "memberSids": [
+        "S112828",
+        "S112836",
+        "S112844",
+        "S113026",
+        "S113034",
+        "S113395",
+        "S113433"
+      ]
+    },
+    {
+      "osid": "op:donji_vakuf:korenici",
+      "memberSids": [
+        "S112810",
+        "S112925",
+        "S113042",
+        "S113077",
+        "S113204",
+        "S113409"
+      ]
+    },
+    {
+      "osid": "op:donji_vakuf:torlakovac_2",
+      "memberSids": [
+        "S112879",
+        "S112887",
+        "S113107",
+        "S113352",
+        "S113379",
+        "S113441",
+        "S164593"
+      ]
+    },
+    {
+      "osid": "op:donji_vakuf:oborci_2",
+      "memberSids": [
+        "S112950",
+        "S113000",
+        "S113158",
+        "S113182",
+        "S113387",
+        "S113425"
+      ]
+    },
+    {
+      "osid": "op:donji_vakuf:babin_potok_2",
+      "memberSids": [
+        "S112763",
+        "S112771",
+        "S112780",
+        "S112801",
+        "S112984",
+        "S113131",
+        "S113255",
+        "S113310",
+        "S113336"
+      ]
+    },
+    {
+      "osid": "op:donji_vakuf:komar_2",
+      "memberSids": [
+        "S112941",
+        "S112968",
+        "S112976",
+        "S113069",
+        "S113093",
+        "S113174",
+        "S113417",
+        "S113484"
+      ]
+    },
+    {
+      "osid": "op:donji_vakuf:donji_vakuf_2",
+      "memberSids": [
+        "S112798",
+        "S112917",
+        "S113212",
+        "S113280",
+        "S113298",
+        "S113468"
+      ]
+    },
+    {
+      "osid": "op:donji_vakuf:pribraca_2",
+      "memberSids": [
+        "S112852",
+        "S113018",
+        "S113085",
+        "S113247",
+        "S113450",
+        "S169650"
+      ]
+    },
+    {
+      "osid": "op:donji_vakuf:kutanja",
+      "memberSids": [
+        "S112909",
+        "S113115",
+        "S113140",
+        "S113166",
+        "S113271",
+        "S113301",
+        "S113328",
+        "S113476"
+      ]
+    },
+    {
+      "osid": "op:duvno:tomislavgrad_2",
+      "memberSids": [
+        "S113506",
+        "S113581",
+        "S113611",
+        "S113719",
+        "S113760",
+        "S113778",
+        "S113808",
+        "S113859",
+        "S113891",
+        "S114006",
+        "S114022",
+        "S166626"
+      ]
+    },
+    {
+      "osid": "op:duvno:kongora",
+      "memberSids": [
+        "S113573",
+        "S113727",
+        "S113786",
+        "S113816",
+        "S113883",
+        "S113948",
+        "S114014",
+        "S114065"
+      ]
+    },
+    {
+      "osid": "op:duvno:rosko_polje_2",
+      "memberSids": [
+        "S113522",
+        "S113557",
+        "S113603",
+        "S113824",
+        "S113867",
+        "S113930",
+        "S113964",
+        "S114081"
+      ]
+    },
+    {
+      "osid": "op:duvno:kovaci",
+      "memberSids": [
+        "S113565",
+        "S113654",
+        "S113689",
+        "S113743",
+        "S113875"
+      ]
+    },
+    {
+      "osid": "op:duvno:dobrici",
+      "memberSids": [
+        "S113590",
+        "S113735",
+        "S113751",
+        "S113999",
+        "S114090",
+        "S114111",
+        "S114120",
+        "S114138"
+      ]
+    },
+    {
+      "osid": "op:duvno:prisoje_2",
+      "memberSids": [
+        "S113646",
+        "S113697",
+        "S113794",
+        "S113905",
+        "S113921",
+        "S113956",
+        "S113972"
+      ]
+    },
+    {
+      "osid": "op:duvno:vinica_2",
+      "memberSids": [
+        "S113549",
+        "S113832",
+        "S114073"
+      ]
+    },
+    {
+      "osid": "op:duvno:stipanjici_2",
+      "memberSids": [
+        "S113662",
+        "S113913",
+        "S114049",
+        "S114103"
+      ]
+    },
+    {
+      "osid": "op:duvno:suica_2",
+      "memberSids": [
+        "S113492",
+        "S113514",
+        "S113620",
+        "S113638",
+        "S114057"
+      ]
+    },
+    {
+      "osid": "op:foca:mazlina",
+      "memberSids": [
+        "S114197",
+        "S115100",
+        "S115185",
+        "S169684",
+        "S169692"
+      ]
+    },
+    {
+      "osid": "op:foca:donje_zesce",
+      "memberSids": [
+        "S114324",
+        "S114430",
+        "S114707",
+        "S114928",
+        "S115002",
+        "S115053"
+      ]
+    },
+    {
+      "osid": "op:foca:velenici_2",
+      "memberSids": [
+        "S227099",
+        "S227153",
+        "S227196",
+        "S227498",
+        "S227552",
+        "S227633",
+        "S227820"
+      ]
+    },
+    {
+      "osid": "op:foca:kosman",
+      "memberSids": [
+        "S227102",
+        "S227161",
+        "S227412",
+        "S227544",
+        "S227749",
+        "S227803",
+        "S227889"
+      ]
+    },
+    {
+      "osid": "op:foca:tjentiste_2",
+      "memberSids": [
+        "S226998",
+        "S227404",
+        "S227536",
+        "S227854"
+      ]
+    },
+    {
+      "osid": "op:foca:zavait_3",
+      "memberSids": [
+        "S227269",
+        "S227340",
+        "S227374",
+        "S227773",
+        "S227781",
+        "S227943",
+        "S227951"
+      ]
+    },
+    {
+      "osid": "op:foca:prevrac",
+      "memberSids": [
+        "S227021",
+        "S227455",
+        "S227587",
+        "S227595",
+        "S227650",
+        "S227684",
+        "S227811",
+        "S227919"
+      ]
+    },
+    {
+      "osid": "op:foca:brusna_2",
+      "memberSids": [
+        "S226939",
+        "S226980",
+        "S227145",
+        "S227218",
+        "S227285",
+        "S227315",
+        "S227323",
+        "S227480",
+        "S227501",
+        "S227790",
+        "S227862",
+        "S227986"
+      ]
+    },
+    {
+      "osid": "op:foca:foca_3",
+      "memberSids": [
+        "S226955",
+        "S227005",
+        "S227013",
+        "S227439",
+        "S227692",
+        "S227897"
+      ]
+    },
+    {
+      "osid": "op:foca:patkovina",
+      "memberSids": [
+        "S164615",
+        "S166537",
+        "S169706",
+        "S226947",
+        "S226963",
+        "S227064",
+        "S227226",
+        "S227234",
+        "S227331",
+        "S227447",
+        "S227463",
+        "S227528",
+        "S227714",
+        "S228010"
+      ]
+    },
+    {
+      "osid": "op:foca:izbisno",
+      "memberSids": [
+        "S114642",
+        "S114839",
+        "S115169",
+        "S164607",
+        "S164623",
+        "S166308",
+        "S166324",
+        "S166545",
+        "S166553",
+        "S169714",
+        "S227242",
+        "S227510",
+        "S227722",
+        "S227838",
+        "S227846"
+      ]
+    },
+    {
+      "osid": "op:foca:miljevina_2",
+      "memberSids": [
+        "S226971",
+        "S227072",
+        "S227382",
+        "S227617",
+        "S227765",
+        "S228001"
+      ]
+    },
+    {
+      "osid": "op:fojnica:bakovici_2",
+      "memberSids": [
+        "S115487",
+        "S115517",
+        "S115576",
+        "S115606",
+        "S115690",
+        "S115959",
+        "S115991",
+        "S116009"
+      ]
+    },
+    {
+      "osid": "op:fojnica:fojnica_2",
+      "memberSids": [
+        "S115509",
+        "S115550",
+        "S115592",
+        "S115622",
+        "S115681",
+        "S115916",
+        "S116041"
+      ]
+    },
+    {
+      "osid": "op:fojnica:turkovici",
+      "memberSids": [
+        "S115541",
+        "S115649",
+        "S115720",
+        "S115738",
+        "S115754",
+        "S115827",
+        "S116017",
+        "S116025"
+      ]
+    },
+    {
+      "osid": "op:fojnica:zivcici_2",
+      "memberSids": [
+        "S115525",
+        "S115568",
+        "S115657",
+        "S115703",
+        "S115932",
+        "S116033",
+        "S116050",
+        "S116068"
+      ]
+    },
+    {
+      "osid": "op:fojnica:plocari_polje",
+      "memberSids": [
+        "S115495",
+        "S115533",
+        "S115584",
+        "S115614",
+        "S115665",
+        "S115673",
+        "S115711",
+        "S115746",
+        "S115762",
+        "S115789",
+        "S115797",
+        "S115819",
+        "S115835",
+        "S115843",
+        "S115851",
+        "S115860",
+        "S115878",
+        "S115886",
+        "S115894",
+        "S115908",
+        "S115924",
+        "S115967",
+        "S115975",
+        "S115983"
+      ]
+    },
+    {
+      "osid": "op:gacko:gacko_2",
+      "memberSids": [
+        "S205419",
+        "S205460",
+        "S205516",
+        "S205605",
+        "S205613",
+        "S205800",
+        "S205842",
+        "S205907",
+        "S205923",
+        "S205958",
+        "S206008",
+        "S206083"
+      ]
+    },
+    {
+      "osid": "op:gacko:avtovac_2",
+      "memberSids": [
+        "S205354",
+        "S205389",
+        "S205443",
+        "S205591",
+        "S205664",
+        "S205699",
+        "S205702",
+        "S205761",
+        "S205770",
+        "S205788",
+        "S205869",
+        "S205940",
+        "S205974",
+        "S205982",
+        "S206067"
+      ]
+    },
+    {
+      "osid": "op:gacko:bahori",
+      "memberSids": [
+        "S205320",
+        "S205338",
+        "S205435",
+        "S205451",
+        "S205508",
+        "S205532",
+        "S205575",
+        "S205885",
+        "S205893",
+        "S205966",
+        "S206016",
+        "S206024",
+        "S206091"
+      ]
+    },
+    {
+      "osid": "op:gacko:gradina",
+      "memberSids": [
+        "S205346",
+        "S205478",
+        "S205494",
+        "S205567",
+        "S205583",
+        "S205656",
+        "S205672",
+        "S205796",
+        "S205834",
+        "S205877",
+        "S205915"
+      ]
+    },
+    {
+      "osid": "op:gacko:nadinici",
+      "memberSids": [
+        "S205362",
+        "S205397",
+        "S205486",
+        "S205559",
+        "S205621",
+        "S205648",
+        "S205729",
+        "S205753",
+        "S205826",
+        "S205931",
+        "S206032",
+        "S206059",
+        "S206075"
+      ]
+    },
+    {
+      "osid": "op:gacko:izgori",
+      "memberSids": [
+        "S205427",
+        "S205524",
+        "S205630",
+        "S205737",
+        "S205818",
+        "S206105"
+      ]
+    },
+    {
+      "osid": "op:glamoc:kovacevci_2",
+      "memberSids": [
+        "S116866",
+        "S117021",
+        "S117137",
+        "S117188",
+        "S117200",
+        "S117226",
+        "S117323"
+      ]
+    },
+    {
+      "osid": "op:glamoc:stekerovci_2",
+      "memberSids": [
+        "S116874",
+        "S117013",
+        "S117170",
+        "S117218",
+        "S117285",
+        "S117340",
+        "S117382",
+        "S117412"
+      ]
+    },
+    {
+      "osid": "op:glamoc:halapic",
+      "memberSids": [
+        "S116971",
+        "S116980",
+        "S117145",
+        "S117196",
+        "S117269",
+        "S117307",
+        "S117331",
+        "S117404",
+        "S166111"
+      ]
+    },
+    {
+      "osid": "op:glamoc:glamoc_2",
+      "memberSids": [
+        "S116882",
+        "S116904",
+        "S116955",
+        "S116963",
+        "S117005",
+        "S117064",
+        "S117242",
+        "S117315",
+        "S117358"
+      ]
+    },
+    {
+      "osid": "op:glamoc:pribelja",
+      "memberSids": [
+        "S116858",
+        "S116947",
+        "S117048",
+        "S117056",
+        "S117153",
+        "S117277",
+        "S117447",
+        "S117463",
+        "S166120"
+      ]
+    },
+    {
+      "osid": "op:glamoc:vidimlije_2",
+      "memberSids": [
+        "S116912",
+        "S116939",
+        "S117030",
+        "S117072",
+        "S117099",
+        "S117102",
+        "S117129",
+        "S117161",
+        "S117234",
+        "S117366",
+        "S117374",
+        "S117439",
+        "S117455"
+      ]
+    },
+    {
+      "osid": "op:foca:brod_3",
+      "memberSids": [
+        "S227030",
+        "S227056",
+        "S227137",
+        "S227170",
+        "S227188",
+        "S227200",
+        "S227277",
+        "S227293",
+        "S227307",
+        "S227366",
+        "S227609",
+        "S227625",
+        "S227641",
+        "S227706",
+        "S227927",
+        "S228028"
+      ]
+    },
+    {
+      "osid": "op:gorazde:ustipraca_2",
+      "memberSids": [
+        "S215643",
+        "S215708",
+        "S215724",
+        "S215732",
+        "S215767",
+        "S216020",
+        "S216119",
+        "S216143",
+        "S216178",
+        "S216194",
+        "S216259",
+        "S216267"
+      ]
+    },
+    {
+      "osid": "op:gorazde:podkozara_donja_2",
+      "memberSids": [
+        "S164780",
+        "S164798",
+        "S169722",
+        "S215597",
+        "S215996",
+        "S216011",
+        "S216097",
+        "S216208",
+        "S216232"
+      ]
+    },
+    {
+      "osid": "op:gorazde:kolovarice",
+      "memberSids": [
+        "S117471",
+        "S117919",
+        "S118079",
+        "S118303",
+        "S118338",
+        "S118451",
+        "S164755",
+        "S166413",
+        "S166588",
+        "S166596",
+        "S169749",
+        "S169790",
+        "S169803",
+        "S169811",
+        "S215651",
+        "S215694",
+        "S215759",
+        "S215872",
+        "S215902",
+        "S215945",
+        "S216003",
+        "S216062"
+      ]
+    },
+    {
+      "osid": "op:gorazde:kamen",
+      "memberSids": [
+        "S117676",
+        "S117684",
+        "S117978",
+        "S118001",
+        "S118206",
+        "S118249",
+        "S118559",
+        "S119199",
+        "S119385"
+      ]
+    },
+    {
+      "osid": "op:gorazde:glamoc",
+      "memberSids": [
+        "S117960",
+        "S118346",
+        "S118583",
+        "S118664",
+        "S118702",
+        "S118761",
+        "S119237",
+        "S164771",
+        "S166405",
+        "S215775"
+      ]
+    },
+    {
+      "osid": "op:gorazde:sopotnica",
+      "memberSids": [
+        "S164810",
+        "S169781",
+        "S215627",
+        "S215805",
+        "S215813",
+        "S216038",
+        "S216151",
+        "S216313"
+      ]
+    },
+    {
+      "osid": "op:gorazde:osjecani_2",
+      "memberSids": [
+        "S117781",
+        "S117811",
+        "S118176",
+        "S118214",
+        "S118516",
+        "S118567",
+        "S118699",
+        "S118796",
+        "S118982",
+        "S166561"
+      ]
+    },
+    {
+      "osid": "op:gorazde:gorazde_2",
+      "memberSids": [
+        "S117994",
+        "S164801",
+        "S164828",
+        "S166359",
+        "S166367",
+        "S166391",
+        "S166570",
+        "S169757",
+        "S169765",
+        "S169773",
+        "S216275",
+        "S216321"
+      ]
+    },
+    {
+      "osid": "op:gorazde:bacci",
+      "memberSids": [
+        "S117480",
+        "S117714",
+        "S117773",
+        "S117820",
+        "S117897",
+        "S118036",
+        "S118222",
+        "S118320",
+        "S118486",
+        "S119016",
+        "S119253",
+        "S119458"
+      ]
+    },
+    {
+      "osid": "op:gorazde:mravinjac_2",
+      "memberSids": [
+        "S117595",
+        "S117692",
+        "S117722",
+        "S118494",
+        "S118591",
+        "S118605",
+        "S118729",
+        "S118737",
+        "S118842",
+        "S118958",
+        "S119296",
+        "S119326"
+      ]
+    },
+    {
+      "osid": "op:gorazde:kola",
+      "memberSids": [
+        "S117501",
+        "S117625",
+        "S118052",
+        "S118184",
+        "S118311",
+        "S118389",
+        "S118478",
+        "S118672",
+        "S118745",
+        "S118753",
+        "S118770",
+        "S118966",
+        "S119318",
+        "S119342",
+        "S166332"
+      ]
+    },
+    {
+      "osid": "op:gorazde:citluk_2",
+      "memberSids": [
+        "S117650",
+        "S117765",
+        "S117803",
+        "S118095",
+        "S118460",
+        "S118575",
+        "S118931",
+        "S119091",
+        "S119121",
+        "S119270",
+        "S119288",
+        "S119431"
+      ]
+    },
+    {
+      "osid": "op:gorazde:semihova_2",
+      "memberSids": [
+        "S117838",
+        "S118010",
+        "S118109",
+        "S118427",
+        "S119032",
+        "S119059",
+        "S119075",
+        "S119148"
+      ]
+    },
+    {
+      "osid": "op:gorazde:faocici_2",
+      "memberSids": [
+        "S117498",
+        "S117536",
+        "S117668",
+        "S117790",
+        "S117943",
+        "S118354",
+        "S118940",
+        "S119113",
+        "S119245",
+        "S166383"
+      ]
+    },
+    {
+      "osid": "op:gorazde:hrancici",
+      "memberSids": [
+        "S117544",
+        "S117757",
+        "S117854",
+        "S118028",
+        "S118087",
+        "S118133",
+        "S118419",
+        "S119474",
+        "S166375"
+      ]
+    },
+    {
+      "osid": "op:gorazde:slatina_2",
+      "memberSids": [
+        "S215856",
+        "S215864",
+        "S215929",
+        "S216127"
+      ]
+    },
+    {
+      "osid": "op:gorazde:zorovici",
+      "memberSids": [
+        "S117510",
+        "S117641",
+        "S117749",
+        "S118290",
+        "S118656",
+        "S119130",
+        "S119423"
+      ]
+    },
+    {
+      "osid": "op:gornji_vakuf:vaganjac",
+      "memberSids": [
+        "S119695",
+        "S119750",
+        "S119814",
+        "S119822",
+        "S119873",
+        "S119997"
+      ]
+    },
+    {
+      "osid": "op:gornji_vakuf:zdrimci",
+      "memberSids": [
+        "S119601",
+        "S119784",
+        "S119938",
+        "S120057",
+        "S120073"
+      ]
+    },
+    {
+      "osid": "op:gornji_vakuf:crkvice",
+      "memberSids": [
+        "S119580",
+        "S119768",
+        "S119776",
+        "S119946",
+        "S119954",
+        "S120006"
+      ]
+    },
+    {
+      "osid": "op:gornji_vakuf:drazev_dolac",
+      "memberSids": [
+        "S119555",
+        "S119610",
+        "S119628",
+        "S119636",
+        "S119687",
+        "S119717",
+        "S119725",
+        "S119806",
+        "S120014"
+      ]
+    },
+    {
+      "osid": "op:gornji_vakuf:pajic_polje_2",
+      "memberSids": [
+        "S119679",
+        "S119733",
+        "S119857",
+        "S119881",
+        "S119911"
+      ]
+    },
+    {
+      "osid": "op:gornji_vakuf:gornji_vakuf_uskoplje_2",
+      "memberSids": [
+        "S119539",
+        "S119547",
+        "S119644",
+        "S119709",
+        "S119865",
+        "S119890",
+        "S119989",
+        "S166618"
+      ]
+    },
+    {
+      "osid": "op:gornji_vakuf:jagnjid_2",
+      "memberSids": [
+        "S119652",
+        "S119741",
+        "S119792",
+        "S119849",
+        "S119962",
+        "S120049"
+      ]
+    },
+    {
+      "osid": "op:gracanica:petrovo_2",
+      "memberSids": [
+        "S217654",
+        "S217662",
+        "S217719",
+        "S217727",
+        "S217735"
+      ]
+    },
+    {
+      "osid": "op:gracanica:gracanica_2",
+      "memberSids": [
+        "S120120",
+        "S120154",
+        "S120197",
+        "S120243",
+        "S120286",
+        "S217689",
+        "S217697"
+      ]
+    },
+    {
+      "osid": "op:gracanica:miricina_2",
+      "memberSids": [
+        "S120146",
+        "S120235",
+        "S120251",
+        "S120308",
+        "S120383"
+      ]
+    },
+    {
+      "osid": "op:gracanica:malesici",
+      "memberSids": [
+        "S120081",
+        "S120219",
+        "S120227",
+        "S120260",
+        "S120375",
+        "S164836",
+        "S169820"
+      ]
+    },
+    {
+      "osid": "op:gracanica:dzakule",
+      "memberSids": [
+        "S120111",
+        "S120138",
+        "S120294",
+        "S120359"
+      ]
+    },
+    {
+      "osid": "op:gradacac:pelagicevo",
+      "memberSids": [
+        "S164917",
+        "S166642",
+        "S217522",
+        "S217549",
+        "S217557"
+      ]
+    },
+    {
+      "osid": "op:gradacac:gradacac_2",
+      "memberSids": [
+        "S120553",
+        "S120626",
+        "S120758",
+        "S164879",
+        "S169838",
+        "S169854",
+        "S169897"
+      ]
+    },
+    {
+      "osid": "op:gradacac:donja_tramosnica_2",
+      "memberSids": [
+        "S164852",
+        "S164887",
+        "S164925"
+      ]
+    },
+    {
+      "osid": "op:gradacac:zelinja_donja_2",
+      "memberSids": [
+        "S120421",
+        "S120448",
+        "S120545",
+        "S120774",
+        "S164895",
+        "S164933",
+        "S169846",
+        "S169862",
+        "S169889",
+        "S169919"
+      ]
+    },
+    {
+      "osid": "op:gradacac:jelovce_selo",
+      "memberSids": [
+        "S120405",
+        "S120464",
+        "S120588",
+        "S120596",
+        "S120723"
+      ]
+    },
+    {
+      "osid": "op:gradacac:mionica",
+      "memberSids": [
+        "S120391",
+        "S120561",
+        "S120618",
+        "S120715",
+        "S120766",
+        "S164844",
+        "S164909"
+      ]
+    },
+    {
+      "osid": "op:grude:grude_2",
+      "memberSids": [
+        "S120839",
+        "S120847",
+        "S120855",
+        "S120880",
+        "S120910",
+        "S120936"
+      ]
+    },
+    {
+      "osid": "op:hadzici:hadzici",
+      "memberSids": [
+        "S142263",
+        "S142310",
+        "S142344",
+        "S142395",
+        "S142409",
+        "S142425",
+        "S142468",
+        "S142506",
+        "S142743"
+      ]
+    },
+    {
+      "osid": "op:hadzici:lokve",
+      "memberSids": [
+        "S142166",
+        "S142387",
+        "S142522",
+        "S142557"
+      ]
+    },
+    {
+      "osid": "op:hadzici:pazaric",
+      "memberSids": [
+        "S142115",
+        "S142239",
+        "S142271",
+        "S142280",
+        "S142301",
+        "S142336",
+        "S142417",
+        "S142441",
+        "S142450",
+        "S142514",
+        "S142620",
+        "S142646",
+        "S142697"
+      ]
+    },
+    {
+      "osid": "op:hadzici:luke",
+      "memberSids": [
+        "S142158",
+        "S142174",
+        "S142182",
+        "S142204",
+        "S142247",
+        "S142328",
+        "S142433",
+        "S142476",
+        "S142549",
+        "S142611",
+        "S142638",
+        "S142654",
+        "S142719",
+        "S142727",
+        "S142751"
+      ]
+    },
+    {
+      "osid": "op:hadzici:budmolici",
+      "memberSids": [
+        "S142131",
+        "S142352",
+        "S142484",
+        "S142590",
+        "S142760"
+      ]
+    },
+    {
+      "osid": "op:hanpijesak:godjenje_2",
+      "memberSids": [
+        "S228052",
+        "S228087",
+        "S228133",
+        "S228214",
+        "S228222",
+        "S228273",
+        "S228290"
+      ]
+    },
+    {
+      "osid": "op:hanpijesak:han_pijesak_2",
+      "memberSids": [
+        "S228044",
+        "S228079",
+        "S228095",
+        "S228109",
+        "S228117",
+        "S228125",
+        "S228141",
+        "S228150",
+        "S228176",
+        "S228192",
+        "S228206",
+        "S228249",
+        "S228257"
+      ]
+    },
+    {
+      "osid": "op:ilidza:rakovica_2",
+      "memberSids": [
+        "S142905",
+        "S142964"
+      ]
+    },
+    {
+      "osid": "op:ilidza:kasindo",
+      "memberSids": [
+        "S142891",
+        "S165301",
+        "S209198",
+        "S209201"
+      ]
+    },
+    {
+      "osid": "op:hadzici:binjezevo",
+      "memberSids": [
+        "S142123",
+        "S142735",
+        "S142778"
+      ]
+    },
+    {
+      "osid": "op:ilijas:visojevica",
+      "memberSids": [
+        "S143090",
+        "S143405",
+        "S143413",
+        "S143499",
+        "S143731",
+        "S143782",
+        "S143804",
+        "S143839",
+        "S170623"
+      ]
+    },
+    {
+      "osid": "op:ilijas:podlugovi",
+      "memberSids": [
+        "S107832",
+        "S107859",
+        "S143073",
+        "S143081",
+        "S143111",
+        "S143138",
+        "S143146",
+        "S143278",
+        "S143332",
+        "S143367",
+        "S143383",
+        "S143391",
+        "S143472",
+        "S143502",
+        "S143529",
+        "S143537",
+        "S143545",
+        "S143570",
+        "S143626",
+        "S143634",
+        "S143669",
+        "S143693",
+        "S143774",
+        "S143847",
+        "S143863"
+      ]
+    },
+    {
+      "osid": "op:ilijas:krivajevici",
+      "memberSids": [
+        "S143103",
+        "S143219",
+        "S143227",
+        "S143375",
+        "S143421",
+        "S143430",
+        "S143588",
+        "S143758",
+        "S143910"
+      ]
+    },
+    {
+      "osid": "op:ilijas:dragoradi",
+      "memberSids": [
+        "S143120",
+        "S143154",
+        "S143189",
+        "S143235",
+        "S143243",
+        "S143677",
+        "S143740",
+        "S143871",
+        "S170640"
+      ]
+    },
+    {
+      "osid": "op:ilijas:sirovine",
+      "memberSids": [
+        "S143618",
+        "S170615",
+        "S170631",
+        "S209449",
+        "S209457",
+        "S209465"
+      ]
+    },
+    {
+      "osid": "op:ilijas:medojevici",
+      "memberSids": [
+        "S143162",
+        "S143197",
+        "S143251",
+        "S143286",
+        "S143316",
+        "S143324",
+        "S143359",
+        "S143553",
+        "S143723",
+        "S143812",
+        "S143880"
+      ]
+    },
+    {
+      "osid": "op:ilijas:srednje",
+      "memberSids": [
+        "S143308",
+        "S143448",
+        "S143456",
+        "S143561",
+        "S143715",
+        "S143901"
+      ]
+    },
+    {
+      "osid": "op:jablanica:doljani_2",
+      "memberSids": [
+        "S121304",
+        "S121487",
+        "S121517",
+        "S164330"
+      ]
+    },
+    {
+      "osid": "op:jablanica:slatina_2",
+      "memberSids": [
+        "S121231",
+        "S121258",
+        "S121266",
+        "S121401",
+        "S121436",
+        "S121495",
+        "S121509",
+        "S121525",
+        "S121541"
+      ]
+    },
+    {
+      "osid": "op:jablanica:jablanica_2",
+      "memberSids": [
+        "S121282",
+        "S121312",
+        "S121339",
+        "S121355",
+        "S121380",
+        "S121398",
+        "S121428",
+        "S121479",
+        "S121550",
+        "S164348",
+        "S164356"
+      ]
+    },
+    {
+      "osid": "op:jablanica:ostrozac_2",
+      "memberSids": [
+        "S121240",
+        "S121274",
+        "S121347",
+        "S121363",
+        "S121371",
+        "S121410",
+        "S121444",
+        "S121452",
+        "S121533"
+      ]
+    },
+    {
+      "osid": "op:jajce:lupnica",
+      "memberSids": [
+        "S121568",
+        "S121886",
+        "S121991",
+        "S122017",
+        "S122033",
+        "S122068"
+      ]
+    },
+    {
+      "osid": "op:jajce:jajce_3",
+      "memberSids": [
+        "S121592",
+        "S121673",
+        "S121851",
+        "S121908",
+        "S121983",
+        "S122084",
+        "S122106",
+        "S122173"
+      ]
+    },
+    {
+      "osid": "op:jajce:bravnice",
+      "memberSids": [
+        "S121878",
+        "S169927",
+        "S169935",
+        "S169943"
+      ]
+    },
+    {
+      "osid": "op:jajce:prisoje",
+      "memberSids": [
+        "S166081",
+        "S169960",
+        "S209643",
+        "S209660",
+        "S209686"
+      ]
+    },
+    {
+      "osid": "op:jajce:jezero_2",
+      "memberSids": [
+        "S164941",
+        "S169994",
+        "S209627",
+        "S209678"
+      ]
+    },
+    {
+      "osid": "op:jajce:grdovo",
+      "memberSids": [
+        "S121622",
+        "S121657",
+        "S121789",
+        "S121835",
+        "S121916",
+        "S121932"
+      ]
+    },
+    {
+      "osid": "op:jajce:kruscica",
+      "memberSids": [
+        "S121665",
+        "S121738",
+        "S121959",
+        "S121975",
+        "S122050"
+      ]
+    },
+    {
+      "osid": "op:jajce:divicani_2",
+      "memberSids": [
+        "S121606",
+        "S121720",
+        "S121754",
+        "S121819",
+        "S121967",
+        "S122122",
+        "S122149",
+        "S122203"
+      ]
+    },
+    {
+      "osid": "op:jajce:barevo_2",
+      "memberSids": [
+        "S121681",
+        "S121690",
+        "S121746",
+        "S122025",
+        "S122092",
+        "S122190",
+        "S122211",
+        "S169986",
+        "S171476"
+      ]
+    },
+    {
+      "osid": "op:jajce:vinac_2",
+      "memberSids": [
+        "S121584",
+        "S121843",
+        "S121894",
+        "S122157",
+        "S122165",
+        "S166421",
+        "S169951",
+        "S169978"
+      ]
+    },
+    {
+      "osid": "op:kakanj:bukovlje_2",
+      "memberSids": [
+        "S122327",
+        "S122343",
+        "S122360",
+        "S122394",
+        "S122416",
+        "S122599",
+        "S122645",
+        "S122882",
+        "S123005",
+        "S123293"
+      ]
+    },
+    {
+      "osid": "op:kakanj:seoce_2",
+      "memberSids": [
+        "S122297",
+        "S122785",
+        "S122815",
+        "S122874",
+        "S122971",
+        "S122980",
+        "S123064",
+        "S123153",
+        "S123242"
+      ]
+    },
+    {
+      "osid": "op:kakanj:poljani_2",
+      "memberSids": [
+        "S122866",
+        "S123021",
+        "S123315"
+      ]
+    },
+    {
+      "osid": "op:kakanj:slapnica_2",
+      "memberSids": [
+        "S122335",
+        "S122548",
+        "S122904",
+        "S123030",
+        "S123170"
+      ]
+    },
+    {
+      "osid": "op:kakanj:zgosca",
+      "memberSids": [
+        "S122408",
+        "S123099",
+        "S123102",
+        "S123358",
+        "S123366",
+        "S123404"
+      ]
+    },
+    {
+      "osid": "op:kakanj:biljesevo",
+      "memberSids": [
+        "S122319",
+        "S122351",
+        "S122912",
+        "S123129",
+        "S123323"
+      ]
+    },
+    {
+      "osid": "op:kakanj:sopotnica",
+      "memberSids": [
+        "S122491",
+        "S122572",
+        "S122718",
+        "S122939",
+        "S123056",
+        "S123137",
+        "S123200"
+      ]
+    },
+    {
+      "osid": "op:kakanj:donja_papratnica",
+      "memberSids": [
+        "S122262",
+        "S122432",
+        "S122467",
+        "S122475",
+        "S122556",
+        "S122700",
+        "S122734",
+        "S122807",
+        "S122840",
+        "S123234"
+      ]
+    },
+    {
+      "osid": "op:kakanj:kakanj_2",
+      "memberSids": [
+        "S122238",
+        "S122459",
+        "S122670",
+        "S122742",
+        "S122963",
+        "S123048",
+        "S123196",
+        "S123382"
+      ]
+    },
+    {
+      "osid": "op:kakanj:ticici_2",
+      "memberSids": [
+        "S122483",
+        "S122530",
+        "S122629",
+        "S122769",
+        "S122777",
+        "S122831",
+        "S122947",
+        "S123072",
+        "S123226",
+        "S123269",
+        "S123331"
+      ]
+    },
+    {
+      "osid": "op:kakanj:trsce_2",
+      "memberSids": [
+        "S122289",
+        "S122378",
+        "S122424",
+        "S122505",
+        "S122513",
+        "S122521",
+        "S122564",
+        "S122653",
+        "S122793",
+        "S123188",
+        "S123277"
+      ]
+    },
+    {
+      "osid": "op:kakanj:vukanovici",
+      "memberSids": [
+        "S122246",
+        "S122637",
+        "S122696",
+        "S122858",
+        "S122955",
+        "S123145",
+        "S123161",
+        "S123340",
+        "S123374"
+      ]
+    },
+    {
+      "osid": "op:kakanj:brnjic_2",
+      "memberSids": [
+        "S122254",
+        "S122386",
+        "S122602",
+        "S122661",
+        "S122688",
+        "S122726",
+        "S122823",
+        "S122998",
+        "S123013",
+        "S123218",
+        "S123285",
+        "S123307"
+      ]
+    },
+    {
+      "osid": "op:kalesija:seher_2",
+      "memberSids": [
+        "S170003",
+        "S170020",
+        "S216348",
+        "S216356",
+        "S216372",
+        "S216402",
+        "S216429",
+        "S216437",
+        "S216445",
+        "S216453",
+        "S216496",
+        "S216500"
+      ]
+    },
+    {
+      "osid": "op:kalesija:kalesija_selo",
+      "memberSids": [
+        "S123439",
+        "S123617",
+        "S123790",
+        "S164364",
+        "S164402"
+      ]
+    },
+    {
+      "osid": "op:kalesija:kalesija_grad_2",
+      "memberSids": [
+        "S123463",
+        "S123536",
+        "S123625",
+        "S123650",
+        "S123668",
+        "S123706"
+      ]
+    },
+    {
+      "osid": "op:kalesija:tojsici_2",
+      "memberSids": [
+        "S123510",
+        "S123641",
+        "S123676",
+        "S123749",
+        "S123765",
+        "S123773"
+      ]
+    },
+    {
+      "osid": "op:kalesija:kikaci",
+      "memberSids": [
+        "S123498",
+        "S123501",
+        "S123544",
+        "S123587",
+        "S123714"
+      ]
+    },
+    {
+      "osid": "op:kalinovik:golubici_2",
+      "memberSids": [
+        "S209716",
+        "S209767",
+        "S209775",
+        "S209791",
+        "S209805",
+        "S209848",
+        "S209872",
+        "S209899",
+        "S209902",
+        "S210030",
+        "S210048",
+        "S210196",
+        "S210293",
+        "S210463",
+        "S210480"
+      ]
+    },
+    {
+      "osid": "op:kalinovik:varos_2",
+      "memberSids": [
+        "S209821",
+        "S209988",
+        "S210200",
+        "S210269",
+        "S210404",
+        "S210412",
+        "S210439",
+        "S210471"
+      ]
+    },
+    {
+      "osid": "op:kalinovik:vlaholje",
+      "memberSids": [
+        "S209724",
+        "S209759",
+        "S209813",
+        "S210005",
+        "S210021",
+        "S210099",
+        "S210102",
+        "S210161",
+        "S210285",
+        "S210323",
+        "S210455"
+      ]
+    },
+    {
+      "osid": "op:kalinovik:sela_2",
+      "memberSids": [
+        "S209708",
+        "S209929",
+        "S209953",
+        "S210137",
+        "S210153",
+        "S210226",
+        "S210234",
+        "S210277",
+        "S210315",
+        "S210374",
+        "S210382"
+      ]
+    },
+    {
+      "osid": "op:kalinovik:tomislja",
+      "memberSids": [
+        "S209783",
+        "S209830",
+        "S209970",
+        "S210013",
+        "S210064",
+        "S210170",
+        "S210188",
+        "S210242",
+        "S210340",
+        "S210366"
+      ]
+    },
+    {
+      "osid": "op:kalinovik:kalinovik_2",
+      "memberSids": [
+        "S209732",
+        "S209856",
+        "S209937",
+        "S209945",
+        "S209961",
+        "S210072",
+        "S210447"
+      ]
+    },
+    {
+      "osid": "op:kalinovik:obalj",
+      "memberSids": [
+        "S209864",
+        "S209996",
+        "S210056",
+        "S210129",
+        "S210145",
+        "S210218",
+        "S210307",
+        "S210331",
+        "S210358"
+      ]
+    },
+    {
+      "osid": "op:kiseljak:bilalovac_2",
+      "memberSids": [
+        "S124613",
+        "S124630",
+        "S124672",
+        "S124761",
+        "S124788",
+        "S125008",
+        "S125059",
+        "S125164",
+        "S125172",
+        "S125199",
+        "S125202",
+        "S125237",
+        "S125253",
+        "S125288",
+        "S125369",
+        "S125423",
+        "S125458"
+      ]
+    },
+    {
+      "osid": "op:hadzici:misevici_2",
+      "memberSids": [
+        "S142107",
+        "S142298",
+        "S142573"
+      ]
+    },
+    {
+      "osid": "op:kiseljak:azapovici_2",
+      "memberSids": [
+        "S124605",
+        "S124656",
+        "S124729",
+        "S124753",
+        "S124982",
+        "S125083",
+        "S125113",
+        "S125130",
+        "S125440"
+      ]
+    },
+    {
+      "osid": "op:kiseljak:drazevici",
+      "memberSids": [
+        "S124818",
+        "S124923",
+        "S124966",
+        "S125342"
+      ]
+    },
+    {
+      "osid": "op:kiseljak:brnjaci_2",
+      "memberSids": [
+        "S124699",
+        "S124737",
+        "S124800",
+        "S124842",
+        "S124907",
+        "S125261",
+        "S125334",
+        "S125482"
+      ]
+    },
+    {
+      "osid": "op:kiseljak:gromiljak_2",
+      "memberSids": [
+        "S124621",
+        "S124648",
+        "S124770",
+        "S124796",
+        "S124826",
+        "S124834",
+        "S124869",
+        "S124877",
+        "S124931",
+        "S124940",
+        "S124958",
+        "S125024",
+        "S125032",
+        "S125091",
+        "S125121",
+        "S125156",
+        "S125229",
+        "S125245",
+        "S125377",
+        "S125415"
+      ]
+    },
+    {
+      "osid": "op:kiseljak:kiseljak_2",
+      "memberSids": [
+        "S124745",
+        "S124893",
+        "S124915",
+        "S125067",
+        "S125075",
+        "S125105",
+        "S125148",
+        "S125270",
+        "S125300",
+        "S125318",
+        "S125326",
+        "S125407",
+        "S125466"
+      ]
+    },
+    {
+      "osid": "op:kladanj:olovci_2",
+      "memberSids": [
+        "S125539",
+        "S125768",
+        "S125776",
+        "S125946"
+      ]
+    },
+    {
+      "osid": "op:kladanj:brgule",
+      "memberSids": [
+        "S125547",
+        "S125636",
+        "S125725",
+        "S125806",
+        "S164976",
+        "S164984",
+        "S165000",
+        "S165018",
+        "S166138"
+      ]
+    },
+    {
+      "osid": "op:kladanj:tarevo_2",
+      "memberSids": [
+        "S125555",
+        "S125571",
+        "S125695",
+        "S125741",
+        "S125750",
+        "S125822",
+        "S125865",
+        "S125881",
+        "S125890",
+        "S125911"
+      ]
+    },
+    {
+      "osid": "op:kladanj:tuholj_2",
+      "memberSids": [
+        "S125512",
+        "S125784",
+        "S125814",
+        "S125903",
+        "S125920",
+        "S125962"
+      ]
+    },
+    {
+      "osid": "op:kladanj:staric_2",
+      "memberSids": [
+        "S125849",
+        "S125857",
+        "S125873",
+        "S164992",
+        "S170046"
+      ]
+    },
+    {
+      "osid": "op:kladanj:kladanj_3",
+      "memberSids": [
+        "S125563",
+        "S125598",
+        "S125601",
+        "S125644",
+        "S125687",
+        "S125733"
+      ]
+    },
+    {
+      "osid": "op:kljuc:kljuc_2",
+      "memberSids": [
+        "S126047",
+        "S126284",
+        "S126314",
+        "S126420",
+        "S126438",
+        "S126489",
+        "S126632",
+        "S170089",
+        "S170127",
+        "S170135"
+      ]
+    },
+    {
+      "osid": "op:kljuc:hadzici",
+      "memberSids": [
+        "S126101",
+        "S126128",
+        "S126217",
+        "S126250",
+        "S126322",
+        "S126365",
+        "S126578",
+        "S170097",
+        "S170119"
+      ]
+    },
+    {
+      "osid": "op:kljuc:krasulje_2",
+      "memberSids": [
+        "S125989",
+        "S125997",
+        "S126276",
+        "S126306",
+        "S126357",
+        "S126403",
+        "S126411",
+        "S126454",
+        "S126519"
+      ]
+    },
+    {
+      "osid": "op:kljuc:sanica_2",
+      "memberSids": [
+        "S126004",
+        "S126349",
+        "S126381",
+        "S126390",
+        "S126446",
+        "S126497",
+        "S126527",
+        "S126624"
+      ]
+    },
+    {
+      "osid": "op:kljuc:donje_ratkovo_2",
+      "memberSids": [
+        "S165034",
+        "S165042",
+        "S166430",
+        "S170054",
+        "S170064",
+        "S219223",
+        "S219339",
+        "S219355",
+        "S219452",
+        "S219487",
+        "S219533"
+      ]
+    },
+    {
+      "osid": "op:kljuc:donji_vrbljani_2",
+      "memberSids": [
+        "S219231",
+        "S219258",
+        "S219266",
+        "S219304",
+        "S219312",
+        "S219363",
+        "S219398",
+        "S219401",
+        "S219444",
+        "S219479",
+        "S219495",
+        "S219517",
+        "S219525"
+      ]
+    },
+    {
+      "osid": "op:konjic:bijela_2",
+      "memberSids": [
+        "S126691",
+        "S126730",
+        "S126900",
+        "S126934",
+        "S127400",
+        "S127558",
+        "S165140",
+        "S170143"
+      ]
+    },
+    {
+      "osid": "op:konjic:turija",
+      "memberSids": [
+        "S126705",
+        "S126853",
+        "S127426",
+        "S127833",
+        "S128180",
+        "S128279",
+        "S128295"
+      ]
+    },
+    {
+      "osid": "op:konjic:konjic_2",
+      "memberSids": [
+        "S126977",
+        "S127060",
+        "S127132",
+        "S127159",
+        "S127353",
+        "S127477",
+        "S127671",
+        "S127779",
+        "S127841",
+        "S127868",
+        "S127949",
+        "S128198",
+        "S128210",
+        "S128287"
+      ]
+    },
+    {
+      "osid": "op:konjic:buturovic_polje_2",
+      "memberSids": [
+        "S126772",
+        "S126845",
+        "S127027",
+        "S127191",
+        "S127205",
+        "S127264",
+        "S127485",
+        "S127523",
+        "S127639",
+        "S127647",
+        "S127698",
+        "S127701",
+        "S127710",
+        "S127744",
+        "S127892",
+        "S127981",
+        "S128074",
+        "S128139",
+        "S128163"
+      ]
+    },
+    {
+      "osid": "op:konjic:jasenik_2",
+      "memberSids": [
+        "S126675",
+        "S126802",
+        "S126861",
+        "S126926",
+        "S126993",
+        "S127035",
+        "S127108",
+        "S127388",
+        "S127582",
+        "S127809",
+        "S127850",
+        "S127914",
+        "S128007"
+      ]
+    },
+    {
+      "osid": "op:konjic:bradina",
+      "memberSids": [
+        "S126756",
+        "S126829",
+        "S127175",
+        "S127329",
+        "S127884",
+        "S127922",
+        "S128040",
+        "S128155",
+        "S128171",
+        "S128309"
+      ]
+    },
+    {
+      "osid": "op:konjic:celebici_2",
+      "memberSids": [
+        "S126683",
+        "S126748",
+        "S126870",
+        "S126985",
+        "S127019",
+        "S127221",
+        "S127248",
+        "S127256",
+        "S127272",
+        "S127337",
+        "S127361",
+        "S127370",
+        "S127396",
+        "S127493",
+        "S127515",
+        "S127574",
+        "S127736",
+        "S127876",
+        "S127965",
+        "S127973",
+        "S128058",
+        "S128147",
+        "S128236"
+      ]
+    },
+    {
+      "osid": "op:konjic:brdjani",
+      "memberSids": [
+        "S126667",
+        "S126764",
+        "S127442",
+        "S127825",
+        "S128104",
+        "S128228"
+      ]
+    },
+    {
+      "osid": "op:konjic:sitnik",
+      "memberSids": [
+        "S127990",
+        "S165077",
+        "S165107",
+        "S170178"
+      ]
+    },
+    {
+      "osid": "op:konjic:glavaticevo_2",
+      "memberSids": [
+        "S127078",
+        "S127086",
+        "S127167",
+        "S127418",
+        "S127469",
+        "S127531",
+        "S127566",
+        "S127604",
+        "S127728",
+        "S127906",
+        "S127957",
+        "S128112"
+      ]
+    },
+    {
+      "osid": "op:konjic:dzepi_2",
+      "memberSids": [
+        "S126713",
+        "S126918",
+        "S127051",
+        "S127094",
+        "S127116",
+        "S127302",
+        "S127612",
+        "S127663",
+        "S128031",
+        "S128244"
+      ]
+    },
+    {
+      "osid": "op:kotor_varos:kotor_varos_2",
+      "memberSids": [
+        "S211591",
+        "S211605",
+        "S211621",
+        "S211656",
+        "S211699",
+        "S211702",
+        "S211761",
+        "S211770",
+        "S211818",
+        "S211826",
+        "S211842",
+        "S211915",
+        "S211923",
+        "S211940"
+      ]
+    },
+    {
+      "osid": "op:kotor_varos:vrbanjci_2",
+      "memberSids": [
+        "S211524",
+        "S211630",
+        "S211664",
+        "S211745",
+        "S211753",
+        "S211907",
+        "S211931"
+      ]
+    },
+    {
+      "osid": "op:kotor_varos:prisocka_2",
+      "memberSids": [
+        "S211508",
+        "S211516",
+        "S211559",
+        "S211567",
+        "S211575",
+        "S211648",
+        "S211729",
+        "S211796",
+        "S211800",
+        "S211834",
+        "S211869"
+      ]
+    },
+    {
+      "osid": "op:kotor_varos:krusevo_brdo_i",
+      "memberSids": [
+        "S211583",
+        "S211966"
+      ]
+    },
+    {
+      "osid": "op:kotor_varos:vagani_2",
+      "memberSids": [
+        "S211613",
+        "S211788",
+        "S211877",
+        "S211885",
+        "S211893",
+        "S211958"
+      ]
+    },
+    {
+      "osid": "op:kotor_varos:maslovare_2",
+      "memberSids": [
+        "S211532",
+        "S211737"
+      ]
+    },
+    {
+      "osid": "op:kresevo:kresevo_2",
+      "memberSids": [
+        "S128775",
+        "S128813",
+        "S128830",
+        "S128864",
+        "S128899",
+        "S128902",
+        "S128929",
+        "S128988",
+        "S129038"
+      ]
+    },
+    {
+      "osid": "op:kresevo:polje_2",
+      "memberSids": [
+        "S128767",
+        "S128791",
+        "S128805",
+        "S128821",
+        "S128848",
+        "S128872",
+        "S128953",
+        "S128961",
+        "S128970",
+        "S128996",
+        "S129011",
+        "S129020",
+        "S129046"
+      ]
+    },
+    {
+      "osid": "op:kupres:novo_selo_2",
+      "memberSids": [
+        "S129054",
+        "S165158",
+        "S165166",
+        "S165174",
+        "S170194"
+      ]
+    },
+    {
+      "osid": "op:kupres:donji_malovan",
+      "memberSids": [
+        "S129160",
+        "S129208",
+        "S129291",
+        "S129364",
+        "S129437"
+      ]
+    },
+    {
+      "osid": "op:kupres:goravci",
+      "memberSids": [
+        "S129119",
+        "S129127",
+        "S129178",
+        "S129216",
+        "S129224",
+        "S129259",
+        "S129267",
+        "S129348",
+        "S129429"
+      ]
+    },
+    {
+      "osid": "op:kupres:kupres_2",
+      "memberSids": [
+        "S129062",
+        "S129089",
+        "S129232",
+        "S129283",
+        "S129313",
+        "S129321",
+        "S129330",
+        "S129372",
+        "S129399",
+        "S129445",
+        "S170208"
+      ]
+    },
+    {
+      "osid": "op:laktasi:drugovici_2",
+      "memberSids": [
+        "S212156",
+        "S212199",
+        "S212237",
+        "S212245",
+        "S212261",
+        "S212300",
+        "S212318",
+        "S212334",
+        "S212393",
+        "S212440",
+        "S212482"
+      ]
+    },
+    {
+      "osid": "op:laktasi:maglajani",
+      "memberSids": [
+        "S212342",
+        "S212369",
+        "S212407",
+        "S212415",
+        "S212431",
+        "S212458",
+        "S212466",
+        "S212474",
+        "S212539"
+      ]
+    },
+    {
+      "osid": "op:laktasi:trn_2",
+      "memberSids": [
+        "S212229",
+        "S212253",
+        "S212423",
+        "S212512",
+        "S212547",
+        "S212555",
+        "S212563"
+      ]
+    },
+    {
+      "osid": "op:laktasi:laktasi_2",
+      "memberSids": [
+        "S212164",
+        "S212202",
+        "S212270",
+        "S212288",
+        "S212296",
+        "S212326",
+        "S212377",
+        "S212385",
+        "S212504"
+      ]
+    },
+    {
+      "osid": "op:listica:kocerin_2",
+      "memberSids": [
+        "S129895",
+        "S129933",
+        "S129941",
+        "S129992",
+        "S130028",
+        "S130087",
+        "S130117",
+        "S130141",
+        "S130150",
+        "S130192"
+      ]
+    },
+    {
+      "osid": "op:listica:lise",
+      "memberSids": [
+        "S129917",
+        "S129925",
+        "S129950",
+        "S129968",
+        "S130001",
+        "S130010",
+        "S130036",
+        "S130044",
+        "S130095",
+        "S130133"
+      ]
+    },
+    {
+      "osid": "op:listica:ljuti_dolac",
+      "memberSids": [
+        "S129879",
+        "S130052",
+        "S130079",
+        "S130125",
+        "S130222"
+      ]
+    },
+    {
+      "osid": "op:listica:siroki_brijeg_2",
+      "memberSids": [
+        "S129887",
+        "S129909",
+        "S129984",
+        "S130109",
+        "S130176",
+        "S130184",
+        "S130206",
+        "S130214",
+        "S166103"
+      ]
+    },
+    {
+      "osid": "op:livno:gubin_2",
+      "memberSids": [
+        "S130273",
+        "S130290",
+        "S130435",
+        "S130672",
+        "S130699",
+        "S130729",
+        "S130818"
+      ]
+    },
+    {
+      "osid": "op:livno:livno_2",
+      "memberSids": [
+        "S130338",
+        "S130354",
+        "S130486",
+        "S130591",
+        "S130621",
+        "S130800"
+      ]
+    },
+    {
+      "osid": "op:livno:misi_2",
+      "memberSids": [
+        "S130257",
+        "S130389",
+        "S130427",
+        "S130559",
+        "S130583",
+        "S130613",
+        "S130842"
+      ]
+    },
+    {
+      "osid": "op:livno:zabljak_2",
+      "memberSids": [
+        "S130362",
+        "S130494",
+        "S130605",
+        "S130630",
+        "S130737",
+        "S130745",
+        "S130826",
+        "S130877"
+      ]
+    },
+    {
+      "osid": "op:livno:zastinje",
+      "memberSids": [
+        "S130443",
+        "S130524",
+        "S130532",
+        "S130702",
+        "S130761",
+        "S130788",
+        "S130796",
+        "S130834",
+        "S130869"
+      ]
+    },
+    {
+      "osid": "op:livno:prolog_2",
+      "memberSids": [
+        "S130249",
+        "S130311",
+        "S130320",
+        "S130419",
+        "S130460",
+        "S130575",
+        "S130664",
+        "S130770"
+      ]
+    },
+    {
+      "osid": "op:livno:priluka_2",
+      "memberSids": [
+        "S130281",
+        "S130303",
+        "S130346",
+        "S130451",
+        "S130478",
+        "S130508",
+        "S130516",
+        "S130567",
+        "S130648",
+        "S130656",
+        "S130753",
+        "S130885"
+      ]
+    },
+    {
+      "osid": "op:ljubinje:bancici",
+      "memberSids": [
+        "S212946",
+        "S212962",
+        "S213071",
+        "S213098",
+        "S213101"
+      ]
+    },
+    {
+      "osid": "op:ljubinje:ljubinje_2",
+      "memberSids": [
+        "S212954",
+        "S212989",
+        "S212997",
+        "S213004",
+        "S213012",
+        "S213039",
+        "S213047",
+        "S213055",
+        "S213063",
+        "S213080",
+        "S213110",
+        "S213128",
+        "S213136",
+        "S213144",
+        "S213152",
+        "S213179"
+      ]
+    },
+    {
+      "osid": "op:ljubuski:radisici_2",
+      "memberSids": [
+        "S132136",
+        "S132152",
+        "S132225",
+        "S132306",
+        "S132322"
+      ]
+    },
+    {
+      "osid": "op:ljubuski:studenci_2",
+      "memberSids": [
+        "S132071",
+        "S132080",
+        "S132250",
+        "S132268",
+        "S132349",
+        "S132357",
+        "S132420"
+      ]
+    },
+    {
+      "osid": "op:ljubuski:ljubuski_2",
+      "memberSids": [
+        "S132063",
+        "S132179",
+        "S132187",
+        "S132195",
+        "S132241",
+        "S132292",
+        "S132373"
+      ]
+    },
+    {
+      "osid": "op:ljubuski:vitina_2",
+      "memberSids": [
+        "S132101",
+        "S132209",
+        "S132217",
+        "S132365",
+        "S132390",
+        "S132403",
+        "S132411"
+      ]
+    },
+    {
+      "osid": "op:ljubuski:grab",
+      "memberSids": [
+        "S132098",
+        "S132110",
+        "S132128",
+        "S132233",
+        "S132276",
+        "S132284",
+        "S132314",
+        "S132381"
+      ]
+    },
+    {
+      "osid": "op:lopare:humci_2",
+      "memberSids": [
+        "S130907",
+        "S130974",
+        "S131296",
+        "S131318"
+      ]
+    },
+    {
+      "osid": "op:lopare:celic_3",
+      "memberSids": [
+        "S165662",
+        "S166260",
+        "S171107"
+      ]
+    },
+    {
+      "osid": "op:lopare:mrtvica_2",
+      "memberSids": [
+        "S212571",
+        "S212636",
+        "S212741",
+        "S212849"
+      ]
+    },
+    {
+      "osid": "op:lopare:nahvioci",
+      "memberSids": [
+        "S130923",
+        "S130940",
+        "S130966",
+        "S131105",
+        "S131148",
+        "S171115",
+        "S171123"
+      ]
+    },
+    {
+      "osid": "op:lopare:jablanica_2",
+      "memberSids": [
+        "S165620",
+        "S165654",
+        "S166278"
+      ]
+    },
+    {
+      "osid": "op:lopare:lopare_selo_2",
+      "memberSids": [
+        "S165638",
+        "S212580",
+        "S212784",
+        "S212890",
+        "S212911",
+        "S212920",
+        "S212938"
+      ]
+    },
+    {
+      "osid": "op:lopare:lopare_2",
+      "memberSids": [
+        "S212644",
+        "S212652",
+        "S212679",
+        "S212687",
+        "S212717",
+        "S212865",
+        "S212881"
+      ]
+    },
+    {
+      "osid": "op:lopare:priboj_2",
+      "memberSids": [
+        "S212750",
+        "S212792",
+        "S212857"
+      ]
+    },
+    {
+      "osid": "op:lukavac:brijesnica_donja_2",
+      "memberSids": [
+        "S131415",
+        "S131423",
+        "S131431",
+        "S131563",
+        "S131628",
+        "S131717",
+        "S131776",
+        "S170216",
+        "S170224",
+        "S170232"
+      ]
+    },
+    {
+      "osid": "op:lukavac:orahovica_2",
+      "memberSids": [
+        "S131342",
+        "S131539",
+        "S131547",
+        "S131644",
+        "S131709",
+        "S131806"
+      ]
+    },
+    {
+      "osid": "op:lukavac:poljice_2",
+      "memberSids": [
+        "S131385",
+        "S131393",
+        "S131407",
+        "S131555",
+        "S131652",
+        "S131687"
+      ]
+    },
+    {
+      "osid": "op:lukavac:bikodze",
+      "memberSids": [
+        "S131334",
+        "S131377",
+        "S131440",
+        "S131458",
+        "S131784"
+      ]
+    },
+    {
+      "osid": "op:lukavac:dobosnica_2",
+      "memberSids": [
+        "S131474",
+        "S131482",
+        "S131580",
+        "S131679",
+        "S131695"
+      ]
+    },
+    {
+      "osid": "op:lukavac:lukavac_2",
+      "memberSids": [
+        "S131598",
+        "S131636",
+        "S131768"
+      ]
+    },
+    {
+      "osid": "op:lukavac:smoluca_donja_2",
+      "memberSids": [
+        "S131466",
+        "S131512",
+        "S131601",
+        "S131725",
+        "S131733",
+        "S131750"
+      ]
+    },
+    {
+      "osid": "op:maglaj:gornja_bocinja",
+      "memberSids": [
+        "S132624",
+        "S132969",
+        "S170275",
+        "S170291"
+      ]
+    },
+    {
+      "osid": "op:maglaj:donja_bocinja_2",
+      "memberSids": [
+        "S132446",
+        "S132560",
+        "S132632",
+        "S132667",
+        "S165182",
+        "S170283"
+      ]
+    },
+    {
+      "osid": "op:maglaj:kosova_2",
+      "memberSids": [
+        "S132730",
+        "S132845",
+        "S132977"
+      ]
+    },
+    {
+      "osid": "op:maglaj:cobe_2",
+      "memberSids": [
+        "S132535",
+        "S132551",
+        "S132837",
+        "S132853",
+        "S170259",
+        "S170313"
+      ]
+    },
+    {
+      "osid": "op:maglaj:strupina",
+      "memberSids": [
+        "S132934",
+        "S133035",
+        "S166634"
+      ]
+    },
+    {
+      "osid": "op:maglaj:jablanica",
+      "memberSids": [
+        "S132691",
+        "S132888",
+        "S132896",
+        "S132918",
+        "S170267"
+      ]
+    },
+    {
+      "osid": "op:maglaj:maglaj_2",
+      "memberSids": [
+        "S132454",
+        "S132675",
+        "S132799"
+      ]
+    },
+    {
+      "osid": "op:maglaj:lijesnica",
+      "memberSids": [
+        "S132462",
+        "S132489",
+        "S132608",
+        "S132748",
+        "S132756",
+        "S133019"
+      ]
+    },
+    {
+      "osid": "op:maglaj:misurici_2",
+      "memberSids": [
+        "S132829",
+        "S132861",
+        "S133051"
+      ]
+    },
+    {
+      "osid": "op:modrica:garevac_2",
+      "memberSids": [
+        "S213853",
+        "S213896",
+        "S213900",
+        "S213942",
+        "S230600"
+      ]
+    },
+    {
+      "osid": "op:modrica:skugric_gornji_2",
+      "memberSids": [
+        "S213764",
+        "S213772",
+        "S213799",
+        "S213802",
+        "S213829",
+        "S213993"
+      ]
+    },
+    {
+      "osid": "op:modrica:vranjak_2",
+      "memberSids": [
+        "S213845",
+        "S213861",
+        "S213888",
+        "S213926",
+        "S213985",
+        "S214027"
+      ]
+    },
+    {
+      "osid": "op:mostar:hodbina_2",
+      "memberSids": [
+        "S133477",
+        "S133485",
+        "S133612",
+        "S133663"
+      ]
+    },
+    {
+      "osid": "op:mostar:blagaj_2",
+      "memberSids": [
+        "S133329",
+        "S133400",
+        "S133540"
+      ]
+    },
+    {
+      "osid": "op:mostar:mostar_istok_2",
+      "memberSids": [
+        "S133370",
+        "S133418",
+        "S133442",
+        "S133736",
+        "S133744",
+        "S133868",
+        "S166090_E"
+      ]
+    },
+    {
+      "osid": "op:mostar:vranjevici_2",
+      "memberSids": [
+        "S133850",
+        "S165930",
+        "S171433",
+        "S171441",
+        "S171450"
+      ]
+    },
+    {
+      "osid": "op:mostar:kruzanj_2",
+      "memberSids": [
+        "S133302",
+        "S133574",
+        "S133698",
+        "S165948",
+        "S165956"
+      ]
+    },
+    {
+      "osid": "op:mostar:potoci",
+      "memberSids": [
+        "S133469",
+        "S133493",
+        "S133582",
+        "S133671",
+        "S133710",
+        "S133728",
+        "S133752",
+        "S133841",
+        "S133892"
+      ]
+    },
+    {
+      "osid": "op:mostar:gornja_dreznica",
+      "memberSids": [
+        "S133337",
+        "S133388",
+        "S133396",
+        "S133426",
+        "S133434",
+        "S133558",
+        "S133825",
+        "S133876"
+      ]
+    },
+    {
+      "osid": "op:mostar:jasenica",
+      "memberSids": [
+        "S133299",
+        "S133345",
+        "S133515",
+        "S133566",
+        "S133604",
+        "S133655",
+        "S133787",
+        "S133795",
+        "S133817",
+        "S133906"
+      ]
+    },
+    {
+      "osid": "op:mostar:mostar_zapad_2",
+      "memberSids": [
+        "S133353",
+        "S133361",
+        "S133507",
+        "S133639",
+        "S133680",
+        "S133701",
+        "S133779",
+        "S133809",
+        "S133833",
+        "S166090_W"
+      ]
+    },
+    {
+      "osid": "op:mrkonjic_grad:baljvine_2",
+      "memberSids": [
+        "S214035",
+        "S214221",
+        "S214434"
+      ]
+    },
+    {
+      "osid": "op:mrkonjic_grad:bjelajce_2",
+      "memberSids": [
+        "S214043",
+        "S214060",
+        "S214183",
+        "S214205",
+        "S214213",
+        "S214230",
+        "S214370",
+        "S214388"
+      ]
+    },
+    {
+      "osid": "op:mrkonjic_grad:mrkonjic_grad_2",
+      "memberSids": [
+        "S214108",
+        "S214116",
+        "S214175",
+        "S214272",
+        "S214329",
+        "S214337",
+        "S214361",
+        "S214400"
+      ]
+    },
+    {
+      "osid": "op:mrkonjic_grad:majdan_2",
+      "memberSids": [
+        "S214051",
+        "S214248",
+        "S214299",
+        "S214345",
+        "S214396",
+        "S214418"
+      ]
+    },
+    {
+      "osid": "op:mrkonjic_grad:podrasnica_2",
+      "memberSids": [
+        "S214078",
+        "S214167",
+        "S214256",
+        "S214302",
+        "S214353",
+        "S214426"
+      ]
+    },
+    {
+      "osid": "op:mrkonjic_grad:gerzovo_2",
+      "memberSids": [
+        "S214086",
+        "S214094",
+        "S214124",
+        "S214132",
+        "S214159",
+        "S214191",
+        "S214264"
+      ]
+    },
+    {
+      "osid": "op:neum:neum_2",
+      "memberSids": [
+        "S134333",
+        "S134341",
+        "S134350",
+        "S134422",
+        "S134465",
+        "S134473",
+        "S134503",
+        "S134538",
+        "S134546",
+        "S134554"
+      ]
+    },
+    {
+      "osid": "op:neum:gornje_hrasno_2",
+      "memberSids": [
+        "S134406",
+        "S134414",
+        "S134457",
+        "S134481",
+        "S134490",
+        "S134589",
+        "S134597",
+        "S134619"
+      ]
+    },
+    {
+      "osid": "op:neum:gradac_2",
+      "memberSids": [
+        "S134368",
+        "S134376",
+        "S134384",
+        "S134392",
+        "S134449",
+        "S134511",
+        "S134520",
+        "S134562",
+        "S134627"
+      ]
+    },
+    {
+      "osid": "op:nevesinje:hrusta_2",
+      "memberSids": [
+        "S214442",
+        "S214507",
+        "S214566",
+        "S214647",
+        "S214701",
+        "S214710",
+        "S214736",
+        "S214744",
+        "S214752",
+        "S214833",
+        "S214850",
+        "S214906",
+        "S214990"
+      ]
+    },
+    {
+      "osid": "op:nevesinje:sopilja",
+      "memberSids": [
+        "S214531",
+        "S214582",
+        "S214655",
+        "S214663",
+        "S214825",
+        "S214841",
+        "S214868",
+        "S214922",
+        "S215040"
+      ]
+    },
+    {
+      "osid": "op:nevesinje:nevesinje_2",
+      "memberSids": [
+        "S214469",
+        "S214485",
+        "S214493",
+        "S214779",
+        "S214787",
+        "S214795",
+        "S214957",
+        "S214973",
+        "S214981",
+        "S215015",
+        "S215031"
+      ]
+    },
+    {
+      "osid": "op:nevesinje:krekovi_2",
+      "memberSids": [
+        "S214515",
+        "S214574",
+        "S214680",
+        "S214728",
+        "S214809",
+        "S214884"
+      ]
+    },
+    {
+      "osid": "op:nevesinje:zovi_do",
+      "memberSids": [
+        "S214477",
+        "S214523",
+        "S214540",
+        "S214558",
+        "S214604",
+        "S214612",
+        "S214639",
+        "S214671",
+        "S214698",
+        "S214817",
+        "S214876",
+        "S214892",
+        "S214914",
+        "S214949",
+        "S214965",
+        "S215007",
+        "S215023"
+      ]
+    },
+    {
+      "osid": "op:novi_grad_sarajevo:recica",
+      "memberSids": [
+        "S143936",
+        "S144029"
+      ]
+    },
+    {
+      "osid": "op:ilidza:rudnik_2",
+      "memberSids": [
+        "S142794",
+        "S142930",
+        "S143006",
+        "S143014",
+        "S143057"
+      ]
+    },
+    {
+      "osid": "op:konjic:ljuta",
+      "memberSids": [
+        "S124176",
+        "S124303",
+        "S126659",
+        "S126942",
+        "S127299",
+        "S127655",
+        "S127680",
+        "S128023",
+        "S128082",
+        "S128201",
+        "S128252",
+        "S165069",
+        "S165085",
+        "S165115",
+        "S165123",
+        "S165131",
+        "S166146",
+        "S166154",
+        "S170151",
+        "S170186"
+      ]
+    },
+    {
+      "osid": "op:ilidza:sarajevo_dio_ilidza_2",
+      "memberSids": [
+        "S143022",
+        "S143065",
+        "S170607"
+      ]
+    },
+    {
+      "osid": "op:vogosca:hotonj",
+      "memberSids": [
+        "S145858",
+        "S145866",
+        "S145882",
+        "S145998",
+        "S146005"
+      ]
+    },
+    {
+      "osid": "op:vogosca:vogosca_3",
+      "memberSids": [
+        "S142093",
+        "S145807",
+        "S145815",
+        "S145831",
+        "S145840",
+        "S145874",
+        "S145904",
+        "S145912",
+        "S145939",
+        "S145947",
+        "S145955",
+        "S145963",
+        "S145980",
+        "S146013",
+        "S146021"
+      ]
+    },
+    {
+      "osid": "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
+      "memberSids": [
+        "S144959",
+        "S166499"
+      ]
+    },
+    {
+      "osid": "op:novo_sarajevo:lukavica",
+      "memberSids": [
+        "S165336",
+        "S165354",
+        "S209511",
+        "S209546",
+        "S209554",
+        "S209562"
+      ]
+    },
+    {
+      "osid": "op:novi_travnik:rat_2",
+      "memberSids": [
+        "S138479",
+        "S138533",
+        "S138754",
+        "S138797"
+      ]
+    },
+    {
+      "osid": "op:novi_travnik:novi_travnik_2",
+      "memberSids": [
+        "S138436",
+        "S138525",
+        "S138541",
+        "S138550",
+        "S138568",
+        "S138584",
+        "S138606",
+        "S138673",
+        "S138720",
+        "S138827",
+        "S138851",
+        "S138894",
+        "S138908"
+      ]
+    },
+    {
+      "osid": "op:novi_travnik:ruda_2",
+      "memberSids": [
+        "S138487",
+        "S138509",
+        "S138576",
+        "S138789",
+        "S138916"
+      ]
+    },
+    {
+      "osid": "op:novi_travnik:rankovici_2",
+      "memberSids": [
+        "S138371",
+        "S138401",
+        "S138410",
+        "S138452",
+        "S138622",
+        "S138703",
+        "S138738",
+        "S138746",
+        "S138835",
+        "S138924"
+      ]
+    },
+    {
+      "osid": "op:novi_travnik:trenica_2",
+      "memberSids": [
+        "S138398",
+        "S138428",
+        "S138444",
+        "S138495",
+        "S138681",
+        "S138690",
+        "S138860",
+        "S138886"
+      ]
+    },
+    {
+      "osid": "op:novi_travnik:orasac_2",
+      "memberSids": [
+        "S138380",
+        "S138592",
+        "S138614",
+        "S138665",
+        "S138711",
+        "S138819"
+      ]
+    },
+    {
+      "osid": "op:novi_travnik:senkovici_2",
+      "memberSids": [
+        "S138649",
+        "S138657",
+        "S138762",
+        "S138843",
+        "S138878"
+      ]
+    },
+    {
+      "osid": "op:odzak:potocani_2",
+      "memberSids": [
+        "S135275",
+        "S135321",
+        "S135356",
+        "S170364",
+        "S170372",
+        "S205303"
+      ]
+    },
+    {
+      "osid": "op:odzak:donja_dubica",
+      "memberSids": [
+        "S135267",
+        "S135291",
+        "S166448",
+        "S170321",
+        "S170348",
+        "S170356",
+        "S205184",
+        "S205222",
+        "S205249"
+      ]
+    },
+    {
+      "osid": "op:olovo:gurdici_2",
+      "memberSids": [
+        "S135488",
+        "S135526",
+        "S135666",
+        "S135747",
+        "S135763",
+        "S135780",
+        "S170399",
+        "S170402",
+        "S170429",
+        "S170437"
+      ]
+    },
+    {
+      "osid": "op:olovo:olovo_2",
+      "memberSids": [
+        "S135402",
+        "S135429",
+        "S135437",
+        "S135445",
+        "S135461",
+        "S135500",
+        "S135518",
+        "S135569",
+        "S135607",
+        "S135712",
+        "S135739",
+        "S135771",
+        "S135798"
+      ]
+    },
+    {
+      "osid": "op:olovo:milankovici_2",
+      "memberSids": [
+        "S135453",
+        "S135470",
+        "S135534",
+        "S135623",
+        "S135640",
+        "S135682",
+        "S135704",
+        "S135755",
+        "S135801",
+        "S135836",
+        "S135887"
+      ]
+    },
+    {
+      "osid": "op:olovo:kamensko_2",
+      "memberSids": [
+        "S135496",
+        "S135585",
+        "S135593",
+        "S135674",
+        "S135810",
+        "S135844",
+        "S135879"
+      ]
+    },
+    {
+      "osid": "op:orasje:orasje",
+      "memberSids": [
+        "S135950",
+        "S136000",
+        "S136042",
+        "S165247",
+        "S166456"
+      ]
+    },
+    {
+      "osid": "op:orasje:donja_mahala",
+      "memberSids": [
+        "S135925",
+        "S135968",
+        "S136026",
+        "S136034",
+        "S170461"
+      ]
+    },
+    {
+      "osid": "op:orasje:ostra_luka",
+      "memberSids": [
+        "S135909",
+        "S165239",
+        "S170453",
+        "S170470",
+        "S208418",
+        "S208442"
+      ]
+    },
+    {
+      "osid": "op:pale:podgrab",
+      "memberSids": [
+        "S144231",
+        "S144258",
+        "S144266",
+        "S144282",
+        "S144509",
+        "S165379",
+        "S165387",
+        "S170674",
+        "S216852"
+      ]
+    },
+    {
+      "osid": "op:pale:praca",
+      "memberSids": [
+        "S165352",
+        "S166464",
+        "S170704",
+        "S170712",
+        "S170739",
+        "S216798",
+        "S216879",
+        "S217077"
+      ]
+    },
+    {
+      "osid": "op:pale:gornje_pale",
+      "memberSids": [
+        "S216909",
+        "S216925",
+        "S216968",
+        "S217000",
+        "S217026",
+        "S217042",
+        "S217115",
+        "S217131",
+        "S217174",
+        "S217182",
+        "S217204",
+        "S217212",
+        "S217352",
+        "S217395",
+        "S217409",
+        "S217417",
+        "S217433",
+        "S217450",
+        "S217468"
+      ]
+    },
+    {
+      "osid": "op:pale:pale",
+      "memberSids": [
+        "S216941",
+        "S216984",
+        "S217069",
+        "S217123",
+        "S217158",
+        "S217166",
+        "S217247",
+        "S217255",
+        "S217298",
+        "S217336"
+      ]
+    },
+    {
+      "osid": "op:pale:mokro",
+      "memberSids": [
+        "S216828",
+        "S216887",
+        "S216895",
+        "S216933",
+        "S217085",
+        "S217107",
+        "S217239",
+        "S217280",
+        "S217328",
+        "S217379",
+        "S217425"
+      ]
+    },
+    {
+      "osid": "op:pale:hotocina",
+      "memberSids": [
+        "S216810",
+        "S216844",
+        "S216917",
+        "S216950",
+        "S217018",
+        "S217093",
+        "S217140",
+        "S217263",
+        "S217301",
+        "S217310",
+        "S217387",
+        "S217441"
+      ]
+    },
+    {
+      "osid": "op:posusje:vir_2",
+      "memberSids": [
+        "S136093",
+        "S136131",
+        "S136204",
+        "S136212",
+        "S136247",
+        "S136255",
+        "S136263"
+      ]
+    },
+    {
+      "osid": "op:posusje:posusje_2",
+      "memberSids": [
+        "S136077",
+        "S136085",
+        "S136107",
+        "S136123",
+        "S136158",
+        "S136166",
+        "S136182",
+        "S136239"
+      ]
+    },
+    {
+      "osid": "op:posusje:sutina_2",
+      "memberSids": [
+        "S136069",
+        "S136115",
+        "S136140",
+        "S136174",
+        "S166600"
+      ]
+    },
+    {
+      "osid": "op:prnjavor:lisnja_2",
+      "memberSids": [
+        "S218901",
+        "S218995",
+        "S219118"
+      ]
+    },
+    {
+      "osid": "op:prnjavor:konjuhovci_2",
+      "memberSids": [
+        "S218537",
+        "S218588",
+        "S218600",
+        "S218693",
+        "S218863",
+        "S218871",
+        "S218928",
+        "S218944",
+        "S218979",
+        "S219134",
+        "S219193"
+      ]
+    },
+    {
+      "osid": "op:prnjavor:gornja_mravica",
+      "memberSids": [
+        "S218570",
+        "S218618",
+        "S218715",
+        "S218723",
+        "S218812",
+        "S218952",
+        "S219053"
+      ]
+    },
+    {
+      "osid": "op:prnjavor:donji_vijacani_2",
+      "memberSids": [
+        "S218545",
+        "S218561",
+        "S218669",
+        "S218766",
+        "S218898",
+        "S219169",
+        "S219215"
+      ]
+    },
+    {
+      "osid": "op:prnjavor:prnjavor_2",
+      "memberSids": [
+        "S218677",
+        "S218847",
+        "S218880",
+        "S218910",
+        "S219029",
+        "S219070",
+        "S219096",
+        "S219126"
+      ]
+    },
+    {
+      "osid": "op:prnjavor:donji_strpci_2",
+      "memberSids": [
+        "S218596",
+        "S218626",
+        "S218634",
+        "S218642",
+        "S218731",
+        "S218758"
+      ]
+    },
+    {
+      "osid": "op:prnjavor:gornji_smrtici",
+      "memberSids": [
+        "S218707",
+        "S218740",
+        "S218774",
+        "S218839",
+        "S219061",
+        "S219177",
+        "S219185",
+        "S219207"
+      ]
+    },
+    {
+      "osid": "op:prnjavor:crkvena_2",
+      "memberSids": [
+        "S218553",
+        "S218685",
+        "S218782",
+        "S218804",
+        "S218855",
+        "S218936",
+        "S218987",
+        "S219002",
+        "S219037",
+        "S219045",
+        "S219088",
+        "S219100",
+        "S219142"
+      ]
+    },
+    {
+      "osid": "op:prozor:uzdol_2",
+      "memberSids": [
+        "S137901",
+        "S137928",
+        "S137944",
+        "S138029",
+        "S138126",
+        "S138258",
+        "S138347"
+      ]
+    },
+    {
+      "osid": "op:prozor:rumboci_2",
+      "memberSids": [
+        "S137995",
+        "S138118",
+        "S138193",
+        "S138231",
+        "S138355",
+        "S138363"
+      ]
+    },
+    {
+      "osid": "op:prozor:lug_2",
+      "memberSids": [
+        "S137758",
+        "S137782",
+        "S137804",
+        "S137839",
+        "S137987",
+        "S138053",
+        "S138240"
+      ]
+    },
+    {
+      "osid": "op:prozor:ustirama_3",
+      "memberSids": [
+        "S137855",
+        "S137880",
+        "S137898",
+        "S137910",
+        "S138045",
+        "S138142",
+        "S138215",
+        "S138304",
+        "S138339"
+      ]
+    },
+    {
+      "osid": "op:prozor:ljubunci_2",
+      "memberSids": [
+        "S137740",
+        "S137774",
+        "S137863",
+        "S137979",
+        "S138002",
+        "S138061"
+      ]
+    },
+    {
+      "osid": "op:prozor:paros",
+      "memberSids": [
+        "S137871",
+        "S138169",
+        "S138274"
+      ]
+    },
+    {
+      "osid": "op:prozor:jaklici",
+      "memberSids": [
+        "S137812",
+        "S137952",
+        "S138070",
+        "S138096",
+        "S138177",
+        "S138185",
+        "S138223",
+        "S138266",
+        "S138282"
+      ]
+    },
+    {
+      "osid": "op:prozor:prozor_2",
+      "memberSids": [
+        "S137766",
+        "S137847",
+        "S138037",
+        "S138100",
+        "S138134",
+        "S138207"
+      ]
+    },
+    {
+      "osid": "op:rogatica:kramer_selo_2",
+      "memberSids": [
+        "S219673",
+        "S219711",
+        "S219720",
+        "S219762",
+        "S219878",
+        "S219908",
+        "S220035",
+        "S220132",
+        "S220213",
+        "S220329",
+        "S220523",
+        "S220566",
+        "S220752",
+        "S220779"
+      ]
+    },
+    {
+      "osid": "op:rogatica:kovanj",
+      "memberSids": [
+        "S219665",
+        "S219789",
+        "S219860",
+        "S219916",
+        "S219991",
+        "S220019",
+        "S220108",
+        "S220159",
+        "S220370",
+        "S220434",
+        "S220647",
+        "S220833"
+      ]
+    },
+    {
+      "osid": "op:rogatica:varosiste_2",
+      "memberSids": [
+        "S219894",
+        "S219932",
+        "S219975",
+        "S220086",
+        "S220175",
+        "S220477",
+        "S220604",
+        "S220701",
+        "S220710"
+      ]
+    },
+    {
+      "osid": "op:rogatica:zepa_2",
+      "memberSids": [
+        "S219550",
+        "S219657",
+        "S219746",
+        "S219886",
+        "S220094",
+        "S220124",
+        "S220388",
+        "S220400",
+        "S220442",
+        "S220515",
+        "S220574",
+        "S220728",
+        "S220744",
+        "S220817",
+        "S220825"
+      ]
+    },
+    {
+      "osid": "op:rogatica:pljesevica",
+      "memberSids": [
+        "S219568",
+        "S219576",
+        "S219584",
+        "S219592",
+        "S219649",
+        "S219819",
+        "S219843",
+        "S219924",
+        "S219959",
+        "S220183",
+        "S220221",
+        "S220248",
+        "S220272",
+        "S220345",
+        "S220353",
+        "S220426",
+        "S220507",
+        "S220639",
+        "S220655",
+        "S220787",
+        "S220795",
+        "S220809"
+      ]
+    },
+    {
+      "osid": "op:rogatica:stara_gora",
+      "memberSids": [
+        "S219541",
+        "S219614",
+        "S219681",
+        "S219835",
+        "S219851",
+        "S219983",
+        "S220043",
+        "S220167",
+        "S220299",
+        "S220493",
+        "S220531",
+        "S220558",
+        "S220582",
+        "S220680"
+      ]
+    },
+    {
+      "osid": "op:rogatica:brcigovo",
+      "memberSids": [
+        "S219622",
+        "S219690",
+        "S219703",
+        "S219738",
+        "S219754",
+        "S219827",
+        "S219967",
+        "S220078",
+        "S220116",
+        "S220191",
+        "S220205",
+        "S220256",
+        "S220302",
+        "S220337",
+        "S220361",
+        "S220396",
+        "S220418",
+        "S220540",
+        "S220612",
+        "S220663",
+        "S220671",
+        "S220698"
+      ]
+    },
+    {
+      "osid": "op:rogatica:rogatica_2",
+      "memberSids": [
+        "S219606",
+        "S219797",
+        "S220027",
+        "S220051",
+        "S220060",
+        "S220230",
+        "S220264",
+        "S220469",
+        "S220485"
+      ]
+    },
+    {
+      "osid": "op:rudo:gornja_strmica",
+      "memberSids": [
+        "S220841",
+        "S220868",
+        "S220922",
+        "S220990",
+        "S221015",
+        "S221074",
+        "S221104",
+        "S221155",
+        "S221180",
+        "S221236",
+        "S221350",
+        "S221376",
+        "S221414",
+        "S221422",
+        "S221465",
+        "S221503",
+        "S221520",
+        "S221651",
+        "S221660",
+        "S221686",
+        "S221775"
+      ]
+    },
+    {
+      "osid": "op:rudo:mrsovo_2",
+      "memberSids": [
+        "S220884",
+        "S220914",
+        "S221058",
+        "S221082",
+        "S221112",
+        "S221198",
+        "S221252",
+        "S221325",
+        "S221384",
+        "S221406",
+        "S221473",
+        "S221481",
+        "S221589",
+        "S221597",
+        "S221619",
+        "S221627",
+        "S221732",
+        "S221805"
+      ]
+    },
+    {
+      "osid": "op:rudo:rudo_2",
+      "memberSids": [
+        "S220850",
+        "S220876",
+        "S220965",
+        "S220981",
+        "S221007",
+        "S221139",
+        "S221171",
+        "S221201",
+        "S221287",
+        "S221309",
+        "S221333",
+        "S221368",
+        "S221392",
+        "S221490",
+        "S221511",
+        "S221538",
+        "S221554",
+        "S221562",
+        "S221635",
+        "S221694",
+        "S221791"
+      ]
+    },
+    {
+      "osid": "op:sanski_most:skucani_vakuf_2",
+      "memberSids": [
+        "S141437",
+        "S141461",
+        "S141500",
+        "S141763",
+        "S141780",
+        "S141798",
+        "S141925",
+        "S170526",
+        "S170542",
+        "S170593"
+      ]
+    },
+    {
+      "osid": "op:sanski_most:stari_majdan",
+      "memberSids": [
+        "S141950",
+        "S165255",
+        "S165298",
+        "S216585",
+        "S216682"
+      ]
+    },
+    {
+      "osid": "op:sanski_most:sanski_most_2",
+      "memberSids": [
+        "S141283",
+        "S141313",
+        "S141356",
+        "S141399",
+        "S141585",
+        "S141836",
+        "S141844",
+        "S141909",
+        "S141968",
+        "S141976",
+        "S170585"
+      ]
+    },
+    {
+      "osid": "op:sanski_most:ilidza_2",
+      "memberSids": [
+        "S141305",
+        "S141577",
+        "S141593",
+        "S141615",
+        "S141666",
+        "S141887",
+        "S141992",
+        "S170569",
+        "S170577"
+      ]
+    },
+    {
+      "osid": "op:sanski_most:donja_kozica",
+      "memberSids": [
+        "S141852",
+        "S165263",
+        "S165271",
+        "S170488",
+        "S170496",
+        "S216631"
+      ]
+    },
+    {
+      "osid": "op:sanski_most:ostra_luka",
+      "memberSids": [
+        "S165999",
+        "S170518",
+        "S216674"
+      ]
+    },
+    {
+      "osid": "op:sanski_most:budimlic_japra_2",
+      "memberSids": [
+        "S141232",
+        "S141364",
+        "S141429",
+        "S141640",
+        "S165280",
+        "S170500",
+        "S170534",
+        "S216534",
+        "S216577",
+        "S216623",
+        "S216658"
+      ]
+    },
+    {
+      "osid": "op:sanski_most:lusci_palanka_2",
+      "memberSids": [
+        "S141259",
+        "S141453",
+        "S141518",
+        "S141682",
+        "S141712",
+        "S141739",
+        "S141755",
+        "S141895"
+      ]
+    },
+    {
+      "osid": "op:sanski_most:jelasinovci",
+      "memberSids": [
+        "S141267",
+        "S141275",
+        "S141526",
+        "S141607",
+        "S141810"
+      ]
+    },
+    {
+      "osid": "op:sanski_most:kljevci",
+      "memberSids": [
+        "S141348",
+        "S141402",
+        "S141496",
+        "S141623",
+        "S141658",
+        "S141704"
+      ]
+    },
+    {
+      "osid": "op:sekovici:kastijelj_2",
+      "memberSids": [
+        "S229288",
+        "S229296",
+        "S229300",
+        "S229318",
+        "S229326",
+        "S229423",
+        "S229440",
+        "S229466",
+        "S229555",
+        "S229571"
+      ]
+    },
+    {
+      "osid": "op:sekovici:sekovici_2",
+      "memberSids": [
+        "S229369",
+        "S229385",
+        "S229415",
+        "S229504",
+        "S229512",
+        "S229547",
+        "S229601",
+        "S229610",
+        "S229628",
+        "S229636"
+      ]
+    },
+    {
+      "osid": "op:sekovici:udbina_2",
+      "memberSids": [
+        "S229334",
+        "S229342",
+        "S229377",
+        "S229393",
+        "S229407",
+        "S229431",
+        "S229458",
+        "S229474",
+        "S229482",
+        "S229539",
+        "S229563",
+        "S229580",
+        "S229598",
+        "S229644",
+        "S229652",
+        "S229679",
+        "S229687",
+        "S229695"
+      ]
+    },
+    {
+      "osid": "op:sipovo:volari_2",
+      "memberSids": [
+        "S229784",
+        "S229873",
+        "S230120",
+        "S230189"
+      ]
+    },
+    {
+      "osid": "op:sipovo:sipovo_2",
+      "memberSids": [
+        "S229814",
+        "S229849",
+        "S229938",
+        "S229997",
+        "S230006",
+        "S230103",
+        "S230111",
+        "S230138",
+        "S230197"
+      ]
+    },
+    {
+      "osid": "op:sipovo:pribeljci_2",
+      "memberSids": [
+        "S229709",
+        "S229768",
+        "S229776",
+        "S229890",
+        "S229911",
+        "S229946",
+        "S230022",
+        "S230049",
+        "S230065",
+        "S230090",
+        "S230162"
+      ]
+    },
+    {
+      "osid": "op:sipovo:gornji_mujdzici_2",
+      "memberSids": [
+        "S229733",
+        "S229792",
+        "S229822",
+        "S229881",
+        "S229903",
+        "S229920",
+        "S229962",
+        "S229989",
+        "S230073",
+        "S230081",
+        "S230146",
+        "S230154"
+      ]
+    },
+    {
+      "osid": "op:sipovo:brdjani",
+      "memberSids": [
+        "S229717",
+        "S229750",
+        "S229806",
+        "S229857",
+        "S229865",
+        "S229954",
+        "S230014",
+        "S230057"
+      ]
+    },
+    {
+      "osid": "op:skender_vakuf:donji_koricani",
+      "memberSids": [
+        "S146072",
+        "S146099",
+        "S146137",
+        "S146145",
+        "S146153",
+        "S146170",
+        "S146226",
+        "S146234",
+        "S146242",
+        "S146269",
+        "S146293",
+        "S146307",
+        "S146331",
+        "S146358",
+        "S146374",
+        "S146382",
+        "S146404",
+        "S146412",
+        "S210684",
+        "S210692"
+      ]
+    },
+    {
+      "osid": "op:skender_vakuf:imljani_2",
+      "memberSids": [
+        "S210498",
+        "S210501",
+        "S210528",
+        "S210579",
+        "S210668",
+        "S210676"
+      ]
+    },
+    {
+      "osid": "op:skender_vakuf:knezevo_2",
+      "memberSids": [
+        "S210510",
+        "S210544",
+        "S210595",
+        "S210609",
+        "S210625",
+        "S210633",
+        "S210641",
+        "S210650"
+      ]
+    },
+    {
+      "osid": "op:skender_vakuf:javorani_2",
+      "memberSids": [
+        "S210536",
+        "S210552",
+        "S210587",
+        "S210617"
+      ]
+    },
+    {
+      "osid": "op:sokolac:sasevci_2",
+      "memberSids": [
+        "S221970",
+        "S221996",
+        "S222046",
+        "S222259",
+        "S222305",
+        "S222402",
+        "S222453",
+        "S222615",
+        "S222674",
+        "S222682",
+        "S222739",
+        "S222747",
+        "S222810",
+        "S222879"
+      ]
+    },
+    {
+      "osid": "op:sokolac:knezina_2",
+      "memberSids": [
+        "S221848",
+        "S221937",
+        "S222011",
+        "S222054",
+        "S222062",
+        "S222178",
+        "S222313",
+        "S222445",
+        "S222585",
+        "S222771"
+      ]
+    },
+    {
+      "osid": "op:sokolac:meljine_2",
+      "memberSids": [
+        "S209481",
+        "S221961",
+        "S222097",
+        "S222151",
+        "S222267",
+        "S222283",
+        "S222330",
+        "S222356",
+        "S222437",
+        "S222461",
+        "S222470",
+        "S222518",
+        "S222542",
+        "S222577",
+        "S222593",
+        "S222801"
+      ]
+    },
+    {
+      "osid": "op:sokolac:sahbegovici",
+      "memberSids": [
+        "S221821",
+        "S221929",
+        "S222135",
+        "S222216",
+        "S222275",
+        "S222364",
+        "S222488",
+        "S222836",
+        "S222852"
+      ]
+    },
+    {
+      "osid": "op:sokolac:sokolac_2",
+      "memberSids": [
+        "S221864",
+        "S221872",
+        "S221899",
+        "S221902",
+        "S221953",
+        "S222038",
+        "S222119",
+        "S222186",
+        "S222208",
+        "S222291",
+        "S222321",
+        "S222348",
+        "S222569",
+        "S222640",
+        "S222780",
+        "S222798",
+        "S222828"
+      ]
+    },
+    {
+      "osid": "op:sokolac:vidrici",
+      "memberSids": [
+        "S221813",
+        "S221830",
+        "S221856",
+        "S221945",
+        "S221988",
+        "S222003",
+        "S222020",
+        "S222089",
+        "S222127",
+        "S222143",
+        "S222224",
+        "S222232",
+        "S222399",
+        "S222496",
+        "S222500",
+        "S222526",
+        "S222755",
+        "S222844",
+        "S228168"
+      ]
+    },
+    {
+      "osid": "op:sokolac:donji_kalimanici",
+      "memberSids": [
+        "S222160",
+        "S222194",
+        "S222372",
+        "S222429",
+        "S222534",
+        "S222607",
+        "S222623",
+        "S222631",
+        "S222763"
+      ]
+    },
+    {
+      "osid": "op:srbac:kobas",
+      "memberSids": [
+        "S222909",
+        "S222925",
+        "S223018",
+        "S223085",
+        "S223115",
+        "S223212"
+      ]
+    },
+    {
+      "osid": "op:srbac:sitnesi_2",
+      "memberSids": [
+        "S222950",
+        "S222976",
+        "S223034",
+        "S223077",
+        "S223166",
+        "S223174",
+        "S223247",
+        "S223271",
+        "S223298"
+      ]
+    },
+    {
+      "osid": "op:srbac:nozicko",
+      "memberSids": [
+        "S222917",
+        "S222941",
+        "S223042",
+        "S223093",
+        "S223107",
+        "S223123",
+        "S223131",
+        "S223182",
+        "S223204",
+        "S223239",
+        "S223280"
+      ]
+    },
+    {
+      "osid": "op:srbac:srbac_2",
+      "memberSids": [
+        "S222887",
+        "S222895",
+        "S222933",
+        "S222984",
+        "S222992",
+        "S223000",
+        "S223026",
+        "S223069",
+        "S223140",
+        "S223158",
+        "S223255",
+        "S223263"
+      ]
+    },
+    {
+      "osid": "op:srebrenica:obadi",
+      "memberSids": [
+        "S223395",
+        "S223441",
+        "S223751",
+        "S223964"
+      ]
+    },
+    {
+      "osid": "op:srebrenica:mala_daljegosta_2",
+      "memberSids": [
+        "S223352",
+        "S223433",
+        "S223514",
+        "S223581",
+        "S223590",
+        "S223689",
+        "S223930",
+        "S224146",
+        "S224162"
+      ]
+    },
+    {
+      "osid": "op:srebrenica:brezovice_2",
+      "memberSids": [
+        "S223336",
+        "S223387",
+        "S223719",
+        "S223735",
+        "S223913",
+        "S224006"
+      ]
+    },
+    {
+      "osid": "op:srebrenica:osmace_2",
+      "memberSids": [
+        "S223450",
+        "S223565",
+        "S223794",
+        "S224014",
+        "S224049",
+        "S224103"
+      ]
+    },
+    {
+      "osid": "op:srebrenica:radovcici",
+      "memberSids": [
+        "S223492",
+        "S223743",
+        "S223832",
+        "S223905",
+        "S223921",
+        "S223972",
+        "S224111",
+        "S224120"
+      ]
+    },
+    {
+      "osid": "op:srebrenica:sulice_2",
+      "memberSids": [
+        "S223328",
+        "S223506",
+        "S223697",
+        "S223786",
+        "S223948",
+        "S223999",
+        "S224090",
+        "S224138"
+      ]
+    },
+    {
+      "osid": "op:srebrenica:ljeskovik_2",
+      "memberSids": [
+        "S223573",
+        "S223603",
+        "S223662",
+        "S223778",
+        "S223891",
+        "S223956"
+      ]
+    },
+    {
+      "osid": "op:srebrenica:luka_2",
+      "memberSids": [
+        "S223417",
+        "S223654",
+        "S223824",
+        "S223883",
+        "S224189"
+      ]
+    },
+    {
+      "osid": "op:srebrenica:srebrenica_2",
+      "memberSids": [
+        "S223310",
+        "S223484",
+        "S223549",
+        "S223808",
+        "S224065",
+        "S224154"
+      ]
+    },
+    {
+      "osid": "op:srebrenica:donji_potocari_2",
+      "memberSids": [
+        "S223476",
+        "S223522",
+        "S223638",
+        "S223859"
+      ]
+    },
+    {
+      "osid": "op:srebrenica:milacevici",
+      "memberSids": [
+        "S223301",
+        "S223727",
+        "S223816",
+        "S224057"
+      ]
+    },
+    {
+      "osid": "op:srebrenica:suceska",
+      "memberSids": [
+        "S223379",
+        "S223611",
+        "S223646",
+        "S224073",
+        "S224081"
+      ]
+    },
+    {
+      "osid": "op:srebrenica:bostahovine_2",
+      "memberSids": [
+        "S223344",
+        "S223409",
+        "S223760",
+        "S223875"
+      ]
+    },
+    {
+      "osid": "op:srebrenik:spionica_srednja_2",
+      "memberSids": [
+        "S148784",
+        "S148903",
+        "S149144",
+        "S149179",
+        "S149187",
+        "S149217"
+      ]
+    },
+    {
+      "osid": "op:srebrenik:tinja_gornja_2",
+      "memberSids": [
+        "S148750",
+        "S148792",
+        "S148865",
+        "S148920",
+        "S148938",
+        "S148946",
+        "S148954",
+        "S148997",
+        "S149004",
+        "S149039",
+        "S149063",
+        "S149071",
+        "S149128",
+        "S149195",
+        "S149209",
+        "S149233"
+      ]
+    },
+    {
+      "osid": "op:srebrenik:spionica_donja_2",
+      "memberSids": [
+        "S148814",
+        "S148822",
+        "S148873",
+        "S148962",
+        "S149152",
+        "S164496"
+      ]
+    },
+    {
+      "osid": "op:srebrenik:duboki_potok_2",
+      "memberSids": [
+        "S148733",
+        "S148776",
+        "S148849",
+        "S148881",
+        "S149012",
+        "S149055",
+        "S149225"
+      ]
+    },
+    {
+      "osid": "op:srebrenik:srebrenik_2",
+      "memberSids": [
+        "S148725",
+        "S148741",
+        "S148989",
+        "S149047",
+        "S149080",
+        "S149110"
+      ]
+    },
+    {
+      "osid": "op:srebrenik:sladna_2",
+      "memberSids": [
+        "S148768",
+        "S148806",
+        "S148857",
+        "S148890",
+        "S149098",
+        "S149101",
+        "S149136"
+      ]
+    },
+    {
+      "osid": "op:stari_grad_sarajevo:faletici",
+      "memberSids": [
+        "S145068",
+        "S165409",
+        "S166073",
+        "S166472",
+        "S170755",
+        "S170763"
+      ]
+    },
+    {
+      "osid": "op:stolac:hatelji_2",
+      "memberSids": [
+        "S165484",
+        "S165492",
+        "S200611",
+        "S200689",
+        "S200735",
+        "S200743",
+        "S200760",
+        "S200778",
+        "S200786",
+        "S200808"
+      ]
+    },
+    {
+      "osid": "op:stolac:stolac_2",
+      "memberSids": [
+        "S149462",
+        "S165522",
+        "S170941",
+        "S170950",
+        "S170976",
+        "S200620"
+      ]
+    },
+    {
+      "osid": "op:stolac:pjesivac_kula_2",
+      "memberSids": [
+        "S149292",
+        "S149489",
+        "S149497",
+        "S149527",
+        "S165506",
+        "S170909",
+        "S200654"
+      ]
+    },
+    {
+      "osid": "op:stolac:prenj",
+      "memberSids": [
+        "S149241",
+        "S149284",
+        "S149420",
+        "S149543",
+        "S165476",
+        "S170925"
+      ]
+    },
+    {
+      "osid": "op:stolac:rotimlja_2",
+      "memberSids": [
+        "S149322",
+        "S149349",
+        "S149411",
+        "S149608",
+        "S170917",
+        "S170933",
+        "S170968",
+        "S200794"
+      ]
+    },
+    {
+      "osid": "op:tesanj:ularice_2",
+      "memberSids": [
+        "S111953",
+        "S112739",
+        "S151327",
+        "S151335",
+        "S151343",
+        "S166529",
+        "S171425"
+      ]
+    },
+    {
+      "osid": "op:tesanj:lepenica",
+      "memberSids": [
+        "S151114",
+        "S151122",
+        "S151378",
+        "S166049"
+      ]
+    },
+    {
+      "osid": "op:tesanj:sije_2",
+      "memberSids": [
+        "S151173",
+        "S151351",
+        "S151386"
+      ]
+    },
+    {
+      "osid": "op:tesanj:kalosevic_2",
+      "memberSids": [
+        "S165549",
+        "S166197",
+        "S170984",
+        "S170992"
+      ]
+    },
+    {
+      "osid": "op:tesanj:novi_miljanovci_2",
+      "memberSids": [
+        "S150967",
+        "S151025",
+        "S151211",
+        "S166219",
+        "S166227",
+        "S171000"
+      ]
+    },
+    {
+      "osid": "op:tesanj:piljuzici_2",
+      "memberSids": [
+        "S151050",
+        "S151068",
+        "S151262",
+        "S166235"
+      ]
+    },
+    {
+      "osid": "op:tesanj:radusa_2",
+      "memberSids": [
+        "S151076",
+        "S151181",
+        "S151297",
+        "S166189"
+      ]
+    },
+    {
+      "osid": "op:tesanj:novo_selo",
+      "memberSids": [
+        "S150991",
+        "S151009",
+        "S151017",
+        "S151041",
+        "S151092",
+        "S151106",
+        "S151165",
+        "S151220",
+        "S151319",
+        "S151394"
+      ]
+    },
+    {
+      "osid": "op:tesanj:tesanj_2",
+      "memberSids": [
+        "S150975",
+        "S150983",
+        "S151149",
+        "S151360",
+        "S151424"
+      ]
+    },
+    {
+      "osid": "op:teslic:kamenica_2",
+      "memberSids": [
+        "S224197",
+        "S224227",
+        "S224235",
+        "S224367",
+        "S224405",
+        "S224499",
+        "S224502",
+        "S224529",
+        "S224596",
+        "S224626",
+        "S224642"
+      ]
+    },
+    {
+      "osid": "op:teslic:donji_ruzevic",
+      "memberSids": [
+        "S224251",
+        "S224260",
+        "S224359",
+        "S224375",
+        "S224383",
+        "S224430",
+        "S224448",
+        "S224456",
+        "S224553"
+      ]
+    },
+    {
+      "osid": "op:teslic:teslic_2",
+      "memberSids": [
+        "S224243",
+        "S224588",
+        "S224618",
+        "S224634",
+        "S224677",
+        "S224715"
+      ]
+    },
+    {
+      "osid": "op:teslic:vitkovci",
+      "memberSids": [
+        "S224219",
+        "S224723",
+        "S224731",
+        "S224740",
+        "S224758",
+        "S224766",
+        "S224774",
+        "S224782",
+        "S224804",
+        "S224812"
+      ]
+    },
+    {
+      "osid": "op:teslic:cecava_2",
+      "memberSids": [
+        "S224316",
+        "S224391",
+        "S224600",
+        "S224693"
+      ]
+    },
+    {
+      "osid": "op:teslic:buletic_2",
+      "memberSids": [
+        "S224308",
+        "S224332",
+        "S224413",
+        "S224561",
+        "S224570",
+        "S224669"
+      ]
+    },
+    {
+      "osid": "op:teslic:blatnica_2",
+      "memberSids": [
+        "S224278",
+        "S224286",
+        "S224294",
+        "S224324",
+        "S224421",
+        "S224464",
+        "S224472",
+        "S224537",
+        "S224545",
+        "S224685",
+        "S224707"
+      ]
+    },
+    {
+      "osid": "op:titov_drvar:drvar_2",
+      "memberSids": [
+        "S151467",
+        "S151530",
+        "S151548",
+        "S151670",
+        "S151742",
+        "S151823",
+        "S151831"
+      ]
+    },
+    {
+      "osid": "op:titov_drvar:sipovljani_2",
+      "memberSids": [
+        "S151459",
+        "S151513",
+        "S151602",
+        "S151734",
+        "S151769",
+        "S151815"
+      ]
+    },
+    {
+      "osid": "op:titov_drvar:prekaja_2",
+      "memberSids": [
+        "S151491",
+        "S151505",
+        "S151556",
+        "S151629",
+        "S151637",
+        "S151661",
+        "S151700",
+        "S151726",
+        "S151840",
+        "S151858",
+        "S165557",
+        "S171026",
+        "S209236",
+        "S209244"
+      ]
+    },
+    {
+      "osid": "op:travnik:travnik_2",
+      "memberSids": [
+        "S151874",
+        "S151998",
+        "S152161",
+        "S152269",
+        "S152307",
+        "S152315",
+        "S152340",
+        "S152480",
+        "S152498",
+        "S152552",
+        "S152641",
+        "S152692",
+        "S152749",
+        "S152765"
+      ]
+    },
+    {
+      "osid": "op:travnik:ovcarevo_2",
+      "memberSids": [
+        "S151904",
+        "S152226",
+        "S152242",
+        "S152293",
+        "S152331",
+        "S152412",
+        "S152536",
+        "S152676",
+        "S152757"
+      ]
+    },
+    {
+      "osid": "op:travnik:paklarevo",
+      "memberSids": [
+        "S152048",
+        "S152439",
+        "S152447",
+        "S152609",
+        "S165573",
+        "S171042",
+        "S171069"
+      ]
+    },
+    {
+      "osid": "op:travnik:puticevo_2",
+      "memberSids": [
+        "S151912",
+        "S151947",
+        "S151955",
+        "S151980",
+        "S152170",
+        "S152196",
+        "S152218",
+        "S152277",
+        "S152366",
+        "S152471",
+        "S152528",
+        "S152544",
+        "S152579"
+      ]
+    },
+    {
+      "osid": "op:travnik:cukle_2",
+      "memberSids": [
+        "S151939",
+        "S151971",
+        "S152153",
+        "S152323",
+        "S152382",
+        "S152455",
+        "S152803",
+        "S152820"
+      ]
+    },
+    {
+      "osid": "op:travnik:varosluk",
+      "memberSids": [
+        "S152005",
+        "S152102",
+        "S152234",
+        "S152722"
+      ]
+    },
+    {
+      "osid": "op:travnik:gornje_krcevine",
+      "memberSids": [
+        "S151963",
+        "S152013",
+        "S152129",
+        "S152145",
+        "S152188",
+        "S152358",
+        "S152595",
+        "S152617",
+        "S152625",
+        "S152668",
+        "S152781"
+      ]
+    },
+    {
+      "osid": "op:travnik:turbe_2",
+      "memberSids": [
+        "S151866",
+        "S151882",
+        "S152099",
+        "S152285",
+        "S152501",
+        "S152510",
+        "S152587",
+        "S152706",
+        "S152714",
+        "S152790"
+      ]
+    },
+    {
+      "osid": "op:travnik:podstinje",
+      "memberSids": [
+        "S152056",
+        "S152200",
+        "S152404",
+        "S152463",
+        "S152650",
+        "S152811"
+      ]
+    },
+    {
+      "osid": "op:travnik:gluha_bukovica",
+      "memberSids": [
+        "S152030",
+        "S152374",
+        "S152633",
+        "S152773",
+        "S171034"
+      ]
+    },
+    {
+      "osid": "op:trebinje:trebimlja_2",
+      "memberSids": [
+        "S152919",
+        "S153079",
+        "S153389",
+        "S153621",
+        "S154016",
+        "S154407",
+        "S154423",
+        "S154580"
+      ]
+    },
+    {
+      "osid": "op:trebinje:velicani",
+      "memberSids": [
+        "S153109",
+        "S153311",
+        "S154237",
+        "S165760",
+        "S165808",
+        "S165832",
+        "S165859",
+        "S165964",
+        "S171166",
+        "S171247",
+        "S225061",
+        "S225088",
+        "S225207",
+        "S225509",
+        "S225924"
+      ]
+    },
+    {
+      "osid": "op:trebinje:ivanica",
+      "memberSids": [
+        "S152960",
+        "S153095",
+        "S153508",
+        "S153559",
+        "S153613",
+        "S153958",
+        "S154008",
+        "S154245",
+        "S154270",
+        "S154288",
+        "S154342",
+        "S154547",
+        "S154601",
+        "S154687",
+        "S154725",
+        "S165735",
+        "S165778",
+        "S171239"
+      ]
+    },
+    {
+      "osid": "op:trebinje:zakovo_2",
+      "memberSids": [
+        "S152862",
+        "S153460",
+        "S153966",
+        "S165743",
+        "S165785",
+        "S165816",
+        "S165824",
+        "S165972",
+        "S171174",
+        "S171182",
+        "S224847",
+        "S225070",
+        "S225177",
+        "S225193",
+        "S225258",
+        "S225371",
+        "S225436",
+        "S225738",
+        "S225916",
+        "S226106",
+        "S226122",
+        "S226335"
+      ]
+    },
+    {
+      "osid": "op:trebinje:hum",
+      "memberSids": [
+        "S224871",
+        "S224910",
+        "S224928",
+        "S224979",
+        "S225029",
+        "S225037",
+        "S225045",
+        "S225096",
+        "S225100",
+        "S225118",
+        "S225231",
+        "S225240",
+        "S225274",
+        "S225282",
+        "S225363",
+        "S225380",
+        "S225401",
+        "S225410",
+        "S225452",
+        "S225525",
+        "S225568",
+        "S225576",
+        "S225614",
+        "S225622",
+        "S225649",
+        "S225690",
+        "S225703",
+        "S225711",
+        "S225762",
+        "S225835",
+        "S225843",
+        "S225851",
+        "S225860",
+        "S225878",
+        "S225894",
+        "S226017",
+        "S226033",
+        "S226041",
+        "S226050",
+        "S226076",
+        "S226114",
+        "S226173",
+        "S226181",
+        "S226220",
+        "S226238",
+        "S226246",
+        "S226289",
+        "S226319",
+        "S226343"
+      ]
+    },
+    {
+      "osid": "op:trebinje:bihovo_2",
+      "memberSids": [
+        "S153346",
+        "S154717",
+        "S165727",
+        "S165751",
+        "S165794",
+        "S166669",
+        "S171204",
+        "S171212",
+        "S224880",
+        "S224898",
+        "S224901",
+        "S225185",
+        "S225223",
+        "S225550",
+        "S225592",
+        "S225665",
+        "S225673",
+        "S225681",
+        "S225819",
+        "S226157",
+        "S226254"
+      ]
+    },
+    {
+      "osid": "op:trebinje:trebinje_2",
+      "memberSids": [
+        "S224839",
+        "S224855",
+        "S224936",
+        "S224944",
+        "S224987",
+        "S224995",
+        "S225126",
+        "S225134",
+        "S225142",
+        "S225169",
+        "S225215",
+        "S225304",
+        "S225312",
+        "S225339",
+        "S225347",
+        "S225355",
+        "S225428",
+        "S225444",
+        "S225487",
+        "S225495",
+        "S225533",
+        "S225584",
+        "S225606",
+        "S225720",
+        "S225754",
+        "S225789",
+        "S225827",
+        "S225886",
+        "S225932",
+        "S225967",
+        "S225975",
+        "S225991",
+        "S226068",
+        "S226084",
+        "S226092",
+        "S226149",
+        "S226165",
+        "S226190",
+        "S226211",
+        "S226262",
+        "S226297",
+        "S226327",
+        "S226351",
+        "S226360"
+      ]
+    },
+    {
+      "osid": "op:trnovo:kijevo_2",
+      "memberSids": [
+        "S165417",
+        "S170801",
+        "S226378",
+        "S226424",
+        "S226432",
+        "S226521",
+        "S226645"
+      ]
+    },
+    {
+      "osid": "op:trnovo:tusila",
+      "memberSids": [
+        "S145149",
+        "S145173",
+        "S145432",
+        "S145483",
+        "S145602",
+        "S145661",
+        "S145726",
+        "S145769"
+      ]
+    },
+    {
+      "osid": "op:trnovo:trnovo",
+      "memberSids": [
+        "S145181",
+        "S145190",
+        "S145220",
+        "S145262",
+        "S145467",
+        "S145505",
+        "S145530",
+        "S145548",
+        "S145653",
+        "S145696",
+        "S165433",
+        "S165441",
+        "S165450",
+        "S170810",
+        "S170836",
+        "S226459"
+      ]
+    },
+    {
+      "osid": "op:trnovo:gornja_presjenica",
+      "memberSids": [
+        "S145319",
+        "S145521",
+        "S145572",
+        "S145742"
+      ]
+    },
+    {
+      "osid": "op:trnovo:tosici",
+      "memberSids": [
+        "S145203",
+        "S145475",
+        "S145629",
+        "S145670",
+        "S165425",
+        "S166502",
+        "S170771",
+        "S170844",
+        "S170852",
+        "S170887",
+        "S226530",
+        "S226556"
+      ]
+    },
+    {
+      "osid": "op:trnovo:delijas",
+      "memberSids": [
+        "S145106",
+        "S145211",
+        "S145238",
+        "S145289",
+        "S145351",
+        "S145386",
+        "S145394",
+        "S145459",
+        "S145564",
+        "S145637",
+        "S145793",
+        "S170780",
+        "S170798",
+        "S170828",
+        "S170879",
+        "S170895"
+      ]
+    },
+    {
+      "osid": "op:tuzla:simin_han_2",
+      "memberSids": [
+        "S154890",
+        "S155080",
+        "S155128",
+        "S155411",
+        "S155446",
+        "S165581",
+        "S165590",
+        "S166243",
+        "S171077",
+        "S171085"
+      ]
+    },
+    {
+      "osid": "op:tuzla:gornja_tuzla",
+      "memberSids": [
+        "S154920",
+        "S154962",
+        "S154997",
+        "S155055",
+        "S155071",
+        "S155497",
+        "S155535"
+      ]
+    },
+    {
+      "osid": "op:tuzla:obodnica_donja_2",
+      "memberSids": [
+        "S154806",
+        "S154946",
+        "S155217",
+        "S155276",
+        "S155284",
+        "S155462",
+        "S155543"
+      ]
+    },
+    {
+      "osid": "op:tuzla:husino_2",
+      "memberSids": [
+        "S154822",
+        "S154849",
+        "S155004",
+        "S155012",
+        "S155110",
+        "S155144",
+        "S155179",
+        "S155187",
+        "S155365",
+        "S155381",
+        "S155420"
+      ]
+    },
+    {
+      "osid": "op:tuzla:lipnica_gornja_2",
+      "memberSids": [
+        "S154903",
+        "S154911",
+        "S155136",
+        "S155152",
+        "S155233",
+        "S155250",
+        "S155268",
+        "S155306"
+      ]
+    },
+    {
+      "osid": "op:tuzla:tuzla_2",
+      "memberSids": [
+        "S154792",
+        "S154881",
+        "S154989",
+        "S155292",
+        "S155314",
+        "S155349",
+        "S155438",
+        "S155551",
+        "S155560"
+      ]
+    },
+    {
+      "osid": "op:tuzla:sicki_brod_2",
+      "memberSids": [
+        "S154814",
+        "S154857",
+        "S155039",
+        "S155195",
+        "S155225",
+        "S155241",
+        "S155322",
+        "S155357",
+        "S155373",
+        "S155390",
+        "S155519",
+        "S155527",
+        "S164429"
+      ]
+    },
+    {
+      "osid": "op:ugljevik:teocak_krstac_2",
+      "memberSids": [
+        "S155756",
+        "S155772",
+        "S165891",
+        "S165913",
+        "S171409"
+      ]
+    },
+    {
+      "osid": "op:ugljevik:jasikovac",
+      "memberSids": [
+        "S171344",
+        "S171352",
+        "S171397"
+      ]
+    },
+    {
+      "osid": "op:ugljevik:srednja_trnova_2",
+      "memberSids": [
+        "S171417",
+        "S226653",
+        "S226700",
+        "S226734",
+        "S226815"
+      ]
+    },
+    {
+      "osid": "op:ugljevik:donja_trnova_2",
+      "memberSids": [
+        "S165905",
+        "S226688",
+        "S226696",
+        "S226726",
+        "S226831"
+      ]
+    },
+    {
+      "osid": "op:ugljevik:zabrdje_2",
+      "memberSids": [
+        "S226793",
+        "S226823",
+        "S226840",
+        "S226874",
+        "S226904",
+        "S226912"
+      ]
+    },
+    {
+      "osid": "op:ugljevik:ugljevik_2",
+      "memberSids": [
+        "S226670",
+        "S226777",
+        "S226785",
+        "S226807",
+        "S226866",
+        "S226882"
+      ]
+    },
+    {
+      "osid": "op:vares:budozelje_2",
+      "memberSids": [
+        "S107913",
+        "S107964",
+        "S155934",
+        "S155977",
+        "S156019",
+        "S156035",
+        "S156051",
+        "S156060",
+        "S156086",
+        "S156116",
+        "S156132",
+        "S156159",
+        "S156221",
+        "S156248",
+        "S156302",
+        "S156353",
+        "S156388",
+        "S156396",
+        "S156418",
+        "S156434",
+        "S156477",
+        "S156485",
+        "S156515",
+        "S156558",
+        "S156574",
+        "S156604",
+        "S156647",
+        "S156655"
+      ]
+    },
+    {
+      "osid": "op:vares:toljenak",
+      "memberSids": [
+        "S155896",
+        "S155985",
+        "S155993",
+        "S156124",
+        "S156191",
+        "S156205",
+        "S156345",
+        "S156400",
+        "S156540",
+        "S156612",
+        "S156663",
+        "S156680",
+        "S156809",
+        "S156817"
+      ]
+    },
+    {
+      "osid": "op:vares:gornja_borovica_2",
+      "memberSids": [
+        "S155900",
+        "S155918",
+        "S155926",
+        "S156078",
+        "S156167",
+        "S156175",
+        "S156370",
+        "S156442",
+        "S156469",
+        "S156566"
+      ]
+    },
+    {
+      "osid": "op:vares:vares_2",
+      "memberSids": [
+        "S155888",
+        "S155942",
+        "S156027",
+        "S156043",
+        "S156094",
+        "S156108",
+        "S156183",
+        "S156213",
+        "S156230",
+        "S156256",
+        "S156264",
+        "S156272",
+        "S156337",
+        "S156361",
+        "S156493",
+        "S156507",
+        "S156582",
+        "S156639",
+        "S156671",
+        "S156698",
+        "S156701",
+        "S156710",
+        "S156736",
+        "S156744",
+        "S156752",
+        "S156779",
+        "S156795"
+      ]
+    },
+    {
+      "osid": "op:velika_kladusa:velika_kladusa_2",
+      "memberSids": [
+        "S157074",
+        "S157104",
+        "S157155",
+        "S157210",
+        "S157228",
+        "S157279",
+        "S157287",
+        "S157309",
+        "S157333"
+      ]
+    },
+    {
+      "osid": "op:velika_kladusa:poljana_2",
+      "memberSids": [
+        "S156825",
+        "S156841",
+        "S156892",
+        "S156914",
+        "S156949",
+        "S156981",
+        "S156990",
+        "S157023",
+        "S157040",
+        "S157112",
+        "S157139",
+        "S157147",
+        "S157163",
+        "S157171",
+        "S157317",
+        "S157325"
+      ]
+    },
+    {
+      "osid": "op:velika_kladusa:zboriste_2",
+      "memberSids": [
+        "S156833",
+        "S156850",
+        "S156868",
+        "S156876",
+        "S156884",
+        "S156957",
+        "S157082",
+        "S157180",
+        "S157201",
+        "S157244",
+        "S157341"
+      ]
+    },
+    {
+      "osid": "op:velika_kladusa:vejinac_2",
+      "memberSids": [
+        "S156906",
+        "S156922",
+        "S156965",
+        "S156973",
+        "S157007",
+        "S157015",
+        "S157031",
+        "S157058",
+        "S157066",
+        "S157198",
+        "S157236",
+        "S157252",
+        "S157295"
+      ]
+    },
+    {
+      "osid": "op:visegrad:donji_dobrun_2",
+      "memberSids": [
+        "S203190",
+        "S203335",
+        "S203475",
+        "S203629",
+        "S203637",
+        "S203769",
+        "S203785",
+        "S203874",
+        "S204072",
+        "S204099",
+        "S204315",
+        "S204331",
+        "S204447",
+        "S204676"
+      ]
+    },
+    {
+      "osid": "op:visegrad:kamenica_2",
+      "memberSids": [
+        "S203203",
+        "S203360",
+        "S203505",
+        "S203513",
+        "S203548",
+        "S203599",
+        "S203688",
+        "S203831",
+        "S204064",
+        "S204200",
+        "S204382",
+        "S204510",
+        "S204528",
+        "S204536",
+        "S204684",
+        "S204757"
+      ]
+    },
+    {
+      "osid": "op:visegrad:zlijeb",
+      "memberSids": [
+        "S202983",
+        "S203025",
+        "S203114",
+        "S203289",
+        "S203424",
+        "S203459",
+        "S203980",
+        "S204340",
+        "S204366",
+        "S204587",
+        "S204609",
+        "S204617",
+        "S204625",
+        "S204668"
+      ]
+    },
+    {
+      "osid": "op:visegrad:prelovo_2",
+      "memberSids": [
+        "S203041",
+        "S203122",
+        "S203238",
+        "S203262",
+        "S203327",
+        "S203351",
+        "S203432",
+        "S203556",
+        "S203742",
+        "S203963",
+        "S204013",
+        "S204153",
+        "S204242",
+        "S204285",
+        "S204374",
+        "S204439",
+        "S204463",
+        "S204579",
+        "S204633"
+      ]
+    },
+    {
+      "osid": "op:visegrad:velji_lug",
+      "memberSids": [
+        "S203084",
+        "S203092",
+        "S203173",
+        "S203181",
+        "S203408",
+        "S203572",
+        "S203602",
+        "S203726",
+        "S203955",
+        "S203971",
+        "S204056",
+        "S204102",
+        "S204129",
+        "S204277",
+        "S204293",
+        "S204323",
+        "S204471",
+        "S204650",
+        "S204692"
+      ]
+    },
+    {
+      "osid": "op:visegrad:okrugla",
+      "memberSids": [
+        "S202991",
+        "S203017",
+        "S203033",
+        "S203068",
+        "S203076",
+        "S203211",
+        "S203319",
+        "S203378",
+        "S203564",
+        "S203700",
+        "S203858",
+        "S203904",
+        "S204030",
+        "S204218",
+        "S204234",
+        "S204706",
+        "S204749"
+      ]
+    },
+    {
+      "osid": "op:visegrad:visegrad_2",
+      "memberSids": [
+        "S203009",
+        "S203149",
+        "S203165",
+        "S203254",
+        "S203297",
+        "S203416",
+        "S203467",
+        "S203521",
+        "S203653",
+        "S203670",
+        "S203734",
+        "S203882",
+        "S204021",
+        "S204048",
+        "S204170",
+        "S204269",
+        "S204404",
+        "S204412",
+        "S204501",
+        "S204595",
+        "S204641"
+      ]
+    },
+    {
+      "osid": "op:visegrad:drinsko",
+      "memberSids": [
+        "S203050",
+        "S203157",
+        "S203343",
+        "S203530",
+        "S203645",
+        "S203661",
+        "S203696",
+        "S203840",
+        "S203912",
+        "S203998",
+        "S204137",
+        "S204145",
+        "S204161",
+        "S204188",
+        "S204196",
+        "S204552",
+        "S204765"
+      ]
+    },
+    {
+      "osid": "op:visegrad:medjedja_2",
+      "memberSids": [
+        "S203220",
+        "S203483",
+        "S203718",
+        "S203777",
+        "S203807",
+        "S203939",
+        "S203947",
+        "S204226",
+        "S204480",
+        "S204544",
+        "S204722"
+      ]
+    },
+    {
+      "osid": "op:visoko:gornja_vratnica_2",
+      "memberSids": [
+        "S157473",
+        "S157554",
+        "S157589",
+        "S157678",
+        "S157813",
+        "S158283"
+      ]
+    },
+    {
+      "osid": "op:visoko:buzic_mahala_2",
+      "memberSids": [
+        "S157406",
+        "S157449",
+        "S157511",
+        "S157635",
+        "S157732",
+        "S157805",
+        "S157929",
+        "S158089",
+        "S158186"
+      ]
+    },
+    {
+      "osid": "op:visoko:stuparici_2",
+      "memberSids": [
+        "S157414",
+        "S157481",
+        "S157520",
+        "S157627",
+        "S157643",
+        "S157651",
+        "S157767",
+        "S158054",
+        "S158062",
+        "S158127",
+        "S158259",
+        "S158313"
+      ]
+    },
+    {
+      "osid": "op:visoko:rajcici_2",
+      "memberSids": [
+        "S157376",
+        "S157503",
+        "S157660",
+        "S157686",
+        "S157708",
+        "S157716",
+        "S158046",
+        "S158194",
+        "S158232",
+        "S158291"
+      ]
+    },
+    {
+      "osid": "op:visoko:bradve_2",
+      "memberSids": [
+        "S157392",
+        "S157465",
+        "S157538",
+        "S157546",
+        "S157775",
+        "S157783",
+        "S157791",
+        "S157830",
+        "S157848",
+        "S157902",
+        "S157961",
+        "S158135",
+        "S158267"
+      ]
+    },
+    {
+      "osid": "op:visoko:podvinjci_2",
+      "memberSids": [
+        "S107972",
+        "S157368",
+        "S157422",
+        "S157562",
+        "S157856",
+        "S157864",
+        "S157872",
+        "S157899",
+        "S157996",
+        "S158143",
+        "S158224"
+      ]
+    },
+    {
+      "osid": "op:visoko:visoko_2",
+      "memberSids": [
+        "S157350",
+        "S157384",
+        "S157821",
+        "S157970",
+        "S157988",
+        "S158119",
+        "S158151",
+        "S158160",
+        "S158178",
+        "S158216",
+        "S158275"
+      ]
+    },
+    {
+      "osid": "op:visoko:podvinje_2",
+      "memberSids": [
+        "S157457",
+        "S157597",
+        "S157619",
+        "S157694",
+        "S157724",
+        "S157759",
+        "S157937",
+        "S157945",
+        "S157953",
+        "S158003",
+        "S158011",
+        "S158020",
+        "S158038",
+        "S158097",
+        "S158208",
+        "S158305"
+      ]
+    },
+    {
+      "osid": "op:vitez:kruscica",
+      "memberSids": [
+        "S160156",
+        "S160164",
+        "S160199",
+        "S160261",
+        "S160440"
+      ]
+    },
+    {
+      "osid": "op:vitez:vitez_2",
+      "memberSids": [
+        "S160121",
+        "S160172",
+        "S160202",
+        "S160229",
+        "S160245",
+        "S160253",
+        "S160296",
+        "S160377",
+        "S160393",
+        "S160407",
+        "S160423",
+        "S160431",
+        "S160466",
+        "S160474"
+      ]
+    },
+    {
+      "osid": "op:vitez:preocica_3",
+      "memberSids": [
+        "S160130",
+        "S160148",
+        "S160237",
+        "S160270",
+        "S160288",
+        "S160318",
+        "S160326",
+        "S160334",
+        "S160342",
+        "S160369",
+        "S160385",
+        "S160415",
+        "S160458"
+      ]
+    },
+    {
+      "osid": "op:vlasenica:cerska_2",
+      "memberSids": [
+        "S204781",
+        "S204935",
+        "S205010",
+        "S205028",
+        "S213187",
+        "S213551",
+        "S213560",
+        "S213616"
+      ]
+    },
+    {
+      "osid": "op:vlasenica:vlasenica_2",
+      "memberSids": [
+        "S204838",
+        "S204897",
+        "S204919",
+        "S204927",
+        "S204960",
+        "S205001",
+        "S205052",
+        "S205079",
+        "S205095",
+        "S205125",
+        "S205141",
+        "S205176",
+        "S213756"
+      ]
+    },
+    {
+      "osid": "op:vlasenica:pomol_2",
+      "memberSids": [
+        "S213209",
+        "S213241",
+        "S213349",
+        "S213373",
+        "S213390",
+        "S213438",
+        "S213578",
+        "S213632",
+        "S213659",
+        "S213683",
+        "S213748"
+      ]
+    },
+    {
+      "osid": "op:vlasenica:bacici",
+      "memberSids": [
+        "S204803",
+        "S204820",
+        "S204862",
+        "S204943",
+        "S205133",
+        "S205150",
+        "S205168",
+        "S213195",
+        "S213284",
+        "S213519",
+        "S213535",
+        "S213543",
+        "S213667",
+        "S213713"
+      ]
+    },
+    {
+      "osid": "op:vlasenica:milici_2",
+      "memberSids": [
+        "S204790",
+        "S204854",
+        "S204951",
+        "S213233",
+        "S213411",
+        "S213454",
+        "S213586",
+        "S213608",
+        "S213624",
+        "S213675",
+        "S213691",
+        "S213721"
+      ]
+    },
+    {
+      "osid": "op:vlasenica:sebiocina",
+      "memberSids": [
+        "S213217",
+        "S213225",
+        "S213250",
+        "S213268",
+        "S213276",
+        "S213292",
+        "S213306",
+        "S213314",
+        "S213322",
+        "S213357",
+        "S213365",
+        "S213381",
+        "S213403",
+        "S213420",
+        "S213446",
+        "S213489",
+        "S213497",
+        "S213527",
+        "S213594",
+        "S213705",
+        "S213730"
+      ]
+    },
+    {
+      "osid": "op:zavidovici:vozuca_2",
+      "memberSids": [
+        "S161764",
+        "S161799",
+        "S161861",
+        "S161918",
+        "S161926",
+        "S162035",
+        "S162051"
+      ]
+    },
+    {
+      "osid": "op:zavidovici:ribnica_dio",
+      "memberSids": [
+        "S161551",
+        "S161594",
+        "S161691",
+        "S161896",
+        "S161942",
+        "S161977",
+        "S162086"
+      ]
+    },
+    {
+      "osid": "op:zavidovici:cardak_2",
+      "memberSids": [
+        "S161560",
+        "S161772",
+        "S161829",
+        "S161870",
+        "S161969",
+        "S162078"
+      ]
+    },
+    {
+      "osid": "op:zavidovici:hajderovici_2",
+      "memberSids": [
+        "S161519",
+        "S161535",
+        "S161756",
+        "S161802",
+        "S161837",
+        "S161845",
+        "S161888",
+        "S162027"
+      ]
+    },
+    {
+      "osid": "op:zavidovici:zavidovici_2",
+      "memberSids": [
+        "S161624",
+        "S161667",
+        "S161675",
+        "S161683",
+        "S161713",
+        "S161748",
+        "S161853",
+        "S161934",
+        "S161985",
+        "S162019",
+        "S162094"
+      ]
+    },
+    {
+      "osid": "op:zavidovici:cinovici",
+      "memberSids": [
+        "S161497",
+        "S161527",
+        "S161578",
+        "S161608",
+        "S161616",
+        "S161632",
+        "S161721",
+        "S161993"
+      ]
+    },
+    {
+      "osid": "op:zenica:serici_2",
+      "memberSids": [
+        "S162132",
+        "S162400",
+        "S162442",
+        "S162817",
+        "S162825",
+        "S162850",
+        "S162957",
+        "S165603",
+        "S171093"
+      ]
+    },
+    {
+      "osid": "op:zenica:orahovica_2",
+      "memberSids": [
+        "S162124",
+        "S162159",
+        "S162230",
+        "S162469",
+        "S162485",
+        "S162540",
+        "S162558",
+        "S162582",
+        "S162639",
+        "S162744",
+        "S162884",
+        "S162906"
+      ]
+    },
+    {
+      "osid": "op:zenica:stranjani_2",
+      "memberSids": [
+        "S162116",
+        "S162175",
+        "S162337",
+        "S162345",
+        "S162361",
+        "S162493",
+        "S162612",
+        "S162647",
+        "S162833"
+      ]
+    },
+    {
+      "osid": "op:zenica:gornja_zenica_2",
+      "memberSids": [
+        "S162183",
+        "S162205",
+        "S162299",
+        "S162302",
+        "S162353",
+        "S162531",
+        "S162922"
+      ]
+    },
+    {
+      "osid": "op:zenica:janjici",
+      "memberSids": [
+        "S162221",
+        "S162248",
+        "S162264",
+        "S162370",
+        "S162388",
+        "S162515",
+        "S162779",
+        "S162787"
+      ]
+    },
+    {
+      "osid": "op:zenica:briznik_2",
+      "memberSids": [
+        "S162108",
+        "S162167",
+        "S162329",
+        "S162566",
+        "S162655",
+        "S162663",
+        "S162701",
+        "S162736",
+        "S162752",
+        "S162795",
+        "S162868",
+        "S162876",
+        "S162949"
+      ]
+    },
+    {
+      "osid": "op:zenica:zenica_2",
+      "memberSids": [
+        "S162191",
+        "S162256",
+        "S162507",
+        "S162604",
+        "S162680",
+        "S162698",
+        "S162841",
+        "S162973"
+      ]
+    },
+    {
+      "osid": "op:zenica:gornja_vraca",
+      "memberSids": [
+        "S162213",
+        "S162272",
+        "S162396",
+        "S162418",
+        "S162426",
+        "S162434",
+        "S162477",
+        "S162523",
+        "S162574",
+        "S162671",
+        "S162710",
+        "S162809",
+        "S162892",
+        "S162914",
+        "S162965",
+        "S162981"
+      ]
+    },
+    {
+      "osid": "op:zepce:zeljezno_polje_2",
+      "memberSids": [
+        "S163775",
+        "S163783",
+        "S163821",
+        "S163953",
+        "S163961"
+      ]
+    },
+    {
+      "osid": "op:zepce:zepce_2",
+      "memberSids": [
+        "S132802",
+        "S132900",
+        "S132926",
+        "S163759",
+        "S163813",
+        "S163864",
+        "S163872",
+        "S163899",
+        "S163929",
+        "S163937",
+        "S163945",
+        "S163970",
+        "S166251"
+      ]
+    },
+    {
+      "osid": "op:zepce:viniste_2",
+      "memberSids": [
+        "S161659",
+        "S161705",
+        "S161900",
+        "S162043",
+        "S162060",
+        "S163732",
+        "S163767",
+        "S163791",
+        "S163830",
+        "S163902"
+      ]
+    },
+    {
+      "osid": "op:zepce:ozimica_2",
+      "memberSids": [
+        "S132438",
+        "S132543",
+        "S132683",
+        "S132713",
+        "S132772",
+        "S161543",
+        "S161730",
+        "S163848"
+      ]
+    },
+    {
+      "osid": "op:zivinice:zivinice_gornje_2",
+      "memberSids": [
+        "S164135",
+        "S164143",
+        "S164151",
+        "S164160",
+        "S164186",
+        "S164275",
+        "S164283"
+      ]
+    },
+    {
+      "osid": "op:zivinice:zivinice_grad_2",
+      "memberSids": [
+        "S163996",
+        "S164038",
+        "S164046",
+        "S164216",
+        "S164224",
+        "S164232",
+        "S164267",
+        "S164291"
+      ]
+    },
+    {
+      "osid": "op:zivinice:dubrave_gornje",
+      "memberSids": [
+        "S164003",
+        "S164011",
+        "S164062"
+      ]
+    },
+    {
+      "osid": "op:zivinice:basigovci_2",
+      "memberSids": [
+        "S163988",
+        "S164020",
+        "S164089",
+        "S164097",
+        "S164119",
+        "S164127"
+      ]
+    },
+    {
+      "osid": "op:zivinice:gracanica_2",
+      "memberSids": [
+        "S164054",
+        "S164178",
+        "S164194",
+        "S164208",
+        "S164259"
+      ]
+    },
+    {
+      "osid": "op:zvornik:vitinica_2",
+      "memberSids": [
+        "S163406",
+        "S163520",
+        "S165867",
+        "S171263",
+        "S171280",
+        "S171328",
+        "S171336",
+        "S208477",
+        "S209015"
+      ]
+    },
+    {
+      "osid": "op:zvornik:rastosnica_2",
+      "memberSids": [
+        "S163163",
+        "S163511",
+        "S165875",
+        "S165883",
+        "S166693",
+        "S171298"
+      ]
+    },
+    {
+      "osid": "op:zvornik:gornji_sepak_2",
+      "memberSids": [
+        "S208558",
+        "S208582",
+        "S208604",
+        "S208639",
+        "S208728",
+        "S208981",
+        "S208990",
+        "S209031",
+        "S209082",
+        "S209147",
+        "S230456",
+        "S230588"
+      ]
+    },
+    {
+      "osid": "op:zvornik:kozluk_2",
+      "memberSids": [
+        "S208566",
+        "S208698",
+        "S208710",
+        "S208736",
+        "S208744",
+        "S208876",
+        "S208884",
+        "S209007",
+        "S209058",
+        "S209074",
+        "S209112",
+        "S230421",
+        "S230537",
+        "S230553"
+      ]
+    },
+    {
+      "osid": "op:zvornik:donja_kamenica",
+      "memberSids": [
+        "S208787",
+        "S208825",
+        "S230413",
+        "S230448",
+        "S230464"
+      ]
+    },
+    {
+      "osid": "op:zvornik:novo_selo",
+      "memberSids": [
+        "S208485",
+        "S208507",
+        "S208817",
+        "S208850",
+        "S208892",
+        "S208965",
+        "S209163",
+        "S230472",
+        "S230596"
+      ]
+    },
+    {
+      "osid": "op:grude:sovici_3",
+      "memberSids": [
+        "S120812",
+        "S120863",
+        "S120871",
+        "S120898",
+        "S120901",
+        "S120928",
+        "S164321"
+      ]
+    },
+    {
+      "osid": "op:lopare:koraj_4",
+      "memberSids": [
+        "S165611",
+        "S165646",
+        "S212628",
+        "S212725",
+        "S212776",
+        "S212814"
+      ]
+    },
+    {
+      "osid": "op:hanpijesak:nevacka_3",
+      "memberSids": [
+        "S228036",
+        "S228184",
+        "S228265",
+        "S228281",
+        "S228303"
+      ]
+    },
+    {
+      "osid": "op:bosanski_brod:lijesce_2",
+      "memberSids": [
+        "S202754",
+        "S202762",
+        "S202797",
+        "S202819",
+        "S202878",
+        "S202967"
+      ]
+    },
+    {
+      "osid": "op:odzak:gornji_svilaj",
+      "memberSids": [
+        "S135305",
+        "S170330",
+        "S205265",
+        "S205273"
+      ]
+    },
+    {
+      "osid": "op:modrica:modrica",
+      "memberSids": [
+        "S213837",
+        "S213870",
+        "S213918",
+        "S213934",
+        "S213969",
+        "S213977",
+        "S214019"
+      ]
+    },
+    {
+      "osid": "op:celinac:snjegotina_srednja",
+      "memberSids": [
+        "S228745",
+        "S228753",
+        "S228818",
+        "S228982",
+        "S229008",
+        "S229016",
+        "S229032"
+      ]
+    },
+    {
+      "osid": "op:kupres:bucovaca",
+      "memberSids": [
+        "S129135",
+        "S129143",
+        "S129151",
+        "S129186",
+        "S129194",
+        "S129453"
+      ]
+    },
+    {
+      "osid": "op:gornji_vakuf:voljevac",
+      "memberSids": [
+        "S119563",
+        "S119571",
+        "S119598",
+        "S119903",
+        "S119920",
+        "S120022",
+        "S120065"
+      ]
+    },
+    {
+      "osid": "op:konjic:gorani_2",
+      "memberSids": [
+        "S126721",
+        "S126837",
+        "S126888",
+        "S126969",
+        "S127183",
+        "S127213",
+        "S127230",
+        "S127345",
+        "S127434",
+        "S127507",
+        "S127540",
+        "S127752",
+        "S127787",
+        "S127795",
+        "S127817",
+        "S128015",
+        "S128066"
+      ]
+    },
+    {
+      "osid": "op:kresevo:mratinici",
+      "memberSids": [
+        "S128783",
+        "S128856",
+        "S128937",
+        "S128945",
+        "S129003"
+      ]
+    },
+    {
+      "osid": "op:kiseljak:bukovica",
+      "memberSids": [
+        "S124702",
+        "S124885",
+        "S125016",
+        "S125393",
+        "S125431",
+        "S125474",
+        "S125504"
+      ]
+    },
+    {
+      "osid": "op:hadzici:tarcin_2",
+      "memberSids": [
+        "S142140",
+        "S142212",
+        "S142255",
+        "S142379",
+        "S142492",
+        "S142565",
+        "S142581",
+        "S142603",
+        "S142662",
+        "S142689"
+      ]
+    },
+    {
+      "osid": "op:vogosca:svrake",
+      "memberSids": [
+        "S145823",
+        "S145971"
+      ]
+    },
+    {
+      "osid": "op:vares:ravne",
+      "memberSids": [
+        "S155969",
+        "S156299",
+        "S156329",
+        "S156531",
+        "S156787"
+      ]
+    },
+    {
+      "osid": "op:centar_sarajevo:radava",
+      "memberSids": [
+        "S142042",
+        "S142069",
+        "S142077",
+        "S142085"
+      ]
+    },
+    {
+      "osid": "op:kladanj:vucinici_2",
+      "memberSids": [
+        "S125652",
+        "S125679",
+        "S125717",
+        "S125938",
+        "S125954"
+      ]
+    },
+    {
+      "osid": "op:olovo:slivnje",
+      "memberSids": [
+        "S135828",
+        "S165212",
+        "S166162",
+        "S170445"
+      ]
+    },
+    {
+      "osid": "op:vlasenica:grabovica",
+      "memberSids": [
+        "S204773",
+        "S204811",
+        "S204846",
+        "S204889",
+        "S204978",
+        "S204986",
+        "S204994",
+        "S205036",
+        "S205044",
+        "S205087",
+        "S205109",
+        "S205117"
+      ]
+    },
+    {
+      "osid": "op:zvornik:krizevici",
+      "memberSids": [
+        "S208779",
+        "S208795",
+        "S230561",
+        "S230618"
+      ]
+    },
+    {
+      "osid": "op:zvornik:djulici",
+      "memberSids": [
+        "S208493",
+        "S208531",
+        "S208809",
+        "S209023",
+        "S209066",
+        "S230499"
+      ]
+    },
+    {
+      "osid": "op:zvornik:zvornik",
+      "memberSids": [
+        "S208574",
+        "S208655",
+        "S208663",
+        "S230383",
+        "S230391",
+        "S230405",
+        "S230430",
+        "S230502",
+        "S230545",
+        "S230570"
+      ]
+    },
+    {
+      "osid": "op:kalesija:gojcin_2",
+      "memberSids": [
+        "S123528",
+        "S164950",
+        "S170011",
+        "S170038",
+        "S216470",
+        "S216488"
+      ]
+    },
+    {
+      "osid": "op:foca:ustikolina",
+      "memberSids": [
+        "S114936",
+        "S114995",
+        "S115312",
+        "S115444",
+        "S166316",
+        "S169668",
+        "S169676",
+        "S170160"
+      ]
+    }
+  ]
+}

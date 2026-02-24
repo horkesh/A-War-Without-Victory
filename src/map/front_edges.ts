@@ -1,6 +1,7 @@
 import { areRbihHrhbAllied } from '../sim/phase_i/alliance_update.js';
 import { GameState } from '../state/game_state.js';
-import { getSettlementControlStatus } from '../state/settlement_control.js';
+import { getPoliticalControllerOSID, getSettlementControlStatus } from '../state/settlement_control.js';
+import type { OperationalToCanonicalReverseMap } from '../data/operational_data.js';
 import { EdgeRecord } from './settlements.js';
 
 
@@ -80,6 +81,44 @@ export function computeFrontEdges(
         return e1.b.localeCompare(e2.b);
     });
 
+    return frontEdges;
+}
+
+/**
+ * Compute front edges from OSID adjacency and OSID-level control.
+ * Same contract as FrontEdge[] but a/b are OSIDs; used when operational data is present.
+ */
+export function computeFrontEdgesOsid(
+    state: GameState,
+    osidEdges: EdgeRecord[],
+    reverseMap: OperationalToCanonicalReverseMap
+): FrontEdge[] {
+    const frontEdges: FrontEdge[] = [];
+    for (const edge of osidEdges) {
+        const sideA = getPoliticalControllerOSID(state, edge.a, reverseMap);
+        const sideB = getPoliticalControllerOSID(state, edge.b, reverseMap);
+        if (sideA === null || sideB === null || sideA === sideB) continue;
+        const isRbihHrhbPair = (sideA === 'RBiH' && sideB === 'HRHB') || (sideA === 'HRHB' && sideB === 'RBiH');
+        if (isRbihHrhbPair) {
+            const turn = state.meta?.turn ?? 0;
+            const earliestWar = state.meta?.rbih_hrhb_war_earliest_turn ?? 26;
+            if (turn < earliestWar || areRbihHrhbAllied(state)) continue;
+        }
+        const [a, b, side_a, side_b] = edge.a < edge.b
+            ? [edge.a, edge.b, sideA, sideB]
+            : [edge.b, edge.a, sideB, sideA];
+        frontEdges.push({
+            edge_id: `${a}__${b}`,
+            a,
+            b,
+            side_a,
+            side_b
+        });
+    }
+    frontEdges.sort((e1, e2) => {
+        if (e1.a !== e2.a) return e1.a.localeCompare(e2.a);
+        return e1.b.localeCompare(e2.b);
+    });
     return frontEdges;
 }
 

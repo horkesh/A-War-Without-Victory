@@ -66,6 +66,10 @@ export class MapApp {
     private mediaChunks: Blob[] = [];
     private isExportingReplay = false;
     private lastLoadedGameState: LoadedGameState | null = null;
+    /** Raw canonical GameState object for browser-mode bridge mutations. */
+    private lastRawGameState: Record<string, unknown> | null = null;
+    /** OOB sidebar list mode: by corps (hierarchy) or by faction (flat). */
+    private oobViewMode: 'corps' | 'faction' = 'corps';
     private uiAudioEnabled = false;
     private selectedRecruitmentBrigadeId: string | null = null;
     private selectedRecruitmentEquipmentClass: string | null = null;
@@ -163,12 +167,18 @@ export class MapApp {
         stageMoveOrder?: (brigadeId: string, targetMunicipalityId: string) => Promise<{ ok: boolean; error?: string }>;
         stageDeployOrder?: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
         stageUndeployOrder?: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
+        assignBrigadeToFront?: (brigadeId: string, frontId: string | null) => Promise<{ ok: boolean; error?: string }>;
+        renameFrontSegment?: (frontId: string, name: string | null) => Promise<{ ok: boolean; error?: string }>;
+        renameTheatre?: (theatreId: string, name: string | null) => Promise<{ ok: boolean; error?: string }>;
         stageBrigadeAoROrder?: (settlementId: string, fromBrigadeId: string, toBrigadeId: string) => Promise<{ ok: boolean; error?: string }>;
         stageBrigadeMovementOrder?: (brigadeId: string, targetSettlementIds: string[]) => Promise<{ ok: boolean; error?: string }>;
         stageBrigadeRepositionOrder?: (brigadeId: string, settlementIds: string[]) => Promise<{ ok: boolean; error?: string }>;
         setBrigadeDesiredAoRCap?: (brigadeId: string, cap: number) => Promise<{ ok: boolean; error?: string }>;
         clearOrders?: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
         stageCorpsStanceOrder?: (corpsId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
+        stageCorpsFrontOrder?: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
+        stageCorpsAttackAxisOrder?: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
+        stageOgSubfrontOrder?: (ogId: string, corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     } | null {
         return (window as unknown as {
             awwv?: {
@@ -177,14 +187,299 @@ export class MapApp {
                 stageMoveOrder?: (brigadeId: string, targetMunicipalityId: string) => Promise<{ ok: boolean; error?: string }>;
                 stageDeployOrder?: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
                 stageUndeployOrder?: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
+                assignBrigadeToFront?: (brigadeId: string, frontId: string | null) => Promise<{ ok: boolean; error?: string }>;
+                renameFrontSegment?: (frontId: string, name: string | null) => Promise<{ ok: boolean; error?: string }>;
+                renameTheatre?: (theatreId: string, name: string | null) => Promise<{ ok: boolean; error?: string }>;
                 stageBrigadeAoROrder?: (settlementId: string, fromBrigadeId: string, toBrigadeId: string) => Promise<{ ok: boolean; error?: string }>;
                 stageBrigadeMovementOrder?: (brigadeId: string, targetSettlementIds: string[]) => Promise<{ ok: boolean; error?: string }>;
                 stageBrigadeRepositionOrder?: (brigadeId: string, settlementIds: string[]) => Promise<{ ok: boolean; error?: string }>;
                 setBrigadeDesiredAoRCap?: (brigadeId: string, cap: number) => Promise<{ ok: boolean; error?: string }>;
                 clearOrders?: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
                 stageCorpsStanceOrder?: (corpsId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
+                stageCorpsFrontOrder?: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
+                stageCorpsAttackAxisOrder?: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
+                stageOgSubfrontOrder?: (ogId: string, corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
             };
         }).awwv ?? null;
+    }
+
+    /** Re-parse and re-apply the raw state after browser bridge mutation. */
+    private reloadFromRawState(): void {
+        if (!this.lastRawGameState) return;
+        const loaded = parseGameState(this.lastRawGameState);
+        this.applyLoadedGameState(loaded);
+        this.push3DState(this.lastRawGameState);
+    }
+
+    /**
+     * Install a browser-mode bridge on window.awwv when no Electron desktop bridge is present.
+     * This lets corps/brigade staging operations work in browser dev mode by mutating
+     * the in-memory raw GameState and re-rendering.
+     */
+    private ensureBrowserBridge(): void {
+        // Skip if Electron bridge already present
+        if ((window as unknown as Record<string, unknown>).awwv) return;
+        const self = this;
+        const ok = () => Promise.resolve({ ok: true as const });
+        const fail = (msg: string) => Promise.resolve({ ok: false as const, error: msg });
+        const state = () => self.lastRawGameState as Record<string, unknown> | null;
+        const formations = () => (state()?.formations ?? {}) as Record<string, Record<string, unknown>>;
+        const normalizeEdge = (id: string): string | null => {
+            const parts = id.split('__');
+            if (parts.length !== 2) return null;
+            const [a, b] = parts;
+            return a < b ? `${a}__${b}` : `${b}__${a}`;
+        };
+
+        (window as unknown as Record<string, unknown>).awwv = {
+            stageCorpsFrontOrder: async (corpsId: string, edgeIds: string[]) => {
+                const s = state(); if (!s) return fail('No state loaded');
+                const corps = formations()[corpsId];
+                if (!corps) return fail('Invalid corps');
+                const normalized = edgeIds.map(normalizeEdge).filter((x): x is string => x !== null).sort();
+                if (!normalized.length) return fail('No valid edge IDs');
+                if (!s.corps_front_edges) s.corps_front_edges = {};
+                (s.corps_front_edges as Record<string, string[]>)[corpsId] = [...new Set(normalized)].sort();
+                self.reloadFromRawState();
+                return ok();
+            },
+            stageCorpsAttackAxisOrder: async (corpsId: string, edgeIds: string[]) => {
+                const s = state(); if (!s) return fail('No state loaded');
+                const corps = formations()[corpsId];
+                if (!corps) return fail('Invalid corps');
+                const normalized = edgeIds.map(normalizeEdge).filter((x): x is string => x !== null).sort();
+                if (!normalized.length) return fail('No valid edge IDs');
+                if (!s.corps_attack_axis_orders) s.corps_attack_axis_orders = {};
+                (s.corps_attack_axis_orders as Record<string, unknown>)[corpsId] = { edge_ids: [...new Set(normalized)].sort(), created_turn: ((s.meta as Record<string, unknown>)?.turn as number) ?? 0 };
+                // Derive per-brigade attack orders from axis
+                const pc = (s.political_controllers ?? {}) as Record<string, string>;
+                const corpsFaction = corps.faction as string;
+                const enemyTargets = new Set<string>();
+                for (const eid of normalized) {
+                    const parts = eid.split('__');
+                    if (parts.length !== 2) continue;
+                    if (pc[parts[0]] && pc[parts[0]] !== corpsFaction) enemyTargets.add(parts[0]);
+                    if (pc[parts[1]] && pc[parts[1]] !== corpsFaction) enemyTargets.add(parts[1]);
+                }
+                const targets = [...enemyTargets].sort();
+                if (targets.length > 0) {
+                    const brigades = Object.keys(formations()).filter(id => {
+                        const f = formations()[id];
+                        return f && (f.kind ?? 'brigade') === 'brigade' && f.corps_id === corpsId && f.faction === corpsFaction;
+                    }).sort();
+                    if (brigades.length > 0) {
+                        if (!s.brigade_attack_orders) s.brigade_attack_orders = {};
+                        for (let i = 0; i < brigades.length; i++) {
+                            (s.brigade_attack_orders as Record<string, string>)[brigades[i]] = targets[i % targets.length];
+                        }
+                    }
+                }
+                self.reloadFromRawState();
+                return ok();
+            },
+            stageOgSubfrontOrder: async (ogId: string, corpsId: string, edgeIds: string[]) => {
+                const s = state(); if (!s) return fail('No state loaded');
+                const normalized = edgeIds.map(normalizeEdge).filter((x): x is string => x !== null).sort();
+                if (!normalized.length) return fail('No valid edge IDs');
+                if (!s.og_subfront_edges) s.og_subfront_edges = {};
+                (s.og_subfront_edges as Record<string, string[]>)[ogId] = [...new Set(normalized)].sort();
+                self.reloadFromRawState();
+                return ok();
+            },
+            stagePostureOrder: async (brigadeId: string, posture: string) => {
+                const s = state(); if (!s) return fail('No state loaded');
+                const f = formations()[brigadeId];
+                if (!f) return fail('Unknown formation');
+                f.posture = posture;
+                self.reloadFromRawState();
+                return ok();
+            },
+            stageBrigadeMovementOrder: async (brigadeId: string, targetSids: string[]) => {
+                const s = state(); if (!s) return fail('No state loaded');
+                if (!s.brigade_movement_orders) s.brigade_movement_orders = {};
+                (s.brigade_movement_orders as Record<string, string[]>)[brigadeId] = targetSids.sort();
+                self.reloadFromRawState();
+                return ok();
+            },
+            stageBrigadeRepositionOrder: async (brigadeId: string, sids: string[]) => {
+                const s = state(); if (!s) return fail('No state loaded');
+                if (!s.brigade_reposition_orders) s.brigade_reposition_orders = {};
+                (s.brigade_reposition_orders as Record<string, { settlement_ids: string[] }>)[brigadeId] = { settlement_ids: [...sids].sort() };
+                self.reloadFromRawState();
+                return ok();
+            },
+            stageAttackOrder: async (brigadeId: string, targetSid: string) => {
+                const s = state(); if (!s) return fail('No state loaded');
+                if (!s.brigade_attack_orders) s.brigade_attack_orders = {};
+                (s.brigade_attack_orders as Record<string, string>)[brigadeId] = targetSid;
+                self.reloadFromRawState();
+                return ok();
+            },
+            stageDeployOrder: async (brigadeId: string) => {
+                const s = state(); if (!s) return fail('No state loaded');
+                const f = formations()[brigadeId]; if (!f) return fail('Unknown formation');
+                f.movement_state = 'deployed';
+                self.reloadFromRawState();
+                return ok();
+            },
+            stageUndeployOrder: async (brigadeId: string) => {
+                const s = state(); if (!s) return fail('No state loaded');
+                const f = formations()[brigadeId]; if (!f) return fail('Unknown formation');
+                f.movement_state = 'column';
+                self.reloadFromRawState();
+                return ok();
+            },
+            assignBrigadeToFront: async (brigadeId: string, frontId: string | null) => {
+                const s = state(); if (!s) return fail('No state loaded');
+                const f = formations()[brigadeId];
+                if (!f || (f.kind ?? 'brigade') !== 'brigade') return fail('Unknown brigade');
+                if (frontId !== null) {
+                    const segments = Array.isArray(s.assignable_front_segments)
+                        ? s.assignable_front_segments as Array<Record<string, unknown>>
+                        : [];
+                    const exists = segments.some((segment) => segment.front_id === frontId);
+                    if (!exists) return fail(`Unknown front_id: ${frontId}`);
+                }
+                if (!s.brigade_front_assignment) s.brigade_front_assignment = {};
+                (s.brigade_front_assignment as Record<string, string | null>)[brigadeId] = frontId;
+                self.reloadFromRawState();
+                return ok();
+            },
+            renameFrontSegment: async (frontId: string, name: string | null) => {
+                const s = state(); if (!s) return fail('No state loaded');
+                const segments = Array.isArray(s.assignable_front_segments)
+                    ? s.assignable_front_segments as Array<Record<string, unknown>>
+                    : [];
+                const segment = segments.find((entry) => entry.front_id === frontId);
+                if (!segment) return fail(`Unknown front_id: ${frontId}`);
+                const normalized = typeof name === 'string' ? name.trim() : '';
+                if (normalized.length === 0) delete segment.name;
+                else segment.name = normalized;
+                self.reloadFromRawState();
+                return ok();
+            },
+            renameTheatre: async (theatreId: string, name: string | null) => {
+                const s = state(); if (!s) return fail('No state loaded');
+                const theatres = (s.theatres ?? {}) as Record<string, Record<string, unknown>>;
+                const theatre = theatres[theatreId];
+                if (!theatre) return fail(`Unknown theatre_id: ${theatreId}`);
+                const faction = typeof theatre.faction === 'string' ? theatre.faction : 'Unknown';
+                const normalized = typeof name === 'string' ? name.trim() : '';
+                theatre.name = normalized.length > 0 ? normalized : `${faction} Theatre`;
+                self.reloadFromRawState();
+                return ok();
+            },
+            stageCorpsStanceOrder: async (corpsId: string, stance: string) => {
+                const s = state(); if (!s) return fail('No state loaded');
+                const corps = formations()[corpsId]; if (!corps) return fail('Unknown corps');
+                corps.stance = stance;
+                self.reloadFromRawState();
+                return ok();
+            },
+            clearOrders: async (brigadeId: string) => {
+                const s = state(); if (!s) return fail('No state loaded');
+                if (s.brigade_movement_orders) delete (s.brigade_movement_orders as Record<string, unknown>)[brigadeId];
+                if (s.brigade_reposition_orders) delete (s.brigade_reposition_orders as Record<string, unknown>)[brigadeId];
+                if (s.brigade_attack_orders) delete (s.brigade_attack_orders as Record<string, unknown>)[brigadeId];
+                self.reloadFromRawState();
+                return ok();
+            },
+        };
+    }
+
+    private normalizeEdgeId(a: string, b: string): string {
+        return a < b ? `${a}__${b}` : `${b}__${a}`;
+    }
+
+    /** Order borders so consecutive ones share a vertex (for contiguous segment drawing). */
+    private orderBordersAsChain(borders: Array<{ a: string; b: string; points: Position[] }>): Array<{ a: string; b: string; points: Position[] }> {
+        if (borders.length <= 1) return borders;
+        const ordered: Array<{ a: string; b: string; points: Position[] }> = [borders[0]];
+        let leftEnd = borders[0].a;
+        let rightEnd = borders[0].b;
+        const remaining = borders.slice(1);
+        while (remaining.length > 0) {
+            let found = -1;
+            let newEnd: string | null = null;
+            let prepend = false;
+            for (let j = 0; j < remaining.length; j++) {
+                const b = remaining[j];
+                if (b.a === rightEnd) { found = j; newEnd = b.b; break; }
+                if (b.b === rightEnd) { found = j; newEnd = b.a; break; }
+                if (b.a === leftEnd) { found = j; newEnd = b.b; prepend = true; break; }
+                if (b.b === leftEnd) { found = j; newEnd = b.a; prepend = true; break; }
+            }
+            if (found < 0) break;
+            const b = remaining.splice(found, 1)[0];
+            if (prepend) {
+                ordered.unshift(b);
+                leftEnd = newEnd!;
+            } else {
+                ordered.push(b);
+                rightEnd = newEnd!;
+            }
+        }
+        return ordered;
+    }
+
+    /** Build one array of points from ordered borders (shared vertex not duplicated at junctions). */
+    private chainedPointsForOrderedBorders(ordered: Array<{ a: string; b: string; points: Position[] }>): [number, number][] {
+        const to2d = (p: Position): [number, number] => [p[0], p[1]];
+        if (ordered.length === 0) return [];
+        const out: [number, number][] = ordered[0].points.map(to2d);
+        for (let i = 1; i < ordered.length; i++) {
+            const prev = out[out.length - 1];
+            const pts = ordered[i].points;
+            if (pts.length === 0) continue;
+            const first = to2d(pts[0]);
+            const last = to2d(pts[pts.length - 1]);
+            const d0 = (prev[0] - first[0]) ** 2 + (prev[1] - first[1]) ** 2;
+            const d1 = (prev[0] - last[0]) ** 2 + (prev[1] - last[1]) ** 2;
+            if (d0 <= d1) {
+                for (let k = 1; k < pts.length; k++) out.push(to2d(pts[k]));
+            } else {
+                for (let k = pts.length - 2; k >= 0; k--) out.push(to2d(pts[k]));
+            }
+        }
+        return out;
+    }
+
+    private controllerForSid(sid: string): string | null {
+        return this.activeControlLookup[sid] ?? this.activeControlLookup[controlKey(sid)] ?? null;
+    }
+
+    private deriveCorpsFrontEdgeIds(corpsId: string, gs: LoadedGameState): string[] {
+        const corps = gs.formations.find((formation) => formation.id === corpsId);
+        if (!corps) return [];
+        const faction = corps.faction;
+        const subordinateSet = new Set((corps.subordinateIds ?? []).slice().sort());
+        const controlledByCorps = new Set<string>();
+        for (const formation of gs.formations) {
+            if (!subordinateSet.has(formation.id)) continue;
+            if (formation.kind !== 'brigade') continue;
+            if (formation.faction !== faction) continue;
+            const aor = gs.brigadeAorByFormationId[formation.id] ?? [];
+            for (const sid of aor) controlledByCorps.add(sid);
+        }
+        if (controlledByCorps.size === 0) return [];
+
+        const edgeIds = new Set<string>();
+        const borders = this.data.sharedBorders.slice().sort((x, y) => this.normalizeEdgeId(x.a, x.b).localeCompare(this.normalizeEdgeId(y.a, y.b)));
+        for (const border of borders) {
+            const aOwned = controlledByCorps.has(border.a);
+            const bOwned = controlledByCorps.has(border.b);
+            if (aOwned === bOwned) continue;
+            const friendlySid = aOwned ? border.a : border.b;
+            const enemySid = aOwned ? border.b : border.a;
+            const friendlyController = this.controllerForSid(friendlySid);
+            const enemyController = this.controllerForSid(enemySid);
+            if (!this.shouldDrawFrontSegment(friendlyController, enemyController)) continue;
+            if (friendlyController !== faction) continue;
+            if (!enemyController || enemyController === faction) continue;
+            edgeIds.add(this.normalizeEdgeId(border.a, border.b));
+        }
+
+        return Array.from(edgeIds).sort();
     }
 
     constructor(_rootId: string) {
@@ -283,7 +578,7 @@ export class MapApp {
     private static readonly TUTORIAL_STEPS = [
         'Click a settlement on the map to open its details in the panel on the right.',
         'Use the − and + buttons (or keyboard shortcuts) to zoom between Strategic, Operational, and Tactical views.',
-        'Open the OOB (Order of Battle) panel to see formations by faction. Click a formation to jump to it on the map.',
+        'Open the OOB (Order of Battle) panel to see formations by corps or by faction. Click a formation to zoom to it and open its detail panel on the right.',
     ] as const;
 
     private showTutorial(stepIndex: number, setDoneOnClose: boolean): void {
@@ -903,6 +1198,12 @@ export class MapApp {
 
         // Classify front segments: which sides are defended?
         const borders = this.data.sharedBorders;
+        const bordersByEdgeId = new Map<string, (typeof borders)[number]>();
+        for (const border of borders) {
+            bordersByEdgeId.set(this.normalizeEdgeId(border.a, border.b), border);
+        }
+        const canonicalFrontEdges = gs?.frontEdges ?? [];
+        const useCanonicalFrontEdges = canonicalFrontEdges.length > 0;
         const centroids = this.data.settlementCentroids;
         const arcs: {
             seg: (typeof borders)[number];
@@ -912,20 +1213,79 @@ export class MapApp {
             bDefended: boolean;
         }[] = [];
 
-        for (const seg of borders) {
-            const ca = controllers[seg.a] ?? controllers[controlKey(seg.a)] ?? null;
-            const cb = controllers[seg.b] ?? controllers[controlKey(seg.b)] ?? null;
-            if (!this.shouldDrawFrontSegment(ca, cb)) continue;
+        const pushArcForSegment = (
+            seg: (typeof borders)[number],
+            ca: string | null,
+            cb: string | null,
+        ): void => {
+            if (!this.shouldDrawFrontSegment(ca, cb)) return;
 
-            const aDefended = defendedByFaction.get(seg.a) === ca;
-            const bDefended = defendedByFaction.get(seg.b) === cb;
+            let aDefended = defendedByFaction.get(seg.a) === ca;
+            let bDefended = defendedByFaction.get(seg.b) === cb;
 
-            // No unit → no front
-            if (!aDefended && !bDefended) continue;
+            // Canonical front snapshots represent the engine truth; render even when no brigade is currently deployed.
+            if (!aDefended && !bDefended) {
+                if (useCanonicalFrontEdges) {
+                    aDefended = true;
+                    bDefended = true;
+                } else {
+                    return;
+                }
+            }
 
             arcs.push({ seg, factionA: ca!, factionB: cb!, aDefended, bDefended });
+        };
+
+        if (useCanonicalFrontEdges) {
+            for (const edge of canonicalFrontEdges) {
+                const seg = bordersByEdgeId.get(this.normalizeEdgeId(edge.a, edge.b));
+                if (!seg) continue;
+                const ca = edge.side_a;
+                const cb = edge.side_b;
+                pushArcForSegment(seg, ca, cb);
+            }
+        } else {
+            for (const seg of borders) {
+                const ca = controllers[seg.a] ?? controllers[controlKey(seg.a)] ?? null;
+                const cb = controllers[seg.b] ?? controllers[controlKey(seg.b)] ?? null;
+                pushArcForSegment(seg, ca, cb);
+            }
         }
         if (arcs.length === 0) return;
+
+        // When we have assignable segments and canonical edges, draw one contiguous path per segment so fronts look continuous
+        const segments = gs?.assignableFrontSegments ?? [];
+        if (useCanonicalFrontEdges && segments.length > 0) {
+            const segBordersByEdgeId = bordersByEdgeId;
+            for (const segment of segments) {
+                const edgeIds = [...(segment.edge_ids ?? [])].sort();
+                const borders = edgeIds
+                    .map((eid) => segBordersByEdgeId.get(eid))
+                    .filter((b): b is NonNullable<typeof b> => !!b);
+                if (borders.length === 0) continue;
+                const ordered = this.orderBordersAsChain(borders);
+                const chained = this.chainedPointsForOrderedBorders(ordered);
+                if (chained.length < 2) continue;
+                const pts = chained.map((p) => rc.project(p[0], p[1]));
+                ctx.save();
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.strokeStyle = `rgba(255, 200, 100, ${FRONT_LINE.glowAlpha})`;
+                ctx.lineWidth = FRONT_LINE.glowWidth;
+                ctx.beginPath();
+                ctx.moveTo(pts[0][0], pts[0][1]);
+                for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+                ctx.stroke();
+                ctx.strokeStyle = `rgba(255, 255, 255, ${FRONT_LINE.arcAlpha})`;
+                ctx.lineWidth = FRONT_LINE.arcWidth;
+                ctx.beginPath();
+                ctx.moveTo(pts[0][0], pts[0][1]);
+                for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+                ctx.stroke();
+                ctx.restore();
+            }
+            return;
+        }
 
         // Helper: perpendicular direction pointing toward a settlement centroid
         const getOffsetDir = (
@@ -1060,11 +1420,28 @@ export class MapApp {
     // ─── Formation Markers ──────────────────────────
 
     /**
-     * Resolve data position for a formation: hq_sid settlement centroid or municipality centroid.
+     * Resolve data position for a formation.
+     * When location_osid is set (HoI ZoC), use OSID centroid first; else hq_sid or first AoR/municipality.
      * When HQ is in enemy-controlled territory, use fallback: first AoR settlement centroid, else municipality centroid.
      */
     private getFormationPosition(f: import('./types.js').FormationView): [number, number] | null {
         const gs = this.state.snapshot.loadedGameState;
+        if (f.location_osid) {
+            const c = this.data.settlementCentroids.get(f.location_osid);
+            if (c) return c;
+        }
+        if (gs?.phase === 'phase_ii') {
+            // Phase II: no AoR fallback; use hq_sid or municipality only
+            if (f.hq_sid) {
+                const c = this.data.settlementCentroids.get(f.hq_sid);
+                if (c) return c;
+            }
+            if (f.municipalityId) {
+                const c = this.data.municipalityCentroids.get(f.municipalityId);
+                if (c) return c;
+            }
+            return null;
+        }
         let useFallback = false;
         if (f.hq_sid && gs) {
             const controllerAtHq = this.activeControlLookup[controlKey(f.hq_sid)] ?? this.activeControlLookup[f.hq_sid];
@@ -1600,6 +1977,7 @@ export class MapApp {
         const gs = this.state.snapshot.loadedGameState;
         const formationId = this.state.snapshot.selectedFormationId;
         if (!gs || !formationId) return;
+        if (gs.phase === 'phase_ii') return; // Phase II: no AoR; location_osid only
         const formation = gs.formations.find((f) => f.id === formationId);
         if (!formation) return;
 
@@ -2085,7 +2463,7 @@ export class MapApp {
             if (!dataX && !dataY) return;
 
             let factor = this.state.snapshot.zoomFactor;
-            factor -= e.deltaY * 0.0015 * factor;
+            factor -= e.deltaY * 0.002 * factor;
             factor = Math.max(1, Math.min(5, factor));
 
             // Update pan center to zoom toward cursor
@@ -2525,7 +2903,7 @@ export class MapApp {
                 e.preventDefault();
                 return;
             }
-            const panDelta = 0.05;
+            const panDelta = 0.07;
             if (e.key === 'ArrowLeft') { this.state.setPan(this.state.snapshot.panCenter.x - panDelta, this.state.snapshot.panCenter.y); e.preventDefault(); }
             if (e.key === 'ArrowRight') { this.state.setPan(this.state.snapshot.panCenter.x + panDelta, this.state.snapshot.panCenter.y); e.preventDefault(); }
             if (e.key === 'ArrowUp') { this.state.setPan(this.state.snapshot.panCenter.x, this.state.snapshot.panCenter.y - panDelta); e.preventDefault(); }
@@ -2754,6 +3132,18 @@ export class MapApp {
         this.setReplayStatus('Replay export running...');
     }
 
+    /** Push raw game state to the embedded 3D operational map (if mounted). */
+    private push3DState(rawState: unknown): void {
+        // Store for deferred pickup if 3D map hasn't initialized yet
+        (window as unknown as Record<string, unknown>).__awwvPending3DState = rawState;
+        try {
+            const fn = (window as unknown as Record<string, unknown>).__awwv3dApplySave;
+            if (typeof fn === 'function') (fn as (s: unknown) => void)(rawState);
+        } catch (err) {
+            console.warn('[MapApp] 3D state sync error (non-fatal):', err instanceof Error ? err.message : String(err));
+        }
+    }
+
     /** Apply a loaded game state to map, OOB, and turn display. */
     private applyLoadedGameState(loaded: LoadedGameState): void {
         const previous = this.lastLoadedGameState;
@@ -2790,8 +3180,12 @@ export class MapApp {
     /** Apply game state from JSON (IPC from Electron or after load). */
     private applyGameStateFromJson(stateJson: string): void {
         try {
-            const loaded = parseGameState(JSON.parse(stateJson) as unknown);
+            const raw = JSON.parse(stateJson) as unknown;
+            const loaded = parseGameState(raw);
+            this.lastRawGameState = raw as Record<string, unknown>;
             this.applyLoadedGameState(loaded);
+            this.push3DState(raw);
+            this.ensureBrowserBridge();
         } catch (err) {
             this.showStatusError(`Failed to apply state: ${err instanceof Error ? err.message : String(err)}`);
         }
@@ -3048,6 +3442,19 @@ export class MapApp {
         // OOB toggle
         document.getElementById('btn-oob')?.addEventListener('click', () => this.toggleOOB());
         document.getElementById('oob-close')?.addEventListener('click', () => this.toggleOOB());
+        // OOB view mode: By corps / By faction
+        document.getElementById('oob-view-corps')?.addEventListener('click', () => {
+            this.oobViewMode = 'corps';
+            document.getElementById('oob-view-corps')?.classList.add('active');
+            document.getElementById('oob-view-faction')?.classList.remove('active');
+            if (this.lastLoadedGameState) this.updateOOBSidebar(this.lastLoadedGameState);
+        });
+        document.getElementById('oob-view-faction')?.addEventListener('click', () => {
+            this.oobViewMode = 'faction';
+            document.getElementById('oob-view-faction')?.classList.add('active');
+            document.getElementById('oob-view-corps')?.classList.remove('active');
+            if (this.lastLoadedGameState) this.updateOOBSidebar(this.lastLoadedGameState);
+        });
 
         // Search toggle
         document.getElementById('btn-search')?.addEventListener('click', () => this.showSearch());
@@ -3067,8 +3474,10 @@ export class MapApp {
             const file = fileInput.files?.[0];
             if (!file) return;
             try {
-                const loaded = parseGameState(JSON.parse(await file.text()));
+                const raw = JSON.parse(await file.text());
+                const loaded = parseGameState(raw);
                 this.applyLoadedGameState(loaded);
+                this.push3DState(raw);
             } catch (err) {
                 this.showStatusError(`Failed to load state: ${err instanceof Error ? err.message : String(err)}`);
             }
@@ -3088,7 +3497,10 @@ export class MapApp {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const json = await res.json();
                 const loaded = parseGameState(json);
+                this.lastRawGameState = json as Record<string, unknown>;
                 this.applyLoadedGameState(loaded);
+                this.push3DState(json);
+                this.ensureBrowserBridge();
                 this.clearStatusBar();
                 return true;
             } catch (err) {
@@ -3196,8 +3608,10 @@ export class MapApp {
                 const r = await awwvDesktop.advanceTurn!();
                 if (!r.ok && r.error) this.showStatusError(r.error);
                 if (r.ok && r.stateJson) {
-                    const parsed = parseGameState(JSON.parse(r.stateJson) as unknown);
+                    const raw = JSON.parse(r.stateJson) as unknown;
+                    const parsed = parseGameState(raw);
                     this.lastLoadedGameState = parsed;
+                    this.push3DState(raw);
                     if (this.uiAudioEnabled) {
                         const audio = new AudioContext();
                         const osc = audio.createOscillator();
@@ -3237,11 +3651,8 @@ export class MapApp {
         this.updateToolbarDate(0, 'phase_0');
         this.setReplayStatus('Replay: not loaded');
         this.updateReplayScrubber();
-        // In desktop/Electron: show menu until game state arrives (then applyLoadedGameState hides it).
-        // In standalone browser: keep overlay closed so the map is visible; user opens Menu to load.
-        if (awwvDesktop) {
-            this.showOverlay('main-menu-overlay', true);
-        }
+        // In desktop/Electron: do not show menu on load; getCurrentGameState callback shows it only when no state.
+        // In standalone browser: overlay stays closed; user opens Menu to load.
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
@@ -4054,6 +4465,21 @@ export class MapApp {
         <select id="corps-bulk-posture-select" class="tm-select" style="font-size:11px;padding:2px 4px;background:#1a2236;color:#c8e6c9;border:1px solid rgba(200,230,201,0.3);border-radius:3px;flex:1">${postureOpts}</select>
         <button type="button" class="tm-toolbar-btn" id="corps-apply-posture-btn" title="Apply posture to all subordinate brigades">Apply</button>
       </div>
+      <div style="margin-top:8px;font-size:10px;color:#90a4ae;text-transform:uppercase;letter-spacing:0.05em">Front assignment</div>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+        <button type="button" class="tm-toolbar-btn" id="corps-stage-front-btn" title="Derive and stage corps front from subordinate AoR">Stage Front</button>
+        <button type="button" class="tm-toolbar-btn" id="corps-stage-axis-btn" title="Stage attack axis using derived corps front">Stage Axis</button>
+      </div>
+      <div style="margin-top:4px;font-size:10px;color:#78909c">To assign a brigade to a front or reserve, click the brigade in Order of Battle below to open its panel.</div>
+      <div style="margin-top:8px;font-size:10px;color:#90a4ae;text-transform:uppercase;letter-spacing:0.05em">Operational group subfront</div>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+        <select id="corps-og-select" class="tm-select" style="font-size:11px;padding:2px 4px;background:#1a2236;color:#c8e6c9;border:1px solid rgba(200,230,201,0.3);border-radius:3px;flex:1">
+          ${(f.corpsActiveOgIds && f.corpsActiveOgIds.length > 0
+                ? f.corpsActiveOgIds.map((ogId) => `<option value="${this.escapeHtml(ogId)}">${this.escapeHtml(ogId)}</option>`).join('')
+                : '<option value="">No active OG</option>')}
+        </select>
+        <button type="button" class="tm-toolbar-btn" id="corps-stage-og-btn" title="Stage selected OG subfront from current corps front"${f.corpsActiveOgIds && f.corpsActiveOgIds.length > 0 ? '' : ' disabled'}>Stage OG</button>
+      </div>
     </div>`;
 
         contentEl.innerHTML = html;
@@ -4091,6 +4517,72 @@ export class MapApp {
                     }
                 }
                 this.showStatusError(`Posture ${posture} staged for ${subIds.length} subordinates of ${f.name}.`);
+            });
+        }
+
+        const stageFrontBtn = contentEl.querySelector('#corps-stage-front-btn') as HTMLButtonElement | null;
+        if (stageFrontBtn) {
+            stageFrontBtn.addEventListener('click', () => {
+                const bridge = this.getDesktopBridge();
+                if (!bridge?.stageCorpsFrontOrder) {
+                    this.showStatusError('Corps front staging unavailable (desktop bridge missing).');
+                    return;
+                }
+                const edgeIds = this.deriveCorpsFrontEdgeIds(f.id, gs);
+                if (edgeIds.length === 0) {
+                    this.showStatusError(`No eligible front edges found for ${f.name}.`);
+                    return;
+                }
+                bridge.stageCorpsFrontOrder(f.id, edgeIds).then((result) => {
+                    if (result.ok) this.showStatusError(`Corps front staged: ${f.name} (${edgeIds.length} edges).`);
+                    else this.showStatusError(`Corps front staging failed: ${result.error ?? 'unknown error'}`);
+                }).catch((err: unknown) => this.showStatusError(`Corps front staging failed: ${String(err)}`));
+            });
+        }
+
+        const stageAxisBtn = contentEl.querySelector('#corps-stage-axis-btn') as HTMLButtonElement | null;
+        if (stageAxisBtn) {
+            stageAxisBtn.addEventListener('click', () => {
+                const bridge = this.getDesktopBridge();
+                if (!bridge?.stageCorpsAttackAxisOrder) {
+                    this.showStatusError('Corps attack-axis staging unavailable (desktop bridge missing).');
+                    return;
+                }
+                const edgeIds = this.deriveCorpsFrontEdgeIds(f.id, gs);
+                if (edgeIds.length === 0) {
+                    this.showStatusError(`No eligible attack-axis edges found for ${f.name}.`);
+                    return;
+                }
+                bridge.stageCorpsAttackAxisOrder(f.id, edgeIds).then((result) => {
+                    if (result.ok) this.showStatusError(`Corps attack axis staged: ${f.name} (${edgeIds.length} edges).`);
+                    else this.showStatusError(`Corps attack axis failed: ${result.error ?? 'unknown error'}`);
+                }).catch((err: unknown) => this.showStatusError(`Corps attack axis failed: ${String(err)}`));
+            });
+        }
+
+        const stageOgBtn = contentEl.querySelector('#corps-stage-og-btn') as HTMLButtonElement | null;
+        const ogSelect = contentEl.querySelector('#corps-og-select') as HTMLSelectElement | null;
+        if (stageOgBtn && ogSelect) {
+            stageOgBtn.addEventListener('click', () => {
+                const bridge = this.getDesktopBridge();
+                if (!bridge?.stageOgSubfrontOrder) {
+                    this.showStatusError('OG subfront staging unavailable (desktop bridge missing).');
+                    return;
+                }
+                const ogId = ogSelect.value;
+                if (!ogId) {
+                    this.showStatusError('Select an active OG first.');
+                    return;
+                }
+                const edgeIds = this.deriveCorpsFrontEdgeIds(f.id, gs);
+                if (edgeIds.length === 0) {
+                    this.showStatusError(`No eligible subfront edges found for OG ${ogId}.`);
+                    return;
+                }
+                bridge.stageOgSubfrontOrder(ogId, f.id, edgeIds).then((result) => {
+                    if (result.ok) this.showStatusError(`OG subfront staged: ${ogId} (${edgeIds.length} edges).`);
+                    else this.showStatusError(`OG subfront staging failed: ${result.error ?? 'unknown error'}`);
+                }).catch((err: unknown) => this.showStatusError(`OG subfront staging failed: ${String(err)}`));
             });
         }
 
@@ -4174,12 +4666,72 @@ export class MapApp {
       <div class="tm-panel-field"><span class="tm-panel-field-label">Fatigue</span><span class="tm-panel-field-value">${f.fatigue}</span></div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">Cohesion</span><span class="tm-panel-field-value">${f.cohesion}%</span></div>
     </div>`;
-        // Consolidated AoR + coverage: single compact line
-        const aorStatusParts: string[] = [`${coveredCount}/${aorCount} settlements covered`];
-        if (overflowCount > 0) aorStatusParts.push(`<span style="color:#ef9a9a">${overflowCount} overextended</span>`);
-        if (fortressActive) aorStatusParts.push(`<span style="color:#80cbc4">urban fortress</span>`);
-        html += `<div class="tm-panel-section"><div class="tm-panel-section-header">AoR</div>
+        const isPhaseII = gs.phase === 'phase_ii';
+        // Phase II: no AoR UI (location_osid only). Phase I: AoR section + coverage.
+        const aorStatusParts: string[] = isPhaseII ? [] : [`${coveredCount}/${aorCount} settlements covered`];
+        if (!isPhaseII && overflowCount > 0) aorStatusParts.push(`<span style="color:#ef9a9a">${overflowCount} overextended</span>`);
+        if (!isPhaseII && fortressActive) aorStatusParts.push(`<span style="color:#80cbc4">urban fortress</span>`);
+        const desiredCap = gs.brigadeDesiredAoRCap?.[f.id];
+        const desiredCapValue = typeof desiredCap === 'number' && desiredCap >= 1 && desiredCap <= 4 ? String(desiredCap) : '0';
+        const hasBridge = !!this.getDesktopBridge()?.setBrigadeDesiredAoRCap;
+        const frontSegments = (gs.assignableFrontSegments ?? [])
+            .filter((segment) => segment.side_a === f.faction || segment.side_b === f.faction)
+            .sort((a, b) => a.front_id.localeCompare(b.front_id));
+        const frontById = new Map(frontSegments.map((segment) => [segment.front_id, segment]));
+        const currentFrontId = gs.brigadeFrontAssignment?.[f.id] ?? null;
+        const currentFront = currentFrontId ? frontById.get(currentFrontId) : undefined;
+        const currentTheatre = currentFront?.theatre_id ? gs.theatres?.[currentFront.theatre_id] : undefined;
+        const currentFrontLabel = currentFront
+            ? (`${currentFront.name ?? `${currentFront.side_a ?? '?'} vs ${currentFront.side_b ?? '?'}`} (${currentFront.length_edges} edges)`)
+            : 'Reserve';
+        if (isPhaseII) {
+            html += `<div class="tm-panel-section"><div class="tm-panel-section-header">LOCATION</div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">OSID</span><span class="tm-panel-field-value">${f.location_osid ? this.escapeHtml(f.location_osid) : '—'}</span></div>
+    </div>`;
+        } else {
+            html += `<div class="tm-panel-section"><div class="tm-panel-section-header">AoR</div>
       <div class="tm-panel-field"><span class="tm-panel-field-value">${aorStatusParts.join(' · ')}</span></div>
+      <div class="tm-panel-field">
+        <span class="tm-panel-field-label">Max settlements (1–4)</span>
+        <select id="brigade-desired-aor-cap" class="tm-select" style="font-size:12px;padding:2px 4px;background:#1a2236;color:#c8e6c9;border:1px solid rgba(200,230,201,0.3);border-radius:3px"${hasBridge ? '' : ' disabled title="Available in desktop app"'}>
+          <option value="0"${desiredCapValue === '0' ? ' selected' : ''}>Auto</option>
+          <option value="1"${desiredCapValue === '1' ? ' selected' : ''}>1</option>
+          <option value="2"${desiredCapValue === '2' ? ' selected' : ''}>2</option>
+          <option value="3"${desiredCapValue === '3' ? ' selected' : ''}>3</option>
+          <option value="4"${desiredCapValue === '4' ? ' selected' : ''}>4</option>
+        </select>
+      </div>
+    </div>`;
+        }
+        const frontOptions = frontSegments
+            .map((segment) => {
+                const selected = currentFrontId === segment.front_id ? ' selected' : '';
+                const label = `${segment.name ?? `${segment.side_a ?? '?'} vs ${segment.side_b ?? '?'}`} (${segment.length_edges} edges)`;
+                return `<option value="${this.escapeHtml(segment.front_id)}"${selected}>${this.escapeHtml(label)}</option>`;
+            })
+            .join('');
+        const canAssignFront = !!this.getDesktopBridge()?.assignBrigadeToFront;
+        const noFrontsHint = frontSegments.length === 0
+            ? '<div style="margin-top:4px;font-size:10px;color:#78909c">No assignable fronts in state. Load a Phase II save or advance turn to derive fronts.</div>'
+            : '';
+        html += `<div class="tm-panel-section"><div class="tm-panel-section-header">FRONT ASSIGNMENT</div>
+      <div class="tm-panel-field"><span class="tm-panel-field-label">Current</span><span class="tm-panel-field-value">${this.escapeHtml(currentFrontLabel)}</span></div>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+        <select id="brigade-front-select" class="tm-select" style="font-size:12px;padding:2px 4px;background:#1a2236;color:#c8e6c9;border:1px solid rgba(200,230,201,0.3);border-radius:3px;flex:1"${canAssignFront ? '' : ' disabled title="Available in desktop app"'}>
+          <option value=""${currentFrontId == null ? ' selected' : ''}>Reserve</option>
+          ${frontOptions}
+        </select>
+        <button type="button" class="tm-toolbar-btn" id="brigade-front-apply-btn"${canAssignFront ? '' : ' disabled'}>Assign</button>
+      </div>
+      ${noFrontsHint}
+      ${currentFront ? `<div style="display:flex;gap:6px;align-items:center;margin-top:8px">
+        <input id="front-name-input" class="tm-input" value="${this.escapeHtml(currentFront.name ?? '')}" placeholder="Front name" style="font-size:11px;padding:2px 4px;background:#1a2236;color:#c8e6c9;border:1px solid rgba(200,230,201,0.3);border-radius:3px;flex:1" />
+        <button type="button" class="tm-toolbar-btn" id="front-name-save-btn"${canAssignFront ? '' : ' disabled'}>Save Front Name</button>
+      </div>` : ''}
+      ${currentFront?.theatre_id ? `<div style="display:flex;gap:6px;align-items:center;margin-top:6px">
+        <input id="theatre-name-input" class="tm-input" value="${this.escapeHtml(currentTheatre?.name ?? '')}" placeholder="Theatre name" style="font-size:11px;padding:2px 4px;background:#1a2236;color:#c8e6c9;border:1px solid rgba(200,230,201,0.3);border-radius:3px;flex:1" />
+        <button type="button" class="tm-toolbar-btn" id="theatre-name-save-btn" data-theatre-id="${this.escapeHtml(currentFront.theatre_id)}"${canAssignFront ? '' : ' disabled'}>Save Theatre</button>
+      </div>` : ''}
     </div>`;
         // Posture dropdown with descriptions and eligibility
         const postureInfo: Record<string, { label: string; pressure: string; defense: string; cohesionCost: string; minCoh: number; readiness: string[] }> = {
@@ -4212,7 +4764,7 @@ export class MapApp {
       <div id="posture-description" style="font-size:10px;color:#90a4ae;margin:4px 0 2px 0">${this.escapeHtml(postureDesc)}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
         <button type="button" class="tm-toolbar-btn" data-brigade-action="move" title="Select 1–4 connected settlements to move to">Move</button>
-        <button type="button" class="tm-toolbar-btn" data-brigade-action="reposition" title="Select 1–4 connected settlements as new AoR (no move)">Reposition</button>
+        ${!isPhaseII ? '<button type="button" class="tm-toolbar-btn" data-brigade-action="reposition" title="Select 1–4 connected settlements as new AoR (no move)">Reposition</button>' : ''}
         <button type="button" class="tm-toolbar-btn" data-brigade-action="attack" title="Select target settlement on map">Attack</button>
         ${canUndeploy ? '<button type="button" class="tm-toolbar-btn" data-brigade-action="undeploy" title="Stage undeploy to column posture">Undeploy</button>' : ''}
         ${canDeploy ? '<button type="button" class="tm-toolbar-btn" data-brigade-action="deploy" title="Stage deploy to combat posture">Deploy</button>' : ''}
@@ -4242,6 +4794,82 @@ export class MapApp {
                 } else {
                     this.showStatusError(`Posture order staged: ${f.name} → ${newPosture}. Advance turn to execute.`);
                 }
+            });
+        }
+
+        // Wire Desired AoR (Max settlements 1–4) dropdown
+        const desiredAoRCapSelect = contentEl.querySelector('#brigade-desired-aor-cap') as HTMLSelectElement | null;
+        if (desiredAoRCapSelect) {
+            desiredAoRCapSelect.addEventListener('change', () => {
+                const raw = desiredAoRCapSelect.value;
+                const cap = raw === '' || raw === '0' ? 0 : Math.min(4, Math.max(1, parseInt(raw, 10)));
+                const bridge = this.getDesktopBridge();
+                if (bridge?.setBrigadeDesiredAoRCap) {
+                    bridge.setBrigadeDesiredAoRCap(f.id, cap).then(r => {
+                        if (r.ok) {
+                            this.showStatusError(cap === 0 ? `AoR cap for ${f.name} set to Auto.` : `AoR cap for ${f.name} set to ${cap} settlement(s).`);
+                        } else {
+                            this.showStatusError(`Set AoR cap failed: ${r.error ?? 'unknown'}`);
+                        }
+                    }).catch(err => this.showStatusError(`Set AoR cap failed: ${err}`));
+                }
+            });
+        }
+
+        const frontSelect = contentEl.querySelector('#brigade-front-select') as HTMLSelectElement | null;
+        const frontApplyBtn = contentEl.querySelector('#brigade-front-apply-btn') as HTMLButtonElement | null;
+        if (frontSelect && frontApplyBtn) {
+            frontApplyBtn.addEventListener('click', () => {
+                const frontIdRaw = frontSelect.value;
+                const frontId = frontIdRaw && frontIdRaw.length > 0 ? frontIdRaw : null;
+                const bridge = this.getDesktopBridge();
+                if (!bridge?.assignBrigadeToFront) {
+                    this.showStatusError('Front assignment requires desktop mode.');
+                    return;
+                }
+                bridge.assignBrigadeToFront(f.id, frontId).then((r) => {
+                    if (r.ok) {
+                        this.showStatusError(frontId
+                            ? `Front assigned: ${f.name} -> ${frontId}.`
+                            : `Front assignment cleared: ${f.name} is now Reserve.`);
+                    } else {
+                        this.showStatusError(`Front assignment failed: ${r.error ?? 'unknown'}`);
+                    }
+                }).catch((err) => this.showStatusError(`Front assignment failed: ${err}`));
+            });
+        }
+        const frontNameInput = contentEl.querySelector('#front-name-input') as HTMLInputElement | null;
+        const frontNameSaveBtn = contentEl.querySelector('#front-name-save-btn') as HTMLButtonElement | null;
+        if (frontNameInput && frontNameSaveBtn && currentFrontId) {
+            frontNameSaveBtn.addEventListener('click', () => {
+                const bridge = this.getDesktopBridge();
+                if (!bridge?.renameFrontSegment) {
+                    this.showStatusError('Front rename requires desktop mode.');
+                    return;
+                }
+                const value = frontNameInput.value.trim();
+                bridge.renameFrontSegment(currentFrontId, value.length > 0 ? value : null).then((r) => {
+                    if (r.ok) this.showStatusError(`Front name updated for ${currentFrontId}.`);
+                    else this.showStatusError(`Front rename failed: ${r.error ?? 'unknown'}`);
+                }).catch((err) => this.showStatusError(`Front rename failed: ${err}`));
+            });
+        }
+        const theatreNameInput = contentEl.querySelector('#theatre-name-input') as HTMLInputElement | null;
+        const theatreNameSaveBtn = contentEl.querySelector('#theatre-name-save-btn') as HTMLButtonElement | null;
+        if (theatreNameInput && theatreNameSaveBtn) {
+            theatreNameSaveBtn.addEventListener('click', () => {
+                const theatreId = theatreNameSaveBtn.dataset.theatreId;
+                if (!theatreId) return;
+                const bridge = this.getDesktopBridge();
+                if (!bridge?.renameTheatre) {
+                    this.showStatusError('Theatre rename requires desktop mode.');
+                    return;
+                }
+                const value = theatreNameInput.value.trim();
+                bridge.renameTheatre(theatreId, value.length > 0 ? value : null).then((r) => {
+                    if (r.ok) this.showStatusError(`Theatre renamed: ${theatreId}.`);
+                    else this.showStatusError(`Theatre rename failed: ${r.error ?? 'unknown'}`);
+                }).catch((err) => this.showStatusError(`Theatre rename failed: ${err}`));
             });
         }
 
@@ -4836,10 +5464,13 @@ export class MapApp {
         const content = document.getElementById('oob-content');
         if (!content) return;
 
+        // Sync view toggle active state
+        document.getElementById('oob-view-corps')?.classList.toggle('active', this.oobViewMode === 'corps');
+        document.getElementById('oob-view-faction')?.classList.toggle('active', this.oobViewMode === 'faction');
+
         const pf = gs.player_faction;
         const visibleFactions = pf ? [pf] : FACTION_DISPLAY_ORDER;
 
-        // Group by faction
         const byFaction = new Map<string, typeof gs.formations>();
         for (const f of gs.formations) {
             let list = byFaction.get(f.faction);
@@ -4847,15 +5478,102 @@ export class MapApp {
             list.push(f);
         }
 
-        let html = '';
-        for (const faction of visibleFactions) {
-            const formations = byFaction.get(faction) ?? [];
-            if (formations.length === 0) continue;
-            const fColor = SIDE_SOLID_COLORS[faction] ?? '#888';
-            const avgCohesion = formations.reduce((s, f) => s + f.cohesion, 0) / formations.length;
+        const frontById = new Map((gs.assignableFrontSegments ?? []).map((segment) => [segment.front_id, segment]));
+        const assignmentByBrigade = gs.brigadeFrontAssignment ?? {};
+        const renderFormationRow = (
+            f: import('./types.js').FormationView,
+            indentPx = 0,
+            subtitle?: string
+        ): string => {
+            const readinessColor = panelReadinessColor(f.readiness);
+            const rowCrestUrl = this.getCrestUrl(f.faction);
+            const mun = f.municipalityId ?? '';
+            let rightText = subtitle ?? f.kind;
+            if (f.kind === 'brigade') {
+                const frontId = assignmentByBrigade[f.id] ?? null;
+                if (!frontId) {
+                    rightText = 'Reserve';
+                } else {
+                    const segment = frontById.get(frontId);
+                    const label = segment
+                        ? `${segment.name ?? `${segment.side_a ?? '?'} vs ${segment.side_b ?? '?'}`} (${segment.length_edges}e)`
+                        : frontId;
+                    rightText = label;
+                }
+            }
+            return `<div class="tm-formation-row" data-formation-id="${this.escapeHtml(f.id)}" data-mun="${this.escapeHtml(mun)}" style="cursor:pointer${indentPx > 0 ? `;padding-left:${indentPx}px` : ''}">
+          <img class="tm-formation-crest" src="${this.escapeHtml(rowCrestUrl)}" alt="" />
+          <span class="tm-formation-badge" style="background:${readinessColor}" title="${f.readiness}"></span>
+          <span class="tm-formation-name">${this.escapeHtml(f.name)}</span>
+          <span class="tm-formation-kind">${this.escapeHtml(rightText)}</span>
+        </div>`;
+        };
 
-            const crestUrl = this.getCrestUrl(faction);
-            html += `<div class="tm-oob-faction">
+        let html = '';
+        if (this.oobViewMode === 'corps') {
+            // Front hierarchy: Theatre -> Army -> Corps -> Brigade/OG
+            const corpsKinds = new Set(['corps', 'corps_asset']);
+            for (const faction of visibleFactions) {
+                const formations = byFaction.get(faction) ?? [];
+                if (formations.length === 0) continue;
+                const formationById = new Map(formations.map((f) => [f.id, f]));
+                const armies = formations.filter((f) => f.kind === 'army_hq').sort((a, b) => a.id.localeCompare(b.id));
+                const corpsList = formations.filter((f) => corpsKinds.has(f.kind)).sort((a, b) => a.id.localeCompare(b.id));
+                const brigades = formations.filter((f) => f.kind === 'brigade').sort((a, b) => a.id.localeCompare(b.id));
+                const theatreEntries = Object.entries(gs.theatres ?? {})
+                    .filter(([, theatre]) => theatre.faction === faction)
+                    .sort((a, b) => a[0].localeCompare(b[0]));
+                const theatreIds = theatreEntries.length > 0
+                    ? theatreEntries.map(([id]) => id)
+                    : [`${faction}_default`];
+                const crestUrl = this.getCrestUrl(faction);
+                const fColor = SIDE_SOLID_COLORS[faction] ?? '#888';
+                html += `<div class="tm-oob-faction">
+        <div class="tm-oob-faction-header">
+          <img class="tm-oob-faction-crest" src="${this.escapeHtml(crestUrl)}" alt="" />
+          <span class="tm-oob-faction-badge" style="background:${fColor}"></span>
+          <span>${this.escapeHtml(SIDE_LABELS[faction] ?? faction)}</span>
+          <span class="tm-oob-faction-count">${formations.length} formations</span>
+        </div>
+        <div class="tm-oob-formation-list">`;
+                for (const theatreId of theatreIds) {
+                    const theatre = gs.theatres?.[theatreId];
+                    const theatreName = theatre?.name ?? `${faction} Theatre`;
+                    html += `<div class="tm-muted" style="padding:4px 0 2px 0">Theatre: ${this.escapeHtml(theatreName)}</div>`;
+                    const armyIds = (gs.armyTheatreAssignment
+                        ? Object.keys(gs.armyTheatreAssignment)
+                            .filter((armyId) => gs.armyTheatreAssignment?.[armyId] === theatreId)
+                            .sort((a, b) => a.localeCompare(b))
+                        : [])
+                        .filter((armyId) => formationById.has(armyId));
+                    const theatreArmies = armyIds.length > 0
+                        ? armyIds.map((id) => formationById.get(id)!).filter((f): f is import('./types.js').FormationView => !!f)
+                        : armies;
+                    for (const army of theatreArmies) {
+                        html += renderFormationRow(army, 8, 'Army');
+                        const armyCorps = corpsList.filter((corps) => corps.corps_id === army.id || (army.subordinateIds ?? []).includes(corps.id));
+                        for (const corps of armyCorps) {
+                            html += renderFormationRow(corps, 20, 'Corps');
+                            const subordinates = formations
+                                .filter((sub) => sub.corps_id === corps.id && (sub.kind === 'brigade' || sub.kind === 'operational_group' || sub.kind === 'og'))
+                                .sort((a, b) => a.id.localeCompare(b.id));
+                            for (const sub of subordinates) {
+                                html += renderFormationRow(sub, 32);
+                            }
+                        }
+                    }
+                }
+                html += `</div></div>`;
+            }
+        } else {
+            // By faction: flat list (original behavior)
+            for (const faction of visibleFactions) {
+                const formations = byFaction.get(faction) ?? [];
+                if (formations.length === 0) continue;
+                const fColor = SIDE_SOLID_COLORS[faction] ?? '#888';
+                const avgCohesion = formations.reduce((s, f) => s + f.cohesion, 0) / formations.length;
+                const crestUrl = this.getCrestUrl(faction);
+                html += `<div class="tm-oob-faction">
         <div class="tm-oob-faction-header">
           <img class="tm-oob-faction-crest" src="${this.escapeHtml(crestUrl)}" alt="" />
           <span class="tm-oob-faction-badge" style="background:${fColor}"></span>
@@ -4863,26 +5581,16 @@ export class MapApp {
           <span class="tm-oob-faction-count">${formations.length} formations — avg cohesion ${Math.round(avgCohesion)}%</span>
         </div>
         <div class="tm-oob-formation-list">`;
-
-            // Show first 50 formations
-            for (const f of formations.slice(0, 50)) {
-                const readinessColor = panelReadinessColor(f.readiness);
-                const rowCrestUrl = this.getCrestUrl(f.faction);
-                html += `<div class="tm-formation-row" data-mun="${this.escapeHtml(f.municipalityId ?? '')}" style="cursor:pointer">
-          <img class="tm-formation-crest" src="${this.escapeHtml(rowCrestUrl)}" alt="" />
-          <span class="tm-formation-badge" style="background:${readinessColor}" title="${f.readiness}"></span>
-          <span class="tm-formation-name">${this.escapeHtml(f.name)}</span>
-          <span class="tm-formation-kind">${this.escapeHtml(f.kind)}</span>
-        </div>`;
+                for (const f of formations.slice(0, 50)) {
+                    html += renderFormationRow(f);
+                }
+                if (formations.length > 50) {
+                    html += `<div class="tm-muted">+${formations.length - 50} more</div>`;
+                }
+                html += `</div></div>`;
             }
-            if (formations.length > 50) {
-                html += `<div class="tm-muted">+${formations.length - 50} more</div>`;
-            }
-
-            html += `</div></div>`;
         }
 
-        // Militia pool summary (player faction only when set)
         const pools = pf ? gs.militiaPools.filter(p => p.faction === pf) : gs.militiaPools;
         if (pools.length > 0) {
             const totalAvail = pools.reduce((s, p) => s + p.available, 0);
@@ -4901,20 +5609,25 @@ export class MapApp {
         }
         content.innerHTML = html;
 
-        // Wire formation row clicks → jump to municipality
-        content.querySelectorAll('.tm-formation-row[data-mun]').forEach(row => {
+        // Wire formation row clicks → select formation, open detail panel, zoom to formation
+        content.querySelectorAll('.tm-formation-row[data-formation-id]').forEach(row => {
             row.addEventListener('click', () => {
-                const munId = (row as HTMLElement).dataset.mun;
-                if (!munId) return;
-                const centroid = this.data.municipalityCentroids.get(munId);
-                if (!centroid) return;
-                const bounds = this.data.dataBounds;
-                this.state.setPan(
-                    (centroid[0] - bounds.minX) / (bounds.maxX - bounds.minX),
-                    (centroid[1] - bounds.minY) / (bounds.maxY - bounds.minY),
-                );
-                this.state.setZoom(2, ZOOM_FACTORS[2]);
-                this.updateZoomPill();
+                const fid = (row as HTMLElement).dataset.formationId;
+                if (!fid) return;
+                const f = gs.formations.find(x => x.id === fid);
+                if (!f) return;
+                this.state.setSelectedFormation(f.id);
+                this.openBrigadePanel(f);
+                const pos = this.getFormationPosition(f);
+                if (pos && this.data?.dataBounds) {
+                    const b = this.data.dataBounds;
+                    this.state.setPan(
+                        (pos[0] - b.minX) / (b.maxX - b.minX),
+                        (pos[1] - b.minY) / (b.maxY - b.minY),
+                    );
+                    this.state.setZoom(2, ZOOM_FACTORS[2]);
+                    this.updateZoomPill();
+                }
             });
         });
     }

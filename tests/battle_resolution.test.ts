@@ -11,7 +11,7 @@ import { computeTerrainModifier, resolveBattleOrders } from '../src/sim/phase_ii
 import { resolveAttackOrders } from '../src/sim/phase_ii/resolve_attack_orders.js';
 import { getFactionTotalCasualties, initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
 import { MIN_COMBAT_PERSONNEL } from '../src/state/formation_constants.js';
-import type { FactionId, FormationId, FormationState, GameState, SettlementId } from '../src/state/game_state.js';
+import type { FactionId, FormationId, FormationState, GameState, LegacyBrigadeAoRState, SettlementId } from '../src/state/game_state.js';
 
 // --- Helpers ---
 
@@ -84,7 +84,7 @@ function makeState(
         political_controllers: pc,
         brigade_aor: aor,
         brigade_attack_orders: orders
-    };
+    } as GameState & LegacyBrigadeAoRState;
 }
 
 // --- Tests ---

@@ -1,0 +1,85 @@
+# HoI Visual Overhaul & Settlement Clustering Implementation Plan
+
+## Goal Description
+Transform A War Without Victory from a technical NATO GIS viewer into a tactile, Hearts-of-Iron-style operational wargame. This involves a fundamental shift to a 2.5D WebGL rendering pipeline, a warm institutional GUI, and most importantly, reducing the 5,823 canonical settlements into a dense-front/sparse-rear "Operational Settlement" layer (~1,500 units) to improve playability and reduce clutter without losing historic fidelity.
+
+## User Review Required
+> [!IMPORTANT]
+> **Orchestrator Pushbacks & Innovations:**
+> 1. **GUI Architecture:** Building a complex HoI sidebar in pure Vanilla JS/DOM is risky. **Pushback:** We must enforce a strict class-based component architecture for `map_hoi/ui` (e.g., `SidebarComponent`, `CorpsCardComponent`), extracting state management from DOM manipulation, otherwise it will collapse under its own weight.
+> 2. **The 2.5D "Tactile" Feel:** **Innovation:** Beyond just terrain relief, I propose a Screen-Space Post-Processing pass (or a simple overlay) containing a subtle "creased paper" normal map and vignette, ensuring the map feels like a physical object sitting on the desk in the dark warroom.
+
+## Proposed Changes
+
+### Phase 1: Data Foundation (Clustering & Split)
+*Implement the offline geometric and clustering pipeline.*
+- **Pre-Clustering:** Implement the Mostar split (West/East) via geometric clipping against the Neretva river.
+- **Zone Config:** Define the JSON configurations mapping municipalities to protection rules.
+- **Clustering Algorithm:** Implement the 5-phase deterministic greedy aggregation (Classify -> Seed -> Cluster -> Merge -> Derive).
+- **Geometric Smoothing:** Implement a post-merge smoothing pass (like Chaikin or polygon simplification) to remove jagged, artificial Voronoi straight lines on inter-municipality borders, ensuring *zero gaps* between the smoothed polygons.
+- **Adjacency:** Rebuild the graph to compute edges between Operational Settlements (OSIDs).
+- **Run `/refactor-pass`** to clean up script logic and verify determinism.
+
+#### [NEW] [data/source/clustering_zone_config.json](file:///f:/A-War-Without-Victory/data/source/clustering_zone_config.json)
+#### [NEW] `scripts/derive_operational_settlements.ts`
+#### [NEW] `data/derived/operational_settlements.geojson` (Output)
+
+---
+
+### Phase 2: Engine & State Integration (The OSID Shift)
+*Retrofit the simulation to operate on OSIDs while preserving the canonical substrate.*
+- **State Schema:** Update `game_state.ts` to expect OSIDs for political control, brigade AoRs, and fronts.
+- **Pipeline:** Update `turn_pipeline.ts`, movement, pressure, and combat rules to target/evaluate operational settlements.
+- **Adapters:** Ensure `DataLoader` and `GameStateAdapter` can serve the operational datasets to the UI.
+- **Run `/refactor-pass`** to isolate OSID-fetching logic and verify headless tests pass.
+
+#### [MODIFY] [src/state/game_state.ts](file:///f:/A-War-Without-Victory/src/state/game_state.ts)
+#### [MODIFY] [src/sim/turn_pipeline.ts](file:///f:/A-War-Without-Victory/src/sim/turn_pipeline.ts)
+#### [MODIFY] [src/ui/map/data/DataLoader.ts](file:///f:/A-War-Without-Victory/src/ui/map/data/DataLoader.ts)
+
+---
+
+### Phase 3: The Parallel `map_hoi` Bootstrap & GUI Shell
+*Stand up the new parallel entrypoint and build the DOM structure.*
+- **Vite Setup:** Create an isolated `map_hoi.html` to avoid disrupting the current `tactical_map`.
+- **Warm Aesthetic:** Implement `styles_hoi.css` with the parchment/charcoal/gold palette.
+- **Army Management:** Build the hierarchical Left Sidebar (Corps -> Brigade) with stance controls and degraded alerts.
+- **Tooltips:** Implement the HoI-style rich data tooltips on hover.
+- **Run `/refactor-pass`** to clean up DOM components and verify IPC bindings.
+
+#### [NEW] `src/ui/map/map_hoi.html`
+#### [NEW] `src/ui/map/styles_hoi.css`
+#### [NEW] `src/ui/map/map_hoi.ts`
+
+---
+
+### Phase 4: The 2.5D WebGL Renderer
+*Swap Canvas 2D for Three.js.*
+- **Graphics Pipeline:** Initialize Three.js orthographic camera tilted at ~20 degrees.
+- **Terrain Mesh:** Pre-render or load DEM data to displace a plane geometry.
+- **Political Draping:** Triangulate operational polygons and drape over terrain with the new saturated faction colors.
+- **Front Bands:** Render thick, terrain-draped ribbon meshes for `front_edges`.
+- **Formations:** Use front-distributed GPU-scaled billboard sprites.
+- **Run `/refactor-pass`** to optimize draw calls and dispose of unused Three.js geometry.
+
+#### [NEW] `src/ui/map/renderer/HoIMapRenderer.ts` (or similar)
+#### [NEW] `src/ui/map/renderer/materials/` (shaders & textures)
+
+---
+
+### Phase 5: Ledger & Documentation Sync
+*Finalize canon alignment.*
+- Update `PROJECT_LEDGER.md` and `PROJECT_LEDGER_KNOWLEDGE.md` to reflect the clustering logic and new OSID identifiers.
+- Update `TACTICAL_MAP_SYSTEM.md` to document the 2.5D architecture.
+- Update [napkin.md](file:///f:/A-War-Without-Victory/.agent/napkin.md) with new architectural patterns discovered.
+
+## Verification Plan
+
+### Automated Tests
+- `npm run test:vitest` and `npm test` after each phase.
+- Validate `data/derived/operational_settlements_audit.json` proves 100% census data retention.
+
+### Manual Verification
+- Launch both `/tactical_map.html` and `/map_hoi.html`.
+- Confirm identical state visualization via IPC on both implementations.
+- Confirm visual scale of HoI counters expands/contracts cleanly via mouse wheel in the WebGL canvas.

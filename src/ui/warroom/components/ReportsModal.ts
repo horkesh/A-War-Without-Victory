@@ -7,10 +7,14 @@
  * - Per-municipality detail with 1-turn delay
  * - Sorted by urgency (highly contested → contested → secure)
  * - Faction-specific headers (FROM/TO per faction)
+ *
+ * War-phase (Phase I/II) renders operational intelligence briefs
+ * using extractWarData snapshot instead of municipality org-pen.
  */
 
 import type { FactionId, GameState, MunicipalityId } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { extractWarData, type WarDataSnapshot } from '../data/war_data_extractor.js';
 import { controlStatusLabel, FACTION_COLORS, factionCssClass, getFactionPartyPen, getPlayerFaction, hasFactionParamilitary, turnToDateString } from './warroom_utils.js';
 
 interface ReportContent {
@@ -39,6 +43,24 @@ const REPORT_HEADERS: Record<string, { from: string; to: string; signature: stri
         from: 'Croatian Defence Council — Intelligence Section',
         to: 'HVO General Staff, Mostar',
         signature: 'Head, HVO Intelligence Department',
+    },
+};
+
+const WAR_REPORT_HEADERS: Record<string, { from: string; to: string; signature: string }> = {
+    RBiH: {
+        from: '2nd Corps Intelligence Section',
+        to: 'ARBiH General Staff, Sarajevo',
+        signature: 'Chief, 2nd Corps Intelligence Section',
+    },
+    RS: {
+        from: 'Main Staff Intelligence Department',
+        to: 'VRS Supreme Command, Pale',
+        signature: 'Chief, Main Staff Intelligence Department',
+    },
+    HRHB: {
+        from: 'HVO Intelligence Section',
+        to: 'HVO General Staff, Mostar',
+        signature: 'Chief, HVO Intelligence Section',
     },
 };
 
@@ -174,7 +196,7 @@ export class ReportsModal {
     }
 
     /**
-     * Generate report content
+     * Generate report content for Phase 0.
      */
     private generateContent(): ReportContent {
         const turn = this.gameState.meta.turn;
@@ -197,9 +219,114 @@ export class ReportsModal {
     }
 
     /**
-     * Render the reports modal as HTML element
+     * Generate the war-phase report body from a WarDataSnapshot.
      */
-    render(): HTMLElement {
+    private generateWarReportBody(snap: WarDataSnapshot, reportTurn: number): string {
+        const lines: string[] = [];
+        const divider = '\u2500'.repeat(45);
+
+        // 1. FRONT STATUS
+        lines.push('FRONT STATUS');
+        lines.push(divider);
+
+        const frontEdges = snap.engagedFrontEdges;
+        if (frontEdges.length === 0) {
+            lines.push('  No active front edges this period.');
+        } else {
+            // Show EXPOSED entries first with warning
+            const exposed = frontEdges.filter(e => e.tier === 'exposed');
+            const nonExposed = frontEdges.filter(e => e.tier !== 'exposed');
+
+            // Combine: exposed first, then rest, take top 5
+            const ordered = [...exposed, ...nonExposed].slice(0, 5);
+            for (const e of ordered) {
+                const tierLabel = e.tier.toUpperCase();
+                const prefix = e.tier === 'exposed' ? '  !! ' : '  ';
+                lines.push(`${prefix}${e.settlementA} \u2194 ${e.settlementB}`);
+                lines.push(`${prefix}Pressure: ${e.pressure} | Friction: ${e.friction} | ${tierLabel}`);
+            }
+        }
+
+        lines.push('');
+
+        // 2. FORMATION READINESS (5 weakest brigades)
+        lines.push('FORMATION READINESS (5 WEAKEST)');
+        lines.push(divider);
+
+        const brigades = snap.ownForces.formationDetails
+            .filter(f => f.kind === 'brigade')
+            .sort((a, b) => a.personnel - b.personnel)
+            .slice(0, 5);
+
+        if (brigades.length === 0) {
+            lines.push('  No brigade formations available.');
+        } else {
+            for (const b of brigades) {
+                lines.push(`  ${b.name} | ${b.personnel} pers | Cohesion: ${b.cohesion} | ${b.posture} | ${b.movementStatus}`);
+            }
+        }
+
+        lines.push('');
+
+        // 3. ENEMY CONTACT
+        lines.push('ENEMY CONTACT (TIER 2 - CONTACT REVEALED)');
+        lines.push(divider);
+
+        if (snap.contactedEnemyFormations.length === 0) {
+            lines.push('  No enemy formations engaged this period.');
+        } else {
+            for (const cf of snap.contactedEnemyFormations) {
+                const contactLoc = cf.contactSettlement ?? 'unknown';
+                lines.push(`  ${cf.name} | Strength: ${cf.strengthCategory} | Last contact: ${contactLoc}`);
+            }
+        }
+
+        lines.push('');
+
+        // 4. DISPLACEMENT ALERTS
+        lines.push('DISPLACEMENT ALERTS');
+        lines.push(divider);
+        lines.push(`  Active hostile takeover timers: ${snap.ownDisplacement.activeHostileTakeoverTimers}`);
+        lines.push(`  Active displacement camps: ${snap.ownDisplacement.activeCamps}`);
+        lines.push(`  Encircled formations: ${snap.brigadeMovement.encircled.length}`);
+
+        lines.push('');
+
+        // 5. SUSTAINABILITY WARNINGS
+        lines.push('SUSTAINABILITY WARNINGS');
+        lines.push(divider);
+
+        const collapsedList = snap.ownSupply.collapsedMunicipalities.length > 0
+            ? snap.ownSupply.collapsedMunicipalities.join(', ')
+            : 'None';
+        lines.push(`  Collapsed: ${collapsedList}`);
+        lines.push(`  Critical: ${snap.ownSupply.criticalCount}`);
+        lines.push(`  Strained: ${snap.ownSupply.strainedCount}`);
+
+        lines.push('');
+
+        // 6. CORPS OPERATIONS
+        lines.push('CORPS OPERATIONS');
+        lines.push(divider);
+
+        if (snap.ownCorpsOps.length === 0) {
+            lines.push('  No corps commands active.');
+        } else {
+            for (const co of snap.ownCorpsOps) {
+                const opInfo = co.operation
+                    ? `Op: ${co.operation.type} | Phase: ${co.operation.phase} (since T${co.operation.started_turn})`
+                    : 'No active operation';
+                lines.push(`  ${co.corpsName} | Stance: ${co.stance} | ${opInfo}`);
+            }
+        }
+
+        return lines.join('\n');
+    }
+
+    /**
+     * Render Phase 0 reports modal (pre-war municipality intelligence).
+     */
+    private renderPhase0(): HTMLElement {
         const content = this.generateContent();
 
         const report = document.createElement('div');
@@ -251,5 +378,79 @@ export class ReportsModal {
         report.appendChild(signature);
 
         return report;
+    }
+
+    /**
+     * Render war-phase (Phase I/II) operational intelligence brief.
+     */
+    private renderWarPhase(): HTMLElement {
+        const turn = this.gameState.meta.turn;
+        const reportTurn = Math.max(0, turn - 1);
+        const factionId = getPlayerFaction(this.gameState);
+        const snap = extractWarData(this.gameState, factionId);
+
+        const headers = WAR_REPORT_HEADERS[factionId] ?? WAR_REPORT_HEADERS['RBiH'];
+        const reportBody = this.generateWarReportBody(snap, reportTurn);
+
+        const report = document.createElement('div');
+        const fCss = factionCssClass(factionId);
+        report.className = `reports-modal faction-${fCss}`;
+        const fc = FACTION_COLORS[factionId] ?? FACTION_COLORS['RBiH'];
+        report.style.borderTop = `3px solid ${fc.primary}`;
+
+        // Classification stamps
+        const classTop = document.createElement('div');
+        classTop.className = 'report-classification-top';
+        classTop.textContent = 'CONFIDENTIAL';
+        report.appendChild(classTop);
+
+        const classBottom = document.createElement('div');
+        classBottom.className = 'report-classification-bottom';
+        classBottom.textContent = 'CONFIDENTIAL';
+        report.appendChild(classBottom);
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'report-header';
+        header.innerHTML = `
+            <div class="report-field">
+                <span class="report-field-label">FROM:</span> ${headers.from}
+            </div>
+            <div class="report-field">
+                <span class="report-field-label">TO:</span> ${headers.to}
+            </div>
+            <div class="report-field">
+                <span class="report-field-label">DATE:</span> ${turnToDateString(reportTurn)}
+            </div>
+            <div class="report-field">
+                <span class="report-field-label">SUBJECT:</span> Operational Intelligence Brief - Week ${reportTurn}
+            </div>
+        `;
+        report.appendChild(header);
+
+        // Body (white-space and font already handled by CSS .report-body)
+        const body = document.createElement('div');
+        body.className = 'report-body';
+        body.textContent = reportBody;
+        report.appendChild(body);
+
+        // Signature
+        const signature = document.createElement('div');
+        signature.className = 'report-signature';
+        signature.textContent = headers.signature;
+        report.appendChild(signature);
+
+        return report;
+    }
+
+    /**
+     * Render the reports modal as HTML element.
+     * Phase gate: Phase 0 shows municipality intelligence,
+     * war phases (Phase I/II) show operational intelligence briefs.
+     */
+    render(): HTMLElement {
+        const phase = this.gameState.meta.phase ?? 'phase_0';
+        if (phase === 'phase_0') return this.renderPhase0();
+        return this.renderWarPhase();
     }
 }

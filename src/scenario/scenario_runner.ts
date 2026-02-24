@@ -11,6 +11,7 @@ import { join } from 'node:path';
 
 import { loadSettlementEthnicityData } from '../data/settlement_ethnicity.js';
 import { computeFrontEdges } from '../map/front_edges.js';
+import type { LoadedSettlementGraph } from '../map/settlements.js';
 import { loadSettlementGraph } from '../map/settlements.js';
 import { BotManager } from '../sim/bot/bot_manager.js';
 import { getBotStrategyProfile } from '../sim/bot/bot_strategy.js';
@@ -21,8 +22,7 @@ import { ensureRbihHrhbState } from '../sim/phase_i/alliance_update.js';
 import type { ControlEvent } from '../sim/phase_i/control_flip.js';
 import { buildSettlementsByMun } from '../sim/phase_i/control_strain.js';
 import { updateMilitiaEmergence } from '../sim/phase_i/militia_emergence.js';
-import { runPoolPopulation } from '../sim/phase_i/pool_population.js';
-import { initializeBrigadeAoR } from '../sim/phase_ii/brigade_aor.js';
+import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../sim/phase_i/pool_population.js';
 import { initializeCorpsCommand } from '../sim/phase_ii/corps_command.js';
 import {
     initializeRecruitmentResources,
@@ -57,6 +57,7 @@ import {
     applyBaselineOpsExhaustion,
     computeEngagementLevel
 } from './baseline_ops_scheduler.js';
+import { backfillFormationLocationOsid, loadOperationalData, loadOperationalEdges } from './../data/operational_data.js';
 import { loadInitialFormations } from './initial_formations_loader.js';
 import {
     loadMunicipalityHqSettlement,
@@ -66,8 +67,10 @@ import {
     type OobCorps
 } from './oob_loader.js';
 import {
+    buildOsidToMunFromReverseMap,
     buildSidToMunFromSettlements,
-    createOobFormationsAtPhaseIEntry
+    createOobFormationsAtPhaseIEntry,
+    spreadBrigadesToFrontOsids
 } from './oob_phase_i_entry.js';
 import { buildOpsCompareConclusion, formatOpsCompareMarkdown } from './ops_compare.js';
 import {
@@ -106,12 +109,6 @@ export function applyActionsToState(_state: GameState, _actions: ScenarioAction[
     // No-op and note do not mutate state. Future action types will mutate here.
 }
 
-import {
-    ensureFormationHomeMunsInFactionAoR,
-    populateFactionAoRFromControl
-} from './aor_init.js';
-export { ensureFormationHomeMunsInFactionAoR, populateFactionAoRFromControl };
-
 /**
  * Build initial GameState using canonical constructor (fixed minimal config; no env-dependent values).
  * Uses same default loadSettlementGraph() and prepareNewGameState() as sim_run; requires
@@ -125,14 +122,23 @@ export async function createInitialGameState(
     seed: string,
     controlPath?: string,
     initOptions?: { init_control_mode?: 'institutional' | 'ethnic_1991' | 'hybrid_1992'; ethnic_override_threshold?: number },
-    options?: { baseDir?: string; organizationalPenetrationSeed?: OrganizationalPenetrationSeedOptions }
+    options?: {
+        baseDir?: string;
+        organizationalPenetrationSeed?: OrganizationalPenetrationSeedOptions;
+        /** When provided, use this graph for control init (must match graph used for run/recruitment). */
+        settlementGraph?: LoadedSettlementGraph;
+        /** When provided, political_controllers are promoted to OSID keying (OSID as base layer). */
+        operationalData?: Awaited<ReturnType<typeof loadOperationalData>> | null;
+    }
 ): Promise<GameState> {
-    const graph = options?.baseDir
-        ? await loadSettlementGraph({
-            settlementsPath: join(options.baseDir, 'data/source/settlements_initial_master.json'),
-            edgesPath: join(options.baseDir, 'data/derived/settlement_edges.json')
-        })
-        : await loadSettlementGraph();
+    const graph =
+        options?.settlementGraph ??
+        (options?.baseDir
+            ? await loadSettlementGraph({
+                settlementsPath: join(options.baseDir, 'data/derived/operational/operational_settlements.geojson'),
+                edgesPath: join(options.baseDir, 'data/derived/operational/operational_contact_graph.json')
+            })
+            : await loadSettlementGraph());
     const state: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 0, seed, phase: 'phase_ii' },
@@ -159,7 +165,10 @@ export async function createInitialGameState(
             negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
         };
     });
-    await prepareNewGameState(state, graph, controlPath, initOptions);
+    const mergedInitOptions = options?.operationalData
+        ? { ...initOptions, operationalToCanonical: options.operationalData.operationalToCanonical }
+        : initOptions;
+    await prepareNewGameState(state, graph, controlPath, mergedInitOptions);
     if (controlPath || initOptions?.init_control_mode) {
         seedOrganizationalPenetrationFromControl(state, graph.settlements, options?.organizationalPenetrationSeed);
     }
@@ -539,7 +548,7 @@ function settlementIdsFromFrontDescriptors(
  * Create OOB formations at Phase I entry via recruitment or legacy auto-spawn.
  * Shared helper to avoid duplication across startup and Phase 0→I transitions.
  */
-function createOobFormations(
+async function createOobFormations(
     state: GameState,
     scenario: Scenario,
     oobCorps: OobCorps[],
@@ -547,8 +556,11 @@ function createOobFormations(
     settlements: Map<string, import('../map/settlements.js').SettlementRecord>,
     municipalityHqSettlement: Record<string, string>,
     sidToMun: Map<string, string>,
-    municipalityPopulation1991: MunicipalityPopulation1991 | undefined
-): void {
+    municipalityPopulation1991: MunicipalityPopulation1991 | undefined,
+    canonicalToOperational?: import('../data/operational_data.js').CanonicalToOperationalMap,
+    operationalData?: Awaited<ReturnType<typeof loadOperationalData>> | null,
+    baseDir?: string
+): Promise<void> {
     if (scenario.recruitment_mode === 'player_choice') {
         // Ensure phase_i militia strength exists before deriving pool availability.
         if (!state.phase_i_militia_strength || Object.keys(state.phase_i_militia_strength).length === 0) {
@@ -557,6 +569,7 @@ function createOobFormations(
         // Recruitment spends from militia pools; seed them first at Phase I entry.
         if (!state.militia_pools || Object.keys(state.militia_pools).length === 0) {
             runPoolPopulation(state, settlements, municipalityPopulation1991);
+            applyRsJnaInheritanceBonus(state, municipalityPopulation1991);
         }
         const factionIds = (state.factions ?? []).map(f => f.id);
         const resources = initializeRecruitmentResources(
@@ -575,12 +588,13 @@ function createOobFormations(
                 [],
                 municipalityHqSettlement,
                 sidToMun,
-                municipalityPopulation1991
+                municipalityPopulation1991,
+                canonicalToOperational
             );
             console.log('[Recruitment] Deferred start enabled: initial setup created corps/army_hq only.');
             return;
         }
-        const report = runBotRecruitment(state, oobCorps, oobBrigades, resources, sidToMun, municipalityHqSettlement);
+        const report = runBotRecruitment(state, oobCorps, oobBrigades, resources, sidToMun, municipalityHqSettlement, { canonicalToOperational });
         console.log(
             `[Recruitment] Mandatory: ${report.mandatory_recruited}, ` +
             `Elective: ${report.elective_recruited}, ` +
@@ -596,7 +610,26 @@ function createOobFormations(
             );
         }
     } else if (scenario.init_formations_oob) {
-        createOobFormationsAtPhaseIEntry(state, oobCorps, oobBrigades, municipalityHqSettlement, sidToMun, municipalityPopulation1991);
+        createOobFormationsAtPhaseIEntry(state, oobCorps, oobBrigades, municipalityHqSettlement, sidToMun, municipalityPopulation1991, canonicalToOperational);
+    }
+
+    // Spread brigades from stacked HQ OSIDs to front-line positions.
+    // Requires operational data (edges + reverse map) for OSID graph analysis.
+    if (operationalData?.operationalToCanonical) {
+        try {
+            const opEdges = await loadOperationalEdges(baseDir);
+            if (opEdges.length > 0) {
+                const spreadReport = spreadBrigadesToFrontOsids(state, opEdges, operationalData.operationalToCanonical);
+                const totalSpread = Object.values(spreadReport.brigades_spread).reduce((a, b) => a + b, 0);
+                const totalCovered = Object.values(spreadReport.front_osids_covered).reduce((a, b) => a + b, 0);
+                console.log(`[Placement] Spread ${totalSpread} brigades to front; ${totalCovered} front OSIDs now covered`);
+                for (const faction of Object.keys(spreadReport.brigades_spread).sort() as FactionId[]) {
+                    console.log(`  ${faction}: spread=${spreadReport.brigades_spread[faction]} covered=${spreadReport.front_osids_covered[faction]}`);
+                }
+            }
+        } catch (e) {
+            console.log(`[Placement] Skipped front spreading: ${(e as Error).message}`);
+        }
     }
 }
 
@@ -675,6 +708,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         if (injectFailureAfterRunMeta) {
             injectFailureAfterRunMeta();
         }
+        // Use canonical graph for init and run so control keys match recruitment (sidToMun / factionHasPresenceInMun).
         const graph = baseDir
             ? await loadSettlementGraph({
                 settlementsPath: join(baseDir, 'data/source/settlements_initial_master.json'),
@@ -750,6 +784,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         let oobBrigades: OobBrigade[] = [];
         let oobCorps: OobCorps[] = [];
         let municipalityHqSettlement: Record<string, string> = {};
+        let operationalData: Awaited<ReturnType<typeof loadOperationalData>> | null = null;
+        try {
+            operationalData = await loadOperationalData(baseDir);
+        } catch {
+            // canonical_to_operational_map.json may be missing; location_osid will not be set
+        }
         if (scenario.init_formations_oob || scenario.recruitment_mode === 'player_choice') {
             oobBrigades = await loadOobBrigades(baseDir);
             oobCorps = await loadOobCorps(baseDir);
@@ -776,7 +816,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     return name ?? null;
                 }
                 : undefined;
-        const sidToMun = buildSidToMunFromSettlements(graph.settlements);
+        let sidToMun = buildSidToMunFromSettlements(graph.settlements);
         const warStartTurnForOrgPenSeeding =
             scenario.start_phase === 'phase_0'
                 ? (scenario.phase_0_war_start_turn ?? (scenario.phase_0_referendum_turn ?? 0) + 4)
@@ -809,8 +849,24 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 : undefined;
         let state = await createInitialGameState('harness-seed', controlPath, initOptions, {
             baseDir,
-            organizationalPenetrationSeed
+            organizationalPenetrationSeed,
+            settlementGraph: graph,
+            operationalData: operationalData ?? undefined
         });
+
+        // After state creation, political_controllers may have been promoted to OSID keys
+        // (OSID-as-base-layer). Rebuild sidToMun as OSID→mun so factionHasPresenceInMun,
+        // resolveValidHqSid, and other consumers match the pc keying scheme.
+        if (operationalData?.operationalToCanonical) {
+            const pc = state.political_controllers ?? {};
+            const firstKey = Object.keys(pc)[0];
+            if (firstKey?.startsWith('op:')) {
+                sidToMun = buildOsidToMunFromReverseMap(
+                    operationalData.operationalToCanonical,
+                    sidToMun
+                );
+            }
+        }
 
         // When init_formations_oob is true, OOB creates formations at Phase I entry; do not load placeholder init_formations.
         if (formationsPath && !scenario.init_formations_oob) {
@@ -821,10 +877,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
         }
 
-        // Phase I forbids AoR; only populate when starting in phase_ii (or legacy no start_phase).
-        if (scenario.start_phase !== 'phase_0' && scenario.start_phase !== 'phase_i') {
-            populateFactionAoRFromControl(state, graph.settlements.keys());
-        }
+        // AoR phase-out: no populateFactionAoRFromControl; Phase II uses location_osid / OSID fronts.
 
         if (scenario.start_phase === 'phase_0') {
             const referendumHeldAtStart = scenario.phase_0_referendum_held_at_start ?? true;
@@ -913,8 +966,17 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 }
                 if (!state.militia_pools || Object.keys(state.militia_pools).length === 0) {
                     runPoolPopulation(state, graph.settlements, municipalityPopulation1991);
+                    applyRsJnaInheritanceBonus(state, municipalityPopulation1991);
                 }
             }
+        }
+
+        // Calendar start date for UI display (non-normative).
+        // Phase 0 scenarios start 1 September 1991; war-start scenarios start 6 April 1992.
+        if (scenario.start_phase === 'phase_0') {
+            state.meta.scenario_start_date = { year: 1991, month: 8, day: 1 };
+        } else {
+            state.meta.scenario_start_date = { year: 1992, month: 3, day: 6 };
         }
 
         // Seed displacement_state from 1991 census when available (Phase I/II only) so receiving capacity and map population scale by real mun size.
@@ -957,7 +1019,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
         // Create OOB formations at Phase I or Phase II start (recruitment or legacy auto-spawn)
         if ((scenario.start_phase === 'phase_i' || scenario.start_phase === 'phase_ii') && !oobCreated) {
-            createOobFormations(
+            await createOobFormations(
                 state,
                 scenario,
                 oobCorps,
@@ -965,17 +1027,20 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 graph.settlements,
                 municipalityHqSettlement,
                 sidToMun,
-                municipalityPopulation1991
+                municipalityPopulation1991,
+                operationalData?.canonicalToOperational,
+                operationalData,
+                baseDir
             );
             oobCreated = true;
         }
 
-        // Phase II entry: initialize corps command FIRST (reads formations only), then brigade AoR
-        // (corps_command must exist so ensureBrigadeMunicipalityAssignment takes the corps-directed path
-        // which includes enforceContiguity + enforceCorpsLevelContiguity)
-        if (scenario.start_phase === 'phase_ii' && graph.edges.length > 0) {
+        // Phase II entry: initialize corps command; location_osid via backfill (AoR phase-out).
+        if (scenario.start_phase === 'phase_ii') {
             initializeCorpsCommand(state);
-            initializeBrigadeAoR(state, graph.edges, graph.settlements);
+        }
+        if (operationalData?.canonicalToOperational) {
+            backfillFormationLocationOsid(state, operationalData.canonicalToOperational);
         }
         const historicalMetricsInitial = captureHistoricalFactionMetrics(state);
 
@@ -1218,7 +1283,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     phase_ii_front_emergence: []
                 } as Awaited<ReturnType<typeof runTurn>>['report'];
                 if (!oobCreated && state.meta.phase === 'phase_i') {
-                    createOobFormations(
+                    await createOobFormations(
                         state,
                         scenario,
                         oobCorps,
@@ -1226,7 +1291,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                         graph.settlements,
                         municipalityHqSettlement,
                         sidToMun,
-                        municipalityPopulation1991
+                        municipalityPopulation1991,
+                        operationalData?.canonicalToOperational,
+                        operationalData,
+                        baseDir
                     );
                     oobCreated = true;
                 }
@@ -1244,7 +1312,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 state = runResult.nextState;
                 turnReport = runResult.report;
                 if (!oobCreated && state.meta.phase === 'phase_i') {
-                    createOobFormations(
+                    await createOobFormations(
                         state,
                         scenario,
                         oobCorps,
@@ -1252,7 +1320,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                         graph.settlements,
                         municipalityHqSettlement,
                         sidToMun,
-                        municipalityPopulation1991
+                        municipalityPopulation1991,
+                        operationalData?.canonicalToOperational,
+                        operationalData,
+                        baseDir
                     );
                     oobCreated = true;
                 }
@@ -1268,30 +1339,40 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 phaseIIAttackResolutionSummary.weeks_with_phase_ii += 1;
                 phaseIITakeoverDisplacementSummary.weeks_with_phase_ii += 1;
                 const phaseIIResolution = turnReport.phase_ii_resolve_attack_orders;
+                // OSID attack resolution writes to a different report key
+                const osidResolution = (turnReport as unknown as Record<string, unknown>).phase_ii_attack_resolution_osid as {
+                    orders_processed?: number; unique_attack_targets?: number; flips_applied?: number;
+                    casualty_attacker?: number; casualty_defender?: number; orders_by_faction?: Record<string, number>;
+                    battles?: Array<{ defender_brigade?: string | null }>;
+                } | undefined;
+                // Use whichever report is available (legacy or OSID)
+                const res = phaseIIResolution ?? osidResolution;
                 let weeklyDefenderPresentBattles = 0;
                 let weeklyDefenderAbsentBattles = 0;
-                for (const battle of phaseIIResolution?.battle_report?.battles ?? []) {
+                // Count defender-present battles from either format
+                const battleList = phaseIIResolution?.battle_report?.battles ?? osidResolution?.battles ?? [];
+                for (const battle of battleList) {
                     if (battle.defender_brigade != null) weeklyDefenderPresentBattles += 1;
                     else weeklyDefenderAbsentBattles += 1;
                 }
-                if (phaseIIResolution) {
-                    phaseIIAttackResolutionSummary.orders_processed += phaseIIResolution.orders_processed ?? 0;
-                    phaseIIAttackResolutionSummary.unique_attack_targets += phaseIIResolution.unique_attack_targets ?? 0;
-                    phaseIIAttackResolutionSummary.flips_applied += phaseIIResolution.flips_applied ?? 0;
-                    phaseIIAttackResolutionSummary.casualty_attacker += phaseIIResolution.casualty_attacker ?? 0;
-                    phaseIIAttackResolutionSummary.casualty_defender += phaseIIResolution.casualty_defender ?? 0;
+                if (res) {
+                    phaseIIAttackResolutionSummary.orders_processed += res.orders_processed ?? 0;
+                    phaseIIAttackResolutionSummary.unique_attack_targets += res.unique_attack_targets ?? 0;
+                    phaseIIAttackResolutionSummary.flips_applied += res.flips_applied ?? 0;
+                    phaseIIAttackResolutionSummary.casualty_attacker += res.casualty_attacker ?? 0;
+                    phaseIIAttackResolutionSummary.casualty_defender += res.casualty_defender ?? 0;
                     phaseIIAttackResolutionSummary.defender_present_battles += weeklyDefenderPresentBattles;
                     phaseIIAttackResolutionSummary.defender_absent_battles += weeklyDefenderAbsentBattles;
-                    const obf = phaseIIResolution.orders_by_faction ?? {};
+                    const obf = res.orders_by_faction ?? {};
                     for (const fid of Object.keys(obf).sort()) {
                         phaseIIAttackResolutionSummary.orders_by_faction[fid] =
                             (phaseIIAttackResolutionSummary.orders_by_faction[fid] ?? 0) + (obf[fid] ?? 0);
                     }
-                    if ((phaseIIResolution.orders_processed ?? 0) > 0) {
+                    if ((res.orders_processed ?? 0) > 0) {
                         phaseIIAttackResolutionSummary.weeks_with_orders += 1;
                     }
                 }
-                const weeklyObf = phaseIIResolution?.orders_by_faction ?? {};
+                const weeklyObf = res?.orders_by_faction ?? {};
                 const weeklyOrdersByFaction: Record<string, number> = {};
                 for (const fid of Object.keys(weeklyObf).sort()) {
                     weeklyOrdersByFaction[fid] = weeklyObf[fid] ?? 0;
@@ -1299,11 +1380,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 phaseIIAttackResolutionWeekly.push({
                     week_index,
                     turn: state.meta.turn,
-                    orders_processed: phaseIIResolution?.orders_processed ?? 0,
-                    unique_attack_targets: phaseIIResolution?.unique_attack_targets ?? 0,
-                    flips_applied: phaseIIResolution?.flips_applied ?? 0,
-                    casualty_attacker: phaseIIResolution?.casualty_attacker ?? 0,
-                    casualty_defender: phaseIIResolution?.casualty_defender ?? 0,
+                    orders_processed: res?.orders_processed ?? 0,
+                    unique_attack_targets: res?.unique_attack_targets ?? 0,
+                    flips_applied: res?.flips_applied ?? 0,
+                    casualty_attacker: res?.casualty_attacker ?? 0,
+                    casualty_defender: res?.casualty_defender ?? 0,
                     defender_present_battles: weeklyDefenderPresentBattles,
                     defender_absent_battles: weeklyDefenderAbsentBattles,
                     orders_by_faction: weeklyOrdersByFaction
@@ -1543,7 +1624,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             const referenceControlPath = resolveInitControlPath('data/scenarios/initial_control/jan1993.json', baseDir);
             const historicalReferenceState = await createInitialGameState('harness-historical-reference', referenceControlPath, {
                 init_control_mode: 'institutional'
-            });
+            }, { baseDir, settlementGraph: graph, operationalData: operationalData ?? undefined });
             const historicalReferenceSnapshot = extractSettlementControlSnapshot(historicalReferenceState, graph);
             historicalControlAlignment = computeHistoricalControlAlignmentDiagnostics(
                 finalControlSnapshot,
@@ -1588,6 +1669,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 : {}),
             ...(phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0 && state.civilian_casualties
                 ? { civilian_casualties: state.civilian_casualties }
+                : {}),
+            ...(phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0
+                ? {
+                    front_corps_tracking: {
+                        corps_front_edges_present: !!(state.corps_front_edges && Object.keys(state.corps_front_edges).length > 0),
+                        corps_count: Object.keys(state.corps_front_edges ?? {}).length
+                    }
+                }
                 : {}),
             ...(botBenchmarkSummary ? { bot_benchmark_evaluation: botBenchmarkSummary } : {}),
             ...(victoryEvaluation ? { victory: victoryEvaluation } : {}),

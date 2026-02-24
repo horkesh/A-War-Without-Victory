@@ -88,11 +88,12 @@ function getSettlementMinorityPop(
         settlementShare = munPopFromSettlements > 0 ? settlementPop / munPopFromSettlements : settlementShare;
     }
     const total = Math.max(0, Math.floor(minorityTotal * settlementShare));
-    return {
+    const result = {
         total,
         toRBiH: Math.floor(toRBiH * (total / (minorityTotal || 1))),
         toHRHB: Math.floor(toHRHB * (total / (minorityTotal || 1)))
     };
+    return result;
 }
 
 function addToCamp(

@@ -7,6 +7,7 @@ import { computeFrontRegions } from '../map/front_regions.js';
 import { getValidMunicipalityIds } from '../map/municipalities.js';
 import { loadSettlementGraph } from '../map/settlements.js';
 import { spawnFormationsFromPools } from '../sim/formation_spawn.js';
+import { loadOperationalData, type CanonicalToOperationalMap } from '../data/operational_data.js';
 import type { GameState, MilitiaPoolState } from '../state/game_state.js';
 import { canonicalizePoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
@@ -198,7 +199,8 @@ export function generateFormationsFromPools(
     applyChanges: boolean,
     formationKind: 'militia' | 'brigade' | null = null,
     historicalNameLookup: ((faction: string, mun_id: string, ordinal: number) => string | null) | null = null,
-    historicalHqLookup: ((faction: string, mun_id: string, ordinal: number) => string | null) | null = null
+    historicalHqLookup: ((faction: string, mun_id: string, ordinal: number) => string | null) | null = null,
+    canonicalToOperational?: CanonicalToOperationalMap
 ): GenerationReportFile {
     ensureFormations(state);
     ensureMilitiaPools(state);
@@ -214,7 +216,8 @@ export function generateFormationsFromPools(
         applyChanges,
         formationKind,
         historicalNameLookup,
-        historicalHqLookup
+        historicalHqLookup,
+        canonicalToOperational
     });
 
     // Build per_municipality from spawn report (group created by mun_id + faction)
@@ -306,6 +309,7 @@ async function main(): Promise<void> {
     // Load OOB data for historical accuracy
     let historicalNameLookup: ((faction: string, mun_id: string, ordinal: number) => string | null) | null = null;
     let historicalHqLookup: ((faction: string, mun_id: string, ordinal: number) => string | null) | null = null;
+    let canonicalToOperational: CanonicalToOperationalMap | undefined;
 
     try {
         const repoRoot = process.cwd();
@@ -353,6 +357,14 @@ async function main(): Promise<void> {
         console.warn('Failed to load OOB data, falling back to procedural generation:', e);
     }
 
+    try {
+        const opData = await loadOperationalData();
+        canonicalToOperational = opData.canonicalToOperational;
+        if (!opts.dryRun) process.stdout.write('  loaded canonical_to_operational_map for location_osid pass-through\n');
+    } catch (e) {
+        console.warn('Failed to load canonical_to_operational_map; spawned formations may miss location_osid:', e);
+    }
+
     // Generate report (only apply changes if not dry-run)
     const report = generateFormationsFromPools(
         state,
@@ -364,7 +376,8 @@ async function main(): Promise<void> {
         !opts.dryRun,
         opts.kind,
         historicalNameLookup,
-        historicalHqLookup
+        historicalHqLookup,
+        canonicalToOperational
     );
 
     // Validate (even in dry-run to catch logic errors)

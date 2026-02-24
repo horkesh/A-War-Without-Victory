@@ -38,27 +38,53 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * Parse settlements from JSON. Expected format: { settlements: [{ sid, source_id, mun_code, mun, name?, mun1990_id? }, ...] }.
  */
 export function parseSettlements(json: unknown): Map<string, SettlementRecord> {
-    const settlementsArray =
-        isRecord(json) && Array.isArray(json.settlements) ? json.settlements : null;
-    if (!settlementsArray) {
-        throw new Error('Unsupported settlements format (expected { settlements: [...] })');
-    }
     const map = new Map<string, SettlementRecord>();
-    for (const item of settlementsArray) {
-        if (!isRecord(item) || typeof item.sid !== 'string') {
-            throw new Error(`Invalid settlement record: missing sid (got ${JSON.stringify(item).substring(0, 100)})`);
+
+    // Support either old { settlements: [...] } or GeoJSON { type: "FeatureCollection", features: [...] }
+    let featuresArray: any[] | null = null;
+
+    if (isRecord(json)) {
+        if (Array.isArray(json.settlements)) {
+            featuresArray = json.settlements;
+        } else if (json.type === 'FeatureCollection' && Array.isArray(json.features)) {
+            featuresArray = json.features;
         }
-        if (typeof item.source_id !== 'string' || typeof item.mun_code !== 'string' || typeof item.mun !== 'string') {
-            throw new Error(`Invalid settlement record: missing required fields (sid: ${item.sid})`);
+    }
+
+    if (!featuresArray) {
+        throw new Error('Unsupported settlements format (expected { settlements: [...] } or GeoJSON FeatureCollection)');
+    }
+
+    for (const item of featuresArray) {
+        // If it's a GeoJSON feature, extract properties
+        const isGeoJsonFeature = isRecord(item) && item.type === 'Feature' && isRecord(item.properties);
+        const props = isGeoJsonFeature ? item.properties : item;
+
+        // In operational layer, sid is 'osid' mapped to 'sid' in memory to satisfy SettlementRecord interface
+        const sidVal = (props.osid as string) || (props.sid as string);
+
+        if (typeof sidVal !== 'string') {
+            throw new Error(`Invalid settlement record: missing sid/osid (got ${JSON.stringify(props).substring(0, 100)})`);
         }
+
+        if (typeof props.mun1990_id !== 'string') {
+            throw new Error(`Invalid settlement record: missing mun1990_id (sid: ${sidVal})`);
+        }
+
         const record: SettlementRecord = {
-            sid: item.sid,
-            source_id: item.source_id,
-            mun_code: item.mun_code,
-            mun: item.mun
+            sid: sidVal,
+            source_id: (props.source_id as string) || sidVal,
+            mun_code: (props.mun_code as string) || props.mun1990_id,
+            mun: (props.mun as string) || (props.mun1990_name as string) || props.mun1990_id,
+            mun1990_id: props.mun1990_id
         };
-        if (typeof item.name === 'string') record.name = item.name;
-        if (typeof item.mun1990_id === 'string') record.mun1990_id = item.mun1990_id;
+
+        if (typeof props.settlement_name === 'string') record.name = props.settlement_name;
+        else if (typeof props.name === 'string') record.name = props.name;
+
+        // Preserve properties for other systems
+        record.properties = { ...props, is_orphan: false, usesFallbackGeometry: false } as Record<string, unknown>;
+
         map.set(record.sid, record);
     }
     return map;

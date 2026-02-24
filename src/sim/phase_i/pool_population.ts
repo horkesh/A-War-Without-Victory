@@ -78,6 +78,69 @@ const RBIH_CROSS_ETHNIC_SHARE = 0.12;
 /** RBiH cross-ethnic cap per mun per turn. */
 const RBIH_CROSS_ETHNIC_CAP_PER_MUN = 500;
 
+/**
+ * RS JNA inheritance: one-time pool bonus at scenario init (12 May 1992).
+ * Includes JNA regulars (~10K), trained reservists (~15K), and TO cadres (~5K)
+ * absorbed by VRS during May-June 1992 handover. Calibrated to historical RS start ~80K.
+ */
+const RS_JNA_INHERITANCE_BONUS = 30_000;
+
+export interface RsJnaInheritanceReport {
+    total_added: number;
+    pools_updated: number;
+}
+
+/**
+ * Apply one-time RS JNA inheritance bonus to RS militia pools. Distribution proportional to eligible Serb population.
+ * Call after runPoolPopulation at scenario init. Deterministic: sorted pool keys.
+ */
+export function applyRsJnaInheritanceBonus(
+    state: GameState,
+    population1991ByMun?: MunicipalityPopulation1991Map
+): RsJnaInheritanceReport {
+    const report: RsJnaInheritanceReport = { total_added: 0, pools_updated: 0 };
+    if (!state.militia_pools || typeof state.militia_pools !== 'object') return report;
+    if (!population1991ByMun || Object.keys(population1991ByMun).length === 0) return report;
+    const pools = state.militia_pools as Record<string, MilitiaPoolState>;
+    const currentTurn = state.meta.turn;
+
+    const rsPoolKeys = (Object.keys(pools) as string[]).filter((k) => pools[k].faction === 'RS').sort(strictCompare);
+    if (rsPoolKeys.length === 0) return report;
+
+    let totalEligible = 0;
+    const eligibleByKey: Record<string, number> = {};
+    for (const key of rsPoolKeys) {
+        const pool = pools[key];
+        const munId = pool.mun_id;
+        const serb = getEligiblePopulationCount(population1991ByMun, munId, 'RS');
+        eligibleByKey[key] = serb;
+        totalEligible += serb;
+    }
+
+    if (totalEligible <= 0) {
+        const evenShare = Math.floor(RS_JNA_INHERITANCE_BONUS / rsPoolKeys.length);
+        for (const key of rsPoolKeys) {
+            pools[key].available += evenShare;
+            pools[key].updated_turn = currentTurn;
+            report.total_added += evenShare;
+            report.pools_updated += 1;
+        }
+        return report;
+    }
+
+    let allocated = 0;
+    for (const key of rsPoolKeys) {
+        const share = eligibleByKey[key]! / totalEligible;
+        const add = Math.floor(RS_JNA_INHERITANCE_BONUS * share);
+        pools[key].available += add;
+        pools[key].updated_turn = currentTurn;
+        allocated += add;
+        report.pools_updated += 1;
+    }
+    report.total_added = allocated;
+    return report;
+}
+
 export interface PoolPopulationReport {
     pools_updated: number;
     pools_created: number;
@@ -85,7 +148,8 @@ export interface PoolPopulationReport {
     rbih_10pct_additions?: number;
 }
 
-function getMunicipalityController(
+/** Deterministic: majority control; tie-break by localeCompare(factionId). */
+export function getMunicipalityController(
     state: GameState,
     sids: string[]
 ): FactionId | null {
@@ -95,21 +159,19 @@ function getMunicipalityController(
         const key = c ?? '_null_';
         counts[key] = (counts[key] ?? 0) + 1;
     }
-    let best: string | null = null;
-    let bestCount = 0;
-    for (const [key, count] of Object.entries(counts)) {
-        if (count > bestCount) {
-            bestCount = count;
-            best = key === '_null_' ? null : key;
-        }
-    }
-    return best as FactionId | null;
+    const entries = (Object.entries(counts) as [string, number][]).filter(([k]) => k !== '_null_');
+    if (entries.length === 0) return null;
+    entries.sort((a, b) => {
+        if (b[1] !== a[1]) return b[1] - a[1];
+        return strictCompare(a[0], b[0]);
+    });
+    return entries[0][0] as FactionId;
 }
 
 /**
  * Build mun_id -> settlement ids from settlements map. Deterministic: sids sorted per mun.
  */
-function buildSettlementsByMun(
+export function buildSettlementsByMun(
     settlements: Map<string, SettlementRecord>
 ): Map<MunicipalityId, string[]> {
     const byMun = new Map<MunicipalityId, string[]>();
@@ -123,6 +185,135 @@ function buildSettlementsByMun(
         list.sort(strictCompare);
     }
     return byMun;
+}
+
+export interface DisplacedAndCrossEthnicReport {
+    displaced_contributions: number;
+    rbih_10pct_additions?: number;
+}
+
+/**
+ * Add displaced-in and RBiH cross-ethnic contributions to militia_pools.
+ * Shared by Phase I runPoolPopulation and Phase II ongoing mobilization. Deterministic.
+ */
+export function runDisplacedAndCrossEthnicContributions(
+    state: GameState,
+    settlements: Map<string, SettlementRecord>,
+    population1991ByMun?: MunicipalityPopulation1991Map
+): DisplacedAndCrossEthnicReport {
+    const report: DisplacedAndCrossEthnicReport = { displaced_contributions: 0 };
+    let rbih10pctTotal = 0;
+    if (!state.militia_pools || typeof state.militia_pools !== 'object') {
+        (state as GameState & { militia_pools: Record<string, MilitiaPoolState> }).militia_pools = {};
+    }
+    const pools = state.militia_pools as Record<string, MilitiaPoolState>;
+    const currentTurn = state.meta.turn;
+    const municipalities = state.municipalities ?? {};
+    const munIds = (Object.keys(municipalities) as MunicipalityId[]).slice().sort(strictCompare);
+    const settlementsByMun = buildSettlementsByMun(settlements);
+    const displacement = state.displacement_state ?? {};
+    const displacementMunIds = (Object.keys(displacement) as MunicipalityId[]).slice().sort(strictCompare);
+
+    for (const munId of displacementMunIds) {
+        const disp = displacement[munId] as DisplacementState | undefined;
+        if (!disp || disp.displaced_in <= 0) continue;
+        const sids = settlementsByMun.get(munId);
+        if (!sids?.length) continue;
+        const byFaction = disp.displaced_in_by_faction;
+        if (byFaction && typeof byFaction === 'object') {
+            for (const factionId of (Object.keys(byFaction) as FactionId[]).sort(strictCompare)) {
+                const displacedForFaction = byFaction[factionId];
+                if (displacedForFaction == null || displacedForFaction <= 0) continue;
+                const contribution = Math.min(
+                    Math.floor(displacedForFaction * REINFORCEMENT_RATE),
+                    DISPLACED_CONTRIBUTION_CAP
+                );
+                if (contribution <= 0) continue;
+                const key = militiaPoolKey(munId, factionId);
+                const pool = pools[key];
+                if (pool) {
+                    pool.available += contribution;
+                    pool.updated_turn = currentTurn;
+                    report.displaced_contributions += 1;
+                } else {
+                    pools[key] = {
+                        mun_id: munId,
+                        faction: factionId,
+                        available: contribution,
+                        committed: 0,
+                        exhausted: 0,
+                        updated_turn: currentTurn
+                    };
+                    report.displaced_contributions += 1;
+                }
+            }
+        } else {
+            const controller = getMunicipalityController(state, sids);
+            if (!controller) continue;
+            const contribution = Math.min(
+                Math.floor(disp.displaced_in * REINFORCEMENT_RATE),
+                DISPLACED_CONTRIBUTION_CAP
+            );
+            if (contribution <= 0) continue;
+            const key = militiaPoolKey(munId, controller);
+            const pool = pools[key];
+            if (pool) {
+                pool.available += contribution;
+                pool.updated_turn = currentTurn;
+                report.displaced_contributions += 1;
+            } else {
+                pools[key] = {
+                    mun_id: munId,
+                    faction: controller,
+                    available: contribution,
+                    committed: 0,
+                    exhausted: 0,
+                    updated_turn: currentTurn
+                };
+                report.displaced_contributions += 1;
+            }
+        }
+    }
+
+    const formations = state.formations ?? {};
+    const hasRBiHBrigade = Object.values(formations).some(
+        (f) => f && typeof f === 'object' && (f as { faction?: string; kind?: string }).faction === 'RBiH' && (f as { kind?: string }).kind === 'brigade'
+    );
+    if (hasRBiHBrigade && population1991ByMun) {
+        for (const munId of munIds) {
+            const sids = settlementsByMun.get(munId);
+            if (!sids?.length) continue;
+            const controller = getMunicipalityController(state, sids);
+            if (controller !== 'RBiH') continue;
+            const entry = population1991ByMun[munId];
+            if (!entry) continue;
+            const nonBosniak = entry.serb + entry.croat + entry.other;
+            if (nonBosniak <= 0) continue;
+            const rawContribution = Math.floor(
+                (nonBosniak / ELIGIBLE_POP_NORMALIZER) * POOL_SCALE_FACTOR * RBIH_CROSS_ETHNIC_SHARE
+            );
+            const contribution = Math.min(rawContribution, RBIH_CROSS_ETHNIC_CAP_PER_MUN);
+            if (contribution <= 0) continue;
+            const key = militiaPoolKey(munId, 'RBiH');
+            const pool = pools[key];
+            if (pool) {
+                pool.available += contribution;
+                pool.updated_turn = currentTurn;
+            } else {
+                pools[key] = {
+                    mun_id: munId,
+                    faction: 'RBiH',
+                    available: contribution,
+                    committed: 0,
+                    exhausted: 0,
+                    updated_turn: currentTurn
+                };
+            }
+            rbih10pctTotal += contribution;
+        }
+        if (rbih10pctTotal > 0) report.rbih_10pct_additions = rbih10pctTotal;
+    }
+    return report;
 }
 
 /**
@@ -142,7 +333,6 @@ export function runPoolPopulation(
         pools_created: 0,
         displaced_contributions: 0
     };
-    let rbih10pctTotal = 0;
 
     if (!state.militia_pools || typeof state.militia_pools !== 'object') {
         (state as GameState & { militia_pools: Record<string, MilitiaPoolState> }).militia_pools = {};
@@ -200,116 +390,10 @@ export function runPoolPopulation(
         }
     }
 
-    // 2) Displaced contribution: add to pool per mun. When displaced_in_by_faction is set (ethnicity-traced), add per faction; else add all displaced_in to controlling faction's pool.
-    const displacement = state.displacement_state ?? {};
-    const displacementMunIds = (Object.keys(displacement) as MunicipalityId[]).slice().sort(strictCompare);
-    const settlementsByMun = buildSettlementsByMun(settlements);
-
-    for (const munId of displacementMunIds) {
-        const disp = displacement[munId] as DisplacementState | undefined;
-        if (!disp || disp.displaced_in <= 0) continue;
-
-        const sids = settlementsByMun.get(munId);
-        if (!sids?.length) continue;
-
-        const byFaction = disp.displaced_in_by_faction;
-        if (byFaction && typeof byFaction === 'object') {
-            for (const factionId of (Object.keys(byFaction) as FactionId[]).sort(strictCompare)) {
-                const displacedForFaction = byFaction[factionId];
-                if (displacedForFaction == null || displacedForFaction <= 0) continue;
-                const contribution = Math.min(
-                    Math.floor(displacedForFaction * REINFORCEMENT_RATE),
-                    DISPLACED_CONTRIBUTION_CAP
-                );
-                if (contribution <= 0) continue;
-                const key = militiaPoolKey(munId, factionId);
-                const pool = pools[key];
-                if (pool) {
-                    pool.available += contribution;
-                    pool.updated_turn = currentTurn;
-                    report.displaced_contributions += 1;
-                } else {
-                    pools[key] = {
-                        mun_id: munId,
-                        faction: factionId,
-                        available: contribution,
-                        committed: 0,
-                        exhausted: 0,
-                        updated_turn: currentTurn
-                    };
-                    report.pools_created += 1;
-                    report.displaced_contributions += 1;
-                }
-            }
-        } else {
-            const controller = getMunicipalityController(state, sids);
-            if (!controller) continue;
-            const contribution = Math.min(
-                Math.floor(disp.displaced_in * REINFORCEMENT_RATE),
-                DISPLACED_CONTRIBUTION_CAP
-            );
-            if (contribution <= 0) continue;
-            const key = militiaPoolKey(munId, controller);
-            const pool = pools[key];
-            if (pool) {
-                pool.available += contribution;
-                pool.updated_turn = currentTurn;
-                report.displaced_contributions += 1;
-            } else {
-                pools[key] = {
-                    mun_id: munId,
-                    faction: controller,
-                    available: contribution,
-                    committed: 0,
-                    exhausted: 0,
-                    updated_turn: currentTurn
-                };
-                report.pools_created += 1;
-                report.displaced_contributions += 1;
-            }
-        }
-    }
-
-    // 3) RBiH 10% rule: when at least one RBiH brigade exists, add up to 10% of non-Bosniak eligible from RBiH-controlled muns to RBiH pools (design §3)
-    const formations = state.formations ?? {};
-    const hasRBiHBrigade = Object.values(formations).some(
-        (f) => f && typeof f === 'object' && (f as { faction?: string; kind?: string }).faction === 'RBiH' && (f as { kind?: string }).kind === 'brigade'
-    );
-    if (hasRBiHBrigade && population1991ByMun) {
-        for (const munId of munIds) {
-            const sids = settlementsByMun.get(munId);
-            if (!sids?.length) continue;
-            const controller = getMunicipalityController(state, sids);
-            if (controller !== 'RBiH') continue;
-            const entry = population1991ByMun[munId];
-            if (!entry) continue;
-            const nonBosniak = entry.serb + entry.croat + entry.other;
-            if (nonBosniak <= 0) continue;
-            const rawContribution = Math.floor(
-                (nonBosniak / ELIGIBLE_POP_NORMALIZER) * POOL_SCALE_FACTOR * RBIH_CROSS_ETHNIC_SHARE
-            );
-            const contribution = Math.min(rawContribution, RBIH_CROSS_ETHNIC_CAP_PER_MUN);
-            if (contribution <= 0) continue;
-            const key = militiaPoolKey(munId, 'RBiH');
-            const pool = pools[key];
-            if (pool) {
-                pool.available += contribution;
-                pool.updated_turn = currentTurn;
-            } else {
-                pools[key] = {
-                    mun_id: munId,
-                    faction: 'RBiH',
-                    available: contribution,
-                    committed: 0,
-                    exhausted: 0,
-                    updated_turn: currentTurn
-                };
-                report.pools_created += 1;
-            }
-            rbih10pctTotal += contribution;
-        }
-        if (rbih10pctTotal > 0) report.rbih_10pct_additions = rbih10pctTotal;
-    }
+    // 2) Displaced + 3) RBiH cross-ethnic: shared path (Phase I and Phase II).
+    const displacedReport = runDisplacedAndCrossEthnicContributions(state, settlements, population1991ByMun);
+    report.displaced_contributions = displacedReport.displaced_contributions;
+    if (displacedReport.rbih_10pct_additions != null) report.rbih_10pct_additions = displacedReport.rbih_10pct_additions;
 
     return report;
 }

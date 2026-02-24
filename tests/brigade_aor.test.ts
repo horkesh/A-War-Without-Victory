@@ -1,6 +1,7 @@
 /**
- * Tests for Phase II per-brigade AoR assignment.
- * Stage 1B of Brigade Operations System.
+ * Phase II brigade behavior. Legacy AoR (Area of Responsibility) is phased out;
+ * spatial model is OSID/location_osid only. describe.skip blocks below are retained
+ * for reference; they assert phased-out AoR init/apply/validate behavior.
  */
 import { describe, expect, it } from 'vitest';
 import type { EdgeRecord } from '../src/map/settlements.js';
@@ -16,7 +17,7 @@ import {
 } from '../src/sim/phase_ii/brigade_aor.js';
 import { getPersonnelBasedAoRCap, MAX_AOR_SETTLEMENTS } from '../src/state/formation_constants.js';
 import type { FactionId, FormationState, GameState } from '../src/state/game_state.js';
-import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
+import { CURRENT_SCHEMA_VERSION, getLegacyAoR } from '../src/state/game_state.js';
 
 function makeFormation(id: string, faction: FactionId, hq: string, personnel: number = 1000): FormationState {
     return {
@@ -108,7 +109,7 @@ describe('identifyFrontActiveSettlements', () => {
     });
 });
 
-describe('initializeBrigadeAoR', () => {
+describe.skip('initializeBrigadeAoR (phased out: OSID/location_osid only)', () => {
     it('assigns each brigade 1–4 contiguous settlements (personnel-based cap, BFS from HQ)', () => {
         const { state, edges } = makeLinearScenario();
         const report = initializeBrigadeAoR(state, edges);
@@ -135,7 +136,7 @@ describe('initializeBrigadeAoR', () => {
         const { state, edges } = makeLinearScenario();
         initializeBrigadeAoR(state, edges);
 
-        const assigned = Object.entries(state.brigade_aor ?? {}).filter(([, v]) => v != null);
+        const assigned = Object.entries(getLegacyAoR(state).brigade_aor ?? {}).filter(([, v]) => v != null);
         const totalSettlements = 12;
         const maxAssigned = 3 * MAX_AOR_SETTLEMENTS; // 3 brigades × 4
         expect(assigned.length).toBeLessThanOrEqual(maxAssigned);
@@ -355,7 +356,7 @@ describe('initializeBrigadeAoR', () => {
     });
 });
 
-describe('applyBrigadeMunicipalityOrders', () => {
+describe.skip('applyBrigadeMunicipalityOrders (phased out: no mun-level orders)', () => {
     it('moves brigade assignment to adjacent municipality deterministically', () => {
         const edges: EdgeRecord[] = [
             { a: 'T1', b: 'S1' },
@@ -400,11 +401,11 @@ describe('applyBrigadeMunicipalityOrders', () => {
 
         const report = applyBrigadeMunicipalityOrders(state, edges, settlements);
         expect(report.orders_applied).toBe(1);
-        expect(state.brigade_municipality_assignment?.['rs-b']).toEqual(['m1', 'm2']);
+        expect(getLegacyAoR(state).brigade_municipality_assignment?.['rs-b']).toEqual(['m1', 'm2']);
     });
 });
 
-describe('validateBrigadeAoR', () => {
+describe.skip('validateBrigadeAoR (phased out: no AoR validation)', () => {
     it('reassigns settlements from dissolved brigades', () => {
         const { state, edges } = makeLinearScenario();
         // Add two RS brigades
@@ -419,7 +420,7 @@ describe('validateBrigadeAoR', () => {
 
         // All RS settlements should now be assigned to rs-brig-1 (only surviving brigade)
         for (const sid of ['S3', 'S4']) {
-            const assigned = state.brigade_aor?.[sid];
+            const assigned = getLegacyAoR(state).brigade_aor?.[sid];
             if (assigned !== null) {
                 expect(assigned).toBe('rs-brig-1');
             }
@@ -429,7 +430,7 @@ describe('validateBrigadeAoR', () => {
     it('enforces contiguity and clears inactive brigade entries only (no mun-home reassignment)', () => {
         const { state, edges } = makeLinearScenario();
         initializeBrigadeAoR(state, edges);
-        const before = { ...(state.brigade_aor ?? {}) };
+        const before = { ...(getLegacyAoR(state).brigade_aor ?? {}) };
 
         validateBrigadeAoR(state, edges);
 
@@ -440,7 +441,7 @@ describe('validateBrigadeAoR', () => {
 });
 
 describe('computeBrigadeDensity', () => {
-    it('computes personnel / settlement count', () => {
+    it.skip('computes personnel / settlement count (phased out: init no-op)', () => {
         const { state, edges } = makeLinearScenario();
         state.formations['rs-brig-1'].personnel = 800;
         initializeBrigadeAoR(state, edges);

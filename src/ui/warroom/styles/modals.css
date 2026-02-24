@@ -569,6 +569,34 @@
 .newspaper-urgency-high { border-left: 3px solid #ffab00; }
 .newspaper-urgency-normal { border-left: 3px solid #252540; }
 
+/* World briefs sidebar — "also in the news" section */
+.newspaper-world-briefs {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #252540;
+}
+
+.newspaper-world-briefs-header {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #555570;
+    margin-bottom: 10px;
+}
+
+.newspaper-world-brief-item {
+    font-size: 10px;
+    line-height: 1.5;
+    color: #666680;
+    padding: 4px 0;
+    border-bottom: 1px solid #1a1a30;
+}
+
+.newspaper-world-brief-item:last-child {
+    border-bottom: none;
+}
+
 /* Faction-specific newspaper masthead separator */
 .faction-rbih .newspaper-masthead { color: rgb(55, 140, 75); }
 .faction-rs .newspaper-masthead { color: rgb(180, 50, 50); }

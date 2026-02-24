@@ -36,9 +36,18 @@ test('init_control apr1995: municipal anchors match apr1995 source snapshot', as
 
     const graph = await loadSettlementGraph();
     const sidToMun = new Map<string, string>();
-    for (const [sid, rec] of graph.settlements) {
+    for (const [_key, rec] of graph.settlements) {
         if (!rec.mun1990_id) continue;
-        sidToMun.set(sid, rec.mun1990_id);
+        // Map the primary key (osid or sid) to municipality
+        sidToMun.set(rec.sid, rec.mun1990_id);
+        // Also map constituent canonical SIDs (from operational settlements)
+        const props = rec.properties as Record<string, unknown> | undefined;
+        const constituents = props?.constituent_sids;
+        if (Array.isArray(constituents)) {
+            for (const csid of constituents) {
+                if (typeof csid === 'string') sidToMun.set(csid, rec.mun1990_id);
+            }
+        }
     }
 
     await ensureRemoved(BASE_OUT);

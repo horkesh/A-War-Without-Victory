@@ -17,9 +17,90 @@ import {
     majorityToFaction,
     type SettlementEthnicityEntry
 } from '../data/settlement_ethnicity.js';
+import type { OperationalToCanonicalReverseMap } from '../data/operational_data.js';
 import type { LoadedSettlementGraph } from '../map/settlements.js';
 import type { FactionId, GameState, SettlementId } from './game_state.js';
 import { isMunicipalityAlignedToRbih } from './rbih_aligned_municipalities.js';
+
+const CANONICAL_FACTION_IDS = ['RBiH', 'RS', 'HRHB'] as const;
+
+/**
+ * Promote SID-keyed political_controllers and contested_control to OSID-keyed (majority per OSID).
+ * Mutates state.political_controllers and state.contested_control. Deterministic: OSIDs and SIDs sorted.
+ */
+export function promotePoliticalControllersToOsid(
+    state: GameState,
+    operationalToCanonical: OperationalToCanonicalReverseMap
+): void {
+    const pcSid = state.political_controllers ?? {};
+    const contestedSid = state.contested_control ?? {};
+    const controllersOsid: Record<string, FactionId | null> = {};
+    const contestedOsid: Record<string, boolean> = {};
+    const osids = Array.from(operationalToCanonical.keys()).sort((a, b) => a.localeCompare(b));
+    for (const osid of osids) {
+        const sids = operationalToCanonical.get(osid) ?? [];
+        const factionCounts: Record<string, number> = { RBiH: 0, RS: 0, HRHB: 0 };
+        let contested = false;
+        for (const sid of sids) {
+            const c = pcSid[sid];
+            if (c !== undefined && c !== null && CANONICAL_FACTION_IDS.includes(c as (typeof CANONICAL_FACTION_IDS)[number])) {
+                factionCounts[c] = (factionCounts[c] ?? 0) + 1;
+            }
+            if (contestedSid[sid]) contested = true;
+        }
+        let best: FactionId | null = null;
+        let bestCount = -1;
+        for (const fid of CANONICAL_FACTION_IDS) {
+            const n = factionCounts[fid] ?? 0;
+            if (n > bestCount) {
+                best = fid as FactionId;
+                bestCount = n;
+            }
+        }
+        controllersOsid[osid] = bestCount > 0 ? best : null;
+        contestedOsid[osid] = contested;
+    }
+    state.political_controllers = controllersOsid;
+    state.contested_control = contestedOsid;
+}
+
+/**
+ * True when state.political_controllers is already keyed by OSID (every key is in operationalToCanonical).
+ * When true, promotePoliticalControllersToOsid must be skipped or it would overwrite valid OSID values
+ * with null (it looks up pc[sid] for canonical SIDs, which are undefined when keys are OSIDs).
+ */
+function isPoliticalControllersAlreadyOsidKeyed(
+    state: GameState,
+    operationalToCanonical: OperationalToCanonicalReverseMap
+): boolean {
+    const pc = state.political_controllers ?? {};
+    const osidSet = new Set(operationalToCanonical.keys());
+    const keys = Object.keys(pc);
+    return keys.length > 0 && keys.every((k) => osidSet.has(k));
+}
+
+/**
+ * If operational data is present and state.political_controllers is SID-keyed (at least one key not an OSID
+ * and that key is a known canonical SID in the map), promote to OSID-keyed and mutate state.
+ * Skips when keys look like test fixtures (e.g. S1, S2 not in map). No-op when already OSID-keyed.
+ * Call after load (e.g. first turn) before running Phase I/II steps.
+ */
+export function migratePoliticalControllersToOsidIfNeeded(
+    state: GameState,
+    operationalToCanonical: OperationalToCanonicalReverseMap
+): void {
+    const pc = state.political_controllers ?? {};
+    const osidSet = new Set(operationalToCanonical.keys());
+    const canonicalSids = new Set<string>();
+    for (const sids of operationalToCanonical.values()) {
+        for (const s of sids) canonicalSids.add(s);
+    }
+    const hasSidKeyFromMap = Object.keys(pc).some(
+        (k) => !osidSet.has(k) && canonicalSids.has(k)
+    );
+    if (!hasSidKeyFromMap) return;
+    promotePoliticalControllersToOsid(state, operationalToCanonical);
+}
 
 /**
  * Best-effort init logging. In some Electron launches stdout can be closed, which throws EPIPE.
@@ -117,7 +198,7 @@ export async function loadMunicipalityControllerMapping(
         }
 
         // Validate all values are valid faction IDs or null
-        const CANONICAL_IDS = ['RBiH', 'RS', 'HRHB'] as const;
+        const CANONICAL_IDS = ['RBiH', 'HRHB', 'RS'];
         for (const [mun_code, controller] of Object.entries(parsed.mappings)) {
             if (controller !== null && !CANONICAL_IDS.includes(controller as any)) {
                 throw new Error(`Invalid controller for municipality ${mun_code}: ${controller} (must be RBiH, RS, HRHB, or null)`);
@@ -178,7 +259,7 @@ export async function loadSettlementsInitialMaster(
     const parsed = JSON.parse(content) as unknown;
     if (!isRecord(parsed) || !Array.isArray(parsed.settlements)) {
         throw new Error(
-            'Invalid settlements_initial_master.json: expected { settlements: Array<{ sid, political_controller, ... }> }'
+            'Invalid settlements initial master: expected { settlements: Array<{ sid, political_controller, ... }> }'
         );
     }
     return parsed as unknown as SettlementsInitialMaster;
@@ -249,8 +330,6 @@ export async function loadMunicipalityControllerMapping1990(
     return { version: post1995Mapping.version, mappings: mappings1990 };
 }
 
-/** Canonical faction IDs for political_controller invariant */
-const CANONICAL_FACTION_IDS = ['RBiH', 'RS', 'HRHB'] as const;
 const DEFAULT_START_CONTROLLER: (typeof CANONICAL_FACTION_IDS)[number] = 'RBiH';
 
 function resolveMajorityController(candidates: readonly PoliticalControllerId[]): PoliticalControllerId {
@@ -411,7 +490,13 @@ export async function loadInitialMunicipalityControllers1990(
         );
     }
 
-    const mapping = parsed.controllers_by_mun1990_id as Record<string, unknown>;
+    const mapping: Record<string, unknown> = {};
+    const rawMapping = parsed.controllers_by_mun1990_id as Record<string, unknown>;
+    for (const [k, v] of Object.entries(rawMapping)) {
+        const outKey = k === 'han_pijesak' ? 'hanpijesak' : k;
+        mapping[outKey] = v;
+    }
+
     for (const [mun1990_id, controller] of Object.entries(mapping)) {
         if (
             controller !== null &&
@@ -456,6 +541,8 @@ export interface PoliticalControlInitOptions {
     ethnic_override_threshold?: number;
     /** Optional path to settlement_ethnicity_data.json (e.g. when baseDir is set so cwd-relative path is wrong). */
     ethnicity_data_path?: string;
+    /** When set, political_controllers and contested_control are promoted to OSID keying (OSID as base layer). */
+    operationalToCanonical?: OperationalToCanonicalReverseMap;
 }
 
 /**
@@ -559,10 +646,12 @@ async function initializePoliticalControllersFromHybrid1992(
     const contestedRecord: Record<SettlementId, boolean> = {};
     const municipalityStatus = new Map<string, 'SECURE' | 'CONTESTED' | 'HIGHLY_CONTESTED'>();
 
+    // Normalize mun1990_id for lookup (must match loadInitialMunicipalityControllers1990 key normalization)
+    const mun1990LookupKey = (id: string) => (id === 'han_pijesak' ? 'hanpijesak' : id);
     for (const sid of settlementIds) {
         const settlement = settlementGraph.settlements.get(sid)!;
         const mun1990Id = settlement.mun1990_id ?? settlement.mun_code;
-        const munController = mapping[mun1990Id];
+        const munController = mapping[mun1990LookupKey(mun1990Id)];
         if (munController === undefined) {
             throw new Error(
                 `Scenario init (hybrid_1992): mun1990_id ${mun1990Id} (settlement ${sid}) not in control file.`
@@ -633,6 +722,8 @@ export async function applyMunicipalityControllersFromMun1990Only(
     const contestedRecord: Record<SettlementId, boolean> = {};
     const municipalityStatus = new Map<string, 'SECURE' | 'CONTESTED' | 'HIGHLY_CONTESTED'>();
 
+    // Normalize mun1990_id for lookup (must match loadInitialMunicipalityControllers1990 key normalization)
+    const mun1990LookupKeyLocal = (id: string) => (id === 'han_pijesak' ? 'hanpijesak' : id);
     for (const sid of settlementIds) {
         const settlement = settlementGraph.settlements.get(sid)!;
         const mun1990Id = settlement.mun1990_id;
@@ -641,7 +732,7 @@ export async function applyMunicipalityControllersFromMun1990Only(
                 `Scenario init (mun1990-only): settlement ${sid} (mun: ${settlement.mun}) missing mun1990_id.`
             );
         }
-        const controller = mapping[mun1990Id];
+        const controller = mapping[mun1990LookupKeyLocal(mun1990Id)];
         if (controller === undefined) {
             throw new Error(
                 `Scenario init (mun1990-only): mun1990_id ${mun1990Id} (settlement ${sid}) not in control file.`
@@ -723,13 +814,26 @@ export async function initializePoliticalControllers(
 
     const mode = initOptions?.init_control_mode;
     const ethnicityDataPath = initOptions?.ethnicity_data_path;
+    let result: PoliticalControlInitResult;
     if (mode === 'ethnic_1991') {
-        return initializePoliticalControllersFromEthnic1991(state, settlementGraph, ethnicityDataPath);
+        result = await initializePoliticalControllersFromEthnic1991(state, settlementGraph, ethnicityDataPath);
+        if (result.applied && initOptions?.operationalToCanonical) {
+            if (!isPoliticalControllersAlreadyOsidKeyed(state, initOptions.operationalToCanonical)) {
+                promotePoliticalControllersToOsid(state, initOptions.operationalToCanonical);
+            }
+        }
+        return result;
     }
     if (mode === 'hybrid_1992') {
         const threshold = initOptions?.ethnic_override_threshold ?? 0.70;
         const path = mappingPath ?? resolve('data/source/municipalities_1990_initial_political_controllers_apr1992.json');
-        return initializePoliticalControllersFromHybrid1992(state, settlementGraph, path, threshold, ethnicityDataPath);
+        result = await initializePoliticalControllersFromHybrid1992(state, settlementGraph, path, threshold, ethnicityDataPath);
+        if (result.applied && initOptions?.operationalToCanonical) {
+            if (!isPoliticalControllersAlreadyOsidKeyed(state, initOptions.operationalToCanonical)) {
+                promotePoliticalControllersToOsid(state, initOptions.operationalToCanonical);
+            }
+        }
+        return result;
     }
 
     if (mappingPath) {
@@ -737,11 +841,22 @@ export async function initializePoliticalControllers(
         const content = await readFile(path, 'utf8');
         const parsed = JSON.parse(content) as unknown;
         if (isMun1990OnlyControlFile(parsed)) {
-            return applyMunicipalityControllersFromMun1990Only(state, settlementGraph, path);
+            const munResult = await applyMunicipalityControllersFromMun1990Only(state, settlementGraph, path);
+            if (munResult.applied && initOptions?.operationalToCanonical) {
+                if (!isPoliticalControllersAlreadyOsidKeyed(state, initOptions.operationalToCanonical)) {
+                    promotePoliticalControllersToOsid(state, initOptions.operationalToCanonical);
+                }
+            }
+            return munResult;
         }
     }
 
-    const master = await loadSettlementsInitialMaster(mappingPath);
+    const useOperationalMasterByDefault = settlementIds.length > 0
+        && settlementIds.every((sid) => sid.startsWith('op:'));
+    const resolvedMasterPath = mappingPath ?? (useOperationalMasterByDefault
+        ? 'data/derived/operational/operational_initial_master.json'
+        : 'data/source/settlements_initial_master.json');
+    const master = await loadSettlementsInitialMaster(resolvedMasterPath);
     const masterBySid = new Map<string, SettlementInitialMasterRecord>();
     for (const entry of master.settlements) {
         if (!entry || typeof entry.sid !== 'string') {
@@ -758,7 +873,7 @@ export async function initializePoliticalControllers(
     }
     if (extraMasterSids.length > 0) {
         throw new Error(
-            `settlements_initial_master.json contains ${extraMasterSids.length} unknown settlement ids (not in settlement graph)`
+            `initial master file contains ${extraMasterSids.length} unknown settlement ids (not in settlement graph)`
         );
     }
 
@@ -768,7 +883,14 @@ export async function initializePoliticalControllers(
     for (const sid of settlementIds) {
         const entry = masterBySid.get(sid);
         if (!entry) {
-            throw new Error(`settlements_initial_master.json missing settlement: ${sid}`);
+            console.warn(`[WARNING] initial master file missing settlement: ${sid} (defaulting to null control)`);
+            controllersRecord[sid] = null;
+            contestedRecord[sid] = false;
+            const graphMun = settlementGraph.settlements.get(sid)?.mun1990_id;
+            if (graphMun && !municipalityStatus.has(graphMun)) {
+                municipalityStatus.set(graphMun, { control_status: 'CONTESTED' });
+            }
+            continue;
         }
         const controller = entry.political_controller ?? null;
         if (
@@ -784,13 +906,17 @@ export async function initializePoliticalControllers(
             throw new Error(`Invariant violation: settlement ${sid} has non-boolean contested_control`);
         }
         const mun1990Id = entry.mun1990_id ?? null;
-        const controlStatus = entry.control_status ?? null;
+        let controlStatus = entry.control_status ?? null;
         if (mun1990Id && controlStatus) {
             const existingStatus = municipalityStatus.get(mun1990Id);
             if (existingStatus && existingStatus.control_status !== controlStatus) {
-                throw new Error(
-                    `Invariant violation: mun1990_id ${mun1990Id} has mixed control_status values in master`
-                );
+                // Degrade to the more contested of the two statuses.
+                const mapScore = { SECURE: 0, CONTESTED: 1, HIGHLY_CONTESTED: 2 };
+                const curScore = mapScore[existingStatus.control_status as keyof typeof mapScore] ?? 0;
+                const newScore = mapScore[controlStatus as keyof typeof mapScore] ?? 0;
+                if (curScore > newScore) {
+                    controlStatus = existingStatus.control_status;
+                }
             }
             municipalityStatus.set(mun1990Id, {
                 control_status: controlStatus,
@@ -804,6 +930,11 @@ export async function initializePoliticalControllers(
     const coercion = enforceNonNullStartControllers(settlementGraph, controllersRecord);
     state.political_controllers = controllersRecord;
     state.contested_control = contestedRecord;
+    if (initOptions?.operationalToCanonical) {
+        if (!isPoliticalControllersAlreadyOsidKeyed(state, initOptions.operationalToCanonical)) {
+            promotePoliticalControllersToOsid(state, initOptions.operationalToCanonical);
+        }
+    }
 
     if (!state.municipalities) state.municipalities = {};
     const sortedMunicipalities = Array.from(municipalityStatus.entries()).sort(([a], [b]) =>

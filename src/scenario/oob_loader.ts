@@ -34,6 +34,8 @@ export interface OobCorps {
     faction: FactionId;
     name: string;
     hq_mun: string;
+    /** Optional historical corps HQ OSID (op:mun:slug). When set, used as formation location_osid. */
+    hq_osid?: string;
     kind: 'corps' | 'army_hq';
 }
 
@@ -156,11 +158,13 @@ export async function loadOobCorps(baseDir: string): Promise<OobCorps[]> {
             throw new Error(`Invalid OOB corps ${id}: hq_mun "${hq_mun}" not in registry`);
         }
         const corpsKind = r.kind === 'army_hq' ? 'army_hq' as const : 'corps' as const;
+        const hq_osid = typeof r.hq_osid === 'string' && r.hq_osid.trim() ? r.hq_osid.trim() : undefined;
         result.push({
             id,
             faction,
             name: String(r.name).trim(),
             hq_mun,
+            ...(hq_osid && { hq_osid }),
             kind: corpsKind,
         });
     }

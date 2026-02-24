@@ -13,6 +13,7 @@ import type {
     GameState,
     SettlementId
 } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // --- Types ---
@@ -85,7 +86,7 @@ export function validateReshapeOrder(
     order: BrigadeAoROrder,
     edges: EdgeRecord[]
 ): string | null {
-    const brigadeAor = state.brigade_aor;
+    const brigadeAor = getLegacyAoR(state).brigade_aor;
     if (!brigadeAor) {
         return 'brigade_aor not initialized';
     }
@@ -147,20 +148,18 @@ export function applyReshapeOrders(state: GameState, edges: EdgeRecord[]): Resha
         rejected_reasons: []
     };
 
-    const orders = state.brigade_aor_orders;
+    const orders = getLegacyAoR(state).brigade_aor_orders;
     if (!orders || orders.length === 0) {
-        state.brigade_aor_orders = [];
         return report;
     }
 
-    const brigadeAor = state.brigade_aor;
+    const brigadeAor = getLegacyAoR(state).brigade_aor;
     if (!brigadeAor) {
-        // All orders rejected if no AoR exists
+        // All orders rejected if no AoR exists (AoR phase-out: no writes)
         for (const _order of orders) {
             report.transfers_rejected++;
             report.rejected_reasons.push('brigade_aor not initialized');
         }
-        state.brigade_aor_orders = [];
         return report;
     }
 
@@ -202,9 +201,7 @@ export function applyReshapeOrders(state: GameState, edges: EdgeRecord[]): Resha
         report.transfers_applied++;
     }
 
-    // Clear orders after processing
-    state.brigade_aor_orders = [];
-
+    // AoR phase-out: do not write brigade_aor_orders
     return report;
 }
 
@@ -217,7 +214,7 @@ function validateReshapeOrderInternal(
     order: BrigadeAoROrder,
     adj: Map<SettlementId, Set<SettlementId>>
 ): string | null {
-    const brigadeAor = state.brigade_aor;
+    const brigadeAor = getLegacyAoR(state).brigade_aor;
     if (!brigadeAor) return 'brigade_aor not initialized';
 
     const formations = state.formations ?? {};

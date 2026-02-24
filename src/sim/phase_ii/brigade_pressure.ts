@@ -15,9 +15,11 @@ import type {
     GameState,
     SettlementId
 } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { computeBrigadeDensity } from './brigade_aor.js';
 import { computeEquipmentMultiplier } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
+import { isBrigadeAssignedToFront } from './front_assignment.js';
 
 // --- Posture multipliers ---
 
@@ -118,7 +120,7 @@ export function computeBrigadePressureByEdge(
     allEdges?: EdgeRecord[]
 ): BrigadePressureResult {
     const result: BrigadePressureResult = { edge_pressure: {}, brigade_pressure: {} };
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const pc = state.political_controllers ?? {};
     const formations = state.formations ?? {};
     const frontSegments = state.front_segments ?? {};
@@ -142,7 +144,7 @@ export function computeBrigadePressureByEdge(
         let sideAPressure = 0;
         if (brigadeA) {
             const brig = formations[brigadeA];
-            if (brig) {
+            if (brig && isBrigadeAssignedToFront(state, brigadeA)) {
                 if (!brigadeCache.has(brigadeA)) {
                     brigadeCache.set(brigadeA, {
                         pressure: computeBrigadeRawPressure(state, brig, allEdges),
@@ -158,7 +160,7 @@ export function computeBrigadePressureByEdge(
         let sideBPressure = 0;
         if (brigadeB) {
             const brig = formations[brigadeB];
-            if (brig) {
+            if (brig && isBrigadeAssignedToFront(state, brigadeB)) {
                 if (!brigadeCache.has(brigadeB)) {
                     brigadeCache.set(brigadeB, {
                         pressure: computeBrigadeRawPressure(state, brig, allEdges),

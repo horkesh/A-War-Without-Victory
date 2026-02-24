@@ -1,0 +1,6032 @@
+{
+  "meta": {
+    "schema_version": 1,
+    "settlement_count": 753
+  },
+  "settlements": [
+    {
+      "sid": "op:banovici:banovici_2",
+      "mun1990_id": "banovici",
+      "political_controller": null,
+      "contested_control": false,
+      "control_status": null,
+      "stability_score": null
+    },
+    {
+      "sid": "op:banovici:banovici_selo_2",
+      "mun1990_id": "banovici",
+      "political_controller": null,
+      "contested_control": false,
+      "control_status": null,
+      "stability_score": null
+    },
+    {
+      "sid": "op:banovici:seona",
+      "mun1990_id": "banovici",
+      "political_controller": null,
+      "contested_control": false,
+      "control_status": null,
+      "stability_score": null
+    },
+    {
+      "sid": "op:banovici:repnik_2",
+      "mun1990_id": "banovici",
+      "political_controller": null,
+      "contested_control": false,
+      "control_status": null,
+      "stability_score": null
+    },
+    {
+      "sid": "op:bihac:brekovica_2",
+      "mun1990_id": "bihac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bihac:bihac_2",
+      "mun1990_id": "bihac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bihac:velika_gata",
+      "mun1990_id": "bihac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bihac:orasac_2",
+      "mun1990_id": "bihac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bihac:racic",
+      "mun1990_id": "bihac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bihac:ripac",
+      "mun1990_id": "bihac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bihac:trubar",
+      "mun1990_id": "bihac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:cazin:varoska_rijeka_3",
+      "mun1990_id": "cazin",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_krupa:otoka_2",
+      "mun1990_id": "bosanska_krupa",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_krupa:jasenica_2",
+      "mun1990_id": "bosanska_krupa",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_krupa:veliki_badic",
+      "mun1990_id": "bosanska_krupa",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:cazin:mrazovac",
+      "mun1990_id": "cazin",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_krupa:vranjska_2",
+      "mun1990_id": "bosanska_krupa",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_krupa:ivanjska_2",
+      "mun1990_id": "bosanska_krupa",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_krupa:gornja_suvaja",
+      "mun1990_id": "bosanska_krupa",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_krupa:jezerski_2",
+      "mun1990_id": "bosanska_krupa",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_krupa:arapusa_2",
+      "mun1990_id": "bosanska_krupa",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanski_petrovac:kolonic_2",
+      "mun1990_id": "bosanski_petrovac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanski_petrovac:prkosi",
+      "mun1990_id": "bosanski_petrovac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanski_petrovac:vodjenica",
+      "mun1990_id": "bosanski_petrovac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanski_petrovac:bosanski_petrovac_2",
+      "mun1990_id": "bosanski_petrovac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanski_petrovac:vrtoce",
+      "mun1990_id": "bosanski_petrovac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanski_petrovac:dobro_selo_2",
+      "mun1990_id": "bosanski_petrovac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanski_petrovac:jasenovac_2",
+      "mun1990_id": "bosanski_petrovac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanski_petrovac:krnjeusa",
+      "mun1990_id": "bosanski_petrovac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanski_samac:domaljevac_2",
+      "mun1990_id": "bosanski_samac",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:bosansko_grahovo:crni_lug",
+      "mun1990_id": "bosansko_grahovo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosansko_grahovo:bosansko_grahovo_2",
+      "mun1990_id": "bosansko_grahovo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosansko_grahovo:malesevci",
+      "mun1990_id": "bosansko_grahovo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosansko_grahovo:ugarci",
+      "mun1990_id": "bosansko_grahovo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:breza:mahala",
+      "mun1990_id": "breza",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:breza:koritnik",
+      "mun1990_id": "breza",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:breza:zupca_2",
+      "mun1990_id": "breza",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:breza:podgora",
+      "mun1990_id": "breza",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:ilijas:podlugovi",
+      "mun1990_id": "ilijas",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:vares:budozelje_2",
+      "mun1990_id": "vares",
+      "political_controller": null,
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:visoko:podvinjci_2",
+      "mun1990_id": "visoko",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bugojno:vesela_2",
+      "mun1990_id": "bugojno",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:bugojno:brizina",
+      "mun1990_id": "bugojno",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:bugojno:kula_2",
+      "mun1990_id": "bugojno",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:bugojno:prijaci",
+      "mun1990_id": "bugojno",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:bugojno:gracanica",
+      "mun1990_id": "bugojno",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:bugojno:kopcic_2",
+      "mun1990_id": "bugojno",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:bugojno:udurlije",
+      "mun1990_id": "bugojno",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:bugojno:vucipolje_3",
+      "mun1990_id": "bugojno",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:bugojno:medini",
+      "mun1990_id": "bugojno",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:bugojno:rovna",
+      "mun1990_id": "bugojno",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:bugojno:vrpec",
+      "mun1990_id": "bugojno",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:bugojno:okoliste",
+      "mun1990_id": "bugojno",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:busovaca:bare_2",
+      "mun1990_id": "busovaca",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:busovaca:dobraljevo_2",
+      "mun1990_id": "busovaca",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:busovaca:buselji_2",
+      "mun1990_id": "busovaca",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:busovaca:busovaca_2",
+      "mun1990_id": "busovaca",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:busovaca:polje_2",
+      "mun1990_id": "busovaca",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:busovaca:gornja_rovna",
+      "mun1990_id": "busovaca",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:busovaca:putis_2",
+      "mun1990_id": "busovaca",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:busovaca:kacuni_2",
+      "mun1990_id": "busovaca",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:cazin:stijena_3",
+      "mun1990_id": "cazin",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:cazin:coralici",
+      "mun1990_id": "cazin",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:cazin:prosici",
+      "mun1990_id": "cazin",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:cazin:cazin_2",
+      "mun1990_id": "cazin",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:cazin:sturlic_2",
+      "mun1990_id": "cazin",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:cazin:liskovac_2",
+      "mun1990_id": "cazin",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:cazin:mutnik_2",
+      "mun1990_id": "cazin",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:cazin:ostrozac_2",
+      "mun1990_id": "cazin",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:cazin:gornja_lucka",
+      "mun1990_id": "cazin",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:capljina:visici_2",
+      "mun1990_id": "capljina",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:capljina:tasovcici_2",
+      "mun1990_id": "capljina",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:capljina:capljina_2",
+      "mun1990_id": "capljina",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:citluk:krehin_gradac_2",
+      "mun1990_id": "citluk",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:citluk:veliki_ogradjenik_2",
+      "mun1990_id": "citluk",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:citluk:citluk_2",
+      "mun1990_id": "citluk",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:tesanj:ularice_2",
+      "mun1990_id": "tesanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:doboj:brijesnica_velika",
+      "mun1990_id": "doboj",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:doboj:klokotnica_2",
+      "mun1990_id": "doboj",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:doboj:matuzici_2",
+      "mun1990_id": "doboj",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:doboj:grapska_gornja_2",
+      "mun1990_id": "doboj",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:donji_vakuf:babin_potok_2",
+      "mun1990_id": "donji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:donji_vakuf:donji_vakuf_2",
+      "mun1990_id": "donji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:donji_vakuf:korenici",
+      "mun1990_id": "donji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:donji_vakuf:jemanlici",
+      "mun1990_id": "donji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:donji_vakuf:pribraca_2",
+      "mun1990_id": "donji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:donji_vakuf:torlakovac_2",
+      "mun1990_id": "donji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:donji_vakuf:dolovi",
+      "mun1990_id": "donji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:donji_vakuf:kutanja",
+      "mun1990_id": "donji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:donji_vakuf:prusac_2",
+      "mun1990_id": "donji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:donji_vakuf:komar_2",
+      "mun1990_id": "donji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:donji_vakuf:oborci_2",
+      "mun1990_id": "donji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:duvno:suica_2",
+      "mun1990_id": "duvno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:duvno:tomislavgrad_2",
+      "mun1990_id": "duvno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:duvno:rosko_polje_2",
+      "mun1990_id": "duvno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:duvno:vinica_2",
+      "mun1990_id": "duvno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:duvno:kovaci",
+      "mun1990_id": "duvno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:duvno:kongora",
+      "mun1990_id": "duvno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:duvno:dobrici",
+      "mun1990_id": "duvno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:duvno:prisoje_2",
+      "mun1990_id": "duvno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:duvno:stipanjici_2",
+      "mun1990_id": "duvno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:foca:mazlina",
+      "mun1990_id": "foca",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:foca:donje_zesce",
+      "mun1990_id": "foca",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:foca:izbisno",
+      "mun1990_id": "foca",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:foca:ustikolina",
+      "mun1990_id": "foca",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:fojnica:bakovici_2",
+      "mun1990_id": "fojnica",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:fojnica:plocari_polje",
+      "mun1990_id": "fojnica",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:fojnica:fojnica_2",
+      "mun1990_id": "fojnica",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:fojnica:zivcici_2",
+      "mun1990_id": "fojnica",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:fojnica:turkovici",
+      "mun1990_id": "fojnica",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:glamoc:pribelja",
+      "mun1990_id": "glamoc",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:glamoc:kovacevci_2",
+      "mun1990_id": "glamoc",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:glamoc:stekerovci_2",
+      "mun1990_id": "glamoc",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:glamoc:glamoc_2",
+      "mun1990_id": "glamoc",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:glamoc:vidimlije_2",
+      "mun1990_id": "glamoc",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:glamoc:halapic",
+      "mun1990_id": "glamoc",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:kolovarice",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:bacci",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:faocici_2",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:kola",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:zorovici",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:hrancici",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:mravinjac_2",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:citluk_2",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:kamen",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:osjecani_2",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:semihova_2",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:glamoc",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:gorazde_2",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gornji_vakuf:gornji_vakuf_uskoplje_2",
+      "mun1990_id": "gornji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:gornji_vakuf:drazev_dolac",
+      "mun1990_id": "gornji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:gornji_vakuf:voljevac",
+      "mun1990_id": "gornji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:gornji_vakuf:crkvice",
+      "mun1990_id": "gornji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:gornji_vakuf:zdrimci",
+      "mun1990_id": "gornji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:gornji_vakuf:jagnjid_2",
+      "mun1990_id": "gornji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:gornji_vakuf:pajic_polje_2",
+      "mun1990_id": "gornji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:gornji_vakuf:vaganjac",
+      "mun1990_id": "gornji_vakuf",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:gracanica:malesici",
+      "mun1990_id": "gracanica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gracanica:dzakule",
+      "mun1990_id": "gracanica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gracanica:gracanica_2",
+      "mun1990_id": "gracanica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gracanica:miricina_2",
+      "mun1990_id": "gracanica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gradacac:mionica",
+      "mun1990_id": "gradacac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gradacac:jelovce_selo",
+      "mun1990_id": "gradacac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gradacac:zelinja_donja_2",
+      "mun1990_id": "gradacac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gradacac:gradacac_2",
+      "mun1990_id": "gradacac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:grude:sovici_3",
+      "mun1990_id": "grude",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:grude:grude_2",
+      "mun1990_id": "grude",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:jablanica:slatina_2",
+      "mun1990_id": "jablanica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:jablanica:ostrozac_2",
+      "mun1990_id": "jablanica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:jablanica:jablanica_2",
+      "mun1990_id": "jablanica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:jablanica:doljani_2",
+      "mun1990_id": "jablanica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:jajce:lupnica",
+      "mun1990_id": "jajce",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:jajce:vinac_2",
+      "mun1990_id": "jajce",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:jajce:jajce_3",
+      "mun1990_id": "jajce",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:jajce:divicani_2",
+      "mun1990_id": "jajce",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:jajce:grdovo",
+      "mun1990_id": "jajce",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:jajce:kruscica",
+      "mun1990_id": "jajce",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:jajce:barevo_2",
+      "mun1990_id": "jajce",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:jajce:bravnice",
+      "mun1990_id": "jajce",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:kakanj:kakanj_2",
+      "mun1990_id": "kakanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kakanj:vukanovici",
+      "mun1990_id": "kakanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kakanj:brnjic_2",
+      "mun1990_id": "kakanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kakanj:donja_papratnica",
+      "mun1990_id": "kakanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kakanj:trsce_2",
+      "mun1990_id": "kakanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kakanj:seoce_2",
+      "mun1990_id": "kakanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kakanj:biljesevo",
+      "mun1990_id": "kakanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kakanj:bukovlje_2",
+      "mun1990_id": "kakanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kakanj:slapnica_2",
+      "mun1990_id": "kakanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kakanj:zgosca",
+      "mun1990_id": "kakanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kakanj:ticici_2",
+      "mun1990_id": "kakanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kakanj:sopotnica",
+      "mun1990_id": "kakanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kakanj:poljani_2",
+      "mun1990_id": "kakanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kalesija:kalesija_selo",
+      "mun1990_id": "kalesija",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kalesija:kalesija_grad_2",
+      "mun1990_id": "kalesija",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kalesija:kikaci",
+      "mun1990_id": "kalesija",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kalesija:tojsici_2",
+      "mun1990_id": "kalesija",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kalesija:gojcin_2",
+      "mun1990_id": "kalesija",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:konjic:ljuta",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kiseljak:azapovici_2",
+      "mun1990_id": "kiseljak",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kiseljak:bilalovac_2",
+      "mun1990_id": "kiseljak",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kiseljak:gromiljak_2",
+      "mun1990_id": "kiseljak",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kiseljak:borina",
+      "mun1990_id": "kiseljak",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kiseljak:brnjaci_2",
+      "mun1990_id": "kiseljak",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kiseljak:bukovica",
+      "mun1990_id": "kiseljak",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kiseljak:kiseljak_2",
+      "mun1990_id": "kiseljak",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kiseljak:drazevici",
+      "mun1990_id": "kiseljak",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kiseljak:hercezi",
+      "mun1990_id": "kiseljak",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kladanj:tuholj_2",
+      "mun1990_id": "kladanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kladanj:olovci_2",
+      "mun1990_id": "kladanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kladanj:brgule",
+      "mun1990_id": "kladanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kladanj:tarevo_2",
+      "mun1990_id": "kladanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kladanj:kladanj_3",
+      "mun1990_id": "kladanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kladanj:vucinici_2",
+      "mun1990_id": "kladanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kladanj:staric_2",
+      "mun1990_id": "kladanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kljuc:krasulje_2",
+      "mun1990_id": "kljuc",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:kljuc:sanica_2",
+      "mun1990_id": "kljuc",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:kljuc:kljuc_2",
+      "mun1990_id": "kljuc",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:kljuc:hadzici",
+      "mun1990_id": "kljuc",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:konjic:brdjani",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:konjic:jasenik_2",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:konjic:celebici_2",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:konjic:bijela_2",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:konjic:turija",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:konjic:dzepi_2",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:konjic:gorani_2",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:konjic:bradina",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:konjic:buturovic_polje_2",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:konjic:bukovica",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:konjic:konjic_2",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:konjic:glavaticevo_2",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:konjic:falanovo_brdo",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:konjic:sitnik",
+      "mun1990_id": "konjic",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kresevo:polje_2",
+      "mun1990_id": "kresevo",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kresevo:kresevo_2",
+      "mun1990_id": "kresevo",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kresevo:mratinici",
+      "mun1990_id": "kresevo",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kupres:novo_selo_2",
+      "mun1990_id": "kupres",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kupres:kupres_2",
+      "mun1990_id": "kupres",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kupres:goravci",
+      "mun1990_id": "kupres",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kupres:bucovaca",
+      "mun1990_id": "kupres",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:kupres:donji_malovan",
+      "mun1990_id": "kupres",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:listica:ljuti_dolac",
+      "mun1990_id": "listica",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:listica:siroki_brijeg_2",
+      "mun1990_id": "listica",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:listica:kocerin_2",
+      "mun1990_id": "listica",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:listica:lise",
+      "mun1990_id": "listica",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:livno:prolog_2",
+      "mun1990_id": "livno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:livno:misi_2",
+      "mun1990_id": "livno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:livno:gubin_2",
+      "mun1990_id": "livno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:livno:priluka_2",
+      "mun1990_id": "livno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:livno:livno_2",
+      "mun1990_id": "livno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:livno:zabljak_2",
+      "mun1990_id": "livno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:livno:zastinje",
+      "mun1990_id": "livno",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:lopare:humci_2",
+      "mun1990_id": "lopare",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:lopare:nahvioci",
+      "mun1990_id": "lopare",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:lukavac:bikodze",
+      "mun1990_id": "lukavac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:lukavac:orahovica_2",
+      "mun1990_id": "lukavac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:lukavac:poljice_2",
+      "mun1990_id": "lukavac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:lukavac:brijesnica_donja_2",
+      "mun1990_id": "lukavac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:lukavac:smoluca_donja_2",
+      "mun1990_id": "lukavac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:lukavac:dobosnica_2",
+      "mun1990_id": "lukavac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:lukavac:gnojnica",
+      "mun1990_id": "lukavac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:lukavac:lukavac_2",
+      "mun1990_id": "lukavac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:ljubuski:ljubuski_2",
+      "mun1990_id": "ljubuski",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:ljubuski:studenci_2",
+      "mun1990_id": "ljubuski",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:ljubuski:grab",
+      "mun1990_id": "ljubuski",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:ljubuski:vitina_2",
+      "mun1990_id": "ljubuski",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:ljubuski:radisici_2",
+      "mun1990_id": "ljubuski",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:ljubuski:greda",
+      "mun1990_id": "ljubuski",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:zepce:ozimica_2",
+      "mun1990_id": "zepce",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:maglaj:donja_bocinja_2",
+      "mun1990_id": "maglaj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:maglaj:maglaj_2",
+      "mun1990_id": "maglaj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:maglaj:lijesnica",
+      "mun1990_id": "maglaj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:maglaj:cobe_2",
+      "mun1990_id": "maglaj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:maglaj:gornja_bocinja",
+      "mun1990_id": "maglaj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:maglaj:jablanica",
+      "mun1990_id": "maglaj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:maglaj:kosova_2",
+      "mun1990_id": "maglaj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zepce:zepce_2",
+      "mun1990_id": "zepce",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:maglaj:misurici_2",
+      "mun1990_id": "maglaj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:maglaj:strupina",
+      "mun1990_id": "maglaj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:mostar:jasenica",
+      "mun1990_id": "mostar",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:mostar:kruzanj_2",
+      "mun1990_id": "mostar",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:mostar:blagaj_2",
+      "mun1990_id": "mostar",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:mostar:gornja_dreznica",
+      "mun1990_id": "mostar",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:mostar:mostar_zapad_2",
+      "mun1990_id": "mostar",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:mostar:mostar_istok_2",
+      "mun1990_id": "mostar",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:mostar:potoci",
+      "mun1990_id": "mostar",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:mostar:hodbina_2",
+      "mun1990_id": "mostar",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:mostar:vranjevici_2",
+      "mun1990_id": "mostar",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:neum:neum_2",
+      "mun1990_id": "neum",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:neum:gradac_2",
+      "mun1990_id": "neum",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:neum:gornje_hrasno_2",
+      "mun1990_id": "neum",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:odzak:donja_dubica",
+      "mun1990_id": "odzak",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:odzak:potocani_2",
+      "mun1990_id": "odzak",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:odzak:gornji_svilaj",
+      "mun1990_id": "odzak",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:olovo:olovo_2",
+      "mun1990_id": "olovo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:olovo:milankovici_2",
+      "mun1990_id": "olovo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:olovo:gurdici_2",
+      "mun1990_id": "olovo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:olovo:kamensko_2",
+      "mun1990_id": "olovo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:olovo:slivnje",
+      "mun1990_id": "olovo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:orasje:ostra_luka",
+      "mun1990_id": "orasje",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:orasje:donja_mahala",
+      "mun1990_id": "orasje",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:orasje:orasje",
+      "mun1990_id": "orasje",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:posusje:sutina_2",
+      "mun1990_id": "posusje",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:posusje:posusje_2",
+      "mun1990_id": "posusje",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:posusje:vir_2",
+      "mun1990_id": "posusje",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prozor:ljubunci_2",
+      "mun1990_id": "prozor",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prozor:lug_2",
+      "mun1990_id": "prozor",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prozor:prozor_2",
+      "mun1990_id": "prozor",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prozor:jaklici",
+      "mun1990_id": "prozor",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prozor:ustirama_3",
+      "mun1990_id": "prozor",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prozor:paros",
+      "mun1990_id": "prozor",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prozor:uzdol_2",
+      "mun1990_id": "prozor",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prozor:hudutsko",
+      "mun1990_id": "prozor",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prozor:rumboci_2",
+      "mun1990_id": "prozor",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prozor:meopotocje",
+      "mun1990_id": "prozor",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:novi_travnik:rankovici_2",
+      "mun1990_id": "novi_travnik",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:novi_travnik:orasac_2",
+      "mun1990_id": "novi_travnik",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:novi_travnik:trenica_2",
+      "mun1990_id": "novi_travnik",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:novi_travnik:novi_travnik_2",
+      "mun1990_id": "novi_travnik",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:novi_travnik:rat_2",
+      "mun1990_id": "novi_travnik",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:novi_travnik:ruda_2",
+      "mun1990_id": "novi_travnik",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:novi_travnik:senkovici_2",
+      "mun1990_id": "novi_travnik",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:sanski_most:budimlic_japra_2",
+      "mun1990_id": "sanski_most",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:sanski_most:lusci_palanka_2",
+      "mun1990_id": "sanski_most",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:sanski_most:jelasinovci",
+      "mun1990_id": "sanski_most",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:sanski_most:sanski_most_2",
+      "mun1990_id": "sanski_most",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:sanski_most:ilidza_2",
+      "mun1990_id": "sanski_most",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:sanski_most:kljevci",
+      "mun1990_id": "sanski_most",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:sanski_most:skucani_vakuf_2",
+      "mun1990_id": "sanski_most",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:sanski_most:donja_kozica",
+      "mun1990_id": "sanski_most",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:sanski_most:stari_majdan",
+      "mun1990_id": "sanski_most",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:centar_sarajevo:radava",
+      "mun1990_id": "centar_sarajevo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:vogosca:vogosca_3",
+      "mun1990_id": "vogosca",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:hadzici:misevici_2",
+      "mun1990_id": "hadzici",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:hadzici:pazaric",
+      "mun1990_id": "hadzici",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:hadzici:binjezevo",
+      "mun1990_id": "hadzici",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:hadzici:budmolici",
+      "mun1990_id": "hadzici",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:hadzici:tarcin_2",
+      "mun1990_id": "hadzici",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:hadzici:luke",
+      "mun1990_id": "hadzici",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:hadzici:lokve",
+      "mun1990_id": "hadzici",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:hadzici:hadzici",
+      "mun1990_id": "hadzici",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:ilidza:rudnik_2",
+      "mun1990_id": "ilidza",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:ilidza:kasindo",
+      "mun1990_id": "ilidza",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:ilidza:rakovica_2",
+      "mun1990_id": "ilidza",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:ilidza:sarajevo_dio_ilidza_2",
+      "mun1990_id": "ilidza",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:ilijas:visojevica",
+      "mun1990_id": "ilijas",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:ilijas:krivajevici",
+      "mun1990_id": "ilijas",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:ilijas:dragoradi",
+      "mun1990_id": "ilijas",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:ilijas:medojevici",
+      "mun1990_id": "ilijas",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:ilijas:hadzici",
+      "mun1990_id": "ilijas",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:ilijas:srednje",
+      "mun1990_id": "ilijas",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:ilijas:sirovine",
+      "mun1990_id": "ilijas",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:ilijas:sovrle",
+      "mun1990_id": "ilijas",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:novi_grad_sarajevo:recica",
+      "mun1990_id": "novi_grad_sarajevo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:pale:podgrab",
+      "mun1990_id": "pale",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
+      "mun1990_id": "stari_grad_sarajevo",
+      "political_controller": null,
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:stari_grad_sarajevo:faletici",
+      "mun1990_id": "stari_grad_sarajevo",
+      "political_controller": null,
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:trnovo:delijas",
+      "mun1990_id": "trnovo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:trnovo:tusila",
+      "mun1990_id": "trnovo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:trnovo:trnovo",
+      "mun1990_id": "trnovo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:trnovo:tosici",
+      "mun1990_id": "trnovo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:trnovo:gornja_presjenica",
+      "mun1990_id": "trnovo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:vogosca:svrake",
+      "mun1990_id": "vogosca",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:vogosca:hotonj",
+      "mun1990_id": "vogosca",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:skender_vakuf:donji_koricani",
+      "mun1990_id": "skender_vakuf",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenik:srebrenik_2",
+      "mun1990_id": "srebrenik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenik:duboki_potok_2",
+      "mun1990_id": "srebrenik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenik:tinja_gornja_2",
+      "mun1990_id": "srebrenik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenik:sladna_2",
+      "mun1990_id": "srebrenik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenik:spionica_srednja_2",
+      "mun1990_id": "srebrenik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenik:spionica_donja_2",
+      "mun1990_id": "srebrenik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:stolac:prenj",
+      "mun1990_id": "stolac",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:stolac:pjesivac_kula_2",
+      "mun1990_id": "stolac",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:stolac:rotimlja_2",
+      "mun1990_id": "stolac",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:stolac:stolac_2",
+      "mun1990_id": "stolac",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:tesanj:novi_miljanovci_2",
+      "mun1990_id": "tesanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:tesanj:tesanj_2",
+      "mun1990_id": "tesanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:tesanj:novo_selo",
+      "mun1990_id": "tesanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:tesanj:piljuzici_2",
+      "mun1990_id": "tesanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:tesanj:radusa_2",
+      "mun1990_id": "tesanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:tesanj:lepenica",
+      "mun1990_id": "tesanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:tesanj:sije_2",
+      "mun1990_id": "tesanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:titov_drvar:sipovljani_2",
+      "mun1990_id": "titov_drvar",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:titov_drvar:drvar_2",
+      "mun1990_id": "titov_drvar",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:titov_drvar:prekaja_2",
+      "mun1990_id": "titov_drvar",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:travnik:turbe_2",
+      "mun1990_id": "travnik",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:travnik:travnik_2",
+      "mun1990_id": "travnik",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:travnik:ovcarevo_2",
+      "mun1990_id": "travnik",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:travnik:puticevo_2",
+      "mun1990_id": "travnik",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:travnik:cukle_2",
+      "mun1990_id": "travnik",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:travnik:gornje_krcevine",
+      "mun1990_id": "travnik",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:travnik:varosluk",
+      "mun1990_id": "travnik",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:travnik:gluha_bukovica",
+      "mun1990_id": "travnik",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:travnik:paklarevo",
+      "mun1990_id": "travnik",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:travnik:podstinje",
+      "mun1990_id": "travnik",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:trebinje:zakovo_2",
+      "mun1990_id": "trebinje",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:trebinje:trebimlja_2",
+      "mun1990_id": "trebinje",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:trebinje:ivanica",
+      "mun1990_id": "trebinje",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:trebinje:velicani",
+      "mun1990_id": "trebinje",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:trebinje:bihovo_2",
+      "mun1990_id": "trebinje",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:tuzla:tuzla_2",
+      "mun1990_id": "tuzla",
+      "political_controller": null,
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:tuzla:obodnica_donja_2",
+      "mun1990_id": "tuzla",
+      "political_controller": null,
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:tuzla:sicki_brod_2",
+      "mun1990_id": "tuzla",
+      "political_controller": null,
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:tuzla:husino_2",
+      "mun1990_id": "tuzla",
+      "political_controller": null,
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:tuzla:simin_han_2",
+      "mun1990_id": "tuzla",
+      "political_controller": null,
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:tuzla:lipnica_gornja_2",
+      "mun1990_id": "tuzla",
+      "political_controller": null,
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:tuzla:gornja_tuzla",
+      "mun1990_id": "tuzla",
+      "political_controller": null,
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:ugljevik:teocak_krstac_2",
+      "mun1990_id": "ugljevik",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:vares:vares_2",
+      "mun1990_id": "vares",
+      "political_controller": null,
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:vares:toljenak",
+      "mun1990_id": "vares",
+      "political_controller": null,
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:vares:gornja_borovica_2",
+      "mun1990_id": "vares",
+      "political_controller": null,
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:vares:ravne",
+      "mun1990_id": "vares",
+      "political_controller": null,
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:vares:pobilje",
+      "mun1990_id": "vares",
+      "political_controller": null,
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:velika_kladusa:poljana_2",
+      "mun1990_id": "velika_kladusa",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:velika_kladusa:zboriste_2",
+      "mun1990_id": "velika_kladusa",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:velika_kladusa:vejinac_2",
+      "mun1990_id": "velika_kladusa",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:velika_kladusa:velika_kladusa_2",
+      "mun1990_id": "velika_kladusa",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visoko:visoko_2",
+      "mun1990_id": "visoko",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visoko:rajcici_2",
+      "mun1990_id": "visoko",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visoko:bradve_2",
+      "mun1990_id": "visoko",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visoko:buzic_mahala_2",
+      "mun1990_id": "visoko",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visoko:stuparici_2",
+      "mun1990_id": "visoko",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visoko:podvinje_2",
+      "mun1990_id": "visoko",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visoko:gornja_vratnica_2",
+      "mun1990_id": "visoko",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:vitez:vitez_2",
+      "mun1990_id": "vitez",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:vitez:preocica_3",
+      "mun1990_id": "vitez",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:vitez:kruscica",
+      "mun1990_id": "vitez",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:zavidovici:cinovici",
+      "mun1990_id": "zavidovici",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:zavidovici:hajderovici_2",
+      "mun1990_id": "zavidovici",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:zavidovici:ribnica_dio",
+      "mun1990_id": "zavidovici",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:zavidovici:cardak_2",
+      "mun1990_id": "zavidovici",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:zavidovici:zavidovici_2",
+      "mun1990_id": "zavidovici",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:zepce:viniste_2",
+      "mun1990_id": "zepce",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zavidovici:vozuca_2",
+      "mun1990_id": "zavidovici",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:zenica:briznik_2",
+      "mun1990_id": "zenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zenica:stranjani_2",
+      "mun1990_id": "zenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zenica:orahovica_2",
+      "mun1990_id": "zenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zenica:serici_2",
+      "mun1990_id": "zenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zenica:gornja_zenica_2",
+      "mun1990_id": "zenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zenica:zenica_2",
+      "mun1990_id": "zenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zenica:gornja_vraca",
+      "mun1990_id": "zenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zenica:janjici",
+      "mun1990_id": "zenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zvornik:rastosnica_2",
+      "mun1990_id": "zvornik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zvornik:vitinica_2",
+      "mun1990_id": "zvornik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zepce:begov_han",
+      "mun1990_id": "zepce",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zepce:zeljezno_polje_2",
+      "mun1990_id": "zepce",
+      "political_controller": "HRHB",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zivinice:basigovci_2",
+      "mun1990_id": "zivinice",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:zivinice:zivinice_grad_2",
+      "mun1990_id": "zivinice",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:zivinice:dubrave_gornje",
+      "mun1990_id": "zivinice",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:zivinice:gracanica_2",
+      "mun1990_id": "zivinice",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:zivinice:zivinice_gornje_2",
+      "mun1990_id": "zivinice",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:travnik:krusevo_brdo_i",
+      "mun1990_id": "travnik",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:bosanska_krupa:donji_dubovik_2",
+      "mun1990_id": "bosanska_krupa",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:foca:patkovina",
+      "mun1990_id": "foca",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:gorazde:podkozara_donja_2",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:sopotnica",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gradacac:donja_tramosnica_2",
+      "mun1990_id": "gradacac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gradacac:pelagicevo",
+      "mun1990_id": "gradacac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:jajce:jezero_2",
+      "mun1990_id": "jajce",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:kljuc:donje_ratkovo_2",
+      "mun1990_id": "kljuc",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:novo_sarajevo:lukavica",
+      "mun1990_id": "novo_sarajevo",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:pale:praca",
+      "mun1990_id": "pale",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:trnovo:kijevo_2",
+      "mun1990_id": "trnovo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:stolac:hatelji_2",
+      "mun1990_id": "stolac",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:tesanj:kalosevic_2",
+      "mun1990_id": "tesanj",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:lopare:koraj_4",
+      "mun1990_id": "lopare",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:lopare:jablanica_2",
+      "mun1990_id": "lopare",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:lopare:lopare_selo_2",
+      "mun1990_id": "lopare",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:lopare:celic_3",
+      "mun1990_id": "lopare",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:odzak:bosanski_samac",
+      "mun1990_id": "bosanski_samac",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 60
+    },
+    {
+      "sid": "op:bosanski_samac:tisina",
+      "mun1990_id": "bosanski_samac",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:ugljevik:donja_trnova_2",
+      "mun1990_id": "ugljevik",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:sanski_most:ostra_luka",
+      "mun1990_id": "sanski_most",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:jajce:prisoje",
+      "mun1990_id": "jajce",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:kalesija:seher_2",
+      "mun1990_id": "kalesija",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
+      "mun1990_id": "novi_grad_sarajevo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
+      "mun1990_id": "novo_sarajevo",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:pale:bulozi",
+      "mun1990_id": "pale",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:pale:vrazalice",
+      "mun1990_id": "pale",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:ugljevik:jasikovac",
+      "mun1990_id": "ugljevik",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:ugljevik:srednja_trnova_2",
+      "mun1990_id": "ugljevik",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
+      "mun1990_id": "centar_sarajevo",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:banja_luka:rekavice_2",
+      "mun1990_id": "banja_luka",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:banja_luka:banja_luka_2",
+      "mun1990_id": "banja_luka",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:banja_luka:dragocaj",
+      "mun1990_id": "banja_luka",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:banja_luka:motike",
+      "mun1990_id": "banja_luka",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:banja_luka:piskavica_2",
+      "mun1990_id": "banja_luka",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:banja_luka:melina_2",
+      "mun1990_id": "banja_luka",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:banja_luka:kola",
+      "mun1990_id": "banja_luka",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:banja_luka:pavici_2",
+      "mun1990_id": "banja_luka",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:banja_luka:potkozarje_3",
+      "mun1990_id": "banja_luka",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bijeljina:janja_2",
+      "mun1990_id": "bijeljina",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bijeljina:dvorovi_2",
+      "mun1990_id": "bijeljina",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bijeljina:suho_polje_2",
+      "mun1990_id": "bijeljina",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bijeljina:glavicice",
+      "mun1990_id": "bijeljina",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bijeljina:bijeljina_2",
+      "mun1990_id": "bijeljina",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bijeljina:velika_obarska_2",
+      "mun1990_id": "bijeljina",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bijeljina:bukovica_donja",
+      "mun1990_id": "bijeljina",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bijeljina:crnjelovo_donje",
+      "mun1990_id": "bijeljina",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bijeljina:cadjavica_gornja_2",
+      "mun1990_id": "bijeljina",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bijeljina:pucile_2",
+      "mun1990_id": "bijeljina",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bileca:bileca_2",
+      "mun1990_id": "bileca",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bileca:mirilovici",
+      "mun1990_id": "bileca",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bileca:vranjska",
+      "mun1990_id": "bileca",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bileca:korita",
+      "mun1990_id": "bileca",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bileca:zausje",
+      "mun1990_id": "bileca",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bratunac:vranesevici",
+      "mun1990_id": "bratunac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bratunac:polom",
+      "mun1990_id": "bratunac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bratunac:zapolje_2",
+      "mun1990_id": "bratunac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bratunac:bratunac_2",
+      "mun1990_id": "bratunac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bratunac:slapasnica",
+      "mun1990_id": "bratunac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bratunac:glogova",
+      "mun1990_id": "bratunac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bratunac:pobudje_2",
+      "mun1990_id": "bratunac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bratunac:jezestica_2",
+      "mun1990_id": "bratunac",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanski_brod:gornja_barica",
+      "mun1990_id": "bosanski_brod",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:bosanski_brod:brod",
+      "mun1990_id": "bosanski_brod",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:bosanski_brod:lijesce_2",
+      "mun1990_id": "bosanski_brod",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:bosanski_brod:donja_vrela",
+      "mun1990_id": "bosanski_brod",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:bosanski_brod:novo_selo_2",
+      "mun1990_id": "bosanski_brod",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:visegrad:zlijeb",
+      "mun1990_id": "visegrad",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visegrad:okrugla",
+      "mun1990_id": "visegrad",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visegrad:visegrad_2",
+      "mun1990_id": "visegrad",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visegrad:prelovo_2",
+      "mun1990_id": "visegrad",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visegrad:drinsko",
+      "mun1990_id": "visegrad",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visegrad:velji_lug",
+      "mun1990_id": "visegrad",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visegrad:donji_dobrun_2",
+      "mun1990_id": "visegrad",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visegrad:kamenica_2",
+      "mun1990_id": "visegrad",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visegrad:medjedja_2",
+      "mun1990_id": "visegrad",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visegrad:bjeljajci",
+      "mun1990_id": "visegrad",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:visegrad:bogdasici",
+      "mun1990_id": "visegrad",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:vlasenica:grabovica",
+      "mun1990_id": "vlasenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:vlasenica:cerska_2",
+      "mun1990_id": "vlasenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:vlasenica:milici_2",
+      "mun1990_id": "vlasenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:vlasenica:bacici",
+      "mun1990_id": "vlasenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:vlasenica:vlasenica_2",
+      "mun1990_id": "vlasenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:gacko:bahori",
+      "mun1990_id": "gacko",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gacko:gradina",
+      "mun1990_id": "gacko",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gacko:avtovac_2",
+      "mun1990_id": "gacko",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gacko:nadinici",
+      "mun1990_id": "gacko",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gacko:gacko_2",
+      "mun1990_id": "gacko",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gacko:izgori",
+      "mun1990_id": "gacko",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_gradiska:gornji_podgradci",
+      "mun1990_id": "bosanska_gradiska",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanska_gradiska:cerovljani",
+      "mun1990_id": "bosanska_gradiska",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanska_gradiska:kruskik_2",
+      "mun1990_id": "bosanska_gradiska",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanska_gradiska:gradiska_3",
+      "mun1990_id": "bosanska_gradiska",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanska_gradiska:kozinci",
+      "mun1990_id": "bosanska_gradiska",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanska_gradiska:grbavci",
+      "mun1990_id": "bosanska_gradiska",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanska_gradiska:mackovac",
+      "mun1990_id": "bosanska_gradiska",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanska_gradiska:masici_2",
+      "mun1990_id": "bosanska_gradiska",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanska_gradiska:nova_topola_2",
+      "mun1990_id": "bosanska_gradiska",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanska_gradiska:orahova",
+      "mun1990_id": "bosanska_gradiska",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanska_gradiska:gornja_jurkovica",
+      "mun1990_id": "bosanska_gradiska",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:derventa:misinci_2",
+      "mun1990_id": "derventa",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:derventa:lug",
+      "mun1990_id": "derventa",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:derventa:velika_socanica_2",
+      "mun1990_id": "derventa",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:derventa:luzani_bosanski",
+      "mun1990_id": "derventa",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:derventa:derventa_2",
+      "mun1990_id": "derventa",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:derventa:zivinice",
+      "mun1990_id": "derventa",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:derventa:cerani_2",
+      "mun1990_id": "derventa",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:doboj:civcije_bukovicke",
+      "mun1990_id": "doboj",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:doboj:kozuhe_2",
+      "mun1990_id": "doboj",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:doboj:stanari_2",
+      "mun1990_id": "doboj",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:doboj:cerovica_2",
+      "mun1990_id": "doboj",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:doboj:zelinja_gornja_2",
+      "mun1990_id": "doboj",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:doboj:makljenovac",
+      "mun1990_id": "doboj",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:doboj:bukovica_velika_2",
+      "mun1990_id": "doboj",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:doboj:kotorsko_2",
+      "mun1990_id": "doboj",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:doboj:boljanic_2",
+      "mun1990_id": "doboj",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:zvornik:novo_selo",
+      "mun1990_id": "zvornik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zvornik:djulici",
+      "mun1990_id": "zvornik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zvornik:gornji_sepak_2",
+      "mun1990_id": "zvornik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zvornik:kozluk_2",
+      "mun1990_id": "zvornik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zvornik:zvornik",
+      "mun1990_id": "zvornik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zvornik:drinjaca",
+      "mun1990_id": "zvornik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zvornik:krizevici",
+      "mun1990_id": "zvornik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zvornik:donja_kamenica",
+      "mun1990_id": "zvornik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:zvornik:paljevici",
+      "mun1990_id": "zvornik",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:ilidza:sarajevo_dio_novi_grad_sarajevo",
+      "mun1990_id": "ilidza",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:sokolac:meljine_2",
+      "mun1990_id": "sokolac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kalinovik:sela_2",
+      "mun1990_id": "kalinovik",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kalinovik:golubici_2",
+      "mun1990_id": "kalinovik",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kalinovik:vlaholje",
+      "mun1990_id": "kalinovik",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kalinovik:kalinovik_2",
+      "mun1990_id": "kalinovik",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kalinovik:tomislja",
+      "mun1990_id": "kalinovik",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kalinovik:varos_2",
+      "mun1990_id": "kalinovik",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kalinovik:obalj",
+      "mun1990_id": "kalinovik",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:skender_vakuf:imljani_2",
+      "mun1990_id": "skender_vakuf",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:skender_vakuf:knezevo_2",
+      "mun1990_id": "skender_vakuf",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:skender_vakuf:javorani_2",
+      "mun1990_id": "skender_vakuf",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_dubica:aginci",
+      "mun1990_id": "bosanska_dubica",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_dubica:donja_slabinja_2",
+      "mun1990_id": "bosanska_dubica",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_dubica:vojskova",
+      "mun1990_id": "bosanska_dubica",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_dubica:hadzibajir_2",
+      "mun1990_id": "bosanska_dubica",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_dubica:kozarska_dubica",
+      "mun1990_id": "bosanska_dubica",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_dubica:knezica_2",
+      "mun1990_id": "bosanska_dubica",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_dubica:medjedja_2",
+      "mun1990_id": "bosanska_dubica",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_dubica:medjuvodje",
+      "mun1990_id": "bosanska_dubica",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_kostajnica:kostajnica",
+      "mun1990_id": "bosanska_kostajnica",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanska_kostajnica:petrinja",
+      "mun1990_id": "bosanska_kostajnica",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kotor_varos:prisocka_2",
+      "mun1990_id": "kotor_varos",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:kotor_varos:vrbanjci_2",
+      "mun1990_id": "kotor_varos",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:kotor_varos:maslovare_2",
+      "mun1990_id": "kotor_varos",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:kotor_varos:krusevo_brdo_i",
+      "mun1990_id": "kotor_varos",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:kotor_varos:kotor_varos_2",
+      "mun1990_id": "kotor_varos",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:kotor_varos:vagani_2",
+      "mun1990_id": "kotor_varos",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:kotor_varos:jakotina",
+      "mun1990_id": "kotor_varos",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:laktasi:drugovici_2",
+      "mun1990_id": "laktasi",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:laktasi:laktasi_2",
+      "mun1990_id": "laktasi",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:laktasi:aleksandrovac",
+      "mun1990_id": "laktasi",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:laktasi:trn_2",
+      "mun1990_id": "laktasi",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:laktasi:maglajani",
+      "mun1990_id": "laktasi",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:lopare:mrtvica_2",
+      "mun1990_id": "lopare",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:lopare:lopare_2",
+      "mun1990_id": "lopare",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:lopare:priboj_2",
+      "mun1990_id": "lopare",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:ljubinje:bancici",
+      "mun1990_id": "ljubinje",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:ljubinje:ljubinje_2",
+      "mun1990_id": "ljubinje",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:vlasenica:pomol_2",
+      "mun1990_id": "vlasenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:vlasenica:sebiocina",
+      "mun1990_id": "vlasenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:vlasenica:bukovica_gornja",
+      "mun1990_id": "vlasenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:modrica:skugric_gornji_2",
+      "mun1990_id": "modrica",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:modrica:modrica",
+      "mun1990_id": "modrica",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:modrica:vranjak_2",
+      "mun1990_id": "modrica",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:modrica:garevac_2",
+      "mun1990_id": "modrica",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "HIGHLY_CONTESTED",
+      "stability_score": 35
+    },
+    {
+      "sid": "op:mrkonjic_grad:baljvine_2",
+      "mun1990_id": "mrkonjic_grad",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:mrkonjic_grad:bjelajce_2",
+      "mun1990_id": "mrkonjic_grad",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:mrkonjic_grad:majdan_2",
+      "mun1990_id": "mrkonjic_grad",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:mrkonjic_grad:podrasnica_2",
+      "mun1990_id": "mrkonjic_grad",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:mrkonjic_grad:gerzovo_2",
+      "mun1990_id": "mrkonjic_grad",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:mrkonjic_grad:mrkonjic_grad_2",
+      "mun1990_id": "mrkonjic_grad",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:nevesinje:hrusta_2",
+      "mun1990_id": "nevesinje",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:nevesinje:nevesinje_2",
+      "mun1990_id": "nevesinje",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:nevesinje:zovi_do",
+      "mun1990_id": "nevesinje",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:nevesinje:krekovi_2",
+      "mun1990_id": "nevesinje",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:nevesinje:sopilja",
+      "mun1990_id": "nevesinje",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanski_novi:svodna_2",
+      "mun1990_id": "bosanski_novi",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanski_novi:blagaj_japra",
+      "mun1990_id": "bosanski_novi",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanski_novi:blatna",
+      "mun1990_id": "bosanski_novi",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanski_novi:novi_grad_3",
+      "mun1990_id": "bosanski_novi",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanski_novi:poljavnice",
+      "mun1990_id": "bosanski_novi",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanski_novi:matavazi_2",
+      "mun1990_id": "bosanski_novi",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanski_novi:krslje_2",
+      "mun1990_id": "bosanski_novi",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanski_novi:dobrljin_2",
+      "mun1990_id": "bosanski_novi",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:bosanski_novi:suhaca_4",
+      "mun1990_id": "bosanski_novi",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:gorazde:ustipraca_2",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:hrusanj",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:slatina_2",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:novakovici",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gorazde:zorlaci",
+      "mun1990_id": "gorazde",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:pale:hotocina",
+      "mun1990_id": "pale",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:pale:mokro",
+      "mun1990_id": "pale",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:pale:podmedenik",
+      "mun1990_id": "pale",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:pale:gornje_pale",
+      "mun1990_id": "pale",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:pale:pale",
+      "mun1990_id": "pale",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:gracanica:petrovo_2",
+      "mun1990_id": "gracanica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prijedor:alisici",
+      "mun1990_id": "prijedor",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:prijedor:kamicani",
+      "mun1990_id": "prijedor",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:prijedor:omarska_2",
+      "mun1990_id": "prijedor",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:prijedor:ljubija_2",
+      "mun1990_id": "prijedor",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:prijedor:brezicani",
+      "mun1990_id": "prijedor",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:prijedor:maricka_2",
+      "mun1990_id": "prijedor",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:prijedor:cejreci",
+      "mun1990_id": "prijedor",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:prijedor:prijedor_2",
+      "mun1990_id": "prijedor",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:prijedor:kozarac_2",
+      "mun1990_id": "prijedor",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:prijedor:raljas",
+      "mun1990_id": "prijedor",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:prijedor:rasavci_2",
+      "mun1990_id": "prijedor",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:prnjavor:konjuhovci_2",
+      "mun1990_id": "prnjavor",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prnjavor:donji_vijacani_2",
+      "mun1990_id": "prnjavor",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prnjavor:crkvena_2",
+      "mun1990_id": "prnjavor",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prnjavor:gornja_mravica",
+      "mun1990_id": "prnjavor",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prnjavor:donji_strpci_2",
+      "mun1990_id": "prnjavor",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prnjavor:prnjavor_2",
+      "mun1990_id": "prnjavor",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prnjavor:gornji_smrtici",
+      "mun1990_id": "prnjavor",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:prnjavor:lisnja_2",
+      "mun1990_id": "prnjavor",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:kljuc:donji_vrbljani_2",
+      "mun1990_id": "kljuc",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:kljuc:cadjavica",
+      "mun1990_id": "kljuc",
+      "political_controller": "RS",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:rogatica:stara_gora",
+      "mun1990_id": "rogatica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:rogatica:zepa_2",
+      "mun1990_id": "rogatica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:rogatica:pljesevica",
+      "mun1990_id": "rogatica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:rogatica:rogatica_2",
+      "mun1990_id": "rogatica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:rogatica:brcigovo",
+      "mun1990_id": "rogatica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:rogatica:kovanj",
+      "mun1990_id": "rogatica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:rogatica:kramer_selo_2",
+      "mun1990_id": "rogatica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:rogatica:varosiste_2",
+      "mun1990_id": "rogatica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:rogatica:vrazalice",
+      "mun1990_id": "rogatica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:rudo:gornja_strmica",
+      "mun1990_id": "rudo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:rudo:rudo_2",
+      "mun1990_id": "rudo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:rudo:mrsovo_2",
+      "mun1990_id": "rudo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:rudo:boranovici",
+      "mun1990_id": "rudo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:rudo:gornja_rijeka",
+      "mun1990_id": "rudo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:rudo:kosovici",
+      "mun1990_id": "rudo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:sokolac:vidrici",
+      "mun1990_id": "sokolac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:sokolac:sahbegovici",
+      "mun1990_id": "sokolac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:sokolac:knezina_2",
+      "mun1990_id": "sokolac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:sokolac:sokolac_2",
+      "mun1990_id": "sokolac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:sokolac:sasevci_2",
+      "mun1990_id": "sokolac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:sokolac:donji_kalimanici",
+      "mun1990_id": "sokolac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srbac:srbac_2",
+      "mun1990_id": "srbac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srbac:kobas",
+      "mun1990_id": "srbac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srbac:nozicko",
+      "mun1990_id": "srbac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srbac:sitnesi_2",
+      "mun1990_id": "srbac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:milacevici",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:srebrenica_2",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:sulice_2",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:brezovice_2",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:bostahovine_2",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:mala_daljegosta_2",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:suceska",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:obadi",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:luka_2",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:osmace_2",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:donji_potocari_2",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:radovcici",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:kalimanici",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:ljeskovik_2",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:lijesce",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:srebrenica:petrica",
+      "mun1990_id": "srebrenica",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:teslic:kamenica_2",
+      "mun1990_id": "teslic",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:teslic:vitkovci",
+      "mun1990_id": "teslic",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:teslic:teslic_2",
+      "mun1990_id": "teslic",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:teslic:donji_ruzevic",
+      "mun1990_id": "teslic",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:teslic:blatnica_2",
+      "mun1990_id": "teslic",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:teslic:buletic_2",
+      "mun1990_id": "teslic",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:teslic:cecava_2",
+      "mun1990_id": "teslic",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:trebinje:trebinje_2",
+      "mun1990_id": "trebinje",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:trebinje:hum",
+      "mun1990_id": "trebinje",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:ugljevik:ugljevik_2",
+      "mun1990_id": "ugljevik",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:ugljevik:zabrdje_2",
+      "mun1990_id": "ugljevik",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:foca:brusna_2",
+      "mun1990_id": "foca",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:foca:foca_3",
+      "mun1990_id": "foca",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:foca:miljevina_2",
+      "mun1990_id": "foca",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:foca:tjentiste_2",
+      "mun1990_id": "foca",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:foca:prevrac",
+      "mun1990_id": "foca",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:foca:brod_3",
+      "mun1990_id": "foca",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:foca:velenici_2",
+      "mun1990_id": "foca",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:foca:kosman",
+      "mun1990_id": "foca",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:foca:zavait_3",
+      "mun1990_id": "foca",
+      "political_controller": "RBiH",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:hanpijesak:nevacka_3",
+      "mun1990_id": "han_pijesak",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:hanpijesak:han_pijesak_2",
+      "mun1990_id": "han_pijesak",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:hanpijesak:godjenje_2",
+      "mun1990_id": "han_pijesak",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:cajnice:miljeno_2",
+      "mun1990_id": "cajnice",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:cajnice:zaborak",
+      "mun1990_id": "cajnice",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:cajnice:batotici",
+      "mun1990_id": "cajnice",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:cajnice:cajnice_2",
+      "mun1990_id": "cajnice",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:cajnice:djakovici",
+      "mun1990_id": "cajnice",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:cajnice:todorovici",
+      "mun1990_id": "cajnice",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:cajnice:metaljka",
+      "mun1990_id": "cajnice",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 65
+    },
+    {
+      "sid": "op:celinac:kablovi_2",
+      "mun1990_id": "celinac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:celinac:snjegotina_srednja",
+      "mun1990_id": "celinac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:celinac:josavka_donja_2",
+      "mun1990_id": "celinac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:celinac:celinac_2",
+      "mun1990_id": "celinac",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:bosanski_samac:novo_selo_2",
+      "mun1990_id": "bosanski_samac",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:bosanski_samac:samac_2",
+      "mun1990_id": "bosanski_samac",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:bosanski_samac:crkvina_2",
+      "mun1990_id": "bosanski_samac",
+      "political_controller": "HRHB",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:sekovici:kastijelj_2",
+      "mun1990_id": "sekovici",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:sekovici:udbina_2",
+      "mun1990_id": "sekovici",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:sekovici:sekovici_2",
+      "mun1990_id": "sekovici",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:sipovo:pribeljci_2",
+      "mun1990_id": "sipovo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:sipovo:brdjani",
+      "mun1990_id": "sipovo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:sipovo:gornji_mujdzici_2",
+      "mun1990_id": "sipovo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:sipovo:volari_2",
+      "mun1990_id": "sipovo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:sipovo:sipovo_2",
+      "mun1990_id": "sipovo",
+      "political_controller": "RS",
+      "contested_control": false,
+      "control_status": "SECURE",
+      "stability_score": 75
+    },
+    {
+      "sid": "op:brcko:bijela_2",
+      "mun1990_id": "brcko",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:brcko:boce_2",
+      "mun1990_id": "brcko",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:brcko:brcko",
+      "mun1990_id": "brcko",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:brcko:potocari_2",
+      "mun1990_id": "brcko",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:brcko:brezovo_polje_selo_2",
+      "mun1990_id": "brcko",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:brcko:brka_2",
+      "mun1990_id": "brcko",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:brcko:donji_rahic",
+      "mun1990_id": "brcko",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:brcko:bukvik_gornji_2",
+      "mun1990_id": "brcko",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:brcko:gornji_rahic_2",
+      "mun1990_id": "brcko",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:brcko:palanka",
+      "mun1990_id": "brcko",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:brcko:krepsic",
+      "mun1990_id": "brcko",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:brcko:maoca_2",
+      "mun1990_id": "brcko",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    },
+    {
+      "sid": "op:brcko:skakava_donja",
+      "mun1990_id": "brcko",
+      "political_controller": "RBiH",
+      "contested_control": true,
+      "control_status": "CONTESTED",
+      "stability_score": 55
+    }
+  ]
+}

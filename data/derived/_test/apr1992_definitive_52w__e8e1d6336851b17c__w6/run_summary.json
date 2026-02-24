@@ -1,0 +1,563 @@
+{
+  "anchor_checks": [
+    {
+      "actual_controller": "RS",
+      "anchor_id": "zvornik",
+      "anchor_type": "municipality",
+      "expected_controller": "RS",
+      "passed": true
+    },
+    {
+      "actual_controller": "RS",
+      "anchor_id": "bijeljina",
+      "anchor_type": "municipality",
+      "expected_controller": "RS",
+      "passed": true
+    },
+    {
+      "actual_controller": "RBiH",
+      "anchor_id": "srebrenica",
+      "anchor_type": "municipality",
+      "expected_controller": "RBiH",
+      "passed": true
+    },
+    {
+      "actual_controller": "RBiH",
+      "anchor_id": "bihac",
+      "anchor_type": "municipality",
+      "expected_controller": "RBiH",
+      "passed": true
+    },
+    {
+      "actual_controller": "RS",
+      "anchor_id": "banja_luka",
+      "anchor_type": "municipality",
+      "expected_controller": "RS",
+      "passed": true
+    },
+    {
+      "actual_controller": "RBiH",
+      "anchor_id": "tuzla",
+      "anchor_type": "municipality",
+      "expected_controller": "RBiH",
+      "passed": true
+    },
+    {
+      "actual_controller": "RS",
+      "anchor_id": "centar_sarajevo",
+      "anchor_type": "municipality",
+      "expected_controller": "RBiH",
+      "passed": false
+    },
+    {
+      "actual_controller": "RBiH",
+      "anchor_id": "S163520",
+      "anchor_type": "settlement",
+      "expected_controller": "RBiH",
+      "passed": true
+    }
+  ],
+  "bot_benchmark_evaluation": {
+    "evaluated": 0,
+    "failed": 0,
+    "not_reached": 6,
+    "passed": 0,
+    "results": [
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 0,
+        "faction": "HRHB",
+        "objective": "secure_herzegovina_core",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0,
+        "turn": 26
+      },
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 0,
+        "faction": "RBiH",
+        "objective": "hold_core_centers",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0,
+        "turn": 26
+      },
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 0,
+        "faction": "RS",
+        "objective": "early_territorial_expansion",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0,
+        "turn": 26
+      },
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 0,
+        "faction": "HRHB",
+        "objective": "hold_central_bosnia_nodes",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0,
+        "turn": 52
+      },
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 0,
+        "faction": "RBiH",
+        "objective": "preserve_survival_corridors",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0,
+        "turn": 52
+      },
+      {
+        "actual_control_share": null,
+        "deviation": null,
+        "expected_control_share": 1,
+        "faction": "RS",
+        "objective": "consolidate_gains",
+        "passed": null,
+        "status": "not_reached",
+        "tolerance": 0,
+        "turn": 52
+      }
+    ]
+  },
+  "civilian_casualties": {
+    "HRHB": {
+      "fled_abroad": 10749,
+      "killed": 4462
+    },
+    "RBiH": {
+      "fled_abroad": 0,
+      "killed": 23286
+    },
+    "RS": {
+      "fled_abroad": 40171,
+      "killed": 15868
+    }
+  },
+  "final_state_hash": "05c0179e951c0ac3",
+  "front_corps_tracking": {
+    "corps_count": 9,
+    "corps_front_edges_present": true
+  },
+  "historical_alignment": {
+    "delta": [
+      {
+        "brigades_active_delta": 0,
+        "brigades_inactive_delta": 0,
+        "brigades_total_delta": 0,
+        "faction": "HRHB",
+        "negotiation_capital_delta": 0,
+        "personnel_total_delta": 3309,
+        "prewar_capital_delta": 0,
+        "recruitment_capital_delta": 38
+      },
+      {
+        "brigades_active_delta": 0,
+        "brigades_inactive_delta": 0,
+        "brigades_total_delta": 0,
+        "faction": "RBiH",
+        "negotiation_capital_delta": 0,
+        "personnel_total_delta": 36914,
+        "prewar_capital_delta": 0,
+        "recruitment_capital_delta": 84
+      },
+      {
+        "brigades_active_delta": 1,
+        "brigades_inactive_delta": 0,
+        "brigades_total_delta": 1,
+        "faction": "RS",
+        "negotiation_capital_delta": 0,
+        "personnel_total_delta": 8781,
+        "prewar_capital_delta": 0,
+        "recruitment_capital_delta": 59
+      }
+    ],
+    "final": [
+      {
+        "brigades_active": 25,
+        "brigades_inactive": 0,
+        "brigades_total": 25,
+        "faction": "HRHB",
+        "negotiation_capital": 0,
+        "personnel_total": 20955,
+        "prewar_capital": 0,
+        "recruitment_capital": 338
+      },
+      {
+        "brigades_active": 81,
+        "brigades_inactive": 0,
+        "brigades_total": 81,
+        "faction": "RBiH",
+        "negotiation_capital": 0,
+        "personnel_total": 98147,
+        "prewar_capital": 0,
+        "recruitment_capital": 484
+      },
+      {
+        "brigades_active": 67,
+        "brigades_inactive": 0,
+        "brigades_total": 67,
+        "faction": "RS",
+        "negotiation_capital": 0,
+        "personnel_total": 52616,
+        "prewar_capital": 0,
+        "recruitment_capital": 659
+      }
+    ],
+    "initial": [
+      {
+        "brigades_active": 25,
+        "brigades_inactive": 0,
+        "brigades_total": 25,
+        "faction": "HRHB",
+        "negotiation_capital": 0,
+        "personnel_total": 17646,
+        "prewar_capital": 0,
+        "recruitment_capital": 300
+      },
+      {
+        "brigades_active": 81,
+        "brigades_inactive": 0,
+        "brigades_total": 81,
+        "faction": "RBiH",
+        "negotiation_capital": 0,
+        "personnel_total": 61233,
+        "prewar_capital": 0,
+        "recruitment_capital": 400
+      },
+      {
+        "brigades_active": 66,
+        "brigades_inactive": 0,
+        "brigades_total": 66,
+        "faction": "RS",
+        "negotiation_capital": 0,
+        "personnel_total": 43835,
+        "prewar_capital": 0,
+        "recruitment_capital": 600
+      }
+    ]
+  },
+  "phase_ii_attack_resolution": {
+    "casualty_attacker": 260,
+    "casualty_defender": 212,
+    "defender_absent_battles": 26,
+    "defender_present_battles": 0,
+    "flips_applied": 23,
+    "orders_by_faction": {
+      "HRHB": 1,
+      "RBiH": 8,
+      "RS": 17
+    },
+    "orders_processed": 26,
+    "unique_attack_targets": 35,
+    "weeks_with_orders": 6,
+    "weeks_with_phase_ii": 6
+  },
+  "phase_ii_attack_resolution_weekly": [
+    {
+      "casualty_attacker": 17,
+      "casualty_defender": 21,
+      "defender_absent_battles": 2,
+      "defender_present_battles": 0,
+      "flips_applied": 2,
+      "orders_by_faction": {
+        "RBiH": 1,
+        "RS": 1
+      },
+      "orders_processed": 2,
+      "turn": 1,
+      "unique_attack_targets": 9,
+      "week_index": 0
+    },
+    {
+      "casualty_attacker": 96,
+      "casualty_defender": 63,
+      "defender_absent_battles": 9,
+      "defender_present_battles": 0,
+      "flips_applied": 8,
+      "orders_by_faction": {
+        "HRHB": 1,
+        "RBiH": 5,
+        "RS": 3
+      },
+      "orders_processed": 9,
+      "turn": 2,
+      "unique_attack_targets": 9,
+      "week_index": 1
+    },
+    {
+      "casualty_attacker": 32,
+      "casualty_defender": 33,
+      "defender_absent_battles": 3,
+      "defender_present_battles": 0,
+      "flips_applied": 3,
+      "orders_by_faction": {
+        "RS": 3
+      },
+      "orders_processed": 3,
+      "turn": 3,
+      "unique_attack_targets": 4,
+      "week_index": 2
+    },
+    {
+      "casualty_attacker": 62,
+      "casualty_defender": 47,
+      "defender_absent_battles": 5,
+      "defender_present_battles": 0,
+      "flips_applied": 4,
+      "orders_by_faction": {
+        "RBiH": 1,
+        "RS": 4
+      },
+      "orders_processed": 5,
+      "turn": 4,
+      "unique_attack_targets": 5,
+      "week_index": 3
+    },
+    {
+      "casualty_attacker": 32,
+      "casualty_defender": 23,
+      "defender_absent_battles": 3,
+      "defender_present_battles": 0,
+      "flips_applied": 2,
+      "orders_by_faction": {
+        "RBiH": 1,
+        "RS": 2
+      },
+      "orders_processed": 3,
+      "turn": 5,
+      "unique_attack_targets": 4,
+      "week_index": 4
+    },
+    {
+      "casualty_attacker": 21,
+      "casualty_defender": 25,
+      "defender_absent_battles": 4,
+      "defender_present_battles": 0,
+      "flips_applied": 4,
+      "orders_by_faction": {
+        "RS": 4
+      },
+      "orders_processed": 4,
+      "turn": 6,
+      "unique_attack_targets": 4,
+      "week_index": 5
+    }
+  ],
+  "phase_ii_minority_flight": {
+    "displaced_total": 334036,
+    "fled_abroad_total": 29404,
+    "killed_total": 31954,
+    "routed_total": 270662,
+    "settlements_displaced_total": 3663,
+    "settlements_evaluated_total": 17466,
+    "weeks_with_activity": 1
+  },
+  "phase_ii_minority_flight_weekly": [
+    {
+      "displaced_total": 0,
+      "fled_abroad_total": 0,
+      "killed_total": 0,
+      "routed_total": 0,
+      "settlements_displaced": 0,
+      "settlements_evaluated": 0,
+      "turn": 1,
+      "week_index": 0
+    },
+    {
+      "displaced_total": 0,
+      "fled_abroad_total": 0,
+      "killed_total": 0,
+      "routed_total": 0,
+      "settlements_displaced": 0,
+      "settlements_evaluated": 0,
+      "turn": 2,
+      "week_index": 1
+    },
+    {
+      "displaced_total": 0,
+      "fled_abroad_total": 0,
+      "killed_total": 0,
+      "routed_total": 0,
+      "settlements_displaced": 0,
+      "settlements_evaluated": 0,
+      "turn": 3,
+      "week_index": 2
+    },
+    {
+      "displaced_total": 334036,
+      "fled_abroad_total": 29404,
+      "killed_total": 31954,
+      "routed_total": 270662,
+      "settlements_displaced": 3663,
+      "settlements_evaluated": 5822,
+      "turn": 4,
+      "week_index": 3
+    },
+    {
+      "displaced_total": 0,
+      "fled_abroad_total": 0,
+      "killed_total": 0,
+      "routed_total": 0,
+      "settlements_displaced": 0,
+      "settlements_evaluated": 5822,
+      "turn": 5,
+      "week_index": 4
+    },
+    {
+      "displaced_total": 0,
+      "fled_abroad_total": 0,
+      "killed_total": 0,
+      "routed_total": 0,
+      "settlements_displaced": 0,
+      "settlements_evaluated": 5822,
+      "turn": 6,
+      "week_index": 5
+    }
+  ],
+  "phase_ii_takeover_displacement": {
+    "camps_created": 8,
+    "camps_routed": 0,
+    "displaced_total": 116636,
+    "fled_abroad_total": 21516,
+    "killed_total": 11662,
+    "routed_total": 83458,
+    "timers_matured": 8,
+    "timers_started": 10,
+    "weeks_with_activity": 6,
+    "weeks_with_phase_ii": 6
+  },
+  "phase_ii_takeover_displacement_weekly": [
+    {
+      "camps_created": 0,
+      "camps_routed": 0,
+      "displaced_total": 0,
+      "fled_abroad_total": 0,
+      "killed_total": 0,
+      "routed_total": 0,
+      "source_municipalities": [],
+      "timers_matured": 0,
+      "timers_started": 2,
+      "turn": 1,
+      "week_index": 0
+    },
+    {
+      "camps_created": 0,
+      "camps_routed": 0,
+      "displaced_total": 0,
+      "fled_abroad_total": 0,
+      "killed_total": 0,
+      "routed_total": 0,
+      "source_municipalities": [],
+      "timers_matured": 0,
+      "timers_started": 6,
+      "turn": 2,
+      "week_index": 1
+    },
+    {
+      "camps_created": 0,
+      "camps_routed": 0,
+      "displaced_total": 0,
+      "fled_abroad_total": 0,
+      "killed_total": 0,
+      "routed_total": 0,
+      "source_municipalities": [],
+      "timers_matured": 0,
+      "timers_started": 1,
+      "turn": 3,
+      "week_index": 2
+    },
+    {
+      "camps_created": 0,
+      "camps_routed": 0,
+      "displaced_total": 0,
+      "fled_abroad_total": 0,
+      "killed_total": 0,
+      "routed_total": 0,
+      "source_municipalities": [],
+      "timers_matured": 0,
+      "timers_started": 1,
+      "turn": 4,
+      "week_index": 3
+    },
+    {
+      "camps_created": 2,
+      "camps_routed": 0,
+      "displaced_total": 11365,
+      "fled_abroad_total": 492,
+      "killed_total": 1136,
+      "routed_total": 9737,
+      "source_municipalities": [
+        "bijeljina",
+        "zavidovici"
+      ],
+      "timers_matured": 2,
+      "timers_started": 0,
+      "turn": 5,
+      "week_index": 4
+    },
+    {
+      "camps_created": 6,
+      "camps_routed": 0,
+      "displaced_total": 105271,
+      "fled_abroad_total": 21024,
+      "killed_total": 10526,
+      "routed_total": 73721,
+      "source_municipalities": [
+        "banovici",
+        "bugojno",
+        "konjic",
+        "lukavac",
+        "stari_grad_sarajevo",
+        "zvornik"
+      ],
+      "timers_matured": 6,
+      "timers_started": 0,
+      "turn": 6,
+      "week_index": 5
+    }
+  ],
+  "run_id": "apr1992_definitive_52w__e8e1d6336851b17c__w6",
+  "scenario_id": "apr1992_definitive_52w",
+  "summary": {
+    "final_turn": 6,
+    "phase": "phase_ii"
+  },
+  "vs_historical": {
+    "counts_by_controller": [
+      {
+        "controller": "HRHB",
+        "delta": 63,
+        "final_count": 1019,
+        "reference_count": 956
+      },
+      {
+        "controller": "RBiH",
+        "delta": 200,
+        "final_count": 2291,
+        "reference_count": 2091
+      },
+      {
+        "controller": "RS",
+        "delta": -263,
+        "final_count": 2512,
+        "reference_count": 2775
+      }
+    ],
+    "final_total": 5822,
+    "reference_key": "jan1993",
+    "reference_total": 5822
+  },
+  "weeks": 6
+}

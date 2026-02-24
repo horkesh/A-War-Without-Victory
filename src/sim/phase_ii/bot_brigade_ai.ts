@@ -21,6 +21,7 @@ import type {
     MunicipalityId,
     SettlementId
 } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { scoreConsolidationTarget } from '../consolidation_scoring.js';
 import { areRbihHrhbAllied, isRbihHrhbAtWar } from '../phase_i/alliance_update.js';
@@ -82,7 +83,7 @@ export function hasDefenderBrigade(state: GameState, sid: SettlementId): boolean
     const pc = state.political_controllers ?? {};
     const defenderFaction = pc[sid] as FactionId | null | undefined;
     if (!defenderFaction) return false;
-    const formationId = state.brigade_aor?.[sid];
+    const formationId = getLegacyAoR(state).brigade_aor?.[sid];
     if (!formationId) return false;
     const formation = state.formations?.[formationId];
     return formation?.faction === defenderFaction;
@@ -141,7 +142,7 @@ function hasHeavyResistance(
 ): boolean {
     const garrison = getSettlementGarrison(state, targetSid, edges);
     if (garrison >= HEAVY_RESISTANCE_GARRISON_THRESHOLD) return true;
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const defenderBrigadeId = brigadeAor[targetSid];
     if (defenderBrigadeId == null) return false;
     const formation = state.formations?.[defenderBrigadeId];
@@ -299,7 +300,7 @@ function findTransferCandidates(
     toBrigade: FormationId,
     adj: Map<SettlementId, Set<SettlementId>>
 ): SettlementId[] {
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const fromSettlements = getBrigadeAoRSettlements(state, fromBrigade);
 
     // Must leave at least 1 settlement in from_brigade
@@ -496,7 +497,7 @@ export function generateBotBrigadeOrders(
     if (brigades.length === 0) return result;
 
     const adj = buildAdjacencyFromEdges(edges);
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const frontPressure = state.front_pressure ?? {};
     const strategy = FACTION_STRATEGIES[faction];
     const munLookup = sidToMun ?? null;
@@ -922,10 +923,8 @@ export function generateAllBotOrders(
     for (const faction of sortedFactions) {
         const orders = generateBotBrigadeOrders(state, edges, faction, sidToMun);
 
-        if (!state.brigade_aor_orders) state.brigade_aor_orders = [];
         if (!state.brigade_posture_orders) state.brigade_posture_orders = [];
-
-        state.brigade_aor_orders.push(...orders.reshape_orders);
+        // AoR phase-out: reshape_orders not written (brigade_aor_orders removed)
         state.brigade_posture_orders.push(...orders.posture_orders);
         for (const [bid, target] of Object.entries(orders.attack_orders)) {
             if (target != null) attackOrdersAccum[bid as FormationId] = target;
@@ -935,40 +934,5 @@ export function generateAllBotOrders(
         state.brigade_attack_orders = attackOrdersAccum;
     }
 
-    // 52w plan Step 3: bot issuance of brigade_mun_orders (one expansion per faction per turn).
-    if (sidToMun && sidToMun.size > 0) {
-        const sidToMunRecord: Record<SettlementId, MunicipalityId> = {};
-        sidToMun.forEach((v, k) => { sidToMunRecord[k] = v as MunicipalityId; });
-        const assignment = state.brigade_municipality_assignment ?? {};
-        const munAdj = buildMunicipalityAdjacency(edges, sidToMunRecord);
-        for (const faction of sortedFactions) {
-            const brigadeIds = getFactionBrigades(state, faction).map((b) => b.id).sort(strictCompare);
-            const factionMuns = new Set<MunicipalityId>();
-            for (const bid of brigadeIds) {
-                for (const munId of (assignment[bid] ?? [])) factionMuns.add(munId);
-            }
-            if (factionMuns.size === 0) continue;
-            let issued = false;
-            for (const bid of brigadeIds) {
-                if (issued) break;
-                const current = assignment[bid] ?? [];
-                if (current.length >= MAX_MUNICIPALITIES_PER_BRIGADE) continue;
-                let added: MunicipalityId | null = null;
-                for (const munId of current) {
-                    const neighbors = munAdj.get(munId);
-                    if (!neighbors) continue;
-                    const sortedNeighbors = Array.from(neighbors).sort(strictCompare);
-                    for (const n of sortedNeighbors) {
-                        if (factionMuns.has(n) && !current.includes(n)) { added = n; break; }
-                    }
-                    if (added) break;
-                }
-                if (added) {
-                    if (!state.brigade_mun_orders) state.brigade_mun_orders = {};
-                    state.brigade_mun_orders[bid] = [...current, added];
-                    issued = true;
-                }
-            }
-        }
-    }
+    // AoR phase-out: brigade_mun_orders not written (Phase II uses location_osid only)
 }

@@ -49,10 +49,10 @@
   - Outputs: `docs/50_research/extracts/*.txt` (agent-readable). See `docs/50_research/README_KNOWLEDGE_BASE.md`.
 
 ### Phase II Browser Advance (Warroom)
-- `src/sim/run_phase_ii_browser.ts` — `runPhaseIITurn(state, input)` — browser-safe Phase II turn advance. No Node/fs. Used by warroom when advancing a turn in phase_ii. Populates AoR from control + formation home muns when faction AoRs empty (via `src/scenario/aor_init.ts`). Does not run supply pressure or exhaustion; full Phase II use Node `runTurn`.
+- `src/sim/run_phase_ii_browser.ts` — `runPhaseIITurn(state, input)` — browser-safe Phase II turn advance. No Node/fs. Used by warroom when advancing a turn in phase_ii. Phase II uses location_osid only (no AoR). Does not run supply pressure or exhaustion; full Phase II use Node `runTurn`.
 
-### AoR Init (Shared)
-- `src/scenario/aor_init.ts` — `populateFactionAoRFromControl`, `ensureFormationHomeMunsInFactionAoR`. Browser-safe. Consumers: scenario_runner (re-exports), run_phase_ii_browser, turn_pipeline `phase-ii-aor-init`.
+### Phase II location_osid (AoR removed)
+- AoR init is removed. Phase II brigade location is **location_osid** only; set at formation creation and via `backfillFormationLocationOsid` at Phase II entry. See docs/30_planning/AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md. Legacy `src/scenario/aor_init.ts` is deprecated and must not be used for Phase II state.
 
 ### Turn Contract (Main Game)
 - Canonical turn contract for desktop and headless runs:
@@ -88,7 +88,7 @@ Canon global turn-order hooks (docs/10_canon/Phase_Specifications_v0_5_0.md) map
 | 5 | Enclave integrity | `update-enclave-integrity` |
 | 6 | Sarajevo exception | `update-sarajevo-exception` |
 | 7 | Negotiation capital | `update-negotiation-pressure`, `update-negotiation-capital` |
-| 8 | AoR | `phase-ii-aor-init`, `phase-e-aor-derivation` (Phase II only) |
+| 8 | OSID location and ZoC | `zoc-computation`, `zoc-constrained-movement`; front snapshot from `derive-osid-front-segments` (Phase II only). No AoR. |
 | 9 | Tactical doctrines | `update-doctrine-eligibility` |
 | 10 | Capability progression | `update-capability-profiles` (Phase II); Phase I: `phase-i-capability-update` (before control flip) |
 | 11 | Contested control | Initialization (control_status from stability); Phase I flip in `phase-i-control-flip` |
@@ -101,7 +101,7 @@ Phase I steps: `evaluate-events` (first), `phase-i-militia-emergence`, `phase-i-
 
 **Authority derivation:** `update-formation-lifecycle` derives municipality authority via `deriveMunicipalityAuthorityMap` (formation_lifecycle.ts) from political control (consolidated/contested/fragmented); used for brigade activation gating.
 
-**AoR init:** `phase-ii-aor-init` uses `populateFactionAoRFromControl` and `ensureFormationHomeMunsInFactionAoR` from `src/scenario/aor_init.ts` (via scenario_runner re-export). Phase II AoR steps: `validate-brigade-aor`, `rebalance-brigade-aor`, `enforce-brigade-aor-contiguity` (repair islands after rebalance), `enforce-corps-aor-contiguity` (when corps_command present; enclave-aware), `surrounded-brigade-reform` (reform in home territory when entire AoR in enclave), `apply-municipality-orders`. See Phase_II_Specification_v0_5_0.md §5.
+**Phase II OSID/ZoC:** No AoR. Pipeline steps: `zoc-computation`, `zoc-constrained-movement`, `derive-osid-front-segments` (sets phase_ii_front_edges_osid; assignable_front_segments derived from it), `phase-ii-resolve-attack-orders` (OSID attack resolution). Brigade location is location_osid only; Phase II entry uses backfillFormationLocationOsid. See Phase_II_Specification_v0_5_0.md §5 and AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md.
 
 ## Non-Canonical / Legacy Harnesses
 These exist for smoke and internal checks, not for authoritative runs:

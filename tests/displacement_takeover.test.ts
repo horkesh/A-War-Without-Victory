@@ -112,7 +112,7 @@ test('east Bosnia Bosniak displacement routes to Srebrenica then Tuzla after cam
     state.formations = {
         rbih_1: { id: 'rbih_1', faction: 'RBiH', kind: 'brigade', status: 'active', name: 'RBiH 1', created_turn: 0, assignment: null }
     };
-    state.brigade_aor = { S_SR: 'rbih_1', S_TZ: 'rbih_1' };
+    (state as import('../src/state/game_state.js').GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState).brigade_aor = { S_SR: 'rbih_1', S_TZ: 'rbih_1' };
     state.displacement_state = {
         zvornik: { mun_id: 'zvornik', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
         srebrenica: { mun_id: 'srebrenica', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
@@ -339,7 +339,7 @@ test('Croat from Prijedor routes to Livno first (Herzegovina urban centers)', ()
     state.formations = {
         hrhb_1: { id: 'hrhb_1', faction: 'HRHB', kind: 'brigade', status: 'active', name: 'HRHB 1', created_turn: 0, assignment: null }
     };
-    state.brigade_aor = { S_LI: 'hrhb_1', S_MO: 'hrhb_1' };
+    (state as import('../src/state/game_state.js').GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState).brigade_aor = { S_LI: 'hrhb_1', S_MO: 'hrhb_1' };
     state.displacement_state = {
         prijedor: { mun_id: 'prijedor', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
         livno: { mun_id: 'livno', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },

@@ -8,6 +8,7 @@ import { Phase0PreparationMap } from './components/Phase0PreparationMap.js';
 import { TacticalMap } from './components/TacticalMap.js';
 import { WallCalendar } from './components/WallCalendar.js';
 import { WarPlanningMap } from './components/WarPlanningMap.js';
+import { setScenarioStartDate, turnToCalendarMonthYear, turnToShortLabel } from './components/warroom_utils.js';
 // Asset URLs via Vite so dev server serves them from the module graph
 import bgUrl from './assets/hq_background_v3.png?url';
 // Flag assets — drawn dynamically on the wall per player faction
@@ -51,6 +52,8 @@ class WarroomApp {
     private tacticalMapIframe: HTMLIFrameElement | null = null;
     private tacticalMapReady = false;
     private phase0StartBriefShown = false;
+    /** True once the user has navigated away from the initial main menu (prevents init race). */
+    private userNavigatedFromMenu = false;
 
     constructor() {
         this.canvas = document.getElementById('warroom-canvas') as HTMLCanvasElement;
@@ -136,7 +139,9 @@ class WarroomApp {
         } else if (!this.desktopBridge?.startNewCampaign) {
             // Browser/dev mode fallback
             await this.loadMockState();
-        } else {
+        } else if (!this.userNavigatedFromMenu) {
+            // Only show main menu if the user hasn't already navigated away
+            // during the async init (e.g. clicked "New Campaign" while assets loaded).
             this.showMainMenu();
         }
 
@@ -181,6 +186,7 @@ class WarroomApp {
             supply_rights: { corridors: [] }
         } as unknown as GameState;
 
+        setScenarioStartDate(this.gameState.meta.scenario_start_date);
         this.updateUIOverlay();
     }
 
@@ -232,6 +238,8 @@ class WarroomApp {
     private applyGameStateFromJson(stateJson: string): void {
         try {
             this.gameState = deserializeState(stateJson);
+            // Sync scenario epoch so date helpers produce correct calendar dates
+            setScenarioStartDate(this.gameState.meta.scenario_start_date);
             // Defer DOM work to the next task so the triggering click is consumed and UI stays responsive.
             setTimeout(() => {
                 this.updateUIOverlay();
@@ -286,6 +294,7 @@ class WarroomApp {
 
     /** STEP 2: Show the side picker (faction selection). */
     private showSidePicker(): void {
+        this.userNavigatedFromMenu = true;
         this.hideAllOverlays(false);
         const picker = document.getElementById('side-picker');
         if (picker) picker.classList.remove('mm-hidden');
@@ -502,11 +511,7 @@ class WarroomApp {
         const el = document.getElementById('wr-turn-display');
         if (!el || !this.gameState) return;
         const turn = this.gameState.meta.turn;
-        // Sep 1991 + turn weeks
-        const startDate = new Date(1991, 8, 1); // Sep 1 1991
-        startDate.setDate(startDate.getDate() + turn * 7);
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const label = `${months[startDate.getMonth()]} ${startDate.getFullYear()}`;
+        const label = turnToShortLabel(turn);
         const phase = this.gameState.meta.phase === 'phase_0' ? 'Pre-War'
             : this.gameState.meta.phase === 'phase_i' ? 'Phase I'
                 : 'Phase II';
@@ -537,9 +542,10 @@ class WarroomApp {
         // 2. Dynamic overlays: flag + calendar content
         this.renderFlag(this.gameState);
 
+        const calMY = turnToCalendarMonthYear(this.gameState.meta.turn);
         const calCanvas = this.calendar.render({
-            month: 9,
-            year: 1991,
+            month: calMY.month,
+            year: calMY.year,
             currentTurn: this.gameState.meta.turn,
             startTurn: 0
         });

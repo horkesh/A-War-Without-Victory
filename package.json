@@ -227,6 +227,8 @@
     "map:attachSettlementTrueNames": "tsx scripts/map/attach_true_settlement_names_option_b.ts",
     "map:deriveMun1990Geometry": "tsx scripts/map/derive_municipalities_1990_geometry.ts",
     "map:derive:mun1990PoliticalControllers": "tsx scripts/map/derive_mun1990_political_controllers.ts",
+    "map:derive:operational-settlements": "tsx scripts/derive_operational_settlements.ts",
+    "map:derive:operational-osid-first": "tsx scripts/derive_operational_osid_first.ts",
     "audit:mun1990:zero": "tsx scripts/audits/list_zero_settlement_municipalities_1990.ts",
     "audit:breza:trace": "tsx scripts/audits/trace_breza_presence_and_mapping.ts",
     "audit:settlementNames:feasibility": "tsx scripts/audits/scan_settlement_name_sources.ts",
@@ -279,6 +281,9 @@
     "@turf/boolean-intersects": "^7.3.2",
     "@turf/boolean-valid": "^7.3.2",
     "@turf/turf": "^7.3.2",
+    "@types/topojson-client": "^3.1.5",
+    "@types/topojson-server": "^3.0.4",
+    "@types/topojson-simplify": "^3.0.3",
     "adm-zip": "^0.5.16",
     "concaveman": "^1.2.1",
     "geotiff": "^3.0.0",
@@ -289,6 +294,9 @@
     "polyclip-ts": "^0.16.8",
     "svg-path-parser": "^1.1.0",
     "three": "^0.170.0",
+    "topojson-client": "^3.1.0",
+    "topojson-server": "^3.0.1",
+    "topojson-simplify": "^3.0.3",
     "xlsx": "^0.18.5"
   }
 }

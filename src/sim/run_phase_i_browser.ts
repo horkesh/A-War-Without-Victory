@@ -13,6 +13,7 @@ import {
     spawnFormationsFromPools,
     type SpawnFormationsReport
 } from './formation_spawn.js';
+import type { CanonicalToOperationalMap } from '../data/operational_data.js';
 import { runAuthorityDegradation, type AuthorityDegradationReport } from './phase_i/authority_degradation.js';
 import type { ControlFlipReport } from './phase_i/control_flip.js';
 import { buildSettlementsByMun, runControlStrain, type ControlStrainReport } from './phase_i/control_strain.js';
@@ -34,6 +35,8 @@ export interface PhaseITurnInput {
     settlementGraph: LoadedSettlementGraph;
     /** Optional 1991 census by mun for displacement hook trigger (Hostile_Population_Share > 0.30). */
     municipalityPopulation1991?: MunicipalityPopulation1991Map;
+    /** Optional mapping for location_osid assignment on spawned formations. */
+    canonicalToOperational?: CanonicalToOperationalMap;
 }
 
 export interface PhaseITurnReport {
@@ -113,7 +116,8 @@ export async function runPhaseITurn(
             maxPerMun: null,
             customTags: [],
             applyChanges: true,
-            formationKind: kind
+            formationKind: kind,
+            canonicalToOperational: input.canonicalToOperational
         });
     }
 

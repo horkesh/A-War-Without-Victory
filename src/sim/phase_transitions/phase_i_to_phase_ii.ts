@@ -7,7 +7,6 @@
 import { computeFrontEdges } from '../../map/front_edges.js';
 import type { EdgeRecord, SettlementRecord } from '../../map/settlements.js';
 import type { GameState } from '../../state/game_state.js';
-import { initializeBrigadeAoR } from '../phase_ii/brigade_aor.js';
 import { initializeCorpsCommand } from '../phase_ii/corps_command.js';
 
 /** D0.9.1: Minimum opposing-control adjacency edges for front-precursor persistence. */
@@ -96,10 +95,7 @@ export function applyPhaseIToPhaseIITransition(
         (state as GameState & { phase_ii_exhaustion_local: Record<string, number> }).phase_ii_exhaustion_local = {};
     }
 
-    // Initialize brigade AoR (Voronoi BFS from brigade HQs)
-    if (edges && edges.length > 0) {
-        initializeBrigadeAoR(state, edges, settlements);
-    }
+    // AoR phase-out: no initializeBrigadeAoR. location_osid is set by backfillFormationLocationOsid in pipeline (phase-ii-location-osid-backfill).
 
     // Initialize corps command state
     initializeCorpsCommand(state);

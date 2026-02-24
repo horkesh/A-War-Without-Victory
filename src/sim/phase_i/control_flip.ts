@@ -4,6 +4,7 @@
  * Control changes do not grant authority (Engine Invariants §3, §9).
  */
 
+import type { CanonicalToOperationalMap } from '../../data/operational_data.js';
 import type { EdgeRecord, SettlementRecord } from '../../map/settlements.js';
 import { getFactionCapabilityModifier } from '../../state/capability_progression.js';
 import { isLargeSettlementMun } from '../../state/formation_constants.js';
@@ -28,6 +29,18 @@ const FLIP_THRESHOLD_BASE = 50;
 const FLIP_ATTACKER_FACTOR = 1.5;
 /** B4: Coercion pressure reduces threshold (max reduction per mun). */
 const COERCION_THRESHOLD_REDUCTION_MAX = 15;
+/** Early-war RS external intervention window (Drina axis). */
+const RS_EARLY_WAR_END_WEEK = 26;
+/** Additional attacker pressure for RS in FRY-adjacent municipalities during early war. */
+const BORDER_INTERVENTION_BONUS = 15;
+const RS_BORDER_INTERVENTION_MUN_IDS = new Set<MunicipalityId>([
+    'bijeljina',
+    'zvornik',
+    'bratunac',
+    'visegrad',
+    'foca',
+    'rudo',
+]);
 
 /** Phase I §4.3.5: Base consolidation duration (turns).
  * Increased from 4 to 8 to dampen oscillation: recently-flipped municipalities
@@ -80,6 +93,8 @@ export interface ControlFlipInput {
     militaryActionAttackScale?: number;
     /** Experimental military-action tuning override. */
     militaryActionStabilityBufferFactor?: number;
+    /** When set, control writes use OSID keys (canonicalToOperational[sid] ?? sid). */
+    canonicalToOperational?: CanonicalToOperationalMap;
 }
 
 /** Brigade offensive amplification factor (brigades amplify militia in Phase I). */
@@ -148,23 +163,25 @@ function buildMunAdjacency(
     return adj;
 }
 
-/** Derive current controller of a municipality from political_controllers (majority of settlements in mun). */
+/** Derive current controller of a municipality from political_controllers (majority of settlements in mun). Uses OSID key when canonicalToOperational present. */
 function getMunicipalityController(
     state: GameState,
-    sids: SettlementId[]
+    sids: SettlementId[],
+    canonicalToOperational?: CanonicalToOperationalMap
 ): FactionId | null {
     const counts: Record<string, number> = {};
     for (const sid of sids) {
-        const c = state.political_controllers?.[sid] ?? null;
-        const key = c ?? '_null_';
-        counts[key] = (counts[key] ?? 0) + 1;
+        const pcKey = canonicalToOperational?.[sid] ?? sid;
+        const c = state.political_controllers?.[pcKey] ?? null;
+        const countKey = c ?? '_null_';
+        counts[countKey] = (counts[countKey] ?? 0) + 1;
     }
     let best: string | null = null;
     let bestCount = 0;
-    for (const [key, count] of Object.entries(counts)) {
+    for (const [countKey, count] of Object.entries(counts)) {
         if (count > bestCount) {
             bestCount = count;
-            best = key === '_null_' ? null : key;
+            best = countKey === '_null_' ? null : countKey;
         }
     }
     return best as FactionId | null;
@@ -187,7 +204,8 @@ function hasAdjacentHostile(
     currentController: FactionId | null,
     munAdjacency: Map<MunicipalityId, Set<MunicipalityId>>,
     state: GameState,
-    settlementsByMun: Map<MunicipalityId, SettlementId[]>
+    settlementsByMun: Map<MunicipalityId, SettlementId[]>,
+    canonicalToOperational?: CanonicalToOperationalMap
 ): boolean {
     const neighbors = munAdjacency.get(munId);
     if (!neighbors) return false;
@@ -200,7 +218,7 @@ function hasAdjacentHostile(
     for (const neighborMun of neighbors) {
         const sids = settlementsByMun.get(neighborMun);
         if (!sids?.length) continue;
-        const neighborController = getMunicipalityController(state, sids);
+        const neighborController = getMunicipalityController(state, sids, canonicalToOperational);
         if (neighborController !== null && neighborController !== currentController) {
             // Dynamic alliance: RBiH and HRHB skip when allied or ceasefire active (or before earliest war week)
             if ((currentController === 'RBiH' && neighborController === 'HRHB') ||
@@ -241,7 +259,8 @@ function getAdjacentBrigadeAttackStrength(
     attackerFaction: FactionId,
     munAdjacency: Map<MunicipalityId, Set<MunicipalityId>>,
     state: GameState,
-    settlementsByMun: Map<MunicipalityId, SettlementId[]>
+    settlementsByMun: Map<MunicipalityId, SettlementId[]>,
+    canonicalToOperational?: CanonicalToOperationalMap
 ): number {
     const neighbors = munAdjacency.get(munId);
     if (!neighbors) return 0;
@@ -249,7 +268,7 @@ function getAdjacentBrigadeAttackStrength(
     for (const neighborMun of neighbors) {
         const sids = settlementsByMun.get(neighborMun);
         if (!sids?.length) continue;
-        const neighborController = getMunicipalityController(state, sids);
+        const neighborController = getMunicipalityController(state, sids, canonicalToOperational);
         if (neighborController !== attackerFaction) continue;
         total += getFormationStrengthInMun(state, neighborMun, attackerFaction);
     }
@@ -262,7 +281,8 @@ function getStrongestAdjacentAttacker(
     currentController: FactionId | null,
     munAdjacency: Map<MunicipalityId, Set<MunicipalityId>>,
     state: GameState,
-    settlementsByMun: Map<MunicipalityId, SettlementId[]>
+    settlementsByMun: Map<MunicipalityId, SettlementId[]>,
+    canonicalToOperational?: CanonicalToOperationalMap
 ): { faction: FactionId; strength: number } | null {
     const neighbors = munAdjacency.get(munId);
     if (!neighbors) return null;
@@ -276,7 +296,7 @@ function getStrongestAdjacentAttacker(
     for (const neighborMun of neighbors) {
         const sids = settlementsByMun.get(neighborMun);
         if (!sids?.length) continue;
-        const neighborController = getMunicipalityController(state, sids);
+        const neighborController = getMunicipalityController(state, sids, canonicalToOperational);
         if (neighborController === null || neighborController === currentController) continue;
 
         // Dynamic alliance: RBiH and HRHB skip when allied or ceasefire active (or before earliest war week)
@@ -302,7 +322,8 @@ function getStrongestAdjacentBrigadeAttacker(
     currentController: FactionId | null,
     munAdjacency: Map<MunicipalityId, Set<MunicipalityId>>,
     state: GameState,
-    settlementsByMun: Map<MunicipalityId, SettlementId[]>
+    settlementsByMun: Map<MunicipalityId, SettlementId[]>,
+    canonicalToOperational?: CanonicalToOperationalMap
 ): { faction: FactionId; strength: number } | null {
     const neighbors = munAdjacency.get(munId);
     if (!neighbors) return null;
@@ -314,7 +335,7 @@ function getStrongestAdjacentBrigadeAttacker(
     for (const neighborMun of neighbors) {
         const sids = settlementsByMun.get(neighborMun);
         if (!sids?.length) continue;
-        const neighborController = getMunicipalityController(state, sids);
+        const neighborController = getMunicipalityController(state, sids, canonicalToOperational);
         if (neighborController === null || neighborController === currentController) continue;
         if ((currentController === 'RBiH' && neighborController === 'HRHB') ||
             (currentController === 'HRHB' && neighborController === 'RBiH')) {
@@ -333,7 +354,8 @@ function countAttackerControlledNeighborMuns(
     attackerFaction: FactionId,
     munAdjacency: Map<MunicipalityId, Set<MunicipalityId>>,
     state: GameState,
-    settlementsByMun: Map<MunicipalityId, SettlementId[]>
+    settlementsByMun: Map<MunicipalityId, SettlementId[]>,
+    canonicalToOperational?: CanonicalToOperationalMap
 ): number {
     const neighbors = munAdjacency.get(munId);
     if (!neighbors) return 0;
@@ -345,7 +367,7 @@ function countAttackerControlledNeighborMuns(
     for (const neighborMun of neighbors) {
         const sids = settlementsByMun.get(neighborMun);
         if (!sids?.length) continue;
-        const neighborController = getMunicipalityController(state, sids);
+        const neighborController = getMunicipalityController(state, sids, canonicalToOperational);
         if (neighborController !== attackerFaction) continue;
         if ((attackerFaction === 'RBiH' || attackerFaction === 'HRHB') && (neighborController === 'RBiH' || neighborController === 'HRHB')) {
             if (attackerFaction !== neighborController && (rbihHrhbAllied || ceasefireActive)) continue;
@@ -353,6 +375,16 @@ function countAttackerControlledNeighborMuns(
         n++;
     }
     return n;
+}
+
+function rsBorderInterventionBonus(
+    munId: MunicipalityId,
+    attackerFaction: FactionId,
+    turn: number
+): number {
+    if (attackerFaction !== 'RS') return 0;
+    if (turn >= RS_EARLY_WAR_END_WEEK) return 0;
+    return RS_BORDER_INTERVENTION_MUN_IDS.has(munId) ? BORDER_INTERVENTION_BONUS : 0;
 }
 
 /** Current stability for mun (Phase I §4.3.2): base + militia defense bonus + control_status adjustment. */
@@ -383,7 +415,8 @@ function applyFlip(
     turn: number,
     settlementsByMun: Map<MunicipalityId, SettlementId[]>,
     settlementData: Map<string, { ethnicity?: { composition?: Record<string, number> }; population?: number }>,
-    scalingContext?: HoldoutScalingContext
+    scalingContext?: HoldoutScalingContext,
+    canonicalToOperational?: CanonicalToOperationalMap
 ): SettlementFlipEvent[] {
     // Use settlement-level wave flip
     const waveResult = applyWaveFlip(
@@ -394,7 +427,8 @@ function applyFlip(
         settlementsByMun,
         settlementData,
         turn,
-        scalingContext
+        scalingContext,
+        canonicalToOperational
     );
 
     // Consolidation and militia updates (same as before)
@@ -419,7 +453,10 @@ function applyFlip(
     if (isMunicipalityAlignedToRbih(munId) && newController === 'HRHB') {
         const sids = settlementsByMun.get(munId) ?? [];
         for (const sid of sids) {
-            if (state.political_controllers) state.political_controllers[sid] = 'RBiH';
+            if (state.political_controllers) {
+                const key = canonicalToOperational?.[sid] ?? sid;
+                state.political_controllers[key] = 'RBiH';
+            }
         }
         const byFaction = state.phase_i_militia_strength?.[munId];
         if (byFaction) {
@@ -446,7 +483,8 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
         settlementPopulationBySid,
         militaryActionOnly,
         militaryActionAttackScale,
-        militaryActionStabilityBufferFactor
+        militaryActionStabilityBufferFactor,
+        canonicalToOperational
     } = input;
     const report: ControlFlipReport = { flips: [], municipalities_evaluated: 0, control_events: [] };
     const allSettlementEvents: SettlementFlipEvent[] = [];
@@ -504,7 +542,7 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
     for (const munId of munIds) {
         if (inConsolidation(state, munId, turn)) continue;
         const sids = settlementsByMun?.get(munId);
-        const controller = sids ? getMunicipalityController(state, sids) : null;
+        const controller = sids ? getMunicipalityController(state, sids, input.canonicalToOperational) : null;
         const strengthByMun = state.phase_i_militia_strength ?? {};
         const byFaction = strengthByMun[munId] ?? {};
         const defensiveMilitia = controller ? (byFaction[controller] ?? 0) : 0;
@@ -513,10 +551,10 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
             if (isLargeSettlementMun(munId) && defensiveMilitia === 0) continue;
         }
         if (!munAdjacency || !settlementsByMun) continue;
-        if (!hasAdjacentHostile(munId, controller, munAdjacency, state, settlementsByMun)) continue;
+        if (!hasAdjacentHostile(munId, controller, munAdjacency, state, settlementsByMun, input.canonicalToOperational)) continue;
         const attacker = militaryActionOnly
-            ? getStrongestAdjacentBrigadeAttacker(munId, controller, munAdjacency, state, settlementsByMun)
-            : getStrongestAdjacentAttacker(munId, controller, munAdjacency, state, settlementsByMun);
+            ? getStrongestAdjacentBrigadeAttacker(munId, controller, munAdjacency, state, settlementsByMun, input.canonicalToOperational)
+            : getStrongestAdjacentAttacker(munId, controller, munAdjacency, state, settlementsByMun, input.canonicalToOperational);
         if (!attacker || attacker.strength <= 0) continue;
         const currentStability = getCurrentStability(state, munId, controller);
         // Phase I §4.8: Allied defense bonus when RS attacks a mixed municipality
@@ -528,15 +566,16 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
             effectiveDefense += getFormationStrengthInMun(state, munId, controller);
         }
         const attackingBrigadeStr = getAdjacentBrigadeAttackStrength(
-            munId, attacker.faction, munAdjacency, state, settlementsByMun
+            munId, attacker.faction, munAdjacency, state, settlementsByMun, input.canonicalToOperational
         );
         const totalAttackerStrength = militaryActionOnly
             ? attackingBrigadeStr * actionAttackScale
             : attacker.strength + attackingBrigadeStr * BRIGADE_ATTACK_AMPLIFIER;
         if (militaryActionOnly && totalAttackerStrength <= 0) continue;
+        const borderBonus = rsBorderInterventionBonus(munId, attacker.faction, turn);
         // Capability-weighted control decision
         const attackerMod = getFactionCapabilityModifier(state, attacker.faction, ATTACKER_DOCTRINE);
-        const scaledAttackerStrength = totalAttackerStrength * attackerMod;
+        const scaledAttackerStrength = totalAttackerStrength * attackerMod + borderBonus;
         const defenderMod = controller !== null
             ? getFactionCapabilityModifier(state, controller, getDefenderDoctrine(controller))
             : 1;
@@ -553,7 +592,7 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
             if (currentStability + scaledDefense >= flipThreshold) continue;
         }
         const attackerNeighborCount = countAttackerControlledNeighborMuns(
-            munId, attacker.faction, munAdjacency, state, settlementsByMun
+            munId, attacker.faction, munAdjacency, state, settlementsByMun, input.canonicalToOperational
         );
         candidates.push([munId, controller, attacker.faction, totalAttackerStrength, currentStability, defensiveMilitia, attackerNeighborCount]);
     }
@@ -576,7 +615,7 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
         // Settlement-level wave flip (replaces bulk mun flip)
         const waveEvents = applyFlip(
             state, munId, toFaction, fromFaction, turn,
-            settlementsByMun, settlementData, scalingContext
+            settlementsByMun, settlementData, scalingContext, canonicalToOperational
         );
         report.flips.push({ mun_id: munId, from_faction: fromFaction, to_faction: toFaction });
         allSettlementEvents.push(...waveEvents);
@@ -597,7 +636,7 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
 
     // Holdout cleanup phase: process existing holdouts each turn
     if (settlements && edges) {
-        const holdoutEvents = processHoldoutCleanup(state, turn, edges, settlements);
+        const holdoutEvents = processHoldoutCleanup(state, turn, edges, settlements, input.canonicalToOperational);
         allSettlementEvents.push(...holdoutEvents);
         for (const evt of holdoutEvents) {
             report.control_events.push({

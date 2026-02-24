@@ -19,7 +19,7 @@ Phase I (Early-War) models the critical opening period of the Bosnian War (appro
 5. **Control Strain begins**: Occupying hostile populations imposes costs
 6. **Rear zones stabilize**: Non-frontline control becomes default political substrate
 
-Phase I is the transition from latent organizational competition (Phase 0) to territorial consolidation and military operations. It ends when control patterns stabilize sufficiently for formal brigade Areas of Responsibility (AoRs) to be instantiated.
+Phase I is the transition from latent organizational competition (Phase 0) to territorial consolidation and military operations. It ends when control patterns stabilize sufficiently for Phase II (OSID/ZoC brigade operations). Phase II entry uses location_osid per formation only; no AoR handoff.
 
 Phase I turn 1 begins immediately after Phase 0 completes. Any declaration occurring during Phase 0 is treated as having occurred at Phase I turn 0 for the purposes of consolidation timers, strain ramps, and persistence counters.
 

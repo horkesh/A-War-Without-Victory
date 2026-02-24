@@ -421,6 +421,9 @@ export function appendBattleLog(panel: HTMLElement, report: SandboxTurnReport): 
     if (report.movementProcessed) {
         html += '<div style="color:#3388ff">Movement orders processed</div>';
     }
+    if (report.repositionApplied) {
+        html += '<div style="color:#88aaff">Reposition orders applied</div>';
+    }
     if (report.postureApplied) {
         html += '<div style="color:#cccc44">Posture orders applied</div>';
     }

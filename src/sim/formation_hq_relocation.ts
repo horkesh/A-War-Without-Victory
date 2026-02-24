@@ -6,6 +6,7 @@
 
 import type { EdgeRecord, SettlementRecord } from '../map/settlements.js';
 import type { FactionId, FormationId, GameState, MunicipalityId, SettlementId } from '../state/game_state.js';
+import { getLegacyAoR } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { identifyFrontActiveSettlements } from './phase_ii/brigade_aor.js';
 
@@ -115,7 +116,7 @@ function getBrigadeAoRSettlements(
     formationId: FormationId
 ): SettlementId[] {
     const out: SettlementId[] = [];
-    const aor = state.brigade_aor ?? {};
+    const aor = getLegacyAoR(state).brigade_aor ?? {};
     for (const [sid, assigned] of Object.entries(aor)) {
         if (assigned === formationId) out.push(sid as SettlementId);
     }
@@ -248,7 +249,7 @@ export function runFormationHqRelocation(
             state.meta.phase === 'phase_ii' &&
             (f.kind ?? 'brigade') === 'brigade' &&
             f.status === 'active' &&
-            state.brigade_aor
+            getLegacyAoR(state).brigade_aor
         ) {
             const aorSids = getBrigadeAoRSettlements(state, id as FormationId);
             const target = pickAoRDepthTarget(aorSids, frontActive, adj, preferredHqRearDepth);

@@ -8,6 +8,7 @@
 
 import { MILITIA_GARRISON_FRACTION } from '../../state/formation_constants.js';
 import type { FactionId, GameState, MilitiaPoolState, MunicipalityId, OrganizationalPenetration, SettlementId } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
@@ -60,7 +61,7 @@ export function computeMilitiaGarrisons(
     sidToMun: Record<SettlementId, MunicipalityId>
 ): void {
     const pc = state.political_controllers ?? {};
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const pools = state.militia_pools ?? {};
     const municipalities = state.municipalities ?? {};
     const out: Record<SettlementId, number> = {};

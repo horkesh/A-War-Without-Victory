@@ -10,6 +10,7 @@
  * Deterministic: settlements processed in sorted SID order. No randomness.
  */
 
+import type { CanonicalToOperationalMap } from '../../data/operational_data.js';
 import type { EdgeRecord, SettlementRecord } from '../../map/settlements.js';
 import type {
     FactionId,
@@ -19,6 +20,11 @@ import type {
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
+/** Resolve control key: OSID when map present, else SID. */
+function controlKey(sid: string, co?: CanonicalToOperationalMap): string {
+    return co?.[sid] ?? sid;
+}
+
 // --- Constants ---
 
 /** Ethnic composition threshold: settlement flips in wave if attacker's ethnicity >= this share. */
@@ -27,16 +33,58 @@ const WAVE_FLIP_ETHNIC_THRESHOLD = 0.30;
 /** Holdout resistance base from hostile population share. */
 const HOLDOUT_RESISTANCE_BASE_FACTOR = 100;
 
-/** Deterministic holdout scaling: population factor (larger = more resistance). 1 + log10(max(100,pop))/4, capped. */
+const ORG_DEFENSE_BONUS = {
+    rbih_to_control_controlled: 0.4,
+    rbih_paramilitary: 0.3,
+    rbih_party_penetration: 0.2,
+    rs_paramilitary: 0.3,
+    rs_party_penetration: 0.2,
+    rs_jna_presence: 0.4,
+    hrhb_paramilitary: 0.3,
+    hrhb_party_penetration: 0.2,
+    police_loyalty: 0.2,
+} as const;
+
+/**
+ * Deterministic holdout scaling: larger population settlements persist longer.
+ * Piecewise table is intentionally steep to distinguish hamlets vs towns/cities.
+ */
 function holdoutPopulationFactor(population: number): number {
-    if (population <= 0) return 1;
-    return 1 + Math.min(1.5, Math.log10(Math.max(100, population)) / 4);
+    if (population < 500) return 0.3;
+    if (population < 2000) return 0.6;
+    if (population < 10000) return 1.0;
+    if (population < 30000) return 1.8;
+    return 2.5;
 }
 
 /** Deterministic holdout scaling: proximity/supply context (more edges = more connected, harder to isolate). */
 function holdoutProximityFactor(degree: number): number {
     if (degree <= 0) return 1;
     return 1 + Math.min(0.5, degree / 20);
+}
+
+function getOrgDefenseBonus(
+    state: GameState,
+    munId: MunicipalityId,
+    holdoutFaction: FactionId
+): number {
+    const op = state.municipalities?.[munId]?.organizational_penetration;
+    if (!op || holdoutFaction == null) return 0;
+    let bonus = 0;
+    if (op.police_loyalty === 'loyal') bonus += ORG_DEFENSE_BONUS.police_loyalty;
+    if (holdoutFaction === 'RBiH') {
+        if (op.to_control === 'controlled') bonus += ORG_DEFENSE_BONUS.rbih_to_control_controlled;
+        if ((op.patriotska_liga ?? 0) > 0) bonus += ORG_DEFENSE_BONUS.rbih_paramilitary;
+        if ((op.sda_penetration ?? 0) > 50) bonus += ORG_DEFENSE_BONUS.rbih_party_penetration;
+    } else if (holdoutFaction === 'RS') {
+        if ((op.paramilitary_rs ?? 0) > 0) bonus += ORG_DEFENSE_BONUS.rs_paramilitary;
+        if ((op.sds_penetration ?? 0) > 50) bonus += ORG_DEFENSE_BONUS.rs_party_penetration;
+        if (op.jna_presence === true) bonus += ORG_DEFENSE_BONUS.rs_jna_presence;
+    } else if (holdoutFaction === 'HRHB') {
+        if ((op.paramilitary_hrhb ?? 0) > 0) bonus += ORG_DEFENSE_BONUS.hrhb_paramilitary;
+        if ((op.hdz_penetration ?? 0) > 50) bonus += ORG_DEFENSE_BONUS.hrhb_party_penetration;
+    }
+    return bonus;
 }
 
 /** Maximum holdout settlements a single brigade can clear per turn. */
@@ -160,7 +208,8 @@ export function applyWaveFlip(
     settlementsByMun: Map<MunicipalityId, SettlementId[]>,
     settlementData: Map<string, { ethnicity?: { composition?: Record<string, number> }; population?: number }>,
     turn: number,
-    scalingContext?: HoldoutScalingContext
+    scalingContext?: HoldoutScalingContext,
+    canonicalToOperational?: CanonicalToOperationalMap
 ): WaveFlipResult {
     const result: WaveFlipResult = { flipped: [], holdouts: [], events: [] };
     const sids = settlementsByMun.get(munId);
@@ -174,7 +223,8 @@ export function applyWaveFlip(
     const holdouts = state.settlement_holdouts!;
 
     for (const sid of sids) {
-        const currentController = pc[sid];
+        const key = controlKey(sid, canonicalToOperational);
+        const currentController = pc[key];
         // Skip settlements already controlled by new controller
         if (currentController === newController) continue;
         // Skip settlements already contested by the same occupying faction.
@@ -190,8 +240,8 @@ export function applyWaveFlip(
             attackerEthnicShare >= WAVE_FLIP_ETHNIC_THRESHOLD &&
             attackerEthnicShare >= defenderEthnicShare
         ) {
-            // Flip this settlement
-            (pc as Record<string, FactionId | null>)[sid] = newController;
+            // Flip this settlement (write by OSID when operational map present)
+            (pc as Record<string, FactionId | null>)[key] = newController;
             result.flipped.push(sid);
             result.events.push({
                 turn,
@@ -212,10 +262,17 @@ export function applyWaveFlip(
             // Deterministic scaling: population + proximity (degree)
             const pop = scalingContext?.sidToPopulation?.get(sid) ?? data?.population ?? 0;
             const degree = scalingContext?.sidToDegree?.get(sid) ?? 0;
-            resistance = Math.round(resistance * holdoutPopulationFactor(pop) * holdoutProximityFactor(degree));
+            const holdoutFaction = currentController ?? previousController ?? 'RBiH';
+            const orgDefenseBonus = getOrgDefenseBonus(state, munId, holdoutFaction);
+            resistance = Math.round(
+                resistance
+                * holdoutPopulationFactor(pop)
+                * holdoutProximityFactor(degree)
+                * (1 + orgDefenseBonus)
+            );
             holdouts[sid] = {
                 holdout: true,
-                holdout_faction: currentController ?? previousController ?? 'RBiH', // fallback
+                holdout_faction: holdoutFaction,
                 occupying_faction: newController,
                 holdout_resistance: resistance,
                 holdout_since_turn: turn,
@@ -248,7 +305,8 @@ export function processHoldoutCleanup(
     state: GameState,
     turn: number,
     edges: EdgeRecord[],
-    settlements: Map<string, SettlementRecord>
+    settlements: Map<string, SettlementRecord>,
+    canonicalToOperational?: CanonicalToOperationalMap
 ): SettlementFlipEvent[] {
     const events: SettlementFlipEvent[] = [];
     const holdouts = state.settlement_holdouts;
@@ -296,7 +354,7 @@ export function processHoldoutCleanup(
                 mechanism: 'holdout_surrendered',
                 mun_id: sidToMun.get(sid) ?? null
             });
-            (pc as Record<string, FactionId | null>)[sid] = occupyingFaction;
+            (pc as Record<string, FactionId | null>)[controlKey(sid, canonicalToOperational)] = occupyingFaction;
             continue;
         }
 
@@ -337,7 +395,7 @@ export function processHoldoutCleanup(
                 // Check if formation's mun has settlements adjacent to holdout
                 for (const neighbor of neighbors) {
                     const neighborMun = sidToMun.get(neighbor);
-                    if (neighborMun === formationMun && pc[neighbor] === occupyingFaction) {
+                    if (neighborMun === formationMun && pc[controlKey(neighbor, canonicalToOperational)] === occupyingFaction) {
                         canReach = true;
                         break;
                     }
@@ -361,7 +419,7 @@ export function processHoldoutCleanup(
                     mechanism: 'holdout_cleared',
                     mun_id: holdoutMun ?? null
                 });
-                (pc as Record<string, FactionId | null>)[sid] = occupyingFaction;
+                (pc as Record<string, FactionId | null>)[controlKey(sid, canonicalToOperational)] = occupyingFaction;
             } else {
                 // Reduce resistance (gradual wearing down)
                 holdout.holdout_resistance = Math.max(0, holdout.holdout_resistance - Math.floor(strength / 10));

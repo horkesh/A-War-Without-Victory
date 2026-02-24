@@ -60,6 +60,12 @@
 ### 40_reports/implemented (consolidated 2026-02-15)
 - **Location:** `docs/_old/40_reports/implemented_2026_02_15/` — all 45 former implemented reports moved here when consolidated into [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md). Do not delete.
 
+### 40_reports/backlog (themed merge 2026-02-24)
+- **Location:** `docs/_old/40_reports/backlog/` — 43 original backlog documents moved here when consolidated into themed docs in [40_reports/backlog/](../40_reports/backlog/) (BACKLOG_*.md + 20260223_PIPELINE_NEXT_WHILE_BOT_REWRITE.md). Full content preserved; see themed docs for index and summary. Do not delete.
+
+### 40_reports/convenes (superseded 2026-02-24)
+- **Location:** `docs/_old/40_reports/convenes/` — convene reports fully superseded by a later report. Current: ORCHESTRATOR_52W_APR1992_RUN_2026_02_21.md (superseded by ORCHESTRATOR_52W_APR1992_DETAILED_RUN_2026_02_21.md in 40_reports/convenes/). Do not delete.
+
 ## Current doc locations
 
 Canon: `docs/10_canon/`. Engineering: `docs/20_engineering/`. Planning: `docs/30_planning/`. Reports: `docs/40_reports/`. Research: `docs/50_research/`. Entrypoint: `docs/00_start_here/docs_index.md`.

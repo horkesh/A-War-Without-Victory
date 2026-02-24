@@ -178,29 +178,30 @@ export function updateFormationVisibility(
         if (e.kind === 'corps') {
             if (camY < fadeStart) {
                 e.sprite.visible = false;
-                mat.opacity = 1.0;
+                mat.opacity = 0;
             } else {
-                e.sprite.visible = true;
                 const t = Math.min(1.0, (camY - fadeStart) / fadeRange);
+                e.sprite.visible = t >= 0.01;
                 mat.opacity = t;
-                e.sprite.scale.set(e.baseScaleX * sf, e.baseScaleY * sf, 1);
             }
         } else {
             if (camY >= threshold) {
                 e.sprite.visible = false;
-                mat.opacity = 1.0;
+                mat.opacity = 0;
             } else if (camY >= fadeStart) {
-                e.sprite.visible = true;
                 const t = 1.0 - Math.min(1.0, (camY - fadeStart) / fadeRange);
+                e.sprite.visible = t >= 0.01;
                 mat.opacity = t;
-                e.sprite.scale.set(e.baseScaleX * sf, e.baseScaleY * sf, 1);
             } else {
                 e.sprite.visible = true;
                 mat.opacity = 1.0;
-                e.sprite.scale.set(e.baseScaleX * sf, e.baseScaleY * sf, 1);
             }
         }
 
+        // Always update scale (prevents visual "pop" when visibility toggles)
+        e.sprite.scale.set(e.baseScaleX * sf, e.baseScaleY * sf, 1);
+
+        // Selection overrides — force visibility for selected/related formations
         if (selectedCorpsChildIds.has(e.formationId) && e.kind === 'brigade') {
             e.sprite.visible = true;
             mat.opacity = Math.max(mat.opacity, 0.9);
@@ -217,7 +218,11 @@ export function updateFormationVisibility(
     }
 }
 
-export function paintFormationCounter(
+// ---------------------------------------------------------------------------
+// Brigade counter — light background, NATO rectangle, warmap data features
+// ---------------------------------------------------------------------------
+
+export function paintBrigadeCounter(
     ctx: OffscreenCanvasRenderingContext2D,
     w: number,
     h: number,
@@ -227,40 +232,38 @@ export function paintFormationCounter(
     const factionRgb = FACTION_BASE_RGB[formation.faction] ?? [90, 90, 110];
     const corpsRgb = deriveCorpsTint(formation);
 
-    ctx.fillStyle = 'rgba(14, 14, 28, 0.93)';
+    // Light background (sandbox style — distinct from dark corps counters)
+    ctx.fillStyle = 'rgba(240, 244, 248, 0.93)';
     ctx.fillRect(0, 0, w, h);
 
     // Corps tint provides quick visual grouping without replacing faction identity.
     ctx.fillStyle = toRgbaString(corpsRgb, 0.36);
     ctx.fillRect(6, 1, w - 7, h - 2);
 
+    // Faction bar (left edge)
     ctx.fillStyle = toRgbString(factionRgb);
     ctx.fillRect(0, 0, 6, h);
-    ctx.strokeStyle = toRgbString(corpsRgb);
+
+    // Border stroke
+    ctx.strokeStyle = 'rgba(60, 80, 100, 0.5)';
     ctx.lineWidth = 1.5;
     ctx.strokeRect(0.75, 0.75, w - 1.5, h - 1.5);
 
+    // NATO rectangle symbol — dark on light
     const symbolX = w / 2 + 3, symbolY = h * 0.36;
-    ctx.strokeStyle = '#e0e0e0';
+    ctx.strokeStyle = '#1a2a3a';
     ctx.lineWidth = 1.5;
-    if (formation.kind === 'brigade') {
-        ctx.strokeRect(symbolX - 10, symbolY - 7, 20, 14);
-    } else if (isCorpsLikeKind(formation.kind)) {
-        ctx.beginPath();
-        ctx.moveTo(symbolX - 12, symbolY - 6); ctx.lineTo(symbolX - 4, symbolY + 6);
-        ctx.moveTo(symbolX - 4, symbolY - 6); ctx.lineTo(symbolX - 12, symbolY + 6);
-        ctx.moveTo(symbolX + 4, symbolY - 6); ctx.lineTo(symbolX + 12, symbolY + 6);
-        ctx.moveTo(symbolX + 12, symbolY - 6); ctx.lineTo(symbolX + 4, symbolY + 6);
-        ctx.stroke();
-    }
+    ctx.strokeRect(symbolX - 10, symbolY - 7, 20, 14);
 
-    ctx.fillStyle = '#e0e8e0';
+    // Name text — dark on light
+    ctx.fillStyle = '#1a2a3a';
     ctx.font = `bold 10px 'IBM Plex Mono', 'Consolas', monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const nameStr = formation.name.length > 14 ? formation.name.slice(0, 13) + '\u2026' : formation.name;
     ctx.fillText(nameStr, w / 2 + 3, h * 0.72);
 
+    // Data badge (mode-dependent) — bottom-right
     const modeValue = getModeValue(formation, mode);
     ctx.fillStyle = getDataBadgeColor(formation, mode);
     ctx.fillRect(w - 30, h - 14, 28, 12);
@@ -284,30 +287,174 @@ export function paintFormationCounter(
             : mode === 'supply' ? 'U'
                 : mode === 'posture' ? 'P'
                     : 'F';
-    ctx.fillStyle = 'rgba(220, 230, 230, 0.9)';
+    ctx.fillStyle = 'rgba(60, 70, 80, 0.7)';
     ctx.font = `bold 7px 'IBM Plex Mono', monospace`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
     ctx.fillText(modeInitial, 8, 3);
 }
 
+// ---------------------------------------------------------------------------
+// Corps counter — CRT terminal style (dark, green text, detailed stats)
+// ---------------------------------------------------------------------------
+
+const FACTION_SOLID_COLORS: Record<string, string> = {
+    RS: '#b43232', RBiH: '#37884b', HRHB: '#326eaa',
+};
+
+const POSTURE_CRT_COLORS: Record<string, string> = {
+    ATTACK: '#ff4444', PROBE: '#ffab00', DEFEND: '#4a8aff',
+    ELASTIC_DEFENSE: '#8a6aff', CONSOLIDATION: '#66ccaa', WITHDRAW: '#ff8844',
+};
+
+export function paintCorpsCounter(
+    ctx: OffscreenCanvasRenderingContext2D,
+    w: number,
+    h: number,
+    agg: CorpsAggregate,
+    mode: FormationCounterDataMode = FORMATION_COUNTER_DATA_MODES[0],
+): void {
+    const formation = agg.formation;
+    const fc = FACTION_SOLID_COLORS[formation.faction] ?? '#666';
+    const corpsRgb = deriveCorpsTint(formation);
+
+    // Dark CRT background
+    ctx.fillStyle = 'rgba(10, 10, 22, 0.92)';
+    ctx.fillRect(0, 0, w, h);
+
+    // Faction bar — left edge, wide
+    ctx.fillStyle = fc;
+    ctx.fillRect(0, 0, 12, h);
+
+    // Corps-tint inner border (subtle, 4px)
+    ctx.strokeStyle = toRgbaString(corpsRgb, 0.45);
+    ctx.lineWidth = 4;
+    ctx.strokeRect(14, 4, w - 18, h - 8);
+
+    // Outer border in faction color
+    ctx.strokeStyle = fc;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(1, 1, w - 2, h - 2);
+
+    // Inner panel frame
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.10)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(14, 6, w - 20, h - 12);
+
+    // Diagonal strike line in faction color
+    ctx.strokeStyle = fc;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(14, h - 14); ctx.lineTo(w - 6, 14);
+    ctx.stroke();
+
+    // Name — bright green CRT
+    ctx.fillStyle = '#00ff88';
+    ctx.font = `bold 20px 'Courier New', Courier, monospace`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    const maxNameLen = Math.floor((w - 40) / 12);
+    const nameStr = formation.name.length > maxNameLen
+        ? formation.name.slice(0, maxNameLen - 1) + '\u2026'
+        : formation.name;
+    ctx.fillText(nameStr, 20, 20);
+
+    // Faction label
+    ctx.fillStyle = fc;
+    ctx.font = `13px 'Courier New', Courier, monospace`;
+    ctx.fillText(formation.faction, 20, 46);
+
+    // Strength line — color-coded by threshold
+    const persStr = agg.totalPersonnel >= 1000
+        ? `${(agg.totalPersonnel / 1000).toFixed(1)}k`
+        : `${agg.totalPersonnel}`;
+    const strLabel = agg.totalPersonnel > 15000 ? 'STRONG' : agg.totalPersonnel > 5000 ? 'MODERATE' : 'WEAK';
+    const strColor = agg.totalPersonnel > 15000 ? '#00ff88' : agg.totalPersonnel > 5000 ? '#ffab00' : '#ff4444';
+    ctx.fillStyle = strColor;
+    ctx.font = `bold 16px 'Courier New', Courier, monospace`;
+    ctx.fillText(`STR: ${persStr} (${strLabel})`, 20, 72);
+
+    // Posture line — posture-colored
+    const postureLabel = (agg.dominantPosture ?? 'defend').toUpperCase();
+    ctx.fillStyle = POSTURE_CRT_COLORS[postureLabel] ?? '#4a8aff';
+    ctx.font = `14px 'Courier New', Courier, monospace`;
+    ctx.fillText(`PST: ${postureLabel}`, 20, 96);
+
+    // Brigade count — muted blue-gray
+    ctx.fillStyle = 'rgba(180, 200, 220, 0.6)';
+    ctx.font = `12px 'Courier New', Courier, monospace`;
+    ctx.fillText(`\u00d7${agg.brigadeCount} bde`, 20, 118);
+
+    // Crosshair symbol — top-right
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1;
+    const ccx = w - 20, ccy = 20, ccs = 8;
+    ctx.beginPath();
+    ctx.moveTo(ccx - ccs, ccy); ctx.lineTo(ccx + ccs, ccy);
+    ctx.moveTo(ccx, ccy - ccs); ctx.lineTo(ccx, ccy + ccs);
+    ctx.stroke();
+
+    // Data mode badge — bottom-right (warmap feature)
+    const modeValue = getModeValue(formation, mode);
+    ctx.fillStyle = getDataBadgeColor(formation, mode);
+    ctx.fillRect(w - 50, h - 22, 44, 16);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `10px 'IBM Plex Mono', monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText(modeValue, w - 28, h - 14);
+
+    // Aggregate soft-factor indicator — bottom-left
+    ctx.fillStyle = getSoftFactorColor(formation);
+    ctx.beginPath();
+    ctx.moveTo(18, h - 6);
+    ctx.lineTo(30, h - 6);
+    ctx.lineTo(24, h - 18);
+    ctx.closePath();
+    ctx.fill();
+}
+
+/** Backwards-compatible wrapper: dispatches to brigade or corps paint (for brigade-only callers). */
+export function paintFormationCounter(
+    ctx: OffscreenCanvasRenderingContext2D,
+    w: number,
+    h: number,
+    formation: FormationRecord,
+    mode: FormationCounterDataMode = FORMATION_COUNTER_DATA_MODES[0],
+): void {
+    paintBrigadeCounter(ctx, w, h, formation, mode);
+}
+
+// Canvas dimensions for each counter tier
+const BRIGADE_W = 128, BRIGADE_H = 72;
+const CORPS_W = 256, CORPS_H = 160;
+
+// Sprite world-scale for each counter tier
+const BRIGADE_SCALE_X = 0.38, BRIGADE_SCALE_Y = 0.22;
+const CORPS_SCALE_X = 0.85, CORPS_SCALE_Y = 0.53;
+
 export function buildFormationSprite(
     formation: FormationRecord,
     mode: FormationCounterDataMode = FORMATION_COUNTER_DATA_MODES[0],
+    corpsAggregate?: CorpsAggregate,
 ): THREE.Sprite {
-    const W = 128, H = 72;
+    const isCorps = isCorpsLikeKind(formation.kind);
+    const W = isCorps ? CORPS_W : BRIGADE_W;
+    const H = isCorps ? CORPS_H : BRIGADE_H;
     const canvas = new OffscreenCanvas(W, H);
     const ctx = canvas.getContext('2d')!;
-    paintFormationCounter(ctx, W, H, formation, mode);
+    if (isCorps && corpsAggregate) {
+        paintCorpsCounter(ctx, W, H, corpsAggregate, mode);
+    } else {
+        paintBrigadeCounter(ctx, W, H, formation, mode);
+    }
     const imgData = ctx.getImageData(0, 0, W, H);
     const tex = new THREE.DataTexture(new Uint8Array(imgData.data.buffer), W, H, THREE.RGBAFormat, THREE.UnsignedByteType);
     tex.needsUpdate = true;
     tex.flipY = true;
     const mat = new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true, opacity: 1.0 });
     const sprite = new THREE.Sprite(mat);
-    // Smaller base so icons are not oversized (convene: 3D icons workstream)
-    const baseX = isCorpsLikeKind(formation.kind) ? 0.44 : 0.38;
-    const baseY = isCorpsLikeKind(formation.kind) ? 0.26 : 0.22;
+    const baseX = isCorps ? CORPS_SCALE_X : BRIGADE_SCALE_X;
+    const baseY = isCorps ? CORPS_SCALE_Y : BRIGADE_SCALE_Y;
     sprite.scale.set(baseX, baseY, 1);
     return sprite;
 }
@@ -316,12 +463,19 @@ export function repaintFormationSprite(
     sprite: THREE.Sprite,
     formation: FormationRecord,
     mode: FormationCounterDataMode = FORMATION_COUNTER_DATA_MODES[0],
+    corpsAggregate?: CorpsAggregate,
 ): void {
-    const W = 128, H = 72;
+    const isCorps = isCorpsLikeKind(formation.kind);
+    const W = isCorps ? CORPS_W : BRIGADE_W;
+    const H = isCorps ? CORPS_H : BRIGADE_H;
     const canvas = new OffscreenCanvas(W, H);
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    paintFormationCounter(ctx, W, H, formation, mode);
+    if (isCorps && corpsAggregate) {
+        paintCorpsCounter(ctx, W, H, corpsAggregate, mode);
+    } else {
+        paintBrigadeCounter(ctx, W, H, formation, mode);
+    }
     const imgData = ctx.getImageData(0, 0, W, H);
     const tex = new THREE.DataTexture(new Uint8Array(imgData.data.buffer), W, H, THREE.RGBAFormat, THREE.UnsignedByteType);
     tex.needsUpdate = true;
@@ -355,7 +509,7 @@ export function buildFormationLODLayer(
         const [lon, lat] = centroid;
         const elev = sampleHeight(hm, lon, lat);
         const [wx, wy, wz] = wgsToWorld(lon, lat, elev);
-        const sprite = buildFormationSprite(formation, mode);
+        const sprite = buildFormationSprite(formation, mode, agg);
         sprite.position.set(wx, wy + 0.08, wz);
         sprite.name = `corps_${formation.id}`;
         sprite.visible = true;
@@ -364,8 +518,8 @@ export function buildFormationLODLayer(
             sprite,
             formationId: formation.id,
             kind: 'corps',
-            baseScaleX: 0.44,
-            baseScaleY: 0.26,
+            baseScaleX: CORPS_SCALE_X,
+            baseScaleY: CORPS_SCALE_Y,
         });
     }
 
@@ -374,27 +528,35 @@ export function buildFormationLODLayer(
         if (!formation) continue;
         if (formation.status !== 'active') continue;
         if (formation.kind !== 'brigade') continue;
-        if (!formation.hq_sid) continue;
 
         let posLon: number | undefined;
         let posLat: number | undefined;
-        let sumLon = 0;
-        let sumLat = 0;
-        let count = 0;
-        for (const sid of Object.keys(save.brigade_aor).sort((a, b) => a.localeCompare(b))) {
-            if (save.brigade_aor[sid] !== formation.id) continue;
-            const c = centroids.get(sid);
-            if (!c) continue;
-            sumLon += c[0];
-            sumLat += c[1];
-            count++;
-        }
-        if (count > 0) {
-            posLon = sumLon / count;
-            posLat = sumLat / count;
+        if (formation.location_osid) {
+            const c = centroids.get(formation.location_osid);
+            if (c) {
+                posLon = c[0];
+                posLat = c[1];
+            }
         }
         if (posLon === undefined || posLat === undefined) {
-            const centroid = centroids.get(formation.hq_sid);
+            let sumLon = 0;
+            let sumLat = 0;
+            let count = 0;
+            for (const sid of Object.keys(save.brigade_aor ?? {}).sort((a, b) => a.localeCompare(b))) {
+                if (save.brigade_aor![sid] !== formation.id) continue;
+                const c = centroids.get(sid);
+                if (!c) continue;
+                sumLon += c[0];
+                sumLat += c[1];
+                count++;
+            }
+            if (count > 0) {
+                posLon = sumLon / count;
+                posLat = sumLat / count;
+            }
+        }
+        if (posLon === undefined || posLat === undefined) {
+            const centroid = formation.hq_sid ? centroids.get(formation.hq_sid) : undefined;
             if (!centroid) continue;
             posLon = centroid[0];
             posLat = centroid[1];
@@ -412,8 +574,8 @@ export function buildFormationLODLayer(
             formationId: formation.id,
             kind: 'brigade',
             corpsId: formation.corps_id,
-            baseScaleX: 0.38,
-            baseScaleY: 0.22,
+            baseScaleX: BRIGADE_SCALE_X,
+            baseScaleY: BRIGADE_SCALE_Y,
         });
     }
     return { group, entries };

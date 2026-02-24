@@ -31,7 +31,8 @@ import { runPhaseIITurn } from '../../sim/run_phase_ii_browser.js';
 import type { FactionId, Phase0Event } from '../../state/game_state.js';
 import { GameState } from '../../state/game_state.js';
 import { deserializeState } from '../../state/serialize.js';
-import { checkWarTransition, findCriticalEvent, showDeclarationModal, showWarBeginsModal } from './components/DeclarationEventModal.js';
+import { checkWarTransition, findCriticalEvent, findWarMilestoneEvent, showDeclarationModal, showWarBeginsModal } from './components/DeclarationEventModal.js';
+import { DiplomacyModal } from './components/DiplomacyModal.js';
 import { FactionOverviewPanel } from './components/FactionOverviewPanel.js';
 import { MagazineModal } from './components/MagazineModal.js';
 import { ModalManager } from './components/ModalManager.js';
@@ -42,6 +43,8 @@ import { Phase0PreparationMap } from './components/Phase0PreparationMap.js';
 import { ReportsModal } from './components/ReportsModal.js';
 import { TacticalMap } from './components/TacticalMap.js';
 import { WarPlanningMap } from './components/WarPlanningMap.js';
+import { extractWarData } from './data/war_data_extractor.js';
+import { capturePreviousTurnSnapshot, getPreviousSnapshot, setPreviousSnapshot } from './data/warroom_state.js';
 import { runPhase0TurnAndAdvance } from './run_phase0_turn.js';
 
 type DesktopBridge = {
@@ -335,12 +338,15 @@ export class ClickableRegionManager {
                 ? `<div class="wr-dialog-info wr-info-amber">No investments staged this turn. Allocate capital before advancing.</div>`
                 : '';
 
+        const thisWeekPreview = this.generateThisWeekPreview(state);
+
         dialog.innerHTML = `
             <h2>ADVANCE TURN?</h2>
             <div class="wr-dialog-body">
                 <div class="wr-dialog-row"><span class="wr-label">Current</span><span class="wr-value">Turn ${currentTurn}</span></div>
                 <div class="wr-dialog-row"><span class="wr-label">Next</span><span class="wr-value">Turn ${nextTurn}</span></div>
                 ${stagedInfo}
+                ${thisWeekPreview}
             </div>
             <div class="wr-dialog-actions">
                 ${state.meta.phase === 'phase_0' ? '<button id="open-invest-map-btn" class="wr-btn wr-btn-secondary">Open Investment Map</button>' : ''}
@@ -375,6 +381,9 @@ export class ClickableRegionManager {
                 const bridge = this.getDesktopBridge();
                 this.playerFaction = (state.meta.player_faction ?? this.playerFaction ?? state.factions[0]?.id) as FactionId | undefined;
 
+                // Capture pre-turn snapshot for delta-based event generation
+                setPreviousSnapshot(capturePreviousTurnSnapshot(state));
+
                 if (bridge?.advanceTurn) {
                     const phase0Directives = state.meta.phase === 'phase_0'
                         ? this.phase0Directives.getStagedInvestments()
@@ -407,6 +416,8 @@ export class ClickableRegionManager {
                             this.phase0Directives.clear();
                         }
                         this.onGameStateChange?.(newState);
+
+                        await this.checkWarMilestone(newState, pf);
                     } catch (e) {
                         this.modalManager?.hideModal();
                         console.error('Desktop advance-turn exception', e);
@@ -444,6 +455,7 @@ export class ClickableRegionManager {
                         const seed = state.meta.seed ?? 'start_1991_09';
                         const { nextState } = await runPhaseITurn(state, { seed, settlementGraph: graph });
                         this.onGameStateChange?.(nextState);
+                        await this.checkWarMilestone(nextState, this.playerFaction ?? 'RBiH');
                     } catch (e) {
                         console.error('Phase I advance failed', e);
                     }
@@ -455,6 +467,7 @@ export class ClickableRegionManager {
                         const seed = state.meta.seed ?? 'start_1991_09';
                         const { nextState } = runPhaseIITurn(state, { seed, settlementGraph: graph });
                         this.onGameStateChange?.(nextState);
+                        await this.checkWarMilestone(nextState, this.playerFaction ?? 'RBiH');
                     } catch (e) {
                         console.error('Phase II advance failed', e);
                     }
@@ -462,6 +475,96 @@ export class ClickableRegionManager {
                 }
             };
         }
+    }
+
+    /** Show a full-screen milestone modal if a war milestone was just crossed. */
+    private async checkWarMilestone(newState: GameState, pf: FactionId): Promise<void> {
+        if (newState.meta.phase === 'phase_0') return;
+        const prevSnap = getPreviousSnapshot();
+        const milestone = findWarMilestoneEvent(newState, prevSnap, pf);
+        if (milestone) {
+            await showDeclarationModal({ type: milestone, turn: newState.meta.turn, details: {} } as Phase0Event, pf);
+        }
+    }
+
+    /**
+     * Generate "THIS WEEK" preview for war-phase turn advance dialog.
+     * Shows pending operations, incoming returns, and critical warnings.
+     * Returns empty string for Phase 0.
+     */
+    private generateThisWeekPreview(state: GameState): string {
+        const phase = state.meta.phase ?? 'phase_0';
+        if (phase === 'phase_0') return '';
+
+        const pf = (state.meta.player_faction ?? this.playerFaction ?? state.factions[0]?.id ?? 'RBiH') as FactionId;
+        const snap = extractWarData(state, pf);
+
+        const lines: string[] = [];
+        lines.push('<div class="wr-dialog-section" style="margin-top:12px;border-top:1px solid #333;padding-top:10px;">');
+        lines.push('<div style="font-size:11px;font-weight:600;color:#ffab00;margin-bottom:8px;letter-spacing:1px;">THIS WEEK</div>');
+
+        // PENDING OPERATIONS
+        const packing = snap.brigadeMovement.packing.length;
+        const transit = snap.brigadeMovement.inTransit.length;
+        const unpacking = snap.brigadeMovement.unpacking.length;
+        if (packing > 0 || transit > 0 || unpacking > 0) {
+            const parts: string[] = [];
+            if (packing > 0) parts.push(`${packing} packing`);
+            if (transit > 0) parts.push(`${transit} in transit`);
+            if (unpacking > 0) parts.push(`${unpacking} arriving`);
+            lines.push(`<div class="wr-dialog-row"><span class="wr-label">Movements</span><span class="wr-value">${parts.join(', ')}</span></div>`);
+        }
+
+        // INCOMING: WIA returning
+        let wiaReturning = 0;
+        const formations = state.formations ?? {};
+        for (const fid of Object.keys(formations).sort()) {
+            const f = formations[fid];
+            if (f?.faction === pf && f.wounded_pending && f.wounded_pending > 0) {
+                wiaReturning++;
+            }
+        }
+        if (wiaReturning > 0) {
+            lines.push(`<div class="wr-dialog-row"><span class="wr-label">WIA returning</span><span class="wr-value">${wiaReturning} formations</span></div>`);
+        }
+
+        // CORPS OPERATIONS
+        const activeOps = snap.ownCorpsOps.filter(co => co.operation != null);
+        if (activeOps.length > 0) {
+            lines.push(`<div class="wr-dialog-row"><span class="wr-label">Active ops</span><span class="wr-value">${activeOps.length} corps</span></div>`);
+        }
+
+        // CRITICAL WARNINGS (red)
+        const warnings: string[] = [];
+        if (snap.brigadeMovement.encircled.length > 0) {
+            warnings.push(`${snap.brigadeMovement.encircled.length} encircled`);
+        }
+        if (snap.ownSupply.collapsedMunicipalities.length > 0) {
+            warnings.push(`${snap.ownSupply.collapsedMunicipalities.length} collapsed supply`);
+        }
+        if (snap.ownSupply.criticalCount > 0) {
+            warnings.push(`${snap.ownSupply.criticalCount} critical supply`);
+        }
+        if (snap.ownExhaustion.level > 0.60) {
+            warnings.push(`exhaustion ${Math.round(snap.ownExhaustion.level * 100)}%`);
+        }
+        if (snap.exposedFrontSettlements.length > 0) {
+            warnings.push(`${snap.exposedFrontSettlements.length} exposed front`);
+        }
+
+        if (warnings.length > 0) {
+            lines.push(`<div class="wr-dialog-info" style="color:#ff3d00;background:rgba(255,61,0,0.08);margin-top:6px;padding:6px 10px;border-radius:4px;font-size:11px;">`);
+            lines.push(`\u26a0 ${warnings.join(' \u2022 ')}`);
+            lines.push('</div>');
+        }
+
+        // If nothing to show, add a quiet status line
+        if (packing === 0 && transit === 0 && unpacking === 0 && wiaReturning === 0 && activeOps.length === 0 && warnings.length === 0) {
+            lines.push('<div class="wr-dialog-row" style="color:#555570;font-style:italic;"><span class="wr-label">No pending operations this turn.</span></div>');
+        }
+
+        lines.push('</div>');
+        return lines.join('');
     }
 
     private openNewspaperModal(gameState: unknown): void {
@@ -519,21 +622,8 @@ export class ClickableRegionManager {
             return;
         }
 
-        // TODO: Replace with full DiplomacyModal once negotiation UI is built
-        const placeholder = document.createElement('div');
-        placeholder.className = 'wr-dialog';
-
-        const negotiation = state.negotiation_status;
-        const ceasefireActive = negotiation?.ceasefire_active ? 'Yes' : 'No';
-
-        placeholder.innerHTML = `
-            <h2>DIPLOMACY</h2>
-            <div class="wr-dialog-body">
-                <div class="wr-dialog-row"><span class="wr-label">Ceasefire active</span><span class="wr-value">${ceasefireActive}</span></div>
-            </div>
-            <div class="wr-dialog-notice">Full negotiation interface coming soon.</div>
-        `;
-        this.modalManager.showModal(placeholder);
+        const modal = new DiplomacyModal(state);
+        this.modalManager.showModal(modal.render());
     }
 
     private getDesktopBridge(): DesktopBridge | null {

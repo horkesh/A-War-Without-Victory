@@ -12,6 +12,7 @@ import type {
     ReconStrengthCategory,
     SettlementId
 } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getBrigadeAoRSettlements } from './brigade_aor.js';
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
@@ -42,7 +43,7 @@ export function getStrengthCategory(personnel: number): ReconStrengthCategory {
 export function updateReconIntelligence(state: GameState, edges: EdgeRecord[]): void {
     const pc = state.political_controllers ?? {};
     const formations = state.formations ?? {};
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const adj = buildAdjacencyFromEdges(edges);
     const turn = state.meta?.turn ?? 0;
 

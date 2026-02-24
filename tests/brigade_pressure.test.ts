@@ -468,4 +468,33 @@ describe('computeBrigadePressureByEdge', () => {
         expect(result.edge_pressure[eid].delta).toBeLessThanOrEqual(10);
         expect(result.edge_pressure[eid].delta).toBeGreaterThanOrEqual(-10);
     });
+
+    it('reserve brigades (unassigned to front) contribute zero pressure', () => {
+        const brigA = makeFormation('rs1', 'RS', 'sA');
+        brigA.posture = 'attack';
+        ensureBrigadeComposition(brigA);
+        const brigB = makeFormation('rbih1', 'RBiH', 'sB');
+        brigB.posture = 'defend';
+        ensureBrigadeComposition(brigB);
+
+        const state = makeState({
+            politicalControllers: { sA: 'RS', sB: 'RBiH' },
+            formations: { rs1: brigA, rbih1: brigB },
+            brigadeAor: { sA: 'rs1', sB: 'rbih1' },
+        });
+        state.assignable_front_segments = [
+            {
+                front_id: 'RBiH__RS__sA__sB',
+                edge_ids: ['sA__sB'],
+                side_a: 'RBiH',
+                side_b: 'RS',
+                length_edges: 1,
+            },
+        ];
+        state.brigade_front_assignment = { rs1: null, rbih1: null };
+
+        const result = computeBrigadePressureByEdge(state, [{ a: 'sA', b: 'sB' }]);
+        expect(result.edge_pressure['sA:sB'].side_a_pressure).toBe(0);
+        expect(result.edge_pressure['sA:sB'].side_b_pressure).toBe(0);
+    });
 });

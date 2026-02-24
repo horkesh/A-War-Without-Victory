@@ -4,49 +4,27 @@
  *
  * Phase 0: shows pre-war capital, organizational coverage, declaration pressure,
  * investment counts, and stability overview.
- * Phase I+: shows territory, military, authority, population, formations.
+ * Phase I+: shows territory, military (real data), casualties, authority/supply,
+ * formations with personnel/posture, and data-driven strategic warnings.
  */
 
 import { getPrewarCapital, PREWAR_CAPITAL_INITIAL } from '../../../phase0/capital.js';
 import type { FactionId, GameState } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { extractWarData, type WarDataSnapshot } from '../data/war_data_extractor.js';
 import {
     FACTION_COLORS,
     FACTION_DISPLAY_NAMES,
+    exhaustionLabel,
     factionCssClass,
     getFactionPartyPen,
     getPlayerFaction,
     hasFactionPresence,
     STABILITY_CONTESTED_MIN,
     STABILITY_SECURE_MIN,
+    trendArrow,
     turnToWeekString
 } from './warroom_utils.js';
-
-interface FactionSnapshot {
-    factionName: string;
-    factionId: string;
-    turn: number;
-    phase: string;
-    territory: {
-        settlementsControlled: number;
-        settlementsTotal: number;
-        territoryPercent: number;
-    };
-    military: {
-        personnel: number;
-        exhaustion: number;
-        supplyDays: number;
-    };
-    authority: {
-        centralAuthority: number;
-        fragmentedMunicipalities: number;
-    };
-    population: {
-        underControl: number;
-        totalDisplaced: number;
-    };
-    warnings: string[];
-}
 
 interface Phase0Snapshot {
     factionId: FactionId;
@@ -171,7 +149,7 @@ export class FactionOverviewPanel {
         if (controlCounts.highlyContested > 2) warnings.push('Multiple municipalities at risk of destabilization');
         if (rsPressure >= 80 && !rs?.declared) warnings.push('RS declaration imminent');
         if (hrhbPressure >= 80 && !hrhb?.declared) warnings.push('HRHB declaration imminent');
-        if (warCountdown !== null && warCountdown <= 4) warnings.push(`War in ${warCountdown} weeks — prepare for Phase I`);
+        if (warCountdown !== null && warCountdown <= 4) warnings.push(`War in ${warCountdown} weeks \u2014 prepare for Phase I`);
         if (warnings.length === 0) warnings.push('No strategic warnings at this time');
 
         return {
@@ -194,49 +172,6 @@ export class FactionOverviewPanel {
             referendumHeld: this.gameState.meta.referendum_held ?? false,
             warCountdown,
             warnings,
-        };
-    }
-
-    /**
-     * Generate faction snapshot from game state (Phase I+)
-     */
-    private generateSnapshot(): FactionSnapshot {
-        const factionId = getPlayerFaction(this.gameState);
-        const faction = this.gameState.factions.find(f => f.id === factionId) ?? this.gameState.factions[0];
-
-        const politicalControllers = this.gameState.political_controllers || {};
-        const controlledSettlements = Object.values(politicalControllers).filter(
-            controller => controller === factionId
-        ).length;
-        const totalSettlements = Object.keys(politicalControllers).length || 1;
-        const territoryPercent = (controlledSettlements / totalSettlements) * 100;
-
-        const profile = faction?.profile || {
-            authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0
-        };
-
-        const personnel = controlledSettlements * 500;
-        const supplyDays = Math.floor(profile.logistics * 30);
-        const avgPopulationPerSettlement = 4000;
-        const populationUnderControl = controlledSettlements * avgPopulationPerSettlement;
-        const totalDisplaced = 0;
-
-        const warnings: string[] = [];
-        if (profile.exhaustion > 0.7) warnings.push('Critical exhaustion levels detected');
-        if (profile.logistics < 0.3) warnings.push('Supply situation critical');
-        if (profile.authority < 0.5) warnings.push('Central authority weakened');
-        if (warnings.length === 0) warnings.push('No strategic warnings at this time');
-
-        return {
-            factionName: this.getFactionDisplayName(factionId),
-            factionId,
-            turn: this.gameState.meta.turn,
-            phase: this.gameState.meta.phase ?? 'phase_0',
-            territory: { settlementsControlled: controlledSettlements, settlementsTotal: totalSettlements, territoryPercent },
-            military: { personnel, exhaustion: profile.exhaustion * 100, supplyDays },
-            authority: { centralAuthority: profile.authority, fragmentedMunicipalities: 0 },
-            population: { underControl: populationUnderControl, totalDisplaced },
-            warnings
         };
     }
 
@@ -268,7 +203,7 @@ export class FactionOverviewPanel {
         header.innerHTML = `
             <div class="fo-faction-badge" style="color:${fc.primary}">${snap.factionId}</div>
             <h2>${snap.factionName}</h2>
-            <div class="meta">${turnToWeekString(snap.turn)} — PRE-WAR PHASE</div>
+            <div class="meta">${turnToWeekString(snap.turn)} \u2014 PRE-WAR PHASE</div>
         `;
         panel.appendChild(header);
 
@@ -378,23 +313,25 @@ export class FactionOverviewPanel {
     }
 
     /**
-     * Phase I+ layout: territory, military, authority, population, formations.
+     * Phase I+ layout: territory, military, casualties, authority/supply, formations, warnings.
+     * Uses extractWarData() for real GameState data instead of fake placeholders.
      */
     private renderPhaseIPlus(): HTMLElement {
-        const snapshot = this.generateSnapshot();
+        const pf = getPlayerFaction(this.gameState);
+        const snap = extractWarData(this.gameState, pf);
+        const fc = FACTION_COLORS[pf] ?? FACTION_COLORS['RBiH'];
 
         const panel = document.createElement('div');
-        panel.className = `faction-overview-panel faction-${factionCssClass(snapshot.factionId as FactionId)}`;
-        const fc = FACTION_COLORS[snapshot.factionId] ?? FACTION_COLORS['RBiH'];
+        panel.className = `faction-overview-panel faction-${factionCssClass(pf)}`;
         panel.style.borderTop = `3px solid ${fc.primary}`;
 
         // Header
         const header = document.createElement('div');
         header.className = 'faction-overview-header';
         header.innerHTML = `
-            <div class="fo-faction-badge" style="color:${fc.primary}">${snapshot.factionId}</div>
-            <h2>${snapshot.factionName}</h2>
-            <div class="meta">${turnToWeekString(snapshot.turn)}</div>
+            <div class="fo-faction-badge" style="color:${fc.primary}">${pf}</div>
+            <h2>${this.getFactionDisplayName(pf)}</h2>
+            <div class="meta">${turnToWeekString(snap.turn)}</div>
         `;
         panel.appendChild(header);
 
@@ -402,91 +339,153 @@ export class FactionOverviewPanel {
         const quadrants = document.createElement('div');
         quadrants.className = 'faction-overview-quadrants';
 
+        // TERRITORY
         quadrants.appendChild(this.createQuadrant('TERRITORY', [
-            { label: 'Settlements Controlled', value: `${snapshot.territory.settlementsControlled} / ${snapshot.territory.settlementsTotal}` },
-            { label: 'Territory Control', value: `${snapshot.territory.territoryPercent.toFixed(1)}%` }
+            { label: 'Settlements Controlled', value: `${snap.ownTerritory.settlementsControlled} / ${snap.ownTerritory.settlementsTotal}` },
+            { label: 'Territory Control', value: `${snap.ownTerritory.territoryPercent.toFixed(1)}%` },
         ]));
 
-        quadrants.appendChild(this.createQuadrant('MILITARY', [
-            { label: 'Personnel', value: `${snapshot.military.personnel.toLocaleString()}` },
-            { label: 'Exhaustion', value: `${snapshot.military.exhaustion.toFixed(0)}%` },
-            { label: 'Supply Days', value: `${snapshot.military.supplyDays}` }
+        // MILITARY — real data from formations
+        const inTransitCount = snap.brigadeMovement.inTransit.length;
+        const militaryStats: Array<{ label: string; value: string }> = [
+            { label: 'Personnel', value: snap.ownForces.totalPersonnel.toLocaleString() },
+            { label: 'Active Brigades', value: `${snap.ownForces.activeBrigades} / ${snap.ownForces.totalBrigades}` },
+            { label: 'Corps', value: `${snap.ownForces.corpsCount}` },
+            { label: 'Avg. Cohesion', value: `${snap.ownForces.avgCohesion.toFixed(0)}` },
+            { label: 'Exhaustion', value: `${exhaustionLabel(snap.ownExhaustion.level)} ${trendArrow(snap.ownExhaustion.trend)}` },
+        ];
+        if (inTransitCount > 0) {
+            militaryStats.push({ label: 'In Transit', value: `${inTransitCount}` });
+        }
+        quadrants.appendChild(this.createQuadrant('MILITARY', militaryStats));
+
+        // CASUALTIES — real data from casualty_ledger
+        const cas = snap.ownCasualties;
+        quadrants.appendChild(this.createQuadrant('CASUALTIES', [
+            { label: 'KIA', value: cas.killed.toLocaleString() },
+            { label: 'WIA', value: cas.wounded.toLocaleString() },
+            { label: 'MIA/Captured', value: cas.missingCaptured.toLocaleString() },
+            { label: 'Civilian Killed', value: snap.ownDisplacement.civilianKilled.toLocaleString() },
+            { label: 'Equipment Lost', value: `T:${cas.equipmentLost.tanks} A:${cas.equipmentLost.artillery} AA:${cas.equipmentLost.aa}` },
+            { label: 'WIA Pending Return', value: cas.woundedPendingReturn.toLocaleString() },
         ]));
 
-        quadrants.appendChild(this.createQuadrant('AUTHORITY', [
-            { label: 'Central Authority', value: `${(snapshot.authority.centralAuthority * 100).toFixed(0)}%` },
-            { label: 'Fragmented Areas', value: `${snapshot.authority.fragmentedMunicipalities}` }
+        // AUTHORITY & SUPPLY — real data, authority displayed directly (no double multiplication)
+        const authPct = (snap.ownAuthority.authority * 100).toFixed(0);
+        quadrants.appendChild(this.createQuadrant('AUTHORITY & SUPPLY', [
+            { label: 'Authority', value: `${authPct}%` },
+            { label: 'Legitimacy', value: `${(snap.ownAuthority.legitimacy * 100).toFixed(0)}%` },
+            { label: 'Supply: Adequate', value: `${snap.ownSupply.adequateCount}` },
+            { label: 'Supply: Strained', value: `${snap.ownSupply.strainedCount}` },
+            { label: 'Supply: Critical', value: `${snap.ownSupply.criticalCount}` },
+            { label: 'Collapsed Municipalities', value: `${snap.ownSupply.collapsedMunicipalities.length}` },
         ]));
-
-        quadrants.appendChild(this.createQuadrant('POPULATION', [
-            { label: 'Under Control', value: `${(snapshot.population.underControl / 1000).toFixed(1)}K` },
-            { label: 'Displaced', value: `${(snapshot.population.totalDisplaced / 1000).toFixed(1)}K` }
-        ]));
-
-        // Formations (Phase I+)
-        const formationsSection = this.renderFormationsSection();
-        if (formationsSection) panel.appendChild(formationsSection);
 
         panel.appendChild(quadrants);
 
-        // Warnings
-        const warnings = document.createElement('div');
-        warnings.className = 'faction-overview-warnings';
-        warnings.innerHTML = `
+        // Formations — own faction only, with personnel and posture
+        const formationsSection = this.renderOwnFormationsSection(snap);
+        if (formationsSection) panel.appendChild(formationsSection);
+
+        // Strategic Warnings — data-driven from real state
+        const warnings = this.generateWarPhaseWarnings(snap);
+        const warningsDiv = document.createElement('div');
+        warningsDiv.className = 'faction-overview-warnings';
+        warningsDiv.innerHTML = `
             <h3>STRATEGIC WARNINGS</h3>
-            <ul>${snapshot.warnings.map(w => `<li>${w}</li>`).join('')}</ul>
+            <ul>${warnings.map(w => `<li>${w}</li>`).join('')}</ul>
         `;
-        panel.appendChild(warnings);
+        panel.appendChild(warningsDiv);
 
         return panel;
     }
 
     /**
-     * Formations section: count per faction and short list (Phase I+).
+     * Formations section for Phase I+: own faction formations with personnel, posture, kind.
      */
-    private renderFormationsSection(): HTMLElement | null {
-        const formations = this.gameState.formations;
-        if (!formations || typeof formations !== 'object') return null;
-        const entries = Object.entries(formations);
-        if (entries.length === 0) return null;
-
-        const byFaction = new Map<string, Array<{ id: string; name: string }>>();
-        for (const [id, f] of entries) {
-            if (!f || typeof f !== 'object' || !f.faction) continue;
-            const list = byFaction.get(f.faction) ?? [];
-            list.push({ id, name: (f as { name?: string }).name ?? id });
-            byFaction.set(f.faction, list);
-        }
-        for (const list of byFaction.values()) {
-            list.sort((a, b) => a.id.localeCompare(b.id));
-        }
+    private renderOwnFormationsSection(snap: WarDataSnapshot): HTMLElement | null {
+        const ownFormations = snap.ownForces.formationDetails;
+        if (ownFormations.length === 0) return null;
 
         const section = document.createElement('div');
         section.className = 'faction-overview-formations';
-        section.innerHTML = '<h3>FORMATIONS</h3>';
-        const factionIds = Array.from(byFaction.keys()).sort((a, b) => a.localeCompare(b));
-        const maxList = 5;
-        for (const fid of factionIds) {
-            const list = byFaction.get(fid) ?? [];
-            const name = this.getFactionDisplayName(fid);
-            const sub = document.createElement('div');
-            sub.className = 'formations-by-faction';
-            sub.innerHTML = `<strong>${name}</strong>: ${list.length} formation(s)`;
-            const ul = document.createElement('ul');
-            for (const item of list.slice(0, maxList)) {
-                const li = document.createElement('li');
-                li.textContent = item.name || item.id;
-                ul.appendChild(li);
-            }
-            if (list.length > maxList) {
-                const li = document.createElement('li');
-                li.textContent = `\u2026 +${list.length - maxList} more`;
-                ul.appendChild(li);
-            }
-            sub.appendChild(ul);
-            section.appendChild(sub);
+        section.innerHTML = `<h3>FORMATIONS (${ownFormations.length})</h3>`;
+
+        const maxList = 10;
+        const ul = document.createElement('ul');
+        for (const f of ownFormations.slice(0, maxList)) {
+            const li = document.createElement('li');
+            const kindLabel = f.kind === 'brigade' ? '' : ` [${f.kind}]`;
+            const personnelLabel = f.personnel > 0 ? ` \u2014 ${f.personnel.toLocaleString()} pers.` : '';
+            const postureLabel = f.kind === 'brigade' || f.kind === 'operational_group'
+                ? ` (${f.posture})`
+                : '';
+            const movementLabel = f.movementStatus !== 'deployed'
+                ? ` [${f.movementStatus.toUpperCase()}]`
+                : '';
+            li.textContent = `${f.name}${kindLabel}${personnelLabel}${postureLabel}${movementLabel}`;
+            ul.appendChild(li);
         }
+        if (ownFormations.length > maxList) {
+            const li = document.createElement('li');
+            li.textContent = `\u2026 +${ownFormations.length - maxList} more`;
+            ul.appendChild(li);
+        }
+        section.appendChild(ul);
         return section;
+    }
+
+    /**
+     * Generate war-phase strategic warnings from real state data.
+     */
+    private generateWarPhaseWarnings(snap: WarDataSnapshot): string[] {
+        const warnings: string[] = [];
+        const state = this.gameState;
+        const pf = snap.playerFaction;
+
+        // Sustainability collapses
+        if (snap.ownSupply.collapsedMunicipalities.length > 0) {
+            warnings.push(`Sustainability collapsed in ${snap.ownSupply.collapsedMunicipalities.length} municipality(s)`);
+        }
+
+        // Exhaustion worsening
+        const trends = state.loss_of_control_trends?.by_faction?.[pf];
+        if (trends?.exhaustion_increasing) {
+            warnings.push('Exhaustion trend worsening');
+        }
+        if (trends?.collapse_eligible) {
+            warnings.push('Faction is collapse-eligible');
+        }
+
+        // Authority critically low
+        if (snap.ownAuthority.authority < 0.30) {
+            warnings.push('Central authority critically low');
+        }
+
+        // Alliance strained (RBiH/HRHB only)
+        if ((pf === 'RBiH' || pf === 'HRHB') && snap.ownDiplomacy.rbihHrhbState) {
+            if (snap.ownDiplomacy.rbihHrhbState.allianceValue < 0.20) {
+                warnings.push('Alliance with partner faction severely strained');
+            }
+        }
+
+        // Exposed front gaps
+        if (snap.exposedFrontSettlements.length > 0) {
+            warnings.push(`EXPOSED FRONT: ${snap.exposedFrontSettlements.length} settlement(s) undefended`);
+        }
+
+        // Encircled brigades
+        if (snap.brigadeMovement.encircled.length > 0) {
+            warnings.push(`${snap.brigadeMovement.encircled.length} brigade(s) encircled`);
+        }
+
+        // Brigades in transit (front gaps opening)
+        if (snap.brigadeMovement.packing.length > 0) {
+            warnings.push(`${snap.brigadeMovement.packing.length} brigade(s) packing \u2014 front gaps opening`);
+        }
+
+        if (warnings.length === 0) warnings.push('No strategic warnings at this time');
+        return warnings;
     }
 
     /**

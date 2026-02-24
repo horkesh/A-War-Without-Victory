@@ -20,6 +20,7 @@ import type {
     OGActivationOrder,
     SettlementId
 } from '../../state/game_state.js';
+import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import {
     FACTION_STRATEGIES,
@@ -171,7 +172,7 @@ function computeSectorThreat(
 ): number {
     const pc = state.political_controllers ?? {};
     const frontPressure = state.front_pressure ?? {};
-    const brigadeAor = state.brigade_aor ?? {};
+    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
 
     let ourPressure = 0;
     let enemyPressure = 0;
@@ -880,7 +881,7 @@ export function generateEmergencyDefensiveOperations(
         if (healthyCount < 2) continue;
 
         // Build target: enemy settlements in or adjacent to corps brigades' AoR
-        const brigadeAor = state.brigade_aor ?? {};
+        const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
         const corpsBrigadeIds = new Set(subordinates.map(b => b.id));
         const targetSettlements: SettlementId[] = [];
 

@@ -15,6 +15,7 @@ import type {
     GameState
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { isBrigadeAssignedToFront } from './front_assignment.js';
 
 // --- Types ---
 
@@ -140,6 +141,10 @@ export function applyPostureOrders(state: GameState): PostureReport {
             report.postures_rejected++;
             continue;
         }
+        if (!isBrigadeAssignedToFront(state, brigadeId)) {
+            report.postures_rejected++;
+            continue;
+        }
 
         // Check posture constraints
         if (!canAdoptPosture(brigade, order.posture)) {
@@ -178,6 +183,7 @@ export function applyPostureCosts(state: GameState): void {
         if (!brigade) continue;
         if (brigade.status !== 'active') continue;
         if ((brigade.kind ?? 'brigade') !== 'brigade') continue;
+        if (!isBrigadeAssignedToFront(state, id as FormationId)) continue;
 
         const posture: BrigadePosture = brigade.posture ?? 'defend';
         let cohesion = brigade.cohesion ?? 60;

@@ -4,6 +4,7 @@
  * FORAWWV H2.4: formation creation only when explicit directive.
  */
 
+import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/operational_data.js';
 import {
     COMBAT_REINFORCEMENT_RATE,
     getBatchSizeForFaction,
@@ -40,6 +41,8 @@ export interface SpawnFormationsOptions {
     historicalHqLookup?: ((faction: string, mun_id: string, ordinal: number) => string | null) | null;
     /** When set, emergent spawn is gated by demographics: skip (mun, faction) where 1991 eligible population < MIN_ELIGIBLE_POPULATION_FOR_BRIGADE. */
     population1991ByMun?: MunicipalityPopulation1991Map | null;
+    /** When set, emergent formations get location_osid from hq_sid via canonical_to_operational_map. */
+    canonicalToOperational?: CanonicalToOperationalMap;
 }
 
 export interface SpawnFormationsReport {
@@ -218,7 +221,7 @@ export function spawnFormationsFromPools(
 
     const pools = state.militia_pools as Record<string, MilitiaPoolState>;
     const currentTurn = state.meta.turn;
-    const { batchSize: optionsBatchSize, factionFilter, munFilter, maxPerMun, customTags, applyChanges, formationKind, municipalityHqSettlement, population1991ByMun } = options;
+    const { batchSize: optionsBatchSize, factionFilter, munFilter, maxPerMun, customTags, applyChanges, formationKind, municipalityHqSettlement, population1991ByMun, canonicalToOperational } = options;
 
     const eligiblePools: Array<{ mun_id: string; pool: MilitiaPoolState }> = [];
     for (const [key, pool] of Object.entries(pools)) {
@@ -276,10 +279,11 @@ export function spawnFormationsFromPools(
             const baseTags = [`generated_phase_i0`, `kind:${kind}`, `mun:${mun_id}`];
             const allTags = Array.from(new Set([...baseTags, ...customTags])).sort(strictCompare);
 
-            const cohesion = computeBaseCohesion(kind, currentTurn);
+            const cohesion = computeBaseCohesion(kind, currentTurn, faction);
 
             // Prioritize historical specific HQ, then municipality capital, then nothing
             const hq_sid = historicalHqSid ?? municipalityHqSettlement?.[mun_id];
+            const location_osid = canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined;
 
             const formation: FormationState = {
                 id: formationId,
@@ -295,7 +299,8 @@ export function spawnFormationsFromPools(
                 cohesion,
                 activation_gated: true,
                 activation_turn: null,
-                ...(hq_sid ? { hq_sid } : {})
+                ...(hq_sid ? { hq_sid } : {}),
+                ...(location_osid != null ? { location_osid } : {})
             };
 
             report.created.push({ formation_id: formationId, name, mun_id, faction, kind });

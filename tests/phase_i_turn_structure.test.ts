@@ -18,6 +18,7 @@ const EXPECTED_PHASE_I_ORDER = [
     'phase-i-minority-militia-decay',
     'phase-i-brigade-reinforcement',
     'phase-i-formation-spawn',
+    'phase-i-bot-posture',
     'phase-i-alliance-update',
     'phase-i-ceasefire-check',
     'phase-i-washington-check',

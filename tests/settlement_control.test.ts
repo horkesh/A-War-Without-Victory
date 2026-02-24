@@ -191,6 +191,42 @@ describe('applyWaveFlip', () => {
         expect(res2Scaled).toBeGreaterThan(res2);
         expect(res2Scaled).toBeGreaterThan(res1Scaled);
     });
+
+    it('applies organizational penetration defense bonus to holdout resistance', () => {
+        const settlementsByMun = new Map<MunicipalityId, SettlementId[]>();
+        settlementsByMun.set('zvornik', ['S1']);
+        const settlementData = makeSettlementData([
+            { sid: 'S1', serb: 0.05, bosniak: 0.90 },
+        ]);
+        const scalingContext: HoldoutScalingContext = {
+            sidToPopulation: new Map([['S1', 12000]]),
+            sidToDegree: new Map([['S1', 6]]),
+        };
+        const baseState = makeState({
+            political_controllers: { S1: 'RBiH' },
+            municipalities: { zvornik: {} } as any,
+        });
+        const boostedState = makeState({
+            political_controllers: { S1: 'RBiH' },
+            municipalities: {
+                zvornik: {
+                    organizational_penetration: {
+                        to_control: 'controlled',
+                        police_loyalty: 'loyal',
+                        patriotska_liga: 60,
+                        sda_penetration: 70,
+                    }
+                }
+            } as any,
+        });
+
+        applyWaveFlip(baseState, 'zvornik', 'RS', 'RBiH', settlementsByMun, settlementData, 10, scalingContext);
+        applyWaveFlip(boostedState, 'zvornik', 'RS', 'RBiH', settlementsByMun, settlementData, 10, scalingContext);
+
+        const baseResistance = baseState.settlement_holdouts?.['S1']?.holdout_resistance ?? 0;
+        const boostedResistance = boostedState.settlement_holdouts?.['S1']?.holdout_resistance ?? 0;
+        expect(boostedResistance).toBeGreaterThan(baseResistance);
+    });
 });
 
 describe('processHoldoutCleanup', () => {

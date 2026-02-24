@@ -40,8 +40,8 @@ export async function loadSettlementGraph(options?: {
     edgesPath?: string;
     enrichWithOrphanFlags?: boolean;
 }): Promise<LoadedSettlementGraph> {
-    const settlementsPath = resolve(options?.settlementsPath ?? 'data/source/settlements_initial_master.json');
-    const edgesPath = resolve(options?.edgesPath ?? 'data/derived/settlement_edges.json');
+    const settlementsPath = resolve(options?.settlementsPath ?? 'data/derived/operational/operational_settlements.geojson');
+    const edgesPath = resolve(options?.edgesPath ?? 'data/derived/operational/operational_contact_graph.json');
 
     const settlementsJson = JSON.parse(await readFile(settlementsPath, 'utf8')) as unknown;
     const edgesJson = JSON.parse(await readFile(edgesPath, 'utf8')) as unknown;
@@ -378,33 +378,50 @@ export function validateSettlementGraph(
 function parseSettlements(json: unknown): Map<string, SettlementRecord> {
     const map = new Map<string, SettlementRecord>();
 
-    // Expected format: { settlements: [{ sid, source_id, mun_code, mun, name? }, ...] }
-    const settlementsArray =
-        isRecord(json) && Array.isArray(json.settlements)
-            ? json.settlements
-            : null;
+    // Support either old { settlements: [...] } or GeoJSON { type: "FeatureCollection", features: [...] }
+    let featuresArray: any[] | null = null;
 
-    if (!settlementsArray) {
-        throw new Error('Unsupported settlements_index.json format (expected { settlements: [...] })');
+    if (isRecord(json)) {
+        if (Array.isArray(json.settlements)) {
+            featuresArray = json.settlements;
+        } else if (json.type === 'FeatureCollection' && Array.isArray(json.features)) {
+            featuresArray = json.features;
+        }
     }
 
-    for (const item of settlementsArray) {
-        if (!isRecord(item) || typeof item.sid !== 'string') {
-            throw new Error(`Invalid settlement record: missing sid (got ${JSON.stringify(item).substring(0, 100)})`);
+    if (!featuresArray) {
+        throw new Error('Unsupported settlements_index.json format (expected { settlements: [...] } or GeoJSON FeatureCollection)');
+    }
+
+    for (const item of featuresArray) {
+        // If it's a GeoJSON feature, extract properties
+        const isGeoJsonFeature = isRecord(item) && item.type === 'Feature' && isRecord(item.properties);
+        const props = isGeoJsonFeature ? item.properties : item;
+
+        // In operational layer, sid is 'osid' mapped to 'sid' in memory to satisfy SettlementRecord interface
+        const sidVal = props.osid || props.sid;
+
+        if (typeof sidVal !== 'string') {
+            throw new Error(`Invalid settlement record: missing sid/osid (got ${JSON.stringify(props).substring(0, 100)})`);
         }
 
-        if (typeof item.source_id !== 'string' || typeof item.mun_code !== 'string' || typeof item.mun !== 'string') {
-            throw new Error(`Invalid settlement record: missing required fields (sid: ${item.sid})`);
+        if (typeof props.mun1990_id !== 'string') {
+            throw new Error(`Invalid settlement record: missing mun1990_id (sid: ${sidVal})`);
         }
 
         const record: SettlementRecord = {
-            sid: item.sid,
-            source_id: item.source_id,
-            mun_code: item.mun_code,
-            mun: item.mun
+            sid: sidVal,
+            source_id: (props.source_id as string) || sidVal, // fake source if missing
+            mun_code: (props.mun_code as string) || props.mun1990_id, // fake code if missing 
+            mun: (props.mun as string) || props.mun1990_name || props.mun1990_id, // fake name if missing
+            mun1990_id: props.mun1990_id
         };
-        if (typeof item.name === 'string') record.name = item.name;
-        if (typeof item.mun1990_id === 'string') record.mun1990_id = item.mun1990_id;
+
+        if (typeof props.settlement_name === 'string') record.name = props.settlement_name;
+        else if (typeof props.name === 'string') record.name = props.name;
+
+        // Preserve population data in properties for other systems
+        record.properties = { ...props, is_orphan: false, usesFallbackGeometry: false } as Record<string, unknown>;
 
         // Index by sid (primary key)
         map.set(record.sid, record);

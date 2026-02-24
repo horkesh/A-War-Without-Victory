@@ -20,8 +20,14 @@ import { getBrigadeAoRSettlements } from '../sim/phase_ii/brigade_aor.js';
 import { shortestPathThroughFriendly } from '../sim/phase_ii/brigade_movement.js';
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/phase_ii/phase_ii_adjacency.js';
 import { estimateAttackCost, type AttackEstimate } from '../sim/phase_ii/combat_estimate.js';
+import {
+    applyCorpsFrontAutoDistributionForCorps,
+    ensureDerivedCorpsFrontEdges,
+} from '../sim/phase_ii/corps_front_assign.js';
+import { computeFrontWidthMetrics } from '../sim/phase_ii/front_width_metrics.js';
 import { applyRecruitment, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
 import { runPhaseITurn } from '../sim/run_phase_i_browser.js';
+import { getLegacyAoR } from '../state/game_state.js';
 import { runTurn } from '../sim/turn_pipeline.js';
 import {
     queryMovementPath as computeMovementPathQuery,
@@ -258,6 +264,8 @@ export interface CorpsSectorQueryEntry {
     faction: string;
     brigade_ids: string[];
     settlement_ids: string[];
+    front_width_score: number;
+    overextended: boolean;
 }
 
 export interface BattleEventQueryEntry {
@@ -279,12 +287,14 @@ export async function querySupplyPaths(
     return computeSupplyReachability(state, adjacency);
 }
 
-/** Read-only query: derived corps sectors from brigade AoR ownership. */
+/** Read-only query: derived corps sectors from brigade location (AoR or location_osid). */
 export function queryCorpsSectors(
     state: GameState
 ): CorpsSectorQueryEntry[] {
     const formations = state.formations ?? {};
-    const brigadeAor = state.brigade_aor ?? {};
+    const phase = state.meta?.phase as string | undefined;
+    const useOsid = phase === 'phase_ii';
+    const brigadeAor = useOsid ? undefined : getLegacyAoR(state).brigade_aor ?? {};
     const corpsMap = new Map<string, { faction: string; brigades: Set<string>; settlements: Set<string> }>();
 
     for (const formationId of Object.keys(formations).sort()) {
@@ -299,27 +309,36 @@ export function queryCorpsSectors(
             });
         }
         corpsMap.get(corpsId)!.brigades.add(formationId);
+        if (useOsid) {
+            const loc = (formation as { location_osid?: string }).location_osid;
+            if (typeof loc === 'string' && loc) corpsMap.get(corpsId)!.settlements.add(loc);
+        }
     }
 
-    for (const sid of Object.keys(brigadeAor).sort()) {
-        const brigadeId = brigadeAor[sid];
-        if (!brigadeId) continue;
-        const formation = formations[brigadeId];
-        const corpsId = formation?.corps_id;
-        if (!corpsId) continue;
-        const entry = corpsMap.get(corpsId);
-        if (!entry) continue;
-        entry.settlements.add(sid);
+    if (!useOsid) {
+        for (const sid of Object.keys(brigadeAor as Record<string, string | null>).sort()) {
+            const brigadeId = (brigadeAor as Record<string, string | null>)[sid];
+            if (!brigadeId) continue;
+            const formation = formations[brigadeId];
+            const corpsId = formation?.corps_id;
+            if (!corpsId) continue;
+            const entry = corpsMap.get(corpsId);
+            if (!entry) continue;
+            entry.settlements.add(sid);
+        }
     }
 
     const sectors: CorpsSectorQueryEntry[] = [];
     for (const corpsId of [...corpsMap.keys()].sort((a, b) => a.localeCompare(b))) {
         const entry = corpsMap.get(corpsId)!;
+        const metrics = computeFrontWidthMetrics(entry.settlements.size, entry.brigades.size);
         sectors.push({
             corps_id: corpsId,
             faction: entry.faction,
             brigade_ids: [...entry.brigades].sort((a, b) => a.localeCompare(b)),
             settlement_ids: [...entry.settlements].sort((a, b) => a.localeCompare(b)),
+            front_width_score: metrics.front_width_score,
+            overextended: metrics.overextended,
         });
     }
     return sectors;
@@ -496,7 +515,10 @@ export async function validateBrigadeMovementOrder(
         return { valid: false, error: 'Destination settlements must be contiguous' };
     }
 
-    const startSid = getBrigadeAoRSettlements(state, brigadeId)[0] ?? formation.hq_sid ?? null;
+    const phase = state.meta?.phase as string | undefined;
+    const startSid = phase === 'phase_ii'
+        ? ((formation as { location_osid?: string }).location_osid ?? formation.hq_sid ?? null)
+        : (getBrigadeAoRSettlements(state, brigadeId)[0] ?? formation.hq_sid ?? null);
     if (!startSid) {
         return { valid: false, error: 'Brigade has no current settlement to path from' };
     }
@@ -540,4 +562,167 @@ export async function validateBrigadeRepositionOrder(
         return { valid: false, error: 'Settlements must be contiguous' };
     }
     return { valid: true };
+}
+
+function normalizeEdgeId(edgeId: string): string | null {
+    const parts = edgeId.split('__');
+    if (parts.length !== 2) return null;
+    const a = parts[0]?.trim();
+    const b = parts[1]?.trim();
+    if (!a || !b) return null;
+    return a < b ? `${a}__${b}` : `${b}__${a}`;
+}
+
+/** Validate and stage corps front edges; auto-distribute nearby front settlements to corps brigades. */
+export async function stageCorpsFrontOrder(
+    state: GameState,
+    corpsId: string,
+    edgeIds: string[],
+    baseDir: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+    const corps = state.formations?.[corpsId];
+    const kind = corps?.kind ?? 'corps';
+    const isCorpsLike = kind === 'corps' || kind === 'corps_asset' || kind === 'army_hq';
+    if (!corps || !isCorpsLike) {
+        return { ok: false, error: 'Invalid corps formation' };
+    }
+    const normalized = edgeIds
+        .map((id) => normalizeEdgeId(id))
+        .filter((id): id is string => id !== null)
+        .sort(strictCompare);
+    if (normalized.length === 0) {
+        return { ok: false, error: 'At least one valid edge_id is required' };
+    }
+    const graph = await loadSettlementGraph(settlementGraphOptions(baseDir));
+    const validEdgeIds = new Set<string>();
+    for (const e of graph.edges) {
+        validEdgeIds.add(e.a < e.b ? `${e.a}__${e.b}` : `${e.b}__${e.a}`);
+    }
+    for (const id of normalized) {
+        if (!validEdgeIds.has(id)) {
+            return { ok: false, error: `Unknown edge_id: ${id}` };
+        }
+    }
+    if (!state.corps_front_edges) state.corps_front_edges = {};
+    state.corps_front_edges[corpsId] = [...new Set(normalized)].sort(strictCompare);
+    ensureDerivedCorpsFrontEdges(state, graph.edges);
+    applyCorpsFrontAutoDistributionForCorps(state, corpsId);
+    return { ok: true };
+}
+
+/** Stage corps attack axis and project it to deterministic per-brigade attack orders. */
+export function stageCorpsAttackAxisOrder(
+    state: GameState,
+    corpsId: string,
+    edgeIds: string[]
+): { ok: true } | { ok: false; error: string } {
+    const corps = state.formations?.[corpsId];
+    const kind = corps?.kind ?? 'corps';
+    const isCorpsLike = kind === 'corps' || kind === 'corps_asset' || kind === 'army_hq';
+    if (!corps || !corps.faction || !isCorpsLike) return { ok: false, error: 'Invalid corps formation' };
+    const normalized = edgeIds
+        .map((id) => normalizeEdgeId(id))
+        .filter((id): id is string => id !== null)
+        .sort(strictCompare);
+    if (normalized.length === 0) return { ok: false, error: 'At least one valid edge_id is required' };
+    if (!state.corps_attack_axis_orders) state.corps_attack_axis_orders = {};
+    state.corps_attack_axis_orders[corpsId] = { edge_ids: [...new Set(normalized)].sort(strictCompare), created_turn: state.meta?.turn ?? 0 };
+    const pc = state.political_controllers ?? {};
+    const enemyTargets = new Set<string>();
+    for (const eid of normalized) {
+        const parts = eid.split('__');
+        if (parts.length !== 2) continue;
+        const a = parts[0];
+        const b = parts[1];
+        if (pc[a] && pc[a] !== corps.faction) enemyTargets.add(a);
+        if (pc[b] && pc[b] !== corps.faction) enemyTargets.add(b);
+    }
+    const targets = [...enemyTargets].sort(strictCompare);
+    if (targets.length === 0) return { ok: true };
+    const brigades = Object.keys(state.formations ?? {})
+        .filter((id) => {
+            const f = state.formations?.[id];
+            return !!f && (f.kind ?? 'brigade') === 'brigade' && f.corps_id === corpsId && f.faction === corps.faction;
+        })
+        .sort(strictCompare);
+    if (brigades.length === 0) return { ok: true };
+    if (!state.brigade_attack_orders) state.brigade_attack_orders = {};
+    for (let i = 0; i < brigades.length; i++) {
+        state.brigade_attack_orders[brigades[i]] = targets[i % targets.length];
+    }
+    return { ok: true };
+}
+
+/** Stage OG subfront edges; must be subset of parent corps front edge set. */
+export function stageOgSubfrontOrder(
+    state: GameState,
+    ogId: string,
+    corpsId: string,
+    edgeIds: string[]
+): { ok: true } | { ok: false; error: string } {
+    const normalized = edgeIds
+        .map((id) => normalizeEdgeId(id))
+        .filter((id): id is string => id !== null)
+        .sort(strictCompare);
+    if (normalized.length === 0) return { ok: false, error: 'At least one valid edge_id is required' };
+    const corpsEdges = new Set((state.corps_front_edges?.[corpsId] ?? []).map((id) => normalizeEdgeId(id)).filter((id): id is string => id !== null));
+    if (corpsEdges.size === 0) return { ok: false, error: 'Parent corps has no front edges' };
+    for (const id of normalized) {
+        if (!corpsEdges.has(id)) return { ok: false, error: `Subfront edge ${id} is outside corps front` };
+    }
+    if (!state.og_subfront_edges) state.og_subfront_edges = {};
+    state.og_subfront_edges[ogId] = [...new Set(normalized)].sort(strictCompare);
+    return { ok: true };
+}
+
+/** Assign brigade to front segment (or null to reserve). */
+export function assignBrigadeToFront(
+    state: GameState,
+    brigadeId: string,
+    frontId: string | null
+): { ok: true } | { ok: false; error: string } {
+    const formation = state.formations?.[brigadeId];
+    if (!formation || (formation.kind ?? 'brigade') !== 'brigade') {
+        return { ok: false, error: 'Invalid brigade formation' };
+    }
+    if (frontId !== null) {
+        const segments = state.assignable_front_segments ?? [];
+        const exists = segments.some((segment) => segment.front_id === frontId);
+        if (!exists) return { ok: false, error: `Unknown front_id: ${frontId}` };
+    }
+    if (!state.brigade_front_assignment) state.brigade_front_assignment = {};
+    state.brigade_front_assignment[brigadeId] = frontId;
+    return { ok: true };
+}
+
+/** Rename an assignable front segment. Empty name clears to default label behavior. */
+export function renameFrontSegment(
+    state: GameState,
+    frontId: string,
+    name: string | null
+): { ok: true } | { ok: false; error: string } {
+    const segments = state.assignable_front_segments ?? [];
+    const segment = segments.find((entry) => entry.front_id === frontId);
+    if (!segment) return { ok: false, error: `Unknown front_id: ${frontId}` };
+    const normalized = typeof name === 'string' ? name.trim() : '';
+    if (normalized.length === 0) {
+        delete segment.name;
+    } else {
+        segment.name = normalized;
+    }
+    return { ok: true };
+}
+
+/** Rename a theatre. Empty name falls back to "<faction> Theatre". */
+export function renameTheatre(
+    state: GameState,
+    theatreId: string,
+    name: string | null
+): { ok: true } | { ok: false; error: string } {
+    const theatres = state.theatres ?? {};
+    const theatre = theatres[theatreId];
+    if (!theatre) return { ok: false, error: `Unknown theatre_id: ${theatreId}` };
+    const normalized = typeof name === 'string' ? name.trim() : '';
+    theatre.name = normalized.length > 0 ? normalized : `${theatre.faction} Theatre`;
+    return { ok: true };
 }

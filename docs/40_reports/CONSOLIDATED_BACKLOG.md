@@ -1,6 +1,8 @@
 # Consolidated: Backlog / Not Yet Implemented (40_reports)
 
-**Purpose:** Single view of plans, designs, and research that have **not** been fully implemented. Use for prioritization and scope control. Source reports remain in docs/40_reports for detail.
+**Purpose:** Single view of plans, designs, and research that have **not** been fully implemented. Use for prioritization and scope control.
+
+**Structure (2026-02-24):** Backlog items are grouped into **themed docs** in [backlog/](backlog/). Original single-topic docs were archived to [docs/_old/40_reports/backlog/](../_old/40_reports/backlog/); see [docs/_old/README.md](../_old/README.md) §40_reports/backlog for the index. No planned work dropped—every archived filename is listed in the themed doc for that theme.
 
 **Scope:** Post-MVP (Phase 7) unless otherwise noted. MVP scope remains frozen per Executive Roadmap.
 
@@ -10,9 +12,7 @@
 
 | Report | Summary | Priority / owner |
 |--------|---------|-------------------|
-| [IMPLEMENTATION_PLAN_MASTER_EARLY_DOCS.md](backlog/IMPLEMENTATION_PLAN_MASTER_EARLY_DOCS.md) | Phase A (AI, victory, production), Phase B (events, campaign, negotiation, coercion), Phase C (multiplayer, UI). AI opponent is critical path for playable release. | Post-MVP; PM for sequencing. |
-| [PHASE7_BACKLOG_QUEUE_MASTER_EARLY_DOCS.md](backlog/PHASE7_BACKLOG_QUEUE_MASTER_EARLY_DOCS.md) | Queue: B1/B2/B4 implemented; **B3 negotiation counter-offers** not started. | Post-MVP. |
-| [MASTER_EARLY_DOCS_ANALYSIS_REPORT.md](backlog/MASTER_EARLY_DOCS_ANALYSIS_REPORT.md) | Analysis that fed IMPLEMENTATION_PLAN_MASTER_EARLY_DOCS. | Reference. |
+| [BACKLOG_PHASE7_MASTER_EARLY_DOCS.md](backlog/BACKLOG_PHASE7_MASTER_EARLY_DOCS.md) | Phase A (AI, victory, production), Phase B (events, campaign, negotiation, coercion), Phase C (multiplayer, UI). B1/B2/B4 implemented; **B3 negotiation counter-offers** not started. AI opponent critical path. Originals: IMPLEMENTATION_PLAN_MASTER_EARLY_DOCS, PHASE7_BACKLOG_QUEUE_*, MASTER_EARLY_DOCS_ANALYSIS_REPORT → _old/40_reports/backlog/. | Post-MVP; PM for sequencing. |
 
 ---
 
@@ -20,11 +20,7 @@
 
 | Report | Summary | Priority / owner |
 |--------|---------|-------------------|
-| [HISTORICAL_FIDELITY_APR1992_RESEARCH_PLAN.md](backlog/HISTORICAL_FIDELITY_APR1992_RESEARCH_PLAN.md) | Research plan for Apr 1992 historical fidelity. | Research. |
-| [HISTORICAL_FIDELITY_APR1992_SUCCESS_CRITERIA.md](backlog/HISTORICAL_FIDELITY_APR1992_SUCCESS_CRITERIA.md) | Success criteria for historical runs. | Design. |
-| [HISTORICAL_FIDELITY_APR1992_MODEL_DESIGN.md](backlog/HISTORICAL_FIDELITY_APR1992_MODEL_DESIGN.md) | Model design for historical fidelity. | Design. |
-| [HISTORICAL_TRAJECTORY_VRS_ARBIH_ANALYSIS.md](backlog/HISTORICAL_TRAJECTORY_VRS_ARBIH_ANALYSIS.md) | VRS/ARBiH trajectory analysis. | Research. |
-| [APR1992_RUNS_EXAMINATION_REPORT.md](backlog/APR1992_RUNS_EXAMINATION_REPORT.md) | Examination of Apr 1992 runs. | Reference. |
+| [BACKLOG_HISTORICAL_FIDELITY_AND_RESEARCH.md](backlog/BACKLOG_HISTORICAL_FIDELITY_AND_RESEARCH.md) | Research plan, success criteria, model design, VRS/ARBiH trajectory analysis, Apr 1992 runs examination. Originals (5) → _old/40_reports/backlog/. | Research / design. |
 | [PARADOX_HISTORICAL_TROOP_NUMBERS_SEPT1992_CONVENE.md](convenes/PARADOX_HISTORICAL_TROOP_NUMBERS_SEPT1992_CONVENE.md) | Convene on historical troop numbers (Sept 1992). | Design input. |
 
 ---
@@ -33,13 +29,10 @@
 
 | Report | Summary | Priority / owner |
 |--------|---------|-------------------|
-| [BRIGADE_REALISM_AND_MILITARY_FRONTS_IMPLEMENTATION_PLAN.md](backlog/BRIGADE_REALISM_AND_MILITARY_FRONTS_IMPLEMENTATION_PLAN.md) | Brigade realism and military fronts implementation plan. | Post-MVP. |
-| [MILITIA_BRIGADE_SYSTEM_RESEARCH_AND_REWORK_PLAN.md](backlog/MILITIA_BRIGADE_SYSTEM_RESEARCH_AND_REWORK_PLAN.md) | Research and rework plan for militia/brigade system. | Research / design. |
-| [FORMATION_BRIGADE_VS_HISTORICAL_OOB_COMPARISON.md](backlog/FORMATION_BRIGADE_VS_HISTORICAL_OOB_COMPARISON.md) | Formation vs historical OOB comparison. | Reference. |
-| [RBiH_HRHB_ALLIANCE_REDESIGN_DESIGN.md](backlog/RBiH_HRHB_ALLIANCE_REDESIGN_DESIGN.md) | RBiH–HRHB alliance redesign design. Core alliance lifecycle implemented; redesign may contain future options. | Design; partial implementation done. |
-| [RBIH_HRHB_ALLIANCE_BREAKDOWN_AND_WAR_PLAN.md](../30_planning/RBIH_HRHB_ALLIANCE_BREAKDOWN_AND_WAR_PLAN.md) | RBiH–HRHB war-within-a-war: alliance-aware targeting, endogenous degradation (refugee pressure, bilateral flips), bilateral combat, Phase 0 handoff. Phase A complete; Phases B/C not started. | Planning; Gameplay Programmer / Game Designer. |
-| **Paramilitary / rear-cleanup units** | Role for cleaning undefended rear settlements; BB-grounded (cleanup, rear areas). Convene: [PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18.md](convenes/PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18.md). | Design: Game Designer (role, canon); Formation-expert (OOB, assignment). No implementation until design agreed. |
-| **Per-army flavor** | Distinct unit roles and capabilities by faction (RS JNA heavy done; RBiH light/embargo/elite; HRHB structure). Paramilitary and rear-cleanup can be faction-specific. Same convene as above. | Design: Game Designer; Formation-expert for OOB/stats. |
+| [BACKLOG_BRIGADE_MILITIA_MILITARY.md](backlog/BACKLOG_BRIGADE_MILITIA_MILITARY.md) | Brigade realism/military fronts, militia/brigade rework plan, formation vs OOB comparison, RBiH–HRHB alliance redesign (core implemented). Originals (4) → _old/40_reports/backlog/. | Post-MVP / research / design. |
+| [RBIH_HRHB_ALLIANCE_BREAKDOWN_AND_WAR_PLAN.md](../30_planning/RBIH_HRHB_ALLIANCE_BREAKDOWN_AND_WAR_PLAN.md) | RBiH–HRHB war-within-a-war: alliance-aware targeting, endogenous degradation, Phase 0 handoff. Phase A complete; Phases B/C not started. | Planning; Gameplay Programmer / Game Designer. |
+| **Paramilitary / rear-cleanup units** | Convene: [PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18.md](convenes/PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18.md). | Design: Game Designer; Formation-expert. |
+| **Per-army flavor** | Same convene as above. | Design: Game Designer; Formation-expert for OOB/stats. |
 
 ---
 
@@ -47,18 +40,14 @@
 
 | Report | Summary | Priority / owner |
 |--------|---------|-------------------|
-| [IMPLEMENTATION_PLAN_GUI_MVP.md](backlog/IMPLEMENTATION_PLAN_GUI_MVP.md) | GUI MVP implementation plan. War Planning Map clarified as separate system. | PM / UI. |
-| [WAR_PLANNING_MAP_EXPERT_PROPOSAL.md](backlog/WAR_PLANNING_MAP_EXPERT_PROPOSAL.md), [WAR_PLANNING_MAP_EXPERT_PROPOSAL_TEAM_DISCUSSION.md](backlog/WAR_PLANNING_MAP_EXPERT_PROPOSAL_TEAM_DISCUSSION.md) | Expert proposal and team discussion for War Planning Map. | Design. |
-| [WAR_PLANNING_MAP_CLARIFICATION_REQUEST.md](handovers/WAR_PLANNING_MAP_CLARIFICATION_REQUEST.md) | Clarification request (PM + Game Designer); status Filled. | Handoff artifact. |
-| [GUI_AND_WAR_SYSTEM_STRATEGIC_DIRECTION.md](backlog/GUI_AND_WAR_SYSTEM_STRATEGIC_DIRECTION.md) | Strategic direction (three pillars). | Reference. |
+| [BACKLOG_GUI_WARROOM_WAR_PLANNING_MAP.md](backlog/BACKLOG_GUI_WARROOM_WAR_PLANNING_MAP.md) | GUI MVP, War Planning Map (proposal, discussion, duty delegation), Warroom setup/Phase 0, start-of-game info, click alignment, asset brief, strategic direction, phased plan. Originals (10) → _old/40_reports/backlog/. | PM / UI / design. |
+| [BACKLOG_UI_AND_ASSET_SPECS.md](backlog/BACKLOG_UI_AND_ASSET_SPECS.md) | UI design/NATO/clickable regions specs; UI designer/systems/temporal; Photoshop/SORA asset specs. Originals (9) → _old/40_reports/backlog/. | Design. |
+| [WAR_PLANNING_MAP_CLARIFICATION_REQUEST.md](handovers/WAR_PLANNING_MAP_CLARIFICATION_REQUEST.md) | Clarification request; status Filled. | Handoff. |
 | [WARROOM_OPTION_B_IMPLEMENTATION_HANDOVER.md](handovers/WARROOM_OPTION_B_IMPLEMENTATION_HANDOVER.md), [GUI_WAR_PLANNING_MAP_EXPERT_HANDOVER.md](handovers/GUI_WAR_PLANNING_MAP_EXPERT_HANDOVER.md), [GUI_MAP_ONLY_EXTERNAL_EXPERT_HANDOVER.md](handovers/GUI_MAP_ONLY_EXTERNAL_EXPERT_HANDOVER.md) | Handovers for Warroom / War Planning Map / map-only. | Handoff. |
-| [WAR_PLANNING_MAP_VIEWER_DUTY_DELEGATION.md](backlog/WAR_PLANNING_MAP_VIEWER_DUTY_DELEGATION.md), [PARADOX_WAR_PLANNING_MAP_FULL_SCENE_TEAM_CONVENE.md](convenes/PARADOX_WAR_PLANNING_MAP_FULL_SCENE_TEAM_CONVENE.md) | Duty delegation and full-scene team convene. | Process. |
-| [WARROOM_START_OF_GAME_INFORMATION_REPORT.md](backlog/WARROOM_START_OF_GAME_INFORMATION_REPORT.md) | Start-of-game information recommendations. | Design input. |
-| [PHASED_PLAN_MAP_AND_WAR_SYSTEM.md](backlog/PHASED_PLAN_MAP_AND_WAR_SYSTEM.md) | Track A (A1–A4) and Track B war system. A1 complete; later tracks backlog. | Planning. |
-| [PHASE_E_DIRECTIVE_SPATIAL_v1.md](backlog/PHASE_E_DIRECTIVE_SPATIAL_v1.md), [PHASE_G_UI_NOTES.md](backlog/PHASE_G_UI_NOTES.md) | Phase E spatial directive v1; Phase G UI notes. | Reference. |
-| [UI_DESIGN_SPECIFICATION.md](backlog/UI_DESIGN_SPECIFICATION.md), [NATO_AESTHETIC_SPEC.md](backlog/NATO_AESTHETIC_SPEC.md) | UI design spec; NATO aesthetic spec. | Design. |
-| [BATCH_ADVANCE_TWO_WEEKS_UI_PLAN.md](../30_planning/BATCH_ADVANCE_TWO_WEEKS_UI_PLAN.md) | Batch-advance N turns (default 2 weeks) in warroom UI; loop-in-UI with existing advanceTurn(); Phase transitions and critical events halt batch. | Planning; PM / UI. |
-| **Phase 0 referendum/deadline fix (priority C)** | When scenario schedules referendum later than default 12-turn eligibility deadline, align deadlineTurns with schedule so Phase 0 does not hit non_war_terminal before referendum can fire. **Implemented 2026-02-18:** buildPhase0TurnOptions sets referendum from meta; callers use built options. Convene: [PRIORITY_C_PHASE0_REFERENDUM_DEADLINE_HANDOFF_2026_02_18.md](convenes/PRIORITY_C_PHASE0_REFERENDUM_DEADLINE_HANDOFF_2026_02_18.md). | Done 2026-02-18. |
+| [PARADOX_WAR_PLANNING_MAP_FULL_SCENE_TEAM_CONVENE.md](convenes/PARADOX_WAR_PLANNING_MAP_FULL_SCENE_TEAM_CONVENE.md) | Full-scene team convene. | Process. |
+| [BATCH_ADVANCE_TWO_WEEKS_UI_PLAN.md](../30_planning/BATCH_ADVANCE_TWO_WEEKS_UI_PLAN.md) | Batch-advance N turns in warroom UI. | Planning; PM / UI. |
+| [BACKLOG_PHASE_D_E_G_DIRECTIVES.md](backlog/BACKLOG_PHASE_D_E_G_DIRECTIVES.md) | Phase D completion report, Phase E spatial directive, Phase G UI notes. Originals (3) → _old/40_reports/backlog/. | Reference. |
+| **Phase 0 referendum/deadline fix (priority C)** | **Implemented 2026-02-18.** Convene: [PRIORITY_C_PHASE0_REFERENDUM_DEADLINE_HANDOFF_2026_02_18.md](convenes/PRIORITY_C_PHASE0_REFERENDUM_DEADLINE_HANDOFF_2026_02_18.md). | Done. |
 
 ---
 
@@ -66,9 +55,11 @@
 
 | Report | Summary | Priority / owner |
 |--------|---------|-------------------|
-| [MAP_RIVER_CLIP_ALIGNMENT_EXPERT_HANDOVER.md](handovers/MAP_RIVER_CLIP_ALIGNMENT_EXPERT_HANDOVER.md), [MAP_HANDOVER_BRIEF_EXTERNAL_CONSULTANCY.md](handovers/MAP_HANDOVER_BRIEF_EXTERNAL_CONSULTANCY.md) | Map handovers (river clip, external consultancy). | Handoff. |
-| [FEASIBILITY_1991_CENSUS_MASTER.md](backlog/FEASIBILITY_1991_CENSUS_MASTER.md), [PARADOX_CENSUS_1991_MASTER_TEAM_CONVENE.md](convenes/PARADOX_CENSUS_1991_MASTER_TEAM_CONVENE.md) | 1991 census feasibility and convene. | Research / design. |
+| [BACKLOG_TERRAIN_MAP_AND_CENSUS.md](backlog/BACKLOG_TERRAIN_MAP_AND_CENSUS.md) | Terrain derivation/scalars/pipeline audit; 1991 census feasibility. Originals (4) → _old/40_reports/backlog/. | Research / design. |
+| [MAP_RIVER_CLIP_ALIGNMENT_EXPERT_HANDOVER.md](handovers/MAP_RIVER_CLIP_ALIGNMENT_EXPERT_HANDOVER.md), [MAP_HANDOVER_BRIEF_EXTERNAL_CONSULTANCY.md](handovers/MAP_HANDOVER_BRIEF_EXTERNAL_CONSULTANCY.md) | Map handovers. | Handoff. |
+| [PARADOX_CENSUS_1991_MASTER_TEAM_CONVENE.md](convenes/PARADOX_CENSUS_1991_MASTER_TEAM_CONVENE.md) | 1991 census convene. | Research / design. |
 | [EXTERNAL_EXPERT_HANDOVER.md](handovers/EXTERNAL_EXPERT_HANDOVER.md) | Generic external expert handover. | Handoff. |
+| **OSID-first build pipeline (Phase 2 B(a))** | **Implemented 2026-02-24.** See [20260224_OSID_AS_BASE_LAYER_PHASE2_IMPLEMENTATION.md](implemented/20260224_OSID_AS_BASE_LAYER_PHASE2_IMPLEMENTATION.md). | Done. |
 
 ---
 
@@ -76,24 +67,22 @@
 
 | Report | Summary | Priority / owner |
 |--------|---------|-------------------|
-| [PARADOX_STATE_OF_GAME_MEETING.md](convenes/PARADOX_STATE_OF_GAME_MEETING.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md), [PRIORITY_C_PHASE0_REFERENDUM_DEADLINE_HANDOFF_2026_02_18.md](convenes/PRIORITY_C_PHASE0_REFERENDUM_DEADLINE_HANDOFF_2026_02_18.md) | State-of-game meetings; priority (C) Phase 0 referendum/deadline handoff. | Process / reference. |
+| [PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md), [PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md](convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md), [PRIORITY_C_PHASE0_REFERENDUM_DEADLINE_HANDOFF_2026_02_18.md](convenes/PRIORITY_C_PHASE0_REFERENDUM_DEADLINE_HANDOFF_2026_02_18.md) | State-of-game meetings; Phase 0 referendum handoff. | Process / reference. |
 | [PARADOX_PHASE0_ORCHESTRATOR_REPORT.md](convenes/PARADOX_PHASE0_ORCHESTRATOR_REPORT.md) | Phase 0 orchestrator report. | Reference. |
 | [PARADOX_TACTICAL_MAP_CANONICAL_DEPRECATION_CONVENE.md](convenes/PARADOX_TACTICAL_MAP_CANONICAL_DEPRECATION_CONVENE.md) | Tactical map canonical deprecation convene. | Process. |
 | [PARADOX_RBIH_WIPEOUT_FIX_MEETING.md](convenes/PARADOX_RBIH_WIPEOUT_FIX_MEETING.md) | RBiH wipeout fix meeting. | Design input. |
 | [PARADOX_ORCHESTRATOR_50W_APR1992_BOTS_RUN_REPORT.md](convenes/PARADOX_ORCHESTRATOR_50W_APR1992_BOTS_RUN_REPORT.md) | 50-week Apr 1992 bots run report. | Reference. |
-| [WARROOM_CLICK_ALIGNMENT_TEAM_DISCUSSION.md](backlog/WARROOM_CLICK_ALIGNMENT_TEAM_DISCUSSION.md), [WARROOM_ASSET_GENERATION_BRIEF.md](backlog/WARROOM_ASSET_GENERATION_BRIEF.md) | Warroom click alignment; asset generation brief. | Design. |
+| [BACKLOG_GUI_WARROOM_WAR_PLANNING_MAP.md](backlog/BACKLOG_GUI_WARROOM_WAR_PLANNING_MAP.md), [BACKLOG_UI_AND_ASSET_SPECS.md](backlog/BACKLOG_UI_AND_ASSET_SPECS.md) | Warroom click alignment, asset brief, clickable regions → themed docs above. | Design. |
 | [HANDOVER_WARROOM_GUI.md](handovers/HANDOVER_WARROOM_GUI.md) | Warroom GUI handover. | Handoff. |
-| [REPO_CLEANUP_2026_PHASE0_DISCOVER.md](backlog/REPO_CLEANUP_2026_PHASE0_DISCOVER.md) | Repo cleanup discovery (Phase 0). | Process. |
-| `DEAD_CODE_AND_FILES_UTF8.md` (root directory) | Pending deletion of 451 dead files identified via `knip` audit. | Tech Debt. |
-| `TACTICAL_SANDBOX_3D_POST_INTEGRATION_ROADMAP.md` (docs/30_planning/) | 3D Map polishing, visual overhaul (Tracestrack Topo), combat width limits, etc. | Design / Tech Debt. |
-| [SCENARIO_RUN_WHAT_ACTUALLY_HAPPENS.md](backlog/SCENARIO_RUN_WHAT_ACTUALLY_HAPPENS.md) | What actually happens in scenario run. | Reference. |
-| [CLICKABLE_REGIONS_SPECIFICATION.md](backlog/CLICKABLE_REGIONS_SPECIFICATION.md) | Clickable regions spec. | Design. |
+| [BACKLOG_PROCESS_AND_REFERENCE.md](backlog/BACKLOG_PROCESS_AND_REFERENCE.md) | Repo cleanup discovery; scenario run reference. Originals (2) → _old/40_reports/backlog/. | Process. |
+| `DEAD_CODE_AND_FILES_UTF8.md` (root directory) | Pending deletion of 451 dead files (knip audit). | Tech Debt. |
+| `TACTICAL_SANDBOX_3D_POST_INTEGRATION_ROADMAP.md` (docs/30_planning/) | 3D Map polishing, visual overhaul, combat width limits. | Design / Tech Debt. |
 
 ---
 
 ## 7. Bot AI remaining work (from BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13)
 
-The report [BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md](implemented/BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md) lists **Remaining Issues (Future Work)**:
+The report [BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md](../_old/40_reports/implemented_2026_02_15/BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md) (archived) lists **Remaining Issues (Future Work)**:
 
 - AoR extreme imbalance (HIGH) — contiguity and surrounded-brigade reform done 2026-02-17; remaining imbalance may be addressed later.
 - **RS early-war underperformance (MEDIUM)** — **Implemented 2026-02-18 (priority B):** RS early-war window extended 0–12 → 0–26 (doctrine, standing orders, attack share, corps E1). [PRIORITY_B_RS_EARLY_WAR_BOT_HANDOFF_2026_02_18.md](convenes/PRIORITY_B_RS_EARLY_WAR_BOT_HANDOFF_2026_02_18.md) (scope, acceptance criteria, implementation complete; 16w comparison vs baseline optional).
@@ -103,17 +92,52 @@ The report [BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md](implemented/BOT_AI_
 - Corps command not integrated with brigade AI (LOW)
 - Operational groups not used by bot AI (LOW)
 
-Treat these as backlog items for bot/brigade AI when prioritizing. **Next single bot priority (choose one):** [NEXT_BOT_PRIORITY_AOR_OR_HRHB_HANDOFF_2026_02_18.md](convenes/NEXT_BOT_PRIORITY_AOR_OR_HRHB_HANDOFF_2026_02_18.md) — Candidate A (AoR behavioral balance, HIGH) remains open; Candidate B (HRHB activity) implemented 2026-02-18.
+Treat these as backlog items for bot/brigade AI when prioritizing. **Next single bot priority (choose one):** [NEXT_BOT_PRIORITY_AOR_OR_HRHB_HANDOFF_2026_02_18.md](convenes/NEXT_BOT_PRIORITY_AOR_OR_HRHB_HANDOFF_2026_02_18.md) — Candidate A (AoR behavioral balance, HIGH) remains open; Candidate B (HRHB activity) implemented 2026-02-18. **Bot rewrite (OSID/ZoC):** External expert implementing per [BOT_AI_DESIGN_SPEC.md](../30_planning/design/BOT_AI_DESIGN_SPEC.md); in parallel, see §9 below.
 
 ---
 
-## 8. Documented-but-unimplemented systems (canon/planning audit)
+## 9. Pipeline next (while bot rewrite)
+
+**Single list of work that can proceed in parallel with the external expert’s bot AI rewrite** (no dependency on new bot):
+
+| Report | Summary | Priority / owner |
+|--------|---------|-------------------|
+| [20260223_PIPELINE_NEXT_WHILE_BOT_REWRITE.md](backlog/20260223_PIPELINE_NEXT_WHILE_BOT_REWRITE.md) | **Critical:** War termination minimal spec, Player’s Turn Guide, supply spec. **Important:** Phase 0 JNA_status hand-off, Phase II ceasefire/Washington in pipeline, Phase I→II edge cases, Operation Storm spec, scoring. **AoR follow-ups:** phase-ii-recon-intelligence OSID, aor_init cleanup, test/baseline strategy. **Other:** Phase 0 output contract, GUI/Warroom items, headless vs desktop Phase II. Ordered suggestions in doc. | PM to sequence; Game Designer / Gameplay / Architect / QA per item. |
+
+---
+
+## 10. Documented-but-unimplemented systems (canon/planning audit)
 
 | Report | Summary | Priority / owner |
 |--------|---------|-------------------|
 | [DOCUMENTED_UNIMPLEMENTED_SYSTEMS_AUDIT_2026_02_15.md](audit/DOCUMENTED_UNIMPLEMENTED_SYSTEMS_AUDIT_2026_02_15.md) | Audit of systems/mechanics described in canon (Engine Invariants, Systems Manual, Phase specs), 30_planning (missing_systems_roadmap, gap_analysis), and docs that are not yet implemented or not in an implementation plan. Includes Phase 3B/3C, phase_ii_exhaustion_local, JNA equipment transfer, OG donor return, doctrines, MCZs, command degradation, player action constraints, milestone events. | Reference; PM/Orchestrator to decide plan inclusion. |
 | [STRATEGIC_DESIGN_COUNCIL_AUDIT_2026_02_15.md](audit/STRATEGIC_DESIGN_COUNCIL_AUDIT_2026_02_15.md) | Paradox-style structural critique: genre mirror (vs EU/HoI/AGEOD), strategic honesty (illusion of control, friction, negative-sum, fragmentation, over-abstraction), UI misrepresentation (control/supply/cohesion), determinism risks, canon stress, FORAWWV addendum candidates. Diagnosis only; no new mechanics or canon edits. | Reference; design/UI when revisiting representation. |
 | [INTEGRATION_AND_SYSTEMS_HANDOVER_EXTERNAL_EXPERT_2026_02_15.md](handovers/INTEGRATION_AND_SYSTEMS_HANDOVER_EXTERNAL_EXPERT_2026_02_15.md) | **External expert handover:** Integration of Warroom/Phase 0 (WARROOM_SETUP_AND_PHASE0_EXECUTION_PROPOSAL) with documented unimplemented systems (audit). Detailed integration description, interaction matrix, instructions/examples, risk flags and pushback, implementation order. Goal: fully fleshed-out game with systems talking to each other. | Handover to implementer. |
+
+---
+
+## 11. Comprehensive design review convene (2026-02-23)
+
+Orchestrator convened Technical Architect and Product Manager to synthesize findings from the comprehensive design review ([20260222_awwv_comprehensive_review.md](../50_research/20260222_awwv_comprehensive_review.md)). Convene report: [ORCHESTRATOR_COMPREHENSIVE_REVIEW_CONVENE_2026_02_23.md](convenes/ORCHESTRATOR_COMPREHENSIVE_REVIEW_CONVENE_2026_02_23.md).
+
+**Action items (PM to sequence):**
+
+| Action | Priority | Owner |
+|--------|----------|-------|
+| Phase 0: Add JNA_status to §7 Hand-Off Data / §8 Output Contract | Important | Gameplay Programmer / Game Designer |
+| Phase I/II: ceasefire/Washington pipeline steps for Phase II | Important | Gameplay Programmer |
+| Rulebook: Player's Turn Guide (per-phase player actions) | Critical path | Game Designer |
+| War termination minimal spec (when/how game ends, scoring) | Critical path | Game Designer / Gameplay Programmer |
+| AoR/OSID/front reconciliation plan | Critical path | Technical Architect (plan); PM (sequence) |
+| Supply spec (sources, OSID graph tracing, corridors, enclaves) | Critical path (after above) | Game Designer / Gameplay Programmer |
+
+**Also in roadmap:** Phase I→II edge cases, Operation Storm spec, scoring/evaluation (important). Consequence Ledger, enclave events, JNA negotiation, Federation stress (nice-to-have / explore; no commitment).
+
+---
+
+## 12. Backlog archive index (2026-02-24 themed merge)
+
+All former single-topic backlog docs are archived to **docs/_old/40_reports/backlog/**; full content preserved. Each themed doc in backlog/ (§1–§6) lists its archived source filenames and a short summary. **Standalone (not merged):** [20260223_PIPELINE_NEXT_WHILE_BOT_REWRITE.md](backlog/20260223_PIPELINE_NEXT_WHILE_BOT_REWRITE.md). Master archive index: [docs/_old/README.md](../_old/README.md) §40_reports/backlog. No planned work dropped.
 
 ---
 

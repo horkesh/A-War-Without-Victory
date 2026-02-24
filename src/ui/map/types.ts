@@ -144,6 +144,8 @@ export interface FormationRecord {
     personnel: number; cohesion: number; fatigue: number;
     posture: string; hq_sid: string; status: string;
     corps_id?: string;
+    /** HoI ZoC: brigade position in OSID space; when set, map uses OSID centroid for icon. */
+    location_osid?: string;
     movement_status?: 'deployed' | 'packing' | 'in_transit' | 'unpacking';
     movement_stance?: 'combat' | 'column';
     composition?: {
@@ -159,6 +161,20 @@ export interface GameSave {
     control_status_by_settlement_id?: Record<string, string>;
     formations: Record<string, FormationRecord>;
     brigade_aor: Record<string, string | null>;
+    /** Brigade assignment to front segment (null = reserve). */
+    brigade_front_assignment?: Record<string, string | null>;
+    /** HoI-style theatres keyed by theatre id. */
+    theatres?: Record<string, TheatreView>;
+    /** Army (army_hq) to theatre assignment map. */
+    army_theatre_assignment?: Record<string, string>;
+    /** Canonical front edges snapshot (when provided by state serialization). */
+    front_edges?: FrontEdgeView[];
+    /** Phase II OSID front-edge snapshot for operational/HoI rendering. */
+    phase_ii_front_edges_osid?: FrontEdgeView[];
+    /** Contiguous assignable front segments derived from canonical front edges. */
+    assignable_front_segments?: AssignableFrontSegmentView[];
+    /** Edge-keyed front pressure values (state.front_pressure). */
+    front_pressure?: Record<string, FrontPressureView>;
     player_faction?: string | null;
     recon_intelligence?: Record<string, {
         detected_brigades?: Record<string, { strength_category?: string; detected_via?: string }>;
@@ -174,6 +190,43 @@ export interface GameSave {
         mun_id: string | null;
     }>;
     turn?: number; week?: number; date?: string;
+    /** phase_i | phase_ii; used to hide AoR UI in Phase II. */
+    phase?: string;
+    rbih_hrhb_war_earliest_turn?: number | null;
+    phase_i_alliance_rbih_hrhb?: number | null;
+}
+
+export interface FrontEdgeView {
+    edge_id: string;
+    a: string;
+    b: string;
+    side_a: string | null;
+    side_b: string | null;
+}
+
+export interface FrontPressureView {
+    edge_id: string;
+    value: number;
+    max_abs: number;
+    last_updated_turn: number;
+}
+
+export interface AssignableFrontSegmentView {
+    front_id: string;
+    edge_ids: string[];
+    side_a: string | null;
+    side_b: string | null;
+    length_edges: number;
+    name?: string;
+    theatre_id?: string;
+}
+
+export interface TheatreView {
+    id: string;
+    name: string;
+    faction: string;
+    army_ids?: string[];
+    region_scope?: string[];
 }
 
 export interface CorpsAggregate {
@@ -224,8 +277,22 @@ export interface LoadedGameState {
     statusBySettlement: Record<string, string>;
     /** Per formation id: sorted list of settlement IDs in that formation's AoR (from state.brigade_aor). */
     brigadeAorByFormationId: Record<string, string[]>;
+    /** Per brigade id: assigned front_id, or null when in reserve. */
+    brigadeFrontAssignment?: Record<string, string | null>;
+    /** HoI-style theatres keyed by theatre id. */
+    theatres?: Record<string, TheatreView>;
+    /** Army (army_hq) to theatre assignment map. */
+    armyTheatreAssignment?: Record<string, string>;
     /** Per brigade formation id: player/bot desired AoR cap (1–4). When set, overrides personnel-based cap. */
     brigadeDesiredAoRCap?: Record<string, number>;
+    /** Canonical front edge snapshot sorted by edge_id when available. */
+    frontEdges?: FrontEdgeView[];
+    /** OSID front edge snapshot sorted by edge_id when available. */
+    frontEdgesOsid?: FrontEdgeView[];
+    /** Contiguous assignable front segments sorted by front_id when available. */
+    assignableFrontSegments?: AssignableFrontSegmentView[];
+    /** Edge-keyed front pressure map from state.front_pressure. */
+    frontPressureByEdge?: Record<string, FrontPressureView>;
     /** Sorted pending attack orders for map overlays and ORDERS tab. */
     attackOrders: AttackOrderView[];
     /** Sorted pending municipality movement orders for map overlays and ORDERS tab. */
@@ -254,6 +321,8 @@ export interface LoadedGameState {
     reconIntelligence?: ReconIntelligenceView;
     /** Phase K: Settlement-level movement orders (destination_sids) for map and ORDERS tab. */
     movementOrdersSettlement?: MovementOrderSettlementView[];
+    /** Phase II OSID: per-faction list of OSIDs in enemy ZoC (for ZoC overlay). When set, map may tint these OSIDs. */
+    enemyZocByFaction?: Record<string, string[]>;
     /** Reposition orders (set AoR to 1–4 settlements; no move). */
     repositionOrders?: RepositionOrderView[];
 }
@@ -361,7 +430,9 @@ export interface FormationView {
     municipalityId?: string;
     /** When set, map draws formation icon at this settlement; else uses municipality centroid. */
     hq_sid?: string;
-    /** Settlement IDs in this formation's AoR (front-active assignments). Sorted for determinism. */
+    /** HoI ZoC: when set, map uses OSID centroid for position (requires osidCentroids or settlementCentroids to include OSID keys). */
+    location_osid?: string;
+    /** Settlement IDs in this formation's AoR (front-active assignments). Sorted for determinism. Legacy when location_osid present. */
     aorSettlementIds?: string[];
     personnel?: number;
     /** Brigade posture: defend | probe | attack | elastic_defense. */

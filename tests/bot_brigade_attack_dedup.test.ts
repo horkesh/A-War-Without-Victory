@@ -71,7 +71,7 @@ function buildStateWithOverlappingTargets(): { state: GameState; edges: EdgeReco
         militia_pools: {},
         political_controllers: { S1: 'RBiH', S2: 'RBiH', S3: 'RBiH', S4: 'RS' },
         brigade_aor: { S1: 'B1', S2: 'B2', S3: 'B3' }
-    };
+    } as import('../src/state/game_state.js').GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState;
     return { state, edges };
 }
 

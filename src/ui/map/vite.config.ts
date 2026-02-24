@@ -9,8 +9,8 @@ const __dirname = dirname(__filename);
 const projectRootFromConfig = resolve(__dirname, '../../..');
 const projectRootFromCwd = typeof process !== 'undefined' && process.cwd ? process.cwd() : projectRootFromConfig;
 
-/** Asset source directories to copy into build (used by tactical map and Electron). */
-const ASSET_SOURCES = ['assets/sources/crests', 'assets/sources/scenarios'];
+/** Asset source directories to copy into build (used by tactical map, map_hoi, and Electron). */
+const ASSET_SOURCES = ['assets/sources/crests', 'assets/sources/scenarios', 'assets/ui'];
 
 /**
  * Copy asset images into the build output so the app works when served from
@@ -140,6 +140,8 @@ export default defineConfig({
                 'map_operational_3d': resolve(__dirname, './map_operational_3d.html'),
                 'map_staff_3d': resolve(__dirname, './map_staff_3d.html'),
                 'tactical_sandbox': resolve(__dirname, './tactical_sandbox.html'),
+                'map_hoi': resolve(__dirname, './map_hoi.html'),
+                'settlement_merger': resolve(__dirname, './settlement_merger.html'),
             },
         },
         copyPublicDir: false,

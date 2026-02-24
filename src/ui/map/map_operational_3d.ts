@@ -25,8 +25,16 @@ import { FORMATION_COUNTER_DATA_MODES, type FormationCounterDataMode } from './c
 import { MapModeController, modeFromFunctionKey, type MapModeId } from './MapModeController';
 import { applyFogOfWarToEntries, rebuildGhostCounterLayer } from './FogOfWarLayer';
 import { resolveRightClickIntent } from './interaction/RightClickHandler';
-import { clearMovementRangePreview, rebuildMovementRangePreview } from './interaction/MovementRangePreview';
+import { clearMovementRangePreview, rebuildMovementRangePreview, rebuildMovementRangePolygon } from './interaction/MovementRangePreview';
 import { AttackOddsPreview } from './interaction/AttackOddsPreview';
+import { buildStemLines, updateStemVisibility, disposeStemLines, type StemEntry } from './StemLineLayer';
+import { SettlementHighlightRings, RING_COLOR_SELECTION, RING_COLOR_MOVE, RING_COLOR_ATTACK } from './interaction/SettlementHighlightRing';
+import { buildPanelStack } from './panels/WarMapPanelStack';
+import { buildSelectionPanel, updateSelectionPanel, type WarMapFormationInfo, type SelectionPanelCallbacks } from './panels/SelectionPanel';
+import { buildBattleLogPanel, appendBattleLogEntry, type BattleEvent as PanelBattleEvent } from './panels/BattleLogPanel';
+import { buildOrdersPanel as buildWarMapOrdersPanel, updateOrdersPanel, type WarMapOrderEntry } from './panels/OrdersQueuePanel';
+import { buildForcesPanel, updateForcesPanel, type FactionForceSummary } from './panels/ForcesSummaryPanel';
+import { buildModeToolbar, installModeKeyboard, updateActiveButton, type InteractionMode } from './panels/ModeToolbar';
 import { clearOrderArrows, drawMovementOrderArrow } from './OrderArrowLayer';
 import { clearSupplyOverlay, rebuildSupplyOverlay } from './SupplyOverlay';
 import { clearDisplacementOverlay, rebuildDisplacementOverlay } from './DisplacementOverlay';
@@ -115,6 +123,14 @@ interface DesktopBridge {
     setGameStateUpdatedCallback?: (cb: (stateJson: string) => void) => void;
     stageDeployOrder?: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     stageUndeployOrder?: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
+    stagePostureOrder?: (brigadeId: string, posture: string) => Promise<{ ok: boolean; error?: string }>;
+    stageAttackOrder?: (brigadeId: string, targetSid: string) => Promise<{ ok: boolean; error?: string }>;
+    assignBrigadeToFront?: (brigadeId: string, frontId: string | null) => Promise<{ ok: boolean; error?: string }>;
+    renameFrontSegment?: (frontId: string, name: string | null) => Promise<{ ok: boolean; error?: string }>;
+    renameTheatre?: (theatreId: string, name: string | null) => Promise<{ ok: boolean; error?: string }>;
+    stageCorpsFrontOrder?: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
+    stageCorpsAttackAxisOrder?: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
+    stageOgSubfrontOrder?: (ogId: string, corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     stageBrigadeMovementOrder?: (brigadeId: string, targetSettlementIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     queryMovementRange?: (brigadeId: string) => Promise<{
         ok: boolean;
@@ -147,7 +163,13 @@ interface DesktopBridge {
     queryCorpsSectors?: () => Promise<{
         ok: boolean;
         error?: string;
-        sectors?: Array<{ corps_id: string; faction: string; settlement_ids: string[] }>;
+        sectors?: Array<{
+            corps_id: string;
+            faction: string;
+            settlement_ids: string[];
+            front_width_score?: number;
+            overextended?: boolean;
+        }>;
     }>;
     queryBattleEvents?: () => Promise<{
         ok: boolean;
@@ -272,9 +294,10 @@ function calculateCentroids(settlements: SettlementsGeoJSON): Map<string, [numbe
 /** Per-faction hatch angle in degrees (plan §2.5: RS 45°, RBiH -45°, HRHB horizontal). */
 const AOR_HATCH_ANGLE: Record<string, number> = { RS: 45, RBiH: -45, HRHB: 0 };
 const AOR_HATCH_SPACING = 8;
-const AOR_HATCH_WIDTH = 2.5;
-const AOR_PULSE_ALPHA = 0.15;  // TACTICAL_MAP_SYSTEM Pass 6: 0.08–0.22
-const AOR_BOUNDARY_GLOW = 4;   // shadowBlur 2–6px
+const AOR_HATCH_WIDTH = 3.0;     // bumped from 2.5 for thicker visual weight
+const AOR_PULSE_ALPHA = 0.20;    // bumped from 0.15 for richer fill saturation
+const AOR_BOUNDARY_GLOW = 6;     // bumped from 4 for stronger boundary glow
+const AOR_BORDER_WIDTH = 4.0;    // bumped from 2.0 for heavier polygon borders
 const CONTACT_EDGE_COLOR = 'rgba(255, 68, 68, 0.9)';  // plan §4.5: red glowing
 const CONTACT_EDGE_GLOW = 4;
 const CONTACT_EDGE_WIDTH = 3;
@@ -344,50 +367,80 @@ function buildSelectedAoRTexture(
             if (ring.length < 3) continue;
             const cx = ringCentroid(ring);
             sidToPx.set(props.sid, [proj.x(cx[0]), proj.y(cx[1])]);
+
+            // Compute per-polygon projected points for bbox hatch optimization
+            const projPts: [number, number][] = [];
+            for (const pt of ring) {
+                if (pt[0] !== undefined && pt[1] !== undefined) {
+                    projPts.push([proj.x(pt[0]), proj.y(pt[1])]);
+                }
+            }
+
+            // Pass 1: Clipped fill + per-polygon bbox hatch
             ctx.save();
             ctx.beginPath();
-            ctx.moveTo(proj.x(ring[0]![0]!), proj.y(ring[0]![1]!));
-            for (let i = 1; i < ring.length; i++) {
-                ctx.lineTo(proj.x(ring[i]![0]!), proj.y(ring[i]![1]!));
+            ctx.moveTo(projPts[0]![0], projPts[0]![1]);
+            for (let i = 1; i < projPts.length; i++) {
+                ctx.lineTo(projPts[i]![0], projPts[i]![1]);
             }
             ctx.closePath();
             ctx.clip();
             ctx.fillStyle = AOR_FILL[faction] ?? `rgba(120,120,120,${AOR_PULSE_ALPHA})`;
             ctx.fill();
+
+            // Per-polygon bounding box hatch (tight bbox instead of full texture extent)
             const angle = (AOR_HATCH_ANGLE[faction] ?? 0) * (Math.PI / 180);
             const cos = Math.cos(angle), sin = Math.sin(angle);
             ctx.strokeStyle = AOR_STROKE[faction] ?? 'rgba(140,140,140,0.6)';
             ctx.lineWidth = AOR_HATCH_WIDTH;
-            const extent = Math.max(TEX_W, TEX_H) * 1.5;
-            for (let d = -extent; d <= extent; d += AOR_HATCH_SPACING) {
+
+            let minPx = Infinity, maxPx = -Infinity, minPy = Infinity, maxPy = -Infinity;
+            for (const [px, py] of projPts) {
+                if (px < minPx) minPx = px;
+                if (px > maxPx) maxPx = px;
+                if (py < minPy) minPy = py;
+                if (py > maxPy) maxPy = py;
+            }
+            // Expand bbox slightly to ensure full coverage
+            const margin = AOR_HATCH_SPACING * 2;
+            minPx -= margin; maxPx += margin; minPy -= margin; maxPy += margin;
+            const bboxExtent = Math.max(maxPx - minPx, maxPy - minPy) * 1.5;
+            const bboxCx = (minPx + maxPx) / 2, bboxCy = (minPy + maxPy) / 2;
+
+            for (let d = -bboxExtent; d <= bboxExtent; d += AOR_HATCH_SPACING) {
                 ctx.beginPath();
                 if (Math.abs(sin) < 0.01) {
-                    ctx.moveTo(0, d);
-                    ctx.lineTo(TEX_W, d);
+                    ctx.moveTo(minPx, bboxCy + d);
+                    ctx.lineTo(maxPx, bboxCy + d);
                 } else {
-                    const y0 = d / sin;
-                    const y1 = (d - TEX_W * cos) / sin;
-                    ctx.moveTo(0, y0);
-                    ctx.lineTo(TEX_W, y1);
+                    const x0 = bboxCx - bboxExtent / 2;
+                    const x1 = bboxCx + bboxExtent / 2;
+                    const y0 = (d - (x0 - bboxCx) * cos) / sin + bboxCy;
+                    const y1 = (d - (x1 - bboxCx) * cos) / sin + bboxCy;
+                    ctx.moveTo(x0, y0);
+                    ctx.lineTo(x1, y1);
                 }
                 ctx.stroke();
             }
             ctx.restore();
+
+            // Pass 2: Glowing polygon border
             ctx.beginPath();
-            ctx.moveTo(proj.x(ring[0]![0]!), proj.y(ring[0]![1]!));
-            for (let i = 1; i < ring.length; i++) {
-                ctx.lineTo(proj.x(ring[i]![0]!), proj.y(ring[i]![1]!));
+            ctx.moveTo(projPts[0]![0], projPts[0]![1]);
+            for (let i = 1; i < projPts.length; i++) {
+                ctx.lineTo(projPts[i]![0], projPts[i]![1]);
             }
             ctx.closePath();
             ctx.shadowColor = AOR_STROKE[faction] ?? 'rgba(140,140,140,0.6)';
             ctx.shadowBlur = AOR_BOUNDARY_GLOW;
             ctx.strokeStyle = AOR_STROKE[faction] ?? 'rgba(140,140,140,0.4)';
-            ctx.lineWidth = 2.0;
+            ctx.lineWidth = AOR_BORDER_WIDTH;
             ctx.stroke();
             ctx.shadowBlur = 0;
         }
     }
 
+    // Contact edges — perpendicular segments at boundary midpoints
     for (const { a, b } of edges) {
         const aOur = sidToFaction.has(a);
         const bOur = sidToFaction.has(b);
@@ -399,9 +452,22 @@ function buildSelectedAoRTexture(
         const pa = sidToPx.get(ourSid);
         const pb = sidToPx.get(otherSid);
         if (!pa || !pb) continue;
+
+        // Draw perpendicular contact segment at midpoint instead of centroid-to-centroid line
+        const mx = (pa[0] + pb[0]) / 2;
+        const my = (pa[1] + pb[1]) / 2;
+        const dx = pb[0] - pa[0];
+        const dy = pb[1] - pa[1];
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len < 1) continue;
+        // Perpendicular direction, half-length proportional to edge distance
+        const segLen = Math.min(len * 0.4, 30);
+        const nx = -dy / len;
+        const ny = dx / len;
+
         ctx.beginPath();
-        ctx.moveTo(pa[0], pa[1]);
-        ctx.lineTo(pb[0], pb[1]);
+        ctx.moveTo(mx - nx * segLen, my - ny * segLen);
+        ctx.lineTo(mx + nx * segLen, my + ny * segLen);
         ctx.strokeStyle = CONTACT_EDGE_COLOR;
         ctx.lineWidth = CONTACT_EDGE_WIDTH;
         ctx.shadowColor = '#ff4444';
@@ -521,29 +587,59 @@ function buildDynamicCityLabels(
     group.name = 'cityLabels';
     const entries: CityEntry[] = [];
 
-    // Deduplicate Sarajevo districts into one label
-    let sarajevoAdded = false;
+    // Single "Sarajevo" label for the whole cluster (all four municipalities)
+    const SARAJEVO_MUN_IDS = new Set([
+        'centar_sarajevo', 'novo_sarajevo', 'novi_grad_sarajevo', 'stari_grad_sarajevo',
+    ]);
+    let sarajevoPop = 0;
+    let ziviniceTownPop = 0;
+    let ziviniceTownLon: number | null = null;
+    let ziviniceTownLat: number | null = null;
     const cities: Array<{ name: string; pop: number; lon: number; lat: number }> = [];
 
     for (const feature of settlements.features) {
         const props = feature.properties;
         if (!props) continue;
-        const centroid = centroids.get(props.sid);
+        const sid = props.sid ?? (props as { osid?: string }).osid ?? '';
+        const centroid = centroids.get(sid);
         if (!centroid) continue;
         const pop = props.population_total ?? 0;
 
+        const munId = (props as { mun1990_id?: string }).mun1990_id ?? '';
         const name = props.settlement_name || props.name || '';
-        // Sarajevo special case: merge districts
-        if (name.startsWith('Sarajevo Dio')) {
-            if (!sarajevoAdded) {
-                sarajevoAdded = true;
-                cities.push({ name: 'SARAJEVO', pop: 500000, lon: 18.41, lat: 43.86 });
+        const osid = (props as { osid?: string }).osid ?? '';
+        const isSarajevo = SARAJEVO_MUN_IDS.has(munId)
+            || name.startsWith('Sarajevo Dio')
+            || osid.includes('sarajevo_dio');
+        if (isSarajevo) {
+            sarajevoPop += pop;
+            continue;
+        }
+
+        // Živinice town: merge Živinice Gornje + Živinice Grad (mun zivinice only; not op:derventa:zivinice)
+        const parts = osid.split(':');
+        const slug = parts[2] ?? '';
+        const isZiviniceTown = munId === 'zivinice'
+            && (slug.startsWith('zivinice_gornje') || slug.startsWith('zivinice_grad'))
+            || /^[ZŽ]ivinice (Gornje|Grad)/i.test(name);
+        if (isZiviniceTown) {
+            ziviniceTownPop += pop;
+            if (ziviniceTownLon === null) {
+                ziviniceTownLon = centroid[0];
+                ziviniceTownLat = centroid[1];
             }
             continue;
         }
 
-        if (pop < 5000) continue;  // only label towns and larger (user can click for smaller)
+        if (pop < 5000) continue;
         cities.push({ name: name.toUpperCase(), pop, lon: centroid[0], lat: centroid[1] });
+    }
+
+    if (sarajevoPop > 0) {
+        cities.push({ name: 'SARAJEVO', pop: Math.max(sarajevoPop, 500000), lon: 18.41, lat: 43.86 });
+    }
+    if (ziviniceTownPop > 0 && ziviniceTownLon !== null && ziviniceTownLat !== null) {
+        cities.push({ name: 'ŽIVINICE', pop: ziviniceTownPop, lon: ziviniceTownLon, lat: ziviniceTownLat });
     }
 
     // Sort by population descending (largest first for consistent z-order)
@@ -750,7 +846,7 @@ function buildLayerToggles(
     onToggleCityLabels: (on: boolean) => void,
 ): HTMLElement {
     const container = document.createElement('div');
-    container.style.cssText = 'position:absolute;top:80px;right:12px;z-index:10;padding:8px 12px;background:rgba(4,4,12,0.88);border:1px solid #1a2a3e;font:11px "IBM Plex Mono",monospace;color:#8090a0;display:flex;flex-direction:column;gap:6px';
+    container.style.cssText = 'position:absolute;top:80px;left:12px;z-index:10;padding:8px 12px;background:rgba(4,4,12,0.88);border:1px solid #1a2a3e;font:11px "IBM Plex Mono",monospace;color:#8090a0;display:flex;flex-direction:column;gap:6px';
 
     function makeToggle(label: string, defaultOn: boolean, cb: (on: boolean) => void): HTMLElement {
         const row = document.createElement('label');
@@ -812,7 +908,7 @@ function buildMapModeBadge(initialMode: MapModeId): HTMLDivElement {
     badge.style.cssText = [
         'position:absolute',
         'top:12px',
-        'right:12px',
+        'left:12px',
         'z-index:12',
         'padding:6px 10px',
         'border:1px solid rgba(94,120,168,0.6)',
@@ -830,7 +926,7 @@ function buildPostFxAudioBadge(): HTMLDivElement {
     badge.style.cssText = [
         'position:absolute',
         'top:44px',
-        'right:12px',
+        'left:12px',
         'z-index:12',
         'padding:6px 10px',
         'border:1px solid rgba(90,112,160,0.45)',
@@ -1428,6 +1524,154 @@ export async function init3DMap(container: HTMLElement): Promise<void> {
     battleMarkerGroup.name = 'battleMarkerOverlay';
     scene.add(battleMarkerGroup);
     const battleMarkerLayer = new BattleMarkerLayer(battleMarkerGroup);
+
+    // ── Stem lines (vertical lines from counters to terrain) ──
+    let stemLineGroup: THREE.Group | null = null;
+    let stemEntries: StemEntry[] = [];
+
+    // ── Settlement highlight rings (animated selection/target markers) ──
+    const highlightRings = new SettlementHighlightRings();
+    scene.add(highlightRings.getGroup());
+
+    // ── Interaction mode system ──
+    let interactionMode: InteractionMode = 'select';
+    const pendingOrders: WarMapOrderEntry[] = [];
+
+    // ── Right-side panel stack ──
+    const panelStack = buildPanelStack();
+    const selectionPanel = buildSelectionPanel();
+    const ordersPanel = buildWarMapOrdersPanel();
+    const battleLogPanel = buildBattleLogPanel();
+    const forcesPanel = buildForcesPanel();
+    panelStack.appendChild(selectionPanel);
+    panelStack.appendChild(ordersPanel);
+    panelStack.appendChild(battleLogPanel);
+    panelStack.appendChild(forcesPanel);
+    container.appendChild(panelStack);
+
+    // ── Mode toolbar ──
+    const modeToolbar = buildModeToolbar(interactionMode, {
+        onModeChange: (mode: InteractionMode) => {
+            interactionMode = mode;
+            // Clear move/attack highlights when returning to select
+            if (mode === 'select') {
+                highlightRings.clearRings('move');
+                highlightRings.clearRings('attack');
+            }
+        },
+    });
+    container.appendChild(modeToolbar);
+
+    const cleanupModeKeyboard = installModeKeyboard(
+        {
+            onModeChange: (mode: InteractionMode) => {
+                interactionMode = mode;
+                if (mode === 'select') {
+                    highlightRings.clearRings('move');
+                    highlightRings.clearRings('attack');
+                }
+            },
+        },
+        modeToolbar,
+        () => interactionMode,
+    );
+
+    // Helper: compute forces summary from save
+    function computeForcesSummary(save: GameSave): FactionForceSummary[] {
+        const factionMap = new Map<string, { brigadeCount: number; totalPersonnel: number }>();
+        const fids = Object.keys(save.formations).sort((a, b) => a.localeCompare(b));
+        for (const fid of fids) {
+            const f = save.formations[fid];
+            if (!f || f.kind !== 'brigade' || f.status !== 'active') continue;
+            const entry = factionMap.get(f.faction) ?? { brigadeCount: 0, totalPersonnel: 0 };
+            entry.brigadeCount++;
+            entry.totalPersonnel += f.personnel ?? 0;
+            factionMap.set(f.faction, entry);
+        }
+        const result: FactionForceSummary[] = [];
+        for (const fid of ['RS', 'RBiH', 'HRHB']) {
+            const e = factionMap.get(fid);
+            if (e) result.push({ id: fid, ...e });
+        }
+        return result;
+    }
+
+    // Helper: build WarMapFormationInfo from a FormationRecord
+    function toWarMapFormationInfo(f: FormationRecord): WarMapFormationInfo {
+        return {
+            id: f.id, name: f.name, faction: f.faction, kind: f.kind,
+            personnel: f.personnel, posture: f.posture,
+            cohesion: f.cohesion, fatigue: f.fatigue,
+            hq_sid: f.hq_sid, status: f.status,
+            movement_stance: f.movement_stance,
+            movement_status: f.movement_status,
+            composition: f.composition as WarMapFormationInfo['composition'],
+        };
+    }
+
+    // Helper: get deployment status for a formation
+    function getDeploymentStatus(save: GameSave, formationId: string): string | null {
+        const formation = save.formations[formationId];
+        if (!formation) return null;
+        if (formation.movement_status === 'packing') return 'deploying';
+        if (formation.movement_status === 'unpacking') return 'undeploying';
+        const stance = formation.movement_stance ?? 'combat';
+        if (stance === 'column') return 'undeployed';
+        if (save.phase === 'phase_ii') {
+            return formation.location_osid ? 'deployed' : 'undeployed';
+        }
+        const aorSids = Object.keys(save.brigade_aor ?? {}).filter(sid => save.brigade_aor[sid] === formationId);
+        return aorSids.length > 0 ? 'deployed' : 'undeployed';
+    }
+
+    // Helper: refresh orders panel display
+    function refreshOrdersPanel(): void {
+        updateOrdersPanel(ordersPanel, pendingOrders, (idx) => {
+            pendingOrders.splice(idx, 1);
+            refreshOrdersPanel();
+        });
+    }
+
+    // Selection panel callbacks
+    const selectionCallbacks: SelectionPanelCallbacks = {
+        onPostureChange: (brigadeId, posture) => {
+            if (bridge?.stagePostureOrder) {
+                void bridge.stagePostureOrder(brigadeId, posture);
+            }
+            const f = currentSave?.formations[brigadeId];
+            if (f) {
+                pendingOrders.push({
+                    type: 'posture', brigadeId, brigadeName: f.name, posture,
+                });
+                refreshOrdersPanel();
+            }
+        },
+        onDeploy: (brigadeId) => {
+            if (bridge?.stageDeployOrder) {
+                void bridge.stageDeployOrder(brigadeId);
+            }
+            const f = currentSave?.formations[brigadeId];
+            if (f) {
+                pendingOrders.push({
+                    type: 'deploy', brigadeId, brigadeName: f.name,
+                });
+                refreshOrdersPanel();
+            }
+        },
+        onUndeploy: (brigadeId) => {
+            if (bridge?.stageUndeployOrder) {
+                void bridge.stageUndeployOrder(brigadeId);
+            }
+            const f = currentSave?.formations[brigadeId];
+            if (f) {
+                pendingOrders.push({
+                    type: 'undeploy', brigadeId, brigadeName: f.name,
+                });
+                refreshOrdersPanel();
+            }
+        },
+    };
+
     const layerFormationsEl = document.getElementById('layer-formations') as HTMLInputElement | null;
     if (layerFormationsEl) {
         layerFormationsEl.addEventListener('change', () => {
@@ -1471,6 +1715,10 @@ export async function init3DMap(container: HTMLElement): Promise<void> {
 
     function updateSelectedAoROverlay(): void {
         if (!currentSave || !selectedFormationId) {
+            if (selectedAoROverlay) selectedAoROverlay.visible = false;
+            return;
+        }
+        if (currentSave.phase === 'phase_ii') {
             if (selectedAoROverlay) selectedAoROverlay.visible = false;
             return;
         }
@@ -1593,6 +1841,28 @@ export async function init3DMap(container: HTMLElement): Promise<void> {
         updateSelectedAoROverlay();
         updateSelectionLinkOverlay();
 
+        // Update highlight rings
+        highlightRings.clearRings('selection');
+        if (currentSave && selectedFormationId) {
+            const selected = currentSave.formations[selectedFormationId];
+            if (selected?.hq_sid) {
+                highlightRings.addRing(selected.hq_sid, centroids, heightmap, RING_COLOR_SELECTION, 'selection');
+            }
+        }
+
+        // Update selection panel
+        if (currentSave && selectedFormationId) {
+            const selected = currentSave.formations[selectedFormationId];
+            if (selected) {
+                const deployStatus = getDeploymentStatus(currentSave, selectedFormationId);
+                updateSelectionPanel(selectionPanel, toWarMapFormationInfo(selected), selectionCallbacks, deployStatus);
+            } else {
+                updateSelectionPanel(selectionPanel, null);
+            }
+        } else {
+            updateSelectionPanel(selectionPanel, null);
+        }
+
         if (announce && currentSave && selectedFormationId) {
             const selected = currentSave.formations[selectedFormationId];
             if (selected?.kind === 'brigade') {
@@ -1647,13 +1917,28 @@ export async function init3DMap(container: HTMLElement): Promise<void> {
             reachable = computeReachableSettlements(currentSave, formation, adjacency, terrainBySid);
         }
         currentReachable = reachable;
-        rebuildMovementRangePreview({
-            group: reachableGroup,
-            reachableSids: [...reachable],
-            startSid,
-            sidToWorld: centroidWorld,
-            color: formation.faction === 'RS' ? 0xff7777 : formation.faction === 'HRHB' ? 0x77aaff : 0x7dff99,
-        });
+        // Use polygon-based overlay when settlement GeoJSON is available, else fall back to dots
+        const isDeployed = (formation.movement_stance ?? (formation.movement_status === 'packing' ? 'column' : 'combat')) !== 'column';
+        if (settlements && heightmap) {
+            rebuildMovementRangePolygon({
+                group: reachableGroup,
+                reachableSids: [...reachable],
+                startSid,
+                terrainMesh,
+                settlements,
+                bbox: heightmap.bbox as [number, number, number, number],
+                fillColor: isDeployed ? { r: 80, g: 160, b: 255 } : { r: 255, g: 200, b: 0 },
+                deployed: isDeployed,
+            });
+        } else {
+            rebuildMovementRangePreview({
+                group: reachableGroup,
+                reachableSids: [...reachable],
+                startSid,
+                sidToWorld: centroidWorld,
+                color: formation.faction === 'RS' ? 0xff7777 : formation.faction === 'HRHB' ? 0x77aaff : 0x7dff99,
+            });
+        }
     }
 
     function setHud(hasGameState: boolean, count: number): void {
@@ -1745,12 +2030,22 @@ export async function init3DMap(container: HTMLElement): Promise<void> {
 
     function rebuildFormationLayer(save: GameSave): void {
         if (formationGroup) scene.remove(formationGroup);
+        // Dispose old stem lines
+        if (stemLineGroup) {
+            disposeStemLines(stemLineGroup, stemEntries);
+            scene.remove(stemLineGroup);
+        }
         const lodLayer = buildFormationLODLayer(heightmap, save, centroids, corpsAggregates, counterDataMode);
         formationGroup = lodLayer.group;
         formationEntries = lodLayer.entries;
         formationCount = formationEntries.filter((e) => e.kind === 'brigade').length;
         if (layerFormationsEl) formationGroup.visible = layerFormationsEl.checked;
         scene.add(formationGroup);
+        // Build stem lines
+        const stemResult = buildStemLines(formationEntries);
+        stemLineGroup = stemResult.group;
+        stemEntries = stemResult.stems;
+        scene.add(stemLineGroup);
     }
 
     function cycleFormationCounterMode(): void {
@@ -1797,7 +2092,15 @@ export async function init3DMap(container: HTMLElement): Promise<void> {
         if (frontLineGroup) {
             scene.remove(frontLineGroup);
         }
-        frontLineGroup = buildFrontLineMesh(heightmap, sharedBorders, controllers, save.brigade_aor, save.formations as Record<string, { faction: string }>);
+        frontLineGroup = buildFrontLineMesh(
+            heightmap,
+            sharedBorders,
+            controllers,
+            save.brigade_aor,
+            save.formations as Record<string, { faction: string }>,
+            save.front_edges,
+            save.front_pressure
+        );
         if (layerFrontlinesEl) {
             frontLineGroup.visible = layerFrontlinesEl.checked;
         }
@@ -1807,6 +2110,21 @@ export async function init3DMap(container: HTMLElement): Promise<void> {
         refreshFogLayer();
         void refreshMapModeOverlays();
         void refreshBattleReplay();
+
+        // Update forces summary panel
+        updateForcesPanel(forcesPanel, computeForcesSummary(save));
+
+        // Clear pending orders on new save (turn advanced)
+        pendingOrders.length = 0;
+        refreshOrdersPanel();
+
+        // Append battle log entry if we have new battle events
+        if (battleEventsCache.length > 0 && save.turn !== undefined) {
+            const turnEvents = battleEventsCache.filter(e => e.turn === (save.turn ?? 0));
+            if (turnEvents.length > 0 || save.turn !== lastBattleReplayTurn) {
+                appendBattleLogEntry(battleLogPanel, save.turn ?? 0, turnEvents as PanelBattleEvent[]);
+            }
+        }
 
         if (selectedFormationId && !save.formations[selectedFormationId] && !corpsAggregates.has(selectedFormationId)) {
             selectedFormationId = null;
@@ -1829,14 +2147,22 @@ export async function init3DMap(container: HTMLElement): Promise<void> {
     refreshPostFxAudioStatus();
     void refreshMapModeOverlays();
 
+    // Expose applySave so the 2D MapApp can push state to the embedded 3D map
+    (window as unknown as Record<string, unknown>).__awwv3dApplySave = (rawState: unknown) => {
+        const save = toViewerSave(rawState);
+        if (save) applySave(save, 'MAPAPP STATE SYNC');
+    };
+
     // ── Game state (run file or desktop bridge) ───────────
     if (runId) {
         showMessage(`LOADING RUN: ${runId}...`);
         try {
             const saveRes = await fetch(`${base}/runs/${runId}/final_save.json`);
             if (!saveRes.ok) throw new Error(`HTTP ${saveRes.status}`);
-            const save = (await saveRes.json()) as GameSave;
-            applySave(save, `RUN LOADED: ${runId}`);
+            const raw = (await saveRes.json()) as unknown;
+            const save = toViewerSave(raw);
+            if (save) applySave(save, `RUN LOADED: ${runId}`);
+            else throw new Error('Failed to parse run save');
         } catch (e) {
             console.warn('[op-map] Run load failed:', (e as Error).message);
             showFadingMessage('RUN LOAD FAILED — Baseline mode', 3000);
@@ -1863,7 +2189,19 @@ export async function init3DMap(container: HTMLElement): Promise<void> {
                 }
             });
         } else {
-            showFadingMessage('READY — Baseline: ethnic majority control', 2500);
+            // Check if 2D MapApp already loaded a save while 3D was still initializing
+            const pending = (window as unknown as Record<string, unknown>).__awwvPending3DState;
+            if (pending) {
+                const save = toViewerSave(pending);
+                if (save) {
+                    applySave(save, 'DEFERRED MAPAPP SYNC');
+                } else {
+                    showFadingMessage('READY — Baseline: ethnic majority control', 2500);
+                }
+                (window as unknown as Record<string, unknown>).__awwvPending3DState = undefined;
+            } else {
+                showFadingMessage('READY — Baseline: ethnic majority control', 2500);
+            }
         }
     }
 
@@ -2100,6 +2438,7 @@ export async function init3DMap(container: HTMLElement): Promise<void> {
             e.preventDefault();
             return;
         }
+        // Night mode disabled for now; day-only. N key reserved for future re-enable.
         keysDown.add(k);
         // Immediate nudge for single-press responsiveness
         const d = computePanDelta(k);
@@ -2132,6 +2471,12 @@ export async function init3DMap(container: HTMLElement): Promise<void> {
         applyKeyboardPan();
         updateFormationVisibility(formationEntries, camera, selectedFormationId, selectedCorpsChildIds, selectedParentCorpsId);
         applyFogOfWarToEntries(formationEntries, currentSave, activeFogFactionOverride());
+        // Sync stem line visibility with formation sprites
+        if (stemEntries.length > 0) {
+            updateStemVisibility(stemEntries, formationEntries);
+        }
+        // Animate highlight rings
+        highlightRings.update();
         updateSelectionLinkOverlay();
         updateCityLabelVisibility(cityLabelEntries, camera, controls, cityLabelsEnabled);
         controls.update();

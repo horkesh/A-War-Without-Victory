@@ -182,7 +182,7 @@ test('phase II brigade HQ moves to depth-2 settlement behind front within AoR', 
         }
     };
     const state = minimalState(formations, { s1: 'RBiH', s2: 'RBiH', s3: 'RBiH', s4: 'RBiH', s5: 'RS' });
-    state.brigade_aor = { s1: 'b1', s2: 'b1', s3: 'b1', s4: 'b1', s5: null };
+    (state as import('../src/state/game_state.js').GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState).brigade_aor = { s1: 'b1', s2: 'b1', s3: 'b1', s4: 'b1', s5: null };
     const settlements = settlementsMap([
         { sid: 's1', mun: 'M1', mun_code: 'M1', mun1990_id: 'M1' },
         { sid: 's2', mun: 'M1', mun_code: 'M1', mun1990_id: 'M1' },
@@ -217,7 +217,7 @@ test('phase II brigade HQ uses deepest available fallback when depth-2 not prese
         }
     };
     const state = minimalState(formations, { s1: 'RBiH', s2: 'RBiH', s3: 'RS' });
-    state.brigade_aor = { s1: 'b1', s2: 'b1', s3: null };
+    (state as import('../src/state/game_state.js').GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState).brigade_aor = { s1: 'b1', s2: 'b1', s3: null };
     const settlements = settlementsMap([
         { sid: 's1', mun: 'M1', mun_code: 'M1', mun1990_id: 'M1' },
         { sid: 's2', mun: 'M1', mun_code: 'M1', mun1990_id: 'M1' },

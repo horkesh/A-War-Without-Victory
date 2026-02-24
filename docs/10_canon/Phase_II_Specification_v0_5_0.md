@@ -12,7 +12,7 @@
 
 Phase II (Mid-War / Consolidation) models the period when:
 
-1. **Fronts are active**: Sustained opposing control produces front-active settlements; Areas of Responsibility (AoRs) may be instantiated per Phase_Specifications_v0_5_0 and Phase I hand-off.
+1. **Fronts are active**: Sustained opposing control at OSID boundaries produces front segments; brigade location is **location_osid** only (no Areas of Responsibility). Phase I hand-off sets location_osid per formation.
 2. **Supply pressure and exhaustion dominate**: Overextension and isolation increase supply pressure; static fronts and supply pressure drive irreversible exhaustion (Engine Invariants §4, §6, §8).
 3. **Command friction degrades intent**: Exhaustion and front length reduce effective command coherence; friction may scale Phase II effects (supply pressure and/or exhaustion accumulation) but never flips control or authority (Systems Manual §8).
 4. **No total victory**: Front descriptors and Phase II logic do not produce decisive territorial or victory outcomes; war trends toward stalemate or collapse.
@@ -43,11 +43,13 @@ Phase II does **not**:
 - Introduce randomness or timestamps.
 - Hard-code historical outcomes or dates.
 - Allow exhaustion or friction to directly change political_controller or authority.
-- Implement Phase E systems (pressure eligibility/diffusion, AoR instantiation rules, rear zones) — those are separate roadmap phases.
+- Implement Phase E systems (pressure eligibility/diffusion, rear zones) — those are separate roadmap phases. AoR is phased out; Phase II uses OSID/ZoC only.
 
 ### 2.3 Control changes in Phase II (canon amendment 2026-02)
 
-**Fronts move only through military actions.** In Phase II, political control (political_controllers) may change only as a result of **military-driven** resolution: specifically, settlement-level flips when front pressure exceeds breach threshold on a front edge (breach-driven flip). The Phase I control-flip mechanic (municipality-level stability and militia/formation strength) **does not run** when meta.phase === "phase_ii". Thus, in Phase II there are no municipality flips from Phase I logic; only breach-based settlement flips apply. Exceptions (e.g. a short list of "contested municipalities" that retain Phase I–style flip eligibility in Phase II) may be defined in a future amendment.
+**Fronts move only through military actions.** In Phase II, political control (political_controllers) may change only as a result of **attack resolution** (attack order → push-back and control flip at the target OSID) or **corps/frontline operations** as defined. There is no passive pressure flip. The Phase I control-flip mechanic **does not run** when meta.phase === "phase_ii". Only attack resolution or corps ops change control. See Systems Manual §7.4 and Attack Resolution Formula Spec.
+
+**Implementation-note (consolidation flips 2026-02-21):** Consolidation as a flip-causing mechanic is Phase I only per canon. The pipeline step `phase-ii-consolidation-flips` still runs when meta.phase === "phase_ii", but `applyConsolidationFlips` returns 0 flips in Phase II (no control change). Bots may still use consolidation posture and scoring for behavior; only the application of control flips from that posture is disabled in Phase II.
 
 ---
 
@@ -80,17 +82,17 @@ Phase II receives Phase I hand-off implicitly via state: control map stable, pha
 
 When brigade operations are enabled, the following state is persisted (serialized):
 
-- **GameState**: brigade_municipality_assignment (Record<FormationId, MunicipalityId[]>), brigade_mun_orders, brigade_aor (Record<SettlementId, FormationId | null>), brigade_aor_orders, brigade_posture_orders, corps_command, army_stance, og_orders, settlement_holdouts.
-- **FormationState** (per formation): posture, corps_id, composition, disrupted.
-- **Movement state**: brigade-level movement transitions are represented in `brigade_movement_state` with statuses `deployed | packing | in_transit | unpacking`; settlement movement orders are staged in `brigade_movement_orders`.
+- **GameState**: brigade_posture_orders, corps_command, army_stance, og_orders, settlement_holdouts. Brigade location and attack resolution state are per-formation (see below). Removed from normative brigade ops state: brigade_aor, brigade_aor_orders, brigade_mun_orders, brigade_municipality_assignment (see HoI ZoC design: docs/30_planning/20260222_HOI_BRIGADES_AND_ZONE_OF_CONTROL_DESIGN.md).
+- **FormationState** (per brigade): posture, corps_id, composition, disrupted; **location_osid** (OSID); **entrenchment_turns** (number, 0–MAX_ENTRENCHMENT); **defense_streak** (number); **disrupted_turns** (number, 0 = not disrupted); **movement_state** (deployed | packing | in_transit | unpacking).
+- **Movement state**: brigade-level movement is represented in **movement_state**; movement orders are staged (e.g. brigade_movement_orders or attack orders) and resolved with ZoC constraints. Path validity: ZoC-constrained (in enemy ZoC, only stay, retreat, or attack ZoC source).
 
 **Movement-state contract (canonical):**
-- UI labels map these states to **Combat** (`deployed`) and **Column** (`packing | in_transit | unpacking`) for player readability.
-- Settlement movement pathing remains friendly-only in canonical runs.
-- Combat movement remains fixed-rate at `3` settlements per turn.
-- Column movement is composition-dependent with a baseline of `12` settlements per turn and roads/terrain-scalar penalties (weaker road access, uphill transitions, major-river crossing penalties).
+- UI labels map movement_state to **Combat** (`deployed`) and **Column** (`packing | in_transit | unpacking`).
+- Movement is along the operational contact graph (OSID to OSID); pathing ZoC-constrained and friendly-only where applicable.
+- Combat movement fixed-rate (e.g. 3 OSIDs per turn when deployed); column movement composition-dependent (e.g. 12 OSIDs per turn baseline) with road/terrain penalties.
+- **Implementation-note (OSID terrain-weighted column 2026-02-23):** Column movement uses terrain-weighted edge costs (road quality, slope, friction, river crossing, uphill) and composition-dependent rate: heavy mech >5% tanks+arty = 2 budget/turn, light infantry <1.5% = 4, mixed = 3. Transit lifecycle: order with `stance: 'column'` → in_transit with path and turns_remaining → on arrival set location_osid, clear movement state, reset entrenchment. Pathfinding: Dijkstra through friendly OSIDs only; deterministic tie-break. See 20260223_OSID_COLUMN_MOVEMENT_AND_BOT_COLUMN_MARCH.md.
 
-For full type definitions and interfaces (BrigadePosture, CorpsStance, ArmyStance, EquipmentCondition, BrigadeComposition, BrigadeAoROrder, BrigadePostureOrder, CorpsOperation, CorpsCommandState, OGActivationOrder, SettlementHoldoutState), see docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md §8.
+For full type definitions and interfaces, see Attack Resolution Formula Spec §9 and docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md §8 where still applicable.
 
 ---
 
@@ -99,28 +101,26 @@ For full type definitions and interfaces (BrigadePosture, CorpsStance, ArmyStanc
 Phase II logic runs inside the sim turn pipeline (src/sim/turn_pipeline.ts):
 
 - **When**: Only when meta.phase === "phase_ii". For meta.phase === "phase_i", Phase I phases run and Phase II consolidation is skipped; for phase_0, the state pipeline is used.
-- **Where**: After "phase-ii-aor-init" (when present), **update-formation-lifecycle** runs first (so brigades may transition forming → active before bot AI evaluates them). Then the following brigade operations phases run in order, then "phase-ii-consolidation":
-  1. validate-brigade-aor
-  2. rebalance-brigade-aor
-  3. enforce-brigade-aor-contiguity (repair islands; no brigade covers non-contiguous settlement)
-  4. enforce-corps-aor-contiguity (when corps_command present; enclave-aware)
-  5. surrounded-brigade-reform (reform in home territory when brigade AoR entirely in enclave)
-  6. apply-municipality-orders
-  7. generate-bot-brigade-orders
-  8. apply-aor-reshaping
-  9. apply-brigade-posture
-  10. update-corps-effects
-  11. advance-corps-operations
-  12. activate-operational-groups
-  13. equipment-degradation
-  14. apply-posture-costs
-  15. compute-brigade-pressure
-  16. phase-ii-resolve-attack-orders (battle resolution: terrain, casualties, control flips; see Systems Manual §7.4)
-  17. phase-ii-hostile-takeover-displacement (4-turn hostile-takeover timer, camp holding pool, camp reroute to urban centers; at-war gate applies, including RBiH-HRHB alliance gate)
-  18. phase-ii-recruitment (accrual + ongoing mandatory/elective recruitment when recruitment_state exists; see Systems Manual §13)
-  19. phase-ii-brigade-reinforcement (reinforce brigades from militia pools)
-  20. phase-ii-wia-trickleback (wounded return to formations when out of combat; rate WIA_TRICKLE_RATE, only when not in attack posture and not disrupted)
-  21. update-og-lifecycle
+- **Where**: After any phase-ii init (when present), **update-formation-lifecycle** runs first (so brigades may transition forming → active before bot AI evaluates them). Then the following brigade operations phases run in order, then "phase-ii-consolidation":
+  1. **zoc-computation** (compute ZoC from deployed brigades' location_osid; derive ZoC-locked state)
+  2. **osid-column-movement** (advance existing column transits; process new column orders with stance: 'column'; terrain-weighted pathfinding through friendly OSIDs. **Must run before zoc-constrained-movement** because that step clears all brigade_movement_orders.)
+  3. **zoc-constrained-movement** (resolve movement orders; only stay, retreat, or attack ZoC source when in enemy ZoC)
+  4. generate-bot-brigade-orders
+  5. apply-brigade-posture
+  6. update-corps-effects
+  7. advance-corps-operations
+  8. activate-operational-groups
+  9. equipment-degradation
+  10. apply-posture-costs
+  11. **phase-ii-resolve-attack-orders** (attack resolution per Attack Resolution Formula Spec: combat power, outcome thresholds, casualties, push-back, control flip; see Systems Manual §7.4)
+  12. phase-ii-hostile-takeover-displacement (4-turn hostile-takeover timer, camp holding pool, camp reroute to urban centers; at-war gate applies, including RBiH-HRHB alliance gate)
+  13. phase-ii-recruitment (accrual + ongoing mandatory/elective recruitment when recruitment_state exists; see Systems Manual §13)
+  14. phase-ii-ongoing-mobilization (per-turn pool growth from conscription, displacement, and cross-ethnic enrollment; see Systems Manual §13; runs before brigade-reinforcement so freshly mobilized manpower is available same turn)
+  15. phase-ii-brigade-reinforcement (reinforce brigades from militia pools)
+  16. phase-ii-wia-trickleback (wounded return to formations when out of combat; rate WIA_TRICKLE_RATE, only when not in attack posture and not disrupted)
+  17. update-og-lifecycle
+
+**Removed from pipeline (OSID/ZoC-only model):** All AoR steps (validate-brigade-aor, rebalance-brigade-aor, enforce-brigade-aor-contiguity, enforce-corps-aor-contiguity, surrounded-brigade-reform, apply-municipality-orders, apply-aor-reshaping, compute-brigade-pressure) are deleted. Phase II control change is only via attack resolution or corps/frontline operations. See AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md.
 
 When **recruitment_state** exists, **phase-ii-recruitment** runs before brigade reinforcement so reinforcement does not consume pool manpower first. Ongoing recruitment may retry mandatory and elective OOB brigades under deterministic per-faction caps (see Systems Manual §13). **Implementation-note (deferred start mode 2026-02-17):** In scenarios with `recruitment_mode: "player_choice"` and `no_initial_brigade_formations: true`, turn 0 starts with corps/army_hq only; brigades are recruited from turn 0 onward under standard eligibility (`available_from === 0` at turn 0, `available_from <= turn` later) using deterministic pools seeded from the same Phase 0->I organizational penetration path. Then phase-ii-consolidation runs. Order within consolidation:
   1. Detect fronts: detectPhaseIIFronts(state, edges).
@@ -128,6 +128,8 @@ When **recruitment_state** exists, **phase-ii-recruitment** runs before brigade 
   3. Update exhaustion: updatePhaseIIExhaustion(state, fronts).
 
 Command friction is computed where needed (e.g. when scaling supply pressure or exhaustion deltas) and is not a separate pipeline phase.
+
+**Implementation-note (ceasefire and Washington Agreement in Phase II):** The RBiH-HRHB bilateral ceasefire (Phase I Spec §ceasefire) and Washington Agreement (Phase I Spec §Washington) precondition checks must also run when meta.phase === "phase_ii". If preconditions are first met during Phase II (e.g. exhaustion thresholds, IVP momentum, patron constraint severity), the milestones must fire. Implementation should add shared milestone evaluation steps or Phase II-specific pipeline steps that invoke the same precondition logic. Until implemented, this is a known pipeline gap.
 
 ---
 
@@ -144,7 +146,7 @@ Phase I → Phase II transition is **deterministic and one-way**, **state-driven
 
 Constants: **MIN_OPPOSING_EDGES = 25**, **PERSIST_TURNS = 4**. No hard-coded historical dates. Once meta.phase === "phase_ii", Phase I phases are no longer executed for subsequent turns.
 
-When **edges** are provided to the transition, it initializes brigade AoR and corps command state (see §7.1).
+When **edges** are provided to the transition, it ensures every brigade has **location_osid** set (e.g. via backfillFormationLocationOsid) and initializes corps command state (see §7.1). No AoR is populated.
 
 ---
 
@@ -155,16 +157,15 @@ When **edges** are provided to the transition, it initializes brigade AoR and co
 - **Stability**: Derived from front_segments (active_streak, max_active_streak). Static when min(active_streak) ≥ N (e.g. 4); oscillating when any edge has active_streak === 1 and max_active_streak > 1; fluid otherwise.
 - **No geometry**: Front descriptors contain only edge_ids and metadata; no polygon or geometric state. Derived each turn; not serialized (Engine Invariants §13.1).
 
-### 7.1 Brigade AoR at Phase II entry
+### 7.1 Brigade location init by OSID at Phase II entry
 
-When the Phase I → Phase II transition runs with **edges** provided, brigade deployment initializes in two layers:
+When the Phase I → Phase II transition runs (or when a scenario starts in Phase II), **every brigade must have a valid location_osid** at creation. All spawn points and initial placements use **location_osid**.
 
-1. **Municipality assignment layer** (`brigade_municipality_assignment`): active brigades are assigned to one or more municipalities (multiple brigades may share a municipality).
-2. **Settlement AoR layer** (`brigade_aor`): front-active settlements (plus optional 1-hop rear depth) are deterministically derived from municipality assignments; each settlement is assigned to exactly one brigade or null (rear).
+**Remapping:** Brigades are placed by OSID, not by canonical settlement ID or municipality alone. Use **canonical_to_operational_map** (data/derived/operational/canonical_to_operational_map.json) to map canonical SID → OSID. When deriving from municipality (e.g. home_mun): choose one OSID deterministically—e.g. **first faction-controlled OSID in that municipality by stable sort** (e.g. OSID string sort). Same inputs (scenario, init_control, formation list) must always yield the same location_osid per formation.
 
-Within a municipality shared by multiple brigades of the same faction, settlement split is deterministic (stable ordering + deterministic graph traversal/tie-break). Municipality movement orders (`brigade_mun_orders`) apply before pressure and attack resolution; settlement-level reshape orders (`brigade_aor_orders`) remain available as fine-grain adjustment. See Systems_Manual_v0_5_0.md §2.1 and §6; implementation: src/sim/phase_ii/brigade_aor.ts and src/sim/turn_pipeline.ts.
+**At creation:** Every brigade gets location_osid set when the formation is created (OOB spawn, recruitment, or scenario init). No brigade is placed or moved in canonical settlement space for game logic; movement and combat use only OSID.
 
-**Implementation-note (2026-02-14):** When `state.corps_command` exists and is non-empty, assignment uses the corps-directed algorithm (partition front into corps sectors, allocate brigades along each sector's frontline; home municipality plus up to two contiguous neighbor municipalities per brigade; contiguity enforced and repaired). Otherwise the legacy Voronoi BFS path is used (Phase I / tests). Rebalance step guards transfers with `wouldRemainContiguous` so the donor brigade stays contiguous. See [BRIGADE_AOR_OVERHAUL_CORPS_DIRECTED_2026_02_14.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md). **Implementation-note (2026-02-15):** Corps-level contiguity is enforced: `checkCorpsContiguity`, `repairCorpsContiguity`, `enforceCorpsLevelContiguity` (enclave-aware; settlements in faction enclaves excluded). Step 9 in `assignCorpsDirectedAoR`; pipeline step `enforce-corps-aor-contiguity` after `enforce-brigade-aor-contiguity` (guards: phase_ii, brigade_aor, corps_command). Brigade contiguity repair prefers same-corps targets. See [CORPS_AOR_CONTIGUITY_ENFORCEMENT_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md). **Implementation-note (2026-02-17):** No brigade may cover a non-contiguous settlement. Rebalance absorb only accepts transfers when receiver would remain contiguous (`checkBrigadeContiguity`). Pipeline step `enforce-brigade-aor-contiguity` after `rebalance-brigade-aor` runs `enforceContiguity` to repair islands. Surrounded brigades (entire AoR in enclave) are reformed in home territory: AoR cleared, HQ set to faction-controlled settlement in main territory (prefer home mun); if none, formation set inactive. Pipeline step `surrounded-brigade-reform` after `enforce-corps-aor-contiguity`. Design: [AOR_CONTIGUITY_AND_SURROUNDED_BRIGADE_DESIGN_2026_02_17.md](../40_reports/convenes/AOR_CONTIGUITY_AND_SURROUNDED_BRIGADE_DESIGN_2026_02_17.md). **Scenario init order (2026-02-15):** Scenario runner calls `initializeCorpsCommand(state)` before `initializeBrigadeAoR(state)` so corps_command exists when municipality assignment runs and the corps-directed path (with contiguity enforcement) is used. `initializeBrigadeAoR()` then calls `enforceContiguity()` and `enforceCorpsLevelContiguity()` after `deriveBrigadeAoRFromMunicipalities()` as an idempotent safety net. See [SCENARIO_INIT_SIX_FIXES_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md). **Brigade/corps HQ (2026-02-15):** Brigade and corps HQ settlement must be faction-controlled at creation. `resolveValidHqSid()` (recruitment_engine) validates default HQ from municipality data; if not faction-controlled, falls back to first (by SID sort) faction-controlled settlement in the same municipality. Applied to mandatory brigade, elective brigade, and corps HQ creation. See [SCENARIO_INIT_SIX_FIXES_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md).
+**Canonical state:** Phase II uses **location_osid** per formation only; no brigade_aor or brigade_municipality_assignment. See docs/30_planning/20260222_HOI_BRIGADES_AND_ZONE_OF_CONTROL_DESIGN.md and AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md.
 
 ---
 
@@ -208,13 +209,37 @@ When the scenario runner produces a run, **run_summary.json** includes a **phase
 
 ---
 
+## 11.2 War Termination and End-Game
+
+Phase II does not have a fixed duration. The war continues until one of the following terminal conditions is met:
+
+### 11.2.1 Negotiated Settlement
+When exhaustion, international pressure, and patron constraints reach sufficient levels, a negotiation window opens (see Rulebook §13). The game ends when a treaty is accepted by all parties per the acceptance computation. Treaty terms (territorial clauses, institutional competences, Brčko status) determine the end state.
+
+### 11.2.2 Faction Collapse
+If a faction's exhaustion exceeds a critical threshold while its authority is Fragmented across all controlled municipalities, and it controls fewer settlements than a minimum viability threshold, the faction is eliminated. Remaining factions continue or negotiate.
+
+### 11.2.3 Timeout / Stalemate
+If the war persists beyond a maximum duration (scenario-defined, e.g. 208 weeks / 4 years for the canonical April 1992 scenario), external intervention forces all parties to the table. This acts as a hard stop ensuring the game always terminates.
+
+### 11.2.4 Scoring and Evaluation
+There is no total victory (Rulebook §15). End-game evaluation considers:
+- Territory controlled vs. pre-war territory
+- Population preserved (displacement as negative score)
+- Exhaustion level (lower is better)
+- Treaty terms favorability (institutional competences, territorial recognition)
+
+**Implementation-note:** War termination mechanics are not yet implemented. This section defines the minimal design intent. A full specification (negotiation window thresholds, collapse conditions, scoring formula) is a critical-path item per the comprehensive review roadmap. See ORCHESTRATOR_COMPREHENSIVE_REVIEW_CONVENE_2026_02_23.md §3 Recommendations.
+
+---
+
 ## 12. Stubs / Known Limitations (Implementation)
 
 - **phase_ii_exhaustion_local**: In schema but not driven by mechanics; may be used by future systems.
 - **Transition conditions**: State-driven (D0.9.1): JNA complete + opposing-control edge count >= MIN_OPPOSING_EDGES for PERSIST_TURNS consecutive turns; no fixed time offset.
 - **Command friction**: getPhaseIICommandFrictionMultipliers returns multipliers >= 1; applied to supply pressure and exhaustion increments.
 - **Supply report**: Optional; isolation is zero when not provided (e.g. when Phase II runs without supply-resolution in same run).
-- **Brigade operations (per BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md §8 and battle_resolution_engine_report_2026_02_12):** Phase II attack resolution is implemented as discrete battle resolution: combat power (garrison × equipment × experience × cohesion × posture × supply × terrain × corps × operations × OG × resilience × disruption), outcome thresholds (≥1.2 attacker victory, 0.7–1.2 stalemate, <0.7 defender victory), terrain modifier (rivers, slope, urban/Sarajevo bonus), per-engagement and cumulative casualties (casualty_ledger), equipment losses and capture on surrender, and deterministic snap events (Ammunition Crisis, Commander Casualty, Last Stand, Surrender Cascade, Pyrrhic Victory). Current casualty calibration uses baseline intensity 50, minimum 15 casualties per side per battle, undefended-defender casualty scale 0.5, and intensity divisor 350. **Defender casualty reporting floor (2026-02-18):** When a defender formation is present but personnel is at or below MIN_COMBAT_PERSONNEL, reported defender casualties use a floor (min(15, defenderPersonnel)) so run_summary and battle reports never show zero; applied loss remains capped so the formation stays at or above MIN_COMBAT_PERSONNEL. JNA equipment transfer to RS brigades is not implemented; RS brigades receive default composition from equipment_effects. **Implementation-note (2026-02-18):** When formations are created via runBotRecruitment (player_choice + init_formations_oob), RS OOB brigades with default_equipment_class mechanized or motorized now receive JNA-heavy composition (40 tanks, 30 artillery) via getRsJnaHeavyComposition() in equipment_effects; see INITIAL_BRIGADE_PLACEMENTS_STRENGTHS_JNA_REEVALUATION_2026_02_18 and PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18. OG donor tracking returns personnel equally to same-corps brigades at dissolution, not proportionally to original donors. The maintenance module is not yet integrated with the typed equipment system.
+- **Brigade operations / attack resolution (canon):** Phase II attack resolution follows the **Attack Resolution Formula Spec** (docs/30_planning/20260222_ATTACK_RESOLUTION_FORMULA_SPEC.md): combat power (attacker/defender formulas with entrenchment, resilience/defense_streak), outcome thresholds (≥2.0 decisive, ≥1.5 victory, ≥1.0 costly victory, 0.7–1.0 stalemate, 0.5–0.7 repulsed, <0.5 catastrophic), casualties (§4), push-back and control flip (§5), retreat tie-break (enemy adjacency count ascending, then OSID string sort). Implementation-note: Existing reports (BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md §8, battle_resolution_engine_report_2026_02_12) describe pre-OSID battle resolution; canonical target is the Formula Spec. Defender casualty reporting floor, JNA composition, OG donor tracking, and maintenance integration remain as implementation details where still applicable.
 - **Phase II bot brigade AI (per BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md and AI_STRATEGY_SPECIFICATION.md):** Formation lifecycle runs before the brigade ops block so forming→active transition occurs before generate-bot-brigade-orders. Bot generates posture orders and attack orders in one pass; attack-order eligibility uses the posture just decided in that pass (pending posture), not the previously applied state. **Soft fronts** (adjacent enemy with no or weak garrison) receive **consolidation** posture; **real fronts** are brigade-vs-brigade. Consolidation brigades may still issue attack orders so rear cleanup produces casualty-ledger updates. Faction strategic objectives (offensive and defensive municipality lists—e.g. RS Drina/Sarajevo, RBiH enclaves/corridors, HRHB Herzegovina) and attack target scoring (undefended +150, corridor +95, offensive objective +85, home recapture +60, weak garrison 0–80, plus weighted consolidation/breakthrough score for rear cleanup and isolated clusters) are applied deterministically; tie-break by settlement ID. Fast rear-cleanup municipality bonus in implementation is faction-scoped (RS-scoped for Prijedor/Banja Luka set). Brigades in offensive-objective municipalities may use a lower coverage threshold for probe. **Implementation-note (2026-02-18):** Corps AI generates corps stance, named operations (expanded catalog including strategic_defense), OG activations (including defensive posture during strategic_defense and emergency ops), emergency defensive operations when sector threat exceeds threshold, and multi-corps offensive coordination under general_offensive; brigade AI uses dynamic elastic defense (1–4 brigades scaled by front length). Phase 0 bot investments run in headless pipeline; Phase I bot assigns hold/probe/push posture. See FACTION_AI_IMPROVEMENTS_ALL_PHASES_2026_02_18.md (IMPLEMENTED_WORK_CONSOLIDATED §25). **RS early-war (priority B 2026-02-18):** RS doctrine phase, standing order "Territorial Seizure", effective attack-share taper, and corps E1 aggression override use weeks 0–26 (RS_EARLY_WAR_END_WEEK); previously 0–12. See PRIORITY_B_RS_EARLY_WAR_BOT_HANDOFF_2026_02_18.md. One brigade per target per faction per turn (exception: OG operation + heavy resistance—not yet implemented). See Systems Manual §6.1 (Consolidation posture), §6.5 (soft/real front, target scoring, one-brigade-per-target).
 
 ---

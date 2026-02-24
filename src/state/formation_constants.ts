@@ -41,6 +41,26 @@ export function getMaxBrigadesPerMun(mun_id: MunicipalityId): number {
 /** Pool must reach this to spawn a new brigade; new brigade starts at this size (research: canFormBrigade ≥800). */
 export const MIN_BRIGADE_SPAWN = 800;
 
+/**
+ * Faction-specific initial brigade personnel at Phase I OOB creation (Mobilization & Force Growth Part 3).
+ * RS (VRS): JNA inheritance → larger initial brigades; RBiH/HRHB: militia/TO origin → standard.
+ */
+export const FACTION_INITIAL_PERSONNEL: Record<string, number> = {
+    RS: 1_200,
+    RBiH: 800,
+    HRHB: 800
+};
+
+/**
+ * Faction-specific initial cohesion for brigades/OG at creation (Mobilization & Force Growth Part 4).
+ * RS: JNA professional cadres; HRHB: Croatian cadres; RBiH: TO/militia origin.
+ */
+export const FACTION_INITIAL_COHESION: Record<string, number> = {
+    RS: 72,
+    HRHB: 62,
+    RBiH: 55
+};
+
 /** Minimum manpower to spawn a mandatory (historical OOB) brigade — lower than MIN_BRIGADE_SPAWN
  * because these formations definitely existed; pools will reinforce them over time. */
 export const MIN_MANDATORY_SPAWN = 200;
@@ -104,11 +124,18 @@ export const MILITIA_GARRISON_FRACTION = 0.15;
  */
 export const MAX_MUNICIPALITIES_PER_BRIGADE = 3;
 
-/** Max personnel absorbed per turn from home municipality militia pool (recruitment_system_design_note §5.1). */
-export const REINFORCEMENT_RATE = 260;
+/**
+ * Max personnel absorbed per turn from home municipality militia pool.
+ * At 400/turn, a brigade reaches operational strength (~2000) in 3-5 weeks.
+ * Calibrated so pool-to-brigade transfer doesn't bottleneck force growth.
+ */
+export const REINFORCEMENT_RATE = 400;
 
-/** Half rate under active combat: brigade in attack posture or under pressure (recruitment_system_design_note §5.3). */
-export const COMBAT_REINFORCEMENT_RATE = 130;
+/**
+ * Half rate under active combat: brigade in attack posture or under pressure.
+ * 200/turn allows slow reinforcement even during operations.
+ */
+export const COMBAT_REINFORCEMENT_RATE = 200;
 
 /**
  * WIA (wounded in action) trickleback: personnel returned per turn to a formation from its wounded pool.

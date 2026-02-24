@@ -1,0 +1,19 @@
+{
+  "flips": [],
+  "flips_by_direction": [],
+  "flips_by_municipality": [],
+  "net_control_count_delta": [],
+  "net_control_counts_after": [
+    {
+      "controller": null,
+      "count": 5822
+    }
+  ],
+  "net_control_counts_before": [
+    {
+      "controller": null,
+      "count": 5822
+    }
+  ],
+  "total_flips": 0
+}
