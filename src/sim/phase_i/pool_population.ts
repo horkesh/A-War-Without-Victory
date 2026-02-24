@@ -14,6 +14,10 @@ import type {
 } from '../../state/game_state.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { buildSettlementsByMun, getMunicipalityController } from './control_strain.js';
+
+/** Re-export for consumers that import from pool_population (e.g. ongoing_mobilization). */
+export { buildSettlementsByMun, getMunicipalityController };
 
 /** Scale phase_i_militia_strength [0,100] to pool available (integer).
  * Raised for long-horizon (52w/104w) personnel growth calibration while keeping deterministic flow. */
@@ -146,70 +150,6 @@ export interface PoolPopulationReport {
     pools_created: number;
     displaced_contributions: number;
     rbih_10pct_additions?: number;
-}
-
-/**
- * Deterministic: majority control; tie-break by localeCompare(factionId).
- * Handles both SID-keyed and OSID-keyed political_controllers.
- * When sids are canonical (S-prefixed) but political_controllers uses OSID keys (op:<mun>:<cluster>),
- * the optional munId enables a fallback that scans pc keys matching the OSID prefix for that mun.
- */
-export function getMunicipalityController(
-    state: GameState,
-    sids: string[],
-    munId?: MunicipalityId
-): FactionId | null {
-    const pc = state.political_controllers ?? {};
-    const counts: Record<string, number> = {};
-    for (const sid of sids) {
-        const c = pc[sid] ?? null;
-        const key = c ?? '_null_';
-        counts[key] = (counts[key] ?? 0) + 1;
-    }
-    let entries = (Object.entries(counts) as [string, number][]).filter(([k]) => k !== '_null_');
-
-    // OSID fallback: if no SID matches found, pc may be OSID-keyed while sids are canonical.
-    // When munId is provided, iterate pc keys matching op:<munId>:* to find the controller.
-    if (entries.length === 0 && munId) {
-        const prefix = `op:${munId}:`;
-        const osidCounts: Record<string, number> = {};
-        const pcKeys = Object.keys(pc).sort(strictCompare);
-        for (const k of pcKeys) {
-            if (k.startsWith(prefix)) {
-                const c = pc[k];
-                if (c != null) {
-                    osidCounts[String(c)] = (osidCounts[String(c)] ?? 0) + 1;
-                }
-            }
-        }
-        entries = (Object.entries(osidCounts) as [string, number][]);
-    }
-
-    if (entries.length === 0) return null;
-    entries.sort((a, b) => {
-        if (b[1] !== a[1]) return b[1] - a[1];
-        return strictCompare(a[0], b[0]);
-    });
-    return entries[0][0] as FactionId;
-}
-
-/**
- * Build mun_id -> settlement ids from settlements map. Deterministic: sids sorted per mun.
- */
-export function buildSettlementsByMun(
-    settlements: Map<string, SettlementRecord>
-): Map<MunicipalityId, string[]> {
-    const byMun = new Map<MunicipalityId, string[]>();
-    for (const [sid, rec] of settlements.entries()) {
-        const munId = (rec.mun1990_id ?? rec.mun_code) as MunicipalityId;
-        const list = byMun.get(munId) ?? [];
-        list.push(sid);
-        byMun.set(munId, list);
-    }
-    for (const list of byMun.values()) {
-        list.sort(strictCompare);
-    }
-    return byMun;
 }
 
 export interface DisplacedAndCrossEthnicReport {

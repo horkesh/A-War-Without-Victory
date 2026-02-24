@@ -15,44 +15,12 @@ import type {
 } from '../../state/game_state.js';
 import { parseMilitiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { buildSettlementsByMun } from './control_strain.js';
+import { buildSettlementsByMun, getMunicipalityController } from './control_strain.js';
 import type { MunicipalityPopulation1991Map } from './pool_population.js';
 
 export interface MinorityDecayReport {
     pools_affected: number;
     manpower_removed: number;
-}
-
-function getMunicipalityController(state: GameState, sids: string[], munId?: string): FactionId | null {
-    const pc = state.political_controllers ?? {};
-    const counts: Record<string, number> = {};
-    for (const sid of sids) {
-        const c = pc[sid] ?? null;
-        const key = c ?? '_null_';
-        counts[key] = (counts[key] ?? 0) + 1;
-    }
-    let entries = Object.entries(counts).filter(([k]) => k !== '_null_');
-    // OSID fallback: if no SID matches and munId is provided, scan OSID-keyed pc
-    if (entries.length === 0 && munId) {
-        const prefix = `op:${munId}:`;
-        const osidCounts: Record<string, number> = {};
-        for (const k of Object.keys(pc).sort()) {
-            if (k.startsWith(prefix) && pc[k] != null) {
-                osidCounts[String(pc[k])] = (osidCounts[String(pc[k])] ?? 0) + 1;
-            }
-        }
-        entries = Object.entries(osidCounts);
-    }
-    if (entries.length === 0) return null;
-    let best: string | null = null;
-    let bestCount = 0;
-    for (const [key, count] of entries) {
-        if (count > bestCount) {
-            bestCount = count;
-            best = key;
-        }
-    }
-    return best as FactionId | null;
 }
 
 /** Faction's share of population in mun (0..1) from 1991 census; used for decay strength. */

@@ -47,8 +47,8 @@ export function buildSettlementsByMun(settlements: Map<string, SettlementRecord>
 }
 
 /** Derive current controller of a municipality from political_controllers (majority of settlements).
- * Handles OSID-keyed pc via munId fallback (scans op:<munId>:* prefix). */
-function getMunicipalityController(state: GameState, sids: SettlementId[], munId?: string): FactionId | null {
+ * Handles OSID-keyed pc via munId fallback (scans op:<munId>:* prefix). Deterministic tie-break: strictCompare(factionId). */
+export function getMunicipalityController(state: GameState, sids: SettlementId[], munId?: string): FactionId | null {
     const pc = state.political_controllers ?? {};
     const counts: Record<string, number> = {};
     for (const sid of sids) {
@@ -57,11 +57,10 @@ function getMunicipalityController(state: GameState, sids: SettlementId[], munId
         counts[key] = (counts[key] ?? 0) + 1;
     }
     let entries = Object.entries(counts).filter(([k]) => k !== '_null_');
-    // OSID fallback
     if (entries.length === 0 && munId) {
         const prefix = `op:${munId}:`;
         const osidCounts: Record<string, number> = {};
-        for (const k of Object.keys(pc).sort()) {
+        for (const k of Object.keys(pc).sort(strictCompare)) {
             if (k.startsWith(prefix) && pc[k] != null) {
                 osidCounts[String(pc[k])] = (osidCounts[String(pc[k])] ?? 0) + 1;
             }
@@ -69,15 +68,11 @@ function getMunicipalityController(state: GameState, sids: SettlementId[], munId
         entries = Object.entries(osidCounts);
     }
     if (entries.length === 0) return null;
-    let best: string | null = null;
-    let bestCount = 0;
-    for (const [key, count] of entries) {
-        if (count > bestCount) {
-            bestCount = count;
-            best = key;
-        }
-    }
-    return best as FactionId | null;
+    entries.sort((a, b) => {
+        if (b[1] !== a[1]) return b[1] - a[1];
+        return strictCompare(a[0], b[0]);
+    });
+    return entries[0]![0] as FactionId;
 }
 
 /** Authority multiplier (Phase I §4.5.1): (1.0 - Faction_Authority_Score). State authority is 0-100. */

@@ -874,6 +874,19 @@ const phases: NamedPhase[] = [
         }
     },
     {
+        name: 'phase-ii-alliance-update',
+        run: (context) => {
+            // RBiH–HRHB alliance dynamics: must run in Phase II too, or alliance never
+            // degrades and HVO never enters bilateral war with RBiH.
+            // Uses same functions as phase-i-alliance-update.
+            ensureRbihHrhbState(context.state);
+            updateMixedMunicipalitiesList(context.state);
+            if (context.state.meta.enable_rbih_hrhb_dynamics !== false) {
+                context.report.phase_i_alliance_update = updateAllianceValue(context.state);
+            }
+        }
+    },
+    {
         name: 'phase-ii-recruitment',
         run: async (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
