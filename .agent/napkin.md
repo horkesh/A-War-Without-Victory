@@ -43,6 +43,7 @@
 - **Attack odds UI:** For hover-based preview, cache by `brigadeId:targetSid` and move tooltip without refetching unless the key changes.
 - **Fog layer (3D):** Apply fog filtering after LOD visibility each frame, then render recon ghost counters from sorted SID keys for deterministic visuals.
 - **Map modes:** Keep F-key mode switching deterministic with explicit mode enum (`F1..F4`) and cache read-only IPC query payloads per loaded state to avoid jitter/refetch loops.
+- **HoI map init:** Use async chunked terrain texture build (`buildHoITerrainTextureAsync` yielding every 64 rows) so init does not block the event loop; wrap `renderer.init()` in map_hoi in Promise.race with ~25s timeout and keep 2D placeholder on failure (2026_02_26_MAP_INITIALIZATION_HANG).
 - **Battle replay markers:** Normalize events at query boundary, replay current-turn events in stable order, and provide explicit skip hotkey to avoid blocking interaction.
 - **Command mode:** Keep hierarchy navigation deterministic (sorted army/corps/brigade IDs) and surface OOB parity warnings directly in the command panel.
 - **PostFX/audio toggles:** Keep them strictly optional and renderer-local (quality preset + ambient/UI sound only), with no game-state mutation or IPC writes.

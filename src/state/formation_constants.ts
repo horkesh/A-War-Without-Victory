@@ -138,6 +138,28 @@ export const REINFORCEMENT_RATE = 400;
 export const COMBAT_REINFORCEMENT_RATE = 200;
 
 /**
+ * Faction-specific reinforcement rate multiplier by war phase.
+ * Historically: RS inherited JNA logistics (full rate from day 1).
+ * RBiH was disorganized militia; reinforcement capacity grew over time as corps formed.
+ * HRHB had Croatian cadre support but limited logistics.
+ */
+export function getFactionReinforcementMult(faction: string, turn: number): number {
+    if (faction === 'RBiH') {
+        // ARBiH mobilization phases: militia → TO brigades → corps structure → professional army
+        if (turn < 12) return 0.25;   // Weeks 0-11: barely organized, 100/turn effective
+        if (turn < 26) return 0.50;   // Weeks 12-25: rudimentary command, 200/turn
+        if (turn < 52) return 0.75;   // Weeks 26-51: corps forming, 300/turn
+        return 1.0;                    // Week 52+: professional army, full rate
+    }
+    if (faction === 'HRHB') {
+        if (turn < 12) return 0.50;   // HVO had Croatian cadre but limited logistics
+        return 0.75;                   // Never matched VRS logistics capacity
+    }
+    // RS: full rate from day 1 (JNA inheritance)
+    return 1.0;
+}
+
+/**
  * WIA (wounded in action) trickleback: personnel returned per turn to a formation from its wounded pool.
  * Only when the brigade is out of combat (not in attack posture, not disrupted). Realistic order of magnitude:
  * ~80/week allows meaningful recovery over several weeks without dominating reinforcement.

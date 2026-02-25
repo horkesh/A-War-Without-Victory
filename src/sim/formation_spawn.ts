@@ -8,6 +8,7 @@ import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/ope
 import {
     COMBAT_REINFORCEMENT_RATE,
     getBatchSizeForFaction,
+    getFactionReinforcementMult,
     getMaxBrigadesPerMun,
     MAX_BRIGADE_PERSONNEL,
     MIN_BRIGADE_SPAWN,
@@ -171,9 +172,11 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         const pool = pools[key];
         if (!pool || pool.available <= 0) continue;
 
-        // Rate limit: combat brigades get half rate
+        // Rate limit: combat brigades get half rate; faction-specific mobilization multiplier
         const inCombat = f.posture === 'attack' || f.disrupted === true;
-        const rate = inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
+        const currentTurnNum = state.meta?.turn ?? 0;
+        const factionMult = getFactionReinforcementMult(faction, currentTurnNum);
+        const rate = Math.max(1, Math.floor((inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE) * factionMult));
 
         const need = Math.min(MAX_BRIGADE_PERSONNEL - current, rate);
         const reserveForSpawn = reservedSpawnManpowerForReinforcement(state, mun_id, faction, spawnDirectiveActive);

@@ -8530,3 +8530,8 @@ Determinism checks **MUST** be run:
 - **Files modified:** src/sim/phase_ii/bot_brigade_ai_osid.ts (major refactor: unified directive execution), src/sim/phase_ii/bot_corps_ai.ts (major expansion: directive generation), src/sim/phase_ii/bot_strategy.ts (army priorities, doctrine phases, standing orders), src/sim/phase_ii/combat_predictor.ts (MAX_ENTRENCHMENT tuning), src/sim/phase_ii/attack_resolution_osid.ts (MAX_ENTRENCHMENT sync), src/state/game_state.ts (CorpsDirective type), src/state/serializeGameState.ts (directive allowlist), src/scenario/scenario_runner.ts (replay optimization), tools/scenario_runner/run_scenario.ts (map URL fix, replay path conditional), tests/bot_three_sides_validation.test.ts (RS_EARLY_WAR_END_WEEK update).
 - **Verification:** npx tsc --noEmit clean, npm run test:vitest (158 passed), 52-week scenario runs n150–n159 completed.
 
+
+**2026-02-26** - Investigated Map Initialization Hang
+- **Phase:** Phase 3 UI Refactor
+- **Summary:** The map is hanging completely upon initialization. Verified network is fine, webgl context is fine. Inserted tracking logs into HoIMapRenderer.init() and reproduced a silent promise hang preventing resolution. Culprit is likely synchronous loops in uildHoITerrainTexture or uildTerrainMesh taking too long and silently failing/locking the browser tab.
+- **Report:** docs/40_reports/issues/2026_02_26_MAP_INITIALIZATION_HANG.md

@@ -128,7 +128,18 @@ function init(): void {
       container: mapWrapEl,
       getBaseUrl,
     });
-    const ok = await renderer.init();
+    const INIT_TIMEOUT_MS = 25000;
+    let ok = false;
+    try {
+      ok = await Promise.race([
+        renderer.init(),
+        new Promise<false>((_, reject) =>
+          setTimeout(() => reject(new Error('HoI map init timeout')), INIT_TIMEOUT_MS)
+        ),
+      ]);
+    } catch (e) {
+      console.warn('map_hoi: WebGL init failed or timed out — keeping 2D placeholder.', e);
+    }
     if (ok) {
       getOsidAdjacency(getBaseUrl).then((adj) => {
         adjacencyRef.current = adj;

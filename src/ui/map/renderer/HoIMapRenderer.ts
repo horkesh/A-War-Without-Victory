@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import { Earcut } from 'three/src/extras/Earcut.js';
 import { wgsToWorld, buildTerrainMesh } from '../terrain/TerrainMeshBuilder.js';
 import { smoothHeightmap } from '../terrain/heightmapSmooth.js';
-import { buildHoITerrainTexture } from '../terrain/HoITerrainTexture.js';
+import { buildHoITerrainTexture, buildHoITerrainTextureAsync } from '../terrain/HoITerrainTexture.js';
 
 const HEIGHTMAP_URL = '/data/derived/terrain/heightmap_3d_viewer.json';
 const OPERATIONAL_SETTLEMENTS_URL = '/data/derived/operational/operational_settlements.geojson';
@@ -405,7 +405,7 @@ export class HoIMapRenderer {
     this.scene.add(dir);
 
     console.log('[HoIMapRenderer] Building terrain...');
-    this.buildTerrain();
+    await this.buildTerrain();
     console.log('[HoIMapRenderer] Building control layer...');
     this.buildControlLayer();
     console.log('[HoIMapRenderer] Building labels...');
@@ -422,11 +422,11 @@ export class HoIMapRenderer {
     return true;
   }
 
-  private buildTerrain(): void {
+  private async buildTerrain(): Promise<void> {
     if (!this.heightmap) return;
 
-    // Build terrain texture (hillshade + rivers + roads + settlement markers)
-    const { texture } = buildHoITerrainTexture(
+    // Async texture build yields to event loop to avoid init hang (2026_02_26_MAP_INITIALIZATION_HANG)
+    const { texture } = await buildHoITerrainTextureAsync(
       this.heightmap, this.waterways, this.roads,
       this.operationalGeo as Parameters<typeof buildHoITerrainTexture>[3],
     );

@@ -1,5 +1,7 @@
 # Issue Report: HoIMapRenderer Initialization Hang (2026-02-26)
 
+**Status: FIXED.** See [20260226_MAP_INITIALIZATION_HANG_FIX.md](../implemented/20260226_MAP_INITIALIZATION_HANG_FIX.md).
+
 ## Summary
 The map view (`map_hoi.html`) currently appears completely blank (black screen with faint province outlines, lacking all UI layout such as sidebars or toolbars). The root cause is a silent initialization hang within `HoIMapRenderer.init()`. 
 

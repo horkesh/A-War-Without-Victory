@@ -863,7 +863,9 @@ function executeFactionDirectives(
 
                 const scored = validTargets.map(t => ({
                     ...t,
-                    finalScore: scoreTargetFromDirective(t.osid, t.prediction, effectiveDirective, faction, ethnicMap) + supplyPenalty
+                    finalScore: scoreTargetFromDirective(t.osid, t.prediction, effectiveDirective, faction, ethnicMap)
+                        + supplyPenalty
+                        + (counterAttackTarget === t.osid ? 180 : 0) // Retreat-based counter-attack bonus
                 })).sort((a, b) => {
                     if (b.finalScore !== a.finalScore) return b.finalScore - a.finalScore;
                     return strictCompare(a.osid, b.osid);

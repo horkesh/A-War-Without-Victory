@@ -103,6 +103,127 @@ const VILLAGE_POP_THRESHOLD = 2000; // small black dot
 
 // -- Main builder -----------------------------------------------------------
 
+/** Chunk size (rows) for async texture build to avoid blocking the event loop. */
+const ASYNC_CHUNK_ROWS = 64;
+
+/**
+ * Async version of buildHoITerrainTexture: yields every ASYNC_CHUNK_ROWS rows
+ * so the main thread can paint and other init can proceed. Use this during
+ * HoIMapRenderer init to prevent initialization hang.
+ */
+export async function buildHoITerrainTextureAsync(
+    hm: HeightmapInput,
+    waterways: LineGeoJSON | null,
+    roads: LineGeoJSON | null,
+    settlements?: SettlementGeoJSON | null,
+): Promise<{ texture: THREE.CanvasTexture }> {
+    const TEX_W = 2048;
+    const TEX_H = 2048;
+    const canvas = new OffscreenCanvas(TEX_W, TEX_H);
+    const ctx = canvas.getContext('2d')!;
+    const proj = makeCanvasProjection(hm.bbox as [number, number, number, number], TEX_W, TEX_H);
+
+    const cellWidthM = 1000;
+    const lightDir: [number, number, number] = [-0.5, 0.5, 0.707];
+
+    const imgData = ctx.createImageData(TEX_W, TEX_H);
+    const data = imgData.data;
+
+    for (let chunkStart = 0; chunkStart < TEX_H; chunkStart += ASYNC_CHUNK_ROWS) {
+        const chunkEnd = Math.min(chunkStart + ASYNC_CHUNK_ROWS, TEX_H);
+        for (let py = chunkStart; py < chunkEnd; py++) {
+            for (let px = 0; px < TEX_W; px++) {
+                const lon = hm.bbox[0]! + (px / (TEX_W - 1)) * (hm.bbox[2]! - hm.bbox[0]!);
+                const lat = hm.bbox[3]! - (py / (TEX_H - 1)) * (hm.bbox[3]! - hm.bbox[1]!);
+
+                const elev = sampleHeight(hm, lon, lat);
+                const [br, bg, bb] = hoiElevationRGB(elev);
+
+                const normal = sampleNormal(hm, lon, lat, cellWidthM);
+                const shade = computeHillshade(normal, lightDir);
+
+                const shadeFactor = 0.65 + shade * 0.50;
+
+                const i = (py * TEX_W + px) * 4;
+                data[i]     = Math.min(255, Math.round(br * shadeFactor));
+                data[i + 1] = Math.min(255, Math.round(bg * shadeFactor));
+                data[i + 2] = Math.min(255, Math.round(bb * shadeFactor));
+                data[i + 3] = 255;
+            }
+        }
+        await new Promise<void>((r) => setTimeout(r, 0));
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+
+    if (waterways) {
+        ctx.save();
+        for (const feature of waterways.features) {
+            const ww = feature.properties.waterway as string | undefined;
+            if (ww === 'river') {
+                const name = feature.properties.name as string | undefined;
+                const isMajor = name === 'Bosna' || name === 'Vrbas' || name === 'Drina'
+                    || name === 'Neretva' || name === 'Una' || name === 'Sava' || name === 'Sana';
+                const width = isMajor ? 4.0 : 2.0;
+                drawLineFeature(ctx, feature.geometry, proj, 'rgba(75, 110, 140, 0.6)', width);
+            } else if (ww === 'stream') {
+                drawLineFeature(ctx, feature.geometry, proj, 'rgba(85, 120, 150, 0.25)', 0.8);
+            }
+        }
+        ctx.restore();
+    }
+
+    if (roads) {
+        ctx.save();
+        for (const feature of roads.features) {
+            const hwy = feature.properties.highway as string;
+            const style = ROAD_STYLES[hwy];
+            if (!style) continue;
+            drawLineFeature(ctx, feature.geometry, proj, ROAD_CASING, style.width + 1.2);
+        }
+        for (const feature of roads.features) {
+            const hwy = feature.properties.highway as string;
+            const style = ROAD_STYLES[hwy];
+            if (!style) continue;
+            drawLineFeature(ctx, feature.geometry, proj, style.fill, style.width);
+        }
+        ctx.restore();
+    }
+
+    if (settlements) {
+        ctx.save();
+        for (const feature of settlements.features) {
+            const pop = feature.properties.population_total as number | undefined;
+            if (typeof pop !== 'number' || pop < VILLAGE_POP_THRESHOLD) continue;
+
+            const centroid = featureCentroid(feature.geometry);
+            if (!centroid) continue;
+            const cx = proj.x(centroid[0]);
+            const cy = proj.y(centroid[1]);
+
+            let dotR: number;
+            if (pop >= CITY_POP_THRESHOLD) dotR = 2.5;
+            else if (pop >= TOWN_POP_THRESHOLD) dotR = 1.8;
+            else dotR = 1.0;
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, dotR, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(20, 18, 15, 0.85)';
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+
+    const texture = new THREE.CanvasTexture(canvas as unknown as HTMLCanvasElement);
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = 16;
+    return { texture };
+}
+
 export function buildHoITerrainTexture(
     hm: HeightmapInput,
     waterways: LineGeoJSON | null,
