@@ -17,7 +17,13 @@
       "Added default_equipment_class to all 261 brigades",
       "Added available_from turn number to all 261 brigades",
       "Added mandatory: true for all turn-0 brigades",
-      "Game design: ARBiH 6th/7th Corps do not exist; 3rd/4th Corps brigades available_from set to 0 (not late by corps)."
+      "Game design: ARBiH 6th/7th Corps do not exist; 3rd/4th Corps brigades available_from set to 0 (not late by corps).",
+      "Historical recalibration (2026-02-25): Per-brigade initial_personnel and initial_cohesion based on BB historical data.",
+      "RS: 5-tier system (mechanized/motorized/strong/standard/weak) with personnel 800-1500, cohesion 62-75.",
+      "RBiH: 4-tier formation timing (tier0 immediate/tier1 early/tier2 corps reorg/tier3 late) with personnel 350-800, cohesion 38-56.",
+      "HRHB: By OZ (SE Herzegovina strongest, Central Bosnia weakest) with personnel 650-950, cohesion 52-64.",
+      "Added ~40 territorial_defense formations for municipalities without brigades at turn 0.",
+      "RBiH brigades not in threatened areas moved to available_from >= 4 (gradual TO→brigade formation)."
     ],
     "validation_status": "COMPLETE - All historical sources reconciled"
   },
@@ -32,7 +38,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "special",
-      "available_from": 16
+      "available_from": 8,
+      "initial_personnel": 600,
+      "initial_cohesion": 65,
+      "mandatory": true
     },
     {
       "id": "arbih_120th_liberation_black_swans",
@@ -43,8 +52,11 @@
       "subordinate_to": "arbih_general_staff",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "light_infantry",
-      "available_from": 16
+      "default_equipment_class": "special",
+      "available_from": 8,
+      "initial_personnel": 600,
+      "initial_cohesion": 65,
+      "mandatory": true
     },
     {
       "id": "arbih_17th_muslim_light",
@@ -57,7 +69,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_141st_light",
@@ -70,7 +84,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_143rd_light",
@@ -83,7 +99,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_145th_light",
@@ -96,7 +114,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_146th_light",
@@ -109,7 +129,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_101st_mountain",
@@ -123,7 +145,9 @@
       "name_1992": "1st Motorized Brigade",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_102nd_motorized",
@@ -135,9 +159,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "name_1992": "2nd Motorized Brigade",
-      "default_equipment_class": "motorized",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_105th_motorized",
@@ -149,9 +175,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "name_1992": "15th Motorized Brigade",
-      "default_equipment_class": "motorized",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_111th_vitezka_motorized",
@@ -162,9 +190,12 @@
       "subordinate_to": "arbih_1st_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "motorized",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_112th_vitezka_motorized",
@@ -175,9 +206,12 @@
       "subordinate_to": "arbih_1st_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "motorized",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_115th_mountain",
@@ -190,7 +224,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_124th_light_king_tvrtko",
@@ -203,7 +239,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_152nd_mountain",
@@ -216,7 +254,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_155th_motorized",
@@ -227,9 +267,11 @@
       "subordinate_to": "arbih_1st_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "motorized",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_104th_vitezka_motorized",
@@ -240,9 +282,12 @@
       "subordinate_to": "arbih_1st_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "motorized",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_109th_mountain",
@@ -255,7 +300,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_123rd_light",
@@ -268,7 +315,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_131st_light",
@@ -281,7 +330,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_181st_mountain",
@@ -294,7 +345,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_182nd_vitezka_light",
@@ -307,7 +360,10 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_147th_light",
@@ -320,7 +376,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_161st_slavna_olovo_mountain",
@@ -332,7 +390,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "honor": "slavna",
+      "initial_personnel": 500,
+      "initial_cohesion": 45,
+      "mandatory": true
     },
     {
       "id": "arbih_162nd_mountain",
@@ -345,7 +407,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_164th_mountain",
@@ -358,7 +422,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_165th_mountain",
@@ -371,7 +437,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_185th_light",
@@ -384,7 +452,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_9th_muslim_liberation",
@@ -396,8 +466,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_211th_liberation",
@@ -409,8 +481,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_212th_mountain",
@@ -422,8 +496,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_213th_vitezka_mountain",
@@ -436,7 +512,10 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_215th_vitezka_mountain",
@@ -449,7 +528,10 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 400,
+      "initial_cohesion": 30,
+      "honor": "vitezka"
     },
     {
       "id": "arbih_217th_vitezka_mountain",
@@ -462,7 +544,10 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_221st_mountain",
@@ -474,8 +559,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_222nd_liberation",
@@ -487,8 +574,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_223rd_mountain",
@@ -500,8 +589,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_224th_mountain",
@@ -513,8 +604,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_225th_muslim_mountain",
@@ -526,8 +619,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_250th_liberation",
@@ -541,7 +636,9 @@
       "name_1992": "1st Tuzla Brigade",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_252nd_slavna_mountain",
@@ -554,7 +651,11 @@
       "source": "markdown_rebuild",
       "name_1992": "3rd Tuzla Brigade",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "honor": "slavna",
+      "initial_personnel": 550,
+      "initial_cohesion": 48,
+      "mandatory": true
     },
     {
       "id": "arbih_253rd_mountain",
@@ -567,7 +668,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_254th_mountain",
@@ -579,8 +682,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_255th_slavna_mountain_hajrudin_mesi",
@@ -591,8 +696,12 @@
       "subordinate_to": "arbih_2nd_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "default_equipment_class": "mountain",
+      "available_from": 26,
+      "honor": "slavna",
+      "initial_personnel": 800,
+      "initial_cohesion": 56,
+      "mandatory": true
     },
     {
       "id": "arbih_7th_vitezka_muslim_liberation",
@@ -604,8 +713,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_303rd_vitezka_mountain",
@@ -617,8 +729,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_314th_slavna_liberation",
@@ -630,8 +745,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "honor": "slavna",
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_319th_liberation",
@@ -644,7 +762,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 8,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 50
     },
     {
       "id": "arbih_330th_liberation",
@@ -656,8 +776,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_327th_vitezka_mountain",
@@ -669,8 +791,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_328th_mountain",
@@ -683,7 +808,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 8,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 50
     },
     {
       "id": "arbih_329th_mountain",
@@ -696,7 +823,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 8,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 50
     },
     {
       "id": "arbih_351st_liberation",
@@ -709,7 +838,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 8,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 50
     },
     {
       "id": "arbih_372nd_vitezka_mountain",
@@ -722,7 +853,10 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 8,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 600,
+      "initial_cohesion": 50
     },
     {
       "id": "arbih_373rd_slavna_mountain",
@@ -735,7 +869,10 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 8,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "slavna",
+      "initial_personnel": 600,
+      "initial_cohesion": 50
     },
     {
       "id": "arbih_374th_slavna_light",
@@ -748,7 +885,10 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 8,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "slavna",
+      "initial_personnel": 600,
+      "initial_cohesion": 50
     },
     {
       "id": "arbih_375th_liberation",
@@ -761,7 +901,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 8,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 50
     },
     {
       "id": "arbih_377th_vitezka_mountain",
@@ -774,7 +916,10 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 8,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 600,
+      "initial_cohesion": 50
     },
     {
       "id": "arbih_4th_muslim_light",
@@ -786,8 +931,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 8,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_443rd_mountain",
@@ -799,8 +946,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 16,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_444th_mountain",
@@ -812,8 +961,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 16,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_445th_mountain",
@@ -825,8 +976,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 16,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_446th_light",
@@ -839,7 +992,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 16,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 52
     },
     {
       "id": "arbih_447th_liberation",
@@ -851,8 +1006,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 16,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_450th_light",
@@ -864,8 +1021,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 16,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_441st_vitezka_mountain",
@@ -877,8 +1036,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 16,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_442nd_mountain",
@@ -890,8 +1052,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 16,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_448th_liberation",
@@ -903,8 +1067,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 16,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_449th_eastern_herzegovina_mountain",
@@ -916,8 +1082,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 16,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_501st_slavna_mountain",
@@ -929,7 +1097,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "honor": "slavna",
+      "initial_personnel": 500,
+      "initial_cohesion": 45,
+      "mandatory": true
     },
     {
       "id": "arbih_502nd_vitezka_mountain",
@@ -942,7 +1114,10 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_503rd_slavna_mountain",
@@ -954,7 +1129,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "honor": "slavna",
+      "initial_personnel": 500,
+      "initial_cohesion": 45,
+      "mandatory": true
     },
     {
       "id": "arbih_505th_vitezka_mountain",
@@ -967,7 +1146,10 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_506th_mountain",
@@ -980,7 +1162,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_510th_bosnian_liberation",
@@ -993,7 +1177,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_511th_slavna_mountain",
@@ -1005,7 +1191,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26
+      "available_from": 0,
+      "honor": "slavna",
+      "initial_personnel": 500,
+      "initial_cohesion": 45,
+      "mandatory": true
     },
     {
       "id": "arbih_517th_light",
@@ -1018,7 +1208,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_17th_vitezka_mountain",
@@ -1030,8 +1222,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_706th_muslim_mountain",
@@ -1043,8 +1238,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_708th_mountain",
@@ -1055,9 +1252,11 @@
       "subordinate_to": "arbih_3rd_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "light_infantry",
+      "default_equipment_class": "mountain",
       "available_from": 26,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 800,
+      "initial_cohesion": 56
     },
     {
       "id": "arbih_712th_mountain",
@@ -1069,8 +1268,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 26,
-      "mandatory": true
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_725th_light",
@@ -1081,9 +1282,11 @@
       "subordinate_to": "arbih_3rd_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "light_infantry",
+      "default_equipment_class": "mountain",
       "available_from": 26,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 800,
+      "initial_cohesion": 56
     },
     {
       "id": "arbih_727th_slavna",
@@ -1096,7 +1299,10 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "slavna",
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_733rd_mountain",
@@ -1108,8 +1314,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_737th_muslim_light",
@@ -1122,7 +1330,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_705th_slavna_mountain",
@@ -1135,7 +1345,10 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "slavna",
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_707th_slavna_mountain",
@@ -1148,7 +1361,10 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "honor": "slavna",
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_717th_slavna_mountain",
@@ -1160,8 +1376,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "honor": "slavna",
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_770th_slavna_mountain",
@@ -1173,8 +1392,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "honor": "slavna",
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_210th_vitezka_liberation_nesib_maliki",
@@ -1186,8 +1408,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_240th_muslim_mountain",
@@ -1199,8 +1424,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_241st_spreca_muslim_light_gazije",
@@ -1212,8 +1439,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_242nd_zvornik_muslim_light",
@@ -1225,8 +1454,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_243rd_muslimpodrinje_mountain",
@@ -1238,8 +1469,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_244th_mountain",
@@ -1251,8 +1484,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_245th_mountain",
@@ -1264,8 +1499,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_246th_vitezka_mountain",
@@ -1277,8 +1514,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_286th_mountain",
@@ -1290,8 +1530,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_287th_mountain",
@@ -1303,8 +1545,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_801st_light",
@@ -1316,7 +1560,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 12
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_802nd_light",
@@ -1328,7 +1575,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 12
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_803rd_light",
@@ -1340,7 +1590,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 12
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_807th_muslim_liberation",
@@ -1352,7 +1605,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 12
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_808th_liberation",
@@ -1364,7 +1620,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 12
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_843rd_light",
@@ -1376,7 +1635,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 12
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_851st_vitezka_liberation",
@@ -1388,7 +1650,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
-      "available_from": 12
+      "available_from": 0,
+      "mandatory": true,
+      "honor": "vitezka",
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "rs_1st_guards_motorized",
@@ -1401,7 +1667,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "motorized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1200,
+      "initial_cohesion": 72
     },
     {
       "id": "rs_1st_armored",
@@ -1414,7 +1682,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mechanized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_2nd_armored",
@@ -1427,7 +1697,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mechanized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_2nd_krajina_infantry",
@@ -1440,7 +1712,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_5th_kozara_light_infantry",
@@ -1453,7 +1727,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1200,
+      "initial_cohesion": 70
     },
     {
       "id": "rs_6th_sanske_infantry",
@@ -1466,7 +1742,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_11th_dubica_infantry",
@@ -1479,7 +1757,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_12th_kotorsko_light_infantry",
@@ -1492,7 +1772,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_16th_krajina_motorized",
@@ -1505,7 +1787,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "motorized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1200,
+      "initial_cohesion": 72
     },
     {
       "id": "rs_11th_mrkonji_light_infantry",
@@ -1518,7 +1802,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_19th_krajina_light_infantry",
@@ -1531,7 +1817,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_22nd_krajina_infantry",
@@ -1544,7 +1832,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_27th_derventa_motorized",
@@ -1557,7 +1847,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "motorized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1200,
+      "initial_cohesion": 72
     },
     {
       "id": "rs_31st_light_infantry",
@@ -1570,7 +1862,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_43rd_prijedor_motorized",
@@ -1583,7 +1877,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "motorized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1200,
+      "initial_cohesion": 72
     },
     {
       "id": "rs_1st_doboj_light_infantry",
@@ -1596,7 +1892,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_celinac_light_infantry",
@@ -1609,7 +1907,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_srbac_light_infantry",
@@ -1622,7 +1922,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_gradika_light_infantry",
@@ -1635,7 +1937,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_novigrad_infantry",
@@ -1648,7 +1952,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_banja_luka_light_infantry",
@@ -1661,7 +1967,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_2nd_banja_luka_light_infantry",
@@ -1674,7 +1982,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_3rd_banja_luka_light_infantry",
@@ -1687,7 +1997,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_4th_banja_luka_light_infantry",
@@ -1700,7 +2012,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_kotor_varo_light_infantry",
@@ -1713,7 +2027,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_prnjavor_light_infantry",
@@ -1726,7 +2042,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_sipovo_light_infantry",
@@ -1739,7 +2057,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_tesli_infantry",
@@ -1752,7 +2072,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_2nd_tesli_light_infantry",
@@ -1765,7 +2087,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_ozren_light_infantry",
@@ -1778,7 +2102,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_2nd_ozren_light_infantry",
@@ -1791,7 +2117,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_3rd_ozren_light_infantry",
@@ -1804,7 +2132,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_4th_ozren_light_infantry",
@@ -1817,7 +2147,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_trebava_infantry",
@@ -1830,7 +2162,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_krnjin_light_infantry",
@@ -1843,7 +2177,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_vujak_light_infantry",
@@ -1856,7 +2192,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_drvar_light_infantry",
@@ -1869,7 +2207,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_3rd_petrovac_light_infantry",
@@ -1882,7 +2222,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_5th_glamo_light_infantry",
@@ -1895,7 +2237,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_7th_krajina_motorized",
@@ -1908,7 +2252,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "motorized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1200,
+      "initial_cohesion": 72
     },
     {
       "id": "rs_9th_grahovo_light_infantry",
@@ -1921,7 +2267,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_11th_krupa_light_infantry",
@@ -1934,7 +2282,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_15th_biha_infantry",
@@ -1947,7 +2297,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_17th_klju_light_infantry",
@@ -1960,7 +2312,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_posavina_infantry",
@@ -1973,7 +2327,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_2nd_posavina_light_infantry",
@@ -1986,7 +2342,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_3rd_posavina_light_infantry",
@@ -1999,7 +2357,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_semberija_light_infantry",
@@ -2012,7 +2372,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_2nd_semberija_light_infantry",
@@ -2025,7 +2387,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_3rd_semberija_light_infantry",
@@ -2038,7 +2402,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_majevica_light_infantry",
@@ -2051,7 +2417,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_2nd_majevica_light_infantry",
@@ -2064,7 +2432,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_3rd_majevica_infantry",
@@ -2077,7 +2447,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_bijeljina_light_infantry_panthers",
@@ -2090,7 +2462,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_sarajevo_mechanized",
@@ -2103,7 +2477,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mechanized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1500,
+      "initial_cohesion": 75
     },
     {
       "id": "rs_2nd_sarajevo_light_infantry",
@@ -2116,7 +2492,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "motorized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1200,
+      "initial_cohesion": 72
     },
     {
       "id": "rs_3rd_sarajevo_infantry",
@@ -2129,7 +2507,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "motorized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1200,
+      "initial_cohesion": 72
     },
     {
       "id": "rs_4th_sarajevo_light_infantry",
@@ -2142,7 +2522,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "motorized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1200,
+      "initial_cohesion": 72
     },
     {
       "id": "rs_1st_romanija_infantry",
@@ -2155,7 +2537,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "motorized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1200,
+      "initial_cohesion": 72
     },
     {
       "id": "rs_1st_zvornik",
@@ -2168,7 +2552,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_bratunac",
@@ -2181,7 +2567,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_vlasenica",
@@ -2194,7 +2582,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_milii",
@@ -2207,7 +2597,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_ekovii_brigade",
@@ -2220,7 +2612,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_rogatica_brigade",
@@ -2233,7 +2627,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_viegrad_brigade",
@@ -2246,7 +2642,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_trebinje_brigade",
@@ -2259,7 +2657,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_nevesinje_brigade",
@@ -2272,7 +2672,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_gacko_brigade",
@@ -2285,7 +2687,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_bilea_brigade",
@@ -2298,7 +2702,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_foa_brigade",
@@ -2311,7 +2717,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_ajnie_brigade",
@@ -2324,7 +2732,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_kalinovik_brigade",
@@ -2337,7 +2747,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_65th_protection_motorized_regiment",
@@ -2350,7 +2762,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "motorized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1200,
+      "initial_cohesion": 72
     },
     {
       "id": "hrhb_1st_brigade_mostar",
@@ -2363,7 +2777,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "motorized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 950,
+      "initial_cohesion": 64
     },
     {
       "id": "hrhb_2nd_brigade_mostar",
@@ -2376,7 +2792,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "motorized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 950,
+      "initial_cohesion": 64
     },
     {
       "id": "hrhb_mostar_brigade",
@@ -2389,7 +2807,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "motorized",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 950,
+      "initial_cohesion": 64
     },
     {
       "id": "hrhb_iroki_brijeg_brigade",
@@ -2402,7 +2822,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 900,
+      "initial_cohesion": 62
     },
     {
       "id": "hrhb_ljubuki_brigade",
@@ -2415,7 +2837,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 900,
+      "initial_cohesion": 62
     },
     {
       "id": "hrhb_grude_brigade",
@@ -2428,7 +2852,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 900,
+      "initial_cohesion": 62
     },
     {
       "id": "hrhb_itluk_brigade",
@@ -2441,7 +2867,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 900,
+      "initial_cohesion": 62
     },
     {
       "id": "hrhb_apljina_brigade",
@@ -2454,7 +2882,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 900,
+      "initial_cohesion": 62
     },
     {
       "id": "hrhb_1st_herzegovina_brigade_knez_domagoj",
@@ -2467,7 +2897,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 900,
+      "initial_cohesion": 62
     },
     {
       "id": "hrhb_stolac_units",
@@ -2480,7 +2912,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 900,
+      "initial_cohesion": 62
     },
     {
       "id": "hrhb_kralj_petar_kreimir_iv_brigade",
@@ -2492,7 +2926,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
-      "available_from": 8
+      "available_from": 8,
+      "initial_personnel": 800,
+      "initial_cohesion": 58,
+      "mandatory": true
     },
     {
       "id": "hrhb_kralj_tomislav_brigade",
@@ -2504,7 +2941,10 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
-      "available_from": 8
+      "available_from": 8,
+      "initial_personnel": 800,
+      "initial_cohesion": 58,
+      "mandatory": true
     },
     {
       "id": "hrhb_ban_jelai_brigade",
@@ -2515,9 +2955,11 @@
       "subordinate_to": "hvo_central_bosnia",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hrhb_herceg_stjepan_brigade",
@@ -2530,7 +2972,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 900,
+      "initial_cohesion": 62
     },
     {
       "id": "hrhb_mario_hrka_ikota_brigade",
@@ -2543,7 +2987,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 900,
+      "initial_cohesion": 62
     },
     {
       "id": "hrhb_6th_brigade_ranko_boban",
@@ -2556,7 +3002,9 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 900,
+      "initial_cohesion": 62
     },
     {
       "id": "hrhb_94th_brigade",
@@ -2567,9 +3015,11 @@
       "subordinate_to": "hvo_central_bosnia",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hrhb_95th_brigade",
@@ -2580,9 +3030,11 @@
       "subordinate_to": "hvo_central_bosnia",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hrhb_vitezovi_brigade_vitez",
@@ -2593,9 +3045,11 @@
       "subordinate_to": "hvo_central_bosnia",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hrhb_jure_franceti_brigade",
@@ -2606,9 +3060,11 @@
       "subordinate_to": "hvo_central_bosnia",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hrhb_stjepan_tomaevi_brigade",
@@ -2619,9 +3075,11 @@
       "subordinate_to": "hvo_central_bosnia",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hrhb_kiseljak_brigade",
@@ -2632,9 +3090,11 @@
       "subordinate_to": "hvo_central_bosnia",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hrhb_kreevo_brigade",
@@ -2645,9 +3105,11 @@
       "subordinate_to": "hvo_central_bosnia",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hrhb_travnik_brigade",
@@ -2658,9 +3120,11 @@
       "subordinate_to": "hvo_central_bosnia",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hrhb_101st_oraje_brigade",
@@ -2671,8 +3135,11 @@
       "subordinate_to": "hvo_northwest_bosnia",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 8
+      "default_equipment_class": "light_infantry",
+      "available_from": 8,
+      "mandatory": true,
+      "initial_personnel": 650,
+      "initial_cohesion": 52
     },
     {
       "id": "hrhb_102nd_brigade",
@@ -2683,8 +3150,11 @@
       "subordinate_to": "hvo_northwest_bosnia",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 8
+      "default_equipment_class": "light_infantry",
+      "available_from": 8,
+      "mandatory": true,
+      "initial_personnel": 650,
+      "initial_cohesion": 52
     },
     {
       "id": "hrhb_107th_gradaac_brigade",
@@ -2695,8 +3165,11 @@
       "subordinate_to": "arbih_2nd_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 8
+      "default_equipment_class": "light_infantry",
+      "available_from": 8,
+      "initial_personnel": 700,
+      "initial_cohesion": 55,
+      "mandatory": true
     },
     {
       "id": "hrhb_108th_brko_brigade",
@@ -2707,20 +3180,10 @@
       "subordinate_to": "arbih_2nd_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 8
-    },
-    {
-      "id": "hrhb_108th_brigade_listed_again_in_narrative",
-      "faction": "HRHB",
-      "name": "108th Brigade (listed again in narrative)",
-      "home_mun": "brcko",
-      "home_settlement": "",
-      "subordinate_to": "hvo_central_bosnia",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
+      "default_equipment_class": "light_infantry",
+      "available_from": 8,
+      "initial_personnel": 700,
+      "initial_cohesion": 55,
       "mandatory": true
     },
     {
@@ -2732,9 +3195,11 @@
       "subordinate_to": "hvo_central_bosnia",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hrhb_110th_usora_brigade",
@@ -2742,11 +3207,14 @@
       "name": "110th Usora Brigade",
       "home_mun": "zepce",
       "home_settlement": "",
-      "subordinate_to": "arbih_2nd_corps",
+      "subordinate_to": "arbih_3rd_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 8
+      "default_equipment_class": "light_infantry",
+      "available_from": 8,
+      "initial_personnel": 700,
+      "initial_cohesion": 55,
+      "mandatory": true
     },
     {
       "id": "hrhb_115th_zrinski_brigade",
@@ -2757,8 +3225,11 @@
       "subordinate_to": "arbih_2nd_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 8
+      "default_equipment_class": "light_infantry",
+      "available_from": 8,
+      "initial_personnel": 700,
+      "initial_cohesion": 55,
+      "mandatory": true
     },
     {
       "id": "arbih_1st_mountain",
@@ -2771,7 +3242,9 @@
       "subordinate_to": "arbih_1st_corps",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_2nd_mountain",
@@ -2784,7 +3257,9 @@
       "subordinate_to": "arbih_1st_corps",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_10th_mountain",
@@ -2797,7 +3272,9 @@
       "subordinate_to": "arbih_1st_corps",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_hvo_kralj_tvrtko",
@@ -2810,7 +3287,9 @@
       "subordinate_to": "arbih_1st_corps",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 500,
+      "initial_cohesion": 45
     },
     {
       "id": "arbih_2nd_tuzla",
@@ -2823,7 +3302,9 @@
       "subordinate_to": "arbih_2nd_corps",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 550,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_1st_olovo",
@@ -2835,8 +3316,10 @@
       "source": "historical_enrichment_1992",
       "subordinate_to": "arbih_2nd_corps",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_116th_mountain",
@@ -2848,8 +3331,10 @@
       "source": "historical_enrichment_1992",
       "subordinate_to": "arbih_2nd_corps",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_285th_light",
@@ -2861,8 +3346,10 @@
       "source": "historical_enrichment_1992",
       "subordinate_to": "arbih_2nd_corps",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_1st_cerska",
@@ -2874,8 +3361,10 @@
       "source": "historical_enrichment_1992",
       "subordinate_to": "arbih_2nd_corps",
       "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
     },
     {
       "id": "arbih_1st_kamenica",
@@ -2887,8 +3376,85 @@
       "source": "historical_enrichment_1992",
       "subordinate_to": "arbih_2nd_corps",
       "default_equipment_class": "light_infantry",
+      "available_from": 4,
+      "mandatory": true,
+      "initial_personnel": 600,
+      "initial_cohesion": 48
+    },
+    {
+      "id": "arbih_280th_east_bosnian_light",
+      "name": "280th East Bosnian Light",
+      "faction": "RBiH",
+      "home_settlement": "Srebrenica",
+      "home_mun": "srebrenica",
+      "kind": "brigade",
+      "source": "bb_28th_division_srebrenica",
+      "subordinate_to": "arbih_2nd_corps",
+      "default_equipment_class": "police",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 350,
+      "initial_cohesion": 38
+    },
+    {
+      "id": "arbih_281st_east_bosnian_light",
+      "name": "281st East Bosnian Light",
+      "faction": "RBiH",
+      "home_settlement": "Srebrenica",
+      "home_mun": "srebrenica",
+      "kind": "brigade",
+      "source": "bb_28th_division_srebrenica",
+      "subordinate_to": "arbih_2nd_corps",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 350,
+      "initial_cohesion": 38
+    },
+    {
+      "id": "arbih_282nd_east_bosnian_light",
+      "name": "282nd East Bosnian Light",
+      "faction": "RBiH",
+      "home_settlement": "Srebrenica",
+      "home_mun": "srebrenica",
+      "kind": "brigade",
+      "source": "bb_28th_division_srebrenica",
+      "subordinate_to": "arbih_2nd_corps",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 350,
+      "initial_cohesion": 38
+    },
+    {
+      "id": "arbih_283rd_east_bosnian_light",
+      "name": "283rd East Bosnian Light",
+      "faction": "RBiH",
+      "home_settlement": "Srebrenica",
+      "home_mun": "srebrenica",
+      "kind": "brigade",
+      "source": "bb_28th_division_srebrenica",
+      "subordinate_to": "arbih_2nd_corps",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 350,
+      "initial_cohesion": 38
+    },
+    {
+      "id": "arbih_284th_east_bosnian_light",
+      "name": "284th East Bosnian Light",
+      "faction": "RBiH",
+      "home_settlement": "Srebrenica",
+      "home_mun": "srebrenica",
+      "kind": "brigade",
+      "source": "bb_28th_division_srebrenica",
+      "subordinate_to": "arbih_2nd_corps",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 350,
+      "initial_cohesion": 38
     },
     {
       "id": "hvo_eugen_kvaternik",
@@ -2899,9 +3465,11 @@
       "kind": "brigade",
       "source": "historical_enrichment_1992",
       "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hvo_kotromanic",
@@ -2912,9 +3480,11 @@
       "kind": "brigade",
       "source": "historical_enrichment_1992",
       "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hvo_travnik",
@@ -2925,9 +3495,11 @@
       "kind": "brigade",
       "source": "historical_enrichment_1992",
       "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hvo_stjepan_tomasevic",
@@ -2938,9 +3510,11 @@
       "kind": "brigade",
       "source": "historical_enrichment_1992",
       "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hvo_frankopan",
@@ -2951,9 +3525,11 @@
       "kind": "brigade",
       "source": "historical_enrichment_1992",
       "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hvo_zvijezda",
@@ -2964,9 +3540,11 @@
       "kind": "brigade",
       "source": "historical_enrichment_1992",
       "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hvo_bobovac",
@@ -2977,9 +3555,11 @@
       "kind": "brigade",
       "source": "historical_enrichment_1992",
       "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "hvo_jure_francetic",
@@ -2990,9 +3570,11 @@
       "kind": "brigade",
       "source": "historical_enrichment_1992",
       "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "mountain",
+      "default_equipment_class": "light_infantry",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 700,
+      "initial_cohesion": 55
     },
     {
       "id": "vrs_31st_mountain_storm",
@@ -3005,7 +3587,9 @@
       "subordinate_to": "vrs_1st_krajina",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "vrs_1st_celinac",
@@ -3018,7 +3602,9 @@
       "subordinate_to": "vrs_1st_krajina",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "vrs_1st_laktasi",
@@ -3031,7 +3617,9 @@
       "subordinate_to": "vrs_1st_krajina",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_birac",
@@ -3044,7 +3632,9 @@
       "source": "VRS_Appendix_G_narrative",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_1st_podrinje",
@@ -3057,7 +3647,9 @@
       "source": "VRS_Appendix_G_narrative",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
     },
     {
       "id": "rs_5th_podrinje",
@@ -3070,7 +3662,360 @@
       "source": "VRS_Appendix_G_narrative",
       "default_equipment_class": "mountain",
       "available_from": 0,
-      "mandatory": true
+      "mandatory": true,
+      "initial_personnel": 1000,
+      "initial_cohesion": 67
+    },
+    {
+      "id": "rbih_td_kladanj",
+      "faction": "RBiH",
+      "name": "Kladanj TO",
+      "home_mun": "kladanj",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 300,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_kakanj",
+      "faction": "RBiH",
+      "name": "Kakanj TO",
+      "home_mun": "kakanj",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 350,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_lukavac",
+      "faction": "RBiH",
+      "name": "Lukavac TO",
+      "home_mun": "lukavac",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 350,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_zivinice",
+      "faction": "RBiH",
+      "name": "Živinice TO",
+      "home_mun": "zivinice",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 350,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_kalesija",
+      "faction": "RBiH",
+      "name": "Kalesija TO",
+      "home_mun": "kalesija",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 300,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_sapna",
+      "faction": "RBiH",
+      "name": "Sapna TO",
+      "home_mun": "zvornik",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 250,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_srebrenik",
+      "faction": "RBiH",
+      "name": "Srebrenik TO",
+      "home_mun": "srebrenik",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 300,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_gracanica",
+      "faction": "RBiH",
+      "name": "Gračanica TO",
+      "home_mun": "gracanica",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 300,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_doboj_jug",
+      "faction": "RBiH",
+      "name": "Doboj Jug TO",
+      "home_mun": "doboj",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 200,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_zavidovici",
+      "faction": "RBiH",
+      "name": "Zavidovići TO",
+      "home_mun": "zavidovici",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 300,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_tesanj",
+      "faction": "RBiH",
+      "name": "Tešanj TO",
+      "home_mun": "tesanj",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 350,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_novi_travnik",
+      "faction": "RBiH",
+      "name": "Novi Travnik TO",
+      "home_mun": "novi_travnik",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 300,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_vitez",
+      "faction": "RBiH",
+      "name": "Vitez Bosniak TO",
+      "home_mun": "vitez",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 250,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_busovaca",
+      "faction": "RBiH",
+      "name": "Busovača Bosniak TO",
+      "home_mun": "busovaca",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 200,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_prozor",
+      "faction": "RBiH",
+      "name": "Prozor TO",
+      "home_mun": "prozor",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 250,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_gornji_vakuf",
+      "faction": "RBiH",
+      "name": "Gornji Vakuf TO",
+      "home_mun": "gornji_vakuf",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 300,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_foca",
+      "faction": "RBiH",
+      "name": "Foča Bosniak TO",
+      "home_mun": "foca",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 250,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_visegrad",
+      "faction": "RBiH",
+      "name": "Višegrad TO",
+      "home_mun": "visegrad",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 200,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_rogatica",
+      "faction": "RBiH",
+      "name": "Rogatica Bosniak TO",
+      "home_mun": "rogatica",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 200,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_vlasenica",
+      "faction": "RBiH",
+      "name": "Vlasenica TO",
+      "home_mun": "vlasenica",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 200,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_bratunac",
+      "faction": "RBiH",
+      "name": "Bratunac TO",
+      "home_mun": "bratunac",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 200,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rbih_td_zvornik",
+      "faction": "RBiH",
+      "name": "Zvornik Bosniak TO",
+      "home_mun": "zvornik",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 250,
+      "initial_cohesion": 30
+    },
+    {
+      "id": "rs_td_brod",
+      "faction": "RS",
+      "name": "Brod TO",
+      "home_mun": "bosanski_brod",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "light_infantry",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 300,
+      "initial_cohesion": 40
+    },
+    {
+      "id": "rs_td_sokolac",
+      "faction": "RS",
+      "name": "Sokolac TO",
+      "home_mun": "sokolac",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "light_infantry",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 350,
+      "initial_cohesion": 40
+    },
+    {
+      "id": "hrhb_td_neum",
+      "faction": "HRHB",
+      "name": "Neum TO",
+      "home_mun": "neum",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 200,
+      "initial_cohesion": 35
+    },
+    {
+      "id": "hrhb_td_posusje",
+      "faction": "HRHB",
+      "name": "Posušje TO",
+      "home_mun": "posusje",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 300,
+      "initial_cohesion": 35
+    },
+    {
+      "id": "hrhb_td_siroki_brijeg",
+      "faction": "HRHB",
+      "name": "Široki Brijeg TO",
+      "home_mun": "listica",
+      "kind": "territorial_defense",
+      "source": "recalibration_2026_02_25",
+      "default_equipment_class": "police",
+      "available_from": 0,
+      "mandatory": true,
+      "initial_personnel": 350,
+      "initial_cohesion": 35
     }
   ]
 }

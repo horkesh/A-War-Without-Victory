@@ -62,19 +62,19 @@ describe('ensureBrigadeComposition', () => {
         expect(f.composition).toBe(comp); // mutates formation
     });
 
-    it('initializes HRHB defaults: tanks=15, artillery=15', () => {
+    it('initializes HRHB defaults: tanks=10, artillery=10', () => {
         const f = makeFormation('hrhb1', 'HRHB', 'hq2');
         const comp = ensureBrigadeComposition(f);
-        expect(comp.tanks).toBe(15);
-        expect(comp.artillery).toBe(15);
+        expect(comp.tanks).toBe(10);
+        expect(comp.artillery).toBe(10);
         expect(comp.infantry).toBe(850);
     });
 
-    it('initializes RBiH defaults: tanks=3, artillery=8', () => {
+    it('initializes RBiH defaults: tanks=1, artillery=3', () => {
         const f = makeFormation('rbih1', 'RBiH', 'hq3');
         const comp = ensureBrigadeComposition(f);
-        expect(comp.tanks).toBe(3);
-        expect(comp.artillery).toBe(8);
+        expect(comp.tanks).toBe(1);
+        expect(comp.artillery).toBe(3);
         expect(comp.infantry).toBe(950);
     });
 
@@ -99,8 +99,8 @@ describe('ensureBrigadeComposition', () => {
     it('unknown faction falls back to RBiH defaults', () => {
         const f = makeFormation('unk1', 'UNKNOWN' as FactionId, 'hq1');
         const comp = ensureBrigadeComposition(f);
-        expect(comp.tanks).toBe(3);
-        expect(comp.artillery).toBe(8);
+        expect(comp.tanks).toBe(1);
+        expect(comp.artillery).toBe(3);
     });
 });
 

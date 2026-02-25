@@ -15,6 +15,9 @@ export const MIN_OPPOSING_EDGES = 25;
 /** D0.9.1: Consecutive turns with >= MIN_OPPOSING_EDGES required before transition. */
 export const PERSIST_TURNS = 4;
 
+/** Cap for entrenchment_turns (Phase II Spec §4; same as attack_resolution_osid). */
+const MAX_ENTRENCHMENT = 12;
+
 /** Phase I §6.1 / jna_transition.ts: JNA withdrawal complete at ≥ 0.95. */
 export const JNA_WITHDRAWAL_COMPLETE_THRESHOLD = 0.95;
 
@@ -72,16 +75,19 @@ export function isPhaseIITransitionEligible(state: GameState): boolean {
 
 /**
  * Apply Phase I → Phase II transition: set meta.phase to 'phase_ii' and ensure Phase II state fields exist.
- * Idempotent when already phase_ii; no-op when not eligible. Mutates state in place; returns same state reference.
+ * Idempotent when already phase_ii; no-op when not eligible (unless forceTransition). Mutates state in place; returns same state reference.
  * Deterministic, one-way (no reverting to phase_i).
+ * @param options.forceTransition - When true, skip eligibility check and force transition (stuck-in-Phase-I fallback).
  */
 export function applyPhaseIToPhaseIITransition(
     state: GameState,
     edges?: EdgeRecord[],
-    settlements?: Map<string, SettlementRecord>
+    settlements?: Map<string, SettlementRecord>,
+    options?: { forceTransition?: boolean }
 ): GameState {
     if (state.meta.phase === 'phase_ii') return state;
-    if (!isPhaseIITransitionEligible(state)) return state;
+    const forceTransition = options?.forceTransition === true;
+    if (!forceTransition && !isPhaseIITransitionEligible(state)) return state;
 
     state.meta = { ...state.meta, phase: 'phase_ii' };
 
@@ -99,6 +105,22 @@ export function applyPhaseIToPhaseIITransition(
 
     // Initialize corps command state
     initializeCorpsCommand(state);
+
+    // Entrenchment init: set brigade/OG entrenchment_turns from scenario (PHASE_I_II_EDGE_CASES.md)
+    const initTurns = Math.min(
+        MAX_ENTRENCHMENT,
+        state.meta.phase_ii_entrenchment_init_turns ?? 0
+    );
+    if (initTurns > 0 && state.formations) {
+        const formationIds = Object.keys(state.formations).sort((a, b) => a.localeCompare(b));
+        for (const id of formationIds) {
+            const f = state.formations[id];
+            if (!f) continue;
+            const kind = f.kind ?? 'brigade';
+            if (kind !== 'brigade' && kind !== 'operational_group' && kind !== 'og') continue;
+            (f as { entrenchment_turns?: number }).entrenchment_turns = initTurns;
+        }
+    }
 
     return state;
 }

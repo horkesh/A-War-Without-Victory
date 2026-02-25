@@ -29,6 +29,7 @@ Development-time validation tools may abort execution on invariant violation.
 - Corridors must always exist in exactly one state: Open, Brittle, or Cut
 - Brittle corridors must apply continuous penalties every turn
 - Junction loss alone must not collapse a corridor unless dependency thresholds are crossed
+- **Cascade:** When connectivity is lost (e.g. control flip), dependent regions transition Adequate→Strained→Critical only when dependency threshold is crossed (no path or only brittle path). Propagation order is deterministic (by faction_id, then by node id). Supply cascade is visible at the start of the **next** turn (supply is not re-run after control flips within the same turn). See SUPPLY_DESIGN.md and SUPPLY_IMPLEMENTATION_PLAN.md.
 
 **Supply Requirements:**
 - All supply must trace through corridors or local production

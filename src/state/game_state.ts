@@ -153,6 +153,32 @@ export interface CorpsOperation {
     participating_brigades: FormationId[];
 }
 
+/**
+ * Corps-level directive: what the corps commander tells subordinate brigades to do.
+ * Generated each turn by bot_corps_ai.ts; consumed by bot_brigade_ai_osid.ts.
+ * Replaces per-brigade strategic scoring — brigades execute, corps decides.
+ *
+ * Deterministic: all arrays sorted by strictCompare.
+ */
+export interface CorpsDirective {
+    /** Front segments this corps is responsible for covering. */
+    assigned_front_ids: string[];
+    /** OSIDs the corps wants attacked this turn (priority-sorted, highest first). */
+    offensive_targets: string[];
+    /** OSIDs that must be held at all costs (chokepoints, enclaves, corridors). */
+    hold_osids: string[];
+    /** OSIDs to avoid attacking (heartland, political constraints). */
+    avoid_osids: string[];
+    /** Maximum simultaneous attackers per target OSID. */
+    max_attackers_per_target: number;
+    /** Fraction of subordinate brigades to keep in reserve (0.0–0.5). */
+    reserve_fraction: number;
+    /** Minimum predicted outcome to approve an attack. */
+    min_attack_outcome: 'decisive_victory' | 'victory' | 'costly_victory' | 'stalemate' | 'repulsed';
+    /** Aggression modifier from doctrine phase (-0.1 to 0.15). */
+    aggression_modifier: number;
+}
+
 /** Per-corps command state. */
 export interface CorpsCommandState {
     command_span: number;
@@ -162,6 +188,8 @@ export interface CorpsCommandState {
     corps_exhaustion: number;
     stance: CorpsStance;
     active_operation?: CorpsOperation | null;
+    /** Corps directive for subordinate brigades (generated each turn by corps AI). */
+    directive?: CorpsDirective | null;
 }
 
 /** Operational group activation order. */
@@ -225,6 +253,8 @@ export interface FormationState {
     readiness?: FormationReadinessState; // default: 'active' for backward compatibility
     cohesion?: number; // [0,100] formation cohesion, affects effectiveness and collapse risk
     experience?: number; // [0,1] formation experience (Phase I / System 10)
+    /** Unit honor/decoration title. Affects combat power: slavna (1.10×), vitezka (1.20×). ARBiH decoration system; reflects veteran status and battle-hardened capability. */
+    honor?: 'slavna' | 'vitezka';
     activation_gated?: boolean; // true if activation is blocked by time, authority, or supply constraints
     activation_turn?: number | null; // turn when formation activated (null if still forming)
     // System 3: Heavy equipment state.
@@ -242,6 +272,8 @@ export interface FormationState {
     corps_id?: FormationId | null;
     /** Typed brigade composition (tanks, artillery, infantry). */
     composition?: BrigadeComposition;
+    /** Equipment class for progression (police → light_infantry → mountain). See recruitment_types.EquipmentClass. */
+    equipment_class?: string;
     /** 1-turn disruption flag from AoR reshaping; reduces pressure output. */
     disrupted?: boolean;
     /** HoI ZoC / Attack Resolution: turns on current OSID without moving; resets on move; caps at MAX_ENTRENCHMENT (12). */
@@ -606,8 +638,20 @@ export interface StateMeta {
     game_over?: boolean;
     /** Phase 0: Outcome label when game_over (e.g. 'non_war_terminal'). */
     outcome?: string;
+    /** Phase 0→I: Turn when Phase 0 ended (audit; set at transition). §8 Output Contract. */
+    phase_0_end_turn?: number | null;
+    /** Phase 0→I: Turn when Phase I started (audit; set at transition). §8 Output Contract. */
+    phase_1_start_turn?: number | null;
+    /** Phase 0→I: What triggered transition (e.g. 'war_start_turn'). §8 Output Contract. */
+    escalation_reason?: string | null;
     /** Phase I → II: Consecutive turns with opposing-control edges >= MIN_OPPOSING_EDGES (D0.9.1). Default 0 on load. */
     phase_i_opposing_edges_streak?: number;
+    /** Phase I→II: Optional initial entrenchment turns (0..12) for all brigades at transition; set from scenario. */
+    phase_ii_entrenchment_init_turns?: number;
+    /** Stuck-in-Phase-I fallback: force transition after this many Phase I turns since war_start_turn (e.g. 52). */
+    phase_i_force_transition_after_turns?: number;
+    /** Phase II §11.3: Operation Storm (Oluja) has triggered (precondition step set). */
+    operation_storm_triggered?: boolean;
     /** Phase I §4.8 (historical fidelity): Earliest turn when RBiH–HRHB open war can begin. When turn < this value, RBiH–HRHB treated as allied for flips and alliance cannot drop below ALLIED_THRESHOLD. Default 26 when absent (October 1992 for April 1992 start). */
     rbih_hrhb_war_earliest_turn?: number | null;
     /** Phase I §4.8: When false, alliance value is not updated (RBiH–HRHB remain at init_alliance_rbih_hrhb). Set from scenario.enable_rbih_hrhb_dynamics. */
@@ -1119,6 +1163,8 @@ export interface GameState {
     phase_ii_exhaustion?: Record<FactionId, number>;
     /** Optional local (per-settlement) exhaustion accumulator; monotonic when present. */
     phase_ii_exhaustion_local?: Record<SettlementId, number>;
+    /** Enclave resilience values [0, 30] per enclave ID. Grows under isolation, provides defense/cohesion bonus. */
+    enclave_resilience?: Record<string, number>;
     /** OSID list in enemy ZoC per faction (for ZoC overlay). Set by zoc-computation when operational data present. */
     phase_ii_enemy_zoc_by_faction?: Record<FactionId, string[]>;
     /** Linked ZoC per faction: OSIDs that form a connected front between 2+ friendly brigades. Enemies cannot enter. */

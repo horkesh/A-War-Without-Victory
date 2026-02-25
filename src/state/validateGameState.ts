@@ -122,6 +122,16 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
             if ('outcome' in m && m.outcome !== undefined && m.outcome !== null && typeof m.outcome !== 'string') {
                 errors.push('meta.outcome must be string or null when present');
             }
+            // Phase 0→I transition audit (§8 Output Contract; optional when present)
+            if ('phase_0_end_turn' in m && m.phase_0_end_turn !== undefined && m.phase_0_end_turn !== null && (typeof m.phase_0_end_turn !== 'number' || !Number.isInteger(m.phase_0_end_turn) || m.phase_0_end_turn < 0)) {
+                errors.push('meta.phase_0_end_turn must be null or a non-negative integer when present');
+            }
+            if ('phase_1_start_turn' in m && m.phase_1_start_turn !== undefined && m.phase_1_start_turn !== null && (typeof m.phase_1_start_turn !== 'number' || !Number.isInteger(m.phase_1_start_turn) || m.phase_1_start_turn < 0)) {
+                errors.push('meta.phase_1_start_turn must be null or a non-negative integer when present');
+            }
+            if ('escalation_reason' in m && m.escalation_reason !== undefined && m.escalation_reason !== null && typeof m.escalation_reason !== 'string') {
+                errors.push('meta.escalation_reason must be string or null when present');
+            }
             // D0.9.1: Phase I opposing-edges streak (optional; non-negative integer when present)
             if (
                 'phase_i_opposing_edges_streak' in m &&

@@ -7,7 +7,7 @@
 import { computeFrontEdges } from '../../map/front_edges.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import type { FactionId, GameState } from '../../state/game_state.js';
-import type { SupplyStateDerivationReport } from '../../state/supply_state_derivation.js';
+import type { SupplyStateByOsidReport, SupplyStateDerivationReport } from '../../state/supply_state_derivation.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 /** Pressure per front edge (overextension). */
@@ -34,13 +34,19 @@ export function updatePhaseIISupplyPressure(
     settlementEdges: EdgeRecord[],
     supplyReport?: SupplyStateDerivationReport,
     frictionMultipliers?: Record<FactionId, number>,
-    productionBonusByFaction?: Record<FactionId, number>
+    productionBonusByFaction?: Record<FactionId, number>,
+    supplyStateByOsid?: SupplyStateByOsidReport
 ): void {
     if (state.meta.phase !== 'phase_ii') {
         return;
     }
 
-    const frontEdges = computeFrontEdges(state, settlementEdges);
+    // Use OSID front edges when available (more accurate in OSID mode);
+    // fall back to settlement-level front edges otherwise.
+    const osidFrontEdges = state.phase_ii_front_edges_osid;
+    const frontEdges = osidFrontEdges && osidFrontEdges.length > 0
+        ? osidFrontEdges
+        : computeFrontEdges(state, settlementEdges);
     const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
 
     const frontEdgeCountByFaction = new Map<FactionId, number>();
@@ -54,7 +60,21 @@ export function updatePhaseIISupplyPressure(
 
     const criticalByFaction = new Map<FactionId, number>();
     const strainedByFaction = new Map<FactionId, number>();
-    if (supplyReport?.factions) {
+
+    // OSID supply state is authoritative when available (settlement-level counts are 0 in OSID mode
+    // because political_controllers are keyed by OSID, not canonical SID).
+    if (supplyStateByOsid?.factions) {
+        for (const facEntry of supplyStateByOsid.factions) {
+            let osidCritical = 0;
+            let osidStrained = 0;
+            for (const e of facEntry.by_osid ?? []) {
+                if (e.state === 'critical') osidCritical++;
+                else if (e.state === 'strained') osidStrained++;
+            }
+            criticalByFaction.set(facEntry.faction_id, osidCritical);
+            strainedByFaction.set(facEntry.faction_id, osidStrained);
+        }
+    } else if (supplyReport?.factions) {
         for (const entry of supplyReport.factions) {
             criticalByFaction.set(entry.faction_id, entry.critical_count ?? 0);
             strainedByFaction.set(entry.faction_id, entry.strained_count ?? 0);

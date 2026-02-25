@@ -107,4 +107,18 @@ export interface Scenario {
      * so the transition can apply it. See Phase II Spec §4, §6 and docs/30_planning/PHASE_I_II_EDGE_CASES.md.
      */
     phase_ii_entrenchment_init_turns?: number;
+    /**
+     * Stuck-in-Phase-I fallback: after this many Phase I turns (since war_start_turn) without transition,
+     * force transition to Phase II. Optional; when absent, default 52 is used for phase_0/phase_i starts.
+     * See docs/30_planning/PHASE_I_II_EDGE_CASES.md.
+     */
+    phase_i_force_transition_after_turns?: number;
+    /**
+     * Per-OSID political control overrides. Applied after OSID promotion (majority voting),
+     * before OOB formation creation. Used for historically accurate initial control that
+     * differs from municipality-level ethnic majority (e.g. Brčko: city held by VRS despite
+     * municipality-level Bosniak majority).
+     * Keys: OSID strings (e.g. "op:brcko:brcko"). Values: FactionId ("RS", "RBiH", "HRHB").
+     */
+    osid_control_overrides?: Record<string, string>;
 }

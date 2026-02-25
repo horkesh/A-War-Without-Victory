@@ -7,9 +7,10 @@
 import type { GameState, MunicipalityId } from './game_state.js';
 
 import type { AdjacencyMap } from '../map/adjacency_map.js';
-import type { SettlementRecord } from '../map/settlements.js';
+import type { EdgeRecord, SettlementRecord } from '../map/settlements.js';
 import { getSettlementControlStatus } from './settlement_control.js';
 import type { SupplyReachabilityReport } from './supply_reachability.js';
+import type { SupplyReachabilityOsidReport } from './supply_reachability_osid.js';
 
 /** Supply state levels per canon (Systems Manual §14). */
 export type SupplyStateLevel = 'adequate' | 'strained' | 'critical';
@@ -65,6 +66,25 @@ export interface LocalProductionCapacityReport {
     schema: 1;
     turn: number;
     by_municipality: LocalProductionCapacityEntry[]; // sorted by mun_id
+}
+
+/** Per-OSID supply state for one faction (Phase II). */
+export interface OsidSupplyStateEntry {
+    osid: string;
+    state: SupplyStateLevel;
+}
+
+/** Per-faction supply state by OSID. */
+export interface FactionSupplyStateByOsidEntry {
+    faction_id: string;
+    by_osid: OsidSupplyStateEntry[]; // sorted by osid
+}
+
+/** Report of supply state by OSID per faction. Used for supply_mult in combat when operational layer is authoritative. */
+export interface SupplyStateByOsidReport {
+    schema: 1;
+    turn: number;
+    factions: FactionSupplyStateByOsidEntry[]; // sorted by faction_id
 }
 
 /**
@@ -313,4 +333,193 @@ export function deriveLocalProductionCapacity(
     }
 
     return { schema: 1, turn, by_municipality };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// OSID-level supply state (Phase II)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function buildOsidAdjacencyFromEdges(edges: EdgeRecord[]): Map<string, string[]> {
+    const adj = new Map<string, string[]>();
+    for (const e of edges) {
+        const a = e.a;
+        const b = e.b;
+        if (!adj.has(a)) adj.set(a, []);
+        adj.get(a)!.push(b);
+        if (!adj.has(b)) adj.set(b, []);
+        adj.get(b)!.push(a);
+    }
+    for (const list of adj.values()) {
+        list.sort((x, y) => x.localeCompare(y));
+    }
+    return adj;
+}
+
+function isBridgeInSubgraphOsid(
+    edgeId: string,
+    edgesUsed: Set<string>,
+    reachableNodes: Set<string>,
+    adjacency: Map<string, string[]>
+): boolean {
+    const parts = edgeId.split('__');
+    if (parts.length !== 2) return false;
+    const [a, b] = parts;
+    if (!reachableNodes.has(a) || !reachableNodes.has(b)) return false;
+    const without = new Set(edgesUsed);
+    without.delete(edgeId);
+    const visited = new Set<string>();
+    const queue: string[] = [a];
+    visited.add(a);
+    while (queue.length > 0) {
+        const cur = queue.shift()!;
+        const neighbors = adjacency.get(cur) ?? [];
+        for (const n of neighbors) {
+            if (visited.has(n)) continue;
+            const eid = cur < n ? `${cur}__${n}` : `${n}__${cur}`;
+            if (!without.has(eid)) continue;
+            visited.add(n);
+            queue.push(n);
+        }
+    }
+    return !visited.has(b);
+}
+
+/**
+ * Derives corridor states (Open/Brittle/Cut) per faction for the OSID graph.
+ */
+export function deriveCorridorsOsid(
+    state: GameState,
+    edges: EdgeRecord[],
+    supplyReport: SupplyReachabilityOsidReport
+): CorridorDerivationReport {
+    const turn = state.meta.turn;
+    const adjacency = buildOsidAdjacencyFromEdges(edges);
+    const corridors: DerivedCorridor[] = [];
+
+    for (const fac of supplyReport.factions) {
+        const controlledSet = new Set(fac.controlled);
+        const edgesUsed = new Set(fac.edges_used ?? []);
+        const reachableSet = new Set(fac.reachable_osids);
+
+        const potentialEdges = new Set<string>();
+        for (const osid of fac.controlled) {
+            const neighbors = adjacency.get(osid) ?? [];
+            for (const n of neighbors) {
+                if (!controlledSet.has(n)) continue;
+                const eid = osid < n ? `${osid}__${n}` : `${n}__${osid}`;
+                potentialEdges.add(eid);
+            }
+        }
+
+        for (const edgeId of edgesUsed) {
+            const isBridge = isBridgeInSubgraphOsid(edgeId, edgesUsed, reachableSet, adjacency);
+            corridors.push({ edge_id: edgeId, faction_id: fac.faction_id, state: isBridge ? 'brittle' : 'open' });
+        }
+        for (const edgeId of potentialEdges) {
+            if (edgesUsed.has(edgeId)) continue;
+            corridors.push({ edge_id: edgeId, faction_id: fac.faction_id, state: 'cut' });
+        }
+    }
+
+    corridors.sort((a, b) => {
+        const fc = a.faction_id.localeCompare(b.faction_id);
+        if (fc !== 0) return fc;
+        return a.edge_id.localeCompare(b.edge_id);
+    });
+
+    return { schema: 1, turn, corridors };
+}
+
+/**
+ * Derives supply state (Adequate/Strained/Critical) per OSID per faction.
+ * Isolated → critical; reachable with brittle path → strained; else adequate.
+ */
+export function deriveSupplyStateByOsid(
+    state: GameState,
+    edges: EdgeRecord[],
+    supplyReport: SupplyReachabilityOsidReport,
+    corridorReport: CorridorDerivationReport
+): SupplyStateByOsidReport {
+    const turn = state.meta.turn;
+    const adjacency = buildOsidAdjacencyFromEdges(edges);
+    const corridorByFactionEdge = new Map<string, CorridorStateLevel>();
+    for (const c of corridorReport.corridors) {
+        corridorByFactionEdge.set(`${c.faction_id}:${c.edge_id}`, c.state);
+    }
+
+    const factionEntries: FactionSupplyStateByOsidEntry[] = [];
+
+    for (const fac of supplyReport.factions) {
+        const reachableSet = new Set(fac.reachable_osids);
+        const isolatedSet = new Set(fac.isolated_osids);
+        const edgesUsed = new Set(fac.edges_used ?? []);
+        const openEdges = new Set<string>();
+        for (const edgeId of edgesUsed) {
+            const st = corridorByFactionEdge.get(`${fac.faction_id}:${edgeId}`);
+            if (st === 'open') openEdges.add(edgeId);
+        }
+
+        const sources = new Set(fac.sources.filter((osid) => reachableSet.has(osid)));
+        const adequateVisited = new Set<string>();
+        const queue: string[] = [...sources];
+        for (const s of sources) adequateVisited.add(s);
+        while (queue.length > 0) {
+            const cur = queue.shift()!;
+            const neighbors = adjacency.get(cur) ?? [];
+            for (const n of neighbors) {
+                if (adequateVisited.has(n)) continue;
+                const eid = cur < n ? `${cur}__${n}` : `${n}__${cur}`;
+                if (!openEdges.has(eid)) continue;
+                adequateVisited.add(n);
+                queue.push(n);
+            }
+        }
+
+        const by_osid: OsidSupplyStateEntry[] = [];
+        for (const osid of fac.controlled) {
+            let level: SupplyStateLevel;
+            if (isolatedSet.has(osid)) {
+                level = 'critical';
+            } else if (adequateVisited.has(osid)) {
+                level = 'adequate';
+            } else {
+                level = 'strained';
+            }
+            by_osid.push({ osid, state: level });
+        }
+        by_osid.sort((a, b) => a.osid.localeCompare(b.osid));
+
+        factionEntries.push({ faction_id: fac.faction_id, by_osid });
+    }
+
+    factionEntries.sort((a, b) => a.faction_id.localeCompare(b.faction_id));
+    return { schema: 1, turn, factions: factionEntries };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Enclave resilience (Phase 4 — formula TBD by Game Designer)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Per-enclave resilience value (0..1). Formula and caps TBD by Game Designer. */
+export interface EnclaveResilienceEntry {
+    enclave_id: string;
+    faction_id: string;
+    resilience: number; // 0..1, bounded
+    hardening_active: boolean; // true after N turns strained/critical in enclave
+}
+
+/** Report of enclave resilience and hardening. Currently stub (no formula). */
+export interface EnclaveResilienceReport {
+    schema: 1;
+    turn: number;
+    enclaves: EnclaveResilienceEntry[]; // sorted by faction_id then enclave_id
+}
+
+/**
+ * Derives enclave resilience and hardening. Returns empty report until Game Designer provides formula.
+ * Deterministic: sorted iteration. See SUPPLY_DESIGN.md and SUPPLY_IMPLEMENTATION_PLAN.md Phase 4.
+ */
+export function deriveEnclaveResilience(_state: GameState): EnclaveResilienceReport {
+    const turn = _state.meta.turn;
+    return { schema: 1, turn, enclaves: [] };
 }

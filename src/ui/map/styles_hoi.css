@@ -487,3 +487,105 @@ html, body {
 .hoi-map-mode-btn.active .hoi-map-mode-label {
   color: var(--hoi-primary);
 }
+
+/* ── Formation DOM Overlay ─────────────────────────────────────────────────── */
+.formation-overlay-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.hoi-formation-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.hoi-formation-marker.selected .marker-box {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+.hoi-formation-marker .marker-box {
+  position: relative;
+  width: 48px;
+  height: 22px;
+  background-color: var(--hoi-card-bg);
+  border: 1px solid rgba(0,0,0,0.8);
+  border-radius: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.hoi-formation-marker.is-corps .marker-box {
+  width: 56px;
+  height: 26px;
+}
+
+.hoi-formation-marker .faction-rs { background-color: var(--hoi-faction-rs); color: #fff; }
+.hoi-formation-marker .faction-rbih { background-color: var(--hoi-faction-rbih); color: #fff; }
+.hoi-formation-marker .faction-hrhb { background-color: var(--hoi-faction-hrhb); color: #fff; }
+
+.hoi-formation-marker .readiness-glow {
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.hoi-formation-marker .posture-stripe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: rgba(255,255,255,0.3);
+}
+
+.hoi-formation-marker .posture-attack { background: #d03030; }
+.hoi-formation-marker .posture-defend { background: #40a050; }
+.hoi-formation-marker .posture-probe { background: #e8a020; }
+
+.hoi-formation-marker .nato-symbol {
+  font-family: var(--hoi-font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  z-index: 1;
+}
+
+.hoi-formation-marker .strength {
+  position: absolute;
+  bottom: 0px;
+  right: 2px;
+  font-family: var(--hoi-font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.8);
+  z-index: 1;
+}
+
+.hoi-formation-marker .name-label {
+  font-family: var(--hoi-font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--hoi-primary);
+  background: rgba(28, 26, 23, 0.7);
+  padding: 1px 4px;
+  border-radius: 2px;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+  white-space: nowrap;
+}

@@ -27,6 +27,7 @@ import { updateMilitiaEmergence, type MilitiaEmergenceReport } from './phase_i/m
 import { runPoolPopulation, type PoolPopulationReport } from './phase_i/pool_population.js';
 import {
     applyPhaseIToPhaseIITransition,
+    isPhaseIITransitionEligible,
     updatePhaseIOpposingEdgesStreak
 } from './phase_transitions/phase_i_to_phase_ii.js';
 
@@ -148,7 +149,18 @@ export async function runPhaseITurn(
     if (graph.edges.length > 0) {
         updatePhaseIOpposingEdgesStreak(working, graph.edges);
     }
-    applyPhaseIToPhaseIITransition(working, graph.edges);
+    const n = working.meta.phase_i_force_transition_after_turns;
+    const warStart = working.meta.war_start_turn ?? 0;
+    if (
+        working.meta.phase === 'phase_i' &&
+        !isPhaseIITransitionEligible(working) &&
+        typeof n === 'number' &&
+        (working.meta.turn ?? 0) >= warStart + n
+    ) {
+        applyPhaseIToPhaseIITransition(working, graph.edges, undefined, { forceTransition: true });
+    } else {
+        applyPhaseIToPhaseIITransition(working, graph.edges);
+    }
 
     return { nextState: working, report };
 }

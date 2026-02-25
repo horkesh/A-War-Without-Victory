@@ -80,7 +80,9 @@
 
 ---
 
-## 7. Bot AI remaining work (from BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13)
+## 7. Bot AI remaining work (from BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13 and CALIBRATION_REPORT_BOT_AI_FEB_2026)
+
+**Open issues from Feb 2026 calibration report** ([CALIBRATION_REPORT_BOT_AI_FEB_2026.md](CALIBRATION_REPORT_BOT_AI_FEB_2026.md) §7): **Front-assignment bug (critical)** — all RS brigades assigned to HRHB-RS front, zero see RBiH-RS front; RS cannot attack Brčko/Posavina corridor regardless of scoring. **Corps personnel imbalance (high)** — VRS 1st Krajina 56K vs Sarajevo-Romanija 2.6K; ARBiH 2nd Corps 75K vs 4th Corps 0 brigades at week 0. **Enclave protection (high)** — Srebrenica, Goražde, Cazin fall to RS; no mechanism to model besieged enclaves that held historically. **ARBiH 4th Corps / 2nd Corps balance (medium)** — OOB available_from gating and turn-0 brigade distribution; RS at 59% not 60–65% (combination of above).
 
 The report [BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md](../_old/40_reports/implemented_2026_02_15/BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md) (archived) lists **Remaining Issues (Future Work)**:
 
@@ -103,6 +105,10 @@ Treat these as backlog items for bot/brigade AI when prioritizing. **Next single
 | Report | Summary | Priority / owner |
 |--------|---------|-------------------|
 | [20260223_PIPELINE_NEXT_WHILE_BOT_REWRITE.md](backlog/20260223_PIPELINE_NEXT_WHILE_BOT_REWRITE.md) | **Critical:** War termination minimal spec, Player’s Turn Guide, supply spec. **Important:** Phase 0 JNA_status hand-off, Phase II ceasefire/Washington in pipeline, Phase I→II edge cases, Operation Storm spec, scoring. **AoR follow-ups:** phase-ii-recon-intelligence OSID, aor_init cleanup, test/baseline strategy. **Other:** Phase 0 output contract, GUI/Warroom items, headless vs desktop Phase II. Ordered suggestions in doc. | PM to sequence; Game Designer / Gameplay / Architect / QA per item. |
+
+**War termination (1.1) work directive (2026-02-24):** [ORCHESTRATOR_WAR_TERMINATION_MINIMAL_SPEC_DIRECTIVE_2026_02_24.md](convenes/ORCHESTRATOR_WAR_TERMINATION_MINIMAL_SPEC_DIRECTIVE_2026_02_24.md) — Game Designer lead, Technical Architect oversee, Historian advise on historicity. Deliverable: minimal spec (Dayton-style end, faction goals, recurring initiatives, preconditions).
+
+**Supply full-team convene (2026-02-24):** [ORCHESTRATOR_SUPPLY_FULL_TEAM_CONVENE_2026_02_24.md](convenes/ORCHESTRATOR_SUPPLY_FULL_TEAM_CONVENE_2026_02_24.md) — Full Paradox team input; innovative proposals (enclave resilience, corridor UI, supply_mult in bot scoring, optional hardening). **Single priority:** Supply design doc (OSID trace, supply_mult wiring, cascade, enclave/resilience rules, minimum supply UX). Owner: Technical Architect (lead author), Game Designer, Architect; PM to sequence implementation after sign-off. **Supply design doc:** [docs/30_planning/SUPPLY_DESIGN.md](../30_planning/SUPPLY_DESIGN.md).
 
 ---
 

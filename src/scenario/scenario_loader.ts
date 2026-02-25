@@ -302,6 +302,15 @@ export function normalizeScenario(raw: unknown): Scenario {
             ? o.phase_ii_entrenchment_init_turns
             : undefined;
 
+    // Stuck-in-Phase-I fallback: optional N turns after war_start_turn to force Phase II transition.
+    const phase_i_force_transition_after_turns =
+        typeof o.phase_i_force_transition_after_turns === 'number' &&
+        Number.isInteger(o.phase_i_force_transition_after_turns) &&
+        o.phase_i_force_transition_after_turns >= 1 &&
+        o.phase_i_force_transition_after_turns <= 104
+            ? o.phase_i_force_transition_after_turns
+            : undefined;
+
     // Phase H2.4: When use_harness_bots is true, ensure every week has at least one baseline_ops action (deterministic; uses existing baseline_ops only).
     if (use_harness_bots && weeks > 0) {
         const turnsByWeek = new Map<number, ScenarioTurn>();
@@ -363,7 +372,8 @@ export function normalizeScenario(raw: unknown): Scenario {
             equipment_points,
             equipment_points_trickle,
             max_recruits_per_faction_per_turn,
-            phase_ii_entrenchment_init_turns
+            phase_ii_entrenchment_init_turns,
+            phase_i_force_transition_after_turns
         };
     }
 
@@ -403,7 +413,8 @@ export function normalizeScenario(raw: unknown): Scenario {
         equipment_points,
         equipment_points_trickle,
         max_recruits_per_faction_per_turn,
-        phase_ii_entrenchment_init_turns
+        phase_ii_entrenchment_init_turns,
+        phase_i_force_transition_after_turns
     };
 }
 

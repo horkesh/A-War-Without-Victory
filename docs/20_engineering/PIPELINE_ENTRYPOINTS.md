@@ -101,7 +101,7 @@ Phase I steps: `evaluate-events` (first), `phase-i-militia-emergence`, `phase-i-
 
 **Authority derivation:** `update-formation-lifecycle` derives municipality authority via `deriveMunicipalityAuthorityMap` (formation_lifecycle.ts) from political control (consolidated/contested/fragmented); used for brigade activation gating.
 
-**Phase II OSID/ZoC:** No AoR. Pipeline steps: `zoc-computation`, `zoc-constrained-movement`, `derive-osid-front-segments` (sets phase_ii_front_edges_osid; assignable_front_segments derived from it), `phase-ii-resolve-attack-orders` (OSID attack resolution). After `phase-ii-alliance-update`, RBiH–HRHB milestone checks run: `phase-ii-ceasefire-check`, `phase-ii-washington-check` (same precondition logic as Phase I). Brigade location is location_osid only; Phase II entry uses backfillFormationLocationOsid. See Phase_II_Specification_v0_5_0.md §5 and AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md.
+**Phase II OSID/ZoC:** No AoR. Pipeline steps: `zoc-computation`, `phase-ii-supply-osid` (OSID supply reachability and supply_state_by_osid for supply_mult in combat), `zoc-constrained-movement`, `derive-osid-front-segments` (sets phase_ii_front_edges_osid; assignable_front_segments derived from it), `phase-ii-resolve-attack-orders` (OSID attack resolution; uses supply_state_by_osid when present). After `phase-ii-alliance-update`, RBiH–HRHB milestone checks run: `phase-ii-ceasefire-check`, `phase-ii-washington-check` (same precondition logic as Phase I). Brigade location is location_osid only; Phase II entry uses backfillFormationLocationOsid. See Phase_II_Specification_v0_5_0.md §5 and AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md.
 
 ## Non-Canonical / Legacy Harnesses
 These exist for smoke and internal checks, not for authoritative runs:

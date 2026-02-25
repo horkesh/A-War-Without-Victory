@@ -71,6 +71,7 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'phase_ii_supply_pressure',
     'phase_ii_exhaustion',
     'phase_ii_exhaustion_local',
+    'enclave_resilience',
     'phase_ii_enemy_zoc_by_faction',
     'phase_ii_linked_zoc_by_faction',
     // Brigade Operations System state (Phase II; AoR keys removed — not serialized)

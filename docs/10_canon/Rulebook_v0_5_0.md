@@ -308,7 +308,7 @@ Some actions are possible but carry severe long-term consequences.
 
 ## 15. Player's Turn Guide
 
-A phase-by-phase summary of player actions each turn. For system details, see the relevant sections above.
+A phase-by-phase summary of player actions each turn. For system details, see the relevant sections above. *Implementation-note: This section satisfies pipeline backlog item 1.2 (Player's Turn Guide); confirmed 2026-02-24.*
 
 ### 15.1 Phase 0 (Pre-War)
 
@@ -338,7 +338,7 @@ Each turn the player:
 2. **Sets brigade postures** and **issues attack orders** (as in Phase I, but with ZoC constraints)
 3. **Manages corps operations**: front assignments, operational groups, attack axes
 4. **Monitors** exhaustion, recruitment, equipment degradation, alliance dynamics
-5. **Responds** to events: ceasefire conditions, Washington Agreement preconditions, enclave integrity
+5. **Responds** to events: ceasefire conditions, Washington Agreement preconditions, enclave integrity (implementation-note: enclave protection for Srebrenica/Goražde/Cazin is not yet implemented; see CALIBRATION_REPORT_BOT_AI_FEB_2026.md §7)
 6. **Ends turn** — ZoC-constrained movement resolves; attacks resolve; supply/exhaustion update; recruitment accrues
 
 Phase II adds operational depth (corps, fronts, supply) but reduces tactical flexibility (ZoC, exhaustion, friction).

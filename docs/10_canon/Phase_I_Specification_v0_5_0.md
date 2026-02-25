@@ -98,6 +98,8 @@ phase_0_outputs:
     description: "JNA withdrawal and asset transfer state"
 ```
 
+*Implementation note:* Phase I receives JNA_status via `state.phase_i_jna`, set by Phase 0 at the moment of Phase 0→I transition (Phase_0_Spec §7.7, §8).
+
 For the purposes of political control invariants, militia pressure applied during Phase I constitutes sustained opposing military pressure.
 
 ---

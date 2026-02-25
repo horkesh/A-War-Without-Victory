@@ -31,6 +31,8 @@ No total victory or automatic control flip is implied; Storm is a conditional la
 
 When implemented, add a **precondition-check step** in the Phase II pipeline (same pattern as Washington Agreement): a dedicated step that evaluates the conditions above and, if met, applies the effects (state updates, narrative, and/or front-priority changes). Reference: Phase II Spec §11.2; phase-ii-washington-check as the pattern to follow.
 
+**Implemented (Pipeline 2.4, 2026-02-25):** Phase II Spec §11.3 added; pipeline step **phase-ii-operation-storm-check** runs after phase-ii-washington-check. Preconditions: Washington active, RS territorial share ≥ STORM_RS_THREAT_SHARE (0.35), combined RBiH+HRHB exhaustion ≥ STORM_COMBINED_EXHAUSTION (60), IVP negotiation_momentum ≥ STORM_IVP_MOMENTUM (0.55). Effect: sets state.meta.operation_storm_triggered. Thresholds are Architect-decided; flag for user review. See implementation report docs/40_reports/implemented/20260225_PIPELINE_2_3_2_4_2_5_EDGE_CASES_OPERATION_STORM_SCORING.md.
+
 ## References
 
 - Phase II Specification v0.5.0 §11.2 War Termination and End-Game

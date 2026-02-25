@@ -158,6 +158,9 @@ interface DesktopBridge {
         error?: string;
         report?: {
             factions: Array<{ faction_id: string; isolated_controlled: string[] }>;
+            supply_state?: {
+                factions: Array<{ faction_id: string; adequate_count: number; strained_count: number; critical_count: number }>;
+            };
         };
     }>;
     queryCorpsSectors?: () => Promise<{
@@ -1471,6 +1474,10 @@ export async function init3DMap(container: HTMLElement): Promise<void> {
     const mapModeController = new MapModeController();
     const mapModeBadge = buildMapModeBadge(mapModeController.getMode());
     container.appendChild(mapModeBadge);
+    const supplySummaryEl = document.createElement('div');
+    supplySummaryEl.className = 'supply-summary';
+    supplySummaryEl.style.cssText = 'position:absolute;bottom:2rem;left:0.5rem;font-size:11px;color:rgba(255,255,255,0.9);background:rgba(0,0,0,0.4);padding:4px 8px;border-radius:4px;display:none;';
+    container.appendChild(supplySummaryEl);
     const postFxManager = new PostProcessingManager();
     const audioManager = new AudioManager();
     const postFxAudioBadge = buildPostFxAudioBadge();
@@ -1479,7 +1486,10 @@ export async function init3DMap(container: HTMLElement): Promise<void> {
     const attackOddsPreview = new AttackOddsPreview(container);
     let attackPreviewSerial = 0;
     let lastAttackPreviewKey = '';
-    let supplyReportCache: { factions: Array<{ faction_id: string; isolated_controlled: string[] }> } | null = null;
+    let supplyReportCache: {
+    factions: Array<{ faction_id: string; isolated_controlled: string[] }>;
+    supply_state?: { factions: Array<{ faction_id: string; adequate_count: number; strained_count: number; critical_count: number }> };
+} | null = null;
     let corpsSectorsCache: Array<{ corps_id: string; faction: string; settlement_ids: string[] }> | null = null;
     let battleEventsCache: Array<{ turn: number; settlement_id: string; from: string | null; to: string | null; mechanism: string; mun_id: string | null }> = [];
     let lastBattleReplayTurn = -1;
@@ -1977,8 +1987,19 @@ export async function init3DMap(container: HTMLElement): Promise<void> {
                 centroidWorld,
                 activeFogFactionOverride() ?? (currentSave?.player_faction ?? null)
             );
+            const ss = supplyReportCache?.supply_state;
+            if (ss?.factions?.length) {
+                supplySummaryEl.style.display = 'block';
+                supplySummaryEl.textContent = ss.factions
+                    .sort((a, b) => a.faction_id.localeCompare(b.faction_id))
+                    .map((f) => `${f.faction_id}: A ${f.adequate_count} S ${f.strained_count} C ${f.critical_count}`)
+                    .join(' | ');
+            } else {
+                supplySummaryEl.style.display = 'none';
+            }
         } else {
             clearSupplyOverlay(supplyOverlayGroup);
+            supplySummaryEl.style.display = 'none';
         }
 
         if (mode === 'displacement') {

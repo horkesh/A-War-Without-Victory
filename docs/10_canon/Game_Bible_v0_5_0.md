@@ -70,6 +70,8 @@ Over time, fronts may harden (e.g. through entrenchment), stabilize, or fracture
 
 Players do not draw geometric frontline entities directly. They assign brigades to derived front segments, optionally name those segments, and command posture, movement, and attacks through formation-level orders. Movement is ZoC-constrained; column movement allows multi-hop redeployment through friendly rear (terrain and composition affect speed). Combat is resolved by the attack-resolution formula (outcome thresholds, casualties, push-back, control flip). Unassigned brigades are reserve and do not execute attack or offensive movement until assigned.
 
+**Implementation-note (bot AI and calibration):** Bot brigade AI uses faction strategic objectives (e.g. RS corridor/Drina/Sarajevo, RBiH enclaves/corridors, HRHB Herzegovina) and target scoring; Feb 2026 calibration added gap filling, concentration attacks, corridor priority scoring, and corps-level rebalancing. Session 2 (2026-02-25): ethnic scoring, init control fix (hybrid_1992 + operational_political_control.json), Bihać OSID narrowing, heartland time-decay, Pelagićevo corridor, ARBiH undefended bonus, HVO Posavina retreat (Phase II Spec §12, PROJECT_LEDGER). Current state and open issues (front-assignment bug, personnel distribution, enclave protection) are documented in Phase II Spec §12 and docs/40_reports/CALIBRATION_REPORT_BOT_AI_FEB_2026.md; no new mechanics invented here.
+
 ## 8. Authority, control, and legitimacy
 
 Authority represents the capacity to govern, coordinate, and extract compliance. Control reflects the ability to enforce decisions locally. Claims represent political intent without enforcement.

@@ -18,7 +18,7 @@ export interface OobBrigade {
     name: string;
     home_mun: string;
     corps?: string;
-    kind: 'brigade' | 'operational_group' | 'corps_asset';
+    kind: 'brigade' | 'operational_group' | 'corps_asset' | 'territorial_defense';
     // Recruitment cost fields (optional for backward compat; defaults applied by loader)
     manpower_cost: number;
     capital_cost: number;
@@ -27,6 +27,14 @@ export interface OobBrigade {
     mandatory: boolean;
     available_from: number;
     max_personnel: number;
+    /** Per-brigade initial personnel override. When set, used instead of FACTION_INITIAL_PERSONNEL. For Phase 0→II scenarios, Phase 0 gameplay determines this; for April 1992 start, these are defaults. */
+    initial_personnel?: number;
+    /** Per-brigade initial cohesion override [0,100]. When set, used instead of FACTION_INITIAL_COHESION. */
+    initial_cohesion?: number;
+    /** Unit honor/decoration title: slavna (10% combat bonus), vitezka (20% combat bonus). */
+    honor?: 'slavna' | 'vitezka';
+    /** Explicit OSID for initial placement (e.g. "op:brcko:brezovo_polje_selo_2"). Overrides home_mun HQ OSID. */
+    home_osid?: string;
 }
 
 export interface OobCorps {
@@ -90,7 +98,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         if (!registry.has(home_mun)) {
             throw new Error(`Invalid OOB brigade ${id}: home_mun "${home_mun}" not in registry`);
         }
-        const kind = (r.kind === 'operational_group' || r.kind === 'corps_asset') ? r.kind : 'brigade';
+        const kind = (r.kind === 'operational_group' || r.kind === 'corps_asset' || r.kind === 'territorial_defense') ? r.kind : 'brigade';
         // Parse recruitment cost fields with defaults
         const manpower_cost = typeof r.manpower_cost === 'number' && Number.isFinite(r.manpower_cost) ? r.manpower_cost : RECRUITMENT_DEFAULTS.manpower_cost;
         const capital_cost = typeof r.capital_cost === 'number' && Number.isFinite(r.capital_cost) ? r.capital_cost : RECRUITMENT_DEFAULTS.capital_cost;
@@ -100,6 +108,11 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         const mandatory = r.mandatory === true;
         const available_from = typeof r.available_from === 'number' && Number.isFinite(r.available_from) ? r.available_from : RECRUITMENT_DEFAULTS.available_from;
         const max_personnel = typeof r.max_personnel === 'number' && Number.isFinite(r.max_personnel) ? r.max_personnel : RECRUITMENT_DEFAULTS.max_personnel;
+        // Per-brigade optional overrides (April 1992 defaults; Phase 0 gameplay overrides these)
+        const initial_personnel = typeof r.initial_personnel === 'number' && Number.isFinite(r.initial_personnel) ? r.initial_personnel : undefined;
+        const initial_cohesion = typeof r.initial_cohesion === 'number' && Number.isFinite(r.initial_cohesion) ? r.initial_cohesion : undefined;
+        const honor = (r.honor === 'slavna' || r.honor === 'vitezka') ? r.honor as 'slavna' | 'vitezka' : undefined;
+        const home_osid = typeof r.home_osid === 'string' && r.home_osid.trim() ? r.home_osid.trim() : undefined;
         result.push({
             id,
             faction,
@@ -116,6 +129,10 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             mandatory,
             available_from,
             max_personnel,
+            ...(initial_personnel != null && { initial_personnel }),
+            ...(initial_cohesion != null && { initial_cohesion }),
+            ...(honor && { honor }),
+            ...(home_osid && { home_osid }),
         });
     }
 

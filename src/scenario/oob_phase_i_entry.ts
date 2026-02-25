@@ -10,7 +10,7 @@ import type { MunicipalityPopulation1991Map } from '../sim/phase_i/pool_populati
 import { getEligiblePopulationCount } from '../sim/phase_i/pool_population.js';
 import { analyzeFactionGraph, type FrontClassification } from '../sim/phase_ii/osid_graph_analysis.js';
 import { buildOsidAdjacency, type Osid } from '../sim/phase_ii/zoc.js';
-import { FACTION_INITIAL_PERSONNEL, MIN_BRIGADE_SPAWN, MIN_ELIGIBLE_POPULATION_FOR_BRIGADE } from '../state/formation_constants.js';
+import { FACTION_INITIAL_COHESION, FACTION_INITIAL_PERSONNEL, MIN_BRIGADE_SPAWN, MIN_ELIGIBLE_POPULATION_FOR_BRIGADE } from '../state/formation_constants.js';
 import { resolveFormationName } from '../state/formation_naming.js';
 import type {
     FactionId,
@@ -156,7 +156,13 @@ export function createOobFormationsAtPhaseIEntry(
             population1991ByMun != null && eligiblePop < MIN_ELIGIBLE_POPULATION_FOR_BRIGADE
                 ? resolveFormationName(b.faction as FactionId, b.home_mun, 'brigade', ordinal)
                 : b.name;
-        const location_osid = canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined;
+        // Resolve location OSID: use per-brigade home_osid override if present, else derive from HQ settlement.
+        const location_osid = b.home_osid
+            ? b.home_osid
+            : (canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined);
+        // Per-brigade personnel/cohesion overrides (April 1992 defaults; Phase 0 gameplay overrides these).
+        const initialPersonnel = b.initial_personnel ?? FACTION_INITIAL_PERSONNEL[b.faction] ?? MIN_BRIGADE_SPAWN;
+        const initialCohesion = b.initial_cohesion ?? FACTION_INITIAL_COHESION[b.faction] ?? 60;
         const formation: FormationState = {
             id: b.id as FormationId,
             faction: b.faction,
@@ -166,10 +172,19 @@ export function createOobFormationsAtPhaseIEntry(
             assignment: null,
             tags,
             kind: b.kind,
-            personnel: FACTION_INITIAL_PERSONNEL[b.faction] ?? MIN_BRIGADE_SPAWN, // faction-specific (RS 1200 from JNA; others 800)
+            personnel: initialPersonnel,
+            cohesion: initialCohesion,
+            ...(b.honor ? { honor: b.honor } : {}),
             ...(hq_sid ? { hq_sid } : {}),
             ...(location_osid != null ? { location_osid } : {})
         };
+        // Pre-war brigades (mandatory, available from turn 0) were already organized
+        // before the simulation starts. Set initial entrenchment so they project
+        // ZoC defense from turn 1. Without this, enclaves like Gorazde and Srebrenica
+        // fall immediately because defenders have 0 ZoC readiness.
+        if (b.mandatory && (b.available_from === 0 || b.available_from === undefined)) {
+            (formation as { entrenchment_turns?: number }).entrenchment_turns = 4;
+        }
         state.formations[b.id] = formation;
         report.brigades_created += 1;
     }

@@ -97,6 +97,7 @@ import {
 import { updateMixedMunicipalitiesList } from './phase_i/mixed_municipality.js';
 import { runPoolPopulation, type PoolPopulationReport } from './phase_i/pool_population.js';
 import { checkAndApplyWashington, type WashingtonCheckReport } from './phase_i/washington_agreement.js';
+import { checkAndApplyOperationStorm, type OperationStormCheckReport } from './phase_ii/operation_storm.js';
 import {
     applyCorpsAttackAxisOrders,
     applyCorpsFrontAutoDistribution,
@@ -137,13 +138,17 @@ import {
     ensureProductionFacilities
 } from '../state/production_facilities.js';
 import { computeSupplyReachability } from '../state/supply_reachability.js';
+import { computeSupplyReachabilityOsid } from '../state/supply_reachability_osid.js';
 import {
     deriveCorridors,
+    deriveCorridorsOsid,
     deriveLocalProductionCapacity,
     deriveSupplyState,
+    deriveSupplyStateByOsid,
     type CorridorDerivationReport,
     type LocalProductionCapacityReport,
-    type SupplyStateDerivationReport
+    type SupplyStateDerivationReport,
+    type SupplyStateByOsidReport
 } from '../state/supply_state_derivation.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { runFormationHqRelocation, type FormationHqRelocationReport } from './formation_hq_relocation.js';
@@ -159,7 +164,8 @@ import { evaluateDisplacementTriggers } from './phase_f/displacement_triggers.js
 import { runPhaseIBotPosture } from './phase_i/bot_phase_i.js';
 import { applyBrigadeRepositionOrders } from './phase_ii/apply_brigade_reposition.js';
 import { applyReshapeOrders } from './phase_ii/aor_reshaping.js';
-import { generateAllBotOrdersOsid, type OsidBotContext } from './phase_ii/bot_brigade_ai_osid.js';
+import { generateAllBotOrdersOsid, computeOsidEthnicComposition, type OsidBotContext } from './phase_ii/bot_brigade_ai_osid.js';
+import { loadSettlementEthnicityData } from '../data/settlement_ethnicity.js';
 import { generateAllCorpsOrders } from './phase_ii/bot_corps_ai.js';
 import {
     applyBrigadeMunicipalityOrders,
@@ -174,9 +180,11 @@ import { applyBrigadePressureToState } from './phase_ii/brigade_pressure.js';
 import { ensureBrigadeFrontAssignments } from './phase_ii/front_assignment.js';
 import { getPhaseIICommandFrictionMultipliers } from './phase_ii/command_friction.js';
 import { applyConsolidationFlips, type ConsolidationFlipsReport } from './phase_ii/consolidation_flips.js';
-import { advanceOperations, applyCorpsEffects } from './phase_ii/corps_command.js';
+import { advanceOperations, applyCorpsEffects, initializeCorpsCommand } from './phase_ii/corps_command.js';
 import { enforceContiguity, enforceCorpsLevelContiguity } from './phase_ii/corps_directed_aor.js';
 import { degradeEquipment, ensureBrigadeComposition } from './phase_ii/equipment_effects.js';
+import { getRSMaintenanceCapacityMult, runEquipmentProgression, type EquipmentProgressionReport } from './phase_ii/faction_progression.js';
+import { updateEnclaveResilience, type EnclaveResilienceReport } from './phase_ii/enclave_resilience.js';
 import { updatePhaseIIExhaustion } from './phase_ii/exhaustion.js';
 import { detectPhaseIIFronts } from './phase_ii/front_emergence.js';
 import { computeMilitiaGarrisons } from './phase_ii/militia_garrison.js';
@@ -192,6 +200,7 @@ import { processOsidColumnMovement, type OsidColumnMovementReport } from './phas
 import { updatePhaseIISupplyPressure } from './phase_ii/supply_pressure.js';
 import {
     applyPhaseIToPhaseIITransition,
+    isPhaseIITransitionEligible,
     updatePhaseIOpposingEdgesStreak
 } from './phase_transitions/phase_i_to_phase_ii.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from './recruitment_turn.js';
@@ -259,6 +268,7 @@ export interface TurnReport {
     phase_i_alliance_update?: AllianceUpdateReport; // Phase I §4.8: RBiH–HRHB alliance value update
     phase_i_ceasefire_check?: CeasefireCheckReport; // Phase I §4.8: bilateral ceasefire evaluation
     phase_i_washington_check?: WashingtonCheckReport; // Phase I §4.8: Washington Agreement evaluation
+    phase_ii_operation_storm_check?: OperationStormCheckReport; // Phase II §11.3: Operation Storm precondition
     phase_i_bilateral_flip_count?: number; // Phase I §4.8: bilateral RBiH–HRHB flips this turn
     phase_i_minority_erosion_report?: MinorityErosionReport; // Phase I §4.8: minority militia erosion
     end_state_active?: boolean; // Phase 12D.0: true if end_state exists (war ended)
@@ -275,6 +285,8 @@ export interface TurnReport {
         corridors: CorridorDerivationReport;
         local_production?: LocalProductionCapacityReport;
         production_bonus_by_faction?: Record<FactionId, number>;
+        /** Phase II: supply state per OSID when operational data present. */
+        supply_state_by_osid?: SupplyStateByOsidReport;
     };
     /** Phase E: pressure diffusion (runs only when meta.phase === 'phase_ii') */
     phase_e_pressure_update?: PhaseEPressureDiffusionReport;
@@ -322,6 +334,10 @@ export interface TurnReport {
     capability_update?: { factions: number };
     doctrine_update?: { formations: number };
     equipment_update?: { formations: number };
+    /** Part C2: Equipment progression report (RBiH gains, HRHB moderate, RS none). Runs every 4 turns. */
+    phase_ii_equipment_progression?: EquipmentProgressionReport;
+    /** B4: Enclave resilience update report. */
+    phase_ii_enclave_resilience?: EnclaveResilienceReport;
     /** Phase II: recruitment resource accrual + ongoing OOB recruitment. */
     phase_ii_recruitment?: {
         accrual_by_faction: Record<FactionId, { capital_delta: number; equipment_delta: number }>;
@@ -580,6 +596,33 @@ const phases: NamedPhase[] = [
         }
     },
     {
+        name: 'phase-ii-supply-osid',
+        run: (context) => {
+            if (context.state.meta.phase !== 'phase_ii') return;
+            const od = getOperationalData(context);
+            if (!od?.opData?.operationalToCanonical || !od?.opData?.canonicalToOperational || !od?.edges?.length) return;
+            const osidReach = computeSupplyReachabilityOsid(
+                context.state,
+                od.edges,
+                od.opData.canonicalToOperational,
+                od.opData.operationalToCanonical
+            );
+            const corridorOsid = deriveCorridorsOsid(context.state, od.edges, osidReach);
+            const supplyStateByOsid = deriveSupplyStateByOsid(context.state, od.edges, osidReach, corridorOsid);
+            if (context.report.supply_resolution) {
+                context.report.supply_resolution.supply_state_by_osid = supplyStateByOsid;
+            }
+        }
+    },
+    {
+        name: 'phase-ii-enclave-resilience',
+        run: (context) => {
+            if (context.state.meta.phase !== 'phase_ii') return;
+            const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
+            context.report.phase_ii_enclave_resilience = updateEnclaveResilience(context.state, supplyByOsid);
+        }
+    },
+    {
         name: 'osid-column-movement',
         run: async (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
@@ -643,7 +686,9 @@ const phases: NamedPhase[] = [
         name: 'generate-bot-corps-orders',
         run: async (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
-            if (!context.state.corps_command) return;
+            // Ensure corps_command is initialized (handles brigades created by per-turn recruitment)
+            initializeCorpsCommand(context.state);
+            if (!context.state.corps_command || Object.keys(context.state.corps_command).length === 0) return;
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
                 ? context.input.settlementEdges
@@ -657,8 +702,12 @@ const phases: NamedPhase[] = [
             const factions = (context.state.factions ?? []).map(f => f.id)
                 .filter(fid => playerFaction == null || fid !== playerFaction)
                 .sort(strictCompare);
+            // Pass operational reverse map + OSID edges for corps directive generation
+            const od = getOperationalData(context);
+            const reverseMap = od?.opData?.operationalToCanonical ?? null;
+            const osidEdges = od?.edges ?? undefined;
             for (const faction of factions) {
-                generateAllCorpsOrders(context.state, faction, edges, sidToMun);
+                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges);
             }
         }
     },
@@ -673,10 +722,32 @@ const phases: NamedPhase[] = [
             // Phase II bot brigade orders: OSID-only (no brigade_aor). When operational data present, run OSID AI.
             const od = getOperationalData(context);
             if (od?.opData?.operationalToCanonical && od?.edges?.length && od?.zocState) {
+                const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
+                const supplyConnectivityByFaction = new Map<string, Set<string>>();
+                if (supplyByOsid?.factions) {
+                    for (const fac of supplyByOsid.factions) {
+                        const supplied = new Set<string>();
+                        for (const e of fac.by_osid ?? []) {
+                            if (e.state !== 'critical') supplied.add(e.osid);
+                        }
+                        supplyConnectivityByFaction.set(fac.faction_id, supplied);
+                    }
+                }
+                // Load ethnic composition data for co-ethnic attack/defend scoring
+                let ethnicCompositionByOsid;
+                try {
+                    const ethnicityData = await loadSettlementEthnicityData();
+                    ethnicCompositionByOsid = computeOsidEthnicComposition(od.opData.operationalToCanonical, ethnicityData);
+                } catch {
+                    // Non-fatal: ethnic scoring is a bonus, not a requirement
+                }
                 const osidCtx: OsidBotContext = {
                     edges: od.edges,
                     reverseMap: od.opData.operationalToCanonical,
-                    enemyZocByFaction: od.zocState.enemyZocByFaction
+                    enemyZocByFaction: od.zocState.enemyZocByFaction,
+                    supplyStateByOsid: supplyByOsid,
+                    supplyConnectivityByFaction: supplyConnectivityByFaction.size > 0 ? supplyConnectivityByFaction : undefined,
+                    ethnicCompositionByOsid
                 };
                 generateAllBotOrdersOsid(context.state, factions, osidCtx);
             }
@@ -761,6 +832,7 @@ const phases: NamedPhase[] = [
         name: 'equipment-degradation',
         run: (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
+            const turn = context.state.meta.turn ?? 0;
             const formations = context.state.formations ?? {};
             for (const fid of Object.keys(formations).sort()) {
                 const f = formations[fid];
@@ -768,9 +840,22 @@ const phases: NamedPhase[] = [
                 ensureBrigadeComposition(f);
                 // Use faction maintenance capacity (0.0-1.0)
                 const factionState = (context.state.factions ?? []).find(fac => fac.id === f.faction);
-                const maintenance = (factionState as any)?.profile?.logistics ?? 50;
-                degradeEquipment(f, f.posture, maintenance / 100);
+                const baseMaintenance = (factionState as any)?.profile?.logistics ?? 50;
+                // C3: RS maintenance capacity decays over time (spare parts depletion)
+                const maintenanceMult = f.faction === 'RS' ? getRSMaintenanceCapacityMult(turn) : 1.0;
+                const maintenance = (baseMaintenance / 100) * maintenanceMult;
+                degradeEquipment(f, f.posture, maintenance);
             }
+        }
+    },
+    {
+        name: 'phase-ii-equipment-progression',
+        run: (context) => {
+            if (context.state.meta.phase !== 'phase_ii') return;
+            const turn = context.state.meta.turn ?? 0;
+            // Run every 4 turns to model gradual acquisition
+            if (turn === 0 || turn % 4 !== 0) return;
+            context.report.phase_ii_equipment_progression = runEquipmentProgression(context.state);
         }
     },
     {
@@ -796,7 +881,8 @@ const phases: NamedPhase[] = [
                     context.state,
                     od.edges,
                     od.opData.operationalToCanonical,
-                    terrainData
+                    terrainData,
+                    context.report.supply_resolution?.supply_state_by_osid
                 );
                 return;
             }
@@ -898,6 +984,13 @@ const phases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
             context.report.phase_i_washington_check = checkAndApplyWashington(context.state);
+        }
+    },
+    {
+        name: 'phase-ii-operation-storm-check',
+        run: (context) => {
+            if (context.state.meta.phase !== 'phase_ii') return;
+            context.report.phase_ii_operation_storm_check = checkAndApplyOperationStorm(context.state);
         }
     },
     {
@@ -1024,7 +1117,8 @@ const phases: NamedPhase[] = [
                 edges,
                 context.report.supply_resolution?.supply_state,
                 frictionMultipliers,
-                context.report.supply_resolution?.production_bonus_by_faction
+                context.report.supply_resolution?.production_bonus_by_faction,
+                context.report.supply_resolution?.supply_state_by_osid
             );
             updatePhaseIIExhaustion(context.state, fronts, frictionMultipliers);
         }
@@ -1864,7 +1958,21 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
         if (edges.length > 0) {
             updatePhaseIOpposingEdgesStreak(working, edges);
         }
-        applyPhaseIToPhaseIITransition(context.state, edges, context.input.settlementGraph?.settlements);
+        // Stuck-in-Phase-I fallback: force transition after N Phase I turns (PHASE_I_II_EDGE_CASES.md)
+        const n = working.meta.phase_i_force_transition_after_turns;
+        const warStart = working.meta.war_start_turn ?? 0;
+        if (
+            working.meta.phase === 'phase_i' &&
+            !isPhaseIITransitionEligible(working) &&
+            typeof n === 'number' &&
+            (working.meta.turn ?? 0) >= warStart + n
+        ) {
+            applyPhaseIToPhaseIITransition(working, edges, context.input.settlementGraph?.settlements, {
+                forceTransition: true
+            });
+        } else {
+            applyPhaseIToPhaseIITransition(context.state, edges, context.input.settlementGraph?.settlements);
+        }
         const derivedFrontEdges = computeFrontEdges(working, edges);
         working.front_edges = derivedFrontEdges;
         ensureDefaultTheatres(working);

@@ -55,8 +55,8 @@ describe('Three-Sided Bot AI Validation', () => {
         expect(share).toBeCloseTo(0.55, 2);
     });
 
-    it('RS getEffectiveAttackShare tapers to base by week 26 (RS_EARLY_WAR_END_WEEK)', () => {
-        const share = getEffectiveAttackShare('RS', 26);
+    it('RS getEffectiveAttackShare tapers to base by week 30 (RS_EARLY_WAR_END_WEEK)', () => {
+        const share = getEffectiveAttackShare('RS', 30);
         expect(share).toBe(FACTION_STRATEGIES.RS.max_attack_posture_share);
     });
 
@@ -80,11 +80,11 @@ describe('Three-Sided Bot AI Validation', () => {
         expect(phase!.default_corps_stance).toBe('defensive');
     });
 
-    it('RBiH doctrine phase at turn 45 allows counteroffensive', () => {
+    it('RBiH doctrine phase at turn 45 is still defensive (no counteroffensive until week 52)', () => {
         const phase = getActiveDoctrinePhase('RBiH', 45);
         expect(phase).not.toBeNull();
-        // Tuned: 0.25→0.35 for historical attack frequency calibration
-        expect(phase!.max_attack_share_override).toBe(0.35);
+        expect(phase!.default_corps_stance).toBe('defensive');
+        expect(phase!.max_attack_share_override).toBe(0.10);
     });
 
     it('RS doctrine phase at turn 60 is strategic defense', () => {
@@ -154,19 +154,25 @@ describe('Three-Sided Bot AI Validation', () => {
         expect(order!.army_stance).toBe('general_defensive');
     });
 
-    it('RBiH standing order at turn 50 is Stretch the Front (general_offensive)', () => {
-        const order = getActiveStandingOrder('RBiH', 50);
+    it('RBiH standing order at turn 30 is Corps Reorganization (general_defensive)', () => {
+        const order = getActiveStandingOrder('RBiH', 30);
         expect(order).not.toBeNull();
-        expect(order!.name).toBe('Stretch the Front');
-        expect(order!.army_stance).toBe('general_offensive');
-        expect(order!.description).toContain('pinprick');
+        expect(order!.name).toBe('Corps Reorganization');
+        expect(order!.army_stance).toBe('general_defensive');
     });
 
-    it('RBiH standing order at turn 90 is Controlled Counteroffensive (balanced)', () => {
+    it('RBiH standing order at turn 60 is Active Defense (balanced)', () => {
+        const order = getActiveStandingOrder('RBiH', 60);
+        expect(order).not.toBeNull();
+        expect(order!.name).toBe('Active Defense');
+        expect(order!.army_stance).toBe('balanced');
+    });
+
+    it('RBiH standing order at turn 90 is Controlled Counteroffensive (general_offensive)', () => {
         const order = getActiveStandingOrder('RBiH', 90);
         expect(order).not.toBeNull();
         expect(order!.name).toBe('Controlled Counteroffensive');
-        expect(order!.army_stance).toBe('balanced');
+        expect(order!.army_stance).toBe('general_offensive');
     });
 
     it('HRHB standing order at turn 15 is Lasva Offensive (general_offensive)', () => {

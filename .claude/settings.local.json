@@ -163,7 +163,17 @@
       "Bash(del:*)",
       "Bash(for turn in 0 8 12 16 26)",
       "Bash(do echo \"=== Turn $turn ===\")",
-      "Bash(tsx -e:*)"
+      "Bash(tsx -e:*)",
+      "Bash(\"F:/A-War-Without-Victory/_diag_tmp.js\":*)",
+      "Bash(npx -y node -e:*)",
+      "Bash(ren:*)",
+      "Bash(dd:*)",
+      "Bash(cd F:\\\\A-War-Without-Victory:*)",
+      "Bash(cat:*)",
+      "Bash(rm:*)",
+      "Bash(cd:*)",
+      "WebSearch",
+      "Bash(cp:*)"
     ]
   }
 }

@@ -85,18 +85,30 @@ const LARGE_CORPS_THRESHOLD = 6; // subordinate count for 2 OG slots
 
 /**
  * Initialize corps command state for corps formations.
- * Called at Phase II entry. Idempotent: skips corps that already have state.
+ * Called at Phase II entry and each turn. Idempotent: skips corps that already have state.
+ *
+ * Sources corps IDs from two places:
+ * 1. Corps/corps_asset formations (kind === 'corps' || kind === 'corps_asset')
+ * 2. Brigade corps_id references (handles cases where brigades are created by per-turn
+ *    recruitment but corps formations haven't been loaded)
  */
 export function initializeCorpsCommand(state: GameState): void {
     if (!state.formations) return;
     if (!state.corps_command) state.corps_command = {};
 
-    const corpsIds = Object.keys(state.formations)
-        .filter((fid) => {
-            const f = state.formations![fid];
-            return (f.kind === 'corps' || f.kind === 'corps_asset') && f.status === 'active';
-        })
-        .sort(strictCompare);
+    // Collect all corps IDs from formations AND from brigade corps_id references
+    const corpsIdSet = new Set<string>();
+    const formationIds = Object.keys(state.formations).sort(strictCompare);
+    for (const fid of formationIds) {
+        const f = state.formations[fid];
+        if ((f.kind === 'corps' || f.kind === 'corps_asset') && f.status === 'active') {
+            corpsIdSet.add(fid);
+        }
+        if (f.corps_id && f.status === 'active') {
+            corpsIdSet.add(f.corps_id);
+        }
+    }
+    const corpsIds = [...corpsIdSet].sort(strictCompare);
 
     for (const cid of corpsIds) {
         // Skip if already initialized
@@ -106,19 +118,20 @@ export function initializeCorpsCommand(state: GameState): void {
 
         // Determine command span from tags or default
         let commandSpan = DEFAULT_COMMAND_SPAN;
-        for (const tag of corps.tags ?? []) {
-            if (tag.startsWith('cmd_span:')) {
-                const parsed = parseInt(tag.slice(9), 10);
-                if (!isNaN(parsed) && parsed > 0) commandSpan = parsed;
+        if (corps) {
+            for (const tag of corps.tags ?? []) {
+                if (tag.startsWith('cmd_span:')) {
+                    const parsed = parseInt(tag.slice(9), 10);
+                    if (!isNaN(parsed) && parsed > 0) commandSpan = parsed;
+                }
             }
         }
 
         // Count subordinate brigades
         let subordinateCount = 0;
-        const formationIds = Object.keys(state.formations).sort(strictCompare);
         for (const fid of formationIds) {
             const f = state.formations[fid];
-            if (f.corps_id === cid && f.kind === 'brigade' && f.status === 'active') {
+            if (f.corps_id === cid && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group') && f.status === 'active') {
                 subordinateCount++;
             }
         }

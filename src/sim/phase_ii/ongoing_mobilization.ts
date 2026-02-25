@@ -32,29 +32,33 @@ const BASE_MOBILIZATION_RATE = 0.003;
  * RS: 0.25 — VRS was already near full mobilization from JNA handover; growth was only ~38%.
  *   RS controls the largest territory with the highest ethnic majority, so the low scale
  *   correctly models that most eligible Serbs were already mobilized by May 1992.
- * RBiH: 1.3 — Mass TO activation + refugee mobilization; fastest growing force.
- * HRHB: 1.2 — Organized Croatian cadres + diaspora support.
+ *   Raised from 0.15 to 0.25 — 0.15 starved RS brigades (avg 1,424 vs RBiH 2,424).
+ * RBiH: 0.85 — Mass TO activation + refugee mobilization; fastest growing force.
+ *   Reduced from 1.1 — was producing 160K total (target 120-140K), 42/66 brigades at cap.
+ * HRHB: 1.0 — Organized Croatian cadres + diaspora support.
+ *   Reduced from 1.2 — was slightly above 50K target.
  */
 const FACTION_MOBILIZATION_SCALE: Record<string, number> = {
-    RBiH: 1.1,
-    RS: 0.15,
-    HRHB: 1.2
+    RBiH: 0.65,
+    RS: 0.25,
+    HRHB: 0.90
 };
 const DEFAULT_MOBILIZATION_SCALE = 1.0;
 
 /**
  * Mobilization surge: higher early war, tapering with war fatigue.
- * Weeks 1-12: mass TO activation, general mobilization → 3.0x
- * Weeks 13-26: continued high mobilization, volunteers → 2.2x
- * Weeks 27-52: established pipelines, moderating → 1.4x
+ * Weeks 1-12: mass TO activation, general mobilization → 2.5x
+ *   Reduced from 3.0 — over-charged RBiH early growth, made RS initial advantage disappear.
+ * Weeks 13-26: continued high mobilization, volunteers → 2.0x
+ * Weeks 27-52: established pipelines, moderating → 1.3x
  * Weeks 53-78: fatigue, diminishing returns → 0.9x
  * Weeks 79-104: deep fatigue → 0.5x
  * 105+: exhaustion → 0.3x
  */
 function getMobilizationSurgeFactor(turn: number): number {
-    if (turn <= 12) return 3.0;
-    if (turn <= 26) return 2.2;
-    if (turn <= 52) return 1.4;
+    if (turn <= 12) return 2.5;
+    if (turn <= 26) return 2.0;
+    if (turn <= 52) return 1.3;
     if (turn <= 78) return 0.9;
     if (turn <= 104) return 0.5;
     return 0.3;

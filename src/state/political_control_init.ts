@@ -65,6 +65,32 @@ export function promotePoliticalControllersToOsid(
 }
 
 /**
+ * Apply per-OSID political control overrides from scenario config.
+ * Runs after OSID promotion. Overwrites specific OSID controllers with scenario-specified values.
+ * Used for historically accurate initial control that differs from municipality-level ethnic majority.
+ * E.g. Brčko: city held by VRS despite municipality-level Bosniak majority.
+ * Deterministic: overrides applied in sorted key order. Mutates state.political_controllers.
+ */
+export function applyOsidControlOverrides(
+    state: GameState,
+    overrides: Record<string, string>
+): void {
+    const pc = state.political_controllers ?? {};
+    const keys = Object.keys(overrides).sort((a, b) => a.localeCompare(b));
+    for (const osid of keys) {
+        const faction = overrides[osid];
+        if (faction && CANONICAL_FACTION_IDS.includes(faction as (typeof CANONICAL_FACTION_IDS)[number])) {
+            pc[osid] = faction as FactionId;
+            // Mark as contested (historically these were disputed areas)
+            if (state.contested_control) {
+                state.contested_control[osid] = true;
+            }
+        }
+    }
+    state.political_controllers = pc;
+}
+
+/**
  * True when state.political_controllers is already keyed by OSID (every key is in operationalToCanonical).
  * When true, promotePoliticalControllersToOsid must be skipped or it would overwrite valid OSID values
  * with null (it looks up pc[sid] for canonical SIDs, which are undefined when keys are OSIDs).

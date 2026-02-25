@@ -175,15 +175,15 @@ export const FACTION_STRATEGIES: Record<FactionId, FactionBotStrategy> = {
     },
     RBiH: {
         corridor_municipalities: [...SARAJEVO_CORE, ...RBIH_ENCLAVE_DEFENSE],
-        // Tuned: 0.12→0.25. ARBiH had multiple corps attacking simultaneously.
-        max_attack_posture_share: 0.25,
+        // Historical: ARBiH had no meaningful offensive capability until mid-1993.
+        max_attack_posture_share: 0.10,
         preferred_posture_when_overstaffed: 'probe',
         attack_coverage_threshold: 240,
         defend_critical_territory: true,
         offensive_objectives: ['ilidza', 'hadzici', 'vogosca', 'ilijas', ...RBIH_CENTRAL_CORRIDOR],
         defensive_priorities: [...SARAJEVO_CORE, ...RBIH_ENCLAVE_DEFENSE, 'tuzla', 'zenica'],
-        // Tuned: 1→3. ARBiH had multiple active brigades even in survival phase.
-        min_active_brigades: 3,
+        // Historical: ARBiH in survival mode first year — minimal offensive capability.
+        min_active_brigades: 1,
     },
     HRHB: {
         corridor_municipalities: [...HRHB_HERZEGOVINA],
@@ -210,7 +210,7 @@ export interface DoctrinePhase {
 }
 
 /** RS early-war window (weeks 0–26): offensive stance and higher attack share for territorial expansion. See PRIORITY_B_RS_EARLY_WAR_BOT_HANDOFF_2026_02_18. */
-export const RS_EARLY_WAR_END_WEEK = 26;
+export const RS_EARLY_WAR_END_WEEK = 30;
 
 /** HRHB Lasva Offensive window (weeks 12–26): higher attack share so HRHB issues more attack orders. See NEXT_BOT_PRIORITY_AOR_OR_HRHB_HANDOFF_2026_02_18 Candidate B. */
 export const HRHB_LASVA_OFFENSIVE_START_WEEK = 12;
@@ -219,15 +219,16 @@ export const HRHB_LASVA_ATTACK_SHARE = 0.45;
 
 export const FACTION_DOCTRINE_PHASES: Record<FactionId, DoctrinePhase[]> = {
     RS: [
-        { start_week: 0, end_week: RS_EARLY_WAR_END_WEEK, default_corps_stance: 'offensive', max_attack_share_override: 0.55, aggression_modifier: 0.15 },
-        { start_week: RS_EARLY_WAR_END_WEEK, end_week: 52, default_corps_stance: 'balanced', max_attack_share_override: 0.4, aggression_modifier: 0 },
+        { start_week: 0, end_week: RS_EARLY_WAR_END_WEEK, default_corps_stance: 'offensive', max_attack_share_override: 0.55, aggression_modifier: 0.35 },
+        { start_week: RS_EARLY_WAR_END_WEEK, end_week: 52, default_corps_stance: 'balanced', max_attack_share_override: 0.4, aggression_modifier: 0.1 },
         { start_week: 52, end_week: 9999, default_corps_stance: 'defensive', max_attack_share_override: 0.3, aggression_modifier: -0.1 },
     ],
     RBiH: [
-        // Tuned: attack shares raised to allow counter-attacks from week 1.
-        { start_week: 0, end_week: 12, default_corps_stance: 'defensive', max_attack_share_override: 0.15, aggression_modifier: -0.1 },
-        { start_week: 12, end_week: 40, default_corps_stance: 'balanced', max_attack_share_override: 0.25, aggression_modifier: 0 },
-        { start_week: 40, end_week: 9999, default_corps_stance: 'balanced', max_attack_share_override: 0.35, aggression_modifier: 0.1 },
+        // Historical: ARBiH purely defensive first year. No counteroffensives until mid-1993.
+        { start_week: 0, end_week: 26, default_corps_stance: 'defensive', max_attack_share_override: 0.05, aggression_modifier: -0.2 },
+        { start_week: 26, end_week: 52, default_corps_stance: 'defensive', max_attack_share_override: 0.10, aggression_modifier: -0.1 },
+        { start_week: 52, end_week: 80, default_corps_stance: 'balanced', max_attack_share_override: 0.25, aggression_modifier: 0.05 },
+        { start_week: 80, end_week: 9999, default_corps_stance: 'offensive', max_attack_share_override: 0.35, aggression_modifier: 0.15 },
     ],
     HRHB: [
         { start_week: 0, end_week: 12, default_corps_stance: 'balanced', max_attack_share_override: 0.25, aggression_modifier: 0 },
@@ -328,27 +329,27 @@ export const FACTION_STANDING_ORDERS: Record<FactionId, StandingOrder[]> = {
     RBiH: [
         {
             name: 'Survival Defense',
-            start_week: 0, end_week: 12,
+            start_week: 0, end_week: 26,
             army_stance: 'general_defensive',
-            description: 'Preserve forces. No offensive operations — hold what you can, evacuate what you cannot.',
+            description: 'Preserve forces. No offensive operations. Hold what you can, reorganize TO into brigades.',
+        },
+        {
+            name: 'Corps Reorganization',
+            start_week: 26, end_week: 52,
+            army_stance: 'general_defensive',
+            description: 'Corps structure forming. Still no counteroffensives — hold territory, build capability.',
         },
         {
             name: 'Active Defense',
-            start_week: 12, end_week: 40,
+            start_week: 52, end_week: 80,
             army_stance: 'balanced',
-            description: 'Reorganize into corps structure. Local counterattacks permitted — no army-wide directive.',
-        },
-        {
-            name: 'Stretch the Front',
-            start_week: 40, end_week: 80,
-            army_stance: 'general_offensive',
-            description: 'Constant pinprick attacks along the entire front. Not operational breakthroughs — probe everywhere, stretch VRS reserves, prevent enemy concentration. Death by a thousand cuts.',
+            description: 'Pinprick attacks begin. Probe VRS lines, test weaknesses, stretch reserves. Not breakthroughs.',
         },
         {
             name: 'Controlled Counteroffensive',
             start_week: 80, end_week: 9999,
-            army_stance: 'balanced',
-            description: 'Shift from attrition to targeted counteroffensives. Corps decide where to concentrate force.',
+            army_stance: 'general_offensive',
+            description: 'Full counteroffensives. Corps-level coordinated operations (1994-1995 campaigns).',
         },
     ],
     HRHB: [
@@ -385,6 +386,146 @@ export function getActiveStandingOrder(faction: FactionId, turn: number): Standi
         if (turn >= order.start_week && turn < order.end_week) return order;
     }
     return null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Army-Level Operation Priorities (distributed to corps)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Army-level operation priority: Main Staff assigns strategic objectives to corps.
+ * Historical: VRS Main Staff directed Drina Corps to secure the Drina valley,
+ * 1st Krajina Corps to open the Posavina corridor, etc.
+ *
+ * These priorities are time-phased and corps-specific. They flow down as
+ * offensive_targets in the CorpsDirective.
+ */
+export interface ArmyOperationPriority {
+    /** Human-readable name (e.g. "Drina Sweep"). */
+    name: string;
+    /** Corps that should execute (corps formation ID). */
+    corps_id: string;
+    /** Municipality patterns for target OSIDs. */
+    target_municipalities: string[];
+    /** First week (inclusive). */
+    start_week: number;
+    /** Last week (exclusive). */
+    end_week: number;
+    /** Priority weight (higher = more important). */
+    weight: number;
+    /** Minimum attack outcome this operation accepts. */
+    min_outcome: 'decisive_victory' | 'victory' | 'costly_victory' | 'stalemate' | 'repulsed';
+    /** Municipality patterns for OSIDs to avoid. */
+    avoid_municipalities?: string[];
+}
+
+/**
+ * VRS army-level operation priorities.
+ * Historical grounding:
+ * - Drina (Apr 1992): Zvornik, Bratunac, Višegrad, Foča taken in first 2 weeks
+ * - Corridor 92 (Jun-Jul 1992): link Banja Luka to Serbia through Posavina
+ * - Krajina (Sep-Oct 1992): Ključ, Jajce, Bosanski Petrovac
+ * - Sarajevo: siege maintenance throughout
+ * - Herzegovina: hold existing gains
+ */
+const VRS_ARMY_PRIORITIES: ArmyOperationPriority[] = [
+    // Drina Corps: clear Drina valley (DAY ONE — highest priority first 12 weeks)
+    { name: 'Drina Sweep', corps_id: 'vrs_drina', target_municipalities: ['zvornik', 'bratunac', 'visegrad', 'foca', 'vlasenica', 'rogatica', 'sekovici', 'han_pijesak', 'milici', 'kalinovik'], start_week: 0, end_week: 26, weight: 100, min_outcome: 'stalemate', avoid_municipalities: ['srebrenica', 'gorazde', 'zepa'] },
+    // Drina Corps: maintain after initial sweep
+    { name: 'Drina Hold', corps_id: 'vrs_drina', target_municipalities: ['zvornik', 'bratunac', 'visegrad', 'foca'], start_week: 26, end_week: 9999, weight: 30, min_outcome: 'stalemate', avoid_municipalities: ['srebrenica', 'gorazde', 'zepa'] },
+    // 1st Krajina Corps + East Bosnian: Operation Corridor 92
+    { name: 'Corridor 92 (1KK)', corps_id: 'vrs_1st_krajina', target_municipalities: ['brcko', 'odzak', 'derventa', 'bosanski_brod', 'bosanski_samac', 'modrica', 'doboj'], start_week: 0, end_week: 30, weight: 90, min_outcome: 'repulsed' },
+    { name: 'Corridor 92 (EBK)', corps_id: 'vrs_east_bosnian', target_municipalities: ['brcko', 'bijeljina', 'bosanski_samac'], start_week: 0, end_week: 30, weight: 80, min_outcome: 'repulsed' },
+    // 1st Krajina: Krajina operations (mid-1992) — aggressive: push through entrenchment
+    { name: 'Krajina Sweep', corps_id: 'vrs_1st_krajina', target_municipalities: ['kljuc', 'bosanski_petrovac', 'jajce', 'donji_vakuf', 'sipovo', 'kupres', 'sanski_most'], start_week: 12, end_week: 40, weight: 60, min_outcome: 'repulsed' },
+    // 2nd Krajina: western operations
+    { name: 'Western Krajina', corps_id: 'vrs_2nd_krajina', target_municipalities: ['bosanski_petrovac', 'titov_drvar', 'glamoc', 'kupres', 'sipovo'], start_week: 0, end_week: 40, weight: 50, min_outcome: 'repulsed' },
+    // Sarajevo-Romanija: siege maintenance — persistent pressure on Sarajevo approaches
+    { name: 'Sarajevo Siege', corps_id: 'vrs_sarajevo_romanija', target_municipalities: ['ilidza', 'hadzici', 'vogosca', 'ilijas', 'pale', 'sokolac', 'trnovo'], start_week: 0, end_week: 9999, weight: 70, min_outcome: 'repulsed', avoid_municipalities: ['centar_sarajevo', 'stari_grad_sarajevo', 'novo_sarajevo', 'novi_grad_sarajevo'] },
+    // Herzegovina: hold territory — probing attacks to maintain pressure
+    { name: 'Herzegovina Hold', corps_id: 'vrs_herzegovina', target_municipalities: ['bileca', 'gacko', 'trebinje', 'nevesinje', 'kalinovik'], start_week: 0, end_week: 9999, weight: 40, min_outcome: 'repulsed' },
+    // East Bosnian: post-corridor, Tuzla containment
+    { name: 'Tuzla Containment', corps_id: 'vrs_east_bosnian', target_municipalities: ['bijeljina', 'ugljevik', 'lopare', 'zvornik'], start_week: 30, end_week: 9999, weight: 40, min_outcome: 'repulsed' },
+    // 1st Krajina: central corridor — Kotor Varoš, Teslić, Doboj (link to Posavina)
+    { name: 'Central Corridor', corps_id: 'vrs_1st_krajina', target_municipalities: ['kotor_varos', 'teslic', 'doboj', 'maglaj'], start_week: 0, end_week: 40, weight: 55, min_outcome: 'repulsed' },
+    // 1st Krajina: consolidation after Corridor/Krajina Sweep expire (week 40+)
+    { name: '1KK Consolidation', corps_id: 'vrs_1st_krajina', target_municipalities: ['kljuc', 'sanski_most', 'jajce', 'donji_vakuf', 'bosanski_petrovac', 'kotor_varos', 'teslic'], start_week: 40, end_week: 9999, weight: 35, min_outcome: 'repulsed' },
+    // 2nd Krajina: western front maintenance after operations expire (week 40+)
+    { name: '2KK Consolidation', corps_id: 'vrs_2nd_krajina', target_municipalities: ['bosanski_petrovac', 'titov_drvar', 'glamoc', 'kupres', 'sipovo', 'mrkonjic_grad'], start_week: 40, end_week: 9999, weight: 30, min_outcome: 'repulsed' },
+    // East Bosnian: Ozren salient operations — pressure toward Tuzla, secure flanks
+    { name: 'Ozren Operations', corps_id: 'vrs_east_bosnian', target_municipalities: ['gradacac', 'lukavac', 'zavidovici', 'maglaj', 'zepc'], start_week: 12, end_week: 40, weight: 45, min_outcome: 'repulsed' },
+];
+
+/**
+ * RBiH army-level operation priorities.
+ * Historical: ARBiH defensive in 1992, reorganized 1993, counteroffensive 1994-95.
+ */
+const RBIH_ARMY_PRIORITIES: ArmyOperationPriority[] = [
+    // 1st Corps: Sarajevo defense — friendly municipalities only until week 52
+    { name: 'Sarajevo Defense', corps_id: 'arbih_1st_corps', target_municipalities: ['centar_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo'], start_week: 0, end_week: 52, weight: 100, min_outcome: 'costly_victory' },
+    // 1st Corps: Sarajevo counter-attacks — include RS-held suburbs from week 52
+    { name: 'Sarajevo Counterattack', corps_id: 'arbih_1st_corps', target_municipalities: ['centar_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo', 'ilidza', 'hadzici', 'vogosca', 'ilijas'], start_week: 52, end_week: 9999, weight: 100, min_outcome: 'stalemate' },
+    // 2nd Corps: Tuzla area defense (hold only first year)
+    { name: 'Tuzla Defense', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj'], start_week: 0, end_week: 52, weight: 70, min_outcome: 'costly_victory' },
+    { name: 'Tuzla Expansion', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj', 'lopare', 'ugljevik'], start_week: 52, end_week: 9999, weight: 60, min_outcome: 'stalemate' },
+    // 3rd Corps: Central Bosnia — defensive only until week 52
+    { name: 'Central Corridor Defense', corps_id: 'arbih_3rd_corps', target_municipalities: ['zenica', 'kakanj', 'visoko'], start_week: 0, end_week: 52, weight: 60, min_outcome: 'costly_victory' },
+    { name: 'Central Corridor Offensive', corps_id: 'arbih_3rd_corps', target_municipalities: ['zenica', 'travnik', 'kakanj', 'visoko', 'bugojno', 'gornji_vakuf', 'fojnica'], start_week: 52, end_week: 9999, weight: 60, min_outcome: 'stalemate' },
+    // 4th Corps: Neretva defense
+    { name: 'Neretva Defense', corps_id: 'arbih_4th_corps', target_municipalities: ['jablanica', 'konjic'], start_week: 0, end_week: 52, weight: 50, min_outcome: 'costly_victory' },
+    { name: 'Neretva Offensive', corps_id: 'arbih_4th_corps', target_municipalities: ['jablanica', 'konjic', 'mostar'], start_week: 52, end_week: 9999, weight: 50, min_outcome: 'stalemate' },
+    // 5th Corps: Bihac pocket defense (crucial — hold throughout)
+    { name: 'Bihac Pocket Defense', corps_id: 'arbih_5th_corps', target_municipalities: ['bihac', 'cazin', 'velika_kladusa', 'bosanska_krupa'], start_week: 0, end_week: 9999, weight: 90, min_outcome: 'costly_victory' },
+    // Late-war counteroffensives (mid-1994+)
+    { name: 'Siege Break', corps_id: 'arbih_1st_corps', target_municipalities: ['ilidza', 'hadzici', 'vogosca', 'ilijas'], start_week: 80, end_week: 9999, weight: 80, min_outcome: 'stalemate' },
+];
+
+/**
+ * HRHB army-level operation priorities.
+ * Historical: Herzegovina consolidation, Lasva Valley (bilateral war), post-Washington cooperation.
+ */
+const HRHB_ARMY_PRIORITIES: ArmyOperationPriority[] = [
+    // Southeast Herzegovina OZ: defend heartland
+    { name: 'Herzegovina Defense', corps_id: 'hvo_southeast_herzegovina', target_municipalities: ['mostar', 'siroki_brijeg', 'citluk', 'capljina', 'stolac', 'neum', 'ljubuski', 'grude', 'posusje'], start_week: 0, end_week: 9999, weight: 80, min_outcome: 'stalemate' },
+    // Central Bosnia OZ: defend/expand Croat pockets
+    { name: 'Central Bosnia Defense', corps_id: 'hvo_central_bosnia', target_municipalities: ['vitez', 'busovaca', 'kiseljak', 'novi_travnik', 'zepce', 'usora'], start_week: 0, end_week: 12, weight: 60, min_outcome: 'stalemate' },
+    // Central Bosnia OZ: Lasva Valley offensive (bilateral war only — checked at runtime)
+    { name: 'Lasva Offensive', corps_id: 'hvo_central_bosnia', target_municipalities: ['vitez', 'busovaca', 'kiseljak', 'novi_travnik', 'travnik', 'bugojno'], start_week: 12, end_week: 26, weight: 90, min_outcome: 'stalemate' },
+    // Central Bosnia OZ: post-Washington defense
+    { name: 'Central Bosnia Hold', corps_id: 'hvo_central_bosnia', target_municipalities: ['vitez', 'busovaca', 'kiseljak', 'zepce'], start_week: 26, end_week: 9999, weight: 50, min_outcome: 'stalemate' },
+    // Northwest Bosnia OZ (Posavina): active defense — Posavina was the one area HRHB fought RS in 1992
+    { name: 'Posavina Defense', corps_id: 'hvo_northwest_bosnia', target_municipalities: ['orasje', 'odzak', 'bosanski_brod', 'derventa'], start_week: 0, end_week: 9999, weight: 70, min_outcome: 'repulsed' },
+    // Tomislavgrad OZ: western defense
+    { name: 'Western Defense', corps_id: 'hvo_tomislavgrad', target_municipalities: ['duvno', 'livno', 'kupres', 'tomislavgrad'], start_week: 0, end_week: 9999, weight: 50, min_outcome: 'stalemate' },
+    // Post-Washington (week 100 ≈ late 1994): anti-RS operations — HVO cooperates with ARBiH against VRS
+    { name: 'Herzegovina Anti-RS', corps_id: 'hvo_southeast_herzegovina', target_municipalities: ['nevesinje', 'bileca', 'gacko', 'trebinje', 'kalinovik'], start_week: 100, end_week: 9999, weight: 60, min_outcome: 'stalemate' },
+    { name: 'Western Anti-RS', corps_id: 'hvo_tomislavgrad', target_municipalities: ['glamoc', 'sipovo', 'kupres', 'bosansko_grahovo'], start_week: 100, end_week: 9999, weight: 55, min_outcome: 'stalemate' },
+    { name: 'Posavina Anti-RS', corps_id: 'hvo_northwest_bosnia', target_municipalities: ['derventa', 'bosanski_brod', 'modrica', 'bosanski_samac'], start_week: 100, end_week: 9999, weight: 55, min_outcome: 'stalemate' },
+];
+
+export const FACTION_ARMY_PRIORITIES: Record<FactionId, ArmyOperationPriority[]> = {
+    RS: VRS_ARMY_PRIORITIES,
+    RBiH: RBIH_ARMY_PRIORITIES,
+    HRHB: HRHB_ARMY_PRIORITIES,
+};
+
+/**
+ * Get active army-level priorities for a corps at a given turn.
+ * Returns priorities sorted by weight descending (highest first).
+ * Deterministic: weight sort, then name sort for tie-break.
+ */
+export function getCorpsArmyPriorities(
+    faction: FactionId,
+    corpsId: string,
+    turn: number
+): ArmyOperationPriority[] {
+    const all = FACTION_ARMY_PRIORITIES[faction] ?? [];
+    return all
+        .filter(p => p.corps_id === corpsId && turn >= p.start_week && turn < p.end_week)
+        .sort((a, b) => {
+            if (b.weight !== a.weight) return b.weight - a.weight;
+            return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+        });
 }
 
 /**

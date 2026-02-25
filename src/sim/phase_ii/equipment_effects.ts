@@ -19,8 +19,8 @@ import type {
 
 const DEFAULT_COMPOSITION: Record<string, Partial<BrigadeComposition>> = {
     RS: { infantry: 800, tanks: 40, artillery: 30, aa_systems: 5 },
-    HRHB: { infantry: 850, tanks: 15, artillery: 15, aa_systems: 3 },
-    RBiH: { infantry: 950, tanks: 3, artillery: 8, aa_systems: 1 }
+    HRHB: { infantry: 850, tanks: 10, artillery: 10, aa_systems: 2 },
+    RBiH: { infantry: 950, tanks: 1, artillery: 3, aa_systems: 0 }
 };
 
 const DEFAULT_CONDITION: EquipmentCondition = { operational: 0.9, degraded: 0.08, non_operational: 0.02 };

@@ -130,8 +130,8 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 
 - `query-supply-paths` (invoke)
   - Payload: none
-  - Returns: `{ ok: boolean, error?: string, report?: SupplyReachabilityReport }`
-  - Behavior: computes current supply reachability report from canonical state and adjacency. Read-only.
+  - Returns: `{ ok: boolean, error?: string, report?: SupplyPathsQueryResult }`. Report includes reachability (factions, reachable_controlled, isolated_controlled), optional `supply_state` (per-faction adequate_count, strained_count, critical_count), and optional `corridors` (Open/Brittle/Cut per faction). See desktop_sim.querySupplyPaths.
+  - Behavior: computes current supply reachability, supply state derivation, and corridor derivation from canonical state and adjacency. Read-only. Used by 3D map supply mode and supply summary panel.
 
 - `query-corps-sectors` (invoke)
   - Payload: none

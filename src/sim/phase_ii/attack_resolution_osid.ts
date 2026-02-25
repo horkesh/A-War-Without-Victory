@@ -21,8 +21,10 @@ import type {
     GameState
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import { getEnclaveDefenseBonus } from './enclave_resilience.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import {
     buildOsidAdjacency,
@@ -41,13 +43,79 @@ const VICTORY_THRESHOLD_COSTLY = 1.0;
 const STALEMATE_FLOOR = 0.7;
 const REPULSED_FLOOR = 0.5;
 
-const MAX_ENTRENCHMENT = 12;
-const ENTRENCHMENT_PER_TURN = 0.035;   // Tuned: 0.065→0.035. Max bonus 1.42× (was 1.78×).
+const MAX_ENTRENCHMENT = 6;             // Tuned: 8→6. Max bonus 1.21× (was 1.28×). RS light infantry needs viable attacks through week 30.
+const ENTRENCHMENT_PER_TURN = 0.035;
 const MAX_RESILIENCE_STREAK = 4;        // Tuned: 6→4. Still rewards persistent defense.
 const RESILIENCE_PER_DEFENSE = 0.025;   // Tuned: 0.05→0.025. Max bonus 1.10× (was 1.30×).
 
-const BASE_ATTACKER_LOSS_RATE = 0.04;
-const BASE_DEFENDER_LOSS_RATE = 0.02;
+/**
+ * Artillery suppression of entrenchment.
+ * Heavy weapons (artillery, tanks) reduce the defender's entrenchment bonus.
+ * This models artillery preparation fires softening fieldworks and tanks
+ * providing direct fire to breach fortified positions.
+ *
+ * Historical: VRS inherited 330+ tanks and 800+ artillery pieces from JNA.
+ * This massive firepower advantage was THE decisive factor allowing VRS to
+ * break through entrenched positions throughout the war (Sarajevo, Gorazde,
+ * Bihac, Drina valley). ARBiH lacked heavy weapons and struggled to break
+ * VRS entrenchment — their offensives required massive numerical superiority.
+ *
+ * Returns 0–0.7: fraction of entrenchment bonus that is suppressed.
+ *   VRS typical: ~0.45 (45% suppression)
+ *   HVO typical: ~0.20 (20% suppression)
+ *   ARBiH typical: ~0.06 (6% suppression)
+ */
+function getArtillerySuppression(attackers: FormationState[]): number {
+    if (attackers.length === 0) return 0;
+    // Use the best-equipped attacker's suppression (corps concentrate fire support)
+    let maxSuppression = 0;
+    for (const attacker of attackers) {
+        const comp = attacker.composition ?? ensureBrigadeComposition(attacker);
+        const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
+        const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
+        // Artillery is the primary counter to entrenchment; tanks contribute at 50%
+        const suppression = (artEff * 1.0 + tankEff * 0.5) / 100;
+        if (suppression > maxSuppression) maxSuppression = suppression;
+    }
+    return Math.min(0.7, maxSuppression);
+}
+
+/**
+ * Heavy weapons offensive firepower multiplier.
+ * Tanks and artillery provide DIRECT firepower advantage in attack, far beyond
+ * their proportional weight in the equipment ratio. A tank or artillery piece
+ * has 10-15× the offensive firepower of an infantryman.
+ *
+ * Historical: VRS's JNA-inherited heavy weapons (330+ tanks, 800+ artillery) gave
+ * them overwhelming fire superiority in every engagement. ARBiH couldn't match this
+ * and relied on terrain, entrenchment, and numerical superiority. The equipment
+ * imbalance was THE defining feature of 1992 combat.
+ *
+ * Formula: Each effective tank = 10× infantry firepower, each artillery = 8×.
+ * Capped at 0.6 (max 1.6× multiplier). At 1.6×, a solo VRS brigade can barely
+ * achieve costly_victory vs fully entrenched ARBiH (power ratio ~1.01). Two VRS
+ * brigades → victory (ratio ~1.8). This matches the historical pattern where VRS
+ * needed corps-level force concentration for reliable breakthroughs but individual
+ * brigades could still push through weak positions.
+ *
+ * Typical values:
+ *   VRS:  ~1.60 (40 tanks + 30 artillery → overwhelming fire superiority)
+ *   HVO:  ~1.27 (15 tanks + 15 artillery → significant advantage)
+ *   ARBiH: ~1.09 (3 tanks + 8 artillery → minimal heavy weapons)
+ */
+function getHeavyWeaponsOffensiveMult(formation: FormationState): number {
+    const comp = formation.composition ?? ensureBrigadeComposition(formation);
+    const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
+    const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
+    // Each effective tank = 10× infantry firepower, each artillery = 8×
+    const heavyFirepower = tankEff * 10 + artEff * 8;
+    // Scale against a reference heavy force (500 heavy firepower points = max bonus)
+    // Cap 0.6: VRS at default composition just reaches cap, HVO/ARBiH well below
+    return 1.0 + Math.min(0.6, heavyFirepower / 500);
+}
+
+const BASE_ATTACKER_LOSS_RATE = 0.06;     // Tuned: 0.04→0.06. Historical Bosnia casualty rates were high.
+const BASE_DEFENDER_LOSS_RATE = 0.03;     // Tuned: 0.02→0.03. Defenders suffered significant losses too.
 const MILITIA_DEFENSE_RATIO = 0.03;
 const COORDINATION_PENALTY_2 = 0.9;
 const COORDINATION_PENALTY_3PLUS = 0.8;
@@ -125,10 +193,16 @@ const POSTURE_DEFENSE: Record<string, number> = {
     consolidation: 1.1
 };
 
+// Tuned: balanced raised 0.8→1.0, offensive 1.0→1.15.
+// Corps stance determines HOW MANY brigades attack (bot decision), not individual
+// effectiveness. A brigade ordered to attack in a balanced corps fights at full
+// capability — only defensive/reorganize stances reduce individual combat power
+// (units are focused elsewhere). Offensive corps gets a mild bonus from concentrated
+// fire support (artillery grouped at corps level for VRS historical operations).
 const CORPS_STANCE_ATTACK: Record<string, number> = {
     defensive: 0.5,
-    balanced: 0.8,
-    offensive: 1.0,
+    balanced: 1.0,
+    offensive: 1.15,
     reorganize: 0.5
 };
 const CORPS_STANCE_DEFENSE: Record<string, number> = {
@@ -142,9 +216,26 @@ const CORPS_STANCE_DEFENSE: Record<string, number> = {
 // Helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
-function getSupplyMult(formation: FormationState, _state: GameState, mode: 'attack' | 'defend'): number {
+/** Supply mult from OSID report when available; else last_supplied_turn fallback. Adequate→1, Strained→0.75, Critical→0.45 attack / 0.5 defend. */
+function getSupplyMult(
+    formation: FormationState,
+    state: GameState,
+    mode: 'attack' | 'defend',
+    supplyStateByOsid?: SupplyStateByOsidReport | null
+): number {
+    const locationOsid = (formation as { location_osid?: string }).location_osid;
+    const factionId = formation.faction as string;
+    if (supplyStateByOsid?.factions && locationOsid) {
+        const facEntry = supplyStateByOsid.factions.find((f) => f.faction_id === factionId);
+        const entry = facEntry?.by_osid?.find((e) => e.osid === locationOsid);
+        if (entry) {
+            if (entry.state === 'adequate') return 1.0;
+            if (entry.state === 'strained') return 0.75;
+            return mode === 'attack' ? 0.45 : 0.5; // critical
+        }
+    }
     const lastSupplied = formation.ops?.last_supplied_turn;
-    if (lastSupplied != null && _state.meta.turn - lastSupplied <= 2) return 1.0;
+    if (lastSupplied != null && state.meta.turn - lastSupplied <= 2) return 1.0;
     return mode === 'attack' ? 0.4 : 0.5;
 }
 
@@ -242,7 +333,7 @@ function getEquipmentRatio(formation: FormationState): number {
 }
 
 /**
- * Base combat power: personnel × equipment_ratio × experience_mult × (cohesion/100).
+ * Base combat power: personnel × equipment_ratio × experience_mult × (cohesion/100) × honor_mult.
  * Experience uses a floor (0.6) so green troops have basic combat effectiveness.
  * Without this floor, formations starting at experience=0 would have zero power,
  * creating a chicken-and-egg problem where no battles can occur to gain experience.
@@ -250,13 +341,23 @@ function getEquipmentRatio(formation: FormationState): number {
 const EXPERIENCE_BASE = 0.6;
 const EXPERIENCE_SCALE = 0.4;
 
+/**
+ * Unit honor/decoration combat power multiplier (synced with combat_predictor.ts).
+ * "Slavna" (glorious) and "Vitezka" (knight/valiant) were ARBiH brigade decorations.
+ */
+const HONOR_MULT: Record<string, number> = { slavna: 1.10, vitezka: 1.20 };
+function getHonorMult(formation: FormationState): number {
+    return HONOR_MULT[(formation as { honor?: string }).honor ?? ''] ?? 1.0;
+}
+
 function basePower(formation: FormationState): number {
     const personnel = formation.personnel ?? 0;
     const eq = getEquipmentRatio(formation);
     const rawExp = Math.max(0, Math.min(1, formation.experience ?? 0));
     const expMult = EXPERIENCE_BASE + EXPERIENCE_SCALE * rawExp;
     const coh = Math.max(0, Math.min(100, formation.cohesion ?? 60)) / 100;
-    return personnel * eq * expMult * coh;
+    const honorMult = getHonorMult(formation);
+    return personnel * eq * expMult * coh * honorMult;
 }
 
 export type AttackOutcome =
@@ -330,7 +431,8 @@ export function resolveAttackOrdersOsid(
     state: GameState,
     edges: EdgeRecord[],
     reverseMap: OperationalToCanonicalReverseMap,
-    terrainData?: TerrainScalarsData | null
+    terrainData?: TerrainScalarsData | null,
+    supplyStateByOsid?: SupplyStateByOsidReport | null
 ): AttackResolutionOsidReport {
     const report: AttackResolutionOsidReport = {
         orders_processed: 0,
@@ -398,14 +500,54 @@ export function resolveAttackOrdersOsid(
 
         let defenderPower: number;
         let defenderFormation: FormationState | null = null;
+        let isZocDefense = false;
+        // Artillery/tank suppression: attacker's heavy weapons reduce defender entrenchment bonus
+        const artSuppression = getArtillerySuppression(attackerFormations);
         if (defenderFormations.length > 0) {
-            const powers = defenderFormations.map(d => computeDefenderPower(state, d, targetOsid, terrainMultByOsid));
+            const powers = defenderFormations.map(d => computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid));
             const sorted = defenderFormations.map((d, i) => ({ f: d, p: powers[i]! })).sort((a, b) => b.p - a.p);
             defenderPower = sorted[0]!.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
             defenderFormation = sorted[0]!.f;
         } else if (isEnemyControlled) {
-            const pop = 5000;
-            defenderPower = pop * MILITIA_DEFENSE_RATIO * 0.25;
+            // ZoC defense: brigades at adjacent OSIDs project Zone of Control.
+            // Attacking into a brigade's ZoC is the same as attacking that brigade,
+            // but without entrenchment (they're responding, not dug in).
+            const zocDefenders = (Object.values(state.formations ?? {}) as FormationState[])
+                .filter(f => {
+                    if (f.status !== 'active' || f.faction === attackerFaction) return false;
+                    if (f.faction !== controller) return false;
+                    const loc = (f as { location_osid?: string }).location_osid;
+                    if (!loc) return false;
+                    const adjToLoc = adjacency.get(loc) ?? [];
+                    return adjToLoc.includes(targetOsid);
+                })
+                .sort((a, b) => strictCompare(a.id, b.id));
+            if (zocDefenders.length > 0) {
+                // Linked ZoC check: if the target OSID is in the defender faction's linked ZoC,
+                // the defense is stronger — the organized front line projects coordinated control.
+                // Defense hierarchy:
+                //   Direct defense (brigade present):     100% of computeDefenderPower
+                //   Linked ZoC (connected chain):          70% of computeDefenderPower
+                //   Unlinked ZoC (isolated projection):    entrenchment-scaled (0-100%)
+                const LINKED_ZOC_READINESS = 0.7;
+                const defenderFaction = zocDefenders[0]!.faction as FactionId;
+                const linkedArr = (state as { phase_ii_linked_zoc_by_faction?: Record<string, string[]> }).phase_ii_linked_zoc_by_faction?.[defenderFaction];
+                const isLinkedZoc = linkedArr != null && linkedArr.includes(targetOsid);
+                const powers = zocDefenders.map(d =>
+                    isLinkedZoc
+                        ? computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid) * LINKED_ZOC_READINESS
+                        : computeZocDefenderPower(state, d, targetOsid, terrainMultByOsid, supplyStateByOsid)
+                );
+                const sorted = zocDefenders.map((d, i) => ({ f: d, p: powers[i]! }))
+                    .sort((a, b) => b.p - a.p);
+                defenderPower = sorted[0]!.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
+                defenderFormation = sorted[0]!.f;
+                isZocDefense = true;
+            } else {
+                // No brigade present or projecting ZoC — pure militia defense
+                const pop = 5000;
+                defenderPower = pop * MILITIA_DEFENSE_RATIO * 0.25;
+            }
         } else {
             continue;
         }
@@ -435,7 +577,7 @@ export function resolveAttackOrdersOsid(
         }
 
         const coordPenalty = attackerFormations.length >= 3 ? COORDINATION_PENALTY_3PLUS : attackerFormations.length === 2 ? COORDINATION_PENALTY_2 : 1.0;
-        const attackerPower = attackerFormations.reduce((s, a) => s + computeAttackerPower(state, a), 0) * coordPenalty;
+        const attackerPower = attackerFormations.reduce((s, a) => s + computeAttackerPower(state, a, supplyStateByOsid), 0) * coordPenalty;
 
         const powerRatio = defenderPower <= 0 ? 10 : attackerPower / defenderPower;
         // Snap: Surrender Cascade — defender cohesion < 10 and power_ratio > 2.5 → eliminate without retreat (Spec §8)
@@ -531,7 +673,7 @@ export function resolveAttackOrdersOsid(
         // Snap: Ammunition Crisis (attack failed + supply CRITICAL) or Pyrrhic Victory (won but >15% casualties) — force defend posture (Spec §8)
         const attackerLost = outcome === 'repulsed' || outcome === 'catastrophic';
         const attackerWon = outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory';
-        const ammoCrisis = attackerLost && getSupplyMult(firstAttacker, state, 'attack') < 0.5;
+        const ammoCrisis = attackerLost && getSupplyMult(firstAttacker, state, 'attack', supplyStateByOsid) < 0.5;
         const pyrrhic = attackerWon && personnelAttacker > 0 && finalAttackerCas / personnelAttacker > 0.15;
         if (ammoCrisis || pyrrhic) {
             const ev: AttackResolutionOsidSnapEvent = ammoCrisis
@@ -599,6 +741,13 @@ export function resolveAttackOrdersOsid(
                 defenderFormation.personnel = 0;
                 defenderFormation.status = 'inactive';
             }
+        }
+
+        // Attacker advance: move into captured OSID after successful flip.
+        // Applies to BOTH defended and undefended captures — without advancing,
+        // the attacker stays at its original position and can never reach the new
+        // front line beyond the captured territory.
+        if (flip) {
             const advanceFormation = attackerFormations[0];
             if (advanceFormation) {
                 (advanceFormation as { location_osid?: string }).location_osid = targetOsid;
@@ -617,40 +766,90 @@ export function resolveAttackOrdersOsid(
     return report;
 }
 
-function computeAttackerPower(state: GameState, formation: FormationState): number {
+function computeAttackerPower(
+    state: GameState,
+    formation: FormationState,
+    supplyStateByOsid?: SupplyStateByOsidReport | null
+): number {
     const base = basePower(formation);
     const posture = formation.posture ?? 'defend';
     const postureMult = POSTURE_ATTACK[posture] ?? 0;
     if (postureMult <= 0) return 0;
-    const supplyMult = getSupplyMult(formation, state, 'attack');
+    const supplyMult = getSupplyMult(formation, state, 'attack', supplyStateByOsid);
     const corpsStance = getCorpsStance(state, formation);
     const corpsMult = corpsStance ? CORPS_STANCE_ATTACK[corpsStance] ?? 1 : 1;
     const opMult = getOperationsMult(state, formation);
     const ogMult = getOgMult(formation);
     const disruptionMult = getDisruptionMult(formation, 'attack');
-    return base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult;
+    const heavyMult = getHeavyWeaponsOffensiveMult(formation);
+    return base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult * heavyMult;
 }
 
 function computeDefenderPower(
     state: GameState,
     formation: FormationState,
     targetOsid: Osid,
-    terrainMultByOsid: Record<string, number>
+    terrainMultByOsid: Record<string, number>,
+    artillerySuppression: number = 0,
+    supplyStateByOsid?: SupplyStateByOsidReport | null
 ): number {
     const base = basePower(formation);
     const posture = formation.posture ?? 'defend';
     const postureMult = POSTURE_DEFENSE[posture] ?? 1;
-    const supplyMult = getSupplyMult(formation, state, 'defend');
+    const supplyMult = getSupplyMult(formation, state, 'defend', supplyStateByOsid);
     const terrainMult = getTerrainMultForOsid(targetOsid, terrainMultByOsid);
     const entrenchmentTurns = Math.min(MAX_ENTRENCHMENT, (formation as { entrenchment_turns?: number }).entrenchment_turns ?? 0);
-    const entrenchmentMult = 1.0 + entrenchmentTurns * ENTRENCHMENT_PER_TURN;
+    // Artillery suppression reduces the entrenchment bonus (not the base defense).
+    // suppressionFactor ranges from 1.0 (no suppression) to 0.3 (70% suppressed by heavy weapons).
+    const suppressionFactor = 1.0 - artillerySuppression;
+    const entrenchmentMult = 1.0 + entrenchmentTurns * ENTRENCHMENT_PER_TURN * suppressionFactor;
     const corpsStance = getCorpsStance(state, formation);
     const corpsDefMult = corpsStance ? CORPS_STANCE_DEFENSE[corpsStance] ?? 1 : 1;
     const defenseStreak = Math.min(MAX_RESILIENCE_STREAK, (formation as { defense_streak?: number }).defense_streak ?? 0);
     const resilienceMult = 1.0 + defenseStreak * RESILIENCE_PER_DEFENSE;
     const urbanMult = getUrbanMult(state, targetOsid);
     const disruptionMult = getDisruptionMult(formation, 'defend');
-    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult;
+    const enclaveMult = getEnclaveDefenseBonus(state, targetOsid);
+    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult;
+}
+
+/**
+ * ZoC defender power: brigade projects Zone of Control to adjacent OSIDs.
+ * Attacking into ZoC = fighting that brigade, but defense effectiveness
+ * scales with entrenchment (readiness). A freshly placed or recently moved
+ * brigade (entrenchment 0) projects no ZoC defense — it hasn't organized
+ * its area control yet. After 4+ turns in position, full ZoC defense.
+ *
+ * This creates the historical early-war dynamic: VRS rapid expansion in
+ * weeks 1-4 (defenders disorganized, no ZoC projection) → front solidifies
+ * as brigades dig in → static siege warfare (strong ZoC defense).
+ *
+ * No resilience streak bonus (responding, not holding position).
+ * Terrain still applies (defenders know the terrain).
+ */
+function computeZocDefenderPower(
+    state: GameState,
+    formation: FormationState,
+    targetOsid: Osid,
+    terrainMultByOsid: Record<string, number>,
+    supplyStateByOsid?: SupplyStateByOsidReport | null
+): number {
+    const base = basePower(formation);
+    const posture = formation.posture ?? 'defend';
+    const postureMult = POSTURE_DEFENSE[posture] ?? 1;
+    const supplyMult = getSupplyMult(formation, state, 'defend', supplyStateByOsid);
+    const terrainMult = getTerrainMultForOsid(targetOsid, terrainMultByOsid);
+    // ZoC readiness: scales 0→1 over 4 turns of entrenchment.
+    // entrenchment 0 = just placed/moved → 0% ZoC (no projection)
+    // entrenchment 2 = 2 weeks in position → 50% ZoC
+    // entrenchment 4+ = fully organized → 100% ZoC
+    const entrench = Math.min(MAX_ENTRENCHMENT, (formation as { entrenchment_turns?: number }).entrenchment_turns ?? 0);
+    const zocReadiness = Math.min(1.0, entrench / 4);
+    const corpsStance = getCorpsStance(state, formation);
+    const corpsDefMult = corpsStance ? CORPS_STANCE_DEFENSE[corpsStance] ?? 1 : 1;
+    const urbanMult = getUrbanMult(state, targetOsid);
+    const disruptionMult = getDisruptionMult(formation, 'defend');
+    return base * postureMult * supplyMult * terrainMult * corpsDefMult * urbanMult * disruptionMult * zocReadiness;
 }
 
 function applyPersonnelLoss(formation: FormationState, loss: number): void {

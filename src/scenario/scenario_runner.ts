@@ -41,6 +41,7 @@ import { CURRENT_SCHEMA_VERSION } from '../state/game_state.js';
 import { prepareNewGameState } from '../state/initialize_new_game_state.js';
 import {
     applyMunicipalityControllersFromMun1990Only,
+    applyOsidControlOverrides,
     loadInitialMunicipalityControllers1990
 } from '../state/political_control_init.js';
 import {
@@ -153,9 +154,9 @@ export async function createInitialGameState(
     const CANONICAL_IDS = ['RBiH', 'RS', 'HRHB'] as const;
     state.factions = CANONICAL_IDS.map((id) => {
         let supply_sources: string[] = [];
-        if (id === 'RBiH') supply_sources = ['S166499', 'S162973', 'S155551', 'S100838']; // Sarajevo, Zenica, Tuzla, Bihac
-        if (id === 'RS') supply_sources = ['S200026', 'S216984', 'S200891']; // Banja Luka, Pale, Bijeljina
-        if (id === 'HRHB') supply_sources = ['S166090', 'S120880', 'S130486']; // Mostar, Grude, Livno
+        if (id === 'RBiH') supply_sources = ['S166499', 'S162973', 'S155551', 'S100838', 'S158275', 'S127477']; // Sarajevo, Zenica, Tuzla, Bihac, Visoko, Konjic
+        if (id === 'RS') supply_sources = ['S200026', 'S216984', 'S200891', 'S208019', 'S230545', 'S226084']; // Banja Luka, Pale, Bijeljina, Doboj, Zvornik, Trebinje
+        if (id === 'HRHB') supply_sources = ['S166090', 'S120880', 'S130486', 'S110442', 'S113611']; // Mostar, Grude, Livno, Capljina, Tomislavgrad
 
         return {
             id,
@@ -817,6 +818,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 }
                 : undefined;
         let sidToMun = buildSidToMunFromSettlements(graph.settlements);
+        const canonicalSidToMun = sidToMun; // Preserve original canonical SID→mun map for later rebuilds
         const warStartTurnForOrgPenSeeding =
             scenario.start_phase === 'phase_0'
                 ? (scenario.phase_0_war_start_turn ?? (scenario.phase_0_referendum_turn ?? 0) + 4)
@@ -863,9 +865,71 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             if (firstKey?.startsWith('op:')) {
                 sidToMun = buildOsidToMunFromReverseMap(
                     operationalData.operationalToCanonical,
-                    sidToMun
+                    canonicalSidToMun
                 );
             }
+        }
+
+        // Apply ethnic-majority OSID control from derived data.
+        // The hybrid_1992 init mode's ethnic lookup fails for OSID keys (looks up
+        // "op:mun:slug" in data keyed by "S123456"). This step loads the pre-derived
+        // operational_political_control.json (40% ethnic majority threshold, HRHB→RBiH
+        // aligned municipality overrides) and overwrites political_controllers.
+        // Historical: April 1992 control followed ethnic concentrations, not municipality admin.
+        if (operationalData?.operationalToCanonical) {
+            try {
+                const opControlPath = join(baseDir ?? '', 'data/derived/operational/operational_political_control.json');
+                const opControlRaw = JSON.parse(await readFile(opControlPath, 'utf8')) as {
+                    by_settlement_id?: Record<string, string>;
+                };
+                if (opControlRaw.by_settlement_id) {
+                    const pc = state.political_controllers ?? {};
+                    const sortedOsids = Object.keys(opControlRaw.by_settlement_id).sort((a, b) => a.localeCompare(b));
+                    for (const osid of sortedOsids) {
+                        const faction = opControlRaw.by_settlement_id[osid];
+                        if (faction) pc[osid] = faction as FactionId;
+                    }
+                    state.political_controllers = pc;
+                    // Reset contested_control to match (ethnic-based start = no contested)
+                    if (state.contested_control) {
+                        for (const osid of sortedOsids) {
+                            state.contested_control[osid] = false;
+                        }
+                    }
+                }
+            } catch {
+                // Non-fatal: fall through to existing municipality-based control
+            }
+            // Rebuild sidToMun after ethnic control override (always use original canonical map as base)
+            sidToMun = buildOsidToMunFromReverseMap(
+                operationalData.operationalToCanonical,
+                canonicalSidToMun
+            );
+        }
+
+        // Apply per-OSID political control overrides from scenario config (after ethnic control, before OOB).
+        // Historical accuracy: some OSIDs need different controllers than ethnic majority.
+        // E.g. Brčko city held by VRS despite Bosniak municipality majority.
+        if (scenario.osid_control_overrides && Object.keys(scenario.osid_control_overrides).length > 0) {
+            applyOsidControlOverrides(state, scenario.osid_control_overrides);
+            // Rebuild sidToMun after overrides so factionHasPresenceInMun sees updated controllers
+            // (control overrides don't change mun mapping, but rebuild ensures consistency)
+            if (operationalData?.operationalToCanonical) {
+                sidToMun = buildOsidToMunFromReverseMap(
+                    operationalData.operationalToCanonical,
+                    canonicalSidToMun
+                );
+            }
+        }
+
+        // Phase I→II edge cases: entrenchment init and stuck-in-Phase-I fallback (PHASE_I_II_EDGE_CASES.md)
+        if (typeof scenario.phase_ii_entrenchment_init_turns === 'number') {
+            state.meta.phase_ii_entrenchment_init_turns = scenario.phase_ii_entrenchment_init_turns;
+        }
+        if (typeof scenario.phase_i_force_transition_after_turns === 'number') {
+            state.meta.phase_i_force_transition_after_turns = scenario.phase_i_force_transition_after_turns;
+        } else if (scenario.start_phase === 'phase_i' || scenario.start_phase === 'phase_0') {
+            state.meta.phase_i_force_transition_after_turns = 52;
         }
 
         // When init_formations_oob is true, OOB creates formations at Phase I entry; do not load placeholder init_formations.
@@ -1059,7 +1123,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     initial_save: initialSavePath,
                     final_save: initialSavePath,
                     weekly_report: join(outDir, 'weekly_report.jsonl'),
-                    replay: join(outDir, 'replay.jsonl'),
+                    replay: '',
                     run_summary: join(outDir, 'run_summary.json'),
                     control_delta: join(outDir, 'control_delta.json'),
                     end_report: join(outDir, 'end_report.md'),
@@ -1082,9 +1146,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
 
         const weeklyReportPath = join(outDir, 'weekly_report.jsonl');
-        const replayPath = join(outDir, 'replay.jsonl');
+        const replayPath = emitWeeklySavesForVideo ? join(outDir, 'replay.jsonl') : null;
         const reportStream = createWriteStream(weeklyReportPath, { flags: 'w' });
-        const replayStream = createWriteStream(replayPath, { flags: 'w' });
+        const replayStream = replayPath ? createWriteStream(replayPath, { flags: 'w' }) : null;
 
         let final_state_hash = '';
         let firstReportRow: WeeklyReportRow | null = null;
@@ -1548,16 +1612,18 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             lastReportRow = reportRow;
             reportStream.write(stableStringify(reportRow) + '\n');
 
-            const replayLine: { week_index: number; actions: ScenarioAction[]; state_hash?: string } = {
-                week_index,
-                actions
-            };
             if (week_index === weeks - 1) {
                 const serialized = serializeState(state);
                 final_state_hash = createHash('sha256').update(serialized, 'utf8').digest('hex').slice(0, 16);
-                replayLine.state_hash = final_state_hash;
             }
-            replayStream.write(stableStringify(replayLine) + '\n');
+            if (replayStream) {
+                const replayLine: { week_index: number; actions: ScenarioAction[]; state_hash?: string } = {
+                    week_index,
+                    actions
+                };
+                if (final_state_hash) replayLine.state_hash = final_state_hash;
+                replayStream.write(stableStringify(replayLine) + '\n');
+            }
 
             if (effectiveEmitEvery > 0 && (week_index + 1) % effectiveEmitEvery === 0) {
                 const midPath = join(outDir, `save_w${week_index + 1}.json`);
@@ -1573,9 +1639,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
 
         reportStream.end();
-        replayStream.end();
+        if (replayStream) replayStream.end();
         await new Promise<void>((resolve, reject) => {
-            reportStream.on('finish', () => replayStream.on('finish', resolve).on('error', reject));
+            if (replayStream) {
+                reportStream.on('finish', () => replayStream.on('finish', resolve).on('error', reject));
+            } else {
+                reportStream.on('finish', resolve);
+            }
             reportStream.on('error', reject);
         });
 
@@ -1680,7 +1750,17 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 : {}),
             ...(botBenchmarkSummary ? { bot_benchmark_evaluation: botBenchmarkSummary } : {}),
             ...(victoryEvaluation ? { victory: victoryEvaluation } : {}),
-            ...(breachDiagnostic ? { breach_diagnostic: breachDiagnostic } : {})
+            ...(breachDiagnostic ? { breach_diagnostic: breachDiagnostic } : {}),
+            ...(state.meta.phase === 'phase_i'
+                ? {
+                      phase_i_note: {
+                          message:
+                              'Opposing control edges have not yet persisted long enough',
+                          streak: state.meta.phase_i_opposing_edges_streak ?? 0,
+                          required_streak: 4
+                      }
+                  }
+                : {})
         };
         const runSummaryPath = join(outDir, 'run_summary.json');
         const runSummaryForWrite = integerizeRunSummaryCounts(runSummary);
@@ -1824,7 +1904,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 initial_save: initialSavePath,
                 final_save: finalSavePath,
                 weekly_report: weeklyReportPath,
-                replay: replayPath,
+                replay: replayPath ?? '',
                 run_summary: runSummaryPath,
                 control_delta: controlDeltaPath,
                 end_report: endReportPath,

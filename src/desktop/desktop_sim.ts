@@ -36,6 +36,12 @@ import {
     type MovementRangeQuery,
 } from '../sim/phase_ii/brigade_movement_query.js';
 import { computeSupplyReachability, type SupplyReachabilityReport } from '../state/supply_reachability.js';
+import {
+    deriveCorridors,
+    deriveSupplyState,
+    type CorridorDerivationReport,
+    type SupplyStateDerivationReport
+} from '../state/supply_state_derivation.js';
 import type { BrigadeAoROrder, FactionId, GameState, MunicipalityId } from '../state/game_state.js';
 import { applyMunicipalityControllersFromMun1990Only } from '../state/political_control_init.js';
 import type { EquipmentClass } from '../state/recruitment_types.js';
@@ -277,14 +283,27 @@ export interface BattleEventQueryEntry {
     mun_id: string | null;
 }
 
-/** Read-only query: current supply reachability report by faction. */
+/** Result of supply query: reachability plus supply state and corridor summary for UI. */
+export interface SupplyPathsQueryResult extends SupplyReachabilityReport {
+    supply_state?: SupplyStateDerivationReport;
+    corridors?: CorridorDerivationReport;
+}
+
+/** Read-only query: supply reachability, state (adequate/strained/critical counts), and corridor summary. */
 export async function querySupplyPaths(
     state: GameState,
     baseDir: string
-): Promise<SupplyReachabilityReport> {
+): Promise<SupplyPathsQueryResult> {
     const graph = await loadSettlementGraph(settlementGraphOptions(baseDir));
     const adjacency = buildAdjacencyMap(graph.edges);
-    return computeSupplyReachability(state, adjacency);
+    const reachability = computeSupplyReachability(state, adjacency);
+    const corridorReport = deriveCorridors(state, adjacency, reachability);
+    const supplyStateReport = deriveSupplyState(state, adjacency, reachability, corridorReport);
+    return {
+        ...reachability,
+        supply_state: supplyStateReport,
+        corridors: corridorReport
+    };
 }
 
 /** Read-only query: derived corps sectors from brigade location (AoR or location_osid). */

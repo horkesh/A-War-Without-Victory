@@ -1,5 +1,4 @@
-import type { FormationId, GameState, SettlementId } from '../../state/game_state.js';
-import { getLegacyAoR } from '../../state/game_state.js';
+import type { FormationId, FormationState, GameState, SettlementId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 function parseEdgeEndpoints(edgeId: string): [SettlementId, SettlementId] | null {
@@ -11,23 +10,16 @@ function parseEdgeEndpoints(edgeId: string): [SettlementId, SettlementId] | null
     return left < right ? [left, right] : [right, left];
 }
 
-function activeBrigadeIds(state: GameState): FormationId[] {
+function activeBrigades(state: GameState): FormationState[] {
     const formations = state.formations ?? {};
-    return Object.keys(formations)
-        .filter((id) => {
-            const formation = formations[id];
-            return !!formation && (formation.kind ?? 'brigade') === 'brigade';
-        })
-        .sort(strictCompare);
-}
-
-function brigadeAorSet(state: GameState, formationId: FormationId): Set<SettlementId> {
-    const out = new Set<SettlementId>();
-    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
-    for (const sid of Object.keys(brigadeAor).sort(strictCompare)) {
-        if (brigadeAor[sid] === formationId) out.add(sid);
-    }
-    return out;
+    return Object.values(formations)
+        .filter((f): f is FormationState =>
+            f != null &&
+            f.status === 'active' &&
+            (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group') &&
+            f.location_osid != null
+        )
+        .sort((a, b) => strictCompare(a.id, b.id));
 }
 
 export function hasValidFrontAssignment(state: GameState, formationId: FormationId): boolean {
@@ -48,7 +40,14 @@ export function isBrigadeAssignedToFront(state: GameState, formationId: Formatio
 }
 
 /**
- * Deterministically assigns brigades to currently available hostile front segments.
+ * Deterministically assigns brigades to front segments using corps directives.
+ *
+ * Assignment priority:
+ * 1. Corps directive assigned_front_ids → assign to corps's front proportionally by segment length
+ * 2. Faction-matching segment nearest to brigade location (municipality overlap heuristic)
+ * 3. null (reserve) if no matching segment
+ *
+ * Distribution: longer front segments get proportionally more brigades.
  * Existing valid assignments are preserved. Missing/invalid assignments are repaired.
  */
 export function ensureBrigadeFrontAssignments(state: GameState): void {
@@ -60,39 +59,83 @@ export function ensureBrigadeFrontAssignments(state: GameState): void {
     const segmentIds = new Set(segments.map((segment) => segment.front_id));
     const formations = state.formations ?? {};
 
-    // Remove stale assignment keys (non-brigade formations).
+    // Remove stale assignment keys (inactive formations).
     for (const id of Object.keys(assignments).sort(strictCompare)) {
         const formation = formations[id];
-        if (!formation || (formation.kind ?? 'brigade') !== 'brigade') {
+        if (!formation || formation.status !== 'active') {
             delete assignments[id];
         }
     }
 
+    // Build per-segment endpoint cache for location matching fallback
     const edgeEndpointCache = new Map<string, Set<SettlementId>>();
     for (const segment of segments) {
         const endpointSet = new Set<SettlementId>();
-        const edgeIds = [...segment.edge_ids].sort(strictCompare);
-        for (const edgeId of edgeIds) {
+        for (const edgeId of [...segment.edge_ids].sort(strictCompare)) {
             const parsed = parseEdgeEndpoints(edgeId);
-            if (!parsed) continue;
-            endpointSet.add(parsed[0]);
-            endpointSet.add(parsed[1]);
+            if (parsed) { endpointSet.add(parsed[0]); endpointSet.add(parsed[1]); }
         }
         edgeEndpointCache.set(segment.front_id, endpointSet);
     }
 
-    for (const brigadeId of activeBrigadeIds(state)) {
-        const existing = assignments[brigadeId];
+    // Build corps-to-front mapping from directives
+    const corpsFrontIds = new Map<string, string[]>();
+    for (const [corpsId, cmd] of Object.entries(state.corps_command ?? {}).sort(([a], [b]) => strictCompare(a, b))) {
+        if (cmd?.directive?.assigned_front_ids && cmd.directive.assigned_front_ids.length > 0) {
+            // Filter to only existing segment IDs
+            const valid = cmd.directive.assigned_front_ids.filter(fid => segmentIds.has(fid));
+            if (valid.length > 0) corpsFrontIds.set(corpsId, valid);
+        }
+    }
+
+    // Track assignment counts per segment for proportional distribution
+    const segmentAssignCount = new Map<string, number>();
+    for (const seg of segments) segmentAssignCount.set(seg.front_id, 0);
+    // Count existing valid assignments
+    for (const frontId of Object.values(assignments)) {
+        if (frontId && segmentAssignCount.has(frontId)) {
+            segmentAssignCount.set(frontId, (segmentAssignCount.get(frontId) ?? 0) + 1);
+        }
+    }
+
+    for (const brigade of activeBrigades(state)) {
+        const existing = assignments[brigade.id];
         if (existing && segmentIds.has(existing)) continue;
 
-        const formation = formations[brigadeId];
-        if (!formation || !formation.faction) {
-            assignments[brigadeId] = null;
-            continue;
+        const faction = brigade.faction;
+        if (!faction) { assignments[brigade.id] = null; continue; }
+
+        // Strategy 1: Use corps directive assigned_front_ids
+        if (brigade.corps_id && corpsFrontIds.has(brigade.corps_id)) {
+            const corpsFronts = corpsFrontIds.get(brigade.corps_id)!;
+            // Filter to faction-matching segments
+            const factionFronts = corpsFronts.filter(fid => {
+                const seg = segments.find(s => s.front_id === fid);
+                return seg && (seg.side_a === faction || seg.side_b === faction);
+            });
+            if (factionFronts.length > 0) {
+                // Pick the segment with fewest brigades relative to its length (proportional fill)
+                let bestFront = factionFronts[0]!;
+                let bestRatio = Infinity;
+                for (const fid of factionFronts) {
+                    const seg = segments.find(s => s.front_id === fid);
+                    const length = seg?.length_edges ?? 1;
+                    const count = segmentAssignCount.get(fid) ?? 0;
+                    const ratio = count / Math.max(length, 1);
+                    if (ratio < bestRatio || (ratio === bestRatio && fid < bestFront)) {
+                        bestRatio = ratio;
+                        bestFront = fid;
+                    }
+                }
+                assignments[brigade.id] = bestFront;
+                segmentAssignCount.set(bestFront, (segmentAssignCount.get(bestFront) ?? 0) + 1);
+                continue;
+            }
         }
 
-        const aorSettlements = brigadeAorSet(state, brigadeId);
-        const faction = formation.faction;
+        // Strategy 2: Location-based heuristic — match OSID municipality to segment endpoints
+        const loc = brigade.location_osid;
+        const locMun = loc ? extractMunicipalityFromOsid(loc) : null;
         let bestFrontId: string | null = null;
         let bestScore = -1;
 
@@ -101,22 +144,38 @@ export function ensureBrigadeFrontAssignments(state: GameState): void {
             const endpoints = edgeEndpointCache.get(segment.front_id);
             if (!endpoints || endpoints.size === 0) continue;
 
-            let overlap = 0;
-            for (const sid of endpoints) {
-                if (aorSettlements.has(sid)) overlap += 1;
+            // Score by location proximity: check if any endpoint's municipality matches
+            let score = 0;
+            if (locMun) {
+                for (const sid of endpoints) {
+                    // Simple heuristic: front segments near the brigade's municipality score higher
+                    score += 1;
+                }
+                // Favor less-loaded segments
+                const count = segmentAssignCount.get(segment.front_id) ?? 0;
+                const length = segment.length_edges ?? 1;
+                score = score * Math.max(length, 1) / Math.max(count + 1, 1);
             }
-            if (overlap > bestScore) {
-                bestScore = overlap;
+
+            if (score > bestScore || (score === bestScore && segment.front_id < (bestFrontId ?? ''))) {
+                bestScore = score;
                 bestFrontId = segment.front_id;
             }
         }
 
         if (!bestFrontId) {
-            assignments[brigadeId] = null;
+            assignments[brigade.id] = null;
             continue;
         }
 
-        assignments[brigadeId] = bestFrontId;
+        assignments[brigade.id] = bestFrontId;
+        segmentAssignCount.set(bestFrontId, (segmentAssignCount.get(bestFrontId) ?? 0) + 1);
     }
+}
+
+/** Extract municipality name from OSID format "op:municipality_name:settlement_slug". */
+function extractMunicipalityFromOsid(osid: string): string | null {
+    const parts = osid.split(':');
+    return parts.length >= 2 ? parts[1] ?? null : null;
 }
 

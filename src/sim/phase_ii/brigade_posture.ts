@@ -26,35 +26,48 @@ export interface PostureReport {
 
 // --- Posture constraints ---
 
-/** Minimum cohesion required to adopt each posture. */
+/** Minimum cohesion required to adopt each posture.
+ * Tuned: attack threshold lowered from 40→25. Historical Bosnian brigades
+ * fought with poor morale throughout the war. 40 was too restrictive and shut
+ * down all offensive operations by week 35. Corps-level operations concentrate
+ * the attack burden on selected brigades while others rest. */
 const POSTURE_MIN_COHESION: Record<BrigadePosture, number> = {
     defend: 0,
-    probe: 20,
-    attack: 40,
+    probe: 15,
+    attack: 25,
     elastic_defense: 0,
     consolidation: 0
 };
 
-/** Readiness levels that are allowed for each posture. */
+/** Readiness levels that are allowed for each posture.
+ * Tuned: overextended brigades can now attack (at higher cohesion cost).
+ * Historically, exhausted brigades still received attack orders for critical
+ * operations — corps and army HQ concentrated resources on key axes using
+ * special operations that drew from multiple brigades. Individual brigade
+ * exhaustion didn't prevent faction-level offensive operations. */
 const POSTURE_MIN_READINESS: Record<BrigadePosture, string[]> = {
     defend: ['active', 'overextended', 'degraded', 'forming'],
     probe: ['active', 'overextended'],
-    attack: ['active'],
+    attack: ['active', 'overextended'],
     elastic_defense: ['active', 'overextended', 'degraded'],
     consolidation: ['active', 'overextended', 'degraded']
 };
 
-/** Per-turn cohesion cost for each posture. Negative = drain, positive = recovery. */
+/** Per-turn cohesion cost for each posture. Negative = drain, positive = recovery.
+ * Tuned: defend recovery +2/turn (was +1) and cap raised to 85 (was 80).
+ * This enables attack-rest cycling: a brigade attacks for ~8 turns (loses ~24 cohesion),
+ * then defends for ~12 turns to recover. Without faster recovery, the system was
+ * one-directional — cohesion only went down, permanently removing units from attack pool. */
 const POSTURE_COHESION_COST: Record<BrigadePosture, number> = {
     attack: -3,
     probe: -1,
     elastic_defense: -0.5,
-    defend: 1,   // Recovery
-    consolidation: 0.5  // Slight recovery (soft front)
+    defend: 2,   // Recovery (tuned: 1→2 for attack-rest cycling)
+    consolidation: 1  // Moderate recovery
 };
 
 /** Maximum cohesion recovery cap when in defend posture. */
-const DEFEND_COHESION_CAP = 80;
+const DEFEND_COHESION_CAP = 85;
 
 /** Absolute cohesion bounds. */
 const COHESION_MIN = 0;

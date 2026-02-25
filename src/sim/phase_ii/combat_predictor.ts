@@ -21,6 +21,7 @@ import type {
     GameState
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
@@ -41,13 +42,44 @@ const VICTORY_THRESHOLD_COSTLY = 1.0;
 const STALEMATE_FLOOR = 0.7;
 const REPULSED_FLOOR = 0.5;
 
-const MAX_ENTRENCHMENT = 12;
-const ENTRENCHMENT_PER_TURN = 0.035;   // Tuned: 0.065→0.035. Max bonus 1.42× (was 1.78×).
+const MAX_ENTRENCHMENT = 6;             // Tuned: 8→6. Max bonus 1.21× (was 1.28×). RS light infantry needs viable attacks through week 30.
+const ENTRENCHMENT_PER_TURN = 0.035;
 const MAX_RESILIENCE_STREAK = 4;        // Tuned: 6→4. Still rewards persistent defense.
 const RESILIENCE_PER_DEFENSE = 0.025;   // Tuned: 0.05→0.025. Max bonus 1.10× (was 1.30×).
 
-const BASE_ATTACKER_LOSS_RATE = 0.04;
-const BASE_DEFENDER_LOSS_RATE = 0.02;
+/**
+ * Artillery suppression of entrenchment. Mirrors attack_resolution_osid.ts.
+ * Attacker's heavy weapons reduce the defender's entrenchment bonus.
+ * VRS (~45%), HVO (~20%), ARBiH (~6%). See attack_resolution_osid.ts for full docs.
+ */
+function getArtillerySuppression(attackers: FormationState[]): number {
+    if (attackers.length === 0) return 0;
+    let maxSuppression = 0;
+    for (const attacker of attackers) {
+        const comp = attacker.composition ?? ensureBrigadeComposition(attacker);
+        const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
+        const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
+        const suppression = (artEff * 1.0 + tankEff * 0.5) / 100;
+        if (suppression > maxSuppression) maxSuppression = suppression;
+    }
+    return Math.min(0.7, maxSuppression);
+}
+
+/**
+ * Heavy weapons offensive firepower multiplier (synced with attack_resolution_osid.ts).
+ * Tanks and artillery provide direct firepower advantage far beyond equipment ratio.
+ * Cap 0.6: VRS ~1.60, HVO ~1.27, ARBiH ~1.09.
+ */
+function getHeavyWeaponsOffensiveMult(formation: FormationState): number {
+    const comp = formation.composition ?? ensureBrigadeComposition(formation);
+    const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
+    const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
+    const heavyFirepower = tankEff * 10 + artEff * 8;
+    return 1.0 + Math.min(0.6, heavyFirepower / 500);
+}
+
+const BASE_ATTACKER_LOSS_RATE = 0.06;     // Synced with attack_resolution_osid.ts: 0.04→0.06
+const BASE_DEFENDER_LOSS_RATE = 0.03;     // Synced with attack_resolution_osid.ts: 0.02→0.03
 const MILITIA_DEFENSE_RATIO = 0.03;
 const COORDINATION_PENALTY_2 = 0.9;
 const COORDINATION_PENALTY_3PLUS = 0.8;
@@ -80,8 +112,9 @@ const POSTURE_DEFENSE: Record<string, number> = {
     elastic_defense: 1.2, consolidation: 1.1
 };
 
+// Synced with attack_resolution_osid.ts. Balanced=1.0 (was 0.8), offensive=1.15 (was 1.0).
 const CORPS_STANCE_ATTACK: Record<string, number> = {
-    defensive: 0.5, balanced: 0.8, offensive: 1.0, reorganize: 0.5
+    defensive: 0.5, balanced: 1.0, offensive: 1.15, reorganize: 0.5
 };
 const CORPS_STANCE_DEFENSE: Record<string, number> = {
     defensive: 1.2, balanced: 1.0, offensive: 0.8, reorganize: 1.0
@@ -157,16 +190,43 @@ function getEquipmentRatio(formation: FormationState): number {
 const EXPERIENCE_BASE = 0.6;
 const EXPERIENCE_SCALE = 0.4;
 
+/**
+ * Unit honor/decoration combat power multiplier.
+ * "Slavna" (glorious) and "Vitezka" (knight/valiant) were ARBiH brigade decorations
+ * awarded for exceptional combat performance. They reflect veteran, battle-hardened capability.
+ */
+const HONOR_MULT: Record<string, number> = { slavna: 1.10, vitezka: 1.20 };
+function getHonorMult(formation: FormationState): number {
+    return HONOR_MULT[(formation as { honor?: string }).honor ?? ''] ?? 1.0;
+}
+
 function basePower(formation: FormationState): number {
     const personnel = formation.personnel ?? 0;
     const eq = getEquipmentRatio(formation);
     const rawExp = Math.max(0, Math.min(1, formation.experience ?? 0));
     const expMult = EXPERIENCE_BASE + EXPERIENCE_SCALE * rawExp;
     const coh = Math.max(0, Math.min(100, formation.cohesion ?? 60)) / 100;
-    return personnel * eq * expMult * coh;
+    const honorMult = getHonorMult(formation);
+    return personnel * eq * expMult * coh * honorMult;
 }
 
-function getSupplyMult(formation: FormationState, state: GameState, mode: 'attack' | 'defend'): number {
+function getSupplyMult(
+    formation: FormationState,
+    state: GameState,
+    mode: 'attack' | 'defend',
+    supplyStateByOsid?: SupplyStateByOsidReport | null
+): number {
+    const locationOsid = formation.location_osid;
+    const factionId = formation.faction as string;
+    if (supplyStateByOsid?.factions && locationOsid) {
+        const facEntry = supplyStateByOsid.factions.find((f) => f.faction_id === factionId);
+        const entry = facEntry?.by_osid?.find((e) => e.osid === locationOsid);
+        if (entry) {
+            if (entry.state === 'adequate') return 1.0;
+            if (entry.state === 'strained') return 0.75;
+            return mode === 'attack' ? 0.45 : 0.5; // critical
+        }
+    }
     const lastSupplied = formation.ops?.last_supplied_turn;
     if (lastSupplied != null && state.meta.turn - lastSupplied <= 2) return 1.0;
     return mode === 'attack' ? 0.4 : 0.5;
@@ -214,33 +274,43 @@ function classifyOutcome(powerRatio: number): PredictedOutcome {
     return 'catastrophic';
 }
 
-function computeAttackerPower(state: GameState, formation: FormationState, overridePosture?: string): number {
+function computeAttackerPower(
+    state: GameState,
+    formation: FormationState,
+    overridePosture?: string,
+    supplyStateByOsid?: SupplyStateByOsidReport | null
+): number {
     const base = basePower(formation);
     const posture = overridePosture ?? formation.posture ?? 'attack';
     const postureMult = POSTURE_ATTACK[posture] ?? 0;
     if (postureMult <= 0) return 0;
-    const supplyMult = getSupplyMult(formation, state, 'attack');
+    const supplyMult = getSupplyMult(formation, state, 'attack', supplyStateByOsid);
     const corpsStance = getCorpsStance(state, formation);
     const corpsMult = corpsStance ? CORPS_STANCE_ATTACK[corpsStance] ?? 1 : 1;
     const opMult = getOperationsMult(state, formation);
     const ogMult = getOgMult(formation);
     const disruptionMult = getDisruptionMult(formation, 'attack');
-    return base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult;
+    const heavyMult = getHeavyWeaponsOffensiveMult(formation);
+    return base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult * heavyMult;
 }
 
 function computeDefenderPower(
     state: GameState,
     formation: FormationState,
     targetOsid: Osid,
-    terrainMultByOsid: Record<string, number>
+    terrainMultByOsid: Record<string, number>,
+    artillerySuppression: number = 0,
+    supplyStateByOsid?: SupplyStateByOsidReport | null
 ): number {
     const base = basePower(formation);
     const posture = formation.posture ?? 'defend';
     const postureMult = POSTURE_DEFENSE[posture] ?? 1;
-    const supplyMult = getSupplyMult(formation, state, 'defend');
+    const supplyMult = getSupplyMult(formation, state, 'defend', supplyStateByOsid);
     const terrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
     const entrenchmentTurns = Math.min(MAX_ENTRENCHMENT, (formation as { entrenchment_turns?: number }).entrenchment_turns ?? 0);
-    const entrenchmentMult = 1.0 + entrenchmentTurns * ENTRENCHMENT_PER_TURN;
+    // Artillery suppression reduces the entrenchment bonus
+    const suppressionFactor = 1.0 - artillerySuppression;
+    const entrenchmentMult = 1.0 + entrenchmentTurns * ENTRENCHMENT_PER_TURN * suppressionFactor;
     const corpsStance = getCorpsStance(state, formation);
     const corpsDefMult = corpsStance ? CORPS_STANCE_DEFENSE[corpsStance] ?? 1 : 1;
     const defenseStreak = Math.min(MAX_RESILIENCE_STREAK, (formation as { defense_streak?: number }).defense_streak ?? 0);
@@ -248,6 +318,33 @@ function computeDefenderPower(
     const urbanMult = getUrbanMult(targetOsid);
     const disruptionMult = getDisruptionMult(formation, 'defend');
     return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult;
+}
+
+/**
+ * ZoC defender power: scales with entrenchment (readiness).
+ * Mirrors computeZocDefenderPower in attack_resolution_osid.ts.
+ * No resilience streak bonus. ZoC readiness: 0→100% over 4 turns.
+ */
+function computeZocDefenderPower(
+    state: GameState,
+    formation: FormationState,
+    targetOsid: Osid,
+    terrainMultByOsid: Record<string, number>,
+    supplyStateByOsid?: SupplyStateByOsidReport | null
+): number {
+    const base = basePower(formation);
+    const posture = formation.posture ?? 'defend';
+    const postureMult = POSTURE_DEFENSE[posture] ?? 1;
+    const supplyMult = getSupplyMult(formation, state, 'defend', supplyStateByOsid);
+    const terrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
+    // ZoC readiness: scales 0→1 over 4 turns of entrenchment
+    const entrench = Math.min(MAX_ENTRENCHMENT, (formation as { entrenchment_turns?: number }).entrenchment_turns ?? 0);
+    const zocReadiness = Math.min(1.0, entrench / 4);
+    const corpsStance = getCorpsStance(state, formation);
+    const corpsDefMult = corpsStance ? CORPS_STANCE_DEFENSE[corpsStance] ?? 1 : 1;
+    const urbanMult = getUrbanMult(targetOsid);
+    const disruptionMult = getDisruptionMult(formation, 'defend');
+    return base * postureMult * supplyMult * terrainMult * corpsDefMult * urbanMult * disruptionMult * zocReadiness;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -305,7 +402,8 @@ export function predictCombatOutcome(
     reverseMap: OperationalToCanonicalReverseMap,
     terrainMultByOsid: Record<string, number>,
     attackerPosture?: string,
-    additionalAttackers?: FormationId[]
+    additionalAttackers?: FormationId[],
+    supplyStateByOsid?: SupplyStateByOsidReport | null
 ): CombatPrediction | null {
     const attacker = state.formations?.[attackerId];
     if (!attacker || attacker.status !== 'active') return null;
@@ -340,17 +438,55 @@ export function predictCombatOutcome(
     let defenderHasBrigade = false;
     let defenderDisrupted = false;
     let defenderCohesion = 60;
+    // Artillery/tank suppression: attacker's heavy weapons reduce defender entrenchment bonus
+    const artSuppression = getArtillerySuppression(attackerFormations);
 
     if (defenderFormations.length > 0) {
         defenderHasBrigade = true;
-        const powers = defenderFormations.map(d => computeDefenderPower(state, d, targetOsid, terrainMultByOsid));
+        const powers = defenderFormations.map(d => computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid));
         const sorted = defenderFormations.map((d, i) => ({ f: d, p: powers[i]! })).sort((a, b) => b.p - a.p);
         defenderPower = sorted[0]!.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
         defenderFormation = sorted[0]!.f;
         defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
         defenderCohesion = defenderFormation.cohesion ?? 60;
     } else if (isEnemyControlled) {
-        defenderPower = 5000 * MILITIA_DEFENSE_RATIO * 0.25;
+        // ZoC defense: brigades at adjacent OSIDs project Zone of Control.
+        // Attacking into ZoC = attacking that brigade (without entrenchment).
+        const zocDefenders = (Object.values(state.formations ?? {}) as FormationState[])
+            .filter(f => {
+                if (f.status !== 'active' || f.faction === attackerFaction) return false;
+                if (f.faction !== controller) return false;
+                const loc = f.location_osid;
+                if (!loc) return false;
+                const adjToLoc = adjacency.get(loc) ?? [];
+                return adjToLoc.includes(targetOsid);
+            })
+            .sort((a, b) => strictCompare(a.id, b.id));
+        if (zocDefenders.length > 0) {
+            defenderHasBrigade = true;
+            // Linked ZoC: stronger defense (organized connected front line).
+            // Defense hierarchy:
+            //   Direct defense (brigade present):     100% of computeDefenderPower
+            //   Linked ZoC (connected chain):          70% of computeDefenderPower
+            //   Unlinked ZoC (isolated projection):    entrenchment-scaled (0-100%)
+            const LINKED_ZOC_READINESS = 0.7;
+            const defenderFaction = zocDefenders[0]!.faction as FactionId;
+            const linkedArr = (state as { phase_ii_linked_zoc_by_faction?: Record<string, string[]> }).phase_ii_linked_zoc_by_faction?.[defenderFaction];
+            const isLinkedZoc = linkedArr != null && linkedArr.includes(targetOsid);
+            const powers = zocDefenders.map(d =>
+                isLinkedZoc
+                    ? computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid) * LINKED_ZOC_READINESS
+                    : computeZocDefenderPower(state, d, targetOsid, terrainMultByOsid, supplyStateByOsid)
+            );
+            const sorted = zocDefenders.map((d, i) => ({ f: d, p: powers[i]! }))
+                .sort((a, b) => b.p - a.p);
+            defenderPower = sorted[0]!.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
+            defenderFormation = sorted[0]!.f;
+            defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
+            defenderCohesion = defenderFormation.cohesion ?? 60;
+        } else {
+            defenderPower = 5000 * MILITIA_DEFENSE_RATIO * 0.25;
+        }
     } else {
         return null; // Friendly-controlled or neutral — nothing to attack
     }
@@ -359,7 +495,7 @@ export function predictCombatOutcome(
     const coordPenalty = attackerFormations.length >= 3 ? COORDINATION_PENALTY_3PLUS
         : attackerFormations.length === 2 ? COORDINATION_PENALTY_2 : 1.0;
     const attackerPower = attackerFormations.reduce(
-        (s, a) => s + computeAttackerPower(state, a, attackerPosture), 0
+        (s, a) => s + computeAttackerPower(state, a, attackerPosture, supplyStateByOsid), 0
     ) * coordPenalty;
 
     // Outcome
@@ -421,7 +557,8 @@ export function predictAllAdjacentTargets(
     adjacency: Map<Osid, Osid[]>,
     reverseMap: OperationalToCanonicalReverseMap,
     terrainMultByOsid: Record<string, number>,
-    attackerPosture?: string
+    attackerPosture?: string,
+    supplyStateByOsid?: SupplyStateByOsidReport | null
 ): Array<{ osid: Osid; prediction: CombatPrediction }> {
     const attacker = state.formations?.[attackerId];
     if (!attacker || attacker.status !== 'active') return [];
@@ -435,7 +572,7 @@ export function predictAllAdjacentTargets(
     for (const n of neighbors) {
         const controller = getPoliticalControllerOSID(state, n, reverseMap);
         if (controller === null || controller === factionId) continue; // Skip friendly/uncontrolled
-        const pred = predictCombatOutcome(state, attackerId, n, adjacency, reverseMap, terrainMultByOsid, attackerPosture);
+        const pred = predictCombatOutcome(state, attackerId, n, adjacency, reverseMap, terrainMultByOsid, attackerPosture, undefined, supplyStateByOsid);
         if (pred) results.push({ osid: n, prediction: pred });
     }
 

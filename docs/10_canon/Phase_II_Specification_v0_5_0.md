@@ -103,22 +103,23 @@ Phase II logic runs inside the sim turn pipeline (src/sim/turn_pipeline.ts):
 - **When**: Only when meta.phase === "phase_ii". For meta.phase === "phase_i", Phase I phases run and Phase II consolidation is skipped; for phase_0, the state pipeline is used.
 - **Where**: After any phase-ii init (when present), **update-formation-lifecycle** runs first (so brigades may transition forming → active before bot AI evaluates them). Then the following brigade operations phases run in order, then "phase-ii-consolidation":
   1. **zoc-computation** (compute ZoC from deployed brigades' location_osid; derive ZoC-locked state)
-  2. **osid-column-movement** (advance existing column transits; process new column orders with stance: 'column'; terrain-weighted pathfinding through friendly OSIDs. **Must run before zoc-constrained-movement** because that step clears all brigade_movement_orders.)
-  3. **zoc-constrained-movement** (resolve movement orders; only stay, retreat, or attack ZoC source when in enemy ZoC)
-  4. generate-bot-brigade-orders
-  5. apply-brigade-posture
-  6. update-corps-effects
-  7. advance-corps-operations
-  8. activate-operational-groups
-  9. equipment-degradation
-  10. apply-posture-costs
-  11. **phase-ii-resolve-attack-orders** (attack resolution per Attack Resolution Formula Spec: combat power, outcome thresholds, casualties, push-back, control flip; see Systems Manual §7.4)
-  12. phase-ii-hostile-takeover-displacement (4-turn hostile-takeover timer, camp holding pool, camp reroute to urban centers; at-war gate applies, including RBiH-HRHB alliance gate)
-  13. phase-ii-recruitment (accrual + ongoing mandatory/elective recruitment when recruitment_state exists; see Systems Manual §13)
-  14. phase-ii-ongoing-mobilization (per-turn pool growth from conscription, displacement, and cross-ethnic enrollment; see Systems Manual §13; runs before brigade-reinforcement so freshly mobilized manpower is available same turn)
-  15. phase-ii-brigade-reinforcement (reinforce brigades from militia pools)
-  16. phase-ii-wia-trickleback (wounded return to formations when out of combat; rate WIA_TRICKLE_RATE, only when not in attack posture and not disrupted)
-  17. update-og-lifecycle
+  2. **phase-ii-supply-osid** (OSID supply reachability from faction sources; derive supply_state_by_osid; supply_mult in attack resolution and bot; see Systems Manual §14 and SUPPLY_IMPLEMENTATION_PLAN.md — implemented 2026-02-24)
+  3. **osid-column-movement** (advance existing column transits; process new column orders with stance: 'column'; terrain-weighted pathfinding through friendly OSIDs. **Must run before zoc-constrained-movement** because that step clears all brigade_movement_orders.)
+  4. **zoc-constrained-movement** (resolve movement orders; only stay, retreat, or attack ZoC source when in enemy ZoC)
+  5. generate-bot-brigade-orders
+  6. apply-brigade-posture
+  7. update-corps-effects
+  8. advance-corps-operations
+  9. activate-operational-groups
+  10. equipment-degradation
+  11. apply-posture-costs
+  12. **phase-ii-resolve-attack-orders** (attack resolution per Attack Resolution Formula Spec: combat power, outcome thresholds, casualties, push-back, control flip; see Systems Manual §7.4)
+  13. phase-ii-hostile-takeover-displacement (4-turn hostile-takeover timer, camp holding pool, camp reroute to urban centers; at-war gate applies, including RBiH-HRHB alliance gate)
+  14. phase-ii-recruitment (accrual + ongoing mandatory/elective recruitment when recruitment_state exists; see Systems Manual §13)
+  15. phase-ii-ongoing-mobilization (per-turn pool growth from conscription, displacement, and cross-ethnic enrollment; see Systems Manual §13; runs before brigade-reinforcement so freshly mobilized manpower is available same turn)
+  16. phase-ii-brigade-reinforcement (reinforce brigades from militia pools)
+  17. phase-ii-wia-trickleback (wounded return to formations when out of combat; rate WIA_TRICKLE_RATE, only when not in attack posture and not disrupted)
+  18. update-og-lifecycle
 
 **Removed from pipeline (OSID/ZoC-only model):** All AoR steps (validate-brigade-aor, rebalance-brigade-aor, enforce-brigade-aor-contiguity, enforce-corps-aor-contiguity, surrounded-brigade-reform, apply-municipality-orders, apply-aor-reshaping, compute-brigade-pressure) are deleted. Phase II control change is only via attack resolution or corps/frontline operations. See AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md.
 
@@ -150,7 +151,11 @@ When **edges** are provided to the transition, it ensures every brigade has **lo
 
 **Stuck-in-Phase-I:** When the transition never fires (e.g. opposing-edge count never persists for PERSIST_TURNS, or JNA not complete), the game remains in Phase I indefinitely. Design allows a **time-based fallback** (e.g. after N Phase I turns, force transition or offer player choice) and **player-facing explanation** (e.g. "Opposing control edges not yet persistent enough"; optionally show phase_i_opposing_edges_streak vs PERSIST_TURNS). See docs/30_planning/PHASE_I_II_EDGE_CASES.md.
 
+**Implementation-note (Pipeline 2.3, 2026-02-25):** Stuck-in-Phase-I fallback and player message implemented. Force transition after N Phase I turns (N = scenario.phase_i_force_transition_after_turns ?? 52); no UI choice — force applied automatically when turn >= war_start_turn + N. run_summary includes phase_i_note (message "Opposing control edges have not yet persisted long enough", streak, required_streak: 4) when run ends in phase_i. Architect decision: N default 52, force-only (no "offer player choice"); flag for user review. Report: docs/40_reports/implemented/20260225_PIPELINE_2_3_2_4_2_5_EDGE_CASES_OPERATION_STORM_SCORING.md.
+
 **Entrenchment init:** Brigades entering Phase II normally start with **entrenchment_turns === 0**. An optional scenario parameter **phase_ii_entrenchment_init_turns** (0..12) may be set; when present, implementation may apply it at transition so all brigades receive that many entrenchment turns (capped by MAX_ENTRENCHMENT). Implementation can set **state.meta.phase_ii_entrenchment_init_turns** at scenario load so the transition step can read it. Default 0; see §4 and PHASE_I_II_EDGE_CASES.md.
+
+**Implementation-note (Pipeline 2.3, 2026-02-25):** Entrenchment init at transition implemented. Scenario runner sets meta.phase_ii_entrenchment_init_turns from scenario; applyPhaseIToPhaseIITransition sets formation.entrenchment_turns for each brigade/OG (capped by MAX_ENTRENCHMENT). See same report as above.
 
 ---
 
@@ -233,7 +238,15 @@ There is no total victory (Rulebook §15). End-game evaluation considers:
 - Exhaustion level (lower is better)
 - Treaty terms favorability (institutional competences, territorial recognition)
 
-**Implementation-note:** War termination mechanics are not yet implemented. This section defines the minimal design intent. A full specification (negotiation window thresholds, collapse conditions, scoring formula) is a critical-path item per the comprehensive review roadmap. See ORCHESTRATOR_COMPREHENSIVE_REVIEW_CONVENE_2026_02_23.md §3 Recommendations.
+These four criteria are the **minimal evaluation set** for timeout/stalemate and end-game display; see [WAR_TERMINATION_MINIMAL_SPEC.md](../30_planning/WAR_TERMINATION_MINIMAL_SPEC.md) §8. Exact scoring formula TBD; Architect to decide numeric formula vs. criteria-only (Pipeline 2.5, 2026-02-25).
+
+**Implementation-note:** War termination mechanics are not yet implemented. This section defines the minimal design intent. A full specification (negotiation window thresholds, collapse conditions, scoring formula) is a critical-path item per the comprehensive review roadmap. See ORCHESTRATOR_COMPREHENSIVE_REVIEW_CONVENE_2026_02_23.md §3 Recommendations. **Minimal spec (2026-02-24):** [WAR_TERMINATION_MINIMAL_SPEC.md](../30_planning/WAR_TERMINATION_MINIMAL_SPEC.md) — Dayton-style negotiated settlement, faction goal hierarchy (RS, HRHB, RBiH), recurring peace initiatives, preconditions (IVP, patron, exhaustion, army strength); thresholds and initiative timing TBD. **Architect (product architecture) sign-off §13 (2026-02-24);** directive 1.1 complete.
+
+### 11.3 Operation Storm (late-war intervention)
+
+**Design reference:** [OPERATION_STORM_DESIGN.md](../30_planning/OPERATION_STORM_DESIGN.md). Operation Storm (Oluja) is a conditional late-war shift: when **Washington Agreement is active**, **RS/VRS threat** (territorial share or front length), **exhaustion**, and **IVP** meet implementation-defined thresholds, the pipeline may apply a **precondition-check step** that sets state flags and/or narrative (HRHB/Croat intervention posture, front-priority shifts). No automatic control flip or total victory; consistent with §11.2.
+
+**Implementation (Pipeline 2.4, 2026-02-25):** Pipeline step **phase-ii-operation-storm-check** runs after phase-ii-washington-check when meta.phase === "phase_ii". It evaluates Washington active, RS territorial share, combined RBiH+HRHB exhaustion, and IVP; if all met, sets state.meta.operation_storm_triggered (and optional narrative). Thresholds are Architect-decided constants; see implementation report and OPERATION_STORM_DESIGN.md. Historian note: BB extraction can refine preconditions from BB1 Oluja/Storm pages.
 
 ---
 
@@ -245,6 +258,8 @@ There is no total victory (Rulebook §15). End-game evaluation considers:
 - **Supply report**: Optional; isolation is zero when not provided (e.g. when Phase II runs without supply-resolution in same run).
 - **Brigade operations / attack resolution (canon):** Phase II attack resolution follows the **Attack Resolution Formula Spec** (docs/30_planning/20260222_ATTACK_RESOLUTION_FORMULA_SPEC.md): combat power (attacker/defender formulas with entrenchment, resilience/defense_streak), outcome thresholds (≥2.0 decisive, ≥1.5 victory, ≥1.0 costly victory, 0.7–1.0 stalemate, 0.5–0.7 repulsed, <0.5 catastrophic), casualties (§4), push-back and control flip (§5), retreat tie-break (enemy adjacency count ascending, then OSID string sort). Implementation-note: Existing reports (BRIGADE_OPERATIONS_SYSTEM_COMPLETION_REPORT.md §8, battle_resolution_engine_report_2026_02_12) describe pre-OSID battle resolution; canonical target is the Formula Spec. Defender casualty reporting floor, JNA composition, OG donor tracking, and maintenance integration remain as implementation details where still applicable.
 - **Phase II bot brigade AI (per BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13.md and AI_STRATEGY_SPECIFICATION.md):** Formation lifecycle runs before the brigade ops block so forming→active transition occurs before generate-bot-brigade-orders. Bot generates posture orders and attack orders in one pass; attack-order eligibility uses the posture just decided in that pass (pending posture), not the previously applied state. **Soft fronts** (adjacent enemy with no or weak garrison) receive **consolidation** posture; **real fronts** are brigade-vs-brigade. Consolidation brigades may still issue attack orders so rear cleanup produces casualty-ledger updates. Faction strategic objectives (offensive and defensive municipality lists—e.g. RS Drina/Sarajevo, RBiH enclaves/corridors, HRHB Herzegovina) and attack target scoring (undefended +150, corridor +95, offensive objective +85, home recapture +60, weak garrison 0–80, plus weighted consolidation/breakthrough score for rear cleanup and isolated clusters) are applied deterministically; tie-break by settlement ID. Fast rear-cleanup municipality bonus in implementation is faction-scoped (RS-scoped for Prijedor/Banja Luka set). Brigades in offensive-objective municipalities may use a lower coverage threshold for probe. **Implementation-note (2026-02-18):** Corps AI generates corps stance, named operations (expanded catalog including strategic_defense), OG activations (including defensive posture during strategic_defense and emergency ops), emergency defensive operations when sector threat exceeds threshold, and multi-corps offensive coordination under general_offensive; brigade AI uses dynamic elastic defense (1–4 brigades scaled by front length). Phase 0 bot investments run in headless pipeline; Phase I bot assigns hold/probe/push posture. See FACTION_AI_IMPROVEMENTS_ALL_PHASES_2026_02_18.md (IMPLEMENTED_WORK_CONSOLIDATED §25). **RS early-war (priority B 2026-02-18):** RS doctrine phase, standing order "Territorial Seizure", effective attack-share taper, and corps E1 aggression override use weeks 0–26 (RS_EARLY_WAR_END_WEEK); previously 0–12. See PRIORITY_B_RS_EARLY_WAR_BOT_HANDOFF_2026_02_18.md. One brigade per target per faction per turn (exception: OG operation + heavy resistance—not yet implemented). See Systems Manual §6.1 (Consolidation posture), §6.5 (soft/real front, target scoring, one-brigade-per-target).
+- **Implementation-note (Feb 2026 bot calibration, CALIBRATION_REPORT_BOT_AI_FEB_2026.md):** Current implementation includes: front-line gap filling (brigades with no attack target move to cover adjacent undefended front OSIDs when ≥2 faction brigades at current OSID); concentration-aware attacks (up to 3 attackers per target with combined power estimation); corridor priority scoring (VRS_CORRIDOR_CRITICAL list with bonus and lower outcome threshold for Posavina corridor targets in weeks 1–30); corps-level rebalancing (MAX_CORPS_BRIGADES_PER_OSID per corps); HVO OOB corrections (Posavina OG 101st/102nd mandatory, subordination fixes). **Open issues (not yet implemented):** (1) **Front-assignment bug (critical):** All RS brigades are assigned to the HRHB-RS front; none see RBiH-RS front edges, so RS cannot target Brčko/Posavina corridor regardless of scoring. (2) **Corps personnel distribution:** Structural imbalance (e.g. VRS 1st Krajina vs Sarajevo-Romanija; ARBiH 2nd vs 4th Corps) is not yet rebalanced. (3) **Enclave protection:** No mechanism to prevent Srebrenica/Goražde/Cazin from falling; historically these held as besieged enclaves. (4) **ARBiH 4th Corps / 2nd Corps balance:** OOB and turn-0 brigade distribution remain as in data; no design change to canon.
+- **Implementation-note (Bot calibration session 2, 2026-02-25, PROJECT_LEDGER):** Additional tuning: ethnic composition scoring (computeOsidEthnicComposition, getCoEthnicScore in VRS/ARBiH/HVO target scoring); init control fix for hybrid_1992 when operational data present (load operational_political_control.json after state creation so ethnic majority at 40% threshold applies; sidToEthnicityKey had failed for OSID keys); Bihać penalty narrowed to exact OSID set (VRS_BIHAC_POCKET_OSIDS: 3 core towns); heartland penalty time-decay (-400 turns 1–12, -250 turns 13–30, -150 turns 31+); Pelagićevo corridor (VRS_CORRIDOR_PATTERNS + VRS_HEARTLAND_EXEMPT_OSIDS); ARBiH +150 undefended enemy bonus; HVO Posavina retreat (Rule 1.5: threatened Posavina brigades retreat toward Orašje when critical/threatened). Open issues unchanged (front-assignment, personnel, enclave, 4th/2nd Corps).
 
 ---
 

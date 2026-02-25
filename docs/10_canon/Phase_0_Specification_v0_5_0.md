@@ -491,6 +491,8 @@ Phase 0 outputs become Phase I initial conditions.
 - Determines Phase I JNA withdrawal dynamics and RS equipment inheritance
 - Required by Phase I §3 (JNA_status)
 
+*Implementation note: At Phase 0→I transition, implementation sets state.phase_i_jna from this output; Phase I reads state.phase_i_jna. Option A1 implemented 2026-02-24: applyPhase0ToPhaseITransition (referendum.ts) sets phase_i_jna (transition_begun = RS declared, withdrawal/asset 0); meta.phase_0_end_turn, phase_1_start_turn, escalation_reason persisted.*
+
 **No Values Reset:**
 All Pre-War consequences persist into Phase I. No "clean slate."
 
@@ -556,6 +558,8 @@ Phase 0 MUST produce:
   }
 }
 ```
+
+*Implementation note:* The `transition` block is realized as `state.meta.phase_0_end_turn`, `state.meta.phase_1_start_turn`, and `state.meta.escalation_reason`; the `JNA_status` block as `state.phase_i_jna`. All are set at Phase 0→I transition (see §7.7).
 
 ---
 

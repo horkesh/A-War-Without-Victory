@@ -175,6 +175,12 @@ function buildRecruitedFormation(
     isMandatory: boolean,
     locationOsid?: string
 ): FormationState {
+    // Per-brigade OOB overrides (initial_personnel, initial_cohesion, honor, home_osid)
+    const effectivePersonnel = brigade.initial_personnel ?? personnel;
+    const defaultCohesion = isMandatory ? BRIGADE_BASE_COHESION + 10 : BRIGADE_BASE_COHESION;
+    const effectiveCohesion = brigade.initial_cohesion ?? defaultCohesion;
+    const effectiveLocationOsid = brigade.home_osid ?? locationOsid;
+
     return {
         id: brigade.id as FormationId,
         faction: brigade.faction,
@@ -184,13 +190,14 @@ function buildRecruitedFormation(
         assignment: null,
         tags: buildRecruitmentTags(brigade.home_mun, brigade.corps, equipClass),
         kind: brigade.kind,
-        personnel,
+        personnel: effectivePersonnel,
         readiness: isMandatory ? 'active' : 'forming',
-        cohesion: isMandatory ? BRIGADE_BASE_COHESION + 10 : BRIGADE_BASE_COHESION,
+        cohesion: effectiveCohesion,
         composition: buildBrigadeComposition(equipClass, brigade.faction, true),
         corps_id: (brigade.corps as FormationId) ?? null,
+        ...(brigade.honor ? { honor: brigade.honor } : {}),
         ...(hqSid ? { hq_sid: hqSid } : {}),
-        ...(locationOsid != null ? { location_osid: locationOsid } : {})
+        ...(effectiveLocationOsid != null ? { location_osid: effectiveLocationOsid } : {})
     };
 }
 

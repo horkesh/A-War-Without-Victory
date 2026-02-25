@@ -20,16 +20,21 @@ import type {
     OGActivationOrder,
     SettlementId
 } from '../../state/game_state.js';
-import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import {
     FACTION_STRATEGIES,
     getActiveDoctrinePhase,
     getActiveStandingOrder,
+    getCorpsArmyPriorities,
     isCorridorMunicipality,
     RS_EARLY_WAR_END_WEEK
 } from './bot_strategy.js';
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
+import { buildOsidAdjacency, type Osid } from './zoc.js';
+import { analyzeFactionGraph, type FactionGraphAnalysis } from './osid_graph_analysis.js';
+import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import type { CorpsDirective } from '../../state/game_state.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -92,16 +97,68 @@ const BRIGADE_LOSS_THRESHOLD = 0.3;
 // Helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Get all active corps for a faction, sorted by ID. */
+/** Get all active corps for a faction, sorted by ID.
+ *  Checks both state.formations (for corps with kind==='corps') AND
+ *  state.corps_command keys (for corps that only exist as references
+ *  from brigade corps_id — common when corps formations aren't loaded).
+ */
 function getFactionCorps(state: GameState, faction: FactionId): FormationState[] {
     const formations = state.formations ?? {};
     const result: FormationState[] = [];
+    const seenIds = new Set<string>();
+
+    // 1. Real corps formations in state.formations
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const f = formations[id];
         if (!f || f.faction !== faction || f.status !== 'active') continue;
         if (f.kind !== 'corps') continue;
         result.push(f);
+        seenIds.add(id);
     }
+
+    // 2. Corps that exist only in corps_command (discovered from brigade corps_id refs)
+    if (state.corps_command) {
+        for (const cid of Object.keys(state.corps_command).sort(strictCompare)) {
+            if (seenIds.has(cid)) continue;
+
+            // Determine faction from subordinate brigades
+            const subs = getCorpsSubordinates(state, cid);
+            if (subs.length === 0) continue;
+            if (subs[0].faction !== faction) continue;
+
+            // Derive home municipality tag from most common subordinate location
+            const munCounts = new Map<string, number>();
+            for (const b of subs) {
+                const osid = b.location_osid;
+                if (!osid) continue;
+                // Extract municipality from OSID: "op:municipality:slug" -> "municipality"
+                const parts = osid.split(':');
+                if (parts.length >= 2) {
+                    const mun = parts[1];
+                    munCounts.set(mun, (munCounts.get(mun) ?? 0) + 1);
+                }
+            }
+            let homeMun: string | null = null;
+            let maxCount = 0;
+            for (const [mun, count] of [...munCounts.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+                if (count > maxCount) { maxCount = count; homeMun = mun; }
+            }
+
+            const tags: string[] = [];
+            if (homeMun) tags.push(`mun:${homeMun}`);
+
+            // Synthesize a minimal FormationState
+            result.push({
+                id: cid,
+                faction,
+                kind: 'corps',
+                status: 'active',
+                tags,
+            } as FormationState);
+            seenIds.add(cid);
+        }
+    }
+
     return result;
 }
 
@@ -164,50 +221,41 @@ function getCorpsHomeMun(corps: FormationState): string | null {
     return null;
 }
 
-/** Compute a simple sector threat ratio for a corps' area based on front pressure. */
+/** Compute a simple sector threat ratio for a corps' area.
+ *  Uses OSID-based brigade locations instead of legacy AoR. */
 function computeSectorThreat(
     state: GameState,
     subordinates: FormationState[],
-    edges: EdgeRecord[]
+    _edges: EdgeRecord[]
 ): number {
-    const pc = state.political_controllers ?? {};
-    const frontPressure = state.front_pressure ?? {};
-    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
-
-    let ourPressure = 0;
-    let enemyPressure = 0;
-    const corpsBrigadeIds = new Set(subordinates.map(b => b.id));
+    if (subordinates.length === 0) return 1.0;
     const faction = subordinates[0]?.faction;
     if (!faction) return 1.0;
 
-    // Check front edges where our brigades' settlements border enemy
-    for (const e of edges) {
-        const ctrlA = pc[e.a];
-        const ctrlB = pc[e.b];
-        if (!ctrlA || !ctrlB || ctrlA === ctrlB) continue;
+    // Collect OSIDs where this corps' brigades are stationed
+    const corpsOsids = new Set<string>();
+    for (const b of subordinates) {
+        if (b.location_osid) corpsOsids.add(b.location_osid);
+    }
+    if (corpsOsids.size === 0) return 1.0;
 
-        const eid = e.a < e.b ? `${e.a}:${e.b}` : `${e.b}:${e.a}`;
-        const pressure = frontPressure[eid];
-        if (!pressure) continue;
-
-        // Check if either side belongs to one of our corps' brigades
-        const aInCorps = brigadeAor[e.a] && corpsBrigadeIds.has(brigadeAor[e.a]!);
-        const bInCorps = brigadeAor[e.b] && corpsBrigadeIds.has(brigadeAor[e.b]!);
-        if (!aInCorps && !bInCorps) continue;
-
-        // Accumulate pressure from our side vs enemy
-        const ourSideIsA = ctrlA === faction;
-        if (ourSideIsA) {
-            ourPressure += Math.abs(Math.max(0, pressure.value));
-            enemyPressure += Math.abs(Math.max(0, -pressure.value));
+    // Count friendly vs enemy personnel at/adjacent to corps positions
+    const formations = state.formations ?? {};
+    let ourPersonnel = 0;
+    let enemyPersonnel = 0;
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[fid];
+        if (f.status !== 'active' || !f.location_osid) continue;
+        if (!corpsOsids.has(f.location_osid)) continue;
+        if (f.faction === faction) {
+            ourPersonnel += f.personnel ?? 0;
         } else {
-            ourPressure += Math.abs(Math.max(0, -pressure.value));
-            enemyPressure += Math.abs(Math.max(0, pressure.value));
+            enemyPersonnel += f.personnel ?? 0;
         }
     }
 
-    if (ourPressure <= 0) return enemyPressure > 0 ? 2.0 : 1.0;
-    return enemyPressure / ourPressure;
+    if (ourPersonnel <= 0) return enemyPersonnel > 0 ? 2.0 : 1.0;
+    return enemyPersonnel / ourPersonnel;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -247,7 +295,10 @@ export function generateCorpsStanceOrders(
         let stance: CorpsStance = 'balanced';
 
         // Decision matrix
-        if (avgCoh < COHESION_REORGANIZE_THRESHOLD || avgPers < PERSONNEL_REORGANIZE_THRESHOLD) {
+        // Reorganize only when BOTH cohesion and personnel are critically low.
+        // Low personnel alone doesn't trigger reorganize — many brigades have
+        // designed strengths well below MAX_BRIGADE_PERSONNEL (e.g. light infantry 1000/3000).
+        if (avgCoh < COHESION_REORGANIZE_THRESHOLD && avgPers < PERSONNEL_REORGANIZE_THRESHOLD) {
             stance = 'reorganize';
         } else if (sectorThreat > THREAT_DEFENSIVE_THRESHOLD) {
             stance = 'defensive';
@@ -880,25 +931,16 @@ export function generateEmergencyDefensiveOperations(
         const healthyCount = countHealthyBrigades(subordinates);
         if (healthyCount < 2) continue;
 
-        // Build target: enemy settlements in or adjacent to corps brigades' AoR
-        const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
-        const corpsBrigadeIds = new Set(subordinates.map(b => b.id));
+        // Build target: enemy OSIDs adjacent to corps brigades' locations
         const targetSettlements: SettlementId[] = [];
-
-        // Find enemy settlements adjacent to settlements in our AoR
-        const adj = buildAdjacencyFromEdges(edges);
-        const ownSids = new Set<SettlementId>();
-        for (const sid of Object.keys(brigadeAor).sort(strictCompare)) {
-            if (brigadeAor[sid] && corpsBrigadeIds.has(brigadeAor[sid]!)) {
-                ownSids.add(sid);
-            }
-        }
-        for (const sid of ownSids) {
-            const neighbors = adj.get(sid);
-            if (!neighbors) continue;
-            for (const nSid of neighbors) {
-                if (pc[nSid] && pc[nSid] !== faction && !ownSids.has(nSid)) {
-                    targetSettlements.push(nSid);
+        const brigadeOsids = new Set(subordinates.map(b => b.location_osid).filter(Boolean) as string[]);
+        const osidAdj = buildOsidAdjacency(edges);
+        for (const osid of brigadeOsids) {
+            const neighbors = osidAdj.get(osid) ?? [];
+            for (const n of neighbors) {
+                const nCtrl = pc[n]; // OSIDs may be in political_controllers if using OSID-based control
+                if (nCtrl && nCtrl !== faction) {
+                    targetSettlements.push(n);
                 }
             }
         }
@@ -985,6 +1027,341 @@ export function coordinateMultiCorpsOffensive(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Corps Directive Generation (Phase 1: HoI-style command hierarchy)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Derive which front segments a corps covers, based on where its brigades are.
+ * A corps "covers" a front segment if any of its brigades are at an OSID that
+ * is an endpoint of one of the segment's hostile boundary edges.
+ *
+ * Returns Record<corpsId, frontId[]> (sorted).
+ * Deterministic: sorted iteration throughout.
+ */
+function deriveCorpsFrontMapping(
+    state: GameState,
+    faction: FactionId
+): Map<FormationId, string[]> {
+    const result = new Map<FormationId, string[]>();
+    const segments = state.assignable_front_segments ?? [];
+    const formations = state.formations ?? {};
+
+    // Build brigade_osid → corps_id mapping
+    const osidToCorps = new Map<string, Set<string>>();
+    for (const id of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[id];
+        if (!f || f.faction !== faction || f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!f.location_osid || !f.corps_id) continue;
+        let set = osidToCorps.get(f.location_osid);
+        if (!set) { set = new Set(); osidToCorps.set(f.location_osid, set); }
+        set.add(f.corps_id);
+    }
+
+    // For each front segment, find which corps have brigades at its edge endpoints
+    for (const seg of segments) {
+        if (seg.side_a !== faction && seg.side_b !== faction) continue;
+        // Extract OSIDs from edge_ids (format: "osidA__osidB")
+        const segOsids = new Set<string>();
+        for (const eid of seg.edge_ids) {
+            const parts = eid.split('__');
+            if (parts.length === 2) {
+                segOsids.add(parts[0]!);
+                segOsids.add(parts[1]!);
+            }
+        }
+        // Find corps with brigades at or adjacent to segment OSIDs
+        for (const osid of segOsids) {
+            const corpsSet = osidToCorps.get(osid);
+            if (corpsSet) {
+                for (const corpsId of corpsSet) {
+                    let list = result.get(corpsId);
+                    if (!list) { list = []; result.set(corpsId, list); }
+                    if (!list.includes(seg.front_id)) list.push(seg.front_id);
+                }
+            }
+        }
+    }
+
+    // Sort each corps's front list
+    for (const list of result.values()) list.sort(strictCompare);
+    return result;
+}
+
+/**
+ * Find OSIDs matching municipality patterns that are enemy-controlled and adjacent to friendly territory.
+ * These become offensive targets in the corps directive.
+ *
+ * Deterministic: sorted output.
+ */
+function findTargetOsidsFromMunicipalities(
+    state: GameState,
+    faction: FactionId,
+    targetMunicipalities: string[],
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: OperationalToCanonicalReverseMap
+): Osid[] {
+    if (targetMunicipalities.length === 0) return [];
+    const targetSet = new Set(targetMunicipalities);
+    const result: Osid[] = [];
+
+    // Iterate over all known OSIDs (from reverseMap keys, not political_controllers)
+    const allOsids = [...reverseMap.keys()].sort(strictCompare);
+    for (const osid of allOsids) {
+        // Check if OSID matches target municipality (OSID format: op:municipality:slug)
+        const munMatch = osid.match(/^op:([^:]+):/);
+        if (!munMatch) continue;
+        const mun = munMatch[1]!;
+        if (!targetSet.has(mun)) continue;
+
+        // Must be enemy-controlled
+        const ctrl = getPoliticalControllerOSID(state, osid, reverseMap);
+        if (ctrl === faction || ctrl === null) continue;
+
+        // Check if adjacent to friendly territory (reachable)
+        const neighbors = adjacency.get(osid) ?? [];
+        const hasAdjacentFriendly = neighbors.some(n => {
+            const nCtrl = getPoliticalControllerOSID(state, n, reverseMap);
+            return nCtrl === faction;
+        });
+        if (hasAdjacentFriendly) {
+            result.push(osid);
+        }
+    }
+    return result.sort(strictCompare);
+}
+
+/**
+ * Find OSIDs matching municipality patterns that are friendly-controlled.
+ * These become avoid_osids or hold_osids in the corps directive.
+ *
+ * Deterministic: sorted output.
+ */
+function findFriendlyOsidsFromMunicipalities(
+    state: GameState,
+    faction: FactionId,
+    municipalities: string[],
+    reverseMap: OperationalToCanonicalReverseMap
+): Osid[] {
+    if (municipalities.length === 0) return [];
+    const munSet = new Set(municipalities);
+    const result: Osid[] = [];
+    for (const osid of [...reverseMap.keys()].sort(strictCompare)) {
+        const munMatch = osid.match(/^op:([^:]+):/);
+        if (!munMatch) continue;
+        if (!munSet.has(munMatch[1]!)) continue;
+        const ctrl = getPoliticalControllerOSID(state, osid, reverseMap);
+        if (ctrl === faction) result.push(osid);
+    }
+    return result;
+}
+
+/**
+ * Find enemy-controlled OSIDs matching municipality patterns (for avoid list — don't attack these).
+ */
+function findEnemyOsidsFromMunicipalities(
+    state: GameState,
+    faction: FactionId,
+    municipalities: string[],
+    reverseMap: OperationalToCanonicalReverseMap
+): Osid[] {
+    if (municipalities.length === 0) return [];
+    const munSet = new Set(municipalities);
+    const result: Osid[] = [];
+    for (const osid of [...reverseMap.keys()].sort(strictCompare)) {
+        const munMatch = osid.match(/^op:([^:]+):/);
+        if (!munMatch) continue;
+        if (!munSet.has(munMatch[1]!)) continue;
+        const ctrl = getPoliticalControllerOSID(state, osid, reverseMap);
+        if (ctrl !== faction && ctrl !== null) result.push(osid);
+    }
+    return result;
+}
+
+/**
+ * Generate CorpsDirective for each corps of a faction.
+ *
+ * The directive tells subordinate brigades:
+ * - Which front segments to cover
+ * - Which OSIDs to attack (from army priorities + named operations)
+ * - Which OSIDs to hold (chokepoints, corridors, enclaves)
+ * - Which OSIDs to avoid
+ * - Reserve policy and attack thresholds
+ *
+ * Called after stance selection and operation management.
+ * Deterministic: sorted iteration, no randomness.
+ */
+export function generateCorpsDirectives(
+    state: GameState,
+    faction: FactionId,
+    edges: EdgeRecord[],
+    reverseMap: OperationalToCanonicalReverseMap | null,
+    graphAnalysis: FactionGraphAnalysis | null
+): void {
+    const corpsCommand = state.corps_command;
+    if (!corpsCommand) return;
+    if (!reverseMap) return; // Need operational data for OSID targeting
+
+    const corpsList = getFactionCorps(state, faction);
+    const turn = state.meta?.turn ?? 0;
+    const corpsFrontMapping = deriveCorpsFrontMapping(state, faction);
+    const adjacency = buildOsidAdjacency(edges);
+    const strategy = FACTION_STRATEGIES[faction];
+    const doctrinePhase = getActiveDoctrinePhase(faction, turn);
+
+    // Army stance modulation: adjusts reserve fractions and aggression
+    const armyStance = state.army_stance?.[faction] ?? 'balanced';
+    const armyAggressionBonus = armyStance === 'general_offensive' ? 0.25
+        : armyStance === 'general_defensive' ? -0.1
+        : 0;
+    const armyReserveModifier = armyStance === 'general_offensive' ? -0.05
+        : armyStance === 'general_defensive' ? 0.1
+        : 0;
+
+    for (const corps of corpsList) {
+        const cmd = corpsCommand[corps.id];
+        if (!cmd) continue;
+
+        const subordinates = getCorpsSubordinates(state, corps.id);
+        if (subordinates.length === 0) {
+            cmd.directive = null;
+            continue;
+        }
+
+        // Front segments this corps covers
+        const assignedFrontIds = corpsFrontMapping.get(corps.id) ?? [];
+
+        // Army-level priorities for this corps
+        const armyPriorities = getCorpsArmyPriorities(faction, corps.id, turn);
+
+        // Collect offensive targets from army priorities
+        const offensiveTargets: Osid[] = [];
+        let bestMinOutcome: CorpsDirective['min_attack_outcome'] = 'stalemate';
+        const avoidOsids: Osid[] = [];
+
+        for (const priority of armyPriorities) {
+            const targets = findTargetOsidsFromMunicipalities(
+                state, faction, priority.target_municipalities, adjacency, reverseMap
+            );
+            for (const t of targets) {
+                if (!offensiveTargets.includes(t)) offensiveTargets.push(t);
+            }
+            // Use the most permissive min_outcome from active priorities
+            const outcomeRank: Record<string, number> = { decisive_victory: 5, victory: 4, costly_victory: 3, stalemate: 2, repulsed: 1 };
+            if ((outcomeRank[priority.min_outcome] ?? 2) < (outcomeRank[bestMinOutcome] ?? 2)) {
+                bestMinOutcome = priority.min_outcome;
+            }
+            // Collect avoid municipalities
+            if (priority.avoid_municipalities) {
+                const avoids = findEnemyOsidsFromMunicipalities(state, faction, priority.avoid_municipalities, reverseMap);
+                for (const a of avoids) {
+                    if (!avoidOsids.includes(a)) avoidOsids.push(a);
+                }
+            }
+        }
+
+        // Add targets from active named operation
+        if (cmd.active_operation?.phase === 'execution' && cmd.active_operation.target_settlements) {
+            for (const sid of cmd.active_operation.target_settlements) {
+                const pc = state.political_controllers ?? {};
+                if (pc[sid] !== faction && !offensiveTargets.includes(sid)) {
+                    offensiveTargets.push(sid);
+                }
+            }
+        }
+
+        // Opportunistic targets: when corps has no specific priorities from army operations,
+        // add weak/undefended enemy OSIDs adjacent to this corps's brigades as fallback targets.
+        if (offensiveTargets.length === 0 && graphAnalysis) {
+            for (const osid of graphAnalysis.undefended_front) {
+                const neighbors = adjacency.get(osid) ?? [];
+                const hasAdjacentBrigade = subordinates.some(b =>
+                    b.location_osid && neighbors.includes(b.location_osid)
+                );
+                if (hasAdjacentBrigade && !offensiveTargets.includes(osid)) {
+                    offensiveTargets.push(osid);
+                }
+            }
+            for (const entry of graphAnalysis.weak_enemy_osids) {
+                const neighbors = adjacency.get(entry.osid) ?? [];
+                const hasAdjacentBrigade = subordinates.some(b =>
+                    b.location_osid && neighbors.includes(b.location_osid)
+                );
+                if (hasAdjacentBrigade && !offensiveTargets.includes(entry.osid)) {
+                    offensiveTargets.push(entry.osid);
+                }
+            }
+        }
+
+        // Hold OSIDs: chokepoints + friendly OSIDs in defensive priority municipalities
+        const holdOsids: Osid[] = [];
+        // Add chokepoints from graph analysis
+        if (graphAnalysis) {
+            for (const cp of graphAnalysis.chokepoints) {
+                // Only hold if a subordinate brigade is near
+                const hasBrigade = subordinates.some(b => b.location_osid === cp);
+                if (hasBrigade) holdOsids.push(cp);
+            }
+        }
+        // Add friendly OSIDs in corridor/defensive priority municipalities
+        const defPriorityOsids = findFriendlyOsidsFromMunicipalities(state, faction, strategy.defensive_priorities, reverseMap);
+        for (const osid of defPriorityOsids) {
+            // Only relevant if on the front (has enemy neighbors)
+            if (graphAnalysis) {
+                const analysis = graphAnalysis.osid_analysis.get(osid);
+                if (analysis && analysis.enemy_neighbors.length > 0 && !holdOsids.includes(osid)) {
+                    holdOsids.push(osid);
+                }
+            }
+        }
+
+        // Reserve fraction: corps stance base + army stance modifier
+        let reserveFraction: number;
+        switch (cmd.stance) {
+            case 'offensive': reserveFraction = 0.1; break;
+            case 'balanced': reserveFraction = 0.2; break;
+            case 'defensive': reserveFraction = 0.3; break;
+            case 'reorganize': reserveFraction = 0.0; break;
+            default: reserveFraction = 0.2;
+        }
+        reserveFraction = Math.max(0, Math.min(0.5, reserveFraction + armyReserveModifier));
+
+        // Max attackers: offensive/balanced allow concentration, defensive is more cautious
+        let maxAttackersPerTarget = cmd.stance === 'defensive' || cmd.stance === 'reorganize' ? 2 : 3;
+        if (armyStance === 'general_offensive' && cmd.stance !== 'reorganize') {
+            maxAttackersPerTarget = Math.max(maxAttackersPerTarget, 4);
+        }
+
+        // Aggression modifier: doctrine phase + army stance bonus
+        const aggressionModifier = (doctrinePhase?.aggression_modifier ?? 0) + armyAggressionBonus;
+
+        // Army defensive stance: no offensive targets — corps only hold and counter-attack
+        if (armyStance === 'general_defensive') {
+            offensiveTargets.length = 0;
+            bestMinOutcome = 'costly_victory'; // Only attack when clearly favorable
+        }
+
+        // Sort all arrays for determinism
+        offensiveTargets.sort(strictCompare);
+        holdOsids.sort(strictCompare);
+        avoidOsids.sort(strictCompare);
+
+        const directive: CorpsDirective = {
+            assigned_front_ids: assignedFrontIds,
+            offensive_targets: offensiveTargets,
+            hold_osids: holdOsids,
+            avoid_osids: avoidOsids,
+            max_attackers_per_target: maxAttackersPerTarget,
+            reserve_fraction: reserveFraction,
+            min_attack_outcome: bestMinOutcome,
+            aggression_modifier: aggressionModifier,
+        };
+
+        cmd.directive = directive;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Main entry point
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1001,12 +1378,15 @@ export function coordinateMultiCorpsOffensive(
  * 3b. Emergency defensive operations (high-threat corps without active ops)
  * 4. Attempt corridor breach if opportunity exists
  * 5. Generate OG activation orders
+ * 6. Generate corps directives for brigade AI
  */
 export function generateAllCorpsOrders(
     state: GameState,
     faction: FactionId,
     edges: EdgeRecord[],
-    sidToMun: Map<SettlementId, string>
+    sidToMun: Map<SettlementId, string>,
+    reverseMap?: OperationalToCanonicalReverseMap | null,
+    osidEdges?: EdgeRecord[]
 ): void {
     // 0. Set army stance from standing orders
     setArmyStandingOrder(state, faction);
@@ -1031,4 +1411,14 @@ export function generateAllCorpsOrders(
 
     // 5. OG activation
     generateOGActivationOrders(state, faction, edges);
+
+    // 6. Generate corps directives (new: HoI-style command hierarchy)
+    // Use OSID edges for adjacency (not canonical SID edges)
+    const effectiveOsidEdges = osidEdges ?? edges;
+    let graphAnalysis: FactionGraphAnalysis | null = null;
+    if (reverseMap) {
+        const adjacency = buildOsidAdjacency(effectiveOsidEdges);
+        graphAnalysis = analyzeFactionGraph(state, faction, adjacency, reverseMap);
+    }
+    generateCorpsDirectives(state, faction, effectiveOsidEdges, reverseMap ?? null, graphAnalysis);
 }

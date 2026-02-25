@@ -47,7 +47,7 @@ export const MIN_BRIGADE_SPAWN = 800;
  */
 export const FACTION_INITIAL_PERSONNEL: Record<string, number> = {
     RS: 1_200,
-    RBiH: 800,
+    RBiH: 500,   // TO/militia origin — per-brigade overrides set historical values
     HRHB: 800
 };
 
@@ -58,7 +58,7 @@ export const FACTION_INITIAL_PERSONNEL: Record<string, number> = {
 export const FACTION_INITIAL_COHESION: Record<string, number> = {
     RS: 72,
     HRHB: 62,
-    RBiH: 55
+    RBiH: 45   // TO/militia origin — per-brigade overrides set historical values
 };
 
 /** Minimum manpower to spawn a mandatory (historical OOB) brigade — lower than MIN_BRIGADE_SPAWN

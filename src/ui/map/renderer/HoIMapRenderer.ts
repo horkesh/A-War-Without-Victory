@@ -43,7 +43,7 @@ type Ring = [number, number][];
 interface GeoJSONFeature {
   type: 'Feature';
   geometry?: { type: 'Polygon'; coordinates: Ring[] } | { type: 'MultiPolygon'; coordinates: Ring[][] };
-  properties?: { osid?: string; sid?: string; [k: string]: unknown };
+  properties?: { osid?: string; sid?: string;[k: string]: unknown };
 }
 interface GeoJSONFC {
   type: 'FeatureCollection';
@@ -148,6 +148,7 @@ export interface HoIMapRendererOptions {
   container: HTMLElement;
   controlBySettlement?: Record<string, string | null>;
   getBaseUrl?: () => string;
+  onRenderSync?: () => void;
 }
 
 /** Front edge: settlement ids a, b (order stable for keying). */
@@ -231,13 +232,7 @@ export class HoIMapRenderer {
   private factionOverlayMesh: THREE.Mesh | null = null;
   private frontRibbonMeshes: THREE.Mesh[] = [];
   private orderArrowLines: THREE.Line[] = [];
-  private formationSprites: THREE.Sprite[] = [];
-  private formationSpriteData: { scaleBase: number; isCorps: boolean; showWhenZoomedOut: boolean }[] = [];
   private showWhenZoomedOutByFormationId = new Map<string, boolean>();
-  /** Invisible hit proxies for formation raycast (one small plane per formation). */
-  private formationHitProxies = new THREE.Group();
-  private formationProxyMeshes: THREE.Mesh[] = [];
-  private formationIdByProxy: Map<THREE.Mesh, string> = new Map();
   private labelSprites: THREE.Sprite[] = [];
   private labelData: { major: boolean }[] = [];
   private strategicMarkers: THREE.Points[] = [];
@@ -266,6 +261,7 @@ export class HoIMapRenderer {
   private controlBySettlement: Record<string, string | null> = {};
   private playerFaction: string | null = null;
   private getBaseUrl: () => string;
+  public onRenderSync?: () => void;
   private pan = { x: 0, z: 0 };
   private zoom = DEFAULT_ZOOM;
   private tilt = DEFAULT_TILT_DEG;
@@ -298,7 +294,6 @@ export class HoIMapRenderer {
   private selectedFeature: GeoJSONFeature | null = null;
   private selectionBorder: THREE.LineSegments | null = null;
   private onClickSettlement: ((feature: GeoJSONFeature | null) => void) | null = null;
-  private onClickFormation: ((formationId: string | null) => void) | null = null;
   /** Cached for label LOD rebuild when zoom crosses threshold. */
   private _lastLabelInput: LabelInput[] = [];
   private _labelLodHighRes = false;
@@ -317,6 +312,7 @@ export class HoIMapRenderer {
     this.container = options.container;
     this.controlBySettlement = options.controlBySettlement ?? {};
     this.getBaseUrl = options.getBaseUrl ?? (() => (typeof window !== 'undefined' && window.location?.origin ? window.location.origin : ''));
+    this.onRenderSync = options.onRenderSync;
   }
 
   async init(): Promise<boolean> {
@@ -408,15 +404,21 @@ export class HoIMapRenderer {
     dir.position.set(1, 2, 1);
     this.scene.add(dir);
 
+    console.log('[HoIMapRenderer] Building terrain...');
     this.buildTerrain();
+    console.log('[HoIMapRenderer] Building control layer...');
     this.buildControlLayer();
+    console.log('[HoIMapRenderer] Building labels...');
     this.buildSettlementLabels();
+    console.log('[HoIMapRenderer] Setting up controls...');
     this.setupControls();
+    console.log('[HoIMapRenderer] Starting animate...');
     this.animate();
     // Resize on next frame so we get correct dimensions after layout (avoids blank 0×0 canvas)
     if (typeof requestAnimationFrame !== 'undefined') {
       requestAnimationFrame(() => this.resize());
     }
+    console.log('[HoIMapRenderer] init() complete!');
     return true;
   }
 
@@ -1394,10 +1396,6 @@ export class HoIMapRenderer {
     this.onClickSettlement = cb;
   }
 
-  setClickFormationCallback(cb: (formationId: string | null) => void): void {
-    this.onClickFormation = cb;
-  }
-
   getControlBySettlement(): Record<string, string | null> {
     return this.controlBySettlement;
   }
@@ -1414,14 +1412,18 @@ export class HoIMapRenderer {
     return { ...this.layerVisibility };
   }
 
+  /** Get current camera zoom level. */
+  getZoom(): number {
+    return this.zoom;
+  }
+
   /** Apply current layerVisibility state to scene objects. */
   private applyLayerVisibility(): void {
     if (this.terrainMesh) this.terrainMesh.visible = this.layerVisibility.terrain;
     if (this.factionOverlayMesh) this.factionOverlayMesh.visible = this.layerVisibility.control;
     for (const m of this.frontRibbonMeshes) m.visible = this.layerVisibility.frontLines;
     for (const m of this.assignableSegmentMeshes) m.visible = this.layerVisibility.frontLines;
-    // Formation sprite visibility per-sprite is set in animate() (zoom-based: at max zoom out only corps/army_hq)
-    for (const s of this.formationSprites) s.visible = this.layerVisibility.formations;
+    // Formation visibility is now handled by FormationOverlayLayer reacting to this.layerVisibility.formations
     for (const s of this.labelSprites) s.visible = this.layerVisibility.labels;
     // Settlement floating labels follow the labels layer toggle
     // (exact visibility per-sprite is handled in animate() based on zoom)
@@ -1501,20 +1503,6 @@ export class HoIMapRenderer {
     this.mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     this.mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     this.raycaster.setFromCamera(this.mouse, this.camera);
-    if (this.formationProxyMeshes.length > 0 && this.layerVisibility.formations) {
-      const formationIntersects = this.raycaster.intersectObjects(this.formationProxyMeshes, false);
-      if (formationIntersects.length > 0) {
-        const hitMesh = formationIntersects[0]!.object as THREE.Mesh;
-        const formationId = this.formationIdByProxy.get(hitMesh);
-        const onlyCorpsLevel = this.zoom >= ZOOM_CORPS_ONLY_THRESHOLD;
-        if (formationId != null && (!onlyCorpsLevel || this.showWhenZoomedOutByFormationId.get(formationId))) {
-          this.selectedFeature = null;
-          this.clearSelectionBorder();
-          this.onClickFormation?.(formationId);
-          return;
-        }
-      }
-    }
     const intersects = this.raycastControl();
     if (intersects.length > 0) {
       const feature = this.featureFromIntersection(intersects[0]!);
@@ -1526,12 +1514,10 @@ export class HoIMapRenderer {
         this.buildSelectionBorder(feature);
       }
       this.onClickSettlement?.(this.selectedFeature);
-      this.onClickFormation?.(null);
     } else {
       this.selectedFeature = null;
       this.clearSelectionBorder();
       this.onClickSettlement?.(null);
-      this.onClickFormation?.(null);
     }
   }
 
@@ -2018,61 +2004,6 @@ export class HoIMapRenderer {
     }
   }
 
-  setFormations(markers: FormationMarkerInput[]): void {
-    for (const s of this.formationSprites) {
-      this.scene.remove(s);
-      (s.material as THREE.SpriteMaterial).map?.dispose();
-      (s.material as THREE.SpriteMaterial).dispose();
-    }
-    this.formationSprites = [];
-    this.formationSpriteData = [];
-    this.showWhenZoomedOutByFormationId.clear();
-    for (const mesh of this.formationProxyMeshes) {
-      this.formationHitProxies.remove(mesh);
-      mesh.geometry.dispose();
-      (mesh.material as THREE.Material).dispose();
-    }
-    this.formationProxyMeshes = [];
-    this.formationIdByProxy.clear();
-    if (this.scene.children.includes(this.formationHitProxies)) {
-      this.scene.remove(this.formationHitProxies);
-    }
-    for (const m of markers) {
-      const colorHex = FACTION_COLORS[m.faction] ?? NULL_COLOR;
-      const canvas = document.createElement('canvas');
-      canvas.width = 64;
-      canvas.height = 32;
-      const ctx = canvas.getContext('2d')!;
-      ctx.fillStyle = `#${colorHex.toString(16).padStart(6, '0')}`;
-      ctx.fillRect(0, 0, 64, 32);
-      ctx.fillStyle = '#ddd5c8';
-      ctx.font = '12px "IBM Plex Mono", monospace';
-      ctx.fillText(m.name.slice(0, 10), 4, 20);
-      const tex = new THREE.CanvasTexture(canvas);
-      tex.needsUpdate = true;
-      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-      const sprite = new THREE.Sprite(mat);
-      sprite.position.set(m.position[0], m.position[1], m.position[2]);
-      const scaleBase = m.isCorps ? this.FORMATION_SPRITE_BASE * 1.5 : this.FORMATION_SPRITE_BASE;
-      sprite.scale.set(scaleBase, scaleBase * 0.5, 1);
-      this.scene.add(sprite);
-      this.formationSprites.push(sprite);
-      const showWhenZoomedOut = m.showWhenZoomedOut ?? (m.isCorps ?? false);
-      this.formationSpriteData.push({ scaleBase, isCorps: m.isCorps ?? false, showWhenZoomedOut });
-      this.showWhenZoomedOutByFormationId.set(m.id, showWhenZoomedOut);
-      const proxyGeom = new THREE.PlaneGeometry(0.05, 0.025);
-      const proxyMat = new THREE.MeshBasicMaterial({ visible: false });
-      const proxyMesh = new THREE.Mesh(proxyGeom, proxyMat);
-      proxyMesh.position.set(m.position[0], m.position[1], m.position[2]);
-      this.formationHitProxies.add(proxyMesh);
-      this.formationProxyMeshes.push(proxyMesh);
-      this.formationIdByProxy.set(proxyMesh, m.id);
-    }
-    if (this.formationHitProxies.children.length > 0) {
-      this.scene.add(this.formationHitProxies);
-    }
-  }
-
   setLabels(labels: LabelInput[]): void {
     this._lastLabelInput = [...labels];
     this._labelLodHighRes = this.zoom < LABEL_LOD_ZOOM_THRESHOLD;
@@ -2311,14 +2242,6 @@ export class HoIMapRenderer {
       this.resize();
     }
     const alt = this.camera.position.length();
-    const onlyCorpsLevel = this.zoom >= ZOOM_CORPS_ONLY_THRESHOLD;
-    for (let i = 0; i < this.formationSprites.length; i++) {
-      const sprite = this.formationSprites[i]!;
-      const { scaleBase, showWhenZoomedOut } = this.formationSpriteData[i]!;
-      const s = scaleBase * (this.REFERENCE_ALTITUDE / Math.max(0.1, alt));
-      sprite.scale.set(s, s * 0.5, 1);
-      sprite.visible = this.layerVisibility.formations && (!onlyCorpsLevel || showWhenZoomedOut);
-    }
     for (let i = 0; i < this.labelSprites.length; i++) {
       const sprite = this.labelSprites[i]!;
       const { major } = this.labelData[i]!;
@@ -2339,6 +2262,7 @@ export class HoIMapRenderer {
       sprite.visible = labelsVisible && (!isTown || this.zoom < 2.5);
     }
     this.renderer.render(this.scene, this.camera);
+    this.onRenderSync?.();
   };
 
   resize(): void {
@@ -2390,12 +2314,6 @@ export class HoIMapRenderer {
       (line.material as THREE.Material).dispose();
     }
     this.orderArrowLines = [];
-    for (const s of this.formationSprites) {
-      (s.material as THREE.SpriteMaterial).map?.dispose();
-      (s.material as THREE.SpriteMaterial).dispose();
-    }
-    this.formationSprites = [];
-    this.formationSpriteData = [];
     this.showWhenZoomedOutByFormationId.clear();
     for (const s of this.labelSprites) {
       (s.material as THREE.SpriteMaterial).map?.dispose();
@@ -2423,5 +2341,15 @@ export class HoIMapRenderer {
     this.scene.clear();
     this.renderer.dispose();
     if (this.renderer.domElement.parentNode) this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
+  }
+
+  worldToScreenSpace(pos: [number, number, number]): { x: number; y: number } | null {
+    if (!this.camera || !this.renderer) return null;
+    const v = new THREE.Vector3(pos[0], pos[1], pos[2]);
+    v.project(this.camera);
+    const rect = this.container.getBoundingClientRect();
+    const x = (v.x * 0.5 + 0.5) * rect.width;
+    const y = (-(v.y * 0.5) + 0.5) * rect.height;
+    return { x, y };
   }
 }

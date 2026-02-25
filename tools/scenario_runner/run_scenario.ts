@@ -79,7 +79,7 @@ async function main(): Promise<void> {
   process.stdout.write(`paths: ${result.paths.initial_save}\n`);
   process.stdout.write(`       ${result.paths.final_save}\n`);
   process.stdout.write(`       ${result.paths.weekly_report}\n`);
-  process.stdout.write(`       ${result.paths.replay}\n`);
+  if (result.paths.replay) process.stdout.write(`       ${result.paths.replay}\n`);
   process.stdout.write(`       ${result.paths.run_summary}\n`);
   process.stdout.write(`       ${result.paths.control_delta}\n`);
   process.stdout.write(`       ${result.paths.end_report}\n`);
@@ -105,7 +105,7 @@ async function main(): Promise<void> {
     process.stdout.write('Final state copied to: data/derived/latest_run_final_save.json\n');
     process.stdout.write('To view on map:\n');
     process.stdout.write('  1) npm run dev:map\n');
-    process.stdout.write('  2) Open http://localhost:3001/tactical_map.html\n');
+    process.stdout.write('  2) Open http://localhost:3001/map_hoi.html\n');
     process.stdout.write('  3) In "Dataset" choose "Latest run" or use "Load state file" and select the file above.\n');
     if (video && result.paths.replay_timeline) {
       process.stdout.write(`  4) Click "Load replay..." and choose: ${result.paths.replay_timeline}\n`);
