@@ -399,6 +399,18 @@ export function generateCorpsStanceOrders(
             }
         }
 
+        // --- Army stance ceiling ---
+        // Army-level stance constrains corps: general_defensive → all corps at most defensive.
+        // Prevents corps from independently going offensive/balanced when army says "hold everywhere."
+        const armyStance = getActiveStandingOrder(faction, turn)?.army_stance ?? 'balanced';
+        if (armyStance === 'general_defensive' && stance !== 'reorganize') {
+            stance = 'defensive';
+        }
+        // general_offensive floor: don't let corps go reorganize (maintain offensive tempo)
+        if (armyStance === 'general_offensive' && stance === 'reorganize' && avgCoh >= 20) {
+            stance = 'defensive'; // at least defend, don't sit out the offensive
+        }
+
         cmd.stance = stance;
     }
 }

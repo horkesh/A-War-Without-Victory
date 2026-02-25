@@ -718,6 +718,12 @@ function executeFactionDirectives(
         const isLocked = isBrigadeInEnemyZoc(state, brigade.id, enemyZoc);
         const adjEnemy = getAdjacentEnemyOsids(loc, faction, adjacency, state, reverseMap);
 
+        // Counter-attack eligibility: only this brigade may counter-attack the OSID it retreated from last turn.
+        // Corps mates can provide concentration support, but cannot initiate.
+        const retreatInfo = (brigade as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from;
+        const counterAttackTarget: Osid | null = (retreatInfo && retreatInfo.turn === state.turn - 1)
+            ? retreatInfo.osid as Osid : null;
+
         // --- Reserve check: should this brigade be in reserve? ---
         if (directive && corpsId) {
             const reserveInfo = corpsReserve.get(corpsId);
@@ -761,10 +767,10 @@ function executeFactionDirectives(
 
         // --- Rule 2: Hold OSID → DEFEND (non-negotiable) ---
         if (directive && directive.hold_osids.includes(loc)) {
-            // Counter-attack exception: if enemy just took adjacent OSID, counter-attack
-            if (adjEnemy.length > 0) {
+            // Counter-attack exception: if THIS brigade retreated from an adjacent OSID last turn, counter-attack
+            if (counterAttackTarget && adjEnemy.includes(counterAttackTarget)) {
                 const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid);
-                const counter = targets.find(t => t.prediction.is_counter_attack_opportunity &&
+                const counter = targets.find(t => t.osid === counterAttackTarget &&
                     isOutcomeSufficientForAttack(t.prediction.predicted_outcome, 'costly_victory'));
                 if (counter && (chosenTargets.get(counter.osid) ?? 0) < (directive.max_attackers_per_target)) {
                     result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
@@ -783,27 +789,35 @@ function executeFactionDirectives(
             continue;
         }
 
-        // --- Rule 4: Defensive stance → defend, with opportunistic exceptions ---
+        // --- Rule 4: Defensive stance → defend, with retreat-based counter-attack only ---
         if (corpsStance === 'defensive') {
-            if (adjEnemy.length > 0) {
+            // Only allow counter-attack if THIS brigade retreated from an adjacent OSID last turn
+            if (counterAttackTarget && adjEnemy.includes(counterAttackTarget)) {
                 const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid);
                 const effDir = directive ?? effectiveDirectiveDefault;
                 const maxAtt = effDir.max_attackers_per_target;
-                // Allow: counter-attacks, undefended targets, and directive offensive_targets
+                const counter = targets.find(t => t.osid === counterAttackTarget &&
+                    (chosenTargets.get(t.osid) ?? 0) < maxAtt &&
+                    isOutcomeSufficientForAttack(t.prediction.predicted_outcome, 'costly_victory'));
+                if (counter) {
+                    result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
+                    result.attack_orders[brigade.id] = counter.osid;
+                    chosenTargets.set(counter.osid, (chosenTargets.get(counter.osid) ?? 0) + 1);
+                    continue;
+                }
+            }
+            // Directive offensive target (rare during defensive but possible if corps has specific targets)
+            if (adjEnemy.length > 0 && directive && directive.offensive_targets.length > 0) {
+                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid);
+                const maxAtt = directive.max_attackers_per_target;
                 const viable = targets.find(t => {
                     if ((chosenTargets.get(t.osid) ?? 0) >= maxAtt) return false;
-                    // HRHB alliance: don't attack RBiH when allied
                     if (faction === 'HRHB' && isAlliedWithRBiH) {
                         const ctrl = getPoliticalControllerOSID(state, t.osid, reverseMap);
                         if (ctrl === 'RBiH') return false;
                     }
-                    // Counter-attack: enemy just arrived (no entrenchment)
-                    if (t.prediction.is_counter_attack_opportunity &&
-                        isOutcomeSufficientForAttack(t.prediction.predicted_outcome, 'costly_victory')) return true;
-                    // Directive offensive target (including undefended): corps explicitly wants this attacked
-                    if (effDir.offensive_targets.includes(t.osid) &&
-                        isOutcomeSufficientForAttack(t.prediction.predicted_outcome, effDir.min_attack_outcome)) return true;
-                    return false;
+                    return directive.offensive_targets.includes(t.osid) &&
+                        isOutcomeSufficientForAttack(t.prediction.predicted_outcome, directive.min_attack_outcome);
                 });
                 if (viable) {
                     result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
@@ -883,9 +897,10 @@ function executeFactionDirectives(
 
                     // Check outcome threshold from directive
                     const outcomeOk = isOutcomeSufficientForAttack(s.prediction.predicted_outcome, effectiveDirective.min_attack_outcome);
-                    const isCounter = s.prediction.is_counter_attack_opportunity;
+                    // Counter-attack: this brigade retreated from this OSID last turn — relaxed threshold
+                    const isRetreatCounter = (counterAttackTarget === s.osid);
 
-                    if (outcomeOk || (isCounter && isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'stalemate'))) {
+                    if (outcomeOk || (isRetreatCounter && isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'stalemate'))) {
                         bestTarget = s;
                         break;
                     }

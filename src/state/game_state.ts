@@ -284,6 +284,9 @@ export interface FormationState {
     disrupted_turns?: number;
     /** WIA trickleback: wounded pending return to this formation (only return when out of combat). */
     wounded_pending?: number;
+    /** Counter-attack tracking: OSID this brigade retreated from and the turn it happened.
+     *  Only the retreated brigade may initiate a counter-attack against this OSID next turn. */
+    last_retreat_from?: { osid: string; turn: number };
 }
 
 export interface FrontPostureAssignment {

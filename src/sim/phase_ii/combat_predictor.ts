@@ -515,8 +515,10 @@ export function predictCombatOutcome(
         ? Math.min(MAX_ENTRENCHMENT, (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns ?? 0)
         : 0;
 
-    // Counter-attack opportunity: defender just arrived (entrenchment=0)
-    const isCounterAttack = defenderHasBrigade && defEntTurns === 0;
+    // Counter-attack opportunity: determined by brigade AI based on retreat history,
+    // NOT by predictor. Predictor returns false; brigade AI overrides for the specific
+    // brigade that retreated from this OSID last turn.
+    const isCounterAttack = false;
 
     // Overextension: count enemy-controlled neighbors of target (if we advance)
     const targetNeighbors = adjacency.get(targetOsid) ?? [];

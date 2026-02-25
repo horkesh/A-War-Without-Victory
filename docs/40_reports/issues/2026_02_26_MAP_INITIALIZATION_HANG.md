@@ -11,6 +11,7 @@ The application hangs when building the WebGL map context and constructing the 3
 2. **WebGL Context Succeeds:** Headless debug scripts verified that the application can successfully acquire a `webgl2` drawing context from the invisible canvas element created.
 3. **Execution Freezes in `init()`:** Internal console checkpoints proved that `HoIMapRenderer.init()` enters its `try` block, fetches data, constructs the OrthographicCamera, dimensions the renderer, and begins to call the internal rendering routines (`this.buildTerrain()`, `this.buildControlLayer()`, etc.). However, it never reaches the end of the method; the promise remains endlessly unresolved.
 4. **No Console Errors:** Despite completely blocking the event loop and never showing up on screen, the JavaScript engine does not crash or emit any unhandled exceptions to the developer console.
+5. **Vite Build Error:** While testing, executing `npx vite build --config src/ui/map/vite.config.ts` failed due to server-side Node libraries (`node:fs/promises`, `node:path`) being imported into browser code in `src/data/operational_data.ts` and `src/map/terrain_scalars.ts`. The recent refactoring may have accidentally introduced dependencies from the Node simulation side into the React/Vite map UI side. This may be related to the hang if Vite dev server is failing to resolve a silent error inside the chunk.
 
 ## Likely Culprits
 The culprit lies inside one of the synchronous terrain generation subroutines, most notably:
