@@ -316,11 +316,18 @@ export class HoIMapRenderer {
   }
 
   async init(): Promise<boolean> {
-    const gl = this.container.ownerDocument.defaultView?.document.createElement('canvas')?.getContext('webgl2') ?? this.container.ownerDocument.defaultView?.document.createElement('canvas')?.getContext('webgl');
+    const doc = this.container.ownerDocument;
+    const win = doc.defaultView;
+    if (!win) return false;
+    const testCanvas = doc.createElement('canvas');
+    const gl = testCanvas.getContext('webgl2') ?? testCanvas.getContext('webgl');
     if (!gl) return false;
 
     try {
-      const heightmapRes = await fetch(`${this.getBaseUrl()}${HEIGHTMAP_URL}`);
+      const ac = new AbortController();
+      const timeoutId = setTimeout(() => ac.abort(), 15000);
+      const heightmapRes = await fetch(`${this.getBaseUrl()}${HEIGHTMAP_URL}`, { signal: ac.signal });
+      clearTimeout(timeoutId);
       if (!heightmapRes.ok) throw new Error(`Heightmap HTTP ${heightmapRes.status}`);
       this.heightmap = (await heightmapRes.json()) as HeightmapData;
       if (!this.heightmap.bbox || !this.heightmap.elevations?.length) throw new Error('Invalid heightmap');

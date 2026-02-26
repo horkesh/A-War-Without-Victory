@@ -433,9 +433,10 @@ const VRS_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     { name: 'Drina Sweep', corps_id: 'vrs_drina', target_municipalities: ['zvornik', 'bratunac', 'visegrad', 'foca', 'vlasenica', 'rogatica', 'sekovici', 'han_pijesak', 'milici', 'kalinovik'], start_week: 0, end_week: 26, weight: 100, min_outcome: 'stalemate', avoid_municipalities: ['srebrenica', 'gorazde', 'zepa'] },
     // Drina Corps: maintain after initial sweep
     { name: 'Drina Hold', corps_id: 'vrs_drina', target_municipalities: ['zvornik', 'bratunac', 'visegrad', 'foca'], start_week: 26, end_week: 9999, weight: 30, min_outcome: 'stalemate', avoid_municipalities: ['srebrenica', 'gorazde', 'zepa'] },
-    // 1st Krajina Corps + East Bosnian: Operation Corridor 92
-    { name: 'Corridor 92 (1KK)', corps_id: 'vrs_1st_krajina', target_municipalities: ['brcko', 'odzak', 'derventa', 'bosanski_brod', 'bosanski_samac', 'modrica', 'doboj'], start_week: 0, end_week: 30, weight: 90, min_outcome: 'repulsed' },
-    { name: 'Corridor 92 (EBK)', corps_id: 'vrs_east_bosnian', target_municipalities: ['brcko', 'bijeljina', 'bosanski_samac'], start_week: 0, end_week: 30, weight: 80, min_outcome: 'repulsed' },
+    // Posavina Corridor — ABSOLUTE HIGHEST PRIORITY for RS (existential: links Banja Luka to Belgrade)
+    // Brčko is the lynchpin — must be secured before anything else. Two-corps operation.
+    { name: 'Corridor 92 (1KK)', corps_id: 'vrs_1st_krajina', target_municipalities: ['brcko', 'odzak', 'derventa', 'bosanski_brod', 'bosanski_samac', 'modrica', 'doboj'], start_week: 0, end_week: 30, weight: 150, min_outcome: 'repulsed' },
+    { name: 'Corridor 92 (EBK)', corps_id: 'vrs_east_bosnian', target_municipalities: ['brcko', 'bijeljina', 'bosanski_samac'], start_week: 0, end_week: 30, weight: 150, min_outcome: 'repulsed' },
     // 1st Krajina: Krajina operations (mid-1992) — aggressive: push through entrenchment
     { name: 'Krajina Sweep', corps_id: 'vrs_1st_krajina', target_municipalities: ['kljuc', 'bosanski_petrovac', 'jajce', 'donji_vakuf', 'sipovo', 'kupres', 'sanski_most'], start_week: 12, end_week: 40, weight: 60, min_outcome: 'repulsed' },
     // 2nd Krajina: western operations
@@ -465,8 +466,8 @@ const RBIH_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     { name: 'Sarajevo Defense', corps_id: 'arbih_1st_corps', target_municipalities: ['centar_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo'], start_week: 0, end_week: 52, weight: 100, min_outcome: 'costly_victory' },
     // 1st Corps: Sarajevo counter-attacks — include RS-held suburbs from week 52
     { name: 'Sarajevo Counterattack', corps_id: 'arbih_1st_corps', target_municipalities: ['centar_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo', 'ilidza', 'hadzici', 'vogosca', 'ilijas'], start_week: 52, end_week: 9999, weight: 100, min_outcome: 'stalemate' },
-    // 2nd Corps: Tuzla area defense (hold only first year)
-    { name: 'Tuzla Defense', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj'], start_week: 0, end_week: 52, weight: 70, min_outcome: 'costly_victory' },
+    // 2nd Corps: Tuzla area defense + Brčko south (ARBiH held OSID just south of Brčko throughout war)
+    { name: 'Tuzla Defense', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj', 'brcko'], start_week: 0, end_week: 52, weight: 70, min_outcome: 'costly_victory' },
     { name: 'Tuzla Expansion', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj', 'lopare', 'ugljevik'], start_week: 52, end_week: 9999, weight: 60, min_outcome: 'stalemate' },
     // 3rd Corps: Central Bosnia — defensive only until week 52
     { name: 'Central Corridor Defense', corps_id: 'arbih_3rd_corps', target_municipalities: ['zenica', 'kakanj', 'visoko'], start_week: 0, end_week: 52, weight: 60, min_outcome: 'costly_victory' },
@@ -493,8 +494,10 @@ const HRHB_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     { name: 'Lasva Offensive', corps_id: 'hvo_central_bosnia', target_municipalities: ['vitez', 'busovaca', 'kiseljak', 'novi_travnik', 'travnik', 'bugojno'], start_week: 12, end_week: 26, weight: 90, min_outcome: 'stalemate' },
     // Central Bosnia OZ: post-Washington defense
     { name: 'Central Bosnia Hold', corps_id: 'hvo_central_bosnia', target_municipalities: ['vitez', 'busovaca', 'kiseljak', 'zepce'], start_week: 26, end_week: 9999, weight: 50, min_outcome: 'stalemate' },
-    // Northwest Bosnia OZ (Posavina): active defense — Posavina was the one area HRHB fought RS in 1992
-    { name: 'Posavina Defense', corps_id: 'hvo_northwest_bosnia', target_municipalities: ['orasje', 'odzak', 'bosanski_brod', 'derventa'], start_week: 0, end_week: 9999, weight: 70, min_outcome: 'repulsed' },
+    // Northwest Bosnia OZ (Posavina): initial defense, then retreat to Orašje pocket
+    // Historically HVO lost Bosanski Brod, Derventa, Odžak by Oct 1992 — retreated to Orašje pocket
+    { name: 'Posavina Defense (initial)', corps_id: 'hvo_northwest_bosnia', target_municipalities: ['orasje', 'odzak', 'bosanski_brod', 'derventa'], start_week: 0, end_week: 16, weight: 70, min_outcome: 'repulsed' },
+    { name: 'Orasje Pocket', corps_id: 'hvo_northwest_bosnia', target_municipalities: ['orasje'], start_week: 16, end_week: 9999, weight: 80, min_outcome: 'costly_victory' },
     // Tomislavgrad OZ: western defense
     { name: 'Western Defense', corps_id: 'hvo_tomislavgrad', target_municipalities: ['duvno', 'livno', 'kupres', 'tomislavgrad'], start_week: 0, end_week: 9999, weight: 50, min_outcome: 'stalemate' },
     // Post-Washington (week 100 ≈ late 1994): anti-RS operations — HVO cooperates with ARBiH against VRS

@@ -104,7 +104,20 @@ const VILLAGE_POP_THRESHOLD = 2000; // small black dot
 // -- Main builder -----------------------------------------------------------
 
 /** Chunk size (rows) for async texture build to avoid blocking the event loop. */
-const ASYNC_CHUNK_ROWS = 64;
+const ASYNC_CHUNK_ROWS = 256;
+/** Async path uses 1024² so init completes in a few seconds; full 2048² can be added later. */
+const ASYNC_TEX_W = 1024;
+const ASYNC_TEX_H = 1024;
+
+/** Create a 2D canvas for async texture build. Use HTMLCanvasElement so THREE.CanvasTexture works in all browsers. */
+function createTextureCanvas(width: number, height: number): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Could not get 2D context for terrain texture');
+  return { canvas, ctx };
+}
 
 /**
  * Async version of buildHoITerrainTexture: yields every ASYNC_CHUNK_ROWS rows
@@ -117,10 +130,9 @@ export async function buildHoITerrainTextureAsync(
     roads: LineGeoJSON | null,
     settlements?: SettlementGeoJSON | null,
 ): Promise<{ texture: THREE.CanvasTexture }> {
-    const TEX_W = 2048;
-    const TEX_H = 2048;
-    const canvas = new OffscreenCanvas(TEX_W, TEX_H);
-    const ctx = canvas.getContext('2d')!;
+    const TEX_W = ASYNC_TEX_W;
+    const TEX_H = ASYNC_TEX_H;
+    const { canvas, ctx } = createTextureCanvas(TEX_W, TEX_H);
     const proj = makeCanvasProjection(hm.bbox as [number, number, number, number], TEX_W, TEX_H);
 
     const cellWidthM = 1000;
@@ -130,28 +142,28 @@ export async function buildHoITerrainTextureAsync(
     const data = imgData.data;
 
     for (let chunkStart = 0; chunkStart < TEX_H; chunkStart += ASYNC_CHUNK_ROWS) {
-        const chunkEnd = Math.min(chunkStart + ASYNC_CHUNK_ROWS, TEX_H);
-        for (let py = chunkStart; py < chunkEnd; py++) {
-            for (let px = 0; px < TEX_W; px++) {
-                const lon = hm.bbox[0]! + (px / (TEX_W - 1)) * (hm.bbox[2]! - hm.bbox[0]!);
-                const lat = hm.bbox[3]! - (py / (TEX_H - 1)) * (hm.bbox[3]! - hm.bbox[1]!);
+      const chunkEnd = Math.min(chunkStart + ASYNC_CHUNK_ROWS, TEX_H);
+      for (let py = chunkStart; py < chunkEnd; py++) {
+        for (let px = 0; px < TEX_W; px++) {
+          const lon = hm.bbox[0]! + (px / (TEX_W - 1)) * (hm.bbox[2]! - hm.bbox[0]!);
+          const lat = hm.bbox[3]! - (py / (TEX_H - 1)) * (hm.bbox[3]! - hm.bbox[1]!);
 
-                const elev = sampleHeight(hm, lon, lat);
-                const [br, bg, bb] = hoiElevationRGB(elev);
+          const elev = sampleHeight(hm, lon, lat);
+          const [br, bg, bb] = hoiElevationRGB(elev);
 
-                const normal = sampleNormal(hm, lon, lat, cellWidthM);
-                const shade = computeHillshade(normal, lightDir);
+          const normal = sampleNormal(hm, lon, lat, cellWidthM);
+          const shade = computeHillshade(normal, lightDir);
 
-                const shadeFactor = 0.65 + shade * 0.50;
+          const shadeFactor = 0.65 + shade * 0.50;
 
-                const i = (py * TEX_W + px) * 4;
-                data[i]     = Math.min(255, Math.round(br * shadeFactor));
-                data[i + 1] = Math.min(255, Math.round(bg * shadeFactor));
-                data[i + 2] = Math.min(255, Math.round(bb * shadeFactor));
-                data[i + 3] = 255;
-            }
+          const i = (py * TEX_W + px) * 4;
+          data[i]     = Math.min(255, Math.round(br * shadeFactor));
+          data[i + 1] = Math.min(255, Math.round(bg * shadeFactor));
+          data[i + 2] = Math.min(255, Math.round(bb * shadeFactor));
+          data[i + 3] = 255;
         }
-        await new Promise<void>((r) => setTimeout(r, 0));
+      }
+      await new Promise<void>((r) => setTimeout(r, 0));
     }
 
     ctx.putImageData(imgData, 0, 0);
@@ -214,7 +226,7 @@ export async function buildHoITerrainTextureAsync(
         ctx.restore();
     }
 
-    const texture = new THREE.CanvasTexture(canvas as unknown as HTMLCanvasElement);
+    const texture = new THREE.CanvasTexture(canvas);
     texture.minFilter = THREE.LinearMipmapLinearFilter;
     texture.magFilter = THREE.LinearFilter;
     texture.wrapS = THREE.ClampToEdgeWrapping;

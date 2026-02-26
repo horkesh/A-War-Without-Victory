@@ -735,6 +735,10 @@ export function resolveAttackOrdersOsid(
                 (defenderFormation as { location_osid?: string }).location_osid = dest;
                 (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
                 (defenderFormation as { defense_streak?: number }).defense_streak = 0;
+                // Track retreat for counter-attack eligibility: only this brigade may counter-attack this OSID next turn
+                (defenderFormation as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
+                    osid: targetOsid, turn: state.meta?.turn ?? 0
+                };
                 if (outcome === 'decisive_victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 2;
                 else if (outcome === 'victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 1;
             } else {

@@ -23,7 +23,7 @@ export function sampleHeight(hm: { width: number, height: number, bbox: number[]
 }
 
 export function drawLineFeature(
-    ctx: OffscreenCanvasRenderingContext2D,
+    ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
     geom: { type: string; coordinates: unknown },
     proj: { x: (lon: number) => number; y: (lat: number) => number },
     color: string,
@@ -43,7 +43,7 @@ export function drawLineFeature(
 }
 
 function drawCoordLine(
-    ctx: OffscreenCanvasRenderingContext2D,
+    ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
     coords: number[][],
     proj: { x: (lon: number) => number; y: (lat: number) => number },
 ): void {

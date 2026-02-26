@@ -1,28 +1,57 @@
-# Issue Report: HoIMapRenderer Initialization Hang (2026-02-26)
+# Issue Report: HoIMapRenderer Never Initializes (2026-02-26)
 
-**Status: FIXED.** See [20260226_MAP_INITIALIZATION_HANG_FIX.md](../implemented/20260226_MAP_INITIALIZATION_HANG_FIX.md).
+**Status: OPEN — Root cause identified.**
 
 ## Summary
-The map view (`map_hoi.html`) currently appears completely blank (black screen with faint province outlines, lacking all UI layout such as sidebars or toolbars). The root cause is a silent initialization hang within `HoIMapRenderer.init()`. 
+The HoI map view (`map_hoi.html`) fails to initialize: the 3D WebGL canvas never appears, the placeholder stays perpetually visible, and no console errors are emitted. The tooltips, hover, click, sidebar, topbar, and status strip all work at the DOM level but the map canvas is absent.
 
-Because `tryWebGL` awaiting `renderer.init()` in `map_hoi.ts` never actually resolves, the surrounding UI layout sequence to attach and run all the toolbars, sidebar panels, and data loaders is never triggered.
+## Root Cause
 
-## Detailed Findings
-The application hangs when building the WebGL map context and constructing the 3D terrain representation:
-1. **Network Initialization Passes:** All the GeoJSON and JSON fetch operations required for normal mapping (`operational_settlements.geojson`, `heightmap_3d_viewer.json`, etc.) successfully return `HTTP 200` and are parsed correctly. It is not an IO/network bug.
-2. **WebGL Context Succeeds:** Headless debug scripts verified that the application can successfully acquire a `webgl2` drawing context from the invisible canvas element created.
-3. **Execution Freezes in `init()`:** Internal console checkpoints proved that `HoIMapRenderer.init()` enters its `try` block, fetches data, constructs the OrthographicCamera, dimensions the renderer, and begins to call the internal rendering routines (`this.buildTerrain()`, `this.buildControlLayer()`, etc.). However, it never reaches the end of the method; the promise remains endlessly unresolved.
-4. **No Console Errors:** Despite completely blocking the event loop and never showing up on screen, the JavaScript engine does not crash or emit any unhandled exceptions to the developer console.
-5. **Vite Build Error:** While testing, executing `npx vite build --config src/ui/map/vite.config.ts` failed due to server-side Node libraries (`node:fs/promises`, `node:path`) being imported into browser code in `src/data/operational_data.ts` and `src/map/terrain_scalars.ts`. The recent refactoring may have accidentally introduced dependencies from the Node simulation side into the React/Vite map UI side. This may be related to the hang if Vite dev server is failing to resolve a silent error inside the chunk.
+**The formation overlay refactor (commit `203779b`) accidentally placed the `requestAnimationFrame(() => tryWebGL())` call _inside_ the `tryWebGL` function body, not after it.** As a result, `tryWebGL` is defined but never invoked.
 
-## Likely Culprits
-The culprit lies inside one of the synchronous terrain generation subroutines, most notably:
-- `buildHoITerrainTexture` (in `HoITerrainTexture.ts`) which manually iterates 2048 x 2048 pixels (4,194,304 operations). It calculates pixel elevation colors and hillshading on the CPU using `ArrayBuffers` and `OffscreenCanvas`.
-- `buildTerrainMesh` (in `TerrainMeshBuilder.ts`) which loops 1,048,576 times to translate the WGS84 coordinates of the heightmap array into 3D positions, and then builds 1024x1024 indexed buffered geometries.
+### How this happened
 
-Given that JavaScript is single-threaded, if any of these massive array loops miscalculate their termination bounds (e.g. infinite loop), or scale exponentially, it will indefinitely block execution without throwing.
+In `map_hoi.ts`, the `init()` function defines a large `tryWebGL` async arrow function (≈200 lines) and then calls it via a double-deferred `requestAnimationFrame`. During the formation overlay refactor, the code that follows the `tryWebGL` definition — the rAF scheduling, the file picker, the topbar/sidebar/statusStrip construction, and the state loading — was **indented one level too deep**, placing it inside the `tryWebGL` closure body.
 
-### Recommended Next Steps for Fix
-1. Insert verbose `performance.now()` logging inside the innermost `for` loops of `buildHoITerrainTexture` and `buildTerrainMesh` to identify which specific looping computation causes the stall.
-2. Refactor any CPU-bound synchronous map-generation loops into chunks using `requestAnimationFrame` yielding, or completely offload them to a WebWorker so they do not block the page thread during initialization.
-3. Consider catching promise timeouts in `map_hoi.ts` around `renderer.init()` so if WebGL initialization takes longer than N seconds or fails silently, the 2D SVG map fallback can take over.
+The brace structure is:
+
+```
+function init() {                               // line ~91
+  ...
+  const tryWebGL = async () => {                 // line ~128
+    ...
+    if (ok) {                                    // line ~163
+      ...
+      if (pendingData.formations?.length) {      // line ~200
+        ...                                      // tooltip, hover, click, formation click
+      }                                          // line ~322
+    };                                           // line ~324  ← closes if(ok) — NOT tryWebGL
+    // ↓↓↓ EVERYTHING BELOW IS STILL INSIDE tryWebGL ↓↓↓
+    requestAnimationFrame(()=>tryWebGL());        // line ~327  ← self-referential, never called initially
+    const topBar = new TopCommandBarComponent(...)
+    ...
+    renderFromState();
+  }                                              // line ~425  ← ACTUALLY closes tryWebGL
+}                                                // line ~426  ← closes init()
+```
+
+Because the rAF that calls `tryWebGL()` lives inside `tryWebGL` itself, it is never reached. `init()` defines `tryWebGL` and returns immediately. Nothing ever calls `tryWebGL()`.
+
+### Secondary issues also introduced by the same refactor
+
+1. **Tooltip/hover/click gated on pending formations data:** `renderer.setHoverCallback()`, `renderer.setClickCallback()`, `showTooltip()`, and the formation click handler are all inside `if (pendingData.formations?.length)` at line ~200. If the renderer initializes before save data loads (the normal case with no IPC bridge), these callbacks will never be registered and the map will have no hover/click/tooltip behavior.
+
+2. **Missing `try/catch` in `init()`:** The user's most recent edit removed the outer `try/catch` around the heightmap fetch and scene construction block, meaning any error during init will propagate as an unhandled rejection rather than being caught and displaying the placeholder error message.
+
+3. **Vite production build error:** `node:fs/promises` and `node:path` imports in `src/data/operational_data.ts` and `src/map/terrain_scalars.ts` are pulled into the browser bundle via transitive imports, causing `npx vite build` to fail. This doesn't affect `vite dev` but blocks production builds.
+
+## Fix Required
+
+1. **Move rAF + file picker + sidebar + topbar + state loaders out of `tryWebGL` body** — decrease their indentation by one level so they sit in `init()` after the `tryWebGL` definition ends.
+2. **Move tooltip / hover / click setup out of `if (pendingData.formations?.length)`** — these should be unconditionally registered whenever `renderer.init()` succeeds.
+3. **Restore `try/catch` around init body** if the user wants error messages to display in the placeholder div.
+
+## Verification
+- Instrumented with `console.log` at `init()` entry, post-guard, pre-overlay, post-overlay, pre-tryWebGL-definition, and pre-rAF-scheduling.
+- Confirmed via headless Puppeteer that `init()` runs but `tryWebGL()` is never entered.
+- The `[map_hoi] about to define tryWebGL` log appears; `[map_hoi] scheduling tryWebGL via rAF` (placed after the `};` at line 324) never appears — proving those lines are inside the `tryWebGL` closure, not at `init()` scope.

@@ -8535,3 +8535,10 @@ Determinism checks **MUST** be run:
 - **Phase:** Phase 3 UI Refactor
 - **Summary:** The map is hanging completely upon initialization. Verified network is fine, webgl context is fine. Inserted tracking logs into HoIMapRenderer.init() and reproduced a silent promise hang preventing resolution. Culprit is likely synchronous loops in uildHoITerrainTexture or uildTerrainMesh taking too long and silently failing/locking the browser tab.
 - **Report:** docs/40_reports/issues/2026_02_26_MAP_INITIALIZATION_HANG.md
+
+**2026-02-26** - HoI map initialization hang fix
+- **Phase:** Phase 3 UI (map_hoi)
+- **Summary:** Fixed silent init hang in map_hoi.html (blank screen, no toolbars/sidebars). Root cause: synchronous 2048×2048 terrain texture build and heavy mesh build blocked the event loop so renderer.init() never resolved. Implemented: (1) buildHoITerrainTextureAsync in HoITerrainTexture.ts — same elevation+hillshade loop in row chunks (64 rows), yielding with setTimeout(0) between chunks; (2) HoIMapRenderer.buildTerrain() made async and awaited in init(); (3) map_hoi tryWebGL wrapped in Promise.race with 25s timeout, 2D placeholder kept on timeout/failure.
+- **Determinism:** No change to simulation or persisted outputs; UI-only. Terrain texture result is identical to sync builder (same loop, chunked).
+- **Report:** docs/40_reports/implemented/20260226_MAP_INITIALIZATION_HANG_FIX.md. CONSOLIDATED_IMPLEMENTED §47; issue doc marked FIXED; napkin pattern added.
+- **Files modified:** src/ui/map/terrain/HoITerrainTexture.ts (async builder), src/ui/map/renderer/HoIMapRenderer.ts (await buildTerrain), src/ui/map/map_hoi.ts (init timeout), docs/40_reports/issues/2026_02_26_MAP_INITIALIZATION_HANG.md, docs/40_reports/implemented/20260226_MAP_INITIALIZATION_HANG_FIX.md, CONSOLIDATED_IMPLEMENTED.md, .agent/napkin.md.

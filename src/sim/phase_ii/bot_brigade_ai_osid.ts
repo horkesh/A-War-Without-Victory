@@ -721,7 +721,8 @@ function executeFactionDirectives(
         // Counter-attack eligibility: only this brigade may counter-attack the OSID it retreated from last turn.
         // Corps mates can provide concentration support, but cannot initiate.
         const retreatInfo = (brigade as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from;
-        const counterAttackTarget: Osid | null = (retreatInfo && retreatInfo.turn === state.turn - 1)
+        const currentTurn = state.meta?.turn ?? 0;
+        const counterAttackTarget: Osid | null = (retreatInfo && retreatInfo.turn === currentTurn - 1)
             ? retreatInfo.osid as Osid : null;
 
         // --- Reserve check: should this brigade be in reserve? ---
