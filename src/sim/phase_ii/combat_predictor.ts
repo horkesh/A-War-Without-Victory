@@ -4,8 +4,14 @@
  * Mirrors the power/outcome logic in attack_resolution_osid.ts but does NOT mutate state.
  * Used by bot brigade AIs to decide whether an attack is worth committing to.
  *
- * The bot has "formula omniscience": it can compute exact power ratios, predict outcomes,
- * and calculate expected casualties before issuing any attack order.
+ * FOG OF WAR: The predictor intentionally underestimates enemy strength.
+ * Commanders don't know exact enemy power before engaging — especially for
+ * ZoC defenders projecting force from adjacent OSIDs. After a failed attack
+ * (tracked via last_retreat_from), the fog lifts for that specific target.
+ *
+ * Actual combat resolution in attack_resolution_osid.ts uses REAL values.
+ * The predictor's optimistic bias means some attacks will fail, and brigades
+ * learn through the retreat mechanic.
  *
  * Deterministic: no randomness, no timestamps.
  * Canon: BOT_AI_DESIGN_SPEC.md §3.1.
@@ -84,6 +90,18 @@ const MILITIA_DEFENSE_RATIO = 0.03;
 const COORDINATION_PENALTY_2 = 0.9;
 const COORDINATION_PENALTY_3PLUS = 0.8;
 const STACKING_DEFENDER_SUPPORT = 0.3;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Fog of War — predictor intentionally underestimates enemy strength.
+// Actual combat resolution uses real values; fog is prediction-only.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Direct defenders: bot can roughly see troop presence but not exact strength. */
+const FOG_DIRECT_VISIBILITY = 0.85;
+/** ZoC defenders: bot can't see indirect force projection from adjacent OSIDs. */
+const FOG_ZOC_VISIBILITY = 0.5;
+/** After failing an attack (retreat), fog lifts — brigade learned enemy strength. */
+const FOG_AFTER_RETREAT_VISIBILITY = 0.95;
 
 const OUTCOME_ATTACKER_MOD: Record<string, number> = {
     decisive_victory: 1.0, victory: 1.2, costly_victory: 1.8,
@@ -388,8 +406,10 @@ export function buildTerrainCache(
 /**
  * Predict combat outcome for an attacker brigade vs a target OSID.
  *
- * Uses the exact same formulas as attack_resolution_osid.ts but read-only.
- * This is the bot's "formula omniscience" — it knows the outcome before committing.
+ * Uses the same formulas as attack_resolution_osid.ts but with FOG OF WAR:
+ * defender power is discounted because commanders don't know exact enemy strength.
+ * ZoC defenders (indirect projection) are heavily discounted; direct defenders less so.
+ * After a failed attack (retreat from this target), fog lifts for that brigade.
  *
  * @param attackerPosture — override posture to use for attack power ('attack' or 'probe')
  * @param additionalAttackers — other brigades joining the attack (coordination penalty applies)
@@ -441,11 +461,20 @@ export function predictCombatOutcome(
     // Artillery/tank suppression: attacker's heavy weapons reduce defender entrenchment bonus
     const artSuppression = getArtillerySuppression(attackerFormations);
 
+    // Fog of war: did this brigade previously retreat from this target?
+    // If so, fog lifts — they learned enemy strength the hard way.
+    const retreatInfo = (attacker as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from;
+    const currentTurn = state.meta?.turn ?? 0;
+    const retreatedFromTarget = retreatInfo != null && retreatInfo.osid === targetOsid && currentTurn - retreatInfo.turn <= 3;
+
     if (defenderFormations.length > 0) {
         defenderHasBrigade = true;
         const powers = defenderFormations.map(d => computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid));
         const sorted = defenderFormations.map((d, i) => ({ f: d, p: powers[i]! })).sort((a, b) => b.p - a.p);
         defenderPower = sorted[0]!.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
+        // Fog of war: bot underestimates direct defenders (can see troops but not exact strength)
+        const fogMult = retreatedFromTarget ? FOG_AFTER_RETREAT_VISIBILITY : FOG_DIRECT_VISIBILITY;
+        defenderPower *= fogMult;
         defenderFormation = sorted[0]!.f;
         defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
         defenderCohesion = defenderFormation.cohesion ?? 60;
@@ -481,6 +510,9 @@ export function predictCombatOutcome(
             const sorted = zocDefenders.map((d, i) => ({ f: d, p: powers[i]! }))
                 .sort((a, b) => b.p - a.p);
             defenderPower = sorted[0]!.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
+            // Fog of war: bot heavily underestimates ZoC defenders (can't see indirect force projection)
+            const fogMult = retreatedFromTarget ? FOG_AFTER_RETREAT_VISIBILITY : FOG_ZOC_VISIBILITY;
+            defenderPower *= fogMult;
             defenderFormation = sorted[0]!.f;
             defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
             defenderCohesion = defenderFormation.cohesion ?? 60;
