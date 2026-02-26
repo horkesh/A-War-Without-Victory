@@ -107,7 +107,7 @@ export function validateFormations(
         // Phase I.0: kind validation (if present)
         const kind = (f as any).kind;
         if (kind !== undefined && kind !== null) {
-            const validKinds = ['militia', 'territorial_defense', 'brigade', 'operational_group', 'corps_asset'];
+            const validKinds = ['militia', 'brigade', 'operational_group', 'corps_asset'];
             if (typeof kind !== 'string' || !validKinds.includes(kind)) {
                 issues.push({
                     severity: 'error',

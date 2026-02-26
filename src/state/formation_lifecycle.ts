@@ -89,7 +89,7 @@ export const DEGRADED_FATIGUE = 40;
  * 
  * Rules:
  * - Explicit kind field takes precedence
- * - Tags: 'militia' → militia, 'territorial_defense' → territorial_defense, 'operational_group' → operational_group
+ * - Tags: 'militia' → militia, 'operational_group' → operational_group
  * - Default: 'brigade'
  */
 export function deriveFormationKind(formation: FormationState): FormationKind {
@@ -98,7 +98,6 @@ export function deriveFormationKind(formation: FormationState): FormationKind {
     // Infer from tags if present
     if (formation.tags) {
         if (formation.tags.includes('militia')) return 'militia';
-        if (formation.tags.includes('territorial_defense')) return 'territorial_defense';
         if (formation.tags.includes('operational_group')) return 'operational_group';
         if (formation.tags.includes('corps_asset')) return 'corps_asset';
     }
@@ -114,10 +113,6 @@ export function computeBaseCohesion(kind: FormationKind, createdTurn: number, fa
     if (kind === 'militia') {
         const lateness = Math.min(createdTurn, MILITIA_EMERGENCE_WINDOW);
         return Math.floor(MILITIA_BASE_COHESION + lateness * 2);
-    }
-
-    if (kind === 'territorial_defense') {
-        return Math.floor((MILITIA_BASE_COHESION + BRIGADE_BASE_COHESION) / 2);
     }
 
     // Brigade, OG, corps_asset: faction-differentiated when provided
@@ -217,7 +212,7 @@ export function deriveReadinessState(formation: FormationState): FormationReadin
  * 
  * Rules:
  * - Militia: -3 cohesion per turn unsupplied (supply-sensitive)
- * - Brigade/TD: -2 cohesion per turn unsupplied (Phase G: -5 when encircled)
+ * - Brigade: -2 cohesion per turn unsupplied (Phase G: -5 when encircled)
  * - OG/Corps: -1 cohesion per turn unsupplied (more resilient)
  * - Cohesion is clamped to [0, 100]
  */
@@ -234,7 +229,7 @@ export function applyCohesionDegradation(
     let degradation = 0;
     if (kind === 'militia') {
         degradation = 3; // supply-sensitive
-    } else if (kind === 'brigade' || kind === 'territorial_defense') {
+    } else if (kind === 'brigade') {
         degradation = (encircled === true) ? 5 : 2; // Phase G: accelerated when encircled
     } else {
         degradation = 1; // OG, corps_asset more resilient

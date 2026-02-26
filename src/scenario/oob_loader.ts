@@ -18,7 +18,7 @@ export interface OobBrigade {
     name: string;
     home_mun: string;
     corps?: string;
-    kind: 'brigade' | 'operational_group' | 'corps_asset' | 'territorial_defense';
+    kind: 'brigade' | 'operational_group' | 'corps_asset';
     // Recruitment cost fields (optional for backward compat; defaults applied by loader)
     manpower_cost: number;
     capital_cost: number;
@@ -98,7 +98,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         if (!registry.has(home_mun)) {
             throw new Error(`Invalid OOB brigade ${id}: home_mun "${home_mun}" not in registry`);
         }
-        const kind = (r.kind === 'operational_group' || r.kind === 'corps_asset' || r.kind === 'territorial_defense') ? r.kind : 'brigade';
+        const kind = (r.kind === 'operational_group' || r.kind === 'corps_asset') ? r.kind : 'brigade';
         // Parse recruitment cost fields with defaults
         const manpower_cost = typeof r.manpower_cost === 'number' && Number.isFinite(r.manpower_cost) ? r.manpower_cost : RECRUITMENT_DEFAULTS.manpower_cost;
         const capital_cost = typeof r.capital_cost === 'number' && Number.isFinite(r.capital_cost) ? r.capital_cost : RECRUITMENT_DEFAULTS.capital_cost;

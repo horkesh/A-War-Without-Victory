@@ -38,7 +38,6 @@ const ZOOM_LABELS = ['STRATEGIC', 'OPERATIONAL', 'TACTICAL'];
 const FORMATION_SHAPES: Record<string, 'square' | 'diamond'> = {
     militia: 'square',
     brigade: 'square',
-    territorial_defense: 'square',
     operational_group: 'diamond',
     corps_asset: 'diamond'
 };

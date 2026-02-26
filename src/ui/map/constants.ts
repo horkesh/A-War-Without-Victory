@@ -80,7 +80,7 @@ export function panelReadinessColor(readiness: string): string {
 export const FORMATION_KIND_SHAPES: Record<string, string> = {
     militia: 'triangle',
     brigade: 'square',
-    territorial_defense: 'square',
+
     operational_group: 'diamond',
     corps_asset: 'xx',
     corps: 'xx',

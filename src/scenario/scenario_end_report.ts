@@ -404,7 +404,7 @@ export function computeArmyStrengthsSummary(state: GameState): ArmyStrengthsSumm
         const kind = ((f as { kind?: string }).kind ?? 'brigade') as string;
         const entry = formationByFaction.get(faction) ?? { militia: 0, brigade: 0, other: 0 };
         if (kind === 'militia') entry.militia += 1;
-        else if (kind === 'brigade' || kind === 'territorial_defense' || kind === 'operational_group' || kind === 'corps_asset') entry.brigade += 1;
+        else if (kind === 'brigade' || kind === 'operational_group' || kind === 'corps_asset') entry.brigade += 1;
         else entry.other += 1;
         formationByFaction.set(faction, entry);
     }

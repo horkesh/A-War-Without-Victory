@@ -234,7 +234,7 @@ export interface FormationOpsState {
 export type FormationReadinessState = 'forming' | 'active' | 'overextended' | 'degraded';
 
 // Phase I.0: Formation types (Systems Manual §4)
-export type FormationKind = 'militia' | 'territorial_defense' | 'brigade' | 'operational_group' | 'corps_asset' | 'corps' | 'og' | 'army_hq';
+export type FormationKind = 'militia' | 'brigade' | 'operational_group' | 'corps_asset' | 'corps' | 'og' | 'army_hq';
 
 export interface FormationState {
     id: FormationId;
@@ -287,6 +287,9 @@ export interface FormationState {
     /** Counter-attack tracking: OSID this brigade retreated from and the turn it happened.
      *  Only the retreated brigade may initiate a counter-attack against this OSID next turn. */
     last_retreat_from?: { osid: string; turn: number };
+    /** Fog of war: OSID where this brigade's attack was repulsed/catastrophic.
+     *  Lifts fog for this target — brigade learned enemy strength the hard way. */
+    last_repulsed_from?: { osid: string; turn: number };
 }
 
 export interface FrontPostureAssignment {

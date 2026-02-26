@@ -105,7 +105,7 @@ export function runPhaseIICohesionDrift(
     for (const id of formationIds) {
         if (engagedSet.has(id)) continue;
         const f = formations[id] as FormationState | undefined;
-        if (!f || (f.kind !== 'brigade' && f.kind !== 'operational_group' && f.kind !== 'territorial_defense')) continue;
+        if (!f || (f.kind !== 'brigade' && f.kind !== 'operational_group')) continue;
         const faction = f.faction;
         if (!faction) continue;
         let drift = getFactionCohesionDrift(faction, turn);
