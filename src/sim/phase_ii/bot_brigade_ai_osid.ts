@@ -887,6 +887,10 @@ function executeFactionDirectives(
                         const ctrl = getPoliticalControllerOSID(state, t.osid, reverseMap);
                         if (ctrl === 'RBiH') return false;
                     }
+                    if (faction === 'RBiH' && isAlliedWithRBiH) {
+                        const ctrl = getPoliticalControllerOSID(state, t.osid, reverseMap);
+                        if (ctrl === 'HRHB') return false;
+                    }
                     return directive.offensive_targets.includes(t.osid) &&
                         isOutcomeSufficientForAttack(t.prediction.predicted_outcome, directive.min_attack_outcome);
                 });
@@ -915,10 +919,13 @@ function executeFactionDirectives(
         // --- Rule 5: Offensive/Balanced — evaluate attacks ---
         const effectiveDirective = directive ?? effectiveDirectiveDefault;
         if (adjEnemy.length > 0) {
-            // HRHB alliance: don't attack RBiH when allied
-            const filteredEnemy = (faction === 'HRHB' && isAlliedWithRBiH)
-                ? adjEnemy.filter(o => getPoliticalControllerOSID(state, o, reverseMap) !== 'RBiH')
-                : adjEnemy;
+            // Alliance filter: don't attack allied faction's territory
+            let filteredEnemy = adjEnemy;
+            if (faction === 'HRHB' && isAlliedWithRBiH) {
+                filteredEnemy = adjEnemy.filter(o => getPoliticalControllerOSID(state, o, reverseMap) !== 'RBiH');
+            } else if (faction === 'RBiH' && isAlliedWithRBiH) {
+                filteredEnemy = adjEnemy.filter(o => getPoliticalControllerOSID(state, o, reverseMap) !== 'HRHB');
+            }
 
             if (filteredEnemy.length > 0) {
                 const supplyPenalty = getAttackerSupplyPenalty(loc, faction, supplyStateByOsid);
@@ -929,6 +936,10 @@ function executeFactionDirectives(
                     if (faction === 'HRHB' && isAlliedWithRBiH) {
                         const ctrl = getPoliticalControllerOSID(state, t.osid, reverseMap);
                         if (ctrl === 'RBiH') return false;
+                    }
+                    if (faction === 'RBiH' && isAlliedWithRBiH) {
+                        const ctrl = getPoliticalControllerOSID(state, t.osid, reverseMap);
+                        if (ctrl === 'HRHB') return false;
                     }
                     return true;
                 });

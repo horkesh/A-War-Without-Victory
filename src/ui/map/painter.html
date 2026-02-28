@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWWV Territory Painter</title>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <script src="https://unpkg.com/pmtiles@3.2.0/dist/pmtiles.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; overflow: hidden; }
+
+    #toolbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+      background: rgba(30, 30, 35, 0.95); backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px; font-size: 13px; flex-wrap: wrap;
+    }
+    #toolbar .sep { width: 1px; height: 28px; background: rgba(255,255,255,0.15); margin: 0 6px; }
+
+    .tb-btn {
+      padding: 5px 14px; border: 2px solid transparent; border-radius: 4px;
+      background: rgba(255,255,255,0.08); color: #ccc; cursor: pointer;
+      font-size: 13px; font-weight: 500; transition: all 0.15s;
+    }
+    .tb-btn:hover { background: rgba(255,255,255,0.15); }
+    .tb-btn.active { border-color: #fff; color: #fff; }
+
+    .tb-btn.faction-rbih { background: rgba(55,140,75,0.3); color: #7fd490; }
+    .tb-btn.faction-rbih.active { background: rgba(55,140,75,0.6); border-color: #7fd490; color: #fff; }
+    .tb-btn.faction-rs { background: rgba(180,50,50,0.3); color: #e08080; }
+    .tb-btn.faction-rs.active { background: rgba(180,50,50,0.6); border-color: #e08080; color: #fff; }
+    .tb-btn.faction-hrhb { background: rgba(50,110,170,0.3); color: #80b8e0; }
+    .tb-btn.faction-hrhb.active { background: rgba(50,110,170,0.6); border-color: #80b8e0; color: #fff; }
+
+    #stats {
+      margin-left: auto; display: flex; gap: 12px; font-size: 12px; font-weight: 600;
+    }
+    #stats .stat-rbih { color: #7fd490; }
+    #stats .stat-rs { color: #e08080; }
+    #stats .stat-hrhb { color: #80b8e0; }
+
+    #map { position: absolute; top: 46px; bottom: 0; left: 0; right: 0; }
+
+    .maplibregl-popup-content {
+      background: rgba(30,30,35,0.95) !important; color: #e0e0e0 !important;
+      border: 1px solid rgba(255,255,255,0.15) !important; border-radius: 6px !important;
+      padding: 10px 14px !important; font-size: 12px !important; line-height: 1.5 !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+    }
+    .maplibregl-popup-tip { border-top-color: rgba(30,30,35,0.95) !important; }
+    .tooltip-label { font-weight: 600; color: #aaa; }
+    .ctrl-rbih { color: #7fd490; font-weight: 700; }
+    .ctrl-rs { color: #e08080; font-weight: 700; }
+    .ctrl-hrhb { color: #80b8e0; font-weight: 700; }
+
+    .tb-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    #import-input { display: none; }
+
+    #undo-btn { font-size: 12px; padding: 5px 10px; }
+    #undo-btn:disabled { opacity: 0.3; cursor: default; }
+  </style>
+</head>
+<body>
+
+<div id="toolbar">
+  <span class="tb-label">Faction:</span>
+  <button class="tb-btn faction-rbih active" data-faction="RBiH" onclick="setFaction('RBiH')">1 RBiH</button>
+  <button class="tb-btn faction-rs" data-faction="RS" onclick="setFaction('RS')">2 RS</button>
+  <button class="tb-btn faction-hrhb" data-faction="HRHB" onclick="setFaction('HRHB')">3 HRHB</button>
+
+  <div class="sep"></div>
+  <span class="tb-label">Brush:</span>
+  <button class="tb-btn active" id="btn-mun" onclick="setBrush('municipality')">M Mun</button>
+  <button class="tb-btn" id="btn-osid" onclick="setBrush('osid')">O OSID</button>
+
+  <div class="sep"></div>
+  <button class="tb-btn" id="undo-btn" onclick="undo()" disabled>Undo</button>
+  <button class="tb-btn" onclick="exportState()">Export</button>
+  <button class="tb-btn" onclick="document.getElementById('import-input').click()">Import</button>
+  <input type="file" id="import-input" accept=".json" onchange="importState(event)">
+
+  <div id="stats">
+    <span class="stat-rs">RS: <span id="count-RS">0</span></span>
+    <span class="stat-rbih">RBiH: <span id="count-RBiH">0</span></span>
+    <span class="stat-hrhb">HRHB: <span id="count-HRHB">0</span></span>
+  </div>
+</div>
+
+<div id="map"></div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────
+let currentFaction = 'RBiH';
+let brushMode = 'municipality'; // 'municipality' | 'osid'
+let controlState = {};          // osid -> faction
+let baseGeoJson = null;         // raw GeoJSON (no controller)
+let osidToMun = {};             // osid -> mun1990_id
+let munToOsids = {};            // mun1990_id -> [osid, ...]
+let map = null;
+let hoverPopup = null;
+let undoStack = [];             // snapshots of controlState
+const MAX_UNDO = 50;
+
+// ─── Toolbar ─────────────────────────────────────────────────────────
+function setFaction(f) {
+  currentFaction = f;
+  document.querySelectorAll('.tb-btn[data-faction]').forEach(b => {
+    b.classList.toggle('active', b.dataset.faction === f);
+  });
+}
+
+function setBrush(mode) {
+  brushMode = mode;
+  document.getElementById('btn-mun').classList.toggle('active', mode === 'municipality');
+  document.getElementById('btn-osid').classList.toggle('active', mode === 'osid');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  switch (e.key) {
+    case '1': setFaction('RBiH'); break;
+    case '2': setFaction('RS'); break;
+    case '3': setFaction('HRHB'); break;
+    case 'm': case 'M': setBrush('municipality'); break;
+    case 'o': case 'O': setBrush('osid'); break;
+    case 'z': case 'Z':
+      if (e.ctrlKey || e.metaKey) { e.preventDefault(); undo(); }
+      break;
+  }
+});
+
+// ─── Undo ────────────────────────────────────────────────────────────
+function pushUndo() {
+  undoStack.push({ ...controlState });
+  if (undoStack.length > MAX_UNDO) undoStack.shift();
+  document.getElementById('undo-btn').disabled = false;
+}
+
+function undo() {
+  if (undoStack.length === 0) return;
+  controlState = undoStack.pop();
+  document.getElementById('undo-btn').disabled = undoStack.length === 0;
+  refreshMap();
+}
+
+// ─── Front Line Generation (ported from generateFactionBorders.ts) ──
+function generateFactionBorders(osidGeoJson) {
+  const features = osidGeoJson.features;
+  const controllerMap = new Map();
+  for (const f of features) {
+    controllerMap.set(f.properties.osid, f.properties.controller);
+  }
+
+  const edgeMap = new Map();
+  for (const feature of features) {
+    const osid = feature.properties.osid;
+    const geom = feature.geometry;
+    const rings = geom.type === 'Polygon'
+      ? geom.coordinates
+      : geom.coordinates.flat();
+
+    for (const ring of rings) {
+      for (let i = 0; i < ring.length - 1; i++) {
+        const a = ring[i], b = ring[i + 1];
+        const keyA = a[0].toFixed(6) + ',' + a[1].toFixed(6);
+        const keyB = b[0].toFixed(6) + ',' + b[1].toFixed(6);
+        const edgeKey = keyA < keyB ? keyA + '|' + keyB : keyB + '|' + keyA;
+        if (!edgeMap.has(edgeKey)) edgeMap.set(edgeKey, new Set());
+        edgeMap.get(edgeKey).add(osid);
+      }
+    }
+  }
+
+  const glowFeatures = [];
+  const frontSegmentsByPair = new Map();
+
+  for (const [edgeKey, osids] of edgeMap) {
+    if (osids.size !== 2) continue;
+    const [osidA, osidB] = [...osids];
+    const ctrlA = controllerMap.get(osidA);
+    const ctrlB = controllerMap.get(osidB);
+    if (!ctrlA || !ctrlB || ctrlA === ctrlB) continue;
+
+    const [partA, partB] = edgeKey.split('|');
+    const [ax, ay] = partA.split(',').map(Number);
+    const [bx, by] = partB.split(',').map(Number);
+    const coords = [[ax, ay], [bx, by]];
+
+    glowFeatures.push({
+      type: 'Feature',
+      properties: { lineType: 'glow', faction: ctrlA },
+      geometry: { type: 'LineString', coordinates: coords }
+    });
+    glowFeatures.push({
+      type: 'Feature',
+      properties: { lineType: 'glow', faction: ctrlB },
+      geometry: { type: 'LineString', coordinates: coords }
+    });
+
+    const pairKey = [ctrlA, ctrlB].sort().join('-');
+    if (!frontSegmentsByPair.has(pairKey)) frontSegmentsByPair.set(pairKey, []);
+    frontSegmentsByPair.get(pairKey).push({
+      type: 'Feature',
+      properties: { lineType: 'front', factionA: ctrlA, factionB: ctrlB },
+      geometry: { type: 'LineString', coordinates: coords }
+    });
+  }
+
+  // Merge consecutive segments
+  const mergedFront = [];
+  for (const segments of frontSegmentsByPair.values()) {
+    mergedFront.push(...mergeLineSegments(segments));
+  }
+
+  return { type: 'FeatureCollection', features: [...glowFeatures, ...mergedFront] };
+}
+
+function mergeLineSegments(segments) {
+  if (segments.length === 0) return [];
+  const coordKey = c => c[0].toFixed(6) + ',' + c[1].toFixed(6);
+  const endpointMap = new Map();
+
+  segments.forEach((seg, i) => {
+    const coords = seg.geometry.coordinates;
+    const sk = coordKey(coords[0]);
+    const ek = coordKey(coords[coords.length - 1]);
+    if (!endpointMap.has(sk)) endpointMap.set(sk, []);
+    if (!endpointMap.has(ek)) endpointMap.set(ek, []);
+    endpointMap.get(sk).push(i);
+    endpointMap.get(ek).push(i);
+  });
+
+  const used = new Set();
+  const merged = [];
+
+  for (let i = 0; i < segments.length; i++) {
+    if (used.has(i)) continue;
+    used.add(i);
+    const props = segments[i].properties;
+    let coords = [...segments[i].geometry.coordinates];
+    let changed = true;
+
+    while (changed) {
+      changed = false;
+      const ek = coordKey(coords[coords.length - 1]);
+      const candidates = endpointMap.get(ek) || [];
+      for (const j of candidates) {
+        if (used.has(j)) continue;
+        const seg = segments[j].geometry.coordinates;
+        const segStart = coordKey(seg[0]);
+        const segEnd = coordKey(seg[seg.length - 1]);
+        if (segStart === ek) {
+          coords.push(...seg.slice(1));
+          used.add(j); changed = true; break;
+        } else if (segEnd === ek) {
+          coords.push(...[...seg].reverse().slice(1));
+          used.add(j); changed = true; break;
+        }
+      }
+    }
+
+    merged.push({
+      type: 'Feature', properties: props,
+      geometry: { type: 'LineString', coordinates: coords }
+    });
+  }
+  return merged;
+}
+
+// ─── Map Refresh ─────────────────────────────────────────────────────
+function refreshMap() {
+  if (!map || !baseGeoJson) return;
+
+  const features = baseGeoJson.features.map(f => ({
+    ...f,
+    properties: {
+      ...f.properties,
+      controller: controlState[f.properties.osid] || null
+    }
+  }));
+  const enriched = { type: 'FeatureCollection', features };
+  const frontLines = generateFactionBorders(enriched);
+
+  map.getSource('osid-control').setData(enriched);
+  map.getSource('front-lines').setData(frontLines);
+
+  // Update stats
+  const counts = { RS: 0, RBiH: 0, HRHB: 0 };
+  for (const osid in controlState) {
+    const f = controlState[osid];
+    if (counts[f] !== undefined) counts[f]++;
+  }
+  document.getElementById('count-RS').textContent = counts.RS;
+  document.getElementById('count-RBiH').textContent = counts.RBiH;
+  document.getElementById('count-HRHB').textContent = counts.HRHB;
+}
+
+// ─── Export / Import ─────────────────────────────────────────────────
+function exportState() {
+  const counts = { RS: 0, RBiH: 0, HRHB: 0 };
+  for (const osid in controlState) {
+    const f = controlState[osid];
+    if (counts[f] !== undefined) counts[f]++;
+  }
+
+  const data = {
+    meta: {
+      description: 'Painted control state',
+      total_osids: Object.keys(controlState).length,
+      counts,
+      painted_at: new Date().toISOString()
+    },
+    by_settlement_id: { ...controlState }
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'painted_control.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importState(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      const byId = data.by_settlement_id;
+      if (!byId || typeof byId !== 'object') {
+        alert('Invalid file: missing by_settlement_id');
+        return;
+      }
+      pushUndo();
+      controlState = { ...byId };
+      refreshMap();
+    } catch (e) {
+      alert('Failed to parse JSON: ' + e.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = ''; // allow re-import of same file
+}
+
+// ─── Map Style ───────────────────────────────────────────────────────
+function buildStyle(origin) {
+  const pmBase = 'pmtiles://' + origin + '/';
+  return {
+    version: 8,
+    name: 'AWWV Territory Painter',
+    sources: {
+      'hillshade-tiles': {
+        type: 'raster',
+        url: pmBase + 'data/derived/tiles/hillshade.pmtiles',
+        tileSize: 256, minzoom: 6, maxzoom: 12
+      },
+      'osm-tiles': {
+        type: 'vector',
+        url: pmBase + 'data/derived/tiles/osm.pmtiles'
+      },
+      'osid-control': {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] }
+      },
+      'mun-borders': {
+        type: 'geojson',
+        data: '/data/source/boundaries/bih_adm3_1990.geojson'
+      },
+      'front-lines': {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] }
+      }
+    },
+    layers: [
+      {
+        id: 'background', type: 'background',
+        paint: { 'background-color': '#ebe1cd' }
+      },
+      {
+        id: 'hillshade', type: 'raster', source: 'hillshade-tiles',
+        paint: { 'raster-opacity': 0.5, 'raster-resampling': 'linear', 'raster-fade-duration': 0 }
+      },
+      {
+        id: 'water-polygons', type: 'fill', source: 'osm-tiles', 'source-layer': 'water',
+        filter: ['==', ['geometry-type'], 'Polygon'],
+        paint: { 'fill-color': 'rgb(100, 150, 200)', 'fill-opacity': 0.5 }
+      },
+      {
+        id: 'forest', type: 'fill', source: 'osm-tiles', 'source-layer': 'landuse',
+        filter: ['in', ['get', 'kind'], ['literal', ['forest', 'park', 'nature_reserve']]],
+        paint: { 'fill-color': '#b5c9a0', 'fill-opacity': 0.15 }
+      },
+      {
+        id: 'osid-control-fill', type: 'fill', source: 'osid-control',
+        paint: {
+          'fill-color': [
+            'match', ['get', 'controller'],
+            'RS', 'rgba(180, 50, 50, 0.45)',
+            'RBiH', 'rgba(55, 140, 75, 0.45)',
+            'HRHB', 'rgba(50, 110, 170, 0.45)',
+            'rgba(60, 60, 70, 0.15)'
+          ]
+        }
+      },
+      {
+        id: 'osid-control-outline', type: 'line', source: 'osid-control',
+        paint: { 'line-color': 'rgba(40, 40, 50, 0.1)', 'line-width': 0.3 }
+      },
+      {
+        id: 'faction-border-glow', type: 'line', source: 'front-lines',
+        filter: ['==', ['get', 'lineType'], 'glow'],
+        paint: {
+          'line-color': [
+            'match', ['get', 'faction'],
+            'RS', 'rgba(180, 50, 50, 0.6)',
+            'RBiH', 'rgba(55, 140, 75, 0.6)',
+            'HRHB', 'rgba(50, 110, 170, 0.6)',
+            'rgba(60, 60, 70, 0.3)'
+          ],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 10, 14, 16],
+          'line-blur': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
+          'line-opacity': 0.7
+        }
+      },
+      {
+        id: 'front-line-base', type: 'line', source: 'front-lines',
+        filter: ['==', ['get', 'lineType'], 'front'],
+        paint: {
+          'line-color': '#1a1a1a',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 6, 2, 10, 4, 14, 6],
+          'line-opacity': 0.85
+        },
+        layout: { 'line-cap': 'round', 'line-join': 'round' }
+      },
+      {
+        id: 'front-line-dash', type: 'line', source: 'front-lines',
+        filter: ['==', ['get', 'lineType'], 'front'],
+        paint: {
+          'line-color': '#ffffff',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 6, 1, 10, 2, 14, 3],
+          'line-opacity': 0.9,
+          'line-dasharray': [2, 3]
+        },
+        layout: { 'line-cap': 'butt', 'line-join': 'round' }
+      },
+      {
+        id: 'waterway-lines', type: 'line', source: 'osm-tiles', 'source-layer': 'water',
+        filter: ['any', ['==', ['geometry-type'], 'LineString'], ['==', ['geometry-type'], 'MultiLineString']],
+        paint: {
+          'line-color': 'rgb(100, 150, 200)', 'line-opacity': 0.7,
+          'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.5, 12, 2.5]
+        }
+      },
+      {
+        id: 'roads-major', type: 'line', source: 'osm-tiles', 'source-layer': 'roads',
+        filter: ['in', ['get', 'kind'], ['literal', ['highway', 'major_road']]],
+        paint: {
+          'line-color': 'rgba(80, 70, 60, 0.35)',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.3, 10, 1, 14, 2],
+          'line-opacity': 1
+        }
+      },
+      {
+        id: 'roads-secondary', type: 'line', source: 'osm-tiles', 'source-layer': 'roads',
+        filter: ['==', ['get', 'kind'], 'medium_road'],
+        minzoom: 10,
+        paint: {
+          'line-color': 'rgba(80, 70, 60, 0.2)',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.3, 14, 1],
+          'line-opacity': 1
+        }
+      },
+      {
+        id: 'mun-borders', type: 'line', source: 'mun-borders',
+        paint: {
+          'line-color': 'rgba(80, 60, 40, 0.35)',
+          'line-width': 1.5,
+          'line-dasharray': [4, 2]
+        }
+      }
+    ]
+  };
+}
+
+// ─── Ethnic majority helper ──────────────────────────────────────────
+function ethnicMajority(props) {
+  const groups = [
+    ['Bosniak', props.population_bosniaks || 0],
+    ['Serb', props.population_serbs || 0],
+    ['Croat', props.population_croats || 0],
+    ['Other', props.population_others || 0],
+  ];
+  groups.sort((a, b) => b[1] - a[1]);
+  const total = props.population_total || 1;
+  const pct = Math.round((groups[0][1] / total) * 100);
+  return groups[0][0] + ' (' + pct + '%)';
+}
+
+// ─── Init ────────────────────────────────────────────────────────────
+async function init() {
+  // Register PMTiles protocol
+  const protocol = new pmtiles.Protocol();
+  maplibregl.addProtocol('pmtiles', protocol.tile);
+
+  const origin = window.location.origin;
+  const style = buildStyle(origin);
+
+  // Fetch data
+  const [geojsonRes, controlRes] = await Promise.all([
+    fetch('/data/derived/operational/operational_settlements.geojson'),
+    fetch('/data/derived/operational/operational_political_control.json'),
+  ]);
+
+  if (!geojsonRes.ok || !controlRes.ok) {
+    document.getElementById('map').innerHTML = '<p style="padding:40px;color:red;">Failed to load data. Is Vite dev server running?</p>';
+    return;
+  }
+
+  baseGeoJson = await geojsonRes.json();
+  const initControl = await controlRes.json();
+  const byOsid = initControl.by_settlement_id || {};
+
+  // Build indices
+  for (const f of baseGeoJson.features) {
+    const osid = f.properties.osid;
+    const mun = f.properties.mun1990_id;
+    osidToMun[osid] = mun;
+    if (!munToOsids[mun]) munToOsids[mun] = [];
+    munToOsids[mun].push(osid);
+    controlState[osid] = byOsid[osid] || null;
+  }
+
+  // Enrich GeoJSON for initial render
+  const features = baseGeoJson.features.map(f => ({
+    ...f,
+    properties: { ...f.properties, controller: controlState[f.properties.osid] || null }
+  }));
+  const enriched = { type: 'FeatureCollection', features };
+  const frontLines = generateFactionBorders(enriched);
+
+  style.sources['osid-control'].data = enriched;
+  style.sources['front-lines'].data = frontLines;
+
+  // Create map
+  map = new maplibregl.Map({
+    container: 'map',
+    style,
+    center: [17.7, 43.87],
+    zoom: 8,
+  });
+  map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+  // Click handler
+  map.on('load', () => {
+    map.on('click', 'osid-control-fill', (e) => {
+      if (!e.features || e.features.length === 0) return;
+      const feature = e.features[0];
+      const osid = feature.properties.osid;
+      const mun = feature.properties.mun1990_id;
+
+      pushUndo();
+
+      if (brushMode === 'municipality' && mun && munToOsids[mun]) {
+        for (const id of munToOsids[mun]) {
+          controlState[id] = currentFaction;
+        }
+      } else {
+        controlState[osid] = currentFaction;
+      }
+      refreshMap();
+    });
+
+    // Hover tooltip
+    hoverPopup = new maplibregl.Popup({
+      closeButton: false, closeOnClick: false,
+      offset: 12, maxWidth: '280px'
+    });
+
+    map.on('mousemove', 'osid-control-fill', (e) => {
+      if (!e.features || e.features.length === 0) return;
+      map.getCanvas().style.cursor = 'pointer';
+      const props = e.features[0].properties;
+      const ctrl = controlState[props.osid] || 'none';
+      const ctrlClass = ctrl === 'none' ? '' : 'ctrl-' + ctrl.toLowerCase();
+
+      hoverPopup.setLngLat(e.lngLat).setHTML(
+        '<b>' + (props.settlement_name || '?') + '</b><br>' +
+        '<span class="tooltip-label">OSID:</span> ' + props.osid + '<br>' +
+        '<span class="tooltip-label">Mun:</span> ' + (props.mun1990_name || props.mun1990_id) + '<br>' +
+        '<span class="tooltip-label">Controller:</span> <span class="' + ctrlClass + '">' + ctrl + '</span><br>' +
+        '<span class="tooltip-label">Majority:</span> ' + ethnicMajority(props) + '<br>' +
+        '<span class="tooltip-label">Pop:</span> ' + (props.population_total || 0).toLocaleString()
+      ).addTo(map);
+    });
+
+    map.on('mouseleave', 'osid-control-fill', () => {
+      map.getCanvas().style.cursor = '';
+      hoverPopup.remove();
+    });
+
+    // Initial stats
+    refreshMap();
+  });
+}
+
+init().catch(err => console.error('Painter init failed:', err));
+</script>
+</body>
+</html>

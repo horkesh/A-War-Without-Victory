@@ -50,18 +50,18 @@ describe('Three-Sided Bot AI Validation', () => {
 
     // --- A3: RS early-war attack share boost ---
 
-    it('RS getEffectiveAttackShare returns 0.33 at turn 0 (doctrine phase)', () => {
+    it('RS getEffectiveAttackShare returns 0.28 at turn 0 (doctrine phase)', () => {
         const share = getEffectiveAttackShare('RS', 0);
-        expect(share).toBeCloseTo(0.33, 2);
+        expect(share).toBeCloseTo(0.28, 2);
     });
 
     it('RS getEffectiveAttackShare uses balanced phase at turn 30', () => {
         const share = getEffectiveAttackShare('RS', 30);
-        expect(share).toBeCloseTo(0.20, 2);
+        expect(share).toBeCloseTo(0.08, 2);
     });
 
     it('Non-RS factions use doctrine phase values', () => {
-        expect(getEffectiveAttackShare('RBiH', 0)).toBeCloseTo(0.05, 2);
+        expect(getEffectiveAttackShare('RBiH', 0)).toBeCloseTo(0.10, 2);
         expect(getEffectiveAttackShare('HRHB', 0)).toBeCloseTo(0.25, 2);
     });
 
@@ -71,7 +71,7 @@ describe('Three-Sided Bot AI Validation', () => {
         const phase = getActiveDoctrinePhase('RS', 5);
         expect(phase).not.toBeNull();
         expect(phase!.default_corps_stance).toBe('offensive');
-        expect(phase!.max_attack_share_override).toBe(0.33);
+        expect(phase!.max_attack_share_override).toBe(0.28);
     });
 
     it('RBiH doctrine phase at turn 5 is defensive', () => {
@@ -80,11 +80,11 @@ describe('Three-Sided Bot AI Validation', () => {
         expect(phase!.default_corps_stance).toBe('defensive');
     });
 
-    it('RBiH doctrine phase at turn 45 is still defensive (no counteroffensive until week 52)', () => {
+    it('RBiH doctrine phase at turn 45 is defensive (transition phase w40-56)', () => {
         const phase = getActiveDoctrinePhase('RBiH', 45);
         expect(phase).not.toBeNull();
         expect(phase!.default_corps_stance).toBe('defensive');
-        expect(phase!.max_attack_share_override).toBe(0.10);
+        expect(phase!.max_attack_share_override).toBe(0.20);
     });
 
     it('RS doctrine phase at turn 60 is strategic defense', () => {
@@ -154,11 +154,11 @@ describe('Three-Sided Bot AI Validation', () => {
         expect(order!.army_stance).toBe('general_defensive');
     });
 
-    it('RBiH standing order at turn 30 is Corps Reorganization (general_defensive)', () => {
+    it('RBiH standing order at turn 30 is Local Counterattacks (balanced)', () => {
         const order = getActiveStandingOrder('RBiH', 30);
         expect(order).not.toBeNull();
-        expect(order!.name).toBe('Corps Reorganization');
-        expect(order!.army_stance).toBe('general_defensive');
+        expect(order!.name).toBe('Local Counterattacks');
+        expect(order!.army_stance).toBe('balanced');
     });
 
     it('RBiH standing order at turn 60 is Active Defense (balanced)', () => {
@@ -175,11 +175,11 @@ describe('Three-Sided Bot AI Validation', () => {
         expect(order!.army_stance).toBe('general_offensive');
     });
 
-    it('HRHB standing order at turn 15 is Lasva Offensive (general_offensive)', () => {
+    it('HRHB standing order at turn 15 is Anti-RS Defense (balanced)', () => {
         const order = getActiveStandingOrder('HRHB', 15);
         expect(order).not.toBeNull();
-        expect(order!.name).toBe('Lasva Offensive');
-        expect(order!.army_stance).toBe('general_offensive');
+        expect(order!.name).toBe('Anti-RS Defense');
+        expect(order!.army_stance).toBe('balanced');
     });
 
     it('HRHB standing order at turn 30 is Washington Pivot (balanced)', () => {

@@ -380,7 +380,12 @@ const HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992: Array<{ settlement_id: s
 ];
 const HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992: Array<{ osid: string; expected_controller: string }> = [
     { osid: 'op:zvornik:vitinica_2', expected_controller: 'RBiH' },        // Sapna — ARBiH stronghold
-    { osid: 'op:ugljevik:teocak_krstac_2', expected_controller: 'RBiH' }   // Teocak — ARBiH stronghold
+    { osid: 'op:ugljevik:teocak_krstac_2', expected_controller: 'RBiH' },  // Teocak — ARBiH stronghold
+    { osid: 'op:orasje:orasje', expected_controller: 'HRHB' },              // Orasje pocket — HVO held throughout
+    { osid: 'op:brcko:brka_2', expected_controller: 'RBiH' },              // South Brcko (Brka) — ARBiH held
+    { osid: 'op:gorazde:gorazde_2', expected_controller: 'RBiH' },         // Gorazde enclave — ARBiH defended
+    { osid: 'op:srebrenica:srebrenica_2', expected_controller: 'RBiH' },   // Srebrenica enclave — ARBiH defended
+    { osid: 'op:zavidovici:vozuca_2', expected_controller: 'RS' },          // Vozuca — VRS held Ozren salient
 ];
 
 function countControllers(snapshot: ControlKey[]): Map<string, number> {

@@ -54,8 +54,8 @@ const STRATEGY_PROFILES: Record<string, BotStrategyProfile> = {
         preferred_objective_sids: ['S166499', 'S155551', 'S162973', 'S100838', 'S117994', 'S224065', 'S163520', 'S123749', 'S208019', 'S151360'],
         consolidation_priority_weight: 0.5,
         benchmarks: [
-            { turn: 26, objective: 'hold_core_centers', expected_control_share: 0.2, tolerance: 0.1 },
-            { turn: 52, objective: 'preserve_survival_corridors', expected_control_share: 0.25, tolerance: 0.12 }
+            { turn: 20, objective: 'hold_core_centers', expected_control_share: 0.35, tolerance: 0.08 },
+            { turn: 40, objective: 'preserve_survival_corridors', expected_control_share: 0.329, tolerance: 0.05 }
         ]
     },
     RS: {
@@ -68,8 +68,8 @@ const STRATEGY_PROFILES: Record<string, BotStrategyProfile> = {
         preferred_objective_sids: ['S200026', 'S216984', 'S200891', 'S230545', 'S227897', 'S205176', 'S202258', 'S203009', 'S220469', 'S218375', 'S120154', 'S162094'],
         consolidation_priority_weight: 0.8,
         benchmarks: [
-            { turn: 26, objective: 'early_territorial_expansion', expected_control_share: 0.60, tolerance: 0.10 },
-            { turn: 52, objective: 'consolidate_gains', expected_control_share: 0.65, tolerance: 0.10 }
+            { turn: 20, objective: 'early_territorial_expansion', expected_control_share: 0.55, tolerance: 0.08 },
+            { turn: 40, objective: 'consolidate_gains', expected_control_share: 0.553, tolerance: 0.05 }
         ]
     },
     HRHB: {
@@ -82,8 +82,8 @@ const STRATEGY_PROFILES: Record<string, BotStrategyProfile> = {
         preferred_objective_sids: ['S166090', 'S120880', 'S130486'],
         consolidation_priority_weight: 0.4,
         benchmarks: [
-            { turn: 26, objective: 'secure_herzegovina_core', expected_control_share: 0.15, tolerance: 0.08 },
-            { turn: 52, objective: 'hold_central_bosnia_nodes', expected_control_share: 0.18, tolerance: 0.1 }
+            { turn: 20, objective: 'secure_herzegovina_core', expected_control_share: 0.12, tolerance: 0.05 },
+            { turn: 40, objective: 'hold_central_bosnia_nodes', expected_control_share: 0.118, tolerance: 0.04 }
         ]
     }
 };
