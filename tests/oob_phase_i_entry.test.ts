@@ -81,7 +81,7 @@ test('createOobFormationsAtPhaseIEntry is idempotent and only creates when prese
     };
     const sidToMun = new Map([['sid_zenica', 'zenica'], ['sid_mostar', 'mostar']]);
     const hq: Record<string, string> = { zenica: 'sid_zenica', mostar: 'sid_mostar' };
-    const corps: OobCorps[] = [{ id: 'arbih_3rd_corps', faction: 'RBiH', name: '3rd Corps', hq_mun: 'zenica', kind: 'corps' }];
+    const corps: OobCorps[] = [{ id: 'arbih_3rd_corps', faction: 'RBiH', name: '3rd Corps', hq_mun: 'zenica', kind: 'corps', available_from: 0 }];
     const brigades: OobBrigade[] = [
         makeBrigade({ id: 'arbih_7th_muslim', faction: 'RBiH', name: '7th Muslim', home_mun: 'zenica', kind: 'brigade', corps: 'arbih_3rd_corps' })
     ];
@@ -114,7 +114,7 @@ test('createOobFormationsAtPhaseIEntry preserves army_hq corps kind', () => {
     const sidToMun = new Map([['sid_sarajevo', 'centar_sarajevo']]);
     const hq: Record<string, string> = { centar_sarajevo: 'sid_sarajevo' };
     const corps: OobCorps[] = [
-        { id: 'arbih_general_staff', faction: 'RBiH', name: 'General Staff', hq_mun: 'centar_sarajevo', kind: 'army_hq' }
+        { id: 'arbih_general_staff', faction: 'RBiH', name: 'General Staff', hq_mun: 'centar_sarajevo', kind: 'army_hq', available_from: 0 }
     ];
 
     const report = createOobFormationsAtPhaseIEntry(state, corps, [], hq, sidToMun);

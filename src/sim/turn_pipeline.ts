@@ -161,6 +161,7 @@ import { applySettlementDisplacementDeltas } from './phase_f/displacement_accumu
 import { buildDisplacementCapacityReport } from './phase_f/displacement_capacity_hooks.js';
 import { aggregateSettlementDisplacementToMunicipalities } from './phase_f/displacement_municipality_aggregation.js';
 import { evaluateDisplacementTriggers } from './phase_f/displacement_triggers.js';
+import { activateCorpsForTurn } from './phase_i/activate_corps.js';
 import { runPhaseIBotPosture } from './phase_i/bot_phase_i.js';
 import { applyBrigadeRepositionOrders } from './phase_ii/apply_brigade_reposition.js';
 import { applyReshapeOrders } from './phase_ii/aor_reshaping.js';
@@ -1809,6 +1810,22 @@ const phaseIPhases: NamedPhase[] = [
                 canonicalToOperational
             });
         }
+    },
+    {
+        name: 'activate-corps',
+        run: async (context) => {
+            if (context.state.meta.recruitment_mode !== 'bottom_up') return;
+            const currentTurn = context.state.meta.turn ?? 0;
+            const catalog = await loadRecruitmentCatalog();
+            if (!catalog) return;
+            activateCorpsForTurn(
+                context.state,
+                catalog.corps,
+                currentTurn,
+                undefined, // sidToMun: skip presence check in pipeline (RS already exists; RBiH/HRHB create regardless)
+                catalog.municipality_hq_settlement
+            );
+        },
     },
     {
         name: 'promote-formations',

@@ -118,7 +118,16 @@ export function createOobFormationsAtPhaseIEntry(
     }
     const currentTurn = state.meta.turn;
 
+    // Phase I Overhaul (bottom_up mode): only RS corps and army_hq entries are created at turn 0.
+    // RBiH and HRHB corps are deferred to activateCorpsForTurn() at their available_from turns.
+    // RS brigades still come from OOB at turn 0 (VRS JNA exception).
+    // RBiH and HRHB brigades are never created here — they emerge as TO detachments from pools.
+    const isBottomUp = state.meta.recruitment_mode === 'bottom_up';
+
     for (const c of oobCorps) {
+        // bottom_up: skip non-RS corps that are not army_hq (army_hq also follows available_from logic)
+        // Exception: RS army_hq (vrs_main_staff) is kind='army_hq' and available_from=0 — keep it.
+        if (isBottomUp && c.faction !== 'RS') continue;
         if (state.formations[c.id]) continue;
         if (!factionHasPresenceInMun(state, c.faction, c.hq_mun, sidToMun)) continue;
         const hq_sid = municipalityHqSettlement[c.hq_mun];
@@ -143,6 +152,9 @@ export function createOobFormationsAtPhaseIEntry(
 
     const brigadeCountByFactionMun = new Map<string, number>();
     for (const b of oobBrigades) {
+        // bottom_up: skip RBiH and HRHB brigades entirely — they emerge from pools as TO detachments.
+        // RS brigades are created at turn 0 (VRS JNA exception).
+        if (isBottomUp && b.faction !== 'RS') continue;
         if (state.formations[b.id]) continue;
         if (!factionHasPresenceInMun(state, b.faction, b.home_mun, sidToMun)) continue;
         const hq_sid = municipalityHqSettlement[b.home_mun];

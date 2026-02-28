@@ -45,6 +45,8 @@ export interface OobCorps {
     /** Optional historical corps HQ OSID (op:mun:slug). When set, used as formation location_osid. */
     hq_osid?: string;
     kind: 'corps' | 'army_hq';
+    /** Turn when this corps becomes available (Phase I Overhaul: phased activation). Default 0. */
+    available_from: number;
 }
 
 interface RegistryRow {
@@ -176,6 +178,7 @@ export async function loadOobCorps(baseDir: string): Promise<OobCorps[]> {
         }
         const corpsKind = r.kind === 'army_hq' ? 'army_hq' as const : 'corps' as const;
         const hq_osid = typeof r.hq_osid === 'string' && r.hq_osid.trim() ? r.hq_osid.trim() : undefined;
+        const available_from = typeof r.available_from === 'number' && Number.isFinite(r.available_from) ? r.available_from : 0;
         result.push({
             id,
             faction,
@@ -183,6 +186,7 @@ export async function loadOobCorps(baseDir: string): Promise<OobCorps[]> {
             hq_mun,
             ...(hq_osid && { hq_osid }),
             kind: corpsKind,
+            available_from,
         });
     }
 
