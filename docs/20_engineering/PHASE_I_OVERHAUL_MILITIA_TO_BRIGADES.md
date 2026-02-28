@@ -534,64 +534,199 @@ This overhaul supersedes several of the targeted structural changes proposed in 
 
 ## 10. Implementation Sequence
 
-### Phase 0: Displacement Reporting Fix (low risk, not a blocker)
+> Each phase ends with a **Refactor Pass** gate before the next phase begins. The refactor pass (via `/refactor-pass`) removes dead code, straightens logic flows, and verifies the smoke-test triad (`tsc --noEmit` + `vitest run` + `desktop:map:build`). No phase starts until the preceding gate is green.
+>
+> Paradox team members are assigned per phase. See Section 13 for parallel dispatch strategy.
+
+---
+
+### Phase 0: Displacement Reporting Fix *(independent — run in parallel with Phase A)*
+
+**Team:** `systems-programmer` (OSID key mismatch), `qa-engineer` (regression test)
+
 0. **Fix displacement reporting** — the "0/0" in end reports is a **reporting bug**, not a missing system. Three displacement subsystems exist:
    - **System A** (Phase I municipality-level, `displacement_state`): **WORKING**. 2.2M displaced out, 45k displaced in. Feeds `displaced_in_by_faction` into militia pools via `runDisplacedAndCrossEthnicContributions()`.
    - **System B** (Phase II hostile takeover + minority flight, `displacement_takeover.ts` / `minority_flight.ts`): **WORKING**. 4-turn timer → camp → route to urban centers. Active timers, camps, civilian casualties recorded.
    - **System C** (Phase F settlement-level front-active, `displacement_triggers.ts`): **BROKEN**. `isPressureEligible()` in `pressure_eligibility.ts` looks up canonical settlement IDs (`S100013`) in `political_controllers` which is now OSID-keyed (`op:mun:slug`). Always returns false → zero deltas → zero accumulation.
    - **Reporting bug**: `scenario_reporting.ts` reads System C fields (`settlement_displacement`, `municipality_displacement`) during Phase II, ignoring System A (`displacement_state`) which has the real data.
    - **Fix**: (a) Update reporting to read `displacement_state` during Phase II. (b) Fix `isPressureEligible()` to use OSID keys. Neither blocks proto-brigade implementation — Systems A/B already feed enclave militia pools.
-
-### Phase A: Foundation (low risk)
-1. Add new constants (MIN_DETACHMENT_SPAWN, MIN_BATTALION_THRESHOLD, MIN_BRIGADE_THRESHOLD, MAX_TO_PER_MUN, SIEGE_* constants)
-2. Add `getFormationTier()` utility function
-3. Add optional fields to FormationState (origin_mun, promoted_turn, matched_oob_id)
-4. Add `promote_formations` pipeline step (no-op initially)
-5. Add `available_from` field to `oob_corps.json` entries (RS: 0, HRHB: 10, RBiH: 24)
-
-### Phase B: Spawn Rewrite
-6. Modify `spawnFormationsFromPools()` to create TO detachments at 100 threshold
-7. Modify `reinforceBrigadesFromPools()` → `reinforceFormationsFromPools()` to handle all tiers with tier growth caps
-8. Implement tier auto-promotion (detachment → battalion at 500)
-9. Update formation naming for TO pattern ("TO [Municipality]", "TO Bn [Municipality]")
-
-### Phase C: Corps Phasing
-10. Implement `activate_corps` pipeline step — create corps only when `turn >= available_from`
-11. Modify `createOobFormationsAtPhaseIEntry()` to skip RBiH/HRHB corps at turn 0
-12. Implement corps activation wave: assign formations + trigger eligible brigade promotions (Section 4.6)
-13. Implement VRS JNA exception (direct brigade creation for RS turn-0 OOB, unchanged)
-
-### Phase D: Brigade Promotion & Naming
-14. Implement brigade promotion logic (battalion → brigade at 1,500 + prerequisites including corps existence)
-15. Implement historical name matching from OOB catalog (Section 5.1)
-16. Add OOB tag propagation on promotion (Section 5.3)
-17. Implement displaced-origin naming on promotion (Section 5.4)
-
-### Phase E: Equipment, Combat & Terrain
-18. Implement tier-based equipment multiplier (Section 6.2)
-19. Implement terrain-amplified defense for TO formations (Section 6.3)
-20. Implement ZoC readiness scaling by tier (0.30x / 0.50x / 1.0x)
-21. Add posture restrictions for TO formations (no offensive for detachments, local only for battalions)
-22. Modify combat resolver to handle TO formation combat limitations
-
-### Phase F: Siege Mobilization
-23. Implement `compute_siege_state` pipeline step — per-municipality siege ratio computation
-24. Apply siege mobilization multiplier to pool_population growth
-25. Lift max_brigades_per_mun cap under siege
-26. Implement no-flee constraint (FLEE_ABROAD_FRACTION → 0 under full siege)
-27. Integrate displacement-driven TO emergence with siege state (Section 3.5 + 3.6)
-
-### Phase G: Calibration
-28. Run 40w scenario with `recruitment_mode: "bottom_up"`
-29. Compare against 82.1% baseline (n241) and painted targets
-30. Tune new levers (thresholds, turn gates, equipment, terrain multipliers, siege multipliers)
-31. Verify enclave survival (Srebrenica, Gorazde, Zepa hold via siege mobilization)
-32. Verify corps activation wave (RBiH brigades appear at ~w24, HRHB at ~w10)
-33. Document new baseline
+   - **QA gate**: After fix, verify run summary shows non-zero displacement in Phase II reports. Add regression test asserting `displacement_state.displaced_out > 0` after a Phase II run.
 
 ---
 
-## 11. Risks
+### Phase A: Foundation *(low risk)*
+
+**Team:** `technical-architect` (schema + ADR), `systems-programmer` (constants, FormationState)
+
+**Parallel within phase:** Steps 1–2 and step 5 are independent and can run concurrently.
+
+1. Add new constants to `formation_constants.ts`: `MIN_DETACHMENT_SPAWN`, `MIN_BATTALION_THRESHOLD`, `MIN_BRIGADE_THRESHOLD`, `MAX_TO_PER_MUN`, `SIEGE_RATIO_FULL`, `SIEGE_RATIO_MOSTLY`, `SIEGE_RATIO_PARTIAL`, `SIEGE_MOBILIZATION_MULT`
+2. Add `getFormationTier()` utility function (derives tier from `kind` + `personnel`)
+3. Add optional fields to `FormationState` (`origin_mun`, `promoted_turn`, `matched_oob_id`) with serializer allowlist entries
+4. Add `promote_formations` pipeline step skeleton (no-op, just registers the step name)
+5. *(parallel with 1–2)* Add `available_from` field to all `oob_corps.json` entries (RS: 0, HRHB: 10, RBiH: 24)
+
+**→ Refactor Pass A** (`code-simplifier`): verify constant naming is consistent with existing `formation_constants.ts` style; confirm `getFormationTier` has no edge-case dead paths; smoke-test triad green.
+
+---
+
+### Phase B: Spawn Rewrite
+
+**Team:** `formation-expert` (owns spawn/reinforce), `gameplay-programmer` (tier growth caps, auto-promotion logic)
+
+**Parallel within phase:** Steps 6–7 (spawn + reinforce rewrite) are in different functions and can be assigned to separate agents; step 9 (naming) is independent.
+
+6. Modify `spawnFormationsFromPools()` to create TO detachments at `MIN_DETACHMENT_SPAWN` (100) threshold; respect `MAX_TO_PER_MUN` per-mun cap
+7. Rename and rewrite `reinforceBrigadesFromPools()` → `reinforceFormationsFromPools()` — handles all tiers with tier growth caps; respects `MIN_BATTALION_THRESHOLD` and `MIN_BRIGADE_THRESHOLD` as soft promotion ceilings
+8. Implement detachment → battalion auto-promotion at 500 personnel (inline in `reinforce_formations` step, no separate pass needed)
+9. *(parallel with 6–7)* Update formation naming utilities for TO pattern: `"TO [Municipality]"` (detachment), `"TO Bn [Municipality]"` (battalion); update `resolveFormationName()` fallback in `formation_naming.ts`
+
+**→ Refactor Pass B** (`determinism-auditor` + `code-simplifier`): spawn and reinforce are the highest-risk determinism surface — verify all mun/faction iteration is sorted; confirm no `Math.random()`, no object key iteration; smoke-test triad green; run a 5-turn headless test and verify formation counts are stable across two identical runs.
+
+---
+
+### Phase C: Corps Phasing
+
+**Team:** `gameplay-programmer` (pipeline step + OOB entry), `scenario-creator-runner-tester` (verify corps appear at correct turns in a test run)
+
+**Parallel within phase:** Steps 12 and 13 (RBiH/HRHB wave vs VRS exception) are independent.
+
+10. Implement `activate_corps` pipeline step — checks `oob_corps.json` entries with `available_from <= turn`, creates corps not yet in state, idempotent (safe to re-run)
+11. Modify `createOobFormationsAtPhaseIEntry()` to skip RBiH/HRHB corps at turn 0 when `recruitment_mode === "bottom_up"`
+12. *(parallel with 13)* Implement corps activation wave for RBiH/HRHB: assign existing formations in AoR to newly created corps; trigger eligible TO battalion → brigade promotions (prerequisites met); add corps AI `bot_corps_ai.ts` to begin generating directives on next turn
+13. *(parallel with 12)* Implement VRS JNA exception pathway: all RS OOB entries with `available_from: 0` created as full brigades at Phase I entry (existing behavior, validate it is unchanged); RS OOB entries with `available_from > N` become catalog-only pending proto-brigade promotion
+
+**→ Refactor Pass C** (`canon-compliance-reviewer`): corps formation timing must match Phase I Spec and Phase II Spec; verify brigade promotion gate (Section 3.3 item 4) is correctly enforced; smoke-test triad green.
+
+---
+
+### Phase D: Brigade Promotion & Naming
+
+**Team:** `formation-expert` (promotion logic + naming ceremony), `game-designer` (historical name matching intent and fallback policy)
+
+**Parallel within phase:** Steps 16–17 (OOB tag propagation + displaced-origin naming) are independent of each other.
+
+14. Implement battalion → brigade promotion logic in `promote_formations` step: personnel ≥ 1,500 AND cohesion ≥ 40 AND turns_active ≥ 4 AND faction corps exist; `kind` → `'brigade'`, cohesion +10 bonus, readiness → `'active'`
+15. Implement historical name matching (`matchHistoricalName`) from OOB catalog — lookup by (faction, home_mun, ordinal); fallback to `"[Ordinal] [Municipality] Brigade"` (Section 5.1–5.2)
+16. *(parallel with 17)* Add OOB tag propagation on promotion: set `matched_oob_id`, inherit `subordinate_to` and equipment class from OOB entry (Section 5.3)
+17. *(parallel with 16)* Implement displaced-origin naming: if `origin_mun ≠ home_mun` and OOB catalog entry specifies displaced origin, use displaced name (Section 5.4)
+
+**→ Refactor Pass D** (`code-simplifier` + `qa-engineer`): add unit tests for `matchHistoricalName` covering exact match, ordinal overflow, and displaced-origin cases; verify no duplicate name assignment across formations; smoke-test triad green.
+
+---
+
+### Phase E: Equipment, Combat & Terrain
+
+**Team:** `gameplay-programmer` (combat resolver + ZoC readiness), `game-designer` (terrain multiplier values — calibration authority)
+
+**Parallel within phase:** Steps 18–19 (equipment multiplier + terrain defense) are in different modules and can run concurrently; steps 20–22 (ZoC + posture + combat resolver) are interdependent and run sequentially.
+
+18. *(parallel with 19)* Implement tier-based `getEquipmentMultiplier()` function (Section 6.2) — derive equipment from `getFormationTier()` + faction; wire into existing `combat_power` calculation in attack resolver
+19. *(parallel with 18)* Implement `getTerrainDefenseMultiplier()` for TO formations (Section 6.3) — urban 2.5×, mountain 2.0×, forest 1.5×, open 1.0×; only applies to `tier !== 'brigade'`; wire into defender combat power
+20. Implement ZoC readiness scaling by tier: detachment 0.30×, battalion 0.50×, brigade 1.0× (modify `getZocReadiness()`)
+21. Add posture restrictions: detachments cannot receive offensive posture orders; battalions limited to local counterattack (home mun + 1 adjacent); enforce in corps directive assignment
+22. Modify combat resolver to handle TO formation limitations: detachments cannot initiate attacks; only defend in response to attack on their OSID
+
+**→ Refactor Pass E** (`determinism-auditor`): terrain lookup and tier derivation are called in hot paths per turn — verify no object allocation per call; confirm `getOsidTerrain()` is O(1) cache lookup, not recomputed; smoke-test triad green.
+
+---
+
+### Phase F: Siege Mobilization
+
+**Team:** `gameplay-programmer` (pipeline step + pool integration), `formation-expert` (displacement-driven TO emergence), `systems-programmer` (pool_population changes)
+
+**Parallel within phase:** Step 23 (`compute_siege_state`) must complete before 24–27; steps 25–26 are independent of step 27.
+
+23. Implement `compute_siege_state` pipeline step (early in pipeline, before `pool_population`) — per-municipality siege ratio computation, writes `siege_state_by_mun` to turn context; deterministic (sorted OSID iteration)
+24. Apply siege mobilization multiplier to `pool_population` growth rate for surrounded municipalities (Section 3.6 step 1)
+25. *(parallel with 26)* Lift `max_brigades_per_mun` cap in `formation_spawn` when `siege_ratio >= SIEGE_RATIO_MOSTLY` (Section 3.6 step 2)
+26. *(parallel with 25)* Implement no-flee constraint: `FLEE_ABROAD_FRACTION → 0` when `siege_ratio >= SIEGE_RATIO_FULL` in the municipality's displacement step (Section 3.6 step 4)
+27. Integrate displacement-driven TO emergence with siege state: when `displaced_in_by_faction[F]` exceeds `DISPLACED_FORMATION_THRESHOLD` in a municipality under siege, spawn new TO detachment; set `origin_mun` from displacement source record (Sections 3.5 + 3.6 step 3)
+
+**→ Refactor Pass F** (`canon-compliance-reviewer` + `code-simplifier`): siege mobilization is a new system — verify it does not violate Phase I Spec constraints; remove any intermediate state written to `GameState` that is recomputable (siege_state_by_mun should be turn-local, not persisted); smoke-test triad green.
+
+---
+
+### Phase G: Calibration
+
+**Team:** `scenario-creator-runner-tester` (calibration runs + result interpretation), `qa-engineer` (baseline documentation + regression test set)
+
+28. Run 40w scenario with `recruitment_mode: "bottom_up"` — compare formation counts, territory, and army sizes against n241 baseline (82.1%)
+29. Compare OSID match rate against painted targets using `tools/compare_painted_vs_sim.cjs`
+30. Tune new levers (thresholds, turn gates, equipment values, terrain multipliers, siege multipliers) — iterative; use 20w runs for fast iteration
+31. Verify enclave survival: Srebrenica, Gorazde, Zepa hold via siege mobilization alone (no hardcoded exceptions)
+32. Verify corps activation wave: RBiH brigades appear at ~w24 (turn 24 wave), HRHB at ~w10 (turn 10 wave); formation names match OOB catalog
+33. Document new baseline — update napkin calibration entries, append ledger entry, add §50 to CONSOLIDATED_IMPLEMENTED
+
+---
+
+## 11. Agent Dispatch Strategy
+
+### 11.1 Phase-Level Parallelism
+
+Phase 0 (displacement fix) is **fully independent** of Phase A and should be dispatched as a background agent the moment implementation begins. It touches different files (`pressure_eligibility.ts`, `scenario_reporting.ts`) with zero overlap with Phase A's files.
+
+```
+Session start:
+  Agent A  → Phase 0 (displacement fix)       [background]
+  Main     → Phase A (foundation)             [foreground]
+  Merge both, run smoke-test triad, then begin Phase B
+```
+
+### 11.2 Within-Phase Parallelism
+
+Several phases have parallel sub-tasks explicitly marked in Section 10. Use the `dispatching-parallel-agents` pattern: one agent per independent file domain, collect summaries, merge, smoke-test.
+
+| Phase | Parallel sub-tasks | Files touched (non-overlapping) |
+|---|---|---|
+| A | Steps 1–2 vs step 5 | `formation_constants.ts` + `turn_pipeline.ts` vs `oob_corps.json` |
+| B | Steps 6–7 vs step 9 | `formation_spawn.ts` vs `formation_naming.ts` |
+| C | Steps 12 vs 13 | RBiH/HRHB activation wave vs VRS exception path |
+| D | Steps 16 vs 17 | OOB tag propagation vs displaced-origin naming |
+| E | Steps 18 vs 19 | `combat_power` multiplier vs `getTerrainDefenseMultiplier` |
+| F | Steps 25 vs 26 | `formation_spawn.ts` (cap lifting) vs displacement flee constraint |
+
+### 11.3 Refactor Pass as Background Agent
+
+Refactor passes are read-heavy + light edit. Run them as background agents while the next phase is being designed:
+
+```
+Phase B complete → dispatch Refactor-B agent [background]
+                → main session designs Phase C details
+                → merge Refactor-B output before starting Phase C implementation
+```
+
+### 11.4 Paradox Team Role Summary
+
+| Role | Phases | Responsibility |
+|---|---|---|
+| `systems-programmer` | 0, A, F | OSID key fix, constants schema, pool_population changes |
+| `technical-architect` | A | FormationState ADR, serializer allowlist |
+| `formation-expert` | B, D, F | Spawn rewrite, naming ceremony, displacement-driven TO |
+| `gameplay-programmer` | B, C, D, E, F | Tier logic, corps phasing, combat/ZoC changes, siege pipeline |
+| `game-designer` | D, E | Historical naming intent, terrain multiplier authority |
+| `scenario-creator-runner-tester` | C, G | Corps activation verification, calibration runs |
+| `qa-engineer` | 0, D, G | Displacement regression test, naming unit tests, baseline docs |
+| `code-simplifier` | Refactor A→B, B→C, D→E, F→G | Dead code, logic flow, parameter cleanup |
+| `determinism-auditor` | Refactor B→C, E→F | Spawn/reinforce ordering, hot-path terrain lookup |
+| `canon-compliance-reviewer` | Refactor C→D, E→F | Phase I Spec compliance, corps timing |
+
+### 11.5 Worktree Isolation
+
+Each phase should be implemented in its own git worktree (`/using-git-worktrees`) to keep the main branch green:
+
+```
+worktree/phase-0-displacement    ← Phase 0 agent
+worktree/phase-a-foundation      ← Phase A (main)
+worktree/phase-b-spawn           ← Phase B
+... etc
+```
+
+Merge worktree → main only after refactor pass is green. This means the main branch always has a working simulation and any phase can be abandoned without damage.
+
+---
+
+## 13. Risks
 
 | Risk | Mitigation |
 |---|---|
@@ -605,7 +740,7 @@ This overhaul supersedes several of the targeted structural changes proposed in 
 
 ---
 
-## 12. Open Questions
+## 14. Open Questions
 
 1. ~~**Should TO detachments participate in battle resolution?**~~ **RESOLVED**: Yes. TO detachments participate as weak defenders with equipment 0.15 (RBiH) or 0.5 (RS/HRHB), amplified by terrain defense multiplier (Section 6.3). Even 200 men with rifles in mountain terrain impose real assault costs.
 
