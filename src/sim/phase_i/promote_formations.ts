@@ -28,7 +28,7 @@ import {
     PROMOTION_COHESION_THRESHOLD,
     PROMOTION_MIN_TURNS_ACTIVE
 } from '../../state/formation_constants.js';
-import { fallbackBrigadeName, matchHistoricalName } from '../../state/formation_naming.js';
+import { fallbackBrigadeName, findMatchedOobEntry } from '../../state/formation_naming.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 export interface PromotionReport {
@@ -135,32 +135,11 @@ export function promoteFormations(
         const currentCount = ordinalCounters.get(munKey) ?? 0;
         const ordinal = currentCount + 1;
 
-        // Steps 16 & 17: find matched OOB entry (displaced-origin first)
-        const candidates = oobBrigades
-            .filter(b => b.faction === f.faction && b.home_mun === homeMun)
-            .sort((a, b) => strictCompare(a.id, b.id));
-
-        // Displaced-origin: also check origin_mun if different from homeMun
+        // Steps 15–17: find matched OOB entry (displaced-origin first) and resolve name.
+        // Displaced-origin: check origin_mun if different from homeMun.
         const originMun = f.origin_mun && f.origin_mun !== homeMun ? f.origin_mun : undefined;
-        let matchedEntry: OobBrigade | null = null;
-
-        if (originMun) {
-            const originCandidates = oobBrigades
-                .filter(b => b.faction === f.faction && b.home_mun === originMun)
-                .sort((a, b) => strictCompare(a.id, b.id));
-            if (originCandidates.length > 0) {
-                matchedEntry = ordinal <= originCandidates.length ? originCandidates[ordinal - 1] : null;
-            } else {
-                matchedEntry = ordinal <= candidates.length ? candidates[ordinal - 1] : null;
-            }
-        } else {
-            matchedEntry = ordinal <= candidates.length ? candidates[ordinal - 1] : null;
-        }
-
-        // Resolve name (Step 15)
-        const name =
-            matchHistoricalName(f.faction, homeMun, ordinal, oobBrigades, originMun) ??
-            fallbackBrigadeName(homeMun, ordinal);
+        const matchedEntry = findMatchedOobEntry(f.faction, homeMun, ordinal, oobBrigades, originMun);
+        const name = matchedEntry?.name ?? fallbackBrigadeName(homeMun, ordinal);
 
         // --- Mutate formation ---
 

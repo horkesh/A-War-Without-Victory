@@ -23,7 +23,7 @@ import assert from 'node:assert';
 import { describe, test } from 'node:test';
 import type { OobBrigade } from '../src/scenario/oob_loader.js';
 import { promoteFormations } from '../src/sim/phase_i/promote_formations.js';
-import { fallbackBrigadeName, matchHistoricalName } from '../src/state/formation_naming.js';
+import { fallbackBrigadeName, findMatchedOobEntry, matchHistoricalName } from '../src/state/formation_naming.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import type { FormationState, GameState } from '../src/state/game_state.js';
 
@@ -416,5 +416,65 @@ describe('promoteFormations', () => {
         });
         const report = promoteFormations(state, 10, []);
         assert.strictEqual(report.promoted, 1);
+    });
+
+    // Direct matchHistoricalName tests (required by Refactor Pass D→E)
+
+    test('matchHistoricalName: ordinal 1 returns first OOB entry name (same mun)', () => {
+        const oobBrigades = [
+            makeOobBrigade('rbih-bihac-1', 'RBiH', 'bihac', '502nd Mountain Brigade'),
+            makeOobBrigade('rbih-bihac-2', 'RBiH', 'bihac', '517th Mountain Brigade')
+        ];
+        assert.strictEqual(matchHistoricalName('RBiH', 'bihac', 1, oobBrigades), '502nd Mountain Brigade');
+    });
+
+    test('matchHistoricalName: ordinal 2 returns second OOB entry name (same mun)', () => {
+        const oobBrigades = [
+            makeOobBrigade('rbih-bihac-1', 'RBiH', 'bihac', '502nd Mountain Brigade'),
+            makeOobBrigade('rbih-bihac-2', 'RBiH', 'bihac', '517th Mountain Brigade')
+        ];
+        assert.strictEqual(matchHistoricalName('RBiH', 'bihac', 2, oobBrigades), '517th Mountain Brigade');
+    });
+
+    test('matchHistoricalName: ordinal overflow (ordinal > candidates) returns null', () => {
+        const oobBrigades = [makeOobBrigade('rbih-bihac-1', 'RBiH', 'bihac', '502nd Mountain Brigade')];
+        assert.strictEqual(matchHistoricalName('RBiH', 'bihac', 2, oobBrigades), null);
+    });
+
+    test('matchHistoricalName: displaced-origin — origin_mun tried first when different from home_mun', () => {
+        const oobBrigades = [
+            makeOobBrigade('rs-prijedor-1', 'RS', 'prijedor', '17th Krajina Brigade'),
+            makeOobBrigade('rs-travnik-1', 'RS', 'travnik', '1st Travnik Brigade')
+        ];
+        // origin_mun=prijedor should yield prijedor name, not travnik name
+        assert.strictEqual(matchHistoricalName('RS', 'travnik', 1, oobBrigades, 'prijedor'), '17th Krajina Brigade');
+        // Without origin_mun, home_mun=travnik is used
+        assert.strictEqual(matchHistoricalName('RS', 'travnik', 1, oobBrigades), '1st Travnik Brigade');
+    });
+
+    // Direct fallbackBrigadeName ordinal tests
+    test('fallbackBrigadeName: ordinals 1, 2, 3, 11 use correct suffix', () => {
+        assert.strictEqual(fallbackBrigadeName('bihac', 1), '1st bihac Brigade');
+        assert.strictEqual(fallbackBrigadeName('bihac', 2), '2nd bihac Brigade');
+        assert.strictEqual(fallbackBrigadeName('bihac', 3), '3rd bihac Brigade');
+        // 11 is special case: ends in 1 but uses "th" not "st"
+        assert.strictEqual(fallbackBrigadeName('bihac', 11), '11th bihac Brigade');
+    });
+
+    // findMatchedOobEntry tests
+    test('findMatchedOobEntry: returns OobBrigade object for valid ordinal', () => {
+        const oobBrigades = [
+            makeOobBrigade('rbih-bihac-1', 'RBiH', 'bihac', '502nd Mountain Brigade', 'rbih-5-corps')
+        ];
+        const entry = findMatchedOobEntry('RBiH', 'bihac', 1, oobBrigades);
+        assert.ok(entry !== null);
+        assert.strictEqual(entry!.id, 'rbih-bihac-1');
+        assert.strictEqual(entry!.name, '502nd Mountain Brigade');
+        assert.strictEqual(entry!.corps, 'rbih-5-corps');
+    });
+
+    test('findMatchedOobEntry: returns null when ordinal exceeds candidates', () => {
+        const oobBrigades = [makeOobBrigade('rbih-bihac-1', 'RBiH', 'bihac', '502nd Mountain Brigade')];
+        assert.strictEqual(findMatchedOobEntry('RBiH', 'bihac', 2, oobBrigades), null);
     });
 });
