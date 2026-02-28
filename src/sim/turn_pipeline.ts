@@ -1249,7 +1249,9 @@ const phases: NamedPhase[] = [
             }
             if (!edges || edges.length === 0) return;
             const graph = await loadSettlementGraph();
-            const { deltas, report: triggerReport } = evaluateDisplacementTriggers(context.state, edges);
+            const od = getOperationalData(context);
+            const c2o = od?.opData?.canonicalToOperational;
+            const { deltas, report: triggerReport } = evaluateDisplacementTriggers(context.state, edges, c2o);
             applySettlementDisplacementDeltas(context.state, deltas);
             const settlementsByMun = buildSettlementsByMun(graph.settlements);
             aggregateSettlementDisplacementToMunicipalities(context.state, settlementsByMun);

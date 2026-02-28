@@ -13,7 +13,7 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import type { GameState, SettlementId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFrontActiveSettlements } from '../phase_e/aor_instantiation.js';
-import { getEligiblePressureEdges, toEdgeId } from '../phase_e/pressure_eligibility.js';
+import { getEligiblePressureEdges, toEdgeId, type SidToOsidMap } from '../phase_e/pressure_eligibility.js';
 
 /** Maximum displacement delta per settlement per turn [0, 1]. Conservative cap. */
 export const PHASE_F_MAX_DELTA_PER_TURN = 0.05;
@@ -50,12 +50,15 @@ export interface DisplacementTriggerReport {
  * Does not mutate state; only reads front_pressure, political_controllers, meta.
  *
  * @param state - Game state (read-only)
- * @param edges - Settlement adjacency edges (contact graph)
+ * @param edges - Settlement adjacency edges (contact graph); endpoints may be SIDs or OSIDs
+ * @param canonicalToOperational - Optional SID→OSID map; supply when political_controllers is
+ *   OSID-keyed and edge endpoints are canonical SIDs (typical Phase II scenario run)
  * @returns Per-settlement displacement_delta (bounded [0, PHASE_F_MAX_DELTA_PER_TURN]) and report
  */
 export function evaluateDisplacementTriggers(
     state: GameState,
-    edges: ReadonlyArray<EdgeRecord>
+    edges: ReadonlyArray<EdgeRecord>,
+    canonicalToOperational?: SidToOsidMap
 ): { deltas: Record<SettlementId, number>; report: DisplacementTriggerReport } {
     const deltas: Record<SettlementId, number> = {};
     const reasons: Record<SettlementId, string[]> = {};
@@ -73,7 +76,7 @@ export function evaluateDisplacementTriggers(
         return { deltas, report: emptyReport };
     }
 
-    const eligible = getEligiblePressureEdges(state, edges);
+    const eligible = getEligiblePressureEdges(state, edges, undefined, canonicalToOperational);
     if (eligible.length === 0) {
         return { deltas, report: emptyReport };
     }

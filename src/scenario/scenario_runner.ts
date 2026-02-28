@@ -1621,7 +1621,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     const stabilityFilter = scopeMode === 'static_front_only' ? 'static' : 'fluid';
                     frontActiveIds = settlementIdsFromFrontDescriptors(descriptors, stabilityFilter);
                 } else {
-                    const eligible = getEligiblePressureEdges(state, graph.edges);
+                    const eligible = getEligiblePressureEdges(state, graph.edges, undefined, operationalData?.canonicalToOperational ?? undefined);
                     frontActiveIds = Array.from(getFrontActiveSettlements(eligible));
                 }
                 applyBaselineOpsDisplacement(state, frontActiveIds, level, scalar);

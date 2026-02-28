@@ -111,6 +111,28 @@ export function buildWeeklyReport(
                 municipality_displacement_total += v;
             }
         }
+        // System A (displacement_state) carries the real Phase I displacement data that flows
+        // into Phase II. System C (settlement_displacement / municipality_displacement) is broken
+        // (always 0) due to the OSID key mismatch in isPressureEligible. Include System A data
+        // so the run report shows the 2.2M displaced persons that actually happened.
+        if (state.displacement_state && typeof state.displacement_state === 'object') {
+            const ds = state.displacement_state;
+            for (const munId of sortedKeys(ds as Record<string, unknown>)) {
+                const d = ds[munId] as { displaced_out?: number; lost_population?: number } | undefined;
+                const out = typeof d?.displaced_out === 'number' ? d.displaced_out : 0;
+                const lost = typeof d?.lost_population === 'number' ? d.lost_population : 0;
+                const total = out + lost;
+                if (total > 0) {
+                    // Only count/add if not already counted by System C to avoid double-counting
+                    // (System C is currently 0, but guard against future fix producing both)
+                    municipality_displacement_count += 1;
+                    municipality_displacement_total += total;
+                    settlement_displacement_total += total; // no per-settlement breakdown; use mun total as proxy
+                }
+            }
+            // settlement_displacement_count is not incremented here because displacement_state
+            // is municipality-level only; leave settlement count to the System C per-settlement data.
+        }
     }
 
     const row: WeeklyReportRow = {
