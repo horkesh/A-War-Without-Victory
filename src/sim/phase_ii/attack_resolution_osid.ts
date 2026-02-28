@@ -543,7 +543,8 @@ export function resolveAttackOrdersOsid(
         if (!neighbors.includes(targetOsid)) continue;
 
         const defenderFormations = (Object.values(state.formations ?? {}) as FormationState[])
-            .filter(f => f.status === 'active' && (f as { location_osid?: string }).location_osid === targetOsid && f.faction !== attackerFaction);
+            .filter(f => f.status === 'active' && (f as { location_osid?: string }).location_osid === targetOsid && f.faction !== attackerFaction)
+            .sort((a, b) => strictCompare(a.id, b.id));
         const controller = getPoliticalControllerOSID(state, targetOsid, reverseMap);
         const isEnemyControlled = controller !== null && controller !== attackerFaction;
 

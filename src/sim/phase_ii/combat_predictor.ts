@@ -104,7 +104,7 @@ const STACKING_DEFENDER_SUPPORT = 0.3;
 /** Direct defenders: bot can roughly see troop presence but not exact strength. */
 const FOG_DIRECT_VISIBILITY = 0.85;
 /** ZoC defenders: bot can't see indirect force projection from adjacent OSIDs.
- *  Calibrated with LINKED_ZOC_READINESS=0.35 so predictions are slightly optimistic. */
+ *  Predictions are intentionally optimistic; brigades learn from failed attacks. */
 const FOG_ZOC_VISIBILITY = 0.6;
 /** After failing an attack (retreat), fog lifts — brigade learned enemy strength. */
 const FOG_AFTER_RETREAT_VISIBILITY = 0.95;
