@@ -1,0 +1,195 @@
+# Napkin Runbook
+
+## Curation Rules
+- Re-prioritize on every read.
+- Keep recurring, high-value notes only.
+- Max 10 items per category.
+- Each item includes date + "Do instead".
+
+## Execution & Validation (Highest Priority)
+1. **[2026-02-25] Determinism is sacred**
+   Do instead: No `Math.random()`, no timestamps, no `Date.now()` in run folders. Use sorted iteration via `strictCompare`. Sorted SID/edge keys. Use monotonic `.run_counter` for unique run folders.
+2. **[2026-02-21] Smoke-test triad after every change**
+   Do instead: Run `tsc --noEmit`, `vitest run`, and `desktop:map:build` as the standard smoke check.
+3. **[2026-02-20] Fix ALL failing tests**
+   Do instead: Fix all failing tests even if they seem unrelated to the current change. Standing user directive.
+4. **[2026-02-13] Verify edits actually applied**
+   Do instead: After edits, verify with `ReadFile` + `git diff`. Use scripted replacement if mismatch detected.
+5. **[2026-02-22] Never auto-rebaseline golden tests**
+   Do instead: Keep failing baselines as known failures pending canon/data authority review. Refresh only after user/PM sign-off per `TEST_BASELINE_STRATEGY.md`.
+6. **[2026-02-21] Refactor-pass between phases**
+   Do instead: After each implementation phase, do a refactor-pass (dead code, duplicates, unused imports) then run smoke-test triad before proceeding.
+7. **[2026-02-11] Preserve shared type exports during refactor**
+   Do instead: Keep `export type { ... }` statements; removing them breaks downstream consumers silently.
+8. **[2026-02-13] Close handoffs with evidence**
+   Do instead: After a roadmap or handoff, close with run evidence + decision memo + cross-link. Do not leave ambiguity open.
+9. **[2026-02-24] Scenario checkpoint lengths**
+   Do instead: Use 20w/30w checkpoint runs for iteration; reserve 52w runs for acceptance only.
+10. **[2026-02-22] Fixture/schema: add dummy fields proactively**
+    Do instead: Add null/dummy values for new required fields in test fixtures during refactor, not after tests break.
+
+## Shell & Command Reliability
+1. **[2026-02-07] Windows shell separator**
+   Do instead: On Windows PowerShell, use `;` not `&&` to chain commands.
+2. **[2026-02-07] Use node_modules/tsx directly**
+   Do instead: Use `node_modules/.bin/tsx` directly instead of `npx tsx` which can hang on Windows.
+3. **[2026-02-07] npx tsx --test can hang**
+   Do instead: Run faster unit subsets first; use `npm run test:vitest` for the Vitest suite.
+4. **[2026-02-13] Validate paths with glob before use**
+   Do instead: Stale paths break silently. Skills live at `.claude/skills/*` now — validate with glob.
+5. **[2026-02-22] OneDrive file lock retries**
+   Do instead: Implement retry logic when encountering file-lock errors from OneDrive.
+6. **[2026-02-28] Monorepo TS checks vs nested UI package**
+   Do instead: When `npx tsc --noEmit` at repo root fails on JSX config mismatch, verify the changed UI package with its own build (`src/ui/map: npm run build`) and report root failures as pre-existing unless introduced by your edits.
+
+## Imports & Build
+1. **[2026-02-07] Martinez ESM import**
+   Do instead: `import * as martinez from 'martinez-polygon-clipping'` (not default import).
+2. **[2026-02-07] JSTS deep imports**
+   Do instead: Import from `jsts/org/locationtech/jts/io/*.js` (not package root).
+3. **[2026-02-07] Browser build: extract Node imports**
+   Do instead: For browser-reachable code, extract Node-only imports to `*_utils.ts` files.
+4. **[2026-02-21] Staged orders: accept both shapes**
+   Do instead: Accept both legacy array and canonical record shapes for `brigade_attack_orders` / `brigade_mun_orders` to keep tests and desktop saves compatible.
+5. **[2026-02-28] Vitest .js import path parity**
+   Do instead: For test imports that use `.js` paths into `src`, ensure the target base path still exists (`foo.ts`/`foo.js`). If module moved, repoint the import to the current module path instead of leaving stale location imports.
+6. **[2026-02-28] Storybook init scope guard**
+   Do instead: Run Storybook setup inside `src/ui/map`, then verify it did not mutate root `vitest.config.ts`/root test tooling. Keep Storybook config isolated to the map package.
+
+## Simulation Engine
+1. **[2026-02-24] OSID-keyed political_controllers**
+   Do instead: When init fills `political_controllers` by OSID, do NOT call `promotePoliticalControllersToOsid` (it expects SID-keyed state). Check `isPoliticalControllersAlreadyOsidKeyed()` first.
+2. **[2026-02-21] Consolidation is Phase I only**
+   Do instead: `applyConsolidationFlips` must return 0 flips when `meta.phase !== 'phase_i'`. Phase II uses breach-based control change only.
+3. **[2026-02-21] Front edges: 2D/3D single source**
+   Do instead: Both 2D and 3D renderers read the same persisted `front_edges` from `LoadedGameState`/`ViewerSave`. `front_pressure` drives thickness/opacity deterministically.
+4. **[2026-02-22] Pipeline step no-ops for missing data**
+   Do instead: When operational data (contact graph, canonical_to_operational_map) is unavailable, log and skip OSID steps safely rather than crashing.
+5. **[2026-02-21] Phase I->II: no initializeBrigadeAoR**
+   Do instead: At Phase I to Phase II transition, use `phase-ii-location-osid-backfill` instead of calling `initializeBrigadeAoR`.
+6. **[2026-02-24] Load migration for political_controllers**
+   Do instead: `migrateState` on load: `migratePoliticalControllersToOsidIfNeeded` only when keys are known canonical SIDs (skip test fixtures like S1/S2).
+
+## Bot AI & Combat
+1. **[2026-02-28] RBiH general_defensive w0-12, balanced w12+**
+   Do instead: ARBiH is `general_defensive` weeks 0-12 only, then `balanced` from week 12 onwards. This enables 91 attacks/40w vs 3 with full defensive.
+2. **[2026-02-28] RS_EARLY_WAR_END_WEEK = 20**
+   Do instead: RS transitions from `general_offensive` to `balanced` at week 20 (not 30). Biggest single calibration lever — RS was at 488 OSIDs by w20 in baseline.
+3. **[2026-02-25] Aggression scoring: additive + multiplicative**
+   Do instead: Use flat additive (`aggression_modifier * 120`) PLUS multiplicative (`* (1 + aggression_modifier)`). Multiplier alone is ineffective on low base scores (stalemate=10).
+4. **[2026-02-22] Pioneer attack seeding**
+   Do instead: First brigade seeds concentration on directive target with 'repulsed' outcome; subsequent brigades join via `estimateConcentratedOutcome()`.
+5. **[2026-02-25] Undefended capture: not for all factions**
+   Do instead: Do not give all armies the ability to grab empty territory — it benefits RBiH more than RS and distorts historical outcomes.
+6. **[2026-02-24] CorpsDirective must be complete**
+   Do instead: Include `offensive_targets`, `hold_osids`, `avoid_osids`, `max_attackers_per_target`, `reserve_fraction`, `min_attack_outcome`, `aggression_modifier`.
+7. **[2026-02-25] sidToMun map preservation**
+   Do instead: Preserve `canonicalSidToMun` in scenario_runner.ts. Corruption prevented ALL 217 mandatory OOB brigades from spawning.
+
+## GUI / HoI Map
+1. **[2026-02-28] Selection panel right-side positioning (React+MapLibre app)**
+   Do instead: Use inline styles (position, left: auto, right, top, bottom, width, zIndex, direction: ltr) for overlay panels so Tailwind/purge/RTL cannot override. Dev-only `?showPanel=1` shows selection panel without map click for layout verification.
+2. **[2026-02-26] Async terrain texture build**
+   Do instead: Use `buildHoITerrainTextureAsync` yielding every 64 rows. Wrap `renderer.init()` in `Promise.race` with ~25s timeout; keep 2D placeholder on failure.
+3. **[2026-02-26] Tooltip/hover/click: unconditional registration**
+   Do instead: Tooltip, hover, and click registration must NOT be gated on `pendingData.formations?.length`. Register unconditionally.
+3. **[2026-02-26] pointer-events on formation markers**
+   Do instead: Set `pointer-events: auto` on `.hoi-formation-marker` (not `none`). Parent overlay layer stays `pointer-events: none`.
+4. **[2026-02-26] Formation stacking**
+   Do instead: Group by location. Overlapping formations: dense deck-of-cards stack (4px shift). Click selects top; stack unspools vertically (28px spacing) with z-index 100+.
+5. **[2026-02-23] Political layer: reverse feature iteration**
+   Do instead: In `buildControlLayer`, iterate features from N-1 down to 0 (reverse) so highest-Y features enter index buffer first, write depth, block double-blending.
+6. **[2026-02-23] Tilt layer separation**
+   Do instead: Use tight Y-offsets (0.001-0.005), `polygonOffset` on all layers, ortho camera `far=100`. For faction overlay, rasterize onto terrain mesh geometry texture.
+7. **[2026-02-23] HoI standalone control desync**
+   Do instead: Track `hasLoadedState` in `map_hoi.ts`. When save loaded, skip auto-fetching `operational_political_control.json` which overwrites save control state.
+8. **[2026-02-26] Terrain texture resolution**
+   Do instead: Keep `ASYNC_TEX_W` and `ASYNC_TEX_H` at 2048x2048 in `HoITerrainTexture.ts`. Async yielding chunk strategy supports 2048 without freezing.
+9. **[2026-02-28] MapLibre + React StrictMode lifecycle**
+    Do instead: For MapLibre wrappers, avoid React StrictMode double-mount in dev (or guard init/cleanup with abort flags). Keep map instance in component refs, and wire source updates after map/source availability checks.
+10. **[2026-02-28] Dynamic source updates should be all-or-retry**
+    Do instead: When setting multiple MapLibre GeoJSON sources from one state update, require all needed sources to exist before returning success; poll/retry if any are missing to avoid partial overlay updates.
+
+## Desktop & Electron
+1. **[2026-02-21] EPIPE guard on init logging**
+   Do instead: Add EPIPE guard on Electron init logging to prevent crashes on pipe closure.
+2. **[2026-02-21] Electron first-paint classes**
+   Do instead: Use `warroom-scene-hidden` for menu and `warroom-desk-hidden` for maps to control first-paint visibility.
+3. **[2026-02-21] Preload + getDataBaseUrl**
+   Do instead: Use Preload script + `getDataBaseUrl()` for iframe/Electron data fetches.
+4. **[2026-02-22] IPC read-only queries**
+   Do instead: Add movement/combat preview handlers as read-only (`query-*`) IPC handlers. Compute from deserialized state without mutating.
+5. **[2026-02-21] Corps staging: accept all formation kinds**
+   Do instead: `stageCorpsFrontOrder` and `stageCorpsAttackAxisOrder` must accept `corps_asset` and `army_hq` (not just brigade/corps).
+
+## Map & Geometry
+1. **[2026-02-07] Voronoi: post-merge validation**
+   Do instead: After boolean ops, add post-merge coverage/overlap validation per mun1990. Drive fixes from area-based diagnostics.
+2. **[2026-02-23] Shared border vertex matching**
+   Do instead: Use `borderVertexKey` with 1e6 rounding scale in `computeSharedBorders`. Dedupe and smooth border runs before storing.
+3. **[2026-02-23] Front ribbons: border-based only**
+   Do instead: Do not use centroid-to-centroid fallback ribbons — they create dark rectangular artifacts. Border-based ribbons at 84% coverage is acceptable.
+4. **[2026-02-23] Consecutive border runs**
+   Do instead: Collect shared vertices as consecutive runs along A's ring; draw one ribbon per run to prevent zig-zag diagonals.
+5. **[2026-02-21] FRONT definition**
+   Do instead: FRONT = where two hostile settlements meet (not "where brigade is present"). Assign units after segment length/name.
+6. **[2026-02-22] Split-muni audit before rebuild**
+   Do instead: Run `npm run map:audit:split-muni-duplicates` before any map rebuild.
+
+## Phase I Overhaul (Proto-Brigade Design)
+1. **[2026-02-28] Three-tier formation system**
+   Do instead: TO Detachment (50-499) → TO Battalion (500-1499) → Brigade (1500+). Formations spawn at MIN_DETACHMENT_SPAWN=100, auto-promote through tiers. Spec: `docs/20_engineering/PHASE_I_OVERHAUL_MILITIA_TO_BRIGADES.md`.
+2. **[2026-02-28] VRS JNA exception at turn 0**
+   Do instead: RS formations spawn as full brigades at turn 0 (JNA inheritance). RBiH/HRHB use bottom-up emergence. This is a game design starting condition, not a historical claim.
+3. **[2026-02-28] Phased corps creation**
+   Do instead: RS corps at turn 0, HRHB OZs at ~turn 10, ARBiH corps at ~turn 24. Add `available_from` field on oob_corps.json entries.
+4. **[2026-02-28] Terrain-amplified defense for TO detachments**
+   Do instead: TO detachments (not battalions/brigades) get defense multipliers: urban 2.5×, mountain 2.0×, forest 1.5×, open 1.0×. Prevents VRS steamroll of ARBiH before corps form.
+5. **[2026-02-28] Siege mobilization mechanic**
+   Do instead: Municipalities with ≥90% enemy neighbors get 3× pool growth, lifted brigade cap, no-flee constraint. Produces enclave brigades (Srebrenica 5×, Gorazde 7×) emergently instead of hardcoding.
+6. **[2026-02-28] Displaced persons swell enclave pools**
+   Do instead: Refugees from fallen municipalities increase enclave recruitment pools. Displacement Systems A+B already work (2.2M displaced); System C (Phase F settlement-level) has OSID key mismatch bug in `isPressureEligible()`.
+7. **[2026-02-28] Historical name matching on promotion**
+   Do instead: Proto-brigades match against OOB catalog by (faction, home_mun, ordinal) on promotion to brigade tier. Unmatched get generic "X Brigade [Mun]".
+8. **[2026-02-28] Scenario compatibility: recruitment_mode field**
+   Do instead: `recruitment_mode: "bottom_up"` for new system, `"auto_oob"` for legacy scenarios. Both must work.
+9. **[2026-02-28] Formation dissolution at MIN_COMBAT_PERSONNEL=100**
+   Do instead: Below 100 personnel, formation dissolves and manpower returns to municipal pool. Keep TO detachments and brigades using same threshold.
+10. **[2026-02-28] Structural changes doc still valid for supply/recruitment cap**
+    Do instead: Proto-brigade overhaul supersedes structural proposals 1,2,4,5 (enclaves/corps/pockets). Proposals 3 (supply overextension) and 6 (RS recruitment cap) remain valuable. See `docs/30_planning/20260228_STRUCTURAL_CHANGES_FOR_90PCT_CALIBRATION.md`.
+
+## User Directives
+1. **[Standing] Absolute paths**
+   Do instead: Always use absolute paths for tool calls.
+2. **[Standing] Update napkin during work**
+   Do instead: Update napkin after significant changes; do not wait until end of session.
+3. **[2026-02-25] Do NOT fix init control**
+   Do instead: RS starting at ~35% is correct — isolated territories connected via early land grabs. Do not "fix" this.
+4. **[2026-02-25] Counterattacks are correct**
+   Do instead: Captured territory SHOULD be immediately reclaimable. Counterattacks are correct mechanically.
+5. **[2026-02-22] Replay disabled by default**
+   Do instead: Only generate replay with `--video` flag (saves 13.6GB).
+6. **[2026-02-21] map_hoi.html is canonical**
+   Do instead: Use `http://localhost:3001/map_hoi.html` for the map (NOT `tactical_map.html`). HoI 3D is the canonical player-facing map.
+7. **[Standing] Address AoR/SID on encounter**
+   Do instead: When you encounter AoR or SID in code, tests, or docs: address it (remove, replace with OSID, or document as legacy).
+
+## Calibration
+1. **[2026-02-25] Historical territory targets (year 1)**
+   Do instead: RS should reach ~60-65% territory. ARBiH ~0% recaptured. ~25-35k military KIA all sides.
+2. **[2026-02-25] Front stabilization timing**
+   Do instead: Fronts should mostly stabilize by early October (~week 25).
+3. **[2026-02-25] Winter slowdown**
+   Do instead: Fighting dies down over winter. Current dead weeks (w32-39) is roughly right but accidental; needs intentional mechanic.
+4. **[2026-02-25] RS init territory is correct at 35%**
+   Do instead: RS starting at ~35% is by design. The gap to 60% target is closed via early land grabs, not init override.
+5. **[2026-02-28] RBiH balanced@w12 enables counterattacks**
+   Do instead: ARBiH switches to `balanced` at week 12 (not 52). This produces 91 attacks/40w. Historical: ARBiH conducted local counterattacks from summer 1992.
+6. **[2026-02-25] sidToMun corruption caused spawn failure**
+   Do instead: Always verify spawn counts after init changes. Preservation of `canonicalSidToMun` is critical.
+7. **[2026-02-28] Calibration knobs**
+   Do instead: Primary levers: `POOL_SCALE_FACTOR`, `FACTION_POOL_SCALE` (RS=0.28, HRHB=2.10), `RS_EARLY_WAR_END_WEEK` (20), per-faction stance/doctrine in `bot_strategy.ts`. 82.1% match at n241.
+8. **[2026-02-25] Knowledge base for OOB**
+   Do instead: Use `docs/knowledge/{VRS,ARBIH,HVO}_ORDER_OF_BATTLE_MASTER.md` for historical formation data.
+9. **[2026-02-24] Phase II entrenchment init**
+   Do instead: Use optional scenario param `phase_ii_entrenchment_init_turns` (0..12) in schema and loader.
