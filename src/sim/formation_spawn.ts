@@ -382,11 +382,11 @@ export function spawnFormationsFromPools(
             eligiblePools.push({ mun_id, pool });
         }
 
-        // Sort deterministically by (mun_id, faction)
+        // Sort deterministically by (mun_id, faction) — strictCompare per Engine Invariants §11.3
         eligiblePools.sort((a, b) => {
-            const c = a.mun_id.localeCompare(b.mun_id);
+            const c = strictCompare(a.mun_id, b.mun_id);
             if (c !== 0) return c;
-            return (a.pool.faction ?? '').localeCompare(b.pool.faction ?? '');
+            return strictCompare(a.pool.faction ?? '', b.pool.faction ?? '');
         });
 
         for (const { mun_id, pool } of eligiblePools) {
@@ -462,11 +462,11 @@ export function spawnFormationsFromPools(
                 if (munFilter !== null && pool.mun_id !== munFilter) continue;
                 dispPairs.push({ mun_id: pool.mun_id, faction: pool.faction });
             }
-            // Sort for determinism
+            // Sort for determinism — strictCompare per Engine Invariants §11.3
             dispPairs.sort((a, b) => {
-                const c = a.mun_id.localeCompare(b.mun_id);
+                const c = strictCompare(a.mun_id, b.mun_id);
                 if (c !== 0) return c;
-                return a.faction.localeCompare(b.faction);
+                return strictCompare(a.faction, b.faction);
             });
 
             const dispState = state.displacement_state;
@@ -531,7 +531,7 @@ export function spawnFormationsFromPools(
             }
         }
 
-        report.created.sort((a, b) => a.formation_id.localeCompare(b.formation_id));
+        report.created.sort((a, b) => strictCompare(a.formation_id, b.formation_id));
         return report;
     }
 
@@ -556,9 +556,9 @@ export function spawnFormationsFromPools(
     }
 
     eligiblePools.sort((a, b) => {
-        const c = a.mun_id.localeCompare(b.mun_id);
+        const c = strictCompare(a.mun_id, b.mun_id);
         if (c !== 0) return c;
-        return (a.pool.faction ?? '').localeCompare(b.pool.faction ?? '');
+        return strictCompare(a.pool.faction ?? '', b.pool.faction ?? '');
     });
 
     const kindRequested = formationKind === 'militia' ? 'brigade' : (formationKind ?? 'brigade');
@@ -631,7 +631,7 @@ export function spawnFormationsFromPools(
         if (count > 0) report.pools_touched += 1;
     }
 
-    report.created.sort((a, b) => a.formation_id.localeCompare(b.formation_id));
+    report.created.sort((a, b) => strictCompare(a.formation_id, b.formation_id));
     return report;
 }
 
