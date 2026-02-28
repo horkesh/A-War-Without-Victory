@@ -14,10 +14,10 @@ test('parseGameState extracts deterministic order lists and events', () => {
             { brigade_id: 'b2', target_settlement_id: 'S3' },
             { brigade_id: 'b1', target_settlement_id: 'S1' }
         ],
-        brigade_mun_orders: [
-            { brigade_id: 'b2', target_mun_id: 'zvornik' },
-            { brigade_id: 'b1', target_mun_id: 'tuzla' }
-        ],
+        brigade_movement_orders: {
+            b2: { destination_sids: ['S4', 'S3'] },
+            b1: { destination_sids: ['S2'] }
+        },
         control_events: [
             { turn: 7, settlement_id: 'S2', from: 'RS', to: 'RBiH', mechanism: 'phase_ii_attack', mun_id: 'foo' },
             { turn: 6, settlement_id: 'S1', from: null, to: 'RS', mechanism: 'phase_i', mun_id: 'bar' }
@@ -27,7 +27,8 @@ test('parseGameState extracts deterministic order lists and events', () => {
 
     assert.strictEqual(parsed.attackOrders.length, 2);
     assert.strictEqual(parsed.attackOrders[0].brigadeId, 'b1');
-    assert.strictEqual(parsed.movementOrders[0].brigadeId, 'b1');
+    assert.strictEqual(parsed.movementOrdersSettlement?.[0]?.brigadeId, 'b1');
+    assert.deepStrictEqual(parsed.movementOrdersSettlement?.[0]?.targetSettlementIds, ['S2']);
     assert.strictEqual(parsed.recentControlEvents.length, 2);
     assert.strictEqual(parsed.recentControlEvents[0].turn, 6);
 });

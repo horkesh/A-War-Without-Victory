@@ -12,9 +12,15 @@ import type {
     MilitiaPoolState,
     MunicipalityId
 } from '../../state/game_state.js';
+import {
+    SIEGE_RATIO_FULL,
+    SIEGE_RATIO_MOSTLY,
+    SIEGE_RATIO_PARTIAL
+} from '../../state/formation_constants.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { buildSettlementsByMun, getMunicipalityController } from './control_strain.js';
+import { type SiegeRatioByMunFaction, getSiegeRatio } from './compute_siege_state.js';
 
 /** Re-export for consumers that import from pool_population (e.g. ongoing_mobilization). */
 export { buildSettlementsByMun, getMunicipalityController };
@@ -295,11 +301,19 @@ export function runDisplacedAndCrossEthnicContributions(
  * When population1991ByMun is provided, pool available is weighted by eligible population (bosniak/serb/croat)
  * so that brigade counts reflect demographics — ARBiH gets most where Bosniaks are, etc.
  * Preserves committed, exhausted, updated_turn.
+ *
+ * When siegeRatios is provided (Phase F Step 24), pool growth is multiplied by a siege bonus:
+ *   siege_ratio >= SIEGE_RATIO_FULL (0.90) → 3.0× growth
+ *   siege_ratio >= SIEGE_RATIO_MOSTLY (0.75) → 2.0× growth
+ *   siege_ratio >= SIEGE_RATIO_PARTIAL (0.50) → 1.5× growth
+ *   otherwise → 1.0× (no change)
+ * This reflects the historical total-war mobilization in besieged enclaves (Sarajevo, Bihac, Srebrenica).
  */
 export function runPoolPopulation(
     state: GameState,
     settlements: Map<string, SettlementRecord>,
-    population1991ByMun?: MunicipalityPopulation1991Map
+    population1991ByMun?: MunicipalityPopulation1991Map,
+    siegeRatios?: SiegeRatioByMunFaction
 ): PoolPopulationReport {
     const report: PoolPopulationReport = {
         pools_updated: 0,
@@ -335,7 +349,13 @@ export function runPoolPopulation(
 
             const key = militiaPoolKey(munId, factionId);
             const existing = pools[key];
-            let derivedAvailable = Math.floor(strength * POOL_SCALE_FACTOR * populationWeight * factionScale);
+            // Phase F Step 24: siege mobilization multiplier
+            const siegeRatio = getSiegeRatio(siegeRatios ?? new Map(), munId, factionId);
+            const siegeMult = siegeRatio >= SIEGE_RATIO_FULL ? 3.0
+                : siegeRatio >= SIEGE_RATIO_MOSTLY ? 2.0
+                : siegeRatio >= SIEGE_RATIO_PARTIAL ? 1.5
+                : 1.0;
+            let derivedAvailable = Math.floor(strength * POOL_SCALE_FACTOR * populationWeight * factionScale * siegeMult);
             const authorityState = state.municipalities?.[munId]?.control ?? 'consolidated';
             if (authorityState === 'contested') derivedAvailable = Math.floor(derivedAvailable * 0.85);
             else if (authorityState === 'fragmented') derivedAvailable = Math.floor(derivedAvailable * 0.7);

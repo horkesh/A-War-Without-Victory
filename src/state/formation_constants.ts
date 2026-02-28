@@ -222,6 +222,14 @@ export const SIEGE_RATIO_MOSTLY = 0.75;
 export const SIEGE_RATIO_PARTIAL = 0.50;
 
 /**
+ * Displaced-in population threshold for displacement-driven TO emergence (Phase F Step 27).
+ * When a besieged municipality (siege_ratio >= SIEGE_RATIO_PARTIAL) has >= this many faction-aligned
+ * displaced civilians, an ADDITIONAL formation is spawned beyond normal pool-threshold spawn.
+ * Reflects historical total-war mobilization: displaced populations in enclaves had no option but to fight.
+ */
+export const DISPLACED_FORMATION_THRESHOLD = 3000;
+
+/**
  * Single nominal brigade size (troops per formation) for all factions.
  * Number of brigades is driven by population-derived militia pool; same template per faction.
  */

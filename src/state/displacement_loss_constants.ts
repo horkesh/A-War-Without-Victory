@@ -17,6 +17,10 @@ export const FLEE_ABROAD_FRACTION_HRHB = 0.25;
 /** Bosniaks: no external state to flee to. */
 export const FLEE_ABROAD_FRACTION_RBIH = 0.0;
 
+// TODO Phase F step 26: when siege_ratio >= SIEGE_RATIO_FULL for a municipality,
+// override FLEE_ABROAD_FRACTION to 0 for all factions — no one can leave a fully surrounded enclave.
+// Requires passing siege state into displacement calculation (src/state/displacement.ts).
+
 /** Flee-abroad fraction for an ethnicity-aligned faction. */
 export function getFactionFleeAbroadFraction(faction: FactionId): number {
     if (faction === 'RS') return FLEE_ABROAD_FRACTION_RS;

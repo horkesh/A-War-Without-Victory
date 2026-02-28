@@ -7,6 +7,7 @@
 import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/operational_data.js';
 import {
     COMBAT_REINFORCEMENT_RATE,
+    DISPLACED_FORMATION_THRESHOLD,
     getBatchSizeForFaction,
     getFactionReinforcementMult,
     getMaxBrigadesPerMun,
@@ -19,6 +20,8 @@ import {
     MIN_DETACHMENT_SPAWN,
     MIN_ELIGIBLE_POPULATION_FOR_BRIGADE,
     REINFORCEMENT_RATE,
+    SIEGE_RATIO_MOSTLY,
+    SIEGE_RATIO_PARTIAL,
     WIA_TRICKLE_RATE
 } from '../state/formation_constants.js';
 import { computeBaseCohesion } from '../state/formation_lifecycle.js';
@@ -28,6 +31,7 @@ import { militiaPoolKey } from '../state/militia_pool_key.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { MunicipalityPopulation1991Map } from './phase_i/pool_population.js';
 import { getEligiblePopulationCount } from './phase_i/pool_population.js';
+import { type SiegeRatioByMunFaction, getSiegeRatio } from './phase_i/compute_siege_state.js';
 import { isEmergentFormationSuppressed } from './recruitment_engine.js';
 
 export interface SpawnFormationsOptions {
@@ -337,7 +341,8 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
  */
 export function spawnFormationsFromPools(
     state: GameState,
-    options: SpawnFormationsOptions
+    options: SpawnFormationsOptions,
+    siegeRatios?: SiegeRatioByMunFaction
 ): SpawnFormationsReport {
     const report: SpawnFormationsReport = {
         formations_created: 0,
@@ -390,9 +395,15 @@ export function spawnFormationsFromPools(
             // maxPerMun=0 means caller explicitly suppresses all spawns for this run
             if (maxPerMun !== null && maxPerMun < 1) continue;
 
-            // Check MAX_TO_PER_MUN cap: count existing militia-kind formations in this (mun, faction)
+            // Phase F Step 25: lift MAX_TO_PER_MUN cap under mostly-surrounded siege
+            const currentSiegeRatio = getSiegeRatio(siegeRatios ?? new Map(), mun_id, faction);
+            const activeCap = currentSiegeRatio >= SIEGE_RATIO_MOSTLY
+                ? MAX_TO_PER_MUN * 3  // Lifted cap — people fight regardless
+                : MAX_TO_PER_MUN;
+
+            // Check per-mun cap: count existing militia-kind formations in this (mun, faction)
             const existingMilitiaCount = countMilitiaFormationsInMun(state, mun_id, faction);
-            if (existingMilitiaCount >= MAX_TO_PER_MUN) continue;
+            if (existingMilitiaCount >= activeCap) continue;
 
             // Spawn one TO detachment per eligible pool per turn
             const formationId = generateDeterministicFormationId(state, faction);
@@ -434,6 +445,89 @@ export function spawnFormationsFromPools(
                 pool.available -= MIN_DETACHMENT_SPAWN;
                 pool.committed += MIN_DETACHMENT_SPAWN;
                 pool.updated_turn = currentTurn;
+            }
+        }
+
+        // Phase F Step 27: Displacement-driven TO emergence.
+        // Large displaced-in populations in besieged municipalities spawn an ADDITIONAL formation
+        // beyond the normal pool-threshold spawn. Processed after the normal pool loop so that
+        // the normal spawn's mutations are visible when checking the lifted cap.
+        if (siegeRatios && applyChanges) {
+            // Build a sorted list of unique (mun_id, faction) pairs from all pools
+            const dispPairs: Array<{ mun_id: string; faction: string }> = [];
+            for (const pool of Object.values(pools)) {
+                if (!pool || typeof pool !== 'object') continue;
+                if (!pool.faction || typeof pool.mun_id !== 'string') continue;
+                if (factionFilter !== null && pool.faction !== factionFilter) continue;
+                if (munFilter !== null && pool.mun_id !== munFilter) continue;
+                dispPairs.push({ mun_id: pool.mun_id, faction: pool.faction });
+            }
+            // Sort for determinism
+            dispPairs.sort((a, b) => {
+                const c = a.mun_id.localeCompare(b.mun_id);
+                if (c !== 0) return c;
+                return a.faction.localeCompare(b.faction);
+            });
+
+            const dispState = state.displacement_state;
+            for (const { mun_id: dispMunId, faction: dispFaction } of dispPairs) {
+                const munDisp = dispState?.[dispMunId];
+                const dispIn = munDisp?.displaced_in_by_faction?.[dispFaction as import('../state/game_state.js').FactionId] ?? 0;
+                const siegeRatio = getSiegeRatio(siegeRatios, dispMunId, dispFaction);
+
+                if (dispIn < DISPLACED_FORMATION_THRESHOLD) continue;
+                if (siegeRatio < SIEGE_RATIO_PARTIAL) continue;
+
+                // Determine lifted cap (same rule as normal spawn above)
+                const liftedCap = siegeRatio >= SIEGE_RATIO_MOSTLY ? MAX_TO_PER_MUN * 3 : MAX_TO_PER_MUN;
+                const currentCount = countMilitiaFormationsInMun(state, dispMunId, dispFaction);
+                if (currentCount >= liftedCap) continue;
+
+                // Check pool has enough to spawn a detachment
+                const poolKey = militiaPoolKey(dispMunId, dispFaction);
+                const pool = pools[poolKey];
+                if (!pool || pool.available < MIN_DETACHMENT_SPAWN) continue;
+
+                // Spawn extra displaced-origin detachment
+                const dispFormationId = generateDeterministicFormationId(state, dispFaction);
+                const dispKind: 'militia' = 'militia';
+                const dispName = resolveFormationName(dispFaction, dispMunId, dispKind, 0, MIN_DETACHMENT_SPAWN);
+                const dispBaseTags = [`generated_phase_i0`, `displaced_origin`, `kind:${dispKind}`, `mun:${dispMunId}`];
+                const dispAllTags = Array.from(new Set([...dispBaseTags, ...customTags])).sort(strictCompare);
+
+                const dispHqSid = municipalityHqSettlement?.[dispMunId];
+                const dispLocationOsid = canonicalToOperational && dispHqSid
+                    ? resolveLocationOsid(dispHqSid, canonicalToOperational)
+                    : undefined;
+
+                const dispFormation: FormationState = {
+                    id: dispFormationId,
+                    faction: dispFaction,
+                    name: dispName,
+                    created_turn: currentTurn,
+                    status: 'active',
+                    assignment: null,
+                    tags: dispAllTags.length > 0 ? dispAllTags : undefined,
+                    kind: dispKind,
+                    personnel: MIN_DETACHMENT_SPAWN,
+                    readiness: 'forming',
+                    cohesion: MILITIA_COHESION,
+                    activation_gated: true,
+                    activation_turn: null,
+                    origin_mun: dispMunId,
+                    ...(dispHqSid ? { hq_sid: dispHqSid } : {}),
+                    ...(dispLocationOsid != null ? { location_osid: dispLocationOsid } : {})
+                };
+
+                state.formations![dispFormationId] = dispFormation;
+                pool.available -= MIN_DETACHMENT_SPAWN;
+                pool.committed += MIN_DETACHMENT_SPAWN;
+                pool.updated_turn = currentTurn;
+
+                report.created.push({ formation_id: dispFormationId, name: dispName, mun_id: dispMunId, faction: dispFaction, kind: dispKind });
+                report.formations_created += 1;
+                report.manpower_committed += MIN_DETACHMENT_SPAWN;
+                report.pools_touched += 1;
             }
         }
 

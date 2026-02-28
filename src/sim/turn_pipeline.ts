@@ -162,6 +162,7 @@ import { buildDisplacementCapacityReport } from './phase_f/displacement_capacity
 import { aggregateSettlementDisplacementToMunicipalities } from './phase_f/displacement_municipality_aggregation.js';
 import { evaluateDisplacementTriggers } from './phase_f/displacement_triggers.js';
 import { activateCorpsForTurn } from './phase_i/activate_corps.js';
+import { computeSiegeState, type SiegeRatioByMunFaction } from './phase_i/compute_siege_state.js';
 import { promoteFormations } from './phase_i/promote_formations.js';
 import { runPhaseIBotPosture } from './phase_i/bot_phase_i.js';
 import { applyBrigadeRepositionOrders } from './phase_ii/apply_brigade_reposition.js';
@@ -376,6 +377,19 @@ function getOperationalData(context: TurnContext): OperationalDataCache | undefi
 /** Type-safe setter for operational data on context. */
 function setOperationalData(context: TurnContext, data: OperationalDataCache): void {
     (context as TurnContext & { operationalData?: OperationalDataCache }).operationalData = data;
+}
+
+/** Siege state cached on TurnContext by compute-siege-state step (Phase F). Turn-local only. */
+interface SiegeStateCache { siegeRatios: SiegeRatioByMunFaction; }
+
+/** Type-safe accessor for siege state attached to context. */
+function getSiegeStateCache(context: TurnContext): SiegeStateCache | undefined {
+    return (context as TurnContext & { siegeStateCache?: SiegeStateCache }).siegeStateCache;
+}
+
+/** Type-safe setter for siege state on context. */
+function setSiegeStateCache(context: TurnContext, data: SiegeStateCache): void {
+    (context as TurnContext & { siegeStateCache?: SiegeStateCache }).siegeStateCache = data;
 }
 
 /** Load settlement graph and edges from context (or default). Used by Phase II AoR and related steps. */
@@ -1754,13 +1768,41 @@ const phaseIPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'compute-siege-state',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'phase_i') return;
+            if (context.state.meta.recruitment_mode !== 'bottom_up') return;
+            try {
+                const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
+                if (!baseDir) return;
+                const [opData, edges] = await Promise.all([
+                    loadOperationalData(baseDir),
+                    loadOperationalEdges(baseDir)
+                ]);
+                if (!opData?.operationalToCanonical || !edges?.length) return;
+                // Build adjacency map from operational edges
+                const { buildOsidAdjacency } = await import('./phase_ii/zoc.js');
+                const adjacency = buildOsidAdjacency(edges);
+                // Build osidToMun: first build sidToMun from the settlement graph
+                const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+                const sidToMun = buildSidToMunFromSettlements(graph.settlements);
+                const osidToMun = buildOsidToMunFromReverseMap(opData.operationalToCanonical, sidToMun);
+                const siegeRatios = computeSiegeState(context.state, adjacency, osidToMun);
+                setSiegeStateCache(context, { siegeRatios });
+            } catch {
+                // Operational data optional — skip siege computation when unavailable
+            }
+        }
+    },
+    {
         name: 'phase-i-pool-population',
         run: async (context) => {
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             context.report.phase_i_pool_population = runPoolPopulation(
                 context.state,
                 graph.settlements,
-                context.input.municipalityPopulation1991
+                context.input.municipalityPopulation1991,
+                getSiegeStateCache(context)?.siegeRatios
             );
         }
     },
@@ -1809,7 +1851,7 @@ const phaseIPhases: NamedPhase[] = [
                 historicalNameLookup: context.input.historicalNameLookup ?? undefined,
                 population1991ByMun: context.input.municipalityPopulation1991 ?? undefined,
                 canonicalToOperational
-            });
+            }, getSiegeStateCache(context)?.siegeRatios);
         }
     },
     {

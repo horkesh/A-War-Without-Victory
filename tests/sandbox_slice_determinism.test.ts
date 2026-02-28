@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canonicalizeSliceData, type SliceData } from '../src/ui/map/sandbox/sandbox_slice.js';
+import { canonicalizeSliceData, type SliceData } from '../src/_archived/ui_legacy/sandbox/sandbox_slice.js';
 
 function makeSlice(): SliceData {
     return {
