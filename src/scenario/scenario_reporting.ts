@@ -13,6 +13,15 @@ export interface WeeklyActivityCounts {
     displacement_trigger_eligible_size: number;
 }
 
+/** Per-faction compact corps AI summary for weekly report. */
+export interface WeeklyCorpsSummaryEntry {
+    faction: string;
+    corps_count: number;
+    offensive_targets_total: number;
+    hold_osids_total: number;
+    stances: Record<string, number>;
+}
+
 export interface WeeklyReportRow {
     week_index: number;
     phase: string | undefined;
@@ -26,6 +35,8 @@ export interface WeeklyReportRow {
     activity?: WeeklyActivityCounts;
     /** Phase H1.9: Baseline ops (enabled + level) when baseline_ops action applied. */
     ops?: { enabled: boolean; level: number };
+    /** Per-faction corps AI summary (Phase II only). */
+    corps_summary?: WeeklyCorpsSummaryEntry[];
 }
 
 function sortedKeys(obj: Record<string, unknown>): string[] {
@@ -39,7 +50,8 @@ function sortedKeys(obj: Record<string, unknown>): string[] {
 export function buildWeeklyReport(
     state: GameState,
     activity?: WeeklyActivityCounts,
-    ops?: { enabled: boolean; level: number }
+    ops?: { enabled: boolean; level: number },
+    corpsSummary?: WeeklyCorpsSummaryEntry[]
 ): WeeklyReportRow {
     const week_index = state.meta.turn;
     const phase = state.meta.phase;
@@ -116,6 +128,9 @@ export function buildWeeklyReport(
     }
     if (ops !== undefined) {
         row.ops = ops;
+    }
+    if (corpsSummary !== undefined && corpsSummary.length > 0) {
+        row.corps_summary = corpsSummary;
     }
     return row;
 }

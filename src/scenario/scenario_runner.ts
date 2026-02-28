@@ -92,7 +92,8 @@ import {
     type HistoricalAlignmentDiagnostics,
     type HistoricalFactionMetrics,
     type PhaseIIAttackResolutionSummary,
-    type PhaseIIAttackResolutionWeekRollup
+    type PhaseIIAttackResolutionWeekRollup,
+    type CorpsAiSnapshot
 } from './scenario_end_report.js';
 import { computeRunId, loadScenario, normalizeActions, resolveInitControlPath, resolveInitFormationsPath } from './scenario_loader.js';
 import {
@@ -100,7 +101,7 @@ import {
     formatProbeCompareMarkdown,
     type CompareResult
 } from './scenario_probe_compare.js';
-import type { WeeklyActivityCounts, WeeklyReportRow } from './scenario_reporting.js';
+import type { WeeklyActivityCounts, WeeklyCorpsSummaryEntry, WeeklyReportRow } from './scenario_reporting.js';
 import { buildWeeklyReport } from './scenario_reporting.js';
 import type { Scenario, ScenarioAction } from './scenario_types.js';
 import { evaluateVictoryConditions } from './victory_conditions.js';
@@ -359,7 +360,7 @@ interface HistoricalControlAlignmentDiagnostics {
 }
 
 interface HistoricalAnchorCheck {
-    anchor_type: 'municipality' | 'settlement';
+    anchor_type: 'municipality' | 'settlement' | 'osid';
     anchor_id: string;
     expected_controller: string;
     actual_controller: string | null;
@@ -376,7 +377,10 @@ const HISTORICAL_ANCHORS_APR1992_TO_DEC1992: Array<{ municipality_id: string; ex
     { municipality_id: 'centar_sarajevo', expected_controller: 'RBiH' }
 ];
 const HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992: Array<{ settlement_id: string; expected_controller: string }> = [
-    { settlement_id: 'S163520', expected_controller: 'RBiH' }
+];
+const HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992: Array<{ osid: string; expected_controller: string }> = [
+    { osid: 'op:zvornik:vitinica_2', expected_controller: 'RBiH' },        // Sapna — ARBiH stronghold
+    { osid: 'op:ugljevik:teocak_krstac_2', expected_controller: 'RBiH' }   // Teocak — ARBiH stronghold
 ];
 
 function countControllers(snapshot: ControlKey[]): Map<string, number> {
@@ -457,7 +461,18 @@ function computeHistoricalAnchorChecks(final: ControlKey[]): HistoricalAnchorChe
             passed: actual === anchor.expected_controller
         };
     });
-    return [...municipalityChecks, ...settlementChecks];
+    // OSID anchors: look up directly via settlement_id (which holds the OSID in OSID-keyed mode)
+    const osidChecks = HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
+        const actual = bySid.get(anchor.osid) ?? null;
+        return {
+            anchor_type: 'osid' as const,
+            anchor_id: anchor.osid,
+            expected_controller: anchor.expected_controller,
+            actual_controller: actual,
+            passed: actual === anchor.expected_controller
+        };
+    });
+    return [...municipalityChecks, ...settlementChecks, ...osidChecks];
 }
 
 /**
@@ -1174,6 +1189,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         const adjacencyMap = shouldApplyBreaches ? buildAdjacencyMap(graph.edges) : null;
         const enableBotDiagnostics = bot_diagnostics || scenario.bot_diagnostics === true;
         const botWeeklyDiagnostics: BotWeeklyDiagnosticsRow[] = [];
+        const corpsAiSnapshots: CorpsAiSnapshot[] = [];
+        const CORPS_AI_SNAPSHOT_TURNS = new Set([1, 13, 26, 52]);
         const botControlTimeline: BotControlShareRow[] = [];
         const phaseIIAttackResolutionSummary: PhaseIIAttackResolutionSummary = {
             weeks_with_phase_ii: 0,
@@ -1607,7 +1624,39 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 ops = { enabled: true, level };
             }
 
-            const reportRow = buildWeeklyReport(state, activity, ops);
+            // Capture corps AI snapshots at key turns for the end report
+            const currentTurn = state.meta.turn;
+            if (CORPS_AI_SNAPSHOT_TURNS.has(currentTurn) && turnReport.corps_ai_report) {
+                corpsAiSnapshots.push({ turn: currentTurn, entries: turnReport.corps_ai_report });
+            }
+
+            // Build per-faction corps AI summary for weekly report
+            let corpsSummary: WeeklyCorpsSummaryEntry[] | undefined;
+            if (turnReport.corps_ai_report && turnReport.corps_ai_report.length > 0) {
+                const byFaction = new Map<string, { count: number; offTargets: number; holdOsids: number; stances: Record<string, number> }>();
+                for (const entry of turnReport.corps_ai_report) {
+                    let agg = byFaction.get(entry.faction);
+                    if (!agg) {
+                        agg = { count: 0, offTargets: 0, holdOsids: 0, stances: {} };
+                        byFaction.set(entry.faction, agg);
+                    }
+                    agg.count += 1;
+                    agg.offTargets += entry.offensive_target_count;
+                    agg.holdOsids += entry.hold_osid_count;
+                    agg.stances[entry.stance] = (agg.stances[entry.stance] ?? 0) + 1;
+                }
+                corpsSummary = [...byFaction.entries()]
+                    .sort((a, b) => a[0].localeCompare(b[0]))
+                    .map(([faction, agg]) => ({
+                        faction,
+                        corps_count: agg.count,
+                        offensive_targets_total: agg.offTargets,
+                        hold_osids_total: agg.holdOsids,
+                        stances: agg.stances
+                    }));
+            }
+
+            const reportRow = buildWeeklyReport(state, activity, ops, corpsSummary);
             if (week_index === 0) firstReportRow = reportRow;
             lastReportRow = reportRow;
             reportStream.write(stableStringify(reportRow) + '\n');
@@ -1891,7 +1940,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0 ? phaseIIAttackResolutionSummary : null,
             phaseIIAttackResolutionWeekly:
                 phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0 ? phaseIIAttackResolutionWeekly : null,
-            historicalAlignmentDiagnostics
+            historicalAlignmentDiagnostics,
+            corpsAiSnapshots: corpsAiSnapshots.length > 0 ? corpsAiSnapshots : null
         });
         const endReportPath = join(outDir, 'end_report.md');
         await writeFile(endReportPath, endReportMd, 'utf8');

@@ -17,7 +17,7 @@ test('bot benchmark evaluation marks pass/fail and not_reached deterministically
         ],
         [
             { faction: 'RBiH', turn: 26, objective: 'hold_core_centers', expected_control_share: 0.2, tolerance: 0.1 },
-            { faction: 'RS', turn: 26, objective: 'early_territorial_expansion', expected_control_share: 0.45, tolerance: 0.15 },
+            { faction: 'RS', turn: 26, objective: 'early_territorial_expansion', expected_control_share: 0.60, tolerance: 0.10 },
             { faction: 'HRHB', turn: 52, objective: 'hold_central_bosnia_nodes', expected_control_share: 0.18, tolerance: 0.1 }
         ]
     );

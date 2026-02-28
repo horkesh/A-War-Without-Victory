@@ -58,7 +58,7 @@
     "sim:phase3a:ab": "tsx src/cli/phase3a_ab_harness.ts",
     "phase3:abc_audit": "tsx src/cli/phase3abc_audit_harness.ts",
     "phase3:abc_audit:tsx": "tsx src/cli/phase3abc_audit_harness.ts",
-    "dev:map": "vite --config src/ui/map/vite.config.ts",
+    "dev:map": "cd src/ui/map && npx vite",
     "desktop:map:build": "vite build --config src/ui/map/vite.config.ts",
     "desktop:sim:build": "node tools/desktop_bundle_sim.mjs",
     "desktop": "npm run desktop:map:build && npm run desktop:sim:build && npm run warroom:build && electron .",

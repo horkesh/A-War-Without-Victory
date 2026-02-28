@@ -22,10 +22,11 @@ export { buildSettlementsByMun, getMunicipalityController };
 /** Scale phase_i_militia_strength [0,100] to pool available (integer).
  * Raised for long-horizon (52w/104w) personnel growth calibration while keeping deterministic flow. */
 const POOL_SCALE_FACTOR = 65;
-/** Displaced_in contribution rate (design note). */
-const REINFORCEMENT_RATE = 0.05;
-/** Cap per mun per turn from displaced (design note). */
-const DISPLACED_CONTRIBUTION_CAP = 2000;
+/** Displaced_in contribution rate per turn. At 0.05, entire displaced pop mobilized in 20 turns — unrealistic.
+ * At 0.01, ~50% mobilized over 52 turns which is still generous but tracks "total war" mobilization. */
+const REINFORCEMENT_RATE = 0.01;
+/** Cap per mun per turn from displaced. Reduced from 2000 to prevent Tuzla-style runaway. */
+const DISPLACED_CONTRIBUTION_CAP = 500;
 
 /** When population1991 is used, pool is weighted by eligible pop / this normalizer (no cap). Aim: ARBiH ~80–100 brigades at batchSize 1000. */
 const ELIGIBLE_POP_NORMALIZER = 50_000;
@@ -35,10 +36,17 @@ const ELIGIBLE_POP_NORMALIZER = 50_000;
  * HVO smallest but ~30-40k historical. HRHB scale is higher because Croat population
  * is concentrated in fewer municipalities — each HVO-controlled mun mobilized proportionally
  * more of its population (near-total male mobilization in western Herzegovina). */
-/** 52w remediation: RS 1.20 to close personnel gap vs historical bands (plan 2026-02-18). */
+/** Holistic tuning: RBiH 1.20→0.85→0.60 — manpower-rich but equipment-poor, many unarmed.
+ * At 0.85 + displacement, ARBiH grew to 167k (target 100-110k). At 0.60, expect ~110-120k.
+ * Historical: ARBiH couldn't convert population into combat power until mid-1993 professionalization. */
+/** Holistic tuning log:
+ * RBiH: 1.20→0.85→0.60→0.40→0.30→0.24→0.20→0.18. At 0.20: 120k. 0.18: 127k (n233).
+ * RS: 1.00→0.70→0.55→0.45→0.40→0.35. At 0.40: 111k. 0.35: 113k (n233).
+ * HRHB: 1.60 (unchanged). At 1.60: 42k end (target ~40k). On target.
+ * Note: pool scale diminishing returns below 0.25 — troop growth driven by elective recruitment capital. */
 const FACTION_POOL_SCALE: Record<string, number> = {
-    RBiH: 1.20,
-    RS: 1.20,
+    RBiH: 0.18,
+    RS: 0.35,
     HRHB: 1.60
 };
 const DEFAULT_FACTION_POOL_SCALE = 1.0;
@@ -87,7 +95,7 @@ const RBIH_CROSS_ETHNIC_CAP_PER_MUN = 500;
  * Includes JNA regulars (~10K), trained reservists (~15K), and TO cadres (~5K)
  * absorbed by VRS during May-June 1992 handover. Calibrated to historical RS start ~80K.
  */
-const RS_JNA_INHERITANCE_BONUS = 30_000;
+const RS_JNA_INHERITANCE_BONUS = 15_000;
 
 export interface RsJnaInheritanceReport {
     total_added: number;

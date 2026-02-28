@@ -28,9 +28,11 @@ import type {
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
+import { getEnclaveDefenseBonus } from './enclave_resilience.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
+import { getSeasonalModifiers } from './seasonal_effects.js';
 import {
     buildOsidAdjacency,
     computeEnemyZocOsidsForFaction,
@@ -81,11 +83,13 @@ function getHeavyWeaponsOffensiveMult(formation: FormationState): number {
     const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
     const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
     const heavyFirepower = tankEff * 10 + artEff * 8;
-    return 1.0 + Math.min(0.6, heavyFirepower / 500);
+    // Synced with attack_resolution_osid.ts: cap 1.5 (2.5x max), divisor 300
+    return 1.0 + Math.min(1.5, heavyFirepower / 300);
 }
 
-const BASE_ATTACKER_LOSS_RATE = 0.06;     // Synced with attack_resolution_osid.ts: 0.04→0.06
-const BASE_DEFENDER_LOSS_RATE = 0.03;     // Synced with attack_resolution_osid.ts: 0.02→0.03
+// Synced with attack_resolution_osid.ts: 0.04→0.06→0.03. Year 1 target ~20k casualties.
+const BASE_ATTACKER_LOSS_RATE = 0.03;
+const BASE_DEFENDER_LOSS_RATE = 0.015;
 const MILITIA_DEFENSE_RATIO = 0.03;
 const COORDINATION_PENALTY_2 = 0.9;
 const COORDINATION_PENALTY_3PLUS = 0.8;
@@ -98,8 +102,9 @@ const STACKING_DEFENDER_SUPPORT = 0.3;
 
 /** Direct defenders: bot can roughly see troop presence but not exact strength. */
 const FOG_DIRECT_VISIBILITY = 0.85;
-/** ZoC defenders: bot can't see indirect force projection from adjacent OSIDs. */
-const FOG_ZOC_VISIBILITY = 0.5;
+/** ZoC defenders: bot can't see indirect force projection from adjacent OSIDs.
+ *  Calibrated with LINKED_ZOC_READINESS=0.35 so predictions are slightly optimistic. */
+const FOG_ZOC_VISIBILITY = 0.6;
 /** After failing an attack (retreat), fog lifts — brigade learned enemy strength. */
 const FOG_AFTER_RETREAT_VISIBILITY = 0.95;
 
@@ -171,7 +176,7 @@ export const OUTCOME_SCORE: Record<PredictedOutcome, number> = {
     decisive_victory: 100,
     victory: 80,
     costly_victory: 40,
-    stalemate: 10,
+    stalemate: 18,
     repulsed: -50,
     catastrophic: -200
 };
@@ -335,7 +340,8 @@ function computeDefenderPower(
     const resilienceMult = 1.0 + defenseStreak * RESILIENCE_PER_DEFENSE;
     const urbanMult = getUrbanMult(targetOsid);
     const disruptionMult = getDisruptionMult(formation, 'defend');
-    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult;
+    const enclaveMult = getEnclaveDefenseBonus(state, targetOsid);
+    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult;
 }
 
 /**
@@ -423,7 +429,9 @@ export function predictCombatOutcome(
     terrainMultByOsid: Record<string, number>,
     attackerPosture?: string,
     additionalAttackers?: FormationId[],
-    supplyStateByOsid?: SupplyStateByOsidReport | null
+    supplyStateByOsid?: SupplyStateByOsidReport | null,
+    osidPopulationMap?: OsidPopulationMap | null,
+    slopeByOsid?: Record<string, number> | null
 ): CombatPrediction | null {
     const attacker = state.formations?.[attackerId];
     if (!attacker || attacker.status !== 'active') return null;
@@ -461,11 +469,15 @@ export function predictCombatOutcome(
     // Artillery/tank suppression: attacker's heavy weapons reduce defender entrenchment bonus
     const artSuppression = getArtillerySuppression(attackerFormations);
 
-    // Fog of war: did this brigade previously retreat from this target?
+    // Fog of war: did this brigade previously fail at this target?
+    // Check both defender-side retreat AND attacker-side repulsion.
     // If so, fog lifts — they learned enemy strength the hard way.
-    const retreatInfo = (attacker as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from;
     const currentTurn = state.meta?.turn ?? 0;
-    const retreatedFromTarget = retreatInfo != null && retreatInfo.osid === targetOsid && currentTurn - retreatInfo.turn <= 3;
+    const retreatInfo = (attacker as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from;
+    const repulseInfo = (attacker as { last_repulsed_from?: { osid: string; turn: number } }).last_repulsed_from;
+    const learnedFromTarget =
+        (retreatInfo != null && retreatInfo.osid === targetOsid && currentTurn - retreatInfo.turn <= 3) ||
+        (repulseInfo != null && repulseInfo.osid === targetOsid && currentTurn - repulseInfo.turn <= 3);
 
     if (defenderFormations.length > 0) {
         defenderHasBrigade = true;
@@ -473,7 +485,7 @@ export function predictCombatOutcome(
         const sorted = defenderFormations.map((d, i) => ({ f: d, p: powers[i]! })).sort((a, b) => b.p - a.p);
         defenderPower = sorted[0]!.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
         // Fog of war: bot underestimates direct defenders (can see troops but not exact strength)
-        const fogMult = retreatedFromTarget ? FOG_AFTER_RETREAT_VISIBILITY : FOG_DIRECT_VISIBILITY;
+        const fogMult = learnedFromTarget ? FOG_AFTER_RETREAT_VISIBILITY : FOG_DIRECT_VISIBILITY;
         defenderPower *= fogMult;
         defenderFormation = sorted[0]!.f;
         defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
@@ -493,12 +505,12 @@ export function predictCombatOutcome(
             .sort((a, b) => strictCompare(a.id, b.id));
         if (zocDefenders.length > 0) {
             defenderHasBrigade = true;
-            // Linked ZoC: stronger defense (organized connected front line).
+            // Linked ZoC: adjacent defenders project partial force.
             // Defense hierarchy:
             //   Direct defense (brigade present):     100% of computeDefenderPower
-            //   Linked ZoC (connected chain):          70% of computeDefenderPower
+            //   Linked ZoC (connected chain):          35% of computeDefenderPower
             //   Unlinked ZoC (isolated projection):    entrenchment-scaled (0-100%)
-            const LINKED_ZOC_READINESS = 0.7;
+            const LINKED_ZOC_READINESS = 0.50;
             const defenderFaction = zocDefenders[0]!.faction as FactionId;
             const linkedArr = (state as { phase_ii_linked_zoc_by_faction?: Record<string, string[]> }).phase_ii_linked_zoc_by_faction?.[defenderFaction];
             const isLinkedZoc = linkedArr != null && linkedArr.includes(targetOsid);
@@ -511,13 +523,14 @@ export function predictCombatOutcome(
                 .sort((a, b) => b.p - a.p);
             defenderPower = sorted[0]!.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
             // Fog of war: bot heavily underestimates ZoC defenders (can't see indirect force projection)
-            const fogMult = retreatedFromTarget ? FOG_AFTER_RETREAT_VISIBILITY : FOG_ZOC_VISIBILITY;
+            const fogMult = learnedFromTarget ? FOG_AFTER_RETREAT_VISIBILITY : FOG_ZOC_VISIBILITY;
             defenderPower *= fogMult;
             defenderFormation = sorted[0]!.f;
             defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
             defenderCohesion = defenderFormation.cohesion ?? 60;
         } else {
-            defenderPower = 5000 * MILITIA_DEFENSE_RATIO * 0.25;
+            const pop = osidPopulationMap?.get(targetOsid) ?? 5000;
+            defenderPower = pop * MILITIA_DEFENSE_RATIO * 0.25;
         }
     } else {
         return null; // Friendly-controlled or neutral — nothing to attack
@@ -526,9 +539,13 @@ export function predictCombatOutcome(
     // Compute attacker power
     const coordPenalty = attackerFormations.length >= 3 ? COORDINATION_PENALTY_3PLUS
         : attackerFormations.length === 2 ? COORDINATION_PENALTY_2 : 1.0;
+    // Seasonal modifier: winter penalizes attackers, slightly benefits defenders
+    const targetSlope = slopeByOsid?.[targetOsid] ?? 0;
+    const seasonal = getSeasonalModifiers(currentTurn, state.meta?.scenario_start_date, targetSlope);
     const attackerPower = attackerFormations.reduce(
         (s, a) => s + computeAttackerPower(state, a, attackerPosture, supplyStateByOsid), 0
-    ) * coordPenalty;
+    ) * coordPenalty * seasonal.attack_mult;
+    defenderPower *= seasonal.defense_mult;
 
     // Outcome
     const powerRatio = defenderPower <= 0 ? 10 : attackerPower / defenderPower;
@@ -592,7 +609,9 @@ export function predictAllAdjacentTargets(
     reverseMap: OperationalToCanonicalReverseMap,
     terrainMultByOsid: Record<string, number>,
     attackerPosture?: string,
-    supplyStateByOsid?: SupplyStateByOsidReport | null
+    supplyStateByOsid?: SupplyStateByOsidReport | null,
+    osidPopulationMap?: OsidPopulationMap | null,
+    slopeByOsid?: Record<string, number> | null
 ): Array<{ osid: Osid; prediction: CombatPrediction }> {
     const attacker = state.formations?.[attackerId];
     if (!attacker || attacker.status !== 'active') return [];
@@ -606,7 +625,7 @@ export function predictAllAdjacentTargets(
     for (const n of neighbors) {
         const controller = getPoliticalControllerOSID(state, n, reverseMap);
         if (controller === null || controller === factionId) continue; // Skip friendly/uncontrolled
-        const pred = predictCombatOutcome(state, attackerId, n, adjacency, reverseMap, terrainMultByOsid, attackerPosture, undefined, supplyStateByOsid);
+        const pred = predictCombatOutcome(state, attackerId, n, adjacency, reverseMap, terrainMultByOsid, attackerPosture, undefined, supplyStateByOsid, osidPopulationMap, slopeByOsid);
         if (pred) results.push({ osid: n, prediction: pred });
     }
 

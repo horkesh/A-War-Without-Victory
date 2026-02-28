@@ -23,8 +23,9 @@ import type {
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import { getEnclaveDefenseBonus } from './enclave_resilience.js';
+import { getSeasonalModifiers } from './seasonal_effects.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import {
     buildOsidAdjacency,
@@ -109,13 +110,15 @@ function getHeavyWeaponsOffensiveMult(formation: FormationState): number {
     const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
     // Each effective tank = 10× infantry firepower, each artillery = 8×
     const heavyFirepower = tankEff * 10 + artEff * 8;
-    // Scale against a reference heavy force (500 heavy firepower points = max bonus)
-    // Cap 0.6: VRS at default composition just reaches cap, HVO/ARBiH well below
-    return 1.0 + Math.min(0.6, heavyFirepower / 500);
+    // Scale against a reference heavy force. Faster ramp, higher cap to model
+    // historical VRS 3-5:1 equipment advantage over ARBiH in open terrain.
+    // Cap 1.5: concentrated VRS attacks (30T + 20A) reach 2.5x; ARBiH light infantry ≈1.03x.
+    return 1.0 + Math.min(1.5, heavyFirepower / 300);
 }
 
-const BASE_ATTACKER_LOSS_RATE = 0.06;     // Tuned: 0.04→0.06. Historical Bosnia casualty rates were high.
-const BASE_DEFENDER_LOSS_RATE = 0.03;     // Tuned: 0.02→0.03. Defenders suffered significant losses too.
+// Tuned: 0.04→0.06→0.03. Full-war casualties ~62k over 4 years; year 1 should be ~20k.
+const BASE_ATTACKER_LOSS_RATE = 0.03;
+const BASE_DEFENDER_LOSS_RATE = 0.015;
 const MILITIA_DEFENSE_RATIO = 0.03;
 const COORDINATION_PENALTY_2 = 0.9;
 const COORDINATION_PENALTY_3PLUS = 0.8;
@@ -304,6 +307,27 @@ function getTerrainMultForOsid(targetOsid: Osid, terrainMultByOsid: Record<strin
     return terrainMultByOsid[targetOsid] ?? 1.0;
 }
 
+/** Build average slope index per OSID for seasonal terrain interaction. */
+function buildSlopeByOsid(
+    reverseMap: OperationalToCanonicalReverseMap,
+    terrainData?: TerrainScalarsData | null
+): Record<string, number> {
+    const out: Record<string, number> = {};
+    if (!terrainData?.by_sid) return out;
+    const osids = Array.from(reverseMap.keys()).sort(strictCompare);
+    for (const osid of osids) {
+        const sids = reverseMap.get(osid) ?? [];
+        if (sids.length === 0) { out[osid] = 0; continue; }
+        let sum = 0;
+        for (const sid of sids) {
+            const t = getTerrainScalarsForSid(terrainData, sid);
+            sum += t.slope_index;
+        }
+        out[osid] = sum / sids.length;
+    }
+    return out;
+}
+
 function getUrbanMult(_state: GameState, targetOsid: Osid): number {
     const osidLower = targetOsid.toLowerCase();
     if (osidLower.includes('centar_sarajevo') || osidLower.includes('novo_sarajevo') || osidLower.includes('stari_grad') || osidLower.includes('sarajevo')) return 1.5;
@@ -405,6 +429,8 @@ export interface AttackResolutionOsidReport {
     snap_event_counts: Partial<Record<AttackResolutionOsidSnapEventType, number>>;
     battles: Array<{
         attacker_brigade: FormationId;
+        attacker_faction: FactionId;
+        defender_faction: FactionId;
         target_osid: Osid;
         outcome: AttackOutcome;
         power_ratio: number;
@@ -432,7 +458,8 @@ export function resolveAttackOrdersOsid(
     edges: EdgeRecord[],
     reverseMap: OperationalToCanonicalReverseMap,
     terrainData?: TerrainScalarsData | null,
-    supplyStateByOsid?: SupplyStateByOsidReport | null
+    supplyStateByOsid?: SupplyStateByOsidReport | null,
+    osidPopulationMap?: OsidPopulationMap | null
 ): AttackResolutionOsidReport {
     const report: AttackResolutionOsidReport = {
         orders_processed: 0,
@@ -448,6 +475,11 @@ export function resolveAttackOrdersOsid(
     };
 
     const terrainMultByOsid = buildTerrainMultByOsid(reverseMap, terrainData);
+    const slopeByOsid = buildSlopeByOsid(reverseMap, terrainData);
+
+    // Seasonal effects: compute once per turn (same for all battles this turn)
+    const currentTurn = state.meta?.turn ?? 0;
+    const startDate = state.meta?.scenario_start_date;
 
     const orders = state.brigade_attack_orders;
     if (!orders || typeof orders !== 'object') return report;
@@ -527,9 +559,13 @@ export function resolveAttackOrdersOsid(
                 // the defense is stronger — the organized front line projects coordinated control.
                 // Defense hierarchy:
                 //   Direct defense (brigade present):     100% of computeDefenderPower
-                //   Linked ZoC (connected chain):          70% of computeDefenderPower
+                //   Linked ZoC (connected chain):          35% of computeDefenderPower
                 //   Unlinked ZoC (isolated projection):    entrenchment-scaled (0-100%)
-                const LINKED_ZOC_READINESS = 0.7;
+                // Tuned: 0.7→0.35→0.50. At 0.35 linked ZoC was too weak to hold enclave
+                // perimeters — 5 Srebrenica brigades couldn't cover 14 OSIDs. At 0.50, a linked
+                // front provides credible defense: concentrated attackers can still break through,
+                // but isolated probes are repulsed. Multi-brigade assaults remain effective.
+                const LINKED_ZOC_READINESS = 0.50;
                 const defenderFaction = zocDefenders[0]!.faction as FactionId;
                 const linkedArr = (state as { phase_ii_linked_zoc_by_faction?: Record<string, string[]> }).phase_ii_linked_zoc_by_faction?.[defenderFaction];
                 const isLinkedZoc = linkedArr != null && linkedArr.includes(targetOsid);
@@ -545,7 +581,7 @@ export function resolveAttackOrdersOsid(
                 isZocDefense = true;
             } else {
                 // No brigade present or projecting ZoC — pure militia defense
-                const pop = 5000;
+                const pop = osidPopulationMap?.get(targetOsid) ?? 5000;
                 defenderPower = pop * MILITIA_DEFENSE_RATIO * 0.25;
             }
         } else {
@@ -577,7 +613,12 @@ export function resolveAttackOrdersOsid(
         }
 
         const coordPenalty = attackerFormations.length >= 3 ? COORDINATION_PENALTY_3PLUS : attackerFormations.length === 2 ? COORDINATION_PENALTY_2 : 1.0;
-        const attackerPower = attackerFormations.reduce((s, a) => s + computeAttackerPower(state, a, supplyStateByOsid), 0) * coordPenalty;
+        // Seasonal modifier: winter penalizes attackers, slightly benefits defenders (mountain amplifies)
+        const targetSlope = slopeByOsid[targetOsid] ?? 0;
+        const seasonal = getSeasonalModifiers(currentTurn, startDate, targetSlope);
+        const attackerPower = attackerFormations.reduce((s, a) => s + computeAttackerPower(state, a, supplyStateByOsid), 0)
+            * coordPenalty * seasonal.attack_mult;
+        defenderPower *= seasonal.defense_mult;
 
         const powerRatio = defenderPower <= 0 ? 10 : attackerPower / defenderPower;
         // Snap: Surrender Cascade — defender cohesion < 10 and power_ratio > 2.5 → eliminate without retreat (Spec §8)
@@ -601,6 +642,8 @@ export function resolveAttackOrdersOsid(
         report.orders_processed += attackerIds.length;
         report.battles.push({
             attacker_brigade: firstAttacker.id,
+            attacker_faction: attackerFaction,
+            defender_faction: (controller ?? attackerFaction) as FactionId,
             target_osid: targetOsid,
             outcome,
             power_ratio: powerRatio,
@@ -634,7 +677,13 @@ export function resolveAttackOrdersOsid(
             applyPersonnelLoss(a, cas);
             a.cohesion = Math.max(0, Math.min(100, (a.cohesion ?? 60) + (COHESION_ATTACKER[outcome] ?? 0)));
             if (outcome === 'costly_victory') (a as { disrupted_turns?: number }).disrupted_turns = 1;
-            if (outcome === 'repulsed' || outcome === 'catastrophic') (a as { disrupted_turns?: number }).disrupted_turns = 1;
+            if (outcome === 'repulsed' || outcome === 'catastrophic') {
+                (a as { disrupted_turns?: number }).disrupted_turns = 1;
+                // Fog of war: attacker learned enemy strength at this target the hard way
+                (a as { last_repulsed_from?: { osid: string; turn: number } }).last_repulsed_from = {
+                    osid: targetOsid, turn: state.meta?.turn ?? 0
+                };
+            }
             recordBattleCasualties(state.casualty_ledger!, a.faction, a.id, {
                 killed: Math.floor(cas * KIA_FRACTION),
                 wounded: Math.floor(cas * WIA_FRACTION),

@@ -7,7 +7,14 @@ import type { LoadedSettlementGraph } from '../map/settlements.js';
 import type { GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { WeeklyActivityCounts, WeeklyReportRow } from './scenario_reporting.js';
+import type { CorpsAiReportEntry } from '../sim/phase_ii/bot_corps_ai.js';
 import type { VictoryEvaluation } from './victory_conditions.js';
+
+/** Snapshot of corps AI directives at a specific turn, for end report. */
+export interface CorpsAiSnapshot {
+    turn: number;
+    entries: CorpsAiReportEntry[];
+}
 
 export interface ControlKey {
     settlement_id: string;
@@ -535,6 +542,8 @@ export interface FormatEndReportParams {
     phaseIIAttackResolutionWeekly?: PhaseIIAttackResolutionWeekRollup[] | null;
     /** Optional initial/final/delta historical-alignment diagnostics by faction. */
     historicalAlignmentDiagnostics?: HistoricalAlignmentDiagnostics | null;
+    /** Optional corps AI directive snapshots at key turns (1, 13, 26, 52). */
+    corpsAiSnapshots?: CorpsAiSnapshot[] | null;
 }
 
 /** Phase H1.7: Run-level activity diagnostics (machine-readable). */
@@ -941,6 +950,32 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
             );
         }
         lines.push('');
+    }
+    if (params.corpsAiSnapshots && params.corpsAiSnapshots.length > 0) {
+        lines.push('## Corps AI directives (key turns)');
+        lines.push('');
+        for (const snapshot of params.corpsAiSnapshots) {
+            lines.push(`### Turn ${snapshot.turn}`);
+            lines.push('');
+            if (snapshot.entries.length === 0) {
+                lines.push('No corps directives (Phase II not yet active).');
+                lines.push('');
+                continue;
+            }
+            for (const e of snapshot.entries) {
+                const munStr = e.offensive_target_municipalities.length > 0
+                    ? e.offensive_target_municipalities.join(', ')
+                    : 'none';
+                lines.push(
+                    `- **${e.corps_id}** (${e.faction}): stance=${e.stance}, ` +
+                    `op=${e.active_operation ?? 'none'}, ` +
+                    `targets=${e.offensive_target_count} [${munStr}], ` +
+                    `hold=${e.hold_osid_count}, aggr=${e.aggression_modifier}, ` +
+                    `subs=${e.subordinate_count}`
+                );
+            }
+            lines.push('');
+        }
     }
     lines.push('## Notes on interpretation');
     lines.push('');

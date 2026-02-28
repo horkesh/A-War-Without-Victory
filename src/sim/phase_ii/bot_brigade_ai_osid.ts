@@ -27,7 +27,7 @@ import type {
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import {
     predictAllAdjacentTargets,
     buildTerrainCache,
@@ -40,6 +40,7 @@ import {
     type FactionGraphAnalysis,
     type OsidAnalysis
 } from './osid_graph_analysis.js';
+import { getEffectiveAttackShare } from './bot_strategy.js';
 import {
     buildOsidAdjacency,
     isBrigadeDeployed,
@@ -58,6 +59,8 @@ import type { SettlementEthnicityData } from '../../data/settlement_ethnicity.js
 export interface OsidBotOrdersResult {
     posture_orders: Array<{ brigade_id: FormationId; posture: BrigadePosture }>;
     attack_orders: Record<FormationId, Osid>;
+    /** Score for each attack order — used by attack share cap to trim lowest-priority attacks first. */
+    attack_scores: Record<FormationId, number>;
     movement_orders: Record<FormationId, Osid>;
     /** Column march orders: brigade → distant destination OSID (multi-turn transit). */
     column_march_orders: Record<FormationId, Osid>;
@@ -219,11 +222,12 @@ function estimateConcentratedOutcome(
     existingAttackers: number
 ): PredictedOutcome | null {
     if (existingAttackers <= 0) return null;
-    // Each additional attacker adds ~65% of one brigade's power (coord penalty 0.8-0.9)
-    // For attacker N+1 joining N existing: combined ratio ≈ individual × (1 + N × 0.65)
-    // N=1: ×1.65 (2 brigades, coord penalty makes combined ~1.8/1.1 per individual)
-    // N=2: ×2.30 (3 brigades, coord penalty makes combined ~2.4/1.04 per individual)
-    const combinedRatioMult = 1 + existingAttackers * 0.65;
+    // Each additional attacker adds ~85% of one brigade's power (mild coord penalty).
+    // Actual attack resolution sums attacker powers independently, so the true ratio for
+    // N equal brigades is N × individual_ratio. 0.85 accounts for sequential resolution
+    // losses (each battle weakens the defender, but also costs the attacker).
+    // N=1: ×1.85 (2 brigades)  N=2: ×2.70 (3 brigades)  N=3: ×3.55 (4 brigades)
+    const combinedRatioMult = 1 + existingAttackers * 0.85;
     const estimatedRatio = individualRatio * combinedRatioMult;
     // Classify using same thresholds as combat predictor
     if (estimatedRatio >= 2.0) return 'decisive_victory';
@@ -564,7 +568,13 @@ export function computeOsidEthnicComposition(
     return result;
 }
 
-/** Co-ethnic bonus: 0–80 proportional to co-ethnic share (full at ≥50%). */
+/**
+ * Bipolar co-ethnic score: -80 (0% co-ethnic) to +80 (≥50% co-ethnic).
+ * Penalizes attacking non-coethnic territory, attracts toward coethnic areas.
+ * Linear: 0% → -80, 25% → 0 (neutral), 50%+ → +80.
+ * This replaces hardcoded avoid_municipalities — factions naturally avoid
+ * territory with no co-ethnic population (e.g., RS won't attack Livno = 3% Serb → -70).
+ */
 function getCoEthnicScore(osid: Osid, faction: FactionId, ethnicMap: OsidEthnicComposition | undefined): number {
     if (!ethnicMap) return 0;
     const comp = ethnicMap.get(osid);
@@ -576,7 +586,8 @@ function getCoEthnicScore(osid: Osid, faction: FactionId, ethnicMap: OsidEthnicC
         case 'HRHB': share = comp.croat; break;
         default: return 0;
     }
-    return Math.floor(Math.min(share / 0.5, 1.0) * 80);
+    const normalized = Math.min(share / 0.5, 1.0); // 0..1
+    return Math.floor((normalized * 2 - 1) * 80);   // -80..+80
 }
 
 /** Supply-aware attack penalty. Faction-specific conservatism. */
@@ -604,9 +615,11 @@ export interface OsidBotContext {
     edges: EdgeRecord[];
     reverseMap: OperationalToCanonicalReverseMap;
     enemyZocByFaction: Map<FactionId, Set<Osid>>;
+    linkedZocByFaction?: Map<FactionId, Set<Osid>>;
     supplyStateByOsid?: SupplyStateByOsidReport | null;
     supplyConnectivityByFaction?: SupplyConnectivityByFaction;
     ethnicCompositionByOsid?: OsidEthnicComposition;
+    osidPopulationMap?: OsidPopulationMap;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -626,7 +639,8 @@ function scoreTargetFromDirective(
     prediction: CombatPrediction,
     directive: import('../../state/game_state.js').CorpsDirective,
     faction: FactionId,
-    ethnicMap?: OsidEthnicComposition
+    ethnicMap?: OsidEthnicComposition,
+    hasDirectiveTargetAdjacent?: boolean
 ): number {
     let score = OUTCOME_SCORE[prediction.predicted_outcome] ?? 0;
 
@@ -635,9 +649,25 @@ function scoreTargetFromDirective(
         score += 200; // Corps wants this attacked
     }
 
-    // Directive-driven: avoid zone
+    // Brigade conservatism: without corps offensive targets, default to territorial defense.
+    // Historical brigades were territorial — only attacked when ordered by corps.
+    if (directive.offensive_targets.length === 0) {
+        score -= 200; // No orders — hold position
+    }
+
+    // When corps has specific offensive targets, penalize non-priority targets.
+    // Penalty scales with aggression: offensive corps (-100) let brigades grab adjacent
+    // undefended territory; defensive corps (-250) lock brigades to directive targets only.
+    // RS early war (aggression 0.35): -145 → undefended non-priority barely viable.
+    // ARBiH defensive (aggression -0.20): -310 → non-priority fully blocked.
+    if (directive.offensive_targets.length > 0 && !directive.offensive_targets.includes(osid)) {
+        const nonPriorityPenalty = Math.floor(-250 + directive.aggression_modifier * 300);
+        score += Math.min(-100, nonPriorityPenalty); // Floor at -100 (never free)
+    }
+
+    // Directive-driven: avoid zone (legacy — avoid_municipalities removed, but keep for future use)
     if (directive.avoid_osids.includes(osid)) {
-        score -= 500; // Corps forbids attacking here
+        score -= 500;
     }
 
     // Tactical bonuses (same for all factions — universal combat logic)
@@ -647,13 +677,26 @@ function scoreTargetFromDirective(
         score += 80; // Weak defender
     }
 
-    // Tactical penalties
-    if (prediction.overextension_risk >= 3) score -= 150;
+    // Tactical penalties — heavily reduced for directive targets (corps accepted the risk).
+    // Zvornik, with overextension=4, gets -57 instead of -230 for directive attacks.
+    const isDirectiveTarget = directive.offensive_targets.includes(osid);
+    const overextPenaltyScale = isDirectiveTarget ? 0.25 : 1.0;
+    if (prediction.overextension_risk >= 3) score -= Math.floor(150 * overextPenaltyScale);
     if (prediction.attacker_casualty_percent > 0.20) score -= 150;
-    if (prediction.overextension_risk >= 2) score -= 80;
+    if (prediction.overextension_risk >= 2) score -= Math.floor(80 * overextPenaltyScale);
 
     // Co-ethnic bonus (all factions fight harder for co-ethnic areas)
     score += getCoEthnicScore(osid, faction, ethnicMap);
+
+    // Frontier pressure: when a brigade has no directive targets adjacent, allow
+    // probing any adjacent enemy OSID at reduced priority. This prevents idle front-line
+    // brigades from freezing once directive targets are exhausted or deeply entrenched.
+    // n215: reduced from +30 to +15. At +30, RS overran Tuzla (invariant violation).
+    if (hasDirectiveTargetAdjacent === false &&
+        directive.offensive_targets.length > 0 &&
+        !directive.offensive_targets.includes(osid)) {
+        score += 15;
+    }
 
     // Aggression modifier: flat bonus for offensive stances + multiplier for the whole score.
     // Flat component ensures stalemate targets (base 10) become viable when aggression is high.
@@ -691,9 +734,10 @@ function executeFactionDirectives(
     enemyZoc: Set<Osid>,
     graphAnalysis: FactionGraphAnalysis,
     supplyStateByOsid?: SupplyStateByOsidReport | null,
-    ethnicMap?: OsidEthnicComposition
+    ethnicMap?: OsidEthnicComposition,
+    osidPopulationMap?: OsidPopulationMap
 ): OsidBotOrdersResult {
-    const result: OsidBotOrdersResult = { posture_orders: [], attack_orders: {}, movement_orders: {}, column_march_orders: {} };
+    const result: OsidBotOrdersResult = { posture_orders: [], attack_orders: {}, attack_scores: {}, movement_orders: {}, column_march_orders: {} };
     const chosenTargets = new Map<Osid, number>();
     const columnAssignments = new Map<Osid, number>();
 
@@ -708,6 +752,18 @@ function executeFactionDirectives(
 
     // Alliance check for HRHB
     const isAlliedWithRBiH = areRbihHrhbAllied(state);
+
+    // Pre-compute concentration potential: for each OSID, count how many faction brigades
+    // are adjacent. Used by the coordinated pioneer check to allow attacks when multiple
+    // brigades can converge, even if each individual prediction is catastrophic.
+    const targetAdjacentCount = new Map<Osid, number>();
+    for (const b of brigades) {
+        if (!b.location_osid) continue;
+        const adj = adjacency.get(b.location_osid) ?? [];
+        for (const n of adj) {
+            targetAdjacentCount.set(n, (targetAdjacentCount.get(n) ?? 0) + 1);
+        }
+    }
 
     for (const brigade of brigades) {
         const loc = brigade.location_osid!;
@@ -762,26 +818,39 @@ function executeFactionDirectives(
             } else if (adjEnemy.length > 0) {
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
                 result.attack_orders[brigade.id] = adjEnemy[0]!;
+                result.attack_scores[brigade.id] = 9999; // ZoC-locked: never trim
             }
             continue;
         }
 
-        // --- Rule 2: Hold OSID → DEFEND (non-negotiable) ---
+        // --- Rule 2: Hold OSID — defend by default, but offensive corps can attack from hold ---
+        // Chokepoints are important to hold, but during a corps offensive the brigade should
+        // still evaluate attacks against adjacent targets. If the attack succeeds and the brigade
+        // advances, the chokepoint becomes interior (front moves forward). If no viable attack,
+        // the brigade defends the chokepoint as before.
+        let isHoldBrigade = false;
         if (directive && directive.hold_osids.includes(loc)) {
             // Counter-attack exception: if THIS brigade retreated from an adjacent OSID last turn, counter-attack
             if (counterAttackTarget && adjEnemy.includes(counterAttackTarget)) {
-                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid);
+                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap);
                 const counter = targets.find(t => t.osid === counterAttackTarget &&
                     isOutcomeSufficientForAttack(t.prediction.predicted_outcome, 'costly_victory'));
                 if (counter && (chosenTargets.get(counter.osid) ?? 0) < (directive.max_attackers_per_target)) {
                     result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
                     result.attack_orders[brigade.id] = counter.osid;
+                    result.attack_scores[brigade.id] = 1000; // Counter-attack: high priority
                     chosenTargets.set(counter.osid, (chosenTargets.get(counter.osid) ?? 0) + 1);
                     continue;
                 }
             }
-            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-            continue;
+            if (corpsStance === 'offensive' && adjEnemy.length > 0) {
+                // Offensive corps: fall through to attack evaluation (Rule 5).
+                // If no viable attack found, the isHoldBrigade flag ensures we defend.
+                isHoldBrigade = true;
+            } else {
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                continue;
+            }
         }
 
         // --- Rule 3: Corps stance reorganize → rest ---
@@ -794,7 +863,7 @@ function executeFactionDirectives(
         if (corpsStance === 'defensive') {
             // Only allow counter-attack if THIS brigade retreated from an adjacent OSID last turn
             if (counterAttackTarget && adjEnemy.includes(counterAttackTarget)) {
-                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid);
+                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap);
                 const effDir = directive ?? effectiveDirectiveDefault;
                 const maxAtt = effDir.max_attackers_per_target;
                 const counter = targets.find(t => t.osid === counterAttackTarget &&
@@ -803,13 +872,14 @@ function executeFactionDirectives(
                 if (counter) {
                     result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
                     result.attack_orders[brigade.id] = counter.osid;
+                    result.attack_scores[brigade.id] = 1000; // Counter-attack: high priority
                     chosenTargets.set(counter.osid, (chosenTargets.get(counter.osid) ?? 0) + 1);
                     continue;
                 }
             }
             // Directive offensive target (rare during defensive but possible if corps has specific targets)
             if (adjEnemy.length > 0 && directive && directive.offensive_targets.length > 0) {
-                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid);
+                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap);
                 const maxAtt = directive.max_attackers_per_target;
                 const viable = targets.find(t => {
                     if ((chosenTargets.get(t.osid) ?? 0) >= maxAtt) return false;
@@ -823,6 +893,7 @@ function executeFactionDirectives(
                 if (viable) {
                     result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
                     result.attack_orders[brigade.id] = viable.osid;
+                    result.attack_scores[brigade.id] = 500; // Defensive directive target: important
                     chosenTargets.set(viable.osid, (chosenTargets.get(viable.osid) ?? 0) + 1);
                     continue;
                 }
@@ -851,7 +922,7 @@ function executeFactionDirectives(
 
             if (filteredEnemy.length > 0) {
                 const supplyPenalty = getAttackerSupplyPenalty(loc, faction, supplyStateByOsid);
-                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid);
+                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap);
 
                 // Filter targets: respect alliance, respect avoid_osids
                 const validTargets = targets.filter(t => {
@@ -862,9 +933,13 @@ function executeFactionDirectives(
                     return true;
                 });
 
+                // Frontier pressure: does this brigade have ANY directive target adjacent?
+                const hasDirectiveTargetAdj = filteredEnemy.some(e =>
+                    effectiveDirective.offensive_targets.includes(e));
+
                 const scored = validTargets.map(t => ({
                     ...t,
-                    finalScore: scoreTargetFromDirective(t.osid, t.prediction, effectiveDirective, faction, ethnicMap)
+                    finalScore: scoreTargetFromDirective(t.osid, t.prediction, effectiveDirective, faction, ethnicMap, hasDirectiveTargetAdj)
                         + supplyPenalty
                         + (counterAttackTarget === t.osid ? 180 : 0) // Retreat-based counter-attack bonus
                 })).sort((a, b) => {
@@ -878,18 +953,36 @@ function executeFactionDirectives(
                     const existing = chosenTargets.get(s.osid) ?? 0;
                     if (existing >= maxAtt) continue;
 
-                    // Pioneer: directive target with risky prediction — attack to seed concentration.
+                    // Pioneer: directive target — attack to seed concentration.
                     // Only for offensive/balanced corps stance (not defensive).
                     // Bypasses finalScore filter since repulsed outcomes have negative score.
                     if (existing === 0 && (corpsStance === 'offensive' || corpsStance === 'balanced') &&
-                        effectiveDirective.offensive_targets.includes(s.osid) &&
-                        isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'repulsed')) {
-                        bestTarget = s;
-                        break;
+                        effectiveDirective.offensive_targets.includes(s.osid)) {
+                        // Standard pioneer: individual prediction sufficient
+                        if (isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'repulsed')) {
+                            bestTarget = s;
+                            break;
+                        }
+                        // Coordinated pioneer: if enough allies are adjacent to this target,
+                        // pioneer even with weaker individual prediction.
+                        if (corpsStance === 'offensive') {
+                            const adjAllies = targetAdjacentCount.get(s.osid) ?? 0;
+                            if (adjAllies >= 2) {
+                                const coordinated = estimateConcentratedOutcome(s.prediction.power_ratio, adjAllies - 1);
+                                if (coordinated && isOutcomeSufficientForAttack(coordinated, effectiveDirective.min_attack_outcome)) {
+                                    bestTarget = s;
+                                    break;
+                                }
+                            }
+                        }
                     }
-                    // Concentration: join an existing pioneer attack
+                    // Concentration: join an existing pioneer attack.
+                    // Use full concentration potential (all adjacent allies) rather than just
+                    // existing attackers — subsequent brigades will also join this turn.
                     if (existing > 0 && effectiveDirective.offensive_targets.includes(s.osid)) {
-                        const combined = estimateConcentratedOutcome(s.prediction.power_ratio, existing);
+                        const adjAllies = targetAdjacentCount.get(s.osid) ?? 0;
+                        const potentialTotal = Math.max(existing + 1, adjAllies);
+                        const combined = estimateConcentratedOutcome(s.prediction.power_ratio, potentialTotal - 1);
                         if (combined && isOutcomeSufficientForAttack(combined, effectiveDirective.min_attack_outcome)) {
                             bestTarget = s;
                             break;
@@ -920,10 +1013,18 @@ function executeFactionDirectives(
                 if (bestTarget) {
                     result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
                     result.attack_orders[brigade.id] = bestTarget.osid;
+                    result.attack_scores[brigade.id] = bestTarget.finalScore;
                     chosenTargets.set(bestTarget.osid, (chosenTargets.get(bestTarget.osid) ?? 0) + 1);
                     continue;
                 }
             }
+        }
+
+        // Hold brigade fallback: no viable attack found — defend at the hold position.
+        // Don't redeploy or move away from a chokepoint.
+        if (isHoldBrigade) {
+            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+            continue;
         }
 
         // --- Rule 5b: Redeploy toward offensive target ---
@@ -1084,13 +1185,62 @@ export function generateAllBotOrdersOsid(
         if (brigades.length === 0) continue;
 
         const enemyZoc = ctx.enemyZocByFaction.get(faction) ?? new Set<Osid>();
-        const graphAnalysis = analyzeFactionGraph(state, faction, adjacency, ctx.reverseMap);
+        const linkedZocForFaction = ctx.linkedZocByFaction?.get(faction);
+        const graphAnalysis = analyzeFactionGraph(state, faction, adjacency, ctx.reverseMap, linkedZocForFaction);
 
         const result = executeFactionDirectives(
             state, faction, brigades, adjacency, ctx.reverseMap,
             terrainCache, enemyZoc, graphAnalysis,
-            ctx.supplyStateByOsid, ctx.ethnicCompositionByOsid
+            ctx.supplyStateByOsid, ctx.ethnicCompositionByOsid, ctx.osidPopulationMap
         );
+
+        // Per-corps attack share cap: each corps gets attack slots proportional to its size.
+        // This prevents large corps (1KK with 28 brigades) from monopolizing all attack slots
+        // while small corps (Drina with 6 brigades) get zero.
+        // Within each corps, trim lowest-scoring attacks first.
+        const turn = state.meta?.turn ?? 0;
+        const maxAttackShare = getEffectiveAttackShare(faction, turn);
+
+        // Count brigades per corps
+        const corpsSize = new Map<string, number>();
+        for (const b of brigades) {
+            const cid = b.corps_id ?? '__nocorps__';
+            corpsSize.set(cid, (corpsSize.get(cid) ?? 0) + 1);
+        }
+
+        // Group attack entries by corps, with scores
+        const attacksByCorps = new Map<string, Array<{ bid: FormationId; target: Osid; score: number }>>();
+        for (const [bid, target] of Object.entries(result.attack_orders)) {
+            if (target == null) continue;
+            const brig = state.formations?.[bid as FormationId];
+            const cid = brig?.corps_id ?? '__nocorps__';
+            if (!attacksByCorps.has(cid)) attacksByCorps.set(cid, []);
+            attacksByCorps.get(cid)!.push({
+                bid: bid as FormationId,
+                target: target as Osid,
+                score: result.attack_scores[bid as FormationId] ?? 0
+            });
+        }
+
+        // Per-corps trimming: each corps gets max(1, floor(size * attackShare)) slots
+        for (const [cid, attacks] of [...attacksByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+            const size = corpsSize.get(cid) ?? 1;
+            const maxCorpsAttacks = Math.max(1, Math.floor(size * maxAttackShare));
+            if (attacks.length <= maxCorpsAttacks) continue;
+
+            // Sort by score DESC, deterministic tiebreak
+            attacks.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return strictCompare(a.bid, b.bid);
+            });
+            // Trim lowest-scoring attacks beyond the corps budget
+            const trimmed = attacks.slice(maxCorpsAttacks);
+            for (const entry of trimmed) {
+                delete result.attack_orders[entry.bid];
+                delete result.attack_scores[entry.bid];
+                result.posture_orders.push({ brigade_id: entry.bid, posture: 'defend' });
+            }
+        }
 
         // Accumulate results
         allPostureOrders.push(...result.posture_orders);

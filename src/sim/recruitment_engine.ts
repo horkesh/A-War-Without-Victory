@@ -517,11 +517,14 @@ export function runBotRecruitment(
             const poolKey = militiaPoolKey(brigade.home_mun, faction);
             const pool = state.militia_pools?.[poolKey];
             const manpowerAvailable = pool ? pool.available : 0;
-            const effectiveManpower = Math.min(brigade.manpower_cost, manpowerAvailable);
 
-            // Mandatory historical formations use a lower threshold than emergent brigades since
-            // they definitely existed — pools will reinforce them over time.
-            if (effectiveManpower < MIN_MANDATORY_SPAWN) {
+            // Mandatory brigades spawn if EITHER condition is met:
+            // 1. Pool has enough for full cost (low-cost enclave brigades like 285th)
+            // 2. Pool exceeds MIN_MANDATORY_SPAWN (partial spawn for high-cost brigades — historical:
+            //    formations existed even if undermanned, e.g. VRS brigades from JNA cadres)
+            // Skip only when BOTH fail — pool is truly insufficient.
+            const effectiveManpower = Math.min(brigade.manpower_cost, manpowerAvailable);
+            if (effectiveManpower < MIN_MANDATORY_SPAWN && manpowerAvailable < brigade.manpower_cost) {
                 report.brigades_skipped_no_manpower++;
                 continue;
             }

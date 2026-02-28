@@ -68,8 +68,8 @@ const STRATEGY_PROFILES: Record<string, BotStrategyProfile> = {
         preferred_objective_sids: ['S200026', 'S216984', 'S200891', 'S230545', 'S227897', 'S205176', 'S202258', 'S203009', 'S220469', 'S218375', 'S120154', 'S162094'],
         consolidation_priority_weight: 0.8,
         benchmarks: [
-            { turn: 26, objective: 'early_territorial_expansion', expected_control_share: 0.45, tolerance: 0.15 },
-            { turn: 52, objective: 'consolidate_gains', expected_control_share: 0.5, tolerance: 0.15 }
+            { turn: 26, objective: 'early_territorial_expansion', expected_control_share: 0.60, tolerance: 0.10 },
+            { turn: 52, objective: 'consolidate_gains', expected_control_share: 0.65, tolerance: 0.10 }
         ]
     },
     HRHB: {

@@ -7,19 +7,21 @@ import type { SettlementRecord } from '../map/settlements.js';
 import type { DisplacementState, FactionId, GameState, MunicipalityId } from './game_state.js';
 import { getLegacyAoR } from './game_state.js';
 
-/** 52w plan Step 6.5.2: true when the faction has at least one brigade present in the municipality (assignment or AoR). */
+/** 52w plan Step 6.5.2: true when the faction has at least one brigade present in the municipality (assignment, AoR, or OSID location). */
 export function factionHasBrigadeInMunicipality(
     state: GameState,
     factionId: FactionId,
     munId: MunicipalityId,
     settlements: Map<string, SettlementRecord>
 ): boolean {
-    const assignment = getLegacyAoR(state).brigade_municipality_assignment ?? {};
     const formations = state.formations ?? {};
+    // Legacy: brigade_municipality_assignment
+    const assignment = getLegacyAoR(state).brigade_municipality_assignment ?? {};
     for (const [fid, muns] of Object.entries(assignment)) {
         const f = formations[fid];
         if (f?.faction === factionId && Array.isArray(muns) && muns.includes(munId)) return true;
     }
+    // Legacy: brigade_aor (settlement-level)
     const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     for (const [sid, rec] of settlements.entries()) {
         const recMun = (rec?.mun1990_id ?? rec?.mun_code) as string | undefined;
@@ -28,6 +30,13 @@ export function factionHasBrigadeInMunicipality(
         if (formationId == null) continue;
         const formation = formations[formationId];
         if (formation?.faction === factionId) return true;
+    }
+    // Phase II: OSID-level brigade location — "op:municipality:slug"
+    const osidPrefix = `op:${munId}:`;
+    for (const f of Object.values(formations)) {
+        if (!f || f.faction !== factionId || f.kind !== 'brigade' || f.status !== 'active') continue;
+        const loc = (f as { location_osid?: string }).location_osid;
+        if (loc && loc.startsWith(osidPrefix)) return true;
     }
     return false;
 }

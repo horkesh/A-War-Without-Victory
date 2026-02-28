@@ -49,15 +49,20 @@ const NORTHWEST_BOSNIA_MUN_IDS = new Set<MunicipalityId>([
     'novi_grad',
     'kljuc'
 ]);
-const EAST_BOSNIA_MUN_IDS = new Set<MunicipalityId>([
+/** Northern Drina: route to Srebrenica first (geographically north). */
+const NORTH_DRINA_MUN_IDS = new Set<MunicipalityId>([
     'zvornik',
     'bratunac',
     'srebrenica',
-    'vlasenica',
+    'vlasenica'
+]);
+/** Southern Drina: route to Gorazde first (geographically adjacent). */
+const SOUTH_DRINA_MUN_IDS = new Set<MunicipalityId>([
     'rogatica',
     'visegrad',
     'foca',
-    'gorazde'
+    'gorazde',
+    'cajnice'
 ]);
 
 const FALLBACK_ROUTES_BY_FACTION: Record<string, MunicipalityId[]> = {
@@ -172,6 +177,7 @@ function buildFriendlyMunicipalitiesByFaction(
         RS: new Set<MunicipalityId>(),
         HRHB: new Set<MunicipalityId>()
     };
+    // Settlement-level AoR (legacy/Phase I)
     const sids = Array.from(settlements.keys()).sort(strictCompare);
     for (const sid of sids) {
         const side = getEffectiveSettlementSide(state, sid);
@@ -179,6 +185,18 @@ function buildFriendlyMunicipalitiesByFaction(
         const rec = settlements.get(sid);
         if (!rec) continue;
         out[side].add(getMunicipalityIdFromRecord(rec));
+    }
+    // OSID-level political_controllers (Phase II): extract municipality from OSID "op:mun:slug"
+    const pc = state.political_controllers;
+    if (pc && typeof pc === 'object') {
+        const osids = Object.keys(pc).sort(strictCompare);
+        for (const osid of osids) {
+            const controller = pc[osid] as string | undefined;
+            if (!controller || !out[controller as FactionId]) continue;
+            const parts = osid.split(':');
+            const mun = parts.length >= 2 ? parts[1] : undefined;
+            if (mun) out[controller as FactionId].add(mun as MunicipalityId);
+        }
     }
     return out;
 }
@@ -199,7 +217,10 @@ function getPrimaryRouteForSourceMun(sourceMun: MunicipalityId, faction: Faction
         if (NORTHWEST_BOSNIA_MUN_IDS.has(sourceMun)) {
             return ['travnik', 'zenica', 'tuzla', 'gorazde'];
         }
-        if (EAST_BOSNIA_MUN_IDS.has(sourceMun)) {
+        if (SOUTH_DRINA_MUN_IDS.has(sourceMun)) {
+            return ['gorazde', 'srebrenica', 'tuzla', 'zenica', 'travnik'];
+        }
+        if (NORTH_DRINA_MUN_IDS.has(sourceMun)) {
             return ['srebrenica', 'tuzla', 'gorazde', 'zenica', 'travnik'];
         }
     }

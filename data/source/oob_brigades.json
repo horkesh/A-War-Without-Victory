@@ -39,8 +39,8 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "special",
       "available_from": 8,
-      "initial_personnel": 600,
-      "initial_cohesion": 65,
+      "initial_personnel": 480,
+      "initial_cohesion": 55,
       "mandatory": true
     },
     {
@@ -54,8 +54,8 @@
       "source": "markdown_rebuild",
       "default_equipment_class": "special",
       "available_from": 8,
-      "initial_personnel": 600,
-      "initial_cohesion": 65,
+      "initial_personnel": 480,
+      "initial_cohesion": 55,
       "mandatory": true
     },
     {
@@ -115,8 +115,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 400,
+      "initial_cohesion": 35
     },
     {
       "id": "arbih_146th_light",
@@ -130,8 +130,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 400,
+      "initial_cohesion": 35
     },
     {
       "id": "arbih_101st_mountain",
@@ -316,8 +316,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 400,
+      "initial_cohesion": 35
     },
     {
       "id": "arbih_131st_light",
@@ -331,8 +331,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 400,
+      "initial_cohesion": 35
     },
     {
       "id": "arbih_181st_mountain",
@@ -377,8 +377,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 400,
+      "initial_cohesion": 35
     },
     {
       "id": "arbih_161st_slavna_olovo_mountain",
@@ -392,8 +392,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "honor": "slavna",
-      "initial_personnel": 500,
-      "initial_cohesion": 45,
+      "initial_personnel": 400,
+      "initial_cohesion": 35,
       "mandatory": true
     },
     {
@@ -408,8 +408,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 400,
+      "initial_cohesion": 35
     },
     {
       "id": "arbih_164th_mountain",
@@ -423,8 +423,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 400,
+      "initial_cohesion": 35
     },
     {
       "id": "arbih_165th_mountain",
@@ -438,8 +438,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 400,
+      "initial_cohesion": 35
     },
     {
       "id": "arbih_185th_light",
@@ -453,8 +453,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 400,
+      "initial_cohesion": 35
     },
     {
       "id": "arbih_9th_muslim_liberation",
@@ -716,8 +716,8 @@
       "available_from": 0,
       "mandatory": true,
       "honor": "vitezka",
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_303rd_vitezka_mountain",
@@ -732,8 +732,8 @@
       "available_from": 0,
       "mandatory": true,
       "honor": "vitezka",
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_314th_slavna_liberation",
@@ -748,8 +748,8 @@
       "available_from": 0,
       "mandatory": true,
       "honor": "slavna",
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_319th_liberation",
@@ -763,8 +763,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 8,
       "mandatory": true,
-      "initial_personnel": 600,
-      "initial_cohesion": 50
+      "initial_personnel": 480,
+      "initial_cohesion": 40
     },
     {
       "id": "arbih_330th_liberation",
@@ -778,8 +778,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_327th_vitezka_mountain",
@@ -794,8 +794,8 @@
       "available_from": 0,
       "mandatory": true,
       "honor": "vitezka",
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_328th_mountain",
@@ -809,8 +809,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 8,
       "mandatory": true,
-      "initial_personnel": 600,
-      "initial_cohesion": 50
+      "initial_personnel": 480,
+      "initial_cohesion": 40
     },
     {
       "id": "arbih_329th_mountain",
@@ -824,8 +824,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 8,
       "mandatory": true,
-      "initial_personnel": 600,
-      "initial_cohesion": 50
+      "initial_personnel": 480,
+      "initial_cohesion": 40
     },
     {
       "id": "arbih_351st_liberation",
@@ -839,8 +839,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 8,
       "mandatory": true,
-      "initial_personnel": 600,
-      "initial_cohesion": 50
+      "initial_personnel": 480,
+      "initial_cohesion": 40
     },
     {
       "id": "arbih_372nd_vitezka_mountain",
@@ -855,8 +855,8 @@
       "available_from": 8,
       "mandatory": true,
       "honor": "vitezka",
-      "initial_personnel": 600,
-      "initial_cohesion": 50
+      "initial_personnel": 480,
+      "initial_cohesion": 40
     },
     {
       "id": "arbih_373rd_slavna_mountain",
@@ -871,8 +871,8 @@
       "available_from": 8,
       "mandatory": true,
       "honor": "slavna",
-      "initial_personnel": 600,
-      "initial_cohesion": 50
+      "initial_personnel": 480,
+      "initial_cohesion": 40
     },
     {
       "id": "arbih_374th_slavna_light",
@@ -887,8 +887,8 @@
       "available_from": 8,
       "mandatory": true,
       "honor": "slavna",
-      "initial_personnel": 600,
-      "initial_cohesion": 50
+      "initial_personnel": 480,
+      "initial_cohesion": 40
     },
     {
       "id": "arbih_375th_liberation",
@@ -902,8 +902,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 8,
       "mandatory": true,
-      "initial_personnel": 600,
-      "initial_cohesion": 50
+      "initial_personnel": 480,
+      "initial_cohesion": 40
     },
     {
       "id": "arbih_377th_vitezka_mountain",
@@ -918,8 +918,8 @@
       "available_from": 8,
       "mandatory": true,
       "honor": "vitezka",
-      "initial_personnel": 600,
-      "initial_cohesion": 50
+      "initial_personnel": 480,
+      "initial_cohesion": 40
     },
     {
       "id": "arbih_4th_muslim_light",
@@ -933,8 +933,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_443rd_mountain",
@@ -948,8 +948,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_444th_mountain",
@@ -963,8 +963,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_445th_mountain",
@@ -978,8 +978,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_446th_light",
@@ -993,8 +993,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 16,
       "mandatory": true,
-      "initial_personnel": 700,
-      "initial_cohesion": 52
+      "initial_personnel": 560,
+      "initial_cohesion": 42
     },
     {
       "id": "arbih_447th_liberation",
@@ -1008,8 +1008,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_450th_light",
@@ -1023,8 +1023,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_441st_vitezka_mountain",
@@ -1039,8 +1039,8 @@
       "available_from": 0,
       "mandatory": true,
       "honor": "vitezka",
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_442nd_mountain",
@@ -1054,8 +1054,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_448th_liberation",
@@ -1069,8 +1069,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_449th_eastern_herzegovina_mountain",
@@ -1084,8 +1084,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_501st_slavna_mountain",
@@ -1099,8 +1099,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "honor": "slavna",
-      "initial_personnel": 500,
-      "initial_cohesion": 45,
+      "initial_personnel": 700,
+      "initial_cohesion": 60,
       "mandatory": true
     },
     {
@@ -1116,8 +1116,8 @@
       "available_from": 0,
       "mandatory": true,
       "honor": "vitezka",
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 700,
+      "initial_cohesion": 60
     },
     {
       "id": "arbih_503rd_slavna_mountain",
@@ -1131,8 +1131,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "honor": "slavna",
-      "initial_personnel": 500,
-      "initial_cohesion": 45,
+      "initial_personnel": 700,
+      "initial_cohesion": 60,
       "mandatory": true
     },
     {
@@ -1148,8 +1148,8 @@
       "available_from": 0,
       "mandatory": true,
       "honor": "vitezka",
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 700,
+      "initial_cohesion": 60
     },
     {
       "id": "arbih_506th_mountain",
@@ -1163,8 +1163,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 700,
+      "initial_cohesion": 60
     },
     {
       "id": "arbih_510th_bosnian_liberation",
@@ -1178,8 +1178,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 700,
+      "initial_cohesion": 60
     },
     {
       "id": "arbih_511th_slavna_mountain",
@@ -1193,8 +1193,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "honor": "slavna",
-      "initial_personnel": 500,
-      "initial_cohesion": 45,
+      "initial_personnel": 700,
+      "initial_cohesion": 60,
       "mandatory": true
     },
     {
@@ -1209,8 +1209,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 700,
+      "initial_cohesion": 60
     },
     {
       "id": "arbih_17th_vitezka_mountain",
@@ -1225,8 +1225,8 @@
       "available_from": 0,
       "mandatory": true,
       "honor": "vitezka",
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_706th_muslim_mountain",
@@ -1240,8 +1240,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_708th_mountain",
@@ -1255,8 +1255,8 @@
       "default_equipment_class": "mountain",
       "available_from": 26,
       "mandatory": true,
-      "initial_personnel": 800,
-      "initial_cohesion": 56
+      "initial_personnel": 640,
+      "initial_cohesion": 46
     },
     {
       "id": "arbih_712th_mountain",
@@ -1270,8 +1270,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_725th_light",
@@ -1285,8 +1285,8 @@
       "default_equipment_class": "mountain",
       "available_from": 26,
       "mandatory": true,
-      "initial_personnel": 800,
-      "initial_cohesion": 56
+      "initial_personnel": 640,
+      "initial_cohesion": 46
     },
     {
       "id": "arbih_727th_slavna",
@@ -1301,8 +1301,8 @@
       "available_from": 0,
       "mandatory": true,
       "honor": "slavna",
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_733rd_mountain",
@@ -1316,8 +1316,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 4,
       "mandatory": true,
-      "initial_personnel": 600,
-      "initial_cohesion": 48
+      "initial_personnel": 480,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_737th_muslim_light",
@@ -1331,8 +1331,8 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_705th_slavna_mountain",
@@ -1347,8 +1347,8 @@
       "available_from": 0,
       "mandatory": true,
       "honor": "slavna",
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_707th_slavna_mountain",
@@ -1363,8 +1363,8 @@
       "available_from": 0,
       "mandatory": true,
       "honor": "slavna",
-      "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_personnel": 440,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_717th_slavna_mountain",
@@ -1379,8 +1379,8 @@
       "available_from": 4,
       "mandatory": true,
       "honor": "slavna",
-      "initial_personnel": 600,
-      "initial_cohesion": 48
+      "initial_personnel": 480,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_770th_slavna_mountain",
@@ -1395,8 +1395,8 @@
       "available_from": 4,
       "mandatory": true,
       "honor": "slavna",
-      "initial_personnel": 600,
-      "initial_cohesion": 48
+      "initial_personnel": 480,
+      "initial_cohesion": 38
     },
     {
       "id": "arbih_210th_vitezka_liberation_nesib_maliki",
@@ -1556,14 +1556,16 @@
       "name": "801st Light",
       "home_mun": "gorazde",
       "home_settlement": "Goražde",
+      "home_osid": "op:gorazde:gorazde_2",
       "subordinate_to": "arbih_1st_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "manpower_cost": 40,
+      "initial_personnel": 1100,
+      "initial_cohesion": 72
     },
     {
       "id": "arbih_802nd_light",
@@ -1571,14 +1573,16 @@
       "name": "802nd Light",
       "home_mun": "gorazde",
       "home_settlement": "Goražde",
+      "home_osid": "op:gorazde:osjecani_2",
       "subordinate_to": "arbih_1st_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "manpower_cost": 40,
+      "initial_personnel": 1100,
+      "initial_cohesion": 72
     },
     {
       "id": "arbih_803rd_light",
@@ -1586,14 +1590,16 @@
       "name": "803rd Light",
       "home_mun": "gorazde",
       "home_settlement": "Goražde",
+      "home_osid": "op:gorazde:faocici_2",
       "subordinate_to": "arbih_1st_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "manpower_cost": 40,
+      "initial_personnel": 1100,
+      "initial_cohesion": 72
     },
     {
       "id": "arbih_807th_muslim_liberation",
@@ -1601,14 +1607,16 @@
       "name": "807th Muslim Liberation",
       "home_mun": "gorazde",
       "home_settlement": "Goražde",
+      "home_osid": "op:gorazde:kolovarice",
       "subordinate_to": "arbih_1st_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "manpower_cost": 40,
+      "initial_personnel": 1100,
+      "initial_cohesion": 72
     },
     {
       "id": "arbih_808th_liberation",
@@ -1616,14 +1624,16 @@
       "name": "808th Liberation",
       "home_mun": "gorazde",
       "home_settlement": "Goražde",
+      "home_osid": "op:gorazde:ustipraca_2",
       "subordinate_to": "arbih_1st_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "manpower_cost": 40,
+      "initial_personnel": 1100,
+      "initial_cohesion": 72
     },
     {
       "id": "arbih_843rd_light",
@@ -1631,14 +1641,16 @@
       "name": "843rd Light",
       "home_mun": "gorazde",
       "home_settlement": "Goražde",
+      "home_osid": "op:gorazde:hrancici",
       "subordinate_to": "arbih_1st_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "manpower_cost": 40,
+      "initial_personnel": 1100,
+      "initial_cohesion": 72
     },
     {
       "id": "arbih_851st_vitezka_liberation",
@@ -1646,15 +1658,17 @@
       "name": "851st Vitezka Liberation",
       "home_mun": "gorazde",
       "home_settlement": "Goražde",
+      "home_osid": "op:gorazde:semihova_2",
       "subordinate_to": "arbih_1st_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
+      "manpower_cost": 40,
       "honor": "vitezka",
-      "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_personnel": 1100,
+      "initial_cohesion": 72
     },
     {
       "id": "rs_1st_guards_motorized",
@@ -2485,8 +2499,8 @@
       "id": "rs_2nd_sarajevo_light_infantry",
       "faction": "RS",
       "name": "2nd Sarajevo Light Infantry",
-      "home_mun": "duvno",
-      "home_settlement": "Vojkovići",
+      "home_mun": "pale",
+      "home_settlement": "Pale",
       "subordinate_to": "vrs_sarajevo_romanija",
       "kind": "brigade",
       "source": "markdown_rebuild",
@@ -2539,7 +2553,8 @@
       "available_from": 0,
       "mandatory": true,
       "initial_personnel": 1200,
-      "initial_cohesion": 72
+      "initial_cohesion": 72,
+      "home_osid": "op:hanpijesak:han_pijesak_2"
     },
     {
       "id": "rs_1st_zvornik",
@@ -2554,7 +2569,8 @@
       "available_from": 0,
       "mandatory": true,
       "initial_personnel": 1000,
-      "initial_cohesion": 67
+      "initial_cohesion": 67,
+      "home_osid": "op:zvornik:kozluk_2"
     },
     {
       "id": "rs_1st_bratunac",
@@ -2764,7 +2780,8 @@
       "available_from": 0,
       "mandatory": true,
       "initial_personnel": 1200,
-      "initial_cohesion": 72
+      "initial_cohesion": 72,
+      "home_osid": "op:hanpijesak:han_pijesak_2"
     },
     {
       "id": "hrhb_1st_brigade_mostar",
@@ -2921,12 +2938,12 @@
       "faction": "HRHB",
       "name": "Kralj Petar Krešimir IV Brigade",
       "home_mun": "livno",
-      "home_settlement": "",
+      "home_settlement": "Livno",
       "subordinate_to": "hvo_tomislavgrad",
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
-      "available_from": 8,
+      "available_from": 0,
       "initial_personnel": 800,
       "initial_cohesion": 58,
       "mandatory": true
@@ -3160,8 +3177,8 @@
       "id": "hrhb_107th_gradaac_brigade",
       "faction": "HRHB",
       "name": "107th \"Gradačac\" Brigade",
-      "home_mun": "gradacac",
-      "home_settlement": "Gradačac",
+      "home_mun": "odzak",
+      "home_settlement": "Odžak",
       "subordinate_to": "arbih_2nd_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
@@ -3175,8 +3192,8 @@
       "id": "hrhb_108th_brko_brigade",
       "faction": "HRHB",
       "name": "108th \"Brčko\" Brigade",
-      "home_mun": "brcko",
-      "home_settlement": "Brčko",
+      "home_mun": "orasje",
+      "home_settlement": "Orašje",
       "subordinate_to": "arbih_2nd_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
@@ -3220,8 +3237,8 @@
       "id": "hrhb_115th_zrinski_brigade",
       "faction": "HRHB",
       "name": "115th \"Zrinski\" Brigade",
-      "home_mun": "tuzla",
-      "home_settlement": "Tuzla",
+      "home_mun": "odzak",
+      "home_settlement": "Odžak",
       "subordinate_to": "arbih_2nd_corps",
       "kind": "brigade",
       "source": "markdown_rebuild",
@@ -3342,12 +3359,14 @@
       "faction": "RBiH",
       "home_settlement": "Žepa",
       "home_mun": "rogatica",
+      "home_osid": "op:rogatica:zepa_2",
       "kind": "brigade",
       "source": "historical_enrichment_1992",
       "subordinate_to": "arbih_2nd_corps",
       "default_equipment_class": "light_infantry",
-      "available_from": 4,
+      "available_from": 0,
       "mandatory": true,
+      "manpower_cost": 100,
       "initial_personnel": 600,
       "initial_cohesion": 48
     },
@@ -3363,6 +3382,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 4,
       "mandatory": true,
+      "manpower_cost": 200,
       "initial_personnel": 600,
       "initial_cohesion": 48
     },
@@ -3374,6 +3394,7 @@
       "home_mun": "zvornik",
       "kind": "brigade",
       "source": "historical_enrichment_1992",
+      "manpower_cost": 200,
       "subordinate_to": "arbih_2nd_corps",
       "default_equipment_class": "light_infantry",
       "available_from": 4,
@@ -3387,14 +3408,16 @@
       "faction": "RBiH",
       "home_settlement": "Srebrenica",
       "home_mun": "srebrenica",
+      "home_osid": "op:srebrenica:srebrenica_2",
       "kind": "brigade",
       "source": "bb_28th_division_srebrenica",
       "subordinate_to": "arbih_2nd_corps",
       "default_equipment_class": "police",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 350,
-      "initial_cohesion": 38
+      "manpower_cost": 60,
+      "initial_personnel": 900,
+      "initial_cohesion": 70
     },
     {
       "id": "arbih_281st_east_bosnian_light",
@@ -3402,14 +3425,16 @@
       "faction": "RBiH",
       "home_settlement": "Srebrenica",
       "home_mun": "srebrenica",
+      "home_osid": "op:srebrenica:donji_potocari_2",
       "kind": "brigade",
       "source": "bb_28th_division_srebrenica",
       "subordinate_to": "arbih_2nd_corps",
       "default_equipment_class": "police",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 350,
-      "initial_cohesion": 38
+      "manpower_cost": 60,
+      "initial_personnel": 900,
+      "initial_cohesion": 70
     },
     {
       "id": "arbih_282nd_east_bosnian_light",
@@ -3417,14 +3442,16 @@
       "faction": "RBiH",
       "home_settlement": "Srebrenica",
       "home_mun": "srebrenica",
+      "home_osid": "op:srebrenica:mala_daljegosta_2",
       "kind": "brigade",
       "source": "bb_28th_division_srebrenica",
       "subordinate_to": "arbih_2nd_corps",
       "default_equipment_class": "police",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 350,
-      "initial_cohesion": 38
+      "manpower_cost": 60,
+      "initial_personnel": 900,
+      "initial_cohesion": 70
     },
     {
       "id": "arbih_283rd_east_bosnian_light",
@@ -3432,14 +3459,16 @@
       "faction": "RBiH",
       "home_settlement": "Srebrenica",
       "home_mun": "srebrenica",
+      "home_osid": "op:srebrenica:ljeskovik_2",
       "kind": "brigade",
       "source": "bb_28th_division_srebrenica",
       "subordinate_to": "arbih_2nd_corps",
       "default_equipment_class": "police",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 350,
-      "initial_cohesion": 38
+      "manpower_cost": 60,
+      "initial_personnel": 900,
+      "initial_cohesion": 70
     },
     {
       "id": "arbih_284th_east_bosnian_light",
@@ -3447,14 +3476,16 @@
       "faction": "RBiH",
       "home_settlement": "Srebrenica",
       "home_mun": "srebrenica",
+      "home_osid": "op:srebrenica:osmace_2",
       "kind": "brigade",
       "source": "bb_28th_division_srebrenica",
       "subordinate_to": "arbih_2nd_corps",
       "default_equipment_class": "police",
       "available_from": 0,
       "mandatory": true,
-      "initial_personnel": 350,
-      "initial_cohesion": 38
+      "manpower_cost": 60,
+      "initial_personnel": 900,
+      "initial_cohesion": 70
     },
     {
       "id": "hvo_eugen_kvaternik",
@@ -3565,8 +3596,8 @@
       "id": "hvo_jure_francetic",
       "name": "Brigade \"Jure Francetić\"",
       "faction": "HRHB",
-      "home_settlement": "Zenica",
-      "home_mun": "zenica",
+      "home_settlement": "Vitez",
+      "home_mun": "vitez",
       "kind": "brigade",
       "source": "historical_enrichment_1992",
       "subordinate_to": "hvo_central_bosnia",

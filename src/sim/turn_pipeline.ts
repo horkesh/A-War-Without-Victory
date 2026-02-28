@@ -166,7 +166,7 @@ import { applyBrigadeRepositionOrders } from './phase_ii/apply_brigade_repositio
 import { applyReshapeOrders } from './phase_ii/aor_reshaping.js';
 import { generateAllBotOrdersOsid, computeOsidEthnicComposition, type OsidBotContext } from './phase_ii/bot_brigade_ai_osid.js';
 import { loadSettlementEthnicityData } from '../data/settlement_ethnicity.js';
-import { generateAllCorpsOrders } from './phase_ii/bot_corps_ai.js';
+import { generateAllCorpsOrders, extractCorpsAiReport, type CorpsAiReportEntry } from './phase_ii/bot_corps_ai.js';
 import {
     applyBrigadeMunicipalityOrders,
     applySurroundedBrigadeReform,
@@ -191,7 +191,7 @@ import { computeMilitiaGarrisons } from './phase_ii/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from './phase_ii/operational_groups.js';
 import { buildAdjacencyFromEdges } from './phase_ii/phase_ii_adjacency.js';
 import { updateReconIntelligence } from './phase_ii/recon_intelligence.js';
-import { backfillFormationLocationOsid, loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
+import { backfillFormationLocationOsid, computeOsidPopulation, loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
 import { resolveAttackOrders, type ResolveAttackOrdersReport } from './phase_ii/resolve_attack_orders.js';
 import { resolveAttackOrdersOsid, type AttackResolutionOsidReport } from './phase_ii/attack_resolution_osid.js';
 import { applyZocConstrainedMovement } from './phase_ii/zoc_constrained_movement.js';
@@ -338,6 +338,8 @@ export interface TurnReport {
     phase_ii_equipment_progression?: EquipmentProgressionReport;
     /** B4: Enclave resilience update report. */
     phase_ii_enclave_resilience?: EnclaveResilienceReport;
+    /** Phase II: corps AI directive report (per-corps stance, targets, aggression). */
+    corps_ai_report?: CorpsAiReportEntry[];
     /** Phase II: recruitment resource accrual + ongoing OOB recruitment. */
     phase_ii_recruitment?: {
         accrual_by_faction: Record<FactionId, { capital_delta: number; equipment_delta: number }>;
@@ -706,8 +708,13 @@ const phases: NamedPhase[] = [
             const od = getOperationalData(context);
             const reverseMap = od?.opData?.operationalToCanonical ?? null;
             const osidEdges = od?.edges ?? undefined;
+            const corpsReport: CorpsAiReportEntry[] = [];
             for (const faction of factions) {
                 generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges);
+                corpsReport.push(...extractCorpsAiReport(context.state, faction as FactionId));
+            }
+            if (corpsReport.length > 0) {
+                context.report.corps_ai_report = corpsReport;
             }
         }
     },
@@ -741,13 +748,18 @@ const phases: NamedPhase[] = [
                 } catch {
                     // Non-fatal: ethnic scoring is a bonus, not a requirement
                 }
+                const osidPopulationMap = context.input.municipalityPopulation1991
+                    ? computeOsidPopulation(od.opData.operationalToCanonical, context.input.municipalityPopulation1991)
+                    : undefined;
                 const osidCtx: OsidBotContext = {
                     edges: od.edges,
                     reverseMap: od.opData.operationalToCanonical,
                     enemyZocByFaction: od.zocState.enemyZocByFaction,
+                    linkedZocByFaction: od.zocState.linkedZocByFaction,
                     supplyStateByOsid: supplyByOsid,
                     supplyConnectivityByFaction: supplyConnectivityByFaction.size > 0 ? supplyConnectivityByFaction : undefined,
-                    ethnicCompositionByOsid
+                    ethnicCompositionByOsid,
+                    osidPopulationMap
                 };
                 generateAllBotOrdersOsid(context.state, factions, osidCtx);
             }
@@ -877,12 +889,16 @@ const phases: NamedPhase[] = [
                 } catch {
                     terrainData = { by_sid: {} };
                 }
+                const osidPopMap = context.input.municipalityPopulation1991
+                    ? computeOsidPopulation(od.opData.operationalToCanonical, context.input.municipalityPopulation1991)
+                    : undefined;
                 context.report.phase_ii_attack_resolution_osid = resolveAttackOrdersOsid(
                     context.state,
                     od.edges,
                     od.opData.operationalToCanonical,
                     terrainData,
-                    context.report.supply_resolution?.supply_state_by_osid
+                    context.report.supply_resolution?.supply_state_by_osid,
+                    osidPopMap
                 );
                 return;
             }
@@ -936,12 +952,42 @@ const phases: NamedPhase[] = [
         name: 'phase-ii-hostile-takeover-displacement',
         run: async (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
-            const battleReport = context.report.phase_ii_resolve_attack_orders?.battle_report;
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+
+            // Build combined battle report from both old settlement-based and OSID-based attack resolution.
+            // The displacement system needs settlement-level records; we synthesize them from OSID flips
+            // by finding one settlement per municipality. This connects OSID-level combat to the
+            // existing displacement routing (e.g. East Bosnia displaced → Srebrenica/Gorazde).
+            const legacyBattles = context.report.phase_ii_resolve_attack_orders?.battle_report?.battles ?? [];
+            const osidBattles: Array<{ settlement_flipped: boolean; location: string; attacker_faction: FactionId; defender_faction: FactionId }> = [];
+            const osidReport = context.report.phase_ii_attack_resolution_osid;
+            if (osidReport?.battles?.length) {
+                const munToSid = new Map<string, string>();
+                for (const [sid, rec] of graph.settlements.entries()) {
+                    const mun = rec.mun1990_id ?? rec.mun_code ?? (rec as { mun?: string }).mun;
+                    if (mun && !munToSid.has(mun)) munToSid.set(mun, sid);
+                }
+                for (const b of osidReport.battles) {
+                    if (!b.attacker_won) continue;
+                    const parts = b.target_osid.split(':');
+                    const mun = parts.length >= 2 ? parts[1] : undefined;
+                    if (!mun) continue;
+                    const sid = munToSid.get(mun);
+                    if (!sid) continue;
+                    osidBattles.push({
+                        settlement_flipped: true,
+                        location: sid,
+                        attacker_faction: b.attacker_faction as FactionId,
+                        defender_faction: b.defender_faction as FactionId
+                    });
+                }
+            }
+            const combinedReport = { battles: [...legacyBattles, ...osidBattles] };
+
             context.report.phase_ii_takeover_displacement = processPhaseIIDisplacementTakeover(
                 context.state,
                 graph.settlements,
-                battleReport,
+                combinedReport,
                 context.input.municipalityPopulation1991
             );
         }

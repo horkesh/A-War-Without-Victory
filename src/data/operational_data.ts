@@ -130,6 +130,40 @@ export function resolveLocationOsid(
  * Mutates state.formations. Call after formations are loaded/created and when canonicalToOperational is available.
  * Deterministic: formations iterated in sorted id order.
  */
+/** Per-OSID estimated population (1991 census, divided evenly across OSIDs within each municipality). */
+export type OsidPopulationMap = Map<string, number>;
+
+/**
+ * Compute per-OSID population by dividing municipality total population across OSIDs.
+ * OSID format: `op:municipality:slug` — municipality extracted from second segment.
+ * Deterministic: result depends only on reverseMap keys and munPopulation values.
+ */
+export function computeOsidPopulation(
+    reverseMap: OperationalToCanonicalReverseMap,
+    munPopulation: Record<string, { total: number }>
+): OsidPopulationMap {
+    // Count OSIDs per municipality
+    const osidsByMun = new Map<string, string[]>();
+    for (const osid of reverseMap.keys()) {
+        const parts = osid.split(':');
+        if (parts.length < 2) continue;
+        const mun = parts[1]!;
+        const list = osidsByMun.get(mun) ?? [];
+        list.push(osid);
+        osidsByMun.set(mun, list);
+    }
+    const result: OsidPopulationMap = new Map();
+    for (const [mun, osids] of osidsByMun) {
+        const entry = munPopulation[mun];
+        if (!entry || entry.total <= 0) continue;
+        const perOsid = Math.floor(entry.total / osids.length);
+        for (const osid of osids) {
+            result.set(osid, perOsid);
+        }
+    }
+    return result;
+}
+
 export function backfillFormationLocationOsid(
     state: { formations?: Record<string, { hq_sid?: string; location_osid?: string }> },
     canonicalToOperational: CanonicalToOperationalMap

@@ -50,19 +50,19 @@ describe('Three-Sided Bot AI Validation', () => {
 
     // --- A3: RS early-war attack share boost ---
 
-    it('RS getEffectiveAttackShare returns 0.55 at turn 0', () => {
+    it('RS getEffectiveAttackShare returns 0.33 at turn 0 (doctrine phase)', () => {
         const share = getEffectiveAttackShare('RS', 0);
-        expect(share).toBeCloseTo(0.55, 2);
+        expect(share).toBeCloseTo(0.33, 2);
     });
 
-    it('RS getEffectiveAttackShare tapers to base by week 30 (RS_EARLY_WAR_END_WEEK)', () => {
+    it('RS getEffectiveAttackShare uses balanced phase at turn 30', () => {
         const share = getEffectiveAttackShare('RS', 30);
-        expect(share).toBe(FACTION_STRATEGIES.RS.max_attack_posture_share);
+        expect(share).toBeCloseTo(0.20, 2);
     });
 
-    it('Non-RS factions are unaffected by early-war boost', () => {
-        expect(getEffectiveAttackShare('RBiH', 0)).toBe(FACTION_STRATEGIES.RBiH.max_attack_posture_share);
-        expect(getEffectiveAttackShare('HRHB', 0)).toBe(FACTION_STRATEGIES.HRHB.max_attack_posture_share);
+    it('Non-RS factions use doctrine phase values', () => {
+        expect(getEffectiveAttackShare('RBiH', 0)).toBeCloseTo(0.05, 2);
+        expect(getEffectiveAttackShare('HRHB', 0)).toBeCloseTo(0.25, 2);
     });
 
     // --- D3: Doctrine phases ---
@@ -71,7 +71,7 @@ describe('Three-Sided Bot AI Validation', () => {
         const phase = getActiveDoctrinePhase('RS', 5);
         expect(phase).not.toBeNull();
         expect(phase!.default_corps_stance).toBe('offensive');
-        expect(phase!.max_attack_share_override).toBe(0.55);
+        expect(phase!.max_attack_share_override).toBe(0.33);
     });
 
     it('RBiH doctrine phase at turn 5 is defensive', () => {

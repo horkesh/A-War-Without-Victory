@@ -62,8 +62,10 @@ export const FACTION_INITIAL_COHESION: Record<string, number> = {
 };
 
 /** Minimum manpower to spawn a mandatory (historical OOB) brigade — lower than MIN_BRIGADE_SPAWN
- * because these formations definitely existed; pools will reinforce them over time. */
-export const MIN_MANDATORY_SPAWN = 200;
+ * because these formations definitely existed; pools will reinforce them over time.
+ * n223: lowered from 200 to 100. At 200, enclave brigades like the 285th (Zepa, manpower_cost=150)
+ * were blocked because Math.min(150, pool) < 200 is always true. */
+export const MIN_MANDATORY_SPAWN = 100;
 
 /** Minimum personnel a formation can have during combat — below this the unit routes/dissolves rather than taking further casualties. Used as casualty floor instead of MIN_BRIGADE_SPAWN so defenders at 800 personnel can actually take losses. */
 export const MIN_COMBAT_PERSONNEL = 100;

@@ -22,7 +22,7 @@ import { type Osid } from './zoc.js';
 // Types
 // ═══════════════════════════════════════════════════════════════════════════
 
-export type FrontClassification = 'undefended' | 'critical' | 'threatened' | 'active' | 'quiet' | 'interior';
+export type FrontClassification = 'undefended' | 'zoc_covered' | 'critical' | 'threatened' | 'active' | 'quiet' | 'interior';
 
 export interface OsidAnalysis {
     osid: Osid;
@@ -61,22 +61,28 @@ export interface FactionGraphAnalysis {
     undefended_front: Osid[];
     /** Enemy OSIDs with weak/no defense (attack opportunities). */
     weak_enemy_osids: Array<{ osid: Osid; reason: string }>;
+    /** Enemy OSIDs completely surrounded by faction-controlled territory (pockets). */
+    enemy_pockets: Osid[];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Get brigade power at an OSID. Returns 0 if no brigade present. */
+/** Get brigade power at an OSID. Returns 0 if no brigade present.
+ *  `power` / `brigadeId` / `formation` = strongest single brigade (for weak-point details).
+ *  `totalPower` / `brigadeCount` = aggregate across ALL brigades (for threat assessment). */
 function getBrigadePowerAtOsid(
     state: GameState,
     osid: Osid,
     factionFilter?: FactionId
-): { power: number; brigadeId: string | null; formation: FormationState | null } {
+): { power: number; totalPower: number; brigadeId: string | null; formation: FormationState | null; brigadeCount: number } {
     const formations = state.formations ?? {};
     let bestPower = 0;
     let bestId: string | null = null;
     let bestFormation: FormationState | null = null;
+    let totalPower = 0;
+    let brigadeCount = 0;
 
     for (const [id, f] of Object.entries(formations)) {
         if (f.status !== 'active') continue;
@@ -88,6 +94,8 @@ function getBrigadePowerAtOsid(
         const eq = Math.max(0.1, f.experience ?? 0.3);
         const coh = Math.max(0.1, (f.cohesion ?? 60) / 100);
         const power = personnel * eq * coh;
+        totalPower += power;
+        brigadeCount++;
 
         if (power > bestPower || (power === bestPower && (bestId === null || strictCompare(id, bestId) < 0))) {
             bestPower = power;
@@ -95,7 +103,7 @@ function getBrigadePowerAtOsid(
             bestFormation = f;
         }
     }
-    return { power: bestPower, brigadeId: bestId, formation: bestFormation };
+    return { power: bestPower, totalPower, brigadeId: bestId, formation: bestFormation, brigadeCount };
 }
 
 /** BFS to find all OSIDs reachable from a source through faction-controlled OSIDs. */
@@ -197,7 +205,8 @@ export function analyzeFactionGraph(
     state: GameState,
     faction: FactionId,
     adjacency: Map<Osid, Osid[]>,
-    reverseMap: OperationalToCanonicalReverseMap
+    reverseMap: OperationalToCanonicalReverseMap,
+    linkedZocForFaction?: Set<Osid>
 ): FactionGraphAnalysis {
     const result: FactionGraphAnalysis = {
         faction,
@@ -206,7 +215,8 @@ export function analyzeFactionGraph(
         chokepoints: [],
         salients: [],
         undefended_front: [],
-        weak_enemy_osids: []
+        weak_enemy_osids: [],
+        enemy_pockets: []
     };
 
     // 1. Identify all faction-controlled OSIDs
@@ -234,14 +244,14 @@ export function analyzeFactionGraph(
             else if (c !== null) enemyNeighbors.push(n);
         }
 
-        // Brigade at this OSID
-        const { power: brigadePower, brigadeId } = getBrigadePowerAtOsid(state, osid, faction);
+        // Brigade at this OSID — use totalPower for classification and OsidAnalysis
+        const { totalPower: brigadePower, brigadeId } = getBrigadePowerAtOsid(state, osid, faction);
 
-        // Enemy threat: sum of enemy brigade powers on adjacent enemy OSIDs
+        // Enemy threat: sum of ALL enemy brigade powers on adjacent enemy OSIDs
         let enemyThreat = 0;
         for (const en of enemyNeighbors) {
-            const { power } = getBrigadePowerAtOsid(state, en);
-            enemyThreat += power;
+            const { totalPower } = getBrigadePowerAtOsid(state, en);
+            enemyThreat += totalPower;
         }
 
         // Front classification
@@ -249,7 +259,13 @@ export function analyzeFactionGraph(
         if (enemyNeighbors.length === 0) {
             classification = 'interior';
         } else if (brigadePower === 0) {
-            classification = 'undefended';
+            // Check if this OSID is covered by linked ZoC or has an adjacent friendly brigade
+            const isInLinkedZoc = linkedZocForFaction?.has(osid) ?? false;
+            const hasAdjacentFriendlyBrigade = !isInLinkedZoc && friendlyNeighbors.some(fn => {
+                const { totalPower } = getBrigadePowerAtOsid(state, fn, faction);
+                return totalPower > 0;
+            });
+            classification = (isInLinkedZoc || hasAdjacentFriendlyBrigade) ? 'zoc_covered' : 'undefended';
         } else if (enemyThreat > 0 && enemyThreat / brigadePower > 2.0) {
             classification = 'critical';
         } else if (enemyThreat > 0 && enemyThreat / brigadePower > 1.0) {
@@ -310,8 +326,8 @@ export function analyzeFactionGraph(
             if (enemyChecked.has(enemyOsid)) continue;
             enemyChecked.add(enemyOsid);
 
-            const { power, formation } = getBrigadePowerAtOsid(state, enemyOsid);
-            if (power === 0) {
+            const { totalPower, formation } = getBrigadePowerAtOsid(state, enemyOsid);
+            if (totalPower === 0) {
                 result.weak_enemy_osids.push({ osid: enemyOsid, reason: 'undefended' });
             } else if (formation) {
                 const entrenchment = (formation as { entrenchment_turns?: number }).entrenchment_turns ?? 0;
@@ -329,12 +345,29 @@ export function analyzeFactionGraph(
         }
     }
 
+    // 4. Detect enemy pockets: enemy OSIDs where ALL neighbors are faction-controlled
+    const pocketChecked = new Set<Osid>();
+    for (const frontOsid of result.front_osids) {
+        const analysis = result.osid_analysis.get(frontOsid)!;
+        for (const enemyOsid of analysis.enemy_neighbors) {
+            if (pocketChecked.has(enemyOsid)) continue;
+            pocketChecked.add(enemyOsid);
+            const enemyNeighbors = adjacency.get(enemyOsid) ?? [];
+            if (enemyNeighbors.length > 0 && enemyNeighbors.every(n =>
+                (controllerCache.get(n) ?? getPoliticalControllerOSID(state, n, reverseMap)) === faction
+            )) {
+                result.enemy_pockets.push(enemyOsid);
+            }
+        }
+    }
+
     // Sort all output arrays for determinism
     result.front_osids.sort(strictCompare);
     result.chokepoints.sort(strictCompare);
     result.salients.sort(strictCompare);
     result.undefended_front.sort(strictCompare);
     result.weak_enemy_osids.sort((a, b) => strictCompare(a.osid, b.osid));
+    result.enemy_pockets.sort(strictCompare);
 
     return result;
 }
@@ -346,12 +379,13 @@ export function analyzeFactionGraph(
 export function analyzeAllFactions(
     state: GameState,
     adjacency: Map<Osid, Osid[]>,
-    reverseMap: OperationalToCanonicalReverseMap
+    reverseMap: OperationalToCanonicalReverseMap,
+    linkedZocByFaction?: Map<FactionId, Set<Osid>>
 ): Map<FactionId, FactionGraphAnalysis> {
     const factions = (state.factions ?? []).map(f => f.id).sort(strictCompare) as FactionId[];
     const result = new Map<FactionId, FactionGraphAnalysis>();
     for (const faction of factions) {
-        result.set(faction, analyzeFactionGraph(state, faction, adjacency, reverseMap));
+        result.set(faction, analyzeFactionGraph(state, faction, adjacency, reverseMap, linkedZocByFaction?.get(faction)));
     }
     return result;
 }
