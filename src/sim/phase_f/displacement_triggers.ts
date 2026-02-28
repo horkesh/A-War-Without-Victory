@@ -13,7 +13,8 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import type { GameState, SettlementId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFrontActiveSettlements } from '../phase_e/aor_instantiation.js';
-import { getEligiblePressureEdges, toEdgeId, type SidToOsidMap } from '../phase_e/pressure_eligibility.js';
+import type { CanonicalToOperationalMap } from '../../data/operational_data.js';
+import { getEligiblePressureEdges, toEdgeId } from '../phase_e/pressure_eligibility.js';
 
 /** Maximum displacement delta per settlement per turn [0, 1]. Conservative cap. */
 export const PHASE_F_MAX_DELTA_PER_TURN = 0.05;
@@ -58,7 +59,7 @@ export interface DisplacementTriggerReport {
 export function evaluateDisplacementTriggers(
     state: GameState,
     edges: ReadonlyArray<EdgeRecord>,
-    canonicalToOperational?: SidToOsidMap
+    canonicalToOperational?: CanonicalToOperationalMap
 ): { deltas: Record<SettlementId, number>; report: DisplacementTriggerReport } {
     const deltas: Record<SettlementId, number> = {};
     const reasons: Record<SettlementId, string[]> = {};

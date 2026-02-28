@@ -178,14 +178,6 @@ export const MIN_BRIGADE_THRESHOLD = 1500;
 /** Max militia-kind formations per municipality per faction (prevents runaway spawning). */
 export const MAX_TO_PER_MUN = 5;
 
-// --- Phase I Overhaul: siege mobilization ratios ---
-/** Full siege (≥90% surrounded): pool growth multiplier 3.0×. */
-export const SIEGE_RATIO_FULL = 0.90;
-/** Mostly surrounded (≥75%): pool growth multiplier 2.0×, caps lifted. */
-export const SIEGE_RATIO_MOSTLY = 0.75;
-/** Partial siege (≥50%): pool growth multiplier 1.5×. */
-export const SIEGE_RATIO_PARTIAL = 0.50;
-
 /**
  * Returns the formation tier based on kind and personnel count.
  * Used by Phase I Overhaul phases D–F for promotion logic and combat tier scaling.
@@ -198,6 +190,14 @@ export function getFormationTier(f: { kind?: string; personnel?: number }): 'det
     if (p >= MIN_BATTALION_THRESHOLD) return 'battalion';
     return 'detachment';
 }
+
+// --- Phase I Overhaul: siege mobilization ratios ---
+/** Full siege (≥90% surrounded): pool growth multiplier 3.0×. */
+export const SIEGE_RATIO_FULL = 0.90;
+/** Mostly surrounded (≥75%): pool growth multiplier 2.0×, caps lifted. */
+export const SIEGE_RATIO_MOSTLY = 0.75;
+/** Partial siege (≥50%): pool growth multiplier 1.5×. */
+export const SIEGE_RATIO_PARTIAL = 0.50;
 
 /**
  * Single nominal brigade size (troops per formation) for all factions.

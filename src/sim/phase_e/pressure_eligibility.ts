@@ -5,16 +5,11 @@
  * Scope: Spatial & Interaction only (no Phase O concepts).
  */
 
+import type { CanonicalToOperationalMap } from '../../data/operational_data.js';
 import type { FactionId, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 export type SettlementId = string;
-
-/**
- * Canonical SID → OSID mapping (subset of CanonicalToOperationalMap from operational_data.ts).
- * Passed optionally to resolve SID-format edge endpoints when political_controllers is OSID-keyed.
- */
-export type SidToOsidMap = Record<string, string>;
 
 /** Edge shape for eligibility (contact graph / adjacency). */
 export interface PressureEdge {
@@ -29,7 +24,7 @@ export interface PressureEdge {
  * mapped to its OSID via canonicalToOperational before the lookup succeeds.
  * Falls back to the id itself when the map is absent or the id is not found in it.
  */
-function resolveControlKey(id: string, pc: Record<string, unknown>, canonicalToOperational?: SidToOsidMap): string {
+function resolveControlKey(id: string, pc: Record<string, unknown>, canonicalToOperational?: CanonicalToOperationalMap): string {
     // If the id is already in pc (SID-keyed state or OSID edge in OSID-keyed state), use as-is.
     if (Object.prototype.hasOwnProperty.call(pc, id)) {
         return id;
@@ -66,7 +61,7 @@ export function isPressureEligible(
     state: GameState,
     edge: PressureEdge,
     _factionId?: FactionId,
-    canonicalToOperational?: SidToOsidMap
+    canonicalToOperational?: CanonicalToOperationalMap
 ): boolean {
     const pc = state.political_controllers ?? {};
     const keyA = resolveControlKey(edge.a, pc as Record<string, unknown>, canonicalToOperational);
@@ -104,7 +99,7 @@ export function getEligiblePressureEdges(
     state: GameState,
     edges: ReadonlyArray<{ a: string; b: string }>,
     factionId?: FactionId,
-    canonicalToOperational?: SidToOsidMap
+    canonicalToOperational?: CanonicalToOperationalMap
 ): PressureEdge[] {
     const out: PressureEdge[] = [];
     const seen = new Set<string>();
