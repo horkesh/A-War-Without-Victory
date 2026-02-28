@@ -122,4 +122,10 @@ export interface Scenario {
      * Keys: OSID strings (e.g. "op:brcko:brcko"). Values: FactionId ("RS", "RBiH", "HRHB").
      */
     osid_control_overrides?: Record<string, string>;
+    /**
+     * Per-faction OSID-level avoidance list. Brigade AI adds a heavy penalty for attacking these OSIDs
+     * for the listed faction, preventing them from targeting historically-specific pockets/salients.
+     * E.g. "RBiH": ["op:zavidovici:vozuca_2"] keeps RBiH from attacking the Vozuća VRS pocket.
+     */
+    avoided_osids_by_faction?: Record<string, string[]>;
 }

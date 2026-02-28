@@ -40,6 +40,9 @@
     "teslic": 0.55,
     "srebrenica": 0.55
   },
-  "osid_control_overrides": {}
+  "osid_control_overrides": {},
+  "avoided_osids_by_faction": {
+    "RBiH": ["op:zavidovici:vozuca_2"]
+  }
 
 }

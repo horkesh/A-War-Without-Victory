@@ -1237,7 +1237,7 @@ export function generateCorpsDirectives(
         // Collect offensive targets from army priorities
         const offensiveTargets: Osid[] = [];
         let bestMinOutcome: CorpsDirective['min_attack_outcome'] = 'stalemate';
-        const avoidOsids: Osid[] = [];
+        const avoidOsids: Osid[] = [...(state.meta.avoided_osids_by_faction?.[faction] ?? [])];
 
         for (const priority of armyPriorities) {
             const targets = findTargetOsidsFromMunicipalities(

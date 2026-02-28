@@ -89,12 +89,14 @@ function mergeLineSegments(
 /**
  * Given the enriched OSID FeatureCollection (with controller property),
  * compute shared edges between OSIDs with different controllers.
+ * When rbihHrhbAllied is true, no front or glow is drawn between RBiH and HRHB (allied).
  * Returns a LineString FeatureCollection containing:
  * - "glow" features (lineType: "glow", faction): one per side for soft faction-colored border glow
  * - "front" features (lineType: "front", factionA, factionB): merged segments for HoI-style dashed front line
  */
 export function generateFactionBorders(
-  osidGeoJson: FeatureCollection
+  osidGeoJson: FeatureCollection,
+  rbihHrhbAllied?: boolean
 ): FeatureCollection<LineString> {
   const features = osidGeoJson.features as Feature<
     Polygon | MultiPolygon,
@@ -143,6 +145,7 @@ export function generateFactionBorders(
     const ctrlA = controllerMap.get(osidA);
     const ctrlB = controllerMap.get(osidB);
     if (!ctrlA || !ctrlB || ctrlA === ctrlB) continue;
+    if (rbihHrhbAllied && ((ctrlA === 'RBiH' && ctrlB === 'HRHB') || (ctrlA === 'HRHB' && ctrlB === 'RBiH'))) continue;
 
     const [partA, partB] = edgeKey.split('|');
     const [ax, ay] = partA.split(',').map(Number);

@@ -9,6 +9,7 @@ import { useGameStore } from '../store/gameStore';
 import { buildOsidDisplayNameMap } from '../utils/osidDisplayName';
 import { loadOperationalPoliticalControl, loadOperationalSettlements } from '../data/DataLoader';
 import { buildControlGeoJSON } from './builders/buildControlGeoJSON';
+import { buildEthnicGeoJSON } from './builders/buildEthnicGeoJSON';
 import { buildFrontLinesGeoJSON } from './builders/buildFrontLinesGeoJSON';
 import { buildFrontEdgesHoverGeoJSON } from './builders/buildFrontEdgesHoverGeoJSON';
 import { buildFormationsGeoJSON } from './builders/buildFormationsGeoJSON';
@@ -24,6 +25,9 @@ const SIDEBAR_HOVER_LAYER_ID = 'sidebar-hover-outline';
 
 /** Layer IDs for front lines (visibility driven by store frontsVisible). */
 const FRONT_LAYER_IDS = ['faction-border-glow', 'front-line-base', 'front-line-dash'];
+/** Fill layer for ethnic map mode (majority_ethnic); toggled with osid-control-fill by mapMode. */
+const OSID_ETHNIC_FILL_LAYER_ID = 'osid-ethnic-fill';
+const OSID_ETHNIC_SOURCE_ID = 'osid-ethnic';
 /** Layer ID for formation markers (formationsVisible). */
 const FORMATION_MARKERS_LAYER_ID = 'formation-markers';
 /** Layer ID for formation labels (labelsVisible). */
@@ -44,6 +48,7 @@ export function MapContainer() {
   const osidBaseRef = useRef<FeatureCollection | null>(null);
   const osidCentroidsRef = useRef<Map<string, [number, number]>>(new Map());
   const lastPanTargetRef = useRef<string | null>(null);
+  const sourceUpdatePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
@@ -61,6 +66,8 @@ export function MapContainer() {
   const frontsVisible = useGameStore((s) => s.frontsVisible);
   const formationsVisible = useGameStore((s) => s.formationsVisible);
   const labelsVisible = useGameStore((s) => s.labelsVisible);
+  const mapMode = useGameStore((s) => s.mapMode);
+  const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -162,41 +169,51 @@ export function MapContainer() {
       onMapMouseLeave: clearTooltipTarget,
     });
     return () => cleanup?.();
-  }, [mapReady, setSelectedOsid, setSelectedFormationId, setTooltipTargetWithPosition, clearTooltipTarget, loadedGameState, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation]);
+  }, [mapReady, setSelectedOsid, setSelectedFormationId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation]);
 
   useEffect(() => {
     const map = mapRef.current;
     const baseGeoJson = osidBaseRef.current;
     if (!mapReady || !map || !baseGeoJson || !loadedGameState) return;
 
-    const controlledGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
-    const frontLinesGeoJson = buildFrontLinesGeoJSON(controlledGeoJson);
-    const formationsGeoJson = buildFormationsGeoJSON(loadedGameState, controlledGeoJson);
-    const orderArrowsGeoJson = buildOrderArrowsGeoJSON(loadedGameState, controlledGeoJson);
-    const iconIds = formationsGeoJson.features
-      .map((feature) => (typeof feature.properties?.icon_id === 'string' ? feature.properties.icon_id : ''))
-      .filter((id) => id.length > 0);
+    let cancelled = false;
 
-    const updateSources = () => {
-      const osidSource = map.getSource('osid-control') as GeoJSONSource | undefined;
-      const frontSource = map.getSource('front-lines') as GeoJSONSource | undefined;
-      const formationsSource = map.getSource('formations') as GeoJSONSource | undefined;
-      const orderArrowsSource = map.getSource('order-arrows') as GeoJSONSource | undefined;
+    const runUpdate = () => {
+      if (cancelled || !mapRef.current || !loadedGameState) return;
+      const m = mapRef.current;
+      const controlledGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
+      const frontLinesGeoJson = buildFrontLinesGeoJSON(
+        controlledGeoJson,
+        loadedGameState.phase_i_alliance_rbih_hrhb
+      );
 
-      if (!osidSource || !frontSource || !formationsSource || !orderArrowsSource) return false;
+      const osidSource = m.getSource('osid-control') as GeoJSONSource | undefined;
+      const frontSource = m.getSource('front-lines') as GeoJSONSource | undefined;
+      const formationsSource = m.getSource('formations') as GeoJSONSource | undefined;
+      const orderArrowsSource = m.getSource('order-arrows') as GeoJSONSource | undefined;
+      if (!osidSource || !frontSource || !formationsSource || !orderArrowsSource) {
+        if (!cancelled && !sourceUpdatePollRef.current) {
+          sourceUpdatePollRef.current = setInterval(() => {
+            if (cancelled) return;
+            runUpdate();
+          }, 500);
+        }
+        return;
+      }
 
       osidSource.setData(controlledGeoJson);
       frontSource.setData(frontLinesGeoJson);
-      ensureFormationIcons(map, iconIds);
-      formationsSource.setData(formationsGeoJson);
-      orderArrowsSource.setData(orderArrowsGeoJson);
+      if (sourceUpdatePollRef.current) {
+        clearInterval(sourceUpdatePollRef.current);
+        sourceUpdatePollRef.current = null;
+      }
 
       const frontEdgesOsid = loadedGameState.frontEdgesOsid;
       if (frontEdgesOsid && frontEdgesOsid.length > 0) {
         const frontEdgesHoverData = buildFrontEdgesHoverGeoJSON(controlledGeoJson, frontEdgesOsid);
-        if (!map.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
-          map.addSource(FRONT_EDGES_HOVER_SOURCE_ID, { type: 'geojson', data: frontEdgesHoverData });
-          map.addLayer(
+        if (!m.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
+          m.addSource(FRONT_EDGES_HOVER_SOURCE_ID, { type: 'geojson', data: frontEdgesHoverData });
+          m.addLayer(
             {
               id: FRONT_EDGES_HOVER_LAYER_ID,
               type: 'line',
@@ -210,19 +227,34 @@ export function MapContainer() {
             'formation-markers'
           );
         } else {
-          (map.getSource(FRONT_EDGES_HOVER_SOURCE_ID) as GeoJSONSource).setData(frontEdgesHoverData);
+          (m.getSource(FRONT_EDGES_HOVER_SOURCE_ID) as GeoJSONSource).setData(frontEdgesHoverData);
         }
       }
 
-      return true;
+      requestAnimationFrame(() => {
+        if (cancelled || !mapRef.current || !loadedGameState) return;
+        const m2 = mapRef.current;
+        const formationsGeoJson = buildFormationsGeoJSON(loadedGameState, controlledGeoJson);
+        const orderArrowsGeoJson = buildOrderArrowsGeoJSON(loadedGameState, controlledGeoJson);
+        const iconIds = formationsGeoJson.features
+          .map((f) => (typeof f.properties?.icon_id === 'string' ? f.properties.icon_id : ''))
+          .filter((id) => id.length > 0);
+        ensureFormationIcons(m2, iconIds);
+        (m2.getSource('formations') as GeoJSONSource)?.setData(formationsGeoJson);
+        (m2.getSource('order-arrows') as GeoJSONSource)?.setData(orderArrowsGeoJson);
+      });
     };
 
-    if (updateSources()) return;
+    const rafId = requestAnimationFrame(() => runUpdate());
 
-    const poll = setInterval(() => {
-      if (updateSources()) clearInterval(poll);
-    }, 500);
-    return () => clearInterval(poll);
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+      if (sourceUpdatePollRef.current) {
+        clearInterval(sourceUpdatePollRef.current);
+        sourceUpdatePollRef.current = null;
+      }
+    };
   }, [loadedGameState, mapReady]);
 
   useEffect(() => {
@@ -262,20 +294,96 @@ export function MapContainer() {
     return () => clearInterval(poll);
   }, [hoveredOsids, mapReady]);
 
-  // Phase C2: apply layer visibility from store (no flicker — single effect, stable map ref)
+  // Ethnic map mode: add osid-ethnic source and fill layer when we have base + osidPropertiesMap
+  useEffect(() => {
+    const map = mapRef.current;
+    const baseGeoJson = osidBaseRef.current;
+    if (!mapReady || !map || !baseGeoJson || !osidPropertiesMap || Object.keys(osidPropertiesMap).length === 0) return;
+
+    const displacementByMun = loadedGameState?.displacementByMun ?? undefined;
+    const ethnicGeoJson = buildEthnicGeoJSON(baseGeoJson, osidPropertiesMap, displacementByMun);
+
+    const applyEthnic = () => {
+      if (!mapRef.current) return;
+      const m = mapRef.current;
+      if (!m.getSource(OSID_ETHNIC_SOURCE_ID)) {
+        m.addSource(OSID_ETHNIC_SOURCE_ID, { type: 'geojson', data: ethnicGeoJson });
+        m.addLayer(
+          {
+            id: OSID_ETHNIC_FILL_LAYER_ID,
+            type: 'fill',
+            source: OSID_ETHNIC_SOURCE_ID,
+            paint: {
+              'fill-color': [
+                'match',
+                ['get', 'majority_ethnic'],
+                'Bosniak',
+                'rgba(55, 140, 75, 0.35)',
+                'Serb',
+                'rgba(180, 50, 50, 0.35)',
+                'Croat',
+                'rgba(50, 110, 170, 0.35)',
+                'Other',
+                'rgba(100, 100, 100, 0.25)',
+                'rgba(60, 60, 70, 0.12)',
+              ],
+            },
+          },
+          'faction-border-glow'
+        );
+      } else {
+        (m.getSource(OSID_ETHNIC_SOURCE_ID) as GeoJSONSource).setData(ethnicGeoJson);
+      }
+      const showPolitical = mapMode === 'political' || mapMode === 'supply' || mapMode === 'pressure';
+      if (m.getLayer('osid-control-fill')) m.setLayoutProperty('osid-control-fill', 'visibility', showPolitical ? 'visible' : 'none');
+      if (m.getLayer(OSID_ETHNIC_FILL_LAYER_ID)) m.setLayoutProperty(OSID_ETHNIC_FILL_LAYER_ID, 'visibility', mapMode === 'ethnic' ? 'visible' : 'none');
+    };
+
+    let cancelled = false;
+    const rafId = requestAnimationFrame(() => {
+      if (!cancelled) applyEthnic();
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+    };
+  }, [mapReady, osidPropertiesMap, mapMode, loadedGameState]);
+
+  // Phase C2: apply layer visibility from store (after style loaded; re-apply when toggles change)
   useEffect(() => {
     const map = mapRef.current;
     if (!mapReady || !map) return;
 
-    const setVisibility = (layerId: string, visible: boolean) => {
-      if (!map.getLayer(layerId)) return;
-      map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+    const applyVisibility = () => {
+      const setVisibility = (layerId: string, visible: boolean) => {
+        if (!map.getLayer(layerId)) return false;
+        map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+        return true;
+      };
+      let allExist = true;
+      FRONT_LAYER_IDS.forEach((id) => {
+        if (!setVisibility(id, frontsVisible)) allExist = false;
+      });
+      if (!setVisibility(FORMATION_MARKERS_LAYER_ID, formationsVisible)) allExist = false;
+      if (!setVisibility(FORMATION_LABELS_LAYER_ID, labelsVisible)) allExist = false;
+      // Map mode: political/supply/pressure show control fill; ethnic shows ethnic fill
+      const showPolitical = mapMode === 'political' || mapMode === 'supply' || mapMode === 'pressure';
+      if (!setVisibility('osid-control-fill', showPolitical)) allExist = false;
+      if (map.getLayer(OSID_ETHNIC_FILL_LAYER_ID) && !setVisibility(OSID_ETHNIC_FILL_LAYER_ID, mapMode === 'ethnic')) allExist = false;
+      return allExist;
     };
 
-    FRONT_LAYER_IDS.forEach((id) => setVisibility(id, frontsVisible));
-    setVisibility(FORMATION_MARKERS_LAYER_ID, formationsVisible);
-    setVisibility(FORMATION_LABELS_LAYER_ID, labelsVisible);
-  }, [mapReady, frontsVisible, formationsVisible, labelsVisible]);
+    if (!applyVisibility()) {
+      const onLoad = () => {
+        applyVisibility();
+        map.off('load', onLoad);
+      };
+      map.once('load', onLoad);
+      return () => {
+        map.off('load', onLoad);
+      };
+    }
+  }, [mapReady, frontsVisible, formationsVisible, labelsVisible, mapMode]);
 
   // Phase C2: mapMode (political | ethnic | supply | pressure) — ethnic/supply/pressure
   // currently show same as political; add mode-specific layers/sources when data is ready.

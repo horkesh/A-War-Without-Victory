@@ -314,6 +314,20 @@ export function normalizeScenario(raw: unknown): Scenario {
             ? o.phase_i_force_transition_after_turns
             : undefined;
 
+    // Per-faction OSID avoidance: prevent specific factions from attacking specific OSIDs (e.g. Vozuca pocket).
+    const avoided_osids_by_faction: Record<string, string[]> | undefined = (() => {
+        const raw = o.avoided_osids_by_faction;
+        if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+        const result: Record<string, string[]> = {};
+        for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+            if (typeof k === 'string' && Array.isArray(v)) {
+                const osids = (v as unknown[]).filter((x): x is string => typeof x === 'string').sort();
+                if (osids.length > 0) result[k] = osids;
+            }
+        }
+        return Object.keys(result).length > 0 ? result : undefined;
+    })();
+
     // Phase H2.4: When use_harness_bots is true, ensure every week has at least one baseline_ops action (deterministic; uses existing baseline_ops only).
     if (use_harness_bots && weeks > 0) {
         const turnsByWeek = new Map<number, ScenarioTurn>();
@@ -376,7 +390,8 @@ export function normalizeScenario(raw: unknown): Scenario {
             equipment_points_trickle,
             max_recruits_per_faction_per_turn,
             phase_ii_entrenchment_init_turns,
-            phase_i_force_transition_after_turns
+            phase_i_force_transition_after_turns,
+            avoided_osids_by_faction
         };
     }
 
@@ -417,7 +432,8 @@ export function normalizeScenario(raw: unknown): Scenario {
         equipment_points_trickle,
         max_recruits_per_faction_per_turn,
         phase_ii_entrenchment_init_turns,
-        phase_i_force_transition_after_turns
+        phase_i_force_transition_after_turns,
+        avoided_osids_by_faction
     };
 }
 

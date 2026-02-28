@@ -676,6 +676,9 @@ export interface StateMeta {
     /** Phase I Overhaul: recruitment mode from scenario config. Controls whether bottom-up TO detachment
      *  lifecycle is active ("bottom_up") or legacy brigade spawn is used ("auto_oob" / "player_choice"). */
     recruitment_mode?: 'player_choice' | 'auto_oob' | 'bottom_up';
+    /** Per-faction OSID-level avoidance: brigade AI will not attack these OSIDs for the listed faction.
+     *  Used to lock historically-specific OSIDs (e.g. Vozuća pocket) without broad municipality targeting. */
+    avoided_osids_by_faction?: Record<string, string[]>;
 }
 
 export interface NegotiationLedgerEntry {

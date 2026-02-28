@@ -957,6 +957,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             state.meta.recruitment_mode = scenario.recruitment_mode;
         }
 
+        // Store per-faction OSID avoidance list in meta so bot corps AI can inject into directives.
+        if (scenario.avoided_osids_by_faction && Object.keys(scenario.avoided_osids_by_faction).length > 0) {
+            state.meta.avoided_osids_by_faction = scenario.avoided_osids_by_faction;
+        }
+
         // When init_formations_oob is true, OOB creates formations at Phase I entry; do not load placeholder init_formations.
         if (formationsPath && !scenario.init_formations_oob) {
             const initialFormations = await loadInitialFormations(formationsPath);
