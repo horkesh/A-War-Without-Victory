@@ -11,6 +11,8 @@
 
 ## 1. Design Vision Shift
 
+**Implementation update (2026-02-28):** The rendering technology has changed from Canvas 2D to MapLibre GL JS. Map visuals (terrain, fills, front lines, formation markers) are now driven by a MapLibre style spec (`awwv_map_style.json`) with PMTiles raster and vector sources. GUI panels are React + Tailwind components overlaid on the MapLibre canvas. The visual design goals in this document remain the authoritative aesthetic target. Section 2 references to "drawImage", "Canvas 2D API", and "pre-rendered texture" should be read as "MapLibre raster/vector tile layers" — the visual effect is the same, the technology is different.
+
 ### 1.1 From NATO Ops Center to Printed War Map
 
 The current aesthetic — dark navy canvas, phosphor-green CRT accents, IBM Plex Mono — was designed as a "NATO Ops Center meets basement command post." It works for conveying data density but reads as a *technical monitoring system*, not a *war game*. The map feels like a GIS viewer; the panels feel like a debug console.
@@ -44,7 +46,7 @@ Hearts of Iron's visual language communicates something different: **you are a h
 - At full political fill opacity, terrain is dimly visible; as fill transparency increases, terrain becomes more prominent
 - Road network rendered as thin ochre/brown lines (pre-modern road map style, not GIS vector style)
 
-**Implementation:** Pre-render a static terrain texture from DEM + OSM data at a resolution matching the canvas. Render as a background image layer, not as per-frame geometry. This is a one-time pipeline step.
+**Implementation:** Terrain relief is now delivered via **hillshade.pmtiles** (raster tiles from DEM, zoom 6–12) rather than a pre-rendered static texture. The visual goal — warm watercolor topographic feel — still applies; it is achieved through MapLibre's raster-opacity, hillshade coloring, and the paper-tone background layer underneath.
 
 ### 2.2 Political Control Fills
 
@@ -62,6 +64,8 @@ Hearts of Iron's visual language communicates something different: **you are a h
 
 **Key change:** Fills are at 75% alpha on a *warm light base*, not 65% on a *dark base*. This inverts the visual weight: territory is colorful and prominent, boundaries are defined by color contrast between factions rather than by bright white lines.
 
+**Implementation:** Political control fills are now **MapLibre fill layers** driven by data-driven styling on the controller property. The alpha values in the table above (0.75) are aspirational — the current implementation uses lower opacity (e.g. 0.25) with a faction-border-glow for the HoI fade effect. These can be tuned to match the spec.
+
 **Province borders (intra-faction):** HoI renders same-faction province borders as very thin, dark lines — barely visible but subtly defining the province grid. For AWWV: same-faction operational settlement borders rendered as `rgba(0, 0, 0, 0.12)` at 0.5px. Present but not distracting.
 
 **Municipality borders:** Thin dashed lines in `rgba(0, 0, 0, 0.25)` at 1px. These are the administrative layer — visible when you look for them, not competing with the military situation.
@@ -71,6 +75,8 @@ Hearts of Iron's visual language communicates something different: **you are a h
 **Current:** Two-pass rendering — amber glow + white dashed line. Reads as a technical overlay.
 
 **New:** HoI-style thick painted front bands.
+
+**Implementation:** Front lines are computed by `generateFactionBorders.ts` and rendered as **MapLibre line layers**. The current implementation uses: dark base line + white dash (HoI barbed-wire style) + faction-colored glow. The spec's "thick painted band" approach below is a valid alternative that can be selected (e.g. via a style toggle).
 
 The front is rendered as a **thick semi-transparent band** along the faction boundary, not as a thin line. The band straddles the boundary — extending slightly into both sides' territory — and is colored to indicate the *character* of the front.
 
@@ -93,6 +99,8 @@ The front is rendered as a **thick semi-transparent band** along the faction bou
 **Current:** Single NATO marker per formation at HQ/centroid location.
 
 **New:** Brigade markers are positioned along their AoR's front edge, not at a centroid.
+
+**Implementation:** Formation markers are now **MapLibre symbol layers** with programmatically generated NATO-style sprites. The **front-distributed placement algorithm** described below is **NOT yet implemented** — markers are currently placed at OSID centroids. This algorithm should be implemented as described so that brigade markers sit at the front centroid of their AoR.
 
 **Marker placement algorithm:**
 
@@ -213,12 +221,22 @@ This is the biggest GUI change. The current left sidebar is a flat War Status + 
 
 For AWWV, the hierarchy is: **Faction → Corps → Brigade** (plus OGs as temporary overlays). There are no theaters or army groups, but the concept of **theater-like groupings** maps naturally to the geographic corps structure.
 
-**New sidebar structure:**
+**Tabbed sidebar: two tabs (not four).** The four-tab design (Army / War Status / Diplomacy / Logistics) spreads information too thin. War Status, Diplomacy, and Logistics are consolidated into a single **SITUATION** tab showing a condensed strategic overview. This matches how players think: "How are my troops?" (Army tab) vs "How is the war going?" (Situation tab).
+
+```
+┌─ TABS ──────────────────────┐
+│ [⚔ ARMY]   [📊 SITUATION]   │
+└─────────────────────────────┘
+```
+
+The **Army** tab is the default and contains the corps cards, brigade rows, and reserve section below. The **Situation** tab combines: territory % (faction bar chart — 3 colored bars, one line); front summary ("12 static, 3 fluid, 1 oscillating" — one line); supply summary ("4 corridors open, 1 strained" — one line); casualty totals (one line per faction); exhaustion sparkline (tiny chart, 30px tall); alliance gauge (RBiH–HRHB bar — one line); IVP gauge (one line); active alerts (enclave integrity, corridor strain — scrollable list). All of this fits in a single scrollable panel. See §3.4–§3.6 for detailed content that populates the Situation tab.
+
+**Sidebar structure (Army tab):**
 
 ```
 ┌─────────────────────── 300px ───────────────────────┐
 │ ┌─ TABS ──────────────────────────────────────────┐ │
-│ │ [ARMY]  [WAR STATUS]  [DIPLOMACY]  [LOGISTICS]  │ │
+│ │ [⚔ ARMY]   [📊 SITUATION]                        │ │
 │ └──────────────────────────────────────────────────┘ │
 │                                                      │
 │ ═══════ ARMY TAB (default) ════════════════════════  │
@@ -228,33 +246,41 @@ For AWWV, the hierarchy is: **Faction → Corps → Brigade** (plus OGs as tempo
 │ │               Brigades: 47 active / 3 forming │   │
 │ └────────────────────────────────────────────────┘   │
 │                                                      │
-│ ┌─ 1ST CORPS (SARAJEVO) ──────── DEFENSIVE ◆ ──┐   │
-│ │  ▼ Stance: [DEFENSIVE ▼]  Exhaustion: 14.2   │   │
-│ │  OG: 1/2 slots   Personnel: 48,200           │   │
+│ ┌─ 1ST CORPS (SARAJEVO) ──── DEFENSIVE ◆ ──┐       │
+│ │  Front: SARAJEVO POCKET (12 contact edges) │       │
+│ │  Stance: [DEFENSIVE ▼]  Exhaustion: 14.2   │       │
+│ │  OG: 1/2 slots   Personnel: 48,200        │       │
 │ │  ┌─────────────────────────────────────────┐  │   │
-│ │  │ ██ 101st Mountain  1840  ■■■■□ ATK     │  │   │
+│ │  │ ● 101st Mountain  1840  ■■■■□ ATK     │  │   │
 │ │  │ ██ 102nd Motorized 2100  ■■■■■ DEF     │  │   │
 │ │  │ ██ 105th Motorized 1650  ■■■□□ PRB     │  │   │
-│ │  │ ██ 111th Vitezka   920   ■□□□□ DEF ⚠  │  │   │
+│ │  │ ◐ 111th Vitezka   920   ■□□□□ DEF ⚠  │  │   │
 │ │  │ ── [Igman OG]      800   ■■■□□ ATK     │  │   │
 │ │  └─────────────────────────────────────────┘  │   │
 │ │  [+ PLAN OPERATION] [+ FORM OG]               │   │
 │ └────────────────────────────────────────────────┘   │
 │                                                      │
 │ ┌─ 2ND CORPS (TUZLA) ─────────── BALANCED ◆ ──┐   │
+│ │  Front: CENTRAL BOSNIA (8 contact edges)      │   │
 │ │  ▼ Stance: [BALANCED ▼]  Exhaustion: 8.7     │   │
 │ │  ...                                          │   │
 │ └────────────────────────────────────────────────┘   │
 │                                                      │
-│ ┌─ 3RD CORPS (ZENICA) ──────── OFFENSIVE ◆ ──┐    │
-│ │  ...                                         │    │
-│ │  OP VLAŠIĆ — EXECUTION (turn 3/4)            │    │
-│ │  ...                                         │    │
-│ └───────────────────────────────────────────────┘    │
+│ ┌─ RESERVE ─────────────────────────────────────────┐│
+│ │  ● 7th Reserve Bde   1200  ■■■□□  —           │   │
+│ │  ● 14th Light Bde     880   ■■□□□  —           │   │
+│ │  [ASSIGN TO FRONT ▼]                            │   │
+│ └──────────────────────────────────────────────────┘│
 │                                                      │
 │ ... (scrollable)                                     │
 └──────────────────────────────────────────────────────┘
 ```
+
+**Corps card — front assignment:** Each corps card header shows a **FRONT:** line indicating which assignable front segment(s) this corps covers (e.g. "Front: SARAJEVO POCKET (12 contact edges)"). This connects the sidebar to the map so the player sees "3rd CORPS → CENTRAL BOSNIA FRONT" and can immediately locate it.
+
+**Brigade rows — supply indicator:** Each brigade row has a small supply status icon (colored dot). **Green dot (●)** = full supply; **amber half-dot (◐)** = strained; **red empty dot (○)** = cut off. Example: `● 101st Mountain  1840  ■■■■□ ATK` (supplied); `◐ 111th Vitezka    920  ■□□□□ DEF ⚠` (strained); `○ 281st Srebrenica 640  ■□□□□ DEF ⛔` (cut off).
+
+**Reserve section:** Brigades not assigned to any front appear in a separate **RESERVE** section at the bottom of the Army tab, not inside a corps card. Reserve rows show the same supply dot and cohesion bar; **[ASSIGN TO FRONT ▼]** allows assignment when mechanics support it.
 
 **Key HoI translations:**
 
@@ -285,7 +311,7 @@ For AWWV, the hierarchy is: **Faction → Corps → Brigade** (plus OGs as tempo
 
 ### 3.4 War Status Tab
 
-Replaces the top section of the current sidebar. Shows aggregate statistics:
+*Content for the SITUATION tab.* Shows aggregate statistics:
 
 - Territory control (% per faction, bar chart)
 - Total personnel (per faction)
@@ -298,7 +324,7 @@ Replaces the top section of the current sidebar. Shows aggregate statistics:
 
 ### 3.5 Diplomacy Tab
 
-Current Phase 0 / Phase I diplomatic state:
+*Content for the SITUATION tab.* Current Phase 0 / Phase I diplomatic state:
 
 - RBiH-HRHB alliance gauge (visual bar from -1.0 to +1.0 with labeled thresholds)
 - Patron commitment per faction (FRY → RS, Croatia → HRHB, international → RBiH)
@@ -308,7 +334,7 @@ Current Phase 0 / Phase I diplomatic state:
 
 ### 3.6 Logistics Tab
 
-Supply and production overview:
+*Content for the SITUATION tab.* Supply and production overview:
 
 - Supply corridors: list with status (open/strained/cut)
 - Enclave supply status
@@ -318,13 +344,24 @@ Supply and production overview:
 
 ### 3.7 Right Intelligence Panel: Context-Sensitive Detail
 
-**Keep the current design** — settlement detail (7 tabs), brigade detail, corps detail. But restyle:
+**Current architecture:** The right panel is context-sensitive — **SelectionPanel** ("Settlement Info") when an OSID is selected, **FormationDetail** when a formation is selected. Restyle per §9.2:
 
 - Warm dark card backgrounds instead of cold navy
 - Gold section headers instead of phosphor green
 - Add a **"Focus on Map"** button that pans/zooms to the selected entity
 - Brigade detail: add a visual AoR mini-map (small diagram showing the brigade's operational settlements, front edges highlighted)
 - Settlement detail: add a strategic importance indicator (diamond size from §2.6)
+
+A richer 7-tab settlement detail view can be revisited if needed; start with the simple SelectionPanel.
+
+### 3.8 Panel interaction patterns
+
+Consistent interaction patterns across all panels:
+
+- **Selection model:** Exactly one entity is selected at a time. Clicking an OSID on the map opens the right panel with settlement detail. Clicking a formation marker opens formation detail. Clicking a brigade row in the sidebar opens formation detail and pans the map. Clicking a corps header pans to the corps area. Each new selection replaces the previous one. Escape clears selection.
+- **Panel persistence:** The left sidebar (Army/Situation) is always visible when the sidebar is open. The right panel is context-sensitive — it appears when something is selected and disappears on Escape or clicking empty map space. Modals (Formation Command, Attack Confirmation, War Summary) overlay everything and must be explicitly dismissed.
+- **Map ↔ sidebar sync:** Selecting a formation in the sidebar highlights its OSID(s) on the map. Selecting an OSID on the map highlights any formations in it in the sidebar (scrolling the sidebar if needed to show them). This bidirectional sync is essential — the player should never have to mentally map between sidebar text and map geography.
+- **Hover previews:** Hovering over a brigade row in the sidebar temporarily highlights its AoR on the map (light outline, no fill change). Hovering over a corps header temporarily highlights all its subordinate AoRs. These highlights disappear on mouse-out. This gives spatial context without committing to a selection.
 
 ---
 
@@ -563,46 +600,54 @@ Tooltips appear on 300ms hover delay. Dismiss on mouse-out. Never block click in
 
 ## 10. Implementation Priorities
 
-### Phase A: Map Visual (pairs with settlement clustering)
+Priorities aligned with the React + MapLibre implementation (canonical GUI in `src/ui/map/`). **Implementation status** (what is done vs not yet) is tracked in **AWWV_GUI_ARCHITECTURE_REWORK_v2.md** §0.
 
-1. Terrain relief base layer generation (DEM → painted texture)
-2. Warm palette color constants (replace nato_tokens.ts values)
-3. Political control fills at new opacity on warm base
-4. Front band rendering (replace current two-pass line with thick painted band)
-5. Province borders (thin intra-faction lines)
-6. Municipality borders (thin dashed)
+**Phase A: Panel styling (COMPLETE — 2026-02-28)**
 
-### Phase B: Formation Display
+1. Apply §9.2 panel palette to all existing React components (TopToolbar, OOBSidebar, SelectionPanel, FormationDetail, BottomStatusStrip, CorpsCard, BrigadeRow)
+2. Add IBM Plex Sans Condensed as secondary font
+3. Add warm gold section headers, warm charcoal backgrounds
+4. Add faction color gradient to TopToolbar
+5. Add cohesion bars to BrigadeRow (five-segment visual)
+6. Add supply status dots to BrigadeRow
 
-7. Front-distributed formation marker placement
-8. HoI-style counter design (faction color, posture stripe, hover expand)
-9. Corps markers at strategic zoom
-10. Formation stacking on crowded fronts
-11. Bézier curve order arrows
+**Phase B: Sidebar enhancement (COMPLETE — 2026-02-28 baseline)**
 
-### Phase C: Army Management Sidebar
+7. Add tabbed sidebar (Army / Situation)
+8. Build Situation tab content (territory bars, front summary, supply summary, alerts)
+9. Add front assignment display to CorpsCard
+10. Add Reserve section
+11. Implement corps stance controls
+12. Add hover-preview highlighting (sidebar ↔ map)
 
-12. Tabbed sidebar structure (Army / War Status / Diplomacy / Logistics)
-13. Corps cards with stance controls
-14. Brigade rows with cohesion bars and posture badges
-15. OG display within corps cards
-16. Named operation cards and planning wizard
+Phase B baseline now exists in `src/ui/map/`: Army/Situation tabs, Situation summary cards, corps front labels, reserve list, stance dropdowns, hover-preview map outline, and selection clearing on Escape.
 
-### Phase D: Panel Polish
+**Phase C: Rich interactions (NEXT)**
 
-17. Warm palette restyle of all panels (right panel, modals, management screen)
-18. Typography update (add IBM Plex Sans Condensed)
-19. Rich tooltip system
-20. Formation management modal (grouped by corps)
-21. Bottom status strip redesign
+13. Rich tooltip system (settlement hover, formation hover, front edge hover)
+14. MapModeToolbar (Political Control / Ethnic / Supply / Pressure modes)
+15. MapLayerToggles
+16. Keyboard shortcuts (Escape, Enter, 1–4 for map modes)
+17. Attack confirmation modal
+18. Order queue panel
 
-### Phase E: Map Polish
+**Phase D: Map visual polish**
 
-22. Strategic point markers (diamonds/stars)
-23. Enclave visualization
-24. Minimap overhaul
-25. Map label improvements (LOD-appropriate sizing, warm colors)
-26. Subtle vignette (keep) / remove CRT scanlines from panels
+19. Tune faction fill opacity for best terrain visibility
+20. Strategic point markers (diamonds/stars at municipal seats and major cities)
+21. Enclave visualization (dashed border, integrity label, pulse at critical)
+22. Front-distributed formation marker placement (§2.4 algorithm)
+23. Bézier order arrows
+24. Settlement labels from OSM places layer
+25. Selectable front line styles (dashed, glow, chevron)
+
+**Phase E: Full modals**
+
+26. Formation Command full-screen modal (§4)
+27. Named Operation planning wizard (§5)
+28. War Summary modal
+29. Recruitment modal
+30. Minimap (bottom-left, 250×180)
 
 ---
 
@@ -611,26 +656,30 @@ Tooltips appear on 300ms hover delay. Dismiss on mouse-out. Never block click in
 - **Warroom** (desk, props, atmosphere) — untouched, still dark and atmospheric
 - **Simulation mechanics** — zero changes, pure visual/UI
 - **Data bindings** — all GUI elements still bind to the same state fields
-- **Keyboard shortcuts** — same set, same keys
+- **Keyboard shortcuts** — same set, same keys (extended per §10 Phase C)
 - **Determinism** — visual-only changes
-- **Canvas rendering technology** — still native Canvas 2D API, no external libraries
-- **Settlement detail panel structure** — 7 tabs, same data, restyled
+- **Map rendering:** MapLibre GL JS with PMTiles. **GUI:** React + Tailwind + Zustand.
 - **AAR modal** — same content, restyled
 - **Order system mechanics** — same workflow (select → target → confirm), better visual feedback
+
+The right panel uses a simpler **SelectionPanel** (Settlement Info) for OSID detail rather than a 7-tab structure. A richer 7-tab settlement detail view can be revisited if needed; start simple.
 
 ---
 
 ## 12. Open Questions
 
-1. **Terrain texture resolution:** Pre-rendering at 4096×4096 or 8192×8192? Higher resolution means better terrain detail at tactical zoom but larger asset size. Could tile at multiple zoom levels.
+**Resolved:**
 
-2. **Typography licensing:** IBM Plex Mono/Sans are open source (SIL OFL) — no issue. But confirm they're already bundled or if they need to be added to the build.
+1. **Terrain texture resolution:** Resolved — hillshade PMTiles at zoom 6–12, derived from 4× upscaled Copernicus 30m DEM. Sharp at tactical zoom.
+2. **Typography licensing:** IBM Plex fonts are SIL OFL; already in use. Confirmed.
+4. **Performance of terrain base layer:** Resolved — MapLibre handles raster tile rendering natively with GPU acceleration. No performance concern.
+5. **Transition plan:** Resolved — legacy UI archived; new React map app is canonical.
 
-3. **Faction emblems:** The top bar faction banner wants a small emblem/flag. These need to be sourced or created: RS (double-headed eagle), RBiH (fleur-de-lis), HRHB (Croatian checkerboard). Simple silhouette versions would suffice.
+**Open:**
 
-4. **Performance of terrain base layer:** A large pre-rendered background image shouldn't impact frame rate (it's a single drawImage call), but needs testing at various canvas sizes.
-
-5. **Transition plan:** This overhaul touches almost every visual constant and rendering function. Suggest implementing as a parallel "theme" system — a `theme.ts` module that exports all palette/sizing constants — so both old and new themes can coexist during transition, togglable in settings.
+3. **Faction emblems:** Still needed for TopToolbar faction banner. RS double-headed eagle, RBiH fleur-de-lis, HRHB checkerboard. Simple SVG silhouettes. Could use Excalidraw to sketch or commission.
+6. **Front line style selection:** Three styles proposed (dashed, glow, chevron/barbed). Need to decide if this is a settings toggle or hardcoded to one style.
+7. **Panel width responsiveness:** Current sidebar is 300px fixed. Should it flex on wider screens? Should the right panel be a fixed width or proportional?
 
 ---
 

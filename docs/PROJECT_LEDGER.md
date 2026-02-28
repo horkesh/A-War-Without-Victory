@@ -8568,37 +8568,45 @@ Determinism checks **MUST** be run:
 - **Files modified:** `src/ui/map/components/SelectionPanel.tsx`, `src/ui/map/App.tsx`, `.claude/napkin.md`.
 - **Verification:** Panel confirmed on the right in map app; napkin updated with pattern for overlay panel positioning.
 
-**2026-02-28** - Jan 1993 painted target calibration session (runs n233→n241, 82.1% match)
-- **Phase:** Phase II calibration — 40-week painted target matching
-- **Summary:** 8-iteration calibration session matching simulation output against painted January 1993 control map (753 OSIDs). Best run n241 reaches 82.1% OSID match rate (618/753 correct). Territory: RS 428 (target 416, +12), RBiH 251 (target 248, +3), HRHB 74 (target 89, -15). Army sizes: VRS 112,738 (target 100k, +12.7k), ARBiH 134,250 (target 130k, +4.3k), HVO 44,933 (target 45k, -67). Edge cases: 3/7 pass (Vozuca, Gorazde, Srebrenica correct; Orasje, Teocak, Sapna, Brcko South wrong). Regional analysis: Krajina 95%, Bihac 94%, Herzegovina 92%, Central 78%, Sarajevo 67%, Drina Valley 62%.
-- **Key changes applied:** RS_EARLY_WAR_END_WEEK 30→20 (biggest lever); RBiH balanced@w12 (91 attacks vs 3); symmetric alliance filter (RBiH→HRHB block); RS pool 0.35→0.28; HRHB pool 1.60→2.10; RS army priorities reshuffled (Drina 130, Corridor 100, SRK 90, removed Ozren); RBiH priorities added (Central Corridor Counter, Bugojno-Konjic Defense, Brcko South Hold); created `data/scenarios/apr1992_definitive_40w.json` and `tools/compare_painted_vs_sim.cjs`.
-- **Structural ceiling identified:** 135 remaining mismatches are structural (not solvable by parameter tuning). Worst regions: Drina (enclave brigades defend entire municipality), Sarajevo (SRK understaffed), HRHB (Orasje steamrolled), Central (1KK overextension).
-- **Determinism:** All changes deterministic.
-- **Report:** `docs/40_reports/implemented/20260228_JAN1993_CALIBRATION_SESSION.md`
-- **Files modified:** `src/sim/phase_ii/bot_strategy.ts`, `src/sim/phase_ii/bot_brigade_ai_osid.ts`, `src/sim/phase_i/pool_population.ts`, `src/sim/bot/bot_strategy.ts`, `src/scenario/scenario_runner.ts`.
-- **Files created:** `data/scenarios/apr1992_definitive_40w.json`, `tools/compare_painted_vs_sim.cjs`.
-- **Verification:** npx tsc --noEmit clean, npm run test:vitest passed, 40-week scenario run completed with 82.1% match.
+**2026-02-28** - GUI Rework v2 Phase 3 status and next priority (Orchestrator + Architect)
+- **Phase:** GUI Architecture Rework v2 — Phase 3 (UI Panels)
+- **Summary:** Phase 3 in progress. Done: TopToolbar, SelectionPanel (right), BottomStatusStrip, Storybook for these; shared utils (osidLookup, formationAtOsid). **Single priority:** Implement OOB sidebar per §6.2 and §8 of AWWV_GUI_ARCHITECTURE_REWORK_v2.md: build CorpsCard and BrigadeRow in Storybook with mock OOB data, then OOBSidebar that builds tree from LoadedGameState (formations, corps_id, theatres, armyTheatreAssignment), then mount OOBSidebar on the left in the map app. No other Paradox roles required for this slice; data flow is store → panels only.
+- **Phase 3 remaining (backlog):** FormationDetail panel, Map mode toolbar (SELECT/ATTACK/MOVE), OrderQueue, AttackConfirmation modal, WarSummaryModal, RecruitmentModal, ReplayScrubber, keyboard shortcuts. PM may formalize order when re-sequencing.
+- **Determinism:** No simulation or persisted output changes; UI only.
+- **Files modified:** `docs/PROJECT_LEDGER.md`.
 
-**2026-02-28** - Structural changes proposal for 90% calibration ceiling
-- **Phase:** Planning — post-calibration structural analysis
-- **Summary:** Documented 7 structural changes needed to break 82% ceiling: (1) Enclave-scoped defense (+15-20 OSIDs), (2) Corps-level brigade allocation (+10-12), (3) Supply-based overextension penalty (+10-15), (4) HVO Orasje pocket enclave (+2-3), (5) Teocak/Sapna finger pocket (+2), (6) RS recruitment rate cap (army size), (7) Displacement system activation (holistic). Recommended sequence: 1→4→5→2→6→3→7.
-- **Status:** Partially superseded by Phase I Overhaul spec (proto-brigade system supersedes proposals 1,2,4,5). Proposals 3 (supply overextension) and 6 (RS recruitment cap) remain valuable.
-- **Report:** `docs/30_planning/20260228_STRUCTURAL_CHANGES_FOR_90PCT_CALIBRATION.md`
+**[2026-02-28] Canon and engineering docs updated for React/MapLibre, Storybook, calibration, OOB**
+- **Summary:** Orchestrator-directed update so all canon and engineering docs reflect the latest development: React+MapLibre as canonical GUI, Storybook for map components, ongoing bot calibration, and initial-brigade/OOB restructuring.
+- **Change:** (1) **context.md:** Added "Canonical GUI and map (2026-02-28)" — React+MapLibre app is single canonical player-facing GUI; links to AWWV_GUI_ARCHITECTURE_REWORK_v2.md and 20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md; Storybook location; legacy HoI/tactical map marked archived; bot calibration and OOB tuning references (BOT_AI_HOLISTIC_TUNING_REFERENCE.md, CALIBRATION_REPORT_BOT_AI_FEB_2026.md, oob_brigades.json, CONSOLIDATED_BACKLOG §7). (2) **TACTICAL_MAP_SYSTEM.md:** New §0 "Canonical map/GUI" — React+MapLibre app is canonical; §1–§2+ labeled legacy reference. (3) **REPO_MAP.md:** GUI/Map UIs section — React+MapLibre app first (canonical), with Storybook and status report; legacy tactical/HoI and 3D render path retained as reference. (4) **CODE_CANON.md:** Tactical Map entry now points to canonical React map app and v2 spec. (5) **CANON.md:** See Also — added "Canonical GUI (React + MapLibre)" with v2 spec and comprehensive status report. (6) **docs_index.md:** TACTICAL_MAP_SYSTEM line updated to §0 canonical + status report and §1+ legacy.
+- **Failure mode prevented:** Agents and external experts reading canon/context/REPO_MAP/CODE_CANON would otherwise assume HoI 3D or tactical_map was still canonical; new GUI work could target wrong codebase.
+- **Files modified:** docs/10_canon/context.md, docs/10_canon/CANON.md, docs/20_engineering/TACTICAL_MAP_SYSTEM.md, docs/20_engineering/REPO_MAP.md, docs/20_engineering/CODE_CANON.md, docs/00_start_here/docs_index.md, docs/PROJECT_LEDGER.md.
+- **FORAWWV note:** None. No design insights; documentation alignment only.
 
-**2026-02-28** - Phase I Overhaul design spec: Militia to Proto-Brigades
-- **Phase:** Design — Phase I formation system redesign
-- **Summary:** Comprehensive design spec for bottom-up brigade formation system replacing current auto-OOB spawn. Key design: formations spawn as TO detachments (50-499 personnel) at MIN_DETACHMENT_SPAWN=100, grow through municipal reinforcement, auto-promote through three tiers (TO Detachment → TO Battalion → Brigade). VRS excepted — JNA inheritance at turn 0 as game design starting condition. Phased corps creation: RS turn 0, HRHB ~turn 10, ARBiH ~turn 24. Terrain-amplified defense for TO detachments (urban 2.5×, mountain 2.0×). Siege mobilization mechanic (≥90% enemy neighbors → 3× pool growth, lifted brigade cap). Displaced persons swell enclave pools. Historical name matching on promotion via OOB catalog. Dissolution at MIN_COMBAT_PERSONNEL=100.
-- **Design decisions:**
-  1. VRS JNA inheritance stays at turn 0 (game design starting condition, not May 12 claim)
-  2. ARBiH corps at ~turn 24 (historical: September-November 1992)
-  3. RBiH TO detachments start with equipment 0.15 (historical: hunting rifles, police weapons, TO stockpiles)
-  4. Siege mobilization supersedes hardcoded enclave brigade exceptions
-  5. Displacement Systems A+B already working (2.2M displaced); only System C (Phase F) broken (OSID key mismatch)
-  6. TO detachments and brigades remain separate formation kinds (not merged)
-  7. Formations dissolve at 100 personnel (manpower returns to pool)
-  8. No separate activation gating mechanic needed — existing available_from/corps gating sufficient
-  9. Enclave supply ceiling deferred
-- **Open question:** Enclave supply ceiling (deferred — design later)
-- **Implementation:** 8 phases (0-G), 33 steps. Phase 0 = displacement reporting fix (not a blocker).
-- **Spec:** `docs/20_engineering/PHASE_I_OVERHAUL_MILITIA_TO_BRIGADES.md`
-- **Historical research:** BB1/BB2 citations supporting TO detachment survival via municipal defense, terrain advantage, and siege mobilization (Srebrenica, Gorazde, Sarajevo, Tuzla, Bihac).
+**2026-02-28** - April 1992 initial political control: fix operational derivation (Vozuća → RS by ethnic majority)
+- **Phase:** Data / scenario init (initial political control)
+- **Summary:** Investigated inconsistency: Vozuća (op:zavidovici:vozuca_2) showed as RBiH in operational_political_control.json despite Serb ethnic majority (54.5% Serb vs 43.7% Bosniak). Root cause: derive_operational_political_control.ts used "first group ≥40%" (order-dependent), so Bosniak 43.7% was assigned RBiH before Serb 54.5%. Fixed to use majority (>50%) when present, else plurality (largest share). Regenerated operational_political_control.json; Vozuća now RS. BB: Vozuća VRS (BB1 p499, BB2 p507).
+- **Determinism:** Derivation script remains deterministic. No change to simulation turn logic.
+- **Files modified:** scripts/derive_operational_political_control.ts, data/derived/operational/operational_political_control.json.
+- **Note:** municipalities_1990_initial_political_controllers_apr1992.json still has zavidovici = RBiH (mun-level). Scenarios using ethnic_1991 or hybrid_1992 get settlement-level ethnic majority; mun1990-only init inherits mun value.
+
+**[2026-02-28] HOI_VISUAL_GUI_OVERHAUL_SPEC updated for MapLibre, sidebar, and phases**
+- **Summary:** Planning doc HOI_VISUAL_GUI_OVERHAUL_SPEC.md aligned with React+MapLibre architecture; sidebar refined to two tabs (ARMY / SITUATION); new §3.8 panel interaction patterns; §10 implementation priorities replaced with Phase A–E; §12 open questions updated (resolved 1,2,4,5; new 6 front-line style, 7 panel width). Canon (context.md, CANON.md) updated to reference the spec as the authoritative aesthetic target and to make two-tab sidebar and §3.8 discoverable.
+- **Change:** (1) **HOI_VISUAL_GUI_OVERHAUL_SPEC.md:** §1 implementation note (Canvas → MapLibre); §2 map rendering (hillshade.pmtiles, fill layers, front lines from generateFactionBorders; formation symbols + front-distributed algorithm not yet implemented); §3.3 sidebar two tabs ARMY/SITUATION, corps FRONT display, brigade supply dots, RESERVE section; new §3.8 Panel interaction patterns; §3.4–§3.6 labeled SITUATION tab; §3.7 aligned to SelectionPanel/FormationDetail; §10 Phase A–E priorities; §11 "What Stays the Same" (MapLibre/React, no 7-tab settlement); §12 open questions. (2) **context.md:** Aesthetic target = HOI_VISUAL_GUI_OVERHAUL_SPEC; sidebar ARMY/SITUATION; panel patterns §3.8. (3) **CANON.md:** See Also — aesthetic target and sidebar/§3.8 reference.
+- **Failure mode prevented:** GUI work could target wrong aesthetic or sidebar model without a single named spec; canon now points to HOI spec for look-and-feel and to v2 for implementation.
+- **Files modified:** docs/30_planning/20260221_settlement remapping and GUI rework/HOI_VISUAL_GUI_OVERHAUL_SPEC.md, docs/10_canon/context.md, docs/10_canon/CANON.md, docs/PROJECT_LEDGER.md.
+- **FORAWWV note:** None. Documentation and planning alignment only.
+
+**2026-02-28** - GUI rework: HOI spec and v2 doc aligned; next priority Phase A panel styling
+- **Phase:** Settlement remapping and GUI rework (React+MapLibre canonical app)
+- **Summary:** HOI_VISUAL_GUI_OVERHAUL_SPEC.md (aesthetic authority) and AWWV_GUI_ARCHITECTURE_REWORK_v2.md (implementation) synced. v2 §0 status table now calls out Phase A (HOI §10) as NEXT — panel styling per §9.2 — and Phase B (tabbed sidebar, Situation content, front/Reserve/stance/hover) in "Not yet." HOI §10 cross-references v2 §0 for implementation status.
+- **Single priority (recommended):** Complete Phase A panel styling. Owner: UI/UX developer. Sub-tasks: (1) Apply §9.2 panel palette to TopToolbar, OOBSidebar, SelectionPanel, FormationDetail, BottomStatusStrip, CorpsCard, BrigadeRow; (2) Add IBM Plex Sans Condensed, warm gold section headers, faction gradient TopToolbar; (3) Add five-segment cohesion bars and supply status dots to BrigadeRow.
+- **Handoff:** Phase B (Army/Situation tabs, Situation content, etc.) can follow Phase A sequentially; panel styling first gives a consistent visual base for the new tabs.
+- **Determinism:** No simulation or persisted output changes; UI/docs only.
+- **Files modified:** docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md (§0), docs/30_planning/20260221_settlement remapping and GUI rework/HOI_VISUAL_GUI_OVERHAUL_SPEC.md (§10), docs/PROJECT_LEDGER.md.
+
+**2026-02-28** - GUI rework implementation: Phase A + Phase B complete in React+MapLibre app
+- **Phase:** Settlement remapping and GUI rework (React+MapLibre canonical app)
+- **Summary:** Implemented Phase A styling and Phase B sidebar enhancements in `src/ui/map/`. Phase A delivered warm panel palette, IBM Plex Sans Condensed section headers, TopToolbar faction gradient, and BrigadeRow five-segment cohesion bars with supply dots. Phase B delivered Army/Situation tabs, Situation summary cards, corps front assignment labels, reserve section, corps stance controls, sidebar↔map hover preview, selection highlighting/scrolling, map pan-on-selection, and Escape to clear selection. Updated canon + technical docs to reflect that Phase A/B baseline is now complete and Phase C is next.
+- **Determinism:** No simulation logic, turn resolution, serialization ordering, or persisted scenario outputs changed. UI and documentation changes only; store and map interactions use stable sorted OSID lists for hover filters.
+- **Files modified:** src/ui/map/tailwind.config.ts, src/ui/map/styles/globals.css, src/ui/map/utils/theme.ts, src/ui/map/components/{TopToolbar,BottomStatusStrip,SelectionPanel,FormationDetail,BrigadeRow,CorpsCard,OOBSidebar,SituationTab}.tsx, src/ui/map/store/gameStore.ts, src/ui/map/map/MapContainer.tsx, src/ui/map/App.tsx, src/ui/map/data/{types,GameStateAdapter}.ts, docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md, docs/30_planning/20260221_settlement remapping and GUI rework/HOI_VISUAL_GUI_OVERHAUL_SPEC.md, docs/10_canon/{context.md,CANON.md}, docs/PROJECT_LEDGER.md, .claude/napkin.md.
+- **Verification:** `npx tsc --noEmit` (repo root) pass x2, `npx vitest run` pass x2 (18 files, 193 passed, 13 skipped), `src/ui/map`: `npm run build` pass, `npx tsc --noEmit` pass.

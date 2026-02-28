@@ -1,0 +1,179 @@
+/**
+ * Type definitions for the MapLibre map application.
+ * Migrated from legacy types.ts — only game-state and map-relevant types.
+ */
+
+export type FactionId = 'RS' | 'RBiH' | 'HRHB' | null;
+
+export interface FrontEdgeView {
+    edge_id: string;
+    a: string;
+    b: string;
+    side_a: string | null;
+    side_b: string | null;
+}
+
+export interface FrontPressureView {
+    edge_id: string;
+    value: number;
+    max_abs: number;
+    last_updated_turn: number;
+}
+
+export interface AssignableFrontSegmentView {
+    front_id: string;
+    edge_ids: string[];
+    side_a: string | null;
+    side_b: string | null;
+    length_edges: number;
+    name?: string;
+    theatre_id?: string;
+}
+
+export interface TheatreView {
+    id: string;
+    name: string;
+    faction: string;
+    army_ids?: string[];
+    region_scope?: string[];
+}
+
+export interface FormationView {
+    id: string;
+    faction: string;
+    name: string;
+    kind: string;
+    readiness: string;
+    cohesion: number;
+    fatigue: number;
+    status: string;
+    createdTurn: number;
+    tags: string[];
+    municipalityId?: string;
+    hq_sid?: string;
+    location_osid?: string;
+    aorSettlementIds?: string[];
+    personnel?: number;
+    posture?: string;
+    corps_id?: string;
+    corpsStance?: string;
+    corpsExhaustion?: number;
+    subordinateIds?: string[];
+    corpsOgSlots?: number;
+    corpsActiveOgIds?: string[];
+    corpsCommandSpan?: number;
+    movementStatus?: 'deployed' | 'packing' | 'in_transit' | 'unpacking';
+    movementStance?: 'combat' | 'column';
+}
+
+export interface MilitiaPoolView {
+    munId: string;
+    faction: string;
+    available: number;
+    committed: number;
+    exhausted: number;
+    fatigue: number;
+}
+
+export interface ReconIntelligenceView {
+    detected_brigades: Record<string, { strength_category: string; detected_via: string }>;
+    confirmed_empty: string[];
+}
+
+export interface RecruitmentView {
+    capitalByFaction: Record<string, number>;
+    equipmentByFaction?: Record<string, number>;
+    recruitedBrigadeIds: string[];
+}
+
+export interface CasualtyLedgerEntryView {
+    killed: number;
+    wounded: number;
+    missing_captured: number;
+}
+
+export interface CivilianCasualtyView {
+    killed: number;
+    fled_abroad: number;
+}
+
+export interface InternationalVisibilityPressureView {
+    atrocity_visibility: number;
+    enclave_humanitarian_pressure: number;
+    sarajevo_siege_visibility: number;
+    negotiation_momentum: number;
+    last_major_shift: number;
+}
+
+export interface AttackOrderView {
+    brigadeId: string;
+    targetSettlementId: string;
+}
+
+export interface MovementOrderSettlementView {
+    brigadeId: string;
+    targetSettlementIds: string[];
+}
+
+export interface RepositionOrderView {
+    brigadeId: string;
+    settlementIds: string[];
+}
+
+export interface AoROrderView {
+    settlementId: string;
+    fromBrigadeId: string;
+    toBrigadeId: string;
+}
+
+export interface RecentControlEventView {
+    turn: number;
+    settlementId: string;
+    from: string | null;
+    to: string | null;
+    mechanism: string;
+    municipalityId: string | null;
+}
+
+export interface LoadedGameState {
+    label: string;
+    turn: number;
+    phase: string;
+    formations: FormationView[];
+    militiaPools: MilitiaPoolView[];
+    controlBySettlement: Record<string, string | null>;
+    statusBySettlement: Record<string, string>;
+    brigadeAorByFormationId: Record<string, string[]>;
+    brigadeFrontAssignment?: Record<string, string | null>;
+    theatres?: Record<string, TheatreView>;
+    armyTheatreAssignment?: Record<string, string>;
+    brigadeDesiredAoRCap?: Record<string, number>;
+    frontEdges?: FrontEdgeView[];
+    frontEdgesOsid?: FrontEdgeView[];
+    assignableFrontSegments?: AssignableFrontSegmentView[];
+    frontPressureByEdge?: Record<string, FrontPressureView>;
+    attackOrders: AttackOrderView[];
+    aorOrders: AoROrderView[];
+    recentControlEvents: RecentControlEventView[];
+    recruitment?: RecruitmentView;
+    armyStance?: Record<string, string>;
+    casualtyLedger?: Record<string, CasualtyLedgerEntryView>;
+    civilianCasualties?: Record<string, CivilianCasualtyView>;
+    internationalVisibilityPressure?: InternationalVisibilityPressureView;
+    phaseIiSupplyPressure?: Record<string, number>;
+    phaseIiExhaustion?: Record<string, number>;
+    player_faction?: string | null;
+    rbih_hrhb_war_earliest_turn?: number | null;
+    phase_i_alliance_rbih_hrhb?: number | null;
+    displacementByMun?: Record<string, {
+        originalPopulation: number;
+        displacedOut: number;
+        displacedIn: number;
+        lostPopulation: number;
+        currentPopulation: number;
+    }>;
+    reconIntelligence?: ReconIntelligenceView;
+    movementOrdersSettlement?: MovementOrderSettlementView[];
+    enemyZocByFaction?: Record<string, string[]>;
+    repositionOrders?: RepositionOrderView[];
+}

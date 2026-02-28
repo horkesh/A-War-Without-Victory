@@ -60,6 +60,7 @@ Do NOT edit FORAWWV automatically.
 - `docs/PROJECT_LEDGER_KNOWLEDGE.md` — Thematic knowledge base: decisions, patterns, rationale by topic (docs root)
 - `docs/10_canon/FORAWWV.md` — Validated design insights extending canon
 - `docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md` — Single implementation reference: sections 1–10 cover combat/battle resolution (§1), recruitment/accrual (§2), brigade AoR/corps (§3), Phase I control/no-flip (§4), scenario runs/handoffs (§5), tactical map/viewer (§6), desktop GUI (§7), canon checkpoints (§8), other resolved (§9), Warroom/Phase 0 and systems integration (§10)
+- **Canonical GUI (React + MapLibre):** `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — implementation spec; `docs/40_reports/20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md` — full done/remaining status. **Aesthetic target:** `docs/30_planning/20260221_settlement remapping and GUI rework/HOI_VISUAL_GUI_OVERHAUL_SPEC.md` (sidebar: ARMY / SITUATION tabs; panel interaction patterns: §3.8). Phase A/B baseline implemented in `src/ui/map/`; Phase C is next.
 - `docs/40_reports/audit/20260222_CANON_VS_INDUSTRY_STRUCTURE_AUDIT.md` — Canon vs industry structure audit and reorganization options
 
 One game turn equals one week.
