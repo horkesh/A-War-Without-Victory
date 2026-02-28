@@ -1,4 +1,11 @@
 /**
+ * LEGACY: Settlement-level brigade coverage system (pre-OSID migration).
+ * Superseded by OSID/ZoC (location_osid + ZoC readiness). §33 of CONSOLIDATED_IMPLEMENTED.
+ * Retained for backward-compatible loading of pre-2026-02-23 saves.
+ * DO NOT add new AoR-based logic here — use OSID/ZoC patterns instead.
+ */
+
+/**
  * Phase II Brigade AoR Assignment.
  *
  * Assigns each front-active settlement to exactly one brigade of the controlling faction.
@@ -14,7 +21,7 @@ import {
     getFormationHomeMunFromTags
 } from '../../state/brigade_operational_cap.js';
 import {
-    getEffectiveAoRCap,
+    getEffectiveZoCCap,
     getMaxBrigadesPerMun,
     MAX_MUNICIPALITIES_PER_BRIGADE
 } from '../../state/formation_constants.js';
@@ -1013,7 +1020,7 @@ function initializeBrigadeAoRSettlementLevel(
 
     for (const formation of brigades) {
         const faction = formation.faction;
-        const maxAoR = getEffectiveAoRCap(
+        const maxAoR = getEffectiveZoCCap(
             formation.personnel ?? 800,
             state.brigade_desired_aor_cap?.[formation.id],
         );

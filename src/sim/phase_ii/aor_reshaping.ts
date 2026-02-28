@@ -1,4 +1,11 @@
 /**
+ * LEGACY: Settlement-level brigade coverage system (pre-OSID migration).
+ * Superseded by OSID/ZoC (location_osid + ZoC readiness). §33 of CONSOLIDATED_IMPLEMENTED.
+ * Retained for backward-compatible loading of pre-2026-02-23 saves.
+ * DO NOT add new AoR-based logic here — use OSID/ZoC patterns instead.
+ */
+
+/**
  * Stage 4A: AoR reshaping -- transfer settlements between brigades.
  * This is how brigade "movement" works: AoR boundary shifts.
  * Settlements are reassigned from one brigade to another, shifting responsibility.

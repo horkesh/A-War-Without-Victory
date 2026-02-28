@@ -1,5 +1,5 @@
 import {
-    BRIGADE_OPERATIONAL_AOR_HARD_CAP,
+    BRIGADE_OPERATIONAL_ZOC_HARD_CAP,
     MAX_BRIGADE_PERSONNEL,
     MIN_BRIGADE_SPAWN,
     isLargeUrbanSettlementMun
@@ -42,7 +42,7 @@ export function computeBrigadeOperationalCoverageCapFromFormation(
     const personnelSpan = Math.max(1, MAX_BRIGADE_PERSONNEL - MIN_BRIGADE_SPAWN);
     const personnelFactor = (personnel - MIN_BRIGADE_SPAWN) / personnelSpan;
     const minBaseCap = 12;
-    const baseCap = minBaseCap + personnelFactor * (BRIGADE_OPERATIONAL_AOR_HARD_CAP - minBaseCap);
+    const baseCap = minBaseCap + personnelFactor * (BRIGADE_OPERATIONAL_ZOC_HARD_CAP - minBaseCap);
 
     const readinessMult: Record<string, number> = {
         active: 1.0,
@@ -63,7 +63,7 @@ export function computeBrigadeOperationalCoverageCapFromFormation(
         (readinessMult[readinessKey] ?? 1.0) *
         (postureMult[postureKey] ?? 1.0);
 
-    let cap = Math.max(1, Math.min(BRIGADE_OPERATIONAL_AOR_HARD_CAP, Math.round(effective)));
+    let cap = Math.max(1, Math.min(BRIGADE_OPERATIONAL_ZOC_HARD_CAP, Math.round(effective)));
 
     const homeMun = getFormationHomeMunFromTags(formation.tags);
     if (homeMun && isLargeUrbanSettlementMun(homeMun)) {

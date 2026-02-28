@@ -1,4 +1,11 @@
 /**
+ * LEGACY: Settlement-level brigade coverage system (pre-OSID migration).
+ * Superseded by OSID/ZoC (location_osid + ZoC readiness). §33 of CONSOLIDATED_IMPLEMENTED.
+ * Retained for backward-compatible loading of pre-2026-02-23 saves.
+ * DO NOT add new AoR-based logic here — use OSID/ZoC patterns instead.
+ */
+
+/**
  * AoR Contiguity Utilities.
  *
  * Reusable functions for checking and repairing brigade and corps AoR contiguity.

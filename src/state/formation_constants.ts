@@ -78,39 +78,53 @@ export const MAX_BRIGADE_PERSONNEL = 3_000;
 
 /**
  * Phase II hard operational frontage cap (settlements) per brigade.
- * AoR ownership may exceed this, but only this many settlements are treated as actively
+ * ZoC coverage may exceed this, but only this many settlements are treated as actively
  * covered by a brigade for garrison/pressure/attack computations each turn.
  */
-export const BRIGADE_OPERATIONAL_AOR_HARD_CAP = 48;
+export const BRIGADE_OPERATIONAL_ZOC_HARD_CAP = 48;
 
-/** Personnel per settlement slot for settlement-level AoR (Brigade AoR Redesign). 400 → max 1–4 settlements. */
-export const PERSONNEL_PER_AOR_SETTLEMENT = 400;
+/** Personnel per settlement slot for settlement-level ZoC (Brigade AoR Redesign). 400 → max 1–4 settlements. */
+export const PERSONNEL_PER_ZOC_SETTLEMENT = 400;
 
-/** Maximum AoR settlements per brigade regardless of personnel (Brigade AoR Redesign). */
-export const MAX_AOR_SETTLEMENTS = 4;
+/** Maximum ZoC settlements per brigade regardless of personnel (Brigade AoR Redesign). */
+export const MAX_ZOC_SETTLEMENTS = 4;
 
-/** Minimum AoR settlements per brigade (Brigade AoR Redesign). */
-export const MIN_AOR_SETTLEMENTS = 1;
+/** Minimum ZoC settlements per brigade (Brigade AoR Redesign). */
+export const MIN_ZOC_SETTLEMENTS = 1;
 
 /**
- * Personnel-based AoR cap (Brigade AoR Redesign): max settlements a brigade can cover.
+ * Personnel-based ZoC cap: max settlements a brigade can cover.
  * Formula: min(4, max(1, floor(personnel / 400))). Deterministic.
  */
-export function getPersonnelBasedAoRCap(personnel: number): number {
-    const n = Math.floor(personnel / PERSONNEL_PER_AOR_SETTLEMENT);
-    return Math.min(MAX_AOR_SETTLEMENTS, Math.max(MIN_AOR_SETTLEMENTS, n));
+export function getPersonnelBasedZoCCap(personnel: number): number {
+    const n = Math.floor(personnel / PERSONNEL_PER_ZOC_SETTLEMENT);
+    return Math.min(MAX_ZOC_SETTLEMENTS, Math.max(MIN_ZOC_SETTLEMENTS, n));
 }
 
 /**
- * Effective AoR cap for a brigade: uses player/bot desired cap (1–4) when set, else personnel-based.
+ * Effective ZoC cap for a brigade: uses player/bot desired cap (1–4) when set, else personnel-based.
  * Convene: ORCHESTRATOR_THREE_WORKSTREAMS_3D_ICONS_AOR_BRIGADE_CAP_2026_02_20.
  */
-export function getEffectiveAoRCap(personnel: number, desiredCap: number | null | undefined): number {
-    if (typeof desiredCap === 'number' && desiredCap >= MIN_AOR_SETTLEMENTS && desiredCap <= MAX_AOR_SETTLEMENTS) {
+export function getEffectiveZoCCap(personnel: number, desiredCap: number | null | undefined): number {
+    if (typeof desiredCap === 'number' && desiredCap >= MIN_ZOC_SETTLEMENTS && desiredCap <= MAX_ZOC_SETTLEMENTS) {
         return Math.floor(desiredCap);
     }
-    return getPersonnelBasedAoRCap(personnel);
+    return getPersonnelBasedZoCCap(personnel);
 }
+
+// --- Backward-compatible aliases (deprecated — use ZoC names above) ---
+/** @deprecated Use BRIGADE_OPERATIONAL_ZOC_HARD_CAP */
+export const BRIGADE_OPERATIONAL_AOR_HARD_CAP = BRIGADE_OPERATIONAL_ZOC_HARD_CAP;
+/** @deprecated Use PERSONNEL_PER_ZOC_SETTLEMENT */
+export const PERSONNEL_PER_AOR_SETTLEMENT = PERSONNEL_PER_ZOC_SETTLEMENT;
+/** @deprecated Use MAX_ZOC_SETTLEMENTS */
+export const MAX_AOR_SETTLEMENTS = MAX_ZOC_SETTLEMENTS;
+/** @deprecated Use MIN_ZOC_SETTLEMENTS */
+export const MIN_AOR_SETTLEMENTS = MIN_ZOC_SETTLEMENTS;
+/** @deprecated Use getPersonnelBasedZoCCap */
+export const getPersonnelBasedAoRCap = getPersonnelBasedZoCCap;
+/** @deprecated Use getEffectiveZoCCap */
+export const getEffectiveAoRCap = getEffectiveZoCCap;
 
 // --- Militia garrison (Brigade AoR Redesign Phase B) ---
 /** Militia cohesion for combat power (low vs brigade 60+). */

@@ -1212,6 +1212,7 @@ const phases: NamedPhase[] = [
     },
     {
         name: 'phase-e-aor-derivation',
+        // Legacy AoR derivation — superseded by OSID/ZoC (phase-out §33). Will be removed in a future cleanup.
         run: async (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
             let edges = context.input.settlementEdges;
@@ -1226,6 +1227,7 @@ const phases: NamedPhase[] = [
     },
     {
         name: 'phase-e-rear-zone-derivation',
+        // Legacy AoR derivation — superseded by OSID/ZoC (phase-out §33). Will be removed in a future cleanup.
         run: async (context) => {
             if (context.state.meta.phase !== 'phase_ii') return;
             let edges = context.input.settlementEdges;

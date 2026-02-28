@@ -7,7 +7,7 @@
  */
 
 import type { EdgeRecord } from '../../map/settlements.js';
-import { getPersonnelBasedAoRCap } from '../../state/formation_constants.js';
+import { getPersonnelBasedZoCCap } from '../../state/formation_constants.js';
 import type {
     FormationId,
     FormationState,
@@ -165,7 +165,7 @@ function shedDonorAoRIfOverCap(
     if (!donor || donor.faction == null) return;
     const factionId = donor.faction;
     const settlements = getBrigadeAoRSettlements(state, donorId);
-    const cap = getPersonnelBasedAoRCap(donor.personnel ?? 0);
+    const cap = getPersonnelBasedZoCCap(donor.personnel ?? 0);
     if (settlements.length <= cap) return;
     const adj = buildAdjacencyFromEdges(edges);
     const isFront = (sid: SettlementId) => {
