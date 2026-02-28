@@ -2151,6 +2151,24 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
         await phase.run(context);
     }
 
+    // Bottom-up formation system: run Phase I bottom-up steps in Phase II context.
+    // Enables RBiH/HRHB militia emergence and promotion for phase_ii-start scenarios.
+    if (working.meta.recruitment_mode === 'bottom_up') {
+        const bottomUpStepNames = new Set([
+            'phase-i-militia-emergence',
+            'compute-siege-state',
+            'phase-i-pool-population',
+            'phase-i-formation-spawn',
+            'activate-corps',
+            'promote-formations',
+        ]);
+        for (const step of phaseIPhases) {
+            if (!bottomUpStepNames.has(step.name)) continue;
+            report.phases.push({ name: step.name });
+            await step.run(context);
+        }
+    }
+
     await refreshFrontEdgeSnapshot(context.state, context.input);
     return { nextState: context.state, report };
 }

@@ -1048,7 +1048,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 state.meta.enable_rbih_hrhb_dynamics = false;
             }
             ensureRbihHrhbState(state, scenario.init_alliance_rbih_hrhb, scenario.init_mixed_municipalities);
-            if (scenario.recruitment_mode === 'player_choice' || scenario.init_formations_oob) {
+            if (scenario.recruitment_mode === 'player_choice' || scenario.recruitment_mode === 'bottom_up' || scenario.init_formations_oob) {
                 // Phase II-start scenarios need deterministic manpower pools for reinforcement/spawn.
                 if (!state.phase_i_militia_strength || Object.keys(state.phase_i_militia_strength).length === 0) {
                     updateMilitiaEmergence(state);
