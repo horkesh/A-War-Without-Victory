@@ -16,7 +16,6 @@
 import { resolveLocationOsid, type CanonicalToOperationalMap } from '../../data/operational_data.js';
 import type { OobCorps } from '../../scenario/oob_loader.js';
 import type {
-    FactionId,
     FormationId,
     FormationState,
     GameState,
@@ -125,12 +124,4 @@ export function activateCorpsForTurn(
     }
 
     return report;
-}
-
-/**
- * Type-narrow helper: returns the corps faction IDs that should be created at turn 0 (RS only in bottom_up mode).
- * Used by createOobFormationsAtPhaseIEntry to decide what to skip.
- */
-export function getBottomUpTurn0CorpsFactions(): FactionId[] {
-    return ['RS'];
 }

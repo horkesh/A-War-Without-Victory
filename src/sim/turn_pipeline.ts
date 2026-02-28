@@ -1814,6 +1814,7 @@ const phaseIPhases: NamedPhase[] = [
     {
         name: 'activate-corps',
         run: async (context) => {
+            if (context.state.meta.phase !== 'phase_i') return;
             if (context.state.meta.recruitment_mode !== 'bottom_up') return;
             const currentTurn = context.state.meta.turn ?? 0;
             const catalog = await loadRecruitmentCatalog();
