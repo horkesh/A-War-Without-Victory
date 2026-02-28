@@ -387,67 +387,54 @@ export function spawnFormationsFromPools(
         for (const { mun_id, pool } of eligiblePools) {
             const faction = pool.faction!;
 
+            // maxPerMun=0 means caller explicitly suppresses all spawns for this run
+            if (maxPerMun !== null && maxPerMun < 1) continue;
+
             // Check MAX_TO_PER_MUN cap: count existing militia-kind formations in this (mun, faction)
             const existingMilitiaCount = countMilitiaFormationsInMun(state, mun_id, faction);
             if (existingMilitiaCount >= MAX_TO_PER_MUN) continue;
 
-            // Task 3: Also check if any brigade in the mun has reached MAX_BRIGADE_PERSONNEL.
-            // If so, and pool has manpower, we want to spawn a new TO detachment IF headroom exists.
-            // This is already handled by the main spawn logic — if pool >= MIN_DETACHMENT_SPAWN and
-            // existingMilitiaCount < MAX_TO_PER_MUN, we spawn. The brigade full check is an
-            // additional trigger (not a gate — we already gate on pool available).
-            // Spawn one TO detachment per eligible pool (maxPerMun applies if set)
-            let count = 1; // bottom_up: one detachment per turn per eligible pool
-            if (maxPerMun !== null && maxPerMun < 1) continue;
+            // Spawn one TO detachment per eligible pool per turn
+            const formationId = generateDeterministicFormationId(state, faction);
+            const kind: 'militia' = 'militia';
+            const name = resolveFormationName(faction, mun_id, kind, 0, MIN_DETACHMENT_SPAWN);
 
-            for (let k = 0; k < count; k += 1) {
-                if (pool.available < MIN_DETACHMENT_SPAWN) break;
-                // Re-check cap (in case prior iteration consumed headroom)
-                const currentMilitiaCount = countMilitiaFormationsInMun(state, mun_id, faction);
-                if (currentMilitiaCount >= MAX_TO_PER_MUN) break;
+            const baseTags = [`generated_phase_i0`, `kind:${kind}`, `mun:${mun_id}`];
+            const allTags = Array.from(new Set([...baseTags, ...customTags])).sort(strictCompare);
 
-                const formationId = generateDeterministicFormationId(state, faction);
-                const kind: 'militia' = 'militia';
-                const name = resolveFormationName(faction, mun_id, kind, 0, MIN_DETACHMENT_SPAWN);
+            const hq_sid = municipalityHqSettlement?.[mun_id];
+            const location_osid = canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined;
 
-                const baseTags = [`generated_phase_i0`, `kind:${kind}`, `mun:${mun_id}`];
-                const allTags = Array.from(new Set([...baseTags, ...customTags])).sort(strictCompare);
+            const formation: FormationState = {
+                id: formationId,
+                faction,
+                name,
+                created_turn: currentTurn,
+                status: 'active',
+                assignment: null,
+                tags: allTags.length > 0 ? allTags : undefined,
+                kind,
+                personnel: MIN_DETACHMENT_SPAWN,
+                readiness: 'forming',
+                cohesion: MILITIA_COHESION,
+                activation_gated: true,
+                activation_turn: null,
+                origin_mun: mun_id,
+                ...(hq_sid ? { hq_sid } : {}),
+                ...(location_osid != null ? { location_osid } : {})
+            };
 
-                const hq_sid = municipalityHqSettlement?.[mun_id];
-                const location_osid = canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined;
+            report.created.push({ formation_id: formationId, name, mun_id, faction, kind });
+            report.formations_created += 1;
+            report.manpower_committed += MIN_DETACHMENT_SPAWN;
+            report.pools_touched += 1;
 
-                const formation: FormationState = {
-                    id: formationId,
-                    faction,
-                    name,
-                    created_turn: currentTurn,
-                    status: 'active',
-                    assignment: null,
-                    tags: allTags.length > 0 ? allTags : undefined,
-                    kind,
-                    personnel: MIN_DETACHMENT_SPAWN,
-                    readiness: 'forming',
-                    cohesion: MILITIA_COHESION,
-                    activation_gated: true,
-                    activation_turn: null,
-                    origin_mun: mun_id,
-                    ...(hq_sid ? { hq_sid } : {}),
-                    ...(location_osid != null ? { location_osid } : {})
-                };
-
-                report.created.push({ formation_id: formationId, name, mun_id, faction, kind });
-                report.formations_created += 1;
-                report.manpower_committed += MIN_DETACHMENT_SPAWN;
-
-                if (applyChanges) {
-                    state.formations![formationId] = formation;
-                    pool.available -= MIN_DETACHMENT_SPAWN;
-                    pool.committed += MIN_DETACHMENT_SPAWN;
-                    pool.updated_turn = currentTurn;
-                }
+            if (applyChanges) {
+                state.formations![formationId] = formation;
+                pool.available -= MIN_DETACHMENT_SPAWN;
+                pool.committed += MIN_DETACHMENT_SPAWN;
+                pool.updated_turn = currentTurn;
             }
-
-            if (count > 0) report.pools_touched += 1;
         }
 
         report.created.sort((a, b) => a.formation_id.localeCompare(b.formation_id));
