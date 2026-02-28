@@ -59,3 +59,7 @@ Thumbs.db
 
 # External skills repo (cloned into .agent; do not track)
 .agent/superpowers-repo/
+
+*storybook.log
+storybook-static
+.worktrees/
