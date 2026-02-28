@@ -6,7 +6,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    include: ['tests/brigade_*.test.ts', 'tests/settlement_control.test.ts', 'tests/corps_command.test.ts', 'tests/aor_reshaping.test.ts', 'tests/bot_three_sides_validation.test.ts', 'tests/corps_aor_contiguity.test.ts', 'tests/sandbox_slice_determinism.test.ts', 'tests/operational_data_osid.test.ts', 'tests/linked_zoc.test.ts', 'tests/ongoing_mobilization.test.ts', 'tests/displacement_reporting_fix.test.ts'],
+    include: ['tests/brigade_*.test.ts', 'tests/settlement_control.test.ts', 'tests/corps_command.test.ts', 'tests/aor_reshaping.test.ts', 'tests/bot_three_sides_validation.test.ts', 'tests/corps_aor_contiguity.test.ts', 'tests/sandbox_slice_determinism.test.ts', 'tests/operational_data_osid.test.ts', 'tests/linked_zoc.test.ts', 'tests/ongoing_mobilization.test.ts', 'tests/displacement_reporting_fix.test.ts', 'tests/proto_brigade_spawn.test.ts'],
     globals: false
   }
 });

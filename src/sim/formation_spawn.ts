@@ -11,7 +11,12 @@ import {
     getFactionReinforcementMult,
     getMaxBrigadesPerMun,
     MAX_BRIGADE_PERSONNEL,
+    MAX_TO_PER_MUN,
+    MILITIA_COHESION,
+    MIN_BATTALION_THRESHOLD,
     MIN_BRIGADE_SPAWN,
+    MIN_BRIGADE_THRESHOLD,
+    MIN_DETACHMENT_SPAWN,
     MIN_ELIGIBLE_POPULATION_FOR_BRIGADE,
     REINFORCEMENT_RATE,
     WIA_TRICKLE_RATE
@@ -93,6 +98,25 @@ function countBrigadesInMun(state: GameState, mun_id: string, faction: string): 
     return n;
 }
 
+/**
+ * Count existing militia-kind formations for (mun_id, faction). Uses tag "mun:mun_id" on formations.
+ * Used in bottom_up mode to enforce MAX_TO_PER_MUN cap on TO detachments/battalions per municipality.
+ * Deterministic: pure count, no ordering needed.
+ */
+function countMilitiaFormationsInMun(state: GameState, mun_id: string, faction: string): number {
+    const formations = state.formations ?? {};
+    const tag = `mun:${mun_id}`;
+    let n = 0;
+    for (const f of Object.values(formations)) {
+        if (!f || typeof f !== 'object') continue;
+        if ((f as FormationState).faction !== faction) continue;
+        if ((f as FormationState).kind !== 'militia') continue;
+        const tags = (f as FormationState).tags;
+        if (Array.isArray(tags) && tags.includes(tag)) n += 1;
+    }
+    return n;
+}
+
 /** Get mun_id from formation tags (tag "mun:mun_id"). Returns null if not found. */
 function getMunIdFromFormation(f: FormationState): string | null {
     const tags = f.tags;
@@ -123,16 +147,24 @@ export interface ReinforceBrigadesReport {
 }
 
 /**
- * Reinforce existing brigades from militia pools up to MAX_BRIGADE_PERSONNEL (3000).
- * Reserve manpower for potential spawn first, then reinforce with the remainder.
- * This keeps frontage-coverage spawning prioritized over pure reinforcement.
+ * Reinforce existing formations from militia pools.
  *
- * Rate-limited: each brigade absorbs at most REINFORCEMENT_RATE (200) per turn,
- * or COMBAT_REINFORCEMENT_RATE (100) if in active combat (posture 'attack' or disrupted).
+ * **Legacy path** (recruitment_mode !== 'bottom_up'):
+ *   Brigades only, up to MAX_BRIGADE_PERSONNEL (3000). Rate-limited by REINFORCEMENT_RATE.
+ *   Readiness-gated: degraded/forming brigades skip reinforcement.
+ *   Reserve manpower for potential spawn first.
  *
- * Readiness-gated: brigades that are 'degraded' do not reinforce (recruitment_system_design_note §5.3).
+ * **Bottom-up path** (recruitment_mode === 'bottom_up'):
+ *   All formation kinds (militia detachments, battalions, brigades) with tier-aware growth caps:
+ *   - Detachment (militia, personnel < MIN_BATTALION_THRESHOLD): grows to MIN_BATTALION_THRESHOLD (500)
+ *   - Battalion (militia, personnel >= MIN_BATTALION_THRESHOLD): grows to MIN_BRIGADE_THRESHOLD (1500)
+ *   - Brigade (kind === 'brigade'): grows to MAX_BRIGADE_PERSONNEL (3000)
+ *   transfer = min(growth_rate, pool.available, tier_cap - personnel)
+ *   No readiness gate for militia-kind formations (they absorb manpower while forming).
  *
- * Deterministic: formations sorted by id; each brigade takes from its (mun, faction) pool.
+ * Deterministic: formations sorted by id; each formation takes from its (mun, faction) pool.
+ *
+ * Note: Previously named reinforceBrigadesFromPools. Alias preserved for callers in turn_pipeline.ts.
  */
 export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesReport {
     const report: ReinforceBrigadesReport = {
@@ -144,15 +176,102 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
     const pools = state.militia_pools as Record<string, MilitiaPoolState> | undefined;
     if (!pools || typeof pools !== 'object') return report;
 
+    const recruitmentMode = state.meta.recruitment_mode;
+    const isBottomUp = recruitmentMode === 'bottom_up';
+
+    const currentTurn = state.meta.turn;
+    const spawnDirectiveActive = isFormationSpawnDirectiveActive(state);
+
+    if (isBottomUp) {
+        // --- bottom_up path: reinforce all formation kinds with tier-aware caps ---
+        // Include both militia-kind (TO detachments/battalions) and brigade-kind formations.
+        const formationIds = (Object.keys(formations) as string[])
+            .filter((id) => {
+                const f = formations[id] as FormationState | undefined;
+                if (!f) return false;
+                const kind = f.kind ?? 'brigade';
+                return (kind === 'militia' || kind === 'brigade') && getMunIdFromFormation(f) !== null;
+            })
+            .sort(strictCompare);
+
+        for (const id of formationIds) {
+            const f = formations[id] as FormationState;
+            const mun_id = getMunIdFromFormation(f);
+            const faction = f.faction;
+            if (!mun_id || !faction) continue;
+
+            const kind = f.kind ?? 'brigade';
+            const current = f.personnel ?? (kind === 'militia' ? MIN_DETACHMENT_SPAWN : MIN_BRIGADE_SPAWN);
+
+            // Determine tier cap
+            let tierCap: number;
+            if (kind === 'brigade') {
+                tierCap = MAX_BRIGADE_PERSONNEL;
+                // Readiness gate only for brigades
+                if (f.readiness === 'degraded') continue;
+                if (f.readiness === 'forming') continue;
+            } else {
+                // militia-kind: detachment or battalion — derive tier from personnel
+                if (current >= MIN_BATTALION_THRESHOLD) {
+                    tierCap = MIN_BRIGADE_THRESHOLD;
+                } else {
+                    tierCap = MIN_BATTALION_THRESHOLD;
+                }
+            }
+
+            if (current >= tierCap) continue;
+
+            const key = militiaPoolKey(mun_id, faction);
+            const pool = pools[key];
+            if (!pool || pool.available <= 0) continue;
+
+            // Rate limit: combat formations get half rate; faction-specific multiplier
+            const inCombat = f.posture === 'attack' || f.disrupted === true;
+            const factionMult = getFactionReinforcementMult(faction, currentTurn);
+            const baseRate = inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
+            const rate = Math.max(1, Math.floor(baseRate * factionMult));
+
+            const need = Math.min(tierCap - current, rate);
+            // For brigades: reserve manpower for potential spawn; for militia-kind: no reserve needed
+            const reserveForSpawn = kind === 'brigade'
+                ? reservedSpawnManpowerForReinforcement(state, mun_id, faction, spawnDirectiveActive)
+                : 0;
+            const availableForReinforcement = Math.max(0, pool.available - reserveForSpawn);
+            const transfer = Math.min(need, availableForReinforcement);
+
+            if (transfer <= 0) continue;
+
+            (f as FormationState & { personnel: number }).personnel = current + transfer;
+            pool.available -= transfer;
+            pool.committed += transfer;
+            pool.updated_turn = currentTurn;
+
+            // Update name when militia formation crosses battalion threshold
+            if (kind === 'militia') {
+                const newPersonnel = current + transfer;
+                const wasDetachment = current < MIN_BATTALION_THRESHOLD;
+                const isBattalion = newPersonnel >= MIN_BATTALION_THRESHOLD;
+                if (wasDetachment && isBattalion) {
+                    // Auto-promote name: "TO <mun_id>" → "TO Bn <mun_id>"
+                    f.name = resolveFormationName(faction, mun_id, 'militia', 0, newPersonnel);
+                }
+            }
+
+            report.formations_reinforced += 1;
+            report.manpower_added += transfer;
+            report.pools_touched += 1;
+        }
+
+        return report;
+    }
+
+    // --- Legacy path (auto_oob / player_choice): brigades only ---
     const brigadeIds = (Object.keys(formations) as string[])
         .filter((id) => {
             const f = formations[id] as FormationState | undefined;
             return f && f.kind === 'brigade' && getMunIdFromFormation(f) !== null;
         })
         .sort(strictCompare);
-
-    const currentTurn = state.meta.turn;
-    const spawnDirectiveActive = isFormationSpawnDirectiveActive(state);
 
     for (const id of brigadeIds) {
         const f = formations[id] as FormationState;
@@ -200,9 +319,21 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
 
 /**
  * Spawn formations from militia pools. Uses composite key (mun_id, faction).
- * Respects max_brigades_per_mun as a *total* cap per (mun, faction): only spawns if existing
- * brigade count in that mun is below cap. Militia is the pool (manpower source); only brigades
- * are formed from pools (canon: militia is not a formation kind).
+ *
+ * **Legacy path** (recruitment_mode !== 'bottom_up' — i.e. 'auto_oob' or 'player_choice'):
+ *   Spawns brigades when pool >= batch size (MIN_BRIGADE_SPAWN / 800).
+ *   Respects max_brigades_per_mun as a *total* cap per (mun, faction).
+ *
+ * **Bottom-up path** (state.meta.recruitment_mode === 'bottom_up'):
+ *   Spawns TO detachments when pool >= MIN_DETACHMENT_SPAWN (100).
+ *   - kind: 'militia', personnel: MIN_DETACHMENT_SPAWN, cohesion: MILITIA_COHESION (30)
+ *   - name: "TO <mun_id>" via resolveFormationName
+ *   - origin_mun set to mun_id for tracking
+ *   - MAX_TO_PER_MUN (5) cap: counts existing militia-kind formations per (mun, faction)
+ *   - Task 3: when any brigade in mun reaches MAX_BRIGADE_PERSONNEL AND pool >= MIN_DETACHMENT_SPAWN,
+ *     spawns a new TO detachment (gated by MAX_TO_PER_MUN cap).
+ *
+ * Deterministic: pools sorted by (mun_id, faction); formations sorted by id in report.
  */
 export function spawnFormationsFromPools(
     state: GameState,
@@ -224,8 +355,106 @@ export function spawnFormationsFromPools(
 
     const pools = state.militia_pools as Record<string, MilitiaPoolState>;
     const currentTurn = state.meta.turn;
+    const recruitmentMode = state.meta.recruitment_mode;
+    const isBottomUp = recruitmentMode === 'bottom_up';
     const { batchSize: optionsBatchSize, factionFilter, munFilter, maxPerMun, customTags, applyChanges, formationKind, municipalityHqSettlement, population1991ByMun, canonicalToOperational } = options;
 
+    if (isBottomUp) {
+        // --- bottom_up path: TO detachments at MIN_DETACHMENT_SPAWN threshold ---
+
+        // Collect eligible pools: available >= MIN_DETACHMENT_SPAWN, faction set, not fragmented
+        const eligiblePools: Array<{ mun_id: string; pool: MilitiaPoolState }> = [];
+        for (const [key, pool] of Object.entries(pools)) {
+            if (!pool || typeof pool !== 'object') continue;
+            if (pool.faction === null || pool.faction === undefined) continue;
+            const mun_id = typeof pool.mun_id === 'string' ? pool.mun_id : key;
+            if (state.municipalities?.[mun_id]?.control === 'fragmented') continue;
+            if (factionFilter !== null && pool.faction !== factionFilter) continue;
+            if (munFilter !== null && mun_id !== munFilter) continue;
+            // Only check the first two conditions for bottom_up (no emergent suppression check,
+            // no population gate — TO detachments emerge wherever there is manpower)
+            if (pool.available < MIN_DETACHMENT_SPAWN) continue;
+            eligiblePools.push({ mun_id, pool });
+        }
+
+        // Sort deterministically by (mun_id, faction)
+        eligiblePools.sort((a, b) => {
+            const c = a.mun_id.localeCompare(b.mun_id);
+            if (c !== 0) return c;
+            return (a.pool.faction ?? '').localeCompare(b.pool.faction ?? '');
+        });
+
+        for (const { mun_id, pool } of eligiblePools) {
+            const faction = pool.faction!;
+
+            // Check MAX_TO_PER_MUN cap: count existing militia-kind formations in this (mun, faction)
+            const existingMilitiaCount = countMilitiaFormationsInMun(state, mun_id, faction);
+            if (existingMilitiaCount >= MAX_TO_PER_MUN) continue;
+
+            // Task 3: Also check if any brigade in the mun has reached MAX_BRIGADE_PERSONNEL.
+            // If so, and pool has manpower, we want to spawn a new TO detachment IF headroom exists.
+            // This is already handled by the main spawn logic — if pool >= MIN_DETACHMENT_SPAWN and
+            // existingMilitiaCount < MAX_TO_PER_MUN, we spawn. The brigade full check is an
+            // additional trigger (not a gate — we already gate on pool available).
+            // Spawn one TO detachment per eligible pool (maxPerMun applies if set)
+            let count = 1; // bottom_up: one detachment per turn per eligible pool
+            if (maxPerMun !== null && maxPerMun < 1) continue;
+
+            for (let k = 0; k < count; k += 1) {
+                if (pool.available < MIN_DETACHMENT_SPAWN) break;
+                // Re-check cap (in case prior iteration consumed headroom)
+                const currentMilitiaCount = countMilitiaFormationsInMun(state, mun_id, faction);
+                if (currentMilitiaCount >= MAX_TO_PER_MUN) break;
+
+                const formationId = generateDeterministicFormationId(state, faction);
+                const kind: 'militia' = 'militia';
+                const name = resolveFormationName(faction, mun_id, kind, 0, MIN_DETACHMENT_SPAWN);
+
+                const baseTags = [`generated_phase_i0`, `kind:${kind}`, `mun:${mun_id}`];
+                const allTags = Array.from(new Set([...baseTags, ...customTags])).sort(strictCompare);
+
+                const hq_sid = municipalityHqSettlement?.[mun_id];
+                const location_osid = canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined;
+
+                const formation: FormationState = {
+                    id: formationId,
+                    faction,
+                    name,
+                    created_turn: currentTurn,
+                    status: 'active',
+                    assignment: null,
+                    tags: allTags.length > 0 ? allTags : undefined,
+                    kind,
+                    personnel: MIN_DETACHMENT_SPAWN,
+                    readiness: 'forming',
+                    cohesion: MILITIA_COHESION,
+                    activation_gated: true,
+                    activation_turn: null,
+                    origin_mun: mun_id,
+                    ...(hq_sid ? { hq_sid } : {}),
+                    ...(location_osid != null ? { location_osid } : {})
+                };
+
+                report.created.push({ formation_id: formationId, name, mun_id, faction, kind });
+                report.formations_created += 1;
+                report.manpower_committed += MIN_DETACHMENT_SPAWN;
+
+                if (applyChanges) {
+                    state.formations![formationId] = formation;
+                    pool.available -= MIN_DETACHMENT_SPAWN;
+                    pool.committed += MIN_DETACHMENT_SPAWN;
+                    pool.updated_turn = currentTurn;
+                }
+            }
+
+            if (count > 0) report.pools_touched += 1;
+        }
+
+        report.created.sort((a, b) => a.formation_id.localeCompare(b.formation_id));
+        return report;
+    }
+
+    // --- Legacy path (auto_oob / player_choice): spawn brigades at batch size threshold ---
     const eligiblePools: Array<{ mun_id: string; pool: MilitiaPoolState }> = [];
     for (const [key, pool] of Object.entries(pools)) {
         if (!pool || typeof pool !== 'object') continue;

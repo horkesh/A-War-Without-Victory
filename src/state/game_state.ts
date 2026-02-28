@@ -673,6 +673,9 @@ export interface StateMeta {
     player_faction?: FactionId;
     /** Calendar date corresponding to turn 0 for this scenario. Defaults to { year: 1991, month: 8, day: 1 } (1 September 1991) when absent. Non-normative for simulation — used by UI only. */
     scenario_start_date?: { year: number; month: number; day: number };
+    /** Phase I Overhaul: recruitment mode from scenario config. Controls whether bottom-up TO detachment
+     *  lifecycle is active ("bottom_up") or legacy brigade spawn is used ("auto_oob" / "player_choice"). */
+    recruitment_mode?: 'player_choice' | 'auto_oob' | 'bottom_up';
 }
 
 export interface NegotiationLedgerEntry {

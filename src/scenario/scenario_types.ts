@@ -84,8 +84,9 @@ export interface Scenario {
     /**
      * Recruitment mode: "player_choice" = setup-phase recruitment from OOB catalog;
      * "auto_oob" = legacy behavior (init_formations_oob: true auto-spawns all). Default: "auto_oob".
+     * "bottom_up" = Phase I Overhaul: TO detachments emerge at 100 threshold, grow via tier system.
      */
-    recruitment_mode?: 'player_choice' | 'auto_oob';
+    recruitment_mode?: 'player_choice' | 'auto_oob' | 'bottom_up';
     /**
      * When true with recruitment_mode "player_choice", init creates corps/army_hq only and
      * defers brigade creation to turn-based recruitment (player or bot) from turn 0 onward.

@@ -952,6 +952,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             state.meta.phase_i_force_transition_after_turns = 52;
         }
 
+        // Phase I Overhaul: store recruitment_mode in state.meta so turn pipeline can access it.
+        if (scenario.recruitment_mode === 'bottom_up' || scenario.recruitment_mode === 'player_choice') {
+            state.meta.recruitment_mode = scenario.recruitment_mode;
+        }
+
         // When init_formations_oob is true, OOB creates formations at Phase I entry; do not load placeholder init_formations.
         if (formationsPath && !scenario.init_formations_oob) {
             const initialFormations = await loadInitialFormations(formationsPath);

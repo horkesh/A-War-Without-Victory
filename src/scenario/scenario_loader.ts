@@ -282,7 +282,10 @@ export function normalizeScenario(raw: unknown): Scenario {
     const prerequisites = normalizePrerequisites(o.prerequisites);
 
     // Recruitment system fields
-    const recruitment_mode = o.recruitment_mode === 'player_choice' ? 'player_choice' as const : undefined;
+    const recruitment_mode =
+        o.recruitment_mode === 'player_choice' ? 'player_choice' as const :
+        o.recruitment_mode === 'bottom_up' ? 'bottom_up' as const :
+        undefined;
     const no_initial_brigade_formations = o.no_initial_brigade_formations === true;
     const recruitment_capital = normalizeResourceRecord(o.recruitment_capital);
     const recruitment_capital_trickle = normalizeResourceRecord(o.recruitment_capital_trickle);
