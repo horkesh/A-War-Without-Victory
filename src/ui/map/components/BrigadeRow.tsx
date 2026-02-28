@@ -13,7 +13,7 @@ export interface BrigadeRowProps {
   compact?: boolean;
   highlighted?: boolean;
   onClick?: () => void;
-  onHoverChange?: (hovered: boolean) => void;
+  onHoverChange?: (hovered: boolean, e?: React.MouseEvent) => void;
 }
 
 /**
@@ -46,8 +46,8 @@ export function BrigadeRow({ formation, compact, highlighted = false, onClick, o
     <div
       className={`flex items-center gap-2 font-mono text-xs border-b border-panel-border/50 last:border-b-0 px-2 ${compact ? 'py-1' : 'py-1.5'} ${rowClass} ${highlighted ? 'bg-panel-active/70' : 'hover:bg-panel-hover/80'}`}
       onClick={onClick}
-      onMouseEnter={() => onHoverChange?.(true)}
-      onMouseLeave={() => onHoverChange?.(false)}
+      onMouseEnter={(e) => onHoverChange?.(true, e)}
+      onMouseLeave={(e) => onHoverChange?.(false, e)}
       data-formation-id={formation.id}
       data-highlighted={highlighted ? 'true' : 'false'}
     >

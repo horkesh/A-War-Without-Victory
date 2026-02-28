@@ -10,6 +10,7 @@ import { buildOsidDisplayNameMap } from '../utils/osidDisplayName';
 import { loadOperationalPoliticalControl, loadOperationalSettlements } from '../data/DataLoader';
 import { buildControlGeoJSON } from './builders/buildControlGeoJSON';
 import { buildFrontLinesGeoJSON } from './builders/buildFrontLinesGeoJSON';
+import { buildFrontEdgesHoverGeoJSON } from './builders/buildFrontEdgesHoverGeoJSON';
 import { buildFormationsGeoJSON } from './builders/buildFormationsGeoJSON';
 import { buildOrderArrowsGeoJSON } from './builders/buildOrderArrowsGeoJSON';
 import { buildOsidCentroidLookup } from './builders/geojsonLookup';
@@ -20,6 +21,15 @@ import styleJson from './awwv_map_style.json';
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
 const DEFAULT_ZOOM = 8;
 const SIDEBAR_HOVER_LAYER_ID = 'sidebar-hover-outline';
+
+/** Layer IDs for front lines (visibility driven by store frontsVisible). */
+const FRONT_LAYER_IDS = ['faction-border-glow', 'front-line-base', 'front-line-dash'];
+/** Layer ID for formation markers (formationsVisible). */
+const FORMATION_MARKERS_LAYER_ID = 'formation-markers';
+/** Layer ID for formation labels (labelsVisible). */
+const FORMATION_LABELS_LAYER_ID = 'formation-labels';
+const FRONT_EDGES_HOVER_LAYER_ID = 'front-edges-hover';
+const FRONT_EDGES_HOVER_SOURCE_ID = 'front-edges-hover';
 
 function rewritePmtilesUrls(style: Record<string, unknown>, origin: string): Record<string, unknown> {
   const base = `pmtiles://${origin}/`;
@@ -37,11 +47,20 @@ export function MapContainer() {
   const [mapReady, setMapReady] = useState(false);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
+  const setPendingAttackConfirmation = useGameStore((s) => s.setPendingAttackConfirmation);
+  const setOrderModeForFormation = useGameStore((s) => s.setOrderModeForFormation);
+  const orderModeForFormation = useGameStore((s) => s.orderModeForFormation);
   const setOsidDisplayNames = useGameStore((s) => s.setOsidDisplayNames);
+  const setOsidPropertiesMap = useGameStore((s) => s.setOsidPropertiesMap);
   const selectedOsid = useGameStore((s) => s.selectedOsid);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const hoveredOsids = useGameStore((s) => s.hoveredOsids);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
+  const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
+  const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
+  const frontsVisible = useGameStore((s) => s.frontsVisible);
+  const formationsVisible = useGameStore((s) => s.formationsVisible);
+  const labelsVisible = useGameStore((s) => s.labelsVisible);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -61,6 +80,13 @@ export function MapContainer() {
         osidBaseRef.current = geojson;
         osidCentroidsRef.current = buildOsidCentroidLookup(geojson);
         setOsidDisplayNames(buildOsidDisplayNameMap(geojson));
+        const osidProps: Record<string, Record<string, unknown>> = {};
+        for (const f of geojson.features) {
+          const props = (f.properties ?? {}) as Record<string, unknown>;
+          const osid = typeof props.osid === 'string' ? props.osid : '';
+          if (osid) osidProps[osid] = { ...props };
+        }
+        setOsidPropertiesMap(osidProps);
 
         const controlledGeoJson = buildControlGeoJSON(geojson, byOsid);
         const frontLinesGeoJson = buildFrontLinesGeoJSON(controlledGeoJson);
@@ -112,11 +138,31 @@ export function MapContainer() {
     if (!mapReady || !mapRef.current) return;
     const map = mapRef.current;
     const cleanup = useMapInteractions(map, {
-      onOsidClick: (osid) => setSelectedOsid(osid),
+      onOsidClick: (osid) => {
+        if (orderModeForFormation === 'attack' && selectedFormationId) {
+          setPendingAttackConfirmation({ attackerFormationId: selectedFormationId, targetOsid: osid });
+          setOrderModeForFormation(null);
+        } else {
+          setSelectedOsid(osid);
+        }
+      },
       onFormationClick: (id) => setSelectedFormationId(id),
+      onOsidHover: (osid, point) => {
+        if (osid) setTooltipTargetWithPosition({ type: 'osid', id: osid }, point ?? undefined);
+        else clearTooltipTarget();
+      },
+      onFormationHover: (id, point) => {
+        if (id) setTooltipTargetWithPosition({ type: 'formation', id }, point ?? undefined);
+        else clearTooltipTarget();
+      },
+      onFrontEdgeHover: (edgeId, point) => {
+        if (edgeId) setTooltipTargetWithPosition({ type: 'front', id: edgeId }, point ?? undefined);
+        else clearTooltipTarget();
+      },
+      onMapMouseLeave: clearTooltipTarget,
     });
     return () => cleanup?.();
-  }, [mapReady, setSelectedOsid, setSelectedFormationId]);
+  }, [mapReady, setSelectedOsid, setSelectedFormationId, setTooltipTargetWithPosition, clearTooltipTarget, loadedGameState, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -144,6 +190,30 @@ export function MapContainer() {
       ensureFormationIcons(map, iconIds);
       formationsSource.setData(formationsGeoJson);
       orderArrowsSource.setData(orderArrowsGeoJson);
+
+      const frontEdgesOsid = loadedGameState.frontEdgesOsid;
+      if (frontEdgesOsid && frontEdgesOsid.length > 0) {
+        const frontEdgesHoverData = buildFrontEdgesHoverGeoJSON(controlledGeoJson, frontEdgesOsid);
+        if (!map.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
+          map.addSource(FRONT_EDGES_HOVER_SOURCE_ID, { type: 'geojson', data: frontEdgesHoverData });
+          map.addLayer(
+            {
+              id: FRONT_EDGES_HOVER_LAYER_ID,
+              type: 'line',
+              source: FRONT_EDGES_HOVER_SOURCE_ID,
+              paint: {
+                'line-width': ['interpolate', ['linear'], ['zoom'], 6, 6, 10, 12, 14, 18],
+                'line-opacity': 0,
+                'line-color': 'transparent',
+              },
+            },
+            'formation-markers'
+          );
+        } else {
+          (map.getSource(FRONT_EDGES_HOVER_SOURCE_ID) as GeoJSONSource).setData(frontEdgesHoverData);
+        }
+      }
+
       return true;
     };
 
@@ -191,6 +261,24 @@ export function MapContainer() {
     }, 250);
     return () => clearInterval(poll);
   }, [hoveredOsids, mapReady]);
+
+  // Phase C2: apply layer visibility from store (no flicker — single effect, stable map ref)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!mapReady || !map) return;
+
+    const setVisibility = (layerId: string, visible: boolean) => {
+      if (!map.getLayer(layerId)) return;
+      map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+    };
+
+    FRONT_LAYER_IDS.forEach((id) => setVisibility(id, frontsVisible));
+    setVisibility(FORMATION_MARKERS_LAYER_ID, formationsVisible);
+    setVisibility(FORMATION_LABELS_LAYER_ID, labelsVisible);
+  }, [mapReady, frontsVisible, formationsVisible, labelsVisible]);
+
+  // Phase C2: mapMode (political | ethnic | supply | pressure) — ethnic/supply/pressure
+  // currently show same as political; add mode-specific layers/sources when data is ready.
 
   useEffect(() => {
     const map = mapRef.current;

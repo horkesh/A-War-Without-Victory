@@ -1,10 +1,15 @@
 # Napkin Runbook
 
+**Location:** This napkin lives at **`.claude/napkin.md`**. It is the single runbook for this repo. Use this file at session start and update it during work. Do not use `.agent/napkin.md` or other napkin paths for runbook content.
+
+**Rules:** Format and curation follow the [Napkin SKILL](https://github.com/blader/napkin/blob/main/SKILL.md): read and curate on every session start; keep recurring high-value guidance only; each entry has date, short title, and explicit "Do instead"; max 10 items per category; re-prioritize by importance.
+
 ## Curation Rules
-- Re-prioritize on every read.
-- Keep recurring, high-value notes only.
-- Max 10 items per category.
+- Re-prioritize on every read (highest first).
+- Merge duplicates and remove stale/low-signal notes.
+- Keep only recurring, high-frequency guidance.
 - Each item includes date + "Do instead".
+- Enforce category caps (max 10 per category).
 
 ## Execution & Validation (Highest Priority)
 1. **[2026-02-25] Determinism is sacred**
@@ -88,10 +93,16 @@
 7. **[2026-02-25] sidToMun map preservation**
    Do instead: Preserve `canonicalSidToMun` in scenario_runner.ts. Corruption prevented ALL 217 mandatory OOB brigades from spawning.
 
+## Design Ideas (Deferred)
+1. **[2026-02-28] Front segment assignment as ZoC alternative**
+   If ZoC proves hard to tune: each front segment is a clickable entity; player assigns brigades and optionally specifies coverage width. Engine computes segment hardness = f(brigades, terrain, width). Mutual support = multiple brigades on same segment. Unassigned segments auto-contested. Explore if "too few brigades to cover the front" persists after calibration.
+
 ## GUI / HoI Map
 1. **[2026-02-28] HOI spec = aesthetic authority; v2 doc = implementation**
    Do instead: Treat HOI_VISUAL_GUI_OVERHAUL_SPEC (docs/30_planning/...) as authoritative for look-and-feel; use AWWV_GUI_ARCHITECTURE_REWORK_v2.md for implementation. Sidebar: two tabs ARMY / SITUATION; panel interaction patterns §3.8 of HOI spec.
-2. **[2026-02-28] Selection panel right-side positioning (React+MapLibre app)**
+2. **[2026-02-28] Phase C complete: tooltips, MapModeToolbar, shortcuts, attack modal, order queue**
+   Do instead: Rich tooltips use store tooltipTarget + tooltipPosition, 300ms delay; MapModeToolbar + MapLayerToggles bottom-right (C2.1); keys 1–4 = map modes, Enter = confirm primary action, Escape clears selection/tooltip/pending; AttackConfirmation modal; OrderQueue from stagedOrders. See docs/40_reports/phase_c/20260228_PHASE_C_GUI_IMPLEMENTATION_REPORT.md.
+3. **[2026-02-28] Selection panel right-side positioning (React+MapLibre app)**
    Do instead: Use inline styles (position, left: auto, right, top, bottom, width, zIndex, direction: ltr) for overlay panels so Tailwind/purge/RTL cannot override. Dev-only `?showPanel=1` shows selection panel without map click for layout verification.
 3. **[2026-02-26] Async terrain texture build**
    Do instead: Use `buildHoITerrainTextureAsync` yielding every 64 rows. Wrap `renderer.init()` in `Promise.race` with ~25s timeout; keep 2D placeholder on failure.
@@ -107,8 +118,6 @@
    Do instead: Use tight Y-offsets (0.001-0.005), `polygonOffset` on all layers, ortho camera `far=100`. For faction overlay, rasterize onto terrain mesh geometry texture.
 9. **[2026-02-28] Sidebar hover-preview in React+MapLibre**
    Do instead: Drive map hover preview from store-owned `hoveredOsids` and a dedicated MapLibre outline layer (`sidebar-hover-outline`) with deterministic sorted OSID filters; brigade/corps hover events set/clear only this list.
-10. **[2026-02-28] MapLibre + React StrictMode lifecycle**
-    Do instead: For MapLibre wrappers, avoid React StrictMode double-mount in dev (or guard init/cleanup with abort flags). Keep map instance in component refs, and wire source updates after map/source availability checks.
 
 ## Desktop & Electron
 1. **[2026-02-21] EPIPE guard on init logging**

@@ -63,6 +63,8 @@ export function OOBSidebar() {
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
+  const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
+  const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<'army' | 'situation'>('army');
   const [corpsStanceOverrides, setCorpsStanceOverrides] = useState<Record<string, string>>({});
@@ -151,8 +153,16 @@ export function OOBSidebar() {
     return corpsFormation?.corpsStance ?? loadedGameState?.armyStance?.[faction] ?? 'balanced';
   };
 
-  const hoverBrigade = (formation: FormationView, hovered: boolean) => {
+  const hoverBrigade = (formation: FormationView, hovered: boolean, e?: React.MouseEvent) => {
     setHoveredOsids(hovered ? getFormationOsids(formation) : []);
+    if (hovered) {
+      setTooltipTargetWithPosition(
+        { type: 'formation', id: formation.id },
+        e ? { x: e.clientX, y: e.clientY } : undefined
+      );
+    } else {
+      clearTooltipTarget();
+    }
   };
 
   const renderTabButtons = () => (
@@ -269,7 +279,7 @@ export function OOBSidebar() {
                                 compact
                                 highlighted={highlightedFormationIds.has(brigade.id)}
                                 onClick={() => setSelectedFormationId(brigade.id)}
-                                onHoverChange={(hovered) => hoverBrigade(brigade, hovered)}
+                                onHoverChange={(hovered, e) => hoverBrigade(brigade, hovered, e)}
                               />
                             ))}
                           </div>

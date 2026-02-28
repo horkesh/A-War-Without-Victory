@@ -7,19 +7,21 @@
 **Audience:** All repo agents, desktop agent, UI/UX agent, orchestrator  
 **Supersedes:** AWWV_GUI_ARCHITECTURE_REWORK.md v1 (same date; deck.gl version)
 
-**Source of truth:** The **React + MapLibre map app** in `src/ui/map/` (Vite, React, Tailwind, Zustand, MapContainer) is the canonical GUI. All GUI work must be applied to this app. The legacy HoI 3D stack and other archived renderers are not targets for new work.
+**Source of truth:** The **React + MapLibre map app** in `src/ui/map/` (Vite, React, Tailwind, Zustand, MapContainer) is the **canonical GUI**. All GUI work must be applied to this app. Run it via `npm run dev:map`. The legacy HoI 3D stack (`map_hoi.html`), tactical map (`tactical_map.html`), and other archived renderers are **not** targets for new work.
 
 ---
 
 ## 0. Implementation Status (vs this document)
 
-*This section tracks what exists in the React map app relative to §5.2 Component Inventory and §8 Migration Plan. Update as work completes. Implementation priorities follow **HOI_VISUAL_GUI_OVERHAUL_SPEC.md** §10 (Phase A/B complete; Phase C next).*
+*This section tracks what exists in the React map app relative to §5.2 Component Inventory and §8 Migration Plan. Update as work completes. Implementation priorities follow **HOI_VISUAL_GUI_OVERHAUL_SPEC.md** §10 (Phase A/B complete; **Phase C complete** 2026-02-28).*
+
+**Document roles:** **HOI_VISUAL_GUI_OVERHAUL_SPEC.md** (in `docs/30_planning/20260221_settlement remapping and GUI rework/`) is the **aesthetic and design authority** for look-and-feel, sidebar structure (Army / SITUATION tabs), and panel interaction patterns (§3.8). This document (v2) is the **implementation reference** — stack, components, migration plan, and status.
 
 | Area | Done | Not yet |
 |------|------|--------|
 | **Phase 1 (Scaffold + Map)** | Vite + React + MapLibre; `awwv_map_style.json`; MapContainer; OSID control layer; front lines; formations; order arrows; PMTiles/base map | — |
 | **Phase 2 (Game state)** | Load save → store; GeoJSON builders (control, front lines, formations, order arrows); formations + orders on map | — |
-| **Phase 3 (UI panels)** | TopToolbar, BottomStatusStrip, SelectionPanel (Settlement Info, OSID humanized), FormationDetail, OOBSidebar, CorpsCard, BrigadeRow; click OSID/formation → panels; Storybook for several components. **Phase A complete:** §9.2 panel palette, IBM Plex Sans Condensed headers, warm gold section headers, faction gradient TopToolbar, BrigadeRow cohesion bars + supply dots. **Phase B complete:** tabbed sidebar (Army/Situation), Situation tab content, front assignment display on CorpsCard, Reserve section, corps stance controls, sidebar↔map hover preview, Escape clears selection. | MapModeToolbar, MapLayerToggles, Minimap, ZoomControls; CorpsDetail, ArmyDetail; OrderQueue, AttackConfirmation, MovementPreview; keyboard shortcuts |
+| **Phase 3 (UI panels)** | TopToolbar, BottomStatusStrip, SelectionPanel (Settlement Info, OSID humanized), FormationDetail, OOBSidebar, CorpsCard, BrigadeRow; click OSID/formation → panels; Storybook. **Phase A complete:** §9.2 panel palette, headers, faction gradient TopToolbar, BrigadeRow cohesion bars + supply dots. **Phase B complete:** tabbed sidebar (Army/Situation), Situation tab, front on CorpsCard, Reserve, stance controls, hover preview, Escape clears selection. **Phase C complete (2026-02-28):** Rich tooltips (§7), MapModeToolbar + MapLayerToggles (bottom-right), useKeyboardShortcuts (Enter, 1–4, Escape), AttackConfirmation modal, OrderQueue. | Minimap, ZoomControls; CorpsDetail, ArmyDetail; MovementPreview |
 | **Phase 4 (Desktop)** | — | useIPC; advance-turn, order staging, recruitment; SidePickerOverlay; fog-of-war; PMTiles in Electron |
 | **Phase 5 (Polish)** | — | ZoC overlay, battle markers, War Summary modal, Replay scrubber, Attack confirmation with odds, Movement preview, visual sign-off |
 
@@ -774,6 +776,12 @@ export default {
 
 Same as v1 §5.5. All IPC channels from `DESKTOP_GUI_IPC_CONTRACT.md` wrapped in a `useIPC()` hook. No channel names change. No payload shapes change.
 
+### 5.5 Implementation Notes (panel positioning, hover preview, dev UX)
+
+- **Overlay panel positioning:** Use **inline styles** as the source of truth for overlay panels (e.g. SelectionPanel): `position: absolute`, `left: auto`, `right`, `top`, `bottom`, `width`, `zIndex`, `direction: ltr`. This prevents Tailwind purge or RTL from overriding placement. Do not rely on Tailwind classes alone for overlay position.
+- **Dev layout verification:** When `import.meta.env.DEV`, support `?showPanel=1` in the URL to show the selection panel with a placeholder selection so the panel is visible without clicking the map, for layout verification.
+- **Sidebar hover-preview:** Drive map hover preview from store-owned `hoveredOsids` and a dedicated MapLibre outline layer (e.g. `sidebar-hover-outline`) with **deterministic sorted OSID filters**. Brigade/corps hover events in the sidebar set/clear only this list; the map renders the outline from the same source. Avoid duplicating hover state or ad-hoc layer updates.
+
 ---
 
 ## 6. Design Workflow
@@ -1126,7 +1134,7 @@ scripts/map/
 
 ### 10.3 For the UI Agent (Primary Owner)
 
-You own everything in `src/ui/map/` (the new React + MapLibre app). **This app is the single source of truth for the GUI;** all new GUI work must be implemented there. Do not target the archived HoI 3D stack or other legacy renderers. Key principles:
+You own everything in `src/ui/map/` (the new React + MapLibre app). **This app is the single source of truth for the GUI;** all new GUI work must be implemented there. Do not target the archived HoI 3D stack or other legacy renderers. **Aesthetic and interaction design** follow **HOI_VISUAL_GUI_OVERHAUL_SPEC.md** (sidebar Army/SITUATION tabs, panel interaction patterns §3.8, palette §9). Key principles:
 
 1. **The style spec is king.** `awwv_map_style.json` defines what the map looks like. To change colors, widths, visibility, zoom behavior — edit the style. Don't write rendering code.
 2. **GeoJSON builders are the bridge between engine and map.** Your main job is converting `LoadedGameState` into GeoJSON FeatureCollections that MapLibre renders. Each builder is a pure function: state in, GeoJSON out.

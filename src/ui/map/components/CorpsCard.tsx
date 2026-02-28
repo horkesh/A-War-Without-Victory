@@ -14,7 +14,7 @@ export interface CorpsCardProps {
   onHoverOsidsChange?: (osids: string[]) => void;
   onBrigadeSelect?: (formationId: string) => void;
   highlightedFormationIds?: Set<string>;
-  onBrigadeHoverOsids?: (formation: FormationView, hovered: boolean) => void;
+  onBrigadeHoverOsids?: (formation: FormationView, hovered: boolean, e?: React.MouseEvent) => void;
 }
 
 /**
@@ -90,7 +90,7 @@ export function CorpsCard({
             compact
             highlighted={highlightedFormationIds?.has(b.id) ?? false}
             onClick={() => onBrigadeSelect?.(b.id)}
-            onHoverChange={(hovered) => onBrigadeHoverOsids?.(b, hovered)}
+            onHoverChange={(hovered, e) => onBrigadeHoverOsids?.(b, hovered, e)}
           />
         ))}
       </div>

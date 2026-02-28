@@ -82,9 +82,11 @@ Implementation-notes in canon (e.g. Phase I §4.3, Systems Manual) that are expl
 
 ### 2. Napkin - SESSION START
 
-**Location:** `.agent/napkin.md`
+**Location:** `.claude/napkin.md` (canonical runbook for this repo; do not use `.agent/napkin.md` for runbook content).
 
-**CRITICAL RULE:** At session start, read `.agent/napkin.md` before doing anything else. It tracks corrections, user preferences, and patterns that work or don't. Update it continuously as you work.
+**CRITICAL RULE:** At session start, read `.claude/napkin.md` before doing anything else. It tracks corrections, user preferences, and patterns that work or don't. Update it continuously as you work. Format and curation follow the [Napkin SKILL](https://github.com/blader/napkin/blob/main/SKILL.md).
+
+**Paradox rules:** When the Orchestrator is in charge of a multi-phase implementation (e.g. Phase C GUI), all agents follow [PARADOX_RULES.md](../20_engineering/PARADOX_RULES.md): concrete phases with todos, refactor-pass between phases, full Paradox team delegation, concurrent execution where possible, then tests → report → napkin/ledger/docs → commit and push. Architect oversees and flags decisions for user review.
 
 ### 3. Git Updates - ALWAYS FOLLOW
 
@@ -117,7 +119,7 @@ Refs: docs/PROJECT_LEDGER.md entry [date]
 - Source code changes (`src/`, `scripts/`, `tools/`)
 - Canonical documentation (`docs/**/*.md`)
 - Configuration (`package.json`, `tsconfig.json`)
-- Project metadata (`docs/PROJECT_LEDGER.md`, `.agent/napkin.md`)
+- Project metadata (`docs/PROJECT_LEDGER.md`, `.claude/napkin.md`)
 
 ### 4. Determinism - ALWAYS ENFORCE
 

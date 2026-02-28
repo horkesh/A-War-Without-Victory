@@ -15,6 +15,8 @@ export function FormationDetail() {
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
+  const setOrderModeForFormation = useGameStore((s) => s.setOrderModeForFormation);
+  const orderModeForFormation = useGameStore((s) => s.orderModeForFormation);
 
   if (!selectedFormationId) return null;
 
@@ -102,6 +104,19 @@ export function FormationDetail() {
                 <span className="text-xs text-text-primary font-mono break-all" title={attackOrder.targetSettlementId}>
                   {getOsidDisplayName(attackOrder.targetSettlementId, osidDisplayNames)}
                 </span>
+              </div>
+            )}
+
+            {/* Phase C4: Attack target selection — click map OSID after this to open confirmation modal */}
+            {formation.kind === 'brigade' && !attackOrder && (
+              <div className="pt-2 border-t border-panel-border">
+                <button
+                  type="button"
+                  onClick={() => setOrderModeForFormation('attack')}
+                  className={`text-xs font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover ${orderModeForFormation === 'attack' ? 'ring-1 ring-accent-gold bg-panel-active' : ''}`}
+                >
+                  {orderModeForFormation === 'attack' ? 'Click map to choose target…' : 'Attack'}
+                </button>
               </div>
             )}
           </>
