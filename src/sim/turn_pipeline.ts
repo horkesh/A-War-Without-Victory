@@ -162,6 +162,7 @@ import { buildDisplacementCapacityReport } from './phase_f/displacement_capacity
 import { aggregateSettlementDisplacementToMunicipalities } from './phase_f/displacement_municipality_aggregation.js';
 import { evaluateDisplacementTriggers } from './phase_f/displacement_triggers.js';
 import { activateCorpsForTurn } from './phase_i/activate_corps.js';
+import { promoteFormations } from './phase_i/promote_formations.js';
 import { runPhaseIBotPosture } from './phase_i/bot_phase_i.js';
 import { applyBrigadeRepositionOrders } from './phase_ii/apply_brigade_reposition.js';
 import { applyReshapeOrders } from './phase_ii/aor_reshaping.js';
@@ -1830,9 +1831,13 @@ const phaseIPhases: NamedPhase[] = [
     },
     {
         name: 'promote-formations',
-        run: (_context) => {
-            // Phase I Overhaul Phase D: battalion→brigade promotion
-            // No-op until Phase D is implemented
+        run: async (context) => {
+            if (context.state.meta.phase !== 'phase_i') return;
+            if (context.state.meta.recruitment_mode !== 'bottom_up') return;
+            const currentTurn = context.state.meta.turn ?? 0;
+            const catalog = await loadRecruitmentCatalog();
+            if (!catalog) return;
+            promoteFormations(context.state, currentTurn, catalog.brigades);
         },
     },
     {

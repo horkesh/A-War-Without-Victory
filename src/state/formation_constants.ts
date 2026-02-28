@@ -192,6 +192,14 @@ export const MIN_BRIGADE_THRESHOLD = 1500;
 /** Max militia-kind formations per municipality per faction (prevents runaway spawning). */
 export const MAX_TO_PER_MUN = 5;
 
+// --- Phase I Overhaul Phase D: promotion thresholds ---
+/** Minimum cohesion [0,100] required for a militia formation to be eligible for brigade promotion. */
+export const PROMOTION_COHESION_THRESHOLD = 40;
+/** Minimum turns a militia formation must have existed before it can promote to brigade. */
+export const PROMOTION_MIN_TURNS_ACTIVE = 4;
+/** Cohesion bonus applied on promotion to brigade (capped at 100). */
+export const PROMOTION_COHESION_BONUS = 10;
+
 /**
  * Returns the formation tier based on kind and personnel count.
  * Used by Phase I Overhaul phases D–F for promotion logic and combat tier scaling.
