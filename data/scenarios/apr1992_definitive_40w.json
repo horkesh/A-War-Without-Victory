@@ -12,7 +12,7 @@
   "use_harness_bots": true,
   "use_smart_bots": true,
   "bot_difficulty": "medium",
-  "recruitment_mode": "player_choice",
+  "recruitment_mode": "bottom_up",
   "recruitment_capital": { "RS": 500, "RBiH": 400, "HRHB": 300 },
   "equipment_points": { "RS": 800, "RBiH": 100, "HRHB": 350 },
   "recruitment_capital_trickle": { "RS": 5, "RBiH": 5, "HRHB": 5 },

@@ -1770,7 +1770,8 @@ const phaseIPhases: NamedPhase[] = [
     {
         name: 'compute-siege-state',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_i') return;
+            const _phase = context.state.meta.phase;
+            if (_phase !== 'phase_i' && _phase !== 'phase_ii') return;
             if (context.state.meta.recruitment_mode !== 'bottom_up') return;
             try {
                 const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
@@ -1857,7 +1858,8 @@ const phaseIPhases: NamedPhase[] = [
     {
         name: 'activate-corps',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_i') return;
+            const _phase2 = context.state.meta.phase;
+            if (_phase2 !== 'phase_i' && _phase2 !== 'phase_ii') return;
             if (context.state.meta.recruitment_mode !== 'bottom_up') return;
             const currentTurn = context.state.meta.turn ?? 0;
             const catalog = await loadRecruitmentCatalog();
@@ -1874,7 +1876,8 @@ const phaseIPhases: NamedPhase[] = [
     {
         name: 'promote-formations',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_i') return;
+            const _phase3 = context.state.meta.phase;
+            if (_phase3 !== 'phase_i' && _phase3 !== 'phase_ii') return;
             if (context.state.meta.recruitment_mode !== 'bottom_up') return;
             const currentTurn = context.state.meta.turn ?? 0;
             const catalog = await loadRecruitmentCatalog();
