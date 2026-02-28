@@ -12,7 +12,7 @@ import {
     initializeCasualtyLedger,
     recordBattleCasualties
 } from '../../state/casualty_ledger.js';
-import { MIN_COMBAT_PERSONNEL } from '../../state/formation_constants.js';
+import { MIN_COMBAT_PERSONNEL, getFormationTier } from '../../state/formation_constants.js';
 import type {
     CorpsStance,
     FactionId,
@@ -339,8 +339,25 @@ function getUrbanMult(_state: GameState, targetOsid: Osid): number {
  * Infantry provides base effectiveness (0.5); heavy equipment adds on top.
  * Pure infantry brigades get 0.5 — they can still fight.
  * Well-equipped mechanized brigades with operational tanks+artillery get up to 1.5.
+ *
+ * For militia (kind === 'militia') formations, tier-based overrides apply:
+ *   Detachment: RBiH 0.15 (hunting rifles/TO stockpiles), RS/HRHB 0.5 (JNA/Croatian stockpiles)
+ *   Battalion: RBiH 0.4, RS 0.7, HRHB 0.6
+ * These reflect the historical reality that TO-origin units were armed from hidden stockpiles
+ * (ARBiH) or JNA/Croatian arsenals (VRS/HVO) before brigade-level equipment was available.
  */
-function getEquipmentRatio(formation: FormationState): number {
+export function getEquipmentRatio(formation: FormationState): number {
+    if (formation.kind === 'militia') {
+        const tier = getFormationTier(formation);
+        if (tier === 'detachment') {
+            if (formation.faction === 'RBiH') return 0.15;  // Hunting rifles, hidden TO stockpiles
+            return 0.5;  // RS/HRHB: JNA/Croatian stockpiles (infantry base)
+        }
+        // battalion
+        if (formation.faction === 'RBiH') return 0.4;
+        if (formation.faction === 'RS') return 0.7;
+        return 0.6;  // HRHB
+    }
     const comp = formation.composition ?? ensureBrigadeComposition(formation);
     const total = comp.infantry + comp.tanks + comp.artillery + comp.aa_systems;
     if (total <= 0) return 0.5;
@@ -565,13 +582,12 @@ export function resolveAttackOrdersOsid(
                 // perimeters — 5 Srebrenica brigades couldn't cover 14 OSIDs. At 0.50, a linked
                 // front provides credible defense: concentrated attackers can still break through,
                 // but isolated probes are repulsed. Multi-brigade assaults remain effective.
-                const LINKED_ZOC_READINESS = 0.50;
                 const defenderFaction = zocDefenders[0]!.faction as FactionId;
                 const linkedArr = (state as { phase_ii_linked_zoc_by_faction?: Record<string, string[]> }).phase_ii_linked_zoc_by_faction?.[defenderFaction];
                 const isLinkedZoc = linkedArr != null && linkedArr.includes(targetOsid);
                 const powers = zocDefenders.map(d =>
                     isLinkedZoc
-                        ? computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid) * LINKED_ZOC_READINESS
+                        ? computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid) * getLinkedZocReadiness(d)
                         : computeZocDefenderPower(state, d, targetOsid, terrainMultByOsid, supplyStateByOsid)
                 );
                 const sorted = zocDefenders.map((d, i) => ({ f: d, p: powers[i]! }))
@@ -863,7 +879,8 @@ function computeDefenderPower(
     const urbanMult = getUrbanMult(state, targetOsid);
     const disruptionMult = getDisruptionMult(formation, 'defend');
     const enclaveMult = getEnclaveDefenseBonus(state, targetOsid);
-    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult;
+    const toTerrainMult = getToTerrainDefenseMult(getFormationTier(formation), targetOsid, terrainMultByOsid);
+    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult * toTerrainMult;
 }
 
 /**
@@ -897,12 +914,65 @@ function computeZocDefenderPower(
     // entrenchment 2 = 2 weeks in position → 50% ZoC
     // entrenchment 4+ = fully organized → 100% ZoC
     const entrench = Math.min(MAX_ENTRENCHMENT, (formation as { entrenchment_turns?: number }).entrenchment_turns ?? 0);
-    const zocReadiness = Math.min(1.0, entrench / 4);
+    // ZoC readiness capped by tier: detachments max 0.30, battalions max 0.50, brigades max 1.0
+    const maxZocByTier = getFormationTier(formation) === 'detachment' ? 0.30
+        : getFormationTier(formation) === 'battalion' ? 0.50 : 1.0;
+    const zocReadiness = Math.min(maxZocByTier, entrench / 4);
     const corpsStance = getCorpsStance(state, formation);
     const corpsDefMult = corpsStance ? CORPS_STANCE_DEFENSE[corpsStance] ?? 1 : 1;
     const urbanMult = getUrbanMult(state, targetOsid);
     const disruptionMult = getDisruptionMult(formation, 'defend');
-    return base * postureMult * supplyMult * terrainMult * corpsDefMult * urbanMult * disruptionMult * zocReadiness;
+    const toTerrainMult = getToTerrainDefenseMult(getFormationTier(formation), targetOsid, terrainMultByOsid);
+    return base * postureMult * supplyMult * terrainMult * corpsDefMult * urbanMult * disruptionMult * zocReadiness * toTerrainMult;
+}
+
+/**
+ * Additional terrain defense multiplier for TO formations (tier !== 'brigade').
+ * Represents light infantry asymmetric advantage in urban/mountain terrain.
+ * Brigades use standard combat mechanics (return 1.0).
+ *
+ * Urban: dense built-up areas — even lightly armed defenders impose real assault costs (BB1 pp.136-141)
+ * Mountain: high terrain gives cover and chokepoint advantages to defenders
+ * Forest: wooded terrain favors light infantry over mechanized formations
+ * Open: no advantage — VRS mechanized forces roll over scattered TO detachments
+ *
+ * Classification uses terrainMultByOsid (slope proxy for mountain/forest) and OSID name for urban.
+ */
+export function getToTerrainDefenseMult(
+    tier: 'detachment' | 'battalion' | 'brigade',
+    targetOsid: string,
+    terrainMultByOsid: Record<string, number>
+): number {
+    if (tier === 'brigade') return 1.0;
+
+    // Urban: check OSID name for known city-center keywords
+    const lower = targetOsid.toLowerCase();
+    const isUrban = lower.includes('centar') || lower.includes('stari_grad') ||
+        lower.includes('novo_sarajevo') || lower.includes('novi_grad') ||
+        lower.includes('banja_luka') || lower.includes('tuzla') ||
+        lower.includes('zenica') || lower.includes('bihac') ||
+        lower.includes('mostar') || lower.includes('sarajevo') ||
+        lower.includes('travnik') || lower.includes('prijedor');
+    if (isUrban) return 2.5;
+
+    // Mountain/forest: derive from terrainMultByOsid (already incorporates slope + friction)
+    const terrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
+    if (terrainMult >= 1.35) return 2.0;  // High slope (mountain/ridge terrain)
+    if (terrainMult >= 1.15) return 1.5;  // Moderate terrain (wooded/broken ground)
+    return 1.0;  // Open terrain: no TO bonus
+}
+
+/**
+ * ZoC readiness scaling by formation tier.
+ * Detachments project very limited ZoC (30%): small, poorly coordinated, local.
+ * Battalions project half-strength ZoC (50%): organized but limited command range.
+ * Brigades project full ZoC (100%): corps-level coordination, real area denial.
+ */
+export function getLinkedZocReadiness(formation: FormationState): number {
+    const tier = getFormationTier(formation);
+    if (tier === 'detachment') return 0.30;
+    if (tier === 'battalion') return 0.50;
+    return 1.0;  // brigade
 }
 
 function applyPersonnelLoss(formation: FormationState, loss: number): void {

@@ -19,6 +19,7 @@
 
 import type { EdgeRecord } from '../../map/settlements.js';
 import { getTerrainScalarsForSid, type TerrainScalarsData } from '../../map/terrain_scalars.js';
+import { getFormationTier } from '../../state/formation_constants.js';
 import type {
     CorpsStance,
     FactionId,
@@ -190,8 +191,22 @@ export const OUTCOME_SCORE: Record<PredictedOutcome, number> = {
  * Infantry provides base effectiveness (0.5); heavy equipment adds on top.
  * Pure infantry brigades get 0.5 — they can still fight.
  * Well-equipped mechanized brigades with operational tanks+artillery get up to 1.5.
+ *
+ * For militia (kind === 'militia') formations, tier-based overrides apply.
+ * Synced with attack_resolution_osid.ts — must use identical formula or predictability degrades.
  */
 function getEquipmentRatio(formation: FormationState): number {
+    if (formation.kind === 'militia') {
+        const tier = getFormationTier(formation);
+        if (tier === 'detachment') {
+            if (formation.faction === 'RBiH') return 0.15;  // Hunting rifles, hidden TO stockpiles
+            return 0.5;  // RS/HRHB: JNA/Croatian stockpiles (infantry base)
+        }
+        // battalion
+        if (formation.faction === 'RBiH') return 0.4;
+        if (formation.faction === 'RS') return 0.7;
+        return 0.6;  // HRHB
+    }
     const comp = formation.composition ?? ensureBrigadeComposition(formation);
     const total = comp.infantry + comp.tanks + comp.artillery + comp.aa_systems;
     if (total <= 0) return 0.5;
@@ -288,6 +303,43 @@ function getUrbanMult(targetOsid: Osid): number {
     return 1.0;
 }
 
+/**
+ * Additional terrain defense multiplier for TO formations (tier !== 'brigade').
+ * Synced with attack_resolution_osid.ts — must use identical formula or predictability degrades.
+ */
+function getToTerrainDefenseMult(
+    tier: 'detachment' | 'battalion' | 'brigade',
+    targetOsid: string,
+    terrainMultByOsid: Record<string, number>
+): number {
+    if (tier === 'brigade') return 1.0;
+
+    const lower = targetOsid.toLowerCase();
+    const isUrban = lower.includes('centar') || lower.includes('stari_grad') ||
+        lower.includes('novo_sarajevo') || lower.includes('novi_grad') ||
+        lower.includes('banja_luka') || lower.includes('tuzla') ||
+        lower.includes('zenica') || lower.includes('bihac') ||
+        lower.includes('mostar') || lower.includes('sarajevo') ||
+        lower.includes('travnik') || lower.includes('prijedor');
+    if (isUrban) return 2.5;
+
+    const terrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
+    if (terrainMult >= 1.35) return 2.0;
+    if (terrainMult >= 1.15) return 1.5;
+    return 1.0;
+}
+
+/**
+ * ZoC readiness scaling by formation tier.
+ * Synced with attack_resolution_osid.ts.
+ */
+function getLinkedZocReadinessPred(formation: FormationState): number {
+    const tier = getFormationTier(formation);
+    if (tier === 'detachment') return 0.30;
+    if (tier === 'battalion') return 0.50;
+    return 1.0;
+}
+
 function classifyOutcome(powerRatio: number): PredictedOutcome {
     if (powerRatio >= VICTORY_THRESHOLD_DECISIVE) return 'decisive_victory';
     if (powerRatio >= VICTORY_THRESHOLD_NORMAL) return 'victory';
@@ -341,7 +393,8 @@ function computeDefenderPower(
     const urbanMult = getUrbanMult(targetOsid);
     const disruptionMult = getDisruptionMult(formation, 'defend');
     const enclaveMult = getEnclaveDefenseBonus(state, targetOsid);
-    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult;
+    const toTerrainMult = getToTerrainDefenseMult(getFormationTier(formation), targetOsid, terrainMultByOsid);
+    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult * toTerrainMult;
 }
 
 /**
@@ -361,14 +414,17 @@ function computeZocDefenderPower(
     const postureMult = POSTURE_DEFENSE[posture] ?? 1;
     const supplyMult = getSupplyMult(formation, state, 'defend', supplyStateByOsid);
     const terrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
-    // ZoC readiness: scales 0→1 over 4 turns of entrenchment
+    // ZoC readiness: scales 0→1 over 4 turns of entrenchment, capped by tier
     const entrench = Math.min(MAX_ENTRENCHMENT, (formation as { entrenchment_turns?: number }).entrenchment_turns ?? 0);
-    const zocReadiness = Math.min(1.0, entrench / 4);
+    const maxZocByTier = getFormationTier(formation) === 'detachment' ? 0.30
+        : getFormationTier(formation) === 'battalion' ? 0.50 : 1.0;
+    const zocReadiness = Math.min(maxZocByTier, entrench / 4);
     const corpsStance = getCorpsStance(state, formation);
     const corpsDefMult = corpsStance ? CORPS_STANCE_DEFENSE[corpsStance] ?? 1 : 1;
     const urbanMult = getUrbanMult(targetOsid);
     const disruptionMult = getDisruptionMult(formation, 'defend');
-    return base * postureMult * supplyMult * terrainMult * corpsDefMult * urbanMult * disruptionMult * zocReadiness;
+    const toTerrainMult = getToTerrainDefenseMult(getFormationTier(formation), targetOsid, terrainMultByOsid);
+    return base * postureMult * supplyMult * terrainMult * corpsDefMult * urbanMult * disruptionMult * zocReadiness * toTerrainMult;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -510,13 +566,12 @@ export function predictCombatOutcome(
             //   Direct defense (brigade present):     100% of computeDefenderPower
             //   Linked ZoC (connected chain):          35% of computeDefenderPower
             //   Unlinked ZoC (isolated projection):    entrenchment-scaled (0-100%)
-            const LINKED_ZOC_READINESS = 0.50;
             const defenderFaction = zocDefenders[0]!.faction as FactionId;
             const linkedArr = (state as { phase_ii_linked_zoc_by_faction?: Record<string, string[]> }).phase_ii_linked_zoc_by_faction?.[defenderFaction];
             const isLinkedZoc = linkedArr != null && linkedArr.includes(targetOsid);
             const powers = zocDefenders.map(d =>
                 isLinkedZoc
-                    ? computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid) * LINKED_ZOC_READINESS
+                    ? computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid) * getLinkedZocReadinessPred(d)
                     : computeZocDefenderPower(state, d, targetOsid, terrainMultByOsid, supplyStateByOsid)
             );
             const sorted = zocDefenders.map((d, i) => ({ f: d, p: powers[i]! }))

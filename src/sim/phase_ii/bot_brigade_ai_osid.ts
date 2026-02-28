@@ -17,6 +17,7 @@
  */
 
 import type { EdgeRecord } from '../../map/settlements.js';
+import { getFormationTier } from '../../state/formation_constants.js';
 import type {
     BrigadePosture,
     CorpsStance,
@@ -767,6 +768,23 @@ function executeFactionDirectives(
 
     for (const brigade of brigades) {
         const loc = brigade.location_osid!;
+
+        // Detachments (militia kind, < 500 personnel) only garrison — never attack.
+        // They provide ZoC defense and can retreat if locked, but cannot initiate offensive action.
+        // TODO(Phase E Step 21): Battalion attack scope restriction to home municipality + adjacent.
+        if (brigade.kind === 'militia' && getFormationTier(brigade) === 'detachment') {
+            // Detachments: defend in place, retreat if ZoC-locked
+            const isLocked = isBrigadeInEnemyZoc(state, brigade.id, enemyZoc);
+            if (isLocked) {
+                const retreatDests = getValidRetreatDestinations(state, brigade.id, adjacency, reverseMap, enemyZoc);
+                if (retreatDests.length > 0) {
+                    result.movement_orders[brigade.id] = retreatDests[0]!;
+                }
+            }
+            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+            continue;
+        }
+
         const corpsId = brigade.corps_id;
         const cmd = corpsId ? state.corps_command?.[corpsId] : null;
         const directive = cmd?.directive ?? null;
@@ -1188,7 +1206,7 @@ export function generateAllBotOrdersOsid(
                 f != null &&
                 f.faction === faction &&
                 f.status === 'active' &&
-                (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group') &&
+                (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'militia') &&
                 f.location_osid != null
             )
             .sort((a, b) => strictCompare(a.id, b.id));
