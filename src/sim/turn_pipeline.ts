@@ -1807,6 +1807,13 @@ const phaseIPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'promote-formations',
+        run: (_context) => {
+            // Phase I Overhaul Phase D: battalion→brigade promotion
+            // No-op until Phase D is implemented
+        },
+    },
+    {
         name: 'phase-i-bot-posture',
         run: async (context) => {
             // Phase I bot: assign posture (hold/probe/push) to front edges for bot-controlled factions

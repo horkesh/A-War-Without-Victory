@@ -290,6 +290,13 @@ export interface FormationState {
     /** Fog of war: OSID where this brigade's attack was repulsed/catastrophic.
      *  Lifts fog for this target — brigade learned enemy strength the hard way. */
     last_repulsed_from?: { osid: string; turn: number };
+    // Phase I Overhaul: proto-brigade lifecycle tracking
+    /** Municipality where formation originally emerged (for naming displaced-origin brigades). */
+    origin_mun?: string;
+    /** Turn when formation was promoted to its current kind. */
+    promoted_turn?: number;
+    /** OOB brigade catalog entry matched on promotion (inherits name/corps/equipment). */
+    matched_oob_id?: string;
 }
 
 export interface FrontPostureAssignment {
