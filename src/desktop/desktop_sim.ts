@@ -16,7 +16,7 @@ import { loadMunicipalityHqSettlement, loadOobBrigades } from '../scenario/oob_l
 import { buildSidToMunFromSettlements } from '../scenario/oob_phase_i_entry.js';
 import { createStateFromScenario } from '../scenario/scenario_runner.js';
 import { validateReshapeOrder } from '../sim/phase_ii/aor_reshaping.js';
-import { getBrigadeAoRSettlements } from '../sim/phase_ii/brigade_aor.js';
+import { getBrigadeAoRSettlements } from '../sim/phase_ii/brigade_aor_legacy.js';
 import { shortestPathThroughFriendly } from '../sim/phase_ii/brigade_movement.js';
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/phase_ii/phase_ii_adjacency.js';
 import { estimateAttackCost, type AttackEstimate } from '../sim/phase_ii/combat_estimate.js';

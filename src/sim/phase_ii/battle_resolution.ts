@@ -35,7 +35,7 @@ import { getLegacyAoR } from '../../state/game_state.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { areRbihHrhbAllied } from '../phase_i/alliance_update.js';
-import { getBrigadeAoRSettlements, getSettlementGarrison } from './brigade_aor.js';
+import { getBrigadeAoRSettlements, getSettlementGarrison } from './brigade_aor_legacy.js';
 import { captureEquipment, computeEquipmentMultiplier, ensureBrigadeComposition } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
 import { isBrigadeAssignedToFront } from './front_assignment.js';

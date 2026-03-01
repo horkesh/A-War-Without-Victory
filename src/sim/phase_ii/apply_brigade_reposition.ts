@@ -8,7 +8,7 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import type { FormationId, GameState, SettlementId } from '../../state/game_state.js';
 import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { getBrigadeAoRSettlements } from './brigade_aor.js';
+import { getBrigadeAoRSettlements } from './brigade_aor_legacy.js';
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from './phase_ii_adjacency.js';
 
 const MIN_REPOSITION = 1;

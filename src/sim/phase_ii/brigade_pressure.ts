@@ -16,7 +16,7 @@ import type {
     SettlementId
 } from '../../state/game_state.js';
 import { getLegacyAoR } from '../../state/game_state.js';
-import { computeBrigadeDensity } from './brigade_aor.js';
+import { computeBrigadeDensity } from './brigade_aor_legacy.js';
 import { computeEquipmentMultiplier } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
 import { isBrigadeAssignedToFront } from './front_assignment.js';

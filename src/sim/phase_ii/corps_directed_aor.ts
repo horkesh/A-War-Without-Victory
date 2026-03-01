@@ -47,7 +47,7 @@ import {
     expandFrontActiveWithDepth,
     identifyFrontActiveSettlements,
     resolveMunicipalityForSid,
-} from './brigade_aor.js';
+} from './brigade_aor_legacy.js';
 import {
     detectDisconnectedTerritories,
     getFormationCorpsId,

@@ -17,7 +17,7 @@ import type {
 } from '../../state/game_state.js';
 import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { getBrigadeAoRSettlements } from './brigade_aor.js';
+import { getBrigadeAoRSettlements } from './brigade_aor_legacy.js';
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
 
 // ---------------------------------------------------------------------------

@@ -10,7 +10,7 @@ import {
     shortestPathThroughFriendly,
     transitTurnsForPath,
 } from './brigade_movement.js';
-import { getBrigadeAoRSettlements } from './brigade_aor.js';
+import { getBrigadeAoRSettlements } from './brigade_aor_legacy.js';
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
 
 export interface MovementRangeQuery {

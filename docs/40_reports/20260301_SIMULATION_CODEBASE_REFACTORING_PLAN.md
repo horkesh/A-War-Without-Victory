@@ -145,7 +145,7 @@ Before executing any slice, the implementer MUST read:
 
 ---
 
-### R5: Remove Legacy brigade_aor.ts
+### R5: Remove Legacy brigade_aor.ts — DONE ✓ (uncommitted)
 
 **Owner:** Systems Programmer
 **Effort:** Medium (~2 hours)
@@ -165,6 +165,8 @@ Before executing any slice, the implementer MUST read:
 - No remaining imports of it
 - All vitest + node:test suites pass (some skipped AoR tests may be deleted)
 - ~1370 lines removed
+
+**Result:** Deleted 1370-line `brigade_aor.ts`. Extracted ~200 lines of still-active functions (6 functions with 11 active callers) into `brigade_aor_legacy.ts`. Net ~1170 lines of dead code removed. 11 source files + 1 test file re-pointed imports. 5 dead imports removed from `turn_pipeline.ts`. Test `describe.skip` blocks removed.
 
 ---
 

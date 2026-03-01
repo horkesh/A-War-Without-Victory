@@ -38,12 +38,11 @@ import { accumulateFrontPressure, FrontPressureStepReport } from '../state/front
 import { syncFrontSegments } from '../state/front_segments.js';
 import { deriveAssignableFrontSegments } from '../state/assignable_front_segments.js';
 import { assignFrontSegmentTheatres, ensureDefaultTheatres } from '../state/theatres.js';
-import { GameState, type FactionId, type LegacyBrigadeAoRState, type PhaseEAorMembership, type PhaseERearZoneDescriptor, type PhaseIIFrontDescriptor } from '../state/game_state.js';
+import { GameState, type FactionId, type LegacyBrigadeAoRState, type PhaseIIFrontDescriptor } from '../state/game_state.js';
 import { updateHeavyEquipmentState } from '../state/heavy_equipment.js';
 import { updateLegitimacyState } from '../state/legitimacy.js';
 import { ensureMaintenanceCapacity } from '../state/maintenance.js';
 import { MilitiaFatigueStepReport, updateMilitiaFatigue } from '../state/militia_fatigue.js';
-import { processMinorityFlight, type MinorityFlightReport } from '../state/minority_flight.js';
 import { NegotiationCapitalStepReport, updateNegotiationCapital } from '../state/negotiation_capital.js';
 import {
     applyEnforcementPackage,
@@ -174,13 +173,6 @@ import { applyReshapeOrders } from './phase_ii/aor_reshaping.js';
 import { generateAllBotOrdersOsid, computeOsidEthnicComposition, type OsidBotContext } from './phase_ii/bot_brigade_ai_osid.js';
 import { loadSettlementEthnicityData } from '../data/settlement_ethnicity.js';
 import { generateAllCorpsOrders, extractCorpsAiReport, type CorpsAiReportEntry } from './phase_ii/bot_corps_ai.js';
-import {
-    applyBrigadeMunicipalityOrders,
-    applySurroundedBrigadeReform,
-    computeBrigadeEncirclement,
-    identifyFrontActiveSettlements,
-    validateBrigadeAoR
-} from './phase_ii/brigade_aor.js';
 import { processBrigadeMovement } from './phase_ii/brigade_movement.js';
 import { applyPostureCosts, applyPostureOrders } from './phase_ii/brigade_posture.js';
 import { applyBrigadePressureToState } from './phase_ii/brigade_pressure.js';
@@ -194,6 +186,9 @@ import { getRSMaintenanceCapacityMult, runEquipmentProgression, type EquipmentPr
 import { updateEnclaveResilience, type EnclaveResilienceReport } from './phase_ii/enclave_resilience.js';
 import { updatePhaseIIExhaustion } from './phase_ii/exhaustion.js';
 import { detectPhaseIIFronts } from './phase_ii/front_emergence.js';
+import { buildLocalFronts } from './phase_ii/local_front_defense.js';
+import { buildCorpsFrontSectors } from './phase_ii/corps_front_sectors.js';
+import { advanceSectorOffensives, updateSectorOffensiveResults } from './phase_ii/sector_offensive.js';
 import { computeMilitiaGarrisons } from './phase_ii/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from './phase_ii/operational_groups.js';
 import { buildAdjacencyFromEdges } from './phase_ii/phase_ii_adjacency.js';
@@ -304,18 +299,12 @@ export interface TurnReport {
     phase_ii_consolidation_flips?: ConsolidationFlipsReport;
     /** Phase II: delayed hostile-takeover displacement (timer + camp + reroute). */
     phase_ii_takeover_displacement?: PhaseIITakeoverDisplacementReport;
-    /** Phase II: non-takeover minority flight (settlement-level). */
-    phase_ii_minority_flight?: MinorityFlightReport;
     /** Phase II: ongoing mobilization (conscription + displaced + cross-ethnic) before reinforcement */
     phase_ii_ongoing_mobilization?: OngoingMobilizationReport;
     /** Phase II: brigade reinforcement from militia pools after casualties */
     phase_ii_brigade_reinforcement?: ReinforceBrigadesReport;
     /** Phase II: WIA trickleback — wounded return to formations when out of combat */
     phase_ii_wia_trickleback?: WiaTricklebackReport;
-    /** Phase E: AoR derivation — Areas of Responsibility from sustained spatial dominance (phase_ii only) */
-    phase_e_aor_derivation?: PhaseEAorMembership;
-    /** Phase E: rear zone derivation — Rear Political Control Zones (phase_ii only) */
-    phase_e_rear_zone_derivation?: PhaseERearZoneDescriptor;
     /** Phase F: displacement triggers + settlement accumulation + municipality aggregation (phase_ii only) */
     phase_f_displacement?: {
         trigger_report: {
@@ -471,7 +460,14 @@ const phases: NamedPhase[] = [
             const derivedFrontEdges = computeFrontEdges(context.state, edges);
             syncFrontSegments(context.state, derivedFrontEdges);
             ensureDefaultTheatres(context.state);
-            const segments = deriveAssignableFrontSegments(derivedFrontEdges);
+            // In war phase, prefer OSID front edges (from previous turn's refreshFrontEdgeSnapshot)
+            // for segment derivation. Canonical SID edges produce front_ids that can't be matched
+            // against OSID-keyed political_controllers and brigade location_osid.
+            const frontEdgesForSegments =
+                context.state.meta.phase === 'war' && context.state.war_front_edges_osid?.length
+                    ? context.state.war_front_edges_osid
+                    : derivedFrontEdges;
+            const segments = deriveAssignableFrontSegments(frontEdgesForSegments);
             context.state.assignable_front_segments = assignFrontSegmentTheatres(context.state, segments);
         }
     },
@@ -480,6 +476,13 @@ const phases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             ensureBrigadeFrontAssignments(context.state);
+        }
+    },
+    {
+        name: 'compute-local-fronts',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            context.state.local_fronts = buildLocalFronts(context.state);
         }
     },
     {
@@ -686,6 +689,22 @@ const phases: NamedPhase[] = [
         }
     },
     {
+        name: 'partition-corps-front-sectors',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+            context.state.corps_front_sectors = buildCorpsFrontSectors(
+                context.state, od.edges, od.opData.operationalToCanonical
+            );
+        }
+    },
+    // Note: brigade_front_assignment and local_fronts are NOT overwritten by sector system.
+    // Sectors are an organizational layer for corps targeting and directives.
+    // The density modifier continues to use the existing local_fronts (faction-level aggregation)
+    // because per-sector density would over-penalize overextended factions (VRS historically thin).
+
+    {
         name: 'process-brigade-movement',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -726,12 +745,21 @@ const phases: NamedPhase[] = [
             const osidEdges = od?.edges ?? undefined;
             const corpsReport: CorpsAiReportEntry[] = [];
             for (const faction of factions) {
-                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges);
+                const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
+                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid);
                 corpsReport.push(...extractCorpsAiReport(context.state, faction as FactionId));
             }
             if (corpsReport.length > 0) {
                 context.report.corps_ai_report = corpsReport;
             }
+        }
+    },
+    {
+        name: 'advance-sector-offensives',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
+            advanceSectorOffensives(context.state, supplyByOsid);
         }
     },
     {
@@ -816,12 +844,6 @@ const phases: NamedPhase[] = [
                 ? context.input.settlementEdges
                 : graph.edges;
             applyBrigadeRepositionOrders(context.state, edges);
-        }
-    },
-    {
-        name: 'formation-location-osid-sync',
-        run: () => {
-            // No-op: AoR phase-out. location_osid set by phase-ii-location-osid-backfill and formation creation.
         }
     },
     {
@@ -943,6 +965,15 @@ const phases: NamedPhase[] = [
         }
     },
     {
+        name: 'update-sector-offensive-results',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            const reverseMap = od?.opData?.operationalToCanonical ?? null;
+            updateSectorOffensiveResults(context.state, reverseMap);
+        }
+    },
+    {
         name: 'phase-ii-cohesion-drift',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -1012,24 +1043,23 @@ const phases: NamedPhase[] = [
             }
             const combinedReport = { battles: [...legacyBattles, ...osidBattles] };
 
+            // Load operational settlements (OSID-keyed) for per-OSID census data
+            let osidSettlements: Map<string, import('../map/settlements_parse.js').SettlementRecord> | undefined;
+            try {
+                const opGraph = await loadSettlementGraph();
+                // Check if it's OSID-keyed (keys start with 'op:') — if so, use it
+                const firstKey = opGraph.settlements.keys().next().value;
+                if (typeof firstKey === 'string' && firstKey.startsWith('op:')) {
+                    osidSettlements = opGraph.settlements;
+                }
+            } catch { /* fallback: no OSID census data */ }
+
             context.report.phase_ii_takeover_displacement = processPhaseIIDisplacementTakeover(
                 context.state,
                 graph.settlements,
                 combinedReport,
-                context.input.municipalityPopulation1991
-            );
-        }
-    },
-    {
-        name: 'phase-ii-minority-flight',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-            context.report.phase_ii_minority_flight = processMinorityFlight(
-                context.state,
-                graph.settlements,
                 context.input.municipalityPopulation1991,
-                context.input.settlementPopulationBySid
+                osidSettlements
             );
         }
     },
@@ -1236,36 +1266,6 @@ const phases: NamedPhase[] = [
             } else if ((context.state as GameState & LegacyBrigadeAoRState).brigade_aor) {
                 updateReconIntelligence(context.state, edges);
             }
-        }
-    },
-    {
-        name: 'phase-e-aor-derivation',
-        // Legacy AoR derivation — superseded by OSID/ZoC (phase-out §33). Will be removed in a future cleanup.
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            let edges = context.input.settlementEdges;
-            if (!edges || edges.length === 0) {
-                const graph = await loadSettlementGraph();
-                edges = graph.edges;
-            }
-            if (!edges || edges.length === 0) return;
-            const { deriveAoRMembership } = await import('./phase_e/aor_instantiation.js');
-            context.report.phase_e_aor_derivation = deriveAoRMembership(context.state, edges);
-        }
-    },
-    {
-        name: 'phase-e-rear-zone-derivation',
-        // Legacy AoR derivation — superseded by OSID/ZoC (phase-out §33). Will be removed in a future cleanup.
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            let edges = context.input.settlementEdges;
-            if (!edges || edges.length === 0) {
-                const graph = await loadSettlementGraph();
-                edges = graph.edges;
-            }
-            if (!edges || edges.length === 0) return;
-            const { deriveRearPoliticalControlZones } = await import('./phase_e/rear_zone_detection.js');
-            context.report.phase_e_rear_zone_derivation = deriveRearPoliticalControlZones(context.state, edges);
         }
     },
     {
@@ -2063,6 +2063,10 @@ async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Pro
     state.assignable_front_segments = assignFrontSegmentTheatres(state, segments);
     if (state.meta.phase === 'war') {
         ensureBrigadeFrontAssignments(state);
+        // Compute local fronts AFTER OSID-based segments and BFA are available.
+        // The earlier compute-local-fronts pipeline step cannot produce valid fronts
+        // because it runs before war_front_edges_osid is derived.
+        state.local_fronts = buildLocalFronts(state);
     }
 }
 

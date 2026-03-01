@@ -8752,3 +8752,13 @@ Determinism checks **MUST** be run:
 - **Files:** `src/sim/phase_ii/corps_front_sectors.ts`, `src/sim/phase_ii/pre_planned_operations.ts` (NEW), `src/sim/phase_ii/sector_offensive.ts`, `src/sim/phase_ii/bot_brigade_ai_osid.ts`, `src/scenario/scenario_runner.ts`, `src/ui/map/data/types.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/components/OOBSidebar.tsx`.
 - **Tests:** `tests/corps_front_sectors_multi.test.ts` (5 tests), `tests/pre_planned_operations.test.ts` (7 tests). All vitest 190/190 pass.
 - **Report:** `docs/40_reports/implemented/20260301_VRS_OPERATIONS_NON_CONTIGUOUS_SECTORS.md`
+
+**2026-03-01** - refactor(sim): delete brigade_aor.ts, extract slim legacy API (R5)
+- **Phase:** Post-MVP maintenance — code health (R5 of R2–R9 refactoring plan).
+- **Summary:** Deleted the 1370-line `brigade_aor.ts` module. Extracted ~200 lines of still-active functions into `brigade_aor_legacy.ts`: `identifyFrontActiveSettlements`, `expandFrontActiveWithDepth`, `buildSidToMunMap`, `buildMunicipalityAdjacency`, `resolveMunicipalityForSid`, `getBrigadeAoRSettlements`, `getBrigadeOperationalCoverageSettlements`, `computeBrigadeDensity`, `getSettlementGarrison`, `ENCIRCLED_GARRISON_MULT`.
+- **Assessment correction:** Plan said "verify it's dead code, delete". Reality: 6 functions still have 11 active callers across battle_resolution, combat_estimate, brigade_movement, brigade_pressure, etc. Created slim legacy module instead of pure deletion. ~1170 lines of truly dead code removed (Voronoi BFS, municipality orders, AoR validation, encirclement detection, surrounded reform).
+- **Dead imports removed:** 5 unused imports from `turn_pipeline.ts` (`applyBrigadeMunicipalityOrders`, `applySurroundedBrigadeReform`, `computeBrigadeEncirclement`, `identifyFrontActiveSettlements`, `validateBrigadeAoR`).
+- **Tests updated:** `brigade_aor.test.ts` — removed `describe.skip` blocks for deleted functions, removed references to `initializeBrigadeAoR`/`computeBrigadeOperationalCoverageCap`, kept active tests for `identifyFrontActiveSettlements`, `computeBrigadeDensity`, `getSettlementGarrison`.
+- **Determinism:** Pure structural refactoring. State hash `1dfb9114d33efbde` unchanged.
+- **Files:** `brigade_aor.ts` DELETED (1370 lines), `brigade_aor_legacy.ts` NEW (~200 lines), 11 source files re-pointed imports, `turn_pipeline.ts` dead imports removed, `brigade_aor.test.ts` cleaned.
+- **Verification:** tsc clean; vitest 189 pass, 1 skipped; map UI build clean; 40w hash identical.
