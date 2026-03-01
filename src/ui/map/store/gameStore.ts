@@ -66,6 +66,9 @@ export interface GameStore {
   setPendingAttackConfirmation: (v: { attackerFormationId: string; targetOsid: string } | null) => void;
 
   loadedGameState: LoadedGameState | null;
+  /** Last load error message (cleared when a new load starts or succeeds). */
+  loadError: string | null;
+  setLoadError: (message: string | null) => void;
   /** Load save: accepts parsed JSON or raw JSON string. Returns Promise that resolves when state is set. Yields before parse so UI can paint loading state. */
   loadSave: (jsonOrText: unknown | string) => Promise<void>;
 
@@ -120,9 +123,19 @@ export const useGameStore = create<GameStore>((set) => ({
 
   loadedGameState: null,
 
+  loadError: null,
+
+  setLoadError: (message) => set({ loadError: message }),
+
   loadSave: (jsonOrText: unknown | string) => {
     return new Promise<void>((resolve, reject) => {
-      setTimeout(() => {
+      set({ loadError: null });
+      // Yield to the browser so "Loading..." can paint, then parse in idle (or after short timeout).
+      const schedule = typeof requestIdleCallback !== 'undefined'
+        ? (fn: () => void) => requestIdleCallback(fn, { timeout: 150 })
+        : (fn: () => void) => setTimeout(fn, 0);
+
+      schedule(() => {
         let state: LoadedGameState;
         try {
           const json =
@@ -131,20 +144,25 @@ export const useGameStore = create<GameStore>((set) => ({
               : jsonOrText;
           state = parseGameState(json);
         } catch (e) {
+          const message = e instanceof Error ? e.message : String(e);
+          set({ loadError: message });
           console.error('[gameStore] Failed to parse save:', e);
           reject(e);
           return;
         }
-        requestAnimationFrame(() => {
+        // Apply state in next tick so we don't block after parse.
+        queueMicrotask(() => {
           try {
-            set({ loadedGameState: state });
+            set({ loadedGameState: state, loadError: null });
             console.log(`[gameStore] Loaded save: ${state.label} — ${state.formations.length} formations, ${Object.keys(state.controlBySettlement).length} control entries`);
             resolve();
           } catch (e) {
+            const message = e instanceof Error ? e.message : String(e);
+            set({ loadError: message });
             reject(e);
           }
         });
-      }, 0);
+      });
     });
   },
 

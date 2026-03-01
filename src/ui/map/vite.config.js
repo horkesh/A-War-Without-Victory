@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import fs from 'fs';
 var dataDir = path.resolve(__dirname, '../../../data');
+var runsDir = path.resolve(__dirname, '../../../runs');
 var mapRoot = path.resolve(__dirname, '.');
 export default defineConfig({
     plugins: [
@@ -13,7 +14,35 @@ export default defineConfig({
                 server.middlewares.use('/data', function (req, res, next) {
                     var _a;
                     var url = (_a = req.url) !== null && _a !== void 0 ? _a : '/';
-                    var filePath = path.join(dataDir, url.split('?')[0]);
+                    var pathname = url.split('?')[0];
+                    // Serve runs/<runId>/final_save.json from /data/runs/<runId>/final_save.json (for "Load run" debugging).
+                    var runsPrefix = '/runs/';
+                    if (pathname.startsWith(runsPrefix)) {
+                        var subPath = pathname.slice(runsPrefix.length);
+                        if (!subPath || subPath.includes('..')) {
+                            next();
+                            return;
+                        }
+                        var filePath_1 = path.join(runsDir, subPath);
+                        if (!filePath_1.startsWith(runsDir) || !filePath_1.endsWith('.json')) {
+                            next();
+                            return;
+                        }
+                        fs.stat(filePath_1, function (err, stat) {
+                            if (err || !(stat === null || stat === void 0 ? void 0 : stat.isFile())) {
+                                next();
+                                return;
+                            }
+                            res.writeHead(200, {
+                                'Content-Type': 'application/json',
+                                'Content-Length': stat.size,
+                                'Access-Control-Allow-Origin': '*',
+                            });
+                            fs.createReadStream(filePath_1).pipe(res);
+                        });
+                        return;
+                    }
+                    var filePath = path.join(dataDir, pathname.replace(/^\//, ''));
                     if (!filePath.startsWith(dataDir)) {
                         next();
                         return;

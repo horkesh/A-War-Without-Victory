@@ -1,6 +1,8 @@
 import { useRef, useCallback, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { loadLatestRunSaveAsText } from '../data/DataLoader';
+import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoader';
+
+const LOAD_TIMEOUT_MS = 25000;
 
 const FACTION_BANNER_TINT: Record<string, string> = {
   RS: 'rgba(194, 64, 64, 0.35)',
@@ -12,7 +14,10 @@ export function TopToolbar() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const loadSave = useGameStore((s) => s.loadSave);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
+  const loadError = useGameStore((s) => s.loadError);
+  const setLoadError = useGameStore((s) => s.setLoadError);
   const [loading, setLoading] = useState(false);
+  const [runIdInput, setRunIdInput] = useState('');
   const playerFaction = loadedGameState?.player_faction ?? '';
   const leftTint = FACTION_BANNER_TINT[playerFaction] ?? 'rgba(196, 163, 90, 0.2)';
   const toolbarBackground = `linear-gradient(90deg, ${leftTint} 0%, rgba(28, 26, 23, 0.95) 42%, rgba(28, 26, 23, 0.95) 100%)`;
@@ -30,28 +35,63 @@ export function TopToolbar() {
         const text = await file.text();
         await new Promise((r) => setTimeout(r, 0));
         const json = JSON.parse(text);
-        await loadSave(json);
+        await Promise.race([
+          loadSave(json),
+          new Promise<void>((_, rej) =>
+            setTimeout(() => rej(new Error('Load timed out. Save may be too large.')), LOAD_TIMEOUT_MS)
+          ),
+        ]);
       } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        setLoadError(message);
         console.error('Failed to load save file:', err);
       } finally {
         setLoading(false);
       }
       if (fileInputRef.current) fileInputRef.current.value = '';
     },
-    [loadSave]
+    [loadSave, setLoadError]
   );
 
   const handleLoadLatest = useCallback(async () => {
     setLoading(true);
     try {
       const text = await loadLatestRunSaveAsText();
-      await loadSave(text);
+      await Promise.race([
+        loadSave(text),
+        new Promise<void>((_, rej) =>
+          setTimeout(() => rej(new Error('Load timed out. Try "Load run" with a run ID or a smaller save.')), LOAD_TIMEOUT_MS)
+        ),
+      ]);
     } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setLoadError(message);
       console.error('Failed to load latest save:', err);
     } finally {
       setLoading(false);
     }
-  }, [loadSave]);
+  }, [loadSave, setLoadError]);
+
+  const handleLoadRun = useCallback(async () => {
+    const runId = runIdInput.trim();
+    if (!runId) return;
+    setLoading(true);
+    try {
+      const text = await loadRunFinalSaveAsText(runId);
+      await Promise.race([
+        loadSave(text),
+        new Promise<void>((_, rej) =>
+          setTimeout(() => rej(new Error('Load timed out. The save may be very large; try opening in a new tab.')), LOAD_TIMEOUT_MS)
+        ),
+      ]);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setLoadError(message);
+      console.error('Failed to load run save:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [loadSave, setLoadError, runIdInput]);
 
   return (
     <div
@@ -78,9 +118,32 @@ export function TopToolbar() {
         {loading ? 'Loading...' : 'Load Latest'}
       </button>
 
+      <span className="text-xs font-mono text-text-secondary">Run ID:</span>
+      <input
+        type="text"
+        value={runIdInput}
+        onChange={(e) => setRunIdInput(e.target.value)}
+        placeholder="e.g. apr1992_definitive_40w__…"
+        className="w-48 px-2 py-1 text-xs font-mono bg-panel-card border border-panel-border rounded text-text-primary placeholder:text-text-muted"
+        onKeyDown={(e) => e.key === 'Enter' && handleLoadRun()}
+      />
+      <button
+        onClick={handleLoadRun}
+        disabled={loading || !runIdInput.trim()}
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+      >
+        Load run
+      </button>
+
       {loadedGameState && (
         <span className="text-xs font-mono text-text-secondary">
           {loadedGameState.label} &mdash; {loadedGameState.formations.length} formations &mdash; {loadedGameState.phase.toUpperCase()}
+        </span>
+      )}
+
+      {loadError && (
+        <span className="text-xs font-mono text-red-400 max-w-md truncate" title={loadError}>
+          Load failed: {loadError}
         </span>
       )}
 

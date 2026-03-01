@@ -28,10 +28,13 @@ export function buildFrontEdgesHoverGeoJSON(
     controllerMap.set(f.properties.osid, f.properties.controller);
   }
 
-  const edgeMap = new Map<string, number[][][]>();
   const coordKey = (c: number[]) => `${c[0].toFixed(6)},${c[1].toFixed(6)}`;
 
+  // Single pass: build edge→{segment, owning OSIDs} in O(total_vertices).
+  const edgeOwners = new Map<string, { segment: number[][]; osids: Set<string> }>();
+
   for (const feature of features) {
+    const osid = feature.properties.osid;
     const rings =
       feature.geometry.type === 'Polygon'
         ? feature.geometry.coordinates
@@ -47,30 +50,19 @@ export function buildFrontEdgesHoverGeoJSON(
         const keyB = coordKey(b);
         const edgeKey = keyA < keyB ? `${keyA}|${keyB}` : `${keyB}|${keyA}`;
 
-        if (!edgeMap.has(edgeKey)) edgeMap.set(edgeKey, []);
-        edgeMap.get(edgeKey)!.push([a, b]);
+        let entry = edgeOwners.get(edgeKey);
+        if (!entry) {
+          entry = { segment: [a, b], osids: new Set() };
+          edgeOwners.set(edgeKey, entry);
+        }
+        entry.osids.add(osid);
       }
     }
   }
 
+  // Group shared boundary segments by OSID pair (only where controllers differ).
   const pairToSegments = new Map<string, number[][][]>();
-  for (const [edgeKey, segList] of edgeMap) {
-    if (segList.length === 0) continue;
-    const segment = segList[0];
-    const osids = new Set<string>();
-    for (const f of features) {
-      const rings =
-        f.geometry.type === 'Polygon' ? f.geometry.coordinates : f.geometry.coordinates.flat();
-      for (const r of rings) {
-        const ring = r as number[][];
-        for (let i = 0; i < ring.length - 1; i++) {
-          const pa = coordKey(ring[i]);
-          const pb = coordKey(ring[i + 1]);
-          const pk = pa < pb ? `${pa}|${pb}` : `${pb}|${pa}`;
-          if (pk === edgeKey) osids.add(f.properties.osid);
-        }
-      }
-    }
+  for (const { segment, osids } of edgeOwners.values()) {
     if (osids.size !== 2) continue;
     const [osidA, osidB] = [...osids].sort((x, y) => x.localeCompare(y));
     const ctrlA = controllerMap.get(osidA);

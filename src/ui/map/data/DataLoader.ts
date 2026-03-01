@@ -33,3 +33,14 @@ export async function loadLatestRunSaveAsText(): Promise<string> {
   }
   return response.text();
 }
+
+/** Fetch a specific run's final_save.json by run folder name (e.g. apr1992_definitive_40w__205b3676c8fe3ce4__w40_n286). For debugging. */
+export async function loadRunFinalSaveAsText(runId: string): Promise<string> {
+  const encoded = runId.replace(/\/|\\/g, '').trim();
+  if (!encoded) throw new Error('Run ID is empty');
+  const response = await fetch(`/data/runs/${encodeURIComponent(encoded)}/final_save.json`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch run save "${runId}": HTTP ${response.status}`);
+  }
+  return response.text();
+}

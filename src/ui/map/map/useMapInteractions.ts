@@ -22,6 +22,26 @@ export function useMapInteractions(
 ) {
   if (!map) return;
 
+  const safeOn = (event: string, layerId: string, handler: (e: MapLayerMouseEvent) => void) => {
+    try {
+      map.on(event as 'click' | 'mousemove' | 'mouseleave', layerId, handler);
+      return true;
+    } catch (e) {
+      console.error('[useMapInteractions] map.on failed', { event, layerId, error: e });
+      return false;
+    }
+  };
+
+  const safeOff = (event: string, layerId: string, handler: (e: MapLayerMouseEvent) => void) => {
+    try {
+      map.off(event as 'click' | 'mousemove' | 'mouseleave', layerId, handler);
+      return true;
+    } catch (e) {
+      console.error('[useMapInteractions] map.off failed', { event, layerId, error: e });
+      return false;
+    }
+  };
+
   const onOsidClick = typeof callbacks === 'function' ? callbacks : callbacks.onOsidClick;
   const onFormationClick = typeof callbacks === 'function' ? undefined : callbacks.onFormationClick;
   const onOsidHover = typeof callbacks === 'function' ? undefined : callbacks.onOsidHover;
@@ -135,53 +155,51 @@ export function useMapInteractions(
     onMapMouseLeave?.();
   };
 
-  map.on('click', 'osid-control-fill', handleOsidClick);
-  map.on('mousemove', 'osid-control-fill', handleOsidMouseMove);
-  map.on('mouseleave', 'osid-control-fill', handleOsidMouseLeave);
-  map.on('click', 'osid-ethnic-fill', handleOsidClick);
-  map.on('mousemove', 'osid-ethnic-fill', handleOsidMouseMove);
-  map.on('mouseleave', 'osid-ethnic-fill', handleOsidMouseLeave);
+  safeOn('click', 'osid-control-fill', handleOsidClick);
+  safeOn('mousemove', 'osid-control-fill', handleOsidMouseMove);
+  safeOn('mouseleave', 'osid-control-fill', handleOsidMouseLeave);
+  safeOn('click', 'osid-ethnic-fill', handleOsidClick);
+  safeOn('mousemove', 'osid-ethnic-fill', handleOsidMouseMove);
+  safeOn('mouseleave', 'osid-ethnic-fill', handleOsidMouseLeave);
 
   if (onFormationClick) {
-    map.on('click', 'formation-markers', handleFormationClick);
-    map.on('click', 'formation-labels', handleFormationClick);
+    safeOn('click', 'formation-markers', handleFormationClick);
+    safeOn('click', 'formation-labels', handleFormationClick);
   }
   if (onFormationHover) {
-    map.on('mousemove', 'formation-markers', handleFormationMouseMove);
-    map.on('mouseleave', 'formation-markers', handleFormationMouseLeave);
-    map.on('mousemove', 'formation-labels', handleFormationMouseMove);
-    map.on('mouseleave', 'formation-labels', handleFormationMouseLeave);
+    safeOn('mousemove', 'formation-markers', handleFormationMouseMove);
+    safeOn('mouseleave', 'formation-markers', handleFormationMouseLeave);
+    safeOn('mousemove', 'formation-labels', handleFormationMouseMove);
+    safeOn('mouseleave', 'formation-labels', handleFormationMouseLeave);
   }
 
   const frontEdgesLayerId = 'front-edges-hover';
-  if (onFrontEdgeHover && map.getLayer(frontEdgesLayerId)) {
-    map.on('mousemove', frontEdgesLayerId, handleFrontEdgeMouseMove);
-    map.on('mouseleave', frontEdgesLayerId, handleFrontEdgeMouseLeave);
+  if (onFrontEdgeHover) {
+    safeOn('mousemove', frontEdgesLayerId, handleFrontEdgeMouseMove);
+    safeOn('mouseleave', frontEdgesLayerId, handleFrontEdgeMouseLeave);
   }
 
   return () => {
-    map.off('click', 'osid-control-fill', handleOsidClick);
-    map.off('mousemove', 'osid-control-fill', handleOsidMouseMove);
-    map.off('mouseleave', 'osid-control-fill', handleOsidMouseLeave);
-    map.off('click', 'osid-ethnic-fill', handleOsidClick);
-    map.off('mousemove', 'osid-ethnic-fill', handleOsidMouseMove);
-    map.off('mouseleave', 'osid-ethnic-fill', handleOsidMouseLeave);
+    safeOff('click', 'osid-control-fill', handleOsidClick);
+    safeOff('mousemove', 'osid-control-fill', handleOsidMouseMove);
+    safeOff('mouseleave', 'osid-control-fill', handleOsidMouseLeave);
+    safeOff('click', 'osid-ethnic-fill', handleOsidClick);
+    safeOff('mousemove', 'osid-ethnic-fill', handleOsidMouseMove);
+    safeOff('mouseleave', 'osid-ethnic-fill', handleOsidMouseLeave);
     if (hoverTimeout) clearTimeout(hoverTimeout);
     if (onFormationClick) {
-      map.off('click', 'formation-markers', handleFormationClick);
-      map.off('click', 'formation-labels', handleFormationClick);
+      safeOff('click', 'formation-markers', handleFormationClick);
+      safeOff('click', 'formation-labels', handleFormationClick);
     }
     if (onFormationHover) {
-      map.off('mousemove', 'formation-markers', handleFormationMouseMove);
-      map.off('mouseleave', 'formation-markers', handleFormationMouseLeave);
-      map.off('mousemove', 'formation-labels', handleFormationMouseMove);
-      map.off('mouseleave', 'formation-labels', handleFormationMouseLeave);
+      safeOff('mousemove', 'formation-markers', handleFormationMouseMove);
+      safeOff('mouseleave', 'formation-markers', handleFormationMouseLeave);
+      safeOff('mousemove', 'formation-labels', handleFormationMouseMove);
+      safeOff('mouseleave', 'formation-labels', handleFormationMouseLeave);
     }
     if (formationHoverTimeout) clearTimeout(formationHoverTimeout);
-    if (map.getLayer(frontEdgesLayerId)) {
-      map.off('mousemove', frontEdgesLayerId, handleFrontEdgeMouseMove);
-      map.off('mouseleave', frontEdgesLayerId, handleFrontEdgeMouseLeave);
-    }
+    safeOff('mousemove', frontEdgesLayerId, handleFrontEdgeMouseMove);
+    safeOff('mouseleave', frontEdgesLayerId, handleFrontEdgeMouseLeave);
     if (frontHoverTimeout) clearTimeout(frontHoverTimeout);
   };
 }

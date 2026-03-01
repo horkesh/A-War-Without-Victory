@@ -4,6 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { Protocol } from 'pmtiles';
 import type { GeoJSONSource } from 'maplibre-gl';
 import type { FeatureCollection } from 'geojson';
+import type { LoadedGameState } from '../data/types';
 import { useMapInteractions } from './useMapInteractions';
 import { useGameStore } from '../store/gameStore';
 import { buildOsidDisplayNameMap } from '../utils/osidDisplayName';
@@ -49,6 +50,10 @@ export function MapContainer() {
   const osidCentroidsRef = useRef<Map<string, [number, number]>>(new Map());
   const lastPanTargetRef = useRef<string | null>(null);
   const sourceUpdatePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  /** Guard: only run heavy overlay build once per loadedGameState; poll must not run build (napkin). */
+  const appliedStateRef = useRef<LoadedGameState | null>(null);
+  /** Idle/timeout handle for deferred formation icons + setData; cleared on effect cleanup. */
+  const deferredOverlayHandleRef = useRef<ReturnType<typeof requestIdleCallback> | ReturnType<typeof setTimeout> | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
@@ -174,7 +179,10 @@ export function MapContainer() {
   useEffect(() => {
     const map = mapRef.current;
     const baseGeoJson = osidBaseRef.current;
-    if (!mapReady || !map || !baseGeoJson || !loadedGameState) return;
+    if (!mapReady || !map || !baseGeoJson || !loadedGameState) {
+      appliedStateRef.current = null;
+      return;
+    }
 
     let cancelled = false;
 
@@ -198,58 +206,107 @@ export function MapContainer() {
         clearInterval(sourceUpdatePollRef.current);
         sourceUpdatePollRef.current = null;
       }
+      // Only run heavy build once per state; poll must not run build (napkin).
+      if (appliedStateRef.current === loadedGameState) return;
+      appliedStateRef.current = loadedGameState;
 
-      // Chunk work across frames so we never block: control -> front lines -> formations
       const state = loadedGameState;
       const base = baseGeoJson;
+      const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
 
       requestAnimationFrame(() => {
         if (cancelled || !mapRef.current || !state) return;
-        const m1 = mapRef.current;
-        const controlledGeoJson = buildControlGeoJSON(base, state.controlBySettlement);
-        (m1.getSource('osid-control') as GeoJSONSource)?.setData(controlledGeoJson);
+        let controlledGeoJson: FeatureCollection;
+        try {
+          if (isDev) console.time('[MapContainer] overlay control');
+          const m1 = mapRef.current;
+          controlledGeoJson = buildControlGeoJSON(base, state.controlBySettlement);
+          (m1.getSource('osid-control') as GeoJSONSource)?.setData(controlledGeoJson);
+          if (isDev) console.timeEnd('[MapContainer] overlay control');
+        } catch (e) {
+          console.error('[MapContainer] overlay control failed:', e);
+          appliedStateRef.current = null;
+          return;
+        }
 
         requestAnimationFrame(() => {
           if (cancelled || !mapRef.current || !state) return;
-          const m2 = mapRef.current;
-          const frontLinesGeoJson = buildFrontLinesGeoJSON(controlledGeoJson, state.war_alliance_rbih_hrhb);
-          (m2.getSource('front-lines') as GeoJSONSource)?.setData(frontLinesGeoJson);
+          try {
+            if (isDev) console.time('[MapContainer] overlay front+formations');
+            const m2 = mapRef.current;
+            const frontLinesGeoJson = buildFrontLinesGeoJSON(controlledGeoJson, state.war_alliance_rbih_hrhb);
+            (m2.getSource('front-lines') as GeoJSONSource)?.setData(frontLinesGeoJson);
 
-          const frontEdgesOsid = state.frontEdgesOsid;
-          if (frontEdgesOsid && frontEdgesOsid.length > 0) {
-            const frontEdgesHoverData = buildFrontEdgesHoverGeoJSON(controlledGeoJson, frontEdgesOsid);
-            if (!m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
-              m2.addSource(FRONT_EDGES_HOVER_SOURCE_ID, { type: 'geojson', data: frontEdgesHoverData });
-              m2.addLayer(
-                {
-                  id: FRONT_EDGES_HOVER_LAYER_ID,
-                  type: 'line',
-                  source: FRONT_EDGES_HOVER_SOURCE_ID,
-                  paint: {
-                    'line-width': ['interpolate', ['linear'], ['zoom'], 6, 6, 10, 12, 14, 18],
-                    'line-opacity': 0,
-                    'line-color': 'transparent',
+            const frontEdgesOsid = state.frontEdgesOsid;
+            if (frontEdgesOsid && frontEdgesOsid.length > 0) {
+              const frontEdgesHoverData = buildFrontEdgesHoverGeoJSON(controlledGeoJson, frontEdgesOsid);
+              if (!m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
+                m2.addSource(FRONT_EDGES_HOVER_SOURCE_ID, { type: 'geojson', data: frontEdgesHoverData });
+                m2.addLayer(
+                  {
+                    id: FRONT_EDGES_HOVER_LAYER_ID,
+                    type: 'line',
+                    source: FRONT_EDGES_HOVER_SOURCE_ID,
+                    paint: {
+                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 6, 10, 12, 14, 18],
+                      'line-opacity': 0,
+                      'line-color': 'transparent',
+                    },
                   },
-                },
-                'formation-markers'
-              );
-            } else {
-              (m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID) as GeoJSONSource).setData(frontEdgesHoverData);
+                  'formation-markers'
+                );
+              } else {
+                (m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID) as GeoJSONSource).setData(frontEdgesHoverData);
+              }
             }
-          }
 
-          requestAnimationFrame(() => {
-            if (cancelled || !mapRef.current || !state) return;
-            const m3 = mapRef.current;
-            const formationsGeoJson = buildFormationsGeoJSON(state, controlledGeoJson);
-            const orderArrowsGeoJson = buildOrderArrowsGeoJSON(state, controlledGeoJson);
-            const iconIds = formationsGeoJson.features
-              .map((f) => (typeof f.properties?.icon_id === 'string' ? f.properties.icon_id : ''))
-              .filter((id) => id.length > 0);
-            ensureFormationIcons(m3, iconIds);
-            (m3.getSource('formations') as GeoJSONSource)?.setData(formationsGeoJson);
-            (m3.getSource('order-arrows') as GeoJSONSource)?.setData(orderArrowsGeoJson);
-          });
+            requestAnimationFrame(() => {
+              if (cancelled || !mapRef.current || !state) return;
+              try {
+                const formationsGeoJson = buildFormationsGeoJSON(state, controlledGeoJson);
+                const orderArrowsGeoJson = buildOrderArrowsGeoJSON(state, controlledGeoJson);
+                const iconIds = formationsGeoJson.features
+                  .map((f) => (typeof f.properties?.icon_id === 'string' ? f.properties.icon_id : ''))
+                  .filter((id) => id.length > 0);
+
+                // Defer icon registration + setData to idle/next tick so this rAF doesn't block the main thread (freeze fix).
+                const runDeferred = () => {
+                  if (cancelled || !mapRef.current || !state) return;
+                  const initialMap = mapRef.current;
+                  try {
+                    try {
+                      ensureFormationIcons(initialMap, iconIds);
+                    } catch (iconErr) {
+                      console.warn('[MapContainer] Formation icon registration failed (labels may still show):', iconErr);
+                    }
+                    if (cancelled || !mapRef.current || mapRef.current !== initialMap) return;
+                    const m = mapRef.current;
+                    (m.getSource('formations') as GeoJSONSource)?.setData(formationsGeoJson);
+                    (m.getSource('order-arrows') as GeoJSONSource)?.setData(orderArrowsGeoJson);
+                    const { formationsVisible: fVis, labelsVisible: lVis } = useGameStore.getState();
+                    safeSetLayoutVisibility(m, FORMATION_MARKERS_LAYER_ID, fVis);
+                    safeSetLayoutVisibility(m, FORMATION_LABELS_LAYER_ID, lVis);
+                    if (isDev) console.timeEnd('[MapContainer] overlay front+formations');
+                  } catch (deferredErr) {
+                    console.error('[MapContainer] deferred overlay failed:', deferredErr);
+                    appliedStateRef.current = null;
+                  }
+                };
+
+                const schedule = typeof requestIdleCallback !== 'undefined'
+                  ? (fn: () => void) => requestIdleCallback(fn, { timeout: 400 })
+                  : (fn: () => void) => setTimeout(fn, 0);
+                const handle = schedule(runDeferred);
+                deferredOverlayHandleRef.current = handle;
+              } catch (e) {
+                console.error('[MapContainer] overlay formations/orders failed:', e);
+                appliedStateRef.current = null;
+              }
+            });
+          } catch (e) {
+            console.error('[MapContainer] overlay front failed:', e);
+            appliedStateRef.current = null;
+          }
         });
       });
     };
@@ -259,6 +316,11 @@ export function MapContainer() {
     return () => {
       cancelled = true;
       cancelAnimationFrame(rafId);
+      if (deferredOverlayHandleRef.current != null) {
+        if (typeof cancelIdleCallback !== 'undefined') cancelIdleCallback(deferredOverlayHandleRef.current as ReturnType<typeof requestIdleCallback>);
+        clearTimeout(deferredOverlayHandleRef.current as ReturnType<typeof setTimeout>);
+        deferredOverlayHandleRef.current = null;
+      }
       if (sourceUpdatePollRef.current) {
         clearInterval(sourceUpdatePollRef.current);
         sourceUpdatePollRef.current = null;
@@ -266,13 +328,40 @@ export function MapContainer() {
     };
   }, [loadedGameState, mapReady]);
 
+  function safeSetLayoutVisibility(
+    map: maplibregl.Map,
+    layerId: string,
+    visible: boolean,
+  ): boolean {
+    try {
+      if (!map.getLayer(layerId)) return false;
+      map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+      return true;
+    } catch (e) {
+      console.error('[MapContainer] safeSetLayoutVisibility failed', { layerId, visible, error: e });
+      return false;
+    }
+  }
+
+  function safeHasLayer(
+    map: maplibregl.Map,
+    layerId: string,
+  ): boolean {
+    try {
+      return Boolean(map.getLayer(layerId));
+    } catch (e) {
+      console.error('[MapContainer] safeHasLayer failed', { layerId, error: e });
+      return false;
+    }
+  }
+
   useEffect(() => {
     const map = mapRef.current;
     if (!mapReady || !map) return;
 
     const applyHoverFilter = () => {
       if (!map.getSource('osid-control')) return false;
-      if (!map.getLayer(SIDEBAR_HOVER_LAYER_ID)) {
+      if (!safeHasLayer(map, SIDEBAR_HOVER_LAYER_ID)) {
         map.addLayer(
           {
             id: SIDEBAR_HOVER_LAYER_ID,
@@ -292,7 +381,12 @@ export function MapContainer() {
         hoveredOsids.length === 0
           ? (['==', ['get', 'osid'], '__none__'] as maplibregl.FilterSpecification)
           : (['in', ['get', 'osid'], ['literal', hoveredOsids]] as maplibregl.FilterSpecification);
-      map.setFilter(SIDEBAR_HOVER_LAYER_ID, filter);
+      try {
+        map.setFilter(SIDEBAR_HOVER_LAYER_ID, filter);
+      } catch (e) {
+        console.error('[MapContainer] applyHoverFilter setFilter failed', e);
+        return false;
+      }
       return true;
     };
 
@@ -347,8 +441,10 @@ export function MapContainer() {
         (m.getSource(OSID_ETHNIC_SOURCE_ID) as GeoJSONSource).setData(ethnicGeoJson);
       }
       const showPolitical = mapMode === 'political' || mapMode === 'supply' || mapMode === 'pressure';
-      if (m.getLayer('osid-control-fill')) m.setLayoutProperty('osid-control-fill', 'visibility', showPolitical ? 'visible' : 'none');
-      if (m.getLayer(OSID_ETHNIC_FILL_LAYER_ID)) m.setLayoutProperty(OSID_ETHNIC_FILL_LAYER_ID, 'visibility', mapMode === 'ethnic' ? 'visible' : 'none');
+      safeSetLayoutVisibility(m, 'osid-control-fill', showPolitical);
+      if (safeHasLayer(m, OSID_ETHNIC_FILL_LAYER_ID)) {
+        safeSetLayoutVisibility(m, OSID_ETHNIC_FILL_LAYER_ID, mapMode === 'ethnic');
+      }
     });
     return () => {
       cancelled = true;
@@ -362,34 +458,35 @@ export function MapContainer() {
     if (!mapReady || !map) return;
 
     const applyVisibility = () => {
-      const setVisibility = (layerId: string, visible: boolean) => {
-        if (!map.getLayer(layerId)) return false;
-        map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
-        return true;
-      };
       let allExist = true;
       FRONT_LAYER_IDS.forEach((id) => {
-        if (!setVisibility(id, frontsVisible)) allExist = false;
+        if (!safeSetLayoutVisibility(map, id, frontsVisible)) allExist = false;
       });
-      if (!setVisibility(FORMATION_MARKERS_LAYER_ID, formationsVisible)) allExist = false;
-      if (!setVisibility(FORMATION_LABELS_LAYER_ID, labelsVisible)) allExist = false;
+      if (!safeSetLayoutVisibility(map, FORMATION_MARKERS_LAYER_ID, formationsVisible)) allExist = false;
+      if (!safeSetLayoutVisibility(map, FORMATION_LABELS_LAYER_ID, labelsVisible)) allExist = false;
       // Map mode: political/supply/pressure show control fill; ethnic shows ethnic fill
       const showPolitical = mapMode === 'political' || mapMode === 'supply' || mapMode === 'pressure';
-      if (!setVisibility('osid-control-fill', showPolitical)) allExist = false;
-      if (map.getLayer(OSID_ETHNIC_FILL_LAYER_ID) && !setVisibility(OSID_ETHNIC_FILL_LAYER_ID, mapMode === 'ethnic')) allExist = false;
+      if (!safeSetLayoutVisibility(map, 'osid-control-fill', showPolitical)) allExist = false;
+      if (safeHasLayer(map, OSID_ETHNIC_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_ETHNIC_FILL_LAYER_ID, mapMode === 'ethnic')) allExist = false;
       return allExist;
     };
 
-    if (!applyVisibility()) {
-      const onLoad = () => {
-        applyVisibility();
-        map.off('load', onLoad);
-      };
-      map.once('load', onLoad);
-      return () => {
-        map.off('load', onLoad);
-      };
-    }
+    if (applyVisibility()) return;
+
+    // Style may not be loaded yet; wait for load and retry once after a short delay (in case load already fired)
+    const onLoad = () => {
+      applyVisibility();
+      map.off('load', onLoad);
+    };
+    map.once('load', onLoad);
+    const retryId = setTimeout(() => {
+      if (applyVisibility()) map.off('load', onLoad);
+    }, 150);
+
+    return () => {
+      map.off('load', onLoad);
+      clearTimeout(retryId);
+    };
   }, [mapReady, frontsVisible, formationsVisible, labelsVisible, mapMode]);
 
   // Phase C2: mapMode (political | ethnic | supply | pressure) — ethnic/supply/pressure

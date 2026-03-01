@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 import fs from 'fs';
 
 const dataDir = path.resolve(__dirname, '../../../data');
+const runsDir = path.resolve(__dirname, '../../../runs');
 const mapRoot = path.resolve(__dirname, '.');
 
 export default defineConfig({
@@ -14,7 +15,35 @@ export default defineConfig({
       configureServer(server) {
         server.middlewares.use('/data', (req, res, next) => {
           const url = req.url ?? '/';
-          const filePath = path.join(dataDir, url.split('?')[0]);
+          const pathname = url.split('?')[0];
+          // Serve runs/<runId>/final_save.json from /data/runs/<runId>/final_save.json (for "Load run" debugging).
+          const runsPrefix = '/runs/';
+          if (pathname.startsWith(runsPrefix)) {
+            const subPath = pathname.slice(runsPrefix.length);
+            if (!subPath || subPath.includes('..')) {
+              next();
+              return;
+            }
+            const filePath = path.join(runsDir, subPath);
+            if (!filePath.startsWith(runsDir) || !filePath.endsWith('.json')) {
+              next();
+              return;
+            }
+            fs.stat(filePath, (err, stat) => {
+              if (err || !stat?.isFile()) {
+                next();
+                return;
+              }
+              res.writeHead(200, {
+                'Content-Type': 'application/json',
+                'Content-Length': stat.size,
+                'Access-Control-Allow-Origin': '*',
+              });
+              fs.createReadStream(filePath).pipe(res);
+            });
+            return;
+          }
+          const filePath = path.join(dataDir, pathname.replace(/^\//, ''));
           if (!filePath.startsWith(dataDir)) {
             next();
             return;

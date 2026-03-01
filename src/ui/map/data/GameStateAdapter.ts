@@ -29,27 +29,58 @@ function finiteNumber(value: unknown, fallback = 0): number {
 /**
  * Parse a final_save.json file content into a LoadedGameState.
  * Validates required fields and extracts formations, militia pools, and control data.
+ * Accepts raw GameState or a single-level wrapper (e.g. { state: GameState }) for IPC/legacy.
  */
 export function parseGameState(json: unknown): LoadedGameState {
-    const state = json as Record<string, unknown>;
-
-    const meta = state.meta as Record<string, unknown> | undefined;
-    if (!meta || typeof meta.turn !== 'number') {
-        throw new Error('Invalid game state: missing meta.turn');
+    // Normalize: unwrap common wrappers so we always work with the flat GameState object.
+    let state = json as Record<string, unknown>;
+    if (state != null && typeof state === 'object' && !Array.isArray(state)) {
+        const keys = Object.keys(state);
+        if (keys.length === 1 && (keys[0] === 'state' || keys[0] === 'gameState')) {
+            const inner = state[keys[0]];
+            if (inner != null && typeof inner === 'object' && !Array.isArray(inner)) {
+                state = inner as Record<string, unknown>;
+            }
+        }
     }
 
-    const turn = meta.turn as number;
+    const meta = state.meta as Record<string, unknown> | undefined;
+    if (!meta || typeof meta !== 'object') {
+        throw new Error('Invalid game state: missing meta. Ensure the file is a final_save.json from the scenario runner.');
+    }
+    const turnVal = meta.turn;
+    if (typeof turnVal !== 'number' || !Number.isFinite(turnVal)) {
+        throw new Error('Invalid game state: meta.turn must be a number. Ensure the file is a final_save.json from the scenario runner.');
+    }
+
+    const turn = turnVal;
     const phase = (meta.phase as string) ?? 'unknown';
     const label = `Turn ${turn} (${phase})`;
 
     const rawMovementState = state.brigade_movement_state as Record<string, { status?: string; stance?: string }> | undefined;
 
+    // Normalize formations to record (engine sends object; accept array for robustness).
+    let formationsRecord: Record<string, Record<string, unknown>> = {};
+    const rawFormationsInput = state.formations;
+    if (rawFormationsInput && typeof rawFormationsInput === 'object') {
+        if (Array.isArray(rawFormationsInput)) {
+            for (const row of rawFormationsInput) {
+                const r = row as Record<string, unknown>;
+                const id = (typeof r?.id === 'string' ? r.id : '') || (typeof r?.id === 'number' ? String(r.id) : '');
+                if (id) formationsRecord[id] = r;
+            }
+        } else {
+            formationsRecord = rawFormationsInput as Record<string, Record<string, unknown>>;
+        }
+    }
+
+    // War-phase: use formation location_osid. Peace/legacy: use brigade_aor. Accept phase_ii as war for backward compat.
     const brigadeAorByFormationId: Record<string, string[]> = {};
-    if (phase === 'war') {
-        const rawFormations = state.formations as Record<string, Record<string, unknown>> | undefined;
-        if (rawFormations) {
-            for (const id of Object.keys(rawFormations).sort()) {
-                const loc = (rawFormations[id] as { location_osid?: string }).location_osid;
+    const isWarPhase = phase === 'war' || phase === 'phase_ii';
+    if (isWarPhase) {
+        if (Object.keys(formationsRecord).length > 0) {
+            for (const id of Object.keys(formationsRecord).sort()) {
+                const loc = (formationsRecord[id] as { location_osid?: string }).location_osid;
                 if (typeof loc === 'string' && loc) {
                     brigadeAorByFormationId[id] = [loc];
                 }
@@ -121,11 +152,10 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     const formations: FormationView[] = [];
-    const rawFormations = state.formations as Record<string, Record<string, unknown>> | undefined;
-    if (rawFormations) {
-        const sortedIds = Object.keys(rawFormations).sort();
+    if (Object.keys(formationsRecord).length > 0) {
+        const sortedIds = Object.keys(formationsRecord).sort();
         for (const id of sortedIds) {
-            const f = rawFormations[id];
+            const f = formationsRecord[id];
             const tags = (f.tags as string[]) ?? [];
 
             let municipalityId: string | undefined;

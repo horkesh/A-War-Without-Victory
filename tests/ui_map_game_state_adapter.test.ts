@@ -84,3 +84,50 @@ test('parseGameState extracts canonical front edge and pressure views', () => {
     assert.strictEqual(parsed.assignableFrontSegments?.[0]?.front_id, 'RBiH__RS__S1__S2');
 });
 
+test('parseGameState treats phase_ii as war for formation location_osid', () => {
+    const parsed = parseGameState({
+        meta: { turn: 5, phase: 'phase_ii' },
+        formations: {
+            b1: { id: 'b1', faction: 'RS', name: 'B1', kind: 'brigade', location_osid: 'op:mun:xyz', tags: [] },
+        },
+        political_controllers: {},
+    });
+    assert.strictEqual(parsed.phase, 'phase_ii');
+    assert.strictEqual(parsed.formations.length, 1);
+    assert.strictEqual(parsed.formations[0].location_osid, 'op:mun:xyz');
+    assert.deepStrictEqual(parsed.formations[0].aorSettlementIds, ['op:mun:xyz']);
+});
+
+test('parseGameState accepts formations as array', () => {
+    const parsed = parseGameState({
+        meta: { turn: 1, phase: 'war' },
+        formations: [
+            { id: 'f1', faction: 'RBiH', name: 'F1', kind: 'brigade', tags: [] },
+            { id: 'f2', faction: 'RS', name: 'F2', kind: 'brigade', tags: [] },
+        ],
+        political_controllers: {},
+    });
+    assert.strictEqual(parsed.formations.length, 2);
+    assert.strictEqual(parsed.formations[0].id, 'f1');
+    assert.strictEqual(parsed.formations[1].id, 'f2');
+});
+
+test('parseGameState unwraps { state: GameState } wrapper', () => {
+    const parsed = parseGameState({
+        state: {
+            meta: { turn: 3, phase: 'war' },
+            formations: {},
+            political_controllers: {},
+        },
+    });
+    assert.strictEqual(parsed.turn, 3);
+    assert.strictEqual(parsed.phase, 'war');
+});
+
+test('parseGameState throws clear error when meta.turn is missing', () => {
+    assert.throws(
+        () => parseGameState({ meta: {}, formations: {}, political_controllers: {} }),
+        /meta\.turn must be a number/
+    );
+});
+
