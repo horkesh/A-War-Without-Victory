@@ -68,7 +68,11 @@
 ## Simulation Engine
 1. **[2026-03-01] Two-phase fixture metadata completeness**
    Do instead: For any test/state fixture that flows through `runTurn` or scenario runners, always set `meta.phase` (`peace`/`war`) plus compatible referendum fields; missing `meta.phase` now hard-fails as unsupported lifecycle.
-2. **[2026-02-24] OSID-keyed political_controllers**
+2. **[2026-03-01] OSID/SID mismatch in displacement — never use getEffectiveSettlementSide for control**
+   Do instead: `political_controllers` is keyed by OSIDs (`op:mun:slug`) in war phase. Use `buildMunControlFromOsids()` or `buildMunDominantController()` for municipality-level control. `getEffectiveSettlementSide()` does SID lookup → always returns null → causes false encirclement, dead minority flight, population drain.
+3. **[2026-03-01] Displacement accounting: displaced_out vs lost_population must not overlap**
+   Do instead: `displaced_out` = only actually-routed amount (to camps/other muns). `lost_population` = killed + fled_abroad + unrouted overflow. These are non-overlapping. Formula: `remaining = original - displaced_out - lost_population + displaced_in`.
+4. **[2026-02-24] OSID-keyed political_controllers init**
    Do instead: When init fills `political_controllers` by OSID, do NOT call `promotePoliticalControllersToOsid` (it expects SID-keyed state). Check `isPoliticalControllersAlreadyOsidKeyed()` first.
 3. **[2026-02-28] Operational control derivation: majority then plurality**
    Do instead: In `derive_operational_political_control.ts`, assign faction by ethnic majority (>50%) when present, else plurality (largest share). Do not use "first group ≥40%" order — that made Vozuća RBiH despite 54.5% Serb.
@@ -108,26 +112,26 @@
    If ZoC proves hard to tune: each front segment is a clickable entity; player assigns brigades and optionally specifies coverage width. Engine computes segment hardness = f(brigades, terrain, width). Mutual support = multiple brigades on same segment. Unassigned segments auto-contested. Explore if "too few brigades to cover the front" persists after calibration.
 
 ## GUI / HoI Map
-1. **[2026-02-28] Map overlay poll: check sources before building**
+1. **[2026-03-01] GUI v2 next priority: Phase 3 remainder then Phase 4**
+   Do instead: Complete Phase 3 remainder (Minimap, ZoomControls, CorpsDetail, ArmyDetail, MovementPreview) per docs/40_reports/20260301_GUI_PHASE3_REMAINDER_PLAN.md; then start Phase 4 (useIPC, advance-turn, Electron). Do not start Phase 4 before Phase 3 remainder unless PM reprioritizes.
+2. **[2026-03-01] Map load: validate save shape against current engine output**
+   Do instead: When the map fails to load "all recent saves", validate the save file (schema, meta.turn, formations/political_controllers shape, optional wrapper). parseGameState now unwraps `{ state }`/`{ gameState }` and gives clear errors for missing meta.turn.
+3. **[2026-03-01] Map load: defer parse and timeout so spinner doesn’t spin forever**
+   Do instead: In loadSave run parse (JSON.parse + parseGameState) in requestIdleCallback (timeout ~150ms) so "Loading..." can paint before main thread blocks. Use 25s load timeout in toolbar (Promise.race) and show loadError so user sees failure or timeout instead of endless spinner.
+4. **[2026-03-01] Map adapter: Peace/War and legacy phase_ii**
+   Do instead: parseGameState must treat `phase_ii` as war (use formation location_osid); accept `formations` as object or array. Ensures scenario runs and legacy saves load in the map after peace/war migration.
+5. **[2026-02-28] Map overlay poll: check sources before building**
    Do instead: In MapContainer overlay effect, call getSource() first; only run buildControlGeoJSON/buildFrontLinesGeoJSON when all sources exist. Otherwise the 500ms poll re-runs the heavy build every tick and freezes the app.
-2. **[2026-02-28] HOI spec = aesthetic authority; v2 doc = implementation**
+6. **[2026-03-01] Front edge hover: single-pass edge ownership**
+   Do instead: In `buildFrontEdgesHoverGeoJSON`, track which OSID owns each edge during the initial vertex pass. NEVER re-scan all features per edge — that's O(n³) and freezes the browser with 753 OSIDs. Fixed 2026-03-01.
+7. **[2026-03-01] Formation icon + setData: defer to idle**
+   Do instead: Run ensureFormationIcons and setData(formations/order-arrows) in requestIdleCallback (timeout ~400ms) or setTimeout(0), not inside the overlay rAF chain. Cancel the deferred handle in effect cleanup. Prevents main-thread freeze from canvas/getImageData/addImage in one frame.
+8. **[2026-02-28] HOI spec = aesthetic authority; v2 doc = implementation**
    Do instead: Treat HOI_VISUAL_GUI_OVERHAUL_SPEC (docs/30_planning/...) as authoritative for look-and-feel; use AWWV_GUI_ARCHITECTURE_REWORK_v2.md for implementation. Sidebar: two tabs ARMY / SITUATION; panel interaction patterns §3.8 of HOI spec.
-3. **[2026-02-28] Phase C complete: tooltips, MapModeToolbar, shortcuts, attack modal, order queue**
+9. **[2026-02-28] Phase C complete: tooltips, MapModeToolbar, shortcuts, attack modal, order queue**
    Do instead: Rich tooltips use store tooltipTarget + tooltipPosition, 300ms delay; MapModeToolbar + MapLayerToggles bottom-right (C2.1); keys 1–4 = map modes, Enter = confirm primary action, Escape clears selection/tooltip/pending; AttackConfirmation modal; OrderQueue from stagedOrders. See docs/40_reports/phase_c/20260228_PHASE_C_GUI_IMPLEMENTATION_REPORT.md.
-4. **[2026-02-28] Selection panel right-side positioning (React+MapLibre app)**
+10. **[2026-02-28] Selection panel right-side positioning (React+MapLibre app)**
    Do instead: Use inline styles (position, left: auto, right, top, bottom, width, zIndex, direction: ltr) for overlay panels so Tailwind/purge/RTL cannot override. Dev-only `?showPanel=1` shows selection panel without map click for layout verification.
-5. **[2026-02-26] Async terrain texture build**
-   Do instead: Use `buildHoITerrainTextureAsync` yielding every 64 rows. Wrap `renderer.init()` in `Promise.race` with ~25s timeout; keep 2D placeholder on failure.
-6. **[2026-02-26] Tooltip/hover/click: unconditional registration**
-   Do instead: Tooltip, hover, and click registration must NOT be gated on `pendingData.formations?.length`. Register unconditionally.
-7. **[2026-02-26] pointer-events on formation markers**
-   Do instead: Set `pointer-events: auto` on `.hoi-formation-marker` (not `none`). Parent overlay layer stays `pointer-events: none`.
-8. **[2026-02-26] Formation stacking**
-   Do instead: Group by location. Overlapping formations: dense deck-of-cards stack (4px shift). Click selects top; stack unspools vertically (28px spacing) with z-index 100+.
-10. **[2026-02-23] Tilt layer separation**
-    Do instead: Use tight Y-offsets (0.001-0.005), `polygonOffset` on all layers, ortho camera `far=100`. For faction overlay, rasterize onto terrain mesh geometry texture.
-11. **[2026-02-28] Sidebar hover-preview in React+MapLibre**
-   Do instead: Drive map hover preview from store-owned `hoveredOsids` and a dedicated MapLibre outline layer (`sidebar-hover-outline`) with deterministic sorted OSID filters; brigade/corps hover events set/clear only this list.
 
 ## Desktop & Electron
 1. **[2026-02-21] EPIPE guard on init logging**

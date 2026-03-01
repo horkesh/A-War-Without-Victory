@@ -1,6 +1,6 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-02-28
+**Last Updated:** 2026-03-01
 **Status:** MVP declared - Phase 6 complete
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
@@ -8652,3 +8652,76 @@ Determinism checks **MUST** be run:
 - **Files modified:** `src/state/game_state.ts`, `src/state/serialize.ts`, `src/state/serializeGameState.ts`, `src/sim/phase_ii/attack_resolution_osid.ts`, `src/sim/phase_ii/combat_predictor.ts`, `src/sim/turn_pipeline.ts`, `data/source/oob_brigades.json`, `src/scenario/oob_loader.ts`, `src/scenario/oob_phase_i_entry.ts`, `src/state/displacement_routing_data.ts`, `src/state/displacement_takeover.ts`, `src/sim/phase_ii/bot_corps_ai.ts`, `src/sim/phase_ii/bot_strategy.ts`, `docs/10_canon/ENGINE_INVARIANTS.md`, `docs/10_canon/SYSTEMS_MANUAL.md`.
 - **Verification:** `npx tsc --noEmit` clean; `npm run test:vitest` 193 pass / 13 skip; `npx tsx --test` 47 pass (17 morale + 7 schema + 23 routing). All 6 bot benchmarks pass.
 - **Deferred:** M5 breakthrough retreat (Orasje gap is OOB assignment issue, not retreat mechanic). OSID-level displacement tracking (system operates at mun level). Enclave morale tuning (70→55, identified as top priority iteration knob).
+
+**2026-03-01** - GUI v2 Phase 3 remainder: assessment and execution plan (planning only)
+- **Phase:** AWWV_GUI_ARCHITECTURE_REWORK_v2 (React + MapLibre canonical GUI).
+- **Summary:** Orchestrator assessed current GUI state in `src/ui/map/` vs v2 §0; confirmed Phase C complete (MapModeToolbar + MapLayerToggles, useKeyboardShortcuts, AttackConfirmation, OrderQueue, tooltips). Phase 3 "Not yet" confirmed absent: Minimap, ZoomControls, CorpsDetail, ArmyDetail, MovementPreview. Chose next priority: complete Phase 3 remainder (then Phase 4 Desktop). Produced execution plan in three slices: (1) Minimap + ZoomControls, (2) CorpsDetail + ArmyDetail, (3) MovementPreview (reachability + map highlight).
+- **No behavior change:** Planning and doc updates only.
+- **Artifacts:** docs/40_reports/20260301_GUI_PHASE3_REMAINDER_PLAN.md (assessment, rationale, slices, owners, gates); docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md §0 updated with next-priority pointer.
+
+**2026-03-01** - React map app: load-save freeze troubleshooting and fixes
+- **Phase:** AWWV_GUI_ARCHITECTURE_REWORK_v2 (React + MapLibre canonical GUI).
+- **Summary:** User reported map app freezing when loading saves. Root causes addressed: (1) Parse and overlay build ran on the main thread without yielding, so "Loading..." could not paint before blocking. (2) Overlay effect could run the heavy GeoJSON build more than once per state; napkin requires the 500ms source poll to only check for sources and never run the build when sources are missing. Fixes: deferred parse with double requestAnimationFrame in loadSave so loading state paints; guard in MapContainer so overlay build runs only once per loadedGameState (appliedStateRef); try/catch and dev-only console timing around overlay steps for future debugging. Added debug script to reproduce load path in Node (parse + overlay builders); confirmed parse and builders are fast (~90 ms total); heaviest step is buildFrontLinesGeoJSON (~50 ms).
+- **Determinism:** No simulation or persisted output changes; UI and load-flow only.
+- **Files modified:** src/ui/map/store/gameStore.ts (loadSave: double rAF before parse, single rAF before set); src/ui/map/map/MapContainer.tsx (appliedStateRef guard, clear ref when no state, try/catch and DEV console.time/timeEnd in overlay effect, LoadedGameState import).
+- **Files created:** src/ui/map/scripts/debugLoadSave.ts (one-off script: read save, parseGameState, run overlay builders; run from repo root with `npx tsx src/ui/map/scripts/debugLoadSave.ts`).
+- **Verification:** src/ui/map npm run build pass; load-save reported working by user.
+
+**2026-03-01** - React map app: formation icon freeze — defer icon registration and setData to idle
+- **Phase:** AWWV_GUI_ARCHITECTURE_REWORK_v2 (React + MapLibre canonical GUI).
+- **Summary:** Map app froze again after load-save and visibility fixes; formation icons were suspected. Root cause: ensureFormationIcons (canvas + getImageData + addImage per unique icon) and setData(formations/order-arrows) ran synchronously in the overlay effect's third rAF, blocking the main thread. Fix: defer that block to requestIdleCallback (timeout 400 ms) or setTimeout(0); store handle in deferredOverlayHandleRef and cancel on effect cleanup so the callback does not run after unmount or new load.
+- **Determinism:** No simulation or persisted output changes; UI only.
+- **Files modified:** src/ui/map/map/MapContainer.tsx (deferredOverlayHandleRef, schedule runDeferred, cleanup cancel).
+- **Verification:** src/ui/map npm run build pass.
+- **Report:** docs/40_reports/20260301_REACT_MAP_FORMATION_ICON_FREEZE_FIX.md.
+
+**2026-03-01** - React map app load freeze: root cause was save file
+- **Phase:** AWWV_GUI_ARCHITECTURE_REWORK_v2 (React + MapLibre canonical GUI).
+- **Summary:** User confirmed the reproduced load freeze was caused by the save file itself (e.g. malformed, oversized, or otherwise problematic content), not by the load/overlay code. Code-side fixes (microtask deferral in loadSave, deferred formation icons, safeOn/safeOff, safeSetLayoutVisibility, appliedStateRef) remain for robustness.
+- **Determinism:** N/A. Documentation only.
+- **Napkin:** Added "Map load freeze: save file can be root cause" — validate save file before assuming code when map freezes on load.
+
+**2026-03-01** - React map: scenario compatibility after Peace/War phase migration
+- **Phase:** AWWV_GUI_ARCHITECTURE_REWORK_v2 (React + MapLibre canonical GUI).
+- **Summary:** After switching from phase_i/phase_ii to peace/war, scenario run saves were reported no longer compatible with the map. Map adapter (parseGameState) was updated for compatibility: (1) treat legacy `phase_ii` as war for formation location (use `location_osid`; was only checking `phase === 'war'` so old phase_ii saves showed no formation locations). (2) Normalize `formations` to a record when it is an array so adapter accepts both engine object and array shape. (3) Use a single normalized formations record for both brigadeAor and formations list parsing.
+- **Determinism:** No simulation or persisted output changes; UI/load only. Ordering remains sorted.
+- **Files modified:** src/ui/map/data/GameStateAdapter.ts; tests/ui_map_game_state_adapter.test.ts (tests for phase_ii and formations-as-array).
+- **Verification:** src/ui/map npm run build pass; npx tsx --test tests/ui_map_game_state_adapter.test.ts (5 tests pass).
+
+**2026-03-01** - fix(displacement): three critical bugs — OSID/SID mismatch, minority flight dead, double-counting
+- **Phase:** War simulation.
+- **Summary:** Displacement system was producing 4.36M displaced (vs ~1M historical by Jan 1993). Root cause investigation found 3 bugs:
+  1. **OSID/SID key mismatch** (displacement.ts): `getEffectiveSettlementSide()` uses canonical SIDs (`S123456`) but `political_controllers` is keyed by OSIDs (`op:mun:slug`) in war phase → returns null for every settlement → BFS encirclement check fails → ALL 110 municipalities appear encircled → 10%/turn drain on ALL population.
+  2. **Minority flight dead** (minority_flight.ts): Same SID mismatch → controller lookup returns null → 215,414 settlements evaluated, 0 displaced. Minority flight (the correct ethnicity-specific mechanism) was completely non-functional.
+  3. **Double-counting** (displacement.ts, displacement_takeover.ts, minority_flight.ts): `displaced_out` included full displacement amount (killed + fled + routed) while `lost_population` also tracked killed + fled. Formula `remaining = original - displaced_out - lost_population` subtracted killed+fled TWICE → 76/110 municipalities went negative.
+- **Fixes applied:**
+  - displacement.ts: Added `buildMunControlFromOsids()` helper to read OSID keys directly. Replaced `isMunicipalityEncircled()` BFS (which used broken SID lookups) with `isMunicipalityEncircledOsid()` using municipality-level OSID control. Replaced `routeDisplacedPopulation()` candidate discovery with OSID-based munControl lookup. Removed dead `isMunicipalityEncircled()` and `findShortestPathToFriendlyMunicipality()` functions.
+  - minority_flight.ts: Added `buildMunDominantController()` helper. Replaced `getEffectiveSettlementSide(state, sid)` with municipality-level dominant controller lookup from OSID data.
+  - displacement_takeover.ts: Removed dead SID-level branch from `buildFriendlyMunicipalitiesByFaction()` (was always null; OSID branch already worked).
+  - All three files: Changed `displaced_out` to only track actually-routed amounts (not killed/fled). `lost_population` correctly tracks killed + fled_abroad + unrouted overflow. No overlap.
+- **Determinism:** Deterministic. All helpers use sorted iteration (OSID keys via Object.entries, alphabetical sort). No Math.random(), no timestamps. Removes nondeterministic BFS over broken null-returning graph.
+- **Files modified:** src/state/displacement.ts, src/state/minority_flight.ts, src/state/displacement_takeover.ts.
+- **Verification:** tsc --noEmit clean; vitest 193 tests pass (18 suites); no displacement-specific test files exist.
+- **Report:** docs/40_reports/implemented/20260301_DISPLACEMENT_THREE_BUG_FIX.md.
+
+**2026-03-01** - React map: parseGameState robustness so recent saves load reliably
+- **Phase:** AWWV_GUI_ARCHITECTURE_REWORK_v2 (React + MapLibre canonical GUI).
+- **Summary:** User reported "all recent saves are unloadable" in the map app. Investigation showed: (1) Current scenario run output (e.g. data/derived/latest_run_final_save.json) has correct shape (meta.turn, meta.phase, formations object, political_controllers OSID-keyed) and parseGameState succeeds in Node (debug script). (2) Adapter was not accepting wrapped payloads (e.g. IPC or tools that pass `{ state: GameState }`). (3) Error message for missing meta.turn was terse. Fixes: (1) Normalize input in parseGameState by unwrapping a single-level wrapper when the object has exactly one key `state` or `gameState` and the value is the GameState object. (2) Validate meta.turn with a clear, actionable error (mention final_save.json from scenario runner). (3) Added tests for unwrap and missing meta.turn. Backward compatibility: raw GameState and formations-as-array unchanged; phase_ii-as-war and OSID political_controllers already supported.
+- **Determinism:** No simulation or persisted output changes; load path only. Ordering remains sorted.
+- **Files modified:** src/ui/map/data/GameStateAdapter.ts; tests/ui_map_game_state_adapter.test.ts.
+- **Verification:** node_modules/.bin/tsx src/ui/map/scripts/debugLoadSave.ts (latest_run_final_save.json loads); tsx --test tests/ui_map_game_state_adapter.test.ts (7 tests pass); src/ui/map npm run build pass.
+- **Report:** docs/40_reports/20260301_MAP_LOAD_RECENT_SAVES_FIX.md.
+
+**2026-03-01** - fix(map): O(n³) → O(n) in buildFrontEdgesHoverGeoJSON — browser freeze on new saves
+- **Phase:** AWWV_GUI_ARCHITECTURE_REWORK_v2 (React + MapLibre canonical GUI).
+- **Summary:** New saves (with `war_front_edges_osid` populated after peace/war migration) froze the browser tab when loaded in the map app. Root cause: `buildFrontEdgesHoverGeoJSON.ts` had an O(edges × features × vertices) triple loop — for every shared edge in the polygon mesh (~37k), it re-scanned all 753 OSID features and their vertices to find which 2 OSIDs share that edge. ~1.4 billion iterations. Old saves had empty `war_front_edges_osid` and never hit this code path. Fix: track OSID ownership during the initial edge-building pass (single O(total_vertices) pass), eliminating the redundant re-scan entirely. Same output, O(n) instead of O(n³).
+- **Determinism:** No simulation changes. Map rendering only. Edge ownership lookup is deterministic (sorted OSID pairs).
+- **Files modified:** src/ui/map/map/builders/buildFrontEdgesHoverGeoJSON.ts.
+- **Verification:** src/ui/map `npm run build` pass; tests/ui_map_game_state_adapter.test.ts 7/7 pass; manual verification — new saves now load instantly.
+
+**2026-03-01** - fix(map): endless load spinner — defer parse and add timeout
+- **Phase:** AWWV_GUI_ARCHITECTURE_REWORK_v2 (React + MapLibre canonical GUI).
+- **Summary:** Map load showed "Loading..." indefinitely when loading large saves (e.g. run final_save.json). Parse (JSON.parse + parseGameState) ran inside queueMicrotask so the main thread never yielded and the loading state could not paint. Fixes: (1) In gameStore.loadSave, run parse in requestIdleCallback (timeout 150ms) so the browser can paint "Loading..." before blocking. (2) Toolbar load handlers (Load Latest, Load run, Load Save) use Promise.race with a 25s timeout; on timeout, spinner stops and loadError shows "Load timed out...". (3) loadError/setLoadError in store and "Load failed: …" in toolbar so fetch/parse errors are visible. (4) Vite dev server serves /data/runs/<runId>/final_save.json from repo runs/ for debugging; DataLoader.loadRunFinalSaveAsText(runId) and TopToolbar "Run ID" input + "Load run" button to load a run without file picker.
+- **Determinism:** No simulation or persisted output changes. Load path only.
+- **Files modified:** src/ui/map/store/gameStore.ts, src/ui/map/components/TopToolbar.tsx, src/ui/map/vite.config.ts, src/ui/map/data/DataLoader.ts.
+- **Verification:** src/ui/map npm run build pass; adapter tests 7/7 pass; user confirmed load fixed.

@@ -180,10 +180,15 @@ export function processMinorityFlight(
 
     const timerMap = state.hostile_takeover_timers ?? {};
     const campMap = state.displacement_camp_state ?? {};
-    const munsInTakeoverOrCamp = new Set<MunicipalityId>([
-        ...Object.keys(timerMap),
-        ...Object.keys(campMap)
-    ]) as Set<MunicipalityId>;
+    // Timer keys are now OSIDs (op:mun:slug); extract municipality from each.
+    const munsInTakeoverOrCamp = new Set<MunicipalityId>();
+    for (const key of Object.keys(timerMap)) {
+        const timer = timerMap[key];
+        if (timer?.mun_id) munsInTakeoverOrCamp.add(timer.mun_id);
+    }
+    for (const key of Object.keys(campMap)) {
+        munsInTakeoverOrCamp.add(key as MunicipalityId);
+    }
 
     if (!state.minority_flight_state) state.minority_flight_state = {};
     const flightMap = state.minority_flight_state;
