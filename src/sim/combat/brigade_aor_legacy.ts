@@ -1,7 +1,7 @@
 /**
  * Legacy brigade AoR helpers — thin API retained from the original 1370-line brigade_aor.ts.
  * The full AoR system (Voronoi BFS, municipality orders, AoR validation, encirclement)
- * was superseded by OSID/ZoC (location_osid + ZoC readiness). §33 of CONSOLIDATED_IMPLEMENTED.
+ * was superseded by OSID/corps sectors (location_osid + sector-line defense). §33 of CONSOLIDATED_IMPLEMENTED.
  *
  * These functions still have active callers that read the legacy `brigade_aor` state field
  * populated by `corps_directed_aor.ts`. They will be removed when all consumers migrate

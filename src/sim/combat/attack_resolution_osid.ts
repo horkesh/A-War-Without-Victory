@@ -23,6 +23,7 @@ import type {
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { deductCombatExpenditure } from '../../state/supply_reserves.js';
+import { FACILITY_COMBAT_DAMAGE_RATE } from '../../state/supply_reserve_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
@@ -36,7 +37,6 @@ import {
     type CombatOutcome,
     // Constants used directly in resolver
     MAX_RESILIENCE_STREAK,
-    MORALE_RESIST_FLOOR,
     BASE_ATTACKER_LOSS_RATE,
     BASE_DEFENDER_LOSS_RATE,
     MILITIA_DEFENSE_RATIO,
@@ -48,6 +48,7 @@ import {
     COHESION_ATTACKER,
     COHESION_DEFENDER,
     // Functions
+    getMoraleResistFloor,
     getArtillerySuppression,
     getSupplyMult,
     classifyOutcome,
@@ -75,8 +76,8 @@ export type { CombatOutcome };
  */
 const MORALE_ABSORPTION_CAS_MULT = 1.35;
 
-const KIA_FRACTION = 0.25;
-const WIA_FRACTION = 0.6;
+const KIA_FRACTION = 0.30;
+const WIA_FRACTION = 0.55;
 const MIA_FRACTION = 0.15;
 
 // Part 7a: Experience gain from combat (Mobilization & Force Growth)
@@ -474,6 +475,21 @@ export function resolveAttackOrdersOsid(
             }
         }
 
+        // Part 6c: Facility combat damage (Phase B)
+        if (state.meta.supply_reserves_enabled && state.production_facilities) {
+            const osidParts = targetOsid.split(':');
+            if (osidParts.length >= 2) {
+                const munId = osidParts[1];
+                const facilityIds = Object.keys(state.production_facilities).sort((a, b) => a.localeCompare(b));
+                for (const fId of facilityIds) {
+                    const facility = state.production_facilities[fId];
+                    if (facility && facility.municipality_id === munId) {
+                        facility.current_condition = Math.max(0, facility.current_condition - FACILITY_COMBAT_DAMAGE_RATE);
+                    }
+                }
+            }
+        }
+
         // Part 7a: Experience gain
         const applyExperienceGain = (f: FormationState, won: boolean) => {
             const rate = FACTION_LEARNING_RATE[f.faction] ?? DEFAULT_LEARNING_RATE;
@@ -495,8 +511,9 @@ export function resolveAttackOrdersOsid(
 
         // === MORALE-BASED RETREAT RESISTANCE ===
         let moraleAbsorbed = false;
+        const defenderFaction = defenderFormation?.faction as string ?? '';
         if (outcome === 'costly_victory' && defenderFormation
-            && (defenderFormation.morale ?? 60) >= MORALE_RESIST_FLOOR) {
+            && (defenderFormation.morale ?? 60) >= getMoraleResistFloor(defenderFaction)) {
             flip = false;
             moraleAbsorbed = true;
             defenderFormation.morale = Math.max(0, (defenderFormation.morale ?? 60) - 5);

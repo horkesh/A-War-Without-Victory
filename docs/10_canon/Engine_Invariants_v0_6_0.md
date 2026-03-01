@@ -38,6 +38,8 @@ Development-time validation tools may abort execution on invariant violation.
 
 **Implementation-note (Phase A — Supply Reserves, 2026-03-01):** Faction-level reserves (`general_supply_reserve`, `heavy_munitions_reserve` [0..100]) implement the "recovery slower than degradation" invariant: maintenance drain (0.15 per formation per turn) and combat expenditure (per-battle deduction) continuously consume reserves; production income replenishes at a bounded rate. Reserve depletion degrades the effective supply state even when OSID reachability is adequate (reserve < 50 → strained; reserve < 20 → critical). Gated by scenario flag `supply_reserves_enabled` (default false). See `src/state/supply_reserves.ts`, SUPPLY_AMMO_SYSTEM_PLAN.md §3.
 
+**Implementation-note (Phase B+C — Siege, Replenishment, Enclave Hardening, 2026-03-02):** Phase B extends reserves with escalating siege drain (per besieged OSID, from `siege_turn_counters`), patron aid income, and embargo reduction on income. Phase C adds enclave hardening: after 8+ consecutive isolation turns, enclaves gain a +5% defense bonus; enclave resilience (up to 30) reduces exhaustion accumulation for RBiH by up to 30%. Production facility combat damage (0.05 condition per battle) degrades facility output over time. All gated by `supply_reserves_enabled`. See `docs/40_reports/implemented/20260302_SUPPLY_SYSTEM_PHASE_B_C_IMPLEMENTATION.md`.
+
 ## 5. Settlement Stabilization Invariants
 
 - Newly captured settlements must enter a stabilization state

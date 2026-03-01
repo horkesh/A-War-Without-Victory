@@ -34,7 +34,7 @@ import type {
     SupplyStateDerivationReport,
     SupplyStateByOsidReport
 } from '../state/supply_state_derivation.js';
-import type { SupplyReservesReport } from '../state/supply_reserves.js';
+import type { SupplyReservesReport, SiegeTurnCounterReport } from '../state/supply_reserves.js';
 import type { Phase3DCollapseResolutionResult } from './collapse/phase3d_collapse_resolution.js';
 import type { SpawnFormationsReport, ReinforceBrigadesReport, WiaTricklebackReport } from './formation_spawn.js';
 import type { FormationHqRelocationReport } from './formation_hq_relocation.js';
@@ -59,6 +59,7 @@ import type { CohesionDriftReport } from './combat/cohesion_drift.js';
 import type { ConsolidationFlipsReport } from './combat/consolidation_flips.js';
 import type { EnclaveResilienceReport } from './combat/enclave_resilience.js';
 import type { EquipmentProgressionReport } from './combat/faction_progression.js';
+import type { FrontlineAttritionReport } from './combat/frontline_attrition.js';
 import type { MoraleDriftReport } from './combat/morale_drift.js';
 import type { OngoingMobilizationReport } from './combat/ongoing_mobilization.js';
 import type { ResolveAttackOrdersReport } from './combat/resolve_attack_orders.js';
@@ -68,7 +69,7 @@ import type { Phase3BExhaustionResult } from './pressure/phase3b_pressure_exhaus
 import type { Phase3CEligibilityResult } from './pressure/phase3c_exhaustion_collapse_gating.js';
 import type { SiegeRatioByMunFaction } from './early_war/compute_siege_state.js';
 import { loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
-import type { computeZoCState } from './combat/zoc.js';
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -160,6 +161,7 @@ export interface TurnReport {
     phase_ii_attack_resolution_osid?: AttackResolutionOsidReport;
     phase_ii_cohesion_drift?: CohesionDriftReport;
     phase_ii_morale_drift?: MoraleDriftReport;
+    frontline_attrition?: FrontlineAttritionReport;
     phase_ii_consolidation_flips?: ConsolidationFlipsReport;
     phase_ii_takeover_displacement?: PhaseIITakeoverDisplacementReport;
     phase_ii_ongoing_mobilization?: OngoingMobilizationReport;
@@ -186,6 +188,7 @@ export interface TurnReport {
     phase_ii_equipment_progression?: EquipmentProgressionReport;
     phase_ii_enclave_resilience?: EnclaveResilienceReport;
     supply_reserves?: SupplyReservesReport;
+    siege_turn_counters?: SiegeTurnCounterReport;
     corps_ai_report?: CorpsAiReportEntry[];
     phase_ii_recruitment?: {
         accrual_by_faction: Record<FactionId, { capital_delta: number; equipment_delta: number }>;
@@ -220,7 +223,6 @@ export interface NamedPhase {
 export interface OperationalDataCache {
     opData: Awaited<ReturnType<typeof loadOperationalData>>;
     edges: Awaited<ReturnType<typeof loadOperationalEdges>>;
-    zocState?: ReturnType<typeof computeZoCState>;
 }
 
 /** Type-safe accessor for operational data attached to context by load-operational-data step. */

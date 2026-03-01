@@ -55,6 +55,14 @@ This document is the **design specification for the supply system** as agreed by
 
 A **parallel track** to the Phases 1–5 above: faction-level supply reserves add a consumption/replenishment layer on top of OSID reachability. Two categories: `general_supply_reserve` and `heavy_munitions_reserve` per faction [0..100]. Three consumption channels: maintenance drain, combat expenditure, siege (Phase B of SUPPLY_AMMO_SYSTEM_PLAN). Effective supply state combines BFS reachability (from Phase 1) with reserve level via interaction table in `getEffectiveSupplyState()`. Gated by `supply_reserves_enabled` scenario flag. See [SUPPLY_AMMO_SYSTEM_PLAN.md](SUPPLY_AMMO_SYSTEM_PLAN.md) and [20260301_SUPPLY_RESERVES_PHASE_A_IMPLEMENTATION.md](../40_reports/implemented/20260301_SUPPLY_RESERVES_PHASE_A_IMPLEMENTATION.md).
 
+### 2.7 Phase B+C — Siege, Replenishment, Enclave Hardening (COMPLETE 2026-03-02)
+
+**Phase B (Siege Curve + Replenishment Wiring):** Escalating siege drain per besieged OSID (`siege_turn_counters`), patron aid income channel, embargo reduction on income, production facility combat damage (0.05 condition per battle). Pipeline step `update-siege-counters` between `phase-ii-supply-osid` and `compute-supply-reserves`.
+
+**Phase C (Enclave Resilience Enhancement + Hardening):** Structured `EnclaveResilienceEntry` with isolation tracking, hardening defense bonus (+5%) after 8+ isolation turns, enclave-based exhaustion reduction for RBiH (up to 30% at max resilience). 25+ calibration constants in `supply_reserve_constants.ts`.
+
+All new mechanics gated behind `supply_reserves_enabled` (default false). See [SUPPLY_AMMO_SYSTEM_PLAN.md](SUPPLY_AMMO_SYSTEM_PLAN.md) and [20260302_SUPPLY_SYSTEM_PHASE_B_C_IMPLEMENTATION.md](../40_reports/implemented/20260302_SUPPLY_SYSTEM_PHASE_B_C_IMPLEMENTATION.md).
+
 ---
 
 ## 3. Target design — OSID supply trace and per-OSID state

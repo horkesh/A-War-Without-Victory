@@ -398,6 +398,7 @@ export function applyRecruitment(
     const pool = state.militia_pools![poolKey]!;
     pool.available -= action.manpower_spent;
     pool.committed += action.manpower_spent;
+    pool.exhausted = (pool.exhausted ?? 0) + action.manpower_spent;
     pool.updated_turn = state.meta.turn;
 
     // Deduct capital
@@ -544,6 +545,7 @@ export function runBotRecruitment(
             if (pool && effectiveManpower > 0) {
                 pool.available -= effectiveManpower;
                 pool.committed += effectiveManpower;
+                pool.exhausted = (pool.exhausted ?? 0) + effectiveManpower;
                 pool.updated_turn = currentTurn;
             }
 

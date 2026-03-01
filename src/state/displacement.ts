@@ -12,6 +12,7 @@ import { buildAdjacencyMap, type AdjacencyMap } from '../map/adjacency_map.js';
 import { computeFrontEdges } from '../map/front_edges.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import { getReceivingCapacityFraction } from './displacement_routing_data.js';
+import { DISPLACEMENT_KILLED_FRACTION } from './displacement_loss_constants.js';
 import { computeFrontBreaches, type FrontBreach } from './front_breaches.js';
 import { LARGE_URBAN_MUN_IDS } from './large_urban_mun_data.js';
 import {
@@ -30,8 +31,7 @@ const BREACH_DISPLACEMENT_FRACTION = 0.03; // 3% per turn when breaches persist
 // Displacement routing constants (receiving cap from getReceivingCapacityFraction; Sarajevo lower)
 const LOST_POPULATION_FRACTION = 0.20; // 20% of displaced population becomes lost (when no 1991 census)
 
-// Ethnicity-based loss: when 1991 census is available
-const DISPLACEMENT_KILLED_FRACTION = 0.10; // 10% killed (all ethnicities)
+// Ethnicity-based loss: imported from displacement_loss_constants.ts (single source of truth)
 const FLEE_ABROAD_FRACTION_RS = 0.30; // Serbs: 30% of displaced leave BiH (Serbia to flee to)
 const FLEE_ABROAD_FRACTION_HRHB = 0.25; // Croats: 25% leave BiH (Croatia to flee to)
 const FLEE_ABROAD_FRACTION_RBIH = 0; // Bosniaks: no external state to flee to

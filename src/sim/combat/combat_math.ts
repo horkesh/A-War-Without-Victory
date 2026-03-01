@@ -46,10 +46,24 @@ export const MAX_RESILIENCE_STREAK = 4;
 export const RESILIENCE_PER_DEFENSE = 0.025;
 
 /** Minimum morale to resist retreat on costly_victory. */
-export const MORALE_RESIST_FLOOR = 70;
+const MORALE_RESIST_FLOOR = 70;
 
-export const BASE_ATTACKER_LOSS_RATE = 0.03;
-export const BASE_DEFENDER_LOSS_RATE = 0.015;
+/** Per-faction retreat resistance floors.
+ * RBiH: defending homes, no retreat option → lower threshold (holds more).
+ * RS: professional withdrawal discipline → standard threshold.
+ * HRHB: middle ground. */
+const FACTION_MORALE_RESIST_FLOOR: Record<string, number> = {
+    RBiH: 55,
+    RS: 70,
+    HRHB: 65,
+};
+
+export function getMoraleResistFloor(faction: string): number {
+    return FACTION_MORALE_RESIST_FLOOR[faction] ?? MORALE_RESIST_FLOOR;
+}
+
+export const BASE_ATTACKER_LOSS_RATE = 0.045;
+export const BASE_DEFENDER_LOSS_RATE = 0.02;
 export const MILITIA_DEFENSE_RATIO = 0.03;
 export const COORDINATION_PENALTY_2 = 0.9;
 export const COORDINATION_PENALTY_3PLUS = 0.8;

@@ -78,9 +78,9 @@ const UNDEFENDED_DEFENDER_CASUALTY_SCALE = 0.5;
 const MIN_UNDEFENDED_DEFENDER_CASUALTIES = 1;
 
 /** Casualty category fractions (must sum to 1). */
-const KIA_FRACTION = 0.25;
+const KIA_FRACTION = 0.30;
 const WIA_FRACTION = 0.55;
-// MIA = remainder (0.20)
+// MIA = remainder (0.15)
 
 /** Experience multiplier: floor + scale × experience. */
 const EXPERIENCE_MULT_BASE = 0.6;

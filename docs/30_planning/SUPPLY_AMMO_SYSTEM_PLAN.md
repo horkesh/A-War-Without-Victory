@@ -211,7 +211,7 @@ All constants are collected in a single file for calibration:
 **Scenario flag:** `supply_reserves_enabled: boolean` (default false). When false, all existing behavior is unchanged.
 
 **Files created/modified:**
-- `src/state/supply_reserve_constants.ts` — NEW: 15 constants for reserves, consumption, enclave resilience
+- `src/state/supply_reserve_constants.ts` — NEW: 25+ constants for reserves, consumption, siege, enclave resilience, hardening
 - `src/state/supply_reserves.ts` — NEW: `ensureSupplyReserves()`, `updateSupplyReserves()`, `deductCombatExpenditure()`, `getEffectiveSupplyState()`
 - `src/state/game_state.ts` — added `general_supply_reserve`, `heavy_munitions_reserve` fields; `supply_reserves_enabled` on StateMeta
 - `src/state/serializeGameState.ts` — added to allowlist
@@ -235,49 +235,57 @@ All constants are collected in a single file for calibration:
 - Cascade documentation in Engine Invariants §4 (deferred to canon update pass)
 - Canon: Systems Manual §14 addition (requires Architect sign-off)
 
-### Phase B: Siege Curve + Replenishment Wiring
+### Phase B: Siege Curve + Replenishment Wiring (COMPLETE 2026-03-02)
 
 **Goal:** Siege supply drain; patron aid and embargo wired to reserves; production facility condition changes affect income.
 
 **Depends on:** Phase A complete.
 
 **GameState changes:**
-- Add `siege_turn_counters: Record<string, number>` (OSID → consecutive critical turns)
-- Extend `ProductionFacilityState` with optional `damage_events` log
+- Added `siege_turn_counters: Record<string, number>` (key: `${factionId}:${osid}` → consecutive critical turns)
 
 **Pipeline changes:**
-- New step `update-siege-counters` (after supply OSID step): increment counters for critical OSIDs, reset for non-critical
-- Modified `compute-supply-reserves`: add siege expenditure channel; wire patron aid from `patron_state`; apply embargo reduction
-- Modified `update-heavy-equipment` or new step: facility damage from combat near facility OSID reduces `current_condition`
+- New step `update-siege-counters` (after `phase-ii-supply-osid`, before `compute-supply-reserves`): increment counters for critical OSIDs, reset for non-critical
+- Modified `compute-supply-reserves`: siege expenditure channel (escalating drain 70/30 general/heavy); patron aid from `patron_state.material_support_level`; embargo reduction (multiplicative cap from `embargo_profile`)
+- Facility damage in `attack_resolution_osid.ts`: `FACILITY_COMBAT_DAMAGE_RATE` (0.05) applied per battle to facilities in target OSID's municipality
 
-**Acceptance criteria:**
-1. Smoke-test triad passes
-2. Siege drain visible in 40w run: besieged enclaves show escalating supply pressure
-3. Patron aid differential: VRS/HVO with Serbian/Croatian patron support maintain higher reserves than under full embargo
-4. Facility capture: when OSID with production facility flips, controlling faction gains production
+**Files modified/created:**
+- `src/state/supply_reserves.ts` — `updateSiegeTurnCounters()`, siege/patron/embargo in `updateSupplyReserves()`
+- `src/state/supply_reserve_constants.ts` — added `PATRON_AID_GENERAL_FRACTION`, `PATRON_AID_HEAVY_FRACTION`, `FACILITY_COMBAT_DAMAGE_RATE`
+- `src/state/game_state.ts` — added `siege_turn_counters` field
+- `src/state/serializeGameState.ts` — added to allowlist
+- `src/sim/turn_phases/war_phases.ts` — `update-siege-counters` step + import
+- `src/sim/turn_pipeline_types.ts` — `SiegeTurnCounterReport` on TurnReport
+- `src/sim/combat/attack_resolution_osid.ts` — Part 6c facility damage
+- `tests/supply_reserves_phase_b.test.ts` — 12 tests
 
-### Phase C: Enclave Resilience + Hardening
+**Verification (n342):** tsc clean, 233 vitest pass, 87.4% OSID match (zero behavioral change; gated off). Report: `docs/40_reports/implemented/20260302_SUPPLY_SYSTEM_PHASE_B_C_IMPLEMENTATION.md`.
 
-**Goal:** Implement enclave resilience growth under isolation; hardening defense bonus. Unstub `updateEnclaveResilience()`.
+### Phase C: Enclave Resilience + Hardening (COMPLETE 2026-03-02)
+
+**Goal:** Implement enclave resilience growth under isolation; hardening defense bonus; exhaustion reduction for enclave faction.
 
 **Depends on:** Phase A complete (reserve + effective supply state).
 
 **GameState changes:**
-- Add `enclave_resilience: Record<string, EnclaveResilienceState>` (enclave_id → `{ resilience: number, hardening_active: boolean, isolation_turns: number }`)
+- `enclave_resilience` type changed from `Record<string, number>` to `Record<string, number | EnclaveResilienceEntry>` (backward compat with old saves)
+- New type `EnclaveResilienceEntry`: `{ resilience: number, isolation_turns: number, hardening_active: boolean }`
 
 **Pipeline changes:**
-- Existing step `phase-ii-enclave-resilience` (to be renamed `war-enclave-resilience`): implement actual resilience growth, hardening check, and modifier output
-- Modified exhaustion step: apply `exhaustion_modifier` from resilience in enclave OSIDs
-- Modified combat resolution: apply `HARDENING_DEFENSE_BONUS` to defender power in hardened enclave OSIDs
+- Existing step `phase-ii-enclave-resilience`: now implements actual resilience growth (critical: +2/turn, strained: +1/turn, adequate: -1/turn), isolation tracking, hardening check (`isolation_turns >= HARDENING_THRESHOLD`)
+- Modified exhaustion step (`exhaustion.ts`): enclave resilience reduces exhaustion growth by `resilience × RESILIENCE_EFFECT_SCALE` (max 30% at resilience 30). Only RBiH benefits.
+- `getEnclaveDefenseBonus()`: base `1.0 + resilience × 0.005` (max 1.15). Hardened: `× (1 + HARDENING_DEFENSE_BONUS)` = ×1.05. Max combined: 1.2075.
 
-**Acceptance criteria:**
-1. Smoke-test triad passes
-2. In 40w run: Bihać, Srebrenica, Goražde enclaves show resilience accumulation
-3. After 8+ turns isolated: hardening_active = true, visible defense bonus
-4. Resilience bounded at `MAX_ENCLAVE_RESILIENCE`
-5. Game Designer + Architect sign-off on formula and caps
+**Files modified/created:**
+- `src/sim/combat/enclave_resilience.ts` — shared constants, structured entries, hardening, `getMaxEnclaveResilienceForFaction()`, `readResilience()`
+- `src/sim/combat/exhaustion.ts` — enclave reduction after effectiveDelta
+- `src/state/supply_reserve_constants.ts` — 7 enclave constants (MAX_ENCLAVE_RESILIENCE, RESILIENCE_GROWTH_*, RESILIENCE_DECAY_ADEQUATE, RESILIENCE_EFFECT_SCALE, HARDENING_THRESHOLD, HARDENING_DEFENSE_BONUS)
+- `src/state/game_state.ts` — `EnclaveResilienceEntry` interface, union type on field
+- `tests/enclave_resilience_phase_c.test.ts` — 19 tests
 
-**Canon:** Recommend Systems Manual §14.4 or §16 addition for enclave resilience formula. Game Designer + Architect sign-off.
+**Verification (n342):** Same as Phase B. Report: `docs/40_reports/implemented/20260302_SUPPLY_SYSTEM_PHASE_B_C_IMPLEMENTATION.md`.
+
+**Canon:** Systems Manual §14.2 implementation-note added (2026-03-02).
 
 ### Phase D: Supply UX + Bot Enhancement
 

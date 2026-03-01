@@ -1,6 +1,6 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-01
+**Last Updated:** 2026-03-02
 **Status:** Post-MVP — Phase II calibration, GUI rework, Phase M complete
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
@@ -8905,3 +8905,34 @@ Determinism checks **MUST** be run:
 - **DESKTOP_GUI_IPC_CONTRACT.md** — Updated `query-corps-sectors` behavior description: splitting, caps, reserves, exempt corps
 
 **No uncertain references found.** All changes are structural (parameter values, mechanic descriptions).
+
+### Supply System Phase B+C — Implementation + Canon Propagation (2026-03-02)
+
+**What:** Implemented Phase B (siege curve + replenishment wiring) and Phase C (enclave resilience enhancement + hardening) of the supply reserves system. All gated by `supply_reserves_enabled` (default false). n342 verification: 87.4% OSID match (within 0.2pp of n335 baseline).
+
+**Code changes (10 source files, 2 new test files, +364 lines):**
+- `supply_reserve_constants.ts` — 10 new constants (25+ total)
+- `game_state.ts` — `EnclaveResilienceEntry` type, union `enclave_resilience` field, `siege_turn_counters` field
+- `serializeGameState.ts` — `siege_turn_counters` in allowlist
+- `supply_reserves.ts` — `updateSiegeTurnCounters()`, siege/patron/embargo in `updateSupplyReserves()`
+- `enclave_resilience.ts` — Shared constants, structured entries, hardening, `getMaxEnclaveResilienceForFaction()`
+- `exhaustion.ts` — Enclave exhaustion reduction (RBiH only, up to 30%)
+- `war_phases.ts` — `update-siege-counters` pipeline step
+- `attack_resolution_osid.ts` — Facility combat damage (0.05 per battle)
+- `turn_pipeline_types.ts` — `SiegeTurnCounterReport` import + field
+- Tests: `enclave_resilience_phase_c.test.ts` (19 tests), `supply_reserves_phase_b.test.ts` (12 tests)
+
+**Canon propagation (8 documents updated):**
+- **Systems Manual §14.2** — Added Phase B+C implementation-note (siege, patron, embargo, enclave hardening)
+- **Engine Invariants §4** — Added Phase B+C implementation-note (siege drain, facility damage, enclave hardening)
+- **War Specification §7** — Added Phase B+C implementation-note (pipeline step, siege, enclave)
+- **context.md** — Added Phase B+C completion entry
+- **REPO_MAP.md** — Updated supply reserve files: 14→25+ constants, added enclave/exhaustion refs
+- **PIPELINE_ENTRYPOINTS.md** — Added `update-siege-counters` step
+- **SUPPLY_DESIGN.md** — Added §2.7 Phase B+C completion note
+- **SUPPLY_IMPLEMENTATION_PLAN.md** — Added Phase B+C COMPLETE status
+- **SUPPLY_AMMO_SYSTEM_PLAN.md** — Marked Phase B and C as COMPLETE (updated earlier)
+
+**Verification:** tsc clean, 233 vitest pass, 40w scenario 87.4% (n342).
+**Report:** `docs/40_reports/implemented/20260302_SUPPLY_SYSTEM_PHASE_B_C_IMPLEMENTATION.md`
+**Decisions:** All Phase B+C mechanics gated behind existing `supply_reserves_enabled` flag. Union type `number | EnclaveResilienceEntry` for backward compatibility.

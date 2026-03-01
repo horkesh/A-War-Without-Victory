@@ -21,7 +21,7 @@ description: Owns militia spawning, brigade formation, militia pools, and format
 ### Flow (Phase I)
 
 1. **Militia emergence** (`src/sim/early_war/militia_emergence.ts`): Updates `phase_i_militia_strength` per (mun_id, faction) from `state.municipalities[munId].organizational_penetration`. RBiH: loyal=1, mixed=0.5, hostile=0; RS/HRHB: hostile=1, mixed=0.5, loyal=0. Declaration multiplier 1.5 if faction declared. When `op` is undefined, base strength is 0 for all factions.
-2. **Pool population** (`src/sim/early_war/pool_population.ts`): Builds `militia_pools` from `phase_i_militia_strength`. `available = floor(strength * POOL_SCALE_FACTOR)` with POOL_SCALE_FACTOR = 100. Does not decrease available; spawn step does. Displaced contribution adds to controlling faction's pool (REINFORCEMENT_RATE, DISPLACED_CONTRIBUTION_CAP).
+2. **Pool population** (`src/sim/early_war/pool_population.ts`): Builds `militia_pools` from `phase_i_militia_strength`. `available = floor(strength * POOL_SCALE_FACTOR)` with POOL_SCALE_FACTOR = 100. Does not decrease available; spawn step does. Displaced contribution adds to controlling faction's pool (REINFORCEMENT_RATE_ACUTE=0.04 first 8 weeks, REINFORCEMENT_RATE_SUSTAINED=0.01 after, DISPLACED_CONTRIBUTION_CAP=800). Also contains `applyCasualtyPoolExhaustion()` for battle-casualty → pool.exhausted feedback.
 3. **Formation spawn** (`src/sim/formation_spawn.ts`): Runs only when `formation_spawn_directive` is active (`isFormationSpawnDirectiveActive`). Spawns from pools with `pool.available >= batchSize` (1000). Respects `getMaxBrigadesPerMun`; deterministic naming. Scenario can set `formation_spawn_directive` (e.g. `{ kind: "both" }`) at init.
 
 ### Key constants and types
@@ -44,12 +44,12 @@ description: Owns militia spawning, brigade formation, militia pools, and format
 - **Peace (organizational penetration → War handoff):** `docs/10_canon/Peace_Specification_v0_6_0.md` — stability and organizational penetration; Peace investment feeds op used by militia emergence.
 
 **Engineering / design (implementation authority):**
-- **Militia and brigade system:** `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md` — pool semantics, RBiH 10% rule, spawn directive, constants (LARGE_SETTLEMENT_MUN_IDS, REINFORCEMENT_RATE, DISPLACED_CONTRIBUTION_CAP, etc.).
+- **Militia and brigade system:** `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md` — pool semantics, RBiH 10% rule, spawn directive, constants (LARGE_SETTLEMENT_MUN_IDS, REINFORCEMENT_RATE_ACUTE/SUSTAINED, DISPLACED_CONTRIBUTION_CAP, etc.).
 - **Canon alignment note:** `docs/40_reports/CANON_ALIGNMENT_MILITIA_BRIGADE_AND_LARGE_SETTLEMENT.md` (if present) — formation agency vs FORAWWV H2.4.
 
 **Code (exact paths):**
 - **Militia emergence (phase_i_militia_strength):** `src/sim/early_war/militia_emergence.ts` — computeMilitiaStrength, updateMilitiaEmergence; reads `state.municipalities[munId].organizational_penetration`.
-- **Pool population (militia_pools from strength):** `src/sim/early_war/pool_population.ts` — runPoolPopulation; POOL_SCALE_FACTOR (100), REINFORCEMENT_RATE, DISPLACED_CONTRIBUTION_CAP; key `mun_id:faction`.
+- **Pool population (militia_pools from strength):** `src/sim/early_war/pool_population.ts` — runPoolPopulation, applyCasualtyPoolExhaustion; POOL_SCALE_FACTOR (100), REINFORCEMENT_RATE_ACUTE (0.04), REINFORCEMENT_RATE_SUSTAINED (0.01), DISPLACED_CONTRIBUTION_CAP (800); key `mun_id:faction`.
 - **Formation spawn from pools:** `src/sim/formation_spawn.ts` — spawnFormationsFromPools, isFormationSpawnDirectiveActive; batchSize from caller; getMaxBrigadesPerMun.
 - **Turn pipeline (Phase I order):** `src/sim/turn_phases/war_phases.ts` (orchestrated by `src/sim/turn_pipeline.ts`) — phase-i-militia-emergence, phase-i-pool-population, phase-i-formation-spawn; spawn options (batchSize: 1000, formationKind from directive).
 - **State types:** `src/state/game_state.ts` — FormationState, MilitiaPoolState, FormationSpawnDirective, phase_i_militia_strength; `src/state/formation_constants.ts` — getMaxBrigadesPerMun; `src/state/militia_pool_key.ts` — militiaPoolKey.

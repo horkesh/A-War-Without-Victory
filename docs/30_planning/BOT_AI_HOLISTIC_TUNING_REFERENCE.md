@@ -106,8 +106,9 @@ Tune all three faction AIs and their starting parameters so that a 52-week scena
 | FACTION_POOL_SCALE.RS | 0.55 | Was 1.00->0.70->0.55. Targets ~80-90k end state |
 | FACTION_POOL_SCALE.HRHB | 1.60 | Unchanged. HVO at ~40-42k (on target) |
 | RS_JNA_INHERITANCE_BONUS | 15,000 | One-time pool bonus at init |
-| REINFORCEMENT_RATE | 0.01 | Displaced contribution rate per turn |
-| DISPLACED_CONTRIBUTION_CAP | 500 | Cap per mun per turn from displaced |
+| REINFORCEMENT_RATE_ACUTE | 0.04 | Displaced contribution rate per turn (first 8 weeks) |
+| REINFORCEMENT_RATE_SUSTAINED | 0.01 | Displaced contribution rate per turn (after 8 weeks) |
+| DISPLACED_CONTRIBUTION_CAP | 800 | Cap per mun per turn from displaced (was 500) |
 | ELIGIBLE_POP_NORMALIZER | 50,000 | Pool weight divisor |
 | RBIH_CROSS_ETHNIC_SHARE | 0.12 | Serbs/Croats contribute 12% to RBiH pool |
 
@@ -118,15 +119,15 @@ Tune all three faction AIs and their starting parameters so that a 52-week scena
 | ENTRENCHMENT_PER_TURN | 0.035 | |
 | MAX_RESILIENCE_STREAK | 4 | Tuned 6->4. Max bonus 1.10x |
 | RESILIENCE_PER_DEFENSE | 0.025 | Tuned 0.05->0.025 |
-| BASE_ATTACKER_LOSS_RATE | 0.03 | Tuned 0.04->0.06->0.03 |
-| BASE_DEFENDER_LOSS_RATE | 0.015 | Half of attacker rate |
+| BASE_ATTACKER_LOSS_RATE | 0.045 | Tuned 0.04->0.06->0.03->0.045 (Phase A) |
+| BASE_DEFENDER_LOSS_RATE | 0.02 | Tuned 0.015->0.02 (Phase A) |
 | MILITIA_DEFENSE_RATIO | 0.03 | Militia defense multiplier |
 | LINKED_ZOC_READINESS | 0.50 | Tuned 0.70->0.35->0.50. ZoC projection strength |
 | COORDINATION_PENALTY_2 | 0.9 | 2-brigade attack penalty |
 | COORDINATION_PENALTY_3PLUS | 0.8 | 3+ brigade attack penalty |
 | STACKING_DEFENDER_SUPPORT | 0.3 | Additional defender contribution |
-| KIA_FRACTION | 0.25 | Of total casualties |
-| WIA_FRACTION | 0.6 | Of total casualties |
+| KIA_FRACTION | 0.30 | Of total casualties (was 0.25, Phase A) |
+| WIA_FRACTION | 0.55 | Of total casualties (was 0.60, Phase A) |
 | MIA_FRACTION | 0.15 | Of total casualties |
 | EXPERIENCE_BASE | 0.6 | Green troops floor |
 | EXPERIENCE_SCALE | 0.4 | Max exp bonus |

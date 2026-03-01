@@ -1,7 +1,7 @@
 /**
  * OSID adjacency graph utilities.
  *
- * Extracted from zoc.ts — these are general-purpose OSID graph utilities
+ * General-purpose OSID graph utilities
  * used by supply, combat, sectors, column movement, and bot AI.
  *
  * Determinism: stable ordering (sorted neighbor lists); no randomness.

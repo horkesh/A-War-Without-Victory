@@ -36,7 +36,7 @@ import {
 // ── Shared combat math ──────────────────────────────────────────────────
 import {
     type CombatOutcome,
-    MORALE_RESIST_FLOOR,
+    getMoraleResistFloor,
     BASE_ATTACKER_LOSS_RATE,
     BASE_DEFENDER_LOSS_RATE,
     MILITIA_DEFENSE_RATIO,
@@ -216,7 +216,8 @@ export function predictCombatOutcome(
 
     // Morale resistance: downgrade costly_victory to stalemate if defender morale is high
     const defenderMorale = defenderFormation?.morale ?? 60;
-    if (predicted === 'costly_victory' && defenderMorale >= MORALE_RESIST_FLOOR) {
+    const defenderFactionId = defenderFormation?.faction as string ?? '';
+    if (predicted === 'costly_victory' && defenderMorale >= getMoraleResistFloor(defenderFactionId)) {
         predicted = 'stalemate';
     }
 

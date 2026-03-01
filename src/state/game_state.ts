@@ -819,6 +819,13 @@ export interface ProductionFacilityState {
     };
 }
 
+/** Phase C enclave resilience structured entry (backward-compat: old saves store bare number). */
+export interface EnclaveResilienceEntry {
+    resilience: number;         // [0, 30]
+    isolation_turns: number;    // consecutive turns critical or strained
+    hardening_active: boolean;  // true when isolation_turns >= HARDENING_THRESHOLD
+}
+
 export interface LegitimacyState {
     legitimacy_score: number; // 0..1
     demographic_legitimacy: number; // 0..1
@@ -1235,12 +1242,11 @@ export interface GameState {
     war_exhaustion?: Record<FactionId, number>;
     /** Optional local (per-settlement) exhaustion accumulator; monotonic when present. */
     war_exhaustion_local?: Record<SettlementId, number>;
-    /** Enclave resilience values [0, 30] per enclave ID. Grows under isolation, provides defense/cohesion bonus. */
-    enclave_resilience?: Record<string, number>;
-    /** OSID list in enemy ZoC per faction (for ZoC overlay). Set by zoc-computation when operational data present. */
-    war_enemy_zoc_by_faction?: Record<FactionId, string[]>;
-    /** Linked ZoC per faction: OSIDs that form a connected front between 2+ friendly brigades. Enemies cannot enter. */
-    war_linked_zoc_by_faction?: Record<FactionId, string[]>;
+    /** Enclave resilience per enclave ID. Phase C: EnclaveResilienceEntry; old saves: bare number. */
+    enclave_resilience?: Record<string, number | EnclaveResilienceEntry>;
+    /** Consecutive critical-supply turns per faction:OSID. Key: `${factionId}:${osid}`. Phase B siege. */
+    siege_turn_counters?: Record<string, number>;
+
 
     // --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
     /** General supply reserves per faction [0..100]. Consumed by maintenance; replenished by facilities/patron. */

@@ -76,41 +76,8 @@ export const MIN_ELIGIBLE_POPULATION_FOR_BRIGADE = 500;
 /** Brigade can grow from pool up to this size; only then do we form a second brigade (if pool still has ≥ MIN_BRIGADE_SPAWN). Tuned for historical personnel band (~3k per brigade at full strength). */
 export const MAX_BRIGADE_PERSONNEL = 3_000;
 
-/**
- * Phase II hard operational frontage cap (settlements) per brigade.
- * ZoC coverage may exceed this, but only this many settlements are treated as actively
- * covered by a brigade for garrison/pressure/attack computations each turn.
- */
-export const BRIGADE_OPERATIONAL_ZOC_HARD_CAP = 48;
-
-/** Personnel per settlement slot for settlement-level ZoC (Brigade AoR Redesign). 400 → max 1–4 settlements. */
-export const PERSONNEL_PER_ZOC_SETTLEMENT = 400;
-
-/** Maximum ZoC settlements per brigade regardless of personnel (Brigade AoR Redesign). */
-export const MAX_ZOC_SETTLEMENTS = 4;
-
-/** Minimum ZoC settlements per brigade (Brigade AoR Redesign). */
-export const MIN_ZOC_SETTLEMENTS = 1;
-
-/**
- * Personnel-based ZoC cap: max settlements a brigade can cover.
- * Formula: min(4, max(1, floor(personnel / 400))). Deterministic.
- */
-export function getPersonnelBasedZoCCap(personnel: number): number {
-    const n = Math.floor(personnel / PERSONNEL_PER_ZOC_SETTLEMENT);
-    return Math.min(MAX_ZOC_SETTLEMENTS, Math.max(MIN_ZOC_SETTLEMENTS, n));
-}
-
-/**
- * Effective ZoC cap for a brigade: uses player/bot desired cap (1–4) when set, else personnel-based.
- * Convene: ORCHESTRATOR_THREE_WORKSTREAMS_3D_ICONS_AOR_BRIGADE_CAP_2026_02_20.
- */
-export function getEffectiveZoCCap(personnel: number, desiredCap: number | null | undefined): number {
-    if (typeof desiredCap === 'number' && desiredCap >= MIN_ZOC_SETTLEMENTS && desiredCap <= MAX_ZOC_SETTLEMENTS) {
-        return Math.floor(desiredCap);
-    }
-    return getPersonnelBasedZoCCap(personnel);
-}
+/** Phase II hard operational frontage cap (settlements) per brigade. */
+export const BRIGADE_OPERATIONAL_FRONTAGE_CAP = 48;
 
 // --- Militia garrison (Brigade AoR Redesign Phase B) ---
 /** Militia cohesion for combat power (low vs brigade 60+). */

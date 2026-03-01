@@ -44,6 +44,32 @@ export const PRODUCTION_GENERAL_FRACTION = 0.6;
 /** Fraction of total production income allocated to heavy munitions. */
 export const PRODUCTION_HEAVY_FRACTION = 0.4;
 
+// ── Replenishment: Patron Aid Split ──────────────────────────────────────────
+/** Fraction of patron aid income allocated to general supply. */
+export const PATRON_AID_GENERAL_FRACTION = 0.5;
+/** Fraction of patron aid income allocated to heavy munitions. */
+export const PATRON_AID_HEAVY_FRACTION = 0.5;
+
+// ── Facility Damage ─────────────────────────────────────────────────────────
+/** Condition loss per battle occurring in the facility's municipality. */
+export const FACILITY_COMBAT_DAMAGE_RATE = 0.05;
+
+// ── Enclave Resilience ──────────────────────────────────────────────────────
+/** Maximum enclave resilience value. */
+export const MAX_ENCLAVE_RESILIENCE = 30;
+/** Resilience growth per turn when enclave supply is critical. */
+export const RESILIENCE_GROWTH_CRITICAL = 2;
+/** Resilience growth per turn when enclave supply is strained. */
+export const RESILIENCE_GROWTH_STRAINED = 1;
+/** Resilience decay per turn when enclave has adequate supply (no longer besieged). */
+export const RESILIENCE_DECAY_ADEQUATE = 1;
+/** Exhaustion reduction per resilience point (multiplicative). */
+export const RESILIENCE_EFFECT_SCALE = 0.01;
+/** Consecutive isolation turns needed to activate hardening. */
+export const HARDENING_THRESHOLD = 8;
+/** Defense bonus multiplier when hardened (+5%). */
+export const HARDENING_DEFENSE_BONUS = 0.05;
+
 // ── Init Values ──────────────────────────────────────────────────────────────
 /** Default starting general supply reserve per faction. */
 export const INIT_GENERAL_SUPPLY_RESERVE = 80;

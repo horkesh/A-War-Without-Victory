@@ -67,6 +67,7 @@ import { runFormationHqRelocation } from '../formation_hq_relocation.js';
 import { ensureRbihHrhbState, updateAllianceValue } from '../early_war/alliance_update.js';
 import { checkAndApplyCeasefire } from '../early_war/bilateral_ceasefire.js';
 import { buildSettlementsByMun } from '../early_war/control_strain.js';
+import { applyCasualtyPoolExhaustion } from '../early_war/pool_population.js';
 import { checkAndApplyWashington } from '../early_war/washington_agreement.js';
 import { updateMixedMunicipalitiesList } from '../early_war/mixed_municipality.js';
 import { checkAndApplyOperationStorm } from '../combat/operation_storm.js';
@@ -94,8 +95,6 @@ import { buildDisplacementCapacityReport } from '../displacement_pipeline/displa
 import { aggregateSettlementDisplacementToMunicipalities } from '../displacement_pipeline/displacement_municipality_aggregation.js';
 import { evaluateDisplacementTriggers } from '../displacement_pipeline/displacement_triggers.js';
 import { applyBrigadeRepositionOrders } from '../combat/apply_brigade_reposition.js';
-import { computeZoCState } from '../combat/zoc.js';
-import { applyZocConstrainedMovement } from '../combat/zoc_constrained_movement.js';
 import { generateAllBotOrdersOsid, computeOsidEthnicComposition, type OsidBotContext } from '../combat/bot_brigade_ai_osid.js';
 import { generateAllCorpsOrders, extractCorpsAiReport, type CorpsAiReportEntry } from '../combat/bot_corps_ai.js';
 import { processBrigadeMovement } from '../combat/brigade_movement.js';
@@ -110,6 +109,7 @@ import { updatePhaseIIExhaustion } from '../combat/exhaustion.js';
 import { detectPhaseIIFronts } from '../combat/front_emergence.js';
 import { buildLocalFronts } from '../combat/local_front_defense.js';
 import { buildCorpsFrontSectors } from '../combat/corps_front_sectors.js';
+import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults } from '../combat/sector_offensive.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from '../combat/operational_groups.js';
@@ -120,7 +120,7 @@ import { resolveAttackOrdersOsid } from '../combat/attack_resolution_osid.js';
 import { applyBrigadeMovementOrders } from '../combat/brigade_movement_orders.js';
 import { processOsidColumnMovement, type OsidColumnMovementReport } from '../combat/osid_column_movement.js';
 import { updatePhaseIISupplyPressure } from '../combat/supply_pressure.js';
-import { updateSupplyReserves } from '../../state/supply_reserves.js';
+import { updateSupplyReserves, updateSiegeTurnCounters } from '../../state/supply_reserves.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 
 // --- Pipeline infrastructure imports ---
@@ -299,7 +299,7 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'zoc-computation',
+        name: 'load-operational-data',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
@@ -308,24 +308,10 @@ export const warPhases: NamedPhase[] = [
                     loadOperationalData(baseDir || undefined),
                     loadOperationalEdges(baseDir || undefined)
                 ]);
-                const zocState = computeZoCState(context.state, edges, opData.operationalToCanonical);
-                setOperationalData(context, { opData, edges, zocState });
-                const factionIds = (context.state.factions ?? []).map(f => f.id).sort(strictCompare) as FactionId[];
-                const enemyZocByFaction: Record<string, string[]> = {};
-                for (const fid of factionIds) {
-                    const set = zocState.enemyZocByFaction.get(fid);
-                    enemyZocByFaction[fid] = set ? [...set].sort(strictCompare) : [];
-                }
-                context.state.war_enemy_zoc_by_faction = enemyZocByFaction;
-                const linkedZocByFaction: Record<string, string[]> = {};
-                for (const fid of factionIds) {
-                    const set = zocState.linkedZocByFaction.get(fid);
-                    linkedZocByFaction[fid] = set ? [...set].sort(strictCompare) : [];
-                }
-                context.state.war_linked_zoc_by_faction = linkedZocByFaction;
+                setOperationalData(context, { opData, edges });
             } catch (err) {
                 if (typeof console !== 'undefined' && console.warn) {
-                    console.warn('ZoC/computation: operational data not available, skipping OSID steps:', err instanceof Error ? err.message : String(err));
+                    console.warn('load-operational-data: operational data not available, skipping OSID steps:', err instanceof Error ? err.message : String(err));
                 }
             }
         }
@@ -347,6 +333,15 @@ export const warPhases: NamedPhase[] = [
             if (context.report.supply_resolution) {
                 context.report.supply_resolution.supply_state_by_osid = supplyStateByOsid;
             }
+        }
+    },
+    {
+        name: 'update-siege-counters',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (!context.state.meta.supply_reserves_enabled) return;
+            const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
+            context.report.siege_turn_counters = updateSiegeTurnCounters(context.state, supplyByOsid);
         }
     },
     {
@@ -388,14 +383,13 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'zoc-constrained-movement',
+        name: 'apply-brigade-movement',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
-            const linkedZocByFaction = od?.zocState?.linkedZocByFaction;
-            const report = applyZocConstrainedMovement(context.state, od.edges, od.opData.operationalToCanonical, linkedZocByFaction);
-            (context.report as TurnReport & { phase_ii_zoc_movement?: typeof report }).phase_ii_zoc_movement = report;
+            const report = applyBrigadeMovementOrders(context.state, od.edges, od.opData.operationalToCanonical);
+            (context.report as TurnReport & { phase_ii_movement?: typeof report }).phase_ii_movement = report;
         }
     },
     {
@@ -695,6 +689,57 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'apply-casualty-pool-exhaustion',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const osidReport = context.report.phase_ii_attack_resolution_osid;
+            if (!osidReport?.battles?.length) return;
+            // Approximate per-formation battle casualties from the report.
+            // Uses the same loss rates and outcome modifiers as attack_resolution_osid.
+            // Not exact (personnel already reduced), but close enough for pool exhaustion.
+            const KIA_FRAC = 0.30;
+            const WIA_FRAC = 0.55;
+            const ATK_RATE = 0.045;
+            const DEF_RATE = 0.02;
+            const ATK_MOD: Record<string, number> = {
+                decisive_victory: 1.0, victory: 1.2, costly_victory: 1.8,
+                stalemate: 1.0, repulsed: 2.0, catastrophic: 3.0
+            };
+            const DEF_MOD: Record<string, number> = {
+                decisive_victory: 2.5, victory: 1.8, costly_victory: 1.2,
+                stalemate: 0.8, repulsed: 0.5, catastrophic: 0.3
+            };
+            const battleCasualties: Array<{ formation_id: string; faction: string; killed: number; missing_captured: number }> = [];
+            for (const battle of osidReport.battles) {
+                const attP = context.state.formations?.[battle.attacker_brigade]?.personnel ?? 0;
+                const attCas = Math.round(attP * ATK_RATE * (ATK_MOD[battle.outcome] ?? 1.0));
+                if (attCas > 0) {
+                    battleCasualties.push({
+                        formation_id: battle.attacker_brigade,
+                        faction: battle.attacker_faction,
+                        killed: Math.floor(attCas * KIA_FRAC),
+                        missing_captured: Math.max(0, attCas - Math.floor(attCas * KIA_FRAC) - Math.floor(attCas * WIA_FRAC))
+                    });
+                }
+                if (battle.defender_brigade) {
+                    const defP = context.state.formations?.[battle.defender_brigade]?.personnel ?? 0;
+                    const defCas = Math.round(defP * DEF_RATE * (DEF_MOD[battle.outcome] ?? 1.0));
+                    if (defCas > 0) {
+                        battleCasualties.push({
+                            formation_id: battle.defender_brigade,
+                            faction: battle.defender_faction,
+                            killed: Math.floor(defCas * KIA_FRAC),
+                            missing_captured: Math.max(0, defCas - Math.floor(defCas * KIA_FRAC) - Math.floor(defCas * WIA_FRAC))
+                        });
+                    }
+                }
+            }
+            if (battleCasualties.length > 0) {
+                applyCasualtyPoolExhaustion(context.state, battleCasualties);
+            }
+        }
+    },
+    {
         name: 'phase-ii-cohesion-drift',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -709,6 +754,16 @@ export const warPhases: NamedPhase[] = [
             const engagedIds = context.report.phase_ii_attack_resolution_osid?.engaged_formation_ids ?? [];
             context.report.phase_ii_morale_drift = runPhaseIIMoraleDrift(
                 context.state, engagedIds, context.input.municipalityPopulation1991,
+                context.report.supply_resolution?.supply_state_by_osid
+            );
+        }
+    },
+    {
+        name: 'apply-frontline-attrition',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            context.report.frontline_attrition = applyFrontlineAttrition(
+                context.state,
                 context.report.supply_resolution?.supply_state_by_osid
             );
         }

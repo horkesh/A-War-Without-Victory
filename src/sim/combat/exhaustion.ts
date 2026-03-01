@@ -7,7 +7,9 @@ import { EXHAUSTION_LEGITIMACY_MULTIPLIER } from '../../state/exhaustion.js';
 import type { FactionId, GameState, PhaseIIFrontDescriptor } from '../../state/game_state.js';
 import { getFactionLegitimacyAverages } from '../../state/legitimacy.js';
 import { getExhaustionExternalModifier } from '../../state/patron_pressure.js';
+import { RESILIENCE_EFFECT_SCALE } from '../../state/supply_reserve_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { getMaxEnclaveResilienceForFaction } from './enclave_resilience.js';
 
 /** Exhaustion per static front (Engine Invariants §6, §8). */
 const EXHAUSTION_PER_STATIC_FRONT = 2;
@@ -65,7 +67,11 @@ export function updatePhaseIIExhaustion(
                         : 0
                 : 0;
         const effectiveDelta = Math.min(MAX_DELTA_PER_TURN, delta * multiplier * (1 + externalMod + legitimacyMod) + sarajevoExtra);
-        exhaustion[fid] = current + effectiveDelta;
+        // Phase C: enclave resilience reduces exhaustion growth (only RBiH has enclaves)
+        const enclaveResilience = getMaxEnclaveResilienceForFaction(state, fid as FactionId);
+        const enclaveReduction = enclaveResilience * RESILIENCE_EFFECT_SCALE;
+        const finalDelta = effectiveDelta * Math.max(0, 1.0 - enclaveReduction);
+        exhaustion[fid] = current + finalDelta;
     }
 }
 

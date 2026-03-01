@@ -28,11 +28,16 @@ export { buildSettlementsByMun, getMunicipalityController };
 /** Scale war_militia_strength [0,100] to pool available (integer).
  * Raised for long-horizon (52w/104w) personnel growth calibration while keeping deterministic flow. */
 const POOL_SCALE_FACTOR = 65;
-/** Displaced_in contribution rate per turn. At 0.05, entire displaced pop mobilized in 20 turns — unrealistic.
+/** Displaced_in contribution rate per turn (acute phase: first 8 weeks of war).
+ * Higher rate reflects urgent mobilization of newly displaced military-age men. */
+const REINFORCEMENT_RATE_ACUTE = 0.04;
+/** Displaced_in contribution rate per turn (sustained phase: after 8 weeks).
  * At 0.01, ~50% mobilized over 52 turns which is still generous but tracks "total war" mobilization. */
-const REINFORCEMENT_RATE = 0.01;
-/** Cap per mun per turn from displaced. Reduced from 2000 to prevent Tuzla-style runaway. */
-const DISPLACED_CONTRIBUTION_CAP = 500;
+const REINFORCEMENT_RATE_SUSTAINED = 0.01;
+/** Number of weeks the acute displacement mobilization rate applies. */
+const ACUTE_DISPLACEMENT_WEEKS = 8;
+/** Cap per mun per turn from displaced. Raised from 500 to allow acute-phase surge. */
+const DISPLACED_CONTRIBUTION_CAP = 800;
 
 /** When population1991 is used, pool is weighted by eligible pop / this normalizer (no cap). Aim: ARBiH ~80–100 brigades at batchSize 1000. */
 const ELIGIBLE_POP_NORMALIZER = 50_000;
@@ -187,6 +192,10 @@ export function runDisplacedAndCrossEthnicContributions(
     }
     const pools = state.militia_pools as Record<string, MilitiaPoolState>;
     const currentTurn = state.meta.turn;
+    // Acute vs sustained displacement mobilization rate (global heuristic)
+    const reinforcementRate = currentTurn <= ACUTE_DISPLACEMENT_WEEKS
+        ? REINFORCEMENT_RATE_ACUTE
+        : REINFORCEMENT_RATE_SUSTAINED;
     const municipalities = state.municipalities ?? {};
     const munIds = (Object.keys(municipalities) as MunicipalityId[]).slice().sort(strictCompare);
     const settlementsByMun = buildSettlementsByMun(settlements);
@@ -204,7 +213,7 @@ export function runDisplacedAndCrossEthnicContributions(
                 const displacedForFaction = byFaction[factionId];
                 if (displacedForFaction == null || displacedForFaction <= 0) continue;
                 const contribution = Math.min(
-                    Math.floor(displacedForFaction * REINFORCEMENT_RATE),
+                    Math.floor(displacedForFaction * reinforcementRate),
                     DISPLACED_CONTRIBUTION_CAP
                 );
                 if (contribution <= 0) continue;
@@ -230,7 +239,7 @@ export function runDisplacedAndCrossEthnicContributions(
             const controller = getMunicipalityController(state, sids, munId);
             if (!controller) continue;
             const contribution = Math.min(
-                Math.floor(disp.displaced_in * REINFORCEMENT_RATE),
+                Math.floor(disp.displaced_in * reinforcementRate),
                 DISPLACED_CONTRIBUTION_CAP
             );
             if (contribution <= 0) continue;
@@ -387,6 +396,55 @@ export function runPoolPopulation(
     const displacedReport = runDisplacedAndCrossEthnicContributions(state, settlements, population1991ByMun);
     report.displaced_contributions = displacedReport.displaced_contributions;
     if (displacedReport.rbih_10pct_additions != null) report.rbih_10pct_additions = displacedReport.rbih_10pct_additions;
+
+    return report;
+}
+
+export interface CasualtyPoolExhaustionReport {
+    formations_processed: number;
+    total_exhaustion_added: number;
+    by_faction: Record<string, number>;
+}
+
+/**
+ * Apply casualty-driven pool exhaustion: killed + missing_captured from battle
+ * casualties feed back into the origin municipality's pool.exhausted.
+ * This ensures the exhaustion gating in ongoing_mobilization activates when
+ * a municipality's demographic base is being consumed by combat losses.
+ *
+ * Deterministic: sorted formation IDs.
+ */
+export function applyCasualtyPoolExhaustion(
+    state: GameState,
+    battleCasualties: Array<{ formation_id: string; faction: string; killed: number; missing_captured: number }>
+): CasualtyPoolExhaustionReport {
+    const report: CasualtyPoolExhaustionReport = {
+        formations_processed: 0,
+        total_exhaustion_added: 0,
+        by_faction: {}
+    };
+
+    if (!state.militia_pools || typeof state.militia_pools !== 'object') return report;
+    const pools = state.militia_pools as Record<string, MilitiaPoolState>;
+
+    for (const cas of battleCasualties) {
+        const formation = state.formations?.[cas.formation_id];
+        if (!formation) continue;
+        const originMun = formation.origin_mun;
+        if (!originMun) continue;
+
+        const permanentLoss = cas.killed + cas.missing_captured;
+        if (permanentLoss <= 0) continue;
+
+        const key = militiaPoolKey(originMun, cas.faction);
+        const pool = pools[key];
+        if (!pool) continue;
+
+        pool.exhausted = (pool.exhausted ?? 0) + permanentLoss;
+        report.formations_processed += 1;
+        report.total_exhaustion_added += permanentLoss;
+        report.by_faction[cas.faction] = (report.by_faction[cas.faction] ?? 0) + permanentLoss;
+    }
 
     return report;
 }

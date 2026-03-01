@@ -274,7 +274,7 @@ When per-municipality routing is exhausted or no route is defined:
 
 | Constant | Value | Meaning |
 |----------|-------|---------|
-| `DISPLACEMENT_KILLED_FRACTION` | 0.10 | 10% of displaced killed (all ethnicities) |
+| `DISPLACEMENT_KILLED_FRACTION` | 0.04 | 4% of displaced killed (all ethnicities). Was 0.10, reduced in Phase A calibration (n343). |
 | `FLEE_ABROAD_FRACTION_RS` | 0.30 | 30% of surviving displaced Serbs leave BiH |
 | `FLEE_ABROAD_FRACTION_HRHB` | 0.25 | 25% of surviving displaced Croats leave BiH |
 | `FLEE_ABROAD_FRACTION_RBIH` | 0.00 | Bosniaks have no external state to flee to |
@@ -458,10 +458,11 @@ When displaced people are routed to a destination municipality, a fraction enter
 
 | Constant | Value | Meaning |
 |----------|-------|---------|
-| `REINFORCEMENT_RATE` | 0.05 | 5% of routed displaced become militia manpower |
-| `DISPLACED_CONTRIBUTION_CAP` | 2000 | Maximum contribution per routing event |
+| `REINFORCEMENT_RATE_ACUTE` | 0.04 | 4% of routed displaced become militia manpower (first 8 weeks) |
+| `REINFORCEMENT_RATE_SUSTAINED` | 0.01 | 1% (after 8 weeks) |
+| `DISPLACED_CONTRIBUTION_CAP` | 800 | Maximum contribution per mun per turn from displaced |
 
-**Calculation:** `contribution = min(floor(routedAmount × 0.05), 2000)`
+**Calculation:** `contribution = min(floor(routedAmount × rate), 800)` where rate depends on war week (acute vs sustained phase)
 
 Added to `state.militia_pools[poolKey].available` where `poolKey = militiaPoolKey(targetMun, faction)`.
 

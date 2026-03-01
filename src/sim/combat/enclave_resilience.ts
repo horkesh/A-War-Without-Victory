@@ -1,5 +1,5 @@
 /**
- * B4: Enclave resilience system.
+ * B4 + Phase C: Enclave resilience system.
  *
  * Known enclaves that historically held despite isolation:
  * - Bihać pocket (5th Corps, 1992-1995)
@@ -9,9 +9,11 @@
  * - Sarajevo (besieged 1992-1996, never fell)
  *
  * Mechanics:
- * - Resilience value [0, 30] per enclave, grows under isolation, decays under adequate supply.
- * - Defense bonus: 1.0 + resilience × 0.005 (max 1.15 = +15% at 30).
+ * - Resilience value [0, MAX_ENCLAVE_RESILIENCE] per enclave, grows under isolation, decays under adequate supply.
+ * - Defense bonus: 1.0 + resilience × 0.005 (max 1.15 = +15% at 30). Hardened: × (1 + HARDENING_DEFENSE_BONUS).
  * - Cohesion recovery: +1/turn per 10 resilience (max +3/turn at 30).
+ * - Hardening: after HARDENING_THRESHOLD consecutive isolation turns, defense bonus boosted.
+ * - Exhaustion reduction: up to MAX_ENCLAVE_RESILIENCE × RESILIENCE_EFFECT_SCALE (30%) for faction with enclaves.
  *
  * Historical rationale: Besieged populations adapted — smuggling, local production
  * (Zenica steelworks ammunition), tunnel construction (Sarajevo), defensive expertise.
@@ -19,8 +21,16 @@
  * Deterministic: sorted iteration, pure arithmetic.
  */
 
-import type { FactionId, GameState } from '../../state/game_state.js';
+import type { EnclaveResilienceEntry, FactionId, GameState } from '../../state/game_state.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
+import {
+    HARDENING_DEFENSE_BONUS,
+    HARDENING_THRESHOLD,
+    MAX_ENCLAVE_RESILIENCE,
+    RESILIENCE_DECAY_ADEQUATE,
+    RESILIENCE_GROWTH_CRITICAL,
+    RESILIENCE_GROWTH_STRAINED,
+} from '../../state/supply_reserve_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // ── Enclave definitions ─────────────────────────────────────────────────────
@@ -64,19 +74,21 @@ const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
     }
 ] as const;
 
-/** Maximum resilience value. */
-const MAX_RESILIENCE = 30;
-
-/** Resilience growth per turn when enclave is critical supply. */
-const RESILIENCE_GROWTH_CRITICAL = 2;
-
-/** Resilience growth per turn when enclave is strained supply. */
-const RESILIENCE_GROWTH_STRAINED = 1;
-
-/** Resilience decay per turn when enclave has adequate supply (no longer besieged). */
-const RESILIENCE_DECAY_ADEQUATE = -1;
-
 // ── Helpers ─────────────────────────────────────────────────────────────────
+
+/** Extract resilience number from a bare number or structured EnclaveResilienceEntry. */
+export function readResilience(entry: number | EnclaveResilienceEntry | undefined): number {
+    if (entry === undefined) return 0;
+    if (typeof entry === 'number') return entry;
+    return entry.resilience;
+}
+
+/** Extract full structured entry, migrating bare number if needed. */
+function readEntry(entry: number | EnclaveResilienceEntry | undefined): EnclaveResilienceEntry {
+    if (entry === undefined) return { resilience: 0, isolation_turns: 0, hardening_active: false };
+    if (typeof entry === 'number') return { resilience: entry, isolation_turns: 0, hardening_active: false };
+    return entry;
+}
 
 /** Check if an OSID belongs to an enclave. */
 function osidBelongsToEnclave(osid: string, enclave: EnclaveDefinition): boolean {
@@ -119,13 +131,19 @@ function getEnclaveSupplyState(
 
 export interface EnclaveResilienceReport {
     enclaves_updated: number;
-    by_enclave: Record<string, { resilience: number; supply_state: string; delta: number }>;
+    by_enclave: Record<string, {
+        resilience: number;
+        supply_state: string;
+        delta: number;
+        isolation_turns: number;
+        hardening_active: boolean;
+    }>;
 }
 
 /**
  * Update enclave resilience values based on supply state.
  * Pipeline step: runs after supply-osid derivation.
- * Mutates state.enclave_resilience.
+ * Mutates state.enclave_resilience. Stores EnclaveResilienceEntry per enclave.
  */
 export function updateEnclaveResilience(
     state: GameState,
@@ -134,33 +152,51 @@ export function updateEnclaveResilience(
     const report: EnclaveResilienceReport = { enclaves_updated: 0, by_enclave: {} };
 
     if (!state.enclave_resilience) {
-        (state as GameState & { enclave_resilience: Record<string, number> }).enclave_resilience = {};
+        (state as GameState & { enclave_resilience: Record<string, number | EnclaveResilienceEntry> }).enclave_resilience = {};
     }
     const resilience = state.enclave_resilience!;
 
     const sortedEnclaves = [...ENCLAVE_DEFINITIONS].sort((a, b) => strictCompare(a.id, b.id));
 
     for (const enclave of sortedEnclaves) {
-        const current = typeof resilience[enclave.id] === 'number' ? resilience[enclave.id]! : 0;
+        const current = readEntry(resilience[enclave.id]);
         const supplyState = getEnclaveSupplyState(enclave, supplyByOsid);
 
         let delta: number;
+        let isolated: boolean;
         switch (supplyState) {
             case 'critical':
                 delta = RESILIENCE_GROWTH_CRITICAL;
+                isolated = true;
                 break;
             case 'strained':
                 delta = RESILIENCE_GROWTH_STRAINED;
+                isolated = true;
                 break;
             default:
-                delta = RESILIENCE_DECAY_ADEQUATE;
+                delta = -RESILIENCE_DECAY_ADEQUATE;
+                isolated = false;
                 break;
         }
 
-        const next = Math.max(0, Math.min(MAX_RESILIENCE, current + delta));
-        resilience[enclave.id] = next;
+        const nextResilience = Math.max(0, Math.min(MAX_ENCLAVE_RESILIENCE, current.resilience + delta));
+        const nextIsolation = isolated ? current.isolation_turns + 1 : 0;
+        const nextHardening = nextIsolation >= HARDENING_THRESHOLD;
+
+        const entry: EnclaveResilienceEntry = {
+            resilience: nextResilience,
+            isolation_turns: nextIsolation,
+            hardening_active: nextHardening,
+        };
+        resilience[enclave.id] = entry;
         report.enclaves_updated++;
-        report.by_enclave[enclave.id] = { resilience: next, supply_state: supplyState, delta };
+        report.by_enclave[enclave.id] = {
+            resilience: nextResilience,
+            supply_state: supplyState,
+            delta,
+            isolation_turns: nextIsolation,
+            hardening_active: nextHardening,
+        };
     }
 
     return report;
@@ -168,7 +204,8 @@ export function updateEnclaveResilience(
 
 /**
  * Get defense bonus multiplier for an OSID based on enclave resilience.
- * Returns 1.0 (no bonus) if OSID is not in an enclave, or 1.0 + resilience × 0.005 (max 1.15).
+ * Base: 1.0 + resilience × 0.005 (max 1.15 at 30).
+ * Hardened: × (1.0 + HARDENING_DEFENSE_BONUS) = ×1.05. Max combined: 1.2075.
  * Used in attack_resolution_osid.ts to boost defender power.
  */
 export function getEnclaveDefenseBonus(state: GameState, osid: string): number {
@@ -177,8 +214,9 @@ export function getEnclaveDefenseBonus(state: GameState, osid: string): number {
 
     for (const enclave of ENCLAVE_DEFINITIONS) {
         if (osidBelongsToEnclave(osid, enclave)) {
-            const val = typeof resilience[enclave.id] === 'number' ? resilience[enclave.id]! : 0;
-            return 1.0 + val * 0.005; // Max: 1.0 + 30 * 0.005 = 1.15
+            const entry = readEntry(resilience[enclave.id]);
+            const base = 1.0 + entry.resilience * 0.005; // Max: 1.0 + 30 * 0.005 = 1.15
+            return entry.hardening_active ? base * (1.0 + HARDENING_DEFENSE_BONUS) : base;
         }
     }
     return 1.0;
@@ -196,9 +234,27 @@ export function getEnclaveCohesionRecovery(state: GameState, osid: string | unde
 
     for (const enclave of ENCLAVE_DEFINITIONS) {
         if (osidBelongsToEnclave(osid, enclave)) {
-            const val = typeof resilience[enclave.id] === 'number' ? resilience[enclave.id]! : 0;
+            const val = readResilience(resilience[enclave.id]);
             return Math.floor(val / 10); // 0, 1, 2, or 3
         }
     }
     return 0;
+}
+
+/**
+ * Get max enclave resilience across all enclaves for a faction.
+ * Used by exhaustion system: higher enclave resilience reduces exhaustion growth.
+ * Only RBiH has enclaves → only RBiH benefits.
+ */
+export function getMaxEnclaveResilienceForFaction(state: GameState, factionId: FactionId): number {
+    const resilience = state.enclave_resilience;
+    if (!resilience) return 0;
+
+    let max = 0;
+    for (const enclave of ENCLAVE_DEFINITIONS) {
+        if (enclave.faction !== factionId) continue;
+        const val = readResilience(resilience[enclave.id]);
+        if (val > max) max = val;
+    }
+    return max;
 }

@@ -1,8 +1,10 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for Phase II 40w calibration (April 1992 → January 1993).
-**Updated:** 2026-03-01
+**Updated:** 2026-03-02
 **Canonical target run:** n335 (`apr1992_definitive_40w__205b3676c8fe3ce4__w40_n335`)
+**Latest calibration run:** n343 (86.3%, Phase A calibration overhaul — 6 constant/wiring changes: civilian kill fraction, battle lethality, per-faction retreat resistance, displaced militia rate, pool exhaustion, frontline attrition. See `docs/40_reports/implemented/20260302_PHASE_A_CALIBRATION_OVERHAUL.md`.)
+**Previous verification run:** n342 (87.4%, post-Phase B+C, gated off — zero behavioral change from supply code; minor drift from linter-applied fixes to other files)
 
 ---
 
@@ -323,9 +325,11 @@ if (retreatDests.length === 0) {
 Triggers only when defender has **zero valid retreat destinations** (complete encirclement).
 
 ### Casualty Rate Constants
-- `BASE_ATTACKER_LOSS_RATE = 0.03` (3% of attacker personnel per engagement)
-- `BASE_DEFENDER_LOSS_RATE = 0.015` (1.5%)
-- `KIA_FRACTION = 0.25` (25% of casualties are killed; 60% wounded; 15% MIA)
+- `BASE_ATTACKER_LOSS_RATE = 0.045` (4.5% of attacker personnel per engagement; was 0.03, Phase A n343)
+- `BASE_DEFENDER_LOSS_RATE = 0.02` (2%; was 0.015, Phase A n343)
+- `KIA_FRACTION = 0.30` (30% of casualties are killed; 55% wounded; 15% MIA; was 0.25/0.60, Phase A n343)
+- **Morale retreat resistance**: per-faction via `getMoraleResistFloor()`: RBiH=55, RS=70, HRHB=65 (was flat 70)
+- **Frontline attrition**: 0.5%/week passive loss for front-assigned brigades (`frontline_attrition.ts`)
 - Outcome multipliers: decisive\_victory → attacker 1.0×/defender 2.5×; stalemate → 1.0×/0.8×; repulsed → 2.0×/0.5×
 
 ### Cohesion Mechanics
