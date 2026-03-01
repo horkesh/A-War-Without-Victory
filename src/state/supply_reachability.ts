@@ -23,6 +23,82 @@ export interface SupplyReachabilityReport {
     factions: FactionSupplyReachability[]; // sorted by faction_id asc
 }
 
+// --- Shared BFS core (used by both SID and OSID variants) ---
+
+export interface SupplyBfsParams {
+    /** Controlled nodes for the report (reachable = controlled ∩ visited) */
+    controlled: string[];
+    /** Supply source nodes */
+    sources: string[];
+    /** Returns true if the node can be traversed in normal (non-corridor) BFS */
+    isTraversable: (node: string) => boolean;
+    /** Returns neighbor list for a node */
+    getNeighbors: (node: string) => string[];
+    /** Optional: corridor traversal check (SID variant supply rights) */
+    canTraverseCorridor?: (edgeId: string, neighbor: string) => { edge: boolean; node: boolean };
+}
+
+export interface SupplyBfsResult {
+    reachable: string[];   // sorted: controlled ∩ visited
+    isolated: string[];    // sorted: controlled - visited
+    edgesUsed: string[];   // sorted edge IDs "a__b"
+    rightsEdgesUsed: number;
+    rightsNodesUsed: number;
+}
+
+/**
+ * Generic BFS for supply reachability, shared by SID and OSID implementations.
+ * Deterministic: sorted iteration, no randomness.
+ */
+export function runSupplyBfs(params: SupplyBfsParams): SupplyBfsResult {
+    const { controlled, sources, isTraversable, getNeighbors, canTraverseCorridor } = params;
+    const visited = new Set<string>();
+    const edgesUsed = new Set<string>();
+    const queue: string[] = [];
+    let rightsEdgesUsed = 0;
+    let rightsNodesUsed = 0;
+
+    // Seed BFS from traversable sources
+    for (const source of sources) {
+        if (isTraversable(source) && !visited.has(source)) {
+            visited.add(source);
+            queue.push(source);
+        }
+    }
+
+    // BFS: traverse controlled neighbors + optional corridor edges
+    while (queue.length > 0) {
+        const current = queue.shift()!;
+        for (const neighbor of getNeighbors(current)) {
+            if (visited.has(neighbor)) continue;
+            const edgeId = current < neighbor ? `${current}__${neighbor}` : `${neighbor}__${current}`;
+
+            if (isTraversable(neighbor)) {
+                visited.add(neighbor);
+                queue.push(neighbor);
+                edgesUsed.add(edgeId);
+            } else if (canTraverseCorridor) {
+                const c = canTraverseCorridor(edgeId, neighbor);
+                if (c.edge || c.node) {
+                    visited.add(neighbor);
+                    queue.push(neighbor);
+                    edgesUsed.add(edgeId);
+                    if (c.edge) rightsEdgesUsed++;
+                    if (c.node) rightsNodesUsed++;
+                }
+            }
+        }
+    }
+
+    return {
+        reachable: controlled.filter(n => visited.has(n)),
+        isolated: controlled.filter(n => !visited.has(n)),
+        edgesUsed: [...edgesUsed].sort((a, b) => a.localeCompare(b)),
+        rightsEdgesUsed,
+        rightsNodesUsed,
+    };
+}
+
 /**
  * Terrain scalars (H6.6-PREP): In a future phase, terrain scalars (e.g. road_access_index,
  * terrain_friction_index) MAY be consumed to modulate edge traversal or supply effectiveness.
@@ -134,77 +210,39 @@ export function computeSupplyReachability(
             }
         }
 
-        // BFS from sources, but only traverse through controlled settlements OR corridor nodes
-        const visited = new Set<string>();
-        const edgesUsed = new Set<string>();
-        const queue: string[] = [];
-        let rightsEdgesUsed = 0;
-        let rightsNodesUsed = 0;
+        // Traversal check: AoR membership + political control
+        const isTraversable = (node: string): boolean => {
+            if (!controlledSet.has(node)) return false;
+            const status = getSettlementControlStatus(state, node);
+            return status.kind === 'known' && status.side === faction.id;
+        };
 
-        // Initialize queue with valid sources (must be controlled by this faction; unknown control: skip)
-        for (const source of sources) {
-            const status = getSettlementControlStatus(state, source);
-            if (status.kind === 'known' && status.side === faction.id && controlledSet.has(source)) {
-                if (!visited.has(source)) {
-                    visited.add(source);
-                    queue.push(source);
-                }
-            }
-        }
+        // Corridor traversal adapter (Phase 12C.3 supply rights)
+        const corridorCheck = (allowedEdges.size > 0 || allowedNodes.size > 0)
+            ? (edgeId: string, neighbor: string) => ({
+                edge: allowedEdges.has(edgeId),
+                node: allowedNodes.has(neighbor),
+            })
+            : undefined;
 
-        // BFS: traverse through controlled neighbors OR corridor-allowed edges/nodes
-        while (queue.length > 0) {
-            const current = queue.shift()!;
-            const neighbors = adjacencyMap[current] ?? [];
-
-            for (const neighbor of neighbors) {
-                if (visited.has(neighbor)) continue;
-
-                const neighborStatus = getSettlementControlStatus(state, neighbor);
-                const edgeId = current < neighbor ? `${current}__${neighbor}` : `${neighbor}__${current}`;
-
-                // Check if we can traverse:
-                // 1. Normal path: neighbor is controlled by this faction (unknown control: no normal traverse)
-                // 2. Corridor path: edge is in allowedEdges OR neighbor is in allowedNodes (traversal only, not control)
-                const canTraverseNormal = neighborStatus.kind === 'known' && neighborStatus.side === faction.id && controlledSet.has(neighbor);
-                const canTraverseCorridor = allowedEdges.has(edgeId) || allowedNodes.has(neighbor);
-
-                if (canTraverseNormal) {
-                    visited.add(neighbor);
-                    queue.push(neighbor);
-                    edgesUsed.add(edgeId);
-                } else if (canTraverseCorridor) {
-                    // Corridor traversal: allow traversal but don't treat as controlled
-                    visited.add(neighbor);
-                    queue.push(neighbor);
-                    edgesUsed.add(edgeId);
-                    if (allowedEdges.has(edgeId)) {
-                        rightsEdgesUsed += 1;
-                    }
-                    if (allowedNodes.has(neighbor)) {
-                        rightsNodesUsed += 1;
-                    }
-                }
-            }
-        }
-
-        // Compute reachable_controlled (controlled ∩ visited)
-        const reachableSet = new Set(visited);
-        const reachable_controlled = controlled.filter((sid) => reachableSet.has(sid));
-
-        // Compute isolated_controlled (controlled - reachable)
-        const isolated_controlled = controlled.filter((sid) => !reachableSet.has(sid));
+        const bfs = runSupplyBfs({
+            controlled,
+            sources,
+            isTraversable,
+            getNeighbors: (node) => adjacencyMap[node] ?? [],
+            canTraverseCorridor: corridorCheck,
+        });
 
         factionResults.push({
             faction_id: faction.id,
             sources,
             controlled,
-            reachable_controlled,
-            isolated_controlled,
-            rights_edges_used_count: rightsEdgesUsed,
-            rights_nodes_used_count: rightsNodesUsed,
+            reachable_controlled: bfs.reachable,
+            isolated_controlled: bfs.isolated,
+            rights_edges_used_count: bfs.rightsEdgesUsed,
+            rights_nodes_used_count: bfs.rightsNodesUsed,
             corridors_active_count: activeCorridors.length,
-            edges_used: [...edgesUsed].sort()
+            edges_used: bfs.edgesUsed
         });
     }
 

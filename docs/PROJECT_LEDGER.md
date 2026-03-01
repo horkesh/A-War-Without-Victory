@@ -14,7 +14,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 **Project:** A War Without Victory (AWWV)
 **Type:** Wargame simulation prototype
 **Repository:** AWWV
-**Current Focus:** Combat calibration (n304, 86.7% OSID match), GUI Architecture Rework v2 (React+MapLibre), displacement system
+**Current Focus:** Combat calibration (n314, 87.4% OSID match), GUI Architecture Rework v2 (React+MapLibre), displacement system
 
 ---
 
@@ -57,7 +57,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 - Corps sector visualization in React+MapLibre map
 
 **Active workstreams:**
-- Combat calibration: n304 = 86.7% (653/753 OSID match), 6/6 benchmarks pass
+- Combat calibration: n314 = 87.4% (658/753 OSID match), multi-sector corps + supply gating + sector offensives
 - GUI Phase 3 remainder: Minimap, ZoomControls, CorpsDetail, ArmyDetail, MovementPreview
 - Displacement: 340k vs ~1M target — deferred until combat calibration stabilizes
 
@@ -8675,3 +8675,32 @@ Determinism checks **MUST** be run:
 - **Determinism:** Pure extraction — zero behavioral change. State hash `2f332a630a820fba` identical across consecutive 40w runs. No new nondeterministic patterns. All `strictCompare` ordering preserved.
 - **Files modified:** src/sim/phase_ii/combat_math.ts (NEW ~310 lines), src/sim/phase_ii/attack_resolution_osid.ts (shrunk ~110 lines), src/sim/phase_ii/combat_predictor.ts (shrunk ~400 lines), tests/to_terrain_combat.test.ts (import redirect).
 - **Verification:** tsc clean; vitest 190/190 pass (13 skipped); node:test to_terrain_combat 15/15 pass; map UI build clean; sim:scenario:run:40w deterministic (hash match).
+
+**2026-03-01** - feat(sim): multi-sector corps, supply gating, and sector offensives — n314 87.4% OSID match (+0.7pp)
+- **Phase:** Post-MVP calibration, Phase II combat mechanics.
+- **Summary:** Four-phase implementation (A–D) adding multi-sector corps front partitioning, supply gating of offensive operations, and named sector offensive infrastructure. Baseline n303 (86.7%) → final n314 (87.4%, +0.7pp). Supply gating prevents overextension in supply-strained areas. Sector offensives are wired but dormant in the 40w window (year-1 defensive doctrine for both VRS and ARBiH prevents launches). Infrastructure activates at 52w+ when factions transition to offensive postures.
+- **Phase A — Multi-sector promotion:** `corps_front_sectors.ts` refactored: sub-segments with ≥ MIN_SECTOR_EDGES (5) edges become independent sectors. Small sub-segments merge into nearest qualifying sector via OSID-hop BFS. Per-sector brigade assignment. Sector ID format: `sector:{corps_id}:{index}`. `CorpsDirective` gains `sector_targets?: Record<string, string[]>`. Result: ARBiH 2nd Corps (3 sectors), 3rd Corps (2), VRS 2nd Krajina (2), SRK (2). n311 = 86.3%.
+- **Phase B — Supply gating:** Brigade-level: critical → forced defend, strained → min_attack_outcome 'victory', no pioneer attacks. Corps-level: `assessCorpsSupplyHealth()` — critical_fraction > 0.5 → strip offensive targets, adequate_fraction < 0.3 → upgrade min_outcome. `supplyByOsid` passed through pipeline to `generateAllCorpsOrders()`. n312 = 87.4% (+0.7pp from baseline). Drina +2.3pp, Central Corridor +2.1pp.
+- **Phase C — Sector offensives:** `CorpsOperation` extended with sector_id, objectives, current_objective_index, planning_duration, supply_readiness, momentum (0-3 cap), failure tracking. Lifecycle: planning → execution → recovery → removed. `operation_names.ts`: per-faction historical name pools (VRS: Koridor, Breza, etc; ARBiH: Uragan, Sana, etc; HVO: Cincar, Maestral, etc). Deterministic selection via hash(corps_id + turn). Two new pipeline steps: `advance-sector-offensives`, `update-sector-offensive-results`. Momentum bonuses: +0.05/0.10/0.15 aggression, relaxed min_outcome. n314 = 87.4% (identical hash to n312 — no offensives launch in year-1 defensive doctrine).
+- **Lessons:** (L36) Supply gating at brigade level slightly improves calibration by preventing overextension. (L37) Sector offensives dormant in 40w window — year-1 doctrine is defensive for both major factions. (L38) Multi-sector promotion produces 2-3 sectors for large corps; most remain single-sector (historically appropriate).
+- **Determinism:** All new code uses strictCompare for iteration. No Math.random(). Operation names selected deterministically. State hash `36f57a795bf2f71b` stable.
+- **Files created:** src/sim/phase_ii/sector_offensive.ts, src/sim/phase_ii/operation_names.ts, tests/corps_front_sectors_multi.test.ts (4), tests/supply_gating.test.ts (5), tests/sector_offensive.test.ts (15), docs/40_reports/implemented/20260301_MULTI_SECTOR_SUPPLY_GATING_SECTOR_OFFENSIVES.md.
+- **Files modified:** src/state/game_state.ts, src/sim/phase_ii/corps_front_sectors.ts, src/sim/phase_ii/bot_corps_ai.ts, src/sim/phase_ii/bot_brigade_ai_osid.ts, src/sim/turn_pipeline.ts, docs/40_reports/CALIBRATION_MASTER.md.
+- **Verification:** tsc clean; vitest 190/190 pass (13 skipped); 24 new unit tests pass; sim:scenario:run:40w n314 87.4% (658/753).
+
+**[2026-03-01] Canon propagation: multi-sector corps, supply gating, sector offensives**
+
+- **Summary:** Propagated report 20260301_MULTI_SECTOR_SUPPLY_GATING_SECTOR_OFFENSIVES.md across canon docs and 40_reports indices.
+- **Change:** Systems Manual §2.1 (multi-sector promotion, sector_targets), §6.4 (sector offensives implementation-note), §6.5 (supply gating and sector offensive participation), §14.5 (supply gating of offensives). War Specification §5 (pipeline steps advance-sector-offensives, update-sector-offensive-results; supply gating reference), §10 (report reference). context.md implementation references. CONSOLIDATED_IMPLEMENTED.md and README §2 (implemented/) index. BOT_AI_HOLISTIC_TUNING_REFERENCE.md (Supply gating and sector offensives subsection with tuning knobs table).
+- **Failure mode prevented:** Canon and tuning docs now authoritatively describe supply gating and sector offensives; future changes can validate against single source.
+- **Files modified:** docs/10_canon/Systems_Manual_v0_6_0.md, docs/10_canon/War_Specification_v0_6_0.md, docs/10_canon/context.md, docs/40_reports/CONSOLIDATED_IMPLEMENTED.md, docs/40_reports/README.md, docs/30_planning/BOT_AI_HOLISTIC_TUNING_REFERENCE.md.
+- **Determinism:** Docs-only; no behavior or output change.
+
+**2026-03-01** - refactor(sim): unify supply reachability BFS (R2)
+- **Phase:** Post-MVP maintenance — code health (R2 of R2–R9 refactoring plan).
+- **Summary:** Extracted shared BFS logic from `supply_reachability.ts` (SID variant) and `supply_reachability_osid.ts` (OSID variant) into a single `runSupplyBfs()` function. Both files now call the shared BFS with their respective adjacency/control callbacks. Eliminates duplicated BFS pattern while preserving each variant's distinct setup (SID: AoR + political control + corridor rights; OSID: political control only).
+- **What changed:** Added `runSupplyBfs(params: SupplyBfsParams): SupplyBfsResult` to `supply_reachability.ts` (~50 lines). SID variant's inline BFS replaced with call to `runSupplyBfs` via `isTraversable` closure (AoR + political control) and corridor adapter. OSID variant's inline BFS replaced with call to `runSupplyBfs` via `isTraversable: controlledSet.has`.
+- **Assessment correction:** Plan estimated "~80% identical BFS, ~120 lines eliminated". Reality: files operate on fundamentally different graph types (SID vs OSID) with different control checks and corridor support. Shared BFS core is ~35 lines. Net savings ~30 lines from OSID file. Plan's deletion target ("delete redundant file") was not appropriate — both files serve distinct consumers.
+- **Determinism:** Pure structural refactoring. State hash `42ad78a39746d166` identical with and without R2 changes (verified via git stash/pop comparison). No new nondeterministic patterns. Sorted edge output uses explicit `localeCompare`.
+- **Files modified:** `src/state/supply_reachability.ts` (+76 lines shared BFS, -38 lines inline BFS), `src/state/supply_reachability_osid.ts` (+1 import, -27 lines inline BFS).
+- **Verification:** tsc clean; vitest 190/190 pass (13 skipped); map UI build clean; sim:scenario:run:40w hash identical before/after.

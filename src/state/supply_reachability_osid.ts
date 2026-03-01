@@ -9,6 +9,7 @@ import type { GameState } from './game_state.js';
 import { getPoliticalControllerOSID } from './settlement_control.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import type { CanonicalToOperationalMap, OperationalToCanonicalReverseMap } from '../data/operational_data.js';
+import { runSupplyBfs } from './supply_reachability.js';
 
 export interface FactionSupplyReachabilityOsid {
     faction_id: string;
@@ -80,40 +81,20 @@ export function computeSupplyReachabilityOsid(
         const sources = [...sourceOsids].sort((a, b) => a.localeCompare(b));
 
         const controlledSet = new Set(controlled);
-        const visited = new Set<string>();
-        const edgesUsed = new Set<string>();
-        const queue: string[] = [];
+        const bfs = runSupplyBfs({
+            controlled,
+            sources,
+            isTraversable: (node) => controlledSet.has(node),
+            getNeighbors: (node) => adjacency.get(node) ?? [],
+        });
 
-        for (const osid of sources) {
-            if (controlledSet.has(osid) && !visited.has(osid)) {
-                visited.add(osid);
-                queue.push(osid);
-            }
-        }
-
-        while (queue.length > 0) {
-            const current = queue.shift()!;
-            const neighbors = adjacency.get(current) ?? [];
-            for (const neighbor of neighbors) {
-                if (visited.has(neighbor)) continue;
-                const c = getPoliticalControllerOSID(state, neighbor, operationalToCanonical);
-                if (c !== faction.id) continue;
-                const edgeId = current < neighbor ? `${current}__${neighbor}` : `${neighbor}__${current}`;
-                visited.add(neighbor);
-                queue.push(neighbor);
-                edgesUsed.add(edgeId);
-            }
-        }
-
-        const reachable_osids = controlled.filter((osid) => visited.has(osid));
-        const isolated_osids = controlled.filter((osid) => !visited.has(osid));
         factionResults.push({
             faction_id: faction.id,
             sources,
             controlled,
-            reachable_osids,
-            isolated_osids,
-            edges_used: [...edgesUsed].sort((a, b) => a.localeCompare(b))
+            reachable_osids: bfs.reachable,
+            isolated_osids: bfs.isolated,
+            edges_used: bfs.edgesUsed
         });
     }
 
