@@ -153,6 +153,41 @@ classDef highlight fill:#b5761433,stroke:#b57614,stroke-width:2px
 classDef muted fill:#7c6f6411,stroke:#7c6f6444,stroke-width:1px
 ```
 
+### Node Label Special Characters
+
+Mermaid uses certain characters for shape syntax. Node labels containing these characters cause syntax errors unless quoted.
+
+**Shape characters to watch:**
+- `[/text/]` — parallelogram
+- `[\text\]` — trapezoid (alt)
+- `[/text\]` — trapezoid
+- `[\text/]` — trapezoid (alt)
+- `[(text)]` — cylindrical
+- `[[text]]` — subroutine
+- `((text))` — circle
+- `{{text}}` — hexagon
+
+**If your node label starts with `/`, `\`, `(`, or `{`, wrap it in quotes:**
+
+```
+%% WRONG — syntax error (/ starts parallelogram shape)
+CMD[/gallery command] --> SRV[server]
+
+%% RIGHT — quotes escape the special character
+CMD["/gallery command"] --> SRV[server]
+```
+
+**Edge labels with special characters also need quotes:**
+
+```
+%% WRONG — quotes inside edge label
+UI -->|"Use as Reference"| RET
+
+%% RIGHT — use single quotes or escape
+UI -->|'Use as Reference'| RET
+UI -->|Use as Reference| RET
+```
+
 Avoid opaque light fills like `fill:#fefce8` — they render as bright boxes in dark mode.
 
 ### stateDiagram-v2 Label Limitations
@@ -220,6 +255,31 @@ B->>S: POST /submit with selected indices
 ```
 
 **Don't mix diagram syntax.** Each diagram type has its own syntax. `-->` works in flowcharts but not in sequence diagrams (`->>` instead). `:::className` works in flowcharts but not in ER diagrams. When in doubt, check the examples below for correct syntax per type.
+
+### Layout Direction: TD vs LR
+
+`flowchart LR` (left-to-right) spreads horizontally. With many nodes, Mermaid scales everything down to fit the width, making text unreadable. `flowchart TD` (top-down) is almost always better.
+
+**When to use each:**
+
+| Direction | Use when | Avoid when |
+|-----------|----------|------------|
+| `TD` (top-down) | Complex diagrams, 5+ nodes, hierarchies, architecture | Simple A→B→C linear flows |
+| `LR` (left-to-right) | Simple linear flows, 3-4 nodes, pipelines | Complex graphs, many branches |
+
+**Rule of thumb:** If the diagram has more than one row of nodes or any branching, use `TD`. The extra vertical space makes labels readable.
+
+```
+%% WRONG — LR with many nodes produces wide, short, unreadable diagram
+flowchart LR
+  A --> B --> C --> D --> E
+  A --> F --> G --> H
+  
+%% RIGHT — TD uses vertical space, labels stay readable
+flowchart TD
+  A --> B --> C --> D --> E
+  A --> F --> G --> H
+```
 
 ### Diagram Type Examples
 
@@ -468,3 +528,16 @@ Define as CSS variables for easy reference:
 | Playfair Display | Roboto Mono | Elegant contrast | Executive summaries |
 
 The first 5 pairings are recommended for most use cases. Vary across consecutive diagrams.
+
+### Typography by Content Voice
+
+For prose-heavy pages (documentation, articles, essays), match typography to the content's voice:
+
+| Voice | Fonts | Best For |
+|-------|-------|----------|
+| **Literary / Thoughtful** | Literata, Lora, Newsreader, Merriweather | Essays, personal posts, long-form articles |
+| **Technical / Precise** | IBM Plex Sans + Mono, Geist + Geist Mono, Source family | Documentation, READMEs, API references |
+| **Bold / Contemporary** | Bricolage Grotesque, Space Grotesk, DM Sans | Product pages, feature announcements |
+| **Minimal / Focused** | Source Serif 4 + Source Sans 3, Karla + Inconsolata | Tutorials, how-tos, focused reading |
+
+**Literata** deserves special mention — it has optical sizing designed specifically for screen reading. Google's answer to Georgia, but modernized.

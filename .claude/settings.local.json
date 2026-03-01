@@ -177,7 +177,9 @@
       "Bash(start:*)",
       "Bash(cd \"F:\\\\A-War-Without-Victory\" && mv tools/check_run.js tools/check_run.cjs && node tools/check_run.cjs 2>&1)",
       "WebFetch(domain:en.wikipedia.org)",
-      "Bash(bc)"
+      "Bash(bc)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(gh api -H \"Accept: application/vnd.github.raw+json\" repos/nicobailon/visual-explainer/contents/SKILL.md)"
     ]
   }
 }
