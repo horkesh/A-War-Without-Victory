@@ -1,26 +1,26 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for Phase II 40w calibration (April 1992 → January 1993).
-**Updated:** 2026-02-28
-**Canonical target run:** n254 (`apr1992_definitive_40w__26e02206211e085d__w40_n254`)
+**Updated:** 2026-03-01
+**Canonical target run:** n284 (`apr1992_definitive_40w__205b3676c8fe3ce4__w40_n284`)
 
 ---
 
 ## Target State (January 1993 / Week 40)
 
 ### Territory (OSIDs of 753 total)
-| Faction | Target | n254 | Delta | Status |
+| Faction | Target | n284 | Delta | Status |
 |---|---|---|---|---|
-| RS | 416 | 422 | +6 | Near |
-| RBiH | 248 | 248 | 0 | ✅ Exact |
-| HRHB | 89 | 83 | -6 | Near |
+| RS | 416 | 392 | -24 | Under — Drina shortfall |
+| RBiH | 248 | 271 | +23 | Over — Drina/Posavina holdouts |
+| HRHB | 89 | 90 | +1 | ✅ Near-exact |
 
 ### Army Strengths (end of 40w)
 | Faction | Personnel | Brigades | Target | Status |
 |---|---|---|---|---|
-| VRS (RS) | ~116k | 86 | ~100k | Over by 16k |
-| ARBiH (RBiH) | ~134k | 70 | ~130k | Over by 4k — acceptable |
-| HVO (HRHB) | ~45k | 29 | ~45k | ✅ Exact |
+| VRS (RS) | ~120k | 85 | ~100k | Over by 20k |
+| ARBiH (RBiH) | ~149k | 72 | ~130k | Over by 19k |
+| HVO (HRHB) | ~52k | 32 | ~45k | Over by 7k |
 
 ### Casualties (40 weeks, n254)
 - **Attacker total:** ~24,000 — dominated by RS (318 attack orders vs RBiH 87 vs HRHB low)
@@ -45,18 +45,18 @@
 - **Minority flight:** 0 (disabled — `enable_rbih_hrhb_dynamics: false`)
 - **Historical note:** Real displacement by Jan 1993 was ~1M+. Engine counts only Phase II takeover-triggered + pressure displacement. Phase I mass displacement is baked into `init_control` snapshot, not tracked in run summaries.
 
-### Match Rate vs Painted Targets (n254)
-Overall: **81.4%** (613/753 OSIDs correct)
+### Match Rate vs Painted Targets (n284)
+Overall: **85.1%** (641/753 OSIDs correct)
 
 | Region | Match | Key Issues |
 |---|---|---|
-| KRAJINA | 95.5% | RS holds 6 Bihac pocket edge OSIDs it shouldn't |
-| POSAVINA_NE | 78.0% | Orasje (HRHB→RS), Brcko south (RBiH→RS), Zvornik interior wrong |
-| DRINA | 62.5% | Enclave brigades push outward into RS-painted territory (~36 OSIDs) |
-| CENTRAL_CORRIDOR | 77.7% | RS pushes too deep into Tešanj/Zavidovići/Kakanj (+13 extra) |
-| CENTRAL_BOSNIA | 84.3% | RS/HRHB overrun some RBiH areas (Bugojno, Konjic, Travnik) |
-| SARAJEVO | 67.7% | Count perfect (21/21 RS) but wrong distribution — Trnovo/Ilidža swap |
-| HERZEGOVINA | 94.6% | RS holds 3 Kupres + 2 Stolac/Trebinje HRHB-painted OSIDs |
+| KRAJINA | 97.0% (128/132) | 4 mismatches: Bosanska Krupa/Cazin edges (RS), Skender Vakuf (HRHB) |
+| POSAVINA_NE | 84.4% (92/109) | Zvornik(8 wrong), Brcko(4 RBiH→RS), Gradacac(1), Teocak(1) |
+| DRINA | 71.9% (92/128) | Main gap. Bratunac/Cajnice/Visegrad/Rudo still RBiH. RS -22. |
+| CENTRAL_CORRIDOR | 87.2% (82/94) | Maglaj(3), Doboj(3), misc. Much improved from 78%. |
+| CENTRAL_BOSNIA | 81.3% (135/166) | Bugojno(8 RS overrun), Konjic/Kladanj(RBiH over), HRHB edges |
+| SARAJEVO | 77.4% (24/31) | Trnovo(3 RS), Ilidza(2 RBiH), Pale/Vogosca edges |
+| HERZEGOVINA | 94.6% (88/93) | Kupres(3 RS→HRHB), Nevesinje(2), Trebinje(1) |
 
 ---
 
@@ -71,6 +71,14 @@ Overall: **81.4%** (613/753 OSIDs correct)
 | **n254** | 26e02206211e085d | **422** | **248** | **83** | **OOB home fixes. Best run. RBiH exact.** |
 | n255 | 54295acf83337756 | 406 | 265 | 82 | Bulk avoided_osids made things worse — reverted |
 | **n268** | 00750db9480be428 | **437** | **235** | **81** | Phase M mechanics (morale, ZoC virtual defense, enclave OOB, displacement routing). 81.0% match (610/753). 6/6 benchmarks. Drina enclave overexpansion (+24 RBiH OSIDs). |
+| n275 | 00750db9480be428 | 425 | 246 | 82 | P2 (enclave morale 55), P5 (RS pool 0.25), P5b (cas mult), Bugojno 3rd Corps. 81.5% match (614/753). RS-12, RBiH+11. **But** Drina WORSE (65.6% vs 68.8%) — morale drift nullified P2 in 3 turns. VRS 117k (pool scale had no effect — recruitment capital drives growth). KIA 5,587 (lower — fewer absorptions). |
+| **n276** | 205b3676c8fe3ce4 | **432** | **238** | **83** | **Supply-CRITICAL morale suppression + RS recruitment reduction.** 83.3% match (627/753). Drina 72.7% (+7.1% from supply fix). Sarajevo 74.2% (+6.5%). Herzegovina 94.6%. VRS still 117k (mandatory OOB, not recruitment capital). KIA 5,404. |
+| n277 | 205b3676c8fe3ce4 | 432 | 238 | 83 | Enclave tag gate + 3rd Corps weights (60→100, 120→150). **Identical OSIDs to n276** — tags weren't propagated (bug). Same hash as n276 sans tag. |
+| **n279** | 205b3676c8fe3ce4 | **437** | **233** | **83** | **Enclave tag propagation fix** (oob_loader + recruitment_engine). 83.7% match (630/753). Enclave brigades capped at initial personnel. Drina 73.4%. Sarajevo 80.6% (+6.4). RS +5 overall (enclave weakening let RS take more). |
+| n280 | 205b3676c8fe3ce4 | 432 | 237 | 84 | REVERTED — added Srebrenica/Gorazde to Drina Sweep + RS attack share 0.28→0.22 + enclave personnel reduced. 81.9% match. Drina COLLAPSED to 67.2%. Adding fortified enclaves to Drina Sweep diluted attacks. |
+| n281 | 205b3676c8fe3ce4 | 431 | 240 | 82 | REVERTED — enclave personnel only (Gorazde 1100→700, Srebrenica 900→600). 81.8% match. Drina 65.6%. Paradoxically worse — cascade effects from weaker enclaves. |
+| n283 | d88dbeb669b72a6f | 404 | 259 | 90 | REVERTED — blunt corps target cap (max(5, 0.75×subordinates)). 82.7% match (623/753). Drina WORSE (69.5%) — cap starved small corps. Central Corridor better but overall worse. |
+| **n284** | **e12111ddb29e02ab** | **392** | **271** | **90** | **P3: Opportunistic target municipality filter.** 85.1% match (641/753). Central Corridor 87.2% (+5.3pp). Posavina 84.4% (+7pp). Krajina 97.0%. Drina 71.9% (still weakest). 6/6 benchmarks. 11/14 anchors. VRS 120k, ARBiH 149k, HVO 52k. |
 
 ---
 
@@ -483,6 +491,107 @@ kill fractions by ethnicity (10% normal, 35% enclave overrun), flee-abroad fract
 The n254 displacement numbers are not wrong — they reflect Phase II only.
 Phase I (~1M+ historical) is captured in the init_control snapshot, not re-simulated.
 
+### L26 — Enclave morale drift nullifies initial_morale reduction
+**Session:** 2026-03-01 (n275 analysis)
+Enclave brigades get +2/turn (affinity: Bosniak majority) + +3/turn (encirclement + own pop)
+= **+5 morale/turn**. Starting at morale 55 → reaches 70 (resist floor) in 3 turns.
+P2 (morale 70→55) was effectively nullified. Drina match rate went from 68.8% to 65.6% (WORSE).
+**Do instead:** Don't rely on initial_morale alone. Must either cap morale drift for supply-CRITICAL
+brigades, or mark enclave supply as permanently CRITICAL and add supply drain on morale.
+
+### L27 — FACTION_POOL_SCALE affects init pools, not ongoing recruitment
+**Session:** 2026-03-01 (n275 analysis)
+RS pool scale 0.28→0.25 reduced init militia pools but VRS end strength went UP (115k→117k).
+Ongoing troop growth is driven by `recruitment_capital_trickle` (5/turn) and `max_recruits_per_faction_per_turn`
+(4 brigades/turn) in the scenario JSON, not by FACTION_POOL_SCALE.
+**Do instead:** To reduce VRS end strength, lower RS `recruitment_capital_trickle` and/or `recruitment_capital`
+in the scenario JSON. Pool scale is a minor lever.
+
+### L28 — Morale absorption casualty multiplier needs sufficient absorption events
+**Session:** 2026-03-01 (n275 analysis)
+P5b (MORALE_ABSORPTION_CAS_MULT = 1.35) implemented but total KIA dropped from 6,082 to 5,587.
+Root cause: fewer morale absorptions (enclave morale started at 55 → fewer absorptions) offset the
+per-event multiplier. The casualty mult is correct design but needs a steady population of
+high-morale defenders to have significant aggregate effect.
+**Do instead:** Fix the enclave overexpansion first (so more regular ARBiH vs VRS engagements
+occur with morale ≥ 70), then the casualty mult will have its intended effect.
+
+### L24 — Bugojno is 3rd Corps (Zenica), not 4th Corps (Mostar)
+**Session:** 2026-03-01 (user correction)
+Bugojno-Konjic Defense army priority was assigned to `arbih_4th_corps` (Mostar/Neretva).
+Historically, Bugojno is in the 3rd Corps (Zenica) area of responsibility. 4th Corps
+covers Neretva valley only (Jablanica, Konjic, Mostar). Fixed in `bot_strategy.ts`:
+`corps_id: 'arbih_4th_corps'` → `'arbih_3rd_corps'` for Bugojno-Konjic Defense.
+**Do instead:** Always cross-check army priority corps assignments against OOB tables above.
+
+### L25 — Displacement continuous pressure pathway uses wrong routing
+**Session:** 2026-03-01 (user correction)
+`src/state/displacement.ts` (continuous pressure) routes displaced via **supply reachability**
+— which fails for besieged factions. `displacement_routing_data.ts` has correct static
+routing tables (47 sub-regions × 3 ethnicities, Phase M4). The continuous pressure pathway
+must be connected to these tables. Supply has nothing to do with refugee routing — people
+flee on foot along roads. Prijedor Bosniaks → Travnik/Jajce/Zenica/Bihac (not Tuzla).
+**Do instead:** All displacement pathways must use the same routing tables.
+
+### L29 — DO NOT add Srebrenica/Gorazde to Drina Sweep targets
+**Session:** 2026-03-01 (n280 analysis — 81.9% match, reverted)
+Adding Srebrenica and Gorazde to the RS Drina Sweep target_municipalities DILUTED Drina Corps
+attacks. With only 2 attack slots per turn, the weight-160 priority sent attacks toward heavily
+fortified enclave concentrations (7 brigades at Gorazde, 5 at Srebrenica) where they FAIL,
+instead of targeting weaker Bratunac/Visegrad/Cajnice where they succeed.
+Drina match rate COLLAPSED from 73.4% to 67.2%.
+**Rule:** Never add fortified positions to sweep priorities. Sweeps should target lightly
+defended or undefended areas. Enclaves are containment targets, not sweep targets.
+
+### L30 — DO NOT reduce enclave personnel below 900/1100
+**Session:** 2026-03-01 (n281 analysis — 81.8% match, reverted)
+Reducing Gorazde 1100→700 and Srebrenica 900→600 paradoxically made Drina WORSE (65.6%
+vs 73.4%). The cascade: weaker enclave brigades change battle outcomes and force
+redistribution patterns throughout the Drina valley. RS ends up with FEWER Drina OSIDs (73
+vs 81). The exact mechanism is unclear but reproducible.
+**Rule:** Enclave personnel levels (1100 Gorazde, 900 Srebrenica, 600 Zepa) are calibrated.
+Do not change without understanding the cascade effects.
+
+### L31 — Reducing RS attack share globally hurts all regions
+**Session:** 2026-03-01 (n280 analysis)
+RS w0-20 attack share 0.28→0.22 reduces 1KK attacks from 7 to 5 per turn BUT also reduces
+Drina/EBK/SRK attacks proportionally. Net effect: RS loses territory everywhere, not just
+Central Corridor. Overall match rate dropped. The Central Corridor overruns come from
+OPPORTUNISTIC targets (all front-line enemy OSIDs during general_offensive), not from
+priority-based targeting. Reducing share doesn't selectively reduce opportunistic targets.
+**Do instead:** Need per-corps attack budget or corps-level avoid mechanisms.
+
+### L32 — OOB tags must be propagated through ALL formation creation paths
+**Session:** 2026-03-01 (n277-n279 investigation)
+Tags added to `oob_brigades.json` were silently dropped because:
+1. `OobBrigade` interface had no `tags` field → loader ignored them
+2. `oob_phase_i_entry.ts` builds tags from scratch (`mun:`, `corps:` only)
+3. `recruitment_engine.ts` also builds tags from scratch (adds `equip:`)
+In `player_choice` mode, brigades go through `recruitment_engine.ts` (which adds `equip:` tag),
+not `oob_phase_i_entry.ts`. Fixed all three: loader, phase_i_entry, and recruitment_engine.
+**Rule:** Any new OOB field must be propagated through ALL formation creation paths.
+The `equip:` tag on the formation reveals which path created it.
+
+### L33 — Opportunistic target municipality filter is the correct P3 fix
+**Session:** 2026-03-01 (n283-n284)
+A blunt count-based corps target cap (`max(5, floor(0.75 × subordinates))`) starved small corps with
+legitimate sweep missions (Drina Corps: 10 brigades, capped from 30→7 targets). n283 dropped to 82.7%.
+The correct approach: filter opportunistic targets (undefended_front, weak_enemy_osids) to only include
+OSIDs in municipalities that appear in the corps's active army priorities. This preserves:
+- All priority targets from `findTargetOsidsFromMunicipalities` (unlimited)
+- Rear-area cleanup targets (no municipality filter)
+- Named operation targets (no municipality filter)
+- Pocket targets (always attack surrounded enemies)
+While preventing corps from sprawling into non-priority municipalities. n284: 85.1% (641/753).
+**Rule:** Corps opportunistic targets must be filtered by priority municipalities, not count-capped.
+**Key result:** 1KK stopped sprawling into tesanj/maglaj/zavidovici (not in any RS priority).
+
+### L34 — Blunt corps target cap HURTS small corps with big AoR
+**Session:** 2026-03-01 (n283)
+`max(5, floor(0.75 × subordinates))` caps Drina Corps (10 brigades) at 7 targets from 30+.
+Drina has 12 priority municipalities with many target OSIDs — capping these destroys the Drina Sweep.
+83.7% → 82.7% (−7 matches). REVERTED. Use municipality filter instead.
+
 ### L23 — Orasje pocket: 3 HVO brigades stay, Derventa/Modrica brigades fall back
 **Session:** 2026-03-01 (user directive)
 3 HVO brigades currently under ARBiH 2nd Corps coordination are supposed to REMAIN in
@@ -504,20 +613,18 @@ Orasje gap. Breakthrough retreat is the second layer for Derventa/Modrica fallba
 
 ---
 
-## Known Gaps (as of n268)
+## Known Gaps (as of n284 — 85.1% match rate, 641/753)
 
-| # | Region | Gap (n268) | Root Cause | Fix | Priority |
+| # | Region | Gap (n284) | Root Cause | Fix | Priority |
 |---|---|---|---|---|---|
-| 1 | DRINA (68.8%) | RBiH holds 53 vs painted 29 — enclave brigades push +24 OSIDs outward | Morale 70 = MORALE_RESIST_FLOOR → enclaves never retreat on costly victories AND counterattack | Enclave morale 70→55 (below resist floor); also material deprivation (N1) | **CRITICAL** |
-| 2 | CORRIDOR (78.7%) | RS holds 54 vs painted 38 — Tešanj/Maglaj/Zavidovići/Kakanj overrun | RS offensive w0-20 captures corridor; morale retreat resistance helps RS hold vs 3rd Corps counterattacks | RS attack share w0-20: 0.28→0.22; RBiH aggression w20-40: −0.05→+0.05; 3rd Corps weight 120→140 | **HIGH** |
-| 3 | C. BOSNIA (80.1%) | RS holds 57 vs painted 42 — Bugojno (10 OSIDs) completely overrun | Bugojno defense wrongly assigned to 4th Corps (Mostar) instead of 3rd Corps (Zenica); 3rd Corps too weak vs VRS 2nd Krajina | Reassign Bugojno-Konjic Defense to `arbih_3rd_corps`; weight 60→90; remove Bugojno from VRS 2KK targets (ahistorical) | **HIGH** |
-| 4 | POSAVINA (75.2%) | Orasje falls (HRHB 0 vs painted 2); Teocak/Brcko south wrong | `hvo_northwest_bosnia` has 0 brigades; Derventa/Modrica HVO don't retreat to Orasje (L23) | OOB: assign 3 brigades to Orasje; breakthrough retreat for Derventa/Modrica (N8) | **HIGH** (OOB) |
-| 5 | VRS strength | 115k vs 100k target (+15k over) | FACTION_POOL_SCALE RS=0.28 still too high | RS pool scale 0.28→0.25 | **MEDIUM** |
-| 6 | Military KIA | 6,082 total vs ~16,000 expected at w40 | 180/312 attacks (58%) undefended → near-zero casualties; defender casualties minimal (2,718 total) | ZoC frontline defense (N6) to reduce free captures; homeland determination (N0) to raise defender casualties | **MEDIUM** |
-| 7 | Displacement | 61k resettled vs 1M+ historical | Phase II displacement requires settlement flips + 4-turn timer; no continuous drain from territorial control | Add continuous displacement: non-aligned population drains at X%/turn while hostile faction controls municipality | **MEDIUM** |
-| 8 | Brigade concentration | 1KK: 35 brigades / 35 targets = 1.0 per target (no concentration) | Corps pass ALL army priority targets as directive targets; too many for available brigades | Cap directive targets to floor(brigades × 0.5); prioritize subset | **MEDIUM** |
-| 9 | SARAJEVO (67.7%) | Wrong OSID distribution (count correct: RS 21, RBiH 10) | Front-line edge wobble: Trnovo/Ilidža swap | Positional — low leverage | LOW |
-| 10 | Anchors | 10/14 pass (4 fail: Zvornik, Teocak, Orasje, Brcko south) | Enclave overexpansion (#1) + Posavina gaps (#4) | Fixes from #1 and #4 should resolve | LOW |
+| 1 | DRINA (71.9%) | RS=77 vs painted=99 (−22). Enclaves hold correctly (Srebrenica/Gorazde/Zepa RBiH PASS), but Bratunac(3), Cajnice(4), Visegrad(5), Rudo(2) still RBiH-held. RS Drina Corps too small to sweep 12 muns in 20w. | Structural: initial control gives RBiH holdouts across Drina valley; RS Drina Corps needs more firepower. **L29: DO NOT add enclaves to Drina Sweep. L30: DO NOT reduce enclave personnel.** Opportunistic filter (n284) slightly worsened Drina by removing non-priority-mun targets. | More RS Drina Corps brigades (OOB) OR Drina offensive window extension OR initial control adjustment | **HIGH** |
+| 2 | CORRIDOR (87.2%) | RS=46 vs painted=38 (+8). Down from +14 in n279. Maglaj(3), Doboj(3), Visoko(1), Zavidovici(1), Kakanj(1), Zenica(1) still RS-overrun. | P3 filter removed most opportunistic sprawl. Remaining 8 overruns: Doboj is in RS 1KK priority (correct); Maglaj/Kakanj/Zavidovici/Visoko may be initial control or early-war captures not reclaimed by 3rd Corps. | 3rd Corps strengthening or initial control tuning. Much improved. | **MEDIUM** |
+| 3 | C. BOSNIA (81.3%) | RS=37 vs painted=42 (−5). Bugojno still 8 RS overruns. HRHB takes some Jajce/Travnik. Konjic/Kladanj go RBiH (should be RS). | Mixed: Bugojno overrun persists (2KK Krajina Sweep). Konjic/Kladanj/Jajce are initial-control edge cases. HRHB takes Jajce/Prozor/Novi Travnik (alliance dynamics). | RS 2KK avoid Bugojno muns; HRHB-RBiH alliance tuning | **MEDIUM** |
+| 4 | POSAVINA (84.4%) | RS=54 vs painted=65 (−11). Zvornik(6 wrong direction), Brcko(4 RBiH instead RS). Improved from 77%. | Zvornik: Sapna/Teocak holdouts structural. Brcko: 1KK targets it but RBiH holds south bank. | Zvornik initial control; Brcko south structural | **MEDIUM** |
+| 5 | VRS strength | 120k vs 100k target (+20k) | All 85 RS brigades mandatory, max_personnel too high. | OOB: reduce RS brigade count or max_personnel | **MEDIUM** |
+| 6 | SARAJEVO (77.4%) | RS=22 vs painted=21 (+1). Trnovo(3 RS overruns), Ilidza(2 should be RS), Pale(1). | Trnovo overruns, Ilidza edges. Worse than n279 (80.6%) — P3 filter redirected RS effort. | Sarajevo Corps priority tuning | **LOW** |
+| 7 | HERZEGOVINA (94.6%) | Kupres(3 RS instead HRHB), Nevesinje(2), Trebinje(1). | Kupres: RS captures HVO territory. Others: edge cases. | Stable. Minor. | **LOW** |
+| 8 | Anchors | Zvornik (RS→RBiH), Bihac (RBiH→RS), Teocak (RBiH→RS). 11/14 pass. | Zvornik holdout, Bihac RS sweep, Teocak structural | Structural | **LOW** |
 
 ---
 
@@ -607,7 +714,7 @@ After 40w converges to >85%, run 52w to verify front freezes appropriately at w4
 ## Post-n268 Iteration Plan (2026-03-01)
 
 **Status of N0–N11 after Phase M:**
-- N0 (Morale + population affinity): **DONE** (Phase M2). Morale field, drift, retreat resistance, ZoC virtual defense.
+- N0 (Morale + population affinity): **PARTIAL** (Phase M2). Morale field, drift, retreat resistance implemented. **BUT: casualty multiplier NOT implemented.** Morale ≥ 70 prevents retreat on costly_victory, but absorbed engagement does NOT increase casualties for either side. L13–L16 (homeland determination → ×1.35 casualty mult) is documented but missing from `attack_resolution_osid.ts`. This is the primary reason defender casualties are 2,718 total vs ~11,500 historical ARBiH KIA at w40.
 - N1 (Enclave material deprivation): **PARTIAL** (Phase M3). Enclave OOB infantry-only + morale 70, but morale 70 = resist floor → they NEVER retreat and counterattack. Needs morale 70→55.
 - N3 (3rd Corps corridor weight): **DONE** (Phase M4). Weight 80→120. Still insufficient — RS overruns +16 in corridor.
 - N4 (VRS troop count): **PARTIAL**. Pool scale lowered 0.35→0.28. Still 115k vs 100k target. Needs 0.28→0.25.
@@ -625,9 +732,19 @@ rate per turn (e.g. 5–10% of hostile population per week). This does NOT need 
 flips — it models ongoing ethnic cleansing as a consequence of territorial control.
 Current displacement requires a settlement flip + 4-turn timer. Hundreds of thousands of
 Bosniaks in RS-controlled Banja Luka, Prijedor, Bijeljina, Zvornik are never displaced.
+
+**CRITICAL BUG (user-identified, 2026-03-01):** The continuous pressure pathway in
+`src/state/displacement.ts` uses **supply reachability** for routing — NOT the static
+routing tables in `displacement_routing_data.ts`. Supply reachability fails for besieged
+factions (no supply path exists), so 98% of displaced_out → lost_population. The routing
+tables already exist (Phase M4, 47 sub-regions × 3 ethnicities) and are correct:
+- Prijedor Bosniaks → `KRAJINA_NORTHWEST` → Travnik, Jajce, Zenica, Bihać (NOT Tuzla)
+- Supply has **nothing** to do with refugee routing — people flee on foot along roads
+
 **Implementation:** New pipeline step in war turn: for each municipality, if controller ≠
 population majority ethnicity, drain `HOSTILE_DRAIN_RATE × hostile_pop` per turn into
-displacement routing. Use existing routing tables from Phase M4.
+displacement routing. Use existing routing tables from `displacement_routing_data.ts`.
+Also fix continuous pressure pathway to use same routing tables instead of supply reachability.
 
 #### P2 — Enclave morale 70→55 [Gap 1 — CRITICAL, single biggest territory improvement]
 Enclave brigade `initial_morale` in OOB: 70 → 55. Since `MORALE_RESIST_FLOOR = 70`,
@@ -645,16 +762,29 @@ the highest-priority subset. With 35 brigades → 17 targets → ~2 brigades per
 Corps can rotate targets over time. This naturally creates the concentration the pioneer
 mechanic needs to function.
 
-#### P4 — Increase free-capture casualties [Gap 6 — KIA too low]
-180 undefended captures generating 0 attacker KIA is unrealistic. RS blitzkrieg still
-took casualties from civilian resistance, militia ambushes, booby traps, friendly fire.
-**Fix:** Add `BASE_FREE_CAPTURE_CASUALTY_RATE` (e.g. 0.005 = 0.5% of attacker personnel)
-applied to every undefended capture. For a 1,500-man brigade: ~8 casualties per free
-capture. Over 180 captures: ~1,400 additional casualties. Small per-event, significant
-in aggregate.
+#### P4 — ~~Increase free-capture casualties~~ **RESOLVED — militia already inflicts casualties**
+**Correction (2026-03-01):** The earlier "180 attacks with 0 casualties" was WRONG. Even
+militia-only defense (`pop × MILITIA_DEFENSE_RATIO × 0.25 = ~37.5 power`) produces a real
+battle with a decisive_victory outcome. Attackers take `3% × personnel × 1.0 outcome mod`
+= ~45 casualties per 1,500-man brigade. Over 180 militia engagements: ~8,100 casualties
+(~2,025 KIA). Virtual militia casualties are NOT tracked (no formation), but attacker
+casualties ARE recorded via `recordBattleCasualties()`. **No code change needed.**
+The real KIA gap (6,082 vs ~16,000) comes from: (a) P5b — morale absorption doesn't raise
+casualties, (b) too few total engagements (312 in 40w), (c) no inter-battle attrition.
 
 #### P5 — RS FACTION_POOL_SCALE 0.28→0.25 [Gap 5]
 Brings VRS from 115k toward 100k target. Simple constant change in `pool_population.ts`.
+
+#### P5b — Homeland determination casualty multiplier [Gap 6 — KIA too low]
+N0 morale retreat resistance is implemented (Phase M2), but the **casualty multiplier** from
+L13–L16 is NOT. When a brigade absorbs a costly_victory due to morale ≥ resist floor,
+casualties should increase for both sides (attacker ×1.8, defender ×1.2 per L16 design).
+Currently: morale check prevents retreat, but `computeCasualties()` runs BEFORE the morale
+check — casualties are identical whether the defender retreats or absorbs.
+**Fix:** In `attack_resolution_osid.ts`, when morale resistance triggers (outcome = costly_victory
+AND morale ≥ MORALE_RESIST_FLOOR AND defender stays), apply post-hoc casualty multiplier:
+defender ×1.35, attacker ×1.35 (both sides bleed more in determined defense per BB evidence).
+This is the primary lever for closing the KIA gap (6,082 → ~16,000 target).
 
 #### P6 — Front segment assignment (replaces ZoC as defensive model) [Structural]
 Current linked ZoC provides only 35% defense power to adjacent OSIDs. A brigade defending

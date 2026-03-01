@@ -1,6 +1,7 @@
 # React Map App — Comprehensive Status Report for External Review
 
 **Date:** 28 February 2026  
+**As of 2026-03-01:** Phase C (rich tooltips, MapModeToolbar + MapLayerToggles, useKeyboardShortcuts, AttackConfirmation, OrderQueue) is **complete**. The "Not implemented" list in §1 and §3 below is outdated for those items. Phase 3 *remainder* (Minimap, ZoomControls, CorpsDetail, ArmyDetail, MovementPreview) is planned; see [20260301_GUI_PHASE3_REMAINDER_PLAN.md](20260301_GUI_PHASE3_REMAINDER_PLAN.md).  
 **Purpose:** Single reference for an outside expert to verify what has been implemented and what remains for the canonical AWWV GUI (React + MapLibre map app).  
 **Audience:** External reviewer, product owner, or integration lead  
 **Reference specification:** [AWWV_GUI_ARCHITECTURE_REWORK_v2.md](../20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md) (hereafter “the v2 doc”)  

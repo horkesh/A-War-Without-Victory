@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV Calibration Report — n284</title>
+<style>
+  :root {
+    --bg-primary: #1a1d23;
+    --bg-secondary: #22262e;
+    --bg-card: #2a2e38;
+    --bg-card-hover: #31363f;
+    --border: #3a3f4a;
+    --text-primary: #e8eaed;
+    --text-secondary: #9aa0a6;
+    --text-muted: #6b7280;
+    --accent: #60a5fa;
+    --rs-color: #4a90d9;
+    --rbih-color: #5cb85c;
+    --hrhb-color: #d9534f;
+    --rs-dim: #4a90d940;
+    --rbih-dim: #5cb85c40;
+    --hrhb-dim: #d9534f40;
+    --pass-color: #22c55e;
+    --fail-color: #ef4444;
+    --warn-color: #f59e0b;
+    --target-color: #f59e0b;
+    --improve-color: #22c55e;
+    --regress-color: #ef4444;
+    --neutral-color: #6b7280;
+    --high-color: #ef4444;
+    --medium-color: #f59e0b;
+    --low-color: #60a5fa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  .dashboard {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #2a2e38 0%, #1e2330 100%);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px 40px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    animation: slideDown 0.5s ease-out;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--rs-color), var(--rbih-color), var(--hrhb-color));
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .header h1 span { color: var(--accent); }
+
+  .header-subtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .meta-item { text-align: right; }
+
+  .meta-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+  }
+
+  .meta-value {
+    font-size: 18px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .meta-value.highlight { color: var(--accent); }
+
+  /* Grid layout */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .grid-full { margin-bottom: 24px; }
+
+  /* Cards */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    animation: fadeIn 0.6s ease-out both;
+  }
+
+  .card:nth-child(1) { animation-delay: 0.1s; }
+  .card:nth-child(2) { animation-delay: 0.2s; }
+  .card:nth-child(3) { animation-delay: 0.3s; }
+
+  .card-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Section numbering */
+  .section-num {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 22px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  /* Donut chart */
+  .donut-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .donut-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+  }
+
+  .donut-center-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .donut-center-text .pct {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .donut-center-text .label {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .donut-legend {
+    display: flex;
+    gap: 24px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .donut-legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .donut-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .donut-stat {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .donut-stat .val {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .donut-stat .lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* SVG charts */
+  svg text {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  /* Tables */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .data-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border);
+  }
+
+  .data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #2a2e38;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .data-table tbody tr:hover {
+    background: var(--bg-card-hover);
+  }
+
+  .data-table .num { text-align: right; }
+
+  .delta-pos { color: var(--improve-color); }
+  .delta-neg { color: var(--regress-color); }
+  .delta-zero { color: var(--neutral-color); }
+
+  /* Badges */
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .badge-pass {
+    background: #22c55e18;
+    border: 1px solid #22c55e40;
+    color: var(--pass-color);
+  }
+
+  .badge-warn {
+    background: #f59e0b18;
+    border: 1px solid #f59e0b40;
+    color: var(--warn-color);
+  }
+
+  .badge-fail {
+    background: #ef444418;
+    border: 1px solid #ef444440;
+    color: var(--fail-color);
+  }
+
+  .badge-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .badge-pass .badge-icon { background: var(--pass-color); color: #000; }
+  .badge-warn .badge-icon { background: var(--warn-color); color: #000; }
+  .badge-fail .badge-icon { background: var(--fail-color); color: #fff; }
+
+  .anchor-fails {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border-left: 3px solid var(--fail-color);
+  }
+
+  .anchor-fails .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--fail-color);
+    margin-bottom: 6px;
+  }
+
+  .anchor-fails ul {
+    list-style: none;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .anchor-fails li { padding: 3px 0; }
+
+  .anchor-fails li::before {
+    content: '\2717 ';
+    color: var(--fail-color);
+    font-weight: 700;
+  }
+
+  .anchor-pass {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border-left: 3px solid var(--pass-color);
+  }
+
+  .anchor-pass .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--pass-color);
+    margin-bottom: 6px;
+  }
+
+  .anchor-pass .items {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+
+  .anchor-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+
+  .anchor-tag-rs { background: var(--rs-dim); color: var(--rs-color); }
+  .anchor-tag-rbih { background: var(--rbih-dim); color: var(--rbih-color); }
+  .anchor-tag-hrhb { background: var(--hrhb-dim); color: var(--hrhb-color); }
+
+  /* Chart containers */
+  .chart-svg {
+    width: 100%;
+    overflow: visible;
+  }
+
+  /* Faction color bars */
+  .faction-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .faction-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+  }
+
+  /* Stat cards */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .stat-card {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-card .val {
+    font-size: 24px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-card .lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+
+  .stat-card .sub {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  /* Tabs */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0;
+  }
+
+  .tab-btn {
+    padding: 8px 20px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .tab-btn:hover { color: var(--text-secondary); }
+
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Corps directive cards */
+  .corps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .corps-card {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 14px;
+    border-left: 3px solid var(--border);
+  }
+
+  .corps-card.offensive { border-left-color: var(--fail-color); }
+  .corps-card.defensive { border-left-color: var(--rs-color); }
+  .corps-card.balanced { border-left-color: var(--warn-color); }
+
+  .corps-card-name {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .corps-card-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .corps-card-meta .k { color: var(--text-muted); }
+
+  .stance-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .stance-offensive { background: #ef444430; color: var(--fail-color); }
+  .stance-defensive { background: #4a90d930; color: var(--rs-color); }
+  .stance-balanced { background: #f59e0b30; color: var(--warn-color); }
+
+  /* Priority badges */
+  .priority-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .priority-high { background: #ef444425; color: var(--high-color); border: 1px solid #ef444450; }
+  .priority-medium { background: #f59e0b25; color: var(--medium-color); border: 1px solid #f59e0b50; }
+  .priority-low { background: #60a5fa25; color: var(--low-color); border: 1px solid #60a5fa50; }
+
+  /* Flow diagram */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+
+  .flow-label {
+    width: 140px;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .flow-bar-wrap {
+    flex: 1;
+    height: 28px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .flow-bar {
+    height: 100%;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    transition: width 1s ease-out;
+  }
+
+  .flow-count {
+    width: 50px;
+    text-align: right;
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  /* Key change box */
+  .key-change-box {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 16px 20px;
+    border-left: 3px solid var(--accent);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .key-change-box .title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 16px;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes drawDonut {
+    from { stroke-dashoffset: 502; }
+  }
+
+  @keyframes growBar {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
+
+  @keyframes drawLine {
+    from { stroke-dashoffset: 1000; }
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* Responsive */
+  @media (max-width: 1100px) {
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 900px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .header-top { flex-direction: column; }
+    .header-meta { justify-content: flex-start; }
+    .meta-item { text-align: left; }
+    .corps-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Print */
+  @media print {
+    body { background: #fff; color: #000; }
+    .card { border: 1px solid #ccc; break-inside: avoid; }
+    .header::before { display: none; }
+    * { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="dashboard">
+
+  <!-- ===== S1. HEADER ===== -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <h1>AWWV Calibration — <span>n284</span></h1>
+        <div class="header-subtitle">A War Without Victory &middot; 40-Week Strategic Simulation &middot; Jan 1993 Calibration Target &middot; Hash: e12111ddb29e02ab</div>
+      </div>
+      <div class="header-meta">
+        <div class="meta-item">
+          <div class="meta-label">Run</div>
+          <div class="meta-value highlight">n284</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Date</div>
+          <div class="meta-value">2026-03-01</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Match Rate</div>
+          <div class="meta-value" style="color: var(--pass-color)">85.1%</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">OSIDs</div>
+          <div class="meta-value">641 / 753</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Previous (n279)</div>
+          <div class="meta-value" style="color: var(--text-secondary)">83.7%</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Target</div>
+          <div class="meta-value" style="color: var(--target-color)">85%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== S2. DONUT + S3. TERRITORY + S13. BENCHMARKS ===== -->
+  <div class="grid-3">
+
+    <!-- S2: Overall Match Rate Donut -->
+    <div class="card">
+      <div class="card-title"><span class="section-num">2</span>Overall Match Rate</div>
+      <div class="donut-container">
+        <div class="donut-wrap">
+          <svg viewBox="0 0 200 200" class="chart-svg">
+            <circle cx="100" cy="100" r="80" fill="none" stroke="#3a3f4a" stroke-width="20"/>
+            <!-- Target marker at 85% -->
+            <circle cx="100" cy="100" r="80" fill="none" stroke="none"
+              stroke-width="22" stroke-dasharray="2 500"
+              stroke-dashoffset="75.4"
+              transform="rotate(-90 100 100)"
+              style="stroke: var(--target-color); opacity: 0.8;"/>
+            <!-- Match arc (85.1%) -->
+            <circle cx="100" cy="100" r="80" fill="none"
+              stroke="url(#matchGrad)" stroke-width="20"
+              stroke-dasharray="427.8 502.65"
+              stroke-linecap="round"
+              transform="rotate(-90 100 100)"
+              style="animation: drawDonut 1.5s ease-out both;"/>
+            <!-- Previous best marker at 83.7% -->
+            <circle cx="100" cy="100" r="80" fill="none" stroke="none"
+              stroke-width="24" stroke-dasharray="2.5 500"
+              stroke-dashoffset="82.1"
+              transform="rotate(-90 100 100)"
+              style="stroke: var(--text-muted); opacity: 0.6;"/>
+            <defs>
+              <linearGradient id="matchGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#3b82f6"/>
+                <stop offset="100%" stop-color="#22c55e"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="donut-center-text">
+            <div class="pct">85.1%</div>
+            <div class="label">641 / 753</div>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <span><span class="dot" style="background:var(--target-color)"></span> 85% target</span>
+          <span><span class="dot" style="background:var(--text-muted)"></span> n279: 83.7%</span>
+        </div>
+        <div class="donut-stats">
+          <div class="donut-stat">
+            <div class="val delta-pos">+1.4%</div>
+            <div class="lbl">vs n279</div>
+          </div>
+          <div class="donut-stat">
+            <div class="val delta-pos">+11</div>
+            <div class="lbl">OSIDs gained</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S3: Faction Territory -->
+    <div class="card">
+      <div class="card-title"><span class="section-num">3</span>Faction Territory (OSIDs)</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Faction</th>
+            <th class="num">Painted</th>
+            <th class="num">Sim</th>
+            <th class="num">Delta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="faction-label"><span class="faction-dot" style="background:var(--rs-color)"></span>RS</span></td>
+            <td class="num">416</td>
+            <td class="num">392</td>
+            <td class="num delta-neg">-24</td>
+          </tr>
+          <tr>
+            <td><span class="faction-label"><span class="faction-dot" style="background:var(--rbih-color)"></span>RBiH</span></td>
+            <td class="num">248</td>
+            <td class="num">271</td>
+            <td class="num delta-pos">+23</td>
+          </tr>
+          <tr>
+            <td><span class="faction-label"><span class="faction-dot" style="background:var(--hrhb-color)"></span>HRHB</span></td>
+            <td class="num">89</td>
+            <td class="num">90</td>
+            <td class="num delta-pos">+1</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top: 24px;" id="territory-bars"></div>
+    </div>
+
+    <!-- S13: Benchmarks -->
+    <div class="card">
+      <div class="card-title"><span class="section-num">13</span>Benchmarks (6/6 PASS)</div>
+      <div class="badge-row" style="margin-bottom:16px;">
+        <div class="badge badge-pass">
+          <span class="badge-icon">&#10003;</span>
+          6/6 PASS
+        </div>
+      </div>
+      <table class="data-table" style="font-size:11px;">
+        <thead>
+          <tr>
+            <th>Faction</th>
+            <th>Turn</th>
+            <th>Objective</th>
+            <th class="num">Actual</th>
+            <th class="num">Expected</th>
+            <th class="num">Tol</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span style="color:var(--hrhb-color)">HRHB</span></td>
+            <td>20</td>
+            <td>secure_herzegovina_core</td>
+            <td class="num">0.1275</td>
+            <td class="num">0.12</td>
+            <td class="num">&plusmn;0.05</td>
+            <td><span style="color:var(--pass-color)">PASS</span></td>
+          </tr>
+          <tr>
+            <td><span style="color:var(--rbih-color)">RBiH</span></td>
+            <td>20</td>
+            <td>hold_core_centers</td>
+            <td class="num">0.3679</td>
+            <td class="num">0.35</td>
+            <td class="num">&plusmn;0.08</td>
+            <td><span style="color:var(--pass-color)">PASS</span></td>
+          </tr>
+          <tr>
+            <td><span style="color:var(--rs-color)">RS</span></td>
+            <td>20</td>
+            <td>early_territorial_expansion</td>
+            <td class="num">0.5046</td>
+            <td class="num">0.55</td>
+            <td class="num">&plusmn;0.08</td>
+            <td><span style="color:var(--pass-color)">PASS</span></td>
+          </tr>
+          <tr>
+            <td><span style="color:var(--hrhb-color)">HRHB</span></td>
+            <td>40</td>
+            <td>hold_central_bosnia_nodes</td>
+            <td class="num">0.1195</td>
+            <td class="num">0.118</td>
+            <td class="num">&plusmn;0.04</td>
+            <td><span style="color:var(--pass-color)">PASS</span></td>
+          </tr>
+          <tr>
+            <td><span style="color:var(--rbih-color)">RBiH</span></td>
+            <td>40</td>
+            <td>preserve_survival_corridors</td>
+            <td class="num">0.3599</td>
+            <td class="num">0.329</td>
+            <td class="num">&plusmn;0.05</td>
+            <td><span style="color:var(--pass-color)">PASS</span></td>
+          </tr>
+          <tr>
+            <td><span style="color:var(--rs-color)">RS</span></td>
+            <td>40</td>
+            <td>consolidate_gains</td>
+            <td class="num">0.5206</td>
+            <td class="num">0.553</td>
+            <td class="num">&plusmn;0.05</td>
+            <td><span style="color:var(--pass-color)">PASS</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ===== S4. REGION MATCH RATES (grouped bar chart) ===== -->
+  <div class="grid-full">
+    <div class="card" style="animation-delay: 0.3s;">
+      <div class="card-title"><span class="section-num">4</span>Region Match Rates — n284 vs n279</div>
+      <div id="region-chart" style="width:100%; overflow-x: auto;"></div>
+    </div>
+  </div>
+
+  <!-- ===== S5. REGION FACTION DETAIL + S6. TROOP COUNTS ===== -->
+  <div class="grid-2">
+    <div class="card" style="animation-delay: 0.4s;">
+      <div class="card-title"><span class="section-num">5</span>Faction Territory by Region — Sim vs Painted</div>
+      <div id="faction-region-chart"></div>
+      <div style="overflow-x:auto; margin-top:16px;">
+        <table class="data-table" id="region-detail-table">
+          <thead>
+            <tr>
+              <th>Region</th>
+              <th class="num" style="color:var(--rs-color)">RS sim</th>
+              <th class="num" style="color:var(--rs-color)">RS tgt</th>
+              <th class="num" style="color:var(--rbih-color)">RBiH sim</th>
+              <th class="num" style="color:var(--rbih-color)">RBiH tgt</th>
+              <th class="num" style="color:var(--hrhb-color)">HRHB sim</th>
+              <th class="num" style="color:var(--hrhb-color)">HRHB tgt</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="animation-delay: 0.5s;">
+      <div class="card-title"><span class="section-num">6</span>Troop Counts</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Faction</th>
+            <th class="num">Start</th>
+            <th class="num">End</th>
+            <th class="num">Brig Start</th>
+            <th class="num">Brig End</th>
+            <th class="num">Target</th>
+            <th class="num">Delta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="faction-label"><span class="faction-dot" style="background:var(--rs-color)"></span>VRS (RS)</span></td>
+            <td class="num">60,100</td>
+            <td class="num">120,101</td>
+            <td class="num">58</td>
+            <td class="num">85</td>
+            <td class="num">~100k</td>
+            <td class="num delta-pos">+20.1%</td>
+          </tr>
+          <tr>
+            <td><span class="faction-label"><span class="faction-dot" style="background:var(--rbih-color)"></span>ARBiH (RBiH)</span></td>
+            <td class="num">24,390</td>
+            <td class="num">148,831</td>
+            <td class="num">36</td>
+            <td class="num">72</td>
+            <td class="num">~130k</td>
+            <td class="num delta-pos">+14.5%</td>
+          </tr>
+          <tr>
+            <td><span class="faction-label"><span class="faction-dot" style="background:var(--hrhb-color)"></span>HVO (HRHB)</span></td>
+            <td class="num">22,450</td>
+            <td class="num">51,864</td>
+            <td class="num">28</td>
+            <td class="num">32</td>
+            <td class="num">~45k</td>
+            <td class="num delta-pos">+15.3%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- S7: Militia Pools -->
+      <div style="margin-top:24px;">
+        <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:12px;"><span class="section-num" style="font-size:10px; width:18px; height:18px; line-height:18px;">7</span> Militia Pools (End State)</div>
+        <table class="data-table" style="font-size:12px;">
+          <thead><tr><th>Faction</th><th class="num">Available</th><th class="num">Committed</th><th class="num">Exhausted</th></tr></thead>
+          <tbody>
+            <tr><td><span style="color:var(--hrhb-color)">HRHB</span></td><td class="num">265</td><td class="num">50,119</td><td class="num">0</td></tr>
+            <tr><td><span style="color:var(--rbih-color)">RBiH</span></td><td class="num">180</td><td class="num">135,470</td><td class="num">0</td></tr>
+            <tr><td><span style="color:var(--rs-color)">RS</span></td><td class="num">281</td><td class="num">78,485</td><td class="num">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- S8: Front Assignments -->
+      <div style="margin-top:24px;">
+        <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:12px;"><span class="section-num" style="font-size:10px; width:18px; height:18px; line-height:18px;">8</span> Front Assignments (End State)</div>
+        <div class="stat-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+          <div class="stat-card">
+            <div class="val" style="color:var(--hrhb-color)">28</div>
+            <div class="lbl">HRHB Brigades</div>
+          </div>
+          <div class="stat-card">
+            <div class="val" style="color:var(--rbih-color)">66</div>
+            <div class="lbl">RBiH Brigades</div>
+          </div>
+          <div class="stat-card">
+            <div class="val" style="color:var(--rs-color)">79</div>
+            <div class="lbl">RS Brigades</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== S9. CASUALTIES & COMBAT ===== -->
+  <div class="grid-full">
+    <div class="card" style="animation-delay: 0.4s;">
+      <div class="card-title"><span class="section-num">9</span>Casualties &amp; Combat</div>
+      <div class="stat-grid" style="grid-template-columns: repeat(6, 1fr); margin-bottom:20px;">
+        <div class="stat-card">
+          <div class="val" style="color:var(--accent)">281</div>
+          <div class="lbl">Total Orders</div>
+          <div class="sub">38 active weeks</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" style="color:var(--rs-color)">216</div>
+          <div class="lbl">RS Orders</div>
+          <div class="sub">76.9%</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" style="color:var(--rbih-color)">65</div>
+          <div class="lbl">RBiH Orders</div>
+          <div class="sub">23.1%</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" style="color:var(--fail-color)">19,163</div>
+          <div class="lbl">Total Casualties</div>
+          <div class="sub">Atk: 17,348 / Def: 1,815</div>
+        </div>
+        <div class="stat-card">
+          <div class="val">9.6:1</div>
+          <div class="lbl">Atk:Def Ratio</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" style="color:var(--warn-color)">149</div>
+          <div class="lbl">Settlement Flips</div>
+          <div class="sub">233 unique targets</div>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-bottom:0;">
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:8px;">Battle Breakdown</div>
+          <div style="display:flex; gap:12px;">
+            <div class="stat-card" style="flex:1;">
+              <div class="val" style="color:var(--rbih-color)">89</div>
+              <div class="lbl">Defender Present</div>
+              <div class="sub">38.2%</div>
+            </div>
+            <div class="stat-card" style="flex:1;">
+              <div class="val" style="color:var(--text-muted)">144</div>
+              <div class="lbl">Free Captures</div>
+              <div class="sub">61.8% — no defender</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:8px;">Historical Year-1 KIA Targets (for comparison)</div>
+          <table class="data-table" style="font-size:11px;">
+            <thead><tr><th>Faction</th><th class="num">Full-War</th><th class="num">Yr1 ~50%</th><th class="num">w40 ~77%</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--rs-color)">VRS</td><td class="num">~24,000</td><td class="num">~12,000</td><td class="num">~9,200</td></tr>
+              <tr><td style="color:var(--rbih-color)">ARBiH</td><td class="num">~30,000</td><td class="num">~15,000</td><td class="num">~11,500</td></tr>
+              <tr><td style="color:var(--hrhb-color)">HVO</td><td class="num">~8,000</td><td class="num">~3,200</td><td class="num">~2,500</td></tr>
+              <tr style="border-top:2px solid var(--border); font-weight:600;"><td>Total</td><td class="num">~62,000</td><td class="num">~30,200</td><td class="num">~23,200</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== S10. WEEKLY COMBAT TEMPO ===== -->
+  <div class="grid-full">
+    <div class="card" style="animation-delay: 0.5s;">
+      <div class="card-title"><span class="section-num">10</span>Weekly Combat Tempo — Orders &amp; Attacker Casualties</div>
+      <div id="tempo-chart" style="width:100%; overflow-x:auto;"></div>
+    </div>
+  </div>
+
+  <!-- ===== S11. CONTROL FLOW + S12. DISPLACEMENT ===== -->
+  <div class="grid-2">
+    <div class="card" style="animation-delay: 0.5s;">
+      <div class="card-title"><span class="section-num">11</span>Control Flow — Settlement Flips</div>
+      <div style="margin-bottom:16px;">
+        <div class="flow-row">
+          <div class="flow-label" style="color:var(--rbih-color)">RBiH &rarr; RS</div>
+          <div class="flow-bar-wrap">
+            <div class="flow-bar" style="width:68%; background: linear-gradient(90deg, var(--rbih-color), var(--rs-color));">96</div>
+          </div>
+          <div class="flow-count">96</div>
+        </div>
+        <div class="flow-row">
+          <div class="flow-label" style="color:var(--hrhb-color)">HRHB &rarr; RS</div>
+          <div class="flow-bar-wrap">
+            <div class="flow-bar" style="width:22%; background: linear-gradient(90deg, var(--hrhb-color), var(--rs-color));">31</div>
+          </div>
+          <div class="flow-count">31</div>
+        </div>
+        <div class="flow-row">
+          <div class="flow-label" style="color:var(--rs-color)">RS &rarr; RBiH</div>
+          <div class="flow-bar-wrap">
+            <div class="flow-bar" style="width:10%; background: linear-gradient(90deg, var(--rs-color), var(--rbih-color));">14</div>
+          </div>
+          <div class="flow-count">14</div>
+        </div>
+      </div>
+      <div style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">Total settlement flips: <strong style="color:var(--text-primary)">141</strong></div>
+      <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:8px;">Top Municipalities by Flips</div>
+      <div id="top-mun-chart"></div>
+    </div>
+
+    <div class="card" style="animation-delay: 0.6s;">
+      <div class="card-title"><span class="section-num">12</span>Displacement</div>
+      <div class="stat-grid" style="grid-template-columns: 1fr 1fr; margin-bottom:20px;">
+        <div class="stat-card">
+          <div class="val" style="color:var(--text-secondary)">2,047,026</div>
+          <div class="lbl">Displaced (Start)</div>
+          <div class="sub">109 settlements</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" style="color:var(--warn-color)">4,359,680</div>
+          <div class="lbl">Displaced (End)</div>
+          <div class="sub">109 settlements</div>
+        </div>
+      </div>
+      <div class="stat-card" style="margin-bottom:20px;">
+        <div class="val delta-neg">+2,312,654</div>
+        <div class="lbl">Net Displacement Increase</div>
+      </div>
+
+      <!-- S14: Anchors -->
+      <div style="margin-top:24px;">
+        <div class="card-title" style="margin-top:0;"><span class="section-num">14</span>Anchors (11/14 PASS)</div>
+        <div class="badge-row" style="margin-bottom:12px;">
+          <div class="badge badge-warn">
+            <span class="badge-icon">!</span>
+            11/14 PASS
+          </div>
+        </div>
+        <div class="anchor-pass">
+          <div class="label">Passing Anchors (11)</div>
+          <div class="items">
+            <span class="anchor-tag anchor-tag-rs">bijeljina (RS)</span>
+            <span class="anchor-tag anchor-tag-rs">banja_luka (RS)</span>
+            <span class="anchor-tag anchor-tag-rs">vozuca_2 (RS)</span>
+            <span class="anchor-tag anchor-tag-rbih">srebrenica (RBiH)</span>
+            <span class="anchor-tag anchor-tag-rbih">tuzla (RBiH)</span>
+            <span class="anchor-tag anchor-tag-rbih">centar_sarajevo (RBiH)</span>
+            <span class="anchor-tag anchor-tag-rbih">vitinica_2 (RBiH)</span>
+            <span class="anchor-tag anchor-tag-rbih">brka_2 (RBiH)</span>
+            <span class="anchor-tag anchor-tag-rbih">gorazde_2 (RBiH)</span>
+            <span class="anchor-tag anchor-tag-rbih">srebrenica_2 (RBiH)</span>
+            <span class="anchor-tag anchor-tag-hrhb">orasje (HRHB)</span>
+          </div>
+        </div>
+        <div class="anchor-fails">
+          <div class="label">Failed Anchors (3)</div>
+          <ul>
+            <li><strong>zvornik</strong> — expected RS, got RBiH</li>
+            <li><strong>bihac</strong> — expected RBiH, got RS</li>
+            <li><strong>teocak</strong> — expected RBiH, got RS</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== S15. CORPS AI DIRECTIVES ===== -->
+  <div class="grid-full">
+    <div class="card" style="animation-delay: 0.6s;">
+      <div class="card-title"><span class="section-num">15</span>Corps AI Directives at Key Turns</div>
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this, 'turn1')">Turn 1</button>
+        <button class="tab-btn" onclick="switchTab(this, 'turn13')">Turn 13</button>
+        <button class="tab-btn" onclick="switchTab(this, 'turn26')">Turn 26</button>
+      </div>
+
+      <div id="turn1" class="tab-panel active">
+        <div class="corps-grid">
+          <div class="corps-card offensive">
+            <div class="corps-card-name" style="color:var(--rs-color)">vrs_1st_krajina <span class="stance-badge stance-offensive">offensive</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 39</div>
+              <div><span class="k">Municipalities:</span> 12</div>
+              <div><span class="k">Subordinates:</span> 27</div>
+              <div><span class="k">Aggression:</span> 0.4</div>
+            </div>
+          </div>
+          <div class="corps-card offensive">
+            <div class="corps-card-name" style="color:var(--rs-color)">vrs_drina <span class="stance-badge stance-offensive">offensive</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 45</div>
+              <div><span class="k">Municipalities:</span> 9</div>
+              <div><span class="k">Subordinates:</span> 6</div>
+              <div><span class="k">Aggression:</span> 0.4</div>
+            </div>
+          </div>
+          <div class="corps-card offensive">
+            <div class="corps-card-name" style="color:var(--rs-color)">vrs_2nd_krajina <span class="stance-badge stance-offensive">offensive</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 14</div>
+              <div><span class="k">Municipalities:</span> 7</div>
+              <div><span class="k">Subordinates:</span> 8</div>
+              <div><span class="k">Aggression:</span> 0.4</div>
+            </div>
+          </div>
+          <div class="corps-card offensive">
+            <div class="corps-card-name" style="color:var(--rs-color)">vrs_sarajevo_romanija <span class="stance-badge stance-offensive">offensive</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 24</div>
+              <div><span class="k">Municipalities:</span> 7</div>
+              <div><span class="k">Subordinates:</span> 4</div>
+              <div><span class="k">Aggression:</span> 0.4</div>
+            </div>
+          </div>
+          <div class="corps-card offensive">
+            <div class="corps-card-name" style="color:var(--rs-color)">vrs_east_bosnian <span class="stance-badge stance-offensive">offensive</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 14</div>
+              <div><span class="k">Municipalities:</span> 3</div>
+              <div><span class="k">Subordinates:</span> 7</div>
+              <div><span class="k">Aggression:</span> 0.4</div>
+            </div>
+          </div>
+          <div class="corps-card offensive">
+            <div class="corps-card-name" style="color:var(--rs-color)">vrs_herzegovina <span class="stance-badge stance-offensive">offensive</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 23</div>
+              <div><span class="k">Municipalities:</span> 8</div>
+              <div><span class="k">Subordinates:</span> 6</div>
+              <div><span class="k">Aggression:</span> 0.4</div>
+            </div>
+          </div>
+          <div class="corps-card defensive">
+            <div class="corps-card-name" style="color:var(--rbih-color)">arbih_1st_corps <span class="stance-badge stance-defensive">defensive</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 0</div>
+              <div><span class="k">Hold OSIDs:</span> 41</div>
+              <div><span class="k">Subordinates:</span> 16</div>
+              <div><span class="k">Aggression:</span> -0.2</div>
+            </div>
+          </div>
+          <div class="corps-card defensive">
+            <div class="corps-card-name" style="color:var(--rbih-color)">arbih_2nd_corps <span class="stance-badge stance-defensive">defensive</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 0</div>
+              <div><span class="k">Hold OSIDs:</span> 41</div>
+              <div><span class="k">Subordinates:</span> 10</div>
+              <div><span class="k">Aggression:</span> -0.2</div>
+            </div>
+          </div>
+          <div class="corps-card defensive">
+            <div class="corps-card-name" style="color:var(--rbih-color)">arbih_3rd_corps <span class="stance-badge stance-defensive">defensive</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 0</div>
+              <div><span class="k">Hold OSIDs:</span> 42</div>
+              <div><span class="k">Subordinates:</span> 4</div>
+              <div><span class="k">Aggression:</span> -0.2</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="turn13" class="tab-panel">
+        <div class="corps-grid">
+          <div class="corps-card offensive">
+            <div class="corps-card-name" style="color:var(--rs-color)">vrs_1st_krajina <span class="stance-badge stance-offensive">offensive</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 16</div>
+              <div><span class="k">Municipalities:</span> 3</div>
+              <div><span class="k">Subordinates:</span> 33</div>
+              <div><span class="k">Aggression:</span> 0.4</div>
+            </div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">Muns: brcko, donji_vakuf, jajce</div>
+          </div>
+          <div class="corps-card offensive">
+            <div class="corps-card-name" style="color:var(--rs-color)">vrs_drina <span class="stance-badge stance-offensive">offensive</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 30</div>
+              <div><span class="k">Municipalities:</span> 8</div>
+              <div><span class="k">Subordinates:</span> 9</div>
+              <div><span class="k">Aggression:</span> 0.4</div>
+            </div>
+          </div>
+          <div class="corps-card defensive">
+            <div class="corps-card-name" style="color:var(--rbih-color)">arbih_2nd_corps <span class="stance-badge stance-defensive">defensive</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 22</div>
+              <div><span class="k">Municipalities:</span> 10</div>
+              <div><span class="k">Subordinates:</span> 26</div>
+              <div><span class="k">Aggression:</span> -0.1</div>
+            </div>
+          </div>
+          <div class="corps-card defensive">
+            <div class="corps-card-name" style="color:var(--rbih-color)">arbih_3rd_corps <span class="stance-badge stance-defensive">defensive</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 38</div>
+              <div><span class="k">Municipalities:</span> 11</div>
+              <div><span class="k">Subordinates:</span> 11</div>
+              <div><span class="k">Aggression:</span> -0.1</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="turn26" class="tab-panel">
+        <div class="corps-grid">
+          <div class="corps-card balanced">
+            <div class="corps-card-name" style="color:var(--rs-color)">vrs_1st_krajina <span class="stance-badge stance-balanced">balanced</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 4</div>
+              <div><span class="k">Municipalities:</span> 2</div>
+              <div><span class="k">Subordinates:</span> 37</div>
+              <div><span class="k">Aggression:</span> -0.1</div>
+            </div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">Muns: donji_vakuf, jajce</div>
+          </div>
+          <div class="corps-card balanced">
+            <div class="corps-card-name" style="color:var(--rs-color)">vrs_drina <span class="stance-badge stance-balanced">balanced</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 30</div>
+              <div><span class="k">Municipalities:</span> 8</div>
+              <div><span class="k">Subordinates:</span> 10</div>
+              <div><span class="k">Aggression:</span> -0.1</div>
+            </div>
+          </div>
+          <div class="corps-card offensive">
+            <div class="corps-card-name" style="color:var(--rbih-color)">arbih_3rd_corps <span class="stance-badge stance-offensive">offensive</span></div>
+            <div class="corps-card-meta">
+              <div><span class="k">Targets:</span> 35</div>
+              <div><span class="k">Municipalities:</span> 11</div>
+              <div><span class="k">Subordinates:</span> 11</div>
+              <div><span class="k">Aggression:</span> -0.1</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== S16. MISMATCH BREAKDOWN ===== -->
+  <div class="grid-2">
+    <div class="card" style="animation-delay: 0.5s;">
+      <div class="card-title"><span class="section-num">16</span>Mismatch Breakdown by Direction</div>
+      <div id="mismatch-chart"></div>
+    </div>
+
+    <!-- S17: Run History -->
+    <div class="card" style="animation-delay: 0.6s;">
+      <div class="card-title"><span class="section-num">17</span>Calibration Progress — Run History</div>
+      <div id="history-chart"></div>
+      <table class="data-table" style="font-size:11px; margin-top:16px;">
+        <thead><tr><th>Run</th><th class="num">Match %</th><th class="num">OSIDs</th><th>Key Change</th></tr></thead>
+        <tbody>
+          <tr><td>n246</td><td class="num">80.0</td><td class="num">~602</td><td>First 40w baseline</td></tr>
+          <tr><td>n254</td><td class="num">81.4</td><td class="num">613</td><td>OOB fixes</td></tr>
+          <tr><td>n268</td><td class="num">81.0</td><td class="num">610</td><td>Phase M mechanics</td></tr>
+          <tr><td>n275</td><td class="num">81.5</td><td class="num">614</td><td>Enclave morale</td></tr>
+          <tr><td>n276</td><td class="num">83.3</td><td class="num">627</td><td>Supply-CRITICAL morale</td></tr>
+          <tr><td>n279</td><td class="num">83.7</td><td class="num">630</td><td>Enclave tag propagation</td></tr>
+          <tr style="font-weight:700; color:var(--pass-color);"><td>n284</td><td class="num">85.1</td><td class="num">641</td><td>P3 municipality filter</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== S18. KNOWN GAPS ===== -->
+  <div class="grid-full">
+    <div class="card" style="animation-delay: 0.7s;">
+      <div class="card-title"><span class="section-num">18</span>Known Gaps</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Region</th>
+            <th>Gap</th>
+            <th>Priority</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>DRINA (71.9%)</td>
+            <td>RS=77 vs 99, Bratunac/Cajnice/Visegrad/Rudo still RBiH</td>
+            <td><span class="priority-badge priority-high">HIGH</span></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>CORRIDOR (87.2%)</td>
+            <td>RS=46 vs 38, Maglaj/Doboj remaining</td>
+            <td><span class="priority-badge priority-medium">MEDIUM</span></td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>C. BOSNIA (81.3%)</td>
+            <td>Bugojno 8 RS overruns, HRHB edges</td>
+            <td><span class="priority-badge priority-medium">MEDIUM</span></td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>POSAVINA (84.4%)</td>
+            <td>Zvornik holdouts, Brcko south</td>
+            <td><span class="priority-badge priority-medium">MEDIUM</span></td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>&mdash;</td>
+            <td>VRS strength 120k vs 100k target</td>
+            <td><span class="priority-badge priority-medium">MEDIUM</span></td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td>SARAJEVO (77.4%)</td>
+            <td>Trnovo/Ilidza positional</td>
+            <td><span class="priority-badge priority-low">LOW</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== S19. KEY CHANGE DESCRIPTION ===== -->
+  <div class="grid-full">
+    <div class="card" style="animation-delay: 0.8s;">
+      <div class="card-title"><span class="section-num">19</span>Key Change — n284</div>
+      <div class="key-change-box">
+        <div class="title">P3: Opportunistic Target Municipality Filter</div>
+        <p>Opportunistic target municipality filter in <code style="background:var(--bg-primary); padding:2px 6px; border-radius:4px; font-size:12px;">bot_corps_ai.ts</code>. Opportunistic targets (<code style="background:var(--bg-primary); padding:2px 6px; border-radius:4px; font-size:12px;">undefended_front</code>, <code style="background:var(--bg-primary); padding:2px 6px; border-radius:4px; font-size:12px;">weak_enemy_osids</code>) now filtered to only include OSIDs in municipalities from the corps's active army priorities. Prevents 1KK sprawling into non-priority municipalities (tesanj, maglaj, zavidovici).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    A War Without Victory &middot; Calibration Dashboard &middot; Generated 2026-03-01 &middot; Run n284 &middot; Hash e12111ddb29e02ab &middot; All 19 sections
+  </div>
+
+</div>
+
+<script>
+// ===== DATA =====
+const regions = [
+  { name: 'KRAJINA',          n284: 97.0, n279: 96.2, match: '128/132', change: '+0.8' },
+  { name: 'POSAVINA_NE',      n284: 84.4, n279: 77.1, match: '92/109',  change: '+7.3' },
+  { name: 'DRINA',            n284: 71.9, n279: 73.4, match: '92/128',  change: '-1.5' },
+  { name: 'CENTRAL_CORRIDOR', n284: 87.2, n279: 81.9, match: '82/94',   change: '+5.3' },
+  { name: 'CENTRAL_BOSNIA',   n284: 81.3, n279: 80.7, match: '135/166', change: '+0.6' },
+  { name: 'SARAJEVO',         n284: 77.4, n279: 80.6, match: '24/31',   change: '-3.2' },
+  { name: 'HERZEGOVINA',      n284: 94.6, n279: 94.6, match: '88/93',   change: '0.0' }
+];
+
+const regionDetail = [
+  { name: 'KRAJINA',          rs_s: 114, rs_p: 112, rb_s: 17, rb_p: 20, hb_s: 1,  hb_p: 0 },
+  { name: 'POSAVINA_NE',      rs_s: 54,  rs_p: 65,  rb_s: 52, rb_p: 42, hb_s: 3,  hb_p: 2 },
+  { name: 'DRINA',            rs_s: 77,  rs_p: 99,  rb_s: 51, rb_p: 29, hb_s: 0,  hb_p: 0 },
+  { name: 'CENTRAL_CORRIDOR', rs_s: 46,  rs_p: 38,  rb_s: 44, rb_p: 52, hb_s: 4,  hb_p: 4 },
+  { name: 'CENTRAL_BOSNIA',   rs_s: 37,  rs_p: 42,  rb_s: 87, rb_p: 85, hb_s: 42, hb_p: 39 },
+  { name: 'SARAJEVO',         rs_s: 22,  rs_p: 21,  rb_s: 9,  rb_p: 10, hb_s: 0,  hb_p: 0 },
+  { name: 'HERZEGOVINA',      rs_s: 42,  rs_p: 39,  rb_s: 11, rb_p: 10, hb_s: 40, hb_p: 44 }
+];
+
+const runHistory = [
+  { run: 'n246', pct: 80.0, osids: '~602', change: 'First 40w baseline' },
+  { run: 'n254', pct: 81.4, osids: '613',  change: 'OOB fixes' },
+  { run: 'n268', pct: 81.0, osids: '610',  change: 'Phase M mechanics' },
+  { run: 'n275', pct: 81.5, osids: '614',  change: 'Enclave morale' },
+  { run: 'n276', pct: 83.3, osids: '627',  change: 'Supply-CRITICAL morale' },
+  { run: 'n279', pct: 83.7, osids: '630',  change: 'Enclave tag propagation' },
+  { run: 'n284', pct: 85.1, osids: '641',  change: 'P3 municipality filter' }
+];
+
+const mismatches = [
+  { label: 'painted=RS, sim=RBiH',  count: 62, color: '#5cb85c', note: 'RS under-capture (mainly Drina)' },
+  { label: 'Drina RS shortfall',     count: 36, color: '#5cb85c80', note: 'subset of above' },
+  { label: 'painted=RBiH, sim=RS',  count: 30, color: '#4a90d9', note: 'RS over-capture (Corridor, Bugojno)' },
+  { label: 'painted=HRHB, sim=RS',  count: 8,  color: '#4a90d9a0', note: 'Kupres, Bugojno, G.Vakuf' },
+  { label: 'painted=RS, sim=HRHB',  count: 5,  color: '#d9534f', note: 'Jajce, Skender Vakuf, Orasje' },
+  { label: 'painted=RBiH, sim=HRHB', count: 5, color: '#d9534fa0', note: 'Kiseljak, Prozor area' }
+];
+
+const territory = [
+  { faction: 'RS',   sim: 392, painted: 416, color: '#4a90d9' },
+  { faction: 'RBiH', sim: 271, painted: 248, color: '#5cb85c' },
+  { faction: 'HRHB', sim: 90,  painted: 89,  color: '#d9534f' }
+];
+
+const weeklyOrders = [14,15,14,14,13,14,12,13,11,12,9,13,13,11,8,9,4,5,6,2,1,2,0,3,2,3,1,2,0,4,4,4,7,5,6,5,5,4,6,5];
+const weeklyCasualties = [459,533,478,483,441,561,409,424,587,559,389,645,598,773,452,599,325,423,420,190,90,416,0,314,246,476,85,216,0,402,162,163,505,576,567,524,687,606,660,905];
+
+const topMunicipalities = [
+  { name: 'bugojno', flips: 8 },
+  { name: 'doboj', flips: 6 },
+  { name: 'foca', flips: 6 },
+  { name: 'donji_vakuf', flips: 5 },
+  { name: 'prijedor', flips: 5 },
+  { name: 'bosanska_krupa', flips: 4 },
+  { name: 'ilijas', flips: 4 },
+  { name: 'jajce', flips: 4 },
+  { name: 'kotor_varos', flips: 4 },
+  { name: 'rogatica', flips: 4 }
+];
+
+// ===== HELPERS =====
+function svgEl(tag, attrs, children) {
+  const ns = 'http://www.w3.org/2000/svg';
+  const el = document.createElementNS(ns, tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    el.setAttribute(k, v);
+  }
+  if (typeof children === 'string') {
+    el.textContent = children;
+  } else if (Array.isArray(children)) {
+    children.forEach(c => { if (c) el.appendChild(c); });
+  }
+  return el;
+}
+
+// ===== TAB SWITCHING =====
+function switchTab(btn, panelId) {
+  btn.closest('.card').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  btn.closest('.card').querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+}
+
+// ===== 1. REGION MATCH RATES (grouped bar chart) =====
+function renderRegionChart() {
+  const container = document.getElementById('region-chart');
+  const W = 900, H = 340;
+  const ml = 60, mr = 20, mt = 30, mb = 80;
+  const cw = W - ml - mr, ch = H - mt - mb;
+  const barGroupW = cw / regions.length;
+  const barW = barGroupW * 0.3;
+  const gap = barGroupW * 0.06;
+
+  const svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'chart-svg', style: 'max-height:340px' });
+
+  for (let y = 0; y <= 100; y += 20) {
+    const py = mt + ch - (y / 100 * ch);
+    svg.appendChild(svgEl('line', { x1: ml, x2: W - mr, y1: py, y2: py, stroke: '#3a3f4a', 'stroke-width': 1 }));
+    svg.appendChild(svgEl('text', { x: ml - 8, y: py + 4, fill: '#6b7280', 'font-size': 11, 'text-anchor': 'end' }, y + '%'));
+  }
+
+  const ty = mt + ch - (85 / 100 * ch);
+  svg.appendChild(svgEl('line', { x1: ml, x2: W - mr, y1: ty, y2: ty, stroke: '#f59e0b', 'stroke-width': 1.5, 'stroke-dasharray': '6 4' }));
+  svg.appendChild(svgEl('text', { x: W - mr + 2, y: ty - 4, fill: '#f59e0b', 'font-size': 10 }, '85% target'));
+
+  regions.forEach(function(r, i) {
+    const gx = ml + i * barGroupW + barGroupW * 0.15;
+    const h284 = r.n284 / 100 * ch;
+    svg.appendChild(svgEl('rect', {
+      x: gx, y: mt + ch - h284, width: barW, height: h284,
+      rx: 3, fill: '#60a5fa',
+      style: 'transform-origin: ' + (gx + barW/2) + 'px ' + (mt + ch) + 'px; animation: growBar 0.8s ease-out ' + (0.1 * i) + 's both'
+    }));
+
+    const h279 = r.n279 / 100 * ch;
+    svg.appendChild(svgEl('rect', {
+      x: gx + barW + gap, y: mt + ch - h279, width: barW, height: h279,
+      rx: 3, fill: '#6b7280',
+      style: 'transform-origin: ' + (gx + barW + gap + barW/2) + 'px ' + (mt + ch) + 'px; animation: growBar 0.8s ease-out ' + (0.1 * i + 0.05) + 's both'
+    }));
+
+    svg.appendChild(svgEl('text', {
+      x: gx + barW / 2, y: mt + ch - h284 - 6,
+      fill: '#60a5fa', 'font-size': 11, 'text-anchor': 'middle', 'font-weight': 600
+    }, r.n284.toFixed(1)));
+
+    const delta = r.n284 - r.n279;
+    const dColor = delta > 0 ? '#22c55e' : delta < 0 ? '#ef4444' : '#6b7280';
+    const dText = delta > 0 ? '+' + delta.toFixed(1) : delta.toFixed(1);
+    svg.appendChild(svgEl('text', {
+      x: gx + barW + gap / 2, y: mt + ch - Math.max(h284, h279) - 18,
+      fill: dColor, 'font-size': 9, 'text-anchor': 'middle', 'font-weight': 600
+    }, dText));
+
+    svg.appendChild(svgEl('text', {
+      x: gx + barW + gap / 2, y: mt + ch + 16,
+      fill: '#9aa0a6', 'font-size': 10, 'text-anchor': 'middle',
+      transform: 'rotate(25 ' + (gx + barW + gap / 2) + ' ' + (mt + ch + 16) + ')'
+    }, r.name));
+
+    svg.appendChild(svgEl('text', {
+      x: gx + barW + gap / 2, y: mt + ch + 32,
+      fill: '#6b7280', 'font-size': 9, 'text-anchor': 'middle',
+      transform: 'rotate(25 ' + (gx + barW + gap / 2) + ' ' + (mt + ch + 32) + ')'
+    }, r.match));
+  });
+
+  const lg = svgEl('g', { transform: 'translate(' + ml + ', ' + (mt - 15) + ')' });
+  lg.appendChild(svgEl('rect', { x: 0, y: 0, width: 12, height: 12, rx: 2, fill: '#60a5fa' }));
+  lg.appendChild(svgEl('text', { x: 16, y: 10, fill: '#9aa0a6', 'font-size': 11 }, 'n284'));
+  lg.appendChild(svgEl('rect', { x: 60, y: 0, width: 12, height: 12, rx: 2, fill: '#6b7280' }));
+  lg.appendChild(svgEl('text', { x: 76, y: 10, fill: '#9aa0a6', 'font-size': 11 }, 'n279'));
+  svg.appendChild(lg);
+
+  container.appendChild(svg);
+}
+
+// ===== 2. FACTION TERRITORY BY REGION =====
+function renderFactionRegionChart() {
+  const container = document.getElementById('faction-region-chart');
+  const W = 620, H = 400;
+  const ml = 120, mr = 20, mt = 30, mb = 30;
+  const cw = W - ml - mr, ch = H - mt - mb;
+  const rowH = ch / regionDetail.length;
+
+  const svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'chart-svg' });
+
+  const maxTotal = Math.max.apply(null, regionDetail.map(function(r) { return Math.max(r.rs_s + r.rb_s + r.hb_s, r.rs_p + r.rb_p + r.hb_p); }));
+  const scale = cw / (maxTotal * 1.1);
+
+  const lg = svgEl('g', { transform: 'translate(' + ml + ', ' + (mt - 18) + ')' });
+  [['RS', '#4a90d9'], ['RBiH', '#5cb85c'], ['HRHB', '#d9534f']].forEach(function(item, i) {
+    lg.appendChild(svgEl('rect', { x: i * 80, y: 0, width: 10, height: 10, rx: 2, fill: item[1] }));
+    lg.appendChild(svgEl('text', { x: i * 80 + 14, y: 9, fill: '#9aa0a6', 'font-size': 10 }, item[0]));
+  });
+  lg.appendChild(svgEl('text', { x: 260, y: 9, fill: '#6b7280', 'font-size': 10 }, 'Top: sim  |  Bottom: painted'));
+  svg.appendChild(lg);
+
+  regionDetail.forEach(function(r, i) {
+    const y = mt + i * rowH;
+    const barH = rowH * 0.32;
+
+    svg.appendChild(svgEl('text', {
+      x: ml - 8, y: y + rowH / 2 + 4,
+      fill: '#e8eaed', 'font-size': 11, 'text-anchor': 'end'
+    }, r.name));
+
+    svg.appendChild(svgEl('line', { x1: ml, x2: W - mr, y1: y + rowH, y2: y + rowH, stroke: '#2a2e38', 'stroke-width': 1 }));
+
+    var sx = ml;
+    [[r.rs_s, '#4a90d9'], [r.rb_s, '#5cb85c'], [r.hb_s, '#d9534f']].forEach(function(item) {
+      var v = item[0], c = item[1];
+      if (v > 0) {
+        var w = v * scale;
+        svg.appendChild(svgEl('rect', {
+          x: sx, y: y + rowH / 2 - barH - 1, width: w, height: barH,
+          rx: 2, fill: c,
+          style: 'animation: fadeIn 0.6s ease-out ' + (0.05 * i) + 's both'
+        }));
+        if (w > 16) {
+          svg.appendChild(svgEl('text', {
+            x: sx + w / 2, y: y + rowH / 2 - barH / 2 + 3,
+            fill: '#fff', 'font-size': 9, 'text-anchor': 'middle', 'font-weight': 600
+          }, '' + v));
+        }
+        sx += w;
+      }
+    });
+
+    var px = ml;
+    [[r.rs_p, '#4a90d970'], [r.rb_p, '#5cb85c70'], [r.hb_p, '#d9534f70']].forEach(function(item) {
+      var v = item[0], c = item[1];
+      if (v > 0) {
+        var w = v * scale;
+        svg.appendChild(svgEl('rect', {
+          x: px, y: y + rowH / 2 + 1, width: w, height: barH,
+          rx: 2, fill: c, stroke: c.slice(0, 7), 'stroke-width': 0.5,
+          style: 'animation: fadeIn 0.6s ease-out ' + (0.05 * i + 0.05) + 's both'
+        }));
+        if (w > 16) {
+          svg.appendChild(svgEl('text', {
+            x: px + w / 2, y: y + rowH / 2 + barH / 2 + 4,
+            fill: '#ccc', 'font-size': 9, 'text-anchor': 'middle'
+          }, '' + v));
+        }
+        px += w;
+      }
+    });
+  });
+
+  container.appendChild(svg);
+}
+
+// ===== 3. RUN HISTORY LINE CHART =====
+function renderHistoryChart() {
+  const container = document.getElementById('history-chart');
+  const W = 550, H = 260;
+  const ml = 50, mr = 40, mt = 20, mb = 50;
+  const cw = W - ml - mr, ch = H - mt - mb;
+  const yMin = 78, yMax = 88;
+
+  const svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'chart-svg' });
+
+  for (let y = yMin; y <= yMax; y += 2) {
+    const py = mt + ch - ((y - yMin) / (yMax - yMin) * ch);
+    svg.appendChild(svgEl('line', { x1: ml, x2: W - mr, y1: py, y2: py, stroke: '#3a3f4a', 'stroke-width': 1 }));
+    svg.appendChild(svgEl('text', { x: ml - 8, y: py + 4, fill: '#6b7280', 'font-size': 11, 'text-anchor': 'end' }, y + '%'));
+  }
+
+  const ty = mt + ch - ((85 - yMin) / (yMax - yMin) * ch);
+  svg.appendChild(svgEl('line', { x1: ml, x2: W - mr, y1: ty, y2: ty, stroke: '#f59e0b', 'stroke-width': 1.5, 'stroke-dasharray': '6 4' }));
+  svg.appendChild(svgEl('text', { x: W - mr + 4, y: ty + 4, fill: '#f59e0b', 'font-size': 10 }, '85%'));
+
+  const points = runHistory.map(function(r, i) {
+    return {
+      x: ml + (i / (runHistory.length - 1)) * cw,
+      y: mt + ch - ((r.pct - yMin) / (yMax - yMin) * ch),
+      run: r.run,
+      pct: r.pct
+    };
+  });
+
+  const areaPath = 'M ' + points[0].x + ' ' + (mt + ch) + ' ' +
+    points.map(function(p) { return 'L ' + p.x + ' ' + p.y; }).join(' ') +
+    ' L ' + points[points.length-1].x + ' ' + (mt + ch) + ' Z';
+
+  const defs = svgEl('defs', {});
+  const grad = svgEl('linearGradient', { id: 'areaGrad', x1: '0', y1: '0', x2: '0', y2: '1' });
+  grad.appendChild(svgEl('stop', { offset: '0%', 'stop-color': '#60a5fa', 'stop-opacity': '0.5' }));
+  grad.appendChild(svgEl('stop', { offset: '100%', 'stop-color': '#60a5fa', 'stop-opacity': '0' }));
+  defs.appendChild(grad);
+  svg.appendChild(defs);
+
+  svg.appendChild(svgEl('path', {
+    d: areaPath, fill: 'url(#areaGrad)', opacity: '0.3',
+    style: 'animation: fadeIn 1s ease-out both'
+  }));
+
+  const linePath = points.map(function(p, i) { return (i === 0 ? 'M' : 'L') + ' ' + p.x + ' ' + p.y; }).join(' ');
+  svg.appendChild(svgEl('path', {
+    d: linePath, fill: 'none', stroke: '#60a5fa', 'stroke-width': 2.5,
+    'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+    'stroke-dasharray': 1000, 'stroke-dashoffset': 1000,
+    style: 'animation: drawLine 1.5s ease-out 0.3s both'
+  }));
+
+  points.forEach(function(p, i) {
+    const isLast = i === points.length - 1;
+    svg.appendChild(svgEl('circle', {
+      cx: p.x, cy: p.y, r: isLast ? 6 : 4,
+      fill: isLast ? '#22c55e' : '#60a5fa',
+      stroke: isLast ? '#22c55e40' : 'none',
+      'stroke-width': isLast ? 3 : 0,
+      style: 'animation: fadeIn 0.5s ease-out ' + (0.2 + i * 0.1) + 's both'
+    }));
+    svg.appendChild(svgEl('text', {
+      x: p.x, y: p.y - 12,
+      fill: isLast ? '#22c55e' : '#9aa0a6',
+      'font-size': isLast ? 12 : 10,
+      'text-anchor': 'middle',
+      'font-weight': isLast ? 700 : 400,
+      style: 'animation: fadeIn 0.5s ease-out ' + (0.3 + i * 0.1) + 's both'
+    }, p.pct.toFixed(1) + '%'));
+    svg.appendChild(svgEl('text', {
+      x: p.x, y: mt + ch + 20,
+      fill: '#6b7280', 'font-size': 10, 'text-anchor': 'middle',
+      transform: 'rotate(30 ' + p.x + ' ' + (mt + ch + 20) + ')'
+    }, p.run));
+  });
+
+  container.appendChild(svg);
+}
+
+// ===== 4. MISMATCH BREAKDOWN (horizontal bar) =====
+function renderMismatchChart() {
+  const container = document.getElementById('mismatch-chart');
+  const W = 620, H = 280;
+  const ml = 210, mr = 60, mt = 10, mb = 30;
+  const cw = W - ml - mr, ch = H - mt - mb;
+  const barH = ch / mismatches.length;
+  const maxCount = Math.max.apply(null, mismatches.map(function(m) { return m.count; }));
+
+  const svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'chart-svg' });
+
+  mismatches.forEach(function(m, i) {
+    const y = mt + i * barH;
+    const w = (m.count / maxCount) * cw;
+
+    svg.appendChild(svgEl('text', {
+      x: ml - 8, y: y + barH / 2 + 4,
+      fill: '#9aa0a6', 'font-size': 11, 'text-anchor': 'end'
+    }, m.label));
+
+    svg.appendChild(svgEl('rect', {
+      x: ml, y: y + barH * 0.2, width: w, height: barH * 0.6,
+      rx: 3, fill: m.color,
+      style: 'animation: fadeIn 0.6s ease-out ' + (0.08 * i) + 's both'
+    }));
+
+    svg.appendChild(svgEl('text', {
+      x: ml + w + 8, y: y + barH / 2 + 4,
+      fill: '#e8eaed', 'font-size': 12, 'font-weight': 600,
+      style: 'animation: fadeIn 0.6s ease-out ' + (0.08 * i + 0.1) + 's both'
+    }, '' + m.count));
+
+    svg.appendChild(svgEl('line', {
+      x1: ml, x2: W - mr, y1: y + barH, y2: y + barH,
+      stroke: '#2a2e38', 'stroke-width': 1
+    }));
+  });
+
+  container.appendChild(svg);
+}
+
+// ===== 5. TERRITORY BARS =====
+function renderTerritoryBars() {
+  const container = document.getElementById('territory-bars');
+  const W = 360, H = 120;
+  const ml = 50, mr = 50, mt = 5, mb = 5;
+  const cw = W - ml - mr, ch = H - mt - mb;
+  const barH = ch / territory.length;
+
+  const svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'chart-svg' });
+  const maxVal = 753;
+
+  territory.forEach(function(t, i) {
+    const y = mt + i * barH;
+    const wSim = (t.sim / maxVal) * cw;
+    const wPainted = (t.painted / maxVal) * cw;
+
+    svg.appendChild(svgEl('text', {
+      x: ml - 8, y: y + barH / 2 + 4,
+      fill: t.color, 'font-size': 11, 'text-anchor': 'end', 'font-weight': 600
+    }, t.faction));
+
+    svg.appendChild(svgEl('rect', {
+      x: ml, y: y + barH * 0.15, width: wPainted, height: barH * 0.7,
+      rx: 3, fill: t.color, opacity: '0.2',
+      stroke: t.color, 'stroke-width': 0.5, 'stroke-dasharray': '3 2'
+    }));
+
+    svg.appendChild(svgEl('rect', {
+      x: ml, y: y + barH * 0.15, width: wSim, height: barH * 0.7,
+      rx: 3, fill: t.color, opacity: '0.7'
+    }));
+
+    const delta = t.sim - t.painted;
+    const dSign = delta > 0 ? '+' : '';
+    svg.appendChild(svgEl('text', {
+      x: ml + Math.max(wSim, wPainted) + 8, y: y + barH / 2 + 4,
+      fill: '#e8eaed', 'font-size': 11
+    }, t.sim + ' (' + dSign + delta + ')'));
+  });
+
+  container.appendChild(svg);
+}
+
+// ===== 6. REGION DETAIL TABLE =====
+function renderRegionDetailTable() {
+  const tbody = document.querySelector('#region-detail-table tbody');
+  regionDetail.forEach(function(r) {
+    const tr = document.createElement('tr');
+    const fmtDelta = function(sim, painted) {
+      const d = sim - painted;
+      const cls = d > 0 ? 'delta-pos' : d < 0 ? 'delta-neg' : 'delta-zero';
+      const sign = d > 0 ? '+' : '';
+      return '<span class="' + cls + '" title="delta: ' + sign + d + '">' + sim + '</span>';
+    };
+    tr.innerHTML =
+      '<td>' + r.name + '</td>' +
+      '<td class="num">' + fmtDelta(r.rs_s, r.rs_p) + '</td>' +
+      '<td class="num" style="color:var(--text-muted)">' + r.rs_p + '</td>' +
+      '<td class="num">' + fmtDelta(r.rb_s, r.rb_p) + '</td>' +
+      '<td class="num" style="color:var(--text-muted)">' + r.rb_p + '</td>' +
+      '<td class="num">' + fmtDelta(r.hb_s, r.hb_p) + '</td>' +
+      '<td class="num" style="color:var(--text-muted)">' + r.hb_p + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  const totals = regionDetail.reduce(function(acc, r) {
+    return {
+      rs_s: acc.rs_s + r.rs_s, rs_p: acc.rs_p + r.rs_p,
+      rb_s: acc.rb_s + r.rb_s, rb_p: acc.rb_p + r.rb_p,
+      hb_s: acc.hb_s + r.hb_s, hb_p: acc.hb_p + r.hb_p
+    };
+  }, { rs_s: 0, rs_p: 0, rb_s: 0, rb_p: 0, hb_s: 0, hb_p: 0 });
+
+  const tr = document.createElement('tr');
+  tr.style.borderTop = '2px solid var(--border)';
+  tr.style.fontWeight = '600';
+  const fmtTotalDelta = function(sim, painted) {
+    const d = sim - painted;
+    const cls = d > 0 ? 'delta-pos' : d < 0 ? 'delta-neg' : 'delta-zero';
+    const sign = d > 0 ? '+' : '';
+    return '<span class="' + cls + '">' + sim + ' (' + sign + d + ')</span>';
+  };
+  tr.innerHTML =
+    '<td>TOTAL</td>' +
+    '<td class="num">' + fmtTotalDelta(totals.rs_s, totals.rs_p) + '</td>' +
+    '<td class="num" style="color:var(--text-muted)">' + totals.rs_p + '</td>' +
+    '<td class="num">' + fmtTotalDelta(totals.rb_s, totals.rb_p) + '</td>' +
+    '<td class="num" style="color:var(--text-muted)">' + totals.rb_p + '</td>' +
+    '<td class="num">' + fmtTotalDelta(totals.hb_s, totals.hb_p) + '</td>' +
+    '<td class="num" style="color:var(--text-muted)">' + totals.hb_p + '</td>';
+  tbody.appendChild(tr);
+}
+
+// ===== 7. WEEKLY COMBAT TEMPO CHART =====
+function renderTempoChart() {
+  const container = document.getElementById('tempo-chart');
+  const W = 1100, H = 360;
+  const ml = 60, mr = 60, mt = 30, mb = 50;
+  const cw = W - ml - mr, ch = H - mt - mb;
+  const weeks = 40;
+  const stepX = cw / (weeks - 1);
+
+  const svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'chart-svg', style: 'max-height:360px' });
+
+  // Defs for casualty area gradient
+  const defs = svgEl('defs', {});
+  const casGrad = svgEl('linearGradient', { id: 'casGrad', x1: '0', y1: '0', x2: '0', y2: '1' });
+  casGrad.appendChild(svgEl('stop', { offset: '0%', 'stop-color': '#ef4444', 'stop-opacity': '0.35' }));
+  casGrad.appendChild(svgEl('stop', { offset: '100%', 'stop-color': '#ef4444', 'stop-opacity': '0.05' }));
+  defs.appendChild(casGrad);
+  svg.appendChild(defs);
+
+  const maxOrders = 16;
+  const maxCas = 950;
+
+  // Y-axis grids (orders, left)
+  for (let y = 0; y <= maxOrders; y += 4) {
+    const py = mt + ch - (y / maxOrders * ch);
+    svg.appendChild(svgEl('line', { x1: ml, x2: W - mr, y1: py, y2: py, stroke: '#3a3f4a', 'stroke-width': 1 }));
+    svg.appendChild(svgEl('text', { x: ml - 8, y: py + 4, fill: '#60a5fa', 'font-size': 10, 'text-anchor': 'end' }, '' + y));
+  }
+  svg.appendChild(svgEl('text', { x: ml - 8, y: mt - 10, fill: '#60a5fa', 'font-size': 10, 'text-anchor': 'end' }, 'Orders'));
+
+  // Y-axis right (casualties)
+  for (let y = 0; y <= maxCas; y += 200) {
+    const py = mt + ch - (y / maxCas * ch);
+    svg.appendChild(svgEl('text', { x: W - mr + 8, y: py + 4, fill: '#ef4444', 'font-size': 10, 'text-anchor': 'start' }, '' + y));
+  }
+  svg.appendChild(svgEl('text', { x: W - mr + 8, y: mt - 10, fill: '#ef4444', 'font-size': 10, 'text-anchor': 'start' }, 'Casualties'));
+
+  // Casualty area fill
+  var casAreaPath = 'M ' + ml + ' ' + (mt + ch);
+  for (var i = 0; i < weeks; i++) {
+    var x = ml + i * stepX;
+    var cy = mt + ch - (weeklyCasualties[i] / maxCas * ch);
+    casAreaPath += ' L ' + x + ' ' + cy;
+  }
+  casAreaPath += ' L ' + (ml + (weeks - 1) * stepX) + ' ' + (mt + ch) + ' Z';
+  svg.appendChild(svgEl('path', { d: casAreaPath, fill: 'url(#casGrad)', style: 'animation: fadeIn 1s ease-out both' }));
+
+  // Casualty line
+  var casLinePath = '';
+  for (var i = 0; i < weeks; i++) {
+    var x = ml + i * stepX;
+    var cy = mt + ch - (weeklyCasualties[i] / maxCas * ch);
+    casLinePath += (i === 0 ? 'M' : 'L') + ' ' + x + ' ' + cy;
+  }
+  svg.appendChild(svgEl('path', {
+    d: casLinePath, fill: 'none', stroke: '#ef4444', 'stroke-width': 1.5, 'stroke-opacity': '0.6',
+    'stroke-dasharray': 2000, 'stroke-dashoffset': 2000,
+    style: 'animation: drawLine 2s ease-out 0.2s both'
+  }));
+
+  // Orders line
+  var ordLinePath = '';
+  for (var i = 0; i < weeks; i++) {
+    var x = ml + i * stepX;
+    var oy = mt + ch - (weeklyOrders[i] / maxOrders * ch);
+    ordLinePath += (i === 0 ? 'M' : 'L') + ' ' + x + ' ' + oy;
+  }
+  svg.appendChild(svgEl('path', {
+    d: ordLinePath, fill: 'none', stroke: '#60a5fa', 'stroke-width': 2.5,
+    'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+    'stroke-dasharray': 2000, 'stroke-dashoffset': 2000,
+    style: 'animation: drawLine 2s ease-out 0.5s both'
+  }));
+
+  // Order dots
+  for (var i = 0; i < weeks; i++) {
+    var x = ml + i * stepX;
+    var oy = mt + ch - (weeklyOrders[i] / maxOrders * ch);
+    svg.appendChild(svgEl('circle', {
+      cx: x, cy: oy, r: 3, fill: '#60a5fa',
+      style: 'animation: fadeIn 0.3s ease-out ' + (0.5 + i * 0.03) + 's both'
+    }));
+  }
+
+  // w20 vertical line: RS -> balanced
+  var w20x = ml + 19 * stepX;
+  svg.appendChild(svgEl('line', {
+    x1: w20x, x2: w20x, y1: mt, y2: mt + ch,
+    stroke: '#f59e0b', 'stroke-width': 1.5, 'stroke-dasharray': '6 4'
+  }));
+  svg.appendChild(svgEl('text', {
+    x: w20x + 4, y: mt + 12, fill: '#f59e0b', 'font-size': 10, 'font-weight': 600
+  }, 'RS \u2192 balanced'));
+
+  // X-axis labels (every 5 weeks)
+  for (var i = 0; i < weeks; i += 5) {
+    var x = ml + i * stepX;
+    svg.appendChild(svgEl('text', {
+      x: x, y: mt + ch + 18, fill: '#6b7280', 'font-size': 10, 'text-anchor': 'middle'
+    }, 'w' + (i + 1)));
+  }
+  // Also label w40
+  svg.appendChild(svgEl('text', {
+    x: ml + 39 * stepX, y: mt + ch + 18, fill: '#6b7280', 'font-size': 10, 'text-anchor': 'middle'
+  }, 'w40'));
+
+  // Legend
+  var lx = ml;
+  svg.appendChild(svgEl('line', { x1: lx, x2: lx + 20, y1: mt - 16, y2: mt - 16, stroke: '#60a5fa', 'stroke-width': 2.5 }));
+  svg.appendChild(svgEl('text', { x: lx + 24, y: mt - 12, fill: '#9aa0a6', 'font-size': 10 }, 'Orders/week'));
+  svg.appendChild(svgEl('rect', { x: lx + 120, y: mt - 22, width: 14, height: 10, rx: 2, fill: '#ef444460' }));
+  svg.appendChild(svgEl('text', { x: lx + 138, y: mt - 12, fill: '#9aa0a6', 'font-size': 10 }, 'Attacker casualties'));
+
+  container.appendChild(svg);
+}
+
+// ===== 8. TOP MUNICIPALITIES CHART =====
+function renderTopMunChart() {
+  const container = document.getElementById('top-mun-chart');
+  const W = 400, H = 260;
+  const ml = 130, mr = 40, mt = 5, mb = 5;
+  const cw = W - ml - mr, ch = H - mt - mb;
+  const barH = ch / topMunicipalities.length;
+  const maxFlips = Math.max.apply(null, topMunicipalities.map(function(m) { return m.flips; }));
+
+  const svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'chart-svg' });
+
+  topMunicipalities.forEach(function(m, i) {
+    const y = mt + i * barH;
+    const w = (m.flips / maxFlips) * cw;
+    const hue = 200 + i * 10;
+
+    svg.appendChild(svgEl('text', {
+      x: ml - 8, y: y + barH / 2 + 4,
+      fill: '#9aa0a6', 'font-size': 10, 'text-anchor': 'end'
+    }, m.name));
+
+    svg.appendChild(svgEl('rect', {
+      x: ml, y: y + barH * 0.2, width: w, height: barH * 0.6,
+      rx: 3, fill: '#f59e0b', opacity: String(0.4 + 0.6 * m.flips / maxFlips),
+      style: 'animation: fadeIn 0.5s ease-out ' + (0.05 * i) + 's both'
+    }));
+
+    svg.appendChild(svgEl('text', {
+      x: ml + w + 6, y: y + barH / 2 + 4,
+      fill: '#e8eaed', 'font-size': 11, 'font-weight': 600
+    }, '' + m.flips));
+  });
+
+  container.appendChild(svg);
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', function() {
+  renderRegionChart();
+  renderFactionRegionChart();
+  renderHistoryChart();
+  renderMismatchChart();
+  renderTerritoryBars();
+  renderRegionDetailTable();
+  renderTempoChart();
+  renderTopMunChart();
+});
+</script>
+</body>
+</html>
