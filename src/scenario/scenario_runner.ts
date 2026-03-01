@@ -24,6 +24,7 @@ import { buildSettlementsByMun } from '../sim/phase_i/control_strain.js';
 import { updateMilitiaEmergence } from '../sim/phase_i/militia_emergence.js';
 import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../sim/phase_i/pool_population.js';
 import { initializeCorpsCommand } from '../sim/phase_ii/corps_command.js';
+import { injectPrePlannedOperations } from '../sim/phase_ii/pre_planned_operations.js';
 import {
     initializeRecruitmentResources,
     runBotRecruitment
@@ -1118,6 +1119,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // Phase II entry: initialize corps command; location_osid via backfill (AoR phase-out).
         if (scenario.start_lifecycle_phase === 'war') {
             initializeCorpsCommand(state);
+            injectPrePlannedOperations(state);
         }
         if (operationalData?.canonicalToOperational) {
             backfillFormationLocationOsid(state, operationalData.canonicalToOperational);
@@ -1216,7 +1218,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             displaced_total: 0,
             killed_total: 0,
             fled_abroad_total: 0,
-            routed_total: 0
+            routed_total: 0,
+            sustained_fires: 0,
+            sustained_displaced_total: 0
         };
         const phaseIITakeoverDisplacementWeekly: Array<{
             week_index: number;
@@ -1229,28 +1233,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             killed_total: number;
             fled_abroad_total: number;
             routed_total: number;
+            sustained_fires: number;
+            sustained_displaced_total: number;
             source_municipalities: string[];
         }> = [];
-        const phaseIIMinorityFlightSummary = {
-            weeks_with_activity: 0,
-            settlements_evaluated_total: 0,
-            settlements_displaced_total: 0,
-            displaced_total: 0,
-            killed_total: 0,
-            fled_abroad_total: 0,
-            routed_total: 0
-        };
-        const phaseIIMinorityFlightWeekly: Array<{
-            week_index: number;
-            turn: number;
-            settlements_evaluated: number;
-            settlements_displaced: number;
-            displaced_total: number;
-            killed_total: number;
-            fled_abroad_total: number;
-            routed_total: number;
-        }> = [];
-
         const botManager = (scenario.use_smart_bots || use_smart_bots)
             ? new BotManager({
                 seed: `${state.meta.seed}:smart-bots`,
@@ -1412,7 +1398,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
                 const evs = turnReport.phase_i_control_flip?.control_events;
                 if (evs?.length) {
-                    console.log(`[DEBUG] Turn ${week_index}: Pushing ${evs.length} events`);
                     events_all.push(...evs);
                 }
             }
@@ -1493,6 +1478,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     phaseIITakeoverDisplacementSummary.killed_total += takeoverReport.killed_total ?? 0;
                     phaseIITakeoverDisplacementSummary.fled_abroad_total += takeoverReport.fled_abroad_total ?? 0;
                     phaseIITakeoverDisplacementSummary.routed_total += takeoverReport.routed_total ?? 0;
+                    phaseIITakeoverDisplacementSummary.sustained_fires += takeoverReport.sustained_fires ?? 0;
+                    phaseIITakeoverDisplacementSummary.sustained_displaced_total += takeoverReport.sustained_displaced_total ?? 0;
                     phaseIITakeoverDisplacementWeekly.push({
                         week_index,
                         turn: state.meta.turn,
@@ -1504,35 +1491,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                         killed_total: takeoverReport.killed_total ?? 0,
                         fled_abroad_total: takeoverReport.fled_abroad_total ?? 0,
                         routed_total: takeoverReport.routed_total ?? 0,
+                        sustained_fires: takeoverReport.sustained_fires ?? 0,
+                        sustained_displaced_total: takeoverReport.sustained_displaced_total ?? 0,
                         source_municipalities: [...(takeoverReport.source_municipalities ?? [])].sort(strictCompare)
-                    });
-                }
-                const minorityFlightReport = turnReport.phase_ii_minority_flight;
-                if (minorityFlightReport) {
-                    const hasActivity =
-                        minorityFlightReport.settlements_displaced > 0 ||
-                        minorityFlightReport.displaced_total > 0 ||
-                        minorityFlightReport.killed_total > 0 ||
-                        minorityFlightReport.fled_abroad_total > 0 ||
-                        minorityFlightReport.routed_total > 0;
-                    if (hasActivity) {
-                        phaseIIMinorityFlightSummary.weeks_with_activity += 1;
-                    }
-                    phaseIIMinorityFlightSummary.settlements_evaluated_total += minorityFlightReport.settlements_evaluated ?? 0;
-                    phaseIIMinorityFlightSummary.settlements_displaced_total += minorityFlightReport.settlements_displaced ?? 0;
-                    phaseIIMinorityFlightSummary.displaced_total += minorityFlightReport.displaced_total ?? 0;
-                    phaseIIMinorityFlightSummary.killed_total += minorityFlightReport.killed_total ?? 0;
-                    phaseIIMinorityFlightSummary.fled_abroad_total += minorityFlightReport.fled_abroad_total ?? 0;
-                    phaseIIMinorityFlightSummary.routed_total += minorityFlightReport.routed_total ?? 0;
-                    phaseIIMinorityFlightWeekly.push({
-                        week_index,
-                        turn: state.meta.turn,
-                        settlements_evaluated: minorityFlightReport.settlements_evaluated ?? 0,
-                        settlements_displaced: minorityFlightReport.settlements_displaced ?? 0,
-                        displaced_total: minorityFlightReport.displaced_total ?? 0,
-                        killed_total: minorityFlightReport.killed_total ?? 0,
-                        fled_abroad_total: minorityFlightReport.fled_abroad_total ?? 0,
-                        routed_total: minorityFlightReport.routed_total ?? 0
                     });
                 }
             }
@@ -1779,12 +1740,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 ? {
                     phase_ii_takeover_displacement: phaseIITakeoverDisplacementSummary,
                     phase_ii_takeover_displacement_weekly: phaseIITakeoverDisplacementWeekly
-                }
-                : {}),
-            ...(phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0
-                ? {
-                    phase_ii_minority_flight: phaseIIMinorityFlightSummary,
-                    phase_ii_minority_flight_weekly: phaseIIMinorityFlightWeekly
                 }
                 : {}),
             ...(phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0 && state.civilian_casualties
