@@ -11,7 +11,6 @@ import type { DisplacementState, FactionId, GameState, MilitiaPoolState, Municip
 import { buildAdjacencyMap, type AdjacencyMap } from '../map/adjacency_map.js';
 import { computeFrontEdges } from '../map/front_edges.js';
 import type { EdgeRecord } from '../map/settlements.js';
-import { getEffectiveSettlementSide } from './control_effective.js';
 import { getReceivingCapacityFraction } from './displacement_routing_data.js';
 import { computeFrontBreaches, type FrontBreach } from './front_breaches.js';
 import { LARGE_URBAN_MUN_IDS } from './large_urban_mun_data.js';
@@ -39,6 +38,57 @@ const FLEE_ABROAD_FRACTION_RBIH = 0; // Bosniaks: no external state to flee to
 
 // Phase 22: Sustainability collapse displacement multiplier
 const COLLAPSE_DISPLACEMENT_MULTIPLIER = 1.5; // 50% increase when municipality is collapsed
+
+/**
+ * Build municipality → controlling faction set from OSID-keyed political_controllers.
+ * OSID format: "op:municipality:slug". Returns map of munId → Set of factions with ≥1 OSID.
+ */
+function buildMunControlFromOsids(state: GameState): Map<MunicipalityId, Set<FactionId>> {
+    const result = new Map<MunicipalityId, Set<FactionId>>();
+    const pc = state.political_controllers;
+    if (!pc || typeof pc !== 'object') return result;
+    for (const [key, value] of Object.entries(pc)) {
+        if (!key.startsWith('op:') || !value) continue;
+        const parts = key.split(':');
+        if (parts.length < 2) continue;
+        const munId = parts[1] as MunicipalityId;
+        const faction = value as FactionId;
+        let set = result.get(munId);
+        if (!set) { set = new Set(); result.set(munId, set); }
+        set.add(faction);
+    }
+    return result;
+}
+
+/**
+ * Check if a municipality has any OSIDs controlled by the given faction.
+ */
+function isMunControlledByFaction(
+    munId: MunicipalityId,
+    factionId: FactionId,
+    munControl: Map<MunicipalityId, Set<FactionId>>
+): boolean {
+    return munControl.get(munId)?.has(factionId) ?? false;
+}
+
+/**
+ * Check if a municipality has a path to another friendly municipality via OSID adjacency.
+ * Uses OSID-keyed political_controllers for control checks.
+ */
+function isMunicipalityEncircledOsid(
+    munId: MunicipalityId,
+    factionId: FactionId,
+    munControl: Map<MunicipalityId, Set<FactionId>>
+): boolean {
+    // If faction doesn't control any OSID in this municipality, it's not "their" municipality to be encircled
+    if (!isMunControlledByFaction(munId, factionId, munControl)) return false;
+    // Check if any adjacent municipality is also controlled by this faction
+    for (const [otherMun, factions] of munControl) {
+        if (otherMun !== munId && factions.has(factionId)) return false;
+    }
+    // No other municipality controlled by this faction — truly isolated
+    return true;
+}
 
 /**
  * Displacement update record per municipality.
@@ -202,60 +252,6 @@ function isMunicipalitySupplied(
     return false;
 }
 
-/**
- * Check if a municipality is encircled (no friendly adjacency path).
- * A municipality is encircled if there's no path through friendly-controlled
- * settlements to any other friendly municipality.
- */
-function isMunicipalityEncircled(
-    munId: MunicipalityId,
-    factionId: FactionId,
-    settlements: Map<string, SettlementRecord>,
-    adjacencyMap: AdjacencyMap,
-    state: GameState
-): boolean {
-    // Find all settlements in this municipality
-    const munSettlements: string[] = [];
-    for (const [sid, settlement] of settlements.entries()) {
-        if ((settlement.mun1990_id ?? settlement.mun_code) === munId) {
-            munSettlements.push(sid);
-        }
-    }
-
-    if (munSettlements.length === 0) return false;
-
-    // BFS from any settlement in this municipality
-    // Check if we can reach any settlement in a different friendly municipality
-    const visited = new Set<string>();
-    const queue: string[] = [munSettlements[0]]; // Start from first settlement
-    visited.add(munSettlements[0]);
-
-    while (queue.length > 0) {
-        const current = queue.shift()!;
-        const neighbors = adjacencyMap[current] ?? [];
-
-        for (const neighbor of neighbors) {
-            if (visited.has(neighbor)) continue;
-
-            const neighborSide = getEffectiveSettlementSide(state, neighbor);
-            if (neighborSide !== factionId) continue; // Must be friendly-controlled
-
-            visited.add(neighbor);
-
-            // Check if neighbor is in a different municipality
-            const neighborSettlement = settlements.get(neighbor);
-            if (neighborSettlement && (neighborSettlement.mun1990_id ?? neighborSettlement.mun_code) !== munId) {
-                // Found path to different friendly municipality - not encircled
-                return false;
-            }
-
-            queue.push(neighbor);
-        }
-    }
-
-    // No path found to different friendly municipality - encircled
-    return true;
-}
 
 /**
  * Count breaches affecting a municipality.
@@ -298,69 +294,6 @@ function countBreachesAffectingMunicipality(
     return count;
 }
 
-/**
- * Find shortest path to friendly municipality using BFS.
- */
-function findShortestPathToFriendlyMunicipality(
-    startMunId: MunicipalityId,
-    factionId: FactionId,
-    settlements: Map<string, SettlementRecord>,
-    adjacencyMap: AdjacencyMap,
-    state: GameState,
-    reachableSettlements: Set<string>
-): MunicipalityId | null {
-    // Find all settlements in starting municipality
-    const startSettlements: string[] = [];
-    for (const [sid, settlement] of settlements.entries()) {
-        if ((settlement.mun1990_id ?? settlement.mun_code) === startMunId) {
-            startSettlements.push(sid);
-        }
-    }
-
-    if (startSettlements.length === 0) return null;
-
-    // BFS to find shortest path to any friendly municipality with supply
-    const visited = new Set<string>();
-    const queue: Array<{ sid: string; path: string[] }> = startSettlements.map((sid) => ({
-        sid,
-        path: [sid]
-    }));
-    for (const sid of startSettlements) {
-        visited.add(sid);
-    }
-
-    while (queue.length > 0) {
-        const current = queue.shift()!;
-        const neighbors = adjacencyMap[current.sid] ?? [];
-
-        for (const neighbor of neighbors) {
-            if (visited.has(neighbor)) continue;
-
-            const neighborSide = getEffectiveSettlementSide(state, neighbor);
-            if (neighborSide !== factionId) continue; // Must be friendly-controlled
-
-            visited.add(neighbor);
-
-            const neighborSettlement = settlements.get(neighbor);
-            if (!neighborSettlement) continue;
-
-            const neighborMunId = neighborSettlement.mun1990_id ?? neighborSettlement.mun_code;
-
-            // Check if this is a different municipality with supply
-            if (neighborMunId !== startMunId && reachableSettlements.has(neighbor)) {
-                return neighborMunId;
-            }
-
-            // Continue searching
-            queue.push({
-                sid: neighbor,
-                path: [...current.path, neighbor]
-            });
-        }
-    }
-
-    return null;
-}
 
 /**
  * Route displaced population to friendly municipalities.
@@ -369,95 +302,24 @@ function routeDisplacedPopulation(
     fromMunId: MunicipalityId,
     factionId: FactionId,
     amount: number,
-    settlements: Map<string, SettlementRecord>,
-    adjacencyMap: AdjacencyMap,
-    state: GameState,
-    reachableSettlements: Set<string>,
-    displacementState: Record<MunicipalityId, DisplacementState>
+    displacementState: Record<MunicipalityId, DisplacementState>,
+    munControl: Map<MunicipalityId, Set<FactionId>>
 ): DisplacementRoutingRecord[] {
     const routing: DisplacementRoutingRecord[] = [];
     let remaining = amount;
 
-    // Find all friendly municipalities with supply, sorted by shortest path
-    const candidateMuns: Array<{ mun_id: MunicipalityId; distance: number }> = [];
+    // Find all friendly municipalities (controlled by this faction), sorted alphabetically for determinism
+    const candidateMuns: MunicipalityId[] = [];
 
-    // Get all municipalities controlled by this faction with supply
-    const munSettlementsByMun = new Map<MunicipalityId, string[]>();
-    for (const [sid, settlement] of settlements.entries()) {
-        const side = getEffectiveSettlementSide(state, sid);
-        if (side !== factionId) continue;
-        if (!reachableSettlements.has(sid)) continue;
-
-        const munId = settlement.mun1990_id ?? settlement.mun_code;
-        if (!munSettlementsByMun.has(munId)) {
-            munSettlementsByMun.set(munId, []);
-        }
-        munSettlementsByMun.get(munId)!.push(sid);
-    }
-
-    // Calculate distances and sort
-    for (const [targetMunId, targetSettlements] of munSettlementsByMun.entries()) {
-        if (targetMunId === fromMunId) continue; // Don't route to self
-
-        // Find shortest path (simplified: use first settlement in each municipality)
-        const fromSettlements: string[] = [];
-        for (const [sid, settlement] of settlements.entries()) {
-            if ((settlement.mun1990_id ?? settlement.mun_code) === fromMunId) {
-                fromSettlements.push(sid);
-            }
-        }
-
-        if (fromSettlements.length === 0 || targetSettlements.length === 0) continue;
-
-        // Simple distance: use BFS from first settlement
-        const visited = new Set<string>();
-        const queue: Array<{ sid: string; dist: number }> = fromSettlements.map((sid) => ({
-            sid,
-            dist: 0
-        }));
-        for (const sid of fromSettlements) {
-            visited.add(sid);
-        }
-
-        let found = false;
-        let distance = Infinity;
-
-        while (queue.length > 0 && !found) {
-            const current = queue.shift()!;
-            const neighbors = adjacencyMap[current.sid] ?? [];
-
-            for (const neighbor of neighbors) {
-                if (visited.has(neighbor)) continue;
-
-                const neighborSide = getEffectiveSettlementSide(state, neighbor);
-                if (neighborSide !== factionId) continue;
-
-                visited.add(neighbor);
-                const neighborSettlement = settlements.get(neighbor);
-                if (!neighborSettlement) continue;
-
-                if ((neighborSettlement.mun1990_id ?? neighborSettlement.mun_code) === targetMunId) {
-                    distance = current.dist + 1;
-                    found = true;
-                    break;
-                }
-
-                queue.push({ sid: neighbor, dist: current.dist + 1 });
-            }
-        }
-
-        if (found) {
-            candidateMuns.push({ mun_id: targetMunId, distance });
-        }
+    for (const [targetMunId, factions] of munControl) {
+        if (targetMunId === fromMunId) continue;
+        if (!factions.has(factionId)) continue;
+        candidateMuns.push(targetMunId);
     }
 
     const urbanMunSet = new Set<MunicipalityId>(LARGE_URBAN_MUN_IDS as readonly MunicipalityId[]);
 
-    // Sort by distance, then mun_id for determinism
-    candidateMuns.sort((a, b) => {
-        if (a.distance !== b.distance) return a.distance - b.distance;
-        return a.mun_id.localeCompare(b.mun_id);
-    });
+    candidateMuns.sort((a, b) => a.localeCompare(b));
 
     const virtualDisplacedIn: Partial<Record<MunicipalityId, number>> = {};
 
@@ -474,17 +336,17 @@ function routeDisplacedPopulation(
         return Math.max(0, capacity - current);
     }
 
-    function fillFromCandidates(candidates: Array<{ mun_id: MunicipalityId }>): void {
-        for (const candidate of candidates) {
+    function fillFromCandidates(candidates: MunicipalityId[]): void {
+        for (const munId of candidates) {
             if (remaining <= 0) break;
-            const targetAvailable = availableAt(candidate.mun_id);
+            const targetAvailable = availableAt(munId);
             if (targetAvailable <= 0) continue;
             const routed = Math.min(remaining, targetAvailable);
             if (routed <= 0) continue;
-            virtualDisplacedIn[candidate.mun_id] = (virtualDisplacedIn[candidate.mun_id] ?? 0) + routed;
+            virtualDisplacedIn[munId] = (virtualDisplacedIn[munId] ?? 0) + routed;
             routing.push({
                 from_mun: fromMunId,
-                to_mun: candidate.mun_id,
+                to_mun: munId,
                 amount: routed,
                 reason: 'friendly_supplied'
             });
@@ -494,16 +356,16 @@ function routeDisplacedPopulation(
 
     fillFromCandidates(candidateMuns);
     if (remaining > 0) {
-        fillFromCandidates(candidateMuns.filter((c) => urbanMunSet.has(c.mun_id)));
+        fillFromCandidates(candidateMuns.filter((m) => urbanMunSet.has(m)));
     }
 
     return routing;
 }
 
-/** One-time displacement fraction for Phase I flip when no 1991 census (Phase I §4.4). */
+/** One-time displacement fraction for control flip when no 1991 census. */
 export const PHASE_I_DISPLACEMENT_FRACTION_NO_CENSUS = 0.15;
 
-/** Minimal shape for Phase I displacement apply (avoids state -> phase_i dependency). */
+/** Minimal shape for control-flip displacement apply. */
 export interface PhaseIDisplacementFlipInfo {
     mun_id: MunicipalityId;
     from_faction: FactionId | null;
@@ -515,16 +377,16 @@ export interface PhaseIDisplacementHooksInfo {
 }
 
 /**
- * Apply one-time Phase I displacement for muns that flipped and had displacement initiated this turn (Phase I §4.4).
- * Mutates state.displacement_state; uses same routing and killed/fled-abroad rules as Phase II when census provided.
+ * Apply one-time displacement for muns that flipped and had displacement initiated this turn.
+ * Mutates state.displacement_state; uses same routing and killed/fled-abroad rules when census provided.
  */
 export function applyPhaseIDisplacementFromFlips(
     state: GameState,
     turn: number,
     flips: PhaseIDisplacementFlipInfo[],
     hooksByMun: PhaseIDisplacementHooksInfo['by_mun'],
-    settlements: Map<string, SettlementRecord>,
-    adjacencyMap: AdjacencyMap,
+    _settlements: Map<string, SettlementRecord>,
+    _adjacencyMap: AdjacencyMap,
     population1991ByMun?: MunicipalityPopulation1991Map
 ): DisplacementStepReport {
     const defaultOriginalPopulation = 10000;
@@ -536,6 +398,7 @@ export function applyPhaseIDisplacementFromFlips(
     }
     const munsInitiatedThisTurn = hooksByMun.filter((m) => m.initiated_turn === turn).map((m) => m.mun_id);
     munsInitiatedThisTurn.sort((a, b) => a.localeCompare(b));
+    const mc = buildMunControlFromOsids(state);
 
     for (const munId of munsInitiatedThisTurn) {
         const flip = flipByMun.get(munId);
@@ -589,28 +452,17 @@ export function applyPhaseIDisplacementFromFlips(
         const beforeOut = dispState.displaced_out;
         const beforeIn = dispState.displaced_in;
         const beforeLost = dispState.lost_population;
-        dispState.displaced_out += displacementAmount;
+        // displaced_out = only actually-routed; lost_population = killed + fled + unrouted
         dispState.lost_population += lostAmount;
         dispState.last_updated_turn = turn;
 
         if (routedAmount > 0) {
-            const reachableSettlements = new Set<string>();
-            for (const [sid, settlement] of settlements.entries()) {
-                const side = getEffectiveSettlementSide(state, sid);
-                if (side !== fromFaction) continue;
-                const sidMun = (settlement.mun1990_id ?? settlement.mun_code) as MunicipalityId;
-                if (sidMun === munId) continue;
-                reachableSettlements.add(sid);
-            }
             const routing = routeDisplacedPopulation(
                 munId,
                 fromFaction,
                 routedAmount,
-                settlements,
-                adjacencyMap,
-                state,
-                reachableSettlements,
-                state.displacement_state!
+                state.displacement_state!,
+                mc
             );
             const totalRoutable = routableByFaction
                 ? routableByFaction.RBiH + routableByFaction.RS + routableByFaction.HRHB
@@ -643,6 +495,7 @@ export function applyPhaseIDisplacementFromFlips(
                 routingRecords.push(route);
             }
             const totalRouted = routing.reduce((sum, r) => sum + r.amount, 0);
+            dispState.displaced_out += totalRouted;
             const unRouted = routedAmount - totalRouted;
             if (unRouted > 0) {
                 dispState.lost_population += unRouted;
@@ -728,6 +581,7 @@ export function updateDisplacement(
     const supplyReport = computeSupplyReachability(state, adjacencyMap);
     const frontEdges = computeFrontEdges(state, settlementEdges);
     const breaches = computeFrontBreaches(state, frontEdges);
+    const munControl = buildMunControlFromOsids(state);
 
     // Build reachable sets by faction
     const reachableByFaction = new Map<FactionId, Set<string>>();
@@ -772,7 +626,7 @@ export function updateDisplacement(
         const underPressure = isMunicipalityUnderPressure(munId, settlements, state, frontEdges);
         const reachableSettlements = reachableByFaction.get(factionId) ?? new Set<string>();
         const supplied = isMunicipalitySupplied(factionId, munId, settlements, reachableSettlements);
-        const encircled = isMunicipalityEncircled(munId, factionId, settlements, adjacencyMap, state);
+        const encircled = isMunicipalityEncircledOsid(munId, factionId, munControl);
         const breachCount = breachCountByMun.get(munId) ?? 0;
 
         // Phase 22: Check if municipality is collapsed (sustainability collapse)
@@ -868,7 +722,7 @@ export function updateDisplacement(
             const beforeIn = dispState.displaced_in;
             const beforeLost = dispState.lost_population;
 
-            dispState.displaced_out += displacementAmount;
+            // displaced_out = only actually-routed amount; lost_population = killed + fled + unrouted
             dispState.lost_population += lostAmount;
             dispState.last_updated_turn = currentTurn;
 
@@ -886,11 +740,8 @@ export function updateDisplacement(
                     munId,
                     factionId,
                     routedAmount,
-                    settlements,
-                    adjacencyMap,
-                    state,
-                    reachableSettlements,
-                    state.displacement_state!
+                    state.displacement_state!,
+                    munControl
                 );
 
                 const totalRoutable = routableByFaction
@@ -928,6 +779,7 @@ export function updateDisplacement(
                 }
 
                 const totalRouted = routing.reduce((sum, r) => sum + r.amount, 0);
+                dispState.displaced_out += totalRouted;
                 const unRouted = routedAmount - totalRouted;
                 if (unRouted > 0) {
                     dispState.lost_population += unRouted;
@@ -968,7 +820,7 @@ export function updateDisplacement(
  * Enforce recruitment ceiling based on displacement.
  * After displacement, the effective recruitment capacity is:
  * original_population - displaced_out - lost_population
- *
+ * where displaced_out = actually routed to other muns, lost_population = killed + fled_abroad + unrouted.
  * This reduces militia pool available if it exceeds the ceiling.
  */
 export function enforceRecruitmentCeilings(state: GameState): void {

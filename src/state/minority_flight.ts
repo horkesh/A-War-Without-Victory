@@ -1,6 +1,6 @@
 /**
- * Phase II: Non-takeover minority flight (settlement-level).
- * Canon: displacement redesign 2026-02-17 (MILITIA_BRIGADE_FORMATION_DESIGN §6, Phase II §15).
+ * War phase: Non-takeover minority flight (settlement-level).
+ * Canon: displacement redesign 2026-02-17.
  *
  * Matrix:
  * - RBiH + Serbs (majority/minority): 50% gradual over 26 turns
@@ -13,7 +13,6 @@
  */
 
 import type { SettlementRecord } from '../map/settlements.js';
-import { getEffectiveSettlementSide } from './control_effective.js';
 import { DISPLACEMENT_KILLED_FRACTION, getFactionFleeAbroadFraction } from './displacement_loss_constants.js';
 import { getMunicipalityIdFromRecord, getOrInitDisplacementState, recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
 import type {
@@ -118,6 +117,37 @@ function addToCamp(
     report.routed_total += amount;
 }
 
+/**
+ * Build municipality → dominant controller from OSID-keyed political_controllers.
+ * Dominant = faction controlling most OSIDs in the municipality. Ties broken alphabetically.
+ */
+function buildMunDominantController(state: GameState): Map<MunicipalityId, FactionId> {
+    const counts = new Map<MunicipalityId, Map<FactionId, number>>();
+    const pc = state.political_controllers;
+    if (!pc || typeof pc !== 'object') return new Map();
+    for (const [key, value] of Object.entries(pc)) {
+        if (!key.startsWith('op:') || !value) continue;
+        const parts = key.split(':');
+        if (parts.length < 2) continue;
+        const munId = parts[1] as MunicipalityId;
+        const faction = value as FactionId;
+        let mc = counts.get(munId);
+        if (!mc) { mc = new Map(); counts.set(munId, mc); }
+        mc.set(faction, (mc.get(faction) ?? 0) + 1);
+    }
+    const result = new Map<MunicipalityId, FactionId>();
+    for (const [munId, factionCounts] of counts) {
+        let best: FactionId | null = null;
+        let bestCount = 0;
+        const sorted = [...factionCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+        for (const [faction, count] of sorted) {
+            if (count > bestCount) { best = faction; bestCount = count; }
+        }
+        if (best) result.set(munId, best);
+    }
+    return result;
+}
+
 export function processMinorityFlight(
     state: GameState,
     settlements: Map<string, SettlementRecord>,
@@ -158,6 +188,24 @@ export function processMinorityFlight(
     if (!state.minority_flight_state) state.minority_flight_state = {};
     const flightMap = state.minority_flight_state;
 
+    const munDominantController = buildMunDominantController(state);
+
+    // Track remaining population per municipality to prevent overdraw from multiple settlements
+    const munRemainingPop = new Map<MunicipalityId, number>();
+    function getMunRemaining(munId: MunicipalityId): number {
+        const cached = munRemainingPop.get(munId);
+        if (cached !== undefined) return cached;
+        const ds = state.displacement_state?.[munId];
+        const orig = ds?.original_population ?? 10000;
+        const remaining = Math.max(0, orig - (ds?.displaced_out ?? 0) - (ds?.lost_population ?? 0));
+        munRemainingPop.set(munId, remaining);
+        return remaining;
+    }
+    function reduceMunRemaining(munId: MunicipalityId, amount: number): void {
+        const current = getMunRemaining(munId);
+        munRemainingPop.set(munId, Math.max(0, current - amount));
+    }
+
     const sids = Array.from(settlements.keys()).sort(strictCompare);
     for (const sid of sids) {
         const rec = settlements.get(sid);
@@ -169,7 +217,7 @@ export function processMinorityFlight(
 
         if (munsInTakeoverOrCamp.has(munId)) continue;
 
-        const controller = getEffectiveSettlementSide(state, sid) as FactionId | null;
+        const controller = munDominantController.get(munId) ?? null;
         if (!controller || (controller !== 'RBiH' && controller !== 'HRHB' && controller !== 'RS')) continue;
 
         const minority = getSettlementMinorityPop(
@@ -233,7 +281,8 @@ export function processMinorityFlight(
 
         if (delta <= 0) continue;
 
-        const phasedDelta = Math.max(0, Math.floor(delta * phaseFactor));
+        const rawPhasedDelta = Math.max(0, Math.floor(delta * phaseFactor));
+        const phasedDelta = Math.min(rawPhasedDelta, getMunRemaining(munId));
         if (phasedDelta <= 0) continue;
 
         report.settlements_displaced += 1;
@@ -273,9 +322,12 @@ export function processMinorityFlight(
             munId,
             state.displacement_state?.[munId]?.original_population ?? 10000
         );
-        dispState.displaced_out += phasedDelta;
+        // displaced_out = only actually-routed to camps; lost_population = killed + fled
+        const routedToCamps = routedRBiH + routedHRHB + routedRS;
+        dispState.displaced_out += routedToCamps;
         dispState.lost_population += killed + fledAbroad;
         dispState.last_updated_turn = currentTurn;
+        reduceMunRemaining(munId, phasedDelta);
 
         const entry = flightMap[sid];
         if (entry) {
