@@ -14,7 +14,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 **Project:** A War Without Victory (AWWV)
 **Type:** Wargame simulation prototype
 **Repository:** AWWV
-**Current Focus:** Combat calibration (n314, 87.4% OSID match), GUI Architecture Rework v2 (React+MapLibre), displacement system
+**Current Focus:** Combat calibration (n326, 84.7% OSID match — post-operations injection), GUI Architecture Rework v2 (React+MapLibre), VRS pre-planned operations
 
 ---
 
@@ -46,12 +46,12 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **Phase:** Post-MVP — Active Development
 **Status:** Phase II live, Phase M complete, GUI rework in progress
-**Focus:** Combat calibration (86.7% OSID match at n304), GUI Phase 3 remainder, displacement gap closure
+**Focus:** Combat calibration (87.4% OSID match at n314), GUI Phase 3 remainder
 
 **Completed milestones:**
 - Phase 6: MVP declared 2026-02-08; A1 base map stable and frozen
 - Phase II: Front-based combat, OSID political control, bot AI (Army→Corps→Brigade), corps front sectors
-- Phase M: Year-one mechanics — morale drift, ZoC virtual defense, enclave deprivation, displacement routing
+- Phase M: Year-one mechanics — morale drift, ZoC virtual defense, enclave deprivation, displacement routing, per-OSID census displacement depth
 - Phase C: GUI tooltips, keyboard shortcuts, attack modal, order queue
 - Peace/War lifecycle migration (replaced phase_i/phase_ii)
 - Corps sector visualization in React+MapLibre map
@@ -59,7 +59,9 @@ This is the single authoritative project ledger. All context, decisions, and sta
 **Active workstreams:**
 - Combat calibration: n314 = 87.4% (658/753 OSID match), multi-sector corps + supply gating + sector offensives
 - GUI Phase 3 remainder: Minimap, ZoomControls, CorpsDetail, ArmyDetail, MovementPreview
-- Displacement: 340k vs ~1M target — deferred until combat calibration stabilizes
+
+**Completed workstreams:**
+- Displacement system complete: n319 = 668k displaced (per-OSID census depth). See 20260301_DISPLACEMENT_DEPTH_CALIBRATION.md
 
 ---
 
@@ -112,13 +114,15 @@ This is the single authoritative project ledger. All context, decisions, and sta
 | 7 | 2026-02-28 | Peace/War lifecycle replaces phase_i/phase_ii |
 | 8 | 2026-03-01 | Morale retreat resistance: MORALE_RESIST_FLOOR = 70 |
 | 9 | 2026-03-01 | Local front density modifier: thin fronts penalized, dense fronts rewarded |
-| 10 | 2026-03-01 | Displacement tuning deferred until combat calibration stabilizes |
+| 10 | 2026-03-01 | ~~Displacement tuning deferred~~ → Displacement system complete (n319, per-OSID census depth) |
+| 11 | 2026-03-01 | Per-OSID census data for displacement depth; hostile share cap 0.95 per-OSID, 0.80 mun fallback |
 
 ---
 
 ## Current State
 
-**Calibration:** n304 (40w) = 86.7% OSID match (653/753). RS=382 (painted 416), RBiH=277 (painted 248), HRHB=94 (painted 89). 6/6 benchmarks pass.
+**Calibration:** n314 (40w) = 87.4% OSID match (658/753). RS=389 (painted 416), RBiH=272 (painted 248), HRHB=92 (painted 89). 6/6 benchmarks pass.
+**Displacement:** n319 = 668k total displaced (RBiH 458k, HRHB 150k, RS 60k). Per-OSID census depth complete. Hash `42ad78a39746d166`.
 
 **Key files:**
 - Simulation: `src/sim/turn_pipeline.ts`, `src/sim/phase_ii/attack_resolution_osid.ts`, `src/sim/phase_ii/bot_corps_ai.ts`
@@ -128,29 +132,26 @@ This is the single authoritative project ledger. All context, decisions, and sta
 - OOB: `data/source/oob_brigades.json`
 
 **Known gaps:**
-- Drina region 71.9% — RS can't sweep 12 municipalities with small Drina Corps
+- Drina region 75.0% — RS can't sweep 12 municipalities with small Drina Corps
 - Bugojno: 8 RS overruns (should be HRHB)
 - VRS troop count 120k vs 100k target
-- Displacement 340k vs ~1M target (deferred)
 
 ---
 
 ## Next Tasks
 
 1. Complete GUI Phase 3 remainder (Minimap, ZoomControls, CorpsDetail, ArmyDetail, MovementPreview)
-2. Stabilize combat calibration before tuning displacement
+2. Continue combat calibration (Drina region, Bugojno, VRS troop counts)
 3. Re-enable minority flight in displacement system
-4. Investigate sustained displacement after initial timer
-5. GUI Phase 4: Desktop/Electron integration (useIPC, advance-turn)
+4. GUI Phase 4: Desktop/Electron integration (useIPC, advance-turn)
 
 ---
 
 ## Backlog
 
 1. M5 breakthrough retreat mechanic
-2. OSID-level displacement tracking (system operates at mun level)
-3. Enclave morale tuning (70→55 for Drina enclaves)
-4. Winter slowdown mechanic (intentional, not accidental dead weeks)
+2. Enclave morale tuning (70→55 for Drina enclaves)
+3. Winter slowdown mechanic (intentional, not accidental dead weeks)
 5. War termination specification implementation
 6. Supply specification completion
 7. Scenario: full 52w historical (Apr 1992 → Oct 1993) acceptance run
@@ -8713,3 +8714,29 @@ Determinism checks **MUST** be run:
 - **Determinism:** Pure constant extraction — same values, same usage. No behavioral change.
 - **Files:** `src/sim/phase_ii/bot_constants.ts` (NEW ~95 lines), `bot_corps_ai.ts` (-52 lines constants, +20 lines imports), `bot_strategy.ts` (-8 lines constants, +5 lines imports/re-exports).
 - **Verification:** tsc clean; vitest 190/190 pass (13 skipped); map UI build clean.
+
+**2026-03-01** - feat(displacement): per-OSID census displacement depth — system complete
+- **Phase:** Post-MVP — displacement system completion.
+- **Summary:** Displacement depth calibrated using per-OSID census data from `operational_settlements.geojson`. Previously, displacement evenly split municipality population across OSIDs and used municipality-level ethnic share, producing shallow displacement (Ljubija: 66% vs 90-97% historical). Now uses actual per-OSID population and ethnic composition for each OSID. Also implemented ethnic map layer (OSID-level ethnic composition using departure events and per-municipality arrivals).
+- **Root cause:** The `settlements` map passed to `processPhaseIIDisplacementTakeover` was SID-keyed (raw graph, 5822 entries), not OSID-keyed (operational graph, 753 entries). Ethnic share used municipality average (cap 0.80) instead of per-OSID census data.
+- **Fix (displacement_takeover.ts):** (1) Added `getOsidCensusPopulation()` and `getOsidCensusHostileShare()` helpers — read `population_total`, `population_bosniaks`, `population_serbs`, `population_croats`, `population_others` from OSID records; faction→ethnic alignment: RBiH=bosniak+other, RS=serb, HRHB=croat. (2) Both Branch A (initial maturation) and Branch B (sustained displacement) use per-OSID census data with 0.95 cap; fallback to municipality-level with 0.80 cap. (3) Sustained pool fix: `cumulative_displaced` set to `displacementAmount` after initial fire (was 0, causing double-counting).
+- **Fix (turn_pipeline.ts):** Operational settlements loaded separately via `loadSettlementGraph()` (OSID-keyed, `op:` prefix validated). Passed as `osidSettlements` parameter to `processPhaseIIDisplacementTakeover`.
+- **Ethnic layer (buildEthnicGeoJSON.ts):** Rewritten with two-pass OSID-level ethnic computation using departure events (displacement_event_log) and per-municipality arrivals. Files: `GameStateAdapter.ts` (+`departedByOsid`, `arrivedByFaction`), `types.ts`, `MapContainer.tsx`.
+- **Results (n310→n319):** Total displaced 481k→668k (+39%). RBiH: 269k→458k. HRHB: 120k→150k. RS: 37k→60k. Ljubija initial fire: 5,331→13,399 (+151%). OSID match: 86.7% (653/753). All 6/6 benchmarks pass. Determinism verified: hash `42ad78a39746d166`.
+- **Displacement system status:** COMPLETE. Per-OSID census depth, displacement routing, expulsion policies, ethnic map layer all implemented and calibrated.
+- **Files modified:** `src/state/displacement_takeover.ts`, `src/sim/turn_pipeline.ts`, `src/ui/map/map/builders/buildEthnicGeoJSON.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/data/types.ts`, `src/ui/map/map/MapContainer.tsx`.
+- **Docs updated:** `docs/20_engineering/DISPLACEMENT_MASTER.md`, `docs/40_reports/20260301_DISPLACEMENT_DEPTH_CALIBRATION.md` (NEW), `docs/10_canon/Systems_Manual_v0_6_0.md` §12.3, `docs/10_canon/War_Specification_v0_6_0.md` §5/§10, `docs/40_reports/CALIBRATION_MASTER.md`.
+
+**[2026-03-01] Canon propagation: displacement system completion**
+- **Summary:** Propagated displacement system completion across canon docs and project tracking.
+- **Changes:** Systems Manual §12.3 (new: per-OSID census data, hostile share caps, sustained pool accounting). War Specification §5 (displacement depth note), §10 (report reference). CALIBRATION_MASTER (n310/n319 rows, updated displacement section). Phase II design doc (Mechanic 8 implementation note). PROJECT_LEDGER (current state, decisions, next tasks, backlog updated; displacement gap closed). PROJECT_LEDGER_KNOWLEDGE (displacement thematic entry).
+- **Failure mode prevented:** All canon and planning docs now reflect displacement system as complete; future sessions won't attempt redundant work on closed gaps.
+
+**2026-03-01** - refactor(sim): consolidate OSID adjacency builders (R4)
+- **Phase:** Post-MVP maintenance — code health (R4 of R2–R9 refactoring plan).
+- **Summary:** Eliminated 2 local duplicate OSID adjacency builder functions by importing canonical `buildOsidAdjacency` from `zoc.ts`. Removed `buildOsidAdjacency` from `supply_reachability_osid.ts` (16 lines) and `buildOsidAdjacencyFromEdges` from `supply_state_derivation.ts` (15 lines + 9 lines dead `deriveEnclaveResilience` stub).
+- **Assessment correction:** Plan estimated "4 similar implementations, consolidate to ≤2". Reality: 3 genuinely distinct builders (OSID sorted-array in `zoc.ts`, settlement Set-based in `phase_ii_adjacency.ts`, settlement sorted-Record in `adjacency_map.ts`) serving different graph levels + 2 local OSID duplicates + 1 validation-only. Only the 2 local OSID duplicates were actual consolidation targets. `phase_ii_adjacency.ts` contains more than adjacency (contiguity check, faction brigade helper) and must stay.
+- **`strictCompare` vs `localeCompare`:** Local copies used `localeCompare`; canonical uses `strictCompare`. For ASCII OSID strings (`op:municipality:slug`), both produce identical ordering.
+- **Determinism:** Pure structural refactoring. State hash `1dfb9114d33efbde` unchanged with and without R4 changes (verified via git stash/pop comparison).
+- **Files modified:** `src/state/supply_reachability_osid.ts` (-16 lines local builder, +1 import), `src/state/supply_state_derivation.ts` (-24 lines local builder + dead stub, +1 import, 2 call sites updated).
+- **Verification:** tsc clean; vitest 190/190 pass (13 skipped); map UI build clean; sim:scenario:run:40w hash identical before/after.

@@ -10,6 +10,7 @@ import { getPoliticalControllerOSID } from './settlement_control.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import type { CanonicalToOperationalMap, OperationalToCanonicalReverseMap } from '../data/operational_data.js';
 import { runSupplyBfs } from './supply_reachability.js';
+import { buildOsidAdjacency } from '../sim/phase_ii/zoc.js';
 
 export interface FactionSupplyReachabilityOsid {
     faction_id: string;
@@ -24,22 +25,6 @@ export interface SupplyReachabilityOsidReport {
     schema: 1;
     turn: number;
     factions: FactionSupplyReachabilityOsid[]; // sorted by faction_id
-}
-
-function buildOsidAdjacency(edges: EdgeRecord[]): Map<string, string[]> {
-    const adj = new Map<string, string[]>();
-    for (const e of edges) {
-        const a = e.a;
-        const b = e.b;
-        if (!adj.has(a)) adj.set(a, []);
-        adj.get(a)!.push(b);
-        if (!adj.has(b)) adj.set(b, []);
-        adj.get(b)!.push(a);
-    }
-    for (const list of adj.values()) {
-        list.sort((x, y) => x.localeCompare(y));
-    }
-    return adj;
 }
 
 /**

@@ -11,6 +11,7 @@ import type { EdgeRecord, SettlementRecord } from '../map/settlements.js';
 import { getSettlementControlStatus } from './settlement_control.js';
 import type { SupplyReachabilityReport } from './supply_reachability.js';
 import type { SupplyReachabilityOsidReport } from './supply_reachability_osid.js';
+import { buildOsidAdjacency } from '../sim/phase_ii/zoc.js';
 
 /** Supply state levels per canon (Systems Manual §14). */
 export type SupplyStateLevel = 'adequate' | 'strained' | 'critical';
@@ -339,21 +340,6 @@ export function deriveLocalProductionCapacity(
 // OSID-level supply state (Phase II)
 // ═══════════════════════════════════════════════════════════════════════════
 
-function buildOsidAdjacencyFromEdges(edges: EdgeRecord[]): Map<string, string[]> {
-    const adj = new Map<string, string[]>();
-    for (const e of edges) {
-        const a = e.a;
-        const b = e.b;
-        if (!adj.has(a)) adj.set(a, []);
-        adj.get(a)!.push(b);
-        if (!adj.has(b)) adj.set(b, []);
-        adj.get(b)!.push(a);
-    }
-    for (const list of adj.values()) {
-        list.sort((x, y) => x.localeCompare(y));
-    }
-    return adj;
-}
 
 function isBridgeInSubgraphOsid(
     edgeId: string,
@@ -393,7 +379,7 @@ export function deriveCorridorsOsid(
     supplyReport: SupplyReachabilityOsidReport
 ): CorridorDerivationReport {
     const turn = state.meta.turn;
-    const adjacency = buildOsidAdjacencyFromEdges(edges);
+    const adjacency = buildOsidAdjacency(edges);
     const corridors: DerivedCorridor[] = [];
 
     for (const fac of supplyReport.factions) {
@@ -441,7 +427,7 @@ export function deriveSupplyStateByOsid(
     corridorReport: CorridorDerivationReport
 ): SupplyStateByOsidReport {
     const turn = state.meta.turn;
-    const adjacency = buildOsidAdjacencyFromEdges(edges);
+    const adjacency = buildOsidAdjacency(edges);
     const corridorByFactionEdge = new Map<string, CorridorStateLevel>();
     for (const c of corridorReport.corridors) {
         corridorByFactionEdge.set(`${c.faction_id}:${c.edge_id}`, c.state);
@@ -513,13 +499,4 @@ export interface EnclaveResilienceReport {
     schema: 1;
     turn: number;
     enclaves: EnclaveResilienceEntry[]; // sorted by faction_id then enclave_id
-}
-
-/**
- * Derives enclave resilience and hardening. Returns empty report until Game Designer provides formula.
- * Deterministic: sorted iteration. See SUPPLY_DESIGN.md and SUPPLY_IMPLEMENTATION_PLAN.md Phase 4.
- */
-export function deriveEnclaveResilience(_state: GameState): EnclaveResilienceReport {
-    const turn = _state.meta.turn;
-    return { schema: 1, turn, enclaves: [] };
 }
