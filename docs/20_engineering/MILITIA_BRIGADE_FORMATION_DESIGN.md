@@ -47,7 +47,7 @@
 
 ## 6. Displaced civilians: reinforcement and formation
 
-- **Reinforcement:** A fraction of displaced population in a municipality contributes to militia pools in that mun. Formula: `displaced_contribution = min(displaced * REINFORCEMENT_RATE, DISPLACED_CONTRIBUTION_CAP)`. REINFORCEMENT_RATE and cap are constants (e.g. 0.05 and 2000). Stable ordering by mun_id.
+- **Reinforcement:** A fraction of displaced population in a municipality contributes to militia pools in that mun. Formula: `displaced_contribution = min(displaced * rate, DISPLACED_CONTRIBUTION_CAP)` where rate = REINFORCEMENT_RATE_ACUTE (0.04) for first 8 weeks, then REINFORCEMENT_RATE_SUSTAINED (0.01). Cap is 800. Stable ordering by mun_id.
 - **Per-faction displaced (ethnicity-traced):** When 1991 census is available at displacement time, routed displaced are **split by source municipality’s 1991 ethnic composition** (Bosniak→RBiH, Serb→RS, Croat→HRHB; other→RBiH). Destination mun state stores `displaced_in_by_faction` and pool population adds each faction’s share to that faction’s pool in that mun. So e.g. Bosniaks displaced from Prijedor to Travnik add to the **RBiH** pool in Travnik, not only to the controlling faction. When `displaced_in_by_faction` is absent (no census or legacy save), reinforcement falls back to attributing all `displaced_in` to the **controlling faction’s** pool.
 - **Form new formation from displaced:** When (a) displaced_in in a mun exceeds a **threshold** (e.g. DISPLACED_FORMATION_THRESHOLD), and (b) the controlling faction has no brigade in that mun, and (c) a **directive** allows “displaced-origin” formation (FORAWWV H2.4), a new formation may be created from displaced. Naming: origin-based if displaced_origin is tracked (e.g. “17th Krajina Brigade” in Travnik); otherwise destination mun + ordinal. **Gating:** Explicit directive or scenario condition; no automatic formation-from-displaced without directive.
 - **Killed and fled-abroad (ethnicity-based):** When 1991 census is available, not all displaced reach faction-held territory. A **killed** fraction (same for all ethnicities) and a **fled outside BiH** fraction are applied: Serbs and Croats have higher flee-abroad rates (Serbia/Croatia to flee to); Bosniaks have none. Remaining displaced are routed and attributed per faction as above. Constants: `DISPLACEMENT_KILLED_FRACTION`, `FLEE_ABROAD_FRACTION_RS`, `FLEE_ABROAD_FRACTION_HRHB`, `FLEE_ABROAD_FRACTION_RBIH` (0). Without census, a flat `LOST_POPULATION_FRACTION` continues to apply.
@@ -104,8 +104,9 @@
 | Constant | Value / source | Purpose |
 |----------|----------------|---------|
 | LARGE_SETTLEMENT_MUN_IDS | [centar_sarajevo, novi_grad_sarajevo, novo_sarajevo, stari_grad_sarajevo] | Control flip: ineligible to flip when no defender |
-| REINFORCEMENT_RATE | 0.05 | displaced_in → pool contribution factor |
-| DISPLACED_CONTRIBUTION_CAP | 2000 | Max added to pool per mun per turn from displaced |
+| REINFORCEMENT_RATE_ACUTE | 0.04 | displaced_in → pool contribution factor (first 8 weeks; was 0.05/0.01) |
+| REINFORCEMENT_RATE_SUSTAINED | 0.01 | displaced_in → pool contribution factor (after 8 weeks) |
+| DISPLACED_CONTRIBUTION_CAP | 800 | Max added to pool per mun per turn from displaced (was 2000→500→800) |
 | DISPLACED_FORMATION_THRESHOLD | (design: e.g. 5000) | Min displaced_in to allow formation-from-displaced when directive present |
 | max_brigades_per_mun | 1 default; 2 from derived data (1991 census: large/mixed) | **Total** brigade cap per (mun, faction); spawn skips when at cap |
 | MIN_BRIGADE_SPAWN | 800 | Pool must reach this to spawn a new brigade; new brigade starts at 800 personnel (research: canFormBrigade ≥800). |

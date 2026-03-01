@@ -7,7 +7,7 @@ import {
     computeBrigadeOperationalCoverageCapFromFormation,
     getFormationHomeMunFromTags
 } from '../../state/brigade_operational_cap.js';
-import { getPersonnelBasedZoCCap as getPersonnelBasedAoRCap, isLargeUrbanSettlementMun } from '../../state/formation_constants.js';
+import { isLargeUrbanSettlementMun } from '../../state/formation_constants.js';
 import { getEquipmentCost } from '../../state/recruitment_types.js';
 import { ACCENT_GREEN, AOR_HIGHLIGHT, BASE_LAYER_COLORS, BASE_LAYER_WIDTHS, detHash, ETHNICITY_COLORS, ETHNICITY_LABELS, FACTION_DISPLAY_ORDER, FORMATION_KIND_SHAPES, FORMATION_MARKER_SIZE, formatTurnDate, FRONT_LINE, MINIMAP, NATO_TOKENS, panelReadinessColor, SIDE_COLORS, SIDE_LABELS, SIDE_RGB, SIDE_SOLID_COLORS, ZOOM_FACTORS, ZOOM_FORMATION_FILTER, ZOOM_LABELS } from './constants.js';
 import { buildControlLookup, buildStatusLookup, censusIdFromSid, controlKey } from './data/ControlLookup.js';

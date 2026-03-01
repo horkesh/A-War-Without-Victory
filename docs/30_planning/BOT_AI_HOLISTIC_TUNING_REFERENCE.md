@@ -573,7 +573,7 @@ Currently, bot_strategy.ts has hardcoded avoid lists:
 - **Vozuca wrong flip:** `op:zavidovici:vozuca_2` flips RBiH in sim but historically was VRS-held (BB1 p499, BB2 p507). Fix options: osid_control_overrides (init only), stronger RS East Bosnian Corps priority for Zavidovici, or avoid_municipalities for RBiH 2nd Corps targeting Zavidovici.
 
 ### ISSUE 1: Troop Strength 20-30k Over Target [MEDIUM]
-**Status:** Active. Pool scale at floor for RS (0.55) and RBiH (0.30).
+**Status:** Partially addressed (Phase A, n343). VRS 129k→107k, ARBiH 207k→177k, HVO 69k→52k. ARBiH still 47k over target. Pool scale at floor for RS (0.55) and RBiH (0.30).
 - RBiH 129k vs 100-110k target. RS 109k vs 90-100k target. HRHB on target.
 - Pool scale can't go lower without destroying init brigades (not enough personnel to fill batch size).
 - **Potential fixes:**
@@ -584,7 +584,7 @@ Currently, bot_strategy.ts has hardcoded avoid lists:
   - Winter effects: reduce reinforcement rate in winter months (weeks 30-45)
 
 ### ISSUE 2: Casualties at 16.4k vs 25-35k Target [MEDIUM]
-**Status:** Active since n213.
+**Status:** Largely addressed (Phase A, n343). Military KIA now 20,508 vs ~23k target. Loss rates raised to 0.045/0.02, KIA fraction to 0.30, frontline attrition added.
 - 13.9k attacker + 2.5k defender = 16.4k total. Target is 25-35k.
 - BASE_ATTACKER_LOSS_RATE was tuned 0.06->0.03 to prevent excessive attrition, but went too low.
 - Current: ~100 casualties per battle average (337 orders, 16.4k casualties).
@@ -679,8 +679,8 @@ Currently, bot_strategy.ts has hardcoded avoid lists:
 - **Winter effects not modeled** (would help with natural front stabilization)
 
 ### Priority Order for Next Tuning Iteration
-1. Raise BASE_ATTACKER/DEFENDER_LOSS_RATE (fixes casualties AND troop strength)
+1. ~~Raise BASE_ATTACKER/DEFENDER_LOSS_RATE~~ **DONE** (Phase A n343: 0.03→0.045, 0.015→0.02)
 2. Add winter effects system (fixes attack timing naturally)
-3. Calibrate ZoC-lock vs heavy weapons balance (extends VRS offensive window)
-4. Investigate RS reaching 70% (may need 1-2 more army operation priorities)
-5. Add siege attrition (Sarajevo steady-state casualties)
+3. ~~Add siege/frontline attrition~~ **DONE** (Phase A n343: frontline_attrition.ts, 0.5%/week)
+4. Fix Sarajevo regression (77.4%, Trnovo area lost to RS)
+5. Reduce ARBiH personnel overshoot (177k vs 130k target)

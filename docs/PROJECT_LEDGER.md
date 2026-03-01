@@ -8936,3 +8936,30 @@ Determinism checks **MUST** be run:
 **Verification:** tsc clean, 233 vitest pass, 40w scenario 87.4% (n342).
 **Report:** `docs/40_reports/implemented/20260302_SUPPLY_SYSTEM_PHASE_B_C_IMPLEMENTATION.md`
 **Decisions:** All Phase B+C mechanics gated behind existing `supply_reserves_enabled` flag. Union type `number | EnclaveResilienceEntry` for backward compatibility.
+
+**2026-03-02** - Phase A Calibration Overhaul — 6 constant/wiring changes to fix military KIA, civilian killed, and personnel bloat
+- **Phase:** Calibration (Phase A)
+- **Summary:** Implemented 6 calibration changes to address n335 baseline gaps. (P2) DISPLACEMENT_KILLED_FRACTION 0.10→0.04. (P9) BASE_ATTACKER_LOSS_RATE 0.03→0.045, BASE_DEFENDER_LOSS_RATE 0.015→0.02, KIA_FRACTION 0.25→0.30, WIA_FRACTION 0.60→0.55. (P6) Per-faction getMoraleResistFloor(): RBiH=55, RS=70, HRHB=65. (P5) Displaced militia acute/sustained rates: 0.04/0.01, cap 500→800. (P3) pool.exhausted wired at 7 sites (formation_spawn 5, recruitment_engine 2) + applyCasualtyPoolExhaustion(). (P1) New frontline_attrition.ts: 0.5%/week passive loss with density/supply modifiers.
+- **Determinism:** All changes deterministic. frontline_attrition uses sorted formationIds via strictCompare. No randomness.
+- **Calibration:** n343 (40w) = 86.3% OSID match (650/753), 6/6 benchmarks pass. Military KIA 4,537→20,508 (target ~23k). Civilian killed 64,420→27,175 (target ~35k). VRS 129k→107k, ARBiH 207k→177k, HVO 69k→52k.
+- **Regression:** Sarajevo 87.1%→77.4% (-9.7pp) from higher lethality. Herzegovina 96.8%→94.6% (-2.2pp).
+- **Files created:** `src/sim/combat/frontline_attrition.ts`
+- **Files modified:** `src/state/displacement_loss_constants.ts`, `src/state/displacement.ts`, `src/sim/combat/combat_math.ts`, `src/sim/combat/attack_resolution_osid.ts`, `src/sim/combat/battle_resolution.ts`, `src/sim/combat/combat_predictor.ts`, `src/sim/early_war/pool_population.ts`, `src/sim/formation_spawn.ts`, `src/sim/recruitment_engine.ts`, `src/sim/turn_phases/war_phases.ts`, `src/sim/turn_pipeline_types.ts`
+- **Verification:** tsc clean, 233 vitest pass / 1 skip, 6/6 benchmarks, OSID ≥85% guardrail.
+- **Report:** `docs/40_reports/implemented/20260302_PHASE_A_CALIBRATION_OVERHAUL.md`
+- **Refactor pass:** Removed unused type imports (FactionId, FormationState) from frontline_attrition.ts. De-exported MORALE_RESIST_FLOOR (now internal to combat_math.ts). Removed unused getFactionFleeAbroadFraction import from displacement.ts.
+
+**2026-03-02** - Propagate Phase A changes to canon, engineering, planning, skills, and MEMORY
+- **Phase:** Documentation propagation
+- **Summary:** Updated 9 documentation files with structural references to Phase A constant/mechanic changes. No behavioral changes.
+- **Files updated:**
+  - `MEMORY.md` — casualty rates, morale resist floor, calibration state (n335→n343), vitest count
+  - `docs/20_engineering/DISPLACEMENT_MASTER.md` — DISPLACEMENT_KILLED_FRACTION 0.10→0.04, REINFORCEMENT_RATE→acute/sustained, cap 2000→800
+  - `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md` — REINFORCEMENT_RATE→acute/sustained, cap 2000→800
+  - `docs/30_planning/BOT_AI_HOLISTIC_TUNING_REFERENCE.md` — loss rates, KIA/WIA fractions, displaced rates, issue status, priority list
+  - `docs/40_reports/CALIBRATION_MASTER.md` — casualty rate constants, n343 reference
+  - `docs/PROJECT_LEDGER_KNOWLEDGE.md` — enclave morale entry updated for per-faction system
+  - `.cursor/skills/formation-expert/SKILL.md` — pool population constants
+  - `.claude/skills/formation-expert/SKILL.md` — pool population constants (mirror)
+- **Skipped (historical):** docs/40_reports/implemented/* (historical reports), docs/_old/* (archived), docs/30_planning/20260222_ATTACK_RESOLUTION_FORMULA_SPEC.md (original design spec), PROJECT_LEDGER entries (historical context)
+- **Flagged:** `docs/10_canon/FORAWWV.md` — no references to changed constants (no update needed)
