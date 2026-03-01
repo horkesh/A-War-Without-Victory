@@ -170,53 +170,40 @@ Before executing any slice, the implementer MUST read:
 
 ---
 
-### R6: Unify Serialization Layer
+### R6: Unify Serialization Layer — SKIPPED (no action needed)
 
 **Owner:** Technical Architect
-**Effort:** Medium (~3 hours)
+**Effort:** N/A
 
-**Scope:**
-1. Read all three serialization touchpoints:
-   - `src/state/serialize.ts` (588 lines — `serializeState`/`deserializeState`)
-   - `src/state/serializeGameState.ts` (204 lines — wrapper layer)
-   - `src/scenario/scenario_runner.ts` lines 1500+ (manual JSON building for save files)
-2. Determine the authoritative serialization path. `serialize.ts` is likely canonical.
-3. If `serializeGameState.ts` is a thin wrapper, inline it into `serialize.ts` and delete.
-4. Replace manual JSON building in `scenario_runner.ts` with calls to the canonical serializer.
-5. Verify round-trip: serialize → deserialize produces identical GameState.
-
-**Acceptance:**
-- Single serialization entry point (1 file, not 3)
-- Scenario runner uses canonical serializer
-- tsc clean, vitest pass, scenario saves still loadable by map GUI
-- ~200 lines eliminated
+**Assessment result:** Architecture is already clean. No refactoring needed.
+- `serialize.ts` (588 lines) is the canonical public API (`serializeState`/`deserializeState` + 570-line `migrateState`)
+- `serializeGameState.ts` (204 lines) is a private implementation detail — deterministic JSON, shape validation, Map/Set rejection. Only imported by `serialize.ts`. NOT a wrapper or duplicate.
+- `scenario_runner.ts` uses only `serializeState`/`deserializeState` (4 call sites). No manual JSON building for GameState. Uses separate `stableStringify` for non-GameState artifacts (run_meta, deltas) — correct separation.
+- Inlining `serializeGameState.ts` into `serialize.ts` would mix business logic (migration, validation) with technical concerns (determinism, shape checking) for no benefit.
+- The plan's original "triple layer, ~200 lines eliminated" estimate was based on incorrect assumption of duplication.
 
 ---
 
-### R7: Split turn_pipeline.ts
+### R7: Split turn_pipeline.ts — DONE ✓
 
 **Owner:** Technical Architect (Systems Programmer assist)
 **Effort:** Large (~4 hours)
 
-**Scope:**
-1. Read `src/sim/turn_pipeline.ts` (2152 lines). Identify logical phase boundaries.
-2. Create `src/sim/turn_phases/` directory.
-3. Extract each phase's orchestration into its own file:
-   - `turn_phases/recruitment_phase.ts` — recruitment engine calls
-   - `turn_phases/combat_phase.ts` — attack order resolution, bot AI dispatch
-   - `turn_phases/movement_phase.ts` — column movement, deployment
-   - `turn_phases/supply_phase.ts` — supply derivation, reachability
-   - `turn_phases/displacement_phase.ts` — displacement pipeline calls
-   - `turn_phases/maintenance_phase.ts` — cohesion drift, entrenchment, morale
-4. `turn_pipeline.ts` becomes a slim orchestrator (~200 lines) that imports and sequences phase runners.
-5. Each phase file exports a single `run(state, context) → report` function.
-6. Move step definitions (`{ name, run }`) into phase files.
+**Assessment correction:** Instead of 6 thematic phase files (recruitment, combat, movement, supply, displacement, maintenance), the step array naturally partitions into two lifecycle-aligned files: `war_phases.ts` (81 war-phase steps) and `peace_phases.ts` (22 Phase I steps). This better reflects the pipeline's two-lifecycle model (war turn runner + peace-phase bottom-up subset). Types, caches, and context helpers extracted to `turn_pipeline_types.ts`.
 
-**Acceptance:**
-- `turn_pipeline.ts` < 300 lines
-- Phase files independently readable
-- Same step names, same execution order
-- tsc clean, vitest pass, scenario hash unchanged
+**Actual execution:**
+1. Created `src/sim/turn_pipeline_types.ts` (~285 lines) — TurnReport, TurnContext, TurnInput, caches, helpers
+2. Created `src/sim/turn_phases/war_phases.ts` (~1450 lines) — 81 war-phase NamedPhase[] steps
+3. Created `src/sim/turn_phases/peace_phases.ts` (~350 lines) — 22 peace-phase NamedPhase[] steps + helpers
+4. Rewrote `src/sim/turn_pipeline.ts` as slim orchestrator (~170 lines) — imports phases, re-exports types
+5. Fixed accidentally dropped `zoc-computation` step and `zoc-constrained-movement` step (agent hallucinated replacements)
+6. Restored `OperationalDataCache.zocState` field in types file
+
+**Result:**
+- `turn_pipeline.ts`: 2152 → 168 lines (92% reduction)
+- All step names preserved, execution order identical
+- tsc clean, vitest 189 pass (1 skip), map build clean
+- Scenario hash verified identical (`ff5cd313ed833865` with both original and split)
 
 ---
 

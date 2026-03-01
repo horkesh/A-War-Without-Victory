@@ -26,6 +26,8 @@
    Do instead: After each implementation phase, do a refactor-pass (dead code, duplicates, unused imports) then run smoke-test triad before proceeding.
 7. **[2026-02-11] Preserve shared type exports during refactor**
    Do instead: Keep `export type { ... }` statements; removing them breaks downstream consumers silently.
+   **[2026-03-01] After subagent extraction, diff step names against original (L36).**
+   Do instead: When agents extract pipeline steps into separate files, diff extracted step names/order against the original. Agents hallucinate step renames and drop logic (e.g. `zoc-computation` → `load-operational-data` dropped ZoC).
 8. **[2026-02-13] Close handoffs with evidence**
    Do instead: After a roadmap or handoff, close with run evidence + decision memo + cross-link. Do not leave ambiguity open.
 9. **[2026-02-24] Scenario checkpoint lengths**
@@ -174,8 +176,8 @@
    Do instead: Only generate replay with `--video` flag (saves 13.6GB).
 7. **[2026-02-28] Canonical player-facing map is React+MapLibre app**
    Do instead: Run `npm run dev:map` for the canonical map GUI. Legacy map_hoi.html / tactical_map.html are archived; do not target them for new GUI work.
-8. **[Standing] Address AoR/SID on encounter**
-   Do instead: When you encounter AoR or SID in code, tests, or docs: address it (remove, replace with OSID, or document as legacy).
+8. **[Standing] Address AoR/SID/ZoC on encounter**
+   Do instead: When you encounter AoR, SID, or ZoC in code, tests, or docs: address it (remove, replace with OSID, or document as legacy). OSID ZoC system fully deprecated 2026-03-01 — `osid_adjacency.ts` replaces `zoc.ts` for adjacency/Osid type.
 
 ## Calibration
 1. **[2026-02-25] Historical territory targets (year 1)**

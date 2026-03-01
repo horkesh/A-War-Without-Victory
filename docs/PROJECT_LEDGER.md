@@ -8762,3 +8762,17 @@ Determinism checks **MUST** be run:
 - **Determinism:** Pure structural refactoring. State hash `1dfb9114d33efbde` unchanged.
 - **Files:** `brigade_aor.ts` DELETED (1370 lines), `brigade_aor_legacy.ts` NEW (~200 lines), 11 source files re-pointed imports, `turn_pipeline.ts` dead imports removed, `brigade_aor.test.ts` cleaned.
 - **Verification:** tsc clean; vitest 189 pass, 1 skipped; map UI build clean; 40w hash identical.
+
+### R7: Split turn_pipeline.ts (2026-03-01)
+
+**What:** Split 2152-line `turn_pipeline.ts` god module into 4 focused files:
+- `turn_pipeline_types.ts` (~285 lines): shared types (TurnReport, TurnContext, TurnInput), context caches (OperationalDataCache incl. zocState, SiegeStateCache, RecruitmentCatalogCache), helper functions
+- `turn_phases/war_phases.ts` (~1450 lines): 81 war-phase NamedPhase[] steps
+- `turn_phases/peace_phases.ts` (~350 lines): 22 peace-phase NamedPhase[] steps + helpers
+- `turn_pipeline.ts` (~168 lines): slim orchestrator, re-exports types for backward compat
+
+**Why:** Largest single module in the codebase (150+ imports, 81+22 step definitions). Split enables focused work on individual phases without loading entire pipeline.
+
+**Verification:** tsc clean, vitest 189/190 pass, map build clean, scenario hash identical with both original and split version (`ff5cd313ed833865`).
+
+**Lesson (L36):** Subagent-driven extraction can hallucinate step replacements. The `zoc-computation` step was replaced with `load-operational-data` (dropping ZoC state computation, `war_enemy_zoc_by_faction`, `war_linked_zoc_by_faction`) and `zoc-constrained-movement` was replaced with `apply-brigade-movement` (entirely different function). Always diff extracted step names against the original before verifying. Caught via state hash mismatch.
