@@ -2,7 +2,7 @@
  * Bot AI for corps-level decisions: stance selection, named operations,
  * operational group activation, and corridor breach detection.
  *
- * Sits above bot_brigade_ai.ts in the decision hierarchy.
+ * Sits above bot_brigade_ai_osid.ts in the decision hierarchy.
  * Corps stance flows down to modulate brigade posture decisions.
  *
  * Deterministic: sorted iteration via strictCompare, no Math.random().
@@ -28,76 +28,74 @@ import {
     getActiveStandingOrder,
     getCorpsArmyPriorities,
     isCorridorMunicipality,
-    RS_EARLY_WAR_END_WEEK
 } from './bot_strategy.js';
+import {
+    BRIGADE_LOSS_THRESHOLD,
+    COHESION_HEALTHY_THRESHOLD,
+    COHESION_REORGANIZE_THRESHOLD,
+    CORRIDOR_BREACH_MAX_STRIP_WIDTH,
+    EMERGENCY_THREAT_THRESHOLD,
+    EXECUTION_MAX_DURATION,
+    MAX_EXHAUSTION_FOR_OPERATION,
+    MIN_BRIGADES_FOR_OPERATION,
+    OG_DEFAULT_DURATION,
+    OG_MAX_CONTRIBUTION_PER_DONOR,
+    OG_MIN_DONOR_RESIDUAL,
+    PERSONNEL_HEALTHY_THRESHOLD,
+    PERSONNEL_REORGANIZE_THRESHOLD,
+    PLANNING_DURATION,
+    PROGRESS_FAILURE_THRESHOLD,
+    PROGRESS_SUCCESS_THRESHOLD,
+    RECOVERY_DURATION,
+    RS_EARLY_WAR_END_WEEK,
+    THREAT_DEFENSIVE_THRESHOLD,
+    THREAT_OFFENSIVE_THRESHOLD,
+} from './bot_constants.js';
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
 import { buildOsidAdjacency, type Osid } from './zoc.js';
 import { analyzeFactionGraph, type FactionGraphAnalysis } from './osid_graph_analysis.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { CorpsDirective } from '../../state/game_state.js';
+import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Constants
-// ═══════════════════════════════════════════════════════════════════════════
-
-/** Sector threat ratio above which corps goes defensive. */
-const THREAT_DEFENSIVE_THRESHOLD = 1.5;
-
-/** Sector threat ratio below which corps can go offensive (if healthy). */
-const THREAT_OFFENSIVE_THRESHOLD = 0.7;
-
-/** Average cohesion below which corps must reorganize. */
-const COHESION_REORGANIZE_THRESHOLD = 25;
-
-/** Average personnel fraction below which corps must reorganize. */
-const PERSONNEL_REORGANIZE_THRESHOLD = 0.5;
-
-/** Personnel fraction above which corps is considered healthy for offensive. */
-const PERSONNEL_HEALTHY_THRESHOLD = 0.7;
-
-/** Cohesion above which corps is considered healthy for offensive. */
-const COHESION_HEALTHY_THRESHOLD = 50;
-
-/** Minimum healthy brigades to launch a named operation. */
-const MIN_BRIGADES_FOR_OPERATION = 3;
-
-/** Corps exhaustion above which no new operations can be launched. */
-const MAX_EXHAUSTION_FOR_OPERATION = 30;
-
-/** Named operation phase durations (turns). */
-const PLANNING_DURATION = 2;
-const EXECUTION_MAX_DURATION = 6;
-const RECOVERY_DURATION = 3;
-
-/** OG minimum donor personnel residual after contribution. */
-const OG_MIN_DONOR_RESIDUAL = 400;
-
-/** OG maximum personnel contribution per donor. */
-const OG_MAX_CONTRIBUTION_PER_DONOR = 500;
-
-/** OG default duration (turns). */
-const OG_DEFAULT_DURATION = 5;
-
-/** Corridor breach: max enemy settlements in a narrow strip to attempt breach. */
-const CORRIDOR_BREACH_MAX_STRIP_WIDTH = 8;
-
-/** Sector threat ratio for emergency defensive operations. */
-const EMERGENCY_THREAT_THRESHOLD = 2.0;
-
-/** Operation progress: target capture threshold to consider success. */
-const PROGRESS_SUCCESS_THRESHOLD = 0.5;
-
-/** Operation progress: failure threshold after 2 turns of execution. */
-const PROGRESS_FAILURE_THRESHOLD = 0.2;
-
-/** Brigade loss threshold to pull from operation. */
-const BRIGADE_LOSS_THRESHOLD = 0.3;
+import { evaluateSectorOffensiveLaunch } from './sector_offensive.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════════════════════════
+
+/** Assess supply health of a corps by checking supply state of subordinate brigades. */
+function assessCorpsSupplyHealth(
+    subordinates: FormationState[],
+    faction: FactionId,
+    supplyByOsid?: SupplyStateByOsidReport | null
+): { adequate_fraction: number; strained_fraction: number; critical_fraction: number } {
+    if (!supplyByOsid?.factions || subordinates.length === 0) {
+        return { adequate_fraction: 1, strained_fraction: 0, critical_fraction: 0 };
+    }
+    const fac = supplyByOsid.factions.find(f => f.faction_id === faction);
+    if (!fac?.by_osid) return { adequate_fraction: 1, strained_fraction: 0, critical_fraction: 0 };
+
+    const osidState = new Map<string, SupplyStateLevel>();
+    for (const e of fac.by_osid) osidState.set(e.osid, e.state);
+
+    let adequate = 0, strained = 0, critical = 0;
+    for (const b of subordinates) {
+        const st = b.location_osid ? (osidState.get(b.location_osid) ?? 'adequate') : 'adequate';
+        switch (st) {
+            case 'adequate': adequate++; break;
+            case 'strained': strained++; break;
+            case 'critical': critical++; break;
+        }
+    }
+    const total = subordinates.length;
+    return {
+        adequate_fraction: adequate / total,
+        strained_fraction: strained / total,
+        critical_fraction: critical / total,
+    };
+}
 
 /** Get all active corps for a faction, sorted by ID.
  *  Checks both state.formations (for corps with kind==='corps') AND
@@ -1196,7 +1194,8 @@ export function generateCorpsDirectives(
     faction: FactionId,
     edges: EdgeRecord[],
     reverseMap: OperationalToCanonicalReverseMap | null,
-    graphAnalysis: FactionGraphAnalysis | null
+    graphAnalysis: FactionGraphAnalysis | null,
+    supplyByOsid?: SupplyStateByOsidReport | null
 ): void {
     const corpsCommand = state.corps_command;
     if (!corpsCommand) return;
@@ -1205,6 +1204,7 @@ export function generateCorpsDirectives(
     const corpsList = getFactionCorps(state, faction);
     const turn = state.meta?.turn ?? 0;
     const corpsFrontMapping = deriveCorpsFrontMapping(state, faction);
+    const sectorLookup = state.corps_front_sectors ?? {};
     const adjacency = buildOsidAdjacency(edges);
     const strategy = FACTION_STRATEGIES[faction];
     const doctrinePhase = getActiveDoctrinePhase(faction, turn);
@@ -1228,7 +1228,12 @@ export function generateCorpsDirectives(
             continue;
         }
 
-        // Front segments this corps covers
+        // Front segments this corps covers — always use front_id-based mapping so downstream
+        // consumers (front_assignment.ts, brigade AI) can match against assignable_front_segments.
+        // Sector sub_segment IDs are a separate organizational layer for target filtering only.
+        const corpsSectors = Object.values(sectorLookup)
+            .filter(s => s.corps_id === corps.id)
+            .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
         const assignedFrontIds = corpsFrontMapping.get(corps.id) ?? [];
 
         // Army-level priorities for this corps
@@ -1416,6 +1421,50 @@ export function generateCorpsDirectives(
             bestMinOutcome = 'costly_victory'; // Only attack when clearly favorable
         }
 
+        // Supply health gating: critical majority → strip offensive targets
+        const supplyHealth = assessCorpsSupplyHealth(subordinates, faction, supplyByOsid);
+        if (supplyHealth.critical_fraction > 0.5) {
+            offensiveTargets.length = 0;
+        }
+        // Low adequate supply → upgrade minimum outcome to victory
+        if (supplyHealth.adequate_fraction < 0.3) {
+            const outcomeRank: Record<string, number> = { decisive_victory: 5, victory: 4, costly_victory: 3, stalemate: 2, repulsed: 1 };
+            if ((outcomeRank[bestMinOutcome] ?? 2) < (outcomeRank['victory'] ?? 4)) {
+                bestMinOutcome = 'victory';
+            }
+        }
+
+        // Sector-aware target filtering: restrict to OSIDs adjacent to corps' sectors
+        if (corpsSectors.length > 0 && offensiveTargets.length > 0) {
+            const allSectorEnemyOsids = new Set<string>();
+            for (const sec of corpsSectors) {
+                for (const ss of sec.sub_segments) {
+                    for (const eo of ss.enemy_osids) allSectorEnemyOsids.add(eo);
+                }
+            }
+            const filtered = offensiveTargets.filter(t => allSectorEnemyOsids.has(t));
+            // Keep all if filter removes everything (corps needs SOMETHING to aim at)
+            if (filtered.length > 0) {
+                offensiveTargets.length = 0;
+                offensiveTargets.push(...filtered);
+            }
+        }
+
+        // Multi-sector: populate per-sector offensive targets
+        const sectorTargets: Record<string, string[]> = {};
+        if (corpsSectors.length > 1 && offensiveTargets.length > 0) {
+            for (const sec of corpsSectors) {
+                const secEnemyOsids = new Set<string>();
+                for (const ss of sec.sub_segments) {
+                    for (const eo of ss.enemy_osids) secEnemyOsids.add(eo);
+                }
+                const secTargets = offensiveTargets.filter(t => secEnemyOsids.has(t));
+                if (secTargets.length > 0) {
+                    sectorTargets[sec.sector_id] = secTargets.sort(strictCompare);
+                }
+            }
+        }
+
         // Sort all arrays for determinism
         offensiveTargets.sort(strictCompare);
         holdOsids.sort(strictCompare);
@@ -1430,9 +1479,48 @@ export function generateCorpsDirectives(
             reserve_fraction: reserveFraction,
             min_attack_outcome: bestMinOutcome,
             aggression_modifier: aggressionModifier,
+            sector_targets: Object.keys(sectorTargets).length > 0 ? sectorTargets : undefined,
         };
 
         cmd.directive = directive;
+
+        // Sector offensive launch evaluation:
+        // Launch if offensive/balanced, no active SECTOR operation, and multi-sector corps.
+        // Sector offensives replace general_offensive/strategic_defense with targeted multi-OSID push.
+        const existingOp = cmd.active_operation;
+        const canLaunchSectorOp = !existingOp || existingOp.type !== 'sector_attack';
+        if (canLaunchSectorOp &&
+            (cmd.stance === 'offensive' || cmd.stance === 'balanced') &&
+            corpsSectors.length > 0 && offensiveTargets.length > 0) {
+
+            for (const sec of corpsSectors) {
+                const secEnemyOsids: string[] = [];
+                for (const ss of sec.sub_segments) {
+                    for (const eo of ss.enemy_osids) {
+                        if (!secEnemyOsids.includes(eo)) secEnemyOsids.push(eo);
+                    }
+                }
+                secEnemyOsids.sort(strictCompare);
+
+                // Brigades in this sector
+                const secBrigadeIds = subordinates
+                    .filter(b => {
+                        if (!b.location_osid) return false;
+                        return sec.sub_segments.some(ss => ss.friendly_osids.includes(b.location_osid!));
+                    })
+                    .map(b => b.id)
+                    .sort(strictCompare);
+
+                const op = evaluateSectorOffensiveLaunch(
+                    state, corps.id, sec.sector_id, faction,
+                    secBrigadeIds, secEnemyOsids, offensiveTargets, supplyByOsid
+                );
+                if (op) {
+                    cmd.active_operation = op;
+                    break; // One offensive at a time per corps
+                }
+            }
+        }
     }
 }
 
@@ -1524,7 +1612,8 @@ export function generateAllCorpsOrders(
     edges: EdgeRecord[],
     sidToMun: Map<SettlementId, string>,
     reverseMap?: OperationalToCanonicalReverseMap | null,
-    osidEdges?: EdgeRecord[]
+    osidEdges?: EdgeRecord[],
+    supplyByOsid?: SupplyStateByOsidReport | null
 ): void {
     // 0. Set army stance from standing orders
     setArmyStandingOrder(state, faction);
@@ -1558,6 +1647,6 @@ export function generateAllCorpsOrders(
         const adjacency = buildOsidAdjacency(effectiveOsidEdges);
         graphAnalysis = analyzeFactionGraph(state, faction, adjacency, reverseMap);
     }
-    generateCorpsDirectives(state, faction, effectiveOsidEdges, reverseMap ?? null, graphAnalysis);
+    generateCorpsDirectives(state, faction, effectiveOsidEdges, reverseMap ?? null, graphAnalysis, supplyByOsid);
 }
 

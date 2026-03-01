@@ -8704,3 +8704,12 @@ Determinism checks **MUST** be run:
 - **Determinism:** Pure structural refactoring. State hash `42ad78a39746d166` identical with and without R2 changes (verified via git stash/pop comparison). No new nondeterministic patterns. Sorted edge output uses explicit `localeCompare`.
 - **Files modified:** `src/state/supply_reachability.ts` (+76 lines shared BFS, -38 lines inline BFS), `src/state/supply_reachability_osid.ts` (+1 import, -27 lines inline BFS).
 - **Verification:** tsc clean; vitest 190/190 pass (13 skipped); map UI build clean; sim:scenario:run:40w hash identical before/after.
+
+**2026-03-01** - refactor(sim): centralize bot constants (R3)
+- **Phase:** Post-MVP maintenance — code health (R3 of R2–R9 refactoring plan).
+- **Summary:** Created `src/sim/phase_ii/bot_constants.ts` containing all bot AI tuning constants. Extracted 19 corps-level thresholds from `bot_corps_ai.ts` (threat thresholds, health gates, operation parameters, OG settings, corridor breach) and 4 doctrine timing knobs from `bot_strategy.ts` (`RS_EARLY_WAR_END_WEEK`, `HRHB_LASVA_*`). Both files now import from `bot_constants.ts`. Backward-compat re-exports added in `bot_strategy.ts`.
+- **Calibration visibility:** All 23 bot tuning constants now in one file, grouped by category (doctrine timing, threat/health thresholds, operation parameters, OG parameters, corridor breach). Makes calibration sweeps trivial.
+- **Note:** `control_flip.ts` has its own `RS_EARLY_WAR_END_WEEK = 26` — different value, different purpose (controls flip mechanics). Intentionally left separate.
+- **Determinism:** Pure constant extraction — same values, same usage. No behavioral change.
+- **Files:** `src/sim/phase_ii/bot_constants.ts` (NEW ~95 lines), `bot_corps_ai.ts` (-52 lines constants, +20 lines imports), `bot_strategy.ts` (-8 lines constants, +5 lines imports/re-exports).
+- **Verification:** tsc clean; vitest 190/190 pass (13 skipped); map UI build clean.

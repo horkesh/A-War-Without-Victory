@@ -9,12 +9,18 @@
  *   RBiH: Sarajevo defense, enclave survival, central Bosnia corridor
  *   HRHB: Herzegovina consolidation, Mostar control, central Bosnia Croat pockets
  *
- * Consumed by bot_brigade_ai.ts for strategic target selection.
+ * Consumed by bot_brigade_ai_osid.ts for strategic target selection.
  *
  * Deterministic: no randomness.
  */
 
 import type { ArmyStance, BrigadePosture, FactionId } from '../../state/game_state.js';
+import {
+    HRHB_LASVA_ATTACK_SHARE,
+    HRHB_LASVA_OFFENSIVE_END_WEEK,
+    HRHB_LASVA_OFFENSIVE_START_WEEK,
+    RS_EARLY_WAR_END_WEEK,
+} from './bot_constants.js';
 
 // --- Faction strategy profiles ---
 
@@ -209,16 +215,8 @@ export interface DoctrinePhase {
     aggression_modifier: number;
 }
 
-/** RS early-war window: offensive stance and higher attack share for territorial expansion.
- * Calibration: 30→20 for Jan 1993 painted targets (RS was at 488 OSIDs by w20 in n233).
- * n246 result: RS=406 (target 416). 2.4% gap is within acceptable variance; extending to 22
- * backfires because RBiH's more-active doctrine starts at fixed w20, causing counterattacks. */
-export const RS_EARLY_WAR_END_WEEK = 20;
-
-/** HRHB Lasva Offensive window (weeks 12–26): higher attack share so HRHB issues more attack orders. See NEXT_BOT_PRIORITY_AOR_OR_HRHB_HANDOFF_2026_02_18 Candidate B. */
-export const HRHB_LASVA_OFFENSIVE_START_WEEK = 12;
-export const HRHB_LASVA_OFFENSIVE_END_WEEK = 26;
-export const HRHB_LASVA_ATTACK_SHARE = 0.35;
+// Re-export timing knobs for backward compatibility (canonical source: bot_constants.ts)
+export { RS_EARLY_WAR_END_WEEK, HRHB_LASVA_OFFENSIVE_START_WEEK, HRHB_LASVA_OFFENSIVE_END_WEEK, HRHB_LASVA_ATTACK_SHARE } from './bot_constants.js';
 
 export const FACTION_DOCTRINE_PHASES: Record<FactionId, DoctrinePhase[]> = {
     RS: [
