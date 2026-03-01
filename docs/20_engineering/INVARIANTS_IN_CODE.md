@@ -55,7 +55,7 @@ For each invariant, we document:
 **Enforcement:**
 - ✅ **Enforced:** State serialization validates before/after (`src/state/serialize.ts:18,31`)
 - ⚠️ **Partial:** No automated detection of state mutations outside turn pipeline
-- ✅ **Enforced:** Turn pipeline is single entry point (`src/sim/turn_pipeline.ts:306`)
+- ✅ **Enforced:** Turn pipeline is single entry point (`src/sim/turn_pipeline.ts` — `runTurn()`)
 
 **Proposed Enforcement:**
 - Deferred - would require architecture refactor (static analysis or runtime guards)

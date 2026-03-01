@@ -417,7 +417,7 @@ All downstream consumers (pressure, attack, supply, displacement) read `brigade_
 - `docs/10_canon/Systems_Manual_v0_5_0.md` §6
 - `docs/10_canon/Phase_I_Specification_v0_5_0.md`, `Phase_II_Specification_v0_5_0.md`
 - `src/map/front_regions.ts`, `src/map/front_edges.ts`
-- `src/sim/phase_ii/brigade_aor.ts`
+- `src/sim/combat/brigade_aor_legacy.ts`
 - `docs/30_planning/WARMAP_UI_UX_ARCHITECTURE_PROPOSAL.md`
 - `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
 - HoI4 wiki: Battle plan, Unit controller, Front line

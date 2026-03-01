@@ -61,11 +61,11 @@ flowchart LR
 
 ### 1.3 Wiring getSupplyMult to supply state at location_osid
 
-- **attack_resolution_osid:** [getSupplyMult](src/sim/phase_ii/attack_resolution_osid.ts) currently uses only `formation.ops.last_supplied_turn`. Change to:
+- **attack_resolution_osid:** [getSupplyMult](src/sim/combat/attack_resolution_osid.ts) currently uses only `formation.ops.last_supplied_turn`. Change to:
   - Accept an optional **supply report** (with optional by_osid). Signature change: callers pass `supplyStateReport` (or context) so that inside the module a helper can resolve supply state at `formation.location_osid` when by_osid is present for the formation's faction.
   - When (1) OSID data is in use for the run and (2) report contains by_osid for the formation's faction and (3) `formation.location_osid` is set: lookup state at that OSID; map Adequate→1.0, Strained→0.7/0.8, Critical→0.4/0.5 (attack/defend).
   - Else: keep current fallback (last_supplied_turn ≤2 → 1.0; else 0.4 / 0.5).
-- **combat_predictor:** Same logic: [getSupplyMult](src/sim/phase_ii/combat_predictor.ts) must accept optional supply report and use formation.location_osid + by_osid when available; otherwise last_supplied_turn.
+- **combat_predictor:** Same logic: [getSupplyMult](src/sim/combat/combat_predictor.ts) must accept optional supply report and use formation.location_osid + by_osid when available; otherwise last_supplied_turn.
 - **Pipeline:** When calling `resolveAttackOrdersOsid`, pass the supply report (with by_osid) from context—e.g. `context.report.supply_resolution?.supply_state` plus optional `context.report.supply_resolution?.supply_state_by_osid` or the extended field. So `resolveAttackOrdersOsid` signature gains an optional 5th parameter (supply report or by_osid lookup). Combat predictor is used by bot AI; ensure the same report (or a recomputed-by_osid view) is available where combat predictor is invoked (e.g. from bot layer with same context/report).
 
 ### 1.4 Tests and determinism
@@ -167,7 +167,7 @@ flowchart LR
 ### 5.1 Integration
 
 - **Data:** Bot reads same supply report (with by_osid) and formation `location_osid`; no new state.
-- **Scoring:** In [bot_brigade_ai](src/sim/phase_ii/) (or equivalent), add supply state at formation location and at target OSID to target scoring (corridor_open, supply_isolation already in spec; add supply_mult prediction). Combat predictor already gets supply_mult once wired in Phase 1; bot can use same predictor.
+- **Scoring:** In [bot_brigade_ai](src/sim/combat/) (or equivalent), add supply state at formation location and at target OSID to target scoring (corridor_open, supply_isolation already in spec; add supply_mult prediction). Combat predictor already gets supply_mult once wired in Phase 1; bot can use same predictor.
 - **Supply connectivity:** Precompute BFS from faction "HQ" (e.g. capital or first supply source) through friendly OSIDs; expose in shared intelligence for chokepoint/corridor defense. Can be derived from same OSID supply reachability used in Phase 1.
 
 ### 5.2 Refactor-pass (after Phase 5)
@@ -190,7 +190,7 @@ flowchart LR
 
 | Phase | Key files                                                                                                                                                                                                                                                                                                                                               | Roles                             |
 | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| 1     | [supply_reachability.ts](src/state/supply_reachability.ts) (or new supply_reachability_osid.ts), [supply_state_derivation.ts](src/state/supply_state_derivation.ts), [turn_pipeline.ts](src/sim/turn_pipeline.ts), [attack_resolution_osid.ts](src/sim/phase_ii/attack_resolution_osid.ts), [combat_predictor.ts](src/sim/phase_ii/combat_predictor.ts) | Gameplay, Tech Architect, Systems |
+| 1     | [supply_reachability.ts](src/state/supply_reachability.ts) (or new supply_reachability_osid.ts), [supply_state_derivation.ts](src/state/supply_state_derivation.ts), [turn_pipeline.ts](src/sim/turn_pipeline.ts), [attack_resolution_osid.ts](src/sim/combat/attack_resolution_osid.ts), [combat_predictor.ts](src/sim/combat/combat_predictor.ts) | Gameplay, Tech Architect, Systems |
 | 2     | [supply_state_derivation.ts](src/state/supply_state_derivation.ts), Engine_Invariants §4                                                                                                                                                                                                                                                                | Gameplay, Systems                 |
 | 3     | Adapter, [desktop_sim.ts](src/desktop/desktop_sim.ts), FactionOverviewPanel or supply panel, optional map overlay                                                                                                                                                                                                                                       | Architect, UI/UX or Graphics      |
 | 4     | New derivation/report, exhaustion/cohesion consumers, enclave detection                                                                                                                                                                                                                                                                                 | Game Designer, Gameplay           |

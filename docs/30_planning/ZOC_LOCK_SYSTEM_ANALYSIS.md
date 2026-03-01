@@ -12,7 +12,7 @@
 
 A deployed brigade at OSID X projects Zone of Control to all OSIDs adjacent to X in the operational contact graph. Only deployed brigades (not in-transit/column) project ZoC.
 
-**Source:** `src/sim/phase_ii/zoc.ts` — `computeEnemyZocOsidsForFaction()`
+**Source:** `src/sim/combat/zoc.ts` — `computeEnemyZocOsidsForFaction()`
 
 ### 1.2 ZoC-Lock Rule
 
@@ -25,7 +25,7 @@ A brigade is "ZoC-locked" when its `location_osid` falls within any enemy brigad
 The brigade AI implements this as Rule 1 (highest priority) in `executeFactionDirectives()`:
 
 ```typescript
-// src/sim/phase_ii/bot_brigade_ai_osid.ts, line 795-805
+// src/sim/combat/bot_brigade_ai_osid.ts, line 795-805
 if (isLocked) {
     const retreatDests = getValidRetreatDestinations(...);
     if (retreatDests.length > 0) {
@@ -42,7 +42,7 @@ if (isLocked) {
 
 When two or more same-faction brigades are close enough that their ZoC sets connect through the adjacency graph, the intermediate ZoC OSIDs form a "linked front." Enemy brigades cannot move into linked ZoC OSIDs (movement is blocked), though they can still attack into enemy-controlled territory that happens to be in linked ZoC.
 
-**Source:** `src/sim/phase_ii/zoc.ts` — `computeLinkedZocForFaction()`
+**Source:** `src/sim/combat/zoc.ts` — `computeLinkedZocForFaction()`
 
 The linked ZoC system uses BFS through a "ZoC subgraph" (union of brigade positions and their ZoC projections). A connected component with 2+ brigades marks all intermediate ZoC OSIDs as "linked." Maximum linking distance: 2 hops between brigades (brigade A -> ZoC -> ZoC -> brigade B). At 3 hops, the gap breaks.
 
@@ -57,7 +57,7 @@ When an enemy-controlled OSID is attacked, the defense strength is resolved in t
 | **Unlinked ZoC** | No brigade present, but adjacent enemy brigade projects ZoC | `computeZocDefenderPower()` — scales 0%->100% with entrenchment (0->4 turns). Fresh brigade = 0% ZoC defense |
 | **Militia** | No brigade present or projecting ZoC | `population * 0.03 * 0.25` — token resistance (~37.5 power for 5000 pop) |
 
-**Source:** `src/sim/phase_ii/attack_resolution_osid.ts`, lines 506-559
+**Source:** `src/sim/combat/attack_resolution_osid.ts`, lines 506-559
 
 ### 1.5 Movement Blocking via Linked ZoC
 
@@ -375,10 +375,10 @@ To mitigate: always test with `MAX_LINKED_ZOC_READINESS <= 0.65`. At 0.65, a sol
 
 | File | Change |
 |------|--------|
-| `src/sim/phase_ii/osid_graph_analysis.ts` | Add `zoc_covered` classification, accept linked ZoC input |
-| `src/sim/phase_ii/attack_resolution_osid.ts` | Variable `LINKED_ZOC_READINESS`, `ZOC_READINESS_FLOOR` |
-| `src/sim/phase_ii/combat_predictor.ts` | Mirror changes from attack_resolution (predictor must stay in sync) |
-| `src/sim/phase_ii/bot_brigade_ai_osid.ts` | Update gap-fill logic to respect `zoc_covered` classification |
+| `src/sim/combat/osid_graph_analysis.ts` | Add `zoc_covered` classification, accept linked ZoC input |
+| `src/sim/combat/attack_resolution_osid.ts` | Variable `LINKED_ZOC_READINESS`, `ZOC_READINESS_FLOOR` |
+| `src/sim/combat/combat_predictor.ts` | Mirror changes from attack_resolution (predictor must stay in sync) |
+| `src/sim/combat/bot_brigade_ai_osid.ts` | Update gap-fill logic to respect `zoc_covered` classification |
 | `src/sim/turn_pipeline.ts` | Pass linked ZoC data to `analyzeFactionGraph` |
 | `tests/linked_zoc.test.ts` | Add test cases for variable readiness and `zoc_covered` classification |
 

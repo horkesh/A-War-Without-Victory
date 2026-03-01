@@ -243,7 +243,7 @@ The front segmentation algorithm (`deriveAssignableFrontSegments`) groups edges 
 ## Displacement System Reference
 
 ### Implementation Files
-- `src/sim/phase_i/displacement_hooks.ts` — Phase I (one-time flip trigger)
+- `src/sim/early_war/displacement_hooks.ts` — Phase I (one-time flip trigger)
 - `src/state/displacement.ts` — Phase II continuous pressure triggers
 - `src/state/displacement_takeover.ts` — 4-week timer + camp maturation
 - `src/state/displacement_routing_data.ts` — Routing tables by faction/region
@@ -689,7 +689,7 @@ Front density = assigned_brigades / coverage_length (edge count). Below 0.5 dens
 both `computeDefenderPower` and `computeZocDefenderPower` in resolver + predictor.
 **Result:** +3 OSIDs (84.7% → 85.1%). Rewards concentrated defense without penalizing it.
 Correctly identifies thin RS fronts as vulnerable and concentrated NE positions as strong.
-**File:** `src/sim/phase_ii/local_front_defense.ts`. Pipeline step `compute-local-fronts`.
+**File:** `src/sim/combat/local_front_defense.ts`. Pipeline step `compute-local-fronts`.
 **Rule:** Front density is a DERIVED state (recomputed each turn). Never serialize as ground truth.
 
 ### L36 — Per-brigade defense_terrain_bonus captures unit-specific terrain mastery
@@ -774,7 +774,7 @@ Consider also adding specific hold_osids for Tešanj, Maglaj, Zavidovići, Žep�
 Expected effect: RS pushed back to ~77% → 85%+ in Corridor region
 
 ### N4 — VRS Troop Count [Gap 4]
-In `src/sim/phase_i/pool_population.ts`, lower `FACTION_POOL_SCALE` RS: 0.35 → 0.30
+In `src/sim/early_war/pool_population.ts`, lower `FACTION_POOL_SCALE` RS: 0.35 → 0.30
 Expected result: VRS ~97–100k (currently 116k)
 
 ### N5 — Run n256 [Verification]

@@ -500,12 +500,12 @@ All panels use a dark NATO aesthetic: `background:rgba(10,10,22,0.92)`, green ac
 
 | Function | Source File | Purpose |
 |----------|------------|---------|
-| `resolveAttackOrders()` | `src/sim/phase_ii/resolve_attack_orders.ts` | Full battle resolution |
-| `processBrigadeMovement()` | `src/sim/phase_ii/brigade_movement.ts` | Pack/transit/unpack movement |
-| `applyPostureOrders()` | `src/sim/phase_ii/brigade_posture.ts` | Posture changes |
-| `applyBrigadePressureToState()` | `src/sim/phase_ii/brigade_pressure.ts` | Brigade pressure computation |
-| `degradeEquipment()` | `src/sim/phase_ii/equipment_effects.ts` | Equipment wear |
-| `ensureBrigadeComposition()` | `src/sim/phase_ii/equipment_effects.ts` | Equipment state initialization |
+| `resolveAttackOrders()` | `src/sim/combat/resolve_attack_orders.ts` | Full battle resolution |
+| `processBrigadeMovement()` | `src/sim/combat/brigade_movement.ts` | Pack/transit/unpack movement |
+| `applyPostureOrders()` | `src/sim/combat/brigade_posture.ts` | Posture changes |
+| `applyBrigadePressureToState()` | `src/sim/combat/brigade_pressure.ts` | Brigade pressure computation |
+| `degradeEquipment()` | `src/sim/combat/equipment_effects.ts` | Equipment wear |
+| `ensureBrigadeComposition()` | `src/sim/combat/equipment_effects.ts` | Equipment state initialization |
 | `applyWiaTrickleback()` | `src/sim/formation_spawn.ts` | WIA recovery |
 | `strictCompare()` | `src/state/validateGameState.ts` | Deterministic sort comparator |
 | `initializeCasualtyLedger()` | `src/state/casualty_ledger.ts` | Casualty tracking initialization |

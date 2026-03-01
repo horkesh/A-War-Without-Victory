@@ -66,11 +66,11 @@ The Bosnian War (1992-1995) displayed a strong seasonal rhythm. Every year of th
 
 The simulation currently has **no seasonal or weather modifiers whatsoever.** The following systems run identically regardless of what calendar month corresponds to the current turn:
 
-- **Attack resolution** (`src/sim/phase_ii/attack_resolution_osid.ts`): Terrain multipliers exist (river x1.3, mountain x1.4, slope x1.15, friction x1.2) but are static year-round.
-- **Bot strategy** (`src/sim/phase_ii/bot_strategy.ts`): Doctrine phases are time-phased by week number but driven by strategic/political considerations (RS early war, HRHB Lasva), not by seasons.
-- **Combat predictor** (`src/sim/phase_ii/combat_predictor.ts`): Mirrors attack resolution constants; no seasonal input.
+- **Attack resolution** (`src/sim/combat/attack_resolution_osid.ts`): Terrain multipliers exist (river x1.3, mountain x1.4, slope x1.15, friction x1.2) but are static year-round.
+- **Bot strategy** (`src/sim/combat/bot_strategy.ts`): Doctrine phases are time-phased by week number but driven by strategic/political considerations (RS early war, HRHB Lasva), not by seasons.
+- **Combat predictor** (`src/sim/combat/combat_predictor.ts`): Mirrors attack resolution constants; no seasonal input.
 - **Supply** (`src/state/supply_state_derivation.ts`): No seasonal degradation.
-- **Movement** (`src/sim/phase_ii/brigade_movement.ts`, `osid_column_movement.ts`): No seasonal slowdown.
+- **Movement** (`src/sim/combat/brigade_movement.ts`, `osid_column_movement.ts`): No seasonal slowdown.
 
 ### 2.2 Date Tracking
 
@@ -222,7 +222,7 @@ This is lower priority than the attack modifier but would complete the seasonal 
 
 ## 5. Implementation Plan
 
-### 5.1 New File: `src/sim/phase_ii/seasonal_effects.ts`
+### 5.1 New File: `src/sim/combat/seasonal_effects.ts`
 
 A new pure-function module with no side effects:
 

@@ -51,7 +51,7 @@ description: Owns militia spawning, brigade formation, militia pools, and format
 - **Militia emergence (phase_i_militia_strength):** `src/sim/early_war/militia_emergence.ts` — computeMilitiaStrength, updateMilitiaEmergence; reads `state.municipalities[munId].organizational_penetration`.
 - **Pool population (militia_pools from strength):** `src/sim/early_war/pool_population.ts` — runPoolPopulation; POOL_SCALE_FACTOR (100), REINFORCEMENT_RATE, DISPLACED_CONTRIBUTION_CAP; key `mun_id:faction`.
 - **Formation spawn from pools:** `src/sim/formation_spawn.ts` — spawnFormationsFromPools, isFormationSpawnDirectiveActive; batchSize from caller; getMaxBrigadesPerMun.
-- **Turn pipeline (Phase I order):** `src/sim/turn_pipeline.ts` — phase-i-militia-emergence, phase-i-pool-population, phase-i-formation-spawn; spawn options (batchSize: 1000, formationKind from directive).
+- **Turn pipeline (Phase I order):** `src/sim/turn_phases/war_phases.ts` (orchestrated by `src/sim/turn_pipeline.ts`) — phase-i-militia-emergence, phase-i-pool-population, phase-i-formation-spawn; spawn options (batchSize: 1000, formationKind from directive).
 - **State types:** `src/state/game_state.ts` — FormationState, MilitiaPoolState, FormationSpawnDirective, phase_i_militia_strength; `src/state/formation_constants.ts` — getMaxBrigadesPerMun; `src/state/militia_pool_key.ts` — militiaPoolKey.
 - **Phase 0 (op set here):** `src/phase0/investment.ts` — sets `state.municipalities[].organizational_penetration` (player/narrative); `src/phase0/stability.ts` — reads op for stability.
 - **Scenario directive at init:** `src/scenario/scenario_runner.ts` — applies `scenario.formation_spawn_directive` to state at init; `src/scenario/scenario_loader.ts` + `scenario_types.ts` — parse formation_spawn_directive.
@@ -82,7 +82,7 @@ When explaining behavior or tracing bugs, cite both the canon/design doc and the
 
 - **Canon:** `docs/10_canon/FORAWWV.md` (H2.4), `docs/10_canon/War_Specification_v0_6_0.md`, `docs/10_canon/Peace_Specification_v0_6_0.md`, `docs/10_canon/Systems_Manual_v0_6_0.md`
 - **Design:** `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md`
-- **Code:** `src/sim/early_war/militia_emergence.ts`, `src/sim/early_war/pool_population.ts`, `src/sim/formation_spawn.ts`, `src/sim/turn_pipeline.ts` (Phase I steps), `src/state/game_state.ts`, `src/state/formation_constants.ts`, `src/state/militia_pool_key.ts`, `src/phase0/investment.ts`, `src/scenario/scenario_runner.ts` (directive at init)
+- **Code:** `src/sim/early_war/militia_emergence.ts`, `src/sim/early_war/pool_population.ts`, `src/sim/formation_spawn.ts`, `src/sim/turn_phases/war_phases.ts` (Phase I steps), `src/sim/turn_pipeline.ts` (orchestrator), `src/state/game_state.ts`, `src/state/formation_constants.ts`, `src/state/militia_pool_key.ts`, `src/phase0/investment.ts`, `src/scenario/scenario_runner.ts` (directive at init)
 - **Historical OOB (for comparison):** `docs/knowledge/ARBIH_ORDER_OF_BATTLE_MASTER.md`, `docs/knowledge/VRS_ORDER_OF_BATTLE_MASTER.md`, `docs/knowledge/HVO_ORDER_OF_BATTLE_MASTER.md`
 
 ## Interaction rules

@@ -164,11 +164,11 @@ In negotiation, abandoned settlements are worth less. A faction holding a wide b
 | `src/state/schema.ts` | Add abandoned schema | ~10 |
 | `src/state/serialize.ts` | Serialize/deserialize abandoned | ~10 |
 | `src/state/clone.ts` | Clone abandoned map | ~5 |
-| `src/sim/phase_ii/abandoned_settlement.ts` | **New file**: evaluate triggers, mark/unmark | ~80 |
-| `src/sim/phase_ii/militia_garrison.ts` | Check abandoned before computing garrison | ~5 |
-| `src/sim/phase_ii/consolidation_flips.ts` | Zero-resistance path for abandoned targets | ~10 |
-| `src/sim/phase_ii/brigade_movement.ts` | Movement cost penalty in `computeEdgeCost()` | ~8 |
-| `src/sim/phase_ii/battle_resolution.ts` | Abandoned defender power reduction | ~10 |
+| `src/sim/combat/abandoned_settlement.ts` | **New file**: evaluate triggers, mark/unmark | ~80 |
+| `src/sim/combat/militia_garrison.ts` | Check abandoned before computing garrison | ~5 |
+| `src/sim/combat/consolidation_flips.ts` | Zero-resistance path for abandoned targets | ~10 |
+| `src/sim/combat/brigade_movement.ts` | Movement cost penalty in `computeEdgeCost()` | ~8 |
+| `src/sim/combat/battle_resolution.ts` | Abandoned defender power reduction | ~10 |
 | `src/sim/turn_pipeline.ts` | Add `evaluate-abandoned-settlements` step after displacement | ~5 |
 | `src/ui/map/data/GameStateAdapter.ts` | Extract abandoned state for rendering | ~15 |
 | `src/ui/map/layers/SettlementControlLayer.ts` | Abandoned visual treatment | ~40 |

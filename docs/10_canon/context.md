@@ -238,9 +238,15 @@ Do NOT edit FORAWWV automatically.
 AWWV/
 ├── src/                          # Simulation engine (TypeScript)
 │   ├── sim/                      # Core simulation logic
-│   │   ├── pressure/             # Phase 3A/B pressure systems
-│   │   ├── collapse/             # Phase 3C/D collapse systems
-│   │   └── turn_pipeline.ts     # Turn execution order
+│   │   ├── combat/               # Phase II combat, bot AI, ZoC, corps sectors (renamed from phase_ii/)
+│   │   ├── early_war/            # Phase I militia, control flip, displacement (renamed from phase_i/)
+│   │   ├── bot/                  # Bot manager, strategy, interfaces
+│   │   ├── events/               # B1 event system
+│   │   ├── turn_phases/          # War and peace phase step definitions
+│   │   │   ├── war_phases.ts     # Phase I + Phase II step arrays
+│   │   │   └── peace_phases.ts   # Phase 0 step arrays
+│   │   ├── turn_pipeline.ts      # Turn orchestrator (slim; assembles phases, runs runTurn)
+│   │   └── turn_pipeline_types.ts # TurnInput, TurnReport, TurnContext, caches
 │   ├── state/                    # Game state definitions
 │   ├── cli/                      # CLI tools and harnesses
 │   └── tests/                    # Test suites

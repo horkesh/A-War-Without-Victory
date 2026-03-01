@@ -29,7 +29,7 @@ Add an `enclave_osids: string[]` field to enclave brigade definitions. Enclave b
 RS Drina Corps can then take outlying OSIDs (e.g. `op:srebrenica:zeleni_jadar_2`, `op:srebrenica:potocari_2`) without fighting through 5 concentrated enclave brigades, while the town OSID (`op:srebrenica:srebrenica_2`) remains defended.
 
 ### Key files
-- `src/sim/phase_ii/bot_brigade_ai_osid.ts` — enclave brigade behavior
+- `src/sim/combat/bot_brigade_ai_osid.ts` — enclave brigade behavior
 - Enclave definitions (currently in formation data)
 
 ### Risks
@@ -69,8 +69,8 @@ Implement corps-level brigade allocation floors or redistribution:
 Option A is simplest and most historically grounded — SRK historically had 5 brigades plus significant independent units. Options B/C are more emergent but harder to tune.
 
 ### Key files
-- `src/sim/phase_ii/bot_corps_ai.ts` — corps subordinate assignment
-- `src/sim/phase_i/pool_population.ts` — brigade spawn/assignment
+- `src/sim/combat/bot_corps_ai.ts` — corps subordinate assignment
+- `src/sim/early_war/pool_population.ts` — brigade spawn/assignment
 - Formation init data
 
 ### Risks
@@ -105,7 +105,7 @@ supply_penalty = -max(0, (distance_from_corps_hq - threshold) * scale)
 At 12+ hops from HQ, the penalty (-60 or more) would make most attacks score negative, naturally limiting overextension without artificial weight caps. Directive targets (overextension penalty scale 0.25x) would still be viable for deep operations but opportunistic grabs would stop.
 
 ### Key files
-- `src/sim/phase_ii/bot_brigade_ai_osid.ts` — `scoreTargetFromDirective()` function
+- `src/sim/combat/bot_brigade_ai_osid.ts` — `scoreTargetFromDirective()` function
 - Graph distance calculation — may need `src/map/` graph utilities
 
 ### Risks
@@ -134,7 +134,7 @@ Model Orasje as a dedicated pocket/enclave, similar to Srebrenica/Gorazde:
 
 ### Key files
 - Formation init data — add Orasje pocket brigade entries
-- `src/sim/phase_ii/bot_brigade_ai_osid.ts` — enclave locking behavior
+- `src/sim/combat/bot_brigade_ai_osid.ts` — enclave locking behavior
 
 ### Risks
 - Minimal. Orasje pocket is well-documented historically.
@@ -164,7 +164,7 @@ Dedicate 1 brigade per pocket with high defense cost. Similar to enclave treatme
 Option A is simpler and lower risk. The Sapna Finger was historically defended by the 206th Mountain Brigade (ARBiH) which operated specifically in this corridor.
 
 ### Key files
-- `src/sim/phase_ii/bot_corps_ai.ts` — CorpsDirective generation, hold_osids
+- `src/sim/combat/bot_corps_ai.ts` — CorpsDirective generation, hold_osids
 - Or formation data for Option B
 
 ### Risks
@@ -202,7 +202,7 @@ Or more elegantly, a scenario-configurable `max_personnel` field:
 This decouples troop count from territorial performance. RS can have aggressive early-war doctrine and still hit 100k by week 40.
 
 ### Key files
-- `src/sim/phase_i/pool_population.ts` — recruitment engine
+- `src/sim/early_war/pool_population.ts` — recruitment engine
 - `data/scenarios/apr1992_definitive_40w.json` — scenario config
 
 ### Risks

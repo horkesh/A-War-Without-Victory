@@ -54,8 +54,8 @@ Currently the engine conflates these. They need to be separated.
 
 **Files affected:**
 - `src/state/game_state.ts` — add `morale?: number` to `FormationState`
-- `src/sim/phase_ii/cohesion_drift.ts` — add parallel `morale_drift.ts` or morale drift step
-- `src/sim/phase_ii/attack_resolution_osid.ts` — use morale in retreat resistance
+- `src/sim/combat/cohesion_drift.ts` — add parallel `morale_drift.ts` or morale drift step
+- `src/sim/combat/attack_resolution_osid.ts` — use morale in retreat resistance
 
 ### 0b: Population Affinity — the data hook
 
@@ -166,7 +166,7 @@ desperately when VRS attacked the enclave.
 
 ## Fix 2: RS-HRHB Co-Ethnic Scoring Penalty [Stops RS attacking Croatian territory]
 
-**File:** `src/sim/phase_ii/bot_brigade_ai_osid.ts`
+**File:** `src/sim/combat/bot_brigade_ai_osid.ts`
 
 **Historical basis:** No VRS-HVO open war in 1992. Herzegovina Corps was DEFENSIVE. VRS had no
 reason to attack HRHB territory — if RS is doing so, it's because RS brigades are mispositioned
@@ -182,7 +182,7 @@ Add to OSID scoring when `faction === 'RS' && controllerFaction === 'HRHB'`:
 
 ## Fix 3: ARBiH 3rd Corps Corridor Weight [Holds Tešanj-Zavidovići]
 
-**File:** `src/sim/phase_ii/bot_strategy.ts`
+**File:** `src/sim/combat/bot_strategy.ts`
 
 **Historical basis:** 3rd Corps (Zenica, ~15–20k men) held Tešanj-Maglaj-Zavidovići-Žepče
 continuously throughout 1992–1993. This was ARBiH's core defensive mission in that region.
@@ -197,7 +197,7 @@ Change `Central Corridor Counter` priority:
 
 ## Fix 4: VRS Troop Count [116k → 100k target]
 
-**File:** `src/sim/phase_i/pool_population.ts`
+**File:** `src/sim/early_war/pool_population.ts`
 
 `FACTION_POOL_SCALE` RS: **0.35 → 0.30**
 

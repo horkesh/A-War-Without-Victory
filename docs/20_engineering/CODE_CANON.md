@@ -19,8 +19,8 @@ Non-negotiables (must hold for all sim execution paths):
 - Derived state must not be serialized as source of truth.
 
 If you touch determinism-sensitive areas, also read:
-- `docs/engineering/DETERMINISM_AUDIT.md`
-- `docs/engineering/INVARIANTS_IN_CODE.md`
+- `docs/20_engineering/DETERMINISM_AUDIT.md`
+- `docs/20_engineering/INVARIANTS_IN_CODE.md`
 
 ## Where to Start Reading the Code (First 30 Minutes)
 Read `docs/context.md` first (workflow discipline and validation rules).
@@ -29,7 +29,7 @@ Primary entrypoints (from deterministic discovery):
 - Scenario harness: `src/scenario/scenario_runner.ts`
 - Scenario CLI: `src/cli/sim_scenario.ts`
 - Single-turn sim CLI: `src/cli/sim_run.ts`
-- War-phase pipeline: `src/sim/turn_pipeline.ts`
+- War-phase pipeline: `src/sim/turn_pipeline.ts` (orchestrator; steps in `src/sim/turn_phases/war_phases.ts`)
 - Phase 0 / canonical pipeline: `src/state/turn_pipeline.ts`
 - Phase II browser advance (warroom subset): `src/sim/run_phase_ii_browser.ts`
 - AoR init shared helper: `src/scenario/aor_init.ts`

@@ -77,7 +77,7 @@
 
 ## Turn pipeline and canon systems (Phase Specifications v0.5)
 
-Canon global turn-order hooks (docs/10_canon/Phase_Specifications_v0_5_0.md) map to `src/sim/turn_pipeline.ts` step names as follows. Gaps (e.g. explicit “System 10 capability step” ordering) should be closed per PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md.
+Canon global turn-order hooks (docs/10_canon/Phase_Specifications_v0_5_0.md) map to step names as follows. Steps are defined in `src/sim/turn_phases/war_phases.ts` (war/Phase I/II) and `src/sim/turn_phases/peace_phases.ts` (Phase 0), orchestrated by `src/sim/turn_pipeline.ts`. Gaps (e.g. explicit “System 10 capability step” ordering) should be closed per PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md.
 
 | Canon hook | System | Pipeline step(s) |
 |------------|--------|-------------------|
@@ -95,7 +95,7 @@ Canon global turn-order hooks (docs/10_canon/Phase_Specifications_v0_5_0.md) map
 | B1 | Events (narrative) | `evaluate-events` (first step in Phase I and Phase II) |
 | B4 | Coercion pressure | `phase-i-control-flip` uses `coercion_pressure_by_municipality` to reduce flip threshold |
 
-Phase I steps: `evaluate-events` (first), `phase-i-militia-emergence`, `phase-i-pool-population`, `phase-i-minority-militia-decay`, `phase-i-brigade-reinforcement`, `phase-i-formation-spawn`, `phase-i-alliance-update`, `phase-i-ceasefire-check`, `phase-i-washington-check`, `phase-i-capability-update`, `phase-i-control-flip` (B4 coercion; capability-weighted attacker/defender), `phase-i-displacement-hooks`, `phase-i-control-strain`, `phase-i-authority-update`, `phase-i-jna-transition`, etc. Full order and conditions are in turn_pipeline.ts.
+Phase I steps: `evaluate-events` (first), `phase-i-militia-emergence`, `phase-i-pool-population`, `phase-i-minority-militia-decay`, `phase-i-brigade-reinforcement`, `phase-i-formation-spawn`, `phase-i-alliance-update`, `phase-i-ceasefire-check`, `phase-i-washington-check`, `phase-i-capability-update`, `phase-i-control-flip` (B4 coercion; capability-weighted attacker/defender), `phase-i-displacement-hooks`, `phase-i-control-strain`, `phase-i-authority-update`, `phase-i-jna-transition`, etc. Full order and conditions are in `src/sim/turn_phases/war_phases.ts`.
 
 **Bottom-up in Phase II:** When `state.meta.recruitment_mode === 'bottom_up'`, `runTurn` injects the following Phase I steps after the main `phases` loop: phase-i-militia-emergence, compute-siege-state, phase-i-pool-population, phase-i-formation-spawn, activate-corps, promote-formations. This is required so that phase_ii-start scenarios still run bottom-up formation growth. See Engine Invariants §14.10 and docs/40_reports/implemented/20260228_PHASE_G_CALIBRATION_BOTTOM_UP_PIPELINE_FIX.md.
 
@@ -103,7 +103,7 @@ Phase I steps: `evaluate-events` (first), `phase-i-militia-emergence`, `phase-i-
 
 **Authority derivation:** `update-formation-lifecycle` derives municipality authority via `deriveMunicipalityAuthorityMap` (formation_lifecycle.ts) from political control (consolidated/contested/fragmented); used for brigade activation gating.
 
-**Phase II OSID/ZoC:** No AoR. Pipeline steps: `zoc-computation`, `phase-ii-supply-osid` (OSID supply reachability and supply_state_by_osid for supply_mult in combat), `zoc-constrained-movement`, `derive-osid-front-segments` (sets phase_ii_front_edges_osid; assignable_front_segments derived from it), `phase-ii-resolve-attack-orders` (OSID attack resolution; uses supply_state_by_osid when present). After `phase-ii-alliance-update`, RBiH–HRHB milestone checks run: `phase-ii-ceasefire-check`, `phase-ii-washington-check` (same precondition logic as Phase I). Brigade location is location_osid only; Phase II entry uses backfillFormationLocationOsid. See Phase_II_Specification_v0_5_0.md §5 and AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md.
+**Phase II OSID/ZoC:** No AoR. Pipeline steps: `zoc-computation`, `phase-ii-supply-osid` (OSID supply reachability and supply_state_by_osid for supply_mult in combat), `zoc-constrained-movement`, `derive-osid-front-segments` (sets phase_ii_front_edges_osid; assignable_front_segments derived from it), `partition-corps-front-sectors`, `generate-bot-corps-orders`, `advance-sector-offensives`, `generate-bot-brigade-orders`, `phase-ii-resolve-attack-orders` (OSID attack resolution; uses supply_state_by_osid when present), `update-sector-offensive-results`. After `phase-ii-alliance-update`, RBiH–HRHB milestone checks run: `phase-ii-ceasefire-check`, `phase-ii-washington-check` (same precondition logic as Phase I). Brigade location is location_osid only; Phase II entry uses backfillFormationLocationOsid. Combat code in `src/sim/combat/`; Phase I code in `src/sim/early_war/`. See Phase_II_Specification_v0_5_0.md §5 and AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md.
 
 ## Non-Canonical / Legacy Harnesses
 These exist for smoke and internal checks, not for authoritative runs:

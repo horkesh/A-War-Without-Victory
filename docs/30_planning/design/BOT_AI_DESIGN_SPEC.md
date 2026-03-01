@@ -783,11 +783,11 @@ The three faction AIs are independently tuned. In a typical game:
 
 | File | Change |
 |------|--------|
-| `src/sim/phase_ii/bot_brigade_ai.ts` | Replace OSID bot with three faction-specific AIs |
-| `src/sim/phase_ii/bot_strategy.ts` | Expand with OSID-native constants, civilian weights |
-| `src/sim/phase_ii/bot_corps_ai.ts` | Update named operation timing, reserve deployment |
-| `src/sim/phase_ii/combat_predictor.ts` | **NEW:** Read-only combat outcome prediction |
-| `src/sim/phase_ii/osid_graph_analysis.ts` | **NEW:** Strategic graph analysis (chokepoints, salients, front classification) |
+| `src/sim/combat/bot_brigade_ai_osid.ts` | Replace OSID bot with three faction-specific AIs |
+| `src/sim/combat/bot_strategy.ts` | Expand with OSID-native constants, civilian weights |
+| `src/sim/combat/bot_corps_ai.ts` | Update named operation timing, reserve deployment |
+| `src/sim/combat/combat_predictor.ts` | **NEW:** Read-only combat outcome prediction |
+| `src/sim/combat/osid_graph_analysis.ts` | **NEW:** Strategic graph analysis (chokepoints, salients, front classification) |
 | `src/sim/turn_pipeline.ts` | Update bot step to dispatch to faction-specific AIs |
 | `tests/bot_osid_*.test.ts` | **NEW:** Test suite for OSID-native bot decisions |
 

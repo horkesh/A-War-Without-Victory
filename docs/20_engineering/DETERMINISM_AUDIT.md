@@ -80,14 +80,10 @@ txtLines.push(`Generated: ${new Date().toISOString()}`);
 
 **POTENTIALLY UNSAFE (not sorted):**
 - `src/cli/sim_smoke.ts:200,214` - `Object.keys(state.sustainability_state)` and `Object.keys(state.displacement_state)` - used for iteration only, not serialized ✅ (safe)
-- `src/sim/turn_pipeline.ts:158,160` - `Object.entries()` used to build Map - Map iteration order is insertion-order, but source object order is non-deterministic ⚠️
+- `src/sim/turn_phases/war_phases.ts` (formerly `turn_pipeline.ts`) - `Object.entries()` used to build Map in some steps - Map iteration order is insertion-order, but source object order is non-deterministic ⚠️
 
-**Analysis of `src/sim/turn_pipeline.ts:158-160`:**
-```typescript
-const deltas = new Map<string, number>(Object.entries(step.pressure_deltas));
-// ...
-Object.entries(step.local_supply)
-```
+**Analysis of war pipeline step internals:**
+`Object.entries(step.pressure_deltas)` / `Object.entries(step.local_supply)` patterns may appear in step implementations.
 
 **Risk:** If `step.pressure_deltas` or `step.local_supply` are objects with non-deterministic key order, Map insertion order will vary. However, these are internal to turn pipeline and not serialized directly. **Status:** Low risk, but should verify these objects are created with stable key order.
 
@@ -156,7 +152,7 @@ return JSON.stringify(obj, Object.keys(obj as Record<string, unknown>).sort(), 2
 1. **`tools/map/report_hull_inflation.ts`** - Timestamp in JSON/TXT artifacts (lines 268, 296)
 
 ### Low Risk (Monitor, May Need Fix)
-1. **`src/sim/turn_pipeline.ts`** - Object.entries() for Map construction - verify source object key order is stable
+1. **`src/sim/turn_phases/war_phases.ts`** (formerly `turn_pipeline.ts`) - Object.entries() for Map construction - verify source object key order is stable
 2. **JSON key ordering** - Consider canonical sorting for critical artifacts
 
 ### Acceptable (Log-Only)

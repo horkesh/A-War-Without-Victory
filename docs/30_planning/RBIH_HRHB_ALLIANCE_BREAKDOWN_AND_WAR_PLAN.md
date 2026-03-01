@@ -41,7 +41,7 @@ The alliance lifecycle framework exists (value tracking, phases, ceasefire, Wash
 
 #### A1: Brigade AI Target Filtering ✅
 
-**File:** `src/sim/phase_ii/bot_brigade_ai.ts`
+**File:** `src/sim/combat/bot_brigade_ai_osid.ts`
 
 **What was implemented:**
 - Added `isBilateralAlly(state, faction, targetFaction)` helper (lines 101-114). Returns true when RBiH↔HRHB and (alliance > ALLIED_THRESHOLD OR ceasefire_active OR washington_signed).
@@ -54,7 +54,7 @@ The alliance lifecycle framework exists (value tracking, phases, ceasefire, Wash
 
 #### A2: Corps AI Named Operations ✅
 
-**File:** `src/sim/phase_ii/bot_corps_ai.ts`
+**File:** `src/sim/combat/bot_corps_ai.ts`
 
 **What was implemented:**
 - `getOperationCatalog()` signature changed to `getOperationCatalog(faction, state)` (line 341).
@@ -65,7 +65,7 @@ The alliance lifecycle framework exists (value tracking, phases, ceasefire, Wash
 
 #### A3: Corps Stance — Anti-Bilateral Offensive ✅
 
-**File:** `src/sim/phase_ii/bot_corps_ai.ts`
+**File:** `src/sim/combat/bot_corps_ai.ts`
 
 **What was implemented:**
 - RBiH bilateral war awareness (lines 307-318): new block after late-war counteroffensive. When alliance < 0.0 and Washington not signed, corps in central Bosnia municipalities (travnik, bugojno, vitez, novi_travnik, busovaca, kiseljak, zenica) are set to balanced (unless reorganize).
@@ -77,7 +77,7 @@ The alliance lifecycle framework exists (value tracking, phases, ceasefire, Wash
 
 #### A4: Phase I Bot Posture — Alliance Awareness ✅
 
-**File:** `src/sim/phase_i/bot_phase_i.ts`
+**File:** `src/sim/early_war/bot_phase_i.ts`
 
 **What was implemented:**
 - Alliance phase logic expanded (lines 87-90): `rbihHrhbAllied` now also true when ceasefire active or Washington signed. New `rbihHrhbAtWar` boolean (alliance < 0.0 AND no ceasefire AND no Washington).
@@ -90,7 +90,7 @@ The alliance lifecycle framework exists (value tracking, phases, ceasefire, Wash
 
 #### A5: Battle Resolution Safety Valve ✅
 
-**File:** `src/sim/phase_ii/battle_resolution.ts`
+**File:** `src/sim/combat/battle_resolution.ts`
 
 **What was implemented:**
 - Restructured bilateral block (lines 806-818): `isRbihVsHrhb` check now gates a block that reads `rbih_hrhb_state` for explicit `ceasefireActive` and `washingtonSigned` checks.
@@ -105,7 +105,7 @@ The alliance lifecycle framework exists (value tracking, phases, ceasefire, Wash
 
 #### B1: Refugee Pressure in Mixed Municipalities
 
-**File:** `src/sim/phase_i/alliance_update.ts` (new formula terms)
+**File:** `src/sim/early_war/alliance_update.ts` (new formula terms)
 
 **Concept:** When displaced Bosniaks arrive in mixed municipalities, they shift the demographic balance and create competition for resources, housing, and political control. This was the primary historical driver of the Lasva Valley war.
 
@@ -142,7 +142,7 @@ REFUGEE_PRESSURE_MIN_RATIO = 0.05 // below this, no pressure
 
 #### B2: Territorial Competition Incidents
 
-**File:** `src/sim/phase_i/alliance_update.ts`
+**File:** `src/sim/early_war/alliance_update.ts`
 
 **Concept:** When HRHB captures a settlement that is demographically Bosniak-majority (or vice versa), this is an alliance incident even if the settlement was RS-controlled at the time. "Taking back from RS" is fine when it's your ethnic territory; taking mixed or other-aligned territory is provocation.
 
@@ -224,7 +224,7 @@ if (state.phase0_relationships?.rbih_hrhb !== undefined) {
 
 #### C1: Bilateral Front Edge Generation
 
-**File:** `src/map/front_edges.ts` or new file `src/sim/phase_ii/bilateral_front.ts`
+**File:** `src/map/front_edges.ts` or new file `src/sim/combat/bilateral_front.ts`
 
 When alliance ≤ HOSTILE_THRESHOLD (0.0):
 
@@ -243,7 +243,7 @@ This is the key mechanical consequence: **formations must now cover two fronts**
 
 #### C2: Formation Diversion
 
-**File:** `src/sim/phase_ii/bot_corps_ai.ts`
+**File:** `src/sim/combat/bot_corps_ai.ts`
 
 When alliance < 0.0 and HRHB has ≥3 corps:
 - Reassign 1 corps AoR to cover RBiH front (central Bosnia)
@@ -274,7 +274,7 @@ The refugees from bilateral fighting further strain the alliance in remaining mi
 
 #### C4: Ceasefire Mechanics — Freeze and Recovery
 
-**Files:** `src/sim/phase_i/bilateral_ceasefire.ts`, battle resolution
+**Files:** `src/sim/early_war/bilateral_ceasefire.ts`, battle resolution
 
 When ceasefire fires:
 - **Freeze bilateral attacks** (already handled in battle_resolution via alliance check, but add explicit ceasefire check per A5)
@@ -305,9 +305,9 @@ Mostly already implemented. Verify/add:
 
 | # | Task | File(s) | Status |
 |---|------|---------|--------|
-| A1a | Add `isBilateralAlly()` helper | `bot_brigade_ai.ts` | ✅ Done |
-| A1b | Filter bilateral edges in `getFactionFrontEdges()` | `bot_brigade_ai.ts` | ✅ Done |
-| A1c | Add bilateral war priority bonus to `scoreTarget()` | `bot_brigade_ai.ts` | ✅ Done |
+| A1a | Add `isBilateralAlly()` helper | `bot_brigade_ai_osid.ts` | ✅ Done |
+| A1b | Filter bilateral edges in `getFactionFrontEdges()` | `bot_brigade_ai_osid.ts` | ✅ Done |
+| A1c | Add bilateral war priority bonus to `scoreTarget()` | `bot_brigade_ai_osid.ts` | ✅ Done |
 | A2a | Pass `state` to `getOperationCatalog()` | `bot_corps_ai.ts` | ✅ Done |
 | A2b | Add bilateral named operations (conditional on alliance) | `bot_corps_ai.ts` | ✅ Done |
 | A2c | Filter operation relevance for bilateral targets | `bot_corps_ai.ts` | ✅ (inherits from existing relevance logic) |
@@ -350,17 +350,17 @@ Mostly already implemented. Verify/add:
 
 | File | Phase | Changes | Status |
 |------|-------|---------|--------|
-| `src/sim/phase_ii/bot_brigade_ai.ts` | A | `isBilateralAlly()`, `getFactionFrontEdges()` filtering, `scoreTarget()` bilateral bonus | ✅ Done |
-| `src/sim/phase_ii/bot_corps_ai.ts` | A, C | `getOperationCatalog(faction, state)`, bilateral ops, stance overrides; (C: corps reassignment) | ✅ A done, C pending |
-| `src/sim/phase_i/bot_phase_i.ts` | A | Ceasefire/Washington awareness, bilateral edge filtering, posture overrides | ✅ Done |
-| `src/sim/phase_ii/battle_resolution.ts` | A, C | Ceasefire+Washington check in bilateral block; (C: joint pressure bonus) | ✅ A done, C pending |
-| `src/sim/phase_i/alliance_update.ts` | B | Refugee pressure term, territorial incidents | ⬜ Pending |
+| `src/sim/combat/bot_brigade_ai_osid.ts` | A | `isBilateralAlly()`, `getFactionFrontEdges()` filtering, `scoreTarget()` bilateral bonus | ✅ Done |
+| `src/sim/combat/bot_corps_ai.ts` | A, C | `getOperationCatalog(faction, state)`, bilateral ops, stance overrides; (C: corps reassignment) | ✅ A done, C pending |
+| `src/sim/early_war/bot_phase_i.ts` | A | Ceasefire/Washington awareness, bilateral edge filtering, posture overrides | ✅ Done |
+| `src/sim/combat/battle_resolution.ts` | A, C | Ceasefire+Washington check in bilateral block; (C: joint pressure bonus) | ✅ A done, C pending |
+| `src/sim/early_war/alliance_update.ts` | B | Refugee pressure term, territorial incidents | ⬜ Pending |
 | `src/sim/turn_pipeline.ts` | B, C | Phase II bilateral flip count step | ⬜ Pending |
 | `src/state/turn_pipeline.ts` | B | Phase 0 → Phase I alliance handoff | ⬜ Pending |
 | `src/ui/warroom/run_phase0_turn.ts` | B | Phase 0 → Phase I alliance handoff | ⬜ Pending |
 | `src/state/displacement_takeover.ts` | C | Bilateral displacement parameters | ⬜ Pending |
 | `src/map/front_edges.ts` | C | Bilateral front edge computation | ⬜ Pending |
-| `src/sim/phase_i/washington_agreement.ts` | C | Mixed municipality restoration | ⬜ Pending |
+| `src/sim/early_war/washington_agreement.ts` | C | Mixed municipality restoration | ⬜ Pending |
 
 ---
 

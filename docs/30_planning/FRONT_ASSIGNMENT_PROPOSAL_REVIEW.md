@@ -240,7 +240,7 @@ Unlike HoI4's mostly contiguous fronts, Bosnia had enclaves (Srebrenica, Goražd
 - Pocket brigades operate independently of the main front hierarchy (they can't coordinate with a corps HQ 100km away through enemy territory).
 - Supply state for pocket brigades is "critical" unless a corridor exists (already computed by supply_state_derivation.ts).
 
-The existing brigade_encirclement detection (brigade_aor.ts) and supply corridor classification (Open/Brittle/Cut) provide the foundation. The front system should integrate with these rather than ignoring them.
+The existing brigade_encirclement detection (brigade_aor_legacy.ts) and supply corridor classification (Open/Brittle/Cut) provide the foundation. The front system should integrate with these rather than ignoring them.
 
 ---
 
@@ -406,12 +406,12 @@ The proposal's §9 canon changes are mostly correct but should be amended:
 - `docs/10_canon/Phase_0_Specification_v0_5_0.md` §4.1–4.6 — pre-war capital, org penetration, stability
 - `docs/10_canon/Phase_I_Specification_v0_5_0.md` §4.3–4.6 — control flips, holdouts, consolidation, control strain
 - `docs/10_canon/Phase_II_Specification_v0_5_0.md` — brigade AoR, contiguity, attack resolution
-- `src/sim/phase_i/settlement_control.ts` — wave flip, holdout creation/cleanup, isolation surrender
-- `src/sim/phase_i/control_flip.ts` — stability/pressure evaluation, consolidation period, FLIP_ELIGIBLE_MILITIA_THRESHOLD
-- `src/sim/phase_ii/brigade_aor.ts` — settlement-level AoR assignment, encirclement detection
-- `src/sim/phase_ii/corps_command.ts` — stance, operations, OG slots
-- `src/sim/phase_ii/bot_corps_ai.ts` — corps-level AI (stance, operations, OGs, standing orders)
-- `src/sim/phase_ii/bot_brigade_ai.ts` — brigade-level AI (posture, attack, reshape)
+- `src/sim/early_war/settlement_control.ts` — wave flip, holdout creation/cleanup, isolation surrender
+- `src/sim/early_war/control_flip.ts` — stability/pressure evaluation, consolidation period, FLIP_ELIGIBLE_MILITIA_THRESHOLD
+- `src/sim/combat/brigade_aor_legacy.ts` — settlement-level AoR assignment, encirclement detection
+- `src/sim/combat/corps_command.ts` — stance, operations, OG slots
+- `src/sim/combat/bot_corps_ai.ts` — corps-level AI (stance, operations, OGs, standing orders)
+- `src/sim/combat/bot_brigade_ai_osid.ts` — brigade-level AI (posture, attack, reshape)
 - `src/map/front_edges.ts` — front edge computation
 - `src/map/front_regions.ts` — connected front components
 - `src/state/supply_reachability.ts` — BFS supply connectivity, isolated territory detection
