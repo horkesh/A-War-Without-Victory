@@ -170,7 +170,7 @@ export function getBrigadeAoRSettlements(
  * Return the settlements actively covered by this brigade this turn.
  * Settlement-level redesign: AoR IS the coverage (1–4 settlements); no separate operational cap.
  */
-export function getBrigadeOperationalCoverageSettlements(
+function getBrigadeOperationalCoverageSettlements(
     state: GameState,
     formationId: FormationId,
     _edges?: EdgeRecord[]

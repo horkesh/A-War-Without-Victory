@@ -19,7 +19,7 @@ import type { FactionId, FormationId, GameState } from '../../state/game_state.j
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
-import { buildOsidAdjacency, type Osid } from './zoc.js';
+import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 
 export interface ZocConstrainedMovementReport {
     moves_applied: number;

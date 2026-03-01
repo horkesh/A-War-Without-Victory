@@ -15,38 +15,15 @@
  * Canon: docs/30_planning/20260222_HOI_BRIGADES_AND_ZONE_OF_CONTROL_DESIGN.md.
  */
 
-import type { EdgeRecord } from '../../map/settlements.js';
 import type { FactionId, FormationId, GameState } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import type { EdgeRecord } from '../../map/settlements.js';
+import { buildOsidAdjacency, isBrigadeDeployed, type Osid } from './osid_adjacency.js';
 
-export type Osid = string;
-
-/**
- * Build OSID → sorted list of adjacent OSIDs from edge list.
- * Determinism: each neighbor list is sorted with localeCompare.
- */
-export function buildOsidAdjacency(edges: EdgeRecord[]): Map<Osid, Osid[]> {
-    const adj = new Map<Osid, Osid[]>();
-    for (const e of edges) {
-        if (!e?.a || !e?.b) continue;
-        const listA = adj.get(e.a) ?? [];
-        if (!listA.includes(e.b)) listA.push(e.b);
-        adj.set(e.a, listA);
-        const listB = adj.get(e.b) ?? [];
-        if (!listB.includes(e.a)) listB.push(e.a);
-        adj.set(e.b, listB);
-    }
-    for (const list of adj.values()) list.sort(strictCompare);
-    return adj;
-}
-
-/** Brigade is deployed if movement_state (from brigade_movement_state) is 'deployed' or absent. */
-export function isBrigadeDeployed(state: GameState, formationId: FormationId): boolean {
-    const status = state.brigade_movement_state?.[formationId]?.status;
-    return status === 'deployed' || status === undefined;
-}
+// Re-export for consumers that import from zoc.ts
+export { buildOsidAdjacency, isBrigadeDeployed, type Osid } from './osid_adjacency.js';
 
 /**
  * Set of OSIDs that lie in the ZoC of any enemy brigade for the given faction
