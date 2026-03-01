@@ -8740,3 +8740,15 @@ Determinism checks **MUST** be run:
 - **Determinism:** Pure structural refactoring. State hash `1dfb9114d33efbde` unchanged with and without R4 changes (verified via git stash/pop comparison).
 - **Files modified:** `src/state/supply_reachability_osid.ts` (-16 lines local builder, +1 import), `src/state/supply_state_derivation.ts` (-24 lines local builder + dead stub, +1 import, 2 call sites updated).
 - **Verification:** tsc clean; vitest 190/190 pass (13 skipped); map UI build clean; sim:scenario:run:40w hash identical before/after.
+
+**2026-03-01** - feat: VRS pre-planned operations, non-contiguous sectors, operations GUI
+- **Phase:** Post-MVP — Phase II bot AI + GUI
+- **Summary:** Implemented three interconnected features: (1) non-contiguous sector separation — every DFS connected component becomes its own sector, no cross-component merging; (2) 5 named pre-planned VRS operations injected at scenario start (Koridor, Drina, Prsten, Foca, Prijedor); (3) Rule 1.5 brigade column march to assigned sector; (4) Operations GUI panel in OOB sidebar.
+- **Non-contiguous sectors (corps_front_sectors.ts):** Removed `findNearestSectorIndex` merge logic. Each sub-segment = one sector. Post-BFS pocket claiming for brigades at unreachable friendly OSIDs. `assignBrigadesToSectors` uses BFS nearest-sector fallback. Result: 29 sectors (up from ~22).
+- **Pre-planned operations (pre_planned_operations.ts, NEW):** 5 operations start in `execution` phase at turn 0. Corps stances set to `offensive`. Sector_id resolution added to `advanceSectorOffensives` for orphaned ops.
+- **Column march (bot_brigade_ai_osid.ts):** Rule 1.5 between supply gate and Hold. Brigades in sector_attack ops march to sector via `findNearestFriendlyOsidInSet` BFS.
+- **Operations GUI (OOBSidebar.tsx, types.ts, GameStateAdapter.ts):** New "Operations" accordion showing active ops by faction with phase badges, momentum, objectives, supply readiness.
+- **Calibration (n326):** 84.7% match (638/753), -2.7pp from n314 baseline. RS peaks at 382 OSIDs (W35), final 375. Casualties: RS=7,187, RBiH=5,304, HRHB=2,548. Key: Drina 71.9% (-3.1pp), column march disrupting initial displacement-driven territorial gains. Needs tuning.
+- **Files:** `src/sim/phase_ii/corps_front_sectors.ts`, `src/sim/phase_ii/pre_planned_operations.ts` (NEW), `src/sim/phase_ii/sector_offensive.ts`, `src/sim/phase_ii/bot_brigade_ai_osid.ts`, `src/scenario/scenario_runner.ts`, `src/ui/map/data/types.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/components/OOBSidebar.tsx`.
+- **Tests:** `tests/corps_front_sectors_multi.test.ts` (5 tests), `tests/pre_planned_operations.test.ts` (7 tests). All vitest 190/190 pass.
+- **Report:** `docs/40_reports/implemented/20260301_VRS_OPERATIONS_NON_CONTIGUOUS_SECTORS.md`

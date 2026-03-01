@@ -36,20 +36,20 @@
 ## Shell & Command Reliability
 1. **[2026-02-28] Prefer built-in `rg` tool over shell `rg`**
    Do instead: In this workspace, shell `rg` can be unavailable in PowerShell; use the `rg`/`Grep` tool for content scans and counts.
-1. **[2026-02-07] Windows shell separator**
+2. **[2026-02-07] Windows shell separator**
    Do instead: On Windows PowerShell, use `;` not `&&` to chain commands.
-2. **[2026-02-07] Use node_modules/tsx directly**
+3. **[2026-02-07] Use node_modules/tsx directly**
    Do instead: Use `node_modules/.bin/tsx` directly instead of `npx tsx` which can hang on Windows.
-3. **[2026-02-07] npx tsx --test can hang**
+4. **[2026-02-07] npx tsx --test can hang**
    Do instead: Run faster unit subsets first; use `npm run test:vitest` for the Vitest suite.
-4. **[2026-02-13] Validate paths with glob before use**
+5. **[2026-02-13] Validate paths with glob before use**
    Do instead: Stale paths break silently. Skills live at `.claude/skills/*` now — validate with glob.
-5. **[2026-02-22] OneDrive file lock retries**
+6. **[2026-02-22] OneDrive file lock retries**
    Do instead: Implement retry logic when encountering file-lock errors from OneDrive.
-6. **[2026-02-28] Monorepo TS checks vs nested UI package**
+7. **[2026-02-28] Monorepo TS checks vs nested UI package**
    Do instead: When `npx tsc --noEmit` at repo root fails on JSX config mismatch, verify the changed UI package with its own build (`src/ui/map: npm run build`) and report root failures as pre-existing unless introduced by your edits.
-7. **[2026-02-28] Peace/War migration: test updates by semantic grep**
-   Do instead: After lifecycle renames, run targeted `rg` for `phase_i|phase_ii|Phase I|Phase II` in tests and update contracts in one sweep (phase gating, expected report fields, and phase literals) before rerunning full node-test chunks.
+8. **[2026-02-28] Peace/War migration: test updates by semantic grep (migration complete)**
+   Do instead: After lifecycle renames (now complete), use targeted `rg` for `phase_i|phase_ii|Phase I|Phase II` in tests to catch any stragglers.
 
 ## Imports & Build
 1. **[2026-02-07] Martinez ESM import**
@@ -70,26 +70,26 @@
    Do instead: For any test/state fixture that flows through `runTurn` or scenario runners, always set `meta.phase` (`peace`/`war`) plus compatible referendum fields; missing `meta.phase` now hard-fails as unsupported lifecycle.
 2. **[2026-03-01] OSID/SID mismatch in displacement — never use getEffectiveSettlementSide for control**
    Do instead: `political_controllers` is keyed by OSIDs (`op:mun:slug`) in war phase. Use `buildMunControlFromOsids()` or `buildMunDominantController()` for municipality-level control. `getEffectiveSettlementSide()` does SID lookup → always returns null → causes false encirclement, dead minority flight, population drain.
-3. **[2026-03-01] Displacement accounting: displaced_out vs lost_population must not overlap**
-   Do instead: `displaced_out` = only actually-routed amount (to camps/other muns). `lost_population` = killed + fled_abroad + unrouted overflow. These are non-overlapping. Formula: `remaining = original - displaced_out - lost_population + displaced_in`.
-4. **[2026-02-24] OSID-keyed political_controllers init**
-   Do instead: When init fills `political_controllers` by OSID, do NOT call `promotePoliticalControllersToOsid` (it expects SID-keyed state). Check `isPoliticalControllersAlreadyOsidKeyed()` first.
-3. **[2026-02-28] Operational control derivation: majority then plurality**
+3. **[2026-03-01] Displacement accounting + ethnic expulsion model**
+   Do instead: `displaced_out` = only actually-routed amount (to camps/other muns). `lost_population` = killed + fled_abroad + unrouted overflow. Non-overlapping: `remaining = original - displaced_out - lost_population + displaced_in`. RS captures expel Bosniak pop via 1991 census ethnic share: `floor(osidPop × ethnicShare)`.
+4. **[2026-02-24] OSID-keyed political_controllers init + load migration**
+   Do instead: When init fills `political_controllers` by OSID, do NOT call `promotePoliticalControllersToOsid` (it expects SID-keyed state). Check `isPoliticalControllersAlreadyOsidKeyed()` first. On load: `migratePoliticalControllersToOsidIfNeeded` only when keys are known canonical SIDs (skip test fixtures like S1/S2).
+5. **[2026-02-28] Operational control derivation: majority then plurality**
    Do instead: In `derive_operational_political_control.ts`, assign faction by ethnic majority (>50%) when present, else plurality (largest share). Do not use "first group ≥40%" order — that made Vozuća RBiH despite 54.5% Serb.
-4. **[2026-02-21] Consolidation is Phase I only**
-   Do instead: `applyConsolidationFlips` must return 0 flips when `meta.phase !== 'phase_i'`. Phase II uses breach-based control change only.
-5. **[2026-02-21] Front edges: 2D/3D single source**
-   Do instead: Both 2D and 3D renderers read the same persisted `front_edges` from `LoadedGameState`/`ViewerSave`. `front_pressure` drives thickness/opacity deterministically.
-6. **[2026-02-22] Pipeline step no-ops for missing data**
+6. **[2026-02-21] Consolidation is peace phase only**
+   Do instead: `applyConsolidationFlips` must return 0 flips when `meta.phase !== 'war'`. War phase uses breach-based control change only.
+7. **[2026-02-22] Pipeline step no-ops for missing data**
    Do instead: When operational data (contact graph, canonical_to_operational_map) is unavailable, log and skip OSID steps safely rather than crashing.
-7. **[2026-02-21] Phase I->II: no initializeBrigadeAoR**
-   Do instead: At Phase I to Phase II transition, use `phase-ii-location-osid-backfill` instead of calling `initializeBrigadeAoR`.
-8. **[2026-02-24] Load migration for political_controllers**
-   Do instead: `migrateState` on load: `migratePoliticalControllersToOsidIfNeeded` only when keys are known canonical SIDs (skip test fixtures like S1/S2).
+8. **[2026-02-21] Peace to war transition: no initializeBrigadeAoR**
+   Do instead: At peace to war transition, use `phase-ii-location-osid-backfill` instead of calling `initializeBrigadeAoR`.
+9. **[2026-03-01] Displacement uses per-OSID census data, not municipality average**
+   Do instead: Use `getOsidCensusPopulation(osidRec)` and `getOsidCensusHostileShare(osidRec, faction)` from operational settlements, not `floor(munPop/osidCount)` + municipality-level `getDynamicHostileShare()`. Load operational graph (`loadSettlementGraph()` no args) separately from raw SID graph passed as `settlements`. Set `cumulative_displaced = displacementAmount` after initial fire (prevents double-counting). n319: 668k displaced (85.5% Ljubija share → 13,399 initial fire).
+10. **[2026-03-01] Corps sector sub_segment IDs ≠ front segment IDs**
+    Do instead: `assigned_front_ids` in CorpsDirective MUST use regular front_id format (from `assignable_front_segments`), NOT sub_segment_id format (`subseg:*`). Sectors are for target filtering only (`sector.sub_segments[*].enemy_osids`). Using subseg IDs breaks `front_assignment.ts` matching → empty front assignments → corps blind.
 
 ## Bot AI & Combat
-1. **[2026-02-25] RBiH general_defensive until week 52**
-   Do instead: ARBiH must remain on `general_defensive` through week 52. "Balanced" before week 52 allows premature counterattacking.
+1. **[2026-02-25] RBiH general_defensive through week 56 (year one)**
+   Do instead: ARBiH must remain on `general_defensive` through week 56 (year one). "Balanced" before week 56 allows premature counterattacking.
 2. **[2026-03-01] RS_EARLY_WAR_END_WEEK = 20**
    Do instead: RS transitions from `general_offensive` to `balanced` at week 20 (not 30). Extending to 22 backfires — RBiH more-active doctrine starts at fixed w20, causing counterattacks that drop RS to 382.
 3. **[2026-02-25] Aggression scoring: additive + multiplicative**
@@ -106,10 +106,8 @@
    Do instead: Routing tables in `displacement_routing_data.ts` are static data (47 sub-regions × 3 ethnicities). Runtime control validation happens in `displacement_takeover.ts` routing loop. Don't add `state` param to route lookup.
 9. **[2026-02-25] sidToMun map preservation**
    Do instead: Preserve `canonicalSidToMun` in scenario_runner.ts. Corruption prevented ALL 217 mandatory OOB brigades from spawning.
-
-## Design Ideas (Deferred)
-1. **[2026-02-28] Front segment assignment as ZoC alternative**
-   If ZoC proves hard to tune: each front segment is a clickable entity; player assigns brigades and optionally specifies coverage width. Engine computes segment hardness = f(brigades, terrain, width). Mutual support = multiple brigades on same segment. Unassigned segments auto-contested. Explore if "too few brigades to cover the front" persists after calibration.
+10. **[2026-03-01] Pre-planned VRS operations: 5 named, injected at turn 0**
+    Do instead: `injectPrePlannedOperations(state)` in scenario_runner after `initializeCorpsCommand`. Operations start in `execution` phase. Rule 1.5 in brigade AI column-marches brigades to sector. n326: 84.7% match (-2.7pp from n314 baseline). Non-contiguous sectors: each DFS component = own sector (no merging).
 
 ## GUI / HoI Map
 1. **[2026-03-01] GUI v2 next priority: Phase 3 remainder then Phase 4**
@@ -118,7 +116,7 @@
    Do instead: When the map fails to load "all recent saves", validate the save file (schema, meta.turn, formations/political_controllers shape, optional wrapper). parseGameState now unwraps `{ state }`/`{ gameState }` and gives clear errors for missing meta.turn.
 3. **[2026-03-01] Map load: defer parse and timeout so spinner doesn’t spin forever**
    Do instead: In loadSave run parse (JSON.parse + parseGameState) in requestIdleCallback (timeout ~150ms) so "Loading..." can paint before main thread blocks. Use 25s load timeout in toolbar (Promise.race) and show loadError so user sees failure or timeout instead of endless spinner.
-4. **[2026-03-01] Map adapter: Peace/War and legacy phase_ii**
+4. **[2026-03-01] Map adapter: Peace/War and legacy phase_ii (legacy compat)**
    Do instead: parseGameState must treat `phase_ii` as war (use formation location_osid); accept `formations` as object or array. Ensures scenario runs and legacy saves load in the map after peace/war migration.
 5. **[2026-02-28] Map overlay poll: check sources before building**
    Do instead: In MapContainer overlay effect, call getSource() first; only run buildControlGeoJSON/buildFrontLinesGeoJSON when all sources exist. Otherwise the 500ms poll re-runs the heavy build every tick and freezes the app.
@@ -128,8 +126,8 @@
    Do instead: Run ensureFormationIcons and setData(formations/order-arrows) in requestIdleCallback (timeout ~400ms) or setTimeout(0), not inside the overlay rAF chain. Cancel the deferred handle in effect cleanup. Prevents main-thread freeze from canvas/getImageData/addImage in one frame.
 8. **[2026-02-28] HOI spec = aesthetic authority; v2 doc = implementation**
    Do instead: Treat HOI_VISUAL_GUI_OVERHAUL_SPEC (docs/30_planning/...) as authoritative for look-and-feel; use AWWV_GUI_ARCHITECTURE_REWORK_v2.md for implementation. Sidebar: two tabs ARMY / SITUATION; panel interaction patterns §3.8 of HOI spec.
-9. **[2026-02-28] Phase C complete: tooltips, MapModeToolbar, shortcuts, attack modal, order queue**
-   Do instead: Rich tooltips use store tooltipTarget + tooltipPosition, 300ms delay; MapModeToolbar + MapLayerToggles bottom-right (C2.1); keys 1–4 = map modes, Enter = confirm primary action, Escape clears selection/tooltip/pending; AttackConfirmation modal; OrderQueue from stagedOrders. See docs/40_reports/phase_c/20260228_PHASE_C_GUI_IMPLEMENTATION_REPORT.md.
+9. **[2026-02-28] Phase C complete — reference only**
+   Do instead: See `docs/40_reports/implemented/20260228_PHASE_C_GUI_IMPLEMENTATION_REPORT.md` for Phase C details (tooltips, MapModeToolbar, shortcuts, attack modal, order queue).
 10. **[2026-02-28] Selection panel right-side positioning (React+MapLibre app)**
    Do instead: Use inline styles (position, left: auto, right, top, bottom, width, zIndex, direction: ltr) for overlay panels so Tailwind/purge/RTL cannot override. Dev-only `?showPanel=1` shows selection panel without map click for layout verification.
 
@@ -158,6 +156,8 @@
    Do instead: FRONT = where two hostile settlements meet (not "where brigade is present"). Assign units after segment length/name.
 6. **[2026-02-22] Split-muni audit before rebuild**
    Do instead: Run `npm run map:audit:split-muni-duplicates` before any map rebuild.
+7. **[2026-02-21] Front edges: 2D/3D single source**
+   Do instead: Both 2D and 3D renderers read the same persisted `front_edges` from `LoadedGameState`/`ViewerSave`. `front_pressure` drives thickness/opacity deterministically.
 
 ## User Directives
 1. **[Standing] Absolute paths**
@@ -168,15 +168,13 @@
    Do instead: When tasks are independent, run them in parallel (subagents/processes/commands) to use available hardware fully; sequence only when there is a shared-file or dependency gate.
 4. **[2026-02-28] Canon docs get implementation notes when tech changes**
    Do instead: When stack or tech changes (e.g. Canvas→MapLibre), add implementation notes in the relevant planning/spec doc and keep the aesthetic/design authority doc referenced from canon (context.md, CANON.md).
-5. **[2026-02-25] Do NOT fix init control**
-   Do instead: RS starting at ~35% is correct — isolated territories connected via early land grabs. Do not "fix" this.
-6. **[2026-02-25] Counterattacks are correct**
+5. **[2026-02-25] Counterattacks are correct**
    Do instead: Captured territory SHOULD be immediately reclaimable. Counterattacks are correct mechanically.
-7. **[2026-02-22] Replay disabled by default**
+6. **[2026-02-22] Replay disabled by default**
    Do instead: Only generate replay with `--video` flag (saves 13.6GB).
-8. **[2026-02-28] Canonical player-facing map is React+MapLibre app**
+7. **[2026-02-28] Canonical player-facing map is React+MapLibre app**
    Do instead: Run `npm run dev:map` for the canonical map GUI. Legacy map_hoi.html / tactical_map.html are archived; do not target them for new GUI work.
-9. **[Standing] Address AoR/SID on encounter**
+8. **[Standing] Address AoR/SID on encounter**
    Do instead: When you encounter AoR or SID in code, tests, or docs: address it (remove, replace with OSID, or document as legacy).
 
 ## Calibration
@@ -188,13 +186,11 @@
    Do instead: Fighting dies down over winter. Current dead weeks (w32-39) is roughly right but accidental; needs intentional mechanic.
 4. **[2026-02-25] RS init territory is correct at 35%**
    Do instead: RS starting at ~35% is by design. The gap to 60% target is closed via early land grabs, not init override.
-5. **[2026-02-25] RBiH no counteroffensive until week 52**
-   Do instead: ARBiH had NO meaningful counteroffensive until mid-1993. Enforce `general_defensive` through week 52.
-6. **[2026-02-25] sidToMun corruption caused spawn failure**
-   Do instead: Always verify spawn counts after init changes. Preservation of `canonicalSidToMun` is critical.
-7. **[2026-03-01] Calibration knobs**
-   Do instead: Primary levers: `POOL_SCALE_FACTOR`, `FACTION_POOL_SCALE`, `RS_EARLY_WAR_END_WEEK` (20), per-faction stance/doctrine in `bot_strategy.ts`, `initial_morale` in OOB, MORALE_RESIST_FLOOR (70).
-8. **[2026-02-25] Knowledge base for OOB**
+5. **[2026-03-01] Calibration knobs**
+   Do instead: Primary levers: `POOL_SCALE_FACTOR`, `FACTION_POOL_SCALE`, `RS_EARLY_WAR_END_WEEK` (20), per-faction stance/doctrine in `bot_strategy.ts`, `initial_morale` in OOB, MORALE_RESIST_FLOOR (70), `defense_terrain_bonus` per brigade in OOB (+0.20–0.30), front density thresholds in `local_front_defense.ts` (THIN=0.5, DENSE=1.0, MIN_PENALTY=0.6, MAX_BONUS=1.25). Supply gating: critical→defend, strained→victory-only, corps critical_fraction>0.5→strip offensives, adequate_fraction<0.3→victory min. Sector offensives: MIN_BRIGADES=3, supply_readiness launch=0.6/abort=0.4, momentum cap=3, max_objectives=6, planning ceil(N×0.6).
+6. **[2026-03-01] Sector offensives dormant in year-1 (L37)**
+   Do instead: Sector offensives don't activate in 40w calibration window. VRS defensive by week 20, ARBiH general_defensive through year one. Infrastructure activates at 52w+ when factions transition to offensive postures. Don't debug "why no sector offensives" in year-1 runs.
+6. **[2026-02-25] Knowledge base for OOB**
    Do instead: Use `docs/knowledge/{VRS,ARBIH,HVO}_ORDER_OF_BATTLE_MASTER.md` for historical formation data.
-9. **[2026-02-24] Phase II entrenchment init**
-   Do instead: Use optional scenario param `phase_ii_entrenchment_init_turns` (0..12) in schema and loader.
+7. **[2026-02-24] War entrenchment init**
+   Do instead: Use optional scenario param `war_entrenchment_init_turns` (0..12) in schema and loader.
