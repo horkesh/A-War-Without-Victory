@@ -10,7 +10,7 @@ import { getPoliticalControllerOSID } from './settlement_control.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import type { CanonicalToOperationalMap, OperationalToCanonicalReverseMap } from '../data/operational_data.js';
 import { runSupplyBfs } from './supply_reachability.js';
-import { buildOsidAdjacency } from '../sim/phase_ii/zoc.js';
+import { buildOsidAdjacency } from '../sim/combat/osid_adjacency.js';
 
 export interface FactionSupplyReachabilityOsid {
     faction_id: string;

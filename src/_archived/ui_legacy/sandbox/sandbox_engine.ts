@@ -10,17 +10,17 @@
 
 import type { EdgeRecord } from '../../../map/settlements.js';
 import type { TerrainScalarsData } from '../../../map/terrain_scalars.js';
-import type { ResolveAttackOrdersReport } from '../../../sim/phase_ii/resolve_attack_orders.js';
+import type { ResolveAttackOrdersReport } from '../../../sim/combat/resolve_attack_orders.js';
 import type { FormationId, GameState } from '../../../state/game_state.js';
 import { getLegacyAoR } from '../../../state/game_state.js';
 
 import { applyWiaTrickleback } from '../../../sim/formation_spawn.js';
-import { applyBrigadeRepositionOrders } from '../../../sim/phase_ii/apply_brigade_reposition.js';
-import { processBrigadeMovement } from '../../../sim/phase_ii/brigade_movement.js';
-import { applyPostureOrders } from '../../../sim/phase_ii/brigade_posture.js';
-import { applyBrigadePressureToState } from '../../../sim/phase_ii/brigade_pressure.js';
-import { degradeEquipment, ensureBrigadeComposition } from '../../../sim/phase_ii/equipment_effects.js';
-import { resolveAttackOrders } from '../../../sim/phase_ii/resolve_attack_orders.js';
+import { applyBrigadeRepositionOrders } from '../../../sim/combat/apply_brigade_reposition.js';
+import { processBrigadeMovement } from '../../../sim/combat/brigade_movement.js';
+import { applyPostureOrders } from '../../../sim/combat/brigade_posture.js';
+import { applyBrigadePressureToState } from '../../../sim/combat/brigade_pressure.js';
+import { degradeEquipment, ensureBrigadeComposition } from '../../../sim/combat/equipment_effects.js';
+import { resolveAttackOrders } from '../../../sim/combat/resolve_attack_orders.js';
 import { initializeCasualtyLedger } from '../../../state/casualty_ledger.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 

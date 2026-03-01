@@ -13,18 +13,18 @@ import { initializePhase0Relationships, updateAllianceAfterInvestment } from '..
 import type { InvestmentScope, InvestmentType } from '../phase0/investment.js';
 import { applyInvestment } from '../phase0/investment.js';
 import { loadMunicipalityHqSettlement, loadOobBrigades } from '../scenario/oob_loader.js';
-import { buildSidToMunFromSettlements } from '../scenario/oob_phase_i_entry.js';
+import { buildSidToMunFromSettlements } from '../scenario/oob_early_war_entry.js';
 import { createStateFromScenario } from '../scenario/scenario_runner.js';
-import { validateReshapeOrder } from '../sim/phase_ii/aor_reshaping.js';
-import { getBrigadeAoRSettlements } from '../sim/phase_ii/brigade_aor_legacy.js';
-import { shortestPathThroughFriendly } from '../sim/phase_ii/brigade_movement.js';
-import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/phase_ii/phase_ii_adjacency.js';
-import { estimateAttackCost, type AttackEstimate } from '../sim/phase_ii/combat_estimate.js';
+import { validateReshapeOrder } from '../sim/combat/aor_reshaping.js';
+import { getBrigadeAoRSettlements } from '../sim/combat/brigade_aor_legacy.js';
+import { shortestPathThroughFriendly } from '../sim/combat/brigade_movement.js';
+import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/combat/phase_ii_adjacency.js';
+import { estimateAttackCost, type AttackEstimate } from '../sim/combat/combat_estimate.js';
 import {
     applyCorpsFrontAutoDistributionForCorps,
     ensureDerivedCorpsFrontEdges,
-} from '../sim/phase_ii/corps_front_assign.js';
-import { computeFrontWidthMetrics } from '../sim/phase_ii/front_width_metrics.js';
+} from '../sim/combat/corps_front_assign.js';
+import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
 import { applyRecruitment, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
 import { getLegacyAoR } from '../state/game_state.js';
 import { runTurn } from '../sim/turn_pipeline.js';
@@ -33,7 +33,7 @@ import {
     queryMovementRange as computeMovementRangeQuery,
     type MovementPathQuery,
     type MovementRangeQuery,
-} from '../sim/phase_ii/brigade_movement_query.js';
+} from '../sim/combat/brigade_movement_query.js';
 import { computeSupplyReachability, type SupplyReachabilityReport } from '../state/supply_reachability.js';
 import {
     deriveCorridors,

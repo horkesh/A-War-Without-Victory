@@ -15,16 +15,16 @@ import type { LoadedSettlementGraph } from '../map/settlements.js';
 import { loadSettlementGraph } from '../map/settlements.js';
 import { BotManager } from '../sim/bot/bot_manager.js';
 import { getBotStrategyProfile } from '../sim/bot/bot_strategy.js';
-import { getFrontActiveSettlements } from '../sim/phase_e/aor_instantiation.js';
-import { getEligiblePressureEdges } from '../sim/phase_e/pressure_eligibility.js';
-import { aggregateSettlementDisplacementToMunicipalities } from '../sim/phase_f/displacement_municipality_aggregation.js';
-import { ensureRbihHrhbState } from '../sim/phase_i/alliance_update.js';
-import type { ControlEvent } from '../sim/phase_i/control_flip.js';
-import { buildSettlementsByMun } from '../sim/phase_i/control_strain.js';
-import { updateMilitiaEmergence } from '../sim/phase_i/militia_emergence.js';
-import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../sim/phase_i/pool_population.js';
-import { initializeCorpsCommand } from '../sim/phase_ii/corps_command.js';
-import { injectPrePlannedOperations } from '../sim/phase_ii/pre_planned_operations.js';
+import { getFrontActiveSettlements } from '../sim/emergence/aor_instantiation.js';
+import { getEligiblePressureEdges } from '../sim/emergence/pressure_eligibility.js';
+import { aggregateSettlementDisplacementToMunicipalities } from '../sim/displacement_pipeline/displacement_municipality_aggregation.js';
+import { ensureRbihHrhbState } from '../sim/early_war/alliance_update.js';
+import type { ControlEvent } from '../sim/early_war/control_flip.js';
+import { buildSettlementsByMun } from '../sim/early_war/control_strain.js';
+import { updateMilitiaEmergence } from '../sim/early_war/militia_emergence.js';
+import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../sim/early_war/pool_population.js';
+import { initializeCorpsCommand } from '../sim/combat/corps_command.js';
+import { injectPrePlannedOperations } from '../sim/combat/pre_planned_operations.js';
 import {
     initializeRecruitmentResources,
     runBotRecruitment
@@ -73,7 +73,7 @@ import {
     buildSidToMunFromSettlements,
     createOobFormationsAtPhaseIEntry,
     spreadBrigadesToFrontOsids
-} from './oob_phase_i_entry.js';
+} from './oob_early_war_entry.js';
 import { buildOpsCompareConclusion, formatOpsCompareMarkdown } from './ops_compare.js';
 import {
     computeActivitySummary,

@@ -8,7 +8,7 @@ import type { EdgeRecord, SettlementRecord } from '../map/settlements.js';
 import type { FactionId, FormationId, GameState, MunicipalityId, SettlementId } from '../state/game_state.js';
 import { getLegacyAoR } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
-import { identifyFrontActiveSettlements } from './phase_ii/brigade_aor_legacy.js';
+import { identifyFrontActiveSettlements } from './combat/brigade_aor_legacy.js';
 
 export interface FormationHqRelocationReport {
     relocated: number;

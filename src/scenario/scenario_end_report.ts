@@ -7,7 +7,7 @@ import type { LoadedSettlementGraph } from '../map/settlements.js';
 import type { GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { WeeklyActivityCounts, WeeklyReportRow } from './scenario_reporting.js';
-import type { CorpsAiReportEntry } from '../sim/phase_ii/bot_corps_ai.js';
+import type { CorpsAiReportEntry } from '../sim/combat/bot_corps_ai.js';
 import type { VictoryEvaluation } from './victory_conditions.js';
 
 /** Snapshot of corps AI directives at a specific turn, for end report. */

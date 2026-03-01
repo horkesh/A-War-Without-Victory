@@ -11,8 +11,8 @@ import { deriveAssignableFrontSegments } from '../state/assignable_front_segment
 import { cloneGameState } from '../state/clone.js';
 import { GameState } from '../state/game_state.js';
 import { assignFrontSegmentTheatres, ensureDefaultTheatres } from '../state/theatres.js';
-import { ensureBrigadeFrontAssignments } from './phase_ii/front_assignment.js';
-import { buildLocalFronts } from './phase_ii/local_front_defense.js';
+import { ensureBrigadeFrontAssignments } from './combat/front_assignment.js';
+import { buildLocalFronts } from './combat/local_front_defense.js';
 import { peacePhases } from './turn_phases/peace_phases.js';
 import { warPhases } from './turn_phases/war_phases.js';
 

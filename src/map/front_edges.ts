@@ -1,4 +1,4 @@
-import { areRbihHrhbAllied } from '../sim/phase_i/alliance_update.js';
+import { areRbihHrhbAllied } from '../sim/early_war/alliance_update.js';
 import { GameState } from '../state/game_state.js';
 import { getPoliticalControllerOSID, getSettlementControlStatus } from '../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../data/operational_data.js';

@@ -1,7 +1,7 @@
 import type { FrontEdge } from '../../map/front_edges.js';
 import type { FactionId, GameState } from '../../state/game_state.js';
 import { scoreConsolidationTarget } from '../consolidation_scoring.js';
-import { areRbihHrhbAllied, isRbihHrhbAtWar } from '../phase_i/alliance_update.js';
+import { areRbihHrhbAllied, isRbihHrhbAtWar } from '../early_war/alliance_update.js';
 import type { Bot, BotDecisionContext, BotDecisions } from './bot_interface.js';
 import { getBotDifficultyTuning, resolveAggression } from './bot_strategy.js';
 

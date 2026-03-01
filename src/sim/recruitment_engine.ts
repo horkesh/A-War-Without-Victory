@@ -11,7 +11,7 @@
 
 import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/operational_data.js';
 import type { OobBrigade, OobCorps } from '../scenario/oob_loader.js';
-import { factionHasPresenceInMun } from '../scenario/oob_phase_i_entry.js';
+import { factionHasPresenceInMun } from '../scenario/oob_early_war_entry.js';
 import { MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
 import { BRIGADE_BASE_COHESION } from '../state/formation_lifecycle.js';
 import type {
@@ -39,7 +39,7 @@ import {
     EQUIPMENT_CLASS_TEMPLATES,
     getEquipmentCost
 } from '../state/recruitment_types.js';
-import { getRsJnaHeavyComposition } from './phase_ii/equipment_effects.js';
+import { getRsJnaHeavyComposition } from './combat/equipment_effects.js';
 
 // ---------------------------------------------------------------------------
 // Strategic area scoring for bot AI
@@ -197,6 +197,7 @@ function buildRecruitedFormation(
         composition: buildBrigadeComposition(equipClass, brigade.faction, true),
         corps_id: (brigade.corps as FormationId) ?? null,
         ...(brigade.honor ? { honor: brigade.honor } : {}),
+        ...(brigade.defense_terrain_bonus != null ? { defense_terrain_bonus: brigade.defense_terrain_bonus } : {}),
         ...(hqSid ? { hq_sid: hqSid } : {}),
         ...(effectiveLocationOsid != null ? { location_osid: effectiveLocationOsid } : {})
     };

@@ -3,7 +3,7 @@
 import { buildAdjacencyMap } from '../../map/adjacency_map.js';
 import { computeFrontEdges } from '../../map/front_edges.js';
 import { loadSettlementGraph } from '../../map/settlements.js';
-import { buildSidToMunFromSettlements, buildOsidToMunFromReverseMap } from '../../scenario/oob_phase_i_entry.js';
+import { buildSidToMunFromSettlements, buildOsidToMunFromReverseMap } from '../../scenario/oob_early_war_entry.js';
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
 import { applyPhaseIDisplacementFromFlips } from '../../state/displacement.js';
 import { GameState, type FactionId } from '../../state/game_state.js';
@@ -19,22 +19,22 @@ import {
     countBilateralFlips,
     ensureRbihHrhbState,
     updateAllianceValue
-} from '../phase_i/alliance_update.js';
-import { runAuthorityDegradation } from '../phase_i/authority_degradation.js';
-import { checkAndApplyCeasefire } from '../phase_i/bilateral_ceasefire.js';
-import { buildSettlementsByMun, runControlStrain } from '../phase_i/control_strain.js';
-import { runDisplacementHooks } from '../phase_i/displacement_hooks.js';
-import { runJNATransition } from '../phase_i/jna_transition.js';
-import { updateMilitiaEmergence } from '../phase_i/militia_emergence.js';
-import { runMinorityErosion } from '../phase_i/minority_erosion.js';
-import { runMinorityMilitiaDecay } from '../phase_i/minority_militia_decay.js';
-import { updateMixedMunicipalitiesList } from '../phase_i/mixed_municipality.js';
-import { runPoolPopulation } from '../phase_i/pool_population.js';
-import { checkAndApplyWashington } from '../phase_i/washington_agreement.js';
-import { activateCorpsForTurn } from '../phase_i/activate_corps.js';
-import { computeSiegeState } from '../phase_i/compute_siege_state.js';
-import { promoteFormations } from '../phase_i/promote_formations.js';
-import { runPhaseIBotPosture } from '../phase_i/bot_phase_i.js';
+} from '../early_war/alliance_update.js';
+import { runAuthorityDegradation } from '../early_war/authority_degradation.js';
+import { checkAndApplyCeasefire } from '../early_war/bilateral_ceasefire.js';
+import { buildSettlementsByMun, runControlStrain } from '../early_war/control_strain.js';
+import { runDisplacementHooks } from '../early_war/displacement_hooks.js';
+import { runJNATransition } from '../early_war/jna_transition.js';
+import { updateMilitiaEmergence } from '../early_war/militia_emergence.js';
+import { runMinorityErosion } from '../early_war/minority_erosion.js';
+import { runMinorityMilitiaDecay } from '../early_war/minority_militia_decay.js';
+import { updateMixedMunicipalitiesList } from '../early_war/mixed_municipality.js';
+import { runPoolPopulation } from '../early_war/pool_population.js';
+import { checkAndApplyWashington } from '../early_war/washington_agreement.js';
+import { activateCorpsForTurn } from '../early_war/activate_corps.js';
+import { computeSiegeState } from '../early_war/compute_siege_state.js';
+import { promoteFormations } from '../early_war/promote_formations.js';
+import { runPhaseIBotPosture } from '../early_war/bot_phase_i.js';
 import type { NamedPhase, TurnContext } from '../turn_pipeline_types.js';
 import { getSiegeStateCache, setSiegeStateCache, loadRecruitmentCatalog } from '../turn_pipeline_types.js';
 
@@ -91,7 +91,7 @@ export const peacePhases: NamedPhase[] = [
                 ]);
                 if (!opData?.operationalToCanonical || !edges?.length) return;
                 // Build adjacency map from operational edges
-                const { buildOsidAdjacency } = await import('../phase_ii/osid_adjacency.js');
+                const { buildOsidAdjacency } = await import('../combat/osid_adjacency.js');
                 const adjacency = buildOsidAdjacency(edges);
                 // Build osidToMun: first build sidToMun from the settlement graph
                 const graph = context.input.settlementGraph ?? (await loadSettlementGraph());

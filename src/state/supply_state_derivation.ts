@@ -11,7 +11,7 @@ import type { EdgeRecord, SettlementRecord } from '../map/settlements.js';
 import { getSettlementControlStatus } from './settlement_control.js';
 import type { SupplyReachabilityReport } from './supply_reachability.js';
 import type { SupplyReachabilityOsidReport } from './supply_reachability_osid.js';
-import { buildOsidAdjacency } from '../sim/phase_ii/zoc.js';
+import { buildOsidAdjacency } from '../sim/combat/osid_adjacency.js';
 
 /** Supply state levels per canon (Systems Manual §14). */
 export type SupplyStateLevel = 'adequate' | 'strained' | 'critical';

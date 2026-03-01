@@ -8776,3 +8776,21 @@ Determinism checks **MUST** be run:
 **Verification:** tsc clean, vitest 189/190 pass, map build clean, scenario hash identical with both original and split version (`ff5cd313ed833865`).
 
 **Lesson (L36):** Subagent-driven extraction can hallucinate step replacements. The `zoc-computation` step was replaced with `load-operational-data` (dropping ZoC state computation, `war_enemy_zoc_by_faction`, `war_linked_zoc_by_faction`) and `zoc-constrained-movement` was replaced with `apply-brigade-movement` (entirely different function). Always diff extracted step names against the original before verifying. Caught via state hash mismatch.
+
+### R9: Phase out phase_i/phase_ii naming (2026-03-01)
+
+**What:** Renamed 4 simulation directories and their contents to domain-descriptive names:
+- `src/sim/phase_i/` (18 files) → `src/sim/early_war/`
+- `src/sim/phase_ii/` (53 files) → `src/sim/combat/`
+- `src/sim/phase_e/` (6 files) → `src/sim/emergence/`
+- `src/sim/phase_f/` (4 files) → `src/sim/displacement_pipeline/`
+- Removed empty `src/sim/phase_transitions/`
+- Renamed 3 standalone files (`run_phase_i_browser.ts`, `run_phase_ii_browser.ts`, `oob_phase_i_entry.ts`)
+- Renamed 34 test files to match new directory names
+- Updated ~144 import paths across ~34 source files
+
+**Why:** Legacy `phase_i`/`phase_ii` naming described *when code was written* (development phases), not *what it does*. New contributors couldn't infer module purpose from the name. Now: `early_war/` = JNA dissolution, militia emergence; `combat/` = attack resolution, bot AI, ZoC; `emergence/` = front emergence, pressure diffusion; `displacement_pipeline/` = displacement triggers/accumulation.
+
+**NOT renamed (save compat):** Step names in TurnReport (`phase-i-militia-emergence`, etc.), scenario JSON references, documentation content references.
+
+**Verification:** tsc clean, vitest 189/190 pass, map build clean, scenario hash identical (`ff5cd313ed833865`).

@@ -29,9 +29,9 @@ import { resolveFormationName } from '../state/formation_naming.js';
 import type { FormationState, GameState, MilitiaPoolState } from '../state/game_state.js';
 import { militiaPoolKey } from '../state/militia_pool_key.js';
 import { strictCompare } from '../state/validateGameState.js';
-import type { MunicipalityPopulation1991Map } from './phase_i/pool_population.js';
-import { getEligiblePopulationCount } from './phase_i/pool_population.js';
-import { type SiegeRatioByMunFaction, getSiegeRatio } from './phase_i/compute_siege_state.js';
+import type { MunicipalityPopulation1991Map } from './early_war/pool_population.js';
+import { getEligiblePopulationCount } from './early_war/pool_population.js';
+import { type SiegeRatioByMunFaction, getSiegeRatio } from './early_war/compute_siege_state.js';
 import { isEmergentFormationSuppressed } from './recruitment_engine.js';
 
 export interface SpawnFormationsOptions {
