@@ -13,7 +13,8 @@ import type {
     FormationState,
     GameState
 } from '../../state/game_state.js';
-import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
+import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
+import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { getEnclaveDefenseBonus } from './enclave_resilience.js';
@@ -59,7 +60,10 @@ export const EXPERIENCE_BASE = 0.6;
 export const EXPERIENCE_SCALE = 0.4;
 
 /** Unit honor/decoration combat power multiplier. */
-export const HONOR_MULT: Record<string, number> = { slavna: 1.10, vitezka: 1.20 };
+export const HONOR_MULT: Record<string, number> = { slavna: 1.10, viteska: 1.20 };
+
+/** Honor-derived defense terrain bonus (used when no explicit defense_terrain_bonus in OOB). */
+export const HONOR_DEFENSE_BONUS: Record<string, number> = { slavna: 0.10, viteska: 0.15 };
 
 // Outcome casualty modifiers (§4.2)
 export const OUTCOME_ATTACKER_MOD: Record<string, number> = {
@@ -177,7 +181,11 @@ export function basePower(formation: FormationState): number {
     return personnel * eq * expMult * coh * honorMult;
 }
 
-/** Supply mult from OSID report when available; else last_supplied_turn fallback. */
+/**
+ * Supply mult from OSID report when available; else last_supplied_turn fallback.
+ * When supply_reserves_enabled, combines OSID reachability with faction reserve level
+ * per SUPPLY_AMMO_SYSTEM_PLAN.md §3.4 interaction table.
+ */
 export function getSupplyMult(
     formation: FormationState,
     state: GameState,
@@ -190,8 +198,16 @@ export function getSupplyMult(
         const facEntry = supplyStateByOsid.factions.find((f) => f.faction_id === factionId);
         const entry = facEntry?.by_osid?.find((e) => e.osid === locationOsid);
         if (entry) {
-            if (entry.state === 'adequate') return 1.0;
-            if (entry.state === 'strained') return 0.75;
+            let effectiveState: SupplyStateLevel = entry.state;
+
+            // Phase A: When reserves enabled, combine reachability with reserves
+            if (state.meta.supply_reserves_enabled && state.general_supply_reserve) {
+                const reserveLevel = (state.general_supply_reserve as Record<string, number>)[factionId] ?? 100;
+                effectiveState = getEffectiveSupplyState(entry.state, reserveLevel);
+            }
+
+            if (effectiveState === 'adequate') return 1.0;
+            if (effectiveState === 'strained') return 0.75;
             return mode === 'attack' ? 0.45 : 0.5;
         }
     }
@@ -316,7 +332,8 @@ export function computeDefenderPower(
     const disruptionMult = getDisruptionMult(formation, 'defend');
     const enclaveMult = getEnclaveDefenseBonus(state, targetOsid);
     const toTerrainMult = getToTerrainDefenseMult(getFormationTier(formation), targetOsid, terrainMultByOsid);
-    const perBrigadeTerrainBonus = 1.0 + (formation.defense_terrain_bonus ?? 0);
+    const honorDefBonus = HONOR_DEFENSE_BONUS[(formation as { honor?: string }).honor ?? ''] ?? 0;
+    const perBrigadeTerrainBonus = 1.0 + (formation.defense_terrain_bonus ?? honorDefBonus);
     const frontDensityMult = getLocalFrontDensityModifier(state, formation);
     return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult * toTerrainMult * perBrigadeTerrainBonus * frontDensityMult;
 }

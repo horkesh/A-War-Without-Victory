@@ -142,6 +142,8 @@ Report: docs/40_reports/implemented/20260301_MULTI_SECTOR_SUPPLY_GATING_SECTOR_O
 | Corps critical_fraction threshold | 0.5 (strip offensives) | bot_corps_ai.ts |
 | Corps adequate_fraction threshold | 0.3 (victory min) | bot_corps_ai.ts |
 | MIN_SECTOR_EDGES | 5 | corps_front_sectors.ts |
+| MAX_SECTOR_EDGES | 25 | corps_front_sectors.ts |
+| MAX_SECTOR_BRIGADES | 8 | corps_front_sectors.ts |
 | Sector offensive: min brigades | 3 | sector_offensive.ts |
 | Supply readiness launch / abort | 0.6 / 0.4 | sector_offensive.ts |
 | Momentum cap | 3 | sector_offensive.ts |

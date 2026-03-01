@@ -153,9 +153,9 @@ const RBIH_SREBRENICA_PATTERN = /srebrenica|28[0-4]/i;
 
 // Honor units get special treatment
 const RBIH_HONOR_IDS: Record<string, { honor: string; cohesion: number }> = {
-    'arbih_7th_vitezka_muslim': { honor: 'vitezka', cohesion: 68 },
+    'arbih_7th_vitezka_muslim': { honor: 'viteska', cohesion: 68 },
     'arbih_17th_slavna_krajiska': { honor: 'slavna', cohesion: 62 },
-    'arbih_502nd_slavna_vitezka': { honor: 'vitezka', cohesion: 65 },
+    'arbih_502nd_slavna_vitezka': { honor: 'viteska', cohesion: 65 },
 };
 
 function tierRBiH(b: Brigade): void {

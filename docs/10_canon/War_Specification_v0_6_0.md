@@ -58,7 +58,7 @@ Front = set of settlement adjacency edges with opposing political control. Group
 
 ## 7. Supply Pressure and Exhaustion
 
-Supply pressure: overextension (per front edge) + isolation (critical/strained from supply derivation). Monotonic per faction; cap 100. Exhaustion: from static front count and supply pressure; monotonic, irreversible (Engine Invariants §8). Command friction: multiplier ≥ 1 from exhaustion and front edge count; scales supply/exhaustion deltas; never serialized, never flips control.
+Supply pressure: overextension (per front edge) + isolation (critical/strained from supply derivation). Monotonic per faction; cap 100. Exhaustion: from static front count and supply pressure; monotonic, irreversible (Engine Invariants §8). Command friction: multiplier ≥ 1 from exhaustion and front edge count; scales supply/exhaustion deltas; never serialized, never flips control. **Implementation-note (Phase A — Supply Reserves, 2026-03-01):** Supply pressure (monotonic, front-based) is distinct from supply reserves (consumption-based, replenishable). Reserves (`general_supply_reserve`, `heavy_munitions_reserve` [0..100]) degrade the effective supply state used in combat (via `getSupplyMult`) when depleted, independent of pressure. Gated by `supply_reserves_enabled` scenario flag. See Systems Manual §14.2 and SUPPLY_AMMO_SYSTEM_PLAN.md.
 
 ---
 

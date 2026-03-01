@@ -160,6 +160,7 @@ export interface OperationView {
     type: string;
     phase: 'planning' | 'execution' | 'recovery';
     sector_id?: string;
+    staging_osid?: string;
     objectives?: string[];
     current_objective_index?: number;
     momentum?: number;

@@ -245,6 +245,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                     type: (op.type as string) ?? 'sector_attack',
                     phase: (op.phase as 'planning' | 'execution' | 'recovery') ?? 'execution',
                     sector_id: typeof op.sector_id === 'string' ? op.sector_id : undefined,
+                    staging_osid: typeof op.staging_osid === 'string' ? op.staging_osid : undefined,
                     objectives: Array.isArray(op.objectives) ? (op.objectives as string[]).filter(o => typeof o === 'string') : undefined,
                     current_objective_index: typeof op.current_objective_index === 'number' ? op.current_objective_index : undefined,
                     momentum: typeof op.momentum === 'number' ? op.momentum : undefined,

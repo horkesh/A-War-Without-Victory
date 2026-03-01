@@ -36,6 +36,8 @@ Development-time validation tools may abort execution on invariant violation.
 - Supply recovery must be slower than degradation
 - Supply cannot improve without improved connectivity or authority
 
+**Implementation-note (Phase A — Supply Reserves, 2026-03-01):** Faction-level reserves (`general_supply_reserve`, `heavy_munitions_reserve` [0..100]) implement the "recovery slower than degradation" invariant: maintenance drain (0.15 per formation per turn) and combat expenditure (per-battle deduction) continuously consume reserves; production income replenishes at a bounded rate. Reserve depletion degrades the effective supply state even when OSID reachability is adequate (reserve < 50 → strained; reserve < 20 → critical). Gated by scenario flag `supply_reserves_enabled` (default false). See `src/state/supply_reserves.ts`, SUPPLY_AMMO_SYSTEM_PLAN.md §3.
+
 ## 5. Settlement Stabilization Invariants
 
 - Newly captured settlements must enter a stabilization state

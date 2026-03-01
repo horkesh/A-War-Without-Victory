@@ -891,28 +891,45 @@ function executeFactionDirectives(
             continue;
         }
 
-        // --- Rule 1.5: Sector operation deployment — column march to sector ---
-        // If brigade is participating in an active sector_attack in execution phase
-        // but is NOT physically in the sector's friendly_osids, column march there.
+        // --- Rule 1.5: Sector operation staging (planning) and deployment (execution) ---
+        // If brigade is participating in an active sector_attack in planning or execution phase,
+        // march to staging_osid (planning) or sector (execution).
         const activeOp15 = corpsId ? cmd?.active_operation : null;
         if (activeOp15?.type === 'sector_attack' &&
-            activeOp15.phase === 'execution' &&
-            activeOp15.sector_id &&
+            (activeOp15.phase === 'planning' || activeOp15.phase === 'execution') &&
             activeOp15.participating_brigades?.includes(brigade.id)) {
-            const sector15 = state.corps_front_sectors?.[activeOp15.sector_id];
-            if (sector15) {
-                const sectorOsids15 = new Set<string>();
-                for (const ss of sector15.sub_segments) {
-                    for (const o of ss.friendly_osids) sectorOsids15.add(o);
-                }
-                if (!sectorOsids15.has(loc)) {
-                    // Brigade not in sector — column march to nearest sector OSID
-                    const nearestSectorOsid = findNearestFriendlyOsidInSet(
-                        state, faction, loc, adjacency, reverseMap, sectorOsids15);
-                    if (nearestSectorOsid) {
-                        result.column_march_orders[brigade.id] = nearestSectorOsid;
+
+            // During PLANNING: march to staging_osid
+            if (activeOp15.phase === 'planning' && activeOp15.staging_osid) {
+                if (loc !== activeOp15.staging_osid) {
+                    const nearestStaging = findNearestFriendlyOsidInSet(
+                        state, faction, loc, adjacency, reverseMap,
+                        new Set([activeOp15.staging_osid]));
+                    if (nearestStaging) {
+                        result.column_march_orders[brigade.id] = nearestStaging;
                         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                         continue;
+                    }
+                }
+            }
+
+            // During EXECUTION: march to sector (existing behavior)
+            if (activeOp15.phase === 'execution' && activeOp15.sector_id) {
+                const sector15 = state.corps_front_sectors?.[activeOp15.sector_id];
+                if (sector15) {
+                    const sectorOsids15 = new Set<string>();
+                    for (const ss of sector15.sub_segments) {
+                        for (const o of ss.friendly_osids) sectorOsids15.add(o);
+                    }
+                    if (!sectorOsids15.has(loc)) {
+                        // Brigade not in sector — column march to nearest sector OSID
+                        const nearestSectorOsid = findNearestFriendlyOsidInSet(
+                            state, faction, loc, adjacency, reverseMap, sectorOsids15);
+                        if (nearestSectorOsid) {
+                            result.column_march_orders[brigade.id] = nearestSectorOsid;
+                            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                            continue;
+                        }
                     }
                 }
             }

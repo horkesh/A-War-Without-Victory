@@ -14,7 +14,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 **Project:** A War Without Victory (AWWV)
 **Type:** Wargame simulation prototype
 **Repository:** AWWV
-**Current Focus:** Combat calibration (n326, 84.7% OSID match — post-operations injection), GUI Architecture Rework v2 (React+MapLibre), VRS pre-planned operations
+**Current Focus:** Combat calibration (n340, 86.9% OSID match), GUI Architecture Rework v2 (React+MapLibre), Sectors & Operations improvements
 
 ---
 
@@ -46,7 +46,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **Phase:** Post-MVP — Active Development
 **Status:** Phase II live, Phase M complete, GUI rework in progress
-**Focus:** Combat calibration (87.4% OSID match at n314), GUI Phase 3 remainder
+**Focus:** Combat calibration (86.9% OSID match at n340), Sectors & Operations Phase 2, GUI Phase 3 remainder
 
 **Completed milestones:**
 - Phase 6: MVP declared 2026-02-08; A1 base map stable and frozen
@@ -116,13 +116,16 @@ This is the single authoritative project ledger. All context, decisions, and sta
 | 9 | 2026-03-01 | Local front density modifier: thin fronts penalized, dense fronts rewarded |
 | 10 | 2026-03-01 | ~~Displacement tuning deferred~~ → Displacement system complete (n319, per-OSID census depth) |
 | 11 | 2026-03-01 | Per-OSID census data for displacement depth; hostile share cap 0.95 per-OSID, 0.80 mun fallback |
+| 12 | 2026-03-01 | Sector exempt corps: general staff + HVO Central Bosnia (army reserves / future Bosniak-Croat war) |
+| 13 | 2026-03-01 | Sector caps: MAX_SECTOR_EDGES=25, MAX_SECTOR_BRIGADES=8 (recursive splitting) |
 
 ---
 
 ## Current State
 
-**Calibration:** n314 (40w) = 87.4% OSID match (658/753). RS=389 (painted 416), RBiH=272 (painted 248), HRHB=92 (painted 89). 6/6 benchmarks pass.
+**Calibration:** n340 (40w) = 86.9% OSID match (654/753). RS=391 (painted 416), RBiH=271 (painted 248), HRHB=91 (painted 89). Hash `a51db370f21d7284`.
 **Displacement:** n319 = 668k total displaced (RBiH 458k, HRHB 150k, RS 60k). Per-OSID census depth complete. Hash `42ad78a39746d166`.
+**Sectors:** 61 sectors (Phase 1 complete). 187/205 brigades assigned (91.2%), max 25 edges/sector, 94 reserves populated.
 
 **Key files:**
 - Simulation: `src/sim/turn_pipeline.ts`, `src/sim/phase_ii/attack_resolution_osid.ts`, `src/sim/phase_ii/bot_corps_ai.ts`
@@ -8745,7 +8748,7 @@ Determinism checks **MUST** be run:
 - **Phase:** Post-MVP — Phase II bot AI + GUI
 - **Summary:** Implemented three interconnected features: (1) non-contiguous sector separation — every DFS connected component becomes its own sector, no cross-component merging; (2) 5 named pre-planned VRS operations injected at scenario start (Koridor, Drina, Prsten, Foca, Prijedor); (3) Rule 1.5 brigade column march to assigned sector; (4) Operations GUI panel in OOB sidebar.
 - **Non-contiguous sectors (corps_front_sectors.ts):** Removed `findNearestSectorIndex` merge logic. Each sub-segment = one sector. Post-BFS pocket claiming for brigades at unreachable friendly OSIDs. `assignBrigadesToSectors` uses BFS nearest-sector fallback. Result: 29 sectors (up from ~22).
-- **Pre-planned operations (pre_planned_operations.ts, NEW):** 5 operations start in `execution` phase at turn 0. Corps stances set to `offensive`. Sector_id resolution added to `advanceSectorOffensives` for orphaned ops.
+- **Pre-planned operations (pre_planned_operations.ts, NEW):** 5 operations originally started in `execution` phase at turn 0. Corps stances set to `offensive`. Sector_id resolution added to `advanceSectorOffensives` for orphaned ops. **Updated n335 (2026-03-01):** Rewritten to OSID-based targets, staging_osid, planning phase with planning_duration: 1.
 - **Column march (bot_brigade_ai_osid.ts):** Rule 1.5 between supply gate and Hold. Brigades in sector_attack ops march to sector via `findNearestFriendlyOsidInSet` BFS.
 - **Operations GUI (OOBSidebar.tsx, types.ts, GameStateAdapter.ts):** New "Operations" accordion showing active ops by faction with phase badges, momentum, objectives, supply readiness.
 - **Calibration (n326):** 84.7% match (638/753), -2.7pp from n314 baseline. RS peaks at 382 OSIDs (W35), final 375. Casualties: RS=7,187, RBiH=5,304, HRHB=2,548. Key: Drina 71.9% (-3.1pp), column march disrupting initial displacement-driven territorial gains. Needs tuning.
@@ -8807,4 +8810,98 @@ Determinism checks **MUST** be run:
 
 **Also:** Created `/propagate-to-canon` skill (`.claude/skills/propagate-to-canon/SKILL.md`) for general post-change documentation propagation — applicable to any change (code, constants, mechanics, paths, schemas), not just structural refactoring.
 
+### Supply & Ammunition System Master Plan (2026-03-01)
+
+**What:** Created `docs/30_planning/SUPPLY_AMMO_SYSTEM_PLAN.md` — comprehensive plan for the supply and ammunition system. Supersedes `SUPPLY_DESIGN.md` (2026-02-24) and `SUPPLY_IMPLEMENTATION_PLAN.md` (2026-02-24), which are retained as reference.
+
+**Design:** Two categories (general supply + heavy munitions), faction-level reserves (not per-brigade), three consumption channels (maintenance, combat, siege), enclave resilience/hardening, supply UX panel. Based on Paradox full-team convene with wargame expert comparative analysis (AACW2, DC:Barbarossa, WitE2, HOI4).
+
+**Phases:** A (reserve system + consumption), B (siege curve + replenishment wiring), C (enclave resilience), D (supply UX + bot enhancement). Scenario-flag gating for backward compat. B and C can run in parallel after A.
+
+**Also includes:** Complete phase_i/phase_ii reference audit (Appendix A) — 38 step names, 28 TurnReport fields, ~25 exported functions, ~14 types, 2 file names, 1 save-compat risk (`GameStateAdapter.ts:86` phase_ii guard). All flagged for dedicated naming migration pass.
+
+**Canon impact:** Systems Manual §14 additions (§14.6 Supply Reserves, §14.7 Siege Supply Curve), Engine Invariants §4 cascade wording, §14.4/§16 enclave resilience. All require Architect sign-off; enclave also requires Game Designer sign-off.
+
 **Total:** ~34 structural references updated across 6 files. Zero uncertain references. No flagged items for manual review.
+
+### Calibration n335: Initial Control, OSID Operations, Honor Defense (2026-03-01)
+
+**What:** Five-phase calibration change: (1) honor rename `vitezka` → `viteska`; (2) honor-derived defense terrain bonus (`HONOR_DEFENSE_BONUS`: slavna +10%, viteska +15%); (3) Brčko corridor initial control overrides (`op:brcko:brcko`, `op:brcko:krepsic` → RS); (4) OSID-based pre-planned operations with staging_osid and planning phase; (5) Rule 1.5 expansion for planning-phase staging march.
+
+**Run n335 results:** 87.6% OSID match (660/753). Drina 85.2% (+10.2pp from n314), Sarajevo 87.1% (+9.7pp), Herzegovina 96.8% (+6.5pp). Posavina NE regressed to 72.5% (-12.8pp). Bihać pocket now holds (was falling in n334). Brčko still recaptured by RBiH despite override. Anchors: 12/14 pass. Benchmarks: 6/6 pass. State hash: `95071b5e32846570`.
+
+**Key changes:**
+- `combat_math.ts`: `HONOR_DEFENSE_BONUS` auto-derives DTB from honor when no explicit OOB `defense_terrain_bonus`. Explicit OOB value overrides.
+- `pre_planned_operations.ts`: Full rewrite — OSID-specific target lists per operation, `staging_osid` field, operations inject in `planning` phase (was `execution`), planning_duration: 1, transition to execution at turn 1.
+- `bot_brigade_ai_osid.ts`: Rule 1.5 fires during both `planning` (march to staging_osid) and `execution` (march to sector) phases.
+- `sector_offensive.ts`: Dynamic launches set `staging_osid` from first friendly OSID in sector.
+- Scenarios: `osid_control_overrides` for Brčko added to `apr1992_definitive_40w.json` and `apr1992_definitive_52w.json`.
+- `oob_brigades.json`: 19× `"vitezka"` → `"viteska"`.
+
+**Files:** `src/state/game_state.ts`, `src/sim/combat/combat_math.ts`, `src/sim/combat/local_front_defense.ts`, `src/sim/combat/pre_planned_operations.ts`, `src/sim/combat/bot_brigade_ai_osid.ts`, `src/sim/combat/sector_offensive.ts`, `src/scenario/oob_loader.ts`, `src/ui/map/data/types.ts`, `src/ui/map/data/GameStateAdapter.ts`, `data/source/oob_brigades.json`, `data/scenarios/apr1992_definitive_40w.json`, `data/scenarios/apr1992_definitive_52w.json`.
+**Tests:** `tests/pre_planned_operations.test.ts` (9/9 pass, rewritten). Vitest 189/190 pass. tsc clean.
+**Lessons:** L38 (honor DTB protects pockets), L39 (Brčko override insufficient alone), L40 (OSID ops improve precision, reduce opportunism), L41 (planning phase 1-turn delay is correct).
+**Report:** `docs/40_reports/implemented/20260301_CALIBRATION_N335_INITIAL_CONTROL_OSID_OPS_HONOR_DEFENSE.md`
+
+### Phase A: Supply Reserve System — IMPLEMENTED (2026-03-01)
+
+**What:** Implemented Phase A of SUPPLY_AMMO_SYSTEM_PLAN.md — two-category supply reserves (general supply + heavy munitions) with faction-level tracking, maintenance drain, combat expenditure, and reserve→supply-state interaction.
+
+**New files:** `src/state/supply_reserve_constants.ts` (15 constants), `src/state/supply_reserves.ts` (init, per-turn update, combat expenditure, effective state), `tests/supply_reserves.test.ts` (13 tests).
+
+**Modified:** `game_state.ts` (+3 fields), `serializeGameState.ts` (+2 keys), `scenario_types.ts` (+1 flag), `scenario_runner.ts` (wire flag), `war_phases.ts` (+1 pipeline step `compute-supply-reserves`), `turn_pipeline_types.ts` (+1 report field), `combat_math.ts` (getSupplyMult combines reachability+reserves), `attack_resolution_osid.ts` (combat expenditure deduction), `vitest.config.ts` (+1 test file).
+
+**Gating:** All behind `supply_reserves_enabled: boolean` (default false). Zero behavioral change when disabled — verified: n338 = 86.9% match (654/753), identical to baseline. 0 reserve fields in save when disabled.
+
+**Verification:** tsc clean (1 pre-existing error unrelated), vitest 202 pass (+13 new), 40w calibration identical.
+
+**Next:** Phase B (siege curve + replenishment wiring) and Phase C (enclave resilience) — can run in parallel. Phase D (supply UX + bot enhancement) depends on Phase A only.
+
+### Sectors Phase 1: Splitting, Assignment, Reserves — IMPLEMENTED (2026-03-01)
+
+**What:** Comprehensive overhaul of corps front sector computation to eliminate jumbo sectors, assign all brigades, and populate reserves. Previously: 35 sectors, max 86 edges/sector, 54% brigades assigned, 0 reserves. After: 61 sectors, max 25 edges, 91% assigned, 94 reserves.
+
+**Changes to `src/sim/combat/corps_front_sectors.ts`:**
+- **Phase 1A**: Split sub-segments by opposing faction (`splitByOpposingFaction`) — edges facing RBiH vs HRHB become separate sectors
+- **Phase 1D**: Split oversized sectors at midpoint (`splitOversizedSubSegments`, `MAX_SECTOR_EDGES=25`)
+- **Phase 1E**: Recursive brigade cap (`MAX_SECTOR_BRIGADES=8`) — keeps splitting until stable or <4 edges
+- **Phase 1B**: Interior brigade BFS assignment (`assignInteriorBrigadesToSectors`) — brigades not at front-adjacent OSIDs assigned to nearest sector as reserves
+- **Phase 1C**: Reserve population — interior brigades automatically become reserves (replaced hardcoded `[]`)
+- **Faction-wide fallback**: Unrestricted BFS for orphaned brigades in corps without sectors or BFS-unreachable pockets
+- **Exemptions**: General staff corps + HVO Central Bosnia exempt from sector assignment (army-level reserves / future Bosniak-Croat conflict)
+- **Fix**: Used `getFormationCorpsId(f)` instead of `f.corps_id` (corps assignment stored in tags, not field)
+
+**Results (n340, 40w):** 61 sectors, 187/205 assigned (91.2%), max 25 edges, OSID match 86.9% (654/753). Deterministic (hash `a51db370f21d7284`). 18 unassigned: 14 HVO CB exempt, 3 general staff exempt, 1 NO_LOC.
+
+**Fog of war (Phase 1.5):** Already existed — `ReconIntelligence` type + `recon_intelligence.ts` runs in turn pipeline. Phase 2 TODO: confidence decay, bot AI intel usage.
+
+**Decisions:** D12 (sector exempt corps: general staff + HVO Central Bosnia). D13 (MAX_SECTOR_EDGES=25, MAX_SECTOR_BRIGADES=8).
+
+### Supply Reserves Phase A — Canon Propagation (2026-03-01)
+
+**What:** Propagated Phase A supply reserves implementation across all canon and technical docs.
+
+**Documents updated:**
+- **Systems Manual §14.2** — Added implementation-note: reserve model, interaction table, pipeline step, constants/module references
+- **Engine Invariants §4** — Added implementation-note: reserves implement "recovery slower than degradation" invariant
+- **War Specification §7** — Added implementation-note: pressure (monotonic) vs reserves (replenishable) distinction
+- **context.md** — Added Phase A completion note with report link and canon cross-references
+- **CONSOLIDATED_IMPLEMENTED.md** — Added Phase A supply reserves entry with summary
+- **REPO_MAP.md** — Added supply reserve files to "Change X → Go Here" section
+- **CALIBRATION_MASTER.md** — Added n338 run entry (86.9%, supply reserves verification)
+- **SUPPLY_IMPLEMENTATION_PLAN.md** — Added Phase A COMPLETE status, cross-reference to SUPPLY_AMMO_SYSTEM_PLAN
+- **SUPPLY_DESIGN.md** — Added §2.6 Phase A as parallel track to Phases 1–5
+
+**Report:** `docs/40_reports/implemented/20260301_SUPPLY_RESERVES_PHASE_A_IMPLEMENTATION.md`
+
+### Sectors Phase 1 — Canon Propagation (2026-03-01)
+
+**What:** Propagated Sectors Phase 1 changes (opposing-faction split, MAX_SECTOR_EDGES=25, MAX_SECTOR_BRIGADES=8, reserve assignment, exempt corps) across canon and engineering docs.
+
+**Documents updated (4 files, 4 references):**
+- **BOT_AI_HOLISTIC_TUNING_REFERENCE.md** — Added MAX_SECTOR_EDGES=25 and MAX_SECTOR_BRIGADES=8 rows to sector constants table
+- **context.md** — Updated Corps Sectors description: splitting, caps, reserve BFS, exempt corps, 91% assignment rate
+- **Systems_Manual_v0_6_0.md** — Updated derived-state description: splitting, caps, reserves, exempt corps
+- **DESKTOP_GUI_IPC_CONTRACT.md** — Updated `query-corps-sectors` behavior description: splitting, caps, reserves, exempt corps
+
+**No uncertain references found.** All changes are structural (parameter values, mechanic descriptions).

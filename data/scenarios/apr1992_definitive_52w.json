@@ -40,6 +40,9 @@
     "teslic": 0.55,
     "srebrenica": 0.55
   },
-  "osid_control_overrides": {}
+  "osid_control_overrides": {
+    "op:brcko:brcko": "RS",
+    "op:brcko:krepsic": "RS"
+  }
 
 }

@@ -287,6 +287,16 @@ Reachability is computed over the settlement (or operational) graph: from each f
 
 When the operational graph (OSID) is the base layer, “supply at OSID” is the supply state at that OSID—either derived from the state at the controlling settlement(s) for that OSID or from a dedicated OSID-level trace; see War Specification §8 for use in supply pressure (isolation). **Implementation-note (Supply Phases 1–5, 2026-02-24):** OSID supply trace (supply_reachability_osid, deriveSupplyStateByOsid), pipeline step **phase-ii-supply-osid** (after zoc-computation), supply_state_by_osid in turn report; getSupplyMult in attack_resolution_osid and combat_predictor use supply_state_by_osid when present; bot receives supplyStateByOsid and supplyConnectivityByFaction; querySupplyPaths extended; 3D supply mode; enclave resilience stub; cascade semantics in Engine Invariants §4. See SUPPLY_DESIGN.md, SUPPLY_IMPLEMENTATION_PLAN.md, PROJECT_LEDGER 2026-02-24.
 
+**Implementation-note (Phase A — Supply Reserves, 2026-03-01):** Faction-level supply reserves add a consumption/replenishment layer on top of OSID reachability. Two categories: `general_supply_reserve` and `heavy_munitions_reserve` per faction [0..100]. Three consumption channels: (1) maintenance drain (0.15 per formation per turn, general only), (2) combat expenditure (per-battle deduction scaled by intensity, both pools), (3) siege (Phase B, not yet implemented). Production income (from production facilities) replenishes reserves at a 60/40 general/heavy split. **Effective supply state** combines BFS reachability with reserve level via interaction table:
+
+| Reachability \ Reserve | ≥50 | 20–49 | <20 |
+|---|---|---|---|
+| adequate | adequate | strained | critical |
+| strained | strained | strained | critical |
+| critical | critical | critical | critical |
+
+Integration: `getSupplyMult()` in `combat_math.ts` uses `getEffectiveSupplyState()` when `supply_reserves_enabled` is true. Pipeline step **compute-supply-reserves** (after phase-ii-supply-osid, before phase-ii-enclave-resilience) runs `updateSupplyReserves()`. Combat expenditure deducted per battle in `attack_resolution_osid.ts`. All behavior gated by scenario flag `supply_reserves_enabled` (default false). Constants: `src/state/supply_reserve_constants.ts`. Core module: `src/state/supply_reserves.ts`. See SUPPLY_AMMO_SYSTEM_PLAN.md and `docs/40_reports/implemented/20260301_SUPPLY_RESERVES_PHASE_A_IMPLEMENTATION.md`.
+
 ### 14.3 Corridors
 
 **Definition:** A corridor is a path or set of edges through which supply flows from sources to controlled territory. Corridors are derived per faction from dependency, capacity, and redundancy (Engine Invariants §4).
@@ -470,7 +480,7 @@ All state additions are serializable and deterministic. Derived state remains no
 
 **Settlement/Municipality state:** `legitimacy_state`, `control_status`, `coercion_pressure_by_municipality` (implementation extension; non-normative until canonized). No assigned_brigade or brigade_aor; War phase uses location_osid per formation (System 8).
 
-**Not serialized (derived each turn):** brigade pressure, density, resilience modifier, corps_front_sectors (per-corps partition of front edges via multi-source BFS), local_fronts (sub-segment defensive power and density).
+**Not serialized (derived each turn):** brigade pressure, density, resilience modifier, corps_front_sectors (per-corps partition of front edges via multi-source BFS, split by opposing faction and capped at MAX_SECTOR_EDGES=25 / MAX_SECTOR_BRIGADES=8, with interior brigades assigned as reserves; exempt corps excluded), local_fronts (sub-segment defensive power and density).
 
 For tunable parameter tables (Appendix B), doctrine eligibility and effects (Appendix C), capability progression curves (Appendix D), and stability score calculation (Appendix E), see the full tables in Phase 0 Specification v0.5.0 §4.5 Stability Score and in archived Systems_Manual_v0_4_0.md; the normative rules above are sufficient for integration.
 

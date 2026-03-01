@@ -2,18 +2,18 @@
 
 **Purpose:** Persistent lessons-learned record for Phase II 40w calibration (April 1992 → January 1993).
 **Updated:** 2026-03-01
-**Canonical target run:** n314 (`apr1992_definitive_40w__205b3676c8fe3ce4__w40_n314`)
+**Canonical target run:** n335 (`apr1992_definitive_40w__205b3676c8fe3ce4__w40_n335`)
 
 ---
 
 ## Target State (January 1993 / Week 40)
 
 ### Territory (OSIDs of 753 total)
-| Faction | Target | n284 | n295 | n299 | n303 | n314 | Delta (n314) | Status |
-|---|---|---|---|---|---|---|---|---|
-| RS | 416 | 392 | 393 | 389 | 382 | 389 | -27 | Under — Drina shortfall |
-| RBiH | 248 | 271 | 273 | 273 | 277 | 272 | +24 | Over — Drina/Posavina holdouts |
-| HRHB | 89 | 90 | 87 | 91 | 94 | 92 | +3 | Near-target |
+| Faction | Target | n284 | n295 | n299 | n303 | n314 | n335 | Delta (n335) | Status |
+|---|---|---|---|---|---|---|---|---|---|
+| RS | 416 | 392 | 393 | 389 | 382 | 389 | 387 | -29 | Under — Drina/Posavina shortfall |
+| RBiH | 248 | 271 | 273 | 273 | 277 | 272 | 273 | +25 | Over — Drina/Posavina holdouts |
+| HRHB | 89 | 90 | 87 | 91 | 94 | 92 | 93 | +4 | Near-target |
 
 ### Army Strengths (end of 40w)
 | Faction | Personnel (n284) | Personnel (n295) | Brigades | Target | Status |
@@ -45,18 +45,18 @@
 - **Minority flight:** 0 (disabled — `enable_rbih_hrhb_dynamics: false`)
 - **Note:** Engine counts only War-phase takeover-triggered + pressure displacement. Pre-war mass displacement is baked into `init_control` snapshot. Displacement system complete as of n319. See `docs/40_reports/20260301_DISPLACEMENT_DEPTH_CALIBRATION.md`.
 
-### Match Rate vs Painted Targets (n314)
-Overall: **87.4%** (658/753 OSIDs correct)
+### Match Rate vs Painted Targets (n335)
+Overall: **87.6%** (660/753 OSIDs correct)
 
-| Region | n284 Match | n295 Match | n299 Match | n303 Match | n314 Match | Key Issues |
-|---|---|---|---|---|---|---|
-| KRAJINA | 97.0% (128/132) | 97.0% (128/132) | 97.0% (128/132) | 97.0% (128/132) | **97.7% (129/132)** | +1 from supply gating. |
-| POSAVINA_NE | 84.4% (92/109) | 85.3% (93/109) | 86.2% (94/109) | 86.2% (94/109) | **85.3% (93/109)** | -1 — minor edge shift. |
-| DRINA | 71.9% (92/128) | 71.9% (92/128) | 71.9% (92/128) | 72.7% (93/128) | **75.0% (96/128)** | **+3** from supply gating. Still weakest. |
-| CENTRAL_CORRIDOR | 87.2% (82/94) | 90.4% (85/94) | 90.4% (85/94) | 89.4% (84/94) | **91.5% (86/94)** | **+2** — supply prevents overextension. |
-| CENTRAL_BOSNIA | 81.3% (135/166) | 81.3% (135/166) | 83.7% (139/166) | 88.0% (146/166) | **88.0% (146/166)** | Stable from sector targeting. |
-| SARAJEVO | 77.4% (24/31) | 77.4% (24/31) | 80.6% (25/31) | 77.4% (24/31) | **77.4% (24/31)** | Unchanged. |
-| HERZEGOVINA | 94.6% (88/93) | 90.3% (84/93) | 93.5% (87/93) | 91.4% (85/93) | **90.3% (84/93)** | -1 — edge shifts. |
+| Region | n284 Match | n295 Match | n299 Match | n303 Match | n314 Match | n335 Match | Key Issues |
+|---|---|---|---|---|---|---|---|
+| KRAJINA | 97.0% (128/132) | 97.0% (128/132) | 97.0% (128/132) | 97.0% (128/132) | 97.7% (129/132) | **95.5% (126/132)** | -3 — Bihać pocket defense stronger, shifts edges. |
+| POSAVINA_NE | 84.4% (92/109) | 85.3% (93/109) | 86.2% (94/109) | 86.2% (94/109) | 85.3% (93/109) | **72.5% (79/109)** | -14 — Brčko/Zvornik corridor still weak. Weakest region. |
+| DRINA | 71.9% (92/128) | 71.9% (92/128) | 71.9% (92/128) | 72.7% (93/128) | 75.0% (96/128) | **85.2% (109/128)** | **+13** — OSID ops + honor DTB major improvement. |
+| CENTRAL_CORRIDOR | 87.2% (82/94) | 90.4% (85/94) | 90.4% (85/94) | 89.4% (84/94) | 91.5% (86/94) | **92.6% (87/94)** | **+1** — stable. |
+| CENTRAL_BOSNIA | 81.3% (135/166) | 81.3% (135/166) | 83.7% (139/166) | 88.0% (146/166) | 88.0% (146/166) | **85.5% (142/166)** | -4 — Hadžići overcaptured by SRK. |
+| SARAJEVO | 77.4% (24/31) | 77.4% (24/31) | 80.6% (25/31) | 77.4% (24/31) | 77.4% (24/31) | **87.1% (27/31)** | **+3** — Prsten operation better targeted. |
+| HERZEGOVINA | 94.6% (88/93) | 90.3% (84/93) | 93.5% (87/93) | 91.4% (85/93) | 90.3% (84/93) | **96.8% (90/93)** | **+6** — Foča operation well-targeted. |
 
 ---
 
@@ -92,6 +92,7 @@ Overall: **87.4%** (658/753 OSIDs correct)
 | **n314** | **205b3676c8fe3ce4** | **389** | **272** | **92** | **Phase A+B+C: Multi-sector + supply gating + sector offensives.** 87.4% match (658/753). **+5 from n303.** Sector offensive infrastructure (named operations, momentum, lifecycle) wired but inactive in 40w window (year-1 defensive doctrine). See L37. |
 | n310 | 205b3676c8fe3ce4 | — | — | — | Pre-displacement-depth baseline. Displacement: 481k total (RBiH 269k, HRHB 120k, RS 37k). Municipality-level even-split averaging. |
 | **n319** | **42ad78a39746d166** | **—** | **—** | **—** | **Per-OSID census displacement depth.** 86.7% match (653/753). Displacement: **668k total** (RBiH 458k, HRHB 150k, RS 60k). Ljubija: 5,331→13,399 (+151%). Sustained pool double-count fix. Displacement system complete. See 20260301_DISPLACEMENT_DEPTH_CALIBRATION.md. |
+| n338 | 205b3676c8fe3ce4 | — | — | — | **Supply Reserves Phase A verification.** 86.9% match (654/753). Supply reserves implemented but gated off (`supply_reserves_enabled=false`). Zero behavioral change confirmed — identical within noise of n335. 14 calibration constants, 13 unit tests, pipeline step compute-supply-reserves. See 20260301_SUPPLY_RESERVES_PHASE_A_IMPLEMENTATION.md. |
 
 ---
 
@@ -223,6 +224,30 @@ The front segmentation algorithm (`deriveAssignableFrontSegments`) groups edges 
 
 ---
 
+## Faction Doctrinal Arcs (Full War)
+
+**CRITICAL CALIBRATION PRINCIPLE — memorize and apply always.**
+
+### VRS (RS): Professional → Degraded
+- **Starts** as a professional, well-equipped army. Inherits JNA officer corps, heavy weapons, logistics, doctrine. Capable of coordinated multi-corps offensive operations (Corridor '92, Drina sweep).
+- **Ends** as mostly rabble without the starter officer corps. Attrition, brain drain, and inability to replace trained NCOs/officers degrades operational capability over 3.5 years. Still capable of defensive operations and local counterattacks, but increasingly unable to sustain large-scale offensives.
+- **Calibration implication:** VRS early-war effectiveness should be HIGH (good morale, high experience, low war weariness). Late-war VRS should show degraded cohesion, officer loss penalties, rising insubordination/war weariness. Equipment advantage persists but crew quality drops.
+
+### ARBiH (RBiH): Rabble → Professional
+- **Starts** as rabble. No officer corps, no heavy weapons, no logistics, many fighters unarmed. Relies on militia formations, Territorial Defense remnants, and sheer numbers in urban defense.
+- **Ends** as a professional army. Still under-equipped compared to VRS (arms embargo throughout), but capable of larger coordinated operations (1994–1995 offensives). Trained officer corps developed organically through combat experience and foreign training.
+- **Calibration implication:** ARBiH early-war should have LOW experience, LOW morale, LOW cohesion — but HIGH willingness to hold ground (desperation, defending homes). Late-war ARBiH should show rising experience, better coordination, ability to conduct corps-level offensives. Equipment gap narrows but never closes.
+
+### HVO (HRHB): Capable Militia → Overstretched
+- **Starts** as capable militia with Croatian state backing. Good equipment pipeline from Croatia, motivated fighters in Croat-majority areas.
+- **Ends** overstretched by two-front war (VRS + ARBiH from 1993). Equipment advantage over ARBiH but manpower-limited. Increasingly reliant on Croatian Army (HV) support.
+- **Calibration implication:** HVO should be regionally strong but unable to project power far from Croat heartland. Manpower ceiling reached early. Two-front war from 1993 should strain resources.
+
+### Design Rule
+These arcs must emerge **organically** from game mechanics (experience gain, attrition, recruitment exhaustion, war weariness) — NOT from hard-coded phase switches or artificial caps. The sim should produce these trajectories as natural consequences of the faction starting conditions and the mechanics acting on them over time.
+
+---
+
 ## RS-HRHB Relations in 1992
 
 **Classification: "Ambiguous Ally" — NO OPEN WAR between VRS and HVO in 1992.**
@@ -325,7 +350,7 @@ defenderPower ×= (1 + formation.defense_terrain_bonus)
 ```
 OOB field. Applied in direct defense AND ZoC projection. Synced between resolver + predictor.
 Current assignments: 255th Slavna (+0.30), 246th Vitezka (+0.25), 328th/351st Mountain (+0.20).
-Stacks multiplicatively with honor (slavna 1.10×, vitezka 1.20×).
+Stacks multiplicatively with honor (slavna 1.10×, viteska 1.20×).
 
 ### What Does NOT Exist
 - No "desperation" parameter (encirclement does not boost morale)
@@ -701,6 +726,36 @@ Stacks multiplicatively with honor: 246th Vitezka (1.20× honor × 1.25× terrai
 **Key insight:** honors are offensive + defensive; defense_terrain_bonus is defense-only. This lets
 specialized defenders hold without making them better attackers (which they weren't historically).
 **Rule:** defense_terrain_bonus must be synced between attack_resolution_osid.ts and combat_predictor.ts.
+
+### L38 — Honor-based DTB effectively protects enclaves/pockets
+**Session:** 2026-03-01 (n335)
+Auto-derived defense_terrain_bonus from honor designation: slavna +10%, viteska +15%.
+Falls back to honor DTB when no explicit OOB defense_terrain_bonus set.
+Combined effect: viteska brigades get 1.20× honor + 1.15× DTB = 1.38× total defense.
+**Key outcome:** Bihać pocket (5th Corps, multiple viteska brigades) now **survives**.
+Previously falling to RS in n334. Historically accurate — these units earned honors through defense.
+**Rule:** Explicit OOB defense_terrain_bonus overrides honor DTB (not additive).
+
+### L39 — Brčko initial control override insufficient alone
+**Session:** 2026-03-01 (n335)
+Setting `op:brcko:brcko` and `op:brcko:krepsic` to RS at init doesn't prevent RBiH recapture.
+East Bosnian Corps Operacija Koridor has 1-OSID objective (`op:modrica:garevac_2`), too narrow.
+**Fix needed:** Expand Koridor targets to include Brčko-area OSIDs, or increase EBC force commitment.
+
+### L40 — OSID-based operations improve targeting precision but may reduce opportunism
+**Session:** 2026-03-01 (n335)
+Municipality-scanned targets produced operations attacking wrong priorities.
+OSID-specific targets ensure each operation pushes exactly where intended.
+Overall match: 87.6% vs 87.4% (n314) — marginal. But Drina +10.2pp and Sarajevo +9.7pp.
+Posavina NE dropped to 72.5% — tighter targeting misses some opportunistic captures.
+**Rule:** OSID targets are correct approach; expand per-operation target lists rather than reverting to mun scan.
+
+### L41 — Planning phase creates correct 1-turn execution delay
+**Session:** 2026-03-01 (n335)
+Operations inject at turn 0 in `planning` phase, execute at turn 1.
+Historically more accurate — JNA plans existed but needed coordination.
+Staging_osid during planning phase ensures brigades concentrate before attacking.
+**Rule:** Do NOT revert to turn-0 execution. The 1-turn delay is intentional.
 
 ### L23 — Orasje pocket: 3 HVO brigades stay, Derventa/Modrica brigades fall back
 **Session:** 2026-03-01 (user directive)

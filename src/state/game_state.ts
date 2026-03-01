@@ -170,6 +170,8 @@ export interface CorpsOperation {
     failure_count?: number;
     /** Consecutive failures on current objective. */
     consecutive_failures_on_current?: number;
+    /** Friendly OSID where brigades stage during planning phase. */
+    staging_osid?: string;
 }
 
 /**
@@ -276,8 +278,8 @@ export interface FormationState {
     /** Willingness to fight [0,100]. Non-monotonic. Distinct from cohesion (tactical effectiveness). Gates retreat resistance. */
     morale?: number;
     experience?: number; // [0,1] formation experience (Phase I / System 10)
-    /** Unit honor/decoration title. Affects combat power: slavna (1.10×), vitezka (1.20×). ARBiH decoration system; reflects veteran status and battle-hardened capability. */
-    honor?: 'slavna' | 'vitezka';
+    /** Unit honor/decoration title. Affects combat power: slavna (1.10×), viteska (1.20×). ARBiH decoration system; reflects veteran status and battle-hardened capability. */
+    honor?: 'slavna' | 'viteska';
     activation_gated?: boolean; // true if activation is blocked by time, authority, or supply constraints
     activation_turn?: number | null; // turn when formation activated (null if still forming)
     // System 3: Heavy equipment state.
@@ -726,6 +728,8 @@ export interface StateMeta {
     /** Per-faction OSID-level avoidance: brigade AI will not attack these OSIDs for the listed faction.
      *  Used to lock historically-specific OSIDs (e.g. Vozuća pocket) without broad municipality targeting. */
     avoided_osids_by_faction?: Record<string, string[]>;
+    /** Phase A: When true, supply reserves system is active (general supply + heavy munitions). */
+    supply_reserves_enabled?: boolean;
 }
 
 export interface NegotiationLedgerEntry {
@@ -1237,6 +1241,12 @@ export interface GameState {
     war_enemy_zoc_by_faction?: Record<FactionId, string[]>;
     /** Linked ZoC per faction: OSIDs that form a connected front between 2+ friendly brigades. Enemies cannot enter. */
     war_linked_zoc_by_faction?: Record<FactionId, string[]>;
+
+    // --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
+    /** General supply reserves per faction [0..100]. Consumed by maintenance; replenished by facilities/patron. */
+    general_supply_reserve?: Record<FactionId, number>;
+    /** Heavy munitions reserves per faction [0..100]. Consumed by combat; replenished by ammo facilities/patron. */
+    heavy_munitions_reserve?: Record<FactionId, number>;
 
     // --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
     /** Settlement-level displacement (capacity degradation) [0, 1]. Monotonic; never decreases. */

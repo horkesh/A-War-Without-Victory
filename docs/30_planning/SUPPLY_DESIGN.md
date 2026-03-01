@@ -51,6 +51,10 @@ This document is the **design specification for the supply system** as agreed by
 - **No cascade propagation** rule: when a critical edge is lost (control flip), dependent regions’ transition (Adequate→Strained→Critical) is not formally specified; full cascade semantics are design intent but "not yet fully confirmed" (DOCUMENTED_UNIMPLEMENTED_SYSTEMS_AUDIT).
 - **No enclave resilience or hardening** mechanics (optional per convene).
 
+### 2.6 Phase A — Supply Reserves (COMPLETE 2026-03-01)
+
+A **parallel track** to the Phases 1–5 above: faction-level supply reserves add a consumption/replenishment layer on top of OSID reachability. Two categories: `general_supply_reserve` and `heavy_munitions_reserve` per faction [0..100]. Three consumption channels: maintenance drain, combat expenditure, siege (Phase B of SUPPLY_AMMO_SYSTEM_PLAN). Effective supply state combines BFS reachability (from Phase 1) with reserve level via interaction table in `getEffectiveSupplyState()`. Gated by `supply_reserves_enabled` scenario flag. See [SUPPLY_AMMO_SYSTEM_PLAN.md](SUPPLY_AMMO_SYSTEM_PLAN.md) and [20260301_SUPPLY_RESERVES_PHASE_A_IMPLEMENTATION.md](../40_reports/implemented/20260301_SUPPLY_RESERVES_PHASE_A_IMPLEMENTATION.md).
+
 ---
 
 ## 3. Target design — OSID supply trace and per-OSID state

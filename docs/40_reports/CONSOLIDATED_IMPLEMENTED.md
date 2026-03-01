@@ -24,6 +24,7 @@
 | **3D map GUI integration (archived — legacy)** | [3D_MAP_GUI_INTEGRATION_REPORT.md](implemented/3D_MAP_GUI_INTEGRATION_REPORT.md) — tactical_map.html era; superseded by React+MapLibre. |
 | **HoI GUI overhaul session (archived — legacy)** | [20260226_HOI_GUI_OVERHAUL_SESSION_REPORT.md](implemented/20260226_HOI_GUI_OVERHAUL_SESSION_REPORT.md) — legacy HoI 3D GUI work; superseded by React+MapLibre. |
 | **Corps sector ID format fix (n304)** | Ledger entry 2026-03-01 — `assignedFrontIds` format mismatch fixed in `bot_corps_ai.ts`. n304 = 86.7% (653/753). |
+| **Supply reserves Phase A** | [20260301_SUPPLY_RESERVES_PHASE_A_IMPLEMENTATION.md](implemented/20260301_SUPPLY_RESERVES_PHASE_A_IMPLEMENTATION.md) — Faction-level two-category reserves (general_supply + heavy_munitions [0..100]), maintenance drain (0.15/formation/turn), combat expenditure (per-battle deduction), effective supply state (reachability × reserves interaction table). Pipeline step compute-supply-reserves; getSupplyMult integration. Gated by `supply_reserves_enabled` scenario flag (default false). 14 calibration constants. n338 86.9%. Canon: Systems Manual §14.2, Engine Invariants §4, War Spec §7. |
 
 ---
 

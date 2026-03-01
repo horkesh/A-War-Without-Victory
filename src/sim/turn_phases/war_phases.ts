@@ -120,6 +120,7 @@ import { resolveAttackOrdersOsid } from '../combat/attack_resolution_osid.js';
 import { applyBrigadeMovementOrders } from '../combat/brigade_movement_orders.js';
 import { processOsidColumnMovement, type OsidColumnMovementReport } from '../combat/osid_column_movement.js';
 import { updatePhaseIISupplyPressure } from '../combat/supply_pressure.js';
+import { updateSupplyReserves } from '../../state/supply_reserves.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 
 // --- Pipeline infrastructure imports ---
@@ -346,6 +347,15 @@ export const warPhases: NamedPhase[] = [
             if (context.report.supply_resolution) {
                 context.report.supply_resolution.supply_state_by_osid = supplyStateByOsid;
             }
+        }
+    },
+    {
+        name: 'compute-supply-reserves',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (!context.state.meta.supply_reserves_enabled) return;
+            const productionBonus = context.report.supply_resolution?.production_bonus_by_faction ?? {};
+            context.report.supply_reserves = updateSupplyReserves(context.state, productionBonus);
         }
     },
     {

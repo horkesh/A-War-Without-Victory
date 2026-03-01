@@ -28,7 +28,8 @@ flowchart LR
 
 
 
-- **Phase 1** is the minimum viable slice: OSID supply state in combat (supply_mult from location) and report shape. Unblocks Phase 2 and 3.
+- **Phase A (Supply Reserves) — COMPLETE (2026-03-01):** Faction-level two-category reserves (general_supply + heavy_munitions [0..100]), maintenance drain, combat expenditure, effective supply state (reachability × reserves). Gated by `supply_reserves_enabled` scenario flag. See [SUPPLY_AMMO_SYSTEM_PLAN.md](SUPPLY_AMMO_SYSTEM_PLAN.md) and [20260301_SUPPLY_RESERVES_PHASE_A_IMPLEMENTATION.md](../40_reports/implemented/20260301_SUPPLY_RESERVES_PHASE_A_IMPLEMENTATION.md). Phase A is a **parallel track** to Phase 1; effective supply state in `getSupplyMult` combines Phase 1 OSID reachability with Phase A reserve levels.
+- **Phase 1** is the minimum viable slice: OSID supply state in combat (supply_mult from location) and report shape. Unblocks Phase 2 and 3. Phase A reserve integration via `getEffectiveSupplyState()` is already wired into `getSupplyMult`.
 - **Phase 2** (cascade) and **Phase 3** (UX) can be sequenced by PM after Phase 1; Phase 3 does not depend on Phase 2.
 - **Phases 4 and 5** (enclave resilience/hardening, bot supply awareness) are **in scope** (not optional) and depend on Phase 1 (and for Phase 4, Game Designer formula).
 - **Refactor-pass** runs **between each phase**: after Phase 1, after Phase 2, after Phase 3, after Phase 4, and after Phase 5. Per [refactor-pass skill](.cursor/skills/refactor-pass/SKILL.md): review changes, remove dead code/paths, straighten logic, trim parameters, run build/tests; optional abstractions only if they clearly improve clarity.

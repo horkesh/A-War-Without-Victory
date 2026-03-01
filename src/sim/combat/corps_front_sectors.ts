@@ -19,6 +19,7 @@ import type {
 } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { computeLocalFrontDefensivePower } from './local_front_defense.js';
+import { getFormationCorpsId } from './corps_sector_partition.js';
 import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -102,6 +103,12 @@ function buildFactionSectors(
         }
     }
 
+    // Step 5: Faction-wide fallback for orphaned brigades
+    // Brigades in corps without sectors or BFS-unreachable pockets get assigned
+    // to the nearest faction sector via unrestricted BFS (through any territory).
+    // General staff units are exempt — they're army-level reserves.
+    assignOrphanedBrigadesToFaction(sectors, faction, formations, adjacency);
+
     sectors.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
     return sectors;
 }
@@ -179,12 +186,13 @@ function mapOsidsToCorps(
         const f = formations[fid];
         if (!f || f.faction !== faction || f.status !== 'active') continue;
         if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-        if (!f.location_osid || !f.corps_id) continue;
+        const fCorpsId = getFormationCorpsId(f);
+        if (!f.location_osid || !fCorpsId) continue;
         if (!friendlyOsids.has(f.location_osid)) continue;
         if (result.has(f.location_osid)) continue;
         // Brigade at unreachable friendly OSID → assign to its corps and BFS from there
-        if (!corpsIds.includes(f.corps_id)) continue;
-        result.set(f.location_osid, f.corps_id);
+        if (!corpsIds.includes(fCorpsId)) continue;
+        result.set(f.location_osid, fCorpsId);
         const pocketQueue: Osid[] = [f.location_osid];
         let pHead = 0;
         while (pHead < pocketQueue.length) {
@@ -193,7 +201,7 @@ function mapOsidsToCorps(
             for (const pn of pNeighbors) {
                 if (result.has(pn)) continue;
                 if (!friendlyOsids.has(pn)) continue;
-                result.set(pn, f.corps_id);
+                result.set(pn, fCorpsId);
                 pocketQueue.push(pn);
             }
         }
@@ -213,7 +221,7 @@ function findSubordinateOsid(
     const sortedIds = Object.keys(formations).sort(strictCompare);
     for (const fid of sortedIds) {
         const f = formations[fid];
-        if (!f || f.corps_id !== corpsId) continue;
+        if (!f || getFormationCorpsId(f) !== corpsId) continue;
         if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
         if (f.status !== 'active' || !f.location_osid) continue;
         if (friendlyOsids.has(f.location_osid)) return f.location_osid;
@@ -262,6 +270,12 @@ function partitionFrontEdges(
 
 /** Minimum front edges for a sub-segment to be promoted to its own sector. */
 export const MIN_SECTOR_EDGES = 5;
+
+/** Maximum edges per sector before forced split at midpoint. */
+export const MAX_SECTOR_EDGES = 25;
+
+/** Maximum brigades per sector before forced split. */
+export const MAX_SECTOR_BRIGADES = 8;
 
 /**
  * Decompose a corps' front edges into connected sub-segments via BFS.
@@ -331,9 +345,13 @@ function findSubSegments(
 /**
  * Build multi-sector output for a corps from its assigned front edge IDs.
  *
- * Every connected component (sub-segment) becomes its own sector, regardless
- * of edge count. Non-contiguous fronts (pockets, enclaves) always get separate
- * sectors — no cross-component merging.
+ * Pipeline:
+ *   1. Find connected components (sub-segments) via BFS on edge adjacency
+ *   2. Split each component by opposing faction (Phase 1A)
+ *   3. Split oversized components at midpoint (Phase 1D: MAX_SECTOR_EDGES)
+ *   4. Build sectors, assign brigades (front + interior via BFS)
+ *   5. Populate reserves from interior brigades (Phase 1C)
+ *   6. Post-pass: split sectors exceeding MAX_SECTOR_BRIGADES (Phase 1E)
  *
  * Sector IDs: `sector:{corps_id}:0`, `sector:{corps_id}:1`, etc.
  */
@@ -355,21 +373,301 @@ function buildMultiSectorsForCorps(
         edgeMeta.set(e.edge_id, e);
     }
 
-    const subSegments = findSubSegments(corpsId, faction, edgeIds, edgeMeta);
+    // Step 1: Find connected components
+    let subSegments = findSubSegments(corpsId, faction, edgeIds, edgeMeta);
     if (subSegments.length === 0) return [];
 
-    // Each connected component becomes its own sector (sorted for determinism)
-    subSegments.sort((a, b) => strictCompare(a.sub_segment_id, b.sub_segment_id));
+    // Step 2 (Phase 1A): Split by opposing faction
+    subSegments = splitByOpposingFaction(corpsId, faction, subSegments, edgeMeta);
 
+    // Step 3 (Phase 1D): Split oversized sub-segments
+    subSegments = splitOversizedSubSegments(corpsId, subSegments, edgeMeta);
+
+    // Renumber sub-segments deterministically
+    subSegments.sort((a, b) => strictCompare(a.sub_segment_id, b.sub_segment_id));
+    for (let i = 0; i < subSegments.length; i++) {
+        subSegments[i]!.sub_segment_id = `subseg:${corpsId}:${i}`;
+    }
+
+    // Step 4: Build sectors with full brigade assignment (front + interior BFS)
     const sectors: CorpsFrontSector[] = [];
     for (let i = 0; i < subSegments.length; i++) {
         const sector = buildSectorFromSubSegments(
-            state, corpsId, faction, i, [subSegments[i]!], edgeMeta, formations
+            state, corpsId, faction, i, [subSegments[i]!], edgeMeta,
+            formations
         );
         if (sector) sectors.push(sector);
     }
 
-    return sectors;
+    // Step 5 (Phase 1E): Recursively split sectors exceeding MAX_SECTOR_BRIGADES
+    let sectorPool = sectors;
+    let splitOccurred = true;
+    while (splitOccurred) {
+        splitOccurred = false;
+        const next: CorpsFrontSector[] = [];
+        for (const sector of sectorPool) {
+            const total = sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length;
+            if (total > MAX_SECTOR_BRIGADES && sector.length_edges >= 4) {
+                const halves = splitSubSegmentAtMidpoint(sector.sub_segments[0]!, corpsId, edgeMeta);
+                if (halves) {
+                    for (const half of halves) {
+                        const s = buildSectorFromSubSegments(
+                            state, corpsId, faction, next.length, [half],
+                            edgeMeta, formations
+                        );
+                        if (s) next.push(s);
+                    }
+                    splitOccurred = true;
+                    continue;
+                }
+            }
+            sector.sector_id = `sector:${corpsId}:${next.length}`;
+            next.push(sector);
+        }
+        sectorPool = next;
+    }
+    const finalSectors = sectorPool;
+
+    // Step 6 (Phase 1B + 1C): Assign interior brigades as reserves
+    assignInteriorBrigadesToSectors(
+        finalSectors, corpsId, faction, formations, adjacency, reverseMap, state
+    );
+
+    return finalSectors;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Phase 1A: Split Sub-Segments by Opposing Faction
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Split each sub-segment into groups facing the same opposing faction.
+ * Edges facing RBiH and edges facing HRHB become separate sub-segments
+ * even if they are contiguous within the same connected component.
+ */
+function splitByOpposingFaction(
+    corpsId: FormationId,
+    faction: FactionId,
+    subSegments: CorpsFrontSubSegment[],
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>
+): CorpsFrontSubSegment[] {
+    const result: CorpsFrontSubSegment[] = [];
+    let idx = 0;
+
+    for (const seg of subSegments) {
+        // Group edges by opposing faction
+        const factionEdges = new Map<string, string[]>();
+        for (const eid of seg.edge_ids) {
+            const meta = edgeMeta.get(eid);
+            if (!meta) continue;
+            const enemy = meta.side_a === faction ? meta.side_b : meta.side_a;
+            const key = enemy ?? 'unknown';
+            let list = factionEdges.get(key);
+            if (!list) { list = []; factionEdges.set(key, list); }
+            list.push(eid);
+        }
+
+        // If only one opposing faction, keep as-is
+        if (factionEdges.size <= 1) {
+            result.push(seg);
+            continue;
+        }
+
+        // Split: find connected components within each faction group
+        for (const [, edges] of [...factionEdges.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+            const innerAdj = buildEdgeAdjacency(edges, edgeMeta);
+            const visited = new Set<string>();
+            const edgeSet = new Set(edges);
+
+            for (const seed of [...edges].sort(strictCompare)) {
+                if (visited.has(seed)) continue;
+                const component: string[] = [];
+                const stack = [seed];
+                visited.add(seed);
+                while (stack.length > 0) {
+                    const eid = stack.pop()!;
+                    component.push(eid);
+                    for (const next of innerAdj.get(eid) ?? []) {
+                        if (visited.has(next) || !edgeSet.has(next)) continue;
+                        visited.add(next);
+                        stack.push(next);
+                    }
+                }
+                component.sort(strictCompare);
+
+                const friendlyOsids = new Set<string>();
+                const enemyOsids = new Set<string>();
+                for (const eid of component) {
+                    const meta = edgeMeta.get(eid);
+                    if (!meta) continue;
+                    if (meta.side_a === faction) {
+                        friendlyOsids.add(meta.a);
+                        enemyOsids.add(meta.b);
+                    } else {
+                        friendlyOsids.add(meta.b);
+                        enemyOsids.add(meta.a);
+                    }
+                }
+
+                result.push({
+                    sub_segment_id: `subseg:${corpsId}:${idx++}`,
+                    edge_ids: component,
+                    friendly_osids: [...friendlyOsids].sort(strictCompare),
+                    enemy_osids: [...enemyOsids].sort(strictCompare),
+                    length_edges: component.length,
+                });
+            }
+        }
+    }
+
+    return result;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Phase 1D: Split Oversized Sub-Segments
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Recursively split sub-segments exceeding MAX_SECTOR_EDGES at their midpoint.
+ */
+function splitOversizedSubSegments(
+    corpsId: FormationId,
+    subSegments: CorpsFrontSubSegment[],
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>
+): CorpsFrontSubSegment[] {
+    const result: CorpsFrontSubSegment[] = [];
+
+    for (const seg of subSegments) {
+        if (seg.length_edges <= MAX_SECTOR_EDGES) {
+            result.push(seg);
+            continue;
+        }
+        // Try to split at midpoint
+        const halves = splitSubSegmentAtMidpoint(seg, corpsId, edgeMeta);
+        if (!halves) {
+            result.push(seg); // Can't split — keep as-is
+            continue;
+        }
+        // Recurse on each half (in case still oversized)
+        for (const half of halves) {
+            if (half.length_edges > MAX_SECTOR_EDGES) {
+                const deeperHalves = splitOversizedSubSegments(corpsId, [half], edgeMeta);
+                result.push(...deeperHalves);
+            } else {
+                result.push(half);
+            }
+        }
+    }
+
+    return result;
+}
+
+/**
+ * Split a sub-segment at its edge-chain midpoint.
+ * Walks from one end of the edge chain, splits at the halfway mark.
+ * Returns two sub-segments, or null if the segment can't be meaningfully split.
+ */
+function splitSubSegmentAtMidpoint(
+    seg: CorpsFrontSubSegment,
+    corpsId: FormationId,
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>
+): [CorpsFrontSubSegment, CorpsFrontSubSegment] | null {
+    if (seg.length_edges < 4) return null;
+
+    // Build local adjacency and walk the edge chain to find ordering
+    const adj = buildEdgeAdjacency(seg.edge_ids, edgeMeta);
+    const chain = walkEdgeChain(seg.edge_ids, adj);
+    const mid = Math.floor(chain.length / 2);
+    const firstHalf = chain.slice(0, mid);
+    const secondHalf = chain.slice(mid);
+
+    if (firstHalf.length === 0 || secondHalf.length === 0) return null;
+
+    return [
+        buildSubSegmentFromEdges(corpsId, 0, firstHalf, edgeMeta, seg),
+        buildSubSegmentFromEdges(corpsId, 1, secondHalf, edgeMeta, seg),
+    ];
+}
+
+/**
+ * Walk the edge chain from an endpoint (edge with degree 1) to produce an ordered list.
+ * If no endpoint exists (cycle), starts from the first sorted edge.
+ */
+function walkEdgeChain(
+    edgeIds: string[],
+    adj: Map<string, string[]>
+): string[] {
+    const edgeSet = new Set(edgeIds);
+    const sorted = [...edgeIds].sort(strictCompare);
+
+    // Find an endpoint (degree 1 in the edge graph) as starting point
+    let start = sorted[0]!;
+    for (const eid of sorted) {
+        const neighbors = (adj.get(eid) ?? []).filter(n => edgeSet.has(n));
+        if (neighbors.length <= 1) { start = eid; break; }
+    }
+
+    // Walk the chain
+    const visited = new Set<string>();
+    const chain: string[] = [];
+    const stack = [start];
+    visited.add(start);
+
+    while (stack.length > 0) {
+        const eid = stack.pop()!;
+        chain.push(eid);
+        const neighbors = (adj.get(eid) ?? []).filter(n => edgeSet.has(n) && !visited.has(n));
+        neighbors.sort(strictCompare);
+        if (neighbors.length > 0) {
+            visited.add(neighbors[0]!);
+            stack.push(neighbors[0]!);
+        }
+    }
+
+    // If we didn't visit all edges (branching graph), add remaining in sorted order
+    for (const eid of sorted) {
+        if (!visited.has(eid)) chain.push(eid);
+    }
+
+    return chain;
+}
+
+/**
+ * Build a CorpsFrontSubSegment from a subset of edge IDs.
+ */
+function buildSubSegmentFromEdges(
+    corpsId: FormationId,
+    indexHint: number,
+    edgeIds: string[],
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    parentSeg: CorpsFrontSubSegment
+): CorpsFrontSubSegment {
+    const edgeSet = new Set(edgeIds);
+    const friendlyOsids = new Set<string>();
+    const enemyOsids = new Set<string>();
+
+    // Derive faction from parent segment's OSID sets
+    for (const eid of edgeIds) {
+        const meta = edgeMeta.get(eid);
+        if (!meta) continue;
+        // An OSID is friendly if it was in the parent's friendly set
+        if (parentSeg.friendly_osids.includes(meta.a)) {
+            friendlyOsids.add(meta.a);
+            enemyOsids.add(meta.b);
+        } else {
+            friendlyOsids.add(meta.b);
+            enemyOsids.add(meta.a);
+        }
+    }
+
+    edgeIds.sort(strictCompare);
+    return {
+        sub_segment_id: `subseg:${corpsId}:split${indexHint}`,
+        edge_ids: edgeIds,
+        friendly_osids: [...friendlyOsids].sort(strictCompare),
+        enemy_osids: [...enemyOsids].sort(strictCompare),
+        length_edges: edgeIds.length,
+    };
 }
 
 /**
@@ -414,7 +712,7 @@ function buildSectorFromSubSegments(
         if (!f || f.faction !== faction || f.status !== 'active') continue;
         if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
         if (!f.location_osid || !allFriendlyOsids.has(f.location_osid)) continue;
-        if (f.corps_id !== corpsId) continue;
+        if (getFormationCorpsId(f) !== corpsId) continue;
         assignedBrigadeIds.push(fid);
     }
 
@@ -447,6 +745,215 @@ function buildSectorFromSubSegments(
         threat_ratio: threatRatio,
         defensive_power: defensivePower,
     };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Phase 1B + 1C: Interior Brigade Assignment → Reserves
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Assign brigades not at front-adjacent OSIDs to their nearest sector as reserves.
+ * BFS from each unassigned brigade's location_osid through friendly territory
+ * toward the nearest sector friendly_osid.
+ */
+function assignInteriorBrigadesToSectors(
+    sectors: CorpsFrontSector[],
+    corpsId: FormationId,
+    faction: FactionId,
+    formations: Record<FormationId, FormationState>,
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: Map<string, string[]> | null,
+    state: GameState
+): void {
+    if (sectors.length === 0) return;
+
+    // Collect all already-assigned brigades
+    const assigned = new Set<FormationId>();
+    for (const s of sectors) {
+        for (const bid of s.assigned_brigade_ids) assigned.add(bid);
+    }
+
+    // Build reverse map: friendly_osid → sector index
+    const osidToSectorIdx = new Map<string, number>();
+    for (let i = 0; i < sectors.length; i++) {
+        const s = sectors[i]!;
+        for (const ss of s.sub_segments) {
+            for (const osid of ss.friendly_osids) {
+                if (!osidToSectorIdx.has(osid)) osidToSectorIdx.set(osid, i);
+            }
+        }
+    }
+
+    // Pre-compute friendly OSIDs for BFS boundary
+    const friendlyOsids = new Set<string>();
+    for (const osid of adjacency.keys()) {
+        const ctrl = getPoliticalControllerOSID(state, osid, reverseMap ?? undefined);
+        if (ctrl === faction) friendlyOsids.add(osid);
+    }
+
+    // Find unassigned brigades in this corps and BFS-assign to nearest sector
+    const sortedFormIds = Object.keys(formations).sort(strictCompare);
+    for (const fid of sortedFormIds) {
+        const f = formations[fid];
+        if (!f || f.faction !== faction || f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (getFormationCorpsId(f) !== corpsId || !f.location_osid) continue;
+        if (assigned.has(fid)) continue;
+
+        const sectorIdx = bfsToNearestSector(
+            f.location_osid, osidToSectorIdx, adjacency, friendlyOsids
+        );
+        if (sectorIdx !== null) {
+            sectors[sectorIdx]!.reserve_brigade_ids.push(fid);
+            assigned.add(fid);
+        }
+    }
+
+    // Sort reserve lists for determinism
+    for (const s of sectors) {
+        s.reserve_brigade_ids.sort(strictCompare);
+    }
+}
+
+/**
+ * BFS from startOsid through friendly territory to find the nearest OSID
+ * belonging to any sector. Returns the sector index, or null if unreachable.
+ */
+function bfsToNearestSector(
+    startOsid: string,
+    osidToSectorIdx: Map<string, number>,
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>
+): number | null {
+    // Quick check: already at a sector OSID?
+    const direct = osidToSectorIdx.get(startOsid);
+    if (direct !== undefined) return direct;
+
+    // BFS through friendly territory (sorted neighbors for determinism)
+    const visited = new Set<string>();
+    visited.add(startOsid);
+    const queue: string[] = [startOsid];
+    let head = 0;
+
+    while (head < queue.length) {
+        const osid = queue[head++]!;
+        const neighbors = (adjacency.get(osid) ?? []).slice().sort(strictCompare);
+        for (const n of neighbors) {
+            if (visited.has(n)) continue;
+            if (!friendlyOsids.has(n)) continue;
+            visited.add(n);
+
+            const sIdx = osidToSectorIdx.get(n);
+            if (sIdx !== undefined) return sIdx;
+
+            queue.push(n);
+        }
+    }
+
+    return null; // Unreachable (enclave with no front edges)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Faction-Wide Orphan Assignment
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Corps IDs exempt from sector assignment (army staff, future-conflict reserves). */
+const EXEMPT_CORPS_IDS = new Set([
+    'arbih_general_staff', 'vrs_main_staff', 'hvo_general_staff',
+    'hvo_central_bosnia', // Reserved for Bosniak-Croat conflict
+]);
+
+/**
+ * Assign brigades orphaned from corps-level assignment (corps without sectors,
+ * BFS-unreachable pockets) to the nearest sector of their faction via
+ * unrestricted BFS through any OSID adjacency. General staff units are exempt.
+ */
+function assignOrphanedBrigadesToFaction(
+    sectors: CorpsFrontSector[],
+    faction: FactionId,
+    formations: Record<FormationId, FormationState>,
+    adjacency: Map<Osid, Osid[]>
+): void {
+    if (sectors.length === 0) return;
+
+    // Collect all assigned brigades
+    const assigned = new Set<FormationId>();
+    for (const s of sectors) {
+        for (const bid of s.assigned_brigade_ids) assigned.add(bid);
+        for (const bid of s.reserve_brigade_ids) assigned.add(bid);
+    }
+
+    // Build reverse map: OSID → sector index (across all faction sectors)
+    const osidToSectorIdx = new Map<string, number>();
+    for (let i = 0; i < sectors.length; i++) {
+        const s = sectors[i]!;
+        for (const ss of s.sub_segments) {
+            for (const osid of ss.friendly_osids) {
+                if (!osidToSectorIdx.has(osid)) osidToSectorIdx.set(osid, i);
+            }
+        }
+    }
+
+    // Find orphaned brigades (excluding general staff units)
+    const sortedFormIds = Object.keys(formations).sort(strictCompare);
+    for (const fid of sortedFormIds) {
+        const f = formations[fid];
+        if (!f || f.faction !== faction || f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!f.location_osid) continue;
+        if (assigned.has(fid)) continue;
+
+        const fCorpsId = getFormationCorpsId(f);
+        if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId)) continue; // Exempt
+
+        // Unrestricted BFS (through any territory) to nearest sector
+        const sectorIdx = bfsUnrestrictedToNearestSector(
+            f.location_osid, osidToSectorIdx, adjacency
+        );
+        if (sectorIdx !== null) {
+            sectors[sectorIdx]!.reserve_brigade_ids.push(fid);
+            assigned.add(fid);
+        }
+    }
+
+    // Re-sort reserve lists for determinism
+    for (const s of sectors) {
+        s.reserve_brigade_ids.sort(strictCompare);
+    }
+}
+
+/**
+ * BFS from startOsid through ALL adjacency (not restricted to friendly territory)
+ * to find the nearest OSID belonging to any sector.
+ */
+function bfsUnrestrictedToNearestSector(
+    startOsid: string,
+    osidToSectorIdx: Map<string, number>,
+    adjacency: Map<Osid, Osid[]>
+): number | null {
+    const direct = osidToSectorIdx.get(startOsid);
+    if (direct !== undefined) return direct;
+
+    const visited = new Set<string>();
+    visited.add(startOsid);
+    const queue: string[] = [startOsid];
+    let head = 0;
+
+    while (head < queue.length) {
+        const osid = queue[head++]!;
+        const neighbors = (adjacency.get(osid) ?? []).slice().sort(strictCompare);
+        for (const n of neighbors) {
+            if (visited.has(n)) continue;
+            visited.add(n);
+
+            const sIdx = osidToSectorIdx.get(n);
+            if (sIdx !== undefined) return sIdx;
+
+            queue.push(n);
+        }
+    }
+
+    return null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

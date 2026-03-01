@@ -75,6 +75,9 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'enclave_resilience',
     'war_enemy_zoc_by_faction',
     'war_linked_zoc_by_faction',
+    // Supply Reserves (Phase A)
+    'general_supply_reserve',
+    'heavy_munitions_reserve',
     // Brigade Operations System state (Phase II)
     'brigade_front_assignment',
     'corps_front_edges',

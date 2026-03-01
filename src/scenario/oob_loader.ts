@@ -31,8 +31,8 @@ export interface OobBrigade {
     initial_personnel?: number;
     /** Per-brigade initial cohesion override [0,100]. When set, used instead of FACTION_INITIAL_COHESION. */
     initial_cohesion?: number;
-    /** Unit honor/decoration title: slavna (10% combat bonus), vitezka (20% combat bonus). */
-    honor?: 'slavna' | 'vitezka';
+    /** Unit honor/decoration title: slavna (10% combat bonus), viteska (20% combat bonus). */
+    honor?: 'slavna' | 'viteska';
     /** Explicit OSID for initial placement (e.g. "op:brcko:brezovo_polje_selo_2"). Overrides home_mun HQ OSID. */
     home_osid?: string;
     /** Explicit brigade composition (tanks, artillery, infantry). When set, overrides faction defaults. Used for enclave brigades (infantry-only). */
@@ -121,7 +121,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         // Per-brigade optional overrides (April 1992 defaults; Phase 0 gameplay overrides these)
         const initial_personnel = typeof r.initial_personnel === 'number' && Number.isFinite(r.initial_personnel) ? r.initial_personnel : undefined;
         const initial_cohesion = typeof r.initial_cohesion === 'number' && Number.isFinite(r.initial_cohesion) ? r.initial_cohesion : undefined;
-        const honor = (r.honor === 'slavna' || r.honor === 'vitezka') ? r.honor as 'slavna' | 'vitezka' : undefined;
+        const honor = (r.honor === 'slavna' || r.honor === 'viteska') ? r.honor as 'slavna' | 'viteska' : undefined;
         const home_osid = typeof r.home_osid === 'string' && r.home_osid.trim() ? r.home_osid.trim() : undefined;
         const initial_morale = typeof r.initial_morale === 'number' && Number.isFinite(r.initial_morale) ? r.initial_morale : undefined;
         const composition = isRecord(r.composition) ? r.composition as unknown as BrigadeComposition : undefined;

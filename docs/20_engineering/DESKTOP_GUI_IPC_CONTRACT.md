@@ -136,7 +136,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `query-corps-sectors` (invoke)
   - Payload: none
   - Returns: `{ ok: boolean, error?: string, sectors?: Array<{ corps_id, faction, brigade_ids, settlement_ids }> }`
-  - Behavior: derives deterministic corps-sector partition via multi-source BFS from corps HQs through friendly-controlled OSIDs. Each sector includes sub-segments (connected components of front edges), assigned/reserve brigade lists, density, and threat metrics. Read-only.
+  - Behavior: derives deterministic corps-sector partition via multi-source BFS from corps HQs through friendly-controlled OSIDs. Sectors split by opposing faction and capped at MAX_SECTOR_EDGES=25 / MAX_SECTOR_BRIGADES=8. Interior brigades assigned as reserves via BFS; exempt corps (general staff, HVO Central Bosnia) excluded. Each sector includes sub-segments (connected components of front edges), assigned/reserve brigade lists, density, and threat metrics. Read-only.
 
 - `query-battle-events` (invoke)
   - Payload: none

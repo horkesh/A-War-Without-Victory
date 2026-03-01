@@ -48,7 +48,7 @@ function brigadePower(formation: FormationState): number {
     const cohesion = Math.max(0, Math.min(100, formation.cohesion ?? 60)) / 100;
     const experience = Math.max(0, Math.min(1, formation.experience ?? 0));
     const expMult = 0.6 + 0.4 * experience;
-    const honorMult = formation.honor === 'vitezka' ? 1.20
+    const honorMult = formation.honor === 'viteska' ? 1.20
         : formation.honor === 'slavna' ? 1.10 : 1.0;
     return personnel * expMult * cohesion * honorMult;
 }

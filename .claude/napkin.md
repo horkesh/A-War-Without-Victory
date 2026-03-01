@@ -68,7 +68,9 @@
    Do instead: Run Storybook setup inside `src/ui/map`, then verify it did not mutate root `vitest.config.ts`/root test tooling. Keep Storybook config isolated to the map package.
 
 ## Simulation Engine
-1. **[2026-03-01] Two-phase fixture metadata completeness**
+1. **[2026-03-01] Supply reserves: gated by supply_reserves_enabled**
+   Do instead: All reserve logic (maintenance drain, combat expenditure, effective supply state) is gated by `state.meta.supply_reserves_enabled`. When false (default), zero behavioral change. Constants in `supply_reserve_constants.ts`. Module: `supply_reserves.ts`. Pipeline step: `compute-supply-reserves` (after `phase-ii-supply-osid`).
+2. **[2026-03-01] Two-phase fixture metadata completeness**
    Do instead: For any test/state fixture that flows through `runTurn` or scenario runners, always set `meta.phase` (`peace`/`war`) plus compatible referendum fields; missing `meta.phase` now hard-fails as unsupported lifecycle.
 2. **[2026-03-01] OSID/SID mismatch in displacement — never use getEffectiveSettlementSide for control**
    Do instead: `political_controllers` is keyed by OSIDs (`op:mun:slug`) in war phase. Use `buildMunControlFromOsids()` or `buildMunDominantController()` for municipality-level control. `getEffectiveSettlementSide()` does SID lookup → always returns null → causes false encirclement, dead minority flight, population drain.
@@ -108,8 +110,18 @@
    Do instead: Routing tables in `displacement_routing_data.ts` are static data (47 sub-regions × 3 ethnicities). Runtime control validation happens in `displacement_takeover.ts` routing loop. Don't add `state` param to route lookup.
 9. **[2026-02-25] sidToMun map preservation**
    Do instead: Preserve `canonicalSidToMun` in scenario_runner.ts. Corruption prevented ALL 217 mandatory OOB brigades from spawning.
-10. **[2026-03-01] Pre-planned VRS operations: 5 named, injected at turn 0**
-    Do instead: `injectPrePlannedOperations(state)` in scenario_runner after `initializeCorpsCommand`. Operations start in `execution` phase. Rule 1.5 in brigade AI column-marches brigades to sector. n326: 84.7% match (-2.7pp from n314 baseline). Non-contiguous sectors: each DFS component = own sector (no merging).
+10. **[2026-03-01] Pre-planned VRS operations: 5 named, OSID-based, staging + planning phase**
+    Do instead: `injectPrePlannedOperations(state)` in scenario_runner after `initializeCorpsCommand`. Operations start in `planning` phase (planning_duration: 1), execute at turn 1. OSID-specific targets + staging_osid. Rule 1.5 fires during planning (march to staging_osid) AND execution (march to sector). n335: 87.6% match. `HONOR_DEFENSE_BONUS`: slavna +10%, viteska +15% auto-DTB. Bihać pocket now holds.
+
+## Sectors & Operations
+1. **[2026-03-01] corps_id from tags, not field**
+   Do instead: Use `getFormationCorpsId(f)` from `corps_sector_partition.ts`, not `f.corps_id`. Brigade corps is stored in tags (`corps:vrs_1st_krajina`), not a direct field. `f.corps_id` is always null/undefined for brigades.
+2. **[2026-03-01] Sector exempt corps: general staff + HVO Central Bosnia**
+   Do instead: arbih_general_staff, vrs_main_staff, hvo_general_staff are army-level reserves (elite units for army-wide ops). hvo_central_bosnia is reserved for Bosniak-Croat conflict. Don't assign their brigades to front sectors.
+3. **[2026-03-01] Sector splitting pipeline (Phase 1)**
+   Do instead: Pipeline in `buildMultiSectorsForCorps()`: findSubSegments → splitByOpposingFaction → splitOversizedSubSegments (MAX_SECTOR_EDGES=25) → buildSectors → recursive Phase 1E (MAX_SECTOR_BRIGADES=8) → assignInteriorBrigades → faction-wide orphan fallback. Reserves assigned AFTER edge splits so total may exceed 8.
+4. **[2026-03-01] Fog of war already implemented (ReconIntelligence)**
+   Do instead: `recon_intelligence.ts` already runs in turn pipeline via `updateReconIntelligence()`. Types: `ReconIntelligence`, `DetectedBrigadeInfo` in game_state.ts. Ranges: RBiH=2, RS=1, HRHB=1. Detection via battle/probe/recon/linked. Phase 2 TODO: confidence decay, bot AI intel usage.
 
 ## GUI / HoI Map
 1. **[2026-03-01] GUI v2 next priority: Phase 3 remainder then Phase 4**

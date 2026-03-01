@@ -337,6 +337,18 @@ export function evaluateSectorOffensiveLaunch(
     const reserveCount = Math.max(1, Math.floor(sectorBrigadeIds.length * 0.15));
     const participating = sectorBrigadeIds.slice(0, sectorBrigadeIds.length - reserveCount);
 
+    // Pick staging OSID: first friendly OSID in the sector (deterministic, sorted)
+    let stagingOsid: string | undefined;
+    const sector = state.corps_front_sectors?.[sectorId];
+    if (sector) {
+        const friendlyOsids: string[] = [];
+        for (const ss of sector.sub_segments) {
+            for (const o of ss.friendly_osids) friendlyOsids.push(o);
+        }
+        friendlyOsids.sort(strictCompare);
+        if (friendlyOsids.length > 0) stagingOsid = friendlyOsids[0];
+    }
+
     return {
         name,
         type: 'sector_attack',
@@ -352,6 +364,7 @@ export function evaluateSectorOffensiveLaunch(
         momentum: 0,
         failure_count: 0,
         consecutive_failures_on_current: 0,
+        ...(stagingOsid && { staging_osid: stagingOsid }),
     };
 }
 

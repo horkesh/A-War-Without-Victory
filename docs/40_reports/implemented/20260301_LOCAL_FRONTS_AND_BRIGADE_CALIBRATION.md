@@ -66,11 +66,11 @@ A simple multiplicative modifier `× (1 + bonus)` applied to defender power. Pro
 | Brigade | Faction | Location | Bonus | Rationale |
 |---------|---------|----------|-------|-----------|
 | 255th Slavna Mountain "Hajrudin Mesić" | RBiH | Teočak | +30% | Isolated mountain pocket, held entire war. Honor: slavna (+10%). Combined: 1.43× |
-| 246th Vitezka Mountain | RBiH | Šapna | +25% | Key forward position blocking VRS NE expansion. Honor: vitezka (+20%). Combined: 1.50× |
+| 246th Vitezka Mountain | RBiH | Šapna | +25% | Key forward position blocking VRS NE expansion. Honor: viteska (+20%). Combined: 1.50× |
 | 328th Mountain | RBiH | Zavidovići | +20% | Vozuća pocket defense, mountain terrain advantage |
 | 351st Liberation | RBiH | Zavidovići | +20% | Vozuća pocket defense, mountain terrain advantage |
 
-These are multiplicative with the existing honor system. The 246th Vitezka with both vitezka honor (1.20×) and defense_terrain_bonus (1.25×) gets 1.50× total defense multiplier — representing a veteran mountain brigade in prepared positions.
+These are multiplicative with the existing honor system. The 246th Vitezka with both viteska honor (1.20×) and defense_terrain_bonus (1.25×) gets 1.50× total defense multiplier — representing a veteran mountain brigade in prepared positions.
 
 ### 2.3 State Schema Changes
 

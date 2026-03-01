@@ -193,7 +193,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 500,
       "initial_cohesion": 45
     },
@@ -209,7 +209,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 500,
       "initial_cohesion": 45
     },
@@ -285,7 +285,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 500,
       "initial_cohesion": 45
     },
@@ -361,7 +361,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 500,
       "initial_cohesion": 45
     },
@@ -513,7 +513,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 550,
       "initial_cohesion": 48
     },
@@ -531,7 +531,7 @@
       "mandatory": true,
       "initial_personnel": 400,
       "initial_cohesion": 30,
-      "honor": "vitezka"
+      "honor": "viteska"
     },
     {
       "id": "arbih_217th_vitezka_mountain",
@@ -545,7 +545,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 550,
       "initial_cohesion": 48
     },
@@ -716,7 +716,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 440,
       "initial_cohesion": 38
     },
@@ -732,7 +732,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 440,
       "initial_cohesion": 38
     },
@@ -794,7 +794,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 440,
       "initial_cohesion": 38
     },
@@ -857,7 +857,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 8,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 480,
       "initial_cohesion": 40
     },
@@ -920,7 +920,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 8,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 480,
       "initial_cohesion": 40
     },
@@ -1041,7 +1041,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 440,
       "initial_cohesion": 38
     },
@@ -1118,7 +1118,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 700,
       "initial_cohesion": 60
     },
@@ -1150,7 +1150,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 700,
       "initial_cohesion": 60
     },
@@ -1227,7 +1227,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 440,
       "initial_cohesion": 38
     },
@@ -1413,7 +1413,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 4,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 600,
       "initial_cohesion": 48
     },
@@ -1519,7 +1519,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 4,
       "mandatory": true,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 600,
       "initial_cohesion": 48,
       "defense_terrain_bonus": 0.25
@@ -1790,7 +1790,7 @@
       "available_from": 0,
       "mandatory": true,
       "manpower_cost": 40,
-      "honor": "vitezka",
+      "honor": "viteska",
       "initial_personnel": 1100,
       "initial_cohesion": 72,
       "initial_morale": 55,

@@ -958,6 +958,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             state.meta.recruitment_mode = scenario.recruitment_mode;
         }
 
+        // Phase A: Supply reserves system flag → state.meta for pipeline gating.
+        if (scenario.supply_reserves_enabled) {
+            state.meta.supply_reserves_enabled = true;
+        }
+
         // Store per-faction OSID avoidance list in meta so bot corps AI can inject into directives.
         if (scenario.avoided_osids_by_faction && Object.keys(scenario.avoided_osids_by_faction).length > 0) {
             state.meta.avoided_osids_by_faction = scenario.avoided_osids_by_faction;

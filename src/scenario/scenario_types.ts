@@ -109,6 +109,12 @@ export interface Scenario {
      */
     war_entrenchment_init_turns?: number;
     /**
+     * Phase A (Supply Reserves): When true, supply reserves system is enabled.
+     * Defaults to false for backward compatibility. When true, each faction accumulates
+     * reserves from production and replenishment, consumed by maintenance and combat.
+     */
+    supply_reserves_enabled?: boolean;
+    /**
      * Stuck-in-Phase-I fallback: after this many Phase I turns (since war_start_turn) without transition,
      * force transition to Phase II. Optional; when absent, default 52 is used for phase_0/phase_i starts.
      * See docs/30_planning/PHASE_I_II_EDGE_CASES.md.

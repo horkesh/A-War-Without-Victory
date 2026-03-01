@@ -35,23 +35,25 @@ function makeMinimalState(): GameState {
         }
     }
 
-    // Create political_controllers with enemy OSIDs in target muns
+    // Create political_controllers with enemy OSIDs at the specific target OSIDs
     const pc: Record<string, string> = {};
-    const targetMuns = [
-        'brcko', 'bosanski_samac', 'modrica',
-        'zvornik', 'bratunac', 'vlasenica',
-        'ilidza', 'hadzici', 'vogosca', 'ilijas',
-        'foca', 'cajnice', 'kalinovik',
-        'prijedor', 'sanski_most', 'kljuc',
+    // All target OSIDs from operations definitions
+    const targetOsids = [
+        'op:modrica:garevac_2',
+        'op:zvornik:zvornik', 'op:bratunac:bratunac_2', 'op:vlasenica:vlasenica_2', 'op:zvornik:drinjaca', 'op:zvornik:krizevici',
+        'op:ilidza:sarajevo_dio_ilidza_2', 'op:vogosca:hotonj', 'op:ilijas:dragoradi', 'op:hadzici:hadzici',
+        'op:foca:ustikolina', 'op:foca:miljevina_2', 'op:cajnice:todorovici', 'op:kalinovik:varos_2',
+        'op:prijedor:kozarac_2', 'op:prijedor:kamicani', 'op:sanski_most:sanski_most_2', 'op:kljuc:kljuc_2',
     ];
-    for (const mun of targetMuns) {
-        for (let i = 0; i < 3; i++) {
-            pc[`op:${mun}:target_${i}`] = 'RBiH';
-        }
+    for (const osid of targetOsids) {
+        pc[osid] = 'RBiH';
     }
-    // Also some RS-held OSIDs
-    pc['op:brcko:rs_held_1'] = 'RS';
-    pc['op:prijedor:rs_held_1'] = 'RS';
+    // Staging OSIDs (RS-held)
+    pc['op:brcko:brcko'] = 'RS';
+    pc['op:zvornik:kozluk_2'] = 'RS';
+    pc['op:ilidza:kasindo'] = 'RS';
+    pc['op:foca:foca_3'] = 'RS';
+    pc['op:prijedor:prijedor_2'] = 'RS';
 
     return {
         meta: { turn: 0, phase: 'war', scenario_start_date: { year: 1992, month: 4, day: 6 }, seed: 'test' } as GameState['meta'],
@@ -76,7 +78,7 @@ describe('Pre-Planned VRS Operations', () => {
         assert.equal(corpsWithOps.length, 5, `Expected 5 corps with ops, got ${corpsWithOps.length}`);
     });
 
-    it('all operations are type sector_attack in execution phase', () => {
+    it('all operations are type sector_attack in planning phase', () => {
         const state = makeMinimalState();
         injectPrePlannedOperations(state);
 
@@ -84,7 +86,8 @@ describe('Pre-Planned VRS Operations', () => {
             const op = state.corps_command![cid]!.active_operation;
             if (!op) continue;
             assert.equal(op.type, 'sector_attack');
-            assert.equal(op.phase, 'execution');
+            assert.equal(op.phase, 'planning');
+            assert.equal(op.planning_duration, 1);
             assert.equal(op.started_turn, 0);
         }
     });
@@ -122,6 +125,25 @@ describe('Pre-Planned VRS Operations', () => {
         }
     });
 
+    it('operations have staging_osid set', () => {
+        const state = makeMinimalState();
+        injectPrePlannedOperations(state);
+
+        const expectedStaging: Record<string, string> = {
+            vrs_east_bosnian: 'op:brcko:brcko',
+            vrs_drina: 'op:zvornik:kozluk_2',
+            vrs_sarajevo_romanija: 'op:ilidza:kasindo',
+            vrs_herzegovina: 'op:foca:foca_3',
+            vrs_1st_krajina: 'op:prijedor:prijedor_2',
+        };
+
+        for (const [cid, expectedOsid] of Object.entries(expectedStaging)) {
+            const op = state.corps_command![cid]!.active_operation;
+            assert.ok(op, `${cid} should have an operation`);
+            assert.equal(op!.staging_osid, expectedOsid, `${cid} staging_osid`);
+        }
+    });
+
     it('skips corps with existing active operation', () => {
         const state = makeMinimalState();
         // Set an existing operation on east_bosnian
@@ -139,17 +161,24 @@ describe('Pre-Planned VRS Operations', () => {
         assert.equal(opsCount, 5);
     });
 
-    it('objectives only include enemy-held OSIDs in target municipalities', () => {
+    it('objectives only include enemy-held target OSIDs', () => {
         const state = makeMinimalState();
         injectPrePlannedOperations(state);
 
         const op = state.corps_command!['vrs_east_bosnian']!.active_operation!;
         assert.ok(op.objectives!.length > 0, 'Should have objectives');
-        for (const obj of op.objectives!) {
-            assert.ok(!obj.includes('rs_held'), `Objective ${obj} should not be RS-held`);
-            const mun = obj.split(':')[1];
-            assert.ok(['brcko', 'bosanski_samac', 'modrica'].includes(mun!),
-                `Objective ${obj} should be in target municipality`);
-        }
+        // Koridor targets: op:modrica:garevac_2 (only non-RS target)
+        assert.deepEqual(op.objectives, ['op:modrica:garevac_2']);
+    });
+
+    it('skips RS-controlled target OSIDs from objectives', () => {
+        const state = makeMinimalState();
+        // Make one Drina target RS-controlled
+        state.political_controllers!['op:zvornik:zvornik'] = 'RS';
+        injectPrePlannedOperations(state);
+
+        const op = state.corps_command!['vrs_drina']!.active_operation!;
+        assert.ok(!op.objectives!.includes('op:zvornik:zvornik'),
+            'Should not include RS-held OSID');
     });
 });

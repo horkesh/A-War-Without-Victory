@@ -22,6 +22,7 @@ import type {
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
+import { deductCombatExpenditure } from '../../state/supply_reserves.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
@@ -462,6 +463,14 @@ export function resolveAttackOrdersOsid(
             for (const a of attackerFormations) {
                 a.cohesion = Math.max(0, (a.cohesion ?? 60) - 10);
                 a.posture = 'defend';
+            }
+        }
+
+        // Part 6b: Supply reserve expenditure (Phase A)
+        if (state.meta.supply_reserves_enabled && state.general_supply_reserve && state.heavy_munitions_reserve) {
+            deductCombatExpenditure(state, attackerFaction, attackerFormations.length, powerRatio);
+            if (defenderFormation) {
+                deductCombatExpenditure(state, defenderFormation.faction, 1, powerRatio * 0.5);
             }
         }
 
