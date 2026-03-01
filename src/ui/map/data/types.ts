@@ -135,6 +135,39 @@ export interface RecentControlEventView {
     municipalityId: string | null;
 }
 
+export interface CorpsFrontSectorView {
+    sector_id: string;
+    corps_id: string;
+    corps_name: string;
+    display_name: string;
+    faction: string;
+    opposing_factions: string[];
+    edge_ids: string[];
+    sub_segment_count: number;
+    length_edges: number;
+    assigned_brigade_ids: string[];
+    reserve_brigade_ids: string[];
+    density: number;
+    threat_ratio: number;
+    defensive_power: number;
+}
+
+export interface OperationView {
+    corps_id: string;
+    corps_name: string;
+    faction: string;
+    name: string;
+    type: string;
+    phase: 'planning' | 'execution' | 'recovery';
+    sector_id?: string;
+    objectives?: string[];
+    current_objective_index?: number;
+    momentum?: number;
+    participating_brigade_count: number;
+    started_turn: number;
+    supply_readiness?: number;
+}
+
 export interface LoadedGameState {
     label: string;
     turn: number;
@@ -171,10 +204,15 @@ export interface LoadedGameState {
         displacedIn: number;
         lostPopulation: number;
         currentPopulation: number;
+        arrivedByFaction?: Partial<Record<string, number>>;
     }>;
+    /** Per-OSID per-faction departed counts (from displacement_event_log). */
+    departedByOsid?: Record<string, Partial<Record<string, number>>>;
     reconIntelligence?: ReconIntelligenceView;
     movementOrdersSettlement?: MovementOrderSettlementView[];
     enemyZocByFaction?: Record<string, string[]>;
     repositionOrders?: RepositionOrderView[];
+    corpsFrontSectors?: CorpsFrontSectorView[];
+    operations?: OperationView[];
 }
 

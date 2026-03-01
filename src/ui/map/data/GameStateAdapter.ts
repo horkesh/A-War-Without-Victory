@@ -7,8 +7,8 @@
  */
 
 import type {
-    AoROrderView, AttackOrderView, FormationView, LoadedGameState,
-    MilitiaPoolView, MovementOrderSettlementView,
+    AoROrderView, AttackOrderView, CorpsFrontSectorView, FormationView, LoadedGameState,
+    MilitiaPoolView, MovementOrderSettlementView, OperationView,
     ReconIntelligenceView, RepositionOrderView, RecruitmentView,
 } from './types';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup';
@@ -24,6 +24,13 @@ function pointsByFaction(rec: Record<string, { points?: number }>): Record<strin
 
 function finiteNumber(value: unknown, fallback = 0): number {
     return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function humanizeMunicipalitySlug(slug: string): string {
+    return slug
+        .split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
 }
 
 /**
@@ -220,6 +227,34 @@ export function parseGameState(json: unknown): LoadedGameState {
                 .map((sub) => sub.id)
                 .sort();
         }
+    }
+
+    // Parse active operations from corps_command
+    const operations: OperationView[] = [];
+    if (rawCorpsCommand) {
+        for (const fv of formations) {
+            if (fv.kind !== 'corps' && fv.kind !== 'corps_asset') continue;
+            const cc = rawCorpsCommand[fv.id];
+            const op = cc?.active_operation as Record<string, unknown> | undefined;
+            if (op && typeof op === 'object' && op.name) {
+                operations.push({
+                    corps_id: fv.id,
+                    corps_name: fv.name,
+                    faction: fv.faction,
+                    name: op.name as string,
+                    type: (op.type as string) ?? 'sector_attack',
+                    phase: (op.phase as 'planning' | 'execution' | 'recovery') ?? 'execution',
+                    sector_id: typeof op.sector_id === 'string' ? op.sector_id : undefined,
+                    objectives: Array.isArray(op.objectives) ? (op.objectives as string[]).filter(o => typeof o === 'string') : undefined,
+                    current_objective_index: typeof op.current_objective_index === 'number' ? op.current_objective_index : undefined,
+                    momentum: typeof op.momentum === 'number' ? op.momentum : undefined,
+                    participating_brigade_count: Array.isArray(op.participating_brigades) ? (op.participating_brigades as string[]).length : 0,
+                    started_turn: typeof op.started_turn === 'number' ? op.started_turn : turn,
+                    supply_readiness: typeof op.supply_readiness === 'number' ? op.supply_readiness : undefined,
+                });
+            }
+        }
+        operations.sort((a, b) => a.faction.localeCompare(b.faction) || a.corps_id.localeCompare(b.corps_id));
     }
 
     const militiaPools: MilitiaPoolView[] = [];
@@ -439,7 +474,34 @@ export function parseGameState(json: unknown): LoadedGameState {
             const displacedOut = typeof row.displaced_out === 'number' && Number.isFinite(row.displaced_out) ? row.displaced_out : 0;
             const displacedIn = typeof row.displaced_in === 'number' && Number.isFinite(row.displaced_in) ? row.displaced_in : 0;
             const lostPopulation = typeof row.lost_population === 'number' && Number.isFinite(row.lost_population) ? row.lost_population : 0;
-            displacementByMun[munId] = { originalPopulation, displacedOut, displacedIn, lostPopulation, currentPopulation: Math.max(0, originalPopulation - displacedOut - lostPopulation + displacedIn) };
+            const arrivedByFaction: Partial<Record<string, number>> = {};
+            const rawArrived = row.displaced_in_by_faction;
+            if (rawArrived && typeof rawArrived === 'object' && !Array.isArray(rawArrived)) {
+                for (const [fid, val] of Object.entries(rawArrived as Record<string, unknown>).sort((a, b) => a[0].localeCompare(b[0]))) {
+                    if (typeof val === 'number' && Number.isFinite(val) && val > 0) arrivedByFaction[fid] = val;
+                }
+            }
+            displacementByMun[munId] = {
+                originalPopulation, displacedOut, displacedIn, lostPopulation,
+                currentPopulation: Math.max(0, originalPopulation - displacedOut - lostPopulation + displacedIn),
+                ...(Object.keys(arrivedByFaction).length > 0 ? { arrivedByFaction } : {}),
+            };
+        }
+    }
+
+    // Scan displacement_event_log for per-OSID per-faction departures
+    const departedByOsid: LoadedGameState['departedByOsid'] = {};
+    const rawEventLog = (state as Record<string, unknown>).displacement_event_log;
+    if (Array.isArray(rawEventLog)) {
+        for (const evt of rawEventLog as Array<Record<string, unknown>>) {
+            const displaced = finiteNumber(evt.displaced);
+            const originOsid = typeof evt.origin_osid === 'string' ? evt.origin_osid : '';
+            const ethnicity = typeof evt.ethnicity === 'string' ? evt.ethnicity : '';
+            if (displaced > 0 && originOsid && ethnicity) {
+                if (!departedByOsid[originOsid]) departedByOsid[originOsid] = {};
+                departedByOsid[originOsid][ethnicity] =
+                    (departedByOsid[originOsid][ethnicity] ?? 0) + displaced;
+            }
         }
     }
 
@@ -521,6 +583,63 @@ export function parseGameState(json: unknown): LoadedGameState {
         if (Object.keys(out).length > 0) enemyZocByFaction = out;
     }
 
+    let corpsFrontSectors: CorpsFrontSectorView[] | undefined;
+    const rawSectors = state.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
+    if (rawSectors && typeof rawSectors === 'object' && !Array.isArray(rawSectors)) {
+        const out: CorpsFrontSectorView[] = [];
+        for (const sectorId of Object.keys(rawSectors).sort((a, b) => a.localeCompare(b))) {
+            const s = rawSectors[sectorId] ?? {};
+            const corpsId = typeof s.corps_id === 'string' ? s.corps_id : '';
+            const faction = typeof s.faction === 'string' ? s.faction : '';
+            if (!corpsId || !faction) continue;
+            const corpsFormation = formationsRecord[corpsId];
+            const corpsName = corpsFormation && typeof corpsFormation.name === 'string' ? corpsFormation.name : corpsId;
+            const edgeIds = Array.isArray(s.edge_ids) ? (s.edge_ids as string[]).filter(e => typeof e === 'string').sort((a, b) => a.localeCompare(b)) : [];
+            const opposingFactions = Array.isArray(s.opposing_factions) ? (s.opposing_factions as string[]).filter(f => typeof f === 'string').sort((a, b) => a.localeCompare(b)) : [];
+            const subSegments = Array.isArray(s.sub_segments) ? s.sub_segments as Array<Record<string, unknown>> : [];
+            const assignedBrigadeIds = Array.isArray(s.assigned_brigade_ids) ? (s.assigned_brigade_ids as string[]).filter(id => typeof id === 'string').sort((a, b) => a.localeCompare(b)) : [];
+            const reserveBrigadeIds = Array.isArray(s.reserve_brigade_ids) ? (s.reserve_brigade_ids as string[]).filter(id => typeof id === 'string').sort((a, b) => a.localeCompare(b)) : [];
+
+            // Derive display_name from municipality slugs in friendly_osids
+            const munCounts = new Map<string, number>();
+            for (const ss of subSegments) {
+                const friendlyOsids = Array.isArray(ss.friendly_osids) ? ss.friendly_osids as string[] : [];
+                for (const osid of friendlyOsids) {
+                    const parts = osid.split(':');
+                    if (parts.length >= 2) {
+                        const mun = parts[1];
+                        munCounts.set(mun, (munCounts.get(mun) ?? 0) + 1);
+                    }
+                }
+            }
+            const topMuns = [...munCounts.entries()]
+                .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+                .slice(0, 2)
+                .map(([m]) => humanizeMunicipalitySlug(m));
+            const displayName = topMuns.length > 0
+                ? `${corpsName} \u2013 ${topMuns.join(', ')}`
+                : corpsName;
+
+            out.push({
+                sector_id: typeof s.sector_id === 'string' ? s.sector_id : sectorId,
+                corps_id: corpsId,
+                corps_name: corpsName,
+                display_name: displayName,
+                faction,
+                opposing_factions: opposingFactions,
+                edge_ids: edgeIds,
+                sub_segment_count: subSegments.length,
+                length_edges: typeof s.length_edges === 'number' ? s.length_edges : edgeIds.length,
+                assigned_brigade_ids: assignedBrigadeIds,
+                reserve_brigade_ids: reserveBrigadeIds,
+                density: typeof s.density === 'number' ? s.density : 0,
+                threat_ratio: typeof s.threat_ratio === 'number' ? s.threat_ratio : 0,
+                defensive_power: typeof s.defensive_power === 'number' ? s.defensive_power : 0,
+            });
+        }
+        if (out.length > 0) corpsFrontSectors = out;
+    }
+
     return {
         label, turn, phase, formations, militiaPools, controlBySettlement, statusBySettlement,
         brigadeAorByFormationId, brigadeFrontAssignment, theatres, armyTheatreAssignment,
@@ -534,9 +653,12 @@ export function parseGameState(json: unknown): LoadedGameState {
         frontEdgesOsid: frontEdgesOsid && frontEdgesOsid.length > 0 ? frontEdgesOsid : undefined,
         assignableFrontSegments, frontPressureByEdge,
         displacementByMun: Object.keys(displacementByMun).length > 0 ? displacementByMun : undefined,
+        departedByOsid: departedByOsid && Object.keys(departedByOsid).length > 0 ? departedByOsid : undefined,
         reconIntelligence, enemyZocByFaction,
         movementOrdersSettlement: movementOrdersSettlement.length > 0 ? movementOrdersSettlement : undefined,
         repositionOrders: repositionOrders.length > 0 ? repositionOrders : undefined,
+        corpsFrontSectors,
+        operations: operations.length > 0 ? operations : undefined,
     };
 }
 

@@ -3,9 +3,10 @@ import { useGameStore } from '../store/gameStore';
 import { CorpsCard } from './CorpsCard';
 import { BrigadeRow } from './BrigadeRow';
 import { FACTION_COLORS } from '../utils/theme';
-import type { FormationView, LoadedGameState } from '../data/types';
+import type { FormationView, LoadedGameState, OperationView } from '../data/types';
 import { SituationTab } from './SituationTab';
 import { getFormationsAtOsid } from '../utils/formationAtOsid';
+import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 
 const FACTION_ORDER = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -54,21 +55,65 @@ function getCorpsFrontAssignment(
   return namesByFrontId.get(bestFrontId) ?? bestFrontId;
 }
 
+// ─────────────────────────────────────────────────────
+// Accordion section header
+// ─────────────────────────────────────────────────────
+
+function AccordionHeader({
+  label,
+  count,
+  expanded,
+  onToggle,
+}: {
+  label: string;
+  count?: number;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="w-full flex items-center justify-between px-3 py-2 bg-panel-card border-b border-panel-border text-left hover:bg-panel-hover transition-colors shrink-0"
+    >
+      <span className="font-sans text-[11px] uppercase tracking-wide font-semibold text-accent-gold">
+        {label}
+      </span>
+      <span className="flex items-center gap-2">
+        {count != null && (
+          <span className="text-[10px] text-text-secondary tabular-nums">{count}</span>
+        )}
+        <span className="text-text-secondary text-[10px]">{expanded ? '\u25BC' : '\u25B6'}</span>
+      </span>
+    </button>
+  );
+}
+
 /**
- * Left sidebar: Army/Situation tabs with OOB corps cards and reserve section.
+ * Left sidebar: Collapsible accordion sections — Situation, Army, Sectors.
  */
 export function OOBSidebar() {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const selectedOsid = useGameStore((s) => s.selectedOsid);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
+  const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
   const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
-  const [activeTab, setActiveTab] = useState<'army' | 'situation'>('army');
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    situation: false,
+    army: true,
+    operations: false,
+    sectors: false,
+  });
   const [corpsStanceOverrides, setCorpsStanceOverrides] = useState<Record<string, string>>({});
   const sidebarRef = useRef<HTMLDivElement>(null);
+
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
 
   const namesByFrontId = useMemo(
     () => (loadedGameState ? frontNameLookup(loadedGameState) : new Map<string, string>()),
@@ -131,13 +176,44 @@ export function OOBSidebar() {
     return ids;
   }, [loadedGameState, selectedFormationId, selectedOsid]);
 
+  const corpsColorMap = useMemo(
+    () => (loadedGameState?.corpsFrontSectors ? buildCorpsColorMap(loadedGameState.corpsFrontSectors) : {}),
+    [loadedGameState?.corpsFrontSectors]
+  );
+
+  // Group operations by faction
+  const operationsByFaction = useMemo(() => {
+    const ops = loadedGameState?.operations;
+    if (!ops || ops.length === 0) return null;
+    const map = new Map<string, OperationView[]>();
+    for (const op of ops) {
+      const list = map.get(op.faction) ?? [];
+      list.push(op);
+      map.set(op.faction, list);
+    }
+    return map;
+  }, [loadedGameState?.operations]);
+
+  // Group sectors by faction for the Sectors accordion
+  const sectorsByFaction = useMemo(() => {
+    const sectors = loadedGameState?.corpsFrontSectors;
+    if (!sectors || sectors.length === 0) return null;
+    const map = new Map<string, typeof sectors>();
+    for (const s of sectors) {
+      const list = map.get(s.faction) ?? [];
+      list.push(s);
+      map.set(s.faction, list);
+    }
+    return map;
+  }, [loadedGameState?.corpsFrontSectors]);
+
   useEffect(() => {
-    if (activeTab !== 'army') return;
+    if (!expandedSections.army) return;
     const root = sidebarRef.current;
     if (!root) return;
     const el = root.querySelector<HTMLElement>('[data-highlighted="true"]');
     el?.scrollIntoView({ block: 'nearest' });
-  }, [activeTab, selectedFormationId, selectedOsid]);
+  }, [expandedSections.army, selectedFormationId, selectedOsid]);
 
   const toggle = (faction: string) => {
     setCollapsed((prev) => ({ ...prev, [faction]: !prev[faction] }));
@@ -165,24 +241,14 @@ export function OOBSidebar() {
     }
   };
 
-  const renderTabButtons = () => (
-    <div className="grid grid-cols-2 gap-1 p-1 border-b border-panel-border bg-panel-bg/90 shrink-0">
-      <button
-        type="button"
-        onClick={() => setActiveTab('army')}
-        className={`px-2 py-1 text-[11px] font-sans uppercase tracking-wide border rounded transition-colors ${activeTab === 'army' ? 'bg-panel-active text-accent-gold border-panel-border' : 'bg-panel-card text-text-secondary border-panel-border hover:bg-panel-hover'}`}
-      >
-        Army
-      </button>
-      <button
-        type="button"
-        onClick={() => setActiveTab('situation')}
-        className={`px-2 py-1 text-[11px] font-sans uppercase tracking-wide border rounded transition-colors ${activeTab === 'situation' ? 'bg-panel-active text-accent-gold border-panel-border' : 'bg-panel-card text-text-secondary border-panel-border hover:bg-panel-hover'}`}
-      >
-        Situation
-      </button>
-    </div>
-  );
+  const totalFormations = useMemo(() => {
+    let n = 0;
+    if (armyByFaction) for (const list of armyByFaction.values()) n += list.length;
+    for (const list of reserveByFaction.values()) n += list.length;
+    return n;
+  }, [armyByFaction, reserveByFaction]);
+  const totalOperations = loadedGameState?.operations?.length ?? 0;
+  const totalSectors = loadedGameState?.corpsFrontSectors?.length ?? 0;
 
   if (!loadedGameState) {
     return (
@@ -193,7 +259,6 @@ export function OOBSidebar() {
         <div className="px-3 py-3 font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold border-b border-panel-border">
           Command
         </div>
-        {renderTabButtons()}
         <div className="p-3 text-xs text-text-secondary italic">Load a save to see army and situation views.</div>
       </div>
     );
@@ -207,92 +272,217 @@ export function OOBSidebar() {
       <div className="px-3 py-2 font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold border-b border-panel-border shrink-0">
         Command
       </div>
-      {renderTabButtons()}
-      {activeTab === 'situation' ? (
-        <div className="flex-1 overflow-auto" ref={sidebarRef}>
-          <SituationTab state={loadedGameState} />
-        </div>
-      ) : (
-        <div className="flex-1 overflow-auto p-2 space-y-3" ref={sidebarRef}>
-          {!armyByFaction || armyByFaction.size === 0 ? (
-            <div className="text-xs text-text-secondary italic">No formations.</div>
-          ) : (
-            FACTION_ORDER.filter((f) => armyByFaction.has(f) || reserveByFaction.has(f)).map((faction) => {
-              const formations = armyByFaction.get(faction) ?? [];
-              const reserves = reserveByFaction.get(faction) ?? [];
-              const isCollapsed = collapsed[faction];
-              const byCorps = groupFormationsByCorps(formations);
-              const corpsEntries = Array.from(byCorps.entries()).sort(([a], [b]) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
-              return (
-                <div key={faction} className="space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => toggle(faction)}
-                    className="w-full flex items-center justify-between px-2 py-1.5 rounded font-mono text-xs font-medium bg-panel-card border border-panel-border text-left hover:bg-panel-hover transition-colors"
-                  >
-                    <span className={FACTION_COLORS[faction] ?? 'text-text-primary'}>
-                      {faction}
-                    </span>
-                    <span className="text-text-secondary tabular-nums">{formations.length + reserves.length} formations</span>
-                    <span className="text-text-secondary">{isCollapsed ? '▶' : '▼'}</span>
-                  </button>
-                  {!isCollapsed && (
-                    <>
-                      {corpsEntries.map(([corpsId, brigades]) => (
-                        <CorpsCard
-                          key={corpsId}
-                          corpsId={corpsId}
-                          corpsName={corpsId === '_ungrouped' ? 'Ungrouped' : undefined}
-                          brigades={brigades}
-                          faction={faction}
-                          frontAssignment={getCorpsFrontAssignment(brigades, loadedGameState, namesByFrontId)}
-                          stance={getCorpsStance(corpsId, faction)}
-                          onStanceChange={(next) => setCorpsStance(corpsId, next)}
-                          onHeaderClick={() => {
-                            const first = [...brigades].sort((a, b) => a.id.localeCompare(b.id))[0];
-                            if (!first) return;
-                            setSelectedFormationId(first.id);
-                          }}
-                          onHoverOsidsChange={(osids) => setHoveredOsids(osids)}
-                          onBrigadeSelect={(formationId) => setSelectedFormationId(formationId)}
-                          highlightedFormationIds={highlightedFormationIds}
-                          onBrigadeHoverOsids={hoverBrigade}
-                        />
-                      ))}
-                      {reserves.length > 0 && (
-                        <div className="rounded-lg border border-panel-border bg-panel-card/90 overflow-hidden">
-                          <div className="px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2">
-                            <span className="font-sans text-xs font-semibold uppercase tracking-wide text-accent-gold">Reserve</span>
-                            <button
-                              type="button"
-                              className="text-[10px] font-mono uppercase bg-panel-card hover:bg-panel-hover text-text-secondary px-1.5 py-0.5 rounded border border-panel-border"
-                            >
-                              Assign To Front
-                            </button>
+      <div className="flex-1 overflow-auto" ref={sidebarRef}>
+        {/* ── Situation ── */}
+        <AccordionHeader
+          label="Situation"
+          expanded={expandedSections.situation}
+          onToggle={() => toggleSection('situation')}
+        />
+        {expandedSections.situation && (
+          <SituationTab state={loadedGameState} />
+        )}
+
+        {/* ── Army ── */}
+        <AccordionHeader
+          label="Army"
+          count={totalFormations}
+          expanded={expandedSections.army}
+          onToggle={() => toggleSection('army')}
+        />
+        {expandedSections.army && (
+          <div className="p-2 space-y-3">
+            {!armyByFaction || armyByFaction.size === 0 ? (
+              <div className="text-xs text-text-secondary italic">No formations.</div>
+            ) : (
+              FACTION_ORDER.filter((f) => armyByFaction.has(f) || reserveByFaction.has(f)).map((faction) => {
+                const formations = armyByFaction.get(faction) ?? [];
+                const reserves = reserveByFaction.get(faction) ?? [];
+                const isCollapsed = collapsed[faction];
+                const byCorps = groupFormationsByCorps(formations);
+                const corpsEntries = Array.from(byCorps.entries()).sort(([a], [b]) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+                return (
+                  <div key={faction} className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => toggle(faction)}
+                      className="w-full flex items-center justify-between px-2 py-1.5 rounded font-mono text-xs font-medium bg-panel-card border border-panel-border text-left hover:bg-panel-hover transition-colors"
+                    >
+                      <span className={FACTION_COLORS[faction] ?? 'text-text-primary'}>
+                        {faction}
+                      </span>
+                      <span className="text-text-secondary tabular-nums">{formations.length + reserves.length} formations</span>
+                      <span className="text-text-secondary">{isCollapsed ? '\u25B6' : '\u25BC'}</span>
+                    </button>
+                    {!isCollapsed && (
+                      <>
+                        {corpsEntries.map(([corpsId, brigades]) => (
+                          <CorpsCard
+                            key={corpsId}
+                            corpsId={corpsId}
+                            corpsName={corpsId === '_ungrouped' ? 'Ungrouped' : undefined}
+                            brigades={brigades}
+                            faction={faction}
+                            frontAssignment={getCorpsFrontAssignment(brigades, loadedGameState, namesByFrontId)}
+                            stance={getCorpsStance(corpsId, faction)}
+                            onStanceChange={(next) => setCorpsStance(corpsId, next)}
+                            onHeaderClick={() => {
+                              const first = [...brigades].sort((a, b) => a.id.localeCompare(b.id))[0];
+                              if (!first) return;
+                              setSelectedFormationId(first.id);
+                            }}
+                            onHoverOsidsChange={(osids) => setHoveredOsids(osids)}
+                            onBrigadeSelect={(formationId) => setSelectedFormationId(formationId)}
+                            highlightedFormationIds={highlightedFormationIds}
+                            onBrigadeHoverOsids={hoverBrigade}
+                          />
+                        ))}
+                        {reserves.length > 0 && (
+                          <div className="rounded-lg border border-panel-border bg-panel-card/90 overflow-hidden">
+                            <div className="px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2">
+                              <span className="font-sans text-xs font-semibold uppercase tracking-wide text-accent-gold">Reserve</span>
+                              <button
+                                type="button"
+                                className="text-[10px] font-mono uppercase bg-panel-card hover:bg-panel-hover text-text-secondary px-1.5 py-0.5 rounded border border-panel-border"
+                              >
+                                Assign To Front
+                              </button>
+                            </div>
+                            <div className="divide-y divide-panel-border/50">
+                              {reserves.map((brigade) => (
+                                <BrigadeRow
+                                  key={`reserve-${brigade.id}`}
+                                  formation={brigade}
+                                  compact
+                                  highlighted={highlightedFormationIds.has(brigade.id)}
+                                  onClick={() => setSelectedFormationId(brigade.id)}
+                                  onHoverChange={(hovered, e) => hoverBrigade(brigade, hovered, e)}
+                                />
+                              ))}
+                            </div>
                           </div>
-                          <div className="divide-y divide-panel-border/50">
-                            {reserves.map((brigade) => (
-                              <BrigadeRow
-                                key={`reserve-${brigade.id}`}
-                                formation={brigade}
-                                compact
-                                highlighted={highlightedFormationIds.has(brigade.id)}
-                                onClick={() => setSelectedFormationId(brigade.id)}
-                                onHoverChange={(hovered, e) => hoverBrigade(brigade, hovered, e)}
-                              />
-                            ))}
+                        )}
+                      </>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+
+        {/* ── Operations ── */}
+        <AccordionHeader
+          label="Operations"
+          count={totalOperations > 0 ? totalOperations : undefined}
+          expanded={expandedSections.operations}
+          onToggle={() => toggleSection('operations')}
+        />
+        {expandedSections.operations && (
+          <div className="p-2 space-y-2 text-xs">
+            {!operationsByFaction ? (
+              <div className="text-text-secondary italic px-1">No active operations.</div>
+            ) : (
+              FACTION_ORDER.filter((f) => operationsByFaction.has(f)).map((faction) => {
+                const ops = operationsByFaction.get(faction)!;
+                return (
+                  <div key={faction} className="space-y-1">
+                    <div className={`font-mono text-[11px] font-medium px-1 ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
+                      {faction}
+                    </div>
+                    {ops.map((op) => {
+                      const phaseBg = op.phase === 'execution' ? 'bg-red-800/60' : op.phase === 'planning' ? 'bg-yellow-700/60' : 'bg-neutral-600/60';
+                      const objTotal = op.objectives?.length ?? 0;
+                      const objCurrent = op.current_objective_index ?? 0;
+                      return (
+                        <div
+                          key={`${op.corps_id}-${op.name}`}
+                          className="rounded border border-panel-border bg-panel-card p-2 space-y-1"
+                        >
+                          <div className={`font-sans text-[11px] font-semibold ${FACTION_COLORS[op.faction] ?? 'text-text-primary'}`}>
+                            {op.name}
+                          </div>
+                          <div className="text-text-secondary text-[10px]">
+                            {op.corps_name} &middot; {op.faction}
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px]">
+                            <span className={`px-1.5 py-0.5 rounded text-white uppercase font-semibold ${phaseBg}`}>
+                              {op.phase}
+                            </span>
+                            {op.momentum != null && (
+                              <span className="text-text-secondary">Mom: {op.momentum}</span>
+                            )}
+                          </div>
+                          <div className="text-text-secondary text-[10px] tabular-nums">
+                            {objTotal > 0 && `Obj: ${objCurrent}/${objTotal}`}
+                            {op.supply_readiness != null && ` · Supply: ${(op.supply_readiness * 100).toFixed(0)}%`}
+                            {` · ${op.participating_brigade_count} brigades`}
                           </div>
                         </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              );
-            })
-          )}
-        </div>
-      )}
+                      );
+                    })}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+
+        {/* ── Sectors ── */}
+        <AccordionHeader
+          label="Sectors"
+          count={totalSectors > 0 ? totalSectors : undefined}
+          expanded={expandedSections.sectors}
+          onToggle={() => toggleSection('sectors')}
+        />
+        {expandedSections.sectors && (
+          <div className="p-2 space-y-2 text-xs">
+            {!sectorsByFaction ? (
+              <div className="text-text-secondary italic px-1">No sector data.</div>
+            ) : (
+              FACTION_ORDER.filter((f) => sectorsByFaction.has(f)).map((faction) => {
+                const sectors = sectorsByFaction.get(faction)!;
+                return (
+                  <div key={faction} className="space-y-1">
+                    <div className={`font-mono text-[11px] font-medium px-1 ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
+                      {faction}
+                    </div>
+                    {sectors.map((sector) => {
+                      const color = corpsColorMap[sector.corps_id] ?? '#888';
+                      return (
+                        <button
+                          key={sector.sector_id}
+                          type="button"
+                          onClick={() => setSelectedCorpsFrontSectorId(sector.sector_id)}
+                          className="w-full flex items-center gap-2 px-2 py-1.5 rounded border border-panel-border bg-panel-card hover:bg-panel-hover transition-colors text-left"
+                        >
+                          <span
+                            className="inline-block w-2.5 h-2.5 rounded-sm shrink-0"
+                            style={{ backgroundColor: color }}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-text-primary truncate text-[11px]">
+                              {sector.display_name}
+                            </div>
+                            <div className="text-text-secondary text-[10px] tabular-nums">
+                              {sector.assigned_brigade_ids.length} assigned
+                              {sector.reserve_brigade_ids.length > 0 && ` + ${sector.reserve_brigade_ids.length} reserve`}
+                              {' \u00B7 '}{sector.length_edges} edges
+                              {' \u00B7 d='}{sector.density.toFixed(2)}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
