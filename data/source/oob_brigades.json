@@ -701,7 +701,8 @@
       "honor": "slavna",
       "initial_personnel": 800,
       "initial_cohesion": 56,
-      "mandatory": true
+      "mandatory": true,
+      "defense_terrain_bonus": 0.30
     },
     {
       "id": "arbih_7th_vitezka_muslim_liberation",
@@ -810,7 +811,8 @@
       "available_from": 8,
       "mandatory": true,
       "initial_personnel": 480,
-      "initial_cohesion": 40
+      "initial_cohesion": 40,
+      "defense_terrain_bonus": 0.20
     },
     {
       "id": "arbih_329th_mountain",
@@ -840,7 +842,8 @@
       "available_from": 8,
       "mandatory": true,
       "initial_personnel": 480,
-      "initial_cohesion": 40
+      "initial_cohesion": 40,
+      "defense_terrain_bonus": 0.20
     },
     {
       "id": "arbih_372nd_vitezka_mountain",
@@ -1518,7 +1521,8 @@
       "mandatory": true,
       "honor": "vitezka",
       "initial_personnel": 600,
-      "initial_cohesion": 48
+      "initial_cohesion": 48,
+      "defense_terrain_bonus": 0.25
     },
     {
       "id": "arbih_286th_mountain",

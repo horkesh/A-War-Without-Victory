@@ -13,11 +13,13 @@ import { buildControlGeoJSON } from './builders/buildControlGeoJSON';
 import { buildEthnicGeoJSON } from './builders/buildEthnicGeoJSON';
 import { buildFrontLinesGeoJSON } from './builders/buildFrontLinesGeoJSON';
 import { buildFrontEdgesHoverGeoJSON } from './builders/buildFrontEdgesHoverGeoJSON';
+import { buildCorpsFrontLinesGeoJSON, buildCorpsColorExpression } from './builders/buildCorpsFrontLinesGeoJSON';
 import { buildFormationsGeoJSON } from './builders/buildFormationsGeoJSON';
 import { buildOrderArrowsGeoJSON } from './builders/buildOrderArrowsGeoJSON';
 import { buildOsidCentroidLookup } from './builders/geojsonLookup';
 import { resolveFormationLocationOsid } from './builders/resolveFormationLocationOsid';
 import { ensureFormationIcons } from './formationIcons';
+import { addFrontLineIcons } from './frontLineIcons';
 import styleJson from './awwv_map_style.json';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
@@ -25,7 +27,7 @@ const DEFAULT_ZOOM = 8;
 const SIDEBAR_HOVER_LAYER_ID = 'sidebar-hover-outline';
 
 /** Layer IDs for front lines (visibility driven by store frontsVisible). */
-const FRONT_LAYER_IDS = ['faction-border-glow', 'front-line-base', 'front-line-dash'];
+const FRONT_LAYER_IDS = ['faction-border-glow-pos', 'faction-border-glow-neg', 'front-line-base', 'front-line-teeth'];
 /** Fill layer for ethnic map mode (majority_ethnic); toggled with osid-control-fill by mapMode. */
 const OSID_ETHNIC_FILL_LAYER_ID = 'osid-ethnic-fill';
 const OSID_ETHNIC_SOURCE_ID = 'osid-ethnic';
@@ -33,8 +35,11 @@ const OSID_ETHNIC_SOURCE_ID = 'osid-ethnic';
 const FORMATION_MARKERS_LAYER_ID = 'formation-markers';
 /** Layer ID for formation labels (labelsVisible). */
 const FORMATION_LABELS_LAYER_ID = 'formation-labels';
-const FRONT_EDGES_HOVER_LAYER_ID = 'front-edges-hover';
 const FRONT_EDGES_HOVER_SOURCE_ID = 'front-edges-hover';
+const FRONT_EDGES_HOVER_POS_LAYER_ID = 'front-edges-hover-pos';
+const FRONT_EDGES_HOVER_NEG_LAYER_ID = 'front-edges-hover-neg';
+const FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID = 'front-edges-highlight-pos';
+const FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID = 'front-edges-highlight-neg';
 
 function rewritePmtilesUrls(style: Record<string, unknown>, origin: string): Record<string, unknown> {
   const base = `pmtiles://${origin}/`;
@@ -57,6 +62,7 @@ export function MapContainer() {
   const [mapReady, setMapReady] = useState(false);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
+  const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const setPendingAttackConfirmation = useGameStore((s) => s.setPendingAttackConfirmation);
   const setOrderModeForFormation = useGameStore((s) => s.setOrderModeForFormation);
   const orderModeForFormation = useGameStore((s) => s.orderModeForFormation);
@@ -133,6 +139,9 @@ export function MapContainer() {
       });
       mapRef.current = map;
       map.addControl(new maplibregl.NavigationControl(), 'top-right');
+      map.on('load', () => {
+        try { addFrontLineIcons(map); } catch (e) { console.warn('[MapContainer] Failed to register front-line icons:', e); }
+      });
       setMapReady(true);
     };
 
@@ -159,6 +168,10 @@ export function MapContainer() {
         }
       },
       onFormationClick: (id) => setSelectedFormationId(id),
+      onFrontEdgeClick: (_edgeId, props) => {
+        const sectorId = props.sector_id as string | undefined;
+        if (sectorId) setSelectedCorpsFrontSectorId(sectorId);
+      },
       onOsidHover: (osid, point) => {
         if (osid) setTooltipTargetWithPosition({ type: 'osid', id: osid }, point ?? undefined);
         else clearTooltipTarget();
@@ -174,7 +187,7 @@ export function MapContainer() {
       onMapMouseLeave: clearTooltipTarget,
     });
     return () => cleanup?.();
-  }, [mapReady, setSelectedOsid, setSelectedFormationId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation]);
+  }, [mapReady, setSelectedOsid, setSelectedFormationId, setSelectedCorpsFrontSectorId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -234,24 +247,106 @@ export function MapContainer() {
           try {
             if (isDev) console.time('[MapContainer] overlay front+formations');
             const m2 = mapRef.current;
-            const frontLinesGeoJson = buildFrontLinesGeoJSON(controlledGeoJson, state.war_alliance_rbih_hrhb);
+            // Corps-colored fronts when sector data is available; else faction borders
+            let frontLinesGeoJson;
+            if (state.corpsFrontSectors && state.corpsFrontSectors.length > 0) {
+              const rbihHrhbAllied = state.war_alliance_rbih_hrhb != null
+                ? state.war_alliance_rbih_hrhb > 0.2 : undefined;
+              frontLinesGeoJson = buildCorpsFrontLinesGeoJSON(
+                controlledGeoJson, state.corpsFrontSectors, rbihHrhbAllied,
+                osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined
+              );
+              // Dynamic corps colors on glow + front-line layers
+              try {
+                const corpsColorExpr = buildCorpsColorExpression(state.corpsFrontSectors);
+                m2.setPaintProperty('faction-border-glow-pos', 'line-color', corpsColorExpr as maplibregl.ExpressionSpecification);
+                m2.setPaintProperty('faction-border-glow-neg', 'line-color', corpsColorExpr as maplibregl.ExpressionSpecification);
+                m2.setPaintProperty('front-line-base', 'line-color', corpsColorExpr as maplibregl.ExpressionSpecification);
+              } catch (e) {
+                console.warn('[MapContainer] Failed to set corps front colors:', e);
+              }
+            } else {
+              frontLinesGeoJson = buildFrontLinesGeoJSON(controlledGeoJson, state.war_alliance_rbih_hrhb);
+            }
             (m2.getSource('front-lines') as GeoJSONSource)?.setData(frontLinesGeoJson);
 
             const frontEdgesOsid = state.frontEdgesOsid;
             if (frontEdgesOsid && frontEdgesOsid.length > 0) {
-              const frontEdgesHoverData = buildFrontEdgesHoverGeoJSON(controlledGeoJson, frontEdgesOsid);
+              const centroidsForHover = osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined;
+              const frontEdgesHoverData = buildFrontEdgesHoverGeoJSON(controlledGeoJson, frontEdgesOsid, state.corpsFrontSectors, centroidsForHover);
               if (!m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
-                m2.addSource(FRONT_EDGES_HOVER_SOURCE_ID, { type: 'geojson', data: frontEdgesHoverData });
+                m2.addSource(FRONT_EDGES_HOVER_SOURCE_ID, { type: 'geojson', data: frontEdgesHoverData, promoteId: 'edge_id' });
+                // Hitbox + highlight for positive-offset side (offset_side == 1)
                 m2.addLayer(
                   {
-                    id: FRONT_EDGES_HOVER_LAYER_ID,
+                    id: FRONT_EDGES_HOVER_POS_LAYER_ID,
                     type: 'line',
                     source: FRONT_EDGES_HOVER_SOURCE_ID,
+                    filter: ['==', ['get', 'offset_side'], 1],
                     paint: {
-                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 6, 10, 12, 14, 18],
+                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 10, 10, 18, 14, 28],
+                      'line-offset': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
                       'line-opacity': 0,
                       'line-color': 'transparent',
                     },
+                  },
+                  'formation-markers'
+                );
+                m2.addLayer(
+                  {
+                    id: FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID,
+                    type: 'line',
+                    source: FRONT_EDGES_HOVER_SOURCE_ID,
+                    filter: ['==', ['get', 'offset_side'], 1],
+                    paint: {
+                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 6, 14, 10],
+                      'line-offset': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
+                      'line-opacity': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        0.6,
+                        0,
+                      ],
+                      'line-color': '#ffffff',
+                    },
+                    layout: { 'line-cap': 'round', 'line-join': 'round' },
+                  },
+                  'formation-markers'
+                );
+                // Hitbox + highlight for negative-offset side (offset_side == -1)
+                m2.addLayer(
+                  {
+                    id: FRONT_EDGES_HOVER_NEG_LAYER_ID,
+                    type: 'line',
+                    source: FRONT_EDGES_HOVER_SOURCE_ID,
+                    filter: ['==', ['get', 'offset_side'], -1],
+                    paint: {
+                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 10, 10, 18, 14, 28],
+                      'line-offset': ['interpolate', ['linear'], ['zoom'], 6, -4, 10, -8, 14, -12],
+                      'line-opacity': 0,
+                      'line-color': 'transparent',
+                    },
+                  },
+                  'formation-markers'
+                );
+                m2.addLayer(
+                  {
+                    id: FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID,
+                    type: 'line',
+                    source: FRONT_EDGES_HOVER_SOURCE_ID,
+                    filter: ['==', ['get', 'offset_side'], -1],
+                    paint: {
+                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 6, 14, 10],
+                      'line-offset': ['interpolate', ['linear'], ['zoom'], 6, -4, 10, -8, 14, -12],
+                      'line-opacity': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        0.6,
+                        0,
+                      ],
+                      'line-color': '#ffffff',
+                    },
+                    layout: { 'line-cap': 'round', 'line-join': 'round' },
                   },
                   'formation-markers'
                 );
@@ -405,11 +500,12 @@ export function MapContainer() {
     if (!mapReady || !map || !baseGeoJson || !osidPropertiesMap || Object.keys(osidPropertiesMap).length === 0) return;
 
     const displacementByMun = loadedGameState?.displacementByMun ?? undefined;
+    const departedByOsid = loadedGameState?.departedByOsid ?? undefined;
 
     let cancelled = false;
     const rafId = requestAnimationFrame(() => {
       if (cancelled || !mapRef.current) return;
-      const ethnicGeoJson = buildEthnicGeoJSON(baseGeoJson, osidPropertiesMap, displacementByMun);
+      const ethnicGeoJson = buildEthnicGeoJSON(baseGeoJson, osidPropertiesMap, displacementByMun, departedByOsid);
       if (cancelled || !mapRef.current) return;
       const m = mapRef.current;
       if (!m.getSource(OSID_ETHNIC_SOURCE_ID)) {
@@ -435,7 +531,7 @@ export function MapContainer() {
               ],
             },
           },
-          'faction-border-glow'
+          'faction-border-glow-pos'
         );
       } else {
         (m.getSource(OSID_ETHNIC_SOURCE_ID) as GeoJSONSource).setData(ethnicGeoJson);

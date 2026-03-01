@@ -1,6 +1,6 @@
 # Issue Report: HoIMapRenderer Never Initializes (2026-02-26)
 
-**Status: OPEN — Root cause identified.**
+**Status: RESOLVED — Fix implemented in implemented/20260226_MAP_INITIALIZATION_HANG_FIX.md**
 
 ## Summary
 The HoI map view (`map_hoi.html`) fails to initialize: the 3D WebGL canvas never appears, the placeholder stays perpetually visible, and no console errors are emitted. The tooltips, hover, click, sidebar, topbar, and status strip all work at the DOM level but the map canvas is absent.

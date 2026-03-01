@@ -11,12 +11,10 @@
  *  7.  getToTerrainDefenseMult: detachment in open terrain (terrainMult=1.0) returns 1.0
  *  8.  getToTerrainDefenseMult: detachment in mountain terrain (terrainMult=1.4) returns 2.0
  *  9.  getToTerrainDefenseMult: brigade always returns 1.0 regardless of terrain
- *  10. getLinkedZocReadiness: detachment returns 0.30, battalion 0.50, brigade 1.0
- *  11. ZoC cap in computeZocDefenderPower: militia detachment with entrenchment=10 still caps at 0.30
- *  12. RS detachment returns 0.5 (same as HRHB for detachment tier)
- *  13. getToTerrainDefenseMult: battalion in mountain terrain returns 2.0
- *  14. getToTerrainDefenseMult: battalion in moderate terrain (terrainMult=1.2) returns 1.5
- *  15. getToTerrainDefenseMult: detachment in sarajevo OSID returns 2.5
+ *  10. RS detachment returns 0.5 (same as HRHB for detachment tier)
+ *  11. getToTerrainDefenseMult: battalion in mountain terrain returns 2.0
+ *  12. getToTerrainDefenseMult: battalion in moderate terrain (terrainMult=1.2) returns 1.5
+ *  13. getToTerrainDefenseMult: detachment in sarajevo OSID returns 2.5
  */
 
 import assert from 'node:assert';
@@ -25,8 +23,7 @@ import { getFormationTier } from '../src/state/formation_constants.js';
 import {
     getEquipmentRatio,
     getToTerrainDefenseMult,
-    getLinkedZocReadiness
-} from '../src/sim/phase_ii/combat_math.js';
+} from '../src/sim/combat/combat_math.js';
 import type { FormationState } from '../src/state/game_state.js';
 
 // ---------------------------------------------------------------------------
@@ -156,58 +153,29 @@ describe('Phase E: TO terrain combat modifiers', () => {
         assert.strictEqual(getToTerrainDefenseMult('brigade', 'op:posavina:plain_1', {}), 1.0);
     });
 
-    // Test 10: getLinkedZocReadiness returns correct values per tier
-    test('10. getLinkedZocReadiness: detachment 0.30, battalion 0.50, brigade 1.0', () => {
-        const detachment = makeMilitia('det', 'RBiH', 200); // detachment
-        const battalion = makeMilitia('bat', 'RS', 800);    // battalion
-        const brigade = makeBrigade('brig', 'RS');          // brigade
-
-        assert.strictEqual(getFormationTier(detachment), 'detachment');
-        assert.strictEqual(getFormationTier(battalion), 'battalion');
-        assert.strictEqual(getFormationTier(brigade), 'brigade');
-
-        assert.strictEqual(getLinkedZocReadiness(detachment), 0.30);
-        assert.strictEqual(getLinkedZocReadiness(battalion), 0.50);
-        assert.strictEqual(getLinkedZocReadiness(brigade), 1.0);
-    });
-
-    // Test 11: ZoC cap for militia detachment with high entrenchment still caps at 0.30
-    // This verifies that maxZocByTier = 0.30 is applied even when entrench/4 > 0.30
-    test('11. ZoC cap: militia detachment with entrenchment=10 still caps at 0.30', () => {
-        // entrench/4 = 10/4 = 2.5, but maxZocByTier for detachment = 0.30
-        // So Math.min(0.30, 2.5) = 0.30
-        const detachment = makeMilitia('det_high_entrench', 'RBiH', 200);
-        const tier = getFormationTier(detachment);
-        assert.strictEqual(tier, 'detachment');
-        const maxZocByTier = tier === 'detachment' ? 0.30 : tier === 'battalion' ? 0.50 : 1.0;
-        const entrench = 10; // far exceeds MAX_ENTRENCHMENT=6 but principle is the same
-        const zocReadiness = Math.min(maxZocByTier, entrench / 4);
-        assert.strictEqual(zocReadiness, 0.30);
-    });
-
-    // Test 12: RS detachment also returns 0.5 (not militia-specific low value)
-    test('12. getEquipmentRatio: RS detachment returns 0.5', () => {
+    // Test 10: RS detachment also returns 0.5 (not militia-specific low value)
+    test('10. getEquipmentRatio: RS detachment returns 0.5', () => {
         const f = makeMilitia('rs_det', 'RS', 150); // < 500 = detachment
         assert.strictEqual(getFormationTier(f), 'detachment');
         assert.strictEqual(getEquipmentRatio(f), 0.5);
     });
 
-    // Test 13: battalion in mountain terrain also gets boost
-    test('13. getToTerrainDefenseMult: battalion in mountain terrain (terrainMult=1.4) returns 2.0', () => {
+    // Test 11: battalion in mountain terrain also gets boost
+    test('11. getToTerrainDefenseMult: battalion in mountain terrain (terrainMult=1.4) returns 2.0', () => {
         const terrainByOsid: Record<string, number> = { 'op:gorazde:mountain_1': 1.4 };
         const mult = getToTerrainDefenseMult('battalion', 'op:gorazde:mountain_1', terrainByOsid);
         assert.strictEqual(mult, 2.0);
     });
 
-    // Test 14: battalion in moderate terrain returns 1.5
-    test('14. getToTerrainDefenseMult: battalion in moderate terrain (terrainMult=1.2) returns 1.5', () => {
+    // Test 12: battalion in moderate terrain returns 1.5
+    test('12. getToTerrainDefenseMult: battalion in moderate terrain (terrainMult=1.2) returns 1.5', () => {
         const terrainByOsid: Record<string, number> = { 'op:gradacac:wooded_1': 1.2 };
         const mult = getToTerrainDefenseMult('battalion', 'op:gradacac:wooded_1', terrainByOsid);
         assert.strictEqual(mult, 1.5);
     });
 
-    // Test 15: detachment in OSID containing 'sarajevo' keyword returns 2.5
-    test('15. getToTerrainDefenseMult: detachment in sarajevo OSID returns 2.5', () => {
+    // Test 13: detachment in OSID containing 'sarajevo' keyword returns 2.5
+    test('13. getToTerrainDefenseMult: detachment in sarajevo OSID returns 2.5', () => {
         const terrainByOsid: Record<string, number> = { 'op:sarajevo:stari_grad_1': 1.0 };
         const mult = getToTerrainDefenseMult('detachment', 'op:sarajevo:stari_grad_1', terrainByOsid);
         assert.strictEqual(mult, 2.5);

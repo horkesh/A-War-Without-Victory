@@ -41,6 +41,8 @@ export interface OobBrigade {
     initial_morale?: number;
     /** Custom tags from OOB (e.g. 'enclave'). Merged into formation tags at creation. */
     tags?: string[];
+    /** Per-brigade terrain defense bonus (e.g. mountain/fortified position). Multiplicative: × (1 + bonus). */
+    defense_terrain_bonus?: number;
 }
 
 export interface OobCorps {
@@ -124,6 +126,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         const initial_morale = typeof r.initial_morale === 'number' && Number.isFinite(r.initial_morale) ? r.initial_morale : undefined;
         const composition = isRecord(r.composition) ? r.composition as unknown as BrigadeComposition : undefined;
         const oobTags = Array.isArray(r.tags) ? (r.tags as unknown[]).filter((t): t is string => typeof t === 'string').map(t => t.trim()).filter(t => t.length > 0) : undefined;
+        const defense_terrain_bonus = typeof r.defense_terrain_bonus === 'number' && Number.isFinite(r.defense_terrain_bonus) ? r.defense_terrain_bonus : undefined;
         result.push({
             id,
             faction,
@@ -147,6 +150,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             ...(home_osid && { home_osid }),
             ...(composition && { composition }),
             ...(oobTags && oobTags.length > 0 && { tags: oobTags }),
+            ...(defense_terrain_bonus != null && { defense_terrain_bonus }),
         });
     }
 

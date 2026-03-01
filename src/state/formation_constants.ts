@@ -112,20 +112,6 @@ export function getEffectiveZoCCap(personnel: number, desiredCap: number | null 
     return getPersonnelBasedZoCCap(personnel);
 }
 
-// --- Backward-compatible aliases (deprecated — use ZoC names above) ---
-/** @deprecated Use BRIGADE_OPERATIONAL_ZOC_HARD_CAP */
-export const BRIGADE_OPERATIONAL_AOR_HARD_CAP = BRIGADE_OPERATIONAL_ZOC_HARD_CAP;
-/** @deprecated Use PERSONNEL_PER_ZOC_SETTLEMENT */
-export const PERSONNEL_PER_AOR_SETTLEMENT = PERSONNEL_PER_ZOC_SETTLEMENT;
-/** @deprecated Use MAX_ZOC_SETTLEMENTS */
-export const MAX_AOR_SETTLEMENTS = MAX_ZOC_SETTLEMENTS;
-/** @deprecated Use MIN_ZOC_SETTLEMENTS */
-export const MIN_AOR_SETTLEMENTS = MIN_ZOC_SETTLEMENTS;
-/** @deprecated Use getPersonnelBasedZoCCap */
-export const getPersonnelBasedAoRCap = getPersonnelBasedZoCCap;
-/** @deprecated Use getEffectiveZoCCap */
-export const getEffectiveAoRCap = getEffectiveZoCCap;
-
 // --- Militia garrison (Brigade AoR Redesign Phase B) ---
 /** Militia cohesion for combat power (low vs brigade 60+). */
 export const MILITIA_COHESION = 30;

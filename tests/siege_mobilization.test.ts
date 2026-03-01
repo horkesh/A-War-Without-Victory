@@ -10,8 +10,8 @@
 import assert from 'node:assert';
 import { test } from 'node:test';
 
-import { computeSiegeState, getSiegeRatio, type SiegeRatioByMunFaction } from '../src/sim/phase_i/compute_siege_state.js';
-import { runPoolPopulation } from '../src/sim/phase_i/pool_population.js';
+import { computeSiegeState, getSiegeRatio, type SiegeRatioByMunFaction } from '../src/sim/early_war/compute_siege_state.js';
+import { runPoolPopulation } from '../src/sim/early_war/pool_population.js';
 import { spawnFormationsFromPools } from '../src/sim/formation_spawn.js';
 import {
     SIEGE_RATIO_FULL,

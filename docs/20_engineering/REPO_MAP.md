@@ -23,7 +23,7 @@ Populate this section from the discovery checklist.
   - War phases: `src/sim/turn_pipeline.ts`
   - Phase 0 / canonical pipeline: `src/state/turn_pipeline.ts`
   - Legacy/minimal turn harness: `src/turn/pipeline.ts` (used by `src/index.ts`)
-- Militia/brigade formation (Phase I): pool population `src/sim/phase_i/pool_population.ts`, formation spawn `src/sim/formation_spawn.ts`, recruitment (player_choice mode) `src/sim/recruitment_engine.ts`, `src/state/recruitment_types.ts`; design: `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md`. CLI: `src/cli/sim_generate_formations.ts`.
+- Militia/brigade formation (Phase I): pool population `src/sim/early_war/pool_population.ts`, formation spawn `src/sim/formation_spawn.ts`, recruitment (player_choice mode) `src/sim/recruitment_engine.ts`, `src/state/recruitment_types.ts`; design: `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md`. CLI: `src/cli/sim_generate_formations.ts`.
 - B1 Events: `src/sim/events/` — `event_types.ts` (trigger/effect types), `event_registry.ts` (historical + random events), `evaluate_events.ts` (deterministic evaluation). Runs first in both Phase I and Phase II pipelines (`evaluate-events` step).
 
 ### Scenario Loading/Execution
@@ -33,7 +33,7 @@ Populate this section from the discovery checklist.
   - Scenario CLI: `src/cli/sim_scenario.ts`
   - Single-turn CLI: `src/cli/sim_run.ts`
   - Scenario loading: `src/scenario/scenario_loader.ts`
-  - AoR init (browser-safe): `src/scenario/aor_init.ts` — `populateFactionAoRFromControl`, `ensureFormationHomeMunsInFactionAoR`. Used by scenario_runner, run_phase_ii_browser, and turn_pipeline `phase-ii-aor-init`.
+  - AoR init (browser-safe): `src/scenario/aor_init.ts` — `populateFactionAoRFromControl`, `ensureFormationHomeMunsInFactionAoR`. Used by scenario_runner, run_combat_browser, and turn_pipeline `phase-ii-aor-init`.
 
 ### Map Build Pipeline
 - Canon reference: `docs/20_engineering/MAP_BUILD_SYSTEM.md`
@@ -48,15 +48,15 @@ Populate this section from the discovery checklist.
 - **Tactical Map System (legacy reference):** `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` — engineering reference for legacy Canvas 2D and HoI 3D. Code: same `src/ui/map/` (legacy entrypoints archived or coexisting).
 - **Legacy 3D tactical render path:** `src/ui/map/map_operational_3d.ts`, `src/ui/map/map_staff_3d.ts`, `src/ui/map/tactical_sandbox.ts`. Shared render contract type: `MapViewInput` in `src/ui/map/types.ts`.
 - **Warroom (HQ scene + map scene):** `src/ui/warroom/`. Dev server: `npm run dev:warroom`. Full-screen map scene uses WarPlanningMap; staged assets, Phase 0 turn advance. See GUI reports in `docs/40_reports/`.
-- **Phase II browser advance:** `src/sim/run_phase_ii_browser.ts` — browser-safe Phase II turn advance (no Node/fs). Used by warroom when advancing a turn in phase_ii. Increments turn; when faction AoRs empty, populates AoR from control + formation home muns via `src/scenario/aor_init.ts`. Does not run supply pressure or exhaustion; for full Phase II use Node `runTurn`.
+- **Phase II browser advance:** `src/sim/run_combat_browser.ts` — browser-safe Phase II turn advance (no Node/fs). Used by warroom when advancing a turn in phase_ii. Increments turn; when faction AoRs empty, populates AoR from control + formation home muns via `src/scenario/aor_init.ts`. Does not run supply pressure or exhaustion; for full Phase II use Node `runTurn`.
 
 ## Change X → Go Here
 Populate with concrete files once confirmed by discovery:
 - Scenario changes → `src/scenario/`, `data/scenarios/`
 - Phase ordering changes → `src/sim/turn_pipeline.ts`, `src/state/turn_pipeline.ts`, `src/state/turn_phases.ts`
 - Authority derivation (municipality control → authority map) → `src/state/formation_lifecycle.ts` (`deriveMunicipalityAuthorityMap`); used by `update-formation-lifecycle` and brigade activation gating.
-- Phase I control flip (incl. B4 coercion pressure, capability-weighted flip) → `src/sim/phase_i/control_flip.ts`; coercion reduces flip threshold via `state.coercion_pressure_by_municipality`; capability scales attacker/defender effectiveness (System 10) via `getFactionCapabilityModifier`; profiles updated in Phase I by `phase-i-capability-update` (turn_pipeline.ts). **Political control init:** `src/state/political_control_init.ts` — `initializePoliticalControllers` supports `init_control_mode` (institutional|ethnic_1991|hybrid_1992) and `ethnic_override_threshold`; ethnicity from `src/data/settlement_ethnicity.ts`; `prepareNewGameState` in `src/state/initialize_new_game_state.ts`; scenario schema in `src/scenario/scenario_types.ts` (init_control_mode, ethnic_override_threshold). **Displacement hooks:** `src/sim/phase_i/displacement_hooks.ts` — Hostile_Population_Share from census (Phase I §4.4); no stub. **Holdout scaling:** `src/sim/phase_i/settlement_control.ts` — resistance scales by population and degree (proximity).
-- Militia pools / formation spawn / pool population / recruitment → `src/sim/phase_i/pool_population.ts`, `src/sim/formation_spawn.ts`, `src/sim/recruitment_engine.ts`, `src/state/recruitment_types.ts`, `src/state/militia_pool_key.ts`, `src/state/formation_constants.ts`, `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md`
+- Phase I control flip (incl. B4 coercion pressure, capability-weighted flip) → `src/sim/early_war/control_flip.ts`; coercion reduces flip threshold via `state.coercion_pressure_by_municipality`; capability scales attacker/defender effectiveness (System 10) via `getFactionCapabilityModifier`; profiles updated in Phase I by `phase-i-capability-update` (turn_pipeline.ts). **Political control init:** `src/state/political_control_init.ts` — `initializePoliticalControllers` supports `init_control_mode` (institutional|ethnic_1991|hybrid_1992) and `ethnic_override_threshold`; ethnicity from `src/data/settlement_ethnicity.ts`; `prepareNewGameState` in `src/state/initialize_new_game_state.ts`; scenario schema in `src/scenario/scenario_types.ts` (init_control_mode, ethnic_override_threshold). **Displacement hooks:** `src/sim/early_war/displacement_hooks.ts` — Hostile_Population_Share from census (Phase I §4.4); no stub. **Holdout scaling:** `src/sim/early_war/settlement_control.ts` — resistance scales by population and degree (proximity).
+- Militia pools / formation spawn / pool population / recruitment → `src/sim/early_war/pool_population.ts`, `src/sim/formation_spawn.ts`, `src/sim/recruitment_engine.ts`, `src/state/recruitment_types.ts`, `src/state/militia_pool_key.ts`, `src/state/formation_constants.ts`, `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md`
 - Determinism/serialization changes → `src/state/serializeGameState.ts`, `src/state/serialize.ts`, `src/utils/stable_json.ts`
 - Map build changes → `scripts/map/`, `src/map/`, `docs/20_engineering/MAP_BUILD_SYSTEM.md`, `docs/20_engineering/specs/map/A1_BASE_MAP_REFERENCE.md`
 - Tactical map UI changes → `src/ui/map/`, `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`

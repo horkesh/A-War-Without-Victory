@@ -76,12 +76,12 @@ Tune all three faction AIs and their starting parameters so that a 52-week scena
 - `docs/knowledge/SCENARIO_SEPTEMBER_1992_SPEC.md` — September 1992 spec
 
 ### Engine Files (Tuning Surface)
-- `src/sim/phase_ii/bot_strategy.ts` — Faction strategies, doctrine phases, standing orders, army operation priorities
-- `src/sim/phase_ii/bot_corps_ai.ts` — Corps directive generation
-- `src/sim/phase_ii/bot_brigade_ai_osid.ts` — Unified brigade execution
-- `src/sim/phase_ii/combat_predictor.ts` — Read-only combat prediction (fog of war)
-- `src/sim/phase_ii/attack_resolution_osid.ts` — Actual combat resolution
-- `src/sim/phase_i/pool_population.ts` — Militia pool population, JNA inheritance
+- `src/sim/combat/bot_strategy.ts` — Faction strategies, doctrine phases, standing orders, army operation priorities
+- `src/sim/combat/bot_corps_ai.ts` — Corps directive generation
+- `src/sim/combat/bot_brigade_ai_osid.ts` — Unified brigade execution
+- `src/sim/combat/combat_predictor.ts` — Read-only combat prediction (fog of war)
+- `src/sim/combat/attack_resolution_osid.ts` — Actual combat resolution
+- `src/sim/early_war/pool_population.ts` — Militia pool population, JNA inheritance
 - `src/state/formation_constants.ts` — Formation caps, batch sizes
 - `data/source/oob_brigades.json` — All 261 brigades with initial_personnel, initial_cohesion, equipment_class, available_from
 
@@ -130,6 +130,25 @@ Tune all three faction AIs and their starting parameters so that a 52-week scena
 | MIA_FRACTION | 0.15 | Of total casualties |
 | EXPERIENCE_BASE | 0.6 | Green troops floor |
 | EXPERIENCE_SCALE | 0.4 | Max exp bonus |
+
+### Supply gating and sector offensives (2026-03-01)
+
+Report: docs/40_reports/implemented/20260301_MULTI_SECTOR_SUPPLY_GATING_SECTOR_OFFENSIVES.md. Calibration summary: CALIBRATION_MASTER.md (n314 87.4%, L36/L37/L38).
+
+| Knob | Default | Location |
+|------|---------|----------|
+| Critical supply gate | forced defend | bot_brigade_ai_osid.ts |
+| Strained min_attack_outcome | 'victory', no pioneer | bot_brigade_ai_osid.ts |
+| Corps critical_fraction threshold | 0.5 (strip offensives) | bot_corps_ai.ts |
+| Corps adequate_fraction threshold | 0.3 (victory min) | bot_corps_ai.ts |
+| MIN_SECTOR_EDGES | 5 | corps_front_sectors.ts |
+| Sector offensive: min brigades | 3 | sector_offensive.ts |
+| Supply readiness launch / abort | 0.6 / 0.4 | sector_offensive.ts |
+| Momentum cap | 3 | sector_offensive.ts |
+| Max objectives | 6 | sector_offensive.ts |
+| Planning duration (3–5 objectives) | ceil(N×0.6) | sector_offensive.ts |
+
+Sector offensives are dormant in the 40w calibration window (year-1 defensive doctrine for both major factions); infrastructure activates at 52w+ when factions transition to offensive postures (L37).
 
 ### Heavy Weapons System (attack_resolution_osid.ts)
 | Parameter | Value | Notes |
@@ -588,13 +607,13 @@ Currently, bot_strategy.ts has hardcoded avoid lists:
 **Status:** Fixed. Now counts enemies at corps positions AND adjacent OSIDs.
 - Was only counting co-located enemies (useless since enemies are on adjacent OSIDs).
 - Fixed by expanding threat zone to include all adjacent OSIDs of corps brigade positions.
-- Location: `src/sim/phase_ii/bot_corps_ai.ts` lines 228-275.
+- Location: `src/sim/combat/bot_corps_ai.ts` lines 228-275.
 
 ### ISSUE 5: getBrigadePowerAtOsid() Returns [FIXED]
 **Status:** Fixed. Now returns both `power` (strongest) and `totalPower` (all brigades).
 - Was returning only the strongest brigade. Multiple brigades at same OSID went unaccounted.
 - Fixed: returns `{ power, totalPower, brigadeId, formation, brigadeCount }`.
-- Location: `src/sim/phase_ii/osid_graph_analysis.ts` lines 75-100.
+- Location: `src/sim/combat/osid_graph_analysis.ts` lines 75-100.
 
 ### ISSUE 6: Gorazde Enclave Vulnerability [LOW]
 **Status:** Active. Gorazde loses 12/20 OSIDs. Acceptable but could improve.

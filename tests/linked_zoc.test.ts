@@ -19,8 +19,8 @@ import {
     computeLinkedZocByFaction,
     computeZoCState,
     type Osid
-} from '../src/sim/phase_ii/zoc.js';
-import { applyZocConstrainedMovement } from '../src/sim/phase_ii/zoc_constrained_movement.js';
+} from '../src/sim/combat/zoc.js';
+import { applyZocConstrainedMovement } from '../src/sim/combat/zoc_constrained_movement.js';
 import type {
     FactionId,
     FormationId,

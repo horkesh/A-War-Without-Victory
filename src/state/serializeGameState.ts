@@ -75,7 +75,7 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'enclave_resilience',
     'war_enemy_zoc_by_faction',
     'war_linked_zoc_by_faction',
-    // Brigade Operations System state (Phase II; AoR keys removed — not serialized)
+    // Brigade Operations System state (Phase II)
     'brigade_front_assignment',
     'corps_front_edges',
     'corps_fallback_front_edges',
@@ -96,6 +96,10 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'brigade_encircled',
     'battle_damage',
     'recon_intelligence',
+    // Local fronts (derived each turn, but stored for GUI/reporting)
+    'local_fronts',
+    // Corps front sectors (derived each turn, stored for GUI/reporting/diagnostics)
+    'corps_front_sectors',
     // Phase F (Displacement & Population Dynamics) — stored, not derived
     'settlement_displacement',
     'settlement_displacement_started_turn',

@@ -10,13 +10,13 @@ import {
     getEffectiveCorpsStance,
     initializeCorpsCommand,
     setArmyStance
-} from '../src/sim/phase_ii/corps_command.js';
+} from '../src/sim/combat/corps_command.js';
 import {
     activateOGs,
     computeOGPressureBonus,
     updateOGLifecycle,
     validateOGOrder
-} from '../src/sim/phase_ii/operational_groups.js';
+} from '../src/sim/combat/operational_groups.js';
 import type { FactionId, FormationState, GameState, OGActivationOrder } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION, getLegacyAoR } from '../src/state/game_state.js';
 

@@ -572,17 +572,6 @@ export function parseGameState(json: unknown): LoadedGameState {
         if (Object.keys(out).length > 0) frontPressureByEdge = out;
     }
 
-    let enemyZocByFaction: LoadedGameState['enemyZocByFaction'];
-    const rawEnemyZoc = state.war_enemy_zoc_by_faction as Record<string, string[]> | undefined;
-    if (rawEnemyZoc && typeof rawEnemyZoc === 'object' && !Array.isArray(rawEnemyZoc)) {
-        const out: Record<string, string[]> = {};
-        for (const fid of Object.keys(rawEnemyZoc).sort((a, b) => a.localeCompare(b))) {
-            const arr = rawEnemyZoc[fid];
-            if (Array.isArray(arr)) out[fid] = [...arr].sort((a, b) => a.localeCompare(b));
-        }
-        if (Object.keys(out).length > 0) enemyZocByFaction = out;
-    }
-
     let corpsFrontSectors: CorpsFrontSectorView[] | undefined;
     const rawSectors = state.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
     if (rawSectors && typeof rawSectors === 'object' && !Array.isArray(rawSectors)) {
@@ -654,7 +643,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         assignableFrontSegments, frontPressureByEdge,
         displacementByMun: Object.keys(displacementByMun).length > 0 ? displacementByMun : undefined,
         departedByOsid: departedByOsid && Object.keys(departedByOsid).length > 0 ? departedByOsid : undefined,
-        reconIntelligence, enemyZocByFaction,
+        reconIntelligence,
         movementOrdersSettlement: movementOrdersSettlement.length > 0 ? movementOrdersSettlement : undefined,
         repositionOrders: repositionOrders.length > 0 ? repositionOrders : undefined,
         corpsFrontSectors,

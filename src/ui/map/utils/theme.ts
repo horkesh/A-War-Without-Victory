@@ -20,8 +20,3 @@ export const FACTION_BG_SUBTLE: Record<string, string> = {
   HRHB: 'bg-faction-hrhb-subtle',
 };
 
-export const FACTION_BG: Record<string, string> = {
-  RS: 'bg-faction-rs',
-  RBiH: 'bg-faction-rbih',
-  HRHB: 'bg-faction-hrhb',
-};

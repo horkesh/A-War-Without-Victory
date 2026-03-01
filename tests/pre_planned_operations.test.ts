@@ -3,7 +3,7 @@
  */
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { injectPrePlannedOperations, _VRS_PRE_PLANNED } from '../src/sim/phase_ii/pre_planned_operations.js';
+import { injectPrePlannedOperations, _VRS_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
 import type { GameState, FactionId, FormationState, CorpsCommandState } from '../src/state/game_state.js';
 
 function makeMinimalState(): GameState {

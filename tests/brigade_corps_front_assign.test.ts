@@ -3,7 +3,7 @@ import {
     applyCorpsAttackAxisOrders,
     applyCorpsFrontAutoDistributionForCorps,
     deriveCorpsFrontEdgesFromBrigadeAoR,
-} from '../src/sim/phase_ii/corps_front_assign.js';
+} from '../src/sim/combat/corps_front_assign.js';
 import { CURRENT_SCHEMA_VERSION, type GameState, type LegacyBrigadeAoRState } from '../src/state/game_state.js';
 import { getLegacyAoR } from '../src/state/game_state.js';
 

@@ -2,13 +2,8 @@ import type { DoctrineState, DoctrineType, FormationState, GameState, PostureLev
 import { getEffectiveEquipmentRatio } from './heavy_equipment.js';
 import type { SupplyStateDerivationReport, SupplyStateLevel } from './supply_state_derivation.js';
 
-export const INFILTRATE_TERRAIN_BONUS = 0.3;
-export const INFILTRATE_VS_STATIC_DEFENSE = 0.4;
-export const INFILTRATE_EXHAUSTION_MULT = 1.1;
-export const ARTILLERY_COUNTER_DEFENSE_BONUS = 0.25;
-export const ARTILLERY_COUNTER_AMMO_MULT = 1.5;
-export const COORDINATED_STRIKE_PRESSURE_MULT = 1.4;
-export const COORDINATED_STRIKE_DURATION = 4;
+const COORDINATED_STRIKE_PRESSURE_MULT = 1.4;
+const COORDINATED_STRIKE_DURATION = 4;
 
 const DOCTRINES: DoctrineType[] = [
     'INFILTRATE',

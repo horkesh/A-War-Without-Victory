@@ -33,12 +33,6 @@ export function deserializeState(payload: string): GameState {
     return migrated;
 }
 
-// Kept for convenience in existing callers; now uses the validation framework.
-export function validateStateCompat(state: GameState): ValidationResult {
-    const issues = validateState(state);
-    return { ok: issues.every((i) => i.severity !== 'error'), issues };
-}
-
 function validateMeta(meta: StateMeta, issues: ValidationIssue[]): void {
     if (!meta || typeof meta !== 'object') {
         issues.push({ severity: 'error', code: 'meta.missing', path: 'meta', message: 'Missing meta block' });

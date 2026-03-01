@@ -1,5 +1,5 @@
 /**
- * Tests for HoI ZoC data/state phase: canonical_to_operational_map, location_osid, OSID control.
+ * Tests for OSID data/state: canonical_to_operational_map, location_osid, OSID control.
  * Determinism: same inputs yield same location_osid and same getPoliticalControllerOSID result.
  */
 

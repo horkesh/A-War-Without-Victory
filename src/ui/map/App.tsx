@@ -3,6 +3,7 @@ import { MapContainer } from './map/MapContainer';
 import { MapModeToolbar } from './components/MapModeToolbar';
 import { TopToolbar } from './components/TopToolbar';
 import { SelectionPanel } from './components/SelectionPanel';
+import { CorpsFrontPanel } from './components/CorpsFrontPanel';
 import { FormationDetail } from './components/FormationDetail';
 import { BottomStatusStrip } from './components/BottomStatusStrip';
 import { OOBSidebar } from './components/OOBSidebar';
@@ -125,6 +126,7 @@ function App() {
       <OOBSidebar />
       <OrderQueue />
       <SelectionPanel />
+      <CorpsFrontPanel />
       <FormationDetail />
       <Tooltip />
       {pendingAttackConfirmation && attackerFormation && (

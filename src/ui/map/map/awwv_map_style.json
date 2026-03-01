@@ -100,22 +100,51 @@
       }
     },
     {
-      "id": "faction-border-glow",
+      "id": "faction-border-glow-pos",
       "type": "line",
       "source": "front-lines",
-      "filter": ["==", ["get", "lineType"], "glow"],
+      "filter": ["all", ["==", ["get", "lineType"], "glow"], ["==", ["get", "offset_side"], 1]],
       "paint": {
         "line-color": [
           "match",
           ["get", "faction"],
-          "RS", "rgba(180, 50, 50, 0.6)",
-          "RBiH", "rgba(55, 140, 75, 0.6)",
-          "HRHB", "rgba(50, 110, 170, 0.6)",
-          "rgba(60, 60, 70, 0.3)"
+          "RS", "rgba(180, 50, 50, 0.85)",
+          "RBiH", "rgba(55, 140, 75, 0.85)",
+          "HRHB", "rgba(50, 110, 170, 0.85)",
+          "rgba(60, 60, 70, 0.4)"
         ],
-        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 4, 10, 10, 14, 16],
-        "line-blur": ["interpolate", ["linear"], ["zoom"], 6, 4, 10, 8, 14, 12],
-        "line-opacity": 0.7
+        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 3, 10, 6, 14, 10],
+        "line-blur": ["interpolate", ["linear"], ["zoom"], 6, 1, 10, 2, 14, 3],
+        "line-offset": ["interpolate", ["linear"], ["zoom"], 6, 4, 10, 8, 14, 12],
+        "line-opacity": 0.9
+      },
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      }
+    },
+    {
+      "id": "faction-border-glow-neg",
+      "type": "line",
+      "source": "front-lines",
+      "filter": ["all", ["==", ["get", "lineType"], "glow"], ["==", ["get", "offset_side"], -1]],
+      "paint": {
+        "line-color": [
+          "match",
+          ["get", "faction"],
+          "RS", "rgba(180, 50, 50, 0.85)",
+          "RBiH", "rgba(55, 140, 75, 0.85)",
+          "HRHB", "rgba(50, 110, 170, 0.85)",
+          "rgba(60, 60, 70, 0.4)"
+        ],
+        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 3, 10, 6, 14, 10],
+        "line-blur": ["interpolate", ["linear"], ["zoom"], 6, 1, 10, 2, 14, 3],
+        "line-offset": ["interpolate", ["linear"], ["zoom"], 6, -4, 10, -8, 14, -12],
+        "line-opacity": 0.9
+      },
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
       }
     },
     {
@@ -124,9 +153,9 @@
       "source": "front-lines",
       "filter": ["==", ["get", "lineType"], "front"],
       "paint": {
-        "line-color": "#1a1a1a",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 2, 10, 4, 14, 6],
-        "line-opacity": 0.85
+        "line-color": "#333333",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 0.8, 10, 1.5, 14, 2],
+        "line-opacity": 0.7
       },
       "layout": {
         "line-cap": "round",
@@ -134,19 +163,21 @@
       }
     },
     {
-      "id": "front-line-dash",
-      "type": "line",
+      "id": "front-line-teeth",
+      "type": "symbol",
       "source": "front-lines",
       "filter": ["==", ["get", "lineType"], "front"],
-      "paint": {
-        "line-color": "#ffffff",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 1, 10, 2, 14, 3],
-        "line-opacity": 0.9,
-        "line-dasharray": [2, 3]
-      },
       "layout": {
-        "line-cap": "butt",
-        "line-join": "round"
+        "symbol-placement": "line",
+        "symbol-spacing": 20,
+        "icon-image": "front-tooth",
+        "icon-size": ["interpolate", ["linear"], ["zoom"], 6, 0.5, 10, 0.8, 14, 1.1],
+        "icon-rotate": ["coalesce", ["get", "tooth_rotation"], 0],
+        "icon-allow-overlap": true,
+        "icon-ignore-placement": true
+      },
+      "paint": {
+        "icon-opacity": 0.7
       }
     },
     {

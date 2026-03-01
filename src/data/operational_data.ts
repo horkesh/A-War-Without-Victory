@@ -3,7 +3,7 @@
  * Used for: location_osid on formations, OSID control derivation, stable iteration.
  *
  * Determinism: All iteration over OSIDs or map keys uses sorted order (localeCompare).
- * Canon: HoI ZoC + Attack Resolution roadmap (data/state phase).
+ * Canon: OSID + Attack Resolution roadmap (data/state phase).
  */
 
 import { readFile } from 'node:fs/promises';

@@ -11,7 +11,7 @@ import {
     getBrigadeAoRSettlements,
     getSettlementGarrison,
     identifyFrontActiveSettlements,
-} from '../src/sim/phase_ii/brigade_aor_legacy.js';
+} from '../src/sim/combat/brigade_aor_legacy.js';
 import type { FactionId, FormationState, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 

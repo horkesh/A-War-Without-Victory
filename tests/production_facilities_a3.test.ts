@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { test } from 'node:test';
 
 import type { EdgeRecord, SettlementRecord } from '../src/map/settlements.js';
-import { updatePhaseIISupplyPressure } from '../src/sim/phase_ii/supply_pressure.js';
+import { updatePhaseIISupplyPressure } from '../src/sim/combat/supply_pressure.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { calculateFactionProductionBonus, ensureProductionFacilities } from '../src/state/production_facilities.js';

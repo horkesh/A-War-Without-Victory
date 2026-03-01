@@ -151,6 +151,25 @@ export interface CorpsOperation {
     phase_started_turn: number;
     target_settlements?: SettlementId[];
     participating_brigades: FormationId[];
+    // --- Sector offensive fields (type === 'sector_attack') ---
+    /** Which sector this launches from. */
+    sector_id?: string;
+    /** Ordered OSID targets (multi-OSID push). */
+    objectives?: string[];
+    /** Next OSID to attack (index into objectives). */
+    current_objective_index?: number;
+    /** Turns of preparation required (from scope). */
+    planning_duration?: number;
+    /** Fraction of participating brigades with adequate supply (0-1). */
+    supply_readiness?: number;
+    /** Consecutive objective captures (0-3, cap). */
+    momentum?: number;
+    /** Result of last objective attack. */
+    last_result?: 'captured' | 'failed' | 'stalemate';
+    /** Total failures across all objectives. */
+    failure_count?: number;
+    /** Consecutive failures on current objective. */
+    consecutive_failures_on_current?: number;
 }
 
 /**
@@ -177,6 +196,8 @@ export interface CorpsDirective {
     min_attack_outcome: 'decisive_victory' | 'victory' | 'costly_victory' | 'stalemate' | 'repulsed';
     /** Aggression modifier from doctrine phase (-0.1 to 0.15). */
     aggression_modifier: number;
+    /** Per-sector offensive targets (sector_id → target OSIDs). Multi-sector corps only. */
+    sector_targets?: Record<string, string[]>;
 }
 
 /** Per-corps command state. */
@@ -265,7 +286,7 @@ export interface FormationState {
     doctrine_state?: DoctrineState;
     /** HQ settlement for map placement and clickable icon. When set, icon is drawn at this settlement; when absent, fallback to municipality centroid. */
     hq_sid?: SettlementId;
-    /** Operational settlement ID (OSID) for HoI ZoC/spawn-by-OSID. Set at creation from hq_sid via canonical_to_operational_map. */
+    /** Operational settlement ID (OSID). Set at creation from hq_sid via canonical_to_operational_map. */
     location_osid?: SettlementId;
     // --- Brigade Operations System fields ---
     /** Brigade posture (Phase II). Default: 'defend'. */
@@ -278,7 +299,7 @@ export interface FormationState {
     equipment_class?: string;
     /** 1-turn disruption flag from AoR reshaping; reduces pressure output. */
     disrupted?: boolean;
-    /** HoI ZoC / Attack Resolution: turns on current OSID without moving; resets on move; caps at MAX_ENTRENCHMENT (12). */
+    /** Turns on current OSID without moving; resets on move; caps at MAX_ENTRENCHMENT (12). */
     entrenchment_turns?: number;
     /** HoI: consecutive successful defenses; resets on move or attacker success; caps at MAX_RESILIENCE_STREAK (4). */
     defense_streak?: number;
@@ -299,6 +320,8 @@ export interface FormationState {
     promoted_turn?: number;
     /** OOB brigade catalog entry matched on promotion (inherits name/corps/equipment). */
     matched_oob_id?: string;
+    /** Per-brigade terrain defense bonus from OOB (e.g. mountain/fortified position). Multiplicative: × (1 + bonus). */
+    defense_terrain_bonus?: number;
 }
 
 export interface FrontPostureAssignment {
@@ -553,6 +576,10 @@ export interface HostileTakeoverTimerState {
     from_faction: FactionId;
     to_faction: FactionId;
     started_turn: number;
+    /** Set when initial displacement fires. Undefined = still in 4-turn countdown. */
+    matured_turn?: number;
+    /** Cumulative persons displaced from this OSID (initial + all sustained rounds). */
+    cumulative_displaced?: number;
 }
 
 /**
@@ -1219,7 +1246,7 @@ export interface GameState {
     /** Municipality-level displacement (capacity degradation) [0, 1]. Monotonic; never decreases. */
     municipality_displacement?: Record<MunicipalityId, number>;
 
-    // --- Brigade Operations System state (Phase II: OSID/ZoC only; AoR removed) ---
+    // --- Brigade Operations System state (Phase II: OSID-based) ---
     /** Canonical front-edge snapshot for GUI rendering and deterministic diagnostics. */
     front_edges?: FrontEdgeState[];
     /** OSID front-edge snapshot (Phase II operational view) for HoI/OSID consumers. */
@@ -1280,6 +1307,77 @@ export interface GameState {
 
     /** Cumulative civilian displacement casualties (killed, fled_abroad) by ethnicity-aligned faction. */
     civilian_casualties?: CivilianCasualtiesByFaction;
+
+    /** Local fronts: bot/player-defined defensive sectors with coverage-based power. Derived each turn. */
+    local_fronts?: Record<string, LocalFront>;
+
+    /** Corps front sectors: per-corps slices of hostile boundary. Derived each turn (Engine Invariants §13). */
+    corps_front_sectors?: Record<string, CorpsFrontSector>;
+}
+
+/**
+ * Local front: a defensive sector composed of contiguous front edges, with
+ * assigned brigades whose power is diluted by coverage length.
+ * Derived each turn (Engine Invariants §13: no serialization of derived state).
+ */
+export interface LocalFront {
+    id: string;                       // e.g. "front_rs_drina_north"
+    faction: FactionId;
+    name: string;
+    created_turn: number;
+    assigned_brigade_ids: string[];   // brigades covering this front
+    edge_ids: string[];               // front edges composing this sector
+    coverage_length: number;          // number of edges (proxy for front width)
+    defensive_power: number;          // computed: f(brigades, terrain, coverage)
+}
+
+/**
+ * Corps front sector: a corps' managed slice of hostile boundary.
+ * Derived each turn (Engine Invariants §13: no serialization of derived state).
+ * Deterministic: sorted iteration via strictCompare.
+ */
+export interface CorpsFrontSector {
+    /** Unique ID: "sector:{corps_id}". */
+    sector_id: string;
+    /** Owning corps formation ID. */
+    corps_id: FormationId;
+    /** Faction that owns this sector. */
+    faction: FactionId;
+    /** Enemy faction(s) on the other side. */
+    opposing_factions: FactionId[];
+    /** OSID hostile-boundary edge IDs composing this sector. */
+    edge_ids: string[];
+    /** Sub-segments: contiguous groups of edges within this sector (for disjoint fronts). */
+    sub_segments: CorpsFrontSubSegment[];
+    /** Total edge count (proxy for front width). */
+    length_edges: number;
+    /** Brigade IDs assigned to this sector. */
+    assigned_brigade_ids: FormationId[];
+    /** Brigade IDs designated reserve for this sector. */
+    reserve_brigade_ids: FormationId[];
+    /** Density: assigned_brigades / length_edges. */
+    density: number;
+    /** Threat ratio: enemy power adjacent to sector / defensive power. */
+    threat_ratio: number;
+    /** Computed defensive power (same formula as LocalFront). */
+    defensive_power: number;
+}
+
+/**
+ * A contiguous group of edges within a corps' front sector.
+ * A corps with disjoint territory (e.g. enclaves) gets multiple sub-segments.
+ */
+export interface CorpsFrontSubSegment {
+    /** Sub-segment ID: "subseg:{corps_id}:{index}". */
+    sub_segment_id: string;
+    /** Edge IDs in this contiguous group. */
+    edge_ids: string[];
+    /** Friendly-side OSIDs touching these edges. */
+    friendly_osids: string[];
+    /** Enemy-side OSIDs touching these edges. */
+    enemy_osids: string[];
+    /** Edge count. */
+    length_edges: number;
 }
 
 /** Civilian casualties from displacement (killed, fled abroad) per faction (ethnicity-aligned). */

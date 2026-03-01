@@ -21,10 +21,6 @@ export async function loadOperationalPoliticalControl(): Promise<Record<string, 
   return payload.by_settlement_id ?? {};
 }
 
-export async function loadLatestRunSave(): Promise<unknown> {
-  return fetchJson<unknown>('/data/derived/latest_run_final_save.json');
-}
-
 /** Fetch latest run save as raw text. Use with loadSave(text) to parse after yielding so UI can show loading state. */
 export async function loadLatestRunSaveAsText(): Promise<string> {
   const response = await fetch('/data/derived/latest_run_final_save.json');

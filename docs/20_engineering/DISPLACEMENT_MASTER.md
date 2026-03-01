@@ -5,6 +5,11 @@
 >
 > **Canon:** v0.6.0 two-phase model (Peace / War). There is no separate "Phase I" or "Phase II".
 > Implementation may still use legacy `phase_ii_*` step IDs during migration.
+>
+> **Architecture (2026-03-01):** Displacement is **OSID-based**, not municipality-based.
+> Each OSID triggers its own displacement independently. Municipalities only serve as
+> grouping for camps before routing. Minority flight is **disabled** — displacement
+> triggers only from hostile OSID takeover (war-start seeding + battle flips).
 
 ## 1. Overview
 
@@ -19,7 +24,22 @@ The system uses **3 distinct trigger types** running at designated points in the
 
 ### Historical Context
 
-By January 1993 (week 40), approximately 1 million people had been displaced in Bosnia. The n284 simulation produces 4.36M displaced across 109 settlements — significantly overshooting the historical figure.
+By January 1993 (week 40), approximately 1 million people had been displaced in Bosnia.
+
+**Historical civilian casualties (full war 1992-1995):**
+- Bosniaks: ~30,000 killed
+- Serbs: ~6,000 killed
+- Croats: ~2,000 killed
+
+**Calibration history:**
+| Run | Total displaced+lost | RBiH killed | HRHB killed | RS killed | Notes |
+|-----|---------------------|-------------|-------------|-----------|-------|
+| n284 | 4,360,000 | — | — | — | Municipality-based, minority flight active |
+| n290 | 312,000 | 4,100 | 1,800 | 212 | Minority flight disabled, 2% kill |
+| n291 | 312,000 | 20,900 | 9,200 | 1,100 | Kill fraction restored to 10% |
+| n296 | 333,592 | 21,481 | 9,218 | 2,604 | OSID-based, war-start seeding, uniform 0.80 cap |
+| n310 | 481,000 | 30,300 | 12,600 | 3,600 | Sustained displacement added |
+| n319 | 668,202 | 45,722 | 15,020 | 5,998 | Per-OSID census data, sustained accounts for initial |
 
 ---
 
@@ -27,11 +47,23 @@ By January 1993 (week 40), approximately 1 million people had been displaced in 
 
 Displacement runs at three points in the **War turn pipeline** (canon: War_Specification_v0_6_0.md §5). The order matters because each step can create state that subsequent steps read.
 
-### 2.1 `war-hostile-takeover-displacement` (step 14)
+### 2.1 `war-hostile-takeover-displacement` (step 14) — **PRIMARY DRIVER**
 
 **File:** `src/state/displacement_takeover.ts` → `processPhaseIIDisplacementTakeover()`
 
-Runs every turn after attack resolution. Processes battle-driven settlement flips through a 3-stage state machine (see Section 6). This is the primary displacement driver during active combat. Also runs minority flight (`processMinorityFlight()`) as a sub-step.
+Runs every turn after attack resolution. The **only active displacement trigger** as of 2026-03-01.
+
+**Three sub-steps per turn:**
+
+1. **Step 0 — War-start seeding:** On the war start turn (`currentTurn === warStartTurn`), creates displacement timers for ALL OSIDs in `political_controllers`. For each OSID, a timer is created for every minority faction (i.e., factions that don't control the OSID and are at war with the controller). This seeds displacement from day one — every minority population begins being displaced immediately at war start.
+
+2. **Step 1 — Battle-driven timers:** When attack resolution flips an OSID, a new timer is created for the losing faction's population in that OSID.
+
+3. **Step 2 — Timer maturation:** After `TAKEOVER_DISPLACEMENT_DELAY_TURNS = 4` turns, the timer matures. Per-OSID population is looked up from the operational settlements census data (`population_total`); falls back to `floor(mun_pop / osid_count)` if unavailable. Hostile share is computed from per-OSID ethnic composition (cap 0.95); falls back to municipality-level `getDynamicHostileShare()` (cap 0.80). Displaced amount = `min(floor(osidPop × hostileShare), remainingPop)`. Kill/flee fractions applied, survivors enter camp.
+
+**Also handles re-displacement pass-through:** When a municipality with `displaced_in > 0` has a timer mature, displaced people already sheltering there are re-routed to new friendly municipalities with **zero casualties and zero flee-abroad**. This prevents double-counting — a person displaced twice counts as 1 displaced person.
+
+**Minority flight** (`processMinorityFlight()`) is **disabled** in `turn_pipeline.ts` as of 2026-03-01. The function exists but is not called; an empty report is returned instead.
 
 ### 2.2 `war-displacement-triggers` (settlement-level)
 
@@ -65,51 +97,47 @@ Runs every turn. Evaluates three continuous pressure conditions per municipality
 
 ## 3. Trigger Types
 
-### 3.1 Hostile Takeover
+### 3.1 Hostile Takeover (OSID-Based) — **ONLY ACTIVE TRIGGER**
 
-The primary combat-driven displacement trigger.
+The sole displacement trigger as of 2026-03-01. All displacement flows through this path.
+
+**Two trigger sources:**
+
+1. **War-start seeding (Step 0):** At `currentTurn === warStartTurn`, iterate all OSIDs in `political_controllers`. For each OSID, create timers for every minority faction at war with the controller. This means ALL minorities begin displacement from day one.
+
+2. **Battle-driven (Step 1):** When attack resolution flips an OSID, a timer is created for the displaced faction.
+
+**Timer key format:** `${osid}|${fromFaction}` — supports multiple displaced ethnicities per OSID (e.g., an RS-controlled OSID gets separate timers for RBiH and HRHB displacement).
 
 **Sequence:**
-1. Battle resolves → settlement control flips
+1. Timer created (war-start or battle flip)
 2. `areFactionsAtWar()` check passes (factions are at war)
 3. Timer starts: `HostileTakeoverTimerState { mun_id, from_faction, to_faction, started_turn }`
 4. After `TAKEOVER_DISPLACEMENT_DELAY_TURNS = 4` turns, timer matures
-5. Displaced amount = `currentPopulation × hostileShare` (modified by faction pair — see below)
-6. Kill fraction applied, flee-abroad fraction applied, survivors enter camp
-7. Camp holds for `CAMP_REROUTE_DELAY_TURNS = 4` turns
-8. Camp routes to destination municipalities via per-ethnicity routing tables
+5. Per-OSID population from census (fallback: `floor(mun_original_population / osid_count_in_mun)`)
+6. Hostile share from per-OSID ethnic data (fallback: `getDynamicHostileShare()`)
+7. Displaced amount = `min(floor(osidPop × hostileShare), remainingPop)`
+7. Kill fraction applied, flee-abroad fraction applied, survivors enter camp
+8. Camp holds for `CAMP_REROUTE_DELAY_TURNS = 4` turns
+9. Camp routes to destination municipalities via per-ethnicity routing tables
 
-**Hostile share modifiers by faction pair:**
+**Hostile share:** Two-tier computation (as of n319):
 
-| Attacker (to) | Defender (from) | Share Modifier |
-|---------------|-----------------|----------------|
-| HRHB | RS (Serbs) | 100% (full expulsion) |
-| RS | RBiH or HRHB | 100% (full expulsion) |
-| RBiH | RS (Serbs) | 50% of dynamic share (partial) |
+1. **Per-OSID census data** (preferred): Uses `population_bosniaks`, `population_serbs`, `population_croats`, `population_others` from operational settlements GeoJSON. Faction alignment: RBiH = bosniak + other, RS = serb, HRHB = croat. Cap: 0.95.
+2. **Municipality-level fallback**: `getDynamicHostileShare()` from 1991 census, adjusted for incoming displaced. Cap: 0.80.
 
-### 3.2 Minority Flight (Settlement-Level)
+Per-OSID data is loaded from `data/derived/operational/operational_settlements.geojson` via the `osidSettlements` parameter.
 
-Non-takeover displacement — minorities fleeing hostile-controlled areas over time.
+**Re-displacement pass-through:** When a timer matures on a municipality that has `displaced_in > 0`, those already-displaced people are re-routed to new friendly municipalities with:
+- **Zero casualties** (no kill fraction)
+- **Zero flee-abroad** (no abroad fraction)
+- **No double-counting** (displaced_total does not increment for pass-through)
 
-**Displacement matrix:**
+### 3.2 Minority Flight — **DISABLED**
 
-| Controller | Minority | Rate | Timing |
-|------------|----------|------|--------|
-| RS | Bosniaks + Croats | 100% | Immediate |
-| HRHB | Serbs | 100% | Immediate |
-| RBiH | Serbs | 50% | Gradual over 26 turns (`RBIH_GRADUAL_TURNS`) |
+As of 2026-03-01, `processMinorityFlight()` is **not called** in `turn_pipeline.ts`. The code remains in `src/state/minority_flight.ts` for potential future use, but the pipeline returns an empty report.
 
-**War-start phasing** (prevents massive week-1 spike):
-- Delay: `MINORITY_FLIGHT_WAR_START_DELAY_WEEKS = 4` weeks before minority flight begins
-- Week 1: 50% of computed amount (`MINORITY_FLIGHT_PHASE1_FRACTION`)
-- Weeks 2-4: ~16.7% each (`MINORITY_FLIGHT_PHASE2_TO_4_FRACTION = 1/6`)
-
-**Settlement-level tracking:** Each settlement gets a `MinorityFlightStateEntry` with:
-- `started_turn`: when flight began
-- `cumulative_fled`: running total
-- `initial_minority_pop`: cap for 50% gradual displacement (RBiH case)
-
-**Minority population calculation:** Uses 1991 census per municipality, then pro-rates to settlement level by settlement population share within the municipality.
+**Rationale:** Displacement should only trigger from hostile OSID takeover (war-start seeding handles the "minorities flee from day one" case that minority flight previously covered).
 
 ### 3.3 Continuous Pressure
 
@@ -280,26 +308,43 @@ brcko, bosanski_samac, odzak, orasje, gradacac, derventa, modrica, bosanski_brod
 ### 6.1 Lifecycle
 
 ```
-Battle → Settlement Flips → Timer Starts
+War Start → Seed ALL OSIDs with timers (Step 0)
+   OR
+Battle → OSID Flips → Timer Starts (Step 1)
                                 |
+                    Timer key: ${osid}|${fromFaction}
                           4 turns wait
                                 |
-                         Timer Matures
-                                |
-                    Kill fraction applied
-                    Flee-abroad applied
-                    Survivors → Camp
-                                |
-                          4 turns wait
-                                |
-                        Camp Routes Out
-                                |
-              Route to destinations (routing tables)
-                                |
-                  Arrives at destination municipality
-                        (displaced_in += routed)
-                                |
-                  5% → militia pool contribution
+                    ┌── Timer Matures (Step 2) ──┐
+                    │                             │
+             Branch A: Initial               Branch B: Sustained
+             (matured_turn set,              (each subsequent turn)
+              cumulative = amount)
+                    │                             │
+     Per-OSID displaced =                  remainingMinority =
+     min(osidPop×share, pop)               initial - cumulative
+                    │                      (starts from initial fire)
+        ┌───────┴────────┐                        │
+        │                │                3% of remaining per turn
+        │                │                        │
+  Native pop      Displaced-in             Kill/flee pipeline
+        │         (pass-through)                  │
+  Kill 10%        Zero casualties          Direct route to
+  Flee-abroad     Re-route                 friendly municipalities
+  → Camp                                   (no camp intermediate)
+        │                                         │
+   4 turns wait                            5% → militia pool
+        │
+   Camp Routes Out
+        │
+   Route to destinations
+        │
+   5% → militia pool
+
+Sustained displacement continues until:
+  - OSID recaptured by displaced faction
+  - Factions no longer at war
+  - Remaining minority < 10 persons
 ```
 
 ### 6.2 Timer State
@@ -310,13 +355,23 @@ interface HostileTakeoverTimerState {
     from_faction: FactionId;    // faction losing population
     to_faction: FactionId;      // faction gaining control
     started_turn: number;       // turn timer began
+    matured_turn?: number;      // set when initial displacement fires (undefined = still in countdown)
+    cumulative_displaced?: number; // total persons displaced from this OSID (initial + sustained)
 }
 ```
 
-- Created when `settlement_flipped === true` in battle report
+**Key format:** `${osid}|${fromFaction}` (e.g., `op:zenica:zenica_1|RS`)
+- Supports multiple timers per OSID (one per displaced ethnicity)
+- Timer keys are stored in `state.hostile_takeover_timers: Record<string, HostileTakeoverTimerState>`
+
+**Created by:**
+1. War-start seeding (Step 0): one timer per minority faction per OSID, at `warStartTurn`
+2. Battle-driven flips (Step 1): one timer per flip, keyed by `${battle.osid}|${fromFaction}`
+
 - Only created when factions are at war (`areFactionsAtWar()`)
-- Overwrites existing timer for same mun only if different faction pair
-- Deleted after maturation (turn 4+)
+- Existing timer for same key is not overwritten (first-come wins)
+- After initial maturation: timer stays alive with `matured_turn` set (enters sustained mode)
+- Deleted when: OSID recaptured, factions not at war, or remaining minority < 10
 
 ### 6.3 Camp State
 
@@ -367,7 +422,7 @@ All displacement-related fields on `GameState` (`src/state/game_state.ts`):
 | Field | Type | Purpose |
 |-------|------|---------|
 | `displacement_state` | `Record<MunicipalityId, DisplacementState>` | Per-municipality population tracking |
-| `hostile_takeover_timers` | `Record<MunicipalityId, HostileTakeoverTimerState>` | Active takeover timers |
+| `hostile_takeover_timers` | `Record<string, HostileTakeoverTimerState>` | Active takeover timers (keyed by `${osid}\|${fromFaction}`) |
 | `displacement_camp_state` | `Record<MunicipalityId, DisplacementCampState>` | Active camps awaiting reroute |
 | `displacement_event_log` | `DisplacementEvent[]` | Cumulative event log |
 | `minority_flight_state` | `Record<SettlementId, MinorityFlightStateEntry>` | Per-settlement gradual flight tracking |
@@ -470,33 +525,109 @@ When an enclave municipality is overrun (from_faction = RBiH, to_faction != RBiH
 
 ### 10.4 Dynamic Hostile Share
 
-`getDynamicHostileShare()` adjusts the hostile population share at a municipality based on incoming displaced population. If a municipality receives displaced people of a different ethnicity, its effective hostile share increases, potentially amplifying displacement cascades.
+`getDynamicHostileShare()` computes the ethnic share of the displaced faction from 1991 census data. A uniform cap is applied:
+
+```typescript
+hostileShare = Math.min(getDynamicHostileShare(...), 0.80);
+```
+
+No per-faction overrides. All faction pairs use the same 0.80 cap. This replaced earlier per-pair modifiers (RS→RBiH was 0.30×, others were min 0.80) which suppressed Serb displacement unrealistically.
+
+### 10.5 OSID-Based Ethnic Displacement
+
+When a faction captures an OSID and holds it for 4 weeks (timer maturation), it expels the **enemy-aligned ethnic population** of that OSID — not a flat percentage of total OSID population.
+
+The computation:
+
+```typescript
+// 1. Per-OSID population = municipality total / OSID count (equal split)
+const osidCount = osidCountByMun.get(munId) ?? 1;
+const osidPop = Math.floor(dispState.original_population / osidCount);
+
+// 2. Ethnic share of the expelled faction (from 1991 census)
+//    e.g., if RS captures OSID → fromFaction = 'RBiH' → hostileShare = Bosniak %
+let hostileShare = getDynamicHostileShare(munId, fromFaction, dispState, population1991ByMun);
+hostileShare = Math.min(hostileShare, 0.80);  // cap at 80%
+
+// 3. Displacement amount = ethnic population of that OSID
+const displacementAmount = Math.min(Math.floor(osidPop * hostileShare), remainingPop);
+```
+
+**Example:** RS captures 1 of 11 OSIDs in Prijedor (pop 112,543, 44% Bosniak). Per-OSID pop = 10,231. Bosniak share = 0.44. Displacement = floor(10,231 × 0.44) = 4,501 Bosniaks expelled from that OSID. Of those: 10% killed (450), remainder routed to camps then to friendly municipalities. RS must hold the OSID for 4 continuous weeks before displacement fires.
+
+### 10.6 Re-Displacement Pass-Through
+
+When a municipality that has received displaced people (`displaced_in > 0`) is itself taken over:
+1. **Native population** is displaced normally (with kill/flee fractions)
+2. **Already-displaced people** (`displaced_in_by_faction`) are re-routed to new friendly municipalities
+3. Re-routing applies **zero casualties** and **zero flee-abroad** — these people were already counted once
+4. This prevents double-counting: a person displaced twice counts as 1 displaced person total
+
+**Accounting invariant:** `Sum(displaced_out) = Sum(displaced_in) + Sum(camp_population)` — verified as exactly 0 in every run.
+
+### 10.7 Sustained Displacement
+
+After the initial 4-turn timer fires (Branch A), the OSID enters **sustained displacement mode** (Branch B). This models ongoing ethnic cleansing — historical patterns like Prijedor camps, Bijeljina forced expulsions, and Foča systematic terror were multi-month processes, not one-shot events.
+
+**Constants:**
+- `SUSTAINED_DISPLACEMENT_RATE = 0.03` — 3% of remaining minority per OSID per turn
+- `SUSTAINED_MIN_REMAINING = 10` — stop when remaining minority falls below threshold
+
+**Mechanic:**
+1. Each turn after `matured_turn`, compute `remainingMinority = initialMinority - cumulative_displaced`
+2. `sustainedAmount = floor(remainingMinority × 0.03)`, capped at municipality remaining population
+3. Standard casualty pipeline: 10% killed (or 35% for enclave overrun), flee-abroad fraction applied
+4. Survivors route **directly** to friendly municipalities (no camp intermediate — sustained = civilian flight, not organized military evacuation)
+5. 5% of routed population contributes to destination militia pools
+
+**Lifecycle:**
+- Timer stays alive with `matured_turn` set after initial fire
+- Each subsequent turn: sustained displacement fires automatically
+- Timer deleted when: OSID recaptured by `from_faction`, factions no longer at war, or `remainingMinority < 10`
+- Recapture check uses `from_faction`: timer deleted when displaced faction regains control. Third-faction takeover continues sustained displacement.
+
+**Per-OSID granularity:** Partial municipal control (e.g., Bratunac RS holds 4/8 OSIDs) naturally yields proportional sustained rate. Consistent with initial displacement model.
 
 ---
 
 ## 11. Diagnostic Checklist
 
-### 11.1 Known Issue: Excessive Displacement
+### 11.1 Current State (n296, 40w)
 
-**n284 result:** 4.36M displaced, 109 settlements affected
-**Historical target (Jan 1993):** ~1M displaced
+| Metric | Value | Full-War Target |
+|--------|-------|-----------------|
+| Total displaced+lost | 333,592 | ~1M by Jan 1993 |
+| RBiH killed | 21,481 | ~30K |
+| HRHB killed | 9,218 | ~2K |
+| RS killed | 2,604 | ~6K |
+| RBiH displaced settled | 189,411 | — |
+| HRHB displaced settled | 22,335 | — |
+| RS displaced settled | 15,003 | — |
+| Accounting (out-in-camp) | 0 | 0 |
 
-### 11.2 Possible Root Causes
+### 11.2 Open Issues
 
-1. **Minority flight fires too broadly:** RS→Bosniaks/Croats at 100% immediate across all RS-controlled settlements may be triggering on too many settlements simultaneously
-2. **Continuous pressure too aggressive:** 10%/turn encirclement + 5%/turn unsupply may compound across many municipalities every turn
-3. **Double-counting:** Same municipality may be hit by hostile takeover, minority flight, AND continuous pressure in the same or adjacent turns
-4. **Camp cascade:** Camps route to destinations that are themselves under displacement pressure, creating chain displacement
-5. **Receiving capacity too generous:** 150% cap allows massive accumulation at hubs like Tuzla, Zenica — inflating displaced_in counts
-6. **Settlement-level deltas accumulating:** Front-active settlement deltas (2-5%/turn) may be adding displacement on top of other triggers
+1. **HRHB killed too high (9.2K vs 2K full-war target):** Driven by large Croat displacement from areas like Livno (17K out, 8K lost from pop 40K). The 10% kill fraction applies uniformly. May need a lower kill fraction for Croat displacement specifically, or the combat system may be over-capturing HRHB-held OSIDs.
 
-### 11.3 Key Diagnostic Metrics
+2. **RS killed slightly low (2.6K vs 6K full-war target at 40w):** War-start seeding improved this from 2.1K to 2.6K. May reach target at 52w, or the 0.80 hostile share cap may still be too aggressive.
+
+3. **Top municipalities by displaced_out** (n296): Prijedor 19.6K, Doboj 17.4K, Livno 17K, Bosanska Krupa 14.7K, Bugojno 9.8K — these align with historically displaced areas.
+
+### 11.3 Resolved Issues
+
+1. ~~Minority flight contributing 69% of displacement~~ → Disabled; only hostile takeover triggers displacement
+2. ~~Municipality-based displacement inflating numbers~~ → Now OSID-based; capturing 1/7 OSIDs displaces 1/7 of population
+3. ~~Double-counting from re-displacement~~ → Pass-through with zero casualties
+4. ~~Serb displacement suppressed by 0.30× multiplier~~ → Uniform 0.80 cap for all factions
+5. ~~Negative population municipalities~~ → Per-OSID remaining pop cap prevents overdraw (22 negative muns → 0)
+
+### 11.4 Key Diagnostic Metrics
 
 - `displaced_out` vs `displaced_in` per municipality (net flow)
 - Kill/abroad totals by faction from `civilian_casualties`
 - Camp occupancy over time (how many camps, how long they persist)
-- Displacement event log: events per turn, volume per turn
-- Which trigger type produces the most displacement (takeover vs minority flight vs continuous pressure)
+- Accounting invariant: `Sum(out) - Sum(in) - Sum(camp) = 0`
+- Per-OSID timer count (war-start seeding creates O(OSIDs × factions) timers)
 
 ---
 
@@ -505,13 +636,22 @@ When an enclave municipality is overrun (from_faction = RBiH, to_faction != RBiH
 | File | Lines | Purpose |
 |------|-------|---------|
 | `src/state/displacement.ts` | ~1003 | Continuous pressure displacement; routing (BFS-based) |
-| `src/state/displacement_takeover.ts` | ~495 | Hostile takeover timer→camp→route state machine; minority flight sub-step |
-| `src/state/minority_flight.ts` | ~303 | Settlement-level minority flight (100% immediate or 50% gradual) |
+| `src/state/displacement_takeover.ts` | ~550 | Hostile takeover: OSID-based timers, war-start seeding, timer→camp→route state machine, re-displacement pass-through |
+| `src/state/minority_flight.ts` | ~360 | Settlement-level minority flight (**DISABLED** in pipeline; code retained) |
 | `src/state/displacement_routing_data.ts` | ~273 | Per-municipality per-ethnicity routing tables (19+15+12 sub-regions) |
 | `src/state/displacement_state_utils.ts` | ~94 | Shared helpers: getOrInitDisplacementState, factionHasBrigadeInMunicipality, recordCivilianDisplacementCasualties |
 | `src/state/displacement_loss_constants.ts` | ~30 | Kill/flee-abroad fractions (single source of truth) |
 | `src/sim/phase_f/displacement_triggers.ts` | ~139 | Settlement-level displacement deltas (front pressure) |
 | `src/state/game_state.ts` | (types) | DisplacementState, HostileTakeoverTimerState, DisplacementCampState, DisplacementEvent, MinorityFlightStateEntry |
+
+### Pipeline Integration
+
+**`TakeoverBattleRecord`** (passed from `turn_pipeline.ts`):
+```typescript
+{ location: string; attacker: FactionId; defender: FactionId;
+  settlement_flipped: boolean; osid?: string; }
+```
+The `osid` field carries the OSID identity from attack resolution into the displacement system. If absent, falls back to `sid:${location}`.
 
 ### Canon References
 

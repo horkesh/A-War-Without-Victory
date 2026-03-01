@@ -17,6 +17,7 @@ export function FormationDetail() {
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setOrderModeForFormation = useGameStore((s) => s.setOrderModeForFormation);
   const orderModeForFormation = useGameStore((s) => s.orderModeForFormation);
+  const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
 
   if (!selectedFormationId) return null;
 
@@ -97,6 +98,59 @@ export function FormationDetail() {
                 </span>
               </div>
             )}
+
+            {(() => {
+              if (!loadedGameState?.corpsFrontSectors) return null;
+              const sectors = loadedGameState.corpsFrontSectors;
+
+              // Corps/corps_asset: show all sectors belonging to this corps
+              if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
+                const corpsSectors = sectors.filter((s) => s.corps_id === formation.id);
+                if (corpsSectors.length === 0) return null;
+                return (
+                  <div className="pt-2 border-t border-panel-border text-xs min-w-0">
+                    <div className="text-text-secondary mb-1">Sectors ({corpsSectors.length}):</div>
+                    <div className="space-y-0.5">
+                      {corpsSectors.map((s) => (
+                        <button
+                          key={s.sector_id}
+                          type="button"
+                          onClick={() => setSelectedCorpsFrontSectorId(s.sector_id)}
+                          className="block w-full text-left text-interactive hover:underline truncate"
+                          title={s.sector_id}
+                        >
+                          {s.display_name}
+                          <span className="text-text-secondary ml-1">
+                            ({s.assigned_brigade_ids.length}+{s.reserve_brigade_ids.length})
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+
+              // Brigade: show the single sector it belongs to
+              if (!formation.corps_id) return null;
+              const sector = sectors.find(
+                (s) => s.corps_id === formation.corps_id &&
+                  (s.assigned_brigade_ids.includes(formation.id) || s.reserve_brigade_ids.includes(formation.id))
+              );
+              if (!sector) return null;
+              return (
+                <div className="text-xs min-w-0">
+                  <span className="text-text-secondary">Sector: </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCorpsFrontSectorId(sector.sector_id)}
+                    className="text-interactive hover:underline"
+                    title={sector.sector_id}
+                  >
+                    {sector.display_name}
+                  </button>
+                </div>
+              );
+            })()}
 
             {attackOrder && (
               <div className="pt-2 border-t border-panel-border min-w-0">

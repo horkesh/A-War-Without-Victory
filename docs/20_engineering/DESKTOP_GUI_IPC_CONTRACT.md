@@ -136,7 +136,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `query-corps-sectors` (invoke)
   - Payload: none
   - Returns: `{ ok: boolean, error?: string, sectors?: Array<{ corps_id, faction, brigade_ids, settlement_ids }> }`
-  - Behavior: derives deterministic corps-sector settlement coverage from brigade AoR ownership and corps assignment. Read-only.
+  - Behavior: derives deterministic corps-sector partition via multi-source BFS from corps HQs through friendly-controlled OSIDs. Each sector includes sub-segments (connected components of front edges), assigned/reserve brigade lists, density, and threat metrics. Read-only.
 
 - `query-battle-events` (invoke)
   - Payload: none

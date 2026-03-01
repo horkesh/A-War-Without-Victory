@@ -8794,3 +8794,17 @@ Determinism checks **MUST** be run:
 **NOT renamed (save compat):** Step names in TurnReport (`phase-i-militia-emergence`, etc.), scenario JSON references, documentation content references.
 
 **Verification:** tsc clean, vitest 189/190 pass, map build clean, scenario hash identical (`ff5cd313ed833865`).
+
+### Propagate R9 renames to documentation (2026-03-01)
+
+**What:** Updated 6 documentation files with stale `phase_i/`/`phase_ii/` path references after R9 directory renames:
+- `.claude/skills/formation-expert/SKILL.md` — 7 path refs (`phase_i/` → `early_war/`), canon version refs (v0_5_0 → v0_6_0, Phase_I → War, Phase_0 → Peace)
+- `.cursor/skills/formation-expert/SKILL.md` — 7 path refs (`phase_i/` → `early_war/`)
+- `docs/20_engineering/REPO_MAP.md` — 4 path refs (`phase_i/` → `early_war/`, `run_phase_ii_browser` → `run_combat_browser`)
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md` — 6 path refs (`phase_ii/` → `combat/`, `phase_i/` → `early_war/`, `bot_brigade_ai.ts` → `bot_brigade_ai_osid.ts`)
+- `docs/30_planning/BOT_AI_HOLISTIC_TUNING_REFERENCE.md` — 7 path refs (`phase_ii/` → `combat/`, `phase_i/` → `early_war/`)
+- `docs/20_engineering/PIPELINE_ENTRYPOINTS.md` — 3 path refs (`phase_i/` → `early_war/`, `run_phase_ii_browser` → `run_combat_browser`)
+
+**Also:** Created `/propagate-to-canon` skill (`.claude/skills/propagate-to-canon/SKILL.md`) for general post-change documentation propagation — applicable to any change (code, constants, mechanics, paths, schemas), not just structural refactoring.
+
+**Total:** ~34 structural references updated across 6 files. Zero uncertain references. No flagged items for manual review.

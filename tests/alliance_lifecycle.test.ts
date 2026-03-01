@@ -17,7 +17,7 @@ import {
     HOSTILE_THRESHOLD,
     isRbihHrhbAtWar,
     updateAllianceValue
-} from '../src/sim/phase_i/alliance_update.js';
+} from '../src/sim/early_war/alliance_update.js';
 import {
     CEASEFIRE_HRHB_EXHAUSTION,
     CEASEFIRE_IVP_THRESHOLD,
@@ -27,9 +27,9 @@ import {
     CEASEFIRE_STALEMATE_MIN,
     checkAndApplyCeasefire,
     evaluateCeasefirePreconditions
-} from '../src/sim/phase_i/bilateral_ceasefire.js';
-import { MINORITY_EROSION_RATE_PER_TURN, runMinorityErosion } from '../src/sim/phase_i/minority_erosion.js';
-import { ALLIED_COORDINATION_FACTOR, computeAlliedDefense } from '../src/sim/phase_i/mixed_municipality.js';
+} from '../src/sim/early_war/bilateral_ceasefire.js';
+import { MINORITY_EROSION_RATE_PER_TURN, runMinorityErosion } from '../src/sim/early_war/minority_erosion.js';
+import { ALLIED_COORDINATION_FACTOR, computeAlliedDefense } from '../src/sim/early_war/mixed_municipality.js';
 import {
     checkAndApplyWashington,
     evaluateWashingtonPreconditions,
@@ -37,7 +37,7 @@ import {
     POST_WASH_EQUIPMENT_ACCESS,
     WASH_ALLIANCE_LOCK_VALUE,
     WASH_CEASEFIRE_DURATION
-} from '../src/sim/phase_i/washington_agreement.js';
+} from '../src/sim/early_war/washington_agreement.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 

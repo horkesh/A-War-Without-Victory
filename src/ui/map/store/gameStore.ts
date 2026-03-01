@@ -28,7 +28,6 @@ export interface GameStore {
   tooltipTarget: { type: 'osid' | 'formation' | 'front'; id: string } | null;
   /** Pixel position for tooltip (from map/sidebar hover). */
   tooltipPosition: { x: number; y: number } | null;
-  setTooltipTarget: (target: { type: 'osid' | 'formation' | 'front'; id: string } | null) => void;
   /** Set tooltip target and optional pixel position (e.g. from map/sidebar hover event). */
   setTooltipTargetWithPosition: (target: { type: 'osid' | 'formation' | 'front'; id: string } | null, position?: { x: number; y: number }) => void;
   clearTooltipTarget: () => void;
@@ -65,6 +64,10 @@ export interface GameStore {
   pendingAttackConfirmation: { attackerFormationId: string; targetOsid: string } | null;
   setPendingAttackConfirmation: (v: { attackerFormationId: string; targetOsid: string } | null) => void;
 
+  /** Selected corps front sector (click on front line). Mutual exclusion with selectedOsid/selectedFormationId. */
+  selectedCorpsFrontSectorId: string | null;
+  setSelectedCorpsFrontSectorId: (id: string | null) => void;
+
   loadedGameState: LoadedGameState | null;
   /** Last load error message (cleared when a new load starts or succeeds). */
   loadError: string | null;
@@ -91,7 +94,6 @@ export const useGameStore = create<GameStore>((set) => ({
 
   tooltipTarget: null,
   tooltipPosition: null,
-  setTooltipTarget: (target) => set({ tooltipTarget: target }),
   setTooltipTargetWithPosition: (target, position) =>
     set({ tooltipTarget: target, tooltipPosition: target != null && position ? position : null }),
   clearTooltipTarget: () => set({ tooltipTarget: null, tooltipPosition: null }),
@@ -120,6 +122,9 @@ export const useGameStore = create<GameStore>((set) => ({
 
   pendingAttackConfirmation: null,
   setPendingAttackConfirmation: (v) => set({ pendingAttackConfirmation: v }),
+
+  selectedCorpsFrontSectorId: null,
+  setSelectedCorpsFrontSectorId: (id) => set({ selectedCorpsFrontSectorId: id, selectedOsid: null, selectedFormationId: null }),
 
   loadedGameState: null,
 

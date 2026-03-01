@@ -1,5 +1,5 @@
 /**
- * Tests for src/sim/phase_ii/equipment_effects.ts
+ * Tests for src/sim/combat/equipment_effects.ts
  *
  * Covers: ensureBrigadeComposition, computeEquipmentMultiplier,
  *         degradeEquipment, captureEquipment
@@ -11,7 +11,7 @@ import {
     computeEquipmentMultiplier,
     degradeEquipment,
     ensureBrigadeComposition
-} from '../src/sim/phase_ii/equipment_effects.js';
+} from '../src/sim/combat/equipment_effects.js';
 import type { BrigadeComposition, FactionId, FormationState } from '../src/state/game_state.js';
 
 // --- Helpers ---

@@ -1,6 +1,6 @@
 /**
- * Tests for src/sim/phase_ii/brigade_pressure.ts and
- *            src/sim/phase_ii/faction_resilience.ts
+ * Tests for src/sim/combat/brigade_pressure.ts and
+ *            src/sim/combat/faction_resilience.ts
  *
  * Covers: computeResilienceModifier, computeBrigadeRawPressure,
  *         computeBrigadeDefense, computeBrigadePressureByEdge
@@ -11,9 +11,9 @@ import {
     computeBrigadeDefense,
     computeBrigadePressureByEdge,
     computeBrigadeRawPressure
-} from '../src/sim/phase_ii/brigade_pressure.js';
-import { ensureBrigadeComposition } from '../src/sim/phase_ii/equipment_effects.js';
-import { computeResilienceModifier } from '../src/sim/phase_ii/faction_resilience.js';
+} from '../src/sim/combat/brigade_pressure.js';
+import { ensureBrigadeComposition } from '../src/sim/combat/equipment_effects.js';
+import { computeResilienceModifier } from '../src/sim/combat/faction_resilience.js';
 import type { FactionId, FormationState, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 

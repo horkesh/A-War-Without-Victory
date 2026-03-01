@@ -5,8 +5,8 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { EdgeRecord } from '../src/map/settlements.js';
-import { checkCorpsContiguity, repairCorpsContiguity } from '../src/sim/phase_ii/aor_contiguity.js';
-import { enforceCorpsLevelContiguity } from '../src/sim/phase_ii/corps_directed_aor.js';
+import { checkCorpsContiguity, repairCorpsContiguity } from '../src/sim/combat/aor_contiguity.js';
+import { enforceCorpsLevelContiguity } from '../src/sim/combat/corps_directed_aor.js';
 import type { FactionId, FormationState, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION, getLegacyAoR } from '../src/state/game_state.js';
 

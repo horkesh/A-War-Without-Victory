@@ -838,6 +838,8 @@ Displacement rules run from turn 0 — no "4-week timer at scenario start" worka
 | 7 | RS-HRHB Scoring | Low (if equipment gates already work) | Low | Mechanic 6 |
 | 8 | Per-Municipality Displacement Routing | High (correctness + tracking) | High | Per-mun route data + census |
 
+**Implementation status (2026-03-01):** Mechanics 1 (morale), 2 (ZoC virtual defense), 3 (enclave deprivation), and 8 (displacement routing) are fully implemented. Mechanic 8 was extended with per-OSID census displacement depth (n319): actual per-OSID population and ethnic composition from `operational_settlements.geojson` replaced municipality-level averaging. Total displaced: 668k (RBiH 458k, HRHB 150k, RS 60k). Displacement system is complete. See `docs/40_reports/20260301_DISPLACEMENT_DEPTH_CALIBRATION.md`.
+
 ---
 
 ## Success Criteria (n256 and beyond)

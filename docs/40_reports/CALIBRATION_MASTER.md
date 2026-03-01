@@ -2,25 +2,25 @@
 
 **Purpose:** Persistent lessons-learned record for Phase II 40w calibration (April 1992 → January 1993).
 **Updated:** 2026-03-01
-**Canonical target run:** n284 (`apr1992_definitive_40w__205b3676c8fe3ce4__w40_n284`)
+**Canonical target run:** n314 (`apr1992_definitive_40w__205b3676c8fe3ce4__w40_n314`)
 
 ---
 
 ## Target State (January 1993 / Week 40)
 
 ### Territory (OSIDs of 753 total)
-| Faction | Target | n284 | Delta | Status |
-|---|---|---|---|---|
-| RS | 416 | 392 | -24 | Under — Drina shortfall |
-| RBiH | 248 | 271 | +23 | Over — Drina/Posavina holdouts |
-| HRHB | 89 | 90 | +1 | ✅ Near-exact |
+| Faction | Target | n284 | n295 | n299 | n303 | n314 | Delta (n314) | Status |
+|---|---|---|---|---|---|---|---|---|
+| RS | 416 | 392 | 393 | 389 | 382 | 389 | -27 | Under — Drina shortfall |
+| RBiH | 248 | 271 | 273 | 273 | 277 | 272 | +24 | Over — Drina/Posavina holdouts |
+| HRHB | 89 | 90 | 87 | 91 | 94 | 92 | +3 | Near-target |
 
 ### Army Strengths (end of 40w)
-| Faction | Personnel | Brigades | Target | Status |
-|---|---|---|---|---|
-| VRS (RS) | ~120k | 85 | ~100k | Over by 20k |
-| ARBiH (RBiH) | ~149k | 72 | ~130k | Over by 19k |
-| HVO (HRHB) | ~52k | 32 | ~45k | Over by 7k |
+| Faction | Personnel (n284) | Personnel (n295) | Brigades | Target | Status |
+|---|---|---|---|---|---|
+| VRS (RS) | ~120k | ~122k | 80 | ~100k | Over by 22k |
+| ARBiH (RBiH) | ~149k | ~205k | 97 | ~130k | Over by 75k |
+| HVO (HRHB) | ~52k | ~65k | 32 | ~45k | Over by 20k |
 
 ### Casualties (40 weeks, n254)
 - **Attacker total:** ~24,000 — dominated by RS (318 attack orders vs RBiH 87 vs HRHB low)
@@ -37,26 +37,26 @@
 
 **n254 distribution concern:** RS is listed as attacker in 318/405 (~78%) orders. At that rate, RS loses ~18.7k attacker casualties — 2× their estimated year-1 historical total. The issue is NOT total casualties but that **RS is fighting too much, including against wrong targets (HRHB), while ARBiH attacks 87 times (still too many historically).**
 
-### Displacement (n254)
-- **Displaced (routed):** ~43k people
-- **Fled abroad:** ~5.7k
-- **Killed in displacement:** ~5.7k
-- **Total displacement events:** 65 municipalities over 37 weeks
+### Displacement (n319 — per-OSID census depth)
+- **Total displaced:** 668,202 (RBiH 457,716, HRHB 150,360, RS 60,126)
+- **Historical target:** ~1M by Jan 1993
+- **Key improvements (n310→n319):** Per-OSID census data replaced municipality-level even-split averaging. Hostile share cap raised from 0.80 to 0.95 for per-OSID data. Sustained pool accounting fixed (cumulative_displaced initialized to initial fire amount).
+- **Ljubija (Prijedor):** 5,331→13,399 initial fire (+151%). 80% Bosniak OSID now correctly shows near-complete displacement.
 - **Minority flight:** 0 (disabled — `enable_rbih_hrhb_dynamics: false`)
-- **Historical note:** Real displacement by Jan 1993 was ~1M+. Engine counts only Phase II takeover-triggered + pressure displacement. Phase I mass displacement is baked into `init_control` snapshot, not tracked in run summaries.
+- **Note:** Engine counts only War-phase takeover-triggered + pressure displacement. Pre-war mass displacement is baked into `init_control` snapshot. Displacement system complete as of n319. See `docs/40_reports/20260301_DISPLACEMENT_DEPTH_CALIBRATION.md`.
 
-### Match Rate vs Painted Targets (n284)
-Overall: **85.1%** (641/753 OSIDs correct)
+### Match Rate vs Painted Targets (n314)
+Overall: **87.4%** (658/753 OSIDs correct)
 
-| Region | Match | Key Issues |
-|---|---|---|
-| KRAJINA | 97.0% (128/132) | 4 mismatches: Bosanska Krupa/Cazin edges (RS), Skender Vakuf (HRHB) |
-| POSAVINA_NE | 84.4% (92/109) | Zvornik(8 wrong), Brcko(4 RBiH→RS), Gradacac(1), Teocak(1) |
-| DRINA | 71.9% (92/128) | Main gap. Bratunac/Cajnice/Visegrad/Rudo still RBiH. RS -22. |
-| CENTRAL_CORRIDOR | 87.2% (82/94) | Maglaj(3), Doboj(3), misc. Much improved from 78%. |
-| CENTRAL_BOSNIA | 81.3% (135/166) | Bugojno(8 RS overrun), Konjic/Kladanj(RBiH over), HRHB edges |
-| SARAJEVO | 77.4% (24/31) | Trnovo(3 RS), Ilidza(2 RBiH), Pale/Vogosca edges |
-| HERZEGOVINA | 94.6% (88/93) | Kupres(3 RS→HRHB), Nevesinje(2), Trebinje(1) |
+| Region | n284 Match | n295 Match | n299 Match | n303 Match | n314 Match | Key Issues |
+|---|---|---|---|---|---|---|
+| KRAJINA | 97.0% (128/132) | 97.0% (128/132) | 97.0% (128/132) | 97.0% (128/132) | **97.7% (129/132)** | +1 from supply gating. |
+| POSAVINA_NE | 84.4% (92/109) | 85.3% (93/109) | 86.2% (94/109) | 86.2% (94/109) | **85.3% (93/109)** | -1 — minor edge shift. |
+| DRINA | 71.9% (92/128) | 71.9% (92/128) | 71.9% (92/128) | 72.7% (93/128) | **75.0% (96/128)** | **+3** from supply gating. Still weakest. |
+| CENTRAL_CORRIDOR | 87.2% (82/94) | 90.4% (85/94) | 90.4% (85/94) | 89.4% (84/94) | **91.5% (86/94)** | **+2** — supply prevents overextension. |
+| CENTRAL_BOSNIA | 81.3% (135/166) | 81.3% (135/166) | 83.7% (139/166) | 88.0% (146/166) | **88.0% (146/166)** | Stable from sector targeting. |
+| SARAJEVO | 77.4% (24/31) | 77.4% (24/31) | 80.6% (25/31) | 77.4% (24/31) | **77.4% (24/31)** | Unchanged. |
+| HERZEGOVINA | 94.6% (88/93) | 90.3% (84/93) | 93.5% (87/93) | 91.4% (85/93) | **90.3% (84/93)** | -1 — edge shifts. |
 
 ---
 
@@ -79,6 +79,78 @@ Overall: **85.1%** (641/753 OSIDs correct)
 | n281 | 205b3676c8fe3ce4 | 431 | 240 | 82 | REVERTED — enclave personnel only (Gorazde 1100→700, Srebrenica 900→600). 81.8% match. Drina 65.6%. Paradoxically worse — cascade effects from weaker enclaves. |
 | n283 | d88dbeb669b72a6f | 404 | 259 | 90 | REVERTED — blunt corps target cap (max(5, 0.75×subordinates)). 82.7% match (623/753). Drina WORSE (69.5%) — cap starved small corps. Central Corridor better but overall worse. |
 | **n284** | **e12111ddb29e02ab** | **392** | **271** | **90** | **P3: Opportunistic target municipality filter.** 85.1% match (641/753). Central Corridor 87.2% (+5.3pp). Posavina 84.4% (+7pp). Krajina 97.0%. Drina 71.9% (still weakest). 6/6 benchmarks. 11/14 anchors. VRS 120k, ARBiH 149k, HVO 52k. |
+| n291 | 205b3676c8fe3ce4 | 390 | 276 | 87 | Pre-local-fronts baseline. 84.7% match (638/753). 6/6 benchmarks. Posavina 83.5%, Central Bosnia 80.7%. |
+| **n295** | **205b3676c8fe3ce4** | **393** | **273** | **87** | **Local Fronts + defense_terrain_bonus.** 85.1% match (641/753). +3 OSID fixes (Brčko krepsic, Kalesija gojcin, Lopare jablanica). Posavina 85.3% (+1.8pp). Central Corridor 90.4% (+3.2pp from n284). 6/6 benchmarks. VRS 122k, ARBiH 205k, HVO 65k. |
+| n297 | 205b3676c8fe3ce4 | 393 | 273 | 87 | Baseline re-run. local_fronts was empty (bug: compute-local-fronts ran with canonical SID segments; OSID segments only in refreshFrontEdgeSnapshot). Identical OSIDs to n295. |
+| n298 | 205b3676c8fe3ce4 | 393 | 273 | 87 | Fix 1: buildLocalFronts added to refreshFrontEdgeSnapshot. 9 local fronts now populated but corps assigned_front_ids still 0 (same root cause — sync-front-segments used canonical edges). |
+| **n299** | **205b3676c8fe3ce4** | **389** | **273** | **91** | **Fix 2: sync-front-segments prefers OSID edges.** 86.3% match (650/753). **+9 from n295.** Corps now have assigned fronts. 13 local fronts with density modifiers active. Central Bosnia 83.7% (+2.4pp). Posavina 86.2% (+0.9pp). Sarajevo 80.6% (+3.2pp). Herzegovina 93.5% (+3.2pp). Drina still 71.9%. RS-27 (from -23), HRHB+2 (from -2). |
+| n300 | 205b3676c8fe3ce4 | 293 | 339 | 121 | REVERTED — Corps front sectors with per-sector density. 77.6% match. Severe regression: VRS thin sectors (0.08-0.17 density) got 0.6× penalty, collapsing RS lines everywhere. Per-sector density too punishing for overextended factions. |
+| n302 | 205b3676c8fe3ce4 | 321 | 321 | 111 | REVERTED — Same but with broader brigade assignment to sectors. 78.6% match. Same root cause: per-sector density penalizes VRS which is inherently thin per-corps. |
+| **n303** | **205b3676c8fe3ce4** | **382** | **277** | **94** | **Corps front sectors (targeting only, density unchanged).** 86.7% match (653/753). **+3 from n299.** Sectors partition front edges by corps via multi-source BFS from HQs. Corps offensive targets filtered to sector-adjacent OSIDs, preventing sprawl. Central Bosnia 88.0% (+4.3pp from sector targeting). Drina 72.7% (+0.8pp). Density modifier unchanged (faction-level aggregation). 14 sectors, 18 corps. |
+| n311 | 205b3676c8fe3ce4 | 389 | 272 | 92 | **Phase A: Multi-sector promotion.** 86.3% match (650/753). Sub-segments >= 5 edges promoted to independent sectors. 4 multi-sector corps (ARBiH 2nd/3rd, VRS 2nd Krajina/SRK). Per-sector brigade assignment + sector_targets in directives. |
+| n312 | 205b3676c8fe3ce4 | 389 | 272 | 92 | **Phase B: Supply gating.** 87.4% match (658/753). **+5 from n303.** Critical supply → forced defend. Strained → victory-only, no pioneer. Corps supply health gating. Drina 75.0% (+2.3pp). Central Corridor 91.5% (+2.1pp). |
+| **n314** | **205b3676c8fe3ce4** | **389** | **272** | **92** | **Phase A+B+C: Multi-sector + supply gating + sector offensives.** 87.4% match (658/753). **+5 from n303.** Sector offensive infrastructure (named operations, momentum, lifecycle) wired but inactive in 40w window (year-1 defensive doctrine). See L37. |
+| n310 | 205b3676c8fe3ce4 | — | — | — | Pre-displacement-depth baseline. Displacement: 481k total (RBiH 269k, HRHB 120k, RS 37k). Municipality-level even-split averaging. |
+| **n319** | **42ad78a39746d166** | **—** | **—** | **—** | **Per-OSID census displacement depth.** 86.7% match (653/753). Displacement: **668k total** (RBiH 458k, HRHB 150k, RS 60k). Ljubija: 5,331→13,399 (+151%). Sustained pool double-count fix. Displacement system complete. See 20260301_DISPLACEMENT_DEPTH_CALIBRATION.md. |
+
+---
+
+## Front System Analysis (n314)
+
+### Corps Front Sectors (end of 40 weeks)
+
+The corps sector system partitions front edges by corps via multi-source BFS from HQ locations. Sub-segments with >= 5 edges promote to independent sectors; small sub-segments merge into nearest. Multi-sector corps get per-sector targeting. Sectors are used for **targeting only** (not density modifiers).
+
+| Corps | Faction | Stance | Sectors | Total Edges | Total Brigades |
+|---|---|---|---|---|---|
+| arbih_1st_corps | RBiH | defensive | 1 | 14 | 10 |
+| arbih_2nd_corps | RBiH | offensive | **3** | 68 | 21 |
+| arbih_3rd_corps | RBiH | offensive | **2** | 33 | 10 |
+| arbih_4th_corps | RBiH | offensive | 1 | 19 | 4 |
+| arbih_5th_corps | RBiH | offensive | 1 | 9 | 2 |
+| vrs_1st_krajina | RS | defensive | 1 | 95 | 11 |
+| vrs_2nd_krajina | RS | defensive | **2** | 23 | 6 |
+| vrs_drina | RS | defensive | 1 | 52 | 7 |
+| vrs_east_bosnian | RS | balanced | 1 | 20 | 1 |
+| vrs_sarajevo_romanija | RS | defensive | **2** | 88 | 3 |
+| vrs_herzegovina | RS | defensive | 1 | 17 | 2 |
+
+**Multi-sector corps (bold):** ARBiH 2nd (3 sectors — covers Tuzla/Majevica/Posavina), ARBiH 3rd (2 sectors — covers Central Bosnia), VRS 2nd Krajina (2 sectors — covers Doboj/Corridor), VRS SRK (2 sectors — covers Sarajevo siege ring).
+
+### Key Design Decision: Density stays at faction level
+
+n300-n302 tested per-sector density modifiers — catastrophic regression (77-78%). VRS is inherently thin per-corps (0.03-0.26 density) because RS has ~80 brigades across 420+ front edges spread over 6 corps. Per-sector density applied 0.6× THIN penalty to EVERY VRS sector, collapsing RS lines. Faction-level mega-front aggregation (80/167 = 0.48 density) hid this truth but matched historical outcomes better.
+
+**Lesson L35:** Do not use per-corps density for the THIN/DENSE modifier. VRS overextension is real but managed by distributing forces. The density modifier should reflect faction-level front density, not per-corps. Per-sector density should only apply to attack sectors (Phase 3 — future work).
+
+### Local Fronts (density modifier — faction-level aggregation)
+
+| Front | Faction | Brigades | Edges | Density | Flag |
+|---|---|---|---|---|---|
+| RBiH-RS Bratunac mega | RBiH | 150 | 171 | 0.877 | — |
+| RBiH-RS Zvornik | RBiH | 25 | 65 | 0.385 | THIN |
+| HRHB-RS Bugojno-1 | HRHB | 10 | 3 | 3.333 | DENSE |
+| HRHB-RS Bugojno-2 | HRHB | 8 | 24 | 0.333 | THIN |
+| HRHB-RS Jajce | HRHB | 8 | 12 | 0.667 | — |
+| HRHB-RS Orašje | HRHB | 2 | 5 | 0.400 | THIN |
+| HRHB-RS Neum | HRHB | 1 | 4 | 0.250 | THIN |
+| HRHB-RS Vareš | HRHB | 3 | 1 | 3.000 | DENSE |
+
+### Corps-Front Mapping
+
+All 15 corps now have front assignments. Most VRS corps map to the RBiH-RS mega-front. Key mappings:
+- **ARBiH 1st Corps**: 1 front (mega) — Sarajevo defense through mega-front
+- **ARBiH 2nd Corps**: 3 fronts — Banovići-Vozuća + mega + Zapolje
+- **ARBiH 3rd Corps**: 2 fronts — Banovići-Vozuća + Donji Vakuf
+- **ARBiH 5th Corps**: 1 front — Bihać (isolated, correct)
+- **VRS 1st Krajina**: 6 fronts — spans HRHB and RBiH boundaries (correct — largest corps)
+- **VRS Drina**: 1 front (mega) — correct assignment but mega-front too large
+
+### Structural Issue: Mega-Front
+
+The front segmentation algorithm (`deriveAssignableFrontSegments`) groups edges into contiguous connected components. The entire RBiH-RS border is one connected graph → one segment → 167 edges with 80 brigades. This makes front density modifiers less meaningful (density 0.479 = modest THIN penalty across entire front, rather than per-sector variation).
+
+**Needed:** Corps-level front splitting. Each corps should "own" a section of the mega-front based on brigade AoR/position, creating 5-8 smaller fronts with more meaningful density variation.
 
 ---
 
@@ -236,6 +308,24 @@ Triggers only when defender has **zero valid retreat destinations** (complete en
 - `RBiH cohesion floor`: rises from 35 (week 0) → 62 (week 52) — enforcing professionalization
 - `RS cohesion ceiling`: falls from 85 (week 0) → 68 (week 52) — enforcing decay
 - `surrenderCascade`: cohesion < 10 AND powerRatio > 2.5 → forced decisive victory, defender eliminated in place
+
+### Local Front Density Modifier (n295+)
+```
+density = assigned_brigades / coverage_length (edge count)
+density < 0.5  →  penalty: 0.6× to 1.0× (linear interpolation)
+0.5 ≤ density ≤ 1.0  →  normal: 1.0×
+density > 1.0  →  bonus: 1.0× to 1.25× (linear, capped at 2× threshold)
+```
+Applied to both `computeDefenderPower` and `computeZocDefenderPower`.
+Derived each turn in `compute-local-fronts` pipeline step (`local_front_defense.ts`).
+
+### Per-Brigade Defense Terrain Bonus (n295+)
+```
+defenderPower ×= (1 + formation.defense_terrain_bonus)
+```
+OOB field. Applied in direct defense AND ZoC projection. Synced between resolver + predictor.
+Current assignments: 255th Slavna (+0.30), 246th Vitezka (+0.25), 328th/351st Mountain (+0.20).
+Stacks multiplicatively with honor (slavna 1.10×, vitezka 1.20×).
 
 ### What Does NOT Exist
 - No "desperation" parameter (encirclement does not boost morale)
@@ -592,6 +682,26 @@ While preventing corps from sprawling into non-priority municipalities. n284: 85
 Drina has 12 priority municipalities with many target OSIDs — capping these destroys the Drina Sweep.
 83.7% → 82.7% (−7 matches). REVERTED. Use municipality filter instead.
 
+### L35 — Local front density modifier improves defensive calibration
+**Session:** 2026-03-01 (n291→n295)
+Front density = assigned_brigades / coverage_length (edge count). Below 0.5 density → defense penalty
+(down to 0.6×); above 1.0 density → mutual support bonus (up to 1.25×). Applied multiplicatively to
+both `computeDefenderPower` and `computeZocDefenderPower` in resolver + predictor.
+**Result:** +3 OSIDs (84.7% → 85.1%). Rewards concentrated defense without penalizing it.
+Correctly identifies thin RS fronts as vulnerable and concentrated NE positions as strong.
+**File:** `src/sim/phase_ii/local_front_defense.ts`. Pipeline step `compute-local-fronts`.
+**Rule:** Front density is a DERIVED state (recomputed each turn). Never serialize as ground truth.
+
+### L36 — Per-brigade defense_terrain_bonus captures unit-specific terrain mastery
+**Session:** 2026-03-01 (n295)
+OOB field `defense_terrain_bonus` → FormationState → `× (1 + bonus)` in defender power.
+Distinct from per-OSID terrain (geographic) — this is unit quality: years of fighting in same terrain.
+Assigned: 255th Slavna (Teočak, +30%), 246th Vitezka (Šapna, +25%), 328th/351st Mountain (Zavidovići, +20%).
+Stacks multiplicatively with honor: 246th Vitezka (1.20× honor × 1.25× terrain = 1.50× total defense).
+**Key insight:** honors are offensive + defensive; defense_terrain_bonus is defense-only. This lets
+specialized defenders hold without making them better attackers (which they weren't historically).
+**Rule:** defense_terrain_bonus must be synced between attack_resolution_osid.ts and combat_predictor.ts.
+
 ### L23 — Orasje pocket: 3 HVO brigades stay, Derventa/Modrica brigades fall back
 **Session:** 2026-03-01 (user directive)
 3 HVO brigades currently under ARBiH 2nd Corps coordination are supposed to REMAIN in
@@ -613,18 +723,18 @@ Orasje gap. Breakthrough retreat is the second layer for Derventa/Modrica fallba
 
 ---
 
-## Known Gaps (as of n284 — 85.1% match rate, 641/753)
+## Known Gaps (as of n295 — 85.1% match rate, 641/753)
 
-| # | Region | Gap (n284) | Root Cause | Fix | Priority |
+| # | Region | Gap (n295) | Root Cause | Fix | Priority |
 |---|---|---|---|---|---|
-| 1 | DRINA (71.9%) | RS=77 vs painted=99 (−22). Enclaves hold correctly (Srebrenica/Gorazde/Zepa RBiH PASS), but Bratunac(3), Cajnice(4), Visegrad(5), Rudo(2) still RBiH-held. RS Drina Corps too small to sweep 12 muns in 20w. | Structural: initial control gives RBiH holdouts across Drina valley; RS Drina Corps needs more firepower. **L29: DO NOT add enclaves to Drina Sweep. L30: DO NOT reduce enclave personnel.** Opportunistic filter (n284) slightly worsened Drina by removing non-priority-mun targets. | More RS Drina Corps brigades (OOB) OR Drina offensive window extension OR initial control adjustment | **HIGH** |
-| 2 | CORRIDOR (87.2%) | RS=46 vs painted=38 (+8). Down from +14 in n279. Maglaj(3), Doboj(3), Visoko(1), Zavidovici(1), Kakanj(1), Zenica(1) still RS-overrun. | P3 filter removed most opportunistic sprawl. Remaining 8 overruns: Doboj is in RS 1KK priority (correct); Maglaj/Kakanj/Zavidovici/Visoko may be initial control or early-war captures not reclaimed by 3rd Corps. | 3rd Corps strengthening or initial control tuning. Much improved. | **MEDIUM** |
-| 3 | C. BOSNIA (81.3%) | RS=37 vs painted=42 (−5). Bugojno still 8 RS overruns. HRHB takes some Jajce/Travnik. Konjic/Kladanj go RBiH (should be RS). | Mixed: Bugojno overrun persists (2KK Krajina Sweep). Konjic/Kladanj/Jajce are initial-control edge cases. HRHB takes Jajce/Prozor/Novi Travnik (alliance dynamics). | RS 2KK avoid Bugojno muns; HRHB-RBiH alliance tuning | **MEDIUM** |
-| 4 | POSAVINA (84.4%) | RS=54 vs painted=65 (−11). Zvornik(6 wrong direction), Brcko(4 RBiH instead RS). Improved from 77%. | Zvornik: Sapna/Teocak holdouts structural. Brcko: 1KK targets it but RBiH holds south bank. | Zvornik initial control; Brcko south structural | **MEDIUM** |
-| 5 | VRS strength | 120k vs 100k target (+20k) | All 85 RS brigades mandatory, max_personnel too high. | OOB: reduce RS brigade count or max_personnel | **MEDIUM** |
-| 6 | SARAJEVO (77.4%) | RS=22 vs painted=21 (+1). Trnovo(3 RS overruns), Ilidza(2 should be RS), Pale(1). | Trnovo overruns, Ilidza edges. Worse than n279 (80.6%) — P3 filter redirected RS effort. | Sarajevo Corps priority tuning | **LOW** |
-| 7 | HERZEGOVINA (94.6%) | Kupres(3 RS instead HRHB), Nevesinje(2), Trebinje(1). | Kupres: RS captures HVO territory. Others: edge cases. | Stable. Minor. | **LOW** |
-| 8 | Anchors | Zvornik (RS→RBiH), Bihac (RBiH→RS), Teocak (RBiH→RS). 11/14 pass. | Zvornik holdout, Bihac RS sweep, Teocak structural | Structural | **LOW** |
+| 1 | DRINA (71.9%) | RS=77 vs painted=99 (−22). Enclaves hold correctly (Srebrenica/Gorazde/Zepa RBiH PASS), but Bratunac(4), Cajnice(4), Visegrad(5), Rudo(2), Foca(2), Vlasenica(4) still RBiH-held. RS Drina Corps too small to sweep 12 muns in 20w. | Structural: initial control gives RBiH holdouts across Drina valley; RS Drina Corps needs more firepower. **L29: DO NOT add enclaves to Drina Sweep. L30: DO NOT reduce enclave personnel.** | More RS Drina Corps brigades (OOB) OR Drina offensive window extension OR initial control adjustment | **HIGH** |
+| 2 | CORRIDOR (90.4%) | RS=44 vs painted=38 (+6). Improved from 87.2% (n284). Maglaj(3), Doboj(3), Visoko(1), Zavidovici(1). Local fronts + defense_terrain_bonus (328th/351st Mountain) helped. | P3 filter + local front density. Remaining overruns: Doboj is correct RS priority; Maglaj structural. | 3rd Corps strengthening or initial control tuning. Much improved. | **MEDIUM** |
+| 3 | C. BOSNIA (81.3%) | RS=37 vs painted=42 (−5). Bugojno still 8+ RS overruns. HRHB takes some Jajce/Travnik. Konjic/Kladanj go RBiH (should be RS). | Mixed: Bugojno overrun persists (2KK Krajina Sweep). Konjic/Kladanj/Jajce are initial-control edge cases. HRHB takes Jajce/Prozor/Novi Travnik (alliance dynamics). | RS 2KK avoid Bugojno muns; HRHB-RBiH alliance tuning | **MEDIUM** |
+| 4 | POSAVINA (85.3%) | RS=53 vs painted=65 (−12). Zvornik(8 wrong direction), Brcko(4 RBiH instead RS). Improved from 84.4% (n284) — Lopare jablanica fixed by front density. | Zvornik: Sapna/Teocak holdouts structural. Brcko: 1KK targets it but RBiH holds south bank. defense_terrain_bonus on 246th Vitezka (Šapna) + 255th Slavna (Teočak) helps but doesn't fully solve. | Zvornik initial control; Brcko south structural | **MEDIUM** |
+| 5 | VRS strength | 122k vs 100k target (+22k) | All RS brigades mandatory, max_personnel too high. n295 VRS slightly higher than n284 (fewer casualties from stronger defense). | OOB: reduce RS brigade count or max_personnel | **MEDIUM** |
+| 6 | SARAJEVO (77.4%) | RS=22 vs painted=21 (+1). Trnovo(3 RS overruns), Ilidza(2 should be RS), Pale(1), Vogosca(1). | Trnovo overruns, Ilidza edges. Unchanged from n284. | Sarajevo Corps priority tuning | **LOW** |
+| 7 | HERZEGOVINA (90.3%) | Livno(7 RS→HRHB), Duvno(3), Nevesinje(1), Trebinje(1). Regressed from 94.6% (n284). RS taking Livno/Duvno from HRHB. | RS Herzegovina Corps + 2KK targeting Livno area — may be n291→n295 code delta effect on RS early-war expansion. | Check RS Herzegovina target priorities for Livno/Duvno | **MEDIUM** |
+| 8 | Anchors | Zvornik (RS→RBiH), Bihac (RBiH→RS), Teocak (RBiH→RS). | Zvornik holdout, Bihac RS sweep, Teocak structural (255th Slavna spawns w26, pocket may fall before then) | Structural | **LOW** |
 
 ---
 
@@ -718,7 +828,7 @@ After 40w converges to >85%, run 52w to verify front freezes appropriately at w4
 - N1 (Enclave material deprivation): **PARTIAL** (Phase M3). Enclave OOB infantry-only + morale 70, but morale 70 = resist floor → they NEVER retreat and counterattack. Needs morale 70→55.
 - N3 (3rd Corps corridor weight): **DONE** (Phase M4). Weight 80→120. Still insufficient — RS overruns +16 in corridor.
 - N4 (VRS troop count): **PARTIAL**. Pool scale lowered 0.35→0.28. Still 115k vs 100k target. Needs 0.28→0.25.
-- N6 (ZoC frontline defense): **PARTIAL** (Phase M2). Virtual ZoC defense at 50% readiness. Still 180 free captures. Bigger structural issue: see P6 below.
+- N6 (ZoC frontline defense): **DONE** (Phase M2 + n295). Virtual ZoC defense at 50% readiness + Local Fronts density modifier (P6). defense_terrain_bonus for key brigades.
 - N7 (Per-municipality displacement routing): **DONE** (Phase M4). 47 sub-regions × 3 ethnicities.
 - N8 (Orasje OOB + breakthrough): **NOT STARTED**. See L23.
 - N9 (Rear-area cleanup): **DONE** (Phase M4). REAR_CLEANUP_END_WEEK = 12.
@@ -786,20 +896,19 @@ AND morale ≥ MORALE_RESIST_FLOOR AND defender stays), apply post-hoc casualty 
 defender ×1.35, attacker ×1.35 (both sides bleed more in determined defense per BB evidence).
 This is the primary lever for closing the KIA gap (6,082 → ~16,000 target).
 
-#### P6 — Front segment assignment (replaces ZoC as defensive model) [Structural]
-Current linked ZoC provides only 35% defense power to adjacent OSIDs. A brigade defending
-OSID A provides 35% power to OSID B — better than nothing but doesn't model a continuous
-front line. Attackers can snipe individual unoccupied OSIDs between brigades.
+#### P6 — Front segment assignment (replaces ZoC as defensive model) [Structural] — **DONE (n295)**
+~~Current linked ZoC provides only 35% defense power to adjacent OSIDs.~~
 
-**Corps-level front assignment would:**
-- Assign X brigades to cover a contiguous Y-OSID front segment
-- Calculate defensive strength = f(brigades, terrain, front width)
-- Force attackers to concentrate against the entire segment, not snipe individual OSIDs
-- Naturally create "too few brigades to cover the front" pressure
-- Make brigade-to-front-width ratio the key defensive metric
-
-**This is the biggest structural lift** but addresses the root of multiple issues: free
-captures, thin coverage, unrealistic defensive posture. Consider after P1–P5 are validated.
+**Implemented as Local Fronts mechanic (n295, 2026-03-01):**
+- `local_front_defense.ts`: builds `LocalFront` from `assignable_front_segments` + `brigade_front_assignment`
+- Coverage density = assigned_brigades / edge_count → defense multiplier (0.6× to 1.25×)
+- Applied to both direct defense and ZoC projection in resolver + predictor
+- Pipeline step `compute-local-fronts` after `ensure-brigade-front-assignment`
+- Derived state (recomputed each turn per Engine Invariants §13)
+- **Result:** +3 OSIDs (84.7% → 85.1%). Thin RS fronts weaker, concentrated positions stronger.
+- **Complement:** `defense_terrain_bonus` OOB field for historically fortified brigades (255th Slavna +30%, 246th Vitezka +25%, 328th/351st Mountain +20%). Multiplicative, defense-only.
+- **What it DOES NOT do:** Force attackers to engage the whole segment. Individual OSIDs are still targetable — density modifier models the softer reality that thin fronts are weaker everywhere.
+- **Future:** Could add segment-level concentration requirement (attacker must overcome segment density, not just OSID defender). Deferred until density-only proves insufficient.
 
 #### P7 — Orasje OOB + breakthrough retreat [Gap 4, L23]
 Two-part fix per L23:
@@ -807,4 +916,5 @@ Two-part fix per L23:
 2. Breakthrough retreat for Derventa/Modrica HVO (mechanic)
 
 ### Verification Target
-After P1–P5: expect 85–88% match rate. After P6–P7: expect 88–90%+.
+~~After P1–P5: expect 85–88% match rate. After P6–P7: expect 88–90%+.~~
+**Updated (n295):** P6 done. Current 85.1%. After P1–P5 + P7: expect 87–90%+. Drina gap (71.9%) remains the ceiling constraint — structural OOB/initial-control fix needed for >88%.

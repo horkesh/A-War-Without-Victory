@@ -26,6 +26,11 @@ import { strictCompare } from './validateGameState.js';
 const TAKEOVER_DISPLACEMENT_DELAY_TURNS = 4;
 const CAMP_REROUTE_DELAY_TURNS = 4;
 
+/** Sustained displacement: fraction of remaining minority displaced per OSID per turn after initial fire. */
+const SUSTAINED_DISPLACEMENT_RATE = 0.03;
+/** Stop sustained displacement when remaining minority in OSID falls below this threshold. */
+const SUSTAINED_MIN_REMAINING = 10;
+
 /** Posavina Croats: most flee to Croatia (canon: displacement redesign 2026-02-17). */
 const POSAVINA_CROAT_FLEE_ABROAD = 0.70;
 
@@ -75,6 +80,8 @@ export interface PhaseIITakeoverDisplacementReport {
     killed_total: number;
     fled_abroad_total: number;
     routed_total: number;
+    sustained_fires: number;
+    sustained_displaced_total: number;
     source_municipalities: MunicipalityId[];
     routing: DisplacementRoutingRecord[];
 }
@@ -110,6 +117,31 @@ function getFactionAlignedPopulation(entry: { total: number; bosniak: number; se
     if (faction === 'RS') return Math.max(0, entry.serb);
     if (faction === 'HRHB') return Math.max(0, entry.croat);
     return 0;
+}
+
+/** Get actual population for an OSID from settlement census data. */
+function getOsidCensusPopulation(rec: SettlementRecord | undefined): number {
+    const pop = rec?.properties?.population_total;
+    return typeof pop === 'number' && Number.isFinite(pop) && (pop as number) > 0 ? (pop as number) : 0;
+}
+
+/** Get per-OSID hostile share from census data. Returns null if data unavailable. */
+function getOsidCensusHostileShare(rec: SettlementRecord | undefined, fromFaction: FactionId): number | null {
+    const total = getOsidCensusPopulation(rec);
+    if (total <= 0) return null;
+    const props = rec!.properties!;
+    const b = typeof props.population_bosniaks === 'number' ? (props.population_bosniaks as number) : 0;
+    const s = typeof props.population_serbs === 'number' ? (props.population_serbs as number) : 0;
+    const c = typeof props.population_croats === 'number' ? (props.population_croats as number) : 0;
+    const o = typeof props.population_others === 'number' ? (props.population_others as number) : 0;
+    // Match getFactionAlignedPopulation logic: RBiH = bosniak + other
+    let factionPop: number;
+    if (fromFaction === 'RBiH') factionPop = b + o;
+    else if (fromFaction === 'RS') factionPop = s;
+    else if (fromFaction === 'HRHB') factionPop = c;
+    else return null;
+    const share = factionPop / total;
+    return Number.isFinite(share) ? Math.max(0, Math.min(1, share)) : null;
 }
 
 function getDynamicHostileShare(
@@ -219,7 +251,9 @@ export function processPhaseIIDisplacementTakeover(
     state: GameState,
     settlements: Map<string, SettlementRecord>,
     battleReport?: PhaseIIBattleResolutionLike,
-    population1991ByMun?: MunicipalityPopulation1991Map
+    population1991ByMun?: MunicipalityPopulation1991Map,
+    /** Optional OSID-keyed settlements with per-OSID census data (population_total, population_bosniaks, etc.). */
+    osidSettlements?: Map<string, SettlementRecord>
 ): PhaseIITakeoverDisplacementReport {
     if (state.meta.phase !== 'war') {
         return {
@@ -231,6 +265,8 @@ export function processPhaseIIDisplacementTakeover(
             killed_total: 0,
             fled_abroad_total: 0,
             routed_total: 0,
+            sustained_fires: 0,
+            sustained_displaced_total: 0,
             source_municipalities: [],
             routing: []
         };
@@ -249,6 +285,8 @@ export function processPhaseIIDisplacementTakeover(
         killed_total: 0,
         fled_abroad_total: 0,
         routed_total: 0,
+        sustained_fires: 0,
+        sustained_displaced_total: 0,
         source_municipalities: [],
         routing: []
     };
@@ -263,7 +301,39 @@ export function processPhaseIIDisplacementTakeover(
         return strictCompare(a.location, b.location);
     });
 
-    // 1) Start takeover timers from flipped OSIDs.
+    // 0) Seed displacement timers for ALL OSIDs at war start.
+    //    Every OSID's minority population begins displacement on day one.
+    const warStartTurn = typeof state.meta.war_start_turn === 'number' ? state.meta.war_start_turn : 0;
+    if (currentTurn === warStartTurn) {
+        const allFactions: FactionId[] = ['HRHB', 'RBiH', 'RS'];
+        const pc = state.political_controllers;
+        if (pc) {
+            const osids = Object.keys(pc).sort(strictCompare);
+            for (const osid of osids) {
+                if (!osid.startsWith('op:')) continue;
+                const controller = pc[osid] as FactionId;
+                if (!controller) continue;
+                const parts = osid.split(':');
+                const munId = parts.length >= 2 ? parts[1] as MunicipalityId : undefined;
+                if (!munId) continue;
+                for (const fromFaction of allFactions) {
+                    if (fromFaction === controller) continue;
+                    if (!areFactionsAtWar(state, fromFaction, controller)) continue;
+                    const timerKey = `${osid}|${fromFaction}`;
+                    if (timerMap[timerKey]) continue;
+                    timerMap[timerKey] = {
+                        mun_id: munId,
+                        from_faction: fromFaction,
+                        to_faction: controller,
+                        started_turn: currentTurn
+                    };
+                    report.timers_started += 1;
+                }
+            }
+        }
+    }
+
+    // 1) Start takeover timers from flipped OSIDs (battle-driven).
     for (const battle of battles) {
         if (!battle.settlement_flipped) continue;
         const fromFaction = battle.defender_faction;
@@ -274,8 +344,8 @@ export function processPhaseIIDisplacementTakeover(
         if (!rec) continue;
         const munId = getMunicipalityIdFromRecord(rec);
         if (!munId) continue;
-        // Key by OSID (per-OSID displacement), fall back to SID for legacy battles
-        const timerKey = battle.osid ?? `sid:${battle.location}`;
+        const osidKey = battle.osid ?? `sid:${battle.location}`;
+        const timerKey = `${osidKey}|${fromFaction}`;
         const existing = timerMap[timerKey];
         if (
             existing &&
@@ -312,64 +382,240 @@ export function processPhaseIIDisplacementTakeover(
         }
     }
 
+    const routedByPoolKey = new Map<string, { munId: MunicipalityId; faction: FactionId; amount: number }>();
+
     const timerKeys = Object.keys(timerMap).sort(strictCompare);
     for (const timerKey of timerKeys) {
         const timer = timerMap[timerKey];
         if (!timer) continue;
-        if (currentTurn - timer.started_turn < TAKEOVER_DISPLACEMENT_DELAY_TURNS) continue;
 
-        const munId = timer.mun_id;
-        const dispState = getOrInitDisplacementState(
-            state,
-            munId,
-            state.displacement_state?.[munId]?.original_population ?? 10000
-        );
+        // Extract OSID from timerKey "osid|faction"
+        const pipeIdx = timerKey.indexOf('|');
+        const osid = pipeIdx >= 0 ? timerKey.substring(0, pipeIdx) : timerKey;
 
-        // Per-OSID population = original mun pop / OSID count.
-        // Cap at remaining mun population to prevent overdraw.
-        const osidCount = osidCountByMun.get(munId) ?? 1;
-        const osidPop = Math.floor(dispState.original_population / osidCount);
-        const remainingPop = Math.max(
-            0,
-            dispState.original_population - dispState.displaced_out - dispState.lost_population
-        );
-        let hostileShare = getDynamicHostileShare(
-            munId,
-            timer.from_faction,
-            dispState,
-            population1991ByMun
-        );
-        if (timer.to_faction === 'HRHB' && timer.from_faction === 'RS') hostileShare = Math.min(hostileShare, 0.80);
-        else if (timer.to_faction === 'RBiH' && timer.from_faction === 'RS') hostileShare = 0.30 * hostileShare;
-        else if (timer.to_faction === 'RS' && (timer.from_faction === 'RBiH' || timer.from_faction === 'HRHB'))
-            hostileShare = Math.min(hostileShare, 0.80);
+        // Recapture check: if displaced faction regained control, delete timer
+        const currentController = state.political_controllers?.[osid] as FactionId | undefined;
+        if (currentController === timer.from_faction) {
+            delete timerMap[timerKey];
+            continue;
+        }
+        // Alliance check: if factions no longer at war, delete timer
+        if (currentController && !areFactionsAtWar(state, timer.from_faction, currentController)) {
+            delete timerMap[timerKey];
+            continue;
+        }
 
-        const displacementAmount = Math.min(
-            Math.max(0, Math.floor(osidPop * hostileShare)),
-            remainingPop
-        );
+        if (timer.matured_turn === undefined) {
+            // ── Branch A: Initial maturation ──
+            if (currentTurn - timer.started_turn < TAKEOVER_DISPLACEMENT_DELAY_TURNS) continue;
 
-        if (displacementAmount > 0) {
+            const munId = timer.mun_id;
+            const dispState = getOrInitDisplacementState(
+                state,
+                munId,
+                state.displacement_state?.[munId]?.original_population ?? 10000
+            );
+
+            const osidRec = osidSettlements?.get(osid);
+            const osidCensusPop = getOsidCensusPopulation(osidRec);
+            const osidCount = osidCountByMun.get(munId) ?? 1;
+            const osidPop = osidCensusPop > 0
+                ? osidCensusPop
+                : Math.floor(dispState.original_population / osidCount);
+            const remainingPop = Math.max(
+                0,
+                dispState.original_population - dispState.displaced_out - dispState.lost_population
+            );
+            const osidCensusShare = getOsidCensusHostileShare(osidRec, timer.from_faction);
+            let hostileShare: number;
+            if (osidCensusShare !== null) {
+                hostileShare = Math.min(osidCensusShare, 0.95);
+            } else {
+                hostileShare = getDynamicHostileShare(
+                    munId, timer.from_faction, dispState, population1991ByMun
+                );
+                hostileShare = Math.min(hostileShare, 0.80);
+            }
+
+            const displacementAmount = Math.min(
+                Math.max(0, Math.floor(osidPop * hostileShare)),
+                remainingPop
+            );
+
+            if (displacementAmount > 0) {
+                const killFraction = isEnclaveOverrun(munId, timer.from_faction, timer.to_faction)
+                    ? ENCLAVE_OVERRUN_KILL_FRACTION
+                    : DISPLACEMENT_KILLED_FRACTION;
+                const killed = Math.floor(displacementAmount * killFraction);
+                const survivors = Math.max(0, displacementAmount - killed);
+                const fledAbroad = Math.floor(survivors * getFleeAbroadFraction(munId, timer.from_faction));
+                const routedToCamp = Math.max(0, survivors - fledAbroad);
+                const lost = killed + fledAbroad;
+
+                const beforePop = remainingPop;
+                dispState.displaced_out += routedToCamp;
+                dispState.lost_population += lost;
+                dispState.last_updated_turn = currentTurn;
+
+                const sourcePoolKey = militiaPoolKey(munId, timer.from_faction);
+                const sourcePool = state.militia_pools?.[sourcePoolKey];
+                if (sourcePool && beforePop > 0) {
+                    const ratio = displacementAmount / beforePop;
+                    const reduction = Math.floor(sourcePool.available * ratio);
+                    if (reduction > 0) {
+                        sourcePool.available = Math.max(0, sourcePool.available - reduction);
+                        sourcePool.updated_turn = currentTurn;
+                    }
+                }
+
+                if (routedToCamp > 0) {
+                    const existingCamp = campMap[munId];
+                    const created = !existingCamp;
+                    const camp: DisplacementCampState = existingCamp ?? {
+                        mun_id: munId,
+                        population: 0,
+                        started_turn: currentTurn,
+                        by_faction: {}
+                    };
+                    camp.population += routedToCamp;
+                    camp.by_faction[timer.from_faction] = (camp.by_faction[timer.from_faction] ?? 0) + routedToCamp;
+                    if (created) report.camps_created += 1;
+                    campMap[munId] = camp;
+                }
+
+                report.timers_matured += 1;
+                report.displaced_total += displacementAmount;
+                report.killed_total += killed;
+                report.fled_abroad_total += fledAbroad;
+                report.routed_total += routedToCamp;
+                report.source_municipalities.push(munId);
+
+                recordCivilianDisplacementCasualties(state, timer.from_faction, killed, fledAbroad);
+
+                state.displacement_event_log.push({
+                    turn: currentTurn,
+                    origin_mun: munId,
+                    origin_osid: osid,
+                    dest_mun: munId,
+                    ethnicity: timer.from_faction,
+                    displaced: displacementAmount,
+                    killed,
+                    fled_abroad: fledAbroad,
+                    settled: 0,
+                });
+            }
+
+            // Re-route displaced_in population without casualties (pass-through).
+            // These people were already displaced once; second displacement incurs no
+            // additional killed/fled_abroad and does not increment displaced_total.
+            if (dispState.displaced_in > 0) {
+                const byFaction = dispState.displaced_in_by_faction ?? {};
+                const fKeys = (Object.keys(byFaction) as FactionId[]).sort(strictCompare);
+                for (const fid of fKeys) {
+                    let rem = Math.max(0, Math.floor(byFaction[fid] ?? 0));
+                    if (rem <= 0) continue;
+                    const routeOrder = getRoutingOrder(munId, fid as FactionId);
+                    for (const targetMunId of routeOrder) {
+                        if (rem <= 0) break;
+                        if (!friendlyMunsByFaction[fid as FactionId]?.has(targetMunId)) continue;
+                        if (targetMunId === munId) continue;
+                        const targetState = getOrInitDisplacementState(
+                            state, targetMunId,
+                            state.displacement_state?.[targetMunId]?.original_population ?? 10000
+                        );
+                        const targetCurrent = Math.max(0,
+                            targetState.original_population + targetState.displaced_in
+                            - targetState.displaced_out - targetState.lost_population
+                        );
+                        const targetCapacity = Math.floor(
+                            targetState.original_population * getReceivingCapacityFraction(targetMunId)
+                        );
+                        const avail = Math.max(0, targetCapacity - targetCurrent);
+                        if (avail <= 0) continue;
+                        const routed = Math.min(rem, avail);
+                        if (routed <= 0) continue;
+                        targetState.displaced_in += routed;
+                        if (!targetState.displaced_in_by_faction) targetState.displaced_in_by_faction = {};
+                        targetState.displaced_in_by_faction[fid as FactionId] =
+                            (targetState.displaced_in_by_faction[fid as FactionId] ?? 0) + routed;
+                        targetState.last_updated_turn = currentTurn;
+                        rem -= routed;
+                    }
+                    byFaction[fid] = rem;
+                }
+                const remainder = (Object.values(byFaction) as number[])
+                    .filter(v => typeof v === 'number' && Number.isFinite(v) && v > 0)
+                    .reduce((sum, v) => sum + v, 0);
+                dispState.displaced_in = remainder;
+            }
+
+            // Mark timer as matured instead of deleting
+            timer.matured_turn = currentTurn;
+            timer.cumulative_displaced = displacementAmount;  // Sustained pool accounts for initial fire
+        } else {
+            // ── Branch B: Sustained displacement ──
+            const munId = timer.mun_id;
+            const dispState = getOrInitDisplacementState(
+                state,
+                munId,
+                state.displacement_state?.[munId]?.original_population ?? 10000
+            );
+
+            const osidRecB = osidSettlements?.get(osid);
+            const osidCensusPopB = getOsidCensusPopulation(osidRecB);
+            const osidCount = osidCountByMun.get(munId) ?? 1;
+            const osidPop = osidCensusPopB > 0
+                ? osidCensusPopB
+                : Math.floor(dispState.original_population / osidCount);
+            const remainingPop = Math.max(
+                0,
+                dispState.original_population - dispState.displaced_out - dispState.lost_population
+            );
+            const osidCensusShareB = getOsidCensusHostileShare(osidRecB, timer.from_faction);
+            let hostileShare: number;
+            if (osidCensusShareB !== null) {
+                hostileShare = Math.min(osidCensusShareB, 0.95);
+            } else {
+                hostileShare = getDynamicHostileShare(
+                    munId, timer.from_faction, dispState, population1991ByMun
+                );
+                hostileShare = Math.min(hostileShare, 0.80);
+            }
+
+            const initialMinority = Math.floor(osidPop * hostileShare);
+            const cumulativeDisplaced = timer.cumulative_displaced ?? 0;
+            const remainingMinority = Math.max(0, initialMinority - cumulativeDisplaced);
+
+            if (remainingMinority < SUSTAINED_MIN_REMAINING) {
+                delete timerMap[timerKey];
+                continue;
+            }
+
+            const sustainedAmount = Math.min(
+                Math.floor(remainingMinority * SUSTAINED_DISPLACEMENT_RATE),
+                remainingPop
+            );
+            if (sustainedAmount <= 0) continue;
+
             const killFraction = isEnclaveOverrun(munId, timer.from_faction, timer.to_faction)
                 ? ENCLAVE_OVERRUN_KILL_FRACTION
                 : DISPLACEMENT_KILLED_FRACTION;
-            const killed = Math.floor(displacementAmount * killFraction);
-            const survivors = Math.max(0, displacementAmount - killed);
+            const killed = Math.floor(sustainedAmount * killFraction);
+            const survivors = Math.max(0, sustainedAmount - killed);
             const fledAbroad = Math.floor(survivors * getFleeAbroadFraction(munId, timer.from_faction));
-            const routedToCamp = Math.max(0, survivors - fledAbroad);
+            const directRouted = Math.max(0, survivors - fledAbroad);
             const lost = killed + fledAbroad;
 
             const beforePop = remainingPop;
-            // displaced_out = only actually-routed to camp; lost_population = killed + fled
-            dispState.displaced_out += routedToCamp;
+            dispState.displaced_out += directRouted;
             dispState.lost_population += lost;
             dispState.last_updated_turn = currentTurn;
 
-            // Reduce source militia availability proportionally to demographic loss.
+            // Reduce source militia pool proportionally
             const sourcePoolKey = militiaPoolKey(munId, timer.from_faction);
             const sourcePool = state.militia_pools?.[sourcePoolKey];
             if (sourcePool && beforePop > 0) {
-                const ratio = displacementAmount / beforePop;
+                const ratio = sustainedAmount / beforePop;
                 const reduction = Math.floor(sourcePool.available * ratio);
                 if (reduction > 0) {
                     sourcePool.available = Math.max(0, sourcePool.available - reduction);
@@ -377,91 +623,95 @@ export function processPhaseIIDisplacementTakeover(
                 }
             }
 
-            if (routedToCamp > 0) {
-                const existingCamp = campMap[munId];
-                const created = !existingCamp;
-                const camp: DisplacementCampState = existingCamp ?? {
-                    mun_id: munId,
-                    population: 0,
-                    started_turn: currentTurn,
-                    by_faction: {}
-                };
-                camp.population += routedToCamp;
-                camp.by_faction[timer.from_faction] = (camp.by_faction[timer.from_faction] ?? 0) + routedToCamp;
-                if (created) report.camps_created += 1;
-                campMap[munId] = camp;
-            }
+            timer.cumulative_displaced = cumulativeDisplaced + sustainedAmount;
 
-            report.timers_matured += 1;
-            report.displaced_total += displacementAmount;
-            report.killed_total += killed;
-            report.fled_abroad_total += fledAbroad;
-            report.routed_total += routedToCamp;
-            report.source_municipalities.push(munId);
-
-            recordCivilianDisplacementCasualties(state, timer.from_faction, killed, fledAbroad);
-
-            state.displacement_event_log.push({
-                turn: currentTurn,
-                origin_mun: munId,
-                dest_mun: munId,
-                ethnicity: timer.from_faction,
-                displaced: displacementAmount,
-                killed,
-                fled_abroad: fledAbroad,
-                settled: 0,
-            });
-        }
-
-        // Re-route displaced_in population without casualties (pass-through).
-        // These people were already displaced once; second displacement incurs no
-        // additional killed/fled_abroad and does not increment displaced_total.
-        if (dispState.displaced_in > 0) {
-            const byFaction = dispState.displaced_in_by_faction ?? {};
-            const fKeys = (Object.keys(byFaction) as FactionId[]).sort(strictCompare);
-            for (const fid of fKeys) {
-                let rem = Math.max(0, Math.floor(byFaction[fid] ?? 0));
-                if (rem <= 0) continue;
-                const routeOrder = getRoutingOrder(munId, fid as FactionId);
+            // Direct routing to friendly municipalities (no camp — sustained = civilian flight)
+            if (directRouted > 0) {
+                let remaining = directRouted;
+                const routeOrder = getRoutingOrder(munId, timer.from_faction);
                 for (const targetMunId of routeOrder) {
-                    if (rem <= 0) break;
-                    if (!friendlyMunsByFaction[fid as FactionId]?.has(targetMunId)) continue;
+                    if (remaining <= 0) break;
+                    if (!friendlyMunsByFaction[timer.from_faction]?.has(targetMunId)) continue;
                     if (targetMunId === munId) continue;
                     const targetState = getOrInitDisplacementState(
-                        state, targetMunId,
+                        state,
+                        targetMunId,
                         state.displacement_state?.[targetMunId]?.original_population ?? 10000
                     );
-                    const targetCurrent = Math.max(0,
+                    const targetCurrent = Math.max(
+                        0,
                         targetState.original_population + targetState.displaced_in
                         - targetState.displaced_out - targetState.lost_population
                     );
                     const targetCapacity = Math.floor(
                         targetState.original_population * getReceivingCapacityFraction(targetMunId)
                     );
-                    const avail = Math.max(0, targetCapacity - targetCurrent);
-                    if (avail <= 0) continue;
-                    const routed = Math.min(rem, avail);
+                    const availableCapacity = Math.max(0, targetCapacity - targetCurrent);
+                    if (availableCapacity <= 0) continue;
+                    const routed = Math.min(remaining, availableCapacity);
                     if (routed <= 0) continue;
+
                     targetState.displaced_in += routed;
                     if (!targetState.displaced_in_by_faction) targetState.displaced_in_by_faction = {};
-                    targetState.displaced_in_by_faction[fid as FactionId] =
-                        (targetState.displaced_in_by_faction[fid as FactionId] ?? 0) + routed;
+                    targetState.displaced_in_by_faction[timer.from_faction] =
+                        (targetState.displaced_in_by_faction[timer.from_faction] ?? 0) + routed;
                     targetState.last_updated_turn = currentTurn;
-                    rem -= routed;
-                }
-                byFaction[fid] = rem;
-            }
-            const remainder = (Object.values(byFaction) as number[])
-                .filter(v => typeof v === 'number' && Number.isFinite(v) && v > 0)
-                .reduce((sum, v) => sum + v, 0);
-            dispState.displaced_in = remainder;
-        }
 
-        delete timerMap[timerKey];
+                    const poolKey = militiaPoolKey(targetMunId, timer.from_faction);
+                    const current = routedByPoolKey.get(poolKey);
+                    if (current) {
+                        current.amount += routed;
+                    } else {
+                        routedByPoolKey.set(poolKey, { munId: targetMunId, faction: timer.from_faction, amount: routed });
+                    }
+
+                    report.routing.push({
+                        from_mun: munId,
+                        to_mun: targetMunId,
+                        amount: routed,
+                        reason: 'sustained_displacement'
+                    });
+
+                    state.displacement_event_log.push({
+                        turn: currentTurn,
+                        origin_mun: munId,
+                        dest_mun: targetMunId,
+                        ethnicity: timer.from_faction,
+                        displaced: 0,
+                        killed: 0,
+                        fled_abroad: 0,
+                        settled: routed,
+                    });
+
+                    remaining -= routed;
+                }
+            }
+
+            recordCivilianDisplacementCasualties(state, timer.from_faction, killed, fledAbroad);
+
+            state.displacement_event_log.push({
+                turn: currentTurn,
+                origin_mun: munId,
+                origin_osid: osid,
+                dest_mun: munId,
+                ethnicity: timer.from_faction,
+                displaced: sustainedAmount,
+                killed,
+                fled_abroad: fledAbroad,
+                settled: 0,
+            });
+
+            report.sustained_fires += 1;
+            report.sustained_displaced_total += sustainedAmount;
+            report.displaced_total += sustainedAmount;
+            report.killed_total += killed;
+            report.fled_abroad_total += fledAbroad;
+            report.routed_total += directRouted;
+            report.source_municipalities.push(munId);
+        }
     }
 
     // 3) Mature camp state into routed arrivals (urban-center order + capacity overflow).
-    const routedByPoolKey = new Map<string, { munId: MunicipalityId; faction: FactionId; amount: number }>();
     const campMuns = Object.keys(campMap).sort(strictCompare) as MunicipalityId[];
     for (const sourceMunId of campMuns) {
         const camp = campMap[sourceMunId];

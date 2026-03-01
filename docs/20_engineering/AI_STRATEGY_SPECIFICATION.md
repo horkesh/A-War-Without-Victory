@@ -95,7 +95,7 @@ AI prioritizes **municipality consolidation**: cleaning hostile settlements insi
 - **Exception data:** Connected strongholds (e.g. Sapna S163520, Teočak S123749) and isolated holdouts (e.g. Petrovo S120154, Vozuća S162094) receive scoring penalties so they persist as in history. Fast rear-cleanup municipalities (Prijedor, Banja Luka) receive a priority bonus; baseline calibration targets completion within ~4 turns.
 - **Garrison/casualties:** Cleanup engagements remain attack-order driven; undefended or weakly defended settlements still incur defender casualties (militia/rear security) so all flips produce tracked casualties.
 
-Integration: `src/sim/consolidation_scoring.ts`, `src/sim/bot/simple_general_bot.ts`, `src/sim/phase_ii/bot_brigade_ai.ts`, `src/sim/phase_i/control_flip.ts`, `src/state/game_state.ts` (BrigadePosture includes `consolidation`).
+Integration: `src/sim/consolidation_scoring.ts`, `src/sim/bot/simple_general_bot.ts`, `src/sim/combat/bot_brigade_ai_osid.ts`, `src/sim/early_war/control_flip.ts`, `src/state/game_state.ts` (BrigadePosture includes `consolidation`).
 
 ## Attack target de-duplication
 
@@ -111,7 +111,7 @@ Phase II bot decisions are organized in three layers, run in pipeline order:
 
 Shared helpers used by corps AI, brigade AI, and AoR rebalancing:
 
-- `src/sim/phase_ii/phase_ii_adjacency.ts` — `buildAdjacencyFromEdges(edges)`, `getFactionBrigades(state, faction)` (deterministic, sorted iteration).
+- `src/sim/combat/phase_ii_adjacency.ts` — `buildAdjacencyFromEdges(edges)`, `getFactionBrigades(state, faction)` (deterministic, sorted iteration).
 
 Pipeline steps: `generate-bot-corps-orders` (before) → `generate-bot-brigade-orders`. See [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) §6.
 
@@ -122,11 +122,11 @@ Pipeline steps: `generate-bot-corps-orders` (before) → `generate-bot-brigade-o
 - `src/sim/bot/simple_general_bot.ts`
 - `src/sim/bot/bot_manager.ts`
 - `src/sim/consolidation_scoring.ts`
-- `src/sim/phase_ii/phase_ii_adjacency.ts` (shared adjacency and faction brigades)
-- `src/sim/phase_ii/bot_corps_ai.ts` (corps stance, operations, OGs, corridor breach, standing orders)
-- `src/sim/phase_ii/bot_brigade_ai.ts` (posture, target scoring, attack orders)
-- `src/sim/phase_ii/bot_strategy.ts` (Phase II faction profiles, doctrine phases, standing orders)
-- `src/sim/phase_ii/combat_estimate.ts` (read-only attack cost for casualty-aversion)
+- `src/sim/combat/phase_ii_adjacency.ts` (shared adjacency and faction brigades)
+- `src/sim/combat/bot_corps_ai.ts` (corps stance, operations, OGs, corridor breach, standing orders)
+- `src/sim/combat/bot_brigade_ai_osid.ts` (posture, target scoring, attack orders)
+- `src/sim/combat/bot_strategy.ts` (Phase II faction profiles, doctrine phases, standing orders)
+- `src/sim/combat/combat_estimate.ts` (read-only attack cost for casualty-aversion)
 - `src/scenario/scenario_types.ts` (`bot_difficulty`)
 - `src/scenario/scenario_loader.ts`
 - `src/scenario/scenario_runner.ts`

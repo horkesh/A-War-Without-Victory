@@ -210,7 +210,6 @@ export interface LoadedGameState {
     departedByOsid?: Record<string, Partial<Record<string, number>>>;
     reconIntelligence?: ReconIntelligenceView;
     movementOrdersSettlement?: MovementOrderSettlementView[];
-    enemyZocByFaction?: Record<string, string[]>;
     repositionOrders?: RepositionOrderView[];
     corpsFrontSectors?: CorpsFrontSectorView[];
     operations?: OperationView[];

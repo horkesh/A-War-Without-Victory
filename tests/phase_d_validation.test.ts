@@ -9,8 +9,8 @@
 import assert from 'node:assert';
 import { test } from 'node:test';
 import type { EdgeRecord } from '../src/map/settlements.js';
-import { updatePhaseIIExhaustion } from '../src/sim/phase_ii/exhaustion.js';
-import { detectPhaseIIFronts } from '../src/sim/phase_ii/front_emergence.js';
+import { updatePhaseIIExhaustion } from '../src/sim/combat/exhaustion.js';
+import { detectPhaseIIFronts } from '../src/sim/combat/front_emergence.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 

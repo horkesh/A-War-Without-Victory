@@ -22,7 +22,7 @@
 import assert from 'node:assert';
 import { describe, test } from 'node:test';
 import type { OobBrigade } from '../src/scenario/oob_loader.js';
-import { promoteFormations } from '../src/sim/phase_i/promote_formations.js';
+import { promoteFormations } from '../src/sim/early_war/promote_formations.js';
 import { fallbackBrigadeName, findMatchedOobEntry, matchHistoricalName } from '../src/state/formation_naming.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import type { FormationState, GameState } from '../src/state/game_state.js';

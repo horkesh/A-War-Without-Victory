@@ -3,7 +3,7 @@ import { test } from 'node:test';
 
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
-import { ensureBrigadeFrontAssignments, isBrigadeAssignedToFront } from '../src/sim/phase_ii/front_assignment.js';
+import { ensureBrigadeFrontAssignments, isBrigadeAssignedToFront } from '../src/sim/combat/front_assignment.js';
 
 function makeState(): GameState {
     return {

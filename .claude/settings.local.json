@@ -175,7 +175,9 @@
       "WebSearch",
       "Bash(cp:*)",
       "Bash(start:*)",
-      "Bash(cd \"F:\\\\A-War-Without-Victory\" && mv tools/check_run.js tools/check_run.cjs && node tools/check_run.cjs 2>&1)"
+      "Bash(cd \"F:\\\\A-War-Without-Victory\" && mv tools/check_run.js tools/check_run.cjs && node tools/check_run.cjs 2>&1)",
+      "WebFetch(domain:en.wikipedia.org)",
+      "Bash(bc)"
     ]
   }
 }

@@ -1,0 +1,305 @@
+import type { FeatureCollection, Feature, Polygon, MultiPolygon, LineString } from 'geojson';
+import type { CorpsFrontSectorView } from '../../data/types';
+
+interface OsidProperties {
+    osid: string;
+    controller: string | null;
+    [key: string]: unknown;
+}
+
+interface CorpsGlowProperties {
+    lineType: 'glow';
+    faction: string;
+    corps_id: string;
+    offset_side?: 1 | -1;
+}
+
+interface CorpsFrontProperties {
+    lineType: 'front';
+    factionA: string;
+    factionB: string;
+    corps_id: string;
+    tooth_rotation?: number;
+}
+
+type CorpsLineProperties = CorpsGlowProperties | CorpsFrontProperties;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Corps color palettes — 4 shades per faction, derived from faction base.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const FACTION_CORPS_PALETTES: Record<string, string[]> = {
+    RS:   ['#c24040', '#d46a4a', '#a83030', '#e08858'],
+    RBiH: ['#4a9a55', '#3a8a70', '#5aaa40', '#2a7a60'],
+    HRHB: ['#4080b8', '#5070a0', '#3090d0', '#6060c0'],
+};
+
+const FACTION_GLOW_COLORS: Record<string, string> = {
+    RS:   'rgba(180, 50, 50, 0.6)',
+    RBiH: 'rgba(55, 140, 75, 0.6)',
+    HRHB: 'rgba(50, 110, 170, 0.6)',
+};
+
+/**
+ * Build a plain Record<corpsId, hexColor> for use in UI panels/badges.
+ */
+export function buildCorpsColorMap(sectors: CorpsFrontSectorView[]): Record<string, string> {
+    const byFaction: Record<string, string[]> = {};
+    for (const s of sectors) {
+        if (!byFaction[s.faction]) byFaction[s.faction] = [];
+        if (!byFaction[s.faction].includes(s.corps_id)) {
+            byFaction[s.faction].push(s.corps_id);
+        }
+    }
+    for (const ids of Object.values(byFaction)) ids.sort((a, b) => a.localeCompare(b));
+
+    const map: Record<string, string> = {};
+    for (const [faction, ids] of Object.entries(byFaction)) {
+        const palette = FACTION_CORPS_PALETTES[faction] ?? ['#888888'];
+        for (let i = 0; i < ids.length; i++) {
+            map[ids[i]] = palette[i % palette.length];
+        }
+    }
+    return map;
+}
+
+/**
+ * Build a MapLibre expression for line-color that colors by corps_id when available,
+ * falling back to faction color for features without corps_id.
+ */
+export function buildCorpsColorExpression(
+    sectors: CorpsFrontSectorView[]
+): unknown[] {
+    const colorMap = buildCorpsColorMap(sectors);
+    const corpsIds = Object.keys(colorMap).sort((a, b) => a.localeCompare(b));
+
+    // ["case", ["has", "corps_id"], ["match", ["get", "corps_id"], id1, c1, id2, c2, ..., fallback],
+    //   ["match", ["get", "faction"], "RS", ..., fallback]]
+    const matchArgs: (string | unknown[])[] = ['match', ['get', 'corps_id']];
+    for (const id of corpsIds) {
+        matchArgs.push(id, colorMap[id]);
+    }
+    matchArgs.push('#888888'); // fallback for unknown corps
+
+    const factionMatch: (string | unknown[])[] = ['match', ['get', 'faction'],
+        'RS', FACTION_GLOW_COLORS.RS,
+        'RBiH', FACTION_GLOW_COLORS.RBiH,
+        'HRHB', FACTION_GLOW_COLORS.HRHB,
+        'rgba(60, 60, 70, 0.3)',
+    ];
+
+    return ['case', ['has', 'corps_id'], matchArgs, factionMatch];
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GeoJSON builder
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Merge consecutive segments that share endpoints into longer LineStrings. */
+function mergeLineSegments<P extends CorpsLineProperties>(
+    segments: Feature<LineString, P>[]
+): Feature<LineString, P>[] {
+    if (segments.length === 0) return [];
+
+    const coordKey = (c: number[]) => `${c[0].toFixed(6)},${c[1].toFixed(6)}`;
+    const endpointMap = new Map<string, number[]>();
+
+    segments.forEach((seg, i) => {
+        const coords = seg.geometry.coordinates;
+        const startKey = coordKey(coords[0]);
+        const endKey = coordKey(coords[coords.length - 1]);
+        if (!endpointMap.has(startKey)) endpointMap.set(startKey, []);
+        if (!endpointMap.has(endKey)) endpointMap.set(endKey, []);
+        endpointMap.get(startKey)!.push(i);
+        endpointMap.get(endKey)!.push(i);
+    });
+
+    const used = new Set<number>();
+    const merged: Feature<LineString, P>[] = [];
+
+    for (let i = 0; i < segments.length; i++) {
+        if (used.has(i)) continue;
+        used.add(i);
+        const props = segments[i].properties;
+        let coords = [...segments[i].geometry.coordinates];
+        let changed = true;
+
+        while (changed) {
+            changed = false;
+            const endKey = coordKey(coords[coords.length - 1]);
+            const candidates = endpointMap.get(endKey) || [];
+            for (const j of candidates) {
+                if (used.has(j)) continue;
+                const seg = segments[j].geometry.coordinates;
+                const segStart = coordKey(seg[0]);
+                const segEnd = coordKey(seg[seg.length - 1]);
+                if (segStart === endKey) {
+                    coords.push(...seg.slice(1));
+                    used.add(j);
+                    changed = true;
+                    break;
+                } else if (segEnd === endKey) {
+                    coords.push(...[...seg].reverse().slice(1));
+                    used.add(j);
+                    changed = true;
+                    break;
+                }
+            }
+        }
+
+        merged.push({
+            type: 'Feature',
+            properties: props,
+            geometry: { type: 'LineString', coordinates: coords },
+        });
+    }
+    return merged;
+}
+
+/**
+ * Build a mapping from (OSID-pair edge key, faction) → corps info.
+ * Keyed as "pairKey\0faction" so both sides of a front edge resolve to
+ * the correct corps for their respective faction.
+ */
+function buildEdgeFactionToCorps(
+    sectors: CorpsFrontSectorView[]
+): Map<string, string> {
+    const map = new Map<string, string>();
+    for (const sector of sectors) {
+        for (const edgeId of sector.edge_ids) {
+            const key = `${edgeId}\0${sector.faction}`;
+            if (!map.has(key)) map.set(key, sector.corps_id);
+        }
+    }
+    return map;
+}
+
+/**
+ * Generate corps-colored front lines GeoJSON. Same geometric approach as
+ * generateFactionBorders but annotates each feature with corps_id.
+ *
+ * When corps sector data is available, glow features get corps_id for
+ * per-corps coloring. Front features get corps_id for potential styling.
+ */
+export function buildCorpsFrontLinesGeoJSON(
+    osidGeoJson: FeatureCollection,
+    corpsFrontSectors: CorpsFrontSectorView[],
+    rbihHrhbAllied?: boolean,
+    osidCentroids?: Map<string, [number, number]>
+): FeatureCollection<LineString> {
+    const features = osidGeoJson.features as Feature<Polygon | MultiPolygon, OsidProperties>[];
+
+    const controllerMap = new Map<string, string | null>();
+    for (const f of features) {
+        controllerMap.set(f.properties.osid, f.properties.controller);
+    }
+
+    // Build (edgeId + faction) → corps_id lookup
+    const edgeFactionToCorps = buildEdgeFactionToCorps(corpsFrontSectors);
+
+    // Build edgeMap: geometric edge key → set of OSIDs sharing that edge
+    const coordKey = (c: number[]) => `${c[0].toFixed(6)},${c[1].toFixed(6)}`;
+    const edgeMap = new Map<string, Set<string>>();
+
+    for (const feature of features) {
+        const osid = feature.properties.osid;
+        const rings =
+            feature.geometry.type === 'Polygon'
+                ? feature.geometry.coordinates
+                : feature.geometry.coordinates.flat();
+
+        for (const ring of rings) {
+            for (let i = 0; i < ring.length - 1; i++) {
+                const a = ring[i];
+                const b = ring[i + 1];
+                const keyA = coordKey(a);
+                const keyB = coordKey(b);
+                const edgeKey = keyA < keyB ? `${keyA}|${keyB}` : `${keyB}|${keyA}`;
+
+                if (!edgeMap.has(edgeKey)) edgeMap.set(edgeKey, new Set());
+                edgeMap.get(edgeKey)!.add(osid);
+            }
+        }
+    }
+
+    // Generate features for shared boundary edges between different controllers
+    const glowFeatures: Feature<LineString, CorpsGlowProperties>[] = [];
+    const frontSegmentsByGroup = new Map<string, Feature<LineString, CorpsFrontProperties>[]>();
+
+    for (const [edgeKey, osids] of edgeMap) {
+        if (osids.size !== 2) continue;
+        const [osidA, osidB] = [...osids];
+        const ctrlA = controllerMap.get(osidA);
+        const ctrlB = controllerMap.get(osidB);
+        if (!ctrlA || !ctrlB || ctrlA === ctrlB) continue;
+        if (rbihHrhbAllied && ((ctrlA === 'RBiH' && ctrlB === 'HRHB') || (ctrlA === 'HRHB' && ctrlB === 'RBiH'))) continue;
+
+        const [partA, partB] = edgeKey.split('|');
+        const [ax, ay] = partA.split(',').map(Number);
+        const [bx, by] = partB.split(',').map(Number);
+        const coords: [number, number][] = [[ax, ay], [bx, by]];
+
+        // Look up which corps owns each side of this edge
+        const pairKey = osidA < osidB ? `${osidA}__${osidB}` : `${osidB}__${osidA}`;
+        const corpsA = edgeFactionToCorps.get(`${pairKey}\0${ctrlA}`) ?? 'unknown';
+        const corpsB = edgeFactionToCorps.get(`${pairKey}\0${ctrlB}`) ?? 'unknown';
+
+        // Compute offset_side + tooth_rotation from OSID centroids
+        let offsetA: 1 | -1 | undefined;
+        let offsetB: 1 | -1 | undefined;
+        let toothRotation: number | undefined;
+        if (osidCentroids) {
+            const centA = osidCentroids.get(osidA);
+            const centB = osidCentroids.get(osidB);
+            if (centA && centB) {
+                // Edge direction vector: (bx-ax, by-ay)
+                const dx = bx - ax;
+                const dy = by - ay;
+                // Cross product: which side of the edge segment does each OSID centroid fall on?
+                const crossA = dx * (centA[1] - ay) - dy * (centA[0] - ax);
+                offsetA = crossA > 0 ? 1 : -1;
+                offsetB = crossA > 0 ? -1 : 1;
+                // Tooth rotation: 0 means triangle points "left" of line direction (toward positive cross side)
+                // If ctrlA (factionA) is on the positive side, teeth should point toward ctrlB (negative side) → 180
+                toothRotation = crossA > 0 ? 180 : 0;
+            }
+        }
+
+        const glowPropsA: CorpsGlowProperties = { lineType: 'glow', faction: ctrlA, corps_id: corpsA };
+        if (offsetA != null) glowPropsA.offset_side = offsetA;
+        const glowPropsB: CorpsGlowProperties = { lineType: 'glow', faction: ctrlB, corps_id: corpsB };
+        if (offsetB != null) glowPropsB.offset_side = offsetB;
+
+        glowFeatures.push({
+            type: 'Feature',
+            properties: glowPropsA,
+            geometry: { type: 'LineString', coordinates: coords },
+        });
+        glowFeatures.push({
+            type: 'Feature',
+            properties: glowPropsB,
+            geometry: { type: 'LineString', coordinates: coords },
+        });
+
+        // Front line feature — group by the first faction's corps for merging
+        const pairFactionKey = [ctrlA, ctrlB].sort().join('-');
+        const groupKey = `${corpsA}:${pairFactionKey}`;
+        if (!frontSegmentsByGroup.has(groupKey)) frontSegmentsByGroup.set(groupKey, []);
+        const frontProps: CorpsFrontProperties = { lineType: 'front', factionA: ctrlA, factionB: ctrlB, corps_id: corpsA };
+        if (toothRotation != null) frontProps.tooth_rotation = toothRotation;
+        frontSegmentsByGroup.get(groupKey)!.push({
+            type: 'Feature',
+            properties: frontProps,
+            geometry: { type: 'LineString', coordinates: coords },
+        });
+    }
+
+    // Merge front segments per corps group for smoother lines
+    const mergedFront: Feature<LineString, CorpsFrontProperties>[] = [];
+    for (const segments of frontSegmentsByGroup.values()) {
+        mergedFront.push(...mergeLineSegments(segments));
+    }
+
+    const allFeatures: Feature<LineString>[] = [...glowFeatures, ...mergedFront];
+    return { type: 'FeatureCollection', features: allFeatures };
+}

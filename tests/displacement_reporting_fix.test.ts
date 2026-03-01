@@ -13,7 +13,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { buildWeeklyReport } from '../src/scenario/scenario_reporting.js';
-import { isPressureEligible, getEligiblePressureEdges } from '../src/sim/phase_e/pressure_eligibility.js';
+import { isPressureEligible, getEligiblePressureEdges } from '../src/sim/emergence/pressure_eligibility.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 

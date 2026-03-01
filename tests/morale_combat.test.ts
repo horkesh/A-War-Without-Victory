@@ -10,7 +10,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import { getFactionAlignedPopulationShare, type MunicipalityPopulation1991Map } from '../src/state/population_share.js';
-import { runPhaseIIMoraleDrift, type MoraleDriftReport } from '../src/sim/phase_ii/morale_drift.js';
+import { runPhaseIIMoraleDrift, type MoraleDriftReport } from '../src/sim/combat/morale_drift.js';
 import type { FormationState, GameState } from '../src/state/game_state.js';
 
 /** Test census data — simplified for testing. */

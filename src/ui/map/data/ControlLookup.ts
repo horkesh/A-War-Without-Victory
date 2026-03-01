@@ -3,10 +3,6 @@
  * Handles dual key formats: S-prefixed ("S100013") and mun:census ("10014:100013").
  */
 
-export function controlKey(sid: string): string {
-    return sid.startsWith('S') ? sid : `S${sid}`;
-}
-
 export function buildControlLookup(
     bySettlementId: Record<string, string | null>
 ): Record<string, string | null> {
@@ -39,6 +35,3 @@ export function buildStatusLookup(
     return out;
 }
 
-export function censusIdFromSid(sid: string): string {
-    return sid.startsWith('S') ? sid.slice(1) : sid;
-}

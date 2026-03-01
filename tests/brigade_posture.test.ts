@@ -8,7 +8,7 @@ import {
     applyPostureCosts,
     applyPostureOrders,
     canAdoptPosture
-} from '../src/sim/phase_ii/brigade_posture.js';
+} from '../src/sim/combat/brigade_posture.js';
 import type { FactionId, FormationState, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 

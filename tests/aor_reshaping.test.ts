@@ -8,7 +8,7 @@ import type { EdgeRecord } from '../src/map/settlements.js';
 import {
     applyReshapeOrders,
     validateReshapeOrder
-} from '../src/sim/phase_ii/aor_reshaping.js';
+} from '../src/sim/combat/aor_reshaping.js';
 import type { BrigadeAoROrder, FactionId, FormationState, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION, type LegacyBrigadeAoRState } from '../src/state/game_state.js';
 

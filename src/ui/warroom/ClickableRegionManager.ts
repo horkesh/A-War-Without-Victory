@@ -26,8 +26,8 @@ export type HoverRegion = {
 };
 
 import { buildGraphFromJSON, type LoadedSettlementGraph } from '../../map/settlements_parse.js';
-import { runPhaseITurn } from '../../sim/run_phase_i_browser.js';
-import { runPhaseIITurn } from '../../sim/run_phase_ii_browser.js';
+import { runPhaseITurn } from '../../sim/run_early_war_browser.js';
+import { runPhaseIITurn } from '../../sim/run_combat_browser.js';
 import type { FactionId, Phase0Event } from '../../state/game_state.js';
 import { GameState } from '../../state/game_state.js';
 import { deserializeState } from '../../state/serialize.js';

@@ -12,7 +12,7 @@
  */
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildCorpsFrontSectors, MIN_SECTOR_EDGES } from '../src/sim/phase_ii/corps_front_sectors.js';
+import { buildCorpsFrontSectors, MIN_SECTOR_EDGES } from '../src/sim/combat/corps_front_sectors.js';
 import type { GameState, FormationState, FactionId } from '../src/state/game_state.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 

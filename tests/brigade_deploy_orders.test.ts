@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { TerrainScalarsData } from '../src/map/terrain_scalars.js';
-import { processBrigadeMovement } from '../src/sim/phase_ii/brigade_movement.js';
+import { processBrigadeMovement } from '../src/sim/combat/brigade_movement.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 

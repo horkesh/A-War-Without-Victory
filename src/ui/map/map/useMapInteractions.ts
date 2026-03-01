@@ -3,6 +3,7 @@ import type { Map as MapLibreMap, MapLayerMouseEvent } from 'maplibre-gl';
 export interface MapInteractionCallbacks {
   onOsidClick?: (osid: string, properties: Record<string, unknown>) => void;
   onFormationClick?: (formationId: string, properties: Record<string, unknown>) => void;
+  onFrontEdgeClick?: (edgeId: string, properties: Record<string, unknown>) => void;
   /** Tooltip: set after 300ms hover; position from event. */
   onOsidHover?: (osid: string | null, point: { x: number; y: number } | null) => void;
   onFormationHover?: (formationId: string | null, point: { x: number; y: number } | null) => void;
@@ -15,6 +16,9 @@ const HOVER_DELAY_MS = 300;
 let hoverTimeout: number | undefined;
 let formationHoverTimeout: number | undefined;
 let frontHoverTimeout: number | undefined;
+let hoveredFrontEdgeId: string | null = null;
+
+const FRONT_EDGES_SOURCE = 'front-edges-hover';
 
 export function useMapInteractions(
   map: MapLibreMap | null,
@@ -42,8 +46,18 @@ export function useMapInteractions(
     }
   };
 
+  const safeSetFeatureState = (
+    target: { source: string; id: string },
+    state: Record<string, unknown>
+  ) => {
+    try {
+      map.setFeatureState(target, state);
+    } catch (_) { /* source may be removed during teardown */ }
+  };
+
   const onOsidClick = typeof callbacks === 'function' ? callbacks : callbacks.onOsidClick;
   const onFormationClick = typeof callbacks === 'function' ? undefined : callbacks.onFormationClick;
+  const onFrontEdgeClick = typeof callbacks === 'function' ? undefined : callbacks.onFrontEdgeClick;
   const onOsidHover = typeof callbacks === 'function' ? undefined : callbacks.onOsidHover;
   const onFormationHover = typeof callbacks === 'function' ? undefined : callbacks.onFormationHover;
   const onFrontEdgeHover = typeof callbacks === 'function' ? undefined : callbacks.onFrontEdgeHover;
@@ -128,9 +142,20 @@ export function useMapInteractions(
   };
 
   const handleFrontEdgeMouseMove = (e: MapLayerMouseEvent) => {
+    map.getCanvas().style.cursor = 'pointer';
     const feature = e.features?.[0];
     const edgeId = feature?.properties?.edge_id as string | undefined;
     const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
+
+    // Update feature-state highlight
+    if (edgeId && edgeId !== hoveredFrontEdgeId) {
+      if (hoveredFrontEdgeId) {
+        safeSetFeatureState({ source: FRONT_EDGES_SOURCE, id: hoveredFrontEdgeId }, { hover: false });
+      }
+      hoveredFrontEdgeId = edgeId;
+      safeSetFeatureState({ source: FRONT_EDGES_SOURCE, id: edgeId }, { hover: true });
+    }
+
     if (onFrontEdgeHover) {
       if (edgeId) {
         if (frontHoverTimeout) clearTimeout(frontHoverTimeout);
@@ -147,6 +172,11 @@ export function useMapInteractions(
   };
 
   const handleFrontEdgeMouseLeave = () => {
+    map.getCanvas().style.cursor = '';
+    if (hoveredFrontEdgeId) {
+      safeSetFeatureState({ source: FRONT_EDGES_SOURCE, id: hoveredFrontEdgeId }, { hover: false });
+      hoveredFrontEdgeId = null;
+    }
     if (frontHoverTimeout) {
       clearTimeout(frontHoverTimeout);
       frontHoverTimeout = undefined;
@@ -173,10 +203,26 @@ export function useMapInteractions(
     safeOn('mouseleave', 'formation-labels', handleFormationMouseLeave);
   }
 
-  const frontEdgesLayerId = 'front-edges-hover';
-  if (onFrontEdgeHover) {
-    safeOn('mousemove', frontEdgesLayerId, handleFrontEdgeMouseMove);
-    safeOn('mouseleave', frontEdgesLayerId, handleFrontEdgeMouseLeave);
+  const frontEdgeLayers = ['front-edges-hover-pos', 'front-edges-hover-neg'];
+
+  const handleFrontEdgeClick = (e: MapLayerMouseEvent) => {
+    const feature = e.features?.[0];
+    if (!feature?.properties) return;
+    const edgeId = feature.properties.edge_id as string | undefined;
+    if (edgeId) {
+      const props = feature.properties as Record<string, unknown>;
+      onFrontEdgeClick?.(edgeId, props);
+    }
+  };
+
+  for (const layerId of frontEdgeLayers) {
+    if (onFrontEdgeClick) {
+      safeOn('click', layerId, handleFrontEdgeClick);
+    }
+    if (onFrontEdgeHover) {
+      safeOn('mousemove', layerId, handleFrontEdgeMouseMove);
+      safeOn('mouseleave', layerId, handleFrontEdgeMouseLeave);
+    }
   }
 
   return () => {
@@ -198,8 +244,17 @@ export function useMapInteractions(
       safeOff('mouseleave', 'formation-labels', handleFormationMouseLeave);
     }
     if (formationHoverTimeout) clearTimeout(formationHoverTimeout);
-    safeOff('mousemove', frontEdgesLayerId, handleFrontEdgeMouseMove);
-    safeOff('mouseleave', frontEdgesLayerId, handleFrontEdgeMouseLeave);
+    for (const layerId of frontEdgeLayers) {
+      if (onFrontEdgeClick) {
+        safeOff('click', layerId, handleFrontEdgeClick);
+      }
+      safeOff('mousemove', layerId, handleFrontEdgeMouseMove);
+      safeOff('mouseleave', layerId, handleFrontEdgeMouseLeave);
+    }
+    if (hoveredFrontEdgeId) {
+      safeSetFeatureState({ source: FRONT_EDGES_SOURCE, id: hoveredFrontEdgeId }, { hover: false });
+      hoveredFrontEdgeId = null;
+    }
     if (frontHoverTimeout) clearTimeout(frontHoverTimeout);
   };
 }

@@ -2,7 +2,7 @@
 
 **High-level map:** See [REPO_MAP.md](REPO_MAP.md) for pipelines, GUI locations, and the full "Change X → Go Here" table.
 
-**Quick change routing:** Scenario changes → `src/scenario/`, `data/scenarios/`. Phase I control flip (incl. B4 coercion) → `src/sim/phase_i/control_flip.ts`. Authority derivation → `src/state/formation_lifecycle.ts`. Events (B1) → `src/sim/events/`. Map build → [MAP_BUILD_SYSTEM.md](MAP_BUILD_SYSTEM.md). Full routing: REPO_MAP.md §Change X → Go Here.
+**Quick change routing:** Scenario changes → `src/scenario/`, `data/scenarios/`. Phase I control flip (incl. B4 coercion) → `src/sim/early_war/control_flip.ts`. Authority derivation → `src/state/formation_lifecycle.ts`. Events (B1) → `src/sim/events/`. Map build → [MAP_BUILD_SYSTEM.md](MAP_BUILD_SYSTEM.md). Full routing: REPO_MAP.md §Change X → Go Here.
 
 ## Canonical Entry Points
 ### Scenario Harness (Deterministic, Multi-Turn)
@@ -49,7 +49,7 @@
   - Outputs: `docs/50_research/extracts/*.txt` (agent-readable). See `docs/50_research/README_KNOWLEDGE_BASE.md`.
 
 ### Phase II Browser Advance (Warroom)
-- `src/sim/run_phase_ii_browser.ts` — `runPhaseIITurn(state, input)` — browser-safe Phase II turn advance. No Node/fs. Used by warroom when advancing a turn in phase_ii. Phase II uses location_osid only (no AoR). Does not run supply pressure or exhaustion; full Phase II use Node `runTurn`.
+- `src/sim/run_combat_browser.ts` — `runPhaseIITurn(state, input)` — browser-safe Phase II turn advance. No Node/fs. Used by warroom when advancing a turn in phase_ii. Phase II uses location_osid only (no AoR). Does not run supply pressure or exhaustion; full Phase II use Node `runTurn`.
 
 ### Phase II location_osid (AoR removed)
 - AoR init is removed. Phase II brigade location is **location_osid** only; set at formation creation and via `backfillFormationLocationOsid` at Phase II entry. See docs/30_planning/AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md. Legacy `src/scenario/aor_init.ts` is deprecated and must not be used for Phase II state.

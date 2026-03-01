@@ -15,8 +15,8 @@ import {
     dijkstraFriendlyPath,
     processOsidColumnMovement,
     OSID_COLUMN_BASE_RATE
-} from '../src/sim/phase_ii/osid_column_movement.js';
-import { buildOsidAdjacency } from '../src/sim/phase_ii/zoc.js';
+} from '../src/sim/combat/osid_column_movement.js';
+import { buildOsidAdjacency } from '../src/sim/combat/osid_adjacency.js';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -310,7 +310,7 @@ describe('processOsidColumnMovement', () => {
         assert.equal(report.column_starts, 0);
     });
 
-    it('ignores non-column orders (leaves them for ZoC movement)', () => {
+    it('ignores non-column orders (leaves them for movement step)', () => {
         const edges = makeLinearEdges();
         const rm = mockReverseMap(['A', 'B', 'C', 'D', 'E']);
         const f1 = makeFormation('brig1', 'RS', 'A');
@@ -322,7 +322,7 @@ describe('processOsidColumnMovement', () => {
         const td = flatTerrain();
         const report = processOsidColumnMovement(state, edges, rm, td);
         assert.equal(report.column_starts, 0);
-        // Regular order should be preserved for ZoC movement step
+        // Regular order should be preserved for movement step
         assert.ok(state.brigade_movement_orders?.brig1);
     });
 

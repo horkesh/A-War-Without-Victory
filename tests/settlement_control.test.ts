@@ -4,8 +4,8 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { EdgeRecord, SettlementRecord } from '../src/map/settlements.js';
-import type { HoldoutScalingContext } from '../src/sim/phase_i/settlement_control.js';
-import { applyWaveFlip, buildSettlementAdjacency, processHoldoutCleanup } from '../src/sim/phase_i/settlement_control.js';
+import type { HoldoutScalingContext } from '../src/sim/early_war/settlement_control.js';
+import { applyWaveFlip, buildSettlementAdjacency, processHoldoutCleanup } from '../src/sim/early_war/settlement_control.js';
 import type { GameState, MunicipalityId, SettlementId } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 

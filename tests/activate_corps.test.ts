@@ -13,8 +13,8 @@
 
 import { describe, expect, it } from 'vitest';
 import type { OobCorps, OobBrigade } from '../src/scenario/oob_loader.js';
-import { createOobFormationsAtPhaseIEntry } from '../src/scenario/oob_phase_i_entry.js';
-import { activateCorpsForTurn } from '../src/sim/phase_i/activate_corps.js';
+import { createOobFormationsAtPhaseIEntry } from '../src/scenario/oob_early_war_entry.js';
+import { activateCorpsForTurn } from '../src/sim/early_war/activate_corps.js';
 import { CURRENT_SCHEMA_VERSION, type FormationState, type GameState } from '../src/state/game_state.js';
 
 // ---------------------------------------------------------------------------

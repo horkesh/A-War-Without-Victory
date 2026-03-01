@@ -14,8 +14,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { hasDefenderBrigade } from '../src/sim/phase_ii/bot_brigade_ai.js';
-import { FACTION_STANDING_ORDERS, FACTION_STRATEGIES, getActiveDoctrinePhase, getActiveStandingOrder, getEffectiveAttackShare } from '../src/sim/phase_ii/bot_strategy.js';
+import { FACTION_STANDING_ORDERS, FACTION_STRATEGIES, getActiveDoctrinePhase, getActiveStandingOrder, getEffectiveAttackShare } from '../src/sim/combat/bot_strategy.js';
 import { MIN_BRIGADE_SPAWN, MIN_COMBAT_PERSONNEL } from '../src/state/formation_constants.js';
 import type {
     FactionId,
@@ -190,36 +189,4 @@ describe('Three-Sided Bot AI Validation', () => {
         expect(order!.army_stance).toBe('balanced');
     });
 
-    // --- Defender-present scoring (Phase 4 run problems) ---
-
-    it('hasDefenderBrigade returns true when settlement has controller and brigade_aor formation matches faction', () => {
-        const sid = 'S1' as SettlementId;
-        const fid = 'F1' as FormationId;
-        const state: GameState = {
-            political_controllers: { [sid]: 'RBiH' as FactionId },
-            brigade_aor: { [sid]: fid },
-            formations: { [fid]: { faction: 'RBiH' as FactionId } as FormationState }
-        } as GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState;
-        expect(hasDefenderBrigade(state, sid)).toBe(true);
-    });
-
-    it('hasDefenderBrigade returns false when no formation has settlement in AoR', () => {
-        const sid = 'S2' as SettlementId;
-        const state: GameState = {
-            political_controllers: { [sid]: 'RS' as FactionId },
-            brigade_aor: {}
-        } as GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState;
-        expect(hasDefenderBrigade(state, sid)).toBe(false);
-    });
-
-    it('hasDefenderBrigade returns false when formation faction differs from controller', () => {
-        const sid = 'S3' as SettlementId;
-        const fid = 'F2' as FormationId;
-        const state: GameState = {
-            political_controllers: { [sid]: 'RBiH' as FactionId },
-            brigade_aor: { [sid]: fid },
-            formations: { [fid]: { faction: 'RS' as FactionId } as FormationState }
-        } as GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState;
-        expect(hasDefenderBrigade(state, sid)).toBe(false);
-    });
 });

@@ -5,7 +5,7 @@
  * - Deterministic: same inputs -> same report.
  */
 import { describe, expect, it } from 'vitest';
-import { runPhaseIIOngoingMobilization } from '../src/sim/phase_ii/ongoing_mobilization.js';
+import { runPhaseIIOngoingMobilization } from '../src/sim/combat/ongoing_mobilization.js';
 import type { GameState, MilitiaPoolState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { militiaPoolKey } from '../src/state/militia_pool_key.js';
