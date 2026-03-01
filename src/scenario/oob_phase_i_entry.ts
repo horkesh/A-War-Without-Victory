@@ -190,6 +190,14 @@ export function createOobFormationsAtPhaseIEntry(
             ...(hq_sid ? { hq_sid } : {}),
             ...(location_osid != null ? { location_osid } : {})
         };
+        // OOB composition override (e.g. enclave brigades: infantry-only)
+        if (b.composition) {
+            formation.composition = b.composition;
+        }
+        // OOB morale override (e.g. enclave brigades: 70 desperation bonus)
+        if (b.initial_morale !== undefined) {
+            formation.morale = b.initial_morale;
+        }
         // Pre-war brigades (mandatory, available from turn 0) were already organized
         // before the simulation starts. Set initial entrenchment so they project
         // ZoC defense from turn 1. Without this, enclaves like Gorazde and Srebrenica

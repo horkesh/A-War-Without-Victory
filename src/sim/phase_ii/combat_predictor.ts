@@ -56,6 +56,9 @@ const ENTRENCHMENT_PER_TURN = 0.035;
 const MAX_RESILIENCE_STREAK = 4;        // Tuned: 6→4. Still rewards persistent defense.
 const RESILIENCE_PER_DEFENSE = 0.025;   // Tuned: 0.05→0.025. Max bonus 1.10× (was 1.30×).
 
+/** Minimum morale to resist retreat on costly_victory (mirrors attack_resolution_osid.ts). */
+const MORALE_RESIST_FLOOR = 70;
+
 /**
  * Artillery suppression of entrenchment. Mirrors attack_resolution_osid.ts.
  * Attacker's heavy weapons reduce the defender's entrenchment bonus.
@@ -567,7 +570,7 @@ export function predictCombatOutcome(
             //   Linked ZoC (connected chain):          35% of computeDefenderPower
             //   Unlinked ZoC (isolated projection):    entrenchment-scaled (0-100%)
             const defenderFaction = zocDefenders[0]!.faction as FactionId;
-            const linkedArr = (state as { phase_ii_linked_zoc_by_faction?: Record<string, string[]> }).phase_ii_linked_zoc_by_faction?.[defenderFaction];
+            const linkedArr = (state as { war_linked_zoc_by_faction?: Record<string, string[]> }).war_linked_zoc_by_faction?.[defenderFaction];
             const isLinkedZoc = linkedArr != null && linkedArr.includes(targetOsid);
             const powers = zocDefenders.map(d =>
                 isLinkedZoc
@@ -604,7 +607,14 @@ export function predictCombatOutcome(
 
     // Outcome
     const powerRatio = defenderPower <= 0 ? 10 : attackerPower / defenderPower;
-    const predicted = classifyOutcome(powerRatio);
+    let predicted = classifyOutcome(powerRatio);
+
+    // Morale resistance: if defender has high morale, costly_victory won't flip.
+    // Downgrade to stalemate for bot scoring — attack won't achieve its objective.
+    const defenderMorale = defenderFormation?.morale ?? 60;
+    if (predicted === 'costly_victory' && defenderMorale >= MORALE_RESIST_FLOOR) {
+        predicted = 'stalemate';
+    }
 
     // Expected casualties
     const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
@@ -692,3 +702,4 @@ export function predictAllAdjacentTargets(
 
     return results;
 }
+

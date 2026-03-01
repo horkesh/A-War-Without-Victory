@@ -49,6 +49,9 @@ const ENTRENCHMENT_PER_TURN = 0.035;
 const MAX_RESILIENCE_STREAK = 4;        // Tuned: 6→4. Still rewards persistent defense.
 const RESILIENCE_PER_DEFENSE = 0.025;   // Tuned: 0.05→0.025. Max bonus 1.10× (was 1.30×).
 
+/** Minimum morale to resist retreat on costly_victory (absorb without retreating). */
+const MORALE_RESIST_FLOOR = 70;
+
 /**
  * Artillery suppression of entrenchment.
  * Heavy weapons (artillery, tanks) reduce the defender's entrenchment bonus.
@@ -410,7 +413,8 @@ export type AttackResolutionOsidSnapEventType =
     | 'commander_casualty'
     | 'last_stand'
     | 'surrender_cascade'
-    | 'pyrrhic_victory';
+    | 'pyrrhic_victory'
+    | 'morale_absorption';
 
 export interface AttackResolutionOsidSnapEvent {
     snap_type: AttackResolutionOsidSnapEventType;
@@ -584,7 +588,7 @@ export function resolveAttackOrdersOsid(
                 // front provides credible defense: concentrated attackers can still break through,
                 // but isolated probes are repulsed. Multi-brigade assaults remain effective.
                 const defenderFaction = zocDefenders[0]!.faction as FactionId;
-                const linkedArr = (state as { phase_ii_linked_zoc_by_faction?: Record<string, string[]> }).phase_ii_linked_zoc_by_faction?.[defenderFaction];
+                const linkedArr = (state as { war_linked_zoc_by_faction?: Record<string, string[]> }).war_linked_zoc_by_faction?.[defenderFaction];
                 const isLinkedZoc = linkedArr != null && linkedArr.includes(targetOsid);
                 const powers = zocDefenders.map(d =>
                     isLinkedZoc
@@ -786,7 +790,31 @@ export function resolveAttackOrdersOsid(
             applyExperienceGain(defenderFormation, !attackerWon);
         }
 
-        const flip = outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory';
+        let flip = outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory';
+
+        // === MORALE-BASED RETREAT RESISTANCE ===
+        // High morale defenders absorb costly_victory without retreating.
+        // Deterministic gate: morale >= 70 AND costly_victory AND not ZoC defense.
+        let moraleAbsorbed = false;
+        if (outcome === 'costly_victory' && defenderFormation
+            && !isZocDefense
+            && (defenderFormation.morale ?? 60) >= MORALE_RESIST_FLOOR) {
+            flip = false;
+            moraleAbsorbed = true;
+            defenderFormation.morale = Math.max(0, (defenderFormation.morale ?? 60) - 5);
+            const ev: AttackResolutionOsidSnapEvent = {
+                snap_type: 'morale_absorption',
+                trigger_phase: 'post_battle',
+                attacker_brigade: firstAttacker.id,
+                target_osid: targetOsid,
+                affected_formation: defenderFormation.id,
+                description: 'Defender morale held — absorbed costly victory without retreating.',
+                effects: { flip_prevented: true, morale_drain: -5 },
+            };
+            battleSnapEvents.push(ev);
+            pushSnapEvent(report, ev);
+        }
+
         if (flip) {
             if (!state.political_controllers) state.political_controllers = {};
             state.political_controllers[targetOsid] = attackerFaction;
@@ -811,6 +839,27 @@ export function resolveAttackOrdersOsid(
                 defenderFormation.personnel = 0;
                 defenderFormation.status = 'inactive';
             }
+        }
+
+        // === POST-BATTLE MORALE EFFECTS ===
+        for (const a of attackerFormations) {
+            if (a.morale === undefined) continue;
+            switch (outcome) {
+                case 'decisive_victory': a.morale = Math.min(100, a.morale + 3); break;
+                case 'victory':          a.morale = Math.min(100, a.morale + 1); break;
+                case 'costly_victory':   break; // neutral — expected cost
+                case 'stalemate':        a.morale = Math.max(0, a.morale - 2); break;
+                case 'repulsed':         a.morale = Math.max(0, a.morale - 5); break;
+                case 'catastrophic':     a.morale = Math.max(0, a.morale - 10); break;
+            }
+        }
+        if (defenderFormation?.morale !== undefined) {
+            if (flip) {
+                defenderFormation.morale = Math.max(0, defenderFormation.morale - 5);
+            } else if (!moraleAbsorbed) {
+                defenderFormation.morale = Math.min(100, defenderFormation.morale + 1);
+            }
+            // moraleAbsorbed case: morale already drained by 5 above (retreat resistance gate)
         }
 
         // Attacker advance: move into captured OSID after successful flip.
@@ -980,3 +1029,4 @@ function applyPersonnelLoss(formation: FormationState, loss: number): void {
     if (typeof formation.personnel !== 'number') return;
     formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, formation.personnel - loss);
 }
+

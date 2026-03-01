@@ -210,6 +210,9 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 - **RS mandatory bottleneck control (2026-02-16):** For ongoing recruitment, apply a small deterministic RS-only manpower mobilization budget to pending mandatory brigade home municipalities before recruitment checks, and cap mandatory recruits per faction per turn to scenario/state max. This improves RS historical brigade activation without uncapped one-turn spikes (see `PROJECT_LEDGER.md` 2026-02-16).
 - **OSID-vs-SID key mismatch pattern (2026-02-24):** After the OSID-as-base-layer migration, `political_controllers` uses OSID keys (format `op:<mun>:<slug>`) but many functions still iterate SID-keyed maps (canonical `S`-prefixed IDs) and check `pc[sid]` — returning `undefined` for every lookup. **Detection:** Any function that looks up `state.political_controllers[sid]` where `sid` is a canonical settlement ID will silently fail when controllers are OSID-keyed. The first key in `Object.keys(state.political_controllers)` starting with `op:` confirms OSID-keyed state. **Fix pattern:** (A) Rebuild the SID→mun map as OSID→mun using `buildOsidToMunFromReverseMap()` (converts the iteration keys); (B) Add OSID-prefix fallback in controller lookup: when SID lookup fails and `munId` is known, scan `op:<munId>:*` keys in sorted order to find controller (the municipality is encoded in the OSID key itself). **Affected systems (fixed 2026-02-24):** `factionHasPresenceInMun` (oob_phase_i_entry.ts), `getMunicipalityController` (pool_population.ts, minority_militia_decay.ts, control_strain.ts), scenario_runner.ts sidToMun rebuild. **Lesson:** After any key-space migration (SID→OSID, canonical→operational), grep for all `political_controllers[` lookups and verify key format compatibility. See `PROJECT_LEDGER.md` 2026-02-24.
 - **Force growth calibration (2026-02-24):** Historical first-year force trajectories: RBiH ~60-80K → 130K (Apr 92 → Apr 93), RS ~80K → 110K, HVO ~30K → 50K. Calibrated via 6 iterative 52w scenario runs. Key parameters: `BASE_MOBILIZATION_RATE=0.003`, faction scales RBiH=1.1 / RS=0.15 / HRHB=1.2, surge curve 3.0/2.2/1.4/0.9/0.5/0.3 (weeks 1-12/13-26/27-52/53-78/79-104/105+), `RS_JNA_INHERITANCE_BONUS=30K`, `REINFORCEMENT_RATE=400`, exhaustion threshold 20%/hard cap 35%. RS low scale (0.15) is correct because VRS was already near full mobilization from JNA handover; RS controls largest territory with highest ethnic majority, so most eligible Serbs were mobilized by May 1992. See `PROJECT_LEDGER.md` 2026-02-24.
+- **Bottom-up pipeline in phase_ii (2026-02-28):** When `recruitment_mode === 'bottom_up'`, the turn pipeline must run Phase I bottom-up steps (militia-emergence, compute-siege-state, pool-population, formation-spawn, activate-corps, promote-formations) even when `meta.phase === 'phase_ii'`. Implemented in turn_pipeline.ts; canon: Engine Invariants §14.10. Report: docs/40_reports/implemented/20260228_PHASE_G_CALIBRATION_BOTTOM_UP_PIPELINE_FIX.md.
+- **40w calibration baseline (2026-02-28):** apr1992_definitive_40w uses `recruitment_mode: "player_choice"` so brigades spread to front OSIDs and generate attack orders; bottom_up is not used for this scenario. n246 baseline: RS=406, RBiH=265, HRHB=82; all 6 benchmarks pass. Report: docs/40_reports/implemented/20260228_PHASE_G_CALIBRATION_BOTTOM_UP_PIPELINE_FIX.md.
+- **Attack share step function (2026-02-28):** Corps attack_slots = max(1, floor(N × share)); tuning within a step can have zero effect. Document step thresholds when tuning bot doctrine; see BOT_AI_HOLISTIC_TUNING_REFERENCE.md and Phase G report.
 - **Brigade operational cap (2026-02-11):** Hard then dynamic cap per brigade; `getBrigadeOperationalCoverageSettlements`; urban fortress for large-urban muns (≥60k 1991) via `large_urban_mun_data.ts`; UI and sim share `src/state/brigade_operational_cap.ts`. MAX_MUNICIPALITIES_PER_BRIGADE (8) in ensure step (2026-02-13) (napkin).
 - **Brigade AoR overhaul (2026-02-14):** Corps-directed assignment when `state.corps_command` present: partition front into corps sectors, allocate brigades along each sector's frontline (home mun + up to 2 contiguous neighbors), derive settlement AoR, enforce contiguity (repair, orphan reassignment). Contiguity is a hard invariant; rebalance shed uses `wouldRemainContiguous` guard. Legacy Voronoi BFS when no corps (Phase I / tests). Tactical map AoR highlight: compound fill (evenodd), outer boundary only, breathing glow. Report: `docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md; archived: docs/_old/40_reports/implemented_2026_02_15/BRIGADE_AOR_OVERHAUL_CORPS_DIRECTED_2026_02_14.md`; canon: Phase II §7.1, Systems Manual §2.1/§8, TACTICAL_MAP_SYSTEM Pass 6.
 - **Phase I no-flip semantics (2026-02-13):** `disable_phase_i_control_flip` = military-action-only (militia-pressure path disabled; formation-led flips still possible). Scenario names with no_flip do not imply strict zero control changes (napkin).
@@ -282,14 +285,13 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 
 | Document | Version | Scope |
 |----------|---------|--------|
-| Game_Bible | v0_5_0 | Design philosophy, constraints, v0.4 design additions |
-| Rulebook | v0_5_0 | Player-facing rules, v0.4 player-facing additions |
-| Engine_Invariants | v0_5_0 | Determinism, milestones §J, v0.4 extensions A–K |
-| Phase_Specifications | v0_5_0 | Phase 3A/B/C + v0.4 turn-order and Phase II+ integration |
-| Phase_0_Specification | v0_5_0 | Referendum, war start, Phase 0 link to Phase I §4.8 |
-| Phase_I_Specification | v0_5_0 | Phase I mechanics, §4.8 RBiH–HRHB relationship |
-| Phase_II_Specification | v0_5_0 | Phase II (mid-war fronts, supply, exhaustion) |
-| Systems_Manual | v0_5_0 | Systems 1–11, Washington Agreement, state schema |
+| Game_Bible | v0_6_0 | Design philosophy, constraints, two-phase lifecycle |
+| Rulebook | v0_6_0 | Player-facing rules, two-phase lifecycle |
+| Engine_Invariants | v0_6_0 | Determinism and war/peace invariants |
+| Phase_Specifications | v0_6_0 | Peace/War phase contract |
+| Peace_Specification | v0_6_0 | Referendum and war-start contract in peace |
+| War_Specification | v0_6_0 | Unified war mechanics (formerly Phase I/II scope) |
+| Systems_Manual | v0_6_0 | Systems 1–11, Washington Agreement, state schema |
 
 ### Specification updates log
 
@@ -477,6 +479,16 @@ Identified via Orchestrator comprehensive review convene ([ORCHESTRATOR_COMPREHE
 - **OSID terrain scalar policy** — Defender terrain multiplier is precomputed per OSID deterministically using max composite over constituent SIDs (defense-favoring, stable order).
 - **Spawn pass-through completion** — Browser and CLI spawn flows now pass `canonicalToOperational` so emergent brigades get `location_osid` where mapping exists.
 - **HoI interaction polish** — `M` key centers player-capital heuristic, double-click settlement zooms tactical-in, and map gets subtle tactile overlay.
+
+### Phase M mechanics decisions (2026-03-01)
+
+- **Morale vs cohesion separation** — Morale is a separate field from cohesion. Morale drifts toward census-based population affinity (ethnic composition of municipality). Cohesion represents unit training/experience. Both affect combat but through different channels. Morale gates retreat resistance; cohesion affects combat power.
+- **ZoC as attack-resolution modifier (not passive)** — ZoC defense is implemented as "virtual defense" within attack resolution, not as a passive terrain modifier. When an unoccupied OSID is attacked, a linked friendly brigade in an adjacent OSID provides virtual defense. The defender stays at their own OSID; if they lose, the target flips but the defender doesn't retreat (they were never "there"). This avoids the complexity of passive zone-of-control mechanics.
+- **Census-driven population affinity** — Morale drift uses 1991 census data (`population_share.ts`) to compute ethnic majority per municipality. Brigade morale drifts toward the ethnic affinity of their location. This creates emergent behavior: units in friendly-majority territory maintain morale; units in hostile-majority territory lose morale over time.
+- **Per-municipality displacement routing** — Static lookup tables (47 sub-regions × 3 ethnicities) in `displacement_routing_data.ts`. Runtime validation (is destination friendly-controlled?) happens in `displacement_takeover.ts` routing loop. This separates data from logic cleanly. Don't add `state` parameter to route lookup function.
+- **Enclave morale initial value** — Set at 70 (= MORALE_RESIST_FLOOR). n268 revealed this makes enclaves too strong: they resist all costly victories AND counterattack. Recommended fix: lower to 55 so enclaves hold under light pressure but retreat under heavy. The resist floor (70) should represent motivated, well-supplied units — not isolated enclaves.
+- **Rear-area cleanup as corps directive** — Implemented as a time-limited (weeks 0-12) corps-level directive that targets own-controlled OSIDs with enemy formations behind the front line. All factions historically secured their rear before pushing forward. Expires after week 12 to avoid permanent defensive distraction.
+- **Breakthrough retreat deferred** — M5 was evaluated and deferred. The HVO Orasje pocket issue is an OOB gap (0 brigades assigned to `hvo_northwest_bosnia`), not a retreat mechanic issue. Breakthrough retreat adds schema complexity (isolation_turns tracking) and BFS pathfinding for a mechanic that primarily helps edge cases.
 
 ---
 

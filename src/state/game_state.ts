@@ -217,7 +217,7 @@ export interface SettlementHoldoutState {
  * Canonical phase names (game phase, not turn sub-phase).
  * Phase 0 = Pre-War; Phase I = Early War (Phase_Specifications_v0_3_0, Phase_0/Phase_I specs).
  */
-export type PhaseName = 'phase_0' | 'phase_i' | 'phase_ii';
+export type PhaseName = 'peace' | 'war';
 
 export interface FormationAssignment {
     kind: 'region' | 'edge';
@@ -252,6 +252,8 @@ export interface FormationState {
     personnel?: number;
     readiness?: FormationReadinessState; // default: 'active' for backward compatibility
     cohesion?: number; // [0,100] formation cohesion, affects effectiveness and collapse risk
+    /** Willingness to fight [0,100]. Non-monotonic. Distinct from cohesion (tactical effectiveness). Gates retreat resistance. */
+    morale?: number;
     experience?: number; // [0,1] formation experience (Phase I / System 10)
     /** Unit honor/decoration title. Affects combat power: slavna (1.10×), vitezka (1.20×). ARBiH decoration system; reflects veteran status and battle-hardened capability. */
     honor?: 'slavna' | 'vitezka';
@@ -522,6 +524,24 @@ export interface DisplacementState {
     displaced_in_by_faction?: Partial<Record<FactionId, number>>;
     lost_population: number; // cumulative (killed, emigrated, unreachable - abstracted)
     last_updated_turn: number; // integer, last mutation turn
+    /** OSID-level tracking: origin OSID → count displaced from. */
+    displaced_out_by_osid?: Record<string, number>;
+    /** OSID-level tracking: destination OSID → count settled in. */
+    displaced_in_by_osid?: Record<string, number>;
+}
+
+/** Per-event displacement record for tracking and reporting. Sorted by (turn, origin_mun). */
+export interface DisplacementEvent {
+    turn: number;
+    origin_mun: MunicipalityId;
+    origin_osid?: string;
+    dest_mun: MunicipalityId;
+    dest_osid?: string;
+    ethnicity: FactionId;
+    displaced: number;
+    killed: number;
+    fled_abroad: number;
+    settled: number;
 }
 
 /**
@@ -638,11 +658,11 @@ export interface StateMeta {
     /** Phase 0: Turn when war starts (referendum_turn + 4). Phase I entered only at this turn. */
     war_start_turn?: number | null;
     /** Phase 0: Optional scheduled referendum turn for deterministic historical starts when referendum is not held at turn 0. */
-    phase_0_scheduled_referendum_turn?: number | null;
+    peace_scheduled_referendum_turn?: number | null;
     /** Phase 0: Optional scheduled war-start turn override used with scheduled referendum starts. */
-    phase_0_scheduled_war_start_turn?: number | null;
+    peace_scheduled_war_start_turn?: number | null;
     /** Phase 0: Optional absolute path to a mun1990 control file to apply exactly when war starts. */
-    phase_0_war_start_control_path?: string | null;
+    peace_war_start_control_path?: string | null;
     /** Phase 0: First turn when referendum became eligible (both RS and HRHB declared). */
     referendum_eligible_turn?: number | null;
     /** Phase 0: Deadline turn for referendum; if reached without referendum → non-war terminal. */
@@ -652,17 +672,17 @@ export interface StateMeta {
     /** Phase 0: Outcome label when game_over (e.g. 'non_war_terminal'). */
     outcome?: string;
     /** Phase 0→I: Turn when Phase 0 ended (audit; set at transition). §8 Output Contract. */
-    phase_0_end_turn?: number | null;
+    peace_end_turn?: number | null;
     /** Phase 0→I: Turn when Phase I started (audit; set at transition). §8 Output Contract. */
-    phase_1_start_turn?: number | null;
+    war_start_lifecycle_phase_turn?: number | null;
     /** Phase 0→I: What triggered transition (e.g. 'war_start_turn'). §8 Output Contract. */
     escalation_reason?: string | null;
     /** Phase I → II: Consecutive turns with opposing-control edges >= MIN_OPPOSING_EDGES (D0.9.1). Default 0 on load. */
-    phase_i_opposing_edges_streak?: number;
+    war_opposing_edges_streak?: number;
     /** Phase I→II: Optional initial entrenchment turns (0..12) for all brigades at transition; set from scenario. */
-    phase_ii_entrenchment_init_turns?: number;
+    war_entrenchment_init_turns?: number;
     /** Stuck-in-Phase-I fallback: force transition after this many Phase I turns since war_start_turn (e.g. 52). */
-    phase_i_force_transition_after_turns?: number;
+    war_force_transition_after_turns?: number;
     /** Phase II §11.3: Operation Storm (Oluja) has triggered (precondition step set). */
     operation_storm_triggered?: boolean;
     /** Phase I §4.8 (historical fidelity): Earliest turn when RBiH–HRHB open war can begin. When turn < this value, RBiH–HRHB treated as allied for flips and alliance cannot drop below ALLIED_THRESHOLD. Default 26 when absent (October 1992 for April 1992 start). */
@@ -1115,6 +1135,8 @@ export interface GameState {
     displacement_camp_state?: Record<MunicipalityId, DisplacementCampState>;
     /** Phase II: non-takeover minority flight state (per settlement). Canon: displacement redesign 2026-02-17. */
     minority_flight_state?: Record<SettlementId, MinorityFlightStateEntry>;
+    /** Cumulative displacement event log, sorted by (turn, origin_mun). */
+    displacement_event_log?: DisplacementEvent[];
     // Phase 22: Sustainability collapse tracking (per municipality)
     sustainability_state?: Record<MunicipalityId, SustainabilityState>;
     // Phase 3C: Collapse eligibility state (per faction, Tier-0)
@@ -1159,35 +1181,35 @@ export interface GameState {
 
     // --- Phase I (Early War) state (Phase_I_Specification_v0_3_0.md) ---
     /** Turn (inclusive) until which municipality cannot flip control; keyed by MunicipalityId. */
-    phase_i_consolidation_until?: Record<MunicipalityId, number>;
+    war_consolidation_until?: Record<MunicipalityId, number>;
     /** Militia strength [0, 100] per municipality per faction; Phase I §4.2. */
-    phase_i_militia_strength?: Record<MunicipalityId, Record<FactionId, number>>;
+    war_militia_strength?: Record<MunicipalityId, Record<FactionId, number>>;
     /** Control strain accumulated per municipality; Phase I §4.5. */
-    phase_i_control_strain?: Record<MunicipalityId, number>;
+    war_control_strain?: Record<MunicipalityId, number>;
     /** JNA withdrawal and asset transfer; Phase I §4.6. Does not start war. */
-    phase_i_jna?: PhaseIJNAState;
+    war_jna?: PhaseIJNAState;
     /** RBiH–HRHB alliance relationship [-1, 1]; Phase I §4.8. */
-    phase_i_alliance_rbih_hrhb?: number;
+    war_alliance_rbih_hrhb?: number;
     /** Phase I §4.8: RBiH–HRHB bilateral state (war tracking, ceasefire, Washington Agreement). */
     rbih_hrhb_state?: RbihHrhbState;
     /** Phase I §4.4: displacement initiated turn per municipality (hook only; no population change). */
-    phase_i_displacement_initiated?: Record<MunicipalityId, number>;
+    war_displacement_initiated?: Record<MunicipalityId, number>;
     /** B4: Coercion pressure [0, 1] per municipality; reduces flip threshold (makes flip easier). Scenario/init can supply (e.g. Prijedor, Zvornik). */
     coercion_pressure_by_municipality?: Record<MunicipalityId, number>;
 
     // --- Phase II (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
     /** Supply pressure per faction [0, 100]; higher = worse. Constrains effectiveness; no free replenishment. */
-    phase_ii_supply_pressure?: Record<FactionId, number>;
+    war_supply_pressure?: Record<FactionId, number>;
     /** Faction-level exhaustion (monotonic, irreversible). Engine Invariants §8. */
-    phase_ii_exhaustion?: Record<FactionId, number>;
+    war_exhaustion?: Record<FactionId, number>;
     /** Optional local (per-settlement) exhaustion accumulator; monotonic when present. */
-    phase_ii_exhaustion_local?: Record<SettlementId, number>;
+    war_exhaustion_local?: Record<SettlementId, number>;
     /** Enclave resilience values [0, 30] per enclave ID. Grows under isolation, provides defense/cohesion bonus. */
     enclave_resilience?: Record<string, number>;
     /** OSID list in enemy ZoC per faction (for ZoC overlay). Set by zoc-computation when operational data present. */
-    phase_ii_enemy_zoc_by_faction?: Record<FactionId, string[]>;
+    war_enemy_zoc_by_faction?: Record<FactionId, string[]>;
     /** Linked ZoC per faction: OSIDs that form a connected front between 2+ friendly brigades. Enemies cannot enter. */
-    phase_ii_linked_zoc_by_faction?: Record<FactionId, string[]>;
+    war_linked_zoc_by_faction?: Record<FactionId, string[]>;
 
     // --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
     /** Settlement-level displacement (capacity degradation) [0, 1]. Monotonic; never decreases. */
@@ -1201,7 +1223,7 @@ export interface GameState {
     /** Canonical front-edge snapshot for GUI rendering and deterministic diagnostics. */
     front_edges?: FrontEdgeState[];
     /** OSID front-edge snapshot (Phase II operational view) for HoI/OSID consumers. */
-    phase_ii_front_edges_osid?: FrontEdgeState[];
+    war_front_edges_osid?: FrontEdgeState[];
     /** HoI-style assignable front segments derived from canonical front_edges. */
     assignable_front_segments?: AssignableFrontSegmentState[];
     /** HoI-style brigade assignment to an assignable front segment. null = reserve. */
@@ -1264,3 +1286,5 @@ export interface GameState {
 export interface CivilianCasualtiesByFaction {
     [factionId: string]: { killed: number; fled_abroad: number };
 }
+
+

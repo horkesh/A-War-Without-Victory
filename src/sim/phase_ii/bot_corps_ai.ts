@@ -373,7 +373,7 @@ export function generateCorpsStanceOrders(
             // E2: RBiH bilateral war awareness
             const rhsRBiH = state.rbih_hrhb_state;
             if (rhsRBiH && !rhsRBiH.washington_signed) {
-                const allianceVal = state.phase_i_alliance_rbih_hrhb ?? 1.0;
+                const allianceVal = state.war_alliance_rbih_hrhb ?? 1.0;
                 if (allianceVal < 0.0) {
                     // Open war with HRHB: central Bosnia corps balanced (defend mixed municipalities)
                     const CENTRAL_BOSNIA_MUNS = new Set(['travnik', 'bugojno', 'vitez', 'novi_travnik', 'busovaca', 'kiseljak', 'zenica']);
@@ -399,7 +399,7 @@ export function generateCorpsStanceOrders(
             // E3: Alliance-sensitive — check RBiH-HRHB war state
             const rhs = state.rbih_hrhb_state;
             if (rhs && !rhs.washington_signed) {
-                const allianceValue = state.phase_i_alliance_rbih_hrhb ?? 1.0;
+                const allianceValue = state.war_alliance_rbih_hrhb ?? 1.0;
                 if (allianceValue < 0.0) {
                     // Open war: central Bosnia corps go offensive, Herzegovina stays defensive
                     if (!HERZEGOVINA_MUNS.has(corpsHomeMun ?? '')) {
@@ -460,7 +460,7 @@ function getOperationCatalog(faction: FactionId, state: GameState): OperationTem
                 { name: 'Tuzla Widening', type: 'sector_attack', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice'] },
                 { name: 'Bihac Pocket Defense', type: 'strategic_defense', target_municipalities: ['bihac', 'cazin', 'velika_kladusa'] },
             ];
-            const allianceValue = state.phase_i_alliance_rbih_hrhb ?? 1.0;
+            const allianceValue = state.war_alliance_rbih_hrhb ?? 1.0;
             if (allianceValue < 0.0) {
                 ops.push({ name: 'Central Bosnia Defense', type: 'strategic_defense', target_municipalities: ['travnik', 'bugojno', 'vitez', 'novi_travnik'] });
             }
@@ -478,7 +478,7 @@ function getOperationCatalog(faction: FactionId, state: GameState): OperationTem
                 { name: 'Posavina Defense', type: 'strategic_defense', target_municipalities: ['orasje', 'odzak', 'bosanski_brod'] },
             ];
             // Bilateral operations only when at war with RBiH
-            const allianceValue = state.phase_i_alliance_rbih_hrhb ?? 1.0;
+            const allianceValue = state.war_alliance_rbih_hrhb ?? 1.0;
             if (allianceValue < 0.0) {
                 ops.push({ name: 'Lasva Valley Offensive', type: 'sector_attack', target_municipalities: ['vitez', 'busovaca', 'kiseljak', 'novi_travnik'] });
                 ops.push({ name: 'Mostar Division', type: 'sector_attack', target_municipalities: ['mostar', 'jablanica', 'konjic'] });
@@ -907,7 +907,7 @@ export function setArmyStandingOrder(
 
     // HRHB: Lasva Offensive only applies when at war with RBiH
     if (faction === 'HRHB' && order.name === 'Lasva Offensive') {
-        const allianceValue = state.phase_i_alliance_rbih_hrhb ?? 1.0;
+        const allianceValue = state.war_alliance_rbih_hrhb ?? 1.0;
         if (allianceValue >= 0.2) {
             stance = 'balanced'; // Not at war — no army-wide offensive
         }
@@ -1254,6 +1254,38 @@ export function generateCorpsDirectives(
             // avoid_municipalities removed — bipolar co-ethnic scoring handles deterrence emergently
         }
 
+        // Rear-area cleanup: weeks 0-12, target undefended faction-controlled OSIDs
+        // behind the front line that have hostile-majority population. All factions
+        // historically secured their rear before pushing forward (BB1 pp496-501).
+        const REAR_CLEANUP_END_WEEK = 12;
+        if (turn < REAR_CLEANUP_END_WEEK && graphAnalysis) {
+            const pc = state.political_controllers ?? {};
+            for (const sub of subordinates) {
+                const subOsid = sub.location_osid;
+                if (!subOsid) continue;
+                const neighbors = adjacency.get(subOsid) ?? [];
+                for (const neighborOsid of neighbors) {
+                    const controller = pc[neighborOsid];
+                    if (controller !== faction) continue; // Must be own-controlled
+                    // Skip if already a target
+                    if (offensiveTargets.includes(neighborOsid)) continue;
+                    // Must have no enemy neighbors (behind front)
+                    const neighborNeighbors = adjacency.get(neighborOsid) ?? [];
+                    const hasEnemyNeighbor = neighborNeighbors.some(nn => {
+                        const nnController = pc[nn];
+                        return nnController && nnController !== faction;
+                    });
+                    if (hasEnemyNeighbor) continue;
+                    // Must have enemy formation present (uncleared pocket/holdout)
+                    const hasEnemyFormation = Object.values(state.formations ?? {}).some(f =>
+                        f && f.status === 'active' && f.faction !== faction && f.location_osid === neighborOsid
+                    );
+                    if (!hasEnemyFormation) continue;
+                    offensiveTargets.push(neighborOsid);
+                }
+            }
+        }
+
         // Add targets from active named operation
         if (cmd.active_operation?.phase === 'execution' && cmd.active_operation.target_settlements) {
             for (const sid of cmd.active_operation.target_settlements) {
@@ -1512,3 +1544,4 @@ export function generateAllCorpsOrders(
     }
     generateCorpsDirectives(state, faction, effectiveOsidEdges, reverseMap ?? null, graphAnalysis);
 }
+

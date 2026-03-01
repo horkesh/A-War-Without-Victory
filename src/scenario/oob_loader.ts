@@ -6,7 +6,7 @@
 
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import type { FactionId } from '../state/game_state.js';
+import type { BrigadeComposition, FactionId } from '../state/game_state.js';
 import type { EquipmentClass } from '../state/recruitment_types.js';
 import { isValidEquipmentClass, RECRUITMENT_DEFAULTS } from '../state/recruitment_types.js';
 
@@ -35,6 +35,10 @@ export interface OobBrigade {
     honor?: 'slavna' | 'vitezka';
     /** Explicit OSID for initial placement (e.g. "op:brcko:brezovo_polje_selo_2"). Overrides home_mun HQ OSID. */
     home_osid?: string;
+    /** Explicit brigade composition (tanks, artillery, infantry). When set, overrides faction defaults. Used for enclave brigades (infantry-only). */
+    composition?: BrigadeComposition;
+    /** Initial morale [0,100]. When set, overrides default (60). Enclave brigades: 70 (desperation bonus). */
+    initial_morale?: number;
 }
 
 export interface OobCorps {
@@ -115,6 +119,8 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         const initial_cohesion = typeof r.initial_cohesion === 'number' && Number.isFinite(r.initial_cohesion) ? r.initial_cohesion : undefined;
         const honor = (r.honor === 'slavna' || r.honor === 'vitezka') ? r.honor as 'slavna' | 'vitezka' : undefined;
         const home_osid = typeof r.home_osid === 'string' && r.home_osid.trim() ? r.home_osid.trim() : undefined;
+        const initial_morale = typeof r.initial_morale === 'number' && Number.isFinite(r.initial_morale) ? r.initial_morale : undefined;
+        const composition = isRecord(r.composition) ? r.composition as unknown as BrigadeComposition : undefined;
         result.push({
             id,
             faction,
@@ -133,8 +139,10 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             max_personnel,
             ...(initial_personnel != null && { initial_personnel }),
             ...(initial_cohesion != null && { initial_cohesion }),
+            ...(initial_morale != null && { initial_morale }),
             ...(honor && { honor }),
             ...(home_osid && { home_osid }),
+            ...(composition && { composition }),
         });
     }
 

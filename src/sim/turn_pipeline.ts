@@ -108,6 +108,10 @@ import {
     type CohesionDriftReport
 } from './phase_ii/cohesion_drift.js';
 import {
+    runPhaseIIMoraleDrift,
+    type MoraleDriftReport
+} from './phase_ii/morale_drift.js';
+import {
     runPhaseIIOngoingMobilization,
     type OngoingMobilizationReport
 } from './phase_ii/ongoing_mobilization.js';
@@ -201,11 +205,6 @@ import { applyZocConstrainedMovement } from './phase_ii/zoc_constrained_movement
 import { computeZoCState } from './phase_ii/zoc.js';
 import { processOsidColumnMovement, type OsidColumnMovementReport } from './phase_ii/osid_column_movement.js';
 import { updatePhaseIISupplyPressure } from './phase_ii/supply_pressure.js';
-import {
-    applyPhaseIToPhaseIITransition,
-    isPhaseIITransitionEligible,
-    updatePhaseIOpposingEdgesStreak
-} from './phase_transitions/phase_i_to_phase_ii.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from './recruitment_turn.js';
 
 
@@ -264,10 +263,10 @@ export interface TurnReport {
     phase_i_control_flip?: ControlFlipReport; // Phase C Step 4: early war control change
     formation_hq_relocation?: FormationHqRelocationReport; // Phase II: relocate HQs for safety and AoR depth sync
     phase_i_authority?: AuthorityDegradationReport; // Phase C Step 5: authority degradation
-    phase_i_control_strain?: ControlStrainReport; // Phase C Step 6: control strain
+    war_control_strain?: ControlStrainReport; // Phase C Step 6: control strain
     phase_i_displacement_hooks?: DisplacementHooksReport; // Phase C Step 7: displacement initiation hooks
     phase_i_displacement_apply?: DisplacementStepReport; // Phase C Step 7b: one-time Phase I displacement from flips (Phase I §4.4)
-    phase_i_jna_transition?: JNATransitionReport; // Phase C Step 8: JNA withdrawal and asset transfer
+    war_jna_transition?: JNATransitionReport; // Phase C Step 8: JNA withdrawal and asset transfer
     phase_i_alliance_update?: AllianceUpdateReport; // Phase I §4.8: RBiH–HRHB alliance value update
     phase_i_ceasefire_check?: CeasefireCheckReport; // Phase I §4.8: bilateral ceasefire evaluation
     phase_i_washington_check?: WashingtonCheckReport; // Phase I §4.8: Washington Agreement evaluation
@@ -291,7 +290,7 @@ export interface TurnReport {
         /** Phase II: supply state per OSID when operational data present. */
         supply_state_by_osid?: SupplyStateByOsidReport;
     };
-    /** Phase E: pressure diffusion (runs only when meta.phase === 'phase_ii') */
+    /** Phase E: pressure diffusion (runs only when meta.phase === 'war') */
     phase_e_pressure_update?: PhaseEPressureDiffusionReport;
     /** Phase II: front emergence — derived fronts from pressure-eligible edges (phase_ii only) */
     phase_ii_front_emergence?: PhaseIIFrontDescriptor[];
@@ -300,6 +299,7 @@ export interface TurnReport {
     /** Phase II: OSID-based attack resolution (when operational data available) */
     phase_ii_attack_resolution_osid?: AttackResolutionOsidReport;
     phase_ii_cohesion_drift?: CohesionDriftReport;
+    phase_ii_morale_drift?: MoraleDriftReport;
     /** Phase II: control flips from consolidation posture. */
     phase_ii_consolidation_flips?: ConsolidationFlipsReport;
     /** Phase II: delayed hostile-takeover displacement (timer + camp + reroute). */
@@ -444,7 +444,7 @@ const phases: NamedPhase[] = [
     {
         name: 'migrate-political-control-osid',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_i' && context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             try {
                 const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
                 const opData = await loadOperationalData(baseDir || undefined);
@@ -478,7 +478,7 @@ const phases: NamedPhase[] = [
     {
         name: 'ensure-brigade-front-assignment',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             ensureBrigadeFrontAssignments(context.state);
         }
     },
@@ -558,7 +558,7 @@ const phases: NamedPhase[] = [
     {
         name: 'formation-hq-relocation',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             const report = runFormationHqRelocation(context.state, graph.settlements, graph.edges);
             if (report.relocated > 0) {
@@ -569,7 +569,7 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-ii-location-osid-backfill',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             try {
                 const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
                 const opData = await loadOperationalData(baseDir || undefined);
@@ -583,7 +583,7 @@ const phases: NamedPhase[] = [
     {
         name: 'zoc-computation',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
             try {
                 const [opData, edges] = await Promise.all([
@@ -598,14 +598,14 @@ const phases: NamedPhase[] = [
                     const set = zocState.enemyZocByFaction.get(fid);
                     enemyZocByFaction[fid] = set ? [...set].sort(strictCompare) : [];
                 }
-                context.state.phase_ii_enemy_zoc_by_faction = enemyZocByFaction;
+                context.state.war_enemy_zoc_by_faction = enemyZocByFaction;
                 // Serialize linked ZoC per faction (for UI/debugging)
                 const linkedZocByFaction: Record<string, string[]> = {};
                 for (const fid of factionIds) {
                     const set = zocState.linkedZocByFaction.get(fid);
                     linkedZocByFaction[fid] = set ? [...set].sort(strictCompare) : [];
                 }
-                context.state.phase_ii_linked_zoc_by_faction = linkedZocByFaction;
+                context.state.war_linked_zoc_by_faction = linkedZocByFaction;
             } catch (err) {
                 if (typeof console !== 'undefined' && console.warn) {
                     console.warn('ZoC/computation: operational data not available, skipping OSID steps:', err instanceof Error ? err.message : String(err));
@@ -616,7 +616,7 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-ii-supply-osid',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.opData?.canonicalToOperational || !od?.edges?.length) return;
             const osidReach = computeSupplyReachabilityOsid(
@@ -635,7 +635,7 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-ii-enclave-resilience',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
             context.report.phase_ii_enclave_resilience = updateEnclaveResilience(context.state, supplyByOsid);
         }
@@ -643,7 +643,7 @@ const phases: NamedPhase[] = [
     {
         name: 'osid-column-movement',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
             let terrainData;
@@ -664,7 +664,7 @@ const phases: NamedPhase[] = [
     {
         name: 'zoc-constrained-movement',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
             const linkedZocByFaction = od?.zocState?.linkedZocByFaction;
@@ -675,20 +675,20 @@ const phases: NamedPhase[] = [
     {
         name: 'derive-osid-front-segments',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) {
-                context.state.phase_ii_front_edges_osid = undefined;
+                context.state.war_front_edges_osid = undefined;
                 return;
             }
             const osidFrontEdges = computeFrontEdgesOsid(context.state, od.edges, od.opData.operationalToCanonical);
-            context.state.phase_ii_front_edges_osid = osidFrontEdges;
+            context.state.war_front_edges_osid = osidFrontEdges;
         }
     },
     {
         name: 'process-brigade-movement',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             if (getOperationalData(context)) return;
             const { edges } = await getGraphAndEdges(context);
             let terrainData;
@@ -703,7 +703,7 @@ const phases: NamedPhase[] = [
     {
         name: 'generate-bot-corps-orders',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             // Ensure corps_command is initialized (handles brigades created by per-turn recruitment)
             initializeCorpsCommand(context.state);
             if (!context.state.corps_command || Object.keys(context.state.corps_command).length === 0) return;
@@ -737,7 +737,7 @@ const phases: NamedPhase[] = [
     {
         name: 'generate-bot-brigade-orders',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const playerFaction = context.state.meta.player_faction ?? null;
             const factions = (context.state.factions ?? []).map(f => f.id)
                 .filter(fid => playerFaction == null || fid !== playerFaction);
@@ -785,7 +785,7 @@ const phases: NamedPhase[] = [
     {
         name: 'ensure-derived-corps-front-edges',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const { edges } = await getGraphAndEdges(context);
             ensureDerivedCorpsFrontEdges(context.state, edges);
         }
@@ -793,7 +793,7 @@ const phases: NamedPhase[] = [
     {
         name: 'apply-corps-front-orders',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             if (!context.state.corps_front_edges) return;
             applyCorpsFrontAutoDistribution(context.state);
         }
@@ -801,7 +801,7 @@ const phases: NamedPhase[] = [
     {
         name: 'apply-corps-attack-axis-orders',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             if (!context.state.corps_attack_axis_orders) return;
             applyCorpsAttackAxisOrders(context.state);
         }
@@ -809,7 +809,7 @@ const phases: NamedPhase[] = [
     {
         name: 'apply-brigade-reposition',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             if (!context.state.brigade_reposition_orders || Object.keys(context.state.brigade_reposition_orders).length === 0) return;
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
@@ -827,14 +827,14 @@ const phases: NamedPhase[] = [
     {
         name: 'apply-brigade-posture',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             applyPostureOrders(context.state);
         }
     },
     {
         name: 'update-corps-effects',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             if (!context.state.corps_command) return;
             applyCorpsEffects(context.state);
         }
@@ -842,7 +842,7 @@ const phases: NamedPhase[] = [
     {
         name: 'advance-corps-operations',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             if (!context.state.corps_command) return;
             advanceOperations(context.state);
         }
@@ -850,7 +850,7 @@ const phases: NamedPhase[] = [
     {
         name: 'activate-operational-groups',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             if (!context.state.og_orders?.length) return;
             const { edges } = await getGraphAndEdges(context);
             activateOGs(context.state, edges);
@@ -859,7 +859,7 @@ const phases: NamedPhase[] = [
     {
         name: 'equipment-degradation',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const turn = context.state.meta.turn ?? 0;
             const formations = context.state.formations ?? {};
             for (const fid of Object.keys(formations).sort()) {
@@ -879,7 +879,7 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-ii-equipment-progression',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const turn = context.state.meta.turn ?? 0;
             // Run every 4 turns to model gradual acquisition
             if (turn === 0 || turn % 4 !== 0) return;
@@ -889,14 +889,14 @@ const phases: NamedPhase[] = [
     {
         name: 'apply-posture-costs',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             applyPostureCosts(context.state);
         }
     },
     {
         name: 'phase-ii-resolve-attack-orders',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
             if (od?.opData?.operationalToCanonical && od?.edges?.length) {
                 let terrainData: Awaited<ReturnType<typeof loadTerrainScalars>> | undefined;
@@ -945,15 +945,25 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-ii-cohesion-drift',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const engagedIds = context.report.phase_ii_attack_resolution_osid?.engaged_formation_ids ?? [];
             context.report.phase_ii_cohesion_drift = runPhaseIICohesionDrift(context.state, engagedIds);
         }
     },
     {
+        name: 'phase-ii-morale-drift',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const engagedIds = context.report.phase_ii_attack_resolution_osid?.engaged_formation_ids ?? [];
+            context.report.phase_ii_morale_drift = runPhaseIIMoraleDrift(
+                context.state, engagedIds, context.input.municipalityPopulation1991
+            );
+        }
+    },
+    {
         name: 'phase-ii-consolidation-flips',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             const sidToMun: Record<string, string> = {};
             for (const [sid, rec] of graph.settlements.entries()) {
@@ -967,7 +977,7 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-ii-hostile-takeover-displacement',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
 
             // Build combined battle report from both old settlement-based and OSID-based attack resolution.
@@ -1011,7 +1021,7 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-ii-minority-flight',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             context.report.phase_ii_minority_flight = processMinorityFlight(
                 context.state,
@@ -1037,28 +1047,28 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-ii-ceasefire-check',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             context.report.phase_i_ceasefire_check = checkAndApplyCeasefire(context.state);
         }
     },
     {
         name: 'phase-ii-washington-check',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             context.report.phase_i_washington_check = checkAndApplyWashington(context.state);
         }
     },
     {
         name: 'phase-ii-operation-storm-check',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             context.report.phase_ii_operation_storm_check = checkAndApplyOperationStorm(context.state);
         }
     },
     {
         name: 'phase-ii-recruitment',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             if (!context.state.recruitment_state) return;
 
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
@@ -1135,7 +1145,7 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-ii-ongoing-mobilization',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             context.report.phase_ii_ongoing_mobilization = runPhaseIIOngoingMobilization(
                 context.state,
@@ -1147,21 +1157,21 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-ii-brigade-reinforcement',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             context.report.phase_ii_brigade_reinforcement = reinforceBrigadesFromPools(context.state);
         }
     },
     {
         name: 'phase-ii-wia-trickleback',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             context.report.phase_ii_wia_trickleback = applyWiaTrickleback(context.state);
         }
     },
     {
         name: 'update-og-lifecycle',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             updateOGLifecycle(context.state);
         }
     },
@@ -1169,7 +1179,7 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-ii-consolidation',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const edges = context.input.settlementEdges;
             if (!edges) return;
             const fronts = detectPhaseIIFronts(context.state, edges);
@@ -1188,7 +1198,7 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-e-pressure-update',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             let edges = context.input.settlementEdges;
             if (!edges || edges.length === 0) {
                 const graph = await loadSettlementGraph();
@@ -1202,7 +1212,7 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-ii-front-emergence',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             let edges = context.input.settlementEdges;
             if (!edges || edges.length === 0) {
                 const graph = await loadSettlementGraph();
@@ -1215,7 +1225,7 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-ii-recon-intelligence',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const { edges } = await getGraphAndEdges(context);
             if (!edges?.length) return;
             const od = getOperationalData(context);
@@ -1230,7 +1240,7 @@ const phases: NamedPhase[] = [
         name: 'phase-e-aor-derivation',
         // Legacy AoR derivation — superseded by OSID/ZoC (phase-out §33). Will be removed in a future cleanup.
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             let edges = context.input.settlementEdges;
             if (!edges || edges.length === 0) {
                 const graph = await loadSettlementGraph();
@@ -1245,7 +1255,7 @@ const phases: NamedPhase[] = [
         name: 'phase-e-rear-zone-derivation',
         // Legacy AoR derivation — superseded by OSID/ZoC (phase-out §33). Will be removed in a future cleanup.
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             let edges = context.input.settlementEdges;
             if (!edges || edges.length === 0) {
                 const graph = await loadSettlementGraph();
@@ -1259,7 +1269,7 @@ const phases: NamedPhase[] = [
     {
         name: 'phase-f-displacement',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             let edges = context.input.settlementEdges;
             if (!edges || edges.length === 0) {
                 const graph = await loadSettlementGraph();
@@ -1287,7 +1297,7 @@ const phases: NamedPhase[] = [
     {
         name: 'update-capability-profiles',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             updateCapabilityProfiles(context.state);
             context.report.capability_update = { factions: context.state.factions.length };
         }
@@ -1295,7 +1305,7 @@ const phases: NamedPhase[] = [
     {
         name: 'update-embargo-profiles',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             updateEmbargoProfiles(context.state);
             ensureMaintenanceCapacity(context.state);
             context.report.embargo_update = { factions: context.state.factions.length };
@@ -1304,7 +1314,7 @@ const phases: NamedPhase[] = [
     {
         name: 'update-enclave-integrity',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             let edges = context.input.settlementEdges;
             if (!edges || edges.length === 0) {
                 const graph = await loadSettlementGraph();
@@ -1327,7 +1337,7 @@ const phases: NamedPhase[] = [
     {
         name: 'update-sarajevo-exception',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const graph = await loadSettlementGraph();
             const sarajevo = updateSarajevoState(context.state, graph, context.report.supply_resolution?.supply_state);
             context.report.sarajevo_exception = {
@@ -1340,7 +1350,7 @@ const phases: NamedPhase[] = [
     {
         name: 'update-patron-ivp',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             ensureInternationalVisibilityPressure(context.state);
             const enclavePressure = context.report.enclave_integrity?.humanitarian_pressure_total ?? 0;
             const ivp = updateInternationalVisibilityPressure(
@@ -1359,7 +1369,7 @@ const phases: NamedPhase[] = [
     {
         name: 'update-legitimacy',
         run: async (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const graph = await loadSettlementGraph();
             await updateLegitimacyState(context.state, graph);
             context.report.legitimacy_update = { settlements: Object.keys(context.state.settlements ?? {}).length };
@@ -1387,7 +1397,7 @@ const phases: NamedPhase[] = [
     {
         name: 'update-doctrine-eligibility',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             updateDoctrineState(context.state, context.report.supply_resolution?.supply_state, (context as any).effectivePosture);
             context.report.doctrine_update = { formations: Object.keys(context.state.formations ?? {}).length };
         }
@@ -1395,7 +1405,7 @@ const phases: NamedPhase[] = [
     {
         name: 'update-heavy-equipment',
         run: (context) => {
-            if (context.state.meta.phase !== 'phase_ii') return;
+            if (context.state.meta.phase !== 'war') return;
             const doctrineTempoByFormation: Record<string, number> = {};
             for (const formation of Object.values(context.state.formations ?? {})) {
                 doctrineTempoByFormation[formation.id] = getDoctrineTempoMultiplier(formation);
@@ -1771,7 +1781,7 @@ const phaseIPhases: NamedPhase[] = [
         name: 'compute-siege-state',
         run: async (context) => {
             const _phase = context.state.meta.phase;
-            if (_phase !== 'phase_i' && _phase !== 'phase_ii') return;
+            if (_phase !== 'war') return;
             if (context.state.meta.recruitment_mode !== 'bottom_up') return;
             try {
                 const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
@@ -1859,7 +1869,7 @@ const phaseIPhases: NamedPhase[] = [
         name: 'activate-corps',
         run: async (context) => {
             const _phase2 = context.state.meta.phase;
-            if (_phase2 !== 'phase_i' && _phase2 !== 'phase_ii') return;
+            if (_phase2 !== 'war') return;
             if (context.state.meta.recruitment_mode !== 'bottom_up') return;
             const currentTurn = context.state.meta.turn ?? 0;
             const catalog = await loadRecruitmentCatalog();
@@ -1877,7 +1887,7 @@ const phaseIPhases: NamedPhase[] = [
         name: 'promote-formations',
         run: async (context) => {
             const _phase3 = context.state.meta.phase;
-            if (_phase3 !== 'phase_i' && _phase3 !== 'phase_ii') return;
+            if (_phase3 !== 'war') return;
             if (context.state.meta.recruitment_mode !== 'bottom_up') return;
             const currentTurn = context.state.meta.turn ?? 0;
             const catalog = await loadRecruitmentCatalog();
@@ -1942,7 +1952,7 @@ const phaseIPhases: NamedPhase[] = [
         run: (context) => {
             // Canonical path: Phase I no longer performs control flips.
             // Political control changes are resolved in Phase II attack resolution only.
-            if (context.state.meta.phase !== 'phase_i') return;
+            if (context.state.meta.phase !== 'war') return;
             context.report.phase_i_control_flip = {
                 flips: [],
                 municipalities_evaluated: 0,
@@ -2000,7 +2010,7 @@ const phaseIPhases: NamedPhase[] = [
         run: async (context) => {
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             const byMun = buildSettlementsByMun(graph.settlements);
-            context.report.phase_i_control_strain = runControlStrain(context.state, context.state.meta.turn, byMun);
+            context.report.war_control_strain = runControlStrain(context.state, context.state.meta.turn, byMun);
         }
     },
     {
@@ -2012,7 +2022,7 @@ const phaseIPhases: NamedPhase[] = [
     {
         name: 'phase-i-jna-transition',
         run: (context) => {
-            context.report.phase_i_jna_transition = runJNATransition(context.state);
+            context.report.war_jna_transition = runJNATransition(context.state);
         }
     },
     {
@@ -2036,20 +2046,20 @@ async function getEdgesForTurn(input: TurnInput): Promise<EdgeRecord[]> {
 }
 
 async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Promise<void> {
-    if (state.meta.phase !== 'phase_ii') {
-        state.phase_ii_front_edges_osid = undefined;
+    if (state.meta.phase !== 'war') {
+        state.war_front_edges_osid = undefined;
     }
     const edges = await getEdgesForTurn(input);
     const derivedFrontEdges = computeFrontEdges(state, edges);
     state.front_edges = derivedFrontEdges;
     ensureDefaultTheatres(state);
     const frontEdgesForSegments =
-        state.meta.phase === 'phase_ii' && state.phase_ii_front_edges_osid?.length
-            ? state.phase_ii_front_edges_osid
+        state.meta.phase === 'war' && state.war_front_edges_osid?.length
+            ? state.war_front_edges_osid
             : derivedFrontEdges;
     const segments = deriveAssignableFrontSegments(frontEdgesForSegments);
     state.assignable_front_segments = assignFrontSegmentTheatres(state, segments);
-    if (state.meta.phase === 'phase_ii') {
+    if (state.meta.phase === 'war') {
         ensureBrigadeFrontAssignments(state);
     }
 }
@@ -2057,54 +2067,15 @@ async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Pro
 export async function runTurn(state: GameState, input: TurnInput): Promise<{ nextState: GameState; report: TurnReport }> {
     const working = cloneGameState(state);
 
-    // Phase C Step 2: Phase 0 must use state pipeline; Phase I only when referendum_held and current_turn >= war_start_turn
+    // Two-phase model: Peace turns use state pipeline; this runner is for War turns only.
     const phase = working.meta.phase;
-    if (phase === 'phase_0') {
+    if (phase === 'peace') {
         throw new Error(
-            'runTurn: use state pipeline runOneTurn for phase_0; Phase I execution only when referendum_held and current_turn >= war_start_turn'
+            'runTurn: use state pipeline runOneTurn for peace; runTurn handles war-phase turns'
         );
     }
-    if (phase === 'phase_i') {
-        if (!isPhaseIAllowed(working)) {
-            throw new Error(
-                'runTurn: Phase I requires referendum_held and current_turn >= war_start_turn'
-            );
-        }
-        assertNoAoRInPhaseI(working);
-        // Run Phase I turn path (minimal until Steps 3–9)
-        working.meta = { ...working.meta, seed: input.seed, turn: working.meta.turn + 1 };
-        const report: TurnReport = { seed: input.seed, phases: phaseIPhases.map((p) => ({ name: p.name })) };
-        const context: TurnContext = { state: working, rng: createRng(input.seed), input, report };
-        for (const p of phaseIPhases) {
-            await p.run(context);
-        }
-        // D0.9.1: Update opposing-edges streak (Phase I), then apply transition
-        const edges = await getEdgesForTurn(context.input);
-        if (edges.length > 0) {
-            updatePhaseIOpposingEdgesStreak(working, edges);
-        }
-        // Stuck-in-Phase-I fallback: force transition after N Phase I turns (PHASE_I_II_EDGE_CASES.md)
-        const n = working.meta.phase_i_force_transition_after_turns;
-        const warStart = working.meta.war_start_turn ?? 0;
-        if (
-            working.meta.phase === 'phase_i' &&
-            !isPhaseIITransitionEligible(working) &&
-            typeof n === 'number' &&
-            (working.meta.turn ?? 0) >= warStart + n
-        ) {
-            applyPhaseIToPhaseIITransition(working, edges, context.input.settlementGraph?.settlements, {
-                forceTransition: true
-            });
-        } else {
-            applyPhaseIToPhaseIITransition(context.state, edges, context.input.settlementGraph?.settlements);
-        }
-        const derivedFrontEdges = computeFrontEdges(working, edges);
-        working.front_edges = derivedFrontEdges;
-        ensureDefaultTheatres(working);
-        const segments = deriveAssignableFrontSegments(derivedFrontEdges);
-        working.assignable_front_segments = assignFrontSegmentTheatres(working, segments);
-        ensureBrigadeFrontAssignments(working);
-        return { nextState: context.state, report };
+    if (phase !== 'war') {
+        throw new Error(`runTurn: unsupported lifecycle phase "${String(phase)}"`);
     }
 
     // Phase 12D.0: If end_state exists, short-circuit to report-only mode
@@ -2194,4 +2165,5 @@ function hashSeed(seed: string): number {
     }
     return (h ^ (h >>> 16)) >>> 0;
 }
+
 

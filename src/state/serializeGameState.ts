@@ -24,7 +24,7 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'front_posture',
     'front_posture_regions',
     'front_edges',
-    'phase_ii_front_edges_osid',
+    'war_front_edges_osid',
     'assignable_front_segments',
     'front_pressure',
     'militia_pools',
@@ -42,6 +42,7 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'hostile_takeover_timers',
     'displacement_camp_state',
     'minority_flight_state',
+    'displacement_event_log',
     'sustainability_state',
     'collapse_eligibility',
     'collapse_eligibility_tier1',
@@ -59,21 +60,21 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'enclaves',
     'sarajevo_state',
     // Phase I (Early War) state (Phase_I_Specification_v0_3_0.md)
-    'phase_i_consolidation_until',
-    'phase_i_militia_strength',
-    'phase_i_control_strain',
-    'phase_i_jna',
-    'phase_i_alliance_rbih_hrhb',
+    'war_consolidation_until',
+    'war_militia_strength',
+    'war_control_strain',
+    'war_jna',
+    'war_alliance_rbih_hrhb',
     'rbih_hrhb_state',
-    'phase_i_displacement_initiated',
+    'war_displacement_initiated',
     'coercion_pressure_by_municipality',
     // Phase II (Mid-War / Consolidation) state (Phase D)
-    'phase_ii_supply_pressure',
-    'phase_ii_exhaustion',
-    'phase_ii_exhaustion_local',
+    'war_supply_pressure',
+    'war_exhaustion',
+    'war_exhaustion_local',
     'enclave_resilience',
-    'phase_ii_enemy_zoc_by_faction',
-    'phase_ii_linked_zoc_by_faction',
+    'war_enemy_zoc_by_faction',
+    'war_linked_zoc_by_faction',
     // Brigade Operations System state (Phase II; AoR keys removed — not serialized)
     'brigade_front_assignment',
     'corps_front_edges',
@@ -196,3 +197,4 @@ export function serializeGameState(state: GameState, space?: number): string {
     }
     return JSON.stringify(serializable);
 }
+

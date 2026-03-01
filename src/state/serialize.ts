@@ -217,14 +217,14 @@ function migrateState(raw: unknown): GameState {
                 if (!('referendum_held' in meta) || meta.referendum_held === undefined) meta.referendum_held = false;
                 if (!('referendum_turn' in meta) || meta.referendum_turn === undefined) meta.referendum_turn = null;
                 if (!('war_start_turn' in meta) || meta.war_start_turn === undefined) meta.war_start_turn = null;
-                if (!('phase_0_scheduled_referendum_turn' in meta) || meta.phase_0_scheduled_referendum_turn === undefined) meta.phase_0_scheduled_referendum_turn = null;
-                if (!('phase_0_scheduled_war_start_turn' in meta) || meta.phase_0_scheduled_war_start_turn === undefined) meta.phase_0_scheduled_war_start_turn = null;
-                if (!('phase_0_war_start_control_path' in meta) || meta.phase_0_war_start_control_path === undefined) meta.phase_0_war_start_control_path = null;
+                if (!('peace_scheduled_referendum_turn' in meta) || meta.peace_scheduled_referendum_turn === undefined) meta.peace_scheduled_referendum_turn = null;
+                if (!('peace_scheduled_war_start_turn' in meta) || meta.peace_scheduled_war_start_turn === undefined) meta.peace_scheduled_war_start_turn = null;
+                if (!('peace_war_start_control_path' in meta) || meta.peace_war_start_control_path === undefined) meta.peace_war_start_control_path = null;
                 if (!('referendum_eligible_turn' in meta) || meta.referendum_eligible_turn === undefined) meta.referendum_eligible_turn = null;
                 if (!('referendum_deadline_turn' in meta) || meta.referendum_deadline_turn === undefined) meta.referendum_deadline_turn = null;
                 if (!('game_over' in meta) || meta.game_over === undefined) meta.game_over = false;
                 if (!('outcome' in meta)) meta.outcome = undefined;
-                // phase_i_opposing_edges_streak: do not default on load (preserve round-trip; readers use ?? 0)
+                // war_opposing_edges_streak: do not default on load (preserve round-trip; readers use ?? 0)
             }
             // Phase 11B: Default negotiation_status and ceasefire
             if (!('negotiation_status' in candidate) || candidate.negotiation_status === undefined) {
@@ -388,6 +388,11 @@ function migrateState(raw: unknown): GameState {
                     if (form.cohesion === undefined) {
                         form.cohesion = 60;
                     }
+                    // morale: default 60 for backward compatibility; clamp to [0, 100]
+                    if (form.morale === undefined || form.morale === null) {
+                        form.morale = 60;
+                    }
+                    form.morale = Math.max(0, Math.min(100, form.morale));
                     // activation_gated: default false for backward compatibility
                     if (form.activation_gated === undefined) {
                         form.activation_gated = false;
@@ -493,26 +498,26 @@ function migrateState(raw: unknown): GameState {
             // Phase I: Default Phase I optional state for determinism when present (do not inject for old saves).
             // When any phase_i_* key exists, ensure others have deterministic defaults for round-trip.
             const hasAnyPhaseI =
-                (candidate.phase_i_consolidation_until !== undefined) ||
-                (candidate.phase_i_militia_strength !== undefined) ||
-                (candidate.phase_i_control_strain !== undefined) ||
-                (candidate.phase_i_jna !== undefined) ||
-                (candidate.phase_i_alliance_rbih_hrhb !== undefined) ||
-                (candidate.phase_i_displacement_initiated !== undefined);
+                (candidate.war_consolidation_until !== undefined) ||
+                (candidate.war_militia_strength !== undefined) ||
+                (candidate.war_control_strain !== undefined) ||
+                (candidate.war_jna !== undefined) ||
+                (candidate.war_alliance_rbih_hrhb !== undefined) ||
+                (candidate.war_displacement_initiated !== undefined);
             if (hasAnyPhaseI) {
-                if (!('phase_i_consolidation_until' in candidate) || candidate.phase_i_consolidation_until === undefined) {
-                    candidate.phase_i_consolidation_until = {};
+                if (!('war_consolidation_until' in candidate) || candidate.war_consolidation_until === undefined) {
+                    candidate.war_consolidation_until = {};
                 }
-                if (!('phase_i_militia_strength' in candidate) || candidate.phase_i_militia_strength === undefined) {
-                    candidate.phase_i_militia_strength = {};
+                if (!('war_militia_strength' in candidate) || candidate.war_militia_strength === undefined) {
+                    candidate.war_militia_strength = {};
                 }
-                if (!('phase_i_control_strain' in candidate) || candidate.phase_i_control_strain === undefined) {
-                    candidate.phase_i_control_strain = {};
+                if (!('war_control_strain' in candidate) || candidate.war_control_strain === undefined) {
+                    candidate.war_control_strain = {};
                 }
-                if (!('phase_i_jna' in candidate) || candidate.phase_i_jna === undefined) {
-                    candidate.phase_i_jna = { transition_begun: false, withdrawal_progress: 0, asset_transfer_rs: 0 };
+                if (!('war_jna' in candidate) || candidate.war_jna === undefined) {
+                    candidate.war_jna = { transition_begun: false, withdrawal_progress: 0, asset_transfer_rs: 0 };
                 } else {
-                    const jna = candidate.phase_i_jna as Record<string, unknown>;
+                    const jna = candidate.war_jna as Record<string, unknown>;
                     if (typeof jna.transition_begun !== 'boolean') jna.transition_begun = false;
                     if (typeof jna.withdrawal_progress !== 'number' || jna.withdrawal_progress < 0 || jna.withdrawal_progress > 1) {
                         jna.withdrawal_progress = 0;
@@ -521,28 +526,28 @@ function migrateState(raw: unknown): GameState {
                         jna.asset_transfer_rs = 0;
                     }
                 }
-                // phase_i_alliance_rbih_hrhb: leave undefined if absent; valid range [-1, 1]
-                if (!('phase_i_displacement_initiated' in candidate) || candidate.phase_i_displacement_initiated === undefined) {
-                    candidate.phase_i_displacement_initiated = {};
+                // war_alliance_rbih_hrhb: leave undefined if absent; valid range [-1, 1]
+                if (!('war_displacement_initiated' in candidate) || candidate.war_displacement_initiated === undefined) {
+                    candidate.war_displacement_initiated = {};
                 }
             }
 
             // Phase II: Default Phase II optional state for determinism when present (do not inject for old saves).
             const hasAnyPhaseII =
-                (candidate as any).phase_ii_supply_pressure !== undefined ||
-                (candidate as any).phase_ii_exhaustion !== undefined ||
-                (candidate as any).phase_ii_exhaustion_local !== undefined ||
+                (candidate as any).war_supply_pressure !== undefined ||
+                (candidate as any).war_exhaustion !== undefined ||
+                (candidate as any).war_exhaustion_local !== undefined ||
                 (candidate as any).hostile_takeover_timers !== undefined ||
                 (candidate as any).displacement_camp_state !== undefined;
             if (hasAnyPhaseII) {
-                if (!('phase_ii_supply_pressure' in candidate) || (candidate as any).phase_ii_supply_pressure === undefined) {
-                    (candidate as any).phase_ii_supply_pressure = {};
+                if (!('war_supply_pressure' in candidate) || (candidate as any).war_supply_pressure === undefined) {
+                    (candidate as any).war_supply_pressure = {};
                 }
-                if (!('phase_ii_exhaustion' in candidate) || (candidate as any).phase_ii_exhaustion === undefined) {
-                    (candidate as any).phase_ii_exhaustion = {};
+                if (!('war_exhaustion' in candidate) || (candidate as any).war_exhaustion === undefined) {
+                    (candidate as any).war_exhaustion = {};
                 }
-                if (!('phase_ii_exhaustion_local' in candidate) || (candidate as any).phase_ii_exhaustion_local === undefined) {
-                    (candidate as any).phase_ii_exhaustion_local = {};
+                if (!('war_exhaustion_local' in candidate) || (candidate as any).war_exhaustion_local === undefined) {
+                    (candidate as any).war_exhaustion_local = {};
                 }
                 if (!('hostile_takeover_timers' in candidate) || (candidate as any).hostile_takeover_timers === undefined) {
                     (candidate as any).hostile_takeover_timers = {};
@@ -569,6 +574,11 @@ function migrateState(raw: unknown): GameState {
                 }
             }
 
+            // Displacement event log: default to empty array
+            if (!(candidate as any).displacement_event_log) {
+                (candidate as any).displacement_event_log = [];
+            }
+
             // AoR phase-out: strip legacy keys so serialization allowlist passes (Phase II uses location_osid only)
             delete candidate.brigade_aor;
             delete candidate.brigade_aor_orders;
@@ -581,3 +591,4 @@ function migrateState(raw: unknown): GameState {
             throw new Error(`Unsupported schema_version ${String(version)}`);
     }
 }
+

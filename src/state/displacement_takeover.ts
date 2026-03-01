@@ -6,12 +6,8 @@ import {
     getFactionFleeAbroadFraction
 } from './displacement_loss_constants.js';
 import {
-    CROAT_KRAJINA_SOURCE_MUN_IDS,
-    EAST_OF_SARAJEVO_MUN_IDS,
-    HERZEGOVINA_DEST_MUN_IDS,
-    POSAVINA_CROAT_DEST_MUN_IDS,
     POSAVINA_MUN_IDS,
-    SARAJEVO_AREA_MUN_IDS,
+    getDisplacementRouteForMun,
     getReceivingCapacityFraction
 } from './displacement_routing_data.js';
 import { factionHasBrigadeInMunicipality, getMunicipalityIdFromRecord, getOrInitDisplacementState, recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
@@ -42,28 +38,6 @@ const DISPLACED_CONTRIBUTION_CAP = 2000;
 const RBIH_HRHB_ALLIED_THRESHOLD = 0.20;
 
 const ENCLAVE_MUN_IDS = new Set<MunicipalityId>(['srebrenica', 'gorazde', 'zepa']);
-const NORTHWEST_BOSNIA_MUN_IDS = new Set<MunicipalityId>([
-    'prijedor',
-    'sanski_most',
-    'bosanski_novi',
-    'novi_grad',
-    'kljuc'
-]);
-/** Northern Drina: route to Srebrenica first (geographically north). */
-const NORTH_DRINA_MUN_IDS = new Set<MunicipalityId>([
-    'zvornik',
-    'bratunac',
-    'srebrenica',
-    'vlasenica'
-]);
-/** Southern Drina: route to Gorazde first (geographically adjacent). */
-const SOUTH_DRINA_MUN_IDS = new Set<MunicipalityId>([
-    'rogatica',
-    'visegrad',
-    'foca',
-    'gorazde',
-    'cajnice'
-]);
 
 const FALLBACK_ROUTES_BY_FACTION: Record<string, MunicipalityId[]> = {
     RBiH: [
@@ -118,7 +92,7 @@ function areFactionsAtWar(state: GameState, a: FactionId, b: FactionId): boolean
             ? state.meta.rbih_hrhb_war_earliest_turn
             : Number.MAX_SAFE_INTEGER;
     if (currentTurn < earliestTurn) return false;
-    const alliance = typeof state.phase_i_alliance_rbih_hrhb === 'number' ? state.phase_i_alliance_rbih_hrhb : 0;
+    const alliance = typeof state.war_alliance_rbih_hrhb === 'number' ? state.war_alliance_rbih_hrhb : 0;
     return alliance <= RBIH_HRHB_ALLIED_THRESHOLD;
 }
 
@@ -212,36 +186,8 @@ function orderedUnique(items: MunicipalityId[]): MunicipalityId[] {
     return out;
 }
 
-function getPrimaryRouteForSourceMun(sourceMun: MunicipalityId, faction: FactionId): MunicipalityId[] {
-    if (faction === 'RBiH') {
-        if (NORTHWEST_BOSNIA_MUN_IDS.has(sourceMun)) {
-            return ['travnik', 'zenica', 'tuzla', 'gorazde'];
-        }
-        if (SOUTH_DRINA_MUN_IDS.has(sourceMun)) {
-            return ['gorazde', 'srebrenica', 'tuzla', 'zenica', 'travnik'];
-        }
-        if (NORTH_DRINA_MUN_IDS.has(sourceMun)) {
-            return ['srebrenica', 'tuzla', 'gorazde', 'zenica', 'travnik'];
-        }
-    }
-    if (faction === 'HRHB') {
-        if (CROAT_KRAJINA_SOURCE_MUN_IDS.has(sourceMun)) {
-            return [...HERZEGOVINA_DEST_MUN_IDS];
-        }
-        if (POSAVINA_MUN_IDS.has(sourceMun)) {
-            return [...POSAVINA_CROAT_DEST_MUN_IDS];
-        }
-    }
-    if (faction === 'RS') {
-        if (SARAJEVO_AREA_MUN_IDS.has(sourceMun)) {
-            return [...EAST_OF_SARAJEVO_MUN_IDS];
-        }
-    }
-    return [];
-}
-
 function getRoutingOrder(sourceMun: MunicipalityId, faction: FactionId): MunicipalityId[] {
-    const primary = getPrimaryRouteForSourceMun(sourceMun, faction);
+    const primary = getDisplacementRouteForMun(sourceMun, faction);
     const fallback = FALLBACK_ROUTES_BY_FACTION[faction] ?? [];
     return orderedUnique([...primary, ...fallback, ...LARGE_URBAN_MUN_IDS]);
 }
@@ -284,7 +230,7 @@ export function processPhaseIIDisplacementTakeover(
     battleReport?: PhaseIIBattleResolutionLike,
     population1991ByMun?: MunicipalityPopulation1991Map
 ): PhaseIITakeoverDisplacementReport {
-    if (state.meta.phase !== 'phase_ii') {
+    if (state.meta.phase !== 'war') {
         return {
             timers_started: 0,
             timers_matured: 0,
@@ -301,6 +247,7 @@ export function processPhaseIIDisplacementTakeover(
 
     if (!state.hostile_takeover_timers) state.hostile_takeover_timers = {};
     if (!state.displacement_camp_state) state.displacement_camp_state = {};
+    if (!state.displacement_event_log) state.displacement_event_log = [];
 
     const report: PhaseIITakeoverDisplacementReport = {
         timers_started: 0,
@@ -437,6 +384,18 @@ export function processPhaseIIDisplacementTakeover(
 
         recordCivilianDisplacementCasualties(state, timer.from_faction, killed, fledAbroad);
 
+        // Displacement event log — origin-side event (dest filled when camp routes)
+        state.displacement_event_log.push({
+            turn: currentTurn,
+            origin_mun: munId,
+            dest_mun: munId,
+            ethnicity: timer.from_faction,
+            displaced: displacementAmount,
+            killed,
+            fled_abroad: fledAbroad,
+            settled: 0,
+        });
+
         delete timerMap[munId];
     }
 
@@ -497,6 +456,18 @@ export function processPhaseIIDisplacementTakeover(
                     amount: routed,
                     reason: 'camp_reroute_urban_motherland'
                 });
+
+                // Displacement event log — settlement/arrival event
+                state.displacement_event_log.push({
+                    turn: currentTurn,
+                    origin_mun: sourceMunId,
+                    dest_mun: targetMunId,
+                    ethnicity: factionId,
+                    displaced: 0,
+                    killed: 0,
+                    fled_abroad: 0,
+                    settled: routed,
+                });
                 remaining -= routed;
                 routedFromCamp += routed;
             }
@@ -521,3 +492,4 @@ export function processPhaseIIDisplacementTakeover(
     });
     return report;
 }
+
