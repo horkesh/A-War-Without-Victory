@@ -53,10 +53,10 @@ export function runDisplacementHooks(
 
     if (!controlFlipReport.flips.length) return report;
 
-    if (!state.phase_i_displacement_initiated) {
-        (state as GameState & { phase_i_displacement_initiated: Record<string, number> }).phase_i_displacement_initiated = {};
+    if (!state.war_displacement_initiated) {
+        (state as GameState & { war_displacement_initiated: Record<string, number> }).war_displacement_initiated = {};
     }
-    const initiated = state.phase_i_displacement_initiated!;
+    const initiated = state.war_displacement_initiated!;
 
     const flipsSorted = [...controlFlipReport.flips].sort((a, b) => strictCompare(a.mun_id, b.mun_id));
     for (const flip of flipsSorted) {
@@ -71,3 +71,4 @@ export function runDisplacementHooks(
 
     return report;
 }
+

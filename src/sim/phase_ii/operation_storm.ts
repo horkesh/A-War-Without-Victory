@@ -57,8 +57,8 @@ export function evaluateOperationStormPreconditions(state: GameState): Operation
     const rsShare = computeRsTerritorialShare(state);
     const rs_threat = rsShare >= STORM_RS_THREAT_SHARE;
 
-    const rbihExhaustion = state.phase_ii_exhaustion?.['RBiH'] ?? 0;
-    const hrhbExhaustion = state.phase_ii_exhaustion?.['HRHB'] ?? 0;
+    const rbihExhaustion = state.war_exhaustion?.['RBiH'] ?? 0;
+    const hrhbExhaustion = state.war_exhaustion?.['HRHB'] ?? 0;
     const combinedExhaustion = rbihExhaustion + hrhbExhaustion;
     const combined_exhaustion = combinedExhaustion >= STORM_COMBINED_EXHAUSTION;
 
@@ -80,7 +80,7 @@ export function evaluateOperationStormPreconditions(state: GameState): Operation
  * Must run after phase-ii-washington-check (Washington must be possible first).
  */
 export function checkAndApplyOperationStorm(state: GameState): OperationStormCheckReport {
-    if (state.meta.phase !== 'phase_ii') {
+    if (state.meta.phase !== 'war') {
         return {
             preconditions: {
                 washington_active: false,
@@ -111,3 +111,4 @@ export function checkAndApplyOperationStorm(state: GameState): OperationStormChe
     state.meta = { ...state.meta, operation_storm_triggered: true };
     return { preconditions, fired: true, already_triggered: false };
 }
+

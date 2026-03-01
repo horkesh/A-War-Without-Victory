@@ -1,6 +1,6 @@
 {
     "scenario_id": "apr1992_bna_bots_40w",
-    "start_phase": "phase_i",
+    "start_lifecycle_phase": "war",
     "weeks": 40,
     "init_control": "apr1992",
     "init_formations": "apr1992",

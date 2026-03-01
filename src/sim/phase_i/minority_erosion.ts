@@ -83,13 +83,13 @@ export function runMinorityErosion(
     // No erosion during ceasefire or post-Washington
     if (rhs.ceasefire_active || rhs.washington_signed) return report;
 
-    const allianceValue = state.phase_i_alliance_rbih_hrhb ?? 1;
+    const allianceValue = state.war_alliance_rbih_hrhb ?? 1;
     if (allianceValue > HOSTILE_THRESHOLD) return report;
 
     const mixedMuns = rhs.allied_mixed_municipalities;
     if (!mixedMuns?.length) return report;
 
-    const strengthByMun = state.phase_i_militia_strength ?? {};
+    const strengthByMun = state.war_militia_strength ?? {};
     const formations = state.formations ?? {};
 
     for (const munId of mixedMuns) {
@@ -117,13 +117,13 @@ export function runMinorityErosion(
         // Apply erosion
         const eroded = Math.floor(militiaBefore * MINORITY_EROSION_RATE_PER_TURN);
         const militiaAfter = Math.max(0, militiaBefore - eroded);
-        if (!state.phase_i_militia_strength) {
-            (state as any).phase_i_militia_strength = {};
+        if (!state.war_militia_strength) {
+            (state as any).war_militia_strength = {};
         }
-        if (!state.phase_i_militia_strength![munId]) {
-            state.phase_i_militia_strength![munId] = {};
+        if (!state.war_militia_strength![munId]) {
+            state.war_militia_strength![munId] = {};
         }
-        state.phase_i_militia_strength![munId][minorityFaction] = militiaAfter;
+        state.war_militia_strength![munId][minorityFaction] = militiaAfter;
 
         // Displace formations if militia below threshold
         const displacedFormations: string[] = [];
@@ -160,3 +160,4 @@ export function runMinorityErosion(
 
     return report;
 }
+

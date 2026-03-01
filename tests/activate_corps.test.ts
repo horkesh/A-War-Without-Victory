@@ -82,7 +82,7 @@ function makeBottomUpState(turn = 0): GameState {
         meta: {
             turn,
             seed: 'activate-corps-test',
-            phase: 'phase_i',
+            phase: 'war',
             recruitment_mode: 'bottom_up'
         },
         factions: [

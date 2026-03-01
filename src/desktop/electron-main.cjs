@@ -437,7 +437,7 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
       const phase0Directives = Array.isArray(payload?.phase0Directives) ? payload.phase0Directives : [];
-      if (state.meta?.phase === 'phase_0' && phase0Directives.length > 0 && typeof sim.applyPhase0Directives === 'function') {
+      if (state.meta?.phase === 'peace' && phase0Directives.length > 0 && typeof sim.applyPhase0Directives === 'function') {
         sim.applyPhase0Directives(state, phase0Directives);
       }
       const result = await sim.advanceTurn(state, getBaseDir());
@@ -854,7 +854,7 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      if ((state?.meta?.phase ?? 'phase_ii') !== 'phase_ii') {
+      if ((state?.meta?.phase ?? 'war') !== 'war') {
         return { ok: false, error: 'Movement range query is available in Phase II only' };
       }
       const result = await sim.queryMovementRangeForBrigade(state, brigadeId, getBaseDir());
@@ -872,7 +872,7 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      if ((state?.meta?.phase ?? 'phase_ii') !== 'phase_ii') {
+      if ((state?.meta?.phase ?? 'war') !== 'war') {
         return { ok: false, error: 'Movement path query is available in Phase II only' };
       }
       const result = await sim.queryMovementPathForBrigade(state, brigadeId, destinationSid, getBaseDir());
@@ -891,7 +891,7 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      if ((state?.meta?.phase ?? 'phase_ii') !== 'phase_ii') {
+      if ((state?.meta?.phase ?? 'war') !== 'war') {
         return { ok: false, error: 'Combat estimate query is available in Phase II only' };
       }
       const estimate = await sim.queryCombatEstimateForBrigade(state, brigadeId, targetSettlementId, getBaseDir());
@@ -964,3 +964,4 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   app.quit();
 });
+

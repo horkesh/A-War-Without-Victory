@@ -14,7 +14,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function minimalPhaseIIState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'rear-test', phase: 'phase_ii', referendum_held: true, referendum_turn: 0, war_start_turn: 1 },
+        meta: { turn: 10, seed: 'rear-test', phase: 'war', referendum_held: true, referendum_turn: 0, war_start_turn: 1 },
         factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
@@ -29,13 +29,13 @@ function minimalPhaseIIState(): GameState {
     };
 }
 
-test('Rear zone: no rear zones when phase_i', () => {
+test('Rear zone: no rear zones when peace', () => {
     const state = minimalPhaseIIState();
-    state.meta.phase = 'phase_i';
+    state.meta.phase = 'peace';
     state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
     const edges = [{ a: 'S1', b: 'S2' }];
     const rearZone = deriveRearPoliticalControlZones(state, edges);
-    assert.strictEqual(rearZone.settlement_ids.length, 0, 'No rear zones in phase_i');
+    assert.strictEqual(rearZone.settlement_ids.length, 0, 'No rear zones in peace');
 });
 
 test('Rear zone: all controlled settlements are rear when no eligible edges', () => {

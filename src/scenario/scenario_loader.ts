@@ -177,24 +177,32 @@ export function normalizeScenario(raw: unknown): Scenario {
     if (weeks === undefined || !Number.isInteger(weeks) || weeks < 1) {
         throw new Error('Scenario must have weeks (integer >= 1)');
     }
-    const start_phase = typeof o.start_phase === 'string' ? o.start_phase.trim() : undefined;
-    const phase_0_referendum_held_at_start =
-        typeof o.phase_0_referendum_held_at_start === 'boolean'
-            ? o.phase_0_referendum_held_at_start
+    const startLifecycleRaw = typeof o.start_lifecycle_phase === 'string' ? o.start_lifecycle_phase.trim() : undefined;
+    if (
+        startLifecycleRaw !== undefined &&
+        startLifecycleRaw !== 'peace' &&
+        startLifecycleRaw !== 'war'
+    ) {
+        throw new Error(`start_lifecycle_phase must be \"peace\" or \"war\", got: ${startLifecycleRaw}`);
+    }
+    const start_lifecycle_phase: 'peace' | 'war' = (startLifecycleRaw as 'peace' | 'war' | undefined) ?? 'war';
+    const peace_referendum_held_at_start =
+        typeof o.peace_referendum_held_at_start === 'boolean'
+            ? o.peace_referendum_held_at_start
             : undefined;
-    const phase_0_rs_declared_at_start =
-        typeof o.phase_0_rs_declared_at_start === 'boolean'
-            ? o.phase_0_rs_declared_at_start
+    const peace_rs_declared_at_start =
+        typeof o.peace_rs_declared_at_start === 'boolean'
+            ? o.peace_rs_declared_at_start
             : undefined;
-    const phase_0_hrhb_declared_at_start =
-        typeof o.phase_0_hrhb_declared_at_start === 'boolean'
-            ? o.phase_0_hrhb_declared_at_start
+    const peace_hrhb_declared_at_start =
+        typeof o.peace_hrhb_declared_at_start === 'boolean'
+            ? o.peace_hrhb_declared_at_start
             : undefined;
-    const phase_0_referendum_turn = typeof o.phase_0_referendum_turn === 'number' && Number.isInteger(o.phase_0_referendum_turn) ? o.phase_0_referendum_turn : undefined;
-    const phase_0_war_start_turn = typeof o.phase_0_war_start_turn === 'number' && Number.isInteger(o.phase_0_war_start_turn) ? o.phase_0_war_start_turn : undefined;
-    const phase_0_war_start_control =
-        typeof o.phase_0_war_start_control === 'string' && o.phase_0_war_start_control.trim() !== ''
-            ? o.phase_0_war_start_control.trim()
+    const peace_referendum_turn = typeof o.peace_referendum_turn === 'number' && Number.isInteger(o.peace_referendum_turn) ? o.peace_referendum_turn : undefined;
+    const peace_war_start_turn = typeof o.peace_war_start_turn === 'number' && Number.isInteger(o.peace_war_start_turn) ? o.peace_war_start_turn : undefined;
+    const peace_war_start_control =
+        typeof o.peace_war_start_control === 'string' && o.peace_war_start_control.trim() !== ''
+            ? o.peace_war_start_control.trim()
             : undefined;
     let turns: ScenarioTurn[] = Array.isArray(o.turns) ? (o.turns as ScenarioTurn[]) : [];
     turns = turns.map((t) => {
@@ -297,21 +305,21 @@ export function normalizeScenario(raw: unknown): Scenario {
             : undefined;
 
     // Phase I→II: optional initial entrenchment at transition (Phase II Spec §4, §6).
-    const phase_ii_entrenchment_init_turns =
-        typeof o.phase_ii_entrenchment_init_turns === 'number' &&
-        Number.isInteger(o.phase_ii_entrenchment_init_turns) &&
-        o.phase_ii_entrenchment_init_turns >= 0 &&
-        o.phase_ii_entrenchment_init_turns <= 12
-            ? o.phase_ii_entrenchment_init_turns
+    const war_entrenchment_init_turns =
+        typeof o.war_entrenchment_init_turns === 'number' &&
+        Number.isInteger(o.war_entrenchment_init_turns) &&
+        o.war_entrenchment_init_turns >= 0 &&
+        o.war_entrenchment_init_turns <= 12
+            ? o.war_entrenchment_init_turns
             : undefined;
 
     // Stuck-in-Phase-I fallback: optional N turns after war_start_turn to force Phase II transition.
-    const phase_i_force_transition_after_turns =
-        typeof o.phase_i_force_transition_after_turns === 'number' &&
-        Number.isInteger(o.phase_i_force_transition_after_turns) &&
-        o.phase_i_force_transition_after_turns >= 1 &&
-        o.phase_i_force_transition_after_turns <= 104
-            ? o.phase_i_force_transition_after_turns
+    const war_force_transition_after_turns =
+        typeof o.war_force_transition_after_turns === 'number' &&
+        Number.isInteger(o.war_force_transition_after_turns) &&
+        o.war_force_transition_after_turns >= 1 &&
+        o.war_force_transition_after_turns <= 104
+            ? o.war_force_transition_after_turns
             : undefined;
 
     // Per-faction OSID avoidance: prevent specific factions from attacking specific OSIDs (e.g. Vozuca pocket).
@@ -356,13 +364,13 @@ export function normalizeScenario(raw: unknown): Scenario {
         return {
             scenario_id,
             scenario_start_week,
-            start_phase,
-            phase_0_referendum_held_at_start,
-            phase_0_rs_declared_at_start,
-            phase_0_hrhb_declared_at_start,
-            phase_0_referendum_turn,
-            phase_0_war_start_turn,
-            phase_0_war_start_control,
+            start_lifecycle_phase,
+            peace_referendum_held_at_start,
+            peace_rs_declared_at_start,
+            peace_hrhb_declared_at_start,
+            peace_referendum_turn,
+            peace_war_start_turn,
+            peace_war_start_control,
             weeks,
             turns: normalizedTurns,
             use_harness_bots,
@@ -389,8 +397,8 @@ export function normalizeScenario(raw: unknown): Scenario {
             equipment_points,
             equipment_points_trickle,
             max_recruits_per_faction_per_turn,
-            phase_ii_entrenchment_init_turns,
-            phase_i_force_transition_after_turns,
+            war_entrenchment_init_turns,
+            war_force_transition_after_turns,
             avoided_osids_by_faction
         };
     }
@@ -398,13 +406,13 @@ export function normalizeScenario(raw: unknown): Scenario {
     return {
         scenario_id,
         scenario_start_week,
-        start_phase,
-        phase_0_referendum_held_at_start,
-        phase_0_rs_declared_at_start,
-        phase_0_hrhb_declared_at_start,
-        phase_0_referendum_turn,
-        phase_0_war_start_turn,
-        phase_0_war_start_control,
+        start_lifecycle_phase,
+        peace_referendum_held_at_start,
+        peace_rs_declared_at_start,
+        peace_hrhb_declared_at_start,
+        peace_referendum_turn,
+        peace_war_start_turn,
+        peace_war_start_control,
         weeks,
         turns,
         use_harness_bots: use_harness_bots || undefined,
@@ -431,8 +439,8 @@ export function normalizeScenario(raw: unknown): Scenario {
         equipment_points,
         equipment_points_trickle,
         max_recruits_per_faction_per_turn,
-        phase_ii_entrenchment_init_turns,
-        phase_i_force_transition_after_turns,
+        war_entrenchment_init_turns,
+        war_force_transition_after_turns,
         avoided_osids_by_faction
     };
 }
@@ -453,3 +461,4 @@ export function computeRunId(scenario: Scenario): string {
     const hash = createHash('sha256').update(stableStringify(scenario), 'utf8').digest('hex').slice(0, 16);
     return `${scenario.scenario_id}__${hash}__w${scenario.weeks}`;
 }
+

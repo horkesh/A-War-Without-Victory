@@ -84,7 +84,7 @@ export function runPhaseIBotPosture(
     if (!state.front_posture) state.front_posture = {};
 
     const turn = state.meta?.turn ?? 0;
-    const allianceValue = state.phase_i_alliance_rbih_hrhb ?? 1.0;
+    const allianceValue = state.war_alliance_rbih_hrhb ?? 1.0;
     const rhs = state.rbih_hrhb_state;
     const rbihHrhbAllied = allianceValue >= 0.2 || rhs?.ceasefire_active || rhs?.washington_signed;
     const rbihHrhbAtWar = allianceValue < 0.0 && !rhs?.ceasefire_active && !rhs?.washington_signed;
@@ -173,3 +173,4 @@ export function runPhaseIBotPosture(
         }
     }
 }
+

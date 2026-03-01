@@ -64,11 +64,11 @@ export function evaluateCeasefirePreconditions(state: GameState): CeasefirePreco
     const c1 = warDuration >= CEASEFIRE_MIN_WAR_DURATION;
 
     // C2: HRHB exhaustion
-    const hrhbExhaustion = state.phase_ii_exhaustion?.['HRHB'] ?? 0;
+    const hrhbExhaustion = state.war_exhaustion?.['HRHB'] ?? 0;
     const c2 = hrhbExhaustion > CEASEFIRE_HRHB_EXHAUSTION;
 
     // C3: RBiH exhaustion
-    const rbihExhaustion = state.phase_ii_exhaustion?.['RBiH'] ?? 0;
+    const rbihExhaustion = state.war_exhaustion?.['RBiH'] ?? 0;
     const c3 = rbihExhaustion > CEASEFIRE_RBIH_EXHAUSTION;
 
     // C4: stalemate
@@ -145,3 +145,4 @@ export function checkAndApplyCeasefire(state: GameState): CeasefireCheckReport {
 
     return { preconditions, fired: true, already_active: false };
 }
+

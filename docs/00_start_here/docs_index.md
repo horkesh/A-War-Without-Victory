@@ -5,7 +5,7 @@
 ## Where to start
 
 - **Process and workflow:** [docs/10_canon/context.md](../10_canon/context.md) — mandatory first read for agents and contributors (ledger, mistake guard, determinism).
-- **Political control:** Control is **settlement-level** (each settlement has a controller); municipality-level control is a derived view (e.g. majority of settlements) for display only. See [Systems_Manual_v0_5_0.md § System 11](../10_canon/Systems_Manual_v0_5_0.md).
+- **Political control:** Control is **settlement-level** (each settlement has a controller); municipality-level control is a derived view (e.g. majority of settlements) for display only. See [Systems_Manual_v0_6_0.md § System 11](../10_canon/Systems_Manual_v0_6_0.md).
 - **Paradox roster and handoffs:** [.cursor/AGENT_TEAM_ROSTER.md](../../.cursor/AGENT_TEAM_ROSTER.md) — Paradox (subagent collective); when to invoke which specialist; clarification-first and handoff rules.
 - **Canon (game truth):** [docs/10_canon/CANON.md](../10_canon/CANON.md) — canonical doc index and precedence order; includes industry mapping (GDD / TDD / process) for readers used to standard game-dev docs.
 - **Project state:** [docs/PROJECT_LEDGER.md](../PROJECT_LEDGER.md) — changelog and current state (at docs root).
@@ -17,14 +17,13 @@
 | [CANON.md](../10_canon/CANON.md) | Index and precedence |
 | [context.md](../10_canon/context.md) | Process canon |
 | [FORAWWV.md](../10_canon/FORAWWV.md) | Validated design insights (addenda) |
-| [Engine_Invariants_v0_5_0.md](../10_canon/Engine_Invariants_v0_5_0.md) | Correctness constraints |
-| [Systems_Manual_v0_5_0.md](../10_canon/Systems_Manual_v0_5_0.md) | System behavior spec |
-| [Rulebook_v0_5_0.md](../10_canon/Rulebook_v0_5_0.md) | Player-facing rules |
-| [Game_Bible_v0_5_0.md](../10_canon/Game_Bible_v0_5_0.md) | Design philosophy |
-| [Phase_Specifications_v0_5_0.md](../10_canon/Phase_Specifications_v0_5_0.md) | Frozen phase specs |
-| [Phase_0_Specification_v0_5_0.md](../10_canon/Phase_0_Specification_v0_5_0.md) | Phase 0 spec |
-| [Phase_I_Specification_v0_5_0.md](../10_canon/Phase_I_Specification_v0_5_0.md) | Phase I spec |
-| [Phase_II_Specification_v0_5_0.md](../10_canon/Phase_II_Specification_v0_5_0.md) | Phase II spec |
+| [Engine_Invariants_v0_6_0.md](../10_canon/Engine_Invariants_v0_6_0.md) | Correctness constraints |
+| [Systems_Manual_v0_6_0.md](../10_canon/Systems_Manual_v0_6_0.md) | System behavior spec |
+| [Rulebook_v0_6_0.md](../10_canon/Rulebook_v0_6_0.md) | Player-facing rules |
+| [Game_Bible_v0_6_0.md](../10_canon/Game_Bible_v0_6_0.md) | Design philosophy |
+| [Phase_Specifications_v0_6_0.md](../10_canon/Phase_Specifications_v0_6_0.md) | Frozen phase specs |
+| [Peace_Specification_v0_6_0.md](../10_canon/Peace_Specification_v0_6_0.md) | Peace spec |
+| [War_Specification_v0_6_0.md](../10_canon/War_Specification_v0_6_0.md) | War spec |
 
 ## Engineering (docs/20_engineering/)
 
@@ -35,7 +34,7 @@
 - [REPO_MAP.md](../20_engineering/REPO_MAP.md) — repo layout and “change X → go here”
 - [MAP_BUILD_SYSTEM.md](../20_engineering/MAP_BUILD_SYSTEM.md) — map build commands and contracts
 - [MAP_RENDERING_PIPELINE.md](../20_engineering/MAP_RENDERING_PIPELINE.md) — map rendering pipeline
-- [TACTICAL_MAP_SYSTEM.md](../20_engineering/TACTICAL_MAP_SYSTEM.md) — tactical map UI (Canvas 2D, War Status, bottom floating layer toolbar §13.1, settlement panel 5 tabs §13.2, corps/brigade panels with trimmed fields §13.3, toolbar date-only §13, posture/move/attack, order staging IPC, target selection [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md §6, §16](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md), strategic zoom watercolor, Staff Map 4th zoom §17, 12 visual enhancements §18, crest stamp and war map barbed-wire §19, enhanced formation markers §20, front line defended/undefended §21, labels/AoR cleanup §22, dual defensive arc front lines §24, settlement fill-only no borders §17, recruitment §13.8, desktop mode; New Game side picker §13.6, §21; embedded iframe in warroom and faction fog-of-war §11; layers UX §15; **§26** accessibility, keyboard settlement navigation, tooltips, loading/error/empty states, optional tour)
+- [TACTICAL_MAP_SYSTEM.md](../20_engineering/TACTICAL_MAP_SYSTEM.md) — **§0:** canonical map = React + MapLibre app (`src/ui/map/`, `npm run dev:map`); [20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md](../40_reports/20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md); **§1 onward:** legacy Canvas 2D and HoI 3D reference (tactical map UI, War Status, layer toolbar, settlement panel, corps/brigade panels, order staging IPC, Staff Map, recruitment, desktop mode, New Game side picker, embedded iframe in warroom, accessibility, operational 3D modes)
 - [DESKTOP_GUI_IPC_CONTRACT.md](../20_engineering/DESKTOP_GUI_IPC_CONTRACT.md) — Electron main/renderer IPC contract for desktop "play myself" flow (start-new-campaign for New Game side picker, load-scenario-dialog, advance-turn, recruitment IPC)
 - [GUI_PLAYBOOK_DESKTOP.md](../20_engineering/GUI_PLAYBOOK_DESKTOP.md) — playbook: load scenario/state, advance turn, AAR, replay
 - [GUI_DESIGN_BLUEPRINT.md](../20_engineering/GUI_DESIGN_BLUEPRINT.md) — GUI design and phased delivery (Phases 2–4); NATO ops center dark theme implemented 2026-02-14 ([IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md §6](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md))
@@ -55,6 +54,7 @@
 - Gap/addendum: [gap_analysis.md](../30_planning/gap_analysis.md), [AWWV_Gap_Systems_*](../30_planning/)
 - Implementation plans: [BATCH_ADVANCE_TWO_WEEKS_UI_PLAN.md](../30_planning/BATCH_ADVANCE_TWO_WEEKS_UI_PLAN.md) (warroom batch advance), [RBIH_HRHB_ALLIANCE_BREAKDOWN_AND_WAR_PLAN.md](../30_planning/RBIH_HRHB_ALLIANCE_BREAKDOWN_AND_WAR_PLAN.md) (RBiH–HRHB alliance breakdown and war; Phase A done, B/C backlog)
 - Fronts and formations: [FRONT_ASSIGNMENT_HOI_STYLE_PROPOSAL.md](../30_planning/FRONT_ASSIGNMENT_HOI_STYLE_PROPOSAL.md) (three-tier Army/Corps/Brigade, OGs as subfronts); [BRIGADE_CORPS_ARMY_HOI_FRONTS_THEATRES_PROPOSAL.md](../30_planning/BRIGADE_CORPS_ARMY_HOI_FRONTS_THEATRES_PROPOSAL.md) (full rework: theatres, first-class fronts, reserve rule, assign-to-front)
+- Bot AI and calibration: [BOT_AI_HOLISTIC_TUNING_REFERENCE.md](../30_planning/BOT_AI_HOLISTIC_TUNING_REFERENCE.md) — holistic bot + starting-parameter tuning; historical territory/force/casualty targets; calibration runs and open issues: [CALIBRATION_REPORT_BOT_AI_FEB_2026.md](../40_reports/CALIBRATION_REPORT_BOT_AI_FEB_2026.md), CONSOLIDATED_BACKLOG §7; OOB: data/source/oob_brigades.json, oob_corps.json (see MILITIA_BRIGADE_FORMATION_DESIGN §10)
 
 ## Reports (docs/40_reports/)
 
@@ -63,6 +63,7 @@
 - **Cleanup plan:** [ORCHESTRATOR_40_REPORTS_CLEANUP_AND_CONSOLIDATION_2026_02_13.md](../40_reports/ORCHESTRATOR_40_REPORTS_CLEANUP_AND_CONSOLIDATION_2026_02_13.md).
 - Subfolders: [audit/](../40_reports/audit/), [implemented/](../40_reports/implemented/) (new reports added 2026-02-16), [backlog/](../40_reports/backlog/), [convenes/](../40_reports/convenes/), [handovers/](../40_reports/handovers/). Custodian: `.cursor/skills/reports-custodian/SKILL.md`.
 - **GUI design advisor handover:** [handovers/GUI_DESIGN_ADVISOR_HANDOVER_2026_02_14.md](../40_reports/handovers/GUI_DESIGN_ADVISOR_HANDOVER_2026_02_14.md) — report for expert GUI/UX advisor (what exists, what’s planned, what we need: layout, readability, panels, controls) before Phase 3/4.
+- **React map app (canonical GUI) — status for external review:** [20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md](../40_reports/20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md) — full done/remaining vs AWWV_GUI_ARCHITECTURE_REWORK_v2.md; file inventory; verification checklist.
 - **Implemented work:** [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) — all implemented reports in one doc (sections 1–29; §10 = Warroom/Phase 0 and systems integration; §11 = Warroom restyle, Apr 1992 scenario fix, embedded map, fog-of-war; §12–§14 = org-pen init, capital trickle, deferred recruitment; §15–§16 = tactical map layers UX and GUI corrections; §17 = Staff Map 4th zoom layer and settlement border removal; §18 = Staff Map 12 visual enhancements; §19 = Staff Map crest stamp and war map barbed-wire front lines; §20 = War map enhanced formation markers; §21 = Front line defended/undefended and AoR crosshatch; §22 = War map labels, AoR auto, front/AoR cleanup; §23 = displacement refactor shared utils; §24 = Dual defensive arc front lines; §25 = Faction AI improvements all phases; §26 = Tactical map UX 2026-02-19: accessibility, visual feedback, typography, color, discoverability, loading/error/empty states, optional tour; §27 = GUI and map frontline rework 2026-02-21; §28 = Front system comprehensive rebuild 2026-02-21; §29 = Headless corps fronts and run_summary tracking 2026-02-21); originals archived to docs/_old/40_reports/implemented_2026_02_15/; new reports in [implemented/](../40_reports/implemented/). Handovers: [handovers/HANDOVER_WARROOM_GUI.md](../40_reports/handovers/HANDOVER_WARROOM_GUI.md). Backlog: themed docs in [backlog/](../40_reports/backlog/) (BACKLOG_*.md; originals archived 2026-02-24 to docs/_old/40_reports/backlog/); see [CONSOLIDATED_BACKLOG.md](../40_reports/CONSOLIDATED_BACKLOG.md).
 
 ## Research (docs/50_research/)

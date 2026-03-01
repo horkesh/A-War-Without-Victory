@@ -1,0 +1,728 @@
+/**
+ * HoI-style map_hoi panel palette and layout.
+ * See HOI_VISUAL_GUI_OVERHAUL_SPEC.md §9.2 Panel Palette, §9.3 Typography.
+ * Fonts: IBM Plex Mono (data/labels), IBM Plex Sans Condensed (titles/body).
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans+Condensed:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+:root {
+  /* Panel palette (§9.2) */
+  --hoi-panel-bg: #1c1a17;
+  --hoi-card-bg: #252220;
+  --hoi-hover: #332e2a;
+  --hoi-active: #3a3020;
+  --hoi-section-header: #c4a35a;
+  --hoi-primary: #ddd5c8;
+  --hoi-secondary: #9a9080;
+  --hoi-interactive: #6a9ec2;
+  --hoi-faction-rs: #c24040;
+  --hoi-faction-rbih: #4a9a55;
+  --hoi-faction-hrhb: #4080b8;
+  --hoi-warning: #e8a020;
+  --hoi-alert: #d03030;
+  --hoi-success: #40a050;
+  --hoi-border: rgba(180, 160, 130, 0.15);
+  /* Typography */
+  --hoi-font-mono: 'IBM Plex Mono', 'Consolas', 'Courier New', monospace;
+  --hoi-font-sans: 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--hoi-panel-bg);
+  color: var(--hoi-primary);
+  font-family: var(--hoi-font-sans);
+  font-size: 13px;
+}
+
+/* Phase 1 layout: map fills available space; no scroll/gap on root or main. */
+#map-hoi-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Top command bar — 52px, faction | turn/date | advance + menu */
+.hoi-top-bar {
+  flex-shrink: 0;
+  height: 52px;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: var(--hoi-card-bg);
+  border-bottom: 1px solid var(--hoi-border);
+  font-family: var(--hoi-font-sans);
+}
+
+.hoi-top-bar-faction {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 200px;
+}
+
+.hoi-top-bar-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--hoi-font-mono);
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.hoi-top-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  justify-content: flex-end;
+}
+
+/* Main: sidebar (fixed) + map (only growing flex child). No gap so map fills. */
+.hoi-main {
+  flex: 1 1 auto;
+  display: flex;
+  gap: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Left sidebar — 300px, tabs + content */
+.hoi-sidebar {
+  flex-shrink: 0;
+  width: 300px;
+  background: var(--hoi-panel-bg);
+  border-right: 1px solid var(--hoi-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.hoi-sidebar-tabs {
+  flex-shrink: 0;
+  display: flex;
+  border-bottom: 1px solid var(--hoi-border);
+  padding: 4px 8px;
+  gap: 4px;
+}
+
+.hoi-sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+/* Map area: only growing flex child (flex: 1 1 auto, min-width: 0). Fills space beside sidebar. */
+.hoi-map-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  background: var(--hoi-card-bg);
+}
+
+.hoi-map-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.16;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.26) 100%),
+    repeating-linear-gradient(172deg, rgba(255, 245, 225, 0.06) 0 2px, rgba(0, 0, 0, 0) 2px 38px),
+    repeating-linear-gradient(8deg, rgba(0, 0, 0, 0.04) 0 1px, rgba(0, 0, 0, 0) 1px 24px);
+  mix-blend-mode: soft-light;
+}
+
+.hoi-map-wrap canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: default;
+}
+
+.hoi-map-wrap canvas:focus-visible {
+  outline: 2px solid var(--hoi-section-header);
+  outline-offset: 2px;
+}
+
+.hoi-map-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--hoi-secondary);
+  font-family: var(--hoi-font-mono);
+  font-size: 14px;
+}
+
+/* Bottom status strip */
+.hoi-status-strip {
+  flex-shrink: 0;
+  height: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: var(--hoi-card-bg);
+  border-top: 1px solid var(--hoi-border);
+  font-family: var(--hoi-font-mono);
+  font-size: 11px;
+  color: var(--hoi-secondary);
+}
+
+.hoi-status-ticker {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-right: 12px;
+}
+
+.hoi-status-alerts {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hoi-status-quickstats {
+  flex-shrink: 0;
+  color: var(--hoi-primary);
+}
+
+/* Top bar content */
+.hoi-top-bar-faction {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hoi-top-bar-faction-name {
+  font-family: var(--hoi-font-sans);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--hoi-primary);
+}
+
+.hoi-top-bar-phase {
+  font-size: 11px;
+  color: var(--hoi-secondary);
+}
+
+.hoi-btn {
+  font-family: var(--hoi-font-sans);
+  font-size: 12px;
+  padding: 6px 10px;
+  background: var(--hoi-active);
+  color: var(--hoi-primary);
+  border: 1px solid var(--hoi-border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.hoi-btn:hover {
+  background: var(--hoi-hover);
+}
+
+.hoi-btn-sm {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+/* Sidebar tabs */
+.hoi-tab-btn {
+  font-family: var(--hoi-font-sans);
+  font-size: 12px;
+  padding: 6px 10px;
+  background: transparent;
+  color: var(--hoi-secondary);
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.hoi-tab-btn:hover {
+  color: var(--hoi-primary);
+}
+
+.hoi-tab-btn.active {
+  color: var(--hoi-section-header);
+  border-bottom-color: var(--hoi-section-header);
+}
+
+/* Corps card */
+.hoi-corps-card {
+  background: var(--hoi-card-bg);
+  border: 1px solid var(--hoi-border);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.hoi-corps-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  font-family: var(--hoi-font-sans);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hoi-corps-toggle {
+  background: none;
+  border: none;
+  color: var(--hoi-secondary);
+  cursor: pointer;
+  padding: 0 4px;
+  font-size: 10px;
+}
+
+.hoi-corps-name {
+  flex: 1;
+  color: var(--hoi-section-header);
+}
+
+.hoi-corps-stance {
+  font-size: 11px;
+  color: var(--hoi-secondary);
+}
+
+.hoi-corps-meta {
+  padding: 4px 10px 6px;
+  font-family: var(--hoi-font-mono);
+  font-size: 11px;
+  color: var(--hoi-secondary);
+  border-top: 1px solid var(--hoi-border);
+}
+
+.hoi-corps-meta select {
+  background: var(--hoi-panel-bg);
+  color: var(--hoi-primary);
+  border: 1px solid var(--hoi-border);
+  padding: 2px 6px;
+  font-size: 11px;
+}
+
+.hoi-corps-brigades {
+  padding: 4px 8px;
+}
+
+.hoi-corps-actions {
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+  border-top: 1px solid var(--hoi-border);
+}
+
+/* Brigade row */
+.hoi-brigade-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  font-family: var(--hoi-font-mono);
+  font-size: 12px;
+  border-radius: 4px;
+  border-left: 3px solid transparent;
+}
+.hoi-brigade-row.hoi-brigade-faction-rs { border-left-color: var(--hoi-faction-rs); }
+.hoi-brigade-row.hoi-brigade-faction-rbih { border-left-color: var(--hoi-faction-rbih); }
+.hoi-brigade-row.hoi-brigade-faction-hrhb { border-left-color: var(--hoi-faction-hrhb); }
+.hoi-brigade-row-og { border-left-style: dashed; }
+.hoi-brigade-row-degraded { border-left-color: var(--hoi-warning) !important; }
+
+.hoi-brigade-row:hover {
+  background: var(--hoi-hover);
+}
+
+.hoi-brigade-row-og {
+  border-left: 2px dashed var(--hoi-interactive);
+  font-style: italic;
+}
+
+.hoi-brigade-row-degraded {
+  border-left: 2px solid var(--hoi-warning);
+}
+
+.hoi-brigade-row-critical {
+  border-left: 2px solid var(--hoi-alert);
+}
+
+.hoi-brigade-name {
+  color: var(--hoi-primary);
+}
+
+.hoi-brigade-personnel {
+  color: var(--hoi-secondary);
+}
+
+.hoi-brigade-posture {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--hoi-secondary);
+}
+
+.hoi-cohesion-bar {
+  display: flex;
+  gap: 1px;
+}
+
+.hoi-cohesion-segment {
+  width: 6px;
+  height: 10px;
+  background: var(--hoi-panel-bg);
+  border-radius: 1px;
+}
+
+.hoi-cohesion-segment.filled {
+  background: var(--hoi-section-header);
+}
+
+.hoi-brigade-warn,
+.hoi-brigade-critical {
+  font-size: 12px;
+}
+
+.hoi-sidebar-placeholder {
+  color: var(--hoi-secondary);
+  padding: 12px;
+  font-size: 12px;
+}
+
+/* War Status tab: territory bars */
+.hoi-war-status-tab {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.hoi-war-status-bars { display: flex; flex-direction: column; gap: 6px; }
+.hoi-territory-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.hoi-territory-faction { min-width: 48px; }
+.hoi-territory-bar-wrap {
+  flex: 1;
+  height: 12px;
+  background: var(--hoi-card-bg);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.hoi-territory-bar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.2s;
+}
+.hoi-territory-bar-row.hoi-territory-faction-rs .hoi-territory-bar { background: var(--hoi-faction-rs); }
+.hoi-territory-bar-row.hoi-territory-faction-rbih .hoi-territory-bar { background: var(--hoi-faction-rbih); }
+.hoi-territory-bar-row.hoi-territory-faction-hrhb .hoi-territory-bar { background: var(--hoi-faction-hrhb); }
+.hoi-territory-pct { font-family: var(--hoi-font-mono); min-width: 48px; }
+.hoi-personnel-by-faction { font-size: 12px; color: var(--hoi-secondary); }
+.hoi-personnel-row { padding: 2px 0; }
+.hoi-front-stability { font-size: 11px; color: var(--hoi-secondary); margin-top: 8px; }
+
+/* Diplomacy tab: alliance gauge */
+.hoi-diplomacy-tab { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.hoi-alliance-gauge { display: flex; flex-direction: column; gap: 4px; }
+.hoi-alliance-label { font-size: 12px; color: var(--hoi-secondary); }
+.hoi-alliance-bar-wrap {
+  height: 10px;
+  background: var(--hoi-card-bg);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.hoi-alliance-bar { height: 100%; background: var(--hoi-interactive); border-radius: 2px; transition: width 0.2s; }
+.hoi-alliance-value { font-family: var(--hoi-font-mono); font-size: 11px; }
+.hoi-diplomacy-row { font-size: 12px; color: var(--hoi-secondary); }
+
+/* Logistics tab */
+.hoi-logistics-tab { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.hoi-recruitment-capital { font-size: 12px; }
+.hoi-logistics-row { padding: 2px 0; }
+.hoi-logistics-placeholder { font-size: 11px; color: var(--hoi-secondary); }
+
+/* Status strip badges */
+.hoi-status-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.hoi-status-badge-alert {
+  background: var(--hoi-alert);
+  color: var(--hoi-primary);
+}
+
+.hoi-status-badge-warning {
+  background: var(--hoi-warning);
+  color: #1c1a17;
+}
+
+.hoi-status-badge-success {
+  background: var(--hoi-success);
+  color: var(--hoi-primary);
+}
+
+/* Tooltip (300ms delay, warm palette per §7) */
+.hoi-tooltip {
+  position: fixed;
+  z-index: 10000;
+  max-width: 320px;
+  padding: 8px 12px;
+  background: rgba(28, 26, 23, 0.95);
+  border: 1px solid var(--hoi-section-header);
+  border-radius: 4px;
+  font-family: var(--hoi-font-mono);
+  font-size: 11px;
+  color: var(--hoi-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.hoi-tooltip-title {
+  font-weight: 700;
+  color: var(--hoi-section-header);
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.hoi-tooltip-row {
+  color: var(--hoi-secondary);
+  line-height: 1.5;
+}
+
+/* ── EU4-style Map Mode Toolbar ──────────────────────────────────────────────
+ * Floats at bottom-center of the map canvas. Row of toggle buttons,
+ * each with a shortcut badge (F1–F5) and a label. Gold when active.
+ * Modelled after Europa Universalis IV / Hearts of Iron IV map mode selectors.
+ */
+.hoi-map-mode-toolbar {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  gap: 2px;
+  padding: 4px 6px;
+  background: rgba(28, 26, 23, 0.92);
+  border: 1px solid var(--hoi-border);
+  border-radius: 6px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+.hoi-map-mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 10px;
+  min-width: 68px;
+  background: var(--hoi-card-bg);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  user-select: none;
+}
+
+.hoi-map-mode-btn:hover {
+  background: var(--hoi-hover);
+  border-color: var(--hoi-border);
+}
+
+.hoi-map-mode-btn.active {
+  background: var(--hoi-active);
+  border-color: var(--hoi-section-header);
+}
+
+.hoi-map-mode-btn:focus-visible {
+  outline: 2px solid var(--hoi-section-header);
+  outline-offset: 1px;
+}
+
+.hoi-map-mode-shortcut {
+  font-family: var(--hoi-font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--hoi-secondary);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.hoi-map-mode-btn.active .hoi-map-mode-shortcut {
+  color: var(--hoi-section-header);
+}
+
+.hoi-map-mode-label {
+  font-family: var(--hoi-font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--hoi-secondary);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.hoi-map-mode-btn.active .hoi-map-mode-label {
+  color: var(--hoi-primary);
+}
+
+/* ── Formation DOM Overlay ─────────────────────────────────────────────────── */
+.formation-overlay-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.hoi-formation-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: auto;
+  cursor: pointer;
+  will-change: transform;
+}
+
+.hoi-formation-marker.selected .marker-box {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+.hoi-formation-marker .marker-box {
+  position: relative;
+  width: 48px;
+  height: 22px;
+  background-color: var(--hoi-card-bg);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  border-radius: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hoi-formation-marker.is-corps .marker-box {
+  width: 56px;
+  height: 26px;
+}
+
+.hoi-formation-marker .faction-rs {
+  background-color: var(--hoi-faction-rs);
+  color: #fff;
+}
+
+.hoi-formation-marker .faction-rbih {
+  background-color: var(--hoi-faction-rbih);
+  color: #fff;
+}
+
+.hoi-formation-marker .faction-hrhb {
+  background-color: var(--hoi-faction-hrhb);
+  color: #fff;
+}
+
+.hoi-formation-marker .readiness-glow {
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.hoi-formation-marker .posture-stripe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.hoi-formation-marker .posture-attack {
+  background: #d03030;
+}
+
+.hoi-formation-marker .posture-defend {
+  background: #40a050;
+}
+
+.hoi-formation-marker .posture-probe {
+  background: #e8a020;
+}
+
+.hoi-formation-marker .nato-symbol {
+  font-family: var(--hoi-font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  z-index: 1;
+}
+
+.hoi-formation-marker .strength {
+  position: absolute;
+  bottom: 0px;
+  right: 2px;
+  font-family: var(--hoi-font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+  z-index: 1;
+}
+
+.hoi-formation-marker .name-label {
+  display: none;
+  font-family: var(--hoi-font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--hoi-primary);
+  background: rgba(28, 26, 23, 0.7);
+  padding: 1px 4px;
+  border-radius: 2px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+}
+
+.hoi-formation-marker.selected .name-label,
+.hoi-formation-marker.stack-expanded .name-label {
+  display: block;
+}

@@ -39,7 +39,7 @@ test('player_choice + no_initial_brigade_formations starts with corps only, then
 
     const scenario = {
         scenario_id: 'tmp_deferred_recruitment_phaseii_1w',
-        start_phase: 'phase_ii',
+        start_lifecycle_phase: 'war',
         weeks: 1,
         init_control: 'apr1992',
         recruitment_mode: 'player_choice',

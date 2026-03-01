@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Front Line Style Mockups — AWWV</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1e1e1a; font-family: 'IBM Plex Sans', Arial, sans-serif; color: #e8e0d0; overflow-y: auto; }
+  .row { display: flex; gap: 16px; padding: 16px; justify-content: center; flex-wrap: wrap; }
+  .panel { background: #2a2d25; border: 1px solid #403828; border-radius: 6px; padding: 12px; width: 480px; }
+  .panel h2 { font-size: 18px; margin-bottom: 2px; }
+  .panel p { font-size: 12px; color: #a09880; margin-bottom: 8px; }
+  canvas { display: block; width: 100%; border-radius: 4px; }
+  .legend { text-align: center; padding: 10px 16px 16px; color: #908878; font-size: 12px; line-height: 1.6; }
+  .legend strong { color: #c8c0b0; }
+</style>
+</head>
+<body>
+<div class="row">
+  <div class="panel">
+    <h2>A) Dual Faction Glowing Tubes</h2>
+    <p>Two faction-colored glowing tubes, one on each side of the border</p>
+    <canvas id="cA" width="900" height="500"></canvas>
+  </div>
+  <div class="panel">
+    <h2>B) HoI4 Painted Band</h2>
+    <p>Thick solid band, faction color each half, dark center stroke</p>
+    <canvas id="cB" width="900" height="500"></canvas>
+  </div>
+  <div class="panel">
+    <h2>C) Defensive Arcs + Barbs</h2>
+    <p>NATO-style paired arcs with barbed-wire ticks (current 2D map style)</p>
+    <canvas id="cC" width="900" height="500"></canvas>
+  </div>
+</div>
+<div class="legend">
+  <strong>All three options follow actual settlement border geometry (not centroid-to-centroid).</strong><br>
+  RS (VRS) in red on top &bull; RBiH (ARBiH) in green on bottom &bull; Terrain + semi-transparent political control visible beneath.<br>
+  Front lines only drawn where brigades are present on at least one side.
+</div>
+
+<script>
+const RS = 'rgb(180, 50, 50)';
+const RS_FILL = 'rgba(180, 50, 50, 0.3)';
+const RBIH = 'rgb(55, 140, 75)';
+const RBIH_FILL = 'rgba(55, 140, 75, 0.3)';
+
+function border() {
+  return [[0,340],[80,270],[160,310],[250,240],[340,280],[430,220],[510,265],[600,210],[690,255],[780,195],[860,240]];
+}
+
+function getPerp(pts, i, off) {
+  const dx = i<pts.length-1 ? pts[i+1][0]-pts[i][0] : pts[i][0]-pts[i-1][0];
+  const dy = i<pts.length-1 ? pts[i+1][1]-pts[i][1] : pts[i][1]-pts[i-1][1];
+  const len = Math.sqrt(dx*dx+dy*dy)||1;
+  return { x: pts[i][0]+(-dy/len)*off, y: pts[i][1]+(dx/len)*off };
+}
+
+function drawBg(ctx, W, H) {
+  const pts = border();
+  // Terrain top (RS side — olive)
+  ctx.fillStyle = 'rgb(155,155,130)';
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,195);
+  for(let i=pts.length-1;i>=0;i--) ctx.lineTo(pts[i][0],pts[i][1]);
+  ctx.closePath(); ctx.fill();
+  // Terrain bottom (RBiH side — green)
+  ctx.fillStyle = 'rgb(130,158,115)';
+  ctx.beginPath(); ctx.moveTo(0,H); ctx.lineTo(W,H); ctx.lineTo(W,195);
+  for(let i=pts.length-1;i>=0;i--) ctx.lineTo(pts[i][0],pts[i][1]);
+  ctx.lineTo(0,340); ctx.closePath(); ctx.fill();
+  // Hillshade
+  ctx.globalAlpha = 0.04;
+  for(let y=0;y<H;y+=4){
+    ctx.fillStyle = (Math.sin(y*0.04)*6+Math.cos(y*0.025+2)*4)>0?'#000':'#fff';
+    ctx.fillRect(0,y,W,3);
+  }
+  ctx.globalAlpha = 1;
+  // Control overlay RS
+  ctx.fillStyle = RS_FILL;
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,195);
+  for(let i=pts.length-1;i>=0;i--) ctx.lineTo(pts[i][0],pts[i][1]);
+  ctx.closePath(); ctx.fill();
+  // Control overlay RBiH
+  ctx.fillStyle = RBIH_FILL;
+  ctx.beginPath(); ctx.moveTo(0,H); ctx.lineTo(W,H); ctx.lineTo(W,195);
+  for(let i=pts.length-1;i>=0;i--) ctx.lineTo(pts[i][0],pts[i][1]);
+  ctx.lineTo(0,340); ctx.closePath(); ctx.fill();
+  // Faint internal settlement borders
+  ctx.strokeStyle = 'rgba(70,65,50,0.35)';
+  ctx.lineWidth = 1; ctx.setLineDash([4,5]);
+  ctx.beginPath();
+  ctx.moveTo(250,0); ctx.lineTo(250,240);
+  ctx.moveTo(510,0); ctx.lineTo(510,265);
+  ctx.moveTo(160,310); ctx.lineTo(160,H);
+  ctx.moveTo(430,220); ctx.lineTo(430,H);
+  ctx.moveTo(690,255); ctx.lineTo(690,H);
+  ctx.stroke(); ctx.setLineDash([]);
+}
+
+// ====== A: Dual Glowing Tubes ======
+(function(){
+  const c = document.getElementById('cA');
+  const ctx = c.getContext('2d');
+  const W=900, H=500;
+  drawBg(ctx, W, H);
+  const pts = border();
+  function tube(color, dir) {
+    const off = 14*dir;
+    // Outer glow
+    ctx.strokeStyle = color.replace('rgb','rgba').replace(')',', 0.18)');
+    ctx.lineWidth = 16; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.beginPath();
+    for(let i=0;i<pts.length;i++){ const p=getPerp(pts,i,off); i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y); }
+    ctx.stroke();
+    // Mid glow
+    ctx.strokeStyle = color.replace('rgb','rgba').replace(')',', 0.4)');
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    for(let i=0;i<pts.length;i++){ const p=getPerp(pts,i,off); i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y); }
+    ctx.stroke();
+    // Core
+    ctx.strokeStyle = color.replace('rgb','rgba').replace(')',', 0.85)');
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for(let i=0;i<pts.length;i++){ const p=getPerp(pts,i,off); i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y); }
+    ctx.stroke();
+    // Hot center
+    ctx.strokeStyle = color.replace('rgb','rgba').replace(')',', 1.0)');
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for(let i=0;i<pts.length;i++){ const p=getPerp(pts,i,off); i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y); }
+    ctx.stroke();
+  }
+  tube(RS, -1);
+  tube(RBIH, 1);
+})();
+
+// ====== B: HoI4 Painted Band ======
+(function(){
+  const c = document.getElementById('cB');
+  const ctx = c.getContext('2d');
+  const W=900, H=500;
+  drawBg(ctx, W, H);
+  const pts = border();
+  const bw = 18;
+  // RS half-band
+  ctx.strokeStyle = 'rgba(180,50,50,0.5)';
+  ctx.lineWidth = bw; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath();
+  for(let i=0;i<pts.length;i++){ const p=getPerp(pts,i,-bw/2); i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y); }
+  ctx.stroke();
+  // RBiH half-band
+  ctx.strokeStyle = 'rgba(55,140,75,0.5)';
+  ctx.beginPath();
+  for(let i=0;i<pts.length;i++){ const p=getPerp(pts,i,bw/2); i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y); }
+  ctx.stroke();
+  // Dark center line
+  ctx.strokeStyle = 'rgba(20,18,15,0.7)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(pts[0][0],pts[0][1]);
+  for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i][0],pts[i][1]);
+  ctx.stroke();
+  // Cross-hatches
+  ctx.strokeStyle = 'rgba(20,18,15,0.25)';
+  ctx.lineWidth = 1;
+  for(let i=1;i<pts.length;i++){
+    const dx=pts[i][0]-pts[i-1][0], dy=pts[i][1]-pts[i-1][1];
+    const slen=Math.sqrt(dx*dx+dy*dy); const steps=Math.floor(slen/35);
+    for(let s=0;s<=steps;s++){
+      const t=steps>0?s/steps:0.5;
+      const bx=pts[i-1][0]+dx*t, by=pts[i-1][1]+dy*t;
+      const nx=-dy/slen*bw, ny=dx/slen*bw;
+      ctx.beginPath(); ctx.moveTo(bx-nx,by-ny); ctx.lineTo(bx+nx,by+ny); ctx.stroke();
+    }
+  }
+})();
+
+// ====== C: Defensive Arcs + Barbs ======
+(function(){
+  const c = document.getElementById('cC');
+  const ctx = c.getContext('2d');
+  const W=900, H=500;
+  drawBg(ctx, W, H);
+  const pts = border();
+  const arcOff = 10, barbLen = 7, barbSp = 18;
+  function side(color, dir){
+    // Glow
+    ctx.strokeStyle = color.replace('rgb','rgba').replace(')',', 0.15)');
+    ctx.lineWidth = 10; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.beginPath();
+    for(let i=0;i<pts.length;i++){ const p=getPerp(pts,i,arcOff*dir); i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y); }
+    ctx.stroke();
+    // Arc
+    ctx.strokeStyle = color.replace('rgb','rgba').replace(')',', 0.7)');
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    for(let i=0;i<pts.length;i++){ const p=getPerp(pts,i,arcOff*dir); i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y); }
+    ctx.stroke();
+    // Barbs
+    ctx.strokeStyle = color.replace('rgb','rgba').replace(')',', 0.85)');
+    ctx.lineWidth = 1.2;
+    for(let i=1;i<pts.length;i++){
+      const dx=pts[i][0]-pts[i-1][0], dy=pts[i][1]-pts[i-1][1];
+      const slen=Math.sqrt(dx*dx+dy*dy); if(slen<6) continue;
+      const steps=Math.floor(slen/barbSp);
+      for(let s=0;s<steps;s++){
+        const t=(s+0.5)/steps;
+        const bx=pts[i-1][0]+dx*t, by=pts[i-1][1]+dy*t;
+        const nx=-dy/slen, ny=dx/slen;
+        const ox=bx+nx*arcOff*dir, oy=by+ny*arcOff*dir;
+        ctx.beginPath(); ctx.moveTo(ox,oy);
+        ctx.lineTo(ox+nx*barbLen*(-dir), oy+ny*barbLen*(-dir));
+        ctx.stroke();
+      }
+    }
+  }
+  side(RS, -1);
+  side(RBIH, 1);
+})();
+</script>
+</body>
+</html>

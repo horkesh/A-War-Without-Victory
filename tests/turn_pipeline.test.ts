@@ -6,7 +6,14 @@ import { CURRENT_SCHEMA_VERSION, GameState } from '../src/state/game_state.js';
 
 const baseState: GameState = {
     schema_version: CURRENT_SCHEMA_VERSION,
-    meta: { turn: 0, seed: 'initial-seed' },
+    meta: {
+        turn: 0,
+        seed: 'initial-seed',
+        phase: 'war',
+        referendum_held: true,
+        referendum_turn: 0,
+        war_start_turn: 0
+    },
     factions: [],
     formations: {},
     front_segments: {},

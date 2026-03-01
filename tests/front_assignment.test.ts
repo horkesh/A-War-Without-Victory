@@ -8,7 +8,7 @@ import { ensureBrigadeFrontAssignments, isBrigadeAssignedToFront } from '../src/
 function makeState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 8, seed: 'test', phase: 'phase_ii' } as any,
+        meta: { turn: 8, seed: 'test', phase: 'war' } as any,
         factions: [],
         formations: {
             b1: {
@@ -22,6 +22,7 @@ function makeState(): GameState {
                 personnel: 1000,
                 cohesion: 60,
                 tags: [],
+                location_osid: 'op:test_mun:s1',
             },
             b2: {
                 id: 'b2',
@@ -34,6 +35,7 @@ function makeState(): GameState {
                 personnel: 1000,
                 cohesion: 60,
                 tags: [],
+                location_osid: 'op:test_mun:s2',
             },
         } as any,
         front_segments: {},

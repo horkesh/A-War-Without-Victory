@@ -2,12 +2,20 @@
 
 **Project:** A War Without Victory (AWWV)
 **Location:** `src/ui/map/`
-**Dev server:** Port 3002 (or next free port if 3002 in use)
-**Date:** 2026-02-08
+**Dev server:** `npm run dev:map` (port may vary, e.g. 3007)
+**Date:** 2026-02-08 | **Canonical GUI update:** 2026-02-28
 
 ---
 
-## 1. Quick Start
+## 0. Canonical map / GUI (2026-02-28)
+
+The **canonical player-facing map and GUI** is the **React + MapLibre map app** in `src/ui/map/` (Vite, React, Tailwind, Zustand). It is the single source of truth for all new GUI work. Spec: [AWWV_GUI_ARCHITECTURE_REWORK_v2.md](AWWV_GUI_ARCHITECTURE_REWORK_v2.md). Full implementation status and backlog: [20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md](../40_reports/20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md). Run: `npm run dev:map`. Storybook for map UI components: `src/ui/map/.storybook/`, `src/ui/map/stories/`.
+
+The sections below (§1 onward) describe the **legacy** tactical map (Canvas 2D, MapApp.ts) and HoI 3D map (map_hoi.html, HoIMapRenderer) for reference. Those stacks are archived; new features belong in the React + MapLibre app.
+
+---
+
+## 1. Quick Start (legacy reference)
 
 ```bash
 # Start the dev server
@@ -23,9 +31,9 @@ The dev server runs Vite on port 3002 with a custom middleware plugin that serve
 
 ---
 
-## 2. System Overview
+## 2. System Overview (legacy reference)
 
-**Canonical map:** The **HoI 3D map** (`map_hoi.html`) is the canonical player-facing map. Unit (formation) display on it follows the write-ups in §2.1; implementation status: [ORCHESTRATOR_VISIBLE_FORMATIONS_ON_MAP_2026_02_23.md](../40_reports/convenes/ORCHESTRATOR_VISIBLE_FORMATIONS_ON_MAP_2026_02_23.md). Formation markers are wired via `getWorldPositionForSettlement(osidOrSid)` and `setFormations(markers)`; selection-driven ZoC and corps–brigade lines are implemented per [ORCHESTRATOR_HOI_3D_FORMATIONS_ZOC_CONVENE_2026_02_23.md](../40_reports/convenes/ORCHESTRATOR_HOI_3D_FORMATIONS_ZOC_CONVENE_2026_02_23.md) (click unit → ZoC; click corps → lines to subordinates + combined ZoC). See [20260224_HOI_3D_FORMATIONS_ZOC_IMPLEMENTATION.md](../40_reports/implemented/20260224_HOI_3D_FORMATIONS_ZOC_IMPLEMENTATION.md). **Strategic zoom (max zoom out):** When zoom ≥ ZOOM_CORPS_ONLY_THRESHOLD (2.6), only corps and army_hq markers are visible and clickable; brigades are hidden. **Corps HQ placement:** Corps (and army_hq) use `location_osid` when set in state (historical HQ OSID from scenario data); otherwise position is the centroid of subordinates’ positions. Scenario authors should set `location_osid` on corps formations to the historical HQ OSID for correct placement.
+**Legacy:** The following describes the HoI 3D map (`map_hoi.html`) and Canvas 2D tactical map (`tactical_map.html`, MapApp.ts) for reference only. The **canonical** map is the React + MapLibre app (see §0 above). Unit (formation) display on it follows the write-ups in §2.1; implementation status: [ORCHESTRATOR_VISIBLE_FORMATIONS_ON_MAP_2026_02_23.md](../40_reports/convenes/ORCHESTRATOR_VISIBLE_FORMATIONS_ON_MAP_2026_02_23.md). Formation markers are wired via `getWorldPositionForSettlement(osidOrSid)` and `setFormations(markers)`; selection-driven ZoC and corps–brigade lines are implemented per [ORCHESTRATOR_HOI_3D_FORMATIONS_ZOC_CONVENE_2026_02_23.md](../40_reports/convenes/ORCHESTRATOR_HOI_3D_FORMATIONS_ZOC_CONVENE_2026_02_23.md) (click unit → ZoC; click corps → lines to subordinates + combined ZoC). See [20260224_HOI_3D_FORMATIONS_ZOC_IMPLEMENTATION.md](../40_reports/implemented/20260224_HOI_3D_FORMATIONS_ZOC_IMPLEMENTATION.md). **Strategic zoom (max zoom out):** When zoom ≥ ZOOM_CORPS_ONLY_THRESHOLD (2.6), only corps and army_hq markers are visible and clickable; brigades are hidden. **Corps HQ placement:** Corps (and army_hq) use `location_osid` when set in state (historical HQ OSID from scenario data); otherwise position is the centroid of subordinates’ positions. Scenario authors should set `location_osid` on corps formations to the historical HQ OSID for correct placement.
 
 ### 2.1 How units (formations) should be displayed — doc index
 

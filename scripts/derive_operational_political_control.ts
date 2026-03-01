@@ -44,8 +44,6 @@ const RBIH_ALIGNED = new Set([
     'tuzla', 'lopare', 'srebrenik', 'tesanj', 'velika_kladusa', 'vogosca',
 ]);
 
-const MAJORITY_THRESHOLD = 0.40;
-
 // ─── Derive control ─────────────────────────────────────────────────────────
 console.log('Deriving operational political control (April 1992)...');
 
@@ -69,20 +67,22 @@ for (const feature of opGeo.features) {
         faction = settlementOverrides.get(seedSid)!;
     }
 
-    // Step 2: Ethnic majority from aggregated population
+    // Step 2: Ethnic majority/plurality from aggregated population
+    // Use majority (>50%) when present; else plurality (largest share). Order-independent.
     if (!faction && popTotal > 0) {
         const bShare = popB / popTotal;
         const sShare = popS / popTotal;
         const cShare = popC / popTotal;
 
-        if (bShare >= MAJORITY_THRESHOLD) faction = 'RBiH';
-        else if (sShare >= MAJORITY_THRESHOLD) faction = 'RS';
-        else if (cShare >= MAJORITY_THRESHOLD) faction = 'HRHB';
+        if (sShare > 0.5) faction = 'RS';
+        else if (bShare > 0.5) faction = 'RBiH';
+        else if (cShare > 0.5) faction = 'HRHB';
         else {
-            // Mixed — use plurality
+            // No majority — use plurality (largest share)
             const max = Math.max(bShare, sShare, cShare);
-            if (bShare === max) faction = 'RBiH';
+            if (max === 0) { /* leave null for Step 3 fallback */ }
             else if (sShare === max) faction = 'RS';
+            else if (bShare === max) faction = 'RBiH';
             else if (cShare === max) faction = 'HRHB';
         }
     }

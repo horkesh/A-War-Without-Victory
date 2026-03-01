@@ -18,7 +18,7 @@ function phase0GameStateFixture(): GameState {
         meta: {
             turn: 0,
             seed: 'phase0-fixture',
-            phase: 'phase_0',
+            phase: 'peace',
             referendum_held: false,
             referendum_turn: null,
             war_start_turn: null,
@@ -150,7 +150,7 @@ test('Phase 0 state serialization round-trip preserves Phase 0 fields', () => {
     const payload = serializeState(original);
     const hydrated = deserializeState(payload);
 
-    assert.strictEqual(hydrated.meta.phase, 'phase_0');
+    assert.strictEqual(hydrated.meta.phase, 'peace');
     assert.strictEqual(hydrated.meta.referendum_held, false);
     assert.strictEqual(hydrated.meta.referendum_turn, null);
     assert.strictEqual(hydrated.meta.war_start_turn, null);

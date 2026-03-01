@@ -9,7 +9,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function makeState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 15, seed: 'bot-test', phase: 'phase_i' },
+        meta: { turn: 15, seed: 'bot-test', phase: 'war' },
         factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },

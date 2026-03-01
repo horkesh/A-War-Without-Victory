@@ -31,7 +31,7 @@ function makeBottomUpState(munAvailable = 150): GameState {
         meta: {
             turn: 1,
             seed: 'proto-brigade-test',
-            phase: 'phase_i',
+            phase: 'war',
             recruitment_mode: 'bottom_up'
         },
         factions: [

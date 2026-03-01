@@ -17,7 +17,7 @@ function stateWithDeclarations(): GameState {
         meta: {
             turn: 10,
             seed: 'authority-fixture',
-            phase: 'phase_i',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -56,7 +56,7 @@ function stateWithDeclarations(): GameState {
         militia_pools: {},
         political_controllers: { s1: 'RBiH', s2: 'RS' },
         municipalities: { MUN_A: { stability_score: 50 }, MUN_B: { stability_score: 50 } },
-        phase_i_jna: { transition_begun: true, withdrawal_progress: 0.2, asset_transfer_rs: 0.15 }
+        war_jna: { transition_begun: true, withdrawal_progress: 0.2, asset_transfer_rs: 0.15 }
     };
 }
 
@@ -105,10 +105,9 @@ test('Authority can degrade while control unchanged (political_controllers not t
     assert.ok(typeof rbihAfter === 'number', 'RBiH authority should still be updated');
 });
 
-test('Phase I runTurn includes authority update in report', async () => {
+test('war runTurn default path omits phase_i authority report', async () => {
     const state = stateWithDeclarations();
     const { report } = await runTurn(state, { seed: state.meta.seed });
-    assert.ok(report.phase_i_authority);
-    assert.ok(Array.isArray(report.phase_i_authority!.changes));
-    assert.ok(report.phases.some((p) => p.name === 'phase-i-authority-update'));
+    assert.strictEqual(report.phase_i_authority, undefined);
+    assert.strictEqual(report.phases.some((p) => p.name === 'phase-i-authority-update'), false);
 });

@@ -85,24 +85,24 @@ export async function buildCompareResult(
             ),
             readFile(join(baselineRunDir, 'final_save.json'), 'utf8').then((t) =>
                 JSON.parse(t) as {
-                    phase_ii_exhaustion?: Record<string, number>;
-                    phase_ii_supply_pressure?: Record<string, number>;
+                    war_exhaustion?: Record<string, number>;
+                    war_supply_pressure?: Record<string, number>;
                     settlement_displacement?: Record<string, number>;
                 }
             ),
             readFile(join(probeRunDir, 'final_save.json'), 'utf8').then((t) =>
                 JSON.parse(t) as {
-                    phase_ii_exhaustion?: Record<string, number>;
-                    phase_ii_supply_pressure?: Record<string, number>;
+                    war_exhaustion?: Record<string, number>;
+                    war_supply_pressure?: Record<string, number>;
                     settlement_displacement?: Record<string, number>;
                 }
             )
         ]);
 
-    const exhaustionBaseline = recordFromFactionKeys(finalBaseline.phase_ii_exhaustion);
-    const exhaustionProbe = recordFromFactionKeys(finalProbe.phase_ii_exhaustion);
-    const supplyBaseline = recordFromFactionKeys(finalBaseline.phase_ii_supply_pressure);
-    const supplyProbe = recordFromFactionKeys(finalProbe.phase_ii_supply_pressure);
+    const exhaustionBaseline = recordFromFactionKeys(finalBaseline.war_exhaustion);
+    const exhaustionProbe = recordFromFactionKeys(finalProbe.war_exhaustion);
+    const supplyBaseline = recordFromFactionKeys(finalBaseline.war_supply_pressure);
+    const supplyProbe = recordFromFactionKeys(finalProbe.war_supply_pressure);
     const dispBaseline = displacementCount(finalBaseline);
     const dispProbe = displacementCount(finalProbe);
 
@@ -232,3 +232,4 @@ export function formatProbeCompareMarkdown(result: CompareResult): string {
     ];
     return lines.join('\n');
 }
+

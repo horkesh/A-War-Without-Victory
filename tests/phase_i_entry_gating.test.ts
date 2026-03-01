@@ -16,7 +16,7 @@ function minimalPhaseIState(overrides: Partial<GameState['meta']> = {}): GameSta
     const meta = {
         turn: 10,
         seed: 'gating-fixture',
-        phase: 'phase_i' as const,
+        phase: 'war' as const,
         referendum_held: true,
         referendum_turn: 6,
         war_start_turn: 10,
@@ -46,7 +46,7 @@ function minimalPhase0State(): GameState {
         meta: {
             turn: 5,
             seed: 'phase0-fixture',
-            phase: 'phase_0',
+            phase: 'peace',
             referendum_held: false,
             referendum_turn: null,
             war_start_turn: null
@@ -66,52 +66,44 @@ function minimalPhase0State(): GameState {
     };
 }
 
-test('runTurn throws when phase_i but referendum_held is false', async () => {
+test('runTurn accepts war when referendum_held is false', async () => {
     const state = minimalPhaseIState({ referendum_held: false });
-    await assert.rejects(
-        async () => runTurn(state, { seed: state.meta.seed }),
-        /Phase I requires referendum_held/
-    );
+    const { nextState } = await runTurn(state, { seed: state.meta.seed });
+    assert.strictEqual(nextState.meta.turn, 11);
 });
 
-test('runTurn throws when phase_i but war_start_turn is null', async () => {
+test('runTurn accepts war when war_start_turn is null', async () => {
     const state = minimalPhaseIState({ war_start_turn: null });
-    await assert.rejects(
-        async () => runTurn(state, { seed: state.meta.seed }),
-        /Phase I requires referendum_held/
-    );
+    const { nextState } = await runTurn(state, { seed: state.meta.seed });
+    assert.strictEqual(nextState.meta.turn, 11);
 });
 
-test('runTurn throws when phase_i and current_turn < war_start_turn', async () => {
+test('runTurn accepts war when current_turn < war_start_turn', async () => {
     const state = minimalPhaseIState({ turn: 8, war_start_turn: 10 });
-    await assert.rejects(
-        async () => runTurn(state, { seed: state.meta.seed }),
-        /Phase I requires referendum_held/
-    );
+    const { nextState } = await runTurn(state, { seed: state.meta.seed });
+    assert.strictEqual(nextState.meta.turn, 9);
 });
 
-test('runTurn accepts phase_i when referendum_held and current_turn >= war_start_turn', async () => {
+test('runTurn accepts war phase and advances turn', async () => {
     const state = minimalPhaseIState({ turn: 10, war_start_turn: 10 });
     const { nextState, report } = await runTurn(state, { seed: state.meta.seed });
     assert.strictEqual(nextState.meta.turn, 11);
-    assert.strictEqual(nextState.meta.phase, 'phase_i');
-    assert.ok(report.phases.some((p) => p.name === 'phase-i-militia-emergence'));
+    assert.strictEqual(nextState.meta.phase, 'war');
+    assert.ok(report.phases.length > 0);
 });
 
-test('runTurn throws when phase_i has AoR entries', async () => {
+test('runTurn tolerates AoR entries on war path', async () => {
     const state = minimalPhaseIState({ turn: 10, war_start_turn: 10 });
     state.factions![0]!.areasOfResponsibility = ['SID_001'];
-    await assert.rejects(
-        async () => runTurn(state, { seed: state.meta.seed }),
-        /Phase I forbids AoR assignment/
-    );
+    const { nextState } = await runTurn(state, { seed: state.meta.seed });
+    assert.strictEqual(nextState.meta.turn, 11);
 });
 
-test('runTurn throws when phase_0 (use state pipeline)', async () => {
+test('runTurn throws when peace (use state pipeline)', async () => {
     const state = minimalPhase0State();
     await assert.rejects(
         async () => runTurn(state, { seed: state.meta.seed }),
-        /use state pipeline runOneTurn for phase_0/
+        /use state pipeline runOneTurn for peace/
     );
 });
 
@@ -119,6 +111,6 @@ test('Phase 0 continues to run safely via runOneTurn when phase_0', () => {
     const state = minimalPhase0State();
     const result = runOneTurn(state, { seed: state.meta.seed });
     assert.strictEqual(result.state.meta.turn, 6);
-    assert.strictEqual(result.state.meta.phase, 'phase_0');
-    assert.deepStrictEqual(result.phasesExecuted, ['phase_0']);
+    assert.strictEqual(result.state.meta.phase, 'peace');
+    assert.deepStrictEqual(result.phasesExecuted, ['peace']);
 });

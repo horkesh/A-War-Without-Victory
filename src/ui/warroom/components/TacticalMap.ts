@@ -140,7 +140,7 @@ export class TacticalMap {
         }
 
         // 4. Draw Frontlines (Layer 2: thick black dashed where control flips) — only in war phase
-        const isWarPhase = state.meta.phase === 'phase_i' || state.meta.phase === 'phase_ii';
+        const isWarPhase = state.meta.phase === 'war';
         if (isWarPhase && this.bounds && this.polygons.size > 0 && this.settlementEdges.length > 0) {
             this.renderFrontlines(state);
         }

@@ -22,7 +22,7 @@ test('V4: 10+ Phase 0 turns without throw', () => {
     }
 
     assert.strictEqual(s.meta.turn, 12);
-    assert.strictEqual(s.meta.phase, 'phase_0');
+    assert.strictEqual(s.meta.phase, 'peace');
 });
 
 test('V4: determinism — same inputs yield identical final state', () => {

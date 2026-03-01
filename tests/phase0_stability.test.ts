@@ -27,7 +27,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function minimalStateWithMunicipalities(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'stab-test', phase: 'phase_0' },
+        meta: { turn: 0, seed: 'stab-test', phase: 'peace' },
         factions: [],
         formations: {},
         front_segments: {},

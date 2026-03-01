@@ -18,7 +18,7 @@ function minimalPhaseIIState(controllers: Record<string, string> = { S1: 'RBiH',
         meta: {
             turn: 20,
             seed: 'pf-trig',
-            phase: 'phase_ii',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -38,9 +38,9 @@ function minimalPhaseIIState(controllers: Record<string, string> = { S1: 'RBiH',
     };
 }
 
-test('evaluateDisplacementTriggers: phase_i returns empty deltas', () => {
+test('evaluateDisplacementTriggers: peace returns empty deltas', () => {
     const state = minimalPhaseIIState() as GameState;
-    state.meta!.phase = 'phase_i';
+    state.meta!.phase = 'peace';
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const { deltas, report } = evaluateDisplacementTriggers(state, edges);
     assert.deepStrictEqual(Object.keys(deltas), []);

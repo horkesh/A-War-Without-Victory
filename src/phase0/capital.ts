@@ -49,8 +49,8 @@ function isNonNegativeInteger(value: number): boolean {
 }
 
 function hasScheduledPhase0Timing(state: GameState): boolean {
-    return isNonNegativeInteger(state.meta.phase_0_scheduled_referendum_turn ?? -1) &&
-        isNonNegativeInteger(state.meta.phase_0_scheduled_war_start_turn ?? -1);
+    return isNonNegativeInteger(state.meta.peace_scheduled_referendum_turn ?? -1) &&
+        isNonNegativeInteger(state.meta.peace_scheduled_war_start_turn ?? -1);
 }
 
 /**
@@ -68,7 +68,7 @@ export function applyPrewarCapitalTrickle(
     state: GameState,
     options: PrewarCapitalTrickleOptions = {}
 ): void {
-    if (state.meta.phase !== 'phase_0') return;
+    if (state.meta.phase !== 'peace') return;
     if (!hasScheduledPhase0Timing(state)) return;
 
     const perTurn = options.perTurn ?? PREWAR_CAPITAL_TRICKLE_PER_TURN;
@@ -132,3 +132,4 @@ export function getPrewarCapital(state: GameState, factionId: FactionId): number
 
 /** Canonical faction order for Phase 0 turn sequence (Phase_0_Spec §5: RBiH, RS, HRHB). */
 export const PHASE0_FACTION_ORDER: readonly FactionId[] = ['RBiH', 'RS', 'HRHB'];
+

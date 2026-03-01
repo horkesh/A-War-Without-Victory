@@ -66,7 +66,8 @@ export interface GameStore {
   setPendingAttackConfirmation: (v: { attackerFormationId: string; targetOsid: string } | null) => void;
 
   loadedGameState: LoadedGameState | null;
-  loadSave: (json: unknown) => void;
+  /** Load save: accepts parsed JSON or raw JSON string. Returns Promise that resolves when state is set. Yields before parse so UI can paint loading state. */
+  loadSave: (jsonOrText: unknown | string) => Promise<void>;
 
   /** Staged orders for current turn (Phase C5). */
   stagedOrders: StagedOrder[];
@@ -119,14 +120,32 @@ export const useGameStore = create<GameStore>((set) => ({
 
   loadedGameState: null,
 
-  loadSave: (json: unknown) => {
-    try {
-      const state = parseGameState(json);
-      set({ loadedGameState: state });
-      console.log(`[gameStore] Loaded save: ${state.label} — ${state.formations.length} formations, ${Object.keys(state.controlBySettlement).length} control entries`);
-    } catch (e) {
-      console.error('[gameStore] Failed to parse save:', e);
-    }
+  loadSave: (jsonOrText: unknown | string) => {
+    return new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        let state: LoadedGameState;
+        try {
+          const json =
+            typeof jsonOrText === 'string'
+              ? JSON.parse(jsonOrText as string)
+              : jsonOrText;
+          state = parseGameState(json);
+        } catch (e) {
+          console.error('[gameStore] Failed to parse save:', e);
+          reject(e);
+          return;
+        }
+        requestAnimationFrame(() => {
+          try {
+            set({ loadedGameState: state });
+            console.log(`[gameStore] Loaded save: ${state.label} — ${state.formations.length} formations, ${Object.keys(state.controlBySettlement).length} control entries`);
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
+        });
+      }, 0);
+    });
   },
 
   stagedOrders: [],

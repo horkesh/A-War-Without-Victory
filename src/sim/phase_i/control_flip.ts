@@ -194,7 +194,7 @@ function isWarActive(state: GameState): boolean {
 
 /** Is municipality in consolidation period? (Phase I §4.3.1, §4.3.5). */
 function inConsolidation(state: GameState, munId: MunicipalityId, turn: number): boolean {
-    const until = state.phase_i_consolidation_until?.[munId];
+    const until = state.war_consolidation_until?.[munId];
     return typeof until === 'number' && turn < until;
 }
 
@@ -209,7 +209,7 @@ function hasAdjacentHostile(
 ): boolean {
     const neighbors = munAdjacency.get(munId);
     if (!neighbors) return false;
-    // Dynamic alliance check: use phase_i_alliance_rbih_hrhb threshold (Phase I §4.8)
+    // Dynamic alliance check: use war_alliance_rbih_hrhb threshold (Phase I §4.8)
     const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 26;
     const beforeEarliestWar = state.meta.turn < earliestTurn;
     const rbihHrhbAllied = beforeEarliestWar || areRbihHrhbAllied(state);
@@ -287,7 +287,7 @@ function getStrongestAdjacentAttacker(
     const neighbors = munAdjacency.get(munId);
     if (!neighbors) return null;
     let best: { faction: FactionId; strength: number } | null = null;
-    const strengthByMun = state.phase_i_militia_strength ?? {};
+    const strengthByMun = state.war_militia_strength ?? {};
     // Dynamic alliance check (Phase I §4.8); before earliest war turn treat RBiH–HRHB as allied (historical fidelity).
     const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 26;
     const beforeEarliestWar = state.meta.turn < earliestTurn;
@@ -393,7 +393,7 @@ function getCurrentStability(state: GameState, munId: MunicipalityId, controller
     const base = mun?.stability_score ?? 50;
     const status = mun?.control_status ?? 'CONTESTED';
     const controlStatusAdj = status === 'SECURE' ? 10 : status === 'HIGHLY_CONTESTED' ? -20 : 0;
-    const strengthByMun = state.phase_i_militia_strength ?? {};
+    const strengthByMun = state.war_militia_strength ?? {};
     const byFaction = strengthByMun[munId] ?? {};
     const militiaStrength = controller ? (byFaction[controller] ?? 0) : 0;
     const militiaDefenseBonus = militiaStrength * 0.15;
@@ -432,21 +432,21 @@ function applyFlip(
     );
 
     // Consolidation and militia updates (same as before)
-    if (!state.phase_i_consolidation_until) {
-        (state as GameState & { phase_i_consolidation_until: Record<string, number> }).phase_i_consolidation_until = {};
+    if (!state.war_consolidation_until) {
+        (state as GameState & { war_consolidation_until: Record<string, number> }).war_consolidation_until = {};
     }
-    state.phase_i_consolidation_until![munId] = turn + CONSOLIDATION_BASE_TURNS;
+    state.war_consolidation_until![munId] = turn + CONSOLIDATION_BASE_TURNS;
     const municipalities = state.municipalities ?? {};
     if (municipalities[munId]) {
         municipalities[munId].stability_score = POST_FLIP_STABILITY;
     }
-    if (state.phase_i_militia_strength) {
-        const byFaction = state.phase_i_militia_strength[munId] ?? {};
+    if (state.war_militia_strength) {
+        const byFaction = state.war_militia_strength[munId] ?? {};
         const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
         for (const fid of factionIds) {
             byFaction[fid] = fid === newController ? POST_FLIP_CONTROLLER_STRENGTH : POST_FLIP_LOST_STRENGTH;
         }
-        state.phase_i_militia_strength[munId] = byFaction;
+        state.war_militia_strength[munId] = byFaction;
     }
 
     // RBiH-aligned municipalities: when flip winner would be HRHB, treat as RBiH (HVO subordinate to ARBiH).
@@ -458,7 +458,7 @@ function applyFlip(
                 state.political_controllers[key] = 'RBiH';
             }
         }
-        const byFaction = state.phase_i_militia_strength?.[munId];
+        const byFaction = state.war_militia_strength?.[munId];
         if (byFaction) {
             (byFaction as Record<string, number>)['RBiH'] = POST_FLIP_CONTROLLER_STRENGTH;
             (byFaction as Record<string, number>)['HRHB'] = POST_FLIP_LOST_STRENGTH;
@@ -543,7 +543,7 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
         if (inConsolidation(state, munId, turn)) continue;
         const sids = settlementsByMun?.get(munId);
         const controller = sids ? getMunicipalityController(state, sids, input.canonicalToOperational) : null;
-        const strengthByMun = state.phase_i_militia_strength ?? {};
+        const strengthByMun = state.war_militia_strength ?? {};
         const byFaction = strengthByMun[munId] ?? {};
         const defensiveMilitia = controller ? (byFaction[controller] ?? 0) : 0;
         if (!militaryActionOnly) {
@@ -653,3 +653,4 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
     report.settlement_events = allSettlementEvents;
     return report;
 }
+

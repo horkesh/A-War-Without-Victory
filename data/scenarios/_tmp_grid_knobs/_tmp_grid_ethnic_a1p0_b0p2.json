@@ -1,6 +1,6 @@
 {
   "scenario_id": "_tmp_grid_ethnic_a1p0_b0p2",
-  "start_phase": "phase_i",
+  "start_lifecycle_phase": "war",
   "weeks": 12,
   "turns": [],
   "init_control_mode": "ethnic_1991",

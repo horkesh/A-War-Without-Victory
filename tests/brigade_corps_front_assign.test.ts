@@ -13,7 +13,7 @@ function makeState(overrides?: Partial<GameState & LegacyBrigadeAoRState>): Game
         meta: {
             turn: 12,
             seed: 'corps-front-assign-test',
-            phase: 'phase_ii',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10,

@@ -62,7 +62,7 @@ export function SituationTab({ state }: { state: LoadedGameState }) {
   const front = computeFrontSummary(state);
   const supply = computeSupplySummary(state);
   const ivpScore = computeIvpScore(state);
-  const alliance = state.phase_i_alliance_rbih_hrhb ?? 0;
+  const alliance = state.war_alliance_rbih_hrhb ?? 0;
   const alliancePct = Math.max(0, Math.min(100, ((alliance + 1) / 2) * 100));
   const alerts: string[] = [];
 
@@ -124,3 +124,4 @@ export function SituationTab({ state }: { state: LoadedGameState }) {
     </div>
   );
 }
+

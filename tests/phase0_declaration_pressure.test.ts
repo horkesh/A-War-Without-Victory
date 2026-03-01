@@ -22,7 +22,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function minimalPhase0State(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'decl-test', phase: 'phase_0' },
+        meta: { turn: 0, seed: 'decl-test', phase: 'peace' },
         factions: [
             {
                 id: 'RBiH',

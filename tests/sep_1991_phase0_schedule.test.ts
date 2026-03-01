@@ -12,19 +12,19 @@ test('sep_1991 phase0 starts pre-referendum with scheduled handoff metadata', as
     const state = await createStateFromScenario(SCENARIO_PATH, process.cwd());
     const rs = state.factions.find((f) => f.id === 'RS');
     const hrhb = state.factions.find((f) => f.id === 'HRHB');
-    assert.strictEqual(state.meta.phase, 'phase_0');
+    assert.strictEqual(state.meta.phase, 'peace');
     assert.strictEqual(state.meta.turn, 0);
     assert.strictEqual(state.meta.referendum_held, false);
     assert.strictEqual(state.meta.referendum_turn, null);
     assert.strictEqual(state.meta.war_start_turn, null);
-    assert.strictEqual(state.meta.phase_0_scheduled_referendum_turn, 26);
-    assert.strictEqual(state.meta.phase_0_scheduled_war_start_turn, 30);
+    assert.strictEqual(state.meta.peace_scheduled_referendum_turn, 26);
+    assert.strictEqual(state.meta.peace_scheduled_war_start_turn, 30);
     assert.strictEqual(rs?.declared, false);
     assert.strictEqual(rs?.declaration_turn, null);
     assert.strictEqual(hrhb?.declared, false);
     assert.strictEqual(hrhb?.declaration_turn, null);
     assert.ok(
-        (state.meta.phase_0_war_start_control_path ?? '').endsWith(
+        (state.meta.peace_war_start_control_path ?? '').endsWith(
             'data\\source\\municipalities_1990_initial_political_controllers_apr1992.json'
         )
     );
@@ -33,7 +33,7 @@ test('sep_1991 phase0 starts pre-referendum with scheduled handoff metadata', as
 test('sep_1991 scheduled referendum transitions to phase_i at scheduled war-start turn', async () => {
     let state = await createStateFromScenario(SCENARIO_PATH, process.cwd());
 
-    while (state.meta.phase === 'phase_0' && state.meta.turn <= 30) {
+    while (state.meta.phase === 'peace' && state.meta.turn <= 30) {
         state = runOneTurn(state, { seed: `sep-1991-phase0-${state.meta.turn}` }).state;
     }
 
@@ -44,7 +44,7 @@ test('sep_1991 scheduled referendum transitions to phase_i at scheduled war-star
     assert.strictEqual(state.meta.referendum_held, true);
     assert.strictEqual(state.meta.referendum_turn, 26);
     assert.strictEqual(state.meta.war_start_turn, 30);
-    assert.strictEqual(state.meta.phase, 'phase_i');
+    assert.strictEqual(state.meta.phase, 'war');
 });
 
 test('sep_1991 applies apr1992 control map at war start before phase_i progression', async () => {
@@ -73,7 +73,7 @@ test('sep_1991 applies apr1992 control map at war start before phase_i progressi
     const initialCounts = countByFaction(initial.political_controllers);
     const finalCounts = countByFaction(final.political_controllers);
 
-    assert.strictEqual(final.meta.phase, 'phase_i');
+    assert.strictEqual(final.meta.phase, 'war');
     assert.strictEqual(final.meta.referendum_turn, 26);
     assert.strictEqual(final.meta.war_start_turn, 30);
     assert.notDeepStrictEqual(finalCounts, initialCounts);

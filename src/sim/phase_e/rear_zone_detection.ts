@@ -41,7 +41,7 @@ export function deriveRearPoliticalControlZones(
     const result: PhaseERearZoneDescriptor = { settlement_ids: [] };
 
     // Phase E only runs in phase_ii
-    if (state.meta?.phase !== 'phase_ii') {
+    if (state.meta?.phase !== 'war') {
         return result;
     }
 
@@ -99,3 +99,4 @@ export function getRearZoneAuthorityStabilizationFactor(
     // Front-active zones have no stabilization: factor 1.0 (full degradation)
     return isSettlementInRearZone(settlementId, rearZone) ? 0.5 : 1.0;
 }
+

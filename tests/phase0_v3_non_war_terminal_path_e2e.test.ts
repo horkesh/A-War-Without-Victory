@@ -30,5 +30,5 @@ test('V3: non-war terminal when deadline reached without referendum', () => {
 
     assert.strictEqual(s.meta.game_over, true);
     assert.strictEqual(s.meta.outcome, OUTCOME_NON_WAR_TERMINAL);
-    assert.notStrictEqual(s.meta.phase, 'phase_i');
+    assert.notStrictEqual(s.meta.phase, 'war');
 });

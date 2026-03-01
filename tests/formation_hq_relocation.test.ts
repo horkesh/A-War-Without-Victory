@@ -13,7 +13,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function minimalState(formations: GameState['formations'], political_controllers: GameState['political_controllers']): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1, seed: 'test', phase: 'phase_ii', referendum_held: false, referendum_turn: null, war_start_turn: null },
+        meta: { turn: 1, seed: 'test', phase: 'war', referendum_held: false, referendum_turn: null, war_start_turn: null },
         factions: [],
         formations,
         front_segments: {},
@@ -23,8 +23,8 @@ function minimalState(formations: GameState['formations'], political_controllers
         militia_pools: {},
         political_controllers: political_controllers ?? {},
         municipalities: {},
-        phase_i_consolidation_until: {},
-        phase_i_militia_strength: {}
+        war_consolidation_until: {},
+        war_militia_strength: {}
     };
 }
 

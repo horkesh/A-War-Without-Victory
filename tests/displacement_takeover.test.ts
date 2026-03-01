@@ -9,7 +9,7 @@ import type { MunicipalityPopulation1991Map } from '../src/state/population_shar
 function baseState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'disp-takeover-test', phase: 'phase_ii', rbih_hrhb_war_earliest_turn: 20 },
+        meta: { turn: 0, seed: 'disp-takeover-test', phase: 'war', rbih_hrhb_war_earliest_turn: 20 },
         factions: [
             {
                 id: 'RBiH',
@@ -71,7 +71,7 @@ const pop1991: MunicipalityPopulation1991Map = {
 test('does not start takeover timer for allied RBiH-HRHB flips before war turn', () => {
     const state = baseState();
     state.meta.turn = 5;
-    state.phase_i_alliance_rbih_hrhb = 0.8;
+    state.war_alliance_rbih_hrhb = 0.8;
     const settlements = settlementsFixture();
     state.political_controllers = {
         S_TR: 'RBiH'
@@ -210,7 +210,7 @@ test('enclave overrun applies higher kill fraction on second displacement', () =
 test('HRHB taking from RS expels 100% of Serbs (hostile share override)', () => {
     const state = baseState();
     state.meta.turn = 20;
-    state.phase_i_alliance_rbih_hrhb = 0.1;
+    state.war_alliance_rbih_hrhb = 0.1;
     const settlements = settlementsFixture();
     state.political_controllers = {
         S_PR: 'HRHB',
@@ -234,7 +234,7 @@ test('HRHB taking from RS expels 100% of Serbs (hostile share override)', () => 
 test('RBiH taking from RS displaces 50% of Serbs', () => {
     const state = baseState();
     state.meta.turn = 20;
-    state.phase_i_alliance_rbih_hrhb = 0.1;
+    state.war_alliance_rbih_hrhb = 0.1;
     const settlements = settlementsFixture();
     state.political_controllers = {
         S_PR: 'RBiH',
@@ -263,7 +263,7 @@ test('RBiH taking from RS displaces 50% of Serbs', () => {
 test('Posavina Croats have higher flee-abroad fraction (70%)', () => {
     const state = baseState();
     state.meta.turn = 20;
-    state.phase_i_alliance_rbih_hrhb = 0.1;
+    state.war_alliance_rbih_hrhb = 0.1;
     const settlements = settlementsFixture();
     state.political_controllers = {
         S_OR: 'RS',
@@ -327,7 +327,7 @@ test('RS taking from RBiH expels 100% of Bosniaks/Croats', () => {
 test('Croat from Prijedor routes to Livno first (Herzegovina urban centers)', () => {
     const state = baseState();
     state.meta.turn = 20;
-    state.phase_i_alliance_rbih_hrhb = 0.1;
+    state.war_alliance_rbih_hrhb = 0.1;
     const settlements = settlementsFixture();
     state.political_controllers = {
         S_PR: 'RS',

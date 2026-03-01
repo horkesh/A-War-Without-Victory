@@ -8,7 +8,7 @@ import type { SupplyStateDerivationReport } from '../src/state/supply_state_deri
 function baseState(): GameState {
     return {
         schema_version: 1,
-        meta: { turn: 5, seed: 'enclave-test', phase: 'phase_ii' },
+        meta: { turn: 5, seed: 'enclave-test', phase: 'war' },
         factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],

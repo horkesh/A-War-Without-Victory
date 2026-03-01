@@ -52,7 +52,7 @@ function makeState(opts: {
 }): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: opts.turn ?? 20, seed: 'test', phase: 'phase_ii' } as any,
+        meta: { turn: opts.turn ?? 20, seed: 'test', phase: 'war' } as any,
         formations: opts.formations ?? {},
         political_controllers: opts.politicalControllers,
         brigade_aor: opts.brigadeAor ?? {},

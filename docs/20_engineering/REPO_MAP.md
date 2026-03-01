@@ -18,7 +18,7 @@ Populate this section from the discovery checklist.
 
 ## Key Pipelines and Their Code Locations
 ### Turn/Phase Pipeline
-- Canon references: `docs/10_canon/Systems_Manual_v0_5_0.md`, `docs/10_canon/Engine_Invariants_v0_5_0.md`
+- Canon references: `docs/10_canon/Systems_Manual_v0_6_0.md`, `docs/10_canon/Engine_Invariants_v0_6_0.md`
 - Code entrypoints:
   - War phases: `src/sim/turn_pipeline.ts`
   - Phase 0 / canonical pipeline: `src/state/turn_pipeline.ts`
@@ -27,7 +27,7 @@ Populate this section from the discovery checklist.
 - B1 Events: `src/sim/events/` — `event_types.ts` (trigger/effect types), `event_registry.ts` (historical + random events), `evaluate_events.ts` (deterministic evaluation). Runs first in both Phase I and Phase II pipelines (`evaluate-events` step).
 
 ### Scenario Loading/Execution
-- Canon references: `docs/10_canon/Rulebook_v0_5_0.md`
+- Canon references: `docs/10_canon/Rulebook_v0_6_0.md`
 - Code entrypoints:
   - Scenario harness: `src/scenario/scenario_runner.ts`
   - Scenario CLI: `src/cli/sim_scenario.ts`
@@ -44,8 +44,9 @@ Populate this section from the discovery checklist.
   - Map data loading: `src/map/`
 
 ### GUI / Map UIs
-- **Tactical Map System (standalone map app):** `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` — engineering reference. Code: `src/ui/map/`. Dev server: `npm run dev:map` (port 3001). Canvas 2D; political control, contested, front lines, settlement panel, OOB sidebar, dataset switching; no Leaflet/Mapbox.
-- **3D tactical render path (integration track):** `src/ui/map/map_operational_3d.ts`, `src/ui/map/map_staff_3d.ts`, `src/ui/map/tactical_sandbox.ts`. Shared render contract type: `MapViewInput` in `src/ui/map/types.ts`.
+- **React + MapLibre map app (canonical):** `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — spec. Code: `src/ui/map/` (Vite, React, Tailwind, Zustand, MapContainer). Dev: `npm run dev:map`. Status and backlog: `docs/40_reports/20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md`. Storybook: `src/ui/map/.storybook/`, `src/ui/map/stories/`.
+- **Tactical Map System (legacy reference):** `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` — engineering reference for legacy Canvas 2D and HoI 3D. Code: same `src/ui/map/` (legacy entrypoints archived or coexisting).
+- **Legacy 3D tactical render path:** `src/ui/map/map_operational_3d.ts`, `src/ui/map/map_staff_3d.ts`, `src/ui/map/tactical_sandbox.ts`. Shared render contract type: `MapViewInput` in `src/ui/map/types.ts`.
 - **Warroom (HQ scene + map scene):** `src/ui/warroom/`. Dev server: `npm run dev:warroom`. Full-screen map scene uses WarPlanningMap; staged assets, Phase 0 turn advance. See GUI reports in `docs/40_reports/`.
 - **Phase II browser advance:** `src/sim/run_phase_ii_browser.ts` — browser-safe Phase II turn advance (no Node/fs). Used by warroom when advancing a turn in phase_ii. Increments turn; when faction AoRs empty, populates AoR from control + formation home muns via `src/scenario/aor_init.ts`. Does not run supply pressure or exhaustion; for full Phase II use Node `runTurn`.
 

@@ -45,7 +45,7 @@ function munHasEnemyBrigade(
  * Apply consolidation flips: for each brigade in consolidation posture,
  * in its assigned muns with no enemy brigade, flip up to CAP undefended non-friendly settlements.
  * Deterministic: sorted formation IDs, sorted settlement IDs.
- * Only applies when meta.phase === 'phase_i'; in Phase II returns 0 flips (canon §2.3).
+ * Only applies when meta.phase === 'war'; in Phase II returns 0 flips (canon §2.3).
  */
 export function applyConsolidationFlips(
     state: GameState,
@@ -53,7 +53,7 @@ export function applyConsolidationFlips(
     sidToMun: Record<SettlementId, MunicipalityId>
 ): ConsolidationFlipsReport {
     const report: ConsolidationFlipsReport = { flips_applied: 0, by_formation: {} };
-    if (state.meta?.phase !== 'phase_i') return report;
+    if (state.meta?.phase !== 'war') return report;
 
     const assignment = getLegacyAoR(state).brigade_municipality_assignment ?? {};
     const formations = state.formations ?? {};
@@ -109,3 +109,4 @@ export function applyConsolidationFlips(
     }
     return report;
 }
+

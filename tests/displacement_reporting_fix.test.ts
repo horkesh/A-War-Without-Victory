@@ -24,7 +24,7 @@ function makePhaseIIStateWithDisplacementState(): GameState {
         meta: {
             turn: 20,
             seed: 'disp-fix-test',
-            phase: 'phase_ii',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 4,
             war_start_turn: 6
@@ -126,7 +126,7 @@ describe('displacement reporting fix — scenario_reporting.ts', () => {
     it('Phase I buildWeeklyReport still reads from displacement_state (existing behavior)', () => {
         const state = makePhaseIIStateWithDisplacementState();
         // Switch to Phase I
-        (state.meta as { phase: string }).phase = 'phase_i';
+        (state.meta as { phase: string }).phase = 'war';
         const report = buildWeeklyReport(state);
 
         expect(report.municipality_displacement_total).toBeGreaterThan(0);
@@ -138,7 +138,7 @@ describe('displacement OSID fix — isPressureEligible', () => {
     /** GameState with OSID-keyed political_controllers (post-promotion Phase II state) */
     const osidKeyedState: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'osid-test', phase: 'phase_ii' },
+        meta: { turn: 10, seed: 'osid-test', phase: 'war' },
         factions: [],
         formations: {},
         front_segments: {},

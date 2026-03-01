@@ -20,7 +20,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function minimalPhaseIIState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'validation-test', phase: 'phase_ii', referendum_held: true, referendum_turn: 0, war_start_turn: 1 },
+        meta: { turn: 10, seed: 'validation-test', phase: 'war', referendum_held: true, referendum_turn: 0, war_start_turn: 1 },
         factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
@@ -35,7 +35,7 @@ function minimalPhaseIIState(): GameState {
         front_pressure: {},
         militia_pools: {},
         political_controllers: { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' },
-        phase_ii_exhaustion: { RBiH: 5, RS: 8 }
+        war_exhaustion: { RBiH: 5, RS: 8 }
     };
 }
 
@@ -115,8 +115,8 @@ test('Phase E validation: no negotiation logic in Phase E modules', async () => 
 
 test('Phase E validation: Phase D invariants still hold (exhaustion monotonic)', async () => {
     const state = minimalPhaseIIState();
-    state.phase_ii_exhaustion = { RBiH: 5, RS: 8 };
-    const originalExhaustion = { ...state.phase_ii_exhaustion };
+    state.war_exhaustion = { RBiH: 5, RS: 8 };
+    const originalExhaustion = { ...state.war_exhaustion };
     const edges = [{ a: 'S1', b: 'S2' }];
 
     // Run one turn with Phase E active
@@ -126,7 +126,7 @@ test('Phase E validation: Phase D invariants still hold (exhaustion monotonic)',
     // Note: Phase II consolidation may increase exhaustion; Phase E must not decrease it
     for (const fid of Object.keys(originalExhaustion)) {
         const original = originalExhaustion[fid] ?? 0;
-        const current = result.nextState.phase_ii_exhaustion?.[fid] ?? 0;
+        const current = result.nextState.war_exhaustion?.[fid] ?? 0;
         assert.ok(current >= original, `Exhaustion for ${fid} did not decrease (Phase D invariant)`);
     }
 });

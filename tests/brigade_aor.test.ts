@@ -58,7 +58,7 @@ function makeLinearScenario(): { state: GameState; edges: EdgeRecord[] } {
 
     const state: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'aor-test', phase: 'phase_ii', rbih_hrhb_war_earliest_turn: 1 } as any,
+        meta: { turn: 20, seed: 'aor-test', phase: 'war', rbih_hrhb_war_earliest_turn: 1 } as any,
         factions: [
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
@@ -75,7 +75,7 @@ function makeLinearScenario(): { state: GameState; edges: EdgeRecord[] } {
         front_pressure: {},
         militia_pools: {},
         political_controllers: pc,
-        phase_i_alliance_rbih_hrhb: -0.5
+        war_alliance_rbih_hrhb: -0.5
     } as GameState;
 
     return { state, edges };
@@ -185,7 +185,7 @@ describe.skip('initializeBrigadeAoR (phased out: OSID/location_osid only)', () =
 
         const state: GameState = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'aor-same-hq', phase: 'phase_ii' } as any,
+            meta: { turn: 20, seed: 'aor-same-hq', phase: 'war' } as any,
             factions: [
                 { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
                 { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
@@ -226,7 +226,7 @@ describe.skip('initializeBrigadeAoR (phased out: OSID/location_osid only)', () =
         };
         const state: GameState = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'aor-missing-hq', phase: 'phase_ii' } as any,
+            meta: { turn: 20, seed: 'aor-missing-hq', phase: 'war' } as any,
             factions: [
                 { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
                 { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
@@ -272,7 +272,7 @@ describe.skip('initializeBrigadeAoR (phased out: OSID/location_osid only)', () =
 
         const state: GameState = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'aor-corps-fallback', phase: 'phase_ii' } as any,
+            meta: { turn: 20, seed: 'aor-corps-fallback', phase: 'war' } as any,
             factions: [
                 { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
                 { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
@@ -330,7 +330,7 @@ describe.skip('initializeBrigadeAoR (phased out: OSID/location_osid only)', () =
         ]);
         const state: GameState = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'aor-shared-mun', phase: 'phase_ii' } as any,
+            meta: { turn: 20, seed: 'aor-shared-mun', phase: 'war' } as any,
             factions: [
                 { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
                 { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
@@ -375,7 +375,7 @@ describe.skip('applyBrigadeMunicipalityOrders (phased out: no mun-level orders)'
         ]);
         const state: GameState = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'mun-orders', phase: 'phase_ii' } as any,
+            meta: { turn: 20, seed: 'mun-orders', phase: 'war' } as any,
             factions: [
                 { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
                 { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
@@ -472,7 +472,7 @@ describe('computeBrigadeDensity', () => {
         }
         const state: GameState = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'aor-cap-test', phase: 'phase_ii' } as any,
+            meta: { turn: 20, seed: 'aor-cap-test', phase: 'war' } as any,
             factions: [
                 { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
             ] as any,
@@ -501,7 +501,7 @@ describe('computeBrigadeDensity', () => {
         pc['S001'] = 'RBiH';
         const state: GameState = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'sarajevo-cap-test', phase: 'phase_ii' } as any,
+            meta: { turn: 20, seed: 'sarajevo-cap-test', phase: 'war' } as any,
             factions: [
                 { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
             ] as any,
@@ -532,7 +532,7 @@ describe('computeBrigadeDensity', () => {
         }
         const state: GameState = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'non-urban-cap-test', phase: 'phase_ii' } as any,
+            meta: { turn: 20, seed: 'non-urban-cap-test', phase: 'war' } as any,
             factions: [
                 { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
             ] as any,

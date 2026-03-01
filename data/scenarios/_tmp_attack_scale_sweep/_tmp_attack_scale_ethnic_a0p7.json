@@ -1,6 +1,6 @@
 {
   "scenario_id": "_tmp_attack_scale_ethnic_a0p7",
-  "start_phase": "phase_i",
+  "start_lifecycle_phase": "war",
   "weeks": 12,
   "turns": [],
   "init_control_mode": "ethnic_1991",

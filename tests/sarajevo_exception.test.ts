@@ -8,7 +8,7 @@ import type { SupplyStateDerivationReport } from '../src/state/supply_state_deri
 test('updateSarajevoState derives siege status from supply', () => {
     const state: GameState = {
         schema_version: 1,
-        meta: { turn: 12, seed: 'sarajevo-test', phase: 'phase_ii' },
+        meta: { turn: 12, seed: 'sarajevo-test', phase: 'war' },
         factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],

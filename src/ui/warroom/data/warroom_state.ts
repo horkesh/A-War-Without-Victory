@@ -77,7 +77,7 @@ export function capturePreviousTurnSnapshot(state: GameState): PreviousTurnSnaps
     // Exhaustion
     const exhaustion: Record<string, number> = {};
     for (const fid of factionIds) {
-        exhaustion[fid] = state.phase_ii_exhaustion?.[fid] ?? 0;
+        exhaustion[fid] = state.war_exhaustion?.[fid] ?? 0;
     }
 
     // Displacement out totals
@@ -114,13 +114,13 @@ export function capturePreviousTurnSnapshot(state: GameState): PreviousTurnSnaps
     }
 
     // Alliance
-    const allianceValue = state.phase_i_alliance_rbih_hrhb ?? null;
+    const allianceValue = state.war_alliance_rbih_hrhb ?? null;
     const ceasefireActive = state.rbih_hrhb_state?.ceasefire_active ?? false;
     const washingtonSigned = state.rbih_hrhb_state?.washington_signed ?? false;
 
     return {
         turn: state.meta.turn,
-        phase: state.meta.phase ?? 'phase_0',
+        phase: state.meta.phase ?? 'peace',
         politicalControllers,
         casualtyTotals,
         exhaustion,

@@ -9,7 +9,7 @@ import type { PhaseName } from './game_state.js';
 
 
 /** Known phase names (must match PhaseName in game_state.ts). */
-const KNOWN_PHASES: readonly PhaseName[] = ['phase_0', 'phase_i', 'phase_ii'];
+const KNOWN_PHASES: readonly PhaseName[] = ['peace', 'war'];
 
 /**
  * Strict comparator for deterministic ordering (Engine Invariants §11.3).
@@ -101,14 +101,14 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
             if ('war_start_turn' in m && m.war_start_turn !== undefined && m.war_start_turn !== null && (typeof m.war_start_turn !== 'number' || !Number.isInteger(m.war_start_turn) || m.war_start_turn < 0)) {
                 errors.push('meta.war_start_turn must be null or a non-negative integer when present');
             }
-            if ('phase_0_scheduled_referendum_turn' in m && m.phase_0_scheduled_referendum_turn !== undefined && m.phase_0_scheduled_referendum_turn !== null && (typeof m.phase_0_scheduled_referendum_turn !== 'number' || !Number.isInteger(m.phase_0_scheduled_referendum_turn) || m.phase_0_scheduled_referendum_turn < 0)) {
-                errors.push('meta.phase_0_scheduled_referendum_turn must be null or a non-negative integer when present');
+            if ('peace_scheduled_referendum_turn' in m && m.peace_scheduled_referendum_turn !== undefined && m.peace_scheduled_referendum_turn !== null && (typeof m.peace_scheduled_referendum_turn !== 'number' || !Number.isInteger(m.peace_scheduled_referendum_turn) || m.peace_scheduled_referendum_turn < 0)) {
+                errors.push('meta.peace_scheduled_referendum_turn must be null or a non-negative integer when present');
             }
-            if ('phase_0_scheduled_war_start_turn' in m && m.phase_0_scheduled_war_start_turn !== undefined && m.phase_0_scheduled_war_start_turn !== null && (typeof m.phase_0_scheduled_war_start_turn !== 'number' || !Number.isInteger(m.phase_0_scheduled_war_start_turn) || m.phase_0_scheduled_war_start_turn < 0)) {
-                errors.push('meta.phase_0_scheduled_war_start_turn must be null or a non-negative integer when present');
+            if ('peace_scheduled_war_start_turn' in m && m.peace_scheduled_war_start_turn !== undefined && m.peace_scheduled_war_start_turn !== null && (typeof m.peace_scheduled_war_start_turn !== 'number' || !Number.isInteger(m.peace_scheduled_war_start_turn) || m.peace_scheduled_war_start_turn < 0)) {
+                errors.push('meta.peace_scheduled_war_start_turn must be null or a non-negative integer when present');
             }
-            if ('phase_0_war_start_control_path' in m && m.phase_0_war_start_control_path !== undefined && m.phase_0_war_start_control_path !== null && typeof m.phase_0_war_start_control_path !== 'string') {
-                errors.push('meta.phase_0_war_start_control_path must be string or null when present');
+            if ('peace_war_start_control_path' in m && m.peace_war_start_control_path !== undefined && m.peace_war_start_control_path !== null && typeof m.peace_war_start_control_path !== 'string') {
+                errors.push('meta.peace_war_start_control_path must be string or null when present');
             }
             if ('referendum_eligible_turn' in m && m.referendum_eligible_turn !== undefined && m.referendum_eligible_turn !== null && (typeof m.referendum_eligible_turn !== 'number' || !Number.isInteger(m.referendum_eligible_turn) || m.referendum_eligible_turn < 0)) {
                 errors.push('meta.referendum_eligible_turn must be null or a non-negative integer when present');
@@ -123,24 +123,24 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
                 errors.push('meta.outcome must be string or null when present');
             }
             // Phase 0→I transition audit (§8 Output Contract; optional when present)
-            if ('phase_0_end_turn' in m && m.phase_0_end_turn !== undefined && m.phase_0_end_turn !== null && (typeof m.phase_0_end_turn !== 'number' || !Number.isInteger(m.phase_0_end_turn) || m.phase_0_end_turn < 0)) {
-                errors.push('meta.phase_0_end_turn must be null or a non-negative integer when present');
+            if ('peace_end_turn' in m && m.peace_end_turn !== undefined && m.peace_end_turn !== null && (typeof m.peace_end_turn !== 'number' || !Number.isInteger(m.peace_end_turn) || m.peace_end_turn < 0)) {
+                errors.push('meta.peace_end_turn must be null or a non-negative integer when present');
             }
-            if ('phase_1_start_turn' in m && m.phase_1_start_turn !== undefined && m.phase_1_start_turn !== null && (typeof m.phase_1_start_turn !== 'number' || !Number.isInteger(m.phase_1_start_turn) || m.phase_1_start_turn < 0)) {
-                errors.push('meta.phase_1_start_turn must be null or a non-negative integer when present');
+            if ('war_start_lifecycle_phase_turn' in m && m.war_start_lifecycle_phase_turn !== undefined && m.war_start_lifecycle_phase_turn !== null && (typeof m.war_start_lifecycle_phase_turn !== 'number' || !Number.isInteger(m.war_start_lifecycle_phase_turn) || m.war_start_lifecycle_phase_turn < 0)) {
+                errors.push('meta.war_start_lifecycle_phase_turn must be null or a non-negative integer when present');
             }
             if ('escalation_reason' in m && m.escalation_reason !== undefined && m.escalation_reason !== null && typeof m.escalation_reason !== 'string') {
                 errors.push('meta.escalation_reason must be string or null when present');
             }
             // D0.9.1: Phase I opposing-edges streak (optional; non-negative integer when present)
             if (
-                'phase_i_opposing_edges_streak' in m &&
-                m.phase_i_opposing_edges_streak !== undefined &&
-                (typeof m.phase_i_opposing_edges_streak !== 'number' ||
-                    !Number.isInteger(m.phase_i_opposing_edges_streak) ||
-                    m.phase_i_opposing_edges_streak < 0)
+                'war_opposing_edges_streak' in m &&
+                m.war_opposing_edges_streak !== undefined &&
+                (typeof m.war_opposing_edges_streak !== 'number' ||
+                    !Number.isInteger(m.war_opposing_edges_streak) ||
+                    m.war_opposing_edges_streak < 0)
             ) {
-                errors.push('meta.phase_i_opposing_edges_streak must be a non-negative integer when present');
+                errors.push('meta.war_opposing_edges_streak must be a non-negative integer when present');
             }
             if (
                 'rbih_hrhb_war_earliest_turn' in m &&
@@ -156,65 +156,65 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
     }
 
     // Phase I: optional top-level Phase I state (validate type when present)
-    if ('phase_i_jna' in s && s.phase_i_jna !== undefined) {
-        const jna = s.phase_i_jna;
+    if ('war_jna' in s && s.war_jna !== undefined) {
+        const jna = s.war_jna;
         if (jna !== null && typeof jna === 'object') {
             const j = jna as Record<string, unknown>;
             if (typeof j.transition_begun !== 'boolean') {
-                errors.push('phase_i_jna.transition_begun must be boolean when present');
+                errors.push('war_jna.transition_begun must be boolean when present');
             }
             if (typeof j.withdrawal_progress !== 'number' || j.withdrawal_progress < 0 || j.withdrawal_progress > 1) {
-                errors.push('phase_i_jna.withdrawal_progress must be a number in [0, 1] when present');
+                errors.push('war_jna.withdrawal_progress must be a number in [0, 1] when present');
             }
             if (typeof j.asset_transfer_rs !== 'number' || j.asset_transfer_rs < 0 || j.asset_transfer_rs > 1) {
-                errors.push('phase_i_jna.asset_transfer_rs must be a number in [0, 1] when present');
+                errors.push('war_jna.asset_transfer_rs must be a number in [0, 1] when present');
             }
         } else {
-            errors.push('phase_i_jna must be an object when present');
+            errors.push('war_jna must be an object when present');
         }
     }
-    if ('phase_i_alliance_rbih_hrhb' in s && s.phase_i_alliance_rbih_hrhb !== undefined) {
-        const v = s.phase_i_alliance_rbih_hrhb;
+    if ('war_alliance_rbih_hrhb' in s && s.war_alliance_rbih_hrhb !== undefined) {
+        const v = s.war_alliance_rbih_hrhb;
         if (typeof v !== 'number' || v < -1 || v > 1) {
-            errors.push('phase_i_alliance_rbih_hrhb must be a number in [-1, 1] when present');
+            errors.push('war_alliance_rbih_hrhb must be a number in [-1, 1] when present');
         }
     }
 
     // Phase II: optional supply pressure and exhaustion (validate type when present)
-    if ('phase_ii_supply_pressure' in s && s.phase_ii_supply_pressure !== undefined) {
-        const pp = s.phase_ii_supply_pressure;
+    if ('war_supply_pressure' in s && s.war_supply_pressure !== undefined) {
+        const pp = s.war_supply_pressure;
         if (pp !== null && typeof pp === 'object' && !Array.isArray(pp)) {
             for (const [fid, val] of Object.entries(pp)) {
                 if (typeof val !== 'number' || val < 0 || val > 100) {
-                    errors.push(`phase_ii_supply_pressure.${fid} must be a number in [0, 100] when present`);
+                    errors.push(`war_supply_pressure.${fid} must be a number in [0, 100] when present`);
                 }
             }
         } else {
-            errors.push('phase_ii_supply_pressure must be an object (Record<FactionId, number>) when present');
+            errors.push('war_supply_pressure must be an object (Record<FactionId, number>) when present');
         }
     }
-    if ('phase_ii_exhaustion' in s && s.phase_ii_exhaustion !== undefined) {
-        const ex = s.phase_ii_exhaustion;
+    if ('war_exhaustion' in s && s.war_exhaustion !== undefined) {
+        const ex = s.war_exhaustion;
         if (ex !== null && typeof ex === 'object' && !Array.isArray(ex)) {
             for (const [fid, val] of Object.entries(ex)) {
                 if (typeof val !== 'number' || val < 0 || !Number.isFinite(val)) {
-                    errors.push(`phase_ii_exhaustion.${fid} must be a non-negative finite number when present`);
+                    errors.push(`war_exhaustion.${fid} must be a non-negative finite number when present`);
                 }
             }
         } else {
-            errors.push('phase_ii_exhaustion must be an object (Record<FactionId, number>) when present');
+            errors.push('war_exhaustion must be an object (Record<FactionId, number>) when present');
         }
     }
-    if ('phase_ii_exhaustion_local' in s && s.phase_ii_exhaustion_local !== undefined) {
-        const loc = s.phase_ii_exhaustion_local;
+    if ('war_exhaustion_local' in s && s.war_exhaustion_local !== undefined) {
+        const loc = s.war_exhaustion_local;
         if (loc !== null && typeof loc === 'object' && !Array.isArray(loc)) {
             for (const [sid, val] of Object.entries(loc)) {
                 if (typeof val !== 'number' || val < 0 || !Number.isFinite(val)) {
-                    errors.push(`phase_ii_exhaustion_local.${sid} must be a non-negative finite number when present`);
+                    errors.push(`war_exhaustion_local.${sid} must be a non-negative finite number when present`);
                 }
             }
         } else {
-            errors.push('phase_ii_exhaustion_local must be an object (Record<SettlementId, number>) when present');
+            errors.push('war_exhaustion_local must be an object (Record<SettlementId, number>) when present');
         }
     }
 
@@ -394,3 +394,5 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
     }
     return { ok: true };
 }
+
+

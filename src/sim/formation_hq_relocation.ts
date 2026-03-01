@@ -246,7 +246,7 @@ export function runFormationHqRelocation(
 
         // Phase II brigade rule: keep HQ synchronized with AoR depth as fronts shift.
         if (
-            state.meta.phase === 'phase_ii' &&
+            state.meta.phase === 'war' &&
             (f.kind ?? 'brigade') === 'brigade' &&
             f.status === 'active' &&
             getLegacyAoR(state).brigade_aor
@@ -267,3 +267,4 @@ export function runFormationHqRelocation(
     report.formation_ids.sort(strictCompare);
     return report;
 }
+

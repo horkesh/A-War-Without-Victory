@@ -138,6 +138,9 @@ export function useMapInteractions(
   map.on('click', 'osid-control-fill', handleOsidClick);
   map.on('mousemove', 'osid-control-fill', handleOsidMouseMove);
   map.on('mouseleave', 'osid-control-fill', handleOsidMouseLeave);
+  map.on('click', 'osid-ethnic-fill', handleOsidClick);
+  map.on('mousemove', 'osid-ethnic-fill', handleOsidMouseMove);
+  map.on('mouseleave', 'osid-ethnic-fill', handleOsidMouseLeave);
 
   if (onFormationClick) {
     map.on('click', 'formation-markers', handleFormationClick);
@@ -160,6 +163,9 @@ export function useMapInteractions(
     map.off('click', 'osid-control-fill', handleOsidClick);
     map.off('mousemove', 'osid-control-fill', handleOsidMouseMove);
     map.off('mouseleave', 'osid-control-fill', handleOsidMouseLeave);
+    map.off('click', 'osid-ethnic-fill', handleOsidClick);
+    map.off('mousemove', 'osid-ethnic-fill', handleOsidMouseMove);
+    map.off('mouseleave', 'osid-ethnic-fill', handleOsidMouseLeave);
     if (hoverTimeout) clearTimeout(hoverTimeout);
     if (onFormationClick) {
       map.off('click', 'formation-markers', handleFormationClick);

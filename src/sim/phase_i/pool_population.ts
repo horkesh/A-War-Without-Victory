@@ -1,5 +1,5 @@
 /**
- * Phase I: Militia pool population from phase_i_militia_strength and displacement.
+ * Phase I: Militia pool population from war_militia_strength and displacement.
  * Plan: militia_and_brigade_formation_system.
  * Deterministic: mun_id then faction sorted; displaced contribution by controller.
  */
@@ -25,7 +25,7 @@ import { type SiegeRatioByMunFaction, getSiegeRatio } from './compute_siege_stat
 /** Re-export for consumers that import from pool_population (e.g. ongoing_mobilization). */
 export { buildSettlementsByMun, getMunicipalityController };
 
-/** Scale phase_i_militia_strength [0,100] to pool available (integer).
+/** Scale war_militia_strength [0,100] to pool available (integer).
  * Raised for long-horizon (52w/104w) personnel growth calibration while keeping deterministic flow. */
 const POOL_SCALE_FACTOR = 65;
 /** Displaced_in contribution rate per turn. At 0.05, entire displaced pop mobilized in 20 turns — unrealistic.
@@ -296,7 +296,7 @@ export function runDisplacedAndCrossEthnicContributions(
 }
 
 /**
- * Update militia_pools from phase_i_militia_strength and (optionally) displaced_in.
+ * Update militia_pools from war_militia_strength and (optionally) displaced_in.
  * Uses composite key "mun_id:faction". Does not decrease available; only adds or sets from strength.
  * When population1991ByMun is provided, pool available is weighted by eligible population (bosniak/serb/croat)
  * so that brigade counts reflect demographics — ARBiH gets most where Bosniaks are, etc.
@@ -326,7 +326,7 @@ export function runPoolPopulation(
     }
     const pools = state.militia_pools as Record<string, MilitiaPoolState>;
     const currentTurn = state.meta.turn;
-    const strengthMap = state.phase_i_militia_strength ?? {};
+    const strengthMap = state.war_militia_strength ?? {};
     const municipalities = state.municipalities ?? {};
     const munIds = (Object.keys(municipalities) as MunicipalityId[]).slice().sort(strictCompare);
     const factionIds: FactionId[] = (state.factions ?? [])
@@ -335,7 +335,7 @@ export function runPoolPopulation(
         .slice()
         .sort(strictCompare);
 
-    // 1) From phase_i_militia_strength: ensure (mun_id, faction) pools and set available
+    // 1) From war_militia_strength: ensure (mun_id, faction) pools and set available
     for (const munId of munIds) {
         const byFaction = strengthMap[munId] ?? {};
         for (const factionId of factionIds) {
@@ -390,3 +390,4 @@ export function runPoolPopulation(
 
     return report;
 }
+

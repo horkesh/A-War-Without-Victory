@@ -449,7 +449,7 @@ export class Phase0PreparationMap {
     }
 
     private isInvestmentTarget(munId: MunicipalityId): boolean {
-        if (!this.gameState || this.gameState.meta.phase !== 'phase_0') return false;
+        if (!this.gameState || this.gameState.meta.phase !== 'peace') return false;
         const investTypes = getInvestmentTypesForFaction(this.playerFaction);
         for (const inv of investTypes) {
             const validation = this.directiveState.validate(this.gameState, this.playerFaction, inv, [munId]);

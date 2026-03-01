@@ -14,13 +14,13 @@ import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
-function minimalPhaseIState(): GameState {
+function minimalPeaceState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: {
             turn: 10,
             seed: 'fe-gate-i',
-            phase: 'phase_i',
+            phase: 'peace',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -38,8 +38,8 @@ function minimalPhaseIState(): GameState {
         militia_pools: {},
         political_controllers: { s1: 'RBiH', s2: 'RS' },
         municipalities: { MUN_A: { stability_score: 50 }, MUN_B: { stability_score: 50 } },
-        phase_i_consolidation_until: {},
-        phase_i_militia_strength: { MUN_A: { RBiH: 30, RS: 60, HRHB: 10 }, MUN_B: { RBiH: 25, RS: 70, HRHB: 5 } }
+        war_consolidation_until: {},
+        war_militia_strength: { MUN_A: { RBiH: 30, RS: 60, HRHB: 10 }, MUN_B: { RBiH: 25, RS: 70, HRHB: 5 } }
     };
 }
 
@@ -49,7 +49,7 @@ function minimalPhaseIIState(controllers: Record<string, string> = { S1: 'RBiH',
         meta: {
             turn: 20,
             seed: 'fe-ii',
-            phase: 'phase_ii',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -69,13 +69,13 @@ function minimalPhaseIIState(controllers: Record<string, string> = { S1: 'RBiH',
     };
 }
 
-test('phase_i runTurn does not run phase-ii-front-emergence (Phase I path has no Phase II front step)', async () => {
-    const state = minimalPhaseIState();
+test('peace runTurn is rejected (war pipeline only)', async () => {
+    const state = minimalPeaceState();
     const edges: EdgeRecord[] = [{ a: 's1', b: 's2' }];
-    const { report } = await runTurn(state, { seed: 'fe-gate-i', settlementEdges: edges });
-    const phaseNames = report.phases.map((p) => p.name);
-    assert.ok(!phaseNames.includes('phase-ii-front-emergence'), 'Phase I path must not include phase-ii-front-emergence');
-    assert.strictEqual(report.phase_ii_front_emergence, undefined);
+    await assert.rejects(
+        () => runTurn(state, { seed: 'fe-gate-i', settlementEdges: edges }),
+        /use state pipeline runOneTurn for peace/
+    );
 });
 
 test('phase_ii runTurn includes phase-ii-front-emergence and runs exactly once per turn', async () => {
@@ -88,8 +88,8 @@ test('phase_ii runTurn includes phase-ii-front-emergence and runs exactly once p
     assert.ok(Array.isArray(report.phase_ii_front_emergence), 'phase_ii_front_emergence report should be an array');
 });
 
-test('derivePhaseIIFrontsFromPressureEligible: phase_i returns empty array', () => {
-    const state = minimalPhaseIState();
+test('derivePhaseIIFrontsFromPressureEligible: peace returns empty array', () => {
+    const state = minimalPeaceState();
     const edges: EdgeRecord[] = [{ a: 's1', b: 's2' }];
     const fronts = derivePhaseIIFrontsFromPressureEligible(state, edges);
     assert.deepStrictEqual(fronts, []);

@@ -16,7 +16,7 @@ function makeState(overrides?: Partial<GameState>): GameState {
         meta: {
             turn: 10,
             seed: 'settlement-test',
-            phase: 'phase_i',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10

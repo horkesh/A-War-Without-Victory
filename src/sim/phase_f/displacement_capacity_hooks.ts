@@ -22,7 +22,7 @@ export type CapacityFactor = number;
  * Authorized for: authority degradation, supply local production, recruitment ceiling.
  */
 export function getMunicipalityDisplacementFactor(state: GameState, munId: MunicipalityId): CapacityFactor {
-    if (state.meta?.phase !== 'phase_ii') return 1;
+    if (state.meta?.phase !== 'war') return 1;
     const v = state.municipality_displacement?.[munId];
     if (typeof v !== 'number' || !Number.isFinite(v)) return 1;
     return Math.max(0, Math.min(1, 1 - v));
@@ -34,7 +34,7 @@ export function getMunicipalityDisplacementFactor(state: GameState, munId: Munic
  * Authorized for: settlement-level supply/authority when spec defines consumption.
  */
 export function getSettlementDisplacementFactor(state: GameState, sid: SettlementId): CapacityFactor {
-    if (state.meta?.phase !== 'phase_ii') return 1;
+    if (state.meta?.phase !== 'war') return 1;
     const v = state.settlement_displacement?.[sid];
     if (typeof v !== 'number' || !Number.isFinite(v)) return 1;
     return Math.max(0, Math.min(1, 1 - v));
@@ -58,7 +58,7 @@ export function buildDisplacementCapacityReport(state: GameState): DisplacementC
     const settlements_affected: SettlementId[] = [];
     const municipality_factors: Record<MunicipalityId, CapacityFactor> = {};
 
-    if (state.meta?.phase !== 'phase_ii') {
+    if (state.meta?.phase !== 'war') {
         return { municipalities_affected, settlements_affected, municipality_factors };
     }
 
@@ -79,3 +79,4 @@ export function buildDisplacementCapacityReport(state: GameState): DisplacementC
 
     return { municipalities_affected, settlements_affected, municipality_factors };
 }
+

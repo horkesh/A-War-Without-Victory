@@ -31,20 +31,20 @@ export interface Scenario {
     scenario_id: string;
     /** Optional absolute week index anchor (weeks since Jan 1992). Enables time-adaptive bot doctrine profiles. */
     scenario_start_week?: number;
-    /** When "phase_0", scenario starts at Turn 0 in Phase 0; transitions to Phase I at war_start_turn. */
-    start_phase?: string;
-    /** For start_phase phase_0: whether referendum is already held at turn 0. Default: true (legacy fixtures). */
-    phase_0_referendum_held_at_start?: boolean;
-    /** For start_phase phase_0: whether RS starts already declared at turn 0. Default: true (legacy fixtures). */
-    phase_0_rs_declared_at_start?: boolean;
-    /** For start_phase phase_0: whether HRHB starts already declared at turn 0. Default: true (legacy fixtures). */
-    phase_0_hrhb_declared_at_start?: boolean;
-    /** For start_phase phase_0: turn when referendum was held. War starts at referendum_turn + 4 per canon. */
-    phase_0_referendum_turn?: number;
-    /** For start_phase phase_0: turn when war starts (Phase I). Must be referendum_turn + 4. Default: phase_0_referendum_turn + 4. */
-    phase_0_war_start_turn?: number;
-    /** For start_phase phase_0: control map key/path to apply exactly when war begins (e.g. "apr1992"). */
-    phase_0_war_start_control?: string;
+    /** Scenario lifecycle start phase. */
+    start_lifecycle_phase?: 'peace' | 'war';
+    /** For start_lifecycle_phase phase_0: whether referendum is already held at turn 0. Default: true (legacy fixtures). */
+    peace_referendum_held_at_start?: boolean;
+    /** For start_lifecycle_phase phase_0: whether RS starts already declared at turn 0. Default: true (legacy fixtures). */
+    peace_rs_declared_at_start?: boolean;
+    /** For start_lifecycle_phase phase_0: whether HRHB starts already declared at turn 0. Default: true (legacy fixtures). */
+    peace_hrhb_declared_at_start?: boolean;
+    /** For start_lifecycle_phase phase_0: turn when referendum was held. War starts at referendum_turn + 4 per canon. */
+    peace_referendum_turn?: number;
+    /** For start_lifecycle_phase phase_0: turn when war starts (Phase I). Must be referendum_turn + 4. Default: peace_referendum_turn + 4. */
+    peace_war_start_turn?: number;
+    /** For start_lifecycle_phase phase_0: control map key/path to apply exactly when war begins (e.g. "apr1992"). */
+    peace_war_start_control?: string;
     weeks: number;
     turns?: ScenarioTurn[];
     /** Phase H2.4: When true, harness injects baseline_ops for each week that has none (harness-only; off by default). */
@@ -104,16 +104,16 @@ export interface Scenario {
     max_recruits_per_faction_per_turn?: number;
     /**
      * Phase I→II transition: initial entrenchment turns (0..12) for all brigades at Phase II entry.
-     * Optional; default 0. When set, implementation may set state.meta.phase_ii_entrenchment_init_turns at load
+     * Optional; default 0. When set, implementation may set state.meta.war_entrenchment_init_turns at load
      * so the transition can apply it. See Phase II Spec §4, §6 and docs/30_planning/PHASE_I_II_EDGE_CASES.md.
      */
-    phase_ii_entrenchment_init_turns?: number;
+    war_entrenchment_init_turns?: number;
     /**
      * Stuck-in-Phase-I fallback: after this many Phase I turns (since war_start_turn) without transition,
      * force transition to Phase II. Optional; when absent, default 52 is used for phase_0/phase_i starts.
      * See docs/30_planning/PHASE_I_II_EDGE_CASES.md.
      */
-    phase_i_force_transition_after_turns?: number;
+    war_force_transition_after_turns?: number;
     /**
      * Per-OSID political control overrides. Applied after OSID promotion (majority voting),
      * before OOB formation creation. Used for historically accurate initial control that
@@ -129,3 +129,4 @@ export interface Scenario {
      */
     avoided_osids_by_faction?: Record<string, string[]>;
 }
+

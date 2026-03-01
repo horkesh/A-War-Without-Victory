@@ -82,7 +82,7 @@ function makeState(formations: FormationState[], factions: FactionId[] = ['RS', 
     const formationMap: Record<string, FormationState> = {};
     for (const f of formations) formationMap[f.id] = f;
     return {
-        meta: { turn: 5, phase: 'phase_ii' },
+        meta: { turn: 5, phase: 'war' },
         factions: factions.map(id => ({ id })),
         formations: formationMap,
         political_controllers: {},

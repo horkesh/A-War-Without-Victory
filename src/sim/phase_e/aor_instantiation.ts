@@ -46,7 +46,7 @@ export function deriveAoRMembership(
     const result: PhaseEAorMembership = { by_formation: {} };
 
     // Phase E only runs in phase_ii
-    if (state.meta?.phase !== 'phase_ii') {
+    if (state.meta?.phase !== 'war') {
         return result;
     }
 
@@ -166,3 +166,4 @@ export function getFrontActiveSettlements(
     }
     return result;
 }
+

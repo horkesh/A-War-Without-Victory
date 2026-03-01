@@ -77,15 +77,15 @@ Enforced by `tests/artifact_determinism.test.ts` and `stripTimestampKeysForArtif
 ### V.1 "Truthful substrate" rule
 The map layer must never be "fixed" by invention:
 - No hulls, unions, smoothing, buffering, snapping, or silent repairs
-- If data is wrong or incomplete: audit, log (mistake log if process mistake), surface as constraint in canon if it affects design
+- If data is wrong or incomplete: audit, log (e.g. in napkin or ledger if it's a process lesson), surface as constraint in canon if it affects design
 
 ### V.2 No invented geometry
 - SVG-derived outlines are not trusted until validated/filtered against fabric adjacency. Dissolved outlines may include interior seams; fabric-based filtering required for truthful boundaries. Ledger provenance: Map Rebuild Path A.
 - Settlement polygons are independently digitized; they do not form a shared-border partition at scale. Adjacency detection must use tolerance-based segment matching, not exact coordinate comparison. Ledger provenance: Phase G3, Map Rebuild.
 
 ### V.3 Ring validity and closure
-- Do not skip on `ring_not_closed` if ring has ≥4 points; close deterministically by appending first coordinate if missing, then revalidate. Only skip if still invalid after closure or if too_few_points/non_finite. Mistake log: svg_substrate:ring_not_closed_skipped.
-- Duplicate SIDs must be merged deterministically into single MultiPolygon features; preserve per-part provenance in properties. Mistake log: svg_substrate:duplicate_sid_not_merged.
+- Do not skip on `ring_not_closed` if ring has ≥4 points; close deterministically by appending first coordinate if missing, then revalidate. Only skip if still invalid after closure or if too_few_points/non_finite. (Recurring issue: document in napkin under svg_substrate / ring_not_closed_skipped if needed.)
+- Duplicate SIDs must be merged deterministically into single MultiPolygon features; preserve per-part provenance in properties. (Recurring issue: document in napkin under svg_substrate / duplicate_sid_not_merged if needed.)
 
 ---
 
@@ -114,7 +114,7 @@ The map layer must never be "fixed" by invention:
 - If overlay layers use different coordinate spaces, each layer must explicitly declare its space and the viewer must transform each layer to substrate before drawing. Ledger provenance: Phase H6.9.3.
 
 ### VII.3 Viewer file:// detection
-- Viewers must detect `file://` protocol and show a clear local-server instruction message (e.g. run `npx http-server -p 8080`, then open the viewer URL). Mistake log: viewer:file_protocol_cors_blocking.
+- Viewers must detect `file://` protocol and show a clear local-server instruction message (e.g. run `npx http-server -p 8080`, then open the viewer URL). (Recurring issue: document in napkin under viewer / file_protocol_cors_blocking if needed.)
 
 ---
 
@@ -140,7 +140,7 @@ The map layer must never be "fixed" by invention:
 - Add an addendum (or section rule) when: (a) a ledger phase explicitly validates a design invariant, (b) the rule is generalizable beyond one municipality/overlay/run, (c) the rule is durable and action-guiding for future engineers. Do not add based on hypotheticals or one-off debugging notes.
 
 ### IX.3 Avoiding silent assumptions
-- Do not compensate for substrate fragmentation with hidden tolerances unless explicitly elevated to canon. Mistake log: MAP: SVG canonical substrate lacks shared-border fabric at scale.
+- Do not compensate for substrate fragmentation with hidden tolerances unless explicitly elevated to canon. (Known constraint: MAP: SVG canonical substrate lacks shared-border fabric at scale; document in napkin if operational impact.)
 
 ### IX.4 Ledger-flagged addenda (pending validation)
 The items below are flagged in `docs/PROJECT_LEDGER.md` as potential addenda. They are **not canon** until explicitly validated and promoted.
@@ -226,10 +226,12 @@ AoR contiguity is defined over the contact graph, not shared borders. AoRs apply
 
 ---
 
-## Mistake log and ledger
+## Session runbook and ledger
 
-- `docs/ASSISTANT_MISTAKES.log` is authoritative, append-only. Mistake guard must remain active in scripts.
-- `docs/PROJECT_LEDGER.md` is mandatory for phase tracking, canon decisions, explicit deferrals, deterministic changelog.
+- **Napkin:** `.claude/napkin.md` is the single session runbook. Read at session start; update as you work. It holds corrections, preferences, and patterns. No separate mistake log.
+- **Ledger:** `docs/PROJECT_LEDGER.md` is mandatory for phase tracking, canon decisions, explicit deferrals, and the deterministic changelog. Append-only.
+
+Rely on napkin, ledger, and canon only.
 
 ---
 

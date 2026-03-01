@@ -23,8 +23,8 @@ const PRESSURE_PER_STRAINED = 2;
 const PRESSURE_CAP = 100;
 
 /**
- * Update phase_ii_supply_pressure from overextension and optional supply report.
- * Only runs when meta.phase === 'phase_ii'.
+ * Update war_supply_pressure from overextension and optional supply report.
+ * Only runs when meta.phase === 'war'.
  * Pressure is monotonic per faction (never decreased) — no free replenishment.
  * When frictionMultipliers is provided (Phase D0.9), supply pressure increment is scaled by multiplier
  * so that higher command friction (higher multiplier) increases effective pressure growth.
@@ -37,13 +37,13 @@ export function updatePhaseIISupplyPressure(
     productionBonusByFaction?: Record<FactionId, number>,
     supplyStateByOsid?: SupplyStateByOsidReport
 ): void {
-    if (state.meta.phase !== 'phase_ii') {
+    if (state.meta.phase !== 'war') {
         return;
     }
 
     // Use OSID front edges when available (more accurate in OSID mode);
     // fall back to settlement-level front edges otherwise.
-    const osidFrontEdges = state.phase_ii_front_edges_osid;
+    const osidFrontEdges = state.war_front_edges_osid;
     const frontEdges = osidFrontEdges && osidFrontEdges.length > 0
         ? osidFrontEdges
         : computeFrontEdges(state, settlementEdges);
@@ -81,10 +81,10 @@ export function updatePhaseIISupplyPressure(
         }
     }
 
-    if (!state.phase_ii_supply_pressure) {
-        (state as GameState & { phase_ii_supply_pressure: Record<FactionId, number> }).phase_ii_supply_pressure = {};
+    if (!state.war_supply_pressure) {
+        (state as GameState & { war_supply_pressure: Record<FactionId, number> }).war_supply_pressure = {};
     }
-    const pressure = state.phase_ii_supply_pressure!;
+    const pressure = state.war_supply_pressure!;
 
     for (const fid of factionIds) {
         const overextension = (frontEdgeCountByFaction.get(fid) ?? 0) * PRESSURE_PER_FRONT_EDGE;
@@ -100,3 +100,4 @@ export function updatePhaseIISupplyPressure(
         pressure[fid] = Math.min(PRESSURE_CAP, current + effectiveIncrement);
     }
 }
+

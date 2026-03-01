@@ -166,7 +166,7 @@ class WarroomApp {
         // September 1991 starting state (Phase 0); minimal shape for runPhase0Turn
         this.gameState = {
             schema_version: 1,
-            meta: { turn: 0, seed: 'start_1991_09', phase: 'phase_0' },
+            meta: { turn: 0, seed: 'start_1991_09', phase: 'peace' },
             factions: [
                 { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0, negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }, declaration_pressure: 0, declared: false, declaration_turn: null },
                 { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0, negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }, declaration_pressure: 0, declared: false, declaration_turn: null },
@@ -261,7 +261,7 @@ class WarroomApp {
     private maybeShowPhase0StartingBrief(): void {
         if (!this.gameState) return;
         if (this.phase0StartBriefShown) return;
-        if (this.gameState.meta.phase !== 'phase_0' || this.gameState.meta.turn !== 0) return;
+        if (this.gameState.meta.phase !== 'peace' || this.gameState.meta.turn !== 0) return;
         this.phase0StartBriefShown = true;
         const brief = new NewspaperModal(this.gameState, { startBrief: true });
         this.modalManager.showModal(brief.render());
@@ -451,7 +451,7 @@ class WarroomApp {
         }
         if (mapBtn) {
             mapBtn.onclick = () => {
-                if (this.gameState?.meta.phase === 'phase_0') {
+                if (this.gameState?.meta.phase === 'peace') {
                     this.showMapScene();
                     this.phase0PreparationMap.show();
                     return;
@@ -464,7 +464,7 @@ class WarroomApp {
         }
         if (investBtn) {
             investBtn.onclick = () => {
-                if (!this.gameState || this.gameState.meta.phase !== 'phase_0') return;
+                if (!this.gameState || this.gameState.meta.phase !== 'peace') return;
                 this.showMapScene();
                 this.phase0PreparationMap.show();
             };
@@ -512,13 +512,13 @@ class WarroomApp {
         if (!el || !this.gameState) return;
         const turn = this.gameState.meta.turn;
         const label = turnToShortLabel(turn);
-        const phase = this.gameState.meta.phase === 'phase_0' ? 'Pre-War'
-            : this.gameState.meta.phase === 'phase_i' ? 'Phase I'
+        const phase = this.gameState.meta.phase === 'peace' ? 'Pre-War'
+            : this.gameState.meta.phase === 'war' ? 'Phase I'
                 : 'Phase II';
         el.textContent = `Turn ${turn} \u2014 ${label} \u2014 ${phase}`;
         const investBtn = document.getElementById('wr-btn-invest') as HTMLButtonElement | null;
         if (investBtn) {
-            investBtn.style.display = this.gameState.meta.phase === 'phase_0' ? '' : 'none';
+            investBtn.style.display = this.gameState.meta.phase === 'peace' ? '' : 'none';
         }
     }
 

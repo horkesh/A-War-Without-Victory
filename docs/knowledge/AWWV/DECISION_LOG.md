@@ -16,7 +16,7 @@ One entry per explicit decision recovered from ChatGPT and/or Claude archives. R
 | 10 | Population displacement: future; settlement + municipality level; turn-indexed overlays; geometry immutable; DO NOT implement yet | chatgpt | Locked constraint | Future layers; no viewer assumption of static population | No |
 | 11 | Phase order fixed: directives → deployments → military_interaction → fragmentation_resolution → supply_resolution → political_effects → exhaustion_update → persistence | both | Phase A; determinism | turn_pipeline.ts; no reordering | No |
 | 12 | Code must not contradict canon docs; code is wrong if it does | both | CANON.md | Validation; doc precedence | No |
-| 13 | Mistake log and ledger mandatory; do not repeat past mistakes | both | context.md; Claude refactoring plan | ASSISTANT_MISTAKES.log; PROJECT_LEDGER; assertNoRepeat | No |
+| 13 | Napkin and ledger mandatory; do not repeat past mistakes | both | context.md; napkin skill | .claude/napkin.md; PROJECT_LEDGER | No |
 | 14 | Terrain scalars (H6.x) not consumed by simulation yet; H6.2 data-only | chatgpt | H6.7-PREP; non-goals | OSM/DEM snapshots; no scalar consumption | No |
 | 15 | Peace ends the war; territorial clauses trigger peace → game ends | chatgpt | Design (Bosnia War Simulation Design) | state.end_state; war pipeline short-circuits | No |
 | 16 | Denylisted derived-state keys: fronts, corridors, derived, cache — not serialized | claude / code | Engine Invariants §13.1 | validateGameStateShape; derived recomputed each turn | No |

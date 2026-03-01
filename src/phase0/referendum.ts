@@ -125,24 +125,25 @@ export function isWarStartTurn(state: GameState): boolean {
  * Transition occurs ONLY when current_turn == war_start_turn (referendum held + 4 turns).
  * No declaration or other condition triggers transition. Irreversible once applied.
  *
- * If state is in phase_0 and isWarStartTurn(state), sets meta.phase = 'phase_i',
- * state.phase_i_jna (Phase_0_Spec §7.7 / §8 JNA_status), and returns true.
+ * If state is in phase_0 and isWarStartTurn(state), sets meta.phase = 'war',
+ * state.war_jna (Phase_0_Spec §7.7 / §8 JNA_status), and returns true.
  * Otherwise returns false and does not mutate state.
  */
 export function applyPhase0ToPhaseITransition(state: GameState): boolean {
     const meta = state.meta;
-    if (meta.phase !== 'phase_0') return false;
+    if (meta.phase !== 'peace') return false;
     if (!isWarStartTurn(state)) return false;
 
-    meta.phase = 'phase_i';
+    meta.phase = 'war';
     const rsDeclared = getRs(state)?.declared === true;
-    state.phase_i_jna = {
+    state.war_jna = {
         transition_begun: rsDeclared,
         withdrawal_progress: 0,
         asset_transfer_rs: 0
     } satisfies PhaseIJNAState;
-    meta.phase_0_end_turn = meta.turn;
-    meta.phase_1_start_turn = meta.turn;
+    meta.peace_end_turn = meta.turn;
+    meta.war_start_lifecycle_phase_turn = meta.turn;
     meta.escalation_reason = 'war_start_turn';
     return true;
 }
+

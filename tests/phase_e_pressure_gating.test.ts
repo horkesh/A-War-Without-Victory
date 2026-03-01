@@ -11,13 +11,13 @@ import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
-function minimalPhaseIState(): GameState {
+function minimalPeaceState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: {
             turn: 10,
             seed: 'gating-i',
-            phase: 'phase_i',
+            phase: 'peace',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -35,8 +35,8 @@ function minimalPhaseIState(): GameState {
         militia_pools: {},
         political_controllers: { s1: 'RBiH', s2: 'RS' },
         municipalities: { MUN_A: { stability_score: 50 }, MUN_B: { stability_score: 50 } },
-        phase_i_consolidation_until: {},
-        phase_i_militia_strength: { MUN_A: { RBiH: 30, RS: 60, HRHB: 10 }, MUN_B: { RBiH: 25, RS: 70, HRHB: 5 } }
+        war_consolidation_until: {},
+        war_militia_strength: { MUN_A: { RBiH: 30, RS: 60, HRHB: 10 }, MUN_B: { RBiH: 25, RS: 70, HRHB: 5 } }
     };
 }
 
@@ -46,7 +46,7 @@ function minimalPhaseIIState(): GameState {
         meta: {
             turn: 20,
             seed: 'gating-ii',
-            phase: 'phase_ii',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -66,13 +66,13 @@ function minimalPhaseIIState(): GameState {
     };
 }
 
-test('phase_i runTurn does not run phase-e-pressure-update (Phase I path has no Phase E)', async () => {
-    const state = minimalPhaseIState();
+test('peace runTurn is rejected (war pipeline only)', async () => {
+    const state = minimalPeaceState();
     const edges: EdgeRecord[] = [{ a: 's1', b: 's2' }];
-    const { report } = await runTurn(state, { seed: 'gating-i', settlementEdges: edges });
-    const phaseNames = report.phases.map((p) => p.name);
-    assert.ok(!phaseNames.includes('phase-e-pressure-update'), 'Phase I path must not include phase-e-pressure-update');
-    assert.strictEqual(report.phase_e_pressure_update, undefined);
+    await assert.rejects(
+        () => runTurn(state, { seed: 'gating-i', settlementEdges: edges }),
+        /use state pipeline runOneTurn for peace/
+    );
 });
 
 test('phase_ii runTurn includes phase-e-pressure-update and runs exactly once per turn', async () => {

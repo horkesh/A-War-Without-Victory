@@ -1270,8 +1270,8 @@ export class WarPlanningMap {
     private updateInvestLayerAvailability(): void {
         const investRow = this.container.querySelector('#wpm-layer-invest-row') as HTMLElement;
         if (!investRow) return;
-        const phase = this.gameState?.meta?.phase ?? 'phase_0';
-        const isPhase0 = phase === 'phase_0';
+        const phase = this.gameState?.meta?.phase ?? 'peace';
+        const isPhase0 = phase === 'peace';
         investRow.style.display = isPhase0 ? 'block' : 'none';
         const cb = this.container.querySelector('#wpm-layer-invest') as HTMLInputElement | null;
         // In Phase 0 default to INVEST enabled so capital allocation is immediately discoverable.

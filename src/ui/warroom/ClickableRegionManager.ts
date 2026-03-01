@@ -277,7 +277,7 @@ export class ClickableRegionManager {
 
     private openPrimaryMap(gameState: unknown): void {
         const state = gameState as GameState;
-        if (state?.meta?.phase === 'phase_0') {
+        if (state?.meta?.phase === 'peace') {
             this.openPhase0PreparationMap();
             return;
         }
@@ -325,8 +325,8 @@ export class ClickableRegionManager {
         const state = gameState as GameState;
         const currentTurn = state.meta.turn;
         const nextTurn = currentTurn + 1;
-        const stagedCount = state.meta.phase === 'phase_0' ? this.phase0Directives.getStagedCount() : 0;
-        const stagedCost = state.meta.phase === 'phase_0' ? this.phase0Directives.getTotalStagedCost() : 0;
+        const stagedCount = state.meta.phase === 'peace' ? this.phase0Directives.getStagedCount() : 0;
+        const stagedCost = state.meta.phase === 'peace' ? this.phase0Directives.getTotalStagedCost() : 0;
 
         // Create confirmation dialog using ops-center theme
         const dialog = document.createElement('div');
@@ -334,7 +334,7 @@ export class ClickableRegionManager {
 
         const stagedInfo = stagedCount > 0
             ? `<div class="wr-dialog-info wr-info-green">Staged investments: <strong>${stagedCount}</strong> (cost: ${stagedCost})</div>`
-            : state.meta.phase === 'phase_0'
+            : state.meta.phase === 'peace'
                 ? `<div class="wr-dialog-info wr-info-amber">No investments staged this turn. Allocate capital before advancing.</div>`
                 : '';
 
@@ -349,7 +349,7 @@ export class ClickableRegionManager {
                 ${thisWeekPreview}
             </div>
             <div class="wr-dialog-actions">
-                ${state.meta.phase === 'phase_0' ? '<button id="open-invest-map-btn" class="wr-btn wr-btn-secondary">Open Investment Map</button>' : ''}
+                ${state.meta.phase === 'peace' ? '<button id="open-invest-map-btn" class="wr-btn wr-btn-secondary">Open Investment Map</button>' : ''}
                 <button id="cancel-turn-btn" class="wr-btn wr-btn-secondary">Cancel</button>
                 <button id="advance-turn-btn" class="wr-btn wr-btn-primary">Advance Turn</button>
             </div>
@@ -385,7 +385,7 @@ export class ClickableRegionManager {
                 setPreviousSnapshot(capturePreviousTurnSnapshot(state));
 
                 if (bridge?.advanceTurn) {
-                    const phase0Directives = state.meta.phase === 'phase_0'
+                    const phase0Directives = state.meta.phase === 'peace'
                         ? this.phase0Directives.getStagedInvestments()
                         : [];
                     try {
@@ -425,7 +425,7 @@ export class ClickableRegionManager {
                     return;
                 }
 
-                if (state.meta.phase === 'phase_0') {
+                if (state.meta.phase === 'peace') {
                     // Apply staged investments before running the turn
                     const working = { ...state };
                     this.phase0Directives.applyAll(working);
@@ -449,7 +449,7 @@ export class ClickableRegionManager {
                     }
 
                     this.onGameStateChange?.(newState);
-                } else if (state.meta.phase === 'phase_i') {
+                } else if (state.meta.phase === 'war') {
                     try {
                         const graph = await this.loadSettlementGraphIfNeeded();
                         const seed = state.meta.seed ?? 'start_1991_09';
@@ -479,7 +479,7 @@ export class ClickableRegionManager {
 
     /** Show a full-screen milestone modal if a war milestone was just crossed. */
     private async checkWarMilestone(newState: GameState, pf: FactionId): Promise<void> {
-        if (newState.meta.phase === 'phase_0') return;
+        if (newState.meta.phase === 'peace') return;
         const prevSnap = getPreviousSnapshot();
         const milestone = findWarMilestoneEvent(newState, prevSnap, pf);
         if (milestone) {
@@ -493,8 +493,8 @@ export class ClickableRegionManager {
      * Returns empty string for Phase 0.
      */
     private generateThisWeekPreview(state: GameState): string {
-        const phase = state.meta.phase ?? 'phase_0';
-        if (phase === 'phase_0') return '';
+        const phase = state.meta.phase ?? 'peace';
+        if (phase === 'peace') return '';
 
         const pf = (state.meta.player_faction ?? this.playerFaction ?? state.factions[0]?.id ?? 'RBiH') as FactionId;
         const snap = extractWarData(state, pf);
@@ -611,7 +611,7 @@ export class ClickableRegionManager {
         const phase = state.meta.phase;
 
         // Diplomacy is only available once the war has started
-        if (phase === 'phase_0') {
+        if (phase === 'peace') {
             const notice = document.createElement('div');
             notice.className = 'wr-dialog';
             notice.innerHTML = `

@@ -25,11 +25,6 @@ import {
 import { runJNATransition, type JNATransitionReport } from './phase_i/jna_transition.js';
 import { updateMilitiaEmergence, type MilitiaEmergenceReport } from './phase_i/militia_emergence.js';
 import { runPoolPopulation, type PoolPopulationReport } from './phase_i/pool_population.js';
-import {
-    applyPhaseIToPhaseIITransition,
-    isPhaseIITransitionEligible,
-    updatePhaseIOpposingEdgesStreak
-} from './phase_transitions/phase_i_to_phase_ii.js';
 
 export interface PhaseITurnInput {
     seed: string;
@@ -48,9 +43,9 @@ export interface PhaseITurnReport {
     phase_i_formation_spawn?: SpawnFormationsReport;
     phase_i_control_flip?: ControlFlipReport;
     phase_i_displacement_hooks?: DisplacementHooksReport;
-    phase_i_control_strain?: ControlStrainReport;
+    war_control_strain?: ControlStrainReport;
     phase_i_authority?: AuthorityDegradationReport;
-    phase_i_jna_transition?: JNATransitionReport;
+    war_jna_transition?: JNATransitionReport;
 }
 
 function isPhaseIAllowed(state: GameState): boolean {
@@ -79,8 +74,8 @@ export async function runPhaseITurn(
     input: PhaseITurnInput
 ): Promise<{ nextState: GameState; report: PhaseITurnReport }> {
     const working = cloneGameState(state);
-    if (working.meta.phase !== 'phase_i') {
-        throw new Error('runPhaseITurn: state must be in phase_i');
+    if (working.meta.phase !== 'war') {
+        throw new Error('runPhaseITurn: state must be in war phase');
     }
     if (!isPhaseIAllowed(working)) {
         throw new Error('runPhaseITurn: Phase I requires referendum_held and current_turn >= war_start_turn');
@@ -140,27 +135,12 @@ export async function runPhaseITurn(
     );
 
     const byMun = buildSettlementsByMun(graph.settlements);
-    report.phase_i_control_strain = runControlStrain(working, working.meta.turn, byMun);
+    report.war_control_strain = runControlStrain(working, working.meta.turn, byMun);
 
     report.phase_i_authority = runAuthorityDegradation(working);
 
-    report.phase_i_jna_transition = runJNATransition(working);
-
-    if (graph.edges.length > 0) {
-        updatePhaseIOpposingEdgesStreak(working, graph.edges);
-    }
-    const n = working.meta.phase_i_force_transition_after_turns;
-    const warStart = working.meta.war_start_turn ?? 0;
-    if (
-        working.meta.phase === 'phase_i' &&
-        !isPhaseIITransitionEligible(working) &&
-        typeof n === 'number' &&
-        (working.meta.turn ?? 0) >= warStart + n
-    ) {
-        applyPhaseIToPhaseIITransition(working, graph.edges, undefined, { forceTransition: true });
-    } else {
-        applyPhaseIToPhaseIITransition(working, graph.edges);
-    }
+    report.war_jna_transition = runJNATransition(working);
 
     return { nextState: working, report };
 }
+

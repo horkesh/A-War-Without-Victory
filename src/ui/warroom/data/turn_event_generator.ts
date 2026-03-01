@@ -289,7 +289,7 @@ function detectAllianceChanges(
     events: TurnEvent[],
 ): void {
     const oldAlliance = prev.allianceValue;
-    const newAlliance = state.phase_i_alliance_rbih_hrhb ?? null;
+    const newAlliance = state.war_alliance_rbih_hrhb ?? null;
 
     if (oldAlliance == null || newAlliance == null) return;
 
@@ -359,12 +359,12 @@ function detectExhaustionMilestones(
     pf: FactionId,
     events: TurnEvent[],
 ): void {
-    if (!state.phase_ii_exhaustion) return;
+    if (!state.war_exhaustion) return;
 
-    const fids = Object.keys(state.phase_ii_exhaustion).sort(sc);
+    const fids = Object.keys(state.war_exhaustion).sort(sc);
     for (const fid of fids) {
         const oldEx = (prev.exhaustion[fid] ?? 0) * 100; // convert to %
-        const newEx = (state.phase_ii_exhaustion[fid] ?? 0) * 100;
+        const newEx = (state.war_exhaustion[fid] ?? 0) * 100;
 
         for (const milestone of EXHAUSTION_MILESTONES) {
             if (oldEx < milestone && newEx >= milestone) {

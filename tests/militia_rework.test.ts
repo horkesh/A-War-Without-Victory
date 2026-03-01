@@ -17,7 +17,7 @@ import { militiaPoolKey } from '../src/state/militia_pool_key.js';
 function baseState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'rework-fixture', phase: 'phase_i' },
+        meta: { turn: 10, seed: 'rework-fixture', phase: 'war' },
         factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null }
@@ -89,7 +89,7 @@ test('fragmented mun never spawns', () => {
 
 test('minority decay runs only in first 3 turns of Phase I and reduces pool', () => {
     const state = baseState();
-    state.meta.phase = 'phase_i';
+    state.meta.phase = 'war';
     state.meta.war_start_turn = 10;
     state.meta.turn = 10;
     state.political_controllers = { s1: 'RS', s2: 'RS' };
@@ -120,7 +120,7 @@ test('minority decay runs only in first 3 turns of Phase I and reduces pool', ()
 
 test('minority decay does not run outside first 3 turns of Phase I', () => {
     const state = baseState();
-    state.meta.phase = 'phase_i';
+    state.meta.phase = 'war';
     state.meta.war_start_turn = 10;
     state.meta.turn = 14;
     state.political_controllers = { s1: 'RS' };

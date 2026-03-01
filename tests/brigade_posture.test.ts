@@ -22,7 +22,7 @@ function makeFormation(id: string, faction: FactionId, hq: string, personnel: nu
 function makePostureState(overrides?: Partial<{ formations: Record<string, FormationState> }>): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'posture-test', phase: 'phase_ii' } as any,
+        meta: { turn: 20, seed: 'posture-test', phase: 'war' } as any,
         factions: [
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],

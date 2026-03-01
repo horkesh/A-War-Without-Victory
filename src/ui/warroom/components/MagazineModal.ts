@@ -192,8 +192,8 @@ export class MagazineModal {
      * Phase gate: render Phase 0 or war-phase content.
      */
     render(): HTMLElement {
-        const phase = this.gameState.meta.phase ?? 'phase_0';
-        if (phase === 'phase_0') return this.renderPhase0();
+        const phase = this.gameState.meta.phase ?? 'peace';
+        if (phase === 'peace') return this.renderPhase0();
         return this.renderWarPhase();
     }
 

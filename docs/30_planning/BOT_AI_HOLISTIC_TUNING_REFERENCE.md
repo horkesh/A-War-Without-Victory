@@ -93,6 +93,11 @@ Tune all three faction AIs and their starting parameters so that a 52-week scena
 
 ## Current Tuning Parameters (as of 2026-02-28)
 
+### 40-week calibration scenario (apr1992_definitive_40w)
+
+- **recruitment_mode:** `"player_choice"` (not `bottom_up`). In bottom_up mode, RS brigades are placed 1-per-HQ at init; `spreadBrigadesToFrontOsids` only moves over-stacked brigades, so 61/77 RS brigades stay at interior HQ OSIDs with no front contact and generate no attack orders. player_choice creates all OOB brigades at turn 0 and spreads them to front positions, enabling calibration of bot attack/territory metrics. bottom_up remains the mode for other scenarios (e.g. militia-emergence play). Report: docs/40_reports/implemented/20260228_PHASE_G_CALIBRATION_BOTTOM_UP_PIPELINE_FIX.md.
+- **40w baseline:** n246 with player_choice; RS=406, RBiH=265, HRHB=82; all 6 benchmarks pass. See same report for n246 metrics and tuning conclusions.
+
 ### Pool & Mobilization (pool_population.ts)
 | Parameter | Value | Notes |
 |-----------|-------|-------|
@@ -464,6 +469,13 @@ Currently, bot_strategy.ts has hardcoded avoid lists:
 | 2026-02-28 | LINKED_ZOC_READINESS 0.35->0.50 | n210: At 0.35, enclave perimeters too weak (5 Srebrenica brigades can't cover 14 OSIDs). At 0.50, linked front credible but concentrated attacks still break through. |
 | 2026-02-28 | RS starts at 35% OSID ethnic majority | Design decision: init control = ethnic majority. RS must reach 65-70% via gameplay. This is working (65.9% achieved by n213). |
 
+### Technical learnings (Phase G calibration 2026-02-28)
+
+- **Attack share step function:** For a corps with N brigades, `attack_slots = max(1, floor(N × share))`. Tuning within a step (e.g. 0.08→0.10) can have zero effect; e.g. for 1KK (26 brigades), 0.08 and 0.10 both yield 2 slots. Document step thresholds when tuning; jumping a step (e.g. 0.08→0.12) may add a marginal third slot that reduces territory efficiency.
+- **Aggression as quality filter:** `aggression_modifier` (e.g. -0.05) acts as a quality threshold; when attack slots are limited, the quality filter is more valuable than extra slots. Removing it allows marginal attacks that can reduce net territory.
+- **Phase timing interdependence:** `RS_EARLY_WAR_END_WEEK` (e.g. 20) is a coordinated design point with RBiH doctrine phase at week 20. Changing RS timing alone creates asymmetric overlaps (e.g. RS offensive + RBiH more-active phase simultaneously), which can worsen RS territory. Keep RS_EARLY_WAR_END_WEEK=20 unless RBiH doctrine boundaries are adjusted in sync.
+- **bottom_up vs player_choice:** bottom_up places RS 1-per-HQ → no spreading → no front contact → no attack orders; use player_choice for calibration scenarios that need front-loaded brigades and attack order validation.
+
 ---
 
 ## Run Results Tracker
@@ -532,6 +544,11 @@ Currently, bot_strategy.ts has hardcoded avoid lists:
 ---
 
 ## Identified Issues & Next Steps (as of 2026-02-28)
+
+### Known structural gaps (Phase G calibration 2026-02-28)
+
+- **HRHB Northwest Bosnia OOB:** `hvo_northwest_bosnia` has 0 brigades in OOB. Posavina (Orasje, Bosanski Brod, Derventa, Odžak) is undefended by HRHB. Fix: assign Posavina brigades (e.g. hrhb_jure_franceti_brigade, hrhb_kralj_petar_kreimir_iv_brigade) to `hvo_northwest_bosnia` in OOB. Expected: HRHB 82→85–88 OSIDs.
+- **Vozuca wrong flip:** `op:zavidovici:vozuca_2` flips RBiH in sim but historically was VRS-held (BB1 p499, BB2 p507). Fix options: osid_control_overrides (init only), stronger RS East Bosnian Corps priority for Zavidovici, or avoid_municipalities for RBiH 2nd Corps targeting Zavidovici.
 
 ### ISSUE 1: Troop Strength 20-30k Over Target [MEDIUM]
 **Status:** Active. Pool scale at floor for RS (0.55) and RBiH (0.30).

@@ -201,7 +201,7 @@ function sc(a: string, b: string): number {
 
 export function extractWarData(gameState: GameState, playerFaction: FactionId): WarDataSnapshot {
     const turn = gameState.meta.turn;
-    const phase = gameState.meta.phase ?? 'phase_0';
+    const phase = gameState.meta.phase ?? 'peace';
 
     // --- Own forces ---
     const ownForces = extractOwnForces(gameState, playerFaction);
@@ -403,7 +403,7 @@ function extractDisplacement(state: GameState, pf: FactionId): DisplacementSnaps
 }
 
 function extractExhaustion(state: GameState, pf: FactionId): ExhaustionSnapshot {
-    const level = state.phase_ii_exhaustion?.[pf] ?? 0;
+    const level = state.war_exhaustion?.[pf] ?? 0;
     const trends = state.loss_of_control_trends?.by_faction?.[pf];
     return {
         level,
@@ -490,7 +490,7 @@ function extractDiplomacy(state: GameState, pf: FactionId): FactionDiplomacySnap
 
     // RBiH-HRHB state (Tier 1 for both RBiH and HRHB)
     const rhs = state.rbih_hrhb_state;
-    const alliance = state.phase_i_alliance_rbih_hrhb;
+    const alliance = state.war_alliance_rbih_hrhb;
     const rbihHrhbState: RBiHDiplomacySnapshot | null =
         (pf === 'RBiH' || pf === 'HRHB') && rhs != null ? {
             allianceValue: alliance ?? 0,
@@ -580,8 +580,8 @@ function extractContactedEnemies(state: GameState, pf: FactionId): ContactedForm
 
 function extractFrontEdges(state: GameState, pf: FactionId): FrontEdgeSnapshot[] {
     const phase = state.meta?.phase as string | undefined;
-    const useOsid = phase === 'phase_ii' && (state.phase_ii_front_edges_osid?.length ?? 0) > 0;
-    const edges: FrontEdgeState[] = useOsid ? (state.phase_ii_front_edges_osid ?? []) : (state.front_edges ?? []);
+    const useOsid = phase === 'war' && (state.war_front_edges_osid?.length ?? 0) > 0;
+    const edges: FrontEdgeState[] = useOsid ? (state.war_front_edges_osid ?? []) : (state.front_edges ?? []);
     const pressure: Record<string, FrontPressureState> = state.front_pressure ?? {};
     const segments: Record<string, { friction: number }> = state.front_segments ?? {};
     const garrison = state.militia_garrison ?? {};
@@ -661,8 +661,8 @@ function extractBrigadeMovement(state: GameState, pf: FactionId): BrigadeMovemen
 
 function extractExposedFront(state: GameState, pf: FactionId): SettlementId[] {
     const phase = state.meta?.phase as string | undefined;
-    const useOsid = phase === 'phase_ii' && (state.phase_ii_front_edges_osid?.length ?? 0) > 0;
-    const edges: FrontEdgeState[] = useOsid ? (state.phase_ii_front_edges_osid ?? []) : (state.front_edges ?? []);
+    const useOsid = phase === 'war' && (state.war_front_edges_osid?.length ?? 0) > 0;
+    const edges: FrontEdgeState[] = useOsid ? (state.war_front_edges_osid ?? []) : (state.front_edges ?? []);
     const formations = state.formations ?? {};
     const osidToBrigade = new Set<string>();
     if (useOsid) {

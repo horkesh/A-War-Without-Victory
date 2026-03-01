@@ -50,7 +50,7 @@ function makeState(formations: FormationState[], opts?: Partial<GameState>): Gam
     const formationsMap: Record<string, FormationState> = {};
     for (const f of formations) formationsMap[f.id] = f;
     return {
-        meta: { turn: 1, phase: 'phase_ii', schema_version: 1, scenario_id: 'test' },
+        meta: { turn: 1, phase: 'war', schema_version: 1, scenario_id: 'test' },
         factions: [{ id: 'RS' as FactionId }, { id: 'RBiH' as FactionId }, { id: 'HRHB' as FactionId }] as GameState['factions'],
         formations: formationsMap,
         political_controllers: {

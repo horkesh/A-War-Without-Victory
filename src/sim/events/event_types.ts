@@ -12,7 +12,7 @@ export interface EventTrigger {
     /** Inclusive. Omit for no upper bound. */
     turn_max?: number;
     /** Require this phase. */
-    phase?: 'phase_i' | 'phase_ii';
+    phase?: 'war';
 }
 
 /** Effect: narrative only (no simulation mutation in B1). */
@@ -49,3 +49,4 @@ export function triggerMatches(def: EventDefinition, state: GameState, currentTu
     if (t.phase != null && state.meta.phase !== t.phase) return false;
     return true;
 }
+

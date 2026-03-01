@@ -99,7 +99,7 @@ function derivePhaseIHandoffOp(state: GameState, munId: string): OrganizationalP
 /**
  * Run one Phase 0 turn: bot investments → real options → runPhase0Turn → events → advance.
  * Returns new state; does not mutate the argument.
- * Only valid when state.meta.phase === 'phase_0'.
+ * Only valid when state.meta.phase === 'peace'.
  *
  * @param state - Current game state (not mutated)
  * @param seed - Deterministic seed for this turn
@@ -111,7 +111,7 @@ export function runPhase0TurnAndAdvance(
     playerFaction?: FactionId
 ): GameState {
     const working = cloneGameState(state);
-    if (working.meta.phase !== 'phase_0') {
+    if (working.meta.phase !== 'peace') {
         return working;
     }
 
@@ -139,9 +139,9 @@ export function runPhase0TurnAndAdvance(
 
     // 5. Phase I handoff: if runPhase0Turn transitioned to phase_i
     // Note: runPhase0Turn mutates working.meta.phase in place, but TS control flow
-    // still narrows it to 'phase_0' from the guard above. Cast to string for comparison.
+    // still narrows it to 'peace' from the guard above. Cast to string for comparison.
     const currentPhase: string = working.meta.phase;
-    if (prevPhase === 'phase_0' && currentPhase === 'phase_i') {
+    if (prevPhase === 'peace' && currentPhase === 'war') {
         applyPhaseIHandoff(working);
         // Emit war_begins event
         events.push({ type: 'war_begins', turn: working.meta.turn, details: {} });
@@ -192,8 +192,8 @@ function applyPhaseIHandoff(state: GameState): void {
     }
 
     // Initialize Phase I JNA transition state
-    if (!state.phase_i_jna) {
-        state.phase_i_jna = {
+    if (!state.war_jna) {
+        state.war_jna = {
             transition_begun: false,
             withdrawal_progress: 0,
             asset_transfer_rs: 0,

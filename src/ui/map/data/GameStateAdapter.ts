@@ -45,7 +45,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     const rawMovementState = state.brigade_movement_state as Record<string, { status?: string; stance?: string }> | undefined;
 
     const brigadeAorByFormationId: Record<string, string[]> = {};
-    if (phase === 'phase_ii') {
+    if (phase === 'war') {
         const rawFormations = state.formations as Record<string, Record<string, unknown>> | undefined;
         if (rawFormations) {
             for (const id of Object.keys(rawFormations).sort()) {
@@ -356,7 +356,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     let phaseIiSupplyPressure: LoadedGameState['phaseIiSupplyPressure'] | undefined;
-    const rawSupply = state.phase_ii_supply_pressure as Record<string, unknown> | undefined;
+    const rawSupply = state.war_supply_pressure as Record<string, unknown> | undefined;
     if (rawSupply && typeof rawSupply === 'object' && !Array.isArray(rawSupply)) {
         const out: NonNullable<LoadedGameState['phaseIiSupplyPressure']> = {};
         for (const faction of Object.keys(rawSupply).sort((a, b) => a.localeCompare(b))) {
@@ -366,7 +366,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     let phaseIiExhaustion: LoadedGameState['phaseIiExhaustion'] | undefined;
-    const rawExhaustion = state.phase_ii_exhaustion as Record<string, unknown> | undefined;
+    const rawExhaustion = state.war_exhaustion as Record<string, unknown> | undefined;
     if (rawExhaustion && typeof rawExhaustion === 'object' && !Array.isArray(rawExhaustion)) {
         const out: NonNullable<LoadedGameState['phaseIiExhaustion']> = {};
         for (const faction of Object.keys(rawExhaustion).sort((a, b) => a.localeCompare(b))) {
@@ -376,7 +376,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     const rbih_hrhb_war_earliest_turn = typeof meta?.rbih_hrhb_war_earliest_turn === 'number' ? meta.rbih_hrhb_war_earliest_turn : undefined;
-    const phase_i_alliance_rbih_hrhb = typeof state.phase_i_alliance_rbih_hrhb === 'number' ? state.phase_i_alliance_rbih_hrhb : undefined;
+    const war_alliance_rbih_hrhb = typeof state.war_alliance_rbih_hrhb === 'number' ? state.war_alliance_rbih_hrhb : undefined;
     const playerFaction = (meta?.player_faction as string | null | undefined) ?? null;
 
     const rawDesiredCap = state.brigade_desired_aor_cap as Record<string, number> | undefined;
@@ -429,8 +429,8 @@ export function parseGameState(json: unknown): LoadedGameState {
             .sort((a, b) => a.edge_id.localeCompare(b.edge_id))
         : undefined;
 
-    const frontEdgesOsid: LoadedGameState['frontEdgesOsid'] = Array.isArray((state as Record<string, unknown>).phase_ii_front_edges_osid)
-        ? ((state as Record<string, unknown>).phase_ii_front_edges_osid as Array<Record<string, unknown>>)
+    const frontEdgesOsid: LoadedGameState['frontEdgesOsid'] = Array.isArray((state as Record<string, unknown>).war_front_edges_osid)
+        ? ((state as Record<string, unknown>).war_front_edges_osid as Array<Record<string, unknown>>)
             .map((edge) => {
                 const a = typeof edge.a === 'string' ? edge.a : '';
                 const b = typeof edge.b === 'string' ? edge.b : '';
@@ -481,7 +481,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     let enemyZocByFaction: LoadedGameState['enemyZocByFaction'];
-    const rawEnemyZoc = state.phase_ii_enemy_zoc_by_faction as Record<string, string[]> | undefined;
+    const rawEnemyZoc = state.war_enemy_zoc_by_faction as Record<string, string[]> | undefined;
     if (rawEnemyZoc && typeof rawEnemyZoc === 'object' && !Array.isArray(rawEnemyZoc)) {
         const out: Record<string, string[]> = {};
         for (const fid of Object.keys(rawEnemyZoc).sort((a, b) => a.localeCompare(b))) {
@@ -498,7 +498,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         armyStance, casualtyLedger, civilianCasualties, internationalVisibilityPressure, phaseIiSupplyPressure, phaseIiExhaustion,
         player_faction: playerFaction ?? undefined,
         rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
-        phase_i_alliance_rbih_hrhb: phase_i_alliance_rbih_hrhb ?? null,
+        war_alliance_rbih_hrhb: war_alliance_rbih_hrhb ?? null,
         brigadeDesiredAoRCap: brigadeDesiredAoRCap && Object.keys(brigadeDesiredAoRCap).length > 0 ? brigadeDesiredAoRCap : undefined,
         frontEdges: frontEdges && frontEdges.length > 0 ? frontEdges : undefined,
         frontEdgesOsid: frontEdgesOsid && frontEdgesOsid.length > 0 ? frontEdgesOsid : undefined,
@@ -509,3 +509,4 @@ export function parseGameState(json: unknown): LoadedGameState {
         repositionOrders: repositionOrders.length > 0 ? repositionOrders : undefined,
     };
 }
+

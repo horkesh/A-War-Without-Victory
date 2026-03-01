@@ -20,14 +20,14 @@ import { isPressureEligible } from './pressure_eligibility.js';
 /**
  * Derive Phase II fronts from pressure-eligible edges (front-active settlement edges only).
  * An edge is front-active iff it has opposing political control AND is pressure-eligible.
- * Runs only when meta.phase === 'phase_ii'. Returns [] otherwise.
+ * Runs only when meta.phase === 'war'. Returns [] otherwise.
  * Deterministic: stable sort by edge_id and faction pair.
  */
 export function derivePhaseIIFrontsFromPressureEligible(
     state: GameState,
     settlementEdges: EdgeRecord[]
 ): PhaseIIFrontDescriptor[] {
-    if (state.meta.phase !== 'phase_ii') {
+    if (state.meta.phase !== 'war') {
         return [];
     }
 
@@ -80,3 +80,4 @@ export function derivePhaseIIFrontsFromPressureEligible(
 
     return descriptors;
 }
+

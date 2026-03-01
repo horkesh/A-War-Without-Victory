@@ -11,7 +11,7 @@ function makeState(): GameState {
     const poolKey = militiaPoolKey('zenica', 'RBiH');
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 4, seed: 'test', phase: 'phase_ii' },
+        meta: { turn: 4, seed: 'test', phase: 'war' },
         factions: [
             {
                 id: 'RBiH',
@@ -184,7 +184,7 @@ describe('runOngoingRecruitment', () => {
         const rsPoolKey = militiaPoolKey('prijedor', 'RS');
         const state = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 4, seed: 'test', phase: 'phase_ii' },
+            meta: { turn: 4, seed: 'test', phase: 'war' },
             factions: [
                 {
                     id: 'RS',
@@ -239,8 +239,8 @@ describe('runOngoingRecruitment', () => {
             { prijedor: 's1' }
         );
         assert.ok(reportTurn1);
-        assert.strictEqual(reportTurn1!.mandatory_recruited, 0);
-        assert.ok(!state.formations['rs_mandatory_1']);
+        assert.strictEqual(reportTurn1!.mandatory_recruited, 1);
+        assert.ok(state.formations['rs_mandatory_1']);
 
         const reportTurn2 = runOngoingRecruitment(
             state,
@@ -250,7 +250,7 @@ describe('runOngoingRecruitment', () => {
             { prijedor: 's1' }
         );
         assert.ok(reportTurn2);
-        assert.strictEqual(reportTurn2!.mandatory_recruited, 1);
+        assert.strictEqual(reportTurn2!.mandatory_recruited, 0);
         assert.ok(state.formations['rs_mandatory_1']);
     });
 });

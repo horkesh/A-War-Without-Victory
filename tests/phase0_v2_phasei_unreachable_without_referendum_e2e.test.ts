@@ -23,6 +23,6 @@ test('V2: phase stays phase_0 when referendum_held false', () => {
     for (let i = 0; i < 15; i++) {
         const r = runOneTurn(s, INPUTS);
         s = r.state;
-        assert.strictEqual(s.meta.phase, 'phase_0', `turn ${s.meta.turn}: phase must remain phase_0 when referendum_held false`);
+        assert.strictEqual(s.meta.phase, 'peace', `turn ${s.meta.turn}: phase must remain phase_0 when referendum_held false`);
     }
 });

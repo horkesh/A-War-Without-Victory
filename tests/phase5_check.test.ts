@@ -13,7 +13,14 @@ test('phase5 sanity: region expansion, edge override, deterministic + no timesta
 
     const base: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'phase5-seed' },
+        meta: {
+            turn: 0,
+            seed: 'phase5-seed',
+            phase: 'war',
+            referendum_held: true,
+            referendum_turn: 0,
+            war_start_turn: 0
+        },
         factions: [
             // Supply sources so pressure path is stable; no special assertions here beyond determinism.
             { id: 'A', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['s1'], supply_sources: ['s1'] },

@@ -1,6 +1,6 @@
 /**
  * Phase A1.2: Canonical weekly turn pipeline (roadmap-aligned).
- * Phase B1.1: Phase 0 wired when meta.phase === 'phase_0'.
+ * Phase B1.1: Phase 0 wired when meta.phase === 'peace'.
  *
  * runOneTurn(state, inputs) → newState
  *
@@ -14,7 +14,7 @@
  * 7. exhaustion_update
  * 8. persistence
  *
- * Phase 0 (Pre-War): When meta.phase === 'phase_0', runs runPhase0Turn once per call;
+ * Phase 0 (Pre-War): When meta.phase === 'peace', runs runPhase0Turn once per call;
  * caller (runOneTurn) advances meta.turn by exactly +1.
  *
  * Determinism rule (Engine Invariants §11.3):
@@ -63,7 +63,7 @@ export interface RunOneTurnResult {
  * meta.turn increments by exactly +1 at the end.
  * meta.turn must remain an integer >= 0.
  *
- * Phase B1.1: When meta.phase === 'phase_0', runs Phase 0 runner once; Phase 0 does not
+ * Phase B1.1: When meta.phase === 'peace', runs Phase 0 runner once; Phase 0 does not
  * increment turn — runOneTurn increments exactly once. phasesExecuted is return-only (not stored).
  */
 export function runOneTurn(
@@ -73,7 +73,7 @@ export function runOneTurn(
 ): RunOneTurnResult {
     let working = cloneGameState(state);
 
-    if (working.meta.phase === 'phase_0') {
+    if (working.meta.phase === 'peace') {
         // Ensure Phase 0 relationships are initialized (mirrors warroom logic)
         if (!working.phase0_relationships) {
             working.phase0_relationships = initializePhase0Relationships();
@@ -99,11 +99,11 @@ export function runOneTurn(
         };
         return {
             state: working,
-            phasesExecuted: ['phase_0']
+            phasesExecuted: ['peace']
         };
     }
 
-    if (working.meta.phase === 'phase_i' || working.meta.phase === 'phase_ii') {
+    if (working.meta.phase === 'war') {
         throw new Error(
             `runOneTurn: phase "${working.meta.phase}" not yet implemented in canonical pipeline; use sim/turn_pipeline runTurn for war phases`
         );
@@ -132,3 +132,4 @@ export function runOneTurn(
         phasesExecuted: [...PHASE_ORDER]
     };
 }
+

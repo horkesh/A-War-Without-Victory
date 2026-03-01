@@ -26,7 +26,6 @@ import {
 } from '../sim/phase_ii/corps_front_assign.js';
 import { computeFrontWidthMetrics } from '../sim/phase_ii/front_width_metrics.js';
 import { applyRecruitment, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
-import { runPhaseITurn } from '../sim/run_phase_i_browser.js';
 import { getLegacyAoR } from '../state/game_state.js';
 import { runTurn } from '../sim/turn_pipeline.js';
 import {
@@ -71,7 +70,7 @@ export interface DesktopSimAdvanceResult {
     };
 }
 
-/** Scenario file used for "New Game" (April 1992 definitive start, Phase II, ethnic_1991). */
+/** Scenario file used for "New Game" (April 1992 definitive war start, hybrid_1992). */
 export const NEW_GAME_SCENARIO_RELATIVE = 'data/scenarios/apr1992_definitive_52w.json';
 export const SEP_1991_SCENARIO_RELATIVE = 'data/scenarios/sep_1991_phase0.json';
 export type DesktopScenarioKey = 'apr_1992' | 'sep_1991';
@@ -134,11 +133,11 @@ export async function loadStateFromPath(statePath: string): Promise<{ state: Gam
 }
 
 /**
- * Advance one turn using browser-safe Phase 0 / I / II runners.
+ * Advance one turn using peace runner (`runPhase0TurnAndAdvance`) or war pipeline (`runTurn`).
  * Returns new state; does not mutate the argument.
  */
 export async function advanceTurn(state: GameState, baseDir: string): Promise<DesktopSimAdvanceResult> {
-    const phase = state.meta?.phase ?? 'phase_ii';
+    const phase = state.meta?.phase ?? 'war';
     const seed = state.meta?.seed ?? 'desktop-seed';
 
     const graph = await loadSettlementGraph(settlementGraphOptions(baseDir));
@@ -146,28 +145,24 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
     const graphForBrowser = graph as LoadedSettlementGraph;
 
     try {
-        if (phase === 'phase_0') {
+        if (phase === 'peace') {
             const playerFaction = state.meta?.player_faction;
             const phaseBefore = state.meta.phase;
             const next = runPhase0TurnAndAdvance(state, seed, playerFaction);
             if (
-                phaseBefore === 'phase_0' &&
-                next.meta.phase === 'phase_i' &&
-                next.meta.phase_0_war_start_control_path
+                phaseBefore === 'peace' &&
+                next.meta.phase === 'war' &&
+                next.meta.peace_war_start_control_path
             ) {
                 await applyMunicipalityControllersFromMun1990Only(
                     next,
                     graphForBrowser,
-                    next.meta.phase_0_war_start_control_path
+                    next.meta.peace_war_start_control_path
                 );
             }
             return { state: next, report: { phase, turn: next.meta.turn } };
         }
-        if (phase === 'phase_i') {
-            const { nextState, report } = await runPhaseITurn(state, { seed, settlementGraph: graphForBrowser });
-            return { state: nextState, report: { phase, turn: nextState.meta.turn, details: report } };
-        }
-        if (phase === 'phase_ii') {
+        if (phase === 'war') {
             const { nextState, report } = await runTurn(state, {
                 seed,
                 settlementGraph: graphForBrowser,
@@ -312,7 +307,7 @@ export function queryCorpsSectors(
 ): CorpsSectorQueryEntry[] {
     const formations = state.formations ?? {};
     const phase = state.meta?.phase as string | undefined;
-    const useOsid = phase === 'phase_ii';
+    const useOsid = phase === 'war';
     const brigadeAor = useOsid ? undefined : getLegacyAoR(state).brigade_aor ?? {};
     const corpsMap = new Map<string, { faction: string; brigades: Set<string>; settlements: Set<string> }>();
 
@@ -535,7 +530,7 @@ export async function validateBrigadeMovementOrder(
     }
 
     const phase = state.meta?.phase as string | undefined;
-    const startSid = phase === 'phase_ii'
+    const startSid = phase === 'war'
         ? ((formation as { location_osid?: string }).location_osid ?? formation.hq_sid ?? null)
         : (getBrigadeAoRSettlements(state, brigadeId)[0] ?? formation.hq_sid ?? null);
     if (!startSid) {
@@ -745,3 +740,4 @@ export function renameTheatre(
     theatre.name = normalized.length > 0 ? normalized : `${theatre.faction} Theatre`;
     return { ok: true };
 }
+

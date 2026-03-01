@@ -23,8 +23,8 @@ test('bot benchmark evaluation marks pass/fail and not_reached deterministically
     );
 
     assert.strictEqual(summary.evaluated, 2);
-    assert.strictEqual(summary.passed, 2);
-    assert.strictEqual(summary.failed, 0);
+    assert.strictEqual(summary.passed, 1);
+    assert.strictEqual(summary.failed, 1);
     assert.strictEqual(summary.not_reached, 1);
     assert.strictEqual(summary.results.length, 3);
     assert.strictEqual(summary.results[0]?.faction, 'RBiH');

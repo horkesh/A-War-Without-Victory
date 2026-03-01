@@ -430,7 +430,7 @@ function scoreTarget(
                 (faction === 'HRHB' && targetController === 'RBiH');
             if (isRbihVsHrhb && isRbihHrhbAtWar(state)) {
                 // Bonus scaled by negative alliance: more negative = higher priority
-                const allianceValue = state.phase_i_alliance_rbih_hrhb ?? 1.0;
+                const allianceValue = state.war_alliance_rbih_hrhb ?? 1.0;
                 const bilateralBonus = Math.min(SCORE_BILATERAL_WAR_TARGET, Math.round(-allianceValue * 120));
                 score += Math.max(0, bilateralBonus);
             }
@@ -936,3 +936,4 @@ export function generateAllBotOrders(
 
     // AoR phase-out: brigade_mun_orders not written (Phase II uses location_osid only)
 }
+

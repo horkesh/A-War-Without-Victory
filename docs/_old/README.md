@@ -32,6 +32,7 @@
 - Systems_Manual_v0_2_7.md
 - Systems_Manual_v0_3_0.md
 - Systems_Manual_v0_4_0.md
+- **Location:** `docs/_old/10_canon/` — archived v0.5 and selected v0.4 canon files superseded by active v0.6 canon in `docs/10_canon/`.
 
 ### FORAWWV (draft / superseded)
 - FORAWWV_addendum_draft_mun1990_id.md

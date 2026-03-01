@@ -17,7 +17,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function minimalPhaseIIState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'aor-test', phase: 'phase_ii', referendum_held: true, referendum_turn: 0, war_start_turn: 1 },
+        meta: { turn: 10, seed: 'aor-test', phase: 'war', referendum_held: true, referendum_turn: 0, war_start_turn: 1 },
         factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
@@ -37,7 +37,7 @@ function minimalPhaseIIState(): GameState {
 
 test('AoR: no AoRs when phase_i', () => {
     const state = minimalPhaseIIState();
-    state.meta.phase = 'phase_i';
+    state.meta.phase = 'war';
     state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
     const edges = [{ a: 'S1', b: 'S2' }];
     const aor = deriveAoRMembership(state, edges);

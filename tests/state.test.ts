@@ -13,9 +13,9 @@ const baseState: GameState = {
         referendum_held: false,
         referendum_turn: null,
         war_start_turn: null,
-        phase_0_scheduled_referendum_turn: null,
-        phase_0_scheduled_war_start_turn: null,
-        phase_0_war_start_control_path: null,
+        peace_scheduled_referendum_turn: null,
+        peace_scheduled_war_start_turn: null,
+        peace_war_start_control_path: null,
         referendum_eligible_turn: null,
         referendum_deadline_turn: null,
         game_over: false,
@@ -55,8 +55,9 @@ const baseState: GameState = {
     theatres: {},
     army_theatre_assignment: {},
     assignable_front_segments: [],
-    brigade_front_assignment: {}
-} as GameState;
+    brigade_front_assignment: {},
+    displacement_event_log: []
+};
 
 test('state serialization round trips cleanly', () => {
     const original = structuredClone(baseState);

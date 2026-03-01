@@ -35,7 +35,7 @@ export function computeEngagementLevel(signal: EngagementSignal): number {
 }
 
 /**
- * Apply baseline-ops exhaustion delta to state (phase_ii_exhaustion and profile.exhaustion).
+ * Apply baseline-ops exhaustion delta to state (war_exhaustion and profile.exhaustion).
  * Monotonic, irreversible. Phase II exhaustion is unbounded; we add delta only (no clamp to 1).
  * H1.11: optional scalar multiplies delta (harness-only; default 1).
  */
@@ -44,13 +44,13 @@ export function applyBaselineOpsExhaustion(
     level: number,
     scalar: number = 1
 ): void {
-    if (state.meta?.phase !== 'phase_ii') return;
+    if (state.meta?.phase !== 'war') return;
 
     const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
-    if (!state.phase_ii_exhaustion) {
-        (state as GameState & { phase_ii_exhaustion: Record<FactionId, number> }).phase_ii_exhaustion = {};
+    if (!state.war_exhaustion) {
+        (state as GameState & { war_exhaustion: Record<FactionId, number> }).war_exhaustion = {};
     }
-    const exhaustion = state.phase_ii_exhaustion!;
+    const exhaustion = state.war_exhaustion!;
 
     const delta = BASELINE_OPS_EXHAUSTION_RATE * level * Math.max(0, scalar);
     for (const fid of factionIds) {
@@ -76,7 +76,7 @@ export function applyBaselineOpsDisplacement(
     level: number,
     scalar: number = 1
 ): void {
-    if (state.meta?.phase !== 'phase_ii') return;
+    if (state.meta?.phase !== 'war') return;
     if (frontActiveIds.length === 0) return;
 
     const sortedIds = [...frontActiveIds].sort(strictCompare);
@@ -102,3 +102,4 @@ export function applyBaselineOpsDisplacement(
         }
     }
 }
+

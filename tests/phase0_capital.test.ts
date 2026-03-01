@@ -62,7 +62,7 @@ function minimalPhase0State(withoutPrewarCapital = false): GameState {
     }
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'cap-test', phase: 'phase_0' },
+        meta: { turn: 0, seed: 'cap-test', phase: 'peace' },
         factions,
         formations: {},
         front_segments: {},
@@ -75,8 +75,8 @@ function minimalPhase0State(withoutPrewarCapital = false): GameState {
 }
 
 function withScheduledPhase0Timing(state: GameState): GameState {
-    state.meta.phase_0_scheduled_referendum_turn = 26;
-    state.meta.phase_0_scheduled_war_start_turn = 30;
+    state.meta.peace_scheduled_referendum_turn = 26;
+    state.meta.peace_scheduled_war_start_turn = 30;
     return state;
 }
 
@@ -171,7 +171,7 @@ test('applyPrewarCapitalTrickle no-ops when scenario is not scheduled phase_0', 
 
 test('applyPrewarCapitalTrickle no-ops outside phase_0', () => {
     const state = withScheduledPhase0Timing(minimalPhase0State(false));
-    state.meta.phase = 'phase_i';
+    state.meta.phase = 'war';
     applyPrewarCapitalTrickle(state);
     assert.strictEqual(getPrewarCapital(state, 'RBiH'), 70);
     assert.strictEqual(getPrewarCapital(state, 'RS'), 100);

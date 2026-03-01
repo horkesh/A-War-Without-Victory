@@ -16,7 +16,7 @@ import type { SupplyStateDerivationReport } from '../src/state/supply_state_deri
 function minimalPhaseIIState(controllers?: Record<string, string | null>): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'sp-test', phase: 'phase_ii', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
+        meta: { turn: 20, seed: 'sp-test', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
         factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
@@ -36,14 +36,14 @@ test('supply pressure increases with front edges (overextension)', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     updatePhaseIISupplyPressure(state, edges);
-    assert.ok(state.phase_ii_supply_pressure);
-    assert.ok(state.phase_ii_supply_pressure!['RBiH']! >= 3);
-    assert.ok(state.phase_ii_supply_pressure!['RS']! >= 3);
+    assert.ok(state.war_supply_pressure);
+    assert.ok(state.war_supply_pressure!['RBiH']! >= 3);
+    assert.ok(state.war_supply_pressure!['RS']! >= 3);
 });
 
 test('isolation increases pressure when supply report has critical count', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
-    state.phase_ii_supply_pressure = { RBiH: 0, RS: 0, HRHB: 0 };
+    state.war_supply_pressure = { RBiH: 0, RS: 0, HRHB: 0 };
     const edges: EdgeRecord[] = [];
     const supplyReport: SupplyStateDerivationReport = {
         schema: 1,
@@ -55,7 +55,7 @@ test('isolation increases pressure when supply report has critical count', () =>
         ]
     };
     updatePhaseIISupplyPressure(state, edges, supplyReport);
-    assert.ok(state.phase_ii_supply_pressure!['RBiH']! >= 20);
+    assert.ok(state.war_supply_pressure!['RBiH']! >= 20);
 });
 
 test('supply pressure is deterministic: same inputs yield same pressure', () => {
@@ -64,22 +64,22 @@ test('supply pressure is deterministic: same inputs yield same pressure', () => 
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     updatePhaseIISupplyPressure(state1, edges);
     updatePhaseIISupplyPressure(state2, edges);
-    assert.deepStrictEqual(state1.phase_ii_supply_pressure, state2.phase_ii_supply_pressure);
+    assert.deepStrictEqual(state1.war_supply_pressure, state2.war_supply_pressure);
 });
 
 test('supply pressure never decreases (no free supply)', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
-    state.phase_ii_supply_pressure = { RBiH: 50, RS: 50, HRHB: 0 };
+    state.war_supply_pressure = { RBiH: 50, RS: 50, HRHB: 0 };
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     updatePhaseIISupplyPressure(state, edges);
-    assert.ok(state.phase_ii_supply_pressure!['RBiH']! >= 50);
-    assert.ok(state.phase_ii_supply_pressure!['RS']! >= 50);
+    assert.ok(state.war_supply_pressure!['RBiH']! >= 50);
+    assert.ok(state.war_supply_pressure!['RS']! >= 50);
 });
 
-test('updatePhaseIISupplyPressure does nothing when meta.phase is phase_i', () => {
+test('updatePhaseIISupplyPressure does nothing when meta.phase is peace', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
-    state.meta.phase = 'phase_i';
+    state.meta.phase = 'peace';
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     updatePhaseIISupplyPressure(state, edges);
-    assert.strictEqual(state.phase_ii_supply_pressure === undefined || Object.keys(state.phase_ii_supply_pressure).length === 0, true);
+    assert.strictEqual(state.war_supply_pressure === undefined || Object.keys(state.war_supply_pressure).length === 0, true);
 });

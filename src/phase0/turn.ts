@@ -51,12 +51,12 @@ export interface Phase0TurnOptions {
  * 9. War start countdown — transition to Phase I if current_turn === war_start_turn
  * 10. Non-war terminal — game_over if deadline reached without referendum
  *
- * No-op if meta.game_over or meta.phase !== 'phase_0'.
+ * No-op if meta.game_over or meta.phase !== 'peace'.
  */
 export function runPhase0Turn(state: GameState, options: Phase0TurnOptions = {}): void {
     const meta = state.meta;
     if (meta.game_over) return;
-    if (meta.phase !== 'phase_0') return;
+    if (meta.phase !== 'peace') return;
 
     const turn = meta.turn;
 
@@ -75,3 +75,4 @@ export function runPhase0Turn(state: GameState, options: Phase0TurnOptions = {})
 
     checkReferendumDeadline(state, turn);
 }
+

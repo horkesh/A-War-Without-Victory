@@ -34,7 +34,7 @@ export function aggregateSettlementDisplacementToMunicipalities(
 ): MunicipalityAggregationReport {
     const report: MunicipalityAggregationReport = { updated: [], before: {}, after: {} };
 
-    if (state.meta?.phase !== 'phase_ii') {
+    if (state.meta?.phase !== 'war') {
         return report;
     }
 
@@ -74,3 +74,4 @@ export function aggregateSettlementDisplacementToMunicipalities(
 
     return report;
 }
+

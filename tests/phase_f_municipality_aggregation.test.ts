@@ -17,7 +17,7 @@ function minimalPhaseIIState(): GameState {
         meta: {
             turn: 25,
             seed: 'pf-mun',
-            phase: 'phase_ii',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -70,9 +70,9 @@ test('aggregateSettlementDisplacementToMunicipalities: deterministic ordering', 
     assert.strictEqual(state1.municipality_displacement!['M1'], state2.municipality_displacement!['M1']);
 });
 
-test('aggregateSettlementDisplacementToMunicipalities: phase_i no-op', () => {
+test('aggregateSettlementDisplacementToMunicipalities: peace no-op', () => {
     const state = minimalPhaseIIState();
-    state.meta!.phase = 'phase_i';
+    state.meta!.phase = 'peace';
     state.settlement_displacement = { s1: 0.5 };
     const byMun = new Map<MunicipalityId, SettlementId[]>();
     byMun.set('MUN_A', ['s1']);

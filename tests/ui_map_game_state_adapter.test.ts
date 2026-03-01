@@ -5,7 +5,7 @@ import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 
 test('parseGameState extracts deterministic order lists and events', () => {
     const parsed = parseGameState({
-        meta: { turn: 7, phase: 'phase_ii' },
+        meta: { turn: 7, phase: 'war' },
         formations: {
             b2: { faction: 'RS', name: 'B2', kind: 'brigade', readiness: 'active', cohesion: 60, status: 'active', created_turn: 1, tags: [] },
             b1: { faction: 'RBiH', name: 'B1', kind: 'brigade', readiness: 'active', cohesion: 70, status: 'active', created_turn: 1, tags: [] }
@@ -20,7 +20,7 @@ test('parseGameState extracts deterministic order lists and events', () => {
         },
         control_events: [
             { turn: 7, settlement_id: 'S2', from: 'RS', to: 'RBiH', mechanism: 'phase_ii_attack', mun_id: 'foo' },
-            { turn: 6, settlement_id: 'S1', from: null, to: 'RS', mechanism: 'phase_i', mun_id: 'bar' }
+            { turn: 6, settlement_id: 'S1', from: null, to: 'RS', mechanism: 'war', mun_id: 'bar' }
         ],
         political_controllers: { S1: 'RBiH' }
     });
@@ -35,7 +35,7 @@ test('parseGameState extracts deterministic order lists and events', () => {
 
 test('parseGameState preserves meta.player_faction in LoadedGameState', () => {
     const parsed = parseGameState({
-        meta: { turn: 1, phase: 'phase_ii', player_faction: 'RS' },
+        meta: { turn: 1, phase: 'war', player_faction: 'RS' },
         formations: {},
         political_controllers: {}
     });
@@ -44,14 +44,14 @@ test('parseGameState preserves meta.player_faction in LoadedGameState', () => {
 
 test('parseGameState extracts canonical front edge and pressure views', () => {
     const parsed = parseGameState({
-        meta: { turn: 11, phase: 'phase_ii' },
+        meta: { turn: 11, phase: 'war' },
         formations: {},
         political_controllers: {},
         front_edges: [
             { a: 'S2', b: 'S1', side_a: 'RS', side_b: 'RBiH' },
             { edge_id: 'S3__S4', a: 'S3', b: 'S4', side_a: 'RBiH', side_b: 'HRHB' }
         ],
-        phase_ii_front_edges_osid: [
+        war_front_edges_osid: [
             { a: 'op:a', b: 'op:b', side_a: 'RS', side_b: 'RBiH' }
         ],
         front_pressure: {

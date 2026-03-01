@@ -19,8 +19,8 @@ const EXHAUSTION_PER_SUPPLY_PRESSURE_POINT = 0.1;
 const MAX_DELTA_PER_TURN = 10;
 
 /**
- * Update phase_ii_exhaustion from static fronts and supply pressure.
- * Only runs when meta.phase === 'phase_ii'.
+ * Update war_exhaustion from static fronts and supply pressure.
+ * Only runs when meta.phase === 'war'.
  * Exhaustion is monotonic (never decreased) — Engine Invariants §8.
  * Does not modify political_controllers.
  * When frictionMultipliers is provided (Phase D0.9), exhaustion delta is scaled by multiplier
@@ -31,20 +31,20 @@ export function updatePhaseIIExhaustion(
     fronts: PhaseIIFrontDescriptor[] = [],
     frictionMultipliers?: Record<FactionId, number>
 ): void {
-    if (state.meta.phase !== 'phase_ii') {
+    if (state.meta.phase !== 'war') {
         return;
     }
 
     const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
     const staticFrontCount = fronts.filter((f) => f.stability === 'static').length;
-    const supplyPressure = state.phase_ii_supply_pressure ?? {};
+    const supplyPressure = state.war_supply_pressure ?? {};
     const legitimacyByFaction = getFactionLegitimacyAverages(state);
     const sarajevo = state.sarajevo_state;
 
-    if (!state.phase_ii_exhaustion) {
-        (state as GameState & { phase_ii_exhaustion: Record<FactionId, number> }).phase_ii_exhaustion = {};
+    if (!state.war_exhaustion) {
+        (state as GameState & { war_exhaustion: Record<FactionId, number> }).war_exhaustion = {};
     }
-    const exhaustion = state.phase_ii_exhaustion!;
+    const exhaustion = state.war_exhaustion!;
 
     for (const fid of factionIds) {
         const current = typeof exhaustion[fid] === 'number' ? exhaustion[fid]! : 0;
@@ -68,3 +68,4 @@ export function updatePhaseIIExhaustion(
         exhaustion[fid] = current + effectiveDelta;
     }
 }
+

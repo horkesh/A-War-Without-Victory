@@ -21,7 +21,7 @@ function minimalPhaseIIState(): GameState {
         meta: {
             turn: 20,
             seed: 'pf-val',
-            phase: 'phase_ii',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10

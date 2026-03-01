@@ -36,7 +36,7 @@ test('validateGameStateShape returns ok for minimal valid GameState', () => {
 
 test('validateGameStateShape returns ok when meta.phase is set to known value', () => {
     const state = minimalValidGameState();
-    state.meta.phase = 'phase_0';
+    state.meta.phase = 'peace';
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, true);
 });

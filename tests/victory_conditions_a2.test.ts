@@ -13,7 +13,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function baseState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'victory-test', phase: 'phase_ii' },
+        meta: { turn: 10, seed: 'victory-test', phase: 'war' },
         factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 10 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 40 }, areasOfResponsibility: [], supply_sources: [] },

@@ -20,7 +20,7 @@ function phaseFGameStateFixture(): GameState {
         meta: {
             turn: 30,
             seed: 'phase-f-fixture',
-            phase: 'phase_ii',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10,

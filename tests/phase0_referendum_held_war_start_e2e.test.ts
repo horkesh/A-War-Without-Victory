@@ -1,7 +1,7 @@
 /**
  * Phase 3 executive roadmap: Referendum held → war at correct turn.
  * Build Phase 0 state with referendum_held, referendum_turn, war_start_turn.
- * Advance to war_start_turn via runOneTurn; assert meta.phase === 'phase_i'.
+ * Advance to war_start_turn via runOneTurn; assert meta.phase === 'war'.
  */
 
 import assert from 'node:assert';
@@ -24,13 +24,13 @@ test('referendum held: at war_start_turn runPhase0Turn applies transition to pha
         war_start_turn: warStartTurn
     });
 
-    assert.strictEqual(state.meta.phase, 'phase_0', 'must start in phase_0');
+    assert.strictEqual(state.meta.phase, 'peace', 'must start in phase_0');
     assert.strictEqual(state.meta.turn, warStartTurn, 'start at war_start_turn so transition runs this turn');
 
     const result = runOneTurn(state, INPUTS);
     state = result.state;
 
-    assert.strictEqual(state.meta.phase, 'phase_i', 'phase must transition to phase_i when current_turn === war_start_turn');
+    assert.strictEqual(state.meta.phase, 'war', 'phase must transition to phase_i when current_turn === war_start_turn');
     assert.strictEqual(state.meta.turn, warStartTurn + 1, 'turn advances after transition');
 });
 

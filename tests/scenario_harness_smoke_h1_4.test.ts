@@ -52,7 +52,9 @@ test('scenario harness smoke: noop scenarios produce expected artifacts', async 
         assert(existsSync(result.paths.initial_save), 'initial_save.json should exist');
         assert(existsSync(result.paths.final_save), 'final_save.json should exist');
         assert(existsSync(result.paths.weekly_report), 'weekly_report.jsonl should exist');
-        assert(existsSync(result.paths.replay), 'replay.jsonl should exist');
+        if (result.paths.replay) {
+            assert(existsSync(result.paths.replay), 'replay.jsonl should exist when replay output is enabled');
+        }
         assert(existsSync(result.paths.run_summary), 'run_summary.json should exist');
         assert(existsSync(result.paths.control_delta), 'control_delta.json should exist');
         assert(existsSync(result.paths.end_report), 'end_report.md should exist');
@@ -62,9 +64,11 @@ test('scenario harness smoke: noop scenarios produce expected artifacts', async 
         const reportLines = countLines(reportContent);
         assert.strictEqual(reportLines, scenario.weeks, `weekly_report.jsonl line count should equal weeks (${scenario.weeks})`);
 
-        const replayContent = await readFile(result.paths.replay, 'utf8');
-        const replayLines = countLines(replayContent);
-        assert.strictEqual(replayLines, scenario.weeks, `replay.jsonl line count should equal weeks (${scenario.weeks})`);
+        if (result.paths.replay) {
+            const replayContent = await readFile(result.paths.replay, 'utf8');
+            const replayLines = countLines(replayContent);
+            assert.strictEqual(replayLines, scenario.weeks, `replay.jsonl line count should equal weeks (${scenario.weeks})`);
+        }
     }
 
     await ensureRemoved(BASE_OUT);

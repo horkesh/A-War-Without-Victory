@@ -21,7 +21,7 @@ function minimalPhaseIState(): GameState {
         meta: {
             turn: 10,
             seed: 'injected-graph-parity',
-            phase: 'phase_i',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -60,8 +60,8 @@ function minimalPhaseIState(): GameState {
         militia_pools: {},
         political_controllers: { s1: 'RBiH', s2: 'RS' },
         municipalities: { MUN_A: { stability_score: 50 }, MUN_B: { stability_score: 50 } },
-        phase_i_consolidation_until: {},
-        phase_i_militia_strength: {
+        war_consolidation_until: {},
+        war_militia_strength: {
             MUN_A: { RBiH: 30, RS: 60, HRHB: 10 },
             MUN_B: { RBiH: 25, RS: 70, HRHB: 5 }
         }

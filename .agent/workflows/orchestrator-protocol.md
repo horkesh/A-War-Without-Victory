@@ -7,7 +7,7 @@ description: Establishes the hierarchy and priority for Paradox team roles durin
 This workflow defines the primary communication channel when starting new work or delegating tasks.
 
 0. **Session start**:
-   - Read `.agent/napkin.md` first. Apply its corrections, preferences, and patterns. Update it as you work.
+   - Read `.claude/napkin.md` first. Internalize and apply silently. Curate it (re-prioritize, merge duplicates, enforce 10-per-category cap). Update during work with date + rule + "Do instead:" action.
 
 1. **Orchestrator Invocation**: 
    - Every new high-level request or phase transition MUST first be processed by the Orchestrator persona.

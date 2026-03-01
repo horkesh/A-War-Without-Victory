@@ -490,6 +490,8 @@ The `recruitment_mode` field in scenarios controls which path is used:
 
 Default for new scenarios: `"bottom_up"`. Existing scenarios default to `"auto_oob"` for backward compatibility.
 
+When the scenario starts in phase_ii (e.g. 40w), the pipeline still runs Phase I bottom-up steps when recruitment_mode is bottom_up (Engine Invariants §14.10; turn_pipeline.ts). The 40w calibration scenario uses player_choice, not bottom_up, so that RS brigades are spread to front OSIDs and generate attack orders; see docs/40_reports/implemented/20260228_PHASE_G_CALIBRATION_BOTTOM_UP_PIPELINE_FIX.md.
+
 ---
 
 ## 9. Calibration Impact

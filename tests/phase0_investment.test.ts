@@ -24,7 +24,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function minimalPhase0StateWithCapital(): GameState {
     const state: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'inv-test', phase: 'phase_0' },
+        meta: { turn: 0, seed: 'inv-test', phase: 'peace' },
         factions: [
             {
                 id: 'RBiH',

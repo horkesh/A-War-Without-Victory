@@ -715,7 +715,14 @@ test('determinism: same scenario run twice produces identical scenario_summary.j
 
     const state: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'determinism-test-seed' },
+        meta: {
+            turn: 0,
+            seed: 'determinism-test-seed',
+            phase: 'war',
+            referendum_held: true,
+            referendum_turn: 0,
+            war_start_turn: 0
+        },
         factions: [
             {
                 id: 'A',

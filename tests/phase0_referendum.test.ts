@@ -23,7 +23,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function minimalPhase0State(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'ref-test', phase: 'phase_0' },
+        meta: { turn: 0, seed: 'ref-test', phase: 'peace' },
         factions: [
             {
                 id: 'RBiH',
@@ -209,34 +209,34 @@ test('isWarStartTurn: true when referendum held and turn === war_start_turn', ()
 
 test('applyPhase0ToPhaseITransition: no transition when phase is not phase_0', () => {
     const state = minimalPhase0State();
-    state.meta.phase = 'phase_i';
+    state.meta.phase = 'war';
     state.meta.referendum_held = true;
     state.meta.war_start_turn = 14;
     state.meta.turn = 14;
     const result = applyPhase0ToPhaseITransition(state);
     assert.strictEqual(result, false);
-    assert.strictEqual(state.meta.phase, 'phase_i');
+    assert.strictEqual(state.meta.phase, 'war');
 });
 
 test('applyPhase0ToPhaseITransition: no transition when not war_start_turn', () => {
     const state = minimalPhase0State();
-    state.meta.phase = 'phase_0';
+    state.meta.phase = 'peace';
     state.meta.referendum_held = true;
     state.meta.war_start_turn = 14;
     state.meta.turn = 13;
     const result = applyPhase0ToPhaseITransition(state);
     assert.strictEqual(result, false);
-    assert.strictEqual(state.meta.phase, 'phase_0');
+    assert.strictEqual(state.meta.phase, 'peace');
 });
 
 test('applyPhase0ToPhaseITransition: transitions to phase_i only when phase_0 and war_start_turn', () => {
     const state = minimalPhase0State();
-    state.meta.phase = 'phase_0';
+    state.meta.phase = 'peace';
     state.meta.referendum_held = true;
     state.meta.referendum_turn = 10;
     state.meta.war_start_turn = 14;
     state.meta.turn = 14;
     const result = applyPhase0ToPhaseITransition(state);
     assert.strictEqual(result, true);
-    assert.strictEqual(state.meta.phase, 'phase_i');
+    assert.strictEqual(state.meta.phase, 'war');
 });

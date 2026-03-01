@@ -1,7 +1,7 @@
 /**
  * Phase C Step 1: Phase I state schema extension tests.
- * - Schema validation accepts Phase I fields (phase_i_consolidation_until, phase_i_militia_strength,
- *   phase_i_control_strain, phase_i_jna, phase_i_alliance_rbih_hrhb).
+ * - Schema validation accepts Phase I fields (war_consolidation_until, war_militia_strength,
+ *   war_control_strain, war_jna, war_alliance_rbih_hrhb).
  * - Serialization round-trip preserves Phase I state and remains deterministic.
  */
 
@@ -20,7 +20,7 @@ function phaseIGameStateFixture(): GameState {
         meta: {
             turn: 10,
             seed: 'phase-i-fixture',
-            phase: 'phase_i',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10,
@@ -82,19 +82,19 @@ function phaseIGameStateFixture(): GameState {
             'MUN_001': { stability_score: 70 },
             'MUN_002': { stability_score: 50 }
         },
-        phase_i_consolidation_until: { 'MUN_001': 14 },
-        phase_i_militia_strength: {
+        war_consolidation_until: { 'MUN_001': 14 },
+        war_militia_strength: {
             'MUN_001': { RBiH: 60, RS: 20, HRHB: 10 },
             'MUN_002': { RBiH: 30, RS: 55, HRHB: 15 }
         },
-        phase_i_control_strain: { 'MUN_001': 5, 'MUN_002': 12 },
-        phase_i_jna: {
+        war_control_strain: { 'MUN_001': 5, 'MUN_002': 12 },
+        war_jna: {
             transition_begun: true,
             withdrawal_progress: 0.25,
             asset_transfer_rs: 0.2
         } as PhaseIJNAState,
-        phase_i_alliance_rbih_hrhb: 0.5,
-        phase_i_displacement_initiated: {}
+        war_alliance_rbih_hrhb: 0.5,
+        war_displacement_initiated: {}
     };
 }
 
@@ -107,34 +107,34 @@ test('validateGameStateShape returns ok for GameState with Phase I fields', () =
 test('validateGameStateShape returns ok for GameState with only some Phase I fields', () => {
     const state = phaseIGameStateFixture();
     const stateObj = state as unknown as Record<string, unknown>;
-    delete stateObj.phase_i_militia_strength;
-    delete stateObj.phase_i_alliance_rbih_hrhb;
+    delete stateObj.war_militia_strength;
+    delete stateObj.war_alliance_rbih_hrhb;
     const result = validateGameStateShape(stateObj);
     assert.strictEqual(result.ok, true);
 });
 
-test('validateGameStateShape rejects phase_i_jna when transition_begun is not boolean', () => {
+test('validateGameStateShape rejects war_jna when transition_begun is not boolean', () => {
     const state = phaseIGameStateFixture();
-    state.phase_i_jna!.transition_begun = 1 as unknown as boolean;
+    state.war_jna!.transition_begun = 1 as unknown as boolean;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
-    assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('phase_i_jna')));
+    assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('war_jna')));
 });
 
-test('validateGameStateShape rejects phase_i_jna when withdrawal_progress out of range', () => {
+test('validateGameStateShape rejects war_jna when withdrawal_progress out of range', () => {
     const state = phaseIGameStateFixture();
-    state.phase_i_jna!.withdrawal_progress = 1.5;
+    state.war_jna!.withdrawal_progress = 1.5;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
     assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('withdrawal_progress')));
 });
 
-test('validateGameStateShape rejects phase_i_alliance_rbih_hrhb when out of [-1, 1]', () => {
+test('validateGameStateShape rejects war_alliance_rbih_hrhb when out of [-1, 1]', () => {
     const state = phaseIGameStateFixture();
-    state.phase_i_alliance_rbih_hrhb = 1.5;
+    state.war_alliance_rbih_hrhb = 1.5;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
-    assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('phase_i_alliance_rbih_hrhb')));
+    assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('war_alliance_rbih_hrhb')));
 });
 
 test('Phase I state serialization round-trip preserves Phase I fields', () => {
@@ -142,15 +142,15 @@ test('Phase I state serialization round-trip preserves Phase I fields', () => {
     const payload = serializeState(original);
     const hydrated = deserializeState(payload);
 
-    assert.deepStrictEqual(hydrated.phase_i_consolidation_until, { 'MUN_001': 14 });
-    assert.ok(hydrated.phase_i_militia_strength);
-    assert.strictEqual(hydrated.phase_i_militia_strength!['MUN_001'].RBiH, 60);
-    assert.strictEqual(hydrated.phase_i_militia_strength!['MUN_001'].RS, 20);
-    assert.deepStrictEqual(hydrated.phase_i_control_strain, { 'MUN_001': 5, 'MUN_002': 12 });
-    assert.strictEqual(hydrated.phase_i_jna!.transition_begun, true);
-    assert.strictEqual(hydrated.phase_i_jna!.withdrawal_progress, 0.25);
-    assert.strictEqual(hydrated.phase_i_jna!.asset_transfer_rs, 0.2);
-    assert.strictEqual(hydrated.phase_i_alliance_rbih_hrhb, 0.5);
+    assert.deepStrictEqual(hydrated.war_consolidation_until, { 'MUN_001': 14 });
+    assert.ok(hydrated.war_militia_strength);
+    assert.strictEqual(hydrated.war_militia_strength!['MUN_001'].RBiH, 60);
+    assert.strictEqual(hydrated.war_militia_strength!['MUN_001'].RS, 20);
+    assert.deepStrictEqual(hydrated.war_control_strain, { 'MUN_001': 5, 'MUN_002': 12 });
+    assert.strictEqual(hydrated.war_jna!.transition_begun, true);
+    assert.strictEqual(hydrated.war_jna!.withdrawal_progress, 0.25);
+    assert.strictEqual(hydrated.war_jna!.asset_transfer_rs, 0.2);
+    assert.strictEqual(hydrated.war_alliance_rbih_hrhb, 0.5);
 });
 
 test('Phase I state serialization reaches deterministic fixed-point after migration defaults', () => {

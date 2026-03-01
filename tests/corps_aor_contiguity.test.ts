@@ -57,7 +57,7 @@ function makeContiguousState(): { state: GameState; edges: EdgeRecord[] } {
 
     const state: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'test', phase: 'phase_ii' } as any,
+        meta: { turn: 20, seed: 'test', phase: 'war' } as any,
         factions: [
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
@@ -104,7 +104,7 @@ function makeDiscontiguousState(): { state: GameState; edges: EdgeRecord[] } {
 
     const state: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'test', phase: 'phase_ii' } as any,
+        meta: { turn: 20, seed: 'test', phase: 'war' } as any,
         factions: [
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
@@ -200,7 +200,7 @@ describe('repairCorpsContiguity', () => {
 
         const state: GameState = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'test', phase: 'phase_ii' } as any,
+            meta: { turn: 20, seed: 'test', phase: 'war' } as any,
             factions: [
                 { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
             ],
@@ -237,7 +237,7 @@ describe('repairCorpsContiguity', () => {
 
         const state: GameState = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'test', phase: 'phase_ii' } as any,
+            meta: { turn: 20, seed: 'test', phase: 'war' } as any,
             factions: [
                 { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
                 { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
@@ -304,7 +304,7 @@ describe('enforceCorpsLevelContiguity', () => {
 
         const state: GameState = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'test', phase: 'phase_ii' } as any,
+            meta: { turn: 20, seed: 'test', phase: 'war' } as any,
             factions: [
                 { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
                 { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },

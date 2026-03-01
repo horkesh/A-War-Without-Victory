@@ -9,7 +9,7 @@ import type { MunicipalityPopulation1991Map } from '../src/state/population_shar
 function baseState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 8, seed: 'mf-test', phase: 'phase_ii', war_start_turn: 0 },
+        meta: { turn: 8, seed: 'mf-test', phase: 'war', war_start_turn: 0 },
         factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },

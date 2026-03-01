@@ -143,7 +143,7 @@ export async function createInitialGameState(
             : await loadSettlementGraph());
     const state: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed, phase: 'phase_ii' },
+        meta: { turn: 0, seed, phase: 'war' },
         factions: [],
         formations: {},
         front_segments: {},
@@ -584,7 +584,7 @@ async function createOobFormations(
 ): Promise<void> {
     if (scenario.recruitment_mode === 'player_choice') {
         // Ensure phase_i militia strength exists before deriving pool availability.
-        if (!state.phase_i_militia_strength || Object.keys(state.phase_i_militia_strength).length === 0) {
+        if (!state.war_militia_strength || Object.keys(state.war_militia_strength).length === 0) {
             updateMilitiaEmergence(state);
         }
         // Recruitment spends from militia pools; seed them first at Phase I entry.
@@ -840,8 +840,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         let sidToMun = buildSidToMunFromSettlements(graph.settlements);
         const canonicalSidToMun = sidToMun; // Preserve original canonical SID→mun map for later rebuilds
         const warStartTurnForOrgPenSeeding =
-            scenario.start_phase === 'phase_0'
-                ? (scenario.phase_0_war_start_turn ?? (scenario.phase_0_referendum_turn ?? 0) + 4)
+            scenario.start_lifecycle_phase === 'peace'
+                ? (scenario.peace_war_start_turn ?? (scenario.peace_referendum_turn ?? 0) + 4)
                 : 0;
         const plannedWarStartBrigadeByMun = buildPlannedWarStartBrigadePresenceByMunicipality(
             oobBrigades,
@@ -943,13 +943,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
 
         // Phase I→II edge cases: entrenchment init and stuck-in-Phase-I fallback (PHASE_I_II_EDGE_CASES.md)
-        if (typeof scenario.phase_ii_entrenchment_init_turns === 'number') {
-            state.meta.phase_ii_entrenchment_init_turns = scenario.phase_ii_entrenchment_init_turns;
+        if (typeof scenario.war_entrenchment_init_turns === 'number') {
+            state.meta.war_entrenchment_init_turns = scenario.war_entrenchment_init_turns;
         }
-        if (typeof scenario.phase_i_force_transition_after_turns === 'number') {
-            state.meta.phase_i_force_transition_after_turns = scenario.phase_i_force_transition_after_turns;
-        } else if (scenario.start_phase === 'phase_i' || scenario.start_phase === 'phase_0') {
-            state.meta.phase_i_force_transition_after_turns = 52;
+        if (typeof scenario.war_force_transition_after_turns === 'number') {
+            state.meta.war_force_transition_after_turns = scenario.war_force_transition_after_turns;
+        } else if (scenario.start_lifecycle_phase === 'war' || scenario.start_lifecycle_phase === 'peace') {
+            state.meta.war_force_transition_after_turns = 52;
         }
 
         // Phase I Overhaul: store recruitment_mode in state.meta so turn pipeline can access it.
@@ -973,27 +973,27 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
         // AoR phase-out: no populateFactionAoRFromControl; Phase II uses location_osid / OSID fronts.
 
-        if (scenario.start_phase === 'phase_0') {
-            const referendumHeldAtStart = scenario.phase_0_referendum_held_at_start ?? true;
-            const refTurn = scenario.phase_0_referendum_turn ?? 0;
-            const warTurn = scenario.phase_0_war_start_turn ?? refTurn + 4;
-            const warStartControlPath = scenario.phase_0_war_start_control
-                ? resolveInitControlPath(scenario.phase_0_war_start_control, baseDir)
+        if (scenario.start_lifecycle_phase === 'peace') {
+            const referendumHeldAtStart = scenario.peace_referendum_held_at_start ?? true;
+            const refTurn = scenario.peace_referendum_turn ?? 0;
+            const warTurn = scenario.peace_war_start_turn ?? refTurn + 4;
+            const warStartControlPath = scenario.peace_war_start_control
+                ? resolveInitControlPath(scenario.peace_war_start_control, baseDir)
                 : undefined;
-            state.meta.phase = 'phase_0';
+            state.meta.phase = 'peace';
             state.meta.turn = 0;
             state.meta.referendum_held = referendumHeldAtStart;
             state.meta.referendum_turn = referendumHeldAtStart ? refTurn : null;
             state.meta.war_start_turn = referendumHeldAtStart ? warTurn : null;
-            state.meta.phase_0_scheduled_referendum_turn = referendumHeldAtStart ? null : refTurn;
-            state.meta.phase_0_scheduled_war_start_turn = referendumHeldAtStart ? null : warTurn;
-            state.meta.phase_0_war_start_control_path = warStartControlPath ?? null;
+            state.meta.peace_scheduled_referendum_turn = referendumHeldAtStart ? null : refTurn;
+            state.meta.peace_scheduled_war_start_turn = referendumHeldAtStart ? null : warTurn;
+            state.meta.peace_war_start_control_path = warStartControlPath ?? null;
             state.meta.referendum_eligible_turn = null;
             state.meta.referendum_deadline_turn = null;
             state.meta.game_over = false;
             state.meta.outcome = undefined;
-            const rsDeclaredAtStart = scenario.phase_0_rs_declared_at_start ?? true;
-            const hrhbDeclaredAtStart = scenario.phase_0_hrhb_declared_at_start ?? true;
+            const rsDeclaredAtStart = scenario.peace_rs_declared_at_start ?? true;
+            const hrhbDeclaredAtStart = scenario.peace_hrhb_declared_at_start ?? true;
             for (const f of state.factions ?? []) {
                 if (f.id === 'RS') (f as { prewar_capital?: number }).prewar_capital = 100;
                 if (f.id === 'RBiH') (f as { prewar_capital?: number }).prewar_capital = 70;
@@ -1010,15 +1010,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
         }
 
-        if (scenario.start_phase === 'phase_i') {
-            state.meta.phase = 'phase_i';
+        if (scenario.start_lifecycle_phase === 'war') {
+            state.meta.phase = 'war';
             state.meta.turn = 0;
             state.meta.referendum_held = true;
             state.meta.referendum_turn = 0;
             state.meta.war_start_turn = 0;
-            state.meta.phase_0_scheduled_referendum_turn = null;
-            state.meta.phase_0_scheduled_war_start_turn = null;
-            state.meta.phase_0_war_start_control_path = null;
+            state.meta.peace_scheduled_referendum_turn = null;
+            state.meta.peace_scheduled_war_start_turn = null;
+            state.meta.peace_war_start_control_path = null;
             // Phase I §4.8 (historical fidelity): no RBiH–HRHB open war before this turn (e.g. 26 = October 1992 for April 1992 start).
             state.meta.rbih_hrhb_war_earliest_turn = scenario.rbih_hrhb_war_earliest_week ?? 26;
             if (scenario.enable_rbih_hrhb_dynamics === false) {
@@ -1038,24 +1038,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
         }
 
-        if (scenario.start_phase === 'phase_ii') {
-            state.meta.phase = 'phase_ii';
-            state.meta.turn = 0;
-            state.meta.referendum_held = true;
-            state.meta.referendum_turn = 0;
-            state.meta.war_start_turn = 0;
-            state.meta.phase_0_scheduled_referendum_turn = null;
-            state.meta.phase_0_scheduled_war_start_turn = null;
-            state.meta.phase_0_war_start_control_path = null;
-            // Keep bilateral war gate and alliance state active for Phase II-start scenarios.
-            state.meta.rbih_hrhb_war_earliest_turn = scenario.rbih_hrhb_war_earliest_week ?? 26;
-            if (scenario.enable_rbih_hrhb_dynamics === false) {
-                state.meta.enable_rbih_hrhb_dynamics = false;
-            }
-            ensureRbihHrhbState(state, scenario.init_alliance_rbih_hrhb, scenario.init_mixed_municipalities);
+        if (scenario.start_lifecycle_phase === 'war') {
             if (scenario.recruitment_mode === 'player_choice' || scenario.recruitment_mode === 'bottom_up' || scenario.init_formations_oob) {
-                // Phase II-start scenarios need deterministic manpower pools for reinforcement/spawn.
-                if (!state.phase_i_militia_strength || Object.keys(state.phase_i_militia_strength).length === 0) {
+                // War-start scenarios need deterministic manpower pools for reinforcement/spawn.
+                if (!state.war_militia_strength || Object.keys(state.war_militia_strength).length === 0) {
                     updateMilitiaEmergence(state);
                 }
                 if (!state.militia_pools || Object.keys(state.militia_pools).length === 0) {
@@ -1067,7 +1053,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
         // Calendar start date for UI display (non-normative).
         // Phase 0 scenarios start 1 September 1991; war-start scenarios start 6 April 1992.
-        if (scenario.start_phase === 'phase_0') {
+        if (scenario.start_lifecycle_phase === 'peace') {
             state.meta.scenario_start_date = { year: 1991, month: 8, day: 1 };
         } else {
             state.meta.scenario_start_date = { year: 1992, month: 3, day: 6 };
@@ -1075,7 +1061,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
         // Seed displacement_state from 1991 census when available (Phase I/II only) so receiving capacity and map population scale by real mun size.
         if (
-            (scenario.start_phase === 'phase_i' || scenario.start_phase === 'phase_ii') &&
+            scenario.start_lifecycle_phase === 'war' &&
             municipalityPopulation1991 &&
             Object.keys(municipalityPopulation1991).length > 0
         ) {
@@ -1112,7 +1098,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         if (!scenario.init_formations_oob && scenario.recruitment_mode !== 'player_choice') oobCreated = true;
 
         // Create OOB formations at Phase I or Phase II start (recruitment or legacy auto-spawn)
-        if ((scenario.start_phase === 'phase_i' || scenario.start_phase === 'phase_ii') && !oobCreated) {
+        if (scenario.start_lifecycle_phase === 'war' && !oobCreated) {
             await createOobFormations(
                 state,
                 scenario,
@@ -1130,7 +1116,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
 
         // Phase II entry: initialize corps command; location_osid via backfill (AoR phase-out).
-        if (scenario.start_phase === 'phase_ii') {
+        if (scenario.start_lifecycle_phase === 'war') {
             initializeCorpsCommand(state);
         }
         if (operationalData?.canonicalToOperational) {
@@ -1284,7 +1270,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             applyActionsToState(state, actions);
             // Phase H1.8: probe_intent is harness-only; no gate toggled in sim (applyActionsToState does not mutate on probe_intent)
 
-            if (postureAllPushAndApplyBreaches && state.meta.phase === 'phase_ii') {
+            if (postureAllPushAndApplyBreaches && state.meta.phase === 'war') {
                 const frontEdgesPre = computeFrontEdges(state, graph.edges);
                 if (!state.front_posture || typeof state.front_posture !== 'object') state.front_posture = {};
                 // Asymmetric posture so pressure accumulates (side_a push, side_b hold) and breaches can fire.
@@ -1356,19 +1342,19 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
 
             let turnReport: Awaited<ReturnType<typeof runTurn>>['report'];
-            if (state.meta.phase === 'phase_0') {
+            if (state.meta.phase === 'peace') {
                 const phaseBeforeTurn = state.meta.phase;
                 const result = runOneTurn(state, { seed: state.meta.seed });
                 state = result.state;
                 if (
-                    phaseBeforeTurn === 'phase_0' &&
-                    state.meta.phase === 'phase_i' &&
-                    state.meta.phase_0_war_start_control_path
+                    phaseBeforeTurn === 'peace' &&
+                    state.meta.phase === 'war' &&
+                    state.meta.peace_war_start_control_path
                 ) {
                     await applyMunicipalityControllersFromMun1990Only(
                         state,
                         graph,
-                        state.meta.phase_0_war_start_control_path
+                        state.meta.peace_war_start_control_path
                     );
                 }
                 turnReport = {
@@ -1378,7 +1364,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     phase_f_displacement: undefined,
                     phase_ii_front_emergence: []
                 } as Awaited<ReturnType<typeof runTurn>>['report'];
-                if (!oobCreated && state.meta.phase === 'phase_i') {
+                if (!oobCreated && state.meta.phase === 'war') {
                     await createOobFormations(
                         state,
                         scenario,
@@ -1407,7 +1393,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 });
                 state = runResult.nextState;
                 turnReport = runResult.report;
-                if (!oobCreated && state.meta.phase === 'phase_i') {
+                if (!oobCreated && state.meta.phase === 'war') {
                     await createOobFormations(
                         state,
                         scenario,
@@ -1431,7 +1417,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 }
             }
 
-            if (state.meta.phase === 'phase_ii') {
+            if (state.meta.phase === 'war') {
                 phaseIIAttackResolutionSummary.weeks_with_phase_ii += 1;
                 phaseIITakeoverDisplacementSummary.weeks_with_phase_ii += 1;
                 const phaseIIResolution = turnReport.phase_ii_resolve_attack_orders;
@@ -1551,7 +1537,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 }
             }
 
-            if (shouldApplyBreaches && adjacencyMap && state.meta.phase === 'phase_ii') {
+            if (shouldApplyBreaches && adjacencyMap && state.meta.phase === 'war') {
                 const derivedFrontEdges = computeFrontEdges(state, graph.edges);
                 let breaches = computeFrontBreaches(state, derivedFrontEdges);
                 if (postureAllPushAndApplyBreaches && breaches.length === 0 && derivedFrontEdges.length > 0) {
@@ -1815,12 +1801,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             ...(botBenchmarkSummary ? { bot_benchmark_evaluation: botBenchmarkSummary } : {}),
             ...(victoryEvaluation ? { victory: victoryEvaluation } : {}),
             ...(breachDiagnostic ? { breach_diagnostic: breachDiagnostic } : {}),
-            ...(state.meta.phase === 'phase_i'
+            ...(state.meta.phase === 'war'
                 ? {
                       phase_i_note: {
                           message:
                               'Opposing control edges have not yet persisted long enough',
-                          streak: state.meta.phase_i_opposing_edges_streak ?? 0,
+                          streak: state.meta.war_opposing_edges_streak ?? 0,
                           required_streak: 4
                       }
                   }
@@ -2117,3 +2103,4 @@ export async function createStateFromScenario(
     const content = await readFile(result.paths.initial_save, 'utf8');
     return deserializeState(content);
 }
+

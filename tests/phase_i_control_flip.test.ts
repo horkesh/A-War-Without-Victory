@@ -18,7 +18,7 @@ function stateWithTwoAdjacentMuns(): GameState {
         meta: {
             turn: 10,
             seed: 'control-flip-fixture',
-            phase: 'phase_i',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -63,8 +63,8 @@ function stateWithTwoAdjacentMuns(): GameState {
             MUN_A: { stability_score: 30 },
             MUN_B: { stability_score: 70 }
         },
-        phase_i_consolidation_until: {},
-        phase_i_militia_strength: {
+        war_consolidation_until: {},
+        war_militia_strength: {
             MUN_A: { RBiH: 25, RS: 60, HRHB: 10 },
             MUN_B: { RBiH: 20, RS: 80, HRHB: 5 }
         }
@@ -106,35 +106,30 @@ test('runControlFlip does not modify faction profile (authority) when flips occu
 
 test('runControlFlip with consolidation set skips that municipality', () => {
     const state = stateWithTwoAdjacentMuns();
-    state.phase_i_consolidation_until = { MUN_A: 20 };
+    state.war_consolidation_until = { MUN_A: 20 };
     const report = runControlFlip({ state, turn: 10 });
     assert.strictEqual(report.flips.length, 0);
 });
 
-test('Phase I runTurn keeps control-flip phase but applies no flips', async () => {
+test('war runTurn default path omits phase_i control-flip report', async () => {
     const state = stateWithTwoAdjacentMuns();
     const { report } = await runTurn(state, { seed: state.meta.seed });
-    assert.ok(report.phase_i_control_flip);
-    assert.strictEqual(report.phase_i_control_flip!.municipalities_evaluated, 0);
-    assert.deepStrictEqual(report.phase_i_control_flip!.flips, []);
-    assert.deepStrictEqual(report.phase_i_control_flip!.control_events, []);
-    assert.ok(report.phases.some((p) => p.name === 'phase-i-control-flip'));
+    assert.strictEqual(report.phase_i_control_flip, undefined);
+    assert.strictEqual(report.phases.some((p) => p.name === 'phase-i-control-flip'), false);
 });
 
-test('No control flips before war_start_turn: Phase I path not executed (gating)', async () => {
+test('war runTurn is not gated by war_start_turn in two-phase model', async () => {
     const state = stateWithTwoAdjacentMuns();
     state.meta.turn = 8;
     state.meta.war_start_turn = 10;
-    await assert.rejects(
-        async () => runTurn(state, { seed: state.meta.seed }),
-        /Phase I requires referendum_held/
-    );
+    const { nextState } = await runTurn(state, { seed: state.meta.seed });
+    assert.strictEqual(nextState.meta.turn, 9);
 });
 
 test('large-settlement resistance: mun in LARGE_SETTLEMENT_MUN_IDS with zero defender militia does not flip', () => {
     const state: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'large-mun-fixture', phase: 'phase_i', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
+        meta: { turn: 10, seed: 'large-mun-fixture', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
         factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 5 },
@@ -151,8 +146,8 @@ test('large-settlement resistance: mun in LARGE_SETTLEMENT_MUN_IDS with zero def
             centar_sarajevo: { stability_score: 30 },
             other_mun: { stability_score: 50 }
         },
-        phase_i_consolidation_until: {},
-        phase_i_militia_strength: {
+        war_consolidation_until: {},
+        war_militia_strength: {
             centar_sarajevo: { RBiH: 0, RS: 80, HRHB: 0 },
             other_mun: { RBiH: 0, RS: 80, HRHB: 0 }
         }
@@ -172,7 +167,7 @@ test('large-settlement resistance: mun in LARGE_SETTLEMENT_MUN_IDS with zero def
 test('B4 coercion: coercion_pressure_by_municipality reduces flip threshold so flip outcome can differ', () => {
     const baseState: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'coercion-fixture', phase: 'phase_i', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
+        meta: { turn: 10, seed: 'coercion-fixture', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
         factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 5 },
@@ -189,8 +184,8 @@ test('B4 coercion: coercion_pressure_by_municipality reduces flip threshold so f
             MUN_A: { stability_score: 30 },
             MUN_B: { stability_score: 70 }
         },
-        phase_i_consolidation_until: {},
-        phase_i_militia_strength: {
+        war_consolidation_until: {},
+        war_militia_strength: {
             MUN_A: { RBiH: 40, RS: 0, HRHB: 0 },
             MUN_B: { RBiH: 0, RS: 20, HRHB: 0 }
         }
@@ -217,7 +212,7 @@ test('B4 coercion: coercion_pressure_by_municipality reduces flip threshold so f
 test('runControlFlip militaryActionOnly branch disables militia-only flips without adjacent brigades', () => {
     const state: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'military-action-only-fixture', phase: 'phase_i', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
+        meta: { turn: 10, seed: 'military-action-only-fixture', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
         factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 0 },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 0 },
@@ -234,8 +229,8 @@ test('runControlFlip militaryActionOnly branch disables militia-only flips witho
             MUN_A: { stability_score: 20 },
             MUN_B: { stability_score: 70 }
         },
-        phase_i_consolidation_until: {},
-        phase_i_militia_strength: {
+        war_consolidation_until: {},
+        war_militia_strength: {
             MUN_A: { RBiH: 0, RS: 0, HRHB: 0 },
             MUN_B: { RBiH: 0, RS: 90, HRHB: 0 }
         }
@@ -268,7 +263,7 @@ test('runControlFlip militaryActionOnly branch disables militia-only flips witho
 test('RS border intervention bonus applies in early-war FRY-adjacent municipalities only', () => {
     const makeState = (turn: number): GameState => ({
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn, seed: 'border-intervention-fixture', phase: 'phase_i', referendum_held: true, referendum_turn: 6, war_start_turn: 0 },
+        meta: { turn, seed: 'border-intervention-fixture', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 0 },
         factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 0 },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 0 },
@@ -285,8 +280,8 @@ test('RS border intervention bonus applies in early-war FRY-adjacent municipalit
             bijeljina: { stability_score: 30 },
             src_mun: { stability_score: 60 },
         },
-        phase_i_consolidation_until: {},
-        phase_i_militia_strength: {
+        war_consolidation_until: {},
+        war_militia_strength: {
             bijeljina: { RBiH: 40, RS: 0, HRHB: 0 },
             src_mun: { RBiH: 0, RS: 10, HRHB: 0 },
         }

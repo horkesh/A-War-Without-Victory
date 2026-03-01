@@ -18,7 +18,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function minimalPhase0State(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'turn-test', phase: 'phase_0' },
+        meta: { turn: 0, seed: 'turn-test', phase: 'peace' },
         factions: [
             {
                 id: 'RBiH',
@@ -83,7 +83,7 @@ test('runPhase0Turn: no-op when game_over', () => {
 
 test('runPhase0Turn: no-op when phase is not phase_0', () => {
     const state = minimalPhase0State();
-    state.meta.phase = 'phase_i';
+    state.meta.phase = 'war';
     runPhase0Turn(state, { declarationPressure: rsSatisfyingOptions });
     const rs = state.factions.find((f) => f.id === 'RS')!;
     assert.strictEqual(rs.declaration_pressure, 0);
@@ -102,8 +102,8 @@ test('runPhase0Turn: applies scheduled phase_0 capital trickle', () => {
     const beforeRbih = getPrewarCapital(state, 'RBiH');
     const beforeRs = getPrewarCapital(state, 'RS');
     const beforeHrhb = getPrewarCapital(state, 'HRHB');
-    state.meta.phase_0_scheduled_referendum_turn = 26;
-    state.meta.phase_0_scheduled_war_start_turn = 30;
+    state.meta.peace_scheduled_referendum_turn = 26;
+    state.meta.peace_scheduled_war_start_turn = 30;
     runPhase0Turn(state, {});
     assert.strictEqual(getPrewarCapital(state, 'RBiH'), beforeRbih + 1);
     assert.strictEqual(getPrewarCapital(state, 'RS'), beforeRs + 1);
@@ -136,7 +136,7 @@ test('runPhase0Turn: runs transition when war_start_turn', () => {
     state.meta.war_start_turn = 14;
     state.meta.turn = 14;
     runPhase0Turn(state, {});
-    assert.strictEqual(state.meta.phase, 'phase_i');
+    assert.strictEqual(state.meta.phase, 'war');
 });
 
 test('runPhase0Turn: runs non-war terminal when deadline reached', () => {
@@ -173,8 +173,8 @@ test('runPhase0Turn: buildPhase0TurnOptions sets referendum deadline from schedu
     rs.declared = true;
     hrhb.declared = true;
     state.meta.turn = 5;
-    state.meta.phase_0_scheduled_referendum_turn = 20;
-    state.meta.phase_0_scheduled_war_start_turn = 24;
+    state.meta.peace_scheduled_referendum_turn = 20;
+    state.meta.peace_scheduled_war_start_turn = 24;
     const options = buildPhase0TurnOptions(state);
     runPhase0Turn(state, options);
     assert.strictEqual(state.meta.referendum_eligible_turn, 5);

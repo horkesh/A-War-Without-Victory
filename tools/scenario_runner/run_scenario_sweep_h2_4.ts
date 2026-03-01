@@ -30,12 +30,12 @@ export interface SweepScenarioRow {
   run_id: string;
   phase: string;
   war_started: boolean;
-  phase_i_ran: boolean;
-  phase_ii_ran: boolean;
+  peace_ran: boolean;
+  war_ran: boolean;
   pressure_eligible_max: number;
   front_active_max: number;
   displacement_trigger_max: number;
-  aor_total: number;
+  brigade_front_assignment_total: number;
   control_flips_total: number;
   displacement_settlement_end: number;
   displacement_municipality_end: number;
@@ -126,10 +126,10 @@ async function extractMetricsRow(
   runDir: string,
   runId: string
 ): Promise<SweepScenarioRow> {
-  const phase = 'phase_ii'; // harness always starts phase_ii
+  const phase = 'war'; // harness always starts in war
   const war_started = true; // no phase_0 in harness
-  const phase_i_ran = false; // harness starts in phase_ii
-  const phase_ii_ran = true;
+  const peace_ran = false; // harness starts in war
+  const war_ran = true;
 
   let pressure_eligible_max = 0;
   let front_active_max = 0;
@@ -144,7 +144,7 @@ async function extractMetricsRow(
   const exhaustion_end: Record<string, number> = {};
   const supply_pressure_start: Record<string, number> = {};
   const supply_pressure_end: Record<string, number> = {};
-  let aor_total = 0;
+  let brigade_front_assignment_total = 0;
 
   const activityPath = join(runDir, 'activity_summary.json');
   if (existsSync(activityPath)) {
@@ -203,11 +203,10 @@ async function extractMetricsRow(
   const finalSavePath = join(runDir, 'final_save.json');
   if (existsSync(finalSavePath)) {
     const state = JSON.parse(await readFile(finalSavePath, 'utf8')) as {
-      factions?: Array<{ areasOfResponsibility?: unknown[] }>;
+      brigade_front_assignment?: Record<string, string | null>;
     };
-    for (const fa of state.factions ?? []) {
-      aor_total += Array.isArray(fa.areasOfResponsibility) ? fa.areasOfResponsibility.length : 0;
-    }
+    const assignments = state.brigade_front_assignment ?? {};
+    brigade_front_assignment_total = Object.values(assignments).filter((v) => typeof v === 'string' && v.length > 0).length;
   }
 
   let classification: SweepScenarioRow['classification'] = 'active';
@@ -226,12 +225,12 @@ async function extractMetricsRow(
     run_id: runId,
     phase,
     war_started,
-    phase_i_ran,
-    phase_ii_ran,
+    peace_ran,
+    war_ran,
     pressure_eligible_max,
     front_active_max,
     displacement_trigger_max,
-    aor_total,
+    brigade_front_assignment_total,
     control_flips_total,
     displacement_settlement_end,
     displacement_municipality_end,
@@ -299,9 +298,9 @@ function formatAggregateMarkdown(summary: AggregateSummary): string {
     lines.push(`## ${r.scenario_id}`);
     lines.push(`- Path: ${r.scenario_path}, weeks: ${r.weeks}`);
     lines.push(`- Run dir: ${r.run_dir}`);
-    lines.push(`- Phase: ${r.phase}, war_started: ${r.war_started}, phase_ii_ran: ${r.phase_ii_ran}`);
+    lines.push(`- Phase: ${r.phase}, war_started: ${r.war_started}, war_ran: ${r.war_ran}`);
     lines.push(`- Activity: front_active_max=${r.front_active_max}, pressure_eligible_max=${r.pressure_eligible_max}`);
-    lines.push(`- Control flips: ${r.control_flips_total}, AoR total: ${r.aor_total}`);
+    lines.push(`- Control flips: ${r.control_flips_total}, brigade front assignments: ${r.brigade_front_assignment_total}`);
     lines.push(`- Formations: initial=${r.formations_initial_total}, final=${r.formations_final_total}, added=${r.formations_added_count}`);
     lines.push(`- Displacement end: settlement=${r.displacement_settlement_end}, municipality=${r.displacement_municipality_end}`);
     lines.push(`- Classification: ${r.classification}`);

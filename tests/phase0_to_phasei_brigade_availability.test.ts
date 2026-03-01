@@ -15,7 +15,7 @@ function makePhase0State(): GameState {
         meta: {
             turn: 0,
             seed: 'phase0-iv1-seed',
-            phase: 'phase_0',
+            phase: 'peace',
             referendum_held: true,
             referendum_turn: 0,
             war_start_turn: 0,
@@ -75,14 +75,14 @@ function makePhase0State(): GameState {
         political_controllers: {
             SID_TEST_1: 'RBiH',
         },
-        phase_i_militia_strength: {},
+        war_militia_strength: {},
         formation_spawn_directive: { kind: 'both' },
     };
 }
 
 function runToSpawn(state: GameState): { poolAvailable: number; spawned: number } {
     const transitioned = runPhase0TurnAndAdvance(state, state.meta.seed ?? 'phase0-iv1-seed', 'RBiH');
-    assert.strictEqual(transitioned.meta.phase, 'phase_i', 'state should transition to phase_i');
+    assert.strictEqual(transitioned.meta.phase, 'war', 'state should transition to phase_i');
     updateMilitiaEmergence(transitioned);
     const settlements = new Map<string, SettlementRecord>([
         ['SID_TEST_1', { mun_code: 'TEST_MUN', mun1990_id: 'TEST_MUN' } as SettlementRecord]

@@ -59,13 +59,13 @@ export function getAlliancePhase(value: number): AlliancePhase {
 }
 
 export function areRbihHrhbAllied(state: GameState): boolean {
-    const value = state.phase_i_alliance_rbih_hrhb;
+    const value = state.war_alliance_rbih_hrhb;
     if (value === undefined || value === null) return true; // absent = allied
     return value > ALLIED_THRESHOLD;
 }
 
 export function isRbihHrhbAtWar(state: GameState): boolean {
-    const value = state.phase_i_alliance_rbih_hrhb;
+    const value = state.war_alliance_rbih_hrhb;
     if (value === undefined || value === null) return false;
     return value <= HOSTILE_THRESHOLD;
 }
@@ -89,8 +89,8 @@ export interface AllianceUpdateReport {
  * Initialize rbih_hrhb_state if absent.
  */
 export function ensureRbihHrhbState(state: GameState, initValue?: number, initMixedMunicipalities?: string[]): void {
-    if (state.phase_i_alliance_rbih_hrhb === undefined || state.phase_i_alliance_rbih_hrhb === null) {
-        state.phase_i_alliance_rbih_hrhb = initValue ?? DEFAULT_INIT_ALLIANCE;
+    if (state.war_alliance_rbih_hrhb === undefined || state.war_alliance_rbih_hrhb === null) {
+        state.war_alliance_rbih_hrhb = initValue ?? DEFAULT_INIT_ALLIANCE;
     }
     if (!state.rbih_hrhb_state) {
         const mixed = initMixedMunicipalities
@@ -119,7 +119,7 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
     ensureRbihHrhbState(state);
     const rhs = state.rbih_hrhb_state!;
 
-    const previousValue = state.phase_i_alliance_rbih_hrhb!;
+    const previousValue = state.war_alliance_rbih_hrhb!;
 
     // If Washington signed, alliance is locked — no update.
     if (rhs.washington_signed) {
@@ -157,7 +157,7 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
     if (state.meta.turn < earliestTurn) {
         newValue = Math.max(newValue, ALLIED_THRESHOLD);
     }
-    state.phase_i_alliance_rbih_hrhb = newValue;
+    state.war_alliance_rbih_hrhb = newValue;
 
     // Track war start (only after earliest turn)
     let warStartedThisTurn = false;
@@ -224,3 +224,4 @@ export function countBilateralFlips(
 
     return count;
 }
+

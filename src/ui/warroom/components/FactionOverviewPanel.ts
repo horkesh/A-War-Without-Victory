@@ -179,8 +179,8 @@ export class FactionOverviewPanel {
      * Render the panel — dispatches to Phase 0 or Phase I+ layout.
      */
     render(): HTMLElement {
-        const phase = this.gameState.meta.phase ?? 'phase_0';
-        if (phase === 'phase_0') {
+        const phase = this.gameState.meta.phase ?? 'peace';
+        if (phase === 'peace') {
             return this.renderPhase0();
         }
         return this.renderPhaseIPlus();

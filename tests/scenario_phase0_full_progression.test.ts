@@ -40,14 +40,14 @@ test('phase0_full_progression: starts Phase 0, transitions to Phase I at war_sta
         assert.ok(lines.length >= 5, 'weekly_report must have at least 5 weeks');
 
         const week1 = JSON.parse(lines[0]!);
-        assert.strictEqual(week1.phase, 'phase_0', 'week 1 must be phase_0');
+        assert.strictEqual(week1.phase, 'peace', 'week 1 must be phase_0');
 
         const week5 = JSON.parse(lines[4]!);
-        assert.strictEqual(week5.phase, 'phase_i', 'week 5 must be phase_i (transition after war_start_turn=4)');
+        assert.strictEqual(week5.phase, 'war', 'week 5 must be phase_i (transition after war_start_turn=4)');
 
         const runSummaryPath = join(result.outDir, 'run_summary.json');
         const runSummary = JSON.parse(await readFile(runSummaryPath, 'utf8'));
-        assert.strictEqual(runSummary.summary.phase, 'phase_i', 'final phase must be phase_i or phase_ii');
+        assert.strictEqual(runSummary.summary.phase, 'war', 'final phase must be phase_i or phase_ii');
     } catch (err) {
         if (isMissingMappingError(err)) return;
         throw err;
@@ -57,7 +57,7 @@ test('phase0_full_progression: starts Phase 0, transitions to Phase I at war_sta
 
 test('phase0_full_progression: Phase 0 decision makers aligned to canon', async () => {
     const scenario = await loadScenario(SCENARIO_PATH);
-    assert.strictEqual(scenario.start_phase, 'phase_0', 'scenario must start in phase_0');
-    assert.strictEqual(scenario.phase_0_referendum_turn, 0, 'referendum at turn 0 (pre-set)');
-    assert.strictEqual(scenario.phase_0_war_start_turn, 4, 'war starts at referendum_turn + 4 per canon');
+    assert.strictEqual(scenario.start_lifecycle_phase, 'peace', 'scenario must start in peace');
+    assert.strictEqual(scenario.peace_referendum_turn, 0, 'referendum at turn 0 (pre-set)');
+    assert.strictEqual(scenario.peace_war_start_turn, 4, 'war starts at referendum_turn + 4 per canon');
 });

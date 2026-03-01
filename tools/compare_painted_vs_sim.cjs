@@ -1,143 +1,411 @@
+'use strict';
+
 /**
- * Compare painted calibration targets against a simulation run's final save.
- * Usage: node tools/compare_painted_vs_sim.cjs <run_dir> [painted_json]
- * Example: node tools/compare_painted_vs_sim.cjs runs/apr1992_definitive_40w__abc123__w40_n1
+ * compare_painted_vs_sim.cjs
+ * Compare painted historical control targets (Jan 1993) against a sim run's final_save.json.
+ * Reports OSID-level match rate by region and highlights mismatches.
+ *
+ * Usage: node tools/compare_painted_vs_sim.cjs <run_dir>
+ *
+ * CommonJS — runs with plain node, no tsx/ESM needed.
  */
-const fs = require('fs');
+
+const fs   = require('fs');
 const path = require('path');
 
-const runDir = process.argv[2];
-const paintedPath = process.argv[3] || 'data/source/calibration/painted_control_jan1993.json';
+// ---------------------------------------------------------------------------
+// Region mapping: municipality slug (middle part of OSID) → region name
+// ---------------------------------------------------------------------------
+const REGION_MAP = {
+  // KRAJINA
+  bosanska_krupa:      'KRAJINA',
+  bosanski_petrovac:   'KRAJINA',
+  bihac:               'KRAJINA',
+  cazin:               'KRAJINA',
+  velika_kladusa:      'KRAJINA',
+  kljuc:               'KRAJINA',
+  sanski_most:         'KRAJINA',
+  prijedor:            'KRAJINA',
+  banja_luka:          'KRAJINA',
+  laktasi:             'KRAJINA',
+  bosanska_gradiska:   'KRAJINA',
+  srbac:               'KRAJINA',
+  kotor_varos:         'KRAJINA',
+  celinac:             'KRAJINA',
+  bosanska_dubica:     'KRAJINA',
+  bosanska_kostajnica: 'KRAJINA',
+  mrkonjic_grad:       'KRAJINA',
+  sipovo:              'KRAJINA',
+  skender_vakuf:       'KRAJINA',
 
-if (!runDir) {
-    console.error('Usage: node tools/compare_painted_vs_sim.cjs <run_dir> [painted_json]');
-    process.exit(1);
-}
+  // POSAVINA_NE
+  brcko:          'POSAVINA_NE',
+  orasje:         'POSAVINA_NE',
+  modrica:        'POSAVINA_NE',
+  derventa:       'POSAVINA_NE',
+  bosanski_brod:  'POSAVINA_NE',
+  odzak:          'POSAVINA_NE',
+  gradacac:       'POSAVINA_NE',
+  lopare:         'POSAVINA_NE',
+  srebrenik:      'POSAVINA_NE',
+  tuzla:          'POSAVINA_NE',
+  gracanica:      'POSAVINA_NE',
+  lukavac:        'POSAVINA_NE',
+  teocak:         'POSAVINA_NE',
+  sapna:          'POSAVINA_NE',
+  zvornik:        'POSAVINA_NE',
+  ugljevik:       'POSAVINA_NE',
+  bijeljina:      'POSAVINA_NE',
+  pelagicevo:     'POSAVINA_NE',
+  bosanski_samac: 'POSAVINA_NE',
 
-const painted = JSON.parse(fs.readFileSync(paintedPath, 'utf8')).by_settlement_id;
-const finalPath = path.join(runDir, 'final_save.json');
-if (!fs.existsSync(finalPath)) {
-    console.error('No final_save.json in', runDir);
-    process.exit(1);
-}
-const final = JSON.parse(fs.readFileSync(finalPath, 'utf8'));
-const pc = final.political_controllers || {};
+  // DRINA
+  bratunac:     'DRINA',
+  srebrenica:   'DRINA',
+  visegrad:     'DRINA',
+  foca:         'DRINA',
+  gorazde:      'DRINA',
+  rogatica:     'DRINA',
+  sokolac:      'DRINA',
+  hanpijesak:   'DRINA',
+  han_pijesak:  'DRINA',
+  vlasenica:    'DRINA',
+  milici:       'DRINA',
+  sekovici:     'DRINA',
+  bosanski_novi:'DRINA',
+  kalinovik:    'DRINA',
+  cajnice:      'DRINA',
+  rudo:         'DRINA',
 
-// Count totals
-const paintedCounts = {};
-const simCounts = {};
-for (const osid of Object.keys(painted)) {
-    const p = painted[osid];
-    paintedCounts[p] = (paintedCounts[p] || 0) + 1;
-}
-for (const osid of Object.keys(pc)) {
-    const s = pc[osid];
-    simCounts[s] = (simCounts[s] || 0) + 1;
-}
+  // CENTRAL_CORRIDOR
+  tesanj:      'CENTRAL_CORRIDOR',
+  maglaj:      'CENTRAL_CORRIDOR',
+  zavidovici:  'CENTRAL_CORRIDOR',
+  zenica:      'CENTRAL_CORRIDOR',
+  kakanj:      'CENTRAL_CORRIDOR',
+  visoko:      'CENTRAL_CORRIDOR',
+  breza:       'CENTRAL_CORRIDOR',
+  ilijas:      'CENTRAL_CORRIDOR',
+  doboj:       'CENTRAL_CORRIDOR',
+  teslic:      'CENTRAL_CORRIDOR',
+  prnjavor:    'CENTRAL_CORRIDOR',
 
-console.log('=== TERRITORY COMPARISON ===');
-console.log('Painted targets:', JSON.stringify(paintedCounts));
-console.log('Sim results:    ', JSON.stringify(simCounts));
-console.log();
+  // CENTRAL_BOSNIA
+  travnik:      'CENTRAL_BOSNIA',
+  novi_travnik: 'CENTRAL_BOSNIA',
+  vitez:        'CENTRAL_BOSNIA',
+  busovaca:     'CENTRAL_BOSNIA',
+  kiseljak:     'CENTRAL_BOSNIA',
+  fojnica:      'CENTRAL_BOSNIA',
+  kresevo:      'CENTRAL_BOSNIA',
+  bugojno:      'CENTRAL_BOSNIA',
+  gornji_vakuf: 'CENTRAL_BOSNIA',
+  prozor:       'CENTRAL_BOSNIA',
+  jablanica:    'CENTRAL_BOSNIA',
+  konjic:       'CENTRAL_BOSNIA',
+  hadzici:      'CENTRAL_BOSNIA',
+  jajce:        'CENTRAL_BOSNIA',
+  donji_vakuf:  'CENTRAL_BOSNIA',
+  zepce:        'CENTRAL_BOSNIA',
+  vares:        'CENTRAL_BOSNIA',
+  olovo:        'CENTRAL_BOSNIA',
+  kalesija:     'CENTRAL_BOSNIA',
+  kladanj:      'CENTRAL_BOSNIA',
+  zivinice:     'CENTRAL_BOSNIA',
+  banovici:     'CENTRAL_BOSNIA',
+  bosansko_grahovo: 'CENTRAL_BOSNIA',
 
-// Mismatch analysis
-const mismatches = {};
-let matchCount = 0;
-const totalOsids = Object.keys(painted).length;
-for (const osid of Object.keys(painted)) {
-    const target = painted[osid];
-    const actual = pc[osid] || 'none';
-    if (target === actual) { matchCount++; continue; }
-    const key = actual + '_should_be_' + target;
-    if (!(key in mismatches)) mismatches[key] = [];
-    mismatches[key].push(osid);
-}
+  // SARAJEVO
+  centar_sarajevo:     'SARAJEVO',
+  ilidza:              'SARAJEVO',
+  vogosca:             'SARAJEVO',
+  pale:                'SARAJEVO',
+  trnovo:              'SARAJEVO',
+  novi_grad_sarajevo:  'SARAJEVO',
+  novo_sarajevo:       'SARAJEVO',
+  stari_grad_sarajevo: 'SARAJEVO',
 
-console.log('Match rate: ' + matchCount + '/' + totalOsids + ' (' + (100 * matchCount / totalOsids).toFixed(1) + '%)');
-console.log('Mismatched: ' + (totalOsids - matchCount));
-console.log();
-
-// Regional breakdown
-const regions = {
-    'Central Bosnia': ['bugojno', 'gornji_vakuf', 'konjic', 'novi_travnik', 'prozor', 'vitez', 'busovaca', 'kiseljak', 'travnik', 'fojnica', 'jablanica', 'kakanj'],
-    'Drina Valley': ['bratunac', 'visegrad', 'gorazde', 'srebrenica', 'zepa', 'vlasenica', 'rogatica', 'foca', 'zvornik', 'milici'],
-    'Central Corridor': ['tesanj', 'maglaj', 'zavidovici', 'zenica', 'visoko', 'doboj', 'teslic', 'kotor_varos'],
-    'Posavina/NE': ['brcko', 'gradacac', 'orasje', 'odzak', 'lopare', 'srebrenik', 'bijeljina', 'ugljevik'],
-    'Sarajevo': ['centar_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo', 'ilidza', 'hadzici', 'vogosca', 'ilijas', 'trnovo', 'pale'],
-    'Bihac': ['bihac', 'cazin', 'velika_kladusa', 'bosanska_krupa', 'sanski_most', 'kljuc'],
-    'Krajina': ['banja_luka', 'prijedor', 'bosanski_petrovac', 'jajce', 'donji_vakuf', 'sipovo', 'kupres', 'mrkonjic_grad'],
-    'Herzegovina': ['mostar', 'siroki_brijeg', 'citluk', 'capljina', 'stolac', 'neum', 'ljubuski', 'grude', 'posusje', 'livno', 'tomislavgrad', 'nevesinje', 'bileca', 'gacko', 'trebinje'],
+  // HERZEGOVINA
+  mostar:        'HERZEGOVINA',
+  citluk:        'HERZEGOVINA',
+  capljina:      'HERZEGOVINA',
+  stolac:        'HERZEGOVINA',
+  neum:          'HERZEGOVINA',
+  grude:         'HERZEGOVINA',
+  siroki_brijeg: 'HERZEGOVINA',
+  ljubuski:      'HERZEGOVINA',
+  posusje:       'HERZEGOVINA',
+  livno:         'HERZEGOVINA',
+  tomislavgrad:  'HERZEGOVINA',
+  kupres:        'HERZEGOVINA',
+  glamoc:        'HERZEGOVINA',
+  drvar:         'HERZEGOVINA',
+  titov_drvar:   'HERZEGOVINA',
+  listica:       'HERZEGOVINA',
+  ljubinje:      'HERZEGOVINA',
+  bileca:        'HERZEGOVINA',
+  trebinje:      'HERZEGOVINA',
+  nevesinje:     'HERZEGOVINA',
+  gacko:         'HERZEGOVINA',
+  duvno:         'HERZEGOVINA',
 };
 
-console.log('=== REGIONAL MISMATCH BREAKDOWN ===');
-for (const [region, muns] of Object.entries(regions)) {
-    let regionMismatches = 0;
-    let regionTotal = 0;
-    const regionDetails = {};
-    for (const osid of Object.keys(painted)) {
-        const mun = osid.split(':')[1];
-        if (!muns.includes(mun)) continue;
-        regionTotal++;
-        const target = painted[osid];
-        const actual = pc[osid] || 'none';
-        if (target !== actual) {
-            regionMismatches++;
-            const key = actual + '→' + target;
-            regionDetails[key] = (regionDetails[key] || 0) + 1;
-        }
-    }
-    if (regionTotal === 0) continue;
-    const pct = (100 * (regionTotal - regionMismatches) / regionTotal).toFixed(0);
-    console.log(region + ': ' + regionMismatches + ' wrong / ' + regionTotal + ' total (' + pct + '% match)');
-    for (const [k, v] of Object.entries(regionDetails).sort((a, b) => b[1] - a[1])) {
-        console.log('  ' + k + ': ' + v);
-    }
-}
-console.log();
-
-// Edge case check
-const edgeCases = [
-    { osid: 'op:orasje:orasje', expected: 'HRHB', label: 'Orasje' },
-    { osid: 'op:ugljevik:teocak_krstac_2', expected: 'RBiH', label: 'Teocak' },
-    { osid: 'op:zvornik:vitinica_2', expected: 'RBiH', label: 'Sapna' },
-    { osid: 'op:zavidovici:vozuca_2', expected: 'RS', label: 'Vozuca' },
-    { osid: 'op:brcko:brka_2', expected: 'RBiH', label: 'Brcko South' },
-    { osid: 'op:gorazde:gorazde_2', expected: 'RBiH', label: 'Gorazde' },
-    { osid: 'op:srebrenica:srebrenica_2', expected: 'RBiH', label: 'Srebrenica' },
+const REGION_ORDER = [
+  'KRAJINA',
+  'POSAVINA_NE',
+  'DRINA',
+  'CENTRAL_CORRIDOR',
+  'CENTRAL_BOSNIA',
+  'SARAJEVO',
+  'HERZEGOVINA',
+  'OTHER',
 ];
 
-console.log('=== EDGE CASES ===');
-for (const ec of edgeCases) {
-    const actual = pc[ec.osid] || 'none';
-    const pass = actual === ec.expected ? 'PASS' : 'FAIL';
-    console.log(pass + ' ' + ec.label + ': expected=' + ec.expected + ' actual=' + actual);
-}
-console.log();
+const FACTIONS = ['RS', 'RBiH', 'HRHB'];
 
-// Army sizes from summary
-const summaryPath = path.join(runDir, 'summary.json');
-if (fs.existsSync(summaryPath)) {
-    const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
-    console.log('=== ARMY SIZES ===');
-    const factionSummary = summary.faction_summary || summary.factions || {};
-    for (const [fid, data] of Object.entries(factionSummary)) {
-        const personnel = data.total_personnel || data.personnel || 'N/A';
-        console.log(fid + ': ' + personnel + ' personnel');
-    }
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Extract municipality slug from OSID (middle segment). */
+function getMuniSlug(osid) {
+  const parts = osid.split(':');
+  return parts.length >= 3 ? parts[1] : 'unknown';
 }
 
-// Mismatch detail by type
-console.log();
-console.log('=== MISMATCH DETAIL ===');
-for (const [key, list] of Object.entries(mismatches).sort((a, b) => b[1].length - a[1].length)) {
-    const byMun = {};
-    for (const osid of list) {
-        const mun = osid.split(':')[1];
-        byMun[mun] = (byMun[mun] || 0) + 1;
-    }
-    console.log(key + ': ' + list.length + ' OSIDs');
-    const sorted = Object.entries(byMun).sort((a, b) => b[1] - a[1]);
-    for (const [m, c] of sorted.slice(0, 15)) console.log('  ' + m + ': ' + c);
-    if (sorted.length > 15) console.log('  ... and ' + (sorted.length - 15) + ' more muns');
-    console.log();
+/** Map an OSID to its region name. */
+function getRegion(osid) {
+  return REGION_MAP[getMuniSlug(osid)] || 'OTHER';
 }
+
+/** Format percentage with one decimal place. */
+function pct(n, total) {
+  if (total === 0) return '0.0';
+  return ((n / total) * 100).toFixed(1);
+}
+
+/** Left-pad a string to width with spaces. */
+function rpad(str, width) {
+  const s = String(str);
+  return ' '.repeat(Math.max(0, width - s.length)) + s;
+}
+
+/** Right-pad a string to width with spaces. */
+function lpad(str, width) {
+  const s = String(str);
+  return s + ' '.repeat(Math.max(0, width - s.length));
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+function main() {
+  const args = process.argv.slice(2);
+  if (args.length < 1) {
+    console.error('Usage: node tools/compare_painted_vs_sim.cjs <run_dir>');
+    process.exit(1);
+  }
+
+  const runDir = args[0];
+
+  // Resolve painted path relative to this script's directory
+  const paintedPath = path.resolve(
+    __dirname,
+    '../data/source/calibration/painted_control_jan1993.json'
+  );
+  const simPath = path.resolve(runDir, 'final_save.json');
+
+  if (!fs.existsSync(paintedPath)) {
+    console.error('ERROR: Painted control file not found at:', paintedPath);
+    process.exit(1);
+  }
+  if (!fs.existsSync(simPath)) {
+    console.error('ERROR: final_save.json not found at:', simPath);
+    process.exit(1);
+  }
+
+  const paintedFile = JSON.parse(fs.readFileSync(paintedPath, 'utf8'));
+  const simFile     = JSON.parse(fs.readFileSync(simPath, 'utf8'));
+
+  const paintedCtrl = paintedFile.by_settlement_id; // osid → faction
+  const simCtrl     = simFile.political_controllers;  // osid → faction
+
+  if (!paintedCtrl) {
+    console.error('ERROR: Painted file missing "by_settlement_id" field');
+    process.exit(1);
+  }
+  if (!simCtrl) {
+    console.error('ERROR: final_save.json missing "political_controllers" field');
+    process.exit(1);
+  }
+
+  // Canonical sorted list of OSIDs from the painted ground truth
+  const paintedOsids = Object.keys(paintedCtrl).sort();
+  const totalOsids   = paintedOsids.length;
+
+  // ---------------------------------------------------------------------------
+  // Initialise accumulators
+  // ---------------------------------------------------------------------------
+
+  let totalMatch    = 0;
+  let totalMismatch = 0;
+
+  const simFactionCount     = { RS: 0, RBiH: 0, HRHB: 0 };
+  const paintedFactionCount = { RS: 0, RBiH: 0, HRHB: 0 };
+
+  /** @type {Record<string, { match: number, total: number, simFaction: Record<string,number>, paintedFaction: Record<string,number> }>} */
+  const regionStats = {};
+  for (const r of REGION_ORDER) {
+    regionStats[r] = {
+      match: 0,
+      total: 0,
+      simFaction:     { RS: 0, RBiH: 0, HRHB: 0 },
+      paintedFaction: { RS: 0, RBiH: 0, HRHB: 0 },
+    };
+  }
+
+  /** @type {Array<{ osid: string, paintedFaction: string, simFaction: string, region: string }>} */
+  const mismatches = [];
+
+  // ---------------------------------------------------------------------------
+  // Main comparison loop (iterate painted OSIDs in sorted order)
+  // ---------------------------------------------------------------------------
+
+  for (const osid of paintedOsids) {
+    const paintedFaction = paintedCtrl[osid];
+    const simFaction     = simCtrl[osid]; // undefined if missing in sim
+    const region         = getRegion(osid);
+
+    // Ensure the region bucket exists (handles any future 'OTHER' entries)
+    if (!regionStats[region]) {
+      regionStats[region] = {
+        match: 0, total: 0,
+        simFaction:     { RS: 0, RBiH: 0, HRHB: 0 },
+        paintedFaction: { RS: 0, RBiH: 0, HRHB: 0 },
+      };
+    }
+
+    const stats = regionStats[region];
+    stats.total++;
+
+    // Painted faction tallies
+    if (FACTIONS.includes(paintedFaction)) {
+      paintedFactionCount[paintedFaction]++;
+      stats.paintedFaction[paintedFaction]++;
+    }
+
+    if (simFaction === undefined || simFaction === null) {
+      // Sim is missing this OSID entirely — treat as mismatch
+      totalMismatch++;
+      mismatches.push({ osid, paintedFaction, simFaction: '(missing)', region });
+    } else {
+      // Sim faction tallies
+      if (FACTIONS.includes(simFaction)) {
+        simFactionCount[simFaction]++;
+        stats.simFaction[simFaction]++;
+      }
+
+      if (simFaction === paintedFaction) {
+        totalMatch++;
+        stats.match++;
+      } else {
+        totalMismatch++;
+        mismatches.push({ osid, paintedFaction, simFaction, region });
+      }
+    }
+  }
+
+  // OSIDs in sim but not in painted (informational only, do not affect match rate)
+  const simOnlyOsids = Object.keys(simCtrl)
+    .filter(k => !Object.prototype.hasOwnProperty.call(paintedCtrl, k))
+    .sort();
+
+  // Sort mismatches: by region order first, then osid alphabetically
+  const regionIndex = {};
+  REGION_ORDER.forEach(function(r, i) { regionIndex[r] = i; });
+
+  mismatches.sort(function(a, b) {
+    const ra = regionIndex[a.region] !== undefined ? regionIndex[a.region] : 9999;
+    const rb = regionIndex[b.region] !== undefined ? regionIndex[b.region] : 9999;
+    if (ra !== rb) return ra - rb;
+    return a.osid < b.osid ? -1 : a.osid > b.osid ? 1 : 0;
+  });
+
+  // ---------------------------------------------------------------------------
+  // Render output
+  // ---------------------------------------------------------------------------
+
+  const lines = [];
+
+  lines.push('=== Painted vs Sim Comparison ===');
+  lines.push('Run: ' + runDir);
+  lines.push('Total OSIDs: ' + totalOsids);
+  lines.push('');
+
+  lines.push('OVERALL');
+  lines.push('  Match:    ' + totalMatch + ' / ' + totalOsids + '  (' + pct(totalMatch, totalOsids) + '%)');
+  lines.push('  Mismatch: ' + totalMismatch + ' / ' + totalOsids + '  (' + pct(totalMismatch, totalOsids) + '%)');
+  lines.push('');
+
+  lines.push('FACTION TOTALS');
+  lines.push('  Painted  RS=' + paintedFactionCount.RS + '  RBiH=' + paintedFactionCount.RBiH + '  HRHB=' + paintedFactionCount.HRHB);
+  lines.push('  Sim      RS=' + simFactionCount.RS + '  RBiH=' + simFactionCount.RBiH + '  HRHB=' + simFactionCount.HRHB);
+  const dRS   = simFactionCount.RS   - paintedFactionCount.RS;
+  const dRBiH = simFactionCount.RBiH - paintedFactionCount.RBiH;
+  const dHRHB = simFactionCount.HRHB - paintedFactionCount.HRHB;
+  lines.push(
+    '  Delta    RS=' + (dRS   >= 0 ? '+' : '') + dRS +
+    '  RBiH='        + (dRBiH >= 0 ? '+' : '') + dRBiH +
+    '  HRHB='        + (dHRHB >= 0 ? '+' : '') + dHRHB
+  );
+  lines.push('');
+
+  lines.push('BY REGION');
+  const maxRLen = Math.max.apply(null, REGION_ORDER.map(function(r) { return r.length; }));
+  for (const region of REGION_ORDER) {
+    const s = regionStats[region];
+    if (!s || s.total === 0) continue;
+    const matchStr = s.match + '/' + s.total;
+    const pctStr   = '(' + pct(s.match, s.total) + '%)';
+    const simStr   = 'RS_sim=' + s.simFaction.RS + ' RBiH_sim=' + s.simFaction.RBiH + ' HRHB_sim=' + s.simFaction.HRHB;
+    const paintStr = 'painted RS=' + s.paintedFaction.RS + ' RBiH=' + s.paintedFaction.RBiH + ' HRHB=' + s.paintedFaction.HRHB;
+    lines.push(
+      '  ' + lpad(region, maxRLen) +
+      '  match  ' + rpad(matchStr, 8) +
+      ' ' + lpad(pctStr, 8) +
+      '  ' + simStr +
+      ' | ' + paintStr
+    );
+  }
+  lines.push('');
+
+  lines.push('MISMATCHES (painted\u2192sim)');
+  if (mismatches.length === 0) {
+    lines.push('  (none)');
+  } else {
+    const maxOLen = Math.max.apply(null, mismatches.map(function(m) { return m.osid.length; }));
+    const maxPLen = Math.max.apply(null, mismatches.map(function(m) { return m.paintedFaction.length; }));
+    const maxSLen = Math.max.apply(null, mismatches.map(function(m) { return m.simFaction.length; }));
+    for (const m of mismatches) {
+      lines.push(
+        '  ' + lpad(m.osid, maxOLen) +
+        '  painted=' + lpad(m.paintedFaction, maxPLen) +
+        '  sim=' + lpad(m.simFaction, maxSLen) +
+        '  region=' + m.region
+      );
+    }
+  }
+
+  if (simOnlyOsids.length > 0) {
+    lines.push('');
+    lines.push('NOTE: ' + simOnlyOsids.length + ' OSID(s) in sim but not in painted file (skipped from match rate):');
+    for (const osid of simOnlyOsids) {
+      lines.push('  ' + osid);
+    }
+  }
+
+  console.log(lines.join('\n'));
+}
+
+main();

@@ -14,7 +14,7 @@ import type { SettlementRecord } from '../src/map/settlements.js';
 function minimalPhaseIIState(overrides?: Partial<{ militia_pools: Record<string, MilitiaPoolState>; meta: { turn: number } }>): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'mob-test', phase: 'phase_ii' as const, ...overrides?.meta },
+        meta: { turn: 5, seed: 'mob-test', phase: 'war' as const, ...overrides?.meta },
         factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }

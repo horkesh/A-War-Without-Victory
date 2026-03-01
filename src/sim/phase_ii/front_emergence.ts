@@ -40,7 +40,7 @@ export function deriveFrontStability(
 
 /**
  * Detect Phase II fronts from settlement-level interaction.
- * - Runs only when meta.phase === 'phase_ii'. Returns [] otherwise (no fronts before Phase II).
+ * - Runs only when meta.phase === 'war'. Returns [] otherwise (no fronts before Phase II).
  * - Fronts are derived from opposing political control across settlement adjacency edges.
  * - No geometry created; returns descriptors with edge_ids only.
  * - Deterministic: stable sort by edge_id and side-pair.
@@ -49,7 +49,7 @@ export function detectPhaseIIFronts(
     state: GameState,
     settlementEdges: EdgeRecord[]
 ): PhaseIIFrontDescriptor[] {
-    if (state.meta.phase !== 'phase_ii') {
+    if (state.meta.phase !== 'war') {
         return [];
     }
 
@@ -96,3 +96,4 @@ export function detectPhaseIIFronts(
 
     return descriptors;
 }
+

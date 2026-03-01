@@ -17,7 +17,7 @@ function stateWithMunicipalitiesAndControl(): GameState {
         meta: {
             turn: 12,
             seed: 'strain-fixture',
-            phase: 'phase_i',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -59,7 +59,7 @@ function stateWithMunicipalitiesAndControl(): GameState {
             MUN_A: { stability_score: 60 },
             MUN_B: { stability_score: 50 }
         },
-        phase_i_control_strain: {}
+        war_control_strain: {}
     };
 }
 
@@ -82,8 +82,8 @@ test('runControlStrain accumulates strain per municipality and reports faction t
     const rsTotal = report.faction_totals.find((t) => t.faction_id === 'RS');
     assert.ok(rbihTotal !== undefined);
     assert.ok(rsTotal !== undefined);
-    assert.ok(state.phase_i_control_strain);
-    assert.ok('MUN_A' in state.phase_i_control_strain! || 'MUN_B' in state.phase_i_control_strain!);
+    assert.ok(state.war_control_strain);
+    assert.ok('MUN_A' in state.war_control_strain! || 'MUN_B' in state.war_control_strain!);
 });
 
 test('runControlStrain is deterministic: same state yields same report', () => {
@@ -118,7 +118,7 @@ test('runControlStrain does not touch supply state', () => {
 
 test('getFactionTotalControlStrain returns sum for faction-controlled municipalities', () => {
     const state = stateWithMunicipalitiesAndControl();
-    state.phase_i_control_strain = { MUN_A: 5, MUN_B: 3 };
+    state.war_control_strain = { MUN_A: 5, MUN_B: 3 };
     const byMun = stubSettlementsByMun();
     const rbihTotal = getFactionTotalControlStrain(state, 'RBiH', byMun);
     const rsTotal = getFactionTotalControlStrain(state, 'RS', byMun);
@@ -126,11 +126,9 @@ test('getFactionTotalControlStrain returns sum for faction-controlled municipali
     assert.strictEqual(rsTotal, 3, 'RS controls MUN_B (s2)');
 });
 
-test('Phase I runTurn includes control strain in report', async () => {
+test('war runTurn default path omits phase_i control strain report', async () => {
     const state = stateWithMunicipalitiesAndControl();
     const { report } = await runTurn(state, { seed: state.meta.seed });
-    assert.ok(report.phase_i_control_strain);
-    assert.strictEqual(typeof report.phase_i_control_strain!.municipalities_updated, 'number');
-    assert.ok(Array.isArray(report.phase_i_control_strain!.faction_totals));
-    assert.ok(report.phases.some((p) => p.name === 'phase-i-control-strain'));
+    assert.strictEqual(report.war_control_strain, undefined);
+    assert.strictEqual(report.phases.some((p) => p.name === 'phase-i-control-strain'), false);
 });

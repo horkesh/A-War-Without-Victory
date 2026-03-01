@@ -138,8 +138,8 @@ export class NewspaperModal {
         const previousTurn = Math.max(0, turn - 1);
 
         // Phase gate: war phases use delta-based TurnEvents instead of Phase 0 events
-        const phase = this.gameState.meta.phase ?? 'phase_0';
-        if (phase !== 'phase_0' && !this.options.startBrief) {
+        const phase = this.gameState.meta.phase ?? 'peace';
+        if (phase !== 'peace' && !this.options.startBrief) {
             return this.generateWarContent();
         }
 
@@ -278,8 +278,8 @@ export class NewspaperModal {
         newspaper.appendChild(columns);
 
         // World briefs sidebar — war phases only
-        const phase = this.gameState.meta.phase ?? 'phase_0';
-        if (phase !== 'phase_0') {
+        const phase = this.gameState.meta.phase ?? 'peace';
+        if (phase !== 'peace') {
             const briefs = this.getWorldBriefs(this.gameState.meta.turn);
             if (briefs.length > 0) {
                 const sidebar = document.createElement('div');

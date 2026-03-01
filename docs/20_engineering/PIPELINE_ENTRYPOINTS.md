@@ -97,6 +97,8 @@ Canon global turn-order hooks (docs/10_canon/Phase_Specifications_v0_5_0.md) map
 
 Phase I steps: `evaluate-events` (first), `phase-i-militia-emergence`, `phase-i-pool-population`, `phase-i-minority-militia-decay`, `phase-i-brigade-reinforcement`, `phase-i-formation-spawn`, `phase-i-alliance-update`, `phase-i-ceasefire-check`, `phase-i-washington-check`, `phase-i-capability-update`, `phase-i-control-flip` (B4 coercion; capability-weighted attacker/defender), `phase-i-displacement-hooks`, `phase-i-control-strain`, `phase-i-authority-update`, `phase-i-jna-transition`, etc. Full order and conditions are in turn_pipeline.ts.
 
+**Bottom-up in Phase II:** When `state.meta.recruitment_mode === 'bottom_up'`, `runTurn` injects the following Phase I steps after the main `phases` loop: phase-i-militia-emergence, compute-siege-state, phase-i-pool-population, phase-i-formation-spawn, activate-corps, promote-formations. This is required so that phase_ii-start scenarios still run bottom-up formation growth. See Engine Invariants §14.10 and docs/40_reports/implemented/20260228_PHASE_G_CALIBRATION_BOTTOM_UP_PIPELINE_FIX.md.
+
 **Events (B1):** `src/sim/events/` — `event_types.ts`, `event_registry.ts`, `evaluate_events.ts`. `evaluate-events` runs first in both Phase I (`phaseIPhases`) and Phase II (`phases`). Deterministic: same seed + turn → same events_fired.
 
 **Authority derivation:** `update-formation-lifecycle` derives municipality authority via `deriveMunicipalityAuthorityMap` (formation_lifecycle.ts) from political control (consolidated/contested/fragmented); used for brigade activation gating.

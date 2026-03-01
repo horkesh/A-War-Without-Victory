@@ -51,6 +51,7 @@ async function collectFiles(dir: string, files: string[] = []): Promise<string[]
     for (const entry of entries) {
         if (entry.isDirectory()) {
             if (IGNORE_DIRS.has(entry.name)) continue;
+            if (entry.name === '_archived') continue;
             if (entry.name === WARROOM_UI_DIR && dir.endsWith('ui')) continue;
             if (entry.name === MAP_UI_DIR && dir.replace(/\\/g, '/').endsWith('ui')) continue;
             await collectFiles(join(dir, entry.name), files);

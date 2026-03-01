@@ -20,7 +20,7 @@ function minimalPhaseIIState(): GameState {
         meta: {
             turn: 25,
             seed: 'pf-cap',
-            phase: 'phase_ii',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -64,9 +64,9 @@ test('buildDisplacementCapacityReport: deterministic and no control flips', () =
     assert.deepStrictEqual(state.political_controllers, { S1: 'RBiH', S2: 'RS' });
 });
 
-test('hooks return 1 when phase !== phase_ii', () => {
+test('hooks return 1 when phase !== war', () => {
     const state = minimalPhaseIIState();
-    state.meta!.phase = 'phase_i';
+    state.meta!.phase = 'peace';
     assert.strictEqual(getMunicipalityDisplacementFactor(state, 'MUN_A'), 1);
     assert.strictEqual(getSettlementDisplacementFactor(state, 'S1'), 1);
 });

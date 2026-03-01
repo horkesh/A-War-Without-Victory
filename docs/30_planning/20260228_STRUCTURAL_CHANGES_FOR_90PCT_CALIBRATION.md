@@ -4,6 +4,8 @@
 **Context**: January 1993 painted target calibration reached 82.1% OSID match (n241) after 7 parameter-tuning iterations. The remaining 135 mismatches are structural — they cannot be resolved by adjusting weights, pool scales, doctrine phases, or standing orders. This document proposes engine-level changes to reach ~90% match.
 **Reference**: `docs/40_reports/implemented/20260228_JAN1993_CALIBRATION_SESSION.md`
 
+**Scenario:** The 40-week calibration scenario uses `recruitment_mode: "player_choice"` (not bottom_up) so that brigades spread to front OSIDs and generate attack orders; see docs/40_reports/implemented/20260228_PHASE_G_CALIBRATION_BOTTOM_UP_PIPELINE_FIX.md.
+
 ---
 
 ## 1. Enclave-Scoped Defense

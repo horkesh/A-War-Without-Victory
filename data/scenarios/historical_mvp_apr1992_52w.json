@@ -1,6 +1,6 @@
 {
   "scenario_id": "historical_mvp_apr1992_52w",
-  "start_phase": "phase_ii",
+  "start_lifecycle_phase": "war",
   "weeks": 52,
   "init_control": "apr1992",
   "init_control_mode": "hybrid_1992",

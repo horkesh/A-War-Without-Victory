@@ -35,7 +35,7 @@ export interface WeeklyReportRow {
     activity?: WeeklyActivityCounts;
     /** Phase H1.9: Baseline ops (enabled + level) when baseline_ops action applied. */
     ops?: { enabled: boolean; level: number };
-    /** Per-faction corps AI summary (Phase II only). */
+    /** Per-faction corps AI summary (war phase only). */
     corps_summary?: WeeklyCorpsSummaryEntry[];
 }
 
@@ -59,7 +59,7 @@ export function buildWeeklyReport(
     const factions = (state.factions ?? []).map((f) => ({
         id: f.id,
         exhaustion: f.profile?.exhaustion ?? 0,
-        supply_pressure: state.phase_ii_supply_pressure?.[f.id]
+        supply_pressure: state.war_supply_pressure?.[f.id]
     })).sort((a, b) => strictCompare(a.id, b.id));
 
     const control_counts: Record<string, number> = {};
@@ -79,8 +79,8 @@ export function buildWeeklyReport(
     let municipality_displacement_count = 0;
     let municipality_displacement_total = 0;
 
-    if (state.meta?.phase === 'phase_i' && state.displacement_state && typeof state.displacement_state === 'object') {
-        // Phase I: derive from displacement_state (displaced_out + lost_population)
+    if (state.meta?.phase === 'war' && state.displacement_state && typeof state.displacement_state === 'object') {
+        // War displacement derivation: from displacement_state (displaced_out + lost_population)
         const ds = state.displacement_state;
         for (const munId of sortedKeys(ds as Record<string, unknown>)) {
             const d = ds[munId] as { displaced_out?: number; lost_population?: number } | undefined;
@@ -90,10 +90,10 @@ export function buildWeeklyReport(
             if (total > 0) {
                 municipality_displacement_count += 1;
                 municipality_displacement_total += total;
-                settlement_displacement_total += total; // Phase I has no per-settlement; use mun total as proxy
+                settlement_displacement_total += total; // No per-settlement split in displacement_state; use municipality total as proxy.
             }
         }
-        settlement_displacement_count = municipality_displacement_count; // 1:1 proxy for Phase I
+        settlement_displacement_count = municipality_displacement_count; // 1:1 proxy when only municipality-level displacement is available.
     } else {
         const sd = state.settlement_displacement ?? {};
         for (const sid of sortedKeys(sd as Record<string, unknown>)) {
@@ -111,8 +111,8 @@ export function buildWeeklyReport(
                 municipality_displacement_total += v;
             }
         }
-        // System A (displacement_state) carries the real Phase I displacement data that flows
-        // into Phase II. System C (settlement_displacement / municipality_displacement) is broken
+        // System A (displacement_state) carries real displacement data used by war mechanics.
+        // System C (settlement_displacement / municipality_displacement) is currently incomplete
         // (always 0) due to the OSID key mismatch in isPressureEligible fixed by Phase 0.
         // Only aggregate System A when System C produced nothing, to prevent double-counting
         // once System C is repaired and starts producing non-zero totals.
@@ -155,3 +155,4 @@ export function buildWeeklyReport(
     }
     return row;
 }
+

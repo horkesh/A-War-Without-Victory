@@ -12,7 +12,7 @@ Order: top = highest priority. Each item: why required for MVP (canon justificat
 - **Canon:** docs/10_canon/context.md (validation before commit); docs/20_engineering/CODE_CANON.md.
 - **Dependencies:** None.
 - **Verification:** `npm run typecheck` exits 0. Fix: (1) `src/state/political_control_init.ts` line 139 — TS2352 Record to SettlementsInitialMaster; (2) `src/ui/warroom/components/FactionOverviewPanel.ts` line 95 — TS2322 string | undefined to string.
-- **Done means:** Zero TypeScript errors; typecheck passes in CI/pre-commit. v0.2: Fixed (political_control_init cast via unknown; FactionOverviewPanel phase ?? 'phase_0'; WarPlanningMap types; vite.config Plugin; vite-env.d.ts).
+- **Done means:** Zero TypeScript errors; typecheck passes in CI/pre-commit. v0.2: Fixed (political_control_init cast via unknown; FactionOverviewPanel phase ?? 'peace'; WarPlanningMap types; vite.config Plugin; vite-env.d.ts).
 
 ---
 

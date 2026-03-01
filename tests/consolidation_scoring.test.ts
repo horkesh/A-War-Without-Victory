@@ -17,7 +17,7 @@ import type { GameState } from '../src/state/game_state.js';
 function makeState(pc: Record<string, string>): GameState {
     return {
         schema_version: 1,
-        meta: { turn: 5, seed: 'cons-test', phase: 'phase_ii' },
+        meta: { turn: 5, seed: 'cons-test', phase: 'war' },
         factions: [],
         formations: {},
         front_segments: {},

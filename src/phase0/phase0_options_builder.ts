@@ -130,8 +130,8 @@ function computeHrhbOrgCoverage(state: GameState): number {
 }
 
 function hasScheduledPhase0Timing(state: GameState): boolean {
-    return Number.isInteger(state.meta.phase_0_scheduled_referendum_turn) &&
-        Number.isInteger(state.meta.phase_0_scheduled_war_start_turn);
+    return Number.isInteger(state.meta.peace_scheduled_referendum_turn) &&
+        Number.isInteger(state.meta.peace_scheduled_war_start_turn);
 }
 
 function isRsDeclared(state: GameState): boolean {
@@ -183,8 +183,8 @@ export function buildPhase0TurnOptions(state: GameState): Phase0TurnOptions {
     };
 
     // Deadline/schedule from scenario so Phase 0 does not hit non_war_terminal before scheduled referendum (Priority C).
-    const refTurn = state.meta.phase_0_scheduled_referendum_turn ?? undefined;
-    const warTurn = state.meta.phase_0_scheduled_war_start_turn ?? undefined;
+    const refTurn = state.meta.peace_scheduled_referendum_turn ?? undefined;
+    const warTurn = state.meta.peace_scheduled_war_start_turn ?? undefined;
     const referendum =
         refTurn != null || warTurn != null
             ? {
@@ -202,3 +202,4 @@ export function buildPhase0TurnOptions(state: GameState): Phase0TurnOptions {
         },
     };
 }
+

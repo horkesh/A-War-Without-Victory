@@ -23,7 +23,7 @@ function stateWithMunicipalities(overrides: Partial<GameState['meta']> = {}): Ga
         meta: {
             turn: 10,
             seed: 'militia-fixture',
-            phase: 'phase_i',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10,
@@ -89,14 +89,14 @@ function stateWithMunicipalities(overrides: Partial<GameState['meta']> = {}): Ga
     };
 }
 
-test('updateMilitiaEmergence populates phase_i_militia_strength when municipalities and org penetration present', () => {
+test('updateMilitiaEmergence populates war_militia_strength when municipalities and org penetration present', () => {
     const state = stateWithMunicipalities();
     const report = updateMilitiaEmergence(state);
-    assert.ok(state.phase_i_militia_strength);
+    assert.ok(state.war_militia_strength);
     assert.strictEqual(report.municipalities_updated, 2);
-    assert.ok(state.phase_i_militia_strength!['MUN_A']);
-    assert.ok(state.phase_i_militia_strength!['MUN_B']);
-    const munA = state.phase_i_militia_strength!['MUN_A'];
+    assert.ok(state.war_militia_strength!['MUN_A']);
+    assert.ok(state.war_militia_strength!['MUN_B']);
+    const munA = state.war_militia_strength!['MUN_A'];
     assert.strictEqual(typeof munA.RBiH, 'number');
     assert.strictEqual(typeof munA.RS, 'number');
     assert.strictEqual(typeof munA.HRHB, 'number');
@@ -106,8 +106,8 @@ test('updateMilitiaEmergence populates phase_i_militia_strength when municipalit
 test('militia strength is bounded [0, 100]', () => {
     const state = stateWithMunicipalities();
     updateMilitiaEmergence(state);
-    for (const munId of Object.keys(state.phase_i_militia_strength!)) {
-        const byFaction = state.phase_i_militia_strength![munId];
+    for (const munId of Object.keys(state.war_militia_strength!)) {
+        const byFaction = state.war_militia_strength![munId];
         for (const faction of Object.keys(byFaction)) {
             const v = byFaction[faction];
             assert.ok(v >= MILITIA_STRENGTH_MIN && v <= MILITIA_STRENGTH_MAX, `${munId}.${faction}=${v}`);
@@ -125,7 +125,7 @@ test('deterministic ordering: same state yields same report order and values', (
     assert.deepStrictEqual(munIds1, munIds2, 'Municipality order must be deterministic (sorted)');
     assert.strictEqual(munIds1[0], 'MUN_A');
     assert.strictEqual(munIds1[1], 'MUN_B');
-    assert.deepStrictEqual(state.phase_i_militia_strength, state2.phase_i_militia_strength, 'Same state must yield same strength map');
+    assert.deepStrictEqual(state.war_militia_strength, state2.war_militia_strength, 'Same state must yield same strength map');
 });
 
 test('computeMilitiaStrength returns 0 when no organizational penetration', () => {
@@ -136,18 +136,17 @@ test('computeMilitiaStrength returns 0 when no organizational penetration', () =
 
 test('RS declared increases militia growth; second runTurn shows higher RS strength in MUN with SDS', async () => {
     const state = stateWithMunicipalities();
-    state.phase_i_militia_strength = {};
+    state.war_militia_strength = {};
     updateMilitiaEmergence(state);
-    const rsFirst = state.phase_i_militia_strength!['MUN_B']?.RS ?? 0;
+    const rsFirst = state.war_militia_strength!['MUN_B']?.RS ?? 0;
     const { nextState } = await runTurn(state, { seed: state.meta.seed });
-    const rsSecond = nextState.phase_i_militia_strength!['MUN_B']?.RS ?? 0;
+    const rsSecond = nextState.war_militia_strength!['MUN_B']?.RS ?? 0;
     assert.ok(rsSecond >= rsFirst, 'RS militia in MUN_B should grow when RS declared');
 });
 
-test('Phase I runTurn includes militia emergence in report', async () => {
+test('war runTurn default path omits phase_i militia emergence report', async () => {
     const state = stateWithMunicipalities();
     const { report } = await runTurn(state, { seed: state.meta.seed });
-    assert.ok(report.phase_i_militia_emergence);
-    assert.strictEqual(report.phase_i_militia_emergence!.municipalities_updated, 2);
-    assert.ok(report.phases.some((p) => p.name === 'phase-i-militia-emergence'));
+    assert.strictEqual(report.phase_i_militia_emergence, undefined);
+    assert.strictEqual(report.phases.some((p) => p.name === 'phase-i-militia-emergence'), false);
 });

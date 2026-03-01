@@ -217,6 +217,7 @@
     "repo:equivalence:r1.3": "tsx scripts/repo/phase_r1_3_equivalence_harness.ts",
     "audit:state": "tsx tools/audit/generate_state_of_game.ts",
     "canon:check": "tsx tools/engineering/canon_check.ts",
+    "lifecycle:check": "tsx tools/engineering/check_lifecycle_legacy_terms.ts",
     "docs:edit:phase3a": "tsx tools/docs/invoke_edit_docx.ts",
     "docs:validate:phase3a": "tsx tools/docs/validate_phase3a_docs_runner.ts",
     "data:extract1990": "tsx scripts/data/extract_1990_municipal_winners_from_docx.ts",

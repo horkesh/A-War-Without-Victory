@@ -103,10 +103,10 @@ export function runControlStrain(
     const munIds = (Object.keys(municipalities) as MunicipalityId[]).slice().sort(strictCompare);
     const warStartTurn = state.meta.war_start_turn ?? null;
 
-    if (!state.phase_i_control_strain) {
-        (state as GameState & { phase_i_control_strain: Record<string, number> }).phase_i_control_strain = {};
+    if (!state.war_control_strain) {
+        (state as GameState & { war_control_strain: Record<string, number> }).war_control_strain = {};
     }
-    const strainByMun = state.phase_i_control_strain!;
+    const strainByMun = state.war_control_strain!;
 
     const factionTotals = new Map<FactionId, number>();
 
@@ -159,7 +159,7 @@ export function getFactionTotalControlStrain(
     factionId: FactionId,
     settlementsByMun: Map<MunicipalityId, SettlementId[]>
 ): number {
-    const strainByMun = state.phase_i_control_strain ?? {};
+    const strainByMun = state.war_control_strain ?? {};
     const municipalities = state.municipalities ?? {};
     let total = 0;
     for (const munId of Object.keys(municipalities) as MunicipalityId[]) {
@@ -169,3 +169,4 @@ export function getFactionTotalControlStrain(
     }
     return total;
 }
+

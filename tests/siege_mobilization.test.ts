@@ -62,7 +62,7 @@ function baseState(overrides: Partial<GameState> = {}): GameState {
         meta: {
             turn: 5,
             seed: 'siege-test',
-            phase: 'phase_i',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 1,
             war_start_turn: 1,
@@ -260,7 +260,7 @@ function makeStateWithStrength(
 ): GameState {
     return baseState({
         municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } },
-        phase_i_militia_strength: { [munId]: { [faction]: strength } },
+        war_militia_strength: { [munId]: { [faction]: strength } },
         militia_pools: {}
     });
 }

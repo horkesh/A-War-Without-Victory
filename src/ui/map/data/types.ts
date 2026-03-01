@@ -164,7 +164,7 @@ export interface LoadedGameState {
     phaseIiExhaustion?: Record<string, number>;
     player_faction?: string | null;
     rbih_hrhb_war_earliest_turn?: number | null;
-    phase_i_alliance_rbih_hrhb?: number | null;
+    war_alliance_rbih_hrhb?: number | null;
     displacementByMun?: Record<string, {
         originalPopulation: number;
         displacedOut: number;
@@ -177,3 +177,4 @@ export interface LoadedGameState {
     enemyZocByFaction?: Record<string, string[]>;
     repositionOrders?: RepositionOrderView[];
 }
+

@@ -1,6 +1,6 @@
 /**
  * Phase F Step 6: Pipeline integration tests.
- * - phase-f-displacement runs only when meta.phase === 'phase_ii'.
+ * - phase-f-displacement runs only when meta.phase === 'war'.
  * - Pipeline order: phase-f-displacement after phase-e-rear-zone-derivation.
  * - No displacement step in phase_0 / phase_i.
  */
@@ -18,7 +18,7 @@ function minimalPhaseIState(): GameState {
         meta: {
             turn: 10,
             seed: 'pf-pipe-i',
-            phase: 'phase_i',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -44,7 +44,7 @@ function minimalPhaseIIState(): GameState {
         meta: {
             turn: 20,
             seed: 'pf-pipe-ii',
-            phase: 'phase_ii',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -64,13 +64,14 @@ function minimalPhaseIIState(): GameState {
     };
 }
 
-test('phase_i runTurn does not run phase-f-displacement', async () => {
+test('runTurn rejects peace phase (state pipeline owns peace)', async () => {
     const state = minimalPhaseIState();
+    state.meta.phase = 'peace';
     const edges: EdgeRecord[] = [{ a: 's1', b: 's2' }];
-    const { report } = await runTurn(state, { seed: 'pf-pipe-i', settlementEdges: edges });
-    const phaseNames = report.phases.map((p) => p.name);
-    assert.ok(!phaseNames.includes('phase-f-displacement'), 'Phase I path must not include phase-f-displacement');
-    assert.strictEqual(report.phase_f_displacement, undefined);
+    await assert.rejects(
+        async () => runTurn(state, { seed: 'pf-pipe-i', settlementEdges: edges }),
+        /use state pipeline runOneTurn for peace/
+    );
 });
 
 test('phase_ii runTurn includes phase-f-displacement after phase-e-rear-zone-derivation', async () => {

@@ -122,7 +122,7 @@ test('createOobFormationsAtPhaseIEntry preserves army_hq corps kind', () => {
     assert.strictEqual(state.formations!['arbih_general_staff']?.kind, 'army_hq');
 });
 
-test('createOobFormationsAtPhaseIEntry uses faction-specific initial personnel (RS 1200, RBiH/HRHB 800)', () => {
+test('createOobFormationsAtPhaseIEntry uses faction-specific initial personnel defaults', () => {
     const state: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 1, seed: 's' },
@@ -145,6 +145,6 @@ test('createOobFormationsAtPhaseIEntry uses faction-specific initial personnel (
     ];
     createOobFormationsAtPhaseIEntry(state, [], brigades, hq, sidToMun);
     assert.strictEqual((state.formations!['vrs_1st'] as { personnel?: number }).personnel, 1200, 'RS brigade starts at 1200');
-    assert.strictEqual((state.formations!['arbih_7th'] as { personnel?: number }).personnel, 800, 'RBiH brigade starts at 800');
+    assert.strictEqual((state.formations!['arbih_7th'] as { personnel?: number }).personnel, 500, 'RBiH brigade starts at 500');
     assert.strictEqual((state.formations!['hvo_1st'] as { personnel?: number }).personnel, 800, 'HRHB brigade starts at 800');
 });

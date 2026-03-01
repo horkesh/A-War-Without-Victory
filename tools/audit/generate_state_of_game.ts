@@ -44,7 +44,7 @@ const MASTER_OVERVIEW = `# Master state of the game overview (AWWV) — v0.2
 | 4 | Map build vs MAP_BUILD_SYSTEM.md | MAP_BUILD_SYSTEM.md (short), _old/MAP_BUILD_SYSTEM.md | tools/map/build_map.ts, scripts/map/* | v0.2: MAP_BUILD_SYSTEM aligned with entrypoints and data contracts |
 | 5 | Settlement substrate shared-border fabric | FORAWWV / ASSISTANT_MISTAKES.log (SVG substrate lacks shared-border) | scripts/map/derive_settlement_substrate_from_svg_sources.ts | Treat as data truth; no tolerance compensation unless canon |
 | 6 | Political control init type assertion | SettlementsInitialMaster type | src/state/political_control_init.ts:139 | v0.2: Resolved — cast via unknown |
-| 7 | Warroom UI type strictness | — | src/ui/warroom/components/FactionOverviewPanel.ts:95 | v0.2: Resolved — phase ?? 'phase_0' |
+| 7 | Warroom UI type strictness | — | src/ui/warroom/components/FactionOverviewPanel.ts:95 | v0.2: Resolved — phase ?? 'peace' |
 | 8 | Golden baselines drift | run_baseline_regression.ts, manifest.json | data/derived/scenario/baselines/ | v0.2: Baselines updated and committed; test:baselines green |
 | 9 | Single canonical scenario runner | CODE_CANON.md, REPO_MAP.md | src/scenario/scenario_runner.ts | No shadow entrypoints; grep for runScenario( usage |
 | 10 | Canon doc set v0.4 vs code assumptions | CANON.md, Engine_Invariants_v0_4_0, Phase_Specifications_v0_4_0 | All state/sim modules | Doc-only review; no mechanics invented |
@@ -160,7 +160,7 @@ Order: top = highest priority. Each item: why required for MVP (canon justificat
 - **Canon:** docs/10_canon/context.md (validation before commit); docs/20_engineering/CODE_CANON.md.
 - **Dependencies:** None.
 - **Verification:** \`npm run typecheck\` exits 0. Fix: (1) \`src/state/political_control_init.ts\` line 139 — TS2352 Record to SettlementsInitialMaster; (2) \`src/ui/warroom/components/FactionOverviewPanel.ts\` line 95 — TS2322 string | undefined to string.
-- **Done means:** Zero TypeScript errors; typecheck passes in CI/pre-commit. v0.2: Fixed (political_control_init cast via unknown; FactionOverviewPanel phase ?? 'phase_0'; WarPlanningMap types; vite.config Plugin; vite-env.d.ts).
+- **Done means:** Zero TypeScript errors; typecheck passes in CI/pre-commit. v0.2: Fixed (political_control_init cast via unknown; FactionOverviewPanel phase ?? 'peace'; WarPlanningMap types; vite.config Plugin; vite-env.d.ts).
 
 ---
 

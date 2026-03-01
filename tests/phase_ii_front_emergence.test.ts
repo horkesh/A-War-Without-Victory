@@ -1,6 +1,6 @@
 /**
  * Phase D Step 2/3: Front emergence and stabilization tests.
- * - No fronts when meta.phase !== 'phase_ii'.
+ * - No fronts when meta.phase !== 'war'.
  * - Fronts emerge deterministically when phase_ii and opposing control on edges.
  * - No geometry created (descriptors have edge_ids only).
  * - Fronts can harden (static) or remain fluid; no front guarantees victory.
@@ -17,7 +17,7 @@ import {
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
-function minimalState(phase: 'phase_0' | 'phase_i' | 'phase_ii', controllers?: Record<string, string | null>): GameState {
+function minimalState(phase: 'peace' | 'war', controllers?: Record<string, string | null>): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: {
@@ -43,29 +43,30 @@ function minimalState(phase: 'phase_0' | 'phase_i' | 'phase_ii', controllers?: R
     };
 }
 
-test('detectPhaseIIFronts returns empty when meta.phase is phase_i', () => {
-    const state = minimalState('phase_i');
+test('detectPhaseIIFronts returns empty when meta.phase is peace', () => {
+    const state = minimalState('war');
+    state.meta.phase = 'peace';
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const fronts = detectPhaseIIFronts(state, edges);
     assert.deepStrictEqual(fronts, []);
 });
 
 test('detectPhaseIIFronts returns empty when meta.phase is phase_0', () => {
-    const state = minimalState('phase_0');
+    const state = minimalState('peace');
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const fronts = detectPhaseIIFronts(state, edges);
     assert.deepStrictEqual(fronts, []);
 });
 
 test('detectPhaseIIFronts returns empty when phase_ii but no opposing control', () => {
-    const state = minimalState('phase_ii', { S1: 'RBiH', S2: 'RBiH', S3: 'RBiH' });
+    const state = minimalState('war', { S1: 'RBiH', S2: 'RBiH', S3: 'RBiH' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const fronts = detectPhaseIIFronts(state, edges);
     assert.deepStrictEqual(fronts, []);
 });
 
 test('detectPhaseIIFronts returns descriptors when phase_ii and opposing control on edge', () => {
-    const state = minimalState('phase_ii', { S1: 'RBiH', S2: 'RS', S3: 'HRHB' });
+    const state = minimalState('war', { S1: 'RBiH', S2: 'RS', S3: 'HRHB' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const fronts = detectPhaseIIFronts(state, edges);
     assert.strictEqual(fronts.length, 1);
@@ -77,7 +78,7 @@ test('detectPhaseIIFronts returns descriptors when phase_ii and opposing control
 });
 
 test('detectPhaseIIFronts produces no geometry (only edge_ids and scalar fields)', () => {
-    const state = minimalState('phase_ii', { S1: 'RBiH', S2: 'RS' });
+    const state = minimalState('war', { S1: 'RBiH', S2: 'RS' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const fronts = detectPhaseIIFronts(state, edges);
     for (const f of fronts) {
@@ -89,7 +90,7 @@ test('detectPhaseIIFronts produces no geometry (only edge_ids and scalar fields)
 });
 
 test('detectPhaseIIFronts is deterministic: same state and edges yield same result', () => {
-    const state = minimalState('phase_ii', { S1: 'RBiH', S2: 'RS', S3: 'HRHB', S4: 'RBiH' });
+    const state = minimalState('war', { S1: 'RBiH', S2: 'RS', S3: 'HRHB', S4: 'RBiH' });
     const edges: EdgeRecord[] = [
         { a: 'S1', b: 'S2' },
         { a: 'S3', b: 'S4' }
@@ -100,7 +101,7 @@ test('detectPhaseIIFronts is deterministic: same state and edges yield same resu
 });
 
 test('detectPhaseIIFronts returns empty when settlementEdges is empty', () => {
-    const state = minimalState('phase_ii', { S1: 'RBiH', S2: 'RS' });
+    const state = minimalState('war', { S1: 'RBiH', S2: 'RS' });
     const fronts = detectPhaseIIFronts(state, []);
     assert.deepStrictEqual(fronts, []);
 });
@@ -128,7 +129,7 @@ test('deriveFrontStability returns oscillating when edge has streak 1 and max_st
 });
 
 test('detectPhaseIIFronts returns static stability when segment has active_streak >= STABILIZATION_TURNS', () => {
-    const state = minimalState('phase_ii', { S1: 'RBiH', S2: 'RS' });
+    const state = minimalState('war', { S1: 'RBiH', S2: 'RS' });
     state.front_segments = {
         S1__S2: {
             edge_id: 'S1__S2',
@@ -149,7 +150,7 @@ test('detectPhaseIIFronts returns static stability when segment has active_strea
 });
 
 test('no front guarantees victory: descriptors do not contain control or victory fields', () => {
-    const state = minimalState('phase_ii', { S1: 'RBiH', S2: 'RS' });
+    const state = minimalState('war', { S1: 'RBiH', S2: 'RS' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const fronts = detectPhaseIIFronts(state, edges);
     for (const f of fronts) {

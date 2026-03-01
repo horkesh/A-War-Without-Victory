@@ -118,7 +118,7 @@ export class NewsTicker {
      */
     private generateWarEvents(gameState: GameState): string[] {
         const phase = gameState.meta.phase;
-        if (!phase || phase === 'phase_0') return [];
+        if (!phase || phase === 'peace') return [];
 
         const playerFaction: FactionId =
             gameState.meta.player_faction ?? (gameState.factions[0]?.id as FactionId) ?? 'RBiH';

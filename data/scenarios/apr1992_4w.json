@@ -1,6 +1,6 @@
 {
   "scenario_id": "apr1992_4w",
-  "start_phase": "phase_ii",
+  "start_lifecycle_phase": "war",
   "weeks": 4,
   "init_control": "apr1992",
   "init_control_mode": "hybrid_1992",

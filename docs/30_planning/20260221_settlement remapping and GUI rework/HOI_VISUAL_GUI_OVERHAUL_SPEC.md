@@ -7,6 +7,8 @@
 **Supersedes:** GUI_DESIGN_BLUEPRINT.md §1, §6, §10, §11, §14, §21 (visual identity sections)  
 **Preserves:** All simulation mechanics, determinism, data bindings
 
+**Authority:** This document is the **authoritative aesthetic and look-and-feel target** for the map and GUI. Implementation status, technical stack choices, and component-level details are tracked in **AWWV_GUI_ARCHITECTURE_REWORK_v2.md** (§0). Use this spec for design decisions; use the v2 doc for what is built and what is next.
+
 ---
 
 ## 1. Design Vision Shift
@@ -351,8 +353,9 @@ The **Army** tab is the default and contains the corps cards, brigade rows, and 
 - Add a **"Focus on Map"** button that pans/zooms to the selected entity
 - Brigade detail: add a visual AoR mini-map (small diagram showing the brigade's operational settlements, front edges highlighted)
 - Settlement detail: add a strategic importance indicator (diamond size from §2.6)
+- A richer 7-tab settlement detail view can be revisited if needed; start with the simple SelectionPanel.
 
-A richer 7-tab settlement detail view can be revisited if needed; start with the simple SelectionPanel.
+**Implementation (React+MapLibre app):** Position the selection panel on the right using **inline styles** as the source of truth (`position: absolute`, `left: auto`, `right`, `top`, `bottom`, `width`, `zIndex`, `direction: ltr`) so Tailwind purge or RTL cannot override. For layout verification in development, `?showPanel=1` (dev-only) shows the selection panel without requiring a map click.
 
 ### 3.8 Panel interaction patterns
 
@@ -658,6 +661,7 @@ Phase B baseline now exists in `src/ui/map/`: Army/Situation tabs, Situation sum
 - **Data bindings** — all GUI elements still bind to the same state fields
 - **Keyboard shortcuts** — same set, same keys (extended per §10 Phase C)
 - **Determinism** — visual-only changes
+- **Canonical map/GUI:** The **React + MapLibre map app** (`src/ui/map/`, run via `npm run dev:map`) is the canonical player-facing GUI. Legacy `map_hoi.html` and `tactical_map.html` are archived; do not target them for new GUI work.
 - **Map rendering:** MapLibre GL JS with PMTiles. **GUI:** React + Tailwind + Zustand.
 - **AAR modal** — same content, restyled
 - **Order system mechanics** — same workflow (select → target → confirm), better visual feedback

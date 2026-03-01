@@ -10,7 +10,7 @@ import { calculateFactionProductionBonus, ensureProductionFacilities } from '../
 function makeState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 30, seed: 'prod-test', phase: 'phase_ii' },
+        meta: { turn: 30, seed: 'prod-test', phase: 'war' },
         factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
@@ -55,9 +55,9 @@ test('production facilities grant deterministic bonus by controlling faction', (
 
 test('production bonus reduces supply-pressure growth without decreasing current pressure', () => {
     const state = makeState();
-    state.phase_ii_supply_pressure = { RBiH: 10, RS: 10, HRHB: 10 };
+    state.war_supply_pressure = { RBiH: 10, RS: 10, HRHB: 10 };
     // Alliance must be broken so the RBiH–HRHB edge counts as a front edge
-    state.phase_i_alliance_rbih_hrhb = -1;
+    state.war_alliance_rbih_hrhb = -1;
     const edges: EdgeRecord[] = [{ a: 'SZ1', b: 'SV1' }];
     updatePhaseIISupplyPressure(
         state,
@@ -74,6 +74,6 @@ test('production bonus reduces supply-pressure growth without decreasing current
         undefined,
         { RBiH: 5, RS: 0, HRHB: 0 }
     );
-    assert.ok((state.phase_ii_supply_pressure?.RBiH ?? 0) >= 10, 'pressure must remain monotonic');
-    assert.ok((state.phase_ii_supply_pressure?.RBiH ?? 0) < (state.phase_ii_supply_pressure?.HRHB ?? 0), 'production bonus should reduce growth relative to higher-isolation side');
+    assert.ok((state.war_supply_pressure?.RBiH ?? 0) >= 10, 'pressure must remain monotonic');
+    assert.ok((state.war_supply_pressure?.RBiH ?? 0) < (state.war_supply_pressure?.HRHB ?? 0), 'production bonus should reduce growth relative to higher-isolation side');
 });

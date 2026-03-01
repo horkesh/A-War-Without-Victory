@@ -33,7 +33,7 @@ test('V1: no war without referendum — eligible but never held, run to deadline
         s.meta.war_start_turn === undefined || s.meta.war_start_turn === null,
         'war_start_turn must be absent'
     );
-    assert.notStrictEqual(s.meta.phase, 'phase_i', 'meta.phase must never become phase_i');
+    assert.notStrictEqual(s.meta.phase, 'war', 'meta.phase must never become phase_i');
     assert.strictEqual(s.meta.game_over, true, 'terminal non-war outcome must be reached');
     assert.strictEqual(s.meta.outcome, OUTCOME_NON_WAR_TERMINAL);
 });

@@ -4,7 +4,7 @@ export function makeMockLoadedGameState(): LoadedGameState {
   return {
     label: 'Turn 12 (phase_ii)',
     turn: 12,
-    phase: 'phase_ii',
+    phase: 'war',
     formations: [
       {
         id: 'rbih_brig_1',

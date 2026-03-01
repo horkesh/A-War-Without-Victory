@@ -45,7 +45,7 @@ export interface DisplacementTriggerReport {
 
 /**
  * Evaluate displacement triggers for this turn.
- * Only runs when meta.phase === 'phase_ii'. Returns empty deltas otherwise.
+ * Only runs when meta.phase === 'war'. Returns empty deltas otherwise.
  *
  * Deterministic: stable sort over settlement IDs; same inputs => same outputs.
  * Does not mutate state; only reads front_pressure, political_controllers, meta.
@@ -73,7 +73,7 @@ export function evaluateDisplacementTriggers(
         front_active_set_size: 0,
         displacement_trigger_eligible_size: 0
     };
-    if (state.meta?.phase !== 'phase_ii') {
+    if (state.meta?.phase !== 'war') {
         return { deltas, report: emptyReport };
     }
 
@@ -135,3 +135,4 @@ export function evaluateDisplacementTriggers(
         }
     };
 }
+

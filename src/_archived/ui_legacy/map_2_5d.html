@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2.5D Map — BiH Municipal — AWWV</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0d0d1a; }
+    #canvas-container { width: 100%; height: 100%; }
+    #message {
+      position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      padding: 1.5rem 2rem; background: rgba(0,0,0,0.85); color: #00e878;
+      font-family: 'IBM Plex Mono', monospace; font-size: 14px; white-space: pre-wrap;
+      border: 1px solid #00e878; border-radius: 8px; max-width: 90%; display: none;
+    }
+    #message.visible { display: block; }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+  <div id="message" aria-live="polite"></div>
+  <script type="module" src="./map_2_5d.ts"></script>
+</body>
+</html>

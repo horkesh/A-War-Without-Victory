@@ -112,8 +112,8 @@ export function evaluateWashingtonPreconditions(state: GameState): WashingtonPre
     const w5 = rsShare > WASH_RS_THREAT_SHARE;
 
     // W6: Combined exhaustion
-    const rbihExhaustion = state.phase_ii_exhaustion?.['RBiH'] ?? 0;
-    const hrhbExhaustion = state.phase_ii_exhaustion?.['HRHB'] ?? 0;
+    const rbihExhaustion = state.war_exhaustion?.['RBiH'] ?? 0;
+    const hrhbExhaustion = state.war_exhaustion?.['HRHB'] ?? 0;
     const combinedExhaustion = rbihExhaustion + hrhbExhaustion;
     const w6 = combinedExhaustion > WASH_COMBINED_EXHAUSTION;
 
@@ -135,7 +135,7 @@ function applyWashingtonEffects(state: GameState): void {
     const rhs = state.rbih_hrhb_state!;
 
     // Lock alliance
-    state.phase_i_alliance_rbih_hrhb = WASH_ALLIANCE_LOCK_VALUE;
+    state.war_alliance_rbih_hrhb = WASH_ALLIANCE_LOCK_VALUE;
     rhs.washington_signed = true;
     rhs.washington_turn = state.meta.turn;
 
@@ -210,3 +210,4 @@ export function checkAndApplyWashington(state: GameState): WashingtonCheckReport
 
     return { preconditions, fired: true, already_signed: false };
 }
+

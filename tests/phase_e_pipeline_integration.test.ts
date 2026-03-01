@@ -2,7 +2,7 @@
  * Phase E Step 6: Pipeline integration tests.
  * - Pipeline order correct (Phase E after Phase II consolidation)
  * - Phase II unchanged (Phase E does not modify Phase II logic)
- * - No early execution (Phase E only runs when meta.phase === 'phase_ii')
+ * - No early execution (Phase E only runs when meta.phase === 'war')
  */
 
 import assert from 'node:assert';
@@ -14,7 +14,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function minimalPhaseIIState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'pipeline-test', phase: 'phase_ii', referendum_held: true, referendum_turn: 0, war_start_turn: 1 },
+        meta: { turn: 10, seed: 'pipeline-test', phase: 'war', referendum_held: true, referendum_turn: 0, war_start_turn: 1 },
         factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
@@ -59,17 +59,14 @@ test('Pipeline: Phase E steps run in correct order (after phase-ii-consolidation
     assert.ok(rearIdx > aorIdx, 'phase-e-rear-zone-derivation after phase-e-aor-derivation');
 });
 
-test('Pipeline: Phase E does not run when phase_i', async () => {
+test('Pipeline: peace phase is rejected by war pipeline', async () => {
     const state = minimalPhaseIIState();
-    state.meta.phase = 'phase_i';
+    state.meta.phase = 'peace';
     const edges = [{ a: 'S1', b: 'S2' }];
-    const result = await runTurn(state, { seed: 'test', settlementEdges: edges });
-
-    const phaseNames = result.report.phases.map((p) => p.name);
-    assert.ok(!phaseNames.includes('phase-e-pressure-update'), 'phase-e-pressure-update does not run in phase_i');
-    assert.ok(!phaseNames.includes('phase-ii-front-emergence'), 'phase-ii-front-emergence does not run in phase_i');
-    assert.ok(!phaseNames.includes('phase-e-aor-derivation'), 'phase-e-aor-derivation does not run in phase_i');
-    assert.ok(!phaseNames.includes('phase-e-rear-zone-derivation'), 'phase-e-rear-zone-derivation does not run in phase_i');
+    await assert.rejects(
+        () => runTurn(state, { seed: 'test', settlementEdges: edges }),
+        /use state pipeline runOneTurn for peace/
+    );
 });
 
 test('Pipeline: Phase E reports are populated when phase_ii', async () => {
@@ -86,10 +83,10 @@ test('Pipeline: Phase E reports are populated when phase_ii', async () => {
 
 test('Pipeline: Phase II unchanged (Phase E does not modify Phase II logic)', async () => {
     const state = minimalPhaseIIState();
-    state.phase_ii_supply_pressure = { RBiH: 10, RS: 15 };
-    state.phase_ii_exhaustion = { RBiH: 5, RS: 8 };
-    const originalPressure = { ...state.phase_ii_supply_pressure };
-    const originalExhaustion = { ...state.phase_ii_exhaustion };
+    state.war_supply_pressure = { RBiH: 10, RS: 15 };
+    state.war_exhaustion = { RBiH: 5, RS: 8 };
+    const originalPressure = { ...state.war_supply_pressure };
+    const originalExhaustion = { ...state.war_exhaustion };
 
     const edges = [{ a: 'S1', b: 'S2' }];
     const result = await runTurn(state, { seed: 'test', settlementEdges: edges });

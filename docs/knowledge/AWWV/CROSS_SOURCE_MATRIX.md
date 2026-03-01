@@ -23,7 +23,7 @@
 | **Rulebook / Systems Manual / Engine Invariants** | Design canon hierarchy; code must not contradict docs | Deep (both) | Yes — CANON.md |
 | **Militia system** | Municipality-based militia pools; formation generation (CLI, deterministic); quality levels | Medium (both) | Yes — militia implementation, Claude “Militia system game development” |
 | **Negotiation / treaties** | Negotiation pressure (monotonic); negotiation capital; treaty offers; territorial/institutional clauses; peace ends war | Deep (ChatGPT), Shallow (Claude) | Partially — treaty system implemented; capital/spend ledger in design |
-| **Mistake log & ledger** | PROJECT_LEDGER, ASSISTANT_MISTAKES.log; do not repeat past mistakes | Medium (both) | Yes — context.md |
+| **Mistake log & ledger** | PROJECT_LEDGER, napkin (.claude/napkin.md); do not repeat past mistakes | Medium (both) | Yes — context.md |
 
 ---
 

@@ -1,20 +1,24 @@
 import { useGameStore } from '../store/gameStore';
-import { getByOsid } from '../utils/osidLookup';
-import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getFormationsAtOsid } from '../utils/formationAtOsid';
-import { FACTION_COLORS_SUBTLE } from '../utils/theme';
+import { SettlementDetailContent } from './SettlementDetailContent';
 
 export function SelectionPanel() {
   const selectedOsid = useGameStore((s) => s.selectedOsid);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
+  const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
 
   if (!selectedOsid) return null;
 
-  const controller = getByOsid(loadedGameState?.controlBySettlement, selectedOsid);
-  const status = getByOsid(loadedGameState?.statusBySettlement, selectedOsid);
   const formations = getFormationsAtOsid(loadedGameState?.formations, selectedOsid);
+  const formationsForDetail = formations.map((f) => ({
+    id: f.id,
+    name: f.name,
+    faction: f.faction,
+    personnel: f.personnel,
+    kind: f.kind,
+  }));
 
   return (
     <div
@@ -42,49 +46,19 @@ export function SelectionPanel() {
         </button>
       </div>
 
-      <div className="p-4 space-y-3 overflow-auto">
-        <div className="font-mono text-sm text-text-primary" title={selectedOsid}>
-          {getOsidDisplayName(selectedOsid, osidDisplayNames)}
-        </div>
-
-        {controller && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-text-secondary">Controller:</span>
-            <span className={`text-xs font-medium ${FACTION_COLORS_SUBTLE[controller] ?? 'text-text-primary'}`}>
-              {controller}
-            </span>
-            {status && (
-              <span className="text-xs text-text-secondary uppercase">{status}</span>
-            )}
-          </div>
-        )}
-
-        {formations.length > 0 && (
-          <div className="space-y-1.5 pt-2 border-t border-panel-border">
-            <span className="text-xs text-text-secondary">
-              Formations ({formations.length}):
-            </span>
-            {formations.slice(0, 8).map((f) => (
-              <div key={f.id} className="flex items-center gap-2 text-xs py-0.5">
-                <span className={FACTION_COLORS_SUBTLE[f.faction] ?? 'text-text-primary'}>●</span>
-                <span className="text-text-primary truncate">{f.name}</span>
-                <span className="text-text-secondary ml-auto">{f.kind}</span>
-                {f.personnel != null && (
-                  <span className="text-text-secondary">{f.personnel.toLocaleString()}</span>
-                )}
-              </div>
-            ))}
-            {formations.length > 8 && (
-              <div className="text-xs text-text-secondary pt-0.5">
-                +{formations.length - 8} more
-              </div>
-            )}
-          </div>
-        )}
-
-        {!controller && !loadedGameState && (
-          <div className="text-xs text-text-secondary italic">
-            Load a save file to see control and formation data.
+      <div className="p-4 overflow-auto">
+        <SettlementDetailContent
+          osid={selectedOsid}
+          osidDisplayNames={osidDisplayNames}
+          osidPropertiesMap={osidPropertiesMap}
+          controlBySettlement={loadedGameState?.controlBySettlement}
+          formationsAtOsid={formationsForDetail}
+          displacementByMun={loadedGameState?.displacementByMun ?? undefined}
+          variant="panel"
+        />
+        {!loadedGameState && (
+          <div className="text-xs text-text-secondary italic mt-3">
+            Load a save file to see control, formations, and population change.
           </div>
         )}
       </div>

@@ -112,7 +112,7 @@ export function getBotStrategyProfile(faction: FactionId): BotStrategyProfile {
 }
 
 export function resolveAggressionForPhase(profile: BotStrategyProfile, phase: PhaseName | undefined): number {
-    if (phase === 'phase_ii') return profile.late_war_aggression;
+    if (phase === 'war') return profile.late_war_aggression;
     return profile.early_war_aggression;
 }
 
@@ -155,7 +155,7 @@ export function resolveAggression(profile: BotStrategyProfile, phase: PhaseName 
     let allianceMod = 0;
     if (state) {
         const rhs = state.rbih_hrhb_state;
-        const allianceValue = state.phase_i_alliance_rbih_hrhb;
+        const allianceValue = state.war_alliance_rbih_hrhb;
         if (rhs && allianceValue !== undefined && allianceValue !== null) {
             if (profile.faction === 'HRHB') {
                 // HRHB: patron pressure drives confrontation — higher aggression when alliance strained
@@ -186,3 +186,4 @@ export function resolveAggression(profile: BotStrategyProfile, phase: PhaseName 
         planned_ops_aggression: clamp01(Math.max(profile.planned_ops_min_aggression, broad))
     };
 }
+

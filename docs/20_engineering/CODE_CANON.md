@@ -2,9 +2,9 @@
 
 ## Canon Precedence for Code
 The codebase follows the same precedence rules as canonical docs:
-- Engine invariants: `docs/10_canon/Engine_Invariants_v0_5_0.md`
-- Rulebook: `docs/10_canon/Rulebook_v0_5_0.md`
-- Systems Manual: `docs/10_canon/Systems_Manual_v0_5_0.md`
+- Engine invariants: `docs/10_canon/Engine_Invariants_v0_6_0.md`
+- Rulebook: `docs/10_canon/Rulebook_v0_6_0.md`
+- Systems Manual: `docs/10_canon/Systems_Manual_v0_6_0.md`
 - FORAWWV addenda: `docs/FORAWWV.md`
 - Code: this repository
 
@@ -37,7 +37,7 @@ Primary entrypoints (from deterministic discovery):
 - Serialization core: `src/state/serialize.ts` and `src/state/serializeGameState.ts`
 - Minimal smoke entrypoint: `src/index.ts`
 - Map pipeline: `docs/20_engineering/MAP_BUILD_SYSTEM.md` (scripts under `scripts/map/`)
-- Tactical Map (standalone map GUI): `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` (`src/ui/map/`; `npm run dev:map`, port 3001)
+- Tactical Map (canonical map GUI): `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` §0 and `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — React + MapLibre app in `src/ui/map/`; `npm run dev:map`
 
 ## Single Source of Truth for Entry Points
 Only the entrypoints listed in `docs/20_engineering/REPO_MAP.md` and `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`,

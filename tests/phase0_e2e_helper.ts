@@ -51,7 +51,7 @@ export function buildMinimalPhase0State(opts?: {
         meta: {
             turn,
             seed,
-            phase: 'phase_0'
+            phase: 'peace'
         },
         factions: [
             { id: 'RBiH', ...DEFAULT_FACTION },

@@ -127,11 +127,11 @@ async function runOne(
 
     const finalSaveRaw = await readFile(join(outDir, 'final_save.json'), 'utf8');
     const finalSave = JSON.parse(finalSaveRaw) as {
-        phase_ii_exhaustion?: Record<string, number>;
+        war_exhaustion?: Record<string, number>;
         settlement_displacement?: Record<string, number>;
     };
 
-    const exhaustion_end = recordFromFactionKeys(finalSave.phase_ii_exhaustion);
+    const exhaustion_end = recordFromFactionKeys(finalSave.war_exhaustion);
     const disp = displacementStats(finalSave.settlement_displacement);
 
     const metrics: PerRunMetrics = {
@@ -302,3 +302,4 @@ export async function runSensitivityHarness(config: SensitivityConfig): Promise<
 
     return report;
 }
+

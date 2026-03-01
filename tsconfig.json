@@ -8,8 +8,15 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "dist",
-    "types": ["node"]
+    "types": ["node"],
+    "jsx": "react-jsx"
   },
   "include": ["src", "tests"],
-  "exclude": ["dist", "node_modules"]
+  "exclude": [
+    "dist",
+    "node_modules",
+    "src/ui/map/.storybook",
+    "src/ui/map/stories",
+    "src/ui/map/__mocks__"
+  ]
 }

@@ -133,7 +133,7 @@ export function processMinorityFlight(
         routed_total: 0
     };
 
-    if (state.meta.phase !== 'phase_ii') return report;
+    if (state.meta.phase !== 'war') return report;
     if (!population1991ByMun) return report;
 
     const warStartTurn = typeof state.meta.war_start_turn === 'number' ? state.meta.war_start_turn : 0;
@@ -300,3 +300,4 @@ export function processMinorityFlight(
 
     return report;
 }
+

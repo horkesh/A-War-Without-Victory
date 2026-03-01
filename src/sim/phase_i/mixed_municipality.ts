@@ -46,7 +46,7 @@ export function computeAlliedDefense(
     controllerFaction: FactionId,
     controllerMilitia: number
 ): number {
-    const allianceValue = state.phase_i_alliance_rbih_hrhb;
+    const allianceValue = state.war_alliance_rbih_hrhb;
     if (allianceValue === undefined || allianceValue === null) {
         // Absent = allied; apply coordination bonus
         return controllerMilitia;
@@ -63,7 +63,7 @@ export function computeAlliedDefense(
     if (allianceValue <= ALLIED_THRESHOLD) return controllerMilitia;
 
     // Get ally militia in this mun
-    const strengthByMun = state.phase_i_militia_strength ?? {};
+    const strengthByMun = state.war_militia_strength ?? {};
     const byFaction = strengthByMun[munId] ?? {};
     const allyMilitia = byFaction[ally] ?? 0;
 
@@ -86,7 +86,7 @@ export function updateMixedMunicipalitiesList(state: GameState): void {
     const rhs = state.rbih_hrhb_state;
     if (!rhs) return;
 
-    const strengthByMun = state.phase_i_militia_strength ?? {};
+    const strengthByMun = state.war_militia_strength ?? {};
     const mixedSet = new Set<string>(rhs.allied_mixed_municipalities);
 
     // Check all muns in militia_strength for dual RBiH+HRHB presence
@@ -125,3 +125,4 @@ export function updateMixedMunicipalitiesList(state: GameState): void {
     // Sort deterministically
     rhs.allied_mixed_municipalities = [...mixedSet].sort();
 }
+

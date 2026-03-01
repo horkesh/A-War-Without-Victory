@@ -173,7 +173,9 @@
       "Bash(rm:*)",
       "Bash(cd:*)",
       "WebSearch",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(start:*)",
+      "Bash(cd \"F:\\\\A-War-Without-Victory\" && mv tools/check_run.js tools/check_run.cjs && node tools/check_run.cjs 2>&1)"
     ]
   }
 }

@@ -17,7 +17,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function minimalPhaseIIState(controllers?: Record<string, string | null>): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'cf-test', phase: 'phase_ii', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
+        meta: { turn: 20, seed: 'cf-test', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
         factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
@@ -35,7 +35,7 @@ function minimalPhaseIIState(controllers?: Record<string, string | null>): GameS
 
 test('identical state yields identical friction multiplier (no randomness)', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
-    state.phase_ii_exhaustion = { RBiH: 10, RS: 15, HRHB: 0 };
+    state.war_exhaustion = { RBiH: 10, RS: 15, HRHB: 0 };
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const a = getPhaseIICommandFrictionMultiplier(state, 'RBiH', edges);
     const b = getPhaseIICommandFrictionMultiplier(state, 'RBiH', edges);
@@ -44,9 +44,9 @@ test('identical state yields identical friction multiplier (no randomness)', () 
 
 test('friction multiplier increases with exhaustion (higher = more friction)', () => {
     const stateLow = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
-    stateLow.phase_ii_exhaustion = { RBiH: 0, RS: 0, HRHB: 0 };
+    stateLow.war_exhaustion = { RBiH: 0, RS: 0, HRHB: 0 };
     const stateHigh = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
-    stateHigh.phase_ii_exhaustion = { RBiH: 100, RS: 100, HRHB: 100 };
+    stateHigh.war_exhaustion = { RBiH: 100, RS: 100, HRHB: 100 };
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const multLow = getPhaseIICommandFrictionMultiplier(stateLow, 'RBiH', edges);
     const multHigh = getPhaseIICommandFrictionMultiplier(stateHigh, 'RBiH', edges);
@@ -54,16 +54,16 @@ test('friction multiplier increases with exhaustion (higher = more friction)', (
     assert.ok(multLow >= 1 && multHigh >= 1);
 });
 
-test('returns 1 when meta.phase is phase_i', () => {
+test('returns 1 when meta.phase is peace', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
-    state.meta.phase = 'phase_i';
+    state.meta.phase = 'peace';
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     assert.strictEqual(getPhaseIICommandFrictionMultiplier(state, 'RBiH', edges), 1);
 });
 
 test('getPhaseIICommandFrictionMultipliers returns record for all factions in deterministic order', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
-    state.phase_ii_exhaustion = { RBiH: 5, RS: 5, HRHB: 5 };
+    state.war_exhaustion = { RBiH: 5, RS: 5, HRHB: 5 };
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const multipliers = getPhaseIICommandFrictionMultipliers(state, edges);
     assert.ok(typeof multipliers['RBiH'] === 'number');

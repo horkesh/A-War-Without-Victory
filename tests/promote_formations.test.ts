@@ -37,7 +37,7 @@ function makeState(formations: Record<string, FormationState>): GameState {
         meta: {
             turn: 10,
             seed: 'promote-test',
-            phase: 'phase_i',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 2,
             war_start_turn: 3,

@@ -21,7 +21,7 @@ const MAX_MULTIPLIER = 10;
 /**
  * Compute command friction multiplier for a faction in Phase II.
  * Returns a value >= 1; higher = more friction = worse execution.
- * Only meaningful when meta.phase === 'phase_ii'; returns 1 otherwise.
+ * Only meaningful when meta.phase === 'war'; returns 1 otherwise.
  * Deterministic: same state + factionId → same result.
  */
 export function getPhaseIICommandFrictionMultiplier(
@@ -29,11 +29,11 @@ export function getPhaseIICommandFrictionMultiplier(
     factionId: FactionId,
     settlementEdges: EdgeRecord[]
 ): number {
-    if (state.meta.phase !== 'phase_ii') {
+    if (state.meta.phase !== 'war') {
         return 1;
     }
 
-    const exhaustion = (state.phase_ii_exhaustion ?? {})[factionId] ?? 0;
+    const exhaustion = (state.war_exhaustion ?? {})[factionId] ?? 0;
     const frontEdges = computeFrontEdges(state, settlementEdges);
     let frontEdgeCount = 0;
     for (const fe of frontEdges) {
@@ -59,3 +59,4 @@ export function getPhaseIICommandFrictionMultipliers(
     }
     return out;
 }
+

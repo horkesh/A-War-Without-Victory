@@ -23,7 +23,7 @@ export function evaluateEvents(
 ): EventsEvaluationReport {
     const fired: FiredEvent[] = [];
     const phase = state.meta.phase;
-    if (phase !== 'phase_i' && phase !== 'phase_ii') {
+    if (phase !== 'war') {
         return { fired };
     }
 
@@ -39,3 +39,4 @@ export function evaluateEvents(
 
     return { fired };
 }
+

@@ -17,7 +17,7 @@ import { validateState } from '../src/validate/validate.js';
 function createTestState(turn: number = 5): GameState {
     return {
         schema_version: 1,
-        meta: { turn, seed: 'test' },
+        meta: { turn, seed: 'test', phase: 'war' },
         factions: [
             {
                 id: 'RBiH',

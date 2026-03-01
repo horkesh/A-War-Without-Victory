@@ -17,7 +17,7 @@ function minimalPhaseIIState(): GameState {
         meta: {
             turn: 20,
             seed: 'pipeline-ii',
-            phase: 'phase_ii',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -43,7 +43,7 @@ function minimalPhaseIState(): GameState {
         meta: {
             turn: 10,
             seed: 'pipeline-i',
-            phase: 'phase_i',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10
@@ -61,8 +61,8 @@ function minimalPhaseIState(): GameState {
         militia_pools: {},
         political_controllers: { s1: 'RBiH', s2: 'RS' },
         municipalities: { MUN_A: { stability_score: 50 }, MUN_B: { stability_score: 50 } },
-        phase_i_consolidation_until: {},
-        phase_i_militia_strength: { MUN_A: { RBiH: 30, RS: 60, HRHB: 10 }, MUN_B: { RBiH: 25, RS: 70, HRHB: 5 } }
+        war_consolidation_until: {},
+        war_militia_strength: { MUN_A: { RBiH: 30, RS: 60, HRHB: 10 }, MUN_B: { RBiH: 25, RS: 70, HRHB: 5 } }
     };
 }
 
@@ -78,10 +78,10 @@ test('Phase II runTurn includes phase-ii-consolidation after supply-resolution',
     assert.ok(idxPhaseII > idxSupply, 'phase-ii-consolidation should run after supply-resolution');
 });
 
-test('Phase I runTurn reports only Phase I phase names (no phase-ii-consolidation)', async () => {
+test('war runTurn includes phase-ii-consolidation on default path', async () => {
     const state = minimalPhaseIState();
     const { report } = await runTurn(state, { seed: 'pipeline-i' });
     const names = report.phases.map((p) => p.name);
-    assert.ok(!names.includes('phase-ii-consolidation'));
-    assert.ok(names.includes('phase-i-control-flip'));
+    assert.ok(names.includes('phase-ii-consolidation'));
+    assert.ok(!names.includes('phase-i-control-flip'));
 });

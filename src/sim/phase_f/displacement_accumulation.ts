@@ -36,7 +36,7 @@ export function applySettlementDisplacementDeltas(
 ): SettlementAccumulationReport {
     const report: SettlementAccumulationReport = { updated: [], before: {}, after: {} };
 
-    if (state.meta?.phase !== 'phase_ii') {
+    if (state.meta?.phase !== 'war') {
         return report;
     }
 
@@ -73,3 +73,4 @@ export function applySettlementDisplacementDeltas(
 
     return report;
 }
+

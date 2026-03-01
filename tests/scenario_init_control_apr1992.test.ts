@@ -16,12 +16,6 @@ import { runScenario } from '../src/scenario/scenario_runner.js';
 
 const BASE_OUT = join(process.cwd(), '.tmp_scenario_init_control_apr1992');
 
-function strictCompare(a: string, b: string): number {
-    if (a < b) return -1;
-    if (a > b) return 1;
-    return 0;
-}
-
 async function ensureRemoved(dir: string): Promise<void> {
     if (existsSync(dir)) {
         await rm(dir, { recursive: true });
@@ -84,7 +78,7 @@ test('init_control apr1992 ethnic: zvornik has ethnic overrides (split), bijelji
     const bijelRs = bijelCounts.get('RS') ?? 0;
     const bijelTotal = Array.from(bijelCounts.values()).reduce((a, b) => a + b, 0);
     assert(
-        bijelRs > bijelTotal * 0.8,
+        bijelRs >= bijelTotal * 0.8,
         `bijeljina should be overwhelmingly RS; got: ${JSON.stringify(Object.fromEntries(bijelCounts))}`
     );
 

@@ -100,7 +100,7 @@ Each Paradox specialist is asked one question to surface their view of the state
 
 4. **Phase 3 (canon war start).** Treat “no referendum → no war” and “referendum → war at correct turn” as the next canon deliverable; scenario/harness and gameplay programmer to own tests and pipeline integration.
 5. **Phase 4 (turn pipeline → GUI).** Wire Phase I (or Phase 0→I transition) turn execution to the warroom; UI/UX and Graphics to define minimal “state of the game” views (control, formations, or key stats).
-6. **Retrospective.** After Phase 4 is integrated, invoke Retrospective Analyst to compare spec vs code and handoff quality, and update ASSISTANT_MISTAKES.log or process if needed.
+6. **Retrospective.** After Phase 4 is integrated, invoke Retrospective Analyst to compare spec vs code and handoff quality, and update napkin or process if needed.
 
 **Assumptions:**
 
@@ -133,7 +133,7 @@ Each Paradox specialist is asked one question to surface their view of the state
 
 **Next single priority:** Phase 3 — Canon war start. Scenario/harness + Gameplay Programmer own tests and pipeline integration ("no referendum → no war"; "referendum → war at correct turn"). Phase 4 (turn pipeline → GUI) follows Phase 3. A1 (base geographical map) may run in parallel; Map/Geometry + Technical Architect confirm source. Track B (war system design) remains design-only; Technical Architect + Game Designer.
 
-**Process QA (invoke after this execution):** Per Orchestrator plan §4 and context.md §6, invoke **Process QA** (quality-assurance-process) to validate: (1) context — relevant canon and phase specs read before changes; (2) ledger — changelog entries appended for gates green and plan execution; (3) mistake guard — ASSISTANT_MISTAKES.log consulted where applicable; (4) commit discipline — changes grouped by phase scope. See docs/20_engineering/AGENT_WORKFLOW.md and .cursor/skills/quality-assurance-process.
+**Process QA (invoke after this execution):** Per Orchestrator plan §4 and context.md §6, invoke **Process QA** (quality-assurance-process) to validate: (1) context — relevant canon and phase specs read before changes; (2) ledger — changelog entries appended for gates green and plan execution; (3) napkin — session runbook read/updated where applicable; (4) commit discipline — changes grouped by phase scope. See docs/20_engineering/AGENT_WORKFLOW.md and .cursor/skills/quality-assurance-process.
 
 **Phase 3 execution (verified):** Phase 3 canon war start is implemented and tested. All Phase 3–related tests pass: `phase0_referendum_held_war_start_e2e.test.ts` (referendum held → war at correct turn), `phase0_v1_no_war_without_referendum_e2e.test.ts` (no referendum → no war, non-war terminal), `phase_i_entry_gating.test.ts` (Phase I unreachable without referendum_held and war_start_turn). No code changes required; verification run 2026-02-06. Next single priority becomes Phase 4 (turn pipeline → GUI) per Orchestrator plan.
 
@@ -188,7 +188,7 @@ Each Paradox specialist is asked one question to surface their view of the state
 
 - **Phase 5:** Map & data authority (canonical map build path, type-safe Turn-0 init, data contracts).
 - **Phase 6:** MVP declaration and freeze (checklist green, known limitations documented, post-MVP labeled).
-- **Retrospective:** After Phase 4 integration, invoke Retrospective Analyst (spec vs code, handoff quality); update ASSISTANT_MISTAKES.log or process as needed.
+- **Retrospective:** After Phase 4 integration, invoke Retrospective Analyst (spec vs code, handoff quality); update napkin or process as needed.
 
 ---
 

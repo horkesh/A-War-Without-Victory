@@ -40,7 +40,7 @@ function getFactionShareInMun(
 
 /**
  * Run early-war minority militia decay when in first 3 turns of Phase I.
- * Only runs when meta.phase === 'phase_i', meta.turn in [war_start_turn, war_start_turn + 2].
+ * Only runs when meta.phase === 'war', meta.turn in [war_start_turn, war_start_turn + 2].
  * Deterministic: sorted pool keys; decay formula from research (ethnicPct → 20–40%).
  */
 export function runMinorityMilitiaDecay(
@@ -53,7 +53,7 @@ export function runMinorityMilitiaDecay(
     const warStart = state.meta.war_start_turn;
     const turn = state.meta.turn;
     if (typeof warStart !== 'number' || typeof turn !== 'number') return report;
-    if (state.meta.phase !== 'phase_i') return report;
+    if (state.meta.phase !== 'war') return report;
     if (turn < warStart || turn > warStart + 2) return report;
 
     const pools = state.militia_pools as Record<string, MilitiaPoolState> | undefined;
@@ -99,3 +99,4 @@ export function runMinorityMilitiaDecay(
 
     return report;
 }
+

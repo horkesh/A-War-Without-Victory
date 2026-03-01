@@ -5,6 +5,8 @@
 **Author:** Claude Code calibration session
 **Targets:** RS 60–65% territory, sustained combat, historical force trajectories, strategic objective alignment
 
+**Scenario note:** The 40w calibration scenario (apr1992_definitive_40w) uses `recruitment_mode: "player_choice"` so that brigades are spread to front OSIDs and generate attack orders; bottom_up is not used for this scenario. See docs/40_reports/implemented/20260228_PHASE_G_CALIBRATION_BOTTOM_UP_PIPELINE_FIX.md.
+
 ---
 
 ## 1. Starting State

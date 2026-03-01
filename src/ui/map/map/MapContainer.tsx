@@ -181,12 +181,6 @@ export function MapContainer() {
     const runUpdate = () => {
       if (cancelled || !mapRef.current || !loadedGameState) return;
       const m = mapRef.current;
-      const controlledGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
-      const frontLinesGeoJson = buildFrontLinesGeoJSON(
-        controlledGeoJson,
-        loadedGameState.phase_i_alliance_rbih_hrhb
-      );
-
       const osidSource = m.getSource('osid-control') as GeoJSONSource | undefined;
       const frontSource = m.getSource('front-lines') as GeoJSONSource | undefined;
       const formationsSource = m.getSource('formations') as GeoJSONSource | undefined;
@@ -200,48 +194,63 @@ export function MapContainer() {
         }
         return;
       }
-
-      osidSource.setData(controlledGeoJson);
-      frontSource.setData(frontLinesGeoJson);
       if (sourceUpdatePollRef.current) {
         clearInterval(sourceUpdatePollRef.current);
         sourceUpdatePollRef.current = null;
       }
 
-      const frontEdgesOsid = loadedGameState.frontEdgesOsid;
-      if (frontEdgesOsid && frontEdgesOsid.length > 0) {
-        const frontEdgesHoverData = buildFrontEdgesHoverGeoJSON(controlledGeoJson, frontEdgesOsid);
-        if (!m.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
-          m.addSource(FRONT_EDGES_HOVER_SOURCE_ID, { type: 'geojson', data: frontEdgesHoverData });
-          m.addLayer(
-            {
-              id: FRONT_EDGES_HOVER_LAYER_ID,
-              type: 'line',
-              source: FRONT_EDGES_HOVER_SOURCE_ID,
-              paint: {
-                'line-width': ['interpolate', ['linear'], ['zoom'], 6, 6, 10, 12, 14, 18],
-                'line-opacity': 0,
-                'line-color': 'transparent',
-              },
-            },
-            'formation-markers'
-          );
-        } else {
-          (m.getSource(FRONT_EDGES_HOVER_SOURCE_ID) as GeoJSONSource).setData(frontEdgesHoverData);
-        }
-      }
+      // Chunk work across frames so we never block: control -> front lines -> formations
+      const state = loadedGameState;
+      const base = baseGeoJson;
 
       requestAnimationFrame(() => {
-        if (cancelled || !mapRef.current || !loadedGameState) return;
-        const m2 = mapRef.current;
-        const formationsGeoJson = buildFormationsGeoJSON(loadedGameState, controlledGeoJson);
-        const orderArrowsGeoJson = buildOrderArrowsGeoJSON(loadedGameState, controlledGeoJson);
-        const iconIds = formationsGeoJson.features
-          .map((f) => (typeof f.properties?.icon_id === 'string' ? f.properties.icon_id : ''))
-          .filter((id) => id.length > 0);
-        ensureFormationIcons(m2, iconIds);
-        (m2.getSource('formations') as GeoJSONSource)?.setData(formationsGeoJson);
-        (m2.getSource('order-arrows') as GeoJSONSource)?.setData(orderArrowsGeoJson);
+        if (cancelled || !mapRef.current || !state) return;
+        const m1 = mapRef.current;
+        const controlledGeoJson = buildControlGeoJSON(base, state.controlBySettlement);
+        (m1.getSource('osid-control') as GeoJSONSource)?.setData(controlledGeoJson);
+
+        requestAnimationFrame(() => {
+          if (cancelled || !mapRef.current || !state) return;
+          const m2 = mapRef.current;
+          const frontLinesGeoJson = buildFrontLinesGeoJSON(controlledGeoJson, state.war_alliance_rbih_hrhb);
+          (m2.getSource('front-lines') as GeoJSONSource)?.setData(frontLinesGeoJson);
+
+          const frontEdgesOsid = state.frontEdgesOsid;
+          if (frontEdgesOsid && frontEdgesOsid.length > 0) {
+            const frontEdgesHoverData = buildFrontEdgesHoverGeoJSON(controlledGeoJson, frontEdgesOsid);
+            if (!m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
+              m2.addSource(FRONT_EDGES_HOVER_SOURCE_ID, { type: 'geojson', data: frontEdgesHoverData });
+              m2.addLayer(
+                {
+                  id: FRONT_EDGES_HOVER_LAYER_ID,
+                  type: 'line',
+                  source: FRONT_EDGES_HOVER_SOURCE_ID,
+                  paint: {
+                    'line-width': ['interpolate', ['linear'], ['zoom'], 6, 6, 10, 12, 14, 18],
+                    'line-opacity': 0,
+                    'line-color': 'transparent',
+                  },
+                },
+                'formation-markers'
+              );
+            } else {
+              (m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID) as GeoJSONSource).setData(frontEdgesHoverData);
+            }
+          }
+
+          requestAnimationFrame(() => {
+            if (cancelled || !mapRef.current || !state) return;
+            const m3 = mapRef.current;
+            const formationsGeoJson = buildFormationsGeoJSON(state, controlledGeoJson);
+            const orderArrowsGeoJson = buildOrderArrowsGeoJSON(state, controlledGeoJson);
+            const iconIds = formationsGeoJson.features
+              .map((f) => (typeof f.properties?.icon_id === 'string' ? f.properties.icon_id : ''))
+              .filter((id) => id.length > 0);
+            ensureFormationIcons(m3, iconIds);
+            (m3.getSource('formations') as GeoJSONSource)?.setData(formationsGeoJson);
+            (m3.getSource('order-arrows') as GeoJSONSource)?.setData(orderArrowsGeoJson);
+          });
+        });
       });
     };
 
@@ -294,17 +303,20 @@ export function MapContainer() {
     return () => clearInterval(poll);
   }, [hoveredOsids, mapReady]);
 
-  // Ethnic map mode: add osid-ethnic source and fill layer when we have base + osidPropertiesMap
+  // Ethnic map mode: add osid-ethnic source and fill layer when we have base + osidPropertiesMap.
+  // Defer buildEthnicGeoJSON to rAF so it doesn't block when loadedGameState is set.
   useEffect(() => {
     const map = mapRef.current;
     const baseGeoJson = osidBaseRef.current;
     if (!mapReady || !map || !baseGeoJson || !osidPropertiesMap || Object.keys(osidPropertiesMap).length === 0) return;
 
     const displacementByMun = loadedGameState?.displacementByMun ?? undefined;
-    const ethnicGeoJson = buildEthnicGeoJSON(baseGeoJson, osidPropertiesMap, displacementByMun);
 
-    const applyEthnic = () => {
-      if (!mapRef.current) return;
+    let cancelled = false;
+    const rafId = requestAnimationFrame(() => {
+      if (cancelled || !mapRef.current) return;
+      const ethnicGeoJson = buildEthnicGeoJSON(baseGeoJson, osidPropertiesMap, displacementByMun);
+      if (cancelled || !mapRef.current) return;
       const m = mapRef.current;
       if (!m.getSource(OSID_ETHNIC_SOURCE_ID)) {
         m.addSource(OSID_ETHNIC_SOURCE_ID, { type: 'geojson', data: ethnicGeoJson });
@@ -337,11 +349,6 @@ export function MapContainer() {
       const showPolitical = mapMode === 'political' || mapMode === 'supply' || mapMode === 'pressure';
       if (m.getLayer('osid-control-fill')) m.setLayoutProperty('osid-control-fill', 'visibility', showPolitical ? 'visible' : 'none');
       if (m.getLayer(OSID_ETHNIC_FILL_LAYER_ID)) m.setLayoutProperty(OSID_ETHNIC_FILL_LAYER_ID, 'visibility', mapMode === 'ethnic' ? 'visible' : 'none');
-    };
-
-    let cancelled = false;
-    const rafId = requestAnimationFrame(() => {
-      if (!cancelled) applyEthnic();
     });
     return () => {
       cancelled = true;
@@ -415,3 +422,4 @@ export function MapContainer() {
 
   return <div ref={containerRef} className="absolute inset-0" />;
 }
+

@@ -3,9 +3,9 @@
 ## Summary
 Resolved the silent initialization hang in `map_hoi.html` (blank screen or only 2D placeholder) caused by synchronous CPU-heavy terrain texture build blocking the event loop in `HoIMapRenderer.init()`.
 
-## Root cause (from issue report)
-- `buildHoITerrainTexture` (HoITerrainTexture.ts) iterates 2048×2048 pixels with elevation + hillshade on the main thread.
-- Because `tryWebGL` awaited `renderer.init()` and init never yielded, the surrounding UI (toolbars, sidebars) was never attached and the WebGL canvas never replaced the 2D placeholder.
+## Root cause (from issue report and further investigation)
+1. **Event Loop Blocking:** `buildHoITerrainTexture` (HoITerrainTexture.ts) iterated 2048×2048 pixels with elevation + hillshade synchronously on the main thread, blocking the event loop.
+2. **Closure Scoping Bug:** `tryWebGL` was never being called. During a recent refactor, the `requestAnimationFrame(() => tryWebGL())` call and the subsequent UI setup code (DOM element bindings, toolbars, sidebars, status strip) were accidentally nested **inside** the body of the `tryWebGL` function itself. As a result, the entire WebGL init sequence was bypassed completely.
 
 ## Changes made (round 1 + round 2)
 
@@ -25,7 +25,8 @@ Resolved the silent initialization hang in `map_hoi.html` (blank screen or only 
 4. **map_hoi.ts**
    - **Promise.race** with **60s** timeout; on timeout or throw, catch sets placeholder text to `3D map unavailable: <message>` and hides the 2D canvas so the message is visible.
    - When init **returns false** (no throw), same message is shown so the user is not left with only the 2D map.
-   - **Deferred init**: `requestAnimationFrame` twice before `tryWebGL()` so the container has layout (napkin: container visible first).
+   - **Deferred init**: `requestAnimationFrame` twice before `tryWebGL()` so the container has layout.
+   - **Closure Fix**: properly closed the `tryWebGL()` function block and un-indented the `requestAnimationFrame()` + UI bindings (toolbars, sidebars, tooltips) back into the main `init()` scope so they successfully execute on load. Tooltips and interaction registrations are now unconditional instead of being gated behind starting with existing formations.
 
 5. **Verification**
    - `tools/verify_hoi_map_loads.ts`: Puppeteer script to load map_hoi.html and assert the 3D canvas appears (placeholder hidden, WebGL canvas present). Run after `npm run dev:map` with `MAP_URL=http://localhost:3002/map_hoi.html npx tsx tools/verify_hoi_map_loads.ts`. Headless Chrome may not provide WebGL; use a real browser to confirm.

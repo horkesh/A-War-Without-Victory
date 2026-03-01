@@ -1,6 +1,6 @@
 import { useRef, useCallback, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { loadLatestRunSave } from '../data/DataLoader';
+import { loadLatestRunSaveAsText } from '../data/DataLoader';
 
 const FACTION_BANNER_TINT: Record<string, string> = {
   RS: 'rgba(194, 64, 64, 0.35)',
@@ -25,12 +25,16 @@ export function TopToolbar() {
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
+      setLoading(true);
       try {
         const text = await file.text();
+        await new Promise((r) => setTimeout(r, 0));
         const json = JSON.parse(text);
-        loadSave(json);
+        await loadSave(json);
       } catch (err) {
         console.error('Failed to load save file:', err);
+      } finally {
+        setLoading(false);
       }
       if (fileInputRef.current) fileInputRef.current.value = '';
     },
@@ -40,7 +44,8 @@ export function TopToolbar() {
   const handleLoadLatest = useCallback(async () => {
     setLoading(true);
     try {
-      loadSave(await loadLatestRunSave());
+      const text = await loadLatestRunSaveAsText();
+      await loadSave(text);
     } catch (err) {
       console.error('Failed to load latest save:', err);
     } finally {
@@ -59,9 +64,10 @@ export function TopToolbar() {
 
       <button
         onClick={handleLoadClick}
-        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors"
+        disabled={loading}
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
       >
-        Load Save
+        {loading ? 'Loading...' : 'Load Save'}
       </button>
 
       <button

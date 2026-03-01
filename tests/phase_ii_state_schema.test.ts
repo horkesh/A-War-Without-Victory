@@ -1,6 +1,6 @@
 /**
  * Phase D Step 1: Phase II state schema extension tests.
- * - Schema validation accepts Phase II fields (phase_ii_supply_pressure, phase_ii_exhaustion, phase_ii_exhaustion_local).
+ * - Schema validation accepts Phase II fields (war_supply_pressure, war_exhaustion, war_exhaustion_local).
  * - Serialization round-trip preserves Phase II state and remains deterministic.
  */
 
@@ -19,7 +19,7 @@ function phaseIIGameStateFixture(): GameState {
         meta: {
             turn: 20,
             seed: 'phase-ii-fixture',
-            phase: 'phase_ii',
+            phase: 'war',
             referendum_held: true,
             referendum_turn: 6,
             war_start_turn: 10,
@@ -78,9 +78,9 @@ function phaseIIGameStateFixture(): GameState {
         supply_rights: { corridors: [] },
         political_controllers: { 'SID_001': 'RBiH', 'SID_002': 'RS', 'SID_003': 'HRHB' },
         municipalities: {},
-        phase_ii_supply_pressure: { RBiH: 25, RS: 30, HRHB: 15 },
-        phase_ii_exhaustion: { RBiH: 12, RS: 18, HRHB: 10 },
-        phase_ii_exhaustion_local: { 'SID_001': 2, 'SID_002': 3 }
+        war_supply_pressure: { RBiH: 25, RS: 30, HRHB: 15 },
+        war_exhaustion: { RBiH: 12, RS: 18, HRHB: 10 },
+        war_exhaustion_local: { 'SID_001': 2, 'SID_002': 3 }
     };
 }
 
@@ -93,25 +93,25 @@ test('validateGameStateShape returns ok for GameState with Phase II fields', () 
 test('validateGameStateShape returns ok for GameState with only some Phase II fields', () => {
     const state = phaseIIGameStateFixture();
     const stateObj = state as unknown as Record<string, unknown>;
-    delete stateObj.phase_ii_exhaustion_local;
+    delete stateObj.war_exhaustion_local;
     const result = validateGameStateShape(stateObj);
     assert.strictEqual(result.ok, true);
 });
 
-test('validateGameStateShape rejects phase_ii_supply_pressure when value out of [0, 100]', () => {
+test('validateGameStateShape rejects war_supply_pressure when value out of [0, 100]', () => {
     const state = phaseIIGameStateFixture();
-    state.phase_ii_supply_pressure!['RBiH'] = 150;
+    state.war_supply_pressure!['RBiH'] = 150;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
-    assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('phase_ii_supply_pressure')));
+    assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('war_supply_pressure')));
 });
 
-test('validateGameStateShape rejects phase_ii_exhaustion when value negative', () => {
+test('validateGameStateShape rejects war_exhaustion when value negative', () => {
     const state = phaseIIGameStateFixture();
-    state.phase_ii_exhaustion!['RS'] = -1;
+    state.war_exhaustion!['RS'] = -1;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
-    assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('phase_ii_exhaustion')));
+    assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('war_exhaustion')));
 });
 
 test('Phase II state serialization round-trip preserves Phase II fields', () => {
@@ -119,9 +119,9 @@ test('Phase II state serialization round-trip preserves Phase II fields', () => 
     const payload = serializeState(original);
     const hydrated = deserializeState(payload);
 
-    assert.deepStrictEqual(hydrated.phase_ii_supply_pressure, { RBiH: 25, RS: 30, HRHB: 15 });
-    assert.deepStrictEqual(hydrated.phase_ii_exhaustion, { RBiH: 12, RS: 18, HRHB: 10 });
-    assert.deepStrictEqual(hydrated.phase_ii_exhaustion_local, { 'SID_001': 2, 'SID_002': 3 });
+    assert.deepStrictEqual(hydrated.war_supply_pressure, { RBiH: 25, RS: 30, HRHB: 15 });
+    assert.deepStrictEqual(hydrated.war_exhaustion, { RBiH: 12, RS: 18, HRHB: 10 });
+    assert.deepStrictEqual(hydrated.war_exhaustion_local, { 'SID_001': 2, 'SID_002': 3 });
 });
 
 test('Phase II state serialization reaches deterministic fixed-point after migration defaults', () => {

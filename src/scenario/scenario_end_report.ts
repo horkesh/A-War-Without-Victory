@@ -288,7 +288,7 @@ export interface FormationFatigueSummary {
 export interface ArmyStrengthsSummary {
     formations_by_faction: Array<{ faction: string; militia: number; brigade: number; other: number; total: number }>;
     militia_pools_by_faction: Array<{ faction: string; available: number; committed: number; exhausted: number }>;
-    aor_counts_by_faction: Array<{ faction: string; settlement_count: number }>;
+    front_assignment_counts_by_faction: Array<{ faction: string; assigned_brigades: number }>;
 }
 
 export interface BotBenchmarkDefinition {
@@ -439,12 +439,21 @@ export function computeArmyStrengthsSummary(state: GameState): ArmyStrengthsSumm
         return { faction, ...e };
     });
 
-    const aor_counts_by_faction = (state.factions ?? []).map((f) => ({
-        faction: f.id,
-        settlement_count: Array.isArray(f.areasOfResponsibility) ? f.areasOfResponsibility.length : 0
-    })).sort((a, b) => a.faction.localeCompare(b.faction));
+    const assignmentCounts = new Map<string, number>();
+    for (const fid of factions) assignmentCounts.set(fid, 0);
+    const assignments = state.brigade_front_assignment ?? {};
+    for (const [formationId, frontId] of Object.entries(assignments)) {
+        if (typeof frontId !== 'string' || frontId.length === 0) continue;
+        const formation = state.formations?.[formationId];
+        const fid = formation?.faction;
+        if (!fid) continue;
+        assignmentCounts.set(fid, (assignmentCounts.get(fid) ?? 0) + 1);
+    }
+    const front_assignment_counts_by_faction = factions
+        .map((faction) => ({ faction, assigned_brigades: assignmentCounts.get(faction) ?? 0 }))
+        .sort((a, b) => a.faction.localeCompare(b.faction));
 
-    return { formations_by_faction, militia_pools_by_faction, aor_counts_by_faction };
+    return { formations_by_faction, militia_pools_by_faction, front_assignment_counts_by_faction };
 }
 
 /**
@@ -528,7 +537,7 @@ export interface FormatEndReportParams {
     formationDelta?: FormationDeltaResult | null;
     /** Optional formation fatigue (brigade casualties proxy). */
     formationFatigueSummary?: FormationFatigueSummary | null;
-    /** Army strengths at scenario end (formations, militia pools, AoR). */
+    /** Army strengths at scenario end (formations, militia pools, front assignments). */
     armyStrengthsSummary?: ArmyStrengthsSummary | null;
     /** End-of-scenario winner evaluation (optional). */
     victoryEvaluation?: VictoryEvaluation | null;
@@ -683,7 +692,7 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
 
     const total = controlDelta.total_flips;
     lines.push(`- Total settlements with controller change: ${total}`);
-    lines.push('  - *(Distinct settlements with controller change from initial→final. Phase II flip events are in the Phase II section below.)*');
+    lines.push('  - *(Distinct settlements with controller change from initial→final. War-phase flip events are in the War section below.)*');
 
     const before = controlDelta.net_control_counts_before
         .map((e) => `${e.controller ?? 'null'}: ${e.count}`)
@@ -766,11 +775,11 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
     }
     if (params.controlEventsSummary) {
         const c = params.controlEventsSummary;
-        lines.push('## Phase I control-flip events (harness log)');
+        lines.push('## War Control-Flip Events (harness log)');
         lines.push('');
-        lines.push('*Control events below are Phase I control-flip events only. Phase II attack-resolution flips are reported in the Phase II section below.*');
+        lines.push('*Control events below are war control-flip events from harness logs. War attack-resolution flips are reported in the War section below.*');
         lines.push('');
-        lines.push(`- Total Phase I control events: ${c.total}`);
+        lines.push(`- Total war control events: ${c.total}`);
         for (const { mechanism, count } of c.by_mechanism) {
             lines.push(`  - ${mechanism}: ${count}`);
         }
@@ -818,11 +827,11 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
         for (const row of as.militia_pools_by_faction) {
             lines.push(`  - ${row.faction}: ${row.available} / ${row.committed} / ${row.exhausted}`);
         }
-        if (as.aor_counts_by_faction.length > 0) {
+        if (as.front_assignment_counts_by_faction.length > 0) {
             lines.push('');
-            lines.push('Areas of responsibility (settlements per faction):');
-            for (const row of as.aor_counts_by_faction) {
-                lines.push(`  - ${row.faction}: ${row.settlement_count} settlements`);
+            lines.push('Front assignments (assigned brigades per faction):');
+            for (const row of as.front_assignment_counts_by_faction) {
+                lines.push(`  - ${row.faction}: ${row.assigned_brigades} brigades`);
             }
         }
         lines.push('');
@@ -904,9 +913,9 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
     }
     if (params.phaseIIAttackResolutionSummary) {
         const a = params.phaseIIAttackResolutionSummary;
-        lines.push('## Phase II attack resolution (pipeline)');
+        lines.push('## War Attack Resolution (pipeline)');
         lines.push('');
-        lines.push(`- Weeks in Phase II: ${a.weeks_with_phase_ii}`);
+        lines.push(`- Weeks in war phase: ${a.weeks_with_phase_ii}`);
         lines.push(`- Weeks with nonzero orders processed: ${a.weeks_with_orders}`);
         lines.push(`- Orders processed: ${a.orders_processed}`);
         if (a.orders_by_faction && Object.keys(a.orders_by_faction).length > 0) {
@@ -917,7 +926,7 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
             lines.push(`- Orders by faction: ${obfLine}`);
         }
         lines.push(`- Unique attack targets (distinct SIDs): ${a.unique_attack_targets}`);
-        lines.push(`- Settlement flips applied: ${a.flips_applied} *(Phase II flip events applied this run.)*`);
+        lines.push(`- Settlement flips applied: ${a.flips_applied} *(War flip events applied this run.)*`);
         lines.push(`- Casualties (attacker / defender): ${a.casualty_attacker} / ${a.casualty_defender}`);
         lines.push(`- Battles with defender present / absent: ${a.defender_present_battles} / ${a.defender_absent_battles}`);
         if (params.phaseIIAttackResolutionWeekly && params.phaseIIAttackResolutionWeekly.length > 0) {
@@ -958,7 +967,7 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
             lines.push(`### Turn ${snapshot.turn}`);
             lines.push('');
             if (snapshot.entries.length === 0) {
-                lines.push('No corps directives (Phase II not yet active).');
+                lines.push('No corps directives (war phase not yet active).');
                 lines.push('');
                 continue;
             }
