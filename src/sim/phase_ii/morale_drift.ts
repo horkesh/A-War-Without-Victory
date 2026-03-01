@@ -7,6 +7,7 @@
 
 import type { FactionId, FormationId, FormationState, GameState } from '../../state/game_state.js';
 import type { MunicipalityPopulation1991Map } from '../../state/population_share.js';
+import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getFactionAlignedPopulationShare } from '../../state/population_share.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
@@ -31,6 +32,13 @@ const AFFINITY_DRIFT_DOWN = -2;
 const ENCIRCLEMENT_OWN_POP_DRIFT = 3;      // Cornered rat — morale UP
 const ENCIRCLEMENT_ENEMY_POP_DRIFT = -3;   // Standard demoralization
 
+/** Supply-CRITICAL morale suppression (L26 in CALIBRATION_MASTER).
+ * Brigades at CRITICAL supply (besieged enclaves, cut-off units) cannot gain morale
+ * from affinity or encirclement. Instead, starvation drains morale.
+ * This prevents enclave brigades from drifting back to morale 70 (resist floor)
+ * and counterattacking outward despite zero supply. */
+const CRITICAL_SUPPLY_DRAIN = -1;
+
 /** Exhaustion thresholds and penalties (mirrors cohesion_drift.ts pattern). */
 const EXHAUSTION_THRESHOLD = 0.80;
 const EXHAUSTION_MORALE_PENALTY = -0.5;
@@ -54,8 +62,18 @@ export interface MoraleDriftReport {
 export function runPhaseIIMoraleDrift(
     state: GameState,
     engagedFormationIds: FormationId[] | Set<string>,
-    munPopulation?: MunicipalityPopulation1991Map
+    munPopulation?: MunicipalityPopulation1991Map,
+    supplyStateByOsid?: SupplyStateByOsidReport
 ): MoraleDriftReport {
+    // Build OSID→supply level lookup for critical supply check
+    const osidSupplyLevel = new Map<string, string>();
+    if (supplyStateByOsid?.factions) {
+        for (const fEntry of supplyStateByOsid.factions) {
+            for (const osidEntry of fEntry.by_osid) {
+                osidSupplyLevel.set(`${fEntry.faction_id}:${osidEntry.osid}`, osidEntry.state);
+            }
+        }
+    }
     const report: MoraleDriftReport = { formations_updated: 0, by_faction: {} };
     const engagedSet = engagedFormationIds instanceof Set
         ? engagedFormationIds
@@ -94,6 +112,17 @@ export function runPhaseIIMoraleDrift(
             } else {
                 drift += ENCIRCLEMENT_ENEMY_POP_DRIFT;
             }
+        }
+
+        // 2b. Supply-CRITICAL suppression: starving brigades cannot gain morale from
+        // affinity or encirclement — starvation overrides determination (L26).
+        const supplyKey = `${f.faction}:${osid}`;
+        const supplyLevel = osidSupplyLevel.get(supplyKey);
+        if (supplyLevel === 'critical') {
+            // Suppress all positive drift (affinity + encirclement)
+            if (drift > 0) drift = 0;
+            // Apply starvation drain
+            drift += CRITICAL_SUPPLY_DRAIN;
         }
 
         // 3. Exhaustion penalty

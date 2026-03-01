@@ -160,6 +160,7 @@ export function createOobFormationsAtPhaseIEntry(
         const hq_sid = municipalityHqSettlement[b.home_mun];
         const tags = [`mun:${b.home_mun}`];
         if (b.corps) tags.push(`corps:${b.corps}`);
+        if (b.tags) tags.push(...b.tags);
         tags.sort((x, y) => x.localeCompare(y));
         const eligiblePop = getEligiblePopulationCount(population1991ByMun, b.home_mun, b.faction);
         const ordinal = (brigadeCountByFactionMun.get(`${b.faction}:${b.home_mun}`) ?? 0) + 1;

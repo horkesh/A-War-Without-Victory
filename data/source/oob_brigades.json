@@ -1566,8 +1566,26 @@
       "manpower_cost": 40,
       "initial_personnel": 1100,
       "initial_cohesion": 72,
-      "initial_morale": 70,
-      "composition": { "infantry": 1100, "tanks": 0, "artillery": 0, "aa_systems": 0, "tank_condition": { "operational": 0, "degraded": 0, "non_operational": 0 }, "artillery_condition": { "operational": 0, "degraded": 0, "non_operational": 0 } }
+      "initial_morale": 55,
+      "composition": {
+        "infantry": 1100,
+        "tanks": 0,
+        "artillery": 0,
+        "aa_systems": 0,
+        "tank_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        },
+        "artillery_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        }
+      },
+      "tags": [
+        "enclave"
+      ]
     },
     {
       "id": "arbih_802nd_light",
@@ -1585,8 +1603,26 @@
       "manpower_cost": 40,
       "initial_personnel": 1100,
       "initial_cohesion": 72,
-      "initial_morale": 70,
-      "composition": { "infantry": 1100, "tanks": 0, "artillery": 0, "aa_systems": 0, "tank_condition": { "operational": 0, "degraded": 0, "non_operational": 0 }, "artillery_condition": { "operational": 0, "degraded": 0, "non_operational": 0 } }
+      "initial_morale": 55,
+      "composition": {
+        "infantry": 1100,
+        "tanks": 0,
+        "artillery": 0,
+        "aa_systems": 0,
+        "tank_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        },
+        "artillery_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        }
+      },
+      "tags": [
+        "enclave"
+      ]
     },
     {
       "id": "arbih_803rd_light",
@@ -1604,8 +1640,26 @@
       "manpower_cost": 40,
       "initial_personnel": 1100,
       "initial_cohesion": 72,
-      "initial_morale": 70,
-      "composition": { "infantry": 1100, "tanks": 0, "artillery": 0, "aa_systems": 0, "tank_condition": { "operational": 0, "degraded": 0, "non_operational": 0 }, "artillery_condition": { "operational": 0, "degraded": 0, "non_operational": 0 } }
+      "initial_morale": 55,
+      "composition": {
+        "infantry": 1100,
+        "tanks": 0,
+        "artillery": 0,
+        "aa_systems": 0,
+        "tank_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        },
+        "artillery_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        }
+      },
+      "tags": [
+        "enclave"
+      ]
     },
     {
       "id": "arbih_807th_muslim_liberation",
@@ -1623,8 +1677,26 @@
       "manpower_cost": 40,
       "initial_personnel": 1100,
       "initial_cohesion": 72,
-      "initial_morale": 70,
-      "composition": { "infantry": 1100, "tanks": 0, "artillery": 0, "aa_systems": 0, "tank_condition": { "operational": 0, "degraded": 0, "non_operational": 0 }, "artillery_condition": { "operational": 0, "degraded": 0, "non_operational": 0 } }
+      "initial_morale": 55,
+      "composition": {
+        "infantry": 1100,
+        "tanks": 0,
+        "artillery": 0,
+        "aa_systems": 0,
+        "tank_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        },
+        "artillery_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        }
+      },
+      "tags": [
+        "enclave"
+      ]
     },
     {
       "id": "arbih_808th_liberation",
@@ -1642,8 +1714,26 @@
       "manpower_cost": 40,
       "initial_personnel": 1100,
       "initial_cohesion": 72,
-      "initial_morale": 70,
-      "composition": { "infantry": 1100, "tanks": 0, "artillery": 0, "aa_systems": 0, "tank_condition": { "operational": 0, "degraded": 0, "non_operational": 0 }, "artillery_condition": { "operational": 0, "degraded": 0, "non_operational": 0 } }
+      "initial_morale": 55,
+      "composition": {
+        "infantry": 1100,
+        "tanks": 0,
+        "artillery": 0,
+        "aa_systems": 0,
+        "tank_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        },
+        "artillery_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        }
+      },
+      "tags": [
+        "enclave"
+      ]
     },
     {
       "id": "arbih_843rd_light",
@@ -1661,8 +1751,26 @@
       "manpower_cost": 40,
       "initial_personnel": 1100,
       "initial_cohesion": 72,
-      "initial_morale": 70,
-      "composition": { "infantry": 1100, "tanks": 0, "artillery": 0, "aa_systems": 0, "tank_condition": { "operational": 0, "degraded": 0, "non_operational": 0 }, "artillery_condition": { "operational": 0, "degraded": 0, "non_operational": 0 } }
+      "initial_morale": 55,
+      "composition": {
+        "infantry": 1100,
+        "tanks": 0,
+        "artillery": 0,
+        "aa_systems": 0,
+        "tank_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        },
+        "artillery_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        }
+      },
+      "tags": [
+        "enclave"
+      ]
     },
     {
       "id": "arbih_851st_vitezka_liberation",
@@ -1681,8 +1789,26 @@
       "honor": "vitezka",
       "initial_personnel": 1100,
       "initial_cohesion": 72,
-      "initial_morale": 70,
-      "composition": { "infantry": 1100, "tanks": 0, "artillery": 0, "aa_systems": 0, "tank_condition": { "operational": 0, "degraded": 0, "non_operational": 0 }, "artillery_condition": { "operational": 0, "degraded": 0, "non_operational": 0 } }
+      "initial_morale": 55,
+      "composition": {
+        "infantry": 1100,
+        "tanks": 0,
+        "artillery": 0,
+        "aa_systems": 0,
+        "tank_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        },
+        "artillery_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        }
+      },
+      "tags": [
+        "enclave"
+      ]
     },
     {
       "id": "rs_1st_guards_motorized",
@@ -3383,8 +3509,26 @@
       "manpower_cost": 100,
       "initial_personnel": 600,
       "initial_cohesion": 48,
-      "initial_morale": 70,
-      "composition": { "infantry": 600, "tanks": 0, "artillery": 0, "aa_systems": 0, "tank_condition": { "operational": 0, "degraded": 0, "non_operational": 0 }, "artillery_condition": { "operational": 0, "degraded": 0, "non_operational": 0 } }
+      "initial_morale": 55,
+      "composition": {
+        "infantry": 600,
+        "tanks": 0,
+        "artillery": 0,
+        "aa_systems": 0,
+        "tank_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        },
+        "artillery_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        }
+      },
+      "tags": [
+        "enclave"
+      ]
     },
     {
       "id": "arbih_1st_cerska",
@@ -3434,8 +3578,26 @@
       "manpower_cost": 60,
       "initial_personnel": 900,
       "initial_cohesion": 70,
-      "initial_morale": 70,
-      "composition": { "infantry": 900, "tanks": 0, "artillery": 0, "aa_systems": 0, "tank_condition": { "operational": 0, "degraded": 0, "non_operational": 0 }, "artillery_condition": { "operational": 0, "degraded": 0, "non_operational": 0 } }
+      "initial_morale": 55,
+      "composition": {
+        "infantry": 900,
+        "tanks": 0,
+        "artillery": 0,
+        "aa_systems": 0,
+        "tank_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        },
+        "artillery_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        }
+      },
+      "tags": [
+        "enclave"
+      ]
     },
     {
       "id": "arbih_281st_east_bosnian_light",
@@ -3453,8 +3615,26 @@
       "manpower_cost": 60,
       "initial_personnel": 900,
       "initial_cohesion": 70,
-      "initial_morale": 70,
-      "composition": { "infantry": 900, "tanks": 0, "artillery": 0, "aa_systems": 0, "tank_condition": { "operational": 0, "degraded": 0, "non_operational": 0 }, "artillery_condition": { "operational": 0, "degraded": 0, "non_operational": 0 } }
+      "initial_morale": 55,
+      "composition": {
+        "infantry": 900,
+        "tanks": 0,
+        "artillery": 0,
+        "aa_systems": 0,
+        "tank_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        },
+        "artillery_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        }
+      },
+      "tags": [
+        "enclave"
+      ]
     },
     {
       "id": "arbih_282nd_east_bosnian_light",
@@ -3472,8 +3652,26 @@
       "manpower_cost": 60,
       "initial_personnel": 900,
       "initial_cohesion": 70,
-      "initial_morale": 70,
-      "composition": { "infantry": 900, "tanks": 0, "artillery": 0, "aa_systems": 0, "tank_condition": { "operational": 0, "degraded": 0, "non_operational": 0 }, "artillery_condition": { "operational": 0, "degraded": 0, "non_operational": 0 } }
+      "initial_morale": 55,
+      "composition": {
+        "infantry": 900,
+        "tanks": 0,
+        "artillery": 0,
+        "aa_systems": 0,
+        "tank_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        },
+        "artillery_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        }
+      },
+      "tags": [
+        "enclave"
+      ]
     },
     {
       "id": "arbih_283rd_east_bosnian_light",
@@ -3491,8 +3689,26 @@
       "manpower_cost": 60,
       "initial_personnel": 900,
       "initial_cohesion": 70,
-      "initial_morale": 70,
-      "composition": { "infantry": 900, "tanks": 0, "artillery": 0, "aa_systems": 0, "tank_condition": { "operational": 0, "degraded": 0, "non_operational": 0 }, "artillery_condition": { "operational": 0, "degraded": 0, "non_operational": 0 } }
+      "initial_morale": 55,
+      "composition": {
+        "infantry": 900,
+        "tanks": 0,
+        "artillery": 0,
+        "aa_systems": 0,
+        "tank_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        },
+        "artillery_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        }
+      },
+      "tags": [
+        "enclave"
+      ]
     },
     {
       "id": "arbih_284th_east_bosnian_light",
@@ -3510,8 +3726,26 @@
       "manpower_cost": 60,
       "initial_personnel": 900,
       "initial_cohesion": 70,
-      "initial_morale": 70,
-      "composition": { "infantry": 900, "tanks": 0, "artillery": 0, "aa_systems": 0, "tank_condition": { "operational": 0, "degraded": 0, "non_operational": 0 }, "artillery_condition": { "operational": 0, "degraded": 0, "non_operational": 0 } }
+      "initial_morale": 55,
+      "composition": {
+        "infantry": 900,
+        "tanks": 0,
+        "artillery": 0,
+        "aa_systems": 0,
+        "tank_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        },
+        "artillery_condition": {
+          "operational": 0,
+          "degraded": 0,
+          "non_operational": 0
+        }
+      },
+      "tags": [
+        "enclave"
+      ]
     },
     {
       "id": "hvo_eugen_kvaternik",

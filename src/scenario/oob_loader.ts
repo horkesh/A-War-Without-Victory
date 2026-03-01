@@ -39,6 +39,8 @@ export interface OobBrigade {
     composition?: BrigadeComposition;
     /** Initial morale [0,100]. When set, overrides default (60). Enclave brigades: 70 (desperation bonus). */
     initial_morale?: number;
+    /** Custom tags from OOB (e.g. 'enclave'). Merged into formation tags at creation. */
+    tags?: string[];
 }
 
 export interface OobCorps {
@@ -121,6 +123,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         const home_osid = typeof r.home_osid === 'string' && r.home_osid.trim() ? r.home_osid.trim() : undefined;
         const initial_morale = typeof r.initial_morale === 'number' && Number.isFinite(r.initial_morale) ? r.initial_morale : undefined;
         const composition = isRecord(r.composition) ? r.composition as unknown as BrigadeComposition : undefined;
+        const oobTags = Array.isArray(r.tags) ? (r.tags as unknown[]).filter((t): t is string => typeof t === 'string').map(t => t.trim()).filter(t => t.length > 0) : undefined;
         result.push({
             id,
             faction,
@@ -143,6 +146,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             ...(honor && { honor }),
             ...(home_osid && { home_osid }),
             ...(composition && { composition }),
+            ...(oobTags && oobTags.length > 0 && { tags: oobTags }),
         });
     }
 

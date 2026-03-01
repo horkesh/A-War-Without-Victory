@@ -956,7 +956,8 @@ const phases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const engagedIds = context.report.phase_ii_attack_resolution_osid?.engaged_formation_ids ?? [];
             context.report.phase_ii_morale_drift = runPhaseIIMoraleDrift(
-                context.state, engagedIds, context.input.municipalityPopulation1991
+                context.state, engagedIds, context.input.municipalityPopulation1991,
+                context.report.supply_resolution?.supply_state_by_osid
             );
         }
     },
@@ -985,7 +986,7 @@ const phases: NamedPhase[] = [
             // by finding one settlement per municipality. This connects OSID-level combat to the
             // existing displacement routing (e.g. East Bosnia displaced → Srebrenica/Gorazde).
             const legacyBattles = context.report.phase_ii_resolve_attack_orders?.battle_report?.battles ?? [];
-            const osidBattles: Array<{ settlement_flipped: boolean; location: string; attacker_faction: FactionId; defender_faction: FactionId }> = [];
+            const osidBattles: Array<{ settlement_flipped: boolean; location: string; osid?: string; attacker_faction: FactionId; defender_faction: FactionId }> = [];
             const osidReport = context.report.phase_ii_attack_resolution_osid;
             if (osidReport?.battles?.length) {
                 const munToSid = new Map<string, string>();
@@ -1003,6 +1004,7 @@ const phases: NamedPhase[] = [
                     osidBattles.push({
                         settlement_flipped: true,
                         location: sid,
+                        osid: b.target_osid,
                         attacker_faction: b.attacker_faction as FactionId,
                         defender_faction: b.defender_faction as FactionId
                     });

@@ -211,6 +211,8 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             let tierCap: number;
             if (kind === 'brigade') {
                 tierCap = MAX_BRIGADE_PERSONNEL;
+                // Enclave gate: besieged brigades cannot receive reinforcements (L26)
+                if (Array.isArray(f.tags) && f.tags.includes('enclave')) continue;
                 // Readiness gate only for brigades
                 if (f.readiness === 'degraded') continue;
                 if (f.readiness === 'forming') continue;
@@ -282,6 +284,9 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         const mun_id = getMunIdFromFormation(f);
         const faction = f.faction;
         if (!mun_id || !faction) continue;
+
+        // Enclave gate: besieged brigades cannot receive reinforcements (L26)
+        if (Array.isArray(f.tags) && f.tags.includes('enclave')) continue;
 
         // Readiness gate: degraded brigades do not reinforce
         if (f.readiness === 'degraded') continue;

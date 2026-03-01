@@ -482,10 +482,10 @@ const RBIH_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     // 3rd Corps: Central Bosnia — defensive only until week 56
     { name: 'Central Corridor Defense', corps_id: 'arbih_3rd_corps', target_municipalities: ['zenica', 'kakanj', 'visoko', 'tesanj', 'maglaj', 'zavidovici', 'zepce'], start_week: 0, end_week: 56, weight: 80, min_outcome: 'costly_victory' },
     // 3rd Corps: Central corridor counter — reclaim municipalities RS overruns (calibration: Phase M, Jan 1993 painted targets)
-    { name: 'Central Corridor Counter', corps_id: 'arbih_3rd_corps', target_municipalities: ['tesanj', 'maglaj', 'zavidovici', 'kakanj', 'visoko', 'travnik', 'zepce'], start_week: 12, end_week: 56, weight: 120, min_outcome: 'stalemate' },
+    { name: 'Central Corridor Counter', corps_id: 'arbih_3rd_corps', target_municipalities: ['tesanj', 'maglaj', 'zavidovici', 'kakanj', 'visoko', 'travnik', 'zepce'], start_week: 12, end_week: 56, weight: 150, min_outcome: 'stalemate' },
     { name: 'Central Corridor Offensive', corps_id: 'arbih_3rd_corps', target_municipalities: ['zenica', 'travnik', 'kakanj', 'visoko', 'bugojno', 'gornji_vakuf', 'fojnica'], start_week: 56, end_week: 9999, weight: 60, min_outcome: 'stalemate' },
-    // 4th Corps: Neretva defense + Bugojno-Konjic defense (calibration: RS overruns these in n233)
-    { name: 'Bugojno-Konjic Defense', corps_id: 'arbih_4th_corps', target_municipalities: ['bugojno', 'gornji_vakuf', 'konjic', 'prozor', 'jablanica'], start_week: 0, end_week: 56, weight: 60, min_outcome: 'costly_victory' },
+    // 3rd Corps: Bugojno-Konjic defense (calibration: Bugojno is 3rd Corps AOR — Zenica, not Mostar)
+    { name: 'Bugojno-Konjic Defense', corps_id: 'arbih_3rd_corps', target_municipalities: ['bugojno', 'gornji_vakuf', 'konjic', 'prozor', 'jablanica'], start_week: 0, end_week: 56, weight: 100, min_outcome: 'costly_victory' },
     // 4th Corps: Neretva defense
     { name: 'Neretva Defense', corps_id: 'arbih_4th_corps', target_municipalities: ['jablanica', 'konjic'], start_week: 0, end_week: 56, weight: 50, min_outcome: 'costly_victory' },
     { name: 'Neretva Offensive', corps_id: 'arbih_4th_corps', target_municipalities: ['jablanica', 'konjic', 'mostar'], start_week: 56, end_week: 9999, weight: 50, min_outcome: 'stalemate' },

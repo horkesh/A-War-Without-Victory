@@ -157,10 +157,11 @@ function buildBrigadeComposition(
 }
 
 /** Build tags array for a recruited brigade. */
-function buildRecruitmentTags(homeMun: string, corps: string | undefined, equipClass: EquipmentClass): string[] {
+function buildRecruitmentTags(homeMun: string, corps: string | undefined, equipClass: EquipmentClass, oobTags?: string[]): string[] {
     const tags = [`mun:${homeMun}`];
     if (corps) tags.push(`corps:${corps}`);
     tags.push(`equip:${equipClass}`);
+    if (oobTags) tags.push(...oobTags);
     tags.sort((a, b) => a.localeCompare(b));
     return tags;
 }
@@ -188,7 +189,7 @@ function buildRecruitedFormation(
         created_turn: currentTurn,
         status: 'active',
         assignment: null,
-        tags: buildRecruitmentTags(brigade.home_mun, brigade.corps, equipClass),
+        tags: buildRecruitmentTags(brigade.home_mun, brigade.corps, equipClass, brigade.tags),
         kind: brigade.kind,
         personnel: effectivePersonnel,
         readiness: isMandatory ? 'active' : 'forming',

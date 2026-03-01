@@ -52,7 +52,7 @@ const ELIGIBLE_POP_NORMALIZER = 50_000;
  * Note: pool scale diminishing returns below 0.25 — troop growth driven by elective recruitment capital. */
 const FACTION_POOL_SCALE: Record<string, number> = {
     RBiH: 0.18,
-    RS: 0.28,
+    RS: 0.25,
     HRHB: 2.10
 };
 const DEFAULT_FACTION_POOL_SCALE = 1.0;

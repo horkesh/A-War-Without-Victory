@@ -284,7 +284,7 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
                 }
             }
         } else {
-            errors.push('hostile_takeover_timers must be an object (Record<MunicipalityId, HostileTakeoverTimerState>) when present');
+            errors.push('hostile_takeover_timers must be an object (Record<string, HostileTakeoverTimerState>) when present');
         }
     }
     if ('displacement_camp_state' in s && s.displacement_camp_state !== undefined) {

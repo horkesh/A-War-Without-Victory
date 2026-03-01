@@ -1129,8 +1129,8 @@ export interface GameState {
     end_state?: EndState;
     // Phase 21: Population displacement tracking (per municipality)
     displacement_state?: Record<MunicipalityId, DisplacementState>;
-    /** Phase II: delayed hostile takeover timers (per municipality). */
-    hostile_takeover_timers?: Record<MunicipalityId, HostileTakeoverTimerState>;
+    /** Phase II: delayed hostile takeover timers (per OSID). */
+    hostile_takeover_timers?: Record<string, HostileTakeoverTimerState>;
     /** Phase II: temporary camp holding pools before rerouting (per municipality). */
     displacement_camp_state?: Record<MunicipalityId, DisplacementCampState>;
     /** Phase II: non-takeover minority flight state (per settlement). Canon: displacement redesign 2026-02-17. */

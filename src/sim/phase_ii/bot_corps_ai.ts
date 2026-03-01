@@ -1254,6 +1254,14 @@ export function generateCorpsDirectives(
             // avoid_municipalities removed — bipolar co-ethnic scoring handles deterrence emergently
         }
 
+        // P3: Collect priority municipality slugs for opportunistic target filtering.
+        // Opportunistic targets outside these municipalities are filtered to prevent
+        // corps spreading into non-priority areas (e.g. 1KK sprawling into Central Corridor).
+        const priorityMunicipalities = new Set<string>();
+        for (const p of armyPriorities) {
+            for (const m of p.target_municipalities) priorityMunicipalities.add(m);
+        }
+
         // Rear-area cleanup: weeks 0-12, target undefended faction-controlled OSIDs
         // behind the front line that have hostile-majority population. All factions
         // historically secured their rear before pushing forward (BB1 pp496-501).
@@ -1306,22 +1314,30 @@ export function generateCorpsDirectives(
             || (offensiveTargets.length === 0);
         if (addOpportunistic && graphAnalysis) {
             for (const osid of graphAnalysis.undefended_front) {
+                if (offensiveTargets.includes(osid)) continue;
+                // P3: Filter opportunistic targets to priority municipalities
+                if (priorityMunicipalities.size > 0) {
+                    const osidMun = osid.split(':')[1];
+                    if (!priorityMunicipalities.has(osidMun)) continue;
+                }
                 const neighbors = adjacency.get(osid) ?? [];
                 const hasAdjacentBrigade = subordinates.some(b =>
                     b.location_osid && neighbors.includes(b.location_osid)
                 );
-                if (hasAdjacentBrigade && !offensiveTargets.includes(osid)) {
-                    offensiveTargets.push(osid);
-                }
+                if (hasAdjacentBrigade) offensiveTargets.push(osid);
             }
             for (const entry of graphAnalysis.weak_enemy_osids) {
+                if (offensiveTargets.includes(entry.osid)) continue;
+                // P3: Filter opportunistic targets to priority municipalities
+                if (priorityMunicipalities.size > 0) {
+                    const osidMun = entry.osid.split(':')[1];
+                    if (!priorityMunicipalities.has(osidMun)) continue;
+                }
                 const neighbors = adjacency.get(entry.osid) ?? [];
                 const hasAdjacentBrigade = subordinates.some(b =>
                     b.location_osid && neighbors.includes(b.location_osid)
                 );
-                if (hasAdjacentBrigade && !offensiveTargets.includes(entry.osid)) {
-                    offensiveTargets.push(entry.osid);
-                }
+                if (hasAdjacentBrigade) offensiveTargets.push(entry.osid);
             }
         }
 

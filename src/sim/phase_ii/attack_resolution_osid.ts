@@ -53,6 +53,14 @@ const RESILIENCE_PER_DEFENSE = 0.025;   // Tuned: 0.05→0.025. Max bonus 1.10×
 const MORALE_RESIST_FLOOR = 70;
 
 /**
+ * Homeland determination casualty multiplier (L13–L16 in CALIBRATION_MASTER).
+ * When morale absorption triggers (defender stays after costly_victory),
+ * BOTH sides take additional casualties. BB evidence: determined defense
+ * costs both attacker and defender dearly (BB1 p456, BB2 p405, BB2 p556).
+ */
+const MORALE_ABSORPTION_CAS_MULT = 1.35;
+
+/**
  * Artillery suppression of entrenchment.
  * Heavy weapons (artillery, tanks) reduce the defender's entrenchment bonus.
  * This models artillery preparation fires softening fieldworks and tanks
@@ -813,6 +821,43 @@ export function resolveAttackOrdersOsid(
             };
             battleSnapEvents.push(ev);
             pushSnapEvent(report, ev);
+        }
+
+        // === HOMELAND DETERMINATION: Extra casualties when morale absorption triggers ===
+        // Both sides bleed more when the defender refuses to retreat (L13–L16, BB evidence).
+        if (moraleAbsorbed && defenderFormation) {
+            const extraMult = MORALE_ABSORPTION_CAS_MULT - 1.0;
+            // Extra attacker casualties
+            const extraAttackerTotal = Math.round(finalAttackerCas * extraMult);
+            if (extraAttackerTotal > 0) {
+                for (const a of attackerFormations) {
+                    const frac = (a.personnel ?? 0) / Math.max(1, personnelAttacker);
+                    const extraCas = Math.min(Math.max(0, (a.personnel ?? 0) - MIN_COMBAT_PERSONNEL), Math.round(extraAttackerTotal * frac));
+                    if (extraCas > 0) {
+                        applyPersonnelLoss(a, extraCas);
+                        report.casualty_attacker += extraCas;
+                        recordBattleCasualties(state.casualty_ledger!, a.faction, a.id, {
+                            killed: Math.floor(extraCas * KIA_FRACTION),
+                            wounded: Math.floor(extraCas * WIA_FRACTION),
+                            missing_captured: Math.max(0, extraCas - Math.floor(extraCas * KIA_FRACTION) - Math.floor(extraCas * WIA_FRACTION))
+                        });
+                    }
+                }
+            }
+            // Extra defender casualties
+            const extraDefenderTotal = Math.min(
+                Math.max(0, (defenderFormation.personnel ?? 0) - MIN_COMBAT_PERSONNEL),
+                Math.round(finalDefenderCas * extraMult)
+            );
+            if (extraDefenderTotal > 0) {
+                applyPersonnelLoss(defenderFormation, extraDefenderTotal);
+                report.casualty_defender += extraDefenderTotal;
+                recordBattleCasualties(state.casualty_ledger!, defenderFormation.faction, defenderFormation.id, {
+                    killed: Math.floor(extraDefenderTotal * KIA_FRACTION),
+                    wounded: Math.floor(extraDefenderTotal * WIA_FRACTION),
+                    missing_captured: Math.max(0, extraDefenderTotal - Math.floor(extraDefenderTotal * KIA_FRACTION) - Math.floor(extraDefenderTotal * WIA_FRACTION))
+                });
+            }
         }
 
         if (flip) {
