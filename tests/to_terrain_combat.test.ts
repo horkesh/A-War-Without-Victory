@@ -26,7 +26,7 @@ import {
     getEquipmentRatio,
     getToTerrainDefenseMult,
     getLinkedZocReadiness
-} from '../src/sim/phase_ii/attack_resolution_osid.js';
+} from '../src/sim/phase_ii/combat_math.js';
 import type { FormationState } from '../src/state/game_state.js';
 
 // ---------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-01
-**Status:** MVP declared - Phase 6 complete
+**Status:** Post-MVP — Phase II calibration, GUI rework, Phase M complete
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
 
@@ -11,30 +11,30 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 ## Identity
 
-**Project:** A War Without Victory (AWWV)  
-**Type:** Wargame simulation prototype  
-**Repository:** AWWV  
-**Current Focus:** MVP declared; scope frozen
+**Project:** A War Without Victory (AWWV)
+**Type:** Wargame simulation prototype
+**Repository:** AWWV
+**Current Focus:** Combat calibration (n304, 86.7% OSID match), GUI Architecture Rework v2 (React+MapLibre), displacement system
 
 ---
 
 ## Non-negotiables
 
-1. **Path A Architecture:** Polygons are territorial micro-areas (`poly_id`), separate from settlement entities (`sid`). Polygons may link only via municipalities (`mid`). No forced 1:1 matching between polygons and settlements.
+1. **OSID Architecture:** Operational Settlement IDs (`op:municipality:slug`, 753 total) are the canonical spatial unit. `political_controllers` keyed by OSIDs. Contact graph between OSIDs. Corps front sectors partition OSIDs.
 
-2. **Aggregate Row Filtering:** Any row containing "∑" symbol in ANY cell must be excluded from settlement-level data. Aggregate rows are for validation only.
+2. **Canonical Faction IDs:** `RBiH`, `RS`, `HRHB` only. No aliases in code or data.
 
-3. **Deterministic Builds:** All outputs must be deterministic - stable sorting, fixed precision (3 decimals for LOCAL_PIXELS_V2), canonical JSON key ordering, no timestamps.
+3. **Deterministic Builds:** All outputs must be deterministic — sorted iteration via `strictCompare`, no `Math.random()`, no timestamps, no `Date.now()`, canonical JSON key ordering.
 
-4. **Empty GeoJSON is Valid:** Always emit valid GeoJSON output even if features array is empty. Never skip writing GeoJSON when feature count is zero.
+4. **Sorted Iteration:** All Map/Object iteration over game state must use sorted keys (strictCompare). Engine Invariants §13.
 
-5. **Canvas Polygon Isolation:** Every polygon must use its own `beginPath()`, `moveTo()` for first vertex, and `closePath()` before fill/stroke. Never connect polygons across paths.
+5. **Canon Hierarchy:** Engine Invariants → Phase Specs → Systems Manual → Rulebook → Game Bible → context.md. Higher levels override lower.
 
-6. **Municipality Outline Handling:** Municipality outlines can be single polygons. Union operations must handle both single and multiple polygon cases. Use convex hull fallback when union is unreliable.
+6. **No source data modification:** `data/source/` is read-only. Derived data goes to `data/derived/`.
 
-7. **Render-Valid Primary Gate:** Primary gate is render-valid (finite, non-zero area, non-self-intersecting/triangulatable). GIS-valid is diagnostic only. Use deterministic convex hull salvage when needed, but measure hull inflation.
+7. **FORAWWV flag-only:** Never auto-edit `docs/10_canon/FORAWWV.md`. Flag for manual review.
 
-8. **Settlement ID Uniqueness:** All `settlement_id` values must be globally unique. When duplicates detected, generate deterministic remapped IDs and record remapping in issues report.
+8. **Golden test governance:** Never auto-rebaseline golden tests. Refresh only after user/PM sign-off per `TEST_BASELINE_STRATEGY.md`.
 
 9. **Napkin:** At session start, read `.claude/napkin.md` (corrections, preferences, patterns). Update it as you work.
 
@@ -44,238 +44,135 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 ## Current Phase
 
-**Phase:** Phase 6 (MVP declaration and freeze) — complete  
-**Status:** MVP declared  
-**Focus:** Scope frozen. **A1 tactical base map is STABLE** and is the basis for the game.
+**Phase:** Post-MVP — Active Development
+**Status:** Phase II live, Phase M complete, GUI rework in progress
+**Focus:** Combat calibration (86.7% OSID match at n304), GUI Phase 3 remainder, displacement gap closure
 
-**Key Work:**
-- Phase 5: COMPLETE — map build docs aligned, type-safe Turn-0 init, data contracts confirmed.
-- Phase 6: COMPLETE — MVP declared 2026-02-08; all gates green.
-- **Track A (A1 base map):** COMPLETE. See `docs/20_engineering/specs/map/A1_BASE_MAP_REFERENCE.md` for canonical reference.
-- Optional parallel: Track B (war system design-only).
+**Completed milestones:**
+- Phase 6: MVP declared 2026-02-08; A1 base map stable and frozen
+- Phase II: Front-based combat, OSID political control, bot AI (Army→Corps→Brigade), corps front sectors
+- Phase M: Year-one mechanics — morale drift, ZoC virtual defense, enclave deprivation, displacement routing
+- Phase C: GUI tooltips, keyboard shortcuts, attack modal, order queue
+- Peace/War lifecycle migration (replaced phase_i/phase_ii)
+- Corps sector visualization in React+MapLibre map
+
+**Active workstreams:**
+- Combat calibration: n304 = 86.7% (653/753 OSID match), 6/6 benchmarks pass
+- GUI Phase 3 remainder: Minimap, ZoomControls, CorpsDetail, ArmyDetail, MovementPreview
+- Displacement: 340k vs ~1M target — deferred until combat calibration stabilizes
 
 ---
 
 ## Allowed / Disallowed Work
 
-### ✅ Allowed in Current Phase
+### Allowed
+- Simulation calibration (bot AI, combat mechanics, OOB tuning, doctrine)
+- GUI component development (React+MapLibre canonical app)
+- Displacement system fixes and tuning
+- Canon document updates when tech/mechanics change
+- Test infrastructure and Vitest suite maintenance
+- Scenario authoring and diagnostics tooling
+- Napkin updates when learning something reusable
 
-- Map rebuild pipeline work (Path A)
-- Polygon fabric extraction and processing
-- Settlement metadata processing (Excel → CSV)
-- Municipality outline derivation
-- Settlement point generation
-- Visual inspection HTML tools
-- Geometry validation and reporting
-- Crosswalk file creation/updates
-- Napkin updates (`.claude/napkin.md`) when you learn something worth recording
-
-### ❌ Disallowed in Current Phase
-
-- Forcing 1:1 polygon-to-settlement matching
-- Treating aggregate rows (∑) as settlements
-- Skipping GeoJSON output when feature count is zero
-- Connecting canvas polygons across paths
-- Using GIS validity as hard gate (use render-valid)
-- Allowing duplicate settlement IDs
-- Rewriting old ledger changelog entries
+### Disallowed
 - Modifying raw source files in `data/source/` (read-only)
+- Using `Math.random()`, `Date.now()`, or unsorted iteration in simulation code
+- Auto-editing FORAWWV.md (flag for manual review)
+- Rebaselining golden tests without PM sign-off
+- Rewriting old ledger changelog entries
+- Canvas-based rendering (canonical GUI is React+MapLibre)
+- Modifying map build pipeline (frozen, A1 base map is stable)
 
 ---
 
-## Geometry Contract (Path A)
+## Geometry Contract
 
-**Path A Architecture:**
+**Spatial Architecture:**
 
-1. **Polygons** (`poly_id`): Territorial micro-areas from SVG, identified by `poly_id`. Linked to municipalities via `mun_code` → `mid` crosswalk. NOT linked directly to settlements.
+1. **OSIDs** (`op:municipality:slug`): 753 operational settlements. Canonical spatial unit for political control, combat, displacement, and corps sectors. Keyed in `political_controllers`, contact graph, front edges.
 
-2. **Settlements** (`sid`): Simulation entities from Excel, identified by `sid`. Linked to municipalities via `mid`. Point+graph entities, NOT polygon entities.
+2. **Settlements** (`sid`, S-prefixed): 1991 census entities. Used for population data, displacement routing, recruitment. Linked to municipalities via `mid`.
 
-3. **Municipalities** (`mid`): Pre-1991 municipality IDs. Polygons and settlements both link to municipalities, but not directly to each other.
+3. **Municipalities** (`mid`, kebab-case): Administrative units. Municipality-level control derived from OSID control via `buildMunControlFromOsids()`.
 
-**Outline Modes:**
-
-The pipeline operates in one of three modes based on crosswalk availability:
-
-| Mode | Crosswalk present | Outlines file | Meaning |
-|------|-------------------|--------------|---------|
-| mid | yes | municipality_outline*.geojson | pre-1991 opštine borders |
-| mun_code | no | mun_code_outline.geojson | map-pack partitions (inspection-only) |
-| national | no | national_outline.geojson | BiH border only |
-
-**Mode "mid" (canonical):**
-- Requires `data/source/mun_code_crosswalk.csv`
-- Produces municipality outlines keyed by pre-1991 `mid`:
-  - `data/derived/municipality_outline.geojson` (or `*_rekeyed.geojson` depending on repo state)
-- Meaning: pre-1991 opštine borders for simulation logic
-
-**Mode "mun_code" (fallback, inspection-only):**
-- Used when crosswalk is missing or yields 0 polygons with mid
-- Produces outlines grouped by polygon fabric `mun_code`:
-  - `data/derived/mun_code_outline.geojson`
-- Meaning: map-pack municipal partitions for inspection only, NOT pre-1991 opštine
-
-**Mode "national" (fallback):**
-- Always produced regardless of mode:
-  - `data/derived/national_outline.geojson`
-- Meaning: country border only
-
-**Crosswalk Behavior:**
-- Without `mun_code_crosswalk.csv`: Polygons have `mid = null`, mid-based municipality outlines cannot be derived. The intended fallback is mun_code outlines for inspection. National outline fallback is always created. Settlement points placed in deterministic grid (synthetic).
-- With `mun_code_crosswalk.csv`: Polygons enriched with `mid`, municipality outlines derived from polygon fabric (union by mid), more accurate territorial representation.
-
-**Missing Crosswalk Handling:**
-- Polygon fabric still fully generated and visible
-- All polygons have `mid = null`
-- Mid-based municipality outlines cannot be derived (empty FeatureCollection expected)
-- Mun_code outlines should be created for inspection: `mun_code_outline.geojson`
-- National outline fallback: `national_outline.geojson` (union of all polygons)
-- Inspector shows warning: "No municipality outlines (mun_code_crosswalk.csv missing)"
-- Settlement points placed in deterministic grid (synthetic flag)
-- "Points inside municipality" validation checks skipped
+4. **Map Build (frozen):** Original poly_id/sid/mid Path A architecture remains valid for the map pipeline but is not the active spatial model. See A1_BASE_MAP_REFERENCE.md.
 
 ---
 
 ## Decisions
 
-| Date | Decision | Rationale | Consequences |
-|------|----------|-----------|--------------|
-| 2026-01-24 | Adopted Path A architecture (polygons ≠ settlements) | Previous approach attempted 1:1 matching which failed due to incompatible ID schemes | Clean separation allows polygons for visualization, settlements remain point+graph entities |
-| 2026-01-24 | Always emit GeoJSON even with zero features | Downstream tools expect consistent output structure | Empty GeoJSON is valid and maintains pipeline consistency |
-| 2026-01-24 | Filter aggregate rows (∑) from settlement data | Aggregate rows are validation-only, not actual settlements | Prevents aggregate totals from becoming settlement entities |
-| 2026-01-24 | Use render-valid as primary gate, GIS-valid as diagnostic | GIS validity too strict, drops usable geometry | More geometry preserved while still maintaining quality |
-| 2026-01-24 | Municipality outlines can be single polygons | Union operations should handle both single and multiple polygon cases | Prevents rejection of valid single-polygon municipalities |
-| 2026-01-24 | Use convex hull fallback for outlines when union fails | Union is unreliable for some municipality geometries | Provides deterministic fallback with inflation reporting |
-| 2026-01-24 | Measure hull inflation when using convex hull salvage | Convex hull can distort settlement shapes | Flags high-inflation hulls in metadata and overlays |
-| 2026-01-24 | Treat SVG ids as opaque geometry handles | SVG polygon ids and Excel settlement ids use different schemes | Explicit crosswalk required, no silent mismatches |
-| 2026-01-24 | Municipality borders sourced directly from drzava.js to avoid unstable unions | Union operations on micro-polygons frequently fail, drzava.js contains pre-authored municipality shapes | Bypasses union completely, renders borders reliably from source |
+| # | Date | Decision |
+|---|------|----------|
+| 1 | 2026-01-24 | Path A architecture: polygons (poly_id) separate from settlements (sid), linked via municipalities (mid) |
+| 2 | 2026-02-08 | MVP declared; A1 base map frozen |
+| 3 | 2026-02-14 | Corps-directed AoR: Army→Corps→Brigade bot AI hierarchy |
+| 4 | 2026-02-22 | OSID as canonical operational map unit (753 settlements) |
+| 5 | 2026-02-25 | RS_EARLY_WAR_END_WEEK = 20; RBiH general_defensive through year one |
+| 6 | 2026-02-28 | React+MapLibre as canonical player-facing GUI (replaces tactical_map.html) |
+| 7 | 2026-02-28 | Peace/War lifecycle replaces phase_i/phase_ii |
+| 8 | 2026-03-01 | Morale retreat resistance: MORALE_RESIST_FLOOR = 70 |
+| 9 | 2026-03-01 | Local front density modifier: thin fronts penalized, dense fronts rewarded |
+| 10 | 2026-03-01 | Displacement tuning deferred until combat calibration stabilizes |
 
 ---
 
 ## Current State
 
-### Files in `data/derived/`
+**Calibration:** n304 (40w) = 86.7% OSID match (653/753). RS=382 (painted 416), RBiH=277 (painted 248), HRHB=94 (painted 89). 6/6 benchmarks pass.
 
-**Proven/Working:**
-- `polygon_fabric.json` - Polygon features extracted from HTML (6148 polygons)
-- `polygon_fabric.geojson` - GeoJSON polygons in LOCAL_PIXELS_V2
-- `polygon_fabric_with_mid.geojson` - Polygons with mid (if crosswalk exists)
-- `settlements_meta.csv` - Settlement metadata from Excel (6283 settlements, 142 aggregate rows filtered)
-- `settlement_points_from_excel.geojson` - Settlement points (6148 points)
-- `municipality_outline.geojson` - Municipality outlines (0 municipalities - crosswalk missing)
-- `national_outline.geojson` - National outline fallback (union of all polygons)
-- `settlements_inspector.html` - Visual inspection tool
-- `municipality_borders_viewer.html` - Municipality borders viewer
-- `municipality_borders.geojson` - Municipality borders extracted from drzava.js (142 features expected)
-- `municipality_borders_viewer.html` - Municipality borders viewer (drzava.js source)
-- `municipality_borders_report.json` - Extraction report for drzava.js borders
-- `geometry_report.json` - Build statistics and validation metrics
-- `mun_code_summary.csv` - Diagnostic summary of mun_code values
+**Key files:**
+- Simulation: `src/sim/turn_pipeline.ts`, `src/sim/phase_ii/attack_resolution_osid.ts`, `src/sim/phase_ii/bot_corps_ai.ts`
+- State: `src/state/game_state.ts`, `src/state/displacement.ts`, `src/state/displacement_takeover.ts`
+- GUI: `src/ui/map/` (React+MapLibre), `src/ui/map/map/MapContainer.tsx`
+- Scenarios: `data/scenarios/apr1992_definitive_40w.json`
+- OOB: `data/source/oob_brigades.json`
 
-**Build Statistics (from geometry_report.json):**
-- Total polygons: 6148
-- Polygons kept: 6148
-- Polygons dropped: 0
-- Points created: 6148
-- Aggregate rows filtered: 142
-- Polygons without meta: 6137
-- Meta without polygons: 6283
-- Municipalities derived: 0 (crosswalk missing)
-- Crosswalk matched: 0
-- Crosswalk unresolved: 6422
-
-**Coordinate System:**
-- CRS: LOCAL_PIXELS_V2
-- Bounds: min_x=1, min_y=-9.521, max_x=940.964, max_y=910.09
-- Precision: 3 decimals
-
-**Status:**
-- ✅ Polygon fabric extraction working
-- ✅ Settlement metadata extraction working (aggregate filtering applied)
-- ✅ Settlement point generation working
-- ⚠️ Municipality crosswalk missing (all polygons have `mid = null`)
-- ⚠️ Mid-based municipality outlines cannot be derived (crosswalk missing - expected)
-- ⚠️ Mun_code outlines should be created for inspection when crosswalk missing
-- ✅ National outline fallback created
-- ✅ Visual inspection tools working
-
-**Counts and Terminology:**
-- `settlements_meta.csv` rows (6,283) ≠ polygon fabric feature count (6,148) - this is normal
-- Settlement entities (from Excel) are authoritative simulation entities
-- Polygon fabric is a territorial substrate for visualization
-- IDs must not be remapped silently. Any remap must be explicit via a committed mapping file (if ever needed)
-
-**Current Blockers:**
-- Blocker: When crosswalk is missing, `mun_code_outline.geojson` must be emitted for inspection. If this file is not being created, the pipeline is incomplete.
-- Blocker: Inspector may show missing outlines if `mun_code_outline.geojson` is not present when in mun_code mode.
-
-**Broken/Missing:**
-- Municipality code crosswalk (`data/source/mun_code_crosswalk.csv`) - missing, causing all polygons to have `mid = null`
-- If crosswalk missing: `mun_code_outline.geojson` should exist for inspection (verify this is being created)
+**Known gaps:**
+- Drina region 71.9% — RS can't sweep 12 municipalities with small Drina Corps
+- Bugojno: 8 RS overruns (should be HRHB)
+- VRS troop count 120k vs 100k target
+- Displacement 340k vs ~1M target (deferred)
 
 ---
 
-## Next Tasks (Top 5)
+## Next Tasks
 
-1. **Verify Mun_Code Outline Creation** - When crosswalk is missing, ensure `mun_code_outline.geojson` is being created for inspection. If not, fix the pipeline to emit this fallback artifact.
-
-2. **Create/Update Municipality Code Crosswalk** - Build `data/source/mun_code_crosswalk.csv` to map polygon `mun_code` values to canonical `mid` values. This will enable mid-based municipality outline derivation and improve territorial representation.
-
-3. **Validate Polygon-to-Municipality Mapping** - After crosswalk is created, verify that municipality outlines are correctly derived and settlement points are contained within outlines.
-
-4. **Update Inspector with Outline Mode Status** - Ensure inspector HTML clearly shows outline mode (mid/mun_code/national) and provides guidance when crosswalk is missing.
-
-5. **Document Crosswalk Creation Process** - Add documentation on how to create/update the municipality code crosswalk file.
+1. Complete GUI Phase 3 remainder (Minimap, ZoomControls, CorpsDetail, ArmyDetail, MovementPreview)
+2. Stabilize combat calibration before tuning displacement
+3. Re-enable minority flight in displacement system
+4. Investigate sustained displacement after initial timer
+5. GUI Phase 4: Desktop/Electron integration (useIPC, advance-turn)
 
 ---
 
 ## Backlog
 
-- Improve polygon-to-municipality matching accuracy
-- Add more detailed geometry validation reports
-- Create automated crosswalk generation tool
-- Add municipality-level statistics to geometry report
-- Improve settlement point placement accuracy (when coordinates missing)
-- Add polygon simplification options for performance
-- Create municipality outline quality metrics
-- Add support for multiple coordinate systems
-- Create migration guide from old map system to Path A
-- Add unit tests for map build pipeline
+1. M5 breakthrough retreat mechanic
+2. OSID-level displacement tracking (system operates at mun level)
+3. Enclave morale tuning (70→55 for Drina enclaves)
+4. Winter slowdown mechanic (intentional, not accidental dead weeks)
+5. War termination specification implementation
+6. Supply specification completion
+7. Scenario: full 52w historical (Apr 1992 → Oct 1993) acceptance run
+8. Drina Corps sweep capability (small corps, large AoR)
+9. AoR/SID legacy cleanup (address on encounter)
+10. Storybook component library for map UI
 
 ---
 
 ## Operational Notes
 
-**Build System:**
-- TypeScript files run directly with `tsx` (no compilation step required)
-- Build command: `npm run build:map` or `pnpm build:map`
-- Check command: `npm run map:check` or `pnpm map:check`
-- PowerShell command chaining:
-  - Windows PowerShell 5.1 does NOT support `&&`. Use separate lines or `;` separator (e.g., `npm run build:map; npm run map:check`)
-  - PowerShell 7 supports `&&` (e.g., `npm run build:map && npm run map:check`)
-  - If `pnpm` is not installed, use `npm run build:map` instead
+**Key commands:**
+- `npm run sim:scenario:run:40w` — 40w calibration scenario
+- `npm run sim:scenario:run:default` — 52w historical scenario
+- `npm run dev:map` — React+MapLibre GUI (port 3001)
+- `npm run desktop` — Electron app
+- `npm run test:vitest` — Vitest suite (193 tests)
+- `npm run typecheck` — TypeScript check
+- `npm run canon:check` — Determinism scan
+- `node tools/compare_painted_vs_sim.cjs <run_dir>` — Calibration comparison
 
-**Dependencies:**
-- `pnpm` may be missing - use `npm` as fallback
-- TypeScript execution: `tsx` (in devDependencies)
-- GeoJSON processing: `@turf/turf`
-- Excel parsing: `xlsx`
-- SVG path parsing: `svg-path-parser`
-- Concave hull: `concaveman`
-
-**File Paths:**
-- Source files: `data/source/`
-- Derived files: `data/derived/`
-- Tools: `tools/map/`
-- Documentation: `docs/`
-
-**Session runbook and ledger:** At session start read `.claude/napkin.md` (runbook). Append changelog entries to `docs/PROJECT_LEDGER.md`. Rely on napkin, ledger, and canon only — no separate mistake log.
-
-**Project Ledger Integration:**
-- All scripts should import and use project ledger guard
-- Reference: `docs/PROJECT_LEDGER.md`
-- Guard functions: `loadLedger()`, `assertLedgerFresh(context)`
-- Summary: `getLedgerSummary()`
+**Session runbook:** Read `.claude/napkin.md` first, then this ledger. Apply napkin patterns silently. Update napkin during work.
 
 ---
 
@@ -8725,3 +8622,56 @@ Determinism checks **MUST** be run:
 - **Determinism:** No simulation or persisted output changes. Load path only.
 - **Files modified:** src/ui/map/store/gameStore.ts, src/ui/map/components/TopToolbar.tsx, src/ui/map/vite.config.ts, src/ui/map/data/DataLoader.ts.
 - **Verification:** src/ui/map npm run build pass; adapter tests 7/7 pass; user confirmed load fixed.
+
+**2026-03-01** - feat(sim): Local Fronts mechanic + per-brigade defense calibration
+- **Phase:** Post-MVP calibration, Phase II combat mechanics.
+- **Summary:** Added two new mechanics: (1) **Local Fronts** — defensive sectors derived from assignable front segments with coverage-based density modifiers. Thin fronts (few brigades / many edges) get defense penalty (down to 0.6×); concentrated fronts get mutual support bonus (up to 1.25×). Computed each turn in `compute-local-fronts` pipeline step. (2) **Per-brigade defense_terrain_bonus** — OOB field propagated through FormationState into combat resolution. Applied multiplicatively to defender power in both direct defense and ZoC projection. Assigned to historically fortified brigades: 255th Slavna (Teočak, +30%), 246th Vitezka (Šapna, +25%), 328th/351st Mountain (Zavidovići/Vozuća, +20%).
+- **Calibration:** n295 = 85.1% (641/753), up from n291 baseline 84.7% (638/753). 6/6 benchmarks pass. +3 OSID fixes (Brčko krepsic, Kalesija gojcin, Lopare jablanica now correctly held by RS). No regressions. Posavina NE 83.5%→85.3%. Central Bosnia 80.7%→81.3%.
+- **Determinism:** All iteration sorted via strictCompare. No Math.random(). LocalFront is derived state, recomputed each turn per Engine Invariants §13.
+- **Files modified:** src/state/game_state.ts (LocalFront type, defense_terrain_bonus on FormationState); src/sim/phase_ii/local_front_defense.ts (NEW); src/sim/phase_ii/attack_resolution_osid.ts (defense_terrain_bonus + frontDensityMult); src/sim/phase_ii/combat_predictor.ts (mirror); src/sim/turn_pipeline.ts (compute-local-fronts step); src/scenario/oob_loader.ts (defense_terrain_bonus parsing); src/sim/recruitment_engine.ts (defense_terrain_bonus passthrough); src/state/serializeGameState.ts (local_fronts key); data/source/oob_brigades.json (4 brigade bonuses).
+- **Verification:** npm run typecheck pass; npm run test:vitest 193/193 pass (13 skipped); npm run sim:scenario:run:40w n295 85.1% 6/6 benchmarks.
+
+**2026-03-01** - analysis(displacement): post-fix validation report — 340k vs 1M target, gap decomposition
+- **Phase:** Post-MVP calibration, displacement mechanics.
+- **Summary:** Validated displacement system against n299 (86.3% OSID match, 6/6 benchmarks). Three-bug fix confirmed working: accounting invariants hold (conservation = 0, no negative populations, no double-counting). Total displaced outcomes = 340,650 vs ~1,000,000 historical target (34% coverage). Gap decomposition: (a) ~300k from single-timer-per-OSID depth limit — each OSID fires displacement once then stops, even where RS holds all OSIDs municipalities show only 19% impact vs 40-55% historical; (b) ~200k from territorial coverage gap — RS misses 27 painted OSIDs, Drina 57% match, Zvornik/Bratunac show 0 displacement; (c) ~100-150k from disabled minority flight. Also fixed DISPLACEMENT_MASTER.md §10.5: corrected misleading "percentage of OSID population" to accurately describe ethnic-population-based expulsion via 1991 census shares.
+- **Determinism:** No simulation changes. Analysis only + doc fix.
+- **Files modified:** docs/20_engineering/DISPLACEMENT_MASTER.md (§10.5 corrected), docs/40_reports/20260301_DISPLACEMENT_VALIDATION_REPORT.md (NEW).
+- **Verification:** n299 run data analyzed. All invariants pass. n301 run confirmed combat calibration in progress (77.6% OSID match, 1/6 benchmarks) — displacement numbers downstream of territorial outcomes.
+- **Recommendations:** (R1) Investigate sustained displacement after initial timer; (R2) Re-enable minority flight; (R3) Fix continuous pressure producing zero; (R4) Stabilize combat calibration BEFORE tuning displacement.
+
+**2026-03-01** - fix(combat): corps front sector ID format mismatch — n304 86.7% OSID match
+- **Phase:** Post-MVP calibration, Phase II combat mechanics.
+- **Summary:** Fixed critical bug in `bot_corps_ai.ts` where `assignedFrontIds` used sub_segment IDs (`subseg:vrs_1st_krajina:0`) instead of regular front segment IDs. Downstream consumers (`front_assignment.ts`) match against `assignable_front_segments[].front_id` — the ID format mismatch caused ALL segment lookups to fail, leaving corps with no front-based target intelligence. Result: n301 had 521 orders but only 18 flips (3.5%). Fix: always use `corpsFrontMapping` for `assignedFrontIds`; sectors remain active for target filtering via `sector.sub_segments[*].enemy_osids`.
+- **Root cause:** `assignedFrontIds = sector.sub_segments.map(ss => ss.sub_segment_id)` produced IDs like `subseg:vrs_1st_krajina:0` but `front_assignment.ts:86` filters against `segmentIds` which are regular front IDs. 0 valid IDs → empty front assignments → corps blind.
+- **Calibration:** n304 = 86.7% (653/753), best result yet. 6/6 benchmarks pass. RS=382 (vs 293 broken, 389 n299). 157 flips (vs 18 broken, 166 n299). Displacement 323k (vs 33k broken, 340k n299). New local fronts + sectors working correctly alongside fix.
+- **Determinism:** No ordering changes. Single expression change.
+- **Files modified:** src/sim/phase_ii/bot_corps_ai.ts (line 1234: assignedFrontIds always from corpsFrontMapping).
+- **Verification:** npm run typecheck pass; npm run sim:scenario:run:40w n304 86.7% 6/6 benchmarks; compare_painted_vs_sim confirms recovery.
+
+**2026-03-01** - feat(displacement): sustained displacement mechanic — n307 481k displaced (+49% from n304 baseline)
+- **Phase:** Post-MVP calibration, displacement mechanics.
+- **Summary:** Implemented sustained displacement: after a hostile-takeover timer's initial 4-turn maturation fires (Branch A), the OSID enters sustained mode (Branch B). Each subsequent turn displaces 3% of remaining minority per OSID. This models historical multi-month ethnic cleansing (Prijedor camps, Bijeljina expulsions, Foča systematic terror) rather than one-shot events. Direct routing to friendly municipalities (no camp intermediate — sustained = civilian flight). Timer lifecycle: stays alive with `matured_turn` set; deleted when OSID recaptured by displaced faction, factions no longer at war, or remaining minority < 10. Recapture check added for all timers (new: prevents displacement from recaptured OSIDs). Harness updated to track `sustained_fires` and `sustained_displaced_total` in weekly/summary reports.
+- **Key design decision:** `cumulative_displaced = 0` at maturation (not `displacementAmount`). Initial displacement already takes 100% of per-OSID minority (`floor(osidPop × hostileShare)`), so starting sustained pool at initial amount → `remainingMinority = 0` → sustained never fires. Setting to 0 gives sustained a full `initialMinority` pool, representing additional ongoing displacement of people who initially stayed.
+- **Calibration:** n307 = 86.3% OSID match (650/753, -3 from n304 86.7%). 6/6 benchmarks pass. Total displaced 481,390 (initial 321,809 + sustained 159,581). By ethnicity: RBiH 332k (+55%), HRHB 111k (+44%), RS 39k (+70%). Sustained fires: 3,686 over 35 weeks. Sustained curve peaks at w16-17 (~6k/week) then decays exponentially. Historical target ~1M; gap narrows from 67% to 52%.
+- **Constants:** `SUSTAINED_DISPLACEMENT_RATE = 0.03`, `SUSTAINED_MIN_REMAINING = 10`. Both tunable.
+- **Determinism:** Sorted timer iteration via strictCompare. No randomness. Per-OSID granularity consistent with initial model.
+- **Files modified:** src/state/game_state.ts (HostileTakeoverTimerState +2 optional fields: matured_turn, cumulative_displaced); src/state/displacement_takeover.ts (core: constants, report fields, refactored timer loop with Branch A/B split, recapture/alliance checks); src/scenario/scenario_runner.ts (harness: sustained report field aggregation); docs/20_engineering/DISPLACEMENT_MASTER.md (§6.1 lifecycle diagram, §6.2 timer state, §10.7 sustained displacement section).
+- **Verification:** npm run typecheck pass; npm run sim:scenario:run:40w n307 86.3% 6/6 benchmarks; compare_painted_vs_sim confirms stable OSID match.
+
+**2026-03-01** - feat(gui): Corps Sector visualization — corps-colored fronts, click-to-inspect panel
+- **Phase:** AWWV_GUI_ARCHITECTURE_REWORK_v2 (React + MapLibre canonical GUI).
+- **Summary:** Replaced generic black-and-white front stripe with corps-colored sector boundaries. Each corps gets a distinct color within its faction palette (4 shades per faction: RS reds, RBiH greens, HRHB blues). Data pipeline: `GameState.corps_front_sectors` → `GameStateAdapter.parseGameState()` → `CorpsFrontSectorView[]` → `buildCorpsFrontLinesGeoJSON()` → MapLibre layers with dynamic `setPaintProperty()`. Click any front edge → right panel shows Corps Sector detail (corps name, faction, stance, front length, density, threat ratio, defensive power, assigned/reserve brigade lists, opposing factions). Removed old `front-line-dash` layer (white barbed-wire stripe). Added `front-line-base` corps coloring. Hover features enriched with `sector_id`/`corps_id` for tooltip display. Fallback: pre-war saves render generic faction borders. Terminology: "Corps Sector" (not "Theatre" or "Corps Front").
+- **Canon propagation:** Systems Manual v0.6.0 §2.1 (Corps Sectors layer), §8 (renamed to include Corps Sectors), Appendix A (derived state list); War Specification v0.6.0 §4 (corps_front_sectors as derived state); context.md (OSID/ZoC/Corps Sectors); DESKTOP_GUI_IPC_CONTRACT.md (query-corps-sectors updated from legacy AoR description to BFS-based). Full evolution report: [20260301_SPATIAL_MODEL_EVOLUTION_AOR_ZOC_CORPS_SECTORS.md](docs/40_reports/implemented/20260301_SPATIAL_MODEL_EVOLUTION_AOR_ZOC_CORPS_SECTORS.md).
+- **Determinism:** GUI-only changes. No simulation or persisted output changes.
+- **Files modified:** src/ui/map/data/types.ts (CorpsFrontSectorView), src/ui/map/data/GameStateAdapter.ts (parse corps_front_sectors), src/ui/map/map/builders/buildCorpsFrontLinesGeoJSON.ts (NEW), src/ui/map/map/builders/buildFrontEdgesHoverGeoJSON.ts (sector enrichment), src/ui/map/map/MapContainer.tsx (conditional corps builder + dynamic paint), src/ui/map/map/useMapInteractions.ts (onFrontEdgeClick), src/ui/map/map/awwv_map_style.json (removed front-line-dash, updated front-line-base), src/ui/map/store/gameStore.ts (selectedCorpsFrontSectorId), src/ui/map/components/CorpsFrontPanel.tsx (NEW), src/ui/map/App.tsx (mount panel).
+- **Verification:** npm run typecheck pass (root + map UI); npm run test:vitest 193/193 pass (13 skipped).
+
+**2026-03-01** - refactor(sim): extract shared combat math into combat_math.ts (R1)
+- **Phase:** Post-MVP maintenance — code health.
+- **Summary:** Extracted ~400 lines of duplicated constants and pure functions from `attack_resolution_osid.ts` (resolver) and `combat_predictor.ts` (predictor) into a new shared module `combat_math.ts`. Both files now import from the single source of truth. Eliminates the largest maintenance risk in the simulation codebase: drift between resolver and predictor formulas (already had signature mismatches in `getUrbanMult`, `getLinkedZocReadiness`, `computeAttackerPower`, and `buildTerrainMultByOsid`/`buildTerrainCache`).
+- **What moved:** 26 constants (thresholds, rates, multiplier tables), `CombatOutcome` type (unifying `AttackOutcome` + `PredictedOutcome`), 17 pure functions (power computation, terrain, supply, posture, disruption, etc.), terrain helpers (`terrainCompositeForSid`, `buildTerrainMultByOsid`).
+- **Signature unification:** `computeAttackerPower(state, formation, supplyStateByOsid?, overridePosture?)` — resolver omits posture override (uses `formation.posture`); predictor passes `attackerPosture ?? 'attack'` to preserve its distinct default. `getUrbanMult(targetOsid)` — removed unused `_state` param from resolver version.
+- **Backward compat:** `AttackOutcome` re-exported from resolver as alias for `CombatOutcome`; `PredictedOutcome` re-exported from predictor. `getEquipmentRatio`, `getToTerrainDefenseMult`, `getLinkedZocReadiness` re-exported from resolver for test consumers.
+- **Determinism:** Pure extraction — zero behavioral change. State hash `2f332a630a820fba` identical across consecutive 40w runs. No new nondeterministic patterns. All `strictCompare` ordering preserved.
+- **Files modified:** src/sim/phase_ii/combat_math.ts (NEW ~310 lines), src/sim/phase_ii/attack_resolution_osid.ts (shrunk ~110 lines), src/sim/phase_ii/combat_predictor.ts (shrunk ~400 lines), tests/to_terrain_combat.test.ts (import redirect).
+- **Verification:** tsc clean; vitest 190/190 pass (13 skipped); node:test to_terrain_combat 15/15 pass; map UI build clean; sim:scenario:run:40w deterministic (hash match).
