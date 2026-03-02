@@ -46,6 +46,6 @@
   },
   "avoided_osids_by_faction": {
     "RBiH": ["op:zavidovici:vozuca_2"]
-  }
-
+  },
+  "war_timeline": "apr1992"
 }

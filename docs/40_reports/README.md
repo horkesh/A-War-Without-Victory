@@ -35,7 +35,7 @@
 | **issues/** | Bug/issue tracking. [2026_02_26_MAP_INITIALIZATION_HANG.md](issues/2026_02_26_MAP_INITIALIZATION_HANG.md) (RESOLVED). |
 | **audits/** | Polygon/settlement/phase audit artifacts from map pipeline era. |
 | **cleanup/** | Repo cleanup records and audit data. |
-| **Root** | README, CONSOLIDATED_*.md, CALIBRATION_MASTER.md (living calibration reference, latest: n359 86.7%), ORCHESTRATOR memo; active plans (GUI Phase 3 remainder, React map status). |
+| **Root** | README, CONSOLIDATED_*.md, CALIBRATION_MASTER.md (living calibration reference, latest: n359 86.7%), ORCHESTRATOR memo; active plans (GUI Phase 3 remainder, React map status). War timeline externalization (2026-03-02): all faction temporal profiles externalized to `data/scenarios/timelines/apr1992.json`; type definitions + resolvers in `src/state/war_timeline.ts`; 38 tests in `tests/war_timeline.test.ts`. |
 
 ---
 

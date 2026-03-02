@@ -4,6 +4,8 @@
  */
 
 import type { MunicipalityId } from './game_state.js';
+import type { WarTimeline } from './war_timeline.js';
+import { lookupStepCurve } from './war_timeline.js';
 import { LARGE_URBAN_MUN_IDS } from './large_urban_mun_data.js';
 import { MAX_BRIGADES_OVERRIDE } from './max_brigades_per_mun_data.js';
 
@@ -112,7 +114,12 @@ export const COMBAT_REINFORCEMENT_RATE = 200;
  * RBiH was disorganized militia; reinforcement capacity grew over time as corps formed.
  * HRHB had Croatian cadre support but limited logistics.
  */
-export function getFactionReinforcementMult(faction: string, turn: number): number {
+export function getFactionReinforcementMult(faction: string, turn: number, timeline?: WarTimeline): number {
+    // Timeline-driven when available
+    if (timeline?.reinforcement_mult?.[faction]) {
+        return lookupStepCurve(timeline.reinforcement_mult[faction], turn, 1.0);
+    }
+    // Hardcoded fallback
     if (faction === 'RBiH') {
         // ARBiH mobilization phases: militia → TO brigades → corps structure → professional army
         if (turn < 12) return 0.25;   // Weeks 0-11: barely organized, 100/turn effective

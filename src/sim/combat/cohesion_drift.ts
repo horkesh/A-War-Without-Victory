@@ -6,6 +6,8 @@
  */
 
 import type { FactionId, FormationId, FormationState, GameState, MilitiaPoolState } from '../../state/game_state.js';
+import type { WarTimeline } from '../../state/war_timeline.js';
+import { lookupStepCurve } from '../../state/war_timeline.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getEnclaveCohesionRecovery } from './enclave_resilience.js';
 import { getFactionCohesionCeiling, getFactionCohesionFloor } from './faction_progression.js';
@@ -46,7 +48,12 @@ function getFactionExhaustionRatio(state: GameState, faction: FactionId): number
  * capability by week 35. Historically VRS maintained offensive operations throughout
  * 1992-93 (corridor, Drina valley, Bihac, Gorazde operations spanning 2+ years).
  */
-function getFactionCohesionDrift(faction: string, turn: number): number {
+function getFactionCohesionDrift(faction: string, turn: number, timeline?: WarTimeline): number {
+    // Timeline-driven when available
+    if (timeline?.cohesion_drift?.[faction]) {
+        return lookupStepCurve(timeline.cohesion_drift[faction], turn, 0);
+    }
+    // Hardcoded fallback
     if (faction === 'RS') {
         // VRS: JNA-inherited organization is resilient.
         // Slow decay starts at week 30 (turn 39), accelerates only in year 2+.
@@ -108,7 +115,7 @@ export function runPhaseIICohesionDrift(
         if (!f || (f.kind !== 'brigade' && f.kind !== 'operational_group')) continue;
         const faction = f.faction;
         if (!faction) continue;
-        let drift = getFactionCohesionDrift(faction, turn);
+        let drift = getFactionCohesionDrift(faction, turn, state.war_timeline);
         const exhaustionPenalty = exhaustionPenaltyByFaction[faction];
         if (exhaustionPenalty != null) drift += exhaustionPenalty;
         // B4: Enclave cohesion recovery — besieged formations adapt over time
@@ -118,8 +125,8 @@ export function runPhaseIICohesionDrift(
         // Apply drift
         let next = Math.max(0, Math.min(100, prev + drift));
         // C1: Clamp to faction cohesion floor (ARBiH professionalization) and ceiling (RS decay)
-        const floor = getFactionCohesionFloor(faction, turn);
-        const ceiling = getFactionCohesionCeiling(faction, turn);
+        const floor = getFactionCohesionFloor(faction, turn, state.war_timeline);
+        const ceiling = getFactionCohesionCeiling(faction, turn, state.war_timeline);
         if (next < floor) next = floor;
         if (next > ceiling) next = ceiling;
         if (next === prev) continue;

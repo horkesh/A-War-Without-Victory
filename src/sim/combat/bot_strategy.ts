@@ -14,11 +14,9 @@
  * Deterministic: no randomness.
  */
 
-import type { ArmyStance, BrigadePosture, FactionId } from '../../state/game_state.js';
+import type { BrigadePosture, FactionId } from '../../state/game_state.js';
+import type { DoctrinePhase, StandingOrder, WarTimeline } from '../../state/war_timeline.js';
 import {
-    HRHB_LASVA_ATTACK_SHARE,
-    HRHB_LASVA_OFFENSIVE_END_WEEK,
-    HRHB_LASVA_OFFENSIVE_START_WEEK,
     RS_EARLY_WAR_END_WEEK,
 } from './bot_constants.js';
 
@@ -187,7 +185,7 @@ export const FACTION_STRATEGIES: Record<FactionId, FactionBotStrategy> = {
         attack_coverage_threshold: 180,
         defend_critical_territory: true,
         offensive_objectives: ['ilidza', 'hadzici', 'vogosca', 'ilijas', ...RBIH_CENTRAL_CORRIDOR],
-        defensive_priorities: [...SARAJEVO_CORE, ...RBIH_ENCLAVE_DEFENSE, 'tuzla', 'zenica'],
+        defensive_priorities: [...SARAJEVO_CORE, ...RBIH_ENCLAVE_DEFENSE, 'tuzla', 'zenica', 'trnovo'],
         // Calibration: 2 active brigades ensures RBiH mounts local counterattacks.
         min_active_brigades: 2,
     },
@@ -207,16 +205,11 @@ export const FACTION_STRATEGIES: Record<FactionId, FactionBotStrategy> = {
 // Time-Phased Doctrine (D3)
 // ═══════════════════════════════════════════════════════════════════════════
 
-export interface DoctrinePhase {
-    start_week: number;
-    end_week: number;
-    default_corps_stance: 'defensive' | 'balanced' | 'offensive';
-    max_attack_share_override: number;
-    aggression_modifier: number;
-}
+// DoctrinePhase is defined in war_timeline.ts (canonical) and re-exported here for backward compatibility.
+export type { DoctrinePhase } from '../../state/war_timeline.js';
 
-// Re-export timing knobs for backward compatibility (canonical source: bot_constants.ts)
-export { RS_EARLY_WAR_END_WEEK, HRHB_LASVA_OFFENSIVE_START_WEEK, HRHB_LASVA_OFFENSIVE_END_WEEK, HRHB_LASVA_ATTACK_SHARE } from './bot_constants.js';
+// Re-export timing knob for backward compatibility (canonical source: bot_constants.ts)
+export { RS_EARLY_WAR_END_WEEK } from './bot_constants.js';
 
 export const FACTION_DOCTRINE_PHASES: Record<FactionId, DoctrinePhase[]> = {
     RS: [
@@ -244,10 +237,11 @@ export const FACTION_DOCTRINE_PHASES: Record<FactionId, DoctrinePhase[]> = {
 
 /**
  * Get the active doctrine phase for a faction at a given turn.
+ * When timeline is provided, uses its doctrine_phases; falls back to hardcoded FACTION_DOCTRINE_PHASES.
  * Returns null if no doctrine phase applies.
  */
-export function getActiveDoctrinePhase(faction: FactionId, turn: number): DoctrinePhase | null {
-    const phases = FACTION_DOCTRINE_PHASES[faction];
+export function getActiveDoctrinePhase(faction: FactionId, turn: number, timeline?: WarTimeline): DoctrinePhase | null {
+    const phases = timeline?.doctrine_phases?.[faction] ?? FACTION_DOCTRINE_PHASES[faction];
     if (!phases) return null;
     for (const phase of phases) {
         if (turn >= phase.start_week && turn < phase.end_week) return phase;
@@ -257,16 +251,12 @@ export function getActiveDoctrinePhase(faction: FactionId, turn: number): Doctri
 
 /**
  * Get effective max_attack_share for a faction at a given turn.
- * Uses doctrine phases (FACTION_DOCTRINE_PHASES) as the single source of truth.
- * HRHB Lasva Offensive overrides the doctrine phase value.
+ * Uses doctrine phases as the single source of truth (timeline-driven when available).
+ * HRHB Lasva Offensive (w12-26) is now handled by HRHB doctrine phase 1 (max_attack_share_override: 0.35).
  * Deterministic: depends only on faction and turn number.
  */
-export function getEffectiveAttackShare(faction: FactionId, turn: number): number {
-    // HRHB Lasva Offensive override
-    if (faction === 'HRHB' && turn >= HRHB_LASVA_OFFENSIVE_START_WEEK && turn < HRHB_LASVA_OFFENSIVE_END_WEEK) {
-        return HRHB_LASVA_ATTACK_SHARE;
-    }
-    const phase = getActiveDoctrinePhase(faction, turn);
+export function getEffectiveAttackShare(faction: FactionId, turn: number, timeline?: WarTimeline): number {
+    const phase = getActiveDoctrinePhase(faction, turn, timeline);
     return phase?.max_attack_share_override ?? FACTION_STRATEGIES[faction].max_attack_posture_share;
 }
 
@@ -292,18 +282,8 @@ export function getEffectiveAttackShare(faction: FactionId, turn: number): numbe
  *       during the Croat-Bosniak war (1993), then pivoted to defense and
  *       cooperation after Washington Agreement (1994).
  */
-export interface StandingOrder {
-    /** Human-readable name for the standing order. */
-    name: string;
-    /** First week this order applies (inclusive). */
-    start_week: number;
-    /** Last week this order applies (exclusive). */
-    end_week: number;
-    /** Army stance to set. 'balanced' means no army-level override. */
-    army_stance: ArmyStance;
-    /** Brief flavor description of the strategic intent. */
-    description: string;
-}
+// StandingOrder is defined in war_timeline.ts (canonical) and re-exported here for backward compatibility.
+export type { StandingOrder } from '../../state/war_timeline.js';
 
 export const FACTION_STANDING_ORDERS: Record<FactionId, StandingOrder[]> = {
     RS: [
@@ -382,11 +362,12 @@ export const FACTION_STANDING_ORDERS: Record<FactionId, StandingOrder[]> = {
 
 /**
  * Get the active standing order for a faction at a given turn.
+ * When timeline is provided, uses its standing_orders; falls back to hardcoded FACTION_STANDING_ORDERS.
  * Returns null if no standing order applies (shouldn't happen with 9999 end_week).
  * Deterministic: depends only on faction and turn number.
  */
-export function getActiveStandingOrder(faction: FactionId, turn: number): StandingOrder | null {
-    const orders = FACTION_STANDING_ORDERS[faction];
+export function getActiveStandingOrder(faction: FactionId, turn: number, timeline?: WarTimeline): StandingOrder | null {
+    const orders = timeline?.standing_orders?.[faction] ?? FACTION_STANDING_ORDERS[faction];
     if (!orders) return null;
     for (const order of orders) {
         if (turn >= order.start_week && turn < order.end_week) return order;
@@ -471,7 +452,7 @@ const VRS_ARMY_PRIORITIES: ArmyOperationPriority[] = [
  */
 const RBIH_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     // 1st Corps: Sarajevo defense — friendly municipalities only until week 56
-    { name: 'Sarajevo Defense', corps_id: 'arbih_1st_corps', target_municipalities: ['centar_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo'], start_week: 0, end_week: 56, weight: 100, min_outcome: 'costly_victory' },
+    { name: 'Sarajevo Defense', corps_id: 'arbih_1st_corps', target_municipalities: ['centar_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo', 'trnovo'], start_week: 0, end_week: 56, weight: 100, min_outcome: 'costly_victory' },
     // 1st Corps: Sarajevo counter-attacks — include RS-held suburbs from week 56
     { name: 'Sarajevo Counterattack', corps_id: 'arbih_1st_corps', target_municipalities: ['centar_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo', 'ilidza', 'hadzici', 'vogosca', 'ilijas'], start_week: 56, end_week: 9999, weight: 100, min_outcome: 'stalemate' },
     // 2nd Corps: Tuzla area defense + Brčko south (ARBiH held OSID just south of Brčko throughout war)

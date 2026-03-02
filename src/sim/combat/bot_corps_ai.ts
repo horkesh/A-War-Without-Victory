@@ -326,7 +326,7 @@ export function generateCorpsStanceOrders(
         }
 
         // --- Doctrine phase influence (D3) ---
-        const doctrinePhase = getActiveDoctrinePhase(faction, turn);
+        const doctrinePhase = getActiveDoctrinePhase(faction, turn, state.war_timeline);
         if (doctrinePhase && stance === 'balanced') {
             // Doctrine provides a default bias when the situation is ambiguous
             stance = doctrinePhase.default_corps_stance;
@@ -417,7 +417,7 @@ export function generateCorpsStanceOrders(
         // --- Army stance ceiling ---
         // Army-level stance constrains corps: general_defensive → all corps at most defensive.
         // Prevents corps from independently going offensive/balanced when army says "hold everywhere."
-        const armyStance = getActiveStandingOrder(faction, turn)?.army_stance ?? 'balanced';
+        const armyStance = getActiveStandingOrder(faction, turn, state.war_timeline)?.army_stance ?? 'balanced';
         if (armyStance === 'general_defensive' && stance !== 'reorganize') {
             stance = 'defensive';
         }
@@ -901,7 +901,7 @@ export function setArmyStandingOrder(
     faction: FactionId
 ): void {
     const turn = state.meta?.turn ?? 0;
-    const order = getActiveStandingOrder(faction, turn);
+    const order = getActiveStandingOrder(faction, turn, state.war_timeline);
     if (!order) return;
 
     let stance = order.army_stance;
@@ -1210,7 +1210,7 @@ export function generateCorpsDirectives(
     const sectorLookup = state.corps_front_sectors ?? {};
     const adjacency = buildOsidAdjacency(edges);
     const strategy = FACTION_STRATEGIES[faction];
-    const doctrinePhase = getActiveDoctrinePhase(faction, turn);
+    const doctrinePhase = getActiveDoctrinePhase(faction, turn, state.war_timeline);
 
     // Army stance modulation: adjusts reserve fractions and aggression
     const armyStance = state.army_stance?.[faction] ?? 'balanced';

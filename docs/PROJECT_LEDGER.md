@@ -14,7 +14,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 **Project:** A War Without Victory (AWWV)
 **Type:** Wargame simulation prototype
 **Repository:** AWWV
-**Current Focus:** Combat calibration (n362, 87.4% OSID match), GUI Architecture Rework v2 (React+MapLibre, Phase 3 COMPLETE), Sectors & Operations active
+**Current Focus:** Combat calibration (n362, 87.4% OSID match), GUI Architecture Rework v2 (React+MapLibre, Phase 3 COMPLETE), Sectors & Operations active, War Timeline externalization complete
 
 ---
 
@@ -9126,3 +9126,32 @@ Determinism checks **MUST** be run:
 - **Files:** 4 new, 7 modified, ~450 lines total
 - **Verification:** tsc clean (0 new errors), 255 vitest pass / 1 skip (17 new + 18 existing), 17 node:test pass.
 - **Canon propagation:** context.md (OOB Rework paragraph extended), PIPELINE_ENTRYPOINTS.md (compute-combat-summaries in Phase II step list), REPO_MAP.md (combat summaries routing), AWWV_GUI_ARCHITECTURE_REWORK_v2.md (§0 status + §5.2 component + §7 directory), 40_reports/README.md (index entry).
+
+### [2026-03-02] War Timeline Externalization — Data-Driven Faction Temporal Profiles
+- **Type:** Architecture / Data externalization
+- **Summary:** Externalized 30+ hardcoded timing constants (doctrine phases, standing orders, cohesion drift/floor/ceiling, reinforcement multipliers, equipment decay, external support, maintenance decay) into a JSON-loadable `WarTimeline` format. Scenarios reference a timeline by ID; all consumers read from `state.war_timeline` with hardcoded fallback.
+- **Changes:**
+  1. `src/state/war_timeline.ts` — NEW: `WarTimeline` interface, `DoctrinePhase`, `StandingOrder`, `StepCurveEntry`, `KeyframeCurve`, `EquipmentDecayConfig`, `ExternalSupportWindow`, `MaintenanceDecayConfig` types; resolver functions (`lookupStepCurve`, `interpolateKeyframeCurve`, `resolveCohesionBound`, `computeMaintenanceMult`); `validateWarTimeline()` with contiguity/ordering validation
+  2. `data/scenarios/timelines/apr1992.json` — NEW: All hardcoded values extracted verbatim (doctrine phases RS/RBiH/HRHB, standing orders, cohesion drift/floor/ceiling, reinforcement mult, equipment decay, external support, maintenance decay)
+  3. `src/scenario/scenario_types.ts` — Added `war_timeline?: string` to `Scenario` interface
+  4. `src/state/game_state.ts` — Added `war_timeline?: WarTimeline` to `GameState`
+  5. `src/scenario/scenario_runner.ts` — Timeline JSON loading when `scenario.war_timeline` is set, with descriptive error on missing file
+  6. `src/sim/combat/bot_strategy.ts` — `getActiveDoctrinePhase`, `getEffectiveAttackShare`, `getActiveStandingOrder` accept optional `timeline?` parameter; `DoctrinePhase` and `StandingOrder` canonical definitions moved here from duplicates; HRHB Lasva override removed (redundant with doctrine phase 1)
+  7. `src/sim/combat/bot_corps_ai.ts` — 4 call sites pass `state.war_timeline`
+  8. `src/sim/combat/bot_brigade_ai_osid.ts` — `getEffectiveAttackShare` passes `state.war_timeline`
+  9. `src/sim/combat/cohesion_drift.ts` — `getFactionCohesionDrift` accepts optional `timeline?`
+  10. `src/sim/combat/faction_progression.ts` — `getFactionCohesionFloor`, `getFactionCohesionCeiling`, `getRSMaintenanceCapacityMult` accept optional `timeline?`
+  11. `src/state/formation_constants.ts` — `getFactionReinforcementMult` accepts optional `timeline?`
+  12. `src/sim/turn_phases/war_phases.ts` — Equipment decay and maintenance steps read from `state.war_timeline`
+  13. `src/sim/combat/battle_resolution.ts` — `getExternalSupportMultiplier` accepts optional `timeline?`
+  14. `src/sim/formation_spawn.ts` — Reinforcement mult calls pass `state.war_timeline`
+  15. `src/sim/combat/bot_constants.ts` — Removed `HRHB_LASVA_OFFENSIVE_START_WEEK`, `HRHB_LASVA_OFFENSIVE_END_WEEK`, `HRHB_LASVA_ATTACK_SHARE`
+  16. `data/scenarios/apr1992_definitive_40w.json` — Added `"war_timeline": "apr1992"`
+  17. `tests/war_timeline.test.ts` — NEW: 38 tests (resolver unit tests, round-trip parity, backward compat, validation)
+- **Architecture:** Timeline stored on `GameState.war_timeline?` (serialized to saves). Separate file (not inline in scenario JSON) — multiple scenarios can share a timeline. Optional `timeline?` parameter on all consumer functions — backward compatible. Hardcoded values preserved as fallbacks. `DoctrinePhase` and `StandingOrder` canonical definitions in `war_timeline.ts`, re-exported by `bot_strategy.ts`.
+- **Design:** Deterministic — no randomness, no timestamps. Step curve lookup is sequential scan. Keyframe interpolation is pure arithmetic. JSON parse produces identical objects. `validateWarTimeline()` checks structure, contiguity, and ordering but does not sort or reorder.
+- **Cleanup:** HRHB Lasva override removed — HRHB doctrine phase 1 (w12-26, share 0.35) already covered it. Three `HRHB_LASVA_*` constants removed from `bot_constants.ts`.
+- **Scope exclusion:** `FACTION_ARMY_PRIORITIES` (complex structure with municipalities/corps IDs) deferred to Phase 2. `control_flip.ts` L33 `RS_EARLY_WAR_END_WEEK = 26` not touched (Phase I border intervention constant, distinct from bot doctrine). Seasonal effects already data-driven.
+- **Files:** 3 new, 14 modified, ~600 lines total
+- **Verification:** tsc clean, 258 vitest pass / 1 skip (38 new), 0 regressions. Round-trip parity tests confirm timeline-driven values match hardcoded at all sampled turns for all factions.
+- **Canon propagation:** context.md (war timeline paragraph), PIPELINE_ENTRYPOINTS.md (scenario loading), REPO_MAP.md (war timeline routing), 40_reports/README.md (index entry), MEMORY.md (war timeline system).

@@ -266,7 +266,7 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
 
             // Rate limit: combat formations get half rate; faction-specific multiplier; ceiling check
             const inCombat = f.posture === 'attack' || f.disrupted === true;
-            const factionMult = getFactionReinforcementMult(faction, currentTurn);
+            const factionMult = getFactionReinforcementMult(faction, currentTurn, state.war_timeline);
             const ceilingMult = getFactionCeilingMult(state, faction);
             if (ceilingMult <= 0) continue; // At hard cap — no reinforcement
             const baseRate = inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
@@ -339,7 +339,7 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         // Rate limit: combat brigades get half rate; faction-specific mobilization multiplier; ceiling check
         const inCombat = f.posture === 'attack' || f.disrupted === true;
         const currentTurnNum = state.meta?.turn ?? 0;
-        const factionMult = getFactionReinforcementMult(faction, currentTurnNum);
+        const factionMult = getFactionReinforcementMult(faction, currentTurnNum, state.war_timeline);
         const ceilingMult = getFactionCeilingMult(state, faction);
         if (ceilingMult <= 0) continue; // At hard cap — no reinforcement
         const rate = Math.max(1, Math.floor((inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE) * factionMult * ceilingMult));

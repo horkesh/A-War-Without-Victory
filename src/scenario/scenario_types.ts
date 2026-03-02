@@ -134,5 +134,12 @@ export interface Scenario {
      * E.g. "RBiH": ["op:zavidovici:vozuca_2"] keeps RBiH from attacking the Vozuća VRS pocket.
      */
     avoided_osids_by_faction?: Record<string, string[]>;
+    /**
+     * War timeline ID (e.g. "apr1992"). When set, loads faction temporal profiles
+     * from data/scenarios/timelines/{id}.json — doctrine phases, standing orders,
+     * cohesion drift/floor/ceiling, reinforcement multipliers, equipment decay,
+     * external support, maintenance decay. Stored on GameState.war_timeline.
+     */
+    war_timeline?: string;
 }
 

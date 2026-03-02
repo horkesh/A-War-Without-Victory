@@ -1,0 +1,165 @@
+{
+  "id": "apr1992",
+
+  "doctrine_phases": {
+    "RS": [
+      { "start_week": 0, "end_week": 20, "default_corps_stance": "offensive", "max_attack_share_override": 0.28, "aggression_modifier": 0.15 },
+      { "start_week": 20, "end_week": 40, "default_corps_stance": "balanced", "max_attack_share_override": 0.08, "aggression_modifier": -0.05 },
+      { "start_week": 40, "end_week": 9999, "default_corps_stance": "defensive", "max_attack_share_override": 0.10, "aggression_modifier": -0.1 }
+    ],
+    "RBiH": [
+      { "start_week": 0, "end_week": 20, "default_corps_stance": "defensive", "max_attack_share_override": 0.10, "aggression_modifier": -0.10 },
+      { "start_week": 20, "end_week": 40, "default_corps_stance": "defensive", "max_attack_share_override": 0.15, "aggression_modifier": -0.05 },
+      { "start_week": 40, "end_week": 56, "default_corps_stance": "defensive", "max_attack_share_override": 0.20, "aggression_modifier": 0.0 },
+      { "start_week": 56, "end_week": 80, "default_corps_stance": "balanced", "max_attack_share_override": 0.25, "aggression_modifier": 0.05 },
+      { "start_week": 80, "end_week": 9999, "default_corps_stance": "offensive", "max_attack_share_override": 0.35, "aggression_modifier": 0.15 }
+    ],
+    "HRHB": [
+      { "start_week": 0, "end_week": 12, "default_corps_stance": "balanced", "max_attack_share_override": 0.25, "aggression_modifier": 0 },
+      { "start_week": 12, "end_week": 26, "default_corps_stance": "balanced", "max_attack_share_override": 0.35, "aggression_modifier": 0.05 },
+      { "start_week": 26, "end_week": 9999, "default_corps_stance": "balanced", "max_attack_share_override": 0.30, "aggression_modifier": 0 }
+    ]
+  },
+
+  "standing_orders": {
+    "RS": [
+      {
+        "name": "Territorial Seizure",
+        "start_week": 0, "end_week": 20,
+        "army_stance": "general_offensive",
+        "description": "Exploit JNA equipment handover for maximum territorial gain before international response."
+      },
+      {
+        "name": "Consolidation",
+        "start_week": 20, "end_week": 56,
+        "army_stance": "balanced",
+        "description": "Secure gains, fortify corridors, maintain siege rings. No army-wide override — corps decide locally."
+      },
+      {
+        "name": "Strategic Hold",
+        "start_week": 56, "end_week": 9999,
+        "army_stance": "general_defensive",
+        "description": "Manpower crisis. Hold existing territory, avoid costly offensives, wait for political settlement."
+      }
+    ],
+    "RBiH": [
+      {
+        "name": "Survival Defense",
+        "start_week": 0, "end_week": 12,
+        "army_stance": "general_defensive",
+        "description": "Preserve forces. No offensive operations. Hold what you can, reorganize TO into brigades."
+      },
+      {
+        "name": "Local Counterattacks",
+        "start_week": 12, "end_week": 40,
+        "army_stance": "balanced",
+        "description": "Corps forming. Local counterattacks permitted to reclaim lost territory. No general offensives."
+      },
+      {
+        "name": "Corps Reorganization",
+        "start_week": 40, "end_week": 56,
+        "army_stance": "balanced",
+        "description": "Corps structure mature. Active defense with counterattack capability."
+      },
+      {
+        "name": "Active Defense",
+        "start_week": 56, "end_week": 80,
+        "army_stance": "balanced",
+        "description": "Pinprick attacks begin. Probe VRS lines, test weaknesses, stretch reserves. Not breakthroughs."
+      },
+      {
+        "name": "Controlled Counteroffensive",
+        "start_week": 80, "end_week": 9999,
+        "army_stance": "general_offensive",
+        "description": "Full counteroffensives. Corps-level coordinated operations (1994-1995 campaigns)."
+      }
+    ],
+    "HRHB": [
+      {
+        "name": "Consolidate Herzegovina",
+        "start_week": 0, "end_week": 12,
+        "army_stance": "balanced",
+        "description": "Secure the Croat heartland. No army-wide override — local commanders secure their sectors."
+      },
+      {
+        "name": "Anti-RS Defense",
+        "start_week": 12, "end_week": 26,
+        "army_stance": "balanced",
+        "description": "No bilateral war — focus on defending Croat territory against RS. Maintain alliance with RBiH."
+      },
+      {
+        "name": "Washington Pivot",
+        "start_week": 26, "end_week": 9999,
+        "army_stance": "balanced",
+        "description": "Post-Washington Agreement. Cease offensive ops against RBiH, defend territory, cooperate with ARBiH against VRS. Counter-attacks and probing permitted against RS."
+      }
+    ]
+  },
+
+  "cohesion_drift": {
+    "RS": [
+      { "start_turn": 0, "end_turn": 40, "value": 0 },
+      { "start_turn": 40, "end_turn": 53, "value": -0.05 },
+      { "start_turn": 53, "end_turn": 79, "value": -0.10 },
+      { "start_turn": 79, "end_turn": 105, "value": -0.20 },
+      { "start_turn": 105, "end_turn": 9999, "value": -0.35 }
+    ],
+    "RBiH": [
+      { "start_turn": 0, "end_turn": 13, "value": 0.4 },
+      { "start_turn": 13, "end_turn": 27, "value": 0.3 },
+      { "start_turn": 27, "end_turn": 53, "value": 0.15 },
+      { "start_turn": 53, "end_turn": 79, "value": 0.10 },
+      { "start_turn": 79, "end_turn": 105, "value": 0.05 },
+      { "start_turn": 105, "end_turn": 9999, "value": 0.03 }
+    ],
+    "HRHB": [
+      { "start_turn": 0, "end_turn": 53, "value": 0.05 },
+      { "start_turn": 53, "end_turn": 9999, "value": 0 }
+    ]
+  },
+
+  "cohesion_floor": {
+    "RBiH": [[0, 35], [13, 42], [26, 50], [39, 56], [52, 62]],
+    "HRHB": 50,
+    "RS": 0
+  },
+
+  "cohesion_ceiling": {
+    "RS": [[0, 85], [13, 82], [26, 78], [39, 73], [52, 68]],
+    "RBiH": 100,
+    "HRHB": 100
+  },
+
+  "reinforcement_mult": {
+    "RBiH": [
+      { "start_turn": 0, "end_turn": 12, "value": 0.25 },
+      { "start_turn": 12, "end_turn": 26, "value": 0.50 },
+      { "start_turn": 26, "end_turn": 52, "value": 0.75 },
+      { "start_turn": 52, "end_turn": 9999, "value": 1.0 }
+    ],
+    "HRHB": [
+      { "start_turn": 0, "end_turn": 12, "value": 0.50 },
+      { "start_turn": 12, "end_turn": 9999, "value": 0.75 }
+    ],
+    "RS": [
+      { "start_turn": 0, "end_turn": 9999, "value": 1.0 }
+    ]
+  },
+
+  "equipment_decay": [
+    { "faction": "RS", "start_week": 26, "rate_per_week": 0.005, "floor": 0.60 }
+  ],
+
+  "external_support": [
+    {
+      "faction": "RS",
+      "end_turn": 26,
+      "municipalities": ["bijeljina", "zvornik", "foca", "vlasenica", "bratunac", "visegrad", "rogatica", "prijedor"],
+      "combat_multiplier": 1.22
+    }
+  ],
+
+  "maintenance_decay": [
+    { "faction": "RS", "formula": "linear_decay", "floor": 0.5, "divisor": 200 }
+  ]
+}

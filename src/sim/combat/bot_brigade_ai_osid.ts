@@ -50,6 +50,7 @@ import {
 import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import type { SettlementEthnicityData } from '../../data/settlement_ethnicity.js';
+import { getSeasonalModifiers } from './seasonal_effects.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -1379,8 +1380,10 @@ export function generateAllBotOrdersOsid(
         // This prevents large corps (1KK with 28 brigades) from monopolizing all attack slots
         // while small corps (Drina with 6 brigades) get zero.
         // Within each corps, trim lowest-scoring attacks first.
+        // Winter: attack_share_mult reduces effective slots (near-total stasis Dec-Jan).
         const turn = state.meta?.turn ?? 0;
-        const maxAttackShare = getEffectiveAttackShare(faction, turn);
+        const seasonal = getSeasonalModifiers(turn, state.meta?.scenario_start_date);
+        const maxAttackShare = getEffectiveAttackShare(faction, turn, state.war_timeline) * seasonal.attack_share_mult;
 
         // Count brigades per corps
         const corpsSize = new Map<string, number>();

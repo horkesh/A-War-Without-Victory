@@ -9,6 +9,7 @@
 - `src/scenario/scenario_runner.ts`
   - Outputs: `runs/<run_id>/` artifacts (see harness docs and tests).
   - Used by: `tools/scenario_runner/` scripts (baseline regression, sweeps).
+  - **War timeline loading:** When `scenario.war_timeline` is set (e.g. `"apr1992"`), loads `data/scenarios/timelines/{id}.json`, validates via `validateWarTimeline()`, stores on `state.war_timeline`. All consumer functions read from timeline first, fall back to hardcoded. Type definitions and resolvers in `src/state/war_timeline.ts`.
 
 ### Scenario CLI (Scripted)
 - `src/cli/sim_scenario.ts`

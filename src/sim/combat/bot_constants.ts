@@ -21,10 +21,8 @@
  * backfires because RBiH's more-active doctrine starts at fixed w20, causing counterattacks. */
 export const RS_EARLY_WAR_END_WEEK = 20;
 
-/** HRHB Lasva Offensive window (weeks 12–26): higher attack share so HRHB issues more attack orders. See NEXT_BOT_PRIORITY_AOR_OR_HRHB_HANDOFF_2026_02_18 Candidate B. */
-export const HRHB_LASVA_OFFENSIVE_START_WEEK = 12;
-export const HRHB_LASVA_OFFENSIVE_END_WEEK = 26;
-export const HRHB_LASVA_ATTACK_SHARE = 0.35;
+// HRHB Lasva Offensive window removed — now handled by HRHB doctrine phase 1
+// (max_attack_share_override: 0.35, weeks 12-26) in timeline or FACTION_DOCTRINE_PHASES.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Corps-level threat and health thresholds (from bot_corps_ai.ts)

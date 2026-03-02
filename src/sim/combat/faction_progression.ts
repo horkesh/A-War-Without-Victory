@@ -16,6 +16,8 @@
  */
 
 import type { FactionId, FormationState, GameState } from '../../state/game_state.js';
+import type { WarTimeline } from '../../state/war_timeline.js';
+import { computeMaintenanceMult as computeMaintenanceMultFromConfig, resolveCohesionBound } from '../../state/war_timeline.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // ── C1: Cohesion floor and ceiling ──────────────────────────────────────────
@@ -73,11 +75,16 @@ function getRSCohesionCeiling(turn: number): number {
 
 /**
  * Returns the cohesion floor for a faction at a given turn.
+ * When timeline is provided, uses its cohesion_floor; falls back to hardcoded values.
  * ARBiH: rising floor (professionalization).
  * HRHB: constant 50 (Croatian cadres, stable).
  * RS: no floor (only ceiling applies).
  */
-export function getFactionCohesionFloor(faction: string, turn: number): number {
+export function getFactionCohesionFloor(faction: string, turn: number, timeline?: WarTimeline): number {
+    if (timeline?.cohesion_floor?.[faction] !== undefined) {
+        const hardcodedDefault = faction === 'RBiH' ? getRBiHCohesionFloor(turn) : faction === 'HRHB' ? 50 : 0;
+        return resolveCohesionBound(timeline.cohesion_floor[faction], turn, hardcodedDefault);
+    }
     if (faction === 'RBiH') return getRBiHCohesionFloor(turn);
     if (faction === 'HRHB') return 50;
     return 0; // RS has no floor
@@ -85,10 +92,15 @@ export function getFactionCohesionFloor(faction: string, turn: number): number {
 
 /**
  * Returns the cohesion ceiling for a faction at a given turn.
+ * When timeline is provided, uses its cohesion_ceiling; falls back to hardcoded values.
  * RS: declining ceiling (organizational decay).
  * Others: 100 (no ceiling constraint).
  */
-export function getFactionCohesionCeiling(faction: string, turn: number): number {
+export function getFactionCohesionCeiling(faction: string, turn: number, timeline?: WarTimeline): number {
+    if (timeline?.cohesion_ceiling?.[faction] !== undefined) {
+        const hardcodedDefault = faction === 'RS' ? getRSCohesionCeiling(turn) : 100;
+        return resolveCohesionBound(timeline.cohesion_ceiling[faction], turn, hardcodedDefault);
+    }
     if (faction === 'RS') return getRSCohesionCeiling(turn);
     return 100; // No ceiling for other factions
 }
@@ -189,7 +201,11 @@ export function runEquipmentProgression(state: GameState): EquipmentProgressionR
  * Applied as a multiplier to the base maintenance capacity in equipment degradation.
  * By week 52: RS tanks ~13 operational (from 40), artillery ~10 (from 30).
  */
-export function getRSMaintenanceCapacityMult(turn: number): number {
+export function getRSMaintenanceCapacityMult(turn: number, timeline?: WarTimeline): number {
+    if (timeline?.maintenance_decay) {
+        const config = timeline.maintenance_decay.find(c => c.faction === 'RS');
+        if (config) return computeMaintenanceMultFromConfig(config, turn);
+    }
     if (turn <= 0) return 1.0;
     return Math.max(0.5, 1.0 - turn / 200);
 }

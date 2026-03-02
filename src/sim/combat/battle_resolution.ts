@@ -33,6 +33,7 @@ import type {
 } from '../../state/game_state.js';
 import { getLegacyAoR } from '../../state/game_state.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
+import type { WarTimeline } from '../../state/war_timeline.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import { getBrigadeAoRSettlements, getSettlementGarrison } from './brigade_aor_legacy.js';
@@ -386,8 +387,22 @@ function getExternalSupportMultiplier(
     attackerFaction: FactionId,
     turn: number,
     settlementToMun: Map<string, string>,
-    targetSid: SettlementId
+    targetSid: SettlementId,
+    timeline?: WarTimeline
 ): number {
+    // Timeline-driven when available
+    if (timeline?.external_support) {
+        const support = timeline.external_support.find(s => s.faction === attackerFaction);
+        if (support) {
+            if (turn >= support.end_turn) return 1.0;
+            const mun = settlementToMun.get(targetSid);
+            if (!mun) return 1.0;
+            if (!support.municipalities.includes(mun)) return 1.0;
+            return support.combat_multiplier;
+        }
+        return 1.0; // No support config for this faction in timeline
+    }
+    // Hardcoded fallback
     if (attackerFaction !== 'RS') return 1.0;
     if (turn >= EARLY_WAR_RS_EXTERNAL_SUPPORT_END_TURN) return 1.0;
     const mun = settlementToMun.get(targetSid);
@@ -888,7 +903,7 @@ export function resolveBattleOrders(
                 (sum, sid) => sum + getSettlementGarrison(state, sid, edges), 0
             );
             const bp = computeCombatPower(state, formations[aid]!, rawGarrison, 'attack', 1.0, 0);
-            const ext = getExternalSupportMultiplier(attackerFaction, turn, settlementToMun, targetSid);
+            const ext = getExternalSupportMultiplier(attackerFaction, turn, settlementToMun, targetSid, state.war_timeline);
             combinedAttackerPower += bp.total_combat_power * ext * effN * ogMult;
         }
         const attackerPower = {

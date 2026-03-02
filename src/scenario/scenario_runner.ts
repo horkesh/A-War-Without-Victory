@@ -963,6 +963,19 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             state.meta.supply_reserves_enabled = true;
         }
 
+        // War timeline: load externalized faction temporal profiles from JSON.
+        if (scenario.war_timeline) {
+            const { validateWarTimeline } = await import('../state/war_timeline.js');
+            const timelinePath = join(baseDir, `data/scenarios/timelines/${scenario.war_timeline}.json`);
+            let timelineRaw: unknown;
+            try {
+                timelineRaw = JSON.parse(await readFile(timelinePath, 'utf8'));
+            } catch (err) {
+                throw new Error(`Failed to load war timeline "${scenario.war_timeline}" from ${timelinePath}: ${err instanceof Error ? err.message : err}`);
+            }
+            state.war_timeline = validateWarTimeline(timelineRaw);
+        }
+
         // Store per-faction OSID avoidance list in meta so bot corps AI can inject into directives.
         if (scenario.avoided_osids_by_faction && Object.keys(scenario.avoided_osids_by_faction).length > 0) {
             state.meta.avoided_osids_by_faction = scenario.avoided_osids_by_faction;
