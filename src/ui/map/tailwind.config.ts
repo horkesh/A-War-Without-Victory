@@ -1,6 +1,21 @@
 /** @type {import('tailwindcss').Config} */
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 export default {
-  content: ['index.html', 'App.tsx', 'main.tsx', 'map/**/*.{ts,tsx}', 'store/**/*.ts', 'components/**/*.{ts,tsx}', 'utils/**/*.ts', 'stories/**/*.{ts,tsx}', 'styles/**/*.css'],
+  content: [
+    path.join(__dirname, 'index.html'),
+    path.join(__dirname, 'App.tsx'),
+    path.join(__dirname, 'main.tsx'),
+    path.join(__dirname, 'map/**/*.{ts,tsx}'),
+    path.join(__dirname, 'store/**/*.ts'),
+    path.join(__dirname, 'components/**/*.{ts,tsx}'),
+    path.join(__dirname, 'utils/**/*.ts'),
+    path.join(__dirname, 'stories/**/*.{ts,tsx}'),
+    path.join(__dirname, 'styles/**/*.css'),
+  ],
   theme: {
     extend: {
       colors: {

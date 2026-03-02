@@ -1,6 +1,6 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-02
+**Last Updated:** 2026-03-03
 **Status:** Post-MVP — Phase II calibration, GUI rework, Phase M complete
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
@@ -9155,3 +9155,19 @@ Determinism checks **MUST** be run:
 - **Files:** 3 new, 14 modified, ~600 lines total
 - **Verification:** tsc clean, 258 vitest pass / 1 skip (38 new), 0 regressions. Round-trip parity tests confirm timeline-driven values match hardcoded at all sampled turns for all factions.
 - **Canon propagation:** context.md (war timeline paragraph), PIPELINE_ENTRYPOINTS.md (scenario loading), REPO_MAP.md (war timeline routing), 40_reports/README.md (index entry), MEMORY.md (war timeline system).
+
+### [2026-03-03] Map runtime contract fixes (plan)
+- **Type:** Plan (GUI / Desktop)
+- **Summary:** Execution plan to resolve map investigation issues: desktop map build output path vs Electron route, density-mode interactions, layer-binding race, protocol routes for `/data/runs` and `/data/source`, glyph documentation, Tailwind build warning.
+- **Blast-radius:** Build output path (`dist/tactical-map`), map interaction bindings (`useMapInteractions.ts`, `MapContainer.tsx`), desktop protocol handlers (`electron-main.cjs`, `protocol_data_route.cjs`), map style/docs (glyphs, optional style contract).
+- **Plan:** `docs/plans/2026-03-03-map-runtime-contract-fixes.md`
+- **Phases:** A (build + Tailwind), B (density + layer-aware binding), C (protocol routes), D (glyphs doc), E (tests + report). Paradox roles: Build Engineer, UI/UX Developer, Platform Specialist, Documentation Specialist, QA Engineer; Process QA after Phase E.
+- **Determinism:** No simulation or ordering impact; build path, UI events, and I/O routes only.
+- **Status:** Plan approved; implementation not started.
+
+### [2026-03-03] Map runtime contract fixes — Phase A complete
+- **Type:** Fix (Build / Map)
+- **Summary:** Map Vite build already output to `dist/tactical-map`; fixed Tailwind "content missing" warning by (1) passing explicit config path from `postcss.config.js` so the map Tailwind config is loaded when building from root, (2) using `path.join(__dirname, ...)` in `tailwind.config.ts` for content paths so utilities are resolved from the map package.
+- **Files modified:** `src/ui/map/tailwind.config.ts`, `src/ui/map/postcss.config.js`
+- **Verification:** `npx tsc --noEmit`, `npx vitest run`, `npm run desktop:map:build` — no Tailwind warning, build succeeds.
+- **Determinism:** Build/output path only; no simulation impact.
