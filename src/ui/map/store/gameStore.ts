@@ -2,6 +2,15 @@ import { create } from 'zustand';
 import type { LoadedGameState } from '../data/types';
 import { parseGameState } from '../data/GameStateAdapter';
 
+function buildStateFingerprint(jsonOrText: unknown | string): string | null {
+  if (typeof jsonOrText === 'string') return jsonOrText;
+  try {
+    return JSON.stringify(jsonOrText);
+  } catch {
+    return null;
+  }
+}
+
 /** Map overlay mode (HOI §3.1, §6). */
 export type MapMode = 'political' | 'ethnic' | 'supply' | 'pressure' | 'density';
 
@@ -96,6 +105,10 @@ export interface GameStore {
   setLoadError: (message: string | null) => void;
   /** Load save: accepts parsed JSON or raw JSON string. Returns Promise that resolves when state is set. Yields before parse so UI can paint loading state. */
   loadSave: (jsonOrText: unknown | string) => Promise<void>;
+  /** Load save only when payload fingerprint differs from last applied desktop/browser payload. Returns true if loaded. */
+  loadSaveIfChanged: (jsonOrText: unknown | string) => Promise<boolean>;
+  /** Fingerprint for latest loaded payload (used for dedupe in desktop session sync). */
+  lastLoadedStateFingerprint: string | null;
 
   /** Staged orders for current turn (Phase C5). */
   stagedOrders: StagedOrder[];
@@ -168,6 +181,7 @@ export const useGameStore = create<GameStore>((set) => ({
   loadedGameState: null,
 
   loadError: null,
+  lastLoadedStateFingerprint: null,
 
   setLoadError: (message) => set({ loadError: message }),
 
@@ -180,6 +194,7 @@ export const useGameStore = create<GameStore>((set) => ({
         : (fn: () => void) => setTimeout(fn, 0);
 
       schedule(() => {
+        const fingerprint = buildStateFingerprint(jsonOrText);
         let state: LoadedGameState;
         try {
           const json =
@@ -197,7 +212,7 @@ export const useGameStore = create<GameStore>((set) => ({
         // Apply state in next tick so we don't block after parse.
         queueMicrotask(() => {
           try {
-            set({ loadedGameState: state, loadError: null });
+            set({ loadedGameState: state, loadError: null, lastLoadedStateFingerprint: fingerprint });
             console.log(`[gameStore] Loaded save: ${state.label} — ${state.formations.length} formations, ${Object.keys(state.controlBySettlement).length} control entries`);
             resolve();
           } catch (e) {
@@ -208,6 +223,15 @@ export const useGameStore = create<GameStore>((set) => ({
         });
       });
     });
+  },
+  loadSaveIfChanged: async (jsonOrText: unknown | string) => {
+    const nextFingerprint = buildStateFingerprint(jsonOrText);
+    const currentFingerprint = useGameStore.getState().lastLoadedStateFingerprint;
+    if (nextFingerprint != null && currentFingerprint === nextFingerprint) {
+      return false;
+    }
+    await useGameStore.getState().loadSave(jsonOrText);
+    return true;
   },
 
   stagedOrders: [],

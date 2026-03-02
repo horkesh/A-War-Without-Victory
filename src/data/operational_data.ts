@@ -6,10 +6,18 @@
  * Canon: OSID + Attack Resolution roadmap (data/state phase).
  */
 
-import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
 import { parseEdges } from '../map/settlements_parse.js';
 import type { EdgeRecord } from '../map/settlements.js';
+
+async function readOperationalJson(baseDir: string | undefined, relativePath: string): Promise<unknown> {
+    const [{ readFile }, pathModule] = await Promise.all([
+        import('node:fs/promises'),
+        import('node:path'),
+    ]);
+    const filePath = pathModule.resolve(baseDir ?? process.cwd(), relativePath);
+    const content = await readFile(filePath, 'utf8');
+    return JSON.parse(content) as unknown;
+}
 
 /** Operational settlement ID (e.g. op:mun1990:cluster). Same value space as SettlementId when graph is operational. */
 export type OperationalSettlementId = string;
@@ -41,12 +49,10 @@ export interface LoadedOperationalData {
  * Determinism: parseEdges preserves array order from file; use sorted iteration when needed.
  */
 export async function loadOperationalEdges(baseDir?: string): Promise<EdgeRecord[]> {
-    const path = resolve(
-        baseDir ?? process.cwd(),
+    const raw = await readOperationalJson(
+        baseDir,
         'data/derived/operational/operational_contact_graph.json'
     );
-    const content = await readFile(path, 'utf8');
-    const raw = JSON.parse(content) as unknown;
     return parseEdges(raw);
 }
 
@@ -62,12 +68,10 @@ function isRecord(x: unknown): x is Record<string, unknown> {
 export async function loadOperationalData(
     baseDir?: string
 ): Promise<LoadedOperationalData> {
-    const path = resolve(
-        baseDir ?? process.cwd(),
+    const raw = await readOperationalJson(
+        baseDir,
         'data/derived/operational/canonical_to_operational_map.json'
     );
-    const content = await readFile(path, 'utf8');
-    const raw = JSON.parse(content) as unknown;
     if (!isRecord(raw)) {
         throw new Error('canonical_to_operational_map: expected object');
     }

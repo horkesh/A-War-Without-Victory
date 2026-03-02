@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MapContainer } from './map/MapContainer';
 import { MapModeToolbar } from './components/MapModeToolbar';
 import { TopToolbar } from './components/TopToolbar';
@@ -13,17 +13,26 @@ import { OOBSidebar } from './components/OOBSidebar';
 import { OrderQueue } from './components/OrderQueue';
 import { Tooltip } from './components/Tooltip';
 import { AttackConfirmation } from './components/AttackConfirmation';
+import { SidePickerOverlay } from './components/SidePickerOverlay';
+import { RecruitmentModal } from './components/RecruitmentModal';
 import { useGameStore } from './store/gameStore';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
-
-/** Desktop bridge (Electron preload); undefined when run in browser. */
-const awwv = typeof window !== 'undefined' ? (window as unknown as { awwv?: { stageAttackOrder?: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; error?: string }>; queryCombatEstimate?: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; win_probability?: number; error?: string }> } }).awwv : undefined;
+import { useDesktopSession } from './hooks/useDesktopSession';
+import { useIPC } from './desktop/useIPC';
+import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
+import {
+  applyRecruitmentAndSync,
+  fetchRecruitmentCatalog,
+  startCampaignFromSidePicker,
+} from './desktop/campaignRecruitmentActions';
 
 function App() {
   // Phase C3: single key handler (Enter, 1–4, Escape)
   useKeyboardShortcuts();
+  useDesktopSession();
+  const ipc = useIPC();
 
   const pendingAttackConfirmation = useGameStore((s) => s.pendingAttackConfirmation);
   const setPendingAttackConfirmation = useGameStore((s) => s.setPendingAttackConfirmation);
@@ -31,6 +40,18 @@ function App() {
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const setConfirmPrimaryAction = useGameStore((s) => s.setConfirmPrimaryAction);
+  const loadSave = useGameStore((s) => s.loadSave);
+  const setLoadError = useGameStore((s) => s.setLoadError);
+  const playerFaction = loadedGameState?.player_faction ?? null;
+
+  const [sidePickerOpen, setSidePickerOpen] = useState(false);
+  const [sidePickerDismissed, setSidePickerDismissed] = useState(false);
+  const [campaignStarting, setCampaignStarting] = useState(false);
+  const [recruitmentOpen, setRecruitmentOpen] = useState(false);
+  const [recruitmentLoading, setRecruitmentLoading] = useState(false);
+  const [recruitmentApplying, setRecruitmentApplying] = useState(false);
+  const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
+  const recruitmentCatalogRequestId = useRef(0);
 
   // C4.3: Combat odds — call existing query-combat-estimate when modal opens; show "—" if unavailable.
   // Phase 5 could add a dedicated combat-estimate IPC if needed; we use existing query-combat-estimate only.
@@ -43,16 +64,25 @@ function App() {
     }
     const { attackerFormationId, targetOsid } = pendingAttackConfirmation;
     setCombatOdds('—');
-    if (awwv?.queryCombatEstimate) {
-      awwv.queryCombatEstimate(attackerFormationId, targetOsid).then((r) => {
-        if (r?.ok && r.win_probability != null) {
-          setCombatOdds(`${Math.round(r.win_probability * 100)}% win`);
-        } else {
-          setCombatOdds('—');
-        }
-      }).catch(() => setCombatOdds('—'));
-    }
+    ipc.queryCombatEstimate(attackerFormationId, targetOsid).then((r) => {
+      if (r?.ok && r.win_probability != null) {
+        setCombatOdds(`${Math.round(r.win_probability * 100)}% win`);
+      } else {
+        setCombatOdds('—');
+      }
+    }).catch(() => setCombatOdds('—'));
   }, [pendingAttackConfirmation, setConfirmPrimaryAction]);
+
+  useEffect(() => {
+    if (loadedGameState) {
+      setSidePickerOpen(false);
+      setSidePickerDismissed(false);
+      return;
+    }
+    if (ipc.isAvailable && !sidePickerDismissed) {
+      setSidePickerOpen(true);
+    }
+  }, [ipc.isAvailable, loadedGameState, sidePickerDismissed]);
 
   // Dev: ?showPanel=1 shows the selection panel with a placeholder OSID for layout verification
   useEffect(() => {
@@ -76,20 +106,20 @@ function App() {
     ? String((osidPropertiesMap[pendingAttackConfirmation.targetOsid].terrain ?? osidPropertiesMap[pendingAttackConfirmation.targetOsid].zone_type) ?? '—')
     : '—';
 
+  const submitAttackOrder = (attackerFormationId: string, targetOsid: string, onDone: () => void) => {
+    ipc.stageAttackOrder(attackerFormationId, targetOsid).then((r) => {
+      if (!r.ok) console.warn('[AttackConfirmation] stageAttackOrder failed:', r.error);
+      onDone();
+    }).catch((err) => {
+      console.warn('[AttackConfirmation] stageAttackOrder error:', err);
+      onDone();
+    });
+  };
+
   const handleAttackConfirm = () => {
     if (!pendingAttackConfirmation) return;
     const { attackerFormationId, targetOsid } = pendingAttackConfirmation;
-    if (awwv?.stageAttackOrder) {
-      awwv.stageAttackOrder(attackerFormationId, targetOsid).then((r) => {
-        if (!r.ok) console.warn('[AttackConfirmation] stageAttackOrder failed:', r.error);
-        setPendingAttackConfirmation(null);
-      }).catch((err) => {
-        console.warn('[AttackConfirmation] stageAttackOrder error:', err);
-        setPendingAttackConfirmation(null);
-      });
-    } else {
-      setPendingAttackConfirmation(null);
-    }
+    submitAttackOrder(attackerFormationId, targetOsid, () => setPendingAttackConfirmation(null));
   };
 
   const handleAttackCancel = () => {
@@ -106,26 +136,68 @@ function App() {
       const state = useGameStore.getState();
       const pending = state.pendingAttackConfirmation;
       if (!pending) return;
-      if (awwv?.stageAttackOrder) {
-        awwv.stageAttackOrder(pending.attackerFormationId, pending.targetOsid).then((r) => {
-          if (!r.ok) console.warn('[AttackConfirmation] stageAttackOrder failed:', r.error);
-          useGameStore.getState().setPendingAttackConfirmation(null);
-        }).catch((err) => {
-          console.warn('[AttackConfirmation] stageAttackOrder error:', err);
-          useGameStore.getState().setPendingAttackConfirmation(null);
-        });
-      } else {
-        state.setPendingAttackConfirmation(null);
-      }
+      submitAttackOrder(
+        pending.attackerFormationId,
+        pending.targetOsid,
+        () => useGameStore.getState().setPendingAttackConfirmation(null)
+      );
     });
     return () => setConfirmPrimaryAction(null);
-  }, [pendingAttackConfirmation, setConfirmPrimaryAction]);
+  }, [pendingAttackConfirmation, setConfirmPrimaryAction, ipc]);
+
+  const refreshRecruitmentCatalog = async () => {
+    if (!ipc.isAvailable) return;
+    const requestId = ++recruitmentCatalogRequestId.current;
+    setRecruitmentLoading(true);
+    const catalog = await fetchRecruitmentCatalog({ ipc, setLoadError });
+    if (requestId !== recruitmentCatalogRequestId.current) return;
+    setRecruitmentCatalog(catalog);
+    setRecruitmentLoading(false);
+  };
+
+  const openRecruitmentModal = () => {
+    setRecruitmentOpen(true);
+    void refreshRecruitmentCatalog();
+  };
+
+  const handleSelectFaction = async (faction: StartNewCampaignPayload['playerFaction']) => {
+    setCampaignStarting(true);
+    const ok = await startCampaignFromSidePicker({ ipc, loadSave, setLoadError }, faction, 'apr_1992');
+    setCampaignStarting(false);
+    if (ok) {
+      setSidePickerOpen(false);
+      setSidePickerDismissed(false);
+      setRecruitmentCatalog([]);
+    }
+  };
+
+  const handleApplyRecruitment = async (brigadeId: string, equipmentClass: string) => {
+    setRecruitmentApplying(true);
+    const ok = await applyRecruitmentAndSync({
+      ipc,
+      loadSave,
+      setLoadError,
+      brigadeId,
+      equipmentClass,
+    });
+    setRecruitmentApplying(false);
+    if (ok) {
+      setRecruitmentOpen(false);
+      void refreshRecruitmentCatalog();
+    }
+  };
 
   return (
     <div className="h-screen w-screen relative">
       <MapContainer />
       <MapModeToolbar />
-      <TopToolbar />
+      <TopToolbar
+        onOpenRecruitment={openRecruitmentModal}
+        onOpenSidePicker={() => {
+          setSidePickerDismissed(false);
+          setSidePickerOpen(true);
+        }}
+      />
       <OOBSidebar />
       <OrderQueue />
       <SelectionPanel />
@@ -146,6 +218,25 @@ function App() {
           onCancel={handleAttackCancel}
         />
       )}
+      <SidePickerOverlay
+        isOpen={sidePickerOpen}
+        starting={campaignStarting}
+        onClose={() => {
+          setSidePickerOpen(false);
+          setSidePickerDismissed(true);
+        }}
+        onSelectFaction={handleSelectFaction}
+      />
+      <RecruitmentModal
+        isOpen={recruitmentOpen}
+        loading={recruitmentLoading}
+        applying={recruitmentApplying}
+        playerFaction={playerFaction}
+        brigades={recruitmentCatalog}
+        onRefresh={() => void refreshRecruitmentCatalog()}
+        onApply={(brigadeId, equipmentClass) => void handleApplyRecruitment(brigadeId, equipmentClass)}
+        onClose={() => setRecruitmentOpen(false)}
+      />
       <Minimap />
       <BottomStatusStrip />
     </div>

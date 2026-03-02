@@ -1,6 +1,8 @@
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
+import { useIPC } from '../desktop/useIPC';
+import { stagePostureOrderAction } from '../desktop/orderActions';
 
 function capitalize(s: string): string {
   if (!s) return s;
@@ -11,6 +13,7 @@ function capitalize(s: string): string {
  * Right panel when a formation marker is clicked: name, kind, faction, strength, fatigue, orders.
  */
 export function FormationDetail() {
+  const ipc = useIPC();
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -18,6 +21,8 @@ export function FormationDetail() {
   const setOrderModeForFormation = useGameStore((s) => s.setOrderModeForFormation);
   const orderModeForFormation = useGameStore((s) => s.orderModeForFormation);
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
+  const addStagedOrder = useGameStore((s) => s.addStagedOrder);
+  const setLoadError = useGameStore((s) => s.setLoadError);
 
   if (!selectedFormationId) return null;
 
@@ -163,21 +168,43 @@ export function FormationDetail() {
 
             {/* Phase C4: Attack/Move target selection — click map OSID */}
             {formation.kind === 'brigade' && !attackOrder && (
-              <div className="pt-2 border-t border-panel-border flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setOrderModeForFormation(orderModeForFormation === 'attack' ? null : 'attack')}
-                  className={`text-xs font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover ${orderModeForFormation === 'attack' ? 'ring-1 ring-accent-gold bg-panel-active' : ''}`}
-                >
-                  {orderModeForFormation === 'attack' ? 'Click target…' : 'Attack'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setOrderModeForFormation(orderModeForFormation === 'move' ? null : 'move')}
-                  className={`text-xs font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover ${orderModeForFormation === 'move' ? 'ring-1 ring-green-500 bg-panel-active' : ''}`}
-                >
-                  {orderModeForFormation === 'move' ? 'Click destination…' : 'Move'}
-                </button>
+              <div className="pt-2 border-t border-panel-border space-y-2">
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setOrderModeForFormation(orderModeForFormation === 'attack' ? null : 'attack')}
+                    className={`text-xs font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover ${orderModeForFormation === 'attack' ? 'ring-1 ring-accent-gold bg-panel-active' : ''}`}
+                  >
+                    {orderModeForFormation === 'attack' ? 'Click target…' : 'Attack'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOrderModeForFormation(orderModeForFormation === 'move' ? null : 'move')}
+                    className={`text-xs font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover ${orderModeForFormation === 'move' ? 'ring-1 ring-green-500 bg-panel-active' : ''}`}
+                  >
+                    {orderModeForFormation === 'move' ? 'Click destination…' : 'Move'}
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {['defensive', 'balanced', 'offensive', 'reorganize'].map((posture) => (
+                    <button
+                      key={posture}
+                      type="button"
+                      onClick={() => void stagePostureOrderAction(
+                        {
+                          ipc,
+                          addStagedOrder,
+                          setLoadError,
+                        },
+                        formation.id,
+                        posture
+                      )}
+                      className="text-[11px] font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover"
+                    >
+                      {posture}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </>

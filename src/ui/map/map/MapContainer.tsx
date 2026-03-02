@@ -23,7 +23,10 @@ import { buildOsidCentroidLookup } from './builders/geojsonLookup';
 import { resolveFormationLocationOsid } from './builders/resolveFormationLocationOsid';
 import { ensureFormationIcons } from './formationIcons';
 import { addFrontLineIcons } from './frontLineIcons';
+import { useIPC } from '../desktop/useIPC';
+import { stageMoveOrderFromOsid } from '../desktop/orderActions';
 import styleJson from './awwv_map_style.json';
+import { rewritePmtilesUrlsForRuntime } from './pmtilesRoute';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
 const DEFAULT_ZOOM = 8;
@@ -51,13 +54,6 @@ const SECTOR_EDGE_GLOW_POS_LAYER_ID = 'sector-edge-glow-pos';
 const SECTOR_EDGE_GLOW_NEG_LAYER_ID = 'sector-edge-glow-neg';
 const SECTOR_BRIGADE_RINGS_LAYER_ID = 'sector-brigade-rings';
 
-function rewritePmtilesUrls(style: Record<string, unknown>, origin: string): Record<string, unknown> {
-  const base = `pmtiles://${origin}/`;
-  const str = JSON.stringify(style);
-  const rewritten = str.replace(/pmtiles:\/\/\//g, base);
-  return JSON.parse(rewritten) as Record<string, unknown>;
-}
-
 export function MapContainer() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -76,6 +72,8 @@ export function MapContainer() {
   const setPendingAttackConfirmation = useGameStore((s) => s.setPendingAttackConfirmation);
   const setOrderModeForFormation = useGameStore((s) => s.setOrderModeForFormation);
   const orderModeForFormation = useGameStore((s) => s.orderModeForFormation);
+  const ipc = useIPC();
+  const setLoadError = useGameStore((s) => s.setLoadError);
   const setOsidDisplayNames = useGameStore((s) => s.setOsidDisplayNames);
   const setOsidPropertiesMap = useGameStore((s) => s.setOsidPropertiesMap);
   const selectedOsid = useGameStore((s) => s.selectedOsid);
@@ -98,7 +96,7 @@ export function MapContainer() {
     maplibregl.addProtocol('pmtiles', new Protocol().tile);
 
     const origin = window.location.origin;
-    const style = rewritePmtilesUrls(styleJson as Record<string, unknown>, origin) as maplibregl.StyleSpecification;
+    const style = rewritePmtilesUrlsForRuntime(styleJson as Record<string, unknown>, origin) as maplibregl.StyleSpecification;
 
     const init = async () => {
       try {
@@ -194,8 +192,15 @@ export function MapContainer() {
           setPendingAttackConfirmation({ attackerFormationId: selectedFormationId, targetOsid: osid });
           setOrderModeForFormation(null);
         } else if (orderModeForFormation === 'move' && selectedFormationId) {
-          // Stage move order and clear move mode
-          useGameStore.getState().addStagedOrder({ type: 'move', formationId: selectedFormationId, targetOsid: osid });
+          void stageMoveOrderFromOsid(
+            {
+              ipc,
+              addStagedOrder: useGameStore.getState().addStagedOrder,
+              setLoadError,
+            },
+            selectedFormationId,
+            osid
+          );
           setOrderModeForFormation(null);
         } else {
           setSelectedOsid(osid);
@@ -221,7 +226,7 @@ export function MapContainer() {
       onMapMouseLeave: clearTooltipTarget,
     });
     return () => cleanup?.();
-  }, [mapReady, setSelectedOsid, setSelectedFormationId, setSelectedCorpsFrontSectorId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation]);
+  }, [mapReady, setSelectedOsid, setSelectedFormationId, setSelectedCorpsFrontSectorId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation, ipc, setLoadError]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -392,8 +397,16 @@ export function MapContainer() {
             requestAnimationFrame(() => {
               if (cancelled || !mapRef.current || !state) return;
               try {
-                const formationsGeoJson = buildFormationsGeoJSON(state, controlledGeoJson);
-                const orderArrowsGeoJson = buildOrderArrowsGeoJSON(state, controlledGeoJson);
+                const formationsGeoJson = buildFormationsGeoJSON(
+                  state,
+                  controlledGeoJson,
+                  state.player_faction ?? null
+                );
+                const orderArrowsGeoJson = buildOrderArrowsGeoJSON(
+                  state,
+                  controlledGeoJson,
+                  state.player_faction ?? null
+                );
                 const iconIds = formationsGeoJson.features
                   .map((f) => (typeof f.properties?.icon_id === 'string' ? f.properties.icon_id : ''))
                   .filter((id) => id.length > 0);

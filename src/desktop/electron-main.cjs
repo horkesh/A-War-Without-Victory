@@ -3,6 +3,7 @@
 const { app, BrowserWindow, protocol, ipcMain, dialog, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { buildDataDerivedResponse, isPathInside } = require('./protocol_data_route.cjs');
 
 const LAST_REPLAY_PATH_FILE = 'last-replay-path.json';
 
@@ -237,25 +238,13 @@ function registerProtocol() {
     const decoded = decodeURIComponent(pathname);
     const segs = decoded.replace(/^\/+/, '').split('/').filter(Boolean);
 
-    if (segs[0] === 'app' && segs[1] === 'data' && segs[2] === 'derived') {
-      const rel = segs.slice(3).join(path.sep);
-      const filePath = path.join(dataDerivedDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(dataDerivedDir))) return new Response(null, { status: 403 });
-      try {
-        const buf = fs.readFileSync(filePath);
-        const ext = path.extname(rel).toLowerCase();
-        const types = { '.json': 'application/json', '.geojson': 'application/geo+json', '.png': 'image/png' };
-        return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
-      } catch (e) {
-        if (e.code === 'ENOENT') return new Response('Not Found', { status: 404 });
-        throw e;
-      }
-    }
+    const dataDerivedResponse = buildDataDerivedResponse(request, dataDerivedDir, segs);
+    if (dataDerivedResponse) return dataDerivedResponse;
 
     if (segs[0] === 'app') {
       const rel = segs.slice(1).join(path.sep) || 'tactical_map.html';
       const filePath = path.join(mapAppDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(mapAppDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(mapAppDir, filePath)) return new Response(null, { status: 403 });
       try {
         const buf = fs.readFileSync(filePath);
         const ext = path.extname(rel).toLowerCase();
@@ -272,7 +261,7 @@ function registerProtocol() {
       const dataDir = resourcePath('data', segs[2]);
       const rel = segs.slice(3).join(path.sep);
       const filePath = path.join(dataDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(dataDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(dataDir, filePath)) return new Response(null, { status: 403 });
       try {
         const buf = fs.readFileSync(filePath);
         const ext = path.extname(rel).toLowerCase();
@@ -295,7 +284,7 @@ function registerProtocol() {
 
       // 1. Try Vite-built warroom assets first (JS, CSS, hashed images)
       const warroomAssetPath = path.join(warroomAppDir, 'assets', rel);
-      if (path.resolve(warroomAssetPath).startsWith(path.resolve(warroomAppDir))) {
+      if (isPathInside(warroomAppDir, warroomAssetPath)) {
         try {
           const buf = fs.readFileSync(warroomAssetPath);
           return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
@@ -305,7 +294,7 @@ function registerProtocol() {
       // 2. Fall back to project root assets/ (crests, flags for embedded tactical map)
       const assetsDir = resourcePath('assets');
       const filePath = path.join(assetsDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(assetsDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(assetsDir, filePath)) return new Response(null, { status: 403 });
       try {
         const buf = fs.readFileSync(filePath);
         return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
@@ -320,7 +309,7 @@ function registerProtocol() {
     if (segs[0] === 'warroom' && segs[1] === 'tactical-map') {
       const rel = segs.slice(2).join(path.sep) || 'tactical_map.html';
       const filePath = path.join(mapAppDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(mapAppDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(mapAppDir, filePath)) return new Response(null, { status: 403 });
       try {
         const buf = fs.readFileSync(filePath);
         const ext = path.extname(rel).toLowerCase();
@@ -335,7 +324,7 @@ function registerProtocol() {
     if (segs[0] === 'warroom') {
       const rel = segs.slice(1).join(path.sep) || 'index.html';
       const filePath = path.join(warroomAppDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(warroomAppDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(warroomAppDir, filePath)) return new Response(null, { status: 403 });
       try {
         const buf = fs.readFileSync(filePath);
         const ext = path.extname(rel).toLowerCase();
@@ -572,26 +561,12 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle('stage-brigade-aor-order', async (_event, payload) => {
-    const { settlementId, fromBrigadeId, toBrigadeId } = payload || {};
-    if (!currentGameStateJson || typeof settlementId !== 'string' || typeof fromBrigadeId !== 'string' || typeof toBrigadeId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const order = { settlement_id: settlementId, from_brigade: fromBrigadeId, to_brigade: toBrigadeId };
-      const result = await sim.validateBrigadeAoROrder(state, order, getBaseDir());
-      if (!result.valid) {
-        return { ok: false, error: result.error || 'Invalid AoR order' };
-      }
-      if (!state.brigade_aor_orders) state.brigade_aor_orders = [];
-      state.brigade_aor_orders.push(order);
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
+    void _event;
+    void payload;
+    return {
+      ok: false,
+      error: 'AoR order staging is deprecated in Phase II desktop flow. Use front assignment and movement orders.',
+    };
   });
 
   ipcMain.handle('assign-brigade-to-front', async (_event, payload) => {
@@ -709,28 +684,12 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle('set-brigade-desired-aor-cap', async (_event, payload) => {
-    const { brigadeId, cap } = payload || {};
-    if (!currentGameStateJson || typeof brigadeId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    const clearCap = typeof cap !== 'number' || cap < 1;
-    const capped = clearCap ? 0 : Math.min(4, Math.max(1, Math.floor(cap)));
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      if (!state.brigade_desired_aor_cap) state.brigade_desired_aor_cap = {};
-      if (clearCap) {
-        delete state.brigade_desired_aor_cap[brigadeId];
-        if (Object.keys(state.brigade_desired_aor_cap).length === 0) delete state.brigade_desired_aor_cap;
-      } else {
-        state.brigade_desired_aor_cap[brigadeId] = capped;
-      }
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
+    void _event;
+    void payload;
+    return {
+      ok: false,
+      error: 'AoR cap staging is deprecated in Phase II desktop flow.',
+    };
   });
 
   ipcMain.handle('stage-brigade-movement-order', async (_event, payload) => {

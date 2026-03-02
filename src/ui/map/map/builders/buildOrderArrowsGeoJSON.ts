@@ -44,8 +44,10 @@ function pushArrow(
 export function buildOrderArrowsGeoJSON(
   state: LoadedGameState,
   controlledOsidGeoJson: FeatureCollection,
+  playerFactionOverride?: string | null,
 ): FeatureCollection<LineString, OrderArrowProperties> {
   const centroidLookup = buildOsidCentroidLookup(controlledOsidGeoJson);
+  const playerFaction = playerFactionOverride ?? state.player_faction ?? null;
   const formationById = new Map(state.formations.map((f) => [f.id, f] as const));
   const sourceByBrigadeId = new Map<string, string | null>();
 
@@ -60,6 +62,8 @@ export function buildOrderArrowsGeoJSON(
     a.targetSettlementId.localeCompare(b.targetSettlementId),
   );
   for (const order of attackOrders) {
+    const formation = formationById.get(order.brigadeId);
+    if (playerFaction && formation?.faction !== playerFaction) continue;
     const sourceOsid = sourceByBrigadeId.get(order.brigadeId) ?? resolveFormationLocationOsid(formationById.get(order.brigadeId), centroidLookup);
     pushArrow(features, 'attack', order.brigadeId, sourceOsid, order.targetSettlementId, centroidLookup);
   }
@@ -67,6 +71,8 @@ export function buildOrderArrowsGeoJSON(
   if (state.movementOrdersSettlement && state.movementOrdersSettlement.length > 0) {
     const settlementOrders = [...state.movementOrdersSettlement].sort((a, b) => a.brigadeId.localeCompare(b.brigadeId));
     for (const order of settlementOrders) {
+      const formation = formationById.get(order.brigadeId);
+      if (playerFaction && formation?.faction !== playerFaction) continue;
       const sourceOsid = sourceByBrigadeId.get(order.brigadeId) ?? resolveFormationLocationOsid(formationById.get(order.brigadeId), centroidLookup);
       const targets = [...order.targetSettlementIds].sort((a, b) => a.localeCompare(b));
       for (const target of targets) {

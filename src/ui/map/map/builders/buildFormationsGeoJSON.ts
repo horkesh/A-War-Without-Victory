@@ -19,12 +19,15 @@ interface FormationMarkerProperties {
 export function buildFormationsGeoJSON(
   state: LoadedGameState,
   controlledOsidGeoJson: FeatureCollection,
+  playerFactionOverride?: string | null,
 ): FeatureCollection<Point, FormationMarkerProperties> {
   const centroidLookup = buildOsidCentroidLookup(controlledOsidGeoJson);
   const orderedFormations = [...state.formations].sort((a, b) => a.id.localeCompare(b.id));
+  const playerFaction = playerFactionOverride ?? state.player_faction ?? null;
   const features: Array<Feature<Point, FormationMarkerProperties>> = [];
 
   for (const formation of orderedFormations) {
+    if (playerFaction && formation.faction !== playerFaction) continue;
     const osid = resolveFormationLocationOsid(formation, centroidLookup);
     if (!osid) continue;
     const point = centroidLookup.get(osid);

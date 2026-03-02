@@ -1,6 +1,8 @@
 import { useRef, useCallback, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoader';
+import { useIPC } from '../desktop/useIPC';
+import { advanceTurnAndSync } from '../desktop/orderActions';
 
 const LOAD_TIMEOUT_MS = 25000;
 
@@ -10,13 +12,21 @@ const FACTION_BANNER_TINT: Record<string, string> = {
   HRHB: 'rgba(64, 128, 184, 0.35)',
 };
 
-export function TopToolbar() {
+interface TopToolbarProps {
+  onOpenRecruitment?: () => void;
+  onOpenSidePicker?: () => void;
+}
+
+export function TopToolbar({ onOpenRecruitment, onOpenSidePicker }: TopToolbarProps) {
+  const ipc = useIPC();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const loadSave = useGameStore((s) => s.loadSave);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const loadError = useGameStore((s) => s.loadError);
   const setLoadError = useGameStore((s) => s.setLoadError);
+  const clearStagedOrders = useGameStore((s) => s.clearStagedOrders);
   const [loading, setLoading] = useState(false);
+  const [advancing, setAdvancing] = useState(false);
   const [runIdInput, setRunIdInput] = useState('');
   const playerFaction = loadedGameState?.player_faction ?? '';
   const leftTint = FACTION_BANNER_TINT[playerFaction] ?? 'rgba(196, 163, 90, 0.2)';
@@ -93,6 +103,26 @@ export function TopToolbar() {
     }
   }, [loadSave, setLoadError, runIdInput]);
 
+  const handleAdvanceTurn = useCallback(async () => {
+    if (!ipc.isAvailable) {
+      setLoadError('Advance turn is available in desktop mode only.');
+      return;
+    }
+    if (!loadedGameState) {
+      setLoadError('Load or start a game before advancing turn.');
+      return;
+    }
+
+    setAdvancing(true);
+    await advanceTurnAndSync({
+      ipc,
+      loadSave,
+      clearStagedOrders,
+      setLoadError,
+    });
+    setAdvancing(false);
+  }, [ipc, loadedGameState, loadSave, clearStagedOrders, setLoadError]);
+
   return (
     <div
       className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-4 py-2.5 backdrop-blur-sm border-b border-panel-border"
@@ -133,6 +163,27 @@ export function TopToolbar() {
         className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
       >
         Load run
+      </button>
+      <button
+        onClick={handleAdvanceTurn}
+        disabled={advancing || loading || !loadedGameState || !ipc.isAvailable}
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+      >
+        {advancing ? 'Advancing...' : 'Advance turn'}
+      </button>
+      <button
+        onClick={() => onOpenSidePicker?.()}
+        disabled={loading || advancing || !ipc.isAvailable}
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+      >
+        New campaign
+      </button>
+      <button
+        onClick={() => onOpenRecruitment?.()}
+        disabled={loading || advancing || !loadedGameState || !ipc.isAvailable}
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+      >
+        Recruitment
       </button>
 
       {loadedGameState && (
