@@ -604,6 +604,9 @@ export function evaluateOperationProgress(
         if (!cmd?.active_operation) continue;
         const op = cmd.active_operation;
 
+        // sector_attack ops have their own lifecycle in advanceSectorOffensives()
+        if (op.type === 'sector_attack') continue;
+
         const turnsInPhase = turn - op.phase_started_turn;
 
         if (op.phase === 'planning') {
@@ -1509,7 +1512,9 @@ export function generateCorpsDirectives(
         // Launch if offensive/balanced, no active SECTOR operation, and multi-sector corps.
         // Sector offensives replace general_offensive/strategic_defense with targeted multi-OSID push.
         const existingOp = cmd.active_operation;
-        const canLaunchSectorOp = !existingOp || existingOp.type !== 'sector_attack';
+        const canLaunchSectorOp = !existingOp
+            || existingOp.type !== 'sector_attack'
+            || existingOp.phase === 'recovery';
         if (canLaunchSectorOp &&
             (cmd.stance === 'offensive' || cmd.stance === 'balanced') &&
             corpsSectors.length > 0 && offensiveTargets.length > 0) {
@@ -1537,6 +1542,10 @@ export function generateCorpsDirectives(
                     secBrigadeIds, secEnemyOsids, offensiveTargets, supplyByOsid
                 );
                 if (op) {
+                    // Apply exhaustion from replaced recovery-phase op
+                    if (existingOp?.type === 'sector_attack' && existingOp.phase === 'recovery') {
+                        cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + 15);
+                    }
                     cmd.active_operation = op;
                     break; // One offensive at a time per corps
                 }

@@ -71,6 +71,8 @@ function computeSupplyReadiness(
     faction: FactionId,
     supplyByOsid?: SupplyStateByOsidReport | null
 ): number {
+    // Supply readiness only meaningful when full supply reserves system is active
+    if (!state.meta?.supply_reserves_enabled) return 1.0;
     if (!supplyByOsid?.factions || participatingBrigades.length === 0) return 1.0;
     const fac = supplyByOsid.factions.find(f => f.faction_id === faction);
     if (!fac?.by_osid) return 1.0;
@@ -195,7 +197,8 @@ export function advanceSectorOffensives(
             const elapsed = turn - op.phase_started_turn;
             const recoveryDuration = Math.max(2, (op.objectives?.length ?? 2));
             if (elapsed >= recoveryDuration) {
-                // Remove operation — recovery complete
+                // Apply exhaustion from completed operation
+                cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + 15);
                 cmd.active_operation = null;
             }
         }
@@ -327,8 +330,8 @@ export function evaluateSectorOffensiveLaunch(
         .filter(t => sectorTargetSet.has(t))
         .slice(0, MAX_OBJECTIVES);
 
-    // Need at least 2 objectives for a sector offensive
-    if (objectives.length < 2) return null;
+    // Need at least 1 objective for a sector offensive
+    if (objectives.length < 1) return null;
 
     const planningDuration = computePlanningDuration(objectives.length);
     const name = pickOperationName(corpsId, turn, faction);
