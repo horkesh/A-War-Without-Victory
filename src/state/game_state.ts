@@ -324,6 +324,10 @@ export interface FormationState {
     matched_oob_id?: string;
     /** Per-brigade terrain defense bonus from OOB (e.g. mountain/fortified position). Multiplicative: × (1 + bonus). */
     defense_terrain_bonus?: number;
+    /** When set, formation recruits from this faction's militia pools instead of its own. Cross-faction recruitment (e.g. HVO-designation ARBiH brigades recruiting from Croatian pools). */
+    recruit_pool_faction?: FactionId;
+    /** Fallback OSID where brigade reforms if stranded with no retreat path. Set from OOB. */
+    fallback_osid?: string;
 }
 
 export interface FrontPostureAssignment {

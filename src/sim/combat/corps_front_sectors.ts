@@ -353,11 +353,10 @@ function findSubSegments(
  *
  * Pipeline:
  *   1. Find connected components (sub-segments) via BFS on edge adjacency
- *   2. Split each component by opposing faction (Phase 1A)
- *   3. Split oversized components at midpoint (Phase 1D: MAX_SECTOR_EDGES)
- *   4. Build sectors, assign brigades (front + interior via BFS)
- *   5. Populate reserves from interior brigades (Phase 1C)
- *   6. Post-pass: split sectors exceeding MAX_SECTOR_BRIGADES (Phase 1E)
+ *   2. Split oversized components at midpoint (Phase 1D: MAX_SECTOR_EDGES)
+ *   3. Build sectors, assign brigades (front + interior via BFS)
+ *   4. Populate reserves from interior brigades (Phase 1C)
+ *   5. Post-pass: split sectors exceeding MAX_SECTOR_BRIGADES (Phase 1E)
  *
  * Sector IDs: `sector:{corps_id}:0`, `sector:{corps_id}:1`, etc.
  */
@@ -383,10 +382,7 @@ function buildMultiSectorsForCorps(
     let subSegments = findSubSegments(corpsId, faction, edgeIds, edgeMeta);
     if (subSegments.length === 0) return [];
 
-    // Step 2 (Phase 1A): Split by opposing faction
-    subSegments = splitByOpposingFaction(corpsId, faction, subSegments, edgeMeta);
-
-    // Step 3 (Phase 1D): Split oversized sub-segments
+    // Step 2 (Phase 1D): Split oversized sub-segments
     subSegments = splitOversizedSubSegments(corpsId, subSegments, edgeMeta);
 
     // Renumber sub-segments deterministically
@@ -395,7 +391,7 @@ function buildMultiSectorsForCorps(
         subSegments[i]!.sub_segment_id = `subseg:${corpsId}:${i}`;
     }
 
-    // Step 4: Build sectors with full brigade assignment (front + interior BFS)
+    // Step 3: Build sectors with full brigade assignment (front + interior BFS)
     const sectors: CorpsFrontSector[] = [];
     for (let i = 0; i < subSegments.length; i++) {
         const sector = buildSectorFromSubSegments(
@@ -405,7 +401,7 @@ function buildMultiSectorsForCorps(
         if (sector) sectors.push(sector);
     }
 
-    // Step 5 (Phase 1E): Recursively split sectors exceeding MAX_SECTOR_BRIGADES
+    // Step 4 (Phase 1E): Recursively split sectors exceeding MAX_SECTOR_BRIGADES
     let sectorPool = sectors;
     let splitOccurred = true;
     while (splitOccurred) {
@@ -434,102 +430,15 @@ function buildMultiSectorsForCorps(
     }
     const finalSectors = sectorPool;
 
-    // Step 6 (Phase 1B + 1C): Assign interior brigades as reserves
+    // Step 5 (Phase 1B + 1C): Assign interior brigades as reserves
     assignInteriorBrigadesToSectors(
         finalSectors, corpsId, faction, formations, adjacency, reverseMap, state
     );
 
-    // Step 7: Redistribute excess reserves (proportional cap per sector)
+    // Step 6: Redistribute excess reserves (proportional cap per sector)
     redistributeExcessReserves(finalSectors);
 
     return finalSectors;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Phase 1A: Split Sub-Segments by Opposing Faction
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Split each sub-segment into groups facing the same opposing faction.
- * Edges facing RBiH and edges facing HRHB become separate sub-segments
- * even if they are contiguous within the same connected component.
- */
-function splitByOpposingFaction(
-    corpsId: FormationId,
-    faction: FactionId,
-    subSegments: CorpsFrontSubSegment[],
-    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>
-): CorpsFrontSubSegment[] {
-    const result: CorpsFrontSubSegment[] = [];
-    let idx = 0;
-
-    for (const seg of subSegments) {
-        // Group edges by opposing faction
-        const factionEdges = new Map<string, string[]>();
-        for (const eid of seg.edge_ids) {
-            const meta = edgeMeta.get(eid);
-            if (!meta) continue;
-            const enemy = meta.side_a === faction ? meta.side_b : meta.side_a;
-            const key = enemy ?? 'unknown';
-            let list = factionEdges.get(key);
-            if (!list) { list = []; factionEdges.set(key, list); }
-            list.push(eid);
-        }
-
-        // If only one opposing faction, keep as-is
-        if (factionEdges.size <= 1) {
-            result.push(seg);
-            continue;
-        }
-
-        // Split: find connected components within each faction group
-        for (const [, edges] of [...factionEdges.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
-            const innerAdj = buildEdgeAdjacency(edges, edgeMeta);
-            const visited = new Set<string>();
-            const edgeSet = new Set(edges);
-
-            for (const seed of [...edges].sort(strictCompare)) {
-                if (visited.has(seed)) continue;
-                const component: string[] = [];
-                const stack = [seed];
-                visited.add(seed);
-                while (stack.length > 0) {
-                    const eid = stack.pop()!;
-                    component.push(eid);
-                    for (const next of innerAdj.get(eid) ?? []) {
-                        if (visited.has(next) || !edgeSet.has(next)) continue;
-                        visited.add(next);
-                        stack.push(next);
-                    }
-                }
-                component.sort(strictCompare);
-
-                const friendlyOsids = new Set<string>();
-                const enemyOsids = new Set<string>();
-                for (const eid of component) {
-                    const meta = edgeMeta.get(eid);
-                    if (!meta) continue;
-                    if (meta.side_a === faction) {
-                        friendlyOsids.add(meta.a);
-                        enemyOsids.add(meta.b);
-                    } else {
-                        friendlyOsids.add(meta.b);
-                        enemyOsids.add(meta.a);
-                    }
-                }
-
-                result.push({
-                    sub_segment_id: `subseg:${corpsId}:${idx++}`,
-                    edge_ids: component,
-                    friendly_osids: [...friendlyOsids].sort(strictCompare),
-                    enemy_osids: [...enemyOsids].sort(strictCompare),
-                    length_edges: component.length,
-                });
-            }
-        }
-    }
-
-    return result;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -538,6 +447,8 @@ function splitByOpposingFaction(
 
 /**
  * Recursively split sub-segments exceeding MAX_SECTOR_EDGES at their midpoint.
+ * After each split, decomposes halves into connected components to guarantee
+ * geographic contiguity (midpoint split on branching graphs can fragment).
  */
 function splitOversizedSubSegments(
     corpsId: FormationId,
@@ -557,18 +468,58 @@ function splitOversizedSubSegments(
             result.push(seg); // Can't split — keep as-is
             continue;
         }
-        // Recurse on each half (in case still oversized)
+        // Ensure contiguity: decompose each half into connected components,
+        // then recurse on oversized components
         for (const half of halves) {
-            if (half.length_edges > MAX_SECTOR_EDGES) {
-                const deeperHalves = splitOversizedSubSegments(corpsId, [half], edgeMeta);
-                result.push(...deeperHalves);
-            } else {
-                result.push(half);
+            const components = decomposeIntoConnectedComponents(half, corpsId, edgeMeta);
+            for (const comp of components) {
+                if (comp.length_edges > MAX_SECTOR_EDGES) {
+                    result.push(...splitOversizedSubSegments(corpsId, [comp], edgeMeta));
+                } else {
+                    result.push(comp);
+                }
             }
         }
     }
 
     return result;
+}
+
+/**
+ * Decompose a sub-segment into connected components via BFS on edge adjacency.
+ * Returns one component if already contiguous, multiple if fragmented.
+ */
+function decomposeIntoConnectedComponents(
+    seg: CorpsFrontSubSegment,
+    corpsId: FormationId,
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>
+): CorpsFrontSubSegment[] {
+    const adj = buildEdgeAdjacency(seg.edge_ids, edgeMeta);
+    const edgeSet = new Set(seg.edge_ids);
+    const visited = new Set<string>();
+    const components: CorpsFrontSubSegment[] = [];
+    let idx = 0;
+
+    const sortedEdges = [...seg.edge_ids].sort(strictCompare);
+    for (const seed of sortedEdges) {
+        if (visited.has(seed)) continue;
+        const component: string[] = [];
+        const stack = [seed];
+        visited.add(seed);
+        while (stack.length > 0) {
+            const eid = stack.pop()!;
+            component.push(eid);
+            for (const next of adj.get(eid) ?? []) {
+                if (visited.has(next) || !edgeSet.has(next)) continue;
+                visited.add(next);
+                stack.push(next);
+            }
+        }
+        component.sort(strictCompare);
+        components.push(buildSubSegmentFromEdges(corpsId, idx++, component, edgeMeta, seg));
+    }
+
+    return components;
 }
 
 /**
@@ -599,8 +550,9 @@ function splitSubSegmentAtMidpoint(
 }
 
 /**
- * Walk the edge chain from an endpoint (edge with degree 1) to produce an ordered list.
- * If no endpoint exists (cycle), starts from the first sorted edge.
+ * BFS traversal from an endpoint edge to produce a geographic ordering.
+ * BFS ensures nearby edges are visited first, giving a spatial ordering
+ * suitable for midpoint splitting even on branching front graphs.
  */
 function walkEdgeChain(
     edgeIds: string[],
@@ -616,24 +568,24 @@ function walkEdgeChain(
         if (neighbors.length <= 1) { start = eid; break; }
     }
 
-    // Walk the chain
+    // BFS traversal — visits all neighbors, geographic ordering
     const visited = new Set<string>();
     const chain: string[] = [];
-    const stack = [start];
+    const queue: string[] = [start];
     visited.add(start);
 
-    while (stack.length > 0) {
-        const eid = stack.pop()!;
+    while (queue.length > 0) {
+        const eid = queue.shift()!;
         chain.push(eid);
         const neighbors = (adj.get(eid) ?? []).filter(n => edgeSet.has(n) && !visited.has(n));
         neighbors.sort(strictCompare);
-        if (neighbors.length > 0) {
-            visited.add(neighbors[0]!);
-            stack.push(neighbors[0]!);
+        for (const n of neighbors) {
+            visited.add(n);
+            queue.push(n);
         }
     }
 
-    // If we didn't visit all edges (branching graph), add remaining in sorted order
+    // Safety fallback for disconnected edges (shouldn't happen in connected component)
     for (const eid of sorted) {
         if (!visited.has(eid)) chain.push(eid);
     }

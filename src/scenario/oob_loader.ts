@@ -43,6 +43,10 @@ export interface OobBrigade {
     tags?: string[];
     /** Per-brigade terrain defense bonus (e.g. mountain/fortified position). Multiplicative: × (1 + bonus). */
     defense_terrain_bonus?: number;
+    /** When set, brigade recruits from this faction's militia pools instead of its own faction. */
+    recruit_pool_faction?: FactionId;
+    /** Fallback OSID for reform when home territory is overrun. Brigade teleports here instead of being eliminated. */
+    fallback_osid?: string;
 }
 
 export interface OobCorps {
@@ -127,6 +131,9 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         const composition = isRecord(r.composition) ? r.composition as unknown as BrigadeComposition : undefined;
         const oobTags = Array.isArray(r.tags) ? (r.tags as unknown[]).filter((t): t is string => typeof t === 'string').map(t => t.trim()).filter(t => t.length > 0) : undefined;
         const defense_terrain_bonus = typeof r.defense_terrain_bonus === 'number' && Number.isFinite(r.defense_terrain_bonus) ? r.defense_terrain_bonus : undefined;
+        const recruit_pool_faction = typeof r.recruit_pool_faction === 'string' && CANONICAL_FACTIONS.includes(r.recruit_pool_faction.trim() as FactionId)
+            ? r.recruit_pool_faction.trim() as FactionId : undefined;
+        const fallback_osid = typeof r.fallback_osid === 'string' && r.fallback_osid.trim() ? r.fallback_osid.trim() : undefined;
         result.push({
             id,
             faction,
@@ -151,6 +158,8 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             ...(composition && { composition }),
             ...(oobTags && oobTags.length > 0 && { tags: oobTags }),
             ...(defense_terrain_bonus != null && { defense_terrain_bonus }),
+            ...(recruit_pool_faction && { recruit_pool_faction }),
+            ...(fallback_osid && { fallback_osid }),
         });
     }
 

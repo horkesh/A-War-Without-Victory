@@ -190,7 +190,7 @@ sidebar-hover-outline → order-arrows
 
 ## Known Issues
 
-1. **Geography layer missing.** PMTiles files (`hillshade.pmtiles` 133 bytes, `osm.pmtiles` 134 bytes) are empty stubs — the base map shows no terrain, roads, or water. This is a pre-existing data issue (tile pipeline Phase 0 was never completed), not caused by Phase 3 changes.
+1. **~~Geography layer missing.~~** **RESOLVED (2026-03-02):** `git lfs pull` restored real tile data. Style reordered + 3 new layers added. See [20260302_GEOGRAPHY_LAYER_REINTRODUCTION_PMTILES.md](20260302_GEOGRAPHY_LAYER_REINTRODUCTION_PMTILES.md).
 
 2. **Phase D partial.** ArmyDetail, Minimap, and MovementPreview were deferred (lower priority items from the plan). These remain in the backlog per [20260301_GUI_PHASE3_REMAINDER_PLAN.md](../20260301_GUI_PHASE3_REMAINDER_PLAN.md).
 

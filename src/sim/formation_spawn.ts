@@ -227,7 +227,8 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
 
             if (current >= tierCap) continue;
 
-            const key = militiaPoolKey(mun_id, faction);
+            const poolFaction = f.recruit_pool_faction ?? faction;
+            const key = militiaPoolKey(mun_id, poolFaction);
             const pool = pools[key];
             if (!pool || pool.available <= 0) continue;
 
@@ -296,7 +297,8 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         const current = f.personnel ?? MIN_BRIGADE_SPAWN;
         if (current >= MAX_BRIGADE_PERSONNEL) continue;
 
-        const key = militiaPoolKey(mun_id, faction);
+        const poolFaction = f.recruit_pool_faction ?? faction;
+        const key = militiaPoolKey(mun_id, poolFaction);
         const pool = pools[key];
         if (!pool || pool.available <= 0) continue;
 

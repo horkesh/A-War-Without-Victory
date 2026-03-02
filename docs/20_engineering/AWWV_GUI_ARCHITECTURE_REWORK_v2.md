@@ -268,8 +268,8 @@ Similarly, the **1990 municipality boundaries** are already WGS84 at `data/sourc
 
 | File | Format | Size (est.) | Contents |
 |------|--------|-------------|----------|
-| `data/derived/tiles/hillshade.pmtiles` | PMTiles (raster) | ~50-200 MB | Hillshade terrain z6-14 |
-| `data/derived/tiles/osm.pmtiles` | PMTiles (vector) | ~20-80 MB | Roads, rivers, forests, boundary |
+| `data/derived/tiles/hillshade.pmtiles` | PMTiles (raster) | 76 MB (actual) | Hillshade terrain z6-12 (PNG, 3,073 tiles, GDAL) |
+| `data/derived/tiles/osm.pmtiles` | PMTiles (vector) | 438 MB (actual) | Roads, rivers, forests, boundary, places (Planetiler, Protomaps basemap v4, 154,877 tiles, z0-15) |
 | `data/derived/operational/operational_settlements.geojson` | GeoJSON | ~2 MB | **Already exists.** 753 OSID polygons in WGS84 |
 | `data/source/boundaries/bih_adm3_1990.geojson` | GeoJSON | ~1 MB | **Already exists.** 110 municipality boundaries in WGS84 |
 
@@ -995,18 +995,18 @@ scripts/map/
 
 ## 8. Migration Plan
 
-### Phase 0: Tile Pipeline (Days 1–2)
+### Phase 0: Tile Pipeline (Days 1–2) — **COMPLETE (2026-03-02)**
 
 **Goal:** Generate the tile assets that MapLibre needs.
 
-1. Install tile generation tools (`tilemaker`, `gdal`, `pmtiles` CLI)
-2. Generate hillshade PMTiles from DEM source
-3. Generate OSM vector PMTiles from PBF source
-4. Verify OSID polygons: confirm `data/derived/operational/operational_settlements.geojson` has 753 features in WGS84 (already confirmed — no action needed)
-5. Verify municipality boundaries: confirm `data/source/boundaries/bih_adm3_1990.geojson` has 110 features in WGS84 (already confirmed)
-6. Add `scripts/map/generate_tiles.sh` to automate the tile pipeline
+1. ~~Install tile generation tools (`tilemaker`, `gdal`, `pmtiles` CLI)~~
+2. ~~Generate hillshade PMTiles from DEM source~~
+3. ~~Generate OSM vector PMTiles from PBF source~~
+4. ~~Verify OSID polygons: confirm `data/derived/operational/operational_settlements.geojson` has 753 features in WGS84~~
+5. ~~Verify municipality boundaries: confirm `data/source/boundaries/bih_adm3_1990.geojson` has 110 features in WGS84~~
+6. ~~Add `scripts/map/generate_tiles.sh` to automate the tile pipeline~~ — tiles generated externally, committed via Git LFS
 
-**Acceptance:** `data/derived/tiles/` contains hillshade and OSM PMTiles. OSID and municipality GeoJSON files confirmed present and correct.
+**Acceptance:** `data/derived/tiles/` contains hillshade (76 MB, z6-12) and OSM (438 MB, z0-15, Protomaps basemap v4) PMTiles. Verified via `PMTiles.getHeader()`. OSID and municipality GeoJSON files confirmed. Style layer ordering fixed and 3 new layers added (earth-fill, place-labels-city, place-labels-village). Report: [20260302_GEOGRAPHY_LAYER_REINTRODUCTION_PMTILES.md](../40_reports/implemented/20260302_GEOGRAPHY_LAYER_REINTRODUCTION_PMTILES.md). **Note:** Fresh clones require `git lfs pull` to restore tile binaries (LFS pointers are 133-134 bytes).
 
 ### Phase 1: Scaffold and Map (Days 3–5)
 

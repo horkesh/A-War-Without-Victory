@@ -50,6 +50,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **Completed milestones:**
 - Phase 6: MVP declared 2026-02-08; A1 base map stable and frozen
+- Phase 0 (tile pipeline): PMTiles restored 2026-03-02 — hillshade + OSM vector tiles live, 21 style layers, place labels
 - Phase II: Front-based combat, OSID political control, bot AI (Army→Corps→Brigade), corps front sectors
 - Phase M: Year-one mechanics — morale drift, ZoC virtual defense, enclave deprivation, displacement routing, per-OSID census displacement depth
 - Phase C: GUI tooltips, keyboard shortcuts, attack modal, order queue
@@ -9008,3 +9009,24 @@ Determinism checks **MUST** be run:
   - `MEMORY.md` — Added reserve proportional cap and rear pocket targeting entries, n348 calibration result
 - **Skipped (historical):** docs/40_reports/* (CALIBRATION_MASTER, PHASE_M_EXECUTION_PLAN, etc.), docs/_old/*, PROJECT_LEDGER entries
 - **Flagged:** `docs/10_canon/FORAWWV.md` — no references to changed constants (no update needed)
+
+**2026-03-02** - Geography layer reintroduction: PMTiles + style reorder + place labels
+- **Phase:** GUI — tile pipeline (Phase 0 completion)
+- **Summary:** Restored map geography layer. PMTiles files (`osm.pmtiles` 438 MB, `hillshade.pmtiles` 76 MB) were Git LFS pointers (133-134 bytes) — `git lfs pull` downloaded real tile data. Fixed layer ordering bug: waterway-lines, roads-major, roads-secondary were rendering ON TOP of front lines/arrows (placed after game overlays in style). Moved to correct position (before osid-control-fill). Added 3 new layers: earth-fill (land mass), place-labels-city (cities/towns at z6+), place-labels-village (villages at z10+).
+- **Tile data:** OSM vector tiles (Planetiler, Protomaps basemap v4 schema, 9 source-layers, 154,877 tiles, z0-15, Bosnia bounds). Hillshade raster tiles (GDAL, PNG, 3,073 tiles, z6-12).
+- **Style layers:** 21 total (was 18). Order: background → earth → hillshade → water → forest → waterways → roads → [game state] → [markers] → place labels.
+- **Files modified:** `src/ui/map/map/awwv_map_style.json` (+63/−45, net +18 lines)
+- **No code changes** — PMTiles protocol handler, Vite range-request middleware, and MapContainer URL rewriting were all already correct.
+- **Verification:** tsc clean, vite build clean, PMTiles header validation pass.
+- **Report:** [20260302_GEOGRAPHY_LAYER_REINTRODUCTION_PMTILES.md](docs/40_reports/implemented/20260302_GEOGRAPHY_LAYER_REINTRODUCTION_PMTILES.md)
+
+**2026-03-02** - Canon propagation: geography layer reintroduction
+- **Phase:** Documentation propagation
+- **Summary:** Updated 4 documentation files with structural references to geography layer restoration, PMTiles sizes, Phase 0 completion, and layer ordering.
+- **Files updated:**
+  - `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — §4.2.4 file sizes (estimated → actual: 76 MB hillshade, 438 MB osm); §8 Phase 0 marked COMPLETE with acceptance note and LFS warning
+  - `docs/10_canon/context.md` — canonical GUI paragraph: added geography layer live note (PMTiles, 21 layers, place labels, report link)
+  - `docs/PROJECT_LEDGER.md` — completed milestones: added Phase 0 tile pipeline entry
+  - `docs/40_reports/implemented/20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md` — Known Issues §1: geography layer marked RESOLVED with cross-link
+- **Also updated:** `docs/40_reports/README.md` — implemented/ index (added geography report)
+- **Flagged:** `docs/10_canon/FORAWWV.md` — no tile/geography references (no update needed)

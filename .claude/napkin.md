@@ -70,7 +70,7 @@
    Do instead: All reserve logic (maintenance drain, combat expenditure, effective supply state) is gated by `state.meta.supply_reserves_enabled`. When false (default), zero behavioral change. Constants in `supply_reserve_constants.ts`. Module: `supply_reserves.ts`. Pipeline step: `compute-supply-reserves` (after `phase-ii-supply-osid`).
 2. **[2026-03-01] Two-phase fixture metadata completeness**
    Do instead: For any test/state fixture that flows through `runTurn` or scenario runners, always set `meta.phase` (`peace`/`war`) plus compatible referendum fields; missing `meta.phase` now hard-fails as unsupported lifecycle.
-2. **[2026-03-01] OSID/SID mismatch in displacement — never use getEffectiveSettlementSide for control**
+3. **[2026-03-01] OSID/SID mismatch in displacement — never use getEffectiveSettlementSide for control**
    Do instead: `political_controllers` is keyed by OSIDs (`op:mun:slug`) in war phase. Use `buildMunControlFromOsids()` or `buildMunDominantController()` for municipality-level control. `getEffectiveSettlementSide()` does SID lookup → always returns null → causes false encirclement, dead minority flight, population drain.
 3. **[2026-03-01] Displacement accounting + ethnic expulsion model**
    Do instead: `displaced_out` = only actually-routed amount (to camps/other muns). `lost_population` = killed + fled_abroad + unrouted overflow. Non-overlapping: `remaining = original - displaced_out - lost_population + displaced_in`. RS captures expel Bosniak pop via 1991 census ethnic share: `floor(osidPop × ethnicShare)`.
@@ -202,7 +202,7 @@
    Do instead: Primary levers: `POOL_SCALE_FACTOR`, `FACTION_POOL_SCALE`, `RS_EARLY_WAR_END_WEEK` (20), per-faction stance/doctrine in `bot_strategy.ts`, `initial_morale` in OOB, MORALE_RESIST_FLOOR (70), `defense_terrain_bonus` per brigade in OOB (+0.20–0.30), front density thresholds in `local_front_defense.ts` (THIN=0.5, DENSE=1.0, MIN_PENALTY=0.6, MAX_BONUS=1.25). Supply gating: critical→defend, strained→victory-only, corps critical_fraction>0.5→strip offensives, adequate_fraction<0.3→victory min. Sector offensives: MIN_BRIGADES=3, supply_readiness launch=0.6/abort=0.4, momentum cap=3, max_objectives=6, planning ceil(N×0.6).
 6. **[2026-03-01] Sector offensives dormant in year-1 (L37)**
    Do instead: Sector offensives don't activate in 40w calibration window. VRS defensive by week 20, ARBiH general_defensive through year one. Infrastructure activates at 52w+ when factions transition to offensive postures. Don't debug "why no sector offensives" in year-1 runs.
-6. **[2026-02-25] Knowledge base for OOB**
+7. **[2026-02-25] Knowledge base for OOB**
    Do instead: Use `docs/knowledge/{VRS,ARBIH,HVO}_ORDER_OF_BATTLE_MASTER.md` for historical formation data.
 7. **[2026-02-24] War entrenchment init**
    Do instead: Use optional scenario param `war_entrenchment_init_turns` (0..12) in schema and loader.
