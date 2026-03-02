@@ -14,7 +14,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 **Project:** A War Without Victory (AWWV)
 **Type:** Wargame simulation prototype
 **Repository:** AWWV
-**Current Focus:** Combat calibration (n359, 86.7% OSID match), GUI Architecture Rework v2 (React+MapLibre), Sectors & Operations active
+**Current Focus:** Combat calibration (n359, 86.7% OSID match), GUI Architecture Rework v2 post-Phase 4 desktop integration (React+MapLibre + Electron), Sectors & Operations active
 
 ---
 
@@ -46,7 +46,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **Phase:** Post-MVP — Active Development
 **Status:** Phase II live, Phase M complete, GUI rework in progress
-**Focus:** Combat calibration (86.7% OSID match at n359), Sector offensives active in early war, GUI Phase 3 remainder
+**Focus:** Combat calibration (86.7% OSID match at n359), Sector offensives active in early war, GUI post-Phase 4 desktop QA/polish
 
 **Completed milestones:**
 - Phase 6: MVP declared 2026-02-08; A1 base map stable and frozen
@@ -59,7 +59,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **Active workstreams:**
 - Combat calibration: n359 = 86.7% (653/753 OSID match), sector offensives active in VRS early-war blitz, 26 ops/40w
-- GUI Phase 3 remainder: Minimap, ZoomControls, ArmyDetail, MovementPreview (CorpsDetail done 2026-03-02; tooltip fix, sector viz, bidirectional sync, density mode done)
+- GUI desktop follow-through: manual smoke/UX validation for side picker, recruitment, staged orders, turn advance, fog-of-war, and PMTiles desktop route behavior
 
 **Completed workstreams:**
 - Displacement system complete: n319 = 668k displaced (per-OSID census depth). See 20260301_DISPLACEMENT_DEPTH_CALIBRATION.md
@@ -144,10 +144,10 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 ## Next Tasks
 
-1. Complete GUI Phase 3 remainder (Minimap, ZoomControls, CorpsDetail, ArmyDetail, MovementPreview)
+1. Run desktop manual smoke pass for Phase 4 flow (new campaign, recruitment, order staging, advance turn, fog filtering, PMTiles map)
 2. Continue combat calibration (Drina region, Bugojno, VRS troop counts)
 3. Re-enable minority flight in displacement system
-4. GUI Phase 4: Desktop/Electron integration (useIPC, advance-turn)
+4. Evaluate post-Phase-4 desktop UX/feedback deltas and queue fixes
 
 ---
 
@@ -172,7 +172,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 - `npm run sim:scenario:run:default` — 52w historical scenario
 - `npm run dev:map` — React+MapLibre GUI (port 3001)
 - `npm run desktop` — Electron app
-- `npm run test:vitest` — Vitest suite (193 tests)
+- `npm run test:vitest` — Vitest suite (247 pass / 1 skip at latest verification)
 - `npm run typecheck` — TypeScript check
 - `npm run canon:check` — Determinism scan
 - `node tools/compare_painted_vs_sim.cjs <run_dir>` — Calibration comparison
@@ -9091,3 +9091,28 @@ Determinism checks **MUST** be run:
 - **Tests:** 81 new tests across 5 test files, all pass. 0 regressions (vitest 220 pass, node 129 pass).
 - **Deferred:** Calibration run (Phase 7), GUI service record panel, bot AI elite deployment decisions, war stories in final save JSON.
 - **Status:** Implementation COMPLETE. Calibration run needed next session.
+
+### [2026-03-02] GUI Phase 4 — Desktop Integration Complete + Verification
+- **Type:** Feature (GUI/Desktop integration)
+- **Summary:** Completed Phase 4 desktop integration workstream for canonical React map app with typed IPC bridge (`useIPC`), desktop bootstrap/live state sync, order staging + turn advancement wiring, side picker + recruitment flow, player-faction fog-of-war filtering for formations/order arrows, and Electron PMTiles route hardening (byte ranges + traversal-safe path checks + canonical data route behavior).
+- **Behavioral notes:**
+  - Desktop flow now supports `start-new-campaign`, `get-recruitment-catalog`, and `apply-recruitment` round-trips with required `stateJson` sync.
+  - Desktop map stages orders and clears local staged queue only after successful `advance-turn`.
+  - AoR desktop staging handlers are explicitly deprecated (`stage-brigade-aor-order`, `set-brigade-desired-aor-cap`) in favor of Phase II OSID/front flow.
+- **Files added (high impact):**
+  - `src/ui/map/desktop/types.ts`, `src/ui/map/desktop/bridge.ts`, `src/ui/map/desktop/useIPC.ts`
+  - `src/ui/map/desktop/orderActions.ts`, `src/ui/map/desktop/campaignRecruitmentActions.ts`
+  - `src/ui/map/components/SidePickerOverlay.tsx`, `src/ui/map/components/RecruitmentModal.tsx`
+  - `src/ui/map/map/pmtilesRoute.ts`, `src/desktop/protocol_data_route.cjs`
+- **Files modified (high impact):**
+  - `src/ui/map/App.tsx`, `src/ui/map/components/TopToolbar.tsx`, `src/ui/map/components/FormationDetail.tsx`, `src/ui/map/map/MapContainer.tsx`
+  - `src/ui/map/store/gameStore.ts`, `src/ui/map/hooks/useDesktopSession.ts`
+  - `src/ui/map/map/builders/buildFormationsGeoJSON.ts`, `src/ui/map/map/builders/buildOrderArrowsGeoJSON.ts`
+  - `src/desktop/electron-main.cjs`, `src/data/operational_data.ts`
+- **Verification evidence:**
+  - `npm run typecheck` ✅
+  - `npm run test:vitest` ✅ (247 pass / 1 skip)
+  - `npm run desktop:map:build` ✅
+  - `npm run warroom:build` ✅
+  - Focused suites passed: desktop bridge/session/orders/recruitment+side-picker/fog-of-war/pmtiles protocol tests
+- **Report:** `docs/40_reports/implemented/20260302_PHASE4_DESKTOP_INTEGRATION_IMPLEMENTATION.md`

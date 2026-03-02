@@ -125,34 +125,44 @@
    Do instead: `recon_intelligence.ts` runs via `updateReconIntelligence()`. Ranges: RBiH=2, RS=1, HRHB=1. Phase 2 TODO: confidence decay, bot AI intel usage.
 
 ## GUI / HoI Map
-1. **[2026-03-02] GUI v2 next: Phase 4 (Desktop)**
-   Do instead: Phase 3 COMPLETE. Next: Phase 4 (useIPC, advance-turn, order staging, recruitment, SidePickerOverlay, fog-of-war, PMTiles in Electron).
-2. **[2026-03-01] Map load: validate save shape**
+1. **[2026-03-02] Desktop session bootstrap ordering**
+   Do instead: In `useDesktopSession`, if a live `game-state-updated` payload arrives first, ignore later bootstrap `getCurrentGameState()` payload to prevent stale overwrite. Surface bootstrap fetch failures through `loadError`.
+2. **[2026-03-02] Advance turn queue clearing rule**
+   Do instead: Clear local staged orders only after `advanceTurn` succeeds and optional `stateJson` sync is applied. Keep queue on failed advance.
+3. **[2026-03-02] Phase 4 desktop flow is canonical**
+   Do instead: Use typed `useIPC` desktop bridge/actions (not ad-hoc `window.awwv` calls), require `stateJson` on successful campaign/recruitment mutation responses, and keep request-id sequencing for recruitment catalog refresh.
+4. **[2026-03-01] Map load: validate save shape**
    Do instead: Validate save (schema, meta.turn, formations/political_controllers shape). parseGameState unwraps `{ state }`/`{ gameState }` and gives clear errors.
-3. **[2026-03-01] Map load: defer parse + timeout**
+5. **[2026-03-01] Map load: defer parse + timeout**
    Do instead: Parse in requestIdleCallback (~150ms). 25s load timeout in toolbar (Promise.race). Show loadError on failure/timeout.
-4. **[2026-03-01] Map adapter: Peace/War + legacy phase_ii compat**
+6. **[2026-03-01] Map adapter: Peace/War + legacy phase_ii compat**
    Do instead: parseGameState treats `phase_ii` as war; accepts `formations` as object or array.
-5. **[2026-02-28] Map overlay poll: check sources first**
+7. **[2026-02-28] Map overlay poll: check sources first**
    Do instead: Call getSource() before buildControlGeoJSON/buildFrontLinesGeoJSON. Otherwise 500ms poll freezes app.
-6. **[2026-03-01] Formation icon + setData: defer to idle**
+8. **[2026-03-01] Formation icon + setData: defer to idle**
    Do instead: Run ensureFormationIcons and setData in requestIdleCallback (~400ms), not in overlay rAF chain. Cancel in cleanup.
-7. **[2026-02-28] HOI spec = aesthetic authority; v2 doc = implementation**
+9. **[2026-02-28] HOI spec = aesthetic authority; v2 doc = implementation**
    Do instead: HOI_VISUAL_GUI_OVERHAUL_SPEC for look-and-feel; AWWV_GUI_ARCHITECTURE_REWORK_v2.md for implementation.
-8. **[2026-02-28] Selection panel: inline styles for positioning**
+10. **[2026-02-28] Selection panel: inline styles for positioning**
    Do instead: Use inline styles (position, right, top, zIndex, direction: ltr) so Tailwind/purge/RTL cannot override. `?showPanel=1` for dev layout verification.
 
 ## Desktop & Electron
-1. **[2026-02-21] EPIPE guard on init logging**
+1. **[2026-03-02] Bridge availability semantics**
+   Do instead: `isAvailable` must indicate core desktop bridge readiness (not just `window.awwv` object presence). Keep method-level fallbacks for partial bridge surfaces.
+2. **[2026-03-02] Movement staging OSID path**
+   Do instead: When map click provides OSID targets, stage movement through `stageBrigadeMovementOrder(brigadeId, [targetOsid])` instead of municipality-ID-only move channels.
+3. **[2026-02-21] EPIPE guard on init logging**
    Do instead: Add EPIPE guard on Electron init logging to prevent crashes on pipe closure.
-2. **[2026-02-21] Electron first-paint classes**
+4. **[2026-02-21] Electron first-paint classes**
    Do instead: `warroom-scene-hidden` for menu, `warroom-desk-hidden` for maps.
-3. **[2026-02-21] Preload + getDataBaseUrl**
+5. **[2026-02-21] Preload + getDataBaseUrl**
    Do instead: Use Preload script + `getDataBaseUrl()` for iframe/Electron data fetches.
-4. **[2026-02-22] IPC read-only queries**
+6. **[2026-02-22] IPC read-only queries**
    Do instead: Movement/combat preview as read-only (`query-*`) IPC handlers. Compute from deserialized state without mutating.
-5. **[2026-02-21] Corps staging: accept all formation kinds**
+7. **[2026-02-21] Corps staging: accept all formation kinds**
    Do instead: `stageCorpsFrontOrder` and `stageCorpsAttackAxisOrder` must accept `corps_asset` and `army_hq`.
+8. **[2026-03-02] PMTiles desktop route hardening**
+   Do instead: In Electron runtime, rewrite `pmtiles:///data/derived/*` to canonical app route and serve with traversal-safe path checks plus byte-range support so PMTiles reads are efficient and secure.
 
 ## Map & Geometry
 1. **[2026-02-21] FRONT definition**
