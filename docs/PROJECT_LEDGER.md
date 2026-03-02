@@ -9030,3 +9030,12 @@ Determinism checks **MUST** be run:
   - `docs/40_reports/implemented/20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md` — Known Issues §1: geography layer marked RESOLVED with cross-link
 - **Also updated:** `docs/40_reports/README.md` — implemented/ index (added geography report)
 - **Flagged:** `docs/10_canon/FORAWWV.md` — no tile/geography references (no update needed)
+
+**2026-03-02** - Wire fallback_osid retreat + cross-faction recruitment pool fallback
+- **Phase:** Bot AI / Formation mechanics
+- **Summary:** Completed the recruit_pool_faction / fallback_osid work from e551247. (1) fallback_osid wiring: defender with no retreat but fallback_osid relocates there (40% personnel loss, -20 cohesion, 3 disrupted). Prevents pocket brigade elimination. (2) Cross-faction pool fallback: when recruit_pool_faction pool doesn't exist in home mun, falls back to own faction pool. (3) pool_faction field on RecruitmentAction for correct pool deduction.
+- **Determinism:** All changes deterministic. Pool fallback uses same sorted iteration. No randomness.
+- **Calibration:** n354 (40w) = 85.8% OSID match (646/753), +0.9pp vs n348 baseline. 6/6 benchmarks, 10/14 anchors (Bihać PASS, Brčko brka_2 PASS — both new). 108th/110th/115th spawn as RBiH with HRHB pool fallback. 107th Gradačac skipped (pool exhaustion).
+- **Files modified:** `src/sim/combat/attack_resolution_osid.ts` (+12 lines), `src/sim/recruitment_engine.ts` (+31/-8), `src/state/recruitment_types.ts` (+2)
+- **Verification:** tsc clean, 220 vitest pass / 1 skip.
+- **FORAWWV note:** None. Do NOT edit FORAWWV automatically.
