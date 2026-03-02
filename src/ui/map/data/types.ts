@@ -64,6 +64,33 @@ export interface FormationView {
     corpsCommandSpan?: number;
     movementStatus?: 'deployed' | 'packing' | 'in_transit' | 'unpacking';
     movementStance?: 'combat' | 'column';
+    // War story (progressive — regenerated each turn from brigade_history)
+    narrativeArc?: 'veteran' | 'bloodied' | 'shattered' | 'risen' | 'destroyed' | 'garrison';
+    warNarrative?: string;
+    notableMoments?: Array<{ turn: number; description: string }>;
+    // Combat summary (corps/army_hq aggregate — computed each turn from subordinate brigade_histories)
+    combatSummary?: {
+        battles_fought: number;
+        victories: number;
+        defeats: number;
+        stalemates: number;
+        battles_as_attacker: number;
+        battles_as_defender: number;
+        total_casualties_taken: number;
+        total_casualties_inflicted: number;
+        total_osids_captured: number;
+        total_osids_lost: number;
+        win_rate: number;
+        casualty_exchange_ratio: number;
+        current_personnel: number;
+        peak_aggregate_personnel: number;
+        nadir_aggregate_personnel: number;
+        arc_distribution: Record<string, number>;
+        brigade_count: number;
+        active_brigade_count: number;
+        most_casualties_brigade_id: string | null;
+        most_victories_brigade_id: string | null;
+    };
 }
 
 export interface MilitiaPoolView {

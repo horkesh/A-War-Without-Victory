@@ -619,7 +619,7 @@ export const warPhases: NamedPhase[] = [
                 const factionState = (context.state.factions ?? []).find(fac => fac.id === f.faction);
                 const baseMaintenance = (factionState as any)?.profile?.logistics ?? 50;
                 // C3: RS maintenance capacity decays over time (spare parts depletion)
-                const maintenanceMult = f.faction === 'RS' ? getRSMaintenanceCapacityMult(turn) : 1.0;
+                const maintenanceMult = f.faction === 'RS' ? getRSMaintenanceCapacityMult(turn, context.state.war_timeline) : 1.0;
                 const maintenance = (baseMaintenance / 100) * maintenanceMult;
                 degradeEquipment(f, f.posture, maintenance);
             }
@@ -1004,11 +1004,16 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const turn = context.state.meta?.turn ?? 0;
             const { VRS_EQUIPMENT_DECAY_START_WEEK, VRS_EQUIPMENT_DECAY_RATE, VRS_EQUIPMENT_DECAY_FLOOR } = await import('../../state/formation_constants.js');
-            if (turn < VRS_EQUIPMENT_DECAY_START_WEEK) return;
+            // Timeline-driven equipment decay when available
+            const timelineDecay = context.state.war_timeline?.equipment_decay?.find(c => c.faction === 'RS');
+            const startWeek = timelineDecay?.start_week ?? VRS_EQUIPMENT_DECAY_START_WEEK;
+            const ratePerWeek = timelineDecay?.rate_per_week ?? VRS_EQUIPMENT_DECAY_RATE;
+            const floor = timelineDecay?.floor ?? VRS_EQUIPMENT_DECAY_FLOOR;
+            if (turn < startWeek) return;
             for (const f of Object.values(context.state.formations ?? {})) {
                 if (f.faction !== 'RS' || f.status !== 'active') continue;
                 const current = f.equipment_decay ?? 1.0;
-                f.equipment_decay = Math.max(VRS_EQUIPMENT_DECAY_FLOOR, current - VRS_EQUIPMENT_DECAY_RATE);
+                f.equipment_decay = Math.max(floor, current - ratePerWeek);
             }
         }
     },
@@ -1018,6 +1023,27 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const { processEliteLoanLifecycle } = await import('../combat/elite_loan.js');
             processEliteLoanLifecycle(context.state);
+        }
+    },
+    {
+        name: 'generate-war-stories',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { generateWarStoryForFormation } = await import('../war_stories.js');
+            const formations = context.state.formations ?? {};
+            for (const fid of Object.keys(formations).sort()) {
+                const f = formations[fid];
+                if (!f || !f.brigade_history) continue;
+                f.war_story = generateWarStoryForFormation(f);
+            }
+        }
+    },
+    {
+        name: 'compute-combat-summaries',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { computeCombatSummaries } = await import('../combat/combat_summary_aggregator.js');
+            computeCombatSummaries(context.state);
         }
     },
     {

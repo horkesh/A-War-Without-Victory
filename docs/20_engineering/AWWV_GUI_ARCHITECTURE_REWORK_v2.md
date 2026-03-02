@@ -21,7 +21,7 @@
 |------|------|--------|
 | **Phase 1 (Scaffold + Map)** | Vite + React + MapLibre; `awwv_map_style.json`; MapContainer; OSID control layer; front lines; formations; order arrows; PMTiles/base map | — |
 | **Phase 2 (Game state)** | Load save → store; GeoJSON builders (control, front lines, formations, order arrows); formations + orders on map | — |
-| **Phase 3 (UI panels)** | TopToolbar, BottomStatusStrip, SelectionPanel (Settlement Info, OSID humanized), FormationDetail, OOBSidebar, CorpsCard, BrigadeRow; click OSID/formation → panels; Storybook. **Phase A complete:** §9.2 panel palette, headers, faction gradient TopToolbar, BrigadeRow cohesion bars + supply dots. **Phase B complete:** tabbed sidebar (Army/Situation), Situation tab, front on CorpsCard, Reserve, stance controls, hover preview, Escape clears selection. **Phase C complete (2026-02-28):** Rich tooltips (§7), MapModeToolbar + MapLayerToggles (bottom-right), useKeyboardShortcuts (Enter, 1–4, Escape), AttackConfirmation modal, OrderQueue. **Phase 3 expansion (2026-03-02):** Tooltip fix (stripFactionSuffix), sector fill + edge glow on map, brigade↔sector bidirectional sync, CorpsDetail panel, density map mode (5th mode). Report: [20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md](../40_reports/implemented/20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md). **Phase 3 remainder (2026-03-02):** ArmyDetail panel (faction-level stats, drill-down to corps), Minimap (second MapLibre, viewport sync, click-to-pan, toggle in Layers), MovementPreview (move mode + green OSID highlight), ZoomControls (satisfied by existing NavigationControl). **Phase 3 COMPLETE.** | — |
+| **Phase 3 (UI panels)** | TopToolbar, BottomStatusStrip, SelectionPanel (Settlement Info, OSID humanized), FormationDetail, OOBSidebar, CorpsCard, BrigadeRow; click OSID/formation → panels; Storybook. **Phase A complete:** §9.2 panel palette, headers, faction gradient TopToolbar, BrigadeRow cohesion bars + supply dots. **Phase B complete:** tabbed sidebar (Army/Situation), Situation tab, front on CorpsCard, Reserve, stance controls, hover preview, Escape clears selection. **Phase C complete (2026-02-28):** Rich tooltips (§7), MapModeToolbar + MapLayerToggles (bottom-right), useKeyboardShortcuts (Enter, 1–4, Escape), AttackConfirmation modal, OrderQueue. **Phase 3 expansion (2026-03-02):** Tooltip fix (stripFactionSuffix), sector fill + edge glow on map, brigade↔sector bidirectional sync, CorpsDetail panel, density map mode (5th mode). Report: [20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md](../40_reports/implemented/20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md). **Phase 3 remainder (2026-03-02):** ArmyDetail panel (faction-level stats, drill-down to corps), Minimap (second MapLibre, viewport sync, click-to-pan, toggle in Layers), MovementPreview (move mode + green OSID highlight), ZoomControls (satisfied by existing NavigationControl). **Progressive war stories in FormationDetail (2026-03-02):** Color-coded arc badge (veteran/green, bloodied/amber, shattered/red, risen/emerald, destroyed/gray, garrison/neutral), italic narrative paragraph, bulleted notable moments with turn numbers. Data from `FormationState.war_story` via `GameStateAdapter`. Report: [20260302_PROGRESSIVE_WAR_STORIES_IMPLEMENTATION.md](../40_reports/implemented/20260302_PROGRESSIVE_WAR_STORIES_IMPLEMENTATION.md). **Corps & army combat summaries (2026-03-02):** CombatSummaryPanel in CorpsDetail, ArmyDetail, FormationDetail. Data from FormationState.combat_summary via GameStateAdapter. Pipeline step `compute-combat-summaries`. **Phase 3 COMPLETE.** | — |
 | **Phase 4 (Desktop)** | — | useIPC; advance-turn, order staging, recruitment; SidePickerOverlay; fog-of-war; PMTiles in Electron |
 | **Phase 5 (Polish)** | — | ZoC overlay, battle markers, War Summary modal, Replay scrubber, Attack confirmation with odds, Movement preview, visual sign-off |
 
@@ -738,7 +738,7 @@ Same as v1 §5.3. Full component list:
 
 **Layout:** `AppShell`, `TopToolbar`, `BottomStatusStrip`  
 **Map overlays:** `MapModeToolbar`, `MapLayerToggles`, `Minimap`, `ZoomControls`  
-**Right panel:** `SelectionPanel`, `SettlementDetail`, `FormationDetail`, `CorpsDetail`, `ArmyDetail`  
+**Right panel:** `SelectionPanel`, `SettlementDetail`, `FormationDetail`, `CorpsDetail`, `ArmyDetail`, `CombatSummaryPanel`  
 **Left sidebar:** `OOBSidebar`, `CorpsCard`, `BrigadeRow`  
 **Orders:** `OrderQueue`, `AttackConfirmation`, `MovementPreview`  
 **Modals:** `WarSummaryModal`, `RecruitmentModal`, `MainMenu`, `SidePickerOverlay`  
@@ -953,7 +953,8 @@ src/ui/map/                         # NEW — clean React + MapLibre app
 │   │   ├── SettlementDetail.tsx
 │   │   ├── FormationDetail.tsx
 │   │   ├── CorpsDetail.tsx
-│   │   └── ArmyDetail.tsx
+│   │   ├── ArmyDetail.tsx
+│   │   └── CombatSummaryPanel.tsx
 │   ├── sidebar/
 │   │   ├── OOBSidebar.tsx
 │   │   ├── CorpsCard.tsx

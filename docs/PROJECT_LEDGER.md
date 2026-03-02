@@ -14,7 +14,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 **Project:** A War Without Victory (AWWV)
 **Type:** Wargame simulation prototype
 **Repository:** AWWV
-**Current Focus:** Combat calibration (n359, 86.7% OSID match), GUI Architecture Rework v2 (React+MapLibre), Sectors & Operations active
+**Current Focus:** Combat calibration (n362, 87.4% OSID match), GUI Architecture Rework v2 (React+MapLibre, Phase 3 COMPLETE), Sectors & Operations active
 
 ---
 
@@ -45,8 +45,8 @@ This is the single authoritative project ledger. All context, decisions, and sta
 ## Current Phase
 
 **Phase:** Post-MVP — Active Development
-**Status:** Phase II live, Phase M complete, GUI rework in progress
-**Focus:** Combat calibration (86.7% OSID match at n359), Sector offensives active in early war, GUI Phase 3 remainder
+**Status:** Phase II live, Phase M complete, GUI Phase 3 COMPLETE
+**Focus:** Combat calibration (87.4% OSID match at n362), Sector offensives active, GUI Phase 4 (Desktop) next
 
 **Completed milestones:**
 - Phase 6: MVP declared 2026-02-08; A1 base map stable and frozen
@@ -58,8 +58,8 @@ This is the single authoritative project ledger. All context, decisions, and sta
 - Corps sector visualization in React+MapLibre map
 
 **Active workstreams:**
-- Combat calibration: n359 = 86.7% (653/753 OSID match), sector offensives active in VRS early-war blitz, 26 ops/40w
-- GUI Phase 3 remainder: Minimap, ZoomControls, ArmyDetail, MovementPreview (CorpsDetail done 2026-03-02; tooltip fix, sector viz, bidirectional sync, density mode done)
+- Combat calibration: n362 = 87.4% (658/753 OSID match), sector offensives active in VRS early-war blitz
+- GUI Phase 4 (Desktop): useIPC, advance-turn, order staging, recruitment, SidePickerOverlay, fog-of-war, PMTiles in Electron
 
 **Completed workstreams:**
 - Displacement system complete: n319 = 668k displaced (per-OSID census depth). See 20260301_DISPLACEMENT_DEPTH_CALIBRATION.md
@@ -144,10 +144,9 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 ## Next Tasks
 
-1. Complete GUI Phase 3 remainder (Minimap, ZoomControls, CorpsDetail, ArmyDetail, MovementPreview)
+1. GUI Phase 4: Desktop/Electron integration (useIPC, advance-turn, order staging, recruitment)
 2. Continue combat calibration (Drina region, Bugojno, VRS troop counts)
 3. Re-enable minority flight in displacement system
-4. GUI Phase 4: Desktop/Electron integration (useIPC, advance-turn)
 
 ---
 
@@ -9089,5 +9088,41 @@ Determinism checks **MUST** be run:
 - **New files (11):** brigade_history.ts, decoration_types.ts, elite_loan_types.ts, brigade_history_recorder.ts, decoration_evaluator.ts, elite_loan.ts, formation_lifecycle_events.ts, war_stories.ts, formation_lifecycle_events.json, + 5 test files
 - **Modified files (10):** game_state.ts, oob_loader.ts, oob_brigades.json, attack_resolution_osid.ts, combat_math.ts, formation_spawn.ts, recruitment_engine.ts, oob_early_war_entry.ts, war_phases.ts, formation_constants.ts
 - **Tests:** 81 new tests across 5 test files, all pass. 0 regressions (vitest 220 pass, node 129 pass).
-- **Deferred:** Calibration run (Phase 7), GUI service record panel, bot AI elite deployment decisions, war stories in final save JSON.
+- **Deferred:** Calibration run (Phase 7), GUI service record panel, bot AI elite deployment decisions. ~~War stories in final save JSON~~ → DONE (progressive war stories, see below).
 - **Status:** Implementation COMPLETE. Calibration run needed next session.
+
+### [2026-03-02] Progressive War Stories — Per-Turn Narrative in Pipeline + GUI
+- **Type:** Feature (Sim pipeline + GUI)
+- **Summary:** Wired the existing war stories engine (`war_stories.ts`) into the turn pipeline so narratives evolve as the war unfolds — not just at game end. Each brigade's narrative arc (veteran, bloodied, shattered, risen, destroyed, garrison) updates every turn based on live `brigade_history` data.
+- **Changes:**
+  1. `src/sim/war_stories.ts` — Added `generateWarStoryForFormation()` single-brigade helper (+36 lines)
+  2. `src/state/game_state.ts` — Added `war_story?: BrigadeWarStory` to FormationState (+3 lines)
+  3. `src/sim/turn_phases/war_phases.ts` — Added `generate-war-stories` pipeline step after `elite-loan-lifecycle` (+13 lines)
+  4. `src/ui/map/data/types.ts` — Added narrativeArc, warNarrative, notableMoments to FormationView (+4 lines)
+  5. `src/ui/map/data/GameStateAdapter.ts` — Extracts war_story from formation data (+8 lines)
+  6. `src/ui/map/components/FormationDetail.tsx` — War story display section with color-coded arc badge, narrative, notable moments (+31 lines)
+- **Design:** Per-turn regeneration (not incremental) — recomputed every turn from brigade_history. Stored on FormationState (co-located with brigade). UI computes nothing — all narrative logic in sim pipeline. Graceful degradation — section only renders when data present.
+- **Files modified:** 6 files, +95 lines total
+- **Verification:** tsc clean, 220 vitest pass / 1 skip (unchanged). Existing 15 war_stories tests still pass.
+- **Canon propagation:** context.md (OOB Rework paragraph updated), PIPELINE_ENTRYPOINTS.md (generate-war-stories in Phase II step list), REPO_MAP.md (war stories routing added), AWWV_GUI_ARCHITECTURE_REWORK_v2.md (Phase 3 FormationDetail note), 40_reports/README.md (index entry).
+- **Report:** [20260302_PROGRESSIVE_WAR_STORIES_IMPLEMENTATION.md](docs/40_reports/implemented/20260302_PROGRESSIVE_WAR_STORIES_IMPLEMENTATION.md)
+
+### [2026-03-02] Corps & Army Aggregate Combat Summaries
+- **Type:** Feature (Sim pipeline + GUI)
+- **Summary:** Added corps-level and army-level aggregate combat statistics computed from subordinate brigade histories. Each corps/army_hq formation now carries a `CombatSummary` with battle tallies, win rate, casualty exchange ratio, territory balance, arc distribution, and notable subordinate identifiers. Displayed in CorpsDetail, ArmyDetail, and FormationDetail panels via a reusable `CombatSummaryPanel` component. Army panel corps rows show mini combat stats (WR + casualties).
+- **Changes:**
+  1. `src/state/combat_summary.ts` — NEW: `CombatSummary` interface, `createEmptyCombatSummary()`, `aggregateBrigadeHistories()` pure aggregation function
+  2. `src/sim/combat/combat_summary_aggregator.ts` — NEW: `computeCombatSummaries(state)` pipeline function (corps by corps_id, army_hq by faction)
+  3. `src/state/game_state.ts` — Added `combat_summary?: CombatSummary` to FormationState (+import)
+  4. `src/sim/turn_phases/war_phases.ts` — Added `compute-combat-summaries` pipeline step after `generate-war-stories`
+  5. `src/ui/map/data/types.ts` — Added `combatSummary` to FormationView (18 fields)
+  6. `src/ui/map/data/GameStateAdapter.ts` — Extracts combat_summary using `finiteNumber()` pattern with object guard on arc_distribution
+  7. `src/ui/map/components/CombatSummaryPanel.tsx` — NEW: Reusable panel showing battles, win rate, casualties, exchange ratio, territory, brigade counts, arc distribution, top brigades (clickable). Supports `compact` mode.
+  8. `src/ui/map/components/CorpsDetail.tsx` — Added CombatSummaryPanel after metrics section
+  9. `src/ui/map/components/ArmyDetail.tsx` — Added CombatSummaryPanel after casualties + mini-stats (WR/casualties) on corps sub-rows
+  10. `src/ui/map/components/FormationDetail.tsx` — Added compact CombatSummaryPanel for corps/army_hq formations
+  11. `tests/combat_summary.test.ts` — NEW: 17 tests (createEmpty, aggregation, ratios, determinism, corps/corps_asset/army_hq/OG exclusion)
+- **Design:** Per-turn recomputation from brigade_history (not incremental). UI computes nothing — all aggregation in sim pipeline. Sorted iteration via `strictCompare`. OG formations excluded from tallies. `finiteNumber()` in adapter for type safety.
+- **Files:** 4 new, 7 modified, ~450 lines total
+- **Verification:** tsc clean (0 new errors), 255 vitest pass / 1 skip (17 new + 18 existing), 17 node:test pass.
+- **Canon propagation:** context.md (OOB Rework paragraph extended), PIPELINE_ENTRYPOINTS.md (compute-combat-summaries in Phase II step list), REPO_MAP.md (combat summaries routing), AWWV_GUI_ARCHITECTURE_REWORK_v2.md (§0 status + §5.2 component + §7 directory), 40_reports/README.md (index entry).

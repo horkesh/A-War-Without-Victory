@@ -4,6 +4,7 @@
  */
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
+import { CombatSummaryPanel } from './CombatSummaryPanel';
 
 const FACTION_DISPLAY: Record<string, string> = {
   RS: 'Republika Srpska (VRS)',
@@ -18,6 +19,7 @@ export function ArmyDetail() {
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const setSelectedArmyId = useGameStore((s) => s.setSelectedArmyId);
   const setSelectedCorpsId = useGameStore((s) => s.setSelectedCorpsId);
+  const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
 
@@ -55,6 +57,10 @@ export function ArmyDetail() {
 
   // Army stance
   const stance = loadedGameState.armyStance?.[faction] ?? 'unknown';
+
+  // Army HQ combat summary (faction-wide aggregate)
+  const armyHq = formations.find((f) => f.kind === 'army_hq');
+  const armyCombatSummary = armyHq?.combatSummary;
 
   return (
     <div
@@ -154,6 +160,15 @@ export function ArmyDetail() {
           </div>
         )}
 
+        {/* Combat Summary */}
+        {armyCombatSummary && (
+          <CombatSummaryPanel
+            summary={armyCombatSummary}
+            formations={loadedGameState.formations}
+            onSelectFormation={setSelectedFormationId}
+          />
+        )}
+
         {/* Corps list (clickable) */}
         {corpsFormations.length > 0 && (
           <div className="border-t border-panel-border pt-2">
@@ -164,11 +179,12 @@ export function ArmyDetail() {
                 .map((f) => {
                   const corpsSubordinates = brigades.filter((b) => b.corps_id === f.id);
                   const corpsPersonnel = corpsSubordinates.reduce((sum, b) => sum + (b.personnel ?? 0), 0);
+                  const cs = f.combatSummary;
                   return (
                     <button
                       key={f.id}
                       type="button"
-                      className="w-full flex justify-between text-text-primary hover:text-interactive transition-colors text-left"
+                      className="w-full flex flex-col text-text-primary hover:text-interactive transition-colors text-left"
                       onClick={() => setSelectedCorpsId(f.id)}
                       onMouseEnter={() => {
                         const osids = corpsSubordinates
@@ -178,10 +194,17 @@ export function ArmyDetail() {
                       }}
                       onMouseLeave={() => setHoveredOsids([])}
                     >
-                      <span className="truncate mr-2">{f.name}</span>
-                      <span className="text-text-secondary tabular-nums shrink-0">
-                        {corpsSubordinates.length}b &middot; {corpsPersonnel.toLocaleString()}
-                      </span>
+                      <div className="flex justify-between w-full">
+                        <span className="truncate mr-2">{f.name}</span>
+                        <span className="text-text-secondary tabular-nums shrink-0">
+                          {corpsSubordinates.length}b &middot; {corpsPersonnel.toLocaleString()}
+                        </span>
+                      </div>
+                      {cs && cs.battles_fought > 0 && (
+                        <div className="text-[10px] text-text-secondary tabular-nums">
+                          WR:{(cs.win_rate * 100).toFixed(0)}% C:{(cs.total_casualties_taken / 1000).toFixed(1)}k
+                        </div>
+                      )}
                     </button>
                   );
                 })}

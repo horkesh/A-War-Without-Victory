@@ -1,6 +1,7 @@
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
+import { CombatSummaryPanel } from './CombatSummaryPanel';
 
 function capitalize(s: string): string {
   if (!s) return s;
@@ -97,6 +98,45 @@ export function FormationDetail() {
                   {getOsidDisplayName(formation.location_osid, osidDisplayNames)}
                 </span>
               </div>
+            )}
+
+            {/* War Story (brigades only) */}
+            {formation.narrativeArc && formation.warNarrative && (
+              <div className="pt-2 border-t border-panel-border">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className={`inline-block text-[10px] font-mono font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded ${
+                    formation.narrativeArc === 'veteran' ? 'bg-green-900/40 text-green-400' :
+                    formation.narrativeArc === 'bloodied' ? 'bg-amber-900/40 text-amber-400' :
+                    formation.narrativeArc === 'shattered' ? 'bg-red-900/40 text-red-400' :
+                    formation.narrativeArc === 'risen' ? 'bg-emerald-900/40 text-emerald-300' :
+                    formation.narrativeArc === 'destroyed' ? 'bg-neutral-800/60 text-neutral-500' :
+                    'bg-neutral-800/40 text-neutral-400'
+                  }`}>
+                    {formation.narrativeArc}
+                  </span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-text-secondary italic">
+                  {formation.warNarrative}
+                </p>
+                {formation.notableMoments && formation.notableMoments.length > 0 && (
+                  <div className="mt-1.5 space-y-0.5">
+                    {formation.notableMoments.map((m, i) => (
+                      <div key={i} className="text-[10px] text-text-secondary flex gap-1">
+                        <span className="text-accent-gold shrink-0">&bull;</span>
+                        <span>{m.description}{m.turn > 0 ? ` (T${m.turn})` : ''}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Combat Summary (corps/army_hq only — field is only set on those kinds) */}
+            {formation.combatSummary && (
+              <CombatSummaryPanel
+                summary={formation.combatSummary}
+                compact
+              />
             )}
 
             {(() => {

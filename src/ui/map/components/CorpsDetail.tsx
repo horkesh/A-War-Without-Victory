@@ -5,6 +5,7 @@
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
+import { CombatSummaryPanel } from './CombatSummaryPanel';
 
 export function CorpsDetail() {
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
@@ -115,6 +116,15 @@ export function CorpsDetail() {
             </div>
           )}
         </div>
+
+        {/* Combat Summary */}
+        {corpsFormation.combatSummary && (
+          <CombatSummaryPanel
+            summary={corpsFormation.combatSummary}
+            formations={loadedGameState.formations}
+            onSelectFormation={setSelectedFormationId}
+          />
+        )}
 
         {/* Sectors */}
         {corpsSectors.length > 0 && (

@@ -29,8 +29,10 @@
  */
 import type { BrigadeHistory } from './brigade_history.js';
 import type { CasualtyLedger } from './casualty_ledger.js';
+import type { CombatSummary } from './combat_summary.js';
 import type { BrigadeDecoration } from './decoration_types.js';
 import type { EliteLoanState } from './elite_loan_types.js';
+import type { BrigadeWarStory } from '../sim/war_stories.js';
 import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 
@@ -343,6 +345,10 @@ export interface FormationState {
     lifecycle_status?: 'active' | 'forming' | 'disbanded' | 'merged' | 'destroyed' | 'withdrawn';
     /** VRS equipment decay factor [0,1]. Applied as multiplier to equipment ratio. 1.0 = full effectiveness, 0.6 = floor. */
     equipment_decay?: number;
+    /** Progressive war story — regenerated each war turn from brigade_history. */
+    war_story?: BrigadeWarStory;
+    /** Corps/Army aggregate combat summary — computed each war turn from subordinate brigade_histories. */
+    combat_summary?: CombatSummary;
 }
 
 export interface FrontPostureAssignment {
@@ -1348,6 +1354,9 @@ export interface GameState {
 
     /** Corps front sectors: per-corps slices of hostile boundary. Derived each turn (Engine Invariants §13). */
     corps_front_sectors?: Record<string, CorpsFrontSector>;
+
+    /** War timeline: externalized faction temporal profiles (doctrine, cohesion, reinforcement, etc). Loaded from data/scenarios/timelines/{id}.json. */
+    war_timeline?: import('./war_timeline.js').WarTimeline;
 }
 
 /**
