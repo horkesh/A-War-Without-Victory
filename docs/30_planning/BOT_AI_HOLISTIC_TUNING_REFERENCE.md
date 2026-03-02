@@ -146,12 +146,14 @@ Report: docs/40_reports/implemented/20260301_MULTI_SECTOR_SUPPLY_GATING_SECTOR_O
 | MAX_SECTOR_EDGES | 25 | corps_front_sectors.ts |
 | MAX_SECTOR_BRIGADES | 8 | corps_front_sectors.ts |
 | Sector offensive: min brigades | 3 | sector_offensive.ts |
-| Supply readiness launch / abort | 0.6 / 0.4 | sector_offensive.ts |
+| Sector offensive: min objectives | 1 | sector_offensive.ts (was 2, lowered n359) |
+| Supply readiness launch / abort | 0.6 / 0.4 | sector_offensive.ts (gated by supply_reserves_enabled; returns 1.0 when disabled, L42) |
 | Momentum cap | 3 | sector_offensive.ts |
 | Max objectives | 6 | sector_offensive.ts |
 | Planning duration (3–5 objectives) | ceil(N×0.6) | sector_offensive.ts |
+| Recovery-phase launch | allowed | bot_corps_ai.ts (new ops can launch over recovery-phase ops, +15 exhaustion) |
 
-Sector offensives are dormant in the 40w calibration window (year-1 defensive doctrine for both major factions); infrastructure activates at 52w+ when factions transition to offensive postures (L37).
+Sector offensives are **active** in the 40w calibration window (n359: 26 ops across 40 weeks). VRS pre-planned ops execute from turn 1; bot AI launches new sector ops after recovery. L37 superseded — sector offensives were dormant due to supply readiness bug (L42) and dual-handler conflict (L43), not doctrine.
 
 ### Heavy Weapons System (attack_resolution_osid.ts)
 | Parameter | Value | Notes |
@@ -193,11 +195,12 @@ Sector offensives are dormant in the 40w calibration window (year-1 defensive do
 ### Doctrine Phases (bot_strategy.ts)
 | Faction | Phase | Weeks | Stance | Attack Share | Aggression |
 |---------|-------|-------|--------|-------------|------------|
-| RS | Territorial Seizure | 0-30 | general_offensive | 0.55 | 0.35 |
-| RS | Consolidation | 30-56 | balanced | 0.40 | 0.10 |
-| RS | Strategic Hold | 56+ | general_defensive | 0.30 | -0.10 |
-| RBiH | Survival Defense | 0-26 | general_defensive | 0.05 | -0.20 |
-| RBiH | Corps Reorganization | 26-56 | general_defensive | 0.10 | -0.10 |
+| RS | General Offensive | 0-20 | general_offensive | 0.28 | -0.05 |
+| RS | Balanced | 20-40 | balanced | 0.08 | -0.05 |
+| RS | Defensive | 40+ | general_defensive | 0.10 | -0.10 |
+| RBiH | Defensive (early) | 0-20 | general_defensive | 0.10 | -0.10 |
+| RBiH | Defensive (mid) | 20-40 | general_defensive | 0.15 | -0.05 |
+| RBiH | Defensive (late) | 40-56 | general_defensive | 0.20 | 0.00 |
 | RBiH | Active Defense | 56-80 | balanced | 0.25 | 0.05 |
 | RBiH | Controlled Counteroffensive | 80+ | general_offensive | 0.35 | 0.15 |
 | HRHB | Consolidate Herzegovina | 0-12 | balanced | 0.25 | 0.00 |

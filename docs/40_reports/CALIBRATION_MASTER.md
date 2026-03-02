@@ -3,7 +3,8 @@
 **Purpose:** Persistent lessons-learned record for Phase II 40w calibration (April 1992 → January 1993).
 **Updated:** 2026-03-02
 **Canonical target run:** n335 (`apr1992_definitive_40w__205b3676c8fe3ce4__w40_n335`)
-**Latest calibration run:** n343 (86.3%, Phase A calibration overhaul — 6 constant/wiring changes: civilian kill fraction, battle lethality, per-faction retreat resistance, displaced militia rate, pool exhaustion, frontline attrition. See `docs/40_reports/implemented/20260302_PHASE_A_CALIBRATION_OVERHAUL.md`.)
+**Latest calibration run:** n359 (86.7%, sector offensive activation — dual-handler fix, supply readiness gate, recovery-phase launches, min objectives 1. 26 sector offensives in 40w. See PROJECT_LEDGER 2026-03-02.)
+**Previous calibration run:** n343 (86.3%, Phase A calibration overhaul — 6 constant/wiring changes. See `docs/40_reports/implemented/20260302_PHASE_A_CALIBRATION_OVERHAUL.md`.)
 **Previous verification run:** n342 (87.4%, post-Phase B+C, gated off — zero behavioral change from supply code; minor drift from linter-applied fixes to other files)
 
 ---
@@ -11,11 +12,11 @@
 ## Target State (January 1993 / Week 40)
 
 ### Territory (OSIDs of 753 total)
-| Faction | Target | n284 | n295 | n299 | n303 | n314 | n335 | Delta (n335) | Status |
-|---|---|---|---|---|---|---|---|---|---|
-| RS | 416 | 392 | 393 | 389 | 382 | 389 | 387 | -29 | Under — Drina/Posavina shortfall |
-| RBiH | 248 | 271 | 273 | 273 | 277 | 272 | 273 | +25 | Over — Drina/Posavina holdouts |
-| HRHB | 89 | 90 | 87 | 91 | 94 | 92 | 93 | +4 | Near-target |
+| Faction | Target | n284 | n295 | n299 | n303 | n314 | n335 | n359 | Delta (n359) | Status |
+|---|---|---|---|---|---|---|---|---|---|---|
+| RS | 416 | 392 | 393 | 389 | 382 | 389 | 387 | 432 | +16 | Over — sector offensives push RS past target |
+| RBiH | 248 | 271 | 273 | 273 | 277 | 272 | 273 | 236 | -12 | Under — sector offensives reduce RBiH territory |
+| HRHB | 89 | 90 | 87 | 91 | 94 | 92 | 93 | 85 | -4 | Near-target |
 
 ### Army Strengths (end of 40w)
 | Faction | Personnel (n284) | Personnel (n295) | Brigades | Target | Status |
@@ -47,18 +48,18 @@
 - **Minority flight:** 0 (disabled — `enable_rbih_hrhb_dynamics: false`)
 - **Note:** Engine counts only War-phase takeover-triggered + pressure displacement. Pre-war mass displacement is baked into `init_control` snapshot. Displacement system complete as of n319. See `docs/40_reports/20260301_DISPLACEMENT_DEPTH_CALIBRATION.md`.
 
-### Match Rate vs Painted Targets (n335)
-Overall: **87.6%** (660/753 OSIDs correct)
+### Match Rate vs Painted Targets (n359, latest)
+Overall: **86.7%** (653/753 OSIDs correct)
 
-| Region | n284 Match | n295 Match | n299 Match | n303 Match | n314 Match | n335 Match | Key Issues |
-|---|---|---|---|---|---|---|---|
-| KRAJINA | 97.0% (128/132) | 97.0% (128/132) | 97.0% (128/132) | 97.0% (128/132) | 97.7% (129/132) | **95.5% (126/132)** | -3 — Bihać pocket defense stronger, shifts edges. |
-| POSAVINA_NE | 84.4% (92/109) | 85.3% (93/109) | 86.2% (94/109) | 86.2% (94/109) | 85.3% (93/109) | **72.5% (79/109)** | -14 — Brčko/Zvornik corridor still weak. Weakest region. |
-| DRINA | 71.9% (92/128) | 71.9% (92/128) | 71.9% (92/128) | 72.7% (93/128) | 75.0% (96/128) | **85.2% (109/128)** | **+13** — OSID ops + honor DTB major improvement. |
-| CENTRAL_CORRIDOR | 87.2% (82/94) | 90.4% (85/94) | 90.4% (85/94) | 89.4% (84/94) | 91.5% (86/94) | **92.6% (87/94)** | **+1** — stable. |
-| CENTRAL_BOSNIA | 81.3% (135/166) | 81.3% (135/166) | 83.7% (139/166) | 88.0% (146/166) | 88.0% (146/166) | **85.5% (142/166)** | -4 — Hadžići overcaptured by SRK. |
-| SARAJEVO | 77.4% (24/31) | 77.4% (24/31) | 80.6% (25/31) | 77.4% (24/31) | 77.4% (24/31) | **87.1% (27/31)** | **+3** — Prsten operation better targeted. |
-| HERZEGOVINA | 94.6% (88/93) | 90.3% (84/93) | 93.5% (87/93) | 91.4% (85/93) | 90.3% (84/93) | **96.8% (90/93)** | **+6** — Foča operation well-targeted. |
+| Region | n284 Match | n314 Match | n335 Match | n359 Match | Key Issues (n359) |
+|---|---|---|---|---|---|
+| KRAJINA | 97.0% (128/132) | 97.7% (129/132) | 95.5% (126/132) | **93.9% (124/132)** | -2 from n335 — sector ops shift edges |
+| POSAVINA_NE | 84.4% (92/109) | 85.3% (93/109) | 72.5% (79/109) | **80.7% (88/109)** | **+9** — East Bosnian sector ops secure corridor |
+| DRINA | 71.9% (92/128) | 75.0% (96/128) | 85.2% (109/128) | **82.8% (106/128)** | -3 from n335 — minor regression |
+| CENTRAL_CORRIDOR | 87.2% (82/94) | 91.5% (86/94) | 92.6% (87/94) | **89.4% (84/94)** | -3 — stable |
+| CENTRAL_BOSNIA | 81.3% (135/166) | 88.0% (146/166) | 85.5% (142/166) | **83.7% (139/166)** | -3 from n335 |
+| SARAJEVO | 77.4% (24/31) | 77.4% (24/31) | 87.1% (27/31) | **83.9% (26/31)** | **+6.5pp from n354** — SRK ops active |
+| HERZEGOVINA | 94.6% (88/93) | 90.3% (84/93) | 96.8% (90/93) | **92.5% (86/93)** | -4 from n335 |
 
 ---
 
@@ -95,6 +96,9 @@ Overall: **87.6%** (660/753 OSIDs correct)
 | n310 | 205b3676c8fe3ce4 | — | — | — | Pre-displacement-depth baseline. Displacement: 481k total (RBiH 269k, HRHB 120k, RS 37k). Municipality-level even-split averaging. |
 | **n319** | **42ad78a39746d166** | **—** | **—** | **—** | **Per-OSID census displacement depth.** 86.7% match (653/753). Displacement: **668k total** (RBiH 458k, HRHB 150k, RS 60k). Ljubija: 5,331→13,399 (+151%). Sustained pool double-count fix. Displacement system complete. See 20260301_DISPLACEMENT_DEPTH_CALIBRATION.md. |
 | n338 | 205b3676c8fe3ce4 | — | — | — | **Supply Reserves Phase A verification.** 86.9% match (654/753). Supply reserves implemented but gated off (`supply_reserves_enabled=false`). Zero behavioral change confirmed — identical within noise of n335. 14 calibration constants, 13 unit tests, pipeline step compute-supply-reserves. See 20260301_SUPPLY_RESERVES_PHASE_A_IMPLEMENTATION.md. |
+| n348 | — | 415 | 261 | 77 | **Reserve proportional cap + rear pocket targeting.** 84.9% match (639/753). Reserve cap `RESERVE_PER_EDGE_CAP=0.5`. Rear pocket targeting (enemy pockets with all neighbors faction-controlled). |
+| n354 | — | — | — | — | **Baseline before sector offensive activation.** 85.8% match. Reference run for n359 comparison. |
+| **n359** | **—** | **432** | **236** | **85** | **Sector offensive activation.** 86.7% match (653/753). 26 sector offensives in 40w (was 0). Fixes: (1) skip sector_attack in evaluateOperationProgress() — sole handler is advanceSectorOffensives(); (2) supply readiness returns 1.0 when supply_reserves_enabled=false; (3) allow new launches during recovery phase (+15 exhaustion); (4) min objectives 2→1. VRS 1st Krajina=7 ops, East Bosnian=6, Drina=6, 2nd Krajina=4; ARBiH 5th Corps=3 counteroffensives. See L42, L43. |
 
 ---
 
@@ -760,6 +764,24 @@ Operations inject at turn 0 in `planning` phase, execute at turn 1.
 Historically more accurate — JNA plans existed but needed coordination.
 Staging_osid during planning phase ensures brigades concentrate before attacking.
 **Rule:** Do NOT revert to turn-0 execution. The 1-turn delay is intentional.
+
+### L42 — Supply readiness gate must respect supply_reserves_enabled
+**Session:** 2026-03-02 (n359)
+`computeSupplyReadiness()` in `sector_offensive.ts` read OSID supply reachability data even when
+`supply_reserves_enabled=false`. The `deriveSupplyStateByOsid()` pipeline step runs unconditionally,
+producing reachability data that flagged forward VRS positions as 0% adequate supply at game start.
+This silently aborted ALL 5 pre-planned VRS operations on turn 1 (`supply_readiness=0.00 < SUPPLY_READINESS_ABORT=0.4`).
+**Fix:** Early return `1.0` when `!state.meta?.supply_reserves_enabled`.
+**Rule:** Any function gated by supply data must check `supply_reserves_enabled` before using reachability/reserve values.
+
+### L43 — Each operation type needs exactly one lifecycle manager
+**Session:** 2026-03-02 (n359)
+`evaluateOperationProgress()` in `bot_corps_ai.ts` handled ALL operations including `sector_attack`,
+using global `PLANNING_DURATION=2` instead of the op's own `planning_duration`. Meanwhile
+`advanceSectorOffensives()` in `sector_offensive.ts` is the dedicated sector_attack handler with
+per-op duration. Both managing planning→execution transitions caused race conditions and wrong timing.
+**Fix:** `if (op.type === 'sector_attack') continue;` in `evaluateOperationProgress()`.
+**Rule:** Operation type handlers must be exclusive — one handler per type, no overlap.
 
 ### L23 — Orasje pocket: 3 HVO brigades stay, Derventa/Modrica brigades fall back
 **Session:** 2026-03-01 (user directive)

@@ -176,7 +176,7 @@ Four-phase implementation adding multi-sector corps front partitioning, supply g
 
 **L36:** Supply gating at the brigade level (critical → defend, strained → victory-only) slightly improves calibration (+0.7pp) by preventing overextension in supply-strained areas. The effect is small because supply states in the 40w calibration window are mostly adequate.
 
-**L37:** Sector offensives don't activate in the 40w calibration window because year-one doctrine is defensive for both major factions. VRS transitions to defensive stance at RS_EARLY_WAR_END_WEEK (20). ARBiH army stance is general_defensive throughout year one. The infrastructure will become relevant in the 52w+ scenario when ARBiH begins Corridor offensive operations (1992 fall/winter).
+**L37:** ~~Sector offensives don't activate in the 40w calibration window because year-one doctrine is defensive for both major factions.~~ **SUPERSEDED (n359, 2026-03-02):** Sector offensives were dormant due to two bugs: (1) `computeSupplyReadiness()` returned 0.00 when `supply_reserves_enabled=false`, aborting all operations at turn 1 (L42); (2) `evaluateOperationProgress()` dual-handled sector_attack ops with wrong planning duration (L43). After fixes: 26 sector offensives in 40w, RS=432, 86.7% match. See PROJECT_LEDGER 2026-03-02.
 
 **L38:** Multi-sector promotion produces 2-3 sectors for large corps (ARBiH 2nd, 3rd; VRS 2nd Krajina, SRK). Most corps remain single-sector because their front is contiguous or their sub-segments are all below MIN_SECTOR_EDGES (5). This is historically appropriate — most corps had a single main front.
 
