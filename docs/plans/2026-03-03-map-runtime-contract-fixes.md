@@ -142,13 +142,13 @@
 - Full implementation report under `docs/40_reports/implemented/`.
 
 **Todos:**
-- [ ] E1 — Add or extend test: “map interactions include osid-density-fill” (e.g. in a describe that mocks the map and checks that handlers are registered for osid-density-fill when present). Prefer unit test in `src/ui/map` or `tests/` as appropriate.
-- [ ] E2 — Add or extend desktop protocol test: request to `awwv://app/data/runs/<safe-id>/final_save.json` (or equivalent) with a temp file returns 200 and correct body when path is allowed; path traversal returns 403. Reuse pattern from `tests/desktop_pmtiles_protocol_route.test.ts`.
-- [ ] E3 — Run full gate: `npx tsc --noEmit`, `npx vitest run`, `npm run desktop:map:build`, and (if available) open desktop and smoke “Load run” + density mode.
-- [ ] E4 — Write `docs/40_reports/implemented/20260303_MAP_RUNTIME_CONTRACT_FIXES.md`: what was fixed (phases A–D), files changed, decisions (e.g. build outDir, binding strategy), verification evidence, and “Decisions for review” if any (e.g. Tailwind resolution from root).
-- [ ] E5 — Update `docs/40_reports/README.md` to link the new report.
-- [ ] E6 — Invoke Process QA (quality-assurance-process) for this execution: context/napkin/ledger/commit discipline.
-- [ ] E7 — Final ledger entry and napkin update; commit: "docs: add map runtime contract fixes report and tests".
+- [x] E1 — Add or extend test: “map interactions include osid-density-fill” (e.g. in a describe that mocks the map and checks that handlers are registered for osid-density-fill when present). Prefer unit test in `src/ui/map` or `tests/` as appropriate.
+- [x] E2 — Add or extend desktop protocol test: request to `awwv://app/data/runs/<safe-id>/final_save.json` (or equivalent) with a temp file returns 200 and correct body when path is allowed; path traversal returns 403. Reuse pattern from `tests/desktop_pmtiles_protocol_route.test.ts`.
+- [x] E3 — Run full gate: `npx tsc --noEmit`, `npx vitest run`, `npm run desktop:map:build`, and (if available) open desktop and smoke “Load run” + density mode.
+- [x] E4 — Write `docs/40_reports/implemented/20260303_MAP_RUNTIME_CONTRACT_FIXES.md`: what was fixed (phases A–D), files changed, decisions (e.g. build outDir, binding strategy), verification evidence, and “Decisions for review” if any (e.g. Tailwind resolution from root).
+- [x] E5 — Update `docs/40_reports/README.md` to link the new report.
+- [x] E6 — Invoke Process QA (quality-assurance-process) for this execution: context/napkin/ledger/commit discipline.
+- [x] E7 — Final ledger entry and napkin update; commit: "docs: add map runtime contract fixes report and tests".
 
 **Files:** `tests/` (new or updated), `docs/40_reports/implemented/20260303_MAP_RUNTIME_CONTRACT_FIXES.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`, `.claude/napkin.md`.
 
@@ -217,5 +217,5 @@
 - [x] Phase A: Build output `dist/tactical-map`, Tailwind warning gone.
 - [x] Phase B: Density interactions + layer-aware binding.
 - [x] Phase C: HTTP server serves `/data/runs`; data/source + mun-borders already done; E2E + test file cleanup + commit.
-- [ ] Phase D: Glyphs documented; optional style contract.
-- [ ] Phase E: Tests added, report written, Process QA run, ledger/napkin updated, final commit.
+- [x] Phase D: Glyphs documented; optional style contract.
+- [x] Phase E: Tests added, report written, Process QA run, ledger/napkin updated, final commit.

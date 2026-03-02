@@ -9185,3 +9185,15 @@ Determinism checks **MUST** be run:
 - **Files modified:** `src/desktop/electron-main.cjs`; deleted 4 files under `tools/`.
 - **Verification:** tsc, vitest pass.
 - **Determinism:** I/O routes only; no simulation impact.
+
+### [2026-03-03] Map runtime contract fixes — Phase E complete
+- **Type:** Tests, report, Process QA
+- **Summary:** Unit test `tests/ui_map_interactions.test.ts` for osid-density-fill bindings and cleanup; added to vitest include. Implementation report `docs/40_reports/implemented/20260303_MAP_RUNTIME_CONTRACT_FIXES.md`; README linked. E2 (HTTP /data/runs automated test) deferred — verification via tools/test_electron_map.cjs and manual Load run. Process QA: context/napkin/ledger/commit discipline followed.
+- **Files modified:** `tests/ui_map_interactions.test.ts`, `vitest.config.ts`, `docs/40_reports/implemented/20260303_MAP_RUNTIME_CONTRACT_FIXES.md`, `docs/40_reports/README.md`, `docs/plans/2026-03-03-map-runtime-contract-fixes.md`
+- **Determinism:** N/A (tests and docs).
+
+### [2026-03-03] Map runtime contract fixes — Phase D complete
+- **Type:** Docs
+- **Summary:** Documented glyph dependency: TACTICAL_MAP_SYSTEM.md §0 notes that the MapLibre style uses `https://demotiles.maplibre.org/...` for glyphs; offline/air-gapped deployments need bundled glyphs and style update. Optional style-contract check (D2) deferred.
+- **Files modified:** `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
+- **Determinism:** N/A (docs only).

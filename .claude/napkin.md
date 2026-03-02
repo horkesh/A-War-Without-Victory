@@ -103,8 +103,8 @@
    Do instead: `getDecorationAtkMult()` and `getDecorationDefBonus()` in `decoration_evaluator.ts` — replace direct honor lookups. Falls back to legacy honor when no decorations. Three tiers per faction. Pipeline step `evaluate-brigade-decorations`.
 2. **[2026-03-02] Brigade history recorder wired after each battle**
    Do instead: `recordAttackerEngagements()` + `recordDefenderEngagement()` called in `attack_resolution_osid.ts` after morale effects. Uses outer-scope `currentTurn` (line 246). FIFO cap 200 entries.
-3. **[2026-03-02] Faction personnel ceilings**
-   Do instead: `getFactionCeilingMult()` in `formation_spawn.ts`. Soft cap 85% → ×0.25, hard cap 95% → 0. Applied in BOTH bottom_up and legacy reinforcement paths. Constants in `formation_constants.ts`.
+3. **[2026-03-03] Faction personnel ceilings REMOVED**
+   Do instead: No hardcoded caps. Personnel emerges from pool demographics, mobilization scales (`ongoing_mobilization.ts`), exhaustion thresholds (0.15/0.25), and FACTION_POOL_SCALE (`pool_population.ts`). n374: ARBiH 127k, VRS 97k, HVO 46k — all in/near band at 87.6% OSID match.
 4. **[2026-03-02] VRS equipment decay**
    Do instead: `equipment_decay` field on FormationState (NOT EquipmentState.condition_pct — doesn't exist). Applied as multiplier in `getEquipmentRatio()` in `combat_math.ts`. Starts w26, 0.5%/week, floor 0.60.
 5. **[2026-03-02] Elite loan lifecycle**
@@ -143,15 +143,23 @@
    Do instead: Use inline styles (position, right, top, zIndex, direction: ltr) so Tailwind/purge/RTL cannot override. `?showPanel=1` for dev layout verification.
 
 ## Desktop & Electron
-1. **[2026-02-21] EPIPE guard on init logging**
+1. **[2026-03-03] Desktop map: HTTP server (127.0.0.1, random port)**
+   Do instead: Map and warroom load map assets from `http://127.0.0.1:<port>/...`; MapLibre blob workers do not work under awwv://. Server started in electron-main.cjs startMapServer().
+2. **[2026-03-03] Desktop map build output**
+   Do instead: Map Vite build must output to `dist/tactical-map` for Electron; outDir in src/ui/map/vite.config.ts.
+3. **[2026-03-03] Map interaction layers: bind when present**
+   Do instead: Bind interactions (control, ethnic, density, front-edges) when layers exist; MapContainer uses 400ms delay after loadedGameState before useMapInteractions so layers are in style.
+4. **[2026-03-03] HTTP map server routes**
+   Do instead: Server serves `data/source` and `data/runs`; path-traversal guard and .json-only for runs. getRunsDir() in electron-main.cjs.
+5. **[2026-02-21] EPIPE guard on init logging**
    Do instead: Add EPIPE guard on Electron init logging to prevent crashes on pipe closure.
-2. **[2026-02-21] Electron first-paint classes**
+6. **[2026-02-21] Electron first-paint classes**
    Do instead: `warroom-scene-hidden` for menu, `warroom-desk-hidden` for maps.
-3. **[2026-02-21] Preload + getDataBaseUrl**
+7. **[2026-02-21] Preload + getDataBaseUrl**
    Do instead: Use Preload script + `getDataBaseUrl()` for iframe/Electron data fetches.
-4. **[2026-02-22] IPC read-only queries**
+8. **[2026-02-22] IPC read-only queries**
    Do instead: Movement/combat preview as read-only (`query-*`) IPC handlers. Compute from deserialized state without mutating.
-5. **[2026-02-21] Corps staging: accept all formation kinds**
+9. **[2026-02-21] Corps staging: accept all formation kinds**
    Do instead: `stageCorpsFrontOrder` and `stageCorpsAttackAxisOrder` must accept `corps_asset` and `army_hq`.
 
 ## Map & Geometry
