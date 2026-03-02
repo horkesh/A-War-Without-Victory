@@ -582,6 +582,18 @@ export function resolveAttackOrdersOsid(
                 };
                 if (outcome === 'decisive_victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 2;
                 else if (outcome === 'victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 1;
+            } else if ((defenderFormation as { fallback_osid?: string }).fallback_osid) {
+                // Fallback retreat: brigade reforms at fallback OSID instead of being destroyed
+                const fallback = (defenderFormation as { fallback_osid?: string }).fallback_osid!;
+                (defenderFormation as { location_osid?: string }).location_osid = fallback;
+                (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
+                (defenderFormation as { defense_streak?: number }).defense_streak = 0;
+                (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 3;
+                defenderFormation.cohesion = Math.max(0, (defenderFormation.cohesion ?? 60) - 20);
+                defenderFormation.personnel = Math.max(MIN_COMBAT_PERSONNEL, Math.floor((defenderFormation.personnel ?? 0) * 0.6));
+                (defenderFormation as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
+                    osid: targetOsid, turn: state.meta?.turn ?? 0
+                };
             } else {
                 defenderFormation.personnel = 0;
                 defenderFormation.status = 'inactive';

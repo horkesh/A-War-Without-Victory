@@ -94,6 +94,8 @@ export interface RecruitmentResourceState {
 export interface RecruitmentAction {
     brigade_id: string;
     faction: FactionId;
+    /** Faction whose militia pool to draw from (defaults to faction if absent). */
+    pool_faction?: FactionId;
     home_mun: string;
     equipment_class: EquipmentClass;
     manpower_spent: number;

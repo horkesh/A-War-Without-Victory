@@ -340,9 +340,16 @@ export function recruitBrigade(
         return { success: false, reason: 'no_control' };
     }
 
-    // Manpower check
-    const poolKey = militiaPoolKey(home_mun, faction);
-    const pool = state.militia_pools?.[poolKey];
+    // Manpower check (use recruit_pool_faction if set, fall back to own faction pool)
+    const preferredPoolFaction = brigade.recruit_pool_faction ?? faction;
+    let poolFaction = preferredPoolFaction;
+    let poolKey = militiaPoolKey(home_mun, poolFaction);
+    let pool = state.militia_pools?.[poolKey];
+    if ((!pool || pool.available < brigade.manpower_cost) && preferredPoolFaction !== faction) {
+        poolFaction = faction;
+        poolKey = militiaPoolKey(home_mun, poolFaction);
+        pool = state.militia_pools?.[poolKey];
+    }
     if (!pool || pool.available < brigade.manpower_cost) {
         return { success: false, reason: 'no_manpower' };
     }
@@ -371,6 +378,7 @@ export function recruitBrigade(
     const action: RecruitmentAction = {
         brigade_id: id,
         faction,
+        ...(poolFaction !== faction ? { pool_faction: poolFaction } : {}),
         home_mun,
         equipment_class: chosenClass,
         manpower_spent: brigade.manpower_cost,
@@ -395,8 +403,8 @@ export function applyRecruitment(
 
     const { action, formation } = result;
 
-    // Deduct manpower
-    const poolKey = militiaPoolKey(action.home_mun, action.faction);
+    // Deduct manpower (use pool_faction for cross-faction recruitment)
+    const poolKey = militiaPoolKey(action.home_mun, action.pool_faction ?? action.faction);
     const pool = state.militia_pools![poolKey]!;
     pool.available -= action.manpower_spent;
     pool.committed += action.manpower_spent;
@@ -518,8 +526,16 @@ export function runBotRecruitment(
             }
 
             // Mandatory formations: zero capital cost, zero equipment cost (equipment was already there)
-            const poolKey = militiaPoolKey(brigade.home_mun, faction);
-            const pool = state.militia_pools?.[poolKey];
+            // Cross-faction recruitment: try recruit_pool_faction first, fall back to own faction pool
+            const preferredPoolFaction = brigade.recruit_pool_faction ?? faction;
+            let poolFaction = preferredPoolFaction;
+            let poolKey = militiaPoolKey(brigade.home_mun, poolFaction);
+            let pool = state.militia_pools?.[poolKey];
+            if ((!pool || pool.available <= 0) && preferredPoolFaction !== faction) {
+                poolFaction = faction;
+                poolKey = militiaPoolKey(brigade.home_mun, poolFaction);
+                pool = state.militia_pools?.[poolKey];
+            }
             const manpowerAvailable = pool ? pool.available : 0;
 
             // Mandatory brigades spawn if EITHER condition is met:
@@ -552,6 +568,7 @@ export function runBotRecruitment(
             report.actions.push({
                 brigade_id: brigade.id,
                 faction,
+                ...(poolFaction !== faction ? { pool_faction: poolFaction } : {}),
                 home_mun: brigade.home_mun,
                 equipment_class: brigade.default_equipment_class,
                 manpower_spent: effectiveManpower,
