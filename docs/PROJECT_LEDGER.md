@@ -14,7 +14,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 **Project:** A War Without Victory (AWWV)
 **Type:** Wargame simulation prototype
 **Repository:** AWWV
-**Current Focus:** Combat calibration (n340, 86.9% OSID match), GUI Architecture Rework v2 (React+MapLibre), Sectors & Operations improvements
+**Current Focus:** Combat calibration (n359, 86.7% OSID match), GUI Architecture Rework v2 (React+MapLibre), Sectors & Operations active
 
 ---
 
@@ -46,7 +46,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **Phase:** Post-MVP — Active Development
 **Status:** Phase II live, Phase M complete, GUI rework in progress
-**Focus:** Combat calibration (86.9% OSID match at n340), Sectors & Operations Phase 2, GUI Phase 3 remainder
+**Focus:** Combat calibration (86.7% OSID match at n359), Sector offensives active in early war, GUI Phase 3 remainder
 
 **Completed milestones:**
 - Phase 6: MVP declared 2026-02-08; A1 base map stable and frozen
@@ -58,7 +58,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 - Corps sector visualization in React+MapLibre map
 
 **Active workstreams:**
-- Combat calibration: n314 = 87.4% (658/753 OSID match), multi-sector corps + supply gating + sector offensives
+- Combat calibration: n359 = 86.7% (653/753 OSID match), sector offensives active in VRS early-war blitz, 26 ops/40w
 - GUI Phase 3 remainder: Minimap, ZoomControls, ArmyDetail, MovementPreview (CorpsDetail done 2026-03-02; tooltip fix, sector viz, bidirectional sync, density mode done)
 
 **Completed workstreams:**
@@ -9039,3 +9039,21 @@ Determinism checks **MUST** be run:
 - **Files modified:** `src/sim/combat/attack_resolution_osid.ts` (+12 lines), `src/sim/recruitment_engine.ts` (+31/-8), `src/state/recruitment_types.ts` (+2)
 - **Verification:** tsc clean, 220 vitest pass / 1 skip.
 - **FORAWWV note:** None. Do NOT edit FORAWWV automatically.
+
+**2026-03-02** - Activate sector offensives during VRS early-war blitz (n359, 86.7%)
+- **Phase:** Bot AI / Sector Offensives
+- **Summary:** Five changes to unblock sector offensive lifecycle, making the VRS early-war blitz (weeks 0-20) use sector offensives instead of only regular corps directive attacks.
+- **Root cause found:** `computeSupplyReadiness()` was reading OSID supply reachability data even when `supply_reserves_enabled=false`, reporting 0.00 readiness at turn 1, instantly aborting all 5 pre-planned VRS operations before execution.
+- **Changes:**
+  1. Skip `sector_attack` ops in `evaluateOperationProgress()` — eliminates dual-handler conflict (global PLANNING_DURATION=2 vs per-op planning_duration)
+  2. Bypass supply readiness gating when `supply_reserves_enabled=false` — OSID supply data is informational, not operational, when reserves disabled
+  3. Allow new sector ops to launch during recovery phase, applying exhaustion (+15) immediately when replacing
+  4. Add corps_exhaustion +15 to sector offensive recovery in `advanceSectorOffensives()` (moved from `evaluateOperationProgress`)
+  5. Lower minimum objectives from 2 to 1 for `evaluateSectorOffensiveLaunch()`, enabling single-target corridor battles
+- **Result:** 26 sector offensives across 40 weeks (was 0 effective). VRS 1KK=7 ops, East Bosnian=6 ops (Brčko corridor secured), Drina=6, 2nd Krajina=4, ARBiH 5th Corps=3 counteroffensives from Bihać.
+- **Calibration:** n359 (40w) = 86.7% OSID match (653/753), +0.9pp vs n354 baseline. Regional: Posavina +8.2pp (80.7%), Sarajevo +6.5pp (83.9%), Central Bosnia +1.8pp (83.7%), Krajina +0.7pp (93.9%). Orašje anchor PASS. 10/14 anchors, 6/6 benchmarks.
+- **Determinism:** Confirmed — identical hash (051f5df92d30529c) across runs.
+- **Files modified:** `src/sim/combat/bot_corps_ai.ts` (+13/-1), `src/sim/combat/sector_offensive.ts` (+5/-3)
+- **Verification:** tsc clean, 220 vitest pass / 1 skip.
+- **Lesson (L38):** OSID supply reachability runs even when supply_reserves_enabled=false. Do NOT use it for operational gating (sector offensive supply checks) unless the full supply system is active.
+- **Lesson (L39):** `evaluateOperationProgress()` was a redundant handler for sector_attack ops. `advanceSectorOffensives()` is the authoritative handler. Each operation type should have exactly one lifecycle manager.
