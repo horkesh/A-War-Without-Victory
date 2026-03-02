@@ -3,6 +3,7 @@
 const { app, BrowserWindow, protocol, ipcMain, dialog, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
 
 const LAST_REPLAY_PATH_FILE = 'last-replay-path.json';
 
@@ -73,6 +74,124 @@ function getDataDerivedDir() {
   return resourcePath('data', 'derived');
 }
 
+function getDataSourceDir() {
+  return resourcePath('data', 'source');
+}
+
+function getRunsDir() {
+  return resourcePath('runs');
+}
+
+/**
+ * Local HTTP server for the tactical map.
+ *
+ * MapLibre GL's Web Workers don't function under custom Electron protocol
+ * schemes (awwv://). Chromium's blob Worker origin handling is incompatible.
+ * Solution: serve the tactical map and its data from a local HTTP server so
+ * MapLibre operates in a standard http:// origin.
+ *
+ * Routes:
+ *   /                      → dist/tactical-map/index.html
+ *   /assets/*              → dist/tactical-map/assets/*
+ *   /data/derived/*        → data/derived/*  (with Range support for PMTiles)
+ *   /data/source/*         → data/source/*
+ *   /data/runs/*           → runs/*  (e.g. final_save.json for "Load run")
+ */
+let mapServerPort = 0;
+
+function startMapServer() {
+  const mapDir = getMapAppDir();
+  const derivedDir = getDataDerivedDir();
+  const sourceDir = getDataSourceDir();
+  const runsDir = getRunsDir();
+
+  const MIME = {
+    '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css',
+    '.json': 'application/json', '.geojson': 'application/geo+json',
+    '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml',
+    '.pmtiles': 'application/octet-stream', '.pbf': 'application/x-protobuf',
+    '.ico': 'image/x-icon',
+  };
+
+  const server = http.createServer((req, res) => {
+    const url = new URL(req.url, 'http://localhost');
+    const pathname = decodeURIComponent(url.pathname);
+    const segments = pathname.replace(/^\/+/, '').split('/').filter(Boolean);
+
+    // Resolve file path based on route
+    let filePath;
+    if (segments[0] === 'data' && segments[1] === 'derived') {
+      filePath = path.join(derivedDir, ...segments.slice(2));
+      if (!path.resolve(filePath).startsWith(path.resolve(derivedDir))) { res.writeHead(403); res.end(); return; }
+    } else if (segments[0] === 'data' && segments[1] === 'source') {
+      filePath = path.join(sourceDir, ...segments.slice(2));
+      if (!path.resolve(filePath).startsWith(path.resolve(sourceDir))) { res.writeHead(403); res.end(); return; }
+    } else if (segments[0] === 'data' && segments[1] === 'runs') {
+      filePath = path.join(runsDir, ...segments.slice(2));
+      if (!path.resolve(filePath).startsWith(path.resolve(runsDir))) { res.writeHead(403); res.end(); return; }
+      if (!filePath.toLowerCase().endsWith('.json')) { res.writeHead(403); res.end(); return; }
+    } else {
+      // Tactical map static files
+      const rel = segments.join(path.sep) || 'index.html';
+      filePath = path.join(mapDir, rel);
+      if (!path.resolve(filePath).startsWith(path.resolve(mapDir))) { res.writeHead(403); res.end(); return; }
+    }
+
+    let stat;
+    try { stat = fs.statSync(filePath); } catch (e) {
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('Not Found');
+      return;
+    }
+    if (!stat.isFile()) { res.writeHead(404); res.end('Not Found'); return; }
+
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = MIME[ext] || 'application/octet-stream';
+
+    // Range request support (essential for PMTiles byte-range access)
+    const rangeHeader = req.headers.range;
+    if (rangeHeader) {
+      const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
+      if (match) {
+        const start = parseInt(match[1], 10);
+        const end = match[2] ? parseInt(match[2], 10) : stat.size - 1;
+        const chunkSize = end - start + 1;
+        res.writeHead(206, {
+          'Content-Type': contentType,
+          'Content-Range': `bytes ${start}-${end}/${stat.size}`,
+          'Content-Length': chunkSize,
+          'Accept-Ranges': 'bytes',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges',
+        });
+        fs.createReadStream(filePath, { start, end }).pipe(res);
+        return;
+      }
+    }
+
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Content-Length': stat.size,
+      'Accept-Ranges': 'bytes',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges',
+    });
+    fs.createReadStream(filePath).pipe(res);
+  });
+
+  return new Promise((resolve) => {
+    server.listen(0, '127.0.0.1', () => {
+      mapServerPort = server.address().port;
+      console.log(`Tactical map server: http://127.0.0.1:${mapServerPort}`);
+      resolve(mapServerPort);
+    });
+  });
+}
+
+function getMapServerUrl(extraPath) {
+  return `http://127.0.0.1:${mapServerPort}${extraPath || '/'}`;
+}
+
 function getLastReplayPathPath() {
   return path.join(app.getPath('userData'), LAST_REPLAY_PATH_FILE);
 }
@@ -141,6 +260,7 @@ function createWindow() {
   });
 
   win.loadURL('awwv://warroom/index.html');
+
   const devToolsPromise = win.webContents.openDevTools({ mode: 'detach' });
   if (devToolsPromise && typeof devToolsPromise.catch === 'function') {
     devToolsPromise.catch(() => { });
@@ -215,7 +335,7 @@ function openTacticalMapWindow() {
       nodeIntegration: false,
     },
   });
-  win.loadURL('awwv://app/tactical_map.html');
+  win.loadURL(getMapServerUrl('/'));
   tacticalMapWindow = win;
   win.on('closed', () => { tacticalMapWindow = null; });
   win.webContents.on('did-finish-load', () => {
@@ -226,10 +346,60 @@ function openTacticalMapWindow() {
   return win;
 }
 
+/**
+ * Serve a file with HTTP Range request support.
+ * Essential for PMTiles which requires byte-range access to large archives.
+ */
+function serveFileResponse(request, filePath, contentType) {
+  const stat = fs.statSync(filePath);
+  const rangeHeader = request.headers.get('range');
+
+  if (rangeHeader) {
+    const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
+    if (match) {
+      const start = parseInt(match[1], 10);
+      const end = match[2] ? parseInt(match[2], 10) : stat.size - 1;
+      const length = end - start + 1;
+      const fd = fs.openSync(filePath, 'r');
+      const buf = Buffer.alloc(length);
+      fs.readSync(fd, buf, 0, length, start);
+      fs.closeSync(fd);
+      return new Response(buf, {
+        status: 206,
+        headers: {
+          'Content-Type': contentType,
+          'Content-Range': `bytes ${start}-${end}/${stat.size}`,
+          'Content-Length': String(length),
+          'Accept-Ranges': 'bytes',
+        },
+      });
+    }
+  }
+
+  const buf = fs.readFileSync(filePath);
+  return new Response(buf, {
+    headers: {
+      'Content-Type': contentType,
+      'Content-Length': String(stat.size),
+      'Accept-Ranges': 'bytes',
+    },
+  });
+}
+
+/** MIME type map for data files (PMTiles, GeoJSON, etc.) */
+const DATA_MIME_TYPES = {
+  '.json': 'application/json',
+  '.geojson': 'application/geo+json',
+  '.png': 'image/png',
+  '.pmtiles': 'application/octet-stream',
+  '.pbf': 'application/x-protobuf',
+};
+
 function registerProtocol() {
   const mapAppDir = getMapAppDir();
   const warroomAppDir = getWarroomAppDir();
   const dataDerivedDir = getDataDerivedDir();
+  const dataSourceDir = getDataSourceDir();
 
   protocol.handle('awwv', (request) => {
     const u = request.url.replace(/^awwv:\/\//, '');
@@ -242,10 +412,24 @@ function registerProtocol() {
       const filePath = path.join(dataDerivedDir, rel);
       if (!path.resolve(filePath).startsWith(path.resolve(dataDerivedDir))) return new Response(null, { status: 403 });
       try {
-        const buf = fs.readFileSync(filePath);
         const ext = path.extname(rel).toLowerCase();
-        const types = { '.json': 'application/json', '.geojson': 'application/geo+json', '.png': 'image/png' };
-        return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
+        const contentType = DATA_MIME_TYPES[ext] || 'application/octet-stream';
+        return serveFileResponse(request, filePath, contentType);
+      } catch (e) {
+        if (e.code === 'ENOENT') return new Response('Not Found', { status: 404 });
+        throw e;
+      }
+    }
+
+    // Tactical map data/source route (e.g. municipality borders GeoJSON)
+    if (segs[0] === 'app' && segs[1] === 'data' && segs[2] === 'source') {
+      const rel = segs.slice(3).join(path.sep);
+      const filePath = path.join(dataSourceDir, rel);
+      if (!path.resolve(filePath).startsWith(path.resolve(dataSourceDir))) return new Response(null, { status: 403 });
+      try {
+        const ext = path.extname(rel).toLowerCase();
+        const contentType = DATA_MIME_TYPES[ext] || 'application/octet-stream';
+        return serveFileResponse(request, filePath, contentType);
       } catch (e) {
         if (e.code === 'ENOENT') return new Response('Not Found', { status: 404 });
         throw e;
@@ -253,7 +437,7 @@ function registerProtocol() {
     }
 
     if (segs[0] === 'app') {
-      const rel = segs.slice(1).join(path.sep) || 'tactical_map.html';
+      const rel = segs.slice(1).join(path.sep) || 'index.html';
       const filePath = path.join(mapAppDir, rel);
       if (!path.resolve(filePath).startsWith(path.resolve(mapAppDir))) return new Response(null, { status: 403 });
       try {
@@ -274,10 +458,9 @@ function registerProtocol() {
       const filePath = path.join(dataDir, rel);
       if (!path.resolve(filePath).startsWith(path.resolve(dataDir))) return new Response(null, { status: 403 });
       try {
-        const buf = fs.readFileSync(filePath);
         const ext = path.extname(rel).toLowerCase();
-        const types = { '.json': 'application/json', '.geojson': 'application/geo+json', '.png': 'image/png' };
-        return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
+        const contentType = DATA_MIME_TYPES[ext] || 'application/octet-stream';
+        return serveFileResponse(request, filePath, contentType);
       } catch (e) {
         if (e.code === 'ENOENT') return new Response('Not Found', { status: 404 });
         throw e;
@@ -318,7 +501,7 @@ function registerProtocol() {
     // Warroom → tactical-map sub-route: serve tactical map files under warroom origin
     // so the iframe is same-origin and can inherit the parent's awwv bridge.
     if (segs[0] === 'warroom' && segs[1] === 'tactical-map') {
-      const rel = segs.slice(2).join(path.sep) || 'tactical_map.html';
+      const rel = segs.slice(2).join(path.sep) || 'index.html';
       const filePath = path.join(mapAppDir, rel);
       if (!path.resolve(filePath).startsWith(path.resolve(mapAppDir))) return new Response(null, { status: 403 });
       try {
@@ -958,7 +1141,15 @@ app.whenReady().then(() => {
     }
   });
 
-  createWindow();
+  ipcMain.handle('get-map-server-url', async () => {
+    return mapServerPort ? getMapServerUrl('/') : null;
+  });
+
+  // Start the tactical map HTTP server (required because MapLibre's Web Workers
+  // don't function under Electron custom protocol schemes), then create the window.
+  startMapServer().then(() => {
+    createWindow();
+  });
 });
 
 app.on('window-all-closed', () => {

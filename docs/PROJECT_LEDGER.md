@@ -9178,3 +9178,10 @@ Determinism checks **MUST** be run:
 - **Files modified:** `src/ui/map/map/useMapInteractions.ts`, `src/ui/map/map/MapContainer.tsx`
 - **Verification:** tsc, vitest pass.
 - **Determinism:** UI events only; no simulation impact.
+
+### [2026-03-03] Map runtime contract fixes — Phase C complete
+- **Type:** Fix (Desktop / HTTP server)
+- **Summary:** Added `/data/runs` route to tactical map HTTP server in `electron-main.cjs`: `getRunsDir()` and branch in `startMapServer()` to serve `runs/<runId>/final_save.json` with path-traversal guard and JSON-only. Removed obsolete test files: `tools/test_maplibre_electron.cjs`, `tools/test_maplibre_file.cjs`, `tools/test_maplibre_privileges.cjs`, `tools/test_maplibre_minimal.html`. data/source and mun-borders already served by existing HTTP server.
+- **Files modified:** `src/desktop/electron-main.cjs`; deleted 4 files under `tools/`.
+- **Verification:** tsc, vitest pass.
+- **Determinism:** I/O routes only; no simulation impact.
