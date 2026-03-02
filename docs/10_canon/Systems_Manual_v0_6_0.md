@@ -482,7 +482,7 @@ All state additions are serializable and deterministic. Derived state remains no
 
 **Settlement/Municipality state:** `legitimacy_state`, `control_status`, `coercion_pressure_by_municipality` (implementation extension; non-normative until canonized). No assigned_brigade or brigade_aor; War phase uses location_osid per formation (System 8).
 
-**Not serialized (derived each turn):** brigade pressure, density, resilience modifier, corps_front_sectors (per-corps partition of front edges via multi-source BFS, split by opposing faction and capped at MAX_SECTOR_EDGES=25 / MAX_SECTOR_BRIGADES=8, with interior brigades assigned as reserves; exempt corps excluded), local_fronts (sub-segment defensive power and density).
+**Not serialized (derived each turn):** brigade pressure, density, resilience modifier, corps_front_sectors (per-corps partition of front edges via multi-source BFS, split by opposing faction and capped at MAX_SECTOR_EDGES=25 / MAX_SECTOR_BRIGADES=8, with interior brigades assigned as reserves and redistributed by proportional cap RESERVE_PER_EDGE_CAP=0.5; exempt corps excluded), local_fronts (sub-segment defensive power and density).
 
 For tunable parameter tables (Appendix B), doctrine eligibility and effects (Appendix C), capability progression curves (Appendix D), and stability score calculation (Appendix E), see the full tables in Phase 0 Specification v0.5.0 §4.5 Stability Score and in archived Systems_Manual_v0_4_0.md; the normative rules above are sufficient for integration.
 

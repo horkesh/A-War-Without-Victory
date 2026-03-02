@@ -123,9 +123,9 @@ A brigade can only provide virtual defense if it's not already in combat at its 
 ## Mechanic 3: Rear-Area Cleanup Priority
 
 ### What it is
-In weeks 0-10 (early war), all factions prioritize securing undefended hostile-population
-settlements behind their front line. This is a corps-level directive priority, not brigade
-autonomy.
+All factions prioritize securing undefended hostile-population settlements behind their
+front line throughout the war. This is a corps-level directive priority, not brigade
+autonomy. (Originally weeks 0-10 only; time gate removed 2026-03-02.)
 
 ### Historical basis
 - VRS: Systematic cleanup of Krajina — Prijedor, Sanski Most, Kotor Varoš, Ključ (BB1 pp496-501)
@@ -137,7 +137,7 @@ Corps directive generation adds "rear cleanup" targets when:
 1. OSID is behind the front line (no enemy-controlled neighbors)
 2. OSID has hostile-majority population (>40% enemy ethnicity from 1991 census)
 3. OSID is undefended (no enemy brigade present)
-4. Week < REAR_CLEANUP_END_WEEK (~10-12)
+4. ~~Week < REAR_CLEANUP_END_WEEK (~10-12)~~ (time gate removed 2026-03-02; runs every turn)
 
 Priority score for cleanup: `hostile_population_fraction × CLEANUP_WEIGHT`
 
@@ -286,7 +286,7 @@ ZoC Frontline Defense
     ↓
   Realistic Front Line Behavior
 
-Rear Cleanup (weeks 0-10)
+Rear Cleanup (continuous — time gate removed)
     ↓
   Corps Directive → hostile-population OSIDs behind front
     ↓

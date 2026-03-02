@@ -53,7 +53,7 @@ const MORALE_RESIST_FLOOR = 70;
  * RS: professional withdrawal discipline → standard threshold.
  * HRHB: middle ground. */
 const FACTION_MORALE_RESIST_FLOOR: Record<string, number> = {
-    RBiH: 55,
+    RBiH: 62,
     RS: 70,
     HRHB: 65,
 };

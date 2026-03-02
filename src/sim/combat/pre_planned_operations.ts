@@ -7,11 +7,11 @@
  * immediately upon JNA withdrawal.
  *
  * Five named operations, one per VRS corps (2nd Krajina excepted):
- * - Operacija Koridor (East Bosnian Corps): Brčko corridor
- * - Operacija Drina (Drina Corps): Zvornik-Bratunac sweep
- * - Operacija Prsten (SRK): Sarajevo encirclement
- * - Operacija Foča (Herzegovina Corps): Secure Foča area
- * - Operacija Prijedor (1st Krajina Corps): Secure Prijedor area
+ * - Operation Koridor (East Bosnian Corps): Brčko corridor link
+ * - Operation Drina (Drina Corps): Zvornik → Novo Selo → Bratunac
+ * - Operation Prsten (SRK): Ilidža → Rakovica → Svrake → Hotonj
+ * - Operation Foča (Herzegovina Corps): Brusna → Mazoče → Tjentište → Miljevina → Izbišno → Patkovina
+ * - Operation Prijedor (1st Krajina Corps): Sweep Prijedor/Sanski Most/Ključ
  *
  * Operations inject in 'planning' phase with planning_duration: 1.
  * Bot/player orders trigger execution next turn.
@@ -40,21 +40,53 @@ interface PrePlannedOp {
 }
 
 const VRS_PRE_PLANNED: PrePlannedOp[] = [
-    { corps: 'vrs_east_bosnian', name: 'Operacija Koridor',
+    { corps: 'vrs_east_bosnian', name: 'Operation Koridor',
       staging_osid: 'op:brcko:brcko',
       target_osids: ['op:modrica:garevac_2'] },
-    { corps: 'vrs_drina', name: 'Operacija Drina',
+    { corps: 'vrs_drina', name: 'Operation Drina',
       staging_osid: 'op:zvornik:kozluk_2',
-      target_osids: ['op:zvornik:zvornik', 'op:bratunac:bratunac_2', 'op:vlasenica:vlasenica_2', 'op:zvornik:drinjaca', 'op:zvornik:krizevici'] },
-    { corps: 'vrs_sarajevo_romanija', name: 'Operacija Prsten',
+      target_osids: [
+          'op:zvornik:zvornik',      // Zvornik
+          'op:zvornik:novo_selo',    // Novo Selo
+          'op:bratunac:bratunac_2',  // Bratunac (march south through friendly RS territory)
+      ] },
+    { corps: 'vrs_sarajevo_romanija', name: 'Operation Prsten',
       staging_osid: 'op:ilidza:kasindo',
-      target_osids: ['op:ilidza:sarajevo_dio_ilidza_2', 'op:vogosca:hotonj', 'op:ilijas:dragoradi', 'op:hadzici:hadzici'] },
-    { corps: 'vrs_herzegovina', name: 'Operacija Foca',
+      target_osids: [
+          'op:ilidza:sarajevo_dio_ilidza_2',  // Sarajevo Dio - Ilidža
+          'op:ilidza:rakovica_2',              // Rakovica
+          'op:vogosca:svrake',                 // Svrake
+          'op:vogosca:hotonj',                 // Hotonj (expected stalemate — bloody battle)
+      ] },
+    { corps: 'vrs_herzegovina', name: 'Operation Foča',
       staging_osid: 'op:foca:foca_3',
-      target_osids: ['op:foca:ustikolina', 'op:foca:miljevina_2', 'op:cajnice:todorovici', 'op:kalinovik:varos_2'] },
-    { corps: 'vrs_1st_krajina', name: 'Operacija Prijedor',
+      target_osids: [
+          'op:foca:brusna_2',       // Brusna
+          'op:foca:kosman',         // Mazoče (OSID slug is 'kosman')
+          'op:foca:tjentiste_2',    // Tjentište
+          'op:foca:miljevina_2',    // Miljevina
+          'op:foca:izbisno',        // Izbišno
+          'op:foca:patkovina',      // Patkovina
+      ] },
+    { corps: 'vrs_1st_krajina', name: 'Operation Prijedor',
       staging_osid: 'op:prijedor:prijedor_2',
-      target_osids: ['op:prijedor:kozarac_2', 'op:prijedor:kamicani', 'op:sanski_most:sanski_most_2', 'op:kljuc:kljuc_2'] },
+      target_osids: [
+          // Prijedor municipality (11 OSIDs)
+          'op:prijedor:prijedor_2', 'op:prijedor:kozarac_2', 'op:prijedor:kamicani',
+          'op:prijedor:cejreci', 'op:prijedor:raljas', 'op:prijedor:ljubija_2',
+          'op:prijedor:brezicani', 'op:prijedor:maricka_2', 'op:prijedor:omarska_2',
+          'op:prijedor:rasavci_2', 'op:prijedor:alisici',
+          // Sanski Most municipality (10 OSIDs)
+          'op:sanski_most:sanski_most_2', 'op:sanski_most:skucani_vakuf_2',
+          'op:sanski_most:stari_majdan', 'op:sanski_most:ilidza_2',
+          'op:sanski_most:donja_kozica', 'op:sanski_most:ostra_luka',
+          'op:sanski_most:budimlic_japra_2', 'op:sanski_most:lusci_palanka_2',
+          'op:sanski_most:jelasinovci', 'op:sanski_most:kljevci',
+          // Ključ municipality (7 OSIDs)
+          'op:kljuc:kljuc_2', 'op:kljuc:hadzici', 'op:kljuc:krasulje_2',
+          'op:kljuc:sanica_2', 'op:kljuc:donje_ratkovo_2',
+          'op:kljuc:donji_vrbljani_2', 'op:kljuc:cadjavica',
+      ] },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════

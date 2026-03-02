@@ -250,7 +250,6 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             (f as FormationState & { personnel: number }).personnel = current + transfer;
             pool.available -= transfer;
             pool.committed += transfer;
-            pool.exhausted = (pool.exhausted ?? 0) + transfer;
             pool.updated_turn = currentTurn;
 
             // Update name when militia formation crosses battalion threshold
@@ -317,7 +316,6 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         (f as FormationState & { personnel: number }).personnel = current + transfer;
         pool.available -= transfer;
         pool.committed += transfer;
-        pool.exhausted = (pool.exhausted ?? 0) + transfer;
         pool.updated_turn = currentTurn;
 
         report.formations_reinforced += 1;
@@ -451,7 +449,6 @@ export function spawnFormationsFromPools(
                 state.formations![formationId] = formation;
                 pool.available -= MIN_DETACHMENT_SPAWN;
                 pool.committed += MIN_DETACHMENT_SPAWN;
-                pool.exhausted = (pool.exhausted ?? 0) + MIN_DETACHMENT_SPAWN;
                 pool.updated_turn = currentTurn;
             }
         }
@@ -530,7 +527,6 @@ export function spawnFormationsFromPools(
                 state.formations![dispFormationId] = dispFormation;
                 pool.available -= MIN_DETACHMENT_SPAWN;
                 pool.committed += MIN_DETACHMENT_SPAWN;
-                pool.exhausted = (pool.exhausted ?? 0) + MIN_DETACHMENT_SPAWN;
                 pool.updated_turn = currentTurn;
 
                 report.created.push({ formation_id: dispFormationId, name: dispName, mun_id: dispMunId, faction: dispFaction, kind: dispKind });
@@ -633,7 +629,6 @@ export function spawnFormationsFromPools(
                 state.formations![formationId] = formation;
                 pool.available -= batchSize;
                 pool.committed += batchSize;
-                pool.exhausted = (pool.exhausted ?? 0) + batchSize;
                 pool.updated_turn = currentTurn;
             }
         }

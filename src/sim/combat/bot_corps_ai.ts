@@ -1245,6 +1245,16 @@ export function generateCorpsDirectives(
         const avoidOsids: Osid[] = [...(state.meta.avoided_osids_by_faction?.[faction] ?? [])];
 
         for (const priority of armyPriorities) {
+            // Direct OSID targets (if specified)
+            if (priority.target_osids && priority.target_osids.length > 0) {
+                for (const osid of priority.target_osids) {
+                    const ctrl = getPoliticalControllerOSID(state, osid, reverseMap);
+                    if (ctrl !== faction && ctrl !== null && !offensiveTargets.includes(osid)) {
+                        offensiveTargets.push(osid);
+                    }
+                }
+            }
+            // Municipality-derived targets (always run — additive)
             const targets = findTargetOsidsFromMunicipalities(
                 state, faction, priority.target_municipalities, reverseMap
             );
@@ -1267,11 +1277,11 @@ export function generateCorpsDirectives(
             for (const m of p.target_municipalities) priorityMunicipalities.add(m);
         }
 
-        // Rear-area cleanup: weeks 0-12, target undefended faction-controlled OSIDs
-        // behind the front line that have hostile-majority population. All factions
+        // Rear-area cleanup: target undefended faction-controlled OSIDs
+        // behind the front line with enemy formations. All factions
         // historically secured their rear before pushing forward (BB1 pp496-501).
-        const REAR_CLEANUP_END_WEEK = 12;
-        if (turn < REAR_CLEANUP_END_WEEK && graphAnalysis) {
+        // No time gate — rear pockets should be cleared throughout the war.
+        if (graphAnalysis) {
             const pc = state.political_controllers ?? {};
             for (const sub of subordinates) {
                 const subOsid = sub.location_osid;
@@ -1346,15 +1356,26 @@ export function generateCorpsDirectives(
             }
         }
 
-        // Pocket targets: enemy OSIDs completely surrounded by faction territory — always attack these
+        // Pocket targets: enemy OSIDs completely surrounded by faction territory — always attack these.
+        // Rear pockets (all neighbors faction-controlled) are targeted even without an adjacent brigade,
+        // so reserves will move toward them. Front pockets still require an adjacent brigade.
         if (graphAnalysis?.enemy_pockets.length) {
+            const pc = state.political_controllers ?? {};
             for (const pocketOsid of graphAnalysis.enemy_pockets) {
+                if (offensiveTargets.includes(pocketOsid)) continue;
                 const neighbors = adjacency.get(pocketOsid) ?? [];
-                const hasAdjacentBrigade = subordinates.some(b =>
-                    b.location_osid && neighbors.includes(b.location_osid)
+                const isRearPocket = neighbors.length > 0 && neighbors.every(n =>
+                    (pc[n] ?? '') === faction
                 );
-                if (hasAdjacentBrigade && !offensiveTargets.includes(pocketOsid)) {
+                if (isRearPocket) {
                     offensiveTargets.push(pocketOsid);
+                } else {
+                    const hasAdjacentBrigade = subordinates.some(b =>
+                        b.location_osid && neighbors.includes(b.location_osid)
+                    );
+                    if (hasAdjacentBrigade) {
+                        offensiveTargets.push(pocketOsid);
+                    }
                 }
             }
         }

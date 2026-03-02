@@ -109,6 +109,9 @@ function buildFactionSectors(
     // General staff units are exempt — they're army-level reserves.
     assignOrphanedBrigadesToFaction(sectors, faction, formations, adjacency);
 
+    // Step 6: Redistribute excess reserves across faction sectors
+    redistributeExcessReserves(sectors);
+
     sectors.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
     return sectors;
 }
@@ -277,6 +280,9 @@ export const MAX_SECTOR_EDGES = 25;
 /** Maximum brigades per sector before forced split. */
 export const MAX_SECTOR_BRIGADES = 8;
 
+/** Maximum reserve brigades per front edge (proportional cap). */
+export const RESERVE_PER_EDGE_CAP = 0.5;
+
 /**
  * Decompose a corps' front edges into connected sub-segments via BFS.
  */
@@ -432,6 +438,9 @@ function buildMultiSectorsForCorps(
     assignInteriorBrigadesToSectors(
         finalSectors, corpsId, faction, formations, adjacency, reverseMap, state
     );
+
+    // Step 7: Redistribute excess reserves (proportional cap per sector)
+    redistributeExcessReserves(finalSectors);
 
     return finalSectors;
 }
@@ -851,6 +860,61 @@ function bfsToNearestSector(
     }
 
     return null; // Unreachable (enclave with no front edges)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Reserve Redistribution (Proportional Cap)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Redistribute excess reserves from overfilled sectors to underfilled ones.
+ * Each sector's reserve cap = max(1, ceil(length_edges × RESERVE_PER_EDGE_CAP)).
+ * Overflow brigades move to the least-filled sector. If all sectors are full,
+ * the brigade stays in its original sector (never dropped).
+ */
+function redistributeExcessReserves(sectors: CorpsFrontSector[]): void {
+    if (sectors.length <= 1) return;
+
+    // Compute per-sector caps
+    const caps = sectors.map(s => Math.max(1, Math.ceil(s.length_edges * RESERVE_PER_EDGE_CAP)));
+
+    // Collect overflow brigades (remove from tail of sorted reserve list)
+    const overflow: FormationId[] = [];
+    for (let i = 0; i < sectors.length; i++) {
+        const s = sectors[i]!;
+        const cap = caps[i]!;
+        if (s.reserve_brigade_ids.length > cap) {
+            // Remove excess from the end (sorted, so tail = last alphabetically)
+            const excess = s.reserve_brigade_ids.splice(cap);
+            overflow.push(...excess);
+        }
+    }
+
+    if (overflow.length === 0) return;
+
+    // Sort overflow for deterministic assignment
+    overflow.sort(strictCompare);
+
+    // Assign each overflow brigade to the least-filled sector
+    for (const bid of overflow) {
+        let bestIdx = -1;
+        let bestRatio = Infinity;
+        for (let i = 0; i < sectors.length; i++) {
+            const ratio = sectors[i]!.reserve_brigade_ids.length / caps[i]!;
+            if (ratio < bestRatio) {
+                bestRatio = ratio;
+                bestIdx = i;
+            }
+        }
+        if (bestIdx >= 0) {
+            sectors[bestIdx]!.reserve_brigade_ids.push(bid);
+        }
+    }
+
+    // Re-sort reserve lists for determinism
+    for (const s of sectors) {
+        s.reserve_brigade_ids.sort(strictCompare);
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

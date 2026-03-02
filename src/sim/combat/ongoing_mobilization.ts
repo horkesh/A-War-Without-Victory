@@ -39,7 +39,7 @@ const BASE_MOBILIZATION_RATE = 0.003;
  *   Reduced from 1.2 — was slightly above 50K target.
  */
 const FACTION_MOBILIZATION_SCALE: Record<string, number> = {
-    RBiH: 0.65,
+    RBiH: 0.40,
     RS: 0.25,
     HRHB: 0.90
 };
