@@ -9186,6 +9186,12 @@ Determinism checks **MUST** be run:
 - **Verification:** tsc, vitest pass.
 - **Determinism:** I/O routes only; no simulation impact.
 
+### [2026-03-03] Map runtime contract fixes — propagation to canon and technical docs
+- **Type:** Docs
+- **Summary:** Propagated map runtime contract fixes to context.md (canonical GUI bullet), TACTICAL_MAP_SYSTEM.md §0 (desktop map runtime: HTTP server, dist/tactical-map, /data/source and /data/runs, layer-aware binding), DESKTOP_GUI_IPC_CONTRACT.md (map assets via HTTP server and getMapServerUrl).
+- **Files modified:** `docs/10_canon/context.md`, `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`, `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`
+- **Determinism:** N/A (docs only).
+
 ### [2026-03-03] Map runtime contract fixes — Phase E complete
 - **Type:** Tests, report, Process QA
 - **Summary:** Unit test `tests/ui_map_interactions.test.ts` for osid-density-fill bindings and cleanup; added to vitest include. Implementation report `docs/40_reports/implemented/20260303_MAP_RUNTIME_CONTRACT_FIXES.md`; README linked. E2 (HTTP /data/runs automated test) deferred — verification via tools/test_electron_map.cjs and manual Load run. Process QA: context/napkin/ledger/commit discipline followed.
