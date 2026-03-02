@@ -299,6 +299,18 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'init-brigade-history',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { ensureBrigadeHistory } = await import('../combat/brigade_history_recorder.js');
+            for (const f of Object.values(context.state.formations ?? {})) {
+                if (f.kind === 'brigade' || !f.kind) {
+                    ensureBrigadeHistory(f);
+                }
+            }
+        }
+    },
+    {
         name: 'load-operational-data',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -689,6 +701,14 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'evaluate-brigade-decorations',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { evaluateAllBrigadeDecorations } = await import('../combat/decoration_evaluator.js');
+            evaluateAllBrigadeDecorations(context.state);
+        }
+    },
+    {
         name: 'apply-casualty-pool-exhaustion',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -874,6 +894,15 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'process-lifecycle-events',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { loadLifecycleEvents, processLifecycleEvents } = await import('../formation_lifecycle_events.js');
+            const events = await loadLifecycleEvents();
+            processLifecycleEvents(context.state, events);
+        }
+    },
+    {
         name: 'phase-ii-recruitment',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -967,6 +996,28 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             context.report.phase_ii_brigade_reinforcement = reinforceBrigadesFromPools(context.state);
+        }
+    },
+    {
+        name: 'apply-vrs-equipment-decay',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const turn = context.state.meta?.turn ?? 0;
+            const { VRS_EQUIPMENT_DECAY_START_WEEK, VRS_EQUIPMENT_DECAY_RATE, VRS_EQUIPMENT_DECAY_FLOOR } = await import('../../state/formation_constants.js');
+            if (turn < VRS_EQUIPMENT_DECAY_START_WEEK) return;
+            for (const f of Object.values(context.state.formations ?? {})) {
+                if (f.faction !== 'RS' || f.status !== 'active') continue;
+                const current = f.equipment_decay ?? 1.0;
+                f.equipment_decay = Math.max(VRS_EQUIPMENT_DECAY_FLOOR, current - VRS_EQUIPMENT_DECAY_RATE);
+            }
+        }
+    },
+    {
+        name: 'elite-loan-lifecycle',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { processEliteLoanLifecycle } = await import('../combat/elite_loan.js');
+            processEliteLoanLifecycle(context.state);
         }
     },
     {

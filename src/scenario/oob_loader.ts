@@ -7,6 +7,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import type { BrigadeComposition, FactionId } from '../state/game_state.js';
+import type { HistoricalDecoration } from '../state/decoration_types.js';
 import type { EquipmentClass } from '../state/recruitment_types.js';
 import { isValidEquipmentClass, RECRUITMENT_DEFAULTS } from '../state/recruitment_types.js';
 
@@ -47,6 +48,16 @@ export interface OobBrigade {
     recruit_pool_faction?: FactionId;
     /** Fallback OSID for reform when home territory is overrun. Brigade teleports here instead of being eliminated. */
     fallback_osid?: string;
+
+    // --- OOB Rework fields ---
+    /** Week when formation is disbanded/destroyed (null = survives entire war). */
+    available_until?: number;
+    /** Target brigade ID if this formation merges into another. */
+    merged_into_id?: string;
+    /** Army-level elite unit, eligible for elite loan system. */
+    is_elite?: boolean;
+    /** Pre-assigned historical decorations (loaded from OOB data). */
+    historical_decorations?: HistoricalDecoration[];
 }
 
 export interface OobCorps {
@@ -134,6 +145,15 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         const recruit_pool_faction = typeof r.recruit_pool_faction === 'string' && CANONICAL_FACTIONS.includes(r.recruit_pool_faction.trim() as FactionId)
             ? r.recruit_pool_faction.trim() as FactionId : undefined;
         const fallback_osid = typeof r.fallback_osid === 'string' && r.fallback_osid.trim() ? r.fallback_osid.trim() : undefined;
+        // OOB Rework fields
+        const available_until = typeof r.available_until === 'number' && Number.isFinite(r.available_until) ? r.available_until : undefined;
+        const merged_into_id = typeof r.merged_into_id === 'string' && r.merged_into_id.trim() ? r.merged_into_id.trim() : undefined;
+        const is_elite = r.is_elite === true ? true : undefined;
+        const historical_decorations: HistoricalDecoration[] | undefined = Array.isArray(r.historical_decorations)
+            ? (r.historical_decorations as unknown[]).filter((d): d is Record<string, unknown> =>
+                isRecord(d) && typeof d.tier === 'string' && typeof d.name === 'string'
+            ).map(d => ({ tier: d.tier as HistoricalDecoration['tier'], name: String(d.name).trim() }))
+            : undefined;
         result.push({
             id,
             faction,
@@ -160,6 +180,10 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             ...(defense_terrain_bonus != null && { defense_terrain_bonus }),
             ...(recruit_pool_faction && { recruit_pool_faction }),
             ...(fallback_osid && { fallback_osid }),
+            ...(available_until != null && { available_until }),
+            ...(merged_into_id && { merged_into_id }),
+            ...(is_elite && { is_elite }),
+            ...(historical_decorations && historical_decorations.length > 0 && { historical_decorations }),
         });
     }
 

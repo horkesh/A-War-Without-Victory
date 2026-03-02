@@ -9057,3 +9057,37 @@ Determinism checks **MUST** be run:
 - **Verification:** tsc clean, 220 vitest pass / 1 skip.
 - **Lesson (L38):** OSID supply reachability runs even when supply_reserves_enabled=false. Do NOT use it for operational gating (sector offensive supply checks) unless the full supply system is active.
 - **Lesson (L39):** `evaluateOperationProgress()` was a redundant handler for sector_attack ops. `advanceSectorOffensives()` is the authoritative handler. Each operation type should have exactly one lifecycle manager.
+
+### [2026-03-02] GUI Phase 3 Remainder — ArmyDetail, Minimap, MovementPreview, ZoomControls
+- **Type:** Feature (GUI)
+- **Summary:** Completed all remaining Phase 3 items, closing out the GUI Phase 3 milestone.
+- **Changes:**
+  1. **ArmyDetail.tsx** (new) — Faction summary panel: personnel, brigades, corps, sectors, militia pools (available/committed/exhausted), casualties (KIA/WIA), clickable corps drill-down. Triggered via OOBSidebar faction header click.
+  2. **Minimap.tsx** (new) — Second MapLibre instance (250×180px, bottom-left), simplified inline style (no PMTiles). Shows faction control fills + front lines + viewport rectangle. Click-to-pan via store-mediated callback. Toggle in MapModeToolbar Layers section.
+  3. **MovementPreview** — Move mode added alongside Attack mode in FormationDetail. MapContainer highlights same-faction-controlled OSIDs with green fill when move mode active. Click stages `move` order via OrderQueue.
+  4. **ZoomControls** — Closed as satisfied by existing MapLibre NavigationControl (zoom +/- buttons already present on map).
+  5. **Store** (gameStore.ts) — Added `selectedArmyId`, `minimapVisible`, `mapViewport`, `panToCenter` fields with mutual exclusion.
+  6. **OOBSidebar** — Split faction header: name → ArmyDetail, arrow → collapse toggle.
+  7. **MapModeToolbar** — Added Minimap checkbox in Layers section.
+- **Files modified:** `gameStore.ts` (store), `ArmyDetail.tsx` (new), `Minimap.tsx` (new), `FormationDetail.tsx`, `MapContainer.tsx`, `OOBSidebar.tsx`, `MapModeToolbar.tsx`, `App.tsx`
+- **Verification:** tsc clean, 220 vitest pass / 1 skip, vite build succeeds.
+- **Status:** Phase 3 COMPLETE. Next: Phase 4 (Desktop integration — useIPC, advance-turn, Electron).
+
+### [2026-03-02] OOB Rework — Brigade History, Decorations, Elite Loan, Lifecycle, War Stories
+- **Type:** Feature (Core systems)
+- **Plan:** `docs/30_planning/OOB_REWORK_MASTER_PLAN.md`
+- **Report:** `docs/40_reports/implemented/20260302_OOB_REWORK_IMPLEMENTATION_REPORT.md`
+- **Summary:** Complete OOB overhaul across 6 phases. Added brigade combat histories (FIFO-capped engagement log + running tallies), 3-tier decoration system per faction (criteria-based, replaces honor-only), faction personnel ceilings (soft/hard cap), VRS equipment decay (0.5%/week from week 26, floor 60%), elite loan system (6w loan + 4w cooldown), formation lifecycle events (territory-based disbands), and deterministic war stories generator.
+- **OOB data changes:**
+  - Removed 13 duplicates (5 VRS, 8 HVO)
+  - Added 16 brigades: 5 VRS (SRK siege ring + Drina + Herzegovina), 1 ARBiH (504th Viteška), 6 HVO regular, 4 HVO Guard (1994+, weeks 80-88)
+  - Fixed spawn timings: Guards Brigade (8→12), Black Swans (8→14)
+  - Added historical_decorations to 46+ brigades, is_elite to 2 army-level units
+  - Fixed Orašje home_osid for 3 HVO brigades
+- **Schema extensions:** FormationState +5 fields (brigade_history, decorations, elite_loan_state, lifecycle_status, equipment_decay); OobBrigade +4 fields (available_until, merged_into_id, is_elite, historical_decorations)
+- **Pipeline steps added (5):** init-brigade-history, evaluate-brigade-decorations, process-lifecycle-events, apply-vrs-equipment-decay, elite-loan-lifecycle
+- **New files (11):** brigade_history.ts, decoration_types.ts, elite_loan_types.ts, brigade_history_recorder.ts, decoration_evaluator.ts, elite_loan.ts, formation_lifecycle_events.ts, war_stories.ts, formation_lifecycle_events.json, + 5 test files
+- **Modified files (10):** game_state.ts, oob_loader.ts, oob_brigades.json, attack_resolution_osid.ts, combat_math.ts, formation_spawn.ts, recruitment_engine.ts, oob_early_war_entry.ts, war_phases.ts, formation_constants.ts
+- **Tests:** 81 new tests across 5 test files, all pass. 0 regressions (vitest 220 pass, node 129 pass).
+- **Deferred:** Calibration run (Phase 7), GUI service record panel, bot AI elite deployment decisions, war stories in final save JSON.
+- **Status:** Implementation COMPLETE. Calibration run needed next session.

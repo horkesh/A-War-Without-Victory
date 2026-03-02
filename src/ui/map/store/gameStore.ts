@@ -58,9 +58,9 @@ export interface GameStore {
   setLabelsVisible: (v: boolean) => void;
   setSectorsVisible: (v: boolean) => void;
 
-  /** Phase C4: When 'attack', next OSID click opens AttackConfirmation instead of selecting OSID. */
-  orderModeForFormation: 'attack' | null;
-  setOrderModeForFormation: (mode: 'attack' | null) => void;
+  /** Phase C4: When 'attack'/'move', next OSID click opens AttackConfirmation or stages move order. */
+  orderModeForFormation: 'attack' | 'move' | null;
+  setOrderModeForFormation: (mode: 'attack' | 'move' | null) => void;
 
   /** Phase C4: When set, show AttackConfirmation modal; cleared on Confirm or Cancel. */
   pendingAttackConfirmation: { attackerFormationId: string; targetOsid: string } | null;
@@ -73,6 +73,22 @@ export interface GameStore {
   /** Selected corps (click on corps header in sidebar). */
   selectedCorpsId: string | null;
   setSelectedCorpsId: (id: string | null) => void;
+
+  /** Selected army / faction (click on faction header in sidebar). */
+  selectedArmyId: string | null;
+  setSelectedArmyId: (id: string | null) => void;
+
+  /** Minimap visibility toggle. */
+  minimapVisible: boolean;
+  setMinimapVisible: (v: boolean) => void;
+
+  /** Main map viewport bounds for minimap sync. */
+  mapViewport: { bounds: [number, number, number, number]; center: [number, number]; zoom: number } | null;
+  setMapViewport: (v: { bounds: [number, number, number, number]; center: [number, number]; zoom: number } | null) => void;
+
+  /** Callback to pan the main map to a center coordinate (registered by MapContainer). */
+  panToCenter: ((center: [number, number]) => void) | null;
+  setPanToCenter: (fn: ((center: [number, number]) => void) | null) => void;
 
   loadedGameState: LoadedGameState | null;
   /** Last load error message (cleared when a new load starts or succeeds). */
@@ -135,7 +151,19 @@ export const useGameStore = create<GameStore>((set) => ({
   setSelectedCorpsFrontSectorId: (id) => set({ selectedCorpsFrontSectorId: id, selectedOsid: null, selectedFormationId: null }),
 
   selectedCorpsId: null,
-  setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedOsid: null, selectedFormationId: null, selectedCorpsFrontSectorId: null }),
+  setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedArmyId: null, selectedOsid: null, selectedFormationId: null, selectedCorpsFrontSectorId: null }),
+
+  selectedArmyId: null,
+  setSelectedArmyId: (id) => set({ selectedArmyId: id, selectedCorpsId: null, selectedOsid: null, selectedFormationId: null, selectedCorpsFrontSectorId: null }),
+
+  minimapVisible: true,
+  setMinimapVisible: (v) => set({ minimapVisible: v }),
+
+  mapViewport: null,
+  setMapViewport: (v) => set({ mapViewport: v }),
+
+  panToCenter: null,
+  setPanToCenter: (fn) => set({ panToCenter: fn }),
 
   loadedGameState: null,
 

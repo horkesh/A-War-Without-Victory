@@ -7,6 +7,7 @@
  */
 
 import { getTerrainScalarsForSid, type TerrainScalarsData } from '../../map/terrain_scalars.js';
+import { getDecorationAtkMult, getDecorationDefBonus } from './decoration_evaluator.js';
 import { getFormationTier } from '../../state/formation_constants.js';
 import type {
     CorpsStance,
@@ -178,11 +179,13 @@ export function getEquipmentRatio(formation: FormationState): number {
         ? (comp.tanks * tankOp + comp.artillery * artOp) / Math.max(1, comp.tanks + comp.artillery)
         : 0;
     const heavyBonus = heavyProportion * heavyCondition;
-    return Math.min(1.5, infantryBase + heavyBonus);
+    const decayMult = formation.equipment_decay ?? 1.0;
+    return Math.min(1.5, (infantryBase + heavyBonus) * decayMult);
 }
 
 export function getHonorMult(formation: FormationState): number {
-    return HONOR_MULT[(formation as { honor?: string }).honor ?? ''] ?? 1.0;
+    // Decoration system supersedes legacy honor field
+    return getDecorationAtkMult(formation);
 }
 
 export function basePower(formation: FormationState): number {
@@ -346,8 +349,8 @@ export function computeDefenderPower(
     const disruptionMult = getDisruptionMult(formation, 'defend');
     const enclaveMult = getEnclaveDefenseBonus(state, targetOsid);
     const toTerrainMult = getToTerrainDefenseMult(getFormationTier(formation), targetOsid, terrainMultByOsid);
-    const honorDefBonus = HONOR_DEFENSE_BONUS[(formation as { honor?: string }).honor ?? ''] ?? 0;
-    const perBrigadeTerrainBonus = 1.0 + (formation.defense_terrain_bonus ?? honorDefBonus);
+    const decorationDefBonus = getDecorationDefBonus(formation);
+    const perBrigadeTerrainBonus = 1.0 + (formation.defense_terrain_bonus ?? decorationDefBonus);
     const frontDensityMult = getLocalFrontDensityModifier(state, formation);
     return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult * toTerrainMult * perBrigadeTerrainBonus * frontDensityMult;
 }

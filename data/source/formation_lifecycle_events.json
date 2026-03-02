@@ -1,0 +1,20 @@
+{
+  "version": "1.0.0",
+  "description": "Formation lifecycle events: disbands, merges, renames triggered by territory loss or scripted timing.",
+  "events": [
+    {
+      "type": "disband",
+      "formation_id": "hvo_derventa",
+      "trigger_condition": "territory_loss",
+      "trigger_municipality": "derventa",
+      "reason": "Derventa fell to VRS — brigade destroyed"
+    },
+    {
+      "type": "disband",
+      "formation_id": "hvo_modrica",
+      "trigger_condition": "territory_loss",
+      "trigger_municipality": "modrica",
+      "reason": "Modriča fell to VRS — brigade destroyed"
+    }
+  ]
+}

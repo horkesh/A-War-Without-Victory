@@ -161,15 +161,22 @@ export function FormationDetail() {
               </div>
             )}
 
-            {/* Phase C4: Attack target selection — click map OSID after this to open confirmation modal */}
+            {/* Phase C4: Attack/Move target selection — click map OSID */}
             {formation.kind === 'brigade' && !attackOrder && (
-              <div className="pt-2 border-t border-panel-border">
+              <div className="pt-2 border-t border-panel-border flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setOrderModeForFormation('attack')}
+                  onClick={() => setOrderModeForFormation(orderModeForFormation === 'attack' ? null : 'attack')}
                   className={`text-xs font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover ${orderModeForFormation === 'attack' ? 'ring-1 ring-accent-gold bg-panel-active' : ''}`}
                 >
-                  {orderModeForFormation === 'attack' ? 'Click map to choose target…' : 'Attack'}
+                  {orderModeForFormation === 'attack' ? 'Click target…' : 'Attack'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOrderModeForFormation(orderModeForFormation === 'move' ? null : 'move')}
+                  className={`text-xs font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover ${orderModeForFormation === 'move' ? 'ring-1 ring-green-500 bg-panel-active' : ''}`}
+                >
+                  {orderModeForFormation === 'move' ? 'Click destination…' : 'Move'}
                 </button>
               </div>
             )}

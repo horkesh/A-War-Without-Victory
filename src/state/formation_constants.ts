@@ -182,6 +182,28 @@ export const SIEGE_RATIO_PARTIAL = 0.50;
  */
 export const DISPLACED_FORMATION_THRESHOLD = 3000;
 
+// --- OOB Rework: Faction personnel ceilings ---
+/** Historical peak personnel by faction. */
+export const FACTION_HISTORICAL_PEAK: Record<string, number> = {
+    RBiH: 130_000,
+    RS: 185_000,
+    HRHB: 45_000,
+};
+/** Soft cap: 85% of historical peak. Below this: normal reinforcement. */
+export const FACTION_SOFT_CAP_RATIO = 0.85;
+/** Hard cap: 95% of historical peak. Above this: no reinforcement, no spawns. */
+export const FACTION_HARD_CAP_RATIO = 0.95;
+/** Reinforcement rate multiplier when between soft and hard cap. */
+export const ABOVE_SOFT_CAP_REINFORCEMENT_MULT = 0.25;
+
+// --- OOB Rework: VRS equipment decay ---
+/** Week when VRS equipment starts degrading (end of initial ammunition/parts stockpiles). */
+export const VRS_EQUIPMENT_DECAY_START_WEEK = 26;
+/** Per-week equipment effectiveness reduction for VRS formations. */
+export const VRS_EQUIPMENT_DECAY_RATE = 0.005;
+/** Floor: VRS equipment never degrades below this fraction. */
+export const VRS_EQUIPMENT_DECAY_FLOOR = 0.60;
+
 /**
  * Single nominal brigade size (troops per formation) for all factions.
  * Number of brigades is driven by population-derived militia pool; same template per faction.

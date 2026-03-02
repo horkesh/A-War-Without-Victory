@@ -24,6 +24,8 @@ export function MapModeToolbar() {
   const setLabelsVisible = useGameStore((s) => s.setLabelsVisible);
   const sectorsVisible = useGameStore((s) => s.sectorsVisible);
   const setSectorsVisible = useGameStore((s) => s.setSectorsVisible);
+  const minimapVisible = useGameStore((s) => s.minimapVisible);
+  const setMinimapVisible = useGameStore((s) => s.setMinimapVisible);
 
   return (
     <div
@@ -105,6 +107,15 @@ export function MapModeToolbar() {
             className="rounded border-panel-border"
           />
           Sectors
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer" style={{ color: '#ddd5c8' }}>
+          <input
+            type="checkbox"
+            checked={minimapVisible}
+            onChange={(e) => setMinimapVisible(e.target.checked)}
+            className="rounded border-panel-border"
+          />
+          Minimap
         </label>
       </div>
     </div>

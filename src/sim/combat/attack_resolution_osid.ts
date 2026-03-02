@@ -10,6 +10,10 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import type { TerrainScalarsData } from '../../map/terrain_scalars.js';
 import { getTerrainScalarsForSid } from '../../map/terrain_scalars.js';
 import {
+    recordAttackerEngagements,
+    recordDefenderEngagement,
+} from './brigade_history_recorder.js';
+import {
     initializeCasualtyLedger,
     recordBattleCasualties
 } from '../../state/casualty_ledger.js';
@@ -626,6 +630,20 @@ export function resolveAttackOrdersOsid(
                 (advanceFormation as { location_osid?: string }).location_osid = targetOsid;
                 (advanceFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
             }
+        }
+
+        // === BRIGADE HISTORY RECORDING ===
+        const defFaction = (controller ?? attackerFaction) as FactionId;
+        const isConcentrated = attackerFormations.length > 1;
+        recordAttackerEngagements(
+            attackerFormations, currentTurn, targetOsid, outcome,
+            defFaction, flip, finalAttackerCas, finalDefenderCas, isConcentrated,
+        );
+        if (defenderFormation) {
+            recordDefenderEngagement(
+                defenderFormation, currentTurn, targetOsid, outcome,
+                attackerFaction, flip, finalDefenderCas, finalAttackerCas, isConcentrated,
+            );
         }
     }
 

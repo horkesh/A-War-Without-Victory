@@ -45,6 +45,7 @@ const FRONT_EDGES_HOVER_POS_LAYER_ID = 'front-edges-hover-pos';
 const FRONT_EDGES_HOVER_NEG_LAYER_ID = 'front-edges-hover-neg';
 const FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID = 'front-edges-highlight-pos';
 const FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID = 'front-edges-highlight-neg';
+const MOVE_PREVIEW_LAYER_ID = 'move-preview-fill';
 const SECTOR_FILL_LAYER_ID = 'sector-fill';
 const SECTOR_EDGE_GLOW_POS_LAYER_ID = 'sector-edge-glow-pos';
 const SECTOR_EDGE_GLOW_NEG_LAYER_ID = 'sector-edge-glow-neg';
@@ -153,6 +154,24 @@ export function MapContainer() {
       map.on('load', () => {
         try { addFrontLineIcons(map); } catch (e) { console.warn('[MapContainer] Failed to register front-line icons:', e); }
       });
+
+      // Minimap sync: report viewport bounds on move
+      const reportViewport = () => {
+        const bounds = map.getBounds();
+        useGameStore.getState().setMapViewport({
+          bounds: [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()],
+          center: [map.getCenter().lng, map.getCenter().lat],
+          zoom: map.getZoom(),
+        });
+      };
+      map.on('moveend', reportViewport);
+      map.on('load', reportViewport);
+
+      // Minimap: register panToCenter callback
+      useGameStore.getState().setPanToCenter((center: [number, number]) => {
+        map.easeTo({ center, duration: 400, essential: true });
+      });
+
       setMapReady(true);
     };
 
@@ -173,6 +192,10 @@ export function MapContainer() {
       onOsidClick: (osid) => {
         if (orderModeForFormation === 'attack' && selectedFormationId) {
           setPendingAttackConfirmation({ attackerFormationId: selectedFormationId, targetOsid: osid });
+          setOrderModeForFormation(null);
+        } else if (orderModeForFormation === 'move' && selectedFormationId) {
+          // Stage move order and clear move mode
+          useGameStore.getState().addStagedOrder({ type: 'move', formationId: selectedFormationId, targetOsid: osid });
           setOrderModeForFormation(null);
         } else {
           setSelectedOsid(osid);
@@ -677,6 +700,66 @@ export function MapContainer() {
     }, 250);
     return () => clearInterval(poll);
   }, [mapReady, selectedCorpsFrontSectorId, sectorsVisible, loadedGameState]);
+
+  // Movement preview: highlight same-faction-controlled OSIDs when move mode is active.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!mapReady || !map) return;
+
+    const ensureMoveLayer = () => {
+      if (!map.getSource('osid-control') || !safeHasLayer(map, 'osid-control-fill')) return false;
+      if (!safeHasLayer(map, MOVE_PREVIEW_LAYER_ID)) {
+        map.addLayer(
+          {
+            id: MOVE_PREVIEW_LAYER_ID,
+            type: 'fill',
+            source: 'osid-control',
+            filter: ['==', ['get', 'osid'], '__none__'],
+            paint: {
+              'fill-color': 'rgba(100, 200, 120, 0.20)',
+              'fill-outline-color': 'rgba(100, 200, 120, 0.50)',
+            },
+          },
+          'faction-border-glow-pos'
+        );
+      }
+      return true;
+    };
+
+    const applyMovePreview = () => {
+      if (!ensureMoveLayer()) return false;
+
+      if (orderModeForFormation !== 'move' || !selectedFormationId || !loadedGameState) {
+        // Clear: hide move preview
+        try {
+          map.setFilter(MOVE_PREVIEW_LAYER_ID, ['==', ['get', 'osid'], '__none__'] as maplibregl.FilterSpecification);
+        } catch (e) {
+          console.warn('[MapContainer] move preview clear failed:', e);
+        }
+        return true;
+      }
+
+      // Find formation's faction, highlight all same-faction OSIDs
+      const formation = loadedGameState.formations.find((f) => f.id === selectedFormationId);
+      if (!formation) return true;
+
+      const faction = formation.faction;
+      try {
+        map.setFilter(MOVE_PREVIEW_LAYER_ID,
+          ['==', ['get', 'controller'], faction] as maplibregl.FilterSpecification
+        );
+      } catch (e) {
+        console.warn('[MapContainer] move preview filter failed:', e);
+      }
+      return true;
+    };
+
+    if (applyMovePreview()) return;
+    const poll = setInterval(() => {
+      if (applyMovePreview()) clearInterval(poll);
+    }, 250);
+    return () => clearInterval(poll);
+  }, [mapReady, orderModeForFormation, selectedFormationId, loadedGameState]);
 
   // Ethnic map mode: add osid-ethnic source and fill layer when we have base + osidPropertiesMap.
   // Defer buildEthnicGeoJSON to rAF so it doesn't block when loadedGameState is set.

@@ -100,6 +100,7 @@ export function OOBSidebar() {
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const setSelectedCorpsId = useGameStore((s) => s.setSelectedCorpsId);
+  const setSelectedArmyId = useGameStore((s) => s.setSelectedArmyId);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
   const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
@@ -334,17 +335,26 @@ export function OOBSidebar() {
 
                 return (
                   <div key={faction} className="space-y-2">
-                    <button
-                      type="button"
-                      onClick={() => toggle(faction)}
+                    <div
                       className="w-full flex items-center justify-between px-2 py-1.5 rounded font-mono text-xs font-medium bg-panel-card border border-panel-border text-left hover:bg-panel-hover transition-colors"
                     >
-                      <span className={FACTION_COLORS[faction] ?? 'text-text-primary'}>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setSelectedArmyId(faction); }}
+                        className={`${FACTION_COLORS[faction] ?? 'text-text-primary'} hover:underline`}
+                        title={`View ${faction} army summary`}
+                      >
                         {faction}
-                      </span>
+                      </button>
                       <span className="text-text-secondary tabular-nums">{formations.length + reserves.length} formations</span>
-                      <span className="text-text-secondary">{isCollapsed ? '\u25B6' : '\u25BC'}</span>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => toggle(faction)}
+                        className="text-text-secondary hover:text-text-primary"
+                      >
+                        {isCollapsed ? '\u25B6' : '\u25BC'}
+                      </button>
+                    </div>
                     {!isCollapsed && (
                       <>
                         {corpsEntries.map(([corpsId, brigades]) => (

@@ -22,7 +22,11 @@ import {
     REINFORCEMENT_RATE,
     SIEGE_RATIO_MOSTLY,
     SIEGE_RATIO_PARTIAL,
-    WIA_TRICKLE_RATE
+    WIA_TRICKLE_RATE,
+    FACTION_HISTORICAL_PEAK,
+    FACTION_SOFT_CAP_RATIO,
+    FACTION_HARD_CAP_RATIO,
+    ABOVE_SOFT_CAP_REINFORCEMENT_MULT,
 } from '../state/formation_constants.js';
 import { computeBaseCohesion } from '../state/formation_lifecycle.js';
 import { resolveFormationName } from '../state/formation_naming.js';
@@ -170,6 +174,34 @@ export interface ReinforceBrigadesReport {
  *
  * Note: Previously named reinforceBrigadesFromPools. Alias preserved for callers in turn_pipeline.ts.
  */
+/**
+ * Compute total formation personnel for a faction.
+ */
+export function getFactionTotalPersonnel(state: GameState, faction: string): number {
+    let total = 0;
+    for (const f of Object.values(state.formations ?? {})) {
+        if (f.faction === faction && f.status === 'active') {
+            total += f.personnel ?? 0;
+        }
+    }
+    return total;
+}
+
+/**
+ * Get reinforcement ceiling multiplier for a faction based on total personnel.
+ * Returns 1.0 below soft cap, ABOVE_SOFT_CAP_REINFORCEMENT_MULT between soft/hard, 0 above hard.
+ */
+export function getFactionCeilingMult(state: GameState, faction: string): number {
+    const peak = FACTION_HISTORICAL_PEAK[faction];
+    if (!peak) return 1.0;
+    const total = getFactionTotalPersonnel(state, faction);
+    const hardCap = peak * FACTION_HARD_CAP_RATIO;
+    const softCap = peak * FACTION_SOFT_CAP_RATIO;
+    if (total >= hardCap) return 0;
+    if (total >= softCap) return ABOVE_SOFT_CAP_REINFORCEMENT_MULT;
+    return 1.0;
+}
+
 export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesReport {
     const report: ReinforceBrigadesReport = {
         formations_reinforced: 0,
@@ -232,11 +264,13 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             const pool = pools[key];
             if (!pool || pool.available <= 0) continue;
 
-            // Rate limit: combat formations get half rate; faction-specific multiplier
+            // Rate limit: combat formations get half rate; faction-specific multiplier; ceiling check
             const inCombat = f.posture === 'attack' || f.disrupted === true;
             const factionMult = getFactionReinforcementMult(faction, currentTurn);
+            const ceilingMult = getFactionCeilingMult(state, faction);
+            if (ceilingMult <= 0) continue; // At hard cap — no reinforcement
             const baseRate = inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
-            const rate = Math.max(1, Math.floor(baseRate * factionMult));
+            const rate = Math.max(1, Math.floor(baseRate * factionMult * ceilingMult));
 
             const need = Math.min(tierCap - current, rate);
             // For brigades: reserve manpower for potential spawn; for militia-kind: no reserve needed
@@ -302,11 +336,13 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         const pool = pools[key];
         if (!pool || pool.available <= 0) continue;
 
-        // Rate limit: combat brigades get half rate; faction-specific mobilization multiplier
+        // Rate limit: combat brigades get half rate; faction-specific mobilization multiplier; ceiling check
         const inCombat = f.posture === 'attack' || f.disrupted === true;
         const currentTurnNum = state.meta?.turn ?? 0;
         const factionMult = getFactionReinforcementMult(faction, currentTurnNum);
-        const rate = Math.max(1, Math.floor((inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE) * factionMult));
+        const ceilingMult = getFactionCeilingMult(state, faction);
+        if (ceilingMult <= 0) continue; // At hard cap — no reinforcement
+        const rate = Math.max(1, Math.floor((inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE) * factionMult * ceilingMult));
 
         const need = Math.min(MAX_BRIGADE_PERSONNEL - current, rate);
         const reserveForSpawn = reservedSpawnManpowerForReinforcement(state, mun_id, faction, spawnDirectiveActive);

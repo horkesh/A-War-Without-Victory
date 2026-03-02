@@ -12,6 +12,7 @@
 import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/operational_data.js';
 import type { OobBrigade, OobCorps } from '../scenario/oob_loader.js';
 import { factionHasPresenceInMun } from '../scenario/oob_early_war_entry.js';
+import type { BrigadeDecoration } from '../state/decoration_types.js';
 import { MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
 import { BRIGADE_BASE_COHESION } from '../state/formation_lifecycle.js';
 import type {
@@ -132,6 +133,20 @@ function computeBotScore(
 // Formation builder helpers
 // ---------------------------------------------------------------------------
 
+function convertOobDecorationsRecruitment(b: OobBrigade): { decorations?: BrigadeDecoration[] } {
+    const result: BrigadeDecoration[] = [];
+    if (b.historical_decorations && b.historical_decorations.length > 0) {
+        for (const hd of b.historical_decorations) {
+            result.push({ tier: hd.tier, awarded_turn: 0, reason: `Historical: ${hd.name}` });
+        }
+    } else if (b.honor === 'slavna') {
+        result.push({ tier: 'tier_1', awarded_turn: 0, reason: 'Historical: Slavna' });
+    } else if (b.honor === 'viteska') {
+        result.push({ tier: 'tier_2', awarded_turn: 0, reason: 'Historical: Viteška' });
+    }
+    return result.length > 0 ? { decorations: result } : {};
+}
+
 function buildBrigadeComposition(
     equipmentClass: EquipmentClass,
     faction: FactionId,
@@ -197,6 +212,8 @@ function buildRecruitedFormation(
         composition: buildBrigadeComposition(equipClass, brigade.faction, true),
         corps_id: (brigade.corps as FormationId) ?? null,
         ...(brigade.honor ? { honor: brigade.honor } : {}),
+        ...convertOobDecorationsRecruitment(brigade),
+        ...(brigade.is_elite ? { elite_loan_state: { on_loan: false, loaned_to_corps: null, loan_start_turn: null, last_recall_turn: null, loan_start_personnel: null, permanently_degraded: false } } : {}),
         ...(brigade.defense_terrain_bonus != null ? { defense_terrain_bonus: brigade.defense_terrain_bonus } : {}),
         ...(brigade.recruit_pool_faction ? { recruit_pool_faction: brigade.recruit_pool_faction } : {}),
         ...(brigade.fallback_osid ? { fallback_osid: brigade.fallback_osid } : {}),

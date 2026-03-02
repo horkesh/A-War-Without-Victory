@@ -6,6 +6,8 @@ import { SelectionPanel } from './components/SelectionPanel';
 import { CorpsFrontPanel } from './components/CorpsFrontPanel';
 import { FormationDetail } from './components/FormationDetail';
 import { CorpsDetail } from './components/CorpsDetail';
+import { ArmyDetail } from './components/ArmyDetail';
+import { Minimap } from './components/Minimap';
 import { BottomStatusStrip } from './components/BottomStatusStrip';
 import { OOBSidebar } from './components/OOBSidebar';
 import { OrderQueue } from './components/OrderQueue';
@@ -129,6 +131,7 @@ function App() {
       <SelectionPanel />
       <CorpsFrontPanel />
       <CorpsDetail />
+      <ArmyDetail />
       <FormationDetail />
       <Tooltip />
       {pendingAttackConfirmation && attackerFormation && (
@@ -143,6 +146,7 @@ function App() {
           onCancel={handleAttackCancel}
         />
       )}
+      <Minimap />
       <BottomStatusStrip />
     </div>
   );

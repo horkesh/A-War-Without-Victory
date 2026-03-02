@@ -21,6 +21,7 @@ import type {
     SettlementId
 } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
+import type { BrigadeDecoration } from '../state/decoration_types.js';
 import type { OobBrigade, OobCorps } from './oob_loader.js';
 
 /**
@@ -94,6 +95,24 @@ export function buildOsidToMunFromReverseMap(
 export interface CreateOobFormationsReport {
     corps_created: number;
     brigades_created: number;
+}
+
+/**
+ * Convert OOB historical_decorations + legacy honor into BrigadeDecoration[].
+ * Historical decorations from OOB take priority. Legacy honor is fallback.
+ */
+function convertOobDecorations(b: OobBrigade): BrigadeDecoration[] {
+    const result: BrigadeDecoration[] = [];
+    if (b.historical_decorations && b.historical_decorations.length > 0) {
+        for (const hd of b.historical_decorations) {
+            result.push({ tier: hd.tier, awarded_turn: 0, reason: `Historical: ${hd.name}` });
+        }
+    } else if (b.honor === 'slavna') {
+        result.push({ tier: 'tier_1', awarded_turn: 0, reason: 'Historical: Slavna' });
+    } else if (b.honor === 'viteska') {
+        result.push({ tier: 'tier_2', awarded_turn: 0, reason: 'Historical: Viteška' });
+    }
+    return result;
 }
 
 /**
@@ -191,6 +210,11 @@ export function createOobFormationsAtPhaseIEntry(
             ...(hq_sid ? { hq_sid } : {}),
             ...(location_osid != null ? { location_osid } : {})
         };
+        // Convert OOB historical decorations + legacy honor into decorations[]
+        const decorations = convertOobDecorations(b);
+        if (decorations.length > 0) formation.decorations = decorations;
+        // OOB elite status
+        if (b.is_elite) formation.elite_loan_state = { on_loan: false, loaned_to_corps: null, loan_start_turn: null, last_recall_turn: null, loan_start_personnel: null, permanently_degraded: false };
         // OOB composition override (e.g. enclave brigades: infantry-only)
         if (b.composition) {
             formation.composition = b.composition;

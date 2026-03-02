@@ -27,7 +27,10 @@
  * - Phase 12C/12D treaty types
  * - Phase 21/22 displacement and sustainability types
  */
+import type { BrigadeHistory } from './brigade_history.js';
 import type { CasualtyLedger } from './casualty_ledger.js';
+import type { BrigadeDecoration } from './decoration_types.js';
+import type { EliteLoanState } from './elite_loan_types.js';
 import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 
@@ -328,6 +331,18 @@ export interface FormationState {
     recruit_pool_faction?: FactionId;
     /** Fallback OSID where brigade reforms if stranded with no retreat path. Set from OOB. */
     fallback_osid?: string;
+
+    // --- OOB Rework: Brigade history, decorations, elite loan, lifecycle ---
+    /** Brigade combat history (engagement log + running tallies). Initialized on first battle or at creation. */
+    brigade_history?: BrigadeHistory;
+    /** Decorations awarded to this brigade (historical + earned). Highest tier bonus applies (no stacking). */
+    decorations?: BrigadeDecoration[];
+    /** Elite loan lifecycle state (army-level elite units only). */
+    elite_loan_state?: EliteLoanState;
+    /** Formation lifecycle status. Default 'active'. Set by lifecycle event processing. */
+    lifecycle_status?: 'active' | 'forming' | 'disbanded' | 'merged' | 'destroyed' | 'withdrawn';
+    /** VRS equipment decay factor [0,1]. Applied as multiplier to equipment ratio. 1.0 = full effectiveness, 0.6 = floor. */
+    equipment_decay?: number;
 }
 
 export interface FrontPostureAssignment {

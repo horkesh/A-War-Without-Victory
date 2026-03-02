@@ -38,10 +38,11 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "special",
-      "available_from": 8,
+      "available_from": 12,
       "initial_personnel": 480,
       "initial_cohesion": 55,
-      "mandatory": true
+      "mandatory": true,
+      "is_elite": true
     },
     {
       "id": "arbih_120th_liberation_black_swans",
@@ -53,7 +54,7 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "special",
-      "available_from": 8,
+      "available_from": 14,
       "initial_personnel": 480,
       "initial_cohesion": 55,
       "mandatory": true
@@ -195,7 +196,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_cohesion": 45,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_112th_vitezka_motorized",
@@ -211,7 +218,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_cohesion": 45,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_115th_mountain",
@@ -287,7 +300,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_cohesion": 45,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_109th_mountain",
@@ -363,7 +382,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 500,
-      "initial_cohesion": 45
+      "initial_cohesion": 45,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_147th_light",
@@ -394,7 +419,13 @@
       "honor": "slavna",
       "initial_personnel": 400,
       "initial_cohesion": 35,
-      "mandatory": true
+      "mandatory": true,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Slavna"
+        }
+      ]
     },
     {
       "id": "arbih_162nd_mountain",
@@ -515,7 +546,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_cohesion": 48,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_215th_vitezka_mountain",
@@ -531,7 +568,13 @@
       "mandatory": true,
       "initial_personnel": 400,
       "initial_cohesion": 30,
-      "honor": "viteska"
+      "honor": "viteska",
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_217th_vitezka_mountain",
@@ -547,7 +590,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 550,
-      "initial_cohesion": 48
+      "initial_cohesion": 48,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_221st_mountain",
@@ -655,7 +704,13 @@
       "honor": "slavna",
       "initial_personnel": 550,
       "initial_cohesion": 48,
-      "mandatory": true
+      "mandatory": true,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Slavna"
+        }
+      ]
     },
     {
       "id": "arbih_253rd_mountain",
@@ -702,7 +757,13 @@
       "initial_personnel": 800,
       "initial_cohesion": 56,
       "mandatory": true,
-      "defense_terrain_bonus": 0.30
+      "defense_terrain_bonus": 0.3,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Slavna"
+        }
+      ]
     },
     {
       "id": "arbih_7th_vitezka_muslim_liberation",
@@ -718,7 +779,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 440,
-      "initial_cohesion": 38
+      "initial_cohesion": 38,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_303rd_vitezka_mountain",
@@ -734,7 +801,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 440,
-      "initial_cohesion": 38
+      "initial_cohesion": 38,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_314th_slavna_liberation",
@@ -750,7 +823,13 @@
       "mandatory": true,
       "honor": "slavna",
       "initial_personnel": 440,
-      "initial_cohesion": 38
+      "initial_cohesion": 38,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Slavna"
+        }
+      ]
     },
     {
       "id": "arbih_319th_liberation",
@@ -796,7 +875,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 440,
-      "initial_cohesion": 38
+      "initial_cohesion": 38,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_328th_mountain",
@@ -812,7 +897,7 @@
       "mandatory": true,
       "initial_personnel": 480,
       "initial_cohesion": 40,
-      "defense_terrain_bonus": 0.20
+      "defense_terrain_bonus": 0.2
     },
     {
       "id": "arbih_329th_mountain",
@@ -843,7 +928,7 @@
       "mandatory": true,
       "initial_personnel": 480,
       "initial_cohesion": 40,
-      "defense_terrain_bonus": 0.20
+      "defense_terrain_bonus": 0.2
     },
     {
       "id": "arbih_372nd_vitezka_mountain",
@@ -859,7 +944,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 480,
-      "initial_cohesion": 40
+      "initial_cohesion": 40,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_373rd_slavna_mountain",
@@ -875,7 +966,13 @@
       "mandatory": true,
       "honor": "slavna",
       "initial_personnel": 480,
-      "initial_cohesion": 40
+      "initial_cohesion": 40,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Slavna"
+        }
+      ]
     },
     {
       "id": "arbih_374th_slavna_light",
@@ -891,7 +988,13 @@
       "mandatory": true,
       "honor": "slavna",
       "initial_personnel": 480,
-      "initial_cohesion": 40
+      "initial_cohesion": 40,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Slavna"
+        }
+      ]
     },
     {
       "id": "arbih_375th_liberation",
@@ -922,7 +1025,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 480,
-      "initial_cohesion": 40
+      "initial_cohesion": 40,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_4th_muslim_light",
@@ -1043,7 +1152,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 440,
-      "initial_cohesion": 38
+      "initial_cohesion": 38,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_442nd_mountain",
@@ -1104,7 +1219,13 @@
       "honor": "slavna",
       "initial_personnel": 700,
       "initial_cohesion": 60,
-      "mandatory": true
+      "mandatory": true,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Slavna"
+        }
+      ]
     },
     {
       "id": "arbih_502nd_vitezka_mountain",
@@ -1120,7 +1241,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 700,
-      "initial_cohesion": 60
+      "initial_cohesion": 60,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_503rd_slavna_mountain",
@@ -1136,7 +1263,13 @@
       "honor": "slavna",
       "initial_personnel": 700,
       "initial_cohesion": 60,
-      "mandatory": true
+      "mandatory": true,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Slavna"
+        }
+      ]
     },
     {
       "id": "arbih_505th_vitezka_mountain",
@@ -1152,7 +1285,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 700,
-      "initial_cohesion": 60
+      "initial_cohesion": 60,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_506th_mountain",
@@ -1198,7 +1337,13 @@
       "honor": "slavna",
       "initial_personnel": 700,
       "initial_cohesion": 60,
-      "mandatory": true
+      "mandatory": true,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Slavna"
+        }
+      ]
     },
     {
       "id": "arbih_517th_light",
@@ -1216,6 +1361,25 @@
       "initial_cohesion": 60
     },
     {
+      "id": "arbih_504th_vitezka_mountain",
+      "faction": "RBiH",
+      "name": "504th Viteška Mountain Brigade",
+      "home_mun": "bihac",
+      "corps": "arbih_5th_corps",
+      "kind": "brigade",
+      "default_equipment_class": "mountain",
+      "available_from": 32,
+      "initial_personnel": 1200,
+      "initial_cohesion": 60,
+      "honor": "viteska",
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
+    },
+    {
       "id": "arbih_17th_vitezka_mountain",
       "faction": "RBiH",
       "name": "17th Vitezka Mountain",
@@ -1229,7 +1393,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 440,
-      "initial_cohesion": 38
+      "initial_cohesion": 38,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_706th_muslim_mountain",
@@ -1305,7 +1475,13 @@
       "mandatory": true,
       "honor": "slavna",
       "initial_personnel": 440,
-      "initial_cohesion": 38
+      "initial_cohesion": 38,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Slavna"
+        }
+      ]
     },
     {
       "id": "arbih_733rd_mountain",
@@ -1351,7 +1527,13 @@
       "mandatory": true,
       "honor": "slavna",
       "initial_personnel": 440,
-      "initial_cohesion": 38
+      "initial_cohesion": 38,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Slavna"
+        }
+      ]
     },
     {
       "id": "arbih_707th_slavna_mountain",
@@ -1367,7 +1549,13 @@
       "mandatory": true,
       "honor": "slavna",
       "initial_personnel": 440,
-      "initial_cohesion": 38
+      "initial_cohesion": 38,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Slavna"
+        }
+      ]
     },
     {
       "id": "arbih_717th_slavna_mountain",
@@ -1383,7 +1571,13 @@
       "mandatory": true,
       "honor": "slavna",
       "initial_personnel": 480,
-      "initial_cohesion": 38
+      "initial_cohesion": 38,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Slavna"
+        }
+      ]
     },
     {
       "id": "arbih_770th_slavna_mountain",
@@ -1399,7 +1593,13 @@
       "mandatory": true,
       "honor": "slavna",
       "initial_personnel": 480,
-      "initial_cohesion": 38
+      "initial_cohesion": 38,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Slavna"
+        }
+      ]
     },
     {
       "id": "arbih_210th_vitezka_liberation_nesib_maliki",
@@ -1415,7 +1615,13 @@
       "mandatory": true,
       "honor": "viteska",
       "initial_personnel": 600,
-      "initial_cohesion": 48
+      "initial_cohesion": 48,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_240th_muslim_mountain",
@@ -1522,7 +1728,13 @@
       "honor": "viteska",
       "initial_personnel": 600,
       "initial_cohesion": 48,
-      "defense_terrain_bonus": 0.25
+      "defense_terrain_bonus": 0.25,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
+      ]
     },
     {
       "id": "arbih_286th_mountain",
@@ -1812,6 +2024,12 @@
       },
       "tags": [
         "enclave"
+      ],
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Viteška"
+        }
       ]
     },
     {
@@ -2698,7 +2916,13 @@
       "mandatory": true,
       "initial_personnel": 1200,
       "initial_cohesion": 72,
-      "home_osid": "op:hanpijesak:han_pijesak_2"
+      "home_osid": "op:hanpijesak:han_pijesak_2",
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Medalja Petra Mrkonjića"
+        }
+      ]
     },
     {
       "id": "rs_1st_zvornik",
@@ -2714,7 +2938,13 @@
       "mandatory": true,
       "initial_personnel": 1000,
       "initial_cohesion": 67,
-      "home_osid": "op:zvornik:kozluk_2"
+      "home_osid": "op:zvornik:kozluk_2",
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Medalja Petra Mrkonjića"
+        }
+      ]
     },
     {
       "id": "rs_1st_bratunac",
@@ -2762,51 +2992,6 @@
       "initial_cohesion": 67
     },
     {
-      "id": "rs_ekovii_brigade",
-      "faction": "RS",
-      "name": "Šekovići Brigade",
-      "home_mun": "sekovici",
-      "home_settlement": "Šekovići",
-      "subordinate_to": "vrs_drina",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true,
-      "initial_personnel": 1000,
-      "initial_cohesion": 67
-    },
-    {
-      "id": "rs_rogatica_brigade",
-      "faction": "RS",
-      "name": "Rogatica Brigade",
-      "home_mun": "rogatica",
-      "home_settlement": "Rogatica",
-      "subordinate_to": "vrs_drina",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true,
-      "initial_personnel": 1000,
-      "initial_cohesion": 67
-    },
-    {
-      "id": "rs_viegrad_brigade",
-      "faction": "RS",
-      "name": "Višegrad Brigade",
-      "home_mun": "visegrad",
-      "home_settlement": "Višegrad",
-      "subordinate_to": "vrs_drina",
-      "kind": "brigade",
-      "source": "markdown_rebuild",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true,
-      "initial_personnel": 1000,
-      "initial_cohesion": 67
-    },
-    {
       "id": "rs_trebinje_brigade",
       "faction": "RS",
       "name": "Trebinje Brigade",
@@ -2819,7 +3004,13 @@
       "available_from": 0,
       "mandatory": true,
       "initial_personnel": 1000,
-      "initial_cohesion": 67
+      "initial_cohesion": 67,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Medalja Petra Mrkonjića"
+        }
+      ]
     },
     {
       "id": "rs_nevesinje_brigade",
@@ -2834,7 +3025,13 @@
       "available_from": 0,
       "mandatory": true,
       "initial_personnel": 1000,
-      "initial_cohesion": 67
+      "initial_cohesion": 67,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Orden Nemanjića"
+        }
+      ]
     },
     {
       "id": "rs_gacko_brigade",
@@ -2849,7 +3046,13 @@
       "available_from": 0,
       "mandatory": true,
       "initial_personnel": 1000,
-      "initial_cohesion": 67
+      "initial_cohesion": 67,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Orden Nemanjića"
+        }
+      ]
     },
     {
       "id": "rs_bilea_brigade",
@@ -2879,7 +3082,13 @@
       "available_from": 0,
       "mandatory": true,
       "initial_personnel": 1000,
-      "initial_cohesion": 67
+      "initial_cohesion": 67,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Medalja Petra Mrkonjića"
+        }
+      ]
     },
     {
       "id": "rs_ajnie_brigade",
@@ -2925,7 +3134,77 @@
       "mandatory": true,
       "initial_personnel": 1200,
       "initial_cohesion": 72,
-      "home_osid": "op:hanpijesak:han_pijesak_2"
+      "home_osid": "op:hanpijesak:han_pijesak_2",
+      "is_elite": true,
+      "historical_decorations": [
+        {
+          "tier": "tier_3",
+          "name": "Orden Miloša Obilića"
+        }
+      ]
+    },
+    {
+      "id": "rs_ilidza_brigade",
+      "faction": "RS",
+      "name": "2nd Sarajevo Light Infantry Brigade (Ilidža)",
+      "home_mun": "ilidza",
+      "corps": "rs_sarajevo_romanija_corps",
+      "kind": "brigade",
+      "default_equipment_class": "light_infantry",
+      "available_from": 0,
+      "initial_personnel": 1800,
+      "initial_cohesion": 55,
+      "home_osid": "op:ilidza:kasindo"
+    },
+    {
+      "id": "rs_ilijas_brigade",
+      "faction": "RS",
+      "name": "3rd Sarajevo Infantry Brigade (Ilijaš)",
+      "home_mun": "ilijas",
+      "corps": "rs_sarajevo_romanija_corps",
+      "kind": "brigade",
+      "default_equipment_class": "light_infantry",
+      "available_from": 0,
+      "initial_personnel": 1500,
+      "initial_cohesion": 50,
+      "home_osid": "op:ilijas:podlugovi"
+    },
+    {
+      "id": "rs_igman_brigade",
+      "faction": "RS",
+      "name": "Igman Infantry Brigade",
+      "home_mun": "hadzici",
+      "corps": "rs_sarajevo_romanija_corps",
+      "kind": "brigade",
+      "default_equipment_class": "light_infantry",
+      "available_from": 0,
+      "initial_personnel": 1400,
+      "initial_cohesion": 50,
+      "home_osid": "op:hadzici:misevici_2"
+    },
+    {
+      "id": "rs_2nd_romanija_brigade",
+      "faction": "RS",
+      "name": "2nd Romanija Motorized Brigade",
+      "home_mun": "sokolac",
+      "corps": "rs_drina_corps",
+      "kind": "brigade",
+      "default_equipment_class": "motorized",
+      "available_from": 0,
+      "initial_personnel": 1600,
+      "initial_cohesion": 55
+    },
+    {
+      "id": "rs_2nd_herzegovina_light_infantry",
+      "faction": "RS",
+      "name": "2nd Herzegovina Light Infantry Brigade",
+      "home_mun": "bileca",
+      "corps": "rs_herzegovina_corps",
+      "kind": "brigade",
+      "default_equipment_class": "light_infantry",
+      "available_from": 0,
+      "initial_personnel": 1400,
+      "initial_cohesion": 50
     },
     {
       "id": "hrhb_1st_brigade_mostar",
@@ -3301,7 +3580,8 @@
       "mandatory": true,
       "initial_personnel": 650,
       "initial_cohesion": 52,
-      "fallback_osid": "op:orasje:orasje"
+      "fallback_osid": "op:orasje:orasje",
+      "home_osid": "op:orasje:orasje"
     },
     {
       "id": "hrhb_102nd_brigade",
@@ -3317,7 +3597,8 @@
       "mandatory": true,
       "initial_personnel": 650,
       "initial_cohesion": 52,
-      "fallback_osid": "op:orasje:orasje"
+      "fallback_osid": "op:orasje:orasje",
+      "home_osid": "op:orasje:orasje"
     },
     {
       "id": "hrhb_103rd_derventa_brigade",
@@ -3377,7 +3658,8 @@
       "mandatory": true,
       "initial_personnel": 650,
       "initial_cohesion": 52,
-      "fallback_osid": "op:orasje:orasje"
+      "fallback_osid": "op:orasje:orasje",
+      "home_osid": "op:orasje:orasje"
     },
     {
       "id": "hrhb_107th_gradaac_brigade",
@@ -3425,6 +3707,153 @@
       "mandatory": true,
       "initial_personnel": 700,
       "initial_cohesion": 55
+    },
+    {
+      "id": "hvo_rama_brigade",
+      "faction": "HRHB",
+      "name": "Rama Brigade",
+      "home_mun": "prozor",
+      "corps": "hvo_oz_nw_herzegovina",
+      "kind": "brigade",
+      "default_equipment_class": "light_infantry",
+      "available_from": 0,
+      "initial_personnel": 1200,
+      "initial_cohesion": 50
+    },
+    {
+      "id": "hvo_ante_starcevic_brigade",
+      "faction": "HRHB",
+      "name": "Ante Starčević Brigade",
+      "home_mun": "kiseljak",
+      "corps": "hvo_oz_central_bosnia",
+      "kind": "brigade",
+      "default_equipment_class": "light_infantry",
+      "available_from": 0,
+      "initial_personnel": 1400,
+      "initial_cohesion": 55
+    },
+    {
+      "id": "hvo_nikola_subic_zrinski_brigade",
+      "faction": "HRHB",
+      "name": "Nikola Šubić Zrinski Brigade",
+      "home_mun": "busovaca",
+      "corps": "hvo_oz_central_bosnia",
+      "kind": "brigade",
+      "default_equipment_class": "light_infantry",
+      "available_from": 0,
+      "initial_personnel": 1300,
+      "initial_cohesion": 55
+    },
+    {
+      "id": "hvo_hrvoje_vukcic_brigade",
+      "faction": "HRHB",
+      "name": "Hrvoje Vukčić Hrvatinić Brigade",
+      "home_mun": "odzak",
+      "corps": "hvo_oz_posavina",
+      "kind": "brigade",
+      "default_equipment_class": "light_infantry",
+      "available_from": 0,
+      "initial_personnel": 1100,
+      "initial_cohesion": 50
+    },
+    {
+      "id": "hvo_posusje_brigade",
+      "faction": "HRHB",
+      "name": "Posušje Brigade",
+      "home_mun": "posusje",
+      "corps": "hvo_oz_se_herzegovina",
+      "kind": "brigade",
+      "default_equipment_class": "light_infantry",
+      "available_from": 0,
+      "initial_personnel": 1000,
+      "initial_cohesion": 50
+    },
+    {
+      "id": "hvo_101st_bihac",
+      "faction": "HRHB",
+      "name": "101st Bihać HVO Brigade",
+      "home_mun": "bihac",
+      "corps": "hvo_oz_nw_bosnia",
+      "kind": "brigade",
+      "default_equipment_class": "light_infantry",
+      "available_from": 4,
+      "initial_personnel": 800,
+      "initial_cohesion": 45,
+      "recruit_pool_faction": "HRHB"
+    },
+    {
+      "id": "hvo_1st_guard_abb",
+      "faction": "HRHB",
+      "name": "1st Guards Brigade 'Ante Bruno Bušić'",
+      "home_mun": "livno",
+      "corps": "hvo_oz_nw_herzegovina",
+      "kind": "brigade",
+      "default_equipment_class": "mechanized",
+      "available_from": 80,
+      "initial_personnel": 2200,
+      "initial_cohesion": 75,
+      "is_elite": true,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Red Nikole Šubića Zrinskog"
+        }
+      ]
+    },
+    {
+      "id": "hvo_2nd_guard_mechanized",
+      "faction": "HRHB",
+      "name": "2nd Guards Mechanized Brigade",
+      "home_mun": "mostar",
+      "corps": "hvo_oz_se_herzegovina",
+      "kind": "brigade",
+      "default_equipment_class": "mechanized",
+      "available_from": 84,
+      "initial_personnel": 2000,
+      "initial_cohesion": 70,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Red Nikole Šubića Zrinskog"
+        }
+      ]
+    },
+    {
+      "id": "hvo_3rd_guard_jastrebovi",
+      "faction": "HRHB",
+      "name": "3rd Guards Brigade 'Jastrebovi'",
+      "home_mun": "capljina",
+      "corps": "hvo_oz_se_herzegovina",
+      "kind": "brigade",
+      "default_equipment_class": "mechanized",
+      "available_from": 84,
+      "initial_personnel": 1800,
+      "initial_cohesion": 70,
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Red Nikole Šubića Zrinskog"
+        }
+      ]
+    },
+    {
+      "id": "hvo_4th_guard_sinovi_posavine",
+      "faction": "HRHB",
+      "name": "4th Guards Brigade 'Sinovi Posavine'",
+      "home_mun": "orasje",
+      "corps": "hvo_oz_posavina",
+      "kind": "brigade",
+      "default_equipment_class": "light_infantry",
+      "available_from": 88,
+      "initial_personnel": 1500,
+      "initial_cohesion": 65,
+      "home_osid": "op:orasje:orasje",
+      "historical_decorations": [
+        {
+          "tier": "tier_1",
+          "name": "Red Nikole Šubića Zrinskog"
+        }
+      ]
     },
     {
       "id": "hrhb_110th_usora_brigade",
@@ -3818,156 +4247,6 @@
       ]
     },
     {
-      "id": "hvo_eugen_kvaternik",
-      "name": "Brigade \"Eugen Kvaternik\"",
-      "faction": "HRHB",
-      "home_settlement": "Bugojno",
-      "home_mun": "bugojno",
-      "kind": "brigade",
-      "source": "historical_enrichment_1992",
-      "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true,
-      "initial_personnel": 700,
-      "initial_cohesion": 55
-    },
-    {
-      "id": "hvo_kotromanic",
-      "name": "Brigade \"Kotromanić\"",
-      "faction": "HRHB",
-      "home_settlement": "Kakanj",
-      "home_mun": "kakanj",
-      "kind": "brigade",
-      "source": "historical_enrichment_1992",
-      "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true,
-      "initial_personnel": 700,
-      "initial_cohesion": 55
-    },
-    {
-      "id": "hvo_travnik",
-      "name": "Brigade \"Travnik\"",
-      "faction": "HRHB",
-      "home_settlement": "Travnik",
-      "home_mun": "travnik",
-      "kind": "brigade",
-      "source": "historical_enrichment_1992",
-      "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true,
-      "initial_personnel": 700,
-      "initial_cohesion": 55
-    },
-    {
-      "id": "hvo_stjepan_tomasevic",
-      "name": "Brigade \"Stjepan Tomašević\"",
-      "faction": "HRHB",
-      "home_settlement": "Novi Travnik",
-      "home_mun": "novi_travnik",
-      "kind": "brigade",
-      "source": "historical_enrichment_1992",
-      "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true,
-      "initial_personnel": 700,
-      "initial_cohesion": 55
-    },
-    {
-      "id": "hvo_frankopan",
-      "name": "Brigade \"Frankopan\"",
-      "faction": "HRHB",
-      "home_settlement": "Guča Gora",
-      "home_mun": "travnik",
-      "kind": "brigade",
-      "source": "historical_enrichment_1992",
-      "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true,
-      "initial_personnel": 700,
-      "initial_cohesion": 55
-    },
-    {
-      "id": "hvo_zvijezda",
-      "name": "Brigade \"Zvijezda\"",
-      "faction": "HRHB",
-      "home_settlement": "Vareš",
-      "home_mun": "vares",
-      "kind": "brigade",
-      "source": "historical_enrichment_1992",
-      "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true,
-      "initial_personnel": 700,
-      "initial_cohesion": 55
-    },
-    {
-      "id": "hvo_bobovac",
-      "name": "Brigade \"Bobovac\"",
-      "faction": "HRHB",
-      "home_settlement": "Vareš",
-      "home_mun": "vares",
-      "kind": "brigade",
-      "source": "historical_enrichment_1992",
-      "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true,
-      "initial_personnel": 700,
-      "initial_cohesion": 55
-    },
-    {
-      "id": "hvo_jure_francetic",
-      "name": "Brigade \"Jure Francetić\"",
-      "faction": "HRHB",
-      "home_settlement": "Vitez",
-      "home_mun": "vitez",
-      "kind": "brigade",
-      "source": "historical_enrichment_1992",
-      "subordinate_to": "hvo_central_bosnia",
-      "default_equipment_class": "light_infantry",
-      "available_from": 0,
-      "mandatory": true,
-      "initial_personnel": 700,
-      "initial_cohesion": 55
-    },
-    {
-      "id": "vrs_31st_mountain_storm",
-      "name": "31st Mountain \"Storm\" Brigade",
-      "faction": "RS",
-      "home_settlement": "Stričići",
-      "home_mun": "banja_luka",
-      "kind": "brigade",
-      "source": "historical_enrichment_1992",
-      "subordinate_to": "vrs_1st_krajina",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true,
-      "initial_personnel": 1000,
-      "initial_cohesion": 67
-    },
-    {
-      "id": "vrs_1st_celinac",
-      "name": "1st Čelinac Light Brigade",
-      "faction": "RS",
-      "home_settlement": "Čelinac",
-      "home_mun": "celinac",
-      "kind": "brigade",
-      "source": "historical_enrichment_1992",
-      "subordinate_to": "vrs_1st_krajina",
-      "default_equipment_class": "mountain",
-      "available_from": 0,
-      "mandatory": true,
-      "initial_personnel": 1000,
-      "initial_cohesion": 67
-    },
-    {
       "id": "vrs_1st_laktasi",
       "name": "1st Laktaši Light Brigade",
       "faction": "RS",
@@ -4010,7 +4289,13 @@
       "available_from": 0,
       "mandatory": true,
       "initial_personnel": 1000,
-      "initial_cohesion": 67
+      "initial_cohesion": 67,
+      "historical_decorations": [
+        {
+          "tier": "tier_2",
+          "name": "Orden Nemanjića"
+        }
+      ]
     },
     {
       "id": "rs_5th_podrinje",
