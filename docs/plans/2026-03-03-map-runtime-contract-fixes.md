@@ -215,7 +215,7 @@
 ## Summary checklist
 
 - [x] Phase A: Build output `dist/tactical-map`, Tailwind warning gone.
-- [ ] Phase B: Density interactions + layer-aware binding.
+- [x] Phase B: Density interactions + layer-aware binding.
 - [ ] Phase C: HTTP server serves `/data/runs`; data/source + mun-borders already done; E2E + test file cleanup + commit.
 - [ ] Phase D: Glyphs documented; optional style contract.
 - [ ] Phase E: Tests added, report written, Process QA run, ledger/napkin updated, final commit.

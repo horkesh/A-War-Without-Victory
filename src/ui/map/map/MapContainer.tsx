@@ -22,7 +22,6 @@ import { buildOrderArrowsGeoJSON } from './builders/buildOrderArrowsGeoJSON';
 import { buildOsidCentroidLookup } from './builders/geojsonLookup';
 import { resolveFormationLocationOsid } from './builders/resolveFormationLocationOsid';
 import { ensureFormationIcons } from './formationIcons';
-import { addFrontLineIcons } from './frontLineIcons';
 import styleJson from './awwv_map_style.json';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
@@ -30,7 +29,7 @@ const DEFAULT_ZOOM = 8;
 const SIDEBAR_HOVER_LAYER_ID = 'sidebar-hover-outline';
 
 /** Layer IDs for front lines (visibility driven by store frontsVisible). */
-const FRONT_LAYER_IDS = ['faction-border-glow-pos', 'faction-border-glow-neg', 'front-line-base', 'front-line-teeth'];
+const FRONT_LAYER_IDS = ['faction-border-glow-pos', 'faction-border-glow-neg', 'front-line-base', 'front-line-stripe'];
 /** Fill layer for ethnic map mode (majority_ethnic); toggled with osid-control-fill by mapMode. */
 const OSID_ETHNIC_FILL_LAYER_ID = 'osid-ethnic-fill';
 const OSID_ETHNIC_SOURCE_ID = 'osid-ethnic';
@@ -51,9 +50,13 @@ const SECTOR_EDGE_GLOW_POS_LAYER_ID = 'sector-edge-glow-pos';
 const SECTOR_EDGE_GLOW_NEG_LAYER_ID = 'sector-edge-glow-neg';
 const SECTOR_BRIGADE_RINGS_LAYER_ID = 'sector-brigade-rings';
 
+/**
+ * Rewrite pmtiles:/// URLs in the style for the current environment.
+ * pmtiles:///path → pmtiles://http://host:port/path (or https, file, etc.)
+ */
 function rewritePmtilesUrls(style: Record<string, unknown>, origin: string): Record<string, unknown> {
-  const base = `pmtiles://${origin}/`;
   const str = JSON.stringify(style);
+  const base = `pmtiles://${origin}/`;
   const rewritten = str.replace(/pmtiles:\/\/\//g, base);
   return JSON.parse(rewritten) as Record<string, unknown>;
 }
@@ -95,9 +98,10 @@ export function MapContainer() {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    maplibregl.addProtocol('pmtiles', new Protocol().tile);
-
+    const pmtilesProtocol = new Protocol();
     const origin = window.location.origin;
+    maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile);
+
     const style = rewritePmtilesUrls(styleJson as Record<string, unknown>, origin) as maplibregl.StyleSpecification;
 
     const init = async () => {
@@ -151,10 +155,6 @@ export function MapContainer() {
       });
       mapRef.current = map;
       map.addControl(new maplibregl.NavigationControl(), 'top-right');
-      map.on('load', () => {
-        try { addFrontLineIcons(map); } catch (e) { console.warn('[MapContainer] Failed to register front-line icons:', e); }
-      });
-
       // Minimap sync: report viewport bounds on move
       const reportViewport = () => {
         const bounds = map.getBounds();
@@ -187,41 +187,47 @@ export function MapContainer() {
 
   useEffect(() => {
     if (!mapReady || !mapRef.current) return;
-    const map = mapRef.current;
-    const cleanup = useMapInteractions(map, {
-      onOsidClick: (osid) => {
-        if (orderModeForFormation === 'attack' && selectedFormationId) {
-          setPendingAttackConfirmation({ attackerFormationId: selectedFormationId, targetOsid: osid });
-          setOrderModeForFormation(null);
-        } else if (orderModeForFormation === 'move' && selectedFormationId) {
-          // Stage move order and clear move mode
-          useGameStore.getState().addStagedOrder({ type: 'move', formationId: selectedFormationId, targetOsid: osid });
-          setOrderModeForFormation(null);
-        } else {
-          setSelectedOsid(osid);
-        }
-      },
-      onFormationClick: (id) => setSelectedFormationId(id),
-      onFrontEdgeClick: (_edgeId, props) => {
-        const sectorId = props.sector_id as string | undefined;
-        if (sectorId) setSelectedCorpsFrontSectorId(sectorId);
-      },
-      onOsidHover: (osid, point) => {
-        if (osid) setTooltipTargetWithPosition({ type: 'osid', id: osid }, point ?? undefined);
-        else clearTooltipTarget();
-      },
-      onFormationHover: (id, point) => {
-        if (id) setTooltipTargetWithPosition({ type: 'formation', id }, point ?? undefined);
-        else clearTooltipTarget();
-      },
-      onFrontEdgeHover: (edgeId, point) => {
-        if (edgeId) setTooltipTargetWithPosition({ type: 'front', id: edgeId }, point ?? undefined);
-        else clearTooltipTarget();
-      },
-      onMapMouseLeave: clearTooltipTarget,
-    });
-    return () => cleanup?.();
-  }, [mapReady, setSelectedOsid, setSelectedFormationId, setSelectedCorpsFrontSectorId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation]);
+    let cleanup: (() => void) | undefined;
+    // Re-register interactions when layers may have been added (e.g. front-edges, ethnic, density after loadedGameState).
+    const t = setTimeout(() => {
+      if (!mapRef.current) return;
+      cleanup = useMapInteractions(mapRef.current, {
+        onOsidClick: (osid) => {
+          if (orderModeForFormation === 'attack' && selectedFormationId) {
+            setPendingAttackConfirmation({ attackerFormationId: selectedFormationId, targetOsid: osid });
+            setOrderModeForFormation(null);
+          } else if (orderModeForFormation === 'move' && selectedFormationId) {
+            useGameStore.getState().addStagedOrder({ type: 'move', formationId: selectedFormationId, targetOsid: osid });
+            setOrderModeForFormation(null);
+          } else {
+            setSelectedOsid(osid);
+          }
+        },
+        onFormationClick: (id) => setSelectedFormationId(id),
+        onFrontEdgeClick: (_edgeId, props) => {
+          const sectorId = props.sector_id as string | undefined;
+          if (sectorId) setSelectedCorpsFrontSectorId(sectorId);
+        },
+        onOsidHover: (osid, point) => {
+          if (osid) setTooltipTargetWithPosition({ type: 'osid', id: osid }, point ?? undefined);
+          else clearTooltipTarget();
+        },
+        onFormationHover: (id, point) => {
+          if (id) setTooltipTargetWithPosition({ type: 'formation', id }, point ?? undefined);
+          else clearTooltipTarget();
+        },
+        onFrontEdgeHover: (edgeId, point) => {
+          if (edgeId) setTooltipTargetWithPosition({ type: 'front', id: edgeId }, point ?? undefined);
+          else clearTooltipTarget();
+        },
+        onMapMouseLeave: clearTooltipTarget,
+      });
+    }, 400);
+    return () => {
+      clearTimeout(t);
+      if (cleanup) cleanup();
+    };
+  }, [mapReady, loadedGameState, setSelectedOsid, setSelectedFormationId, setSelectedCorpsFrontSectorId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation]);
 
   useEffect(() => {
     const map = mapRef.current;

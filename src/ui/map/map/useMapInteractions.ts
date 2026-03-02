@@ -191,6 +191,9 @@ export function useMapInteractions(
   safeOn('click', 'osid-ethnic-fill', handleOsidClick);
   safeOn('mousemove', 'osid-ethnic-fill', handleOsidMouseMove);
   safeOn('mouseleave', 'osid-ethnic-fill', handleOsidMouseLeave);
+  safeOn('click', 'osid-density-fill', handleOsidClick);
+  safeOn('mousemove', 'osid-density-fill', handleOsidMouseMove);
+  safeOn('mouseleave', 'osid-density-fill', handleOsidMouseLeave);
 
   if (onFormationClick) {
     safeOn('click', 'formation-markers', handleFormationClick);
@@ -232,6 +235,9 @@ export function useMapInteractions(
     safeOff('click', 'osid-ethnic-fill', handleOsidClick);
     safeOff('mousemove', 'osid-ethnic-fill', handleOsidMouseMove);
     safeOff('mouseleave', 'osid-ethnic-fill', handleOsidMouseLeave);
+    safeOff('click', 'osid-density-fill', handleOsidClick);
+    safeOff('mousemove', 'osid-density-fill', handleOsidMouseMove);
+    safeOff('mouseleave', 'osid-density-fill', handleOsidMouseLeave);
     if (hoverTimeout) clearTimeout(hoverTimeout);
     if (onFormationClick) {
       safeOff('click', 'formation-markers', handleFormationClick);

@@ -9171,3 +9171,10 @@ Determinism checks **MUST** be run:
 - **Files modified:** `src/ui/map/tailwind.config.ts`, `src/ui/map/postcss.config.js`
 - **Verification:** `npx tsc --noEmit`, `npx vitest run`, `npm run desktop:map:build` — no Tailwind warning, build succeeds.
 - **Determinism:** Build/output path only; no simulation impact.
+
+### [2026-03-03] Map runtime contract fixes — Phase B complete
+- **Type:** Fix (Map / GUI)
+- **Summary:** Density mode OSID click/hover/tooltips: added `osid-density-fill` bindings in `useMapInteractions.ts`. Layer-aware interaction registration: MapContainer effect now depends on `loadedGameState` and re-runs after 400ms delay so front-edges and ethnic/density layers are present before registering.
+- **Files modified:** `src/ui/map/map/useMapInteractions.ts`, `src/ui/map/map/MapContainer.tsx`
+- **Verification:** tsc, vitest pass.
+- **Determinism:** UI events only; no simulation impact.
