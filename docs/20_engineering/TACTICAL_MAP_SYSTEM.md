@@ -11,6 +11,10 @@
 
 The **canonical player-facing map and GUI** is the **React + MapLibre map app** in `src/ui/map/` (Vite, React, Tailwind, Zustand). It is the single source of truth for all new GUI work. Spec: [AWWV_GUI_ARCHITECTURE_REWORK_v2.md](AWWV_GUI_ARCHITECTURE_REWORK_v2.md). Full implementation status and backlog: [20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md](../40_reports/20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md). Phase 3 expansion (2026-03-02): tooltip fix, sector visualization, brigade↔sector sync, CorpsDetail, density mode — [20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md](../40_reports/implemented/20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md). Run: `npm run dev:map`. Storybook for map UI components: `src/ui/map/.storybook/`, `src/ui/map/stories/`.
 
+**Glyphs and offline deployment:** The MapLibre style (`awwv_map_style.json`) references glyphs from `https://demotiles.maplibre.org/...`. Offline or air-gapped deployments will not have map labels unless glyphs are bundled locally and the style updated to point to a local or relative glyph URL.
+
+**Desktop map runtime (2026-03-03):** In Electron, map assets (PMTiles, style, GeoJSON) and Load run data are served from a local HTTP server (127.0.0.1, random port) started at app launch; MapLibre blob workers do not work under the `awwv://` protocol. The server serves `/data/source` and `/data/runs` (path-traversal guard, `.json` only for runs). Map build output is `dist/tactical-map`. Interaction layers (control, ethnic, density, front-edges) are bound when present (layer-aware delay after load). Report: [20260303_MAP_RUNTIME_CONTRACT_FIXES.md](../40_reports/implemented/20260303_MAP_RUNTIME_CONTRACT_FIXES.md).
+
 The sections below (§1 onward) describe the **legacy** tactical map (Canvas 2D, MapApp.ts) and HoI 3D map (map_hoi.html, HoIMapRenderer) for reference. Those stacks are archived; new features belong in the React + MapLibre app.
 
 ---

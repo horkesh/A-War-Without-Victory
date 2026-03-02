@@ -2,7 +2,7 @@
 
 ## Scope
 
-This document defines the Electron main <-> renderer IPC used by the desktop app (warroom-first launcher flow). The tactical map is embedded as an iframe in the warroom window (same-origin, `awwv://warroom/tactical-map/...`), not a separate `BrowserWindow`.
+This document defines the Electron main <-> renderer IPC used by the desktop app (warroom-first launcher flow). The tactical map is embedded as an iframe in the warroom window (same-origin, `awwv://warroom/tactical-map/...`), not a separate `BrowserWindow`. **Map assets (PMTiles, style, GeoJSON, Load run):** MapLibre blob workers do not work under `awwv://`; the main process starts a local HTTP server (127.0.0.1, random port) and exposes `getMapServerUrl` via preload. The map and warroom load map data from `http://127.0.0.1:<port>/data/source/...` and `/data/runs/<id>/final_save.json`. See [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §0 and [20260303_MAP_RUNTIME_CONTRACT_FIXES.md](../40_reports/implemented/20260303_MAP_RUNTIME_CONTRACT_FIXES.md).
 
 - Main process: `src/desktop/electron-main.cjs`
 - Preload bridge: `src/desktop/preload.cjs`
