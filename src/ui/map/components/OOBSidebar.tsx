@@ -98,6 +98,8 @@ export function OOBSidebar() {
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
+  const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
+  const setSelectedCorpsId = useGameStore((s) => s.setSelectedCorpsId);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
   const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
@@ -215,6 +217,19 @@ export function OOBSidebar() {
     el?.scrollIntoView({ block: 'nearest' });
   }, [expandedSections.army, selectedFormationId, selectedOsid]);
 
+  // C.2: Auto-expand Sectors accordion + scroll to selected sector
+  useEffect(() => {
+    if (!selectedCorpsFrontSectorId) return;
+    setExpandedSections((prev) => (prev.sectors ? prev : { ...prev, sectors: true }));
+    // Defer scroll to allow DOM to update after expansion
+    requestAnimationFrame(() => {
+      const root = sidebarRef.current;
+      if (!root) return;
+      const el = root.querySelector<HTMLElement>(`[data-sector-id="${selectedCorpsFrontSectorId}"]`);
+      el?.scrollIntoView({ block: 'nearest' });
+    });
+  }, [selectedCorpsFrontSectorId]);
+
   const toggle = (faction: string) => {
     setCollapsed((prev) => ({ ...prev, [faction]: !prev[faction] }));
   };
@@ -227,6 +242,20 @@ export function OOBSidebar() {
     if (corpsStanceOverrides[corpsId]) return corpsStanceOverrides[corpsId];
     const corpsFormation = corpsFormationById.get(corpsId);
     return corpsFormation?.corpsStance ?? loadedGameState?.armyStance?.[faction] ?? 'balanced';
+  };
+
+  /** Select brigade + its sector atomically (C.1: brigade click → sector on map). */
+  const selectBrigadeWithSector = (brigadeId: string) => {
+    const sectors = loadedGameState?.corpsFrontSectors;
+    const sectorId = sectors?.find(
+      (s) => s.assigned_brigade_ids.includes(brigadeId) || s.reserve_brigade_ids.includes(brigadeId)
+    )?.sector_id ?? null;
+    // Atomic: set both without mutual-exclusion clearing
+    useGameStore.setState({
+      selectedFormationId: brigadeId,
+      selectedCorpsFrontSectorId: sectorId,
+      selectedOsid: null,
+    });
   };
 
   const hoverBrigade = (formation: FormationView, hovered: boolean, e?: React.MouseEvent) => {
@@ -329,12 +358,15 @@ export function OOBSidebar() {
                             stance={getCorpsStance(corpsId, faction)}
                             onStanceChange={(next) => setCorpsStance(corpsId, next)}
                             onHeaderClick={() => {
-                              const first = [...brigades].sort((a, b) => a.id.localeCompare(b.id))[0];
-                              if (!first) return;
-                              setSelectedFormationId(first.id);
+                              if (corpsId !== '_ungrouped') {
+                                setSelectedCorpsId(corpsId);
+                              } else {
+                                const first = [...brigades].sort((a, b) => a.id.localeCompare(b.id))[0];
+                                if (first) setSelectedFormationId(first.id);
+                              }
                             }}
                             onHoverOsidsChange={(osids) => setHoveredOsids(osids)}
-                            onBrigadeSelect={(formationId) => setSelectedFormationId(formationId)}
+                            onBrigadeSelect={(formationId) => selectBrigadeWithSector(formationId)}
                             highlightedFormationIds={highlightedFormationIds}
                             onBrigadeHoverOsids={hoverBrigade}
                           />
@@ -357,7 +389,7 @@ export function OOBSidebar() {
                                   formation={brigade}
                                   compact
                                   highlighted={highlightedFormationIds.has(brigade.id)}
-                                  onClick={() => setSelectedFormationId(brigade.id)}
+                                  onClick={() => selectBrigadeWithSector(brigade.id)}
                                   onHoverChange={(hovered, e) => hoverBrigade(brigade, hovered, e)}
                                 />
                               ))}
@@ -455,8 +487,13 @@ export function OOBSidebar() {
                         <button
                           key={sector.sector_id}
                           type="button"
+                          data-sector-id={sector.sector_id}
                           onClick={() => setSelectedCorpsFrontSectorId(sector.sector_id)}
-                          className="w-full flex items-center gap-2 px-2 py-1.5 rounded border border-panel-border bg-panel-card hover:bg-panel-hover transition-colors text-left"
+                          className={`w-full flex items-center gap-2 px-2 py-1.5 rounded border transition-colors text-left ${
+                            selectedCorpsFrontSectorId === sector.sector_id
+                              ? 'border-accent-gold bg-panel-active'
+                              : 'border-panel-border bg-panel-card hover:bg-panel-hover'
+                          }`}
                         >
                           <span
                             className="inline-block w-2.5 h-2.5 rounded-sm shrink-0"

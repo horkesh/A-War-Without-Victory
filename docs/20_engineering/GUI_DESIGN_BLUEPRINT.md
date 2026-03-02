@@ -160,7 +160,7 @@ A single 48px strip across the top. Dark background (#1a1a2e). Divided into zone
 | **ADVANCE button** | Primary action button. Green background, white text. Prominent. Pulses faintly when it's the player's turn. Text: `▶ ADVANCE WEEK` | Triggers turn pipeline |
 | **Auto-advance** | `[AUTO ▶]` toggle. When on, advances every N seconds (configurable 1-10s). Shows progress: `Week 23/52`. For "run to end" mode. | — |
 | **Zoom controls** | `STRATEGIC / OPERATIONAL / TACTICAL` pill selector + `+`/`-` buttons. Current zoom level highlighted. | Map zoom state |
-| **Layer menu** | Dropdown: Political Control (default), Ethnic 1991, Supply Status, Front Pressure, Terrain, Brigade AoR, Displacement. Checkboxes for overlays: Front Lines, Unit Markers, Order Arrows, Settlement Labels. | Map render flags |
+| **Layer menu** | Dropdown: Political Control (default), Ethnic 1991, Supply Status, Front Pressure, Density. Checkboxes for overlays: Front Lines, Formations (OOB), Labels, Sectors. *(2026-03-02: Brigade AoR removed; Density and Sectors added; canonical impl in `src/ui/map/components/MapModeToolbar.tsx`)* | Map render flags |
 | **Search** | Magnifying glass icon. Opens search overlay (settlement names, formation names, municipality names). Diacritic-insensitive. | Existing search |
 
 ### 4.2 Turn Advance Behavior

@@ -9,7 +9,7 @@
 
 ## 0. Canonical map / GUI (2026-02-28)
 
-The **canonical player-facing map and GUI** is the **React + MapLibre map app** in `src/ui/map/` (Vite, React, Tailwind, Zustand). It is the single source of truth for all new GUI work. Spec: [AWWV_GUI_ARCHITECTURE_REWORK_v2.md](AWWV_GUI_ARCHITECTURE_REWORK_v2.md). Full implementation status and backlog: [20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md](../40_reports/20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md). Run: `npm run dev:map`. Storybook for map UI components: `src/ui/map/.storybook/`, `src/ui/map/stories/`.
+The **canonical player-facing map and GUI** is the **React + MapLibre map app** in `src/ui/map/` (Vite, React, Tailwind, Zustand). It is the single source of truth for all new GUI work. Spec: [AWWV_GUI_ARCHITECTURE_REWORK_v2.md](AWWV_GUI_ARCHITECTURE_REWORK_v2.md). Full implementation status and backlog: [20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md](../40_reports/20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md). Phase 3 expansion (2026-03-02): tooltip fix, sector visualization, brigade↔sector sync, CorpsDetail, density mode — [20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md](../40_reports/implemented/20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md). Run: `npm run dev:map`. Storybook for map UI components: `src/ui/map/.storybook/`, `src/ui/map/stories/`.
 
 The sections below (§1 onward) describe the **legacy** tactical map (Canvas 2D, MapApp.ts) and HoI 3D map (map_hoi.html, HoIMapRenderer) for reference. Those stacks are archived; new features belong in the React + MapLibre app.
 
@@ -517,7 +517,7 @@ The `SpatialIndex` is a 50x50 uniform grid over the data bounds. For ~6,000 sett
 
 A **bottom floating toolbar** (`.tm-layer-toolbar`) centred above the status area provides layer toggles only:
 
-- **Checkboxes:** Political control, Front lines, Municipality borders, Minimap, Formations (OOB). Labels and Brigade AoR toggles removed (2026-02-17): labels always on; AoR highlight automatic when a formation is selected. Same element IDs for remaining layers (`layer-control`, `layer-frontlines`, etc.). IMPLEMENTED_WORK_CONSOLIDATED §22.
+- **Checkboxes:** Political control, Front lines, Municipality borders, Minimap, Formations (OOB). Labels and Brigade AoR toggles removed (2026-02-17): labels always on; AoR highlight automatic when a formation is selected. Same element IDs for remaining layers (`layer-control`, `layer-frontlines`, etc.). IMPLEMENTED_WORK_CONSOLIDATED §22. **React+MapLibre app (canonical GUI, 2026-03-02):** MapModeToolbar layer toggles: Fronts, Formations, Labels, Sectors. Map modes: Political, Ethnic, Supply, Pressure, Density.
 - **No load/dataset controls on map:** Load State, Load Run, Load Replay, dataset dropdown, and replay controls are not on the map surface; loading is via **main menu** (Menu → Load Save / Load Replay) or desktop IPC (`game-state-updated`). Replay scrubber still appears when a replay is loaded (e.g. via File → Open replay or IPC).
 
 Settlement fill mode (political control vs ethnic majority 1991) is toggled by the **Ethnic 1991** toolbar button only; legend and tooltip reflect the current mode.

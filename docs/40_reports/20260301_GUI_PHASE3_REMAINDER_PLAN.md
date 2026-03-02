@@ -31,13 +31,13 @@
 |------|--------|
 | **Minimap** | Not present. MapModeToolbar is positioned at `bottom: 200` (space reserved per Phase C report). |
 | **ZoomControls** | Only MapLibre's built-in NavigationControl in MapContainer; no separate ZoomControls component. |
-| **CorpsDetail** | Not present. No `selectedCorpsId` in store; no right-panel view for corps. |
+| **CorpsDetail** | **Done (2026-03-02).** `selectedCorpsId` in store; `CorpsDetail.tsx` shows corps identity, metrics, sectors, operations, subordinate brigades. Report: [20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md](implemented/20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md). |
 | **ArmyDetail** | Not present. No `selectedArmyId`; OOB groups by corps, not by army. |
 | **MovementPreview** | Not present. No reachable-OSID highlight layer or `orderModeForFormation: 'move'` → preview. |
 
 ### 1.3 Drift and notes
 
-- **v2 §0** is accurate: Phase C is complete; Phase 3 "Not yet" correctly lists Minimap, ZoomControls, CorpsDetail, ArmyDetail, MovementPreview.
+- **v2 §0** updated 2026-03-02: Phase C + Phase 3 expansion complete; Phase 3 "Not yet" reduced to Minimap, ZoomControls, ArmyDetail, MovementPreview (CorpsDetail done).
 - **20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md** is outdated: it was written before/during Phase C and still lists MapModeToolbar, OrderQueue, AttackConfirmation, useKeyboardShortcuts as "Not implemented." In reality they are implemented. No code drift; only the status report is stale.
 - **MapLayerToggles:** Implemented inside MapModeToolbar (not a separate component). v2 §5.2 lists them separately; functionally done.
 

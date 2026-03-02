@@ -44,7 +44,7 @@ Populate this section from the discovery checklist.
   - Map data loading: `src/map/`
 
 ### GUI / Map UIs
-- **React + MapLibre map app (canonical):** `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — spec. Code: `src/ui/map/` (Vite, React, Tailwind, Zustand, MapContainer). Dev: `npm run dev:map`. Status and backlog: `docs/40_reports/20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md`. Storybook: `src/ui/map/.storybook/`, `src/ui/map/stories/`.
+- **React + MapLibre map app (canonical):** `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — spec. Code: `src/ui/map/` (Vite, React, Tailwind, Zustand, MapContainer). Dev: `npm run dev:map`. Status and backlog: `docs/40_reports/20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md`. Phase 3 expansion (2026-03-02): `docs/40_reports/implemented/20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md`. Storybook: `src/ui/map/.storybook/`, `src/ui/map/stories/`.
 - **Tactical Map System (legacy reference):** `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` — engineering reference for legacy Canvas 2D and HoI 3D. Code: same `src/ui/map/` (legacy entrypoints archived or coexisting).
 - **Legacy 3D tactical render path:** `src/ui/map/map_operational_3d.ts`, `src/ui/map/map_staff_3d.ts`, `src/ui/map/tactical_sandbox.ts`. Shared render contract type: `MapViewInput` in `src/ui/map/types.ts`.
 - **Warroom (HQ scene + map scene):** `src/ui/warroom/`. Dev server: `npm run dev:warroom`. Full-screen map scene uses WarPlanningMap; staged assets, Phase 0 turn advance. See GUI reports in `docs/40_reports/`.

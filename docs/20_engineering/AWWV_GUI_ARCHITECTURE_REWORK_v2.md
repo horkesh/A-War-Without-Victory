@@ -21,7 +21,7 @@
 |------|------|--------|
 | **Phase 1 (Scaffold + Map)** | Vite + React + MapLibre; `awwv_map_style.json`; MapContainer; OSID control layer; front lines; formations; order arrows; PMTiles/base map | — |
 | **Phase 2 (Game state)** | Load save → store; GeoJSON builders (control, front lines, formations, order arrows); formations + orders on map | — |
-| **Phase 3 (UI panels)** | TopToolbar, BottomStatusStrip, SelectionPanel (Settlement Info, OSID humanized), FormationDetail, OOBSidebar, CorpsCard, BrigadeRow; click OSID/formation → panels; Storybook. **Phase A complete:** §9.2 panel palette, headers, faction gradient TopToolbar, BrigadeRow cohesion bars + supply dots. **Phase B complete:** tabbed sidebar (Army/Situation), Situation tab, front on CorpsCard, Reserve, stance controls, hover preview, Escape clears selection. **Phase C complete (2026-02-28):** Rich tooltips (§7), MapModeToolbar + MapLayerToggles (bottom-right), useKeyboardShortcuts (Enter, 1–4, Escape), AttackConfirmation modal, OrderQueue. | Minimap, ZoomControls; CorpsDetail, ArmyDetail; MovementPreview. **Next priority:** Complete Phase 3 remainder (see docs/40_reports/20260301_GUI_PHASE3_REMAINDER_PLAN.md). |
+| **Phase 3 (UI panels)** | TopToolbar, BottomStatusStrip, SelectionPanel (Settlement Info, OSID humanized), FormationDetail, OOBSidebar, CorpsCard, BrigadeRow; click OSID/formation → panels; Storybook. **Phase A complete:** §9.2 panel palette, headers, faction gradient TopToolbar, BrigadeRow cohesion bars + supply dots. **Phase B complete:** tabbed sidebar (Army/Situation), Situation tab, front on CorpsCard, Reserve, stance controls, hover preview, Escape clears selection. **Phase C complete (2026-02-28):** Rich tooltips (§7), MapModeToolbar + MapLayerToggles (bottom-right), useKeyboardShortcuts (Enter, 1–4, Escape), AttackConfirmation modal, OrderQueue. **Phase 3 expansion (2026-03-02):** Tooltip fix (stripFactionSuffix), sector fill + edge glow on map, brigade↔sector bidirectional sync, CorpsDetail panel, density map mode (5th mode). Report: [20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md](../40_reports/implemented/20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md). | Minimap, ZoomControls; ArmyDetail; MovementPreview. **Next priority:** Complete Phase 3 remainder (see docs/40_reports/20260301_GUI_PHASE3_REMAINDER_PLAN.md). |
 | **Phase 4 (Desktop)** | — | useIPC; advance-turn, order staging, recruitment; SidePickerOverlay; fog-of-war; PMTiles in Electron |
 | **Phase 5 (Polish)** | — | ZoC overlay, battle markers, War Summary modal, Replay scrubber, Attack confirmation with odds, Movement preview, visual sign-off |
 
@@ -800,7 +800,7 @@ Before building UI panels (Phase 3 / Step 5 in the implementation guide), the ke
    - **Bottom status strip:** selected OSID info, population, controller, supply status
    - **Left sidebar (collapsible):** OOB tree (Theatre → Army → Corps → Brigade hierarchy)
    - **Right panel (context-sensitive):** appears when clicking an OSID, formation, or front line. Shows detail for the selected entity.
-   - **Map mode toolbar (floating, bottom-left or top-left):** toggle between Political Control, Ethnic Majority, Supply State, Front Pressure map modes
+   - **Map mode toolbar (floating, bottom-right):** toggle between Political Control, Ethnic Majority, Supply State, Front Pressure, Density map modes. Layer toggles: Fronts, Formations, Labels, Sectors.
 
 2. **Settlement/OSID detail panel** — right panel content when an OSID is selected:
    - OSID name, municipality, controller
@@ -1045,7 +1045,7 @@ scripts/map/
 1. Create component shell: `AppShell`, `TopToolbar`, `BottomStatusStrip`
 2. Implement `SelectionPanel` — click OSID → show settlement details
 3. Implement `OOBSidebar` with `CorpsCard` / `BrigadeRow`
-4. Implement `FormationDetail`, `CorpsDetail` panels
+4. Implement `FormationDetail`, `CorpsDetail` panels — **Done (2026-03-02)**: CorpsDetail with corps identity, metrics, sectors, operations, subordinate brigades
 5. Implement map mode toolbar (SELECT / ATTACK / MOVE)
 6. Implement keyboard shortcuts
 7. Verify: full interactive session — click settlements, browse OOB, select formations

@@ -58,7 +58,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **Active workstreams:**
 - Combat calibration: n314 = 87.4% (658/753 OSID match), multi-sector corps + supply gating + sector offensives
-- GUI Phase 3 remainder: Minimap, ZoomControls, CorpsDetail, ArmyDetail, MovementPreview
+- GUI Phase 3 remainder: Minimap, ZoomControls, ArmyDetail, MovementPreview (CorpsDetail done 2026-03-02; tooltip fix, sector viz, bidirectional sync, density mode done)
 
 **Completed workstreams:**
 - Displacement system complete: n319 = 668k displaced (per-OSID census depth). See 20260301_DISPLACEMENT_DEPTH_CALIBRATION.md
@@ -8962,4 +8962,49 @@ Determinism checks **MUST** be run:
   - `.cursor/skills/formation-expert/SKILL.md` — pool population constants
   - `.claude/skills/formation-expert/SKILL.md` — pool population constants (mirror)
 - **Skipped (historical):** docs/40_reports/implemented/* (historical reports), docs/_old/* (archived), docs/30_planning/20260222_ATTACK_RESOLUTION_FORMULA_SPEC.md (original design spec), PROJECT_LEDGER entries (historical context)
+- **Flagged:** `docs/10_canon/FORAWWV.md` — no references to changed constants (no update needed)
+
+**2026-03-02** - GUI Phase 3 Expansion: Sector Visualization, Bidirectional Sync, Density Mode
+- **Phase:** GUI Phase 3 expansion (Phases A–E)
+- **Summary:** 5-phase implementation making the map the primary command interface for corps sector management. Fixed broken "FRONT: ? — ?" tooltip, added sector territory visualization on map, wired bidirectional brigade↔sector selection, created CorpsDetail panel, added density map mode.
+- **New files (3):** `src/ui/map/utils/sectorUtils.ts` (65 lines — stripFactionSuffix, collectSectorFriendlyOsids), `src/ui/map/components/CorpsDetail.tsx` (190 lines — corps detail panel), `src/ui/map/map/builders/buildDensityGeoJSON.ts` (60 lines — density mode builder)
+- **Modified files (7):** MapContainer.tsx (+236 — sector layers, brigade rings, density source/layer), Tooltip.tsx (+60 — suffix strip, sector/density/threat badges), OOBSidebar.tsx (+49 — brigade→sector selection, auto-expand, corps header click), CorpsFrontPanel.tsx (+46 — clickable brigades, badges, panel priority), gameStore.ts (+15 — sectorsVisible, selectedCorpsId, density MapMode), MapModeToolbar.tsx (+12 — sectors toggle, density button), App.tsx (+2 — render CorpsDetail)
+- **Total:** +711 lines (396 modified + 315 new). All typechecks pass.
+- **Store additions:** `MapMode` now includes `'density'` (5th mode); `sectorsVisible: boolean`; `selectedCorpsId: string | null` with mutual exclusion
+- **Map layers added:** sector-fill, sector-edge-glow-pos/neg, sector-brigade-rings, osid-density-fill/source
+- **Phase 3 remainder updated:** CorpsDetail done; remaining: Minimap, ZoomControls, ArmyDetail, MovementPreview
+- **Report:** docs/40_reports/implemented/20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md
+
+**2026-03-02** - Canon propagation: GUI Phase 3 expansion
+- **Phase:** Documentation propagation
+- **Summary:** Updated 8 documentation files with structural references to GUI Phase 3 expansion changes.
+- **Files updated:**
+  - `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — §0 status table (Phase 3 expansion done, CorpsDetail removed from "Not yet"), map modes (added Density), §8 checklist (CorpsDetail marked done)
+  - `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` — §0 status reference (added expansion report link), §13.1 layer toggles (added Sectors, map modes for React app)
+  - `docs/20_engineering/GUI_DESIGN_BLUEPRINT.md` — §4.1 layer menu (removed Brigade AoR, added Density+Sectors)
+  - `docs/10_canon/context.md` — canonical GUI paragraph (Phase C + expansion complete, 5 map modes, 4 layer toggles)
+  - `docs/20_engineering/REPO_MAP.md` — GUI status reference (added expansion report)
+  - `docs/40_reports/20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md` — staleness note (CorpsDetail now implemented)
+  - `docs/40_reports/20260301_GUI_PHASE3_REMAINDER_PLAN.md` — §1.2 CorpsDetail marked done, §1.3 updated
+  - `docs/40_reports/README.md` — implemented/ index (added expansion report)
+- **Flagged:** `docs/10_canon/FORAWWV.md` — no GUI references (no update needed)
+
+**2026-03-02** - Fix reserve assignment proportionality + rear pocket priority
+- **Phase:** Bot AI calibration
+- **Summary:** Two fixes: (1) Reserve flooding — `redistributeExcessReserves()` caps each sector at `max(1, ceil(edges × RESERVE_PER_EDGE_CAP))` where `RESERVE_PER_EDGE_CAP=0.5`, redistributing overflow to least-filled sectors. Prevents tiny pocket sectors from hoarding reserves (e.g. 4-edge Konjuhovci attracted 11 reserves, now capped at 2). Called after both `assignInteriorBrigadesToSectors()` and `assignOrphanedBrigadesToFaction()`. (2) Rear pocket targeting — removed `REAR_CLEANUP_END_WEEK=12` time gate (rear cleanup runs every turn); rear pockets (all neighbors faction-controlled) targeted even without adjacent brigade so reserves move toward them.
+- **Determinism:** All changes deterministic. Overflow sorted by strictCompare, assignment by fill ratio. No randomness.
+- **Files modified:** `src/sim/combat/corps_front_sectors.ts` (new constant, new function, 2 call sites), `src/sim/combat/bot_corps_ai.ts` (rear cleanup time gate removed, pocket targeting logic updated)
+- **Calibration:** n348 (40w) = 84.9% OSID match (639/753), 6/6 benchmarks pass, 11/14 anchors pass (same known failures). Identical match rate to n344 baseline.
+- **Verification:** tsc clean, 220 vitest pass / 1 skip.
+
+**2026-03-02** - Canon propagation: reserve cap + rear pocket fix
+- **Phase:** Documentation propagation
+- **Summary:** Updated 5 documentation files with structural references to reserve proportional cap and rear cleanup behavior changes.
+- **Files updated:**
+  - `docs/PROJECT_LEDGER_KNOWLEDGE.md` — rear-area cleanup entry: removed "time-limited (weeks 0-12)" and "Expires after week 12", added rear pocket targeting note
+  - `docs/30_planning/20260228_phase_ii_mechanics_design.md` — 3 references: "weeks 0-10" → "continuous", "REAR_CLEANUP_END_WEEK" struck through, diagram updated
+  - `docs/10_canon/Systems_Manual_v0_6_0.md` — corps_front_sectors description: added "redistributed by proportional cap RESERVE_PER_EDGE_CAP=0.5"
+  - `docs/10_canon/context.md` — Corps Sectors bullet: added proportional cap description
+  - `MEMORY.md` — Added reserve proportional cap and rear pocket targeting entries, n348 calibration result
+- **Skipped (historical):** docs/40_reports/* (CALIBRATION_MASTER, PHASE_M_EXECUTION_PLAN, etc.), docs/_old/*, PROJECT_LEDGER entries
 - **Flagged:** `docs/10_canon/FORAWWV.md` — no references to changed constants (no update needed)

@@ -5,6 +5,7 @@ import { TopToolbar } from './components/TopToolbar';
 import { SelectionPanel } from './components/SelectionPanel';
 import { CorpsFrontPanel } from './components/CorpsFrontPanel';
 import { FormationDetail } from './components/FormationDetail';
+import { CorpsDetail } from './components/CorpsDetail';
 import { BottomStatusStrip } from './components/BottomStatusStrip';
 import { OOBSidebar } from './components/OOBSidebar';
 import { OrderQueue } from './components/OrderQueue';
@@ -127,6 +128,7 @@ function App() {
       <OrderQueue />
       <SelectionPanel />
       <CorpsFrontPanel />
+      <CorpsDetail />
       <FormationDetail />
       <Tooltip />
       {pendingAttackConfirmation && attackerFormation && (

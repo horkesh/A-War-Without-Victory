@@ -1,0 +1,65 @@
+/**
+ * Shared sector utilities for map visualization.
+ * Used by Tooltip (Phase A), sector fill (Phase B), brigade sync (Phase C), density mode (Phase E).
+ */
+
+const FACTION_SUFFIXES = [':RS', ':RBiH', ':HRHB'] as const;
+
+/**
+ * Strip the faction suffix from a composite front-edge hover ID.
+ * Hover features use format `op:a:b__op:c:d:RS` but canonical edge IDs are `op:a:b__op:c:d`.
+ */
+export function stripFactionSuffix(compositeEdgeId: string): string {
+  for (const suffix of FACTION_SUFFIXES) {
+    if (compositeEdgeId.endsWith(suffix)) {
+      return compositeEdgeId.slice(0, -suffix.length);
+    }
+  }
+  return compositeEdgeId;
+}
+
+/**
+ * Extract the faction suffix from a composite front-edge hover ID.
+ * Returns the faction string (e.g. 'RS') or null if no known suffix.
+ */
+export function extractFactionFromEdgeId(compositeEdgeId: string): string | null {
+  for (const suffix of FACTION_SUFFIXES) {
+    if (compositeEdgeId.endsWith(suffix)) {
+      return suffix.slice(1); // strip leading ':'
+    }
+  }
+  return null;
+}
+
+interface FrontEdgeView {
+  edge_id: string;
+  a: string;
+  b: string;
+  side_a: string | null;
+  side_b: string | null;
+}
+
+interface SectorView {
+  sector_id: string;
+  faction: string;
+  edge_ids: string[];
+}
+
+/**
+ * Collect the friendly-side OSIDs for a given sector.
+ * For each edge in the sector, finds the OSID on the sector's faction side.
+ */
+export function collectSectorFriendlyOsids(
+  sector: SectorView,
+  frontEdgesOsid: FrontEdgeView[] | undefined
+): string[] {
+  if (!frontEdgesOsid) return [];
+  const edgeIdSet = new Set(sector.edge_ids);
+  const osids = new Set<string>();
+  for (const edge of frontEdgesOsid) {
+    if (!edgeIdSet.has(edge.edge_id)) continue;
+    if (edge.side_a === sector.faction) osids.add(edge.a);
+    if (edge.side_b === sector.faction) osids.add(edge.b);
+  }
+  return [...osids].sort();
+}

@@ -2,12 +2,30 @@ import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 
+/** Density badge with color coding. */
+function DensityBadge({ density }: { density: number }) {
+  if (density < 0.5) return <span className="text-red-400 font-semibold">THIN</span>;
+  if (density > 1.0) return <span className="text-green-400 font-semibold">DENSE</span>;
+  return <span className="text-amber-300">Normal</span>;
+}
+
+/** Threat ratio badge with color coding. */
+function ThreatBadge({ ratio }: { ratio: number }) {
+  if (ratio > 1.5) return <span className="text-red-400 font-semibold">{ratio.toFixed(2)}</span>;
+  if (ratio > 0.8) return <span className="text-amber-300">{ratio.toFixed(2)}</span>;
+  return <span className="text-green-400">{ratio.toFixed(2)}</span>;
+}
+
 export function CorpsFrontPanel() {
   const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const setSelectedSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
+  const selectedFormationId = useGameStore((s) => s.selectedFormationId);
+  const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
+  const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
 
-  if (!selectedSectorId || !loadedGameState?.corpsFrontSectors) return null;
+  // Formation detail takes priority — hide sector panel when a formation is selected
+  if (selectedFormationId || !selectedSectorId || !loadedGameState?.corpsFrontSectors) return null;
 
   const sector = loadedGameState.corpsFrontSectors.find((s) => s.sector_id === selectedSectorId);
   if (!sector) return null;
@@ -82,12 +100,12 @@ export function CorpsFrontPanel() {
           <div className="flex justify-between">
             <span className="text-text-secondary">Density</span>
             <span className="text-text-primary tabular-nums">
-              {sector.density.toFixed(2)} ({sector.assigned_brigade_ids.length} / {sector.length_edges})
+              {sector.density.toFixed(2)} <DensityBadge density={sector.density} /> <span className="text-text-secondary">({sector.assigned_brigade_ids.length}/{sector.length_edges})</span>
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-text-secondary">Threat ratio</span>
-            <span className="text-text-primary tabular-nums">{sector.threat_ratio.toFixed(2)}</span>
+            <span className="tabular-nums"><ThreatBadge ratio={sector.threat_ratio} /></span>
           </div>
           <div className="flex justify-between">
             <span className="text-text-secondary">Def. power</span>
@@ -116,12 +134,19 @@ export function CorpsFrontPanel() {
             </div>
             <div className="space-y-0.5 max-h-[200px] overflow-auto">
               {assignedFormations.map((f) => (
-                <div key={f.id} className="flex justify-between text-text-primary">
+                <button
+                  key={f.id}
+                  type="button"
+                  className="w-full flex justify-between text-text-primary hover:text-interactive transition-colors text-left"
+                  onClick={() => setSelectedFormationId(f.id)}
+                  onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
+                  onMouseLeave={() => setHoveredOsids([])}
+                >
                   <span className="truncate mr-2">{f.name}</span>
                   <span className="text-text-secondary tabular-nums shrink-0">
                     {f.personnel != null ? f.personnel.toLocaleString() : '—'}
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -135,12 +160,19 @@ export function CorpsFrontPanel() {
             </div>
             <div className="space-y-0.5 max-h-[120px] overflow-auto">
               {reserveFormations.map((f) => (
-                <div key={f.id} className="flex justify-between text-text-primary">
+                <button
+                  key={f.id}
+                  type="button"
+                  className="w-full flex justify-between text-text-primary/70 hover:text-interactive transition-colors text-left"
+                  onClick={() => setSelectedFormationId(f.id)}
+                  onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
+                  onMouseLeave={() => setHoveredOsids([])}
+                >
                   <span className="truncate mr-2">{f.name}</span>
                   <span className="text-text-secondary tabular-nums shrink-0">
                     {f.personnel != null ? f.personnel.toLocaleString() : '—'}
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           </div>

@@ -10,6 +10,7 @@ const MAP_MODES: { id: MapMode; label: string }[] = [
   { id: 'ethnic', label: 'Ethnic' },
   { id: 'supply', label: 'Supply' },
   { id: 'pressure', label: 'Pressure' },
+  { id: 'density', label: 'Density' },
 ];
 
 export function MapModeToolbar() {
@@ -21,6 +22,8 @@ export function MapModeToolbar() {
   const setFormationsVisible = useGameStore((s) => s.setFormationsVisible);
   const labelsVisible = useGameStore((s) => s.labelsVisible);
   const setLabelsVisible = useGameStore((s) => s.setLabelsVisible);
+  const sectorsVisible = useGameStore((s) => s.sectorsVisible);
+  const setSectorsVisible = useGameStore((s) => s.setSectorsVisible);
 
   return (
     <div
@@ -93,6 +96,15 @@ export function MapModeToolbar() {
             className="rounded border-panel-border"
           />
           Labels
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer" style={{ color: '#ddd5c8' }}>
+          <input
+            type="checkbox"
+            checked={sectorsVisible}
+            onChange={(e) => setSectorsVisible(e.target.checked)}
+            className="rounded border-panel-border"
+          />
+          Sectors
         </label>
       </div>
     </div>

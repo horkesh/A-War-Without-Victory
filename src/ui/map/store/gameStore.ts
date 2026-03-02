@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import type { LoadedGameState } from '../data/types';
 import { parseGameState } from '../data/GameStateAdapter';
 
-/** Map overlay mode (HOI §3.1, §6). Ethnic/Supply/Pressure use same as political until data/layers exist. */
-export type MapMode = 'political' | 'ethnic' | 'supply' | 'pressure';
+/** Map overlay mode (HOI §3.1, §6). */
+export type MapMode = 'political' | 'ethnic' | 'supply' | 'pressure' | 'density';
 
 /** Single staged order for the current turn (Phase C5). */
 export interface StagedOrder {
@@ -52,9 +52,11 @@ export interface GameStore {
   frontsVisible: boolean;
   formationsVisible: boolean;
   labelsVisible: boolean;
+  sectorsVisible: boolean;
   setFrontsVisible: (v: boolean) => void;
   setFormationsVisible: (v: boolean) => void;
   setLabelsVisible: (v: boolean) => void;
+  setSectorsVisible: (v: boolean) => void;
 
   /** Phase C4: When 'attack', next OSID click opens AttackConfirmation instead of selecting OSID. */
   orderModeForFormation: 'attack' | null;
@@ -67,6 +69,10 @@ export interface GameStore {
   /** Selected corps front sector (click on front line). Mutual exclusion with selectedOsid/selectedFormationId. */
   selectedCorpsFrontSectorId: string | null;
   setSelectedCorpsFrontSectorId: (id: string | null) => void;
+
+  /** Selected corps (click on corps header in sidebar). */
+  selectedCorpsId: string | null;
+  setSelectedCorpsId: (id: string | null) => void;
 
   loadedGameState: LoadedGameState | null;
   /** Last load error message (cleared when a new load starts or succeeds). */
@@ -113,9 +119,11 @@ export const useGameStore = create<GameStore>((set) => ({
   frontsVisible: true,
   formationsVisible: true,
   labelsVisible: true,
+  sectorsVisible: true,
   setFrontsVisible: (v) => set({ frontsVisible: v }),
   setFormationsVisible: (v) => set({ formationsVisible: v }),
   setLabelsVisible: (v) => set({ labelsVisible: v }),
+  setSectorsVisible: (v) => set({ sectorsVisible: v }),
 
   orderModeForFormation: null,
   setOrderModeForFormation: (mode) => set({ orderModeForFormation: mode }),
@@ -125,6 +133,9 @@ export const useGameStore = create<GameStore>((set) => ({
 
   selectedCorpsFrontSectorId: null,
   setSelectedCorpsFrontSectorId: (id) => set({ selectedCorpsFrontSectorId: id, selectedOsid: null, selectedFormationId: null }),
+
+  selectedCorpsId: null,
+  setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedOsid: null, selectedFormationId: null, selectedCorpsFrontSectorId: null }),
 
   loadedGameState: null,
 
