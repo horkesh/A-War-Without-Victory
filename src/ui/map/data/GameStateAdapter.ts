@@ -8,10 +8,11 @@
 
 import type {
     AoROrderView, AttackOrderView, CorpsFrontSectorView, FormationView, LoadedGameState,
-    MilitiaPoolView, MovementOrderSettlementView, OperationView,
-    ReconIntelligenceView, RepositionOrderView, RecruitmentView,
+    MilitiaPoolView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
+    OperationView, ReconIntelligenceView, RepositionOrderView, RecruitmentView,
 } from './types';
-import { buildControlLookup, buildStatusLookup } from './ControlLookup';
+import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
+import { strictCompare } from '../../../state/validateGameState.js';
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
     const out: Record<string, number> = {};
@@ -227,6 +228,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                 narrativeArc,
                 warNarrative: typeof warStory?.narrative === 'string' ? warStory.narrative : undefined,
                 notableMoments: Array.isArray(warStory?.notable_moments) ? warStory.notable_moments : undefined,
+                officer_quality: typeof f.officer_quality === 'number' && Number.isFinite(f.officer_quality) ? f.officer_quality : undefined,
                 combatSummary,
             });
         }
@@ -490,6 +492,53 @@ export function parseGameState(json: unknown): LoadedGameState {
         if (Object.keys(out).length > 0) phaseIiExhaustion = out;
     }
 
+    let namedOfficerData: LoadedGameState['namedOfficerData'] | undefined;
+    let namedOfficerStateById: LoadedGameState['namedOfficerStateById'] | undefined;
+    const rawOfficerData = state.named_officer_data as Array<Record<string, unknown>> | undefined;
+    const rawOfficers = state.named_officers as Record<string, Record<string, unknown>> | undefined;
+    if (Array.isArray(rawOfficerData) && rawOfficers && typeof rawOfficers === 'object' && !Array.isArray(rawOfficers)) {
+        const officerList: NamedOfficerView[] = [];
+        const sortedData = [...rawOfficerData].sort((a, b) => strictCompare(String(a?.id ?? ''), String(b?.id ?? '')));
+        for (const data of sortedData) {
+            const id = typeof data?.id === 'string' ? data.id : '';
+            if (!id) continue;
+            const os = rawOfficers[id];
+            officerList.push({
+                id,
+                name: typeof data.name === 'string' ? data.name : id,
+                faction: typeof data.faction === 'string' ? data.faction : '',
+                rank: typeof data.rank === 'string' ? data.rank : 'corps_commander',
+                competence: finiteNumber(data.competence, 0),
+                aggressiveness: finiteNumber(data.aggressiveness, 0),
+                defensive_skill: finiteNumber(data.defensive_skill, 0),
+                home_corps_id: typeof data.home_corps_id === 'string' ? data.home_corps_id : undefined,
+                status: typeof os?.status === 'string' ? os.status : 'active',
+                assigned_corps_id: typeof os?.assigned_corps_id === 'string' ? os.assigned_corps_id : null,
+                acting_commander: Boolean(os?.acting_commander),
+                turns_in_command: finiteNumber(os?.turns_in_command, 0),
+                battles: finiteNumber(os?.battles, 0),
+                victories: finiteNumber(os?.victories, 0),
+            });
+        }
+        if (officerList.length > 0) namedOfficerData = officerList;
+
+        const stateById: Record<string, NamedOfficerStateView> = {};
+        for (const officerId of Object.keys(rawOfficers).sort(strictCompare)) {
+            const os = rawOfficers[officerId];
+            if (!os || typeof os !== 'object') continue;
+            stateById[officerId] = {
+                officer_id: officerId,
+                status: typeof os.status === 'string' ? os.status : 'active',
+                assigned_corps_id: typeof os.assigned_corps_id === 'string' ? os.assigned_corps_id : null,
+                acting_commander: Boolean(os.acting_commander),
+                turns_in_command: finiteNumber(os.turns_in_command, 0),
+                battles: finiteNumber(os.battles, 0),
+                victories: finiteNumber(os.victories, 0),
+            };
+        }
+        if (Object.keys(stateById).length > 0) namedOfficerStateById = stateById;
+    }
+
     const rbih_hrhb_war_earliest_turn = typeof meta?.rbih_hrhb_war_earliest_turn === 'number' ? meta.rbih_hrhb_war_earliest_turn : undefined;
     const war_alliance_rbih_hrhb = typeof state.war_alliance_rbih_hrhb === 'number' ? state.war_alliance_rbih_hrhb : undefined;
     const playerFaction = (meta?.player_faction as string | null | undefined) ?? null;
@@ -698,6 +747,8 @@ export function parseGameState(json: unknown): LoadedGameState {
         repositionOrders: repositionOrders.length > 0 ? repositionOrders : undefined,
         corpsFrontSectors,
         operations: operations.length > 0 ? operations : undefined,
+        namedOfficerData,
+        namedOfficerStateById,
         factionReserves,
     };
 }

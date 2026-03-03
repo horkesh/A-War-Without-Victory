@@ -38,6 +38,35 @@ export interface TheatreView {
     region_scope?: string[];
 }
 
+/** Officer mutable state for UI (from GameState.named_officers). */
+export interface NamedOfficerStateView {
+    officer_id: string;
+    status: string;
+    assigned_corps_id: string | null;
+    acting_commander: boolean;
+    turns_in_command: number;
+    battles: number;
+    victories: number;
+}
+
+/** Flattened officer data for UI (merge of named_officer_data + named_officers). */
+export interface NamedOfficerView {
+    id: string;
+    name: string;
+    faction: string;
+    rank: string;
+    competence: number;
+    aggressiveness: number;
+    defensive_skill: number;
+    home_corps_id?: string;
+    status: string;
+    assigned_corps_id: string | null;
+    acting_commander: boolean;
+    turns_in_command: number;
+    battles: number;
+    victories: number;
+}
+
 export interface FormationView {
     id: string;
     faction: string;
@@ -68,6 +97,8 @@ export interface FormationView {
     narrativeArc?: 'veteran' | 'bloodied' | 'shattered' | 'risen' | 'destroyed' | 'garrison';
     warNarrative?: string;
     notableMoments?: Array<{ turn: number; description: string }>;
+    /** Brigade officer quality [0.05, 0.90] (Officers Phase E). */
+    officer_quality?: number;
     // Combat summary (corps/army_hq aggregate — computed each turn from subordinate brigade_histories)
     combatSummary?: {
         battles_fought: number;
@@ -241,6 +272,10 @@ export interface LoadedGameState {
     repositionOrders?: RepositionOrderView[];
     corpsFrontSectors?: CorpsFrontSectorView[];
     operations?: OperationView[];
+    /** Officer data for Phase E GUI (sorted by id). Present when state has named_officers. */
+    namedOfficerData?: NamedOfficerView[];
+    /** Officer mutable state by id (sorted keys when iterating). */
+    namedOfficerStateById?: Record<string, NamedOfficerStateView>;
     /** Per-faction supply reserve levels (general supply + heavy munitions, 0–100 each). Only present when supply_reserves_enabled. */
     factionReserves?: Record<string, { generalSupply: number; heavyMunitions: number }>;
 }
