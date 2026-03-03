@@ -1078,8 +1078,8 @@
         "artillery": 0,
         "tanks": 0
       },
-      "killed": 11923,
-      "missing_captured": 9253,
+      "killed": 11925,
+      "missing_captured": 9260,
       "per_formation": {
         "arbih_101st_mountain": {
           "killed": 351,
@@ -1102,8 +1102,8 @@
           "wounded": 599
         },
         "arbih_10th_mountain": {
-          "killed": 175,
-          "missing_captured": 130,
+          "killed": 177,
+          "missing_captured": 131,
           "wounded": 330
         },
         "arbih_111th_vitezka_motorized": {
@@ -1393,8 +1393,8 @@
         },
         "arbih_501st_slavna_mountain": {
           "killed": 235,
-          "missing_captured": 152,
-          "wounded": 438
+          "missing_captured": 158,
+          "wounded": 440
         },
         "arbih_502nd_vitezka_mountain": {
           "killed": 247,
@@ -1527,7 +1527,7 @@
           "wounded": 83
         }
       },
-      "wounded": 22740
+      "wounded": 22742
     },
     "RS": {
       "equipment_lost": {
@@ -3150,7 +3150,7 @@
         ],
         "hold_osids": [],
         "max_attackers_per_target": 3,
-        "min_attack_outcome": "stalemate",
+        "min_attack_outcome": "victory",
         "offensive_targets": [],
         "reserve_fraction": 0.1
       },
@@ -3575,12 +3575,12 @@
         "offensive_targets": [
           "op:hadzici:binjezevo",
           "op:ilidza:rakovica_2",
+          "op:bihac:bihac_2",
           "op:breza:mahala",
           "op:breza:podgora",
           "op:breza:zupca_2",
           "op:vares:budozelje_2",
           "op:visoko:stuparici_2",
-          "op:bihac:bihac_2",
           "op:ilijas:sovrle",
           "op:ilijas:srednje",
           "op:novi_grad_sarajevo:recica",
@@ -3955,9 +3955,9 @@
           "op:hadzici:binjezevo",
           "op:ilidza:rakovica_2",
           "op:banovici:repnik_2",
+          "op:bihac:bihac_2",
           "op:zivinice:basigovci_2",
           "op:zivinice:zivinice_grad_2",
-          "op:bihac:bihac_2",
           "op:foca:brusna_2",
           "op:foca:patkovina",
           "op:foca:prevrac"
@@ -4053,7 +4053,7 @@
         "arbih_124th_light_king_tvrtko"
       ],
       "corps_id": "arbih_1st_corps",
-      "defensive_power": 288.634476,
+      "defensive_power": 288.55623982271464,
       "density": 0.42105263157894735,
       "edge_ids": [
         "op:centar_sarajevo:radava__op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
@@ -13527,7 +13527,7 @@
         "fatigue": 0,
         "last_supplied_turn": 40
       },
-      "personnel": 1193,
+      "personnel": 1190,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -13542,12 +13542,12 @@
         "faction": "RBiH",
         "formation_id": "arbih_10th_mountain",
         "formation_name": "10th Mountain Brigade",
-        "narrative": "The 10th Mountain Brigade held its ground. With only 0 engagements, its war was one of patience, not blood. It ended at 1193 personnel.",
+        "narrative": "The 10th Mountain Brigade held its ground. With only 0 engagements, its war was one of patience, not blood. It ended at 1190 personnel.",
         "notable_moments": [],
         "stats": {
           "battles_fought": 0,
           "defeats": 0,
-          "final_personnel": 1193,
+          "final_personnel": 1190,
           "nadir_personnel": 500,
           "peak_personnel": 500,
           "total_casualties_inflicted": 0,
@@ -14972,7 +14972,7 @@
         "battles_fought": 0,
         "brigade_count": 20,
         "casualty_exchange_ratio": 0,
-        "current_personnel": 20074,
+        "current_personnel": 20071,
         "defeats": 0,
         "most_casualties_brigade_id": "arbih_101st_mountain",
         "most_victories_brigade_id": "arbih_101st_mountain",
@@ -23574,7 +23574,7 @@
         "battles_fought": 14,
         "brigade_count": 89,
         "casualty_exchange_ratio": 0.2744886975242196,
-        "current_personnel": 129817,
+        "current_personnel": 129814,
         "defeats": 2,
         "most_casualties_brigade_id": "arbih_210th_vitezka_liberation_nesib_maliki",
         "most_victories_brigade_id": "arbih_210th_vitezka_liberation_nesib_maliki",
@@ -40135,7 +40135,7 @@
       ],
       "coverage_length": 102,
       "created_turn": 40,
-      "defensive_power": 130.89502889056394,
+      "defensive_power": 130.8817911396989,
       "edge_ids": [
         "op:bratunac:bratunac_2__op:srebrenica:donji_potocari_2",
         "op:bratunac:glogova__op:srebrenica:donji_potocari_2",
@@ -40484,8 +40484,8 @@
       "updated_turn": 0
     },
     "bihac:RBiH": {
-      "available": 2776,
-      "committed": 9854,
+      "available": 2768,
+      "committed": 9862,
       "exhausted": 0,
       "faction": "RBiH",
       "fatigue": 40,

@@ -417,8 +417,50 @@ export function deriveCorridorsOsid(
 }
 
 /**
+ * Find the heartland (largest connected component) of a reachable set.
+ * Sources in disconnected pockets (enclaves like Sarajevo, Bihać) are
+ * excluded from adequate-BFS seeding → their OSIDs classify as "strained".
+ * Deterministic: sorted iteration over OSIDs and neighbors.
+ */
+function findHeartlandComponent(
+    reachableSet: Set<string>,
+    adjacency: Map<string, string[]>
+): Set<string> {
+    const visited = new Set<string>();
+    let largest = new Set<string>();
+
+    const reachableSorted = [...reachableSet].sort((a, b) => a.localeCompare(b));
+    for (const start of reachableSorted) {
+        if (visited.has(start)) continue;
+        const component = new Set<string>();
+        const queue = [start];
+        visited.add(start);
+        while (queue.length > 0) {
+            const node = queue.shift()!;
+            component.add(node);
+            const neighbors = adjacency.get(node) ?? [];
+            for (const n of neighbors) {
+                if (reachableSet.has(n) && !visited.has(n)) {
+                    visited.add(n);
+                    queue.push(n);
+                }
+            }
+        }
+        if (component.size > largest.size) largest = component;
+    }
+
+    return largest;
+}
+
+/**
  * Derives supply state (Adequate/Strained/Critical) per OSID per faction.
  * Isolated → critical; reachable with brittle path → strained; else adequate.
+ *
+ * Isolated source detection: supply sources in pockets disconnected from the
+ * heartland (largest reachable component) produce "strained", not "adequate".
+ * Models besieged cities with limited supply (Sarajevo UN airlift, Bihać
+ * Croatian corridor) — reachable from a local source but cut off from the
+ * main supply network.
  */
 export function deriveSupplyStateByOsid(
     state: GameState,
@@ -445,7 +487,13 @@ export function deriveSupplyStateByOsid(
             if (st === 'open') openEdges.add(edgeId);
         }
 
-        const sources = new Set(fac.sources.filter((osid) => reachableSet.has(osid)));
+        // Isolated source detection: only seed adequate BFS from sources in
+        // the heartland (largest connected component of reachable set).
+        // Sources in disconnected pockets → their OSIDs are strained, not adequate.
+        const heartland = findHeartlandComponent(reachableSet, adjacency);
+        const sources = new Set(
+            fac.sources.filter((osid) => reachableSet.has(osid) && heartland.has(osid))
+        );
         const adequateVisited = new Set<string>();
         const queue: string[] = [...sources];
         for (const s of sources) adequateVisited.add(s);

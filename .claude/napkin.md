@@ -13,8 +13,8 @@
    Do instead: Fix all failing tests even if unrelated to current change. Standing directive.
 4. **[2026-02-22] Never auto-rebaseline golden tests**
    Do instead: Keep failing baselines pending canon/data authority review. Refresh only after user/PM sign-off per `TEST_BASELINE_STRATEGY.md`.
-5. **[2026-02-21] Refactor-pass between phases**
-   Do instead: After each implementation phase, refactor-pass (dead code, duplicates, unused imports) then smoke-test triad. Add null/dummy values for new required fields in test fixtures proactively.
+5. **[2026-02-21] Refactor-pass and code-simplifier between phases/checkpoints**
+   Do instead: After each implementation phase or between plan checkpoints, run /refactor-pass (dead code, duplication, over-engineered stubs, simplify conditionals; then tsc + vitest) and /code-simplifier on recently modified code. Plans (e.g. officers-phase-e-implementation) must instruct this between tasks.
 6. **[2026-02-13] Verify edits + close handoffs with evidence**
    Do instead: After edits, verify with `ReadFile` + `git diff`. After roadmap or handoff, close with run evidence + decision memo + cross-link.
 7. **[2026-02-24] Scenario checkpoint lengths**

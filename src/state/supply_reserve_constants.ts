@@ -11,6 +11,15 @@
 // ── Consumption: Maintenance ─────────────────────────────────────────────────
 /** Per-formation per-turn general supply drain. */
 export const MAINTENANCE_DRAIN_PER_FORMATION = 0.04;
+/**
+ * Per-heavy-weapon per-turn heavy munitions drain (tanks + artillery).
+ * Represents ammunition expenditure for training/readiness, barrel wear,
+ * spare parts consumption, and fuel for armored vehicles.
+ * RS (1035 weapons) → ~5.2/turn drain; RBiH (647) → ~3.2; HRHB (258) → ~1.3.
+ * Calibrated so RS heavy munitions transitions adequate→strained around w40
+ * (JNA stockpile depletion), making E2 bombardment differentiation active.
+ */
+export const HEAVY_MAINTENANCE_PER_WEAPON = 0.005;
 
 // ── Consumption: Combat ──────────────────────────────────────────────────────
 /** Heavy munitions deducted per battle (scaled by intensity = attackerCount × powerRatio). */

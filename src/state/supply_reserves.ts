@@ -36,6 +36,7 @@ import {
     AIRDROP_ELIGIBLE_FACTION,
     JNA_INHERITANCE_FACTION,
     JNA_INHERITANCE_HEAVY_BONUS,
+    HEAVY_MAINTENANCE_PER_WEAPON,
 } from './supply_reserve_constants.js';
 import type { EnclaveResilienceEntry } from './game_state.js';
 
@@ -71,6 +72,7 @@ export interface SupplyReservesFactionEntry {
     general_supply: number;
     heavy_munitions: number;
     maintenance_drain: number;
+    heavy_maintenance_drain: number;
     production_income_general: number;
     production_income_heavy: number;
     siege_drain_general: number;
