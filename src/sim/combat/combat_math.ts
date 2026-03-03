@@ -18,6 +18,10 @@ import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supp
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import {
+    RESERVE_ADEQUATE_THRESHOLD,
+    RESERVE_STRAINED_THRESHOLD,
+} from '../../state/supply_reserve_constants.js';
 import { getEnclaveDefenseBonus } from './enclave_resilience.js';
 import { getLocalFrontDensityModifier } from './local_front_defense.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
@@ -284,11 +288,25 @@ export function getThreeTierOfficerMod(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * Heavy munitions scale factor for bombardment and suppression.
+ * Adequate (≥50) → 1.0, Strained (20–49) → 0.75, Critical (<20) → 0.5.
+ * Returns 1.0 when supply_reserves_enabled is false.
+ */
+function getHeavyMunitionsMult(factionId: string, state: GameState): number {
+    if (!state.meta?.supply_reserves_enabled || !state.heavy_munitions_reserve) return 1.0;
+    const reserve = (state.heavy_munitions_reserve as Record<string, number>)[factionId] ?? 100;
+    if (reserve >= RESERVE_ADEQUATE_THRESHOLD) return 1.0;
+    if (reserve >= RESERVE_STRAINED_THRESHOLD) return 0.75;
+    return 0.5;
+}
+
+/**
  * Artillery suppression of entrenchment.
  * Uses the best-equipped attacker's suppression (corps concentrate fire support).
  * Returns 0–0.7: fraction of entrenchment bonus that is suppressed.
+ * Scaled by heavy munitions reserve when supply system is enabled.
  */
-export function getArtillerySuppression(attackers: FormationState[]): number {
+export function getArtillerySuppression(attackers: FormationState[], attackerFactionId: string, state: GameState): number {
     if (attackers.length === 0) return 0;
     let maxSuppression = 0;
     for (const attacker of attackers) {
@@ -298,7 +316,8 @@ export function getArtillerySuppression(attackers: FormationState[]): number {
         const suppression = (artEff * 1.0 + tankEff * 0.5) / 100;
         if (suppression > maxSuppression) maxSuppression = suppression;
     }
-    return Math.min(0.7, maxSuppression);
+    const munitionsMult = getHeavyMunitionsMult(attackerFactionId, state);
+    return Math.min(0.7, maxSuppression) * munitionsMult;
 }
 
 /**
@@ -312,7 +331,7 @@ export function getArtillerySuppression(attackers: FormationState[]): number {
 const MAX_BOMBARDMENT_CAS_MULT = 1.8;    // up to 80% extra defender casualties from bombardment
 const BOMBARDMENT_DIVISOR = 80;           // firepower units needed for full effect
 
-export function getBombardmentCasualtyMult(attackers: FormationState[]): number {
+export function getBombardmentCasualtyMult(attackers: FormationState[], attackerFactionId: string, state: GameState): number {
     if (attackers.length === 0) return 1.0;
     let totalFirepower = 0;
     for (const attacker of attackers) {
@@ -322,7 +341,8 @@ export function getBombardmentCasualtyMult(attackers: FormationState[]): number 
         totalFirepower += artEff + tankEff * 0.5;
     }
     const bombardmentFraction = Math.min(1.0, totalFirepower / BOMBARDMENT_DIVISOR);
-    return 1.0 + (MAX_BOMBARDMENT_CAS_MULT - 1.0) * bombardmentFraction;
+    const munitionsMult = getHeavyMunitionsMult(attackerFactionId, state);
+    return 1.0 + (MAX_BOMBARDMENT_CAS_MULT - 1.0) * bombardmentFraction * munitionsMult;
 }
 
 /**

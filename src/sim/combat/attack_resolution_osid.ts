@@ -307,7 +307,7 @@ export function resolveAttackOrdersOsid(
 
         let defenderPower: number;
         let defenderFormation: FormationState | null = null;
-        const artSuppression = getArtillerySuppression(attackerFormations);
+        const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
         if (defenderFormations.length > 0) {
             const powers = defenderFormations.map(d => {
                 const share = getCoEthnicShare(targetOsid, d.faction, ethnicComposition);
@@ -390,7 +390,7 @@ export function resolveAttackOrdersOsid(
 
         const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
         const personnelDefender = defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
-        const bombardmentMult = getBombardmentCasualtyMult(attackerFormations);
+        const bombardmentMult = getBombardmentCasualtyMult(attackerFormations, attackerFaction, state);
         const baseAttackerCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[outcome] ?? 1) * lastStandCasMult;
         const baseDefenderCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[outcome] ?? 1) * lastStandCasMult * bombardmentMult;
         const finalAttackerCas = Math.min(personnelAttacker - MIN_COMBAT_PERSONNEL, Math.max(0, Math.round(baseAttackerCas)));
