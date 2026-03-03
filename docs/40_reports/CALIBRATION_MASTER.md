@@ -2,9 +2,10 @@
 
 **Purpose:** Persistent lessons-learned record for Phase II 40w calibration (April 1992 → January 1993).
 **Updated:** 2026-03-03
-**Canonical target run:** n335 (`apr1992_definitive_40w__205b3676c8fe3ce4__w40_n335`)
-**Latest calibration run:** n403 (88.0% count-based, 90.4% area-weighted — Officers System two-tier: 63 named officers + per-brigade officer_quality. ARBiH 131k, VRS 88k, HVO 42k. Three regions improved: Central Bosnia +6pp, Sarajevo +3.2pp, Posavina +2.7pp. Drina -8pp from per-corps variance.)
-**Previous calibration run:** n409 (90.5% area-weighted ATH maintained — Phase E: PATRON_AID_SCALE=12, JNA inheritance bonus for RS, heavy munitions gates bombardment/suppression. ATH unchanged from n407.)
+**Canonical target run:** n422/n423 (`apr1992_definitive_40w__2da7a05b322452f6__w40_n422` / `w40_n423`)
+**Latest calibration run:** n422/n423 (88.2% count-based, 91.3% area-weighted — bot_strategy: EBK without brcko, Tuzla Containment without lopare, Drina Hold expanded with rogatica/vlasenica/sekovici/milici/han_pijesak/cajnice/rudo, Sarajevo Siege without trnovo, Herzegovina Hold without trebinje, Krajina/Western/2KK without kupres. POSAVINA_NE 89.0%, DRINA 78.0%.)
+**Reverted:** n424 (Drina Sweep/Hold: add srebrenica, drop kalinovik/cajnice/rudo — DRINA 78→75.6, global 91.3→91.1%; reverted.)
+**Previous calibration run:** n403 (88.0% count-based, 90.4% area-weighted — Officers System two-tier: 63 named officers + per-brigade officer_quality. ARBiH 131k, VRS 88k, HVO 42k. Three regions improved: Central Bosnia +6pp, Sarajevo +3.2pp, Posavina +2.7pp. Drina -8pp from per-corps variance.)
 **Previous calibration run:** n407 (90.5% area-weighted ATH, 86.7% count-based — Phase D: supply reserves enabled by default, UN airdrops for RBiH enclaves, bot supply-aware targeting.)
 **Previous calibration run:** n392 (88.6% count-based ATH — comprehensive combat formula: officer quality, ethnic homeland defense, bombardment exposure attrition. Krajina 98.5%. ARBiH KIA 9,831 toward 11,500 target.)
 **Previous calibration run:** n374 (87.6%, ceiling removal + emergent growth via pool mechanics.)
@@ -56,18 +57,18 @@
 - **Minority flight:** 0 (disabled — `enable_rbih_hrhb_dynamics: false`)
 - **Note:** Engine counts only War-phase takeover-triggered + pressure displacement. Pre-war mass displacement is baked into `init_control` snapshot. Displacement system complete as of n319. See `docs/40_reports/20260301_DISPLACEMENT_DEPTH_CALIBRATION.md`.
 
-### Match Rate vs Painted Targets (n407, latest)
-Overall count-based: **86.7%** (645/744 OSIDs correct); **Area-weighted: 90.5% (46,470/51,337 km²) — NEW ALL-TIME HIGH**
+### Match Rate vs Painted Targets (n422/n423, latest)
+Overall count-based: **88.2%** (656/744 OSIDs correct); **Area-weighted: 91.3% (46,870/51,337 km²) — ALL-TIME HIGH**
 
-| Region | n374 Match | n392 Match | n407 Match | n407 Area | Key Issues (n407) |
-|---|---|---|---|---|---|
-| KRAJINA | 95.5% (126/132) | 98.5% (130/132) | **93.1% (122/131)** | 96.1% | -5.4pp count but +1.1pp area |
-| POSAVINA_NE | 81.7% (89/109) | 81.7% (89/109) | **81.7% (89/109)** | 84.3% | Stable |
-| DRINA | 81.3% (104/128) | 82.0% (105/128) | **78.0% (96/123)** | 83.4% | Višegrad still mostly RBiH; Goražde hinterland |
-| CENTRAL_CORRIDOR | 90.4% (85/94) | 90.4% (85/94) | **88.3% (83/94)** | 92.6% | Minor drift in Doboj/Maglaj area |
-| CENTRAL_BOSNIA | 88.0% (146/166) | 87.3% (145/166) | **85.9% (140/163)** | 86.9% | Hadžići suburbs drifting RS |
-| SARAJEVO | 87.1% (27/31) | 87.1% (27/31) | **87.1% (27/31)** | 80.6% | Stable — Trnovo/Pale edges |
-| HERZEGOVINA | 88.2% (82/93) | 92.5% (86/93) | **94.6% (88/93)** | 95.2% | Best result — Kupres edges |
+| Region | n374 Match | n392 Match | n407 Match | n422/n423 Match | n422/n423 Area | Key Issues (n422) |
+|---|---|---|---|---|---|---|
+| KRAJINA | 95.5% (126/132) | 98.5% (130/132) | 93.1% (122/131) | **95.4%** (125/131) | — | Stable |
+| POSAVINA_NE | 81.7% (89/109) | 81.7% (89/109) | 81.7% (89/109) | **89.0%** (97/109) | — | +8.3pp from EBK/lopare trim |
+| DRINA | 81.3% (104/128) | 82.0% (105/128) | 78.0% (96/123) | **78.0%** (96/123) | — | Next improvement target |
+| CENTRAL_CORRIDOR | 90.4% (85/94) | 90.4% (85/94) | 88.3% (83/94) | — | — | Minor drift |
+| CENTRAL_BOSNIA | 88.0% (146/166) | 87.3% (145/166) | 85.9% (140/163) | — | — | — |
+| SARAJEVO | 87.1% (27/31) | 87.1% (27/31) | 87.1% (27/31) | — | — | Stable — Trnovo/Pale edges |
+| HERZEGOVINA | 88.2% (82/93) | 92.5% (86/93) | 94.6% (88/93) | **95.2%** | — | Best result — Kupres edges |
 
 Note: Area-weighted metric better reflects historical territory; count-based penalizes small eastern settlements that RS didn't hold in history.
 
@@ -128,6 +129,10 @@ Note: Area-weighted metric better reflects historical territory; count-based pen
 | **n407** | **2da7a05b322452f6** | **426** | **230** | **88** | **ALL-TIME HIGH (area-weighted): 90.5% (46,470/51,337 km²).** Supply reserves enabled by default (`supply_reserves_enabled: true`). Count-based 86.7% (645/744). Phase D: UN airdrops (RBiH enclave supply 7.5 at w40), bot supply-aware targeting, MAINTENANCE_DRAIN 0.15→0.04. Krajina **96.1%**. Herzegovina **95.2%**. ARBiH KIA **12,054** (historically plausible for year-1 intensity; 11.5k was a floor estimate). VRS KIA 13,170. HVO KIA 5,904. Personnel: ARBiH 129k, VRS 77k, HVO 38k. Civilian killed: 28,159. |
 | **n408** | **2da7a05b322452f6** | **426** | **230** | **88** | **Phase E1: PATRON_AID_SCALE 1→12; JNA inheritance +40 heavy munitions for RS (start=100).** ATH maintained at 90.5% area-weighted. Total KIA 31,128. RS heavy_munitions=100 at w40 (JNA bonus), general_supply→0 (siege drain accumulation — deferred). |
 | **n409** | **2da7a05b322452f6** | **426** | **230** | **88** | **Phase E2: heavy munitions gates getBombardmentCasualtyMult + getArtillerySuppression via getHeavyMunitionsMult().** ATH maintained at 90.5%. E2 mechanism inert at 40w (RS heavy_munitions stays at 100; drain rate too low to deplete in 40 weeks from JNA start). |
+| **n422** | **2da7a05b322452f6** | — | — | — | **Bot strategy: EBK drop brcko, Tuzla drop lopare, Herzegovina Hold + Drina munis.** 88.2% count, **91.3% area-weighted** (ATH). POSAVINA_NE 89.0% (+8.3pp). DRINA 78.0% (unchanged). Kept. |
+| **n423** | **2da7a05b322452f6** | — | — | — | Drina munis moved from Herzegovina Hold to Drina Hold. Hash changed; metrics identical to n422. Kept for clarity. |
+| **n424** | 2da7a05b322452f6 | — | — | — | REVERTED — Drina Sweep/Hold: add srebrenica, drop kalinovik/cajnice/rudo. DRINA 78→75.6, global 91.3→91.1%. |
+| **n425** | 2da7a05b322452f6 | — | — | — | INERT — Drina Sweep weight 130→138. Same hash as n423; 88.2% count, 91.3% area-weighted. Reverted. |
 | **n403** | **d8657a4dfd1fc276** | **408** | **246** | **90** | **Officers System two-tier (Phases A–D).** 88.0% count-based (655/744), 90.4% area-weighted. 63 named officers + per-brigade officer_quality. Brigade quality: RS avg 0.390, RBiH 0.076, HRHB 0.211. Named officers: 25 active, 1 killed, 2 retired, 21 assigned. Three regions improved: Central Bosnia 93.3% (+6pp), Sarajevo 90.3% (+3.2pp), Posavina 84.4% (+2.7pp). Drina 74.0% (-8pp, per-corps variance). Personnel: ARBiH 131k, VRS 88k, HVO 42k. KIA: ARBiH 9,604, VRS 10,445, HVO 5,606. **Critical fix:** normalizeScenario whitelist — war_timeline was never loading in previous runs. |
 
 ---

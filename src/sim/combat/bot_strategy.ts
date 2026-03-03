@@ -421,27 +421,27 @@ const VRS_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     // Drina Corps: clear Drina valley (DAY ONE — highest priority first 12 weeks)
     { name: 'Drina Sweep', corps_id: 'vrs_drina', target_municipalities: ['zvornik', 'bratunac', 'visegrad', 'foca', 'vlasenica', 'rogatica', 'sekovici', 'han_pijesak', 'milici', 'kalinovik', 'cajnice', 'rudo'], start_week: 0, end_week: 30, weight: 130, min_outcome: 'stalemate' },
     // Drina Corps: maintain after initial sweep
-    { name: 'Drina Hold', corps_id: 'vrs_drina', target_municipalities: ['zvornik', 'bratunac', 'visegrad', 'foca'], start_week: 26, end_week: 9999, weight: 30, min_outcome: 'stalemate' },
+    { name: 'Drina Hold', corps_id: 'vrs_drina', target_municipalities: ['zvornik', 'bratunac', 'visegrad', 'foca', 'rogatica', 'vlasenica', 'sekovici', 'milici', 'han_pijesak', 'cajnice', 'rudo'], start_week: 26, end_week: 9999, weight: 30, min_outcome: 'stalemate' },
     // Posavina Corridor — ABSOLUTE HIGHEST PRIORITY for RS (existential: links Banja Luka to Belgrade)
     // Brčko is the lynchpin — must be secured before anything else. Two-corps operation.
     { name: 'Corridor 92 (1KK)', corps_id: 'vrs_1st_krajina', target_municipalities: ['brcko', 'odzak', 'derventa', 'bosanski_brod', 'bosanski_samac', 'modrica', 'doboj'], start_week: 0, end_week: 25, weight: 100, min_outcome: 'repulsed' },
-    { name: 'Corridor 92 (EBK)', corps_id: 'vrs_east_bosnian', target_municipalities: ['brcko', 'bijeljina', 'bosanski_samac'], start_week: 0, end_week: 25, weight: 100, min_outcome: 'repulsed' },
+    { name: 'Corridor 92 (EBK)', corps_id: 'vrs_east_bosnian', target_municipalities: ['bijeljina', 'bosanski_samac'], start_week: 0, end_week: 25, weight: 100, min_outcome: 'repulsed' },
     // 1st Krajina: Krajina operations (mid-1992) — aggressive: push through entrenchment
-    { name: 'Krajina Sweep', corps_id: 'vrs_1st_krajina', target_municipalities: ['kljuc', 'bosanski_petrovac', 'jajce', 'donji_vakuf', 'sipovo', 'kupres', 'sanski_most'], start_week: 12, end_week: 30, weight: 45, min_outcome: 'repulsed' },
+    { name: 'Krajina Sweep', corps_id: 'vrs_1st_krajina', target_municipalities: ['kljuc', 'bosanski_petrovac', 'jajce', 'donji_vakuf', 'sipovo', 'sanski_most'], start_week: 12, end_week: 30, weight: 45, min_outcome: 'repulsed' },
     // 2nd Krajina: western operations + Bihac edges
-    { name: 'Western Krajina', corps_id: 'vrs_2nd_krajina', target_municipalities: ['bosanski_petrovac', 'titov_drvar', 'glamoc', 'kupres', 'sipovo', 'bosanska_krupa', 'sanski_most'], start_week: 0, end_week: 30, weight: 55, min_outcome: 'repulsed' },
+    { name: 'Western Krajina', corps_id: 'vrs_2nd_krajina', target_municipalities: ['bosanski_petrovac', 'titov_drvar', 'glamoc', 'sipovo', 'bosanska_krupa', 'sanski_most'], start_week: 0, end_week: 30, weight: 55, min_outcome: 'repulsed' },
     // Sarajevo-Romanija: siege maintenance — persistent pressure on Sarajevo approaches
-    { name: 'Sarajevo Siege', corps_id: 'vrs_sarajevo_romanija', target_municipalities: ['ilidza', 'hadzici', 'vogosca', 'ilijas', 'pale', 'sokolac', 'trnovo'], start_week: 0, end_week: 9999, weight: 90, min_outcome: 'repulsed' },
+    { name: 'Sarajevo Siege', corps_id: 'vrs_sarajevo_romanija', target_municipalities: ['ilidza', 'hadzici', 'vogosca', 'ilijas', 'pale', 'sokolac'], start_week: 0, end_week: 9999, weight: 90, min_outcome: 'repulsed' },
     // Herzegovina: hold territory — probing attacks to maintain pressure (+ cajnice/rudo/foca for Drina south)
-    { name: 'Herzegovina Hold', corps_id: 'vrs_herzegovina', target_municipalities: ['bileca', 'gacko', 'trebinje', 'nevesinje', 'kalinovik', 'cajnice', 'rudo', 'foca'], start_week: 0, end_week: 9999, weight: 50, min_outcome: 'repulsed' },
+    { name: 'Herzegovina Hold', corps_id: 'vrs_herzegovina', target_municipalities: ['bileca', 'gacko', 'nevesinje', 'kalinovik', 'cajnice', 'rudo', 'foca'], start_week: 0, end_week: 9999, weight: 50, min_outcome: 'repulsed' },
     // East Bosnian: post-corridor, Tuzla containment
-    { name: 'Tuzla Containment', corps_id: 'vrs_east_bosnian', target_municipalities: ['bijeljina', 'ugljevik', 'lopare', 'zvornik'], start_week: 30, end_week: 9999, weight: 40, min_outcome: 'repulsed' },
+    { name: 'Tuzla Containment', corps_id: 'vrs_east_bosnian', target_municipalities: ['bijeljina', 'ugljevik', 'zvornik'], start_week: 30, end_week: 9999, weight: 40, min_outcome: 'repulsed' },
     // 1st Krajina: central corridor — Kotor Varoš, Teslić, Doboj (link to Posavina)
     { name: 'Central Corridor', corps_id: 'vrs_1st_krajina', target_municipalities: ['kotor_varos', 'teslic', 'doboj'], start_week: 0, end_week: 20, weight: 30, min_outcome: 'repulsed' },
     // 1st Krajina: consolidation after Corridor/Krajina Sweep expire (week 40+) — includes Posavina corridor municipalities for continued pressure
     { name: '1KK Consolidation', corps_id: 'vrs_1st_krajina', target_municipalities: ['kljuc', 'sanski_most', 'jajce', 'donji_vakuf', 'bosanski_petrovac', 'kotor_varos', 'teslic', 'brcko', 'odzak', 'derventa', 'bosanski_brod', 'bosanski_samac', 'modrica', 'doboj'], start_week: 40, end_week: 9999, weight: 35, min_outcome: 'repulsed' },
     // 2nd Krajina: western front maintenance after operations expire (week 40+)
-    { name: '2KK Consolidation', corps_id: 'vrs_2nd_krajina', target_municipalities: ['bosanski_petrovac', 'titov_drvar', 'glamoc', 'kupres', 'sipovo', 'mrkonjic_grad'], start_week: 40, end_week: 9999, weight: 30, min_outcome: 'repulsed' },
+    { name: '2KK Consolidation', corps_id: 'vrs_2nd_krajina', target_municipalities: ['bosanski_petrovac', 'titov_drvar', 'glamoc', 'sipovo', 'mrkonjic_grad'], start_week: 40, end_week: 9999, weight: 30, min_outcome: 'repulsed' },
     // East Bosnian: Ozren salient operations — pressure toward Tuzla, secure flanks
     // Ozren Operations removed — RS was overrunning central corridor via this route
 ];

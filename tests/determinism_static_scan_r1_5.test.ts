@@ -1,7 +1,7 @@
 /**
  * Phase R1.5: Determinism static scan (no Date.now/new Date/Math.random in core pipeline).
  * Scope is intentionally narrow: src/ and tools/scenario_runner/.
- * Excludes src/ui/warroom/ (display-only UI; turn-based date display uses Date for calendar math).
+ * Excludes src/ui/warroom/ and src/ui/map/ (display-only UI), and src/desktop/ (Electron host; cache-busting may use Date).
  */
 
 import assert from 'node:assert';
@@ -38,6 +38,11 @@ function isUnderWarroom(path: string): boolean {
     return normalized.includes('/ui/warroom');
 }
 
+function isUnderDesktop(path: string): boolean {
+    const normalized = path.replace(/\\/g, '/');
+    return normalized.includes('/desktop/');
+}
+
 const FILE_EXTENSIONS = new Set(['.ts', '.js', '.mjs', '.cjs']);
 
 const DISALLOWED_PATTERNS: Array<{ label: string; regex: RegExp }> = [
@@ -60,6 +65,7 @@ async function collectFiles(dir: string, files: string[] = []): Promise<string[]
         if (!entry.isFile()) continue;
         const fullPath = join(dir, entry.name);
         if (isUnderWarroom(fullPath)) continue;
+        if (isUnderDesktop(fullPath)) continue;
         const ext = entry.name.slice(entry.name.lastIndexOf('.'));
         if (FILE_EXTENSIONS.has(ext)) {
             files.push(fullPath);

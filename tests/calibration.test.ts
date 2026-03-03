@@ -385,8 +385,7 @@ test('calibration: scenario 1 - prolonged siege', () => {
         const sustRecord = sustReport.by_municipality.find(r => r.mun_id === 'MUN_A');
 
         // Update displacement
-        const dispReport = updateDisplacement(state, settlements, edges);
-        const dispRecord = dispReport.by_municipality.find(r => r.mun_id === 'MUN_A');
+        updateDisplacement(state, settlements, edges);
 
         // Update negotiation pressure (simplified - need front edges for full calculation)
         const frontEdges = computeFrontEdges(state, edges);
@@ -401,7 +400,8 @@ test('calibration: scenario 1 - prolonged siege', () => {
         );
         const negFaction = negReport.per_faction.find(f => f.faction_id === 'FACTION_A');
 
-        if (sustRecord && dispRecord) {
+        if (sustRecord) {
+            // Displacement report only has a row when displacementAmount > 0; use state for current values
             const dispState = state.displacement_state?.['MUN_A'];
             const originalPop = dispState?.original_population ?? 10000;
             const displacedRatio = dispState ? dispState.displaced_out / originalPop : 0;
@@ -492,9 +492,8 @@ test('calibration: scenario 2 - temporary encirclement', () => {
         const dispReport = updateDisplacement(state, settlements, edges);
 
         const sustRecord = sustReport.by_municipality.find(r => r.mun_id === 'MUN_A');
-        const dispRecord = dispReport.by_municipality.find(r => r.mun_id === 'MUN_A');
 
-        if (sustRecord && dispRecord) {
+        if (sustRecord) {
             const dispState = state.displacement_state?.['MUN_A'];
             const originalPop = dispState?.original_population ?? 10000;
             const displacedRatio = dispState ? dispState.displaced_out / originalPop : 0;
@@ -524,9 +523,8 @@ test('calibration: scenario 2 - temporary encirclement', () => {
         const dispReport = updateDisplacement(state, settlements, edges);
 
         const sustRecord = sustReport.by_municipality.find(r => r.mun_id === 'MUN_A');
-        const dispRecord = dispReport.by_municipality.find(r => r.mun_id === 'MUN_A');
 
-        if (sustRecord && dispRecord) {
+        if (sustRecord) {
             const dispState = state.displacement_state?.['MUN_A'];
             const originalPop = dispState?.original_population ?? 10000;
             const displacedRatio = dispState ? dispState.displaced_out / originalPop : 0;
@@ -544,6 +542,7 @@ test('calibration: scenario 2 - temporary encirclement', () => {
     }
 
     // Evaluation criteria
+    assert.ok(metrics.length > 0, 'Should have metrics from sustainability');
     const finalMetric = metrics[metrics.length - 1];
 
     // Criterion 1: Should NOT collapse from temporary encirclement

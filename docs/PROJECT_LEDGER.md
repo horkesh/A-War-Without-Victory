@@ -9341,3 +9341,139 @@ Determinism checks **MUST** be run:
 - **Failure mode prevented:** Without isolated source detection, encircled cities with supply source status (Sarajevo) appeared fully supplied. Without heavy weapon drain, RS heavy munitions stayed at 100 permanently, making Phase E2 bombardment differentiation completely inert.
 - **Mistake guard:** Heavy drain rate 0.003 calibrated iteratively — 0.005 depleted RS to 0 by w21 (patron income ramps from zero). Current rate produces strained (42.9) not critical (0).
 - **Determinism:** `findHeartlandComponent()` sorts reachable set via `localeCompare` for deterministic BFS. Heavy weapon counting iterates sorted formation IDs. No randomness.
+
+### [2026-03-03] Calibration orchestration kickoff — n414 baseline and first retune plan
+- **Type:** Calibration / Orchestrator checkpoint (pre-implementation blast radius)
+- **Summary:** Established fresh 40w baseline `n414` on current mainline: **85.9% count-based**, **89.7% area-weighted** (`tools/compare_painted_vs_sim.cjs`). Key drift pattern is unchanged from n413: RS over-expands in Krajina/Posavina/Central pockets while underperforming in Drina holdout strip. n414 totals: RS 432 (+21 vs painted), RBiH 225 (-21), HRHB 87 (0). Mismatch concentrations: KRAJINA (Cazin/Bihać edge), POSAVINA_NE (Brčko south + Teočak), DRINA (Višegrad/Rogatica/Srebrenica hinterland).
+- **Decision (single priority):** Run one focused allocation retune to shift RS pressure from Krajina spillover toward Drina without touching supply/combat math constants.
+- **Planned code scope:** `src/sim/combat/bot_strategy.ts` (VRS operation weights only): raise `Drina Sweep` + `Drina Hold`; lower `Krajina Sweep` + `Western Krajina`.
+- **Validation gates:** rerun `sim:scenario:run:40w`; compare via `tools/compare_painted_vs_sim.cjs`; keep or revert based on area-weighted and regional deltas (Drina vs Krajina tradeoff).
+
+### [2026-03-03] Calibration iteration 1 verification — timeline retune (`n416`)
+- **Type:** Calibration / verification evidence (post-implementation)
+- **What was tested:**
+  1. **Inert attempt (discarded):** `bot_strategy.ts` VRS operation-weight edits produced identical `final_state_hash` (`n414` == `n415`: `b7ef3066a91b62e6`) and no behavioral change; reverted.
+  2. **Applied retune:** `data/scenarios/timelines/apr1992.json` RS week-0 doctrine adjusted (`max_attack_share_override` `0.28 -> 0.24`, `aggression_modifier` `0.15 -> 0.12`) with offsetting RS `external_support.combat_multiplier` bump (`1.22 -> 1.26`) to preserve Drina pressure.
+- **Results (`n414` -> `n416`):**
+  - Overall match: **85.9% -> 86.4%** (+0.5pp)
+  - Area-weighted match: **89.7% -> 89.8%** (+0.1pp)
+  - Faction totals delta vs painted: RS **+21 -> +16**, RBiH **-21 -> -14**, HRHB **0 -> -2**
+  - Region deltas: KRAJINA **89.3 -> 95.4** (improved), DRINA **78.0 -> 78.9** (slight improvement), SARAJEVO **87.1 -> 80.6** (regressed), HERZEGOVINA **94.6 -> 92.5** (regressed), CENTRAL_BOSNIA **84.7 -> 84.0** (minor regression).
+  - Orders summary: RS orders **194 -> 189**; total orders **217 -> 215**.
+- **Decision:** Keep this retune as current iteration baseline (`n416`) and run next targeted pass on Sarajevo/Herzegovina positional regressions while protecting Krajina and Drina gains.
+
+### [2026-03-03] Calibration iteration 2 kickoff — Sarajevo/Herzegovina positional correction (`n417` plan)
+- **Type:** Calibration / Orchestrator checkpoint (pre-implementation blast radius)
+- **Summary:** `n416` improved global metrics but regressed SARAJEVO and HERZEGOVINA. Timeline-only knobs in `data/scenarios/timelines/apr1992.json` have no per-corps municipality targeting controls, so this pass will use targeted operation municipality edits in `src/sim/combat/bot_strategy.ts`.
+- **Single priority:** Reduce RS spillover into Sarajevo/Herzegovina edge municipalities while preserving KRAJINA and DRINA gains from `n416`.
+- **Planned scope (narrow):**
+  - `VRS_ARMY_PRIORITIES` only.
+  - Remove `trnovo` from `Sarajevo Siege` targets.
+  - Remove `kupres` from `Krajina Sweep`, `Western Krajina`, and `2KK Consolidation` target lists.
+- **Validation gates:** Run 40w (`sim:scenario:run:40w`) and compare with `tools/compare_painted_vs_sim.cjs`; accept only if SARAJEVO/HERZEGOVINA improve without material loss in KRAJINA/DRINA and no major global regression.
+
+### [2026-03-03] Calibration iteration 3 kickoff — Drina support micro-tune (`n418` plan)
+- **Type:** Calibration / Orchestrator checkpoint (pre-implementation blast radius)
+- **Summary:** `n417` improved global and Sarajevo metrics (87.1% count, 90.1% area-weighted) but DRINA remained at 78.0%. This pass adds only targeted RS support municipalities for Drina hinterland pressure.
+- **Planned scope:** `data/scenarios/timelines/apr1992.json` `external_support[RS].municipalities`: add `hanpijesak`, `sekovici`, `milici`.
+- **Guardrails:** No change to attack-share/aggression or broad operation lists. Keep KRAJINA/SARAJEVO gains from `n417`.
+
+### [2026-03-03] Calibration iteration 4 kickoff — Herzegovina containment micro-tune (`n419` plan)
+- **Type:** Calibration / Orchestrator checkpoint (pre-implementation blast radius)
+- **Summary:** `n418` produced no output change vs `n417` (bit-identical outcome), so the no-op support-list expansion is reverted. Next pass targets persistent Herzegovina spillover directly in VRS operation targets.
+- **Planned scope:** `src/sim/combat/bot_strategy.ts` only — remove `trebinje` from `Herzegovina Hold` target municipalities.
+- **Guardrails:** Preserve `n417` gains (KRAJINA 96.2%, SARAJEVO 83.9%, overall 87.1%/90.1%).
+
+### [2026-03-03] Calibration iterations 2-4 verification — `n417`/`n418`/`n419`
+- **Type:** Calibration / verification evidence (post-implementation)
+- **`n417` result (kept baseline):**
+  - Metrics: **87.1% count**, **90.1% area-weighted**.
+  - vs `n416`: improved overall and Sarajevo while retaining Krajina gains; DRINA unchanged at 78.0.
+- **`n418` result (discarded):**
+  - Added RS external-support municipalities (`hanpijesak`, `sekovici`, `milici`) produced **bit-identical output** to `n417` (same metrics and attack-resolution totals); reverted to avoid no-op config drift.
+- **`n419` result (current best in-session):**
+  - Change: removed `trebinje` from `Herzegovina Hold` targets in `bot_strategy.ts`.
+  - Metrics: **87.2% count**, **90.4% area-weighted** (best this session).
+  - Regional effects vs `n417`: HERZEGOVINA **92.5 -> 93.5** (+1.0pp), SARAJEVO held at **83.9**, KRAJINA held at **96.2**, DRINA unchanged (**78.0**), POSAVINA/CORRIDOR unchanged.
+  - Combat tempo: RS orders **183 -> 182**, total orders **207 -> 206**.
+- **Decision:** keep `n419` tuning as active calibration state; next priority remains DRINA/Posavina structural underperformance without sacrificing current area-weighted gains.
+
+### [2026-03-03] Calibration iteration 5 kickoff — Drina pressure vs Posavina spillover balance (`n420` plan)
+- **Type:** Calibration / Orchestrator checkpoint (pre-implementation blast radius)
+- **Summary:** `n419` is current best (87.2% / 90.4%) but DRINA remains 78.0 and POSAVINA_NE remains 80.7 with RS over-control in Brčko/Tuzla-side fringes. This pass tunes **Drina permissiveness up** while **corridor pressure down**.
+- **Planned scope:** `src/sim/combat/bot_strategy.ts` only:
+  - `Drina Sweep`: `weight 130 -> 145`, `min_outcome stalemate -> repulsed`
+  - `Corridor 92 (1KK)` and `Corridor 92 (EBK)`: `weight 100 -> 92`
+- **Acceptance gate:** Keep only if DRINA and/or POSAVINA_NE improve with no material regression of KRAJINA/SARAJEVO and no global area-weighted drop.
+
+### [2026-03-03] Calibration iteration 6 kickoff — timeline support retarget (`n421` plan)
+- **Type:** Calibration / Orchestrator checkpoint (pre-implementation blast radius)
+- **Summary:** `n420` demonstrated inert behavior (bit-identical hash), confirming `bot_strategy.ts` knobs are inactive for this scenario path. Next iteration uses timeline-level retargeting only.
+- **Planned scope:** `data/scenarios/timelines/apr1992.json` only (RS `external_support`):
+  - remove `bijeljina` and `prijedor` from support municipalities to reduce Posavina/Krajina spillover
+  - increase `combat_multiplier` from `1.26 -> 1.30` to reinforce remaining Drina corridor municipalities
+- **Acceptance gate:** Keep only if this is non-inert and improves DRINA and/or POSAVINA_NE without meaningful regressions in KRAJINA/SARAJEVO/HERZEGOVINA or global area-weighted score.
+
+### [2026-03-03] Calibration iterations 5-6 verification — `n420`/`n421`
+- **Type:** Calibration / verification evidence (post-implementation)
+- **`n420` result (discarded):**
+  - Change tested: `bot_strategy.ts` Drina/Corridor weight and `min_outcome` edits.
+  - Evidence: `final_state_hash` remained **`5d0881379b469dc1`** (same as `n419`) and `compare_painted_vs_sim.cjs` was bit-identical.
+  - Decision: reverted immediately as inert/no-op.
+- **`n421` result (discarded):**
+  - Change tested: timeline `external_support` retarget (remove `bijeljina`/`prijedor`, raise multiplier `1.26 -> 1.30`).
+  - Evidence: hash changed (**`8f1e501360fa4372`**), but calibration outputs did not improve: overall still **87.2% count / 90.4% area-weighted**, DRINA still **78.0**, POSAVINA_NE still **80.7**, and mismatch profile unchanged.
+  - Decision: reverted timeline edits; keep `n419` as active best calibration state.
+- **Next single priority:** pursue **Drina + Posavina** improvement using knobs that demonstrate positive regional delta (not merely hash movement), while holding KRAJINA/SARAJEVO/HERZEGOVINA and 90.4% area-weighted baseline.
+
+### [2026-03-03] Calibration iteration 7 kickoff — municipality-target retune (`n422` plan)
+- **Type:** Calibration / Orchestrator checkpoint (pre-implementation blast radius)
+- **Summary:** `n420`/`n421` confirmed that non-municipality edits can be inert or no-gain for control metrics. This pass uses only municipality target-set edits in VRS priorities.
+- **Planned scope:** `src/sim/combat/bot_strategy.ts` only:
+  - **Drina late-hold reinforcement:** expand `Herzegovina Hold` with `vlasenica`, `sekovici`, `han_pijesak`, `milici`
+  - **Posavina pressure trim (EBK lane):**
+    - `Corridor 92 (EBK)`: remove `brcko`
+    - `Tuzla Containment`: remove `lopare`
+- **Acceptance gate:** Keep only if DRINA and/or POSAVINA_NE improve without material regressions in KRAJINA/SARAJEVO/HERZEGOVINA and no global area-weighted decline.
+
+### [2026-03-03] Calibration iteration 8 kickoff — Drina ownership correction (`n423` plan)
+- **Type:** Calibration / Orchestrator checkpoint (pre-implementation blast radius)
+- **Summary:** `n422` materially improved POSAVINA_NE and global metrics but DRINA remained flat. Identified targeting issue: Drina reinforcement municipalities were attached to `vrs_herzegovina` instead of `vrs_drina`.
+- **Planned scope:** `src/sim/combat/bot_strategy.ts` only:
+  - expand `Drina Hold` (`vrs_drina`) to include `rogatica`, `vlasenica`, `sekovici`, `milici`, `han_pijesak`, `cajnice`, `rudo`
+  - revert `Herzegovina Hold` to Herzegovina-focused municipality set
+- **Acceptance gate:** Keep only if DRINA improves while preserving `n422` POSAVINA_NE and global gains (91.3% area-weighted baseline).
+
+### [2026-03-03] Calibration iterations 7-8 verification — `n422`/`n423`
+- **Type:** Calibration / verification evidence (post-implementation)
+- **`n422` result (kept):**
+  - Metrics: **88.2% count**, **91.3% area-weighted** (new session high).
+  - Regional delta vs `n419`: POSAVINA_NE **80.7 -> 89.0** (+8.3pp), KRAJINA **96.2 -> 95.4** (-0.8pp, acceptable), SARAJEVO/HERZEGOVINA unchanged, DRINA unchanged (**78.0**).
+  - Faction count deltas vs painted improved to RS **+4**, RBiH **-6**, HRHB **+2** (from `n419`: +11/-13/+2).
+- **`n423` result (no additional gain):**
+  - Ownership correction (move Drina reinforcement municipalities from `vrs_herzegovina` to `vrs_drina`) changed hash (**`f9dd9f98e434ef1a`**) but produced identical calibration outputs to `n422` (overall + all regional percentages unchanged).
+  - Decision: retain current code state (equivalent top-line calibration), classify `n423` as **no extra control gain**.
+- **Current best baseline:** `n422`/`n423` metric envelope = **88.2% count / 91.3% area-weighted**.
+- **Next single priority:** improve **DRINA (78.0)** without giving back POSAVINA_NE gains from `n422`.
+
+### [2026-03-03] Calibration iteration 9 kickoff — focused Drina target-set tighten (`n424` plan)
+- **Type:** Calibration / Orchestrator checkpoint (pre-implementation blast radius)
+- **Summary:** DRINA remains flat at 78.0 despite prior gains elsewhere. This pass narrows Drina target municipalities to contested Drina-core nodes and explicitly adds `srebrenica` to both early and hold phases.
+- **Planned scope:** `src/sim/combat/bot_strategy.ts` only:
+  - `Drina Sweep`: add `srebrenica`; remove low-leverage spread municipalities (`kalinovik`, `cajnice`, `rudo`)
+  - `Drina Hold`: add `srebrenica`; remove southern spread municipalities (`foca`, `cajnice`, `rudo`)
+- **Acceptance gate:** Keep only if DRINA improves without surrendering `n422` POSAVINA_NE gains and without global area-weighted regression below 91.3%.
+
+### [2026-03-03] Calibration iteration 9 verification — `n424` (reverted)
+- **Type:** Calibration / verification evidence (post-implementation)
+- **Result:** `n424` regressed and was reverted.
+  - Global: **88.2% -> 87.8%** count; **91.3% -> 91.1%** area-weighted
+  - DRINA: **78.0 -> 75.6** (worse)
+  - POSAVINA_NE held at **89.0**
+- **Decision:** Revert `n424` Drina sweep/hold tighten; retain `n422/n423` as best active baseline.
+
+### [2026-03-03] Master calibration file update + n425 run
+- **Type:** Calibration / documentation
+- **Master file:** `docs/40_reports/CALIBRATION_MASTER.md` updated: canonical target run set to n422/n423 (88.2% count, 91.3% area-weighted); Match Rate table and Calibration Run History updated with n422, n423, n424 (reverted), n425 (inert). POSAVINA_NE 89.0%, DRINA 78.0% recorded as current regional baseline.
+- **n425:** Drina Sweep weight 130→138 in `bot_strategy.ts`. Run produced same `final_state_hash` as n423 (`f9dd9f98e434ef1a`); compare_painted_vs_sim: 88.2% count, 91.3% area-weighted, DRINA 78.0%. No metric gain; change reverted. Drina Sweep weight remains 130.
+- **Next:** Improve DRINA without losing n422 gains; use small municipality deltas (avoid n424-style big tighten).

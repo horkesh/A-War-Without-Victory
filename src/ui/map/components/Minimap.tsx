@@ -163,7 +163,7 @@ export function Minimap() {
       // Actually we import the builders inline to avoid circular deps
       import('../data/DataLoader').then(async ({ loadOperationalSettlements, loadOperationalPoliticalControl }) => {
         try {
-          const [geojson, byOsid] = await Promise.all([
+          const [geojson] = await Promise.all([
             loadOperationalSettlements(),
             loadOperationalPoliticalControl(),
           ]);
@@ -205,8 +205,8 @@ export function Minimap() {
     <div
       style={{
         position: 'absolute',
-        left: '1rem',
-        bottom: '2.5rem',
+        right: '1rem',
+        bottom: 76,
         width: MINIMAP_WIDTH,
         height: MINIMAP_HEIGHT,
         zIndex: 10,

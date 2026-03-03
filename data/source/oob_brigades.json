@@ -4151,7 +4151,7 @@
       "faction": "RBiH",
       "home_settlement": "Srebrenica",
       "home_mun": "srebrenica",
-      "home_osid": "op:srebrenica:mala_daljegosta_2",
+      "home_osid": "op:srebrenica:srebrenica_2",
       "kind": "brigade",
       "source": "bb_28th_division_srebrenica",
       "subordinate_to": "arbih_2nd_corps",

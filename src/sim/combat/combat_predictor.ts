@@ -103,6 +103,8 @@ export interface CombatPrediction {
     defender_terrain_mult: number;
     is_counter_attack_opportunity: boolean;
     overextension_risk: number;
+    /** Number of neighbors of the target that would be friendly after capture (1 = salient tip, 0 = would be surrounded). Used to avoid cut-off risk. */
+    friendly_neighbors_after_capture: number;
     defender_has_brigade: boolean;
     defender_disrupted: boolean;
     defender_cohesion: number;
@@ -252,6 +254,7 @@ export function predictCombatOutcome(
         const c = getPoliticalControllerOSID(state, n, reverseMap);
         if (c !== null && c !== attackerFaction) enemyAdj++;
     }
+    const friendlyNeighborsAfterCapture = targetNeighbors.length - enemyAdj;
 
     return {
         attacker_power: attackerPower,
@@ -268,6 +271,7 @@ export function predictCombatOutcome(
         defender_terrain_mult: terrainMultByOsid[targetOsid] ?? 1.0,
         is_counter_attack_opportunity: isCounterAttack,
         overextension_risk: enemyAdj,
+        friendly_neighbors_after_capture: friendlyNeighborsAfterCapture,
         defender_has_brigade: defenderHasBrigade,
         defender_disrupted: defenderDisrupted,
         defender_cohesion: defenderCohesion

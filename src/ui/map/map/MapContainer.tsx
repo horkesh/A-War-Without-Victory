@@ -18,6 +18,8 @@ import { buildSupplyGeoJSON } from './builders/buildSupplyGeoJSON';
 import { buildFrontLinesGeoJSON } from './builders/buildFrontLinesGeoJSON';
 import { buildFrontEdgesHoverGeoJSON } from './builders/buildFrontEdgesHoverGeoJSON';
 import { buildCorpsFrontLinesGeoJSON, buildCorpsColorExpression } from './builders/buildCorpsFrontLinesGeoJSON';
+import { buildSectorDemarcationGeoJSON } from './builders/buildSectorDemarcationGeoJSON';
+import { buildOperationTargetPointsGeoJSON, buildOperationTargetCrosshairsGeoJSON } from './builders/buildOperationTargetIconsGeoJSON';
 import { buildFormationsGeoJSON } from './builders/buildFormationsGeoJSON';
 import { buildOrderArrowsGeoJSON } from './builders/buildOrderArrowsGeoJSON';
 import { buildOsidCentroidLookup } from './builders/geojsonLookup';
@@ -52,6 +54,17 @@ const SECTOR_FILL_LAYER_ID = 'sector-fill';
 const SECTOR_EDGE_GLOW_POS_LAYER_ID = 'sector-edge-glow-pos';
 const SECTOR_EDGE_GLOW_NEG_LAYER_ID = 'sector-edge-glow-neg';
 const SECTOR_BRIGADE_RINGS_LAYER_ID = 'sector-brigade-rings';
+const SECTOR_DEMARCATION_SOURCE_ID = 'sector-demarcation';
+const SECTOR_DEMARCATION_LAYER_ID = 'sector-demarcation-lines';
+const OP_TARGET_POLYGON_SOURCE_ID = 'operation-target-polygons';
+const OP_TARGET_POINT_SOURCE_ID = 'operation-target-points';
+const OP_TARGET_CROSSHAIR_SOURCE_ID = 'operation-target-crosshairs';
+const OP_TARGET_FILL_LAYER_ID = 'operation-target-fill';
+const OP_TARGET_OUTLINE_LAYER_ID = 'operation-target-outline';
+const OP_TARGET_ICON_RING_LAYER_ID = 'operation-target-icon-ring';
+const OP_TARGET_ICON_INNER_RING_LAYER_ID = 'operation-target-icon-inner-ring';
+const OP_TARGET_ICON_DOT_LAYER_ID = 'operation-target-icon-dot';
+const OP_TARGET_ICON_CROSSHAIR_LAYER_ID = 'operation-target-icon-crosshair';
 
 /**
  * Rewrite pmtiles:/// URLs in the style for the current environment.
@@ -87,6 +100,7 @@ export function MapContainer() {
   const selectedOsid = useGameStore((s) => s.selectedOsid);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const hoveredOsids = useGameStore((s) => s.hoveredOsids);
+  const operationTargetOsids = useGameStore((s) => s.operationTargetOsids);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
   const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
@@ -175,6 +189,13 @@ export function MapContainer() {
         map.easeTo({ center, duration: 400, essential: true });
       });
 
+      // Operations panel: register panToOsid callback
+      useGameStore.getState().setPanToOsid((osid: string) => {
+        const center = osidCentroidsRef.current.get(osid);
+        if (!center) return;
+        map.easeTo({ center, duration: 420, essential: true });
+      });
+
       setMapReady(true);
     };
 
@@ -183,6 +204,8 @@ export function MapContainer() {
     return () => {
       mapRef.current?.remove();
       mapRef.current = null;
+      useGameStore.getState().setPanToCenter(null);
+      useGameStore.getState().setPanToOsid(null);
       setMapReady(false);
       maplibregl.removeProtocol('pmtiles');
     };
@@ -299,14 +322,13 @@ export function MapContainer() {
                 controlledGeoJson, state.corpsFrontSectors, rbihHrhbAllied,
                 osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined
               );
-              // Dynamic corps colors on glow + front-line layers
+              // Corps colors on glow layers only; front-line-base/stripe stay black-white stripe.
               try {
                 const corpsColorExpr = buildCorpsColorExpression(state.corpsFrontSectors);
                 m2.setPaintProperty('faction-border-glow-pos', 'line-color', corpsColorExpr as maplibregl.ExpressionSpecification);
                 m2.setPaintProperty('faction-border-glow-neg', 'line-color', corpsColorExpr as maplibregl.ExpressionSpecification);
-                m2.setPaintProperty('front-line-base', 'line-color', corpsColorExpr as maplibregl.ExpressionSpecification);
               } catch (e) {
-                console.warn('[MapContainer] Failed to set corps front colors:', e);
+                console.warn('[MapContainer] Failed to set corps glow colors:', e);
               }
             } else {
               frontLinesGeoJson = buildFrontLinesGeoJSON(controlledGeoJson, state.war_alliance_rbih_hrhb);
@@ -395,6 +417,37 @@ export function MapContainer() {
                 );
               } else {
                 (m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID) as GeoJSONSource).setData(frontEdgesHoverData);
+              }
+
+              // Sector demarcation lines: thin dashed lines between adjacent same-faction sectors
+              if (state.corpsFrontSectors && state.corpsFrontSectors.length > 0) {
+                const demarcData = buildSectorDemarcationGeoJSON(controlledGeoJson, state.corpsFrontSectors, frontEdgesOsid);
+                if (!m2.getSource(SECTOR_DEMARCATION_SOURCE_ID)) {
+                  m2.addSource(SECTOR_DEMARCATION_SOURCE_ID, { type: 'geojson', data: demarcData });
+                  m2.addLayer(
+                    {
+                      id: SECTOR_DEMARCATION_LAYER_ID,
+                      type: 'line',
+                      source: SECTOR_DEMARCATION_SOURCE_ID,
+                      paint: {
+                        'line-color': [
+                          'match', ['get', 'faction'],
+                          'RS',   'rgba(160, 60,  60,  0.5)',
+                          'RBiH', 'rgba(55,  130, 70,  0.5)',
+                          'HRHB', 'rgba(50,  100, 160, 0.5)',
+                          'rgba(80, 80, 90, 0.35)',
+                        ],
+                        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.6, 10, 1.0, 14, 1.5],
+                        'line-dasharray': [5, 3],
+                        'line-opacity': 0.65,
+                      },
+                      layout: { 'line-cap': 'butt', 'line-join': 'round' },
+                    },
+                    'faction-border-glow-pos'
+                  );
+                } else {
+                  (m2.getSource(SECTOR_DEMARCATION_SOURCE_ID) as GeoJSONSource).setData(demarcData);
+                }
               }
             }
 
@@ -534,6 +587,92 @@ export function MapContainer() {
     }, 250);
     return () => clearInterval(poll);
   }, [hoveredOsids, mapReady]);
+
+  // Operation target visualization: crosshair + ring + dot + fill on objective OSIDs
+  useEffect(() => {
+    const map = mapRef.current;
+    const centroidLookup = osidCentroidsRef.current;
+    const baseGeoJson = osidBaseRef.current;
+    if (!mapReady || !map || !baseGeoJson) return;
+
+    const emptyGeoJson: FeatureCollection = { type: 'FeatureCollection', features: [] };
+    const targetSet = new Set(operationTargetOsids.filter((osid) => osid.length > 0));
+    const targetPolygons: FeatureCollection = targetSet.size
+      ? {
+          type: 'FeatureCollection',
+          features: baseGeoJson.features.filter((feature) => {
+            const osid = typeof feature.properties?.osid === 'string' ? feature.properties.osid : '';
+            return osid.length > 0 && targetSet.has(osid);
+          }),
+        }
+      : emptyGeoJson;
+    const targetPoints = targetSet.size
+      ? buildOperationTargetPointsGeoJSON(centroidLookup, operationTargetOsids)
+      : emptyGeoJson;
+    const targetCrosshairs = targetSet.size
+      ? buildOperationTargetCrosshairsGeoJSON(centroidLookup, operationTargetOsids)
+      : emptyGeoJson;
+
+    const applyOperationTargets = () => {
+      if (!map.getSource('osid-control')) return false;
+
+      if (!map.getSource(OP_TARGET_POLYGON_SOURCE_ID)) {
+        map.addSource(OP_TARGET_POLYGON_SOURCE_ID, { type: 'geojson', data: emptyGeoJson });
+      }
+      if (!map.getSource(OP_TARGET_POINT_SOURCE_ID)) {
+        map.addSource(OP_TARGET_POINT_SOURCE_ID, { type: 'geojson', data: emptyGeoJson });
+      }
+      if (!map.getSource(OP_TARGET_CROSSHAIR_SOURCE_ID)) {
+        map.addSource(OP_TARGET_CROSSHAIR_SOURCE_ID, { type: 'geojson', data: emptyGeoJson });
+      }
+
+      if (!safeHasLayer(map, OP_TARGET_FILL_LAYER_ID)) {
+        const spec = { id: OP_TARGET_FILL_LAYER_ID, type: 'fill', source: OP_TARGET_POLYGON_SOURCE_ID, paint: { 'fill-color': 'rgba(8, 8, 8, 0.28)' }, layout: { visibility: 'none' } } as maplibregl.LayerSpecification;
+        safeHasLayer(map, 'formation-markers') ? map.addLayer(spec, 'formation-markers') : map.addLayer(spec);
+      }
+      if (!safeHasLayer(map, OP_TARGET_OUTLINE_LAYER_ID)) {
+        const spec = { id: OP_TARGET_OUTLINE_LAYER_ID, type: 'line', source: OP_TARGET_POLYGON_SOURCE_ID, paint: { 'line-color': 'rgba(5, 5, 5, 0.95)', 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.9, 10, 1.35, 14, 1.8], 'line-opacity': 0.95 }, layout: { visibility: 'none' } } as maplibregl.LayerSpecification;
+        safeHasLayer(map, 'formation-markers') ? map.addLayer(spec, 'formation-markers') : map.addLayer(spec);
+      }
+      if (!safeHasLayer(map, OP_TARGET_ICON_RING_LAYER_ID)) {
+        const spec = { id: OP_TARGET_ICON_RING_LAYER_ID, type: 'circle', source: OP_TARGET_POINT_SOURCE_ID, paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 7, 10, 10, 14, 14], 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': 'rgba(5,5,5,0.95)', 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 6, 1, 10, 1.5, 14, 2], 'circle-opacity': 1 }, layout: { visibility: 'none' } } as maplibregl.LayerSpecification;
+        safeHasLayer(map, 'formation-markers') ? map.addLayer(spec, 'formation-markers') : map.addLayer(spec);
+      }
+      if (!safeHasLayer(map, OP_TARGET_ICON_INNER_RING_LAYER_ID)) {
+        const spec = { id: OP_TARGET_ICON_INNER_RING_LAYER_ID, type: 'circle', source: OP_TARGET_POINT_SOURCE_ID, paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 3.5, 10, 5, 14, 7], 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': 'rgba(5,5,5,0.85)', 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 6, 0.8, 10, 1.1, 14, 1.5], 'circle-opacity': 1 }, layout: { visibility: 'none' } } as maplibregl.LayerSpecification;
+        safeHasLayer(map, 'formation-markers') ? map.addLayer(spec, 'formation-markers') : map.addLayer(spec);
+      }
+      if (!safeHasLayer(map, OP_TARGET_ICON_DOT_LAYER_ID)) {
+        const spec = { id: OP_TARGET_ICON_DOT_LAYER_ID, type: 'circle', source: OP_TARGET_POINT_SOURCE_ID, paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 1.2, 10, 1.8, 14, 2.6], 'circle-color': 'rgba(5,5,5,0.95)', 'circle-opacity': 1 }, layout: { visibility: 'none' } } as maplibregl.LayerSpecification;
+        safeHasLayer(map, 'formation-markers') ? map.addLayer(spec, 'formation-markers') : map.addLayer(spec);
+      }
+      if (!safeHasLayer(map, OP_TARGET_ICON_CROSSHAIR_LAYER_ID)) {
+        const spec = { id: OP_TARGET_ICON_CROSSHAIR_LAYER_ID, type: 'line', source: OP_TARGET_CROSSHAIR_SOURCE_ID, layout: { 'line-cap': 'round', 'line-join': 'round', visibility: 'none' }, paint: { 'line-color': 'rgba(5,5,5,0.95)', 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 1, 10, 1.4, 14, 1.9], 'line-opacity': 0.95 } } as maplibregl.LayerSpecification;
+        safeHasLayer(map, 'formation-markers') ? map.addLayer(spec, 'formation-markers') : map.addLayer(spec);
+      }
+
+      const targetSource = map.getSource(OP_TARGET_POLYGON_SOURCE_ID) as GeoJSONSource | undefined;
+      const pointSource = map.getSource(OP_TARGET_POINT_SOURCE_ID) as GeoJSONSource | undefined;
+      const crosshairSource = map.getSource(OP_TARGET_CROSSHAIR_SOURCE_ID) as GeoJSONSource | undefined;
+      if (!targetSource || !pointSource || !crosshairSource) return false;
+      targetSource.setData(targetPolygons);
+      pointSource.setData(targetPoints);
+      crosshairSource.setData(targetCrosshairs);
+      safeSetLayoutVisibility(map, OP_TARGET_FILL_LAYER_ID, targetSet.size > 0);
+      safeSetLayoutVisibility(map, OP_TARGET_OUTLINE_LAYER_ID, targetSet.size > 0);
+      safeSetLayoutVisibility(map, OP_TARGET_ICON_RING_LAYER_ID, targetSet.size > 0);
+      safeSetLayoutVisibility(map, OP_TARGET_ICON_INNER_RING_LAYER_ID, targetSet.size > 0);
+      safeSetLayoutVisibility(map, OP_TARGET_ICON_DOT_LAYER_ID, targetSet.size > 0);
+      safeSetLayoutVisibility(map, OP_TARGET_ICON_CROSSHAIR_LAYER_ID, targetSet.size > 0);
+      return true;
+    };
+
+    if (applyOperationTargets()) return;
+    const poll = setInterval(() => {
+      if (applyOperationTargets()) clearInterval(poll);
+    }, 250);
+    return () => clearInterval(poll);
+  }, [mapReady, operationTargetOsids]);
 
   // Phase B: Sector visualization — fill territory + glow edges when a sector is selected.
   useEffect(() => {
@@ -889,6 +1028,7 @@ export function MapContainer() {
       const supplyGeoJson = buildSupplyGeoJSON(
         controlGeoJson,
         loadedGameState.controlBySettlement,
+        loadedGameState.factionReserves,
         loadedGameState.phaseIiSupplyPressure
       );
       if (cancelled || !mapRef.current) return;

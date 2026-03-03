@@ -95,6 +95,10 @@ export interface GameStore {
   selectedOperationKey: string | null;
   setSelectedOperationKey: (key: string | null) => void;
 
+  /** Whether the Operations Panel modal is open. */
+  isOperationsPanelOpen: boolean;
+  setIsOperationsPanelOpen: (v: boolean) => void;
+
   /** Minimap visibility toggle. */
   minimapVisible: boolean;
   setMinimapVisible: (v: boolean) => void;
@@ -106,6 +110,14 @@ export interface GameStore {
   /** Callback to pan the main map to a center coordinate (registered by MapContainer). */
   panToCenter: ((center: [number, number]) => void) | null;
   setPanToCenter: (fn: ((center: [number, number]) => void) | null) => void;
+
+  /** Callback to pan the main map to an OSID centroid (registered by MapContainer). */
+  panToOsid: ((osid: string) => void) | null;
+  setPanToOsid: (fn: ((osid: string) => void) | null) => void;
+
+  /** OSIDs to highlight on the map as operation targets (crosshairs, rings, fill). */
+  operationTargetOsids: string[];
+  setOperationTargetOsids: (osids: string[]) => void;
 
   loadedGameState: LoadedGameState | null;
   /** Last turn report from desktop (after advance-turn). Used for succession notifications. */
@@ -126,10 +138,10 @@ export interface GameStore {
 
 export const useGameStore = create<GameStore>((set) => ({
   selectedOsid: null,
-  setSelectedOsid: (osid) => set({ selectedOsid: osid, selectedFormationId: null }),
+  setSelectedOsid: (osid) => set({ selectedOsid: osid, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedCorpsId: null, selectedArmyId: null }),
 
   selectedFormationId: null,
-  setSelectedFormationId: (id) => set({ selectedFormationId: id, selectedOsid: null }),
+  setSelectedFormationId: (id) => set({ selectedFormationId: id, selectedOsid: null, selectedOperationKey: null }),
 
   hoveredOsids: [],
   setHoveredOsids: (osids) => set({ hoveredOsids: [...new Set(osids)].sort((a, b) => a.localeCompare(b)) }),
@@ -168,16 +180,27 @@ export const useGameStore = create<GameStore>((set) => ({
   setPendingAttackConfirmation: (v) => set({ pendingAttackConfirmation: v }),
 
   selectedCorpsFrontSectorId: null,
-  setSelectedCorpsFrontSectorId: (id) => set({ selectedCorpsFrontSectorId: id, selectedOsid: null, selectedFormationId: null }),
+  setSelectedCorpsFrontSectorId: (id) => set({ selectedCorpsFrontSectorId: id, selectedOsid: null, selectedFormationId: null, selectedOperationKey: null }),
 
   selectedCorpsId: null,
-  setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedArmyId: null, selectedOsid: null, selectedFormationId: null, selectedCorpsFrontSectorId: null }),
+  setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedArmyId: null, selectedOsid: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null }),
 
   selectedArmyId: null,
-  setSelectedArmyId: (id) => set({ selectedArmyId: id, selectedCorpsId: null, selectedOsid: null, selectedFormationId: null, selectedCorpsFrontSectorId: null }),
+  setSelectedArmyId: (id) => set({ selectedArmyId: id, selectedCorpsId: null, selectedOsid: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null }),
 
   selectedOperationKey: null,
-  setSelectedOperationKey: (key) => set({ selectedOperationKey: key }),
+  setSelectedOperationKey: (key) => set((state) => ({
+    selectedOperationKey: key,
+    isOperationsPanelOpen: key != null ? true : state.isOperationsPanelOpen,
+    selectedCorpsId: null,
+    selectedArmyId: null,
+    selectedCorpsFrontSectorId: null,
+    selectedFormationId: null,
+    selectedOsid: null,
+  })),
+
+  isOperationsPanelOpen: false,
+  setIsOperationsPanelOpen: (v) => set({ isOperationsPanelOpen: v }),
 
   minimapVisible: true,
   setMinimapVisible: (v) => set({ minimapVisible: v }),
@@ -187,6 +210,12 @@ export const useGameStore = create<GameStore>((set) => ({
 
   panToCenter: null,
   setPanToCenter: (fn) => set({ panToCenter: fn }),
+
+  panToOsid: null,
+  setPanToOsid: (fn) => set({ panToOsid: fn }),
+
+  operationTargetOsids: [],
+  setOperationTargetOsids: (osids) => set({ operationTargetOsids: [...new Set(osids)] }),
 
   loadedGameState: null,
 

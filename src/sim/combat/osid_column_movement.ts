@@ -289,15 +289,22 @@ export function processOsidColumnMovement(
         const remaining = (ms.turns_remaining ?? 1) - 1;
 
         if (remaining <= 0) {
-            // Arrived at destination
+            // Arrived at destination — only complete move if destination is still friendly
             const dest = ms.destination_sids?.[0];
-            if (dest) {
+            const factionId = f.faction as FactionId;
+            const destController = dest ? getPoliticalControllerOSID(state, dest, reverseMap) : null;
+            if (dest && destController === factionId) {
                 (f as { location_osid?: string }).location_osid = dest;
                 (f as { entrenchment_turns?: number }).entrenchment_turns = 0;
+                report.column_arrivals += 1;
+            } else if (dest && (ms.path?.length ?? 0) >= 2) {
+                // Destination flipped to enemy: stop at previous step on path (friendly when we left)
+                const prevStep = ms.path![ms.path!.length - 2];
+                (f as { location_osid?: string }).location_osid = prevStep;
+                (f as { entrenchment_turns?: number }).entrenchment_turns = 0;
+                report.column_arrivals += 1;
             }
-            // Mark as deployed (will be cleaned up by normal movement state processing)
             delete movementState[formationId];
-            report.column_arrivals += 1;
         } else {
             movementState[formationId] = { ...ms, turns_remaining: remaining };
             report.column_advances += 1;

@@ -3,7 +3,7 @@
 
   "doctrine_phases": {
     "RS": [
-      { "start_week": 0, "end_week": 20, "default_corps_stance": "offensive", "max_attack_share_override": 0.28, "aggression_modifier": 0.15 },
+      { "start_week": 0, "end_week": 20, "default_corps_stance": "offensive", "max_attack_share_override": 0.24, "aggression_modifier": 0.12 },
       { "start_week": 20, "end_week": 40, "default_corps_stance": "balanced", "max_attack_share_override": 0.08, "aggression_modifier": -0.05 },
       { "start_week": 40, "end_week": 9999, "default_corps_stance": "defensive", "max_attack_share_override": 0.10, "aggression_modifier": -0.1 }
     ],
@@ -155,7 +155,7 @@
       "faction": "RS",
       "end_turn": 26,
       "municipalities": ["bijeljina", "zvornik", "foca", "vlasenica", "bratunac", "visegrad", "rogatica", "prijedor"],
-      "combat_multiplier": 1.22
+      "combat_multiplier": 1.26
     }
   ],
 

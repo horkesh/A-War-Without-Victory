@@ -61,6 +61,7 @@ import {
     computeEngagementLevel
 } from './baseline_ops_scheduler.js';
 import { backfillFormationLocationOsid, loadOperationalData, loadOperationalEdges } from './../data/operational_data.js';
+import { displaceFormationsInEnemyTerritory } from '../sim/combat/attack_resolution_osid.js';
 import { loadInitialFormations } from './initial_formations_loader.js';
 import {
     loadMunicipalityHqSettlement,
@@ -1158,6 +1159,17 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
         if (operationalData?.canonicalToOperational) {
             backfillFormationLocationOsid(state, operationalData.canonicalToOperational);
+        }
+        // Ensure no formation remains in an OSID controlled by another faction (initial or after backfill).
+        if (state.meta.phase === 'war' && operationalData?.operationalToCanonical) {
+            try {
+                const edges = await loadOperationalEdges(baseDir);
+                if (edges?.length) {
+                    displaceFormationsInEnemyTerritory(state, edges, operationalData.operationalToCanonical);
+                }
+            } catch {
+                // Edges may be missing; skip displacement
+            }
         }
         const historicalMetricsInitial = captureHistoricalFactionMetrics(state);
 

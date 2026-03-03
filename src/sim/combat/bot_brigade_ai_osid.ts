@@ -235,6 +235,21 @@ function countFactionBrigadesAtOsid(state: GameState, faction: FactionId, osid: 
  *
  * Deterministic: sorted neighbor iteration, returns first qualifying gap.
  */
+/** True if moving a brigade to this OSID would be risky (salient or cut-off).
+ * Used to avoid sending reinforcements into positions that could be overrun or isolated. */
+function isMovementDestinationRisky(
+    dest: Osid,
+    graphAnalysis: FactionGraphAnalysis
+): boolean {
+    const analysis = graphAnalysis.osid_analysis.get(dest);
+    if (!analysis) return false;
+    const enemyCount = analysis.enemy_neighbors.length;
+    const friendlyCount = analysis.friendly_neighbors.length;
+    if (enemyCount >= 3) return true;   // salient — exposed on 3+ sides
+    if (friendlyCount <= 1) return true; // cut-off risk — at most one escape route
+    return false;
+}
+
 function findAdjacentFrontGap(
     state: GameState,
     loc: Osid,
@@ -254,7 +269,7 @@ function findAdjacentFrontGap(
             (analysis.classification === 'undefended' || analysis.classification === 'critical')) {
             // Don't move to a gap if it already has a faction brigade heading there
             const factionHere = countFactionBrigadesAtOsid(state, faction, n);
-            if (factionHere === 0) return n;
+            if (factionHere === 0 && !isMovementDestinationRisky(n, graphAnalysis)) return n;
         }
     }
     return null;
@@ -342,7 +357,7 @@ function findNearestFrontOsid(
             const step = firstStep ?? n;
             const analysis = graphAnalysis.osid_analysis.get(n);
             if (analysis && targetClassifications.includes(analysis.classification)) {
-                return step; // Return the FIRST step toward the target, not the target itself
+                if (!isMovementDestinationRisky(n, graphAnalysis)) return step; // safe first step
             }
             queue.push({ osid: n, firstStep: step });
         }
@@ -475,6 +490,8 @@ function findFrontDestinationForColumnMarch(
         if (depth > 0) {
             const analysis = graphAnalysis.osid_analysis.get(osid);
             if (analysis && analysis.enemy_neighbors.length > 0) {
+                // Skip salient or cut-off destinations — avoid sending brigades into risky positions
+                if (isMovementDestinationRisky(osid, graphAnalysis)) continue;
                 // Distribution: skip if too many brigades already assigned here
                 const assigned = assignedDests?.get(osid) ?? 0;
                 if (assigned >= MAX_COLUMN_MARCH_PER_OSID) {
@@ -750,12 +767,20 @@ function scoreTargetFromDirective(
     }
 
     // Tactical penalties — heavily reduced for directive targets (corps accepted the risk).
-    // Zvornik, with overextension=4, gets -57 instead of -230 for directive attacks.
+    // Overextension: avoid pushing into salients or positions that could be cut off.
     const isDirectiveTarget = directive.offensive_targets.includes(osid);
     const overextPenaltyScale = isDirectiveTarget ? 0.25 : 1.0;
-    if (prediction.overextension_risk >= 3) score -= Math.floor(150 * overextPenaltyScale);
+    if (prediction.overextension_risk >= 3) score -= Math.floor(220 * overextPenaltyScale);
+    if (prediction.overextension_risk >= 2) score -= Math.floor(120 * overextPenaltyScale);
+    if (prediction.overextension_risk >= 1) score -= Math.floor(50 * overextPenaltyScale);
     if (prediction.attacker_casualty_percent > 0.20) score -= 150;
-    if (prediction.overextension_risk >= 2) score -= Math.floor(80 * overextPenaltyScale);
+    // Cut-off risk: advancing to a tile with 0–1 friendly neighbors risks being isolated/cut off.
+    const friendlyAfter = prediction.friendly_neighbors_after_capture ?? 2;
+    if (friendlyAfter <= 1) score -= Math.floor(180 * overextPenaltyScale);
+    // Line-shortening (consolidation): prefer capturing bulges — more friendly neighbors after
+    // capture = shorter front (e.g. Teočak, Šapna historically). Bonus when 2+ friendly neighbors.
+    if (friendlyAfter >= 3) score += 35;
+    else if (friendlyAfter >= 2) score += 20;
 
     // Co-ethnic bonus (all factions fight harder for co-ethnic areas)
     score += getCoEthnicScore(osid, faction, ethnicMap);
@@ -1254,7 +1279,9 @@ function executeFactionDirectives(
                     }
                 }
                 if (redeployTarget) {
-                    result.movement_orders[brigade.id] = redeployTarget;
+                    if (!isMovementDestinationRisky(redeployTarget, graphAnalysis)) {
+                        result.movement_orders[brigade.id] = redeployTarget;
+                    }
                     result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                     continue;
                 }
@@ -1318,7 +1345,9 @@ function executeFactionDirectives(
                 }
             }
             if (directiveTarget) {
-                result.movement_orders[brigade.id] = directiveTarget;
+                if (!isMovementDestinationRisky(directiveTarget, graphAnalysis)) {
+                    result.movement_orders[brigade.id] = directiveTarget;
+                }
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                 continue;
             }

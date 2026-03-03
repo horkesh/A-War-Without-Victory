@@ -114,8 +114,10 @@ export function buildFrontEdgesHoverGeoJSON(
       const centFirst = osidCentroids.get(osidFirst);
       if (centFirst) {
         const cross = dx * (centFirst[1] - ay) - dy * (centFirst[0] - ax);
-        const offsetFirst: 1 | -1 = cross > 0 ? 1 : -1;
-        pairToOffsets.set(pairKey, { osidA: osidFirst, osidB: osidSecond, offsetA: offsetFirst, offsetB: cross > 0 ? -1 : 1 });
+        // cross > 0 → centFirst is LEFT of directed edge; MapLibre positive line-offset = RIGHT,
+        // so assign -1 to push glow LEFT into osidFirst's territory.
+        const offsetFirst: 1 | -1 = cross > 0 ? -1 : 1;
+        pairToOffsets.set(pairKey, { osidA: osidFirst, osidB: osidSecond, offsetA: offsetFirst, offsetB: cross > 0 ? 1 : -1 });
       }
     }
   }

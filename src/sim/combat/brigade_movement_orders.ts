@@ -54,11 +54,10 @@ export function applyBrigadeMovementOrders(
         const destOsid = order?.destination_sids?.[0] as Osid | undefined;
         const neighbors = adjacency.get(loc) ?? [];
 
+        const factionId = (f as { faction?: string }).faction;
+        const destController = destOsid ? getPoliticalControllerOSID(state, destOsid, reverseMap) : null;
         const canMove = Boolean(
-            destOsid && destOsid !== loc && neighbors.includes(destOsid) && (() => {
-                const controller = getPoliticalControllerOSID(state, destOsid, reverseMap);
-                return controller !== null;
-            })()
+            destOsid && destOsid !== loc && neighbors.includes(destOsid) && factionId && destController === factionId
         );
 
         if (canMove && destOsid) {

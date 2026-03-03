@@ -7,6 +7,7 @@ import { CorpsFrontPanel } from './components/CorpsFrontPanel';
 import { FormationDetail } from './components/FormationDetail';
 import { CorpsDetail } from './components/CorpsDetail';
 import { ArmyDetail } from './components/ArmyDetail';
+import { OperationsPanel } from './components/OperationsPanel';
 import { Minimap } from './components/Minimap';
 import { BottomStatusStrip } from './components/BottomStatusStrip';
 import { OOBSidebar } from './components/OOBSidebar';
@@ -181,6 +182,7 @@ function App() {
       <CorpsFrontPanel />
       <CorpsDetail />
       <ArmyDetail />
+      <OperationsPanel />
       <FormationDetail />
       <Tooltip />
       {pendingAttackConfirmation && attackerFormation && (

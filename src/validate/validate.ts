@@ -1,4 +1,5 @@
 import { CURRENT_SCHEMA_VERSION, GameState } from '../state/game_state.js';
+import { validateBrigadeLocationControl } from './brigade_location_control.js';
 import { validateControlOverrides, validateControlRecognition } from './control_overrides.js';
 import { validateEndState } from './end_state.js';
 import { validateFactions } from './factions.js';
@@ -81,6 +82,9 @@ export function validateState(state: GameState): ValidationIssue[] {
     // Phase 12C.2: Validate control_overrides and control_recognition
     issues.push(...validateControlOverrides(state));
     issues.push(...validateControlRecognition(state));
+
+    // Phase II: Brigade/OG location_osid must be in faction-controlled territory
+    issues.push(...validateBrigadeLocationControl(state));
 
     // Phase 12C.3: Validate supply_rights
     issues.push(...validateSupplyRights(state));

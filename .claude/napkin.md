@@ -127,7 +127,7 @@
    Do instead: showTacticalMapScene() re-queries getMapServerUrl() so we never use awwv fallback if map server is ready. createWindow() calls session.clearCache() so iframe gets fresh bundle. TopToolbar shows "map HH:MM" when embedded (__MAP_BUILD_TIME__) to confirm which bundle loaded.
 3. **[2026-03-03] Desktop map: HTTP server + routes**
    Do instead: Map and warroom load assets from `http://127.0.0.1:<port>/...`; MapLibre blob workers do not work under awwv://. Server started in `electron-main.cjs startMapServer()`. Serves `data/source` and `data/runs`; path-traversal guard and .json-only for runs.
-2. **[2026-03-03] Desktop map build output**
+4. **[2026-03-03] Desktop map build output**
    Do instead: Map Vite build must output to `dist/tactical-map` for Electron; outDir in src/ui/map/vite.config.ts.
 5. **[2026-03-03] Map interaction layers: bind when present**
    Do instead: Bind interactions (control, ethnic, density, front-edges) when layers exist; MapContainer uses 400ms delay after loadedGameState before useMapInteractions so layers are in style.
@@ -139,7 +139,9 @@
    Do instead: `stageCorpsFrontOrder` and `stageCorpsAttackAxisOrder` must accept `corps_asset` and `army_hq`.
 
 ## Map & Geometry
-1. **[2026-02-21] FRONT definition**
+1. **[2026-03-03] Front line style: black-white stripe — no chevrons**
+   Do instead: Front style = `front-line-base` (dark) + `front-line-dash` (white dash). User confirmed keep as-is. Do NOT propose or implement HoI4 chevron/barbed-wire variants.
+2. **[2026-02-21] FRONT definition**
    Do instead: FRONT = where two hostile settlements meet (not "where brigade is present"). Assign units after segment length/name.
 2. **[2026-02-23] Front ribbons: border-based only, consecutive runs**
    Do instead: No centroid-to-centroid fallback ribbons — they create dark rectangular artifacts. Collect shared vertices as consecutive runs along A's ring; one ribbon per run to prevent zig-zag. Use `borderVertexKey` with 1e6 rounding. Dedupe and smooth border runs before storing.
@@ -170,20 +172,22 @@
 
 ## Calibration
 1. **[2026-03-03] Area-weighted is primary calibration metric (n413=89.7%)**
-   Do instead: Use area-weighted match (km²) as primary. Count-based penalizes small eastern settlements disproportionately. n413=89.7% area-weighted vs 85.9% count-based (supply fixes: pocket threshold + isolated source + heavy weapon drain). Compare tool shows both columns.
-2. **[2026-03-01] Calibration knobs (master reference)**
+   Do instead: Use area-weighted match (km²) as primary. Count-based penalizes small eastern settlements disproportionately. n413=89.7% area-weighted vs 85.9% count-based. Compare tool shows both columns.
+2. **[2026-03-03] Timeline knobs drive 40w behavior first**
+   Do instead: For `apr1992_definitive_40w`, tune `data/scenarios/timelines/apr1992.json` (`doctrine_phases`, `external_support`) before editing `bot_strategy.ts`; verify with `final_state_hash` and `compare_painted_vs_sim.cjs`.
+3. **[2026-03-03] Prove knob efficacy immediately (hash + metrics)**
+   Do instead: After each calibration edit, run one 40w and compare both `final_state_hash` and `compare_painted_vs_sim.cjs`; if unchanged vs prior run, revert as inert/no-op before next iteration.
+4. **[2026-03-03] Municipality target sets are the strongest live lever**
+   Do instead: Prioritize small `target_municipalities` edits for affected corps (e.g., EBK `brcko`/`lopare` trimming yielded +8.3pp POSAVINA_NE) before weight/min_outcome tuning.
+5. **[2026-03-03] Hash movement alone is not calibration progress**
+   Do instead: Treat `compare_painted_vs_sim.cjs` (overall + regional) as acceptance authority; if hash changes but regional metrics are unchanged, classify as no-gain and revert.
+6. **[2026-03-03] Drina over-focus can backfire**
+   Do instead: Avoid aggressive Drina list tightening + explicit `srebrenica` prioritization in one step; test smaller municipality deltas to prevent DRINA regression (n424: 78.0 -> 75.6).
+7. **[2026-03-01] Calibration knobs (master reference)**
    Do instead: Primary levers: POOL_SCALE_FACTOR, FACTION_POOL_SCALE, RS_EARLY_WAR_END_WEEK (20), per-faction stance/doctrine in bot_strategy.ts, initial_morale in OOB, per-faction morale resist floor, defense_terrain_bonus (+0.20–0.30), local_front_defense.ts thresholds (THIN=0.5, DENSE=1.0). Supply gating: critical→defend, strained→victory-only. Sector offensives: MIN_BRIGADES=3, supply_readiness launch=0.6/abort=0.4. Combat formula: officer quality, ethnic defense, bombardment casualty mult, bombardment exposure attrition.
-2. **[2026-03-02] Sector offensives active in year-1 (n359)**
-   Do instead: 26 ops/40w. `advanceSectorOffensives()` is sole lifecycle manager (L43). `computeSupplyReadiness()` returns 1.0 when `supply_reserves_enabled=false` (L42). Recovery-phase launches allowed. Min 1 objective.
-3. **[2026-02-25] Historical territory targets (year 1)**
+8. **[2026-02-25] Historical territory targets (year 1)**
    Do instead: RS ~60-65% territory. ARBiH ~0% recaptured. ~25-35k military KIA all sides.
-4. **[2026-02-25] Front stabilization timing**
-   Do instead: Fronts mostly stabilize by early October (~week 25).
-5. **[2026-02-25] Winter slowdown**
-   Do instead: Fighting dies down over winter. Dead weeks (w32-39) roughly right but accidental; needs intentional mechanic.
-6. **[2026-02-25] RS init territory correct at 35%**
-   Do instead: RS starting ~35% is by design. Gap to 60% closed via early land grabs, not init override.
-7. **[2026-02-25] OOB knowledge base**
-   Do instead: Use `docs/knowledge/{VRS,ARBIH,HVO}_ORDER_OF_BATTLE_MASTER.md` for historical formation data.
-8. **[2026-02-24] War entrenchment init**
-   Do instead: Optional scenario param `war_entrenchment_init_turns` (0..12) in schema and loader.
+9. **[2026-02-25] Front stabilization timing + winter slowdown**
+   Do instead: Fronts stabilize by early October (~w25). Dead weeks (w32-39) accidental; needs intentional winter mechanic.
+10. **[2026-02-25] RS init territory correct at 35%**
+    Do instead: RS starting ~35% is by design. Gap to 60% closed via early land grabs, not init override.

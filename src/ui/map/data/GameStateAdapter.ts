@@ -159,6 +159,9 @@ export function parseGameState(json: unknown): LoadedGameState {
         if (Object.keys(out).length > 0) theatres = out;
     }
 
+    // Index brigade_history so brigades can get a synthesized combatSummary.
+    const brigadeHistoryRecord = state.brigade_history as Record<string, Record<string, unknown>> | undefined;
+
     const formations: FormationView[] = [];
     if (Object.keys(formationsRecord).length > 0) {
         const sortedIds = Object.keys(formationsRecord).sort();
@@ -192,9 +195,9 @@ export function parseGameState(json: unknown): LoadedGameState {
             const narrativeArc = (warStory?.arc === 'veteran' || warStory?.arc === 'bloodied' || warStory?.arc === 'shattered' || warStory?.arc === 'risen' || warStory?.arc === 'destroyed' || warStory?.arc === 'garrison')
                 ? warStory.arc : undefined;
 
-            // Extract combat summary if present (corps/army_hq only)
+            // Extract combat summary if present (corps/army_hq); brigades get a fallback below.
             const rawCS = f.combat_summary as Record<string, unknown> | undefined;
-            const combatSummary = rawCS && typeof rawCS.battles_fought === 'number' ? {
+            let combatSummary = rawCS && typeof rawCS.battles_fought === 'number' ? {
                 battles_fought: finiteNumber(rawCS.battles_fought),
                 victories: finiteNumber(rawCS.victories),
                 defeats: finiteNumber(rawCS.defeats),
@@ -217,6 +220,39 @@ export function parseGameState(json: unknown): LoadedGameState {
                 most_casualties_brigade_id: typeof rawCS.most_casualties_brigade_id === 'string' ? rawCS.most_casualties_brigade_id : null,
                 most_victories_brigade_id: typeof rawCS.most_victories_brigade_id === 'string' ? rawCS.most_victories_brigade_id : null,
             } : undefined;
+
+            // Brigade fallback: synthesize combatSummary from brigade_history running tallies.
+            if (!combatSummary && (f.kind === 'brigade' || f.kind === 'operational_group') && brigadeHistoryRecord) {
+                const bh = brigadeHistoryRecord[id];
+                if (bh && typeof bh.battles_fought === 'number' && bh.battles_fought > 0) {
+                    const bf = finiteNumber(bh.battles_fought);
+                    const vic = finiteNumber(bh.victories);
+                    const taken = finiteNumber(bh.total_casualties_taken);
+                    const inflicted = finiteNumber(bh.total_casualties_inflicted);
+                    combatSummary = {
+                        battles_fought: bf,
+                        victories: vic,
+                        defeats: finiteNumber(bh.defeats),
+                        stalemates: finiteNumber(bh.stalemates),
+                        battles_as_attacker: finiteNumber(bh.battles_as_attacker),
+                        battles_as_defender: finiteNumber(bh.battles_as_defender),
+                        total_casualties_taken: taken,
+                        total_casualties_inflicted: inflicted,
+                        total_osids_captured: finiteNumber(bh.total_osids_captured),
+                        total_osids_lost: finiteNumber(bh.total_osids_lost),
+                        win_rate: bf > 0 ? vic / bf : 0,
+                        casualty_exchange_ratio: taken > 0 ? inflicted / taken : (inflicted > 0 ? inflicted : 1),
+                        current_personnel: personnel ?? 0,
+                        peak_aggregate_personnel: finiteNumber(bh.peak_personnel),
+                        nadir_aggregate_personnel: finiteNumber(bh.nadir_personnel),
+                        arc_distribution: {},
+                        brigade_count: 1,
+                        active_brigade_count: 1,
+                        most_casualties_brigade_id: null,
+                        most_victories_brigade_id: null,
+                    };
+                }
+            }
 
             formations.push({
                 id, faction: (f.faction as string) ?? '', name: (f.name as string) ?? id,

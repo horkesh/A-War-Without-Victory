@@ -257,8 +257,10 @@ export function buildCorpsFrontLinesGeoJSON(
                 const dy = by - ay;
                 // Cross product: which side of the edge segment does each OSID centroid fall on?
                 const crossA = dx * (centA[1] - ay) - dy * (centA[0] - ax);
-                offsetA = crossA > 0 ? 1 : -1;
-                offsetB = crossA > 0 ? -1 : 1;
+                // crossA > 0 → centA is LEFT of directed edge; MapLibre positive line-offset = RIGHT,
+                // so assign -1 (negative offset) to push glow LEFT into faction A's territory.
+                offsetA = crossA > 0 ? -1 : 1;
+                offsetB = crossA > 0 ? 1 : -1;
                 // Tooth rotation: 0 means triangle points "left" of line direction (toward positive cross side)
                 // If ctrlA (factionA) is on the positive side, teeth should point toward ctrlB (negative side) → 180
                 toothRotation = crossA > 0 ? 180 : 0;

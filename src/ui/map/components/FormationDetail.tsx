@@ -41,10 +41,9 @@ export function FormationDetail() {
 
   const panelStyle = {
     position: 'absolute' as const,
-    left: 'auto' as const,
-    right: '1rem',
+    left: '19rem',
     top: '3.5rem',
-    bottom: '1rem',
+    bottom: '2rem',
     width: '20rem',
     zIndex: 50,
     direction: 'ltr' as const,
@@ -229,7 +228,7 @@ export function FormationDetail() {
               </div>
             )}
 
-            {/* Combat Summary (corps/army_hq only — field is only set on those kinds) */}
+            {/* Combat Summary: corps/army_hq aggregate, or brigade record synthesized from brigade_history. */}
             {formation.combatSummary && (
               <CombatSummaryPanel
                 summary={formation.combatSummary}

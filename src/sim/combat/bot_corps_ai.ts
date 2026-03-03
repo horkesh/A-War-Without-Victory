@@ -1506,7 +1506,8 @@ export function generateCorpsDirectives(
         }
 
         // Supply-aware target sorting: prefer attacking enemy OSIDs with critical/strained supply.
-        // Critical-supply defenders are weaker; prioritizing these targets improves attack efficiency.
+        // Then prefer targets that shorten the line (many friendly neighbors — e.g. Teočak, Šapna:
+        // capturing bulges reduces front length and consolidation cost).
         // Deterministic: ties broken by strictCompare (stable for same-supply-state targets).
         offensiveTargets.sort((a, b) => {
             const getSupplyPriority = (osid: string): number => {
@@ -1521,8 +1522,14 @@ export function generateCorpsDirectives(
                 if (osidEntry.state === 'strained') return 1;
                 return 2;
             };
-            const diff = getSupplyPriority(a) - getSupplyPriority(b);
-            if (diff !== 0) return diff;
+            const getConsolidationScore = (osid: string): number => {
+                const neighbors = adjacency.get(osid) ?? [];
+                return neighbors.filter(n => getPoliticalControllerOSID(state, n, reverseMap) === faction).length;
+            };
+            const supplyDiff = getSupplyPriority(a) - getSupplyPriority(b);
+            if (supplyDiff !== 0) return supplyDiff;
+            const consolidationDiff = getConsolidationScore(b) - getConsolidationScore(a);
+            if (consolidationDiff !== 0) return consolidationDiff;
             return strictCompare(a, b);
         });
         holdOsids.sort(strictCompare);

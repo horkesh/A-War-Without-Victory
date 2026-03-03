@@ -4,12 +4,15 @@ import { SettlementDetailContent } from './SettlementDetailContent';
 
 export function SelectionPanel() {
   const selectedOsid = useGameStore((s) => s.selectedOsid);
+  const selectedFormationId = useGameStore((s) => s.selectedFormationId);
+  const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
 
-  if (!selectedOsid) return null;
+  // Lowest-priority panel: hide when any higher-priority selection is active.
+  if (!selectedOsid || selectedFormationId || selectedSectorId) return null;
 
   const formations = getFormationsAtOsid(loadedGameState?.formations, selectedOsid);
   const formationsForDetail = formations.map((f) => ({

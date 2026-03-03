@@ -1,17 +1,21 @@
 /**
  * Build a GeoJSON FeatureCollection for supply map mode.
- * Colors OSIDs by the controlling faction's supply pressure:
- *   adequate  (pressure ≥ 80) → green
- *   strained  (pressure 50–79) → amber
- *   critical  (pressure < 50)  → red
- *   unknown   (no controller / no data) → grey
+ * Colors OSIDs by the controlling faction's supply state:
+ *   adequate  (general reserve ≥ 50) → green
+ *   strained  (reserve 20–49)        → amber
+ *   critical  (reserve < 20)         → red
+ *   unknown   (no controller / supply disabled) → grey
  *
- * Uses faction-level war_supply_pressure as a proxy for per-OSID state.
- * No GameState changes required — derived from controlBySettlement + phaseIiSupplyPressure.
+ * Prefers Phase A-E factionReserves (general_supply_reserve, 0–100).
+ * Falls back to legacy phaseIiSupplyPressure when reserves not present.
  */
 import type { FeatureCollection, Feature, Polygon, MultiPolygon } from 'geojson';
 
 export type OsidSupplyClass = 'adequate' | 'strained' | 'critical' | 'unknown';
+
+// Thresholds matching supply_reserve_constants.ts
+const RESERVE_ADEQUATE = 50;
+const RESERVE_STRAINED = 20;
 
 interface SupplyProperties {
   osid: string;
@@ -20,7 +24,13 @@ interface SupplyProperties {
   supply_pressure: number;
 }
 
-function pressureToClass(pressure: number): OsidSupplyClass {
+function reserveToClass(reserve: number): OsidSupplyClass {
+  if (reserve >= RESERVE_ADEQUATE) return 'adequate';
+  if (reserve >= RESERVE_STRAINED) return 'strained';
+  return 'critical';
+}
+
+function legacyPressureToClass(pressure: number): OsidSupplyClass {
   if (pressure >= 80) return 'adequate';
   if (pressure >= 50) return 'strained';
   return 'critical';
@@ -28,14 +38,16 @@ function pressureToClass(pressure: number): OsidSupplyClass {
 
 /**
  * Build supply-colored features from osid-control GeoJSON.
- * @param controlGeoJson   Existing control GeoJSON (from buildControlGeoJSON)
- * @param controlBySettlement  OSID → faction controller map
- * @param phaseIiSupplyPressure  Faction → pressure value [0–100] map
+ * @param controlGeoJson        Existing control GeoJSON (from buildControlGeoJSON)
+ * @param controlBySettlement   OSID → faction controller map
+ * @param factionReserves       Phase A-E per-faction reserve levels (preferred)
+ * @param phaseIiSupplyPressure Legacy faction → pressure fallback
  */
 export function buildSupplyGeoJSON(
   controlGeoJson: FeatureCollection,
   controlBySettlement: Record<string, string | null>,
-  phaseIiSupplyPressure: Record<string, number> | undefined
+  factionReserves: Record<string, { generalSupply: number; heavyMunitions: number }> | undefined,
+  phaseIiSupplyPressure?: Record<string, number>
 ): FeatureCollection<Polygon | MultiPolygon, SupplyProperties> {
   const features: Feature<Polygon | MultiPolygon, SupplyProperties>[] = [];
 
@@ -45,13 +57,19 @@ export function buildSupplyGeoJSON(
 
     const controller = controlBySettlement[osid] ?? null;
     let supply_class: OsidSupplyClass = 'unknown';
-    let supply_pressure = 100;
+    let supply_pressure = 0;
 
-    if (controller && phaseIiSupplyPressure) {
-      const pressure = phaseIiSupplyPressure[controller];
-      if (typeof pressure === 'number' && isFinite(pressure)) {
-        supply_pressure = pressure;
-        supply_class = pressureToClass(pressure);
+    if (controller) {
+      const res = factionReserves?.[controller];
+      if (res != null && isFinite(res.generalSupply)) {
+        supply_pressure = res.generalSupply;
+        supply_class = reserveToClass(res.generalSupply);
+      } else if (phaseIiSupplyPressure) {
+        const p = phaseIiSupplyPressure[controller];
+        if (typeof p === 'number' && isFinite(p)) {
+          supply_pressure = p;
+          supply_class = legacyPressureToClass(p);
+        }
       }
     }
 

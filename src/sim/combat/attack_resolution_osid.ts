@@ -164,6 +164,41 @@ function getFriendlyRetreatDestinations(
     return friendly;
 }
 
+/**
+ * Displace any active formation that has location_osid in an OSID not controlled by its faction.
+ * Used after attack resolution (and optionally at end of turn) to enforce invariant: no brigade in enemy territory.
+ */
+export function displaceFormationsInEnemyTerritory(
+    state: GameState,
+    edges: EdgeRecord[],
+    reverseMap: OperationalToCanonicalReverseMap
+): void {
+    const adjacency = buildOsidAdjacency(edges);
+    const formations = state.formations ?? {};
+    for (const f of Object.values(formations)) {
+        if (!f || f.status !== 'active') continue;
+        const loc = (f as { location_osid?: string }).location_osid;
+        if (!loc) continue;
+        const factionId = f.faction as FactionId;
+        if (getPoliticalControllerOSID(state, loc, reverseMap) === factionId) continue;
+        const otherFormation = f as FormationState & { location_osid?: string; fallback_osid?: string };
+        const retreatDests = getFriendlyRetreatDestinations(state, otherFormation, adjacency, reverseMap);
+        const dest = retreatDests[0];
+        if (dest != null) {
+            otherFormation.location_osid = dest;
+            (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
+            (otherFormation as { defense_streak?: number }).defense_streak = 0;
+        } else if (otherFormation.fallback_osid && getPoliticalControllerOSID(state, otherFormation.fallback_osid, reverseMap) === factionId) {
+            otherFormation.location_osid = otherFormation.fallback_osid;
+            (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
+            (otherFormation as { defense_streak?: number }).defense_streak = 0;
+        } else {
+            otherFormation.personnel = 0;
+            otherFormation.status = 'inactive';
+        }
+    }
+}
+
 function applyPersonnelLoss(formation: FormationState, loss: number): void {
     if (typeof formation.personnel !== 'number') return;
     formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, formation.personnel - loss);
@@ -257,9 +292,34 @@ export function resolveAttackOrdersOsid(
     const startDate = state.meta?.scenario_start_date;
 
     const orders = state.brigade_attack_orders;
-    if (!orders || typeof orders !== 'object') return report;
-
     const adjacency = buildOsidAdjacency(edges);
+    if (!orders || typeof orders !== 'object') {
+        // No orders this turn — still run displacement pass so formations left in enemy territory from a previous turn are fixed
+        for (const f of Object.values(state.formations ?? {})) {
+            if (!f || f.status !== 'active') continue;
+            const loc = (f as { location_osid?: string }).location_osid;
+            if (!loc) continue;
+            const factionId = f.faction as FactionId;
+            if (getPoliticalControllerOSID(state, loc, reverseMap) === factionId) continue;
+            const otherFormation = f as FormationState & { location_osid?: string; fallback_osid?: string };
+            const retreatDests = getFriendlyRetreatDestinations(state, otherFormation, adjacency, reverseMap);
+            const dest = retreatDests[0];
+            if (dest != null) {
+                otherFormation.location_osid = dest;
+                (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
+                (otherFormation as { defense_streak?: number }).defense_streak = 0;
+            } else if (otherFormation.fallback_osid && getPoliticalControllerOSID(state, otherFormation.fallback_osid, reverseMap) === factionId) {
+                otherFormation.location_osid = otherFormation.fallback_osid;
+                (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
+                (otherFormation as { defense_streak?: number }).defense_streak = 0;
+            } else {
+                otherFormation.personnel = 0;
+                otherFormation.status = 'inactive';
+            }
+        }
+        return report;
+    }
+
     const formationIds = Object.keys(orders).sort(strictCompare) as FormationId[];
     const targetToAttackers = new Map<Osid, FormationId[]>();
     for (const fid of formationIds) {
@@ -619,17 +679,24 @@ export function resolveAttackOrdersOsid(
                 if (outcome === 'decisive_victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 2;
                 else if (outcome === 'victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 1;
             } else if ((defenderFormation as { fallback_osid?: string }).fallback_osid) {
-                // Fallback retreat: brigade reforms at fallback OSID instead of being destroyed
+                // Fallback retreat: brigade reforms at fallback OSID only if it is still friendly
                 const fallback = (defenderFormation as { fallback_osid?: string }).fallback_osid!;
-                (defenderFormation as { location_osid?: string }).location_osid = fallback;
-                (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
-                (defenderFormation as { defense_streak?: number }).defense_streak = 0;
-                (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 3;
-                defenderFormation.cohesion = Math.max(0, (defenderFormation.cohesion ?? 60) - 20);
-                defenderFormation.personnel = Math.max(MIN_COMBAT_PERSONNEL, Math.floor((defenderFormation.personnel ?? 0) * 0.6));
-                (defenderFormation as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
-                    osid: targetOsid, turn: state.meta?.turn ?? 0
-                };
+                const fallbackController = getPoliticalControllerOSID(state, fallback, reverseMap);
+                if (fallbackController === defenderFormation.faction) {
+                    (defenderFormation as { location_osid?: string }).location_osid = fallback;
+                    (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
+                    (defenderFormation as { defense_streak?: number }).defense_streak = 0;
+                    (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 3;
+                    defenderFormation.cohesion = Math.max(0, (defenderFormation.cohesion ?? 60) - 20);
+                    defenderFormation.personnel = Math.max(MIN_COMBAT_PERSONNEL, Math.floor((defenderFormation.personnel ?? 0) * 0.6));
+                    (defenderFormation as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
+                        osid: targetOsid, turn: state.meta?.turn ?? 0
+                    };
+                } else {
+                    // Fallback OSID is enemy-controlled; no valid retreat — treat as destroyed
+                    defenderFormation.personnel = 0;
+                    defenderFormation.status = 'inactive';
+                }
             } else {
                 defenderFormation.personnel = 0;
                 defenderFormation.status = 'inactive';
@@ -662,6 +729,27 @@ export function resolveAttackOrdersOsid(
                 (advanceFormation as { location_osid?: string }).location_osid = targetOsid;
                 (advanceFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
             }
+            // Displace any other formations still in the flipped OSID (invariant: no brigade in enemy territory)
+            const formations = state.formations ?? {};
+            for (const f of Object.values(formations)) {
+                if (!f || f.status !== 'active' || (f as { location_osid?: string }).location_osid !== targetOsid) continue;
+                if (f.faction === attackerFaction) continue;
+                const otherFormation = f as FormationState & { location_osid?: string; fallback_osid?: string };
+                const retreatDests = getFriendlyRetreatDestinations(state, otherFormation, adjacency, reverseMap);
+                const dest = retreatDests[0];
+                if (dest != null) {
+                    otherFormation.location_osid = dest;
+                    (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
+                    (otherFormation as { defense_streak?: number }).defense_streak = 0;
+                } else if (otherFormation.fallback_osid && getPoliticalControllerOSID(state, otherFormation.fallback_osid, reverseMap) === otherFormation.faction) {
+                    otherFormation.location_osid = otherFormation.fallback_osid;
+                    (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
+                    (otherFormation as { defense_streak?: number }).defense_streak = 0;
+                } else {
+                    otherFormation.personnel = 0;
+                    otherFormation.status = 'inactive';
+                }
+            }
         }
 
         // === BRIGADE HISTORY RECORDING ===
@@ -676,6 +764,32 @@ export function resolveAttackOrdersOsid(
                 defenderFormation, currentTurn, targetOsid, outcome,
                 attackerFaction, flip, finalDefenderCas, finalAttackerCas, isConcentrated,
             );
+        }
+    }
+
+    // Final pass: displace any formation still in enemy territory (e.g. moved to an OSID that flipped in a later battle this turn)
+    const formations = state.formations ?? {};
+    for (const f of Object.values(formations)) {
+        if (!f || f.status !== 'active') continue;
+        const loc = (f as { location_osid?: string }).location_osid;
+        if (!loc) continue;
+        const factionId = f.faction as FactionId;
+        const controller = getPoliticalControllerOSID(state, loc, reverseMap);
+        if (controller === factionId) continue;
+        const otherFormation = f as FormationState & { location_osid?: string; fallback_osid?: string };
+        const retreatDests = getFriendlyRetreatDestinations(state, otherFormation, adjacency, reverseMap);
+        const dest = retreatDests[0];
+        if (dest != null) {
+            otherFormation.location_osid = dest;
+            (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
+            (otherFormation as { defense_streak?: number }).defense_streak = 0;
+        } else if (otherFormation.fallback_osid && getPoliticalControllerOSID(state, otherFormation.fallback_osid, reverseMap) === factionId) {
+            otherFormation.location_osid = otherFormation.fallback_osid;
+            (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
+            (otherFormation as { defense_streak?: number }).defense_streak = 0;
+        } else {
+            otherFormation.personnel = 0;
+            otherFormation.status = 'inactive';
         }
     }
 

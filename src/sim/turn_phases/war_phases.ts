@@ -116,7 +116,7 @@ import { activateOGs, updateOGLifecycle } from '../combat/operational_groups.js'
 import { updateReconIntelligence } from '../combat/recon_intelligence.js';
 import { ensureBrigadeFrontAssignments } from '../combat/front_assignment.js';
 import { resolveAttackOrders } from '../combat/resolve_attack_orders.js';
-import { resolveAttackOrdersOsid } from '../combat/attack_resolution_osid.js';
+import { resolveAttackOrdersOsid, displaceFormationsInEnemyTerritory } from '../combat/attack_resolution_osid.js';
 import { applyBrigadeMovementOrders } from '../combat/brigade_movement_orders.js';
 import { processOsidColumnMovement, type OsidColumnMovementReport } from '../combat/osid_column_movement.js';
 import { updatePhaseIISupplyPressure } from '../combat/supply_pressure.js';
@@ -711,6 +711,15 @@ export const warPhases: NamedPhase[] = [
             const od = getOperationalData(context);
             const reverseMap = od?.opData?.operationalToCanonical ?? null;
             updateSectorOffensiveResults(context.state, reverseMap);
+        }
+    },
+    {
+        name: 'phase-ii-displace-enemy-territory',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+            displaceFormationsInEnemyTerritory(context.state, od.edges, od.opData.operationalToCanonical);
         }
     },
     {

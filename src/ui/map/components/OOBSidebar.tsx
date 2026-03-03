@@ -101,6 +101,8 @@ export function OOBSidebar() {
   const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const setSelectedCorpsId = useGameStore((s) => s.setSelectedCorpsId);
   const setSelectedArmyId = useGameStore((s) => s.setSelectedArmyId);
+  const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
+  const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
   const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
@@ -361,7 +363,7 @@ export function OOBSidebar() {
                           <CorpsCard
                             key={corpsId}
                             corpsId={corpsId}
-                            corpsName={corpsId === '_ungrouped' ? 'Ungrouped' : undefined}
+                            corpsName={corpsId === '_ungrouped' ? 'Ungrouped' : (corpsFormationById.get(corpsId)?.name ?? corpsId)}
                             brigades={brigades}
                             faction={faction}
                             frontAssignment={getCorpsFrontAssignment(brigades, loadedGameState, namesByFrontId)}
@@ -438,10 +440,14 @@ export function OOBSidebar() {
                       const phaseBg = op.phase === 'execution' ? 'bg-red-800/60' : op.phase === 'planning' ? 'bg-yellow-700/60' : 'bg-neutral-600/60';
                       const objTotal = op.objectives?.length ?? 0;
                       const objCurrent = op.current_objective_index ?? 0;
+                      const opKey = `${op.corps_id}|${op.name}`;
+                      const isSelected = selectedOperationKey === opKey;
                       return (
-                        <div
-                          key={`${op.corps_id}-${op.name}`}
-                          className="rounded border border-panel-border bg-panel-card p-2 space-y-1"
+                        <button
+                          key={opKey}
+                          type="button"
+                          onClick={() => setSelectedOperationKey(isSelected ? null : opKey)}
+                          className={`w-full text-left rounded border p-2 space-y-1 transition-colors ${isSelected ? 'border-accent-gold bg-panel-active' : 'border-panel-border bg-panel-card hover:bg-panel-hover'}`}
                         >
                           <div className={`font-sans text-[11px] font-semibold ${FACTION_COLORS[op.faction] ?? 'text-text-primary'}`}>
                             {op.name}
@@ -462,7 +468,7 @@ export function OOBSidebar() {
                             {op.supply_readiness != null && ` · Supply: ${(op.supply_readiness * 100).toFixed(0)}%`}
                             {` · ${op.participating_brigade_count} brigades`}
                           </div>
-                        </div>
+                        </button>
                       );
                     })}
                   </div>

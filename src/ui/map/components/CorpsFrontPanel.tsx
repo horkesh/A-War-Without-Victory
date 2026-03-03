@@ -59,9 +59,9 @@ export function CorpsFrontPanel() {
       className="flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
       style={{
         position: 'absolute',
-        right: '1rem',
+        left: '19rem',
         top: '3.5rem',
-        bottom: '1rem',
+        bottom: '2rem',
         width: '20rem',
         zIndex: 50,
         display: visible ? undefined : 'none',
