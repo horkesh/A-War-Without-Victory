@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV Calibration Dashboard — n375→n392</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  /* ============ THEME ============ */
+  :root {
+    --font-body: 'Bricolage Grotesque', system-ui, sans-serif;
+    --font-mono: 'Fragment Mono', 'SF Mono', Consolas, monospace;
+
+    /* Deep blue + gold palette */
+    --bg: #f4f1ec;
+    --surface: #ffffff;
+    --surface2: #eae6df;
+    --surface-elevated: #fffdf8;
+    --surface-recessed: #ece8e1;
+    --border: rgba(30, 58, 95, 0.10);
+    --border-bright: rgba(30, 58, 95, 0.20);
+    --text: #1a1d23;
+    --text-dim: #6b7080;
+    --accent: #1e3a5f;
+    --accent-light: #2d5a8e;
+    --accent-dim: rgba(30, 58, 95, 0.06);
+    --gold: #b8860b;
+    --gold-bright: #d4a73a;
+    --gold-dim: rgba(212, 167, 58, 0.10);
+    --green: #2d6a30;
+    --green-dim: rgba(45, 106, 48, 0.08);
+    --red: #9b2c2c;
+    --red-dim: rgba(155, 44, 44, 0.08);
+    --amber: #92400e;
+    --amber-dim: rgba(146, 64, 14, 0.08);
+    --rs-color: #1e3a5f;
+    --rbih-color: #2d6a30;
+    --hrhb-color: #b8860b;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1218;
+      --surface: #171c25;
+      --surface2: #1d2230;
+      --surface-elevated: #1f2638;
+      --surface-recessed: #12161e;
+      --border: rgba(212, 167, 58, 0.08);
+      --border-bright: rgba(212, 167, 58, 0.18);
+      --text: #e8e4dc;
+      --text-dim: #8a8e9a;
+      --accent: #6b9fd4;
+      --accent-light: #8bb8e8;
+      --accent-dim: rgba(107, 159, 212, 0.10);
+      --gold: #d4a73a;
+      --gold-bright: #e8c050;
+      --gold-dim: rgba(212, 167, 58, 0.12);
+      --green: #5cb85c;
+      --green-dim: rgba(92, 184, 92, 0.12);
+      --red: #e57373;
+      --red-dim: rgba(229, 115, 115, 0.10);
+      --amber: #f0ad4e;
+      --amber-dim: rgba(240, 173, 78, 0.10);
+      --rs-color: #6b9fd4;
+      --rbih-color: #5cb85c;
+      --hrhb-color: #d4a73a;
+    }
+  }
+
+  /* ============ RESET ============ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 25% 0%, var(--gold-dim) 0%, transparent 50%),
+      radial-gradient(ellipse at 75% 100%, var(--accent-dim) 0%, transparent 40%);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-wrap: break-word;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============ NAV LAYOUT ============ */
+  .wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 0 40px;
+  }
+  .main { min-width: 0; padding: 40px 32px 80px; }
+
+  .toc {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 40px 0 40px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    scrollbar-width: thin;
+  }
+  .toc-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--gold);
+    margin-bottom: 12px;
+    padding-left: 10px;
+  }
+  .toc a {
+    display: block;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-decoration: none;
+    border-radius: 6px;
+    border-left: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .toc a:hover, .toc a.active {
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-left-color: var(--gold);
+  }
+
+  @media (max-width: 900px) {
+    .wrap {
+      grid-template-columns: 1fr;
+    }
+    .toc {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: auto;
+      flex-direction: row;
+      padding: 10px 16px;
+      gap: 4px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .toc-title { display: none; }
+    .toc a {
+      white-space: nowrap;
+      padding: 6px 12px;
+      border-left: none;
+      border-bottom: 2px solid transparent;
+    }
+    .toc a:hover, .toc a.active {
+      border-left: none;
+      border-bottom-color: var(--gold);
+    }
+    .main { padding: 24px 16px 60px; }
+  }
+
+  /* ============ HEADINGS ============ */
+  h1 {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1.1;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .subtitle {
+    font-size: 16px;
+    color: var(--text-dim);
+    margin-bottom: 36px;
+  }
+  .subtitle strong { color: var(--gold); font-weight: 700; }
+
+  .sec-head {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--gold);
+    margin-top: 48px;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-bright);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    scroll-margin-top: 20px;
+  }
+  .sec-head::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    background: color-mix(in srgb, var(--surface) 92%, var(--gold) 8%);
+    border: 1px solid color-mix(in srgb, var(--border) 50%, var(--gold) 50%);
+    border-radius: 14px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.03);
+    margin-bottom: 32px;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: center;
+  }
+  .hero-number {
+    font-size: clamp(56px, 8vw, 80px);
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+  .hero-number span { color: var(--gold); }
+  .hero-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 20px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .hero-meta-item {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .hero-meta-item strong { color: var(--text); }
+
+  .hero-badge {
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .hero-badge em {
+    display: block;
+    font-style: normal;
+    font-size: 9px;
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+
+  @media (max-width: 640px) {
+    .hero-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ============ KPI CARDS ============ */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .kpi--rs::after { background: var(--rs-color); }
+  .kpi--rbih::after { background: var(--rbih-color); }
+  .kpi--hrhb::after { background: var(--hrhb-color); }
+
+  .kpi__faction {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+  }
+  .kpi--rs .kpi__faction { color: var(--rs-color); }
+  .kpi--rbih .kpi__faction { color: var(--rbih-color); }
+  .kpi--hrhb .kpi__faction { color: var(--hrhb-color); }
+
+  .kpi__value {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .kpi__sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .kpi__detail {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .kpi__detail-item {
+    font-size: 12px;
+  }
+  .kpi__detail-item small {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  @media (max-width: 640px) {
+    .kpi-row { grid-template-columns: 1fr; }
+  }
+
+  /* ============ STATUS BADGES ============ */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 100px;
+  }
+  .badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .badge--pass { background: var(--green-dim); color: var(--green); }
+  .badge--pass::before { background: var(--green); }
+  .badge--fail { background: var(--red-dim); color: var(--red); }
+  .badge--fail::before { background: var(--red); }
+  .badge--warn { background: var(--amber-dim); color: var(--amber); }
+  .badge--warn::before { background: var(--amber); }
+
+  /* ============ CARDS ============ */
+  .ve-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    position: relative;
+  }
+  .ve-card--elevated {
+    background: var(--surface-elevated);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.03);
+  }
+  .ve-card--recessed {
+    background: var(--surface-recessed);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .ve-card__label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ve-card__label::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* ============ MECHANICS GRID ============ */
+  .mech-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .mech-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    border-top: 3px solid var(--gold);
+  }
+  .mech-card__num {
+    font-family: var(--font-mono);
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--gold);
+    opacity: 0.3;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .mech-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .mech-card p {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+  .mech-card code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--surface-recessed);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent);
+  }
+
+  .mech-values {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .mech-val {
+    background: var(--surface-recessed);
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+  }
+  .mech-val__label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+  .mech-val__num {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  @media (max-width: 640px) {
+    .mech-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ============ BOMBARDMENT DEEP DIVE ============ */
+  .ratio-chart {
+    display: grid;
+    grid-template-columns: 100px 1fr 80px;
+    gap: 8px;
+    align-items: center;
+    margin: 16px 0;
+  }
+  .ratio-chart__faction {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: right;
+  }
+  .ratio-chart__bar-wrap {
+    background: var(--surface-recessed);
+    border-radius: 6px;
+    height: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .ratio-chart__bar {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.8s ease-out;
+  }
+  .ratio-chart__pct {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .formula-box {
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+    text-align: center;
+  }
+  .formula-box__eq {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    color: var(--accent);
+    letter-spacing: -0.3px;
+  }
+  .formula-box__note {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+
+  /* ============ TABLES ============ */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 16px 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  thead th {
+    background: var(--surface-elevated);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--border-bright);
+    white-space: nowrap;
+  }
+  thead th.num { text-align: right; }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tbody td.num {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  tbody td.mono {
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  tbody tr:nth-child(even) td {
+    background: color-mix(in srgb, var(--bg) 50%, var(--surface) 50%);
+  }
+  tbody tr:hover td {
+    background: var(--gold-dim);
+  }
+  tbody tr.row-highlight td {
+    background: var(--gold-dim);
+    font-weight: 600;
+  }
+  tfoot td {
+    padding: 10px 14px;
+    font-weight: 700;
+    border-top: 2px solid var(--border-bright);
+    background: var(--surface-elevated);
+  }
+
+  /* ============ DELTA INDICATORS ============ */
+  .delta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .delta--up { color: var(--green); }
+  .delta--down { color: var(--red); }
+  .delta--neutral { color: var(--text-dim); }
+
+  /* ============ PROGRESS BAR ============ */
+  .progress {
+    background: var(--surface-recessed);
+    border-radius: 6px;
+    height: 8px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  .progress__fill {
+    height: 100%;
+    border-radius: 6px;
+    background: var(--green);
+    transition: width 0.6s ease-out;
+  }
+  .progress__fill--warn { background: var(--amber); }
+  .progress__fill--fail { background: var(--red); }
+
+  /* ============ CALLOUT ============ */
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .callout--insight {
+    border-left-color: var(--accent);
+  }
+  .callout strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .callout p {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .callout code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--surface-recessed);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* ============ COLLAPSIBLE ============ */
+  details.collapsible {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 16px 0;
+    overflow: hidden;
+  }
+  details.collapsible summary {
+    padding: 12px 20px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    background: var(--surface);
+    transition: background 0.2s;
+    list-style: none;
+  }
+  details.collapsible summary::-webkit-details-marker { display: none; }
+  details.collapsible summary::before {
+    content: '+';
+    display: inline-block;
+    width: 16px;
+    margin-right: 8px;
+    color: var(--gold);
+    font-weight: 700;
+  }
+  details.collapsible[open] summary::before { content: '-'; }
+  details.collapsible summary:hover {
+    background: var(--gold-dim);
+  }
+  details.collapsible > div {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ============ LEGEND ============ */
+  .legend {
+    display: flex;
+    gap: 20px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  /* ============ SEPARATOR ============ */
+  .sep {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+    margin: 32px 0;
+  }
+
+  /* ============ FLOW ARROW ============ */
+  .flow-arrow {
+    display: flex;
+    justify-content: center;
+    margin: 12px 0;
+    color: var(--text-dim);
+    opacity: 0.4;
+  }
+
+  /* ============ CASCADE ============ */
+  .cascade-flow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    align-items: center;
+    margin: 16px 0;
+  }
+  .cascade-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    position: relative;
+  }
+  .cascade-step__num {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .cascade-step__text {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .cascade-arrow {
+    text-align: center;
+    font-size: 18px;
+    color: var(--gold);
+  }
+  @media (max-width: 640px) {
+    .cascade-flow { grid-template-columns: 1fr; }
+    .cascade-arrow { transform: rotate(90deg); }
+  }
+
+  /* ============ TIMELINE ============ */
+  .timeline {
+    position: relative;
+    padding-left: 28px;
+    margin: 16px 0;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border-bright);
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--gold);
+  }
+  .timeline-item--peak::before {
+    background: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-dim);
+  }
+  .timeline-item__run {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .timeline-item__desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .timeline-item__value {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* ============ ANIMATION ============ */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeScale {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .anim-up { animation: fadeUp 0.5s ease-out both; }
+  .anim-scale { animation: fadeScale 0.4s ease-out both; }
+  .anim-count { animation: countUp 0.3s ease-out both; }
+
+  [style*="--i"] { animation-delay: calc(var(--i) * 80ms); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+
+  /* ============ MISC ============ */
+  .text-sm { font-size: 13px; }
+  .text-dim { color: var(--text-dim); }
+  .text-mono { font-family: var(--font-mono); }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-16 { margin-bottom: 16px; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+  .gap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  @media (max-width: 640px) { .gap-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ TOC ============ -->
+  <nav class="toc" id="toc">
+    <div class="toc-title">Sections</div>
+    <a href="#s1">Overview</a>
+    <a href="#s2">Faction Status</a>
+    <a href="#s3">Combat Mechanics</a>
+    <a href="#s4">Bombardment Model</a>
+    <a href="#s5">Iteration History</a>
+    <a href="#s6">Regional Match</a>
+    <a href="#s7">Cascade Dynamics</a>
+    <a href="#s8">Remaining Gaps</a>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+
+    <h1 class="anim-up" style="--i:0">Calibration Dashboard</h1>
+    <p class="subtitle anim-up" style="--i:1">AWWV 40-week scenario &mdash; runs <strong>n375 &rarr; n392</strong> &mdash; comprehensive combat formula</p>
+
+    <!-- ============ S1: HERO ============ -->
+    <div id="s1" class="sec-head anim-up" style="--i:2">1 &mdash; Overview</div>
+
+    <div class="hero anim-scale" style="--i:3">
+      <div class="hero-grid">
+        <div>
+          <div class="hero-number">88<span>.6%</span></div>
+          <div class="hero-label">OSID Match Rate &mdash; 667 / 753</div>
+          <div class="hero-meta">
+            <div class="hero-meta-item">Run: <strong>n392</strong></div>
+            <div class="hero-meta-item">Week: <strong>40</strong> (Dec 1992)</div>
+            <div class="hero-meta-item">Delta from n374: <strong>+1.0pp</strong></div>
+            <div class="hero-meta-item">Delta from n362: <strong>+1.2pp</strong></div>
+          </div>
+        </div>
+        <div class="hero-badge">
+          All-Time High
+          <em>+7 OSIDs from n374</em>
+        </div>
+      </div>
+    </div>
+
+    <!-- quick stats row -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px;">
+      <div class="ve-card anim-count" style="--i:4;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:var(--text);">25,805</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">Military KIA</div>
+      </div>
+      <div class="ve-card anim-count" style="--i:5;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:var(--text);">27,868</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">Civilian Killed</div>
+      </div>
+      <div class="ve-card anim-count" style="--i:6;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:var(--text);">12/14</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">Anchors Passed</div>
+      </div>
+      <div class="ve-card anim-count" style="--i:7;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:var(--text);">4</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">New Mechanics</div>
+      </div>
+    </div>
+
+    <!-- ============ S2: FACTION STATUS ============ -->
+    <div id="s2" class="sec-head anim-up" style="--i:8">2 &mdash; Faction Status</div>
+
+    <div class="kpi-row">
+      <!-- VRS -->
+      <div class="kpi kpi--rs anim-up" style="--i:9">
+        <div class="kpi__faction">VRS (Republika Srpska)</div>
+        <div class="kpi__value">420 OSIDs</div>
+        <div class="kpi__sub">Target: 416 &nbsp; <span class="delta delta--up">+4</span></div>
+        <div class="kpi__detail">
+          <div class="kpi__detail-item">
+            <strong>85k</strong>
+            <small>Personnel (target 90-100k)</small>
+          </div>
+          <div class="kpi__detail-item">
+            <strong>81</strong>
+            <small>Brigades active</small>
+          </div>
+          <div class="kpi__detail-item">
+            <strong>11,068</strong>
+            <small>KIA (target ~9,200)</small>
+          </div>
+          <div class="kpi__detail-item">
+            <span class="badge badge--warn">Below band</span>
+          </div>
+        </div>
+      </div>
+      <!-- ARBiH -->
+      <div class="kpi kpi--rbih anim-up" style="--i:10">
+        <div class="kpi__faction">ARBiH (Republic of BiH)</div>
+        <div class="kpi__value">246 OSIDs</div>
+        <div class="kpi__sub">Target: 248 &nbsp; <span class="delta delta--neutral">-2</span></div>
+        <div class="kpi__detail">
+          <div class="kpi__detail-item">
+            <strong>119k</strong>
+            <small>Personnel (target 110-130k)</small>
+          </div>
+          <div class="kpi__detail-item">
+            <strong>86</strong>
+            <small>Brigades active</small>
+          </div>
+          <div class="kpi__detail-item">
+            <strong>9,831</strong>
+            <small>KIA (target ~11,500)</small>
+          </div>
+          <div class="kpi__detail-item">
+            <span class="badge badge--pass">In band</span>
+          </div>
+        </div>
+      </div>
+      <!-- HVO -->
+      <div class="kpi kpi--hrhb anim-up" style="--i:11">
+        <div class="kpi__faction">HVO (HR Herceg-Bosna)</div>
+        <div class="kpi__value">87 OSIDs</div>
+        <div class="kpi__sub">Target: 89 &nbsp; <span class="delta delta--neutral">-2</span></div>
+        <div class="kpi__detail">
+          <div class="kpi__detail-item">
+            <strong>41k</strong>
+            <small>Personnel (target 40-45k)</small>
+          </div>
+          <div class="kpi__detail-item">
+            <strong>31</strong>
+            <small>Brigades active</small>
+          </div>
+          <div class="kpi__detail-item">
+            <strong>4,906</strong>
+            <small>KIA (target ~2,500)</small>
+          </div>
+          <div class="kpi__detail-item">
+            <span class="badge badge--pass">In band</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ S3: COMBAT MECHANICS ============ -->
+    <div id="s3" class="sec-head anim-up" style="--i:12">3 &mdash; New Combat Mechanics</div>
+
+    <p class="text-sm text-dim mb-16">Four mechanics added between n375 and n392 to create a comprehensive combat formula. Each models a distinct historical dynamic of the Bosnian War.</p>
+
+    <div class="mech-grid">
+      <!-- 1. Officer Quality -->
+      <div class="mech-card anim-up" style="--i:13">
+        <div class="mech-card__num">01</div>
+        <h3>Officer Quality</h3>
+        <p>Faction-level command effectiveness modeled on historical doctrinal arcs. VRS inherits JNA officers, ARBiH starts as rabble.</p>
+        <code>combat_math.ts:getOfficerQualityMult()</code>
+        <div class="mech-values">
+          <div class="mech-val">
+            <div class="mech-val__label">VRS</div>
+            <div class="mech-val__num" style="color:var(--rs-color);">1.10</div>
+            <div class="mech-val__label">decays 0.002/w</div>
+          </div>
+          <div class="mech-val">
+            <div class="mech-val__label">ARBiH</div>
+            <div class="mech-val__num" style="color:var(--rbih-color);">0.85</div>
+            <div class="mech-val__label">grows 0.003/w</div>
+          </div>
+          <div class="mech-val">
+            <div class="mech-val__label">HVO</div>
+            <div class="mech-val__num" style="color:var(--hrhb-color);">0.97</div>
+            <div class="mech-val__label">constant</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Ethnic Defense -->
+      <div class="mech-card anim-up" style="--i:14">
+        <div class="mech-card__num">02</div>
+        <h3>Ethnic Homeland Defense</h3>
+        <p>Defenders fight harder in co-ethnic majority OSIDs. Graduated bonus from 30% to 60% population share.</p>
+        <code>ethnic_defense.ts:getEthnicDefenseBonus()</code>
+        <div class="mech-values">
+          <div class="mech-val">
+            <div class="mech-val__label">&ge;60%</div>
+            <div class="mech-val__num">+12%</div>
+            <div class="mech-val__label">full bonus</div>
+          </div>
+          <div class="mech-val">
+            <div class="mech-val__label">30-60%</div>
+            <div class="mech-val__num">grad.</div>
+            <div class="mech-val__label">scaled</div>
+          </div>
+          <div class="mech-val">
+            <div class="mech-val__label">&lt;30%</div>
+            <div class="mech-val__num">0%</div>
+            <div class="mech-val__label">no bonus</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Bombardment Casualty Mult -->
+      <div class="mech-card anim-up" style="--i:15">
+        <div class="mech-card__num">03</div>
+        <h3>Bombardment Casualty Multiplier</h3>
+        <p>Attacker heavy weapons inflict extra defender casualties even on stalemate/repulsed outcomes. Models VRS artillery effect.</p>
+        <code>combat_math.ts:getBombardmentCasualtyMult()</code>
+        <div class="mech-values">
+          <div class="mech-val">
+            <div class="mech-val__label">Formula</div>
+            <div class="mech-val__num" style="font-size:13px;">(art+tank&times;.5)/80</div>
+            <div class="mech-val__label">firepower ratio</div>
+          </div>
+          <div class="mech-val">
+            <div class="mech-val__label">Range</div>
+            <div class="mech-val__num">1.0&ndash;1.8&times;</div>
+            <div class="mech-val__label">def casualties</div>
+          </div>
+          <div class="mech-val">
+            <div class="mech-val__label">Max</div>
+            <div class="mech-val__num">1.8&times;</div>
+            <div class="mech-val__label">capped</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Bombardment Exposure -->
+      <div class="mech-card anim-up" style="--i:16">
+        <div class="mech-card__num">04</div>
+        <h3>Bombardment Exposure Attrition</h3>
+        <p>Passive attrition from enemy heavy weapons. Ratio-based model using ln(incoming/own) for exponential low-equipment penalty.</p>
+        <code>frontline_attrition.ts</code>
+        <div class="mech-values">
+          <div class="mech-val">
+            <div class="mech-val__label">Rate</div>
+            <div class="mech-val__num">1.2%</div>
+            <div class="mech-val__label">per week max</div>
+          </div>
+          <div class="mech-val">
+            <div class="mech-val__label">Scale</div>
+            <div class="mech-val__num">2.0</div>
+            <div class="mech-val__label">ln(7)&asymp;full</div>
+          </div>
+          <div class="mech-val">
+            <div class="mech-val__label">Gap Closed</div>
+            <div class="mech-val__num">+36%</div>
+            <div class="mech-val__label">ARBiH KIA</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ S4: BOMBARDMENT DEEP DIVE ============ -->
+    <div id="s4" class="sec-head anim-up" style="--i:17">4 &mdash; Bombardment Exposure Model</div>
+
+    <p class="text-sm text-dim mb-16">The key innovation for closing the ARBiH casualty gap. Brigades facing superior enemy heavy weapons take passive attrition proportional to the equipment mismatch.</p>
+
+    <div class="formula-box anim-up" style="--i:18">
+      <div class="formula-box__eq">
+        effect = min(1.0, &nbsp; ln(incoming_FP / own_FP) &nbsp; / &nbsp; SCALE)
+      </div>
+      <div class="formula-box__note">
+        casualties = personnel &times; 0.012 &times; effect &nbsp;&mdash;&nbsp; added to base frontline attrition (0.5%/week)
+      </div>
+    </div>
+
+    <div class="ve-card anim-up" style="--i:19;margin-bottom:20px;">
+      <div class="ve-card__label" style="color:var(--accent);">Faction Exposure Breakdown (Week 40 averages)</div>
+
+      <div class="ratio-chart">
+        <div class="ratio-chart__faction" style="color:var(--rbih-color);">ARBiH</div>
+        <div class="ratio-chart__bar-wrap">
+          <div class="ratio-chart__bar" style="width:99%;background:var(--rbih-color);opacity:0.7;"></div>
+        </div>
+        <div class="ratio-chart__pct" style="color:var(--rbih-color);">99%</div>
+      </div>
+      <div style="padding-left:108px;font-family:var(--font-mono);font-size:11px;color:var(--text-dim);margin-bottom:12px;">
+        own FP ~1.8 &nbsp;&bull;&nbsp; incoming ~13 &nbsp;&bull;&nbsp; ratio 7.2 &nbsp;&bull;&nbsp; ln(7.2)/2.0 = 0.99
+      </div>
+
+      <div class="ratio-chart">
+        <div class="ratio-chart__faction" style="color:var(--hrhb-color);">HVO</div>
+        <div class="ratio-chart__bar-wrap">
+          <div class="ratio-chart__bar" style="width:48%;background:var(--hrhb-color);opacity:0.7;"></div>
+        </div>
+        <div class="ratio-chart__pct" style="color:var(--hrhb-color);">48%</div>
+      </div>
+      <div style="padding-left:108px;font-family:var(--font-mono);font-size:11px;color:var(--text-dim);margin-bottom:12px;">
+        own FP ~5 &nbsp;&bull;&nbsp; incoming ~13 &nbsp;&bull;&nbsp; ratio 2.6 &nbsp;&bull;&nbsp; ln(2.6)/2.0 = 0.48
+      </div>
+
+      <div class="ratio-chart">
+        <div class="ratio-chart__faction" style="color:var(--rs-color);">VRS</div>
+        <div class="ratio-chart__bar-wrap">
+          <div class="ratio-chart__bar" style="width:0%;background:var(--rs-color);opacity:0.7;"></div>
+        </div>
+        <div class="ratio-chart__pct" style="color:var(--rs-color);">0%</div>
+      </div>
+      <div style="padding-left:108px;font-family:var(--font-mono);font-size:11px;color:var(--text-dim);margin-bottom:4px;">
+        own FP ~17 &nbsp;&bull;&nbsp; incoming ~2 &nbsp;&bull;&nbsp; ratio 0.13 &nbsp;&bull;&nbsp; ln(0.13) &lt; 0 &rarr; zero
+      </div>
+    </div>
+
+    <div class="callout callout--insight anim-up" style="--i:20">
+      <strong>Why ratio-based, not linear deficit?</strong>
+      <p>A linear model <code>(deficit / divisor)</code> gave only 1.4&times; differentiation between ARBiH and HVO. The log-ratio model <code>ln(incoming/own)</code> gives 2.07&times; differentiation, correctly penalizing brigades with very low equipment (no counter-battery fire, no suppression capability) much more steeply. The natural logarithm also provides diminishing returns at high ratios &mdash; going from ratio 7 to 14 doesn't double the effect.</p>
+    </div>
+
+    <div class="gap-grid">
+      <div class="ve-card anim-up" style="--i:21">
+        <div class="ve-card__label" style="color:var(--rbih-color);">ARBiH KIA Progress</div>
+        <div class="flex-between">
+          <span class="text-mono" style="font-size:24px;font-weight:700;">9,831</span>
+          <span class="text-mono text-dim" style="font-size:13px;">target: 11,500</span>
+        </div>
+        <div class="progress"><div class="progress__fill" style="width:85.5%;"></div></div>
+        <div class="text-mono text-dim" style="font-size:11px;">85.5% of target &mdash; +2,617 from n382 baseline (7,214)</div>
+      </div>
+      <div class="ve-card anim-up" style="--i:22">
+        <div class="ve-card__label" style="color:var(--gold);">Model Evolution</div>
+        <div style="font-size:13px;color:var(--text-dim);">
+          <div style="margin-bottom:6px;"><strong style="color:var(--text);">v1 &mdash; Linear deficit</strong><br>Simple <code>(netExposure / divisor)</code>. 1.4&times; faction differentiation. HVO over-penalized.</div>
+          <div style="margin-bottom:6px;"><strong style="color:var(--text);">v2 &mdash; Fixed distribution</strong><br>Enemy FP across all non-enemy brigades (not just own faction). Fixed HVO.</div>
+          <div><strong style="color:var(--text);">v3 &mdash; Ratio-based (final)</strong><br><code>ln(incoming/own) / SCALE</code>. 2.07&times; differentiation. Natural diminishing returns.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ S5: ITERATION HISTORY ============ -->
+    <div id="s5" class="sec-head anim-up" style="--i:23">5 &mdash; Calibration Iterations</div>
+
+    <div class="table-wrap anim-up" style="--i:24">
+      <table>
+        <thead>
+          <tr>
+            <th>Run</th>
+            <th>Model</th>
+            <th class="num">Rate</th>
+            <th class="num">Scale</th>
+            <th class="num">ARBiH KIA</th>
+            <th class="num">VRS Pers.</th>
+            <th class="num">HVO Pers.</th>
+            <th class="num">OSID %</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono">n382</td>
+            <td class="mono text-dim">none</td>
+            <td class="num">&mdash;</td>
+            <td class="num">&mdash;</td>
+            <td class="num">7,214</td>
+            <td class="num">91k</td>
+            <td class="num">46k</td>
+            <td class="num">88.3%</td>
+            <td class="text-sm">Baseline (officer + ethnic + bombardment mult)</td>
+          </tr>
+          <tr>
+            <td class="mono">n383</td>
+            <td class="mono">linear</td>
+            <td class="num">0.005</td>
+            <td class="num">DIV=20</td>
+            <td class="num">8,057</td>
+            <td class="num">&mdash;</td>
+            <td class="num">41k</td>
+            <td class="num">88.0%</td>
+            <td class="text-sm">HVO over-penalized (4,577 KIA)</td>
+          </tr>
+          <tr>
+            <td class="mono">n385</td>
+            <td class="mono">linear</td>
+            <td class="num">0.012</td>
+            <td class="num">DIV=12</td>
+            <td class="num">9,287</td>
+            <td class="num">88k</td>
+            <td class="num">42k</td>
+            <td class="num">88.4%</td>
+            <td class="text-sm">Tuned linear &mdash; good ARBiH progress</td>
+          </tr>
+          <tr>
+            <td class="mono">n386</td>
+            <td class="mono">linear</td>
+            <td class="num">0.015</td>
+            <td class="num">DIV=10</td>
+            <td class="num">10,292</td>
+            <td class="num">88k</td>
+            <td class="num">39k</td>
+            <td class="num text-dim">88.0%</td>
+            <td class="text-sm">HVO dropped below band (39k &lt; 40k)</td>
+          </tr>
+          <tr>
+            <td class="mono">n387</td>
+            <td class="mono" style="color:var(--gold);">ratio ln()</td>
+            <td class="num">0.015</td>
+            <td class="num">2.0</td>
+            <td class="num">10,403</td>
+            <td class="num">85k</td>
+            <td class="num">39k</td>
+            <td class="num">88.2%</td>
+            <td class="text-sm">Ratio model, rate too aggressive</td>
+          </tr>
+          <tr class="row-highlight">
+            <td class="mono" style="color:var(--gold);">n392</td>
+            <td class="mono" style="color:var(--gold);">ratio ln()</td>
+            <td class="num">0.012</td>
+            <td class="num">2.0</td>
+            <td class="num" style="color:var(--green);">9,831</td>
+            <td class="num">85k</td>
+            <td class="num" style="color:var(--green);">41k</td>
+            <td class="num" style="color:var(--gold);font-weight:700;">88.6%</td>
+            <td class="text-sm" style="font-weight:700;">All-time high &mdash; optimal balance</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout anim-up" style="--i:25">
+      <strong>Key insight: the Goldilocks zone</strong>
+      <p>RATE=0.012 + ratio model hits the sweet spot. RATE=0.015 closes more of the ARBiH KIA gap but drops HVO below 40k and crashes OSID match via cascade effects. The ratio-based model at 0.012 keeps HVO in-band (41k) while still recovering 85% of the ARBiH KIA target.</p>
+    </div>
+
+    <!-- Longer history -->
+    <details class="collapsible anim-up" style="--i:26">
+      <summary>Extended calibration history (n362 &rarr; n392)</summary>
+      <div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Run</th>
+                <th class="num">RS</th>
+                <th class="num">RBiH</th>
+                <th class="num">HRHB</th>
+                <th class="num">Match</th>
+                <th>Milestone</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="mono">n362</td>
+                <td class="num">409</td>
+                <td class="num">260</td>
+                <td class="num">84</td>
+                <td class="num">87.4%</td>
+                <td class="text-sm">Winter strengthening + Biha&#x107; DTB</td>
+              </tr>
+              <tr>
+                <td class="mono">n371</td>
+                <td class="num">411</td>
+                <td class="num">256</td>
+                <td class="num">86</td>
+                <td class="num">87.6%</td>
+                <td class="text-sm">Ceiling removal iteration 3</td>
+              </tr>
+              <tr>
+                <td class="mono">n374</td>
+                <td class="num">411</td>
+                <td class="num">256</td>
+                <td class="num">86</td>
+                <td class="num">87.6%</td>
+                <td class="text-sm">Ceiling removal complete, HRHB pool 1.70</td>
+              </tr>
+              <tr>
+                <td class="mono">n375</td>
+                <td class="num">409</td>
+                <td class="num">260</td>
+                <td class="num">84</td>
+                <td class="num">88.3%</td>
+                <td class="text-sm">Officer + ethnic + bombardment</td>
+              </tr>
+              <tr class="row-highlight">
+                <td class="mono">n392</td>
+                <td class="num">420</td>
+                <td class="num">246</td>
+                <td class="num">87</td>
+                <td class="num" style="font-weight:700;">88.6%</td>
+                <td class="text-sm">+ bombardment exposure attrition</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+
+    <!-- ============ S6: REGIONAL MATCH ============ -->
+    <div id="s6" class="sec-head anim-up" style="--i:27">6 &mdash; Regional Breakdown</div>
+
+    <div class="table-wrap anim-up" style="--i:28">
+      <table>
+        <thead>
+          <tr>
+            <th>Region</th>
+            <th class="num">n362</th>
+            <th class="num">n374</th>
+            <th class="num">n392</th>
+            <th class="num">Delta</th>
+            <th>Status</th>
+            <th>Key Issues</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Krajina</strong></td>
+            <td class="num">96.2%</td>
+            <td class="num">95.5%</td>
+            <td class="num" style="color:var(--green);font-weight:700;">98.5%</td>
+            <td class="num"><span class="delta delta--up">+3.0pp</span></td>
+            <td><span class="badge badge--pass">130/132</span></td>
+            <td class="text-sm text-dim">Near-perfect. Only 2 mismatches remain.</td>
+          </tr>
+          <tr>
+            <td><strong>Herzegovina</strong></td>
+            <td class="num">92.5%</td>
+            <td class="num">88.2%</td>
+            <td class="num" style="color:var(--green);font-weight:700;">92.5%</td>
+            <td class="num"><span class="delta delta--up">+4.3pp</span></td>
+            <td><span class="badge badge--pass">86/93</span></td>
+            <td class="text-sm text-dim">RS incursion corrected via ethnic defense.</td>
+          </tr>
+          <tr>
+            <td><strong>Central Corridor</strong></td>
+            <td class="num">91.5%</td>
+            <td class="num">90.4%</td>
+            <td class="num">90.4%</td>
+            <td class="num"><span class="delta delta--neutral">0.0pp</span></td>
+            <td><span class="badge badge--pass">85/94</span></td>
+            <td class="text-sm text-dim">Stable at high level.</td>
+          </tr>
+          <tr>
+            <td><strong>Sarajevo</strong></td>
+            <td class="num">90.3%</td>
+            <td class="num">87.1%</td>
+            <td class="num">87.1%</td>
+            <td class="num"><span class="delta delta--neutral">0.0pp</span></td>
+            <td><span class="badge badge--pass">27/31</span></td>
+            <td class="text-sm text-dim">Trnovo/Pale edges remain RS.</td>
+          </tr>
+          <tr>
+            <td><strong>Central Bosnia</strong></td>
+            <td class="num">88.0%</td>
+            <td class="num">88.0%</td>
+            <td class="num">87.3%</td>
+            <td class="num"><span class="delta delta--down">-0.7pp</span></td>
+            <td><span class="badge badge--warn">145/166</span></td>
+            <td class="text-sm text-dim">Minor drift, single OSID loss.</td>
+          </tr>
+          <tr>
+            <td><strong>Drina</strong></td>
+            <td class="num">75.0%</td>
+            <td class="num">81.3%</td>
+            <td class="num">82.0%</td>
+            <td class="num"><span class="delta delta--up">+0.7pp</span></td>
+            <td><span class="badge badge--warn">105/128</span></td>
+            <td class="text-sm text-dim">Ethnic defense helps enclaves. Still weakest.</td>
+          </tr>
+          <tr>
+            <td><strong>Posavina</strong></td>
+            <td class="num">81.7%</td>
+            <td class="num">81.7%</td>
+            <td class="num">81.7%</td>
+            <td class="num"><span class="delta delta--neutral">0.0pp</span></td>
+            <td><span class="badge badge--warn">89/109</span></td>
+            <td class="text-sm text-dim">Zvornik/Lopare structural.</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td><strong>Overall</strong></td>
+            <td class="num">87.4%</td>
+            <td class="num">87.6%</td>
+            <td class="num" style="color:var(--gold);font-weight:800;">88.6%</td>
+            <td class="num"><span class="delta delta--up">+1.0pp</span></td>
+            <td><strong>667/753</strong></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="legend mb-16">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green);"></div> Pass (&ge;85%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber);"></div> Warn (75&ndash;85%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red);"></div> Fail (&lt;75%)</div>
+    </div>
+
+    <!-- ============ S7: CASCADE ============ -->
+    <div id="s7" class="sec-head anim-up" style="--i:29">7 &mdash; Cascade Dynamics</div>
+
+    <p class="text-sm text-dim mb-16">The most surprising finding: bombardment attrition creates a four-step feedback loop that affects VRS more than expected.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0;align-items:center;margin:20px 0;">
+      <div class="cascade-step anim-up" style="--i:30;border-color:var(--gold-dim);">
+        <div class="cascade-step__num" style="font-size:16px;">1</div>
+        <div class="cascade-step__text">Bombardment attrition weakens ARBiH + HVO</div>
+      </div>
+      <div class="cascade-arrow" style="font-size:22px;">&rarr;</div>
+      <div class="cascade-step anim-up" style="--i:31;border-color:var(--gold-dim);">
+        <div class="cascade-step__num" style="font-size:16px;">2</div>
+        <div class="cascade-step__text">VRS attacks succeed more often</div>
+      </div>
+      <div class="cascade-arrow" style="font-size:22px;">&rarr;</div>
+      <div class="cascade-step anim-up" style="--i:32;border-color:var(--gold-dim);">
+        <div class="cascade-step__num" style="font-size:16px;">3</div>
+        <div class="cascade-step__text">More VRS attacks = more attacker casualties</div>
+      </div>
+      <div class="cascade-arrow" style="font-size:22px;">&rarr;</div>
+      <div class="cascade-step anim-up" style="--i:33;border-color:var(--gold-dim);">
+        <div class="cascade-step__num" style="font-size:16px;">4</div>
+        <div class="cascade-step__text">VRS personnel drops to 85k</div>
+      </div>
+    </div>
+
+    <div class="callout anim-up" style="--i:34">
+      <strong>RS pool scale is extremely sensitive</strong>
+      <p>Tested RS pool 0.25 &rarr; 0.27 (n391): OSID crashed from 88.6% to 85.7%. Extra VRS troops enable over-extension beyond historical territory. The VRS at 85k is accepted as an emergent consequence of historically aggressive offensive behavior &mdash; the same behavior that gives VRS 420 OSIDs (target 416).</p>
+    </div>
+
+    <div class="gap-grid">
+      <div class="ve-card anim-up" style="--i:35">
+        <div class="ve-card__label" style="color:var(--red);">Failed Pool Scale Experiments</div>
+        <div style="font-size:13px;">
+          <div style="display:grid;grid-template-columns:60px 1fr;gap:4px 12px;margin-top:8px;">
+            <span class="text-mono" style="font-weight:600;">n390</span><span class="text-dim">RS 0.30 &rarr; 86.3% (-2.3pp)</span>
+            <span class="text-mono" style="font-weight:600;">n391</span><span class="text-dim">RS 0.27 &rarr; 85.7% (-2.9pp)</span>
+          </div>
+          <div class="text-dim mt-8" style="font-size:12px;">Both massive regressions. VRS over-extension with more troops.</div>
+        </div>
+      </div>
+      <div class="ve-card anim-up" style="--i:36">
+        <div class="ve-card__label" style="color:var(--green);">Current Pool Scales</div>
+        <div style="display:grid;grid-template-columns:70px 1fr;gap:4px 12px;font-family:var(--font-mono);font-size:13px;margin-top:8px;">
+          <span style="color:var(--rbih-color);font-weight:600;">RBiH</span><span>0.18</span>
+          <span style="color:var(--rs-color);font-weight:600;">RS</span><span>0.25</span>
+          <span style="color:var(--hrhb-color);font-weight:600;">HRHB</span><span>1.55</span>
+        </div>
+        <div class="text-dim mt-8" style="font-size:12px;">Do not change. Cascade dynamics make these extremely sensitive.</div>
+      </div>
+    </div>
+
+    <!-- ============ S8: REMAINING GAPS ============ -->
+    <div id="s8" class="sec-head anim-up" style="--i:37">8 &mdash; Remaining Gaps &amp; Next Steps</div>
+
+    <div class="gap-grid">
+      <div class="ve-card anim-up" style="--i:38">
+        <div class="ve-card__label" style="color:var(--amber);">ARBiH KIA Gap</div>
+        <div style="font-size:28px;font-weight:800;color:var(--text);">1,669</div>
+        <div class="text-mono text-dim" style="font-size:11px;">remaining shortfall (9,831 vs 11,500 target)</div>
+        <div class="progress mt-8"><div class="progress__fill progress__fill--warn" style="width:14.5%;"></div></div>
+        <div class="text-dim mt-8" style="font-size:12px;">Likely requires <strong>siege-specific mechanics</strong>: Sarajevo daily shelling, enclave bombardment. Not solvable by further parameter tuning.</div>
+      </div>
+      <div class="ve-card anim-up" style="--i:39">
+        <div class="ve-card__label" style="color:var(--amber);">VRS Below Band</div>
+        <div style="font-size:28px;font-weight:800;color:var(--text);">85k</div>
+        <div class="text-mono text-dim" style="font-size:11px;">vs 90-100k target band (-5k)</div>
+        <div class="progress mt-8"><div class="progress__fill progress__fill--warn" style="width:85%;"></div></div>
+        <div class="text-dim mt-8" style="font-size:12px;">Emergent from combat cascade. RS pool increase causes worse OSID match. Accepted tradeoff for 88.6% territory accuracy.</div>
+      </div>
+    </div>
+
+    <div class="ve-card ve-card--recessed anim-up" style="--i:40;margin-top:16px;">
+      <div class="ve-card__label" style="color:var(--text-dim);">Structural Gaps (Persisting)</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;font-size:13px;margin-top:8px;">
+        <div>
+          <span class="badge badge--fail">Zvornik</span>
+          <span class="text-dim" style="margin-left:6px;">RBiH holds (should be RS)</span>
+        </div>
+        <div>
+          <span class="badge badge--warn">Drina 82%</span>
+          <span class="text-dim" style="margin-left:6px;">Gorazde hinterland + Visegrad</span>
+        </div>
+        <div>
+          <span class="badge badge--warn">Posavina 81.7%</span>
+          <span class="text-dim" style="margin-left:6px;">Lopare/Zvornik contested</span>
+        </div>
+        <div>
+          <span class="badge badge--warn">Sarajevo edges</span>
+          <span class="text-dim" style="margin-left:6px;">Trnovo/Pale RS boundary</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout anim-up" style="--i:41;margin-top:20px;">
+      <strong>Design principle confirmed</strong>
+      <p>No hardcoded personnel limits. Personnel totals emerge from: census demographics (initial pool size) &rarr; mobilization rate &times; surge &times; exhaustion (ongoing growth) &rarr; reinforcement rate ramp (pool &rarr; brigade transfer) &rarr; combat attrition (drain) &rarr; pool depletion (finite manpower). Four comprehensive combat mechanics now differentiate factions organically through equipment, officers, ethnic composition, and bombardment exposure.</p>
+    </div>
+
+    <div class="sep"></div>
+
+    <div style="text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-dim);letter-spacing:1px;">
+      A WAR WITHOUT VICTORY &mdash; Calibration n375&rarr;n392 &mdash; 2026-03-03
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /wrap -->
+
+<script>
+  // Intersection observer for TOC highlighting
+  const sections = document.querySelectorAll('.sec-head[id]');
+  const tocLinks = document.querySelectorAll('.toc a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const link = document.querySelector(`.toc a[href="#${entry.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paradox Team Assessment — Sectors &amp; Operations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+
+    --bg: #0e1520;
+    --surface: #151d2b;
+    --surface2: #1a2435;
+    --surface-elevated: #1f2b3d;
+    --border: rgba(100, 140, 180, 0.12);
+    --border-bright: rgba(100, 140, 180, 0.25);
+    --text: #c8d6e5;
+    --text-dim: #6b7d94;
+    --accent: #3b82c4;
+    --accent-dim: rgba(59, 130, 196, 0.10);
+    --gold: #d4a73a;
+    --gold-dim: rgba(212, 167, 58, 0.10);
+    --green: #2d9e6a;
+    --green-dim: rgba(45, 158, 106, 0.10);
+    --red: #c0392b;
+    --red-dim: rgba(192, 57, 43, 0.10);
+    --orange: #d4873a;
+    --orange-dim: rgba(212, 135, 58, 0.10);
+    --rs: #4a7db8;
+    --rbih: #3a9e6a;
+    --hrhb: #b8784a;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #edf1f5;
+      --surface: #ffffff;
+      --surface2: #f3f6f9;
+      --surface-elevated: #ffffff;
+      --border: rgba(30, 58, 95, 0.10);
+      --border-bright: rgba(30, 58, 95, 0.20);
+      --text: #1e3a5f;
+      --text-dim: #5a7a9a;
+      --accent: #2563a0;
+      --accent-dim: rgba(37, 99, 160, 0.08);
+      --gold: #b08520;
+      --gold-dim: rgba(176, 133, 32, 0.08);
+      --green: #1a7a4a;
+      --green-dim: rgba(26, 122, 74, 0.08);
+      --red: #a0281e;
+      --red-dim: rgba(160, 40, 30, 0.08);
+      --orange: #b06a20;
+      --orange-dim: rgba(176, 106, 32, 0.08);
+      --rs: #3a6da8;
+      --rbih: #2a8e5a;
+      --hrhb: #a8683a;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle, var(--border) 0.5px, transparent 0.5px);
+    background-size: 20px 20px;
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 32px 40px;
+    min-height: 100vh;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate {
+    animation: fadeUp 0.3s ease-out both;
+    animation-delay: calc(var(--i, 0) * 0.04s);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+    }
+  }
+
+  /* ============ GRID LAYOUT ============ */
+  .wrap {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 0 36px;
+  }
+  .main { min-width: 0; }
+
+  /* ============ TOC ============ */
+  .toc {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    padding: 14px 0;
+    grid-row: 1 / -1;
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+  }
+  .toc::-webkit-scrollbar { width: 3px; }
+  .toc::-webkit-scrollbar-thumb { background: var(--surface-elevated); border-radius: 2px; }
+  .toc-title {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    padding: 0 0 10px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .toc a {
+    display: block;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    line-height: 1.4;
+    margin-bottom: 1px;
+  }
+  .toc a:hover { color: var(--text); background: var(--surface2); }
+  .toc a.active { color: var(--gold); border-left-color: var(--gold); }
+
+  @media (max-width: 1000px) {
+    .wrap { grid-template-columns: 1fr; padding-top: 0; }
+    body { padding-top: 0; }
+    .toc {
+      position: sticky; top: 0; z-index: 200;
+      max-height: none; display: flex; gap: 4px;
+      align-items: center; overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      padding: 10px 0; margin: 0 -40px; padding-left: 40px; padding-right: 40px;
+      grid-row: auto;
+    }
+    .toc::-webkit-scrollbar { display: none; }
+    .toc-title { display: none; }
+    .toc a {
+      white-space: nowrap; flex-shrink: 0;
+      border-left: none; border-bottom: 2px solid transparent;
+      border-radius: 4px 4px 0 0; padding: 6px 10px; font-size: 10px;
+    }
+    .toc a.active { border-left: none; border-bottom-color: var(--gold); background: var(--surface); }
+    .main { padding-top: 20px; }
+    .sec-head { scroll-margin-top: 52px; }
+  }
+
+  /* ============ HEADER ============ */
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  h1 span { color: var(--gold); }
+  .subtitle {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+  }
+
+  /* ============ SECTION HEADS ============ */
+  .sec-head {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--gold);
+    padding: 12px 0 8px;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-bright);
+  }
+  .sec-head:first-of-type { margin-top: 0; }
+
+  /* ============ KPI ROW ============ */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .kpi-card__value {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-card__label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+    margin-top: 5px;
+  }
+
+  /* ============ TABLE ============ */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .data-table thead { position: sticky; top: 0; z-index: 2; }
+  .data-table th {
+    background: var(--surface2);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+    text-align: left;
+    padding: 11px 14px;
+    border-bottom: 2px solid var(--border-bright);
+    white-space: nowrap;
+  }
+  .data-table th.right { text-align: right; }
+  .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+  .data-table tbody tr:nth-child(even) { background: var(--accent-dim); }
+  .data-table tbody tr {
+    transition: background 0.12s ease;
+    animation: fadeUp 0.3s ease-out both;
+    animation-delay: calc(var(--i, 0) * 0.03s);
+  }
+  .data-table tbody tr:hover { background: var(--border); }
+  .data-table code {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .data-table small {
+    display: block;
+    color: var(--text-dim);
+    font-size: 10px;
+    margin-top: 2px;
+  }
+  .data-table .num {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .data-table tfoot td {
+    background: var(--surface2);
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    border-top: 2px solid var(--border-bright);
+    border-bottom: none;
+    padding: 11px 14px;
+  }
+
+  /* ============ STATUS BADGES ============ */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+  .badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .badge--critical { background: var(--red-dim); color: var(--red); }
+  .badge--warning { background: var(--orange-dim); color: var(--orange); }
+  .badge--ok { background: var(--green-dim); color: var(--green); }
+  .badge--info { background: var(--accent-dim); color: var(--accent); }
+  .badge--rs { background: var(--accent-dim); color: var(--rs); }
+  .badge--rbih { background: var(--green-dim); color: var(--rbih); }
+  .badge--hrhb { background: var(--orange-dim); color: var(--hrhb); }
+
+  /* ============ CALLOUT ============ */
+  .callout {
+    border-left: 3px solid var(--gold);
+    background: var(--gold-dim);
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 20px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .callout strong { color: var(--gold); }
+  .callout code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--surface);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .callout--red {
+    border-left-color: var(--red);
+    background: var(--red-dim);
+  }
+  .callout--red strong { color: var(--red); }
+
+  /* ============ ROLE TAG ============ */
+  .role-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    margin-right: 6px;
+  }
+
+  /* ============ RECOMMENDATION CARDS ============ */
+  .rec-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .rec-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    border-left: 3px solid var(--accent);
+  }
+  .rec-card--high { border-left-color: var(--red); }
+  .rec-card--med { border-left-color: var(--orange); }
+  .rec-card--low { border-left-color: var(--green); }
+  .rec-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .rec-card p {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .rec-card p:last-child { margin-bottom: 0; }
+  .rec-card ul {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    padding-left: 18px;
+  }
+  .rec-card ul li { margin-bottom: 3px; }
+
+  /* ============ COLLAPSIBLE ============ */
+  details.collapsible {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  details.collapsible summary {
+    padding: 12px 16px;
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+    transition: background 0.12s ease;
+  }
+  details.collapsible summary:hover { background: var(--surface-elevated); }
+  details.collapsible summary::-webkit-details-marker { display: none; }
+  details.collapsible summary::before {
+    content: '\25B8';
+    font-size: 10px;
+    color: var(--text-dim);
+    transition: transform 0.12s ease;
+  }
+  details.collapsible[open] summary::before { transform: rotate(90deg); }
+  details.collapsible .collapsible__body {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+  details.collapsible .collapsible__body strong { color: var(--text); }
+  details.collapsible .collapsible__body code {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  details .collapsible__body ul {
+    padding-left: 18px;
+    margin: 6px 0;
+  }
+  details .collapsible__body li { margin-bottom: 4px; }
+
+  /* ============ PRIORITY ============ */
+  .priority {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .priority--p1 { color: var(--red); }
+  .priority--p2 { color: var(--orange); }
+  .priority--p3 { color: var(--green); }
+
+  /* ============ PROSE ============ */
+  .prose {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+  .prose strong { color: var(--text); }
+  .prose code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* Bar viz */
+  .bar-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bar {
+    height: 6px;
+    border-radius: 3px;
+    min-width: 2px;
+    transition: width 0.3s ease;
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 16px; }
+    h1 { font-size: 22px; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <nav class="toc" id="toc">
+    <div class="toc-title">Sections</div>
+    <a href="#s1">1. State of Play</a>
+    <a href="#s2">2. Sector Data</a>
+    <a href="#s3">3. Problems Found</a>
+    <a href="#s4">4. Team Assessment</a>
+    <a href="#s5">5. Recommendations</a>
+    <a href="#s6">6. Priority Queue</a>
+  </nav>
+
+  <div class="main">
+
+    <h1 class="animate" style="--i:0">Sectors &amp; Operations <span>Assessment</span></h1>
+    <p class="subtitle animate" style="--i:1">paradox team review &mdash; week 40 save &mdash; 2026-03-01</p>
+
+    <!-- ═══ S1: STATE OF PLAY ═══ -->
+    <div id="s1" class="sec-head animate" style="--i:2">1 &mdash; State of Play</div>
+
+    <div class="kpi-row animate" style="--i:3">
+      <div class="kpi-card">
+        <div class="kpi-card__value" style="color:var(--gold)">35</div>
+        <div class="kpi-card__label">Total Sectors</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__value" style="color:var(--red)">3</div>
+        <div class="kpi-card__label">Jumbo (10+)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__value" style="color:var(--orange)">0</div>
+        <div class="kpi-card__label">Active Ops</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__value" style="color:var(--accent)">0</div>
+        <div class="kpi-card__label">Reserves Assigned</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__value" style="color:var(--text-dim)">8</div>
+        <div class="kpi-card__label">Empty Sectors</div>
+      </div>
+    </div>
+
+    <p class="prose animate" style="--i:4">
+      Current architecture splits sectors only on <strong>connectivity</strong>&hairsp;&mdash;&hairsp;disjoint fronts get separate sectors, but a contiguous 86-edge front stays as one monolith. No max-size splitting exists. <code>reserve_brigade_ids</code> is hardcoded <code>[]</code> in the builder. Sector offensives are dormant in year-1 because all factions are on defensive/balanced stances before week 40.
+    </p>
+
+    <!-- ═══ S2: SECTOR DATA ═══ -->
+    <div id="s2" class="sec-head animate" style="--i:5">2 &mdash; Sector Data (Week 40)</div>
+
+    <p class="prose animate" style="--i:6" style="margin-bottom:10px">
+      <strong>Corps-level view.</strong> Brigade totals, sector counts, and total front edges per corps.
+    </p>
+
+    <div class="table-wrap animate" style="--i:7">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Corps</th>
+              <th>Faction</th>
+              <th class="right">Sectors</th>
+              <th class="right">Brigades</th>
+              <th class="right">Edges</th>
+              <th>Assessment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="--i:0"><td><code>arbih_2nd_corps</code></td><td><span class="badge badge--rbih">RBiH</span></td><td class="num">7</td><td class="num">22</td><td class="num">103</td><td><span class="badge badge--warning">Fragmented</span></td></tr>
+            <tr style="--i:1"><td><code>vrs_1st_krajina</code></td><td><span class="badge badge--rs">RS</span></td><td class="num">3</td><td class="num">18</td><td class="num">93</td><td><span class="badge badge--critical">Jumbo sector:0</span></td></tr>
+            <tr style="--i:2"><td><code>arbih_1st_corps</code></td><td><span class="badge badge--rbih">RBiH</span></td><td class="num">2</td><td class="num">17</td><td class="num">49</td><td><span class="badge badge--critical">10 brig in 14 edges</span></td></tr>
+            <tr style="--i:3"><td><code>arbih_3rd_corps</code></td><td><span class="badge badge--rbih">RBiH</span></td><td class="num">5</td><td class="num">16</td><td class="num">75</td><td><span class="badge badge--critical">Jumbo sector:2</span></td></tr>
+            <tr style="--i:4"><td><code>vrs_east_bosnian</code></td><td><span class="badge badge--rs">RS</span></td><td class="num">2</td><td class="num">8</td><td class="num">30</td><td><span class="badge badge--ok">Reasonable</span></td></tr>
+            <tr style="--i:5"><td><code>arbih_5th_corps</code></td><td><span class="badge badge--rs">RBiH</span></td><td class="num">1</td><td class="num">7</td><td class="num">20</td><td><span class="badge badge--ok">Single pocket</span></td></tr>
+            <tr style="--i:6"><td><code>vrs_2nd_krajina</code></td><td><span class="badge badge--rs">RS</span></td><td class="num">2</td><td class="num">7</td><td class="num">29</td><td><span class="badge badge--ok">OK</span></td></tr>
+            <tr style="--i:7"><td><code>vrs_herzegovina</code></td><td><span class="badge badge--rs">RS</span></td><td class="num">1</td><td class="num">5</td><td class="num">28</td><td><span class="badge badge--ok">OK</span></td></tr>
+            <tr style="--i:8"><td><code>vrs_drina</code></td><td><span class="badge badge--rs">RS</span></td><td class="num">4</td><td class="num">3</td><td class="num">44</td><td><span class="badge badge--warning">Thin coverage</span></td></tr>
+            <tr style="--i:9"><td><code>vrs_sarajevo_romanija</code></td><td><span class="badge badge--rs">RS</span></td><td class="num">3</td><td class="num">3</td><td class="num">86</td><td><span class="badge badge--warning">Very thin</span></td></tr>
+            <tr style="--i:10"><td><code>arbih_4th_corps</code></td><td><span class="badge badge--rbih">RBiH</span></td><td class="num">1</td><td class="num">2</td><td class="num">25</td><td><span class="badge badge--warning">Understaffed</span></td></tr>
+            <tr style="--i:11"><td><code>hvo_*</code> (combined)</td><td><span class="badge badge--hrhb">HRHB</span></td><td class="num">4</td><td class="num">4</td><td class="num">21</td><td><span class="badge badge--info">Small force</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="prose animate" style="--i:8">
+      <strong>Jumbo sectors in detail.</strong> These three sectors concentrate far too many brigades under a single sector identity.
+    </p>
+
+    <div class="table-wrap animate" style="--i:9">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Sector</th>
+              <th class="right">Brigades</th>
+              <th class="right">Edges</th>
+              <th class="right">Density</th>
+              <th class="right">Threat</th>
+              <th>Opposing</th>
+              <th>Problem</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="--i:0">
+              <td><code>vrs_1st_krajina:0</code><small>RS &mdash; 1 sub-segment, 35 friendly OSIDs</small></td>
+              <td class="num">16</td>
+              <td class="num">86</td>
+              <td class="num">0.19</td>
+              <td class="num" style="color:var(--red)">716.5</td>
+              <td><span class="badge badge--rbih">RBiH</span> <span class="badge badge--hrhb">HRHB</span></td>
+              <td>Entire Krajina AO in one sector. Two distinct opposing factions blended.</td>
+            </tr>
+            <tr style="--i:1">
+              <td><code>arbih_3rd_corps:2</code><small>RBiH &mdash; 1 sub-segment, 21 friendly OSIDs</small></td>
+              <td class="num">15</td>
+              <td class="num">43</td>
+              <td class="num">0.35</td>
+              <td class="num">39.9</td>
+              <td><span class="badge badge--rs">RS</span></td>
+              <td>Central Bosnia concentration. 15 brigades without subdivision.</td>
+            </tr>
+            <tr style="--i:2">
+              <td><code>arbih_1st_corps:1</code><small>RBiH &mdash; Sarajevo pocket, 5 friendly OSIDs</small></td>
+              <td class="num">10</td>
+              <td class="num">14</td>
+              <td class="num">0.71</td>
+              <td class="num">0.0</td>
+              <td><span class="badge badge--rs">RS</span></td>
+              <td>Dense Sarajevo garrison. No active enemy adjacent (threat=0). Stacking problem.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ S3: PROBLEMS ═══ -->
+    <div id="s3" class="sec-head animate" style="--i:10">3 &mdash; Problems Identified</div>
+
+    <div class="callout--red callout animate" style="--i:11">
+      <strong>P1: No max-size splitting.</strong> The sector builder (<code>corps_front_sectors.ts</code>) only splits on connectivity via BFS. A 86-edge contiguous front stays as one sector. This creates jumbo sectors where 15-16 brigades share a single sector identity, making them operationally indistinguishable.
+    </div>
+
+    <div class="rec-grid animate" style="--i:12">
+      <div class="rec-card rec-card--high">
+        <h3><span class="priority priority--p1">P1</span> No geographic splitting of large sectors</h3>
+        <p>VRS 1st Krajina has 86 edges and 16 brigades in one sector. Facing both HRHB and RBiH. Impossible to assign distinct defensive tasks or launch a sector offensive with just the right 5 brigades.</p>
+        <p><strong>Impact:</strong> Sector offensives pull all 16 brigades. No granular force allocation. Density metric meaningless at this scale.</p>
+      </div>
+
+      <div class="rec-card rec-card--high">
+        <h3><span class="priority priority--p1">P1</span> reserve_brigade_ids always empty</h3>
+        <p>Line 445 of <code>corps_front_sectors.ts</code>: <code>reserve_brigade_ids: []</code>. Never populated. The corps directive tracks <code>reserve_fraction</code>, but the sector builder ignores it. Interior brigades (not on any front edge) get assigned to sectors but aren't flagged as reserves.</p>
+        <p><strong>Impact:</strong> Sector offensive launch uses all brigades minus a hardcoded 15%. No sector-level reserve management. The CorpsFrontPanel UI shows "Reserve (0)" always.</p>
+      </div>
+
+      <div class="rec-card rec-card--med">
+        <h3><span class="priority priority--p2">P2</span> Sector offensives dormant in year-1</h3>
+        <p>All pre-planned operations complete by ~week 5. After that, no new sector offensives launch because: RS goes to <code>balanced</code> at week 20, RBiH stays <code>general_defensive</code> through week 56. Launch requires <code>offensive</code> or <code>balanced</code> + 3 brigades + supply &#8805; 0.6.</p>
+        <p><strong>Impact:</strong> No coordinated multi-OSID operations for 35+ weeks. Brigades operate purely on directive-based individual targeting. Historically VRS conducted major named operations through 1992.</p>
+      </div>
+
+      <div class="rec-card rec-card--med">
+        <h3><span class="priority priority--p2">P2</span> No opposing-faction-aware splitting</h3>
+        <p>VRS 1st Krajina sector:0 faces both RBiH and HRHB simultaneously across 86 edges. These are distinct strategic contexts (alliance dynamics, co-ethnic scoring, operational tempo) that shouldn't be in one bucket.</p>
+        <p><strong>Impact:</strong> Sector offensives against RBiH accidentally include edges facing HRHB. Density/threat metrics average across two different conflicts.</p>
+      </div>
+
+      <div class="rec-card rec-card--low">
+        <h3><span class="priority priority--p3">P3</span> Single-sector corps can't differentiate front zones</h3>
+        <p>ARBiH 5th Corps (Biha&#x107; pocket): 7 brigades, 1 sector, 20 edges. Historically this force defended multiple axes (Biha&#x107; north vs south vs Cazin approach). Single sector prevents prioritized defense.</p>
+      </div>
+
+      <div class="rec-card rec-card--low">
+        <h3><span class="priority priority--p3">P3</span> Sarajevo stacking (10 brigades, 14 edges)</h3>
+        <p>ARBiH 1st Corps sector:1 has density 0.71 with threat 0.0. These brigades have nothing to do. This is a downstream effect of no reserve system + no rotation mechanic.</p>
+      </div>
+    </div>
+
+    <!-- ═══ S4: TEAM ASSESSMENT ═══ -->
+    <div id="s4" class="sec-head animate" style="--i:13">4 &mdash; Paradox Team Assessment</div>
+
+    <details class="collapsible animate" style="--i:14" open>
+      <summary><span class="role-tag">Game Designer</span> Sector granularity and operational art</summary>
+      <div class="collapsible__body">
+        <p><strong>Sectors should model "defended directions", not "everything a corps touches."</strong> In real BiH war operations, a corps AO was divided into operational directions (pravac) &mdash; each with a responsible officer, assigned units, and specific task (defend, delay, attack). VRS 1st Krajina Corps had distinct Biha&#x107;, Jajce, and Donji Vakuf directions simultaneously.</p>
+        <p><strong>Target: 3-8 brigades per sector.</strong> This is the sweet spot for:</p>
+        <ul>
+          <li>Meaningful density metrics (not diluted over 86 edges)</li>
+          <li>Sector offensives that involve a realistic force (3-6 brigades attacking 2-4 objectives)</li>
+          <li>Reserve designation (1-2 brigades behind the line per sector)</li>
+          <li>UI readability (click a sector, see a manageable list of units)</li>
+        </ul>
+        <p><strong>Opposing-faction splits are mandatory.</strong> Facing RBiH and HRHB is not the same operational problem. Sector metrics (threat, density) should be per-opponent to drive correct AI decisions.</p>
+      </div>
+    </details>
+
+    <details class="collapsible animate" style="--i:15" open>
+      <summary><span class="role-tag">Technical Architect</span> Splitting algorithm design</summary>
+      <div class="collapsible__body">
+        <p><strong>Two splitting criteria, applied in order:</strong></p>
+        <ul>
+          <li><strong>Opposing-faction split (Phase A):</strong> After finding connected components, group edges by opposing faction. Edges facing RBiH and edges facing HRHB become separate sectors even if contiguous. Simple, deterministic, cheap.</li>
+          <li><strong>Size-based split (Phase B):</strong> After Phase A, if a sector still has &gt;MAX_SECTOR_EDGES (suggest 25-30), find a natural cut point. <strong>Algorithm:</strong> walk the edge chain, find the edge nearest the midpoint by cumulative length, split there. Each half keeps its own friendly/enemy OSID sets. Recurse if still over threshold.</li>
+        </ul>
+        <p><strong>Stability concern:</strong> Sectors are rebuilt every turn. If we split by midpoint, small territorial changes could cause sector boundaries to jump. Mitigate: use municipality boundaries as preferred cut points (edges that cross a municipality boundary are natural split candidates).</p>
+        <p><strong>Reserve population:</strong> After sector assignment, interior brigades (location_osid not in any sector's enemy_osids neighbors) go to <code>reserve_brigade_ids</code>. Respect <code>reserve_fraction</code> from corps directive. Excess interior brigades beyond reserve quota stay in <code>assigned_brigade_ids</code>.</p>
+      </div>
+    </details>
+
+    <details class="collapsible animate" style="--i:16" open>
+      <summary><span class="role-tag">Gameplay Programmer</span> Implementation approach</summary>
+      <div class="collapsible__body">
+        <p><strong>Changes scoped to 3 files:</strong></p>
+        <ul>
+          <li><code>corps_front_sectors.ts</code> &mdash; Add <code>splitByOpposingFaction()</code> and <code>splitBySize()</code> after <code>findSubSegments()</code>. Populate <code>reserve_brigade_ids</code> in <code>buildSectorFromSubSegments()</code>.</li>
+          <li><code>sector_offensive.ts</code> &mdash; No changes needed. Launch evaluation already checks per-sector brigade count. Smaller sectors = more focused offensives automatically.</li>
+          <li><code>bot_corps_ai.ts</code> &mdash; Update <code>sector_targets</code> population to handle more sectors per corps. May need to adjust <code>max_attackers_per_target</code> per sector size.</li>
+        </ul>
+        <p><strong>Risk:</strong> More sectors means more sector offensive evaluations per turn. Should be negligible &mdash; it's O(sectors &times; brigades) and we're going from ~35 to ~50-60 sectors.</p>
+      </div>
+    </details>
+
+    <details class="collapsible animate" style="--i:17">
+      <summary><span class="role-tag">Historian</span> Historical operations in year-1</summary>
+      <div class="collapsible__body">
+        <p>VRS conducted major named operations throughout 1992, not just the first 5 weeks:</p>
+        <ul>
+          <li><strong>Operacija Koridor (Jun-Oct 1992)</strong>: Months-long Posavina corridor battle. Multiple phases.</li>
+          <li><strong>Prijedor cleansing operations (Apr-Jul 1992)</strong>: Systematic, sustained over months.</li>
+          <li><strong>Sarajevo siege tightening (Apr 1992 onwards)</strong>: Continuous operations around the ring.</li>
+          <li><strong>Drina valley operations (Apr-Sep 1992)</strong>: Bratunac, Srebrenica, Cerska in sequence.</li>
+        </ul>
+        <p>The current system where pre-planned operations end by week 5 and nothing replaces them is ahistorical. VRS corps should be able to generate new sector offensives from <code>balanced</code> stance, not just <code>offensive</code>. The historical pattern was persistent operational pressure, not a single burst then static defense.</p>
+      </div>
+    </details>
+
+    <details class="collapsible animate" style="--i:18">
+      <summary><span class="role-tag">UI/UX Dev</span> Sector panel improvements</summary>
+      <div class="collapsible__body">
+        <p>With smaller sectors, the CorpsFrontPanel becomes more useful:</p>
+        <ul>
+          <li>3-8 brigades per sector = readable list without scrolling</li>
+          <li>Reserves shown separately (currently always "Reserve (0)")</li>
+          <li>Per-sector opposing faction badge (clear who you're facing)</li>
+          <li>Sector offensive status indicator (planning/executing/recovering/idle)</li>
+          <li>Sector name derived from geography (e.g., "Biha&#x107; Direction") instead of just "sector:corps:N"</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="collapsible animate" style="--i:19">
+      <summary><span class="role-tag">Scenario Runner</span> Calibration impact</summary>
+      <div class="collapsible__body">
+        <p><strong>Splitting sectors should not change OSID match rate.</strong> Sectors are derived state; they don't affect territorial control, combat resolution, or displacement. The concern is second-order: if sector offensives become more focused, they might capture different OSIDs. But since sector offensives are currently dormant (year-1), the first implementation phase is risk-free for calibration.</p>
+        <p><strong>Enabling year-1 sector offensives (Phase 2) WILL affect calibration.</strong> That needs a separate 40w run with comparison against n295 baseline. Start with splitting only.</p>
+      </div>
+    </details>
+
+    <!-- ═══ S5: RECOMMENDATIONS ═══ -->
+    <div id="s5" class="sec-head animate" style="--i:20">5 &mdash; Recommended Implementation</div>
+
+    <div class="callout animate" style="--i:21">
+      <strong>Phased approach.</strong> Phase 1 (splitting + reserves) is calibration-safe. Phase 2 (year-1 operations) requires calibration run. Phase 3 (sector naming, UI, operational art) is polish.
+    </div>
+
+    <div class="rec-grid">
+      <div class="rec-card rec-card--high animate" style="--i:22">
+        <h3>Phase 1: Split jumbo sectors + populate reserves</h3>
+        <ul>
+          <li><strong>A.</strong> Split by opposing faction: edges facing different enemies = different sectors</li>
+          <li><strong>B.</strong> Split by size: <code>MAX_SECTOR_EDGES = 25</code>. Walk edge chain, split at midpoint. Prefer municipality boundaries as cut points.</li>
+          <li><strong>C.</strong> Populate <code>reserve_brigade_ids</code>: interior brigades (not on front edge) marked as reserves up to <code>reserve_fraction</code>. Excess stay assigned.</li>
+          <li><strong>D.</strong> <code>MAX_SECTOR_BRIGADES = 8</code> as secondary cap: if a sector has &lt;25 edges but &gt;8 brigades, split it anyway.</li>
+        </ul>
+        <p><strong>Calibration impact:</strong> None. Sectors are derived state. Combat/displacement unchanged.</p>
+      </div>
+
+      <div class="rec-card rec-card--med animate" style="--i:23">
+        <h3>Phase 2: Enable year-1 sector offensives</h3>
+        <ul>
+          <li><strong>A.</strong> Allow <code>balanced</code> stance to launch sector offensives (currently requires offensive OR balanced, but RS goes balanced at week 20 &mdash; verify this path actually works)</li>
+          <li><strong>B.</strong> Lower <code>MIN_BRIGADES_FOR_OFFENSIVE</code> from 3 to 2 for small sectors (&lt;15 edges)</li>
+          <li><strong>C.</strong> Add corps-level "operational tempo" &mdash; a cooldown between sector offensives on the same corps (prevent launching 5 ops simultaneously on 5 sectors)</li>
+          <li><strong>D.</strong> Pre-planned operations should chain: after Operacija Koridor completes, 1st Krajina should evaluate launching a follow-up in a different sector</li>
+        </ul>
+        <p><strong>Calibration impact:</strong> Medium. Requires 40w comparison run. More targeted operations could improve OSID match rate.</p>
+      </div>
+
+      <div class="rec-card rec-card--low animate" style="--i:24">
+        <h3>Phase 3: Operational art polish</h3>
+        <ul>
+          <li><strong>A.</strong> Geographic sector naming from municipality centroids (e.g., "Pravac Biha&#x107;" instead of "sector:corps:2")</li>
+          <li><strong>B.</strong> Sector offensive status in CorpsFrontPanel (planning bar, execution tracker)</li>
+          <li><strong>C.</strong> Map visualization: highlight active sector offensive with pulsing glow on the offensive axis</li>
+          <li><strong>D.</strong> Sector rotation mechanic: brigades cycle between front and reserve within a sector over time (fatigue management)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ═══ S6: PRIORITY QUEUE ═══ -->
+    <div id="s6" class="sec-head animate" style="--i:25">6 &mdash; Priority Queue</div>
+
+    <div class="table-wrap animate" style="--i:26">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Priority</th>
+              <th>Task</th>
+              <th>File</th>
+              <th>Risk</th>
+              <th>Phase</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="--i:0">
+              <td><span class="priority priority--p1">P1</span></td>
+              <td>Split sectors by opposing faction<small>Edges facing different enemies = different sectors</small></td>
+              <td><code>corps_front_sectors.ts</code></td>
+              <td><span class="badge badge--ok">None</span></td>
+              <td>1A</td>
+            </tr>
+            <tr style="--i:1">
+              <td><span class="priority priority--p1">P1</span></td>
+              <td>Split oversized sectors at midpoint<small>MAX_SECTOR_EDGES = 25, prefer mun boundaries</small></td>
+              <td><code>corps_front_sectors.ts</code></td>
+              <td><span class="badge badge--ok">None</span></td>
+              <td>1B</td>
+            </tr>
+            <tr style="--i:2">
+              <td><span class="priority priority--p1">P1</span></td>
+              <td>Populate reserve_brigade_ids<small>Interior brigades up to reserve_fraction</small></td>
+              <td><code>corps_front_sectors.ts</code></td>
+              <td><span class="badge badge--ok">None</span></td>
+              <td>1C</td>
+            </tr>
+            <tr style="--i:3">
+              <td><span class="priority priority--p1">P1</span></td>
+              <td>Secondary cap: MAX_SECTOR_BRIGADES = 8<small>Split dense sectors even if edge count is low</small></td>
+              <td><code>corps_front_sectors.ts</code></td>
+              <td><span class="badge badge--ok">None</span></td>
+              <td>1D</td>
+            </tr>
+            <tr style="--i:4">
+              <td><span class="priority priority--p2">P2</span></td>
+              <td>Verify balanced-stance offensive launches<small>RS balanced at w20 should enable sector offensives</small></td>
+              <td><code>sector_offensive.ts</code></td>
+              <td><span class="badge badge--warning">Calibration</span></td>
+              <td>2A</td>
+            </tr>
+            <tr style="--i:5">
+              <td><span class="priority priority--p2">P2</span></td>
+              <td>Corps operational tempo cooldown<small>Prevent simultaneous multi-sector launches</small></td>
+              <td><code>bot_corps_ai.ts</code></td>
+              <td><span class="badge badge--warning">Calibration</span></td>
+              <td>2C</td>
+            </tr>
+            <tr style="--i:6">
+              <td><span class="priority priority--p3">P3</span></td>
+              <td>Geographic sector naming<small>"Pravac Biha&#x107;" from centroid + municipality</small></td>
+              <td><code>corps_front_sectors.ts</code></td>
+              <td><span class="badge badge--ok">None</span></td>
+              <td>3A</td>
+            </tr>
+            <tr style="--i:7">
+              <td><span class="priority priority--p3">P3</span></td>
+              <td>Sector offensive status in panel<small>Planning bar, execution tracker in CorpsFrontPanel</small></td>
+              <td><code>CorpsFrontPanel.tsx</code></td>
+              <td><span class="badge badge--ok">None</span></td>
+              <td>3B</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout animate" style="--i:27">
+      <strong>Orchestrator recommendation:</strong> Start with Phase 1 (all four tasks). It's entirely in <code>corps_front_sectors.ts</code>, zero calibration risk, and immediately fixes the jumbo-sector problem + gives the UI real reserve data. Phase 2 is the strategic improvement but requires a calibration checkpoint.
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /wrap -->
+
+<script>
+(function() {
+  const toc = document.getElementById('toc');
+  const links = toc.querySelectorAll('a');
+  const sections = [];
+  links.forEach(link => {
+    const id = link.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) sections.push({ id, el, link });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const match = sections.find(s => s.el === entry.target);
+        if (match) {
+          match.link.classList.add('active');
+          if (window.innerWidth <= 1000) {
+            match.link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          }
+        }
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+  sections.forEach(s => observer.observe(s.el));
+  links.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const id = link.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', '#' + id);
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

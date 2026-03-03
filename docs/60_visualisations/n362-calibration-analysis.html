@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>n362 Calibration Analysis — AWWV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --font-body: 'Instrument Serif', 'Georgia', serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    --font-sans: system-ui, -apple-system, sans-serif;
+
+    --bg: #faf8f5;
+    --surface: #ffffff;
+    --surface2: #f3f0eb;
+    --surface-elevated: #fffdf9;
+    --border: rgba(0,0,0,0.07);
+    --border-bright: rgba(0,0,0,0.14);
+    --text: #1c1917;
+    --text-dim: #78716c;
+    --accent: #1e3a5f;
+    --accent-dim: rgba(30,58,95,0.06);
+    --gold: #b57614;
+    --gold-dim: rgba(181,118,20,0.08);
+    --green: #2d6a4f;
+    --green-dim: rgba(45,106,79,0.08);
+    --red: #9b2226;
+    --red-dim: rgba(155,34,38,0.08);
+    --orange: #b07d10;
+    --orange-dim: rgba(176,125,16,0.08);
+    --rs: #3a6ea5;
+    --rs-dim: rgba(58,110,165,0.08);
+    --rbih: #2d6a4f;
+    --rbih-dim: rgba(45,106,79,0.08);
+    --hrhb: #8b4513;
+    --hrhb-dim: rgba(139,69,19,0.08);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141210;
+      --surface: #1e1c19;
+      --surface2: #28251f;
+      --surface-elevated: #2e2a22;
+      --border: rgba(255,255,255,0.06);
+      --border-bright: rgba(255,255,255,0.12);
+      --text: #ede8e0;
+      --text-dim: #9e9688;
+      --accent: #7db4e0;
+      --accent-dim: rgba(125,180,224,0.10);
+      --gold: #daa520;
+      --gold-dim: rgba(218,165,32,0.10);
+      --green: #52b788;
+      --green-dim: rgba(82,183,136,0.10);
+      --red: #e07070;
+      --red-dim: rgba(224,112,112,0.10);
+      --orange: #daa520;
+      --orange-dim: rgba(218,165,32,0.10);
+      --rs: #7db4e0;
+      --rs-dim: rgba(125,180,224,0.10);
+      --rbih: #52b788;
+      --rbih-dim: rgba(82,183,136,0.10);
+      --hrhb: #cd853f;
+      --hrhb-dim: rgba(205,133,63,0.10);
+    }
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 0%, var(--gold-dim) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, var(--accent-dim) 0%, transparent 40%);
+    color: var(--text);
+    font-family: var(--font-sans);
+    padding: 40px;
+    min-height: 100vh;
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(12px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  @keyframes fadeScale {
+    from { opacity:0; transform:scale(0.92); }
+    to { opacity:1; transform:scale(1); }
+  }
+
+  .animate {
+    animation: fadeUp 0.4s ease-out both;
+    animation-delay: calc(var(--i,0) * 0.05s);
+  }
+  .animate-scale {
+    animation: fadeScale 0.4s ease-out both;
+    animation-delay: calc(var(--i,0) * 0.05s);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration:0.01ms !important;
+      animation-delay:0ms !important;
+      transition-duration:0.01ms !important;
+    }
+  }
+
+  /* ===== LAYOUT ===== */
+  .wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 170px 1fr;
+    gap: 0 40px;
+  }
+  .main { min-width: 0; }
+
+  /* ===== TOC ===== */
+  .toc {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    padding: 14px 0;
+    grid-row: 1 / -1;
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+  }
+  .toc::-webkit-scrollbar { width:3px; }
+  .toc::-webkit-scrollbar-thumb { background:var(--surface-elevated); border-radius:2px; }
+  .toc-title {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    padding: 0 0 10px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .toc a {
+    display: block;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 5px;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    line-height: 1.4;
+    margin-bottom: 1px;
+  }
+  .toc a:hover { color: var(--text); background: var(--surface2); }
+  .toc a.active { color: var(--text); border-left-color: var(--gold); }
+
+  @media (max-width: 1000px) {
+    .wrap { grid-template-columns:1fr; padding-top:0; }
+    body { padding-top:0; }
+    .toc {
+      position:sticky; top:0; z-index:200; max-height:none;
+      display:flex; gap:4px; align-items:center;
+      overflow-x:auto; -webkit-overflow-scrolling:touch;
+      background:var(--bg); border-bottom:1px solid var(--border);
+      padding:10px 0; margin:0 -40px; padding-left:40px; padding-right:40px;
+      grid-row:auto;
+    }
+    .toc::-webkit-scrollbar { display:none; }
+    .toc-title { display:none; }
+    .toc a {
+      white-space:nowrap; flex-shrink:0;
+      border-left:none; border-bottom:2px solid transparent;
+      border-radius:4px 4px 0 0; padding:6px 10px; font-size:10px;
+    }
+    .toc a.active { border-left:none; border-bottom-color:var(--gold); background:var(--surface); }
+    .main { padding-top:20px; }
+    .sec-head { scroll-margin-top:52px; }
+  }
+
+  /* ===== SECTION HEADERS ===== */
+  h1 {
+    font-family: var(--font-body);
+    font-size: 36px;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .subtitle {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+  }
+  .sec-head {
+    font-family: var(--font-body);
+    font-size: 22px;
+    font-weight: 400;
+    margin: 40px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-bright);
+    color: var(--text);
+  }
+  .sec-head .sec-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gold);
+    margin-right: 8px;
+    letter-spacing: 1px;
+  }
+
+  /* ===== HERO KPI ===== */
+  .hero-kpi {
+    display: grid;
+    grid-template-columns: 1.4fr repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 768px) {
+    .hero-kpi { grid-template-columns: 1fr 1fr; }
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .kpi-card--hero {
+    background: var(--surface-elevated);
+    border-color: var(--gold);
+    box-shadow: 0 4px 16px rgba(181,118,20,0.08);
+  }
+  .kpi-value {
+    font-family: var(--font-body);
+    font-size: 42px;
+    font-weight: 400;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-value--gold { color: var(--gold); }
+  .kpi-value--green { color: var(--green); }
+  .kpi-value--red { color: var(--red); }
+  .kpi-value--accent { color: var(--accent); }
+  .kpi-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+  .kpi-sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .kpi-delta {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 4px;
+  }
+  .kpi-delta--up { background: var(--green-dim); color: var(--green); }
+  .kpi-delta--down { background: var(--red-dim); color: var(--red); }
+
+  /* ===== TABLES ===== */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .data-table thead { position: sticky; top:0; z-index:2; }
+  .data-table th {
+    background: var(--surface2);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 2px solid var(--border-bright);
+    white-space: nowrap;
+  }
+  .data-table th.right, .data-table td.right {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .data-table tbody tr:last-child td { border-bottom:none; }
+  .data-table tbody tr:nth-child(even) { background: var(--surface2); }
+  .data-table tbody tr { transition: background 0.15s; }
+  .data-table tbody tr:hover { background: var(--gold-dim); }
+  .data-table tfoot td {
+    background: var(--surface2);
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    border-top: 2px solid var(--border-bright);
+    border-bottom: none;
+    padding: 12px 14px;
+  }
+  .data-table code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .data-table small {
+    display: block;
+    color: var(--text-dim);
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  /* ===== STATUS BADGES ===== */
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+  .status::before {
+    content:''; width:6px; height:6px; border-radius:50%; background:currentColor;
+  }
+  .status--pass { background:var(--green-dim); color:var(--green); }
+  .status--fail { background:var(--red-dim); color:var(--red); }
+  .status--partial { background:var(--orange-dim); color:var(--orange); }
+  .status--new { background:var(--gold-dim); color:var(--gold); }
+
+  /* ===== FACTION BADGES ===== */
+  .fac { font-family:var(--font-mono); font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px; }
+  .fac--rs { background:var(--rs-dim); color:var(--rs); }
+  .fac--rbih { background:var(--rbih-dim); color:var(--rbih); }
+  .fac--hrhb { background:var(--hrhb-dim); color:var(--hrhb); }
+
+  /* ===== DELTA BARS ===== */
+  .delta-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .delta-bar__bar {
+    height: 8px;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+  .delta-bar--up .delta-bar__bar { background: var(--green); }
+  .delta-bar--down .delta-bar__bar { background: var(--red); }
+  .delta-bar--flat .delta-bar__bar { background: var(--text-dim); }
+
+  /* ===== CHART CONTAINER ===== */
+  .chart-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .chart-container canvas { max-height: 260px; }
+  .chart-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+
+  /* ===== CALIBRATION HISTORY ===== */
+  .history-row {
+    display: flex;
+    align-items: end;
+    gap: 6px;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .history-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+  }
+  .history-bar__fill {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    transition: height 0.6s ease;
+  }
+  .history-bar__label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+  .history-bar__value {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  /* ===== CALLOUT ===== */
+  .callout {
+    border-left: 3px solid var(--gold);
+    background: var(--gold-dim);
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .callout strong { color: var(--text); }
+  .callout--warn {
+    border-left-color: var(--red);
+    background: var(--red-dim);
+  }
+
+  /* ===== GRID CARDS ===== */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .info-card__title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .info-card__body { font-size: 13px; line-height: 1.6; }
+  .info-card__body li { margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+  .info-card__body li::before {
+    content: ''; position: absolute; left: 0; top: 8px;
+    width: 5px; height: 5px; border-radius: 50%; background: var(--gold);
+  }
+
+  /* ===== COLLAPSIBLE ===== */
+  details.collapsible {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  details.collapsible summary {
+    padding: 12px 18px;
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+    transition: background 0.15s;
+  }
+  details.collapsible summary:hover { background: var(--surface-elevated); }
+  details.collapsible summary::-webkit-details-marker { display: none; }
+  details.collapsible summary::before {
+    content: '\25B8'; font-size:11px; color:var(--text-dim); transition: transform 0.15s;
+  }
+  details.collapsible[open] summary::before { transform: rotate(90deg); }
+  details.collapsible .collapsible__body {
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+  details.collapsible .collapsible__body strong { color: var(--text); }
+
+  @media (max-width: 768px) {
+    body { padding:16px; }
+    h1 { font-size:26px; }
+    .hero-kpi { grid-template-columns:1fr 1fr; }
+    .kpi-value { font-size:32px; }
+    .data-table th, .data-table td { padding:8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<nav class="toc" id="toc">
+  <div class="toc-title">n362 Report</div>
+  <a href="#s1">Overview</a>
+  <a href="#s2">Calibration History</a>
+  <a href="#s3">Regional Breakdown</a>
+  <a href="#s4">Anchor Checks</a>
+  <a href="#s5">Combat Tempo</a>
+  <a href="#s6">Casualties</a>
+  <a href="#s7">Troop Strength</a>
+  <a href="#s8">Displacement</a>
+  <a href="#s9">Control Checks</a>
+  <a href="#s10">What Changed</a>
+  <a href="#s11">Assessment</a>
+</nav>
+
+<div class="main">
+
+  <h1 class="animate" style="--i:0">n362 Calibration Analysis</h1>
+  <p class="subtitle animate" style="--i:1">A War Without Victory &mdash; 40-week run &mdash; 2 Mar 2026 &mdash; run hash <code style="font-family:var(--font-mono);font-size:11px;background:var(--accent-dim);color:var(--accent);padding:1px 5px;border-radius:3px;">ceddda9a</code></p>
+
+  <!-- ===== S1: OVERVIEW ===== -->
+  <div id="s1" class="sec-head animate" style="--i:2"><span class="sec-num">01</span> Overview</div>
+
+  <div class="hero-kpi">
+    <div class="kpi-card kpi-card--hero animate-scale" style="--i:3">
+      <div class="kpi-value kpi-value--gold">87.4%</div>
+      <div class="kpi-label">OSID Match Rate</div>
+      <div class="kpi-sub">658 / 753 &mdash; New all-time high <span class="kpi-delta kpi-delta--up">+0.8pp vs n359</span></div>
+    </div>
+    <div class="kpi-card animate-scale" style="--i:4">
+      <div class="kpi-value kpi-value--green">12/14</div>
+      <div class="kpi-label">Anchors Pass</div>
+      <div class="kpi-sub">Was 10/14 <span class="kpi-delta kpi-delta--up">+2</span></div>
+    </div>
+    <div class="kpi-card animate-scale" style="--i:5">
+      <div class="kpi-value kpi-value--accent">6/6</div>
+      <div class="kpi-label">Bot Benchmarks</div>
+      <div class="kpi-sub">All pass</div>
+    </div>
+    <div class="kpi-card animate-scale" style="--i:6">
+      <div class="kpi-value" style="font-size:32px;">204</div>
+      <div class="kpi-label">Attack Orders</div>
+      <div class="kpi-sub">RS 178 &middot; RBiH 23 &middot; HVO 3</div>
+    </div>
+  </div>
+
+  <!-- ===== S2: CALIBRATION HISTORY ===== -->
+  <div id="s2" class="sec-head animate" style="--i:7"><span class="sec-num">02</span> Calibration History</div>
+
+  <div class="history-row animate" style="--i:8">
+    <div class="history-bar">
+      <div class="history-bar__value">84.9%</div>
+      <div class="history-bar__fill" style="height:80px;background:var(--text-dim);opacity:0.3;"></div>
+      <div class="history-bar__label">n344</div>
+    </div>
+    <div class="history-bar">
+      <div class="history-bar__value">84.9%</div>
+      <div class="history-bar__fill" style="height:80px;background:var(--text-dim);opacity:0.35;"></div>
+      <div class="history-bar__label">n348</div>
+    </div>
+    <div class="history-bar">
+      <div class="history-bar__value">85.8%</div>
+      <div class="history-bar__fill" style="height:90px;background:var(--text-dim);opacity:0.4;"></div>
+      <div class="history-bar__label">n354</div>
+    </div>
+    <div class="history-bar">
+      <div class="history-bar__value">86.7%</div>
+      <div class="history-bar__fill" style="height:100px;background:var(--text-dim);opacity:0.5;"></div>
+      <div class="history-bar__label">n359</div>
+    </div>
+    <div class="history-bar">
+      <div class="history-bar__value">86.6%</div>
+      <div class="history-bar__fill" style="height:98px;background:var(--text-dim);opacity:0.55;"></div>
+      <div class="history-bar__label">n361</div>
+    </div>
+    <div class="history-bar">
+      <div class="history-bar__value" style="color:var(--gold);font-weight:700;">87.4%</div>
+      <div class="history-bar__fill" style="height:115px;background:var(--gold);"></div>
+      <div class="history-bar__label" style="color:var(--gold);font-weight:700;">n362</div>
+    </div>
+  </div>
+
+  <!-- ===== S3: REGIONAL BREAKDOWN ===== -->
+  <div id="s3" class="sec-head animate" style="--i:9"><span class="sec-num">03</span> Regional Breakdown</div>
+
+  <div class="table-wrap animate" style="--i:10">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Region</th>
+            <th class="right">n362</th>
+            <th class="right">n359</th>
+            <th class="right">Delta</th>
+            <th>Trend</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="--i:11">
+            <td><strong>Krajina</strong></td>
+            <td class="right">96.2% <small>127/132</small></td>
+            <td class="right">93.9%</td>
+            <td class="right" style="color:var(--green);font-weight:600;">+2.3pp</td>
+            <td><div class="delta-bar delta-bar--up"><div class="delta-bar__bar" style="width:46px;"></div></div></td>
+          </tr>
+          <tr style="--i:12">
+            <td><strong>Sarajevo</strong></td>
+            <td class="right">90.3% <small>28/31</small></td>
+            <td class="right">83.9%</td>
+            <td class="right" style="color:var(--green);font-weight:600;">+6.4pp</td>
+            <td><div class="delta-bar delta-bar--up"><div class="delta-bar__bar" style="width:128px;"></div></div></td>
+          </tr>
+          <tr style="--i:13">
+            <td><strong>Herzegovina</strong></td>
+            <td class="right">92.5% <small>86/93</small></td>
+            <td class="right">92.5%</td>
+            <td class="right" style="color:var(--text-dim);">+0.0pp</td>
+            <td><div class="delta-bar delta-bar--flat"><div class="delta-bar__bar" style="width:2px;"></div></div></td>
+          </tr>
+          <tr style="--i:14">
+            <td><strong>Central Corridor</strong></td>
+            <td class="right">91.5% <small>86/94</small></td>
+            <td class="right">89.4%</td>
+            <td class="right" style="color:var(--green);font-weight:600;">+2.1pp</td>
+            <td><div class="delta-bar delta-bar--up"><div class="delta-bar__bar" style="width:42px;"></div></div></td>
+          </tr>
+          <tr style="--i:15">
+            <td><strong>Central Bosnia</strong></td>
+            <td class="right">88.0% <small>146/166</small></td>
+            <td class="right">83.7%</td>
+            <td class="right" style="color:var(--green);font-weight:600;">+4.3pp</td>
+            <td><div class="delta-bar delta-bar--up"><div class="delta-bar__bar" style="width:86px;"></div></div></td>
+          </tr>
+          <tr style="--i:16">
+            <td><strong>Posavina NE</strong></td>
+            <td class="right">81.7% <small>89/109</small></td>
+            <td class="right">80.7%</td>
+            <td class="right" style="color:var(--green);font-weight:600;">+1.0pp</td>
+            <td><div class="delta-bar delta-bar--up"><div class="delta-bar__bar" style="width:20px;"></div></div></td>
+          </tr>
+          <tr style="--i:17">
+            <td><strong>Drina</strong></td>
+            <td class="right">75.0% <small>96/128</small></td>
+            <td class="right">82.8%</td>
+            <td class="right" style="color:var(--red);font-weight:600;">&minus;7.8pp</td>
+            <td><div class="delta-bar delta-bar--down"><div class="delta-bar__bar" style="width:156px;"></div></div></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td><strong>Overall</strong></td>
+            <td class="right" style="color:var(--gold);">87.4%</td>
+            <td class="right">86.7%</td>
+            <td class="right" style="color:var(--green);">+0.7pp</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="callout--warn callout animate" style="--i:18">
+    <strong>Drina regression &minus;7.8pp</strong> is the critical concern. RBiH holds too much of Vi&scaron;egrad and Srebrenica expands beyond historical lines. The winter slowdown reduced VRS Drina Corps pressure, allowing RBiH enclaves to over-extend. Needs VRS init_control overrides for Vi&scaron;egrad (deferred to future session).
+  </div>
+
+  <!-- ===== S4: ANCHOR CHECKS ===== -->
+  <div id="s4" class="sec-head animate" style="--i:19"><span class="sec-num">04</span> Anchor Checks</div>
+
+  <div class="table-wrap animate" style="--i:20">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Anchor</th>
+            <th>Type</th>
+            <th>Expected</th>
+            <th>Actual</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>bijeljina</td><td>mun</td><td><span class="fac fac--rs">RS</span></td><td><span class="fac fac--rs">RS</span></td><td><span class="status status--pass">Pass</span></td></tr>
+          <tr><td>banja_luka</td><td>mun</td><td><span class="fac fac--rs">RS</span></td><td><span class="fac fac--rs">RS</span></td><td><span class="status status--pass">Pass</span></td></tr>
+          <tr><td>tuzla</td><td>mun</td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="status status--pass">Pass</span></td></tr>
+          <tr><td>centar_sarajevo</td><td>mun</td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="status status--pass">Pass</span></td></tr>
+          <tr><td>srebrenica</td><td>mun</td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="status status--pass">Pass</span></td></tr>
+          <tr><td>vitinica_2</td><td>osid</td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="status status--new">New Pass</span></td></tr>
+          <tr><td>teocak_krstac_2</td><td>osid</td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="status status--new">New Pass</span></td></tr>
+          <tr><td>brka_2</td><td>osid</td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="status status--new">New Pass</span></td></tr>
+          <tr><td>orasje</td><td>osid</td><td><span class="fac fac--hrhb">HRHB</span></td><td><span class="fac fac--hrhb">HRHB</span></td><td><span class="status status--pass">Pass</span></td></tr>
+          <tr><td>gorazde_2</td><td>osid</td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="status status--pass">Pass</span></td></tr>
+          <tr><td>srebrenica_2</td><td>osid</td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="status status--pass">Pass</span></td></tr>
+          <tr><td>vozuca_2</td><td>osid</td><td><span class="fac fac--rs">RS</span></td><td><span class="fac fac--rs">RS</span></td><td><span class="status status--pass">Pass</span></td></tr>
+          <tr style="background:var(--red-dim);">
+            <td><strong>zvornik</strong></td><td>mun</td><td><span class="fac fac--rs">RS</span></td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="status status--fail">Fail</span></td>
+          </tr>
+          <tr style="background:var(--red-dim);">
+            <td><strong>bihac</strong></td><td>mun</td><td><span class="fac fac--rbih">RBiH</span></td><td><span class="fac fac--rs">RS</span></td><td><span class="status status--fail">New Fail</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== S5: COMBAT TEMPO ===== -->
+  <div id="s5" class="sec-head animate" style="--i:21"><span class="sec-num">05</span> Combat Tempo</div>
+
+  <div class="chart-container animate" style="--i:22">
+    <div class="chart-title">Weekly Attack Orders &mdash; Seasonal Rhythm</div>
+    <canvas id="tempoChart" width="800" height="260"></canvas>
+  </div>
+
+  <div class="card-grid animate" style="--i:23">
+    <div class="info-card">
+      <div class="info-card__title">Offensive Season (w1&ndash;19)</div>
+      <div class="info-card__body" style="font-family:var(--font-mono);font-size:24px;font-weight:600;color:var(--gold);">168 orders</div>
+      <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">VRS general offensive blitz. Peak w9 = 14 orders.</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card__title">Transition (w20&ndash;29)</div>
+      <div class="info-card__body" style="font-family:var(--font-mono);font-size:24px;font-weight:600;color:var(--accent);">15 orders</div>
+      <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">RS shifts to balanced doctrine. 12 flips.</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card__title">Winter (w30&ndash;40)</div>
+      <div class="info-card__body" style="font-family:var(--font-mono);font-size:24px;font-weight:600;color:var(--green);">21 orders</div>
+      <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">Winter slowdown active. 20 flips (down from ~25 in n361).</div>
+    </div>
+  </div>
+
+  <!-- ===== S6: CASUALTIES ===== -->
+  <div id="s6" class="sec-head animate" style="--i:24"><span class="sec-num">06</span> Military Casualties</div>
+
+  <div class="table-wrap animate" style="--i:25">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Army</th>
+            <th class="right">Killed</th>
+            <th class="right">Wounded</th>
+            <th class="right">MIA/Captured</th>
+            <th class="right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="fac fac--rbih">ARBiH</span></td>
+            <td class="right">6,544</td>
+            <td class="right">13,416</td>
+            <td class="right">7,424</td>
+            <td class="right"><strong>27,384</strong></td>
+          </tr>
+          <tr>
+            <td><span class="fac fac--rs">VRS</span></td>
+            <td class="right">8,648</td>
+            <td class="right">16,828</td>
+            <td class="right">7,974</td>
+            <td class="right"><strong>33,450</strong></td>
+          </tr>
+          <tr>
+            <td><span class="fac fac--hrhb">HVO</span></td>
+            <td class="right">2,691</td>
+            <td class="right">5,235</td>
+            <td class="right">2,705</td>
+            <td class="right"><strong>10,631</strong></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total (40w)</td>
+            <td class="right">17,883</td>
+            <td class="right">35,479</td>
+            <td class="right">18,103</td>
+            <td class="right"><strong>71,465</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="callout animate" style="--i:26">
+    <strong>Note:</strong> These are first-year casualties (40 weeks). Historical full-war totals: ARBiH ~30k, VRS ~24k, HVO ~8k. VRS taking highest casualties in year 1 reflects the offensive posture &mdash; they are the attacker absorbing assault losses. This inverts over the full war as ARBiH grows and launches its own offensives.
+  </div>
+
+  <!-- ===== S7: TROOP STRENGTH ===== -->
+  <div id="s7" class="sec-head animate" style="--i:27"><span class="sec-num">07</span> Troop Strength</div>
+
+  <div class="table-wrap animate" style="--i:28">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Faction</th>
+            <th class="right">Init Personnel</th>
+            <th class="right">Final Personnel</th>
+            <th class="right">Growth</th>
+            <th class="right">Militia Avail</th>
+            <th class="right">Militia Committed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="fac fac--rbih">ARBiH</span></td>
+            <td class="right">24,150</td>
+            <td class="right">123,559</td>
+            <td class="right" style="color:var(--green);">+412%</td>
+            <td class="right">120,395</td>
+            <td class="right">118,457</td>
+          </tr>
+          <tr>
+            <td><span class="fac fac--rs">VRS</span></td>
+            <td class="right">57,100</td>
+            <td class="right">102,753</td>
+            <td class="right" style="color:var(--green);">+80%</td>
+            <td class="right">9,731</td>
+            <td class="right">85,598</td>
+          </tr>
+          <tr>
+            <td><span class="fac fac--hrhb">HVO</span></td>
+            <td class="right">20,850</td>
+            <td class="right">42,861</td>
+            <td class="right" style="color:var(--green);">+106%</td>
+            <td class="right">76,744</td>
+            <td class="right">55,834</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== S8: DISPLACEMENT ===== -->
+  <div id="s8" class="sec-head animate" style="--i:29"><span class="sec-num">08</span> Civilian Displacement</div>
+
+  <div class="hero-kpi" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi-card animate-scale" style="--i:30">
+      <div class="kpi-value" style="font-size:30px;">634,237</div>
+      <div class="kpi-label">Total Displaced</div>
+    </div>
+    <div class="kpi-card animate-scale" style="--i:31">
+      <div class="kpi-value kpi-value--red" style="font-size:30px;">27,985</div>
+      <div class="kpi-label">Civilians Killed</div>
+    </div>
+    <div class="kpi-card animate-scale" style="--i:32">
+      <div class="kpi-value kpi-value--accent" style="font-size:30px;">103,181</div>
+      <div class="kpi-label">Fled Abroad</div>
+    </div>
+  </div>
+
+  <div class="table-wrap animate" style="--i:33">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Nationality</th>
+            <th class="right">Killed</th>
+            <th class="right">Fled Abroad</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="fac fac--rbih">Bosniak</span></td>
+            <td class="right">19,967</td>
+            <td class="right">18,638</td>
+            <td><span class="status status--new">New</span> Was 0 in n359</td>
+          </tr>
+          <tr>
+            <td><span class="fac fac--hrhb">Croat</span></td>
+            <td class="right">6,225</td>
+            <td class="right">71,572</td>
+            <td>Posavina 70% abroad rate</td>
+          </tr>
+          <tr>
+            <td><span class="fac fac--rs">Serb</span></td>
+            <td class="right">1,793</td>
+            <td class="right">12,971</td>
+            <td>30% abroad fraction</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="callout animate" style="--i:34">
+    <strong>Bosniak abroad displacement now working.</strong> The new 10% abroad_fraction for border-adjacent municipalities (Krajina, Posavina, Herzegovina, Biha&cacute; pocket) produces 18,638 fled abroad. Historically, hundreds of thousands of Bosniaks fled to Croatia, Germany, Austria, and Sweden. The 10% rate is conservative &mdash; may need further tuning.
+  </div>
+
+  <!-- ===== S9: CONTROL CHECKS ===== -->
+  <div id="s9" class="sec-head animate" style="--i:35"><span class="sec-num">09</span> Key Control Checks</div>
+
+  <div class="table-wrap animate" style="--i:36">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Question</th>
+            <th>Answer</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>RS controls Posavina corridor?</td><td>Yes &mdash; corridor held</td><td><span class="status status--pass">Yes</span></td></tr>
+          <tr><td>HVO holds Ora&scaron;je pocket?</td><td>Yes &mdash; anchor passes</td><td><span class="status status--pass">Yes</span></td></tr>
+          <tr><td>ARBiH holds south of Br&ccaron;ko?</td><td>Yes &mdash; Grada&ccaron;ac/Srebrenik held</td><td><span class="status status--pass">Yes</span></td></tr>
+          <tr><td>RS holds Vozu&cacute;a?</td><td>Yes &mdash; anchor passes</td><td><span class="status status--pass">Yes</span></td></tr>
+          <tr><td>RBiH holds Biha&cacute; pocket?</td><td>Partial &mdash; Cazin/V. Kladu&scaron;a held, Biha&cacute; mun lost</td><td><span class="status status--partial">Partial</span></td></tr>
+          <tr><td>RBiH holds Srebrenica?</td><td>Yes &mdash; enclave holds</td><td><span class="status status--pass">Yes</span></td></tr>
+          <tr><td>RBiH holds Gora&zcaron;de?</td><td>Yes &mdash; enclave holds</td><td><span class="status status--pass">Yes</span></td></tr>
+          <tr><td>RBiH holds &Zcaron;epa?</td><td>Not explicitly anchored</td><td><span class="status status--partial">N/A</span></td></tr>
+          <tr><td>RS holds Sarajevo suburbs?</td><td>Yes &mdash; Pale, Ilid&zcaron;a, Vogo&scaron;&cacute;a</td><td><span class="status status--pass">Yes</span></td></tr>
+          <tr><td>RBiH holds Sarajevo center?</td><td>Yes &mdash; anchor passes</td><td><span class="status status--pass">Yes</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== S10: WHAT CHANGED ===== -->
+  <div id="s10" class="sec-head animate" style="--i:37"><span class="sec-num">10</span> What Changed in n362</div>
+
+  <div class="card-grid animate" style="--i:38">
+    <div class="info-card" style="border-left:3px solid var(--green);">
+      <div class="info-card__title">P0: Biha&cacute; DTB</div>
+      <div class="info-card__body">
+        Added <code>defense_terrain_bonus</code> to 4 key 5th Corps brigades:
+        <ul style="margin-top:8px;">
+          <li>501st Slavna +0.25</li>
+          <li>503rd Slavna +0.25</li>
+          <li>505th Vitezka +0.20</li>
+          <li>511th Slavna +0.20</li>
+        </ul>
+        <small style="margin-top:6px;">Result: Krajina +2.3pp but biha&cacute; anchor still fails.</small>
+      </div>
+    </div>
+    <div class="info-card" style="border-left:3px solid var(--gold);">
+      <div class="info-card__title">P1: Winter Strengthening</div>
+      <div class="info-card__body">
+        Strengthened <code>BASE_ATTACK_MULT</code> and added new <code>attack_share_mult</code> field to SeasonalModifiers:
+        <ul style="margin-top:8px;">
+          <li>Dec: 0.75&rarr;0.60, share &times;0.25</li>
+          <li>Jan: 0.70&rarr;0.55, share &times;0.25</li>
+          <li>Feb: 0.75&rarr;0.60, share &times;0.50</li>
+          <li>Nov: 0.85&rarr;0.75, share &times;0.50</li>
+        </ul>
+        <small style="margin-top:6px;">Effect: 1KK Jan goes from 2 attack slots &rarr; 1.</small>
+      </div>
+    </div>
+    <div class="info-card" style="border-left:3px solid var(--accent);">
+      <div class="info-card__title">P2: Bosniak Abroad Routes</div>
+      <div class="info-card__body">
+        10% <code>abroad_fraction</code> for 40 border-adjacent municipalities (Krajina, Posavina, Herzegovina, Biha&cacute;).
+        <ul style="margin-top:8px;">
+          <li>RBiH fled_abroad: 0 &rarr; 18,638</li>
+          <li>Interior (Sarajevo, Central Bosnia) stays 0%</li>
+        </ul>
+        <small style="margin-top:6px;">Conservative rate &mdash; may increase in future.</small>
+      </div>
+    </div>
+    <div class="info-card" style="border-left:3px solid var(--text-dim);">
+      <div class="info-card__title">Pre-Applied (n361)</div>
+      <div class="info-card__body">
+        <ul style="margin-top:4px;">
+          <li>255th Slavna <code>available_from: 0</code></li>
+          <li>Trnovo in Sarajevo Defense targets</li>
+          <li>Trnovo in RBiH defensive_priorities</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== S11: ASSESSMENT ===== -->
+  <div id="s11" class="sec-head animate" style="--i:39"><span class="sec-num">11</span> Assessment</div>
+
+  <div class="card-grid animate" style="--i:40">
+    <div class="info-card" style="border-top:3px solid var(--green);">
+      <div class="info-card__title" style="color:var(--green);">Winners</div>
+      <div class="info-card__body">
+        <ul>
+          <li><strong>Sarajevo +6.4pp</strong> &mdash; Trnovo defense + 255th Slavna</li>
+          <li><strong>Central Bosnia +4.3pp</strong> &mdash; better balance</li>
+          <li><strong>Krajina +2.3pp</strong> &mdash; 5th Corps DTBs</li>
+          <li><strong>Central Corridor +2.1pp</strong> &mdash; indirect benefits</li>
+          <li><strong>Posavina +1.0pp</strong> &mdash; 3 new anchor passes</li>
+        </ul>
+      </div>
+    </div>
+    <div class="info-card" style="border-top:3px solid var(--red);">
+      <div class="info-card__title" style="color:var(--red);">Open Issues</div>
+      <div class="info-card__body">
+        <ul>
+          <li><strong>Drina &minus;7.8pp</strong> &mdash; now 75.0%, weakest region. Vi&scaron;egrad + Zvornik still RBiH.</li>
+          <li><strong>Biha&cacute; anchor FAIL</strong> &mdash; DTBs helped Krajina overall but VRS 2KK still captures biha&cacute; mun.</li>
+          <li><strong>Late-war flips: 20</strong> &mdash; improved from ~25 but above &lt;15 target.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <details class="collapsible animate" style="--i:41">
+    <summary>Faction Control Deltas (painted vs sim)</summary>
+    <div class="collapsible__body">
+      <table class="data-table" style="margin-top:8px;">
+        <thead>
+          <tr><th>Faction</th><th class="right">Painted</th><th class="right">Sim n362</th><th class="right">Delta</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="fac fac--rs">RS</span></td><td class="right">416</td><td class="right">409</td><td class="right" style="color:var(--red);">-7</td></tr>
+          <tr><td><span class="fac fac--rbih">RBiH</span></td><td class="right">248</td><td class="right">260</td><td class="right" style="color:var(--green);">+12</td></tr>
+          <tr><td><span class="fac fac--hrhb">HRHB</span></td><td class="right">89</td><td class="right">84</td><td class="right" style="color:var(--red);">-5</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;">RBiH sim excess (+12) is almost entirely from Drina: Vi&scaron;egrad (7 OSIDs), Srebrenica expansion (6 OSIDs), Bratunac (3 OSIDs). RS deficit (-7) mirrors this.</p>
+    </div>
+  </details>
+
+  <details class="collapsible animate" style="--i:42">
+    <summary>Next Steps</summary>
+    <div class="collapsible__body">
+      <ul style="list-style:none;">
+        <li style="margin-bottom:8px;"><strong>1. Drina fix (highest priority):</strong> Vi&scaron;egrad init_control overrides + VRS pre-planned Drina sweep adjustments. Target: Drina &gt;80%.</li>
+        <li style="margin-bottom:8px;"><strong>2. Biha&cacute; defense:</strong> Consider stronger measures &mdash; 5th Corps personnel boost, additional brigades from w0, or VRS 2nd Krajina attack cap.</li>
+        <li style="margin-bottom:8px;"><strong>3. Winter fine-tuning:</strong> Late-war flips at 20 (target &lt;15). Could further reduce <code>attack_share_mult</code> for Dec/Jan to 0.15.</li>
+        <li style="margin-bottom:8px;"><strong>4. Displacement abroad:</strong> Consider raising Bosniak abroad_fraction to 0.15&ndash;0.20 for closer historical match.</li>
+      </ul>
+    </div>
+  </details>
+
+</div><!-- /main -->
+</div><!-- /wrap -->
+
+<script>
+// ===== TEMPO CHART =====
+const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const textColor = isDark ? '#9e9688' : '#78716c';
+const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+const weeks = Array.from({length:40}, (_,i) => 'w' + (i+1));
+const orders = [6,7,9,7,6,10,13,11,14,10,5,11,11,10,3,6,6,12,11,1,2,1,1,2,2,1,1,3,1,4,2,2,2,2,2,1,2,2,2,0];
+
+const bgColors = orders.map((_,i) => {
+  if (i < 19) return isDark ? 'rgba(218,165,32,0.6)' : 'rgba(181,118,20,0.6)';
+  if (i < 29) return isDark ? 'rgba(125,180,224,0.5)' : 'rgba(30,58,95,0.5)';
+  return isDark ? 'rgba(82,183,136,0.5)' : 'rgba(45,106,79,0.5)';
+});
+const borderColors = orders.map((_,i) => {
+  if (i < 19) return isDark ? '#daa520' : '#b57614';
+  if (i < 29) return isDark ? '#7db4e0' : '#1e3a5f';
+  return isDark ? '#52b788' : '#2d6a4f';
+});
+
+new Chart(document.getElementById('tempoChart'), {
+  type: 'bar',
+  data: {
+    labels: weeks,
+    datasets: [{
+      label: 'Attack Orders',
+      data: orders,
+      backgroundColor: bgColors,
+      borderColor: borderColors,
+      borderWidth: 1,
+      borderRadius: 2,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          title: ctx => ctx[0].label,
+          label: ctx => {
+            const w = ctx.dataIndex;
+            let phase = w < 19 ? 'Offensive' : w < 29 ? 'Transition' : 'Winter';
+            return ctx.raw + ' orders (' + phase + ')';
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: textColor, font: { family: "'JetBrains Mono'", size: 9 }, maxRotation: 0 },
+        grid: { display: false }
+      },
+      y: {
+        ticks: { color: textColor, font: { family: "'JetBrains Mono'", size: 10 } },
+        grid: { color: gridColor },
+        beginAtZero: true
+      }
+    }
+  }
+});
+
+// ===== SCROLL SPY =====
+(function() {
+  const toc = document.getElementById('toc');
+  const links = toc.querySelectorAll('a');
+  const sections = [];
+
+  links.forEach(link => {
+    const id = link.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) sections.push({ id, el, link });
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const match = sections.find(s => s.el === entry.target);
+        if (match) {
+          match.link.classList.add('active');
+          if (window.innerWidth <= 1000) {
+            match.link.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+          }
+        }
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+
+  sections.forEach(s => observer.observe(s.el));
+
+  links.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const id = link.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior:'smooth', block:'start' });
+        history.replaceState(null, '', '#' + id);
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

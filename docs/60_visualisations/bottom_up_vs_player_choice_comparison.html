@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recruitment Mode Comparison: Bottom-Up vs Player-Choice</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #faf8f5;
+    --surface: #ffffff;
+    --surface-alt: #f5f2ed;
+    --border: #e0dbd3;
+    --border-dark: #c4bdb2;
+    --text: #2c2a26;
+    --text-secondary: #6b6560;
+    --text-muted: #9a948c;
+    --accent-rs: #8b4513;
+    --accent-rs-bg: #f5ede5;
+    --accent-rbih: #2e5e4e;
+    --accent-rbih-bg: #e5f0eb;
+    --accent-hrhb: #3a5a8c;
+    --accent-hrhb-bg: #e5edf5;
+    --red: #9b2c2c;
+    --red-bg: #fef2f2;
+    --green: #276749;
+    --green-bg: #f0fdf4;
+    --gold: #92700c;
+    --gold-bg: #fefce8;
+    --player-choice: #5b4a3a;
+    --bottom-up: #3a4a5b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #2c2a26 0%, #4a443c 100%);
+    color: #faf8f5;
+    padding: 3rem 0 2.5rem;
+    border-bottom: 4px solid var(--accent-rs);
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+
+  header .subtitle {
+    font-size: 1.05rem;
+    font-weight: 300;
+    color: #c4bdb2;
+    margin-bottom: 1.5rem;
+  }
+
+  .run-badges {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .run-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+
+  .run-badge.pc { background: rgba(91,74,58,0.3); border: 1px solid rgba(91,74,58,0.5); }
+  .run-badge.bu { background: rgba(58,74,91,0.3); border: 1px solid rgba(58,74,91,0.5); }
+
+  .run-badge .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .run-badge.pc .dot { background: #d4a574; }
+  .run-badge.bu .dot { background: #74a5d4; }
+
+  /* Section */
+  section {
+    margin: 2.5rem 0;
+  }
+
+  section h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+  }
+
+  section h2 .num {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 0.9rem;
+    margin-right: 0.3rem;
+  }
+
+  section .section-note {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.2rem;
+  }
+
+  /* KPI Cards */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0 2rem;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem 1.4rem;
+    text-align: center;
+  }
+
+  .kpi-card .kpi-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+  }
+
+  .kpi-card .kpi-values {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 1.2rem;
+  }
+
+  .kpi-val {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .kpi-val .number {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .kpi-val .label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+  }
+
+  .kpi-val.pc .number { color: var(--player-choice); }
+  .kpi-val.bu .number { color: var(--bottom-up); }
+
+  .kpi-card .kpi-vs {
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-weight: 300;
+  }
+
+  /* Tables */
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .comparison-table thead th {
+    background: var(--surface-alt);
+    padding: 0.7rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    border-bottom: 2px solid var(--border);
+  }
+
+  .comparison-table thead th.pc-col { color: var(--player-choice); }
+  .comparison-table thead th.bu-col { color: var(--bottom-up); }
+
+  .comparison-table tbody td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .comparison-table tbody tr:last-child td { border-bottom: none; }
+  .comparison-table tbody tr:hover { background: var(--surface-alt); }
+
+  .comparison-table .row-label {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .comparison-table .num-cell {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    text-align: right;
+  }
+
+  .comparison-table .delta-cell {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    text-align: right;
+    font-weight: 600;
+  }
+
+  .delta-positive { color: var(--green); }
+  .delta-negative { color: var(--red); }
+  .delta-zero { color: var(--text-muted); }
+
+  .faction-rs { color: var(--accent-rs); }
+  .faction-rbih { color: var(--accent-rbih); }
+  .faction-hrhb { color: var(--accent-hrhb); }
+
+  .faction-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 0.4rem;
+    vertical-align: middle;
+  }
+  .faction-dot.rs { background: var(--accent-rs); }
+  .faction-dot.rbih { background: var(--accent-rbih); }
+  .faction-dot.hrhb { background: var(--accent-hrhb); }
+
+  .pass { color: var(--green); font-weight: 600; }
+  .fail { color: var(--red); font-weight: 600; }
+
+  /* Match rate bar */
+  .match-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .match-bar {
+    flex: 1;
+    height: 14px;
+    background: #e8e4de;
+    border-radius: 7px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .match-bar .fill {
+    height: 100%;
+    border-radius: 7px;
+    transition: width 0.3s ease;
+  }
+
+  .match-bar .fill.pc { background: linear-gradient(90deg, #a08060, #c4a574); }
+  .match-bar .fill.bu { background: linear-gradient(90deg, #6080a0, #74a5d4); }
+
+  .match-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    font-weight: 500;
+    min-width: 52px;
+    text-align: right;
+  }
+
+  /* Grid layout for side-by-side */
+  .dual-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .dual-grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.6rem; }
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* Analysis box */
+  .analysis-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-rs);
+    border-radius: 0 8px 8px 0;
+    padding: 1.5rem 2rem;
+    margin: 1.5rem 0;
+  }
+
+  .analysis-box h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .analysis-box p {
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.6rem;
+    line-height: 1.7;
+  }
+
+  .analysis-box ul {
+    margin: 0.5rem 0 0.5rem 1.2rem;
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+  }
+
+  .analysis-box ul li { margin-bottom: 0.3rem; }
+
+  /* Totals row */
+  .comparison-table .totals-row td {
+    font-weight: 700;
+    border-top: 2px solid var(--border-dark);
+    background: var(--surface-alt);
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 2rem 0;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+
+  .legend {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.2rem;
+    font-size: 0.85rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .legend-swatch {
+    width: 14px; height: 14px; border-radius: 3px;
+  }
+  .legend-swatch.pc { background: #c4a574; }
+  .legend-swatch.bu { background: #74a5d4; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <h1>Recruitment Mode Comparison</h1>
+    <p class="subtitle">Bottom-Up vs Player-Choice &mdash; 40-Week Calibration Scenario (Apr 1992 &rarr; Jan 1993)</p>
+    <div class="run-badges">
+      <span class="run-badge pc"><span class="dot"></span>n335 &middot; player_choice &middot; 87.6% match</span>
+      <span class="run-badge bu"><span class="dot"></span>n336 &middot; bottom_up &middot; 77.7% match</span>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- 1. KPI Cards -->
+  <section>
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">OSID Match Rate</div>
+        <div class="kpi-values">
+          <div class="kpi-val pc"><span class="number">87.6%</span><span class="label">Player-Choice</span></div>
+          <span class="kpi-vs">vs</span>
+          <div class="kpi-val bu"><span class="number">77.7%</span><span class="label">Bottom-Up</span></div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Total Brigades (Final)</div>
+        <div class="kpi-values">
+          <div class="kpi-val pc"><span class="number">209</span><span class="label">Player-Choice</span></div>
+          <span class="kpi-vs">vs</span>
+          <div class="kpi-val bu"><span class="number">77</span><span class="label">Bottom-Up</span></div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Military Casualties</div>
+        <div class="kpi-values">
+          <div class="kpi-val pc"><span class="number">19,888</span><span class="label">Player-Choice</span></div>
+          <span class="kpi-vs">vs</span>
+          <div class="kpi-val bu"><span class="number">1,188</span><span class="label">Bottom-Up</span></div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Control Flips</div>
+        <div class="kpi-values">
+          <div class="kpi-val pc"><span class="number">228</span><span class="label">Player-Choice</span></div>
+          <span class="kpi-vs">vs</span>
+          <div class="kpi-val bu"><span class="number">7</span><span class="label">Bottom-Up</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Troop Strengths -->
+  <section>
+    <h2><span class="num">01</span> Troop Strengths</h2>
+    <p class="section-note">Initial &rarr; Final personnel by faction. Bottom-up mode failed to spawn RBiH/HRHB brigades; only RS OOB brigades materialized.</p>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Faction</th>
+          <th class="pc-col" colspan="3" style="text-align:center">Player-Choice (n335)</th>
+          <th class="bu-col" colspan="3" style="text-align:center">Bottom-Up (n336)</th>
+        </tr>
+        <tr>
+          <th></th>
+          <th class="pc-col num-cell">Initial</th>
+          <th class="pc-col num-cell">Final</th>
+          <th class="pc-col num-cell">&Delta;</th>
+          <th class="bu-col num-cell">Initial</th>
+          <th class="bu-col num-cell">Final</th>
+          <th class="bu-col num-cell">&Delta;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label"><span class="faction-dot rbih"></span>ARBiH (RBiH)</td>
+          <td class="num-cell">24,390</td>
+          <td class="num-cell">207,788</td>
+          <td class="delta-cell delta-positive">+183,398</td>
+          <td class="num-cell">0</td>
+          <td class="num-cell">0</td>
+          <td class="delta-cell delta-zero">0</td>
+        </tr>
+        <tr>
+          <td class="row-label"><span class="faction-dot rs"></span>VRS (RS)</td>
+          <td class="num-cell">60,100</td>
+          <td class="num-cell">129,630</td>
+          <td class="delta-cell delta-positive">+69,530</td>
+          <td class="num-cell">79,300</td>
+          <td class="num-cell">211,346</td>
+          <td class="delta-cell delta-positive">+132,046</td>
+        </tr>
+        <tr>
+          <td class="row-label"><span class="faction-dot hrhb"></span>HVO (HRHB)</td>
+          <td class="num-cell">22,450</td>
+          <td class="num-cell">69,895</td>
+          <td class="delta-cell delta-positive">+47,445</td>
+          <td class="num-cell">0</td>
+          <td class="num-cell">0</td>
+          <td class="delta-cell delta-zero">0</td>
+        </tr>
+        <tr class="totals-row">
+          <td class="row-label">Total</td>
+          <td class="num-cell">106,940</td>
+          <td class="num-cell">407,313</td>
+          <td class="delta-cell delta-positive">+300,373</td>
+          <td class="num-cell">79,300</td>
+          <td class="num-cell">211,346</td>
+          <td class="delta-cell delta-positive">+132,046</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 3. Brigade Counts -->
+  <section>
+    <h2><span class="num">02</span> Brigade Formation</h2>
+    <p class="section-note">In bottom_up mode, the militia-to-brigade promotion pipeline did not activate for RBiH or HRHB. Only RS&rsquo;s pre-defined OOB brigades spawned.</p>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Faction</th>
+          <th class="pc-col" colspan="2" style="text-align:center">Player-Choice (n335)</th>
+          <th class="bu-col" colspan="2" style="text-align:center">Bottom-Up (n336)</th>
+        </tr>
+        <tr>
+          <th></th>
+          <th class="pc-col num-cell">Initial</th>
+          <th class="pc-col num-cell">Final</th>
+          <th class="bu-col num-cell">Initial</th>
+          <th class="bu-col num-cell">Final</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label"><span class="faction-dot rbih"></span>ARBiH</td>
+          <td class="num-cell">36</td>
+          <td class="num-cell">97</td>
+          <td class="num-cell">0</td>
+          <td class="num-cell">0</td>
+        </tr>
+        <tr>
+          <td class="row-label"><span class="faction-dot rs"></span>VRS</td>
+          <td class="num-cell">58</td>
+          <td class="num-cell">80</td>
+          <td class="num-cell">77</td>
+          <td class="num-cell">77</td>
+        </tr>
+        <tr>
+          <td class="row-label"><span class="faction-dot hrhb"></span>HVO</td>
+          <td class="num-cell">28</td>
+          <td class="num-cell">32</td>
+          <td class="num-cell">0</td>
+          <td class="num-cell">0</td>
+        </tr>
+        <tr class="totals-row">
+          <td class="row-label">Total</td>
+          <td class="num-cell">122</td>
+          <td class="num-cell">209</td>
+          <td class="num-cell">77</td>
+          <td class="num-cell">77</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="analysis-box">
+      <h3>Formation Note</h3>
+      <p>In <strong>bottom_up</strong> mode, only 2,217 militia detachments (army_hq: 3, corps_asset: 9, militia: 2,205) were created &mdash; but none promoted to brigade status. The entire RBiH and HRHB fighting force consisted of militia units that cannot issue attack orders, rendering those factions passive.</p>
+      <p>In <strong>player_choice</strong> mode, 87 named OOB brigades were added at turn 0, and the 3-resource recruitment system produced 87 more over 40 weeks (122 &rarr; 209).</p>
+    </div>
+  </section>
+
+  <!-- 4. Military Casualties -->
+  <section>
+    <h2><span class="num">03</span> Military Casualties</h2>
+    <p class="section-note">Casualty ledger breakdown: killed + wounded + missing/captured.</p>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Faction</th>
+          <th class="pc-col" colspan="4" style="text-align:center">Player-Choice (n335)</th>
+          <th class="bu-col" colspan="4" style="text-align:center">Bottom-Up (n336)</th>
+        </tr>
+        <tr>
+          <th></th>
+          <th class="pc-col num-cell">KIA</th>
+          <th class="pc-col num-cell">WIA</th>
+          <th class="pc-col num-cell">MIA</th>
+          <th class="pc-col num-cell">Total</th>
+          <th class="bu-col num-cell">KIA</th>
+          <th class="bu-col num-cell">WIA</th>
+          <th class="bu-col num-cell">MIA</th>
+          <th class="bu-col num-cell">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label"><span class="faction-dot rbih"></span>ARBiH</td>
+          <td class="num-cell">2,323</td>
+          <td class="num-cell">5,631</td>
+          <td class="num-cell">1,478</td>
+          <td class="num-cell" style="font-weight:600">9,432</td>
+          <td class="num-cell">210</td>
+          <td class="num-cell">507</td>
+          <td class="num-cell">135</td>
+          <td class="num-cell" style="font-weight:600">852</td>
+        </tr>
+        <tr>
+          <td class="row-label"><span class="faction-dot rs"></span>VRS</td>
+          <td class="num-cell">2,070</td>
+          <td class="num-cell">5,097</td>
+          <td class="num-cell">1,467</td>
+          <td class="num-cell" style="font-weight:600">8,634</td>
+          <td class="num-cell">68</td>
+          <td class="num-cell">171</td>
+          <td class="num-cell">47</td>
+          <td class="num-cell" style="font-weight:600">286</td>
+        </tr>
+        <tr>
+          <td class="row-label"><span class="faction-dot hrhb"></span>HVO</td>
+          <td class="num-cell">144</td>
+          <td class="num-cell">352</td>
+          <td class="num-cell">96</td>
+          <td class="num-cell" style="font-weight:600">592</td>
+          <td class="num-cell">0</td>
+          <td class="num-cell">0</td>
+          <td class="num-cell">0</td>
+          <td class="num-cell" style="font-weight:600">0</td>
+        </tr>
+        <tr class="totals-row">
+          <td class="row-label">All Factions</td>
+          <td class="num-cell">4,537</td>
+          <td class="num-cell">11,080</td>
+          <td class="num-cell">3,041</td>
+          <td class="num-cell" style="font-weight:700">18,658</td>
+          <td class="num-cell">278</td>
+          <td class="num-cell">678</td>
+          <td class="num-cell">182</td>
+          <td class="num-cell" style="font-weight:700">1,138</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 5. Civilian Casualties -->
+  <section>
+    <h2><span class="num">04</span> Civilian Casualties</h2>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Nationality</th>
+          <th class="pc-col" colspan="2" style="text-align:center">Player-Choice (n335)</th>
+          <th class="bu-col" colspan="2" style="text-align:center">Bottom-Up (n336)</th>
+        </tr>
+        <tr>
+          <th></th>
+          <th class="pc-col num-cell">Killed</th>
+          <th class="pc-col num-cell">Fled Abroad</th>
+          <th class="bu-col num-cell">Killed</th>
+          <th class="bu-col num-cell">Fled Abroad</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label"><span class="faction-dot rbih"></span>Bosniak</td>
+          <td class="num-cell">43,209</td>
+          <td class="num-cell">0</td>
+          <td class="num-cell">1,310</td>
+          <td class="num-cell">0</td>
+        </tr>
+        <tr>
+          <td class="row-label"><span class="faction-dot rs"></span>Serb</td>
+          <td class="num-cell">7,222</td>
+          <td class="num-cell">19,542</td>
+          <td class="num-cell">0</td>
+          <td class="num-cell">0</td>
+        </tr>
+        <tr>
+          <td class="row-label"><span class="faction-dot hrhb"></span>Croat</td>
+          <td class="num-cell">13,860</td>
+          <td class="num-cell">64,858</td>
+          <td class="num-cell">1,078</td>
+          <td class="num-cell">2,427</td>
+        </tr>
+        <tr class="totals-row">
+          <td class="row-label">Total</td>
+          <td class="num-cell">64,291</td>
+          <td class="num-cell">84,400</td>
+          <td class="num-cell">2,388</td>
+          <td class="num-cell">2,427</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 6. Displacement -->
+  <section>
+    <h2><span class="num">05</span> Displacement</h2>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th class="pc-col num-cell">Player-Choice (n335)</th>
+          <th class="bu-col num-cell">Bottom-Up (n336)</th>
+          <th class="num-cell">&Delta;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label">Total Displaced</td>
+          <td class="num-cell">643,834</td>
+          <td class="num-cell">23,897</td>
+          <td class="delta-cell delta-negative">&minus;619,937</td>
+        </tr>
+        <tr>
+          <td class="row-label">Routed to Camps</td>
+          <td class="num-cell">495,143</td>
+          <td class="num-cell">19,082</td>
+          <td class="delta-cell delta-negative">&minus;476,061</td>
+        </tr>
+        <tr>
+          <td class="row-label">Killed (Displacement)</td>
+          <td class="num-cell">64,291</td>
+          <td class="num-cell">2,388</td>
+          <td class="delta-cell delta-negative">&minus;61,903</td>
+        </tr>
+        <tr>
+          <td class="row-label">Fled Abroad</td>
+          <td class="num-cell">84,400</td>
+          <td class="num-cell">2,427</td>
+          <td class="delta-cell delta-negative">&minus;81,973</td>
+        </tr>
+        <tr>
+          <td class="row-label">Camps Created</td>
+          <td class="num-cell">88</td>
+          <td class="num-cell">6</td>
+          <td class="delta-cell delta-negative">&minus;82</td>
+        </tr>
+        <tr>
+          <td class="row-label">Active Weeks</td>
+          <td class="num-cell">40</td>
+          <td class="num-cell">4</td>
+          <td class="delta-cell delta-negative">&minus;36</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 7. OSID Match Rate -->
+  <section>
+    <h2><span class="num">06</span> OSID Match Rate &mdash; Regional Breakdown</h2>
+    <p class="section-note">Comparison against Jan 1993 painted targets (753 OSIDs total).</p>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch pc"></div> Player-Choice (n335)</div>
+      <div class="legend-item"><div class="legend-swatch bu"></div> Bottom-Up (n336)</div>
+    </div>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Region</th>
+          <th style="text-align:center">OSIDs</th>
+          <th class="pc-col" colspan="2" style="text-align:center">n335</th>
+          <th class="bu-col" colspan="2" style="text-align:center">n336</th>
+          <th style="text-align:center">&Delta;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label">Krajina</td>
+          <td class="num-cell">132</td>
+          <td class="num-cell">126</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill pc" style="width:95.5%"></div></div>
+              <span class="match-pct">95.5%</span>
+            </div>
+          </td>
+          <td class="num-cell">108</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill bu" style="width:81.8%"></div></div>
+              <span class="match-pct">81.8%</span>
+            </div>
+          </td>
+          <td class="delta-cell delta-negative">&minus;13.7pp</td>
+        </tr>
+        <tr>
+          <td class="row-label">Posavina NE</td>
+          <td class="num-cell">109</td>
+          <td class="num-cell">79</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill pc" style="width:72.5%"></div></div>
+              <span class="match-pct">72.5%</span>
+            </div>
+          </td>
+          <td class="num-cell">78</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill bu" style="width:71.6%"></div></div>
+              <span class="match-pct">71.6%</span>
+            </div>
+          </td>
+          <td class="delta-cell delta-negative">&minus;0.9pp</td>
+        </tr>
+        <tr>
+          <td class="row-label">Drina</td>
+          <td class="num-cell">128</td>
+          <td class="num-cell">109</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill pc" style="width:85.2%"></div></div>
+              <span class="match-pct">85.2%</span>
+            </div>
+          </td>
+          <td class="num-cell">74</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill bu" style="width:57.8%"></div></div>
+              <span class="match-pct">57.8%</span>
+            </div>
+          </td>
+          <td class="delta-cell delta-negative">&minus;27.4pp</td>
+        </tr>
+        <tr>
+          <td class="row-label">Central Corridor</td>
+          <td class="num-cell">94</td>
+          <td class="num-cell">87</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill pc" style="width:92.6%"></div></div>
+              <span class="match-pct">92.6%</span>
+            </div>
+          </td>
+          <td class="num-cell">79</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill bu" style="width:84.0%"></div></div>
+              <span class="match-pct">84.0%</span>
+            </div>
+          </td>
+          <td class="delta-cell delta-negative">&minus;8.6pp</td>
+        </tr>
+        <tr>
+          <td class="row-label">Central Bosnia</td>
+          <td class="num-cell">166</td>
+          <td class="num-cell">142</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill pc" style="width:85.5%"></div></div>
+              <span class="match-pct">85.5%</span>
+            </div>
+          </td>
+          <td class="num-cell">138</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill bu" style="width:83.1%"></div></div>
+              <span class="match-pct">83.1%</span>
+            </div>
+          </td>
+          <td class="delta-cell delta-negative">&minus;2.4pp</td>
+        </tr>
+        <tr>
+          <td class="row-label">Sarajevo</td>
+          <td class="num-cell">31</td>
+          <td class="num-cell">27</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill pc" style="width:87.1%"></div></div>
+              <span class="match-pct">87.1%</span>
+            </div>
+          </td>
+          <td class="num-cell">25</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill bu" style="width:80.6%"></div></div>
+              <span class="match-pct">80.6%</span>
+            </div>
+          </td>
+          <td class="delta-cell delta-negative">&minus;6.5pp</td>
+        </tr>
+        <tr>
+          <td class="row-label">Herzegovina</td>
+          <td class="num-cell">93</td>
+          <td class="num-cell">90</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill pc" style="width:96.8%"></div></div>
+              <span class="match-pct">96.8%</span>
+            </div>
+          </td>
+          <td class="num-cell">83</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill bu" style="width:89.2%"></div></div>
+              <span class="match-pct">89.2%</span>
+            </div>
+          </td>
+          <td class="delta-cell delta-negative">&minus;7.6pp</td>
+        </tr>
+        <tr class="totals-row">
+          <td class="row-label">Overall</td>
+          <td class="num-cell">753</td>
+          <td class="num-cell">660</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill pc" style="width:87.6%"></div></div>
+              <span class="match-pct" style="font-weight:700">87.6%</span>
+            </div>
+          </td>
+          <td class="num-cell">585</td>
+          <td class="num-cell">
+            <div class="match-bar-container">
+              <div class="match-bar"><div class="fill bu" style="width:77.7%"></div></div>
+              <span class="match-pct" style="font-weight:700">77.7%</span>
+            </div>
+          </td>
+          <td class="delta-cell delta-negative">&minus;9.9pp</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 8. Operations & Combat -->
+  <section>
+    <h2><span class="num">07</span> Operations &amp; Combat</h2>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th class="pc-col num-cell">Player-Choice (n335)</th>
+          <th class="bu-col num-cell">Bottom-Up (n336)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label">Orders Processed</td>
+          <td class="num-cell">291</td>
+          <td class="num-cell">19</td>
+        </tr>
+        <tr>
+          <td class="row-label">RS Orders</td>
+          <td class="num-cell">207</td>
+          <td class="num-cell">9</td>
+        </tr>
+        <tr>
+          <td class="row-label">RBiH Orders</td>
+          <td class="num-cell">83</td>
+          <td class="num-cell">10</td>
+        </tr>
+        <tr>
+          <td class="row-label">HRHB Orders</td>
+          <td class="num-cell">5</td>
+          <td class="num-cell">0</td>
+        </tr>
+        <tr>
+          <td class="row-label">Unique Attack Targets</td>
+          <td class="num-cell">252</td>
+          <td class="num-cell">15</td>
+        </tr>
+        <tr>
+          <td class="row-label">Flips Applied</td>
+          <td class="num-cell">228</td>
+          <td class="num-cell">7</td>
+        </tr>
+        <tr>
+          <td class="row-label">Defender Present Battles</td>
+          <td class="num-cell">38</td>
+          <td class="num-cell">0</td>
+        </tr>
+        <tr>
+          <td class="row-label">Defender Absent Battles</td>
+          <td class="num-cell">210</td>
+          <td class="num-cell">15</td>
+        </tr>
+        <tr>
+          <td class="row-label">Weeks with Orders</td>
+          <td class="num-cell">40 / 40</td>
+          <td class="num-cell">10 / 40</td>
+        </tr>
+        <tr>
+          <td class="row-label">Attacker Casualties</td>
+          <td class="num-cell">17,526</td>
+          <td class="num-cell">1,138</td>
+        </tr>
+        <tr>
+          <td class="row-label">Defender Casualties</td>
+          <td class="num-cell">2,362</td>
+          <td class="num-cell">50</td>
+        </tr>
+        <tr>
+          <td class="row-label">Atk/Def Casualty Ratio</td>
+          <td class="num-cell">7.4 : 1</td>
+          <td class="num-cell">22.8 : 1</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 9. Bot Benchmarks & Anchors -->
+  <section>
+    <h2><span class="num">08</span> Bot Benchmarks &amp; Anchor Checks</h2>
+
+    <div class="dual-grid">
+      <div>
+        <h3 style="font-size:0.95rem;color:var(--text-secondary);margin-bottom:0.8rem;text-transform:uppercase;letter-spacing:0.06em;">Bot Benchmarks</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Benchmark</th>
+              <th class="pc-col" style="text-align:center">n335</th>
+              <th class="bu-col" style="text-align:center">n336</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="row-label">HRHB: secure_herzegovina_core (w20)</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">RBiH: hold_core_centers (w20)</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="fail">FAIL</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">RS: early_territorial_expansion (w20)</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="fail">FAIL</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">HRHB: hold_central_bosnia_nodes (w40)</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="fail">FAIL</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">RBiH: preserve_survival_corridors (w40)</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="fail">FAIL</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">RS: consolidate_gains (w40)</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="fail">FAIL</span></td>
+            </tr>
+            <tr class="totals-row">
+              <td class="row-label">Score</td>
+              <td style="text-align:center;font-weight:700"><span class="pass">6 / 6</span></td>
+              <td style="text-align:center;font-weight:700"><span class="fail">1 / 6</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <h3 style="font-size:0.95rem;color:var(--text-secondary);margin-bottom:0.8rem;text-transform:uppercase;letter-spacing:0.06em;">Anchor Checks</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Anchor</th>
+              <th class="pc-col" style="text-align:center">n335</th>
+              <th class="bu-col" style="text-align:center">n336</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="row-label">Zvornik &rarr; RS</td>
+              <td style="text-align:center"><span class="fail">FAIL</span></td>
+              <td style="text-align:center"><span class="fail">FAIL</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">Bijeljina &rarr; RS</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">Srebrenica &rarr; RBiH</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">Biha&cacute; &rarr; RBiH</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">Banja Luka &rarr; RS</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">Tuzla &rarr; RBiH</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">Centar Sarajevo &rarr; RBiH</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">Ora&scaron;je &rarr; HRHB</td>
+              <td style="text-align:center"><span class="fail">FAIL</span></td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">Br&ccedil;ko &rarr; RBiH</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">Gora&zcaron;de &rarr; RBiH</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">Srebrenica OSID &rarr; RBiH</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">Vozu&cacute;a &rarr; RS</td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+              <td style="text-align:center"><span class="pass">PASS</span></td>
+            </tr>
+            <tr class="totals-row">
+              <td class="row-label">Score</td>
+              <td style="text-align:center;font-weight:700">12 / 14</td>
+              <td style="text-align:center;font-weight:700">13 / 14</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. Key Control Checks -->
+  <section>
+    <h2><span class="num">09</span> Key Control Checks</h2>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Control Check</th>
+          <th class="pc-col" style="text-align:center">Player-Choice (n335)</th>
+          <th class="bu-col" style="text-align:center">Bottom-Up (n336)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label">RS controls Br&ccedil;ko + Posavina corridor</td>
+          <td style="text-align:center"><span class="fail">NO</span> &mdash; RBiH holds Br&ccedil;ko</td>
+          <td style="text-align:center"><span class="fail">NO</span> &mdash; RBiH holds Br&ccedil;ko</td>
+        </tr>
+        <tr>
+          <td class="row-label">HVO holds Ora&scaron;je pocket</td>
+          <td style="text-align:center"><span class="fail">NO</span> &mdash; RS overran</td>
+          <td style="text-align:center"><span class="pass">YES</span></td>
+        </tr>
+        <tr>
+          <td class="row-label">ARBiH holds south of Br&ccedil;ko (Grada&ccedil;ac/Srebrenik)</td>
+          <td style="text-align:center"><span class="pass">YES</span></td>
+          <td style="text-align:center"><span class="pass">YES</span></td>
+        </tr>
+        <tr>
+          <td class="row-label">RS holds Vozu&cacute;a</td>
+          <td style="text-align:center"><span class="pass">YES</span></td>
+          <td style="text-align:center"><span class="pass">YES</span></td>
+        </tr>
+        <tr>
+          <td class="row-label">RBiH holds Biha&cacute; pocket</td>
+          <td style="text-align:center"><span class="pass">YES</span></td>
+          <td style="text-align:center"><span class="pass">YES</span></td>
+        </tr>
+        <tr>
+          <td class="row-label">RBiH holds Srebrenica enclave</td>
+          <td style="text-align:center"><span class="pass">YES</span></td>
+          <td style="text-align:center"><span class="pass">YES</span></td>
+        </tr>
+        <tr>
+          <td class="row-label">RBiH holds Gora&zcaron;de enclave</td>
+          <td style="text-align:center"><span class="pass">YES</span></td>
+          <td style="text-align:center"><span class="pass">YES</span></td>
+        </tr>
+        <tr>
+          <td class="row-label">RS holds Sarajevo suburbs (Pale, Ilid&zcaron;a)</td>
+          <td style="text-align:center"><span class="pass">YES</span></td>
+          <td style="text-align:center"><span class="pass">Partial</span> &mdash; less expansion</td>
+        </tr>
+        <tr>
+          <td class="row-label">RBiH holds Sarajevo center</td>
+          <td style="text-align:center"><span class="pass">YES</span></td>
+          <td style="text-align:center"><span class="pass">YES</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 11. Control Totals -->
+  <section>
+    <h2><span class="num">10</span> Control Totals (Initial &rarr; Final)</h2>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Faction</th>
+          <th colspan="2" style="text-align:center">Initial (Both Runs)</th>
+          <th class="pc-col" colspan="2" style="text-align:center">Final &mdash; n335</th>
+          <th class="bu-col" colspan="2" style="text-align:center">Final &mdash; n336</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label"><span class="faction-dot rs"></span>RS</td>
+          <td class="num-cell" colspan="2">279</td>
+          <td class="num-cell" colspan="2" style="font-weight:600">387 (+108)</td>
+          <td class="num-cell" colspan="2">286 (+7)</td>
+        </tr>
+        <tr>
+          <td class="row-label"><span class="faction-dot rbih"></span>RBiH</td>
+          <td class="num-cell" colspan="2">353</td>
+          <td class="num-cell" colspan="2" style="font-weight:600">273 (&minus;80)</td>
+          <td class="num-cell" colspan="2">348 (&minus;5)</td>
+        </tr>
+        <tr>
+          <td class="row-label"><span class="faction-dot hrhb"></span>HRHB</td>
+          <td class="num-cell" colspan="2">121</td>
+          <td class="num-cell" colspan="2" style="font-weight:600">93 (&minus;28)</td>
+          <td class="num-cell" colspan="2">119 (&minus;2)</td>
+        </tr>
+        <tr>
+          <td class="row-label">Painted Target (Jan 1993)</td>
+          <td class="num-cell" colspan="2" style="color:var(--text-muted)">&mdash;</td>
+          <td class="num-cell" colspan="2" style="color:var(--text-muted)">RS=416, RBiH=248, HRHB=89</td>
+          <td class="num-cell" colspan="2" style="color:var(--text-muted)">RS=416, RBiH=248, HRHB=89</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 12. Analysis -->
+  <section>
+    <h2><span class="num">11</span> Analysis</h2>
+
+    <div class="analysis-box">
+      <h3>Bottom-Up Mode Is Not Viable for the 40w Calibration Window</h3>
+      <p>The <code>bottom_up</code> recruitment mode produces a fundamentally broken scenario at the 40-week mark. The core problem is systemic:</p>
+      <ul>
+        <li><strong>Zero RBiH/HRHB brigades</strong>: The militia-to-brigade promotion pipeline never fires. Only 2,205 militia detachments are created alongside 3 army HQs and 9 corps assets, but these militia units cannot issue attack orders or meaningfully defend territory.</li>
+        <li><strong>VRS monopoly</strong>: With 77 RS brigades and 0 opposing brigades, the scenario becomes a one-sided walkover. RS barely attacks (9 orders total over 40 weeks) because it faces no organized opposition to trigger offensive behavior.</li>
+        <li><strong>9.9pp OSID match drop</strong>: Overall match falls from 87.6% to 77.7%. The Drina valley is catastrophic (&minus;27.4pp) because VRS never captures the eastern territories it historically seized &mdash; the early war Drina Sweep needs brigade-level RS formations that the OOB provides, but without opposing brigades the bot AI doesn&rsquo;t generate enough attack orders.</li>
+        <li><strong>96.6% fewer military casualties</strong>: 1,138 vs 18,658 &mdash; reflecting near-total absence of combat.</li>
+        <li><strong>96.3% less displacement</strong>: 23,897 vs 643,834 &mdash; ethnic cleansing mechanics require takeover events that barely occur.</li>
+      </ul>
+      <p style="margin-top:1rem"><strong>Conclusion:</strong> The <code>player_choice</code> mode with bot-driven 3-resource recruitment is the correct configuration for calibration. Bottom-up recruitment needs substantial work on the militia promotion pipeline before it can approach historical fidelity.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    A War Without Victory &middot; Recruitment Mode Comparison &middot; Generated 2026-03-01 &middot; Runs n335 / n336
+  </div>
+</footer>
+
+</body>
+</html>

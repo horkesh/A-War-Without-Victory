@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calibration Overhaul Plan v2 — AWWV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Crimson Pro', 'Georgia', serif;
+    --font-mono: 'Fragment Mono', 'SF Mono', Consolas, monospace;
+    --bg: #faf8f5;
+    --surface: #ffffff;
+    --surface2: #f5f0eb;
+    --surface-elevated: #fff9f4;
+    --border: rgba(0,0,0,0.07);
+    --border-bright: rgba(0,0,0,0.14);
+    --text: #1c1917;
+    --text-dim: #78716c;
+    --accent: #1e3a5f;
+    --accent-dim: rgba(30,58,95,0.06);
+    --gold: #b8860b;
+    --gold-dim: rgba(184,134,11,0.08);
+    --green: #2d6a4f;
+    --green-dim: rgba(45,106,79,0.08);
+    --red: #9b2226;
+    --red-dim: rgba(155,34,38,0.08);
+    --orange: #bc6c25;
+    --orange-dim: rgba(188,108,37,0.08);
+    --rs: #4a6fa5;
+    --rs-dim: rgba(74,111,165,0.08);
+    --rbih: #2d6a4f;
+    --rbih-dim: rgba(45,106,79,0.08);
+    --hrhb: #9b2226;
+    --hrhb-dim: rgba(155,34,38,0.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141210;
+      --surface: #1e1b18;
+      --surface2: #28241f;
+      --surface-elevated: #2e2924;
+      --border: rgba(255,255,255,0.06);
+      --border-bright: rgba(255,255,255,0.12);
+      --text: #ede8e3;
+      --text-dim: #a09890;
+      --accent: #6b9fd4;
+      --accent-dim: rgba(107,159,212,0.12);
+      --gold: #daa520;
+      --gold-dim: rgba(218,165,32,0.12);
+      --green: #52b788;
+      --green-dim: rgba(82,183,136,0.1);
+      --red: #e76f51;
+      --red-dim: rgba(231,111,81,0.1);
+      --orange: #e9c46a;
+      --orange-dim: rgba(233,196,106,0.1);
+      --rs: #8bb8e8;
+      --rs-dim: rgba(139,184,232,0.1);
+      --rbih: #52b788;
+      --rbih-dim: rgba(82,183,136,0.1);
+      --hrhb: #e76f51;
+      --hrhb-dim: rgba(231,111,81,0.1);
+    }
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 0%, var(--gold-dim) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, var(--accent-dim) 0%, transparent 40%);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 40px;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(10px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  .animate { animation: fadeUp 0.35s ease-out both; animation-delay: calc(var(--i,0)*0.04s); }
+  @media (prefers-reduced-motion: reduce) {
+    *,*::before,*::after { animation-duration:0.01ms!important; transition-duration:0.01ms!important; }
+  }
+
+  .wrap { max-width:1400px; margin:0 auto; display:grid; grid-template-columns:180px 1fr; gap:0 40px; }
+  .main { min-width:0; }
+
+  .toc { position:sticky; top:24px; align-self:start; padding:14px 0; grid-row:1/-1; max-height:calc(100dvh - 48px); overflow-y:auto; }
+  .toc::-webkit-scrollbar { width:3px; }
+  .toc::-webkit-scrollbar-thumb { background:var(--surface-elevated); border-radius:2px; }
+  .toc-title { font-family:var(--font-mono); font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--text-dim); padding:0 0 10px; margin-bottom:8px; border-bottom:1px solid var(--border); }
+  .toc a { display:block; font-family:var(--font-mono); font-size:10px; color:var(--text-dim); text-decoration:none; padding:4px 8px; border-radius:5px; border-left:2px solid transparent; transition:all 0.15s; line-height:1.4; margin-bottom:1px; }
+  .toc a:hover { color:var(--text); background:var(--surface2); }
+  .toc a.active { color:var(--text); border-left-color:var(--gold); }
+
+  @media (max-width:1000px) {
+    .wrap { grid-template-columns:1fr; padding-top:0; }
+    body { padding-top:0; }
+    .toc { position:sticky; top:0; z-index:200; max-height:none; display:flex; gap:4px; align-items:center; overflow-x:auto; -webkit-overflow-scrolling:touch; background:var(--bg); border-bottom:1px solid var(--border); padding:10px 0; margin:0 -40px; padding-left:40px; padding-right:40px; grid-row:auto; }
+    .toc::-webkit-scrollbar { display:none; }
+    .toc-title { display:none; }
+    .toc a { white-space:nowrap; flex-shrink:0; border-left:none; border-bottom:2px solid transparent; border-radius:4px 4px 0 0; padding:6px 10px; }
+    .toc a.active { border-left:none; border-bottom-color:var(--gold); background:var(--surface); }
+    .main { padding-top:20px; }
+    .sec-head { scroll-margin-top:52px; }
+  }
+
+  h1 { font-size:36px; font-weight:700; letter-spacing:-0.5px; margin-bottom:6px; color:var(--text); }
+  .subtitle { color:var(--text-dim); font-family:var(--font-mono); font-size:11px; margin-bottom:32px; }
+
+  .sec-head { font-family:var(--font-mono); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--gold); padding:24px 0 8px; margin-top:32px; border-bottom:1px solid var(--border); margin-bottom:16px; }
+  .sec-head:first-of-type { margin-top:0; }
+
+  .kpi-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:14px; margin-bottom:24px; }
+  .kpi-card { background:var(--surface-elevated); border:1px solid var(--border); border-radius:10px; padding:18px; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+  .kpi-card__value { font-family:var(--font-body); font-size:32px; font-weight:700; line-height:1.1; font-variant-numeric:tabular-nums; }
+  .kpi-card__label { font-family:var(--font-mono); font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--text-dim); margin-top:6px; }
+
+  .proposal { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px 24px; margin-bottom:16px; transition:border-color 0.15s; }
+  .proposal:hover { border-color:var(--border-bright); }
+  .proposal-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+  .proposal-id { font-family:var(--font-mono); font-size:10px; font-weight:700; background:var(--accent-dim); color:var(--accent); padding:2px 8px; border-radius:4px; }
+  .proposal-title { font-size:20px; font-weight:600; }
+  .proposal-body { font-size:15px; color:var(--text-dim); line-height:1.6; }
+  .proposal-body strong { color:var(--text); }
+  .badge { font-family:var(--font-mono); font-size:9px; font-weight:700; padding:2px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:0.5px; }
+  .badge--a { background:var(--green-dim); color:var(--green); }
+  .badge--b { background:var(--orange-dim); color:var(--orange); }
+  .badge--c { background:var(--accent-dim); color:var(--accent); }
+  .badge--new { background:var(--gold-dim); color:var(--gold); }
+  .badge--revised { background:var(--red-dim); color:var(--red); }
+  .badge--dropped { background:var(--border); color:var(--text-dim); text-decoration:line-through; }
+
+  .table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:20px; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .data-table { width:100%; border-collapse:collapse; font-size:13px; line-height:1.55; }
+  .data-table thead { position:sticky; top:0; z-index:2; }
+  .data-table th { background:var(--surface2); font-family:var(--font-mono); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); text-align:left; padding:12px 14px; border-bottom:2px solid var(--border-bright); white-space:nowrap; }
+  .data-table td { padding:12px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .data-table tbody tr:last-child td { border-bottom:none; }
+  .data-table tbody tr:nth-child(even) { background:var(--accent-dim); }
+  .data-table tbody tr { transition:background 0.15s; }
+  .data-table tbody tr:hover { background:var(--gold-dim); }
+  .data-table code { font-family:var(--font-mono); font-size:11px; background:var(--accent-dim); color:var(--accent); padding:1px 5px; border-radius:3px; }
+  .data-table small { display:block; color:var(--text-dim); font-size:11px; margin-top:3px; }
+  .data-table tfoot td { background:var(--surface2); font-weight:700; font-family:var(--font-mono); font-size:11px; border-top:2px solid var(--border-bright); border-bottom:none; }
+  .data-table .wide { min-width:200px; max-width:400px; }
+  .data-table .num { text-align:right; font-variant-numeric:tabular-nums; font-family:var(--font-mono); font-size:12px; }
+
+  details.collapsible { border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:16px; }
+  details.collapsible summary { padding:14px 20px; background:var(--surface); font-family:var(--font-mono); font-size:12px; font-weight:700; cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px; color:var(--text); transition:background 0.15s; }
+  details.collapsible summary:hover { background:var(--surface-elevated); }
+  details.collapsible summary::-webkit-details-marker { display:none; }
+  details.collapsible summary::before { content:'▸'; font-size:11px; color:var(--text-dim); transition:transform 0.15s; }
+  details.collapsible[open] summary::before { transform:rotate(90deg); }
+  details.collapsible .collapsible__body { padding:16px 20px; border-top:1px solid var(--border); font-size:14px; line-height:1.6; color:var(--text-dim); }
+  details.collapsible .collapsible__body strong { color:var(--text); }
+
+  .status { display:inline-flex; align-items:center; gap:5px; font-family:var(--font-mono); font-size:10px; font-weight:700; padding:3px 10px; border-radius:6px; white-space:nowrap; letter-spacing:0.3px; }
+  .status::before { content:''; width:6px; height:6px; border-radius:50%; background:currentColor; }
+  .status--match { background:var(--green-dim); color:var(--green); }
+  .status--gap { background:var(--red-dim); color:var(--red); }
+  .status--partial { background:var(--orange-dim); color:var(--orange); }
+
+  .fc-rs { color:var(--rs); }
+  .fc-rbih { color:var(--rbih); }
+  .fc-hrhb { color:var(--hrhb); }
+
+  .arc-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:24px; }
+  .arc-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px; position:relative; overflow:hidden; }
+  .arc-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+  .arc-card.arc-rs::before { background:var(--rs); }
+  .arc-card.arc-rbih::before { background:var(--rbih); }
+  .arc-card.arc-hrhb::before { background:var(--hrhb); }
+  .arc-card h3 { font-family:var(--font-mono); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .arc-card .arc-from { font-size:14px; margin-bottom:4px; }
+  .arc-card .arc-arrow { font-family:var(--font-mono); font-size:18px; color:var(--text-dim); text-align:center; margin:6px 0; }
+  .arc-card .arc-to { font-size:14px; }
+
+  .flow { display:flex; align-items:center; gap:0; margin:20px 0; flex-wrap:wrap; justify-content:center; }
+  .flow-step { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 16px; font-family:var(--font-mono); font-size:11px; text-align:center; min-width:0; }
+  .flow-arrow { color:var(--text-dim); font-size:18px; padding:0 6px; flex-shrink:0; }
+
+  @media (max-width:768px) {
+    body { padding:16px; }
+    h1 { font-size:26px; }
+    .arc-row { grid-template-columns:1fr; }
+    .kpi-row { grid-template-columns:repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="toc" id="toc">
+  <div class="toc-title">Overhaul v2</div>
+  <a href="#s0">Doctrine</a>
+  <a href="#s1">Diagnosis</a>
+  <a href="#s2">P1 Frontline Attrition</a>
+  <a href="#s3">P2 Civilian Kill Rate</a>
+  <a href="#s4">P3 Population Pools</a>
+  <a href="#s5">P4 Mun Brigades</a>
+  <a href="#s6">P5 Displaced Militia</a>
+  <a href="#s7">P6 Stand and Die</a>
+  <a href="#s8">P7 War Weariness</a>
+  <a href="#s9">P8 Officer Quality</a>
+  <a href="#s10">P9 Battle Lethality</a>
+  <a href="#s11">Sequencing</a>
+  <a href="#s12">Expected Outcomes</a>
+</nav>
+
+<div class="main">
+
+  <h1 class="animate" style="--i:0">Calibration Overhaul v2</h1>
+  <p class="subtitle animate" style="--i:1">AWWV &mdash; Revised 2026-03-02 &mdash; 9 proposals &mdash; n335 baseline (87.6%)</p>
+
+  <div id="s0" class="sec-head animate" style="--i:2">0 &mdash; Faction Doctrinal Arcs</div>
+
+  <div class="arc-row animate" style="--i:3">
+    <div class="arc-card arc-rs">
+      <h3 class="fc-rs">VRS (RS)</h3>
+      <div class="arc-from"><strong>Professional army.</strong> JNA officers, heavy weapons, logistics, coordinated offensive capability.</div>
+      <div class="arc-arrow">&darr;</div>
+      <div class="arc-to"><strong>Degraded rabble.</strong> Officer attrition irreplaceable. Still capable locally, unable to sustain large offensives.</div>
+    </div>
+    <div class="arc-card arc-rbih">
+      <h3 class="fc-rbih">ARBiH (RBiH)</h3>
+      <div class="arc-from"><strong>Rabble.</strong> No officers, no weapons, many unarmed. Militia + TD remnants. Defending homes.</div>
+      <div class="arc-arrow">&darr;</div>
+      <div class="arc-to"><strong>Professional army.</strong> Homegrown officers, corps-level offensives. Still under-equipped (embargo) but operationally capable.</div>
+    </div>
+    <div class="arc-card arc-hrhb">
+      <h3 class="fc-hrhb">HVO (HRHB)</h3>
+      <div class="arc-from"><strong>Capable militia.</strong> Croatian state backing, good equipment pipeline, motivated in Croat areas.</div>
+      <div class="arc-arrow">&darr;</div>
+      <div class="arc-to"><strong>Overstretched.</strong> Two-front war (1993+), manpower ceiling, reliant on HV support.</div>
+    </div>
+  </div>
+
+  <div class="proposal animate" style="--i:4">
+    <div class="proposal-body">
+      <strong>Design rule:</strong> These arcs must emerge <strong>organically</strong> from game mechanics &mdash; experience gain, officer attrition, recruitment exhaustion, war weariness &mdash; NOT from hard-coded phase switches, artificial caps, or scenario-specific tuning. We are calibrating the <em>game</em>, not scenarios. Armies must continue growing organically beyond 40w and 52w.
+    </div>
+  </div>
+
+  <div id="s1" class="sec-head animate" style="--i:5">1 &mdash; Current Diagnosis (n335)</div>
+
+  <div class="kpi-row animate" style="--i:6">
+    <div class="kpi-card">
+      <div class="kpi-card__value" style="color:var(--gold)">87.6%</div>
+      <div class="kpi-card__label">OSID Match</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card__value" style="color:var(--red)">4,537</div>
+      <div class="kpi-card__label">Military KIA (target ~23k)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card__value" style="color:var(--red)">64,420</div>
+      <div class="kpi-card__label">Civilian Killed (target ~35k)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card__value" style="color:var(--orange)">405k</div>
+      <div class="kpi-card__label">Total Military (target ~275k)</div>
+    </div>
+  </div>
+
+  <div class="table-wrap animate" style="--i:7">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>Issue</th><th>Current</th><th>Target</th><th>Root Cause</th></tr></thead>
+        <tbody>
+          <tr style="--i:8"><td>Military KIA</td><td class="num">4,537</td><td class="num">~23,200</td><td>No passive attrition. Battles only produce ~5k KIA. Fronts "asleep" between attacks.</td></tr>
+          <tr style="--i:9"><td>Civilian Killed</td><td class="num">64,420</td><td class="num">~35,000</td><td><code>DISPLACEMENT_KILLED_FRACTION = 0.10</code> too high. 10% of 644k displaced = 64k.</td></tr>
+          <tr style="--i:10"><td>VRS Personnel</td><td class="num">129,000</td><td class="num">~100,000</td><td>Pools not tied to remaining population. No exhaustion feedback loop.</td></tr>
+          <tr style="--i:11"><td>ARBiH Personnel</td><td class="num">207,000</td><td class="num">~130,000</td><td>Same. <code>pool.exhausted</code> field exists but never populated.</td></tr>
+          <tr style="--i:12"><td>HVO Personnel</td><td class="num">69,000</td><td class="num">~45,000</td><td>Same. Smallest population but <code>FACTION_POOL_SCALE = 2.10</code>.</td></tr>
+          <tr style="--i:13"><td>ARBiH Retreat</td><td>Retreats at costly_victory</td><td>Should hold ground</td><td><code>MORALE_RESIST_FLOOR = 70</code> uniform. ARBiH default morale 60 &lt; threshold.</td></tr>
+          <tr style="--i:14"><td>War Weariness</td><td>No order failure</td><td>Orders should degrade</td><td>No insubordination mechanic. Orders always 100% effective.</td></tr>
+          <tr style="--i:15"><td>Officer Quality</td><td>Not modeled</td><td>VRS high&rarr;degraded, ARBiH low&rarr;growing</td><td>No officer mechanic. No distinction well-led vs poorly-led.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="s2" class="sec-head animate" style="--i:16">2 &mdash; P1: Passive Frontline Attrition</div>
+  <div class="proposal animate" style="--i:17">
+    <div class="proposal-header">
+      <span class="proposal-id">P1</span>
+      <span class="proposal-title">Weekly Attrition for All Front-Line Units</span>
+      <span class="badge badge--a">Phase A</span>
+    </div>
+    <div class="proposal-body">
+      <strong>Problem:</strong> Fronts are never asleep. Sniping, shelling, skirmishes, exposure, disease caused steady casualties even without formal attacks. Currently ZERO passive attrition.<br><br>
+      <strong>Solution:</strong> New pipeline step <code>apply-frontline-attrition</code>. Every brigade on a front edge loses personnel per turn.<br><br>
+      <strong>Formula:</strong> <code>attrition = personnel &times; BASE_ATTRITION_RATE &times; exposureMod &times; supplyMod</code><br>
+      &bull; <code>BASE_ATTRITION_RATE = 0.005</code> (0.5%/week)<br>
+      &bull; Thin front (density &lt;0.5) = 1.5&times;, dense = 0.7&times;<br>
+      &bull; Critical supply = 2.0&times;, strained = 1.3&times;<br><br>
+      <strong>Expected:</strong> ~18,750 additional casualties over 40w. Combined with battle KIA (~7k after P9 lethality boost), approaches ~23k target.<br><br>
+      <strong>Files:</strong> New <code>src/sim/combat/frontline_attrition.ts</code>, pipeline in <code>war_phases.ts</code>.
+    </div>
+  </div>
+
+  <div id="s3" class="sec-head animate" style="--i:18">3 &mdash; P2: Reduce Civilian Kill Fraction</div>
+  <div class="proposal animate" style="--i:19">
+    <div class="proposal-header">
+      <span class="proposal-id">P2</span>
+      <span class="proposal-title">Displacement Kill Rate Calibration</span>
+      <span class="badge badge--a">Phase A</span>
+    </div>
+    <div class="proposal-body">
+      <strong>Current:</strong> <code>DISPLACEMENT_KILLED_FRACTION = 0.10</code> &rarr; 64,420 killed.<br>
+      <strong>Target:</strong> ~30,000&ndash;40,000 at w40.<br>
+      <strong>Fix:</strong> Reduce to <code>0.04</code>. High-violence municipalities (Prijedor, Zvornik, Fo&ccedil;a, Bratunac) retain higher rates via <code>coercion_pressure</code> scaling.<br>
+      <strong>Result:</strong> 644k &times; 0.04 = ~25,700 + targeted &asymp; ~35,000 total. Single constant change.
+    </div>
+  </div>
+
+  <div id="s4" class="sec-head animate" style="--i:20">4 &mdash; P3: Population-Driven Recruitment Exhaustion</div>
+  <div class="proposal animate" style="--i:21">
+    <div class="proposal-header">
+      <span class="proposal-id">P3</span>
+      <span class="proposal-title">Tie Recruitment to Remaining Population</span>
+      <span class="badge badge--a">Phase A</span>
+      <span class="badge badge--revised">Revised</span>
+    </div>
+    <div class="proposal-body">
+      <strong>Original:</strong> Hard personnel ceilings. <span class="badge badge--dropped">Dropped</span> &mdash; gamey, scenario-specific.<br><br>
+      <strong>Revised:</strong> Close the population feedback loop. <code>ongoing_mobilization.ts</code> already gates at 20%/35% exhaustion but <code>pool.exhausted</code> is <strong>never populated</strong>.<br><br>
+      <strong>Three changes:</strong><br>
+      1. <strong>Recruitment feedback:</strong> <code>reinforceBrigadesFromPools()</code> increments <code>pool.exhausted</code> on transfer<br>
+      2. <strong>Casualty feedback:</strong> KIA + captured deducted from originating municipality's eligible pop<br>
+      3. <strong>Displacement drain:</strong> Fled-abroad permanently lost from recruitment pool<br><br>
+      <strong>Effect:</strong> Each faction hits natural ceiling from demographics. VRS (smaller Serb pop, heavy early recruitment) plateaus ~100k. ARBiH (larger Bosniak pop, slower start) keeps growing past 40w. No caps needed.
+    </div>
+  </div>
+
+  <div class="flow animate" style="--i:22">
+    <div class="flow-step">1991 Census<br><small style="font-size:10px;color:var(--text-dim)">per municipality</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Eligible Pop<br><small style="font-size:10px;color:var(--text-dim)">&minus; recruited &minus; KIA &minus; fled</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Militia Pool<br><small style="font-size:10px;color:var(--text-dim)">&times; POOL_SCALE</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Formations<br><small style="font-size:10px;color:var(--text-dim)">reinforcement</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Casualties<br><small style="font-size:10px;color:var(--text-dim)">feed back</small></div>
+  </div>
+
+  <details class="collapsible animate" style="--i:23">
+    <summary>Exhaustion Gating (already implemented, just needs wiring)</summary>
+    <div class="collapsible__body">
+      <code>ongoing_mobilization.ts</code> checks <code>(pool.committed + pool.exhausted) / eligible_pop</code>:<br>
+      &bull; <strong>&ge; 20%</strong>: half mobilization rate<br>
+      &bull; <strong>&ge; 35%</strong>: no mobilization<br><br>
+      Currently never fires because <code>pool.exhausted = 0</code> always. Once populated from recruitment + casualties, natural brakes engage. No new constants.
+    </div>
+  </details>
+
+  <div id="s5" class="sec-head animate" style="--i:24">5 &mdash; P4: Municipality Generic Brigades</div>
+  <div class="proposal animate" style="--i:25">
+    <div class="proposal-header">
+      <span class="proposal-id">P4</span>
+      <span class="proposal-title">Auto-Spawn + Corps Assignment + Naming</span>
+      <span class="badge badge--b">Phase B</span>
+      <span class="badge badge--revised">Revised</span>
+    </div>
+    <div class="proposal-body">
+      <strong>Problem:</strong> Municipalities without OOB brigades have no formation. Historically every municipality raised at least one unit.<br><br>
+      <strong>1. Corps Assignment:</strong> Build <code>municipality &rarr; corps</code> mapping from OOB <code>home_mun</code> + <code>subordinate_to</code>. New brigades inherit corps. Unmapped municipalities use nearest-HQ fallback.<br><br>
+      <strong>2. ARBiH Numbering:</strong> Corps-based auto-increment:<br>
+      &bull; 1st Corps: try 110, 111, 112... (1xx range)<br>
+      &bull; 3rd Corps: try 304, 305, 306... (3xx range)<br>
+      Check all existing OOB; if taken, increment.<br><br>
+      <strong>3. VRS/HVO:</strong> Location-based names:<br>
+      &bull; VRS: "[Ordinal] [Municipality] Infantry Brigade"<br>
+      &bull; HVO: "[Municipality] Brigade"
+    </div>
+  </div>
+
+  <div class="table-wrap animate" style="--i:26">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>Corps</th><th>Numbers Used</th><th>Auto-Start</th><th>Available</th></tr></thead>
+        <tbody>
+          <tr><td class="fc-rbih">1st Corps</td><td>1,2,10,17,101-185 (sparse)</td><td>103</td><td>103,106-108,110,113-114,116-122,125-130,132-140...</td></tr>
+          <tr><td class="fc-rbih">2nd Corps</td><td>1,2,9,116,210-287 (sparse)</td><td>214</td><td>214,216,218-220,226-239,247-249,251,256-279...</td></tr>
+          <tr><td class="fc-rbih">3rd Corps</td><td>7,17,303,314,319,327-377,705-770</td><td>304</td><td>304-313,315-318,320-326,331-350,352-371...</td></tr>
+          <tr><td class="fc-rbih">4th Corps</td><td>4,441-450</td><td>451</td><td>451-499</td></tr>
+          <tr><td class="fc-rbih">5th Corps</td><td>501-517 (sparse)</td><td>504</td><td>504,507-509,512-516,518-599</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="s6" class="sec-head animate" style="--i:27">6 &mdash; P5: Enhanced Displaced &rarr; Militia</div>
+  <div class="proposal animate" style="--i:28">
+    <div class="proposal-header">
+      <span class="proposal-id">P5</span>
+      <span class="proposal-title">Two-Phase Displaced Contribution Rate</span>
+      <span class="badge badge--a">Phase A</span>
+    </div>
+    <div class="proposal-body">
+      <strong>Current:</strong> <code>REINFORCEMENT_RATE = 0.01</code> (1%/turn flat).<br>
+      <strong>Fix:</strong> Acute phase (first 8 weeks): <code>0.04</code> (4%/turn). Sustained: <code>0.01</code>.<br>
+      Increase <code>DISPLACED_CONTRIBUTION_CAP</code> 500 &rarr; 800 per mun/turn.
+    </div>
+  </div>
+
+  <div id="s7" class="sec-head animate" style="--i:29">7 &mdash; P6: ARBiH "Stand and Die"</div>
+  <div class="proposal animate" style="--i:30">
+    <div class="proposal-header">
+      <span class="proposal-id">P6</span>
+      <span class="proposal-title">Faction-Specific Retreat Resistance</span>
+      <span class="badge badge--a">Phase A</span>
+    </div>
+    <div class="proposal-body">
+      <strong>Current:</strong> <code>MORALE_RESIST_FLOOR = 70</code> uniform. ARBiH morale 60 &lt; 70, so never resists.<br>
+      <strong>Fix:</strong> ARBiH: 55 (hold ground, die defending homes). VRS: 70 (professional withdrawal). HVO: 65 (middle).<br>
+      <strong>Effect:</strong> ARBiH holds territory but takes more casualties. VRS preserves force but cedes ground. Directly produces doctrinal arcs.
+    </div>
+  </div>
+
+  <div id="s8" class="sec-head animate" style="--i:31">8 &mdash; P7: War Weariness &amp; Insubordination</div>
+  <div class="proposal animate" style="--i:32">
+    <div class="proposal-header">
+      <span class="proposal-id">P7</span>
+      <span class="proposal-title">Orders Degrade Under Exhaustion</span>
+      <span class="badge badge--b">Phase B</span>
+      <span class="badge badge--new">New</span>
+    </div>
+    <div class="proposal-body">
+      <strong>Problem:</strong> Orders always execute at 100%. Late-war VRS units routinely ignored orders.<br><br>
+      <strong>Partial execution:</strong> Brigade attacks at 70&ndash;80% power. Foot-dragging, delayed advance.<br>
+      <strong>Order refusal:</strong> (rare) Brigade does not attack. "The men refused to advance."<br><br>
+      <strong>Triggers:</strong><br>
+      &bull; <code>exhaustion &gt; 50</code> + <code>officer_quality &lt; 0.3</code> &rarr; partial execution<br>
+      &bull; <code>exhaustion &gt; 80</code> + <code>morale &lt; 40</code> &rarr; refusal<br><br>
+      <strong>Player notification required.</strong> No silent failures. "[301st Bde] executed at reduced effectiveness &mdash; war weariness" or "[Bde] refused to advance &mdash; troops exhausted."
+    </div>
+  </div>
+
+  <div id="s9" class="sec-head animate" style="--i:33">9 &mdash; P8: Officer Quality &amp; Named Generals</div>
+  <div class="proposal animate" style="--i:34">
+    <div class="proposal-header">
+      <span class="proposal-id">P8</span>
+      <span class="proposal-title">Two-Tier Command Quality</span>
+      <span class="badge badge--c">Phase C</span>
+      <span class="badge badge--new">New</span>
+    </div>
+    <div class="proposal-body">
+      <strong>Full plan:</strong> <code>docs/30_planning/OFFICER_QUALITY_AND_GENERALS_PLAN.md</code><br><br>
+      <strong>Brigade-level</strong> <code>officer_quality</code> [0.0&ndash;1.0]:<br>
+      &bull; VRS: 0.7&ndash;0.8 start, growth &times;0.7 (no replacement pipeline)<br>
+      &bull; ARBiH: 0.15&ndash;0.25 start, growth &times;1.5 (battlefield promotion)<br>
+      &bull; Combat mod: <code>1.0 + (oq &minus; 0.3) &times; 0.5</code><br><br>
+      <strong>Corps-level named generals</strong> (Command / Organization / Aggression, 1&ndash;5 each):<br>
+      &bull; 7 VRS (strong, no replacements), 7 ARBiH (weak&rarr;growing), 4 HVO<br>
+      &bull; Optional traits: siege_specialist, charismatic, guerrilla_leader, logistician, political, aggressive, methodical<br>
+      &bull; Player can reassign (2-turn transition). Bot keeps historical.
+    </div>
+  </div>
+
+  <div class="table-wrap animate" style="--i:35">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>General</th><th>Faction</th><th>Cmd</th><th>Org</th><th>Agg</th><th>Trait</th><th>Assignment</th></tr></thead>
+        <tbody>
+          <tr><td>Ratko Mladi&cacute;</td><td class="fc-rs">RS</td><td class="num">5</td><td class="num">3</td><td class="num">5</td><td><code>aggressive</code></td><td>Main Staff</td></tr>
+          <tr><td>Momir Tali&cacute;</td><td class="fc-rs">RS</td><td class="num">4</td><td class="num">5</td><td class="num">3</td><td><code>logistician</code></td><td>1st Krajina</td></tr>
+          <tr><td>Stanislav Gali&cacute;</td><td class="fc-rs">RS</td><td class="num">3</td><td class="num">4</td><td class="num">2</td><td><code>siege_specialist</code></td><td>SRK</td></tr>
+          <tr><td>Atif Dudakovi&cacute;</td><td class="fc-rbih">RBiH</td><td class="num">4</td><td class="num">3</td><td class="num">4</td><td><code>charismatic</code></td><td>5th Corps</td></tr>
+          <tr><td>Mehmed Alagi&cacute;</td><td class="fc-rbih">RBiH</td><td class="num">4</td><td class="num">2</td><td class="num">5</td><td><code>aggressive</code></td><td>3rd Corps</td></tr>
+          <tr><td>Sefer Halilovi&cacute;</td><td class="fc-rbih">RBiH</td><td class="num">2</td><td class="num">1</td><td class="num">4</td><td><code>political</code></td><td>Gen. Staff (&rarr;w50)</td></tr>
+          <tr><td>Rasim Deli&cacute;</td><td class="fc-rbih">RBiH</td><td class="num">3</td><td class="num">4</td><td class="num">2</td><td><code>methodical</code></td><td>Gen. Staff (w50&rarr;)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="s10" class="sec-head animate" style="--i:36">10 &mdash; P9: Increased Battle Lethality</div>
+  <div class="proposal animate" style="--i:37">
+    <div class="proposal-header">
+      <span class="proposal-id">P9</span>
+      <span class="proposal-title">Higher Base Casualty Rates</span>
+      <span class="badge badge--a">Phase A</span>
+    </div>
+    <div class="proposal-body">
+      <strong>Current:</strong> <code>BASE_ATTACKER = 0.03</code>, <code>BASE_DEFENDER = 0.015</code>, <code>KIA_FRACTION = 0.25</code><br>
+      <strong>Fix:</strong> <code>BASE_ATTACKER = 0.045</code>, <code>BASE_DEFENDER = 0.02</code>, <code>KIA_FRACTION = 0.30</code><br>
+      Poor medical evacuation in BiH = higher KIA:WIA ratio than modern wars. Combined with P1, total KIA approaches target.
+    </div>
+  </div>
+
+  <div id="s11" class="sec-head animate" style="--i:38">11 &mdash; Implementation Sequencing</div>
+
+  <div class="table-wrap animate" style="--i:39">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>Phase</th><th>Proposals</th><th>Nature</th><th>Risk</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge--a">Phase A</span></td>
+            <td>P1, P2, P3, P5, P6, P9</td>
+            <td>Constants + wiring existing fields. No new entities.</td>
+            <td><span class="status status--match">Low</span></td>
+          </tr>
+          <tr>
+            <td><span class="badge badge--b">Phase B</span></td>
+            <td>P4, P7</td>
+            <td>New spawn logic, corps mapping, naming. Notifications.</td>
+            <td><span class="status status--partial">Medium</span></td>
+          </tr>
+          <tr>
+            <td><span class="badge badge--c">Phase C</span></td>
+            <td>P8</td>
+            <td>New entity type, data file, combat math, scripted events, UI.</td>
+            <td><span class="status status--gap">High</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <details class="collapsible animate" style="--i:40">
+    <summary>Phase A Implementation Order</summary>
+    <div class="collapsible__body">
+      <strong>1. P2</strong> &mdash; civilian kill fraction (single constant)<br>
+      <strong>2. P9</strong> &mdash; battle lethality (two constants, sync resolver + predictor)<br>
+      <strong>3. P6</strong> &mdash; faction resist floors (small logic change)<br>
+      <strong>4. P5</strong> &mdash; displaced militia rate (acute/sustained phase)<br>
+      <strong>5. P3</strong> &mdash; population pools (wire pool.exhausted + casualty feedback)<br>
+      <strong>6. P1</strong> &mdash; passive attrition (new pipeline step, depends on P3 loop)<br><br>
+      Run <code>npm run sim:scenario:run:40w</code> after each. Compare against n335.
+    </div>
+  </details>
+
+  <div id="s12" class="sec-head animate" style="--i:41">12 &mdash; Expected Outcomes</div>
+
+  <div class="table-wrap animate" style="--i:42">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>Metric</th><th>n335 Current</th><th>After Phase A</th><th>Historical Target</th></tr></thead>
+        <tbody>
+          <tr><td>Military KIA (40w)</td><td class="num">4,537</td><td class="num">~20,000&ndash;25,000</td><td class="num">~23,200</td></tr>
+          <tr><td>Civilian Killed</td><td class="num">64,420</td><td class="num">~30,000&ndash;40,000</td><td class="num">~35,000</td></tr>
+          <tr><td>VRS Personnel</td><td class="num">129,000</td><td class="num">~95,000&ndash;105,000</td><td class="num">~100,000</td></tr>
+          <tr><td>ARBiH Personnel</td><td class="num">207,000</td><td class="num">~120,000&ndash;140,000</td><td class="num">~130,000</td></tr>
+          <tr><td>HVO Personnel</td><td class="num">69,000</td><td class="num">~40,000&ndash;50,000</td><td class="num">~45,000</td></tr>
+          <tr><td>OSID Match</td><td class="num">87.6%</td><td class="num">85&ndash;90%</td><td class="num">&ge; 85%</td></tr>
+          <tr><td>ARBiH Ground</td><td>Retreats often</td><td>Holds at cost</td><td>Held Sarajevo, enclaves, Biha&cacute;</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td colspan="2">Constraint: OSID match &ge; 85%, 6/6 benchmarks</td><td colspan="2">Personnel within 15% of historical</td></tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="proposal animate" style="--i:43">
+    <div class="proposal-body">
+      <strong>Guardrail:</strong> If OSID match drops below 85% after any change, revert and investigate. P3 (population pools) is highest-risk for OSID stability since it directly affects brigade counts. Run iteratively.
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+(function() {
+  const toc = document.getElementById('toc');
+  const links = toc.querySelectorAll('a');
+  const sections = [];
+  links.forEach(link => {
+    const id = link.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) sections.push({ id, el, link });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const match = sections.find(s => s.el === entry.target);
+        if (match) {
+          match.link.classList.add('active');
+          if (window.innerWidth <= 1000) match.link.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+        }
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+  sections.forEach(s => observer.observe(s.el));
+  links.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const id = link.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if (el) { el.scrollIntoView({ behavior:'smooth', block:'start' }); history.replaceState(null,'','#'+id); }
+    });
+  });
+})();
+</script>
+</body>
+</html>

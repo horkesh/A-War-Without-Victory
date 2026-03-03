@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>n268 Scenario Report — AWWV 40-Week Calibration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ============ THEME — Deep Blue + Gold (Editorial) ============ */
+  :root {
+    --font-display: 'Instrument Serif', 'Georgia', serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    --font-sans: system-ui, -apple-system, sans-serif;
+
+    --bg: #f8f6f1;
+    --surface: #ffffff;
+    --surface2: #f2efe8;
+    --surface-elevated: #fffdf8;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-bright: rgba(0, 0, 0, 0.16);
+    --text: #1a1a2e;
+    --text-dim: #6b6b80;
+
+    --navy: #1e3a5f;
+    --navy-dim: rgba(30, 58, 95, 0.07);
+    --gold: #d4a73a;
+    --gold-dim: rgba(212, 167, 58, 0.10);
+    --green: #2d7a4f;
+    --green-dim: rgba(45, 122, 79, 0.08);
+    --red: #b91c1c;
+    --red-dim: rgba(185, 28, 28, 0.08);
+    --amber: #b45309;
+    --amber-dim: rgba(180, 83, 9, 0.08);
+    --teal: #0e7490;
+    --teal-dim: rgba(14, 116, 144, 0.08);
+
+    --rs-color: #1e3a5f;
+    --rbih-color: #2d7a4f;
+    --hrhb-color: #b45309;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f0f1a;
+      --surface: #1a1a2e;
+      --surface2: #222240;
+      --surface-elevated: #2a2a48;
+      --border: rgba(255, 255, 255, 0.06);
+      --border-bright: rgba(255, 255, 255, 0.12);
+      --text: #e8e6e0;
+      --text-dim: #9a98a8;
+
+      --navy: #6ba3d6;
+      --navy-dim: rgba(107, 163, 214, 0.12);
+      --gold: #f0c95a;
+      --gold-dim: rgba(240, 201, 90, 0.10);
+      --green: #6dd5a0;
+      --green-dim: rgba(109, 213, 160, 0.10);
+      --red: #f87171;
+      --red-dim: rgba(248, 113, 113, 0.10);
+      --amber: #fbbf24;
+      --amber-dim: rgba(251, 191, 36, 0.10);
+      --teal: #67e8f9;
+      --teal-dim: rgba(103, 232, 249, 0.10);
+
+      --rs-color: #6ba3d6;
+      --rbih-color: #6dd5a0;
+      --hrhb-color: #fbbf24;
+    }
+  }
+
+  /* ============ RESET + BASE ============ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 0%, var(--navy-dim) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, var(--gold-dim) 0%, transparent 40%);
+    color: var(--text);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ============ ANIMATION ============ */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeScale {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate {
+    animation: fadeUp 0.4s ease-out both;
+    animation-delay: calc(var(--i, 0) * 0.05s);
+  }
+  .animate-scale {
+    animation: fadeScale 0.35s ease-out both;
+    animation-delay: calc(var(--i, 0) * 0.06s);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    background: var(--navy);
+    background-image: linear-gradient(135deg, var(--navy) 0%, #152d4a 100%);
+    color: #e8e6e0;
+    padding: 56px 40px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 60%;
+    height: 200%;
+    background: radial-gradient(ellipse, rgba(212, 167, 58, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero__inner {
+    max-width: 1060px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: 42px;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+    color: #fff;
+  }
+  .hero__sub {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 28px;
+    letter-spacing: 0.5px;
+  }
+  .hero__sub code {
+    color: var(--gold);
+    background: rgba(212, 167, 58, 0.12);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+  }
+
+  /* ============ HERO KPIs ============ */
+  .hero-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px;
+  }
+  .hero-kpi {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 18px 16px;
+    backdrop-filter: blur(4px);
+  }
+  .hero-kpi__value {
+    font-family: var(--font-display);
+    font-size: 34px;
+    font-weight: 400;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .hero-kpi__value--gold { color: var(--gold); }
+  .hero-kpi__value--green { color: #6dd5a0; }
+  .hero-kpi__value--red { color: #f87171; }
+  .hero-kpi__value--white { color: #fff; }
+  .hero-kpi__label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: rgba(255, 255, 255, 0.45);
+    margin-top: 6px;
+  }
+
+  /* ============ CONTAINER ============ */
+  .container {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 32px 40px 60px;
+  }
+
+  /* ============ SECTION ============ */
+  .section {
+    margin-bottom: 36px;
+  }
+  .section__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border-bright);
+  }
+  .section__num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gold);
+    background: var(--gold-dim);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .section__title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+
+  /* ============ TABLE WRAPPER ============ */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ============ TABLE ============ */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .data-table thead { position: sticky; top: 0; z-index: 2; }
+  .data-table th {
+    background: var(--surface2);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+    text-align: left;
+    padding: 14px 16px;
+    border-bottom: 2px solid var(--border-bright);
+    white-space: nowrap;
+  }
+  .data-table th.num { text-align: right; }
+  .data-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+  .data-table tbody tr:nth-child(even) { background: var(--navy-dim); }
+  .data-table tbody tr {
+    transition: background 0.15s ease;
+    animation: fadeUp 0.3s ease-out both;
+    animation-delay: calc(var(--i, 0) * 0.03s);
+  }
+  .data-table tbody tr:hover { background: var(--border); }
+  .data-table .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .data-table code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--navy-dim);
+    color: var(--navy);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .data-table small {
+    display: block;
+    color: var(--text-dim);
+    font-size: 11px;
+    margin-top: 2px;
+  }
+  .data-table tfoot td {
+    background: var(--surface2);
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    border-top: 2px solid var(--border-bright);
+    border-bottom: none;
+    padding: 14px 16px;
+  }
+
+  /* ============ STATUS BADGES ============ */
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+  .status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .status--pass { background: var(--green-dim); color: var(--green); }
+  .status--fail { background: var(--red-dim); color: var(--red); }
+  .status--warn { background: var(--amber-dim); color: var(--amber); }
+  .status--info { background: var(--teal-dim); color: var(--teal); }
+
+  /* Faction tags */
+  .tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .tag--rs { background: var(--navy-dim); color: var(--rs-color); }
+  .tag--rbih { background: var(--green-dim); color: var(--rbih-color); }
+  .tag--hrhb { background: var(--amber-dim); color: var(--hrhb-color); }
+
+  /* Delta indicators */
+  .delta { font-family: var(--font-mono); font-size: 11px; font-weight: 500; }
+  .delta--pos { color: var(--green); }
+  .delta--neg { color: var(--red); }
+  .delta--zero { color: var(--text-dim); }
+
+  /* ============ KPI ROW (in-body) ============ */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .kpi-card {
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+  .kpi-card__value {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-card__value--navy { color: var(--navy); }
+  .kpi-card__value--green { color: var(--green); }
+  .kpi-card__value--amber { color: var(--amber); }
+  .kpi-card__value--red { color: var(--red); }
+  .kpi-card__value--gold { color: var(--gold); }
+  .kpi-card__label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  /* ============ COLLAPSIBLE ============ */
+  details.collapsible {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  details.collapsible summary {
+    padding: 14px 20px;
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+    transition: background 0.15s ease;
+  }
+  details.collapsible summary:hover { background: var(--surface-elevated); }
+  details.collapsible summary::-webkit-details-marker { display: none; }
+  details.collapsible summary::before {
+    content: '\25B8';
+    font-size: 11px;
+    color: var(--text-dim);
+    transition: transform 0.15s ease;
+  }
+  details.collapsible[open] summary::before { transform: rotate(90deg); }
+  details.collapsible .collapsible__body {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+  details.collapsible .collapsible__body strong { color: var(--text); font-weight: 600; }
+
+  /* ============ TERRITORY BAR ============ */
+  .territory-bar {
+    display: flex;
+    height: 28px;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+  }
+  .territory-bar__segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+    transition: flex-basis 0.5s ease;
+  }
+  .territory-bar__segment--rs { background: var(--navy); }
+  .territory-bar__segment--rbih { background: var(--green); }
+  .territory-bar__segment--hrhb { background: var(--amber); }
+  .territory-bar-legend {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .territory-bar-legend__item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .territory-bar-legend__swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+
+  /* ============ NOTE ============ */
+  .note {
+    background: var(--gold-dim);
+    border-left: 3px solid var(--gold);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+  .note strong { color: var(--navy); }
+
+  /* ============ FOOTER ============ */
+  .footer {
+    text-align: center;
+    padding: 24px 0;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 768px) {
+    .hero { padding: 32px 16px 28px; }
+    .hero h1 { font-size: 28px; }
+    .container { padding: 20px 16px 40px; }
+    .data-table th, .data-table td { padding: 10px 12px; }
+    .hero-kpi-row { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== HERO ==================== -->
+<div class="hero">
+  <div class="hero__inner">
+    <h1 class="animate" style="--i:0">n268 Scenario Report</h1>
+    <p class="hero__sub animate" style="--i:1">
+      AWWV 40-week calibration &mdash; <code>apr1992_definitive_40w</code> &mdash; 2026-03-01
+    </p>
+
+    <div class="hero-kpi-row">
+      <div class="hero-kpi animate-scale" style="--i:2">
+        <div class="hero-kpi__value hero-kpi__value--gold">81.0%</div>
+        <div class="hero-kpi__label">OSID Match</div>
+      </div>
+      <div class="hero-kpi animate-scale" style="--i:3">
+        <div class="hero-kpi__value hero-kpi__value--green">6/6</div>
+        <div class="hero-kpi__label">Benchmarks</div>
+      </div>
+      <div class="hero-kpi animate-scale" style="--i:4">
+        <div class="hero-kpi__value hero-kpi__value--white">610</div>
+        <div class="hero-kpi__label">OSIDs Correct</div>
+      </div>
+      <div class="hero-kpi animate-scale" style="--i:5">
+        <div class="hero-kpi__value hero-kpi__value--red">143</div>
+        <div class="hero-kpi__label">OSIDs Wrong</div>
+      </div>
+      <div class="hero-kpi animate-scale" style="--i:6">
+        <div class="hero-kpi__value hero-kpi__value--white">10/14</div>
+        <div class="hero-kpi__label">Anchors Pass</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ==================== 1. TERRITORY CONTROL ==================== -->
+  <div class="section animate" style="--i:7">
+    <div class="section__header">
+      <span class="section__num">1</span>
+      <h2 class="section__title">Territory Control</h2>
+    </div>
+
+    <div class="territory-bar" style="animation: fadeUp 0.4s ease-out both; animation-delay: 0.4s;">
+      <div class="territory-bar__segment territory-bar__segment--rs" style="flex-basis: 58.0%;">RS 437</div>
+      <div class="territory-bar__segment territory-bar__segment--rbih" style="flex-basis: 31.2%;">RBiH 235</div>
+      <div class="territory-bar__segment territory-bar__segment--hrhb" style="flex-basis: 10.8%;">HRHB 81</div>
+    </div>
+    <div class="territory-bar-legend">
+      <div class="territory-bar-legend__item"><div class="territory-bar-legend__swatch" style="background:var(--navy)"></div> VRS (RS)</div>
+      <div class="territory-bar-legend__item"><div class="territory-bar-legend__swatch" style="background:var(--green)"></div> ARBiH (RBiH)</div>
+      <div class="territory-bar-legend__item"><div class="territory-bar-legend__swatch" style="background:var(--amber)"></div> HVO (HRHB)</div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Faction</th>
+              <th class="num">Initial</th>
+              <th class="num">Final</th>
+              <th class="num">Painted Target</th>
+              <th class="num">Delta vs Target</th>
+              <th>Assessment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="--i:0">
+              <td><span class="tag tag--rs">RS / VRS</span></td>
+              <td class="num">279</td>
+              <td class="num">437</td>
+              <td class="num">416</td>
+              <td class="num"><span class="delta delta--pos">+21</span></td>
+              <td><span class="status status--warn">Over-expanded</span></td>
+            </tr>
+            <tr style="--i:1">
+              <td><span class="tag tag--rbih">RBiH / ARBiH</span></td>
+              <td class="num">353</td>
+              <td class="num">235</td>
+              <td class="num">248</td>
+              <td class="num"><span class="delta delta--neg">&minus;13</span></td>
+              <td><span class="status status--warn">Under target</span></td>
+            </tr>
+            <tr style="--i:2">
+              <td><span class="tag tag--hrhb">HRHB / HVO</span></td>
+              <td class="num">121</td>
+              <td class="num">81</td>
+              <td class="num">89</td>
+              <td class="num"><span class="delta delta--neg">&minus;8</span></td>
+              <td><span class="status status--warn">Under target</span></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>Total</td>
+              <td class="num">753</td>
+              <td class="num">753</td>
+              <td class="num">753</td>
+              <td class="num">&mdash;</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Direction of flips:</strong> RBiH&rarr;RS: 133 &middot; HRHB&rarr;RS: 40 &middot; RS&rarr;RBiH: 15
+      &mdash; 188 settlements changed hands total. RS captured 173, lost 15.
+    </div>
+  </div>
+
+  <!-- ==================== 2. TROOP STRENGTHS ==================== -->
+  <div class="section animate" style="--i:9">
+    <div class="section__header">
+      <span class="section__num">2</span>
+      <h2 class="section__title">Troop Strengths</h2>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Army</th>
+              <th class="num">Initial Personnel</th>
+              <th class="num">Final Personnel</th>
+              <th class="num">Change</th>
+              <th class="num">Target</th>
+              <th class="num">Active Brigades</th>
+              <th class="num">Militia Committed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="--i:0">
+              <td><span class="tag tag--rs">VRS</span></td>
+              <td class="num">61,100</td>
+              <td class="num">115,133</td>
+              <td class="num"><span class="delta delta--pos">+54,033</span></td>
+              <td class="num">97&ndash;102k</td>
+              <td class="num">80</td>
+              <td class="num">80,655</td>
+            </tr>
+            <tr style="--i:1">
+              <td><span class="tag tag--rbih">ARBiH</span></td>
+              <td class="num">24,390</td>
+              <td class="num">147,239</td>
+              <td class="num"><span class="delta delta--pos">+122,849</span></td>
+              <td class="num">~130k</td>
+              <td class="num">68</td>
+              <td class="num">133,243</td>
+            </tr>
+            <tr style="--i:2">
+              <td><span class="tag tag--hrhb">HVO</span></td>
+              <td class="num">22,450</td>
+              <td class="num">51,190</td>
+              <td class="num"><span class="delta delta--pos">+28,740</span></td>
+              <td class="num">~45k</td>
+              <td class="num">27</td>
+              <td class="num">51,315</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>Total</td>
+              <td class="num">107,940</td>
+              <td class="num">313,562</td>
+              <td class="num">+205,622</td>
+              <td class="num">&mdash;</td>
+              <td class="num">175</td>
+              <td class="num">265,213</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>VRS over target by ~13k.</strong> FACTION_POOL_SCALE 0.28 may need reduction to 0.25.
+      ARBiH and HVO both above target but within acceptable range.
+    </div>
+  </div>
+
+  <!-- ==================== 3. DISPLACED PERSONS ==================== -->
+  <div class="section animate" style="--i:11">
+    <div class="section__header">
+      <span class="section__num">3</span>
+      <h2 class="section__title">Displaced Persons</h2>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card animate-scale" style="--i:12">
+        <div class="kpi-card__value kpi-card__value--red">2,231,934</div>
+        <div class="kpi-card__label">Total Displaced Out</div>
+      </div>
+      <div class="kpi-card animate-scale" style="--i:13">
+        <div class="kpi-card__value kpi-card__value--navy">61,403</div>
+        <div class="kpi-card__label">Resettled In-Country</div>
+      </div>
+      <div class="kpi-card animate-scale" style="--i:14">
+        <div class="kpi-card__value kpi-card__value--amber">2,170,531</div>
+        <div class="kpi-card__label">Net Lost Population</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Receiving Faction Territory</th>
+              <th class="num">Displaced Received</th>
+              <th class="num">Share</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="--i:0">
+              <td><span class="tag tag--rbih">RBiH</span></td>
+              <td class="num">44,611</td>
+              <td class="num">72.7%</td>
+            </tr>
+            <tr style="--i:1">
+              <td><span class="tag tag--hrhb">HRHB</span></td>
+              <td class="num">16,178</td>
+              <td class="num">26.3%</td>
+            </tr>
+            <tr style="--i:2">
+              <td><span class="tag tag--rs">RS</span></td>
+              <td class="num">614</td>
+              <td class="num">1.0%</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>Total resettled</td>
+              <td class="num">61,403</td>
+              <td class="num">100%</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Massive displacement:</strong> 2.2M displaced out of municipalities. Only 61k resettled in-country &mdash;
+      the vast majority remain unaccounted for in the current displacement model (absorbed into camps,
+      fled abroad, or not yet tracked at OSID level). 109 municipalities affected.
+    </div>
+  </div>
+
+  <!-- ==================== 4. MILITARY CASUALTIES ==================== -->
+  <div class="section animate" style="--i:15">
+    <div class="section__header">
+      <span class="section__num">4</span>
+      <h2 class="section__title">Military Casualties</h2>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card animate-scale" style="--i:16">
+        <div class="kpi-card__value kpi-card__value--red">26,157</div>
+        <div class="kpi-card__label">Total Battle Casualties</div>
+      </div>
+      <div class="kpi-card animate-scale" style="--i:17">
+        <div class="kpi-card__value kpi-card__value--navy">392</div>
+        <div class="kpi-card__label">Attack Orders</div>
+      </div>
+      <div class="kpi-card animate-scale" style="--i:18">
+        <div class="kpi-card__value kpi-card__value--amber">206</div>
+        <div class="kpi-card__label">Settlement Flips</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Army</th>
+              <th class="num">Killed</th>
+              <th class="num">Wounded</th>
+              <th class="num">MIA/Captured</th>
+              <th class="num">Total</th>
+              <th class="num">Attack Orders</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="--i:0">
+              <td><span class="tag tag--rs">VRS</span></td>
+              <td class="num">4,168</td>
+              <td class="num">10,212</td>
+              <td class="num">2,843</td>
+              <td class="num"><strong>17,223</strong></td>
+              <td class="num">331</td>
+            </tr>
+            <tr style="--i:1">
+              <td><span class="tag tag--rbih">ARBiH</span></td>
+              <td class="num">1,808</td>
+              <td class="num">4,425</td>
+              <td class="num">1,226</td>
+              <td class="num"><strong>7,459</strong></td>
+              <td class="num">61</td>
+            </tr>
+            <tr style="--i:2">
+              <td><span class="tag tag--hrhb">HVO</span></td>
+              <td class="num">106</td>
+              <td class="num">264</td>
+              <td class="num">82</td>
+              <td class="num"><strong>452</strong></td>
+              <td class="num">0</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>Total</td>
+              <td class="num">6,082</td>
+              <td class="num">14,901</td>
+              <td class="num">4,151</td>
+              <td class="num"><strong>25,134</strong></td>
+              <td class="num">392</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Attacker/Defender split:</strong> 23,439 attacker casualties vs 2,718 defender casualties.
+      132 battles with defender present; 180 free captures (no defender). VRS bore 69% of all casualties
+      as the primary aggressor with 331 of 392 orders.
+    </div>
+  </div>
+
+  <!-- ==================== 5. CIVILIAN CASUALTIES ==================== -->
+  <div class="section animate" style="--i:19">
+    <div class="section__header">
+      <span class="section__num">5</span>
+      <h2 class="section__title">Civilian Casualties</h2>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card animate-scale" style="--i:20">
+        <div class="kpi-card__value kpi-card__value--red">8,223</div>
+        <div class="kpi-card__label">Civilians Killed</div>
+      </div>
+      <div class="kpi-card animate-scale" style="--i:21">
+        <div class="kpi-card__value kpi-card__value--amber">6,527</div>
+        <div class="kpi-card__label">Fled Abroad</div>
+      </div>
+      <div class="kpi-card animate-scale" style="--i:22">
+        <div class="kpi-card__value kpi-card__value--navy">14,750</div>
+        <div class="kpi-card__label">Total Civilian Impact</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nationality</th>
+              <th class="num">Killed</th>
+              <th class="num">Fled Abroad</th>
+              <th class="num">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="--i:0">
+              <td><span class="tag tag--rbih">Bosniak (RBiH areas)</span></td>
+              <td class="num">5,642</td>
+              <td class="num">0</td>
+              <td class="num"><strong>5,642</strong></td>
+            </tr>
+            <tr style="--i:1">
+              <td><span class="tag tag--hrhb">Croat (HRHB areas)</span></td>
+              <td class="num">2,485</td>
+              <td class="num">6,266</td>
+              <td class="num"><strong>8,751</strong></td>
+            </tr>
+            <tr style="--i:2">
+              <td><span class="tag tag--rs">Serb (RS areas)</span></td>
+              <td class="num">96</td>
+              <td class="num">261</td>
+              <td class="num"><strong>357</strong></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>Total</td>
+              <td class="num">8,223</td>
+              <td class="num">6,527</td>
+              <td class="num"><strong>14,750</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 6. KEY CONTROL CHECKS ==================== -->
+  <div class="section animate" style="--i:23">
+    <div class="section__header">
+      <span class="section__num">6</span>
+      <h2 class="section__title">Key Control Checks</h2>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Location</th>
+              <th>Question</th>
+              <th>Expected</th>
+              <th>Actual</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="--i:0">
+              <td>Posavina Corridor</td>
+              <td>Does RS control the corridor?<small>Bosanski Brod, Derventa, Modrica, B. Samac</small></td>
+              <td><span class="tag tag--rs">RS</span></td>
+              <td><span class="tag tag--rs">RS (21/21)</span></td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+            <tr style="--i:1">
+              <td>Brcko</td>
+              <td>Does RS hold Brcko?<small>13 OSIDs: 7 RS, 6 RBiH</small></td>
+              <td><span class="tag tag--rs">RS majority</span></td>
+              <td><span class="tag tag--rs">RS 7 / RBiH 6</span></td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+            <tr style="--i:2">
+              <td>Brcko South (Brka)</td>
+              <td>Does ARBiH hold south of Brcko?</td>
+              <td><span class="tag tag--rbih">RBiH</span></td>
+              <td><span class="tag tag--rs">RS</span></td>
+              <td><span class="status status--fail">Fail</span></td>
+            </tr>
+            <tr style="--i:3">
+              <td>Orasje Pocket</td>
+              <td>Does HVO hold Orasje?</td>
+              <td><span class="tag tag--hrhb">HRHB</span></td>
+              <td><span class="tag tag--rs">RS (3/3)</span></td>
+              <td><span class="status status--fail">Fail</span></td>
+            </tr>
+            <tr style="--i:4">
+              <td>Vozuca</td>
+              <td>Does RS hold Vozuca pocket?</td>
+              <td><span class="tag tag--rs">RS</span></td>
+              <td><span class="tag tag--rs">RS</span></td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+            <tr style="--i:5">
+              <td>Bihac Pocket</td>
+              <td>Does RBiH hold Bihac?<small>7 OSIDs: 4 RBiH, 3 RS</small></td>
+              <td><span class="tag tag--rbih">RBiH</span></td>
+              <td><span class="tag tag--rbih">RBiH majority</span></td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+            <tr style="--i:6">
+              <td>Srebrenica Enclave</td>
+              <td>Does RBiH hold Srebrenica?<small>16 OSIDs: 13 RBiH, 3 RS</small></td>
+              <td><span class="tag tag--rbih">RBiH</span></td>
+              <td><span class="tag tag--rbih">RBiH (13/16)</span></td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+            <tr style="--i:7">
+              <td>Gorazde Enclave</td>
+              <td>Does RBiH hold Gorazde?<small>20 OSIDs: 15 RBiH, 5 RS</small></td>
+              <td><span class="tag tag--rbih">RBiH</span></td>
+              <td><span class="tag tag--rbih">RBiH (15/20)</span></td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+            <tr style="--i:8">
+              <td>Sarajevo (Government)</td>
+              <td>Does RBiH hold central Sarajevo?<small>4 mun OSIDs checked</small></td>
+              <td><span class="tag tag--rbih">RBiH</span></td>
+              <td><span class="tag tag--rbih">RBiH majority</span></td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+            <tr style="--i:9">
+              <td>Banja Luka</td>
+              <td>Does RS hold Banja Luka?</td>
+              <td><span class="tag tag--rs">RS</span></td>
+              <td><span class="tag tag--rs">RS</span></td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+            <tr style="--i:10">
+              <td>Tuzla</td>
+              <td>Does RBiH hold Tuzla?</td>
+              <td><span class="tag tag--rbih">RBiH</span></td>
+              <td><span class="tag tag--rbih">RBiH</span></td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+            <tr style="--i:11">
+              <td>Zvornik</td>
+              <td>Does RS hold Zvornik?</td>
+              <td><span class="tag tag--rs">RS</span></td>
+              <td><span class="tag tag--rbih">RBiH</span></td>
+              <td><span class="status status--fail">Fail</span></td>
+            </tr>
+            <tr style="--i:12">
+              <td>Teocak</td>
+              <td>Does RBiH hold Teocak?</td>
+              <td><span class="tag tag--rbih">RBiH</span></td>
+              <td><span class="tag tag--rs">RS</span></td>
+              <td><span class="status status--fail">Fail</span></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4">13 locations checked</td>
+              <td>9 pass &middot; 4 fail</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 7. BENCHMARKS ==================== -->
+  <div class="section animate" style="--i:25">
+    <div class="section__header">
+      <span class="section__num">7</span>
+      <h2 class="section__title">Bot Benchmarks</h2>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Faction</th>
+              <th>Benchmark</th>
+              <th class="num">Week</th>
+              <th class="num">Actual</th>
+              <th class="num">Expected</th>
+              <th class="num">Tolerance</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="--i:0">
+              <td><span class="tag tag--rs">RS</span></td>
+              <td>Early territorial expansion</td>
+              <td class="num">20</td>
+              <td class="num">0.591</td>
+              <td class="num">0.550</td>
+              <td class="num">&pm;0.08</td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+            <tr style="--i:1">
+              <td><span class="tag tag--rs">RS</span></td>
+              <td>Consolidate gains</td>
+              <td class="num">40</td>
+              <td class="num">0.580</td>
+              <td class="num">0.553</td>
+              <td class="num">&pm;0.05</td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+            <tr style="--i:2">
+              <td><span class="tag tag--rbih">RBiH</span></td>
+              <td>Hold core centers</td>
+              <td class="num">20</td>
+              <td class="num">0.301</td>
+              <td class="num">0.350</td>
+              <td class="num">&pm;0.08</td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+            <tr style="--i:3">
+              <td><span class="tag tag--rbih">RBiH</span></td>
+              <td>Preserve survival corridors</td>
+              <td class="num">40</td>
+              <td class="num">0.312</td>
+              <td class="num">0.329</td>
+              <td class="num">&pm;0.05</td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+            <tr style="--i:4">
+              <td><span class="tag tag--hrhb">HRHB</span></td>
+              <td>Secure Herzegovina core</td>
+              <td class="num">20</td>
+              <td class="num">0.108</td>
+              <td class="num">0.120</td>
+              <td class="num">&pm;0.05</td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+            <tr style="--i:5">
+              <td><span class="tag tag--hrhb">HRHB</span></td>
+              <td>Hold central Bosnia nodes</td>
+              <td class="num">40</td>
+              <td class="num">0.108</td>
+              <td class="num">0.118</td>
+              <td class="num">&pm;0.04</td>
+              <td><span class="status status--pass">Pass</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 8. REGIONAL BREAKDOWN ==================== -->
+  <details class="collapsible animate" style="--i:27">
+    <summary>Regional OSID Match Breakdown</summary>
+    <div class="collapsible__body">
+      <div class="table-wrap" style="margin-top: 12px;">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Region</th>
+                <th class="num">Match %</th>
+                <th class="num">n268 RS</th>
+                <th class="num">n268 RBiH</th>
+                <th class="num">n268 HRHB</th>
+                <th class="num">RS Delta</th>
+                <th class="num">RBiH Delta</th>
+                <th>Assessment</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="--i:0">
+                <td>Krajina</td>
+                <td class="num">96.2%</td>
+                <td class="num">113</td>
+                <td class="num">18</td>
+                <td class="num">1</td>
+                <td class="num"><span class="delta delta--pos">+1</span></td>
+                <td class="num"><span class="delta delta--neg">&minus;2</span></td>
+                <td><span class="status status--pass">Excellent</span></td>
+              </tr>
+              <tr style="--i:1">
+                <td>Herzegovina</td>
+                <td class="num">91.4%</td>
+                <td class="num">43</td>
+                <td class="num">11</td>
+                <td class="num">39</td>
+                <td class="num"><span class="delta delta--pos">+4</span></td>
+                <td class="num"><span class="delta delta--pos">+1</span></td>
+                <td><span class="status status--pass">Good</span></td>
+              </tr>
+              <tr style="--i:2">
+                <td>Central Bosnia</td>
+                <td class="num">80.1%</td>
+                <td class="num">57</td>
+                <td class="num">72</td>
+                <td class="num">37</td>
+                <td class="num"><span class="delta delta--pos">+15</span></td>
+                <td class="num"><span class="delta delta--neg">&minus;13</span></td>
+                <td><span class="status status--warn">RS overruns Bugojno</span></td>
+              </tr>
+              <tr style="--i:3">
+                <td>Central Corridor</td>
+                <td class="num">78.7%</td>
+                <td class="num">54</td>
+                <td class="num">36</td>
+                <td class="num">4</td>
+                <td class="num"><span class="delta delta--pos">+16</span></td>
+                <td class="num"><span class="delta delta--neg">&minus;16</span></td>
+                <td><span class="status status--warn">RS overruns corridor</span></td>
+              </tr>
+              <tr style="--i:4">
+                <td>Posavina / NE</td>
+                <td class="num">75.2%</td>
+                <td class="num">74</td>
+                <td class="num">35</td>
+                <td class="num">0</td>
+                <td class="num"><span class="delta delta--pos">+9</span></td>
+                <td class="num"><span class="delta delta--neg">&minus;7</span></td>
+                <td><span class="status status--warn">Orasje falls, Teocak lost</span></td>
+              </tr>
+              <tr style="--i:5">
+                <td>Drina</td>
+                <td class="num">68.8%</td>
+                <td class="num">75</td>
+                <td class="num">53</td>
+                <td class="num">0</td>
+                <td class="num"><span class="delta delta--neg">&minus;24</span></td>
+                <td class="num"><span class="delta delta--pos">+24</span></td>
+                <td><span class="status status--fail">Enclave overexpansion</span></td>
+              </tr>
+              <tr style="--i:6">
+                <td>Sarajevo</td>
+                <td class="num">67.7%</td>
+                <td class="num">21</td>
+                <td class="num">10</td>
+                <td class="num">0</td>
+                <td class="num"><span class="delta delta--zero">0</span></td>
+                <td class="num"><span class="delta delta--zero">0</span></td>
+                <td><span class="status status--info">Front-edge wobble</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== 9. KNOWN ISSUES ==================== -->
+  <details class="collapsible animate" style="--i:28">
+    <summary>Known Issues &amp; Iteration Knobs</summary>
+    <div class="collapsible__body">
+      <table class="data-table" style="width:100%; border-collapse:collapse; font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:var(--surface2); font-family:var(--font-mono); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.2px; color:var(--text-dim); text-align:left; padding:12px 16px; border-bottom:2px solid var(--border-bright);">#</th>
+            <th style="background:var(--surface2); font-family:var(--font-mono); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.2px; color:var(--text-dim); text-align:left; padding:12px 16px; border-bottom:2px solid var(--border-bright);">Issue</th>
+            <th style="background:var(--surface2); font-family:var(--font-mono); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.2px; color:var(--text-dim); text-align:left; padding:12px 16px; border-bottom:2px solid var(--border-bright);">Impact</th>
+            <th style="background:var(--surface2); font-family:var(--font-mono); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.2px; color:var(--text-dim); text-align:left; padding:12px 16px; border-bottom:2px solid var(--border-bright);">Proposed Fix</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:10px 16px; border-bottom:1px solid var(--border); font-family:var(--font-mono); font-size:12px; color:var(--gold);">1</td><td style="padding:10px 16px; border-bottom:1px solid var(--border);">Drina enclave overexpansion</td><td style="padding:10px 16px; border-bottom:1px solid var(--border);"><strong>24 OSIDs</strong></td><td style="padding:10px 16px; border-bottom:1px solid var(--border);">Enclave morale 70 &rarr; 55 (below resist floor)</td></tr>
+          <tr><td style="padding:10px 16px; border-bottom:1px solid var(--border); font-family:var(--font-mono); font-size:12px; color:var(--gold);">2</td><td style="padding:10px 16px; border-bottom:1px solid var(--border);">Central Corridor overrun</td><td style="padding:10px 16px; border-bottom:1px solid var(--border);"><strong>16 OSIDs</strong></td><td style="padding:10px 16px; border-bottom:1px solid var(--border);">RS attack share w0-20: 0.28 &rarr; 0.22</td></tr>
+          <tr><td style="padding:10px 16px; border-bottom:1px solid var(--border); font-family:var(--font-mono); font-size:12px; color:var(--gold);">3</td><td style="padding:10px 16px; border-bottom:1px solid var(--border);">VRS over target strength</td><td style="padding:10px 16px; border-bottom:1px solid var(--border);"><strong>+13k personnel</strong></td><td style="padding:10px 16px; border-bottom:1px solid var(--border);">FACTION_POOL_SCALE 0.28 &rarr; 0.25</td></tr>
+          <tr><td style="padding:10px 16px; border-bottom:1px solid var(--border); font-family:var(--font-mono); font-size:12px; color:var(--gold);">4</td><td style="padding:10px 16px; border-bottom:1px solid var(--border);">Central Bosnia / Bugojno falls</td><td style="padding:10px 16px; border-bottom:1px solid var(--border);"><strong>15 OSIDs</strong></td><td style="padding:10px 16px; border-bottom:1px solid var(--border);">4th Corps Bugojno weight 60 &rarr; 90</td></tr>
+          <tr><td style="padding:10px 16px; border-bottom:none; font-family:var(--font-mono); font-size:12px; color:var(--gold);">5</td><td style="padding:10px 16px; border-bottom:none;">Orasje pocket falls (OOB gap)</td><td style="padding:10px 16px; border-bottom:none;"><strong>3 OSIDs</strong></td><td style="padding:10px 16px; border-bottom:none;">Assign brigades to hvo_northwest_bosnia</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <div class="footer">
+    AWWV &mdash; A War Without Victory &middot; n268 &middot; State hash <code style="font-family:var(--font-mono);font-size:10px;background:var(--navy-dim);color:var(--navy);padding:1px 5px;border-radius:3px;">8c70d61f3c37f740</code> &middot; Generated 2026-03-01
+  </div>
+
+</div>
+
+</body>
+</html>

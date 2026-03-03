@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PARADOX TEAM — Run n361 Full Scenario Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Fragment+Mono:wght@400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+/* ============ THEME — Deep Blue + Gold (Editorial Military) ============ */
+:root {
+  --font-body: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Fragment Mono', 'SF Mono', Consolas, monospace;
+  --bg: #0c1220;
+  --bg-pattern: #0e1528;
+  --surface: #131b2e;
+  --surface2: #182035;
+  --surface-elevated: #1d2842;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-bright: rgba(255, 255, 255, 0.12);
+  --text: #e8edf5;
+  --text-dim: #7a8ba5;
+  --accent: #d4a73a;
+  --accent-dim: rgba(212, 167, 58, 0.12);
+  --accent2: #2d8cf0;
+  --accent2-dim: rgba(45, 140, 240, 0.10);
+  --rs: #c05050;
+  --rs-dim: rgba(192, 80, 80, 0.15);
+  --rbih: #4a9a5a;
+  --rbih-dim: rgba(74, 154, 90, 0.15);
+  --hrhb: #4a7abf;
+  --hrhb-dim: rgba(74, 122, 191, 0.15);
+  --pass: #4ade80;
+  --pass-dim: rgba(74, 222, 128, 0.10);
+  --fail: #f87171;
+  --fail-dim: rgba(248, 113, 113, 0.10);
+  --warn: #fbbf24;
+  --warn-dim: rgba(251, 191, 36, 0.10);
+  --up: #4ade80;
+  --down: #f87171;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f5f0e8;
+    --bg-pattern: #f0ebe3;
+    --surface: #ffffff;
+    --surface2: #faf7f2;
+    --surface-elevated: #fff9f0;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-bright: rgba(0, 0, 0, 0.15);
+    --text: #1a1a2e;
+    --text-dim: #6b7280;
+    --accent: #b8860b;
+    --accent-dim: rgba(184, 134, 11, 0.08);
+    --accent2: #1e5faa;
+    --accent2-dim: rgba(30, 95, 170, 0.08);
+    --rs: #b91c1c;
+    --rs-dim: rgba(185, 28, 28, 0.08);
+    --rbih: #15803d;
+    --rbih-dim: rgba(21, 128, 61, 0.08);
+    --hrhb: #1d4ed8;
+    --hrhb-dim: rgba(29, 78, 216, 0.08);
+    --pass: #16a34a;
+    --pass-dim: rgba(22, 163, 74, 0.08);
+    --fail: #dc2626;
+    --fail-dim: rgba(220, 38, 38, 0.08);
+    --warn: #d97706;
+    --warn-dim: rgba(217, 119, 6, 0.08);
+    --up: #16a34a;
+    --down: #dc2626;
+  }
+}
+
+/* ============ RESET ============ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 20% 0%, var(--accent-dim) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, var(--accent2-dim) 0%, transparent 40%);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ============ LAYOUT ============ */
+.wrap {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 0 40px;
+}
+.main { min-width: 0; padding: 32px 24px 80px; }
+
+/* ============ TOC ============ */
+.toc {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+  padding: 14px 0;
+  grid-row: 1 / -1;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+}
+.toc::-webkit-scrollbar { width: 3px; }
+.toc::-webkit-scrollbar-thumb { background: var(--surface-elevated); border-radius: 2px; }
+.toc-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  padding: 0 0 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.toc a {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-decoration: none;
+  padding: 5px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  line-height: 1.3;
+}
+.toc a:hover, .toc a.active {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+@media (max-width: 900px) {
+  .wrap { grid-template-columns: 1fr; }
+  .toc {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; gap: 4px; padding: 8px 12px;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    overflow-x: auto; white-space: nowrap;
+    max-height: unset; grid-row: auto;
+  }
+  .toc-title { display: none; }
+  .toc a { flex-shrink: 0; padding: 4px 10px; font-size: 10px; }
+}
+
+/* ============ HEADER ============ */
+.report-header {
+  margin-bottom: 40px;
+  padding-bottom: 32px;
+  border-bottom: 2px solid var(--accent);
+}
+.report-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.report-header h1 {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+.report-header h1 span { color: var(--accent); }
+.report-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.report-meta b { color: var(--text); }
+
+/* ============ SECTION HEADS ============ */
+.sec-head {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 24px 0 12px;
+  margin-top: 40px;
+  border-top: 1px solid var(--border);
+  scroll-margin-top: 80px;
+}
+.sec-head .num {
+  display: inline-block;
+  width: 24px; height: 24px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-size: 11px;
+  margin-right: 8px;
+}
+
+/* ============ KPI CARDS ============ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeUp 0.5s ease both;
+}
+.kpi::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.kpi--gold::before { background: var(--accent); }
+.kpi--rs::before { background: var(--rs); }
+.kpi--rbih::before { background: var(--rbih); }
+.kpi--hrhb::before { background: var(--hrhb); }
+.kpi--pass::before { background: var(--pass); }
+.kpi--fail::before { background: var(--fail); }
+.kpi--warn::before { background: var(--warn); }
+.kpi-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.kpi-value.gold { color: var(--accent); }
+.kpi-value.rs { color: var(--rs); }
+.kpi-value.rbih { color: var(--rbih); }
+.kpi-value.hrhb { color: var(--hrhb); }
+.kpi-value.pass { color: var(--pass); }
+.kpi-value.fail { color: var(--fail); }
+.kpi-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+.delta-up { color: var(--up); }
+.delta-down { color: var(--down); }
+
+/* ============ CHART CONTAINER ============ */
+.chart-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 16px 0 24px;
+}
+.chart-wrap canvas {
+  width: 100% !important;
+  max-height: 320px;
+}
+
+/* ============ TABLES ============ */
+.table-wrap {
+  overflow-x: auto;
+  margin: 16px 0 24px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface-elevated);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-bright);
+  white-space: nowrap;
+}
+tbody td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+tbody tr:nth-child(even) td { background: var(--surface2); }
+tbody tr:hover td { background: var(--accent-dim); }
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.badge--pass { background: var(--pass-dim); color: var(--pass); }
+.badge--fail { background: var(--fail-dim); color: var(--fail); }
+.badge--warn { background: var(--warn-dim); color: var(--warn); }
+.badge--rs { background: var(--rs-dim); color: var(--rs); }
+.badge--rbih { background: var(--rbih-dim); color: var(--rbih); }
+.badge--hrhb { background: var(--hrhb-dim); color: var(--hrhb); }
+.badge--neutral { background: var(--accent2-dim); color: var(--accent2); }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--surface-elevated);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* ============ ROLE CARDS ============ */
+.role-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin: 12px 0;
+  border-left: 3px solid var(--accent);
+  animation: fadeUp 0.4s ease both;
+}
+.role-card h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.role-card h3 .role-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: var(--accent-dim);
+  color: var(--accent);
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+.role-card .finding { margin: 10px 0 4px; }
+.role-card .finding b {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.finding--works b { color: var(--pass); }
+.finding--issues b { color: var(--fail); }
+.finding--needs b { color: var(--warn); }
+.role-card ul {
+  margin: 4px 0 0 18px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.7;
+}
+.role-card li { margin-bottom: 2px; }
+
+/* ============ RECOMMENDATION CARDS ============ */
+.rec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.rec-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  border-top: 3px solid var(--fail);
+}
+.rec-card.priority-high { border-top-color: var(--fail); }
+.rec-card.priority-med { border-top-color: var(--warn); }
+.rec-card.priority-low { border-top-color: var(--accent2); }
+.rec-card h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rec-card .pri-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.pri-badge.p1 { background: var(--fail-dim); color: var(--fail); }
+.pri-badge.p2 { background: var(--warn-dim); color: var(--warn); }
+.pri-badge.p3 { background: var(--accent2-dim); color: var(--accent2); }
+.rec-card p { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+
+/* ============ EXEC SUMMARY ============ */
+.exec-summary {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-bright);
+  border-left: 4px solid var(--accent);
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin: 16px 0 28px;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.exec-summary strong { color: var(--accent); }
+
+/* ============ DETAILS ============ */
+details {
+  margin: 12px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+details summary {
+  padding: 10px 16px;
+  background: var(--surface);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  user-select: none;
+}
+details summary:hover { color: var(--accent); background: var(--surface-elevated); }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .detail-body { padding: 16px; background: var(--surface); }
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* ============ UTILITIES ============ */
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.text-dim { color: var(--text-dim); }
+.text-sm { font-size: 12px; }
+.mono { font-family: var(--font-mono); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ====== TOC ====== -->
+<nav class="toc" id="toc">
+  <div class="toc-title">Report</div>
+  <a href="#s1">1. Executive Summary</a>
+  <a href="#s2">2. Key Metrics</a>
+  <a href="#s3">3. Territory Control</a>
+  <a href="#s4">4. Anchor Checks</a>
+  <a href="#s5">5. Regional Breakdown</a>
+  <a href="#s6">6. Military Casualties</a>
+  <a href="#s7">7. Civilian &amp; Displacement</a>
+  <a href="#s8">8. Troop Strengths</a>
+  <a href="#s9">9. Combat Activity</a>
+  <a href="#s10">10. Paradox Team Review</a>
+  <a href="#s11">11. Recommendations</a>
+</nav>
+
+<!-- ====== MAIN ====== -->
+<div class="main">
+
+<header class="report-header">
+  <div class="report-tag">Paradox Team Convene &mdash; Full Run Analysis</div>
+  <h1>Run <span>n361</span> &mdash; 40-Week Scenario Report</h1>
+  <div class="report-meta">
+    <span><b>Scenario:</b> apr1992_definitive_40w</span>
+    <span><b>Run ID:</b> 205b3676c8fe3ce4</span>
+    <span><b>Date:</b> 2026-03-02</span>
+    <span><b>State Hash:</b> 54ee099b</span>
+  </div>
+</header>
+
+<!-- ====== 1. EXECUTIVE SUMMARY ====== -->
+<div id="s1" class="sec-head"><span class="num">1</span> Executive Summary</div>
+
+<div class="exec-summary">
+  Run n361 achieves <strong>86.6% OSID match</strong> (652/753) — virtually identical to n359 (86.7%).
+  <strong>Anchors improved to 12/14</strong> (from 10/14 at n359), gaining Vitinica, Teočak-Krstac, and Brka
+  — but <strong>Bihać fell to RS</strong>, a critical regression. The 5th Corps pocket must never collapse.
+  All 6 bot benchmarks pass. RS controls 415 OSIDs (painted: 416, near-perfect), but the
+  <strong>Drina Valley regressed -8.6pp</strong> to 74.2% with RBiH enclaves retaining too much territory.
+  A late-war RS push (weeks 30-40) gains 25 OSIDs when fronts should be frozen —
+  this captures Bihać ahistorically while failing to consolidate the Drina.
+  <strong>Priority:</strong> Protect Bihać pocket; address Drina Valley RBiH over-retention;
+  implement winter slowdown mechanic.
+</div>
+
+<!-- ====== 2. KEY METRICS ====== -->
+<div id="s2" class="sec-head"><span class="num">2</span> Key Metrics Dashboard</div>
+
+<div class="kpi-grid">
+  <div class="kpi kpi--gold" style="animation-delay:0.05s">
+    <div class="kpi-label">OSID Match Rate</div>
+    <div class="kpi-value gold">86.6%</div>
+    <div class="kpi-sub">652 / 753 &nbsp; <span class="delta-down">&darr; 0.1pp vs n359</span></div>
+  </div>
+  <div class="kpi kpi--pass" style="animation-delay:0.1s">
+    <div class="kpi-label">Anchor Checks</div>
+    <div class="kpi-value pass">12 / 14</div>
+    <div class="kpi-sub"><span class="delta-up">&uarr; +2 vs n359</span> (was 10/14)</div>
+  </div>
+  <div class="kpi kpi--pass" style="animation-delay:0.15s">
+    <div class="kpi-label">Bot Benchmarks</div>
+    <div class="kpi-value pass">6 / 6</div>
+    <div class="kpi-sub">All within tolerance</div>
+  </div>
+  <div class="kpi kpi--fail" style="animation-delay:0.2s">
+    <div class="kpi-label">Critical Failures</div>
+    <div class="kpi-value fail">2</div>
+    <div class="kpi-sub">Biha&cacute; fell &bull; Zvornik still RBiH</div>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi kpi--rs" style="animation-delay:0.25s">
+    <div class="kpi-label">RS Control (Final)</div>
+    <div class="kpi-value rs">415</div>
+    <div class="kpi-sub">Painted: 416 &nbsp; &Delta;=-1</div>
+  </div>
+  <div class="kpi kpi--rbih" style="animation-delay:0.3s">
+    <div class="kpi-label">RBiH Control (Final)</div>
+    <div class="kpi-value rbih">255</div>
+    <div class="kpi-sub">Painted: 248 &nbsp; &Delta;=+7</div>
+  </div>
+  <div class="kpi kpi--hrhb" style="animation-delay:0.35s">
+    <div class="kpi-label">HRHB Control (Final)</div>
+    <div class="kpi-value hrhb">83</div>
+    <div class="kpi-sub">Painted: 89 &nbsp; &Delta;=-6</div>
+  </div>
+  <div class="kpi kpi--gold" style="animation-delay:0.4s">
+    <div class="kpi-label">Total Flips</div>
+    <div class="kpi-value gold">166</div>
+    <div class="kpi-sub">151 &rarr; RS &bull; 15 &rarr; others</div>
+  </div>
+</div>
+
+<!-- ====== 3. TERRITORY CONTROL CHART ====== -->
+<div id="s3" class="sec-head"><span class="num">3</span> Territory Control Progression</div>
+
+<div class="chart-wrap">
+  <canvas id="controlChart"></canvas>
+</div>
+
+<div class="chart-wrap">
+  <canvas id="weeklyOrdersChart"></canvas>
+</div>
+
+<!-- ====== 4. ANCHOR CHECKS ====== -->
+<div id="s4" class="sec-head"><span class="num">4</span> Anchor Checks</div>
+
+<div class="table-wrap">
+<table>
+<thead>
+  <tr><th>Anchor</th><th>Type</th><th>Expected</th><th>Actual</th><th>Result</th><th>vs n359</th></tr>
+</thead>
+<tbody>
+  <tr><td><code>zvornik</code></td><td>Municipality</td><td><span class="badge badge--rs">RS</span></td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--fail">FAIL</span></td><td><span class="text-dim">Same</span></td></tr>
+  <tr><td><code>bijeljina</code></td><td>Municipality</td><td><span class="badge badge--rs">RS</span></td><td><span class="badge badge--rs">RS</span></td><td><span class="badge badge--pass">PASS</span></td><td><span class="text-dim">Same</span></td></tr>
+  <tr><td><code>srebrenica</code></td><td>Municipality</td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--pass">PASS</span></td><td><span class="text-dim">Same</span></td></tr>
+  <tr style="background: var(--fail-dim)"><td><code>bihac</code></td><td>Municipality</td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--rs">RS</span></td><td><span class="badge badge--fail">FAIL</span></td><td><span class="delta-down">REGRESSION</span></td></tr>
+  <tr><td><code>banja_luka</code></td><td>Municipality</td><td><span class="badge badge--rs">RS</span></td><td><span class="badge badge--rs">RS</span></td><td><span class="badge badge--pass">PASS</span></td><td><span class="text-dim">Same</span></td></tr>
+  <tr><td><code>tuzla</code></td><td>Municipality</td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--pass">PASS</span></td><td><span class="text-dim">Same</span></td></tr>
+  <tr><td><code>centar_sarajevo</code></td><td>Municipality</td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--pass">PASS</span></td><td><span class="text-dim">Same</span></td></tr>
+  <tr><td><code>op:zvornik:vitinica_2</code></td><td>OSID</td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--pass">PASS</span></td><td><span class="delta-up">NEW PASS</span></td></tr>
+  <tr><td><code>op:ugljevik:teocak_krstac_2</code></td><td>OSID</td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--pass">PASS</span></td><td><span class="delta-up">NEW PASS</span></td></tr>
+  <tr><td><code>op:orasje:orasje</code></td><td>OSID</td><td><span class="badge badge--hrhb">HRHB</span></td><td><span class="badge badge--hrhb">HRHB</span></td><td><span class="badge badge--pass">PASS</span></td><td><span class="text-dim">Same</span></td></tr>
+  <tr><td><code>op:brcko:brka_2</code></td><td>OSID</td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--pass">PASS</span></td><td><span class="delta-up">NEW PASS</span></td></tr>
+  <tr><td><code>op:gorazde:gorazde_2</code></td><td>OSID</td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--pass">PASS</span></td><td><span class="text-dim">Same</span></td></tr>
+  <tr><td><code>op:srebrenica:srebrenica_2</code></td><td>OSID</td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--pass">PASS</span></td><td><span class="text-dim">Same</span></td></tr>
+  <tr><td><code>op:zavidovici:vozuca_2</code></td><td>OSID</td><td><span class="badge badge--rs">RS</span></td><td><span class="badge badge--rs">RS</span></td><td><span class="badge badge--pass">PASS</span></td><td><span class="text-dim">Same</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ====== 5. REGIONAL BREAKDOWN ====== -->
+<div id="s5" class="sec-head"><span class="num">5</span> Regional Breakdown</div>
+
+<div class="table-wrap">
+<table>
+<thead>
+  <tr><th>Region</th><th>Match</th><th>Total</th><th>Rate</th><th>n359</th><th>&Delta;</th><th>RS (sim/paint)</th><th>RBiH (sim/paint)</th><th>HRHB (sim/paint)</th></tr>
+</thead>
+<tbody>
+  <tr><td><b>Krajina</b></td><td>127</td><td>132</td><td><b>96.2%</b></td><td>93.9%</td><td class="delta-up">+2.3pp</td><td>115/112</td><td>17/20</td><td>0/0</td></tr>
+  <tr><td><b>Central Corridor</b></td><td>86</td><td>94</td><td><b>91.5%</b></td><td>89.4%</td><td class="delta-up">+2.1pp</td><td>44/38</td><td>46/52</td><td>4/4</td></tr>
+  <tr><td><b>Herzegovina</b></td><td>85</td><td>93</td><td><b>91.4%</b></td><td>92.5%</td><td class="delta-down">-1.1pp</td><td>47/39</td><td>10/10</td><td>36/44</td></tr>
+  <tr><td><b>Sarajevo</b></td><td>28</td><td>31</td><td><b>90.3%</b></td><td>83.9%</td><td class="delta-up">+6.4pp</td><td>24/21</td><td>7/10</td><td>0/0</td></tr>
+  <tr><td><b>Central Bosnia</b></td><td>144</td><td>166</td><td><b>86.7%</b></td><td>83.7%</td><td class="delta-up">+3.0pp</td><td>44/42</td><td>81/85</td><td>41/39</td></tr>
+  <tr><td><b>Posavina NE</b></td><td>87</td><td>109</td><td><b>79.8%</b></td><td>80.7%</td><td class="delta-down">-0.9pp</td><td>51/65</td><td>56/42</td><td>2/2</td></tr>
+  <tr style="background: var(--fail-dim)"><td><b>Drina</b></td><td>95</td><td>128</td><td><b>74.2%</b></td><td>82.8%</td><td class="delta-down"><b>-8.6pp</b></td><td>90/99</td><td>38/29</td><td>0/0</td></tr>
+</tbody>
+</table>
+</div>
+
+<details>
+  <summary>Drina Mismatch Analysis (33 mismatched OSIDs)</summary>
+  <div class="detail-body">
+    <p class="text-sm text-dim" style="margin-bottom:12px">The Drina Valley is the worst-performing region. RBiH holds 38 OSIDs vs painted 29 (+9 excess). RS holds 90 vs painted 99 (-9 deficit). The core issue: VRS Drina Corps and East Bosnian Corps are not consolidating the Drina Valley while RBiH enclaves (Srebrenica, Goražde) retain far more territory than historically accurate.</p>
+    <div class="table-wrap">
+    <table>
+    <thead><tr><th>OSID</th><th>Painted</th><th>Sim</th><th>Issue</th></tr></thead>
+    <tbody>
+      <tr><td><code>bratunac (3 OSIDs)</code></td><td><span class="badge badge--rs">RS</span></td><td><span class="badge badge--rbih">RBiH</span></td><td>Srebrenica enclave too large</td></tr>
+      <tr><td><code>srebrenica (6 OSIDs)</code></td><td><span class="badge badge--rs">RS</span></td><td><span class="badge badge--rbih">RBiH</span></td><td>Srebrenica enclave over-extended</td></tr>
+      <tr><td><code>visegrad (7 OSIDs)</code></td><td><span class="badge badge--rs">RS</span></td><td><span class="badge badge--rbih">RBiH</span></td><td>Višegrad should be fully RS-controlled</td></tr>
+      <tr><td><code>gorazde (8 OSIDs)</code></td><td>Mixed</td><td>Mixed</td><td>Goražde perimeter contested — 5 excess RBiH, 3 excess RS</td></tr>
+      <tr><td><code>vlasenica (3 OSIDs)</code></td><td><span class="badge badge--rbih">RBiH</span></td><td><span class="badge badge--rs">RS</span></td><td>Over-captured by VRS</td></tr>
+    </tbody>
+    </table>
+    </div>
+  </div>
+</details>
+
+<!-- ====== 6. MILITARY CASUALTIES ====== -->
+<div id="s6" class="sec-head"><span class="num">6</span> Military Casualties</div>
+
+<div class="kpi-grid">
+  <div class="kpi kpi--gold" style="animation-delay:0.05s">
+    <div class="kpi-label">Total Military Casualties</div>
+    <div class="kpi-value gold">71,831</div>
+    <div class="kpi-sub">KIA: 18,006 &bull; WIA: 35,682 &bull; MIA: 18,143</div>
+  </div>
+  <div class="kpi kpi--rs" style="animation-delay:0.1s">
+    <div class="kpi-label">VRS (RS)</div>
+    <div class="kpi-value rs">33,970</div>
+    <div class="kpi-sub">KIA 8,787 &bull; WIA 17,108 &bull; MIA 8,075</div>
+  </div>
+  <div class="kpi kpi--rbih" style="animation-delay:0.15s">
+    <div class="kpi-label">ARBiH (RBiH)</div>
+    <div class="kpi-value rbih">27,209</div>
+    <div class="kpi-sub">KIA 6,521 &bull; WIA 13,327 &bull; MIA 7,361</div>
+  </div>
+  <div class="kpi kpi--hrhb" style="animation-delay:0.2s">
+    <div class="kpi-label">HVO (HRHB)</div>
+    <div class="kpi-value hrhb">10,652</div>
+    <div class="kpi-sub">KIA 2,698 &bull; WIA 5,247 &bull; MIA 2,707</div>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead>
+  <tr><th>Metric</th><th>VRS (RS)</th><th>ARBiH (RBiH)</th><th>HVO (HRHB)</th><th>Total</th><th>Assessment</th></tr>
+</thead>
+<tbody>
+  <tr><td>KIA (40w)</td><td>8,787</td><td>6,521</td><td>2,698</td><td>18,006</td><td><span class="badge badge--warn">HIGH</span></td></tr>
+  <tr><td>KIA (full war historical)</td><td>~24,000</td><td>~30,000</td><td>~8,000</td><td>~62,000</td><td><span class="badge badge--neutral">REF</span></td></tr>
+  <tr><td>Year-1 proportion</td><td>36.6%</td><td>21.7%</td><td>33.7%</td><td>29.0%</td><td><span class="badge badge--warn">RS HIGH</span></td></tr>
+  <tr><td>Attack orders</td><td>192</td><td>24</td><td>3</td><td>219</td><td>RS dominates offensives</td></tr>
+  <tr><td>Attacker casualties</td><td colspan="3" style="text-align:center">12,107</td><td>&mdash;</td><td>87% of combat losses</td></tr>
+  <tr><td>Defender casualties</td><td colspan="3" style="text-align:center">1,838</td><td>&mdash;</td><td>13% of combat losses</td></tr>
+</tbody>
+</table>
+</div>
+
+<details>
+  <summary>Casualty Assessment Notes</summary>
+  <div class="detail-body text-sm">
+    <p><b>RS KIA concern:</b> VRS at 8,787 KIA in 40 weeks already reaches 36.6% of the full-war historical 24,000. This is elevated because RS issued 192 of 219 attack orders — attackers always take heavier casualties. However, VRS's firepower superiority (30T/20A heavy weapons) should offset attacker penalty more than it currently does.</p>
+    <p class="mt-2"><b>Attacker/Defender ratio:</b> 12,107:1,838 (6.6:1) is extremely skewed toward attacker losses. This is because 175 of 192 battles had no defender present (free captures of unoccupied territory). The 17 contested battles generated the bulk of real casualties.</p>
+    <p class="mt-2"><b>RBiH at 21.7% of full-war:</b> Proportionally correct for year 1 — ARBiH losses escalated in 1993-95 offensive operations.</p>
+  </div>
+</details>
+
+<!-- ====== 7. CIVILIAN & DISPLACEMENT ====== -->
+<div id="s7" class="sec-head"><span class="num">7</span> Civilian Casualties &amp; Displacement</div>
+
+<div class="kpi-grid">
+  <div class="kpi kpi--gold" style="animation-delay:0.05s">
+    <div class="kpi-label">Total Displaced</div>
+    <div class="kpi-value gold">615,693</div>
+    <div class="kpi-sub">Across 58 settlements / 81 camps</div>
+  </div>
+  <div class="kpi kpi--fail" style="animation-delay:0.1s">
+    <div class="kpi-label">Civilians Killed</div>
+    <div class="kpi-value fail">27,244</div>
+    <div class="kpi-sub">RBiH 19,361 &bull; HRHB 6,291 &bull; RS 1,592</div>
+  </div>
+  <div class="kpi kpi--warn" style="animation-delay:0.15s">
+    <div class="kpi-label">Fled Abroad</div>
+    <div class="kpi-value" style="color:var(--warn)">83,490</div>
+    <div class="kpi-sub">HRHB 71,968 &bull; RS 11,522 &bull; RBiH 0</div>
+  </div>
+  <div class="kpi kpi--gold" style="animation-delay:0.2s">
+    <div class="kpi-label">Camps Created</div>
+    <div class="kpi-value gold">81</div>
+    <div class="kpi-sub">78 routed &bull; 162 timers matured</div>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Nationality</th><th>Civilians Killed</th><th>Fled Abroad</th><th>Assessment</th></tr></thead>
+<tbody>
+  <tr><td><span class="badge badge--rbih">Bosniak (RBiH)</span></td><td>19,361</td><td>0</td><td><span class="badge badge--fail">ANOMALY</span> — 0 fled abroad unrealistic</td></tr>
+  <tr><td><span class="badge badge--hrhb">Croat (HRHB)</span></td><td>6,291</td><td>71,968</td><td><span class="badge badge--warn">HIGH</span> — Posavina corridor collapse</td></tr>
+  <tr><td><span class="badge badge--rs">Serb (RS)</span></td><td>1,592</td><td>11,522</td><td><span class="badge badge--pass">PLAUSIBLE</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<details>
+  <summary>Displacement System Notes</summary>
+  <div class="detail-body text-sm">
+    <p><b>RBiH 0 fled abroad:</b> This is a significant anomaly. In reality, Bosniak civilians were the largest refugee group. The displacement routing system may not have valid abroad routes for Bosniak populations, or the routing tables need revision. This requires investigation in <code>displacement_routing_data.ts</code>.</p>
+    <p class="mt-2"><b>HRHB fled abroad 71,968:</b> Elevated due to Posavina corridor collapse — Croat civilians fleeing to Croatia proper. Directionally correct but magnitude may be high.</p>
+  </div>
+</details>
+
+<!-- ====== 8. TROOP STRENGTHS ====== -->
+<div id="s8" class="sec-head"><span class="num">8</span> Troop Strengths &amp; Formation Delta</div>
+
+<div class="table-wrap">
+<table>
+<thead>
+  <tr><th>Faction</th><th>Personnel (Init)</th><th>Personnel (Final)</th><th>&Delta;</th><th>Brigades (Init)</th><th>Brigades (Final)</th><th>Spawned</th></tr>
+</thead>
+<tbody>
+  <tr><td><span class="badge badge--rbih">ARBiH</span></td><td>23,350</td><td>123,531</td><td class="delta-up">+100,181</td><td>34</td><td>116</td><td>+82</td></tr>
+  <tr><td><span class="badge badge--rs">VRS</span></td><td>57,100</td><td>101,610</td><td class="delta-up">+44,510</td><td>55</td><td>77</td><td>+22</td></tr>
+  <tr><td><span class="badge badge--hrhb">HVO</span></td><td>20,850</td><td>42,840</td><td class="delta-up">+21,990</td><td>24</td><td>31</td><td>+7</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead>
+  <tr><th>Faction</th><th>Militia Available</th><th>Militia Committed</th><th>Militia Exhausted</th><th>Pool Health</th></tr>
+</thead>
+<tbody>
+  <tr><td><span class="badge badge--rbih">ARBiH</span></td><td>124,485</td><td>119,635</td><td>0</td><td><span class="badge badge--pass">HEALTHY</span></td></tr>
+  <tr><td><span class="badge badge--rs">VRS</span></td><td>9,766</td><td>84,975</td><td>0</td><td><span class="badge badge--fail">DEPLETED</span></td></tr>
+  <tr><td><span class="badge badge--hrhb">HVO</span></td><td>76,694</td><td>55,845</td><td>0</td><td><span class="badge badge--pass">HEALTHY</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<details>
+  <summary>Formation Delta Details (111 spawned, 0 removed)</summary>
+  <div class="detail-body text-sm">
+    <p><b>ARBiH:</b> 82 brigades spawned via elective recruitment — massive mobilization from 34 to 116 brigades. Includes Guards Brigade, eastern enclaves (280th-284th East Bosnian Light), Cerska/Kamenica enclave units.</p>
+    <p class="mt-2"><b>VRS:</b> 22 brigades spawned. Key additions: 1st Guards Motorized, 65th Protection Regiment, 2nd Armored, Romanija infantry. RS militia pool nearly depleted (9,766 available vs 84,975 committed).</p>
+    <p class="mt-2"><b>HVO:</b> 7 brigades spawned. Includes 101st-106th Posavina brigades and Ante Starčević Brigade. Modest growth — manpower-limited.</p>
+    <p class="mt-2"><b>Final formation count:</b> 224 brigades, 14 corps assets, 2 army HQs = 240 total.</p>
+  </div>
+</details>
+
+<!-- ====== 9. COMBAT ACTIVITY ====== -->
+<div id="s9" class="sec-head"><span class="num">9</span> Combat Activity Analysis</div>
+
+<div class="table-wrap">
+<table>
+<thead>
+  <tr><th>Metric</th><th>Value</th><th>Assessment</th></tr>
+</thead>
+<tbody>
+  <tr><td>Total attack orders</td><td>219</td><td>RS: 192 (87.7%) &bull; RBiH: 24 (11.0%) &bull; HRHB: 3 (1.4%)</td></tr>
+  <tr><td>Unique targets</td><td>192</td><td>Broad offensive front</td></tr>
+  <tr><td>Settlement flips</td><td>178</td><td>81% of orders resulted in flips</td></tr>
+  <tr><td>Defended battles</td><td>17</td><td><span class="badge badge--warn">LOW</span> — only 8.7% of attacks met defenders</td></tr>
+  <tr><td>Undefended captures</td><td>175</td><td>91.3% of attacks were unopposed</td></tr>
+  <tr><td>Sectors at end</td><td>61</td><td>Active ops: 0 (all completed)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="grid-2 mt-2">
+  <div class="chart-wrap">
+    <canvas id="ordersPerWeek"></canvas>
+  </div>
+  <div class="chart-wrap">
+    <canvas id="displacementChart"></canvas>
+  </div>
+</div>
+
+<details>
+  <summary>Weekly Combat Tempo Analysis</summary>
+  <div class="detail-body text-sm">
+    <p><b>Phase 1 (w1-20, RS Offensive):</b> Peak activity w7-w13 with 10-14 orders/week. VRS 1st Krajina clearing Posavina, Drina Corps pushing east, SRK tightening around Sarajevo. This matches historical tempo.</p>
+    <p class="mt-2"><b>Phase 2 (w20-30, Transition):</b> Sharp drop to 1-4 orders/week after RS doctrine shifts to "balanced" at w20. Only 6 OSIDs gained in 10 weeks. This is correct behavior.</p>
+    <p class="mt-2"><b>Phase 3 (w30-40, Late Push):</b> <span style="color:var(--fail)">ANOMALOUS</span> — RS gains accelerate again: 390&rarr;415 (+25 OSIDs). This includes Bihać falling and Herzegovina/Livno HRHB losses. Fronts should be mostly frozen by winter. The "balanced" doctrine is still allowing too many attacks in the late period.</p>
+  </div>
+</details>
+
+<!-- ====== 10. PARADOX TEAM REVIEW ====== -->
+<div id="s10" class="sec-head"><span class="num">10</span> Paradox Team Review</div>
+
+<div class="role-card" style="animation-delay:0.05s; border-left-color: var(--accent)">
+  <h3>Orchestrator <span class="role-tag">Strategic Direction</span></h3>
+  <div class="finding finding--works"><b>What Works</b></div>
+  <ul>
+    <li>Overall match rate stable at 86.6% — calibration is holding across code changes</li>
+    <li>Anchor improvement (+2 net) — Posavina/NE fixes landing</li>
+    <li>Bot benchmarks 6/6 — all faction objectives within tolerance</li>
+  </ul>
+  <div class="finding finding--issues"><b>What Does Not Work</b></div>
+  <ul>
+    <li>Bihać fell — this is the single most critical regression. The 5th Corps pocket held for the entire war.</li>
+    <li>Drina dropped 8.6pp — RBiH enclaves too large, VRS consolidation insufficient</li>
+    <li>Late-war RS push (w30-40) is ahistorical — fronts should be frozen by winter</li>
+  </ul>
+  <div class="finding finding--needs"><b>Single Priority</b></div>
+  <ul>
+    <li><b>P0: Protect Bihać pocket</b> — add defense_terrain_bonus or anchor protection mechanism to 5th Corps AoR. This must never fall.</li>
+  </ul>
+</div>
+
+<div class="role-card" style="animation-delay:0.1s; border-left-color: var(--rs)">
+  <h3>Game Designer <span class="role-tag">Design Intent &amp; Balance</span></h3>
+  <div class="finding finding--works"><b>What Works</b></div>
+  <ul>
+    <li>RS early blitz captures ~100 OSIDs in w1-20 — matches historical "shock and awe" phase</li>
+    <li>Front stabilization around w20-25 — correct timing for summer/fall 1992</li>
+    <li>HRHB Posavina corridor collapse (Bosanski Brod, Derventa, Odžak fall) — historically accurate</li>
+    <li>Sarajevo siege established (RS 24 OSIDs, painted 21) — slightly over but plausible</li>
+  </ul>
+  <div class="finding finding--issues"><b>What Does Not Work</b></div>
+  <ul>
+    <li>Bihać pocket collapse contradicts core design intent — the pocket's survival is a defining narrative of the war</li>
+    <li>175 of 192 attacks hit no defenders — combat feels like "walking into empty rooms" rather than contested warfare</li>
+    <li>RS "balanced" doctrine still generates 25 captures in w30-40 — balanced should mean near-static</li>
+    <li>Attacker:defender casualty ratio 6.6:1 is extremely skewed, even accounting for free captures</li>
+  </ul>
+  <div class="finding finding--needs"><b>Recommendations</b></div>
+  <ul>
+    <li>Winter slowdown mechanic (w32-39) — reduce attack frequency by 60-80%</li>
+    <li>Review balanced doctrine: attack_share 0.08 still yields 2 slots per corps — consider 0.04 for true balanced</li>
+    <li>Investigate why defenders are absent in 91% of attacks — front assignment or movement issue?</li>
+  </ul>
+</div>
+
+<div class="role-card" style="animation-delay:0.15s; border-left-color: var(--rbih)">
+  <h3>Gameplay Programmer <span class="role-tag">Pipeline &amp; Sim Logic</span></h3>
+  <div class="finding finding--works"><b>What Works</b></div>
+  <ul>
+    <li>Turn pipeline stable — 40 weeks, 219 orders, no crashes or errors</li>
+    <li>Sector operations lifecycle functioning — all ops completed, no stuck operations</li>
+    <li>Displacement system fired correctly across 40 weeks of war phase activity</li>
+    <li>Formation spawning: 111 new brigades across all factions, no removals, no duplicates</li>
+  </ul>
+  <div class="finding finding--issues"><b>What Does Not Work</b></div>
+  <ul>
+    <li>Defender-absent ratio 91.3% — <code>local_front_defense.ts</code> militia defense may not be positioning correctly</li>
+    <li>RS doctrine "balanced" phase (w20+) attack_share=0.08 produces floor(N*0.08)=2 slots per corps — still aggressive</li>
+    <li>Front-active metric reporting 0 for all weeks despite active combat — harness tracking anomaly?</li>
+    <li>Personnel tracking in weekly_report shows 0 for all factions — reporting gap</li>
+  </ul>
+  <div class="finding finding--needs"><b>Recommendations</b></div>
+  <ul>
+    <li>Investigate <code>activity_summary.json</code> showing all-zero metrics despite active war phase</li>
+    <li>Add personnel tracking to weekly JSONL rows for troop strength over time</li>
+    <li>Review militia defense presence at unoccupied OSIDs — 175 undefended targets is too many</li>
+  </ul>
+</div>
+
+<div class="role-card" style="animation-delay:0.2s; border-left-color: var(--hrhb)">
+  <h3>Formation Expert <span class="role-tag">Brigades, Pools &amp; OOB</span></h3>
+  <div class="finding finding--works"><b>What Works</b></div>
+  <ul>
+    <li>ARBiH massive mobilization: 34&rarr;116 brigades — rabble-to-army arc beginning to emerge</li>
+    <li>VRS starts with 55 brigades (JNA inheritance) and grows modestly to 77 — historically correct</li>
+    <li>HVO Posavina brigades (101st-106th) spawned and deployed</li>
+    <li>Personnel ceilings not yet triggered (RBiH at 123k / 130k cap = 95% — soft cap active)</li>
+  </ul>
+  <div class="finding finding--issues"><b>What Does Not Work</b></div>
+  <ul>
+    <li>VRS militia pool nearly depleted: 9,766 available vs 84,975 committed. RS manpower stretched thin.</li>
+    <li>RBiH at 123,531 personnel with soft cap active (85% threshold) — ceiling is working but 116 brigades may be too many for year 1</li>
+    <li>No formations removed in 40 weeks — lifecycle events (territory-loss disbands, personnel collapse) may not be triggering</li>
+  </ul>
+  <div class="finding finding--needs"><b>Recommendations</b></div>
+  <ul>
+    <li>Verify lifecycle events are firing — some formations should disband when losing all territory (especially HVO Posavina)</li>
+    <li>Review RS FACTION_POOL_SCALE=0.25 — pool may be draining too fast relative to population</li>
+    <li>Consider historical brigade spawn gating — not all 247 OOB brigades should be available in year 1</li>
+  </ul>
+</div>
+
+<div class="role-card" style="animation-delay:0.25s; border-left-color: var(--accent2)">
+  <h3>Historian <span class="role-tag">Historical Plausibility</span></h3>
+  <div class="finding finding--works"><b>What Works</b></div>
+  <ul>
+    <li><b>Posavina corridor:</b> RS clears Bosanski Brod, Derventa, Odžak, Modriča — matches BB1 account of 1KK operations May-Oct 1992</li>
+    <li><b>Krajina cleansing:</b> 96.2% match — Prijedor, Sanski Most, Ključ, Kotor Varoš all fall to RS per BB1 ch.4</li>
+    <li><b>Sarajevo siege:</b> RS controls suburbs (Ilidža, Ilijaš, Vogošća, Hadžići) — matches BB1 SRK deployment</li>
+    <li><b>Jajce falls:</b> All 7 Jajce OSIDs flip to RS — historically fell October 1992 (BB1 ch.6)</li>
+    <li><b>Foča/Čajniče:</b> 8+4 flips to RS — matches BB1 account of Drina Corps ethnic cleansing operations</li>
+  </ul>
+  <div class="finding finding--issues"><b>What Does Not Work</b></div>
+  <ul>
+    <li><b>Bihać pocket fell:</b> Per BB1 ch.8, the 5th Corps (General Dudaković) held the Bihać pocket throughout 1992-95 despite complete encirclement. Its fall is the single most ahistorical outcome.</li>
+    <li><b>Višegrad still RBiH:</b> Per BB1, Višegrad fell to Serb forces in April-May 1992 in the first weeks. 7 RBiH OSIDs here is severely wrong.</li>
+    <li><b>Zvornik still RBiH:</b> BB1 documents Zvornik's fall to Arkan's Tigers and VRS in April 1992. Persistent failure across runs.</li>
+    <li><b>Lopare captured by RBiH:</b> 5 Lopare OSIDs flip RS→RBiH. No historical basis — Lopare was firmly in RS territory.</li>
+    <li><b>Bijeljina sim=RBiH for 2 OSIDs:</b> Bijeljina was among the first Serb-captured cities (April 1992, Arkan). Should be fully RS.</li>
+  </ul>
+  <div class="finding finding--needs"><b>Recommendations</b></div>
+  <ul>
+    <li>Bihać: Add defense_terrain_bonus for 5th Corps brigades (+30%) reflecting Cazin Krajina terrain advantage + Dudaković's leadership</li>
+    <li>Višegrad: Needs init_control override or pre-planned operation — it fell in the first days</li>
+    <li>Zvornik: Consider init_control override — paramilitaries captured it before formal military operations</li>
+    <li>Lopare/Bijeljina: Investigate RBiH counterattack logic — 2nd Corps pushing too far northeast</li>
+  </ul>
+</div>
+
+<div class="role-card" style="animation-delay:0.3s; border-left-color: var(--pass)">
+  <h3>Scenario Expert <span class="role-tag">Anchors &amp; Outcomes</span></h3>
+  <div class="finding finding--works"><b>What Works</b></div>
+  <ul>
+    <li>12/14 anchors pass — best result to date, up from 10/14 at n359</li>
+    <li>Vitinica, Teočak-Krstac, Brka now pass — NE Bosnia anchor fixes landing</li>
+    <li>Orašje still PASS — HVO pocket holds with fallback_osid mechanic</li>
+    <li>Goražde, Srebrenica, Vozuća all PASS — enclave anchors stable</li>
+  </ul>
+  <div class="finding finding--issues"><b>What Does Not Work</b></div>
+  <ul>
+    <li>Bihać anchor REGRESSION — was PASS at n359, now FAIL. Root cause: 2nd Krajina Corps + late-war RS push</li>
+    <li>Zvornik anchor still FAIL — persistent across n344→n359→n361. Structural issue with Drina Valley init_control</li>
+    <li>Drina region dropped from 82.8% to 74.2% — worst regional regression</li>
+  </ul>
+  <div class="finding finding--needs"><b>Recommendations</b></div>
+  <ul>
+    <li>Add Bihać to the "protected pocket" list alongside Srebrenica/Goražde</li>
+    <li>Consider Zvornik init_control override in scenario data — start RS-controlled</li>
+    <li>Add new anchors for Višegrad (RS) and Lopare (RS) to catch persistent mismatches</li>
+  </ul>
+</div>
+
+<div class="role-card" style="animation-delay:0.35s; border-left-color: var(--text-dim)">
+  <h3>Systems Programmer <span class="role-tag">Determinism &amp; Pipeline</span></h3>
+  <div class="finding finding--works"><b>What Works</b></div>
+  <ul>
+    <li>Deterministic: state hash <code>54ee099b</code> is reproducible</li>
+    <li>61 corps front sectors computed correctly with non-contiguous DFS partitioning</li>
+    <li>Pipeline complete: all 40 weeks executed without step failures</li>
+    <li>No serialization issues detected in final save JSON</li>
+  </ul>
+  <div class="finding finding--issues"><b>What Does Not Work</b></div>
+  <ul>
+    <li><code>activity_summary.json</code> reports all-zero metrics (front_active=0, pressure_eligible=0) despite 40 active war weeks. Likely a reporting/instrumentation gap.</li>
+    <li>Weekly report personnel tracking returns 0 for all factions — <code>factions</code> field not populated</li>
+  </ul>
+  <div class="finding finding--needs"><b>Recommendations</b></div>
+  <ul>
+    <li>Fix activity_summary instrumentation to track actual front-active counts during war phase</li>
+    <li>Wire personnel totals into weekly_report JSONL for troop progression charting</li>
+  </ul>
+</div>
+
+<div class="role-card" style="animation-delay:0.4s; border-left-color: var(--warn)">
+  <h3>Canon Compliance <span class="role-tag">Rules &amp; Phase Specs</span></h3>
+  <div class="finding finding--works"><b>What Works</b></div>
+  <ul>
+    <li>VRS doctrine phases executing correctly: offensive (w0-20) → balanced (w20-40)</li>
+    <li>RBiH defensive posture maintained through all 40 weeks — no premature counterattacking</li>
+    <li>Personnel ceilings functional — RBiH soft cap active at 95%</li>
+    <li>Displacement routing firing per canon (static tables + runtime validation)</li>
+  </ul>
+  <div class="finding finding--issues"><b>What Does Not Work</b></div>
+  <ul>
+    <li>RS "balanced" doctrine still permits 2 attack slots per corps — effective behavior more like "reduced offensive" than "balanced"</li>
+    <li>HVO only 3 attack orders in 40 weeks — may be too passive (HVO contested Kupres, Jajce approaches historically)</li>
+    <li>RBiH civilian fled_abroad=0 conflicts with historical refugee patterns — routing data gap</li>
+  </ul>
+</div>
+
+<!-- ====== 11. RECOMMENDATIONS ====== -->
+<div id="s11" class="sec-head"><span class="num">11</span> Consolidated Recommendations</div>
+
+<div class="rec-grid">
+  <div class="rec-card priority-high">
+    <h4><span class="pri-badge p1">P0</span> Protect Bihać Pocket</h4>
+    <p>Add <code>defense_terrain_bonus: 0.30</code> to 5th Corps brigades in OOB data. Alternatively, add Bihać to protected enclave list with hardening mechanic. The 5th Corps pocket held for the entire war — its fall is the single most ahistorical outcome. Consider also adding morale_resist_floor buff for enclave defenders.</p>
+  </div>
+  <div class="rec-card priority-high">
+    <h4><span class="pri-badge p1">P1</span> Implement Winter Slowdown</h4>
+    <p>Add seasonal modifier reducing attack frequency by 60-80% during weeks 32-39 (November-January). Currently the RS late-war push captures 25 OSIDs when fronts should be frozen. This mechanic is noted as a known gap in calibration — "dead weeks are roughly right but accidental; needs intentional mechanic."</p>
+  </div>
+  <div class="rec-card priority-high">
+    <h4><span class="pri-badge p1">P1</span> Fix Drina Valley</h4>
+    <p>Višegrad and Zvornik should start RS-controlled or fall in first weeks. Add init_control overrides for Višegrad (7 OSIDs still RBiH). Increase Drina Corps targeting priority for enclaves. Reduce Srebrenica enclave perimeter — 6 excess RBiH OSIDs around the historical enclave.</p>
+  </div>
+  <div class="rec-card priority-med">
+    <h4><span class="pri-badge p2">P2</span> Review Balanced Doctrine Attack Share</h4>
+    <p>RS attack_share=0.08 in balanced phase gives floor(26*0.08)=2 attack slots per corps — still aggressive. Consider 0.04 (=1 slot) or add a "defensive" phase post-w30 with 0.02. The design intent of "balanced" should mean mostly holding, occasional limited operations.</p>
+  </div>
+  <div class="rec-card priority-med">
+    <h4><span class="pri-badge p2">P2</span> Fix RBiH Displacement Routing</h4>
+    <p>RBiH civilian <code>fled_abroad=0</code> is a data gap. Bosniak refugees were the largest displaced group — many fled to Germany, Sweden, Croatia. Review <code>displacement_routing_data.ts</code> for missing Bosniak abroad routes.</p>
+  </div>
+  <div class="rec-card priority-med">
+    <h4><span class="pri-badge p2">P2</span> Investigate 91% Undefended Attacks</h4>
+    <p>175 of 192 attacks had no defender present. Check <code>local_front_defense.ts</code> militia positioning — are unoccupied OSIDs getting militia defense? If not, RS is essentially capturing empty territory without cost, inflating territorial gains.</p>
+  </div>
+  <div class="rec-card priority-low">
+    <h4><span class="pri-badge p3">P3</span> Fix Activity Summary Instrumentation</h4>
+    <p>The <code>activity_summary.json</code> reports all-zero metrics despite 40 active war weeks. Weekly report personnel fields also return 0. These are reporting/diagnostic gaps that don't affect simulation but hinder analysis.</p>
+  </div>
+  <div class="rec-card priority-low">
+    <h4><span class="pri-badge p3">P3</span> Add New Anchor Checks</h4>
+    <p>Consider adding anchors for Višegrad (RS), Lopare (RS), Bijeljina individual OSIDs (RS), and Bihać as a mandatory-PASS anchor. Currently only 14 anchors — expanding to 18-20 would catch more persistent mismatches.</p>
+  </div>
+</div>
+
+<div class="exec-summary mt-3">
+  <strong>Orchestrator Decision — Single Priority:</strong> Protect the Bihać pocket. This is a non-negotiable historical anchor
+  whose fall undermines the simulation's credibility. Implementation: add <code>defense_terrain_bonus</code> to 5th Corps brigades
+  in OOB data + review 2nd Krajina Corps targeting to ensure Bihać is not on its offensive target list.
+  Secondary: implement winter slowdown mechanic to prevent the ahistorical late-war RS push.
+  <b>Owner: Gameplay Programmer (Bihać fix) + Game Designer (winter mechanic design).</b>
+</div>
+
+<div class="mt-3 text-sm text-dim mono">
+  <b>Artifacts:</b> runs/apr1992_definitive_40w__205b3676c8fe3ce4__w40_n361/ —
+  run_summary.json, end_report.md, final_save.json, control_delta.json, formation_delta.json,
+  activity_summary.json, control_events.jsonl, weekly_report.jsonl<br>
+  <b>Canon refs:</b> Systems Manual, Phase II Spec, Engine Invariants<br>
+  <b>Report generated by:</b> Paradox Team (Orchestrator-led convene) — 2026-03-02
+</div>
+
+</div><!-- /main -->
+</div><!-- /wrap -->
+
+<script>
+// ====== TERRITORY CONTROL CHART ======
+const weeklyData = [{"week":2,"RS":285,"RBiH":348,"HRHB":120},{"week":3,"RS":290,"RBiH":344,"HRHB":119},{"week":4,"RS":297,"RBiH":339,"HRHB":117},{"week":5,"RS":303,"RBiH":335,"HRHB":115},{"week":6,"RS":308,"RBiH":330,"HRHB":115},{"week":7,"RS":318,"RBiH":324,"HRHB":111},{"week":8,"RS":328,"RBiH":316,"HRHB":109},{"week":9,"RS":338,"RBiH":312,"HRHB":103},{"week":10,"RS":348,"RBiH":305,"HRHB":100},{"week":11,"RS":358,"RBiH":296,"HRHB":99},{"week":12,"RS":363,"RBiH":291,"HRHB":99},{"week":13,"RS":367,"RBiH":287,"HRHB":99},{"week":14,"RS":371,"RBiH":284,"HRHB":98},{"week":15,"RS":374,"RBiH":281,"HRHB":98},{"week":16,"RS":375,"RBiH":280,"HRHB":98},{"week":17,"RS":377,"RBiH":279,"HRHB":97},{"week":18,"RS":378,"RBiH":278,"HRHB":97},{"week":19,"RS":379,"RBiH":277,"HRHB":97},{"week":20,"RS":383,"RBiH":274,"HRHB":96},{"week":21,"RS":384,"RBiH":273,"HRHB":96},{"week":22,"RS":386,"RBiH":271,"HRHB":96},{"week":23,"RS":387,"RBiH":270,"HRHB":96},{"week":24,"RS":388,"RBiH":269,"HRHB":96},{"week":25,"RS":388,"RBiH":269,"HRHB":96},{"week":26,"RS":388,"RBiH":269,"HRHB":96},{"week":27,"RS":389,"RBiH":268,"HRHB":96},{"week":28,"RS":390,"RBiH":267,"HRHB":96},{"week":29,"RS":390,"RBiH":267,"HRHB":96},{"week":30,"RS":390,"RBiH":267,"HRHB":96},{"week":31,"RS":392,"RBiH":266,"HRHB":95},{"week":32,"RS":394,"RBiH":265,"HRHB":94},{"week":33,"RS":395,"RBiH":265,"HRHB":93},{"week":34,"RS":397,"RBiH":264,"HRHB":92},{"week":35,"RS":399,"RBiH":263,"HRHB":91},{"week":36,"RS":402,"RBiH":262,"HRHB":89},{"week":37,"RS":405,"RBiH":260,"HRHB":88},{"week":38,"RS":408,"RBiH":259,"HRHB":86},{"week":39,"RS":411,"RBiH":258,"HRHB":84},{"week":40,"RS":414,"RBiH":256,"HRHB":83},{"week":41,"RS":415,"RBiH":255,"HRHB":83}];
+
+const weeks = weeklyData.map(d => 'W' + d.week);
+const chartColors = {
+  rs: { line: getComputedStyle(document.documentElement).getPropertyValue('--rs').trim() || '#c05050', bg: 'rgba(192,80,80,0.1)' },
+  rbih: { line: getComputedStyle(document.documentElement).getPropertyValue('--rbih').trim() || '#4a9a5a', bg: 'rgba(74,154,90,0.1)' },
+  hrhb: { line: getComputedStyle(document.documentElement).getPropertyValue('--hrhb').trim() || '#4a7abf', bg: 'rgba(74,122,191,0.1)' }
+};
+
+const textDim = getComputedStyle(document.documentElement).getPropertyValue('--text-dim').trim() || '#7a8ba5';
+const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || 'rgba(255,255,255,0.06)';
+
+const commonOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { labels: { color: textDim, font: { family: "'Fragment Mono', monospace", size: 11 }, boxWidth: 12 } }
+  },
+  scales: {
+    x: { ticks: { color: textDim, font: { family: "'Fragment Mono', monospace", size: 10 }, maxRotation: 0 }, grid: { color: borderColor } },
+    y: { ticks: { color: textDim, font: { family: "'Fragment Mono', monospace", size: 10 } }, grid: { color: borderColor } }
+  }
+};
+
+new Chart(document.getElementById('controlChart'), {
+  type: 'line',
+  data: {
+    labels: weeks,
+    datasets: [
+      { label: 'RS', data: weeklyData.map(d => d.RS), borderColor: chartColors.rs.line, backgroundColor: chartColors.rs.bg, fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
+      { label: 'RBiH', data: weeklyData.map(d => d.RBiH), borderColor: chartColors.rbih.line, backgroundColor: chartColors.rbih.bg, fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
+      { label: 'HRHB', data: weeklyData.map(d => d.HRHB), borderColor: chartColors.hrhb.line, backgroundColor: chartColors.hrhb.bg, fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 }
+    ]
+  },
+  options: {
+    ...commonOptions,
+    plugins: {
+      ...commonOptions.plugins,
+      title: { display: true, text: 'OSID Control by Faction (Weekly)', color: textDim, font: { family: "'Fragment Mono', monospace", size: 12, weight: 600 } },
+      annotation: {
+        annotations: {
+          line1: { type: 'line', xMin: 18, xMax: 18, borderColor: 'rgba(212,167,58,0.4)', borderWidth: 1, borderDash: [4,4], label: { content: 'RS→Balanced', display: true, position: 'start', color: textDim, font: { size: 9, family: "'Fragment Mono', monospace" } } }
+        }
+      }
+    }
+  }
+});
+
+// ====== WEEKLY ORDERS CHART ======
+const weeklyOrders = [6,7,9,7,6,10,13,11,14,10,5,11,11,10,3,5,5,12,12,1,2,1,1,1,3,1,1,3,2,4,2,5,3,2,3,3,3,5,5,1];
+const weekLabels = weeklyOrders.map((_, i) => 'W' + (i + 1));
+
+new Chart(document.getElementById('weeklyOrdersChart'), {
+  type: 'bar',
+  data: {
+    labels: weekLabels,
+    datasets: [{
+      label: 'Attack Orders',
+      data: weeklyOrders,
+      backgroundColor: weeklyOrders.map((v, i) => i < 20 ? 'rgba(192,80,80,0.6)' : 'rgba(192,80,80,0.25)'),
+      borderColor: weeklyOrders.map((v, i) => i < 20 ? 'rgba(192,80,80,0.9)' : 'rgba(192,80,80,0.4)'),
+      borderWidth: 1
+    }]
+  },
+  options: {
+    ...commonOptions,
+    plugins: {
+      ...commonOptions.plugins,
+      title: { display: true, text: 'Attack Orders per Week (brighter = offensive phase)', color: textDim, font: { family: "'Fragment Mono', monospace", size: 12, weight: 600 } }
+    }
+  }
+});
+
+// ====== ORDERS PER WEEK BY FACTION (placeholder) ======
+new Chart(document.getElementById('ordersPerWeek'), {
+  type: 'bar',
+  data: {
+    labels: ['RS', 'RBiH', 'HRHB'],
+    datasets: [{
+      label: 'Attack Orders (40w)',
+      data: [192, 24, 3],
+      backgroundColor: [chartColors.rs.bg, chartColors.rbih.bg, chartColors.hrhb.bg],
+      borderColor: [chartColors.rs.line, chartColors.rbih.line, chartColors.hrhb.line],
+      borderWidth: 2
+    }]
+  },
+  options: {
+    ...commonOptions,
+    indexAxis: 'y',
+    plugins: {
+      ...commonOptions.plugins,
+      title: { display: true, text: 'Attack Orders by Faction', color: textDim, font: { family: "'Fragment Mono', monospace", size: 12, weight: 600 } }
+    }
+  }
+});
+
+// ====== DISPLACEMENT CHART ======
+const dispData = weeklyData.map(d => d.disp || 0);
+// Need to add disp to weekly data
+const dispWeekly = [0,0,0,0,15608,39844,70160,93143,118577,155953,209729,273962,317473,364595,368070,425072,461096,475595,478901,490309,502303,521107,532043,532386,534321,534607,535366,535366,535366,535366,535366,553132,554583,564811,574474,580489,588471,599332,610329,615693];
+
+new Chart(document.getElementById('displacementChart'), {
+  type: 'line',
+  data: {
+    labels: weeks,
+    datasets: [{
+      label: 'Cumulative Displaced',
+      data: dispWeekly,
+      borderColor: 'rgba(251,191,36,0.8)',
+      backgroundColor: 'rgba(251,191,36,0.08)',
+      fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2
+    }]
+  },
+  options: {
+    ...commonOptions,
+    plugins: {
+      ...commonOptions.plugins,
+      title: { display: true, text: 'Cumulative Displacement (persons)', color: textDim, font: { family: "'Fragment Mono', monospace", size: 12, weight: 600 } }
+    }
+  }
+});
+
+// ====== TOC ACTIVE STATE ======
+const tocLinks = document.querySelectorAll('.toc a');
+const sections = document.querySelectorAll('.sec-head');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocLinks.forEach(a => a.classList.remove('active'));
+      const active = document.querySelector('.toc a[href="#' + e.target.id + '"]');
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

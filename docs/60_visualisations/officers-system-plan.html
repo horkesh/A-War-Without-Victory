@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV Officers System — Historical Officer Database (88 Officers)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+    --bg: #0f1923;
+    --surface: #152231;
+    --surface2: #1a2a3d;
+    --surface-elevated: #1e3248;
+    --border: rgba(255,255,255,0.06);
+    --border-bright: rgba(255,255,255,0.12);
+    --text: #d4dde8;
+    --text-dim: #7a8fa6;
+    --accent: #3b9ece;
+    --accent-dim: rgba(59,158,206,0.12);
+    --vrs: #c2410c;
+    --vrs-dim: rgba(194,65,12,0.15);
+    --vrs-bg: rgba(194,65,12,0.08);
+    --arbih: #16a34a;
+    --arbih-dim: rgba(22,163,74,0.15);
+    --arbih-bg: rgba(22,163,74,0.08);
+    --hvo: #2563eb;
+    --hvo-dim: rgba(37,99,235,0.15);
+    --hvo-bg: rgba(37,99,235,0.08);
+    --gold: #d4a73a;
+    --gold-dim: rgba(212,167,58,0.12);
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #eef2f7;
+      --surface: #ffffff;
+      --surface2: #f5f7fa;
+      --surface-elevated: #ffffff;
+      --border: rgba(0,0,0,0.07);
+      --border-bright: rgba(0,0,0,0.14);
+      --text: #1a2332;
+      --text-dim: #5a6a7c;
+      --accent: #1e6ca0;
+      --accent-dim: rgba(30,108,160,0.08);
+      --vrs: #b91c1c;
+      --vrs-dim: rgba(185,28,28,0.1);
+      --vrs-bg: rgba(185,28,28,0.04);
+      --arbih: #15803d;
+      --arbih-dim: rgba(21,128,61,0.1);
+      --arbih-bg: rgba(21,128,61,0.04);
+      --hvo: #1d4ed8;
+      --hvo-dim: rgba(29,78,216,0.1);
+      --hvo-bg: rgba(29,78,216,0.04);
+      --gold: #a16207;
+      --gold-dim: rgba(161,98,7,0.08);
+    }
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 0%, var(--vrs-bg) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 0%, var(--arbih-bg) 0%, transparent 35%),
+      radial-gradient(ellipse at 80% 0%, var(--hvo-bg) 0%, transparent 40%);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 32px;
+    min-height: 100vh;
+  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .anim { animation: fadeUp 0.3s ease-out both; animation-delay: calc(var(--i,0)*0.03s); }
+  @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0.01ms!important; transition-duration:0.01ms!important; } }
+  .container { max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .subtitle { color: var(--text-dim); font-family: var(--font-mono); font-size: 11px; margin-bottom: 28px; letter-spacing: 0.5px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+  .kpi__val { font-family: var(--font-mono); font-size: 28px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .kpi__label { font-family: var(--font-mono); font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-dim); margin-top: 4px; }
+  .kpi--vrs { border-left: 3px solid var(--vrs); }
+  .kpi--arbih { border-left: 3px solid var(--arbih); }
+  .kpi--hvo { border-left: 3px solid var(--hvo); }
+  .kpi--gold { border-left: 3px solid var(--gold); }
+  .section-hdr { display: flex; align-items: center; gap: 10px; margin: 28px 0 12px; }
+  .section-hdr__dot { width: 10px; height: 10px; border-radius: 50%; }
+  .section-hdr__title { font-family: var(--font-mono); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; }
+  .section-hdr__sub { font-size: 12px; color: var(--text-dim); margin-left: auto; }
+  .tw { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+  .ts { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .dt { width: 100%; border-collapse: collapse; font-size: 12px; line-height: 1.45; }
+  .dt thead { position: sticky; top: 0; z-index: 2; }
+  .dt th { background: var(--surface2); font-family: var(--font-mono); font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); text-align: left; padding: 10px 10px; border-bottom: 2px solid var(--border-bright); white-space: nowrap; }
+  .dt td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .dt tbody tr:last-child td { border-bottom: none; }
+  .dt tbody tr { transition: background 0.12s ease; }
+  .dt tbody tr:hover { background: var(--accent-dim); }
+  .dt code { font-family: var(--font-mono); font-size: 10px; background: var(--accent-dim); color: var(--accent); padding: 1px 4px; border-radius: 3px; }
+  .dt small { display: block; color: var(--text-dim); font-size: 10px; margin-top: 2px; }
+  .dt .num { text-align: center; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .dt tfoot td { background: var(--surface2); font-weight: 600; font-family: var(--font-mono); font-size: 11px; border-top: 2px solid var(--border-bright); border-bottom: none; }
+  .rbar { display: inline-flex; gap: 2px; }
+  .rbar__pip { width: 8px; height: 8px; border-radius: 2px; background: var(--border-bright); }
+  .rbar__pip--filled { background: var(--gold); }
+  .rbar__pip--filled.r5 { background: #e5a100; box-shadow: 0 0 4px rgba(229,161,0,0.4); }
+  .tier { font-family: var(--font-mono); font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+  .tier--army { background: var(--gold-dim); color: var(--gold); }
+  .tier--corps { background: var(--accent-dim); color: var(--accent); }
+  .tier--a { background: rgba(74,222,128,0.12); color: #4ade80; }
+  .tier--b { background: rgba(251,191,36,0.12); color: #fbbf24; }
+  .tier--c { background: rgba(248,113,113,0.1); color: #f87171; }
+  @media (prefers-color-scheme: light) {
+    .tier--a { background: rgba(21,128,61,0.08); color: #15803d; }
+    .tier--b { background: rgba(161,98,7,0.08); color: #a16207; }
+    .tier--c { background: rgba(185,28,28,0.08); color: #b91c1c; }
+    .rbar__pip--filled { background: #a16207; }
+    .rbar__pip--filled.r5 { background: #854d0e; box-shadow: 0 0 3px rgba(133,77,14,0.3); }
+  }
+  details.coll { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+  details.coll summary { padding: 10px 16px; background: var(--surface); font-family: var(--font-mono); font-size: 11px; font-weight: 600; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; color: var(--text); transition: background 0.12s; }
+  details.coll summary:hover { background: var(--surface2); }
+  details.coll summary::-webkit-details-marker { display:none; }
+  details.coll summary::before { content:'▸'; font-size:10px; color:var(--text-dim); transition: transform 0.12s; }
+  details.coll[open] summary::before { transform: rotate(90deg); }
+  details.coll .coll__body { padding: 12px 16px; border-top: 1px solid var(--border); font-size: 12px; line-height: 1.55; color: var(--text-dim); }
+  details.coll .coll__body strong { color: var(--text); }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); }
+  .legend-sw { width: 8px; height: 8px; border-radius: 3px; }
+  @media (max-width:768px) { body { padding:12px; } h1 { font-size:22px; } .dt th,.dt td { padding:6px 8px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1 class="anim" style="--i:0">AWWV Officers System — Historical Database</h1>
+<p class="subtitle anim" style="--i:1">88 NAMED OFFICERS &bull; 3 FACTIONS &bull; TWO-TIER SYSTEM &bull; 1992&ndash;1995 BOSNIAN WAR</p>
+
+<div class="kpi-row anim" style="--i:2">
+  <div class="kpi kpi--gold"><div class="kpi__val">88</div><div class="kpi__label">Total Officers</div></div>
+  <div class="kpi kpi--vrs"><div class="kpi__val" style="color:var(--vrs)">32</div><div class="kpi__label">VRS Officers</div></div>
+  <div class="kpi kpi--arbih"><div class="kpi__val" style="color:var(--arbih)">34</div><div class="kpi__label">ARBiH Officers</div></div>
+  <div class="kpi kpi--hvo"><div class="kpi__val" style="color:var(--hvo)">22</div><div class="kpi__label">HVO Officers</div></div>
+  <div class="kpi"><div class="kpi__val">31</div><div class="kpi__label">Corps Cdrs</div></div>
+  <div class="kpi"><div class="kpi__val">48</div><div class="kpi__label">Pool Reserves</div></div>
+</div>
+
+<div class="legend anim" style="--i:3">
+  <div class="legend-item"><div class="legend-sw" style="background:var(--gold)"></div> Rating pip (1-5)</div>
+  <div class="legend-item"><span class="tier tier--army">ARMY</span> Army-level</div>
+  <div class="legend-item"><span class="tier tier--corps">CORPS</span> Corps cdr</div>
+  <div class="legend-item"><span class="tier tier--a">POOL-A</span> Immediate</div>
+  <div class="legend-item"><span class="tier tier--b">POOL-B</span> 2-turn delay</div>
+  <div class="legend-item"><span class="tier tier--c">POOL-C</span> Limited</div>
+</div>
+
+<!-- ============ VRS ============ -->
+<div class="section-hdr anim" style="--i:4">
+  <div class="section-hdr__dot" style="background:var(--vrs)"></div>
+  <div class="section-hdr__title" style="color:var(--vrs)">VRS &mdash; Vojska Republike Srpske</div>
+  <div class="section-hdr__sub">32 officers &bull; JNA inheritance, no regeneration</div>
+</div>
+
+<div class="tw anim" style="--i:5">
+<div class="ts">
+<table class="dt">
+<thead><tr><th>Role</th><th>ID</th><th>Name</th><th>Corps</th><th>C</th><th>A</th><th>D</th><th>P</th><th>Turns</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><span class="tier tier--army">ARMY</span></td><td><code>vrs_mladic</code></td><td>Ratko Mladić</td><td>&mdash;</td><td class="num">4</td><td class="num">5</td><td class="num">3</td><td class="num">2</td><td class="num">0&ndash;&infin;</td><td>Centralized command. Bypassed corps cdrs. Pol=2: defied Karadžić.</td></tr>
+<tr><td><span class="tier tier--army">ARMY</span></td><td><code>vrs_milovanovic</code></td><td>Manojlo Milovanović</td><td>&mdash;</td><td class="num">4</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">0&ndash;&infin;</td><td>Chief of Staff. Steady counterpart to Mladić.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>vrs_talic</code></td><td><strong>Momir Talić</strong></td><td>1KK</td><td class="num"><strong>5</strong></td><td class="num">4</td><td class="num">4</td><td class="num">4</td><td class="num">0&ndash;&infin;</td><td>Best VRS corps cdr. 60-72k troops. Op Corridor 92, Jajce.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>vrs_simic</code></td><td><strong>Novica Simić</strong></td><td>IBK</td><td class="num">4</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">0&ndash;&infin;</td><td>Earned cmd via Op Corridor (was 16th Krajina Mtbr cdr). Sole IBK cdr.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>vrs_boric</code></td><td>Grujo Borić</td><td>2KK</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">0&ndash;w110</td><td>Adequate. Weakest corps (~15k).</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>vrs_tomanic</code></td><td>Radivoje Tomanić</td><td>2KK</td><td class="num">2</td><td class="num">2</td><td class="num">3</td><td class="num">3</td><td class="num">w110&ndash;&infin;</td><td>Inherited impossible situation. Corps collapsed after Op Storm.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>vrs_sipcic</code></td><td>Tomislav Šipčić</td><td>SRK</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">0&ndash;w18</td><td>First SRK cdr. Set up siege infrastructure.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>vrs_galic</code></td><td><strong>Stanislav Galić</strong></td><td>SRK</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num"><strong>5</strong></td><td class="num">w18&ndash;w118</td><td>Core siege period. From 1KK 30th Div. ICTY: life.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>vrs_d_milosevic</code></td><td>Dragomir Milošević</td><td>SRK</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num"><strong>5</strong></td><td class="num">w118&ndash;&infin;</td><td>Promoted from SRK CoS. Siege under NATO pressure.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>vrs_zivanovic</code></td><td>Milenko Živanović</td><td>Drina</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">w28&ndash;w170</td><td>First Drina Corps cdr. Enclave siege ops.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>vrs_krstic</code></td><td>Radislav Krstić</td><td>Drina</td><td class="num">3</td><td class="num">4</td><td class="num">3</td><td class="num"><strong>5</strong></td><td class="num">w170&ndash;&infin;</td><td>Promoted from Drina CoS. Returned after amputation.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>vrs_grubac</code></td><td>Radovan Grubač</td><td>HK</td><td class="num">3</td><td class="num">2</td><td class="num">4</td><td class="num">4</td><td class="num">0&ndash;&infin;</td><td>Sole HK cdr. Grew 4,500&rarr;24,000. 250km front.</td></tr>
+<!-- Pool A -->
+<tr style="background:var(--vrs-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>vrs_lisica</code></td><td>Slavko Lisica</td><td>1KK</td><td class="num">4</td><td class="num"><strong>5</strong></td><td class="num">3</td><td class="num">3</td><td class="num">&mdash;</td><td>OG Doboj cdr. Corridor hero. Blitzkrieg tactician.</td></tr>
+<tr style="background:var(--vrs-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>vrs_kelecevic</code></td><td>Boško Kelečević</td><td>1KK</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">&mdash;</td><td>1KK Chief of Staff. Natural Talić successor.</td></tr>
+<tr style="background:var(--vrs-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>vrs_sladoje</code></td><td>Čedomir Sladoje</td><td>SRK</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">&mdash;</td><td>SRK CoS (Aug 94+). Natural SRK successor.</td></tr>
+<tr style="background:var(--vrs-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>vrs_gavric</code></td><td>Budimir Gavrić</td><td>IBK</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>IBK CoS (Col&rarr;MajGen 1994). Natural IBK successor.</td></tr>
+<tr style="background:var(--vrs-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>vrs_tolimir</code></td><td>Zdravko Tolimir</td><td>&mdash;</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num"><strong>5</strong></td><td class="num">&mdash;</td><td>Intelligence chief. Not a combat cdr. Loyal to Mladić.</td></tr>
+<tr style="background:var(--vrs-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>vrs_miletic</code></td><td>Radivoje Miletić</td><td>&mdash;</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>Main Staff Ops &amp; Training. Emergency corps cdr.</td></tr>
+<!-- Pool B -->
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>vrs_pandurevic</code></td><td><strong>Vinko Pandurević</strong></td><td>Drina</td><td class="num">4</td><td class="num"><strong>5</strong></td><td class="num">3</td><td class="num">3</td><td class="num">&mdash;</td><td>Zvornik Bde (5,012 men). JNA academy. Bold. ICTY: 13y.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>vrs_andric</code></td><td>Svetozar Andrić</td><td>Drina</td><td class="num">4</td><td class="num">4</td><td class="num">4</td><td class="num">4</td><td class="num">&mdash;</td><td>Birčani Bde &rarr; Drina CoS (Jul 95+).</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>vrs_zeljaja</code></td><td>Radmilo Željaja</td><td>1KK</td><td class="num">4</td><td class="num"><strong>5</strong></td><td class="num">3</td><td class="num">3</td><td class="num">&mdash;</td><td>OG Prijedor (14k+ troops). Aggressive.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>vrs_samardzija</code></td><td>Drago Samardžija</td><td>2KK</td><td class="num">4</td><td class="num">4</td><td class="num">4</td><td class="num">3</td><td class="num">&mdash;</td><td>3 brigades, 2 corps (1KK+2KK). Versatile.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>vrs_kutlesic</code></td><td>Milorad Kutlešić</td><td>IBK</td><td class="num">3</td><td class="num">3</td><td class="num"><strong>5</strong></td><td class="num">4</td><td class="num">&mdash;</td><td>1st Posavina/Brčko, sole cdr entire war.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>vrs_gusic_n</code></td><td><strong>Novica Gušić</strong></td><td>HK</td><td class="num">4</td><td class="num">3</td><td class="num"><strong>5</strong></td><td class="num">3</td><td class="num">&mdash;</td><td>8th Mtbr Nevesinje (legendary). Mitrovdan hero.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>vrs_colic</code></td><td>Pero Čolić</td><td>1KK</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">&mdash;</td><td>5th Kozara Bde. Nominated VRS CoS.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>vrs_lalovic</code></td><td>Dragan Lalović</td><td>HK</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">3</td><td class="num">&mdash;</td><td>2 HK brigades. 3+ year tenure.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>vrs_despotovic</code></td><td>Pero Despotović</td><td>IBK</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">&mdash;</td><td>Majevica bdes in IBK + SRK. Cross-corps.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>vrs_arsic</code></td><td>Vladimir Arsić</td><td>1KK</td><td class="num">3</td><td class="num">4</td><td class="num">3</td><td class="num">3</td><td class="num">&mdash;</td><td>43rd Prijedor Mtbr &rarr; OG Doboj.</td></tr>
+<!-- Pool C -->
+<tr><td><span class="tier tier--c">POOL-C</span></td><td><code>vrs_blagojevic</code></td><td>Vidoje Blagojević</td><td>Drina</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>Bratunac Bde. Drina only. ICTY convicted.</td></tr>
+<tr><td><span class="tier tier--c">POOL-C</span></td><td><code>vrs_obrenovic</code></td><td>Dragan Obrenović</td><td>Drina</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>Zvornik dep. 2nd choice Drina.</td></tr>
+<tr><td><span class="tier tier--c">POOL-C</span></td><td><code>vrs_ninkovic</code></td><td>Živomir Ninković</td><td>&mdash;</td><td class="num">3</td><td class="num">2</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>Air Force cdr. Emergency only.</td></tr>
+<tr><td><span class="tier tier--c">POOL-C</span></td><td><code>vrs_lizdek</code></td><td>Vlado Lizdek</td><td>SRK</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">&mdash;</td><td>1st Romanija Bde (~15k). SRK only.</td></tr>
+</tbody>
+<tfoot><tr><td colspan="4">32 VRS officers</td><td colspan="2">12 corps</td><td colspan="2">20 pool</td><td colspan="2">No regeneration &mdash; pool depletes only</td></tr></tfoot>
+</table>
+</div></div>
+
+<!-- ============ ARBiH ============ -->
+<div class="section-hdr anim" style="--i:6">
+  <div class="section-hdr__dot" style="background:var(--arbih)"></div>
+  <div class="section-hdr__title" style="color:var(--arbih)">ARBiH &mdash; Armija Republike Bosne i Hercegovine</div>
+  <div class="section-hdr__sub">34 officers &bull; Starts near-zero, grows via battlefield promotion</div>
+</div>
+
+<div class="tw anim" style="--i:7">
+<div class="ts">
+<table class="dt">
+<thead><tr><th>Role</th><th>ID</th><th>Name</th><th>Corps</th><th>C</th><th>A</th><th>D</th><th>P</th><th>Turns</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><span class="tier tier--army">ARMY</span></td><td><code>arbih_halilovic</code></td><td>Sefer Halilović</td><td>&mdash;</td><td class="num">3</td><td class="num">4</td><td class="num">2</td><td class="num">2</td><td class="num">0&ndash;w60</td><td>Founded Patriotic League. Good organizer, poor strategist.</td></tr>
+<tr><td><span class="tier tier--army">ARMY</span></td><td><code>arbih_delic</code></td><td><strong>Rasim Delić</strong></td><td>&mdash;</td><td class="num">4</td><td class="num">3</td><td class="num">4</td><td class="num"><strong>5</strong></td><td class="num">w60&ndash;&infin;</td><td>Artillery background. Professionalized the army. Prevented collapse.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_talijan</code></td><td>M. Hajrulahović "Talijan"</td><td>1st</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">4</td><td class="num">0&ndash;w68</td><td>Natural combat leader. Improvised Sarajevo defense.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_karavelic</code></td><td><strong>Vahid Karavelić</strong></td><td>1st</td><td class="num">4</td><td class="num">2</td><td class="num"><strong>5</strong></td><td class="num">4</td><td class="num">w68&ndash;&infin;</td><td>Best defensive corps cdr. 75k. Professional, methodical.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_knez</code></td><td>Željko Knez</td><td>2nd</td><td class="num">2</td><td class="num">2</td><td class="num">3</td><td class="num">2</td><td class="num">0&ndash;w44</td><td>Multi-ethnic (Croat). Failed to relieve Srebrenica.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_sadic</code></td><td>Hazim Šadić</td><td>2nd</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">w44&ndash;w132</td><td>Adequate. Critical 1993-94 period.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_s_delic</code></td><td><strong>Sead Delić</strong></td><td>2nd</td><td class="num">4</td><td class="num">4</td><td class="num">3</td><td class="num">4</td><td class="num">w132&ndash;&infin;</td><td>Aggressive. Op Majevica. Largest corps by zone.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_hadzihasanovic</code></td><td>Enver Hadžihasanović</td><td>3rd</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">w28&ndash;w80</td><td>Belgian academy. Three-way fighting + mujahideen.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_jusic</code></td><td>Kadir Jusić</td><td>3rd</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">w96&ndash;w110</td><td>Transitional 3rd Corps cdr (Feb-Sep 1994).</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_alagic</code></td><td><strong>Mehmed Alagić</strong></td><td>7th&rarr;3rd</td><td class="num"><strong>5</strong></td><td class="num">4</td><td class="num">3</td><td class="num">3</td><td class="num">w80&ndash;w120</td><td>Most tactically gifted ARBiH cdr. Founded 7th. Op Vlašić.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_mahmuljin</code></td><td>Sakib Mahmuljin</td><td>3rd</td><td class="num">3</td><td class="num">4</td><td class="num">2</td><td class="num">4</td><td class="num">w110&ndash;&infin;</td><td>Battle of Vozuća. El Mujahid detachment.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_pasalic</code></td><td><strong>Arif Pašalić</strong></td><td>4th</td><td class="num">4</td><td class="num">3</td><td class="num">4</td><td class="num"><strong>5</strong></td><td class="num">w28&ndash;w80</td><td>Most senior JNA-trained corps cdr. First 4th Corps cdr.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_budakovic</code></td><td>Budaković "Tetak"</td><td>4th</td><td class="num">3</td><td class="num">4</td><td class="num">3</td><td class="num">3</td><td class="num">w80&ndash;w100</td><td>Aggressive. Strong Herzegovina ties.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_drekovic</code></td><td>Ramiz Dreković</td><td>5th&rarr;4th</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">0&ndash;w140</td><td>First 5th Corps cdr (w0-w80), then 4th Corps.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_polutak</code></td><td>Mustafa Polutak</td><td>4th</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">w140&ndash;&infin;</td><td>Final 4th Corps cdr. Post-Washington ops.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_dudakovic</code></td><td><strong>Atif Dudaković</strong></td><td>5th</td><td class="num"><strong>5</strong></td><td class="num"><strong>5</strong></td><td class="num"><strong>5</strong></td><td class="num">4</td><td class="num">w80&ndash;&infin;</td><td>Best general of the war (any side). Bihać + 1995 breakout.</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_gusic</code></td><td>Salko Gušić</td><td>6th</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">w60&ndash;w100</td><td>Short-lived 6th Corps (Jun 93-Mar 94).</td></tr>
+<tr><td><span class="tier tier--corps">CORPS</span></td><td><code>arbih_planincic</code></td><td>Rifet Planinčić</td><td>7th</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">w105&ndash;w130</td><td>7th Corps cdr after Alagić returned to 3rd.</td></tr>
+<!-- Pool A -->
+<tr style="background:var(--arbih-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>arbih_ajnadzic</code></td><td>Nedžad Ajnadžić</td><td>1st</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">&mdash;</td><td>Late-war 1st Corps cdr. Replaced Karavelić.</td></tr>
+<tr style="background:var(--arbih-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>arbih_selmanovic</code></td><td><strong>Mirsad Šelmanović</strong></td><td>5th</td><td class="num">4</td><td class="num">4</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>5th Corps CoS. OG North in Op Sana. Professional.</td></tr>
+<tr style="background:var(--arbih-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>arbih_cikotic</code></td><td>Selmo Čikotić</td><td>3rd</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>OG Zapad cdr. Later Min of Defense.</td></tr>
+<tr style="background:var(--arbih-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>arbih_cuskic</code></td><td>Fikret Čuškić</td><td>7th</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>7th Corps deputy. Natural successor.</td></tr>
+<tr style="background:var(--arbih-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>arbih_divjak</code></td><td>Jovan Divjak</td><td>1st</td><td class="num">3</td><td class="num">2</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>JNA Col (Serb). Multi-ethnic. Limited operationally.</td></tr>
+<tr style="background:var(--arbih-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>arbih_siber</code></td><td>Stjepan Šiber</td><td>&mdash;</td><td class="num">3</td><td class="num">2</td><td class="num">3</td><td class="num">3</td><td class="num">&mdash;</td><td>JNA Col (Croat). Deputy Commander ABiH.</td></tr>
+<tr style="background:var(--arbih-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>arbih_fazlic</code></td><td>Braco Fazlić</td><td>6th</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">&mdash;</td><td>6th Corps deputy. Available after w100.</td></tr>
+<!-- Pool B -->
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>arbih_oric</code></td><td><strong>Naser Orić</strong></td><td>2nd</td><td class="num">3</td><td class="num"><strong>5</strong></td><td class="num">4</td><td class="num">3</td><td class="num">&mdash;</td><td>Srebrenica/28th Div. Cannot cmd mainland corps.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>arbih_lendo</code></td><td>Refik Lendo</td><td>2nd</td><td class="num">4</td><td class="num">4</td><td class="num">3</td><td class="num">4</td><td class="num">w120+</td><td>25th Div cdr. Op Hurricane 95.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>arbih_becirovic</code></td><td>Ramiz Bećirović</td><td>2nd</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">4</td><td class="num">&mdash;</td><td>28th Div dep. Led column breakout Jul 95.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>arbih_imamovic</code></td><td>Zaim Imamović</td><td>2nd</td><td class="num">4</td><td class="num">4</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>14th Division cdr. KIA Oct 1995.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>arbih_bahto</code></td><td>Hamid Bahto</td><td>&mdash;</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">&mdash;</td><td>81st Div (Goražde). Enclave defense specialist.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>arbih_merdan</code></td><td>Dževad Merdan</td><td>3rd</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>3rd Corps deputy. UNPROFOR liaison.</td></tr>
+<!-- Pool C -->
+<tr><td><span class="tier tier--c">POOL-C</span></td><td><code>arbih_nanic</code></td><td><strong>Izet Nanić</strong></td><td>5th</td><td class="num">4</td><td class="num"><strong>5</strong></td><td class="num">3</td><td class="num">3</td><td class="num">&mdash;</td><td>505th Bde (Bihać). Legendary. KIA Aug 1995.</td></tr>
+<tr><td><span class="tier tier--c">POOL-C</span></td><td><code>arbih_hujdur</code></td><td>Midhad Hujdur "Hujka"</td><td>4th</td><td class="num">3</td><td class="num"><strong>5</strong></td><td class="num">3</td><td class="num">3</td><td class="num">&mdash;</td><td>41st Bde Mostar. KIA Jun 1993.</td></tr>
+<tr><td><span class="tier tier--c">POOL-C</span></td><td><code>arbih_sehovic</code></td><td>Enver Šehović</td><td>1st</td><td class="num">3</td><td class="num">4</td><td class="num">3</td><td class="num">3</td><td class="num">&mdash;</td><td>1st Corps bde cdr. KIA age 26.</td></tr>
+<tr><td><span class="tier tier--c">POOL-C</span></td><td><code>arbih_hadzic</code></td><td>Ismet Hadžić "Mutevelija"</td><td>1st</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">3</td><td class="num">&mdash;</td><td>Dobrinja defense cdr. Local hero.</td></tr>
+</tbody>
+<tfoot><tr><td colspan="4">34 ARBiH officers</td><td colspan="2">16 corps</td><td colspan="2">18 pool</td><td colspan="2">Growing pool &mdash; +1 officer every 12 turns</td></tr></tfoot>
+</table>
+</div></div>
+
+<!-- ============ HVO ============ -->
+<div class="section-hdr anim" style="--i:8">
+  <div class="section-hdr__dot" style="background:var(--hvo)"></div>
+  <div class="section-hdr__title" style="color:var(--hvo)">HVO &mdash; Croatian Defence Council</div>
+  <div class="section-hdr__sub">22 officers &bull; Zagreb pipeline, political appointments</div>
+</div>
+
+<div class="tw anim" style="--i:9">
+<div class="ts">
+<table class="dt">
+<thead><tr><th>Role</th><th>ID</th><th>Name</th><th>OZ</th><th>C</th><th>A</th><th>D</th><th>P</th><th>Turns</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><span class="tier tier--army">ARMY</span></td><td><code>hvo_petkovic</code></td><td><strong>Milivoj Petković</strong></td><td>&mdash;</td><td class="num">4</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">0&ndash;w64</td><td>Built HVO from scratch. JNA academy. ICTY: 20y.</td></tr>
+<tr><td><span class="tier tier--army">ARMY</span></td><td><code>hvo_praljak</code></td><td>Slobodan Praljak</td><td>&mdash;</td><td class="num">2</td><td class="num"><strong>5</strong></td><td class="num">2</td><td class="num"><strong>5</strong></td><td class="num">w64&ndash;w80</td><td>"The Praljak Problem." Theatre director. Suicide in ICTY.</td></tr>
+<tr><td><span class="tier tier--army">ARMY</span></td><td><code>hvo_roso</code></td><td><strong>Ante Roso</strong></td><td>&mdash;</td><td class="num"><strong>5</strong></td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">w80&ndash;w100</td><td>French Foreign Legion. Most competent HVO cdr. Guards Bdes.</td></tr>
+<tr><td><span class="tier tier--army">ARMY</span></td><td><code>hvo_petkovic_2</code></td><td>Petković (2nd)</td><td>&mdash;</td><td class="num">4</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">w100&ndash;w120</td><td>Returned for second stint.</td></tr>
+<tr><td><span class="tier tier--army">ARMY</span></td><td><code>hvo_blaskic_2</code></td><td>Blaškić (army)</td><td>&mdash;</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">3</td><td class="num">w120&ndash;&infin;</td><td>Promoted from OZ Central Bosnia.</td></tr>
+<tr><td><span class="tier tier--corps">OZ</span></td><td><code>hvo_blaskic</code></td><td><strong>Tihomir Blaškić</strong></td><td>Central</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">3</td><td class="num">0&ndash;w120</td><td>Held surrounded enclaves. ICTY: 45y&rarr;9y appeal.</td></tr>
+<tr><td><span class="tier tier--corps">OZ</span></td><td><code>hvo_tole</code></td><td>Žarko Tole</td><td>NW Herz</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">0&ndash;w44</td><td>First OZ NW Herzegovina cdr.</td></tr>
+<tr><td><span class="tier tier--corps">OZ</span></td><td><code>hvo_siljeg</code></td><td>Željko Šiljeg</td><td>NW Herz</td><td class="num">3</td><td class="num">4</td><td class="num">3</td><td class="num"><strong>5</strong></td><td class="num">w44&ndash;w96</td><td>Largest OZ. Mladić's wedding kum. Pol=5.</td></tr>
+<tr><td><span class="tier tier--corps">OZ</span></td><td><code>hvo_skender</code></td><td><strong>Zvonimir Skender</strong></td><td>NW Herz</td><td class="num">4</td><td class="num">4</td><td class="num">4</td><td class="num">4</td><td class="num">w96&ndash;w120</td><td>FFL veteran. Highest-ranking Croat in FFL.</td></tr>
+<tr><td><span class="tier tier--corps">OZ</span></td><td><code>hvo_glasnovic</code></td><td><strong>Željko Glasnović</strong></td><td>NW Herz</td><td class="num">4</td><td class="num">4</td><td class="num">3</td><td class="num">4</td><td class="num">w120&ndash;&infin;</td><td>Canadian Army &rarr; FFL &rarr; Gulf War.</td></tr>
+<tr><td><span class="tier tier--corps">OZ</span></td><td><code>hvo_lasic</code></td><td>Miljenko Lasić</td><td>SE Herz</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">0&ndash;&infin;</td><td>Businessman turned cdr. Mostar siege.</td></tr>
+<tr><td><span class="tier tier--corps">OZ</span></td><td><code>hvo_matuzovic</code></td><td>Đuro Matuzović</td><td>Posavina</td><td class="num">3</td><td class="num">2</td><td class="num">4</td><td class="num">4</td><td class="num">0&ndash;&infin;</td><td>Held isolated Orašje pocket entire war.</td></tr>
+<!-- Pool A -->
+<tr style="background:var(--hvo-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>hvo_nakic</code></td><td>Franjo Nakić</td><td>Central</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>OZ Central CoS. Natural Blaškić successor.</td></tr>
+<tr style="background:var(--hvo-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>hvo_obradovic</code></td><td>Nedjeljko Obradović</td><td>SE Herz</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>1st Knez Domagoj. Natural Lasić successor.</td></tr>
+<tr style="background:var(--hvo-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>hvo_stefanek</code></td><td>Vinko Štefanek</td><td>Posavina</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num"><strong>5</strong></td><td class="num">&mdash;</td><td>HV Col. OG Eastern Posavina. Zagreb loyalist.</td></tr>
+<tr style="background:var(--hvo-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>hvo_rajic</code></td><td>Ivica Rajić</td><td>Central</td><td class="num">2</td><td class="num"><strong>5</strong></td><td class="num">2</td><td class="num">4</td><td class="num">&mdash;</td><td>2nd OG. Stupni Do. ICTY: pled guilty.</td></tr>
+<tr style="background:var(--hvo-bg)"><td><span class="tier tier--a">POOL-A</span></td><td><code>hvo_cerni</code></td><td>Josip Černi</td><td>NW Herz</td><td class="num">3</td><td class="num">4</td><td class="num">3</td><td class="num">4</td><td class="num">w120+</td><td>Op Cincar joint cdr. Kupres recapture.</td></tr>
+<!-- Pool B -->
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>hvo_cerkez</code></td><td>Mario Čerkez</td><td>Central</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td class="num">3</td><td class="num">&mdash;</td><td>Vitešku Bde. Vitez enclave. ICTY: 15y.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>hvo_grubesic</code></td><td>Duško Grubešić</td><td>Central</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>Zrinski Bde (Bušovača). Steady.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>hvo_lozancic</code></td><td>Ivo Lozančić</td><td>Central</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">&mdash;</td><td>111th Žepče + multi-OZ. Order of Ban Jelačić.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>hvo_bradara</code></td><td>Mario Bradara</td><td>Central</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">&mdash;</td><td>Jelačić Bde. Central Bosnia.</td></tr>
+<tr><td><span class="tier tier--b">POOL-B</span></td><td><code>hvo_naletlic</code></td><td>Naletilić "Tuta"</td><td>SE Herz</td><td class="num">2</td><td class="num"><strong>5</strong></td><td class="num">1</td><td class="num">3</td><td class="num">&mdash;</td><td>Convicts Bn. Warlord. Destabilizes command.</td></tr>
+</tbody>
+<tfoot><tr><td colspan="4">22 HVO officers</td><td colspan="2">12 OZ</td><td colspan="2">10 pool</td><td colspan="2">Zagreb pipeline &mdash; +1 HV officer every 20 turns</td></tr></tfoot>
+</table>
+</div></div>
+
+<!-- ============ Design notes ============ -->
+<details class="coll anim" style="--i:10">
+  <summary>Two-Tier System Design Summary</summary>
+  <div class="coll__body">
+    <strong>Tier 1 (Named Officers, Corps+):</strong> Individual officers with 4 ratings (C/A/D/P) on 1-5 scale. Corps commander modifier: <code>0.90 + competence &times; 0.04</code> (range 0.94&times; to 1.10&times;). Assignment penalty for incompatible corps.<br><br>
+    <strong>Tier 2 (Brigade Officer Quality):</strong> Abstract <code>officer_quality</code> stat [0.0-1.0] on FormationState. VRS starts 0.65-0.80 (degrades), ARBiH starts 0.10-0.25 (grows &times;1.5 rate), HVO stable 0.35-0.50. Brigade modifier: <code>1.0 + (quality - 0.30) &times; 0.4</code>.<br><br>
+    <strong>Combined max:</strong> 1.20 (brigade) &times; 1.10 (corps) = 1.32&times; (peak VRS brigade under Talić).<br>
+    <strong>Combined min:</strong> 0.92 (brigade) &times; 0.94 (corps) = 0.865&times; (ARBiH enclave under incompetent cdr).
+  </div>
+</details>
+
+<details class="coll anim" style="--i:11">
+  <summary>Key Corrections From Extended Research (7 agents, 500+ sources)</summary>
+  <div class="coll__body">
+    <strong>7th Corps (ARBiH):</strong> Primary commander was <strong>Mehmed Alagić</strong>, not Halid Dedić (who was 305th Brigade commander). Alagić founded the 7th Corps (Feb 1994), then returned to the 3rd Corps.<br><br>
+    <strong>3rd Corps (ARBiH):</strong> Missing transitional commander <strong>Kadir Jusić</strong> (Feb-Sep 1994) between Alagić and Mahmuljin.<br><br>
+    <strong>4th Corps (ARBiH):</strong> Full succession: Pašalić &rarr; Budaković "Tetak" &rarr; Dreković &rarr; Polutak (4 commanders, not 2).<br><br>
+    <strong>OZ NW Herzegovina (HVO):</strong> Full succession: Tole &rarr; Šiljeg &rarr; Skender &rarr; Glasnović (4 commanders). Skender and Glasnović were FFL / international military veterans.<br><br>
+    <strong>Novica Simić (VRS IBK):</strong> Competence upgraded 3&rarr;4. Earned command through Op Corridor 92 performance. CoS confirmed: Budimir Gavrić.
+  </div>
+</details>
+
+<p class="anim" style="--i:12; margin-top: 24px; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-align: center;">
+  AWWV Officers System Plan &bull; 88 Historical Officers &bull; <code>docs/30_planning/OFFICERS_SYSTEM_COMPREHENSIVE_PLAN.md</code>
+</p>
+
+</div>
+</body>
+</html>
