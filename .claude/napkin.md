@@ -45,8 +45,8 @@
    Do instead: For test imports using `.js` paths into `src`, ensure target base path exists. If module moved, repoint import.
 
 ## Simulation Engine
-1. **[2026-03-01] Supply reserves: gated by supply_reserves_enabled**
-   Do instead: All reserve logic gated by `state.meta.supply_reserves_enabled`. When false (default), zero behavioral change. Constants: `supply_reserve_constants.ts`. Module: `supply_reserves.ts`. Pipeline: `compute-supply-reserves`.
+1. **[2026-03-03] Supply reserves: gated by supply_reserves_enabled + pocket-size threshold**
+   Do instead: All reserve logic gated by `state.meta.supply_reserves_enabled`. When false (default), zero behavioral change. Constants: `supply_reserve_constants.ts`. Module: `supply_reserves.ts`. Pipeline: `compute-supply-reserves`. Siege drain: `SIEGE_MIN_POCKET_SIZE=5` — connected components of critical OSIDs below this size get counter frozen at 1 (flat drain). Prevents RS depletion from scattered outposts.
 2. **[2026-03-01] OSID/SID mismatch — never use getEffectiveSettlementSide for control**
    Do instead: `political_controllers` keyed by OSIDs in war phase. Use `buildMunControlFromOsids()` or `buildMunDominantController()` for municipality control. `getEffectiveSettlementSide()` does SID lookup → always null → false encirclement.
 3. **[2026-03-01] Displacement: per-OSID census, non-overlapping buckets, static routing**
@@ -169,8 +169,8 @@
    Do instead: ZoC deleted. Movement via `brigade_movement_orders.ts` / `apply-brigade-movement`. Defense via `local_front_defense.ts` density. AoR legacy code still present — address when encountered.
 
 ## Calibration
-1. **[2026-03-03] Area-weighted is primary calibration metric (n407=90.5% ATH)**
-   Do instead: Use area-weighted match (km²) as primary. Count-based penalizes small eastern settlements disproportionately. n407=90.5% area-weighted (ATH, +1.9pp) vs 86.7% count-based — area-weighted captures historical territory outcome better. Compare tool shows both columns.
+1. **[2026-03-03] Area-weighted is primary calibration metric (n410=89.7%)**
+   Do instead: Use area-weighted match (km²) as primary. Count-based penalizes small eastern settlements disproportionately. n410=89.7% area-weighted vs 85.9% count-based (siege drain fix; ATH was 90.5% n409 with artificial RS depletion). Compare tool shows both columns.
 2. **[2026-03-01] Calibration knobs (master reference)**
    Do instead: Primary levers: POOL_SCALE_FACTOR, FACTION_POOL_SCALE, RS_EARLY_WAR_END_WEEK (20), per-faction stance/doctrine in bot_strategy.ts, initial_morale in OOB, per-faction morale resist floor, defense_terrain_bonus (+0.20–0.30), local_front_defense.ts thresholds (THIN=0.5, DENSE=1.0). Supply gating: critical→defend, strained→victory-only. Sector offensives: MIN_BRIGADES=3, supply_readiness launch=0.6/abort=0.4. Combat formula: officer quality, ethnic defense, bombardment casualty mult, bombardment exposure attrition.
 2. **[2026-03-02] Sector offensives active in year-1 (n359)**

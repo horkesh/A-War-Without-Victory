@@ -25,6 +25,15 @@ export const SIEGE_BASE_RATE = 0.3;
 export const SIEGE_ESCALATION_RATE = 0.1;
 /** Maximum siege drain rate per OSID. */
 export const MAX_SIEGE_PRESSURE_RATE = 2.0;
+/**
+ * Minimum connected-component size for escalating siege drain.
+ * Critical OSIDs in pockets smaller than this get their counter frozen at 1
+ * (flat drain, no escalation). Genuine siege pockets (Srebrenica, Central Bosnia)
+ * with ≥ this many connected critical OSIDs escalate normally.
+ * Distinguishes scattered outposts (RS perimeter around enclaves) from
+ * actual besieged territory (RBiH enclaves, HRHB Central Bosnia).
+ */
+export const SIEGE_MIN_POCKET_SIZE = 5;
 
 // ── Replenishment ────────────────────────────────────────────────────────────
 /** Global multiplier for production facility income. */

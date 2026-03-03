@@ -121,6 +121,7 @@ import { applyBrigadeMovementOrders } from '../combat/brigade_movement_orders.js
 import { processOsidColumnMovement, type OsidColumnMovementReport } from '../combat/osid_column_movement.js';
 import { updatePhaseIISupplyPressure } from '../combat/supply_pressure.js';
 import { updateSupplyReserves, updateSiegeTurnCounters, applyUnAirdrops } from '../../state/supply_reserves.js';
+import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 
 // --- Pipeline infrastructure imports ---
@@ -353,7 +354,9 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             if (!context.state.meta.supply_reserves_enabled) return;
             const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-            context.report.siege_turn_counters = updateSiegeTurnCounters(context.state, supplyByOsid);
+            const od = getOperationalData(context);
+            const adjacency = od ? buildOsidAdjacency(od.edges) : undefined;
+            context.report.siege_turn_counters = updateSiegeTurnCounters(context.state, supplyByOsid, adjacency);
         }
     },
     {

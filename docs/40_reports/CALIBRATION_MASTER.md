@@ -3,7 +3,8 @@
 **Purpose:** Persistent lessons-learned record for Phase II 40w calibration (April 1992 → January 1993).
 **Updated:** 2026-03-03
 **Canonical target run:** n335 (`apr1992_definitive_40w__205b3676c8fe3ce4__w40_n335`)
-**Latest calibration run:** n409 (90.5% area-weighted ATH maintained — Phase E: PATRON_AID_SCALE=12, JNA inheritance bonus for RS, heavy munitions gates bombardment/suppression. ATH unchanged from n407.)
+**Latest calibration run:** n403 (88.0% count-based, 90.4% area-weighted — Officers System two-tier: 63 named officers + per-brigade officer_quality. ARBiH 131k, VRS 88k, HVO 42k. Three regions improved: Central Bosnia +6pp, Sarajevo +3.2pp, Posavina +2.7pp. Drina -8pp from per-corps variance.)
+**Previous calibration run:** n409 (90.5% area-weighted ATH maintained — Phase E: PATRON_AID_SCALE=12, JNA inheritance bonus for RS, heavy munitions gates bombardment/suppression. ATH unchanged from n407.)
 **Previous calibration run:** n407 (90.5% area-weighted ATH, 86.7% count-based — Phase D: supply reserves enabled by default, UN airdrops for RBiH enclaves, bot supply-aware targeting.)
 **Previous calibration run:** n392 (88.6% count-based ATH — comprehensive combat formula: officer quality, ethnic homeland defense, bombardment exposure attrition. Krajina 98.5%. ARBiH KIA 9,831 toward 11,500 target.)
 **Previous calibration run:** n374 (87.6%, ceiling removal + emergent growth via pool mechanics.)
@@ -127,6 +128,45 @@ Note: Area-weighted metric better reflects historical territory; count-based pen
 | **n407** | **2da7a05b322452f6** | **426** | **230** | **88** | **ALL-TIME HIGH (area-weighted): 90.5% (46,470/51,337 km²).** Supply reserves enabled by default (`supply_reserves_enabled: true`). Count-based 86.7% (645/744). Phase D: UN airdrops (RBiH enclave supply 7.5 at w40), bot supply-aware targeting, MAINTENANCE_DRAIN 0.15→0.04. Krajina **96.1%**. Herzegovina **95.2%**. ARBiH KIA **12,054** (historically plausible for year-1 intensity; 11.5k was a floor estimate). VRS KIA 13,170. HVO KIA 5,904. Personnel: ARBiH 129k, VRS 77k, HVO 38k. Civilian killed: 28,159. |
 | **n408** | **2da7a05b322452f6** | **426** | **230** | **88** | **Phase E1: PATRON_AID_SCALE 1→12; JNA inheritance +40 heavy munitions for RS (start=100).** ATH maintained at 90.5% area-weighted. Total KIA 31,128. RS heavy_munitions=100 at w40 (JNA bonus), general_supply→0 (siege drain accumulation — deferred). |
 | **n409** | **2da7a05b322452f6** | **426** | **230** | **88** | **Phase E2: heavy munitions gates getBombardmentCasualtyMult + getArtillerySuppression via getHeavyMunitionsMult().** ATH maintained at 90.5%. E2 mechanism inert at 40w (RS heavy_munitions stays at 100; drain rate too low to deplete in 40 weeks from JNA start). |
+| **n403** | **d8657a4dfd1fc276** | **408** | **246** | **90** | **Officers System two-tier (Phases A–D).** 88.0% count-based (655/744), 90.4% area-weighted. 63 named officers + per-brigade officer_quality. Brigade quality: RS avg 0.390, RBiH 0.076, HRHB 0.211. Named officers: 25 active, 1 killed, 2 retired, 21 assigned. Three regions improved: Central Bosnia 93.3% (+6pp), Sarajevo 90.3% (+3.2pp), Posavina 84.4% (+2.7pp). Drina 74.0% (-8pp, per-corps variance). Personnel: ARBiH 131k, VRS 88k, HVO 42k. KIA: ARBiH 9,604, VRS 10,445, HVO 5,606. **Critical fix:** normalizeScenario whitelist — war_timeline was never loading in previous runs. |
+
+---
+
+## Officers System (n403)
+
+### Two-Tier Architecture
+
+**Tier 2 (brigade):** Per-brigade `officer_quality` [0.05, 0.90]. Growth from combat (0.01/turn) and frontline (0.005/turn), diminished at high quality. Loss from casualties. Faction learning rates: RBiH 1.5×, RS 0.7×, HRHB 1.0×. VRS brain drain -0.001/turn after w40.
+
+**Tier 1 (named officers):** 63 historical officers. Corps mod: `0.90 + comp×0.03 + rating×0.01` (range 0.94–1.10). Acting commander flat 0.92. HVO political sorting + 4-turn delay. VRS finite pool (no regeneration). ARBiH pool regeneration every 12 turns.
+
+**Bot AI integration:** Corps aggressiveness shift, ARBiH warlord friction (pre-w78), VRS Mladić override for general_offensive operations.
+
+### Officer Quality at w40 (n403)
+
+| Faction | Start | w40 Avg | Expected Range | Status |
+|---------|-------|---------|----------------|--------|
+| VRS | 0.55 | 0.390 | 0.45–0.55 | Below (attrition heavier than expected) |
+| HVO | 0.225 | 0.211 | 0.35–0.45 | Below (growth rate low) |
+| ARBiH | 0.05 | 0.076 | 0.30–0.40 | Below (40w insufficient for full learning arc) |
+
+Quality values are lower than projected. The learning effect will be more visible over 52+ week runs. The two-tier interaction produces correct relative ordering (VRS > HVO > ARBiH) and the calibration guard passes.
+
+### Calibration Impact
+
+| Region | Pre-Officers | n403 | Delta | Analysis |
+|--------|-------------|------|-------|----------|
+| Central Bosnia | 87.3% | **93.3%** | **+6.0pp** | Per-corps variance helps ARBiH 3rd Corps hold |
+| Sarajevo | 87.1% | **90.3%** | **+3.2pp** | SRK corps commander modifiers tune siege |
+| Posavina | 81.7% | **84.4%** | **+2.7pp** | VRS 1KK officer quality boosts corridor hold |
+| Krajina | 98.5% | 94.7% | -3.8pp | Minor shifts at Bihać pocket edges |
+| Central Corridor | 90.4% | 88.3% | -2.1pp | Doboj/Maglaj area shifts |
+| Herzegovina | 92.5% | 91.4% | -1.1pp | Kupres edges |
+| Drina | 82.0% | 74.0% | -8.0pp | Enclave periphery flips from per-corps variance |
+
+### Critical Finding: normalizeScenario Whitelist Bug
+
+`war_timeline` field was being stripped by the scenario loader's `normalizeScenario()` whitelist. This means **all runs n335–n409 used hardcoded timeline fallbacks instead of the externalized JSON data.** The fix adds `war_timeline`, `init_officers`, `supply_reserves_enabled`, and `osid_control_overrides` to the normalizer. This may explain some prior calibration differences since timeline data was never actually being loaded.
 
 ---
 

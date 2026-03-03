@@ -26,6 +26,7 @@ import {
     SIEGE_BASE_RATE,
     SIEGE_ESCALATION_RATE,
     MAX_SIEGE_PRESSURE_RATE,
+    SIEGE_MIN_POCKET_SIZE,
     PATRON_AID_SCALE,
     PATRON_AID_GENERAL_FRACTION,
     PATRON_AID_HEAVY_FRACTION,
@@ -86,16 +87,60 @@ export interface SiegeTurnCounterReport {
     active_sieges: number;
 }
 
-// ── Siege Turn Counters (Phase B) ───────────────────────────────────────────
+// ── Siege Turn Counters (Phase B + pocket-size threshold) ───────────────────
+
+/**
+ * Compute connected components of critical OSIDs for a faction using BFS.
+ * Returns an array of sets, each set = one connected component.
+ * Deterministic: sorted iteration over OSIDs and neighbors.
+ */
+function computeCriticalPockets(
+    criticalOsids: string[],
+    adjacency: Map<string, string[]>
+): Set<string>[] {
+    const criticalSet = new Set(criticalOsids);
+    const visited = new Set<string>();
+    const components: Set<string>[] = [];
+
+    for (const start of criticalOsids) {
+        if (visited.has(start)) continue;
+        const component = new Set<string>();
+        const queue = [start];
+        visited.add(start);
+        while (queue.length > 0) {
+            const node = queue.shift()!;
+            component.add(node);
+            const neighbors = adjacency.get(node) ?? [];
+            for (const n of neighbors) {
+                if (criticalSet.has(n) && !visited.has(n)) {
+                    visited.add(n);
+                    queue.push(n);
+                }
+            }
+        }
+        components.push(component);
+    }
+
+    return components;
+}
 
 /**
  * Update siege turn counters based on OSID supply state.
  * Critical supply → increment counter. Else → reset (delete).
+ *
+ * Pocket-size threshold: When adjacency data is provided, critical OSIDs in
+ * connected components smaller than SIEGE_MIN_POCKET_SIZE get their counter
+ * frozen at 1 (flat drain, no escalation). Genuine siege pockets (large
+ * connected components) escalate normally.
+ *
+ * Without adjacency data: all critical OSIDs escalate (backward compat).
+ *
  * Mutates state.siege_turn_counters. Deterministic (sorted iteration).
  */
 export function updateSiegeTurnCounters(
     state: GameState,
-    supplyByOsid?: SupplyStateByOsidReport | null
+    supplyByOsid?: SupplyStateByOsidReport | null,
+    adjacency?: Map<string, string[]>
 ): SiegeTurnCounterReport {
     const report: SiegeTurnCounterReport = { counters_updated: 0, counters_reset: 0, active_sieges: 0 };
 
@@ -109,6 +154,29 @@ export function updateSiegeTurnCounters(
     // Track which keys are still active this turn
     const activeKeys = new Set<string>();
 
+    // Pre-compute small-pocket OSIDs when adjacency available
+    const smallPocketOsids = new Set<string>();
+    if (adjacency) {
+        const sortedFactions = [...supplyByOsid.factions].sort((a, b) => a.faction_id.localeCompare(b.faction_id));
+        for (const facEntry of sortedFactions) {
+            if (!facEntry.by_osid) continue;
+            const criticalOsids = facEntry.by_osid
+                .filter(e => e.state === 'critical')
+                .map(e => e.osid)
+                .sort((a, b) => a.localeCompare(b));
+            if (criticalOsids.length === 0) continue;
+
+            const pockets = computeCriticalPockets(criticalOsids, adjacency);
+            for (const pocket of pockets) {
+                if (pocket.size < SIEGE_MIN_POCKET_SIZE) {
+                    for (const osid of pocket) {
+                        smallPocketOsids.add(`${facEntry.faction_id}:${osid}`);
+                    }
+                }
+            }
+        }
+    }
+
     const sortedFactions = [...supplyByOsid.factions].sort((a, b) => a.faction_id.localeCompare(b.faction_id));
     for (const facEntry of sortedFactions) {
         if (!facEntry.by_osid) continue;
@@ -116,7 +184,12 @@ export function updateSiegeTurnCounters(
         for (const entry of sortedOsids) {
             const key = `${facEntry.faction_id}:${entry.osid}`;
             if (entry.state === 'critical') {
-                counters[key] = (counters[key] ?? 0) + 1;
+                if (smallPocketOsids.has(key)) {
+                    // Small pocket: freeze counter at 1 (flat drain, no escalation)
+                    counters[key] = 1;
+                } else {
+                    counters[key] = (counters[key] ?? 0) + 1;
+                }
                 activeKeys.add(key);
                 report.counters_updated++;
                 report.active_sieges++;

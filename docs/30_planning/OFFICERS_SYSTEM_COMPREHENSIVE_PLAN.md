@@ -1,7 +1,8 @@
 # Officers System — Comprehensive Design Plan
 
 **Created:** 2026-03-03
-**Status:** Planning
+**Status:** IMPLEMENTED (Phases A–D complete, 2026-03-03; n403 88.0% OSID match)
+**Implementation report:** `docs/40_reports/implemented/20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md`
 **Supersedes:** `OFFICER_QUALITY_AND_GENERALS_PLAN.md` (brigade-only sketch)
 **Research base:** Balkan Battlegrounds I/II (CIA), ICTY trial records, Wikipedia biographies, IWPR trial monitoring reports, academic sources. Game design survey: HoI4, Gary Grigsby WitE2, AGEOD Civil War II, Decisive Campaigns: Barbarossa, Command Ops 2, Unity of Command 2, Strategic Command, Panzer Corps 2.
 

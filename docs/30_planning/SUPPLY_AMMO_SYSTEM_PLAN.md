@@ -188,6 +188,7 @@ All constants are collected in a single file for calibration:
 | `SIEGE_BASE_RATE` | 0.3 | Consumption | Per-turn drain for besieged settlements |
 | `SIEGE_ESCALATION_RATE` | 0.1 | Consumption | Per-turn escalation multiplier |
 | `MAX_SIEGE_PRESSURE_RATE` | 2.0 | Consumption | Cap on siege drain |
+| `SIEGE_MIN_POCKET_SIZE` | 5 | Siege threshold | Min connected-component size for escalating drain; below this → counter frozen at 1 |
 | `PRODUCTION_SCALE` | 1.0 | Replenishment | Global multiplier for facility income |
 | `PATRON_AID_SCALE` | 12 | Replenishment | Global multiplier for patron aid (raised from 1.0 in Phase E1) |
 | `RESERVE_ADEQUATE_THRESHOLD` | 50 | Reserve→State | Reserve ≥ this → adequate (if reachable) |
