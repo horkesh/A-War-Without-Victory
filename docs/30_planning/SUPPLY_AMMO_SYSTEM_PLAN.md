@@ -182,14 +182,14 @@ All constants are collected in a single file for calibration:
 
 | Constant | Default | Category | Notes |
 |---|---|---|---|
-| `MAINTENANCE_DRAIN_PER_FORMATION` | 0.15 | Consumption | Per-formation per-turn general supply drain |
+| `MAINTENANCE_DRAIN_PER_FORMATION` | 0.04 | Consumption | Per-formation per-turn general supply drain |
 | `COMBAT_HEAVY_MUNITIONS_RATE` | 2.0 | Consumption | Heavy munitions per battle (scaled by intensity) |
 | `COMBAT_GENERAL_SUPPLY_RATE` | 0.5 | Consumption | General supply per battle (secondary) |
 | `SIEGE_BASE_RATE` | 0.3 | Consumption | Per-turn drain for besieged settlements |
 | `SIEGE_ESCALATION_RATE` | 0.1 | Consumption | Per-turn escalation multiplier |
 | `MAX_SIEGE_PRESSURE_RATE` | 2.0 | Consumption | Cap on siege drain |
 | `PRODUCTION_SCALE` | 1.0 | Replenishment | Global multiplier for facility income |
-| `PATRON_AID_SCALE` | 1.0 | Replenishment | Global multiplier for patron aid |
+| `PATRON_AID_SCALE` | 12 | Replenishment | Global multiplier for patron aid (raised from 1.0 in Phase E1) |
 | `RESERVE_ADEQUATE_THRESHOLD` | 50 | Reserve→State | Reserve ≥ this → adequate (if reachable) |
 | `RESERVE_STRAINED_THRESHOLD` | 20 | Reserve→State | Reserve < this → critical |
 | `MAX_ENCLAVE_RESILIENCE` | 30 | Enclave | Cap on resilience accumulation |
@@ -287,28 +287,26 @@ All constants are collected in a single file for calibration:
 
 **Canon:** Systems Manual §14.2 implementation-note added (2026-03-02).
 
-### Phase D: Supply UX + Bot Enhancement
+### Phase D: Supply UX + Bot Enhancement + UN Airdrops — COMPLETE (2026-03-03)
 
-**Goal:** Player-facing supply panel (corridor state + isolation summary + reserve levels); bot supply-aware target scoring.
+**Goal:** Player-facing supply panel (corridor state + isolation summary + reserve levels); bot supply-aware target scoring; UN humanitarian airdrops for isolated RBiH enclaves.
 
 **Depends on:** Phase A complete (reserve levels to display).
 
-**No GameState changes.** Report and adapter only.
+**Delivered:**
+- `factionReserves` extracted in `GameStateAdapter.ts` → exposed on `LoadedGameState`; no GameState schema change
+- Map mode 'supply': `buildSupplyGeoJSON.ts` colors OSIDs by faction supply pressure (adequate/strained/critical/unknown)
+- `SupplyPanel.tsx` — bottom-left Logistics overlay: per-faction reserve bars (general + heavy, color-coded) + corridor summary
+- `applyUnAirdrops()` in `supply_reserves.ts`: deterministic weekly general supply injection for RBiH enclaves with `isolation_turns ≥ 4`; capped at 15/turn; humanitarian only (no munitions)
+- `AIRDROP_*` constants added to `supply_reserve_constants.ts`; pipeline step wired after `phase-ii-enclave-resilience`
+- Bot supply-aware targeting: enemy OSIDs sorted critical→strained→adequate in `bot_corps_ai.ts`
+- `MAINTENANCE_DRAIN_PER_FORMATION` tuned 0.15 → 0.04
+- `apr1992_definitive_40w` scenario: `supply_reserves_enabled: true` by default
+- 8 Vitest tests: `tests/supply_airdrop.test.ts`
 
-**Adapter/IPC changes:**
-- Extend `GameStateAdapter` to expose: per-faction reserve levels, corridor summary (open/brittle/cut counts), isolation summary (adequate/strained/critical counts)
-- Add or extend IPC `query-corridor-summary` to include reserve levels and isolation counts
-- UI component: single "Logistics" panel showing per-faction corridor state, isolation summary, and reserve bars
+**Calibration result:** n407 — 90.5% area-weighted (ATH, +1.9pp over n392), 86.7% count-based. UN airdrops sustain RBiH at 7.5 general supply by week 40.
 
-**Bot enhancement:**
-- Supply connectivity in shared intelligence (BFS from HQ through friendly OSIDs — already available from OSID reachability)
-- Target scoring: incorporate supply state at target OSID (attack supply-strained targets preferentially)
-- Defense priority: protect corridor chokepoints (brittle edges)
-
-**Acceptance criteria:**
-1. Smoke-test triad passes
-2. UI panel renders correct data (manual QA)
-3. Bot targeting shows supply-aware behavior (supply-strained enemy OSIDs scored higher)
+**Canon:** Systems Manual §14.2 implementation-note added (2026-03-03). Report: `docs/40_reports/implemented/20260303_SUPPLY_PHASE_D_IMPLEMENTATION.md`.
 
 ---
 

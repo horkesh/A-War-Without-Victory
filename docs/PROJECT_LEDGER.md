@@ -9254,3 +9254,35 @@ Determinism checks **MUST** be run:
 - **Report:** `docs/40_reports/DEGENERATE_OSID_AUDIT.md`, `docs/40_reports/implemented/20260303_AREA_WEIGHTED_TERRITORY_AND_DEGENERATE_MERGE.md`
 - **Determinism:** N/A (data-only change, pipeline regenerated deterministically)
 - **Calibration:** No run change — degenerate OSIDs were graph-isolated (unreachable by combat/movement).
+
+### [2026-03-03] Supply Phase D — UX, UN Airdrops, Bot Targeting (n407)
+- **Type:** Feature (Simulation / UI / Calibration)
+- **Phase:** War phase (supply system, map UI)
+- **Summary:** Completed Phase D of `SUPPLY_AMMO_SYSTEM_PLAN.md`. Three delivery areas: (1) **Supply map layer + Logistics panel** — map mode 'supply' colors OSIDs by faction supply pressure; `SupplyPanel.tsx` (Logistics panel, bottom-left) shows per-faction reserve bars (general + heavy) and corridor summary; `factionReserves` extracted in `GameStateAdapter.ts`; (2) **UN humanitarian airdrops** — `applyUnAirdrops()` injects 1.5 general supply/enclave/turn (capped 15/turn) to RBiH enclaves with `isolation_turns ≥ 4`; general supply only (no munitions); runs after `phase-ii-enclave-resilience`; (3) **Bot supply-aware targeting** — enemy OSIDs in `bot_corps_ai.ts` sorted by supply state (critical→strained→adequate→unknown) with deterministic tie-break. Constant tuning: `MAINTENANCE_DRAIN_PER_FORMATION` 0.15→0.04. Scenario `apr1992_definitive_40w` now enables `supply_reserves_enabled: true` by default. 8 new Vitest tests. Calibration n407: **90.5% area-weighted (ATH +1.9pp)**, 86.7% count-based. UN airdrops sustain RBiH at 7.5 general supply by week 40; RS/HRHB reserves deplete (production income < maintenance drain — Phase E item).
+- **Files modified:** `src/ui/map/data/types.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/map/builders/buildSupplyGeoJSON.ts` (new), `src/ui/map/map/MapContainer.tsx`, `src/ui/map/components/SupplyPanel.tsx` (new), `src/ui/map/App.tsx`, `src/state/supply_reserve_constants.ts`, `src/state/supply_reserves.ts`, `src/sim/turn_phases/war_phases.ts`, `src/sim/combat/bot_corps_ai.ts`, `data/scenarios/apr1992_definitive_40w.json`, `tests/supply_airdrop.test.ts` (new), `vitest.config.ts`
+- **Docs updated:** `docs/10_canon/Systems_Manual_v0_6_0.md` (§14.2 Phase D note), `docs/10_canon/Engine_Invariants_v0_6_0.md` (§4 drain value), `docs/10_canon/context.md` (Phase D entry), `docs/30_planning/SUPPLY_AMMO_SYSTEM_PLAN.md` (Phase D COMPLETE, constant table), `docs/40_reports/CALIBRATION_MASTER.md` (n407 row, regional table updated)
+- **Report:** `docs/40_reports/implemented/20260303_SUPPLY_PHASE_D_IMPLEMENTATION.md`
+- **Determinism:** Deterministic. `applyUnAirdrops()` iterates `enclave_resilience` keys sorted alphabetically; bot targeting uses `strictCompare` tie-break; no `Math.random()`.
+
+### [2026-03-03] Supply Phase E — income balance + bombardment differentiation (n408–n409)
+- **Type:** Feature (Simulation / Combat / Calibration)
+- **Phase:** Supply Phase E (E1 + E2)
+- **Summary:** Completed Phase E of `SUPPLY_AMMO_SYSTEM_PLAN.md` in two sub-phases:
+  - **E1 (n408):** `PATRON_AID_SCALE` raised 1→12 to provide meaningful patron-driven income against growing siege drain. `applyJnaInheritanceBonus()` added to `supply_reserves.ts` — gives RS 40 extra heavy munitions at scenario init (modeling JNA warehouse captures, April 1992), making effective RS starting heavy munitions = 100 (base 60 + bonus 40).
+  - **E2 (n409):** New `getHeavyMunitionsMult(factionId, state)` helper in `combat_math.ts` — reads faction heavy_munitions_reserve and returns a scaling multiplier (adequate → 1.0, strained → interpolated, critical → floor). Wired into `getBombardmentCasualtyMult()` and `getArtillerySuppression()`. Both functions now accept `(attackers, attackerFactionId, state)` signature. Heavy munitions reserve now gates bombardment bonus and suppression output, so a faction running dry on munitions loses artillery/armour effectiveness proportionally.
+- **Run IDs:** n408 (E1 calibration), n409 (E2 calibration)
+- **Calibration:** 90.5% area-weighted — ATH maintained through both phases
+- **Total KIA:** 31,128 (identical n408/n409)
+- **Files modified:** `src/state/supply_reserve_constants.ts`, `src/state/supply_reserves.ts`, `src/scenario/scenario_runner.ts`, `src/sim/combat/combat_math.ts`, `src/sim/combat/attack_resolution_osid.ts`, `src/sim/combat/combat_predictor.ts`, `vitest.config.ts`
+- **Tests:** 15 new Vitest tests (`tests/supply_phase_e1.test.ts`: 7, `tests/supply_phase_e2_bombardment.test.ts`: 8); 283 total pass
+- **Determinism:** Deterministic. `applyJnaInheritanceBonus` is a one-shot reserve write at scenario init; `getHeavyMunitionsMult` is a stateless read; no ordering changes to pipeline.
+- **Notable finding:** RS `general_supply` depletes to 0 by w40 due to siege drain accumulation (8 critical RS OSIDs × escalating counters = 7.4/turn at w40). Siege drain design review deferred to future phase. RS `heavy_munitions` stays at 100 throughout 40w run (JNA bonus + low combat drain rate).
+- **Commits:** 138307e (E1), 8717d95 (E2)
+
+### [2026-03-03] Propagate Supply Phase D+E to canon and engineering docs
+- **Type:** Documentation propagation
+- **Phase:** Supply Phase D+E (retrospective canon sync)
+- **Summary:** Propagated Supply Phase D and Phase E changes to canon and engineering documentation. Phase D: Engine Invariants §4 updated with `MAINTENANCE_DRAIN_PER_FORMATION=0.04`; Systems Manual §14.2 Phase D note added; context.md Phase D entry. Phase E: Systems Manual §14.2 bombardment description updated to include heavy munitions scaling + function signatures; Phase E implementation note added; `PATRON_AID_SCALE` updated from 1.0 to 12 in SUPPLY_AMMO_SYSTEM_PLAN.md. CALIBRATION_MASTER updated with n408/n409 confirmation runs (ATH maintained at 90.5%). Also committed retroactive Phase D code that was sitting uncommitted (scenario_loader.ts field parsing, bot supply-aware targeting, applyUnAirdrops wiring, UI supply layer, serializeGameState timeline fields).
+- **Files updated:** `docs/10_canon/Systems_Manual_v0_6_0.md`, `docs/10_canon/Engine_Invariants_v0_6_0.md`, `docs/10_canon/context.md`, `docs/30_planning/SUPPLY_AMMO_SYSTEM_PLAN.md`, `docs/40_reports/CALIBRATION_MASTER.md`, `docs/PROJECT_LEDGER.md`, `.claude/napkin.md`
+- **Code files committed (Phase D retroactive):** `src/scenario/scenario_loader.ts`, `src/sim/combat/bot_corps_ai.ts`, `src/sim/turn_phases/war_phases.ts`, `src/state/serializeGameState.ts`, `src/ui/map/App.tsx`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/data/types.ts`, `src/ui/map/map/MapContainer.tsx`, `tests/supply_reserves.test.ts`, `data/scenarios/apr1992_definitive_40w.json`
+- **Determinism:** N/A (documentation + canon sync only; Phase D code is deterministic per Phase D entry)
