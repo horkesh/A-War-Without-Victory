@@ -11,7 +11,7 @@
 import { getPrewarCapital, PREWAR_CAPITAL_INITIAL } from '../../../phase0/capital.js';
 import type { FactionId, GameState } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
-import { extractWarData, type WarDataSnapshot } from '../data/war_data_extractor.js';
+import { extractWarData, type OfficerListEntry, type WarDataSnapshot } from '../data/war_data_extractor.js';
 import {
     FACTION_COLORS,
     FACTION_DISPLAY_NAMES,
@@ -391,6 +391,10 @@ export class FactionOverviewPanel {
         const formationsSection = this.renderOwnFormationsSection(snap);
         if (formationsSection) panel.appendChild(formationsSection);
 
+        // Officers (Phase E) — own faction only
+        const officersSection = this.renderOfficersSection(snap);
+        if (officersSection) panel.appendChild(officersSection);
+
         // Strategic Warnings — data-driven from real state
         const warnings = this.generateWarPhaseWarnings(snap);
         const warningsDiv = document.createElement('div');
@@ -433,6 +437,41 @@ export class FactionOverviewPanel {
         if (ownFormations.length > maxList) {
             const li = document.createElement('li');
             li.textContent = `\u2026 +${ownFormations.length - maxList} more`;
+            ul.appendChild(li);
+        }
+        section.appendChild(ul);
+        return section;
+    }
+
+    /**
+     * Officers section for Phase I+ (Phase E): list commanders for player faction.
+     */
+    private renderOfficersSection(snap: WarDataSnapshot): HTMLElement | null {
+        const pf = snap.playerFaction;
+        const list = snap.officersByFaction?.[pf];
+        if (!list || list.length === 0) return null;
+
+        const section = document.createElement('div');
+        section.className = 'faction-overview-section';
+        section.innerHTML = `<h3>COMMAND (${list.length})</h3>`;
+
+        const ul = document.createElement('ul');
+        const statusLabel = (s: string): string => {
+            switch (s) {
+                case 'active': return 'Active';
+                case 'reserve': return 'Reserve';
+                case 'killed': return 'Killed';
+                case 'retired': return 'Retired';
+                case 'captured': return 'Captured';
+                case 'defected': return 'Defected';
+                default: return s;
+            }
+        };
+        for (const o of list) {
+            const li = document.createElement('li');
+            const corpsLabel = o.assigned_corps_id ? ` \u2014 ${o.assigned_corps_id}` : ' \u2014 \u2014';
+            const actingLabel = o.acting_commander ? ' (Acting)' : '';
+            li.textContent = `${o.name} [${o.rank}] ${statusLabel(o.status)}${actingLabel}${corpsLabel}`;
             ul.appendChild(li);
         }
         section.appendChild(ul);

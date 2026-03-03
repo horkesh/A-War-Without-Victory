@@ -48,6 +48,29 @@ export function setPreviousSnapshot(snap: PreviousTurnSnapshot): void {
     _previousSnapshot = snap;
 }
 
+/** Last turn report from advance-turn (for AAR / succession in newspaper). */
+export interface LastTurnReport {
+    phase?: string;
+    turn?: number;
+    details?: {
+        officer_succession?: {
+            replacements?: Array<{ corps_id: string; old_officer: string; new_officer: string }>;
+            casualties?: string[];
+            departures?: string[];
+        };
+    };
+}
+
+let _lastTurnReport: LastTurnReport | null = null;
+
+export function getLastTurnReport(): LastTurnReport | null {
+    return _lastTurnReport;
+}
+
+export function setLastTurnReport(report: LastTurnReport | null): void {
+    _lastTurnReport = report;
+}
+
 /**
  * Capture a PreviousTurnSnapshot from the current GameState.
  * Call this BEFORE advancing the turn, so the next turn can diff against it.

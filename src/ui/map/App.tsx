@@ -24,6 +24,7 @@ interface DesktopBridge {
   queryCombatEstimate?: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; win_probability?: number; error?: string }>;
   getCurrentGameState?: () => Promise<string | null>;
   setGameStateUpdatedCallback?: (cb: ((stateJson: string) => void) | null) => void;
+  setTurnReportUpdatedCallback?: (cb: ((report: unknown) => void) | null) => void;
 }
 
 /** Desktop bridge (Electron preload); undefined when run in browser. */
@@ -44,6 +45,7 @@ function App() {
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const setConfirmPrimaryAction = useGameStore((s) => s.setConfirmPrimaryAction);
   const mapMode = useGameStore((s) => s.mapMode);
+  const setLastTurnReport = useGameStore((s) => s.setLastTurnReport);
 
   // Desktop state bootstrap + subscription (standalone window and embedded bridge).
   useEffect(() => {
@@ -61,6 +63,11 @@ function App() {
     awwv.setGameStateUpdatedCallback((stateJson: string) => {
       void applyStateJson(stateJson);
     });
+    if (awwv.setTurnReportUpdatedCallback) {
+      awwv.setTurnReportUpdatedCallback((report: unknown) => {
+        if (active && report != null && typeof report === 'object') setLastTurnReport(report as Parameters<typeof setLastTurnReport>[0]);
+      });
+    }
     void awwv.getCurrentGameState()
       .then((stateJson) => applyStateJson(stateJson))
       .catch((err) => {
@@ -70,8 +77,9 @@ function App() {
     return () => {
       active = false;
       awwv.setGameStateUpdatedCallback?.(null);
+      awwv.setTurnReportUpdatedCallback?.(null);
     };
-  }, [loadSave, setLoadError]);
+  }, [loadSave, setLoadError, setLastTurnReport]);
 
   // C4.3: Combat odds — call existing query-combat-estimate when modal opens; show "—" if unavailable.
   // Phase 5 could add a dedicated combat-estimate IPC if needed; we use existing query-combat-estimate only.

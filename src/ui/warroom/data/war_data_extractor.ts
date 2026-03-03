@@ -131,6 +131,16 @@ export interface BrigadeMovementSnapshot {
     encircled: FormationId[];
 }
 
+/** Officer list entry for warroom (Officers Phase E). Sorted by id per faction. */
+export interface OfficerListEntry {
+    id: string;
+    name: string;
+    rank: string;
+    status: string;
+    assigned_corps_id: string | null;
+    acting_commander: boolean;
+}
+
 // Faction-specific diplomacy snapshots
 export interface RSPatronSnapshot {
     patronCommitment: number;
@@ -188,6 +198,8 @@ export interface WarDataSnapshot {
 
     brigadeMovement: BrigadeMovementSnapshot;
     exposedFrontSettlements: SettlementId[];
+    /** Officers by faction (fog of war: only player faction populated). Phase E. */
+    officersByFaction?: Partial<Record<FactionId, OfficerListEntry[]>>;
 }
 
 // ---------------------------------------------------------------------------
@@ -249,6 +261,9 @@ export function extractWarData(
     // --- Exposed front settlements ---
     const exposedFrontSettlements = extractExposedFront(gameState, playerFaction);
 
+    // --- Officers by faction (fog of war: player faction only) ---
+    const officersByFaction = extractOfficersByFaction(gameState, playerFaction);
+
     return {
         playerFaction,
         turn,
@@ -266,6 +281,7 @@ export function extractWarData(
         engagedFrontEdges,
         brigadeMovement,
         exposedFrontSettlements,
+        officersByFaction: Object.keys(officersByFaction).length > 0 ? officersByFaction : undefined,
     };
 }
 
@@ -687,6 +703,30 @@ function extractBrigadeMovement(state: GameState, pf: FactionId): BrigadeMovemen
     }
 
     return { packing, inTransit, unpacking, encircled: encircledList };
+}
+
+function extractOfficersByFaction(
+    state: GameState,
+    playerFaction: FactionId
+): Partial<Record<FactionId, OfficerListEntry[]>> {
+    const data = state.named_officer_data ?? [];
+    const officers = state.named_officers ?? {};
+    const list: OfficerListEntry[] = [];
+    for (const d of data) {
+        const id = typeof (d as { id?: string }).id === 'string' ? (d as { id: string }).id : '';
+        if (!id || (d as { faction?: string }).faction !== playerFaction) continue;
+        const os = officers[id] as { status?: string; assigned_corps_id?: string | null; acting_commander?: boolean } | undefined;
+        list.push({
+            id,
+            name: typeof (d as { name?: string }).name === 'string' ? (d as { name: string }).name : id,
+            rank: typeof (d as { rank?: string }).rank === 'string' ? (d as { rank: string }).rank : 'corps_commander',
+            status: typeof os?.status === 'string' ? os.status : 'active',
+            assigned_corps_id: typeof os?.assigned_corps_id === 'string' ? os.assigned_corps_id : null,
+            acting_commander: Boolean(os?.acting_commander),
+        });
+    }
+    list.sort((a, b) => sc(a.id, b.id));
+    return list.length > 0 ? { [playerFaction]: list } : {};
 }
 
 function extractExposedFront(state: GameState, pf: FactionId): SettlementId[] {

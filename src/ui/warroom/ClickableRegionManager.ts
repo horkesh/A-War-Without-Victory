@@ -44,11 +44,11 @@ import { ReportsModal } from './components/ReportsModal.js';
 import { TacticalMap } from './components/TacticalMap.js';
 import { WarPlanningMap } from './components/WarPlanningMap.js';
 import { extractWarData } from './data/war_data_extractor.js';
-import { capturePreviousTurnSnapshot, getPreviousSnapshot, setPreviousSnapshot } from './data/warroom_state.js';
+import { capturePreviousTurnSnapshot, getPreviousSnapshot, setPreviousSnapshot, setLastTurnReport, type LastTurnReport } from './data/warroom_state.js';
 import { runPhase0TurnAndAdvance } from './run_phase0_turn.js';
 
 type DesktopBridge = {
-    advanceTurn?: (payload?: { phase0Directives?: StagedInvestment[] }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
+    advanceTurn?: (payload?: { phase0Directives?: StagedInvestment[] }) => Promise<{ ok: boolean; error?: string; stateJson?: string; report?: unknown }>;
     openTacticalMapWindow?: () => Promise<unknown>;
 };
 
@@ -400,6 +400,7 @@ export class ClickableRegionManager {
 
                         const newState = deserializeState(result.stateJson);
                         this.playerFaction = (newState.meta.player_faction ?? this.playerFaction ?? newState.factions[0]?.id) as FactionId | undefined;
+                        if (result.report) setLastTurnReport(result.report as LastTurnReport);
                         const pf = this.playerFaction ?? 'RBiH';
 
                         const lastEvents: Phase0Event[] = newState.phase0_events_log?.[newState.phase0_events_log.length - 1] ?? [];

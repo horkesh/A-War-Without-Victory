@@ -2,6 +2,19 @@ import { create } from 'zustand';
 import type { LoadedGameState } from '../data/types';
 import { parseGameState } from '../data/GameStateAdapter';
 
+/** Last turn report shape from desktop (advance-turn). Used for succession in FormationDetail. */
+export interface LastTurnReport {
+  phase?: string;
+  turn?: number;
+  details?: {
+    officer_succession?: {
+      replacements?: Array<{ corps_id: string; old_officer: string; new_officer: string }>;
+      casualties?: string[];
+      departures?: string[];
+    };
+  };
+}
+
 /** Map overlay mode (HOI §3.1, §6). */
 export type MapMode = 'political' | 'ethnic' | 'supply' | 'pressure' | 'density';
 
@@ -95,6 +108,9 @@ export interface GameStore {
   setPanToCenter: (fn: ((center: [number, number]) => void) | null) => void;
 
   loadedGameState: LoadedGameState | null;
+  /** Last turn report from desktop (after advance-turn). Used for succession notifications. */
+  lastTurnReport: LastTurnReport | null;
+  setLastTurnReport: (report: LastTurnReport | null) => void;
   /** Last load error message (cleared when a new load starts or succeeds). */
   loadError: string | null;
   setLoadError: (message: string | null) => void;
@@ -173,6 +189,9 @@ export const useGameStore = create<GameStore>((set) => ({
   setPanToCenter: (fn) => set({ panToCenter: fn }),
 
   loadedGameState: null,
+
+  lastTurnReport: null,
+  setLastTurnReport: (report) => set({ lastTurnReport: report }),
 
   loadError: null,
 

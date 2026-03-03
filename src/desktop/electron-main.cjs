@@ -33,11 +33,17 @@ function sendGameStateToRenderer(stateJson, excludeSender) {
   const targets = [mainWindow, tacticalMapWindow];
   for (const win of targets) {
     if (win && !win.isDestroyed()) {
-      // Skip the window that initiated the IPC call — it already gets
-      // stateJson from the return value, so broadcasting to it would
-      // cause a double-apply.
       if (excludeSender && win.webContents === excludeSender) continue;
       win.webContents.send('game-state-updated', stateJson);
+    }
+  }
+}
+
+function sendTurnReportToRenderer(report) {
+  const targets = [mainWindow, tacticalMapWindow];
+  for (const win of targets) {
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('turn-report-updated', report);
     }
   }
 }
@@ -638,6 +644,7 @@ app.whenReady().then(() => {
       if (result.error) return { ok: false, error: result.error };
       currentGameStateJson = sim.serializeState(result.state);
       sendGameStateToRenderer(currentGameStateJson, _event.sender);
+      if (result.report) sendTurnReportToRenderer(result.report);
       return { ok: true, stateJson: currentGameStateJson, report: result.report ?? null };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };

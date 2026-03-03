@@ -8,6 +8,17 @@ function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 }
 
+function getNarrativeArcClass(arc: string): string {
+  switch (arc) {
+    case 'veteran': return 'bg-green-900/40 text-green-400';
+    case 'bloodied': return 'bg-amber-900/40 text-amber-400';
+    case 'shattered': return 'bg-red-900/40 text-red-400';
+    case 'risen': return 'bg-emerald-900/40 text-emerald-300';
+    case 'destroyed': return 'bg-neutral-800/60 text-neutral-500';
+    default: return 'bg-neutral-800/40 text-neutral-400';
+  }
+}
+
 /**
  * Right panel when a formation marker is clicked: name, kind, faction, strength, fatigue, orders.
  */
@@ -19,6 +30,7 @@ export function FormationDetail() {
   const setOrderModeForFormation = useGameStore((s) => s.setOrderModeForFormation);
   const orderModeForFormation = useGameStore((s) => s.orderModeForFormation);
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
+  const lastTurnReport = useGameStore((s) => s.lastTurnReport);
 
   if (!selectedFormationId) return null;
 
@@ -100,18 +112,104 @@ export function FormationDetail() {
               </div>
             )}
 
+            {/* Command (Officers Phase E) */}
+            {(() => {
+              const namedOfficerData = loadedGameState?.namedOfficerData;
+              const namedOfficerStateById = loadedGameState?.namedOfficerStateById;
+              if (!namedOfficerData?.length || !namedOfficerStateById) return null;
+
+              function findCommanderForCorps(corpsId: string | undefined): { name: string; acting: boolean } | null {
+                if (!corpsId) return null;
+                for (const entry of namedOfficerData ?? []) {
+                  const state = namedOfficerStateById?.[entry.id];
+                  if (state?.status === 'active' && state.assigned_corps_id === corpsId) {
+                    return { name: entry.name, acting: state.acting_commander };
+                  }
+                }
+                return null;
+              }
+              function findArmyCommander(faction: string): { name: string; acting: boolean } | null {
+                for (const entry of namedOfficerData ?? []) {
+                  if (entry.faction !== faction || entry.rank !== 'army_commander') continue;
+                  const state = namedOfficerStateById?.[entry.id];
+                  if (state?.status === 'active') return { name: entry.name, acting: state.acting_commander };
+                }
+                return null;
+              }
+
+              const isBrigade = formation.kind === 'brigade' || formation.kind === 'operational_group';
+              const isCorps = formation.kind === 'corps' || formation.kind === 'corps_asset';
+              const isArmyHq = formation.kind === 'army_hq';
+              const corpsCommanderBrigade = isBrigade && formation.corps_id ? findCommanderForCorps(formation.corps_id) : null;
+              const corpsCommanderCorps = isCorps ? findCommanderForCorps(formation.id) : null;
+              const armyCommander = isArmyHq ? findArmyCommander(formation.faction) : null;
+
+              const hasOfficerQuality = formation.officer_quality != null && isBrigade;
+              const hasCorpsCommander = corpsCommanderBrigade || corpsCommanderCorps;
+              const hasArmyCommander = isArmyHq && armyCommander;
+              if (!hasOfficerQuality && !hasCorpsCommander && !hasArmyCommander) return null;
+
+              return (
+                <div className="pt-2 border-t border-panel-border text-xs min-w-0 space-y-1">
+                  <div className="text-text-secondary font-medium uppercase tracking-wide">Command</div>
+                  {hasOfficerQuality && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-text-secondary">Officer quality</span>
+                      <span className="text-text-primary tabular-nums">{(formation.officer_quality! * 100).toFixed(0)}%</span>
+                      <div className="flex-1 h-1.5 bg-panel-border rounded-full overflow-hidden" role="progressbar" aria-valuenow={formation.officer_quality! * 100} aria-valuemin={0} aria-valuemax={100}>
+                        <div className="h-full bg-accent-gold rounded-full" style={{ width: `${(formation.officer_quality! * 100).toFixed(0)}%` }} />
+                      </div>
+                    </div>
+                  )}
+                  {corpsCommanderBrigade && (
+                    <div>
+                      <span className="text-text-secondary">Corps commander: </span>
+                      <span className="text-text-primary">{corpsCommanderBrigade.name}{corpsCommanderBrigade.acting ? ' (Acting)' : ''}</span>
+                    </div>
+                  )}
+                  {corpsCommanderCorps && (
+                    <div>
+                      <span className="text-text-secondary">Corps commander: </span>
+                      <span className="text-text-primary">{corpsCommanderCorps.name}{corpsCommanderCorps.acting ? ' (Acting)' : ''}</span>
+                    </div>
+                  )}
+                  {hasArmyCommander && armyCommander && (
+                    <div>
+                      <span className="text-text-secondary">Army commander: </span>
+                      <span className="text-text-primary">{armyCommander.name}{armyCommander.acting ? ' (Acting)' : ''}</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Recent command changes (corps only, Officers Phase E) */}
+            {(() => {
+              const succession = lastTurnReport?.details?.officer_succession;
+              const isCorps = formation.kind === 'corps' || formation.kind === 'corps_asset';
+              if (!succession || !isCorps || !loadedGameState?.namedOfficerData?.length) return null;
+              const replacementsForCorps = (succession.replacements ?? []).filter((r) => r.corps_id === formation.id);
+              if (replacementsForCorps.length === 0) return null;
+              const nameById = new Map(loadedGameState.namedOfficerData!.map((o) => [o.id, o.name]));
+              return (
+                <div className="pt-2 border-t border-panel-border text-xs min-w-0">
+                  <div className="text-text-secondary font-medium uppercase tracking-wide mb-1">Recent command changes</div>
+                  <ul className="space-y-0.5 list-none">
+                    {replacementsForCorps.map((r, i) => (
+                      <li key={i} className="text-text-primary">
+                        {nameById.get(r.new_officer) ?? r.new_officer} took command
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
+
             {/* War Story (brigades only) */}
             {formation.narrativeArc && formation.warNarrative && (
               <div className="pt-2 border-t border-panel-border">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <span className={`inline-block text-[10px] font-mono font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded ${
-                    formation.narrativeArc === 'veteran' ? 'bg-green-900/40 text-green-400' :
-                    formation.narrativeArc === 'bloodied' ? 'bg-amber-900/40 text-amber-400' :
-                    formation.narrativeArc === 'shattered' ? 'bg-red-900/40 text-red-400' :
-                    formation.narrativeArc === 'risen' ? 'bg-emerald-900/40 text-emerald-300' :
-                    formation.narrativeArc === 'destroyed' ? 'bg-neutral-800/60 text-neutral-500' :
-                    'bg-neutral-800/40 text-neutral-400'
-                  }`}>
+                  <span className={`inline-block text-[10px] font-mono font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded ${getNarrativeArcClass(formation.narrativeArc)}`}>
                     {formation.narrativeArc}
                   </span>
                 </div>

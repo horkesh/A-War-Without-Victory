@@ -343,9 +343,19 @@ Fixed by adding `war_timeline`, `init_officers`, `supply_reserves_enabled`, and 
 
 ---
 
-## Deferred (Phase E: GUI Integration)
+## Phase E (GUI) — Implemented (2026-03-02)
 
-Not implemented in this phase. Would add:
-- Officer info in FormationDetail panel
-- Officer list in warroom
-- Succession notifications in war stories
+Phase E adds officer information to the tactical map and warroom without new IPC. Implementation plan: `docs/plans/2026-03-02-officers-phase-e-implementation.md`.
+
+**Map (React + MapLibre):**
+- **View types:** `NamedOfficerView`, `NamedOfficerStateView`; `FormationView.officer_quality`; `LoadedGameState.namedOfficerData`, `namedOfficerStateById` (all sorted by id).
+- **GameStateAdapter:** Maps `state.named_officer_data` and `state.named_officers` into the view; passes `formation.officer_quality` to FormationView.
+- **FormationDetail Command block:** When officer data is present: brigade shows officer quality (progress bar) and corps commander name; corps/army_hq show corps or army commander and (Acting) status.
+- **Recent command changes:** When the selected formation is a corps and the last turn report has `officer_succession`, a "Recent command changes" block lists replacements for that corps (new officer took command). Desktop sends `turn-report-updated` after advance-turn so the map store can hold `lastTurnReport`.
+
+**Warroom:**
+- **WarDataSnapshot:** `officersByFaction?: Partial<Record<FactionId, OfficerListEntry[]>>` (fog of war: player faction only). `extractOfficersByFaction()` builds the list from `gameState.named_officer_data` and `named_officers`, sorted by id.
+- **FactionOverviewPanel:** "COMMAND" subsection lists officers (name, rank, status, assigned corps) for the player faction.
+- **NewspaperModal / AAR:** After advance-turn, `setLastTurnReport(report)` stores the turn report. When the newspaper is opened, officer succession lines are appended: replacements ("[Turn N] X assigned to Y Corps"), casualties ("X killed in action"), departures ("X retired"). Order: replacements (by corps_id, new_officer), then casualties, then departures (sorted by id).
+
+**Determinism:** All officer arrays sorted by id (strictCompare). Succession display order as above. No timestamps in view types.

@@ -11,7 +11,7 @@ import { fallbackHeadline, getUrgencyLevel, pickBestHeadline } from '../content/
 import { PHASE0_TICKER_EVENTS } from '../content/ticker_events.js';
 import { fallbackWarHeadline, pickBestWarHeadline } from '../content/war_headline_templates.js';
 import { generateTurnEvents } from '../data/turn_event_generator.js';
-import { getPreviousSnapshot } from '../data/warroom_state.js';
+import { getPreviousSnapshot, getLastTurnReport } from '../data/warroom_state.js';
 import { FACTION_COLORS, factionCssClass, getPlayerFaction, toTickerTurn, turnToDateString } from './warroom_utils.js';
 
 interface NewspaperContent {
@@ -117,6 +117,11 @@ export class NewspaperModal {
             photoCaption = fb.photoCaption;
         }
 
+        const successionLines = this.getOfficerSuccessionLines(playerFaction);
+        if (successionLines.length > 0) {
+            bodyText += '\n\nCommand changes — ' + successionLines.join(' ');
+        }
+
         return {
             factionId: playerFaction,
             masthead: this.getWarMastheadName(playerFaction),
@@ -127,6 +132,48 @@ export class NewspaperModal {
             bodyText,
             urgency: 'elevated',
         };
+    }
+
+    /**
+     * Get officer succession lines for newspaper AAR (Phase E).
+     * Order: replacements (by corps_id, new_officer), then casualties, then departures.
+     */
+    private getOfficerSuccessionLines(playerFaction: string): string[] {
+        const report = getLastTurnReport();
+        const succession = report?.details?.officer_succession;
+        if (!succession) return [];
+
+        const nameById = new Map<string, string>();
+        const data = this.gameState.named_officer_data ?? [];
+        for (const o of data) {
+            nameById.set(o.id, o.name ?? o.id);
+        }
+        const corpsName = (corpsId: string): string =>
+            this.gameState.formations?.[corpsId]?.name ?? corpsId;
+
+        const lines: string[] = [];
+        const replacements = succession.replacements ?? [];
+        const sortedReplacements = [...replacements].sort((a, b) => {
+            const c = a.corps_id < b.corps_id ? -1 : a.corps_id > b.corps_id ? 1 : 0;
+            if (c !== 0) return c;
+            return a.new_officer < b.new_officer ? -1 : a.new_officer > b.new_officer ? 1 : 0;
+        });
+        for (const r of sortedReplacements) {
+            const name = nameById.get(r.new_officer) ?? r.new_officer;
+            const corps = corpsName(r.corps_id);
+            lines.push(`[Turn ${report?.turn ?? '?'}] ${name} assigned to ${corps}.`);
+        }
+        const casualties = succession.casualties ?? [];
+        for (const id of [...casualties].sort((a, b) => a < b ? -1 : a > b ? 1 : 0)) {
+            const name = nameById.get(id) ?? id;
+            lines.push(`[Turn ${report?.turn ?? '?'}] ${name} killed in action.`);
+        }
+        const departures = succession.departures ?? [];
+        for (const id of [...departures].sort((a, b) => a < b ? -1 : a > b ? 1 : 0)) {
+            const name = nameById.get(id) ?? id;
+            lines.push(`[Turn ${report?.turn ?? '?'}] ${name} retired.`);
+        }
+        return lines;
     }
 
     /**
