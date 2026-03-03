@@ -583,7 +583,7 @@ Currently, bot_strategy.ts has hardcoded avoid lists:
   - Increase BASE_ATTACKER_LOSS_RATE / BASE_DEFENDER_LOSS_RATE to burn more personnel per battle
   - Add ongoing attrition from supply strain (garrison drain, desertion)
   - Reduce REINFORCEMENT_RATE from displacement further
-  - Cap total faction personnel via a "mobilization ceiling" mechanic
+  - ~~Cap total faction personnel via a "mobilization ceiling" mechanic~~ — **DONE then REMOVED (n369–n374).** Replaced by tuned mobilization scales + exhaustion thresholds. See `docs/40_reports/implemented/20260303_CEILING_REMOVAL_EMERGENT_GROWTH.md`.
   - Winter effects: reduce reinforcement rate in winter months (weeks 30-45)
 
 ### ISSUE 2: Casualties at 16.4k vs 25-35k Target [MEDIUM]

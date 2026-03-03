@@ -186,20 +186,7 @@ The root cause: RS recruits ~2-3 brigades per turn via elective recruitment capi
 
 ### Proposed fix
 
-Add a per-faction **personnel ceiling** in the recruitment engine:
-
-```typescript
-if (faction === 'RS' && totalPersonnel >= 100000) {
-    // Skip elective recruitment for this faction this turn
-}
-```
-
-Or more elegantly, a scenario-configurable `max_personnel` field:
-```json
-"max_personnel": { "RS": 100000, "RBiH": 135000, "HRHB": 48000 }
-```
-
-This decouples troop count from territorial performance. RS can have aggressive early-war doctrine and still hit 100k by week 40.
+~~Add a per-faction **personnel ceiling** in the recruitment engine~~ — **SUPERSEDED.** Personnel ceilings were implemented in n364 but **removed in n369–n374**. The ceiling values were factually wrong (ARBiH cap 130k vs actual peak 180–200k; VRS cap 185k vs actual peak 100–110k). Replaced by tuned mobilization scales in `ongoing_mobilization.ts` (RBiH 0.14, RS 0.22, HRHB 0.18) + tightened exhaustion thresholds (0.15/0.25). Personnel now emerges organically from demographics, mobilization, and attrition. See `docs/40_reports/implemented/20260303_CEILING_REMOVAL_EMERGENT_GROWTH.md`.
 
 ### Key files
 - `src/sim/early_war/pool_population.ts` — recruitment engine

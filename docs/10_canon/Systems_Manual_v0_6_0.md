@@ -73,7 +73,7 @@ All coercive force is represented through formations. Types include militia, Ter
 
 Formations have attributes: manpower, cohesion, **morale**, readiness state, supply state, experience, exhaustion contribution, and **location_osid** (War phase; one OSID per formation).
 
-**Morale** (`morale: number`, [0,100]) represents willingness to fight, distinct from cohesion (tactical effectiveness). Morale is non-monotonic (can increase and decrease). Population affinity from 1991 census drives morale drift: defending own-majority OSID increases morale; defending enemy-majority OSID decreases it. Encirclement of own-population defenders causes morale spike (not collapse). High morale gates retreat: defenders with morale ≥70 absorb costly_victory outcomes without retreating, taking casualties but holding position. See Engine Invariants §14.3a.
+**Morale** (`morale: number`, [0,100]) represents willingness to fight, distinct from cohesion (tactical effectiveness). Morale is non-monotonic (can increase and decrease). Population affinity from 1991 census drives morale drift: defending own-majority OSID increases morale; defending enemy-majority OSID decreases it. Encirclement of own-population defenders causes morale spike (not collapse). High morale gates retreat: defenders with morale at or above their faction's resist floor absorb costly_victory outcomes without retreating, taking casualties but holding position. Per-faction floors: RBiH=62, RS=70, HRHB=65 (via `getMoraleResistFloor(faction)` in `combat_math.ts`). See Engine Invariants §14.3a.
 
 ## 5. Formation lifecycle and readiness
 
@@ -170,9 +170,11 @@ Eligibility does not imply immediate failure. Collapse remains delayed, continge
 
 When War phase runs, attack orders are resolved as **discrete attacks** per target OSID. The resolution follows the **Attack Resolution Formula Spec** (docs/30_planning/20260222_ATTACK_RESOLUTION_FORMULA_SPEC.md). Summary:
 
-**Combat power (attacker):** base_power × posture_attack_mult × supply_mult × corps_stance_mult × operations_mult × og_mult × disruption_mult. Base power = personnel × equipment_ratio × experience × (cohesion/100).
+**Combat power (attacker):** base_power × posture_attack_mult × supply_mult × corps_stance_mult × operations_mult × og_mult × disruption_mult × **officer_quality_mult**. Base power = personnel × equipment_ratio × experience × (cohesion/100).
 
-**Combat power (defender):** base_power × posture_defense_mult × supply_mult × terrain_mult × **entrenchment_mult** × corps_stance_defense_mult × **resilience_mult** (defense_streak) × urban_mult × disruption_mult. Terrain applies to the defender's OSID (rivers, mountain, forest, road access, slope). **Entrenchment:** entrenchment_mult = 1.0 + min(entrenchment_turns, 12) × 0.065; resets on move; degrades by 1 when disrupted. **Resilience:** resilience_mult = 1.0 + min(defense_streak, 6) × 0.05; resets on move or when attacker succeeds.
+**Combat power (defender):** base_power × posture_defense_mult × supply_mult × terrain_mult × **entrenchment_mult** × corps_stance_defense_mult × **resilience_mult** (defense_streak) × urban_mult × disruption_mult × **officer_quality_mult** × **ethnic_defense_mult**. Terrain applies to the defender's OSID (rivers, mountain, forest, road access, slope). **Entrenchment:** entrenchment_mult = 1.0 + min(entrenchment_turns, 12) × 0.065; resets on move; degrades by 1 when disrupted. **Resilience:** resilience_mult = 1.0 + min(defense_streak, 6) × 0.05; resets on move or when attacker succeeds. **Officer quality:** faction-level command effectiveness — VRS 1.10 peak decaying 0.002/w after w20 (floor 0.95), ARBiH 0.85 growing 0.003/w (cap 1.05), HVO constant 0.97 (`getOfficerQualityMult` in `combat_math.ts`). **Ethnic homeland defense:** +12% for ≥60% co-ethnic population in defender's OSID, graduated 30–60%, none <30% (`getEthnicDefenseBonus` in `ethnic_defense.ts`).
+
+**Defender casualty multiplier:** Attacker heavy weapons inflict additional defender casualties via **bombardment casualty multiplier** (1.0–1.8×): `(artEff + tankEff×0.5) / 80` from attacker firepower. Applied after base casualty calculation (`getBombardmentCasualtyMult` in `combat_math.ts`).
 
 **Power ratio:** attacker_power / defender_power.
 

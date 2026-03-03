@@ -14,13 +14,13 @@ This is the single authoritative project ledger. All context, decisions, and sta
 **Project:** A War Without Victory (AWWV)
 **Type:** Wargame simulation prototype
 **Repository:** AWWV
-**Current Focus:** Combat calibration (n362, 87.4% OSID match), GUI Architecture Rework v2 (React+MapLibre, Phase 3 COMPLETE), Sectors & Operations active, War Timeline externalization complete
+**Current Focus:** Combat calibration (n392, 88.6% OSID match — ATH), GUI Architecture Rework v2 (React+MapLibre, Phase 3 COMPLETE), Sectors & Operations active, War Timeline externalization complete
 
 ---
 
 ## Non-negotiables
 
-1. **OSID Architecture:** Operational Settlement IDs (`op:municipality:slug`, 753 total) are the canonical spatial unit. `political_controllers` keyed by OSIDs. Contact graph between OSIDs. Corps front sectors partition OSIDs.
+1. **OSID Architecture:** Operational Settlement IDs (`op:municipality:slug`, 744 total) are the canonical spatial unit. `political_controllers` keyed by OSIDs. Contact graph between OSIDs. Corps front sectors partition OSIDs. Area-weighted territory percentages via `data/derived/operational/osid_areas.json` (51,337 km² total).
 
 2. **Canonical Faction IDs:** `RBiH`, `RS`, `HRHB` only. No aliases in code or data.
 
@@ -46,7 +46,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **Phase:** Post-MVP — Active Development
 **Status:** Phase II live, Phase M complete, GUI Phase 3 COMPLETE
-**Focus:** Combat calibration (87.4% OSID match at n362), Sector offensives active, GUI Phase 4 (Desktop) next
+**Focus:** Combat calibration (88.6% OSID match at n392 — ATH), Sector offensives active, GUI Phase 4 (Desktop) next
 
 **Completed milestones:**
 - Phase 6: MVP declared 2026-02-08; A1 base map stable and frozen
@@ -58,7 +58,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 - Corps sector visualization in React+MapLibre map
 
 **Active workstreams:**
-- Combat calibration: n362 = 87.4% (658/753 OSID match), sector offensives active in VRS early-war blitz
+- Combat calibration: n392 = 88.6% (667/744 OSID match, ATH), comprehensive combat formula (officer quality, ethnic defense, bombardment exposure), sector offensives active, area-weighted territory (RS 65.1%)
 - GUI Phase 4 (Desktop): useIPC, advance-turn, order staging, recruitment, SidePickerOverlay, fog-of-war, PMTiles in Electron
 
 **Completed workstreams:**
@@ -92,7 +92,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **Spatial Architecture:**
 
-1. **OSIDs** (`op:municipality:slug`): 753 operational settlements. Canonical spatial unit for political control, combat, displacement, and corps sectors. Keyed in `political_controllers`, contact graph, front edges.
+1. **OSIDs** (`op:municipality:slug`): 744 operational settlements (was 753; 9 degenerate < 0.01 km² merged 2026-03-03). Canonical spatial unit for political control, combat, displacement, and corps sectors. Keyed in `political_controllers`, contact graph, front edges. Area data: `data/derived/operational/osid_areas.json` (51,337 km² total).
 
 2. **Settlements** (`sid`, S-prefixed): 1991 census entities. Used for population data, displacement routing, recruitment. Linked to municipalities via `mid`.
 
@@ -109,7 +109,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 | 1 | 2026-01-24 | Path A architecture: polygons (poly_id) separate from settlements (sid), linked via municipalities (mid) |
 | 2 | 2026-02-08 | MVP declared; A1 base map frozen |
 | 3 | 2026-02-14 | Corps-directed AoR: Army→Corps→Brigade bot AI hierarchy |
-| 4 | 2026-02-22 | OSID as canonical operational map unit (753 settlements) |
+| 4 | 2026-02-22 | OSID as canonical operational map unit (753 settlements; reduced to 744 on 2026-03-03 via degenerate merge) |
 | 5 | 2026-02-25 | RS_EARLY_WAR_END_WEEK = 20; RBiH general_defensive through year one |
 | 6 | 2026-02-28 | React+MapLibre as canonical player-facing GUI (replaces tactical_map.html) |
 | 7 | 2026-02-28 | Peace/War lifecycle replaces phase_i/phase_ii |
@@ -124,7 +124,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 ## Current State
 
-**Calibration:** n340 (40w) = 86.9% OSID match (654/753). RS=391 (painted 416), RBiH=271 (painted 248), HRHB=91 (painted 89). Hash `a51db370f21d7284`.
+**Calibration:** n392 (40w) = 88.6% OSID match (667/753 → 744 after degenerate merge). RS=420 (painted 416), RBiH=246 (painted 248), HRHB=87 (painted 89). ATH. Area-weighted territory: RS 65.1%, RBiH 23.2%, HRHB 11.7%.
 **Displacement:** n319 = 668k total displaced (RBiH 458k, HRHB 150k, RS 60k). Per-OSID census depth complete. Hash `42ad78a39746d166`.
 **Sectors:** 61 sectors (Phase 1 complete). 187/205 brigades assigned (91.2%), max 25 edges/sector, 94 reserves populated.
 
@@ -9203,3 +9203,54 @@ Determinism checks **MUST** be run:
 - **Summary:** Documented glyph dependency: TACTICAL_MAP_SYSTEM.md §0 notes that the MapLibre style uses `https://demotiles.maplibre.org/...` for glyphs; offline/air-gapped deployments need bundled glyphs and style update. Optional style-contract check (D2) deferred.
 - **Files modified:** `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
 - **Determinism:** N/A (docs only).
+
+### [2026-03-03] Ceiling removal — emergent growth via pool mechanics (n369–n374)
+- **Type:** Refactor + Calibration (Simulation / Combat)
+- **Summary:** Removed hardcoded `FACTION_HISTORICAL_PEAK` personnel ceiling system (values were factually wrong: ARBiH cap 130k vs actual peak 180–200k, VRS cap 185k vs actual peak 100–110k). Deleted ceiling constants (`FACTION_SOFT_CAP_RATIO`, `FACTION_HARD_CAP_RATIO`, `ABOVE_SOFT_CAP_REINFORCEMENT_MULT`), ceiling functions (`getFactionCeilingMult()`, `getFactionTotalPersonnel()`), and `ceilingMult` gating in `reinforceBrigadesFromPools()`. Tuned mobilization scales (RBiH 0.40→0.14, RS 0.25→0.22, HRHB 0.90→0.18), tightened exhaustion thresholds (0.20/0.35→0.15/0.25), reduced HRHB pool scale (2.10→1.70). Personnel now emerges organically from demographics, mobilization, exhaustion, and attrition. Six calibration iterations converged on n374: 87.6% OSID match (660/753), ARBiH 127k, VRS 97k, HVO 46k — all within/near historical Dec 1992 bands.
+- **Files modified:** `src/state/formation_constants.ts` (4 constants removed), `src/sim/formation_spawn.ts` (2 functions + ceilingMult usage removed), `src/sim/combat/ongoing_mobilization.ts` (3 mobilization scales + 2 exhaustion thresholds tuned), `src/sim/early_war/pool_population.ts` (HRHB pool scale tuned), `tests/troop_balance_lifecycle.test.ts` (5 ceiling tests removed)
+- **Report:** `docs/40_reports/implemented/20260303_CEILING_REMOVAL_EMERGENT_GROWTH.md`
+- **Determinism:** Deterministic. Same sorted iteration, same game state shape. Behavioral change: personnel growth trajectories differ (no artificial caps).
+
+### [2026-03-03] Officer quality mechanic (n375)
+- **Type:** Feature (Simulation / Combat)
+- **Summary:** Added `getOfficerQualityMult(faction, turn)` to `combat_math.ts`. Faction-level command effectiveness multiplier modeling documented doctrinal arcs: VRS peaks at 1.10 (JNA officers), decays 0.002/week after w20, floor 0.95; ARBiH starts 0.85, grows 0.003/week, cap 1.05; HVO constant 0.97. Applied multiplicatively in both `computeAttackerPower` and `computeDefenderPower`. Wired into resolver, predictor, and bot AI.
+- **Files modified:** `src/sim/combat/combat_math.ts` (+35 lines), `src/sim/combat/attack_resolution_osid.ts`, `src/sim/combat/combat_predictor.ts`, `src/sim/combat/bot_brigade_ai_osid.ts`
+- **Determinism:** Deterministic. No randomness. Faction + turn → fixed multiplier.
+- **Calibration:** Part of n375 (88.3% OSID match, +0.7pp from n374).
+
+### [2026-03-03] Ethnic homeland defense mechanic (n375)
+- **Type:** Feature (Simulation / Combat)
+- **Summary:** New module `ethnic_defense.ts` (68 lines). Defenders get graduated defense bonus when defending co-ethnic majority OSIDs: ≥60% co-ethnic → +12% defense, 30–60% graduated, <30% none. Exports: `OsidEthnicComposition` type, `getCoEthnicShare()`, `getEthnicDefenseBonus()`. Uses 1991 census data per OSID from `operational_data.ts`. Applied as ×(1 + bonus) in `computeDefenderPower`. Wired into resolver, predictor, and bot AI.
+- **Files modified:** `src/sim/combat/ethnic_defense.ts` (new, 68 lines), `src/sim/combat/attack_resolution_osid.ts`, `src/sim/combat/combat_predictor.ts`, `src/sim/combat/bot_brigade_ai_osid.ts`
+- **Determinism:** Deterministic. OSID + faction + census → fixed bonus.
+- **Calibration:** Part of n375 (88.3% OSID match). Helps Drina enclaves and Krajina hold correct territory.
+
+### [2026-03-03] Bombardment casualty multiplier (n375)
+- **Type:** Feature (Simulation / Combat)
+- **Summary:** Added `getBombardmentCasualtyMult(attackers)` to `combat_math.ts`. Attacker heavy weapons inflict 1.0–1.8× defender casualties based on total firepower `(artEff + tankEff×0.5) / 80`. Models VRS artillery causing ARBiH losses even on stalemate/repulsed outcomes. Constants: `MAX_BOMBARDMENT_CAS_MULT=1.8`, `BOMBARDMENT_DIVISOR=80`. Wired into resolver and predictor.
+- **Files modified:** `src/sim/combat/combat_math.ts` (+15 lines), `src/sim/combat/attack_resolution_osid.ts`, `src/sim/combat/combat_predictor.ts`
+- **Determinism:** Deterministic. Attacker equipment → fixed multiplier.
+- **Calibration:** Part of n375 (88.3% OSID match).
+
+### [2026-03-03] Bombardment exposure attrition (n382–n392)
+- **Type:** Feature (Simulation / Combat)
+- **Summary:** Added ratio-based passive attrition from enemy heavy weapons to `frontline_attrition.ts`. Brigades with low own firepower facing high enemy firepower take additional weekly casualties: `effect = min(1.0, ln(incoming_FP / own_FP) / 2.0)`, casualties = `personnel × 0.012 × effect`. ARBiH gets 99% effect (own FP ~1.8 vs incoming ~13), HVO 48%, VRS 0%. Enemy FP distributed across all non-enemy brigades (prevents small-faction over-penalization). Three model iterations: linear deficit (n383) → fixed distribution (n384-n386) → ratio-based with log scaling (n387-n392). ARBiH KIA increased from 7,214 to 9,831 (+36%, closing 85% of 11,500 target gap). n392: 88.6% OSID match (667/753, all-time high).
+- **Files modified:** `src/sim/combat/frontline_attrition.ts` (+55 lines: constants, pre-loop FP aggregation, per-brigade ratio computation, import of `ensureBrigadeComposition`)
+- **Report:** `docs/40_reports/implemented/20260303_COMPREHENSIVE_COMBAT_FORMULA_IMPLEMENTATION.md`
+- **Determinism:** Deterministic. Sorted faction keys, sorted formation IDs, no randomness.
+- **Calibration:** n392 = 88.6% (667/753) — new all-time high. +1.0pp from n374. Krajina 98.5%, Herzegovina 92.5%. Cascade finding: bombardment attrition weakens ARBiH/HVO → more VRS attacks → more VRS attacker casualties → VRS drops to 85k (below 90k band, accepted tradeoff).
+
+### [2026-03-03] Area-weighted territory percentages
+- **Type:** Feature (Data / Territory / UI)
+- **Summary:** Territory control percentages switched from count-based (each OSID = 1 unit) to area-weighted throughout codebase. Count-based showed RS 55.2% vs actual 65.1% by area — 10pp gap. Area-weighted matches historical consensus (~65% RS). New `tools/generate_osid_areas.cjs` precomputes areas from GeoJSON (`turf.area()`); output: `data/derived/operational/osid_areas.json` (744 entries, 51,337 km²). Runtime loader `loadOsidAreas()` in `operational_data.ts`. Map UI `useOsidAreas()` React hook in `SituationTab.tsx`. Warroom `extractTerritory()` accepts optional area data. FactionOverviewPanel shows area % primary, count secondary. Comparison tool shows area-weighted columns. GeoJSON features enriched with `area_km2` property.
+- **Files modified:** `tools/generate_osid_areas.cjs` (new), `data/derived/operational/osid_areas.json` (generated), `scripts/derive_operational_settlements.ts`, `src/data/operational_data.ts`, `src/ui/warroom/data/war_data_extractor.ts`, `src/ui/map/components/SituationTab.tsx`, `src/ui/warroom/components/FactionOverviewPanel.ts`, `tools/compare_painted_vs_sim.cjs`
+- **Report:** `docs/40_reports/implemented/20260303_AREA_WEIGHTED_TERRITORY_AND_DEGENERATE_MERGE.md`
+- **Determinism:** Deterministic. Sorted keys, fixed decimal precision, turf.area() is pure geometry.
+
+### [2026-03-03] Degenerate OSID merge (753 → 744)
+- **Type:** Data cleanup (Spatial model)
+- **Summary:** 9 truly degenerate OSIDs (< 0.01 km², all graph-isolated geometric artifacts from Voronoi/topological merge pipeline) merged into same-municipality same-ethnicity targets via `merge_progress.json`. Population transferred. Painted targets updated (753 → 744). All derived data regenerated. 2 painted faction mismatches negligible (both 0.000 km²). 25 borderline OSIDs (0.01–0.1 km²) remain for future investigation. Area-weighted territory percentages stable: RS 65.1%, RBiH 23.2%, HRHB 11.7%.
+- **Files modified:** `data/source/merge_progress.json` (9 SIDs added), `data/source/calibration/painted_control_jan1993.json` (9 entries removed), `data/derived/operational/operational_settlements.geojson` (regenerated, 744 features), `data/derived/operational/osid_areas.json` (regenerated, 744 entries), `tools/area_compare.cjs` (deleted — superseded)
+- **Report:** `docs/40_reports/DEGENERATE_OSID_AUDIT.md`, `docs/40_reports/implemented/20260303_AREA_WEIGHTED_TERRITORY_AND_DEGENERATE_MERGE.md`
+- **Determinism:** N/A (data-only change, pipeline regenerated deterministically)
+- **Calibration:** No run change — degenerate OSIDs were graph-isolated (unreachable by combat/movement).

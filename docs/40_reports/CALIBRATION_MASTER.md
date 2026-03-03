@@ -1,29 +1,35 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for Phase II 40w calibration (April 1992 → January 1993).
-**Updated:** 2026-03-02
+**Updated:** 2026-03-03
 **Canonical target run:** n335 (`apr1992_definitive_40w__205b3676c8fe3ce4__w40_n335`)
-**Latest calibration run:** n359 (86.7%, sector offensive activation — dual-handler fix, supply readiness gate, recovery-phase launches, min objectives 1. 26 sector offensives in 40w. See PROJECT_LEDGER 2026-03-02.)
-**Previous calibration run:** n343 (86.3%, Phase A calibration overhaul — 6 constant/wiring changes. See `docs/40_reports/implemented/20260302_PHASE_A_CALIBRATION_OVERHAUL.md`.)
-**Previous verification run:** n342 (87.4%, post-Phase B+C, gated off — zero behavioral change from supply code; minor drift from linter-applied fixes to other files)
+**Latest calibration run:** n392 (88.6%, NEW ALL-TIME HIGH — comprehensive combat formula: officer quality, ethnic homeland defense, bombardment exposure attrition. Krajina 98.5%. ARBiH KIA 9,831 toward 11,500 target.)
+**Previous calibration run:** n374 (87.6%, ceiling removal + emergent growth via pool mechanics.)
+**Previous calibration run:** n364 (87.4%, verification run — combat summaries pipeline step added, zero behavioral change.)
+**Previous calibration run:** n362 (87.4%, winter strengthening + Bihać DTB + Bosniak abroad routes.)
 
 ---
 
 ## Target State (January 1993 / Week 40)
 
-### Territory (OSIDs of 753 total)
-| Faction | Target | n284 | n295 | n299 | n303 | n314 | n335 | n359 | Delta (n359) | Status |
-|---|---|---|---|---|---|---|---|---|---|---|
-| RS | 416 | 392 | 393 | 389 | 382 | 389 | 387 | 432 | +16 | Over — sector offensives push RS past target |
-| RBiH | 248 | 271 | 273 | 273 | 277 | 272 | 273 | 236 | -12 | Under — sector offensives reduce RBiH territory |
-| HRHB | 89 | 90 | 87 | 91 | 94 | 92 | 93 | 85 | -4 | Near-target |
+### Territory (OSIDs of 744 total; was 753 before degenerate merge 2026-03-03)
+| Faction | Target | n284 | n295 | n303 | n335 | n359 | n362 | n364 | n374 | n392 | Delta (n392) | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| RS | 416 | 392 | 393 | 382 | 387 | 432 | 409 | 409 | 411 | **420** | +4 | Near-target |
+| RBiH | 248 | 271 | 273 | 277 | 273 | 236 | 260 | 260 | 256 | **246** | -2 | Near-target |
+| HRHB | 89 | 90 | 87 | 94 | 93 | 85 | 84 | 84 | 86 | **87** | -2 | Near-target |
 
 ### Army Strengths (end of 40w)
-| Faction | Personnel (n284) | Personnel (n295) | Brigades | Target | Status |
-|---|---|---|---|---|---|
-| VRS (RS) | ~120k | ~122k | 80 | ~100k | Over by 22k |
-| ARBiH (RBiH) | ~149k | ~205k | 97 | ~130k | Over by 75k |
-| HVO (HRHB) | ~52k | ~65k | 32 | ~45k | Over by 20k |
+
+**Historical bands from knowledge base** (see §Historical OOB Baselines below for full citations):
+
+| Faction | Dec 1992 Target Band | Full-War Peak | n284 | n364 | n374 | n392 | Brigades (n392) | Growth Mechanism | Status |
+|---|---|---|---|---|---|---|---|---|---|
+| VRS (RS) | **90k–100k** | 100k–110k (1993–94) | ~120k | **103k** | **97k** | **85k** | 81 | Emergent (pool exhaustion + bombardment cascade) | Below band (-5k) |
+| ARBiH (RBiH) | **110k–130k** | 180k–200k (1995) | ~149k | **124k** | **127k** | **119k** | 86 | Emergent (pool exhaustion + bombardment attrition) | **In band** |
+| HVO (HRHB) | **40k–45k** | 50k–55k (1993) | ~52k | **43k** | **46k** | **41k** | 31 | Emergent (pool exhaustion + attrition) | **In band** |
+
+**NOTE:** `FACTION_HISTORICAL_PEAK` ceiling system REMOVED (n369). Personnel totals now emerge organically from pool demographics, mobilization rates, exhaustion thresholds, and combat attrition — no hardcoded caps. See §Ceiling Removal (n369–n374) below.
 
 ### Casualties (40 weeks, n254)
 - **Attacker total:** ~24,000 — dominated by RS (318 attack orders vs RBiH 87 vs HRHB low)
@@ -48,18 +54,18 @@
 - **Minority flight:** 0 (disabled — `enable_rbih_hrhb_dynamics: false`)
 - **Note:** Engine counts only War-phase takeover-triggered + pressure displacement. Pre-war mass displacement is baked into `init_control` snapshot. Displacement system complete as of n319. See `docs/40_reports/20260301_DISPLACEMENT_DEPTH_CALIBRATION.md`.
 
-### Match Rate vs Painted Targets (n359, latest)
-Overall: **86.7%** (653/753 OSIDs correct)
+### Match Rate vs Painted Targets (n392, latest)
+Overall: **88.6%** (667/753 OSIDs correct) — **NEW ALL-TIME HIGH** (+1.0pp from n374)
 
-| Region | n284 Match | n314 Match | n335 Match | n359 Match | Key Issues (n359) |
-|---|---|---|---|---|---|
-| KRAJINA | 97.0% (128/132) | 97.7% (129/132) | 95.5% (126/132) | **93.9% (124/132)** | -2 from n335 — sector ops shift edges |
-| POSAVINA_NE | 84.4% (92/109) | 85.3% (93/109) | 72.5% (79/109) | **80.7% (88/109)** | **+9** — East Bosnian sector ops secure corridor |
-| DRINA | 71.9% (92/128) | 75.0% (96/128) | 85.2% (109/128) | **82.8% (106/128)** | -3 from n335 — minor regression |
-| CENTRAL_CORRIDOR | 87.2% (82/94) | 91.5% (86/94) | 92.6% (87/94) | **89.4% (84/94)** | -3 — stable |
-| CENTRAL_BOSNIA | 81.3% (135/166) | 88.0% (146/166) | 85.5% (142/166) | **83.7% (139/166)** | -3 from n335 |
-| SARAJEVO | 77.4% (24/31) | 77.4% (24/31) | 87.1% (27/31) | **83.9% (26/31)** | **+6.5pp from n354** — SRK ops active |
-| HERZEGOVINA | 94.6% (88/93) | 90.3% (84/93) | 96.8% (90/93) | **92.5% (86/93)** | -4 from n335 |
+| Region | n284 Match | n314 Match | n362/n364 Match | n374 Match | n392 Match | Key Issues (n392) |
+|---|---|---|---|---|---|---|
+| KRAJINA | 97.0% (128/132) | 97.7% (129/132) | 96.2% (127/132) | 95.5% (126/132) | **98.5% (130/132)** | +3.0pp — near-perfect, only 2 mismatches |
+| POSAVINA_NE | 84.4% (92/109) | 85.3% (93/109) | 81.7% (89/109) | 81.7% (89/109) | **81.7% (89/109)** | Stable — Zvornik/Lopare still contested |
+| DRINA | 71.9% (92/128) | 75.0% (96/128) | 75.0% (96/128) | 81.3% (104/128) | **82.0% (105/128)** | +0.7pp — ethnic defense bonus helps enclaves |
+| CENTRAL_CORRIDOR | 87.2% (82/94) | 91.5% (86/94) | 91.5% (86/94) | 90.4% (85/94) | **90.4% (85/94)** | Stable |
+| CENTRAL_BOSNIA | 81.3% (135/166) | 88.0% (146/166) | 88.0% (146/166) | 88.0% (146/166) | **87.3% (145/166)** | -0.7pp — minor drift |
+| SARAJEVO | 77.4% (24/31) | 77.4% (24/31) | 90.3% (28/31) | 87.1% (27/31) | **87.1% (27/31)** | Stable — Trnovo/Pale edges |
+| HERZEGOVINA | 94.6% (88/93) | 90.3% (84/93) | 92.5% (86/93) | 88.2% (82/93) | **92.5% (86/93)** | +4.3pp — RS incursion corrected |
 
 ---
 
@@ -99,6 +105,113 @@ Overall: **86.7%** (653/753 OSIDs correct)
 | n348 | — | 415 | 261 | 77 | **Reserve proportional cap + rear pocket targeting.** 84.9% match (639/753). Reserve cap `RESERVE_PER_EDGE_CAP=0.5`. Rear pocket targeting (enemy pockets with all neighbors faction-controlled). |
 | n354 | — | — | — | — | **Baseline before sector offensive activation.** 85.8% match. Reference run for n359 comparison. |
 | **n359** | **—** | **432** | **236** | **85** | **Sector offensive activation.** 86.7% match (653/753). 26 sector offensives in 40w (was 0). Fixes: (1) skip sector_attack in evaluateOperationProgress() — sole handler is advanceSectorOffensives(); (2) supply readiness returns 1.0 when supply_reserves_enabled=false; (3) allow new launches during recovery phase (+15 exhaustion); (4) min objectives 2→1. VRS 1st Krajina=7 ops, East Bosnian=6, Drina=6, 2nd Krajina=4; ARBiH 5th Corps=3 counteroffensives. See L42, L43. |
+| **n362** | **205b3676c8fe3ce4** | **409** | **260** | **84** | **ALL-TIME HIGH: 87.4% match (658/753).** Winter strengthening + Bihać DTB + Bosniak abroad routes. VRS 103k, ARBiH 124k, HVO 43k — **ALL THREE FACTIONS NOW WITHIN HISTORICAL DEC 1992 BANDS** (VRS 90–100k near, ARBiH 110–130k, HVO 40–45k). 12/14 anchors (zvornik + bihac fail). Krajina 96.2%, Herzegovina 92.5%, Central Corridor 91.5%, Sarajevo 90.3%, Central Bosnia 88.0%, Posavina 81.7%, Drina 75.0%. Casualties: ARBiH 27.4k, VRS 33.5k, HVO 10.6k (71.5k total military). |
+| **n364** | **205b3676c8fe3ce4** | **409** | **260** | **84** | **Verification run — combat summaries pipeline step.** 87.4% match (658/753). Identical OSIDs to n362. New `compute-combat-summaries` step produces aggregate CombatSummary on corps/army_hq formations (read-only aggregation, zero behavioral change). 16 formations with combat_summary. State hash `d4e0b2ff59a5cb38`. |
+| n369 | 205b3676c8fe3ce4 | 412 | 256 | 85 | **Ceiling removal — first iteration.** 87.5% match (659/753). Removed `FACTION_HISTORICAL_PEAK` ceiling system. Mobilization scales RBiH 0.28, RS 0.16, HRHB 0.50. Exhaustion 0.15/0.25. JNA 12k. Personnel: ARBiH **151k** (OVER), VRS **79k** (UNDER), HVO **55k** (OVER). 13/14 anchors (bihac PASS, zvornik FAIL). |
+| n370 | 205b3676c8fe3ce4 | 410 | 257 | 86 | **Ceiling removal — iteration 2.** 87.4% match (658/753). Scales RBiH 0.16, RS 0.22, HRHB 0.30. JNA restored 15k. Personnel: ARBiH **134k** (near), VRS **96k** (IN BAND), HVO **50k** (over). 12/14 anchors (zvornik + bihac FAIL). |
+| n371 | 205b3676c8fe3ce4 | 411 | 256 | 86 | **Ceiling removal — iteration 3.** 87.6% match (660/753). Scales RBiH 0.14, RS 0.22, HRHB 0.24. Personnel: ARBiH **129k** (IN BAND), VRS **97k** (IN BAND), HVO **49k** (over). Drina 81.3% (+6.3pp from n362). 12/14 anchors. |
+| n372 | 205b3676c8fe3ce4 | 411 | 256 | 86 | Scales HRHB 0.18 (ongoing mob). Identical OSIDs to n371. HVO 48k — ongoing mobilization not the driver; FACTION_POOL_SCALE is. |
+| n373 | 205b3676c8fe3ce4 | 411 | 256 | 86 | FACTION_POOL_SCALE HRHB 2.10→1.80. HVO 46k. Identical OSIDs to n371. |
+| **n374** | **205b3676c8fe3ce4** | **411** | **256** | **86** | **ALL-TIME HIGH: 87.6% (660/753).** Ceiling removal complete. FACTION_POOL_SCALE HRHB 1.70. Personnel: ARBiH **127k** (IN BAND), VRS **97k** (IN BAND), HVO **46k** (near band, +1k). Casualties: ARBiH 21.6k, VRS 32.2k, HVO 11.4k (65.2k total). 12/14 anchors (zvornik structural, bihac VRS overran). Drina **81.3%** (+6.3pp from n362). No hardcoded personnel caps — growth emerges from pool demographics, mobilization, exhaustion, and attrition. |
+| **n375** | **205b3676c8fe3ce4** | **409** | **260** | **84** | **Comprehensive combat formula: officer quality + ethnic defense + bombardment.** 88.3% match (665/753). Three new mechanics: `getOfficerQualityMult()` (VRS 1.10→decays, ARBiH 0.85→grows, HVO 0.97), `getEthnicDefenseBonus()` (+12% for defending co-ethnic majority OSID), `getBombardmentCasualtyMult()` (1.0–1.8× defender casualties from attacker heavy weapons). HRHB pool 1.70. |
+| n376–n381 | 205b3676c8fe3ce4 | — | — | — | **Parameter exploration**: bombardment scaling (2.0/50, 2.5/40), morale absorption (1.75, 2.5), morale resist floors (45/60/52), BASE_DEFENDER_LOSS_RATE (0.03). All showed diminishing returns or paradoxical cascade effects. Reverted to n375 values. |
+| n382 | 205b3676c8fe3ce4 | 418 | 248 | 87 | **n375 verification with HRHB pool 1.55.** 88.3% match (665/753). Confirmed n375 baseline. HRHB pool 1.70→1.55 reduced HVO 47k→46k. |
+| n383 | 205b3676c8fe3ce4 | 416 | 250 | 87 | **Bombardment exposure v1 (linear deficit).** 88.0% match (663/753). First bombardment exposure attrition in frontline_attrition.ts. ARBiH KIA 8,057 (+843). HVO over-penalized (4,577 KIA, 41k). |
+| n385 | 205b3676c8fe3ce4 | — | — | — | **Bombardment exposure v2 (linear, tuned).** 88.4% match (666/753). RATE=0.012, DIVISOR=12. ARBiH KIA 9,287 (+2,073). VRS 88k, HVO 42k. |
+| n386 | 205b3676c8fe3ce4 | 416 | 251 | 86 | RATE=0.015, DIVISOR=10. ARBiH KIA 10,292 but HVO 39k (below band), VRS 88k. Regressed to 88.0%. |
+| n387 | 205b3676c8fe3ce4 | — | — | — | **Bombardment exposure v3 (ratio-based).** 88.2%. Log-ratio model: `ln(incoming/own) / SCALE`. Better ARBiH/HVO differentiation. RATE=0.015 too aggressive (VRS 85k). |
+| **n392** | **205b3676c8fe3ce4** | **420** | **246** | **87** | **NEW ALL-TIME HIGH: 88.6% (667/753).** Ratio-based bombardment exposure (RATE=0.012, SCALE=2.0). Krajina **98.5%** (+3.0pp). ARBiH KIA **9,831** (target 11,500, 85% achieved). Personnel: ARBiH 119k (in band), VRS 85k (below band -5k), HVO 41k (in band). Total military KIA: 25,805. Civilian killed: 27,868. |
+
+---
+
+## Comprehensive Combat Formula (n375–n392)
+
+### New Mechanics Added
+
+**1. Officer Quality** (`combat_math.ts:getOfficerQualityMult`)
+Faction-level command effectiveness curve modeled on historical doctrinal arcs:
+- **VRS**: 1.10 peak (JNA officers), decays 0.002/week after w20, floor 0.95 (brain drain, no replacement officers)
+- **ARBiH**: 0.85 floor (no officers, rabble), grows 0.003/week, cap 1.05 (professionalization)
+- **HVO**: constant 0.97 (Croatian backing, stable cadre)
+Applied to both `computeAttackerPower` and `computeDefenderPower`.
+
+**2. Ethnic Homeland Defense** (`ethnic_defense.ts`)
+Defenders fight harder in co-ethnic majority OSIDs:
+- ≥60% co-ethnic population → +12% defense power
+- 30–60% → graduated bonus
+- <30% → no bonus
+Shared module (`OsidEthnicComposition`), wired into resolver, predictor, and bot AI.
+
+**3. Bombardment Casualty Multiplier** (`combat_math.ts:getBombardmentCasualtyMult`)
+Attacker heavy weapons inflict extra defender casualties even on stalemate/repulsed outcomes:
+- `(artEff + tankEff×0.5) / 80` → 1.0–1.8× defender casualties
+- Models VRS artillery causing ARBiH losses while ARBiH never yields
+
+**4. Bombardment Exposure Attrition** (`frontline_attrition.ts`)
+Passive attrition from enemy heavy weapons — the major new mechanic for closing the casualty gap:
+- Ratio-based vulnerability: `ln(incoming/ownFP) / SCALE`
+- Brigades with very low own firepower facing high enemy firepower are exponentially more vulnerable
+- ARBiH (own FP ~1.8, incoming ~13) → ln(7.2)/2.0 = 0.99 → near-full effect
+- HVO (own FP ~5, incoming ~13) → ln(2.6)/2.0 = 0.48 → half effect
+- VRS (own FP ~17, incoming ~2) → ln(0.13) < 0 → zero effect
+- BOMBARDMENT_EXPOSURE_RATE = 0.012, BOMBARDMENT_RATIO_SCALE = 2.0
+- Enemy FP distributed across all non-enemy brigades (not just own faction)
+
+### Calibration Iterations (n375–n392)
+
+| Run | Model | RATE | DIVISOR/SCALE | ARBiH KIA | VRS P | HVO P | OSID |
+|---|---|---|---|---|---|---|---|
+| n382 | none | — | — | 7,214 | 91k | 46k | 88.3% |
+| n383 | linear deficit | 0.005 | DIV=20 | 8,057 | — | 41k | 88.0% |
+| n385 | linear deficit | 0.012 | DIV=12 | 9,287 | 88k | 42k | 88.4% |
+| n386 | linear deficit | 0.015 | DIV=10 | 10,292 | 88k | 39k | 88.0% |
+| n387 | **ratio ln()** | 0.015 | SCALE=2.0 | 10,403 | 85k | 39k | 88.2% |
+| **n392** | **ratio ln()** | **0.012** | **SCALE=2.0** | **9,831** | **85k** | **41k** | **88.6%** |
+
+### Key Finding: Cascade Dynamics
+Increasing bombardment attrition weakens ARBiH/HVO → VRS attacks more successfully → VRS takes more attacker casualties → VRS personnel drops. RS pool scale is extremely sensitive: 0.25→0.27 crashed OSID match from 88.6% to 85.7% (VRS over-extension). The VRS at 85k is an emergent consequence of historically aggressive VRS offensive behavior.
+
+### Remaining Gap
+- ARBiH KIA: 9,831 vs target 11,500 (85% achieved, 1,669 gap)
+- Gap likely requires siege-specific mechanics (Sarajevo daily shelling, enclave bombardment) rather than further parameter tuning
+- VRS at 85k: below 90k band, driven by combat cascade — accepted as emergent behavior
+
+---
+
+## Ceiling Removal (n369–n374)
+
+### Problem
+`FACTION_HISTORICAL_PEAK` ceiling system applied hardcoded caps (RBiH 130k, RS 185k, HRHB 45k) via soft/hard cap ratios. Values were factually wrong (ARBiH peak should be 180-200k, VRS peak 100-110k) and violated the design principle of emergent growth.
+
+### Solution
+Removed ceiling system entirely. Tuned mobilization parameters so personnel naturally settles within historical bands:
+
+| Parameter | Before | After (n374) | File |
+|---|---|---|---|
+| `FACTION_HISTORICAL_PEAK` | RBiH 130k, RS 185k, HRHB 45k | **DELETED** | `formation_constants.ts` |
+| `FACTION_SOFT_CAP_RATIO` | 0.85 | **DELETED** | `formation_constants.ts` |
+| `FACTION_HARD_CAP_RATIO` | 0.95 | **DELETED** | `formation_constants.ts` |
+| `ABOVE_SOFT_CAP_REINFORCEMENT_MULT` | 0.25 | **DELETED** | `formation_constants.ts` |
+| `getFactionCeilingMult()` | Soft/hard cap gating | **DELETED** | `formation_spawn.ts` |
+| `getFactionTotalPersonnel()` | Personnel counter for ceiling | **DELETED** | `formation_spawn.ts` |
+| `FACTION_MOBILIZATION_SCALE.RBiH` | 0.40 | **0.14** | `ongoing_mobilization.ts` |
+| `FACTION_MOBILIZATION_SCALE.RS` | 0.25 | **0.22** | `ongoing_mobilization.ts` |
+| `FACTION_MOBILIZATION_SCALE.HRHB` | 0.90 | **0.18** | `ongoing_mobilization.ts` |
+| `EXHAUSTION_THRESHOLD` | 0.20 | **0.15** | `ongoing_mobilization.ts` |
+| `EXHAUSTION_HARD_CAP` | 0.35 | **0.25** | `ongoing_mobilization.ts` |
+| `FACTION_POOL_SCALE.HRHB` | 2.10 | **1.55** | `pool_population.ts` |
+
+### Calibration iterations
+| Run | RBiH mob | RS mob | HRHB mob | HRHB pool | ARBiH | VRS | HVO | Match |
+|---|---|---|---|---|---|---|---|---|
+| n364 (baseline) | 0.40 + ceiling | 0.25 + ceiling | 0.90 + ceiling | 2.10 | 124k | 103k | 43k | 87.4% |
+| n369 | 0.28 | 0.16 | 0.50 | 2.10 | 151k | 79k | 55k | 87.5% |
+| n370 | 0.16 | 0.22 | 0.30 | 2.10 | 134k | 96k | 50k | 87.4% |
+| n371 | 0.14 | 0.22 | 0.24 | 2.10 | 129k | 97k | 49k | 87.6% |
+| n374 | 0.14 | 0.22 | 0.18 | 1.70 | 127k | 97k | 46k | 87.6% |
+
+### Design principle confirmed
+Personnel totals emerge from: census demographics (initial pool size) → mobilization rate × surge × exhaustion (ongoing growth) → reinforcement rate ramp (pool→brigade transfer) → combat attrition (drain) → pool depletion (finite manpower). No hardcoded limits needed.
 
 ---
 

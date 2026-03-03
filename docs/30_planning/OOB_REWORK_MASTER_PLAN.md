@@ -473,8 +473,8 @@ Selected deterministically from history data:
 ### Phase 4: Troop Balancing + Lifecycle
 **Effort:** 1 session | **Risk:** Medium (affects recruitment/reinforcement)
 
-1. Add faction personnel ceilings to `formation_constants.ts`
-2. Implement soft/hard cap check in `reinforceBrigadesFromPools()`
+1. ~~Add faction personnel ceilings to `formation_constants.ts`~~ — **REMOVED in n369–n374.** Ceilings replaced by tuned mobilization scales + exhaustion thresholds in `ongoing_mobilization.ts`. See `docs/40_reports/implemented/20260303_CEILING_REMOVAL_EMERGENT_GROWTH.md`.
+2. ~~Implement soft/hard cap check in `reinforceBrigadesFromPools()`~~ — **REMOVED.** `getFactionCeilingMult()` and `getFactionTotalPersonnel()` deleted.
 3. Implement VRS equipment decay pipeline step
 4. Create `src/sim/formation_lifecycle.ts` — process lifecycle events
 5. Add `process-lifecycle-events` pipeline step

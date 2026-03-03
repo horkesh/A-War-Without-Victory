@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Complete implementation of the OOB rework across 6 phases. Added brigade combat histories, a 3-tier decoration system, faction personnel ceilings, VRS equipment decay, elite loan mechanics, formation lifecycle events, and war stories generation. 81 new tests, 0 regressions.
+Complete implementation of the OOB rework across 6 phases. Added brigade combat histories, a 3-tier decoration system, ~~faction personnel ceilings~~ (**removed in n369–n374** — replaced by emergent growth via tuned mobilization), VRS equipment decay, elite loan mechanics, formation lifecycle events, and war stories generation. 81 new tests, 0 regressions.
 
 ---
 
@@ -106,13 +106,13 @@ Complete implementation of the OOB rework across 6 phases. Added brigade combat 
 | File | Purpose |
 |------|---------|
 | `src/sim/formation_lifecycle_events.ts` | Territory-based disband, merge, rename processing |
-| `tests/troop_balance_lifecycle.test.ts` | 14 tests: ceilings, VRS decay, lifecycle triggers |
+| `tests/troop_balance_lifecycle.test.ts` | 14 tests: ~~ceilings~~ (5 ceiling tests removed in n369–n374), VRS decay, lifecycle triggers |
 
 ### Modified Files
 | File | Change |
 |------|--------|
-| `src/state/formation_constants.ts` | +8 constants: faction ceilings, VRS decay |
-| `src/sim/formation_spawn.ts` | getFactionTotalPersonnel(), getFactionCeilingMult() + integration in both reinforcement paths |
+| `src/state/formation_constants.ts` | +8 constants: ~~faction ceilings~~ (**removed n369–n374**), VRS decay |
+| `src/sim/formation_spawn.ts` | ~~getFactionTotalPersonnel(), getFactionCeilingMult()~~ (**removed n369–n374**) + reinforcement paths |
 | `src/sim/turn_phases/war_phases.ts` | +2 pipeline steps: process-lifecycle-events, apply-vrs-equipment-decay |
 | `src/sim/combat/combat_math.ts` | equipment_decay multiplier in getEquipmentRatio() |
 
