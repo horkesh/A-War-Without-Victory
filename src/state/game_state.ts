@@ -345,6 +345,8 @@ export interface FormationState {
     lifecycle_status?: 'active' | 'forming' | 'disbanded' | 'merged' | 'destroyed' | 'withdrawn';
     /** VRS equipment decay factor [0,1]. Applied as multiplier to equipment ratio. 1.0 = full effectiveness, 0.6 = floor. */
     equipment_decay?: number;
+    /** Brigade officer quality [0,1]. Abstracted command competence at brigade level. Grows with combat experience, decays with casualties. Faction defaults: VRS starts high (~0.55), ARBiH starts low (~0.05), HVO stable (~0.225). */
+    officer_quality?: number;
     /** Progressive war story — regenerated each war turn from brigade_history. */
     war_story?: BrigadeWarStory;
     /** Corps/Army aggregate combat summary — computed each war turn from subordinate brigade_histories. */
@@ -1357,6 +1359,11 @@ export interface GameState {
 
     /** War timeline: externalized faction temporal profiles (doctrine, cohesion, reinforcement, etc). Loaded from data/scenarios/timelines/{id}.json. */
     war_timeline?: import('./war_timeline.js').WarTimeline;
+
+    /** Named officer static data (loaded from JSON). Immutable during simulation. */
+    named_officer_data?: import('./officer_types.js').NamedOfficer[];
+    /** Named officer mutable state keyed by officer ID. */
+    named_officers?: Record<string, import('./officer_types.js').NamedOfficerState>;
 }
 
 /**

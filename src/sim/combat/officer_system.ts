@@ -1,0 +1,577 @@
+/**
+ * Core officer system: named officer management, combat modifiers, succession.
+ *
+ * Tier 1 of the two-tier officer system. Named officers (corps and above)
+ * provide per-corps combat modifiers and are managed through succession rules.
+ *
+ * Deterministic: officerHash for casualty checks, sorted iteration, no randomness.
+ */
+
+import type { FactionId, FormationState, GameState } from '../../state/game_state.js';
+import type {
+    NamedOfficer,
+    NamedOfficerState,
+    OfficerPoolTier,
+    FactionOfficerConfig,
+} from '../../state/officer_types.js';
+import { strictCompare } from '../../state/validateGameState.js';
+import { getBrigadeOfficerMod } from './combat_math.js';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Constants
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Modifier for acting/temporary commanders. */
+const ACTING_COMMANDER_MOD = 0.92;
+
+/** Incompatible corps penalty: -2 effective competence. */
+const INCOMPATIBLE_PENALTY = 2;
+/** Incompatible corps penalty duration. */
+const INCOMPATIBLE_PENALTY_TURNS = 12;
+
+/** Compatible corps penalty: -1 effective competence. */
+const COMPATIBLE_PENALTY = 1;
+/** Compatible corps penalty duration. */
+const COMPATIBLE_PENALTY_TURNS = 8;
+
+/** C.3: HVO political replacement delay (turns). */
+const HVO_POLITICAL_REPLACEMENT_DELAY = 4;
+/** C.3: HVO combat death replacement delay (turns). */
+const HVO_COMBAT_DEATH_REPLACEMENT_DELAY = 1;
+
+/** Pool tier succession priority ordering. */
+const TIER_PRIORITY: Record<OfficerPoolTier, number> = {
+    starter: 0,
+    tier_a: 1,
+    tier_b: 2,
+    tier_c: 3,
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Deterministic hash for casualty checks
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Deterministic hash for officer casualty vulnerability checks.
+ * Produces a stable [0,1) value from (turn, officerId).
+ * NOT random — same inputs always produce same output.
+ */
+export function officerHash(turn: number, officerId: string): number {
+    let hash = 5381;
+    const combined = `${turn}:${officerId}`;
+    for (let i = 0; i < combined.length; i++) {
+        hash = ((hash << 5) + hash + combined.charCodeAt(i)) | 0;
+    }
+    return Math.abs(hash % 10000) / 10000;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Officer lookups
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Get the named officer currently commanding a corps.
+ * Returns null if no named officer is assigned.
+ */
+export function getCorpsCommander(
+    corpsId: string,
+    state: GameState
+): { data: NamedOfficer; state: NamedOfficerState } | null {
+    const officers = state.named_officers;
+    const officerData = state.named_officer_data;
+    if (!officers || !officerData) return null;
+
+    const officerIds = Object.keys(officers).sort(strictCompare);
+    for (const id of officerIds) {
+        const os = officers[id]!;
+        if (os.status === 'active' && os.assigned_corps_id === corpsId) {
+            const data = officerData.find(o => o.id === id);
+            if (data) return { data, state: os };
+        }
+    }
+    return null;
+}
+
+/**
+ * Get the army-level commander for a faction.
+ */
+export function getArmyCommander(
+    faction: FactionId,
+    state: GameState
+): { data: NamedOfficer; state: NamedOfficerState } | null {
+    const officers = state.named_officers;
+    const officerData = state.named_officer_data;
+    if (!officers || !officerData) return null;
+
+    const officerIds = Object.keys(officers).sort(strictCompare);
+    for (const id of officerIds) {
+        const os = officers[id]!;
+        if (os.status !== 'active') continue;
+        const data = officerData.find(o => o.id === id);
+        if (data && data.faction === faction && data.rank === 'army_commander') {
+            return { data, state: os };
+        }
+    }
+    return null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Effective competence
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Get effective competence of an officer, accounting for assignment penalties.
+ * Clamped to [1, 5].
+ */
+export function getEffectiveCompetence(os: NamedOfficerState, data: NamedOfficer): number {
+    const penalty = os.penalty_turns_remaining > 0 ? os.effective_competence_penalty : 0;
+    return Math.max(1, Math.min(5, data.competence - penalty));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Combat modifiers
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Corps commander attack modifier.
+ * attack_mod = 0.90 + comp×0.03 + agg×0.01
+ * Acting commanders get a flat 0.92.
+ */
+export function getCorpsCommanderAttackMod(data: NamedOfficer, os: NamedOfficerState): number {
+    if (os.acting_commander) return ACTING_COMMANDER_MOD;
+    const comp = getEffectiveCompetence(os, data);
+    return 0.90 + comp * 0.03 + data.aggressiveness * 0.01;
+}
+
+/**
+ * Corps commander defense modifier.
+ * defense_mod = 0.90 + comp×0.03 + def×0.01
+ * Acting commanders get a flat 0.92.
+ */
+export function getCorpsCommanderDefenseMod(data: NamedOfficer, os: NamedOfficerState): number {
+    if (os.acting_commander) return ACTING_COMMANDER_MOD;
+    const comp = getEffectiveCompetence(os, data);
+    return 0.90 + comp * 0.03 + data.defensive_skill * 0.01;
+}
+
+/**
+ * Combined Tier 1 × Tier 2 officer modifier for a formation.
+ *
+ * If named officers are present and the formation's corps has a named commander,
+ * uses the corps commander modifier × brigade officer mod.
+ * Otherwise falls back to brigade officer mod alone.
+ */
+export function getOfficerCombatMod(
+    formation: FormationState,
+    state: GameState,
+    role: 'attack' | 'defend'
+): number {
+    const turn = state.meta?.turn ?? 0;
+    const brigadeOfficerMod = getBrigadeOfficerMod(formation, turn);
+
+    // Check for named corps commander
+    const corpsId = formation.corps_id;
+    if (!corpsId || !state.named_officers || !state.named_officer_data) {
+        return brigadeOfficerMod;
+    }
+
+    const commander = getCorpsCommander(corpsId, state);
+    if (!commander) return brigadeOfficerMod;
+
+    const corpsMod = role === 'attack'
+        ? getCorpsCommanderAttackMod(commander.data, commander.state)
+        : getCorpsCommanderDefenseMod(commander.data, commander.state);
+
+    return brigadeOfficerMod * corpsMod;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Initialization
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Initialize named officers on GameState.
+ * Assigns historical starters to their corps; places pool officers in reserve.
+ */
+export function initializeNamedOfficers(
+    state: GameState,
+    officerData: NamedOfficer[]
+): void {
+    state.named_officer_data = officerData;
+    state.named_officers = {};
+    const turn = state.meta?.turn ?? 0;
+
+    // Sort for determinism
+    const sorted = [...officerData].sort((a, b) => strictCompare(a.id, b.id));
+
+    for (const officer of sorted) {
+        // Skip officers not yet available
+        if (officer.available_from_turn > turn) continue;
+        // Skip officers already departed
+        if (officer.available_until_turn !== undefined && officer.available_until_turn <= turn) continue;
+
+        const isStarter = officer.is_historical_start === true;
+        const assignedCorps = isStarter && officer.historical_corps_id
+            ? officer.historical_corps_id
+            : null;
+
+        state.named_officers[officer.id] = {
+            officer_id: officer.id,
+            status: isStarter || assignedCorps ? 'active' : 'reserve',
+            assigned_corps_id: assignedCorps,
+            turns_in_command: 0,
+            battles: 0,
+            victories: 0,
+            effective_competence_penalty: 0,
+            penalty_turns_remaining: 0,
+            acting_commander: false,
+        };
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Succession
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface OfficerSuccessionReport {
+    departures: string[];
+    casualties: string[];
+    replacements: Array<{ corps_id: string; old_officer: string; new_officer: string }>;
+    new_arrivals: string[];
+    generic_replacements: number;
+}
+
+/**
+ * Process officer succession for one turn.
+ *
+ * 1. Process historical departures (available_until_turn).
+ * 2. Check for newly available officers (available_from_turn).
+ * 3. Casualty checks for active officers in corps that fought.
+ * 4. Fill vacant corps commands from pool.
+ */
+export function processOfficerSuccession(
+    state: GameState,
+    engagedCorpsIds: Set<string>
+): OfficerSuccessionReport {
+    const report: OfficerSuccessionReport = {
+        departures: [],
+        casualties: [],
+        replacements: [],
+        new_arrivals: [],
+        generic_replacements: 0,
+    };
+
+    const officers = state.named_officers;
+    const officerData = state.named_officer_data;
+    if (!officers || !officerData) return report;
+
+    const turn = state.meta?.turn ?? 0;
+
+    // 1. Historical departures
+    for (const data of officerData) {
+        const os = officers[data.id];
+        if (!os || os.status !== 'active' && os.status !== 'reserve') continue;
+        if (data.available_until_turn !== undefined && turn >= data.available_until_turn) {
+            os.status = 'retired';
+            if (os.assigned_corps_id) {
+                os.assigned_corps_id = null;
+            }
+            report.departures.push(data.id);
+        }
+    }
+
+    // 2. New arrivals
+    for (const data of officerData) {
+        if (officers[data.id]) continue; // Already in state
+        if (data.available_from_turn <= turn) {
+            const isExpired = data.available_until_turn !== undefined && data.available_until_turn <= turn;
+            if (isExpired) continue;
+
+            officers[data.id] = {
+                officer_id: data.id,
+                status: 'reserve',
+                assigned_corps_id: null,
+                turns_in_command: 0,
+                battles: 0,
+                victories: 0,
+                effective_competence_penalty: 0,
+                penalty_turns_remaining: 0,
+                acting_commander: false,
+            };
+            report.new_arrivals.push(data.id);
+        }
+    }
+
+    // 3. Casualty checks for corps that fought
+    const officerIds = Object.keys(officers).sort(strictCompare);
+    for (const id of officerIds) {
+        const os = officers[id]!;
+        if (os.status !== 'active') continue;
+        if (!os.assigned_corps_id || !engagedCorpsIds.has(os.assigned_corps_id)) continue;
+
+        const data = officerData.find(o => o.id === id);
+        if (!data) continue;
+
+        const hash = officerHash(turn, id);
+        if (hash < data.casualty_vulnerability * 0.1) {
+            // Officer killed/captured
+            os.status = 'killed';
+            os.assigned_corps_id = null;
+            report.casualties.push(id);
+        }
+    }
+
+    // 4. Advance turns_in_command and reduce penalties
+    for (const id of officerIds) {
+        const os = officers[id]!;
+        if (os.status !== 'active') continue;
+        if (os.assigned_corps_id) {
+            os.turns_in_command++;
+            if (os.penalty_turns_remaining > 0) {
+                os.penalty_turns_remaining--;
+            }
+        }
+    }
+
+    // 5. Fill vacant corps commands
+    // C.3: HVO Zagreb delay — track whether vacancy was from combat or non-combat
+    const combatCasualtiesThisTurn = new Set(report.casualties);
+    const departureFactions = new Map<string, FactionId>();
+    for (const depId of report.departures) {
+        const depData = officerData.find(o => o.id === depId);
+        if (depData) departureFactions.set(depId, depData.faction);
+    }
+
+    const formations = state.formations ?? {};
+    const corpsFormationIds = Object.keys(formations)
+        .filter(id => {
+            const f = formations[id]!;
+            return (f.kind === 'corps_asset' || f.kind === 'army_hq') && f.status === 'active';
+        })
+        .sort(strictCompare);
+
+    for (const corpsFormId of corpsFormationIds) {
+        const corpsFormation = formations[corpsFormId]!;
+        if (corpsFormation.kind !== 'corps_asset') continue;
+
+        const existingCommander = getCorpsCommander(corpsFormId, state);
+        if (existingCommander) {
+            // C.3: HVO acting commanders get replaced once their delay is served
+            if (existingCommander.state.acting_commander && existingCommander.data.faction === 'HRHB') {
+                // D.4: Read delays from war_timeline if available, else hardcoded fallback
+                const hvoConfig = state.war_timeline?.officer_config?.HRHB;
+                const politicalDelay = hvoConfig?.political_replacement_delay ?? HVO_POLITICAL_REPLACEMENT_DELAY;
+                const combatDelay = hvoConfig?.combat_death_replacement_delay ?? HVO_COMBAT_DEATH_REPLACEMENT_DELAY;
+                // Acting commander: check if enough turns have passed
+                const requiredDelay = existingCommander.data.id.startsWith('generic_combat_')
+                    ? combatDelay : politicalDelay;
+                if (existingCommander.state.turns_in_command < requiredDelay) continue;
+                // Delay served — retire acting, look for pool replacement below
+                existingCommander.state.status = 'retired';
+                existingCommander.state.assigned_corps_id = null;
+            } else {
+                continue;
+            }
+        }
+
+        // Find best available replacement from pool
+        const faction = corpsFormation.faction as FactionId;
+        const replacement = findBestReplacement(officers, officerData, faction, corpsFormId);
+
+        if (replacement) {
+            const os = officers[replacement.id]!;
+            os.status = 'active';
+            os.assigned_corps_id = corpsFormId;
+            os.turns_in_command = 0;
+            os.acting_commander = false;
+
+            // Compute assignment penalty
+            const isHome = replacement.home_corps_id === corpsFormId;
+            const isCompatible = replacement.compatible_corps_ids?.includes(corpsFormId) ?? false;
+
+            if (!isHome && !isCompatible) {
+                os.effective_competence_penalty = INCOMPATIBLE_PENALTY;
+                os.penalty_turns_remaining = INCOMPATIBLE_PENALTY_TURNS;
+            } else if (!isHome && isCompatible) {
+                os.effective_competence_penalty = COMPATIBLE_PENALTY;
+                os.penalty_turns_remaining = COMPATIBLE_PENALTY_TURNS;
+            } else {
+                os.effective_competence_penalty = 0;
+                os.penalty_turns_remaining = 0;
+            }
+
+            report.replacements.push({
+                corps_id: corpsFormId,
+                old_officer: '',
+                new_officer: replacement.id,
+            });
+        } else {
+            // No pool officer available — create generic acting replacement
+            // C.3: HVO uses combat-death or political prefix to track delay source
+            const wasCombatDeath = [...combatCasualtiesThisTurn].some(id => {
+                const d = officerData.find(o => o.id === id);
+                return d && d.faction === faction;
+            });
+            const prefix = faction === 'HRHB' && wasCombatDeath ? 'generic_combat_' : 'generic_';
+            const genericId = `${prefix}${faction}_${corpsFormId}_t${turn}`;
+            // D.4: Read generic replacement competence from war_timeline if available
+            const factionConfig = state.war_timeline?.officer_config?.[faction];
+            const genericComp = factionConfig?.generic_replacement_competence ?? 2;
+
+            const genericData: NamedOfficer = {
+                id: genericId,
+                name: `Acting Commander (${corpsFormId})`,
+                faction,
+                rank: 'corps_commander',
+                competence: genericComp,
+                aggressiveness: 3,
+                defensive_skill: 2,
+                political_reliability: 3,
+                home_corps_id: corpsFormId,
+                available_from_turn: turn,
+                origin: 'military',
+                casualty_vulnerability: 0.15,
+                can_improve: true,
+                improvement_rate: 0.06,
+                pool_tier: 'tier_c',
+            };
+            officerData.push(genericData);
+            officers[genericId] = {
+                officer_id: genericId,
+                status: 'active',
+                assigned_corps_id: corpsFormId,
+                turns_in_command: 0,
+                battles: 0,
+                victories: 0,
+                effective_competence_penalty: 0,
+                penalty_turns_remaining: 0,
+                acting_commander: true,
+            };
+            report.generic_replacements++;
+        }
+    }
+
+    return report;
+}
+
+/**
+ * Find best available replacement officer for a corps.
+ * Priority: pool_tier (starter > tier_a > tier_b > tier_c), then competence, then home corps match.
+ */
+function findBestReplacement(
+    officers: Record<string, NamedOfficerState>,
+    officerData: NamedOfficer[],
+    faction: FactionId,
+    corpsId: string
+): NamedOfficer | null {
+    const candidates: NamedOfficer[] = [];
+
+    for (const data of officerData) {
+        if (data.faction !== faction) continue;
+        if (data.rank === 'army_commander' || data.rank === 'deputy') continue;
+
+        const os = officers[data.id];
+        if (!os || os.status !== 'reserve') continue;
+
+        candidates.push(data);
+    }
+
+    if (candidates.length === 0) return null;
+
+    // Sort by: home corps match, then pool tier, then competence desc, then id.
+    // C.3: HVO sorts by political_reliability first (before competence).
+    candidates.sort((a, b) => {
+        // Home corps match
+        const aHome = a.home_corps_id === corpsId ? 0 : 1;
+        const bHome = b.home_corps_id === corpsId ? 0 : 1;
+        if (aHome !== bHome) return aHome - bHome;
+
+        // Compatible corps match
+        const aCompat = a.compatible_corps_ids?.includes(corpsId) ? 0 : 1;
+        const bCompat = b.compatible_corps_ids?.includes(corpsId) ? 0 : 1;
+        if (aCompat !== bCompat) return aCompat - bCompat;
+
+        // Pool tier
+        const aTier = TIER_PRIORITY[a.pool_tier] ?? 99;
+        const bTier = TIER_PRIORITY[b.pool_tier] ?? 99;
+        if (aTier !== bTier) return aTier - bTier;
+
+        // C.3: HVO — political_reliability first, then competence
+        if (faction === 'HRHB') {
+            if (a.political_reliability !== b.political_reliability) return b.political_reliability - a.political_reliability;
+        }
+
+        // Competence (higher first)
+        if (a.competence !== b.competence) return b.competence - a.competence;
+
+        // Deterministic tie-break
+        return strictCompare(a.id, b.id);
+    });
+
+    return candidates[0] ?? null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Validation
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Validate raw officer data from JSON.
+ * Returns validated NamedOfficer[] or throws on invalid data.
+ */
+export function validateOfficerData(raw: unknown): NamedOfficer[] {
+    if (!raw || typeof raw !== 'object') throw new Error('Officer data must be an object');
+    const obj = raw as Record<string, unknown>;
+    const officers = obj.officers;
+    if (!Array.isArray(officers)) throw new Error('Officer data must have an "officers" array');
+
+    const result: NamedOfficer[] = [];
+    const seenIds = new Set<string>();
+    const validFactions: FactionId[] = ['RBiH', 'RS', 'HRHB'];
+
+    for (let i = 0; i < officers.length; i++) {
+        const o = officers[i] as Record<string, unknown>;
+        if (!o || typeof o !== 'object') throw new Error(`Officer at index ${i} is not an object`);
+
+        const id = o.id;
+        if (typeof id !== 'string' || !id) throw new Error(`Officer at index ${i}: missing id`);
+        if (seenIds.has(id)) throw new Error(`Duplicate officer id: ${id}`);
+        seenIds.add(id);
+
+        const faction = o.faction as FactionId;
+        if (!validFactions.includes(faction)) throw new Error(`Officer ${id}: invalid faction ${faction}`);
+
+        const clampRating = (val: unknown, field: string): number => {
+            const n = typeof val === 'number' ? val : 3;
+            if (n < 1 || n > 5) throw new Error(`Officer ${id}: ${field} must be 1-5, got ${n}`);
+            return n;
+        };
+
+        result.push({
+            id,
+            name: String(o.name ?? id),
+            faction,
+            rank: (o.rank as NamedOfficer['rank']) ?? 'corps_commander',
+            competence: clampRating(o.competence, 'competence'),
+            aggressiveness: clampRating(o.aggressiveness, 'aggressiveness'),
+            defensive_skill: clampRating(o.defensive_skill, 'defensive_skill'),
+            political_reliability: clampRating(o.political_reliability, 'political_reliability'),
+            home_corps_id: typeof o.home_corps_id === 'string' ? o.home_corps_id : undefined,
+            compatible_corps_ids: Array.isArray(o.compatible_corps_ids)
+                ? (o.compatible_corps_ids as unknown[]).filter((x): x is string => typeof x === 'string')
+                : undefined,
+            available_from_turn: typeof o.available_from_turn === 'number' ? o.available_from_turn : 0,
+            available_until_turn: typeof o.available_until_turn === 'number' ? o.available_until_turn : undefined,
+            is_historical_start: o.is_historical_start === true,
+            historical_corps_id: typeof o.historical_corps_id === 'string' ? o.historical_corps_id : undefined,
+            origin: (o.origin as NamedOfficer['origin']) ?? 'military',
+            casualty_vulnerability: typeof o.casualty_vulnerability === 'number'
+                ? Math.max(0, Math.min(1, o.casualty_vulnerability)) : 0.1,
+            can_improve: o.can_improve === true,
+            improvement_rate: typeof o.improvement_rate === 'number' ? o.improvement_rate : 0,
+            pool_tier: (o.pool_tier as OfficerPoolTier) ?? 'tier_c',
+        });
+    }
+
+    return result;
+}

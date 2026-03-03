@@ -35,6 +35,11 @@ import {
     buildOsidAdjacency,
     type Osid
 } from './osid_adjacency.js';
+import {
+    type OsidEthnicComposition,
+    getCoEthnicShare,
+    getEthnicDefenseBonus,
+} from './ethnic_defense.js';
 
 // ── Shared combat math ──────────────────────────────────────────────────
 import {
@@ -54,6 +59,7 @@ import {
     // Functions
     getMoraleResistFloor,
     getArtillerySuppression,
+    getBombardmentCasualtyMult,
     getSupplyMult,
     classifyOutcome,
     computeAttackerPower,
@@ -63,6 +69,7 @@ import {
     getEquipmentRatio,
     getToTerrainDefenseMult,
 } from './combat_math.js';
+import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from './officer_quality_update.js';
 
 // Backward-compat re-exports
 export type AttackOutcome = CombatOutcome;
@@ -74,9 +81,11 @@ export type { CombatOutcome };
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Homeland determination casualty multiplier (L13–L16 in CALIBRATION_MASTER).
+ * Homeland determination casualty multiplier.
  * When morale absorption triggers (defender stays after costly_victory),
- * BOTH sides take additional casualties.
+ * BOTH sides take additional casualties. This is the primary driver of
+ * "defending harder, taking more casualties, not yielding ground" behavior.
+ * High multiplier = bloodier stalemates (historically accurate for Bosnian War).
  */
 const MORALE_ABSORPTION_CAS_MULT = 1.35;
 
@@ -225,7 +234,8 @@ export function resolveAttackOrdersOsid(
     reverseMap: OperationalToCanonicalReverseMap,
     terrainData?: TerrainScalarsData | null,
     supplyStateByOsid?: SupplyStateByOsidReport | null,
-    osidPopulationMap?: OsidPopulationMap | null
+    osidPopulationMap?: OsidPopulationMap | null,
+    ethnicComposition?: OsidEthnicComposition | null
 ): AttackResolutionOsidReport {
     const report: AttackResolutionOsidReport = {
         orders_processed: 0,
@@ -299,7 +309,11 @@ export function resolveAttackOrdersOsid(
         let defenderFormation: FormationState | null = null;
         const artSuppression = getArtillerySuppression(attackerFormations);
         if (defenderFormations.length > 0) {
-            const powers = defenderFormations.map(d => computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid));
+            const powers = defenderFormations.map(d => {
+                const share = getCoEthnicShare(targetOsid, d.faction, ethnicComposition);
+                const ethBonus = getEthnicDefenseBonus(share);
+                return computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+            });
             const sorted = defenderFormations.map((d, i) => ({ f: d, p: powers[i]! })).sort((a, b) => b.p - a.p);
             defenderPower = sorted[0]!.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
             defenderFormation = sorted[0]!.f;
@@ -376,8 +390,9 @@ export function resolveAttackOrdersOsid(
 
         const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
         const personnelDefender = defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
+        const bombardmentMult = getBombardmentCasualtyMult(attackerFormations);
         const baseAttackerCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[outcome] ?? 1) * lastStandCasMult;
-        const baseDefenderCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[outcome] ?? 1) * lastStandCasMult;
+        const baseDefenderCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[outcome] ?? 1) * lastStandCasMult * bombardmentMult;
         const finalAttackerCas = Math.min(personnelAttacker - MIN_COMBAT_PERSONNEL, Math.max(0, Math.round(baseAttackerCas)));
         const finalDefenderCas = Math.min(personnelDefender, Math.max(0, Math.round(baseDefenderCas)));
 
@@ -509,6 +524,23 @@ export function resolveAttackOrdersOsid(
         }
         if (defenderFormation && (defenderFormation.personnel ?? 0) > 0) {
             applyExperienceGain(defenderFormation, !attackerWon);
+        }
+
+        // Officer quality loss from casualties
+        const applyOfficerLoss = (f: FormationState, cas: number, totalPersonnel: number) => {
+            if (f.officer_quality === undefined) return;
+            if (totalPersonnel <= 0) return;
+            const casualtyRatio = cas / totalPersonnel;
+            const officerLoss = casualtyRatio * OFFICER_CASUALTY_MULT * (1.0 - f.officer_quality * 0.3);
+            f.officer_quality = Math.max(OFFICER_QUALITY_FLOOR, f.officer_quality - officerLoss);
+        };
+        for (const a of attackerFormations) {
+            const frac = (a.personnel ?? 0) / Math.max(1, personnelAttacker);
+            const cas = Math.round(finalAttackerCas * frac);
+            applyOfficerLoss(a, cas, a.personnel ?? 0);
+        }
+        if (defenderFormation) {
+            applyOfficerLoss(defenderFormation, finalDefenderCas, personnelDefender);
         }
 
         let flip = outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory';

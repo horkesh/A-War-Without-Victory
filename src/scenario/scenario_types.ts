@@ -141,5 +141,7 @@ export interface Scenario {
      * external support, maintenance decay. Stored on GameState.war_timeline.
      */
     war_timeline?: string;
+    /** Officer data file ID. When set, loads named officers from data/scenarios/officers/{id}_officers.json. */
+    init_officers?: string;
 }
 

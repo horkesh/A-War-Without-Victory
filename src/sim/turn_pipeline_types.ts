@@ -64,6 +64,8 @@ import type { MoraleDriftReport } from './combat/morale_drift.js';
 import type { OngoingMobilizationReport } from './combat/ongoing_mobilization.js';
 import type { ResolveAttackOrdersReport } from './combat/resolve_attack_orders.js';
 import type { OsidColumnMovementReport } from './combat/osid_column_movement.js';
+import type { OfficerQualityReport } from './combat/officer_quality_update.js';
+import type { OfficerSuccessionReport } from './combat/officer_system.js';
 import type { Phase3AAuditSummary } from './pressure/phase3a_pressure_eligibility.js';
 import type { Phase3BExhaustionResult } from './pressure/phase3b_pressure_exhaustion.js';
 import type { Phase3CEligibilityResult } from './pressure/phase3c_exhaustion_collapse_gating.js';
@@ -199,6 +201,10 @@ export interface TurnReport {
     };
     /** Phase II: OSID column movement report */
     osid_column_movement?: OsidColumnMovementReport;
+    /** Officer quality growth/loss report */
+    officer_quality_update?: OfficerQualityReport;
+    /** Named officer succession report */
+    officer_succession?: OfficerSuccessionReport;
 }
 
 export interface TurnContext {

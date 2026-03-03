@@ -657,13 +657,22 @@ export const warPhases: NamedPhase[] = [
                 const osidPopMap = context.input.municipalityPopulation1991
                     ? computeOsidPopulation(od.opData.operationalToCanonical, context.input.municipalityPopulation1991)
                     : undefined;
+                // Ethnic composition for homeland defense bonus in combat resolution
+                let ethnicComp;
+                try {
+                    const ethnicityData = await loadSettlementEthnicityData();
+                    ethnicComp = computeOsidEthnicComposition(od.opData.operationalToCanonical, ethnicityData);
+                } catch {
+                    // Non-fatal: ethnic defense bonus simply not applied
+                }
                 context.report.phase_ii_attack_resolution_osid = resolveAttackOrdersOsid(
                     context.state,
                     od.edges,
                     od.opData.operationalToCanonical,
                     terrainData,
                     context.report.supply_resolution?.supply_state_by_osid,
-                    osidPopMap
+                    osidPopMap,
+                    ethnicComp
                 );
                 return;
             }
@@ -698,6 +707,18 @@ export const warPhases: NamedPhase[] = [
             const od = getOperationalData(context);
             const reverseMap = od?.opData?.operationalToCanonical ?? null;
             updateSectorOffensiveResults(context.state, reverseMap);
+        }
+    },
+    {
+        name: 'update-officer-quality',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { updateBrigadeOfficerQuality } = await import('../combat/officer_quality_update.js');
+            // Collect engaged formation IDs from OSID attack resolution report
+            const osidReport = context.report.phase_ii_attack_resolution_osid;
+            const engagedIds = new Set<string>(osidReport?.engaged_formation_ids ?? []);
+            const report = updateBrigadeOfficerQuality(context.state, engagedIds);
+            context.report.officer_quality_update = report;
         }
     },
     {
@@ -1023,6 +1044,31 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const { processEliteLoanLifecycle } = await import('../combat/elite_loan.js');
             processEliteLoanLifecycle(context.state);
+        }
+    },
+    {
+        name: 'officer-succession',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (!context.state.named_officers || !context.state.named_officer_data) return;
+            const { processOfficerSuccession } = await import('../combat/officer_system.js');
+            // Collect corps IDs that had combat this turn from the OSID attack report
+            const engagedCorpsIds = new Set<string>();
+            const osidReport = context.report.phase_ii_attack_resolution_osid;
+            if (osidReport?.battles) {
+                for (const battle of osidReport.battles) {
+                    if (battle.attacker_brigade) {
+                        const f = context.state.formations?.[battle.attacker_brigade];
+                        if (f?.corps_id) engagedCorpsIds.add(f.corps_id);
+                    }
+                    if (battle.defender_brigade) {
+                        const f = context.state.formations?.[battle.defender_brigade];
+                        if (f?.corps_id) engagedCorpsIds.add(f.corps_id);
+                    }
+                }
+            }
+            const report = processOfficerSuccession(context.state, engagedCorpsIds);
+            context.report.officer_succession = report;
         }
     },
     {

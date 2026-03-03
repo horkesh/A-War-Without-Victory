@@ -50,9 +50,13 @@ export const RESILIENCE_PER_DEFENSE = 0.025;
 const MORALE_RESIST_FLOOR = 70;
 
 /** Per-faction retreat resistance floors.
- * RBiH: defending homes, no retreat option → lower threshold (holds more).
- * RS: professional withdrawal discipline → standard threshold.
- * HRHB: middle ground. */
+ * When morale ≥ floor AND outcome is costly_victory, defender absorbs (holds ground,
+ * both sides take extra casualties from MORALE_ABSORPTION_CAS_MULT).
+ * Lower floor = more frequent absorption = stickier fronts + higher casualties.
+ *
+ * RBiH: defending homes, no retreat option → very low threshold (almost always holds).
+ * RS: professional withdrawal discipline → moderate threshold.
+ * HRHB: Croatian homeland defense → moderate-low threshold. */
 const FACTION_MORALE_RESIST_FLOOR: Record<string, number> = {
     RBiH: 62,
     RS: 70,
@@ -119,6 +123,163 @@ export const CORPS_STANCE_DEFENSE: Record<string, number> = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Officer quality — faction-level command effectiveness
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Officer quality multiplier based on faction and week of war.
+ *
+ * Models the documented command structure asymmetry:
+ * - VRS: Inherited full JNA officer corps — professional, but irreplaceable.
+ *   Peaks early, decays as officers are killed/captured with no pipeline.
+ * - ARBiH: Nearly no trained officers at start (TDF cadres only).
+ *   Steep learning curve from battlefield promotions and foreign-trained returnees.
+ * - HVO: Croatian Army secondees provide stable but limited officer quality.
+ *
+ * Applied multiplicatively to both attack and defense power.
+ */
+export function getOfficerQualityMult(faction: string, turn: number): number {
+    switch (faction) {
+        case 'RS': {
+            // VRS: JNA officers. Peak early, slow decay as irreplaceable officers lost.
+            const peak = 1.10;
+            const decayStart = 20;
+            const decayRate = 0.002;
+            const decay = Math.max(0, turn - decayStart) * decayRate;
+            return Math.max(0.95, peak - decay);
+        }
+        case 'RBiH': {
+            // ARBiH: Almost no officers at start. Rapid battlefield learning.
+            const floor = 0.85;
+            const growthRate = 0.003;
+            const growth = turn * growthRate;
+            return Math.min(1.05, floor + growth);
+        }
+        case 'HRHB': {
+            // HVO: Croatian Army cadres, stable but limited.
+            return 0.97;
+        }
+        default: return 1.0;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Brigade officer quality — per-brigade command effectiveness (Tier 2)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Faction default officer quality [0,1].
+ * Calibration-safe: chosen so getBrigadeOfficerMod(default, t=0) ≈ getOfficerQualityMult(faction, t=0).
+ *   RS:   0.55 → mod 1.10 (matches VRS peak 1.10)
+ *   RBiH: 0.05 → mod 0.90 (matches ARBiH floor 0.85 at t=0 → actually 0.85, but we want smooth transition)
+ *   HRHB: 0.225 → mod 0.97 (matches HVO constant 0.97)
+ */
+export function getFactionDefaultOfficerQuality(faction: string, turn: number): number {
+    switch (faction) {
+        case 'RS':
+            // VRS: JNA inheritance. Starts high, decays as officers lost.
+            return Math.max(0.45, 0.55 - turn * 0.002);
+        case 'RBiH':
+            // ARBiH: Almost no officers. Rapid battlefield learning.
+            return Math.min(0.50, 0.05 + turn * 0.004);
+        case 'HRHB':
+            // HVO: Croatian Army cadres, stable.
+            return 0.225;
+        default:
+            return 0.30;
+    }
+}
+
+/**
+ * Per-brigade officer modifier from officer_quality.
+ * Maps quality [0,1] to combat multiplier centered around 1.0 at quality=0.30.
+ *   quality 0.00 → 0.88
+ *   quality 0.05 → 0.90
+ *   quality 0.225 → 0.97
+ *   quality 0.30 → 1.00
+ *   quality 0.55 → 1.10
+ *   quality 0.90 → 1.24
+ */
+export function getBrigadeOfficerMod(formation: FormationState, turn: number): number {
+    const quality = formation.officer_quality ?? getFactionDefaultOfficerQuality(formation.faction, turn);
+    return 1.0 + (quality - 0.30) * 0.4;
+}
+
+/**
+ * Three-tier officer combat modifier:
+ *   1. named_officers present → corps commander × brigade mod
+ *   2. officer_quality present → brigade mod only
+ *   3. Neither → legacy getOfficerQualityMult
+ *
+ * Inlined here to avoid circular dependency with officer_system.ts.
+ */
+export function getThreeTierOfficerMod(
+    formation: FormationState,
+    state: GameState,
+    role: 'attack' | 'defend'
+): number {
+    const turn = state.meta?.turn ?? 0;
+
+    // Tier 1+2: named officers present
+    if (state.named_officers && state.named_officer_data) {
+        const brigMod = getBrigadeOfficerMod(formation, turn);
+        const corpsId = formation.corps_id;
+        if (!corpsId) return brigMod;
+
+        // C.4: VRS pre-planned/general_offensive ops use army commander (Mladić) modifier
+        if (formation.faction === 'RS' && role === 'attack') {
+            const corps = state.corps_command?.[corpsId];
+            if (corps?.active_operation?.type === 'general_offensive' && corps.active_operation.phase === 'execution') {
+                // Find army commander instead of corps commander
+                const officerIds = Object.keys(state.named_officers).sort(strictCompare);
+                for (const id of officerIds) {
+                    const os = state.named_officers[id]!;
+                    if (os.status !== 'active') continue;
+                    const data = state.named_officer_data.find(o => o.id === id);
+                    if (!data || data.faction !== 'RS' || data.rank !== 'army_commander') continue;
+                    const penalty = os.penalty_turns_remaining > 0 ? os.effective_competence_penalty : 0;
+                    const comp = Math.max(1, Math.min(5, data.competence - penalty));
+                    const armyMod = 0.90 + comp * 0.03 + data.aggressiveness * 0.01;
+                    return brigMod * armyMod;
+                }
+            }
+        }
+
+        // Find corps commander
+        const officerIds = Object.keys(state.named_officers).sort(strictCompare);
+        for (const id of officerIds) {
+            const os = state.named_officers[id]!;
+            if (os.status !== 'active' || os.assigned_corps_id !== corpsId) continue;
+            const data = state.named_officer_data.find(o => o.id === id);
+            if (!data) continue;
+
+            // Compute effective competence with assignment penalty
+            const penalty = os.penalty_turns_remaining > 0 ? os.effective_competence_penalty : 0;
+            const comp = Math.max(1, Math.min(5, data.competence - penalty));
+
+            let corpsMod: number;
+            if (os.acting_commander) {
+                corpsMod = 0.92;
+            } else if (role === 'attack') {
+                corpsMod = 0.90 + comp * 0.03 + data.aggressiveness * 0.01;
+            } else {
+                corpsMod = 0.90 + comp * 0.03 + data.defensive_skill * 0.01;
+            }
+            return brigMod * corpsMod;
+        }
+        return brigMod; // No commander found for corps
+    }
+
+    // Tier 2 only: brigade officer quality
+    if (formation.officer_quality !== undefined) {
+        return getBrigadeOfficerMod(formation, turn);
+    }
+
+    // Legacy fallback
+    return getOfficerQualityMult(formation.faction, turn);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Pure functions
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -138,6 +299,30 @@ export function getArtillerySuppression(attackers: FormationState[]): number {
         if (suppression > maxSuppression) maxSuppression = suppression;
     }
     return Math.min(0.7, maxSuppression);
+}
+
+/**
+ * Bombardment casualty multiplier for defenders.
+ * When attackers have significant heavy weapons (artillery + tanks), defenders
+ * take additional casualties from shelling even when they hold ground.
+ * Models VRS artillery bombardment causing ARBiH losses while ARBiH never yields.
+ * Returns 1.0 (no bonus) to MAX_BOMBARDMENT_CAS_MULT based on attacker firepower.
+ * Uses same firepower formula as getArtillerySuppression but different scaling.
+ */
+const MAX_BOMBARDMENT_CAS_MULT = 1.8;    // up to 80% extra defender casualties from bombardment
+const BOMBARDMENT_DIVISOR = 80;           // firepower units needed for full effect
+
+export function getBombardmentCasualtyMult(attackers: FormationState[]): number {
+    if (attackers.length === 0) return 1.0;
+    let totalFirepower = 0;
+    for (const attacker of attackers) {
+        const comp = attacker.composition ?? ensureBrigadeComposition(attacker);
+        const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
+        const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
+        totalFirepower += artEff + tankEff * 0.5;
+    }
+    const bombardmentFraction = Math.min(1.0, totalFirepower / BOMBARDMENT_DIVISOR);
+    return 1.0 + (MAX_BOMBARDMENT_CAS_MULT - 1.0) * bombardmentFraction;
 }
 
 /**
@@ -322,7 +507,8 @@ export function computeAttackerPower(
     const ogMult = getOgMult(formation);
     const disruptionMult = getDisruptionMult(formation, 'attack');
     const heavyMult = getHeavyWeaponsOffensiveMult(formation);
-    return base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult * heavyMult;
+    const officerMult = getThreeTierOfficerMod(formation, state, 'attack');
+    return base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult * heavyMult * officerMult;
 }
 
 export function computeDefenderPower(
@@ -331,7 +517,8 @@ export function computeDefenderPower(
     targetOsid: Osid,
     terrainMultByOsid: Record<string, number>,
     artillerySuppression: number = 0,
-    supplyStateByOsid?: SupplyStateByOsidReport | null
+    supplyStateByOsid?: SupplyStateByOsidReport | null,
+    ethnicDefenseBonus?: number
 ): number {
     const base = basePower(formation);
     const posture = formation.posture ?? 'defend';
@@ -352,7 +539,9 @@ export function computeDefenderPower(
     const decorationDefBonus = getDecorationDefBonus(formation);
     const perBrigadeTerrainBonus = 1.0 + (formation.defense_terrain_bonus ?? decorationDefBonus);
     const frontDensityMult = getLocalFrontDensityModifier(state, formation);
-    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult * toTerrainMult * perBrigadeTerrainBonus * frontDensityMult;
+    const officerMult = getThreeTierOfficerMod(formation, state, 'defend');
+    const ethnicMult = 1.0 + (ethnicDefenseBonus ?? 0);
+    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult * toTerrainMult * perBrigadeTerrainBonus * frontDensityMult * officerMult * ethnicMult;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -32,6 +32,11 @@ import {
     buildOsidAdjacency,
     type Osid
 } from './osid_adjacency.js';
+import {
+    type OsidEthnicComposition,
+    getCoEthnicShare,
+    getEthnicDefenseBonus,
+} from './ethnic_defense.js';
 
 // ── Shared combat math ──────────────────────────────────────────────────
 import {
@@ -53,6 +58,7 @@ import {
     computeAttackerPower,
     computeDefenderPower,
     buildTerrainMultByOsid,
+    getBombardmentCasualtyMult,
 } from './combat_math.js';
 
 // Backward-compat re-export
@@ -141,7 +147,8 @@ export function predictCombatOutcome(
     additionalAttackers?: FormationId[],
     supplyStateByOsid?: SupplyStateByOsidReport | null,
     osidPopulationMap?: OsidPopulationMap | null,
-    slopeByOsid?: Record<string, number> | null
+    slopeByOsid?: Record<string, number> | null,
+    ethnicComposition?: OsidEthnicComposition | null
 ): CombatPrediction | null {
     const attacker = state.formations?.[attackerId];
     if (!attacker || attacker.status !== 'active') return null;
@@ -184,7 +191,11 @@ export function predictCombatOutcome(
 
     if (defenderFormations.length > 0) {
         defenderHasBrigade = true;
-        const powers = defenderFormations.map(d => computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid));
+        const powers = defenderFormations.map(d => {
+            const share = getCoEthnicShare(targetOsid, d.faction, ethnicComposition);
+            const ethBonus = getEthnicDefenseBonus(share);
+            return computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+        });
         const sorted = defenderFormations.map((d, i) => ({ f: d, p: powers[i]! })).sort((a, b) => b.p - a.p);
         defenderPower = sorted[0]!.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
         const fogMult = learnedFromTarget ? FOG_AFTER_RETREAT_VISIBILITY : FOG_DIRECT_VISIBILITY;
@@ -223,8 +234,9 @@ export function predictCombatOutcome(
 
     const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
     const personnelDefender = defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
+    const bombardmentMult = getBombardmentCasualtyMult(attackerFormations);
     const baseAttCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[predicted] ?? 1);
-    const baseDefCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[predicted] ?? 1);
+    const baseDefCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[predicted] ?? 1) * bombardmentMult;
     const expectedAttCas = Math.max(0, Math.round(baseAttCas));
     const expectedDefCas = Math.max(0, Math.round(baseDefCas));
 
@@ -275,7 +287,8 @@ export function predictAllAdjacentTargets(
     attackerPosture?: string,
     supplyStateByOsid?: SupplyStateByOsidReport | null,
     osidPopulationMap?: OsidPopulationMap | null,
-    slopeByOsid?: Record<string, number> | null
+    slopeByOsid?: Record<string, number> | null,
+    ethnicComposition?: OsidEthnicComposition | null
 ): Array<{ osid: Osid; prediction: CombatPrediction }> {
     const attacker = state.formations?.[attackerId];
     if (!attacker || attacker.status !== 'active') return [];
@@ -289,7 +302,7 @@ export function predictAllAdjacentTargets(
     for (const n of neighbors) {
         const controller = getPoliticalControllerOSID(state, n, reverseMap);
         if (controller === null || controller === factionId) continue;
-        const pred = predictCombatOutcome(state, attackerId, n, adjacency, reverseMap, terrainMultByOsid, attackerPosture, undefined, supplyStateByOsid, osidPopulationMap, slopeByOsid);
+        const pred = predictCombatOutcome(state, attackerId, n, adjacency, reverseMap, terrainMultByOsid, attackerPosture, undefined, supplyStateByOsid, osidPopulationMap, slopeByOsid, ethnicComposition);
         if (pred) results.push({ osid: n, prediction: pred });
     }
 

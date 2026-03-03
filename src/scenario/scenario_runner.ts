@@ -976,6 +976,20 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             state.war_timeline = validateWarTimeline(timelineRaw);
         }
 
+        // Named officers: load historical officer data from JSON.
+        if (scenario.init_officers) {
+            const { validateOfficerData, initializeNamedOfficers } = await import('../sim/combat/officer_system.js');
+            const officerPath = join(baseDir, `data/scenarios/officers/${scenario.init_officers}_officers.json`);
+            let officerRaw: unknown;
+            try {
+                officerRaw = JSON.parse(await readFile(officerPath, 'utf8'));
+            } catch (err) {
+                throw new Error(`Failed to load officers "${scenario.init_officers}" from ${officerPath}: ${err instanceof Error ? err.message : err}`);
+            }
+            const officerData = validateOfficerData(officerRaw);
+            initializeNamedOfficers(state, officerData);
+        }
+
         // Store per-faction OSID avoidance list in meta so bot corps AI can inject into directives.
         if (scenario.avoided_osids_by_faction && Object.keys(scenario.avoided_osids_by_faction).length > 0) {
             state.meta.avoided_osids_by_faction = scenario.avoided_osids_by_faction;

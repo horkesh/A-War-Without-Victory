@@ -598,8 +598,9 @@ function isPartOfNamedOperation(state: GameState, formation: FormationState): bo
  */
 export type SupplyConnectivityByFaction = Map<FactionId, Set<Osid>>;
 
-/** Per-OSID ethnic composition (averaged from canonical settlements' 1991 census). */
-export type OsidEthnicComposition = Map<string, { bosniak: number; serb: number; croat: number }>;
+// Re-export from shared module
+export type { OsidEthnicComposition } from './ethnic_defense.js';
+import type { OsidEthnicComposition } from './ethnic_defense.js';
 
 /**
  * Compute per-OSID ethnic composition by averaging canonical SID compositions.
@@ -945,7 +946,7 @@ function executeFactionDirectives(
         if (directive && directive.hold_osids.includes(loc)) {
             // Counter-attack exception: if THIS brigade retreated from an adjacent OSID last turn, counter-attack
             if (counterAttackTarget && adjEnemy.includes(counterAttackTarget)) {
-                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap);
+                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
                 const counter = targets.find(t => t.osid === counterAttackTarget &&
                     isOutcomeSufficientForAttack(t.prediction.predicted_outcome, 'costly_victory'));
                 if (counter && (chosenTargets.get(counter.osid) ?? 0) < (directive.max_attackers_per_target)) {
@@ -976,7 +977,7 @@ function executeFactionDirectives(
         if (corpsStance === 'defensive') {
             // Only allow counter-attack if THIS brigade retreated from an adjacent OSID last turn
             if (counterAttackTarget && adjEnemy.includes(counterAttackTarget)) {
-                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap);
+                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
                 const effDir = directive ?? effectiveDirectiveDefault;
                 const maxAtt = effDir.max_attackers_per_target;
                 const counter = targets.find(t => t.osid === counterAttackTarget &&
@@ -992,7 +993,7 @@ function executeFactionDirectives(
             }
             // Directive offensive target (rare during defensive but possible if corps has specific targets)
             if (adjEnemy.length > 0 && directive && directive.offensive_targets.length > 0) {
-                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap);
+                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
                 const maxAtt = directive.max_attackers_per_target;
                 const viable = targets.find(t => {
                     if ((chosenTargets.get(t.osid) ?? 0) >= maxAtt) return false;
@@ -1101,7 +1102,7 @@ function executeFactionDirectives(
 
             if (filteredEnemy.length > 0) {
                 const supplyPenalty = getAttackerSupplyPenalty(loc, faction, supplyStateByOsid);
-                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap);
+                const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
 
                 // Filter targets: respect alliance, respect avoid_osids
                 const validTargets = targets.filter(t => {
@@ -1423,6 +1424,25 @@ export function generateAllBotOrdersOsid(
                 delete result.attack_orders[entry.bid];
                 delete result.attack_scores[entry.bid];
                 result.posture_orders.push({ brigade_id: entry.bid, posture: 'defend' });
+            }
+        }
+
+        // C.2: ARBiH warlord friction — before w78, one attacking brigade per corps
+        // is forced to defend each turn (deterministic: turn % attackingBrigadeCount).
+        // Simulates lack of unified command / warlord autonomy in early ARBiH.
+        // D.4: Read warlord friction end week from war_timeline if available
+        const warlordFrictionEndWeek = state.war_timeline?.officer_config?.RBiH?.warlord_friction_end_week ?? 78;
+        if (faction === 'RBiH' && turn < warlordFrictionEndWeek) {
+            for (const [cid, attacks] of [...attacksByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+                if (attacks.length <= 1) continue; // Need at least 2 attackers for friction
+                // Sort by bid for deterministic selection
+                const sorted = [...attacks].sort((a, b) => strictCompare(a.bid, b.bid));
+                const frictionIndex = turn % sorted.length;
+                const frictionTarget = sorted[frictionIndex]!;
+                // Remove from attack orders, force defend
+                delete result.attack_orders[frictionTarget.bid];
+                delete result.attack_scores[frictionTarget.bid];
+                result.posture_orders.push({ brigade_id: frictionTarget.bid, posture: 'defend' });
             }
         }
 

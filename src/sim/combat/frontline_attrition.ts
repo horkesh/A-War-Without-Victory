@@ -7,6 +7,8 @@
  *   - Dense fronts → lower attrition (mutual support)
  *   - Critical supply → doubled attrition (starvation, disease)
  *   - Strained supply → 30% increase
+ *   - Bombardment exposure: brigades facing superior enemy heavy weapons
+ *     take additional casualties from shelling (equipment deficit driven)
  *
  * Deterministic: sorted formation IDs, no randomness.
  */
@@ -24,6 +26,7 @@ import type { SupplyStateByOsidReport } from '../../state/supply_state_derivatio
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
+import { ensureBrigadeComposition } from './equipment_effects.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -31,6 +34,24 @@ import { militiaPoolKey } from '../../state/militia_pool_key.js';
 
 /** Base weekly attrition rate for frontline brigades. */
 const BASE_ATTRITION_RATE = 0.005;
+
+/**
+ * Bombardment exposure: additional attrition for brigades facing superior
+ * enemy heavy weapons. Uses a ratio-based vulnerability model with log scaling:
+ * brigades with very low own firepower facing high enemy firepower are
+ * exponentially more vulnerable (no counter-battery fire, no suppression).
+ *
+ * The firepower RATIO (incoming/own) is what matters, not the absolute deficit.
+ * ln(ratio) provides natural diminishing returns and better differentiation:
+ *   - ARBiH (own FP ~1.8, incoming ~13) → ratio 7.2, ln=1.98 → near-full effect
+ *   - HVO (own FP ~5, incoming ~13) → ratio 2.6, ln=0.96 → half effect
+ *   - VRS (own FP ~17, incoming ~2) → ratio 0.13, ln<0 → zero effect
+ */
+const BOMBARDMENT_EXPOSURE_RATE = 0.012;
+/** ln(firepower ratio) divisor for full bombardment effect. ln(7)≈2.0 */
+const BOMBARDMENT_RATIO_SCALE = 2.0;
+/** Minimum own firepower floor (prevents division by zero). */
+const MIN_COUNTERBATTERY_FP = 1.0;
 
 /** Fraction of attrition casualties that are KIA (match P9 value). */
 const KIA_FRACTION = 0.30;
@@ -82,6 +103,24 @@ export function applyFrontlineAttrition(
 
     const formationIds = Object.keys(assignments).sort(strictCompare);
 
+    // Compute per-faction total heavy weapons firepower for front-assigned brigades.
+    // Used to determine bombardment exposure: brigades facing superior enemy
+    // firepower take additional passive casualties from persistent shelling.
+    const factionFrontFP: Record<string, { totalFP: number; count: number }> = {};
+    for (const fid of formationIds) {
+        const frontId = assignments[fid];
+        if (!frontId) continue;
+        const f = formations[fid];
+        if (!f || f.status !== 'active') continue;
+        const fac = f.faction as string;
+        if (!factionFrontFP[fac]) factionFrontFP[fac] = { totalFP: 0, count: 0 };
+        const comp = f.composition ?? ensureBrigadeComposition(f);
+        const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
+        const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
+        factionFrontFP[fac].totalFP += artEff + tankEff * 0.5;
+        factionFrontFP[fac].count += 1;
+    }
+
     for (const fid of formationIds) {
         const frontId = assignments[fid];
         if (!frontId) continue;
@@ -122,9 +161,32 @@ export function applyFrontlineAttrition(
             }
         }
 
+        // Base attrition (sniping, disease, desertion)
+        const baseAttritionCas = Math.floor(personnel * BASE_ATTRITION_RATE * exposureMod * supplyMod);
+
+        // Bombardment exposure: ratio-based vulnerability model.
+        // Brigades with low own firepower facing high enemy firepower take extra losses.
+        // Uses ln(incoming/own) for natural diminishing returns and steep low-equipment penalty.
+        const comp = formation.composition ?? ensureBrigadeComposition(formation);
+        const ownArt = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
+        const ownTank = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
+        const ownFP = Math.max(MIN_COUNTERBATTERY_FP, ownArt + ownTank * 0.5);
+        const totalFrontBrigades = Object.values(factionFrontFP).reduce((s, d) => s + d.count, 0);
+        let incomingFPPerBrigade = 0;
+        for (const fac of Object.keys(factionFrontFP).sort(strictCompare)) {
+            if (fac !== factionId) {
+                const targetCount = totalFrontBrigades - factionFrontFP[fac].count;
+                incomingFPPerBrigade += factionFrontFP[fac].totalFP / Math.max(1, targetCount);
+            }
+        }
+        const firepowerRatio = incomingFPPerBrigade / ownFP;
+        const logRatio = Math.max(0, Math.log(firepowerRatio));
+        const bombardmentFraction = Math.min(1.0, logRatio / BOMBARDMENT_RATIO_SCALE);
+        const bombardmentCas = Math.floor(personnel * BOMBARDMENT_EXPOSURE_RATE * bombardmentFraction);
+
         const casualties = Math.min(
             personnel - MIN_COMBAT_PERSONNEL,
-            Math.max(1, Math.floor(personnel * BASE_ATTRITION_RATE * exposureMod * supplyMod))
+            Math.max(1, baseAttritionCas + bombardmentCas)
         );
         if (casualties <= 0) continue;
 
