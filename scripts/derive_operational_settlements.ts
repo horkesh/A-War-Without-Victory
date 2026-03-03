@@ -547,6 +547,7 @@ for (const [osid, memberSids] of clusters.entries()) {
     // Normalize geometry: unwrap MultiPolygon, close rings, remove tiny holes
     const finalGeom = normalizeGeometry(mergedGeom, osid);
 
+    const areaKm2 = turf.area(finalGeom) / 1e6;
     const osFeature = turf.feature(finalGeom, {
         osid,
         sid: repSid,
@@ -560,6 +561,7 @@ for (const [osid, memberSids] of clusters.entries()) {
         population_serbs: totS,
         population_others: totO,
         ethnic_key: aggEthKey,
+        area_km2: Math.round(areaKm2 * 1000) / 1000,
     });
 
     clusteredFeatures.set(osid, osFeature);

@@ -164,6 +164,19 @@ const REGION_ORDER = [
 const FACTIONS = ['RS', 'RBiH', 'HRHB'];
 
 // ---------------------------------------------------------------------------
+// OSID area data (optional — enriches output with area-weighted percentages)
+// ---------------------------------------------------------------------------
+const AREA_PATH = path.resolve(__dirname, '../data/derived/operational/osid_areas.json');
+let areaData = null;
+if (fs.existsSync(AREA_PATH)) {
+    try {
+        areaData = JSON.parse(fs.readFileSync(AREA_PATH, 'utf8'));
+    } catch (_) {
+        // Proceed without area data
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -254,7 +267,13 @@ function main() {
   const simFactionCount     = { RS: 0, RBiH: 0, HRHB: 0 };
   const paintedFactionCount = { RS: 0, RBiH: 0, HRHB: 0 };
 
-  /** @type {Record<string, { match: number, total: number, simFaction: Record<string,number>, paintedFaction: Record<string,number> }>} */
+  // Area-weighted accumulators
+  const areas = areaData ? areaData.areas : null;
+  const totalAreaKm2 = areaData ? areaData.total_area_km2 : 0;
+  const simFactionArea     = { RS: 0, RBiH: 0, HRHB: 0 };
+  const paintedFactionArea = { RS: 0, RBiH: 0, HRHB: 0 };
+
+  /** @type {Record<string, { match: number, total: number, simFaction: Record<string,number>, paintedFaction: Record<string,number>, totalArea: number, matchArea: number, simFactionArea: Record<string,number>, paintedFactionArea: Record<string,number> }>} */
   const regionStats = {};
   for (const r of REGION_ORDER) {
     regionStats[r] = {
@@ -262,6 +281,10 @@ function main() {
       total: 0,
       simFaction:     { RS: 0, RBiH: 0, HRHB: 0 },
       paintedFaction: { RS: 0, RBiH: 0, HRHB: 0 },
+      totalArea: 0,
+      matchArea: 0,
+      simFactionArea:     { RS: 0, RBiH: 0, HRHB: 0 },
+      paintedFactionArea: { RS: 0, RBiH: 0, HRHB: 0 },
     };
   }
 
@@ -283,16 +306,25 @@ function main() {
         match: 0, total: 0,
         simFaction:     { RS: 0, RBiH: 0, HRHB: 0 },
         paintedFaction: { RS: 0, RBiH: 0, HRHB: 0 },
+        totalArea: 0, matchArea: 0,
+        simFactionArea:     { RS: 0, RBiH: 0, HRHB: 0 },
+        paintedFactionArea: { RS: 0, RBiH: 0, HRHB: 0 },
       };
     }
 
     const stats = regionStats[region];
     stats.total++;
+    const osidArea = areas ? (areas[osid] || 0) : 0;
+    stats.totalArea += osidArea;
 
     // Painted faction tallies
     if (FACTIONS.includes(paintedFaction)) {
       paintedFactionCount[paintedFaction]++;
       stats.paintedFaction[paintedFaction]++;
+      if (areas) {
+        paintedFactionArea[paintedFaction] += osidArea;
+        stats.paintedFactionArea[paintedFaction] += osidArea;
+      }
     }
 
     if (simFaction === undefined || simFaction === null) {
@@ -304,11 +336,16 @@ function main() {
       if (FACTIONS.includes(simFaction)) {
         simFactionCount[simFaction]++;
         stats.simFaction[simFaction]++;
+        if (areas) {
+          simFactionArea[simFaction] += osidArea;
+          stats.simFactionArea[simFaction] += osidArea;
+        }
       }
 
       if (simFaction === paintedFaction) {
         totalMatch++;
         stats.match++;
+        stats.matchArea += osidArea;
       } else {
         totalMismatch++;
         mismatches.push({ osid, paintedFaction, simFaction, region });
@@ -346,11 +383,18 @@ function main() {
   lines.push('OVERALL');
   lines.push('  Match:    ' + totalMatch + ' / ' + totalOsids + '  (' + pct(totalMatch, totalOsids) + '%)');
   lines.push('  Mismatch: ' + totalMismatch + ' / ' + totalOsids + '  (' + pct(totalMismatch, totalOsids) + '%)');
+  if (areas) {
+    let totalMatchArea = 0;
+    for (const r of REGION_ORDER) {
+      if (regionStats[r]) totalMatchArea += regionStats[r].matchArea;
+    }
+    lines.push('  Area-weighted match: ' + totalMatchArea.toFixed(0) + ' / ' + totalAreaKm2.toFixed(0) + ' km²  (' + pct(totalMatchArea, totalAreaKm2) + '%)');
+  }
   lines.push('');
 
-  lines.push('FACTION TOTALS');
-  lines.push('  Painted  RS=' + paintedFactionCount.RS + '  RBiH=' + paintedFactionCount.RBiH + '  HRHB=' + paintedFactionCount.HRHB);
-  lines.push('  Sim      RS=' + simFactionCount.RS + '  RBiH=' + simFactionCount.RBiH + '  HRHB=' + simFactionCount.HRHB);
+  lines.push('FACTION TOTALS (count)');
+  lines.push('  Painted  RS=' + paintedFactionCount.RS + ' (' + pct(paintedFactionCount.RS, totalOsids) + '%)  RBiH=' + paintedFactionCount.RBiH + ' (' + pct(paintedFactionCount.RBiH, totalOsids) + '%)  HRHB=' + paintedFactionCount.HRHB + ' (' + pct(paintedFactionCount.HRHB, totalOsids) + '%)');
+  lines.push('  Sim      RS=' + simFactionCount.RS + ' (' + pct(simFactionCount.RS, totalOsids) + '%)  RBiH=' + simFactionCount.RBiH + ' (' + pct(simFactionCount.RBiH, totalOsids) + '%)  HRHB=' + simFactionCount.HRHB + ' (' + pct(simFactionCount.HRHB, totalOsids) + '%)');
   const dRS   = simFactionCount.RS   - paintedFactionCount.RS;
   const dRBiH = simFactionCount.RBiH - paintedFactionCount.RBiH;
   const dHRHB = simFactionCount.HRHB - paintedFactionCount.HRHB;
@@ -359,6 +403,12 @@ function main() {
     '  RBiH='        + (dRBiH >= 0 ? '+' : '') + dRBiH +
     '  HRHB='        + (dHRHB >= 0 ? '+' : '') + dHRHB
   );
+  if (areas) {
+    lines.push('');
+    lines.push('FACTION TOTALS (area-weighted)');
+    lines.push('  Painted  RS=' + paintedFactionArea.RS.toFixed(0) + ' km² (' + pct(paintedFactionArea.RS, totalAreaKm2) + '%)  RBiH=' + paintedFactionArea.RBiH.toFixed(0) + ' km² (' + pct(paintedFactionArea.RBiH, totalAreaKm2) + '%)  HRHB=' + paintedFactionArea.HRHB.toFixed(0) + ' km² (' + pct(paintedFactionArea.HRHB, totalAreaKm2) + '%)');
+    lines.push('  Sim      RS=' + simFactionArea.RS.toFixed(0) + ' km² (' + pct(simFactionArea.RS, totalAreaKm2) + '%)  RBiH=' + simFactionArea.RBiH.toFixed(0) + ' km² (' + pct(simFactionArea.RBiH, totalAreaKm2) + '%)  HRHB=' + simFactionArea.HRHB.toFixed(0) + ' km² (' + pct(simFactionArea.HRHB, totalAreaKm2) + '%)');
+  }
   lines.push('');
 
   lines.push('BY REGION');
@@ -370,10 +420,14 @@ function main() {
     const pctStr   = '(' + pct(s.match, s.total) + '%)';
     const simStr   = 'RS_sim=' + s.simFaction.RS + ' RBiH_sim=' + s.simFaction.RBiH + ' HRHB_sim=' + s.simFaction.HRHB;
     const paintStr = 'painted RS=' + s.paintedFaction.RS + ' RBiH=' + s.paintedFaction.RBiH + ' HRHB=' + s.paintedFaction.HRHB;
+    const areaStr  = areas && s.totalArea > 0
+      ? '  area ' + rpad(pct(s.matchArea, s.totalArea) + '%', 6) + ' (' + s.totalArea.toFixed(0) + ' km²)'
+      : '';
     lines.push(
       '  ' + lpad(region, maxRLen) +
       '  match  ' + rpad(matchStr, 8) +
       ' ' + lpad(pctStr, 8) +
+      areaStr +
       '  ' + simStr +
       ' | ' + paintStr
     );

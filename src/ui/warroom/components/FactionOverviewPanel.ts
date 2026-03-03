@@ -339,11 +339,15 @@ export class FactionOverviewPanel {
         const quadrants = document.createElement('div');
         quadrants.className = 'faction-overview-quadrants';
 
-        // TERRITORY
-        quadrants.appendChild(this.createQuadrant('TERRITORY', [
-            { label: 'Settlements Controlled', value: `${snap.ownTerritory.settlementsControlled} / ${snap.ownTerritory.settlementsTotal}` },
+        // TERRITORY — area-weighted primary, settlement count secondary
+        const territoryStats: Array<{ label: string; value: string }> = [
             { label: 'Territory Control', value: `${snap.ownTerritory.territoryPercent.toFixed(1)}%` },
-        ]));
+            { label: 'Settlements Controlled', value: `${snap.ownTerritory.settlementsControlled} / ${snap.ownTerritory.settlementsTotal}` },
+        ];
+        if (snap.ownTerritory.areaControlledKm2 != null && snap.ownTerritory.areaTotalKm2 != null) {
+            territoryStats.push({ label: 'Area Controlled', value: `${snap.ownTerritory.areaControlledKm2.toFixed(0)} / ${snap.ownTerritory.areaTotalKm2.toFixed(0)} km²` });
+        }
+        quadrants.appendChild(this.createQuadrant('TERRITORY', territoryStats));
 
         // MILITARY — real data from formations
         const inTransitCount = snap.brigadeMovement.inTransit.length;

@@ -11,20 +11,16 @@ import { resolve } from 'node:path';
 import { parseEdges } from '../map/settlements_parse.js';
 import type { EdgeRecord } from '../map/settlements.js';
 
-/** Operational settlement ID (e.g. op:mun1990:cluster). Same value space as SettlementId when graph is operational. */
-export type OperationalSettlementId = string;
-
-/**
- * Canonical SID → OSID. One canonical settlement maps to exactly one operational settlement.
- * Source: data/derived/operational/canonical_to_operational_map.json
- */
-export type CanonicalToOperationalMap = Record<string, OperationalSettlementId>;
-
-/**
- * OSID → list of canonical SIDs that map to it. SIDs per OSID are sorted for determinism.
- * Built from canonical_to_operational_map.
- */
-export type OperationalToCanonicalReverseMap = Map<OperationalSettlementId, string[]>;
+// Re-export types and browser-safe pure functions for backward compatibility
+export type {
+    OperationalSettlementId,
+    CanonicalToOperationalMap,
+    OperationalToCanonicalReverseMap,
+    OsidPopulationMap,
+} from './operational_data_types.js';
+export { resolveLocationOsid, buildReverseMap } from './operational_data_types.js';
+import { resolveLocationOsid, buildReverseMap } from './operational_data_types.js';
+import type { OperationalSettlementId, CanonicalToOperationalMap, OperationalToCanonicalReverseMap } from './operational_data_types.js';
 
 export interface LoadedOperationalData {
     /** SID (canonical) → OSID. Keys iterated in sorted order. */
@@ -81,25 +77,7 @@ export async function loadOperationalData(
     return { canonicalToOperational, operationalToCanonical };
 }
 
-/**
- * Build OSID → sorted SIDs from SID → OSID map.
- * Determinism: each OSID's SID list is sorted with localeCompare.
- */
-export function buildReverseMap(
-    canonicalToOperational: CanonicalToOperationalMap
-): OperationalToCanonicalReverseMap {
-    const reverse = new Map<OperationalSettlementId, string[]>();
-    for (const [sid, osid] of Object.entries(canonicalToOperational)) {
-        const list = reverse.get(osid) ?? [];
-        list.push(sid);
-        reverse.set(osid, list);
-    }
-    for (const [osid, list] of reverse) {
-        list.sort((a, b) => a.localeCompare(b));
-        reverse.set(osid, list);
-    }
-    return reverse;
-}
+// buildReverseMap is re-exported from operational_data_types.ts (browser-safe)
 
 /**
  * Return OSIDs in stable sorted order for iteration.
@@ -112,26 +90,14 @@ export function getOsidKeysSorted(data: LoadedOperationalData): OperationalSettl
     return Array.from(osids).sort((a, b) => a.localeCompare(b));
 }
 
-/**
- * Resolve location_osid for a formation: map hq_sid (canonical SID) to OSID, or use hq_sid if already OSID.
- * Deterministic: when hq_sid is in map, return map[hq_sid]; else return hq_sid when already op: prefix.
- */
-export function resolveLocationOsid(
-    hqSid: string | undefined,
-    canonicalToOperational: CanonicalToOperationalMap
-): OperationalSettlementId | undefined {
-    if (hqSid == null || hqSid === '') return undefined;
-    const osid = canonicalToOperational[hqSid];
-    return osid ?? (hqSid.startsWith('op:') ? hqSid : undefined);
-}
+// resolveLocationOsid is re-exported from operational_data_types.ts (browser-safe)
 
 /**
  * Backfill location_osid for all formations that have hq_sid but no location_osid.
  * Mutates state.formations. Call after formations are loaded/created and when canonicalToOperational is available.
  * Deterministic: formations iterated in sorted id order.
  */
-/** Per-OSID estimated population (1991 census, divided evenly across OSIDs within each municipality). */
-export type OsidPopulationMap = Map<string, number>;
+import type { OsidPopulationMap } from './operational_data_types.js';
 
 /**
  * Compute per-OSID population by dividing municipality total population across OSIDs.
@@ -162,6 +128,34 @@ export function computeOsidPopulation(
         }
     }
     return result;
+}
+
+// ---------------------------------------------------------------------------
+// OSID area data
+// ---------------------------------------------------------------------------
+
+export type OsidAreaMap = Record<string, number>;
+
+export interface OsidAreaData {
+    totalArea: number;
+    areas: OsidAreaMap;
+}
+
+/**
+ * Load precomputed OSID areas from osid_areas.json.
+ * Returns total area and per-OSID area in km².
+ */
+export async function loadOsidAreas(baseDir?: string): Promise<OsidAreaData> {
+    const areaPath = resolve(
+        baseDir ?? process.cwd(),
+        'data/derived/operational/osid_areas.json'
+    );
+    const content = await readFile(areaPath, 'utf8');
+    const raw = JSON.parse(content) as { total_area_km2: number; areas: Record<string, number> };
+    return {
+        totalArea: raw.total_area_km2,
+        areas: raw.areas,
+    };
 }
 
 export function backfillFormationLocationOsid(

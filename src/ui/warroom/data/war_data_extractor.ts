@@ -66,7 +66,10 @@ export interface CasualtiesSnapshot {
 export interface TerritorySnapshot {
     settlementsControlled: number;
     settlementsTotal: number;
+    /** Area-weighted when osidAreas provided, count-based fallback. */
     territoryPercent: number;
+    areaControlledKm2?: number;
+    areaTotalKm2?: number;
 }
 
 export interface DisplacementSnapshot {
@@ -199,7 +202,11 @@ function sc(a: string, b: string): number {
 // Extraction
 // ---------------------------------------------------------------------------
 
-export function extractWarData(gameState: GameState, playerFaction: FactionId): WarDataSnapshot {
+export function extractWarData(
+    gameState: GameState,
+    playerFaction: FactionId,
+    osidAreas?: { totalArea: number; areas: Record<string, number> }
+): WarDataSnapshot {
     const turn = gameState.meta.turn;
     const phase = gameState.meta.phase ?? 'peace';
 
@@ -210,7 +217,7 @@ export function extractWarData(gameState: GameState, playerFaction: FactionId): 
     const ownCasualties = extractCasualties(gameState, playerFaction);
 
     // --- Territory ---
-    const ownTerritory = extractTerritory(gameState, playerFaction);
+    const ownTerritory = extractTerritory(gameState, playerFaction, osidAreas);
 
     // --- Displacement ---
     const ownDisplacement = extractDisplacement(gameState, playerFaction);
@@ -357,7 +364,11 @@ function extractCasualties(state: GameState, pf: FactionId): CasualtiesSnapshot 
     };
 }
 
-function extractTerritory(state: GameState, pf: FactionId): TerritorySnapshot {
+function extractTerritory(
+    state: GameState,
+    pf: FactionId,
+    osidAreas?: { totalArea: number; areas: Record<string, number> }
+): TerritorySnapshot {
     const controllers = state.political_controllers ?? {};
     const keys = Object.keys(controllers);
     const total = keys.length || 1;
@@ -365,6 +376,25 @@ function extractTerritory(state: GameState, pf: FactionId): TerritorySnapshot {
     for (const sid of keys) {
         if (controllers[sid] === pf) controlled++;
     }
+
+    if (osidAreas) {
+        let areaControlled = 0;
+        for (const sid of keys) {
+            if (controllers[sid] === pf) {
+                areaControlled += osidAreas.areas[sid] ?? 0;
+            }
+        }
+        return {
+            settlementsControlled: controlled,
+            settlementsTotal: total,
+            territoryPercent: osidAreas.totalArea > 0
+                ? (areaControlled / osidAreas.totalArea) * 100
+                : (controlled / total) * 100,
+            areaControlledKm2: areaControlled,
+            areaTotalKm2: osidAreas.totalArea,
+        };
+    }
+
     return {
         settlementsControlled: controlled,
         settlementsTotal: total,

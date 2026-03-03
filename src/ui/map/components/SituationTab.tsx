@@ -1,20 +1,64 @@
+import { useState, useEffect } from 'react';
 import type { LoadedGameState } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
-function computeTerritoryPercentages(controlBySettlement: Record<string, string | null>): Record<string, number> {
+interface OsidAreasFile {
+  total_area_km2: number;
+  areas: Record<string, number>;
+}
+
+/** Load osid_areas.json once (browser fetch). Cached in module scope. */
+let cachedAreas: OsidAreasFile | null = null;
+let areaLoadAttempted = false;
+
+function useOsidAreas(): OsidAreasFile | null {
+  const [areas, setAreas] = useState<OsidAreasFile | null>(cachedAreas);
+  useEffect(() => {
+    if (cachedAreas || areaLoadAttempted) return;
+    areaLoadAttempted = true;
+    // Try data server first (Electron), then relative path (dev server)
+    const baseUrl = (window as unknown as Record<string, unknown>).__DATA_BASE_URL as string | undefined;
+    const url = baseUrl
+      ? `${baseUrl}/derived/operational/osid_areas.json`
+      : '/data/derived/operational/osid_areas.json';
+    fetch(url)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) { cachedAreas = data; setAreas(data); } })
+      .catch(() => { /* area data unavailable — degrade to count-based */ });
+  }, []);
+  return areas;
+}
+
+function computeTerritoryPercentages(
+  controlBySettlement: Record<string, string | null>,
+  osidAreas?: { total_area_km2: number; areas: Record<string, number> }
+): Record<string, number> {
   const totals: Record<string, number> = { RS: 0, RBiH: 0, HRHB: 0 };
-  const values = Object.values(controlBySettlement);
-  const totalCount = values.length;
-  if (totalCount === 0) return totals;
-  for (const controller of values) {
-    if (controller === 'RS' || controller === 'RBiH' || controller === 'HRHB') {
-      totals[controller] += 1;
+  if (osidAreas && osidAreas.total_area_km2 > 0) {
+    // Area-weighted percentages
+    for (const [osid, controller] of Object.entries(controlBySettlement)) {
+      if (controller === 'RS' || controller === 'RBiH' || controller === 'HRHB') {
+        totals[controller] += osidAreas.areas[osid] ?? 0;
+      }
     }
-  }
-  for (const faction of FACTIONS) {
-    totals[faction] = (totals[faction] / totalCount) * 100;
+    for (const faction of FACTIONS) {
+      totals[faction] = (totals[faction] / osidAreas.total_area_km2) * 100;
+    }
+  } else {
+    // Count-based fallback
+    const values = Object.values(controlBySettlement);
+    const totalCount = values.length;
+    if (totalCount === 0) return totals;
+    for (const controller of values) {
+      if (controller === 'RS' || controller === 'RBiH' || controller === 'HRHB') {
+        totals[controller] += 1;
+      }
+    }
+    for (const faction of FACTIONS) {
+      totals[faction] = (totals[faction] / totalCount) * 100;
+    }
   }
   return totals;
 }
@@ -58,7 +102,8 @@ function computeIvpScore(state: LoadedGameState): number {
 }
 
 export function SituationTab({ state }: { state: LoadedGameState }) {
-  const territoryPct = computeTerritoryPercentages(state.controlBySettlement);
+  const osidAreas = useOsidAreas();
+  const territoryPct = computeTerritoryPercentages(state.controlBySettlement, osidAreas ?? undefined);
   const front = computeFrontSummary(state);
   const supply = computeSupplySummary(state);
   const ivpScore = computeIvpScore(state);
