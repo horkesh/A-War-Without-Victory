@@ -646,7 +646,7 @@ async function initializePoliticalControllersFromEthnic1991(
         );
     }
     writeInitLog(
-        `[E5] Political control initialized (ethnic_1991): ${counts.total} settlements, RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}\n`
+        `[E5] Political control initialized (ethnic_1991): ${counts.total} canonical graph nodes (SID-keyed), RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}. Promoted to OSID when operational data present.\n`
     );
     return { applied: true, counts };
 }
@@ -727,7 +727,7 @@ async function initializePoliticalControllersFromHybrid1992(
         );
     }
     writeInitLog(
-        `[E5] Political control initialized (hybrid_1992, threshold=${ethnicOverrideThreshold}): ${counts.total} settlements, RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}\n`
+        `[E5] Political control initialized (hybrid_1992, threshold=${ethnicOverrideThreshold}): ${counts.total} canonical graph nodes (SID-keyed), RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}. Promoted to OSID when operational data present.\n`
     );
     return { applied: true, counts };
 }
@@ -797,7 +797,7 @@ export async function applyMunicipalityControllersFromMun1990Only(
         );
     }
     writeInitLog(
-        `[E5] Political control initialized (scenario mun1990-only): ${counts.total} settlements, RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}, null=${counts.null}\n`
+        `[E5] Political control initialized (scenario mun1990-only): ${counts.total} canonical graph nodes (SID-keyed), RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}, null=${counts.null}. Promoted to OSID when operational data present.\n`
     );
     return { applied: true, counts };
 }
@@ -999,7 +999,7 @@ export async function initializePoliticalControllers(
     }
 
     writeInitLog(
-        `[E5] Political control initialized (initial municipal substrate): ${counts.total} settlements, RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}, null=${counts.null}\n`
+        `[E5] Political control initialized (initial municipal substrate): ${counts.total} canonical graph nodes (SID-keyed), RBiH=${counts.RBiH}, RS=${counts.RS}, HRHB=${counts.HRHB}, null=${counts.null}. Promoted to OSID when operational data present.\n`
     );
 
     return { applied: true, counts };

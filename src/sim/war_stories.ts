@@ -1,7 +1,9 @@
 /**
- * War Stories: end-of-game narrative generation for brigades.
+ * War Stories: progressive narrative generation for brigades.
  *
- * Each brigade gets classified into a narrative arc based on combat history:
+ * War stories are regenerated each war turn so narratives evolve as the war
+ * unfolds. Each brigade gets classified into a narrative arc based on combat
+ * history:
  * - veteran: backbone of the corps (>65% win rate, >60% personnel retained)
  * - bloodied: heavy combat, heavy losses, still fighting
  * - shattered: <50% peak personnel, still in line
@@ -10,6 +12,7 @@
  * - garrison: ≤2 battles, patience not blood
  *
  * Templates are deterministic — no randomness, no AI.
+ * Called per-turn via the 'generate-war-stories' pipeline step in war_phases.ts.
  */
 
 import type { FormationState, FactionId, GameState } from '../state/game_state.js';
@@ -214,8 +217,45 @@ export function selectNotableMoments(
 }
 
 /**
+ * Generate a war story for a single formation.
+ * Returns undefined if the formation has no brigade history.
+ * Called per-turn by the pipeline step and available for on-demand use.
+ */
+export function generateWarStoryForFormation(f: FormationState): BrigadeWarStory | undefined {
+    const kind = f.kind ?? 'brigade';
+    if (kind !== 'brigade') return undefined;
+
+    const history = f.brigade_history;
+    if (!history) return undefined;
+
+    const arc = classifyArc(f, history);
+    const narrative = generateNarrative(f, history, arc);
+    const notable_moments = selectNotableMoments(f, history);
+
+    return {
+        formation_id: f.id,
+        formation_name: f.name,
+        faction: f.faction,
+        corps_id: f.corps_id ?? undefined,
+        arc,
+        narrative,
+        notable_moments,
+        stats: {
+            battles_fought: history.battles_fought,
+            victories: history.victories,
+            defeats: history.defeats,
+            total_casualties_taken: history.total_casualties_taken,
+            total_casualties_inflicted: history.total_casualties_inflicted,
+            final_personnel: f.personnel ?? 0,
+            peak_personnel: history.peak_personnel,
+            nadir_personnel: history.nadir_personnel,
+        },
+    };
+}
+
+/**
  * Generate war stories for all brigades in the game state.
- * Called at end of game (final save generation).
+ * Called per-turn by the pipeline step; also usable at end-of-game.
  */
 export function generateWarStories(state: GameState): BrigadeWarStory[] {
     const stories: BrigadeWarStory[] = [];

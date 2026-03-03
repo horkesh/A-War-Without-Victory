@@ -13,7 +13,7 @@ import {
     spawnFormationsFromPools,
     type SpawnFormationsReport
 } from './formation_spawn.js';
-import type { CanonicalToOperationalMap } from '../data/operational_data.js';
+import type { CanonicalToOperationalMap } from '../data/operational_data_types.js';
 import { runAuthorityDegradation, type AuthorityDegradationReport } from './early_war/authority_degradation.js';
 import type { ControlFlipReport } from './early_war/control_flip.js';
 import { buildSettlementsByMun, runControlStrain, type ControlStrainReport } from './early_war/control_strain.js';

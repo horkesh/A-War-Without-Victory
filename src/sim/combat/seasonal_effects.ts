@@ -24,6 +24,8 @@ export interface SeasonalModifiers {
     defense_mult: number;
     /** [-0.20, 0.00] additive modifier to bot aggression */
     aggression_adj: number;
+    /** [0.25, 1.0] multiplier on effective attack_share — reduces corps attack slots in winter */
+    attack_share_mult: number;
     /** Human-readable season label */
     season_label: 'summer' | 'spring' | 'autumn' | 'late_autumn' | 'winter' | 'deep_winter' | 'mud_season';
 }
@@ -37,8 +39,8 @@ export interface SeasonalModifiers {
  * Lowland/flat terrain values.
  */
 const BASE_ATTACK_MULT: Record<number, number> = {
-    1: 0.70,   // January — deep winter
-    2: 0.75,   // February — deep winter
+    1: 0.55,   // January — deep winter (strengthened from 0.70)
+    2: 0.60,   // February — deep winter (strengthened from 0.75)
     3: 0.85,   // March — thaw/mud
     4: 0.95,   // April — spring thaw/mud
     5: 1.00,   // May — full capability
@@ -47,8 +49,8 @@ const BASE_ATTACK_MULT: Record<number, number> = {
     8: 1.00,   // August
     9: 1.00,   // September
     10: 0.95,  // October — autumn rain
-    11: 0.85,  // November — winter onset
-    12: 0.75,  // December — deep winter
+    11: 0.75,  // November — winter onset (strengthened from 0.85)
+    12: 0.60,  // December — deep winter (strengthened from 0.75)
 };
 
 /**
@@ -91,6 +93,26 @@ const AGGRESSION_ADJ: Record<number, number> = {
 
 /** Slope index threshold for full mountain penalty */
 const MOUNTAIN_SLOPE_THRESHOLD = 0.50;
+
+/**
+ * Seasonal multiplier on effective attack_share — directly reduces corps attack slots.
+ * In deep winter, corps can barely launch any attacks (quarter of normal).
+ * BB2 p.486: "The war of maneuver was over, at least until the following spring."
+ */
+const ATTACK_SHARE_MULT: Record<number, number> = {
+    1: 0.25,   // January — near-total stasis
+    2: 0.50,   // February — still deep winter
+    3: 0.75,   // March — thaw beginning
+    4: 1.00,   // April
+    5: 1.00,   // May
+    6: 1.00,   // June
+    7: 1.00,   // July
+    8: 1.00,   // August
+    9: 1.00,   // September
+    10: 1.00,  // October
+    11: 0.50,  // November — winter onset
+    12: 0.25,  // December — near-total stasis
+};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Calendar helpers
@@ -154,6 +176,7 @@ export function getSeasonalModifiers(
             attack_mult: 1.0,
             defense_mult: 1.0,
             aggression_adj: 0,
+            attack_share_mult: 1.0,
             season_label: 'summer',
         };
     }
@@ -173,10 +196,14 @@ export function getSeasonalModifiers(
     // Aggression adjustment
     const aggression_adj = AGGRESSION_ADJ[month] ?? 0;
 
+    // Attack share multiplier — reduces corps attack slots in winter
+    const attack_share_mult = ATTACK_SHARE_MULT[month] ?? 1.0;
+
     return {
         attack_mult,
         defense_mult,
         aggression_adj,
+        attack_share_mult,
         season_label: getSeasonLabel(month),
     };
 }

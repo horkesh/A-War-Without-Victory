@@ -58,6 +58,8 @@ export interface OobBrigade {
     is_elite?: boolean;
     /** Pre-assigned historical decorations (loaded from OOB data). */
     historical_decorations?: HistoricalDecoration[];
+    /** Initial brigade officer quality [0,1]. When set, overrides faction default. Elite units get higher values. */
+    initial_officer_quality?: number;
 }
 
 export interface OobCorps {
@@ -154,6 +156,8 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
                 isRecord(d) && typeof d.tier === 'string' && typeof d.name === 'string'
             ).map(d => ({ tier: d.tier as HistoricalDecoration['tier'], name: String(d.name).trim() }))
             : undefined;
+        const initial_officer_quality = typeof r.initial_officer_quality === 'number' && Number.isFinite(r.initial_officer_quality)
+            ? Math.max(0, Math.min(1, r.initial_officer_quality)) : undefined;
         result.push({
             id,
             faction,
@@ -184,6 +188,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             ...(merged_into_id && { merged_into_id }),
             ...(is_elite && { is_elite }),
             ...(historical_decorations && historical_decorations.length > 0 && { historical_decorations }),
+            ...(initial_officer_quality != null && { initial_officer_quality }),
         });
     }
 

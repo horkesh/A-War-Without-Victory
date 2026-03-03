@@ -42,7 +42,8 @@
       "initial_personnel": 480,
       "initial_cohesion": 55,
       "mandatory": true,
-      "is_elite": true
+      "is_elite": true,
+      "initial_officer_quality": 0.35
     },
     {
       "id": "arbih_120th_liberation_black_swans",
@@ -752,7 +753,7 @@
       "kind": "brigade",
       "source": "markdown_rebuild",
       "default_equipment_class": "mountain",
-      "available_from": 26,
+      "available_from": 0,
       "honor": "slavna",
       "initial_personnel": 800,
       "initial_cohesion": 56,
@@ -1217,9 +1218,11 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "honor": "slavna",
+      "defense_terrain_bonus": 0.25,
       "initial_personnel": 700,
       "initial_cohesion": 60,
       "mandatory": true,
+      "initial_officer_quality": 0.20,
       "historical_decorations": [
         {
           "tier": "tier_1",
@@ -1261,6 +1264,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "honor": "slavna",
+      "defense_terrain_bonus": 0.25,
       "initial_personnel": 700,
       "initial_cohesion": 60,
       "mandatory": true,
@@ -1284,6 +1288,7 @@
       "available_from": 0,
       "mandatory": true,
       "honor": "viteska",
+      "defense_terrain_bonus": 0.20,
       "initial_personnel": 700,
       "initial_cohesion": 60,
       "historical_decorations": [
@@ -1335,6 +1340,7 @@
       "default_equipment_class": "light_infantry",
       "available_from": 0,
       "honor": "slavna",
+      "defense_terrain_bonus": 0.20,
       "initial_personnel": 700,
       "initial_cohesion": 60,
       "mandatory": true,
@@ -1783,6 +1789,7 @@
       "initial_personnel": 1100,
       "initial_cohesion": 72,
       "initial_morale": 55,
+      "initial_officer_quality": 0.08,
       "composition": {
         "infantry": 1100,
         "tanks": 0,
@@ -2060,7 +2067,8 @@
       "available_from": 0,
       "mandatory": true,
       "initial_personnel": 1000,
-      "initial_cohesion": 67
+      "initial_cohesion": 67,
+      "initial_officer_quality": 0.65
     },
     {
       "id": "rs_2nd_armored",
@@ -3136,6 +3144,7 @@
       "initial_cohesion": 72,
       "home_osid": "op:hanpijesak:han_pijesak_2",
       "is_elite": true,
+      "initial_officer_quality": 0.85,
       "historical_decorations": [
         {
           "tier": "tier_3",
@@ -3793,6 +3802,7 @@
       "initial_personnel": 2200,
       "initial_cohesion": 75,
       "is_elite": true,
+      "initial_officer_quality": 0.50,
       "historical_decorations": [
         {
           "tier": "tier_1",

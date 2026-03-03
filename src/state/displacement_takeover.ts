@@ -34,6 +34,30 @@ const SUSTAINED_MIN_REMAINING = 10;
 /** Posavina Croats: most flee to Croatia (canon: displacement redesign 2026-02-17). */
 const POSAVINA_CROAT_FLEE_ABROAD = 0.70;
 
+/**
+ * Border-adjacent municipalities where displaced Bosniaks flee abroad (Croatia, Germany, Austria, Sweden).
+ * Historically, Bosniaks near international borders had realistic escape routes.
+ * Interior populations (Sarajevo, Central Bosnia, Drina enclaves) displaced internally.
+ */
+const BOSNIAK_BORDER_ADJACENT_MUN_IDS = new Set<MunicipalityId>([
+    // Krajina — near Croatian border
+    'prijedor', 'sanski_most', 'kljuc', 'bosanski_novi',
+    'banja_luka', 'celinac', 'laktasi', 'prnjavor',
+    'bosanski_petrovac', 'titov_drvar', 'bosansko_grahovo', 'glamoc',
+    'bosanska_dubica', 'bosanska_kostajnica', 'bosanska_gradiska', 'srbac',
+    'kotor_varos', 'skender_vakuf', 'mrkonjic_grad', 'sipovo',
+    // Posavina — near Croatia/Serbia border
+    'brcko', 'bosanski_samac', 'odzak', 'orasje',
+    'derventa', 'modrica', 'bosanski_brod', 'bijeljina',
+    'lopare', 'ugljevik',
+    // Herzegovina — near Croatian border
+    'mostar', 'capljina', 'stolac', 'jablanica', 'konjic',
+    'trebinje', 'bileca', 'nevesinje', 'ljubinje', 'gacko',
+    // Bihać pocket — near Croatian border
+    'bihac', 'cazin', 'velika_kladusa', 'bosanska_krupa',
+]);
+const BOSNIAK_BORDER_FLEE_ABROAD = 0.10;
+
 // Enclave-overrun special case (historical high-lethality second displacement).
 export const ENCLAVE_OVERRUN_KILL_FRACTION = 0.35;
 
@@ -105,6 +129,7 @@ function areFactionsAtWar(state: GameState, a: FactionId, b: FactionId): boolean
 
 function getFleeAbroadFraction(sourceMun: MunicipalityId, fromFaction: FactionId): number {
     if (fromFaction === 'HRHB' && POSAVINA_MUN_IDS.has(sourceMun)) return POSAVINA_CROAT_FLEE_ABROAD;
+    if (fromFaction === 'RBiH' && BOSNIAK_BORDER_ADJACENT_MUN_IDS.has(sourceMun)) return BOSNIAK_BORDER_FLEE_ABROAD;
     return getFactionFleeAbroadFraction(fromFaction);
 }
 

@@ -1,19 +1,17 @@
 /**
- * Tests for troop balancing (faction ceilings) and lifecycle events.
+ * Tests for troop balancing (emergent growth via pool mechanics) and lifecycle events.
  */
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-    FACTION_HISTORICAL_PEAK,
-    FACTION_SOFT_CAP_RATIO,
-    FACTION_HARD_CAP_RATIO,
-    ABOVE_SOFT_CAP_REINFORCEMENT_MULT,
     VRS_EQUIPMENT_DECAY_START_WEEK,
     VRS_EQUIPMENT_DECAY_RATE,
     VRS_EQUIPMENT_DECAY_FLOOR,
+    REINFORCEMENT_RATE,
+    MAX_BRIGADE_PERSONNEL,
 } from '../src/state/formation_constants.js';
-import { getFactionTotalPersonnel, getFactionCeilingMult } from '../src/sim/formation_spawn.js';
+import { reinforceBrigadesFromPools } from '../src/sim/formation_spawn.js';
 import { processLifecycleEvents, type LifecycleEventDef } from '../src/sim/formation_lifecycle_events.js';
 import type { GameState, FormationState } from '../src/state/game_state.js';
 
@@ -45,47 +43,82 @@ function makeState(formations: Record<string, Partial<FormationState>>, override
     } as unknown as GameState;
 }
 
-describe('faction personnel ceilings', () => {
-    it('constants are correctly defined', () => {
-        assert.equal(FACTION_HISTORICAL_PEAK['RBiH'], 130_000);
-        assert.equal(FACTION_HISTORICAL_PEAK['RS'], 185_000);
-        assert.equal(FACTION_HISTORICAL_PEAK['HRHB'], 45_000);
-        assert.equal(FACTION_SOFT_CAP_RATIO, 0.85);
-        assert.equal(FACTION_HARD_CAP_RATIO, 0.95);
+describe('emergent growth — no hardcoded ceilings', () => {
+    it('reinforcement works without ceiling gating — pool availability is the limiter', () => {
+        const state = makeState({
+            b1: { faction: 'RBiH', personnel: 1500, tags: ['mun:sarajevo_centar'] },
+        });
+        state.militia_pools = {
+            'sarajevo_centar:RBiH': {
+                mun_id: 'sarajevo_centar',
+                faction: 'RBiH',
+                available: 200,
+                committed: 0,
+                exhausted: 0,
+                updated_turn: 10,
+            },
+        } as any;
+        const report = reinforceBrigadesFromPools(state);
+        assert.equal(report.formations_reinforced, 1);
+        assert.ok(report.manpower_added > 0);
+        assert.ok(report.manpower_added <= 200); // limited by pool, not ceiling
     });
 
-    it('getFactionTotalPersonnel sums active formations', () => {
+    it('reinforcement is limited by pool availability, not by faction total', () => {
+        // Even with very high faction total, reinforcement proceeds if pool has manpower
         const state = makeState({
-            b1: { faction: 'RBiH', personnel: 2000 },
-            b2: { faction: 'RBiH', personnel: 1500 },
-            b3: { faction: 'RS', personnel: 3000 },
-            b4: { faction: 'RBiH', personnel: 1000, status: 'inactive' },
+            b1: { faction: 'RBiH', personnel: 2500, tags: ['mun:sarajevo_centar'] },
         });
-        assert.equal(getFactionTotalPersonnel(state, 'RBiH'), 3500); // only active
-        assert.equal(getFactionTotalPersonnel(state, 'RS'), 3000);
+        state.militia_pools = {
+            'sarajevo_centar:RBiH': {
+                mun_id: 'sarajevo_centar',
+                faction: 'RBiH',
+                available: 100,
+                committed: 150000, // massive committed — no ceiling blocks this
+                exhausted: 0,
+                updated_turn: 10,
+            },
+        } as any;
+        const report = reinforceBrigadesFromPools(state);
+        assert.equal(report.formations_reinforced, 1);
+        assert.ok(report.manpower_added > 0);
     });
 
-    it('getFactionCeilingMult returns 1.0 below soft cap', () => {
+    it('reinforcement stops when pool is empty', () => {
         const state = makeState({
-            b1: { faction: 'RBiH', personnel: 50000 },
+            b1: { faction: 'RBiH', personnel: 1500, tags: ['mun:sarajevo_centar'] },
         });
-        assert.equal(getFactionCeilingMult(state, 'RBiH'), 1.0);
+        state.militia_pools = {
+            'sarajevo_centar:RBiH': {
+                mun_id: 'sarajevo_centar',
+                faction: 'RBiH',
+                available: 0,
+                committed: 5000,
+                exhausted: 0,
+                updated_turn: 10,
+            },
+        } as any;
+        const report = reinforceBrigadesFromPools(state);
+        assert.equal(report.formations_reinforced, 0);
+        assert.equal(report.manpower_added, 0);
     });
 
-    it('getFactionCeilingMult returns reduced mult between soft and hard cap', () => {
-        // RBiH soft cap: 110,500. Hard cap: 123,500
+    it('reinforcement stops at MAX_BRIGADE_PERSONNEL', () => {
         const state = makeState({
-            b1: { faction: 'RBiH', personnel: 115000 },
+            b1: { faction: 'RS', personnel: MAX_BRIGADE_PERSONNEL, tags: ['mun:banja_luka'] },
         });
-        assert.equal(getFactionCeilingMult(state, 'RBiH'), ABOVE_SOFT_CAP_REINFORCEMENT_MULT);
-    });
-
-    it('getFactionCeilingMult returns 0 at hard cap', () => {
-        // RBiH hard cap: 123,500
-        const state = makeState({
-            b1: { faction: 'RBiH', personnel: 125000 },
-        });
-        assert.equal(getFactionCeilingMult(state, 'RBiH'), 0);
+        state.militia_pools = {
+            'banja_luka:RS': {
+                mun_id: 'banja_luka',
+                faction: 'RS',
+                available: 5000,
+                committed: 0,
+                exhausted: 0,
+                updated_turn: 10,
+            },
+        } as any;
+        const report = reinforceBrigadesFromPools(state);
+        assert.equal(report.formations_reinforced, 0);
     });
 });
 

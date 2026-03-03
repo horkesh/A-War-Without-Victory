@@ -4,13 +4,14 @@
  * faction presence in home mun (and not fragmented).
  */
 
-import { resolveLocationOsid, type CanonicalToOperationalMap, type OperationalSettlementId, type OperationalToCanonicalReverseMap } from '../data/operational_data.js';
+import { resolveLocationOsid, type CanonicalToOperationalMap, type OperationalSettlementId, type OperationalToCanonicalReverseMap } from '../data/operational_data_types.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import type { MunicipalityPopulation1991Map } from '../sim/early_war/pool_population.js';
 import { getEligiblePopulationCount } from '../sim/early_war/pool_population.js';
 import { analyzeFactionGraph, type FrontClassification } from '../sim/combat/osid_graph_analysis.js';
 import { buildOsidAdjacency, type Osid } from '../sim/combat/osid_adjacency.js';
 import { FACTION_INITIAL_COHESION, FACTION_INITIAL_PERSONNEL, MIN_BRIGADE_SPAWN, MIN_ELIGIBLE_POPULATION_FOR_BRIGADE } from '../state/formation_constants.js';
+import { getFactionDefaultOfficerQuality } from '../sim/combat/combat_math.js';
 import { resolveFormationName } from '../state/formation_naming.js';
 import type {
     FactionId,
@@ -228,6 +229,8 @@ export function createOobFormationsAtPhaseIEntry(
         if (b.mandatory && (b.available_from === 0 || b.available_from === undefined)) {
             (formation as { entrenchment_turns?: number }).entrenchment_turns = 4;
         }
+        // Officer quality: use per-brigade OOB override or faction default
+        formation.officer_quality = b.initial_officer_quality ?? getFactionDefaultOfficerQuality(b.faction, currentTurn);
         state.formations[b.id] = formation;
         report.brigades_created += 1;
     }
