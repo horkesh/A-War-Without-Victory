@@ -18,8 +18,17 @@ import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
+interface DesktopBridge {
+  stageAttackOrder?: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; error?: string }>;
+  queryCombatEstimate?: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; win_probability?: number; error?: string }>;
+  getCurrentGameState?: () => Promise<string | null>;
+  setGameStateUpdatedCallback?: (cb: ((stateJson: string) => void) | null) => void;
+}
+
 /** Desktop bridge (Electron preload); undefined when run in browser. */
-const awwv = typeof window !== 'undefined' ? (window as unknown as { awwv?: { stageAttackOrder?: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; error?: string }>; queryCombatEstimate?: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; win_probability?: number; error?: string }> } }).awwv : undefined;
+const awwv = typeof window !== 'undefined'
+  ? (window as unknown as { awwv?: DesktopBridge }).awwv
+  : undefined;
 
 function App() {
   // Phase C3: single key handler (Enter, 1–4, Escape)
@@ -28,9 +37,39 @@ function App() {
   const pendingAttackConfirmation = useGameStore((s) => s.pendingAttackConfirmation);
   const setPendingAttackConfirmation = useGameStore((s) => s.setPendingAttackConfirmation);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
+  const loadSave = useGameStore((s) => s.loadSave);
+  const setLoadError = useGameStore((s) => s.setLoadError);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const setConfirmPrimaryAction = useGameStore((s) => s.setConfirmPrimaryAction);
+
+  // Desktop state bootstrap + subscription (standalone window and embedded bridge).
+  useEffect(() => {
+    if (!awwv?.getCurrentGameState || !awwv?.setGameStateUpdatedCallback) return;
+    let active = true;
+    const applyStateJson = async (stateJson: string | null) => {
+      if (!active || !stateJson) return;
+      try {
+        await loadSave(stateJson);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        setLoadError(message);
+      }
+    };
+    awwv.setGameStateUpdatedCallback((stateJson: string) => {
+      void applyStateJson(stateJson);
+    });
+    void awwv.getCurrentGameState()
+      .then((stateJson) => applyStateJson(stateJson))
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : String(err);
+        setLoadError(message);
+      });
+    return () => {
+      active = false;
+      awwv.setGameStateUpdatedCallback?.(null);
+    };
+  }, [loadSave, setLoadError]);
 
   // C4.3: Combat odds — call existing query-combat-estimate when modal opens; show "—" if unavailable.
   // Phase 5 could add a dedicated combat-estimate IPC if needed; we use existing query-combat-estimate only.

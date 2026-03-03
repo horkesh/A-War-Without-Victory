@@ -27,7 +27,8 @@ interface DesktopBridge {
     startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
     setGameStateUpdatedCallback?: (cb: (stateJson: string) => void) => void;
     getCurrentGameState?: () => Promise<string | null>;
-    openTacticalMapWindow?: () => Promise<unknown>;
+    openTacticalMapWindow?: (payload?: { mode?: 'operational' | 'sandbox' }) => Promise<unknown>;
+    [key: string]: unknown;
 }
 
 class WarroomApp {
@@ -51,6 +52,10 @@ class WarroomApp {
     /** Tactical map iframe (lazily created on first open). */
     private tacticalMapIframe: HTMLIFrameElement | null = null;
     private tacticalMapReady = false;
+    /** HTTP base URL for the tactical map server (set at init from Electron IPC). */
+    private mapServerUrl: string | null = null;
+    /** Embedded iframe subscribers to game-state-updated bridge events. */
+    private embeddedBridgeSubscribers = new Map<WindowProxy, string>();
     private phase0StartBriefShown = false;
     /** True once the user has navigated away from the initial main menu (prevents init race). */
     private userNavigatedFromMenu = false;
@@ -117,6 +122,14 @@ class WarroomApp {
         window.addEventListener('message', (e) => {
             if (e.data?.type === 'awwv-back-to-hq') {
                 this.showWarroomScene();
+                return;
+            }
+            if (e.data?.type === 'awwv-bridge:subscribe-game-state') {
+                this.handleEmbeddedBridgeSubscription(e);
+                return;
+            }
+            if (e.data?.type === 'awwv-bridge:invoke') {
+                void this.handleEmbeddedBridgeInvoke(e);
             }
         });
 
@@ -124,9 +137,18 @@ class WarroomApp {
         await this.phase0PreparationMap.loadData();
 
         this.desktopBridge = this.getDesktopBridge();
+        // Resolve tactical map HTTP server URL (set by Electron main process).
+        // MapLibre requires http:// origin; its Web Workers don't work under awwv://.
+        if (this.desktopBridge && typeof (this.desktopBridge as Record<string, unknown>).getMapServerUrl === 'function') {
+            try {
+                const url = await (this.desktopBridge as { getMapServerUrl: () => Promise<string | null> }).getMapServerUrl();
+                if (url) this.mapServerUrl = url.replace(/\/+$/, '');
+            } catch (_) { /* not available — fallback to awwv:// */ }
+        }
         if (this.desktopBridge?.setGameStateUpdatedCallback) {
             this.desktopBridge.setGameStateUpdatedCallback((stateJson: string) => {
                 this.applyGameStateFromJson(stateJson);
+                this.broadcastEmbeddedBridgeEvent('game-state-updated', stateJson);
             });
         }
 
@@ -644,16 +666,16 @@ class WarroomApp {
 
     /**
      * Show the tactical map as a full-screen iframe layer (same window, no separate BrowserWindow).
-     * In Electron: embeds map_operational_3d.html via awwv:// protocol (same origin).
-     * In dev/browser: opens the tactical map in a new tab (cross-origin prevents iframe embedding).
+     * In Electron: embeds the React tactical map via HTTP map server (MapLibre requires http://).
+     * In dev/browser: opens the tactical map in a new tab.
      */
-    private showTacticalMapScene(mode: 'operational' | 'sandbox' = 'operational'): void {
+    private async showTacticalMapScene(mode: 'operational' | 'sandbox' = 'operational'): Promise<void> {
         const isElectron = !!(window as unknown as { awwv?: unknown }).awwv;
         if (!isElectron) {
             // Dev/browser: cross-origin prevents meaningful iframe interaction
             const devUrl = mode === 'sandbox'
                 ? 'http://localhost:3002/tactical_sandbox.html'
-                : 'http://localhost:3002/tactical_map.html';
+                : 'http://localhost:3002/';
             window.open(devUrl, '_blank');
             return;
         }
@@ -661,17 +683,29 @@ class WarroomApp {
         const tacticalScene = document.getElementById('tactical-map-scene');
         if (!tacticalScene) return;
 
+        // Prefer HTTP map server (re-query each time so we never use stale awwv if server is ready).
+        let mapBaseUrl = this.mapServerUrl;
+        if (this.desktopBridge && typeof (this.desktopBridge as Record<string, unknown>).getMapServerUrl === 'function') {
+            try {
+                const url = await (this.desktopBridge as { getMapServerUrl: () => Promise<string | null> }).getMapServerUrl();
+                if (url) {
+                    mapBaseUrl = url.replace(/\/+$/, '');
+                    this.mapServerUrl = mapBaseUrl;
+                }
+            } catch (_) { /* keep existing mapServerUrl or awwv fallback */ }
+        }
+        mapBaseUrl = mapBaseUrl || 'awwv://warroom/tactical-map';
+
+        const cacheBuster = `v=${Date.now()}`;
         const targetSrc = mode === 'sandbox'
-            ? 'awwv://warroom/tactical-map/tactical_sandbox.html?embedded=1'
-            : 'awwv://warroom/tactical-map/tactical_map.html?embedded=1';
+            ? `${mapBaseUrl}/tactical_sandbox.html?embedded=1&${cacheBuster}`
+            : `${mapBaseUrl}/index.html?embedded=1&${cacheBuster}`;
 
         // Lazily create iframe on first open
         if (!this.tacticalMapIframe) {
             const iframe = document.createElement('iframe');
             iframe.id = 'tactical-map-iframe';
             iframe.setAttribute('allowfullscreen', '');
-            // Serve tactical map under warroom origin so iframe is same-origin
-            // and can inherit window.parent.awwv bridge for IPC
             iframe.src = targetSrc;
 
             iframe.onload = () => {
@@ -698,8 +732,8 @@ class WarroomApp {
 
     /**
      * Post-load setup for the tactical map iframe.
-     * The bridge is inherited via the inline script in map_operational_3d.html (?embedded=1).
-     * This method handles edge cases and ensures menu/button state is correct.
+     * For tactical_map.html / tactical_sandbox.html the bridge is inherited via inline script (?embedded=1).
+     * For map_hoi.html we inject a "Back to HQ" button since it doesn't have one natively.
      */
     private injectBridgeIntoTacticalMap(iframe: HTMLIFrameElement): void {
         try {
@@ -707,7 +741,25 @@ class WarroomApp {
             if (!iframeWindow) return;
 
             // Ensure the "Back to HQ" button is visible (inline script handles this too)
-            const hqBtn = iframeWindow.document.getElementById('btn-back-to-hq');
+            let hqBtn = iframeWindow.document.getElementById('btn-back-to-hq');
+
+            // map_hoi.html doesn't have a native "Back to HQ" button — inject one
+            if (!hqBtn) {
+                const topBar = iframeWindow.document.getElementById('hoi-top-bar-actions')
+                    ?? iframeWindow.document.getElementById('hoi-top-bar');
+                if (topBar) {
+                    hqBtn = iframeWindow.document.createElement('button');
+                    hqBtn.id = 'btn-back-to-hq';
+                    hqBtn.textContent = '\u25C0 HQ';
+                    hqBtn.title = 'Return to warroom HQ';
+                    hqBtn.style.cssText = 'padding:4px 10px;background:rgba(0,232,120,0.12);color:#00e878;border:1px solid rgba(0,232,120,0.3);border-radius:3px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-right:6px;';
+                    hqBtn.addEventListener('click', () => {
+                        window.postMessage({ type: 'awwv-back-to-hq' }, '*');
+                    });
+                    topBar.insertBefore(hqBtn, topBar.firstChild);
+                }
+            }
+
             if (hqBtn) {
                 hqBtn.style.display = '';
             }
@@ -731,7 +783,53 @@ class WarroomApp {
         if (this.desktopBridge?.setGameStateUpdatedCallback) {
             this.desktopBridge.setGameStateUpdatedCallback((stateJson: string) => {
                 this.applyGameStateFromJson(stateJson);
+                this.broadcastEmbeddedBridgeEvent('game-state-updated', stateJson);
             });
+        }
+    }
+
+    private handleEmbeddedBridgeSubscription(event: MessageEvent): void {
+        const source = event.source;
+        if (!source || typeof (source as WindowProxy).postMessage !== 'function') return;
+        const enabled = Boolean((event.data as { enabled?: boolean })?.enabled);
+        const origin = typeof event.origin === 'string' ? event.origin : '*';
+        if (enabled) {
+            this.embeddedBridgeSubscribers.set(source as WindowProxy, origin);
+        } else {
+            this.embeddedBridgeSubscribers.delete(source as WindowProxy);
+        }
+    }
+
+    private async handleEmbeddedBridgeInvoke(event: MessageEvent): Promise<void> {
+        const data = event.data as { id?: string; method?: string; args?: unknown[] } | null;
+        if (!data || typeof data.id !== 'string' || typeof data.method !== 'string') return;
+        const source = event.source;
+        if (!source || typeof (source as WindowProxy).postMessage !== 'function') return;
+        const target = source as WindowProxy;
+        const origin = typeof event.origin === 'string' && event.origin !== 'null' ? event.origin : '*';
+        const bridge = this.desktopBridge as DesktopBridge | null;
+        const method = bridge?.[data.method];
+        if (typeof method !== 'function') {
+            target.postMessage({ type: 'awwv-bridge:response', id: data.id, ok: false, error: `Bridge method not found: ${data.method}` }, origin);
+            return;
+        }
+        try {
+            const args = Array.isArray(data.args) ? data.args : [];
+            const result = await (method as (...fnArgs: unknown[]) => unknown)(...args);
+            target.postMessage({ type: 'awwv-bridge:response', id: data.id, ok: true, result }, origin);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            target.postMessage({ type: 'awwv-bridge:response', id: data.id, ok: false, error: message }, origin);
+        }
+    }
+
+    private broadcastEmbeddedBridgeEvent(eventName: string, payload: unknown): void {
+        for (const [target, origin] of this.embeddedBridgeSubscribers.entries()) {
+            try {
+                target.postMessage({ type: 'awwv-bridge:event', eventName, payload }, origin === 'null' ? '*' : origin);
+            } catch {
+                this.embeddedBridgeSubscribers.delete(target);
+            }
         }
     }
 

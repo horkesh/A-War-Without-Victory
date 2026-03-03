@@ -78,6 +78,10 @@ export interface GameStore {
   selectedArmyId: string | null;
   setSelectedArmyId: (id: string | null) => void;
 
+  /** Selected operation (click on operation card in sidebar). Key: `${corps_id}|${name}`. */
+  selectedOperationKey: string | null;
+  setSelectedOperationKey: (key: string | null) => void;
+
   /** Minimap visibility toggle. */
   minimapVisible: boolean;
   setMinimapVisible: (v: boolean) => void;
@@ -155,6 +159,9 @@ export const useGameStore = create<GameStore>((set) => ({
 
   selectedArmyId: null,
   setSelectedArmyId: (id) => set({ selectedArmyId: id, selectedCorpsId: null, selectedOsid: null, selectedFormationId: null, selectedCorpsFrontSectorId: null }),
+
+  selectedOperationKey: null,
+  setSelectedOperationKey: (key) => set({ selectedOperationKey: key }),
 
   minimapVisible: true,
   setMinimapVisible: (v) => set({ minimapVisible: v }),

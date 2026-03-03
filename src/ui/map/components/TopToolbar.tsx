@@ -10,6 +10,8 @@ const FACTION_BANNER_TINT: Record<string, string> = {
   HRHB: 'rgba(64, 128, 184, 0.35)',
 };
 
+const isEmbedded = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('embedded') === '1';
+
 export function TopToolbar() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const loadSave = useGameStore((s) => s.loadSave);
@@ -98,9 +100,28 @@ export function TopToolbar() {
       className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-4 py-2.5 backdrop-blur-sm border-b border-panel-border"
       style={{ background: toolbarBackground }}
     >
+      {isEmbedded && (
+        <button
+          onClick={() => window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*')}
+          className="px-3 py-1 text-xs font-mono uppercase tracking-wide font-semibold rounded transition-colors"
+          style={{ background: 'rgba(0,232,120,0.12)', color: '#00e878', border: '1px solid rgba(0,232,120,0.3)' }}
+        >
+          &#9664; HQ
+        </button>
+      )}
+
       <span className="font-sans text-sm text-accent-gold tracking-wider uppercase font-semibold">
         A War Without Victory
       </span>
+      {/* Build badge: confirms which bundle is running in desktop iframe (remove once verified). */}
+      {isEmbedded && typeof __MAP_BUILD_TIME__ !== 'undefined' && (
+        <span
+          className="text-[10px] font-mono text-text-muted px-1.5 py-0.5 rounded border border-panel-border"
+          title={`Map bundle: ${__MAP_BUILD_TIME__}`}
+        >
+          map {typeof import.meta !== 'undefined' && import.meta.env?.DEV ? 'dev' : new Date(__MAP_BUILD_TIME__).toLocaleTimeString()}
+        </span>
+      )}
 
       <button
         onClick={handleLoadClick}

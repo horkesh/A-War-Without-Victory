@@ -98,6 +98,10 @@ export default defineConfig({
         },
     ],
     root: mapRoot,
+    define: {
+        // Injected at build time so desktop can confirm which bundle is loaded (see TopToolbar badge).
+        __MAP_BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    },
     server: {
         port: 3002,
         fs: {
@@ -105,6 +109,17 @@ export default defineConfig({
         },
     },
     publicDir: false,
+    base: './',
+    build: {
+        outDir: path.resolve(__dirname, '../../../dist/tactical-map'),
+        emptyOutDir: true,
+        rollupOptions: {
+            input: {
+                tactical_map: path.resolve(__dirname, 'index.html'),
+            },
+        },
+        copyPublicDir: false,
+    },
     resolve: {
         alias: {
             '@': path.resolve(__dirname, '.'),

@@ -24,24 +24,35 @@ export function CorpsFrontPanel() {
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
 
-  // Formation detail takes priority — hide sector panel when a formation is selected
-  if (selectedFormationId || !selectedSectorId || !loadedGameState?.corpsFrontSectors) return null;
-
-  const sector = loadedGameState.corpsFrontSectors.find((s) => s.sector_id === selectedSectorId);
-  if (!sector) return null;
-
-  const corpsFormation = loadedGameState.formations.find((f) => f.id === sector.corps_id);
+  // Derive all data unconditionally (no early returns) so hook order is stable (Rules of Hooks).
+  const sector = loadedGameState?.corpsFrontSectors && selectedSectorId && !selectedFormationId
+    ? loadedGameState.corpsFrontSectors.find((s) => s.sector_id === selectedSectorId) ?? null
+    : null;
+  const corpsFormation = sector && loadedGameState
+    ? loadedGameState.formations.find((f) => f.id === sector.corps_id) ?? null
+    : null;
   const corpsStance = corpsFormation?.corpsStance ?? 'unknown';
-  const corpsColorMap = buildCorpsColorMap(loadedGameState.corpsFrontSectors);
-  const corpsColor = corpsColorMap[sector.corps_id] ?? '#888';
+  const corpsColorMap = loadedGameState?.corpsFrontSectors
+    ? buildCorpsColorMap(loadedGameState.corpsFrontSectors)
+    : {};
+  const corpsColor = sector ? (corpsColorMap[sector.corps_id] ?? '#888') : '#888';
+  const assignedFormations = sector && loadedGameState
+    ? sector.assigned_brigade_ids
+        .map((id) => loadedGameState.formations.find((f) => f.id === id))
+        .filter((f): f is NonNullable<typeof f> => f != null)
+    : [];
+  const reserveFormations = sector && loadedGameState
+    ? sector.reserve_brigade_ids
+        .map((id) => loadedGameState.formations.find((f) => f.id === id))
+        .filter((f): f is NonNullable<typeof f> => f != null)
+    : [];
 
-  const assignedFormations = sector.assigned_brigade_ids
-    .map((id) => loadedGameState.formations.find((f) => f.id === id))
-    .filter((f): f is NonNullable<typeof f> => f != null);
-
-  const reserveFormations = sector.reserve_brigade_ids
-    .map((id) => loadedGameState.formations.find((f) => f.id === id))
-    .filter((f): f is NonNullable<typeof f> => f != null);
+  const visible = !(
+    selectedFormationId ||
+    !selectedSectorId ||
+    !loadedGameState?.corpsFrontSectors ||
+    !sector
+  );
 
   return (
     <div
@@ -53,10 +64,13 @@ export function CorpsFrontPanel() {
         bottom: '1rem',
         width: '20rem',
         zIndex: 50,
+        display: visible ? undefined : 'none',
       }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
+      {visible && sector ? (
+        <>
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
         <div className="flex items-center gap-2">
           <span
             className="inline-block w-3 h-3 rounded-sm"
@@ -178,6 +192,8 @@ export function CorpsFrontPanel() {
           </div>
         )}
       </div>
+    </>
+      ) : null}
     </div>
   );
 }

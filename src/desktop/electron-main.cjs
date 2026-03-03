@@ -161,6 +161,7 @@ function startMapServer() {
           'Content-Range': `bytes ${start}-${end}/${stat.size}`,
           'Content-Length': chunkSize,
           'Accept-Ranges': 'bytes',
+          'Cache-Control': 'no-store',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges',
         });
@@ -173,6 +174,7 @@ function startMapServer() {
       'Content-Type': contentType,
       'Content-Length': stat.size,
       'Accept-Ranges': 'bytes',
+      'Cache-Control': 'no-store',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges',
     });
@@ -261,6 +263,9 @@ function createWindow() {
 
   win.loadURL('awwv://warroom/index.html');
 
+  // Clear HTTP cache so the tactical map iframe always loads the latest bundle from the map server.
+  win.webContents.session.clearCache().catch(() => {});
+
   const devToolsPromise = win.webContents.openDevTools({ mode: 'detach' });
   if (devToolsPromise && typeof devToolsPromise.catch === 'function') {
     devToolsPromise.catch(() => { });
@@ -320,8 +325,14 @@ function createWindow() {
   win.on('closed', () => { mainWindow = null; });
 }
 
-function openTacticalMapWindow() {
+function openTacticalMapWindow(mode = 'operational') {
+  const targetPath = mode === 'sandbox' ? '/tactical_sandbox.html' : '/';
+  const cacheBuster = `v=${Date.now()}`;
+  const targetUrl = `${getMapServerUrl(targetPath)}${targetPath.includes('?') ? '&' : '?'}${cacheBuster}`;
   if (tacticalMapWindow && !tacticalMapWindow.isDestroyed()) {
+    if (tacticalMapWindow.webContents.getURL() !== targetUrl) {
+      tacticalMapWindow.loadURL(targetUrl);
+    }
     tacticalMapWindow.focus();
     return tacticalMapWindow;
   }
@@ -335,7 +346,7 @@ function openTacticalMapWindow() {
       nodeIntegration: false,
     },
   });
-  win.loadURL(getMapServerUrl('/'));
+  win.loadURL(targetUrl);
   tacticalMapWindow = win;
   win.on('closed', () => { tacticalMapWindow = null; });
   win.webContents.on('did-finish-load', () => {
@@ -1132,9 +1143,10 @@ app.whenReady().then(() => {
 
   ipcMain.handle('get-current-game-state', async () => currentGameStateJson);
 
-  ipcMain.handle('open-tactical-map-window', async () => {
+  ipcMain.handle('open-tactical-map-window', async (_event, payload) => {
     try {
-      openTacticalMapWindow();
+      const mode = payload?.mode === 'sandbox' ? 'sandbox' : 'operational';
+      openTacticalMapWindow(mode);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -1142,7 +1154,34 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle('get-map-server-url', async () => {
-    return mapServerPort ? getMapServerUrl('/') : null;
+    // Prefer Vite dev map when running. Vite may use 3003, 3004... if 3002 is in use.
+    // Skip the port our built server uses so we never mistake it for dev.
+    const portsToTry = [3002, 3003, 3004, 3005];
+    for (const port of portsToTry) {
+      if (port === mapServerPort) continue; // built server is on this port
+      const devMapBase = `http://127.0.0.1:${port}`;
+      try {
+        const res = await new Promise((resolve, reject) => {
+          const req = http.get(`${devMapBase}/index.html`, (r) => {
+            let body = '';
+            r.on('data', (chunk) => { if (body.length < 500) body += chunk.toString(); });
+            r.on('end', () => resolve({ statusCode: r.statusCode, body }));
+            r.on('error', reject);
+          });
+          req.on('error', reject);
+          req.setTimeout(2000, () => { req.destroy(); reject(new Error('timeout')); });
+        });
+        // Vite dev serves raw index.html with script src="/main.tsx"; built serves hashed /assets/
+        const isViteDev = res && res.statusCode === 200 && res.body && res.body.includes('main.tsx');
+        if (isViteDev) {
+          console.log(`[AWWV] Map: using dev server at ${devMapBase}`);
+          return devMapBase;
+        }
+      } catch (_) { /* try next port */ }
+    }
+    const built = mapServerPort ? getMapServerUrl('/') : null;
+    if (built) console.log(`[AWWV] Map: using built server at ${built}`);
+    return built;
   });
 
   // Start the tactical map HTTP server (required because MapLibre's Web Workers

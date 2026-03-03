@@ -7,6 +7,79 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=IBM+Plex+Sans+Condensed:wght@400;600&display=swap" rel="stylesheet" />
+    <script>
+      (() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('embedded') !== '1' || window.parent === window) return;
+
+        const pending = new Map();
+        let nextId = 1;
+        let gameStateUpdatedCallback = null;
+
+        const postToParent = (payload) => {
+          window.parent.postMessage(payload, '*');
+        };
+
+        const invoke = (method, args) => {
+          const id = `awwv_bridge_${nextId++}`;
+          return new Promise((resolve, reject) => {
+            const timeout = window.setTimeout(() => {
+              pending.delete(id);
+              reject(new Error(`Bridge timeout for ${method}`));
+            }, 15000);
+            pending.set(id, { resolve, reject, timeout });
+            postToParent({
+              type: 'awwv-bridge:invoke',
+              id,
+              method,
+              args: Array.isArray(args) ? args : [],
+            });
+          });
+        };
+
+        window.addEventListener('message', (event) => {
+          const data = event.data;
+          if (!data || typeof data !== 'object') return;
+
+          if (data.type === 'awwv-bridge:response' && typeof data.id === 'string') {
+            const entry = pending.get(data.id);
+            if (!entry) return;
+            pending.delete(data.id);
+            window.clearTimeout(entry.timeout);
+            if (data.ok) {
+              entry.resolve(data.result);
+            } else {
+              entry.reject(new Error(data.error || 'Bridge request failed'));
+            }
+            return;
+          }
+
+          if (data.type === 'awwv-bridge:event' && data.eventName === 'game-state-updated') {
+            if (typeof gameStateUpdatedCallback === 'function') {
+              gameStateUpdatedCallback(data.payload);
+            }
+          }
+        });
+
+        const baseBridge = {
+          setGameStateUpdatedCallback(cb) {
+            gameStateUpdatedCallback = typeof cb === 'function' ? cb : null;
+            postToParent({
+              type: 'awwv-bridge:subscribe-game-state',
+              enabled: !!gameStateUpdatedCallback,
+            });
+          },
+        };
+
+        window.awwv = new Proxy(baseBridge, {
+          get(target, prop) {
+            if (prop in target) return target[prop];
+            if (typeof prop !== 'string') return undefined;
+            return (...args) => invoke(prop, args);
+          },
+        });
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

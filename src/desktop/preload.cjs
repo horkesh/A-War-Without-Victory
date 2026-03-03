@@ -18,7 +18,7 @@ contextBridge.exposeInMainWorld('awwv', {
   advanceTurn: (payload) => ipcRenderer.invoke('advance-turn', payload),
   setGameStateUpdatedCallback: (cb) => { gameStateUpdatedCallback = typeof cb === 'function' ? cb : null; },
   getCurrentGameState: () => ipcRenderer.invoke('get-current-game-state'),
-  openTacticalMapWindow: () => ipcRenderer.invoke('open-tactical-map-window'),
+  openTacticalMapWindow: (payload) => ipcRenderer.invoke('open-tactical-map-window', payload),
   getRecruitmentCatalog: () => ipcRenderer.invoke('get-recruitment-catalog'),
   applyRecruitment: (brigadeId, equipmentClass) => ipcRenderer.invoke('apply-recruitment', { brigadeId, equipmentClass }),
   stageAttackOrder: (brigadeId, targetSettlementId) => ipcRenderer.invoke('stage-attack-order', { brigadeId, targetSettlementId }),
@@ -45,4 +45,5 @@ contextBridge.exposeInMainWorld('awwv', {
   clearOrders: (brigadeId) => ipcRenderer.invoke('clear-orders', { brigadeId }),
   stageCorpsStanceOrder: (corpsId, stance) => ipcRenderer.invoke('stage-corps-stance-order', { corpsId, stance }),
   focusWarroom: () => ipcRenderer.invoke('focus-warroom'),
+  getMapServerUrl: () => ipcRenderer.invoke('get-map-server-url'),
 });
