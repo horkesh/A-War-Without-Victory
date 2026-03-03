@@ -336,6 +336,26 @@ export function normalizeScenario(raw: unknown): Scenario {
         return Object.keys(result).length > 0 ? result : undefined;
     })();
 
+    // Supply reserves system (Phase A)
+    const supply_reserves_enabled = o.supply_reserves_enabled === true ? true : undefined;
+
+    // Per-OSID political control overrides (applied after OSID promotion, before OOB)
+    const osid_control_overrides = (() => {
+        const raw = o.osid_control_overrides;
+        if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+        const result: Record<string, string> = {};
+        for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+            if (typeof k === 'string' && typeof v === 'string') result[k] = v;
+        }
+        return Object.keys(result).length > 0 ? result : undefined;
+    })();
+
+    // War timeline ID (e.g. "apr1992"). Loads faction temporal profiles from JSON.
+    const war_timeline = typeof o.war_timeline === 'string' && o.war_timeline.trim() !== '' ? o.war_timeline.trim() : undefined;
+
+    // Named officers file ID. Loads historical officers from JSON.
+    const init_officers = typeof o.init_officers === 'string' && o.init_officers.trim() !== '' ? o.init_officers.trim() : undefined;
+
     // Phase H2.4: When use_harness_bots is true, ensure every week has at least one baseline_ops action (deterministic; uses existing baseline_ops only).
     if (use_harness_bots && weeks > 0) {
         const turnsByWeek = new Map<number, ScenarioTurn>();
@@ -399,7 +419,11 @@ export function normalizeScenario(raw: unknown): Scenario {
             max_recruits_per_faction_per_turn,
             war_entrenchment_init_turns,
             war_force_transition_after_turns,
-            avoided_osids_by_faction
+            avoided_osids_by_faction,
+            supply_reserves_enabled,
+            osid_control_overrides,
+            war_timeline,
+            init_officers
         };
     }
 
@@ -441,7 +465,11 @@ export function normalizeScenario(raw: unknown): Scenario {
         max_recruits_per_faction_per_turn,
         war_entrenchment_init_turns,
         war_force_transition_after_turns,
-        avoided_osids_by_faction
+        avoided_osids_by_faction,
+        supply_reserves_enabled,
+        osid_control_overrides,
+        war_timeline,
+        init_officers
     };
 }
 

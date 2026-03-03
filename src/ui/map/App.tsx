@@ -13,6 +13,7 @@ import { OOBSidebar } from './components/OOBSidebar';
 import { OrderQueue } from './components/OrderQueue';
 import { Tooltip } from './components/Tooltip';
 import { AttackConfirmation } from './components/AttackConfirmation';
+import { SupplyPanel } from './components/SupplyPanel';
 import { useGameStore } from './store/gameStore';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
@@ -42,6 +43,7 @@ function App() {
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const setConfirmPrimaryAction = useGameStore((s) => s.setConfirmPrimaryAction);
+  const mapMode = useGameStore((s) => s.mapMode);
 
   // Desktop state bootstrap + subscription (standalone window and embedded bridge).
   useEffect(() => {
@@ -184,6 +186,9 @@ function App() {
           onConfirm={handleAttackConfirm}
           onCancel={handleAttackCancel}
         />
+      )}
+      {mapMode === 'supply' && loadedGameState && (
+        <SupplyPanel state={loadedGameState} />
       )}
       <Minimap />
       <BottomStatusStrip />

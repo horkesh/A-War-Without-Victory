@@ -120,7 +120,7 @@ import { resolveAttackOrdersOsid } from '../combat/attack_resolution_osid.js';
 import { applyBrigadeMovementOrders } from '../combat/brigade_movement_orders.js';
 import { processOsidColumnMovement, type OsidColumnMovementReport } from '../combat/osid_column_movement.js';
 import { updatePhaseIISupplyPressure } from '../combat/supply_pressure.js';
-import { updateSupplyReserves, updateSiegeTurnCounters } from '../../state/supply_reserves.js';
+import { updateSupplyReserves, updateSiegeTurnCounters, applyUnAirdrops } from '../../state/supply_reserves.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 
 // --- Pipeline infrastructure imports ---
@@ -371,6 +371,7 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
             context.report.phase_ii_enclave_resilience = updateEnclaveResilience(context.state, supplyByOsid);
+            applyUnAirdrops(context.state);
         }
     },
     {

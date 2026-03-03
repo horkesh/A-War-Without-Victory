@@ -14,6 +14,7 @@ import { loadOperationalPoliticalControl, loadOperationalSettlements } from '../
 import { buildControlGeoJSON } from './builders/buildControlGeoJSON';
 import { buildDensityGeoJSON } from './builders/buildDensityGeoJSON';
 import { buildEthnicGeoJSON } from './builders/buildEthnicGeoJSON';
+import { buildSupplyGeoJSON } from './builders/buildSupplyGeoJSON';
 import { buildFrontLinesGeoJSON } from './builders/buildFrontLinesGeoJSON';
 import { buildFrontEdgesHoverGeoJSON } from './builders/buildFrontEdgesHoverGeoJSON';
 import { buildCorpsFrontLinesGeoJSON, buildCorpsColorExpression } from './builders/buildCorpsFrontLinesGeoJSON';
@@ -35,6 +36,8 @@ const OSID_ETHNIC_FILL_LAYER_ID = 'osid-ethnic-fill';
 const OSID_ETHNIC_SOURCE_ID = 'osid-ethnic';
 const OSID_DENSITY_FILL_LAYER_ID = 'osid-density-fill';
 const OSID_DENSITY_SOURCE_ID = 'osid-density';
+const OSID_SUPPLY_FILL_LAYER_ID = 'osid-supply-fill';
+const OSID_SUPPLY_SOURCE_ID = 'osid-supply';
 /** Layer ID for formation markers (formationsVisible). */
 const FORMATION_MARKERS_LAYER_ID = 'formation-markers';
 /** Layer ID for formation labels (labelsVisible). */
@@ -811,13 +814,16 @@ export function MapContainer() {
       } else {
         (m.getSource(OSID_ETHNIC_SOURCE_ID) as GeoJSONSource).setData(ethnicGeoJson);
       }
-      const showPolitical = mapMode === 'political' || mapMode === 'supply' || mapMode === 'pressure';
+      const showPolitical = mapMode === 'political' || mapMode === 'pressure';
       safeSetLayoutVisibility(m, 'osid-control-fill', showPolitical);
       if (safeHasLayer(m, OSID_ETHNIC_FILL_LAYER_ID)) {
         safeSetLayoutVisibility(m, OSID_ETHNIC_FILL_LAYER_ID, mapMode === 'ethnic');
       }
       if (safeHasLayer(m, OSID_DENSITY_FILL_LAYER_ID)) {
         safeSetLayoutVisibility(m, OSID_DENSITY_FILL_LAYER_ID, mapMode === 'density');
+      }
+      if (safeHasLayer(m, OSID_SUPPLY_FILL_LAYER_ID)) {
+        safeSetLayoutVisibility(m, OSID_SUPPLY_FILL_LAYER_ID, mapMode === 'supply');
       }
     });
     return () => {
@@ -863,6 +869,55 @@ export function MapContainer() {
         (m.getSource(OSID_DENSITY_SOURCE_ID) as GeoJSONSource).setData(densityGeoJson);
       }
       safeSetLayoutVisibility(m, OSID_DENSITY_FILL_LAYER_ID, mapMode === 'density');
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+    };
+  }, [mapReady, mapMode, loadedGameState]);
+
+  // Supply map mode — color OSIDs by faction supply pressure (adequate/strained/critical).
+  useEffect(() => {
+    const map = mapRef.current;
+    const baseGeoJson = osidBaseRef.current;
+    if (!mapReady || !map || !baseGeoJson || !loadedGameState) return;
+
+    let cancelled = false;
+    const rafId = requestAnimationFrame(() => {
+      if (cancelled || !mapRef.current || !loadedGameState) return;
+      const controlGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
+      const supplyGeoJson = buildSupplyGeoJSON(
+        controlGeoJson,
+        loadedGameState.controlBySettlement,
+        loadedGameState.phaseIiSupplyPressure
+      );
+      if (cancelled || !mapRef.current) return;
+      const m = mapRef.current;
+      if (!m.getSource(OSID_SUPPLY_SOURCE_ID)) {
+        m.addSource(OSID_SUPPLY_SOURCE_ID, { type: 'geojson', data: supplyGeoJson });
+        m.addLayer(
+          {
+            id: OSID_SUPPLY_FILL_LAYER_ID,
+            type: 'fill',
+            source: OSID_SUPPLY_SOURCE_ID,
+            paint: {
+              'fill-color': [
+                'match',
+                ['get', 'supply_class'],
+                'adequate', 'rgba(74, 222, 128, 0.45)',
+                'strained',  'rgba(251, 191, 36, 0.50)',
+                'critical',  'rgba(248, 113, 113, 0.60)',
+                'rgba(156, 163, 175, 0.35)',
+              ],
+              'fill-opacity': 1,
+            },
+          },
+          'faction-border-glow-pos'
+        );
+      } else {
+        (m.getSource(OSID_SUPPLY_SOURCE_ID) as GeoJSONSource).setData(supplyGeoJson);
+      }
+      safeSetLayoutVisibility(m, OSID_SUPPLY_FILL_LAYER_ID, mapMode === 'supply');
     });
     return () => {
       cancelled = true;

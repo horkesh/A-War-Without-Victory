@@ -12,6 +12,7 @@
   "use_harness_bots": true,
   "use_smart_bots": true,
   "bot_difficulty": "medium",
+  "supply_reserves_enabled": true,
   "recruitment_mode": "player_choice",
   "recruitment_capital": { "RS": 400, "RBiH": 400, "HRHB": 300 },
   "equipment_points": { "RS": 800, "RBiH": 100, "HRHB": 350 },

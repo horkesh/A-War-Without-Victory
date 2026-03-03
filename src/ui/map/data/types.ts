@@ -241,5 +241,7 @@ export interface LoadedGameState {
     repositionOrders?: RepositionOrderView[];
     corpsFrontSectors?: CorpsFrontSectorView[];
     operations?: OperationView[];
+    /** Per-faction supply reserve levels (general supply + heavy munitions, 0–100 each). Only present when supply_reserves_enabled. */
+    factionReserves?: Record<string, { generalSupply: number; heavyMunitions: number }>;
 }
 

@@ -113,7 +113,12 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'recruitment_state',
     // Phase 0: Event log and relationship tracking
     'phase0_events_log',
-    'phase0_relationships'
+    'phase0_relationships',
+    // War timeline (externalized faction temporal profiles)
+    'war_timeline',
+    // Named officers system (Tier 1)
+    'named_officer_data',
+    'named_officers'
 ]);
 
 /**

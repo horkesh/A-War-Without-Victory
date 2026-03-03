@@ -466,6 +466,20 @@ export function parseGameState(json: unknown): LoadedGameState {
         if (Object.keys(out).length > 0) phaseIiSupplyPressure = out;
     }
 
+    let factionReserves: LoadedGameState['factionReserves'] | undefined;
+    const rawGeneral = state.general_supply_reserve as Record<string, unknown> | undefined;
+    if (rawGeneral && typeof rawGeneral === 'object' && !Array.isArray(rawGeneral)) {
+        const out: NonNullable<LoadedGameState['factionReserves']> = {};
+        const rawHeavy = state.heavy_munitions_reserve as Record<string, unknown> | undefined;
+        for (const faction of Object.keys(rawGeneral).sort((a, b) => a.localeCompare(b))) {
+            out[faction] = {
+                generalSupply: finiteNumber(rawGeneral[faction], 0),
+                heavyMunitions: finiteNumber(rawHeavy?.[faction] ?? 0, 0),
+            };
+        }
+        if (Object.keys(out).length > 0) factionReserves = out;
+    }
+
     let phaseIiExhaustion: LoadedGameState['phaseIiExhaustion'] | undefined;
     const rawExhaustion = state.war_exhaustion as Record<string, unknown> | undefined;
     if (rawExhaustion && typeof rawExhaustion === 'object' && !Array.isArray(rawExhaustion)) {
@@ -684,6 +698,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         repositionOrders: repositionOrders.length > 0 ? repositionOrders : undefined,
         corpsFrontSectors,
         operations: operations.length > 0 ? operations : undefined,
+        factionReserves,
     };
 }
 

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { updateSupplyReserves, ensureSupplyReserves, deductCombatExpenditure, getEffectiveSupplyState } from '../src/state/supply_reserves.js';
+import { MAINTENANCE_DRAIN_PER_FORMATION } from '../src/state/supply_reserve_constants.js';
 import type { GameState } from '../src/state/game_state.js';
 
 function makeMinimalState(overrides: Partial<GameState> = {}): GameState {
@@ -54,11 +55,11 @@ describe('updateSupplyReserves', () => {
         // Zero production
         const report = updateSupplyReserves(state, { RBiH: 0, RS: 0, HRHB: 0 });
 
-        // RBiH: 80 - 2*0.15 = 79.7
-        expect(state.general_supply_reserve!['RBiH']).toBeCloseTo(79.7, 5);
-        // RS: 80 - 1*0.15 = 79.85
-        expect(state.general_supply_reserve!['RS']).toBeCloseTo(79.85, 5);
-        // HRHB: 80 - 0*0.15 = 80
+        // RBiH: 80 - 2*DRAIN
+        expect(state.general_supply_reserve!['RBiH']).toBeCloseTo(80 - 2 * MAINTENANCE_DRAIN_PER_FORMATION, 5);
+        // RS: 80 - 1*DRAIN
+        expect(state.general_supply_reserve!['RS']).toBeCloseTo(80 - 1 * MAINTENANCE_DRAIN_PER_FORMATION, 5);
+        // HRHB: 80 - 0*DRAIN = 80
         expect(state.general_supply_reserve!['HRHB']).toBe(80);
 
         // Heavy munitions unchanged (no combat expenditure in per-turn update)

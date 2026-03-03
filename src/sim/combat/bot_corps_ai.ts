@@ -1505,8 +1505,26 @@ export function generateCorpsDirectives(
             }
         }
 
-        // Sort all arrays for determinism
-        offensiveTargets.sort(strictCompare);
+        // Supply-aware target sorting: prefer attacking enemy OSIDs with critical/strained supply.
+        // Critical-supply defenders are weaker; prioritizing these targets improves attack efficiency.
+        // Deterministic: ties broken by strictCompare (stable for same-supply-state targets).
+        offensiveTargets.sort((a, b) => {
+            const getSupplyPriority = (osid: string): number => {
+                if (!supplyByOsid?.factions) return 2;
+                const controller = (state.political_controllers ?? {})[osid];
+                if (!controller || controller === faction) return 2;
+                const facEntry = supplyByOsid.factions.find(f => f.faction_id === controller);
+                if (!facEntry) return 2;
+                const osidEntry = facEntry.by_osid.find(e => e.osid === osid);
+                if (!osidEntry) return 2;
+                if (osidEntry.state === 'critical') return 0;
+                if (osidEntry.state === 'strained') return 1;
+                return 2;
+            };
+            const diff = getSupplyPriority(a) - getSupplyPriority(b);
+            if (diff !== 0) return diff;
+            return strictCompare(a, b);
+        });
         holdOsids.sort(strictCompare);
         avoidOsids.sort(strictCompare);
 
