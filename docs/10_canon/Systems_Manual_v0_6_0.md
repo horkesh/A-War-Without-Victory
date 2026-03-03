@@ -206,6 +206,8 @@ When War phase runs, attack orders are resolved as **discrete attacks** per targ
 
 **Determinism:** `officerHash(turn, officerId)` uses FNV-1a (no Math.random). Sorted iteration via `strictCompare`. Growth/loss rates are pure arithmetic. Assignment penalties are lookup-based. Warlord friction uses `turn % brigadeCount`.
 
+**Phase E GUI (2026-03-03):** Tactical map FormationDetail panel shows **Command** (brigade officer quality bar, corps/army commander name and Acting status) and **Recent command changes** for corps when the last turn report includes `officer_succession`. Warroom FactionOverviewPanel lists officers in a COMMAND subsection; NewspaperModal appends officer succession lines (replacements, casualties, departures) to AAR body. Main process sends `turn-report-updated` to both renderers after advance-turn; see DESKTOP_GUI_IPC_CONTRACT.
+
 Report: [20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md](../40_reports/implemented/20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md). Design doc: [OFFICERS_SYSTEM_COMPREHENSIVE_PLAN.md](../30_planning/OFFICERS_SYSTEM_COMPREHENSIVE_PLAN.md).
 
 ## 8. Command and control degradation

@@ -15,11 +15,12 @@ export const MAINTENANCE_DRAIN_PER_FORMATION = 0.04;
  * Per-heavy-weapon per-turn heavy munitions drain (tanks + artillery).
  * Represents ammunition expenditure for training/readiness, barrel wear,
  * spare parts consumption, and fuel for armored vehicles.
- * RS (1035 weapons) → ~5.2/turn drain; RBiH (647) → ~3.2; HRHB (258) → ~1.3.
- * Calibrated so RS heavy munitions transitions adequate→strained around w40
- * (JNA stockpile depletion), making E2 bombardment differentiation active.
+ * RS starts with 794 heavy weapons (400T+394A from JNA): drain ~2.4/turn.
+ * Combined with siege drain (~0.8) and ramping patron income (~0→4.7/turn),
+ * RS heavy transitions 100→43 (adequate→strained) by w40.
+ * n413 calibration: RS heavy=42.9 (strained), E2 bombardment mult 0.75×.
  */
-export const HEAVY_MAINTENANCE_PER_WEAPON = 0.005;
+export const HEAVY_MAINTENANCE_PER_WEAPON = 0.003;
 
 // ── Consumption: Combat ──────────────────────────────────────────────────────
 /** Heavy munitions deducted per battle (scaled by intensity = attackerCount × powerRatio). */

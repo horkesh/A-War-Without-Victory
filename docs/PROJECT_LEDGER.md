@@ -9314,7 +9314,7 @@ Determinism checks **MUST** be run:
 
 ### [2026-03-03] Officers System — follow-ups (post-propagation)
 - **Type:** Process / follow-up tracking
-- **Summary:** Officers System Phases A–D complete and propagated. **Remaining:** (1) **Commit** — implementation report and canon/docs propagation still uncommitted (report at `docs/40_reports/implemented/20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md`; 7 canon/report files updated). (2) **Should-do (follow-up):** Re-run n407/n409 baseline (normalizeScenario whitelist fix means war_timeline now loads; supply-phase ATH 90.5% may shift). Officer quality tuning (w40 averages below projected ranges; calibration session). Drina region -8pp investigation. (3) **Deferred:** Phase E GUI (officer info in FormationDetail, officer list in warroom, succession notifications) — not in scope. No structural gaps; commit-ready once changes are committed.
+- **Summary:** Officers System Phases A–D complete and propagated. **Phase E GUI** implemented and propagated (2026-03-03). **Remaining:** (1) **Should-do (follow-up):** Re-run n407/n409 baseline (normalizeScenario whitelist fix means war_timeline now loads; supply-phase ATH 90.5% may shift). Officer quality tuning (w40 averages below projected ranges; calibration session). Drina region -8pp investigation. No structural gaps.
 
 ### [2026-03-03] Officers Phase E GUI — Implementation complete
 - **Type:** Feature (GUI — map + warroom)
@@ -9322,3 +9322,22 @@ Determinism checks **MUST** be run:
 - **Verification:** Manual: load run with officers (e.g. apr1992 definitive 40w), open formation panel (brigade/corps) and confirm Command block; open warroom faction overview and confirm COMMAND list; advance turn and open newspaper to see succession lines; select corps and confirm Recent command changes when succession occurred.
 - **Tests:** `tests/ui_map_officers_phase_e.test.ts` (parseGameState officer mapping and formation.officer_quality). Full vitest and tsc pass.
 - **Docs:** TACTICAL_MAP_SYSTEM.md (§0 FormationDetail and Officers); 20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md Phase E section updated from Deferred to Implemented.
+
+### [2026-03-03] Officers Phase E — Propagate to canon and technical docs
+- **Type:** Documentation (propagate-to-canon)
+- **Summary:** Propagated Phase E GUI behavior to canon and engineering docs so references match code. **Files updated (5):** `docs/10_canon/context.md` (Officers paragraph: added Phase E GUI bullet — FormationDetail Command/succession, warroom COMMAND, NewspaperModal, turn-report-updated); `docs/10_canon/Systems_Manual_v0_6_0.md` (§7.5: added Phase E GUI paragraph — FormationDetail Command + Recent command changes, FactionOverviewPanel, NewspaperModal, turn-report-updated); `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md` (new event `turn-report-updated` with payload and behavior); `docs/20_engineering/REPO_MAP.md` (new "Officers Phase E GUI" bullet in Change X → Go Here with all touched paths); `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` (FormationDetail table row: Phase E Command block and Recent command changes). No structural path renames; behavioral/feature descriptions only. FORAWWV.md not edited.
+- **References changed:** 5 files, ~8 distinct reference blocks added or extended.
+- **Uncertain/flagged:** None.
+
+### [2026-03-03] Supply system: isolated source detection + heavy weapons maintenance drain (n413)
+- **Type:** Feature + Calibration (Supply Reserves / Combat Math)
+- **Phase:** War phase (supply reserves, supply state derivation, combat math)
+- **Summary:** Two supply system improvements addressing remaining calibration gaps:
+  1. **Isolated supply source detection**: `findHeartlandComponent()` in `supply_state_derivation.ts` identifies the largest connected component of reachable OSIDs (heartland). Supply sources in disconnected pockets (Sarajevo, Bihać) now produce "strained" instead of "adequate" — Sarajevo correctly modeled as besieged with limited supply. 3 new tests in `supply_reachability_osid.test.ts`.
+  2. **Heavy weapons maintenance drain**: `HEAVY_MAINTENANCE_PER_WEAPON=0.003` in `supply_reserve_constants.ts`. Per-tank/artillery per-turn drain on `heavy_munitions_reserve`. RS (794 init heavy weapons) drains ~2.4/turn. Combined with zero early patron income and siege drain, RS heavy transitions 100→42.9 (strained) by w40. Phase E2 bombardment differentiation now **active** (0.75× mult for strained reserves). 1 new test in `supply_reserves.test.ts`. Report field `heavy_maintenance_drain` added to `SupplyReservesFactionEntry`.
+- **Calibration:** n413 = 89.7% area-weighted (no regression from n410/n411). RS heavy=42.9 (strained, was 100), RS general=26.5 (strained). E2 bombardment mult 0.75× active for RS. RBiH/HRHB heavy already at 0 from siege drain.
+- **Files modified:** `src/state/supply_state_derivation.ts` (findHeartlandComponent + heartland filtering), `src/state/supply_reserve_constants.ts` (HEAVY_MAINTENANCE_PER_WEAPON), `src/state/supply_reserves.ts` (heavy weapon counting + drain + report field), `tests/supply_reachability_osid.test.ts` (+3 tests), `tests/supply_reserves.test.ts` (+1 test), `docs/30_planning/SUPPLY_AMMO_SYSTEM_PLAN.md` (parameterization table)
+- **Tests:** 290 vitest pass, 1 skipped. 4 new tests total.
+- **Failure mode prevented:** Without isolated source detection, encircled cities with supply source status (Sarajevo) appeared fully supplied. Without heavy weapon drain, RS heavy munitions stayed at 100 permanently, making Phase E2 bombardment differentiation completely inert.
+- **Mistake guard:** Heavy drain rate 0.003 calibrated iteratively — 0.005 depleted RS to 0 by w21 (patron income ramps from zero). Current rate produces strained (42.9) not critical (0).
+- **Determinism:** `findHeartlandComponent()` sorts reachable set via `localeCompare` for deterministic BFS. Heavy weapon counting iterates sorted formation IDs. No randomness.

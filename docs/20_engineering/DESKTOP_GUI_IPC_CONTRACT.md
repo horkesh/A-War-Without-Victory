@@ -147,6 +147,10 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Payload: `stateJson: string`
   - Behavior: pushed from main process whenever scenario/state load, order staging, recruitment, or turn advance mutates current desktop state. Broadcast to warroom and tactical-map renderers.
 
+- `turn-report-updated` (event)
+  - Payload: `report: { phase: string, turn: number, details?: { officer_succession?: ... } | unknown }`
+  - Behavior: sent from main process after each successful advance-turn (same report object returned by advance-turn). Both warroom and tactical-map renderers receive it so they can show officer succession (FormationDetail “Recent command changes”, NewspaperModal AAR lines). Used for Officers Phase E GUI.
+
 - `get-current-game-state` (invoke)
   - Returns: `string | null`
   - Behavior: returns current serialized GameState held by main process; used by warroom at startup.

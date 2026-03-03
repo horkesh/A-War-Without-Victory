@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { updateSupplyReserves, ensureSupplyReserves, deductCombatExpenditure, getEffectiveSupplyState } from '../src/state/supply_reserves.js';
-import { MAINTENANCE_DRAIN_PER_FORMATION } from '../src/state/supply_reserve_constants.js';
+import { MAINTENANCE_DRAIN_PER_FORMATION, HEAVY_MAINTENANCE_PER_WEAPON } from '../src/state/supply_reserve_constants.js';
 import type { GameState } from '../src/state/game_state.js';
 
 function makeMinimalState(overrides: Partial<GameState> = {}): GameState {
@@ -79,6 +79,35 @@ describe('updateSupplyReserves', () => {
         expect(state.general_supply_reserve!['RS']).toBeCloseTo(84.8, 5);
         // RS: heavy = 60 + 8*1.0*0.4 = 63.2
         expect(state.heavy_munitions_reserve!['RS']).toBeCloseTo(63.2, 5);
+    });
+
+    it('drains heavy munitions proportional to heavy weapon count (tanks + artillery)', () => {
+        const state = makeMinimalState({
+            formations: {
+                'rs1': { id: 'rs1', faction: 'RS', personnel: 3000, composition: { tanks: 30, artillery: 20, infantry: 0, aa_systems: 0 } } as any,
+                'rs2': { id: 'rs2', faction: 'RS', personnel: 2000, composition: { tanks: 0, artillery: 10, infantry: 0, aa_systems: 0 } } as any,
+                'rbih1': { id: 'rbih1', faction: 'RBiH', personnel: 2000, composition: { tanks: 0, artillery: 5, infantry: 0, aa_systems: 0 } } as any,
+            }
+        });
+        ensureSupplyReserves(state);
+        const report = updateSupplyReserves(state, { RBiH: 0, RS: 0, HRHB: 0 });
+
+        // RS: 50 heavy weapons (30T+20A + 10A), RBiH: 5 (5A)
+        const rsHeavyDrain = 60 * HEAVY_MAINTENANCE_PER_WEAPON;  // 60 weapons × 0.005 = 0.30
+        const rbihHeavyDrain = 5 * HEAVY_MAINTENANCE_PER_WEAPON; // 5 weapons × 0.005 = 0.025
+
+        // RS heavy: 60 - 0.30 = 59.70
+        expect(state.heavy_munitions_reserve!['RS']).toBeCloseTo(60 - rsHeavyDrain, 5);
+        // RBiH heavy: 60 - 0.025 = 59.975
+        expect(state.heavy_munitions_reserve!['RBiH']).toBeCloseTo(60 - rbihHeavyDrain, 5);
+        // HRHB: no formations → no drain → 60
+        expect(state.heavy_munitions_reserve!['HRHB']).toBe(60);
+
+        // Report should include heavy_maintenance_drain
+        const rsEntry = report.factions.find(f => f.faction_id === 'RS')!;
+        expect(rsEntry.heavy_maintenance_drain).toBeCloseTo(rsHeavyDrain, 5);
+        const rbihEntry = report.factions.find(f => f.faction_id === 'RBiH')!;
+        expect(rbihEntry.heavy_maintenance_drain).toBeCloseTo(rbihHeavyDrain, 5);
     });
 
     it('clamps reserves at 0 and 100', () => {

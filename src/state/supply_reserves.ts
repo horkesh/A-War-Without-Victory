@@ -239,14 +239,23 @@ export function updateSupplyReserves(
     const formations = state.formations ?? {};
     const formationIds = Object.keys(formations).sort((a, b) => a.localeCompare(b));
 
-    // Count formations per faction (deterministic)
+    // Count formations and heavy weapons per faction (deterministic)
     const formationCountByFaction: Record<string, number> = {};
-    for (const fid of factionIds) formationCountByFaction[fid] = 0;
+    const heavyWeaponCountByFaction: Record<string, number> = {};
+    for (const fid of factionIds) {
+        formationCountByFaction[fid] = 0;
+        heavyWeaponCountByFaction[fid] = 0;
+    }
     for (const fmId of formationIds) {
         const fm = formations[fmId];
         if (!fm || !fm.faction) continue;
         const fid = fm.faction as string;
         formationCountByFaction[fid] = (formationCountByFaction[fid] ?? 0) + 1;
+        const comp = fm.composition;
+        if (comp) {
+            heavyWeaponCountByFaction[fid] = (heavyWeaponCountByFaction[fid] ?? 0)
+                + (comp.tanks ?? 0) + (comp.artillery ?? 0);
+        }
     }
 
     // Pre-compute siege drain per faction from siege_turn_counters
@@ -273,8 +282,10 @@ export function updateSupplyReserves(
         const formCount = formationCountByFaction[fid] ?? 0;
         const faction = state.factions.find((f) => f.id === fid);
 
-        // Maintenance drain: general supply only
+        // Maintenance drain: general supply (per formation) + heavy munitions (per heavy weapon)
         const maintenanceDrain = formCount * MAINTENANCE_DRAIN_PER_FORMATION;
+        const heavyWeaponCount = heavyWeaponCountByFaction[fid] ?? 0;
+        const heavyMaintenanceDrain = heavyWeaponCount * HEAVY_MAINTENANCE_PER_WEAPON;
 
         // Production income: split by facility type fraction
         const totalProduction = (productionBonusByFaction[fid] ?? 0) * PRODUCTION_SCALE;
@@ -312,7 +323,7 @@ export function updateSupplyReserves(
             prevGeneral - maintenanceDrain - siegeDrain.general + totalIncomeGeneral
         ));
         state.heavy_munitions_reserve![factionKey] = Math.max(0, Math.min(100,
-            prevHeavy - siegeDrain.heavy + totalIncomeHeavy
+            prevHeavy - heavyMaintenanceDrain - siegeDrain.heavy + totalIncomeHeavy
         ));
 
         entries.push({
@@ -320,6 +331,7 @@ export function updateSupplyReserves(
             general_supply: state.general_supply_reserve![factionKey],
             heavy_munitions: state.heavy_munitions_reserve![factionKey],
             maintenance_drain: maintenanceDrain,
+            heavy_maintenance_drain: heavyMaintenanceDrain,
             production_income_general: productionGeneral,
             production_income_heavy: productionHeavy,
             siege_drain_general: siegeDrain.general,

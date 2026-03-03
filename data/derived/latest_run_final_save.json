@@ -1219,7 +1219,7 @@
         "arbih_224th_mountain": {
           "killed": 48,
           "missing_captured": 70,
-          "wounded": 103
+          "wounded": 102
         },
         "arbih_225th_muslim_mountain": {
           "killed": 81,
@@ -1527,7 +1527,7 @@
           "wounded": 83
         }
       },
-      "wounded": 22742
+      "wounded": 22741
     },
     "RS": {
       "equipment_lost": {
@@ -4392,7 +4392,7 @@
         "arbih_224th_mountain"
       ],
       "corps_id": "arbih_2nd_corps",
-      "defensive_power": 142.745105776,
+      "defensive_power": 142.77176794400003,
       "density": 0.2,
       "edge_ids": [
         "op:bosanski_samac:domaljevac_2__op:gradacac:pelagicevo",
@@ -4464,7 +4464,7 @@
           "sub_segment_id": "subseg:arbih_2nd_corps:12"
         }
       ],
-      "threat_ratio": 42.65645373197625
+      "threat_ratio": 42.648487776577184
     },
     "sector:arbih_2nd_corps:14": {
       "assigned_brigade_ids": [],
@@ -6755,7 +6755,7 @@
           "sub_segment_id": "subseg:vrs_1st_krajina:0"
         }
       ],
-      "threat_ratio": 44.75464515716808
+      "threat_ratio": 44.762890301817514
     },
     "sector:vrs_1st_krajina:1": {
       "assigned_brigade_ids": [],
@@ -16290,7 +16290,7 @@
         "engagements": [
           {
             "casualties_inflicted": 74,
-            "casualties_taken": 22,
+            "casualties_taken": 21,
             "enemy_faction": "RS",
             "osid": "op:doboj:brijesnica_velika",
             "outcome": "victory",
@@ -16304,16 +16304,16 @@
         "first_battle_turn": 8,
         "longest_defense_streak": 0,
         "longest_victory_streak": 0,
-        "nadir_personnel": 566,
+        "nadir_personnel": 567,
         "peak_personnel": 600,
         "stalemates": 0,
         "total_casualties_inflicted": 74,
-        "total_casualties_taken": 22,
+        "total_casualties_taken": 21,
         "total_osids_captured": 0,
         "total_osids_lost": 1,
         "turns_under_siege": 0,
         "victories": 0,
-        "worst_single_battle_casualties": 22,
+        "worst_single_battle_casualties": 21,
         "worst_single_battle_turn": 8
       },
       "cohesion": 85.15,
@@ -16376,7 +16376,7 @@
         "fatigue": 0,
         "last_supplied_turn": 40
       },
-      "personnel": 379,
+      "personnel": 380,
       "posture": "defend",
       "readiness": "active",
       "status": "active",
@@ -16391,7 +16391,7 @@
         "faction": "RBiH",
         "formation_id": "arbih_224th_mountain",
         "formation_name": "224th Mountain",
-        "narrative": "The 224th Mountain held its ground. With only 1 engagements, its war was one of patience, not blood. It ended at 379 personnel.",
+        "narrative": "The 224th Mountain held its ground. With only 1 engagements, its war was one of patience, not blood. It ended at 380 personnel.",
         "notable_moments": [
           {
             "description": "First battle at op:doboj:brijesnica_velika",
@@ -16401,11 +16401,11 @@
         "stats": {
           "battles_fought": 1,
           "defeats": 1,
-          "final_personnel": 379,
-          "nadir_personnel": 566,
+          "final_personnel": 380,
+          "nadir_personnel": 567,
           "peak_personnel": 600,
           "total_casualties_inflicted": 74,
-          "total_casualties_taken": 22,
+          "total_casualties_taken": 21,
           "victories": 0
         }
       }
@@ -18605,16 +18605,16 @@
         "battles_as_defender": 2,
         "battles_fought": 11,
         "brigade_count": 35,
-        "casualty_exchange_ratio": 0.3310626702997275,
-        "current_personnel": 47046,
+        "casualty_exchange_ratio": 0.3315143246930423,
+        "current_personnel": 47047,
         "defeats": 2,
         "most_casualties_brigade_id": "arbih_210th_vitezka_liberation_nesib_maliki",
         "most_victories_brigade_id": "arbih_210th_vitezka_liberation_nesib_maliki",
-        "nadir_aggregate_personnel": 22761,
+        "nadir_aggregate_personnel": 22762,
         "peak_aggregate_personnel": 26184,
         "stalemates": 0,
         "total_casualties_inflicted": 243,
-        "total_casualties_taken": 734,
+        "total_casualties_taken": 733,
         "total_osids_captured": 9,
         "total_osids_lost": 2,
         "victories": 9,
@@ -23573,16 +23573,16 @@
         "battles_as_defender": 2,
         "battles_fought": 14,
         "brigade_count": 89,
-        "casualty_exchange_ratio": 0.2744886975242196,
-        "current_personnel": 129814,
+        "casualty_exchange_ratio": 0.27478448275862066,
+        "current_personnel": 129815,
         "defeats": 2,
         "most_casualties_brigade_id": "arbih_210th_vitezka_liberation_nesib_maliki",
         "most_victories_brigade_id": "arbih_210th_vitezka_liberation_nesib_maliki",
-        "nadir_aggregate_personnel": 55618,
+        "nadir_aggregate_personnel": 55619,
         "peak_aggregate_personnel": 59571,
         "stalemates": 0,
         "total_casualties_inflicted": 255,
-        "total_casualties_taken": 929,
+        "total_casualties_taken": 928,
         "total_osids_captured": 12,
         "total_osids_lost": 2,
         "victories": 12,
@@ -28101,7 +28101,7 @@
         "defeats": 0,
         "engagements": [
           {
-            "casualties_inflicted": 6,
+            "casualties_inflicted": 5,
             "casualties_taken": 65,
             "enemy_faction": "HRHB",
             "osid": "op:travnik:paklarevo",
@@ -28141,7 +28141,7 @@
         "nadir_personnel": 1000,
         "peak_personnel": 1133,
         "stalemates": 0,
-        "total_casualties_inflicted": 16,
+        "total_casualties_inflicted": 15,
         "total_casualties_taken": 183,
         "total_osids_captured": 3,
         "total_osids_lost": 0,
@@ -28220,7 +28220,7 @@
         "faction": "RS",
         "formation_id": "rs_12th_kotorsko_light_infantry",
         "formation_name": "12th Kotorsko Light Infantry",
-        "narrative": "The 12th Kotorsko Light Infantry fought 3 battles, winning 3. It inflicted 16 casualties while losing 183 of its own. A reliable formation, it ended the war at 1004 personnel — the backbone of its corps.",
+        "narrative": "The 12th Kotorsko Light Infantry fought 3 battles, winning 3. It inflicted 15 casualties while losing 183 of its own. A reliable formation, it ended the war at 1004 personnel — the backbone of its corps.",
         "notable_moments": [
           {
             "description": "First battle at op:travnik:paklarevo",
@@ -28237,7 +28237,7 @@
           "final_personnel": 1004,
           "nadir_personnel": 1000,
           "peak_personnel": 1133,
-          "total_casualties_inflicted": 16,
+          "total_casualties_inflicted": 15,
           "total_casualties_taken": 183,
           "victories": 3
         }
@@ -28940,7 +28940,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 5,
+            "casualties_inflicted": 4,
             "casualties_taken": 35,
             "enemy_faction": "RBiH",
             "osid": "op:jajce:kruscica",
@@ -28969,7 +28969,7 @@
         "nadir_personnel": 753,
         "peak_personnel": 1000,
         "stalemates": 0,
-        "total_casualties_inflicted": 42,
+        "total_casualties_inflicted": 41,
         "total_casualties_taken": 235,
         "total_osids_captured": 6,
         "total_osids_lost": 0,
@@ -29054,7 +29054,7 @@
         "faction": "RS",
         "formation_id": "rs_19th_krajina_light_infantry",
         "formation_name": "19th Krajina Light Infantry",
-        "narrative": "The 19th Krajina Light Infantry fought 6 battles, winning 6. It inflicted 42 casualties while losing 235 of its own. A reliable formation, it ended the war at 732 personnel — the backbone of its corps.",
+        "narrative": "The 19th Krajina Light Infantry fought 6 battles, winning 6. It inflicted 41 casualties while losing 235 of its own. A reliable formation, it ended the war at 732 personnel — the backbone of its corps.",
         "notable_moments": [
           {
             "description": "First battle at op:donji_vakuf:torlakovac_2",
@@ -29075,7 +29075,7 @@
           "final_personnel": 732,
           "nadir_personnel": 753,
           "peak_personnel": 1000,
-          "total_casualties_inflicted": 42,
+          "total_casualties_inflicted": 41,
           "total_casualties_taken": 235,
           "victories": 6
         }
@@ -29116,7 +29116,7 @@
             "was_concentrated": true
           },
           {
-            "casualties_inflicted": 10,
+            "casualties_inflicted": 9,
             "casualties_taken": 35,
             "enemy_faction": "HRHB",
             "osid": "op:jajce:divicani_2",
@@ -29127,7 +29127,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 5,
+            "casualties_inflicted": 4,
             "casualties_taken": 35,
             "enemy_faction": "RBiH",
             "osid": "op:jajce:kruscica",
@@ -29156,7 +29156,7 @@
         "nadir_personnel": 708,
         "peak_personnel": 2080,
         "stalemates": 0,
-        "total_casualties_inflicted": 35,
+        "total_casualties_inflicted": 33,
         "total_casualties_taken": 259,
         "total_osids_captured": 5,
         "total_osids_lost": 0,
@@ -29241,7 +29241,7 @@
         "faction": "RS",
         "formation_id": "rs_1st_armored",
         "formation_name": "1st Armored",
-        "narrative": "The 1st Armored fought 5 battles, winning 5. It inflicted 35 casualties while losing 259 of its own. A reliable formation, it ended the war at 2662 personnel — the backbone of its corps.",
+        "narrative": "The 1st Armored fought 5 battles, winning 5. It inflicted 33 casualties while losing 259 of its own. A reliable formation, it ended the war at 2662 personnel — the backbone of its corps.",
         "notable_moments": [
           {
             "description": "First battle at op:mrkonjic_grad:baljvine_2",
@@ -29262,7 +29262,7 @@
           "final_personnel": 2662,
           "nadir_personnel": 708,
           "peak_personnel": 2080,
-          "total_casualties_inflicted": 35,
+          "total_casualties_inflicted": 33,
           "total_casualties_taken": 259,
           "victories": 5
         }
@@ -29833,7 +29833,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 6,
+            "casualties_inflicted": 5,
             "casualties_taken": 43,
             "enemy_faction": "RBiH",
             "osid": "op:zvornik:djulici",
@@ -29862,7 +29862,7 @@
         "nadir_personnel": 709,
         "peak_personnel": 1000,
         "stalemates": 0,
-        "total_casualties_inflicted": 38,
+        "total_casualties_inflicted": 37,
         "total_casualties_taken": 198,
         "total_osids_captured": 5,
         "total_osids_lost": 0,
@@ -29947,7 +29947,7 @@
         "faction": "RS",
         "formation_id": "rs_1st_bratunac",
         "formation_name": "1st Bratunac",
-        "narrative": "The 1st Bratunac fought 5 battles, winning 5. It inflicted 38 casualties while losing 198 of its own. A reliable formation, it ended the war at 701 personnel — the backbone of its corps.",
+        "narrative": "The 1st Bratunac fought 5 battles, winning 5. It inflicted 37 casualties while losing 198 of its own. A reliable formation, it ended the war at 701 personnel — the backbone of its corps.",
         "notable_moments": [
           {
             "description": "First battle at op:zvornik:novo_selo",
@@ -29968,7 +29968,7 @@
           "final_personnel": 701,
           "nadir_personnel": 709,
           "peak_personnel": 1000,
-          "total_casualties_inflicted": 38,
+          "total_casualties_inflicted": 37,
           "total_casualties_taken": 198,
           "victories": 5
         }
@@ -30149,7 +30149,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 22,
+            "casualties_inflicted": 21,
             "casualties_taken": 74,
             "enemy_faction": "RBiH",
             "osid": "op:doboj:brijesnica_velika",
@@ -30167,7 +30167,7 @@
         "nadir_personnel": 1000,
         "peak_personnel": 1289,
         "stalemates": 0,
-        "total_casualties_inflicted": 38,
+        "total_casualties_inflicted": 37,
         "total_casualties_taken": 188,
         "total_osids_captured": 3,
         "total_osids_lost": 0,
@@ -30246,7 +30246,7 @@
         "faction": "RS",
         "formation_id": "rs_1st_doboj_light_infantry",
         "formation_name": "1st Doboj Light Infantry",
-        "narrative": "The 1st Doboj Light Infantry fought 3 battles, winning 3. It inflicted 38 casualties while losing 188 of its own. A reliable formation, it ended the war at 2684 personnel — the backbone of its corps.",
+        "narrative": "The 1st Doboj Light Infantry fought 3 battles, winning 3. It inflicted 37 casualties while losing 188 of its own. A reliable formation, it ended the war at 2684 personnel — the backbone of its corps.",
         "notable_moments": [
           {
             "description": "First battle at op:doboj:grapska_gornja_2",
@@ -30263,7 +30263,7 @@
           "final_personnel": 2684,
           "nadir_personnel": 1000,
           "peak_personnel": 1289,
-          "total_casualties_inflicted": 38,
+          "total_casualties_inflicted": 37,
           "total_casualties_taken": 188,
           "victories": 3
         }
@@ -30632,7 +30632,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 40,
             "enemy_faction": "RBiH",
             "osid": "op:foca:patkovina",
@@ -30643,7 +30643,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 38,
             "enemy_faction": "RBiH",
             "osid": "op:foca:izbisno",
@@ -30654,7 +30654,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 36,
             "enemy_faction": "RBiH",
             "osid": "op:foca:mazlina",
@@ -30665,7 +30665,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 35,
             "enemy_faction": "RBiH",
             "osid": "op:trnovo:delijas",
@@ -30676,7 +30676,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 33,
             "enemy_faction": "RBiH",
             "osid": "op:kalinovik:varos_2",
@@ -30694,7 +30694,7 @@
         "nadir_personnel": 698,
         "peak_personnel": 1204,
         "stalemates": 0,
-        "total_casualties_inflicted": 89,
+        "total_casualties_inflicted": 84,
         "total_casualties_taken": 480,
         "total_osids_captured": 8,
         "total_osids_lost": 0,
@@ -30805,7 +30805,7 @@
           "final_personnel": 557,
           "nadir_personnel": 698,
           "peak_personnel": 1204,
-          "total_casualties_inflicted": 89,
+          "total_casualties_inflicted": 84,
           "total_casualties_taken": 480,
           "victories": 8
         }
@@ -32142,7 +32142,7 @@
         "defeats": 0,
         "engagements": [
           {
-            "casualties_inflicted": 10,
+            "casualties_inflicted": 9,
             "casualties_taken": 47,
             "enemy_faction": "RBiH",
             "osid": "op:sokolac:knezina_2",
@@ -32153,7 +32153,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 10,
+            "casualties_inflicted": 9,
             "casualties_taken": 45,
             "enemy_faction": "RBiH",
             "osid": "op:sokolac:sasevci_2",
@@ -32164,7 +32164,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 9,
             "casualties_taken": 42,
             "enemy_faction": "RBiH",
             "osid": "op:ilijas:sirovine",
@@ -32175,7 +32175,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 9,
             "casualties_taken": 40,
             "enemy_faction": "RBiH",
             "osid": "op:sokolac:meljine_2",
@@ -32186,7 +32186,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 9,
             "casualties_taken": 39,
             "enemy_faction": "RBiH",
             "osid": "op:ilijas:medojevici",
@@ -32197,7 +32197,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 9,
             "casualties_taken": 37,
             "enemy_faction": "RBiH",
             "osid": "op:ilijas:krivajevici",
@@ -32208,7 +32208,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 9,
             "casualties_taken": 35,
             "enemy_faction": "RBiH",
             "osid": "op:ilijas:dragoradi",
@@ -32226,7 +32226,7 @@
         "nadir_personnel": 751,
         "peak_personnel": 1200,
         "stalemates": 0,
-        "total_casualties_inflicted": 75,
+        "total_casualties_inflicted": 63,
         "total_casualties_taken": 285,
         "total_osids_captured": 7,
         "total_osids_lost": 0,
@@ -32332,7 +32332,7 @@
           "final_personnel": 623,
           "nadir_personnel": 751,
           "peak_personnel": 1200,
-          "total_casualties_inflicted": 75,
+          "total_casualties_inflicted": 63,
           "total_casualties_taken": 285,
           "victories": 7
         }
@@ -32351,7 +32351,7 @@
         "defeats": 0,
         "engagements": [
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 63,
             "enemy_faction": "RBiH",
             "osid": "op:trnovo:kijevo_2",
@@ -32362,7 +32362,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 9,
             "casualties_taken": 51,
             "enemy_faction": "RBiH",
             "osid": "op:pale:praca",
@@ -32380,7 +32380,7 @@
         "nadir_personnel": 1079,
         "peak_personnel": 1500,
         "stalemates": 0,
-        "total_casualties_inflicted": 22,
+        "total_casualties_inflicted": 19,
         "total_casualties_taken": 114,
         "total_osids_captured": 2,
         "total_osids_lost": 0,
@@ -32476,7 +32476,7 @@
           "final_personnel": 813,
           "nadir_personnel": 1079,
           "peak_personnel": 1500,
-          "total_casualties_inflicted": 22,
+          "total_casualties_inflicted": 19,
           "total_casualties_taken": 114,
           "victories": 2
         }
@@ -33802,7 +33802,7 @@
             "was_concentrated": true
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 56,
             "enemy_faction": "HRHB",
             "osid": "op:derventa:misinci_2",
@@ -33813,7 +33813,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 55,
             "enemy_faction": "HRHB",
             "osid": "op:doboj:kotorsko_2",
@@ -33831,7 +33831,7 @@
         "nadir_personnel": 1160,
         "peak_personnel": 1253,
         "stalemates": 0,
-        "total_casualties_inflicted": 38,
+        "total_casualties_inflicted": 36,
         "total_casualties_taken": 223,
         "total_osids_captured": 4,
         "total_osids_lost": 0,
@@ -33910,7 +33910,7 @@
         "faction": "RS",
         "formation_id": "rs_27th_derventa_motorized",
         "formation_name": "27th Derventa Motorized",
-        "narrative": "The 27th Derventa Motorized fought 4 battles, winning 4. It inflicted 38 casualties while losing 223 of its own. A reliable formation, it ended the war at 1600 personnel — the backbone of its corps.",
+        "narrative": "The 27th Derventa Motorized fought 4 battles, winning 4. It inflicted 36 casualties while losing 223 of its own. A reliable formation, it ended the war at 1600 personnel — the backbone of its corps.",
         "notable_moments": [
           {
             "description": "First battle at op:derventa:zivinice",
@@ -33931,7 +33931,7 @@
           "final_personnel": 1600,
           "nadir_personnel": 1160,
           "peak_personnel": 1253,
-          "total_casualties_inflicted": 38,
+          "total_casualties_inflicted": 36,
           "total_casualties_taken": 223,
           "victories": 4
         }
@@ -33961,7 +33961,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 39,
             "enemy_faction": "RBiH",
             "osid": "op:doboj:makljenovac",
@@ -33972,7 +33972,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 37,
             "enemy_faction": "RBiH",
             "osid": "op:doboj:matuzici_2",
@@ -33990,7 +33990,7 @@
         "nadir_personnel": 783,
         "peak_personnel": 1000,
         "stalemates": 0,
-        "total_casualties_inflicted": 23,
+        "total_casualties_inflicted": 21,
         "total_casualties_taken": 211,
         "total_osids_captured": 2,
         "total_osids_lost": 0,
@@ -34091,7 +34091,7 @@
           "final_personnel": 588,
           "nadir_personnel": 783,
           "peak_personnel": 1000,
-          "total_casualties_inflicted": 23,
+          "total_casualties_inflicted": 21,
           "total_casualties_taken": 211,
           "victories": 2
         }
@@ -34694,7 +34694,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 61,
             "enemy_faction": "RBiH",
             "osid": "op:hadzici:lokve",
@@ -34705,7 +34705,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 59,
             "enemy_faction": "RBiH",
             "osid": "op:hadzici:budmolici",
@@ -34716,7 +34716,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 58,
             "enemy_faction": "RBiH",
             "osid": "op:hadzici:luke",
@@ -34727,7 +34727,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 57,
             "enemy_faction": "RBiH",
             "osid": "op:hadzici:pazaric",
@@ -34738,7 +34738,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 56,
             "enemy_faction": "RBiH",
             "osid": "op:hadzici:hadzici",
@@ -34749,7 +34749,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 9,
             "casualties_taken": 61,
             "enemy_faction": "RBiH",
             "osid": "op:hadzici:tarcin_2",
@@ -34767,7 +34767,7 @@
         "nadir_personnel": 1190,
         "peak_personnel": 1294,
         "stalemates": 0,
-        "total_casualties_inflicted": 77,
+        "total_casualties_inflicted": 70,
         "total_casualties_taken": 411,
         "total_osids_captured": 7,
         "total_osids_lost": 0,
@@ -34852,7 +34852,7 @@
         "faction": "RS",
         "formation_id": "rs_2nd_sarajevo_light_infantry",
         "formation_name": "2nd Sarajevo Light Infantry",
-        "narrative": "The 2nd Sarajevo Light Infantry fought 7 battles, winning 7. It inflicted 77 casualties while losing 411 of its own. A reliable formation, it ended the war at 1458 personnel — the backbone of its corps.",
+        "narrative": "The 2nd Sarajevo Light Infantry fought 7 battles, winning 7. It inflicted 70 casualties while losing 411 of its own. A reliable formation, it ended the war at 1458 personnel — the backbone of its corps.",
         "notable_moments": [
           {
             "description": "First battle at op:ilidza:sarajevo_dio_ilidza_2",
@@ -34873,7 +34873,7 @@
           "final_personnel": 1458,
           "nadir_personnel": 1190,
           "peak_personnel": 1294,
-          "total_casualties_inflicted": 77,
+          "total_casualties_inflicted": 70,
           "total_casualties_taken": 411,
           "victories": 7
         }
@@ -35845,7 +35845,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 6,
+            "casualties_inflicted": 5,
             "casualties_taken": 46,
             "enemy_faction": "HRHB",
             "osid": "op:orasje:ostra_luka",
@@ -35874,7 +35874,7 @@
         "nadir_personnel": 739,
         "peak_personnel": 1000,
         "stalemates": 0,
-        "total_casualties_inflicted": 19,
+        "total_casualties_inflicted": 18,
         "total_casualties_taken": 130,
         "total_osids_captured": 3,
         "total_osids_lost": 0,
@@ -35966,7 +35966,7 @@
           "final_personnel": 561,
           "nadir_personnel": 739,
           "peak_personnel": 1000,
-          "total_casualties_inflicted": 19,
+          "total_casualties_inflicted": 18,
           "total_casualties_taken": 130,
           "victories": 3
         }
@@ -35985,7 +35985,7 @@
         "defeats": 0,
         "engagements": [
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 51,
             "enemy_faction": "RBiH",
             "osid": "op:vogosca:svrake",
@@ -36003,7 +36003,7 @@
         "nadir_personnel": 1080,
         "peak_personnel": 1200,
         "stalemates": 0,
-        "total_casualties_inflicted": 11,
+        "total_casualties_inflicted": 10,
         "total_casualties_taken": 51,
         "total_osids_captured": 1,
         "total_osids_lost": 0,
@@ -36099,7 +36099,7 @@
           "final_personnel": 945,
           "nadir_personnel": 1080,
           "peak_personnel": 1200,
-          "total_casualties_inflicted": 11,
+          "total_casualties_inflicted": 10,
           "total_casualties_taken": 51,
           "victories": 1
         }
@@ -36229,7 +36229,7 @@
         "defeats": 0,
         "engagements": [
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 10,
             "casualties_taken": 76,
             "enemy_faction": "RBiH",
             "osid": "op:prijedor:ljubija_2",
@@ -36269,7 +36269,7 @@
         "nadir_personnel": 1200,
         "peak_personnel": 1679,
         "stalemates": 0,
-        "total_casualties_inflicted": 18,
+        "total_casualties_inflicted": 17,
         "total_casualties_taken": 189,
         "total_osids_captured": 3,
         "total_osids_lost": 0,
@@ -36348,7 +36348,7 @@
         "faction": "RS",
         "formation_id": "rs_43rd_prijedor_motorized",
         "formation_name": "43rd Prijedor Motorized",
-        "narrative": "The 43rd Prijedor Motorized fought 3 battles, winning 3. It inflicted 18 casualties while losing 189 of its own. A reliable formation, it ended the war at 2542 personnel — the backbone of its corps.",
+        "narrative": "The 43rd Prijedor Motorized fought 3 battles, winning 3. It inflicted 17 casualties while losing 189 of its own. A reliable formation, it ended the war at 2542 personnel — the backbone of its corps.",
         "notable_moments": [
           {
             "description": "First battle at op:prijedor:ljubija_2",
@@ -36365,7 +36365,7 @@
           "final_personnel": 2542,
           "nadir_personnel": 1200,
           "peak_personnel": 1679,
-          "total_casualties_inflicted": 18,
+          "total_casualties_inflicted": 17,
           "total_casualties_taken": 189,
           "victories": 3
         }
@@ -37101,7 +37101,7 @@
         "defeats": 0,
         "engagements": [
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 9,
             "casualties_taken": 54,
             "enemy_faction": "RBiH",
             "osid": "op:hanpijesak:nevacka_3",
@@ -37112,7 +37112,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 9,
             "casualties_taken": 51,
             "enemy_faction": "RBiH",
             "osid": "op:kladanj:staric_2",
@@ -37123,7 +37123,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 9,
             "casualties_taken": 49,
             "enemy_faction": "RBiH",
             "osid": "op:kladanj:kladanj_3",
@@ -37134,7 +37134,7 @@
             "was_concentrated": false
           },
           {
-            "casualties_inflicted": 11,
+            "casualties_inflicted": 9,
             "casualties_taken": 46,
             "enemy_faction": "RBiH",
             "osid": "op:kladanj:tarevo_2",
@@ -37152,7 +37152,7 @@
         "nadir_personnel": 977,
         "peak_personnel": 1200,
         "stalemates": 0,
-        "total_casualties_inflicted": 44,
+        "total_casualties_inflicted": 36,
         "total_casualties_taken": 200,
         "total_osids_captured": 4,
         "total_osids_lost": 0,
@@ -37245,7 +37245,7 @@
         "faction": "RS",
         "formation_id": "rs_65th_protection_motorized_regiment",
         "formation_name": "65th Protection Motorized Regiment",
-        "narrative": "The 65th Protection Motorized Regiment fought 4 battles, winning 4. It inflicted 44 casualties while losing 200 of its own. A reliable formation, it ended the war at 740 personnel — the backbone of its corps.",
+        "narrative": "The 65th Protection Motorized Regiment fought 4 battles, winning 4. It inflicted 36 casualties while losing 200 of its own. A reliable formation, it ended the war at 740 personnel — the backbone of its corps.",
         "notable_moments": [
           {
             "description": "First battle at op:hanpijesak:nevacka_3",
@@ -37266,7 +37266,7 @@
           "final_personnel": 740,
           "nadir_personnel": 977,
           "peak_personnel": 1200,
-          "total_casualties_inflicted": 44,
+          "total_casualties_inflicted": 36,
           "total_casualties_taken": 200,
           "victories": 4
         }
@@ -38926,7 +38926,7 @@
         "battles_as_defender": 1,
         "battles_fought": 85,
         "brigade_count": 36,
-        "casualty_exchange_ratio": 0.15503875968992248,
+        "casualty_exchange_ratio": 0.152885443583118,
         "current_personnel": 41369,
         "defeats": 4,
         "most_casualties_brigade_id": "rs_11th_mrkonji_light_infantry",
@@ -38934,7 +38934,7 @@
         "nadir_aggregate_personnel": 34682,
         "peak_aggregate_personnel": 41750,
         "stalemates": 0,
-        "total_casualties_inflicted": 720,
+        "total_casualties_inflicted": 710,
         "total_casualties_taken": 4644,
         "total_osids_captured": 81,
         "total_osids_lost": 1,
@@ -39208,7 +39208,7 @@
         "battles_as_defender": 0,
         "battles_fought": 16,
         "brigade_count": 7,
-        "casualty_exchange_ratio": 0.19718309859154928,
+        "casualty_exchange_ratio": 0.19561815336463223,
         "current_personnel": 5559,
         "defeats": 0,
         "most_casualties_brigade_id": "rs_1st_bratunac",
@@ -39216,7 +39216,7 @@
         "nadir_aggregate_personnel": 6089,
         "peak_aggregate_personnel": 7016,
         "stalemates": 0,
-        "total_casualties_inflicted": 126,
+        "total_casualties_inflicted": 125,
         "total_casualties_taken": 639,
         "total_osids_captured": 16,
         "total_osids_lost": 0,
@@ -39277,7 +39277,7 @@
         "battles_as_defender": 0,
         "battles_fought": 23,
         "brigade_count": 10,
-        "casualty_exchange_ratio": 0.16042345276872963,
+        "casualty_exchange_ratio": 0.15960912052117263,
         "current_personnel": 9796,
         "defeats": 0,
         "most_casualties_brigade_id": "rs_1st_bijeljina_light_infantry_panthers",
@@ -39285,7 +39285,7 @@
         "nadir_aggregate_personnel": 9315,
         "peak_aggregate_personnel": 10977,
         "stalemates": 0,
-        "total_casualties_inflicted": 197,
+        "total_casualties_inflicted": 196,
         "total_casualties_taken": 1228,
         "total_osids_captured": 23,
         "total_osids_lost": 0,
@@ -39417,7 +39417,7 @@
         "battles_as_defender": 7,
         "battles_fought": 201,
         "brigade_count": 76,
-        "casualty_exchange_ratio": 0.33151310563939634,
+        "casualty_exchange_ratio": 0.3267474185861795,
         "current_personnel": 79037,
         "defeats": 5,
         "most_casualties_brigade_id": "rs_15th_biha_infantry",
@@ -39425,7 +39425,7 @@
         "nadir_aggregate_personnel": 72532,
         "peak_aggregate_personnel": 85344,
         "stalemates": 0,
-        "total_casualties_inflicted": 3339,
+        "total_casualties_inflicted": 3291,
         "total_casualties_taken": 10072,
         "total_osids_captured": 190,
         "total_osids_lost": 1,
@@ -39487,7 +39487,7 @@
         "battles_as_defender": 0,
         "battles_fought": 17,
         "brigade_count": 5,
-        "casualty_exchange_ratio": 0.2148664343786295,
+        "casualty_exchange_ratio": 0.18815331010452963,
         "current_personnel": 4943,
         "defeats": 0,
         "most_casualties_brigade_id": "rs_2nd_sarajevo_light_infantry",
@@ -39495,7 +39495,7 @@
         "nadir_aggregate_personnel": 5300,
         "peak_aggregate_personnel": 6394,
         "stalemates": 0,
-        "total_casualties_inflicted": 185,
+        "total_casualties_inflicted": 162,
         "total_casualties_taken": 861,
         "total_osids_captured": 17,
         "total_osids_lost": 0,
@@ -39565,7 +39565,7 @@
   "heavy_munitions_reserve": {
     "HRHB": 0,
     "RBiH": 0,
-    "RS": 100
+    "RS": 42.914394311185795
   },
   "hostile_takeover_timers": {
     "op:bihac:velika_gata|RBiH": {
@@ -39896,7 +39896,7 @@
       ],
       "coverage_length": 147,
       "created_turn": 40,
-      "defensive_power": 279.0148835210457,
+      "defensive_power": 279.0183561468127,
       "edge_ids": [
         "op:banovici:repnik_2__op:kladanj:tarevo_2",
         "op:banovici:seona__op:lukavac:brijesnica_donja_2",
