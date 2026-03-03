@@ -148,6 +148,8 @@ A settlement may have political_controller = null only if:
 
 In War phase, brigade location is **location_osid** only; no AoR or settlement-level assignment. Control change only via attack resolution or corps/frontline operations. All OSID-keyed state must use stable ordering (e.g. strictCompare, sorted keys) in iteration and output.
 
+**Implementation-note (formation location-in-control, 2026-03-03):** Every active formation with `location_osid` set must be in an OSID controlled by that formation's faction (`political_controllers[location_osid] === formation.faction`). Enforced by: pipeline step `phase-ii-displace-enemy-territory` (after attack resolution, when operational data + edges present); scenario runner initial-state displacement after backfill; validation `validateBrigadeLocationControl` in `src/validate/brigade_location_control.ts` (run in `validateState` before serialize). OOB `home_osid` in `data/source/oob_brigades.json` must be faction-controlled at scenario start (e.g. 282nd East Bosnian Light: `op:srebrenica:srebrenica_2`). See context.md "Formation location-in-control invariant", PROJECT_LEDGER 2026-03-03.
+
 ### 9.9 Determinism and Auditability
 
 Political control initialization and transitions must be:
