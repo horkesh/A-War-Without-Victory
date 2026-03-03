@@ -9,7 +9,7 @@
  * Design: recruitment_system_design_note.md §§3-10.
  */
 
-import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/operational_data.js';
+import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/operational_data_types.js';
 import type { OobBrigade, OobCorps } from '../scenario/oob_loader.js';
 import { factionHasPresenceInMun } from '../scenario/oob_early_war_entry.js';
 import type { BrigadeDecoration } from '../state/decoration_types.js';
@@ -41,6 +41,7 @@ import {
     getEquipmentCost
 } from '../state/recruitment_types.js';
 import { getRsJnaHeavyComposition } from './combat/equipment_effects.js';
+import { getFactionDefaultOfficerQuality } from './combat/combat_math.js';
 
 // ---------------------------------------------------------------------------
 // Strategic area scoring for bot AI
@@ -211,6 +212,7 @@ function buildRecruitedFormation(
         cohesion: effectiveCohesion,
         composition: buildBrigadeComposition(equipClass, brigade.faction, true),
         corps_id: (brigade.corps as FormationId) ?? null,
+        officer_quality: brigade.initial_officer_quality ?? getFactionDefaultOfficerQuality(brigade.faction, currentTurn),
         ...(brigade.honor ? { honor: brigade.honor } : {}),
         ...convertOobDecorationsRecruitment(brigade),
         ...(brigade.is_elite ? { elite_loan_state: { on_loan: false, loaned_to_corps: null, loan_start_turn: null, last_recall_turn: null, loan_start_personnel: null, permanently_degraded: false } } : {}),

@@ -29,19 +29,17 @@ const BASE_MOBILIZATION_RATE = 0.003;
 
 /**
  * Faction mobilization scale modifiers.
- * RS: 0.25 — VRS was already near full mobilization from JNA handover; growth was only ~38%.
- *   RS controls the largest territory with the highest ethnic majority, so the low scale
- *   correctly models that most eligible Serbs were already mobilized by May 1992.
- *   Raised from 0.15 to 0.25 — 0.15 starved RS brigades (avg 1,424 vs RBiH 2,424).
- * RBiH: 0.85 — Mass TO activation + refugee mobilization; fastest growing force.
- *   Reduced from 1.1 — was producing 160K total (target 120-140K), 42/66 brigades at cap.
- * HRHB: 1.0 — Organized Croatian cadres + diaspora support.
- *   Reduced from 1.2 — was slightly above 50K target.
+ * Calibrated so personnel totals emerge organically within historical bands
+ * without hardcoded ceilings. Pool exhaustion + combat attrition are the natural limiters.
+ * n369: RBiH 0.28→151k, RS 0.16→79k, HRHB 0.50→55k (all out of band).
+ * n370: RBiH 0.16→134k, RS 0.22→96k (in band), HRHB 0.30→50k.
+ * n371: RBiH 0.14→129k (IN BAND), RS 0.22→97k (IN BAND), HRHB 0.24→49k (over by 4k).
+ * n372: HRHB 0.24→0.18 — target 42.5k midpoint.
  */
 const FACTION_MOBILIZATION_SCALE: Record<string, number> = {
-    RBiH: 0.40,
-    RS: 0.25,
-    HRHB: 0.90
+    RBiH: 0.14,
+    RS: 0.22,
+    HRHB: 0.18
 };
 const DEFAULT_MOBILIZATION_SCALE = 1.0;
 
@@ -67,12 +65,12 @@ function getMobilizationSurgeFactor(turn: number): number {
 /** Hard cap per municipality per turn to prevent single-mun dominance. */
 const MAX_MOBILIZATION_PER_MUN_PER_TURN = 300;
 /**
- * Exhaustion thresholds: historically BiH factions mobilized 15-25% of total population.
- * Threshold (20%): half-rate mobilization. Hard cap (35%): no more mobilization.
- * Higher than initial values to match historical mobilization depth.
+ * Exhaustion thresholds: war-weariness bites sooner as pools deplete and casualties mount.
+ * Threshold (15%): half-rate mobilization. Hard cap (25%): no more mobilization.
+ * Tightened from 0.20/0.35 — all factions faced severe manpower constraints by mid-war.
  */
-const EXHAUSTION_THRESHOLD = 0.20;
-const EXHAUSTION_HARD_CAP = 0.35;
+const EXHAUSTION_THRESHOLD = 0.15;
+const EXHAUSTION_HARD_CAP = 0.25;
 
 export interface OngoingMobilizationReport {
     total_mobilized: number;

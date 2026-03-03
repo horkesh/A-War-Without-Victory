@@ -4,7 +4,7 @@
  * FORAWWV H2.4: formation creation only when explicit directive.
  */
 
-import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/operational_data.js';
+import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/operational_data_types.js';
 import {
     COMBAT_REINFORCEMENT_RATE,
     DISPLACED_FORMATION_THRESHOLD,
@@ -23,10 +23,6 @@ import {
     SIEGE_RATIO_MOSTLY,
     SIEGE_RATIO_PARTIAL,
     WIA_TRICKLE_RATE,
-    FACTION_HISTORICAL_PEAK,
-    FACTION_SOFT_CAP_RATIO,
-    FACTION_HARD_CAP_RATIO,
-    ABOVE_SOFT_CAP_REINFORCEMENT_MULT,
 } from '../state/formation_constants.js';
 import { computeBaseCohesion } from '../state/formation_lifecycle.js';
 import { resolveFormationName } from '../state/formation_naming.js';
@@ -37,6 +33,7 @@ import type { MunicipalityPopulation1991Map } from './early_war/pool_population.
 import { getEligiblePopulationCount } from './early_war/pool_population.js';
 import { type SiegeRatioByMunFaction, getSiegeRatio } from './early_war/compute_siege_state.js';
 import { isEmergentFormationSuppressed } from './recruitment_engine.js';
+import { getFactionDefaultOfficerQuality } from './combat/combat_math.js';
 
 export interface SpawnFormationsOptions {
     /** If set, used for all factions; if omitted, per-faction nominal size from OOB is used (RBiH 1000, RS 2500, HRHB 1500). */
@@ -174,34 +171,6 @@ export interface ReinforceBrigadesReport {
  *
  * Note: Previously named reinforceBrigadesFromPools. Alias preserved for callers in turn_pipeline.ts.
  */
-/**
- * Compute total formation personnel for a faction.
- */
-export function getFactionTotalPersonnel(state: GameState, faction: string): number {
-    let total = 0;
-    for (const f of Object.values(state.formations ?? {})) {
-        if (f.faction === faction && f.status === 'active') {
-            total += f.personnel ?? 0;
-        }
-    }
-    return total;
-}
-
-/**
- * Get reinforcement ceiling multiplier for a faction based on total personnel.
- * Returns 1.0 below soft cap, ABOVE_SOFT_CAP_REINFORCEMENT_MULT between soft/hard, 0 above hard.
- */
-export function getFactionCeilingMult(state: GameState, faction: string): number {
-    const peak = FACTION_HISTORICAL_PEAK[faction];
-    if (!peak) return 1.0;
-    const total = getFactionTotalPersonnel(state, faction);
-    const hardCap = peak * FACTION_HARD_CAP_RATIO;
-    const softCap = peak * FACTION_SOFT_CAP_RATIO;
-    if (total >= hardCap) return 0;
-    if (total >= softCap) return ABOVE_SOFT_CAP_REINFORCEMENT_MULT;
-    return 1.0;
-}
-
 export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesReport {
     const report: ReinforceBrigadesReport = {
         formations_reinforced: 0,
@@ -264,13 +233,11 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             const pool = pools[key];
             if (!pool || pool.available <= 0) continue;
 
-            // Rate limit: combat formations get half rate; faction-specific multiplier; ceiling check
+            // Rate limit: combat formations get half rate; faction-specific multiplier
             const inCombat = f.posture === 'attack' || f.disrupted === true;
             const factionMult = getFactionReinforcementMult(faction, currentTurn, state.war_timeline);
-            const ceilingMult = getFactionCeilingMult(state, faction);
-            if (ceilingMult <= 0) continue; // At hard cap — no reinforcement
             const baseRate = inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
-            const rate = Math.max(1, Math.floor(baseRate * factionMult * ceilingMult));
+            const rate = Math.max(1, Math.floor(baseRate * factionMult));
 
             const need = Math.min(tierCap - current, rate);
             // For brigades: reserve manpower for potential spawn; for militia-kind: no reserve needed
@@ -336,13 +303,11 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         const pool = pools[key];
         if (!pool || pool.available <= 0) continue;
 
-        // Rate limit: combat brigades get half rate; faction-specific mobilization multiplier; ceiling check
+        // Rate limit: combat brigades get half rate; faction-specific mobilization multiplier
         const inCombat = f.posture === 'attack' || f.disrupted === true;
         const currentTurnNum = state.meta?.turn ?? 0;
         const factionMult = getFactionReinforcementMult(faction, currentTurnNum, state.war_timeline);
-        const ceilingMult = getFactionCeilingMult(state, faction);
-        if (ceilingMult <= 0) continue; // At hard cap — no reinforcement
-        const rate = Math.max(1, Math.floor((inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE) * factionMult * ceilingMult));
+        const rate = Math.max(1, Math.floor((inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE) * factionMult));
 
         const need = Math.min(MAX_BRIGADE_PERSONNEL - current, rate);
         const reserveForSpawn = reservedSpawnManpowerForReinforcement(state, mun_id, faction, spawnDirectiveActive);
@@ -474,6 +439,7 @@ export function spawnFormationsFromPools(
                 activation_gated: true,
                 activation_turn: null,
                 origin_mun: mun_id,
+                officer_quality: getFactionDefaultOfficerQuality(faction, currentTurn),
                 ...(hq_sid ? { hq_sid } : {}),
                 ...(location_osid != null ? { location_osid } : {})
             };
@@ -558,6 +524,7 @@ export function spawnFormationsFromPools(
                     activation_gated: true,
                     activation_turn: null,
                     origin_mun: dispMunId,
+                    officer_quality: getFactionDefaultOfficerQuality(dispFaction, currentTurn),
                     ...(dispHqSid ? { hq_sid: dispHqSid } : {}),
                     ...(dispLocationOsid != null ? { location_osid: dispLocationOsid } : {})
                 };
@@ -655,6 +622,7 @@ export function spawnFormationsFromPools(
                 cohesion,
                 activation_gated: true,
                 activation_turn: null,
+                officer_quality: getFactionDefaultOfficerQuality(faction, currentTurn),
                 ...(hq_sid ? { hq_sid } : {}),
                 ...(location_osid != null ? { location_osid } : {})
             };

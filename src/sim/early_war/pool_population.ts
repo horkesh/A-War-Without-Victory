@@ -58,7 +58,7 @@ const ELIGIBLE_POP_NORMALIZER = 50_000;
 const FACTION_POOL_SCALE: Record<string, number> = {
     RBiH: 0.18,
     RS: 0.25,
-    HRHB: 2.10
+    HRHB: 1.55    // n375: 1.70→47k. Target 42k; reducing to 1.55.
 };
 const DEFAULT_FACTION_POOL_SCALE = 1.0;
 
@@ -105,6 +105,7 @@ const RBIH_CROSS_ETHNIC_CAP_PER_MUN = 500;
  * RS JNA inheritance: one-time pool bonus at scenario init (12 May 1992).
  * Includes JNA regulars (~10K), trained reservists (~15K), and TO cadres (~5K)
  * absorbed by VRS during May-June 1992 handover. Calibrated to historical RS start ~80K.
+ * n369: 12k undershoot VRS to 79k; restored to 15k.
  */
 const RS_JNA_INHERITANCE_BONUS = 15_000;
 
