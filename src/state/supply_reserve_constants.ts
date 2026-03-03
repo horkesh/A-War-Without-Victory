@@ -10,7 +10,7 @@
 
 // ── Consumption: Maintenance ─────────────────────────────────────────────────
 /** Per-formation per-turn general supply drain. */
-export const MAINTENANCE_DRAIN_PER_FORMATION = 0.15;
+export const MAINTENANCE_DRAIN_PER_FORMATION = 0.04;
 
 // ── Consumption: Combat ──────────────────────────────────────────────────────
 /** Heavy munitions deducted per battle (scaled by intensity = attackerCount × powerRatio). */
@@ -30,7 +30,7 @@ export const MAX_SIEGE_PRESSURE_RATE = 2.0;
 /** Global multiplier for production facility income. */
 export const PRODUCTION_SCALE = 1.0;
 /** Global multiplier for patron aid income. */
-export const PATRON_AID_SCALE = 1.0;
+export const PATRON_AID_SCALE = 12;
 
 // ── Reserve → Effective Supply State Thresholds ──────────────────────────────
 /** Reserve level at or above which faction supply is considered adequate (if OSID reachable). */
@@ -69,6 +69,30 @@ export const RESILIENCE_EFFECT_SCALE = 0.01;
 export const HARDENING_THRESHOLD = 8;
 /** Defense bonus multiplier when hardened (+5%). */
 export const HARDENING_DEFENSE_BONUS = 0.05;
+
+// ── UN Airdrops (Phase D) ────────────────────────────────────────────────────
+/**
+ * Consecutive isolation turns an enclave must be isolated before UN airdrops begin.
+ * Historically: US C-130 drops to Srebrenica/Goražde/Žepa/Bihać started ~Feb 1993
+ * (after ~40 weeks of siege). Set low so shorter runs see the effect.
+ */
+export const AIRDROP_ISOLATION_THRESHOLD = 4;
+/** General supply added per eligible enclave per turn (humanitarian: food/medical only). */
+export const AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE = 1.5;
+/** Max total general supply injected per turn across all airdrops (prevents stacking with many enclaves). */
+export const AIRDROP_MAX_SUPPLY_PER_TURN = 15;
+/** Only RBiH enclaves receive UN airdrops. */
+export const AIRDROP_ELIGIBLE_FACTION = 'RBiH';
+
+// ── JNA Inheritance (Phase E1) ───────────────────────────────────────────────
+/** Faction that receives JNA inheritance heavy munitions bonus at scenario start. */
+export const JNA_INHERITANCE_FACTION = 'RS';
+/**
+ * Extra heavy munitions added to RS at start.
+ * Represents JNA ammunition warehouses captured April 1992.
+ * Base INIT_HEAVY_MUNITIONS_RESERVE = 60; RS effectively starts at 100.
+ */
+export const JNA_INHERITANCE_HEAVY_BONUS = 40;
 
 // ── Init Values ──────────────────────────────────────────────────────────────
 /** Default starting general supply reserve per faction. */

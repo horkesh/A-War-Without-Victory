@@ -29,7 +29,14 @@ import {
     PATRON_AID_SCALE,
     PATRON_AID_GENERAL_FRACTION,
     PATRON_AID_HEAVY_FRACTION,
+    AIRDROP_ISOLATION_THRESHOLD,
+    AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE,
+    AIRDROP_MAX_SUPPLY_PER_TURN,
+    AIRDROP_ELIGIBLE_FACTION,
+    JNA_INHERITANCE_FACTION,
+    JNA_INHERITANCE_HEAVY_BONUS,
 } from './supply_reserve_constants.js';
+import type { EnclaveResilienceEntry } from './game_state.js';
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 
@@ -313,4 +320,52 @@ export function getEffectiveSupplyState(
     if (reserveLevel >= RESERVE_ADEQUATE_THRESHOLD) return 'adequate';
     if (reserveLevel >= RESERVE_STRAINED_THRESHOLD) return 'strained';
     return 'critical';
+}
+
+// ── UN Airdrops (Phase D) ─────────────────────────────────────────────────────
+
+/**
+ * Apply UN humanitarian airdrops to isolated RBiH enclaves.
+ * Called once per turn after enclave resilience update.
+ *
+ * Historically: US C-130 drops to Srebrenica, Goražde, Žepa, Bihać (Feb 1993+).
+ * Humanitarian only — general supply (food/medical), no heavy munitions.
+ * Deterministic: sorted enclave key iteration, bounded by AIRDROP_MAX_SUPPLY_PER_TURN.
+ */
+export function applyUnAirdrops(state: GameState): void {
+    if (!state.meta?.supply_reserves_enabled) return;
+
+    const enclaveResilience = state.enclave_resilience ?? {};
+    let totalDrop = 0;
+
+    // Sorted iteration for determinism
+    for (const key of Object.keys(enclaveResilience).sort((a, b) => a.localeCompare(b))) {
+        const entry = enclaveResilience[key];
+        if (typeof entry !== 'object' || entry === null) continue;
+        const typedEntry = entry as EnclaveResilienceEntry;
+        if (typedEntry.isolation_turns < AIRDROP_ISOLATION_THRESHOLD) continue;
+        totalDrop += AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE;
+    }
+
+    const drop = Math.min(totalDrop, AIRDROP_MAX_SUPPLY_PER_TURN);
+    if (drop <= 0) return;
+
+    if (!state.general_supply_reserve) state.general_supply_reserve = {};
+    const current = state.general_supply_reserve[AIRDROP_ELIGIBLE_FACTION] ?? 0;
+    state.general_supply_reserve[AIRDROP_ELIGIBLE_FACTION] = Math.min(100, current + drop);
+}
+
+// ── JNA Inheritance Bonus (Phase E1) ─────────────────────────────────────────
+
+/**
+ * Apply JNA inheritance heavy munitions bonus to RS at scenario start.
+ * Represents the ammunition warehouses inherited from the JNA in April 1992.
+ * Called once from scenario_runner after ensureSupplyReserves().
+ * No-op when supply_reserves_enabled is false.
+ */
+export function applyJnaInheritanceBonus(state: GameState): void {
+    if (!state.meta?.supply_reserves_enabled) return;
+    if (!state.heavy_munitions_reserve) return;
+    const current = (state.heavy_munitions_reserve as Record<string, number>)[JNA_INHERITANCE_FACTION] ?? 0;
+    (state.heavy_munitions_reserve as Record<string, number>)[JNA_INHERITANCE_FACTION] = Math.min(100, current + JNA_INHERITANCE_HEAVY_BONUS);
 }

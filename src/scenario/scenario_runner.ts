@@ -50,6 +50,7 @@ import {
     type OrganizationalPenetrationSeedOptions,
     type PlannedWarStartBrigadePresenceByMunicipality
 } from '../state/seed_organizational_penetration_from_control.js';
+import { applyJnaInheritanceBonus, ensureSupplyReserves } from '../state/supply_reserves.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 import { runOneTurn } from '../state/turn_pipeline.js';
 import { strictCompare } from '../state/validateGameState.js';
@@ -961,6 +962,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // Phase A: Supply reserves system flag → state.meta for pipeline gating.
         if (scenario.supply_reserves_enabled) {
             state.meta.supply_reserves_enabled = true;
+            ensureSupplyReserves(state);
+            applyJnaInheritanceBonus(state);
         }
 
         // War timeline: load externalized faction temporal profiles from JSON.
