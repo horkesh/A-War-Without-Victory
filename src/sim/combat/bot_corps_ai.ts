@@ -60,6 +60,7 @@ import type { CorpsDirective } from '../../state/game_state.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { evaluateSectorOffensiveLaunch } from './sector_offensive.js';
+import { getCorpsCommander, getEffectiveCompetence } from './officer_system.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
@@ -1426,11 +1427,26 @@ export function generateCorpsDirectives(
             maxAttackersPerTarget = Math.max(maxAttackersPerTarget, 4);
         }
 
-        // Aggression modifier: doctrine phase + army stance bonus + seasonal adjustment
+        // Aggression modifier: doctrine phase + army stance bonus + seasonal adjustment + officer aggressiveness
         const seasonalAdj = getSeasonalModifiers(
             state.meta?.turn ?? 0, state.meta?.scenario_start_date
         ).aggression_adj;
-        const aggressionModifier = (doctrinePhase?.aggression_modifier ?? 0) + armyAggressionBonus + seasonalAdj;
+        let aggressionModifier = (doctrinePhase?.aggression_modifier ?? 0) + armyAggressionBonus + seasonalAdj;
+
+        // C.1: Named officer aggressiveness shifts corps aggression
+        if (state.named_officers && state.named_officer_data) {
+            const commander = getCorpsCommander(corps.id, state);
+            if (commander) {
+                // Shift aggression by (aggressiveness - 3) × 0.05
+                const officerAggressionShift = (commander.data.aggressiveness - 3) * 0.05;
+                aggressionModifier += officerAggressionShift;
+                // High-competence commanders (≥4) accept riskier attacks
+                const effComp = getEffectiveCompetence(commander.state, commander.data);
+                if (effComp >= 4 && bestMinOutcome === 'victory') {
+                    bestMinOutcome = 'costly_victory';
+                }
+            }
+        }
 
         // Army offensive stance: accept riskier attacks to maintain offensive tempo.
         // Concentration joining only needs 'repulsed' instead of 'stalemate', enabling

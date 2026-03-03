@@ -161,5 +161,33 @@
 
   "maintenance_decay": [
     { "faction": "RS", "formula": "linear_decay", "floor": 0.5, "divisor": 200 }
-  ]
+  ],
+
+  "officer_config": {
+    "RS": {
+      "faction": "RS",
+      "learning_rate": 0.007,
+      "brain_drain_rate": 0.001,
+      "brain_drain_start_week": 40,
+      "generic_replacement_competence": 2
+    },
+    "RBiH": {
+      "faction": "RBiH",
+      "learning_rate": 0.015,
+      "pool_regeneration_interval": 12,
+      "pool_generated_base_competence": 2,
+      "pool_generated_max_competence": 4,
+      "warlord_friction_end_week": 78,
+      "generic_replacement_competence": 2
+    },
+    "HRHB": {
+      "faction": "HRHB",
+      "learning_rate": 0.010,
+      "zagreb_cadre_interval": 15,
+      "roso_restructuring_week": 52,
+      "political_replacement_delay": 4,
+      "combat_death_replacement_delay": 1,
+      "generic_replacement_competence": 2
+    }
+  }
 }

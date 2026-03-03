@@ -91,6 +91,8 @@ export interface WarTimeline {
     equipment_decay: EquipmentDecayConfig[];
     external_support: ExternalSupportWindow[];
     maintenance_decay: MaintenanceDecayConfig[];
+    /** Per-faction officer configuration. Keys: faction IDs (RS, RBiH, HRHB). Optional; hardcoded defaults used when absent. */
+    officer_config?: Record<string, import('./officer_types.js').FactionOfficerConfig>;
 }
 
 // ── Generic lookup functions ─────────────────────────────────────────────────
@@ -267,6 +269,25 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
         if (typeof m.faction !== 'string') throw new Error(`WarTimeline: maintenance_decay[${i}].faction must be a string`);
         if (typeof m.floor !== 'number') throw new Error(`WarTimeline: maintenance_decay[${i}].floor must be a number`);
         if (typeof m.divisor !== 'number') throw new Error(`WarTimeline: maintenance_decay[${i}].divisor must be a number`);
+    }
+
+    // Validate officer_config (optional)
+    if (obj.officer_config !== undefined) {
+        if (typeof obj.officer_config !== 'object' || obj.officer_config === null) {
+            throw new Error('WarTimeline: "officer_config" must be an object when present');
+        }
+        for (const [faction, config] of Object.entries(obj.officer_config as Record<string, unknown>)) {
+            if (typeof config !== 'object' || config === null) {
+                throw new Error(`WarTimeline: officer_config["${faction}"] must be an object`);
+            }
+            const c = config as Record<string, unknown>;
+            if (typeof c.learning_rate !== 'number') {
+                throw new Error(`WarTimeline: officer_config["${faction}"].learning_rate must be a number`);
+            }
+            if (typeof c.faction !== 'string') {
+                throw new Error(`WarTimeline: officer_config["${faction}"].faction must be a string`);
+            }
+        }
     }
 
     return obj as unknown as WarTimeline;
