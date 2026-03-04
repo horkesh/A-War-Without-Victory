@@ -83,6 +83,8 @@
    Do instead: Preserve `canonicalSidToMun` in scenario_runner.ts. Corruption prevented ALL 217 mandatory brigades from spawning.
 10. **[2026-03-04] Brigade discipline: hard block + combat fatigue (n472)**
     Do instead: `bot_brigade_ai_osid.ts` hard block — brigades ONLY attack `effectiveDirective.offensive_targets`, sole exception: counter-attacks. Frontier pressure mechanic REMOVED. `RESERVE_PER_EDGE_CAP=0.07` (was 0.5) → ~1 reserve per sector. Combat fatigue: attacker +2, defender +1 per battle (cap 20); recovery -1/turn via `applyFatigueRecovery()` in `formation_fatigue.ts`. Phase I supply-assignment fatigue inert — combat-activity fatigue supersedes it.
+11. **[2026-03-04] Vienna Declaration / Local Truces (RS-HRHB non-aggression)**
+    Do instead: `src/sim/local_truces.ts` — fires at week 4 via `checkAndFireViennaDeclaration()` in evaluate-events step; sets `state.vienna_declaration_turn`. Bot `generateCorpsDirectives()` filters truce-partner OSIDs from `offensive_targets` (RS filters HRHB, HRHB filters RS), except `TRUCE_EXCEPTION_MUNICIPALITIES` = {brod, derventa, odzak, bosanski_samac, orasje, jajce}. Player truce-break: detected in `check-truce-break` step; sets `state.truce_broken_turn[faction]`, emits warning event, opponent gets +0.25 aggression for 6 turns. State fields: `vienna_declaration_turn?`, `truce_broken_turn?`.
 
 ## OOB & Brigade Systems
 1. **[2026-03-03] Personnel ceilings REMOVED + combat formula (n392 = 88.6% ATH)**
@@ -111,8 +113,8 @@
    Do instead: `recon_intelligence.ts` runs via `updateReconIntelligence()`. Ranges: RBiH=2, RS=1, HRHB=1. Phase 2 TODO: confidence decay, bot AI intel usage.
 
 ## GUI / HoI Map
-1. **[2026-03-02] GUI v2 next: Phase 4 (Desktop)**
-   Do instead: Phase 3 COMPLETE. Next: Phase 4 (useIPC, advance-turn, order staging, recruitment, SidePickerOverlay, fog-of-war, PMTiles in Electron).
+1. **[2026-03-04] GUI Phase 4 COMPLETE. Phase 5 is next.**
+   Do instead: Phase 4 done (useIPC, SidePickerOverlay, RecruitmentModal, fog-of-war, MapContainer surgical patch). Phase 5 items: battle markers, enclave visualization (dashed border + pulse), strategic point markers (§2.6), front-distributed formation placement (spec §2.4), fog toggle button, stageCorpsOperationOrder backend.
 2. **[2026-03-01] Map load: validate + defer parse + timeout**
    Do instead: Validate save (schema, meta.turn, formations/political_controllers shape). `parseGameState` unwraps `{ state }`/`{ gameState }`, treats `phase_ii` as war, accepts `formations` as object or array. Parse in requestIdleCallback (~150ms). 25s load timeout in toolbar. Show loadError on failure/timeout.
 3. **[2026-02-28] Map overlay poll: check sources first**

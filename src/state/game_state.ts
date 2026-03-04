@@ -1364,6 +1364,20 @@ export interface GameState {
     named_officer_data?: import('./officer_types.js').NamedOfficer[];
     /** Named officer mutable state keyed by officer ID. */
     named_officers?: Record<string, import('./officer_types.js').NamedOfficerState>;
+
+    // --- Local Truces (Vienna Declaration, May 1992) ---
+    /**
+     * Turn at which the Vienna Declaration fired (RS-HRHB non-aggression).
+     * Once set, bot RS and HRHB corps filter each other's OSIDs from offensive_targets,
+     * except municipalities in the Posavina corridor and Jajce.
+     */
+    vienna_declaration_turn?: number;
+    /**
+     * Turn at which each faction broke the Vienna Declaration truce.
+     * Key: FactionId ('RS' or 'HRHB'). Value: turn number.
+     * When set, the opponent bot receives an aggression modifier spike for 6 turns.
+     */
+    truce_broken_turn?: Record<FactionId, number>;
 }
 
 /**

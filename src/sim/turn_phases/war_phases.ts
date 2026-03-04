@@ -97,6 +97,7 @@ import { evaluateDisplacementTriggers } from '../displacement_pipeline/displacem
 import { applyBrigadeRepositionOrders } from '../combat/apply_brigade_reposition.js';
 import { generateAllBotOrdersOsid, computeOsidEthnicComposition, type OsidBotContext } from '../combat/bot_brigade_ai_osid.js';
 import { generateAllCorpsOrders, extractCorpsAiReport, type CorpsAiReportEntry } from '../combat/bot_corps_ai.js';
+import { checkAndFireViennaDeclaration, recordTruceBroken } from '../local_truces.js';
 import { processBrigadeMovement } from '../combat/brigade_movement.js';
 import { applyPostureCosts, applyPostureOrders } from '../combat/brigade_posture.js';
 import { getPhaseIICommandFrictionMultipliers } from '../combat/command_friction.js';
@@ -166,6 +167,12 @@ export const warPhases: NamedPhase[] = [
             const turn = context.state.meta.turn;
             const result = evaluateEvents(context.state, context.rng, turn);
             context.report.events_fired = result.fired;
+            // Vienna Declaration: fires at week 4 (May 1992), sets state.vienna_declaration_turn
+            const viennaText = checkAndFireViennaDeclaration(context.state);
+            if (viennaText) {
+                context.report.events_fired = [...(context.report.events_fired ?? []),
+                    { id: 'vienna_declaration', text: viennaText }];
+            }
         }
     },
     {
@@ -646,6 +653,29 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             applyPostureCosts(context.state);
+        }
+    },
+    {
+        name: 'check-truce-break',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const playerFaction = context.state.meta.player_faction ?? null;
+            if (!playerFaction) return;
+            // Check if player has any attack orders targeting a truce-partner OSID
+            const orders = context.state.brigade_attack_orders;
+            if (!orders) return;
+            const pc = context.state.political_controllers ?? {};
+            for (const targetOsid of Object.values(orders)) {
+                if (!targetOsid) continue;
+                const controller = pc[targetOsid];
+                if (!controller) continue;
+                const warning = recordTruceBroken(playerFaction, targetOsid, context.state);
+                if (warning) {
+                    context.report.events_fired = [...(context.report.events_fired ?? []),
+                        { id: 'truce_broken', text: warning }];
+                    break; // One warning per turn is enough
+                }
+            }
         }
     },
     {

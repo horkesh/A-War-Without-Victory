@@ -60,6 +60,7 @@ import type { CorpsDirective } from '../../state/game_state.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { evaluateSectorOffensiveLaunch } from './sector_offensive.js';
+import { getTruceBreakAggressionBonus, getTrucePartner, isViennaDeclarationActive, isTruceException } from '../local_truces.js';
 import { getCorpsCommander, getEffectiveCompetence } from './officer_system.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1439,7 +1440,9 @@ export function generateCorpsDirectives(
         const seasonalAdj = getSeasonalModifiers(
             state.meta?.turn ?? 0, state.meta?.scenario_start_date
         ).aggression_adj;
-        let aggressionModifier = (doctrinePhase?.aggression_modifier ?? 0) + armyAggressionBonus + seasonalAdj;
+        // Truce-break retaliation: opponent faction broke truce → this faction gets aggression spike
+        const truceBreakBonus = getTruceBreakAggressionBonus(faction, state);
+        let aggressionModifier = (doctrinePhase?.aggression_modifier ?? 0) + armyAggressionBonus + seasonalAdj + truceBreakBonus;
 
         // C.1: Named officer aggressiveness shifts corps aggression
         if (state.named_officers && state.named_officer_data) {
@@ -1479,6 +1482,21 @@ export function generateCorpsDirectives(
             const outcomeRank: Record<string, number> = { decisive_victory: 5, victory: 4, costly_victory: 3, stalemate: 2, repulsed: 1 };
             if ((outcomeRank[bestMinOutcome] ?? 2) < (outcomeRank['victory'] ?? 4)) {
                 bestMinOutcome = 'victory';
+            }
+        }
+
+        // Vienna Declaration truce: RS and HRHB do not attack each other's OSIDs,
+        // except in the Posavina corridor and Jajce (truce exceptions).
+        if (isViennaDeclarationActive(state)) {
+            const trucePartner = getTrucePartner(faction);
+            if (trucePartner) {
+                const pc = state.political_controllers ?? {};
+                for (let i = offensiveTargets.length - 1; i >= 0; i--) {
+                    const osid = offensiveTargets[i]!;
+                    if (pc[osid] === trucePartner && !isTruceException(osid)) {
+                        offensiveTargets.splice(i, 1);
+                    }
+                }
             }
         }
 

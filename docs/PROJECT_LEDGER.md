@@ -9521,3 +9521,99 @@ Determinism checks **MUST** be run:
 - **Canon propagation:** `context.md` corps sector cap + discipline + fatigue notes updated; `Systems_Manual_v0_6_0.md` §State updated; napkin updated (brigade discipline, reserve cap, HRHB init-based mismatches).
 - **Report:** `docs/40_reports/implemented/20260304_BRIGADE_DISCIPLINE_FATIGUE_RESERVE_CAP.md`
 - **Next:** Local HRHB-RS truces (Task #15); CENTRAL_CORRIDOR regression investigation (Doboj/Maglaj); Donji Vakuf RS under-capture.
+
+### [2026-03-04] GUI Phase 4 — Electron Desktop Integration (useIPC, IPC order staging, fog of war)
+
+- **Summary:** Wired the Electron desktop app for full single-player gameplay: faction selection via `SidePickerOverlay`, IPC-based order staging (move, posture, attack), advance-turn flow, recruitment modal, and fog-of-war overlay.
+- **Phase:** GUI Phase 4 (desktop integration). Backend `electron-main.cjs` (40+ handlers) was already complete; this adds the thin React wiring layer.
+- **Files created (new):**
+  - `src/ui/map/desktop/types.ts` — `RecruitmentCatalogBrigade`, `StartNewCampaignPayload` matching actual backend API shape
+  - `src/ui/map/desktop/useIPC.ts` — stable React hook (`useMemo []`) wrapping `window.awwv`; returns `isAvailable` + all method proxies with safe no-op fallbacks for browser mode
+  - `src/ui/map/desktop/orderActions.ts` — `advanceTurnAndSync`, `stageMoveOrderFromOsid`, `stagePostureOrderAction`
+  - `src/ui/map/desktop/campaignRecruitmentActions.ts` — `startCampaignFromSidePicker`, `fetchRecruitmentCatalog`, `applyRecruitmentAndSync`
+  - `src/ui/map/hooks/useDesktopSession.ts` — bootstrap hook: subscribes to IPC callbacks, fetches initial state on mount
+  - `src/ui/map/map/builders/buildFogOfWarGeoJSON.ts` — covers enemy-controlled OSIDs not in `reconIntelligence.confirmed_empty`; returns empty collection when no `player_faction` or no recon data
+  - `src/ui/map/map/frontLineIcons.ts` — no-op stub (front lines use line-dasharray, not icon sprites)
+  - `src/ui/map/map/pmtilesRoute.ts` — `rewritePmtilesUrlsForRuntime` utility (extracted from legacy MapContainer)
+- **Files promoted from `saved/`:**
+  - `src/ui/map/components/SidePickerOverlay.tsx` — faction picker dialog for campaign start
+  - `src/ui/map/components/RecruitmentModal.tsx` — brigade recruitment with catalog + apply flow
+  - `src/ui/map/components/FormationDetail.tsx` — posture order buttons via IPC
+  - `src/ui/map/components/CorpsDetail.tsx` — corps stance + operation draft via IPC
+  - `src/ui/map/components/TopToolbar.tsx` — advance-turn button with loading guard
+  - `src/ui/map/App.tsx` — orchestrates campaign start, recruitment, and desktop session
+- **Files surgically updated (HEAD version preserved):**
+  - `src/ui/map/map/MapContainer.tsx` — added `useIPC` + `stageMoveOrderFromOsid` for move orders via IPC; added `fog-overlay` GeoJSON source init; added `buildFogOfWarGeoJSON` call in `runDeferred` with lazy `fog-fill` layer insertion before `formation-markers`
+- **Fog-of-war behaviour:** Visible when `player_faction` is set AND `reconIntelligence` is present. Covers enemy-controlled OSIDs not in `confirmed_empty`. Semi-transparent black fill (rgba 0,0,0,0.42) above control fill, below formation icons. Hidden in observer mode.
+- **IPC move order change:** MapContainer move-mode click now calls `stageMoveOrderFromOsid` → `ipc.stageMoveOrder(brigadeId, targetOsid)` instead of local-only `addStagedOrder`.
+- **Determinism:** No simulation code touched. All new files are pure UI/IPC wiring. `buildFogOfWarGeoJSON` is deterministic (sorted OSID iteration via Array.filter over baseGeoJson which has stable order). No `Math.random()`, no timestamps.
+- **Tests:** Build passes (`npm run desktop:map:build`). Vitest: 288 pass, 2 pre-existing failures in `war_timeline.test.ts` (unrelated to this change; present before session).
+
+
+### [2026-03-04] Propagate to canon — GUI Phase 4 desktop integration
+
+- **Summary:** Propagated Phase 4 structural changes to all relevant engineering and canon docs.
+- **Files updated:**
+  - `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — Phase 4 row marked COMPLETE with report link; deferred items listed
+  - `docs/20_engineering/MAP_UI_MASTER.md` — Directory layout updated: added `desktop/` module (useIPC, types, orderActions, campaignRecruitmentActions), `hooks/useDesktopSession.ts`, `map/frontLineIcons.ts`, `map/pmtilesRoute.ts`, `map/builders/buildFogOfWarGeoJSON.ts`, `components/SidePickerOverlay.tsx`, `components/RecruitmentModal.tsx`; `saved/` note updated
+  - `docs/20_engineering/REPO_MAP.md` — Added "Desktop GUI integration" change-routing entry under "Change X → Go Here"
+  - `docs/10_canon/context.md` — Added "GUI Phase 4 — Desktop Integration (2026-03-04)" implementation reference paragraph after War Timeline entry
+  - `docs/40_reports/README.md` — Added `20260304_GUI_PHASE4_ELECTRON_DESKTOP_INTEGRATION.md` to implemented/ summary at top of list
+- **Determinism:** Documentation only. No code, schema, or simulation changes.
+
+### [2026-03-04] Formation marker overhaul — corps removal, HoI counters, front-distributed placement
+
+- **Summary:** Three targeted map improvements to formation presentation: (1) corps/army_hq removed from map surface; (2) brigade counters redesigned as HoI-style rectangles; (3) markers offset toward the front line.
+- **Phase:** GUI Phase 5 (Polish).
+- **Files changed:**
+  - `src/ui/map/map/builders/buildFormationsGeoJSON.ts` — filter `kind === 'corps' || kind === 'army_hq'`; added `buildFrontOffsetLookup()` (OSID→avg-enemy-centroid from `state.frontEdgesOsid`) and `applyFrontOffset()` (`FRONT_LERP=0.35`); imports `FrontEdgeView` from types
+  - `src/ui/map/map/formationIcons.ts` — canvas redesigned 48×48 → 160×80 (pixelRatio 2); faction-colored fill; white kind abbreviation; rounded corners via `roundedRect()`; `corps`/`army_hq` abbreviations removed
+  - `src/ui/map/map/awwv_map_style.json` — `icon-size` stops: `(6:0.42, 10:0.62, 14:0.8)` → `(6:0.5, 9:0.7, 12:0.9, 14:1.0)`; `icon-allow-overlap`/`icon-ignore-placement`: `false` → `true`; `text-offset`: `[0, 0.9]` → `[0, 1.7]`
+- **Determinism:** UI-only. No simulation code touched. `buildFrontOffsetLookup` is deterministic (sorted OSID iteration via Map iteration over sorted `frontEdgesOsid`).
+- **Tests:** Build passes. Vitest: 288 pass, 2 pre-existing failures in `war_timeline.test.ts` (unrelated).
+
+### [2026-03-04] Propagate to canon — formation marker overhaul
+
+- **Summary:** Propagated formation marker changes to engineering and canon docs.
+- **Files updated:**
+  - `docs/30_planning/20260221_.../HOI_VISUAL_GUI_OVERHAUL_SPEC.md` — §2.4 implementation note updated from "NOT yet implemented" to "IMPLEMENTED (2026-03-04)" with details on placement algorithm, canvas spec, overlap flags
+  - `docs/20_engineering/MAP_UI_MASTER.md` — `formationIcons.ts` directory description updated to reflect 160×80 canvas and faction-colored fill
+  - `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — Phase 5 status row updated with completed items; style example updated to match actual layer config
+  - `docs/10_canon/context.md` — Added "Formation markers overhaul (2026-03-04)" implementation reference paragraph
+- **Determinism:** Documentation only.
+
+### [2026-03-04] GUI Phase 5 — posture stripes + enclave visualization
+
+- **Summary:** Two targeted map improvements: (1) brigade counters now show a colored left-edge stripe encoding posture (defend/probe/attack/elastic_defense/consolidation); (2) enclave polygons rendered with dashed faction-colored outline, faint fill, and text label.
+- **Phase:** GUI Phase 5 (Polish).
+- **Files changed:**
+  - `src/ui/map/map/builders/formationIconId.ts` — added optional `posture?` parameter; icon_id format becomes `kind__FACTION__posture` when posture present
+  - `src/ui/map/map/builders/buildFormationsGeoJSON.ts` — added `posture: string | null` to `FormationMarkerProperties`; passes `formation.posture` to `formationIconId()`
+  - `src/ui/map/map/formationIcons.ts` — `parseIconId` now extracts posture from third `__`-segment; added `POSTURE_STRIPE` color map; `createFormationIcon` clips to rounded rect then draws 12px left-edge stripe before border
+  - `src/ui/map/data/types.ts` — added `EnclaveResilienceView {resilience, isolation_turns, hardening_active}`; added `enclaveResilience?: Record<string, EnclaveResilienceView>` to `LoadedGameState`
+  - `src/ui/map/data/GameStateAdapter.ts` — added `EnclaveResilienceView` import; added extraction block for `state.enclave_resilience` (bare number → `{resilience, isolation_turns:0, hardening_active:false}` or structured entry); added `enclaveResilience` to return object
+  - `src/ui/map/map/builders/buildEnclaveGeoJSON.ts` — **new file**; mirrors `ENCLAVE_DEFINITIONS` from `enclave_resilience.ts` with display labels; returns `{polygons, labels}` GeoJSON filtered to faction-controlled OSIDs matching enclave prefixes; label at average centroid
+  - `src/ui/map/map/MapContainer.tsx` — added `buildEnclaveGeoJSON` import; constants `ENCLAVE_SOURCE_ID`, `ENCLAVE_LABEL_SOURCE_ID`, `ENCLAVE_OUTLINE_LAYER_ID`, `ENCLAVE_FILL_LAYER_ID`, `ENCLAVE_LABEL_LAYER_ID`; lazy source+layer add in `runDeferred` block: dashed outline (4,3 dash, faction-colored, 1.2–3.0px by zoom), faint fill (0.08 opacity), symbol label (8–15px by zoom)
+- **Enclave definitions (UI-side):** bihac_pocket, srebrenica, zepa, gorazde, sarajevo — all RBiH; OSID prefixes mirror `enclave_resilience.ts`
+- **Posture stripe colors:** defend=blue, probe=amber, attack=red, elastic_defense=teal, consolidation=olive; no stripe when posture absent
+- **Determinism:** UI-only. All new code is deterministic: sorted OSID iteration via `Object.keys().sort()`, no `Math.random()`, no timestamps.
+- **Tests:** Build passes (`npm run desktop:map:build`). Vitest: 288 pass, 2 pre-existing failures in `war_timeline.test.ts` (unrelated).
+
+---
+
+## [2026-03-04] Vienna Declaration / Local RS-HRHB Truces
+
+- **Task:** #15 — Implement local HRHB-RS truces (Vienna Declaration, May 1992)
+- **Summary:** At week 4, the Vienna Declaration event fires and sets `state.vienna_declaration_turn`. Bot RS and HRHB corps thereafter filter each other's controlled OSIDs from `offensive_targets` in `generateCorpsDirectives()`, except the Posavina corridor municipalities and Jajce. Player CAN attack across the truce — detected by new `check-truce-break` pipeline step, which emits a warning event and sets `state.truce_broken_turn[faction]`. Opponent bot gets +0.25 aggression for 6 turns after a truce break.
+- **No calibration run yet.** n473 planned next to measure impact.
+- **Tests:** 31 unit tests in `tests/local_truces.test.ts` — all passing.
+- **Files changed:**
+  - `src/sim/local_truces.ts` — new module: Vienna Declaration constants and core functions
+  - `src/state/game_state.ts` — added `vienna_declaration_turn?` and `truce_broken_turn?` to `GameState`
+  - `src/sim/turn_phases/war_phases.ts` — import; evaluate-events step extended; new `check-truce-break` step before attack resolution
+  - `src/sim/combat/bot_corps_ai.ts` — import; truce filtering in `generateCorpsDirectives`; aggression spike from `getTruceBreakAggressionBonus`
+  - `tests/local_truces.test.ts` — new test file, 31 tests
+  - `docs/10_canon/context.md` — added Vienna Declaration mechanic note
+  - `docs/10_canon/Systems_Manual_v0_6_0.md` — added implementation note
+  - `.claude/napkin.md` — added Bot AI item 11 (Vienna Declaration truce)
+  - `docs/40_reports/implemented/20260304_VIENNA_DECLARATION_LOCAL_TRUCES.md` — implementation report
