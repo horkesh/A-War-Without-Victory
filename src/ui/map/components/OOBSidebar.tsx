@@ -10,6 +10,24 @@ import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON'
 
 const FACTION_ORDER = ['RS', 'RBiH', 'HRHB'] as const;
 
+function formatRawId(id: string): string {
+  if (!id) return '';
+  return id
+    .replace(/^(RS|RBiH|HRHB)_/i, '')
+    .split('_')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+}
+
+function formatFrontId(id: string): string {
+  if (!id) return '';
+  return id
+    .replace(/^.*__op:/, '')
+    .split(':')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' \u2014 ');
+}
+
 function getFormationOsids(formation: FormationView): string[] {
   const values = formation.aorSettlementIds ?? (formation.location_osid ? [formation.location_osid] : []);
   return [...new Set(values)].filter((osid) => typeof osid === 'string' && osid.length > 0).sort((a, b) => a.localeCompare(b));
@@ -52,7 +70,8 @@ function getCorpsFrontAssignment(
   }
   if (counts.size === 0) return null;
   const [bestFrontId] = Array.from(counts.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
-  return namesByFrontId.get(bestFrontId) ?? bestFrontId;
+  const rawId = namesByFrontId.get(bestFrontId) ?? bestFrontId;
+  return rawId === bestFrontId ? formatFrontId(rawId) : rawId;
 }
 
 // ─────────────────────────────────────────────────────
@@ -363,7 +382,10 @@ export function OOBSidebar() {
                           <CorpsCard
                             key={corpsId}
                             corpsId={corpsId}
-                            corpsName={corpsId === '_ungrouped' ? 'Ungrouped' : (corpsFormationById.get(corpsId)?.name ?? corpsId)}
+                            corpsName={corpsId === '_ungrouped' ? 'Ungrouped' : (() => {
+                              const fName = corpsFormationById.get(corpsId)?.name ?? corpsId;
+                              return fName === corpsId ? formatRawId(fName) : fName;
+                            })()}
                             brigades={brigades}
                             faction={faction}
                             frontAssignment={getCorpsFrontAssignment(brigades, loadedGameState, namesByFrontId)}
@@ -381,6 +403,22 @@ export function OOBSidebar() {
                             onBrigadeSelect={(formationId) => selectBrigadeWithSector(formationId)}
                             highlightedFormationIds={highlightedFormationIds}
                             onBrigadeHoverOsids={hoverBrigade}
+                            commanderName={(() => {
+                              if (!loadedGameState?.namedOfficerData || !loadedGameState?.namedOfficerStateById) return undefined;
+                              for (const entry of loadedGameState.namedOfficerData) {
+                                const st = loadedGameState.namedOfficerStateById[entry.id];
+                                if (st?.status === 'active' && st.assigned_corps_id === corpsId) return entry.name;
+                              }
+                              return undefined;
+                            })()}
+                            commanderActing={(() => {
+                              if (!loadedGameState?.namedOfficerData || !loadedGameState?.namedOfficerStateById) return undefined;
+                              for (const entry of loadedGameState.namedOfficerData) {
+                                const st = loadedGameState.namedOfficerStateById[entry.id];
+                                if (st?.status === 'active' && st.assigned_corps_id === corpsId) return st.acting_commander;
+                              }
+                              return undefined;
+                            })()}
                           />
                         ))}
                         {reserves.length > 0 && (
@@ -505,11 +543,10 @@ export function OOBSidebar() {
                           type="button"
                           data-sector-id={sector.sector_id}
                           onClick={() => setSelectedCorpsFrontSectorId(sector.sector_id)}
-                          className={`w-full flex items-center gap-2 px-2 py-1.5 rounded border transition-colors text-left ${
-                            selectedCorpsFrontSectorId === sector.sector_id
-                              ? 'border-accent-gold bg-panel-active'
-                              : 'border-panel-border bg-panel-card hover:bg-panel-hover'
-                          }`}
+                          className={`w-full flex items-center gap-2 px-2 py-1.5 rounded border transition-colors text-left ${selectedCorpsFrontSectorId === sector.sector_id
+                            ? 'border-accent-gold bg-panel-active'
+                            : 'border-panel-border bg-panel-card hover:bg-panel-hover'
+                            }`}
                         >
                           <span
                             className="inline-block w-2.5 h-2.5 rounded-sm shrink-0"

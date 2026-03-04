@@ -15,6 +15,8 @@ export interface CorpsCardProps {
   onBrigadeSelect?: (formationId: string) => void;
   highlightedFormationIds?: Set<string>;
   onBrigadeHoverOsids?: (formation: FormationView, hovered: boolean, e?: React.MouseEvent) => void;
+  commanderName?: string;
+  commanderActing?: boolean;
 }
 
 /**
@@ -33,6 +35,8 @@ export function CorpsCard({
   onBrigadeSelect,
   highlightedFormationIds,
   onBrigadeHoverOsids,
+  commanderName,
+  commanderActing,
 }: CorpsCardProps) {
   const displayName = corpsName ?? `Corps ${corpsId}`;
   const factionClass = FACTION_COLORS[faction] ?? 'text-text-primary';
@@ -54,7 +58,6 @@ export function CorpsCard({
     >
       <button
         type="button"
-        onClick={onHeaderClick}
         className={`w-full px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2 ${onHeaderClick ? 'hover:bg-panel-hover transition-colors cursor-pointer' : 'cursor-default'}`}
       >
         <span className={`font-sans text-xs font-semibold uppercase tracking-wide ${factionClass}`}>{displayName}</span>
@@ -62,6 +65,12 @@ export function CorpsCard({
           {totalPersonnel.toLocaleString()} · {brigades.length} brg
         </span>
       </button>
+      {commanderName && (
+        <div className="px-3 py-1 text-[10px] bg-panel-bg flex justify-between border-b border-panel-border/50 text-text-secondary">
+          <span>Commander:</span>
+          <span className="text-text-primary">{commanderName}{commanderActing ? ' (Acting)' : ''}</span>
+        </div>
+      )}
       {onStanceChange && (
         <div className="px-3 py-1.5 border-b border-panel-border/70 flex items-center justify-between gap-2">
           <span className="text-[10px] uppercase text-accent-gold font-sans tracking-wide font-semibold">Stance</span>

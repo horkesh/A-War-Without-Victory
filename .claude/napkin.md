@@ -67,8 +67,8 @@
    Do instead: ARBiH must remain `general_defensive` through week 56. "Balanced" before w56 allows premature counterattacking.
 2. **[2026-03-01] RS_EARLY_WAR_END_WEEK = 20 — DO NOT CHANGE**
    Do instead: RS `general_offensive` → `balanced` at w20. Extending to 22 backfires (RBiH counterattacks drop RS to 382).
-3. **[2026-03-01] Morale retreat resistance: per-faction floor**
-   Do instead: `getMoraleResistFloor()`: RBiH=62, RS=70, HRHB=65. Morale ≥ floor + costly_victory → absorb. Decisive always retreats.
+3. **[2026-03-04] Morale retreat resistance: per-faction floor (updated)**
+   Do instead: `getMoraleResistFloor()`: RBiH=**50**, RS=70, HRHB=**60**. Morale ≥ floor + costly_victory → absorb. Decisive always retreats. ARBiH homeland last stand (≥50% Bosniak co-ethnic) also absorbs 'victory' outcomes regardless of morale. Added in n439 session.
 4. **[2026-02-25] Aggression scoring: additive + multiplicative**
    Do instead: Flat additive (`aggression_modifier × 120`) PLUS multiplicative (`× (1 + aggression_modifier)`). Multiplier alone ineffective on low base scores.
 5. **[2026-02-22] Pioneer attack seeding**
@@ -171,8 +171,16 @@
    Do instead: ZoC deleted. Movement via `brigade_movement_orders.ts` / `apply-brigade-movement`. Defense via `local_front_defense.ts` density. AoR legacy code still present — address when encountered.
 
 ## Calibration
-1. **[2026-03-03] Area-weighted is primary calibration metric (n413=89.7%)**
-   Do instead: Use area-weighted match (km²) as primary. Count-based penalizes small eastern settlements disproportionately. n413=89.7% area-weighted vs 85.9% count-based. Compare tool shows both columns.
+1. **[2026-03-04] Area-weighted is primary calibration metric (ATH n466=92.0%)**
+   Do instead: Use area-weighted match (km²) as primary. Count-based penalizes small eastern settlements disproportionately. ATH n466=92.0% (670/744 count). 20 overrides + 16 RS avoided_osids. ARBiH homeland last stand (combat_math.ts morale floor 50, attack_resolution_osid.ts 'victory' absorption) added n439.
+2. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
+   Do instead: RS `avoided_osids` = fix RS OVER-captures (painted=RBiH/HRHB, sim=RS — prevent VRS from attacking there). RS `osid_control_overrides` = fix RS UNDER-captures (painted=RS, sim=RBiH — force-start RS control). Adding under-captures to avoided_osids makes RS even less likely to capture them.
+3. **[2026-03-04] Consolidation captures CANNOT be fixed by bot config — ~8 persistent mismatches**
+   Do instead: Cells surrounded by same-faction neighbors auto-flip regardless of avoided_osids or overrides. Confirmed: kakanj:biljesevo, zavidovici:cardak_2, olovo:olovo_2, and all 4 HRHB over-captures (jablanica, kiseljak outskirts, rat_2, prozor area) are consolidation-captured. Only engine-level consolidation rule changes could fix these.
+4. **[2026-03-04] Load-bearing wrong captures: turbe_2 RS over-capture enables Donji Vakuf cascade**
+   Do instead: turbe_2 is an RS over-capture BUT it is a stepping stone enabling Donji Vakuf consolidation cascade (3 correct cells). Adding turbe_2 to RS avoided_osids breaks Donji Vakuf → net -3pp loss (n463 confirmed). Do NOT add turbe_2 to RS avoided_osids.
+5. **[2026-03-04] Fragile VRS force allocation: Kalesija→Kupres dependency**
+   Do instead: Kalesija seher_2/gojcin_2 RS overrides redirect VRS pressure → bonus kupres:kupres_2 fix (n466). Adding Kladanj overrides on top disrupts this allocation → kupres:kupres_2 reverts (n467). Test each override block in isolation; never stack two override groups without verifying the underlying force dynamics.
 2. **[2026-03-03] Timeline knobs drive 40w behavior first**
    Do instead: For `apr1992_definitive_40w`, tune `data/scenarios/timelines/apr1992.json` (`doctrine_phases`, `external_support`) before editing `bot_strategy.ts`; verify with `final_state_hash` and `compare_painted_vs_sim.cjs`.
 3. **[2026-03-03] Prove knob efficacy immediately (hash + metrics)**

@@ -17,7 +17,7 @@ import { getDoctrineTempoMultiplier, updateDoctrineState } from '../../state/doc
 import { updateEmbargoProfiles } from '../../state/embargo.js';
 import { updateEnclaveIntegrity } from '../../state/enclave_integrity.js';
 import { accumulateExhaustion } from '../../state/exhaustion.js';
-import { updateFormationFatigue } from '../../state/formation_fatigue.js';
+import { applyFatigueRecovery, updateFormationFatigue } from '../../state/formation_fatigue.js';
 import { deriveMunicipalityAuthorityMap, updateFormationLifecycle } from '../../state/formation_lifecycle.js';
 import { normalizeFrontPosture } from '../../state/front_posture.js';
 import { applyFormationCommitment } from '../../state/front_posture_commitment.js';
@@ -220,6 +220,8 @@ export const warPhases: NamedPhase[] = [
     {
         name: 'update-formation-fatigue',
         run: (context) => {
+            // Apply per-turn recovery first (combat fatigue accumulated during attack resolution).
+            applyFatigueRecovery(context.state);
             const edges = context.input.settlementEdges;
             if (!edges) return;
             const derivedFrontEdges = computeFrontEdges(context.state, edges);

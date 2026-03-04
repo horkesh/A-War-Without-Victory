@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV Calibration Session Report — n449 to n466</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ BLUEPRINT THEME ============ */
+:root {
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'Fira Code', 'SF Mono', Consolas, monospace;
+
+  --bg: #0d1520;
+  --surface: #111d2e;
+  --surface2: #162236;
+  --surface3: #1a2b42;
+  --border: rgba(100, 160, 220, 0.12);
+  --border-bright: rgba(100, 160, 220, 0.25);
+
+  --text: #c8ddf0;
+  --text-dim: #6b8ab0;
+  --text-dimmer: #3d5a7a;
+
+  --teal: #22c5e0;
+  --teal-dim: rgba(34, 197, 224, 0.1);
+  --teal-glow: rgba(34, 197, 224, 0.06);
+  --slate: #64a0dc;
+  --slate-dim: rgba(100, 160, 220, 0.1);
+
+  --green: #34d399;
+  --green-dim: rgba(52, 211, 153, 0.1);
+  --red: #f87171;
+  --red-dim: rgba(248, 113, 113, 0.1);
+  --amber: #fbbf24;
+  --amber-dim: rgba(251, 191, 36, 0.1);
+  --gold: #e5c46a;
+  --gold-dim: rgba(229, 196, 106, 0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  background-image:
+    linear-gradient(rgba(34, 197, 224, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 197, 224, 0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  min-height: 100vh;
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 48px 24px; }
+
+/* ============ TYPOGRAPHY ============ */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--teal);
+  opacity: 0.8;
+  margin-bottom: 8px;
+  display: block;
+}
+
+h1 { font-size: 2.4rem; font-weight: 700; line-height: 1.15; color: var(--text); }
+h2 { font-size: 1.25rem; font-weight: 600; color: var(--text); margin-bottom: 16px; }
+h3 { font-size: 1rem; font-weight: 600; color: var(--text); }
+
+.mono { font-family: var(--font-mono); }
+
+/* ============ HERO ============ */
+.hero {
+  padding: 56px 0 40px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -24px; right: -24px; height: 100%;
+  background: radial-gradient(ellipse 60% 70% at 30% 50%, rgba(34, 197, 224, 0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 14px;
+}
+
+.hero-subtitle {
+  color: var(--text-dim);
+  font-size: 1.05rem;
+  margin-top: 10px;
+  max-width: 600px;
+}
+
+/* ============ KPI STRIP ============ */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 36px 0;
+}
+
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 20px 16px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeUp 0.5s ease both;
+}
+
+.kpi--hero {
+  border-color: var(--teal-dim);
+  background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 100%);
+}
+
+.kpi--hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--teal), transparent);
+}
+
+.kpi-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.kpi-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--teal);
+  line-height: 1;
+  font-family: var(--font-mono);
+}
+
+.kpi--hero .kpi-value { color: var(--gold); font-size: 2.4rem; }
+
+.kpi-delta {
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: var(--green);
+  margin-top: 6px;
+}
+
+/* ============ SECTION ============ */
+.section {
+  margin-bottom: 56px;
+}
+
+/* ============ CALIBRATION CHART ============ */
+.chart-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px 28px 20px;
+  overflow-x: auto;
+}
+
+.chart-inner {
+  min-width: 800px;
+  position: relative;
+}
+
+.chart-y-axis {
+  position: absolute;
+  left: 0; top: 0; bottom: 40px;
+  width: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-right: 8px;
+}
+
+.chart-y-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dimmer);
+}
+
+.chart-area {
+  margin-left: 56px;
+  position: relative;
+}
+
+.chart-grid-lines {
+  position: absolute;
+  left: 0; right: 0;
+  top: 0; bottom: 40px;
+  pointer-events: none;
+}
+
+.chart-grid-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: var(--border);
+}
+
+.chart-target-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: rgba(229, 196, 106, 0.3);
+  border-top: 1px dashed rgba(229, 196, 106, 0.4);
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 200px;
+  position: relative;
+  z-index: 1;
+}
+
+.chart-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.chart-bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  transition: opacity 0.2s;
+  position: relative;
+  cursor: default;
+}
+
+.chart-bar--kept { background: var(--slate); }
+.chart-bar--reverted { background: var(--surface3); border: 1px solid var(--border-bright); }
+.chart-bar--ath { background: var(--gold); }
+.chart-bar--baseline { background: var(--teal); }
+
+.chart-bar:hover::after {
+  content: attr(data-value);
+  position: absolute;
+  top: -26px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface3);
+  border: 1px solid var(--border-bright);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text);
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.chart-x-labels {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.chart-x-label {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dimmer);
+  text-align: center;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chart-x-label.ath { color: var(--gold); font-weight: 600; }
+.chart-x-label.kept { color: var(--slate); }
+
+.chart-legend {
+  display: flex;
+  gap: 20px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ============ TABLES ============ */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  font-size: 0.86rem;
+}
+
+thead th {
+  background: var(--surface2);
+  padding: 12px 14px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border-bright);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  animation: fadeUp 0.4s ease both;
+}
+
+tbody tr:last-child { border-bottom: none; }
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.015); }
+tbody tr:hover { background: var(--teal-glow); }
+
+td {
+  padding: 10px 14px;
+  vertical-align: top;
+  color: var(--text);
+}
+
+td code {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  background: var(--surface2);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--teal);
+}
+
+.run-id {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--slate);
+}
+
+.verdict {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.verdict--ath { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(229,196,106,0.25); }
+.verdict--kept { background: var(--slate-dim); color: var(--slate); border: 1px solid rgba(100,160,220,0.2); }
+.verdict--reverted { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+
+.num { font-family: var(--font-mono); text-align: right; }
+.num--ath { color: var(--gold); font-weight: 600; }
+.num--kept { color: var(--slate); }
+.num--base { color: var(--teal); }
+.num--reverted { color: var(--text-dimmer); }
+
+/* ============ REGIONAL TABLE BARS ============ */
+.region-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.region-bar-bg {
+  flex: 1;
+  height: 6px;
+  background: var(--surface3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.region-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--teal);
+}
+
+.region-pct {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* ============ FINDING CARDS ============ */
+.findings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.finding-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 20px 18px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeUp 0.5s ease both;
+}
+
+.finding-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+}
+
+.finding-card--teal::before { background: linear-gradient(90deg, var(--teal), transparent); }
+.finding-card--slate::before { background: linear-gradient(90deg, var(--slate), transparent); }
+.finding-card--amber::before { background: linear-gradient(90deg, var(--amber), transparent); }
+.finding-card--red::before { background: linear-gradient(90deg, var(--red), transparent); }
+.finding-card--green::before { background: linear-gradient(90deg, var(--green), transparent); }
+.finding-card--gold::before { background: linear-gradient(90deg, var(--gold), transparent); }
+
+.finding-number {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dimmer);
+  margin-bottom: 6px;
+}
+
+.finding-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.finding-body {
+  font-size: 0.84rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+
+.finding-body code {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  background: var(--surface2);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--teal);
+}
+
+.finding-pill {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  margin-top: 10px;
+  border: 1px solid;
+}
+
+.pill--warning { color: var(--amber); border-color: rgba(251,191,36,0.3); background: var(--amber-dim); }
+.pill--good { color: var(--green); border-color: rgba(52,211,153,0.3); background: var(--green-dim); }
+.pill--info { color: var(--teal); border-color: rgba(34,197,224,0.3); background: var(--teal-dim); }
+.pill--danger { color: var(--red); border-color: rgba(248,113,113,0.3); background: var(--red-dim); }
+
+/* ============ MECHANIC CARDS ============ */
+.mech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.mech-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.mech-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  display: inline-block;
+}
+
+.mech-tag--new { background: var(--green-dim); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+.mech-tag--tuned { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(34,197,224,0.3); }
+.mech-tag--scenario { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(229,196,106,0.3); }
+
+.mech-before-after {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.mech-val {
+  flex: 1;
+  background: var(--surface2);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.mech-val-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dimmer);
+  margin-bottom: 2px;
+}
+
+.mech-val-data { color: var(--text); }
+.mech-val--before .mech-val-data { color: var(--red); }
+.mech-val--after .mech-val-data { color: var(--green); }
+
+/* ============ DIVIDER ============ */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0 0 40px;
+}
+
+/* ============ ANIMATION ============ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.kpi:nth-child(1) { animation-delay: 0.05s; }
+.kpi:nth-child(2) { animation-delay: 0.10s; }
+.kpi:nth-child(3) { animation-delay: 0.15s; }
+.kpi:nth-child(4) { animation-delay: 0.20s; }
+.kpi:nth-child(5) { animation-delay: 0.25s; }
+
+.finding-card:nth-child(1) { animation-delay: 0.05s; }
+.finding-card:nth-child(2) { animation-delay: 0.10s; }
+.finding-card:nth-child(3) { animation-delay: 0.15s; }
+.finding-card:nth-child(4) { animation-delay: 0.20s; }
+.finding-card:nth-child(5) { animation-delay: 0.25s; }
+.finding-card:nth-child(6) { animation-delay: 0.30s; }
+.finding-card:nth-child(7) { animation-delay: 0.35s; }
+
+tbody tr:nth-child(1) { animation-delay: 0.03s; }
+tbody tr:nth-child(2) { animation-delay: 0.06s; }
+tbody tr:nth-child(3) { animation-delay: 0.09s; }
+tbody tr:nth-child(4) { animation-delay: 0.12s; }
+tbody tr:nth-child(5) { animation-delay: 0.15s; }
+tbody tr:nth-child(6) { animation-delay: 0.18s; }
+tbody tr:nth-child(7) { animation-delay: 0.21s; }
+tbody tr:nth-child(8) { animation-delay: 0.24s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">A War Without Victory · Calibration Session Report · 2026-03-03/04</div>
+    <h1>40-Week Scenario Calibration<br>n449 → n466</h1>
+    <p class="hero-subtitle">19 runs. New all-time high achieved. ARBiH homeland defense mechanic implemented. Territory match pushed to 92.0% area-weighted.</p>
+
+    <div class="kpi-strip">
+      <div class="kpi kpi--hero">
+        <div class="kpi-label">Area-Weighted ATH</div>
+        <div class="kpi-value">92.0%</div>
+        <div class="kpi-delta">+1.5pp vs session start (n439)</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Count-Based ATH</div>
+        <div class="kpi-value">90.1%</div>
+        <div class="kpi-delta">670 / 744 OSIDs correct</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Runs This Session</div>
+        <div class="kpi-value">19</div>
+        <div class="kpi-delta">n449 – n467 (8 kept, 11 reverted)</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Overrides in Scenario</div>
+        <div class="kpi-value">20</div>
+        <div class="kpi-delta">+7 new since n439 baseline</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">RS Avoided OSIDs</div>
+        <div class="kpi-value">16</div>
+        <div class="kpi-delta">+16 since n439 baseline</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALIBRATION PROGRESSION CHART -->
+  <section class="section">
+    <span class="section-label">Calibration Progression</span>
+    <h2>Area-Weighted Match Rate — Run by Run</h2>
+
+    <div class="chart-wrap">
+      <div class="chart-inner">
+        <!-- Y axis -->
+        <div style="display:flex; align-items:stretch; gap:0;">
+          <div style="width:50px; display:flex; flex-direction:column; justify-content:space-between; padding-bottom:40px; padding-right:8px; flex-shrink:0;">
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-dimmer);text-align:right;">93%</span>
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-dimmer);text-align:right;">92%</span>
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-dimmer);text-align:right;">91%</span>
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-dimmer);text-align:right;">90%</span>
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-dimmer);text-align:right;">89%</span>
+          </div>
+          <div style="flex:1; position:relative;">
+            <!-- Grid lines -->
+            <div style="position:absolute;left:0;right:0;top:0;height:1px;background:var(--border);"></div>
+            <div style="position:absolute;left:0;right:0;top:25%;height:1px;background:var(--border);"></div>
+            <div style="position:absolute;left:0;right:0;top:50%;height:1px;background:var(--border);"></div>
+            <div style="position:absolute;left:0;right:0;top:75%;height:1px;background:var(--border);"></div>
+            <!-- ATH target line at 92% (25% from top in 89-93 range) -->
+            <div style="position:absolute;left:0;right:0;top:25%;height:1px;border-top:1px dashed rgba(229,196,106,0.5);z-index:2;" title="92.0% ATH"></div>
+
+            <!-- Bars: 19 runs n449–n467, scale 89–93% = 4pp range = 200px height -->
+            <!-- height formula: (value - 89) / 4 * 200 px -->
+            <div style="display:flex;align-items:flex-end;height:200px;gap:3px;position:relative;z-index:1;padding-bottom:0;">
+
+              <!-- n449: 89.1% → (0.1/4)*200=5px REVERTED -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:5px;background:var(--surface3);border:1px solid var(--border-bright);border-radius:3px 3px 0 0;" title="n449: 89.1% (REVERTED)"></div>
+              </div>
+              <!-- n450: 90.1% → (1.1/4)*200=55px REVERTED -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:55px;background:var(--surface3);border:1px solid var(--border-bright);border-radius:3px 3px 0 0;" title="n450: 90.1% (REVERTED)"></div>
+              </div>
+              <!-- n451: 90.1% → 55px REVERTED -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:55px;background:var(--surface3);border:1px solid var(--border-bright);border-radius:3px 3px 0 0;" title="n451: 90.1% (REVERTED)"></div>
+              </div>
+              <!-- n452: 90.3% → 65px REVERTED -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:65px;background:var(--surface3);border:1px solid var(--border-bright);border-radius:3px 3px 0 0;" title="n452: 90.3% (REVERTED)"></div>
+              </div>
+              <!-- n453: 90.1% → 55px REVERTED -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:55px;background:var(--surface3);border:1px solid var(--border-bright);border-radius:3px 3px 0 0;" title="n453: 90.1% (REVERTED)"></div>
+              </div>
+              <!-- n454: 90.7% → 85px ATH -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:85px;background:var(--teal);border-radius:3px 3px 0 0;" title="n454: 90.7% ATH — Visoko avoided_osids"></div>
+              </div>
+              <!-- n455: 89.9% → 45px REVERTED -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:45px;background:var(--surface3);border:1px solid var(--border-bright);border-radius:3px 3px 0 0;" title="n455: 89.9% (REVERTED — Cajniče cascade)"></div>
+              </div>
+              <!-- n456: 90.8% → 90px ATH -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:90px;background:var(--teal);border-radius:3px 3px 0 0;" title="n456: 90.8% ATH — Kiseljak + Breza/Kakanj"></div>
+              </div>
+              <!-- n457: 91.7% → 135px MASSIVE ATH -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:135px;background:var(--gold);border-radius:3px 3px 0 0;" title="n457: 91.7% MASSIVE ATH — Bugojno/Vares/Doboj avoided"></div>
+              </div>
+              <!-- n458: 91.1% → 110px REVERTED -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:110px;background:var(--surface3);border:1px solid var(--border-bright);border-radius:3px 3px 0 0;" title="n458: 91.1% (REVERTED — isolation test)"></div>
+              </div>
+              <!-- n459: 91.8% → 140px ATH -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:140px;background:var(--gold);border-radius:3px 3px 0 0;" title="n459: 91.8% ATH — Zvornik overrides + rastosnica avoided"></div>
+              </div>
+              <!-- n460: 91.3% → 115px REVERTED -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:115px;background:var(--surface3);border:1px solid var(--border-bright);border-radius:3px 3px 0 0;" title="n460: 91.3% (REVERTED — HRHB expansion)"></div>
+              </div>
+              <!-- n461: 91.1% → 110px REVERTED -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:110px;background:var(--surface3);border:1px solid var(--border-bright);border-radius:3px 3px 0 0;" title="n461: 91.1% (REVERTED — direction error)"></div>
+              </div>
+              <!-- n462: 91.5% → 125px KEPT -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:125px;background:var(--slate);border-radius:3px 3px 0 0;" title="n462: 91.5% KEPT — Kladanj overrides"></div>
+              </div>
+              <!-- n463: 91.4% → 120px REVERTED -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:120px;background:var(--surface3);border:1px solid var(--border-bright);border-radius:3px 3px 0 0;" title="n463: 91.4% (REVERTED — broke cascade)"></div>
+              </div>
+              <!-- n464: 91.5% → 125px REVERTED -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:125px;background:var(--surface3);border:1px solid var(--border-bright);border-radius:3px 3px 0 0;" title="n464: 91.5% (REVERTED — neutral swap)"></div>
+              </div>
+              <!-- n465: 91.5% → 125px REVERTED -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:125px;background:var(--surface3);border:1px solid var(--border-bright);border-radius:3px 3px 0 0;" title="n465: 91.5% (REVERTED — consolidation confirmed)"></div>
+              </div>
+              <!-- n466: 92.0% → 150px ATH GOLD -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:150px;background:var(--gold);border-radius:3px 3px 0 0;box-shadow:0 0 16px rgba(229,196,106,0.3);" title="n466: 92.0% NEW ATH — Kalesija overrides"></div>
+              </div>
+              <!-- n467: 91.5% → 125px REVERTED -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+                <div style="width:100%;height:125px;background:var(--surface3);border:1px solid var(--border-bright);border-radius:3px 3px 0 0;" title="n467: 91.5% (REVERTED — disrupted Kupres fix)"></div>
+              </div>
+            </div>
+
+            <!-- X labels -->
+            <div style="display:flex;gap:3px;margin-top:8px;">
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--text-dimmer);text-align:center;">n449</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--text-dimmer);text-align:center;">n450</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--text-dimmer);text-align:center;">n451</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--text-dimmer);text-align:center;">n452</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--text-dimmer);text-align:center;">n453</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--teal);text-align:center;font-weight:600;">n454</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--text-dimmer);text-align:center;">n455</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--teal);text-align:center;font-weight:600;">n456</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--gold);text-align:center;font-weight:600;">n457</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--text-dimmer);text-align:center;">n458</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--gold);text-align:center;font-weight:600;">n459</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--text-dimmer);text-align:center;">n460</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--text-dimmer);text-align:center;">n461</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--slate);text-align:center;">n462</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--text-dimmer);text-align:center;">n463</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--text-dimmer);text-align:center;">n464</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--text-dimmer);text-align:center;">n465</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--gold);text-align:center;font-weight:600;">n466★</div>
+              <div style="flex:1;font-family:var(--font-mono);font-size:9px;color:var(--text-dimmer);text-align:center;">n467</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:20px;margin-top:16px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text-dim);">
+            <div style="width:10px;height:10px;border-radius:2px;background:var(--gold);flex-shrink:0;"></div>
+            ATH milestone
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text-dim);">
+            <div style="width:10px;height:10px;border-radius:2px;background:var(--teal);flex-shrink:0;"></div>
+            Intermediate ATH
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text-dim);">
+            <div style="width:10px;height:10px;border-radius:2px;background:var(--slate);flex-shrink:0;"></div>
+            Kept (not ATH)
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text-dim);">
+            <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border-bright);flex-shrink:0;"></div>
+            Reverted
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text-dim);">
+            <div style="width:16px;height:1px;border-top:1px dashed rgba(229,196,106,0.5);flex-shrink:0;"></div>
+            92.0% ATH line
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- RUN HISTORY TABLE -->
+  <section class="section">
+    <span class="section-label">Run History</span>
+    <h2>Session Run Log — Key Milestones</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Run</th>
+            <th>Area %</th>
+            <th>Count %</th>
+            <th>Key Change</th>
+            <th>Verdict</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="run-id">n439</td>
+            <td class="num num--base">90.5%</td>
+            <td class="num num--base">87.8%</td>
+            <td>Session baseline: 13 overrides + ARBiH last stand mechanic + morale floor tune</td>
+            <td><span class="verdict verdict--kept">BASELINE</span></td>
+          </tr>
+          <tr>
+            <td class="run-id">n449–n453</td>
+            <td class="num num--reverted">89.1–90.3%</td>
+            <td class="num num--reverted">—</td>
+            <td>RS-HRHB attack penalty tests (−80, −200, −400) + Glogova/Bosanski Samac overrides. All caused cascade regressions. Penalty confirmed harmful at any level for KRAJINA/HERZEGOVINA.</td>
+            <td><span class="verdict verdict--reverted">REVERTED</span></td>
+          </tr>
+          <tr>
+            <td class="run-id">n454</td>
+            <td class="num num--ath">90.7%</td>
+            <td class="num num--ath">88.6%</td>
+            <td>RS <code>avoided_osids</code> for 4 Visoko cells (visoko_2, gornja_vratnica_2, podvinjci_2, stuparici_2). CENTRAL_CORRIDOR +1.7pp, no cascades.</td>
+            <td><span class="verdict verdict--ath">ATH +1</span></td>
+          </tr>
+          <tr>
+            <td class="run-id">n455</td>
+            <td class="num num--reverted">—</td>
+            <td class="num num--reverted">—</td>
+            <td>Cajniče 2 overrides → Trnovo/Sarajevo COLLAPSE (−8.3pp). Confirmed SE BiH structural cascade barrier.</td>
+            <td><span class="verdict verdict--reverted">REVERTED</span></td>
+          </tr>
+          <tr>
+            <td class="run-id">n456</td>
+            <td class="num num--ath">90.8%</td>
+            <td class="num num--ath">88.8%</td>
+            <td>HRHB overrides for Kiseljak + RS avoided for Breza/Kakanj/Zavidovici. CENTRAL_CORRIDOR +0.7pp.</td>
+            <td><span class="verdict verdict--ath">ATH +2</span></td>
+          </tr>
+          <tr>
+            <td class="run-id">n457</td>
+            <td class="num num--ath">91.7%</td>
+            <td class="num num--ath">89.7%</td>
+            <td>RS avoided for Bugojno/Vares/Doboj (7 cells) + travnik:cukle_2 HRHB override. CENTRAL_BOSNIA +3.9pp, CENTRAL_CORRIDOR +1.5pp, HERZEGOVINA +1.7pp. Massive clean gain.</td>
+            <td><span class="verdict verdict--ath">ATH +3</span></td>
+          </tr>
+          <tr>
+            <td class="run-id">n458</td>
+            <td class="num num--reverted">91.1%</td>
+            <td class="num num--reverted">—</td>
+            <td>Isolation: remove Doboj avoided_osids, add Zvornik redirect fixes. Confirmed Doboj avoided_osids are worth the POSAVINA_NE cost.</td>
+            <td><span class="verdict verdict--reverted">REVERTED</span></td>
+          </tr>
+          <tr>
+            <td class="run-id">n459</td>
+            <td class="num num--ath">91.8%</td>
+            <td class="num num--ath">89.9%</td>
+            <td>Zvornik donja_kamenica/krizevici → RS overrides + rastosnica_2 avoided. POSAVINA_NE +0.3pp, CENTRAL_BOSNIA +0.6pp.</td>
+            <td><span class="verdict verdict--ath">ATH +4</span></td>
+          </tr>
+          <tr>
+            <td class="run-id">n460–n465</td>
+            <td class="num num--reverted">91.1–91.5%</td>
+            <td class="num num--reverted">—</td>
+            <td>Multiple tests: cukle_2 RS avoided (HRHB expansion), Donji Vakuf direction error, Kladanj overrides (cascade), HRHB avoided_osids (consolidation confirmed zero effect). All reverted or marginally kept.</td>
+            <td><span class="verdict verdict--reverted">MOSTLY REVERTED</span></td>
+          </tr>
+          <tr>
+            <td class="run-id"><strong>n466</strong></td>
+            <td class="num num--ath"><strong>92.0%</strong></td>
+            <td class="num num--ath"><strong>90.1%</strong></td>
+            <td>Kalesija <code>seher_2</code> + <code>gojcin_2</code> RS overrides from n459 base. CENTRAL_BOSNIA 90.2% count, HERZEGOVINA 96.8% (bonus: kupres:kupres_2 fixed via VRS dynamics). Clean, no cascades.</td>
+            <td><span class="verdict verdict--ath">★ NEW ATH</span></td>
+          </tr>
+          <tr>
+            <td class="run-id">n467</td>
+            <td class="num num--reverted">91.5%</td>
+            <td class="num num--reverted">89.8%</td>
+            <td>n466 + Kladanj 4 overrides. Disrupted VRS dynamics that fixed kupres:kupres_2 → reverted. Kalesija→Kupres fix is fragile.</td>
+            <td><span class="verdict verdict--reverted">REVERTED</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- REGIONAL BREAKDOWN -->
+  <section class="section">
+    <span class="section-label">Final State — n466</span>
+    <h2>Regional Match Rate: Painted vs Sim</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Region</th>
+            <th>Count Match</th>
+            <th>Area Match</th>
+            <th>Area Progress</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>OVERALL</strong></td>
+            <td class="num"><strong>670 / 744 (90.1%)</strong></td>
+            <td class="num num--ath"><strong>92.0%</strong></td>
+            <td>
+              <div class="region-bar-wrap">
+                <div class="region-bar-bg"><div class="region-bar-fill" style="width:92%;background:var(--gold);"></div></div>
+                <span class="region-pct num--ath">92.0%</span>
+              </div>
+            </td>
+            <td><span class="verdict verdict--ath">★ ATH</span></td>
+          </tr>
+          <tr>
+            <td>HERZEGOVINA</td>
+            <td class="num">90 / 93 (96.8%)</td>
+            <td class="num">96.2%</td>
+            <td>
+              <div class="region-bar-wrap">
+                <div class="region-bar-bg"><div class="region-bar-fill" style="width:96.2%;"></div></div>
+                <span class="region-pct">96.2%</span>
+              </div>
+            </td>
+            <td><span class="verdict verdict--ath">Excellent</span></td>
+          </tr>
+          <tr>
+            <td>KRAJINA</td>
+            <td class="num">122 / 131 (93.1%)</td>
+            <td class="num">96.1%</td>
+            <td>
+              <div class="region-bar-wrap">
+                <div class="region-bar-bg"><div class="region-bar-fill" style="width:96.1%;"></div></div>
+                <span class="region-pct">96.1%</span>
+              </div>
+            </td>
+            <td><span class="verdict verdict--ath">Excellent</span></td>
+          </tr>
+          <tr>
+            <td>CENTRAL_CORRIDOR</td>
+            <td class="num">86 / 94 (91.5%)</td>
+            <td class="num">90.7%</td>
+            <td>
+              <div class="region-bar-wrap">
+                <div class="region-bar-bg"><div class="region-bar-fill" style="width:90.7%;"></div></div>
+                <span class="region-pct">90.7%</span>
+              </div>
+            </td>
+            <td><span class="verdict verdict--kept">Good</span></td>
+          </tr>
+          <tr>
+            <td>SARAJEVO</td>
+            <td class="num">28 / 31 (90.3%)</td>
+            <td class="num">86.7%</td>
+            <td>
+              <div class="region-bar-wrap">
+                <div class="region-bar-bg"><div class="region-bar-fill" style="width:86.7%;background:var(--slate);"></div></div>
+                <span class="region-pct">86.7%</span>
+              </div>
+            </td>
+            <td><span class="verdict verdict--kept">Good</span></td>
+          </tr>
+          <tr>
+            <td>CENTRAL_BOSNIA</td>
+            <td class="num">147 / 163 (90.2%)</td>
+            <td class="num">87.6%</td>
+            <td>
+              <div class="region-bar-wrap">
+                <div class="region-bar-bg"><div class="region-bar-fill" style="width:87.6%;background:var(--slate);"></div></div>
+                <span class="region-pct">87.6%</span>
+              </div>
+            </td>
+            <td><span class="verdict verdict--kept">Good</span></td>
+          </tr>
+          <tr>
+            <td>POSAVINA_NE</td>
+            <td class="num">95 / 109 (87.2%)</td>
+            <td class="num">89.5%</td>
+            <td>
+              <div class="region-bar-wrap">
+                <div class="region-bar-bg"><div class="region-bar-fill" style="width:89.5%;background:var(--amber);"></div></div>
+                <span class="region-pct">89.5%</span>
+              </div>
+            </td>
+            <td><span class="verdict verdict--kept">Structural</span></td>
+          </tr>
+          <tr>
+            <td>DRINA</td>
+            <td class="num">102 / 123 (82.9%)</td>
+            <td class="num">87.2%</td>
+            <td>
+              <div class="region-bar-wrap">
+                <div class="region-bar-bg"><div class="region-bar-fill" style="width:87.2%;background:var(--red);"></div></div>
+                <span class="region-pct">87.2%</span>
+              </div>
+            </td>
+            <td><span class="verdict verdict--reverted">Barrier</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:0.8rem;color:var(--text-dim);margin-top:10px;font-family:var(--font-mono);">Area from <code>data/derived/operational/osid_areas.json</code> (51,337 km² total). Count uses 744 OSIDs after degenerate merge.</p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- KEY FINDINGS -->
+  <section class="section">
+    <span class="section-label">Key Findings</span>
+    <h2>What Was Discovered — Calibration Lessons</h2>
+
+    <div class="findings-grid">
+      <div class="finding-card finding-card--teal">
+        <div class="finding-number">01 / DIRECTION LAW</div>
+        <div class="finding-title">Override Direction Is Everything</div>
+        <div class="finding-body">
+          <code>avoided_osids</code> only fix RS <em>over-captures</em> (painted=RBiH/HRHB, sim=RS). RS <em>overrides</em> only fix <em>under-captures</em> (painted=RS, sim=RBiH). Confusing them — as happened in n461 with Donji Vakuf — causes large regressions in the wrong direction. n461 lost −0.7pp area by adding under-captures to avoided_osids.
+        </div>
+        <span class="finding-pill pill--danger">n461 direction error</span>
+      </div>
+
+      <div class="finding-card finding-card--red">
+        <div class="finding-number">02 / CONSOLIDATION WALL</div>
+        <div class="finding-title">Consolidation Captures Are Unfixable</div>
+        <div class="finding-body">
+          Cells that flip faction via neighbor consolidation (all neighbors same faction → automatic capture) cannot be fixed by either avoided_osids or HRHB avoided_osids. Confirmed: <code>kakanj:biljesevo</code>, <code>zavidovici:cardak_2</code>, <code>olovo:olovo_2</code>, <code>zvornik:rastosnica_2</code>, and all 4 persistent HRHB over-captures (<code>jablanica:doljani_2</code>, <code>kiseljak:brnjaci_2</code>, etc.) are consolidation-captured.
+        </div>
+        <span class="finding-pill pill--danger">confirmed n465</span>
+      </div>
+
+      <div class="finding-card finding-card--amber">
+        <div class="finding-number">03 / CASCADE BARRIER</div>
+        <div class="finding-title">SE BiH Hard Cascade: Rogatica → Trnovo → Sarajevo</div>
+        <div class="finding-body">
+          Any RS gain in southeastern BiH (Rogatica 5 cells, Cajniče 2 cells, Foča perimeter) causes <code>trnovo:delijas</code> to flip RS via consolidation cascade, collapsing SARAJEVO match by 8+ percentage points. Confirmed 3 times: n438, n441, n455. Also confirmed: Cajniče → POSAVINA_NE cascade (−1.5pp Zvornik area). Structural barrier — no override-based fix possible.
+        </div>
+        <span class="finding-pill pill--danger">structural — no fix</span>
+      </div>
+
+      <div class="finding-card finding-card--slate">
+        <div class="finding-number">04 / LOAD-BEARING WRONG CAPTURE</div>
+        <div class="finding-title">turbe_2 RS Over-Capture Enables Donji Vakuf Cascade</div>
+        <div class="finding-body">
+          In n462, VRS capturing <code>travnik:turbe_2</code> (a wrong RS over-capture) was the stepping stone enabling consolidation to cascade and fix 3 Donji Vakuf cells (jemanlici, korenici, prusac_2). Fixing turbe_2 with avoided_osids (n463) broke the entire Donji Vakuf chain: 3 correct cells reverted, new Travnik mis-captures appeared. Net −0.7pp. "Wrong captures" can be load-bearing.
+        </div>
+        <span class="finding-pill pill--warning">do not fix turbe_2</span>
+      </div>
+
+      <div class="finding-card finding-card--green">
+        <div class="finding-number">05 / FRAGILE DEPENDENCY</div>
+        <div class="finding-title">Kalesija → Kupres Bonus: VRS Force Dynamics</div>
+        <div class="finding-body">
+          Adding <code>kalesija:seher_2</code> + <code>gojcin_2</code> RS overrides (n466) produced a bonus fix of <code>kupres:kupres_2</code> — HERZEGOVINA jumped from 94.5% to 96.8%. The mechanism: VRS corps with Kalesija secured redirected forces toward Kupres, enabling them to hold kupres_2 against HRHB pressure. Adding Kladanj overrides on top (n467) disrupted this VRS allocation and kupres_2 reverted. The dependency is real but fragile.
+        </div>
+        <span class="finding-pill pill--good">n466 ATH</span>
+      </div>
+
+      <div class="finding-card finding-card--amber">
+        <div class="finding-number">06 / EBK REDIRECT</div>
+        <div class="finding-title">Doboj Avoided → EBK Redirects to Zvornik</div>
+        <div class="finding-body">
+          When RS avoided_osids prevent the East Bosnia Corps (EBK) from targeting Doboj cells, it redirects to Zvornik area, causing disorganization: cells VRS should hold (donja_kamenica, krizevici) are lost, while wrong cells (rastosnica_2) are over-captured. n457 fixed the Doboj side (+3.9pp CENTRAL_BOSNIA) but POSAVINA_NE dropped −2.4pp. n459 partially fixed POSAVINA_NE with explicit Zvornik overrides.
+        </div>
+        <span class="finding-pill pill--warning">mitigated in n459</span>
+      </div>
+
+      <div class="finding-card finding-card--teal">
+        <div class="finding-number">07 / RS-HRHB PENALTY</div>
+        <div class="finding-title">RS Attack Penalty Hurts Large Regions</div>
+        <div class="finding-body">
+          Testing RS-HRHB attack penalties (−80 in n453, −200 in n450, −400 in n449) consistently caused KRAJINA −1.5–3.8pp and HERZEGOVINA −1.1–1.9pp regressions. The mechanism: HVO brigades face reduced VRS pressure → run unchallenged → expand into RS territory. Even small penalties hurt. Central Bosnia gains (~+2pp) were never enough to offset large-region losses. Penalty disabled at 0.
+        </div>
+        <span class="finding-pill pill--danger">disabled — do not re-enable</span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- MECHANICS CHANGES -->
+  <section class="section">
+    <span class="section-label">Mechanic Changes</span>
+    <h2>Engine Changes Made This Session</h2>
+
+    <div class="mech-grid">
+      <div class="mech-card">
+        <span class="mech-tag mech-tag--new">New Mechanic</span>
+        <h3>ARBiH Homeland Last Stand</h3>
+        <p style="font-size:0.84rem;color:var(--text-dim);margin-top:8px;line-height:1.55;">
+          Bosniak defenders in co-ethnic majority OSIDs (≥50%) absorb <em>both</em> 'victory' and 'costly_victory' attack outcomes — no retreat. Implemented in <code>attack_resolution_osid.ts</code>. Reflects historically documented ARBiH fighting spirit: defenders fighting for their homes accepted heavy casualties rather than giving ground. Lowering the threshold to 0.60 (from 0.50) was tested in n443 — zero effect, as no contested cells had 0.50–0.60 Bosniak share.
+        </p>
+        <div class="mech-before-after">
+          <div class="mech-val mech-val--before">
+            <div class="mech-val-label">Before</div>
+            <div class="mech-val-data">Costly victory → retreat</div>
+          </div>
+          <div class="mech-val mech-val--after">
+            <div class="mech-val-label">After</div>
+            <div class="mech-val-data">≥50% Bosniak → absorb</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mech-card">
+        <span class="mech-tag mech-tag--tuned">Tuned</span>
+        <h3>Morale Resist Floors</h3>
+        <p style="font-size:0.84rem;color:var(--text-dim);margin-top:8px;line-height:1.55;">
+          Morale ≥ floor + costly_victory outcome → defender absorbs (no retreat). Lowering RBiH floor increases resistance — ARBiH units hold longer even at moderate morale. HRHB floor also reduced for similar effect. Implemented in <code>getMoraleResistFloor()</code> in <code>combat_math.ts</code>.
+        </p>
+        <div class="mech-before-after">
+          <div class="mech-val mech-val--before">
+            <div class="mech-val-label">Before</div>
+            <div class="mech-val-data">RBiH=62, HRHB=65</div>
+          </div>
+          <div class="mech-val mech-val--after">
+            <div class="mech-val-label">After</div>
+            <div class="mech-val-data">RBiH=50, HRHB=60</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mech-card">
+        <span class="mech-tag mech-tag--scenario">Scenario Data</span>
+        <h3>OSID Control Overrides Added</h3>
+        <p style="font-size:0.84rem;color:var(--text-dim);margin-top:8px;line-height:1.55;">
+          7 new OSID control overrides added to <code>apr1992_definitive_40w.json</code> since n439 baseline. These correct initial-position mismatches where the sim doesn't reach historically correct w0 control through organic means.
+        </p>
+        <div style="margin-top:10px;font-size:0.8rem;color:var(--text-dim);font-family:var(--font-mono);">
+          <div>+ kiseljak:kiseljak_2 → HRHB</div>
+          <div>+ kiseljak:borina → HRHB</div>
+          <div>+ travnik:cukle_2 → HRHB</div>
+          <div>+ zvornik:donja_kamenica → RS</div>
+          <div>+ zvornik:krizevici → RS</div>
+          <div>+ kalesija:seher_2 → RS</div>
+          <div>+ kalesija:gojcin_2 → RS</div>
+        </div>
+      </div>
+
+      <div class="mech-card">
+        <span class="mech-tag mech-tag--scenario">Scenario Data</span>
+        <h3>RS Avoided OSIDs Added</h3>
+        <p style="font-size:0.84rem;color:var(--text-dim);margin-top:8px;line-height:1.55;">
+          16 RS <code>avoided_osids</code> now prevent VRS bots from targeting cells they historically didn't hold by Jan 1993. Added in waves: Visoko (n454), Breza/Kakanj/Zavidovici (n456), Bugojno/Vares/Doboj (n457), Zvornik:rastosnica (n459). Cannot prevent consolidation captures.
+        </p>
+        <div style="margin-top:10px;font-size:0.8rem;color:var(--text-dim);font-family:var(--font-mono);">
+          4× Visoko · 2× Breza · 1× Kakanj · 1× Zavidovici<br>
+          2× Bugojno · 2× Vares · 3× Doboj · 1× Zvornik
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- REMAINING GAPS -->
+  <section class="section">
+    <span class="section-label">Remaining Gaps — n466</span>
+    <h2>Structural Mismatches (74 remaining)</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Cells</th>
+            <th>Examples</th>
+            <th>Fix Possible?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>SE BiH Cascade Barrier</strong></td>
+            <td class="num">5+5+2 = 12</td>
+            <td>Rogatica 5, Srebrenica 6, Cajniče 2 — all cascade Trnovo→Sarajevo</td>
+            <td><span class="verdict verdict--reverted">NO</span></td>
+          </tr>
+          <tr>
+            <td><strong>Consolidation Captures</strong></td>
+            <td class="num">~8</td>
+            <td><code>kakanj:biljesevo</code>, <code>zavidovici:cardak_2</code>, <code>olovo:olovo_2</code>, 4 HRHB over-captures</td>
+            <td><span class="verdict verdict--reverted">NO</span></td>
+          </tr>
+          <tr>
+            <td><strong>Goražde Enclave</strong></td>
+            <td class="num">4</td>
+            <td><code>glamoc</code>, <code>kamen</code>, <code>sopotnica</code>, <code>kolovarice</code> — all structural enclave dynamics</td>
+            <td><span class="verdict verdict--reverted">NO</span></td>
+          </tr>
+          <tr>
+            <td><strong>POSAVINA_NE EBK Redirect</strong></td>
+            <td class="num">~8</td>
+            <td>Lukavac/Lopare RS over-captures + Ugljevik/Djulici RS under-captures</td>
+            <td><span class="verdict verdict--reverted">Risky</span></td>
+          </tr>
+          <tr>
+            <td><strong>Central Bosnia RS Under-Captures</strong></td>
+            <td class="num">~9</td>
+            <td>Kladanj 4, Konjic 2, donji_vakuf_2, olovo:gurdici_2 — VRS historically held these but sim underperforms</td>
+            <td><span class="verdict verdict--kept">Partial</span></td>
+          </tr>
+          <tr>
+            <td><strong>Structural Edge Cells</strong></td>
+            <td class="num">~6</td>
+            <td>Livno 2 (HRHB over), Trnovo 2 (RS over), pale:praca (RS under), Vlasenica 2 (RS over)</td>
+            <td><span class="verdict verdict--kept">Possible</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <div style="text-align:center;padding:24px 0 8px;border-top:1px solid var(--border);margin-top:16px;">
+    <p style="font-family:var(--font-mono);font-size:10px;color:var(--text-dimmer);letter-spacing:0.1em;">
+      AWWV CALIBRATION SESSION · 2026-03-04 · n449–n467 · CANONICAL RUN: n466 (92.0% AREA-WEIGHTED ATH)
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

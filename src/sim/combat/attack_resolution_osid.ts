@@ -608,22 +608,34 @@ export function resolveAttackOrdersOsid(
         // === MORALE-BASED RETREAT RESISTANCE ===
         let moraleAbsorbed = false;
         const defenderFaction = defenderFormation?.faction as string ?? '';
-        if (outcome === 'costly_victory' && defenderFormation
-            && (defenderFormation.morale ?? 60) >= getMoraleResistFloor(defenderFaction)) {
-            flip = false;
-            moraleAbsorbed = true;
-            defenderFormation.morale = Math.max(0, (defenderFormation.morale ?? 60) - 5);
-            const ev: AttackResolutionOsidSnapEvent = {
-                snap_type: 'morale_absorption',
-                trigger_phase: 'post_battle',
-                attacker_brigade: firstAttacker.id,
-                target_osid: targetOsid,
-                affected_formation: defenderFormation.id,
-                description: 'Defender morale held — absorbed costly victory without retreating.',
-                effects: { flip_prevented: true, morale_drain: -5 },
-            };
-            battleSnapEvents.push(ev);
-            pushSnapEvent(report, ev);
+        if (defenderFormation) {
+            const defMorale = defenderFormation.morale ?? 60;
+            const resistFloor = getMoraleResistFloor(defenderFaction);
+            const coEthnicShare = getCoEthnicShare(targetOsid, defenderFaction, ethnicComposition);
+            // ARBiH homeland defense: fighters refuse to retreat even under heavy losses.
+            // In co-ethnic homeland (≥50%), absorb up to 'victory'; elsewhere absorb 'costly_victory' if morale holds.
+            const homelandLastStand = defenderFaction === 'RBiH' && coEthnicShare >= 0.50;
+            const absorb = homelandLastStand
+                ? (outcome === 'costly_victory' || outcome === 'victory')
+                : (outcome === 'costly_victory' && defMorale >= resistFloor);
+            if (absorb && flip) {
+                flip = false;
+                moraleAbsorbed = true;
+                defenderFormation.morale = Math.max(0, defMorale - 5);
+                const ev: AttackResolutionOsidSnapEvent = {
+                    snap_type: 'morale_absorption',
+                    trigger_phase: 'post_battle',
+                    attacker_brigade: firstAttacker.id,
+                    target_osid: targetOsid,
+                    affected_formation: defenderFormation.id,
+                    description: homelandLastStand
+                        ? 'ARBiH homeland last stand — absorbed defeat without retreating.'
+                        : 'Defender morale held — absorbed costly victory without retreating.',
+                    effects: { flip_prevented: true, morale_drain: -5 },
+                };
+                battleSnapEvents.push(ev);
+                pushSnapEvent(report, ev);
+            }
         }
 
         // === HOMELAND DETERMINATION: Extra casualties when morale absorption triggers ===
@@ -764,6 +776,21 @@ export function resolveAttackOrdersOsid(
                 defenderFormation, currentTurn, targetOsid, outcome,
                 attackerFaction, flip, finalDefenderCas, finalAttackerCas, isConcentrated,
             );
+        }
+
+        // === COMBAT FATIGUE ===
+        // Attackers accumulate +2 fatigue per battle; defender +1.
+        // Fatigue is reduced by recovery each turn (see formation_fatigue.ts).
+        const FATIGUE_ATTACKER = 2;
+        const FATIGUE_DEFENDER = 1;
+        const FATIGUE_MAX = 20;
+        for (const af of attackerFormations) {
+            if (!af.ops) af.ops = { fatigue: 0, last_supplied_turn: null };
+            af.ops.fatigue = Math.min(FATIGUE_MAX, (af.ops.fatigue ?? 0) + FATIGUE_ATTACKER);
+        }
+        if (defenderFormation) {
+            if (!defenderFormation.ops) defenderFormation.ops = { fatigue: 0, last_supplied_turn: null };
+            defenderFormation.ops.fatigue = Math.min(FATIGUE_MAX, (defenderFormation.ops.fatigue ?? 0) + FATIGUE_DEFENDER);
         }
     }
 

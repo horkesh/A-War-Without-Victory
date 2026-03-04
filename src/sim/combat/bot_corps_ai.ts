@@ -1363,10 +1363,18 @@ export function generateCorpsDirectives(
         // Pocket targets: enemy OSIDs completely surrounded by faction territory — always attack these.
         // Rear pockets (all neighbors faction-controlled) are targeted even without an adjacent brigade,
         // so reserves will move toward them. Front pockets still require an adjacent brigade.
+        // Constraint: only target pockets in municipalities within this corps' operational area
+        // (derived from armyPriorities target_municipalities). This prevents VRS corps from cleaning
+        // up pockets deep in enemy heartland just because they happen to be "surrounded".
         if (graphAnalysis?.enemy_pockets.length) {
+            const corpsMunSet = new Set<string>(
+                armyPriorities.flatMap(p => p.target_municipalities ?? [])
+            );
             const pc = state.political_controllers ?? {};
             for (const pocketOsid of graphAnalysis.enemy_pockets) {
                 if (offensiveTargets.includes(pocketOsid)) continue;
+                const pocketMun = pocketOsid.split(':')[1];
+                if (!pocketMun || !corpsMunSet.has(pocketMun)) continue; // out of operational area
                 const neighbors = adjacency.get(pocketOsid) ?? [];
                 const isRearPocket = neighbors.length > 0 && neighbors.every(n =>
                     (pc[n] ?? '') === faction
@@ -1471,6 +1479,18 @@ export function generateCorpsDirectives(
             const outcomeRank: Record<string, number> = { decisive_victory: 5, victory: 4, costly_victory: 3, stalemate: 2, repulsed: 1 };
             if ((outcomeRank[bestMinOutcome] ?? 2) < (outcomeRank['victory'] ?? 4)) {
                 bestMinOutcome = 'victory';
+            }
+        }
+
+        // Hard-enforce avoided_osids_by_faction before sector and sort steps:
+        // remove any avoided OSID from offensive_targets regardless of how it got there.
+        // Must run before sectorTargets is built so avoid list is respected in sector_targets too.
+        // Without this, rear-pocket targeting bypasses the avoid list because pioneer attacks
+        // skip the score filter and trigger purely on offensive_targets membership.
+        if (avoidOsids.length > 0) {
+            const avoidSet = new Set(avoidOsids);
+            for (let i = offensiveTargets.length - 1; i >= 0; i--) {
+                if (avoidSet.has(offensiveTargets[i]!)) offensiveTargets.splice(i, 1);
             }
         }
 

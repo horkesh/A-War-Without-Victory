@@ -891,6 +891,8 @@ export async function initializePoliticalControllers(
         masterBySid.set(entry.sid, entry);
     }
 
+    // Post-merge (2026-03-03): settlement graph may have 744 OSIDs while master still has 753 (9 merged away).
+    // Use only master entries that exist in the graph; drop the rest (merged-away IDs) and warn.
     const extraMasterSids: string[] = [];
     for (const sid of masterBySid.keys()) {
         if (!settlementGraph.settlements.has(sid)) {
@@ -898,8 +900,11 @@ export async function initializePoliticalControllers(
         }
     }
     if (extraMasterSids.length > 0) {
-        throw new Error(
-            `initial master file contains ${extraMasterSids.length} unknown settlement ids (not in settlement graph)`
+        for (const sid of extraMasterSids) {
+            masterBySid.delete(sid);
+        }
+        console.warn(
+            `[political_control_init] Dropped ${extraMasterSids.length} settlement id(s) from initial master (not in settlement graph; likely merged 2026-03-03): ${extraMasterSids.slice(0, 5).join(', ')}${extraMasterSids.length > 5 ? ` ... +${extraMasterSids.length - 5} more` : ''}`
         );
     }
 

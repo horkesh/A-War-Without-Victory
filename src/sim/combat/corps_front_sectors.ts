@@ -280,8 +280,8 @@ export const MAX_SECTOR_EDGES = 25;
 /** Maximum brigades per sector before forced split. */
 export const MAX_SECTOR_BRIGADES = 8;
 
-/** Maximum reserve brigades per front edge (proportional cap). */
-export const RESERVE_PER_EDGE_CAP = 0.5;
+/** Maximum reserve brigades per front edge (proportional cap). ~1 per typical 10-18 edge sector. */
+export const RESERVE_PER_EDGE_CAP = 0.07;
 
 /**
  * Decompose a corps' front edges into connected sub-segments via BFS.

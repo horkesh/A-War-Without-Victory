@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": 1,
-    "settlement_count": 753
+    "settlement_count": 744
   },
   "settlements": [
     {
@@ -1685,14 +1685,6 @@
       "stability_score": 65
     },
     {
-      "sid": "op:konjic:falanovo_brdo",
-      "mun1990_id": "konjic",
-      "political_controller": "RBiH",
-      "contested_control": false,
-      "control_status": "SECURE",
-      "stability_score": 65
-    },
-    {
       "sid": "op:konjic:sitnik",
       "mun1990_id": "konjic",
       "political_controller": "RBiH",
@@ -3133,14 +3125,6 @@
       "stability_score": 35
     },
     {
-      "sid": "op:vares:pobilje",
-      "mun1990_id": "vares",
-      "political_controller": null,
-      "contested_control": true,
-      "control_status": "HIGHLY_CONTESTED",
-      "stability_score": 35
-    },
-    {
       "sid": "op:velika_kladusa:poljana_2",
       "mun1990_id": "velika_kladusa",
       "political_controller": "RBiH",
@@ -3443,14 +3427,6 @@
       "contested_control": false,
       "control_status": "SECURE",
       "stability_score": 75
-    },
-    {
-      "sid": "op:travnik:krusevo_brdo_i",
-      "mun1990_id": "travnik",
-      "political_controller": "RBiH",
-      "contested_control": true,
-      "control_status": "CONTESTED",
-      "stability_score": 55
     },
     {
       "sid": "op:bosanska_krupa:donji_dubovik_2",
@@ -5005,22 +4981,6 @@
       "stability_score": 75
     },
     {
-      "sid": "op:gorazde:novakovici",
-      "mun1990_id": "gorazde",
-      "political_controller": "RBiH",
-      "contested_control": false,
-      "control_status": "SECURE",
-      "stability_score": 75
-    },
-    {
-      "sid": "op:gorazde:zorlaci",
-      "mun1990_id": "gorazde",
-      "political_controller": "RBiH",
-      "contested_control": false,
-      "control_status": "SECURE",
-      "stability_score": 75
-    },
-    {
       "sid": "op:pale:hotocina",
       "mun1990_id": "pale",
       "political_controller": "RS",
@@ -5069,7 +5029,7 @@
       "stability_score": 75
     },
     {
-      "sid": "op:prijedor:alisici",
+      "sid": "op:prijedor:ljubija_2",
       "mun1990_id": "prijedor",
       "political_controller": "RBiH",
       "contested_control": true,
@@ -5086,14 +5046,6 @@
     },
     {
       "sid": "op:prijedor:omarska_2",
-      "mun1990_id": "prijedor",
-      "political_controller": "RBiH",
-      "contested_control": true,
-      "control_status": "CONTESTED",
-      "stability_score": 55
-    },
-    {
-      "sid": "op:prijedor:ljubija_2",
       "mun1990_id": "prijedor",
       "political_controller": "RBiH",
       "contested_control": true,
@@ -5342,14 +5294,6 @@
     },
     {
       "sid": "op:rudo:gornja_rijeka",
-      "mun1990_id": "rudo",
-      "political_controller": "RS",
-      "contested_control": false,
-      "control_status": "SECURE",
-      "stability_score": 75
-    },
-    {
-      "sid": "op:rudo:kosovici",
       "mun1990_id": "rudo",
       "political_controller": "RS",
       "contested_control": false,
@@ -5781,23 +5725,7 @@
       "stability_score": 65
     },
     {
-      "sid": "op:cajnice:djakovici",
-      "mun1990_id": "cajnice",
-      "political_controller": "RS",
-      "contested_control": false,
-      "control_status": "SECURE",
-      "stability_score": 65
-    },
-    {
       "sid": "op:cajnice:todorovici",
-      "mun1990_id": "cajnice",
-      "political_controller": "RS",
-      "contested_control": false,
-      "control_status": "SECURE",
-      "stability_score": 65
-    },
-    {
-      "sid": "op:cajnice:metaljka",
       "mun1990_id": "cajnice",
       "political_controller": "RS",
       "contested_control": false,

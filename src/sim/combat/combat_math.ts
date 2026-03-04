@@ -62,9 +62,9 @@ const MORALE_RESIST_FLOOR = 70;
  * RS: professional withdrawal discipline → moderate threshold.
  * HRHB: Croatian homeland defense → moderate-low threshold. */
 const FACTION_MORALE_RESIST_FLOOR: Record<string, number> = {
-    RBiH: 62,
+    RBiH: 50,
     RS: 70,
-    HRHB: 65,
+    HRHB: 60,
 };
 
 export function getMoraleResistFloor(faction: string): number {

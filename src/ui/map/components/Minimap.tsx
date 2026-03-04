@@ -126,7 +126,8 @@ export function Minimap() {
       style,
       center: BOSNIA_CENTER,
       zoom: 6.2,
-      interactive: false,
+      interactive: true,
+      scrollZoom: false,
       attributionControl: false,
     });
     mapRef.current = map;

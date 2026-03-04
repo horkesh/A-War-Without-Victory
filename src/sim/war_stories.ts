@@ -118,14 +118,14 @@ export function generateNarrative(
 
     switch (arc) {
         case 'veteran':
-            return `The ${name} fought ${battles} battles, winning ${wins}. ` +
-                `It inflicted ${inflicted} casualties while losing ${casualties} of its own. ` +
-                `A reliable formation, it ended the war at ${currentPers} personnel — the backbone of its corps.`;
+            return `The ${name} has fought ${battles} battles, winning ${wins}. ` +
+                `It has inflicted ${inflicted} casualties while losing ${casualties} of its own. ` +
+                `A reliable formation, it stands at ${currentPers} personnel — the backbone of its corps.`;
 
         case 'bloodied':
-            return `The ${name} was tested in ${battles} engagements, suffering ${casualties} total casualties. ` +
-                `It won ${wins} and lost ${losses}. The cost of holding the line was written in its ranks: ` +
-                `from a peak of ${peak} to a low of ${nadir}, then rebuilt to ${currentPers}.`;
+            return `The ${name} has been tested in ${battles} engagements, suffering ${casualties} total casualties. ` +
+                `It has won ${wins} and lost ${losses}. The cost of holding the line is written in its ranks: ` +
+                `from a peak of ${peak} to a low of ${nadir}, rebuilding to ${currentPers}.`;
 
         case 'shattered':
             return `The ${name} is a shadow of what it was. After ${battles} battles and ${casualties} casualties, ` +
@@ -133,20 +133,20 @@ export function generateNarrative(
                 `Still in the line, but barely.`;
 
         case 'risen':
-            return `The ${name} was nearly destroyed and rebuilt. Over ${battles} battles, ` +
-                `it suffered ${casualties} total casualties — far exceeding its peak strength of ${peak}. ` +
-                `But it rose each time. By war's end, it stood at ${currentPers} men, ` +
+            return `The ${name} has been nearly destroyed and rebuilt. Over ${battles} battles, ` +
+                `it has suffered ${casualties} total casualties — far exceeding its peak strength of ${peak}. ` +
+                `But it rises each time. It currently stands at ${currentPers} men, ` +
                 `a testament to the will to fight on.`;
 
         case 'destroyed':
-            return `The ${name} ceased to exist. ` +
+            return `The ${name} has ceased to exist. ` +
                 (battles > 0
                     ? `In its ${battles} battles, it suffered ${casualties} casualties before being destroyed.`
                     : `It was dissolved before seeing significant action.`);
 
         case 'garrison':
-            return `The ${name} held its ground. With only ${battles} engagements, ` +
-                `its war was one of patience, not blood. It ended at ${currentPers} personnel.`;
+            return `The ${name} has held its ground. With only ${battles} engagements, ` +
+                `its war has been one of patience, not blood. It currently fields ${currentPers} personnel.`;
     }
 }
 

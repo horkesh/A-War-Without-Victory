@@ -43,10 +43,29 @@
   },
   "osid_control_overrides": {
     "op:brcko:brcko": "RS",
-    "op:brcko:krepsic": "RS"
-  },
-  "avoided_osids_by_faction": {
-    "RBiH": ["op:zavidovici:vozuca_2"]
+    "op:brcko:krepsic": "RS",
+    "op:visegrad:visegrad_2": "RS",
+    "op:visegrad:bogdasici": "RS",
+    "op:visegrad:drinsko": "RS",
+    "op:visegrad:kamenica_2": "RS",
+    "op:visegrad:medjedja_2": "RS",
+    "op:visegrad:prelovo_2": "RS",
+    "op:visegrad:velji_lug": "RS",
+    "op:bratunac:bratunac_2": "RS",
+    "op:bratunac:zapolje_2": "RS",
+    "op:foca:ustikolina": "RS",
+    "op:rudo:gornja_strmica": "RS",
+    "op:kiseljak:kiseljak_2": "HRHB",
+    "op:kiseljak:borina": "HRHB",
+    "op:travnik:cukle_2": "HRHB",
+    "op:zvornik:donja_kamenica": "RS",
+    "op:zvornik:krizevici": "RS",
+    "op:kalesija:seher_2": "RS",
+    "op:kalesija:gojcin_2": "RS",
+    "op:kakanj:biljesevo": "RBiH",
+    "op:zavidovici:cardak_2": "RBiH",
+    "op:bugojno:prijaci": "RBiH",
+    "op:visoko:gornja_vratnica_2": "RBiH"
   },
   "war_timeline": "apr1992",
   "init_officers": "apr1992"

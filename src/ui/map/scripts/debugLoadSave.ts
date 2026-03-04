@@ -54,7 +54,7 @@ function main() {
   console.log('buildFormationsGeoJSON', Date.now() - t, 'ms, features:', formations.features.length);
 
   t = Date.now();
-  const orderArrows = buildOrderArrowsGeoJSON(state, controlled);
+  const orderArrows = buildOrderArrowsGeoJSON(state, [], controlled);
   console.log('buildOrderArrowsGeoJSON', Date.now() - t, 'ms, features:', orderArrows.features.length);
 
   console.log('Total load+overlay time:', Date.now() - t0, 'ms');

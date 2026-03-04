@@ -231,6 +231,7 @@
     "map:derive:mun1990PoliticalControllers": "tsx scripts/map/derive_mun1990_political_controllers.ts",
     "map:derive:operational-settlements": "tsx scripts/derive_operational_settlements.ts",
     "map:derive:operational-osid-first": "tsx scripts/derive_operational_osid_first.ts",
+    "map:derive:operational-initial-master": "tsx scripts/map/derive_operational_initial_master.ts",
     "audit:mun1990:zero": "tsx scripts/audits/list_zero_settlement_municipalities_1990.ts",
     "audit:breza:trace": "tsx scripts/audits/trace_breza_presence_and_mapping.ts",
     "audit:settlementNames:feasibility": "tsx scripts/audits/scan_settlement_name_sources.ts",

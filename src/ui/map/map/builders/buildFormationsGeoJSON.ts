@@ -12,6 +12,7 @@ interface FormationMarkerProperties {
   icon_id: string;
   status: string;
   readiness: string;
+  cohesion: number;
   personnel: number | null;
   location_osid: string;
 }
@@ -41,6 +42,7 @@ export function buildFormationsGeoJSON(
         icon_id: formationIconId(formation.kind, formation.faction),
         status: formation.status,
         readiness: formation.readiness,
+        cohesion: formation.cohesion,
         personnel: typeof formation.personnel === 'number' ? formation.personnel : null,
         location_osid: osid,
       },

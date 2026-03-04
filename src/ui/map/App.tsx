@@ -15,6 +15,7 @@ import { OrderQueue } from './components/OrderQueue';
 import { Tooltip } from './components/Tooltip';
 import { AttackConfirmation } from './components/AttackConfirmation';
 import { SupplyPanel } from './components/SupplyPanel';
+import { OpsPlanningModal } from './components/OpsPlanningModal';
 import { useGameStore } from './store/gameStore';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
@@ -200,6 +201,7 @@ function App() {
       {mapMode === 'supply' && loadedGameState && (
         <SupplyPanel state={loadedGameState} />
       )}
+      <OpsPlanningModal />
       <Minimap />
       <BottomStatusStrip />
     </div>

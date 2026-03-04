@@ -16,7 +16,10 @@
     },
     "osid-control": {
       "type": "geojson",
-      "data": { "type": "FeatureCollection", "features": [] }
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
     },
     "mun-borders": {
       "type": "geojson",
@@ -24,15 +27,24 @@
     },
     "front-lines": {
       "type": "geojson",
-      "data": { "type": "FeatureCollection", "features": [] }
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
     },
     "formations": {
       "type": "geojson",
-      "data": { "type": "FeatureCollection", "features": [] }
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
     },
     "order-arrows": {
       "type": "geojson",
-      "data": { "type": "FeatureCollection", "features": [] }
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
     }
   },
   "layers": [
@@ -68,7 +80,13 @@
       "type": "fill",
       "source": "osm-tiles",
       "source-layer": "water",
-      "filter": ["==", ["geometry-type"], "Polygon"],
+      "filter": [
+        "==",
+        [
+          "geometry-type"
+        ],
+        "Polygon"
+      ],
       "paint": {
         "fill-color": "rgb(100, 150, 200)",
         "fill-opacity": 0.5
@@ -79,7 +97,21 @@
       "type": "fill",
       "source": "osm-tiles",
       "source-layer": "landuse",
-      "filter": ["in", ["get", "kind"], ["literal", ["forest", "park", "nature_reserve"]]],
+      "filter": [
+        "in",
+        [
+          "get",
+          "kind"
+        ],
+        [
+          "literal",
+          [
+            "forest",
+            "park",
+            "nature_reserve"
+          ]
+        ]
+      ],
       "paint": {
         "fill-color": "#b5c9a0",
         "fill-opacity": 0.15
@@ -90,14 +122,39 @@
       "type": "line",
       "source": "osm-tiles",
       "source-layer": "water",
-      "filter": ["any",
-        ["==", ["geometry-type"], "LineString"],
-        ["==", ["geometry-type"], "MultiLineString"]
+      "filter": [
+        "any",
+        [
+          "==",
+          [
+            "geometry-type"
+          ],
+          "LineString"
+        ],
+        [
+          "==",
+          [
+            "geometry-type"
+          ],
+          "MultiLineString"
+        ]
       ],
       "paint": {
         "line-color": "rgb(100, 150, 200)",
         "line-opacity": 0.7,
-        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 0.5, 12, 2.5]
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          0.5,
+          12,
+          2.5
+        ]
       }
     },
     {
@@ -105,10 +162,37 @@
       "type": "line",
       "source": "osm-tiles",
       "source-layer": "roads",
-      "filter": ["in", ["get", "kind"], ["literal", ["highway", "major_road"]]],
+      "filter": [
+        "in",
+        [
+          "get",
+          "kind"
+        ],
+        [
+          "literal",
+          [
+            "highway",
+            "major_road"
+          ]
+        ]
+      ],
       "paint": {
         "line-color": "rgba(80, 70, 60, 0.35)",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 0.3, 10, 1, 14, 2],
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          0.3,
+          10,
+          1,
+          14,
+          2
+        ],
         "line-opacity": 1
       }
     },
@@ -117,11 +201,30 @@
       "type": "line",
       "source": "osm-tiles",
       "source-layer": "roads",
-      "filter": ["==", ["get", "kind"], "medium_road"],
+      "filter": [
+        "==",
+        [
+          "get",
+          "kind"
+        ],
+        "medium_road"
+      ],
       "minzoom": 10,
       "paint": {
         "line-color": "rgba(80, 70, 60, 0.2)",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.3, 14, 1],
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          10,
+          0.3,
+          14,
+          1
+        ],
         "line-opacity": 1
       }
     },
@@ -132,10 +235,16 @@
       "paint": {
         "fill-color": [
           "match",
-          ["get", "controller"],
-          "RS", "rgba(180, 50, 50, 0.25)",
-          "RBiH", "rgba(55, 140, 75, 0.25)",
-          "HRHB", "rgba(50, 110, 170, 0.25)",
+          [
+            "get",
+            "controller"
+          ],
+          "RS",
+          "rgba(180, 50, 50, 0.25)",
+          "RBiH",
+          "rgba(55, 140, 75, 0.25)",
+          "HRHB",
+          "rgba(50, 110, 170, 0.25)",
           "rgba(60, 60, 70, 0.15)"
         ]
       }
@@ -153,20 +262,148 @@
       "id": "faction-border-glow-pos",
       "type": "line",
       "source": "front-lines",
-      "filter": ["all", ["==", ["get", "lineType"], "glow"], ["==", ["get", "offset_side"], 1]],
+      "filter": [
+        "all",
+        [
+          "==",
+          [
+            "get",
+            "lineType"
+          ],
+          "glow"
+        ],
+        [
+          "==",
+          [
+            "get",
+            "offset_side"
+          ],
+          1
+        ]
+      ],
       "paint": {
         "line-color": [
           "match",
-          ["get", "faction"],
-          "RS", "rgba(180, 50, 50, 0.85)",
-          "RBiH", "rgba(55, 140, 75, 0.85)",
-          "HRHB", "rgba(50, 110, 170, 0.85)",
+          [
+            "get",
+            "faction"
+          ],
+          "RS",
+          "rgba(180, 50, 50, 0.85)",
+          "RBiH",
+          "rgba(55, 140, 75, 0.85)",
+          "HRHB",
+          "rgba(50, 110, 170, 0.85)",
           "rgba(60, 60, 70, 0.4)"
         ],
-        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 3, 10, 6, 14, 10],
-        "line-blur": ["interpolate", ["linear"], ["zoom"], 6, 1, 10, 2, 14, 3],
-        "line-offset": ["interpolate", ["linear"], ["zoom"], 6, 4, 10, 8, 14, 12],
-        "line-opacity": 0.9
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          [
+            "+",
+            2,
+            [
+              "*",
+              4,
+              [
+                "coalesce",
+                [
+                  "get",
+                  "pressure_intensity"
+                ],
+                0
+              ]
+            ]
+          ],
+          10,
+          [
+            "+",
+            4,
+            [
+              "*",
+              6,
+              [
+                "coalesce",
+                [
+                  "get",
+                  "pressure_intensity"
+                ],
+                0
+              ]
+            ]
+          ],
+          14,
+          [
+            "+",
+            6,
+            [
+              "*",
+              10,
+              [
+                "coalesce",
+                [
+                  "get",
+                  "pressure_intensity"
+                ],
+                0
+              ]
+            ]
+          ]
+        ],
+        "line-blur": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          1,
+          10,
+          2,
+          14,
+          3
+        ],
+        "line-offset": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          4,
+          10,
+          8,
+          14,
+          12
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "coalesce",
+            [
+              "get",
+              "pressure_intensity"
+            ],
+            0
+          ],
+          0,
+          0.45,
+          1,
+          0.95
+        ]
       },
       "layout": {
         "line-cap": "round",
@@ -177,20 +414,148 @@
       "id": "faction-border-glow-neg",
       "type": "line",
       "source": "front-lines",
-      "filter": ["all", ["==", ["get", "lineType"], "glow"], ["==", ["get", "offset_side"], -1]],
+      "filter": [
+        "all",
+        [
+          "==",
+          [
+            "get",
+            "lineType"
+          ],
+          "glow"
+        ],
+        [
+          "==",
+          [
+            "get",
+            "offset_side"
+          ],
+          -1
+        ]
+      ],
       "paint": {
         "line-color": [
           "match",
-          ["get", "faction"],
-          "RS", "rgba(180, 50, 50, 0.85)",
-          "RBiH", "rgba(55, 140, 75, 0.85)",
-          "HRHB", "rgba(50, 110, 170, 0.85)",
+          [
+            "get",
+            "faction"
+          ],
+          "RS",
+          "rgba(180, 50, 50, 0.85)",
+          "RBiH",
+          "rgba(55, 140, 75, 0.85)",
+          "HRHB",
+          "rgba(50, 110, 170, 0.85)",
           "rgba(60, 60, 70, 0.4)"
         ],
-        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 3, 10, 6, 14, 10],
-        "line-blur": ["interpolate", ["linear"], ["zoom"], 6, 1, 10, 2, 14, 3],
-        "line-offset": ["interpolate", ["linear"], ["zoom"], 6, -4, 10, -8, 14, -12],
-        "line-opacity": 0.9
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          [
+            "+",
+            2,
+            [
+              "*",
+              4,
+              [
+                "coalesce",
+                [
+                  "get",
+                  "pressure_intensity"
+                ],
+                0
+              ]
+            ]
+          ],
+          10,
+          [
+            "+",
+            4,
+            [
+              "*",
+              6,
+              [
+                "coalesce",
+                [
+                  "get",
+                  "pressure_intensity"
+                ],
+                0
+              ]
+            ]
+          ],
+          14,
+          [
+            "+",
+            6,
+            [
+              "*",
+              10,
+              [
+                "coalesce",
+                [
+                  "get",
+                  "pressure_intensity"
+                ],
+                0
+              ]
+            ]
+          ]
+        ],
+        "line-blur": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          1,
+          10,
+          2,
+          14,
+          3
+        ],
+        "line-offset": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          -4,
+          10,
+          -8,
+          14,
+          -12
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "coalesce",
+            [
+              "get",
+              "pressure_intensity"
+            ],
+            0
+          ],
+          0,
+          0.45,
+          1,
+          0.95
+        ]
       },
       "layout": {
         "line-cap": "round",
@@ -201,10 +566,31 @@
       "id": "front-line-base",
       "type": "line",
       "source": "front-lines",
-      "filter": ["==", ["get", "lineType"], "front"],
+      "filter": [
+        "==",
+        [
+          "get",
+          "lineType"
+        ],
+        "front"
+      ],
       "paint": {
         "line-color": "#252220",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 1.8, 10, 3.0, 14, 4.2],
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          1.8,
+          10,
+          3,
+          14,
+          4.2
+        ],
         "line-opacity": 0.9
       },
       "layout": {
@@ -216,12 +602,36 @@
       "id": "front-line-stripe",
       "type": "line",
       "source": "front-lines",
-      "filter": ["==", ["get", "lineType"], "front"],
+      "filter": [
+        "==",
+        [
+          "get",
+          "lineType"
+        ],
+        "front"
+      ],
       "paint": {
         "line-color": "#e8ddd0",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 1.0, 10, 1.8, 14, 2.6],
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          1,
+          10,
+          1.8,
+          14,
+          2.6
+        ],
         "line-opacity": 0.85,
-        "line-dasharray": [4, 3]
+        "line-dasharray": [
+          4,
+          3
+        ]
       },
       "layout": {
         "line-cap": "butt",
@@ -232,10 +642,44 @@
       "id": "attack-arrows",
       "type": "line",
       "source": "order-arrows",
-      "filter": ["==", ["get", "type"], "attack"],
+      "filter": [
+        "==",
+        [
+          "get",
+          "type"
+        ],
+        "attack"
+      ],
       "paint": {
-        "line-color": "rgba(196, 48, 48, 0.85)",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 1.2, 10, 2.6, 14, 3.8],
+        "line-color": [
+          "match",
+          [
+            "get",
+            "faction"
+          ],
+          "RS",
+          "rgba(180, 50, 50, 0.95)",
+          "RBiH",
+          "rgba(55, 140, 75, 0.95)",
+          "HRHB",
+          "rgba(50, 110, 170, 0.95)",
+          "rgba(196, 48, 48, 0.85)"
+        ],
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          1.2,
+          10,
+          2.6,
+          14,
+          3.8
+        ],
         "line-opacity": 0.9
       },
       "layout": {
@@ -247,16 +691,371 @@
       "id": "movement-arrows",
       "type": "line",
       "source": "order-arrows",
-      "filter": ["==", ["get", "type"], "movement"],
+      "filter": [
+        "==",
+        [
+          "get",
+          "type"
+        ],
+        "movement"
+      ],
       "paint": {
-        "line-color": "rgba(62, 168, 95, 0.8)",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 1, 10, 2, 14, 3],
+        "line-color": [
+          "match",
+          [
+            "get",
+            "faction"
+          ],
+          "RS",
+          "rgba(180, 50, 50, 0.95)",
+          "RBiH",
+          "rgba(55, 140, 75, 0.95)",
+          "HRHB",
+          "rgba(50, 110, 170, 0.95)",
+          "rgba(62, 168, 95, 0.8)"
+        ],
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          1,
+          10,
+          2,
+          14,
+          3
+        ],
         "line-opacity": 0.85,
-        "line-dasharray": [3, 2]
+        "line-dasharray": [
+          3,
+          2
+        ]
       },
       "layout": {
         "line-cap": "round",
         "line-join": "round"
+      }
+    },
+    {
+      "id": "attack-arrows-heads",
+      "type": "symbol",
+      "source": "order-arrows",
+      "filter": [
+        "==",
+        [
+          "get",
+          "type"
+        ],
+        "attack"
+      ],
+      "layout": {
+        "symbol-placement": "line",
+        "symbol-spacing": 100,
+        "text-field": "▶",
+        "text-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          8,
+          10,
+          16,
+          14,
+          24
+        ],
+        "text-allow-overlap": true,
+        "text-pitch-alignment": "map",
+        "text-rotation-alignment": "map",
+        "text-keep-upright": false
+      },
+      "paint": {
+        "text-color": [
+          "match",
+          [
+            "get",
+            "faction"
+          ],
+          "RS",
+          "rgba(180, 50, 50, 0.95)",
+          "RBiH",
+          "rgba(55, 140, 75, 0.95)",
+          "HRHB",
+          "rgba(50, 110, 170, 0.95)",
+          "rgba(196, 48, 48, 0.95)"
+        ]
+      }
+    },
+    {
+      "id": "movement-arrows-heads",
+      "type": "symbol",
+      "source": "order-arrows",
+      "filter": [
+        "==",
+        [
+          "get",
+          "type"
+        ],
+        "movement"
+      ],
+      "layout": {
+        "symbol-placement": "line",
+        "symbol-spacing": 100,
+        "text-field": "▶",
+        "text-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          8,
+          10,
+          16,
+          14,
+          24
+        ],
+        "text-allow-overlap": true,
+        "text-pitch-alignment": "map",
+        "text-rotation-alignment": "map",
+        "text-keep-upright": false
+      },
+      "paint": {
+        "text-color": [
+          "match",
+          [
+            "get",
+            "faction"
+          ],
+          "RS",
+          "rgba(180, 50, 50, 0.95)",
+          "RBiH",
+          "rgba(55, 140, 75, 0.95)",
+          "HRHB",
+          "rgba(50, 110, 170, 0.95)",
+          "rgba(62, 168, 95, 0.95)"
+        ]
+      }
+    },
+    {
+      "id": "attack-arrows-staged",
+      "type": "line",
+      "source": "order-arrows",
+      "filter": [
+        "==",
+        [
+          "get",
+          "type"
+        ],
+        "attack-staged"
+      ],
+      "paint": {
+        "line-color": [
+          "match",
+          [
+            "get",
+            "faction"
+          ],
+          "RS",
+          "rgba(180, 50, 50, 0.95)",
+          "RBiH",
+          "rgba(55, 140, 75, 0.95)",
+          "HRHB",
+          "rgba(50, 110, 170, 0.95)",
+          "rgba(196, 48, 48, 0.85)"
+        ],
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          1.2,
+          10,
+          2.6,
+          14,
+          3.8
+        ],
+        "line-opacity": 0.9,
+        "line-dasharray": [
+          2,
+          2
+        ]
+      },
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      }
+    },
+    {
+      "id": "movement-arrows-staged",
+      "type": "line",
+      "source": "order-arrows",
+      "filter": [
+        "==",
+        [
+          "get",
+          "type"
+        ],
+        "movement-staged"
+      ],
+      "paint": {
+        "line-color": [
+          "match",
+          [
+            "get",
+            "faction"
+          ],
+          "RS",
+          "rgba(180, 50, 50, 0.95)",
+          "RBiH",
+          "rgba(55, 140, 75, 0.95)",
+          "HRHB",
+          "rgba(50, 110, 170, 0.95)",
+          "rgba(62, 168, 95, 0.8)"
+        ],
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          1,
+          10,
+          2,
+          14,
+          3
+        ],
+        "line-opacity": 0.85,
+        "line-dasharray": [
+          2,
+          2
+        ]
+      },
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      }
+    },
+    {
+      "id": "attack-arrows-heads-staged",
+      "type": "symbol",
+      "source": "order-arrows",
+      "filter": [
+        "==",
+        [
+          "get",
+          "type"
+        ],
+        "attack-staged"
+      ],
+      "layout": {
+        "symbol-placement": "line",
+        "symbol-spacing": 100,
+        "text-field": "▶",
+        "text-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          8,
+          10,
+          16,
+          14,
+          24
+        ],
+        "text-allow-overlap": true,
+        "text-pitch-alignment": "map",
+        "text-rotation-alignment": "map",
+        "text-keep-upright": false
+      },
+      "paint": {
+        "text-color": [
+          "match",
+          [
+            "get",
+            "faction"
+          ],
+          "RS",
+          "rgba(180, 50, 50, 0.95)",
+          "RBiH",
+          "rgba(55, 140, 75, 0.95)",
+          "HRHB",
+          "rgba(50, 110, 170, 0.95)",
+          "rgba(196, 48, 48, 0.95)"
+        ]
+      }
+    },
+    {
+      "id": "movement-arrows-heads-staged",
+      "type": "symbol",
+      "source": "order-arrows",
+      "filter": [
+        "==",
+        [
+          "get",
+          "type"
+        ],
+        "movement-staged"
+      ],
+      "layout": {
+        "symbol-placement": "line",
+        "symbol-spacing": 100,
+        "text-field": "▶",
+        "text-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          8,
+          10,
+          16,
+          14,
+          24
+        ],
+        "text-allow-overlap": true,
+        "text-pitch-alignment": "map",
+        "text-rotation-alignment": "map",
+        "text-keep-upright": false
+      },
+      "paint": {
+        "text-color": [
+          "match",
+          [
+            "get",
+            "faction"
+          ],
+          "RS",
+          "rgba(180, 50, 50, 0.95)",
+          "RBiH",
+          "rgba(55, 140, 75, 0.95)",
+          "HRHB",
+          "rgba(50, 110, 170, 0.95)",
+          "rgba(62, 168, 95, 0.95)"
+        ]
       }
     },
     {
@@ -266,7 +1065,10 @@
       "paint": {
         "line-color": "rgba(80, 60, 40, 0.35)",
         "line-width": 1.5,
-        "line-dasharray": [4, 2]
+        "line-dasharray": [
+          4,
+          2
+        ]
       }
     },
     {
@@ -274,8 +1076,25 @@
       "type": "symbol",
       "source": "formations",
       "layout": {
-        "icon-image": ["get", "icon_id"],
-        "icon-size": ["interpolate", ["linear"], ["zoom"], 6, 0.42, 10, 0.62, 14, 0.8],
+        "icon-image": [
+          "get",
+          "icon_id"
+        ],
+        "icon-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          0.42,
+          10,
+          0.62,
+          14,
+          0.8
+        ],
         "icon-allow-overlap": false,
         "icon-ignore-placement": false
       },
@@ -289,16 +1108,52 @@
       "source": "formations",
       "minzoom": 9,
       "layout": {
-        "text-field": ["get", "name"],
-        "text-size": ["interpolate", ["linear"], ["zoom"], 9, 10, 14, 12],
+        "text-field": [
+          "get",
+          "name"
+        ],
+        "text-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          9,
+          10,
+          14,
+          12
+        ],
         "text-anchor": "top",
-        "text-offset": [0, 0.9],
+        "text-offset": [
+          0,
+          0.9
+        ],
         "text-allow-overlap": false
       },
       "paint": {
         "text-color": "rgba(20, 20, 20, 0.9)",
-        "text-halo-color": "rgba(235, 225, 205, 0.85)",
-        "text-halo-width": 1.2
+        "text-halo-color": [
+          "step",
+          [
+            "get",
+            "cohesion"
+          ],
+          "rgba(240, 80, 80, 0.95)",
+          30,
+          "rgba(235, 225, 205, 0.85)"
+        ],
+        "text-halo-width": [
+          "step",
+          [
+            "get",
+            "cohesion"
+          ],
+          2.5,
+          30,
+          1.2
+        ]
       }
     },
     {
@@ -306,13 +1161,66 @@
       "type": "symbol",
       "source": "osm-tiles",
       "source-layer": "places",
-      "filter": ["in", ["get", "kind"], ["literal", ["city", "town"]]],
+      "filter": [
+        "in",
+        [
+          "get",
+          "kind"
+        ],
+        [
+          "literal",
+          [
+            "city",
+            "town"
+          ]
+        ]
+      ],
       "layout": {
-        "text-field": ["get", "name"],
-        "text-size": ["interpolate", ["linear"], ["zoom"],
-          6, ["match", ["get", "kind"], "city", 13, 10],
-          10, ["match", ["get", "kind"], "city", 16, 12],
-          14, ["match", ["get", "kind"], "city", 18, 14]
+        "text-field": [
+          "get",
+          "name"
+        ],
+        "text-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          [
+            "match",
+            [
+              "get",
+              "kind"
+            ],
+            "city",
+            13,
+            10
+          ],
+          10,
+          [
+            "match",
+            [
+              "get",
+              "kind"
+            ],
+            "city",
+            16,
+            12
+          ],
+          14,
+          [
+            "match",
+            [
+              "get",
+              "kind"
+            ],
+            "city",
+            18,
+            14
+          ]
         ],
         "text-anchor": "center",
         "text-allow-overlap": false,
@@ -331,10 +1239,32 @@
       "source": "osm-tiles",
       "source-layer": "places",
       "minzoom": 10,
-      "filter": ["==", ["get", "kind"], "village"],
+      "filter": [
+        "==",
+        [
+          "get",
+          "kind"
+        ],
+        "village"
+      ],
       "layout": {
-        "text-field": ["get", "name"],
-        "text-size": ["interpolate", ["linear"], ["zoom"], 10, 9, 14, 11],
+        "text-field": [
+          "get",
+          "name"
+        ],
+        "text-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          10,
+          9,
+          14,
+          11
+        ],
         "text-anchor": "center",
         "text-allow-overlap": false,
         "text-optional": true,

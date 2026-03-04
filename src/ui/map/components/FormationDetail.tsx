@@ -8,6 +8,15 @@ function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 }
 
+function formatRawId(id: string): string {
+  if (!id) return '';
+  return id
+    .replace(/^(RS|RBiH|HRHB)_/i, '')
+    .split('_')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+}
+
 function getNarrativeArcClass(arc: string): string {
   switch (arc) {
     case 'veteran': return 'bg-green-900/40 text-green-400';
@@ -72,19 +81,27 @@ export function FormationDetail() {
         ) : (
           <>
             <div className={`font-mono text-sm font-medium ${FACTION_COLORS_SUBTLE[formation.faction] ?? 'text-text-primary'}`}>
-              {formation.name}
+              {formation.name === formation.id ? formatRawId(formation.name) : formation.name}
             </div>
 
-            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
-              <span className="text-text-secondary">Kind:</span>
-              <span className="text-text-primary">{formation.kind}</span>
-              <span className="text-text-secondary">Faction:</span>
-              <span className={FACTION_COLORS_SUBTLE[formation.faction] ?? 'text-text-primary'}>{formation.faction}</span>
-            </div>
+            {(() => {
+              const homeMunTag = formation.tags?.find(t => t.startsWith('mun:'));
+              const homeMun = homeMunTag ? capitalize(homeMunTag.slice(4).replace(/_/g, ' ')) : 'Unknown';
+              return (
+                <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                  <span className="text-text-secondary">Home:</span>
+                  <span className="text-text-primary">{homeMun}</span>
+                </div>
+              );
+            })()}
 
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
               <span className="text-text-secondary">Cohesion</span>
-              <span className="text-text-primary tabular-nums">{formation.cohesion}</span>
+              <div className="flex items-center gap-0.5" title={`Cohesion: ${formation.cohesion}`}>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className={`h-2.5 w-1.5 rounded-sm ${i < Math.ceil((formation.cohesion ?? 0) / 20) ? 'bg-amber-400' : 'bg-panel-border'}`} />
+                ))}
+              </div>
               <span className="text-text-secondary">Fatigue</span>
               <span className="text-text-primary tabular-nums">{formation.fatigue}</span>
               {formation.personnel != null && (
@@ -105,7 +122,7 @@ export function FormationDetail() {
             {formation.location_osid && (
               <div className="text-xs min-w-0">
                 <span className="text-text-secondary">Location: </span>
-                <span className="font-mono text-text-primary break-all" title={formation.location_osid}>
+                <span className="font-mono text-text-primary break-all">
                   {getOsidDisplayName(formation.location_osid, osidDisplayNames)}
                 </span>
               </div>
@@ -196,7 +213,7 @@ export function FormationDetail() {
                   <ul className="space-y-0.5 list-none">
                     {replacementsForCorps.map((r, i) => (
                       <li key={i} className="text-text-primary">
-                        {nameById.get(r.new_officer) ?? r.new_officer} took command
+                        {nameById.get(r.new_officer) ?? formatRawId(r.new_officer)} took command
                       </li>
                     ))}
                   </ul>
@@ -217,12 +234,15 @@ export function FormationDetail() {
                 </p>
                 {formation.notableMoments && formation.notableMoments.length > 0 && (
                   <div className="mt-1.5 space-y-0.5">
-                    {formation.notableMoments.map((m, i) => (
-                      <div key={i} className="text-[10px] text-text-secondary flex gap-1">
-                        <span className="text-accent-gold shrink-0">&bull;</span>
-                        <span>{m.description}{m.turn > 0 ? ` (T${m.turn})` : ''}</span>
-                      </div>
-                    ))}
+                    {formation.notableMoments.map((m, i) => {
+                      const localizedDesc = m.description.replace(/op:[a-z0-9_]+:[a-z0-9_]+/gi, (match) => getOsidDisplayName(match, osidDisplayNames));
+                      return (
+                        <div key={i} className="text-[10px] text-text-secondary flex gap-1">
+                          <span className="text-accent-gold shrink-0">&bull;</span>
+                          <span>{localizedDesc}{m.turn > 0 ? ` (T${m.turn})` : ''}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -254,7 +274,6 @@ export function FormationDetail() {
                           type="button"
                           onClick={() => setSelectedCorpsFrontSectorId(s.sector_id)}
                           className="block w-full text-left text-interactive hover:underline truncate"
-                          title={s.sector_id}
                         >
                           {s.display_name}
                           <span className="text-text-secondary ml-1">
@@ -281,7 +300,6 @@ export function FormationDetail() {
                     type="button"
                     onClick={() => setSelectedCorpsFrontSectorId(sector.sector_id)}
                     className="text-interactive hover:underline"
-                    title={sector.sector_id}
                   >
                     {sector.display_name}
                   </button>
@@ -292,7 +310,7 @@ export function FormationDetail() {
             {attackOrder && (
               <div className="pt-2 border-t border-panel-border min-w-0">
                 <span className="text-xs text-text-secondary">Attack order: </span>
-                <span className="text-xs text-text-primary font-mono break-all" title={attackOrder.targetSettlementId}>
+                <span className="text-xs text-text-primary font-mono break-all">
                   {getOsidDisplayName(attackOrder.targetSettlementId, osidDisplayNames)}
                 </span>
               </div>

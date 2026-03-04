@@ -99,6 +99,10 @@ export interface GameStore {
   isOperationsPanelOpen: boolean;
   setIsOperationsPanelOpen: (v: boolean) => void;
 
+  /** Whether the Ops Planning Modal (Staff Map) is open. */
+  opsPlanningModalOpen: boolean;
+  setOpsPlanningModalOpen: (v: boolean) => void;
+
   /** Minimap visibility toggle. */
   minimapVisible: boolean;
   setMinimapVisible: (v: boolean) => void;
@@ -201,6 +205,9 @@ export const useGameStore = create<GameStore>((set) => ({
 
   isOperationsPanelOpen: false,
   setIsOperationsPanelOpen: (v) => set({ isOperationsPanelOpen: v }),
+
+  opsPlanningModalOpen: false,
+  setOpsPlanningModalOpen: (v) => set({ opsPlanningModalOpen: v }),
 
   minimapVisible: true,
   setMinimapVisible: (v) => set({ minimapVisible: v }),

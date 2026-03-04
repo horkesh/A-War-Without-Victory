@@ -432,8 +432,8 @@ const VRS_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     { name: 'Western Krajina', corps_id: 'vrs_2nd_krajina', target_municipalities: ['bosanski_petrovac', 'titov_drvar', 'glamoc', 'sipovo', 'bosanska_krupa', 'sanski_most'], start_week: 0, end_week: 30, weight: 55, min_outcome: 'repulsed' },
     // Sarajevo-Romanija: siege maintenance — persistent pressure on Sarajevo approaches
     { name: 'Sarajevo Siege', corps_id: 'vrs_sarajevo_romanija', target_municipalities: ['ilidza', 'hadzici', 'vogosca', 'ilijas', 'pale', 'sokolac'], start_week: 0, end_week: 9999, weight: 90, min_outcome: 'repulsed' },
-    // Herzegovina: hold territory — probing attacks to maintain pressure (+ cajnice/rudo/foca for Drina south)
-    { name: 'Herzegovina Hold', corps_id: 'vrs_herzegovina', target_municipalities: ['bileca', 'gacko', 'nevesinje', 'kalinovik', 'cajnice', 'rudo', 'foca'], start_week: 0, end_week: 9999, weight: 50, min_outcome: 'repulsed' },
+    // Herzegovina: hold territory + push north through Foča into Višegrad (Drina valley north push)
+    { name: 'Herzegovina Hold', corps_id: 'vrs_herzegovina', target_municipalities: ['bileca', 'gacko', 'nevesinje', 'kalinovik', 'cajnice', 'rudo', 'foca', 'visegrad'], start_week: 0, end_week: 9999, weight: 50, min_outcome: 'repulsed' },
     // East Bosnian: post-corridor, Tuzla containment
     { name: 'Tuzla Containment', corps_id: 'vrs_east_bosnian', target_municipalities: ['bijeljina', 'ugljevik', 'zvornik'], start_week: 30, end_week: 9999, weight: 40, min_outcome: 'repulsed' },
     // 1st Krajina: central corridor — Kotor Varoš, Teslić, Doboj (link to Posavina)

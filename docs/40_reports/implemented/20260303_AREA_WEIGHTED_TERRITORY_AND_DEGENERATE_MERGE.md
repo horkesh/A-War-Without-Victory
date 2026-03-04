@@ -111,6 +111,7 @@ The RS 65.1% area figure matches the historical consensus (~65% of BiH territory
 | `data/derived/operational/operational_settlements.geojson` | Regenerated — 744 features |
 | `data/derived/operational/canonical_to_operational_map.json` | Regenerated |
 | `data/derived/operational/operational_contact_graph.json` | Regenerated |
+| `data/derived/operational/operational_initial_master.json` | **Re-derive after merge:** run `npm run map:derive:operational-initial-master` so dev runner and political control init see 744 OSIDs (avoids "9 unknown settlement ids" when graph is 744). |
 | `tools/area_compare.cjs` | **Deleted** — superseded by `generate_osid_areas.cjs` |
 | `docs/40_reports/DEGENERATE_OSID_AUDIT.md` | **Created** — audit of 34 OSIDs < 0.1 km² |
 

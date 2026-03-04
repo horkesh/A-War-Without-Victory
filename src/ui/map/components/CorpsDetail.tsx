@@ -7,6 +7,15 @@ import { FACTION_COLORS } from '../utils/theme';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
 
+function formatRawId(id: string): string {
+  if (!id) return '';
+  return id
+    .replace(/^(RS|RBiH|HRHB)_/i, '')
+    .split('_')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+}
+
 export function CorpsDetail() {
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
@@ -79,7 +88,7 @@ export function CorpsDetail() {
         {/* Identity */}
         <div className="mb-3">
           <div className="font-semibold text-text-primary text-[13px]">
-            {corpsFormation.name}
+            {corpsFormation.name === corpsFormation.id ? formatRawId(corpsFormation.name) : corpsFormation.name}
           </div>
           <div className="text-text-secondary mt-0.5">
             <span className={FACTION_COLORS[corpsFormation.faction] ?? 'text-text-primary'}>

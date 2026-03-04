@@ -17,6 +17,7 @@
     "node_modules",
     "src/ui/map/.storybook",
     "src/ui/map/stories",
-    "src/ui/map/__mocks__"
+    "src/ui/map/__mocks__",
+    "src/ui/map/saved"
   ]
 }

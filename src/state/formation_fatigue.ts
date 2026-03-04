@@ -248,6 +248,27 @@ function getFormationSupplyMultiplier(
     return 1;
 }
 
+/** Fatigue recovery per turn (integer; fatigue can't go below 0). */
+const FATIGUE_RECOVERY_PER_TURN = 1;
+
+/**
+ * Apply per-turn fatigue recovery to all active formations.
+ * Called once per turn from the war pipeline, regardless of combat activity.
+ * Fatigue accumulates during combat (attack_resolution_osid.ts) and recovers here.
+ */
+export function applyFatigueRecovery(state: GameState): void {
+    const formations = (state as any).formations as Record<string, any> | undefined;
+    if (!formations) return;
+    for (const formation of Object.values(formations)) {
+        if (!formation || formation.status !== 'active') continue;
+        if (!formation.ops || typeof formation.ops !== 'object') continue;
+        const current = formation.ops.fatigue ?? 0;
+        if (current > 0) {
+            formation.ops.fatigue = Math.max(0, current - FATIGUE_RECOVERY_PER_TURN);
+        }
+    }
+}
+
 /**
  * Update formation fatigue based on supply status.
  *

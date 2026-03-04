@@ -12,6 +12,7 @@ interface CorpsGlowProperties {
     faction: string;
     corps_id: string;
     offset_side?: 1 | -1;
+    pressure_intensity?: number;
 }
 
 interface CorpsFrontProperties {
@@ -29,13 +30,13 @@ type CorpsLineProperties = CorpsGlowProperties | CorpsFrontProperties;
 // ═══════════════════════════════════════════════════════════════════════════
 
 const FACTION_CORPS_PALETTES: Record<string, string[]> = {
-    RS:   ['#c24040', '#d46a4a', '#a83030', '#e08858'],
+    RS: ['#c24040', '#d46a4a', '#a83030', '#e08858'],
     RBiH: ['#4a9a55', '#3a8a70', '#5aaa40', '#2a7a60'],
     HRHB: ['#4080b8', '#5070a0', '#3090d0', '#6060c0'],
 };
 
 const FACTION_GLOW_COLORS: Record<string, string> = {
-    RS:   'rgba(180, 50, 50, 0.6)',
+    RS: 'rgba(180, 50, 50, 0.6)',
     RBiH: 'rgba(55, 140, 75, 0.6)',
     HRHB: 'rgba(50, 110, 170, 0.6)',
 };
@@ -185,7 +186,8 @@ export function buildCorpsFrontLinesGeoJSON(
     osidGeoJson: FeatureCollection,
     corpsFrontSectors: CorpsFrontSectorView[],
     rbihHrhbAllied?: boolean,
-    osidCentroids?: Map<string, [number, number]>
+    osidCentroids?: Map<string, [number, number]>,
+    frontPressureByEdge?: Record<string, { value: number; max_abs: number }>
 ): FeatureCollection<LineString> {
     const features = osidGeoJson.features as Feature<Polygon | MultiPolygon, OsidProperties>[];
 
@@ -267,9 +269,12 @@ export function buildCorpsFrontLinesGeoJSON(
             }
         }
 
-        const glowPropsA: CorpsGlowProperties = { lineType: 'glow', faction: ctrlA, corps_id: corpsA };
+        const pressureData = frontPressureByEdge?.[pairKey];
+        const pressureIntensity = pressureData && pressureData.max_abs > 0 ? Math.abs(pressureData.value) / pressureData.max_abs : 0;
+
+        const glowPropsA: CorpsGlowProperties = { lineType: 'glow', faction: ctrlA, corps_id: corpsA, pressure_intensity: pressureIntensity };
         if (offsetA != null) glowPropsA.offset_side = offsetA;
-        const glowPropsB: CorpsGlowProperties = { lineType: 'glow', faction: ctrlB, corps_id: corpsB };
+        const glowPropsB: CorpsGlowProperties = { lineType: 'glow', faction: ctrlB, corps_id: corpsB, pressure_intensity: pressureIntensity };
         if (offsetB != null) glowPropsB.offset_side = offsetB;
 
         glowFeatures.push({

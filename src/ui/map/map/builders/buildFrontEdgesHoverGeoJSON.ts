@@ -122,14 +122,17 @@ export function buildFrontEdgesHoverGeoJSON(
     }
   }
 
-  const outFeatures: Array<{ type: 'Feature'; properties: FrontEdgeHoverProperties; geometry: { type: 'LineString'; coordinates: number[][] } }> = [];
+  // Instead of an individual feature per edge, we group by (sector + faction)
+  // and merge all contiguous segments for that group.
+  const groupedCoords = new Map<string, { props: FrontEdgeHoverProperties; segments: number[][][] }>();
+
   for (const edge of frontEdgesOsid) {
     const a = edge.a;
     const b = edge.b;
     const pairKey = a < b ? `${a}__${b}` : `${b}__${a}`;
     const segs = pairToSegments.get(pairKey);
     if (!segs || segs.length === 0) continue;
-    const coords = segs.length === 1 ? segs[0] : mergeSegmentCoords(segs);
+
     const factionA = edge.side_a ?? '';
     const factionB = edge.side_b ?? '';
 
@@ -139,11 +142,8 @@ export function buildFrontEdgesHoverGeoJSON(
     let offsetForA: 1 | -1 = 1;
     let offsetForB: 1 | -1 = -1;
     if (offsets) {
-      // factionA = side_a = controller of edge.a
-      // We need to map edge.a's controller to the correct offset
       const ctrlEdgeA = controllerMap.get(edge.a);
       if (ctrlEdgeA === ctrlFirst) {
-        // edge.a corresponds to osidFirst (sorted first)
         offsetForA = offsets.offsetA;
         offsetForB = offsets.offsetB;
       } else {
@@ -152,41 +152,53 @@ export function buildFrontEdgesHoverGeoJSON(
       }
     }
 
-    // Feature for faction A's side
     const sectorA = edgeFactionToSector.get(`${pairKey}\0${factionA}`);
-    const propsA: FrontEdgeHoverProperties = {
-      edge_id: `${edge.edge_id}:${factionA}`,
-      faction: factionA,
-      opposing_faction: factionB,
-      offset_side: offsetForA,
-    };
-    if (sectorA) {
-      propsA.sector_id = sectorA.sector_id;
-      propsA.corps_id = sectorA.corps_id;
+    const keyA = sectorA ? `sector_${sectorA.sector_id}_${factionA}` : `edge_${edge.edge_id}_${factionA}`;
+    if (!groupedCoords.has(keyA)) {
+      groupedCoords.set(keyA, {
+        props: {
+          edge_id: sectorA ? sectorA.sector_id : `${edge.edge_id}:${factionA}`,
+          faction: factionA,
+          opposing_faction: factionB,
+          offset_side: offsetForA,
+          sector_id: sectorA?.sector_id,
+          corps_id: sectorA?.corps_id,
+        },
+        segments: [],
+      });
     }
-    outFeatures.push({
-      type: 'Feature',
-      properties: propsA,
-      geometry: { type: 'LineString', coordinates: coords },
-    });
+    groupedCoords.get(keyA)!.segments.push(...segs);
 
-    // Feature for faction B's side
     const sectorB = edgeFactionToSector.get(`${pairKey}\0${factionB}`);
-    const propsB: FrontEdgeHoverProperties = {
-      edge_id: `${edge.edge_id}:${factionB}`,
-      faction: factionB,
-      opposing_faction: factionA,
-      offset_side: offsetForB,
-    };
-    if (sectorB) {
-      propsB.sector_id = sectorB.sector_id;
-      propsB.corps_id = sectorB.corps_id;
+    const keyB = sectorB ? `sector_${sectorB.sector_id}_${factionB}` : `edge_${edge.edge_id}_${factionB}`;
+    if (!groupedCoords.has(keyB)) {
+      groupedCoords.set(keyB, {
+        props: {
+          edge_id: sectorB ? sectorB.sector_id : `${edge.edge_id}:${factionB}`,
+          faction: factionB,
+          opposing_faction: factionA,
+          offset_side: offsetForB,
+          sector_id: sectorB?.sector_id,
+          corps_id: sectorB?.corps_id,
+        },
+        segments: [],
+      });
     }
-    outFeatures.push({
-      type: 'Feature',
-      properties: propsB,
-      geometry: { type: 'LineString', coordinates: coords },
-    });
+    groupedCoords.get(keyB)!.segments.push(...segs);
+  }
+
+  // Now export the groupings, merging segments where possible
+  const outFeatures: Array<{ type: 'Feature'; properties: FrontEdgeHoverProperties; geometry: { type: 'LineString'; coordinates: number[][] } }> = [];
+  for (const group of groupedCoords.values()) {
+    const merged = mergeSegmentCoords(group.segments);
+    if (merged.length > 0) {
+      // Create one unified LineString for this block
+      outFeatures.push({
+        type: 'Feature',
+        properties: group.props,
+        geometry: { type: 'LineString', coordinates: merged },
+      });
+    }
   }
 
   return { type: 'FeatureCollection', features: outFeatures };
@@ -194,35 +206,51 @@ export function buildFrontEdgesHoverGeoJSON(
 
 function mergeSegmentCoords(segments: number[][][]): number[][] {
   if (segments.length === 0) return [];
-  const coordKey = (c: number[]) => `${c[0].toFixed(6)},${c[1].toFixed(6)}`;
+  const coordKey = (c: number[]) => `${c[0].toFixed(5)},${c[1].toFixed(5)}`;
   const used = new Set<number>();
-  const result: number[][] = [];
-  const current = segments[0];
-  result.push(...current);
+  const result: number[][] = [...segments[0]];
   used.add(0);
 
-  while (used.size < segments.length) {
-    const endKey = coordKey(result[result.length - 1]);
-    let found = false;
+  let added = true;
+  while (added && used.size < segments.length) {
+    added = false;
+    const tailKey = coordKey(result[result.length - 1]);
+    const headKey = coordKey(result[0]);
+
     for (let i = 0; i < segments.length; i++) {
       if (used.has(i)) continue;
       const seg = segments[i];
       const startKey = coordKey(seg[0]);
-      const segEndKey = coordKey(seg[seg.length - 1]);
-      if (startKey === endKey) {
+      const endKey = coordKey(seg[seg.length - 1]);
+
+      // Connects to the tail?
+      if (startKey === tailKey) {
         result.push(...seg.slice(1));
         used.add(i);
-        found = true;
+        added = true;
         break;
       }
-      if (segEndKey === endKey) {
+      if (endKey === tailKey) {
         result.push(...[...seg].reverse().slice(1));
         used.add(i);
-        found = true;
+        added = true;
+        break;
+      }
+
+      // Connects to the head?
+      if (endKey === headKey) {
+        result.unshift(...seg.slice(0, -1));
+        used.add(i);
+        added = true;
+        break;
+      }
+      if (startKey === headKey) {
+        result.unshift(...[...seg].reverse().slice(0, -1));
+        used.add(i);
+        added = true;
         break;
       }
     }
-    if (!found) break;
   }
   return result;
 }

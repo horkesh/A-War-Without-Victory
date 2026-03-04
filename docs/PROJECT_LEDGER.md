@@ -9255,6 +9255,12 @@ Determinism checks **MUST** be run:
 - **Determinism:** N/A (data-only change, pipeline regenerated deterministically)
 - **Calibration:** No run change — degenerate OSIDs were graph-isolated (unreachable by combat/movement).
 
+### [2026-03-04] Operational initial master re-derived (744) — dev runner init fix
+- **Type:** Data / Docs
+- **Summary:** Re-ran `npm run map:derive:operational-initial-master` so `data/derived/operational/operational_initial_master.json` has 744 entries (matching post-merge settlement graph). Dev runner and political control init use this file when graph is OSID-keyed; previously it still had 753 entries, causing "9 unknown settlement ids (not in settlement graph)" at init. No code change; political_control_init already drops master IDs not in graph and warns — the fix was aligning derived data. **After any future OSID merge:** run `npm run map:derive:operational-initial-master` so master matches operational_settlements.geojson.
+- **Files modified:** `data/derived/operational/operational_initial_master.json` (regenerated, 744 settlements), `docs/40_reports/implemented/20260303_AREA_WEIGHTED_TERRITORY_AND_DEGENERATE_MERGE.md` (operational_initial_master in Files Changed), `docs/10_canon/context.md`, `docs/20_engineering/MAP_BUILD_SYSTEM.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/20_engineering/REPO_MAP.md`
+- **Determinism:** N/A (data + docs propagation).
+
 ### [2026-03-03] Supply Phase D — UX, UN Airdrops, Bot Targeting (n407)
 - **Type:** Feature (Simulation / UI / Calibration)
 - **Phase:** War phase (supply system, map UI)
@@ -9485,3 +9491,13 @@ Determinism checks **MUST** be run:
 - **Failure mode prevented:** Scenario run abort on serialize due to formation in enemy-controlled OSID; invariant "formation.location_osid implies political_controllers[location_osid] === formation.faction" enforced by pipeline step + initial displacement + validation.
 - **Files modified:** `src/sim/combat/attack_resolution_osid.ts`, `src/sim/turn_phases/war_phases.ts`, `src/scenario/scenario_runner.ts`, `data/source/oob_brigades.json`, `src/validate/validate.ts`, `src/validate/brigade_location_control.ts` (new).
 - **Ledger/canon:** This entry; context.md implementation reference; REPO_MAP/PIPELINE/Engine Invariants propagation below.
+
+### [2026-03-04] Player-Facing UI Text Polish
+- **Summary:** Executed a comprehensive pass on the UI components (WebGL and DOM layer) to ensure all data is formatted gracefully for the player. Eliminated "raw" internal system IDs from tooltips and panels.  
+- **Change:**
+  1. Converted `Turn 37` into historical dates matching the April 1992 start date (`formatTurnLabel`).
+  2. Applied dynamic title-casing and stripped internal logic prefixes for OSIDs, Corps, and Front labels (e.g. converting `HRHB__RS__op:bugojno:udurlije` into `Bugojno — Udurlije` via `formatFrontId` and `RS_Sarajevo_romanija_corps` into `Sarajevo Romanija Corps` via `formatRawId`).
+  3. Swapped raw Cohesion numbers (0-100) for visual indicator blocks (`■■■■`) across panels to improve immediate tactical readability.
+  4. Updated dynamic Brigade War Stories (`generateNarrative`) from past tense to present/present-perfect tense to reflect the ongoing state of the conflict.
+- **Report:** A full breakdown was recorded at `docs/40_reports/20260304_UI_POLISH_REPORT.md`.
+- **Files modified:** `src/ui/map/components/OOBSidebar.tsx`, `src/ui/map/components/FormationDetail.tsx`, `src/ui/map/components/CorpsDetail.tsx`, `src/ui/map/components/TopToolbar.tsx`, `src/sim/war_stories.ts`.

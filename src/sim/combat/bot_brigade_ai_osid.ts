@@ -701,6 +701,23 @@ function getAttackerSupplyPenalty(attackerOsid: Osid, faction: FactionId, supply
     }
 }
 
+/**
+ * RS should not attack HRHB-controlled territory outside historically plausible areas.
+ * VRS had no strategic interest in fighting HVO in Central Bosnia or Herzegovina in 1992.
+ * Allowlist: Posavina corridor municipalities + Kupres (VRS-HVO friction did occur there).
+ */
+const RS_VS_HRHB_ATTACK_ALLOWLIST = new Set([
+    'odzak', 'orasje', 'bosanski_samac', 'bosanski_brod', 'brcko',
+    'derventa', 'modrica', 'kupres',
+]);
+
+function getRsVsHrhbPenalty(targetOsid: string, attackerFaction: string, defenderFaction: string | null): number {
+    if (attackerFaction !== 'RS' || defenderFaction !== 'HRHB') return 0;
+    const mun = targetOsid.split(':')[1];
+    if (!mun || RS_VS_HRHB_ATTACK_ALLOWLIST.has(mun)) return 0;
+    return 0; // Disabled — net area regression (KRAJINA/HERZEGOVINA offset Central gains)
+}
+
 /** Context needed for OSID bot decisions. Passed from the pipeline. */
 export interface OsidBotContext {
     edges: EdgeRecord[];
@@ -784,16 +801,6 @@ function scoreTargetFromDirective(
 
     // Co-ethnic bonus (all factions fight harder for co-ethnic areas)
     score += getCoEthnicScore(osid, faction, ethnicMap);
-
-    // Frontier pressure: when a brigade has no directive targets adjacent, allow
-    // probing any adjacent enemy OSID at reduced priority. This prevents idle front-line
-    // brigades from freezing once directive targets are exhausted or deeply entrenched.
-    // n215: reduced from +30 to +15. At +30, RS overran Tuzla (invariant violation).
-    if (hasDirectiveTargetAdjacent === false &&
-        directive.offensive_targets.length > 0 &&
-        !directive.offensive_targets.includes(osid)) {
-        score += 15;
-    }
 
     // Aggression modifier: flat bonus for offensive stances + multiplier for the whole score.
     // Flat component ensures stalemate targets (base 10) become viable when aggression is high.
@@ -1142,16 +1149,16 @@ function executeFactionDirectives(
                     return true;
                 });
 
-                // Frontier pressure: does this brigade have ANY directive target adjacent?
-                const hasDirectiveTargetAdj = filteredEnemy.some(e =>
-                    effectiveDirective.offensive_targets.includes(e));
-
-                const scored = validTargets.map(t => ({
-                    ...t,
-                    finalScore: scoreTargetFromDirective(t.osid, t.prediction, effectiveDirective, faction, ethnicMap, hasDirectiveTargetAdj)
-                        + supplyPenalty
-                        + (counterAttackTarget === t.osid ? 180 : 0) // Retreat-based counter-attack bonus
-                })).sort((a, b) => {
+                const scored = validTargets.map(t => {
+                    const defenderFaction = getPoliticalControllerOSID(state, t.osid, reverseMap);
+                    return {
+                        ...t,
+                        finalScore: scoreTargetFromDirective(t.osid, t.prediction, effectiveDirective, faction, ethnicMap)
+                            + supplyPenalty
+                            + (counterAttackTarget === t.osid ? 180 : 0) // Retreat-based counter-attack bonus
+                            + getRsVsHrhbPenalty(t.osid, faction, defenderFaction)
+                    };
+                }).sort((a, b) => {
                     if (b.finalScore !== a.finalScore) return b.finalScore - a.finalScore;
                     return strictCompare(a.osid, b.osid);
                 });
@@ -1198,6 +1205,10 @@ function executeFactionDirectives(
                             break;
                         }
                     }
+
+                    // Directive discipline: brigades only attack corps-ordered targets.
+                    // Counter-attacks (brigade retreated from this OSID last turn) are the sole autonomous exception.
+                    if (!effectiveDirective.offensive_targets.includes(s.osid) && counterAttackTarget !== s.osid) continue;
 
                     if (s.finalScore <= 0) continue;
 

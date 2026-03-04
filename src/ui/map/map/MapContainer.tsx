@@ -102,6 +102,8 @@ export function MapContainer() {
   const hoveredOsids = useGameStore((s) => s.hoveredOsids);
   const operationTargetOsids = useGameStore((s) => s.operationTargetOsids);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
+  const stagedOrders = useGameStore((s) => s.stagedOrders);
+  const appliedStagedOrdersRef = useRef(stagedOrders);
   const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
   const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
   const frontsVisible = useGameStore((s) => s.frontsVisible);
@@ -286,10 +288,12 @@ export function MapContainer() {
         sourceUpdatePollRef.current = null;
       }
       // Only run heavy build once per state; poll must not run build (napkin).
-      if (appliedStateRef.current === loadedGameState) return;
+      if (appliedStateRef.current === loadedGameState && appliedStagedOrdersRef.current === stagedOrders) return;
       appliedStateRef.current = loadedGameState;
+      appliedStagedOrdersRef.current = stagedOrders;
 
       const state = loadedGameState;
+      const currentStagedOrders = stagedOrders;
       const base = baseGeoJson;
       const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
 
@@ -320,7 +324,8 @@ export function MapContainer() {
                 ? state.war_alliance_rbih_hrhb > 0.2 : undefined;
               frontLinesGeoJson = buildCorpsFrontLinesGeoJSON(
                 controlledGeoJson, state.corpsFrontSectors, rbihHrhbAllied,
-                osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined
+                osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined,
+                state.frontPressureByEdge
               );
               // Corps colors on glow layers only; front-line-base/stripe stay black-white stripe.
               try {
@@ -364,12 +369,12 @@ export function MapContainer() {
                     source: FRONT_EDGES_HOVER_SOURCE_ID,
                     filter: ['==', ['get', 'offset_side'], 1],
                     paint: {
-                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 6, 14, 10],
+                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
                       'line-offset': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
                       'line-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        0.6,
+                        0.8,
                         0,
                       ],
                       'line-color': '#ffffff',
@@ -401,12 +406,12 @@ export function MapContainer() {
                     source: FRONT_EDGES_HOVER_SOURCE_ID,
                     filter: ['==', ['get', 'offset_side'], -1],
                     paint: {
-                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 6, 14, 10],
+                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
                       'line-offset': ['interpolate', ['linear'], ['zoom'], 6, -4, 10, -8, 14, -12],
                       'line-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        0.6,
+                        0.8,
                         0,
                       ],
                       'line-color': '#ffffff',
@@ -432,7 +437,7 @@ export function MapContainer() {
                       paint: {
                         'line-color': [
                           'match', ['get', 'faction'],
-                          'RS',   'rgba(160, 60,  60,  0.5)',
+                          'RS', 'rgba(160, 60,  60,  0.5)',
                           'RBiH', 'rgba(55,  130, 70,  0.5)',
                           'HRHB', 'rgba(50,  100, 160, 0.5)',
                           'rgba(80, 80, 90, 0.35)',
@@ -455,7 +460,7 @@ export function MapContainer() {
               if (cancelled || !mapRef.current || !state) return;
               try {
                 const formationsGeoJson = buildFormationsGeoJSON(state, controlledGeoJson);
-                const orderArrowsGeoJson = buildOrderArrowsGeoJSON(state, controlledGeoJson);
+                const orderArrowsGeoJson = buildOrderArrowsGeoJSON(state, currentStagedOrders, controlledGeoJson);
                 const iconIds = formationsGeoJson.features
                   .map((f) => (typeof f.properties?.icon_id === 'string' ? f.properties.icon_id : ''))
                   .filter((id) => id.length > 0);
@@ -517,7 +522,7 @@ export function MapContainer() {
         sourceUpdatePollRef.current = null;
       }
     };
-  }, [loadedGameState, mapReady]);
+  }, [loadedGameState, mapReady, stagedOrders]);
 
   function safeSetLayoutVisibility(
     map: maplibregl.Map,
@@ -599,12 +604,12 @@ export function MapContainer() {
     const targetSet = new Set(operationTargetOsids.filter((osid) => osid.length > 0));
     const targetPolygons: FeatureCollection = targetSet.size
       ? {
-          type: 'FeatureCollection',
-          features: baseGeoJson.features.filter((feature) => {
-            const osid = typeof feature.properties?.osid === 'string' ? feature.properties.osid : '';
-            return osid.length > 0 && targetSet.has(osid);
-          }),
-        }
+        type: 'FeatureCollection',
+        features: baseGeoJson.features.filter((feature) => {
+          const osid = typeof feature.properties?.osid === 'string' ? feature.properties.osid : '';
+          return osid.length > 0 && targetSet.has(osid);
+        }),
+      }
       : emptyGeoJson;
     const targetPoints = targetSet.size
       ? buildOperationTargetPointsGeoJSON(centroidLookup, operationTargetOsids)
@@ -1045,8 +1050,8 @@ export function MapContainer() {
                 'match',
                 ['get', 'supply_class'],
                 'adequate', 'rgba(74, 222, 128, 0.45)',
-                'strained',  'rgba(251, 191, 36, 0.50)',
-                'critical',  'rgba(248, 113, 113, 0.60)',
+                'strained', 'rgba(251, 191, 36, 0.50)',
+                'critical', 'rgba(248, 113, 113, 0.60)',
                 'rgba(156, 163, 175, 0.35)',
               ],
               'fill-opacity': 1,
@@ -1119,6 +1124,13 @@ export function MapContainer() {
       }
     }
     if (!targetOsid && selectedOsid) targetOsid = selectedOsid;
+    if (!targetOsid && selectedCorpsFrontSectorId && loadedGameState?.corpsFrontSectors) {
+      const sector = loadedGameState.corpsFrontSectors.find(s => s.sector_id === selectedCorpsFrontSectorId);
+      if (sector && sector.edge_ids?.[0]) {
+        const edge = loadedGameState.frontEdgesOsid?.find(e => e.edge_id === sector.edge_ids[0]);
+        if (edge) targetOsid = edge.a;
+      }
+    }
     if (!targetOsid) {
       lastPanTargetRef.current = null;
       return;
@@ -1129,7 +1141,37 @@ export function MapContainer() {
 
     map.easeTo({ center, duration: 450, essential: true });
     lastPanTargetRef.current = targetOsid;
-  }, [loadedGameState, mapReady, selectedFormationId, selectedOsid]);
+  }, [loadedGameState, mapReady, selectedFormationId, selectedOsid, selectedCorpsFrontSectorId]);
+
+  // Pulse animation for staged orders
+  useEffect(() => {
+    if (!mapReady || !mapRef.current) return;
+    const map = mapRef.current;
+    let frameId: number;
+    let lastTime = 0;
+    const animate = (time: number) => {
+      // Throttle to save CPU, ~15fps is fine for pulsing
+      if (time - lastTime > 64) {
+        lastTime = time;
+        const opacity = Math.sin(time / 200) * 0.3 + 0.6;
+        try {
+          if (map.getLayer('attack-arrows-staged')) {
+            map.setPaintProperty('attack-arrows-staged', 'line-opacity', opacity);
+            map.setPaintProperty('attack-arrows-heads-staged', 'text-opacity', opacity);
+          }
+          if (map.getLayer('movement-arrows-staged')) {
+            map.setPaintProperty('movement-arrows-staged', 'line-opacity', opacity);
+            map.setPaintProperty('movement-arrows-heads-staged', 'text-opacity', opacity);
+          }
+        } catch (e) {
+          // ignore if style not loaded yet
+        }
+      }
+      frameId = requestAnimationFrame(animate);
+    };
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, [mapReady]);
 
   return <div ref={containerRef} className="absolute inset-0" />;
 }
