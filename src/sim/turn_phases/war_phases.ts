@@ -707,6 +707,13 @@ export const warPhases: NamedPhase[] = [
                 } catch {
                     // Non-fatal: ethnic defense bonus simply not applied
                 }
+                // Trim control_events to last 3 turns before adding new ones this turn.
+                const currentTurn = context.state.meta?.turn ?? 0;
+                if (context.state.control_events) {
+                    context.state.control_events = context.state.control_events.filter(
+                        (e) => e.turn >= currentTurn - 2
+                    );
+                }
                 context.report.phase_ii_attack_resolution_osid = resolveAttackOrdersOsid(
                     context.state,
                     od.edges,
@@ -716,6 +723,13 @@ export const warPhases: NamedPhase[] = [
                     osidPopMap,
                     ethnicComp
                 );
+                // Sort control_events deterministically after resolution.
+                if (context.state.control_events?.length) {
+                    context.state.control_events.sort((a, b) => {
+                        if (a.turn !== b.turn) return a.turn - b.turn;
+                        return a.settlement_id < b.settlement_id ? -1 : a.settlement_id > b.settlement_id ? 1 : 0;
+                    });
+                }
                 return;
             }
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());

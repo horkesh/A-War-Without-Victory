@@ -31,7 +31,7 @@ export function CorpsDetail() {
   const [prepSecondWord, setPrepSecondWord] = useState('');
   const [prepSectorId, setPrepSectorId] = useState('');
   const [savingOperation, setSavingOperation] = useState(false);
-  const operationsPanelOpen = useGameStore((s) => s.operationsPanelOpen);
+  const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);

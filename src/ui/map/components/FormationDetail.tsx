@@ -18,12 +18,6 @@ function humanizeMunicipalityId(munId: string): string {
     .join(' ');
 }
 
-function formatOutcome(outcome: string): string {
-  return outcome
-    .split('_')
-    .map((word) => (word ? word[0].toUpperCase() + word.slice(1) : word))
-    .join(' ');
-}
 
 /**
  * Right panel when a formation marker is clicked: name, kind, faction, strength, fatigue, orders.
@@ -31,7 +25,7 @@ function formatOutcome(outcome: string): string {
 export function FormationDetail() {
   const ipc = useIPC();
   const [ordersPanelOpen, setOrdersPanelOpen] = useState(false);
-  const operationsPanelOpen = useGameStore((s) => s.operationsPanelOpen);
+  const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -49,9 +43,7 @@ export function FormationDetail() {
   if (operationsPanelOpen || !selectedFormationId) return null;
 
   const formation = loadedGameState?.formations.find((f) => f.id === selectedFormationId) ?? null;
-  const formationCasualties = formation
-    ? loadedGameState?.formationCasualtyLedger?.[formation.id]
-    : undefined;
+  // Per-formation casualty data is not available in LoadedGameState (ledger is per-faction).
   const attackOrder = loadedGameState?.attackOrders?.find(
     (o) => o.brigadeId === selectedFormationId
   );
@@ -137,49 +129,24 @@ export function FormationDetail() {
               </div>
             )}
 
-            {formation.kind === 'brigade' && (
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                <span className="text-text-secondary">KIA</span>
-                <span className="text-text-primary tabular-nums">{(formationCasualties?.killed ?? 0).toLocaleString()}</span>
-                <span className="text-text-secondary">WIA</span>
-                <span className="text-text-primary tabular-nums">{(formationCasualties?.wounded ?? 0).toLocaleString()}</span>
-                <span className="text-text-secondary">MIA/Captured</span>
-                <span className="text-text-primary tabular-nums">{(formationCasualties?.missing_captured ?? 0).toLocaleString()}</span>
-              </div>
-            )}
 
-            {formation.kind === 'brigade' && formation.brigadeHistory && (
+            {formation.kind === 'brigade' && formation.combatSummary && (
               <div className="pt-2 border-t border-panel-border space-y-1">
                 <div className="text-xs text-text-secondary">Brigade history</div>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                   <span className="text-text-secondary">Battles</span>
-                  <span className="text-text-primary tabular-nums">{formation.brigadeHistory.battles_fought.toLocaleString()}</span>
+                  <span className="text-text-primary tabular-nums">{formation.combatSummary.battles_fought.toLocaleString()}</span>
                   <span className="text-text-secondary">Victories</span>
-                  <span className="text-text-primary tabular-nums">{formation.brigadeHistory.victories.toLocaleString()}</span>
+                  <span className="text-text-primary tabular-nums">{formation.combatSummary.victories.toLocaleString()}</span>
                   <span className="text-text-secondary">Defeats</span>
-                  <span className="text-text-primary tabular-nums">{formation.brigadeHistory.defeats.toLocaleString()}</span>
+                  <span className="text-text-primary tabular-nums">{formation.combatSummary.defeats.toLocaleString()}</span>
                   <span className="text-text-secondary">Stalemates</span>
-                  <span className="text-text-primary tabular-nums">{formation.brigadeHistory.stalemates.toLocaleString()}</span>
+                  <span className="text-text-primary tabular-nums">{formation.combatSummary.stalemates.toLocaleString()}</span>
                   <span className="text-text-secondary">OSIDs captured</span>
-                  <span className="text-text-primary tabular-nums">{formation.brigadeHistory.total_osids_captured.toLocaleString()}</span>
+                  <span className="text-text-primary tabular-nums">{formation.combatSummary.total_osids_captured.toLocaleString()}</span>
                   <span className="text-text-secondary">OSIDs lost</span>
-                  <span className="text-text-primary tabular-nums">{formation.brigadeHistory.total_osids_lost.toLocaleString()}</span>
+                  <span className="text-text-primary tabular-nums">{formation.combatSummary.total_osids_lost.toLocaleString()}</span>
                 </div>
-                {formation.brigadeHistory.recent_engagements.length > 0 && (
-                  <div className="pt-1">
-                    <div className="text-xs text-text-secondary mb-1">Recent engagements</div>
-                    <div className="space-y-1">
-                      {formation.brigadeHistory.recent_engagements.map((engagement, idx) => (
-                        <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-[11px] leading-4">
-                          <span className="text-text-secondary">T{engagement.turn} </span>
-                          <span className="text-text-primary">{formatOutcome(engagement.outcome)}</span>
-                          <span className="text-text-secondary"> @ </span>
-                          <span className="font-mono text-text-primary">{getOsidDisplayName(engagement.osid, osidDisplayNames)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 

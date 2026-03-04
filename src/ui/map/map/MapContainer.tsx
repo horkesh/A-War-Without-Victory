@@ -27,6 +27,8 @@ import { resolveFormationLocationOsid } from './builders/resolveFormationLocatio
 import { ensureFormationIcons } from './formationIcons';
 import { buildFogOfWarGeoJSON } from './builders/buildFogOfWarGeoJSON';
 import { buildEnclaveGeoJSON } from './builders/buildEnclaveGeoJSON';
+import { buildBattleMarkersGeoJSON } from './builders/buildBattleMarkersGeoJSON';
+import { buildStrategicPointGeoJSON } from './builders/buildStrategicPointGeoJSON';
 import { useIPC } from '../desktop/useIPC';
 import { stageMoveOrderFromOsid } from '../desktop/orderActions';
 import styleJson from './awwv_map_style.json';
@@ -71,6 +73,10 @@ const OP_TARGET_ICON_DOT_LAYER_ID = 'operation-target-icon-dot';
 const OP_TARGET_ICON_CROSSHAIR_LAYER_ID = 'operation-target-icon-crosshair';
 const FOG_OVERLAY_SOURCE_ID = 'fog-overlay';
 const FOG_FILL_LAYER_ID = 'fog-fill';
+const BATTLE_MARKERS_SOURCE_ID = 'battle-markers';
+const BATTLE_MARKERS_LAYER_ID = 'battle-markers-pulse';
+const STRATEGIC_POINTS_SOURCE_ID = 'strategic-points';
+const STRATEGIC_POINTS_LAYER_ID = 'strategic-points-circles';
 const ENCLAVE_SOURCE_ID = 'enclave-osids';
 const ENCLAVE_LABEL_SOURCE_ID = 'enclave-labels';
 const ENCLAVE_OUTLINE_LAYER_ID = 'enclave-outline';
@@ -122,6 +128,9 @@ export function MapContainer() {
   const labelsVisible = useGameStore((s) => s.labelsVisible);
   const mapMode = useGameStore((s) => s.mapMode);
   const sectorsVisible = useGameStore((s) => s.sectorsVisible);
+  const fogVisible = useGameStore((s) => s.fogVisible);
+  const battlesVisible = useGameStore((s) => s.battlesVisible);
+  const strategicVisible = useGameStore((s) => s.strategicVisible);
   const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const setLoadError = useGameStore((s) => s.setLoadError);
@@ -175,6 +184,8 @@ export function MapContainer() {
           sources['order-arrows'].data = emptyGeoJson;
         }
         (sources as Record<string, { type?: string; data?: FeatureCollection }>)['fog-overlay'] = { type: 'geojson', data: emptyGeoJson };
+        (sources as Record<string, { type?: string; data?: FeatureCollection }>)[BATTLE_MARKERS_SOURCE_ID] = { type: 'geojson', data: emptyGeoJson };
+        (sources as Record<string, { type?: string; data?: FeatureCollection }>)[STRATEGIC_POINTS_SOURCE_ID] = { type: 'geojson', data: emptyGeoJson };
       } catch (e) {
         console.warn('Failed to pre-load OSID data:', e);
       }
@@ -510,7 +521,8 @@ export function MapContainer() {
                       }
                     }
                     (m.getSource(FOG_OVERLAY_SOURCE_ID) as GeoJSONSource | undefined)?.setData(fogGeoJson);
-                    safeSetLayoutVisibility(m, FOG_FILL_LAYER_ID, !!state.player_faction && !!state.reconIntelligence);
+                    const { fogVisible: fogVis } = useGameStore.getState();
+                    safeSetLayoutVisibility(m, FOG_FILL_LAYER_ID, fogVis && !!state.player_faction && !!state.reconIntelligence);
 
                     // Enclave visualization: dashed faction-colored outline + faint fill + text label
                     const { polygons: enclavePolygons, labels: enclaveLabels } = buildEnclaveGeoJSON(
@@ -581,6 +593,64 @@ export function MapContainer() {
                     } else {
                       (m.getSource(ENCLAVE_LABEL_SOURCE_ID) as GeoJSONSource).setData(enclaveLabels);
                     }
+
+                    // Battle markers: pulsing circles on OSIDs that flipped in last 3 turns
+                    const battleMarkersGeoJson = buildBattleMarkersGeoJSON(
+                      state.recentControlEvents ?? [],
+                      base,
+                      state.turn ?? 0,
+                    );
+                    if (!safeHasLayer(m, BATTLE_MARKERS_LAYER_ID)) {
+                      try {
+                        m.addLayer({
+                          id: BATTLE_MARKERS_LAYER_ID,
+                          type: 'circle',
+                          source: BATTLE_MARKERS_SOURCE_ID,
+                          paint: {
+                            'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 7, 14, 10],
+                            'circle-color': '#ffffff',
+                            'circle-opacity': ['interpolate', ['linear'], ['get', 'age'], 0, 0.90, 1, 0.60, 2, 0.30],
+                            'circle-stroke-color': ['match', ['get', 'to'],
+                              'RS', 'rgba(160,50,50,0.9)',
+                              'RBiH', 'rgba(40,120,55,0.9)',
+                              'HRHB', 'rgba(35,90,145,0.9)',
+                              'rgba(90,90,100,0.8)',
+                            ],
+                            'circle-stroke-width': 2,
+                          },
+                        } as maplibregl.LayerSpecification, 'formation-markers');
+                      } catch (bErr) {
+                        console.warn('[MapContainer] battle-markers layer add failed:', bErr);
+                      }
+                    }
+                    (m.getSource(BATTLE_MARKERS_SOURCE_ID) as GeoJSONSource | undefined)?.setData(battleMarkersGeoJson);
+                    const { battlesVisible: battlesVis } = useGameStore.getState();
+                    safeSetLayoutVisibility(m, BATTLE_MARKERS_LAYER_ID, battlesVis);
+
+                    // Strategic points: gold circles for major cities and municipal seats
+                    if (!safeHasLayer(m, STRATEGIC_POINTS_LAYER_ID)) {
+                      const strategicGeoJson = buildStrategicPointGeoJSON(base);
+                      (m.getSource(STRATEGIC_POINTS_SOURCE_ID) as GeoJSONSource | undefined)?.setData(strategicGeoJson);
+                      try {
+                        m.addLayer({
+                          id: STRATEGIC_POINTS_LAYER_ID,
+                          type: 'circle',
+                          source: STRATEGIC_POINTS_SOURCE_ID,
+                          minzoom: 5,
+                          paint: {
+                            'circle-radius': ['match', ['get', 'tier'], 'city', 8, 5],
+                            'circle-color': '#c4a35a',
+                            'circle-opacity': 0.85,
+                            'circle-stroke-color': 'rgba(0,0,0,0.5)',
+                            'circle-stroke-width': 1,
+                          },
+                        } as maplibregl.LayerSpecification, 'formation-markers');
+                      } catch (spErr) {
+                        console.warn('[MapContainer] strategic-points layer add failed:', spErr);
+                      }
+                    }
+                    const { strategicVisible: stratVis } = useGameStore.getState();
+                    safeSetLayoutVisibility(m, STRATEGIC_POINTS_LAYER_ID, stratVis);
 
                     const { formationsVisible: fVis, labelsVisible: lVis } = useGameStore.getState();
                     safeSetLayoutVisibility(m, FORMATION_MARKERS_LAYER_ID, fVis);
@@ -1210,6 +1280,22 @@ export function MapContainer() {
       clearTimeout(retryId);
     };
   }, [mapReady, frontsVisible, formationsVisible, labelsVisible, mapMode]);
+
+  // Phase 5 toggles: fog / battles / strategic points — reactive visibility when store changes.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!mapReady || !map) return;
+    const { player_faction, reconIntelligence } = useGameStore.getState().loadedGameState ?? {};
+    if (safeHasLayer(map, FOG_FILL_LAYER_ID)) {
+      safeSetLayoutVisibility(map, FOG_FILL_LAYER_ID, fogVisible && !!player_faction && !!reconIntelligence);
+    }
+    if (safeHasLayer(map, BATTLE_MARKERS_LAYER_ID)) {
+      safeSetLayoutVisibility(map, BATTLE_MARKERS_LAYER_ID, battlesVisible);
+    }
+    if (safeHasLayer(map, STRATEGIC_POINTS_LAYER_ID)) {
+      safeSetLayoutVisibility(map, STRATEGIC_POINTS_LAYER_ID, strategicVisible);
+    }
+  }, [mapReady, fogVisible, battlesVisible, strategicVisible]);
 
   // Phase C2: mapMode (political | ethnic | supply | pressure) — ethnic/supply/pressure
   // currently show same as political; add mode-specific layers/sources when data is ready.

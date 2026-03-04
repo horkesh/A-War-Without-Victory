@@ -16,6 +16,7 @@ import { Tooltip } from './components/Tooltip';
 import { AttackConfirmation } from './components/AttackConfirmation';
 import { SidePickerOverlay } from './components/SidePickerOverlay';
 import { RecruitmentModal } from './components/RecruitmentModal';
+import { WarSummaryModal } from './components/WarSummaryModal';
 import { useGameStore } from './store/gameStore';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
@@ -49,6 +50,7 @@ function App() {
   const [sidePickerDismissed, setSidePickerDismissed] = useState(false);
   const [campaignStarting, setCampaignStarting] = useState(false);
   const [recruitmentOpen, setRecruitmentOpen] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
@@ -198,6 +200,7 @@ function App() {
           setSidePickerDismissed(false);
           setSidePickerOpen(true);
         }}
+        onOpenSummary={() => setSummaryOpen(true)}
       />
       <OOBSidebar />
       <OperationsPanel />
@@ -239,6 +242,7 @@ function App() {
         onApply={(brigadeId, equipmentClass) => void handleApplyRecruitment(brigadeId, equipmentClass)}
         onClose={() => setRecruitmentOpen(false)}
       />
+      <WarSummaryModal isOpen={summaryOpen} onClose={() => setSummaryOpen(false)} />
       <Minimap />
       <BottomStatusStrip />
     </div>

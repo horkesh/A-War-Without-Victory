@@ -48,7 +48,9 @@ src/ui/map/
 │       ├── geojsonLookup.ts                    buildOsidCentroidLookup() helper
 │       ├── resolveFormationLocationOsid.ts     location_osid or first AoR fallback
 │       ├── generateFactionBorders.ts           Shared-edge faction boundary computation
-│       └── buildFogOfWarGeoJSON.ts             Enemy-territory fog-of-war polygon fill (observer-mode-safe)
+│       ├── buildFogOfWarGeoJSON.ts             Enemy-territory fog-of-war polygon fill (observer-mode-safe)
+│       ├── buildBattleMarkersGeoJSON.ts        Combat flip events → Point features (last 3 turns, age-based opacity)
+│       └── buildStrategicPointGeoJSON.ts       City/seat classification from OSID `{mun}_2` slug → Point features
 │
 ├── components/
 │   ├── Entity slide-out panels (left: 19rem — see §2 for layout)
@@ -75,6 +77,7 @@ src/ui/map/
 │   ├── SettlementDetailContent.tsx Reusable settlement info (used in SelectionPanel + Tooltip)
 │   ├── SidePickerOverlay.tsx      Faction selection overlay shown before game load (Phase 4)
 │   ├── RecruitmentModal.tsx       Brigade recruitment modal: catalog, eligibility, recruit action (Phase 4)
+│   ├── WarSummaryModal.tsx        War Summary modal: area-weighted territory, military strength, displacement (Phase 5)
 │   └── panelRail.ts               Shared panel positioning constants (DETAIL_PANEL_STYLE, SECONDARY_PANEL_STYLE)
 │
 ├── store/
@@ -273,6 +276,9 @@ Layer toggles (no keys):
 | Labels | `labelsVisible` | formation-labels (requires formationsVisible) |
 | Sectors | `sectorsVisible` | sector-fill, sector-demarcation, sector-glow-pos/neg, brigade-rings |
 | Minimap | `minimapVisible` | Minimap component visibility |
+| Fog | `fogVisible` | fog-fill (AND-gated with player_faction + reconIntelligence; no-op in observer mode) |
+| Battles | `battlesVisible` | battle-markers-pulse (white circles at recent combat flip OSIDs; opacity by age) |
+| Points | `strategicVisible` | strategic-points-circles (gold circles — tier city r8, seat r5; derived from `_2` OSID slug) |
 
 ### 3.4 SelectionPanel
 

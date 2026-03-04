@@ -1,6 +1,18 @@
 import { useMemo } from 'react';
 import type { StartNewCampaignPayload } from './types';
 
+export interface CorpsOperationOrderPayload {
+    corpsId: string;
+    name: string;
+    type: 'general_offensive' | 'sector_attack' | 'strategic_defense' | 'reorganization';
+    targetSettlements: string[];
+    participatingBrigades: string[];
+    sectorId?: string;
+    objectives?: string[];
+    planningDuration?: number;
+    stagingOsid?: string;
+}
+
 /** Shape of window.awwv as exposed by preload.cjs. */
 interface WindowAwwv {
     startNewCampaign: (payload: StartNewCampaignPayload) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
@@ -22,6 +34,7 @@ interface WindowAwwv {
     stageCorpsAttackAxisOrder: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     stageOgSubfrontOrder: (ogId: string, corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsStanceOrder: (corpsId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
+    stageCorpsOperationOrder: (payload: CorpsOperationOrderPayload) => Promise<{ ok: boolean; error?: string }>;
     clearOrders: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     assignBrigadeToFront: (brigadeId: string, frontId: string) => Promise<{ ok: boolean; error?: string }>;
     renameFrontSegment: (frontId: string, name: string) => Promise<{ ok: boolean; error?: string }>;
@@ -203,8 +216,9 @@ export function useIPC() {
                 ? (payload?: { mode?: string }) => awwv.openTacticalMapWindow(payload)
                 : (_payload?: { mode?: string }): Promise<void> => Promise.resolve(),
 
-            // Future: operation planning via IPC (backend not yet wired).
-            stageCorpsOperationOrder: makeNoop<{ ok: boolean; error?: string }>(),
+            stageCorpsOperationOrder: awwv
+                ? (payload: CorpsOperationOrderPayload) => awwv.stageCorpsOperationOrder(payload)
+                : (_payload: CorpsOperationOrderPayload) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
         };
     }, []); // stable — never changes reference
 }

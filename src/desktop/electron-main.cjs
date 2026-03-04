@@ -270,7 +270,7 @@ function createWindow() {
   win.loadURL('awwv://warroom/index.html');
 
   // Clear HTTP cache so the tactical map iframe always loads the latest bundle from the map server.
-  win.webContents.session.clearCache().catch(() => {});
+  win.webContents.session.clearCache().catch(() => { });
 
   const devToolsPromise = win.webContents.openDevTools({ mode: 'detach' });
   if (devToolsPromise && typeof devToolsPromise.catch === 'function') {
@@ -1038,6 +1038,54 @@ app.whenReady().then(() => {
       } else {
         state.corps_command[corpsId].stance = stance;
       }
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-corps-operation-order', async (_event, payload) => {
+    const { corpsId, name, type, targetSettlements, participatingBrigades, sectorId, objectives, planningDuration, stagingOsid } = payload || {};
+    if (!currentGameStateJson || typeof corpsId !== 'string' || typeof name !== 'string' || typeof type !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    const validTypes = ['general_offensive', 'sector_attack', 'strategic_defense', 'reorganization'];
+    if (!validTypes.includes(type)) {
+      return { ok: false, error: `Invalid operation type: ${type}` };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      if (!state.corps_command) state.corps_command = {};
+      if (!state.corps_command[corpsId]) {
+        state.corps_command[corpsId] = {
+          command_span: 5,
+          subordinate_count: 0,
+          og_slots: 1,
+          active_ogs: [],
+          corps_exhaustion: 0,
+          stance: 'balanced',
+          active_operation: null,
+        };
+      }
+      const turn = state.meta?.turn ?? 0;
+      state.corps_command[corpsId].active_operation = {
+        name,
+        type,
+        phase: 'planning',
+        started_turn: turn,
+        phase_started_turn: turn,
+        target_settlements: Array.isArray(targetSettlements) ? targetSettlements : [],
+        participating_brigades: Array.isArray(participatingBrigades) ? participatingBrigades : [],
+        sector_id: typeof sectorId === 'string' ? sectorId : undefined,
+        objectives: Array.isArray(objectives) ? objectives : [],
+        planning_duration: typeof planningDuration === 'number' ? planningDuration : 2,
+        staging_osid: typeof stagingOsid === 'string' ? stagingOsid : undefined,
+        momentum: 0,
+        current_objective_index: 0,
+      };
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };

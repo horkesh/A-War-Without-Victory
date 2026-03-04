@@ -19,6 +19,7 @@ import {
 } from '../../state/casualty_ledger.js';
 import { MIN_COMBAT_PERSONNEL } from '../../state/formation_constants.js';
 import type {
+    ControlEvent,
     FactionId,
     FormationId,
     FormationState,
@@ -674,8 +675,18 @@ export function resolveAttackOrdersOsid(
 
         if (flip) {
             if (!state.political_controllers) state.political_controllers = {};
+            const prevController = state.political_controllers[targetOsid] ?? null;
             state.political_controllers[targetOsid] = attackerFaction;
             report.flips_applied += 1;
+            // Record control event for GUI battle markers (does not affect simulation logic).
+            (state.control_events ??= []).push({
+                turn: state.meta?.turn ?? 0,
+                settlement_id: targetOsid,
+                mechanism: 'combat',
+                from: prevController,
+                to: attackerFaction,
+                mun_id: targetOsid.split(':')[1] ?? undefined,
+            } satisfies ControlEvent);
         }
 
         if (flip && defenderFormation) {

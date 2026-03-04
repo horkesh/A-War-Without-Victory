@@ -15,9 +15,10 @@ const FACTION_BANNER_TINT: Record<string, string> = {
 interface TopToolbarProps {
   onOpenRecruitment?: () => void;
   onOpenSidePicker?: () => void;
+  onOpenSummary?: () => void;
 }
 
-export function TopToolbar({ onOpenRecruitment, onOpenSidePicker }: TopToolbarProps) {
+export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary }: TopToolbarProps) {
   const ipc = useIPC();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const loadSave = useGameStore((s) => s.loadSave);
@@ -184,6 +185,13 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker }: TopToolbarPr
         className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
       >
         Recruitment
+      </button>
+      <button
+        onClick={() => onOpenSummary?.()}
+        disabled={!loadedGameState}
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+      >
+        Summary
       </button>
 
       {loadedGameState && (

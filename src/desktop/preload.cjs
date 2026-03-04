@@ -49,6 +49,7 @@ contextBridge.exposeInMainWorld('awwv', {
   setBrigadeDesiredAoRCap: (brigadeId, cap) => ipcRenderer.invoke('set-brigade-desired-aor-cap', { brigadeId, cap }),
   clearOrders: (brigadeId) => ipcRenderer.invoke('clear-orders', { brigadeId }),
   stageCorpsStanceOrder: (corpsId, stance) => ipcRenderer.invoke('stage-corps-stance-order', { corpsId, stance }),
+  stageCorpsOperationOrder: (payload) => ipcRenderer.invoke('stage-corps-operation-order', payload),
   focusWarroom: () => ipcRenderer.invoke('focus-warroom'),
   getMapServerUrl: () => ipcRenderer.invoke('get-map-server-url'),
 });

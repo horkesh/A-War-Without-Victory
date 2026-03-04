@@ -113,8 +113,8 @@
    Do instead: `recon_intelligence.ts` runs via `updateReconIntelligence()`. Ranges: RBiH=2, RS=1, HRHB=1. Phase 2 TODO: confidence decay, bot AI intel usage.
 
 ## GUI / HoI Map
-1. **[2026-03-04] GUI Phase 4 COMPLETE. Phase 5 is next.**
-   Do instead: Phase 4 done (useIPC, SidePickerOverlay, RecruitmentModal, fog-of-war, MapContainer surgical patch). Phase 5 items: battle markers, enclave visualization (dashed border + pulse), strategic point markers (§2.6), front-distributed formation placement (spec §2.4), fog toggle button, stageCorpsOperationOrder backend.
+1. **[2026-03-04] GUI Phase 5 COMPLETE. Only replay scrubber deferred.**
+   Do instead: Phase 5 done — battle markers (GameState.control_events + buildBattleMarkersGeoJSON), fog/battles/strategic-points layer toggles, buildStrategicPointGeoJSON (city/seat from `{mun}_2` slug), stageCorpsOperationOrder IPC backend, WarSummaryModal. Replay scrubber deferred (--video flag, 13.6 GB/run). Visual sign-off TBD.
 2. **[2026-03-01] Map load: validate + defer parse + timeout**
    Do instead: Validate save (schema, meta.turn, formations/political_controllers shape). `parseGameState` unwraps `{ state }`/`{ gameState }`, treats `phase_ii` as war, accepts `formations` as object or array. Parse in requestIdleCallback (~150ms). 25s load timeout in toolbar. Show loadError on failure/timeout.
 3. **[2026-02-28] Map overlay poll: check sources first**
@@ -191,7 +191,7 @@
    Do instead: For `apr1992_definitive_40w`, tune `data/scenarios/timelines/apr1992.json` (`doctrine_phases`, `external_support`) before editing `bot_strategy.ts`; verify with `final_state_hash` and `compare_painted_vs_sim.cjs`.
 8. **[2026-03-03] Prove knob efficacy immediately (hash + metrics)**
    Do instead: After each calibration edit, run one 40w and compare both `final_state_hash` and `compare_painted_vs_sim.cjs`; if unchanged vs prior run, revert as inert/no-op before next iteration.
-9. **[2026-03-03] Municipality target sets are the strongest live lever**
-   Do instead: Prioritize small `target_municipalities` edits for affected corps (e.g., EBK `brcko`/`lopare` trimming yielded +8.3pp POSAVINA_NE) before weight/min_outcome tuning.
-10. **[2026-03-01] Calibration knobs (master reference)**
-    Do instead: Primary levers: POOL_SCALE_FACTOR, FACTION_POOL_SCALE, RS_EARLY_WAR_END_WEEK (20), per-faction stance/doctrine in bot_strategy.ts, initial_morale in OOB, per-faction morale resist floor, defense_terrain_bonus (+0.20–0.30), local_front_defense.ts thresholds (THIN=0.5, DENSE=1.0). Supply gating: critical→defend, strained→victory-only. Sector offensives: MIN_BRIGADES=3, supply_readiness launch=0.6/abort=0.4. Combat formula: officer quality, ethnic defense, bombardment casualty mult, bombardment exposure attrition.
+9. **[2026-03-04] apr1992.json ↔ FACTION_DOCTRINE_PHASES must stay synced**
+   Do instead: After editing EITHER `data/scenarios/timelines/apr1992.json` doctrine values OR `bot_strategy.ts` `FACTION_DOCTRINE_PHASES`, immediately run `npx vitest run tests/war_timeline.test.ts` to confirm round-trip parity. Drift causes silent calibration regression.
+10. **[2026-03-03] Municipality target sets are the strongest live lever**
+    Do instead: Prioritize small `target_municipalities` edits for affected corps (e.g., EBK `brcko`/`lopare` trimming yielded +8.3pp POSAVINA_NE) before weight/min_outcome tuning.

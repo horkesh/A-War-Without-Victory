@@ -589,6 +589,16 @@ export interface DisplacementState {
 }
 
 /** Per-event displacement record for tracking and reporting. Sorted by (turn, origin_mun). */
+/** Single OSID control-change event. Used by GUI battle-markers layer; does not affect simulation. */
+export interface ControlEvent {
+    turn: number;
+    settlement_id: string;
+    mechanism: 'combat' | 'consolidation' | 'abandoned';
+    from: string | null;
+    to: string | null;
+    mun_id?: string;
+}
+
 export interface DisplacementEvent {
     turn: number;
     origin_mun: MunicipalityId;
@@ -1370,6 +1380,15 @@ export interface GameState {
     named_officer_data?: import('./officer_types.js').NamedOfficer[];
     /** Named officer mutable state keyed by officer ID. */
     named_officers?: Record<string, import('./officer_types.js').NamedOfficerState>;
+
+    // --- Control change events (Phase 5 GUI: battle markers) ---
+    /**
+     * Per-turn log of OSID control changes. Cleared at the start of each attack-resolution step,
+     * then populated by combat flips (mechanism='combat') and consolidation flips (mechanism='consolidation').
+     * Kept for last 3 turns. Sorted by (turn, settlement_id) for determinism.
+     * Used by the GUI battle-markers layer — does not affect simulation logic.
+     */
+    control_events?: ControlEvent[];
 
     // --- Local Truces (Vienna Declaration, May 1992) ---
     /**

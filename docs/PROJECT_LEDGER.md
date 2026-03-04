@@ -9672,3 +9672,58 @@ Determinism checks **MUST** be run:
   - `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md` — probe/consolidation → hold, BrigadePosture note updated
   - `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` — Brigade panel posture dropdown updated, type comment updated
   - `docs/20_engineering/PIPELINE_ENTRYPOINTS.md` — row 8 updated to reflect home-defense step, ZoC removed note
+
+## [2026-03-04] GUI Phase 5 — Battle Markers, Fog Toggle, Strategic Points, Corps Op IPC, War Summary
+
+- **Phase:** GUI Phase 5 (polish, visualization, IPC backend)
+- **Summary:**
+  - **GameState.control_events (sim schema):** Added `ControlEvent` interface (`turn, settlement_id, mechanism, from, to, mun_id?`) and `control_events?: ControlEvent[]` to `GameState`. Populated in `attack_resolution_osid.ts` on every OSID flip with `mechanism: 'combat'`. Trimmed to last 3 turns and sorted by `(turn, settlement_id)` in `war_phases.ts` before/after `resolveAttackOrdersOsid`.
+  - **Battle Markers layer:** New `buildBattleMarkersGeoJSON.ts` builder — filters `recentControlEvents` to combat flips in last 3 turns, deduplicates per OSID (keep latest), computes polygon centroids, returns `FeatureCollection<Point>`. Circle layer in MapContainer (white fill, age-based opacity 1.0→0.3 over 3 turns). Toggle: `battlesVisible` in store + Battles button in MapModeToolbar.
+  - **Fog toggle:** `fogVisible` added to gameStore (default true). Fog layer visibility now gated by `fogVisible && player_faction && reconIntelligence`. Fog button in MapModeToolbar.
+  - **Strategic point markers:** New `buildStrategicPointGeoJSON.ts` builder — derives tier from OSID naming (`slug === {mun}_2` → seat; 6 hardcoded city mun IDs → city). Gold circle layer (radius 5 seat / 8 city). Toggle: `strategicVisible` + Points button.
+  - **stageCorpsOperationOrder IPC backend:** Added `CorpsOperationOrderPayload` type to `useIPC.ts`. Added real IPC call in useIPC (was noop). Added `ipcMain.handle('stage-corps-operation-order', ...)` in `electron-main.cjs` following stance-order pattern — validates type, deserializes state, sets `active_operation` on `corps_command[corpsId]`, reserializes and broadcasts. Added `stageCorpsOperationOrder` to `preload.cjs`.
+  - **War Summary modal:** New `WarSummaryModal.tsx` — shows area-weighted territory (from `controlBySettlement` + static `osid_areas.json` import), military personnel + KIA/WIA per faction, displacement totals by faction. Opens via "Summary" button in TopToolbar. Pre-existing CorpsDetail/FormationDetail type errors fixed (operationsPanelOpen → isOperationsPanelOpen, brigadeHistory → combatSummary, formationCasualtyLedger guard).
+- **Determinism:** `control_events` sorted by `(turn, settlement_id)` using string comparison (deterministic). All UI builders are pure functions. No randomness introduced.
+- **Tests:** 312 pass, 1 skipped — no regressions. No new sim tests (ControlEvent is additive/display-only).
+- **Build:** `npm run desktop:map:build` clean (pre-existing chunk-size warnings only).
+- **Files changed:**
+  - `src/state/game_state.ts` — ControlEvent interface + control_events field
+  - `src/sim/combat/attack_resolution_osid.ts` — push ControlEvent on flip
+  - `src/sim/turn_phases/war_phases.ts` — trim + sort control_events
+  - `src/ui/map/store/gameStore.ts` — fogVisible, battlesVisible, strategicVisible + setters
+  - `src/ui/map/components/MapModeToolbar.tsx` — Fog, Battles, Points toggles
+  - `src/ui/map/map/builders/buildBattleMarkersGeoJSON.ts` — NEW
+  - `src/ui/map/map/builders/buildStrategicPointGeoJSON.ts` — NEW
+  - `src/ui/map/map/MapContainer.tsx` — battle-markers + strategic-points sources/layers + reactive visibility effect
+  - `src/ui/map/desktop/useIPC.ts` — CorpsOperationOrderPayload type + real stageCorpsOperationOrder call
+  - `src/desktop/electron-main.cjs` — stage-corps-operation-order handler
+  - `src/desktop/preload.cjs` — stageCorpsOperationOrder bridge
+  - `src/ui/map/components/WarSummaryModal.tsx` — NEW
+  - `src/ui/map/components/TopToolbar.tsx` — onOpenSummary prop + Summary button
+  - `src/ui/map/App.tsx` — summaryOpen state + WarSummaryModal render
+  - `src/ui/map/components/FormationDetail.tsx` — isOperationsPanelOpen fix, combatSummary fix, formationCasualtyLedger guard
+  - `src/ui/map/components/CorpsDetail.tsx` — isOperationsPanelOpen fix
+
+### n477: Map Visibility Polish + Timeline Sync Fix + Electron Crash Investigation (2026-03-04 evening)
+
+- **Summary:** (1) Increased sector glow opacity and front line width/opacity for better map readability. (2) Fixed `war_timeline.test.ts` failures by syncing `apr1992.json` RS doctrine values to match hardcoded `FACTION_DOCTRINE_PHASES`. (3) Investigated Electron `app.whenReady()` crash — confirmed file runs in Electron but `require('electron')` yields undefined `app`; unresolved.
+- **Change (map visibility):** `awwv_map_style.json`: `faction-border-glow-pos` and `faction-border-glow-neg` base opacity 0.45 → 0.65. `front-line-base` widths increased (1.8/3.0/4.2 → 2.2/3.8/5.0), opacity 0.9 → 0.95. `front-line-stripe` widths increased (1.0/1.8/2.6 → 1.4/2.4/3.2), opacity 0.85 → 0.95.
+- **Change (timeline sync):** `data/scenarios/timelines/apr1992.json` RS phase 0: `max_attack_share_override` 0.26 → 0.28, `aggression_modifier` 0.13 → 0.15. RS phase 1: `max_attack_share_override` 0.10 → 0.08. Values now match `bot_strategy.ts` `FACTION_DOCTRINE_PHASES` hardcoded fallback. 38/38 tests pass.
+- **Investigation (Electron):** `electron-main.cjs` crashes at `app.whenReady()` — `app` undefined from `require('electron')` destructuring. File IS running inside Electron (Node.js v20.18.0 in trace). Electron v33.0.0 correctly installed. Clean reinstall attempted but blocked by file locks. Debug `console.log` at line 2 of `electron-main.cjs` still present — remove after diagnosis.
+- **Test results:** vitest full suite 288 passed, 1 skipped, 0 failed. desktop:map:build, desktop:sim:build, warroom:build all succeed.
+- **Files modified:** `src/ui/map/map/awwv_map_style.json`, `data/scenarios/timelines/apr1992.json`, `src/desktop/electron-main.cjs` (debug line).
+- **Artifacts:** `docs/40_reports/implemented/20260304_MAP_VISIBILITY_TIMELINE_SYNC_ELECTRON_INVESTIGATION.md`.
+
+## [2026-03-04] Propagate to canon — GUI Phase 5 report and canon propagation
+
+- **Phase:** GUI Phase 5 documentation sync
+- **Summary:** Created implementation report and propagated Phase 5 changes to all relevant engineering docs and session memory.
+- **Files updated:**
+  - `docs/40_reports/implemented/20260304_GUI_PHASE5_BATTLE_MARKERS_FOG_STRATEGIC_CORPS_OP_WAR_SUMMARY.md` — NEW report
+  - `docs/40_reports/README.md` — added Phase 5 report to implemented/ table
+  - `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — Phase 4 deferred items (fog toggle, stageCorpsOp) moved to Done; Phase 5 Done column updated with all completed items; replay scrubber remains in Not Yet
+  - `docs/20_engineering/MAP_UI_MASTER.md` — added 3 new layer toggles (Fog/Battles/Points) to §3.3 table; added `buildBattleMarkersGeoJSON.ts`, `buildStrategicPointGeoJSON.ts`, `WarSummaryModal.tsx` to directory listing
+  - `docs/20_engineering/PIPELINE_ENTRYPOINTS.md` — added `control_events` note to `phase-ii-resolve-attack-orders` step; updated pre-commit checklist with GAMESTATE_TOP_LEVEL_KEYS example
+  - `docs/20_engineering/REPO_MAP.md` — added Phase 4 + Phase 5 report links to GUI section; noted `control_events` field and MAP_UI_MASTER reference
+  - `.claude/napkin.md` — updated Phase 5 status entry from "next" to "COMPLETE"
+- **Canon changes:** None — `control_events` is an implementation-level field not requiring canon spec updates (display-only, additive, gated by null check)

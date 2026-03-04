@@ -19,6 +19,9 @@ const LAYER_TOGGLES = [
   { key: 'labelsVisible', setKey: 'setLabelsVisible', label: 'Labels' },
   { key: 'sectorsVisible', setKey: 'setSectorsVisible', label: 'Sectors' },
   { key: 'minimapVisible', setKey: 'setMinimapVisible', label: 'Minimap' },
+  { key: 'fogVisible', setKey: 'setFogVisible', label: 'Fog' },
+  { key: 'battlesVisible', setKey: 'setBattlesVisible', label: 'Battles' },
+  { key: 'strategicVisible', setKey: 'setStrategicVisible', label: 'Points' },
 ] as const;
 
 export function MapModeToolbar() {
@@ -34,6 +37,12 @@ export function MapModeToolbar() {
   const setSectorsVisible = useGameStore((s) => s.setSectorsVisible);
   const minimapVisible = useGameStore((s) => s.minimapVisible);
   const setMinimapVisible = useGameStore((s) => s.setMinimapVisible);
+  const fogVisible = useGameStore((s) => s.fogVisible);
+  const setFogVisible = useGameStore((s) => s.setFogVisible);
+  const battlesVisible = useGameStore((s) => s.battlesVisible);
+  const setBattlesVisible = useGameStore((s) => s.setBattlesVisible);
+  const strategicVisible = useGameStore((s) => s.strategicVisible);
+  const setStrategicVisible = useGameStore((s) => s.setStrategicVisible);
 
   const toggles: Record<string, { value: boolean; set: (v: boolean) => void }> = {
     frontsVisible: { value: frontsVisible, set: setFrontsVisible },
@@ -41,6 +50,9 @@ export function MapModeToolbar() {
     labelsVisible: { value: labelsVisible, set: setLabelsVisible },
     sectorsVisible: { value: sectorsVisible, set: setSectorsVisible },
     minimapVisible: { value: minimapVisible, set: setMinimapVisible },
+    fogVisible: { value: fogVisible, set: setFogVisible },
+    battlesVisible: { value: battlesVisible, set: setBattlesVisible },
+    strategicVisible: { value: strategicVisible, set: setStrategicVisible },
   };
 
   return (
