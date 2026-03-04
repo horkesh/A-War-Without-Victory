@@ -802,7 +802,7 @@ Officer state lookup: `namedOfficerStateById[officer.id].status === 'active'`
 |-----------|------|
 | Front line style | Black-white stripe only. No chevrons, no HoI4 barbed-wire. |
 | Sector density modifiers | Use faction-level aggregation only. Never per-corps density for THIN/DENSE modifier. |
-| AoR legacy | `getLegacyAoR()` still called by 17+ files. ZoC fully removed. See `AOR_ZOC_LEGACY_AUDIT.md`. |
+| AoR legacy | AoR/ZoC cleanup R1–R5 complete (2026-03-04). `getLegacyAoR()` + all consumer dead branches removed. ZoC fully removed (2026-03-02). See `AOR_ZOC_LEGACY_AUDIT.md`. |
 | OSID vs SID | `political_controllers` keyed by OSID. Never use getEffectiveSettlementSide() for control. |
 | Supply gating | Only gate on supply when `supply_reserves_enabled=true`. OSID reachability runs regardless. |
 | MapLibre blob workers | Map assets served over HTTP (`http://127.0.0.1:<port>`). Blob workers fail under `awwv://`. |

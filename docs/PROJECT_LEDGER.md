@@ -9742,3 +9742,16 @@ Determinism checks **MUST** be run:
   - `docs/20_engineering/REPO_MAP.md` — added Phase 4 + Phase 5 report links to GUI section; noted `control_events` field and MAP_UI_MASTER reference
   - `.claude/napkin.md` — updated Phase 5 status entry from "next" to "COMPLETE"
 - **Canon changes:** None — `control_events` is an implementation-level field not requiring canon spec updates (display-only, additive, gated by null check)
+
+## [2026-03-04] AoR/ZoC legacy cleanup — R1–R5 complete
+
+- **Phase:** Engineering hygiene / OSID migration
+- **Summary:** Completed full AoR, ZoC, and Phase I/II legacy cleanup as planned in `AOR_ZOC_LEGACY_AUDIT.md`. All five phases (R1–R5) executed in the same session: dead AoR files deleted, all 18 consumers migrated to OSID/hq_sid, ZoC tombstone notes applied across 12 docs, peace/war terminology updated in 4 canon docs, 3 type renames applied.
+- **Change (R1 — dead AoR files deleted):** 10 files removed: `corps_directed_aor.ts`, `aor_reshaping.ts`, `aor_contiguity.ts` (combat + validate), `sim_aorcheck.ts`, `phaseF3_aor_fallback_usage_audit.ts`, `aor_reconcile_scan.py`, `aor_reconcile_apply.py`, `tests/aor_reshaping.test.ts`, `tests/corps_aor_contiguity.test.ts`. ~1,700 lines deleted.
+- **Change (R2 — ZoC doc tombstones):** 12 doc files updated (7 canon + 5 engineering): all ZoC references replaced with tombstone notes and current replacements (frontage cap = 48, `local_front_defense.ts` density modifier, `apply-brigade-movement` via `brigade_movement_orders.ts`).
+- **Change (R3 — AoR consumer migration):** 18 consumer files migrated. `brigade_aor` field is never populated by any active pipeline step; all consumers now use `location_osid`/`hq_sid`. Dead branches removed from: `recon_intelligence`, `brigade_pressure`, `militia_garrison`, `faction_resilience`, `corps_front_assign`, `apply_brigade_reposition`, `formation_hq_relocation`, `displacement_state_utils`, `operational_groups`, `combat_estimate`, `battle_resolution`, `brigade_movement`, `brigade_movement_query`, `war_data_extractor`, `desktop_sim`, `electron-main.cjs`, `sim_validate`, `brigade_deploy_orders.test.ts`. Pre-existing TS errors (`aor_contiguity.js`, `aor_reshaping.js` missing imports) fixed.
+- **Change (R4 — peace/war canon terminology):** 4 canon docs updated: `context.md`, `Systems_Manual_v0_6_0.md`, `Phase_Specifications_v0_6_0.md`, `War_Specification_v0_6_0.md`. "Phase I / Phase II" architectural framing replaced with "peace phase / war phase". Pipeline step names (`phase-i-*`, `phase-ii-*`) preserved.
+- **Change (R5 — type renames):** 3 renames: `PHASE_I_DISPLACEMENT_FRACTION_NO_CENSUS` → `EARLY_WAR_DISPLACEMENT_FRACTION_NO_CENSUS` (`displacement.ts`); `PhaseIDisplacementFlipInfo` → `EarlyWarDisplacementFlipInfo` (`displacement.ts`); `assertNoAoRInPhaseI` → `assertNoAoRInEarlyWar` (`peace_phases.ts`, `run_early_war_browser.ts`).
+- **Determinism:** No simulation behavior changed. All removed code was operating on empty `brigade_aor = {}` data (never populated by any active pipeline step). tsc clean, 296/296 vitest pass.
+- **Retained:** `brigade_aor_legacy.ts` + `aor_instantiation.ts` + `LegacyBrigadeAoRState` retained for legacy test stubs. Full deletion deferred.
+- **Artifacts:** commits `23a39fa`, `3f36b61`. Updated `AOR_ZOC_LEGACY_AUDIT.md` with completion status.
