@@ -73,18 +73,16 @@
    Do instead: Flat additive (`aggression_modifier × 120`) PLUS multiplicative (`× (1 + aggression_modifier)`). Multiplier alone ineffective on low base scores.
 5. **[2026-02-22] Pioneer attack seeding**
    Do instead: First brigade seeds concentration with 'repulsed' outcome; subsequent join via `estimateConcentratedOutcome()`.
-6. **[2026-02-25] Undefended capture: not for all factions**
-   Do instead: Do not give all armies empty-territory grab — benefits RBiH more than RS, distorts outcomes.
-7. **[2026-02-24] CorpsDirective must be complete**
+6. **[2026-02-24] CorpsDirective must be complete**
    Do instead: Include `offensive_targets`, `hold_osids`, `avoid_osids`, `max_attackers_per_target`, `reserve_fraction`, `min_attack_outcome`, `aggression_modifier`.
-8. **[2026-03-01] Pre-planned VRS operations**
+7. **[2026-03-01] Pre-planned VRS operations**
    Do instead: `injectPrePlannedOperations(state)` after `initializeCorpsCommand`. 5 named ops, `planning` phase (duration 1), execute turn 1. OSID targets + staging_osid.
-9. **[2026-02-25] sidToMun map preservation**
+8. **[2026-02-25] sidToMun map preservation**
    Do instead: Preserve `canonicalSidToMun` in scenario_runner.ts. Corruption prevented ALL 217 mandatory brigades from spawning.
-10. **[2026-03-04] Brigade discipline: hard block + combat fatigue (n472)**
-    Do instead: `bot_brigade_ai_osid.ts` hard block — brigades ONLY attack `effectiveDirective.offensive_targets`, sole exception: counter-attacks. Frontier pressure mechanic REMOVED. `RESERVE_PER_EDGE_CAP=0.07` (was 0.5) → ~1 reserve per sector. Combat fatigue: attacker +2, defender +1 per battle (cap 20); recovery -1/turn via `applyFatigueRecovery()` in `formation_fatigue.ts`. Phase I supply-assignment fatigue inert — combat-activity fatigue supersedes it.
-11. **[2026-03-04] Vienna Declaration / Local Truces (RS-HRHB non-aggression)**
-    Do instead: `src/sim/local_truces.ts` — fires at week 4 via `checkAndFireViennaDeclaration()` in evaluate-events step; sets `state.vienna_declaration_turn`. Bot `generateCorpsDirectives()` filters truce-partner OSIDs from `offensive_targets` (RS filters HRHB, HRHB filters RS), except `TRUCE_EXCEPTION_MUNICIPALITIES` = {brod, derventa, odzak, bosanski_samac, orasje, jajce}. Player truce-break: detected in `check-truce-break` step; sets `state.truce_broken_turn[faction]`, emits warning event, opponent gets +0.25 aggression for 6 turns. State fields: `vienna_declaration_turn?`, `truce_broken_turn?`.
+9. **[2026-03-04] Brigade discipline: hard block + combat fatigue (n472)**
+   Do instead: `bot_brigade_ai_osid.ts` hard block — brigades ONLY attack `effectiveDirective.offensive_targets`, sole exception: counter-attacks. Frontier pressure mechanic REMOVED. `RESERVE_PER_EDGE_CAP=0.07` (was 0.5) → ~1 reserve per sector. Combat fatigue: attacker +2, defender +1 per battle (cap 20); recovery -1/turn via `applyFatigueRecovery()` in `formation_fatigue.ts`. Phase I supply-assignment fatigue inert.
+10. **[2026-03-04] Vienna Declaration / Local Truces (RS-HRHB non-aggression)**
+    Do instead: `src/sim/local_truces.ts` — fires at week 4; sets `state.vienna_declaration_turn`. Bot filters RS↔HRHB truce-partner OSIDs from `offensive_targets`, except {brod, derventa, odzak, bosanski_samac, orasje, jajce}. Player truce-break: `check-truce-break` step; sets `state.truce_broken_turn[faction]`, opponent gets +0.25 aggression for 6 turns.
 
 ## OOB & Brigade Systems
 1. **[2026-03-03] Personnel ceilings REMOVED + combat formula (n392 = 88.6% ATH)**

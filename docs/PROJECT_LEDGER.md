@@ -14,7 +14,7 @@ This is the single authoritative project ledger. All context, decisions, and sta
 **Project:** A War Without Victory (AWWV)
 **Type:** Wargame simulation prototype
 **Repository:** AWWV
-**Current Focus:** Combat calibration (n392, 88.6% OSID match — ATH), GUI Architecture Rework v2 (React+MapLibre, Phase 3 COMPLETE), Sectors & Operations active, War Timeline externalization complete
+**Current Focus:** Calibration n466 = 92.0% area-weighted (ATH). GUI Phase 5 complete. AoR/ZoC cleanup R1–R5 complete. GUI Phase 6 scope TBD.
 
 ---
 
@@ -45,21 +45,25 @@ This is the single authoritative project ledger. All context, decisions, and sta
 ## Current Phase
 
 **Phase:** Post-MVP — Active Development
-**Status:** Phase II live, Phase M complete, GUI Phase 3 COMPLETE
-**Focus:** Combat calibration (88.6% OSID match at n392 — ATH), Sector offensives active, GUI Phase 4 (Desktop) next
+**Status:** Phase II + supply system live, GUI Phase 5 complete, AoR/ZoC fully removed
+**Focus:** Calibration n466 = 92.0% area-weighted (ATH). GUI Phase 6 scope TBD.
 
 **Completed milestones:**
 - Phase 6: MVP declared 2026-02-08; A1 base map stable and frozen
 - Phase 0 (tile pipeline): PMTiles restored 2026-03-02 — hillshade + OSM vector tiles live, 21 style layers, place labels
 - Phase II: Front-based combat, OSID political control, bot AI (Army→Corps→Brigade), corps front sectors
-- Phase M: Year-one mechanics — morale drift, ZoC virtual defense, enclave deprivation, displacement routing, per-OSID census displacement depth
+- Phase M: Year-one mechanics — morale drift, enclave deprivation, displacement routing, per-OSID census displacement depth
 - Phase C: GUI tooltips, keyboard shortcuts, attack modal, order queue
 - Peace/War lifecycle migration (replaced phase_i/phase_ii)
-- Corps sector visualization in React+MapLibre map
+- Supply reserves (Phases A–E): general + heavy reserves, siege drain, enclave hardening, patron aid, JNA inheritance, maintenance drain
+- OOB rework: 247 brigades, brigade history, decorations, elite loan, VRS equipment decay, lifecycle events
+- War timeline externalization: `src/state/war_timeline.ts` + `data/scenarios/timelines/apr1992.json`
+- GUI Phases 3–5: sector viz, desktop integration, battle markers, fog/layer toggles, corps op IPC, War Summary modal
+- AoR/ZoC legacy cleanup R1–R5 (2026-03-04): -2,883 lines, all dead code removed
 
 **Active workstreams:**
-- Combat calibration: n392 = 88.6% (667/744 OSID match, ATH), comprehensive combat formula (officer quality, ethnic defense, bombardment exposure), sector offensives active, area-weighted territory (RS 65.1%)
-- GUI Phase 4 (Desktop): useIPC, advance-turn, order staging, recruitment, SidePickerOverlay, fog-of-war, PMTiles in Electron
+- Calibration: n466 = 92.0% area-weighted (670/744 count, ATH). Vienna Declaration truces live. 20 overrides + 16 RS avoided_osids.
+- Next: GUI Phase 6 scope decision (see Next Steps in AOR_ZOC_LEGACY_CLEANUP_R1_R5 report)
 
 **Completed workstreams:**
 - Displacement system complete: n319 = 668k displaced (per-OSID census depth). See 20260301_DISPLACEMENT_DEPTH_CALIBRATION.md
