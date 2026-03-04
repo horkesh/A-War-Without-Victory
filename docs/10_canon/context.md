@@ -219,7 +219,7 @@ Do NOT edit FORAWWV automatically.
 - Stable by default (doesn't drift without defined mechanisms)
 - Change only via: sustained pressure, internal collapse, or negotiation
 
-**Phase II spatial model (OSID/ZoC/Corps Sectors; AoR removed)**
+**War phase spatial model (OSID/Corps Sectors/Frontage cap; AoR removed, ZoC removed 2026-03-02)**
 - Brigade location is location_osid only; no AoR
 - Rear Political Control Zones: control unchanged without attack resolution
 - Control change only via attack resolution or corps/frontline operations
@@ -261,7 +261,7 @@ Do NOT edit FORAWWV automatically.
 AWWV/
 ├── src/                          # Simulation engine (TypeScript)
 │   ├── sim/                      # Core simulation logic
-│   │   ├── combat/               # Phase II combat, bot AI, ZoC, corps sectors (renamed from phase_ii/)
+│   │   ├── combat/               # Phase II combat, bot AI, corps sectors (renamed from phase_ii/; ZoC removed 2026-03-02)
 │   │   ├── early_war/            # Phase I militia, control flip, displacement (renamed from phase_i/)
 │   │   ├── bot/                  # Bot manager, strategy, interfaces
 │   │   ├── events/               # B1 event system

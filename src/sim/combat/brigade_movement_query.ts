@@ -10,7 +10,6 @@ import {
     shortestPathThroughFriendly,
     transitTurnsForPath,
 } from './brigade_movement.js';
-import { getBrigadeAoRSettlements } from './brigade_aor_legacy.js';
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
 
 export interface MovementRangeQuery {
@@ -30,10 +29,9 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function getStartSid(state: GameState, brigadeId: FormationId): SettlementId | null {
-    const aor = getBrigadeAoRSettlements(state, brigadeId);
-    if (aor.length > 0) return aor[0]!;
     const formation = state.formations?.[brigadeId];
-    return formation?.hq_sid ?? null;
+    const locOsid = (formation as { location_osid?: string })?.location_osid as SettlementId | undefined;
+    return locOsid ?? formation?.hq_sid ?? null;
 }
 
 function getColumnMovementRate(state: GameState, brigadeId: FormationId): number {

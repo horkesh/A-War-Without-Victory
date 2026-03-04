@@ -15,8 +15,6 @@ import { applyInvestment } from '../phase0/investment.js';
 import { loadMunicipalityHqSettlement, loadOobBrigades } from '../scenario/oob_loader.js';
 import { buildSidToMunFromSettlements } from '../scenario/oob_early_war_entry.js';
 import { createStateFromScenario } from '../scenario/scenario_runner.js';
-import { validateReshapeOrder } from '../sim/combat/aor_reshaping.js';
-import { getBrigadeAoRSettlements } from '../sim/combat/brigade_aor_legacy.js';
 import { shortestPathThroughFriendly } from '../sim/combat/brigade_movement.js';
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/combat/phase_ii_adjacency.js';
 import { estimateAttackCost, type AttackEstimate } from '../sim/combat/combat_estimate.js';
@@ -26,7 +24,6 @@ import {
 } from '../sim/combat/corps_front_assign.js';
 import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
 import { applyRecruitment, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
-import { getLegacyAoR } from '../state/game_state.js';
 import { runTurn } from '../sim/turn_pipeline.js';
 import {
     queryMovementPath as computeMovementPathQuery,
@@ -41,7 +38,7 @@ import {
     type CorridorDerivationReport,
     type SupplyStateDerivationReport
 } from '../state/supply_state_derivation.js';
-import type { BrigadeAoROrder, FactionId, GameState, MunicipalityId } from '../state/game_state.js';
+import type { FactionId, GameState, MunicipalityId } from '../state/game_state.js';
 import { applyMunicipalityControllersFromMun1990Only } from '../state/political_control_init.js';
 import type { EquipmentClass } from '../state/recruitment_types.js';
 import { isValidEquipmentClass } from '../state/recruitment_types.js';
@@ -307,8 +304,6 @@ export function queryCorpsSectors(
 ): CorpsSectorQueryEntry[] {
     const formations = state.formations ?? {};
     const phase = state.meta?.phase as string | undefined;
-    const useOsid = phase === 'war';
-    const brigadeAor = useOsid ? undefined : getLegacyAoR(state).brigade_aor ?? {};
     const corpsMap = new Map<string, { faction: string; brigades: Set<string>; settlements: Set<string> }>();
 
     for (const formationId of Object.keys(formations).sort()) {
@@ -323,23 +318,8 @@ export function queryCorpsSectors(
             });
         }
         corpsMap.get(corpsId)!.brigades.add(formationId);
-        if (useOsid) {
-            const loc = (formation as { location_osid?: string }).location_osid;
-            if (typeof loc === 'string' && loc) corpsMap.get(corpsId)!.settlements.add(loc);
-        }
-    }
-
-    if (!useOsid) {
-        for (const sid of Object.keys(brigadeAor as Record<string, string | null>).sort()) {
-            const brigadeId = (brigadeAor as Record<string, string | null>)[sid];
-            if (!brigadeId) continue;
-            const formation = formations[brigadeId];
-            const corpsId = formation?.corps_id;
-            if (!corpsId) continue;
-            const entry = corpsMap.get(corpsId);
-            if (!entry) continue;
-            entry.settlements.add(sid);
-        }
+        const loc = (formation as { location_osid?: string }).location_osid;
+        if (typeof loc === 'string' && loc) corpsMap.get(corpsId)!.settlements.add(loc);
     }
 
     const sectors: CorpsSectorQueryEntry[] = [];
@@ -472,20 +452,6 @@ export async function getRecruitmentCatalog(baseDir: string): Promise<{
 /** Re-export for main process (serialize/deserialize state for IPC). */
 export { deserializeState, serializeState };
 
-/**
- * Validate a brigade AoR reshape order (contiguity, same-faction, adjacency).
- * Used by main process when staging player AoR orders. Loads graph from baseDir.
- */
-export async function validateBrigadeAoROrder(
-    state: GameState,
-    order: BrigadeAoROrder,
-    baseDir: string
-): Promise<{ valid: boolean; error?: string }> {
-    const graph = await loadSettlementGraph(settlementGraphOptions(baseDir));
-    const err = validateReshapeOrder(state, order, graph.edges);
-    return err != null ? { valid: false, error: err } : { valid: true };
-}
-
 /** Phase K: Validate settlement-level movement order (1-4 contiguous, same-faction). */
 export async function validateBrigadeMovementOrder(
     state: GameState,
@@ -529,10 +495,7 @@ export async function validateBrigadeMovementOrder(
         return { valid: false, error: 'Destination settlements must be contiguous' };
     }
 
-    const phase = state.meta?.phase as string | undefined;
-    const startSid = phase === 'war'
-        ? ((formation as { location_osid?: string }).location_osid ?? formation.hq_sid ?? null)
-        : (getBrigadeAoRSettlements(state, brigadeId)[0] ?? formation.hq_sid ?? null);
+    const startSid = (formation as { location_osid?: string }).location_osid ?? formation.hq_sid ?? null;
     if (!startSid) {
         return { valid: false, error: 'Brigade has no current settlement to path from' };
     }

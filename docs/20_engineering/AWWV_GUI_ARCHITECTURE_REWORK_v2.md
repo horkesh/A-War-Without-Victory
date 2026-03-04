@@ -143,7 +143,7 @@ Everything under `src/ui/map/` is replaced. The following are **archived, not de
 │  │  │  │  Front lines       — hostile boundary edges   ││ │ │
 │  │  │  │  Formation markers  — NATO symbology icons    ││ │ │
 │  │  │  │  Order arrows       — attack/movement paths   ││ │ │
-│  │  │  │  ZoC overlay        — zone of control fill    ││ │ │
+│  │  │  │  ZoC overlay        — removed (ZoC system deleted 2026-03-02) ││ │ │
 │  │  │  │  Labels             — city/town names         ││ │ │
 │  │  │  │  Battle markers     — control change events   ││ │ │
 │  │  │  └───────────────────────────────────────────────┘│ │ │
@@ -185,7 +185,7 @@ This is where we spare no expense. The map is the central visual element of the 
 | Smooth continuous zoom | Native — MapLibre invented this. Butter-smooth at any zoom level |
 | Click detection on everything | Built-in `queryRenderedFeatures()` — no spatial index needed |
 | Order arrows | GeoJSON source + `line` layer with arrows via `symbol` placement along lines |
-| ZoC / AoR overlays | Additional GeoJSON source + `fill` layer with translucent paint |
+| ZoC / AoR overlays | ~~Additional GeoJSON source + `fill` layer with translucent paint~~ — ZoC overlay: removed (ZoC system deleted 2026-03-02); AoR: legacy |
 | Labels with automatic collision avoidance | `symbol` layer with `text-field` — MapLibre handles declutter, priority, overlap |
 | Style-driven visual changes | Change colors, widths, visibility via JSON style spec — no code changes |
 | Offline / Electron friendly | Self-hosted tiles; no external tile server needed |
@@ -933,7 +933,7 @@ src/ui/map/                         # NEW — clean React + MapLibre app
 │   │   ├── buildFrontLinesGeoJSON.ts   # front_edges → LineString features
 │   │   ├── buildFormationsGeoJSON.ts   # formations → Point features at OSID centroids
 │   │   ├── buildOrderArrowsGeoJSON.ts  # orders → LineString features
-│   │   └── buildZocGeoJSON.ts          # selected formation → ZoC polygon features
+│   │   └── buildZocGeoJSON.ts          # ZoC overlay: removed (ZoC system deleted 2026-03-02)
 │   └── assets/
 │       ├── nato-sprites.png        # Pre-built NATO symbology sprite atlas
 │       ├── nato-sprites.json       # Sprite atlas metadata
@@ -1071,7 +1071,7 @@ scripts/map/
 2. Fine-tune OSM feature filtering (which roads at which zooms)
 3. Polish label styling (font sizes, halo widths, zoom transitions)
 4. Polish front line styling (glow intensity, dash patterns)
-5. Add ZoC overlay for selected formations
+5. ~~Add ZoC overlay for selected formations~~ — ZoC overlay: removed (ZoC system deleted 2026-03-02)
 6. Add battle replay markers (pulsing control-change indicators)
 7. War Summary modal, Replay scrubber, Attack confirmation with odds preview
 8. Movement preview (reachable OSIDs highlight)

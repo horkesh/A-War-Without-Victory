@@ -31,12 +31,10 @@ import type {
     GameState,
     SettlementId
 } from '../../state/game_state.js';
-import { getLegacyAoR } from '../../state/game_state.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import type { WarTimeline } from '../../state/war_timeline.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
-import { getBrigadeAoRSettlements, getSettlementGarrison } from './brigade_aor_legacy.js';
 import { captureEquipment, computeEquipmentMultiplier, ensureBrigadeComposition } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
 import { isBrigadeAssignedToFront } from './front_assignment.js';
@@ -834,7 +832,6 @@ export function resolveBattleOrders(
     const adjacency = buildAdjacency(edges);
     const pc = state.political_controllers ?? {};
     const formations = state.formations ?? {};
-    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const frontSegments = state.front_segments ?? {};
     const turn = state.meta.turn;
 
@@ -851,9 +848,8 @@ export function resolveBattleOrders(
         const defenderFaction = pc[targetSid] as FactionId | null | undefined;
         if (!defenderFaction || defenderFaction === formation.faction) continue;
         const neighbors = adjacency.get(targetSid) ?? [];
-        const aorSettlements = getBrigadeAoRSettlements(state, formationId);
-        const adjacent = aorSettlements.some(sid => neighbors.includes(sid));
-        if (!adjacent) continue;
+        const fromSid = formation.hq_sid;
+        if (!fromSid || !neighbors.includes(fromSid)) continue;
         let list = targetToAttackers.get(targetSid);
         if (!list) {
             list = [];
@@ -903,11 +899,7 @@ export function resolveBattleOrders(
             : (sameCorps ? SAME_CORPS_EFFICIENCY_3 : MULTI_BRIGADE_EFFICIENCY_3);
         const ogMult = hasOG ? OG_COORDINATION_BONUS : 1;
         for (const aid of attackerIds) {
-            const aorSettlements = getBrigadeAoRSettlements(state, aid);
-            const frontlineSids = aorSettlements.filter(sid => neighbors.includes(sid));
-            const rawGarrison = frontlineSids.reduce(
-                (sum, sid) => sum + getSettlementGarrison(state, sid, edges), 0
-            );
+            const rawGarrison = 0;
             const bp = computeCombatPower(state, formations[aid]!, rawGarrison, 'attack', 1.0, 0);
             const ext = getExternalSupportMultiplier(attackerFaction, turn, settlementToMun, targetSid, state.war_timeline);
             combinedAttackerPower += bp.total_combat_power * ext * effN * ogMult;
@@ -933,11 +925,11 @@ export function resolveBattleOrders(
         // --- Terrain for defending settlement ---
         const terrain = computeTerrainModifier(terrainData, targetSid, settlementToMun);
 
-        // --- Defender brigade or militia ---
-        const defenderBrigadeId: FormationId | undefined = brigadeAor[targetSid] ?? undefined;
-        const defenderFormation = defenderBrigadeId != null ? formations[defenderBrigadeId] : undefined;
+        // --- Defender brigade or militia (legacy SID path: militia-only, no brigade_aor lookup) ---
+        const defenderBrigadeId = undefined as FormationId | undefined;
+        const defenderFormation = undefined as FormationState | undefined;
         const defenderFormationOrNull = defenderFormation ?? null;
-        const defGarrison = getSettlementGarrison(state, targetSid, edges);
+        const defGarrison = state.militia_garrison?.[targetSid] ?? 0;
 
         // --- Front hardening streak ---
         let activeStreak = 0;
@@ -960,17 +952,8 @@ export function resolveBattleOrders(
 
         // --- Defender outnumbered bonus (Phase D) ---
         const outnumberedMult = attackerIds.length >= 2 ? DEFENDER_OUTNUMBERED_BONUS : 1;
-        // --- Linking: defender has another friendly brigade with AoR adjacent to target (+10%) ---
-        let linkingMult = 1;
-        if (defenderFaction) {
-            for (const nSid of neighbors) {
-                const aorOwner = brigadeAor[nSid];
-                if (aorOwner && aorOwner !== defenderBrigadeId && formations[aorOwner]?.faction === defenderFaction) {
-                    linkingMult = LINKING_DEFENSE_BONUS;
-                    break;
-                }
-            }
-        }
+        // Linking mult: always 1 in legacy SID path (no brigade_aor).
+        const linkingMult = 1;
 
         let defenderPower: CombatPowerBreakdown | null = null;
         if (defenderFormation) {
@@ -1054,8 +1037,7 @@ export function resolveBattleOrders(
                 if (preBattleSnaps.isSurrenderCascade) {
                     applySurrenderCapture(defenderFormation, formation);
                 } else {
-                    const loserAoRSize = getBrigadeAoRSettlements(state, defenderBrigadeId!).length;
-                    captureEquipment(defenderFormation, formation, loserAoRSize);
+                    captureEquipment(defenderFormation, formation, 0);
                 }
             }
             // AoR phase-out: do not write brigade_aor

@@ -15,11 +15,9 @@ import type {
     GameState,
     SettlementId
 } from '../../state/game_state.js';
-import { getLegacyAoR } from '../../state/game_state.js';
 import { computeBrigadeDensity } from './brigade_aor_legacy.js';
 import { computeEquipmentMultiplier } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
-import { isBrigadeAssignedToFront } from './front_assignment.js';
 
 // --- Posture multipliers ---
 
@@ -123,63 +121,26 @@ export function computeBrigadeDefense(
 export function computeBrigadePressureByEdge(
     state: GameState,
     frontEdges: Array<{ a: SettlementId; b: SettlementId }>,
-    allEdges?: EdgeRecord[]
+    _allEdges?: EdgeRecord[]
 ): BrigadePressureResult {
     const result: BrigadePressureResult = { edge_pressure: {}, brigade_pressure: {} };
-    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const pc = state.political_controllers ?? {};
-    const formations = state.formations ?? {};
     const frontSegments = state.front_segments ?? {};
-
-    // Pre-compute brigade pressure for each brigade (cache)
-    const brigadeCache = new Map<FormationId, { pressure: number; defense: number }>();
 
     for (const edge of frontEdges) {
         const controlA = pc[edge.a];
         const controlB = pc[edge.b];
         if (!controlA || !controlB || controlA === controlB) continue;
 
-        const brigadeA = brigadeAor[edge.a];
-        const brigadeB = brigadeAor[edge.b];
-
         const eid = edgeId(edge.a, edge.b);
         const segment = frontSegments[eid];
         const streak = segment?.active_streak ?? 0;
+        void streak; // streak retained for future use
 
-        // Side A pressure
-        let sideAPressure = 0;
-        if (brigadeA) {
-            const brig = formations[brigadeA];
-            if (brig && isBrigadeAssignedToFront(state, brigadeA)) {
-                if (!brigadeCache.has(brigadeA)) {
-                    brigadeCache.set(brigadeA, {
-                        pressure: computeBrigadeRawPressure(state, brig, allEdges),
-                        defense: computeBrigadeDefense(state, brig, streak, allEdges)
-                    });
-                }
-                sideAPressure = brigadeCache.get(brigadeA)!.pressure;
-                result.brigade_pressure[brigadeA] = sideAPressure;
-            }
-        }
-
-        // Side B pressure
-        let sideBPressure = 0;
-        if (brigadeB) {
-            const brig = formations[brigadeB];
-            if (brig && isBrigadeAssignedToFront(state, brigadeB)) {
-                if (!brigadeCache.has(brigadeB)) {
-                    brigadeCache.set(brigadeB, {
-                        pressure: computeBrigadeRawPressure(state, brig, allEdges),
-                        defense: computeBrigadeDefense(state, brig, streak, allEdges)
-                    });
-                }
-                sideBPressure = brigadeCache.get(brigadeB)!.pressure;
-                result.brigade_pressure[brigadeB] = sideBPressure;
-            }
-        }
-
-        // Net delta = side_a - side_b, clamped
-        const delta = Math.max(-10, Math.min(10, sideAPressure - sideBPressure));
+        // brigade_aor is never populated; pressure comes from OSID-based systems
+        const sideAPressure = 0;
+        const sideBPressure = 0;
+        const delta = 0;
 
         result.edge_pressure[eid] = {
             side_a_pressure: sideAPressure,

@@ -8,9 +8,7 @@
 import type { EdgeRecord } from '../../map/settlements.js';
 import { getTerrainScalarsForSid, type TerrainScalarsData } from '../../map/terrain_scalars.js';
 import type { FactionId, FormationId, GameState, SettlementId } from '../../state/game_state.js';
-import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { getBrigadeAoRSettlements } from './brigade_aor_legacy.js';
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
 
 /** Settlements per turn (infantry march rate). Study: 3 settlements per turn. */
@@ -19,23 +17,9 @@ export const COLUMN_BASE_MOVEMENT_RATE = 12;
 export const COLUMN_MIN_MOVEMENT_RATE = 8;
 export const COLUMN_MAX_MOVEMENT_RATE = 14;
 
-function collapseAoRToSingleSettlement(
-    brigadeAor: Record<SettlementId, FormationId | null>,
-    formationId: FormationId,
-    keepSid: SettlementId,
-    fromSids: SettlementId[],
-): void {
-    for (const sid of fromSids) {
-        if (sid !== keepSid && brigadeAor[sid] === formationId) brigadeAor[sid] = null;
-    }
-    brigadeAor[keepSid] = formationId;
-}
-
 function getHoldSid(state: GameState, formationId: FormationId): SettlementId | null {
     const formation = state.formations?.[formationId];
-    if (formation?.hq_sid) return formation.hq_sid;
-    const aor = getBrigadeAoRSettlements(state, formationId);
-    return aor.length > 0 ? aor[0]! : null;
+    return formation?.hq_sid ?? null;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -174,7 +158,6 @@ export function processBrigadeMovement(
     const movementState = { ...(state.brigade_movement_state ?? {}) };
     const movementOrders = state.brigade_movement_orders ?? {};
     const deployOrders = state.brigade_deploy_orders ?? {};
-    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
     const formations = state.formations ?? {};
     const pc = state.political_controllers ?? {};
 
@@ -187,8 +170,6 @@ export function processBrigadeMovement(
         if (action === 'undeploy') {
             const holdSid = getHoldSid(state, formationId);
             if (!holdSid) continue;
-            const fromSids = getBrigadeAoRSettlements(state, formationId);
-            collapseAoRToSingleSettlement(brigadeAor, formationId, holdSid, fromSids);
             movementState[formationId] = {
                 status: 'packing',
                 stance: 'column',
@@ -244,15 +225,13 @@ export function processBrigadeMovement(
 
         if (current.status === 'packing') {
             const dest = current.destination_sids ?? [];
-            const fromSids = getBrigadeAoRSettlements(state, formationId);
-            const fromSid = fromSids[0];
+            const fromSid = getHoldSid(state, formationId);
             if (!fromSid || dest.length === 0) {
                 delete movementState[formationId];
                 continue;
             }
             // Column hold mode (undeployed): stay packed at a single hold settlement until explicit deploy or move.
             if (current.stance === 'column' && dest.length === 1 && dest[0] === fromSid) {
-                collapseAoRToSingleSettlement(brigadeAor, formationId, fromSid, fromSids);
                 movementState[formationId] = {
                     status: 'packing',
                     stance: 'column',
@@ -272,9 +251,6 @@ export function processBrigadeMovement(
                 ? (fromSid: SettlementId, toSid: SettlementId) => getColumnEdgeTraversalCost(fromSid, toSid, terrainData)
                 : null;
             const turns = transitTurnsForPath(path, state, { movementRate, edgeCost });
-            for (const sid of fromSids) {
-                if (brigadeAor[sid] === formationId) brigadeAor[sid] = null;
-            }
             movementState[formationId] = {
                 status: 'in_transit',
                 stance: current.stance ?? 'combat',
@@ -289,9 +265,6 @@ export function processBrigadeMovement(
             const remaining = (current.turns_remaining ?? 1) - 1;
             if (remaining <= 0) {
                 const dest = current.destination_sids ?? [];
-                for (const sid of dest) {
-                    brigadeAor[sid] = formationId;
-                }
                 if (dest.length > 0) formation.hq_sid = [...dest].sort(strictCompare)[0]!;
                 movementState[formationId] = {
                     status: 'unpacking',

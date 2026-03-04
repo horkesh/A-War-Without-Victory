@@ -52,19 +52,9 @@ Development-time validation tools may abort execution on invariant violation.
 - Static fronts must increase exhaustion and defensive hardness together.
 - **No single resolution flips more than one OSID.** One attack → one target OSID; control flip at most for that OSID.
 
-### 6.1 ZoC Defensive Projection
+### 6.1 Defense of Unoccupied OSIDs
 
-When an attacker targets an **unoccupied** OSID that is within a linked ZoC component of the defending faction, the nearest ZoC-locked brigade in that component provides **virtual defense** of the empty OSID.
-
-**Invariants:**
-- ZoC Defensive Projection is an **attack-resolution modifier**, NOT a passive control mechanism. It does not change control; it modifies how attack resolution proceeds when no defender is physically present.
-- Virtual defense uses 50% of the defender's entrenchment bonus (outpost, not main position).
-- Virtual defender takes 50% of normal defender casualties (partial exposure).
-- If virtual defense loses: the target OSID flips, but the virtual defender does NOT retreat (it remains at its actual OSID — it lost a forward position, not its own).
-- If virtual defense wins (stalemate/repulsed): attacker takes full casualties; target OSID does NOT flip.
-- **Priority:** A brigade already in combat at its own OSID cannot provide virtual defense elsewhere. Own-position defense takes absolute priority over virtual defense.
-- Virtual defender selection is deterministic: BFS from target OSID through ZoC component with sorted neighbor iteration; tie-break by formation ID.
-- This does NOT create a new control-change mechanism — control still changes only via attack resolution (§9.6). The projection only ensures attack resolution occurs (with a virtual defender) instead of a free capture.
+*(ZoC Defensive Projection removed 2026-03-02 — ZoC system deleted. Unoccupied OSIDs adjacent to friendly brigades have militia-only defense. Frontage constraint is enforced by BRIGADE_OPERATIONAL_FRONTAGE_CAP=48 in formation_constants.ts. Local front density modifier (local_front_defense.ts) applies THIN_FRONT_THRESHOLD=0.5 / MIN_COVERAGE_PENALTY=0.6 to defender power when brigades are sparse.)*
 
 ## 7. Fragmentation Invariants
 
@@ -94,7 +84,7 @@ Political control must not be inferred from military formations, brigade locatio
 
 Political control must be initialized deterministically **before**:
 - Any front detection
-- Any brigade location or ZoC logic
+- Any brigade location logic
 - Any pressure, exhaustion, or supply logic
 
 Any system operating on settlements must treat political control as pre-existing state.
@@ -268,11 +258,10 @@ Formation cohesion must remain in [0, 100] after all updates.
 
 When a defender retreats, valid destinations are chosen deterministically. **Tie-break** among valid retreat destinations: **enemy adjacency count ascending** (prefer rear), then **OSID string sort** (stable ordering). No randomness.
 
-**Retreat destination classes (priority order):**
-1. **Friendly OSID not in enemy ZoC** (preferred — safe retreat)
-2. **Friendly OSID in enemy ZoC** (acceptable — retreat under pressure)
-3. **Breakthrough to friendly** (desperate — cut-off brigade escapes through hostile territory; see §14.5a)
-4. **Last stand** (no retreat possible — fight to destruction; defenderPower × 1.5, casualty multiplier × 2)
+**Retreat destination classes (priority order):** *(ZoC removed 2026-03-02; OSID-based retreat destinations, no ZoC blocking)*
+1. **Friendly OSID (preferred — safe rear retreat)** — chosen by enemy adjacency count ascending, then OSID string sort
+2. **Breakthrough to friendly** (desperate — cut-off brigade escapes through hostile territory; see §14.5a)
+3. **Last stand** (no retreat possible — fight to destruction; defenderPower × 1.5, casualty multiplier × 2)
 
 ### 14.5a Breakthrough Retreat
 
@@ -299,7 +288,7 @@ Brigade operations pipeline steps run only when meta.phase === "war".
 
 ### 14.9 War movement pipeline order
 
-**osid-column-movement** must run **before** **zoc-constrained-movement**. The ZoC step clears all brigade_movement_orders; column movement consumes only orders with stance 'column' and must process them first. Violation causes column march orders to be dropped.
+*(ZoC removed 2026-03-02 — zoc-constrained-movement step deleted; replaced by apply-brigade-movement using brigade_movement_orders.ts.)* **osid-column-movement** must run **before** **apply-brigade-movement**. Column movement consumes orders with stance 'column' and must process them first. Violation causes column march orders to be dropped.
 
 ### 14.10 Bottom-up recruitment in War context
 

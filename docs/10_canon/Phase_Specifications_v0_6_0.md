@@ -5,7 +5,7 @@
 The simulation has exactly two lifecycle phases:
 
 - **Peace** (Pre-War): Organizational preparation, referendum gate, investment. See [Peace_Specification_v0_6_0.md](Peace_Specification_v0_6_0.md).
-- **War**: Sustained conflict with fronts, OSID location, ZoC, attack resolution, supply, exhaustion. See [War_Specification_v0_6_0.md](War_Specification_v0_6_0.md).
+- **War**: Sustained conflict with fronts, OSID location, attack resolution, supply, exhaustion, frontage cap, local front density. *(ZoC removed 2026-03-02.)* See [War_Specification_v0_6_0.md](War_Specification_v0_6_0.md).
 
 There is no separate "Phase I" or "Phase II". Canonical April 1992 scenarios start directly in **War**. War start is referendum-gated (CANON.md War Start Rule).
 

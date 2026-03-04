@@ -130,21 +130,20 @@ describe('computeResilienceModifier', () => {
         expect(mod10).toBeGreaterThan(mod25);
     });
 
-    it('gives home defense bonus when brigade defends home municipality', () => {
+    it('gives cohesion-under-pressure bonus when brigade defends home municipality', () => {
         const brigade = makeFormation('rbih1', 'RBiH', 'hq_s5');
         brigade.posture = 'defend';
         brigade.tags = ['mun:MUN_HOME'];
 
-        // 35% control => no existential threat but under pressure threshold
+        // 35% control => no existential threat but under pressure threshold (< 40%)
         const pc = makePCMap('RBiH', 35, 100);
-        const brigadeAor: Record<string, string> = { hq_s5: 'rbih1' };
-        const state = makeState({ politicalControllers: pc, brigadeAor });
+        const state = makeState({ politicalControllers: pc });
 
         const mod = computeResilienceModifier(state, 'RBiH', brigade);
-        // Should get home defense bonus (0.20) + cohesion under pressure (0.15)
+        // Cohesion under pressure (+0.15) applies since 35% < 40% and default cohesion 60 > 50
+        // brigade_aor removed: home defense bonus no longer applies
         expect(mod).toBeGreaterThan(1.0);
-        // Home defense bonus alone is +0.20
-        expect(mod).toBeGreaterThanOrEqual(1.2);
+        expect(mod).toBeCloseTo(1.15, 5);
     });
 
     it('no home defense bonus when posture is attack', () => {
@@ -395,21 +394,20 @@ describe('computeBrigadePressureByEdge', () => {
         ensureBrigadeComposition(brigB);
 
         const pc: Record<string, string> = { sA: 'RS', sB: 'RBiH' };
-        const brigadeAor: Record<string, string> = { sA: 'rs1', sB: 'rbih1' };
 
         const state = makeState({
             politicalControllers: pc,
             formations: { rs1: brigA, rbih1: brigB },
-            brigadeAor
         });
 
         const frontEdges = [{ a: 'sA', b: 'sB' }];
         const result = computeBrigadePressureByEdge(state, frontEdges);
 
         const eid = 'sA:sB'; // sorted
+        // brigade_aor removed: pressure comes from OSID-based systems (always 0 here)
         expect(result.edge_pressure[eid]).toBeDefined();
-        expect(result.edge_pressure[eid].side_a_pressure).toBeGreaterThan(0);
-        expect(result.edge_pressure[eid].side_b_pressure).toBeGreaterThan(0);
+        expect(result.edge_pressure[eid].side_a_pressure).toBe(0);
+        expect(result.edge_pressure[eid].side_b_pressure).toBe(0);
         expect(typeof result.edge_pressure[eid].delta).toBe('number');
     });
 
@@ -423,7 +421,7 @@ describe('computeBrigadePressureByEdge', () => {
         expect(Object.keys(result.edge_pressure)).toHaveLength(0);
     });
 
-    it('populates brigade_pressure for each brigade on a front edge', () => {
+    it('brigade_pressure map is empty when brigade_aor is removed', () => {
         const brigA = makeFormation('rs1', 'RS', 'sA');
         brigA.posture = 'counterattack';
         ensureBrigadeComposition(brigA);
@@ -433,18 +431,17 @@ describe('computeBrigadePressureByEdge', () => {
         ensureBrigadeComposition(brigB);
 
         const pc: Record<string, string> = { sA: 'RS', sB: 'RBiH' };
-        const brigadeAor: Record<string, string> = { sA: 'rs1', sB: 'rbih1' };
 
         const state = makeState({
             politicalControllers: pc,
             formations: { rs1: brigA, rbih1: brigB },
-            brigadeAor
         });
 
         const result = computeBrigadePressureByEdge(state, [{ a: 'sA', b: 'sB' }]);
 
-        expect(result.brigade_pressure['rs1']).toBeGreaterThan(0);
-        expect(result.brigade_pressure['rbih1']).toBeGreaterThan(0);
+        // brigade_aor removed: pressure comes from OSID-based systems
+        expect(result.brigade_pressure['rs1']).toBeUndefined();
+        expect(result.brigade_pressure['rbih1']).toBeUndefined();
     });
 
     it('delta is clamped to [-10, 10]', () => {

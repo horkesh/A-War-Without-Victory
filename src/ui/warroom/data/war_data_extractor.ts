@@ -25,7 +25,6 @@ import type {
     SettlementId,
     TrendDirection,
 } from '../../../state/game_state.js';
-import { getLegacyAoR } from '../../../state/game_state.js';
 import { getEnemyFactions, personnelToStrengthCategory } from './fog_of_war.js';
 
 // ---------------------------------------------------------------------------
@@ -633,13 +632,10 @@ function extractFrontEdges(state: GameState, pf: FactionId): FrontEdgeSnapshot[]
     const garrison = state.militia_garrison ?? {};
     const formations = state.formations ?? {};
     const osidToBrigade = new Set<string>();
-    if (useOsid) {
-        for (const fid of Object.keys(formations).sort(sc)) {
-            const loc = (formations[fid] as { location_osid?: string }).location_osid;
-            if (typeof loc === 'string' && loc) osidToBrigade.add(loc);
-        }
+    for (const fid of Object.keys(formations).sort(sc)) {
+        const loc = (formations[fid] as { location_osid?: string }).location_osid;
+        if (typeof loc === 'string' && loc) osidToBrigade.add(loc);
     }
-    const brigadeAor = useOsid ? undefined : getLegacyAoR(state).brigade_aor ?? {};
 
     const results: FrontEdgeSnapshot[] = [];
 
@@ -649,7 +645,7 @@ function extractFrontEdges(state: GameState, pf: FactionId): FrontEdgeSnapshot[]
         const playerSide = edge.side_a === pf ? 'a' : 'b';
         const playerNode = playerSide === 'a' ? edge.a : edge.b;
 
-        const hasBrigade = useOsid ? osidToBrigade.has(playerNode) : (brigadeAor as Record<string, string | null>)[playerNode] != null;
+        const hasBrigade = osidToBrigade.has(playerNode);
         const hasGarrison = (garrison[playerNode] ?? 0) > 0;
         const tier: 'defended' | 'garrisoned' | 'exposed' =
             hasBrigade ? 'defended' : hasGarrison ? 'garrisoned' : 'exposed';
@@ -735,13 +731,10 @@ function extractExposedFront(state: GameState, pf: FactionId): SettlementId[] {
     const edges: FrontEdgeState[] = useOsid ? (state.war_front_edges_osid ?? []) : (state.front_edges ?? []);
     const formations = state.formations ?? {};
     const osidToBrigade = new Set<string>();
-    if (useOsid) {
-        for (const fid of Object.keys(formations).sort(sc)) {
-            const loc = (formations[fid] as { location_osid?: string }).location_osid;
-            if (typeof loc === 'string' && loc) osidToBrigade.add(loc);
-        }
+    for (const fid of Object.keys(formations).sort(sc)) {
+        const loc = (formations[fid] as { location_osid?: string }).location_osid;
+        if (typeof loc === 'string' && loc) osidToBrigade.add(loc);
     }
-    const brigadeAor = useOsid ? undefined : getLegacyAoR(state).brigade_aor ?? {};
     const garrison = state.militia_garrison ?? {};
 
     const frontSettlements = new Set<SettlementId>();
@@ -752,7 +745,7 @@ function extractExposedFront(state: GameState, pf: FactionId): SettlementId[] {
 
     const exposed: SettlementId[] = [];
     for (const nodeId of Array.from(frontSettlements).sort(sc)) {
-        const hasBrigade = useOsid ? osidToBrigade.has(nodeId) : (brigadeAor as Record<string, string | null>)[nodeId] != null;
+        const hasBrigade = osidToBrigade.has(nodeId);
         const hasGarrison = (garrison[nodeId] ?? 0) > 0;
         if (!hasBrigade && !hasGarrison) exposed.push(nodeId);
     }

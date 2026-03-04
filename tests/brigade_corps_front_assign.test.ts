@@ -34,7 +34,7 @@ function makeState(overrides?: Partial<GameState & LegacyBrigadeAoRState>): Game
 }
 
 describe('corps_front_assign', () => {
-    it('derives corps front edges from brigade AoR and control boundaries', () => {
+    it('derives corps front edges from brigade AoR (always empty — brigade_aor never populated)', () => {
         const state = makeState({
             formations: {
                 corps_rbih: { id: 'corps_rbih', faction: 'RBiH', kind: 'corps', status: 'active', name: 'Corps', created_turn: 1, assignment: null },
@@ -43,8 +43,9 @@ describe('corps_front_assign', () => {
             brigade_aor: { S1: 'b1' },
             political_controllers: { S1: 'RBiH', S2: 'RS' },
         });
+        // brigade_aor is never populated in pipeline; function always returns {}
         const derived = deriveCorpsFrontEdgesFromBrigadeAoR(state, [{ a: 'S1', b: 'S2' }]);
-        expect(derived.corps_rbih).toEqual(['S1__S2']);
+        expect(derived).toEqual({});
     });
 
     it.skip('auto-distributes front-adjacent controlled settlements (phased out: OSID/front assignment only)', () => {

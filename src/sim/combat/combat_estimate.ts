@@ -16,9 +16,6 @@ import type {
     GameState,
     SettlementId
 } from '../../state/game_state.js';
-import { computeTerrainModifier } from './battle_resolution.js';
-import { getLegacyAoR } from '../../state/game_state.js';
-import { getBrigadeAoRSettlements, getSettlementGarrison } from './brigade_aor_legacy.js';
 import { computeEquipmentMultiplier } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
 
@@ -27,11 +24,6 @@ import { computeResilienceModifier } from './faction_resilience.js';
 const POSTURE_PRESSURE_MULT: Record<BrigadePosture, number> = {
     hold: 0, defend: 0.3, defend_at_all_costs: 0, elastic_defense: 0.2,
     counterattack: 0.65, dig_in: 0, attack: 1.5, assault: 1.8,
-};
-
-const POSTURE_DEFENSE_MULT: Record<BrigadePosture, number> = {
-    hold: 1.20, defend: 1.40, defend_at_all_costs: 1.60, elastic_defense: 1.10,
-    counterattack: 1.15, dig_in: 1.35, attack: 0.80, assault: 0.60,
 };
 
 const READINESS_MULT: Record<string, number> = {
@@ -64,16 +56,16 @@ export interface AttackEstimate {
 export function estimateAttackCost(
     state: GameState,
     brigade: FormationState,
-    targetSid: SettlementId,
-    edges: EdgeRecord[],
-    terrainData: TerrainScalarsData | null,
-    settlementToMun: Map<string, string>
+    _targetSid: SettlementId,
+    _edges: EdgeRecord[],
+    _terrainData: TerrainScalarsData | null,
+    _settlementToMun: Map<string, string>
 ): AttackEstimate {
     const fallback: AttackEstimate = { expected_loss_fraction: 0.5, win_probability: 0.0, power_ratio: 0 };
 
-    // Attacker power estimate
-    const aorSids = getBrigadeAoRSettlements(state, brigade.id);
-    if (aorSids.length === 0) return fallback;
+    // Attacker power estimate — use brigade personnel directly (no AoR density)
+    const brigadePersonnel = brigade.personnel ?? 0;
+    if (brigadePersonnel === 0) return fallback;
 
     const posture = brigade.posture ?? 'attack';
     const exp = brigade.experience ?? 0;
@@ -84,28 +76,11 @@ export function estimateAttackCost(
     const equipMult = computeEquipmentMultiplier(brigade, posture);
     const resilienceMult = computeResilienceModifier(state, brigade.faction as any, brigade);
 
-    const brigadePersonnel = brigade.personnel ?? 0;
-    const density = aorSids.length > 0 ? brigadePersonnel / aorSids.length : 0;
-    const attackerPower = density * experienceMult * cohesionMult * postureMult
+    const attackerPower = brigadePersonnel * experienceMult * cohesionMult * postureMult
         * readinessMult * equipMult * resilienceMult;
 
-    // Defender power estimate
-    const defenderGarrison = getSettlementGarrison(state, targetSid, edges);
-    let defenderPower = defenderGarrison;
-
-    if (defenderPower > 0) {
-        // Approximate defender multipliers (assume defend posture, active readiness)
-        const defPostureMult = POSTURE_DEFENSE_MULT['defend'];
-
-        // Terrain modifier
-        let terrainMult = 1.0;
-        if (terrainData) {
-            const terrain = computeTerrainModifier(terrainData, targetSid, settlementToMun);
-            terrainMult = terrain.composite;
-        }
-
-        defenderPower = defenderGarrison * defPostureMult * terrainMult;
-    }
+    // Defender power estimate — AoR garrison removed; OSID-based garrison not wired here
+    const defenderPower = 0;
 
     // Power ratio
     const powerRatio = defenderPower <= 0

@@ -51,19 +51,19 @@ function getFormationTier(f: FormationState): 'detachment' | 'battalion' | 'brig
 - Cannot be assigned offensive posture
 - Cannot move outside home municipality
 - Does not count for corps front-line calculations
-- Low ZoC readiness (0.30x)
+- Low ZoC readiness (0.30x) *(ZoC removed 2026-03-02; frontage cap BRIGADE_OPERATIONAL_FRONTAGE_CAP=48 replaces ZoC for frontage constraint)*
 
 **TO Battalion** (500-1,499):
 - Can garrison and defend (defensive posture)
 - Can execute local counterattacks within home municipality + 1 adjacent
 - Cannot be assigned to corps offensive operations
-- Moderate ZoC readiness (0.50x)
+- Moderate ZoC readiness (0.50x) *(ZoC removed 2026-03-02; see frontage cap above)*
 - Eligible for corps assignment once promoted to brigade
 
 **Brigade** (1,500+):
 - Full combat capability (attack, defend, reserve)
 - Assignable to corps directives
-- Full ZoC readiness (1.0x)
+- Full ZoC readiness (1.0x) *(ZoC removed 2026-03-02; see frontage cap above)*
 - Gets historical name on promotion (see Section 5)
 
 ---
@@ -619,13 +619,13 @@ This overhaul supersedes several of the targeted structural changes proposed in 
 
 ### Phase E: Equipment, Combat & Terrain
 
-**Team:** `gameplay-programmer` (combat resolver + ZoC readiness), `game-designer` (terrain multiplier values — calibration authority)
+**Team:** `gameplay-programmer` (combat resolver + tier readiness), `game-designer` (terrain multiplier values — calibration authority)
 
-**Parallel within phase:** Steps 18–19 (equipment multiplier + terrain defense) are in different modules and can run concurrently; steps 20–22 (ZoC + posture + combat resolver) are interdependent and run sequentially.
+**Parallel within phase:** Steps 18–19 (equipment multiplier + terrain defense) are in different modules and can run concurrently; steps 20–22 (posture + combat resolver) are interdependent and run sequentially.
 
 18. *(parallel with 19)* Implement tier-based `getEquipmentMultiplier()` function (Section 6.2) — derive equipment from `getFormationTier()` + faction; wire into existing `combat_power` calculation in attack resolver
 19. *(parallel with 18)* Implement `getTerrainDefenseMultiplier()` for TO formations (Section 6.3) — urban 2.5×, mountain 2.0×, forest 1.5×, open 1.0×; only applies to `tier !== 'brigade'`; wire into defender combat power
-20. Implement ZoC readiness scaling by tier: detachment 0.30×, battalion 0.50×, brigade 1.0× (modify `getZocReadiness()`)
+20. ~~Implement ZoC readiness scaling by tier: detachment 0.30×, battalion 0.50×, brigade 1.0× (modify `getZocReadiness()`)~~ **(ZoC removed 2026-03-02; frontage cap BRIGADE_OPERATIONAL_FRONTAGE_CAP=48 replaces ZoC for frontage constraint; this step is obsolete)**
 21. Add posture restrictions: detachments cannot receive offensive posture orders; battalions limited to local counterattack (home mun + 1 adjacent); enforce in corps directive assignment
 22. Modify combat resolver to handle TO formation limitations: detachments cannot initiate attacks; only defend in response to attack on their OSID
 

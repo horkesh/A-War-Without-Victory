@@ -782,27 +782,9 @@ app.whenReady().then(() => {
     return stageDeployOrder(brigadeId, 'undeploy');
   });
 
-  ipcMain.handle('stage-brigade-aor-order', async (_event, payload) => {
-    const { settlementId, fromBrigadeId, toBrigadeId } = payload || {};
-    if (!currentGameStateJson || typeof settlementId !== 'string' || typeof fromBrigadeId !== 'string' || typeof toBrigadeId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const order = { settlement_id: settlementId, from_brigade: fromBrigadeId, to_brigade: toBrigadeId };
-      const result = await sim.validateBrigadeAoROrder(state, order, getBaseDir());
-      if (!result.valid) {
-        return { ok: false, error: result.error || 'Invalid AoR order' };
-      }
-      if (!state.brigade_aor_orders) state.brigade_aor_orders = [];
-      state.brigade_aor_orders.push(order);
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
+  // AoR reshape orders removed (OSID migration complete — brigade_aor no longer used).
+  ipcMain.handle('stage-brigade-aor-order', async (_event, _payload) => {
+    return { ok: false, error: 'AoR reshape orders are not supported (OSID mode active)' };
   });
 
   ipcMain.handle('assign-brigade-to-front', async (_event, payload) => {

@@ -12,12 +12,8 @@ import type {
     FormationState,
     GameState,
     OGActivationOrder,
-    SettlementId,
 } from '../../state/game_state.js';
-import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { getBrigadeAoRSettlements } from './brigade_aor_legacy.js';
-import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -144,49 +140,14 @@ export function validateOGOrder(state: GameState, order: OGActivationOrder): str
 }
 
 // ---------------------------------------------------------------------------
-// Phase E: Donor AoR shed after personnel contribution
-// ---------------------------------------------------------------------------
-
-/**
- * If donor brigade's AoR settlement count exceeds personnel-based cap, shed one settlement
- * (prefer non-front). Deterministic: sorted iteration.
- */
-function shedDonorAoRIfOverCap(
-    state: GameState,
-    donorId: FormationId,
-    edges: EdgeRecord[]
-): void {
-    const brigadeAor = getLegacyAoR(state).brigade_aor;
-    const formations = state.formations;
-    const pc = state.political_controllers ?? {};
-    if (!brigadeAor || !formations) return;
-    const donor = formations[donorId];
-    if (!donor || donor.faction == null) return;
-    const factionId = donor.faction;
-    const settlements = getBrigadeAoRSettlements(state, donorId);
-    const cap = Math.min(4, Math.max(1, Math.floor((donor.personnel ?? 0) / 400)));
-    if (settlements.length <= cap) return;
-    const adj = buildAdjacencyFromEdges(edges);
-    const isFront = (sid: SettlementId) => {
-        const neighbors = adj.get(sid);
-        if (!neighbors) return false;
-        return [...neighbors].some(n => pc[n] && pc[n] !== factionId);
-    };
-    const rear = settlements.filter(sid => !isFront(sid)).sort(strictCompare);
-    const toShed = rear.length > 0 ? rear[0] : settlements.sort(strictCompare)[0];
-    if (toShed) { /* AoR phase-out: do not write brigade_aor */ }
-}
-
-// ---------------------------------------------------------------------------
 // Activation
 // ---------------------------------------------------------------------------
 
 /**
  * Activate OGs from pending orders.
  * Processes orders in deterministic order (sorted by corps_id).
- * Phase E: When edges provided, recalc donor AoR cap and shed one settlement if over cap.
  */
-export function activateOGs(state: GameState, edges?: EdgeRecord[]): OGActivationReport {
+export function activateOGs(state: GameState, _edges?: EdgeRecord[]): OGActivationReport {
     const report: OGActivationReport = { activated: [], rejected: [] };
     const orders = state.og_orders;
     if (!orders || orders.length === 0) return report;
@@ -211,11 +172,6 @@ export function activateOGs(state: GameState, edges?: EdgeRecord[]): OGActivatio
             brig.personnel = (brig.personnel ?? 0) - donor.personnel_contribution;
             brig.cohesion = Math.max(0, (brig.cohesion ?? 60) - DONOR_COHESION_STRAIN);
         }
-        if (edges?.length) {
-            for (const donor of order.donors) {
-                shedDonorAoRIfOverCap(state, donor.brigade_id, edges);
-            }
-        }
 
         // Create OG formation entry
         state.formations[ogId] = {
@@ -239,8 +195,6 @@ export function activateOGs(state: GameState, edges?: EdgeRecord[]): OGActivatio
         if (corpsCmd) {
             corpsCmd.active_ogs.push(ogId);
         }
-
-        // AoR phase-out: do not write brigade_aor
 
         report.activated.push(ogId);
     }
@@ -340,7 +294,6 @@ export function updateOGLifecycle(state: GameState): FormationId[] {
                 if (idx >= 0) ogs.splice(idx, 1);
             }
 
-            // AoR phase-out: do not write brigade_aor
         } else {
             // OG exhaustion: attack-rate cohesion drain per turn
             f.cohesion = Math.max(0, (f.cohesion ?? OG_INITIAL_COHESION) - OG_COHESION_DRAIN_PER_TURN);
@@ -356,26 +309,8 @@ export function updateOGLifecycle(state: GameState): FormationId[] {
 
 /**
  * Compute OG pressure bonus on a front edge.
- * Returns the coordination multiplier (1.3) if any OG covers a settlement
- * on this edge; otherwise returns 1.0.
- *
- * Edge ID format: "sidA:sidB".
+ * brigade_aor is never populated; always returns 1.0.
  */
-export function computeOGPressureBonus(state: GameState, edgeId: string): number {
-    const aor = getLegacyAoR(state).brigade_aor;
-    if (!aor || !state.formations) return 1.0;
-
-    const separatorIdx = edgeId.indexOf(':');
-    if (separatorIdx < 0) return 1.0;
-
-    const sidA = edgeId.slice(0, separatorIdx);
-    const sidB = edgeId.slice(separatorIdx + 1);
-
-    const brigA = aor[sidA];
-    if (brigA && state.formations[brigA]?.kind === 'og') return OG_COORDINATION_BONUS;
-
-    const brigB = aor[sidB];
-    if (brigB && state.formations[brigB]?.kind === 'og') return OG_COORDINATION_BONUS;
-
+export function computeOGPressureBonus(_state: GameState, _edgeId: string): number {
     return 1.0;
 }

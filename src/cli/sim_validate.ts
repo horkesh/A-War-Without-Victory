@@ -6,7 +6,6 @@ import { computeFrontRegions } from '../map/front_regions.js';
 import { getValidMunicipalityIds } from '../map/municipalities.js';
 import { loadSettlementGraph } from '../map/settlements.js';
 import { deserializeState } from '../state/serialize.js';
-import { validateAllAoRContiguity } from '../validate/aor_contiguity.js';
 import { validateCeasefire } from '../validate/ceasefire.js';
 import { validateFactions } from '../validate/factions.js';
 import { validateFormations } from '../validate/formations.js';
@@ -30,9 +29,6 @@ async function main(): Promise<void> {
     // Add AoR contiguity + front segment invariants (derived data only)
     try {
         const graph = await loadSettlementGraph();
-        const aorIssues = validateAllAoRContiguity(state, graph);
-        issues.push(...aorIssues);
-
         const frontSegmentIssues = validateFrontSegments(state, graph.edges, { settlementIds: graph.settlements.keys() });
         issues.push(...frontSegmentIssues);
 
@@ -65,8 +61,8 @@ async function main(): Promise<void> {
     } catch (err) {
         issues.push({
             severity: 'error',
-            code: 'aor.validation_failed',
-            message: `Could not load settlement graph for AoR validation: ${err}`
+            code: 'validation_failed',
+            message: `Could not load settlement graph for validation: ${err}`
         });
     }
 

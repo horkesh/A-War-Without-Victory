@@ -42,7 +42,7 @@ Settlements function as spatial anchors that define connectivity, movement corri
 
 Geography matters politically because it shapes who can govern, supply, and sustain, not because it confers abstract ownership.
 
-Spatial responsibility is held at brigade level through **location**: each brigade occupies **one operational settlement (OSID)**. Multiple brigades may stack on the same OSID. A brigade projects **Zone of Control (ZoC)** to all neighboring OSIDs. Corps and temporary Operational Groups coordinate effort but never own space. **Control change** over territory occurs only when a brigade **attacks** (or through defined frontline/corps operations)—there is no passive pressure flip. Rear political control zones are those OSIDs (or canonical settlements derived from them) not currently contested by attack resolution; they remain stable unless control is changed by an authorized mechanism.
+Spatial responsibility is held at brigade level through **location**: each brigade occupies **one operational settlement (OSID)**. Multiple brigades may stack on the same OSID. Corps and temporary Operational Groups coordinate effort but never own space. Frontage constraint is enforced via **BRIGADE_OPERATIONAL_FRONTAGE_CAP=48**; local front density (local_front_defense.ts) modifies defender power based on brigade-to-edge coverage. *(ZoC system removed 2026-03-02.)* **Control change** over territory occurs only when a brigade **attacks** (or through defined frontline/corps operations)—there is no passive pressure flip. Rear political control zones are those OSIDs (or canonical settlements derived from them) not currently contested by attack resolution; they remain stable unless control is changed by an authorized mechanism.
 
 ### 5.1 Political control substrate
 
@@ -60,15 +60,17 @@ Only formations generate coercive pressure and combat friction. Political or adm
 
 Political control defines governance and authority. Military formations contest or replace political control through pressure and collapse mechanisms but do not generate it.
 
-## 7. Brigades, Zone of Control, and attack-driven control
+## 7. Brigades, frontage, and attack-driven control
 
-Brigades occupy **one OSID** (operational settlement) each; stacking on the same OSID is allowed. Each deployed brigade projects **Zone of Control (ZoC)** to all neighboring OSIDs. An enemy brigade in ZoC is **locked**: it may only stay, retreat (to an OSID not in enemy ZoC), or attack the ZoC source. Control over an OSID **changes only when a brigade attacks** (attack resolution → push-back and control flip) or through defined frontline/corps operations—there is no passive pressure flip.
+*(ZoC system removed 2026-03-02. Movement is no longer ZoC-constrained; retreat destinations are OSID-based with no ZoC blocking.)*
+
+Brigades occupy **one OSID** (operational settlement) each; stacking on the same OSID is allowed. Control over an OSID **changes only when a brigade attacks** (attack resolution → push-back and control flip) or through defined frontline/corps operations—there is no passive pressure flip. Brigade frontage is constrained by **BRIGADE_OPERATIONAL_FRONTAGE_CAP=48** (formation_constants.ts). Local front density modifier (local_front_defense.ts) applies THIN_FRONT_THRESHOLD=0.5 and DENSE_FRONT_THRESHOLD=1.0 to scale defender power based on brigade coverage of front edges.
 
 Fronts are derived from hostile OSID adjacency: a front exists where two adjacent OSIDs have opposing controllers. Front edges are grouped into contiguous, assignable front segments. Front segments are organized within theatres (Theatre → Army → Corps → Brigade) for operational command framing.
 
 Over time, fronts may harden (e.g. through entrenchment), stabilize, or fracture depending on supply and exhaustion. Static fronts accumulate strain rather than resolve conflict.
 
-Players do not draw geometric frontline entities directly. They assign brigades to derived front segments, optionally name those segments, and command posture, movement, and attacks through formation-level orders. Movement is ZoC-constrained; column movement allows multi-hop redeployment through friendly rear (terrain and composition affect speed). Combat is resolved by the attack-resolution formula (outcome thresholds, casualties, push-back, control flip). Unassigned brigades are reserve and do not execute attack or offensive movement until assigned.
+Players do not draw geometric frontline entities directly. They assign brigades to derived front segments, optionally name those segments, and command posture, movement, and attacks through formation-level orders. Column movement allows multi-hop redeployment through friendly rear (terrain and composition affect speed). Combat is resolved by the attack-resolution formula (outcome thresholds, casualties, push-back, control flip). Unassigned brigades are reserve and do not execute attack or offensive movement until assigned.
 
 **Implementation-note (bot AI and calibration):** Bot brigade AI uses faction strategic objectives (e.g. RS corridor/Drina/Sarajevo, RBiH enclaves/corridors, HRHB Herzegovina) and target scoring; Feb 2026 calibration added gap filling, concentration attacks, corridor priority scoring, and corps-level rebalancing. Session 2 (2026-02-25): ethnic scoring, init control fix (hybrid_1992 + operational_political_control.json), Bihać OSID narrowing, heartland time-decay, Pelagićevo corridor, ARBiH undefended bonus, HVO Posavina retreat (War phase Spec §12, PROJECT_LEDGER). Current state and open issues (front-assignment bug, personnel distribution, enclave protection) are documented in War phase Spec §12 and docs/40_reports/CALIBRATION_REPORT_BOT_AI_FEB_2026.md; no new mechanics invented here.
 

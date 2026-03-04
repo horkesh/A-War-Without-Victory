@@ -119,15 +119,15 @@ Battalions exist only as internal subunits of brigades. They are not represented
 
 Formations differ in manpower, cohesion, supply, and experience.
 
-### 5.2 Brigade location and Zone of Control
+### 5.2 Brigade location and movement
 
-**OSID location:** Each brigade occupies one OSID (`location_osid`). Stacking is allowed. Only **deployed** brigades (not in column: packing / in_transit / unpacking) project ZoC and participate in combat.
+*(ZoC system removed 2026-03-02. Movement is no longer ZoC-constrained. Retreat destinations are OSID-based with no ZoC blocking. Frontage is constrained by BRIGADE_OPERATIONAL_FRONTAGE_CAP=48.)*
 
-**Zone of Control (ZoC):** A brigade projects ZoC to all OSIDs **adjacent** to its current OSID (in the operational contact graph). An **enemy** brigade that is in the ZoC of a friendly brigade is **ZoC-locked**.
+**OSID location:** Each brigade occupies one OSID (`location_osid`). Stacking is allowed. Only **deployed** brigades (not in column: packing / in_transit / unpacking) participate in combat.
 
-**ZoC-locked options:** While in enemy ZoC, a brigade may only: **stay** on its current OSID; **retreat** to an OSID that is not in any enemy ZoC; or **attack** the OSID occupied by the ZoC-owning enemy (attack that tile). Any other move (e.g. moving to a different enemy-ZoC tile without attacking the ZoC source) is disallowed.
+**Movement orders:** Brigade movement uses `brigade_movement_orders.ts` (apply-brigade-movement pipeline step). Column movement allows multi-hop redeployment through friendly rear (terrain-weighted path, composition-dependent rate); brigades in column are in_transit and do not fight until they arrive.
 
-**Retreat (prefer rear):** When retreating, valid destinations are friendly-controlled OSIDs not in enemy ZoC (or, if none, friendly OSIDs in enemy ZoC—retreat under pressure). Tie-break among valid destinations: **enemy adjacency count ascending** (prefer rear), then **OSID string sort** (determinism).
+**Retreat (prefer rear):** When retreating, valid destinations are friendly-controlled OSIDs. Tie-break among valid destinations: **enemy adjacency count ascending** (prefer rear), then **OSID string sort** (determinism). No ZoC blocking of retreat destinations.
 
 **Attack-only control change:** Control of an OSID does not change from passive pressure. It changes only when an **attack** is resolved (attack resolution → push-back and control flip) or through defined corps/frontline operations.
 
@@ -144,7 +144,7 @@ Rear zones:
 
 Brigades are assigned to derived front segments (`brigade_front_assignment`). `null` assignment means the brigade is in **reserve**. Reserve brigades do not execute attack or offensive movement orders until assigned to a front.
 
-Movement is along the **operational contact graph** (OSID to OSID) and is **ZoC-constrained**: in enemy ZoC, only stay, retreat, or attack the ZoC source. **Column movement** allows multi-hop redeployment through friendly rear areas (terrain-weighted path, composition-dependent rate); brigades in column are in_transit and do not project ZoC or fight until they arrive. Combat is resolved by the **attack resolution** formula: outcome thresholds, casualties, push-back, and control flip at the target OSID.
+Movement is along the **operational contact graph** (OSID to OSID). *(ZoC-constrained movement removed 2026-03-02; ZoC system deleted.)* **Column movement** allows multi-hop redeployment through friendly rear areas (terrain-weighted path, composition-dependent rate); brigades in column are in_transit and do not fight until they arrive. Frontage constraint: BRIGADE_OPERATIONAL_FRONTAGE_CAP=48 (formation_constants.ts). Local front density modifier (local_front_defense.ts) scales defender power: THIN_FRONT_THRESHOLD=0.5 / DENSE_FRONT_THRESHOLD=1.0 / MIN_COVERAGE_PENALTY=0.6 / MAX_DENSITY_BONUS=1.25. Combat is resolved by the **attack resolution** formula: outcome thresholds, casualties, push-back, and control flip at the target OSID.
 
 ### 5.5 Brigade posture
 
@@ -156,7 +156,7 @@ Reserve rule: brigades in reserve (no front assignment) do not issue attack/post
 
 ### 5.6 Operational Groups
 
-Operational Groups are temporary coordination constructs authorized at Corps level. They do not own OSIDs. They occupy an OSID and function like a brigade for ZoC and combat; they coordinate timing and provide bonuses (e.g. og_mult) to adjacent friendly attacks during operations.
+Operational Groups are temporary coordination constructs authorized at Corps level. They do not own OSIDs. They occupy an OSID and participate in combat; they coordinate timing and provide bonuses (e.g. og_mult) to adjacent friendly attacks during operations. *(ZoC removed 2026-03-02 — OGs no longer project ZoC.)*
 
 With Corps authorization, an OG may temporarily pull battalion-equivalent manpower from brigades. Donor brigades retain their location_osid but suffer reduced strength. Detached manpower operates within the OG's OSID and operation scope; OGs dissolve per lifecycle rules and personnel return to donors.
 
@@ -174,7 +174,7 @@ Combat occurs when a brigade **attacks** an adjacent OSID (enemy-controlled or o
 
 - **Power ratio** determines outcome: decisive victory (≥2.0), victory (≥1.5), costly victory (≥1.0), stalemate (0.7–1.0), repulsed (0.5–0.7), catastrophic (<0.5).
 - **Casualties** apply to both sides; snap events may apply when state conditions are met.
-- **Push-back and control flip:** On attacker victory (decisive/victory/costly), the defender retreats, control of the target OSID flips to the attacker, and the attacker may advance into it (one OSID per attack). Retreat destination is chosen deterministically: prefer friendly OSID not in enemy ZoC, then tie-break by enemy adjacency count (ascending) then OSID string sort.
+- **Push-back and control flip:** On attacker victory (decisive/victory/costly), the defender retreats, control of the target OSID flips to the attacker, and the attacker may advance into it (one OSID per attack). Retreat destination is chosen deterministically (OSID-based, no ZoC blocking): prefer friendly OSID with fewest enemy neighbors (ascending enemy adjacency count), then OSID string sort. *(ZoC removed 2026-03-02.)*
 
 **Entrenchment** and **resilience (defense_streak)** modify defender power. Only deployed brigades participate. No single resolution flips more than one OSID.
 
@@ -335,13 +335,13 @@ The player commands through posture and targeting, not direct unit movement. Com
 
 Each turn the player:
 1. **Reviews** reports: front status, exhaustion, supply pressure, corps operations, recent battles
-2. **Sets brigade postures** and **issues attack orders** (as in War phase, but with ZoC constraints)
+2. **Sets brigade postures** and **issues attack orders**
 3. **Manages corps operations**: front assignments, operational groups, attack axes
 4. **Monitors** exhaustion, recruitment, equipment degradation, alliance dynamics
 5. **Responds** to events: ceasefire conditions, Washington Agreement preconditions, enclave integrity (implementation-note: enclave protection for Srebrenica/Goražde/Cazin is not yet implemented; see CALIBRATION_REPORT_BOT_AI_FEB_2026.md §7)
-6. **Ends turn** — ZoC-constrained movement resolves; attacks resolve; supply/exhaustion update; recruitment accrues
+6. **Ends turn** — brigade movement resolves (brigade_movement_orders.ts); attacks resolve; supply/exhaustion update; recruitment accrues. *(ZoC-constrained movement removed 2026-03-02.)*
 
-War phase adds operational depth (corps, fronts, supply) but reduces tactical flexibility (ZoC, exhaustion, friction).
+War phase adds operational depth (corps, fronts, supply) but reduces tactical flexibility (frontage cap, exhaustion, friction).
 
 ### 15.4 General Principles
 

@@ -18,7 +18,6 @@ import type {
     FormationState,
     GameState
 } from '../../state/game_state.js';
-import { getLegacyAoR } from '../../state/game_state.js';
 
 // --- Constants ---
 
@@ -27,9 +26,6 @@ const EXISTENTIAL_THREAT_THRESHOLD = 0.30;
 
 /** Maximum bonus from existential threat. */
 const EXISTENTIAL_THREAT_MAX_BONUS = 0.30;
-
-/** Bonus for defending home municipality. */
-const HOME_DEFENSE_BONUS = 0.20;
 
 /** Control share below which cohesion-under-pressure bonus activates. */
 const PRESSURE_THRESHOLD = 0.40;
@@ -51,30 +47,6 @@ function countFactionSettlements(state: GameState, faction: FactionId): number {
         if (pc[sid] === faction) count++;
     }
     return count;
-}
-
-/** Get faction's home municipality from formation tags. */
-function getFormationHomeMun(formation: FormationState): string | null {
-    if (!formation.tags) return null;
-    for (const tag of formation.tags) {
-        if (tag.startsWith('mun:')) return tag.slice(4);
-    }
-    return null;
-}
-
-/** Check if a brigade's AoR includes settlements in its home municipality. */
-function isInHomeMun(
-    state: GameState,
-    formation: FormationState,
-    homeMun: string | null
-): boolean {
-    const aor = getLegacyAoR(state).brigade_aor;
-    if (!homeMun || !aor) return false;
-    // Check if the brigade's HQ settlement is in its AoR
-    if (formation.hq_sid && aor[formation.hq_sid] === formation.id) {
-        return true;
-    }
-    return false;
 }
 
 // --- Main function ---
@@ -108,12 +80,7 @@ export function computeResilienceModifier(
     }
 
     // 2. Home territory defense: brigade defending its home municipality
-    const homeMun = getFormationHomeMun(brigade);
-    const posture = brigade.posture ?? 'defend';
-    const isDefending = posture === 'defend' || posture === 'elastic_defense';
-    if (isDefending && isInHomeMun(state, brigade, homeMun)) {
-        modifier += HOME_DEFENSE_BONUS;
-    }
+    // (brigade_aor removed — HOME_DEFENSE_BONUS via AoR dead path removed)
 
     // 3. Cohesion under pressure: high-cohesion brigades in desperate situations
     //    Models RBiH determination — applies to any faction but RBiH triggers more

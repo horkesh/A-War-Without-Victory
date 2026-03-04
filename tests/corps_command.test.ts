@@ -18,7 +18,7 @@ import {
     validateOGOrder
 } from '../src/sim/combat/operational_groups.js';
 import type { FactionId, FormationState, GameState, OGActivationOrder } from '../src/state/game_state.js';
-import { CURRENT_SCHEMA_VERSION, getLegacyAoR } from '../src/state/game_state.js';
+import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function makeFormation(id: string, faction: FactionId, hq: string, personnel: number = 1000): FormationState {
     return {
@@ -313,7 +313,7 @@ describe('operational groups - updateOGLifecycle', () => {
 });
 
 describe('operational groups - computeOGPressureBonus', () => {
-    it('returns 1.3 when OG covers an edge settlement', () => {
+    it('returns 1.0 (brigade_aor removed, OG bonus no longer computed)', () => {
         const state = makeCorpsState();
         initializeCorpsCommand(state);
 
@@ -334,11 +334,10 @@ describe('operational groups - computeOGPressureBonus', () => {
             posture: 'attack',
             corps_id: 'rs-corps-1'
         };
-        getLegacyAoR(state).brigade_aor!['S3'] = ogId;
 
-        // Edge S3:S4 should have OG bonus because S3 is assigned to an OG
+        // brigade_aor removed: computeOGPressureBonus always returns 1.0
         const bonus = computeOGPressureBonus(state, 'S3:S4');
-        expect(bonus).toBe(1.3);
+        expect(bonus).toBe(1.0);
     });
 
     it('returns 1.0 when no OG covers the edge', () => {

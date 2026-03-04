@@ -1,6 +1,5 @@
 import type { EdgeRecord } from '../../map/settlements.js';
 import type { FormationId, GameState, SettlementId } from '../../state/game_state.js';
-import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 function edgeId(a: string, b: string): string {
@@ -15,51 +14,14 @@ function parseEdgeId(id: string): [SettlementId, SettlementId] | null {
 
 /**
  * Derive corps front edges from existing brigade AoR ownership and control boundaries.
- * Deterministic: sorted edge traversal and sorted output edge lists.
+ * brigade_aor is never populated; always returns empty record.
+ * Deterministic: sorted output.
  */
 export function deriveCorpsFrontEdgesFromBrigadeAoR(
-    state: GameState,
-    edges: EdgeRecord[]
+    _state: GameState,
+    _edges: EdgeRecord[]
 ): Record<FormationId, string[]> {
-    const formations = state.formations ?? {};
-    const controllers = state.political_controllers ?? {};
-    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
-    const byCorps = new Map<FormationId, Set<string>>();
-    const sortedEdges = [...edges].sort((x, y) => edgeId(x.a, x.b).localeCompare(edgeId(y.a, y.b)));
-    for (const e of sortedEdges) {
-        const ca = controllers[e.a] ?? null;
-        const cb = controllers[e.b] ?? null;
-        if (!ca || !cb || ca === cb) continue;
-        const ba = brigadeAor[e.a];
-        const bb = brigadeAor[e.b];
-        if (typeof ba === 'string') {
-            const f = formations[ba];
-            if (f && f.corps_id && f.faction === ca) {
-                let set = byCorps.get(f.corps_id);
-                if (!set) {
-                    set = new Set<string>();
-                    byCorps.set(f.corps_id, set);
-                }
-                set.add(edgeId(e.a, e.b));
-            }
-        }
-        if (typeof bb === 'string') {
-            const f = formations[bb];
-            if (f && f.corps_id && f.faction === cb) {
-                let set = byCorps.get(f.corps_id);
-                if (!set) {
-                    set = new Set<string>();
-                    byCorps.set(f.corps_id, set);
-                }
-                set.add(edgeId(e.a, e.b));
-            }
-        }
-    }
-    const out: Record<FormationId, string[]> = {};
-    for (const corpsId of [...byCorps.keys()].sort(strictCompare)) {
-        out[corpsId] = [...(byCorps.get(corpsId) ?? new Set<string>())].sort(strictCompare);
-    }
-    return out;
+    return {};
 }
 
 /**
@@ -102,7 +64,6 @@ export function applyCorpsFrontAutoDistributionForCorps(
         })
         .sort(strictCompare);
     if (brigades.length === 0) return;
-    // AoR phase-out: do not write brigade_aor (assignments skipped)
 }
 
 export function applyCorpsFrontAutoDistribution(
