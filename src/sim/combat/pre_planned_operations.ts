@@ -6,12 +6,13 @@
  * not ad-hoc — they were pre-positioned, pre-supplied, and launched
  * immediately upon JNA withdrawal.
  *
- * Five named operations, one per VRS corps (2nd Krajina excepted):
+ * Six named operations, one per VRS corps:
  * - Operation Koridor (East Bosnian Corps): Brčko corridor link
  * - Operation Drina (Drina Corps): Zvornik → Novo Selo → Bratunac
  * - Operation Prsten (SRK): Ilidža → Rakovica → Svrake → Hotonj
  * - Operation Foča (Herzegovina Corps): Brusna → Mazoče → Tjentište → Miljevina → Izbišno → Patkovina
  * - Operation Prijedor (1st Krajina Corps): Sweep Prijedor/Sanski Most/Ključ
+ * - Operation Kupres (2nd Krajina Corps): Seize Kupres from HVO (April 1992)
  *
  * Operations inject in 'planning' phase with planning_duration: 1.
  * Bot/player orders trigger execution next turn.
@@ -86,6 +87,14 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
           'op:kljuc:kljuc_2', 'op:kljuc:hadzici', 'op:kljuc:krasulje_2',
           'op:kljuc:sanica_2', 'op:kljuc:donje_ratkovo_2',
           'op:kljuc:donji_vrbljani_2', 'op:kljuc:cadjavica',
+      ] },
+    { corps: 'vrs_2nd_krajina', name: 'Operation Kupres',
+      staging_osid: 'op:donji_vakuf:pribraca_2',
+      target_osids: [
+          'op:kupres:kupres_2',   // Kupres town (adjacent to pribraca_2, main objective)
+          'op:kupres:goravci',    // Goravci (accessible after kupres_2 taken)
+          'op:livno:priluka_2',   // Livno area (HRHB at init, painted RS)
+          'op:livno:zastinje',    // Livno area (HRHB at init, painted RS)
       ] },
 ];
 

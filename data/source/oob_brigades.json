@@ -2631,6 +2631,7 @@
       "name": "7th Krajina Motorized",
       "home_mun": "kupres",
       "home_settlement": "Kupres",
+      "home_osid": "op:donji_vakuf:pribraca_2",
       "subordinate_to": "vrs_2nd_krajina",
       "kind": "brigade",
       "source": "markdown_rebuild",
