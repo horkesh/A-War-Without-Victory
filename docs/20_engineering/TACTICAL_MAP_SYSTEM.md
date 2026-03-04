@@ -552,7 +552,7 @@ When the user **clicks a formation marker** on the map (with game state loaded),
 
 **Corps panel** — Sections: CORPS COMMAND (stance, exhaustion, command span); STRENGTH (subordinate count, total personnel); OPERATIONAL GROUPS (OG slots, active OGs with names); ORDER OF BATTLE (clickable subordinate formation rows). **ACTIONS:** corps stance dropdown (defensive/balanced/offensive/reorganize) via `stage-corps-stance-order` IPC; bulk subordinate posture (dropdown + "Apply" calls `stagePostureOrder` per brigade); frontline controls: **Stage Front** (derives corps edge set from subordinate AoR and stages via `stage-corps-front-order`), **Stage Axis** (stages same edge set as attack axis via `stage-corps-attack-axis-order`), and **Stage OG** (stages selected active OG subfront via `stage-og-subfront-order`). At strategic zoom only corps/corps_asset/army_hq markers are shown and hit-tested.
 
-**Brigade panel** — Header: formation name; subtitle shows kind, faction, personnel, posture. The panel emphasizes **Chain of Command** with a prominent clickable parent-corps control (when `corps_id` is set). **Statistics:** personnel, posture (defend/probe/attack/elastic_defense/consolidation), fatigue, cohesion; **AoR:** covered/assigned summary; **Actions:** SET POSTURE (dropdown: defend, probe, attack, elastic_defense, consolidation); **ATTACK** uses target-selection mode with two-step confirmation and preview dashed arrow. **MOVE** and **REPOSITION** use settlement-selection mode: choose 1–4 connected friendly settlements, see selected footprint + validity feedback on map, Confirm/Cancel in panel, Enter to confirm, Esc to cancel, and click selected settlement to remove from the staged set.
+**Brigade panel** — Header: formation name; subtitle shows kind, faction, personnel, posture. The panel emphasizes **Chain of Command** with a prominent clickable parent-corps control (when `corps_id` is set). **Statistics:** personnel, posture, fatigue, cohesion; **Actions:** SET POSTURE (dropdown: hold, defend, defend_at_all_costs, elastic_defense, counterattack, dig_in, attack, assault — 8-posture system 2026-03-04; attack/assault blocked when home_defense_active); **ATTACK** uses target-selection mode with two-step confirmation and preview dashed arrow. **MOVE** and **REPOSITION** use settlement-selection mode: choose 1–4 connected friendly settlements, see selected footprint + validity feedback on map, Confirm/Cancel in panel, Enter to confirm, Esc to cancel, and click selected settlement to remove from the staged set.
 
 **Zoom to selection:** Toolbar zoom-in (or shortcut) pans to the centroid of the selected settlement or formation (formation uses HQ settlement or municipality centroid).
 
@@ -661,7 +661,7 @@ Key field mappings from `final_save.json`:
 - `formations[id].tags` (array containing `"mun:xxx"`) → `municipalityId`
 - `formations[id].ops.fatigue` → `fatigue`
 - `formations[id].personnel` → `personnel`
-- `formations[id].posture` → `posture` (brigade posture: defend/probe/attack/elastic_defense)
+- `formations[id].posture` → `posture` (brigade posture: hold/defend/defend_at_all_costs/elastic_defense/counterattack/dig_in/attack/assault)
 - `militia_pools[key].mun_id` → `munId`
 - `political_controllers` → `controlBySettlement` (via `buildControlLookup`)
 - `contested_control` → `statusBySettlement` (via `buildStatusLookup`)
@@ -919,7 +919,7 @@ interface FormationView {
   /** Sorted settlement IDs in this formation’s AoR (when state.brigade_aor present). */
   aorSettlementIds?: string[];
   personnel?: number;
-  posture?: string;  // brigade posture: defend | probe | attack | elastic_defense
+  posture?: string;  // brigade posture: hold | defend | defend_at_all_costs | elastic_defense | counterattack | dig_in | attack | assault
 }
 
 interface MilitiaPoolView {

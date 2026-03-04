@@ -324,7 +324,7 @@ The player cannot control military forces (none exist). Strategic choices shape 
 
 Each turn the player:
 1. **Reviews** the situation: control map, militia emergence, authority states, alliance status
-2. **Sets brigade postures** (when formations exist): hold, probe, push, consolidate
+2. **Sets brigade postures** (when formations exist): hold, defend, defend_at_all_costs, elastic_defense, counterattack, dig_in, attack, assault
 3. **Issues attack orders** against adjacent enemy-controlled settlements
 4. **Monitors** JNA withdrawal, alliance strain, and War phase→II transition conditions
 5. **Ends turn** — postures apply; battles resolve; control may flip; displacement triggers

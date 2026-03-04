@@ -37,7 +37,7 @@ This spec covers:
 
 - `HRHB`
   - Early-war posture: opportunistic offensives with retention of key lines.
-  - Late-war posture: balanced hold/probe posture.
+  - Late-war posture: balanced hold/defend posture.
   - Priority SIDs: `S166090`, `S120880`, `S130486`.
   - Benchmarks:
     - Turn 26: secure Herzegovina core (`expected_control_share=0.15`, `tolerance=0.08`)
@@ -63,8 +63,8 @@ This spec covers:
    - objective SID bonus,
    - pressure magnitude.
 3. Assign posture:
-   - top-ranked edge subset => `push`,
-   - mid-ranked with pressure/objective signal => `probe`,
+   - top-ranked edge subset => `attack` or `assault`,
+   - mid-ranked with pressure/objective signal => `defend`,
    - remainder => `hold`.
 4. Assign formations:
    - sorted active formations only,
@@ -91,11 +91,11 @@ This allows behavior such as:
 AI prioritizes **municipality consolidation**: cleaning hostile settlements inside owned municipalities and pushing toward isolated hostile clusters. Behavior is deterministic and produces tracked military action (casualties) rather than administrative flips.
 
 - **Phase I (legacy):** Edge scoring includes a consolidation bonus when the scenario runner supplies graph context (`consolidationContext`). Strategy profiles have `consolidation_priority_weight` (RS 0.8, RBiH 0.5, HRHB 0.4). Control-flip candidate order prefers municipalities with more attacker-controlled adjacent muns (consolidation pressure first).
-- **Phase II:** Brigades on a **soft front** (adjacent enemy settlements with no or weak garrison) adopt **consolidation** posture; they still issue attack orders so cleanup is resolved via battle resolution with casualty ledger updates. **Real fronts** = brigade-vs-brigade contact; soft fronts = rear pockets and undefended settlements.
+- **Phase II (8-posture system, 2026-03-04):** Brigades on a **soft front** (adjacent enemy settlements with no or weak garrison) adopt **hold** posture and issue attack orders; cleanup is resolved via battle resolution with casualty ledger updates. **Real fronts** = brigade-vs-brigade contact; soft fronts = rear pockets and undefended settlements. The legacy 'consolidation' and 'probe' postures have been removed; saves with those values normalize to 'hold' on load.
 - **Exception data:** Connected strongholds (e.g. Sapna S163520, Teočak S123749) and isolated holdouts (e.g. Petrovo S120154, Vozuća S162094) receive scoring penalties so they persist as in history. Fast rear-cleanup municipalities (Prijedor, Banja Luka) receive a priority bonus; baseline calibration targets completion within ~4 turns.
 - **Garrison/casualties:** Cleanup engagements remain attack-order driven; undefended or weakly defended settlements still incur defender casualties (militia/rear security) so all flips produce tracked casualties.
 
-Integration: `src/sim/consolidation_scoring.ts`, `src/sim/bot/simple_general_bot.ts`, `src/sim/combat/bot_brigade_ai_osid.ts`, `src/sim/early_war/control_flip.ts`, `src/state/game_state.ts` (BrigadePosture includes `consolidation`).
+Integration: `src/sim/consolidation_scoring.ts`, `src/sim/bot/simple_general_bot.ts`, `src/sim/combat/bot_brigade_ai_osid.ts`, `src/sim/early_war/control_flip.ts`, `src/state/game_state.ts` (BrigadePosture: 8-posture system — hold, defend, defend_at_all_costs, elastic_defense, counterattack, dig_in, attack, assault).
 
 ## Attack target de-duplication
 

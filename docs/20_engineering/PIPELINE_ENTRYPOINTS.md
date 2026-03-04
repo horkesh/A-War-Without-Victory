@@ -90,7 +90,7 @@ Canon global turn-order hooks (docs/10_canon/Phase_Specifications_v0_5_0.md) map
 | 5 | Enclave integrity | `update-enclave-integrity` |
 | 6 | Sarajevo exception | `update-sarajevo-exception` |
 | 7 | Negotiation capital | `update-negotiation-pressure`, `update-negotiation-capital` |
-| 8 | OSID location and ZoC | `zoc-computation`, `zoc-constrained-movement`; front snapshot from `derive-osid-front-segments` (Phase II only). No AoR. |
+| 8 | OSID location + home defense | `compute-home-defense-active` (sets home_defense_active, decrements counterattack_window_turns); `osid-column-movement`; front snapshot from `derive-osid-front-segments` (Phase II only). No AoR. ZoC removed n344. |
 | 9 | Tactical doctrines | `update-doctrine-eligibility` |
 | 10 | Capability progression | `update-capability-profiles` (Phase II); Phase I: `phase-i-capability-update` (before control flip) |
 | 11 | Contested control | Initialization (control_status from stability); Phase I flip in `phase-i-control-flip` |

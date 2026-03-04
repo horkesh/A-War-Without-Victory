@@ -9633,3 +9633,42 @@ Determinism checks **MUST** be run:
   - `memory/MEMORY.md` — added Vienna Declaration bullet in Combat Mechanics section
 - **Reports:**
   - `docs/40_reports/implemented/20260304_VIENNA_DECLARATION_REFACTOR.md` — combined implementation + refactor report
+
+---
+
+## [2026-03-04] 8-Posture System: dig_in + Home Ground Defense
+
+- **Phase:** War phase combat / brigade AI
+- **Branch:** feature/posture-system (9 commits, 5bc234f → fb74032)
+- **Summary:**
+  - Replaced legacy 5-posture system (defend/probe/attack/elastic_defense/consolidation) with 8-posture system: hold, defend, defend_at_all_costs, elastic_defense, counterattack, dig_in, attack, assault
+  - Added `dig_in` posture: multi-turn active fortification (DIG_IN_PROGRESS_PER_TURN=0.25, full effect at 0.75, defense ramps 1.35→1.60, +0.5 cohesion/turn, caps at 85, no move/ops, resets on displacement)
+  - Added `home_defense_active` per-brigade flag: computed by `computeHomeDefenseActive()` (new pipeline step), blocks attack/assault, auto-upgrades hold→defend, morale floor 15, +0.5 cohesion/turn bonus
+  - Added `counterattack_window_turns` countdown enabling counterattack eligibility after retreat
+  - `probe` and `consolidation` removed from BrigadePosture; save migration normalizes them to 'hold'
+  - `consolidation_flips.ts` permanently disabled (returns 0 unconditionally)
+- **Determinism:** Fully deterministic — sorted iteration, no randomness, no timestamps in any new file. `normalizePosture()` prevents NaN cohesion on legacy saves.
+- **Tests:** 22 new tests in `tests/brigade_posture.test.ts`; total 310 passing (2 pre-existing failures in war_timeline.test.ts)
+- **Spec:** `docs/30_planning/20260304_POSTURE_HOME_GROUND_DEFENSE_SPEC.md`
+- **Report:** `docs/40_reports/implemented/20260304_8POSTURE_DIG_IN_HOME_DEFENSE.md`
+- **Files changed:**
+  - `src/state/game_state.ts` — BrigadePosture 8-posture type, 3 new FormationState fields
+  - `src/sim/combat/combat_math.ts` — posture tables, constants, computeDigInDefMult, computeDefenderPower
+  - `src/sim/combat/brigade_posture.ts` — full rewrite
+  - `src/sim/compute_home_defense.ts` — NEW computeHomeDefenseActive
+  - `src/sim/turn_phases/war_phases.ts` — new pipeline step compute-home-defense-active
+  - `src/sim/combat/morale_drift.ts` — home ground morale floor
+  - `src/sim/combat/brigade_pressure.ts`, `equipment_effects.ts` — updated posture tables
+  - `src/sim/combat/bot_brigade_ai_osid.ts` — 5-state decision tree with home-ground gate
+  - `src/sim/combat/consolidation_flips.ts` — permanently disabled stub
+  - `src/ui/map/map/formationIcons.ts` — updated POSTURE_STRIPE colors
+  - `src/sim/combat/bot_strategy.ts` — preferred_posture_when_overstaffed → 'hold'
+  - `tests/brigade_posture.test.ts` — 22 new tests
+  - 11 other files — probe/consolidation cleanup
+- **Canon propagation:**
+  - `docs/10_canon/Systems_Manual_v0_6_0.md` §6.1 — new 8-posture table, home defense note, bot AI note
+  - `docs/10_canon/War_Specification_v0_6_0.md` §5 — pipeline step list updated, ZoC removed, compute-home-defense-active added, consolidation posture removal noted
+  - `docs/10_canon/Rulebook_v0_6_0.md` — posture list updated
+  - `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md` — probe/consolidation → hold, BrigadePosture note updated
+  - `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` — Brigade panel posture dropdown updated, type comment updated
+  - `docs/20_engineering/PIPELINE_ENTRYPOINTS.md` — row 8 updated to reflect home-defense step, ZoC removed note
