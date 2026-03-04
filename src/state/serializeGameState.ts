@@ -118,7 +118,10 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'war_timeline',
     // Named officers system (Tier 1)
     'named_officer_data',
-    'named_officers'
+    'named_officers',
+    // Vienna Declaration / local truces (2026-03-04)
+    'vienna_declaration_turn',
+    'truce_broken_turn',
 ]);
 
 /**
