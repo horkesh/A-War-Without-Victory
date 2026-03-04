@@ -1,6 +1,16 @@
 'use strict';
 
-const { app, BrowserWindow, protocol, ipcMain, dialog, Menu } = require('electron');
+const _electronModule = require('electron');
+if (typeof _electronModule === 'string') {
+  process.stderr.write(
+    'ERROR: electron-main.cjs must be launched via the Electron binary.\n' +
+    '  Correct:   electron .\n' +
+    '  Correct:   npm run desktop\n' +
+    '  Wrong:     node src/desktop/electron-main.cjs\n'
+  );
+  process.exit(1);
+}
+const { app, BrowserWindow, protocol, ipcMain, dialog, Menu } = _electronModule;
 const path = require('path');
 const fs = require('fs');
 const http = require('http');

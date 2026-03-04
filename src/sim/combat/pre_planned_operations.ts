@@ -6,12 +6,13 @@
  * not ad-hoc — they were pre-positioned, pre-supplied, and launched
  * immediately upon JNA withdrawal.
  *
- * Five named operations, one per VRS corps (2nd Krajina excepted):
+ * Six named operations, one per VRS corps:
  * - Operation Koridor (East Bosnian Corps): Brčko corridor link
  * - Operation Drina (Drina Corps): Zvornik → Novo Selo → Bratunac
  * - Operation Prsten (SRK): Ilidža → Rakovica → Svrake → Hotonj
  * - Operation Foča (Herzegovina Corps): Brusna → Mazoče → Tjentište → Miljevina → Izbišno → Patkovina
  * - Operation Prijedor (1st Krajina Corps): Sweep Prijedor/Sanski Most/Ključ
+ * - Operation Kupres (2nd Krajina Corps): Seize Kupres from HVO (April 1992)
  *
  * Operations inject in 'planning' phase with planning_duration: 1.
  * Bot/player orders trigger execution next turn.
