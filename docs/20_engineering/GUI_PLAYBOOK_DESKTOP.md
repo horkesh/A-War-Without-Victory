@@ -30,6 +30,10 @@
 - `R`: open replay loader
 - `Esc`: close overlays/search
 
+## Troubleshooting
+
+- **`TypeError: Cannot read properties of undefined (reading 'whenReady')`** — You ran `node src/desktop/electron-main.cjs` directly. Always use `npm run desktop` or `electron .` (via `node_modules/.bin/electron`). The main process now exits with an explicit error message if invoked from plain Node.js.
+
 ## Validation Checklist
 
 - Scenario/state load updates map + OOB + war status.

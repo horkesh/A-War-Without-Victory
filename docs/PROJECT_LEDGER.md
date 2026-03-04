@@ -9714,6 +9714,21 @@ Determinism checks **MUST** be run:
 - **Files modified:** `src/ui/map/map/awwv_map_style.json`, `data/scenarios/timelines/apr1992.json`, `src/desktop/electron-main.cjs` (debug line).
 - **Artifacts:** `docs/40_reports/implemented/20260304_MAP_VISIBILITY_TIMELINE_SYNC_ELECTRON_INVESTIGATION.md`.
 
+## [2026-03-04] Electron guard + crash resolution + doc propagation
+
+- **Phase:** Desktop / engineering hygiene
+- **Summary:** Resolved HIGH-severity Electron crash (`app.whenReady()` TypeError). Root cause: `electron-main.cjs` was invoked via plain Node.js during investigation (not via `electron .`). Under Node.js, `require('electron')` returns a string → `{ app }` destructures to `undefined`. Added defensive early-exit guard. Confirmed app launches cleanly. Also documented Operation Kupres (6th pre-planned VRS op) in `pre_planned_operations.ts` comment.
+- **Change (`src/desktop/electron-main.cjs`):** Added Node.js detection guard at top of file — checks `typeof require('electron') === 'string'` and exits with a plain-English error listing correct/wrong invocations. IPC contract and all handlers unchanged.
+- **Change (`src/sim/combat/pre_planned_operations.ts`):** Header comment updated: "Five named operations, one per VRS corps (2nd Krajina excepted)" → "Six named operations, one per VRS corps". Added Operation Kupres bullet. Code unchanged.
+- **Determinism:** No simulation behavior changed. Guard is startup-only; no effect on turn pipeline, serialization, or outputs.
+- **Docs propagated:**
+  - `docs/40_reports/implemented/20260304_ELECTRON_GUARD_AND_CRASH_RESOLUTION.md` — NEW report
+  - `docs/40_reports/issues/2026_03_04_ELECTRON_APP_WHENREADY_CRASH.md` — OPEN → RESOLVED with root cause and fix
+  - `docs/40_reports/README.md` — issues/ row updated (RESOLVED); new report prepended to implemented/ table; stale "unresolved" note corrected
+  - `docs/20_engineering/REPO_MAP.md` — desktop bullet updated to note Node.js guard
+  - `docs/20_engineering/GUI_PLAYBOOK_DESKTOP.md` — Troubleshooting section added with TypeError explanation and correct invocation
+- **Artifacts:** commit `4456017`
+
 ## [2026-03-04] Propagate to canon — GUI Phase 5 report and canon propagation
 
 - **Phase:** GUI Phase 5 documentation sync
