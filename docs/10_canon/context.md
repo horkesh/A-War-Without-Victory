@@ -220,7 +220,9 @@ Do NOT edit FORAWWV automatically.
 - Rear Political Control Zones: control unchanged without attack resolution
 - Control change only via attack resolution or corps/frontline operations
 - Brigades have one OSID; front segments from phase_ii_front_edges_osid
-- Corps Sectors: derived each turn via multi-source BFS; partition front edges per corps for targeting and density. Sectors split by opposing faction and capped at MAX_SECTOR_EDGES=25 / MAX_SECTOR_BRIGADES=8; interior brigades assigned as reserves via BFS with proportional cap (RESERVE_PER_EDGE_CAP=0.5, excess redistributed to underfilled sectors). Exempt corps (general staff, HVO Central Bosnia) excluded. GUI renders corps-colored sector boundaries with click-to-inspect panels.
+- Corps Sectors: derived each turn via multi-source BFS; partition front edges per corps for targeting and density. Sectors split by opposing faction and capped at MAX_SECTOR_EDGES=25 / MAX_SECTOR_BRIGADES=8; interior brigades assigned as reserves via BFS with proportional cap (RESERVE_PER_EDGE_CAP=0.07 — ~1 reserve per typical sector; was 0.5, excess redistributed to underfilled sectors). Exempt corps (general staff, HVO Central Bosnia) excluded. GUI renders corps-colored sector boundaries with click-to-inspect panels.
+- Brigade Directive Discipline: brigades may only attack OSIDs in effectiveDirective.offensive_targets; sole exception is counter-attacks (brigade retreated from that OSID last turn). Hard block in bot_brigade_ai_osid.ts — no opportunistic off-directive attacks.
+- Combat Fatigue: ops.fatigue increments per battle (attacker +2, defender +1, cap 20); recovers -1/turn via applyFatigueRecovery() before updateFormationFatigue() in update-formation-fatigue pipeline step. Phase I supply-assignment fatigue inert for Phase II brigades (no assignment field).
 
 ### 4. Pressure → Exhaustion → Collapse Chain
 

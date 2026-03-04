@@ -29,5 +29,14 @@ This report details the successful execution of the UI text polish pass, fulfill
 - **Resolution:** Created `formatFrontId()` in `OOBSidebar.tsx` to strip parent faction relationships and cleanly hyphenate settlement pairings. Applied user-friendly fallbacks to officer succession.
 - **Outcome:** Front descriptions now render as elegant operational areas (e.g., `Bugojno — Udurlije`), and officer names map consistently.
 
+## 6. Map Interactivity & Front Sectors
+- **Issue:** Front lines were split into numerous tiny, hard-to-click edge segments, making it difficult to select entire sectors. Additionally, the minimap was locked from drag-panning, and some sidebar Corps interactions failed.
+- **Resolution:**
+  - Rewrote the `buildFrontEdgesHoverGeoJSON` algorithm to merge and group contiguous LineStrings dynamically based on shared sector assignments.
+  - Enlarged the hover offset buffers and CSS thickness limits for map layers.
+  - Allowed manual view-panning within the minimap viewport by instantiating `interactive: true` and `scrollZoom: false`.
+  - Injected dynamic commander data by directly piping `namedOfficerStateById` into `CorpsCard`, enabling visual rank and name display in the sidebar.
+- **Outcome:** Sectors now react intuitively as massive contiguous blocks, the minimap can be freely dragged, and the player can immediately see their commanding officers in the OOB list.
+
 ## Conclusion
-The WebGL map and operations UI are now aligned with the "player-first" paradigm. Internal simulation scaffolding has been entirely abstracted away behind immersive formatting.
+The WebGL map and operations UI are now aligned with the "player-first" paradigm. Internal simulation scaffolding has been entirely abstracted away behind immersive formatting and heavily optimized, massive contiguous interaction hitboxes.

@@ -9498,6 +9498,10 @@ Determinism checks **MUST** be run:
   1. Converted `Turn 37` into historical dates matching the April 1992 start date (`formatTurnLabel`).
   2. Applied dynamic title-casing and stripped internal logic prefixes for OSIDs, Corps, and Front labels (e.g. converting `HRHB__RS__op:bugojno:udurlije` into `Bugojno — Udurlije` via `formatFrontId` and `RS_Sarajevo_romanija_corps` into `Sarajevo Romanija Corps` via `formatRawId`).
   3. Swapped raw Cohesion numbers (0-100) for visual indicator blocks (`■■■■`) across panels to improve immediate tactical readability.
+  4. Redesigned `MapContainer` sector hover rendering to algorithmically merge contiguous LineStrings into singular geometry features, ensuring entire fronts glow seamlessly and are easily clickable.
+  5. Implemented manual panning on the `Minimap` layout config to let players natively drag/inspect the map boundary.
+  6. Substituted explicit Faction/Kind fields on the `FormationDetail` sheet for elegant parsing of the brigade's source `home_mun` recruitment tag.
+  7. Restored OOB commander name data routing, enabling the `CorpsCard` UI widget to functionally display real named officers acting as Corps commanders.
   4. Updated dynamic Brigade War Stories (`generateNarrative`) from past tense to present/present-perfect tense to reflect the ongoing state of the conflict.
 - **Report:** A full breakdown was recorded at `docs/40_reports/20260304_UI_POLISH_REPORT.md`.
 - **Files modified:** `src/ui/map/components/OOBSidebar.tsx`, `src/ui/map/components/FormationDetail.tsx`, `src/ui/map/components/CorpsDetail.tsx`, `src/ui/map/components/TopToolbar.tsx`, `src/sim/war_stories.ts`.

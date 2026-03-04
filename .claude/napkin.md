@@ -81,6 +81,8 @@
    Do instead: `injectPrePlannedOperations(state)` after `initializeCorpsCommand`. 5 named ops, `planning` phase (duration 1), execute turn 1. OSID targets + staging_osid.
 9. **[2026-02-25] sidToMun map preservation**
    Do instead: Preserve `canonicalSidToMun` in scenario_runner.ts. Corruption prevented ALL 217 mandatory brigades from spawning.
+10. **[2026-03-04] Brigade discipline: hard block + combat fatigue (n472)**
+    Do instead: `bot_brigade_ai_osid.ts` hard block — brigades ONLY attack `effectiveDirective.offensive_targets`, sole exception: counter-attacks. Frontier pressure mechanic REMOVED. `RESERVE_PER_EDGE_CAP=0.07` (was 0.5) → ~1 reserve per sector. Combat fatigue: attacker +2, defender +1 per battle (cap 20); recovery -1/turn via `applyFatigueRecovery()` in `formation_fatigue.ts`. Phase I supply-assignment fatigue inert — combat-activity fatigue supersedes it.
 
 ## OOB & Brigade Systems
 1. **[2026-03-03] Personnel ceilings REMOVED + combat formula (n392 = 88.6% ATH)**
@@ -103,8 +105,8 @@
    Do instead: Use `getFormationCorpsId(f)` from `corps_sector_partition.ts`. Brigade corps stored in tags (`corps:vrs_1st_krajina`), not `f.corps_id`.
 2. **[2026-03-01] Sector exempt corps**
    Do instead: arbih_general_staff, vrs_main_staff, hvo_general_staff (army reserves) + hvo_central_bosnia (Bosniak-Croat conflict) — don't assign their brigades to front sectors.
-3. **[2026-03-02] Sector pipeline (current)**
-   Do instead: `buildMultiSectorsForCorps()`: findSubSegments → splitOversizedSubSegments (MAX_SECTOR_EDGES=25) → buildSectors → Phase 1E split (MAX_SECTOR_BRIGADES=8) → assignInteriorBrigades → redistributeExcessReserves (RESERVE_PER_EDGE_CAP=0.5). Orphan fallback faction-wide.
+3. **[2026-03-04] Sector pipeline (current)**
+   Do instead: `buildMultiSectorsForCorps()`: findSubSegments → splitOversizedSubSegments (MAX_SECTOR_EDGES=25) → buildSectors → Phase 1E split (MAX_SECTOR_BRIGADES=8) → assignInteriorBrigades → redistributeExcessReserves (`RESERVE_PER_EDGE_CAP=0.07`, was 0.5 → ~1 reserve per typical sector). Orphan fallback faction-wide.
 4. **[2026-03-01] Fog of war (ReconIntelligence) — already implemented**
    Do instead: `recon_intelligence.ts` runs via `updateReconIntelligence()`. Ranges: RBiH=2, RS=1, HRHB=1. Phase 2 TODO: confidence decay, bot AI intel usage.
 
@@ -175,27 +177,19 @@
    Do instead: Use area-weighted match (km²) as primary. Count-based penalizes small eastern settlements disproportionately. ATH n466=92.0% (670/744 count). 20 overrides + 16 RS avoided_osids. ARBiH homeland last stand (combat_math.ts morale floor 50, attack_resolution_osid.ts 'victory' absorption) added n439.
 2. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
    Do instead: RS `avoided_osids` = fix RS OVER-captures (painted=RBiH/HRHB, sim=RS — prevent VRS from attacking there). RS `osid_control_overrides` = fix RS UNDER-captures (painted=RS, sim=RBiH — force-start RS control). Adding under-captures to avoided_osids makes RS even less likely to capture them.
-3. **[2026-03-04] Consolidation captures CANNOT be fixed by bot config — ~8 persistent mismatches**
+3. **[2026-03-04] HRHB Krajina/Posavina mismatches are INIT-based (ethnic Croat composition)**
+   Do instead: Cells banja_luka:dragocaj, banja_luka:potkozarje_3, bosanska_gradiska:mackovac, prijedor:raljas, odzak:bosanski_samac, orasje:ostra_luka start as HRHB in initial_save due to Croat ethnic majority in those cells. Not a runtime regression. Do NOT chase these as calibration mismatches caused by bot changes — they are data-driven init artifacts.
+4. **[2026-03-04] Consolidation captures CANNOT be fixed by bot config — ~8 persistent mismatches**
    Do instead: Cells surrounded by same-faction neighbors auto-flip regardless of avoided_osids or overrides. Confirmed: kakanj:biljesevo, zavidovici:cardak_2, olovo:olovo_2, and all 4 HRHB over-captures (jablanica, kiseljak outskirts, rat_2, prozor area) are consolidation-captured. Only engine-level consolidation rule changes could fix these.
-4. **[2026-03-04] Load-bearing wrong captures: turbe_2 RS over-capture enables Donji Vakuf cascade**
+5. **[2026-03-04] Load-bearing wrong captures: turbe_2 RS over-capture enables Donji Vakuf cascade**
    Do instead: turbe_2 is an RS over-capture BUT it is a stepping stone enabling Donji Vakuf consolidation cascade (3 correct cells). Adding turbe_2 to RS avoided_osids breaks Donji Vakuf → net -3pp loss (n463 confirmed). Do NOT add turbe_2 to RS avoided_osids.
-5. **[2026-03-04] Fragile VRS force allocation: Kalesija→Kupres dependency**
+6. **[2026-03-04] Fragile VRS force allocation: Kalesija→Kupres dependency**
    Do instead: Kalesija seher_2/gojcin_2 RS overrides redirect VRS pressure → bonus kupres:kupres_2 fix (n466). Adding Kladanj overrides on top disrupts this allocation → kupres:kupres_2 reverts (n467). Test each override block in isolation; never stack two override groups without verifying the underlying force dynamics.
-2. **[2026-03-03] Timeline knobs drive 40w behavior first**
+7. **[2026-03-03] Timeline knobs drive 40w behavior first**
    Do instead: For `apr1992_definitive_40w`, tune `data/scenarios/timelines/apr1992.json` (`doctrine_phases`, `external_support`) before editing `bot_strategy.ts`; verify with `final_state_hash` and `compare_painted_vs_sim.cjs`.
-3. **[2026-03-03] Prove knob efficacy immediately (hash + metrics)**
+8. **[2026-03-03] Prove knob efficacy immediately (hash + metrics)**
    Do instead: After each calibration edit, run one 40w and compare both `final_state_hash` and `compare_painted_vs_sim.cjs`; if unchanged vs prior run, revert as inert/no-op before next iteration.
-4. **[2026-03-03] Municipality target sets are the strongest live lever**
+9. **[2026-03-03] Municipality target sets are the strongest live lever**
    Do instead: Prioritize small `target_municipalities` edits for affected corps (e.g., EBK `brcko`/`lopare` trimming yielded +8.3pp POSAVINA_NE) before weight/min_outcome tuning.
-5. **[2026-03-03] Hash movement alone is not calibration progress**
-   Do instead: Treat `compare_painted_vs_sim.cjs` (overall + regional) as acceptance authority; if hash changes but regional metrics are unchanged, classify as no-gain and revert.
-6. **[2026-03-03] Drina over-focus can backfire**
-   Do instead: Avoid aggressive Drina list tightening + explicit `srebrenica` prioritization in one step; test smaller municipality deltas to prevent DRINA regression (n424: 78.0 -> 75.6).
-7. **[2026-03-01] Calibration knobs (master reference)**
-   Do instead: Primary levers: POOL_SCALE_FACTOR, FACTION_POOL_SCALE, RS_EARLY_WAR_END_WEEK (20), per-faction stance/doctrine in bot_strategy.ts, initial_morale in OOB, per-faction morale resist floor, defense_terrain_bonus (+0.20–0.30), local_front_defense.ts thresholds (THIN=0.5, DENSE=1.0). Supply gating: critical→defend, strained→victory-only. Sector offensives: MIN_BRIGADES=3, supply_readiness launch=0.6/abort=0.4. Combat formula: officer quality, ethnic defense, bombardment casualty mult, bombardment exposure attrition.
-8. **[2026-02-25] Historical territory targets (year 1)**
-   Do instead: RS ~60-65% territory. ARBiH ~0% recaptured. ~25-35k military KIA all sides.
-9. **[2026-02-25] Front stabilization timing + winter slowdown**
-   Do instead: Fronts stabilize by early October (~w25). Dead weeks (w32-39) accidental; needs intentional winter mechanic.
-10. **[2026-02-25] RS init territory correct at 35%**
-    Do instead: RS starting ~35% is by design. Gap to 60% closed via early land grabs, not init override.
+10. **[2026-03-01] Calibration knobs (master reference)**
+    Do instead: Primary levers: POOL_SCALE_FACTOR, FACTION_POOL_SCALE, RS_EARLY_WAR_END_WEEK (20), per-faction stance/doctrine in bot_strategy.ts, initial_morale in OOB, per-faction morale resist floor, defense_terrain_bonus (+0.20–0.30), local_front_defense.ts thresholds (THIN=0.5, DENSE=1.0). Supply gating: critical→defend, strained→victory-only. Sector offensives: MIN_BRIGADES=3, supply_readiness launch=0.6/abort=0.4. Combat formula: officer quality, ethnic defense, bombardment casualty mult, bombardment exposure attrition.
