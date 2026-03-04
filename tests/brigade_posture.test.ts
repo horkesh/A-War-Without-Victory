@@ -65,13 +65,13 @@ describe('brigade posture - canAdoptPosture', () => {
         expect(canAdoptPosture(brig, 'attack')).toBe(false);
     });
 
-    it('can adopt consolidation posture (min cohesion 0, readiness active/overextended/degraded)', () => {
+    it('can adopt hold posture (min cohesion 0, readiness active/overextended/degraded)', () => {
         const brig = makeFormation('rs-brig-1', 'RS', 'S1');
         brig.cohesion = 20;
         brig.readiness = 'active';
-        expect(canAdoptPosture(brig, 'consolidation')).toBe(true);
+        expect(canAdoptPosture(brig, 'hold')).toBe(true);
         brig.readiness = 'degraded';
-        expect(canAdoptPosture(brig, 'consolidation')).toBe(true);
+        expect(canAdoptPosture(brig, 'hold')).toBe(true);
     });
 });
 
@@ -106,7 +106,7 @@ describe('brigade posture - applyPostureOrders', () => {
     it('clears orders after processing', () => {
         const state = makePostureState();
         state.brigade_posture_orders = [
-            { brigade_id: 'rs-brig-1', posture: 'probe' }
+            { brigade_id: 'rs-brig-1', posture: 'hold' }
         ];
 
         applyPostureOrders(state);
@@ -114,16 +114,16 @@ describe('brigade posture - applyPostureOrders', () => {
         expect(state.brigade_posture_orders).toEqual([]);
     });
 
-    it('applies consolidation posture order', () => {
+    it('applies hold posture order', () => {
         const state = makePostureState();
         state.brigade_posture_orders = [
-            { brigade_id: 'rs-brig-1', posture: 'consolidation' }
+            { brigade_id: 'rs-brig-1', posture: 'hold' }
         ];
 
         const report = applyPostureOrders(state);
 
         expect(report.postures_changed).toBe(1);
-        expect(state.formations['rs-brig-1'].posture).toBe('consolidation');
+        expect(state.formations['rs-brig-1'].posture).toBe('hold');
     });
 });
 
@@ -138,9 +138,9 @@ describe('brigade posture - applyPostureCosts', () => {
         expect(state.formations['rs-brig-1'].cohesion).toBe(57);
     });
 
-    it('consolidation posture adds 1 cohesion per turn (tuned)', () => {
+    it('hold posture adds 1 cohesion per turn (recovery)', () => {
         const state = makePostureState();
-        state.formations['rs-brig-1'].posture = 'consolidation';
+        state.formations['rs-brig-1'].posture = 'hold';
         state.formations['rs-brig-1'].cohesion = 50;
 
         applyPostureCosts(state);

@@ -1,5 +1,16 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
 
+export const POSTURE_STRIPE: Record<string, string> = {
+    hold: 'rgba(140, 140, 140, 0.95)',
+    defend: 'rgba(40, 120, 210, 0.95)',
+    defend_at_all_costs: 'rgba(255, 255, 255, 0.95)',
+    elastic_defense: 'rgba(25, 175, 150, 0.95)',
+    counterattack: 'rgba(240, 130, 20, 0.95)',
+    dig_in: 'rgba(139, 101, 42, 0.95)',
+    attack: 'rgba(205, 45, 45, 0.95)',
+    assault: 'rgba(130, 0, 0, 0.95)',
+};
+
 const FACTION_STROKE: Record<string, string> = {
   RS: 'rgb(180, 50, 50)',
   RBiH: 'rgb(55, 140, 75)',

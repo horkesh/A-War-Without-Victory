@@ -135,7 +135,7 @@ export function buildTerrainCache(
  * Uses the same formulas as attack_resolution_osid.ts but with FOG OF WAR:
  * defender power is discounted because commanders don't know exact enemy strength.
  *
- * @param attackerPosture — override posture to use for attack power ('attack' or 'probe')
+ * @param attackerPosture — override posture to use for attack power ('attack' or 'assault')
  * @param additionalAttackers — other brigades joining the attack (coordination penalty applies)
  */
 export function predictCombatOutcome(

@@ -527,7 +527,7 @@ export function classifyOutcome(powerRatio: number): CombatOutcome {
 
 /**
  * Compute attacker power for a single formation.
- * @param overridePosture — optional posture override (predictor uses this for 'attack'/'probe')
+ * @param overridePosture — optional posture override (predictor uses this for 'attack'/'assault')
  */
 export function computeAttackerPower(
     state: GameState,

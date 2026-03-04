@@ -5,12 +5,13 @@
  * Per canon: consolidation as a flip-causing mechanic is Phase I only. In Phase II
  * this function no-ops (returns 0 flips) so control changes in Phase II remain
  * breach-based / battle-resolution only (Phase_II_Specification §2.3).
+ *
+ * NOTE (8-posture migration): The 'consolidation' posture has been removed from
+ * BrigadePosture. This function is permanently disabled and always returns 0 flips.
  */
 
 import type { SettlementRecord } from '../../map/settlements.js';
-import type { FactionId, FormationId, GameState, MunicipalityId, SettlementId } from '../../state/game_state.js';
-import { getLegacyAoR } from '../../state/game_state.js';
-import { strictCompare } from '../../state/validateGameState.js';
+import type { FormationId, GameState, MunicipalityId, SettlementId } from '../../state/game_state.js';
 
 /** Max settlements one brigade can flip per turn via consolidation (Option B cap). */
 export const CONSOLIDATION_FLIPS_CAP_PER_BRIGADE = 3;
@@ -21,92 +22,14 @@ export interface ConsolidationFlipsReport {
 }
 
 /**
- * Returns true if any settlement in the municipality has an enemy brigade in AoR
- * (enemy = faction that controls that settlement or has a formation there).
- */
-function munHasEnemyBrigade(
-    state: GameState,
-    ourFaction: FactionId,
-    sidsInMun: SettlementId[]
-): boolean {
-    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
-    const formations = state.formations ?? {};
-    for (const sid of sidsInMun) {
-        const formationId = brigadeAor[sid];
-        if (formationId == null) continue;
-        const formation = formations[formationId];
-        if (!formation || formation.faction === ourFaction) continue;
-        return true;
-    }
-    return false;
-}
-
-/**
- * Apply consolidation flips: for each brigade in consolidation posture,
- * in its assigned muns with no enemy brigade, flip up to CAP undefended non-friendly settlements.
- * Deterministic: sorted formation IDs, sorted settlement IDs.
- * Only applies when meta.phase === 'war'; in Phase II returns 0 flips (canon §2.3).
+ * Apply consolidation flips — permanently disabled in the 8-posture system.
+ * The 'consolidation' posture no longer exists; returns 0 flips unconditionally.
+ * Kept as a stub so callers in the pipeline do not need to be updated.
  */
 export function applyConsolidationFlips(
-    state: GameState,
-    settlements: Map<SettlementId, SettlementRecord>,
-    sidToMun: Record<SettlementId, MunicipalityId>
+    _state: GameState,
+    _settlements: Map<SettlementId, SettlementRecord>,
+    _sidToMun: Record<SettlementId, MunicipalityId>
 ): ConsolidationFlipsReport {
-    const report: ConsolidationFlipsReport = { flips_applied: 0, by_formation: {} };
-    if (state.meta?.phase !== 'war') return report;
-
-    const assignment = getLegacyAoR(state).brigade_municipality_assignment ?? {};
-    const formations = state.formations ?? {};
-    const brigadeAor = getLegacyAoR(state).brigade_aor ?? {};
-    const pc = state.political_controllers ?? {};
-    if (typeof pc !== 'object') return report;
-
-    const sidsByMun = new Map<MunicipalityId, SettlementId[]>();
-    for (const [sid, munId] of Object.entries(sidToMun)) {
-        if (!munId) continue;
-        const list = sidsByMun.get(munId) ?? [];
-        list.push(sid as SettlementId);
-        sidsByMun.set(munId, list);
-    }
-    for (const list of sidsByMun.values()) list.sort(strictCompare);
-
-    const formationIds = Object.keys(formations).sort(strictCompare);
-    for (const formationId of formationIds) {
-        const f = formations[formationId];
-        if (!f || f.kind !== 'brigade' || f.status !== 'active' || f.posture !== 'consolidation') continue;
-        const faction = f.faction as FactionId;
-        const muns = assignment[formationId] ?? [];
-        if (muns.length === 0) continue;
-
-        let flippedThisBrigade = 0;
-        for (const munId of muns) {
-            if (flippedThisBrigade >= CONSOLIDATION_FLIPS_CAP_PER_BRIGADE) break;
-            const sidsInMun = sidsByMun.get(munId) ?? [];
-            if (sidsInMun.length === 0) continue;
-            if (munHasEnemyBrigade(state, faction, sidsInMun)) continue;
-
-            const eligible: SettlementId[] = [];
-            for (const sid of sidsInMun) {
-                const controller = pc[sid] as FactionId | undefined;
-                if (controller === faction) continue;
-                const defenderId = brigadeAor[sid];
-                if (defenderId != null) {
-                    const defForm = formations[defenderId];
-                    if (defForm?.faction === controller) continue;
-                }
-                eligible.push(sid);
-            }
-            eligible.sort(strictCompare);
-            const remaining = CONSOLIDATION_FLIPS_CAP_PER_BRIGADE - flippedThisBrigade;
-            const toFlip = eligible.slice(0, remaining);
-            for (const sid of toFlip) {
-                (state.political_controllers as Record<string, string>)[sid] = faction;
-                flippedThisBrigade++;
-                report.flips_applied++;
-            }
-        }
-        if (flippedThisBrigade > 0) report.by_formation[formationId] = flippedThisBrigade;
-    }
-    return report;
+    return { flips_applied: 0, by_formation: {} };
 }
-
