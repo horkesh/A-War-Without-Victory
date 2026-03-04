@@ -59,7 +59,10 @@ import {
     computeDefenderPower,
     buildTerrainMultByOsid,
     getBombardmentCasualtyMult,
+    rankDefendersByPower,
 } from './combat_math.js';
+import { findSectorForEnemyOsid } from './corps_front_sectors.js';
+import { frontDensityModifier } from './local_front_defense.js';
 
 // Backward-compat re-export
 export type PredictedOutcome = CombatOutcome;
@@ -73,6 +76,8 @@ export type { CombatOutcome };
 const FOG_DIRECT_VISIBILITY = 0.85;
 /** After failing an attack (retreat), fog lifts — brigade learned enemy strength. */
 const FOG_AFTER_RETREAT_VISIBILITY = 0.95;
+/** Mirror of resolver constant: power reduction for sector-coverage defense. */
+const SECTOR_COVERAGE_PENALTY = 0.5;
 
 /** Predicted outcome → numeric score for bot target scoring. */
 export const OUTCOME_SCORE: Record<CombatOutcome, number> = {
@@ -191,23 +196,35 @@ export function predictCombatOutcome(
         (retreatInfo != null && retreatInfo.osid === targetOsid && currentTurn - retreatInfo.turn <= 3) ||
         (repulseInfo != null && repulseInfo.osid === targetOsid && currentTurn - repulseInfo.turn <= 3);
 
+    const ethBonus = (d: FormationState) => getEthnicDefenseBonus(getCoEthnicShare(targetOsid, d.faction, ethnicComposition));
+    const fogMult = learnedFromTarget ? FOG_AFTER_RETREAT_VISIBILITY : FOG_DIRECT_VISIBILITY;
     if (defenderFormations.length > 0) {
+        // Brigade physically at the OSID — standard resolution
         defenderHasBrigade = true;
-        const powers = defenderFormations.map(d => {
-            const share = getCoEthnicShare(targetOsid, d.faction, ethnicComposition);
-            const ethBonus = getEthnicDefenseBonus(share);
-            return computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-        });
-        const sorted = defenderFormations.map((d, i) => ({ f: d, p: powers[i]! })).sort((a, b) => b.p - a.p);
-        defenderPower = sorted[0]!.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
-        const fogMult = learnedFromTarget ? FOG_AFTER_RETREAT_VISIBILITY : FOG_DIRECT_VISIBILITY;
-        defenderPower *= fogMult;
-        defenderFormation = sorted[0]!.f;
+        const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+        defenderPower = totalPower * fogMult;
+        defenderFormation = primary;
         defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
         defenderCohesion = defenderFormation.cohesion ?? 60;
     } else if (isEnemyControlled) {
-        const pop = osidPopulationMap?.get(targetOsid) ?? 5000;
-        defenderPower = pop * MILITIA_DEFENSE_RATIO * 0.25;
+        // No brigade at the OSID. Try sector-pooled defense: mirror of resolver logic.
+        const sector = findSectorForEnemyOsid(state, targetOsid);
+        const sectorBrigades = sector
+            ? sector.assigned_brigade_ids
+                .map(id => state.formations?.[id])
+                .filter((f): f is FormationState => f != null && f.status === 'active')
+            : [];
+        if (sectorBrigades.length > 0) {
+            defenderHasBrigade = true;
+            const coverageMult = frontDensityModifier(sector!.assigned_brigade_ids.length, sector!.length_edges) * SECTOR_COVERAGE_PENALTY;
+            const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+            defenderPower = totalPower * coverageMult * fogMult;
+            defenderFormation = primary;
+            defenderCohesion = defenderFormation.cohesion ?? 60;
+        } else {
+            // Truly undefended: militia ghost only
+            defenderPower = (osidPopulationMap?.get(targetOsid) ?? 5000) * MILITIA_DEFENSE_RATIO * 0.25;
+        }
     } else {
         return null;
     }

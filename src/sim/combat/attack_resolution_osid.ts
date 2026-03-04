@@ -69,8 +69,11 @@ import {
     // Re-exported for test consumers
     getEquipmentRatio,
     getToTerrainDefenseMult,
+    rankDefendersByPower,
 } from './combat_math.js';
 import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from './officer_quality_update.js';
+import { findSectorForEnemyOsid, getCorpsHqOsid } from './corps_front_sectors.js';
+import { frontDensityModifier } from './local_front_defense.js';
 
 // Backward-compat re-exports
 export type AttackOutcome = CombatOutcome;
@@ -89,6 +92,20 @@ export type { CombatOutcome };
  * High multiplier = bloodier stalemates (historically accurate for Bosnian War).
  */
 const MORALE_ABSORPTION_CAS_MULT = 1.35;
+
+/**
+ * Power multiplier applied when sector brigades defend an OSID they are not physically at.
+ * Reflects that a brigade spread across multiple front edges cannot concentrate at one point.
+ * Combined with the sector's frontDensityModifier: thin sectors defend weakly, dense ones better.
+ */
+const SECTOR_COVERAGE_PENALTY = 0.5;
+
+/** Disruption turns applied to a brigade that is routed to its corps HQ after defending a lost sector OSID. */
+const SECTOR_ROUT_DISRUPTED_TURNS = 4;
+/** Cohesion loss on rout to corps HQ. */
+const SECTOR_ROUT_COHESION_LOSS = 30;
+/** Personnel fraction retained after rout (0.7 = 30% additional loss). */
+const SECTOR_ROUT_PERSONNEL_RETAIN = 0.7;
 
 const KIA_FRACTION = 0.30;
 const WIA_FRACTION = 0.55;
@@ -368,19 +385,33 @@ export function resolveAttackOrdersOsid(
 
         let defenderPower: number;
         let defenderFormation: FormationState | null = null;
+        let isSectorCoverageDefense = false;
         const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
+        const ethBonus = (d: FormationState) => getEthnicDefenseBonus(getCoEthnicShare(targetOsid, d.faction, ethnicComposition));
         if (defenderFormations.length > 0) {
-            const powers = defenderFormations.map(d => {
-                const share = getCoEthnicShare(targetOsid, d.faction, ethnicComposition);
-                const ethBonus = getEthnicDefenseBonus(share);
-                return computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-            });
-            const sorted = defenderFormations.map((d, i) => ({ f: d, p: powers[i]! })).sort((a, b) => b.p - a.p);
-            defenderPower = sorted[0]!.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
-            defenderFormation = sorted[0]!.f;
+            // Brigade physically at the OSID — standard resolution
+            const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+            defenderPower = totalPower;
+            defenderFormation = primary;
         } else if (isEnemyControlled) {
-            const pop = osidPopulationMap?.get(targetOsid) ?? 5000;
-            defenderPower = pop * MILITIA_DEFENSE_RATIO * 0.25;
+            // No brigade at the OSID. Try sector-pooled defense: brigades in the owning sector
+            // cover the entire sector frontline even when not physically at this OSID.
+            const sector = findSectorForEnemyOsid(state, targetOsid);
+            const sectorBrigades = sector
+                ? sector.assigned_brigade_ids
+                    .map(id => state.formations?.[id])
+                    .filter((f): f is FormationState => f != null && f.status === 'active')
+                : [];
+            if (sectorBrigades.length > 0) {
+                const coverageMult = frontDensityModifier(sector!.assigned_brigade_ids.length, sector!.length_edges) * SECTOR_COVERAGE_PENALTY;
+                const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+                defenderPower = totalPower * coverageMult;
+                defenderFormation = primary;
+                isSectorCoverageDefense = true;
+            } else {
+                // Truly undefended: militia ghost only (no brigades in sector)
+                defenderPower = (osidPopulationMap?.get(targetOsid) ?? 5000) * MILITIA_DEFENSE_RATIO * 0.25;
+            }
         } else {
             continue;
         }
@@ -701,6 +732,27 @@ export function resolveAttackOrdersOsid(
                 };
                 if (outcome === 'decisive_victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 2;
                 else if (outcome === 'victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 1;
+            } else if (isSectorCoverageDefense) {
+                // Sector-coverage defenders with no retreat path rout to their corps HQ.
+                // They were not physically at the OSID, so destruction is historically wrong —
+                // the unit still exists, just shattered and pulled back to reform.
+                const hqOsid = getCorpsHqOsid(state, defenderFormation);
+                const hqController = hqOsid ? getPoliticalControllerOSID(state, hqOsid, reverseMap) : null;
+                if (hqOsid && hqController === defenderFormation.faction) {
+                    (defenderFormation as { location_osid?: string }).location_osid = hqOsid;
+                    (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
+                    (defenderFormation as { defense_streak?: number }).defense_streak = 0;
+                    (defenderFormation as { disrupted_turns?: number }).disrupted_turns = SECTOR_ROUT_DISRUPTED_TURNS;
+                    defenderFormation.cohesion = Math.max(0, (defenderFormation.cohesion ?? 60) - SECTOR_ROUT_COHESION_LOSS);
+                    defenderFormation.personnel = Math.floor((defenderFormation.personnel ?? 0) * SECTOR_ROUT_PERSONNEL_RETAIN);
+                    (defenderFormation as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
+                        osid: targetOsid, turn: state.meta?.turn ?? 0
+                    };
+                } else {
+                    // HQ also lost or unknown — brigade destroyed
+                    defenderFormation.personnel = 0;
+                    defenderFormation.status = 'inactive';
+                }
             } else if ((defenderFormation as { fallback_osid?: string }).fallback_osid) {
                 // Fallback retreat: brigade reforms at fallback OSID only if it is still friendly
                 const fallback = (defenderFormation as { fallback_osid?: string }).fallback_osid!;

@@ -58,8 +58,9 @@ function brigadePower(formation: FormationState): number {
  * - density < THIN_FRONT_THRESHOLD → penalty (down to MIN_COVERAGE_PENALTY)
  * - density between thresholds → 1.0 (normal)
  * - density > DENSE_FRONT_THRESHOLD → bonus (up to MAX_DENSITY_BONUS)
+ * Exported so attack resolution can apply the same formula to sector-coverage defense.
  */
-function frontDensityModifier(assignedBrigades: number, coverageLength: number): number {
+export function frontDensityModifier(assignedBrigades: number, coverageLength: number): number {
     if (coverageLength <= 0) return 1.0;
     const density = assignedBrigades / coverageLength;
 
@@ -170,20 +171,35 @@ export function buildLocalFronts(state: GameState): Record<string, LocalFront> {
 }
 
 /**
- * Get the front density modifier for a specific brigade's local front.
- * Used by attack resolution to apply coverage-based defense modifier.
+ * Get the front density modifier for a specific brigade.
  *
- * Returns 1.0 if brigade is not assigned to a local front.
+ * Lookup order:
+ * 1. brigade_front_assignment (player-facing legacy path)
+ * 2. corps_front_sectors (bot/sim path — populated each turn by buildCorpsFrontSectors)
+ *
+ * Returns 1.0 if brigade is not assigned to any front or sector.
  */
 export function getLocalFrontDensityModifier(
     state: GameState,
     formation: FormationState
 ): number {
+    // Path 1: player-assigned front (legacy)
     const frontId = state.brigade_front_assignment?.[formation.id];
-    if (!frontId) return 1.0;
+    if (frontId) {
+        const front = state.local_fronts?.[frontId];
+        if (front) return frontDensityModifier(front.assigned_brigade_ids.length, front.coverage_length);
+    }
 
-    const front = state.local_fronts?.[frontId];
-    if (!front) return 1.0;
+    // Path 2: corps sector (bot/sim path)
+    const sectors = state.corps_front_sectors;
+    if (sectors) {
+        for (const sid of Object.keys(sectors).sort(strictCompare)) {
+            const sector = sectors[sid]!;
+            if (sector.assigned_brigade_ids.includes(formation.id)) {
+                return frontDensityModifier(sector.assigned_brigade_ids.length, sector.length_edges);
+            }
+        }
+    }
 
-    return frontDensityModifier(front.assigned_brigade_ids.length, front.coverage_length);
+    return 1.0;
 }

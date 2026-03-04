@@ -620,3 +620,24 @@ export function buildTerrainMultByOsid(
     }
     return out;
 }
+
+/**
+ * Rank a list of defender formations by power (highest first) and compute
+ * the stacked defender total. Returns { primary, totalPower } where primary
+ * is the highest-power formation that takes casualties.
+ * Used identically in resolver and predictor for both direct and sector defense.
+ */
+export function rankDefendersByPower(
+    defenders: FormationState[],
+    state: GameState,
+    targetOsid: string,
+    terrainMultByOsid: Record<string, number>,
+    artSuppression: number,
+    supplyStateByOsid: import('../../state/supply_state_derivation.js').SupplyStateByOsidReport | null | undefined,
+    ethnicBonusFn: (d: FormationState) => number
+): { primary: FormationState; totalPower: number } {
+    const powers = defenders.map(d => computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethnicBonusFn(d)));
+    const sorted = defenders.map((d, i) => ({ f: d, p: powers[i]! })).sort((a, b) => b.p - a.p);
+    const totalPower = sorted[0]!.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
+    return { primary: sorted[0]!.f, totalPower };
+}

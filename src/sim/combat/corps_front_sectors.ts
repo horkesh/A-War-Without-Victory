@@ -85,7 +85,7 @@ function buildFactionSectors(
 
     // Step 3: Partition front edges to corps
     const corpsEdges = partitionFrontEdges(
-        osidFrontEdges, faction, osidToCorps, state, reverseMap, corpsIds
+        osidFrontEdges, faction, osidToCorps, state, reverseMap, corpsIds, adjacency
     );
 
     // Step 4: Build multi-sectors (sub-segments promoted to independent sectors)
@@ -238,6 +238,10 @@ function findSubordinateOsid(
 
 /**
  * Assign each hostile-boundary front edge to the corps that owns its friendly-side OSID.
+ * When an edge is on an OSID not reachable by the main BFS (disconnected pockets/islands),
+ * BFS outward through OSID adjacency to find the nearest already-claimed OSID and inherit
+ * its corps. This correctly assigns Bihać, Srebrenica, etc. to the geographically nearest
+ * corps rather than the alphabetically-first one.
  */
 function partitionFrontEdges(
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
@@ -245,7 +249,8 @@ function partitionFrontEdges(
     osidToCorps: Map<Osid, FormationId>,
     state: GameState,
     reverseMap: Map<string, string[]> | null,
-    corpsIds: FormationId[]
+    corpsIds: FormationId[],
+    adjacency: Map<Osid, Osid[]>
 ): Map<FormationId, string[]> {
     const result = new Map<FormationId, string[]>();
 
@@ -254,54 +259,16 @@ function partitionFrontEdges(
         .filter(e => e.side_a === faction || e.side_b === faction)
         .sort((a, b) => strictCompare(a.edge_id, b.edge_id));
 
-    // In case there are disconnected friendly islands from the BFS, map orphaned OSIDs to nearest corps HQ.
-    // Calculate centroids for fallback distance calculation.
-    const hqCentroids = new Map<FormationId, [number, number]>();
-    let fallbackCenter: [number, number] | null = null;
-    let fallbackCorpsId: FormationId | null = null;
-    if (state.corps_front_sectors) {
-        // Just extract centroids safely or use a default
-        for (const corpsId of osidToCorps.values()) {
-            if (hqCentroids.has(corpsId)) continue;
-            // Best effort center, fallback to first friendly OSID assigned to corps
-            let center: [number, number] | null = null;
-            for (const [osid, cId] of osidToCorps.entries()) {
-                if (cId === corpsId) {
-                    center = getOsidCentroid(state, osid);
-                    if (center) break;
-                }
-            }
-            if (center) hqCentroids.set(corpsId, center);
-            if (!fallbackCenter && center) {
-                fallbackCenter = center;
-                fallbackCorpsId = corpsId;
-            }
-        }
-    }
-
     for (const edge of sorted) {
         // Identify the friendly-side OSID
         const friendlyOsid = edge.side_a === faction ? edge.a : edge.b;
         let corpsId = osidToCorps.get(friendlyOsid);
 
-        // Edge on unclaimed or disconnected OSID. We MUST assign it to a corps so it renders.
+        // Edge on unclaimed or disconnected OSID (pocket/island). BFS outward through
+        // OSID adjacency (ignoring control, any territory) to find nearest claimed OSID.
         if (!corpsId) {
-            let bestDistance = Infinity;
-            let bestCorpsId: FormationId | null = null;
-            const edgeCentroid = getOsidCentroid(state, friendlyOsid);
-            if (edgeCentroid && hqCentroids.size > 0) {
-                for (const [cId, hqPos] of hqCentroids.entries()) {
-                    const dx = edgeCentroid[0] - hqPos[0];
-                    const dy = edgeCentroid[1] - hqPos[1];
-                    const distSq = dx * dx + dy * dy;
-                    if (distSq < bestDistance) {
-                        bestDistance = distSq;
-                        bestCorpsId = cId;
-                    }
-                }
-            }
-            corpsId = bestCorpsId ?? fallbackCorpsId ?? corpsIds[0];
-            if (!corpsId) continue; // Should only happen if faction has NO corps
+            corpsId = bfsNearestClaimedCorps(friendlyOsid, osidToCorps, adjacency) ?? corpsIds[0];
+            if (!corpsId) continue; // Only if faction has NO corps at all
         }
 
         let list = result.get(corpsId);
@@ -312,9 +279,32 @@ function partitionFrontEdges(
     return result;
 }
 
-/** Get the [lng, lat] centroid of an OSID (not natively on GameState without map data injection, falling back to dummy values for assignment). */
-function getOsidCentroid(state: GameState, osid: string): [number, number] | null {
-    return null; // The simulator doesn't have geometry down here!
+/**
+ * BFS from startOsid through all OSID adjacency (ignoring political control) to find
+ * the nearest OSID that is already assigned to a corps in osidToCorps.
+ * Returns that corps ID, or null if none reachable.
+ * Deterministic: adjacency lists must be sorted (buildOsidAdjacency guarantees this).
+ */
+function bfsNearestClaimedCorps(
+    startOsid: Osid,
+    osidToCorps: Map<Osid, FormationId>,
+    adjacency: Map<Osid, Osid[]>
+): FormationId | null {
+    const queue: Osid[] = [startOsid];
+    const visited = new Set<Osid>([startOsid]);
+    let head = 0;
+    while (head < queue.length) {
+        const cur = queue[head++]!;
+        const neighbors = adjacency.get(cur) ?? [];
+        for (const nb of neighbors) {
+            if (visited.has(nb)) continue;
+            visited.add(nb);
+            const cId = osidToCorps.get(nb);
+            if (cId) return cId;
+            queue.push(nb);
+        }
+    }
+    return null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1094,3 +1084,43 @@ function getFactions(state: GameState): FactionId[] {
 // Sector-Aware Brigade Assignment
 // ═══════════════════════════════════════════════════════════════════════════
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Exported query helpers for attack resolution
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Find the sector that has targetOsid as an enemy-side OSID (i.e., the sector
+ * whose brigades should defend it when attacked with no brigade physically there).
+ * Returns the first matching sector in deterministic sector_id order, or null.
+ */
+export function findSectorForEnemyOsid(
+    state: GameState,
+    targetOsid: string
+): CorpsFrontSector | null {
+    const sectors = state.corps_front_sectors;
+    if (!sectors) return null;
+    for (const sid of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sid]!;
+        for (const sub of sector.sub_segments) {
+            if (sub.enemy_osids.includes(targetOsid)) return sector;
+        }
+    }
+    return null;
+}
+
+/**
+ * Get the corps HQ OSID for the brigade's corps — used as rout destination when
+ * a sector-coverage defender has no valid retreat path after a flip.
+ * Returns null if no corps formation is found or it has no location_osid.
+ */
+export function getCorpsHqOsid(
+    state: GameState,
+    formation: FormationState
+): string | null {
+    const corpsId = getFormationCorpsId(formation);
+    if (!corpsId) return null;
+    const corpsFormation = state.formations?.[corpsId];
+    if (!corpsFormation) return null;
+    return (corpsFormation as FormationState & { location_osid?: string }).location_osid ?? null;
+}
