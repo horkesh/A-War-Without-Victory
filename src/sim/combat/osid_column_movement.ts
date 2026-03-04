@@ -327,6 +327,13 @@ export function processOsidColumnMovement(
             continue;
         }
 
+        // dig_in lockout: brigades actively fortifying cannot be ordered to move
+        if (f.posture === 'dig_in') {
+            report.column_blocked += 1;
+            delete movementOrders[formationId];
+            continue;
+        }
+
         const loc = (f as { location_osid?: string }).location_osid as Osid | undefined;
         if (!loc) {
             delete movementOrders[formationId];

@@ -183,6 +183,7 @@ export function parseGameState(json: unknown): LoadedGameState {
             const aorSettlementIds = brigadeAorByFormationId[id];
             const personnel = typeof f.personnel === 'number' ? f.personnel : undefined;
             const posture = typeof f.posture === 'string' && f.posture ? f.posture : undefined;
+            const home_defense_active = f.home_defense_active === true ? true : undefined;
             const corps_id = typeof f.corps_id === 'string' && f.corps_id ? f.corps_id : undefined;
             const movementState = rawMovementState?.[id] as { status?: string; stance?: string } | undefined;
             const movementStatus = (movementState?.status === 'packing' || movementState?.status === 'in_transit' || movementState?.status === 'unpacking')
@@ -260,7 +261,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                 cohesion: (f.cohesion as number) ?? 100, fatigue: (ops?.fatigue as number) ?? 0,
                 status: (f.status as string) ?? 'active', createdTurn: (f.created_turn as number) ?? 0,
                 tags, municipalityId, hq_sid, location_osid, aorSettlementIds,
-                personnel, posture, corps_id, movementStatus, movementStance,
+                personnel, posture, home_defense_active, corps_id, movementStatus, movementStance,
                 narrativeArc,
                 warNarrative: typeof warStory?.narrative === 'string' ? warStory.narrative : undefined,
                 notableMoments: Array.isArray(warStory?.notable_moments) ? warStory.notable_moments : undefined,

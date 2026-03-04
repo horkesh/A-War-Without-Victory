@@ -99,6 +99,8 @@ export interface FormationView {
     notableMoments?: Array<{ turn: number; description: string }>;
     /** Brigade officer quality [0.05, 0.90] (Officers Phase E). */
     officer_quality?: number;
+    /** True when brigade is in its home municipality (blocks attack/assault orders). */
+    home_defense_active?: boolean;
     // Combat summary (corps/army_hq aggregate — computed each turn from subordinate brigade_histories)
     combatSummary?: {
         battles_fought: number;

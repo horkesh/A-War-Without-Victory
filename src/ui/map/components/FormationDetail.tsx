@@ -299,10 +299,14 @@ export function FormationDetail() {
             <div className="pt-1 border-t border-panel-border">
               <div className="text-[11px] text-text-secondary mb-1">Posture</div>
               <div className="flex flex-wrap gap-1">
-                {['defensive', 'balanced', 'offensive', 'reorganize'].map((posture) => (
+                {(['hold', 'defend', 'defend_at_all_costs', 'elastic_defense', 'counterattack', 'dig_in', 'attack', 'assault'] as const).map((posture) => {
+                  const isOffensive = posture === 'attack' || posture === 'assault';
+                  const blocked = isOffensive && (formation.home_defense_active ?? false);
+                  return (
                   <button
                     key={posture}
                     type="button"
+                    disabled={blocked}
                     onClick={() => void stagePostureOrderAction(
                       {
                         ipc,
@@ -312,11 +316,13 @@ export function FormationDetail() {
                       formation.id,
                       posture
                     )}
-                    className="text-[11px] font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover"
+                    title={blocked ? 'Blocked: home defense active' : undefined}
+                    className={`text-[11px] font-sans px-2 py-1 rounded border border-panel-border ${blocked ? 'opacity-40 cursor-not-allowed text-text-secondary' : 'text-interactive hover:bg-panel-hover'}`}
                   >
-                    {posture}
+                    {posture.replace(/_/g, ' ')}
                   </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
