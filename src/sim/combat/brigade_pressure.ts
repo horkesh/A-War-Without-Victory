@@ -24,19 +24,25 @@ import { isBrigadeAssignedToFront } from './front_assignment.js';
 // --- Posture multipliers ---
 
 const POSTURE_PRESSURE_MULT: Record<BrigadePosture, number> = {
-    defend: 0.3,
-    probe: 0.7,
-    attack: 1.5,
-    elastic_defense: 0.2,
-    consolidation: 0.6
+    hold: 0.20,
+    defend: 0.35,
+    defend_at_all_costs: 0.10,
+    elastic_defense: 0.15,
+    counterattack: 1.20,
+    dig_in: 0.10,
+    attack: 1.50,
+    assault: 2.00,
 };
 
 const POSTURE_DEFENSE_MULT: Record<BrigadePosture, number> = {
-    defend: 1.5,
-    probe: 1.0,
-    attack: 0.5,
-    elastic_defense: 1.2,
-    consolidation: 1.1
+    hold: 1.20,
+    defend: 1.40,
+    defend_at_all_costs: 1.60,
+    elastic_defense: 1.10,
+    counterattack: 1.15,
+    dig_in: 1.35,
+    attack: 0.80,
+    assault: 0.60,
 };
 
 const READINESS_MULT: Record<string, number> = {

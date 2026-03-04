@@ -27,13 +27,16 @@ function kindAbbrev(kind: string): string {
   return normalized.slice(0, 2).toUpperCase() || 'U';
 }
 
-/** Left-edge stripe colors per posture value. */
-const POSTURE_STRIPE: Record<string, string> = {
+/** Left-edge stripe colors per posture value (8-posture system). */
+export const POSTURE_STRIPE: Record<string, string> = {
+  hold: 'rgba(140, 140, 140, 0.95)',
   defend: 'rgba(40, 120, 210, 0.95)',
-  probe: 'rgba(210, 155, 25, 0.95)',
-  attack: 'rgba(205, 45, 45, 0.95)',
+  defend_at_all_costs: 'rgba(255, 255, 255, 0.95)',
   elastic_defense: 'rgba(25, 175, 150, 0.95)',
-  consolidation: 'rgba(110, 110, 75, 0.95)',
+  counterattack: 'rgba(240, 130, 20, 0.95)',
+  dig_in: 'rgba(139, 101, 42, 0.95)',
+  attack: 'rgba(205, 45, 45, 0.95)',
+  assault: 'rgba(130, 0, 0, 0.95)',
 };
 
 function parseIconId(iconId: string): { kind: string; faction: string; posture?: string } {

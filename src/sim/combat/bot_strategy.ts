@@ -170,7 +170,7 @@ export const FACTION_STRATEGIES: Record<FactionId, FactionBotStrategy> = {
     RS: {
         corridor_municipalities: POSAVINA_CORRIDOR,
         max_attack_posture_share: 0.4,
-        preferred_posture_when_overstaffed: 'probe',
+        preferred_posture_when_overstaffed: 'hold',
         attack_coverage_threshold: 120,
         defend_critical_territory: true,
         offensive_objectives: [...DRINA_VALLEY, ...SARAJEVO_SIEGE_RING],
@@ -181,7 +181,7 @@ export const FACTION_STRATEGIES: Record<FactionId, FactionBotStrategy> = {
         corridor_municipalities: [...SARAJEVO_CORE, ...RBIH_ENCLAVE_DEFENSE],
         // Historical: ARBiH had no meaningful offensive capability until mid-1993.
         max_attack_posture_share: 0.15,
-        preferred_posture_when_overstaffed: 'probe',
+        preferred_posture_when_overstaffed: 'hold',
         attack_coverage_threshold: 180,
         defend_critical_territory: true,
         offensive_objectives: ['ilidza', 'hadzici', 'vogosca', 'ilijas', ...RBIH_CENTRAL_CORRIDOR],
@@ -192,7 +192,7 @@ export const FACTION_STRATEGIES: Record<FactionId, FactionBotStrategy> = {
     HRHB: {
         corridor_municipalities: [...HRHB_HERZEGOVINA, 'orasje'],
         max_attack_posture_share: 0.35,
-        preferred_posture_when_overstaffed: 'probe',
+        preferred_posture_when_overstaffed: 'hold',
         attack_coverage_threshold: 100,
         defend_critical_territory: true,
         offensive_objectives: [...HRHB_CENTRAL_BOSNIA, 'gornji_vakuf', 'jablanica'],

@@ -876,6 +876,17 @@ function executeFactionDirectives(
             continue;
         }
 
+        // --- Home-ground brigades: defend or counterattack only, never attack ---
+        // home_defense_active is set by the compute-home-defense-active pipeline step.
+        if (brigade.home_defense_active === true) {
+            if ((brigade.counterattack_window_turns ?? 0) > 0) {
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'counterattack' });
+            } else {
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+            }
+            continue;
+        }
+
         const corpsId = brigade.corps_id;
         const cmd = corpsId ? state.corps_command?.[corpsId] : null;
         const directive = cmd?.directive ?? null;
@@ -1058,7 +1069,12 @@ function executeFactionDirectives(
                     continue;
                 }
             }
-            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+            // Defensive stance, no attack — dig_in if cohesion sufficient
+            if ((brigade.cohesion ?? 0) >= 20) {
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'dig_in' });
+            } else {
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+            }
             continue;
         }
 
@@ -1232,7 +1248,12 @@ function executeFactionDirectives(
                 }
 
                 if (bestTarget) {
-                    result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
+                    // Assault posture: only assign when corps is offensive AND brigade cohesion is high.
+                    // Otherwise fall back to standard attack posture.
+                    const attackPosture: BrigadePosture = (corpsStance === 'offensive' && (brigade.cohesion ?? 0) >= 60)
+                        ? 'assault'
+                        : 'attack';
+                    result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });
                     result.attack_orders[brigade.id] = bestTarget.osid;
                     result.attack_scores[brigade.id] = bestTarget.finalScore;
                     chosenTargets.set(bestTarget.osid, (chosenTargets.get(bestTarget.osid) ?? 0) + 1);
@@ -1318,7 +1339,14 @@ function executeFactionDirectives(
                     ['undefended', 'critical', 'threatened'], columnAssignments);
                 continue;
             }
-            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+            // On front, no viable attack, holding position.
+            // Dig_in when corps is balanced (defensive already exits early at Rule 4) and cohesion sufficient.
+            // Offensive corps keeps 'defend' to signal readiness for next turn's attack.
+            if (corpsStance === 'balanced' && (brigade.cohesion ?? 0) >= 20) {
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'dig_in' });
+            } else {
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+            }
             continue;
         }
 
@@ -1463,7 +1491,7 @@ export function generateAllBotOrdersOsid(
             for (const entry of trimmed) {
                 delete result.attack_orders[entry.bid];
                 delete result.attack_scores[entry.bid];
-                result.posture_orders.push({ brigade_id: entry.bid, posture: 'defend' });
+                result.posture_orders.push({ brigade_id: entry.bid, posture: 'hold' });
             }
         }
 
@@ -1479,10 +1507,10 @@ export function generateAllBotOrdersOsid(
                 const sorted = [...attacks].sort((a, b) => strictCompare(a.bid, b.bid));
                 const frictionIndex = turn % sorted.length;
                 const frictionTarget = sorted[frictionIndex]!;
-                // Remove from attack orders, force defend
+                // Remove from attack orders, force hold (warlord friction: unit refuses orders)
                 delete result.attack_orders[frictionTarget.bid];
                 delete result.attack_scores[frictionTarget.bid];
-                result.posture_orders.push({ brigade_id: frictionTarget.bid, posture: 'defend' });
+                result.posture_orders.push({ brigade_id: frictionTarget.bid, posture: 'hold' });
             }
         }
 

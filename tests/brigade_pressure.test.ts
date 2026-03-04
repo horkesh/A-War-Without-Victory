@@ -425,7 +425,7 @@ describe('computeBrigadePressureByEdge', () => {
 
     it('populates brigade_pressure for each brigade on a front edge', () => {
         const brigA = makeFormation('rs1', 'RS', 'sA');
-        brigA.posture = 'probe';
+        brigA.posture = 'counterattack';
         ensureBrigadeComposition(brigA);
 
         const brigB = makeFormation('rbih1', 'RBiH', 'sB');

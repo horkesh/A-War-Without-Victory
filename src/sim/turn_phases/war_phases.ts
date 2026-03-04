@@ -124,6 +124,7 @@ import { updatePhaseIISupplyPressure } from '../combat/supply_pressure.js';
 import { updateSupplyReserves, updateSiegeTurnCounters, applyUnAirdrops } from '../../state/supply_reserves.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
+import { computeHomeDefenseActive } from '../compute_home_defense.js';
 
 // --- Pipeline infrastructure imports ---
 import type { NamedPhase, TurnContext, TurnReport } from '../turn_pipeline_types.js';
@@ -383,6 +384,13 @@ export const warPhases: NamedPhase[] = [
             const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
             context.report.phase_ii_enclave_resilience = updateEnclaveResilience(context.state, supplyByOsid);
             applyUnAirdrops(context.state);
+        }
+    },
+    {
+        name: 'compute-home-defense-active',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            computeHomeDefenseActive(context.state);
         }
     },
     {

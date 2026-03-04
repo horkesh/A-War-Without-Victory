@@ -21,7 +21,7 @@ function makeSlice(): SliceData {
         },
         formations: {
             F2: { id: 'F2', faction: 'RS', name: 'F2', kind: 'brigade', personnel: 500, cohesion: 70, fatigue: 5, experience: 30, posture: 'defend', hq_sid: 'S3', status: 'active' },
-            F1: { id: 'F1', faction: 'RBiH', name: 'F1', kind: 'brigade', personnel: 700, cohesion: 75, fatigue: 4, experience: 40, posture: 'probe', hq_sid: 'S2', status: 'active' },
+            F1: { id: 'F1', faction: 'RBiH', name: 'F1', kind: 'brigade', personnel: 700, cohesion: 75, fatigue: 4, experience: 40, posture: 'defend', hq_sid: 'S2', status: 'active' },
         },
         brigade_aor: {
             S3: 'F2',

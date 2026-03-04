@@ -10,6 +10,7 @@ import type { MunicipalityPopulation1991Map } from '../../state/population_share
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getFactionAlignedPopulationShare } from '../../state/population_share.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { HOME_GROUND_MORALE_FLOOR } from './combat_math.js';
 
 /** Extract municipality ID from OSID (format: op:municipality:slug). */
 function munFromOsid(osid: string): string | undefined {
@@ -137,6 +138,14 @@ export function runPhaseIIMoraleDrift(
 
         const prev = f.morale;
         f.morale = Math.max(0, Math.min(100, f.morale + drift));
+
+        // Home ground morale floor: brigades defending their home municipality
+        // never drop below HOME_GROUND_MORALE_FLOOR (15) — models historical holdouts
+        // (e.g. Goražde defenders). Applied AFTER drift, as a hard minimum on the morale value.
+        if (f.home_defense_active === true) {
+            f.morale = Math.max(f.morale, HOME_GROUND_MORALE_FLOOR);
+        }
+
         if (f.morale !== prev) {
             report.formations_updated++;
             report.by_faction[f.faction] = (report.by_faction[f.faction] ?? 0) + 1;

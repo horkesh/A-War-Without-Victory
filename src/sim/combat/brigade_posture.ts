@@ -5,6 +5,10 @@
  * defensive strength, and per-turn cohesion cost.
  *
  * Deterministic: no randomness, no timestamps. All iteration in sorted order.
+ *
+ * 8-posture system: hold, defend, defend_at_all_costs, elastic_defense,
+ * counterattack, dig_in, attack, assault.
+ * Legacy postures 'probe' and 'consolidation' are migrated to 'hold' on load.
  */
 
 import type {
@@ -16,6 +20,7 @@ import type {
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { isBrigadeAssignedToFront } from './front_assignment.js';
+import { HOME_GROUND_COHESION_BONUS } from './combat_math.js';
 
 // --- Types ---
 
@@ -26,48 +31,56 @@ export interface PostureReport {
 
 // --- Posture constraints ---
 
-/** Minimum cohesion required to adopt each posture.
- * Tuned: attack threshold lowered from 40→25. Historical Bosnian brigades
- * fought with poor morale throughout the war. 40 was too restrictive and shut
- * down all offensive operations by week 35. Corps-level operations concentrate
- * the attack burden on selected brigades while others rest. */
+/** Minimum cohesion required to adopt each posture. */
 const POSTURE_MIN_COHESION: Record<BrigadePosture, number> = {
+    hold: 0,
     defend: 0,
-    probe: 15,
-    attack: 25,
+    defend_at_all_costs: 10,
     elastic_defense: 0,
-    consolidation: 0
+    counterattack: 10,
+    dig_in: 0,
+    attack: 25,
+    assault: 60,
 };
 
 /** Readiness levels that are allowed for each posture.
- * Tuned: overextended brigades can now attack (at higher cohesion cost).
+ * Tuned: overextended brigades can still attack (at higher cohesion cost).
  * Historically, exhausted brigades still received attack orders for critical
  * operations — corps and army HQ concentrated resources on key axes using
  * special operations that drew from multiple brigades. Individual brigade
  * exhaustion didn't prevent faction-level offensive operations. */
 const POSTURE_MIN_READINESS: Record<BrigadePosture, string[]> = {
+    hold: ['active', 'overextended', 'degraded', 'forming'],
     defend: ['active', 'overextended', 'degraded', 'forming'],
-    probe: ['active', 'overextended'],
-    attack: ['active', 'overextended'],
+    defend_at_all_costs: ['active', 'overextended', 'degraded'],
     elastic_defense: ['active', 'overextended', 'degraded'],
-    consolidation: ['active', 'overextended', 'degraded']
+    counterattack: ['active', 'overextended'],
+    dig_in: ['active', 'overextended', 'degraded'],
+    attack: ['active', 'overextended'],
+    assault: ['active'],
 };
 
 /** Per-turn cohesion cost for each posture. Negative = drain, positive = recovery.
- * Tuned: defend recovery +2/turn (was +1) and cap raised to 85 (was 80).
- * This enables attack-rest cycling: a brigade attacks for ~8 turns (loses ~24 cohesion),
- * then defends for ~12 turns to recover. Without faster recovery, the system was
- * one-directional — cohesion only went down, permanently removing units from attack pool. */
+ * Recovery postures (hold, dig_in) are capped at DEFEND_COHESION_CAP. */
 const POSTURE_COHESION_COST: Record<BrigadePosture, number> = {
-    attack: -3,
-    probe: -1,
+    hold: 1.0,
+    defend: -1.0,
+    defend_at_all_costs: -4.0,
     elastic_defense: -0.5,
-    defend: 2,   // Recovery (tuned: 1→2 for attack-rest cycling)
-    consolidation: 1  // Moderate recovery
+    counterattack: -1.5,
+    dig_in: 0.5,
+    attack: -3.0,
+    assault: -5.0,
 };
 
-/** Maximum cohesion recovery cap when in defend posture. */
+/** Maximum cohesion recovery cap for postures with positive net cost (hold, dig_in). */
 const DEFEND_COHESION_CAP = 85;
+
+/** dig_in progress increment per turn while in dig_in posture. */
+const DIG_IN_PROGRESS_PER_TURN = 0.25;
+
+/** dig_in progress value when reset (posture changed away from dig_in). */
+const DIG_IN_PROGRESS_RESET = 0;
 
 /** Absolute cohesion bounds. */
 const COHESION_MIN = 0;
@@ -77,11 +90,19 @@ const COHESION_MAX = 100;
 
 /**
  * Check if a brigade can adopt a given posture.
- * Validates cohesion threshold and readiness level.
+ * Validates cohesion threshold, readiness level, and home-ground gate.
+ *
+ * Home-ground gate: if brigade.home_defense_active is true, attack and assault
+ * postures are blocked (militia brigades cannot be ordered into offensive ops).
  */
 export function canAdoptPosture(brigade: FormationState, posture: BrigadePosture): boolean {
     const cohesion = brigade.cohesion ?? 60;
     const readiness = brigade.readiness ?? 'active';
+
+    // Home-ground gate: block offensive postures for home-defense brigades
+    if ((brigade.home_defense_active ?? false) && (posture === 'attack' || posture === 'assault')) {
+        return false;
+    }
 
     // Check cohesion meets minimum for target posture
     if (cohesion < POSTURE_MIN_COHESION[posture]) {
@@ -102,6 +123,12 @@ export function canAdoptPosture(brigade: FormationState, posture: BrigadePosture
  * Orders are processed in deterministic order (sorted by brigade_id).
  * Each order is validated: the brigade must exist, be active, be kind=brigade,
  * and pass canAdoptPosture.
+ *
+ * Save migration: legacy postures 'probe' and 'consolidation' are silently
+ * converted to 'hold' before processing each order.
+ *
+ * Home-ground auto-upgrade: if a brigade has home_defense_active and the order
+ * is 'hold', the order is upgraded to 'defend' before constraint checks.
  *
  * Clears brigade_posture_orders after processing.
  */
@@ -143,6 +170,12 @@ export function applyPostureOrders(state: GameState): PostureReport {
             continue;
         }
 
+        // Save migration: legacy postures → 'hold'
+        const legacyPosture = brigade.posture as string | undefined;
+        if (legacyPosture === 'probe' || legacyPosture === 'consolidation') {
+            brigade.posture = 'hold';
+        }
+
         // Must be active
         if (brigade.status !== 'active') {
             report.postures_rejected++;
@@ -159,14 +192,20 @@ export function applyPostureOrders(state: GameState): PostureReport {
             continue;
         }
 
+        // Home-ground auto-upgrade: hold → defend for home-defense brigades
+        let targetPosture = order.posture;
+        if ((brigade.home_defense_active ?? false) && targetPosture === 'hold') {
+            targetPosture = 'defend';
+        }
+
         // Check posture constraints
-        if (!canAdoptPosture(brigade, order.posture)) {
+        if (!canAdoptPosture(brigade, targetPosture)) {
             report.postures_rejected++;
             continue;
         }
 
         // Apply posture change
-        brigade.posture = order.posture;
+        brigade.posture = targetPosture;
         report.postures_changed++;
     }
 
@@ -178,14 +217,27 @@ export function applyPostureOrders(state: GameState): PostureReport {
 
 /**
  * Apply per-turn posture costs to all active brigades.
- * Posture determines cohesion drain or recovery:
- *   - attack:           -3 cohesion per turn
- *   - probe:            -1 cohesion per turn
- *   - elastic_defense:  -0.5 cohesion per turn (truncated toward zero)
- *   - defend:           +1 cohesion per turn (capped at 80)
  *
- * Cohesion is clamped to [0, 100].
- * If cohesion drops below the minimum for the current posture, auto-switch to defend.
+ * Posture cost table (POSTURE_COHESION_COST):
+ *   hold:               +1.0/turn (recovery, capped at DEFEND_COHESION_CAP)
+ *   defend:             -1.0/turn (slow drain — hold to recover)
+ *   defend_at_all_costs: -4.0/turn
+ *   elastic_defense:    -0.5/turn
+ *   counterattack:      -1.5/turn
+ *   dig_in:             +0.5/turn (recovery, capped at DEFEND_COHESION_CAP)
+ *   attack:             -3.0/turn
+ *   assault:            -5.0/turn
+ *
+ * Home-ground bonus: brigades with home_defense_active receive +0.5 added to
+ * their effective cost (i.e., reduced drain or increased recovery).
+ *
+ * dig_in progress: increments by DIG_IN_PROGRESS_PER_TURN while in dig_in posture,
+ * capped at 1.0. Resets to 0 when posture changes away from dig_in.
+ *
+ * Auto-downgrade: if cohesion drops below posture minimum, switch to 'hold'.
+ * Exception: defend_at_all_costs never auto-downgrades (existential orders).
+ *
+ * Cohesion is kept to 1 decimal place and clamped to [0, 100].
  */
 export function applyPostureCosts(state: GameState): void {
     const formations = state.formations ?? {};
@@ -198,27 +250,57 @@ export function applyPostureCosts(state: GameState): void {
         if ((brigade.kind ?? 'brigade') !== 'brigade') continue;
         if (!isBrigadeAssignedToFront(state, id as FormationId)) continue;
 
-        const posture: BrigadePosture = brigade.posture ?? 'defend';
+        const posture: BrigadePosture = normalizePosture(brigade.posture);
+        // Migrate in-place so auto-downgrade and progress tracking use the canonical posture
+        if (brigade.posture !== posture) brigade.posture = posture;
         let cohesion = brigade.cohesion ?? 60;
 
         const cost = POSTURE_COHESION_COST[posture];
 
-        if (posture === 'defend') {
-            // Recovery: +1 per turn, capped at DEFEND_COHESION_CAP
-            cohesion = Math.min(DEFEND_COHESION_CAP, cohesion + cost);
-        } else {
-            // Drain: truncate toward zero for fractional costs (elastic_defense = -0.5)
-            cohesion = cohesion + Math.trunc(cost);
+        // Home-ground bonus: reduces drain / increases recovery
+        const homeBonus = (brigade.home_defense_active ?? false) ? HOME_GROUND_COHESION_BONUS : 0;
+        const effectiveCost = cost + homeBonus;
+
+        cohesion = cohesion + effectiveCost;
+
+        // Recovery postures: cap at DEFEND_COHESION_CAP (only postures with positive net cost)
+        if (posture === 'hold' || posture === 'dig_in') {
+            cohesion = Math.min(DEFEND_COHESION_CAP, cohesion);
         }
 
-        // Clamp to absolute bounds
+        // Clamp to absolute bounds and round to 1 decimal place
         cohesion = Math.max(COHESION_MIN, Math.min(COHESION_MAX, cohesion));
+        cohesion = Math.round(cohesion * 10) / 10;
 
         brigade.cohesion = cohesion;
 
-        // Auto-downgrade: if cohesion is below posture minimum, switch to defend
-        if (cohesion < POSTURE_MIN_COHESION[posture]) {
-            brigade.posture = 'defend';
+        // dig_in progress tracking
+        if (posture === 'dig_in') {
+            brigade.dig_in_progress = Math.min(1.0, (brigade.dig_in_progress ?? DIG_IN_PROGRESS_RESET) + DIG_IN_PROGRESS_PER_TURN);
+        } else if ((brigade.dig_in_progress ?? 0) > 0) {
+            // Reset dig_in progress when posture changes away from dig_in
+            brigade.dig_in_progress = DIG_IN_PROGRESS_RESET;
+        }
+
+        // Auto-downgrade: if cohesion is below posture minimum, switch to 'hold'
+        // Exception: defend_at_all_costs never auto-downgrades (existential orders)
+        if (posture !== 'defend_at_all_costs' && cohesion < POSTURE_MIN_COHESION[posture]) {
+            brigade.posture = 'hold';
         }
     }
+}
+
+const VALID_POSTURES: ReadonlySet<string> = new Set<BrigadePosture>([
+    'hold', 'defend', 'defend_at_all_costs', 'elastic_defense',
+    'counterattack', 'dig_in', 'attack', 'assault',
+]);
+
+/**
+ * Normalizes legacy posture values ('probe', 'consolidation') to 'hold'.
+ * Called during save file load to handle old save files.
+ */
+export function normalizePosture(posture: string | undefined): BrigadePosture {
+    if (!posture || posture === 'probe' || posture === 'consolidation') return 'hold';
+    if (VALID_POSTURES.has(posture)) return posture as BrigadePosture;
+    return 'hold';
 }

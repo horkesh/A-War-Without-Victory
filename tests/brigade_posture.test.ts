@@ -2,13 +2,18 @@
  * Tests for Phase II brigade posture system (Stage 4B).
  * Validates posture adoption constraints, order processing,
  * per-turn cohesion costs, and auto-downgrade mechanics.
+ *
+ * 8-posture system: hold, defend, defend_at_all_costs, elastic_defense,
+ * counterattack, dig_in, attack, assault.
  */
 import { describe, expect, it } from 'vitest';
 import {
     applyPostureCosts,
     applyPostureOrders,
-    canAdoptPosture
+    canAdoptPosture,
+    normalizePosture
 } from '../src/sim/combat/brigade_posture.js';
+import { computeDigInDefMult } from '../src/sim/combat/combat_math.js';
 import type { FactionId, FormationState, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
@@ -65,13 +70,46 @@ describe('brigade posture - canAdoptPosture', () => {
         expect(canAdoptPosture(brig, 'attack')).toBe(false);
     });
 
-    it('can adopt consolidation posture (min cohesion 0, readiness active/overextended/degraded)', () => {
+    it('can adopt hold posture (min cohesion 0, readiness active/overextended/degraded)', () => {
         const brig = makeFormation('rs-brig-1', 'RS', 'S1');
         brig.cohesion = 20;
         brig.readiness = 'active';
-        expect(canAdoptPosture(brig, 'consolidation')).toBe(true);
+        expect(canAdoptPosture(brig, 'hold')).toBe(true);
         brig.readiness = 'degraded';
-        expect(canAdoptPosture(brig, 'consolidation')).toBe(true);
+        expect(canAdoptPosture(brig, 'hold')).toBe(true);
+    });
+
+    it('assault requires cohesion >= 60 — cohesion 59 cannot adopt assault', () => {
+        const brig = makeFormation('rs-brig-1', 'RS', 'S1');
+        brig.cohesion = 59;
+        expect(canAdoptPosture(brig, 'assault')).toBe(false);
+    });
+
+    it('assault requires cohesion >= 60 — cohesion 60 can adopt assault', () => {
+        const brig = makeFormation('rs-brig-1', 'RS', 'S1');
+        brig.cohesion = 60;
+        expect(canAdoptPosture(brig, 'assault')).toBe(true);
+    });
+
+    it('home_defense_active blocks attack posture', () => {
+        const brig = makeFormation('rs-brig-1', 'RS', 'S1');
+        brig.cohesion = 80;
+        brig.home_defense_active = true;
+        expect(canAdoptPosture(brig, 'attack')).toBe(false);
+    });
+
+    it('home_defense_active blocks assault posture', () => {
+        const brig = makeFormation('rs-brig-1', 'RS', 'S1');
+        brig.cohesion = 80;
+        brig.home_defense_active = true;
+        expect(canAdoptPosture(brig, 'assault')).toBe(false);
+    });
+
+    it('home_defense_active does not block defend posture', () => {
+        const brig = makeFormation('rs-brig-1', 'RS', 'S1');
+        brig.cohesion = 80;
+        brig.home_defense_active = true;
+        expect(canAdoptPosture(brig, 'defend')).toBe(true);
     });
 });
 
@@ -106,7 +144,7 @@ describe('brigade posture - applyPostureOrders', () => {
     it('clears orders after processing', () => {
         const state = makePostureState();
         state.brigade_posture_orders = [
-            { brigade_id: 'rs-brig-1', posture: 'probe' }
+            { brigade_id: 'rs-brig-1', posture: 'hold' }
         ];
 
         applyPostureOrders(state);
@@ -114,16 +152,30 @@ describe('brigade posture - applyPostureOrders', () => {
         expect(state.brigade_posture_orders).toEqual([]);
     });
 
-    it('applies consolidation posture order', () => {
+    it('applies hold posture order', () => {
         const state = makePostureState();
         state.brigade_posture_orders = [
-            { brigade_id: 'rs-brig-1', posture: 'consolidation' }
+            { brigade_id: 'rs-brig-1', posture: 'hold' }
         ];
 
         const report = applyPostureOrders(state);
 
         expect(report.postures_changed).toBe(1);
-        expect(state.formations['rs-brig-1'].posture).toBe('consolidation');
+        expect(state.formations['rs-brig-1'].posture).toBe('hold');
+    });
+
+    it('hold auto-upgrades to defend for home_defense_active brigade', () => {
+        const state = makePostureState();
+        state.formations['rs-brig-1'].home_defense_active = true;
+        state.brigade_posture_orders = [
+            { brigade_id: 'rs-brig-1', posture: 'hold' }
+        ];
+
+        const report = applyPostureOrders(state);
+
+        expect(report.postures_changed).toBe(1);
+        // 'hold' order was upgraded to 'defend' for home-ground brigade
+        expect(state.formations['rs-brig-1'].posture).toBe('defend');
     });
 });
 
@@ -138,9 +190,9 @@ describe('brigade posture - applyPostureCosts', () => {
         expect(state.formations['rs-brig-1'].cohesion).toBe(57);
     });
 
-    it('consolidation posture adds 1 cohesion per turn (tuned)', () => {
+    it('hold posture adds 1 cohesion per turn (recovery)', () => {
         const state = makePostureState();
-        state.formations['rs-brig-1'].posture = 'consolidation';
+        state.formations['rs-brig-1'].posture = 'hold';
         state.formations['rs-brig-1'].cohesion = 50;
 
         applyPostureCosts(state);
@@ -148,21 +200,29 @@ describe('brigade posture - applyPostureCosts', () => {
         expect(state.formations['rs-brig-1'].cohesion).toBe(51);
     });
 
-    it('defend posture recovers 2 cohesion per turn, capped at 85', () => {
+    it('defend posture drains 1 cohesion per turn', () => {
         const state = makePostureState();
         state.formations['rs-brig-1'].posture = 'defend';
         state.formations['rs-brig-1'].cohesion = 83;
 
         applyPostureCosts(state);
 
-        // 83 + 2 = 85 (at cap)
-        expect(state.formations['rs-brig-1'].cohesion).toBe(85);
+        // 83 - 1 = 82
+        expect(state.formations['rs-brig-1'].cohesion).toBe(82);
+    });
+
+    it('hold posture recovery is capped at 85', () => {
+        const state = makePostureState();
+        state.formations['rs-brig-1'].posture = 'hold';
+        state.formations['rs-brig-1'].cohesion = 85;
 
         applyPostureCosts(state);
+
+        // Already at cap — no increase beyond 85
         expect(state.formations['rs-brig-1'].cohesion).toBe(85);
     });
 
-    it('auto-downgrades to defend when cohesion drops below posture minimum', () => {
+    it('auto-downgrades to hold when cohesion drops below posture minimum', () => {
         const state = makePostureState();
         // attack requires min 25; set cohesion to 26 so after -3 drain it becomes 23 < 25
         state.formations['rs-brig-1'].posture = 'attack';
@@ -171,6 +231,121 @@ describe('brigade posture - applyPostureCosts', () => {
         applyPostureCosts(state);
 
         expect(state.formations['rs-brig-1'].cohesion).toBe(23);
-        expect(state.formations['rs-brig-1'].posture).toBe('defend');
+        // New system: auto-downgrade goes to 'hold', not 'defend'
+        expect(state.formations['rs-brig-1'].posture).toBe('hold');
+    });
+
+    it('dig_in posture adds 0.5 cohesion per turn (stored as float)', () => {
+        const state = makePostureState();
+        state.formations['rs-brig-1'].posture = 'dig_in';
+        state.formations['rs-brig-1'].cohesion = 60;
+
+        applyPostureCosts(state);
+
+        // 60 + 0.5 = 60.5 (stored to 1 decimal, not truncated)
+        expect(state.formations['rs-brig-1'].cohesion).toBe(60.5);
+    });
+
+    it('dig_in progress increments by 0.25 each turn', () => {
+        const state = makePostureState();
+        state.formations['rs-brig-1'].posture = 'dig_in';
+        state.formations['rs-brig-1'].dig_in_progress = 0;
+
+        applyPostureCosts(state);
+
+        expect(state.formations['rs-brig-1'].dig_in_progress).toBe(0.25);
+
+        applyPostureCosts(state);
+
+        expect(state.formations['rs-brig-1'].dig_in_progress).toBe(0.5);
+    });
+
+    it('dig_in progress is capped at 1.0', () => {
+        const state = makePostureState();
+        state.formations['rs-brig-1'].posture = 'dig_in';
+        state.formations['rs-brig-1'].dig_in_progress = 0.9;
+
+        applyPostureCosts(state);
+
+        // 0.9 + 0.25 = 1.15 → clamped to 1.0
+        expect(state.formations['rs-brig-1'].dig_in_progress).toBe(1.0);
+    });
+
+    it('dig_in progress resets to 0 when switching away from dig_in', () => {
+        const state = makePostureState();
+        state.formations['rs-brig-1'].posture = 'hold'; // switched away from dig_in
+        state.formations['rs-brig-1'].dig_in_progress = 0.75;
+
+        applyPostureCosts(state);
+
+        // Progress was > 0, posture is not dig_in → reset to 0
+        expect(state.formations['rs-brig-1'].dig_in_progress).toBe(0);
+    });
+
+    it('defend_at_all_costs never auto-downgrades even at very low cohesion', () => {
+        const state = makePostureState();
+        state.formations['rs-brig-1'].posture = 'defend_at_all_costs';
+        // cohesion will drop to 6 after -4; min is 10 for DAAC but it must NOT downgrade
+        state.formations['rs-brig-1'].cohesion = 10;
+
+        applyPostureCosts(state);
+
+        expect(state.formations['rs-brig-1'].cohesion).toBe(6);
+        // DAAC never auto-downgrades
+        expect(state.formations['rs-brig-1'].posture).toBe('defend_at_all_costs');
+    });
+});
+
+describe('brigade posture - computeDigInDefMult', () => {
+    it('at progress=0.0 returns base value 1.35', () => {
+        expect(computeDigInDefMult(0)).toBeCloseTo(1.35, 4);
+    });
+
+    it('at progress=0.25 ramps to ~1.433', () => {
+        // 1.35 + (0.25/0.75) * 0.25 = 1.35 + 0.08333 = 1.43333
+        expect(computeDigInDefMult(0.25)).toBeCloseTo(1.4333, 3);
+    });
+
+    it('at progress=0.50 ramps to ~1.517', () => {
+        // 1.35 + (0.50/0.75) * 0.25 = 1.35 + 0.16667 = 1.51667
+        expect(computeDigInDefMult(0.50)).toBeCloseTo(1.5167, 3);
+    });
+
+    it('at progress=0.75 reaches full value 1.60', () => {
+        expect(computeDigInDefMult(0.75)).toBeCloseTo(1.60, 4);
+    });
+
+    it('at progress=1.0 is clamped at 1.60 (no overshoot)', () => {
+        expect(computeDigInDefMult(1.0)).toBeCloseTo(1.60, 4);
+    });
+
+    it('default (no argument) returns base value 1.35', () => {
+        expect(computeDigInDefMult()).toBeCloseTo(1.35, 4);
+    });
+});
+
+describe('brigade posture - normalizePosture', () => {
+    it("normalizes 'probe' to 'hold'", () => {
+        expect(normalizePosture('probe')).toBe('hold');
+    });
+
+    it("normalizes 'consolidation' to 'hold'", () => {
+        expect(normalizePosture('consolidation')).toBe('hold');
+    });
+
+    it("preserves valid 8-posture values unchanged", () => {
+        expect(normalizePosture('hold')).toBe('hold');
+        expect(normalizePosture('defend')).toBe('defend');
+        expect(normalizePosture('defend_at_all_costs')).toBe('defend_at_all_costs');
+        expect(normalizePosture('elastic_defense')).toBe('elastic_defense');
+        expect(normalizePosture('counterattack')).toBe('counterattack');
+        expect(normalizePosture('dig_in')).toBe('dig_in');
+        expect(normalizePosture('attack')).toBe('attack');
+        expect(normalizePosture('assault')).toBe('assault');
+    });
+
+    it("normalizes unknown/undefined to 'hold'", () => {
+        expect(normalizePosture(undefined)).toBe('hold');
+        expect(normalizePosture('garbage')).toBe('hold');
     });
 });

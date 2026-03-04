@@ -119,12 +119,12 @@ describe('computeEquipmentMultiplier', () => {
         expect(attackMult).toBeGreaterThan(defendMult);
     });
 
-    it('probe posture also gets offensive tank bonus', () => {
+    it('counterattack posture also gets offensive tank bonus', () => {
         const f = makeFormation('rs1', 'RS', 'hq1');
         ensureBrigadeComposition(f);
-        const probeMult = computeEquipmentMultiplier(f, 'probe');
+        const counterattackMult = computeEquipmentMultiplier(f, 'counterattack');
         const defendMult = computeEquipmentMultiplier(f, 'defend');
-        expect(probeMult).toBeGreaterThan(defendMult);
+        expect(counterattackMult).toBeGreaterThan(defendMult);
     });
 
     it('RS multiplier > RBiH multiplier (equipment advantage)', () => {
