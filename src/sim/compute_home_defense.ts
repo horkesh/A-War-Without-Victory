@@ -31,9 +31,9 @@ export function computeHomeDefenseActive(state: GameState): void {
         }
 
         // Counterattack window countdown
-        const window = brigade.counterattack_window_turns ?? 0;
-        if (window > 0) {
-            brigade.counterattack_window_turns = window - 1;
+        const remaining = brigade.counterattack_window_turns ?? 0;
+        if (remaining > 0) {
+            brigade.counterattack_window_turns = remaining - 1;
         }
     }
 }

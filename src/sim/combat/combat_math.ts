@@ -562,7 +562,7 @@ export function computeDefenderPower(
     const base = basePower(formation);
     const posture = formation.posture ?? 'defend';
     const postureMult = posture === 'dig_in'
-        ? computeDigInDefMult((formation as { dig_in_progress?: number }).dig_in_progress)
+        ? computeDigInDefMult(formation.dig_in_progress)
         : POSTURE_DEFENSE[posture] ?? 1;
     const supplyMult = getSupplyMult(formation, state, 'defend', supplyStateByOsid);
     const terrainMult = terrainMultByOsid[targetOsid] ?? 1.0;

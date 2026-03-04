@@ -61,7 +61,7 @@ const POSTURE_MIN_READINESS: Record<BrigadePosture, string[]> = {
 };
 
 /** Per-turn cohesion cost for each posture. Negative = drain, positive = recovery.
- * Recovery postures (hold, defend, dig_in) are capped at DEFEND_COHESION_CAP. */
+ * Recovery postures (hold, dig_in) are capped at DEFEND_COHESION_CAP. */
 const POSTURE_COHESION_COST: Record<BrigadePosture, number> = {
     hold: 1.0,
     defend: -1.0,
@@ -290,14 +290,17 @@ export function applyPostureCosts(state: GameState): void {
     }
 }
 
+const VALID_POSTURES: ReadonlySet<string> = new Set<BrigadePosture>([
+    'hold', 'defend', 'defend_at_all_costs', 'elastic_defense',
+    'counterattack', 'dig_in', 'attack', 'assault',
+]);
+
 /**
  * Normalizes legacy posture values ('probe', 'consolidation') to 'hold'.
  * Called during save file load to handle old save files.
  */
 export function normalizePosture(posture: string | undefined): BrigadePosture {
-    if (posture === 'probe' || posture === 'consolidation') return 'hold';
-    const valid: BrigadePosture[] = ['hold', 'defend', 'defend_at_all_costs', 'elastic_defense',
-        'counterattack', 'dig_in', 'attack', 'assault'];
-    if (valid.includes(posture as BrigadePosture)) return posture as BrigadePosture;
+    if (!posture || posture === 'probe' || posture === 'consolidation') return 'hold';
+    if (VALID_POSTURES.has(posture)) return posture as BrigadePosture;
     return 'hold';
 }
