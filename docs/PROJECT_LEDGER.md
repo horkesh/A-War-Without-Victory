@@ -1,6 +1,6 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-03
+**Last Updated:** 2026-03-04
 **Status:** Post-MVP — Phase II calibration, GUI rework, Phase M complete
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
@@ -9505,3 +9505,19 @@ Determinism checks **MUST** be run:
   4. Updated dynamic Brigade War Stories (`generateNarrative`) from past tense to present/present-perfect tense to reflect the ongoing state of the conflict.
 - **Report:** A full breakdown was recorded at `docs/40_reports/20260304_UI_POLISH_REPORT.md`.
 - **Files modified:** `src/ui/map/components/OOBSidebar.tsx`, `src/ui/map/components/FormationDetail.tsx`, `src/ui/map/components/CorpsDetail.tsx`, `src/ui/map/components/TopToolbar.tsx`, `src/sim/war_stories.ts`.
+
+### [2026-03-04] Brigade discipline, combat fatigue, reserve cap reduction — n472
+
+- **Summary:** Three mechanic changes to improve brigade realism and corps-level control: (1) hard directive block — brigades only attack `effectiveDirective.offensive_targets`; (2) combat-activity fatigue replacing the inert Phase I supply-assignment system; (3) `RESERVE_PER_EDGE_CAP` reduced from 0.5 → 0.07.
+- **Changes:**
+  1. **`bot_brigade_ai_osid.ts`**: Hard block before `finalScore <= 0` check — brigade skips OSID unless it's in `effectiveDirective.offensive_targets` or is a counter-attack target (sole exception). Removed "frontier pressure" mechanic (`+15` for non-directive adjacent targets). Removed dead `hasDirectiveTargetAdj` variable.
+  2. **`corps_front_sectors.ts`**: `RESERVE_PER_EDGE_CAP` 0.5 → 0.07 (~1 reserve per typical 10–18 edge sector; cap `ceil(edges × 0.07)`).
+  3. **`attack_resolution_osid.ts`**: Combat fatigue: attacker formations +2 per battle, defender +1, cap 20. `FormationOpsState.ops = { fatigue: 0, last_supplied_turn: null }` init in both paths.
+  4. **`formation_fatigue.ts`**: New `applyFatigueRecovery()` function — -1 fatigue/turn for all active formations with fatigue > 0.
+  5. **`war_phases.ts`**: Import `applyFatigueRecovery`; call it before `updateFormationFatigue` in `update-formation-fatigue` pipeline step.
+- **Result (n472):** 652/744 (87.6%) count, **89.7% area-weighted**. CENTRAL_BOSNIA +8.7pp (78.4%→87.1%); CENTRAL_CORRIDOR -3.2pp (90.4%→87.2%). Net area-weighted: -0.3pp.
+- **Investigation finding:** HRHB Krajina cells (banja_luka:dragocaj, bosanska_gradiska:mackovac etc.) are **init-based** (ethnic Croat composition) — confirmed present in `initial_save`. Not runtime regressions.
+- **Supply reserves schema note:** Reserves stored at `state.general_supply_reserve` and `state.heavy_munitions_reserve` (top-level per-faction maps), NOT under `state.supply_reserves`. n472: RS gen=27.8 (strained), RS heavy=64.3 (adequate), RBiH gen=7.5 (critical).
+- **Canon propagation:** `context.md` corps sector cap + discipline + fatigue notes updated; `Systems_Manual_v0_6_0.md` §State updated; napkin updated (brigade discipline, reserve cap, HRHB init-based mismatches).
+- **Report:** `docs/40_reports/implemented/20260304_BRIGADE_DISCIPLINE_FATIGUE_RESERVE_CAP.md`
+- **Next:** Local HRHB-RS truces (Task #15); CENTRAL_CORRIDOR regression investigation (Doboj/Maglaj); Donji Vakuf RS under-capture.
