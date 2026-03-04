@@ -122,6 +122,8 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     // Vienna Declaration / local truces (2026-03-04)
     'vienna_declaration_turn',
     'truce_broken_turn',
+    // Control change event log (GUI battle markers, last 3 turns)
+    'control_events',
 ]);
 
 /**
