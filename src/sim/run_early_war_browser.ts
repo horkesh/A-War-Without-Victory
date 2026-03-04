@@ -56,7 +56,7 @@ function isPhaseIAllowed(state: GameState): boolean {
     return meta.turn >= warStart;
 }
 
-function assertNoAoRInPhaseI(state: GameState): void {
+function assertNoAoRInEarlyWar(state: GameState): void {
     const factions = state.factions ?? [];
     for (const faction of factions) {
         if (faction.areasOfResponsibility && faction.areasOfResponsibility.length > 0) {
@@ -80,7 +80,7 @@ export async function runPhaseITurn(
     if (!isPhaseIAllowed(working)) {
         throw new Error('runPhaseITurn: Phase I requires referendum_held and current_turn >= war_start_turn');
     }
-    assertNoAoRInPhaseI(working);
+    assertNoAoRInEarlyWar(working);
 
     const graph = input.settlementGraph;
     const report: PhaseITurnReport = {

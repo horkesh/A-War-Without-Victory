@@ -2,6 +2,7 @@
 
 **Created:** 2026-03-02
 **Expanded:** 2026-03-04 — corrected ZoC status (deleted, not active), added Phase I/II section, confirmed AoR consumer list
+**R1-R3 completed:** 2026-03-04 — dead AoR files deleted, all consumers migrated, ZoC + AoR doc tombstones applied
 **Purpose:** Exhaustive inventory of all legacy references across codebase with phased removal plan.
 
 ---
@@ -10,9 +11,9 @@
 
 | System | Code Status | Doc Status | Action Required |
 |--------|-------------|------------|-----------------|
-| **AoR** | Legacy — 8 dead files + 17 active consumers | Stale refs in 3 canon + 3 eng docs | R1: delete dead; R2: migrate consumers; R3: update docs |
-| **ZoC** | **Fully deleted (2026-03-02)** | **Stale — 7 canon + 5 eng docs still describe ZoC as present** | Doc cleanup only — no code to remove |
-| **Phase I/II naming** | Pipeline step names load-bearing (keep); minor type names are cosmetic | Canon docs describe old "Phase I / Phase II" architecture | Update canon to say "peace / war"; keep step names |
+| **AoR** | ✅ R1-R3 complete — dead files deleted, consumers migrated to OSID/hq_sid. `brigade_aor_legacy.ts` + `aor_instantiation.ts` remain (still compile, no active callers outside legacy tests) | Stale refs in 3 canon + 3 eng docs | R4: update canon peace/war framing; R5: cosmetic type renames (optional) |
+| **ZoC** | ✅ Fully deleted (2026-03-02) | ✅ R2 complete — 12 docs updated with tombstone notes | Done |
+| **Phase I/II naming** | Pipeline step names load-bearing (keep); minor type names are cosmetic | ✅ R4 partial — peace/war framing updated in 4 canon docs | R5: optional type renames (not blocking) |
 
 ---
 
@@ -239,28 +240,30 @@ The canon docs still describe the system in terms of "Phase 0 / Phase I / Phase 
 
 ## Phased Removal Plan
 
-### Phase R1: Dead AoR Code — Delete Immediately
-**Scope:** 10 files (~1,700 lines). No behavioral change. No consumer updates needed.
-**Files:** `corps_directed_aor.ts`, `aor_reshaping.ts`, `aor_contiguity.ts` (combat + validate), `sim_aorcheck.ts`, `phaseF3_aor_fallback_usage_audit.ts`, `aor_reconcile_scan.py`, `aor_reconcile_apply.py`, `tests/aor_reshaping.test.ts`, `tests/corps_aor_contiguity.test.ts`
-**Test gate:** `npx vitest run` must stay green after deletion.
+### ✅ Phase R1: Dead AoR Code — COMPLETE (2026-03-04)
+**Scope:** 10 files (~1,700 lines) deleted. Zero behavioral change.
+**Files deleted:** `corps_directed_aor.ts`, `aor_reshaping.ts`, `aor_contiguity.ts` (combat + validate), `sim_aorcheck.ts`, `phaseF3_aor_fallback_usage_audit.ts`, `aor_reconcile_scan.py`, `aor_reconcile_apply.py`, `tests/aor_reshaping.test.ts`, `tests/corps_aor_contiguity.test.ts`
+**Commit:** `23a39fa`
 
-### Phase R2: ZoC Doc Cleanup
-**Scope:** 12 doc files (7 canon + 5 engineering). No code changes.
-**Pattern:** Remove ZoC sections / replace with current mechanic descriptions (frontage cap, local_front_defense density, OSID-based movement).
-**Test gate:** `npx tsc --noEmit`. Docs only — no runtime test.
+### ✅ Phase R2: ZoC Doc Cleanup — COMPLETE (2026-03-04)
+**Scope:** 12 doc files (7 canon + 5 engineering) updated with ZoC tombstone notes.
+**Pattern:** Removed ZoC sections, replaced with frontage cap + local_front_defense descriptions, added "(ZoC removed 2026-03-02)" annotations throughout.
+**Commit:** `23a39fa`
 
-### Phase R3: AoR Consumer Migration
-**Scope:** 17 active consumers migrated to OSID-based equivalents, then `brigade_aor_legacy.ts` + `aor_instantiation.ts` deleted, `LegacyBrigadeAoRState` removed from GameState.
-**Order by risk:** `recon_intelligence` → `brigade_pressure` → `consolidation_flips` → `corps_front_assign` → `militia_garrison` → `displacement_state_utils` → `faction_resilience` → `formation_hq_relocation` → `operational_groups` → `apply_brigade_reposition` → `combat_estimate` → `brigade_movement` / `brigade_movement_query` → `battle_resolution` (highest risk) → `desktop_sim` / `war_data_extractor` / `GameStateAdapter`
-**Test gate:** After each migration: `npx vitest run`. After all: `npm run sim:scenario:run:40w` and compare calibration (hash must match).
+### ✅ Phase R3: AoR Consumer Migration — COMPLETE (2026-03-04)
+**Scope:** 18 consumer files migrated. Dead branches removed. `brigade_aor` field is never populated by any active pipeline step; all consumers now use OSID/hq_sid/location_osid.
+**Result:** tsc clean, 296 vitest pass. Behavioral hash unchanged (migration = removing dead branches).
+**Note:** `brigade_aor_legacy.ts` + `aor_instantiation.ts` + `LegacyBrigadeAoRState` deliberately retained (still compile, used by legacy test stubs). Full deletion deferred to R3-final when legacy tests are updated.
+**Commit:** `23a39fa`
 
-### Phase R4: AoR + Phase I/II Doc Cleanup
-**Scope:** Update 3 canon + 3 engineering docs post-code-removal. Update peace/war terminology in canon.
-**Pattern:** Remove deleted file references. Replace "Phase I / Phase II" with "peace / war" where architectural. Keep pipeline step names in any documentation that lists them.
+### ✅ Phase R4: AoR + Phase I/II Doc Cleanup — COMPLETE (2026-03-04)
+**Scope:** peace/war terminology updated in 4 canon docs. ZoC tombstone already done by R2.
+**Pattern:** Replaced "Phase I / Phase II" with "peace phase / war phase" where architectural. Pipeline step names (phase-i-*, phase-ii-*) left unchanged.
 
 ### Phase R5: Phase I/II Type Renames (Optional, Low Priority)
 **Scope:** ~7 type/function/constant renames. `phase_i_militia_strength` GameState field rename requires save migration.
 **Recommendation:** Only do this if actively working in those files. Not worth a dedicated session.
+**Candidates:** `PhaseIJNAState` → `EarlyWarJNAState`; `applyPhase0ToPhaseITransition` → `applyPeaceToWarTransition`; `PHASE_I_DISPLACEMENT_FRACTION_NO_CENSUS` → `EARLY_WAR_DISPLACEMENT_FRACTION_NO_CENSUS`; `PhaseIDisplacementFlipInfo` → `EarlyWarDisplacementFlipInfo`; `assertNoAoRInPhaseI` → `assertNoAoRInEarlyWar`
 
 ---
 

@@ -226,7 +226,7 @@ Do NOT edit FORAWWV automatically.
 - Brigades have one OSID; front segments from phase_ii_front_edges_osid
 - Corps Sectors: derived each turn via multi-source BFS; partition front edges per corps for targeting and density. Sectors split by opposing faction and capped at MAX_SECTOR_EDGES=25 / MAX_SECTOR_BRIGADES=8; interior brigades assigned as reserves via BFS with proportional cap (RESERVE_PER_EDGE_CAP=0.07 — ~1 reserve per typical sector; was 0.5, excess redistributed to underfilled sectors). Exempt corps (general staff, HVO Central Bosnia) excluded. GUI renders corps-colored sector boundaries with click-to-inspect panels.
 - Brigade Directive Discipline: brigades may only attack OSIDs in effectiveDirective.offensive_targets; sole exception is counter-attacks (brigade retreated from that OSID last turn). Hard block in bot_brigade_ai_osid.ts — no opportunistic off-directive attacks.
-- Combat Fatigue: ops.fatigue increments per battle (attacker +2, defender +1, cap 20); recovers -1/turn via applyFatigueRecovery() before updateFormationFatigue() in update-formation-fatigue pipeline step. Phase I supply-assignment fatigue inert for Phase II brigades (no assignment field).
+- Combat Fatigue: ops.fatigue increments per battle (attacker +2, defender +1, cap 20); recovers -1/turn via applyFatigueRecovery() before updateFormationFatigue() in update-formation-fatigue pipeline step. Peace-phase supply-assignment fatigue inert for war-phase brigades (no assignment field).
 - Vienna Declaration / Local Truces: at week 4 (May 1992), evaluate-events step fires checkAndFireViennaDeclaration() → sets state.vienna_declaration_turn; narrative event pushed to events_fired. After declaration, bot generateCorpsDirectives() filters each truce partner's controlled OSIDs from offensive_targets (RS filters HRHB OSIDs, HRHB filters RS OSIDs), except municipalities in TRUCE_EXCEPTION_MUNICIPALITIES (Posavina corridor: brod/derventa/odzak/bosanski_samac/orasje + jajce). Player CAN attack across truce → check-truce-break pipeline step detects player brigade_attack_orders against partner OSIDs → sets state.truce_broken_turn[faction] and emits warning event. Truce break gives opponent bot +0.25 aggression for 6 turns (getTruceBreakAggressionBonus). Module: src/sim/local_truces.ts. State fields: vienna_declaration_turn?, truce_broken_turn?.
 
 ### 4. Pressure → Exhaustion → Collapse Chain
@@ -261,13 +261,13 @@ Do NOT edit FORAWWV automatically.
 AWWV/
 ├── src/                          # Simulation engine (TypeScript)
 │   ├── sim/                      # Core simulation logic
-│   │   ├── combat/               # Phase II combat, bot AI, corps sectors (renamed from phase_ii/; ZoC removed 2026-03-02)
-│   │   ├── early_war/            # Phase I militia, control flip, displacement (renamed from phase_i/)
+│   │   ├── combat/               # War-phase combat, bot AI, corps sectors (renamed from phase_ii/; ZoC removed 2026-03-02)
+│   │   ├── early_war/            # Early-war (peace-phase) militia, control flip, displacement (renamed from phase_i/)
 │   │   ├── bot/                  # Bot manager, strategy, interfaces
 │   │   ├── events/               # B1 event system
 │   │   ├── turn_phases/          # War and peace phase step definitions
-│   │   │   ├── war_phases.ts     # Phase I + Phase II step arrays
-│   │   │   └── peace_phases.ts   # Phase 0 step arrays
+│   │   │   ├── war_phases.ts     # War-phase pipeline steps (phase-i-* early-war + phase-ii-* combat; step names load-bearing)
+│   │   │   └── peace_phases.ts   # Peace-phase pipeline steps
 │   │   ├── turn_pipeline.ts      # Turn orchestrator (slim; assembles phases, runs runTurn)
 │   │   └── turn_pipeline_types.ts # TurnInput, TurnReport, TurnContext, caches
 │   ├── state/                    # Game state definitions
@@ -467,7 +467,7 @@ cat docs/specs/sim/phase3a_pressure_eligibility.md
 - **Dev runner**: Exposes raw GameState via HTTP (port 3000)
 - **Dev viewer**: Read-only HTML viewer, no game logic
 - **Canonical faction IDs**: RBiH, RS, HRHB only (no aliases)
-- **location_osid**: Phase II brigade location; dev/viewer use OSID for formation position
+- **location_osid**: War-phase brigade location; dev/viewer use OSID for formation position
 
 ## Validation Commands
 

@@ -363,10 +363,10 @@ function routeDisplacedPopulation(
 }
 
 /** One-time displacement fraction for control flip when no 1991 census. */
-export const PHASE_I_DISPLACEMENT_FRACTION_NO_CENSUS = 0.15;
+export const EARLY_WAR_DISPLACEMENT_FRACTION_NO_CENSUS = 0.15;
 
 /** Minimal shape for control-flip displacement apply. */
-export interface PhaseIDisplacementFlipInfo {
+export interface EarlyWarDisplacementFlipInfo {
     mun_id: MunicipalityId;
     from_faction: FactionId | null;
     to_faction: FactionId;
@@ -383,7 +383,7 @@ export interface PhaseIDisplacementHooksInfo {
 export function applyPhaseIDisplacementFromFlips(
     state: GameState,
     turn: number,
-    flips: PhaseIDisplacementFlipInfo[],
+    flips: EarlyWarDisplacementFlipInfo[],
     hooksByMun: PhaseIDisplacementHooksInfo['by_mun'],
     _settlements: Map<string, SettlementRecord>,
     _adjacencyMap: AdjacencyMap,
@@ -392,7 +392,7 @@ export function applyPhaseIDisplacementFromFlips(
     const defaultOriginalPopulation = 10000;
     const records: DisplacementRecord[] = [];
     const routingRecords: DisplacementRoutingRecord[] = [];
-    const flipByMun = new Map<MunicipalityId, PhaseIDisplacementFlipInfo>();
+    const flipByMun = new Map<MunicipalityId, EarlyWarDisplacementFlipInfo>();
     for (const f of flips) {
         flipByMun.set(f.mun_id, f);
     }
@@ -418,7 +418,7 @@ export function applyPhaseIDisplacementFromFlips(
             munId,
             fromFaction,
             population1991ByMun,
-            PHASE_I_DISPLACEMENT_FRACTION_NO_CENSUS
+            EARLY_WAR_DISPLACEMENT_FRACTION_NO_CENSUS
         );
         const displacementAmount = Math.min(
             Math.floor(dispState.original_population * share),

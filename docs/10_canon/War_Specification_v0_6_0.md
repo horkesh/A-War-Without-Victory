@@ -3,7 +3,6 @@
 **Status:** Canon (v0.6.0; two-phase model)
 **Canon Version:** v0.6.0
 **Date:** 2026-02-28
-**Supersedes:** Phase_I_Specification_v0_5_0.md, Phase_II_Specification_v0_5_0.md (deprecated; see docs/_old/10_canon/)
 
 ---
 
@@ -82,7 +81,9 @@ Attack resolution: Attack Resolution Formula Spec (combat power, outcome thresho
 
 ## 11. v0.6 Canon consolidation
 
-This document (v0.6.0) is the single War phase specification in the two-phase (Peace/War) model. It supersedes Phase_I_Specification_v0_5_0.md and Phase_II_Specification_v0_5_0.md. Deprecated docs are in docs/_old/10_canon/. Runtime phase value for this phase is **war**.
+This document (v0.6.0) is the single War phase specification in the two-phase (Peace/War) model. Runtime phase value for this phase is **war**.
+
+*Historical note: This document replaces the former Phase_I_Specification_v0_5_0.md and Phase_II_Specification_v0_5_0.md (three-phase model). Those deprecated docs are in docs/_old/10_canon/.*
 
 ---
 

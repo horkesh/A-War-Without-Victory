@@ -51,7 +51,7 @@ export function isPhaseIAllowed(state: GameState): boolean {
     return meta.turn >= warStart;
 }
 
-export function assertNoAoRInPhaseI(state: GameState): void {
+export function assertNoAoRInEarlyWar(state: GameState): void {
     const factions = state.factions ?? [];
     for (const faction of factions) {
         if (faction.areasOfResponsibility && faction.areasOfResponsibility.length > 0) {
