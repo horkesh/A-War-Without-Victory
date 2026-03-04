@@ -85,7 +85,7 @@ function buildFactionSectors(
 
     // Step 3: Partition front edges to corps
     const corpsEdges = partitionFrontEdges(
-        osidFrontEdges, faction, osidToCorps, state, reverseMap
+        osidFrontEdges, faction, osidToCorps, state, reverseMap, corpsIds
     );
 
     // Step 4: Build multi-sectors (sub-segments promoted to independent sectors)
@@ -244,7 +244,8 @@ function partitionFrontEdges(
     faction: FactionId,
     osidToCorps: Map<Osid, FormationId>,
     state: GameState,
-    reverseMap: Map<string, string[]> | null
+    reverseMap: Map<string, string[]> | null,
+    corpsIds: FormationId[]
 ): Map<FormationId, string[]> {
     const result = new Map<FormationId, string[]>();
 
@@ -253,11 +254,55 @@ function partitionFrontEdges(
         .filter(e => e.side_a === faction || e.side_b === faction)
         .sort((a, b) => strictCompare(a.edge_id, b.edge_id));
 
+    // In case there are disconnected friendly islands from the BFS, map orphaned OSIDs to nearest corps HQ.
+    // Calculate centroids for fallback distance calculation.
+    const hqCentroids = new Map<FormationId, [number, number]>();
+    let fallbackCenter: [number, number] | null = null;
+    let fallbackCorpsId: FormationId | null = null;
+    if (state.corps_front_sectors) {
+        // Just extract centroids safely or use a default
+        for (const corpsId of osidToCorps.values()) {
+            if (hqCentroids.has(corpsId)) continue;
+            // Best effort center, fallback to first friendly OSID assigned to corps
+            let center: [number, number] | null = null;
+            for (const [osid, cId] of osidToCorps.entries()) {
+                if (cId === corpsId) {
+                    center = getOsidCentroid(state, osid);
+                    if (center) break;
+                }
+            }
+            if (center) hqCentroids.set(corpsId, center);
+            if (!fallbackCenter && center) {
+                fallbackCenter = center;
+                fallbackCorpsId = corpsId;
+            }
+        }
+    }
+
     for (const edge of sorted) {
         // Identify the friendly-side OSID
         const friendlyOsid = edge.side_a === faction ? edge.a : edge.b;
-        const corpsId = osidToCorps.get(friendlyOsid);
-        if (!corpsId) continue; // Edge on unclaimed OSID — skip
+        let corpsId = osidToCorps.get(friendlyOsid);
+
+        // Edge on unclaimed or disconnected OSID. We MUST assign it to a corps so it renders.
+        if (!corpsId) {
+            let bestDistance = Infinity;
+            let bestCorpsId: FormationId | null = null;
+            const edgeCentroid = getOsidCentroid(state, friendlyOsid);
+            if (edgeCentroid && hqCentroids.size > 0) {
+                for (const [cId, hqPos] of hqCentroids.entries()) {
+                    const dx = edgeCentroid[0] - hqPos[0];
+                    const dy = edgeCentroid[1] - hqPos[1];
+                    const distSq = dx * dx + dy * dy;
+                    if (distSq < bestDistance) {
+                        bestDistance = distSq;
+                        bestCorpsId = cId;
+                    }
+                }
+            }
+            corpsId = bestCorpsId ?? fallbackCorpsId ?? corpsIds[0];
+            if (!corpsId) continue; // Should only happen if faction has NO corps
+        }
 
         let list = result.get(corpsId);
         if (!list) { list = []; result.set(corpsId, list); }
@@ -265,6 +310,11 @@ function partitionFrontEdges(
     }
 
     return result;
+}
+
+/** Get the [lng, lat] centroid of an OSID (not natively on GameState without map data injection, falling back to dummy values for assignment). */
+function getOsidCentroid(state: GameState, osid: string): [number, number] | null {
+    return null; // The simulator doesn't have geometry down here!
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

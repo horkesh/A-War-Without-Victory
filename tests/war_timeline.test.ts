@@ -177,10 +177,12 @@ describe('validateWarTimeline', () => {
     it('rejects non-contiguous step curve entries', () => {
         expect(() => validateWarTimeline({
             id: 'test', doctrine_phases: {}, standing_orders: {},
-            cohesion_drift: { RS: [
-                { start_turn: 0, end_turn: 10, value: 0 },
-                { start_turn: 15, end_turn: 20, value: 1 }
-            ] },
+            cohesion_drift: {
+                RS: [
+                    { start_turn: 0, end_turn: 10, value: 0 },
+                    { start_turn: 15, end_turn: 20, value: 1 }
+                ]
+            },
             cohesion_floor: {}, cohesion_ceiling: {}, reinforcement_mult: {},
             equipment_decay: [], external_support: [], maintenance_decay: []
         })).toThrow('gap/overlap');

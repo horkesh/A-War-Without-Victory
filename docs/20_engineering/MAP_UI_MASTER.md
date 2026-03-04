@@ -19,10 +19,18 @@ src/ui/map/
 ├── App.tsx                        Entry point — bootstraps desktop bridge, keyboard shortcuts, modals
 ├── main.tsx                       React DOM render
 │
+├── desktop/                       Electron IPC bridge (Phase 4)
+│   ├── useIPC.ts                  React hook wrapping window.awwv; stable useMemo([]); safe no-ops in browser
+│   ├── types.ts                   RecruitmentCatalogBrigade, StartNewCampaignPayload
+│   ├── orderActions.ts            advanceTurnAndSync(), stageMoveOrderFromOsid(), stagePostureOrderAction()
+│   └── campaignRecruitmentActions.ts  startCampaignFromSidePicker(), fetchRecruitmentCatalog(), applyRecruitmentAndSync()
+│
 ├── map/
 │   ├── MapContainer.tsx           Master map: MapLibre init, all sources/layers, GeoJSON updates
 │   ├── useMapInteractions.ts      Click/hover event wiring → store callbacks (300ms hover delay)
-│   ├── formationIcons.ts          SVG icon sprite registration for formation markers
+│   ├── formationIcons.ts          HoI-style rectangular brigade counters (160×80 canvas, pixelRatio 2 → 80×40 CSS px/unit; faction-colored fill; white kind abbreviation)
+│   ├── frontLineIcons.ts          Front-line SVG icon helpers (stub)
+│   ├── pmtilesRoute.ts            PMTiles URL routing helper (stub)
 │   ├── awwv_map_style.json        MapLibre base style (terrain, glyphs, base layers)
 │   └── builders/
 │       ├── buildControlGeoJSON.ts              OSID polygons + faction controller property
@@ -39,7 +47,8 @@ src/ui/map/
 │       ├── formationIconId.ts                  Icon ID string from kind + faction
 │       ├── geojsonLookup.ts                    buildOsidCentroidLookup() helper
 │       ├── resolveFormationLocationOsid.ts     location_osid or first AoR fallback
-│       └── generateFactionBorders.ts           Shared-edge faction boundary computation
+│       ├── generateFactionBorders.ts           Shared-edge faction boundary computation
+│       └── buildFogOfWarGeoJSON.ts             Enemy-territory fog-of-war polygon fill (observer-mode-safe)
 │
 ├── components/
 │   ├── Entity slide-out panels (left: 19rem — see §2 for layout)
@@ -64,6 +73,8 @@ src/ui/map/
 │   ├── BrigadeRow.tsx             Compact brigade list item in OOBSidebar
 │   ├── CorpsCard.tsx              Corps card in OOBSidebar accordion
 │   ├── SettlementDetailContent.tsx Reusable settlement info (used in SelectionPanel + Tooltip)
+│   ├── SidePickerOverlay.tsx      Faction selection overlay shown before game load (Phase 4)
+│   ├── RecruitmentModal.tsx       Brigade recruitment modal: catalog, eligibility, recruit action (Phase 4)
 │   └── panelRail.ts               Shared panel positioning constants (DETAIL_PANEL_STYLE, SECONDARY_PANEL_STYLE)
 │
 ├── store/
@@ -76,9 +87,10 @@ src/ui/map/
 │   └── ControlLookup.ts           Control/status lookup builders
 │
 ├── hooks/
-│   └── useKeyboardShortcuts.ts    Enter/Escape/1–4 global key handler
+│   ├── useKeyboardShortcuts.ts    Enter/Escape/1–4 global key handler
+│   └── useDesktopSession.ts       Bootstrap + game-state-updated/turn-report-updated IPC subscriptions (Phase 4)
 │
-├── saved/                         Reference snapshots from old codebase (excluded from tsconfig)
+├── saved/                         Phase 4 staging area — promoted to live files; kept for reference (excluded from tsconfig)
 │
 └── utils/
     ├── theme.ts                   FACTION_COLORS, FACTION_COLORS_SUBTLE, FACTION_BG_SUBTLE

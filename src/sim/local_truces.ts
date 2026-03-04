@@ -98,7 +98,7 @@ export function getTruceBreakAggressionBonus(faction: FactionId, state: GameStat
     if (brokenTurn == null) return 0;
 
     const currentTurn = state.meta?.turn ?? 0;
-    if (currentTurn >= brokenTurn && currentTurn < brokenTurn + TRUCE_BREAK_SPIKE_TURNS) {
+    if (currentTurn < brokenTurn + TRUCE_BREAK_SPIKE_TURNS) {
         return TRUCE_BREAK_AGGRESSION_SPIKE;
     }
     return 0;

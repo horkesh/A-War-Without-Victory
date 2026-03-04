@@ -152,7 +152,7 @@ export function buildFrontEdgesHoverGeoJSON(
       }
     }
 
-    const sectorA = edgeFactionToSector.get(`${pairKey}\0${factionA}`);
+    const sectorA = edgeFactionToSector.get(`${edge.edge_id}\0${factionA}`);
     const keyA = sectorA ? `sector_${sectorA.sector_id}_${factionA}` : `edge_${edge.edge_id}_${factionA}`;
     if (!groupedCoords.has(keyA)) {
       groupedCoords.set(keyA, {
@@ -169,7 +169,7 @@ export function buildFrontEdgesHoverGeoJSON(
     }
     groupedCoords.get(keyA)!.segments.push(...segs);
 
-    const sectorB = edgeFactionToSector.get(`${pairKey}\0${factionB}`);
+    const sectorB = edgeFactionToSector.get(`${edge.edge_id}\0${factionB}`);
     const keyB = sectorB ? `sector_${sectorB.sector_id}_${factionB}` : `edge_${edge.edge_id}_${factionB}`;
     if (!groupedCoords.has(keyB)) {
       groupedCoords.set(keyB, {

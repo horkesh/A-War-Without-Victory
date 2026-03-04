@@ -7,7 +7,7 @@
  */
 
 import type {
-    AoROrderView, AttackOrderView, CorpsFrontSectorView, FormationView, LoadedGameState,
+    AoROrderView, AttackOrderView, CorpsFrontSectorView, EnclaveResilienceView, FormationView, LoadedGameState,
     MilitiaPoolView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
     OperationView, ReconIntelligenceView, RepositionOrderView, RecruitmentView,
 } from './types';
@@ -764,6 +764,26 @@ export function parseGameState(json: unknown): LoadedGameState {
         if (out.length > 0) corpsFrontSectors = out;
     }
 
+    let enclaveResilience: LoadedGameState['enclaveResilience'] | undefined;
+    const rawEnclave = state.enclave_resilience as Record<string, unknown> | undefined;
+    if (rawEnclave && typeof rawEnclave === 'object' && !Array.isArray(rawEnclave)) {
+        const out: Record<string, EnclaveResilienceView> = {};
+        for (const key of Object.keys(rawEnclave).sort()) {
+            const entry = rawEnclave[key];
+            if (typeof entry === 'number') {
+                out[key] = { resilience: entry, isolation_turns: 0, hardening_active: false };
+            } else if (entry && typeof entry === 'object' && !Array.isArray(entry)) {
+                const e = entry as Record<string, unknown>;
+                out[key] = {
+                    resilience: finiteNumber(e.resilience),
+                    isolation_turns: finiteNumber(e.isolation_turns),
+                    hardening_active: Boolean(e.hardening_active),
+                };
+            }
+        }
+        if (Object.keys(out).length > 0) enclaveResilience = out;
+    }
+
     return {
         label, turn, phase, formations, militiaPools, controlBySettlement, statusBySettlement,
         brigadeAorByFormationId, brigadeFrontAssignment, theatres, armyTheatreAssignment,
@@ -786,6 +806,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         namedOfficerData,
         namedOfficerStateById,
         factionReserves,
+        enclaveResilience,
     };
 }
 

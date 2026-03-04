@@ -170,8 +170,7 @@ export const warPhases: NamedPhase[] = [
             // Vienna Declaration: fires at week 4 (May 1992), sets state.vienna_declaration_turn
             const viennaText = checkAndFireViennaDeclaration(context.state);
             if (viennaText) {
-                context.report.events_fired = [...(context.report.events_fired ?? []),
-                    { id: 'vienna_declaration', text: viennaText }];
+                context.report.events_fired!.push({ id: 'vienna_declaration', text: viennaText });
             }
         }
     },
@@ -671,8 +670,7 @@ export const warPhases: NamedPhase[] = [
                 if (!controller) continue;
                 const warning = recordTruceBroken(playerFaction, targetOsid, context.state);
                 if (warning) {
-                    context.report.events_fired = [...(context.report.events_fired ?? []),
-                        { id: 'truce_broken', text: warning }];
+                    (context.report.events_fired ??= []).push({ id: 'truce_broken', text: warning });
                     break; // One warning per turn is enough
                 }
             }

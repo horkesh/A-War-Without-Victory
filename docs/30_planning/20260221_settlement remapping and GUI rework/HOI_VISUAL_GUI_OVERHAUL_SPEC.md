@@ -102,7 +102,7 @@ The front is rendered as a **thick semi-transparent band** along the faction bou
 
 **New:** Brigade markers are positioned along their AoR's front edge, not at a centroid.
 
-**Implementation:** Formation markers are now **MapLibre symbol layers** with programmatically generated NATO-style sprites. The **front-distributed placement algorithm** described below is **NOT yet implemented** — markers are currently placed at OSID centroids. This algorithm should be implemented as described so that brigade markers sit at the front centroid of their AoR.
+**Implementation (2026-03-04):** Formation markers are **MapLibre symbol layers** with programmatically generated sprites in `formationIcons.ts`. **Front-distributed placement is now IMPLEMENTED** in `buildFormationsGeoJSON.ts`: brigade markers are offset 35% (`FRONT_LERP=0.35`) from OSID centroid toward the average centroid of adjacent enemy OSIDs (using `state.frontEdgesOsid`). Rear brigades (no front adjacency) remain at OSID centroid. Corps and army HQs are **filtered out** — they are command abstractions represented by sector fills and OOB sidebar, not map pins. Counter canvas: 160×80 at pixelRatio 2 → 80×40 CSS px per icon-size unit; faction-colored fill (RS crimson / RBiH green / HRHB blue); white kind abbreviation; `icon-allow-overlap: true`. Zoom stops: z6→40×20px, z9→56×28px, z12→72×36px, z14→80×40px.
 
 **Marker placement algorithm:**
 

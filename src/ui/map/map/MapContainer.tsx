@@ -25,6 +25,10 @@ import { buildOrderArrowsGeoJSON } from './builders/buildOrderArrowsGeoJSON';
 import { buildOsidCentroidLookup } from './builders/geojsonLookup';
 import { resolveFormationLocationOsid } from './builders/resolveFormationLocationOsid';
 import { ensureFormationIcons } from './formationIcons';
+import { buildFogOfWarGeoJSON } from './builders/buildFogOfWarGeoJSON';
+import { buildEnclaveGeoJSON } from './builders/buildEnclaveGeoJSON';
+import { useIPC } from '../desktop/useIPC';
+import { stageMoveOrderFromOsid } from '../desktop/orderActions';
 import styleJson from './awwv_map_style.json';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
@@ -65,6 +69,13 @@ const OP_TARGET_ICON_RING_LAYER_ID = 'operation-target-icon-ring';
 const OP_TARGET_ICON_INNER_RING_LAYER_ID = 'operation-target-icon-inner-ring';
 const OP_TARGET_ICON_DOT_LAYER_ID = 'operation-target-icon-dot';
 const OP_TARGET_ICON_CROSSHAIR_LAYER_ID = 'operation-target-icon-crosshair';
+const FOG_OVERLAY_SOURCE_ID = 'fog-overlay';
+const FOG_FILL_LAYER_ID = 'fog-fill';
+const ENCLAVE_SOURCE_ID = 'enclave-osids';
+const ENCLAVE_LABEL_SOURCE_ID = 'enclave-labels';
+const ENCLAVE_OUTLINE_LAYER_ID = 'enclave-outline';
+const ENCLAVE_FILL_LAYER_ID = 'enclave-fill';
+const ENCLAVE_LABEL_LAYER_ID = 'enclave-label';
 
 /**
  * Rewrite pmtiles:/// URLs in the style for the current environment.
@@ -113,6 +124,8 @@ export function MapContainer() {
   const sectorsVisible = useGameStore((s) => s.sectorsVisible);
   const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
+  const setLoadError = useGameStore((s) => s.setLoadError);
+  const ipc = useIPC();
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -161,6 +174,7 @@ export function MapContainer() {
         if (sources['order-arrows']) {
           sources['order-arrows'].data = emptyGeoJson;
         }
+        (sources as Record<string, { type?: string; data?: FeatureCollection }>)['fog-overlay'] = { type: 'geojson', data: emptyGeoJson };
       } catch (e) {
         console.warn('Failed to pre-load OSID data:', e);
       }
@@ -225,7 +239,11 @@ export function MapContainer() {
             setPendingAttackConfirmation({ attackerFormationId: selectedFormationId, targetOsid: osid });
             setOrderModeForFormation(null);
           } else if (orderModeForFormation === 'move' && selectedFormationId) {
-            useGameStore.getState().addStagedOrder({ type: 'move', formationId: selectedFormationId, targetOsid: osid });
+            void stageMoveOrderFromOsid(
+              { ipc, addStagedOrder: useGameStore.getState().addStagedOrder, setLoadError },
+              selectedFormationId,
+              osid
+            );
             setOrderModeForFormation(null);
           } else {
             setSelectedOsid(osid);
@@ -479,6 +497,91 @@ export function MapContainer() {
                     const m = mapRef.current;
                     (m.getSource('formations') as GeoJSONSource)?.setData(formationsGeoJson);
                     (m.getSource('order-arrows') as GeoJSONSource)?.setData(orderArrowsGeoJson);
+                    // Fog of war: cover enemy OSIDs not confirmed empty by player recon
+                    const fogGeoJson = buildFogOfWarGeoJSON(base, state.controlBySettlement, state.player_faction, state.reconIntelligence);
+                    if (!safeHasLayer(m, FOG_FILL_LAYER_ID)) {
+                      try {
+                        m.addLayer(
+                          { id: FOG_FILL_LAYER_ID, type: 'fill', source: FOG_OVERLAY_SOURCE_ID, paint: { 'fill-color': 'rgba(0, 0, 0, 0.42)' } } as maplibregl.LayerSpecification,
+                          'formation-markers'
+                        );
+                      } catch (fogErr) {
+                        console.warn('[MapContainer] fog-fill layer add failed:', fogErr);
+                      }
+                    }
+                    (m.getSource(FOG_OVERLAY_SOURCE_ID) as GeoJSONSource | undefined)?.setData(fogGeoJson);
+                    safeSetLayoutVisibility(m, FOG_FILL_LAYER_ID, !!state.player_faction && !!state.reconIntelligence);
+
+                    // Enclave visualization: dashed faction-colored outline + faint fill + text label
+                    const { polygons: enclavePolygons, labels: enclaveLabels } = buildEnclaveGeoJSON(
+                      base, state.controlBySettlement, state.enclaveResilience,
+                    );
+                    if (!m.getSource(ENCLAVE_SOURCE_ID)) {
+                      m.addSource(ENCLAVE_SOURCE_ID, { type: 'geojson', data: enclavePolygons });
+                      m.addLayer({
+                        id: ENCLAVE_FILL_LAYER_ID,
+                        type: 'fill',
+                        source: ENCLAVE_SOURCE_ID,
+                        paint: {
+                          'fill-color': ['match', ['get', 'faction'],
+                            'RS', 'rgba(178,60,60,1)',
+                            'RBiH', 'rgba(55,135,70,1)',
+                            'HRHB', 'rgba(50,108,168,1)',
+                            'rgba(90,90,100,1)',
+                          ],
+                          'fill-opacity': 0.08,
+                        },
+                      } as maplibregl.LayerSpecification, 'formation-markers');
+                      m.addLayer({
+                        id: ENCLAVE_OUTLINE_LAYER_ID,
+                        type: 'line',
+                        source: ENCLAVE_SOURCE_ID,
+                        paint: {
+                          'line-color': ['match', ['get', 'faction'],
+                            'RS', 'rgba(160,50,50,0.85)',
+                            'RBiH', 'rgba(40,120,55,0.85)',
+                            'HRHB', 'rgba(35,90,145,0.85)',
+                            'rgba(80,80,90,0.75)',
+                          ],
+                          'line-width': ['interpolate', ['linear'], ['zoom'], 6, 1.2, 10, 2.0, 14, 3.0],
+                          'line-dasharray': [4, 3],
+                          'line-opacity': 0.85,
+                        },
+                        layout: { 'line-cap': 'butt', 'line-join': 'round' },
+                      } as maplibregl.LayerSpecification, 'formation-markers');
+                    } else {
+                      (m.getSource(ENCLAVE_SOURCE_ID) as GeoJSONSource).setData(enclavePolygons);
+                    }
+                    if (!m.getSource(ENCLAVE_LABEL_SOURCE_ID)) {
+                      m.addSource(ENCLAVE_LABEL_SOURCE_ID, { type: 'geojson', data: enclaveLabels });
+                      m.addLayer({
+                        id: ENCLAVE_LABEL_LAYER_ID,
+                        type: 'symbol',
+                        source: ENCLAVE_LABEL_SOURCE_ID,
+                        layout: {
+                          'text-field': ['get', 'label'],
+                          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                          'text-size': ['interpolate', ['linear'], ['zoom'], 6, 8, 10, 11, 14, 15],
+                          'text-anchor': 'center',
+                          'text-allow-overlap': false,
+                          'text-letter-spacing': 0.08,
+                        },
+                        paint: {
+                          'text-color': ['match', ['get', 'faction'],
+                            'RS', 'rgba(130,35,35,0.92)',
+                            'RBiH', 'rgba(28,95,42,0.92)',
+                            'HRHB', 'rgba(22,65,115,0.92)',
+                            'rgba(55,55,65,0.85)',
+                          ],
+                          'text-halo-color': 'rgba(255,255,255,0.88)',
+                          'text-halo-width': 1.5,
+                          'text-opacity': 0.9,
+                        },
+                      } as maplibregl.LayerSpecification);
+                    } else {
+                      (m.getSource(ENCLAVE_LABEL_SOURCE_ID) as GeoJSONSource).setData(enclaveLabels);
+                    }
+
                     const { formationsVisible: fVis, labelsVisible: lVis } = useGameStore.getState();
                     safeSetLayoutVisibility(m, FORMATION_MARKERS_LAYER_ID, fVis);
                     safeSetLayoutVisibility(m, FORMATION_LABELS_LAYER_ID, lVis);

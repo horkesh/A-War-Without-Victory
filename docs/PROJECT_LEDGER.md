@@ -9617,3 +9617,19 @@ Determinism checks **MUST** be run:
   - `docs/10_canon/Systems_Manual_v0_6_0.md` — added implementation note
   - `.claude/napkin.md` — added Bot AI item 11 (Vienna Declaration truce)
   - `docs/40_reports/implemented/20260304_VIENNA_DECLARATION_LOCAL_TRUCES.md` — implementation report
+
+---
+
+## [2026-03-04] Vienna Declaration — Refactor Pass + Canon Propagation
+
+- **Scope:** Refactor of Vienna Declaration code + propagation to engineering docs
+- **Refactor changes:**
+  - `src/sim/local_truces.ts` — removed tautological `currentTurn >= brokenTurn` clause in `getTruceBreakAggressionBonus()` (always true by construction)
+  - `src/sim/turn_phases/war_phases.ts` — replaced two `[...(array ?? []), item]` spread patterns with `.push()` and `(arr ??= []).push()` at `evaluate-events` and `check-truce-break` callsites
+- **Verification:** 31/31 local_truces tests pass; `tsc --noEmit` clean (no new errors)
+- **Canon propagation:**
+  - `docs/20_engineering/PIPELINE_ENTRYPOINTS.md` — Phase II step list: added `check-truce-break`; removed stale `zoc-computation` and `zoc-constrained-movement` references (ZoC removed n344); renamed section header to "Phase II OSID" (no ZoC)
+  - `docs/20_engineering/REPO_MAP.md` — added Vienna Declaration / local truces entry (file, exports, state fields, pipeline steps, tests)
+  - `memory/MEMORY.md` — added Vienna Declaration bullet in Combat Mechanics section
+- **Reports:**
+  - `docs/40_reports/implemented/20260304_VIENNA_DECLARATION_REFACTOR.md` — combined implementation + refactor report

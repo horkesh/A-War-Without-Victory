@@ -1,6 +1,8 @@
 import { useRef, useCallback, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoader';
+import { useIPC } from '../desktop/useIPC';
+import { advanceTurnAndSync } from '../desktop/orderActions';
 
 const LOAD_TIMEOUT_MS = 25000;
 
@@ -10,25 +12,21 @@ const FACTION_BANNER_TINT: Record<string, string> = {
   HRHB: 'rgba(64, 128, 184, 0.35)',
 };
 
-const isEmbedded = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('embedded') === '1';
-
-function formatTurnLabel(label: string): string {
-  const match = label.match(/Turn\s+(\d+)/i);
-  if (!match) return label;
-  const t = parseInt(match[1], 10);
-  const startDate = new Date('1992-04-01T00:00:00Z');
-  startDate.setDate(startDate.getDate() + t * 7);
-  const dateStr = startDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  return label.replace(match[0], `${dateStr} \u00B7 Turn ${t}`);
+interface TopToolbarProps {
+  onOpenRecruitment?: () => void;
+  onOpenSidePicker?: () => void;
 }
 
-export function TopToolbar() {
+export function TopToolbar({ onOpenRecruitment, onOpenSidePicker }: TopToolbarProps) {
+  const ipc = useIPC();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const loadSave = useGameStore((s) => s.loadSave);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const loadError = useGameStore((s) => s.loadError);
   const setLoadError = useGameStore((s) => s.setLoadError);
+  const clearStagedOrders = useGameStore((s) => s.clearStagedOrders);
   const [loading, setLoading] = useState(false);
+  const [advancing, setAdvancing] = useState(false);
   const [runIdInput, setRunIdInput] = useState('');
   const playerFaction = loadedGameState?.player_faction ?? '';
   const leftTint = FACTION_BANNER_TINT[playerFaction] ?? 'rgba(196, 163, 90, 0.2)';
@@ -105,33 +103,34 @@ export function TopToolbar() {
     }
   }, [loadSave, setLoadError, runIdInput]);
 
+  const handleAdvanceTurn = useCallback(async () => {
+    if (!ipc.isAvailable) {
+      setLoadError('Advance turn is available in desktop mode only.');
+      return;
+    }
+    if (!loadedGameState) {
+      setLoadError('Load or start a game before advancing turn.');
+      return;
+    }
+
+    setAdvancing(true);
+    await advanceTurnAndSync({
+      ipc,
+      loadSave,
+      clearStagedOrders,
+      setLoadError,
+    });
+    setAdvancing(false);
+  }, [ipc, loadedGameState, loadSave, clearStagedOrders, setLoadError]);
+
   return (
     <div
       className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-4 py-2.5 backdrop-blur-sm border-b border-panel-border"
       style={{ background: toolbarBackground }}
     >
-      {isEmbedded && (
-        <button
-          onClick={() => window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*')}
-          className="px-3 py-1 text-xs font-mono uppercase tracking-wide font-semibold rounded transition-colors"
-          style={{ background: 'rgba(0,232,120,0.12)', color: '#00e878', border: '1px solid rgba(0,232,120,0.3)' }}
-        >
-          &#9664; HQ
-        </button>
-      )}
-
       <span className="font-sans text-sm text-accent-gold tracking-wider uppercase font-semibold">
         A War Without Victory
       </span>
-      {/* Build badge: confirms which bundle is running in desktop iframe (remove once verified). */}
-      {isEmbedded && typeof __MAP_BUILD_TIME__ !== 'undefined' && (
-        <span
-          className="text-[10px] font-mono text-text-muted px-1.5 py-0.5 rounded border border-panel-border"
-          title={`Map bundle: ${__MAP_BUILD_TIME__}`}
-        >
-          map {typeof import.meta !== 'undefined' && import.meta.env?.DEV ? 'dev' : new Date(__MAP_BUILD_TIME__).toLocaleTimeString()}
-        </span>
-      )}
 
       <button
         onClick={handleLoadClick}
@@ -165,10 +164,31 @@ export function TopToolbar() {
       >
         Load run
       </button>
+      <button
+        onClick={handleAdvanceTurn}
+        disabled={advancing || loading || !loadedGameState || !ipc.isAvailable}
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+      >
+        {advancing ? 'Advancing...' : 'Advance turn'}
+      </button>
+      <button
+        onClick={() => onOpenSidePicker?.()}
+        disabled={loading || advancing || !ipc.isAvailable}
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+      >
+        New campaign
+      </button>
+      <button
+        onClick={() => onOpenRecruitment?.()}
+        disabled={loading || advancing || !loadedGameState || !ipc.isAvailable}
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+      >
+        Recruitment
+      </button>
 
       {loadedGameState && (
         <span className="text-xs font-mono text-text-secondary">
-          {formatTurnLabel(loadedGameState.label)} &mdash; {loadedGameState.formations.length} formations &mdash; {loadedGameState.phase.toUpperCase()}
+          {loadedGameState.label} &mdash; {loadedGameState.formations.length} formations &mdash; {loadedGameState.phase.toUpperCase()}
         </span>
       )}
 

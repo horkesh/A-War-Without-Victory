@@ -400,7 +400,7 @@
             0
           ],
           0,
-          0.45,
+          0.65,
           1,
           0.95
         ]
@@ -459,10 +459,10 @@
           6,
           [
             "+",
-            2,
+            3,
             [
               "*",
-              4,
+              5,
               [
                 "coalesce",
                 [
@@ -476,10 +476,10 @@
           10,
           [
             "+",
-            4,
+            6,
             [
               "*",
-              6,
+              8,
               [
                 "coalesce",
                 [
@@ -493,10 +493,10 @@
           14,
           [
             "+",
-            6,
+            9,
             [
               "*",
-              10,
+              12,
               [
                 "coalesce",
                 [
@@ -552,7 +552,7 @@
             0
           ],
           0,
-          0.45,
+          0.65,
           1,
           0.95
         ]
@@ -585,13 +585,13 @@
             "zoom"
           ],
           6,
-          1.8,
+          2.5,
           10,
-          3,
+          4,
           14,
-          4.2
+          5.5
         ],
-        "line-opacity": 0.9
+        "line-opacity": 0.95
       },
       "layout": {
         "line-cap": "butt",
@@ -621,11 +621,11 @@
             "zoom"
           ],
           6,
-          1,
+          1.5,
           10,
-          1.8,
+          2.6,
           14,
-          2.6
+          4
         ],
         "line-opacity": 0.85,
         "line-dasharray": [
@@ -1089,14 +1089,16 @@
             "zoom"
           ],
           6,
-          0.42,
-          10,
-          0.62,
+          0.5,
+          9,
+          0.7,
+          12,
+          0.9,
           14,
-          0.8
+          1.0
         ],
-        "icon-allow-overlap": false,
-        "icon-ignore-placement": false
+        "icon-allow-overlap": true,
+        "icon-ignore-placement": true
       },
       "paint": {
         "icon-opacity": 0.96
@@ -1128,7 +1130,7 @@
         "text-anchor": "top",
         "text-offset": [
           0,
-          0.9
+          1.7
         ],
         "text-allow-overlap": false
       },

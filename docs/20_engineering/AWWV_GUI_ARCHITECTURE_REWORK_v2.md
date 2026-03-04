@@ -22,8 +22,8 @@
 | **Phase 1 (Scaffold + Map)** | Vite + React + MapLibre; `awwv_map_style.json`; MapContainer; OSID control layer; front lines; formations; order arrows; PMTiles/base map | — |
 | **Phase 2 (Game state)** | Load save → store; GeoJSON builders (control, front lines, formations, order arrows); formations + orders on map | — |
 | **Phase 3 (UI panels)** | TopToolbar, BottomStatusStrip, SelectionPanel (Settlement Info, OSID humanized), FormationDetail, OOBSidebar, CorpsCard, BrigadeRow; click OSID/formation → panels; Storybook. **Phase A complete:** §9.2 panel palette, headers, faction gradient TopToolbar, BrigadeRow cohesion bars + supply dots. **Phase B complete:** tabbed sidebar (Army/Situation), Situation tab, front on CorpsCard, Reserve, stance controls, hover preview, Escape clears selection. **Phase C complete (2026-02-28):** Rich tooltips (§7), MapModeToolbar + MapLayerToggles (bottom-right), useKeyboardShortcuts (Enter, 1–4, Escape), AttackConfirmation modal, OrderQueue. **Phase 3 expansion (2026-03-02):** Tooltip fix (stripFactionSuffix), sector fill + edge glow on map, brigade↔sector bidirectional sync, CorpsDetail panel, density map mode (5th mode). Report: [20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md](../40_reports/implemented/20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md). **Phase 3 remainder (2026-03-02):** ArmyDetail panel (faction-level stats, drill-down to corps), Minimap (second MapLibre, viewport sync, click-to-pan, toggle in Layers), MovementPreview (move mode + green OSID highlight), ZoomControls (satisfied by existing NavigationControl). **Progressive war stories in FormationDetail (2026-03-02):** Color-coded arc badge (veteran/green, bloodied/amber, shattered/red, risen/emerald, destroyed/gray, garrison/neutral), italic narrative paragraph, bulleted notable moments with turn numbers. Data from `FormationState.war_story` via `GameStateAdapter`. Report: [20260302_PROGRESSIVE_WAR_STORIES_IMPLEMENTATION.md](../40_reports/implemented/20260302_PROGRESSIVE_WAR_STORIES_IMPLEMENTATION.md). **Corps & army combat summaries (2026-03-02):** CombatSummaryPanel in CorpsDetail, ArmyDetail, FormationDetail. Data from FormationState.combat_summary via GameStateAdapter. Pipeline step `compute-combat-summaries`. **Phase 3 COMPLETE.** | — |
-| **Phase 4 (Desktop)** | — | useIPC; advance-turn, order staging, recruitment; SidePickerOverlay; fog-of-war; PMTiles in Electron |
-| **Phase 5 (Polish)** | — | ZoC overlay, battle markers, War Summary modal, Replay scrubber, Attack confirmation with odds, Movement preview, visual sign-off |
+| **Phase 4 (Desktop)** | useIPC hook, SidePickerOverlay, RecruitmentModal, useDesktopSession, desktop/orderActions + campaignRecruitmentActions, fog-of-war layer (buildFogOfWarGeoJSON, fog-fill in MapContainer). Move orders staged via IPC. Report: [20260304_GUI_PHASE4_ELECTRON_DESKTOP_INTEGRATION.md](../40_reports/implemented/20260304_GUI_PHASE4_ELECTRON_DESKTOP_INTEGRATION.md) | Fog toggle button; stageCorpsOperationOrder backend; PMTiles manual smoke test |
+| **Phase 5 (Polish)** | Formation markers: corps/army_hq removed from map (abstracted to sidebar+sector); HoI-style rectangular counters (faction-colored, 80×40 CSS px at z14); front-distributed placement (35% LERP toward enemy; `buildFrontOffsetLookup` in `buildFormationsGeoJSON.ts`); `icon-allow-overlap: true` (all brigades always visible). | Battle markers, War Summary modal, Replay scrubber, enclave visualization, strategic point markers, posture stripe on counters, movement preview, visual sign-off |
 
 ---
 
@@ -504,30 +504,26 @@ MapLibre renders everything according to a **style spec** — a JSON document th
     },
 
     // ── 12. Formation markers (GAME DATA) ──
+    // Note (2026-03-04): corps and army_hq are filtered out in buildFormationsGeoJSON
+    // so only brigade and corps_asset markers appear. Icon canvas is 160×80 at
+    // pixelRatio 2 (→ 80×40 CSS px per icon-size unit), faction-colored fill.
     {
       "id": "formation-markers",
       "type": "symbol",
       "source": "formations",
       "layout": {
-        "icon-image": ["concat", ["get", "kind"], "-", ["get", "faction"]],
+        "icon-image": ["get", "icon_id"],
         "icon-size": ["interpolate", ["linear"], ["zoom"],
-          6, 0.4,
-          10, 0.8,
-          14, 1.2
+          6, 0.5,
+          9, 0.7,
+          12, 0.9,
+          14, 1.0
         ],
-        "icon-allow-overlap": false,
-        "icon-ignore-placement": false,
-        "icon-padding": 4,
-        "symbol-sort-key": [
-          "match", ["get", "kind"],
-          "army_hq", 0,
-          "corps", 1,
-          "brigade", 2,
-          3
-        ]
+        "icon-allow-overlap": true,
+        "icon-ignore-placement": true
       },
       "paint": {
-        "icon-opacity": 1.0
+        "icon-opacity": 0.96
       }
     },
 
