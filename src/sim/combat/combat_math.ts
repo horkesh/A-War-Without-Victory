@@ -110,13 +110,32 @@ export const COHESION_DEFENDER: Record<string, number> = {
 
 // Posture multipliers (§2.4)
 export const POSTURE_ATTACK: Record<string, number> = {
-    defend: 0, hold: 0, probe: 0.5, attack: 1.0, assault: 1.2,
-    elastic_defense: 0, consolidation: 0.6
+    hold: 0, defend: 0, defend_at_all_costs: 0, elastic_defense: 0,
+    counterattack: 0.65, dig_in: 0, attack: 1.0, assault: 1.20
 };
 export const POSTURE_DEFENSE: Record<string, number> = {
-    defend: 1.4, hold: 1.2, probe: 1.0, attack: 0.8, assault: 0.6,
-    elastic_defense: 1.2, consolidation: 1.1
+    hold: 1.20, defend: 1.40, defend_at_all_costs: 1.60, elastic_defense: 1.10,
+    counterattack: 1.15, dig_in: 1.35,  // base value; ramp applied in computeDefenderPower
+    attack: 0.80, assault: 0.60
 };
+
+export const HOME_GROUND_DEFENSE_MULT = 1.25;
+export const HOME_GROUND_COUNTERATTACK_MULT = 1.15;
+export const HOME_GROUND_OQ_BONUS = 0.10;
+export const HOME_GROUND_MORALE_FLOOR = 15;
+export const HOME_GROUND_COHESION_BONUS = 0.5;
+export const DIG_IN_BASE_DEF = 1.35;
+export const DIG_IN_FULL_DEF = 1.60;
+export const DIG_IN_FULL_EFFECT_THRESHOLD = 0.75;
+
+/**
+ * Computes the defense multiplier for dig_in posture based on construction progress.
+ * Ramps from DIG_IN_BASE_DEF (1.35) at progress=0 to DIG_IN_FULL_DEF (1.60) at progress>=0.75.
+ */
+export function computeDigInDefMult(progress: number = 0): number {
+    const ratio = Math.min(1, progress / DIG_IN_FULL_EFFECT_THRESHOLD);
+    return DIG_IN_BASE_DEF + ratio * (DIG_IN_FULL_DEF - DIG_IN_BASE_DEF);
+}
 
 // Corps stance multipliers
 export const CORPS_STANCE_ATTACK: Record<string, number> = {
@@ -542,7 +561,9 @@ export function computeDefenderPower(
 ): number {
     const base = basePower(formation);
     const posture = formation.posture ?? 'defend';
-    const postureMult = POSTURE_DEFENSE[posture] ?? 1;
+    const postureMult = posture === 'dig_in'
+        ? computeDigInDefMult((formation as { dig_in_progress?: number }).dig_in_progress)
+        : POSTURE_DEFENSE[posture] ?? 1;
     const supplyMult = getSupplyMult(formation, state, 'defend', supplyStateByOsid);
     const terrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
     const entrenchmentTurns = Math.min(MAX_ENTRENCHMENT, (formation as { entrenchment_turns?: number }).entrenchment_turns ?? 0);
