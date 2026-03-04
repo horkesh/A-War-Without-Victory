@@ -52,7 +52,7 @@ export type PostureLevel = 'hold' | 'probe' | 'push';
 // --- Brigade Operations System types ---
 
 /** Brigade posture (Phase II). Controls pressure output, defensive resilience, and exhaustion rate. */
-export type BrigadePosture = 'defend' | 'probe' | 'attack' | 'elastic_defense' | 'consolidation';
+export type BrigadePosture = 'hold' | 'defend' | 'defend_at_all_costs' | 'elastic_defense' | 'counterattack' | 'dig_in' | 'attack' | 'assault';
 
 /** Equipment condition for a typed equipment category (tanks, artillery). */
 export interface EquipmentCondition {
@@ -225,7 +225,7 @@ export interface OGActivationOrder {
     corps_id: FormationId;
     donors: Array<{ brigade_id: FormationId; personnel_contribution: number }>;
     focus_settlements: SettlementId[];
-    posture: 'probe' | 'attack' | 'defend';
+    posture: BrigadePosture;
     max_duration: number;
 }
 
@@ -296,8 +296,14 @@ export interface FormationState {
     /** Operational settlement ID (OSID). Set at creation from hq_sid via canonical_to_operational_map. */
     location_osid?: SettlementId;
     // --- Brigade Operations System fields ---
-    /** Brigade posture (Phase II). Default: 'defend'. */
+    /** Brigade posture (Phase II). Default: 'hold'. */
     posture?: BrigadePosture;
+    /** True when brigade is defending its ethnic homeland (auto-set by posture system). */
+    home_defense_active?: boolean;
+    /** Countdown from 2 after a retreat; 0 = expired. Enables counterattack posture eligibility. */
+    counterattack_window_turns?: number;
+    /** Dig-in construction progress [0.0, 1.0]; full effect at >= 0.75; resets on displacement/move. */
+    dig_in_progress?: number;
     /** Parent corps formation ID (null = unattached). */
     corps_id?: FormationId | null;
     /** Typed brigade composition (tanks, artillery, infantry). */
