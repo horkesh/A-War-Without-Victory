@@ -73,14 +73,11 @@ const POSTURE_COHESION_COST: Record<BrigadePosture, number> = {
     assault: -5.0,
 };
 
-/** Maximum cohesion recovery cap for recovery postures (hold, defend, dig_in). */
+/** Maximum cohesion recovery cap for postures with positive net cost (hold, dig_in). */
 const DEFEND_COHESION_CAP = 85;
 
 /** dig_in progress increment per turn while in dig_in posture. */
 const DIG_IN_PROGRESS_PER_TURN = 0.25;
-
-/** dig_in progress threshold for full defensive effect. */
-const DIG_IN_FULL_EFFECT_THRESHOLD = 0.75; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 /** dig_in progress value when reset (posture changed away from dig_in). */
 const DIG_IN_PROGRESS_RESET = 0;
@@ -223,7 +220,7 @@ export function applyPostureOrders(state: GameState): PostureReport {
  *
  * Posture cost table (POSTURE_COHESION_COST):
  *   hold:               +1.0/turn (recovery, capped at DEFEND_COHESION_CAP)
- *   defend:             -1.0/turn (note: negative = drain in new system — see below)
+ *   defend:             -1.0/turn (slow drain — hold to recover)
  *   defend_at_all_costs: -4.0/turn
  *   elastic_defense:    -0.5/turn
  *   counterattack:      -1.5/turn
@@ -253,7 +250,9 @@ export function applyPostureCosts(state: GameState): void {
         if ((brigade.kind ?? 'brigade') !== 'brigade') continue;
         if (!isBrigadeAssignedToFront(state, id as FormationId)) continue;
 
-        const posture: BrigadePosture = brigade.posture ?? 'hold';
+        const posture: BrigadePosture = normalizePosture(brigade.posture);
+        // Migrate in-place so auto-downgrade and progress tracking use the canonical posture
+        if (brigade.posture !== posture) brigade.posture = posture;
         let cohesion = brigade.cohesion ?? 60;
 
         const cost = POSTURE_COHESION_COST[posture];
@@ -264,8 +263,8 @@ export function applyPostureCosts(state: GameState): void {
 
         cohesion = cohesion + effectiveCost;
 
-        // Recovery postures: cap at DEFEND_COHESION_CAP
-        if (posture === 'hold' || posture === 'defend' || posture === 'dig_in') {
+        // Recovery postures: cap at DEFEND_COHESION_CAP (only postures with positive net cost)
+        if (posture === 'hold' || posture === 'dig_in') {
             cohesion = Math.min(DEFEND_COHESION_CAP, cohesion);
         }
 
