@@ -1,332 +1,284 @@
-# AoR & ZoC Legacy Audit — Comprehensive Reference Listing
+# AoR / ZoC / Phase-I·II Legacy Audit
 
 **Created:** 2026-03-02
-**Purpose:** Exhaustive inventory of all AoR (Area of Responsibility) and ZoC (Zone of Control) references across the codebase, with removal plan.
+**Expanded:** 2026-03-04 — corrected ZoC status (deleted, not active), added Phase I/II section, confirmed AoR consumer list
+**Purpose:** Exhaustive inventory of all legacy references across codebase with phased removal plan.
 
 ---
 
-## Status Summary
+## Executive Summary
 
-| System | Status | Pipeline Active? | GameState Fields? | Files |
-|--------|--------|-----------------|-------------------|-------|
-| **AoR** | Legacy — phased out, superseded by OSID `location_osid` | No (no pipeline step) | Yes (`brigade_aor`, `brigade_aor_orders` via `LegacyBrigadeAoRState`) | 4 core + 20+ consumers |
-| **ZoC** | **Active** — runs every turn | Yes (`zoc-computation`, `zoc-constrained-movement`) | Yes (`war_enemy_zoc_by_faction`, `war_linked_zoc_by_faction`) | 2 core + 5+ consumers |
-
-**Key finding:** The MEMORY.md entry "ZoC DEPRECATED (2026-03-01)" is **incorrect**. ZoC is fully active in the turn pipeline. Virtual defense (`computeZocDefenderPower`) was removed, but core ZoC (enemy ZoC sets, linked ZoC, ZoC-constrained movement) remains.
-
----
-
-## Part 1: AoR References
-
-### 1A. Core AoR Source Files (candidates for deletion)
-
-| File | Lines | Role | Consumers |
-|------|-------|------|-----------|
-| `src/sim/combat/brigade_aor_legacy.ts` | ~227 | Slim legacy API: `getBrigadeAoRSettlements`, `getSettlementGarrison`, `computeBrigadeDensity` | 10+ files |
-| `src/sim/combat/corps_directed_aor.ts` | ~550 | Legacy corps-directed AoR allocation | 0 active callers in pipeline |
-| `src/sim/combat/aor_reshaping.ts` | ~230 | Legacy AoR reshape order validation | Desktop GUI only |
-| `src/sim/combat/aor_contiguity.ts` | ~250 | Legacy AoR contiguity checks | Tests only |
-| `src/sim/emergence/aor_instantiation.ts` | ~100 | AoR init at Phase I→II transition | Pipeline (legacy path only) |
-| `src/validate/aor_contiguity.ts` | ~80 | AoR contiguity validation | CLI tool |
-| `src/cli/sim_aorcheck.ts` | ~50 | CLI: check AoR contiguity | Standalone |
-| `src/cli/phaseF3_aor_fallback_usage_audit.ts` | ~100 | CLI: AoR fallback audit | Standalone |
-
-### 1B. Active Consumers of `getLegacyAoR()` / `getBrigadeAoRSettlements()`
-
-These files import and call AoR functions. Each must be updated or have AoR paths removed.
-
-| File | Import | Usage |
-|------|--------|-------|
-| `src/sim/combat/battle_resolution.ts` | `getLegacyAoR`, `getBrigadeAoRSettlements`, `getSettlementGarrison` | Garrison lookup, retreat AoR size, attacker AoR |
-| `src/sim/combat/brigade_movement.ts` | `getLegacyAoR`, `getBrigadeAoRSettlements` | Movement within AoR, reposition source |
-| `src/sim/combat/brigade_movement_query.ts` | `getBrigadeAoRSettlements` | Movement range query |
-| `src/sim/combat/brigade_pressure.ts` | `getLegacyAoR` | Pressure computation over AoR |
-| `src/sim/combat/combat_estimate.ts` | `getLegacyAoR`, `getBrigadeAoRSettlements`, `getSettlementGarrison` | Combat estimate garrison |
-| `src/sim/combat/consolidation_flips.ts` | `getLegacyAoR` | Consolidation control flips via brigade_aor |
-| `src/sim/combat/corps_front_assign.ts` | `getLegacyAoR` | Front assignment from brigade_aor |
-| `src/sim/combat/faction_resilience.ts` | `getLegacyAoR` | Faction resilience via AoR coverage |
-| `src/sim/combat/militia_garrison.ts` | `getLegacyAoR` | Militia garrison from brigade_aor |
-| `src/sim/combat/operational_groups.ts` | `getLegacyAoR`, `getBrigadeAoRSettlements` | OG donor settlement lookup |
-| `src/sim/combat/recon_intelligence.ts` | `getLegacyAoR`, `getBrigadeAoRSettlements` | Recon seed fallback from brigade_aor |
-| `src/sim/combat/apply_brigade_reposition.ts` | `getLegacyAoR`, `getBrigadeAoRSettlements` | Reposition within AoR |
-| `src/sim/formation_hq_relocation.ts` | `getLegacyAoR` | HQ placement within AoR settlements |
-| `src/state/displacement_state_utils.ts` | `getLegacyAoR` | Displacement municipality assignment |
-| `src/desktop/desktop_sim.ts` | `getLegacyAoR`, `getBrigadeAoRSettlements` | Desktop queries |
-| `src/ui/warroom/data/war_data_extractor.ts` | `getLegacyAoR` | Warroom data extraction |
-| `src/sim/turn_phases/war_phases.ts` | `LegacyBrigadeAoRState` | Legacy path check |
-
-### 1C. GameState Fields (AoR)
-
-In `src/state/game_state.ts`:
-
-| Field | Type | Line | Status |
-|-------|------|------|--------|
-| `brigade_aor` | `Record<SettlementId, FormationId \| null>` | 84 | Legacy, via `LegacyBrigadeAoRState` |
-| `brigade_aor_orders` | `BrigadeAoROrder[]` | 85 | Legacy, via `LegacyBrigadeAoRState` |
-| `BrigadeAoROrder` | Interface | 69-93 | Legacy type |
-| `LegacyBrigadeAoRState` | Interface | 83-93 | Legacy wrapper |
-| `getLegacyAoR()` | Function | 91-93 | Legacy accessor |
-
-In `src/state/serializeGameState.ts`:
-- Not actively serialized (omitted from derivedKeys or serialized conditionally)
-
-### 1D. Test Files (AoR)
-
-| File | Tests | Status |
-|------|-------|--------|
-| `tests/brigade_aor.test.ts` | `identifyFrontActiveSettlements`, `computeBrigadeDensity`, `getSettlementGarrison` | Legacy API tests |
-| `tests/aor_reshaping.test.ts` | AoR reshape order validation (15+ cases) | Dead — reshaping removed |
-| `tests/corps_aor_contiguity.test.ts` | Corps contiguity enforcement (~250 lines) | Dead — contiguity removed |
-| `tests/emergence_aor_instantiation.test.ts` | AoR init at Phase I→II | Legacy path |
-| `tests/brigade_deploy_orders.test.ts` | Uses `brigade_aor` field | Partial legacy |
-| `tests/brigade_corps_front_assign.test.ts` | Front assignment via `brigade_aor` | Partial legacy |
-| `tests/battle_resolution.test.ts` | Battle resolution with `brigade_aor` | Partial legacy |
-| `tests/brigade_pressure.test.ts` | Pressure via AoR | Partial legacy |
-| `tests/corps_command.test.ts` | Corps command with `brigade_aor` | Partial legacy |
-| `tests/formation_hq_relocation.test.ts` | HQ within AoR settlements | Partial legacy |
-| `tests/displacement_takeover.test.ts` | Displacement with `brigade_aor` | Partial legacy |
-| `tests/front_assignment.test.ts` | Front assignment with `brigade_aor` | Partial legacy |
-| `tests/sandbox_slice_determinism.test.ts` | Sandbox with `brigade_aor` | Partial legacy |
-
-### 1E. Documentation (AoR)
-
-**Canon (structural — need update on removal):**
-- `docs/10_canon/Systems_Manual_v0_6_0.md` — §8 "OSID location, ZoC, and Corps Sectors (AoR removed)", line 481 "No assigned_brigade or brigade_aor"
-- `docs/10_canon/context.md` — line 202 "Phase II spatial model (OSID/ZoC/Corps Sectors; AoR removed)"
-- `docs/10_canon/War_Specification_v0_6_0.md` — AoR removal references
-- `docs/10_canon/Peace_Specification_v0_6_0.md` — Phase I forbidding AoR
-
-**Engineering (structural — need update on removal):**
-- `docs/20_engineering/REPO_MAP.md` — AoR file locations
-- `docs/20_engineering/GUI_DESIGN_BLUEPRINT.md` — line 527 "AREA OF RESPONSIBILITY" display
-- `docs/20_engineering/PIPELINE_ENTRYPOINTS.md` — AoR pipeline references
-
-**Planning (historical — leave as-is):**
-- `docs/30_planning/AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md` — 70-line reconciliation doc
-- `docs/30_planning/design/BOT_AI_DESIGN_SPEC.md` — "built for AoR regime"
-- `docs/30_planning/FRONT_ASSIGNMENT_HOI_STYLE_PROPOSAL.md` — replacement proposal
-
-**Reports (historical — leave as-is):**
-- `docs/40_reports/implemented/20260223_AOR_PHASEOUT_OSID_ZOC_FULL_IMPLEMENTATION.md`
-- `docs/40_reports/implemented/20260301_SPATIAL_MODEL_EVOLUTION_AOR_ZOC_CORPS_SECTORS.md`
-- `docs/40_reports/convenes/BRIGADE_AOR_REDESIGN_IMPLEMENTATION_PLAN_2026_02_18.md`
-- `docs/40_reports/convenes/AOR_CONTIGUITY_AND_SURROUNDED_BRIGADE_DESIGN_2026_02_17.md`
-- Plus ~10 more historical reports (see agent search results)
-
-### 1F. Config & Tooling (AoR)
-
-| File | Reference |
-|------|-----------|
-| `.claude/napkin.md` | "Peace to war transition: no initializeBrigadeAoR" |
-| `.agent/napkin.md` | "When encountering AoR or SID, address it" |
-| `.cursor/rules/aor-sid-address.mdc` | 16-line rule document |
-| `.cursor/agents/formation-expert.md` | Formation expert owns AoR |
-| `.cursor/AGENT_TEAM_ROSTER.md` | AoR in formation expert mandate |
-| `tools/docs/aor_reconcile_scan.py` | 163-line reconciliation scanner |
-| `tools/docs/aor_reconcile_apply.py` | 223-line reconciliation applicator |
+| System | Code Status | Doc Status | Action Required |
+|--------|-------------|------------|-----------------|
+| **AoR** | Legacy — 8 dead files + 17 active consumers | Stale refs in 3 canon + 3 eng docs | R1: delete dead; R2: migrate consumers; R3: update docs |
+| **ZoC** | **Fully deleted (2026-03-02)** | **Stale — 7 canon + 5 eng docs still describe ZoC as present** | Doc cleanup only — no code to remove |
+| **Phase I/II naming** | Pipeline step names load-bearing (keep); minor type names are cosmetic | Canon docs describe old "Phase I / Phase II" architecture | Update canon to say "peace / war"; keep step names |
 
 ---
 
-## Part 2: ZoC References
+## Part 1: AoR (Area of Responsibility)
 
-### 2A. Core ZoC Source Files (ACTIVE — not candidates for deletion)
+### 1A. Dead Code — Safe to Delete Immediately
+
+These files have no active pipeline callers. Deletion = zero behavioral change.
+
+| File | Lines | Why Dead |
+|------|-------|----------|
+| `src/sim/combat/corps_directed_aor.ts` | ~550 | No pipeline callers; `aor_instantiation.ts` calls it but that file is also legacy |
+| `src/sim/combat/aor_reshaping.ts` | ~230 | Reshape order system removed |
+| `src/sim/combat/aor_contiguity.ts` | ~250 | Contiguity enforcement removed from pipeline |
+| `src/validate/aor_contiguity.ts` | ~80 | Validation for dead system |
+| `src/cli/sim_aorcheck.ts` | ~50 | CLI tool for dead system |
+| `src/cli/phaseF3_aor_fallback_usage_audit.ts` | ~100 | Audit tool for dead system |
+| `tools/docs/aor_reconcile_scan.py` | ~163 | Reconciliation tool for dead system |
+| `tools/docs/aor_reconcile_apply.py` | ~223 | Reconciliation applicator for dead system |
+| `tests/aor_reshaping.test.ts` | All | Tests dead reshape system |
+| `tests/corps_aor_contiguity.test.ts` | All | Tests dead contiguity system |
+
+**Estimated removal:** ~1,700 lines, 0 behavioral impact.
+
+### 1B. Core Legacy API (delete after consumers migrated)
 
 | File | Lines | Role |
 |------|-------|------|
-| `src/sim/combat/zoc.ts` | ~297 | Core ZoC: `computeEnemyZocOsidsForFaction`, `computeLinkedZocForFaction`, `computeZoCState`, `isBrigadeInEnemyZoc`, `getValidRetreatDestinations` |
-| `src/sim/combat/zoc_constrained_movement.ts` | ~90 | `applyZocConstrainedMovement` — movement respecting ZoC |
-| `src/sim/combat/osid_adjacency.ts` | ~50 | Extracted from zoc.ts — `buildOsidAdjacency`, `isBrigadeDeployed`, `type Osid` |
+| `src/sim/combat/brigade_aor_legacy.ts` | ~227 | Slim legacy API: `getBrigadeAoRSettlements`, `getSettlementGarrison`, `computeBrigadeDensity`, `getLegacyAoR` |
+| `src/sim/emergence/aor_instantiation.ts` | ~100 | AoR init at peace→war transition (legacy path only) |
 
-### 2B. Pipeline Integration (ZoC)
+### 1C. Active Consumers of `getLegacyAoR()` / `getBrigadeAoRSettlements()`
 
-In `src/sim/turn_phases/war_phases.ts`:
-- **Line 97-98:** Imports `computeZoCState`, `applyZocConstrainedMovement`
-- **Line 302:** Pipeline step `'zoc-computation'` — computes enemy + linked ZoC
-- **Line 311:** `computeZoCState(context.state, edges, opData.operationalToCanonical)`
-- **Line 319:** Writes `state.war_enemy_zoc_by_faction`
-- **Line 325:** Writes `state.war_linked_zoc_by_faction`
-- **Line 400:** Pipeline step `'zoc-constrained-movement'` — applies movement with ZoC blocking
+**Confirmed by grep (2026-03-04):** 25 files total.
 
-### 2C. GameState Fields (ZoC)
+| Priority | File | Usage |
+|----------|------|-------|
+| HIGH | `src/sim/combat/battle_resolution.ts` | Garrison lookup, retreat AoR size, attacker AoR |
+| HIGH | `src/sim/combat/brigade_movement.ts` | Movement within AoR, reposition source |
+| HIGH | `src/sim/combat/brigade_movement_query.ts` | Movement range query |
+| MEDIUM | `src/sim/combat/brigade_pressure.ts` | Pressure computation over AoR |
+| MEDIUM | `src/sim/combat/combat_estimate.ts` | Combat estimate garrison |
+| MEDIUM | `src/sim/combat/militia_garrison.ts` | Militia garrison from brigade_aor |
+| MEDIUM | `src/sim/combat/operational_groups.ts` | OG donor settlement lookup |
+| MEDIUM | `src/sim/combat/apply_brigade_reposition.ts` | Reposition within AoR |
+| MEDIUM | `src/sim/combat/corps_front_assign.ts` | Front assignment from brigade_aor |
+| MEDIUM | `src/sim/combat/faction_resilience.ts` | Faction resilience via AoR coverage |
+| MEDIUM | `src/sim/combat/bot_brigade_ai_osid.ts` | Brigade AI uses AoR for targeting context |
+| MEDIUM | `src/sim/combat/corps_sector_partition.ts` | Sector partition references brigade_aor |
+| MEDIUM | `src/state/displacement_state_utils.ts` | Displacement municipality assignment |
+| LOW | `src/sim/combat/recon_intelligence.ts` | Recon seed fallback from brigade_aor |
+| LOW | `src/sim/formation_hq_relocation.ts` | HQ placement within AoR settlements |
+| LOW | `src/state/game_state.ts` | `LegacyBrigadeAoRState`, `getLegacyAoR()`, `BrigadeAoROrder` types |
+| LOW | `src/state/serialize.ts` | AoR field serialization |
+| LOW | `src/sim/turn_phases/war_phases.ts` | Legacy path check |
+| LOW | `src/desktop/desktop_sim.ts` | Desktop queries (phase-gated, peace only) |
+| LOW | `src/ui/warroom/data/war_data_extractor.ts` | Warroom data extraction (phase-gated) |
+| LOW | `src/ui/map/data/GameStateAdapter.ts` | Map adapter reads brigade_aor |
+| LEGACY | `src/sim/combat/aor_contiguity.ts` | (see dead code above) |
+| LEGACY | `src/sim/combat/aor_reshaping.ts` | (see dead code above) |
+| LEGACY | `src/sim/combat/corps_directed_aor.ts` | (see dead code above) |
+| LEGACY | `src/sim/emergence/aor_instantiation.ts` | (see core legacy above) |
 
-In `src/state/game_state.ts`:
+### 1D. OSID Replacement Patterns
 
-| Field | Type | Line |
-|-------|------|------|
-| `war_enemy_zoc_by_faction` | `Record<FactionId, string[]>` | 1250 |
-| `war_linked_zoc_by_faction` | `Record<FactionId, string[]>` | 1252 |
+| AoR Usage | OSID-based Replacement |
+|-----------|------------------------|
+| `getBrigadeAoRSettlements(state, bid)` → SID list | Brigade `location_osid` + operational contact graph adjacency |
+| `getSettlementGarrison(state, sid)` → brigade at SID | Find brigade where `location_osid` matches |
+| `computeBrigadeDensity(state, bid)` → AoR coverage | Corps front sector density (`corps_front_sectors`) |
+| `getLegacyAoR(state).brigade_aor` → SID→brigade map | Build from formations by `location_osid` |
+| `getLegacyAoR(state).brigade_municipality_assignment` | Derive from `location_osid` → municipality |
 
-In `src/state/serializeGameState.ts`:
-- Lines 76-77: Both fields listed in serialization
+### 1E. GameState Fields (remove after consumers migrated)
 
-### 2D. ZoC Constants (formation_constants.ts)
+| Field | Type | File | Line |
+|-------|------|------|------|
+| `brigade_aor` | `Record<SettlementId, FormationId \| null>` | `game_state.ts` | ~84 |
+| `brigade_aor_orders` | `BrigadeAoROrder[]` | `game_state.ts` | ~85 |
+| `LegacyBrigadeAoRState` | Interface | `game_state.ts` | ~83 |
+| `BrigadeAoROrder` | Interface | `game_state.ts` | ~69 |
+| `getLegacyAoR()` | Accessor function | `game_state.ts` | ~91 |
 
-| Constant/Function | Purpose |
-|--------------------|---------|
-| `MAX_ZOC_SETTLEMENTS` | Max ZoC per brigade |
-| `MIN_ZOC_SETTLEMENTS` | Min ZoC per brigade |
-| `getPersonnelBasedZoCCap()` | Personnel-scaled ZoC cap |
-| `getEffectiveZoCCap()` | Effective cap (player/bot desired + personnel) |
+### 1F. Test Files (partial legacy — keep, update fixtures after migration)
 
-Used in: `operational_groups.ts` (donor settlement count), archived UI.
+| File | Status |
+|------|--------|
+| `tests/brigade_aor.test.ts` | Keep — tests low-level legacy API; delete after migration |
+| `tests/emergence_aor_instantiation.test.ts` | Keep — legacy path; delete after migration |
+| `tests/battle_resolution.test.ts` | Keep — update fixtures after migration |
+| `tests/brigade_pressure.test.ts` | Keep — update fixtures after migration |
+| `tests/corps_command.test.ts` | Keep — update fixtures after migration |
+| `tests/brigade_deploy_orders.test.ts` | Keep — update fixtures after migration |
+| `tests/brigade_corps_front_assign.test.ts` | Keep — update fixtures after migration |
+| `tests/displacement_takeover.test.ts` | Keep — update fixtures after migration |
+| `tests/front_assignment.test.ts` | Keep — update fixtures after migration |
+| `tests/formation_hq_relocation.test.ts` | Keep — update fixtures after migration |
+| `tests/sandbox_slice_determinism.test.ts` | Keep — update fixtures after migration |
 
-### 2E. Active ZoC Consumers
+### 1G. Documentation (AoR)
 
-| File | Usage |
-|------|-------|
-| `src/sim/turn_phases/war_phases.ts` | Pipeline orchestration |
-| `src/sim/turn_pipeline_types.ts` | `zocState` cache type |
-| `src/sim/combat/operational_groups.ts` | `getPersonnelBasedZoCCap` for donor cap |
-| `src/state/settlement_control.ts` | Comment: "HoI ZoC / spawn-by-OSID" |
+**Update when code is removed:**
+- `docs/10_canon/Systems_Manual_v0_6_0.md` — §8 mentions AoR removal; update to reflect complete removal
+- `docs/10_canon/context.md` — "Phase II spatial model (OSID/ZoC/Corps Sectors; AoR removed)" — update ZoC part too
+- `docs/20_engineering/REPO_MAP.md` — remove deleted file entries from file list
+- `docs/20_engineering/PIPELINE_ENTRYPOINTS.md` — remove any AoR pipeline refs
+- `docs/20_engineering/GUI_DESIGN_BLUEPRINT.md` — remove "AREA OF RESPONSIBILITY" display mockup
+- `.cursor/rules/aor-sid-address.mdc` — remove or update rule
+- `.cursor/agents/formation-expert.md` — remove AoR ownership
+- `.claude/napkin.md` — remove "no initializeBrigadeAoR" note (will be moot)
 
-### 2F. Test Files (ZoC)
-
-| File | Tests |
-|------|-------|
-| `tests/linked_zoc.test.ts` | ~450 lines: two-brigade linking, chains, distance limits, movement blocking, attack bypass, per-faction independence |
-
-### 2G. Documentation (ZoC)
-
-**Canon (active — describes current system):**
-- `docs/10_canon/Engine_Invariants_v0_6_0.md` — §6.1 ZoC Defensive Projection, retreat destinations
-- `docs/10_canon/Game_Bible_v0_6_0.md` — ZoC overview, movement constraints
-- `docs/10_canon/Rulebook_v0_6_0.md` — lines 124-147: comprehensive ZoC rules
-- `docs/10_canon/Systems_Manual_v0_6_0.md` — §8 OSID/ZoC/Corps Sectors, deployment/movement
-- `docs/10_canon/Phase_Specifications_v0_6_0.md` — War phase includes ZoC
-- `docs/10_canon/War_Specification_v0_6_0.md` — ZoC-constrained movement
-- `docs/10_canon/context.md` — "Phase II spatial model (OSID/ZoC/Corps Sectors)"
-
-**Engineering:**
-- `docs/20_engineering/PIPELINE_ENTRYPOINTS.md` — ZoC computation + constrained movement steps
-- `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — ZoC overlay (Phase 5)
-- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` — ZoC overlay rendering
-- `docs/20_engineering/PHASE_I_OVERHAUL_MILITIA_TO_BRIGADES.md` — ZoC readiness tiers
-
-**Planning:**
-- `docs/30_planning/20260222_HOI_BRIGADES_AND_ZONE_OF_CONTROL_DESIGN.md` — Original ZoC design spec
-- `docs/30_planning/20260222_ATTACK_RESOLUTION_FORMULA_SPEC.md` — ZoC in attack resolution
-
-### 2H. Archived UI (ZoC)
-
-| File | References |
-|------|-----------|
-| `src/_archived/ui_legacy/data/GameStateAdapter.ts` | `enemyZocByFaction` parsing |
-| `src/_archived/ui_legacy/renderer/HoIMapRenderer.ts` | ZoC overlay meshes, selection ZoC |
-| `src/_archived/ui_legacy/MapApp.ts` | `getPersonnelBasedZoCCap` |
-| `src/_archived/ui_legacy/map_hoi/MapModeToolbar.ts` | ZoC layer toggle (F6) |
-| `src/_archived/ui_legacy/types.ts` | ZoC type definitions |
+**Leave as-is (historical records):**
+- All `docs/40_reports/` entries
+- `docs/30_planning/AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md`
+- `docs/_old/` entries
 
 ---
 
-## Part 3: Removal Plan
+## Part 2: ZoC (Zone of Control)
 
-### Phase R1: Remove Dead AoR Code (Safe — no behavioral change)
+### 2A. Code Status: FULLY DELETED (2026-03-02)
 
-**Delete files:**
-1. `src/sim/combat/corps_directed_aor.ts` — no active pipeline callers
-2. `src/sim/combat/aor_reshaping.ts` — reshape orders are dead
-3. `src/sim/combat/aor_contiguity.ts` — contiguity checks are dead
-4. `src/validate/aor_contiguity.ts` — validation for dead system
-5. `src/cli/sim_aorcheck.ts` — CLI for dead system
-6. `src/cli/phaseF3_aor_fallback_usage_audit.ts` — audit for dead system
-7. `tools/docs/aor_reconcile_scan.py` — reconciliation for dead system
-8. `tools/docs/aor_reconcile_apply.py` — reconciliation for dead system
+The following files were deleted as part of n344:
 
-**Delete tests:**
-1. `tests/aor_reshaping.test.ts` — tests dead reshape system
-2. `tests/corps_aor_contiguity.test.ts` — tests dead contiguity system
+| Deleted File | Lines Removed | What It Did |
+|-------------|--------------|-------------|
+| `src/sim/combat/zoc.ts` | ~297 | Core: `computeEnemyZocOsidsForFaction`, `computeLinkedZocForFaction`, `computeZoCState`, `isBrigadeInEnemyZoc`, `getValidRetreatDestinations` |
+| `src/sim/combat/zoc_constrained_movement.ts` | ~90 | `applyZocConstrainedMovement` — movement blocked by enemy ZoC |
+| `tests/linked_zoc.test.ts` | ~450 | ZoC chain, distance, movement blocking tests |
 
-**Estimated impact:** 0 behavioral change. These files have no active callers in the turn pipeline.
+Pipeline steps removed: `zoc-computation`, `zoc-constrained-movement`
+GameState fields removed: `war_enemy_zoc_by_faction`, `war_linked_zoc_by_faction`
+Constants replaced: `MAX_ZOC_SETTLEMENTS`, `MIN_ZOC_SETTLEMENTS` → `BRIGADE_OPERATIONAL_FRONTAGE_CAP = 48`
+Replacement: `apply-brigade-movement` via `brigade_movement_orders.ts`, defense via `local_front_defense.ts` density
 
-### Phase R2: Migrate AoR Consumers to OSID-Only (Requires careful work)
+**Retained from ZoC system:** `src/sim/combat/osid_adjacency.ts` — `buildOsidAdjacency`, `type Osid` (still actively used)
 
-Each consumer of `getLegacyAoR()` / `getBrigadeAoRSettlements()` needs an OSID-only replacement. The pattern is:
+### 2B. Stale ZoC References in Live Docs (ACTION REQUIRED)
 
-| AoR Usage | OSID Replacement |
-|-----------|-----------------|
-| `getBrigadeAoRSettlements(state, bid)` → list of SIDs | Brigade's `location_osid` → operational_contact_graph adjacency |
-| `getSettlementGarrison(state, sid)` → brigade at SID | Find brigade where `location_osid` maps to SID |
-| `computeBrigadeDensity(state, bid)` → AoR coverage | Use corps front sector density instead |
-| `getLegacyAoR(state).brigade_aor` → SID→brigade map | Build from formations where `location_osid` is set |
-| `getLegacyAoR(state).brigade_municipality_assignment` | Derive from `location_osid` → municipality mapping |
+These files still describe ZoC as present and active. They need targeted updates to reflect deletion.
 
-**Priority order (by risk):**
-1. `recon_intelligence.ts` — already has OSID path, legacy is fallback only
-2. `brigade_pressure.ts` — pressure computation
-3. `consolidation_flips.ts` — control flip logic
-4. `corps_front_assign.ts` — front assignment
-5. `militia_garrison.ts` — garrison lookup
-6. `battle_resolution.ts` — highest risk, most complex
-7. `combat_estimate.ts` — estimate depends on garrison
-8. `brigade_movement.ts` / `brigade_movement_query.ts` — movement range
-9. `apply_brigade_reposition.ts` — reposition
-10. `operational_groups.ts` — OG donor lookup
-11. `formation_hq_relocation.ts` — HQ placement
-12. `displacement_state_utils.ts` — displacement municipality
-13. `faction_resilience.ts` — resilience coverage
-14. `desktop_sim.ts` / `war_data_extractor.ts` — UI layer (lower priority)
+**Canon (7 files — must update):**
 
-**After all consumers migrated:**
-- Delete `src/sim/combat/brigade_aor_legacy.ts`
-- Delete `src/sim/emergence/aor_instantiation.ts`
-- Remove `LegacyBrigadeAoRState`, `BrigadeAoROrder`, `getLegacyAoR()` from `game_state.ts`
-- Remove `brigade_aor` from serialization
-- Delete remaining AoR test fixtures
+| File | Reference Type | What to Fix |
+|------|---------------|-------------|
+| `docs/10_canon/Engine_Invariants_v0_6_0.md` | §6.1 "ZoC Defensive Projection, retreat destinations" | Remove ZoC section; update retreat to OSID-based |
+| `docs/10_canon/Game_Bible_v0_6_0.md` | ZoC overview, movement constraints | Replace with sector-line defense + frontage cap explanation |
+| `docs/10_canon/Rulebook_v0_6_0.md` | Lines 124–147: comprehensive ZoC rules | Replace with local_front_defense + movement order rules |
+| `docs/10_canon/Systems_Manual_v0_6_0.md` | §8 "OSID/ZoC/Corps Sectors" | Remove ZoC from §8; update to "OSID/Corps Sectors/Frontage" |
+| `docs/10_canon/Phase_Specifications_v0_6_0.md` | "War phase includes ZoC" | Remove ZoC from war phase description |
+| `docs/10_canon/War_Specification_v0_6_0.md` | "ZoC-constrained movement" | Replace with movement order mechanics |
+| `docs/10_canon/context.md` | "Phase II spatial model (OSID/ZoC/Corps Sectors)" | Remove ZoC; add frontage cap + local_front_defense |
 
-### Phase R3: Clean Up AoR Documentation
+**Engineering (5 files — must update):**
 
-**Update (structural references):**
-- `docs/10_canon/Systems_Manual_v0_6_0.md` — remove "(AoR removed)" suffix, update §8
-- `docs/10_canon/context.md` — remove "AoR removed" from spatial model
-- `docs/20_engineering/REPO_MAP.md` — remove deleted file entries
-- `docs/20_engineering/GUI_DESIGN_BLUEPRINT.md` — remove AoR display mockup
-- `docs/20_engineering/PIPELINE_ENTRYPOINTS.md` — remove AoR pipeline refs
+| File | Reference Type | What to Fix |
+|------|---------------|-------------|
+| `docs/20_engineering/AOR_ZOC_LEGACY_AUDIT.md` | Part 2 said ZoC "ACTIVE" | **This document** — already corrected in this revision |
+| `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` | "ZoC overlay (Phase 5)" | Mark as removed / not implemented |
+| `docs/20_engineering/MAP_UI_MASTER.md` | ZoC overlay reference | Remove or mark removed |
+| `docs/20_engineering/PIPELINE_ENTRYPOINTS.md` | ZoC pipeline steps listed | Remove `zoc-computation` and `zoc-constrained-movement` entries |
+| `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` | ZoC overlay rendering | Mark ZoC overlay as removed |
+
+**Planning docs (leave as-is — historical):**
+- `docs/30_planning/20260222_HOI_BRIGADES_AND_ZONE_OF_CONTROL_DESIGN.md` — original ZoC design spec
+- `docs/30_planning/20260222_ATTACK_RESOLUTION_FORMULA_SPEC.md` — ZoC in attack resolution spec
+
+**Archived UI (no action — already archived):**
+- `src/_archived/ui_legacy/` — 5 files with ZoC rendering code; archived, no impact
+
+---
+
+## Part 3: Phase I / Phase II Naming
+
+### 3A. Load-Bearing Pipeline Step Names (DO NOT RENAME)
+
+These `phase-i-*` and `phase-ii-*` strings are embedded in serialized `TurnReport` objects and save files. Renaming them would break save compatibility.
+
+**Keep exactly as-is:**
+- `peace_phases.ts`: `phase-i-militia-emergence`, `phase-i-pool-population`, `phase-i-minority-militia-decay`, `phase-i-brigade-reinforcement`, `phase-i-formation-spawn`, `phase-i-control-flip`, `phase-i-displacement-hooks`, `phase-i-control-strain`, `phase-i-authority-update`, `phase-i-jna-transition`
+- `war_phases.ts`: `phase-ii-supply-osid`, `phase-ii-enclave-resilience`, `phase-ii-resolve-attack-orders`, `phase-ii-brigade-reinforcement`, etc.
+- `run_early_war_browser.ts`, `run_combat_browser.ts`: Browser-side step name lists
+
+### 3B. Run Summary Fields (keep — historical naming convention)
+
+In `scenario_runner.ts` and `scenario_end_report.ts`:
+- `weeks_with_phase_ii`, `phaseIIAttackResolutionSummary`, `phaseIITakeoverDisplacementSummary`
+
+These appear in final_save.json outputs read by external tools. Renaming risks breaking tooling. Mark as "historical naming" in comments if confusion arises, but do not rename.
+
+### 3C. Type Names and Function Names (low-priority rename candidates)
+
+These are internal and can be renamed with a small-scope refactor. None are in public API or save format.
+
+| Current Name | Suggested Rename | Files | Effort |
+|---|---|---|---|
+| `PhaseIJNAState` | `EarlyWarJNAState` | `game_state.ts`, `referendum.ts` | 1h |
+| `applyPhase0ToPhaseITransition` | `applyPeaceToWarTransition` | `referendum.ts`, callers | 2h |
+| `phase_i_militia_strength` (GameState field) | `early_war_militia_strength` | `game_state.ts`, `militia_emergence.ts`, `scenario_runner.ts` | 2h + save migration |
+| `PHASE_I_DISPLACEMENT_FRACTION_NO_CENSUS` | `EARLY_WAR_DISPLACEMENT_FRACTION_NO_CENSUS` | `displacement.ts` | 30m |
+| `PhaseIDisplacementFlipInfo` | `EarlyWarDisplacementFlipInfo` | `displacement.ts` | 30m |
+| `assertNoAoRInPhaseI` | `assertNoAoRInEarlyWar` | `peace_phases.ts`, `run_early_war_browser.ts` | 30m |
+
+**Note on `phase_i_militia_strength`:** This is a GameState field that appears in serialized saves. Renaming requires a migration function in `normalizeScenario` / `loadState`, similar to past migrations. Non-trivial but doable.
+
+### 3D. Canon Documentation (stale architecture description)
+
+The canon docs still describe the system in terms of "Phase 0 / Phase I / Phase II" when the correct framing is now "peace / war". These need targeted edits — not full rewrites.
+
+**Files to update:**
+| File | What to Change |
+|------|---------------|
+| `docs/10_canon/context.md` | "Phase II spatial model" → "war phase spatial model (OSID/Corps Sectors/Frontage)" |
+| `docs/10_canon/Systems_Manual_v0_6_0.md` | §1 architecture overview — replace Phase I/II framing with peace/war framing |
+| `docs/10_canon/Phase_Specifications_v0_6_0.md` | Update cross-references to use peace/war terminology |
+| `docs/10_canon/War_Specification_v0_6_0.md` | Remove "supersedes Phase_I/II" header note (move to historical footnote) |
 
 **Leave as-is (historical):**
-- All `docs/40_reports/` entries — historical record
-- `docs/30_planning/AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md` — historical
-- All `docs/_old/` entries — archived
+- `docs/20_engineering/PHASE_I_OVERHAUL_MILITIA_TO_BRIGADES.md` — historical design doc
+- `docs/30_planning/PHASE_I_II_EDGE_CASES.md` — historical spec
+- All `docs/40_reports/` mentions — historical record
 
-**Update config:**
-- `.cursor/rules/aor-sid-address.mdc` — remove or update
-- `.cursor/agents/formation-expert.md` — remove AoR ownership
-- `.claude/napkin.md` — remove AoR entries
-- `.agent/napkin.md` — remove AoR entries
+---
 
-### Phase R4: ZoC Cleanup (Future — only if ZoC is deprecated)
+## Phased Removal Plan
 
-ZoC is **currently active** and should NOT be removed. If a future decision deprecates ZoC:
+### Phase R1: Dead AoR Code — Delete Immediately
+**Scope:** 10 files (~1,700 lines). No behavioral change. No consumer updates needed.
+**Files:** `corps_directed_aor.ts`, `aor_reshaping.ts`, `aor_contiguity.ts` (combat + validate), `sim_aorcheck.ts`, `phaseF3_aor_fallback_usage_audit.ts`, `aor_reconcile_scan.py`, `aor_reconcile_apply.py`, `tests/aor_reshaping.test.ts`, `tests/corps_aor_contiguity.test.ts`
+**Test gate:** `npx vitest run` must stay green after deletion.
 
-**Would require removing:**
-- `src/sim/combat/zoc.ts` (~297 lines)
-- `src/sim/combat/zoc_constrained_movement.ts` (~90 lines)
-- Pipeline steps `zoc-computation` and `zoc-constrained-movement` from `war_phases.ts`
-- GameState fields `war_enemy_zoc_by_faction`, `war_linked_zoc_by_faction`
-- Serialization entries in `serializeGameState.ts`
-- `tests/linked_zoc.test.ts` (~450 lines)
-- ZoC constants in `formation_constants.ts`
-- All canon ZoC sections (6+ files)
-- Archived UI ZoC rendering (5+ files)
+### Phase R2: ZoC Doc Cleanup
+**Scope:** 12 doc files (7 canon + 5 engineering). No code changes.
+**Pattern:** Remove ZoC sections / replace with current mechanic descriptions (frontage cap, local_front_defense density, OSID-based movement).
+**Test gate:** `npx tsc --noEmit`. Docs only — no runtime test.
 
-**NOT recommended at this time.** ZoC provides movement constraints and front-line modeling that has no replacement.
+### Phase R3: AoR Consumer Migration
+**Scope:** 17 active consumers migrated to OSID-based equivalents, then `brigade_aor_legacy.ts` + `aor_instantiation.ts` deleted, `LegacyBrigadeAoRState` removed from GameState.
+**Order by risk:** `recon_intelligence` → `brigade_pressure` → `consolidation_flips` → `corps_front_assign` → `militia_garrison` → `displacement_state_utils` → `faction_resilience` → `formation_hq_relocation` → `operational_groups` → `apply_brigade_reposition` → `combat_estimate` → `brigade_movement` / `brigade_movement_query` → `battle_resolution` (highest risk) → `desktop_sim` / `war_data_extractor` / `GameStateAdapter`
+**Test gate:** After each migration: `npx vitest run`. After all: `npm run sim:scenario:run:40w` and compare calibration (hash must match).
 
-### Phase R5: Fix Incorrect Memory Entry
+### Phase R4: AoR + Phase I/II Doc Cleanup
+**Scope:** Update 3 canon + 3 engineering docs post-code-removal. Update peace/war terminology in canon.
+**Pattern:** Remove deleted file references. Replace "Phase I / Phase II" with "peace / war" where architectural. Keep pipeline step names in any documentation that lists them.
 
-The MEMORY.md entry stating "ZoC DEPRECATED (2026-03-01): Entire OSID ZoC system removed" is **factually incorrect**. ZoC remains active. This entry should be corrected to reflect that only `computeZocDefenderPower` (virtual defense) was removed, not the ZoC system itself.
+### Phase R5: Phase I/II Type Renames (Optional, Low Priority)
+**Scope:** ~7 type/function/constant renames. `phase_i_militia_strength` GameState field rename requires save migration.
+**Recommendation:** Only do this if actively working in those files. Not worth a dedicated session.
 
 ---
 
 ## Metrics
 
-| Category | AoR Files | ZoC Files |
-|----------|-----------|-----------|
-| Core source | 8 | 3 |
-| Active consumers | 17 | 4 |
-| Tests | 13 | 1 |
-| Canon docs | 4 | 7 |
-| Engineering docs | 3 | 4 |
-| Planning docs | 3 | 2 |
-| Reports (historical) | 15+ | 0 |
-| Config/tooling | 7 | 3 |
-| Archived UI | 3+ | 5 |
-| **Total references** | **~75** | **~30** |
+| Category | Dead Code | Active Consumers | Stale Docs | Total Files |
+|----------|-----------|-----------------|------------|-------------|
+| AoR | 10 files | 25 files | 6 docs | 41 |
+| ZoC | 0 (deleted) | 0 | 12 docs | 12 |
+| Phase I/II naming | 0 | ~20 (load-bearing, keep) | 4 canon docs | ~24 |
+| **Total** | **10** | **25** | **22** | **~77** |
+
+---
+
+## What NOT to Do
+
+- **Do not rename pipeline step names** (`phase-i-*`, `phase-ii-*`) — save compat
+- **Do not delete `osid_adjacency.ts`** — still actively used (was extracted from ZoC, serves adjacency queries)
+- **Do not remove AoR consumers before migrating them** — will break battle resolution, movement, garrison
+- **Do not touch `docs/40_reports/` or `docs/_old/`** — historical record, leave as-is
+- **Do not rename `phase_i_militia_strength` without a save migration function**
