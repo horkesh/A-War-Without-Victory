@@ -212,6 +212,7 @@ function buildRecruitedFormation(
         cohesion: effectiveCohesion,
         composition: buildBrigadeComposition(equipClass, brigade.faction, true),
         corps_id: (brigade.corps as FormationId) ?? null,
+        origin_mun: brigade.home_mun,
         officer_quality: brigade.initial_officer_quality ?? getFactionDefaultOfficerQuality(brigade.faction, currentTurn),
         ...(brigade.honor ? { honor: brigade.honor } : {}),
         ...convertOobDecorationsRecruitment(brigade),

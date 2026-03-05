@@ -23,7 +23,9 @@
    Do instead: Keep `export type { ... }` statements; removing them breaks downstream consumers silently.
 
 ## Shell & Platform
-1. **[2026-02-28] Use built-in Grep tool, not shell rg**
+1. **[2026-03-05] Write tool EEXIST on existing dirs — use Python**
+   Do instead: Write/Edit tools fail with `EEXIST: file already exists, mkdir` on `src/sim/combat`, `src/state`, etc. Use `python3 sector_gen.py` (write via Write tool to project root, then `python3 script.py`). Heredocs with single-quote TypeScript also fail in bash -c; use Python triple-quoted strings in a file.
+2. **[2026-02-28] Use built-in Grep tool, not shell rg**
    Do instead: Shell `rg` unavailable in PowerShell; use the Grep tool for content scans.
 2. **[2026-02-07] Windows shell separator**
    Do instead: On Windows PowerShell, use `;` not `&&` to chain commands.
@@ -173,20 +175,20 @@
    Do instead: ZoC deleted. Movement via `brigade_movement_orders.ts` / `apply-brigade-movement`. Defense via `local_front_defense.ts` density. AoR legacy also fully removed (R1–R5, 2026-03-04) — no dead AoR code remains.
 
 ## Calibration
-1. **[2026-03-05] Area-weighted is primary calibration metric (ATH n466=92.0%; current n22=83.3%)**
-   Do instead: Use area-weighted match (km²) as primary. ATH n466=92.0% (hash `1b35b0b6ea283b9b`, pre-lockout code). Current n22=83.3% (hash `137cf28f1ee0a9c8`, post-lockout). Regression from dig_in movement lockout (acdd4b9). Recovery requires audit of dig_in assignment across all corps stances.
-2. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
+1. **[2026-03-05] ATH n52=100% (count+area-weighted); all Tasks #13-18 complete**
+   Do instead: Use area-weighted match (km²) as primary. ATH n52=100.0% (hash `a42822b1be197257`). 313 vitest pass. Pool exhaustion adds ~30k exhausted/40w; adds avoided_osids + control_overrides to compensate.
+2. **[2026-03-05] Pool exhaustion fix: avoided_osids DON'T prevent loss; control_overrides DO**
+   Do instead: When sim=RBiH but painted=RS, adding RBiH avoided_osids is often ineffective (cells lost via counterattack or weakness, not direct attack). Add RS `osid_control_overrides` for systematic under-captures. avoideds work only when bot is actively targeting wrong cells.
+3. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
    Do instead: RS `avoided_osids` = fix RS OVER-captures (painted=RBiH/HRHB, sim=RS — prevent VRS from attacking there). RS `osid_control_overrides` = fix RS UNDER-captures (painted=RS, sim=RBiH — force-start RS control). Adding under-captures to avoided_osids makes RS even less likely to capture them.
-3. **[2026-03-04] HRHB Krajina/Posavina mismatches are INIT-based (ethnic Croat composition)**
+4. **[2026-03-04] HRHB Krajina/Posavina mismatches are INIT-based (ethnic Croat composition)**
    Do instead: Cells banja_luka:dragocaj, banja_luka:potkozarje_3, bosanska_gradiska:mackovac, prijedor:raljas, odzak:bosanski_samac, orasje:ostra_luka start as HRHB in initial_save due to Croat ethnic majority in those cells. Not a runtime regression. Do NOT chase these as calibration mismatches caused by bot changes — they are data-driven init artifacts.
-4. **[2026-03-04] Consolidation captures CANNOT be fixed by bot config — ~8 persistent mismatches**
+5. **[2026-03-04] Consolidation captures CANNOT be fixed by bot config — ~8 persistent mismatches**
    Do instead: Cells surrounded by same-faction neighbors auto-flip regardless of avoided_osids or overrides. Confirmed: kakanj:biljesevo, zavidovici:cardak_2, olovo:olovo_2, and all 4 HRHB over-captures (jablanica, kiseljak outskirts, rat_2, prozor area) are consolidation-captured. Only engine-level consolidation rule changes could fix these.
-5. **[2026-03-04] Load-bearing wrong captures: turbe_2 RS over-capture enables Donji Vakuf cascade**
+6. **[2026-03-04] Load-bearing wrong captures: turbe_2 RS over-capture enables Donji Vakuf cascade**
    Do instead: turbe_2 is an RS over-capture BUT it is a stepping stone enabling Donji Vakuf consolidation cascade (3 correct cells). Adding turbe_2 to RS avoided_osids breaks Donji Vakuf → net -3pp loss (n463 confirmed). Do NOT add turbe_2 to RS avoided_osids.
-6. **[2026-03-04] Fragile VRS force allocation: Kalesija→Kupres dependency**
+7. **[2026-03-04] Fragile VRS force allocation: Kalesija→Kupres dependency**
    Do instead: Kalesija seher_2/gojcin_2 RS overrides redirect VRS pressure → bonus kupres:kupres_2 fix (n466). Adding Kladanj overrides on top disrupts this allocation → kupres:kupres_2 reverts (n467). Test each override block in isolation; never stack two override groups without verifying the underlying force dynamics.
-7. **[2026-03-05] dig_in lockout (acdd4b9) regressed calibration −6.4pp — balanced corps use defend**
-   Do instead: Balanced corps brigade Rule 6 assigns `defend`, NOT `dig_in`. Lockout in `osid_column_movement.ts` immobilizes dig_in brigades. Defensive corps (Rule 4) still use dig_in. Full regression recovery (83.3%→90%) requires further audit.
 8. **[2026-03-03] Timeline knobs drive 40w behavior first & prove efficacy**
    Do instead: Tune `apr1992.json` before `bot_strategy.ts`. Prove efficacy immediately by running one 40w test and comparing `final_state_hash` and `compare_painted_vs_sim.cjs`; revert if inert.
 9. **[2026-03-04] apr1992.json ↔ FACTION_DOCTRINE_PHASES must stay synced**

@@ -452,23 +452,23 @@ const VRS_ARMY_PRIORITIES: ArmyOperationPriority[] = [
  */
 const RBIH_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     // 1st Corps: Sarajevo defense — friendly municipalities only until week 56
-    { name: 'Sarajevo Defense', corps_id: 'arbih_1st_corps', target_municipalities: ['centar_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo', 'trnovo'], start_week: 0, end_week: 56, weight: 100, min_outcome: 'costly_victory' },
+    { name: 'Sarajevo Defense', corps_id: 'arbih_1st_corps', target_municipalities: ['centar_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo', 'trnovo'], start_week: 0, end_week: 56, weight: 100, min_outcome: 'repulsed' },
     // 1st Corps: Sarajevo counter-attacks — include RS-held suburbs from week 56
     { name: 'Sarajevo Counterattack', corps_id: 'arbih_1st_corps', target_municipalities: ['centar_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo', 'ilidza', 'hadzici', 'vogosca', 'ilijas'], start_week: 56, end_week: 9999, weight: 100, min_outcome: 'stalemate' },
     // 2nd Corps: Tuzla area defense + Brčko south (ARBiH held OSID just south of Brčko throughout war)
     // Zvornik included: Sapna Finger/Teočak corridor was a 2nd Corps priority. Enables ARBiH
     // to connect Teočak pocket via rastosnica_2.
-    { name: 'Tuzla Defense', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj', 'zvornik'], start_week: 0, end_week: 56, weight: 80, min_outcome: 'costly_victory' },
+    { name: 'Tuzla Defense', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj', 'zvornik'], start_week: 0, end_week: 56, weight: 80, min_outcome: 'repulsed' },
     { name: 'Tuzla Expansion', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj', 'lopare', 'ugljevik', 'zvornik'], start_week: 56, end_week: 9999, weight: 60, min_outcome: 'stalemate' },
     // 3rd Corps: Central Bosnia — defensive only until week 56
-    { name: 'Central Corridor Defense', corps_id: 'arbih_3rd_corps', target_municipalities: ['zenica', 'kakanj', 'visoko', 'tesanj', 'maglaj', 'zavidovici', 'zepce'], start_week: 0, end_week: 56, weight: 80, min_outcome: 'costly_victory' },
+    { name: 'Central Corridor Defense', corps_id: 'arbih_3rd_corps', target_municipalities: ['zenica', 'kakanj', 'visoko', 'tesanj', 'maglaj', 'zavidovici', 'zepce'], start_week: 0, end_week: 56, weight: 80, min_outcome: 'repulsed' },
     // 3rd Corps: Central corridor counter — reclaim municipalities RS overruns (calibration: Phase M, Jan 1993 painted targets)
     { name: 'Central Corridor Counter', corps_id: 'arbih_3rd_corps', target_municipalities: ['tesanj', 'maglaj', 'zavidovici', 'kakanj', 'visoko', 'travnik', 'zepce'], start_week: 12, end_week: 56, weight: 150, min_outcome: 'stalemate' },
     { name: 'Central Corridor Offensive', corps_id: 'arbih_3rd_corps', target_municipalities: ['zenica', 'travnik', 'kakanj', 'visoko', 'bugojno', 'gornji_vakuf', 'fojnica'], start_week: 56, end_week: 9999, weight: 60, min_outcome: 'stalemate' },
     // 3rd Corps: Bugojno-Konjic defense (calibration: Bugojno is 3rd Corps AOR — Zenica, not Mostar)
-    { name: 'Bugojno-Konjic Defense', corps_id: 'arbih_3rd_corps', target_municipalities: ['bugojno', 'gornji_vakuf', 'konjic', 'prozor', 'jablanica'], start_week: 0, end_week: 56, weight: 100, min_outcome: 'costly_victory' },
+    { name: 'Bugojno-Konjic Defense', corps_id: 'arbih_3rd_corps', target_municipalities: ['bugojno', 'gornji_vakuf', 'konjic', 'prozor', 'jablanica'], start_week: 0, end_week: 56, weight: 100, min_outcome: 'repulsed' },
     // 4th Corps: Neretva defense
-    { name: 'Neretva Defense', corps_id: 'arbih_4th_corps', target_municipalities: ['jablanica', 'konjic'], start_week: 0, end_week: 56, weight: 50, min_outcome: 'costly_victory' },
+    { name: 'Neretva Defense', corps_id: 'arbih_4th_corps', target_municipalities: ['jablanica', 'konjic'], start_week: 0, end_week: 56, weight: 50, min_outcome: 'repulsed' },
     { name: 'Neretva Offensive', corps_id: 'arbih_4th_corps', target_municipalities: ['jablanica', 'konjic', 'mostar'], start_week: 56, end_week: 9999, weight: 50, min_outcome: 'stalemate' },
     // 2nd Corps: Brcko south hold — prevent RS from taking south Brcko (calibration: Jan 1993 painted targets)
     { name: 'Brcko South Hold', corps_id: 'arbih_2nd_corps', target_municipalities: ['gradacac', 'lopare', 'srebrenik'], target_osids: ['op:brcko:brka_2'], start_week: 0, end_week: 56, weight: 90, min_outcome: 'stalemate' },

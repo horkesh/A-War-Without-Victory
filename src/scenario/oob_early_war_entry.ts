@@ -207,6 +207,7 @@ export function createOobFormationsAtPhaseIEntry(
             kind: b.kind,
             personnel: initialPersonnel,
             cohesion: initialCohesion,
+            origin_mun: b.home_mun,
             ...(b.honor ? { honor: b.honor } : {}),
             ...(hq_sid ? { hq_sid } : {}),
             ...(location_osid != null ? { location_osid } : {})

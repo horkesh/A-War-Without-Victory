@@ -622,6 +622,7 @@ export function spawnFormationsFromPools(
                 cohesion,
                 activation_gated: true,
                 activation_turn: null,
+                origin_mun: mun_id,
                 officer_quality: getFactionDefaultOfficerQuality(faction, currentTurn),
                 ...(hq_sid ? { hq_sid } : {}),
                 ...(location_osid != null ? { location_osid } : {})
