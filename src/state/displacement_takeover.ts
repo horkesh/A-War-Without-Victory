@@ -328,8 +328,11 @@ export function processPhaseIIDisplacementTakeover(
 
     // 0) Seed displacement timers for ALL OSIDs at war start.
     //    Every OSID's minority population begins displacement on day one.
+    //    NOTE: war_start_turn is set to the initial state's turn (e.g. 0), but runTurn()
+    //    increments turn BEFORE executing phases. So the first executed war turn is always
+    //    warStartTurn + 1. Use +1 here to fire on that actual first war turn.
     const warStartTurn = typeof state.meta.war_start_turn === 'number' ? state.meta.war_start_turn : 0;
-    if (currentTurn === warStartTurn) {
+    if (currentTurn === warStartTurn + 1) {
         const allFactions: FactionId[] = ['HRHB', 'RBiH', 'RS'];
         const pc = state.political_controllers;
         if (pc) {

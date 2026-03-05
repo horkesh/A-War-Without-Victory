@@ -148,9 +148,11 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 ## Next Tasks
 
-1. GUI Phase 4: Desktop/Electron integration (useIPC, advance-turn, order staging, recruitment)
-2. Continue combat calibration (Drina region, Bugojno, VRS troop counts)
-3. Re-enable minority flight in displacement system
+1. Continue combat calibration (recover from dig_in regression, target ATH n466=92.0%)
+2. Winter slowdown mechanic
+3. Probe posture (sector intel constants already defined)
+<!-- NOTE: minority flight confirmed running (493k displaced in 52w run, 2026-03-05).
+     GUI Phase 4+5 complete. takeover displacement = 0 — may be a gap. -->
 
 ---
 
@@ -9835,3 +9837,34 @@ Determinism checks **MUST** be run:
 - **Calibration gate:** 95.6% area-weighted pre- and post-change (zero regression).
 - **Tests:** 17 new Vitest tests (T1–T13: first-contact buildup, accumulation cap, no-contact decay, strength bins, visible brigade thresholds, recon-by-force, same-faction no-op, faction profile ordering, confidence threshold ordering). All 313 existing tests pass.
 - **Report:** `docs/40_reports/implemented/20260305_SECTOR_INTEL_IMPLEMENTATION.md`
+
+## [2026-03-05] Displacement Audit — Minority Flight Confirmed, Takeover Gap Identified
+
+- **Phase:** Investigation / audit
+- **Summary:** Checked latest 52w run to verify displacement system status. Minority flight was incorrectly listed as a backlog item — it is fully implemented and running.
+- **Minority flight (confirmed running):** 493,713 displaced over 52w (42,685 killed, 53,128 fled abroad, 395,658 routed to camps). Week 4: 378k spike (immediate RS/HRHB ejections). Then ~9,450/4-week gradual cycle (RBiH Serb flight over 26 turns). Logic in `src/state/minority_flight.ts`, pipeline step `phase-ii-minority-flight` in `war_phases.ts`. State: `minority_flight_state` on GameState, serialized.
+- **Takeover displacement (gap):** `phase_ii_takeover_displacement = 0` across all 52 weeks. The step runs but produces no output — worth investigating separately.
+- **Backlog correction:** Removed "Re-enable minority flight" from Next Tasks. Updated napkin to remove stale `recon_intelligence.ts` entry (file deleted 2026-03-05).
+
+## [2026-03-05] Fix: Takeover Displacement Off-By-One — War-Start Seeding Now Fires
+
+**Type:** Bug Fix
+**Files:** `src/state/displacement_takeover.ts`
+
+### Problem
+`processPhaseIIDisplacementTakeover` Section 0 (war-start seeding of all OSID timers) checked
+`currentTurn === warStartTurn`. But `runTurn()` increments `state.meta.turn` BEFORE running phases,
+so the first executed war turn is always `warStartTurn + 1`. For the definitive scenario
+(`war_start_turn = 0`), `currentTurn` was 1 on the first pass — never matching 0. All 52 weeks
+had `timers_started = 0`, `displaced_total = 0`.
+
+### Fix
+Changed the condition to `currentTurn === warStartTurn + 1`. Correct for all scenario types:
+- Phase II definitive: `war_start_turn=0`, first exec turn=1=0+1 ✓
+- Phase 0: `war_start_turn=T` (set during turn T execution), first war exec turn=T+1 ✓
+
+### Result (40w run)
+- **w1**: 1,045 timers started (all war-start OSIDs)
+- **w5**: 949 timers matured, 869,551 displaced
+- **40w total**: 890,818 displaced, 36,042 killed, 186,584 fled abroad
+- 313/314 vitest tests pass
