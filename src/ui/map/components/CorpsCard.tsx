@@ -58,6 +58,7 @@ export function CorpsCard({
     >
       <button
         type="button"
+        onClick={onHeaderClick}
         className={`w-full px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2 ${onHeaderClick ? 'hover:bg-panel-hover transition-colors cursor-pointer' : 'cursor-default'}`}
       >
         <span className={`font-sans text-xs font-semibold uppercase tracking-wide ${factionClass}`}>{displayName}</span>

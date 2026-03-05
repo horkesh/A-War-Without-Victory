@@ -1,6 +1,11 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { OperationView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
+import { collectSectorFriendlyOsids } from '../utils/sectorUtils';
+import { getOperationId, getOperationPhaseBadgeClass } from '../utils/operations';
+import { DETAIL_PANEL_STYLE } from './panelRail';
 
 /** Density badge with color coding. */
 function DensityBadge({ density }: { density: number }) {
@@ -16,95 +21,171 @@ function ThreatBadge({ ratio }: { ratio: number }) {
   return <span className="text-green-400">{ratio.toFixed(2)}</span>;
 }
 
+const SECTOR_TABS = ['overview', 'forces', 'logistics', 'ops'] as const;
+type SectorTab = (typeof SECTOR_TABS)[number];
+
+function compareOperations(a: OperationView, b: OperationView): number {
+  return (
+    a.phase.localeCompare(b.phase) ||
+    a.name.localeCompare(b.name) ||
+    a.started_turn - b.started_turn
+  );
+}
+
 export function CorpsFrontPanel() {
+  const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const setSelectedSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
+  const setIsOperationsPanelOpen = useGameStore((s) => s.setIsOperationsPanelOpen);
+  const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
+  const panToOsid = useGameStore((s) => s.panToOsid);
+  const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setOpsPlanningModalOpen = useGameStore((s) => s.setOpsPlanningModalOpen);
+  const [activeTab, setActiveTab] = useState<SectorTab>('overview');
+  const tabButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
-  // Derive all data unconditionally (no early returns) so hook order is stable (Rules of Hooks).
-  const sector = loadedGameState?.corpsFrontSectors && selectedSectorId && !selectedFormationId
-    ? loadedGameState.corpsFrontSectors.find((s) => s.sector_id === selectedSectorId) ?? null
-    : null;
-  const corpsFormation = sector && loadedGameState
-    ? loadedGameState.formations.find((f) => f.id === sector.corps_id) ?? null
-    : null;
-  const corpsStance = corpsFormation?.corpsStance ?? 'unknown';
-  const corpsColorMap = loadedGameState?.corpsFrontSectors
-    ? buildCorpsColorMap(loadedGameState.corpsFrontSectors)
-    : {};
-  const corpsColor = sector ? (corpsColorMap[sector.corps_id] ?? '#888') : '#888';
-  const assignedFormations = sector && loadedGameState
-    ? sector.assigned_brigade_ids
-      .map((id) => loadedGameState.formations.find((f) => f.id === id))
-      .filter((f): f is NonNullable<typeof f> => f != null)
-    : [];
-  const reserveFormations = sector && loadedGameState
-    ? sector.reserve_brigade_ids
-      .map((id) => loadedGameState.formations.find((f) => f.id === id))
-      .filter((f): f is NonNullable<typeof f> => f != null)
-    : [];
+  // All hooks must run unconditionally before any early return
+  useEffect(() => {
+    setActiveTab('overview');
+  }, [selectedSectorId]);
 
-  const visible = !(
-    selectedFormationId ||
-    !selectedSectorId ||
-    !loadedGameState?.corpsFrontSectors ||
-    !sector
+  const _sector = loadedGameState?.corpsFrontSectors?.find((s) => s.sector_id === selectedSectorId) ?? null;
+  const sectorFriendlyOsids = useMemo(
+    () => _sector ? collectSectorFriendlyOsids(_sector, loadedGameState!.frontEdgesOsid) : [],
+    [_sector, loadedGameState?.frontEdgesOsid]
   );
+  const sectorFriendlySet = useMemo(() => new Set(sectorFriendlyOsids), [sectorFriendlyOsids]);
+  const relatedOperations = useMemo(
+    () => {
+      if (!_sector) return [];
+      return [...(loadedGameState?.operations ?? [])]
+        .filter((op) => {
+          if (op.corps_id !== _sector.corps_id) return false;
+          if (op.sector_id === _sector.sector_id) return true;
+          if (!op.objectives || op.objectives.length === 0) return false;
+          return op.objectives.some((osid) => sectorFriendlySet.has(osid));
+        })
+        .sort(compareOperations);
+    },
+    [loadedGameState?.operations, _sector, sectorFriendlySet]
+  );
+
+  // Formation detail takes priority — hide sector panel when a formation is selected
+  if (operationsPanelOpen || selectedFormationId || !selectedSectorId || !loadedGameState?.corpsFrontSectors) return null;
+
+  const sector = _sector;
+  if (!sector) return null;
+
+  const corpsFormation = loadedGameState.formations.find((f) => f.id === sector.corps_id);
+  const corpsStance = corpsFormation?.corpsStance ?? 'unknown';
+  const corpsColorMap = buildCorpsColorMap(loadedGameState.corpsFrontSectors);
+  const corpsColor = corpsColorMap[sector.corps_id] ?? '#888';
+
+  const assignedFormations = sector.assigned_brigade_ids
+    .map((id) => loadedGameState.formations.find((f) => f.id === id))
+    .filter((f): f is NonNullable<typeof f> => f != null);
+
+  const reserveFormations = sector.reserve_brigade_ids
+    .map((id) => loadedGameState.formations.find((f) => f.id === id))
+    .filter((f): f is NonNullable<typeof f> => f != null);
+
+  const assignedPersonnel = assignedFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
+  const reservePersonnel = reserveFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
+  const totalSectorPersonnel = assignedPersonnel + reservePersonnel;
+  const reserveRatio = totalSectorPersonnel > 0 ? reservePersonnel / totalSectorPersonnel : 0;
+  const frontlineCoverage = sector.length_edges > 0 ? sector.assigned_brigade_ids.length / sector.length_edges : 0;
+  const avgOperationSupply = relatedOperations.length > 0
+    ? relatedOperations.reduce((sum, op) => sum + (op.supply_readiness ?? 0), 0) / relatedOperations.length
+    : null;
+
+  const handleTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft' && event.key !== 'Home' && event.key !== 'End') return;
+    event.preventDefault();
+    let nextIndex = index;
+    if (event.key === 'ArrowRight') nextIndex = (index + 1) % SECTOR_TABS.length;
+    if (event.key === 'ArrowLeft') nextIndex = (index - 1 + SECTOR_TABS.length) % SECTOR_TABS.length;
+    if (event.key === 'Home') nextIndex = 0;
+    if (event.key === 'End') nextIndex = SECTOR_TABS.length - 1;
+    const nextTab = SECTOR_TABS[nextIndex];
+    setActiveTab(nextTab);
+    tabButtonRefs.current[nextIndex]?.focus();
+  };
 
   return (
     <div
-      className="flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
-      style={{
-        position: 'absolute',
-        left: '19rem',
-        top: '3.5rem',
-        bottom: '2rem',
-        width: '20rem',
-        zIndex: 50,
-        display: visible ? undefined : 'none',
-      }}
+      className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
+      style={DETAIL_PANEL_STYLE}
     >
-      {visible && sector ? (
-        <>
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
-            <div className="flex items-center gap-2">
-              <span
-                className="inline-block w-3 h-3 rounded-sm"
-                style={{ backgroundColor: corpsColor }}
-              />
-              <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-                Corps Sector
-              </span>
-            </div>
-            <button
-              onClick={() => setSelectedSectorId(null)}
-              className="text-text-secondary hover:text-interactive text-sm leading-none"
-            >
-              ✕
-            </button>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-block w-3 h-3 rounded-sm"
+            style={{ backgroundColor: corpsColor }}
+          />
+          <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
+            Sector Intelligence
+          </span>
+        </div>
+        <button
+          onClick={() => setSelectedSectorId(null)}
+          aria-label="Close sector intelligence panel"
+          className="kbd-focus text-text-secondary hover:text-interactive text-sm leading-none rounded"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="p-4 overflow-auto text-[12px]">
+        <div className="mb-3 flex flex-wrap gap-1" role="tablist" aria-label="Sector intelligence tabs">
+          {SECTOR_TABS.map((tab, index) => {
+            const active = activeTab === tab;
+            const tabId = `sector-intel-tab-${tab}`;
+            const tabPanelId = `sector-intel-panel-${tab}`;
+            return (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                id={tabId}
+                aria-controls={tabPanelId}
+                aria-selected={active}
+                ref={(el) => {
+                  tabButtonRefs.current[index] = el;
+                }}
+                onClick={() => setActiveTab(tab)}
+                onKeyDown={(event) => handleTabKeyDown(event, index)}
+                className={`kbd-focus px-2 py-1 rounded border text-[10px] uppercase tracking-wide transition-all duration-200 ${active
+                  ? 'border-accent-gold bg-panel-active text-accent-gold'
+                  : 'border-panel-border bg-panel-card text-text-secondary hover:bg-panel-hover'
+                  }`}
+              >
+                {tab}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Corps identity */}
+        <div className="mb-3">
+          <div className="font-semibold text-text-primary text-[13px]">
+            {sector.display_name}
           </div>
+          <div className="text-text-secondary mt-0.5">
+            <span className={FACTION_COLORS[sector.faction] ?? 'text-text-primary'}>
+              {sector.faction}
+            </span>
+            {' · '}
+            <span className="capitalize">{corpsStance}</span>
+          </div>
+        </div>
 
-          <div className="p-4 overflow-auto text-[12px]">
-            {/* Corps identity */}
-            <div className="mb-3">
-              <div className="font-semibold text-text-primary text-[13px]">
-                {sector.display_name}
-              </div>
-              <div className="text-text-secondary mt-0.5">
-                <span className={FACTION_COLORS[sector.faction] ?? 'text-text-primary'}>
-                  {sector.faction}
-                </span>
-                {' · '}
-                <span className="capitalize">{corpsStance}</span>
-              </div>
-            </div>
-
-            {/* Metrics */}
+        {activeTab === 'overview' && (
+          <div role="tabpanel" id="sector-intel-panel-overview" aria-labelledby="sector-intel-tab-overview">
             <div className="border-t border-panel-border pt-2 mb-3 space-y-1">
               <div className="flex justify-between">
                 <span className="text-text-secondary">Front length</span>
@@ -126,20 +207,11 @@ export function CorpsFrontPanel() {
                 <span className="text-text-secondary">Def. power</span>
                 <span className="text-text-primary tabular-nums">{Math.round(sector.defensive_power).toLocaleString()}</span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-text-secondary">Linked settlements</span>
+                <span className="text-text-primary tabular-nums">{sectorFriendlyOsids.length}</span>
+              </div>
             </div>
-
-            {/* Operations */}
-            <div className="mb-3">
-              <button
-                type="button"
-                onClick={() => setOpsPlanningModalOpen(true)}
-                className="w-full text-[12px] font-bold px-3 py-2 rounded bg-interactive text-white hover:bg-interactive-hover transition-colors shadow-[0_0_15px_rgba(200,165,110,0.15)] hover:shadow-[0_0_20px_rgba(200,165,110,0.3)]"
-              >
-                Plan Operation...
-              </button>
-            </div>
-
-            {/* Opposing */}
             {sector.opposing_factions.length > 0 && (
               <div className="border-t border-panel-border pt-2 mb-3">
                 <span className="text-text-secondary">Opposing: </span>
@@ -151,8 +223,11 @@ export function CorpsFrontPanel() {
                 ))}
               </div>
             )}
+          </div>
+        )}
 
-            {/* Assigned brigades */}
+        {activeTab === 'forces' && (
+          <div role="tabpanel" id="sector-intel-panel-forces" aria-labelledby="sector-intel-tab-forces">
             {assignedFormations.length > 0 && (
               <div className="border-t border-panel-border pt-2 mb-3">
                 <div className="text-text-secondary mb-1">
@@ -163,7 +238,8 @@ export function CorpsFrontPanel() {
                     <button
                       key={f.id}
                       type="button"
-                      className="w-full flex justify-between text-text-primary hover:text-interactive transition-colors text-left"
+                      aria-label={`Assigned brigade ${f.name}${f.personnel != null ? `, personnel ${f.personnel.toLocaleString()}` : ''}`}
+                      className="kbd-focus w-full flex justify-between text-text-primary hover:text-interactive transition-colors text-left rounded"
                       onClick={() => setSelectedFormationId(f.id)}
                       onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
                       onMouseLeave={() => setHoveredOsids([])}
@@ -177,8 +253,6 @@ export function CorpsFrontPanel() {
                 </div>
               </div>
             )}
-
-            {/* Reserve brigades */}
             {reserveFormations.length > 0 && (
               <div className="border-t border-panel-border pt-2">
                 <div className="text-text-secondary mb-1">
@@ -189,7 +263,8 @@ export function CorpsFrontPanel() {
                     <button
                       key={f.id}
                       type="button"
-                      className="w-full flex justify-between text-text-primary/70 hover:text-interactive transition-colors text-left"
+                      aria-label={`Reserve brigade ${f.name}${f.personnel != null ? `, personnel ${f.personnel.toLocaleString()}` : ''}`}
+                      className="kbd-focus w-full flex justify-between text-text-primary/70 hover:text-interactive transition-colors text-left rounded"
                       onClick={() => setSelectedFormationId(f.id)}
                       onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
                       onMouseLeave={() => setHoveredOsids([])}
@@ -204,8 +279,107 @@ export function CorpsFrontPanel() {
               </div>
             )}
           </div>
-        </>
-      ) : null}
+        )}
+
+        {activeTab === 'logistics' && (
+          <div
+            role="tabpanel"
+            id="sector-intel-panel-logistics"
+            aria-labelledby="sector-intel-tab-logistics"
+            className="border-t border-panel-border pt-2 space-y-1"
+          >
+            <div className="flex justify-between">
+              <span className="text-text-secondary">Assigned manpower</span>
+              <span className="text-text-primary tabular-nums">{assignedPersonnel.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-text-secondary">Reserve manpower</span>
+              <span className="text-text-primary tabular-nums">{reservePersonnel.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-text-secondary">Reserve ratio</span>
+              <span className="text-text-primary tabular-nums">{Math.round(reserveRatio * 100)}%</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-text-secondary">Frontline coverage</span>
+              <span className="text-text-primary tabular-nums">{Math.round(frontlineCoverage * 100)}%</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-text-secondary">Ops supply readiness</span>
+              <span className="text-text-primary tabular-nums">
+                {avgOperationSupply != null ? `${Math.round(avgOperationSupply * 100)}%` : '—'}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'ops' && (
+          <div
+            role="tabpanel"
+            id="sector-intel-panel-ops"
+            aria-labelledby="sector-intel-tab-ops"
+            className="border-t border-panel-border pt-2 space-y-1"
+          >
+            {relatedOperations.length === 0 ? (
+              <div className="text-xs text-text-secondary italic">No linked operations for this sector.</div>
+            ) : (
+              relatedOperations.map((op) => {
+                const phaseBg = getOperationPhaseBadgeClass(op.phase);
+                const operationId = getOperationId(op);
+                const objective = op.objectives?.[op.current_objective_index ?? 0] ?? op.objectives?.[0];
+                return (
+                  <div key={operationId} className="rounded border border-panel-border bg-panel-card p-2 space-y-1 transition-all duration-200 hover:bg-panel-hover/70">
+                    <div className={`text-[11px] font-semibold ${FACTION_COLORS[op.faction] ?? 'text-text-primary'}`}>
+                      {op.name}
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px]">
+                      <span className={`px-1 py-0.5 rounded text-white uppercase font-semibold ${phaseBg}`}>
+                        {op.phase}
+                      </span>
+                      <span className="text-text-secondary">{op.participating_brigade_count} brigades</span>
+                      {op.supply_readiness != null && (
+                        <span className="text-text-secondary tabular-nums">
+                          supply {Math.round(op.supply_readiness * 100)}%
+                        </span>
+                      )}
+                    </div>
+                    {objective && (
+                      <button
+                        type="button"
+                        aria-label={`Focus map on objective ${osidDisplayNames?.[objective] ?? objective}`}
+                        onClick={() => panToOsid?.(objective)}
+                        className="kbd-focus text-[10px] text-interactive hover:underline rounded px-1 py-0.5"
+                      >
+                        Focus: {osidDisplayNames?.[objective] ?? objective}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      aria-label={`Open operation ${op.name} in operations panel`}
+                      onClick={() => {
+                        setSelectedOperationKey(operationId);
+                        setIsOperationsPanelOpen(true);
+                      }}
+                      className="kbd-focus w-full text-[11px] px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover"
+                    >
+                      Open in Operations Panel
+                    </button>
+                  </div>
+                );
+              })
+            )}
+            <div className="pt-2 border-t border-panel-border">
+              <button
+                type="button"
+                onClick={() => setOpsPlanningModalOpen(true)}
+                className="kbd-focus w-full text-xs font-sans px-2 py-2 rounded border border-panel-border text-interactive hover:bg-panel-hover"
+              >
+                Open Ops Planning
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

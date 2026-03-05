@@ -17,6 +17,8 @@ import { AttackConfirmation } from './components/AttackConfirmation';
 import { SidePickerOverlay } from './components/SidePickerOverlay';
 import { RecruitmentModal } from './components/RecruitmentModal';
 import { WarSummaryModal } from './components/WarSummaryModal';
+import { OpsPlanningModal } from './components/OpsPlanningModal';
+import { SupplyPanel } from './components/SupplyPanel';
 import { useGameStore } from './store/gameStore';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
@@ -45,6 +47,7 @@ function App() {
   const loadSave = useGameStore((s) => s.loadSave);
   const setLoadError = useGameStore((s) => s.setLoadError);
   const playerFaction = loadedGameState?.player_faction ?? null;
+  const mapMode = useGameStore((s) => s.mapMode);
 
   const [sidePickerOpen, setSidePickerOpen] = useState(false);
   const [sidePickerDismissed, setSidePickerDismissed] = useState(false);
@@ -243,6 +246,10 @@ function App() {
         onClose={() => setRecruitmentOpen(false)}
       />
       <WarSummaryModal isOpen={summaryOpen} onClose={() => setSummaryOpen(false)} />
+      <OpsPlanningModal />
+      {mapMode === 'supply' && loadedGameState && (
+        <SupplyPanel state={loadedGameState} />
+      )}
       <Minimap />
       <BottomStatusStrip />
     </div>

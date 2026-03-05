@@ -9,6 +9,7 @@ import { getOperationId } from '../utils/operations';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { useIPC } from '../desktop/useIPC';
 import { DETAIL_PANEL_STYLE, SECONDARY_PANEL_STYLE } from './panelRail';
+import { CombatSummaryPanel } from './CombatSummaryPanel';
 
 const OP_SECOND_WORDS: Record<string, string[]> = {
   RBiH: ['Uragan', 'Sana', 'Igman', 'Trebevic', 'Bosna', 'Drina'],
@@ -20,6 +21,15 @@ function toOneWord(input: string): string {
   const cleaned = input.replace(/[^A-Za-z0-9]+/g, ' ').trim();
   const first = cleaned.split(/\s+/)[0] ?? '';
   return first;
+}
+
+function formatRawId(id: string): string {
+  if (!id) return '';
+  return id
+    .replace(/^(RS|RBiH|HRHB)_/i, '')
+    .split('_')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
 }
 
 export function CorpsDetail() {
@@ -43,12 +53,35 @@ export function CorpsDetail() {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
 
+  // Derived values needed by hooks — computed unconditionally so hooks are always called in the same order
+  const corpsFormation = loadedGameState?.formations.find(
+    (f) => f.id === selectedCorpsId && (f.kind === 'corps' || f.kind === 'corps_asset')
+  ) ?? null;
+  const corpsFaction = corpsFormation?.faction ?? 'RBiH';
+  const corpsSectors = useMemo(
+    () => loadedGameState?.corpsFrontSectors?.filter((s) => s.corps_id === selectedCorpsId) ?? [],
+    [loadedGameState?.corpsFrontSectors, selectedCorpsId]
+  );
+  const secondWordOptions = useMemo(
+    () => OP_SECOND_WORDS[corpsFaction] ?? ['Bosna', 'Drina', 'Una'],
+    [corpsFaction]
+  );
+
+  useEffect(() => {
+    setOrdersPanelOpen(false);
+    setOperationPrepOpen(false);
+  }, [selectedCorpsId]);
+
+  useEffect(() => {
+    if (!corpsFormation) return;
+    const candidateTarget = toOneWord(corpsSectors[0]?.display_name ?? corpsFormation.name);
+    setPrepTargetWord(candidateTarget || 'Target');
+    setPrepSecondWord(secondWordOptions[0] ?? 'Bosna');
+    setPrepSectorId(corpsSectors[0]?.sector_id ?? '');
+  }, [corpsFormation, corpsSectors, secondWordOptions]);
+
   // Hide when formation or sector panel would show (priority: Formation > Sector > Corps)
   if (operationsPanelOpen || selectedFormationId || selectedSectorId || !selectedCorpsId || !loadedGameState) return null;
-
-  const corpsFormation = loadedGameState.formations.find(
-    (f) => f.id === selectedCorpsId && (f.kind === 'corps' || f.kind === 'corps_asset')
-  );
   if (!corpsFormation) return null;
 
   const corpsColorMap = loadedGameState.corpsFrontSectors
@@ -61,31 +94,10 @@ export function CorpsDetail() {
   );
   const totalPersonnel = subordinates.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
 
-  const corpsSectors = loadedGameState.corpsFrontSectors?.filter(
-    (s) => s.corps_id === selectedCorpsId
-  ) ?? [];
-
   // Active operations for this corps
   const corpsOps = loadedGameState.operations?.filter(
     (op) => op.corps_id === selectedCorpsId
   ) ?? [];
-
-  const secondWordOptions = useMemo(
-    () => OP_SECOND_WORDS[corpsFormation.faction] ?? ['Bosna', 'Drina', 'Una'],
-    [corpsFormation.faction]
-  );
-
-  useEffect(() => {
-    setOrdersPanelOpen(false);
-    setOperationPrepOpen(false);
-  }, [selectedCorpsId]);
-
-  useEffect(() => {
-    const candidateTarget = toOneWord(corpsSectors[0]?.display_name ?? corpsFormation.name);
-    setPrepTargetWord(candidateTarget || 'Target');
-    setPrepSecondWord(secondWordOptions[0] ?? 'Bosna');
-    setPrepSectorId(corpsSectors[0]?.sector_id ?? '');
-  }, [corpsFormation.name, corpsSectors, secondWordOptions]);
 
   const operationNamePreview = `${toOneWord(prepTargetWord) || 'Target'} ${prepSecondWord || 'Bosna'}`.trim();
 
@@ -196,7 +208,7 @@ export function CorpsDetail() {
         {/* Identity */}
         <div className="mb-3">
           <div className="font-semibold text-text-primary text-[13px]">
-            {corpsFormation.name}
+            {corpsFormation.name === corpsFormation.id ? formatRawId(corpsFormation.name) : corpsFormation.name}
           </div>
           <div className="text-text-secondary mt-0.5">
             <span className={FACTION_COLORS[corpsFormation.faction] ?? 'text-text-primary'}>
@@ -233,6 +245,15 @@ export function CorpsDetail() {
             </div>
           )}
         </div>
+
+        {/* Combat Summary */}
+        {corpsFormation.combatSummary && (
+          <CombatSummaryPanel
+            summary={corpsFormation.combatSummary}
+            formations={loadedGameState.formations}
+            onSelectFormation={setSelectedFormationId}
+          />
+        )}
 
         {/* Sectors */}
         {corpsSectors.length > 0 && (
