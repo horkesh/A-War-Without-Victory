@@ -1340,13 +1340,9 @@ function executeFactionDirectives(
                 continue;
             }
             // On front, no viable attack, holding position.
-            // Dig_in when corps is balanced (defensive already exits early at Rule 4) and cohesion sufficient.
-            // Offensive corps keeps 'defend' to signal readiness for next turn's attack.
-            if (corpsStance === 'balanced' && (brigade.cohesion ?? 0) >= 20) {
-                result.posture_orders.push({ brigade_id: brigade.id, posture: 'dig_in' });
-            } else {
-                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-            }
+            // Defensive corps exits early at Rule 4 with dig_in. Balanced and offensive corps use
+            // 'defend' so movement lockout doesn't freeze them when repositioning is needed.
+            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
             continue;
         }
 

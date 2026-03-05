@@ -9759,3 +9759,15 @@ Determinism checks **MUST** be run:
 - **Determinism:** No simulation behavior changed. All removed code was operating on empty `brigade_aor = {}` data (never populated by any active pipeline step). tsc clean, 296/296 vitest pass.
 - **Retained:** `brigade_aor_legacy.ts` + `aor_instantiation.ts` + `LegacyBrigadeAoRState` retained for legacy test stubs. Full deletion deferred.
 - **Artifacts:** commits `23a39fa`, `3f36b61`. Updated `AOR_ZOC_LEGACY_AUDIT.md` with completion status.
+
+## [2026-03-05] Calibration regression investigation: dig_in lockout + Operation Kupres
+
+- **Phase:** Calibration / bot AI
+- **Summary:** Investigated calibration regression introduced by the dig_in movement lockout commit (acdd4b9). Discovered that post-lockout code produces 83.4% area-weighted (n21) vs 89.7% pre-lockout (n472), a −6.4pp regression. Applied dig_in fix for balanced corps (+0.1pp to 83.3%). Operation Kupres pre-planned op investigated and deferred.
+- **Change (`src/sim/combat/bot_brigade_ai_osid.ts`):** Rule 6: balanced corps stance → `defend` instead of `dig_in`. Prevents movement lockout from immobilizing RS balanced corps brigades after w20. Logical improvement; only +0.1pp calibration recovery.
+- **Root cause (not fixed):** Commit `acdd4b9` added movement lockout for dig_in brigades. This causes RS balanced corps (after w20 doctrine transition) to be permanently immobilized when assigned dig_in. Full recovery requires systematic audit of which brigades receive dig_in and when.
+- **Operation Kupres (deferred):** Three staging OSID approaches tried. Best attempt (pribraca_2 staging) causes −6.7pp regression because `injectPrePlannedOperations()` permanently sets 2KK corps to `offensive` stance, disrupting Krajina/POSAVINA_NE defense. Organic bot + Kalesija overrides (n466 config) already capture kupres_2. Pre-planned op incompatible with stable force allocation.
+- **Calibration state:** n22 = 83.3% area-weighted (82.5% count, 614/744 OSIDs). Hash `137cf28f1ee0a9c8`. ATH remains n466-n469 at 92.0% (hash `1b35b0b6ea283b9b`, pre-lockout code).
+- **Determinism:** Change removes balanced corps dig_in from bot posture assignment. No non-determinism introduced. 296/296 vitest pass.
+- **Files modified:** `src/sim/combat/bot_brigade_ai_osid.ts`
+- **Artifacts:** `docs/40_reports/implemented/20260305_CALIBRATION_REGRESSION_DIG_IN_LOCKOUT.md`, CALIBRATION_MASTER.md runs n468-n22 added.

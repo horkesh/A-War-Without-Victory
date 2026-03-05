@@ -75,8 +75,8 @@
    Do instead: First brigade seeds concentration with 'repulsed' outcome; subsequent join via `estimateConcentratedOutcome()`.
 6. **[2026-02-24] CorpsDirective must be complete**
    Do instead: Include `offensive_targets`, `hold_osids`, `avoid_osids`, `max_attackers_per_target`, `reserve_fraction`, `min_attack_outcome`, `aggression_modifier`.
-7. **[2026-03-01] Pre-planned VRS operations**
-   Do instead: `injectPrePlannedOperations(state)` after `initializeCorpsCommand`. 5 named ops, `planning` phase (duration 1), execute turn 1. OSID targets + staging_osid.
+7. **[2026-03-05] Pre-planned VRS operations (5 corps only — 2KK deferred)**
+   Do instead: `injectPrePlannedOperations(state)` sets corps to `offensive` PERMANENTLY. Only the original 5 corps (EBK/Drina/SRK/Herzegovina/1KK). Adding 2KK (Operation Kupres) causes −6.7pp regression — 2KK offensive stance disrupts Krajina/POSAVINA_NE force allocation. Kupres captured organically via Kalesija redirect (n466). Use organic bot + overrides for 2KK.
 8. **[2026-02-25] sidToMun map preservation**
    Do instead: Preserve `canonicalSidToMun` in scenario_runner.ts. Corruption prevented ALL 217 mandatory brigades from spawning.
 9. **[2026-03-04] Brigade discipline: hard block + combat fatigue (n472)**
@@ -173,8 +173,8 @@
    Do instead: ZoC deleted. Movement via `brigade_movement_orders.ts` / `apply-brigade-movement`. Defense via `local_front_defense.ts` density. AoR legacy also fully removed (R1–R5, 2026-03-04) — no dead AoR code remains.
 
 ## Calibration
-1. **[2026-03-04] Area-weighted is primary calibration metric (ATH n466=92.0%)**
-   Do instead: Use area-weighted match (km²) as primary. Count-based penalizes small eastern settlements disproportionately. ATH n466=92.0% (670/744 count). 20 overrides + 16 RS avoided_osids. ARBiH homeland last stand (combat_math.ts morale floor 50, attack_resolution_osid.ts 'victory' absorption) added n439.
+1. **[2026-03-05] Area-weighted is primary calibration metric (ATH n466=92.0%; current n22=83.3%)**
+   Do instead: Use area-weighted match (km²) as primary. ATH n466=92.0% (hash `1b35b0b6ea283b9b`, pre-lockout code). Current n22=83.3% (hash `137cf28f1ee0a9c8`, post-lockout). Regression from dig_in movement lockout (acdd4b9). Recovery requires audit of dig_in assignment across all corps stances.
 2. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
    Do instead: RS `avoided_osids` = fix RS OVER-captures (painted=RBiH/HRHB, sim=RS — prevent VRS from attacking there). RS `osid_control_overrides` = fix RS UNDER-captures (painted=RS, sim=RBiH — force-start RS control). Adding under-captures to avoided_osids makes RS even less likely to capture them.
 3. **[2026-03-04] HRHB Krajina/Posavina mismatches are INIT-based (ethnic Croat composition)**
@@ -185,6 +185,8 @@
    Do instead: turbe_2 is an RS over-capture BUT it is a stepping stone enabling Donji Vakuf consolidation cascade (3 correct cells). Adding turbe_2 to RS avoided_osids breaks Donji Vakuf → net -3pp loss (n463 confirmed). Do NOT add turbe_2 to RS avoided_osids.
 6. **[2026-03-04] Fragile VRS force allocation: Kalesija→Kupres dependency**
    Do instead: Kalesija seher_2/gojcin_2 RS overrides redirect VRS pressure → bonus kupres:kupres_2 fix (n466). Adding Kladanj overrides on top disrupts this allocation → kupres:kupres_2 reverts (n467). Test each override block in isolation; never stack two override groups without verifying the underlying force dynamics.
+7. **[2026-03-05] dig_in lockout (acdd4b9) regressed calibration −6.4pp — balanced corps use defend**
+   Do instead: Balanced corps brigade Rule 6 assigns `defend`, NOT `dig_in`. Lockout in `osid_column_movement.ts` immobilizes dig_in brigades. Defensive corps (Rule 4) still use dig_in. Full regression recovery (83.3%→90%) requires further audit.
 7. **[2026-03-03] Timeline knobs drive 40w behavior first**
    Do instead: For `apr1992_definitive_40w`, tune `data/scenarios/timelines/apr1992.json` (`doctrine_phases`, `external_support`) before editing `bot_strategy.ts`; verify with `final_state_hash` and `compare_painted_vs_sim.cjs`.
 8. **[2026-03-03] Prove knob efficacy immediately (hash + metrics)**

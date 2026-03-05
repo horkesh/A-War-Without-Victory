@@ -1,9 +1,11 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for Phase II 40w calibration (April 1992 → January 1993).
-**Updated:** 2026-03-03
-**Canonical target run:** n422/n423 (`apr1992_definitive_40w__2da7a05b322452f6__w40_n422` / `w40_n423`)
-**Latest calibration run:** n422/n423 (88.2% count-based, 91.3% area-weighted — bot_strategy: EBK without brcko, Tuzla Containment without lopare, Drina Hold expanded with rogatica/vlasenica/sekovici/milici/han_pijesak/cajnice/rudo, Sarajevo Siege without trnovo, Herzegovina Hold without trebinje, Krajina/Western/2KK without kupres. POSAVINA_NE 89.0%, DRINA 78.0%.)
+**Updated:** 2026-03-05
+**Canonical target run:** n466/n469 (`apr1992_definitive_40w__1b35b0b6ea283b9b__w40_n466` ATH 92.0%)
+**Latest calibration run:** n22 (83.3% area-weighted, 82.5% count — current code with dig_in lockout regression. Hash `137cf28f1ee0a9c8`. dig_in balanced corps fix applied; lockout root cause under investigation.)
+**ALL-TIME HIGH:** n466/n468/n469 (92.0% area-weighted, 90.1% count — hash `1b35b0b6ea283b9b`, pre-lockout code. Kalesija overrides + kupres:kupres_2 organic fix.)
+**Regression note:** commit `acdd4b9` dig_in movement lockout regressed current hash from 90.0% (n471, pre-lockout) to 83.4% (n21, post-lockout). Recovery work needed.
 **Reverted:** n424 (Drina Sweep/Hold: add srebrenica, drop kalinovik/cajnice/rudo — DRINA 78→75.6, global 91.3→91.1%; reverted.)
 **Previous calibration run:** n403 (88.0% count-based, 90.4% area-weighted — Officers System two-tier: 63 named officers + per-brigade officer_quality. ARBiH 131k, VRS 88k, HVO 42k. Three regions improved: Central Bosnia +6pp, Sarajevo +3.2pp, Posavina +2.7pp. Drina -8pp from per-corps variance.)
 **Previous calibration run:** n407 (90.5% area-weighted ATH, 86.7% count-based — Phase D: supply reserves enabled by default, UN airdrops for RBiH enclaves, bot supply-aware targeting.)
@@ -166,6 +168,16 @@ Note: Area-weighted metric better reflects historical territory; count-based pen
 | n465 | — | 411 | 240 | 93 | REVERTED — n462 + HRHB avoided_osids for jablanica:doljani_2, kiseljak:brnjaci_2, novi_travnik:rat_2, prozor:prozor_2 (4 HRHB over-captures). 91.5% area (=n462), 89.8% count (=n462). ZERO effect. HRHB sim still 93 (painted 87). CONFIRMED: HRHB over-captures are consolidation-captured (same principle as RS consolidation captures). HRHB avoided_osids cannot fix cells that HRHB acquires via consolidation expansion, only bot-targeted captures. Cannot fix jablanica/kiseljak/travnik/prozor HRHB over-captures this way. |
 | **n466** | **1b35b0b6ea283b9b** | **409** | **243** | **92** | **NEW ATH: 92.0% area (90.1% count, 670/744). n459 + kalesija:seher_2/gojcin_2 RS overrides. CENTRAL_BOSNIA 90.2% count (147/163, +5pp vs n459). HERZEGOVINA 96.8% area (90/93 count, +2.3pp): bonus fix of kupres:kupres_2 (now correctly RS via VRS dynamics change). No cascades. POSAVINA_NE 89.5% area (=n462). Kalesija overrides enabled VRS to redirect resources to Kupres direction (geographic effect). 20 overrides total. Clean result.** |
 | n467 | — | 411 | 240 | 93 | REVERTED — n466 + Kladanj 4 RS overrides. 91.5% area (-0.5pp vs n466 ATH). Kladanj overrides disrupted the VRS force allocation that fixed kupres:kupres_2 in n466 — it reverted to HRHB mismatch. New over-captures: kalesija:kalesija_selo, travnik:podstinje. Only kladanj:staric_2 held (1 of 4). CRITICAL: kalesija overrides → kupres:kupres_2 fix is a FRAGILE DEPENDENCY. Kladanj overrides break it by redirecting VRS forces away from Kupres corridor. Cannot stack Kladanj on top of Kalesija. |
+| n468 | 1b35b0b6ea283b9b | 409 | 243 | 92 | Baseline verification of n466 ATH. 92.0% area, 90.1% count. Deterministic. |
+| n469 | 1b35b0b6ea283b9b | 408 | 244 | 92 | Baseline verification of n466 ATH. 92.0% area, 90.2% count. Deterministic (tiny persona variance). |
+| n470 | 7d8d3fbd1a912da3 | 422 | 233 | 89 | REVERTED — New scenario config attempt. 89.8% area (-2.2pp vs n466 ATH). RS over-captures increased. |
+| n471 | 137cf28f1ee0a9c8 | 420 | 235 | 89 | REVERTED — New scenario config. 90.0% area (-2.0pp vs ATH). **RUN PRE-LOCKOUT** (before commit acdd4b9). |
+| n472 | 137cf28f1ee0a9c8 | 395 | 252 | 97 | REVERTED — Fine-tune attempt. 89.7% area (-2.3pp vs ATH). **RUN PRE-LOCKOUT** (before commit acdd4b9). Last pre-lockout run. |
+| n18 | 137cf28f1ee0a9c8 | 327 | 300 | 117 | REVERTED — Op Kupres pre-planned + dig_in balanced removed. 82.9% area (-6.8pp vs n472). Op Kupres forces 2KK offensive → Krajina/POSAVINA_NE collapse. |
+| n19 | 137cf28f1ee0a9c8 | 327 | 300 | 117 | REVERTED — Op Kupres pre-planned only (dig_in reverted). 83.0% area. Confirms Op Kupres alone causes regression. |
+| n20 | 137cf28f1ee0a9c8 | 333 | 296 | 115 | REVERTED — All code reverted but rs_7th home_osid=pribraca_2 still in OOB. 83.4% area. Confirms home_osid alone has neutral-to-negative effect (Kupres area undefended). |
+| n21 | 137cf28f1ee0a9c8 | 333 | 296 | 115 | REVERTED — All changes fully reverted (clean main code). 83.4% area. **Establishes post-lockout baseline** (−6.4pp vs n472 pre-lockout). Lockout commit acdd4b9 is root cause. |
+| **n22** | **137cf28f1ee0a9c8** | **331** | **298** | **115** | **KEPT — dig_in fix for balanced corps (Rule 6: balanced → defend, not dig_in). 83.3% area (+0.1pp vs n21). Current baseline. Logical improvement but lockout regression not fully recovered.** |
 
 ---
 
