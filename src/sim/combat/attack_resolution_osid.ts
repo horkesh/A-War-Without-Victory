@@ -442,7 +442,8 @@ export function resolveAttackOrdersOsid(
         const coordPenalty = attackerFormations.length >= 3 ? COORDINATION_PENALTY_3PLUS : attackerFormations.length === 2 ? COORDINATION_PENALTY_2 : 1.0;
         const targetSlope = slopeByOsid[targetOsid] ?? 0;
         const seasonal = getSeasonalModifiers(currentTurn, startDate, targetSlope);
-        const attackerPower = attackerFormations.reduce((s, a) => s + computeAttackerPower(state, a, supplyStateByOsid), 0)
+        const targetTerrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
+        const attackerPower = attackerFormations.reduce((s, a) => s + computeAttackerPower(state, a, supplyStateByOsid, undefined, targetTerrainMult), 0)
             * coordPenalty * seasonal.attack_mult;
         defenderPower *= seasonal.defense_mult;
 

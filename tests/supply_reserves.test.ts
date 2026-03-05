@@ -134,8 +134,8 @@ describe('deductCombatExpenditure', () => {
         // 3 attackers at intensity 1.5
         deductCombatExpenditure(state, 'RBiH', 3, 1.5);
 
-        // Heavy: 60 - (3 * 1.5 * 2.0 / 100) = 60 - 0.09 = 59.91
-        expect(state.heavy_munitions_reserve!['RBiH']).toBeCloseTo(59.91, 5);
+        // Heavy: 60 - (3 * 1.5 * 1.2 / 100) = 60 - 0.054 = 59.946
+        expect(state.heavy_munitions_reserve!['RBiH']).toBeCloseTo(59.946, 5);
         // General: 80 - (3 * 1.5 * 0.5 / 100) = 80 - 0.0225 = 79.9775
         expect(state.general_supply_reserve!['RBiH']).toBeCloseTo(79.9775, 5);
     });

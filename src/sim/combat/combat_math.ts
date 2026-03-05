@@ -366,14 +366,25 @@ export function getBombardmentCasualtyMult(attackers: FormationState[], attacker
 
 /**
  * Heavy weapons offensive firepower multiplier.
- * Cap 1.5 (2.5× max), divisor 300.
+ * Cap 1.5 (2.5× max), divisor 200.
+ *
+ * Tanks are terrain-penalized: open ground (terrainMult≈1.0) → full effectiveness;
+ * hills (≈1.4) → ~60%; mountains/rivers (≥1.7) → floored at 30%.
+ * Artillery is terrain-independent (indirect fire works anywhere).
+ *
+ * Formula: tankTerrainFactor = max(0.3, 2.0 − terrainMult)
+ *   terrainMult=1.0 → 1.00 (flat, full tank power)
+ *   terrainMult=1.3 → 0.70 (rolling hills, moderate penalty)
+ *   terrainMult=1.5 → 0.50 (steep hills / river crossing, heavy penalty)
+ *   terrainMult=1.7 → 0.30 (mountains, minimum effectiveness)
  */
-export function getHeavyWeaponsOffensiveMult(formation: FormationState): number {
+export function getHeavyWeaponsOffensiveMult(formation: FormationState, terrainMult = 1.0): number {
     const comp = formation.composition ?? ensureBrigadeComposition(formation);
     const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
     const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
-    const heavyFirepower = tankEff * 10 + artEff * 8;
-    return 1.0 + Math.min(1.5, heavyFirepower / 300);
+    const tankTerrainFactor = Math.max(0.3, 2.0 - terrainMult);
+    const heavyFirepower = tankEff * tankTerrainFactor * 10 + artEff * 8;
+    return 1.0 + Math.min(1.5, heavyFirepower / 200);
 }
 
 /**
@@ -528,12 +539,14 @@ export function classifyOutcome(powerRatio: number): CombatOutcome {
 /**
  * Compute attacker power for a single formation.
  * @param overridePosture — optional posture override (predictor uses this for 'attack'/'assault')
+ * @param targetTerrainMult — defender terrain multiplier for the target OSID; gates tank effectiveness
  */
 export function computeAttackerPower(
     state: GameState,
     formation: FormationState,
     supplyStateByOsid?: SupplyStateByOsidReport | null,
-    overridePosture?: string
+    overridePosture?: string,
+    targetTerrainMult = 1.0
 ): number {
     const base = basePower(formation);
     const posture = overridePosture ?? formation.posture ?? 'defend';
@@ -545,7 +558,7 @@ export function computeAttackerPower(
     const opMult = getOperationsMult(state, formation);
     const ogMult = getOgMult(formation);
     const disruptionMult = getDisruptionMult(formation, 'attack');
-    const heavyMult = getHeavyWeaponsOffensiveMult(formation);
+    const heavyMult = getHeavyWeaponsOffensiveMult(formation, targetTerrainMult);
     const officerMult = getThreeTierOfficerMod(formation, state, 'attack');
     return base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult * heavyMult * officerMult;
 }

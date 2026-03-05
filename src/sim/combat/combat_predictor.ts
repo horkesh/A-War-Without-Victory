@@ -236,8 +236,9 @@ export function predictCombatOutcome(
     // Predictor default: 'attack' posture (if no override provided, assume attack intent).
     // Resolver default: 'defend' (formation.posture is always set for ordered brigades).
     const effectivePosture = attackerPosture ?? 'attack';
+    const targetTerrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
     const attackerPower = attackerFormations.reduce(
-        (s, a) => s + computeAttackerPower(state, a, supplyStateByOsid, effectivePosture), 0
+        (s, a) => s + computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult), 0
     ) * coordPenalty * seasonal.attack_mult;
     defenderPower *= seasonal.defense_mult;
 

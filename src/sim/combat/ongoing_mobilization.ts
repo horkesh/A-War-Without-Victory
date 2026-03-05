@@ -65,12 +65,14 @@ function getMobilizationSurgeFactor(turn: number): number {
 /** Hard cap per municipality per turn to prevent single-mun dominance. */
 const MAX_MOBILIZATION_PER_MUN_PER_TURN = 300;
 /**
- * Exhaustion thresholds: war-weariness bites sooner as pools deplete and casualties mount.
- * Threshold (15%): half-rate mobilization. Hard cap (25%): no more mobilization.
- * Tightened from 0.20/0.35 — all factions faced severe manpower constraints by mid-war.
+ * Exhaustion thresholds: war-weariness bites as pools deplete and casualties mount.
+ * Threshold (25%): half-rate mobilization. Hard cap (45%): no more mobilization.
+ * Raised from 0.15/0.25 — original values caused all pools to drain to 0 by w40
+ * because committed+exhausted (total ever mobilized) too quickly hit a tight cap.
+ * Historical Bosnia mobilized 30–45% of eligible males in fighting-age brackets.
  */
-const EXHAUSTION_THRESHOLD = 0.15;
-const EXHAUSTION_HARD_CAP = 0.25;
+const EXHAUSTION_THRESHOLD = 0.25;
+const EXHAUSTION_HARD_CAP = 0.45;
 
 export interface OngoingMobilizationReport {
     total_mobilized: number;

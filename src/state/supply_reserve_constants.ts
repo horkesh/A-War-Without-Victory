@@ -15,16 +15,25 @@ export const MAINTENANCE_DRAIN_PER_FORMATION = 0.04;
  * Per-heavy-weapon per-turn heavy munitions drain (tanks + artillery).
  * Represents ammunition expenditure for training/readiness, barrel wear,
  * spare parts consumption, and fuel for armored vehicles.
- * RS starts with 794 heavy weapons (400T+394A from JNA): drain ~2.4/turn.
- * Combined with siege drain (~0.8) and ramping patron income (~0→4.7/turn),
- * RS heavy transitions 100→43 (adequate→strained) by w40.
- * n413 calibration: RS heavy=42.9 (strained), E2 bombardment mult 0.75×.
+ * RS starts with 794 heavy weapons (400T+394A from JNA): drain ~0.8/turn.
+ * Combined with combat + patron income, RS heavy transitions 100→~43 (strained) by w40.
+ * History of reductions: 0.003 (n413, pre-sector-defense) → 0.002 (RS→11.2) → 0.001.
+ * Sector-pooled defense (a288b17) roughly doubled battle count vs n413, increasing
+ * combat expenditure drain substantially. At 0.001 maintenance drain = 31.75 pts/40w;
+ * combined with ~25 pts net combat/siege drain, RS ends near the 43-pt strained target.
+ * n413 calibration target: RS heavy≈43 (strained), E2 bombardment mult 0.75×.
  */
-export const HEAVY_MAINTENANCE_PER_WEAPON = 0.003;
+export const HEAVY_MAINTENANCE_PER_WEAPON = 0.001;
 
 // ── Consumption: Combat ──────────────────────────────────────────────────────
-/** Heavy munitions deducted per battle (scaled by intensity = attackerCount × powerRatio). */
-export const COMBAT_HEAVY_MUNITIONS_RATE = 2.0;
+/**
+ * Heavy munitions deducted per battle (scaled by intensity = attackerCount × powerRatio).
+ * Reduced from 2.0 to 1.2: sector-pooled defense (a288b17) roughly doubled the number of
+ * combat expenditure events by making every frontline OSID contested. At 2.0 RS heavy ran
+ * to 0 by w40 (was calibrated to ~43 at w40 in n413 pre-sector-defense). At 1.2 per-battle
+ * drain is reduced; combined with HEAVY_MAINTENANCE_PER_WEAPON=0.002 keeps RS strained.
+ */
+export const COMBAT_HEAVY_MUNITIONS_RATE = 1.2;
 /** General supply deducted per battle (secondary). */
 export const COMBAT_GENERAL_SUPPLY_RATE = 0.5;
 
