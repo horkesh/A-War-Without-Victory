@@ -174,6 +174,11 @@
     "RS": [
       {
         "start_turn": 0,
+        "end_turn": 20,
+        "value": 0.05
+      },
+      {
+        "start_turn": 20,
         "end_turn": 40,
         "value": 0
       },
@@ -267,7 +272,12 @@
       ]
     ],
     "HRHB": 50,
-    "RS": 0
+    "RS": [
+      [0, 35],
+      [20, 30],
+      [40, 25],
+      [60, 20]
+    ]
   },
   "cohesion_ceiling": {
     "RS": [

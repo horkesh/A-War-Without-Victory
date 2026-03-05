@@ -49,6 +49,30 @@ function getRBiHCohesionFloor(turn: number): number {
 }
 
 /**
+ * RS cohesion floor: no formation drifts below this.
+ * Models VRS professional JNA cadre sustaining unit cohesion under attrition.
+ *
+ * Turn 0:  35 (JNA inherited professionalism — trained NCO/officer corps)
+ * Turn 20: 30 (first-year attrition, officer losses start)
+ * Turn 40: 25 (war fatigue, partial mobilization strain)
+ * Turn 60: 20 (deep fatigue, reorganization)
+ */
+function getRSCohesionFloor(turn: number): number {
+    if (turn <= 0) return 35;
+    if (turn >= 60) return 20;
+    const keyframes: [number, number][] = [[0, 35], [20, 30], [40, 25], [60, 20]];
+    for (let i = 0; i < keyframes.length - 1; i++) {
+        const [t0, v0] = keyframes[i]!;
+        const [t1, v1] = keyframes[i + 1]!;
+        if (turn >= t0 && turn <= t1) {
+            const frac = (turn - t0) / (t1 - t0);
+            return v0 + frac * (v1 - v0);
+        }
+    }
+    return 20;
+}
+
+/**
  * RS cohesion ceiling: no formation rises above this.
  * Models organizational decay — JNA professionalism eroding.
  *
@@ -82,12 +106,12 @@ function getRSCohesionCeiling(turn: number): number {
  */
 export function getFactionCohesionFloor(faction: string, turn: number, timeline?: WarTimeline): number {
     if (timeline?.cohesion_floor?.[faction] !== undefined) {
-        const hardcodedDefault = faction === 'RBiH' ? getRBiHCohesionFloor(turn) : faction === 'HRHB' ? 50 : 0;
+        const hardcodedDefault = faction === 'RBiH' ? getRBiHCohesionFloor(turn) : faction === 'HRHB' ? 50 : getRSCohesionFloor(turn);
         return resolveCohesionBound(timeline.cohesion_floor[faction], turn, hardcodedDefault);
     }
     if (faction === 'RBiH') return getRBiHCohesionFloor(turn);
     if (faction === 'HRHB') return 50;
-    return 0; // RS has no floor
+    return getRSCohesionFloor(turn);
 }
 
 /**
