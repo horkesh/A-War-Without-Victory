@@ -180,7 +180,15 @@
       "Bash(bc)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(gh api -H \"Accept: application/vnd.github.raw+json\" repos/nicobailon/visual-explainer/contents/SKILL.md)",
-      "Bash(test -f src/sim/combat/brigade_movement_orders.ts)"
+      "Bash(test -f src/sim/combat/brigade_movement_orders.ts)",
+      "Bash(xargs:*)",
+      "Bash(\"F:/A-War-Without-Victory/docs/PROJECT_LEDGER.md\":*)",
+      "Bash(while read f)",
+      "Bash(do grep -l \"Bosnian War\\\\|defensive\\\\|defense strategy\\\\|war tactics\\\\|historical\" \"$f\")",
+      "Bash(npm install)",
+      "Bash(npm install --ignore-scripts)",
+      "Bash(/f/A-War-Without-Victory/docs/PROJECT_LEDGER.md:*)",
+      "Bash(\"F:\\\\A-War-Without-Victory\\\\docs\\\\PROJECT_LEDGER.md\":*)"
     ]
   }
 }
