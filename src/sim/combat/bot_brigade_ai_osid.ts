@@ -49,6 +49,7 @@ import {
 } from './osid_adjacency.js';
 import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
+import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import type { SettlementEthnicityData } from '../../data/settlement_ethnicity.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 
@@ -72,6 +73,37 @@ interface BrigadeContext {
     osidAnalysis: OsidAnalysis | null;
     corpsStance: CorpsStance | null;
     adjacentEnemyOsids: Osid[];
+}
+
+export function applySectorOffensiveDirectiveOverride(
+    directive: import('../../state/game_state.js').CorpsDirective,
+    activeOp: import('../../state/game_state.js').CorpsOperation
+): import('../../state/game_state.js').CorpsDirective {
+    if (activeOp.phase !== 'execution') {
+        return directive;
+    }
+    const objectives = activeOp.objectives ?? [];
+    const currentIdx = activeOp.current_objective_index ?? 0;
+    const currentObjective = objectives[currentIdx];
+    if (typeof currentObjective !== 'string' || currentObjective.length === 0) {
+        return directive;
+    }
+    return {
+        ...directive,
+        offensive_targets: [currentObjective],
+    };
+}
+
+function getSectorOffensiveCurrentObjective(
+    activeOp: import('../../state/game_state.js').CorpsOperation | null | undefined
+): Osid | null {
+    if (!activeOp) return null;
+    const objectives = activeOp.objectives ?? [];
+    const currentIdx = activeOp.current_objective_index ?? 0;
+    const currentObjective = objectives[currentIdx];
+    return typeof currentObjective === 'string' && currentObjective.length > 0
+        ? currentObjective as Osid
+        : null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -160,19 +192,19 @@ function findNearestFriendlyOsidInSet(
     targetOsids: Set<string>
 ): Osid | null {
     const visited = new Set<string>();
-    const queue: Osid[] = [startOsid];
+    const queue: Array<{ osid: Osid; firstStep: Osid | null }> = [{ osid: startOsid, firstStep: null }];
     visited.add(startOsid);
     let head = 0;
     while (head < queue.length) {
-        const osid = queue[head++]!;
-        if (targetOsids.has(osid)) return osid;
+        const { osid, firstStep } = queue[head++]!;
+        if (targetOsids.has(osid)) return firstStep ?? osid;
         const neighbors = adjacency.get(osid) ?? [];
         for (const n of [...neighbors].sort(strictCompare)) {
             if (visited.has(n)) continue;
             visited.add(n);
             const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
             if (ctrl === faction) {
-                queue.push(n);
+                queue.push({ osid: n, firstStep: firstStep ?? n });
             }
         }
     }
@@ -869,6 +901,12 @@ function executeFactionDirectives(
 
     for (const brigade of brigades) {
         const loc = brigade.location_osid!;
+        const corpsId = brigade.corps_id;
+        const cmd = corpsId ? state.corps_command?.[corpsId] : null;
+        const activeOp = cmd?.active_operation;
+        const isActiveSectorOperationParticipant =
+            activeOp?.type === 'sector_attack' &&
+            activeOp.participating_brigades?.includes(brigade.id);
 
         // Detachments (militia kind, < 500 personnel) only garrison — never attack.
         if (brigade.kind === 'militia' && getFormationTier(brigade) === 'detachment') {
@@ -878,7 +916,7 @@ function executeFactionDirectives(
 
         // --- Home-ground brigades: defend or counterattack only, never attack ---
         // home_defense_active is set by the compute-home-defense-active pipeline step.
-        if (brigade.home_defense_active === true) {
+        if (brigade.home_defense_active === true && !isActiveSectorOperationParticipant) {
             if ((brigade.counterattack_window_turns ?? 0) > 0) {
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'counterattack' });
             } else {
@@ -887,8 +925,6 @@ function executeFactionDirectives(
             continue;
         }
 
-        const corpsId = brigade.corps_id;
-        const cmd = corpsId ? state.corps_command?.[corpsId] : null;
         const directive = cmd?.directive ?? null;
         const corpsStance = cmd?.stance ?? 'balanced';
         const adjEnemy = getAdjacentEnemyOsids(loc, faction, adjacency, state, reverseMap);
@@ -930,54 +966,120 @@ function executeFactionDirectives(
         };
 
         // --- Supply gate: critical → forced defend (no voluntary attacks) ---
-        const brigadeSupplyState = getBrigadeSupplyState(brigade, supplyStateByOsid);
-        if (brigadeSupplyState === 'critical') {
-            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-            continue;
-        }
+        // Combine raw OSID-level reachability with faction reserve level
+        // (mirrors getSupplyMult logic in combat_math.ts).
+        const rawOsidSupplyState = getBrigadeSupplyState(brigade, supplyStateByOsid);
+        const factionReserveLevel = state.meta?.supply_reserves_enabled
+            ? ((state.general_supply_reserve as Record<string, number> | undefined)?.[brigade.faction] ?? 100)
+            : 100;
+        const brigadeSupplyState = state.meta?.supply_reserves_enabled
+            ? getEffectiveSupplyState(rawOsidSupplyState, factionReserveLevel)
+            : rawOsidSupplyState;
 
-        // --- Rule 1.5: Sector operation staging (planning) and deployment (execution) ---
-        // If brigade is participating in an active sector_attack in planning or execution phase,
-        // march to staging_osid (planning) or sector (execution).
-        const activeOp15 = corpsId ? cmd?.active_operation : null;
-        if (activeOp15?.type === 'sector_attack' &&
-            (activeOp15.phase === 'planning' || activeOp15.phase === 'execution') &&
-            activeOp15.participating_brigades?.includes(brigade.id)) {
-
-            // During PLANNING: march to staging_osid
-            if (activeOp15.phase === 'planning' && activeOp15.staging_osid) {
-                if (loc !== activeOp15.staging_osid) {
+        const activeOp15 = activeOp;
+        if (isActiveSectorOperationParticipant && activeOp15?.type === 'sector_attack') {
+            if (activeOp15.phase === 'planning') {
+                if (activeOp15.staging_osid && loc !== activeOp15.staging_osid) {
                     const nearestStaging = findNearestFriendlyOsidInSet(
-                        state, faction, loc, adjacency, reverseMap,
-                        new Set([activeOp15.staging_osid]));
+                        state,
+                        faction,
+                        loc,
+                        adjacency,
+                        reverseMap,
+                        new Set([activeOp15.staging_osid])
+                    );
                     if (nearestStaging) {
                         result.column_march_orders[brigade.id] = nearestStaging;
-                        result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                    }
+                }
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                continue;
+            }
+
+            if (activeOp15.phase === 'recovery') {
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                continue;
+            }
+
+            if (activeOp15.phase === 'execution') {
+                const currentObjective = getSectorOffensiveCurrentObjective(activeOp15);
+                if (!currentObjective || getPoliticalControllerOSID(state, currentObjective, reverseMap) === faction) {
+                    result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                    continue;
+                }
+
+                const targets = predictAllAdjacentTargets(
+                    state,
+                    brigade.id,
+                    adjacency,
+                    reverseMap,
+                    terrainCache,
+                    'attack',
+                    supplyStateByOsid,
+                    osidPopulationMap,
+                    undefined,
+                    ethnicMap
+                );
+                const directObjectiveAttack = targets.find((t) => t.osid === currentObjective);
+                const alreadyAssigned = chosenTargets.get(currentObjective) ?? 0;
+                if (directObjectiveAttack && alreadyAssigned < MAX_ATTACKERS_PER_TARGET) {
+                    const predictedOutcome = directObjectiveAttack.prediction.predicted_outcome;
+                    const adjacentOperationParticipants = (activeOp15.participating_brigades ?? []).filter((brigadeId) => {
+                        const participant = state.formations?.[brigadeId];
+                        if (!participant?.location_osid || participant.status !== 'active') return false;
+                        return (adjacency.get(participant.location_osid) ?? []).includes(currentObjective);
+                    }).length;
+                    const concentratedOutcome = adjacentOperationParticipants > 1
+                        ? estimateConcentratedOutcome(
+                            directObjectiveAttack.prediction.power_ratio,
+                            Math.max(alreadyAssigned + 1, adjacentOperationParticipants) - 1
+                        )
+                        : null;
+                    if (
+                        isOutcomeSufficientForAttack(predictedOutcome, 'costly_victory') ||
+                        (concentratedOutcome != null &&
+                            isOutcomeSufficientForAttack(concentratedOutcome, 'costly_victory'))
+                    ) {
+                        const attackPosture: BrigadePosture = (brigade.cohesion ?? 0) >= 60 ? 'assault' : 'attack';
+                        result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });
+                        result.attack_orders[brigade.id] = currentObjective;
+                        result.attack_scores[brigade.id] = 900;
+                        chosenTargets.set(currentObjective, alreadyAssigned + 1);
                         continue;
                     }
                 }
-            }
 
-            // During EXECUTION: march to sector (existing behavior)
-            if (activeOp15.phase === 'execution' && activeOp15.sector_id) {
-                const sector15 = state.corps_front_sectors?.[activeOp15.sector_id];
-                if (sector15) {
-                    const sectorOsids15 = new Set<string>();
-                    for (const ss of sector15.sub_segments) {
-                        for (const o of ss.friendly_osids) sectorOsids15.add(o);
-                    }
-                    if (!sectorOsids15.has(loc)) {
-                        // Brigade not in sector — column march to nearest sector OSID
-                        const nearestSectorOsid = findNearestFriendlyOsidInSet(
-                            state, faction, loc, adjacency, reverseMap, sectorOsids15);
-                        if (nearestSectorOsid) {
-                            result.column_march_orders[brigade.id] = nearestSectorOsid;
-                            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-                            continue;
-                        }
+                const objectiveApproachOsids = new Set<Osid>();
+                for (const neighbor of adjacency.get(currentObjective) ?? []) {
+                    if (neighbor === loc) continue;
+                    if (getPoliticalControllerOSID(state, neighbor, reverseMap) === faction) {
+                        objectiveApproachOsids.add(neighbor);
                     }
                 }
+                if (objectiveApproachOsids.size > 0 && !objectiveApproachOsids.has(loc)) {
+                    const approachStep = findNearestFriendlyOsidInSet(
+                        state,
+                        faction,
+                        loc,
+                        adjacency,
+                        reverseMap,
+                        objectiveApproachOsids
+                    );
+                    // Named operations own their brigades: allow approach movement even when
+                    // the intermediate front OSID is risky, otherwise execution can stall
+                    // one hop short of a valid objective approach position.
+                    if (approachStep) {
+                        result.movement_orders[brigade.id] = approachStep;
+                    }
+                }
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                continue;
             }
+        }
+
+        if (brigadeSupplyState === 'critical') {
+            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+            continue;
         }
 
         // --- Rule 2: Hold OSID — defend by default, but offensive corps can attack from hold ---
@@ -1100,28 +1202,21 @@ function executeFactionDirectives(
             }
         }
         // Sector offensive participation: override targets and thresholds
-        const activeOp = corpsId ? state.corps_command?.[corpsId]?.active_operation : null;
-        const isInSectorOffensive = activeOp?.type === 'sector_attack' &&
-            activeOp.participating_brigades?.includes(brigade.id);
-        if (isInSectorOffensive && activeOp) {
-            if (activeOp.phase === 'recovery') {
+        const activeOpLater = corpsId ? state.corps_command?.[corpsId]?.active_operation : null;
+        const isInSectorOffensive = activeOpLater?.type === 'sector_attack' &&
+            activeOpLater.participating_brigades?.includes(brigade.id);
+        if (isInSectorOffensive && activeOpLater) {
+            if (activeOpLater.phase === 'recovery') {
                 // Recovery: forced defend
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                 continue;
             }
-            if (activeOp.phase === 'execution') {
-                // Override targets to current objective
-                const objectives = activeOp.objectives ?? [];
-                const currentIdx = activeOp.current_objective_index ?? 0;
-                if (currentIdx < objectives.length) {
-                    const currentObjective = objectives[currentIdx]!;
-                    effectiveDirective = {
-                        ...effectiveDirective,
-                        offensive_targets: [currentObjective],
-                    };
-                }
+            if (activeOpLater.phase === 'execution') {
+                // Named operations are sequential: participating brigades should focus on the
+                // current objective, not opportunistically attack unrelated corps targets.
+                effectiveDirective = applySectorOffensiveDirectiveOverride(effectiveDirective, activeOpLater);
                 // Apply momentum bonuses
-                const momentum = activeOp.momentum ?? 0;
+                const momentum = activeOpLater.momentum ?? 0;
                 if (momentum > 0) {
                     const momentumAggression = momentum >= 3 ? 0.15 : momentum >= 2 ? 0.10 : 0.05;
                     effectiveDirective = {
@@ -1188,17 +1283,20 @@ function executeFactionDirectives(
                     // Pioneer: directive target — attack to seed concentration.
                     // Only for offensive/balanced corps stance (not defensive).
                     // Bypasses finalScore filter since repulsed outcomes have negative score.
-                    // Strained supply: no pioneer attacks (too risky without adequate supply).
-                    if (!isSupplyStrained && existing === 0 && (corpsStance === 'offensive' || corpsStance === 'balanced') &&
+                    // Adequate supply: pioneer at 'repulsed' bar (any chance is fine).
+                    // Strained supply: pioneer only at 'victory' bar (need decent odds).
+                    // Critical supply: blocked entirely by outer gate (brigade already skipped).
+                    if (existing === 0 && (corpsStance === 'offensive' || corpsStance === 'balanced') &&
                         effectiveDirective.offensive_targets.includes(s.osid)) {
+                        const pioneerBar = isSupplyStrained ? 'victory' : 'repulsed';
                         // Standard pioneer: individual prediction sufficient
-                        if (isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'repulsed')) {
+                        if (isOutcomeSufficientForAttack(s.prediction.predicted_outcome, pioneerBar)) {
                             bestTarget = s;
                             break;
                         }
-                        // Coordinated pioneer: if enough allies are adjacent to this target,
+                        // Coordinated pioneer (adequate supply only): if enough allies adjacent,
                         // pioneer even with weaker individual prediction.
-                        if (corpsStance === 'offensive') {
+                        if (!isSupplyStrained && corpsStance === 'offensive') {
                             const adjAllies = targetAdjacentCount.get(s.osid) ?? 0;
                             if (adjAllies >= 2) {
                                 const coordinated = estimateConcentratedOutcome(s.prediction.power_ratio, adjAllies - 1);

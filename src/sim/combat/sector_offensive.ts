@@ -20,6 +20,7 @@ import type {
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
+import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { pickOperationName } from './operation_names.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
@@ -60,6 +61,20 @@ export function computePlanningDuration(objectiveCount: number): number {
     return Math.min(5, Math.ceil(objectiveCount * 0.8));
 }
 
+function areParticipantsStaged(state: GameState, participatingBrigades: FormationId[], stagingOsid: string | undefined): boolean {
+    if (typeof stagingOsid !== 'string' || stagingOsid.length === 0) return false;
+    let activeParticipantCount = 0;
+    for (const brigadeId of participatingBrigades) {
+        const brigade = state.formations?.[brigadeId];
+        if (!brigade || brigade.status !== 'active') continue;
+        activeParticipantCount += 1;
+        if (brigade.location_osid !== stagingOsid) {
+            return false;
+        }
+    }
+    return activeParticipantCount > 0;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Supply readiness
 // ═══════════════════════════════════════════════════════════════════════════
@@ -79,11 +94,18 @@ function computeSupplyReadiness(
     const osidState = new Map<string, SupplyStateLevel>();
     for (const e of fac.by_osid) osidState.set(e.osid, e.state);
 
+    const reserveLevel = state.meta?.supply_reserves_enabled
+        ? ((state.general_supply_reserve as Record<string, number> | undefined)?.[faction] ?? 100)
+        : 100;
+
     let adequate = 0;
     for (const bid of participatingBrigades) {
         const b = state.formations?.[bid];
         if (!b || b.status !== 'active') continue;
-        const st = b.location_osid ? (osidState.get(b.location_osid) ?? 'adequate') : 'adequate';
+        const rawSt = b.location_osid ? (osidState.get(b.location_osid) ?? 'adequate') : 'adequate';
+        const st = state.meta?.supply_reserves_enabled
+            ? getEffectiveSupplyState(rawSt, reserveLevel)
+            : rawSt;
         if (st === 'adequate') adequate++;
     }
     return participatingBrigades.length > 0 ? adequate / participatingBrigades.length : 1.0;
@@ -154,16 +176,16 @@ export function advanceSectorOffensives(
         if (op.phase === 'planning') {
             const elapsed = turn - op.phase_started_turn;
             const planDuration = op.planning_duration ?? 1;
+            const stagedEarly = elapsed >= 1 && areParticipantsStaged(state, op.participating_brigades, op.staging_osid);
 
-            // Abort if supply drops below threshold
-            if ((op.supply_readiness ?? 1) < SUPPLY_READINESS_ABORT) {
-                op.phase = 'recovery';
-                op.phase_started_turn = turn;
-                continue;
-            }
-
-            // Transition to execution when planning complete and supply adequate
-            if (elapsed >= planDuration && (op.supply_readiness ?? 1) >= SUPPLY_READINESS_LAUNCH) {
+            // Transition to execution only after completing the configured number of
+            // full planning turns. This preserves one real staging turn for
+            // pre-planned operations injected at turn 0 with planning_duration = 1.
+            // Supply readiness is NOT gated here — the per-brigade supply gate in bot_brigade_ai_osid
+            // handles individual attack eligibility. Sector-level supply gating caused pre-planned
+            // VRS operations to never execute (critical-reachability brigades at game start don't
+            // have supply routes yet, making readiness < 0.6 indefinitely).
+            if (elapsed > planDuration || stagedEarly) {
                 op.phase = 'execution';
                 op.phase_started_turn = turn;
                 op.current_objective_index = 0;
@@ -172,12 +194,8 @@ export function advanceSectorOffensives(
                 op.consecutive_failures_on_current = 0;
             }
         } else if (op.phase === 'execution') {
-            // Check abort conditions
-            if ((op.supply_readiness ?? 1) < SUPPLY_READINESS_ABORT) {
-                op.phase = 'recovery';
-                op.phase_started_turn = turn;
-                continue;
-            }
+            // No supply-based abort during execution — per-brigade gates handle attack eligibility.
+            // (Removed: if supply_readiness < SUPPLY_READINESS_ABORT → recovery)
 
             // Check if all objectives completed
             const objectives = op.objectives ?? [];
@@ -246,14 +264,25 @@ export function updateSectorOffensiveResults(
             op.current_objective_index = currentIdx + 1;
             op.consecutive_failures_on_current = 0;
         } else {
-            // Check if any participating brigade attacked this objective this turn
+            // Check if any participating brigade actually attacked this specific objective this turn.
+            // Use corps_front_sectors adjacency to determine which brigades are adjacent to the
+            // current objective — prevents false failure counting from brigades attacking elsewhere.
+            const adjacentFriendlyOsids = new Set<string>();
+            if (state.corps_front_sectors) {
+                for (const sector of Object.values(state.corps_front_sectors)) {
+                    if (sector.corps_id !== corpsId) continue;
+                    for (const ss of sector.sub_segments) {
+                        if (ss.enemy_osids.includes(currentObjective)) {
+                            for (const fo of ss.friendly_osids) adjacentFriendlyOsids.add(fo);
+                        }
+                    }
+                }
+            }
             const anyAttacked = op.participating_brigades.some(bid => {
                 const b = state.formations?.[bid];
-                if (!b) return false;
-                // Check if brigade has an attack order targeting this objective
-                // We use a heuristic: if the brigade's posture is 'attack' and it's adjacent
-                // This is approximate — the exact check would need attack_orders from the pipeline
-                return b.posture === 'attack';
+                if (!b || b.posture !== 'attack') return false;
+                // Brigade is adjacent to this specific objective and was attacking
+                return b.location_osid ? adjacentFriendlyOsids.has(b.location_osid) : false;
             });
 
             if (anyAttacked) {
@@ -270,6 +299,14 @@ export function updateSectorOffensiveResults(
                 }
             } else {
                 op.last_result = 'stalemate';
+                op.momentum = 0;
+                op.failure_count = (op.failure_count ?? 0) + 1;
+                op.consecutive_failures_on_current = (op.consecutive_failures_on_current ?? 0) + 1;
+
+                if ((op.consecutive_failures_on_current ?? 0) >= MAX_CONSECUTIVE_FAILURES_ON_CURRENT) {
+                    op.current_objective_index = currentIdx + 1;
+                    op.consecutive_failures_on_current = 0;
+                }
             }
         }
 

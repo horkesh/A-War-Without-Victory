@@ -125,14 +125,14 @@ describe('corps command - applyCorpsEffects', () => {
 });
 
 describe('corps command - advanceOperations', () => {
-    it('transitions planning -> execution -> recovery -> complete', () => {
+    it('transitions non-sector operations planning -> execution -> recovery -> complete', () => {
         const state = makeCorpsState();
         initializeCorpsCommand(state);
 
         // Start an operation in planning phase at turn 20
         state.corps_command!['rs-corps-1'].active_operation = {
             name: 'Test Op',
-            type: 'sector_attack',
+            type: 'general_offensive',
             phase: 'planning',
             started_turn: 20,
             phase_started_turn: 20,
@@ -155,6 +155,35 @@ describe('corps command - advanceOperations', () => {
         state.meta.turn = 30;
         advanceOperations(state);
         expect(state.corps_command!['rs-corps-1'].active_operation).toBeNull();
+    });
+
+    it('does not auto-advance sector_attack operations', () => {
+        const state = makeCorpsState();
+        initializeCorpsCommand(state);
+
+        state.corps_command!['rs-corps-1'].active_operation = {
+            name: 'Test Sector Op',
+            type: 'sector_attack',
+            phase: 'planning',
+            started_turn: 20,
+            phase_started_turn: 20,
+            participating_brigades: ['rs-brig-1', 'rs-brig-2'],
+            objectives: ['op:test:objective_a', 'op:test:objective_b'],
+            current_objective_index: 0,
+            planning_duration: 5,
+        };
+
+        state.meta.turn = 23;
+        advanceOperations(state);
+        expect(state.corps_command!['rs-corps-1'].active_operation!.phase).toBe('planning');
+        expect(state.corps_command!['rs-corps-1'].active_operation!.phase_started_turn).toBe(20);
+
+        state.corps_command!['rs-corps-1'].active_operation!.phase = 'execution';
+        state.corps_command!['rs-corps-1'].active_operation!.phase_started_turn = 23;
+        state.meta.turn = 40;
+        advanceOperations(state);
+        expect(state.corps_command!['rs-corps-1'].active_operation!.phase).toBe('execution');
+        expect(state.corps_command!['rs-corps-1'].active_operation!.phase_started_turn).toBe(23);
     });
 });
 
