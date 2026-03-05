@@ -441,7 +441,12 @@ export function applyCasualtyPoolExhaustion(
         const pool = pools[key];
         if (!pool) continue;
 
-        pool.exhausted = (pool.exhausted ?? 0) + permanentLoss;
+        // Feed 25% of permanent battle losses into pool.exhausted.
+        // Full (100%) feedback overpowers the mobilization threshold in frontline
+        // municipalities, causing RS to fail organic captures and requiring excessive
+        // overrides that kill bot activity. 25% keeps demographic gating active while
+        // preserving sim dynamics. Re-evaluate at longer (52w) run if needed.
+        pool.exhausted = (pool.exhausted ?? 0) + Math.round(permanentLoss * 0.25);
         report.formations_processed += 1;
         report.total_exhaustion_added += permanentLoss;
         report.by_faction[cas.faction] = (report.by_faction[cas.faction] ?? 0) + permanentLoss;
