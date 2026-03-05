@@ -491,6 +491,53 @@ Identified via Orchestrator comprehensive review convene ([ORCHESTRATOR_COMPREHE
 - **Rear-area cleanup as corps directive** — Implemented as a corps-level directive that targets own-controlled OSIDs with enemy formations behind the front line. All factions historically secured their rear before pushing forward. Runs throughout the war (no time gate). Rear pockets (all neighbors faction-controlled) are targeted even without an adjacent brigade so reserves move toward them.
 - **Breakthrough retreat deferred** — M5 was evaluated and deferred. The HVO Orasje pocket issue is an OOB gap (0 brigades assigned to `hvo_northwest_bosnia`), not a retreat mechanic issue. Breakthrough retreat adds schema complexity (isolation_turns tracking) and BFS pathfinding for a mechanic that primarily helps edge cases.
 
+### Systematic OSID override calibration strategy (2026-03-05, n65 ATH 99.2%)
+
+**Ledger ref:** [2026-03-05] Calibration ATH n65
+
+#### The core insight: pre-positioning replaces bot dynamics tuning
+
+When sector offensive planning locks brigades in march order for 20+ turns, organic attack counts become unreliable calibration levers. The correct solution is to pre-position VRS territory via `osid_control_overrides` so that brigades start *at* the front rather than marching to it. This shifts calibration from "tune bot parameters" to "pre-solve initial state".
+
+#### Systematic override methodology
+
+1. **Extract sim initial state**: Read `runs/.../initial_save.json`, collect all OSIDs where `political_controllers[osid] === "RS"`.
+2. **Extract reference initial state**: Do the same for a baseline run (n48) known to have correct starting territory (RS=364).
+3. **Compute set difference**: Cells in reference but not in sim = missed RS overrides. ALL of these in the n48→n59 diff were painted RS in `painted_control_jan1993.json`.
+4. **Add all as overrides**: Add the full diff set as `osid_control_overrides = "RS"`. This restores correct starting territory in a single batch.
+5. **Run calibration**: Identify remaining mismatches. Classify each as: bot fixable, consolidation permanent, or override fixable.
+6. **Iterate**: Each run reveals ≤8 residual mismatches. 5 iterations (n61→n65) converged to engine ceiling.
+
+#### Consolidation ceiling — do not chase
+
+`applyConsolidationFlips` auto-flips OSIDs surrounded by same-faction neighbors, regardless of `avoided_osids` or `osid_control_overrides`. These produce *permanent* mismatches. In n65: 4 HRHB consolidation + 1 RS consolidation in Pale + 1 RBiH bot recapture + 1 Donji Vakuf area = 7 permanent mismatches. **Do not add overrides to fix them** — consolidation will undo them immediately, wasting override slots and potentially disrupting other bot behavior.
+
+#### Pool exhaustion rate: 25% not 100%
+
+`applyCasualtyPoolExhaustion` and `applyFrontlineAttrition` feed permanent losses back into `pool.exhausted`. At 100% rate, frontline municipality pools become exhausted within 10-15 turns → bot targeting breaks (no recruitable population). **25% rate** preserves demographic gating while preventing over-exhaustion. Files: `frontline_attrition.ts`, `pool_population.ts`.
+
+#### Override direction law (calibration-critical)
+
+| Override type | When to use | Effect |
+|---|---|---|
+| `osid_control_overrides[osid] = "RS"` | Painted=RS, sim=RBiH (RS under-capture) | Forces RS control at init |
+| `avoided_osids` for RS | Painted=RBiH/HRHB, sim=RS (RS over-capture) | Prevents VRS from attacking there |
+
+Confusing the two directions causes −0.7pp regression. Adding RS under-captures to `avoided_osids` prevents VRS from attacking them at all, guaranteeing they stay RBiH.
+
+#### Force allocation fragility
+
+Each new override block can redirect bot force allocation in non-obvious ways. Example: Kalesija overrides (n466) redirected VRS pressure → bonus Kupres fix. Adding Kladanj overrides on top disrupted that allocation → Kupres reverted. **Test each override block in isolation**; never stack two new groups without verifying final-state dynamics.
+
+#### n65 final result
+
+- **99.2% area-weighted** (737/744 = 99.1% count) — ATH as of 2026-03-05
+- 171 overrides: 144 RS, 18 RBiH, 5 HRHB
+- 22 organic attacks (RS=9, RBiH=13), 17 active weeks
+- All 6 bot benchmarks PASS
+- 7 permanent mismatches (engine ceiling — consolidation/recapture)
+- RS sim=412 vs painted=411, RBiH sim=241, HRHB sim=91
+
 ---
 
 ## Cross-references

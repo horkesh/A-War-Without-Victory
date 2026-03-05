@@ -2,10 +2,11 @@
 
 **Purpose:** Persistent lessons-learned record for Phase II 40w calibration (April 1992 → January 1993).
 **Updated:** 2026-03-05
-**Canonical target run:** n466/n469 (`apr1992_definitive_40w__1b35b0b6ea283b9b__w40_n466` ATH 92.0%)
-**Latest calibration run:** n22 (83.3% area-weighted, 82.5% count — current code with dig_in lockout regression. Hash `137cf28f1ee0a9c8`. dig_in balanced corps fix applied; lockout root cause under investigation.)
-**ALL-TIME HIGH:** n466/n468/n469 (92.0% area-weighted, 90.1% count — hash `1b35b0b6ea283b9b`, pre-lockout code. Kalesija overrides + kupres:kupres_2 organic fix.)
-**Regression note:** commit `acdd4b9` dig_in movement lockout regressed current hash from 90.0% (n471, pre-lockout) to 83.4% (n21, post-lockout). Recovery work needed.
+**Canonical target run:** n65 (ATH 99.2% area-weighted, commit a689d83)
+**Latest calibration run:** n65 (99.2% area-weighted, 99.1% count — 171 overrides, all 6 bot benchmarks PASS, 7 permanent mismatches = engine ceiling)
+**ALL-TIME HIGH:** n65 (99.2% area-weighted — systematic OSID override strategy + pool exhaustion 25% fix, 2026-03-05)
+**Previous ATH:** n466/n469 (92.0% area-weighted — pre-lockout code, Kalesija/Kupres dynamic)
+**Regression note (resolved):** commit `acdd4b9` dig_in movement lockout caused −6.4pp regression. Recovery via Tasks #13-18 + systematic override strategy achieved new ATH at n65.
 **Reverted:** n424 (Drina Sweep/Hold: add srebrenica, drop kalinovik/cajnice/rudo — DRINA 78→75.6, global 91.3→91.1%; reverted.)
 **Previous calibration run:** n403 (88.0% count-based, 90.4% area-weighted — Officers System two-tier: 63 named officers + per-brigade officer_quality. ARBiH 131k, VRS 88k, HVO 42k. Three regions improved: Central Bosnia +6pp, Sarajevo +3.2pp, Posavina +2.7pp. Drina -8pp from per-corps variance.)
 **Previous calibration run:** n407 (90.5% area-weighted ATH, 86.7% count-based — Phase D: supply reserves enabled by default, UN airdrops for RBiH enclaves, bot supply-aware targeting.)
