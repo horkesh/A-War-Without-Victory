@@ -9953,3 +9953,28 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 - Typecheck clean (0 errors).
 
 **Files:** `src/state/displacement_takeover.ts`, `docs/20_engineering/DISPLACEMENT_MASTER.md`.
+
+---
+[2026-03-05] fix(sectors): Corps Front Sector OSID-Adjacency Connectivity + Merge + Brigade Dedup
+
+**Type:** Bug Fix
+**Files:** `src/sim/combat/corps_front_sectors.ts`
+
+### Problem
+`buildEdgeAdjacency` connected edges only via shared OSID endpoints. Two edges E1=(A,X) and E2=(B,Y) where A and B are adjacent OSIDs (but different) were treated as disconnected, fragmenting the front into single-edge islands. 255 sectors for 266 front edges (95% tiny, 1–4 edges). `MIN_SECTOR_EDGES=5` was defined but never enforced. Phase 1E midpoint splits put junction OSIDs into both halves' `friendly_osids`, causing 18 brigade double-assignments per run.
+
+### Fix
+- **Proposal A:** `buildEdgeAdjacency` accepts `osidAdjacency: Map<Osid, Osid[]>`. Edges whose friendly-side OSIDs are OSID-adjacent are now connected. Threaded through `findSubSegments` → `buildMultiSectorsForCorps`.
+- **Proposal B:** `mergeUndersizedSubSegments()` iteratively merges sub-segments below `MIN_SECTOR_EDGES` into nearest OSID-adjacent neighbor. Isolated segments kept as-is.
+- **Brigade dedup:** `deduplicateBrigadesAcrossSectors()` removes duplicate brigade assignments after Phase 1E, keeping first sector by sorted `sector_id`.
+
+### Result (40w)
+| Metric | Before | After |
+|--------|--------|-------|
+| Total sectors | 255 | 150 |
+| Mean edges/sector | 2.1 | 8.6 |
+| Tiny (1–4 edges) | 242 (95%) | 53 (35%) |
+| Good (5–25 edges) | 13 (5%) | 97 (65%) |
+| Empty sectors | 99 | 27 |
+| Brigade duplicates | 18 | 0 |
+
