@@ -34,6 +34,19 @@ const SUSTAINED_MIN_REMAINING = 10;
  *  Historically ~70% of minorities fled in the first weeks after takeover; 30% remained under duress. */
 const INITIAL_DISPLACEMENT_FRACTION = 0.70;
 
+/** HRHB-controlled OSIDs: 100% of Serbs expelled — no front gating (historic mass exodus). */
+const HRHB_SERB_EXPULSION_FRACTION = 1.00;
+/** RBiH-controlled front-adjacent OSIDs: 50% of Serbs displaced. */
+const RBIH_SERB_DISPLACEMENT_FRACTION = 0.50;
+/** RBiH-controlled Sarajevo urban OSIDs: only 10% displaced (gradual departure, no mass exodus). */
+const SARAJEVO_SERB_DISPLACEMENT_FRACTION = 0.10;
+
+/** Sarajevo urban municipalities: Serb displacement is historically lower. */
+const SARAJEVO_URBAN_MUN_IDS = new Set<MunicipalityId>([
+    'centar_sarajevo', 'novi_grad_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo',
+    'ilidza', 'vogosca', 'hadzici',
+]);
+
 /** Posavina Croats: most flee to Croatia (canon: displacement redesign 2026-02-17). */
 const POSAVINA_CROAT_FLEE_ABROAD = 0.70;
 
@@ -275,6 +288,30 @@ function addOneTurnPoolContribution(
     }
 }
 
+/**
+ * Returns the initial-wave displacement fraction for a controller/displaced-faction pair.
+ * Returns null to skip seeding entirely (deep-rear RBiH->RS OSIDs not touching the front).
+ *
+ * Canon rules (displacement redesign 2026-03-05):
+ *  - HRHB->RS:  1.00 exodus — every HRHB OSID, no front gating
+ *  - RBiH->RS:  0.10 in Sarajevo urban; 0.50 front-adjacent only; null for deep rear
+ *  - All other: INITIAL_DISPLACEMENT_FRACTION (0.70)
+ */
+function getInitialDisplacementFraction(
+    toFaction: FactionId,
+    fromFaction: FactionId,
+    munId: MunicipalityId,
+    isFrontAdjacent: boolean
+): number | null {
+    if (toFaction === 'HRHB' && fromFaction === 'RS') return HRHB_SERB_EXPULSION_FRACTION;
+    if (toFaction === 'RBiH' && fromFaction === 'RS') {
+        if (SARAJEVO_URBAN_MUN_IDS.has(munId)) return SARAJEVO_SERB_DISPLACEMENT_FRACTION;
+        if (!isFrontAdjacent) return null;
+        return RBIH_SERB_DISPLACEMENT_FRACTION;
+    }
+    return INITIAL_DISPLACEMENT_FRACTION;
+}
+
 export function processPhaseIIDisplacementTakeover(
     state: GameState,
     settlements: Map<string, SettlementRecord>,
@@ -323,6 +360,16 @@ export function processPhaseIIDisplacementTakeover(
     const timerMap = state.hostile_takeover_timers as Record<string, HostileTakeoverTimerState>;
     const campMap = state.displacement_camp_state as Record<MunicipalityId, DisplacementCampState>;
 
+    // Build set of OSIDs on the front line (for front-adjacency gating in displacement seeding).
+    // war_front_edges_osid.a/b are OSIDs in op:municipality:slug format.
+    const frontOsids = new Set<string>();
+    for (const fe of state.war_front_edges_osid ?? []) {
+        if (fe.a) frontOsids.add(fe.a);
+        if (fe.b) frontOsids.add(fe.b);
+    }
+    // Fallback: if no front edges computed yet (turn 1), treat all as front-adjacent.
+    const allFrontAdjacent = frontOsids.size === 0;
+
     const battles = (battleReport?.battles ?? []).slice().sort((a, b) => {
         const byAttacker = strictCompare(a.attacker_faction, b.attacker_faction);
         if (byAttacker !== 0) return byAttacker;
@@ -352,6 +399,10 @@ export function processPhaseIIDisplacementTakeover(
                     if (!areFactionsAtWar(state, fromFaction, controller)) continue;
                     const timerKey = `${osid}|${fromFaction}`;
                     if (timerMap[timerKey]) continue;
+                    // Skip seeding if per-faction rules say no displacement (e.g. deep-rear RBiH->RS).
+                    const isFrontAdj = allFrontAdjacent || frontOsids.has(osid);
+                    const fraction = getInitialDisplacementFraction(controller, fromFaction, munId, isFrontAdj);
+                    if (fraction === null) continue;
                     timerMap[timerKey] = {
                         mun_id: munId,
                         from_faction: fromFaction,
@@ -468,8 +519,12 @@ export function processPhaseIIDisplacementTakeover(
                 hostileShare = Math.min(hostileShare, 0.80);
             }
 
+            const isFrontAdjMatured = allFrontAdjacent || frontOsids.has(osid);
+            const initFraction = getInitialDisplacementFraction(
+                timer.to_faction, timer.from_faction, munId, isFrontAdjMatured
+            ) ?? INITIAL_DISPLACEMENT_FRACTION;
             const displacementAmount = Math.min(
-                Math.max(0, Math.floor(osidPop * hostileShare * INITIAL_DISPLACEMENT_FRACTION)),
+                Math.max(0, Math.floor(osidPop * hostileShare * initFraction)),
                 remainingPop
             );
 

@@ -55,11 +55,21 @@ Runs every turn after attack resolution. The **only active displacement trigger*
 
 **Three sub-steps per turn:**
 
-1. **Step 0 — War-start seeding:** On the first executed war turn (`currentTurn === warStartTurn + 1`), creates displacement timers for ALL OSIDs in `political_controllers`. **Note:** `runTurn()` increments `state.meta.turn` BEFORE running phases, so `warStartTurn + 1` is the first actual execution turn (not `warStartTurn` itself). For each OSID, a timer is created for every minority faction (i.e., factions that don't control the OSID and are at war with the controller). This seeds displacement from day one — every minority population begins being displaced immediately at war start.
+1. **Step 0 — War-start seeding:** On the first executed war turn (`currentTurn === warStartTurn + 1`), creates displacement timers for OSIDs in `political_controllers`. **Note:** `runTurn()` increments `state.meta.turn` BEFORE running phases, so `warStartTurn + 1` is the first actual execution turn (not `warStartTurn` itself). For each OSID, a timer is created for every minority faction at war with the controller — subject to **per-faction gating rules**:
+
+   | Controller | Displaced | Fraction | Gate |
+   |---|---|---|---|
+   | HRHB | RS (Serbs) | **100%** | No gating — every HRHB OSID seeds |
+   | RBiH | RS (Serbs) | **10%** | Sarajevo urban municipalities only |
+   | RBiH | RS (Serbs) | **50%** | Front-adjacent OSIDs only |
+   | RBiH | RS (Serbs) | **skip** | Deep-rear non-Sarajevo OSIDs |
+   | Any | Any (default) | **70%** | No gating |
+
+   Front-adjacency is determined from `state.war_front_edges_osid`. If no front edges are computed yet (first turn), all OSIDs are treated as front-adjacent (fallback). Sarajevo urban: `centar_sarajevo`, `novi_grad_sarajevo`, `novo_sarajevo`, `stari_grad_sarajevo`, `ilidza`, `vogosca`, `hadzici`.
 
 2. **Step 1 — Battle-driven timers:** When attack resolution flips an OSID, a new timer is created for the losing faction's population in that OSID.
 
-3. **Step 2 — Timer maturation:** After `TAKEOVER_DISPLACEMENT_DELAY_TURNS = 4` turns, the timer matures. Per-OSID population is looked up from the operational settlements census data (`population_total`); falls back to `floor(mun_pop / osid_count)` if unavailable. Hostile share is computed from per-OSID ethnic composition (cap 0.95); falls back to municipality-level `getDynamicHostileShare()` (cap 0.80). Initial displaced amount = `min(floor(osidPop × hostileShare × INITIAL_DISPLACEMENT_FRACTION=0.70), remainingPop)` — 70% of the minority leaves in the initial wave. Kill/flee fractions applied, survivors enter camp. `timer.cumulative_displaced` is set; remaining 30% flows through sustained displacement (Branch B).
+3. **Step 2 — Timer maturation:** After `TAKEOVER_DISPLACEMENT_DELAY_TURNS = 4` turns, the timer matures. Per-OSID population is looked up from the operational settlements census data (`population_total`); falls back to `floor(mun_pop / osid_count)` if unavailable. Hostile share is computed from per-OSID ethnic composition (cap 0.95); falls back to municipality-level `getDynamicHostileShare()` (cap 0.80). Initial displaced amount = `min(floor(osidPop × hostileShare × initFraction), remainingPop)`, where `initFraction` is determined by `getInitialDisplacementFraction(toFaction, fromFaction, munId, isFrontAdjacent)` (see per-faction table above; default 70%). Kill/flee fractions applied, survivors enter camp. `timer.cumulative_displaced` is set; remaining 30% flows through sustained displacement (Branch B).
 
 **Also handles re-displacement pass-through:** When a municipality with `displaced_in > 0` has a timer mature, displaced people already sheltering there are re-routed to new friendly municipalities with **zero casualties and zero flee-abroad**. This prevents double-counting — a person displaced twice counts as 1 displaced person.
 

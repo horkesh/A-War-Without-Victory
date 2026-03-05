@@ -9931,3 +9931,25 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 - **sustained_displaced_total: 250,717** (was 0)
 - **total displaced: 1,183,578** (was 890,818, +33%)
 - 18,591 sustained fires across 35 weeks
+
+---
+[2026-03-05] feat: Per-Faction Displacement Fractions + Front-Adjacency Gating
+
+**What changed:** Implemented per-faction displacement rules for war-start seeding and Branch A maturation in `displacement_takeover.ts`.
+
+**Rules (canon 2026-03-05):**
+- HRHB-controlled OSIDs → Serbs: **100% expelled** — no front gating (historic mass exodus).
+- RBiH-controlled Sarajevo urban → Serbs: **10%** (gradual departure, `centar_sarajevo` etc.).
+- RBiH-controlled front-adjacent OSIDs → Serbs: **50%**, front-adjacent only.
+- RBiH deep-rear non-Sarajevo OSIDs: **skipped entirely** (no timer seeded).
+- All other faction pairs: **70%** (INITIAL_DISPLACEMENT_FRACTION, default).
+
+**Implementation:**
+- Added `HRHB_SERB_EXPULSION_FRACTION`, `RBIH_SERB_DISPLACEMENT_FRACTION`, `SARAJEVO_SERB_DISPLACEMENT_FRACTION`, `SARAJEVO_URBAN_MUN_IDS` constants.
+- Added `getInitialDisplacementFraction(toFaction, fromFaction, munId, isFrontAdjacent)` helper.
+- Built `frontOsids` set from `state.war_front_edges_osid` before Section 0 (fallback: all front-adjacent if empty).
+- Section 0 gating: skips timer creation when `getInitialDisplacementFraction` returns null.
+- Branch A maturation uses per-faction fraction instead of flat `INITIAL_DISPLACEMENT_FRACTION`.
+- Typecheck clean (0 errors).
+
+**Files:** `src/state/displacement_takeover.ts`, `docs/20_engineering/DISPLACEMENT_MASTER.md`.

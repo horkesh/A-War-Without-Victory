@@ -175,8 +175,8 @@
    Do instead: ZoC deleted. Movement via `brigade_movement_orders.ts` / `apply-brigade-movement`. Defense via `local_front_defense.ts` density. AoR legacy also fully removed (R1–R5, 2026-03-04) — no dead AoR code remains.
 
 ## Calibration
-1. **[2026-03-05] ATH n52=100% (count+area-weighted); all Tasks #13-18 complete**
-   Do instead: Use area-weighted match (km²) as primary. ATH n52=100.0% (hash `a42822b1be197257`). 313 vitest pass. Pool exhaustion adds ~30k exhausted/40w; adds avoided_osids + control_overrides to compensate.
+1. **[2026-03-05] ATH n65=99.2% area-weighted (40w); systematic OSID override strategy**
+   Do instead: Use area-weighted match (km²) as primary. ATH 40w = 99.2% (n65, commit a689d83). 171 overrides (144 RS, 18 RBiH, 5 HRHB). 7 permanent mismatches (consolidation ceiling — do not chase). Pool exhaustion at 25% rate. All 6 bot benchmarks PASS.
 2. **[2026-03-05] Pool exhaustion fix: avoided_osids DON'T prevent loss; control_overrides DO**
    Do instead: When sim=RBiH but painted=RS, adding RBiH avoided_osids is often ineffective (cells lost via counterattack or weakness, not direct attack). Add RS `osid_control_overrides` for systematic under-captures. avoideds work only when bot is actively targeting wrong cells.
 3. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
