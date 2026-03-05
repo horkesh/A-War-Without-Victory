@@ -19,7 +19,7 @@ import type {
     SectorIntelRecord,
     SectorStrengthCategory,
     SectorPostureObserved,
-}from '../../state/game_state.js';
+} from '../../state/game_state.js';
 import {
     FACTION_RECON_PROFILES,
     CONFIDENCE_ROUGH_STRENGTH,
@@ -28,6 +28,7 @@ import {
     CONFIDENCE_DEEP_INTEL,
 } from './sector_intel_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
+
 // ===============================================================
 // Main Derivation
 // ===============================================================
@@ -141,7 +142,7 @@ export function updateSectorIntelFromCombat(
     rec.strength_category = computeStrengthCategory(enemySector, 1.0);
     rec.posture_observed = computePosture(enemySector, state, 1.0);
     rec.offensive_signs = computeOffensiveSigns(enemySector, state, 1.0, profile.recon_range);
-    rec.visible_brigade_ids = computeVisibleBrigades(enemySector, 1.0, profile.recon_range).slice().sort(strictCompare);
+    rec.visible_brigade_ids = computeVisibleBrigades(enemySector, 1.0, profile.recon_range).sort(strictCompare);
 }
 
 // ===============================================================
@@ -168,7 +169,7 @@ function buildRecord(
         offensive_signs: computeOffensiveSigns(enemySector, state, confidence, reconRange),
         confidence,
         turns_in_contact: turnsInContact,
-        visible_brigade_ids: computeVisibleBrigades(enemySector, confidence, reconRange).slice().sort(strictCompare),
+        visible_brigade_ids: computeVisibleBrigades(enemySector, confidence, reconRange).sort(strictCompare),
         last_updated_turn: turn,
     };
 }

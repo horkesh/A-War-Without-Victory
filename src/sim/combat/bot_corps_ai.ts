@@ -1558,35 +1558,34 @@ export function generateCorpsDirectives(
         // Soft weight (+/-2) applied within the supply-aware sort below.
         const intelScoreByOsid = new Map<string, number>();
         if (state.sector_intel && corpsSectors.length > 0) {
-            // Build osid -> enemy_sector_id lookup from this corps sectors
-            const osidToEnemySector = new Map<string, string>();
+            // target OSID -> friendly sector that faces it
+            const targetToFriendlySector = new Map<string, string>();
             for (const sec of corpsSectors) {
                 for (const ss of sec.sub_segments) {
-                    for (const eo of ss.enemy_osids) {
-                        osidToEnemySector.set(eo, sec.sector_id);
-                    }
+                    for (const eo of ss.enemy_osids) targetToFriendlySector.set(eo, sec.sector_id);
+                }
+            }
+            // target OSID -> enemy sector that owns it
+            const targetToEnemySector = new Map<string, string>();
+            for (const [sId, sec] of Object.entries(state.corps_front_sectors!)) {
+                if (sec.faction === faction) continue;
+                for (const ss of sec.sub_segments) {
+                    for (const fo of ss.friendly_osids) targetToEnemySector.set(fo, sId);
                 }
             }
             for (const osid of offensiveTargets) {
-                const friendlySectorId = osidToEnemySector.get(osid);
-                if (!friendlySectorId) continue;
-                const records = state.sector_intel[friendlySectorId] ?? [];
-                // Find the intel record whose enemy sector contains this OSID
-                for (const rec of records) {
-                    if (rec.confidence < CONFIDENCE_ROUGH_STRENGTH) continue;
-                    const enemySector = (state.corps_front_sectors ?? {})[rec.enemy_sector_id];
-                    if (!enemySector) continue;
-                    const inEnemy = enemySector.sub_segments.some(ss => ss.friendly_osids.includes(osid));
-                    if (!inEnemy) continue;
-                    if (rec.strength_category === 'thin') intelScoreByOsid.set(osid, -2);
-                    else if (rec.strength_category === 'fortress') intelScoreByOsid.set(osid, 2);
-                    else if (rec.strength_category === 'dense') intelScoreByOsid.set(osid, 1);
-                    break;
-                }
+                const friendlySectorId = targetToFriendlySector.get(osid);
+                const enemySectorId = targetToEnemySector.get(osid);
+                if (!friendlySectorId || !enemySectorId) continue;
+                const rec = state.sector_intel[friendlySectorId]?.find(r => r.enemy_sector_id === enemySectorId);
+                if (!rec || rec.confidence < CONFIDENCE_ROUGH_STRENGTH) continue;
+                if (rec.strength_category === 'thin') intelScoreByOsid.set(osid, -2);
+                else if (rec.strength_category === 'fortress') intelScoreByOsid.set(osid, 2);
+                else if (rec.strength_category === 'dense') intelScoreByOsid.set(osid, 1);
             }
         }
 
-                // Supply-aware target sorting: prefer attacking enemy OSIDs with critical/strained supply.
+        // Supply-aware target sorting: prefer attacking enemy OSIDs with critical/strained supply.
         // Then prefer targets that shorten the line (many friendly neighbors — e.g. Teočak, Šapna:
         // capturing bulges reduces front length and consolidation cost).
         // Deterministic: ties broken by strictCompare (stable for same-supply-state targets).
