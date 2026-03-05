@@ -105,8 +105,8 @@
    Do instead: Use `getFormationCorpsId(f)` from `corps_sector_partition.ts`. Brigade corps stored in tags (`corps:vrs_1st_krajina`), not `f.corps_id`.
 2. **[2026-03-01] Sector exempt corps**
    Do instead: arbih_general_staff, vrs_main_staff, hvo_general_staff (army reserves) + hvo_central_bosnia (Bosniak-Croat conflict) — don't assign their brigades to front sectors.
-3. **[2026-03-04] Sector pipeline (current)**
-   Do instead: `buildMultiSectorsForCorps()`: findSubSegments → splitOversizedSubSegments (MAX_SECTOR_EDGES=25) → buildSectors → Phase 1E split (MAX_SECTOR_BRIGADES=8) → assignInteriorBrigades → redistributeExcessReserves (`RESERVE_PER_EDGE_CAP=0.07`, was 0.5 → ~1 reserve per typical sector). Orphan fallback faction-wide.
+3. **[2026-03-05] Sector pipeline (updated — contiguity fix + min coverage + balancing)**
+   Do instead: `buildMultiSectorsForCorps()`: findSubSegments (friendly-OSID adjacency only — fix for non-contiguous sectors) → splitOversizedSubSegments (MAX_SECTOR_EDGES=25) → buildSectors → Phase 1E split (MAX_SECTOR_BRIGADES=8) → assignInteriorBrigades → redistributeExcessReserves → ensureMinimumSectorCoverage (promotes reserve or transfers from surplus). CorpsDirective now has `reinforce_sector_ids` (under-density sectors, <50% target density) + `priority_sector_id` (sector with most offensive targets). Bot: Rule 5c marches overstocked brigades to reinforce sectors; Rule 7 marches interior brigades to priority sector first.
 4. **[2026-03-01] Fog of war (ReconIntelligence) — already implemented**
    Do instead: `recon_intelligence.ts` runs via `updateReconIntelligence()`. Ranges: RBiH=2, RS=1, HRHB=1. Phase 2 TODO: confidence decay, bot AI intel usage.
 
@@ -145,13 +145,13 @@
    Do instead: Front style = `front-line-base` (dark) + `front-line-dash` (white dash). User confirmed keep as-is. Do NOT propose or implement HoI4 chevron/barbed-wire variants.
 2. **[2026-02-21] FRONT definition**
    Do instead: FRONT = where two hostile settlements meet (not "where brigade is present"). Assign units after segment length/name.
-2. **[2026-02-23] Front ribbons: border-based only, consecutive runs**
+3. **[2026-02-23] Front ribbons: border-based only, consecutive runs**
    Do instead: No centroid-to-centroid fallback ribbons — they create dark rectangular artifacts. Collect shared vertices as consecutive runs along A's ring; one ribbon per run to prevent zig-zag. Use `borderVertexKey` with 1e6 rounding. Dedupe and smooth border runs before storing.
-3. **[2026-02-21] Front edges: 2D/3D single source**
+4. **[2026-02-21] Front edges: 2D/3D single source**
    Do instead: Both renderers read persisted `front_edges` from `LoadedGameState`/`ViewerSave`. `front_pressure` drives thickness/opacity.
-4. **[2026-02-07] Voronoi: post-merge validation**
+5. **[2026-02-07] Voronoi: post-merge validation**
    Do instead: After boolean ops, add post-merge coverage/overlap validation per mun1990.
-5. **[2026-02-22] Split-muni audit before rebuild**
+6. **[2026-02-22] Split-muni audit before rebuild**
    Do instead: Run `npm run map:audit:split-muni-duplicates` before any map rebuild.
 
 ## User Directives
@@ -187,10 +187,8 @@
    Do instead: Kalesija seher_2/gojcin_2 RS overrides redirect VRS pressure → bonus kupres:kupres_2 fix (n466). Adding Kladanj overrides on top disrupts this allocation → kupres:kupres_2 reverts (n467). Test each override block in isolation; never stack two override groups without verifying the underlying force dynamics.
 7. **[2026-03-05] dig_in lockout (acdd4b9) regressed calibration −6.4pp — balanced corps use defend**
    Do instead: Balanced corps brigade Rule 6 assigns `defend`, NOT `dig_in`. Lockout in `osid_column_movement.ts` immobilizes dig_in brigades. Defensive corps (Rule 4) still use dig_in. Full regression recovery (83.3%→90%) requires further audit.
-7. **[2026-03-03] Timeline knobs drive 40w behavior first**
-   Do instead: For `apr1992_definitive_40w`, tune `data/scenarios/timelines/apr1992.json` (`doctrine_phases`, `external_support`) before editing `bot_strategy.ts`; verify with `final_state_hash` and `compare_painted_vs_sim.cjs`.
-8. **[2026-03-03] Prove knob efficacy immediately (hash + metrics)**
-   Do instead: After each calibration edit, run one 40w and compare both `final_state_hash` and `compare_painted_vs_sim.cjs`; if unchanged vs prior run, revert as inert/no-op before next iteration.
+8. **[2026-03-03] Timeline knobs drive 40w behavior first & prove efficacy**
+   Do instead: Tune `apr1992.json` before `bot_strategy.ts`. Prove efficacy immediately by running one 40w test and comparing `final_state_hash` and `compare_painted_vs_sim.cjs`; revert if inert.
 9. **[2026-03-04] apr1992.json ↔ FACTION_DOCTRINE_PHASES must stay synced**
    Do instead: After editing EITHER `data/scenarios/timelines/apr1992.json` doctrine values OR `bot_strategy.ts` `FACTION_DOCTRINE_PHASES`, immediately run `npx vitest run tests/war_timeline.test.ts` to confirm round-trip parity. Drift causes silent calibration regression.
 10. **[2026-03-03] Municipality target sets are the strongest live lever**

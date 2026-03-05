@@ -9771,3 +9771,18 @@ Determinism checks **MUST** be run:
 - **Determinism:** Change removes balanced corps dig_in from bot posture assignment. No non-determinism introduced. 296/296 vitest pass.
 - **Files modified:** `src/sim/combat/bot_brigade_ai_osid.ts`
 - **Artifacts:** `docs/40_reports/implemented/20260305_CALIBRATION_REGRESSION_DIG_IN_LOCKOUT.md`, CALIBRATION_MASTER.md runs n468-n22 added.
+
+**2026-03-05** - Sectors Overhaul, SRC Officer Fix, GUI First-Engagement Data
+- **Phase:** Post-MVP — Phase II development
+- **Changes:**
+  - **Contiguous sectors**: `buildEdgeAdjacency` in `corps_front_sectors.ts` now accepts a `faction` parameter; sub-segments group front edges only via friendly-side OSID endpoints, preventing geographically distant edges from being merged into one sector via shared enemy OSIDs.
+  - **Minimum sector coverage (Step 7)**: New `ensureMinimumSectorCoverage` function runs as Step 7 of `buildFactionSectors`; for each empty sector it promotes the first reserve brigade, or BFS-transfers a surplus brigade from a neighboring over-assigned sector in the same corps. Guarantees every non-cutoff sector has at least one assigned brigade.
+  - **CorpsDirective new fields**: `reinforce_sector_ids?: string[]` (sectors below 50% of corps target density) and `priority_sector_id?: string` (sector facing the most offensive targets). Computed in `bot_corps_ai.ts` before directive construction.
+  - **Bot Rule 5c**: Brigade at an OSID with >=2 friendly brigades (overstocked) marches to the nearest OSID in a `reinforce_sector_ids` sector.
+  - **Bot Rule 7 priority prefix**: Interior brigades check `priority_sector_id` first and march toward the offensive concentration sector before any other movement rule.
+  - **SRC officer fix**: All 6 SRC officers in `data/scenarios/officers/apr1992_officers.json` had `home_corps_id`/`compatible_corps_ids` set to alias `vrs_srk` instead of actual formation ID `vrs_sarajevo_romanija`; fixed for all 6 (vrs_sipcic, vrs_galic, vrs_d_milosevic, vrs_sladoje, vrs_despotovic, vrs_lizdek). OOBSidebar commander lookup now matches correctly.
+  - **GUI first-engagement data**: `BrigadeHistory.first_battle_turn` and `first_battle_osid` surfaced through `FormationView` → `GameStateAdapter` → `FormationDetail` display.
+  - **Refactor pass**: Flattened nested ifs in Rule 5c; replaced redundant `&& state.corps_front_sectors` with optional chaining in Rule 7; simplified BFS init in `ensureMinimumSectorCoverage`.
+- **Files changed:** `src/sim/combat/corps_front_sectors.ts`, `src/sim/combat/bot_corps_ai.ts`, `src/sim/combat/bot_brigade_ai_osid.ts`, `src/state/game_state.ts`, `data/scenarios/officers/apr1992_officers.json`
+- **Docs updated:** `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`, `docs/20_engineering/REPO_MAP.md`, `docs/40_reports/README.md`
+- **Report:** `docs/40_reports/implemented/20260305_SECTORS_OVERHAUL_GUI_SRC_FIX.md`

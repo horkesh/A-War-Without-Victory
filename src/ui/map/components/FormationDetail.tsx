@@ -6,6 +6,13 @@ import { useIPC } from '../desktop/useIPC';
 import { stagePostureOrderAction } from '../desktop/orderActions';
 import { DETAIL_PANEL_STYLE, SECONDARY_PANEL_STYLE } from './panelRail';
 
+function formatOutcome(outcome: string): string {
+  return outcome
+    .split('_')
+    .map((word) => (word ? word[0].toUpperCase() + word.slice(1) : word))
+    .join(' ');
+}
+
 function capitalize(s: string): string {
   if (!s) return s;
   return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
@@ -90,7 +97,22 @@ export function FormationDetail() {
 
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
               <span className="text-text-secondary">Cohesion</span>
-              <span className="text-text-primary tabular-nums">{formation.cohesion}</span>
+              <span className="text-text-primary tabular-nums flex items-center gap-1">
+                {(() => {
+                  const c = formation.cohesion;
+                  const blocks = 10;
+                  const filled = Math.round((c / 100) * blocks);
+                  const color = c >= 70 ? '#d4a055' : c >= 40 ? '#d48a55' : '#d45555';
+                  return (
+                    <>
+                      <span style={{ color, letterSpacing: '1px', fontSize: '10px' }}>
+                        {'■'.repeat(filled)}<span style={{ opacity: 0.2 }}>{'■'.repeat(blocks - filled)}</span>
+                      </span>
+                      <span className="text-text-secondary text-[10px]">{c}</span>
+                    </>
+                  );
+                })()}
+              </span>
               <span className="text-text-secondary">Fatigue</span>
               <span className="text-text-primary tabular-nums">{formation.fatigue}</span>
               {formation.personnel != null && (
@@ -133,7 +155,24 @@ export function FormationDetail() {
             {formation.kind === 'brigade' && formation.combatSummary && (
               <div className="pt-2 border-t border-panel-border space-y-1">
                 <div className="text-xs text-text-secondary">Brigade history</div>
+                {formation.firstBattleTurn != null && (
+                  <div className="text-[11px]">
+                    <span className="text-text-secondary">First engagement: </span>
+                    <span className="text-text-primary">T{formation.firstBattleTurn}</span>
+                    {formation.firstBattleOsid && (
+                      <span className="text-text-secondary"> @ <span className="font-mono text-text-primary">{getOsidDisplayName(formation.firstBattleOsid, osidDisplayNames)}</span></span>
+                    )}
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                  <span className="text-text-secondary">Total losses</span>
+                  <span className="text-text-primary tabular-nums">{formation.combatSummary.total_casualties_taken.toLocaleString()}</span>
+                  <span className="text-text-secondary">KIA (est.)</span>
+                  <span className="text-text-primary tabular-nums">{Math.round(formation.combatSummary.total_casualties_taken * 0.30).toLocaleString()}</span>
+                  <span className="text-text-secondary">WIA (est.)</span>
+                  <span className="text-text-primary tabular-nums">{Math.round(formation.combatSummary.total_casualties_taken * 0.55).toLocaleString()}</span>
+                  <span className="text-text-secondary">Enemy losses</span>
+                  <span className="text-text-primary tabular-nums">{formation.combatSummary.total_casualties_inflicted.toLocaleString()}</span>
                   <span className="text-text-secondary">Battles</span>
                   <span className="text-text-primary tabular-nums">{formation.combatSummary.battles_fought.toLocaleString()}</span>
                   <span className="text-text-secondary">Victories</span>
@@ -147,6 +186,41 @@ export function FormationDetail() {
                   <span className="text-text-secondary">OSIDs lost</span>
                   <span className="text-text-primary tabular-nums">{formation.combatSummary.total_osids_lost.toLocaleString()}</span>
                 </div>
+                {formation.recent_engagements && formation.recent_engagements.length > 0 && (
+                  <div className="pt-1">
+                    <div className="text-xs text-text-secondary mb-1">Recent engagements</div>
+                    <div className="space-y-1">
+                      {[...formation.recent_engagements].reverse().map((engagement, idx) => (
+                        <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-[11px] leading-4">
+                          <span className="text-text-secondary">T{engagement.turn} </span>
+                          <span className="text-text-primary">{formatOutcome(engagement.outcome)}</span>
+                          <span className="text-text-secondary"> as {engagement.role} @ </span>
+                          <span className="font-mono text-text-primary">{getOsidDisplayName(engagement.osid, osidDisplayNames)}</span>
+                          {engagement.territory_flipped && <span className="text-accent-gold ml-1">⚑</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {formation.narrativeArc && (
+              <div className="pt-2 border-t border-panel-border space-y-1">
+                <div className="text-xs text-text-secondary">War story</div>
+                <div className="text-xs font-semibold text-accent-gold capitalize">{formation.narrativeArc}</div>
+                {formation.warNarrative && (
+                  <div className="text-[11px] text-text-primary leading-4 italic">{formation.warNarrative}</div>
+                )}
+                {formation.notableMoments && formation.notableMoments.length > 0 && (
+                  <div className="space-y-0.5 pt-1">
+                    {formation.notableMoments.map((m, i) => (
+                      <div key={i} className="text-[11px] text-text-secondary">
+                        <span className="text-text-primary">T{m.turn}:</span> {m.description.replace(/op:[a-z0-9_]+:[a-z0-9_]+/gi, (match) => getOsidDisplayName(match, osidDisplayNames))}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -270,24 +344,24 @@ export function FormationDetail() {
                   const isOffensive = posture === 'attack' || posture === 'assault';
                   const blocked = isOffensive && (formation.home_defense_active ?? false);
                   return (
-                  <button
-                    key={posture}
-                    type="button"
-                    disabled={blocked}
-                    onClick={() => void stagePostureOrderAction(
-                      {
-                        ipc,
-                        addStagedOrder,
-                        setLoadError,
-                      },
-                      formation.id,
-                      posture
-                    )}
-                    title={blocked ? 'Blocked: home defense active' : undefined}
-                    className={`text-[11px] font-sans px-2 py-1 rounded border border-panel-border ${blocked ? 'opacity-40 cursor-not-allowed text-text-secondary' : 'text-interactive hover:bg-panel-hover'}`}
-                  >
-                    {posture.replace(/_/g, ' ')}
-                  </button>
+                    <button
+                      key={posture}
+                      type="button"
+                      disabled={blocked}
+                      onClick={() => void stagePostureOrderAction(
+                        {
+                          ipc,
+                          addStagedOrder,
+                          setLoadError,
+                        },
+                        formation.id,
+                        posture
+                      )}
+                      title={blocked ? 'Blocked: home defense active' : undefined}
+                      className={`text-[11px] font-sans px-2 py-1 rounded border border-panel-border ${blocked ? 'opacity-40 cursor-not-allowed text-text-secondary' : 'text-interactive hover:bg-panel-hover'}`}
+                    >
+                      {posture.replace(/_/g, ' ')}
+                    </button>
                   );
                 })}
               </div>

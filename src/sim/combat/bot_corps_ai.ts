@@ -1573,6 +1573,48 @@ export function generateCorpsDirectives(
         holdOsids.sort(strictCompare);
         avoidOsids.sort(strictCompare);
 
+        // Sector density balancing: find under-density sectors needing reinforcement.
+        // Target density = total assigned brigades / total front edges for this corps.
+        // Sectors below 50% of target density get flagged for reinforcement.
+        const reinforceSectorIds: string[] = [];
+        if (corpsSectors.length > 1) {
+            let totalAssigned = 0;
+            let totalEdges = 0;
+            for (const sec of corpsSectors) {
+                totalAssigned += sec.assigned_brigade_ids.length;
+                totalEdges += sec.length_edges;
+            }
+            const targetDensity = totalEdges > 0 ? totalAssigned / totalEdges : 0;
+            for (const sec of corpsSectors) {
+                const actualDensity = sec.length_edges > 0 ? sec.assigned_brigade_ids.length / sec.length_edges : 0;
+                if (targetDensity > 0 && actualDensity < targetDensity * 0.5) {
+                    reinforceSectorIds.push(sec.sector_id);
+                }
+            }
+            reinforceSectorIds.sort(strictCompare);
+        }
+
+        // Priority sector: for offensive/balanced corps, pick the sector with the most
+        // offensive targets in its enemy_osids. Brigades will concentrate there.
+        let prioritySectorId: string | undefined;
+        if ((cmd.stance === 'offensive' || cmd.stance === 'balanced') &&
+            corpsSectors.length > 0 && offensiveTargets.length > 0) {
+            const targetSet = new Set(offensiveTargets);
+            let bestOverlap = 0;
+            for (const sec of corpsSectors) {
+                let overlap = 0;
+                for (const ss of sec.sub_segments) {
+                    for (const eo of ss.enemy_osids) {
+                        if (targetSet.has(eo)) overlap++;
+                    }
+                }
+                if (overlap > bestOverlap) {
+                    bestOverlap = overlap;
+                    prioritySectorId = sec.sector_id;
+                }
+            }
+        }
+
         const directive: CorpsDirective = {
             assigned_front_ids: assignedFrontIds,
             offensive_targets: offensiveTargets,
@@ -1583,6 +1625,8 @@ export function generateCorpsDirectives(
             min_attack_outcome: bestMinOutcome,
             aggression_modifier: aggressionModifier,
             sector_targets: Object.keys(sectorTargets).length > 0 ? sectorTargets : undefined,
+            reinforce_sector_ids: reinforceSectorIds.length > 0 ? reinforceSectorIds : undefined,
+            priority_sector_id: prioritySectorId,
         };
 
         cmd.directive = directive;

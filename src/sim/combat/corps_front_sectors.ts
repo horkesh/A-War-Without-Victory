@@ -112,6 +112,9 @@ function buildFactionSectors(
     // Step 6: Redistribute excess reserves across faction sectors
     redistributeExcessReserves(sectors);
 
+    // Step 7: Ensure every sector has at least one assigned brigade
+    ensureMinimumSectorCoverage(sectors, formations, adjacency);
+
     sectors.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
     return sectors;
 }
@@ -333,7 +336,7 @@ function findSubSegments(
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>
 ): CorpsFrontSubSegment[] {
     const edgeSet = new Set(edgeIds);
-    const edgeAdj = buildEdgeAdjacency(edgeIds, edgeMeta);
+    const edgeAdj = buildEdgeAdjacency(edgeIds, edgeMeta, faction);
     const visited = new Set<string>();
     const subSegments: CorpsFrontSubSegment[] = [];
     let segIndex = 0;
@@ -910,6 +913,102 @@ function redistributeExcessReserves(sectors: CorpsFrontSector[]): void {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Step 7: Minimum Sector Coverage
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Ensure every sector has at least one assigned brigade.
+ *
+ * For sectors with 0 assigned brigades:
+ *   1. Promote the first reserve brigade to assigned (if any exist).
+ *   2. Otherwise, BFS from the sector's friendly OSIDs to find the nearest
+ *      brigade in a surplus sector (>1 assigned) and transfer it.
+ *
+ * "Assigned" here means the brigade is physically present at a front OSID of
+ * the sector. Reserves are interior brigades BFS-assigned as backup.
+ * Deterministic: sorted iteration throughout.
+ */
+function ensureMinimumSectorCoverage(
+    allSectors: CorpsFrontSector[],
+    formations: Record<FormationId, FormationState>,
+    adjacency: Map<Osid, Osid[]>
+): void {
+    // Group by corps — only transfer within the same corps
+    const sectorsByCorps = new Map<FormationId, CorpsFrontSector[]>();
+    for (const s of allSectors) {
+        const list = sectorsByCorps.get(s.corps_id) ?? [];
+        list.push(s);
+        sectorsByCorps.set(s.corps_id, list);
+    }
+
+    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+        for (const sector of corpsSectors) {
+            if (sector.assigned_brigade_ids.length > 0) continue;
+
+            // Step 1: promote first reserve to assigned
+            if (sector.reserve_brigade_ids.length > 0) {
+                const bid = sector.reserve_brigade_ids.shift()!;
+                sector.assigned_brigade_ids.push(bid);
+                continue;
+            }
+
+            // Step 2: BFS from sector friendly OSIDs to find nearest brigade
+            // in a surplus sector (>1 assigned) within the same corps
+            const sectorOsids = new Set<string>();
+            for (const ss of sector.sub_segments) {
+                for (const o of ss.friendly_osids) sectorOsids.add(o);
+            }
+
+            // Map brigade location_osid → brigade_id for surplus sectors only
+            const donorByOsid = new Map<string, FormationId>();
+            for (const other of corpsSectors) {
+                if (other.sector_id === sector.sector_id) continue;
+                if (other.assigned_brigade_ids.length <= 1) continue; // Keep at least 1
+                for (const bid of other.assigned_brigade_ids) {
+                    const f = formations[bid];
+                    if (f?.location_osid && !donorByOsid.has(f.location_osid)) {
+                        donorByOsid.set(f.location_osid, bid);
+                    }
+                }
+            }
+            if (donorByOsid.size === 0) continue;
+
+            // BFS through all adjacency from sector friendly OSIDs
+            const queue: Osid[] = [...sectorOsids].sort(strictCompare);
+            const visited = new Set(queue);
+            let head = 0;
+            let donorBid: FormationId | null = null;
+
+            outer: while (head < queue.length) {
+                const osid = queue[head++]!;
+                for (const n of [...(adjacency.get(osid) ?? [])].sort(strictCompare)) {
+                    if (visited.has(n)) continue;
+                    visited.add(n);
+                    const bid = donorByOsid.get(n);
+                    if (bid) { donorBid = bid; break outer; }
+                    queue.push(n);
+                }
+            }
+
+            if (!donorBid) continue;
+
+            // Transfer donorBid from its sector to this empty sector
+            for (const other of corpsSectors) {
+                const idx = other.assigned_brigade_ids.indexOf(donorBid);
+                if (idx >= 0) {
+                    other.assigned_brigade_ids.splice(idx, 1);
+                    sector.assigned_brigade_ids.push(donorBid);
+                    break;
+                }
+            }
+        }
+    }
+
+    // Sort for determinism
+    for (const s of allSectors) s.assigned_brigade_ids.sort(strictCompare);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Faction-Wide Orphan Assignment
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1018,21 +1117,28 @@ function bfsUnrestrictedToNearestSector(
 
 /**
  * Build adjacency map between front edges (edges sharing an OSID endpoint).
+ * When faction is provided, only connects edges via friendly-side OSIDs, ensuring
+ * sub-segments are geographically contiguous on the friendly side.
  */
 function buildEdgeAdjacency(
     edgeIds: string[],
-    edgeMeta: Map<string, { a: string; b: string }>
+    edgeMeta: Map<string, { a: string; b: string; side_a?: string | null; side_b?: string | null }>,
+    faction?: string
 ): Map<string, string[]> {
     const osidToEdges = new Map<string, string[]>();
     for (const eid of edgeIds) {
         const meta = edgeMeta.get(eid);
         if (!meta) continue;
-        let listA = osidToEdges.get(meta.a);
-        if (!listA) { listA = []; osidToEdges.set(meta.a, listA); }
-        listA.push(eid);
-        let listB = osidToEdges.get(meta.b);
-        if (!listB) { listB = []; osidToEdges.set(meta.b, listB); }
-        listB.push(eid);
+        // When faction is provided, only group by friendly-side OSIDs so that sub-segments
+        // are connected through shared friendly territory, not shared enemy territory.
+        const addOsid = (osid: string, side: string | null | undefined) => {
+            if (faction !== undefined && side !== faction) return;
+            let list = osidToEdges.get(osid);
+            if (!list) { list = []; osidToEdges.set(osid, list); }
+            list.push(eid);
+        };
+        addOsid(meta.a, meta.side_a);
+        addOsid(meta.b, meta.side_b);
     }
 
     const adj = new Map<string, string[]>();

@@ -101,6 +101,19 @@ export interface FormationView {
     officer_quality?: number;
     /** True when brigade is in its home municipality (blocks attack/assault orders). */
     home_defense_active?: boolean;
+    /** Turn of first battle (brigades only). Null if never fought. */
+    firstBattleTurn?: number | null;
+    /** OSID where first battle occurred (brigades only). */
+    firstBattleOsid?: string | null;
+    /** Last N engagement records from brigade_history.engagements (brigades only). */
+    recent_engagements?: Array<{
+        turn: number;
+        osid: string;
+        role: 'attacker' | 'defender';
+        outcome: string;
+        casualties_taken: number;
+        territory_flipped: boolean;
+    }>;
     // Combat summary (corps/army_hq aggregate — computed each turn from subordinate brigade_histories)
     combatSummary?: {
         battles_fought: number;

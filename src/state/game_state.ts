@@ -205,6 +205,10 @@ export interface CorpsDirective {
     aggression_modifier: number;
     /** Per-sector offensive targets (sector_id → target OSIDs). Multi-sector corps only. */
     sector_targets?: Record<string, string[]>;
+    /** Sector IDs that are under-density and need brigade reinforcement. */
+    reinforce_sector_ids?: string[];
+    /** Priority sector for offensive concentration (sector with most offensive targets). */
+    priority_sector_id?: string;
 }
 
 /** Per-corps command state. */

@@ -352,7 +352,7 @@ function findNearestFrontOsid(
                 ctrl = getPoliticalControllerOSID(state, n, reverseMap);
                 controllerCache.set(n, ctrl);
             }
-            if (ctrl !== faction) continue; // Only move through friendly territory
+            if (ctrl !== faction && ctrl !== null) continue; // Move through friendly or unoccupied
 
             const step = firstStep ?? n;
             const analysis = graphAnalysis.osid_analysis.get(n);
@@ -513,7 +513,7 @@ function findFrontDestinationForColumnMarch(
             if (visited.has(n)) continue;
             visited.add(n);
             const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
-            if (ctrl !== faction) continue;
+            if (ctrl !== faction && ctrl !== null) continue; // traverse friendly or unoccupied
             queue.push({ osid: n, depth: depth + 1 });
         }
     }
@@ -1320,6 +1320,31 @@ function executeFactionDirectives(
             }
         }
 
+        // --- Rule 5c: Reinforce under-density or empty sector ---
+        // When this brigade is on a stacked front OSID (≥2 friendly brigades here) and
+        // the directive flags under-density sectors, march to the nearest one.
+        if (adjEnemy.length > 0 &&
+            directive?.reinforce_sector_ids?.length &&
+            state.corps_front_sectors &&
+            countFactionBrigadesAtOsid(state, faction, loc) >= 2) {
+            const targetOsids = new Set<string>();
+            for (const sid of directive.reinforce_sector_ids) {
+                const sec = state.corps_front_sectors[sid];
+                if (!sec) continue;
+                for (const ss of sec.sub_segments) {
+                    for (const o of ss.friendly_osids) targetOsids.add(o);
+                }
+            }
+            if (targetOsids.size > 0 && !targetOsids.has(loc)) {
+                const dest = findNearestFriendlyOsidInSet(state, faction, loc, adjacency, reverseMap, targetOsids);
+                if (dest && !isMovementDestinationRisky(dest, graphAnalysis)) {
+                    result.movement_orders[brigade.id] = dest;
+                }
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                continue;
+            }
+        }
+
         // --- Rule 6: Front coverage — fill gaps, rebalance ---
         if (adjEnemy.length > 0) {
             // On front but no viable attack: fill adjacent gaps
@@ -1347,6 +1372,26 @@ function executeFactionDirectives(
         }
 
         // --- Rule 7: Interior — move toward front, preferring offensive targets ---
+        // First: if directive has a priority sector, march toward it (offensive concentration).
+        if (directive?.priority_sector_id) {
+            const prioritySec = state.corps_front_sectors?.[directive.priority_sector_id];
+            if (prioritySec) {
+                const priorityOsids = new Set<string>();
+                for (const ss of prioritySec.sub_segments) {
+                    for (const o of ss.friendly_osids) priorityOsids.add(o);
+                }
+                if (!priorityOsids.has(loc)) {
+                    const dest = findNearestFriendlyOsidInSet(
+                        state, faction, loc, adjacency, reverseMap, priorityOsids
+                    );
+                    if (dest && !isMovementDestinationRisky(dest, graphAnalysis)) {
+                        result.movement_orders[brigade.id] = dest;
+                        result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                        continue;
+                    }
+                }
+            }
+        }
         if (directive && directive.offensive_targets.length > 0) {
             // BFS through friendly territory toward nearest offensive_target neighbor
             const targetSet = new Set(directive.offensive_targets);
