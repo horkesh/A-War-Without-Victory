@@ -98,11 +98,12 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'brigade_deploy_orders',
     'brigade_encircled',
     'battle_damage',
-    'recon_intelligence',
     // Local fronts (derived each turn, but stored for GUI/reporting)
     'local_fronts',
     // Corps front sectors (derived each turn, stored for GUI/reporting/diagnostics)
     'corps_front_sectors',
+    // Sector-facing intelligence (derived each turn, stored for GUI/fog-of-war/bot)
+    'sector_intel',
     // Phase F (Displacement & Population Dynamics) — stored, not derived
     'settlement_displacement',
     'settlement_displacement_started_turn',

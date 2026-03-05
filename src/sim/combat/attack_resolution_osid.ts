@@ -13,6 +13,7 @@ import {
     recordAttackerEngagements,
     recordDefenderEngagement,
 } from './brigade_history_recorder.js';
+import { updateSectorIntelFromCombat } from './sector_intel.js';
 import {
     initializeCasualtyLedger,
     recordBattleCasualties
@@ -841,6 +842,9 @@ export function resolveAttackOrdersOsid(
                 attackerFaction, flip, finalDefenderCas, finalAttackerCas, isConcentrated,
             );
         }
+
+        // === SECTOR INTEL: RECON BY FORCE ===
+        updateSectorIntelFromCombat(state, attackerFormations[0].location_osid ?? targetOsid, targetOsid, currentTurn);
 
         // === COMBAT FATIGUE ===
         // Attackers accumulate +2 fatigue per battle; defender +1.

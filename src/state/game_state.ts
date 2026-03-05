@@ -128,23 +128,39 @@ export type CorpsStance = 'defensive' | 'balanced' | 'offensive' | 'reorganize';
 /** Army-level stance (overrides corps stances when set). */
 export type ArmyStance = 'general_defensive' | 'balanced' | 'general_offensive' | 'total_mobilization';
 
-/** Phase J: Strength category for fog-of-war display (enemy formation revealed by battle/probe/recon). */
-export type ReconStrengthCategory = 'weak' | 'moderate' | 'strong' | 'fortress';
+// --- Sector-facing intelligence (replaces legacy SID-keyed recon_intelligence) ---
 
-/** Phase J: Detected enemy brigade info (formation known from battle, else presence-only from recon). */
-export interface DetectedBrigadeInfo {
-    formation_id?: FormationId;
-    strength_category: ReconStrengthCategory;
-    detected_turn: number;
-    detected_via: 'battle' | 'probe' | 'recon' | 'linked';
-}
+/** Estimated enemy sector strength from sector-pair observation. */
+export type SectorStrengthCategory = 'unknown' | 'thin' | 'moderate' | 'dense' | 'fortress';
 
-/** Phase J: Per-faction fog-of-war intelligence (passive recon refreshed each turn). */
-export interface ReconIntelligence {
-    /** Enemy settlements where brigade presence is known. */
-    detected_brigades: Record<SettlementId, DetectedBrigadeInfo>;
-    /** Enemy settlements confirmed empty (no brigade; may have militia). Sorted array for determinism. */
-    confirmed_empty: SettlementId[];
+/** Observed enemy posture across a shared front boundary. */
+export type SectorPostureObserved = 'unknown' | 'defensive' | 'entrenched' | 'offensive_prep';
+
+/**
+ * Per-friendly-sector, per-enemy-sector intelligence record.
+ * Keyed: sector_intel[friendly_sector_id] = SectorIntelRecord[].
+ * One record per enemy sector that shares front edges with the friendly sector.
+ */
+export interface SectorIntelRecord {
+    enemy_sector_id: string;
+    enemy_faction: FactionId;
+    enemy_corps_id: FormationId;
+    /** Number of front edges shared between friendly and enemy sector (always known). */
+    front_edge_count: number;
+    /** Estimated enemy density/strength. Requires confidence >= CONFIDENCE_ROUGH_STRENGTH. */
+    strength_category: SectorStrengthCategory;
+    /** Observed enemy posture. Requires confidence >= CONFIDENCE_FULL_STRENGTH. */
+    posture_observed: SectorPostureObserved;
+    /** True if enemy offensive preparation detected. Requires confidence >= CONFIDENCE_DEEP_INTEL and recon_range >= 2. */
+    offensive_signs: boolean;
+    /** Current intelligence confidence [0.0, 1.0]. Drives all observable thresholds. */
+    confidence: number;
+    /** Consecutive turns this sector pair has been in contact (sharing front edges). */
+    turns_in_contact: number;
+    /** Enemy brigade IDs visible at current confidence level. Empty when confidence < CONFIDENCE_FRONT_BRIGADES. */
+    visible_brigade_ids: FormationId[];
+    /** Turn this record was last updated. */
+    last_updated_turn: number;
 }
 
 /** Named corps operation (multi-turn: planning → execution → recovery). */
@@ -1193,8 +1209,6 @@ export interface GameState {
     brigade_encircled?: Record<FormationId, boolean>;
     /** Phase II (Brigade AoR Redesign Phase I): Per-settlement cumulative battle damage [0, 1] (exhaustion-as-terrain). */
     battle_damage?: Record<SettlementId, number>;
-    /** Phase II (Brigade AoR Redesign Phase J): Per-faction recon intelligence (detected enemy brigades, confirmed empty). */
-    recon_intelligence?: Record<FactionId, ReconIntelligence>;
     /** Formation spawn directive (FORAWWV H2.4). When set and active for current turn, formation spawn may run. */
     formation_spawn_directive?: FormationSpawnDirective;
     /** Strategic production facilities (capturable local supply contributors). */
@@ -1376,6 +1390,9 @@ export interface GameState {
 
     /** Corps front sectors: per-corps slices of hostile boundary. Derived each turn (Engine Invariants §13). */
     corps_front_sectors?: Record<string, CorpsFrontSector>;
+
+    /** Sector-facing intelligence: per-friendly-sector intelligence records (one per facing enemy sector). Derived each turn. */
+    sector_intel?: Record<string, SectorIntelRecord[]>;
 
     /** War timeline: externalized faction temporal profiles (doctrine, cohesion, reinforcement, etc). Loaded from data/scenarios/timelines/{id}.json. */
     war_timeline?: import('./war_timeline.js').WarTimeline;

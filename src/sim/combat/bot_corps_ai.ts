@@ -60,6 +60,7 @@ import type { CorpsDirective } from '../../state/game_state.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { evaluateSectorOffensiveLaunch } from './sector_offensive.js';
+import { CONFIDENCE_ROUGH_STRENGTH } from './sector_intel_constants.js';
 import { getTruceBreakAggressionBonus, getTrucePartner, isViennaDeclarationActive, isTruceException } from '../local_truces.js';
 import { getCorpsCommander, getEffectiveCompetence } from './officer_system.js';
 
@@ -1273,6 +1274,9 @@ export function generateCorpsDirectives(
             }
             // avoid_municipalities removed — bipolar co-ethnic scoring handles deterrence emergently
         }
+        // Track how many targets came from army priorities (before opportunistic targets are added).
+        // Used by general_defensive to keep priority-derived counterattack targets.
+        const priorityTargetCount = offensiveTargets.length;
 
         // P3: Collect priority municipality slugs for opportunistic target filtering.
         // Opportunistic targets outside these municipalities are filtered to prevent
@@ -1466,10 +1470,12 @@ export function generateCorpsDirectives(
             bestMinOutcome = 'repulsed';
         }
 
-        // Army defensive stance: no offensive targets — corps only hold and counter-attack
+        // Army defensive stance: keep army-priority-derived counterattack targets, drop opportunistic ones.
+        // Priority targets represent defensive recapture goals (e.g. RBiH reclaiming lost corridor cells).
+        // Opportunistic targets (undefended front, weak OSIDs) are suppressed to prevent adventurism.
         if (armyStance === 'general_defensive') {
-            offensiveTargets.length = 0;
-            bestMinOutcome = 'costly_victory'; // Only attack when clearly favorable
+            offensiveTargets.splice(priorityTargetCount); // Remove opportunistic targets added after priorities
+            // bestMinOutcome comes from army priority definitions (already set above)
         }
 
         // Supply health gating: critical majority → strip offensive targets
@@ -1477,11 +1483,16 @@ export function generateCorpsDirectives(
         if (supplyHealth.critical_fraction > 0.5) {
             offensiveTargets.length = 0;
         }
-        // Low adequate supply → upgrade minimum outcome to victory
-        if (supplyHealth.adequate_fraction < 0.3) {
+        // Near-complete supply isolation → upgrade minimum outcome by one rank (max costly_victory).
+        // Only applies when almost no brigades have adequate supply (< 5%).
+        // Skipped for general_defensive: those factions only attack from army-priority defensive targets,
+        // not opportunistic offensives. RBiH in Sarajevo siege has 0% adequate supply but still
+        // mounts desperate counterattacks — blocking them is historically wrong.
+        if (supplyHealth.adequate_fraction < 0.05 && armyStance !== 'general_defensive') {
             const outcomeRank: Record<string, number> = { decisive_victory: 5, victory: 4, costly_victory: 3, stalemate: 2, repulsed: 1 };
-            if ((outcomeRank[bestMinOutcome] ?? 2) < (outcomeRank['victory'] ?? 4)) {
-                bestMinOutcome = 'victory';
+            const rankVal = outcomeRank[bestMinOutcome] ?? 2;
+            if (rankVal < 3) { // below costly_victory → upgrade to costly_victory
+                bestMinOutcome = 'costly_victory';
             }
         }
 
@@ -1543,7 +1554,39 @@ export function generateCorpsDirectives(
             }
         }
 
-        // Supply-aware target sorting: prefer attacking enemy OSIDs with critical/strained supply.
+        // Sector-intel target scoring: prefer thin sectors, deprioritize fortress sectors.
+        // Soft weight (+/-2) applied within the supply-aware sort below.
+        const intelScoreByOsid = new Map<string, number>();
+        if (state.sector_intel && corpsSectors.length > 0) {
+            // Build osid -> enemy_sector_id lookup from this corps sectors
+            const osidToEnemySector = new Map<string, string>();
+            for (const sec of corpsSectors) {
+                for (const ss of sec.sub_segments) {
+                    for (const eo of ss.enemy_osids) {
+                        osidToEnemySector.set(eo, sec.sector_id);
+                    }
+                }
+            }
+            for (const osid of offensiveTargets) {
+                const friendlySectorId = osidToEnemySector.get(osid);
+                if (!friendlySectorId) continue;
+                const records = state.sector_intel[friendlySectorId] ?? [];
+                // Find the intel record whose enemy sector contains this OSID
+                for (const rec of records) {
+                    if (rec.confidence < CONFIDENCE_ROUGH_STRENGTH) continue;
+                    const enemySector = (state.corps_front_sectors ?? {})[rec.enemy_sector_id];
+                    if (!enemySector) continue;
+                    const inEnemy = enemySector.sub_segments.some(ss => ss.friendly_osids.includes(osid));
+                    if (!inEnemy) continue;
+                    if (rec.strength_category === 'thin') intelScoreByOsid.set(osid, -2);
+                    else if (rec.strength_category === 'fortress') intelScoreByOsid.set(osid, 2);
+                    else if (rec.strength_category === 'dense') intelScoreByOsid.set(osid, 1);
+                    break;
+                }
+            }
+        }
+
+                // Supply-aware target sorting: prefer attacking enemy OSIDs with critical/strained supply.
         // Then prefer targets that shorten the line (many friendly neighbors — e.g. Teočak, Šapna:
         // capturing bulges reduces front length and consolidation cost).
         // Deterministic: ties broken by strictCompare (stable for same-supply-state targets).
@@ -1566,6 +1609,8 @@ export function generateCorpsDirectives(
             };
             const supplyDiff = getSupplyPriority(a) - getSupplyPriority(b);
             if (supplyDiff !== 0) return supplyDiff;
+            const intelDiff = (intelScoreByOsid.get(a) ?? 0) - (intelScoreByOsid.get(b) ?? 0);
+            if (intelDiff !== 0) return intelDiff;
             const consolidationDiff = getConsolidationScore(b) - getConsolidationScore(a);
             if (consolidationDiff !== 0) return consolidationDiff;
             return strictCompare(a, b);

@@ -12,7 +12,6 @@ import type {
     BrigadeMovementState,
     CorpsCommandState,
     CorpsOperation,
-    DetectedBrigadeInfo,
     EmbargoProfile,
     FactionId,
     FormationId,
@@ -581,24 +580,7 @@ function extractContactedEnemies(state: GameState, pf: FactionId): ContactedForm
     const enemies = getEnemyFactions(pf, allFactionIds);
     const results: ContactedFormation[] = [];
 
-    // Method 1: Recon intelligence (Tier 2 — detected via battle/probe/recon)
-    const recon = state.recon_intelligence?.[pf];
-    if (recon?.detected_brigades) {
-        for (const sid of Object.keys(recon.detected_brigades).sort(sc)) {
-            const info: DetectedBrigadeInfo = recon.detected_brigades[sid];
-            if (!info) continue;
-            results.push({
-                formationId: info.formation_id ?? 'unknown',
-                name: info.formation_id ? (state.formations[info.formation_id]?.name ?? info.formation_id) : 'Unknown formation',
-                strengthCategory: info.strength_category,
-                contactSettlement: sid,
-                detectedTurn: info.detected_turn,
-            });
-        }
-    }
-
-    // Method 2: Casualty ledger per-formation keys (enemy formations that took casualties = contacted)
-    // Only add formations not already in recon results
+    // Casualty ledger per-formation keys: enemy formations that took casualties = contacted
     const existingIds = new Set(results.map(r => r.formationId));
     for (const enemyFaction of enemies) {
         const enemyLedger = state.casualty_ledger?.[enemyFaction];

@@ -114,7 +114,7 @@ import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults } from '../combat/sector_offensive.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from '../combat/operational_groups.js';
-import { updateReconIntelligence } from '../combat/recon_intelligence.js';
+import { deriveSectorIntel } from '../combat/sector_intel.js';
 import { ensureBrigadeFrontAssignments } from '../combat/front_assignment.js';
 import { resolveAttackOrders } from '../combat/resolve_attack_orders.js';
 import { resolveAttackOrdersOsid, displaceFormationsInEnemyTerritory } from '../combat/attack_resolution_osid.js';
@@ -1219,17 +1219,10 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-recon-intelligence',
-        run: async (context) => {
+        name: 'derive-sector-intel',
+        run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const { edges } = await getGraphAndEdges(context);
-            if (!edges?.length) return;
-            const od = getOperationalData(context);
-            if (od?.opData?.operationalToCanonical && od?.edges?.length) {
-                updateReconIntelligence(context.state, edges, { operationalToCanonical: od.opData.operationalToCanonical });
-            } else if ((context.state as GameState & LegacyBrigadeAoRState).brigade_aor) {
-                updateReconIntelligence(context.state, edges);
-            }
+            deriveSectorIntel(context.state, context.state.meta.turn);
         }
     },
     {
