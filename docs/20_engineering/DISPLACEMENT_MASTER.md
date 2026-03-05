@@ -59,7 +59,7 @@ Runs every turn after attack resolution. The **only active displacement trigger*
 
 2. **Step 1 — Battle-driven timers:** When attack resolution flips an OSID, a new timer is created for the losing faction's population in that OSID.
 
-3. **Step 2 — Timer maturation:** After `TAKEOVER_DISPLACEMENT_DELAY_TURNS = 4` turns, the timer matures. Per-OSID population is looked up from the operational settlements census data (`population_total`); falls back to `floor(mun_pop / osid_count)` if unavailable. Hostile share is computed from per-OSID ethnic composition (cap 0.95); falls back to municipality-level `getDynamicHostileShare()` (cap 0.80). Displaced amount = `min(floor(osidPop × hostileShare), remainingPop)`. Kill/flee fractions applied, survivors enter camp.
+3. **Step 2 — Timer maturation:** After `TAKEOVER_DISPLACEMENT_DELAY_TURNS = 4` turns, the timer matures. Per-OSID population is looked up from the operational settlements census data (`population_total`); falls back to `floor(mun_pop / osid_count)` if unavailable. Hostile share is computed from per-OSID ethnic composition (cap 0.95); falls back to municipality-level `getDynamicHostileShare()` (cap 0.80). Initial displaced amount = `min(floor(osidPop × hostileShare × INITIAL_DISPLACEMENT_FRACTION=0.70), remainingPop)` — 70% of the minority leaves in the initial wave. Kill/flee fractions applied, survivors enter camp. `timer.cumulative_displaced` is set; remaining 30% flows through sustained displacement (Branch B).
 
 **Also handles re-displacement pass-through:** When a municipality with `displaced_in > 0` has a timer mature, displaced people already sheltering there are re-routed to new friendly municipalities with **zero casualties and zero flee-abroad**. This prevents double-counting — a person displaced twice counts as 1 displaced person.
 
@@ -99,7 +99,7 @@ Runs every turn. Evaluates three continuous pressure conditions per municipality
 
 ### 3.1 Hostile Takeover (OSID-Based) — **ONLY ACTIVE TRIGGER**
 
-The sole displacement trigger as of 2026-03-01. All displacement flows through this path.
+The sole displacement trigger as of 2026-03-01. All displacement flows through this path. As of 2026-03-05, sustained displacement is active: initial wave = 70% of minority, sustained trickle = 3%/turn on remaining 30% until < 10 people remain.
 
 **Two trigger sources:**
 
