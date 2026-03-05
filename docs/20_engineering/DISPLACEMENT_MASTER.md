@@ -55,7 +55,7 @@ Runs every turn after attack resolution. The **only active displacement trigger*
 
 **Three sub-steps per turn:**
 
-1. **Step 0 — War-start seeding:** On the war start turn (`currentTurn === warStartTurn`), creates displacement timers for ALL OSIDs in `political_controllers`. For each OSID, a timer is created for every minority faction (i.e., factions that don't control the OSID and are at war with the controller). This seeds displacement from day one — every minority population begins being displaced immediately at war start.
+1. **Step 0 — War-start seeding:** On the first executed war turn (`currentTurn === warStartTurn + 1`), creates displacement timers for ALL OSIDs in `political_controllers`. **Note:** `runTurn()` increments `state.meta.turn` BEFORE running phases, so `warStartTurn + 1` is the first actual execution turn (not `warStartTurn` itself). For each OSID, a timer is created for every minority faction (i.e., factions that don't control the OSID and are at war with the controller). This seeds displacement from day one — every minority population begins being displaced immediately at war start.
 
 2. **Step 1 — Battle-driven timers:** When attack resolution flips an OSID, a new timer is created for the losing faction's population in that OSID.
 
@@ -63,7 +63,7 @@ Runs every turn after attack resolution. The **only active displacement trigger*
 
 **Also handles re-displacement pass-through:** When a municipality with `displaced_in > 0` has a timer mature, displaced people already sheltering there are re-routed to new friendly municipalities with **zero casualties and zero flee-abroad**. This prevents double-counting — a person displaced twice counts as 1 displaced person.
 
-**Minority flight** (`processMinorityFlight()`) is **disabled** in `turn_pipeline.ts` as of 2026-03-01. The function exists but is not called; an empty report is returned instead.
+**Minority flight** (`processMinorityFlight()`) is **active** in the pipeline (`phase-ii-minority-flight` step). Confirmed running: ~493k displaced in 52w (378k spike at w4, ~9.4k/4-week cycle after). It runs independently of takeover displacement.
 
 ### 2.2 `war-displacement-triggers` (settlement-level)
 
@@ -103,7 +103,7 @@ The sole displacement trigger as of 2026-03-01. All displacement flows through t
 
 **Two trigger sources:**
 
-1. **War-start seeding (Step 0):** At `currentTurn === warStartTurn`, iterate all OSIDs in `political_controllers`. For each OSID, create timers for every minority faction at war with the controller. This means ALL minorities begin displacement from day one.
+1. **War-start seeding (Step 0):** At `currentTurn === warStartTurn + 1` (first executed war turn — `runTurn()` increments turn before phases), iterate all OSIDs in `political_controllers`. For each OSID, create timers for every minority faction at war with the controller. This means ALL minorities begin displacement from day one.
 
 2. **Battle-driven (Step 1):** When attack resolution flips an OSID, a timer is created for the displaced faction.
 
@@ -365,7 +365,7 @@ interface HostileTakeoverTimerState {
 - Timer keys are stored in `state.hostile_takeover_timers: Record<string, HostileTakeoverTimerState>`
 
 **Created by:**
-1. War-start seeding (Step 0): one timer per minority faction per OSID, at `warStartTurn`
+1. War-start seeding (Step 0): one timer per minority faction per OSID, at `warStartTurn + 1` (first executed war turn)
 2. Battle-driven flips (Step 1): one timer per flip, keyed by `${battle.osid}|${fromFaction}`
 
 - Only created when factions are at war (`areFactionsAtWar()`)
