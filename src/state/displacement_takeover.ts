@@ -30,6 +30,9 @@ const CAMP_REROUTE_DELAY_TURNS = 4;
 const SUSTAINED_DISPLACEMENT_RATE = 0.03;
 /** Stop sustained displacement when remaining minority in OSID falls below this threshold. */
 const SUSTAINED_MIN_REMAINING = 10;
+/** Fraction of minority displaced in the initial maturation wave. The rest trickles via sustained mode.
+ *  Historically ~70% of minorities fled in the first weeks after takeover; 30% remained under duress. */
+const INITIAL_DISPLACEMENT_FRACTION = 0.70;
 
 /** Posavina Croats: most flee to Croatia (canon: displacement redesign 2026-02-17). */
 const POSAVINA_CROAT_FLEE_ABROAD = 0.70;
@@ -466,7 +469,7 @@ export function processPhaseIIDisplacementTakeover(
             }
 
             const displacementAmount = Math.min(
-                Math.max(0, Math.floor(osidPop * hostileShare)),
+                Math.max(0, Math.floor(osidPop * hostileShare * INITIAL_DISPLACEMENT_FRACTION)),
                 remainingPop
             );
 
