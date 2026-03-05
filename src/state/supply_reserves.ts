@@ -26,6 +26,8 @@ import {
     SIEGE_BASE_RATE,
     SIEGE_ESCALATION_RATE,
     MAX_SIEGE_PRESSURE_RATE,
+    MAX_SIEGE_DRAIN_GENERAL_PER_FACTION,
+    MAX_SIEGE_DRAIN_HEAVY_PER_FACTION,
     SIEGE_MIN_POCKET_SIZE,
     PATRON_AID_SCALE,
     PATRON_AID_GENERAL_FRACTION,
@@ -273,6 +275,12 @@ export function updateSupplyReserves(
             siegeDrainByFaction[fid].general += drain * 0.7;
             siegeDrainByFaction[fid].heavy += drain * 0.3;
         }
+    }
+    // Cap total siege drain per faction to prevent early-war cascade
+    for (const fid of factionIds) {
+        const sd = siegeDrainByFaction[fid]!;
+        sd.general = Math.min(MAX_SIEGE_DRAIN_GENERAL_PER_FACTION, sd.general);
+        sd.heavy = Math.min(MAX_SIEGE_DRAIN_HEAVY_PER_FACTION, sd.heavy);
     }
 
     const entries: SupplyReservesFactionEntry[] = [];

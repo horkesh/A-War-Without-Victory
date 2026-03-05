@@ -57,7 +57,8 @@ export function applyBrigadeMovementOrders(
         const factionId = (f as { faction?: string }).faction;
         const destController = destOsid ? getPoliticalControllerOSID(state, destOsid, reverseMap) : null;
         const canMove = Boolean(
-            destOsid && destOsid !== loc && neighbors.includes(destOsid) && factionId && destController === factionId
+            destOsid && destOsid !== loc && neighbors.includes(destOsid) && factionId
+            && (destController === factionId || destController === null)
         );
 
         if (canMove && destOsid) {

@@ -112,7 +112,7 @@ describe('updateSupplyReserves', () => {
 
     it('clamps reserves at 0 and 100', () => {
         const state = makeMinimalState({
-            general_supply_reserve: { RBiH: 2, RS: 99, HRHB: 50 } as any,
+            general_supply_reserve: { RBiH: 1, RS: 99, HRHB: 50 } as any,
             heavy_munitions_reserve: { RBiH: 1, RS: 99, HRHB: 50 } as any,
             formations: Object.fromEntries(
                 Array.from({ length: 50 }, (_, i) => [`b${i}`, { id: `b${i}`, faction: 'RBiH', personnel: 1000 }])
@@ -120,7 +120,7 @@ describe('updateSupplyReserves', () => {
         });
         updateSupplyReserves(state, { RBiH: 0, RS: 50, HRHB: 0 });
 
-        // RBiH: 2 - 50*0.15 = 2-7.5 = -5.5 → clamped to 0
+        // RBiH: 1 - 50*0.025 = 1-1.25 = -0.25 → clamped to 0
         expect(state.general_supply_reserve!['RBiH']).toBe(0);
         // RS: 99 + 50*0.6 = 129 → clamped to 100
         expect(state.general_supply_reserve!['RS']).toBe(100);

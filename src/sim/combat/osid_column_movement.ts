@@ -210,9 +210,9 @@ export function dijkstraFriendlyPath(
         const neighbors = adjacency.get(current) ?? [];
         for (const n of neighbors) {
             if (visited.has(n)) continue;
-            // Only traverse through friendly territory (or destination)
+            // Traverse through friendly or unoccupied territory (or the destination itself)
             const controller = getPoliticalControllerOSID(state, n, reverseMap);
-            if (controller !== factionId && n !== toOsid) continue;
+            if (controller !== factionId && controller !== null && n !== toOsid) continue;
 
             const edgeCost = getOsidEdgeMovementCost(current, n, reverseMap, terrainData);
             const newCost = currentCost + edgeCost;
@@ -293,7 +293,7 @@ export function processOsidColumnMovement(
             const dest = ms.destination_sids?.[0];
             const factionId = f.faction as FactionId;
             const destController = dest ? getPoliticalControllerOSID(state, dest, reverseMap) : null;
-            if (dest && destController === factionId) {
+            if (dest && (destController === factionId || destController === null)) {
                 (f as { location_osid?: string }).location_osid = dest;
                 (f as { entrenchment_turns?: number }).entrenchment_turns = 0;
                 report.column_arrivals += 1;

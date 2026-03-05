@@ -190,8 +190,8 @@ describe('updateSiegeTurnCounters — pocket-size threshold', () => {
         expect(state.siege_turn_counters!['RS:op:outpost:1']).toBe(6);
     });
 
-    it('SIEGE_MIN_POCKET_SIZE constant is 5', () => {
-        expect(SIEGE_MIN_POCKET_SIZE).toBe(5);
+    it('SIEGE_MIN_POCKET_SIZE constant is 8', () => {
+        expect(SIEGE_MIN_POCKET_SIZE).toBe(8);
     });
 });
 

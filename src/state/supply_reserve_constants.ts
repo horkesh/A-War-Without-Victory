@@ -9,8 +9,14 @@
  */
 
 // ── Consumption: Maintenance ─────────────────────────────────────────────────
-/** Per-formation per-turn general supply drain. */
-export const MAINTENANCE_DRAIN_PER_FORMATION = 0.04;
+/**
+ * Per-formation per-turn general supply drain.
+ * Reduced from 0.04: at 0.04, RS (avg 70 formations) drains 70×0.04×40=112 pts
+ * over 40w, exceeding patron aid income (~94 pts) and leaving RS general at 0.
+ * General supply at 0 → supply mult 0.45× → attack power collapse → calibration gap.
+ * At 0.025: drain = 70×0.025×40 = 70 pts; combined with patron (~94) → adequate.
+ */
+export const MAINTENANCE_DRAIN_PER_FORMATION = 0.025;
 /**
  * Per-heavy-weapon per-turn heavy munitions drain (tanks + artillery).
  * Represents ammunition expenditure for training/readiness, barrel wear,
@@ -45,14 +51,28 @@ export const SIEGE_ESCALATION_RATE = 0.1;
 /** Maximum siege drain rate per OSID. */
 export const MAX_SIEGE_PRESSURE_RATE = 2.0;
 /**
+ * Maximum total general supply siege drain per faction per turn.
+ * Prevents early-war cascade where many ephemeral isolated OSIDs (before
+ * corridors are secured) drain reserves to 0 before patron income stabilises.
+ * At cap=2.5: RS net ≈ 0 late-war (ends ~60-76 general, adequate).
+ */
+export const MAX_SIEGE_DRAIN_GENERAL_PER_FACTION = 2.5;
+/** Maximum total heavy munitions siege drain per faction per turn. */
+export const MAX_SIEGE_DRAIN_HEAVY_PER_FACTION = 1.0;
+/**
  * Minimum connected-component size for escalating siege drain.
  * Critical OSIDs in pockets smaller than this get their counter frozen at 1
  * (flat drain, no escalation). Genuine siege pockets (Srebrenica, Central Bosnia)
  * with ≥ this many connected critical OSIDs escalate normally.
- * Distinguishes scattered outposts (RS perimeter around enclaves) from
- * actual besieged territory (RBiH enclaves, HRHB Central Bosnia).
+ * Distinguishes scattered outposts from actual besieged territory.
+ *
+ * Raised from 5→8: the Ozren/Maglaj RS pocket (6 OSIDs) was escalating to
+ * counter=40 (1.05/turn each = 6.3/turn total general drain), causing RS general
+ * supply to deplete to 0 by w15 despite adequate patron income. At 8, the 6-OSID
+ * RS pocket is frozen at counter=1 (0.231/turn each = 1.39/turn total).
+ * Large genuine enclaves (Srebrenica ~20+, Goražde ~15+) continue to escalate.
  */
-export const SIEGE_MIN_POCKET_SIZE = 5;
+export const SIEGE_MIN_POCKET_SIZE = 8;
 
 // ── Replenishment ────────────────────────────────────────────────────────────
 /** Global multiplier for production facility income. */
