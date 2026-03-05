@@ -333,10 +333,11 @@ function findSubSegments(
     corpsId: FormationId,
     faction: FactionId,
     edgeIds: string[],
-    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    osidAdjacency: Map<Osid, Osid[]>
 ): CorpsFrontSubSegment[] {
     const edgeSet = new Set(edgeIds);
-    const edgeAdj = buildEdgeAdjacency(edgeIds, edgeMeta, faction);
+    const edgeAdj = buildEdgeAdjacency(edgeIds, edgeMeta, faction, osidAdjacency);
     const visited = new Set<string>();
     const subSegments: CorpsFrontSubSegment[] = [];
     let segIndex = 0;
@@ -422,7 +423,9 @@ function buildMultiSectorsForCorps(
     }
 
     // Step 1: Find connected components
-    let subSegments = findSubSegments(corpsId, faction, edgeIds, edgeMeta);
+    let subSegments = findSubSegments(corpsId, faction, edgeIds, edgeMeta, adjacency);
+    // Proposal B: merge undersized sub-segments up to MIN_SECTOR_EDGES
+    subSegments = mergeUndersizedSubSegments(corpsId, subSegments, adjacency);
     if (subSegments.length === 0) return [];
 
     // Step 2 (Phase 1D): Split oversized sub-segments
@@ -472,6 +475,10 @@ function buildMultiSectorsForCorps(
         sectorPool = next;
     }
     const finalSectors = sectorPool;
+
+    // Dedup: Phase 1E splits can produce the same brigade in two sectors when
+    // a junction OSID has edges on both sides of a midpoint split.
+    deduplicateBrigadesAcrossSectors(finalSectors);
 
     // Step 5 (Phase 1B + 1C): Assign interior brigades as reserves
     assignInteriorBrigadesToSectors(
@@ -1115,6 +1122,153 @@ function bfsUnrestrictedToNearestSector(
 // Helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Brigade Deduplication
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Remove brigades that appear in multiple sectors, keeping only the first
+ * claim in sector_id order. This fixes the Phase 1E junction-OSID bug where
+ * a brigade at an OSID that spans both halves of a midpoint split gets
+ * double-assigned. Applies across both assigned and reserve lists.
+ */
+function deduplicateBrigadesAcrossSectors(sectors: CorpsFrontSector[]): void {
+    if (sectors.length <= 1) return;
+    const claimed = new Set<FormationId>();
+    const sorted = [...sectors].sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+    for (const sector of sorted) {
+        sector.assigned_brigade_ids = sector.assigned_brigade_ids.filter(bid => {
+            if (claimed.has(bid)) return false;
+            claimed.add(bid);
+            return true;
+        });
+        sector.reserve_brigade_ids = sector.reserve_brigade_ids.filter(bid => {
+            if (claimed.has(bid)) return false;
+            claimed.add(bid);
+            return true;
+        });
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Proposal B: Merge Undersized Sub-Segments
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Returns true if two sub-segments are geographically adjacent: any friendly OSID
+ * of one is the same as, or OSID-adjacent to, any friendly OSID of the other.
+ */
+function isSegmentAdjacent(
+    a: CorpsFrontSubSegment,
+    b: CorpsFrontSubSegment,
+    osidAdjacency: Map<Osid, Osid[]>
+): boolean {
+    const bSet = new Set(b.friendly_osids);
+    for (const osid of a.friendly_osids) {
+        if (bSet.has(osid)) return true;
+        for (const nb of osidAdjacency.get(osid) ?? []) {
+            if (bSet.has(nb)) return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Combine two sub-segments into one, merging their edge IDs and OSID sets.
+ */
+function mergeSubSegmentsInto(
+    corpsId: FormationId,
+    indexHint: number,
+    a: CorpsFrontSubSegment,
+    b: CorpsFrontSubSegment
+): CorpsFrontSubSegment {
+    const edgeIds = [...new Set([...a.edge_ids, ...b.edge_ids])].sort(strictCompare);
+    const friendlyOsids = [...new Set([...a.friendly_osids, ...b.friendly_osids])].sort(strictCompare);
+    const enemyOsids = [...new Set([...a.enemy_osids, ...b.enemy_osids])].sort(strictCompare);
+    return {
+        sub_segment_id: `subseg:${corpsId}:${indexHint}`,
+        edge_ids: edgeIds,
+        friendly_osids: friendlyOsids,
+        enemy_osids: enemyOsids,
+        length_edges: edgeIds.length,
+    };
+}
+
+/**
+ * Iteratively merge sub-segments below MIN_SECTOR_EDGES into their nearest
+ * OSID-adjacent neighbor. Isolated segments (enclaves with no adjacent neighbor)
+ * are kept as-is. Always merges the smallest segment first; ties broken by ID.
+ */
+function mergeUndersizedSubSegments(
+    corpsId: FormationId,
+    subSegments: CorpsFrontSubSegment[],
+    osidAdjacency: Map<Osid, Osid[]>
+): CorpsFrontSubSegment[] {
+    if (subSegments.length <= 1) return subSegments;
+
+    let segs = subSegments.slice();
+    const unmergeableIds = new Set<string>();
+
+    let changed = true;
+    while (changed) {
+        changed = false;
+
+        let targetIdx = -1;
+        let minSize = Infinity;
+        for (let i = 0; i < segs.length; i++) {
+            const s = segs[i]!;
+            if (unmergeableIds.has(s.sub_segment_id)) continue;
+            if (s.length_edges < MIN_SECTOR_EDGES) {
+                if (s.length_edges < minSize ||
+                    (s.length_edges === minSize && targetIdx >= 0 &&
+                     strictCompare(s.sub_segment_id, segs[targetIdx]!.sub_segment_id) < 0)) {
+                    minSize = s.length_edges;
+                    targetIdx = i;
+                }
+            }
+        }
+        if (targetIdx === -1) break;
+
+        const target = segs[targetIdx]!;
+
+        let bestIdx = -1;
+        let bestSize = Infinity;
+        for (let i = 0; i < segs.length; i++) {
+            if (i === targetIdx) continue;
+            const candidate = segs[i]!;
+            if (isSegmentAdjacent(target, candidate, osidAdjacency)) {
+                if (candidate.length_edges < bestSize ||
+                    (candidate.length_edges === bestSize && bestIdx >= 0 &&
+                     strictCompare(candidate.sub_segment_id, segs[bestIdx]!.sub_segment_id) < 0)) {
+                    bestSize = candidate.length_edges;
+                    bestIdx = i;
+                }
+            }
+        }
+
+        if (bestIdx === -1) {
+            unmergeableIds.add(target.sub_segment_id);
+            continue;
+        }
+
+        const merged = mergeSubSegmentsInto(corpsId, segs.length, target, segs[bestIdx]!);
+        const newSegs: CorpsFrontSubSegment[] = [];
+        for (let i = 0; i < segs.length; i++) {
+            if (i === targetIdx || i === bestIdx) continue;
+            newSegs.push(segs[i]!);
+        }
+        newSegs.push(merged);
+        segs = newSegs;
+        changed = true;
+    }
+
+    segs.sort((a, b) => strictCompare(a.sub_segment_id, b.sub_segment_id));
+    for (let i = 0; i < segs.length; i++) {
+        segs[i]!.sub_segment_id = `subseg:${corpsId}:${i}`;
+    }
+    return segs;
+}
+
 /**
  * Build adjacency map between front edges (edges sharing an OSID endpoint).
  * When faction is provided, only connects edges via friendly-side OSIDs, ensuring
@@ -1123,7 +1277,8 @@ function bfsUnrestrictedToNearestSector(
 function buildEdgeAdjacency(
     edgeIds: string[],
     edgeMeta: Map<string, { a: string; b: string; side_a?: string | null; side_b?: string | null }>,
-    faction?: string
+    faction?: string,
+    osidAdjacency?: Map<Osid, Osid[]>
 ): Map<string, string[]> {
     const osidToEdges = new Map<string, string[]>();
     for (const eid of edgeIds) {
@@ -1154,6 +1309,29 @@ function buildEdgeAdjacency(
                 let listB = adj.get(b);
                 if (!listB) { listB = []; adj.set(b, listB); }
                 if (!listB.includes(a)) listB.push(a);
+            }
+        }
+    }
+
+    // Proposal A: also connect edges whose friendly-side OSIDs are OSID-adjacent.
+    // E1=(A,X) and E2=(B,Y) become adjacent if A and B are neighbors in the OSID graph.
+    // This makes sub-segments follow the geographic front line, not isolated by OSID.
+    if (osidAdjacency) {
+        for (const [osidA, edgesA] of osidToEdges) {
+            for (const neighborOsid of osidAdjacency.get(osidA) ?? []) {
+                const edgesB = osidToEdges.get(neighborOsid);
+                if (!edgesB) continue;
+                for (const ea of edgesA) {
+                    for (const eb of edgesB) {
+                        if (ea === eb) continue;
+                        let listA = adj.get(ea);
+                        if (!listA) { listA = []; adj.set(ea, listA); }
+                        if (!listA.includes(eb)) listA.push(eb);
+                        let listB = adj.get(eb);
+                        if (!listB) { listB = []; adj.set(eb, listB); }
+                        if (!listB.includes(ea)) listB.push(ea);
+                    }
+                }
             }
         }
     }
