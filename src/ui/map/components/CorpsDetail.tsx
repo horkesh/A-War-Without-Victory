@@ -11,18 +11,6 @@ import { useIPC } from '../desktop/useIPC';
 import { DETAIL_PANEL_STYLE, SECONDARY_PANEL_STYLE } from './panelRail';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
 
-const OP_SECOND_WORDS: Record<string, string[]> = {
-  RBiH: ['Uragan', 'Sana', 'Igman', 'Trebevic', 'Bosna', 'Drina'],
-  RS: ['Stit', 'Breza', 'Zvezda', 'Romanija', 'Vrbas', 'Sava'],
-  HRHB: ['Maestral', 'Cincar', 'Zima', 'Una', 'Neretva', 'JuzniPotez'],
-};
-
-function toOneWord(input: string): string {
-  const cleaned = input.replace(/[^A-Za-z0-9]+/g, ' ').trim();
-  const first = cleaned.split(/\s+/)[0] ?? '';
-  return first;
-}
-
 function formatRawId(id: string): string {
   if (!id) return '';
   return id
@@ -35,12 +23,6 @@ function formatRawId(id: string): string {
 export function CorpsDetail() {
   const ipc = useIPC();
   const [ordersPanelOpen, setOrdersPanelOpen] = useState(false);
-  const [operationPrepOpen, setOperationPrepOpen] = useState(false);
-  const [prepOperationType, setPrepOperationType] = useState('sector_attack');
-  const [prepTargetWord, setPrepTargetWord] = useState('');
-  const [prepSecondWord, setPrepSecondWord] = useState('');
-  const [prepSectorId, setPrepSectorId] = useState('');
-  const [savingOperation, setSavingOperation] = useState(false);
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
@@ -48,37 +30,24 @@ export function CorpsDetail() {
   const setSelectedCorpsId = useGameStore((s) => s.setSelectedCorpsId);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
+  const setOpsPlanningModalOpen = useGameStore((s) => s.setOpsPlanningModalOpen);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const setLoadError = useGameStore((s) => s.setLoadError);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
-  const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
 
   // Derived values needed by hooks — computed unconditionally so hooks are always called in the same order
   const corpsFormation = loadedGameState?.formations.find(
     (f) => f.id === selectedCorpsId && (f.kind === 'corps' || f.kind === 'corps_asset')
   ) ?? null;
-  const corpsFaction = corpsFormation?.faction ?? 'RBiH';
   const corpsSectors = useMemo(
     () => loadedGameState?.corpsFrontSectors?.filter((s) => s.corps_id === selectedCorpsId) ?? [],
     [loadedGameState?.corpsFrontSectors, selectedCorpsId]
   );
-  const secondWordOptions = useMemo(
-    () => OP_SECOND_WORDS[corpsFaction] ?? ['Bosna', 'Drina', 'Una'],
-    [corpsFaction]
-  );
+
 
   useEffect(() => {
     setOrdersPanelOpen(false);
-    setOperationPrepOpen(false);
   }, [selectedCorpsId]);
-
-  useEffect(() => {
-    if (!corpsFormation) return;
-    const candidateTarget = toOneWord(corpsSectors[0]?.display_name ?? corpsFormation.name);
-    setPrepTargetWord(candidateTarget || 'Target');
-    setPrepSecondWord(secondWordOptions[0] ?? 'Bosna');
-    setPrepSectorId(corpsSectors[0]?.sector_id ?? '');
-  }, [corpsFormation, corpsSectors, secondWordOptions]);
 
   // Hide when formation or sector panel would show (priority: Formation > Sector > Corps)
   if (operationsPanelOpen || selectedFormationId || selectedSectorId || !selectedCorpsId) return null;
@@ -118,7 +87,15 @@ export function CorpsDetail() {
     (op) => op.corps_id === selectedCorpsId
   ) ?? [];
 
-  const operationNamePreview = `${toOneWord(prepTargetWord) || 'Target'} ${prepSecondWord || 'Bosna'}`.trim();
+  const handleOpenOpsPlanning = () => {
+    const primarySector = corpsSectors[0];
+    if (primarySector) {
+      setSelectedCorpsFrontSectorId(primarySector.sector_id);
+      setOpsPlanningModalOpen(true);
+    } else {
+      setLoadError('Ops Planning requires the Corps to be assigned to a front sector.');
+    }
+  };
 
   const stageCorpsStance = async (stance: string) => {
     if (!ipc.isAvailable) {
@@ -129,65 +106,6 @@ export function CorpsDetail() {
     if (!result.ok) {
       setLoadError(result.error ?? 'Failed to stage corps stance order.');
     }
-  };
-
-  const resolveTargetOsid = (targetWord: string): string | null => {
-    const needle = targetWord.trim().toLowerCase();
-    if (!needle) return null;
-    const allOsids = Object.keys(loadedGameState.controlBySettlement).sort((a, b) => a.localeCompare(b));
-    for (const osid of allOsids) {
-      const slug = (osid.split(':')[2] ?? '').toLowerCase();
-      if (slug === needle || slug.startsWith(`${needle}-`) || slug.startsWith(needle)) return osid;
-      const display = (osidDisplayNames?.[osid] ?? '').toLowerCase();
-      const firstWord = display.split(/\s+/)[0] ?? '';
-      if (firstWord === needle) return osid;
-    }
-    return null;
-  };
-
-  const handleSaveOperationDraft = async () => {
-    if (!ipc.isAvailable) {
-      setLoadError('Operation preparation is available in desktop mode only.');
-      return;
-    }
-    const targetWord = toOneWord(prepTargetWord);
-    const name = `${targetWord || 'Target'} ${prepSecondWord || 'Bosna'}`.trim();
-    if (!name) {
-      setLoadError('Operation name is required.');
-      return;
-    }
-    const resolvedTargetOsid = resolveTargetOsid(targetWord);
-    if (!resolvedTargetOsid && prepOperationType !== 'reorganization') {
-      setLoadError(`Could not resolve target settlement "${targetWord}". Try a known map settlement name.`);
-      return;
-    }
-
-    const participatingBrigades = subordinates
-      .map((f) => f.id)
-      .sort((a, b) => a.localeCompare(b))
-      .slice(0, 6);
-
-    setSavingOperation(true);
-    const result = await ipc.stageCorpsOperationOrder({
-      corpsId: selectedCorpsId,
-      name,
-      type: prepOperationType as 'general_offensive' | 'sector_attack' | 'strategic_defense' | 'reorganization',
-      targetSettlements: resolvedTargetOsid ? [resolvedTargetOsid] : [],
-      participatingBrigades,
-      sectorId: prepOperationType === 'sector_attack' ? prepSectorId || undefined : undefined,
-      objectives: prepOperationType === 'sector_attack' && resolvedTargetOsid ? [resolvedTargetOsid] : [],
-      planningDuration: prepOperationType === 'sector_attack' ? 1 : undefined,
-      stagingOsid: undefined,
-    });
-    setSavingOperation(false);
-
-    if (!result.ok) {
-      setLoadError(result.error ?? 'Failed to stage operation draft.');
-      return;
-    }
-    setOperationPrepOpen(false);
-    setOrdersPanelOpen(false);
-    setLoadError(null);
   };
 
   return (
@@ -288,7 +206,7 @@ export function CorpsDetail() {
                 >
                   <span className="truncate mr-2">{s.display_name}</span>
                   <span className="text-text-secondary tabular-nums shrink-0">
-                    d={s.density.toFixed(2)}
+                    Density: {s.density.toFixed(2)}
                   </span>
                 </button>
               ))}
@@ -379,156 +297,11 @@ export function CorpsDetail() {
             <div className="pt-1 border-t border-panel-border">
               <button
                 type="button"
-                onClick={() => setOperationPrepOpen(true)}
+                onClick={handleOpenOpsPlanning}
                 className="w-full text-xs font-sans px-2 py-2 rounded border border-panel-border text-interactive hover:bg-panel-hover"
               >
                 Prepare operation
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {operationPrepOpen && (
-        <div className="fixed inset-0 z-[90] bg-black/55 backdrop-blur-sm flex items-center justify-center p-6">
-          <div className="w-[min(92vw,1220px)] h-[min(88vh,860px)] bg-panel-bg border border-panel-border rounded-xl shadow-2xl flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-3 bg-panel-card border-b border-panel-border shrink-0">
-              <div>
-                <div className="font-sans text-sm text-accent-gold uppercase tracking-wide font-semibold">
-                  Operation Preparation
-                </div>
-                <div className="text-[11px] text-text-secondary mt-0.5">
-                  {corpsFormation.name} · {corpsFormation.faction}
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setOperationPrepOpen(false)}
-                className="text-text-secondary hover:text-interactive text-sm leading-none"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="flex-1 grid grid-cols-12 gap-4 p-4 overflow-auto">
-              <div className="col-span-5 rounded-lg border border-panel-border bg-panel-card/60 p-4 space-y-4">
-                <div className="text-xs text-text-secondary uppercase tracking-wide">Draft</div>
-                <div>
-                  <label className="text-[11px] text-text-secondary block mb-1">Operation type</label>
-                  <select
-                    value={prepOperationType}
-                    onChange={(e) => setPrepOperationType(e.target.value)}
-                    className="w-full px-2 py-1 text-xs bg-panel-card border border-panel-border rounded text-text-primary"
-                  >
-                    <option value="sector_attack">Sector attack</option>
-                    <option value="general_offensive">General offensive</option>
-                    <option value="strategic_defense">Strategic defense</option>
-                    <option value="reorganization">Reorganization</option>
-                  </select>
-                </div>
-                {prepOperationType === 'sector_attack' && corpsSectors.length > 0 && (
-                  <div>
-                    <label className="text-[11px] text-text-secondary block mb-1">Launch sector</label>
-                    <select
-                      value={prepSectorId}
-                      onChange={(e) => setPrepSectorId(e.target.value)}
-                      className="w-full px-2 py-1 text-xs bg-panel-card border border-panel-border rounded text-text-primary"
-                    >
-                      {corpsSectors.map((sector) => (
-                        <option key={sector.sector_id} value={sector.sector_id}>
-                          {sector.display_name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                <div>
-                  <label className="text-[11px] text-text-secondary block mb-1">Target settlement (one word)</label>
-                  <input
-                    value={prepTargetWord}
-                    onChange={(e) => setPrepTargetWord(toOneWord(e.target.value))}
-                    className="w-full px-2 py-1 text-xs bg-panel-card border border-panel-border rounded text-text-primary"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] text-text-secondary block mb-1">Second word</label>
-                  <div className="flex flex-wrap gap-1">
-                    {secondWordOptions.map((word) => (
-                      <button
-                        key={word}
-                        type="button"
-                        onClick={() => setPrepSecondWord(word)}
-                        className={`text-[11px] px-2 py-1 rounded border ${prepSecondWord === word ? 'bg-panel-active text-accent-gold' : 'text-text-primary hover:bg-panel-hover'} border-panel-border`}
-                      >
-                        {word}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="pt-2 border-t border-panel-border">
-                  <div className="text-[11px] text-text-secondary mb-1">Proposed operation name</div>
-                  <div className="font-mono text-sm text-text-primary">{operationNamePreview}</div>
-                </div>
-                <div className="pt-2 border-t border-panel-border">
-                  <button
-                    type="button"
-                    onClick={() => void handleSaveOperationDraft()}
-                    className="w-full text-xs font-sans px-2 py-2 rounded border border-panel-border text-interactive hover:bg-panel-hover disabled:opacity-50"
-                    disabled={savingOperation}
-                  >
-                    {savingOperation ? 'Saving…' : 'Save draft'}
-                  </button>
-                </div>
-              </div>
-              <div className="col-span-7 rounded-lg border border-panel-border bg-panel-card/40 p-4 space-y-3 overflow-auto">
-                <div className="text-xs text-text-secondary uppercase tracking-wide">Context</div>
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="border border-panel-border rounded p-2">
-                    <div className="text-text-secondary">Corps stance</div>
-                    <div className="text-text-primary capitalize">{corpsFormation.corpsStance ?? 'unknown'}</div>
-                  </div>
-                  <div className="border border-panel-border rounded p-2">
-                    <div className="text-text-secondary">Exhaustion</div>
-                    <div className="text-text-primary">{corpsFormation.corpsExhaustion?.toFixed(1) ?? '—'}</div>
-                  </div>
-                </div>
-                <div className="pt-2 border-t border-panel-border">
-                  <div className="text-[11px] text-text-secondary mb-1">Sectors ({corpsSectors.length})</div>
-                  <div className="space-y-1 max-h-[220px] overflow-auto">
-                    {corpsSectors.map((sector) => (
-                      <button
-                        key={sector.sector_id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedCorpsFrontSectorId(sector.sector_id);
-                          setPrepTargetWord(toOneWord(sector.display_name));
-                        }}
-                        className="w-full text-left rounded border border-panel-border bg-panel-card px-2 py-1 hover:bg-panel-hover"
-                      >
-                        <div className="text-text-primary text-xs truncate">{sector.display_name}</div>
-                        <div className="text-[10px] text-text-secondary tabular-nums">
-                          d={sector.density.toFixed(2)} · threat={sector.threat_ratio.toFixed(2)} · {sector.assigned_brigade_ids.length} assigned
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="pt-2 border-t border-panel-border">
-                  <div className="text-[11px] text-text-secondary mb-1">Current active operations</div>
-                  {corpsOps.length === 0 ? (
-                    <div className="text-xs text-text-secondary italic">No active operations for this corps.</div>
-                  ) : (
-                    <div className="space-y-1">
-                      {corpsOps.map((op) => (
-                        <div key={getOperationId(op)} className="rounded border border-panel-border bg-panel-card px-2 py-1">
-                          <div className="text-xs text-text-primary">{op.name}</div>
-                          <div className="text-[10px] text-text-secondary">
-                            {op.phase} · {op.participating_brigade_count} brigades · started T{op.started_turn}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
         </div>

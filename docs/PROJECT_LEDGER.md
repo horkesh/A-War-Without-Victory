@@ -7,6 +7,37 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-06] N159 deep engine audit calibration — organic VRS tempo decay, casualty tuning, supply/patron rebalancing
+
+### Summary
+- Addressed 14 issues from the full Paradox 40w engine audit (n159 report) across 4 phases (A-D).
+- **Core directive:** organic VRS tempo decay — no artificial stance transitions. RS slows down through fatigue, supply consumption, entrenchment wall, and ARBiH resistance.
+- **Fatigue as combat power modifier:** new `getFatigueMult()` — fatigued units fight worse (attack floor 0.6×, defense floor 0.75×). Recovery every 2 turns, +0.5/turn frontline duty, FATIGUE_MAX=30 (consolidated).
+- **Entrenchment diminishing returns:** sqrt-based curve (first turns matter most).
+- **RS doctrine:** reduced to 2 phases (both offensive) — no defensive regression at w20/w40.
+- **Casualty tuning:** attacker base 0.045→0.04, defender base 0.02→0.028, attrition 0.005→0.003, bombardment 0.012→0.008.
+- **Supply drain:** MAINTENANCE_DRAIN 0.025→0.045, UN airdrops capped 15→3/turn, HRHB init 55→75.
+- **Patron commitment:** historical faction-specific bases (RBiH 0.3 in 1992 under embargo, RS 0.8 JNA backing).
+
+### Change
+- `src/sim/combat/combat_math.ts`: getFatigueMult(), sqrt entrenchment, casualty rates
+- `src/state/formation_fatigue.ts`: recovery interval, frontline fatigue, shared FATIGUE_MAX
+- `src/state/formation_constants.ts`: shared FATIGUE_MAX=30
+- `src/sim/combat/bot_strategy.ts`: RS doctrine 3→2 phases (both offensive)
+- `data/scenarios/timelines/apr1992.json`: RS doctrine/standing orders simplified
+- `src/sim/combat/frontline_attrition.ts`: reduced attrition/bombardment rates
+- `src/state/supply_reserve_constants.ts`: maintenance drain, airdrop caps, HRHB init
+- `src/state/patron_pressure.ts`: historical patron commitment, initial material support
+- `tests/bot_three_sides_validation.test.ts`, `tests/supply_reserves.test.ts`: updated expectations
+
+### Metrics
+- **n165:** 84.2% area-weighted (up from 81.5% at n142/n159)
+- **Combat activity:** 146 attack orders, 118 battles, 103 captures — combat-causality gate GREEN
+- **RS general supply:** 68.2% at w40 (was 100% — realistic decline)
+- **319 tests passing** (1 pre-existing structural failure)
+
+---
+
 ## [2026-03-06] OOB cleanup: unified fields, universal home_osid, dead field removal, cross-faction correction
 
 ### Summary
@@ -117,6 +148,36 @@ This is the single authoritative project ledger. All context, decisions, and sta
 - Prevents operations from wasting planning turns after brigades are already in viable approach positions.
 - Prevents corps AI from leaving thin adjacent sectors too fragmented to launch offensives.
 - Prevents false combat-causality failures caused by post-capture objective advancement or ordinary operational lulls.
+
+---
+
+## [2026-03-06] Recovery-lane canon and technical docs consolidated around the restored `n158` baseline
+
+### Summary
+- Added one consolidated recovery report for the full combat-causality lane, from zero-battle invalidation through controlled calibration resumption.
+- Propagated the resulting lessons, assumptions, and do/don’t rules into the 40_reports index, implemented-work consolidation, lessons-learned consolidation, canon context, REPO_MAP, PIPELINE_ENTRYPOINTS, and CALIBRATION_MASTER.
+- Anchored the documentation to the accepted runtime baseline `n158`.
+
+### Change
+- New report:
+  - `docs/40_reports/implemented/20260306_COMBAT_CAUSALITY_RECOVERY_AND_CONTROLLED_CALIBRATION_RESUMPTION.md`
+- Updated report index / consolidation:
+  - `docs/40_reports/README.md`
+  - `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`
+  - `docs/40_reports/CONSOLIDATED_LESSONS_LEARNED.md`
+- Updated canon / engineering references:
+  - `docs/10_canon/context.md`
+  - `docs/20_engineering/REPO_MAP.md`
+  - `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`
+  - `docs/40_reports/CALIBRATION_MASTER.md`
+
+### Failure mode prevented
+- Prevents the team from rediscovering the recovery lane by folklore instead of through stable docs.
+- Prevents future calibration work from collapsing back into mixed debugging/map-fit reasoning.
+
+### Architect note
+- The recovered runtime baseline is `n158`.
+- Quiet weeks remain warnings, not failures, unless they coincide with attack-orders-without-battles or whole-run zero combat.
 
 ---
 
@@ -10678,3 +10739,42 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 - Final visual sweep confirms all panels now share the same vertical information hierarchy and loading aesthetic.
 
 
+
+## 2026-03-06 - GUI Polish: Tactical Data Humanization
+
+### Summary
+- Performed a comprehensive data humanization pass across the Map UI to scrub technical simulation strings and raw turn numbers.
+- Implemented `utils/formatters.ts` to centralize DD MMM YYYY date formatting, posture Title Case mapping, and combat outcome translation.
+- Humanized front-line metrics: replaced raw "edges" counts with estimated "km" distances and clarified multi-segment front counts.
+- Expanded personnel and assignment notations (e.g., "(3+2)" → "(3 Frontline / 2 Reserve)" and "3200" → "3,200 men").
+- Standardized the use of `formatTurnLabel` in TopToolbar and WarSummaryModal.
+
+### Changes
+- `src/ui/map/utils/formatters.ts` (NEW): Central utility for all humanized string conversions.
+- `src/ui/map/components/TopToolbar.tsx`: (MODIFY) Integrated `formatTurnLabel`.
+- `src/ui/map/components/FormationDetail.tsx`: (MODIFY) Applied humanized turn dates, combat outcomes, and "men" suffix.
+- `src/ui/map/components/OOBSidebar.tsx`: (MODIFY) Replaced "edges" with "~km" and "d=" with "Density: ".
+- `src/ui/map/components/CorpsFrontPanel.tsx`: (MODIFY) Reformatted front length to km, expanded segment counts, and converted "Threat ratio" to "Risk ratio".
+- `src/ui/map/components/OperationDetail.tsx`, `OperationsPanel.tsx`: (MODIFY) Humanized operation types and start dates.
+- `src/ui/map/components/WarSummaryModal.tsx`: (MODIFY) Applied `formatTurnLabel`.
+- `docs/20_engineering/MAP_UI_MASTER.md`: (MODIFY) Added Section 13 (Data Humanization Standards).
+
+### Failure mode prevented
+- Prevents immersion-breaking technical jargon (snake_case, raw turn numbers) from being exposed to the player.
+- Prevents ambiguity in unit assignments through explicit "Frontline / Reserve" labeling.
+- Prevents confusion over map scale by providing approximate real-world kilometer estimates instead of internal mesh edge counts.
+
+### Files modified
+- `src/ui/map/utils/formatters.ts`
+- `src/ui/map/components/TopToolbar.tsx`
+- `src/ui/map/components/FormationDetail.tsx`
+- `src/ui/map/components/OOBSidebar.tsx`
+- `src/ui/map/components/CorpsFrontPanel.tsx`
+- `src/ui/map/components/OperationDetail.tsx`
+- `src/ui/map/components/OperationsPanel.tsx`
+- `src/ui/map/components/WarSummaryModal.tsx`
+- `docs/20_engineering/MAP_UI_MASTER.md`
+
+### FORAWWV note
+- Time presentation is now calendar-first in all UI contexts to align with the "1990s War Room" design philosophy.
+- Metric conversion for front length: `1 front edge ≈ 1.0 km` estimate used for player-facing tactical scale.

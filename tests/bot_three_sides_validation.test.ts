@@ -54,9 +54,9 @@ describe('Three-Sided Bot AI Validation', () => {
         expect(share).toBeCloseTo(0.28, 2);
     });
 
-    it('RS getEffectiveAttackShare uses balanced phase at turn 30', () => {
+    it('RS getEffectiveAttackShare uses post-offensive phase at turn 30', () => {
         const share = getEffectiveAttackShare('RS', 30);
-        expect(share).toBeCloseTo(0.08, 2);
+        expect(share).toBeCloseTo(0.22, 2);
     });
 
     it('Non-RS factions use doctrine phase values', () => {
@@ -86,11 +86,11 @@ describe('Three-Sided Bot AI Validation', () => {
         expect(phase!.max_attack_share_override).toBe(0.20);
     });
 
-    it('RS doctrine phase at turn 60 is strategic defense', () => {
+    it('RS doctrine phase at turn 60 is still offensive — no artificial defensive regression', () => {
         const phase = getActiveDoctrinePhase('RS', 60);
         expect(phase).not.toBeNull();
-        expect(phase!.default_corps_stance).toBe('defensive');
-        expect(phase!.aggression_modifier).toBe(-0.1);
+        expect(phase!.default_corps_stance).toBe('offensive');
+        expect(phase!.aggression_modifier).toBe(0.05);
     });
 
     // --- Faction strategies completeness ---
@@ -132,18 +132,18 @@ describe('Three-Sided Bot AI Validation', () => {
         expect(order!.army_stance).toBe('general_offensive');
     });
 
-    it('RS standing order at turn 30 is Consolidation (balanced)', () => {
+    it('RS standing order at turn 30 is Targeted Operations (balanced)', () => {
         const order = getActiveStandingOrder('RS', 30);
         expect(order).not.toBeNull();
-        expect(order!.name).toBe('Consolidation');
+        expect(order!.name).toBe('Targeted Operations');
         expect(order!.army_stance).toBe('balanced');
     });
 
-    it('RS standing order at turn 60 is Strategic Hold (general_defensive)', () => {
+    it('RS standing order at turn 60 is Targeted Operations (balanced) — no artificial defensive regression', () => {
         const order = getActiveStandingOrder('RS', 60);
         expect(order).not.toBeNull();
-        expect(order!.name).toBe('Strategic Hold');
-        expect(order!.army_stance).toBe('general_defensive');
+        expect(order!.name).toBe('Targeted Operations');
+        expect(order!.army_stance).toBe('balanced');
     });
 
     it('RBiH standing order at turn 5 is Survival Defense (general_defensive)', () => {

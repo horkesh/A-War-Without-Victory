@@ -56,12 +56,12 @@ describe('updateSupplyReserves', () => {
         // Zero production
         const report = updateSupplyReserves(state, { RBiH: 0, RS: 0, HRHB: 0 });
 
-        // RBiH starts at 10 (per-faction override), RS at 80, HRHB at 55
+        // RBiH starts at 10 (per-faction override), RS at 80, HRHB at 75
         expect(state.general_supply_reserve!['RBiH']).toBeCloseTo(10 - 2 * MAINTENANCE_DRAIN_PER_FORMATION, 5);
         // RS: 80 - 1*DRAIN
         expect(state.general_supply_reserve!['RS']).toBeCloseTo(80 - 1 * MAINTENANCE_DRAIN_PER_FORMATION, 5);
-        // HRHB: 55 - 0*DRAIN = 55
-        expect(state.general_supply_reserve!['HRHB']).toBe(55);
+        // HRHB: 75 - 0*DRAIN = 75
+        expect(state.general_supply_reserve!['HRHB']).toBe(75);
 
         // Heavy munitions unchanged (no combat expenditure in per-turn update)
         // RBiH starts at 5 (per-faction override)

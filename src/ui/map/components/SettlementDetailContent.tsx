@@ -6,6 +6,7 @@
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getByOsid } from '../utils/osidLookup';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
+import { toTitleCase } from '../utils/formatters';
 
 function num(v: unknown): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : 0;
@@ -64,7 +65,7 @@ export function SettlementDetailContent({
     { label: 'Croat', pct: popOriginal ? (num(props.population_croats) / popOriginal) * 100 : 0 },
     { label: 'Other', pct: popOriginal ? (num(props.population_others) / popOriginal) * 100 : 0 },
   ];
-  const terrain = str(props.terrain || props.zone_type);
+  const terrain = toTitleCase(str(props.terrain || props.zone_type));
   const strategic = props.municipal_seat === true || props.strategic === true;
 
   const munId = getMunIdForDisplacement(props);

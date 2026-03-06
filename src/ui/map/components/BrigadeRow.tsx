@@ -1,5 +1,6 @@
 import type { FormationView } from '../data/types';
 import { FACTION_BG_SUBTLE, FACTION_COLORS } from '../utils/theme';
+import { toTitleCase } from '../utils/formatters';
 
 const STATUS_BADGE: Record<string, string> = {
   assigned: 'bg-panel-hover text-text-secondary',
@@ -64,7 +65,7 @@ export function BrigadeRow({ formation, compact, highlighted = false, onClick, o
       </div>
       <span className="text-text-secondary shrink-0 tabular-nums">{formation.fatigue}</span>
       <span className={`shrink-0 text-[10px] uppercase px-1 rounded ${statusClass}`}>
-        {formation.status}
+        {toTitleCase(formation.status)}
       </span>
     </div>
   );

@@ -9,22 +9,30 @@ export const SARAJEVO_VISIBILITY_RATE = 0.5;
 export const ENCLAVE_PRESSURE_WEIGHT = 1.0;
 export const SARAJEVO_ISOLATION_RATE = 0.05;
 
+/**
+ * Base patron commitment by faction and year.
+ * Historical basis:
+ *   RS: Serbia/JNA full backing 1992, declining as war drags and sanctions bite
+ *   HRHB: Croatia provides steady support, increasing after Washington Agreement
+ *   RBiH: Under arms embargo; Islamic world trickle, no state patron until late war
+ */
 function patronCommitmentBase(factionId: FactionId, year: number): number {
     switch (factionId) {
         case 'RBiH':
-            if (year <= 1992) return 0.6;
-            if (year === 1993) return 0.7;
-            if (year === 1994) return 0.75;
-            return 0.8;
+            // Arms embargo: minimal external support early, growing through Islamic world + smuggling
+            if (year <= 1992) return 0.3;
+            if (year === 1993) return 0.4;
+            if (year === 1994) return 0.5;
+            return 0.6;
         case 'RS':
             if (year <= 1992) return 0.8;
             if (year === 1993) return 0.7;
             if (year === 1994) return 0.6;
             return 0.55;
         case 'HRHB':
-            if (year <= 1992) return 0.5;
-            if (year === 1993) return 0.55;
-            if (year === 1994) return 0.65;
+            if (year <= 1992) return 0.6;
+            if (year === 1993) return 0.65;
+            if (year === 1994) return 0.7;
             return 0.7;
         default:
             return 0.5;
@@ -50,11 +58,13 @@ export function ensurePatronState(state: GameState, factionId: FactionId): Patro
         throw new Error(`Faction not found: ${factionId}`);
     }
     if (!faction.patron_state) {
+        // Historical initial material support: RS (JNA stocks + Serbia) > HRHB (Croatia) > RBiH (embargo)
+        const initialMaterial = factionId === 'RS' ? 0.75 : factionId === 'HRHB' ? 0.65 : 0.3;
         faction.patron_state = {
-            material_support_level: 0.5,
+            material_support_level: initialMaterial,
             diplomatic_isolation: 0,
             constraint_severity: 0.3,
-            patron_commitment: 0.5,
+            patron_commitment: patronCommitmentBase(factionId, getYearForTurn(state.meta.turn)),
             last_updated: state.meta.turn
         };
     }

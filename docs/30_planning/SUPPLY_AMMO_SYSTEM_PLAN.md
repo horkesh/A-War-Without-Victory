@@ -182,14 +182,14 @@ All constants are collected in a single file for calibration:
 
 | Constant | Default | Category | Notes |
 |---|---|---|---|
-| `MAINTENANCE_DRAIN_PER_FORMATION` | 0.04 | Consumption | Per-formation per-turn general supply drain |
+| `MAINTENANCE_DRAIN_PER_FORMATION` | 0.045 | Consumption | Per-formation per-turn general supply drain (n159 audit: 0.025→0.045) |
 | `COMBAT_HEAVY_MUNITIONS_RATE` | 2.0 | Consumption | Heavy munitions per battle (scaled by intensity) |
 | `COMBAT_GENERAL_SUPPLY_RATE` | 0.5 | Consumption | General supply per battle (secondary) |
 | `SIEGE_BASE_RATE` | 0.3 | Consumption | Per-turn drain for besieged settlements |
 | `SIEGE_ESCALATION_RATE` | 0.1 | Consumption | Per-turn escalation multiplier |
 | `MAX_SIEGE_PRESSURE_RATE` | 2.0 | Consumption | Cap on siege drain |
-| `SIEGE_MIN_POCKET_SIZE` | 5 | Siege threshold | Min connected-component size for escalating drain; below this → counter frozen at 1 |
-| `HEAVY_MAINTENANCE_PER_WEAPON` | 0.003 | Consumption | Per-heavy-weapon (tanks+artillery) per-turn drain on heavy_munitions_reserve. RS (794 initial) drains ~2.4/turn → strained by w40 |
+| `SIEGE_MIN_POCKET_SIZE` | 8 | Siege threshold | Min connected-component size for escalating drain; below this → counter frozen at 1 (n159 audit: 5→8, Ozren/Maglaj RS pocket fix) |
+| `HEAVY_MAINTENANCE_PER_WEAPON` | 0.001 | Consumption | Per-heavy-weapon (tanks+artillery) per-turn drain on heavy_munitions_reserve. RS (794 initial) drains ~0.8/turn (n159 audit: 0.003→0.001, sector-pooled defense doubled battle count) |
 | `PRODUCTION_SCALE` | 1.0 | Replenishment | Global multiplier for facility income |
 | `PATRON_AID_SCALE` | 12 | Replenishment | Global multiplier for patron aid (raised from 1.0 in Phase E1) |
 | `RESERVE_ADEQUATE_THRESHOLD` | 50 | Reserve→State | Reserve ≥ this → adequate (if reachable) |
@@ -302,7 +302,7 @@ All constants are collected in a single file for calibration:
 - `applyUnAirdrops()` in `supply_reserves.ts`: deterministic weekly general supply injection for RBiH enclaves with `isolation_turns ≥ 4`; capped at 15/turn; humanitarian only (no munitions)
 - `AIRDROP_*` constants added to `supply_reserve_constants.ts`; pipeline step wired after `phase-ii-enclave-resilience`
 - Bot supply-aware targeting: enemy OSIDs sorted critical→strained→adequate in `bot_corps_ai.ts`
-- `MAINTENANCE_DRAIN_PER_FORMATION` tuned 0.15 → 0.04
+- `MAINTENANCE_DRAIN_PER_FORMATION` tuned 0.15 → 0.04 → 0.025 → 0.045 (n159 audit: RS general supply 68% by w40)
 - `apr1992_definitive_40w` scenario: `supply_reserves_enabled: true` by default
 - 8 Vitest tests: `tests/supply_airdrop.test.ts`
 

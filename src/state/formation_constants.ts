@@ -72,6 +72,9 @@ export const MIN_MANDATORY_SPAWN = 100;
 /** Minimum personnel a formation can have during combat — below this the unit routes/dissolves rather than taking further casualties. Used as casualty floor instead of MIN_BRIGADE_SPAWN so defenders at 800 personnel can actually take losses. */
 export const MIN_COMBAT_PERSONNEL = 100;
 
+/** Maximum fatigue a formation can accumulate. Shared across combat resolution, fatigue recovery, and combat power calculation. */
+export const FATIGUE_MAX = 30;
+
 /** Minimum 1991 population (faction-eligible) in a municipality to assign historical brigade name or allow emergent spawn (demographic gating). Below this: OOB brigades get generic name; emergent spawn is skipped. */
 export const MIN_ELIGIBLE_POPULATION_FOR_BRIGADE = 500;
 

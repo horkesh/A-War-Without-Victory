@@ -1,9 +1,14 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for Phase II 40w calibration (April 1992 → January 1993).
-**Updated:** 2026-03-06
+**Updated:** 2026-03-06 (n159 deep audit — Phases A-D complete)
+**N159 Deep Audit (2026-03-06):** 5-phase calibration addressing 14 issues from the full Paradox 40w engine audit.
+- **Phase A (P0 bugs):** All three resolved without code changes — brigade_history working, posture lifecycle correct, displaced_out reporter already fixed.
+- **Phase B (casualty tuning):** BASE_ATTRITION_RATE 0.005→0.003, BOMBARDMENT_EXPOSURE_RATE 0.012→0.008, BASE_ATTACKER_LOSS_RATE 0.045→0.04, BASE_DEFENDER_LOSS_RATE 0.02→0.028. Att:def ratio target 2.5-3:1 (was 4.78:1).
+- **Phase C (organic VRS tempo decay):** RS doctrine phases reduced to 2 (both offensive — no artificial defensive regression). RS stays offensive permanently; tempo decay is organic via fatigue, supply, entrenchment. Fatigue now meaningful: recovery every 2 turns, +0.5/turn frontline duty, cap 30 (was 20), fatigue directly degrades combat power (×0.6-1.0 attack, ×0.75-1.0 defense). Entrenchment diminishing returns (sqrt curve). FATIGUE_MAX consolidated to single shared constant.
+- **Phase D (supply & exhaustion):** MAINTENANCE_DRAIN_PER_FORMATION 0.025→0.045 (RS general 68% by w40, was 100%). RBiH patron commitment reduced (0.6→0.3 in 1992 — arms embargo). HRHB patron raised (0.5→0.6). UN airdrops capped (15→3/turn). HRHB initial supply 55→75.
 **Canonical target run:** n65 (ATH 99.2% area-weighted, commit a689d83)
-**Latest calibration run:** n142 (sector-fix session: all 15 corps now have front sectors, 25 misassigned brigades (down from 50), 0 empty non-pocket sectors; area-weighted 81.5% — expected regression from corrected corps assignments; combat-causality gate green)
+**Latest calibration run:** n166 (n159 audit Phase E verification: deterministic rerun of n165. 84.2% area-weighted, RS=321/HRHB=110/RBiH=313 OSIDs. 146 attacks, 118 battles, 103 captures. Att:def casualty ratio 3.26:1. RS weekly attacks decline 8→1 (organic tempo decay confirmed). All VRS corps still offensive at t26 with aggression 0.0-0.1 (was 0.4-0.45 at t1). Bot benchmarks 2/6 PASS — RS/RBiH targets need recalibration for organic model. Combat-causality gate green.)
 **Latest recovery-gated run:** n158 (live sector-rearrangement + planning-movement recovery: combat-causality gate green, behavioral-health gate green, planning now includes movement into approach positions, live sector concentration restored)
 **Previous calibration run:** n137 (combat-causality gate green again after runtime rollback: valid_for_combat_calibration=true, 86 attack orders, 74 battles, 30 combat-attributed control changes; deterministic rerun of n136 after removing live sector rearrangement from corps-AI runtime)
 **ALL-TIME HIGH:** n65 (99.2% area-weighted — systematic OSID override strategy + pool exhaustion 25% fix, 2026-03-05)
@@ -232,15 +237,91 @@ Current invalidation reasons:
 
 **Note:** Corps HQs are abstractions (not physical map entities). BFS seeding uses political_controllers, not HQ OSID positions. HQ locations are for GUI display only.
 
+### N159 Deep Engine Audit (2026-03-06, runs n165→n166)
+
+14-issue deep engine audit addressing all findings from the full Paradox 40w team review. Core directive: organic VRS tempo decay — no artificial stance transitions.
+
+**Phase A (P0 bugs):** All three investigated, no code changes needed. brigade_history working, posture lifecycle correct, displaced_out already fixed.
+
+**Phase B (casualty tuning):**
+- `BASE_ATTRITION_RATE`: 0.005→0.003; `BOMBARDMENT_EXPOSURE_RATE`: 0.012→0.008
+- `BASE_ATTACKER_LOSS_RATE`: 0.045→0.04; `BASE_DEFENDER_LOSS_RATE`: 0.02→0.028
+- Target att:def ratio 2.5-3:1 (was 4.78:1). Achieved: 3.26:1 at n166.
+
+**Phase C (organic VRS tempo decay):**
+- `getFatigueMult()` — fatigued units fight worse (attack floor 0.6×, defense floor 0.75×)
+- `FATIGUE_MAX`: 20→30, consolidated to `formation_constants.ts`
+- Fatigue recovery: every 2 turns (was every turn), +0.5/turn frontline duty
+- Entrenchment: sqrt-based diminishing returns (first turns of digging in matter most)
+- RS doctrine phases: 3→2 (both offensive — no defensive regression at w20/w40)
+- RS_EARLY_WAR_END_WEEK=20 still marks reduced aggression (0.15→0.05) and max_attack_share (0.28→0.22)
+
+**Phase D (supply & patron rebalancing):**
+- `MAINTENANCE_DRAIN_PER_FORMATION`: 0.025→0.045 (RS general supply 68% by w40, was 100%)
+- UN airdrops: `AIRDROP_MAX_SUPPLY_PER_TURN` 15→3, `AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE` 1.5→0.5
+- Patron commitment: historical faction-specific bases (RBiH 0.3 in 1992 under embargo, RS 0.8, HRHB 0.6)
+- Initial supply: HRHB 55→75 (Croatian pipeline open early war)
+
+**Phase E (verification):**
+- n166: 84.2% area-weighted, 146 attacks, 118 battles, 103 captures
+- RS weekly attacks decline 8→1 by w40 (organic tempo decay confirmed)
+- All VRS corps still offensive at t26; aggression naturally declining 0.4→0.0
+- Bot benchmarks 2/6 PASS — RS/RBiH targets need recalibration for organic model
+- Combat-causality gate GREEN
+
+**Deferred items from n159 audit:**
+- **B2 (Serb civilian casualties):** Investigation complete. Logic correct, tuning issue: 4% DISPLACEMENT_KILLED_FRACTION applied uniformly. Sim: 10,860 RS civ killed (history: ~4k). Fix: per-context kill fractions (RS from RBiH ~1%, RS from HRHB ~1-2%, non-Serb from RS keep 4%). File: `displacement_loss_constants.ts`.
+- **B4 (HVO personnel shortfall):** Deferred — low priority, HRHB reaching adequate levels.
+- **Bot benchmark recalibration:** RS `early_territorial_expansion` and `consolidate_gains` targets assume old aggressive w20 blitz model; need new targets for organic tempo.
+- **Canon/engineering doc propagation:** Completed as part of Phase E close-out.
+
 ### Current resume point
 
-- Sector partitioning is now correct for all 15 corps.
+- N159 deep engine audit complete (Phases A-E). Organic VRS tempo decay confirmed.
+- Sector partitioning correct for all 15 corps.
 - Combat causality gate is green.
-- Area-weighted match regressed to 81.5% — expected; re-calibration needed with correct corps assignments.
+- Area-weighted match at 84.2% (up from 81.5% post-sector-fix).
 - Runtime sector rearrangement (thin consolidation + pocket containment) is live and validated.
 - Historical tuning may resume, but only under the recovery-plan rule:
   - cite both `behavioral_health` and `historical_fit`
   - do not call a run “better” if map fit improves while behavioral health regresses
+
+### Recovery-lane lessons and rules (2026-03-06)
+
+Use these as the permanent operating rules for post-recovery calibration work:
+
+1. Good map fit is not proof of healthy combat.
+   - Read `behavioral_health` first.
+   - Then read `historical_fit`.
+   - Then explain `control_change_attribution`.
+2. Planning is a maneuver phase, not a timer.
+   - Operation-owned brigades should move into staging/approach positions during planning.
+   - Planning may end early once the force is actually ready.
+3. Quiet weeks are not the same as broken combat causality.
+   - Quiet weeks with no attack orders and no invalid operations are warnings.
+   - Attack-orders-without-battles is still a failure.
+   - Whole-run zero battles is still a failure.
+4. Sector rearrangement is a scenario-scale acceptance problem.
+   - Unit tests are necessary but not sufficient.
+   - Keep live sector-topology changes only when 40-week combat-causality stays green.
+5. Operation ownership must remain real.
+   - Do not let generic corps logic, reserve logic, or `home_defense_active` silently retake operation brigades while the op is live.
+
+### Do / Don’t for resumed calibration
+
+Do:
+
+- use `CALIBRATION_MASTER.md` as the control file before changing tuning
+- cite run ids and both reporting families when discussing results
+- verify operation-path changes with the proof scenario before broad full-run claims
+- update the master file during the session when a gate or interpretation rule changes
+
+Don’t:
+
+- call a run “better” because area-weighted fit improved while behavioral health regressed
+- use legacy Phase I flip-log thinking for current war-phase analysis
+- hide engine failures behind scenario overrides
+- treat planning dead time as acceptable operational behavior
 
 ### Opening-operation debug lane updates (2026-03-05)
 
@@ -791,8 +872,8 @@ if (retreatDests.length === 0) {
 Triggers only when defender has **zero valid retreat destinations** (complete encirclement).
 
 ### Casualty Rate Constants
-- `BASE_ATTACKER_LOSS_RATE = 0.045` (4.5% of attacker personnel per engagement; was 0.03, Phase A n343)
-- `BASE_DEFENDER_LOSS_RATE = 0.02` (2%; was 0.015, Phase A n343)
+- `BASE_ATTACKER_LOSS_RATE = 0.04` (4% of attacker personnel per engagement; was 0.03→0.045→0.04, Phase A n343 + n159 audit)
+- `BASE_DEFENDER_LOSS_RATE = 0.028` (2.8%; was 0.015→0.02→0.028, Phase A n343 + n159 audit). Att:def ratio target 2.5-3:1.
 - `KIA_FRACTION = 0.30` (30% of casualties are killed; 55% wounded; 15% MIA; was 0.25/0.60, Phase A n343)
 - **Morale retreat resistance**: per-faction via `getMoraleResistFloor()`: RBiH=55, RS=70, HRHB=65 (was flat 70)
 - **Frontline attrition**: 0.5%/week passive loss for front-assigned brigades (`frontline_attrition.ts`)

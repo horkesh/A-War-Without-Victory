@@ -246,7 +246,7 @@ base_casualties_defender = defender_personnel × BASE_DEFENDER_LOSS_RATE × inte
 | Parameter | Value | Notes |
 |-----------|-------|-------|
 | BASE_ATTACKER_LOSS_RATE | 0.04 | 4% of attacking personnel per engagement |
-| BASE_DEFENDER_LOSS_RATE | 0.02 | 2% of defending personnel per engagement |
+| BASE_DEFENDER_LOSS_RATE | 0.028 | 2.8% of defending personnel per engagement (n159 audit: att:def ratio target 2.5-3:1) |
 
 ### 4.2 Outcome casualty modifiers
 
@@ -501,7 +501,7 @@ Deterministic snap events trigger when specific state conditions are met during 
 | MAX_RESILIENCE_STREAK | 6 | §2.7 |
 | RESILIENCE_PER_DEFENSE | 0.05 | §2.7 |
 | BASE_ATTACKER_LOSS_RATE | 0.04 | §4.1 |
-| BASE_DEFENDER_LOSS_RATE | 0.02 | §4.1 |
+| BASE_DEFENDER_LOSS_RATE | 0.028 | §4.1 |
 | MILITIA_DEFENSE_RATIO | 0.03 ** | §3.3 |
 | COORDINATION_PENALTY_2 | 0.90 | §3.4 |
 | COORDINATION_PENALTY_3PLUS | 0.80 | §3.4 |

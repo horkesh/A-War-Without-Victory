@@ -11,12 +11,13 @@
 // ── Consumption: Maintenance ─────────────────────────────────────────────────
 /**
  * Per-formation per-turn general supply drain.
- * Reduced from 0.04: at 0.04, RS (avg 70 formations) drains 70×0.04×40=112 pts
- * over 40w, exceeding patron aid income (~94 pts) and leaving RS general at 0.
- * General supply at 0 → supply mult 0.45× → attack power collapse → calibration gap.
- * At 0.025: drain = 70×0.025×40 = 70 pts; combined with patron (~94) → adequate.
+ * History: 0.04 (RS hit 0 by w40) → 0.025 (RS/RBiH sat at 100 — no drain).
+ * At 0.045: RS (70 fmns) = 3.15/turn drain vs ~5.3/turn patron → net +2.15,
+ * but combat drain (~1.3/turn) brings net to +0.85 → gradual decline from 100.
+ * RBiH (127 fmns) = 5.7/turn drain vs ~4/turn patron → net -1.7 → genuine pressure.
+ * n159 audit: RS/RBiH at 100% after 40w is unrealistic. Active armies consume supplies.
  */
-export const MAINTENANCE_DRAIN_PER_FORMATION = 0.025;
+export const MAINTENANCE_DRAIN_PER_FORMATION = 0.045;
 /**
  * Per-heavy-weapon per-turn heavy munitions drain (tanks + artillery).
  * Represents ammunition expenditure for training/readiness, barrel wear,
@@ -125,10 +126,16 @@ export const HARDENING_DEFENSE_BONUS = 0.05;
  * (after ~40 weeks of siege). Set low so shorter runs see the effect.
  */
 export const AIRDROP_ISOLATION_THRESHOLD = 4;
-/** General supply added per eligible enclave per turn (humanitarian: food/medical only). */
-export const AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE = 1.5;
-/** Max total general supply injected per turn across all airdrops (prevents stacking with many enclaves). */
-export const AIRDROP_MAX_SUPPLY_PER_TURN = 15;
+/** General supply added per eligible enclave per turn (humanitarian: food/medical only).
+ * Reduced from 1.5: reflects limited cargo capacity of C-130 drops to dispersed enclaves.
+ */
+export const AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE = 0.5;
+/** Max total general supply injected per turn across all airdrops (prevents stacking with many enclaves).
+ * Reduced from 15: airdrops were humanitarian (food/medical), not military resupply.
+ * At 15/turn, RBiH sat at 100% general supply despite low patron support — unrealistic.
+ * At 3/turn: meaningful relief for enclaves without eliminating supply pressure.
+ */
+export const AIRDROP_MAX_SUPPLY_PER_TURN = 3;
 /** Only RBiH enclaves receive UN airdrops. */
 export const AIRDROP_ELIGIBLE_FACTION = 'RBiH';
 
@@ -157,7 +164,7 @@ export const INIT_HEAVY_MUNITIONS_RESERVE = 60;
  */
 export const INIT_GENERAL_SUPPLY_RESERVE_BY_FACTION: Partial<Record<string, number>> = {
     RS: 80,
-    HRHB: 55,
+    HRHB: 75,   // Croatian supply pipeline open; higher than default
     RBiH: 10,   // critical (< RESERVE_STRAINED_THRESHOLD=20) → brigades forced to defend
 };
 export const INIT_HEAVY_MUNITIONS_RESERVE_BY_FACTION: Partial<Record<string, number>> = {

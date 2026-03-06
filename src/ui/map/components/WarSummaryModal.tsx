@@ -4,6 +4,7 @@
  */
 import osidAreas from '../../../../data/derived/operational/osid_areas.json';
 import { useGameStore } from '../store/gameStore';
+import { formatTurnLabel } from '../utils/formatters';
 
 const FACTION_LABEL: Record<string, string> = {
     RS: 'RS',
@@ -39,7 +40,7 @@ export function WarSummaryModal({ isOpen, onClose }: WarSummaryModalProps) {
 
     if (!isOpen || !loadedGameState) return null;
 
-    const { turn, label, formations, controlBySettlement, casualtyLedger, displacementByMun, departedByOsid } = loadedGameState;
+    const { label, formations, controlBySettlement, casualtyLedger, displacementByMun, departedByOsid } = loadedGameState;
 
     // Territory: area-weighted percentage per faction
     const areaByFaction: Record<string, number> = {};
@@ -116,7 +117,7 @@ export function WarSummaryModal({ isOpen, onClose }: WarSummaryModalProps) {
                             War Summary
                         </div>
                         <div style={{ fontSize: 11, color: '#8a7d70', marginTop: 2 }}>
-                            {label} — Week {turn}
+                            {formatTurnLabel(label)}
                         </div>
                     </div>
                     <button
@@ -221,7 +222,7 @@ export function WarSummaryModal({ isOpen, onClose }: WarSummaryModalProps) {
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 

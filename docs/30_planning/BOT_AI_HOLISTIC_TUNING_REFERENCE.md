@@ -119,8 +119,8 @@ Tune all three faction AIs and their starting parameters so that a 52-week scena
 | ENTRENCHMENT_PER_TURN | 0.035 | |
 | MAX_RESILIENCE_STREAK | 4 | Tuned 6->4. Max bonus 1.10x |
 | RESILIENCE_PER_DEFENSE | 0.025 | Tuned 0.05->0.025 |
-| BASE_ATTACKER_LOSS_RATE | 0.045 | Tuned 0.04->0.06->0.03->0.045 (Phase A) |
-| BASE_DEFENDER_LOSS_RATE | 0.02 | Tuned 0.015->0.02 (Phase A) |
+| BASE_ATTACKER_LOSS_RATE | 0.04 | Tuned 0.04→0.06→0.03→0.045→0.04 (Phase A + n159 audit) |
+| BASE_DEFENDER_LOSS_RATE | 0.028 | Tuned 0.015→0.02→0.028 (Phase A + n159 audit). Att:def ratio target 2.5-3:1 |
 | MILITIA_DEFENSE_RATIO | 0.03 | Militia defense multiplier |
 | LINKED_ZOC_READINESS | 0.50 | Tuned 0.70->0.35->0.50. ZoC projection strength |
 | COORDINATION_PENALTY_2 | 0.9 | 2-brigade attack penalty |
@@ -587,15 +587,7 @@ Currently, bot_strategy.ts has hardcoded avoid lists:
   - Winter effects: reduce reinforcement rate in winter months (weeks 30-45)
 
 ### ISSUE 2: Casualties at 16.4k vs 25-35k Target [MEDIUM]
-**Status:** Largely addressed (Phase A, n343). Military KIA now 20,508 vs ~23k target. Loss rates raised to 0.045/0.02, KIA fraction to 0.30, frontline attrition added.
-- 13.9k attacker + 2.5k defender = 16.4k total. Target is 25-35k.
-- BASE_ATTACKER_LOSS_RATE was tuned 0.06->0.03 to prevent excessive attrition, but went too low.
-- Current: ~100 casualties per battle average (337 orders, 16.4k casualties).
-- **Potential fixes:**
-  - Raise BASE_ATTACKER_LOSS_RATE from 0.03 to 0.04-0.05
-  - Raise BASE_DEFENDER_LOSS_RATE from 0.015 to 0.02-0.025
-  - Both would also help with ISSUE 1 (troop strength) by burning more personnel
-  - Siege casualties: Sarajevo siege should generate steady attritional casualties even without assaults
+**Status:** Addressed (Phase A n343 + n159 audit). Loss rates: 0.04/0.028 (att/def). KIA fraction 0.30, frontline attrition added (BASE_ATTRITION_RATE=0.003, BOMBARDMENT_EXPOSURE_RATE=0.008). n166 att:def casualty ratio 3.26:1 (target 2.5-3:1). Fatigue now degrades combat power (getFatigueMult: attack floor 0.6×, defense floor 0.75×).
 
 ### ISSUE 3: Attack Taper / Freeze Timing [LOW-MEDIUM]
 **Status:** Active. Attack intensity drops too early.
@@ -682,7 +674,7 @@ Currently, bot_strategy.ts has hardcoded avoid lists:
 - **Winter effects not modeled** (would help with natural front stabilization)
 
 ### Priority Order for Next Tuning Iteration
-1. ~~Raise BASE_ATTACKER/DEFENDER_LOSS_RATE~~ **DONE** (Phase A n343: 0.03→0.045, 0.015→0.02)
+1. ~~Raise BASE_ATTACKER/DEFENDER_LOSS_RATE~~ **DONE** (Phase A n343: 0.03→0.045, 0.015→0.02; n159 audit: 0.045→0.04, 0.02→0.028)
 2. Add winter effects system (fixes attack timing naturally)
 3. ~~Add siege/frontline attrition~~ **DONE** (Phase A n343: frontline_attrition.ts, 0.5%/week)
 4. Fix Sarajevo regression (77.4%, Trnovo area lost to RS)

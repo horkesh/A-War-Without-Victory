@@ -8,24 +8,17 @@ import { SituationTab } from './SituationTab';
 import { getFormationsAtOsid } from '../utils/formationAtOsid';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { AccordionHeader } from './AccordionHeader';
+import { toTitleCase } from '../utils/formatters';
 
 const FACTION_ORDER = ['RS', 'RBiH', 'HRHB'] as const;
 
-function formatRawId(id: string): string {
-  if (!id) return '';
-  return id
-    .replace(/^(RS|RBiH|HRHB)_/i, '')
-    .split('_')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(' ');
-}
 
 function formatFrontId(id: string): string {
   if (!id) return '';
   return id
     .replace(/^.*__op:/, '')
     .split(':')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .map(w => toTitleCase(w))
     .join(' \u2014 ');
 }
 
@@ -353,7 +346,7 @@ export function OOBSidebar() {
                             corpsId={corpsId}
                             corpsName={corpsId === '_ungrouped' ? 'Ungrouped' : (() => {
                               const fName = corpsFormationById.get(corpsId)?.name ?? corpsId;
-                              return fName === corpsId ? formatRawId(fName) : fName;
+                              return fName === corpsId ? toTitleCase(fName.replace(/^(RS|RBiH|HRHB)_/i, '')) : fName;
                             })()}
                             brigades={brigades}
                             faction={faction}
@@ -464,7 +457,7 @@ export function OOBSidebar() {
                           </div>
                           <div className="flex items-center gap-2 text-[10px]">
                             <span className={`px-1.5 py-0.5 rounded text-white uppercase font-semibold ${phaseBg}`}>
-                              {op.phase}
+                              {toTitleCase(op.phase)}
                             </span>
                             {op.momentum != null && (
                               <span className="text-text-secondary">Mom: {op.momentum}</span>
@@ -528,8 +521,8 @@ export function OOBSidebar() {
                             <div className="text-text-secondary text-[10px] tabular-nums">
                               {sector.assigned_brigade_ids.length} assigned
                               {sector.reserve_brigade_ids.length > 0 && ` + ${sector.reserve_brigade_ids.length} reserve`}
-                              {' \u00B7 '}{sector.length_edges} edges
-                              {' \u00B7 d='}{sector.density.toFixed(2)}
+                              {' \u00B7 ~'}{sector.length_edges} km
+                              {' \u00B7 Density: '}{sector.density.toFixed(2)}
                             </div>
                           </div>
                         </button>

@@ -8,7 +8,7 @@
 
 import { getTerrainScalarsForSid, type TerrainScalarsData } from '../../map/terrain_scalars.js';
 import { getDecorationAtkMult, getDecorationDefBonus } from './decoration_evaluator.js';
-import { getFormationTier } from '../../state/formation_constants.js';
+import { FATIGUE_MAX, getFormationTier } from '../../state/formation_constants.js';
 import type {
     CorpsStance,
     FormationState,
@@ -71,8 +71,10 @@ export function getMoraleResistFloor(faction: string): number {
     return FACTION_MORALE_RESIST_FLOOR[faction] ?? MORALE_RESIST_FLOOR;
 }
 
-export const BASE_ATTACKER_LOSS_RATE = 0.045;
-export const BASE_DEFENDER_LOSS_RATE = 0.02;
+/** Reduced from 0.045 (n159 audit: att:def ratio 4.78:1, target 2.5-3:1). */
+export const BASE_ATTACKER_LOSS_RATE = 0.04;
+/** Increased from 0.02 (n159 audit: defenders losing too little relative to attackers). */
+export const BASE_DEFENDER_LOSS_RATE = 0.028;
 export const MILITIA_DEFENSE_RATIO = 0.03;
 export const COORDINATION_PENALTY_2 = 0.9;
 export const COORDINATION_PENALTY_3PLUS = 0.8;
@@ -495,6 +497,24 @@ export function getDisruptionMult(formation: FormationState, mode: 'attack' | 'd
     return 1.0;
 }
 
+/**
+ * Combat fatigue multiplier: exhausted units fight worse.
+ * Linear degradation from 1.0 (fresh) to floor at max fatigue.
+ * Attackers suffer more (0.6 floor) than defenders (0.75 floor) —
+ * offensive operations require more coordination and energy.
+ * Uses FATIGUE_MAX from formation_constants.ts (shared with attack_resolution, fatigue recovery).
+ */
+const FATIGUE_ATTACK_FLOOR = 0.6;
+const FATIGUE_DEFEND_FLOOR = 0.75;
+
+export function getFatigueMult(formation: FormationState, mode: 'attack' | 'defend'): number {
+    const fatigue = formation.ops?.fatigue ?? 0;
+    if (fatigue <= 0) return 1.0;
+    const ratio = Math.min(1.0, fatigue / FATIGUE_MAX);
+    const floor = mode === 'attack' ? FATIGUE_ATTACK_FLOOR : FATIGUE_DEFEND_FLOOR;
+    return 1.0 - ratio * (1.0 - floor);
+}
+
 /** Urban defense multiplier: Sarajevo OSIDs get 1.5×. */
 export function getUrbanMult(targetOsid: Osid): number {
     const lower = targetOsid.toLowerCase();
@@ -560,7 +580,8 @@ export function computeAttackerPower(
     const disruptionMult = getDisruptionMult(formation, 'attack');
     const heavyMult = getHeavyWeaponsOffensiveMult(formation, targetTerrainMult);
     const officerMult = getThreeTierOfficerMod(formation, state, 'attack');
-    return base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult * heavyMult * officerMult;
+    const fatigueMult = getFatigueMult(formation, 'attack');
+    return base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult * heavyMult * officerMult * fatigueMult;
 }
 
 export function computeDefenderPower(
@@ -581,7 +602,9 @@ export function computeDefenderPower(
     const terrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
     const entrenchmentTurns = Math.min(MAX_ENTRENCHMENT, (formation as { entrenchment_turns?: number }).entrenchment_turns ?? 0);
     const suppressionFactor = 1.0 - artillerySuppression;
-    const entrenchmentMult = 1.0 + entrenchmentTurns * ENTRENCHMENT_PER_TURN * suppressionFactor;
+    // Diminishing returns: sqrt curve — first turns of digging in matter most.
+    // At 1 turn: 0.07 (was 0.035). At 6 turns: 0.07×√6 = 0.171 (was 0.21).
+    const entrenchmentMult = 1.0 + Math.sqrt(entrenchmentTurns) * ENTRENCHMENT_PER_TURN * 2 * suppressionFactor;
     const corpsStance = getCorpsStance(state, formation);
     const corpsDefMult = corpsStance ? CORPS_STANCE_DEFENSE[corpsStance] ?? 1 : 1;
     const defenseStreak = Math.min(MAX_RESILIENCE_STREAK, (formation as { defense_streak?: number }).defense_streak ?? 0);
@@ -595,7 +618,8 @@ export function computeDefenderPower(
     const frontDensityMult = getLocalFrontDensityModifier(state, formation);
     const officerMult = getThreeTierOfficerMod(formation, state, 'defend');
     const ethnicMult = 1.0 + (ethnicDefenseBonus ?? 0);
-    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult * toTerrainMult * perBrigadeTerrainBonus * frontDensityMult * officerMult * ethnicMult;
+    const fatigueMult = getFatigueMult(formation, 'defend');
+    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult * toTerrainMult * perBrigadeTerrainBonus * frontDensityMult * officerMult * ethnicMult * fatigueMult;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

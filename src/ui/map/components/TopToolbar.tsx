@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoader';
 import { useIPC } from '../desktop/useIPC';
 import { advanceTurnAndSync } from '../desktop/orderActions';
+import { formatTurnLabel } from '../utils/formatters';
 
 const LOAD_TIMEOUT_MS = 25000;
 
@@ -11,16 +12,6 @@ const FACTION_BANNER_TINT: Record<string, string> = {
   RBiH: 'rgba(74, 154, 85, 0.35)',
   HRHB: 'rgba(64, 128, 184, 0.35)',
 };
-
-function formatTurnLabel(label: string): string {
-  const match = label.match(/Turn\s+(\d+)/i);
-  if (!match) return label;
-  const t = parseInt(match[1], 10);
-  const startDate = new Date('1992-04-01T00:00:00Z');
-  startDate.setDate(startDate.getDate() + t * 7);
-  const dateStr = startDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  return label.replace(match[0], `${dateStr} \u00B7 Turn ${t}`);
-}
 
 interface TopToolbarProps {
   onOpenRecruitment?: () => void;

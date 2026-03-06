@@ -5,25 +5,7 @@ import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 import { stagePostureOrderAction } from '../desktop/orderActions';
 import { DETAIL_PANEL_STYLE, SECONDARY_PANEL_STYLE } from './panelRail';
-
-function formatOutcome(outcome: string): string {
-  return outcome
-    .split('_')
-    .map((word) => (word ? word[0].toUpperCase() + word.slice(1) : word))
-    .join(' ');
-}
-
-function capitalize(s: string): string {
-  if (!s) return s;
-  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-}
-
-function humanizeMunicipalityId(munId: string): string {
-  return munId
-    .split('-')
-    .map((word) => (word ? word[0].toUpperCase() + word.slice(1) : word))
-    .join(' ');
-}
+import { turnToDateString, formatCombatOutcome, formatPosture, toTitleCase } from '../utils/formatters';
 
 
 /**
@@ -114,7 +96,7 @@ export function FormationDetail() {
 
             <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
               <span className="text-text-secondary">Kind:</span>
-              <span className="text-text-primary">{formation.kind}</span>
+              <span className="text-text-primary">{toTitleCase(formation.kind)}</span>
               <span className="text-text-secondary">Faction:</span>
               <span className={FACTION_COLORS_SUBTLE[formation.faction] ?? 'text-text-primary'}>{formation.faction}</span>
             </div>
@@ -142,16 +124,16 @@ export function FormationDetail() {
               {formation.personnel != null && (
                 <>
                   <span className="text-text-secondary">Personnel</span>
-                  <span className="text-text-primary tabular-nums">{formation.personnel.toLocaleString()}</span>
+                  <span className="text-text-primary tabular-nums">{formation.personnel.toLocaleString()} men</span>
                 </>
               )}
             </div>
 
             <div className="flex flex-wrap gap-x-2 text-xs">
               <span className="text-text-secondary">Status:</span>
-              <span className="text-text-primary">{capitalize(formation.status)}</span>
+              <span className="text-text-primary">{toTitleCase(formation.status)}</span>
               <span className="text-text-secondary">Readiness:</span>
-              <span className="text-text-primary">{capitalize(formation.readiness)}</span>
+              <span className="text-text-primary">{toTitleCase(formation.readiness)}</span>
             </div>
 
             {formation.location_osid && (
@@ -170,7 +152,7 @@ export function FormationDetail() {
                   className="font-mono text-text-primary break-all"
                   title={formation.municipalityId ?? '—'}
                 >
-                  {formation.municipalityId ? humanizeMunicipalityId(formation.municipalityId) : '—'}
+                  {formation.municipalityId ? toTitleCase(formation.municipalityId) : '—'}
                 </span>
               </div>
             )}
@@ -182,7 +164,7 @@ export function FormationDetail() {
                 {formation.firstBattleTurn != null && (
                   <div className="text-[11px]">
                     <span className="text-text-secondary">First engagement: </span>
-                    <span className="text-text-primary">T{formation.firstBattleTurn}</span>
+                    <span className="text-text-primary">{turnToDateString(formation.firstBattleTurn)}</span>
                     {formation.firstBattleOsid && (
                       <span className="text-text-secondary"> @ <span className="font-mono text-text-primary">{getOsidDisplayName(formation.firstBattleOsid, osidDisplayNames)}</span></span>
                     )}
@@ -216,8 +198,8 @@ export function FormationDetail() {
                     <div className="space-y-1">
                       {[...formation.recent_engagements].reverse().map((engagement, idx) => (
                         <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-[11px] leading-4">
-                          <span className="text-text-secondary">T{engagement.turn} </span>
-                          <span className="text-text-primary">{formatOutcome(engagement.outcome)}</span>
+                          <span className="text-text-secondary">{turnToDateString(engagement.turn)} </span>
+                          <span className="text-text-primary">{formatCombatOutcome(engagement.outcome)}</span>
                           <span className="text-text-secondary"> as {engagement.role} @ </span>
                           <span className="font-mono text-text-primary">{getOsidDisplayName(engagement.osid, osidDisplayNames)}</span>
                           {engagement.territory_flipped && <span className="text-accent-gold ml-1">⚑</span>}
@@ -240,7 +222,7 @@ export function FormationDetail() {
                   <div className="space-y-0.5 pt-1">
                     {formation.notableMoments.map((m, i) => (
                       <div key={i} className="text-[11px] text-text-secondary">
-                        <span className="text-text-primary">T{m.turn}:</span> {m.description.replace(/op:[a-z0-9_]+:[a-z0-9_]+/gi, (match) => getOsidDisplayName(match, osidDisplayNames))}
+                        <span className="text-text-primary">{turnToDateString(m.turn)}:</span> {m.description.replace(/op:[a-z0-9_]+:[a-z0-9_]+/gi, (match) => getOsidDisplayName(match, osidDisplayNames))}
                       </div>
                     ))}
                   </div>
@@ -270,7 +252,7 @@ export function FormationDetail() {
                         >
                           {s.display_name}
                           <span className="text-text-secondary ml-1">
-                            ({s.assigned_brigade_ids.length}+{s.reserve_brigade_ids.length})
+                            ({s.assigned_brigade_ids.length} Frontline / {s.reserve_brigade_ids.length} Reserve)
                           </span>
                         </button>
                       ))}
@@ -386,7 +368,7 @@ export function FormationDetail() {
                       title={blocked ? 'Blocked: home defense active' : operationOwnershipOverridesHomeDefense ? `Operation-owned: ${operationOwningFormation?.name}` : undefined}
                       className={`text-[11px] font-sans px-2 py-1 rounded border border-panel-border ${blocked ? 'opacity-40 cursor-not-allowed text-text-secondary' : 'text-interactive hover:bg-panel-hover'}`}
                     >
-                      {posture.replace(/_/g, ' ')}
+                      {formatPosture(posture)}
                     </button>
                   );
                 })}

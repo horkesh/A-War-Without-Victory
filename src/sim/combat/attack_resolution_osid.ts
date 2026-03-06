@@ -18,7 +18,7 @@ import {
     initializeCasualtyLedger,
     recordBattleCasualties
 } from '../../state/casualty_ledger.js';
-import { MIN_COMBAT_PERSONNEL } from '../../state/formation_constants.js';
+import { FATIGUE_MAX, MIN_COMBAT_PERSONNEL } from '../../state/formation_constants.js';
 import type {
     ControlEvent,
     FactionId,
@@ -852,7 +852,6 @@ export function resolveAttackOrdersOsid(
         // Fatigue is reduced by recovery each turn (see formation_fatigue.ts).
         const FATIGUE_ATTACKER = 2;
         const FATIGUE_DEFENDER = 1;
-        const FATIGUE_MAX = 20;
         for (const af of attackerFormations) {
             if (!af.ops) af.ops = { fatigue: 0, last_supplied_turn: null };
             af.ops.fatigue = Math.min(FATIGUE_MAX, (af.ops.fatigue ?? 0) + FATIGUE_ATTACKER);

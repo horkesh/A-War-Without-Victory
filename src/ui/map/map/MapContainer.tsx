@@ -31,11 +31,9 @@ import { buildEnclaveGeoJSON } from './builders/buildEnclaveGeoJSON';
 import { buildBattleMarkersGeoJSON } from './builders/buildBattleMarkersGeoJSON';
 import { buildStrategicPointGeoJSON } from './builders/buildStrategicPointGeoJSON';
 import { rewritePmtilesUrls } from './rewritePmtilesUrls';
-import { addFrontLineIcons } from './frontLineIcons';
 import { useIPC } from '../desktop/useIPC';
 import { stageMoveOrderFromOsid } from '../desktop/orderActions';
 import styleJson from './awwv_map_style.json';
-import { rewritePmtilesUrlsForRuntime } from './pmtilesRoute';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
 const DEFAULT_ZOOM = 8;

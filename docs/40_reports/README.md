@@ -11,6 +11,7 @@
 | Need | Go to |
 |------|--------|
 | **What’s already implemented** | [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md) → [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) (single doc; originals archived to docs/_old/40_reports/implemented_2026_02_15/) |
+| **Recovery-plan closure report** | [20260306_COMBAT_CAUSALITY_RECOVERY_AND_CONTROLLED_CALIBRATION_RESUMPTION.md](implemented/20260306_COMBAT_CAUSALITY_RECOVERY_AND_CONTROLLED_CALIBRATION_RESUMPTION.md) — end-to-end account of the combat-causality recovery lane, lessons learned, must-have assumptions, and controlled calibration resumption rules. |
 | **Latest recovery-plan hardening report** | [20260306_RECOVERY_PLAN_REPORTING_UI_AND_BENCHMARK_HARDENING.md](implemented/20260306_RECOVERY_PLAN_REPORTING_UI_AND_BENCHMARK_HARDENING.md) — reporting split (`behavioral_health`/`historical_fit`), live fog-of-war adapter contract, benchmark fraction serialization fix, `n130` verification. |
 | **Latest sector contiguity + rearrangement report** | [20260306_SECTOR_CONTIGUITY_AND_REARRANGEMENT.md](implemented/20260306_SECTOR_CONTIGUITY_AND_REARRANGEMENT.md) — post-build contiguity split via friendly OSID BFS, thin-sector consolidation, pocket containment; 7 new tests, 321 total pass. |
 | **Latest sector visualization fix** | [20260306_SECTOR_VISUALIZATION_HOVER_CLICK_FIX.md](implemented/20260306_SECTOR_VISUALIZATION_HOVER_CLICK_FIX.md) — per-segment hover, sector-based highlight, hostile-side adjacency consolidation, authoritative pair filtering. |
@@ -39,7 +40,7 @@
 | **issues/** | Bug/issue tracking. [2026_03_04_ELECTRON_APP_WHENREADY_CRASH.md](issues/2026_03_04_ELECTRON_APP_WHENREADY_CRASH.md) (RESOLVED — `app.whenReady()` TypeError; root cause: invoked via Node.js instead of `electron .`; defensive guard added to `electron-main.cjs`). [2026_02_26_MAP_INITIALIZATION_HANG.md](issues/2026_02_26_MAP_INITIALIZATION_HANG.md) (RESOLVED). |
 | **audits/** | Polygon/settlement/phase audit artifacts from map pipeline era. |
 | **cleanup/** | Repo cleanup records and audit data. |
-| **Root** | README, CONSOLIDATED_*.md, CALIBRATION_MASTER.md (living calibration reference, latest ATH: n65 99.2% area-weighted; combat-causality gate added 2026-03-05), ORCHESTRATOR memo; active plans (GUI Phase 3 remainder, React map status). War timeline externalization (2026-03-02): all faction temporal profiles externalized to `data/scenarios/timelines/apr1992.json`; type definitions + resolvers in `src/state/war_timeline.ts`; 38 tests in `tests/war_timeline.test.ts`. |
+| **Root** | README, CONSOLIDATED_*.md, CALIBRATION_MASTER.md (living calibration reference, latest ATH: n65 99.2% area-weighted; latest calibration: n166 84.2% area-weighted; combat-causality gate added 2026-03-05; n159 deep audit Phases A-E complete 2026-03-06), ORCHESTRATOR memo; active plans (GUI Phase 3 remainder, React map status). War timeline externalization (2026-03-02): all faction temporal profiles externalized to `data/scenarios/timelines/apr1992.json`; type definitions + resolvers in `src/state/war_timeline.ts`; 38 tests in `tests/war_timeline.test.ts`. |
 
 ---
 

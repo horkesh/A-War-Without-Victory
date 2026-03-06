@@ -1,0 +1,63 @@
+/**
+ * Formats a raw turn number into a human-readable date string (DD MMM YYYY).
+ * Baseline: 1 Apr 1992 (Scenario start).
+ */
+export function turnToDateString(turn: number): string {
+    const startDate = new Date('1992-04-01T00:00:00Z');
+    startDate.setDate(startDate.getDate() + turn * 7);
+    return startDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+/**
+ * Humanizes a turn label (e.g., "T32" or "Turn 32") by prepending the calendar date.
+ */
+export function formatTurnLabel(label: string): string {
+    const match = label.match(/Turn\s+(\d+)/i);
+    if (!match) return label;
+    const t = parseInt(match[1], 10);
+    const dateStr = turnToDateString(t);
+    return label.replace(match[0], `${dateStr} \u00B7 Turn ${t}`);
+}
+
+/**
+ * Converts snake_case_strings to Title Case Strings.
+ */
+export function toTitleCase(s: string | undefined): string {
+    if (!s) return '';
+    return s
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+}
+
+/**
+ * Humanizes an operation type identifier.
+ */
+export function formatOperationType(type: string | undefined): string {
+    if (!type) return 'Unknown Operation';
+    return toTitleCase(type);
+}
+
+/**
+ * Humanizes a posture identifier.
+ */
+export function formatPosture(posture: string | undefined): string {
+    return toTitleCase(posture);
+}
+
+/**
+ * Humanizes a combat outcome identifier with descriptive phrasing.
+ */
+export function formatCombatOutcome(outcome: string | undefined): string {
+    if (!outcome) return '';
+    switch (outcome) {
+        case 'skirmish_won': return 'Achieved victory in a skirmish';
+        case 'skirmish_lost': return 'Defeated in a skirmish';
+        case 'repulsed_assault': return 'Repulsed enemy assault';
+        case 'assault_failed': return 'Assault failed';
+        case 'breakthrough': return 'Achieved breakthrough';
+        case 'routed': return 'Routed from position';
+        case 'stalemate': return 'Stalemate';
+        default: return toTitleCase(outcome);
+    }
+}

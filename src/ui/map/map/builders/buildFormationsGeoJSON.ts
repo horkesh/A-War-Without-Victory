@@ -84,7 +84,6 @@ function applyFrontOffset(
 export function buildFormationsGeoJSON(
   state: LoadedGameState,
   controlledOsidGeoJson: FeatureCollection,
-  playerFactionOverride?: string | null,
 ): FeatureCollection<Point, FormationMarkerProperties> {
   const centroidLookup = buildOsidCentroidLookup(controlledOsidGeoJson);
   const frontOffsetLookup = buildFrontOffsetLookup(
@@ -93,7 +92,6 @@ export function buildFormationsGeoJSON(
   );
 
   const orderedFormations = [...state.formations].sort((a, b) => a.id.localeCompare(b.id));
-  const playerFaction = playerFactionOverride ?? state.player_faction ?? null;
   const features: Array<Feature<Point, FormationMarkerProperties>> = [];
 
   for (const formation of orderedFormations) {

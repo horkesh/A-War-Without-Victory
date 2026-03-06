@@ -54,10 +54,10 @@
 **File:** `src/state/supply_reserve_constants.ts`
 - Added 4 airdrop constants:
   - `AIRDROP_ISOLATION_THRESHOLD = 4` (turns before drops begin)
-  - `AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE = 1.5` (per eligible enclave per turn)
-  - `AIRDROP_MAX_SUPPLY_PER_TURN = 15` (faction-level cap per turn)
+  - `AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE = 0.5` (per eligible enclave per turn; was 1.5, n159 audit reduced — humanitarian only)
+  - `AIRDROP_MAX_SUPPLY_PER_TURN = 3` (faction-level cap per turn; was 15, n159 audit reduced — prevented RBiH at 100%)
   - `AIRDROP_ELIGIBLE_FACTION = 'RBiH'` (humanitarian: RBiH only)
-- Tuned `MAINTENANCE_DRAIN_PER_FORMATION`: 0.15 → 0.04
+- Tuned `MAINTENANCE_DRAIN_PER_FORMATION`: 0.15 → 0.04 → 0.025 → 0.045 (n159 audit: RS general supply 68% by w40)
 
 **File:** `src/state/supply_reserves.ts`
 - Added `applyUnAirdrops(state: GameState): void`

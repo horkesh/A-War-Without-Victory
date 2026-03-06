@@ -10,6 +10,7 @@ import {
 } from '../utils/operations';
 import { FACTION_COLORS } from '../utils/theme';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
+import { turnToDateString, formatOperationType, toTitleCase } from '../utils/formatters';
 
 function compareOperations(a: OperationView, b: OperationView): number {
   return (
@@ -224,8 +225,8 @@ export function OperationsPanel() {
                     onClick={() => setSelectedOperationKey(id)}
                     onKeyDown={(event) => handleOperationCardKeyDown(event, index)}
                     className={`kbd-focus w-full text-left rounded border px-2 py-1.5 transition-all duration-200 ease-out hover:-translate-y-[1px] ${selected
-                        ? 'border-accent-gold bg-panel-active shadow-[0_0_0_1px_rgba(212,175,55,0.22)]'
-                        : 'border-panel-border bg-panel-card hover:bg-panel-hover'
+                      ? 'border-accent-gold bg-panel-active shadow-[0_0_0_1px_rgba(212,175,55,0.22)]'
+                      : 'border-panel-border bg-panel-card hover:bg-panel-hover'
                       }`}
                   >
                     <div className={`text-[11px] font-semibold truncate ${FACTION_COLORS[op.faction] ?? 'text-text-primary'} transition-colors`}>
@@ -234,7 +235,7 @@ export function OperationsPanel() {
                     <div className="text-[10px] text-text-secondary truncate">{op.corps_name}</div>
                     <div className="mt-0.5">
                       <span className={`px-1 py-0.5 rounded text-white text-[10px] uppercase font-semibold ${phaseBadgeClass}`}>
-                        {op.phase}
+                        {toTitleCase(op.phase)}
                       </span>
                     </div>
                   </button>
@@ -264,7 +265,7 @@ export function OperationsPanel() {
                         key={phase}
                         className={`px-1.5 py-0.5 rounded border text-[10px] uppercase tracking-wide font-semibold ${tone} ${active ? 'ring-1 ring-accent-gold/60' : 'opacity-80'}`}
                       >
-                        {phase}
+                        {toTitleCase(phase)}
                       </span>
                     );
                   })}
@@ -274,11 +275,11 @@ export function OperationsPanel() {
                 <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-panel-border">
                   <div>
                     <span className="text-text-secondary">Type: </span>
-                    <span className="text-text-primary capitalize">{selectedOperation.type.replace(/_/g, ' ')}</span>
+                    <span className="text-text-primary">{formatOperationType(selectedOperation.type)}</span>
                   </div>
                   <div>
                     <span className="text-text-secondary">Phase: </span>
-                    <span className="text-text-primary capitalize">{selectedOperation.phase}</span>
+                    <span className="text-text-primary">{toTitleCase(selectedOperation.phase)}</span>
                   </div>
                   <div>
                     <span className="text-text-secondary">Brigades: </span>
@@ -286,7 +287,7 @@ export function OperationsPanel() {
                   </div>
                   <div>
                     <span className="text-text-secondary">Started: </span>
-                    <span className="text-text-primary tabular-nums">T{selectedOperation.started_turn}</span>
+                    <span className="text-text-primary text-[11px] whitespace-nowrap">{turnToDateString(selectedOperation.started_turn)}</span>
                   </div>
                   {selectedOperation.momentum != null && (
                     <div>
@@ -363,10 +364,10 @@ export function OperationsPanel() {
                             onBlur={() => setObjectiveHoverOsid(null)}
                             onKeyDown={(event) => handleObjectiveKeyDown(event, index, obj)}
                             className={`kbd-focus w-full text-left rounded border px-2 py-1 transition-colors ${isCurrent
-                                ? 'border-accent-gold/70 bg-panel-active/60'
-                                : isDone
-                                  ? 'border-panel-border bg-panel-bg/40 opacity-60'
-                                  : 'border-panel-border bg-panel-card hover:bg-panel-hover'
+                              ? 'border-accent-gold/70 bg-panel-active/60'
+                              : isDone
+                                ? 'border-panel-border bg-panel-bg/40 opacity-60'
+                                : 'border-panel-border bg-panel-card hover:bg-panel-hover'
                               }`}
                           >
                             <div className="flex items-start gap-1.5">

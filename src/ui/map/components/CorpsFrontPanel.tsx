@@ -166,17 +166,17 @@ export function CorpsFrontPanel() {
               <div className="flex justify-between">
                 <span className="text-text-secondary">Front length</span>
                 <span className="text-text-primary tabular-nums">
-                  {sector.length_edges} edges · {sector.sub_segment_count} segment{sector.sub_segment_count !== 1 ? 's' : ''}
+                  ~{sector.length_edges} km · {sector.sub_segment_count === 1 ? 'Contiguous' : `${sector.sub_segment_count} Disconnected Fronts`}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-text-secondary">Density</span>
                 <span className="text-text-primary tabular-nums">
-                  {sector.density.toFixed(2)} <DensityBadge density={sector.density} /> <span className="text-text-secondary">({sector.assigned_brigade_ids.length}/{sector.length_edges})</span>
+                  {sector.density.toFixed(2)} <DensityBadge density={sector.density} /> <span className="text-text-secondary">({sector.assigned_brigade_ids.length} Frontline / {sector.length_edges} km)</span>
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-text-secondary">Threat ratio</span>
+                <span className="text-text-secondary">Risk ratio</span>
                 <span className="tabular-nums"><ThreatBadge ratio={sector.threat_ratio} /></span>
               </div>
               <div className="flex justify-between">

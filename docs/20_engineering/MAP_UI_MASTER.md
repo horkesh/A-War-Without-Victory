@@ -103,7 +103,8 @@ src/ui/map/
     ├── osidLookup.ts              getByOsid() helper
     ├── formationAtOsid.ts         getFormationsAtOsid(formations, osid)
     ├── sectorUtils.ts             stripFactionSuffix, extractFactionFromEdgeId, collectSectorFriendlyOsids
-    └── operations.ts              getOperationId, getOperationPhaseBadgeClass/Tone, OPERATION_PHASE_TIMELINE
+    ├── operations.ts              getOperationId, getOperationPhaseBadgeClass/Tone, OPERATION_PHASE_TIMELINE
+    └── formatters.ts              turnToDateString, formatTurnLabel, formatOperationType, formatCombatOutcome, formatPosture
 ```
 
 ---
@@ -798,6 +799,34 @@ When `loadedGameState.namedOfficerData` is present:
 - `FormationDetail` shows **Command** section:
   - Officer quality bar (for brigades) — officer_quality × 100%
   - Corps commander name (from `namedOfficerStateById`, assigned_corps_id match)
+
+---
+
+## 13. Data Humanization Standards
+
+To improve immersion and readability, all raw simulation data must be processed through `utils/formatters.ts` before rendering.
+
+### 13.1 Time and Dates
+- **Policy:** Never show raw turn numbers (e.g., "T32") as the primary identifier.
+- **Formatter:** `turnToDateString(turn)` (e.g., "12 Nov 1992") or `formatTurnLabel(label)` (e.g., "12 Nov 1992 · Turn 32").
+- **Usage:** Applied to top toolbar, operation start dates, battle history, and modal headers.
+
+### 13.2 Technical Strings (Enums)
+- **Policy:** Snake_case internal identifiers must be converted to Title Case for the UI.
+- **Formatters:**
+  - `formatOperationType(type)`: "sector_attack" → "Sector Attack".
+  - `formatPosture(posture)`: "defensive" → "Defensive".
+  - `formatCombatOutcome(outcome)`: "attacker_victory" → "Attacker Victory".
+
+### 13.3 Unit Metrics and Counts
+- **Personnel:** Use "men" suffix and locale stringing (e.g., "3,200 men").
+- **Brigade Assignment:** Expand `(assigned+reserve)` notation to clear labels: `(3 Frontline / 2 Reserve)`.
+- **Map Metrics:**
+  - "Edges" (mesh geometry counts) → "~X km" (approximate real-world distance).
+  - "Segments" → "Contiguous" or "X Disconnected Fronts".
+  - "d=" → "Density: ".
+  - "Threat ratio" → "Risk ratio".
+
   - Army commander name (for army_hq formations)
   - Acting commander badge `(Acting)`
 - `FormationDetail` shows **Recent command changes** for corps:

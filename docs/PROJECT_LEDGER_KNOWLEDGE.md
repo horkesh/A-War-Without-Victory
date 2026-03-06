@@ -1,6 +1,6 @@
 # AWWV Project Ledger — Thematic Knowledge Base
 
-**Last Updated:** 2026-02-24  
+**Last Updated:** 2026-03-06
 **Purpose:** Knowledge accumulation by theme.
 
 **40_reports structure (2026-02-24):** Backlog is consolidated into themed docs (BACKLOG_*.md) in docs/40_reports/backlog/; originals archived to docs/_old/40_reports/backlog/. For historical fidelity, Phase 7, mobilization, etc., use the themed doc or the archived filename in _old. See docs/_old/README.md §40_reports/backlog and CONSOLIDATED_BACKLOG. Chronological record remains in `docs/PROJECT_LEDGER.md` (append-only).
@@ -91,6 +91,10 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
    Do instead: Keep sector rearrangement in live corps AI only when full-run combat-causality evidence stays green. Unit tests alone are not enough; use 40-week scenario acceptance as the runtime gate.
 5. **[2026-03-06] Quiet weeks are not the same as broken combat causality**
    Do instead: Weekly `zero_battles` should invalidate only when attack orders were issued and still produced no battles. Quiet weeks with no attacks and no invalid operations remain warnings, visible under `battleless_weeks`.
+6. **[2026-03-06] Good map fit is not proof of healthy combat**
+   Do instead: Read `behavioral_health` before `historical_fit`, then explain `control_change_attribution`. A better-looking map is not a valid success signal if the combat-health layer regressed.
+7. **[2026-03-06] `CALIBRATION_MASTER.md` is the control file for resumed tuning**
+   Do instead: Treat calibration changes as gated work. Read the master file first, update it during the session, and do not resume historical shaping unless the combat-causality gate is green.
 | 2026-01-24 | Municipality outlines can be single polygons | Union must handle single and multi | No rejection of valid single-polygon munis | architecture |
 | 2026-01-24 | Convex hull fallback when union fails | Union unreliable for some geometries | Deterministic fallback + inflation reporting | architecture |
 | 2026-01-24 | Measure hull inflation when using hull salvage | Convex hull can distort shapes | High-inflation flagged in metadata | architecture |
@@ -628,3 +632,17 @@ Each new override block can redirect bot force allocation in non-obvious ways. E
   - `hvo_oz_posavina` → `hvo_northwest_bosnia`
   - `hvo_oz_central_bosnia` → `hvo_central_bosnia`
   - `hvo_oz_nw_bosnia` → `hvo_northwest_bosnia`
+
+## 2026-03-06 - N159 deep engine audit: organic VRS tempo decay
+
+- **Core design decision:** VRS tempo decay must emerge organically — not from hardcoded stance transitions. RS stays offensive permanently; slowdown comes from fatigue, supply consumption, entrenchment wall, and ARBiH resistance.
+- **Fatigue as combat power modifier:** `getFatigueMult()` in `combat_math.ts`. Fatigued units fight worse: attack floor 0.6×, defense floor 0.75×. This is the cleanest organic slowdown — simpler than overstretch calculations, naturally penalizes continuous fighting.
+- **FATIGUE_MAX consolidation:** Was duplicated across 3 files (combat_math.ts as FATIGUE_CAP, formation_fatigue.ts, attack_resolution_osid.ts). Consolidated to single shared constant in `formation_constants.ts` = 30 (was 20).
+- **Fatigue accumulation rebalanced:** Recovery every 2 turns (was every turn). +0.5/turn for frontline-assigned formations. Combined with combat fatigue (+2 att / +1 def per battle), this creates genuine fatigue pressure.
+- **Entrenchment diminishing returns:** sqrt-based curve replaces linear. At 1 turn: 0.07 bonus (doubled from linear). At 6 turns: 0.171 (reduced from 0.21). First turns of digging matter most — rewards ARBiH early defenders.
+- **RS doctrine phases:** Reduced from 3 to 2 (both offensive). RS_EARLY_WAR_END_WEEK=20 still marks reduced aggression (0.15→0.05) and max_attack_share (0.28→0.22). No artificial defensive regression.
+- **Supply drain critical finding:** UN airdrops at 15 pts/turn were silently dominating RBiH supply, masking the entire maintenance drain system. Reduced to 3/turn. Single constants can mask entire systems — always audit income vs drain arithmetic.
+- **Patron commitment historical basis:** RBiH 0.3 in 1992 (arms embargo), growing to 0.6 post-1994. RS 0.8 (JNA backing), declining to 0.55. HRHB 0.6 (Croatian support), increasing to 0.7. Initial material_support_level: RS 0.75, HRHB 0.65, RBiH 0.3.
+- **HRHB supply fragility:** 59 siege counters from central Bosnia pockets drain faction reserves. Need higher initial supply (75) + patron commitment to stay strained (19.3%), not collapsed (0%).
+- **Displacement kill fraction issue (deferred):** 4% DISPLACEMENT_KILLED_FRACTION uniform for all contexts. RS civilian departure from RBiH/HRHB was mostly voluntary flight (~1% lethality). Sim produces 10,860 RS civ killed vs ~4k historical. Fix: per-context kill fractions in `displacement_loss_constants.ts`.
+- **Calibration result:** n166 = 84.2% area-weighted (up from 81.5%). 146 attacks, 118 battles, 103 captures. RS weekly attacks decline 8→1 (organic tempo confirmed). All VRS corps still offensive at t26.

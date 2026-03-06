@@ -182,7 +182,7 @@ During n472 analysis, the following cells appeared as "painted=RS, sim=HRHB" and
 |------|--------|
 | `src/sim/combat/bot_brigade_ai_osid.ts` | Hard directive block; removed frontier pressure mechanic; cleaned dead variable |
 | `src/sim/combat/corps_front_sectors.ts` | `RESERVE_PER_EDGE_CAP`: 0.5 → 0.07 |
-| `src/sim/combat/attack_resolution_osid.ts` | Combat fatigue: +2 attacker, +1 defender per battle, cap 20 |
+| `src/sim/combat/attack_resolution_osid.ts` | Combat fatigue: +2 attacker, +1 defender per battle, cap 20 (later raised to 30 in n159 audit) |
 | `src/state/formation_fatigue.ts` | `applyFatigueRecovery()` function added |
 | `src/sim/turn_phases/war_phases.ts` | Import `applyFatigueRecovery`; call before `updateFormationFatigue` in `update-formation-fatigue` step |
 | `tools/check_hrhb_krajina.cjs` | Diagnostic tool created (not production code; may be removed) |

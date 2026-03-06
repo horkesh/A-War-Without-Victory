@@ -32,8 +32,10 @@ import { ensureBrigadeComposition } from './equipment_effects.js';
 // Constants
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Base weekly attrition rate for frontline brigades. */
-const BASE_ATTRITION_RATE = 0.005;
+/** Base weekly attrition rate for frontline brigades.
+ * Reduced from 0.005 to 0.003 (n159 audit: RS/HRHB KIA running 2-3× historical pace).
+ */
+const BASE_ATTRITION_RATE = 0.003;
 
 /**
  * Bombardment exposure: additional attrition for brigades facing superior
@@ -47,7 +49,8 @@ const BASE_ATTRITION_RATE = 0.005;
  *   - HVO (own FP ~5, incoming ~13) → ratio 2.6, ln=0.96 → half effect
  *   - VRS (own FP ~17, incoming ~2) → ratio 0.13, ln<0 → zero effect
  */
-const BOMBARDMENT_EXPOSURE_RATE = 0.012;
+/** Reduced from 0.012 to 0.008 (n159 audit: background losses too dominant vs active combat). */
+const BOMBARDMENT_EXPOSURE_RATE = 0.008;
 /** ln(firepower ratio) divisor for full bombardment effect. ln(7)≈2.0 */
 const BOMBARDMENT_RATIO_SCALE = 2.0;
 /** Minimum own firepower floor (prevents division by zero). */

@@ -69,8 +69,8 @@
 ## Bot AI & Combat
 1. **[2026-02-25] RBiH general_defensive through week 56**
    Do instead: ARBiH must remain `general_defensive` through week 56. "Balanced" before w56 allows premature counterattacking.
-2. **[2026-03-01] RS_EARLY_WAR_END_WEEK = 20 — DO NOT CHANGE**
-   Do instead: RS `general_offensive` → `balanced` at w20. Extending to 22 backfires (RBiH counterattacks drop RS to 382).
+2. **[2026-03-06] RS stays offensive permanently — organic tempo decay (n159 audit)**
+   Do instead: RS has 2 doctrine phases (both offensive). No stance switch to balanced/defensive. Tempo decay emerges organically from fatigue (+2/battle, recovery every 2 turns), supply drain (MAINTENANCE_DRAIN 0.045/formation), and entrenchment wall (sqrt curve). RS_EARLY_WAR_END_WEEK=20 still marks reduced aggression (0.15→0.05) and max_attack_share (0.28→0.22). Weekly RS attacks decline 8→1 by w40.
 3. **[2026-03-04] Morale retreat resistance: per-faction floor (updated)**
    Do instead: `getMoraleResistFloor()`: RBiH=**50**, RS=70, HRHB=**60**. Morale ≥ floor + costly_victory → absorb. Decisive always retreats. ARBiH homeland last stand (≥50% Bosniak co-ethnic) also absorbs 'victory' outcomes regardless of morale. Added in n439 session.
 4. **[2026-02-25] Aggression scoring: additive + multiplicative**
@@ -83,8 +83,8 @@
    Do instead: `injectPrePlannedOperations(state)` sets corps to `offensive` PERMANENTLY. Only the original 5 corps (EBK/Drina/SRK/Herzegovina/1KK). Adding 2KK (Operation Kupres) causes −6.7pp regression — 2KK offensive stance disrupts Krajina/POSAVINA_NE force allocation. Kupres captured organically via Kalesija redirect (n466). Use organic bot + overrides for 2KK.
 8. **[2026-02-25] sidToMun map preservation**
    Do instead: Preserve `canonicalSidToMun` in scenario_runner.ts. Corruption prevented ALL 217 mandatory brigades from spawning.
-9. **[2026-03-04] Brigade discipline: hard block + combat fatigue (n472)**
-   Do instead: `bot_brigade_ai_osid.ts` hard block — brigades ONLY attack `effectiveDirective.offensive_targets`, sole exception: counter-attacks. Frontier pressure mechanic REMOVED. `RESERVE_PER_EDGE_CAP=0.07` (was 0.5) → ~1 reserve per sector. Combat fatigue: attacker +2, defender +1 per battle (cap 20); recovery -1/turn via `applyFatigueRecovery()` in `formation_fatigue.ts`. Phase I supply-assignment fatigue inert.
+9. **[2026-03-06] Brigade discipline: hard block + combat fatigue (n159 audit rewrite)**
+   Do instead: `bot_brigade_ai_osid.ts` hard block — brigades ONLY attack `effectiveDirective.offensive_targets`, sole exception: counter-attacks. Frontier pressure mechanic REMOVED. `RESERVE_PER_EDGE_CAP=0.07` (was 0.5) → ~1 reserve per sector. Combat fatigue: attacker +2, defender +1 per battle (cap `FATIGUE_MAX=30` from `formation_constants.ts`); recovery -1 every 2 turns, +0.5/turn frontline duty via `applyFatigueRecovery()`. Fatigue degrades combat power: `getFatigueMult()` in `combat_math.ts` — attackers ×0.6-1.0, defenders ×0.75-1.0 at max fatigue.
 10. **[2026-03-04] Vienna Declaration / Local Truces (RS-HRHB non-aggression)**
     Do instead: `src/sim/local_truces.ts` — fires at week 4; sets `state.vienna_declaration_turn`. Bot filters RS↔HRHB truce-partner OSIDs from `offensive_targets`, except {brod, derventa, odzak, bosanski_samac, orasje, jajce}. Player truce-break: `check-truce-break` step; sets `state.truce_broken_turn[faction]`, opponent gets +0.25 aggression for 6 turns.
 

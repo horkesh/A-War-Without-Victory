@@ -213,11 +213,9 @@ export { RS_EARLY_WAR_END_WEEK } from './bot_constants.js';
 
 export const FACTION_DOCTRINE_PHASES: Record<FactionId, DoctrinePhase[]> = {
     RS: [
-        // n224: 0.35 gave 70.7% (slightly over). Revert to 0.33 — with lower MIN_MANDATORY_SPAWN
-        // and reduced RBiH pool scale, more RS brigades spawn and RBiH is weaker.
+        // n159 audit: RS stays offensive permanently. Tempo decay is organic (supply, fatigue, overstretch).
         { start_week: 0, end_week: RS_EARLY_WAR_END_WEEK, default_corps_stance: 'offensive', max_attack_share_override: 0.28, aggression_modifier: 0.15 },
-        { start_week: RS_EARLY_WAR_END_WEEK, end_week: 40, default_corps_stance: 'balanced', max_attack_share_override: 0.08, aggression_modifier: -0.05 },
-        { start_week: 40, end_week: 9999, default_corps_stance: 'defensive', max_attack_share_override: 0.10, aggression_modifier: -0.1 },
+        { start_week: RS_EARLY_WAR_END_WEEK, end_week: 9999, default_corps_stance: 'offensive', max_attack_share_override: 0.22, aggression_modifier: 0.05 },
     ],
     RBiH: [
         // Historical: ARBiH purely defensive first year. Minimal counteroffensives until mid-1993.
@@ -294,16 +292,10 @@ export const FACTION_STANDING_ORDERS: Record<FactionId, StandingOrder[]> = {
             description: 'Exploit JNA equipment handover for maximum territorial gain before international response.',
         },
         {
-            name: 'Consolidation',
-            start_week: RS_EARLY_WAR_END_WEEK, end_week: 56,
+            name: 'Targeted Operations',
+            start_week: RS_EARLY_WAR_END_WEEK, end_week: 9999,
             army_stance: 'balanced',
-            description: 'Secure gains, fortify corridors, maintain siege rings. No army-wide override — corps decide locally.',
-        },
-        {
-            name: 'Strategic Hold',
-            start_week: 56, end_week: 9999,
-            army_stance: 'general_defensive',
-            description: 'Manpower crisis. Hold existing territory, avoid costly offensives, wait for political settlement.',
+            description: 'Consolidate gains, targeted operations on strategic objectives. Tempo constrained by supply, fatigue, and overstretch — not by standing order.',
         },
     ],
     RBiH: [

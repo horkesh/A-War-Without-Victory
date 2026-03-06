@@ -1,15 +1,16 @@
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
+import { formatOperationType, turnToDateString, toTitleCase } from '../utils/formatters';
 
 function PhaseBadge({ phase }: { phase: string }) {
   const cls =
     phase === 'execution' ? 'bg-red-800/60 text-white' :
-    phase === 'planning' ? 'bg-yellow-700/60 text-white' :
-    'bg-neutral-600/60 text-neutral-300';
+      phase === 'planning' ? 'bg-yellow-700/60 text-white' :
+        'bg-neutral-600/60 text-neutral-300';
   return (
     <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls}`}>
-      {phase}
+      {toTitleCase(phase)}
     </span>
   );
 }
@@ -87,7 +88,7 @@ export function OperationDetail() {
           </div>
           <div className="mt-1 flex items-center gap-2 flex-wrap">
             <PhaseBadge phase={op.phase} />
-            <span className="text-text-secondary capitalize">{op.type.replace(/_/g, ' ')}</span>
+            <span className="text-text-secondary">{formatOperationType(op.type)}</span>
           </div>
         </div>
 
@@ -98,8 +99,8 @@ export function OperationDetail() {
             <span className="text-text-primary tabular-nums">{op.participating_brigade_count}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-text-secondary">Started turn</span>
-            <span className="text-text-primary tabular-nums">{op.started_turn}</span>
+            <span className="text-text-secondary">Started</span>
+            <span className="text-text-primary tabular-nums whitespace-nowrap text-[11px]">{turnToDateString(op.started_turn)}</span>
           </div>
           {op.momentum != null && (
             <div className="flex justify-between items-center">

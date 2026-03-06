@@ -56,6 +56,16 @@
 | Scenario handoffs (ORCHESTRATOR_SCENARIO_HANDOFF_DECISIONS) | 0 flips from `orders_processed: 0` (not defender-favored); formation count change from OOB/recruitment path. Close with decision memo + run evidence. |
 | No-flip (PARADOX_PHASEI_NOFLIP_FINAL_PROPOSAL) | player_choice GO for recruitment-centric; ethnic/hybrid NO-GO default. Canon-safe vs implementation-note called out. |
 | Municipality supra-layer | `brigade_municipality_assignment` as deployment layer; derive `brigade_aor` each validation/init turn; process brigade_mun_orders before pressure/attack; sync after reshape. |
+| Combat-causality recovery | Good map fit is not proof of healthy combat. Read `behavioral_health` before `historical_fit`, then explain `control_change_attribution`. |
+| Combat-causality recovery | Planning is a maneuver phase, not a timer. Operation-owned brigades should move into staging and approach positions during planning, and planning may end early once the force is actually ready. |
+| Combat-causality recovery | Quiet weeks are not the same as broken combat causality. Fail on attack-orders-without-battles and whole-run zero battles; keep battleless weeks visible as warnings. |
+| Combat-causality recovery | Sector rearrangement is a scenario-scale acceptance problem, not just a helper-test problem. Keep live only when 40-week combat-causality stays green. |
+| N159 deep audit | Fatigue-as-combat-power-modifier is the cleanest organic slowdown mechanism. Simpler than overstretch distance calculations; naturally penalizes continuous fighting (VRS operational pattern). |
+| N159 deep audit | UN airdrops were silently dominating RBiH supply (15 pts/turn dwarfed all drain). A single constant can mask an entire system. Always audit income vs drain arithmetic. |
+| N159 deep audit | tsx caching can mask code changes — patron_pressure.ts edits weren't picked up until tsx cache was cleared. Different state hash is the proof. |
+| N159 deep audit | Entrenchment sqrt curve creates interesting dynamics: early digging matters more (rewards ARBiH homeland defense), later turns plateau (penalizes late-arriving RS attackers less). |
+| N159 deep audit | HRHB supply is inherently fragile: 59 siege counters from central Bosnia pockets drain faction reserves. Need higher initial supply + patron commitment to keep them strained (not collapsed). |
+| N159 deep audit | Displacement kill fraction (4%) should not be uniform across all contexts. RS civilian departure from RBiH/HRHB was mostly voluntary flight (~1% lethality). Sim: 10,860 RS civ killed vs ~4k historical. |
 
 ---
 

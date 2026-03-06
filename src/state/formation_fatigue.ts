@@ -1,6 +1,7 @@
 import { buildAdjacencyMap, type AdjacencyMap } from '../map/adjacency_map.js';
 import type { FrontEdge } from '../map/front_edges.js';
 import type { FrontRegionsFile } from '../map/front_regions.js';
+import { FATIGUE_MAX } from './formation_constants.js';
 import type { FactionId, FormationId, GameState } from './game_state.js';
 import { getSettlementControlStatus } from './settlement_control.js';
 import { computeSupplyReachability } from './supply_reachability.js';
@@ -248,24 +249,51 @@ function getFormationSupplyMultiplier(
     return 1;
 }
 
-/** Fatigue recovery per turn (integer; fatigue can't go below 0). */
-const FATIGUE_RECOVERY_PER_TURN = 1;
+/**
+ * Fatigue recovery: 1 point every 2 turns (alternating turns based on parity).
+ * Reduced from 1/turn (n159 audit: fatigue inert — recovery outpaced accumulation).
+ */
+const FATIGUE_RECOVERY_INTERVAL = 2;
+
+/** Frontline duty fatigue: brigades assigned to fronts accumulate passive fatigue. */
+const FRONTLINE_FATIGUE_PER_TURN = 0.5;
 
 /**
- * Apply per-turn fatigue recovery to all active formations.
+ * Apply per-turn fatigue recovery and frontline duty fatigue to all active formations.
  * Called once per turn from the war pipeline, regardless of combat activity.
- * Fatigue accumulates during combat (attack_resolution_osid.ts) and recovers here.
+ *
+ * Recovery: -1 fatigue every 2 turns (even turns recover).
+ * Frontline duty: +0.5 fatigue/turn for front-assigned brigades.
+ * Combat fatigue: accumulates separately in attack_resolution_osid.ts (+2 attacker, +1 defender).
+ *
+ * n159 audit: with 1.3 battles/brigade/40w and -1/turn recovery, fatigue never accumulated.
+ * This change makes fatigue meaningful: after 20 weeks of frontline duty + battles, fatigue ~10-12.
  */
 export function applyFatigueRecovery(state: GameState): void {
     const formations = (state as any).formations as Record<string, any> | undefined;
     if (!formations) return;
-    for (const formation of Object.values(formations)) {
+    const currentTurn = state.meta?.turn ?? 0;
+    const isRecoveryTurn = currentTurn % FATIGUE_RECOVERY_INTERVAL === 0;
+    const assignments = (state as any).brigade_front_assignment as Record<string, string> | undefined;
+
+    for (const [fid, formation] of Object.entries(formations)) {
         if (!formation || formation.status !== 'active') continue;
-        if (!formation.ops || typeof formation.ops !== 'object') continue;
-        const current = formation.ops.fatigue ?? 0;
-        if (current > 0) {
-            formation.ops.fatigue = Math.max(0, current - FATIGUE_RECOVERY_PER_TURN);
+        if (!formation.ops || typeof formation.ops !== 'object') {
+            formation.ops = { fatigue: 0, last_supplied_turn: null };
         }
+        let current = formation.ops.fatigue ?? 0;
+
+        // Recovery: -1 on even turns
+        if (isRecoveryTurn && current > 0) {
+            current = Math.max(0, current - 1);
+        }
+
+        // Frontline duty fatigue: +0.5/turn for front-assigned brigades
+        if (assignments && assignments[fid]) {
+            current = Math.min(FATIGUE_MAX, current + FRONTLINE_FATIGUE_PER_TURN);
+        }
+
+        formation.ops.fatigue = current;
     }
 }
 
