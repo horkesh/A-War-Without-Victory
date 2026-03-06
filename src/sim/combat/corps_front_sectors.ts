@@ -110,18 +110,25 @@ function buildFactionSectors(
         }
     }
 
+    // Pre-compute friendly OSIDs once for Steps 5 and 7 (no cross-pocket transfers)
+    const friendlyOsids = new Set<string>();
+    for (const osid of adjacency.keys()) {
+        const ctrl = getPoliticalControllerOSID(state, osid, reverseMap ?? undefined);
+        if (ctrl === faction) friendlyOsids.add(osid);
+    }
+
     // Step 5: Own-corps fallback for orphaned brigades
     // Brigades in corps without sectors or not at front OSIDs get assigned
     // to the nearest sector of their own corps via friendly-territory BFS.
     // General staff units are exempt — they're army-level reserves.
-    assignOrphanedBrigadesToFaction(sectors, faction, formations, adjacency, state, reverseMap);
+    assignOrphanedBrigadesToFaction(sectors, faction, formations, adjacency, friendlyOsids);
 
     // Step 6: Redistribute excess reserves across faction sectors
     redistributeExcessReserves(sectors);
 
     // Step 7: Ensure every sector has at least one assigned brigade
     // Only transfer brigades reachable through friendly territory (no cross-pocket transfers).
-    ensureMinimumSectorCoverage(sectors, formations, adjacency, faction, state, reverseMap);
+    ensureMinimumSectorCoverage(sectors, formations, adjacency, friendlyOsids);
 
     sectors.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
     return sectors;
@@ -1056,39 +1063,51 @@ function bfsToNearestSector(
 function redistributeExcessReserves(sectors: CorpsFrontSector[]): void {
     if (sectors.length <= 1) return;
 
-    // Compute per-sector caps
-    const caps = sectors.map(s => Math.max(1, Math.ceil(s.length_edges * RESERVE_PER_EDGE_CAP)));
-
-    // Collect overflow brigades (remove from tail of sorted reserve list)
-    const overflow: FormationId[] = [];
+    // Group by corps — only redistribute within the same corps
+    const sectorsByCorps = new Map<string, { sector: CorpsFrontSector; idx: number; cap: number }[]>();
     for (let i = 0; i < sectors.length; i++) {
         const s = sectors[i]!;
-        const cap = caps[i]!;
-        if (s.reserve_brigade_ids.length > cap) {
-            // Remove excess from the end (sorted, so tail = last alphabetically)
-            const excess = s.reserve_brigade_ids.splice(cap);
-            overflow.push(...excess);
-        }
+        const cap = Math.max(1, Math.ceil(s.length_edges * RESERVE_PER_EDGE_CAP));
+        const list = sectorsByCorps.get(s.corps_id) ?? [];
+        list.push({ sector: s, idx: i, cap });
+        sectorsByCorps.set(s.corps_id, list);
     }
 
-    if (overflow.length === 0) return;
+    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+        if (corpsSectors.length <= 1) continue;
 
-    // Sort overflow for deterministic assignment
-    overflow.sort(strictCompare);
-
-    // Assign each overflow brigade to the least-filled sector
-    for (const bid of overflow) {
-        let bestIdx = -1;
-        let bestRatio = Infinity;
-        for (let i = 0; i < sectors.length; i++) {
-            const ratio = sectors[i]!.reserve_brigade_ids.length / caps[i]!;
-            if (ratio < bestRatio) {
-                bestRatio = ratio;
-                bestIdx = i;
+        // Collect overflow brigades within this corps
+        const overflow: FormationId[] = [];
+        for (const { sector, cap } of corpsSectors) {
+            if (sector.reserve_brigade_ids.length > cap) {
+                const excess = sector.reserve_brigade_ids.splice(cap);
+                overflow.push(...excess);
             }
         }
-        if (bestIdx >= 0) {
-            sectors[bestIdx]!.reserve_brigade_ids.push(bid);
+        if (overflow.length === 0) continue;
+
+        overflow.sort(strictCompare);
+
+        // Assign each overflow to the least-filled sector within the same corps.
+        // Only target sectors that already have brigades (assigned or reserve) —
+        // empty sectors are likely disconnected pockets with no local forces.
+        for (const bid of overflow) {
+            let bestEntry: typeof corpsSectors[0] | null = null;
+            let bestRatio = Infinity;
+            for (const entry of corpsSectors) {
+                const hasForces = entry.sector.assigned_brigade_ids.length > 0 || entry.sector.reserve_brigade_ids.length > 0;
+                if (!hasForces) continue; // Skip empty (likely disconnected) sectors
+                const ratio = entry.sector.reserve_brigade_ids.length / entry.cap;
+                if (ratio < bestRatio) {
+                    bestRatio = ratio;
+                    bestEntry = entry;
+                }
+            }
+            if (bestEntry) {
+                bestEntry.sector.reserve_brigade_ids.push(bid);
+            }
+            // If no eligible sector found, brigade is dropped from sector assignment
+            // (stays unassigned — rear-area reserve with no front responsibility)
         }
     }
 
@@ -1118,17 +1137,8 @@ function ensureMinimumSectorCoverage(
     allSectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
-    faction: FactionId,
-    state: GameState,
-    reverseMap: Map<string, string[]> | null
+    friendlyOsids: Set<string>
 ): void {
-    // Pre-compute friendly OSIDs for BFS boundary (no cross-pocket transfers)
-    const friendlyOsids = new Set<string>();
-    for (const osid of adjacency.keys()) {
-        const ctrl = getPoliticalControllerOSID(state, osid, reverseMap ?? undefined);
-        if (ctrl === faction) friendlyOsids.add(osid);
-    }
-
     // Group by corps — only transfer within the same corps
     const sectorsByCorps = new Map<FormationId, CorpsFrontSector[]>();
     for (const s of allSectors) {
@@ -1141,11 +1151,33 @@ function ensureMinimumSectorCoverage(
         for (const sector of corpsSectors) {
             if (sector.assigned_brigade_ids.length > 0) continue;
 
-            // Step 1: promote first reserve to assigned
-            if (sector.reserve_brigade_ids.length > 0) {
-                const bid = sector.reserve_brigade_ids.shift()!;
-                sector.assigned_brigade_ids.push(bid);
-                continue;
+            // Step 1: promote first connected reserve to assigned
+            // Only promote reserves whose location is reachable from sector
+            // through friendly territory (skip disconnected pocket reserves).
+            {
+                const sectorFriendly = new Set<string>();
+                for (const ss of sector.sub_segments) {
+                    for (const o of ss.friendly_osids) sectorFriendly.add(o);
+                }
+                let promoted = false;
+                for (let ri = 0; ri < sector.reserve_brigade_ids.length; ri++) {
+                    const bid = sector.reserve_brigade_ids[ri]!;
+                    const f = formations[bid];
+                    if (!f?.location_osid) continue;
+                    // Check connectivity: BFS from brigade location through friendly to sector
+                    const reachable = bfsToNearestSector(
+                        f.location_osid,
+                        new Map([...sectorFriendly].map(o => [o, 0])),
+                        adjacency, friendlyOsids
+                    );
+                    if (reachable !== null) {
+                        sector.reserve_brigade_ids.splice(ri, 1);
+                        sector.assigned_brigade_ids.push(bid);
+                        promoted = true;
+                        break;
+                    }
+                }
+                if (promoted) continue;
             }
 
             // Step 2: BFS from sector friendly OSIDs through friendly territory
@@ -1230,17 +1262,9 @@ function assignOrphanedBrigadesToFaction(
     faction: FactionId,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
-    state: GameState,
-    reverseMap: Map<string, string[]> | null
+    friendlyOsids: Set<string>
 ): void {
     if (sectors.length === 0) return;
-
-    // Pre-compute friendly OSIDs for BFS boundary
-    const friendlyOsids = new Set<string>();
-    for (const osid of adjacency.keys()) {
-        const ctrl = getPoliticalControllerOSID(state, osid, reverseMap ?? undefined);
-        if (ctrl === faction) friendlyOsids.add(osid);
-    }
 
     // Collect all assigned brigades
     const assigned = new Set<FormationId>();

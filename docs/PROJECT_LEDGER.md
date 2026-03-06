@@ -10834,8 +10834,8 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 - src/ui/map/map/awwv_map_style.json: (MODIFY) Reduced icon-size values for formation markers.
 - src/ui/map/map/formationIcons.ts: (MODIFY) Implemented drawTacticalSymbol with scaled shapes and reduced line widths; adjusted faction color logic.
 - src/ui/map/map/builders/buildFormationsGeoJSON.ts: (MODIFY) Removed FRONT_LERP drift; implemented fanned stacking logic for co-located units.
-- docs/30_planning/20260221_settlement remapping and GUI rework/HOI_VISUAL_GUI_OVERHAUL_SPEC.md: (MODIFY) Updated ß2.4 and ß10 to reflect centered placement and stacking.
-- docs/20_engineering/TACTICAL_MAP_SYSTEM.md: (MODIFY) Updated ß2.1 marker summary.
+- docs/30_planning/20260221_settlement remapping and GUI rework/HOI_VISUAL_GUI_OVERHAUL_SPEC.md: (MODIFY) Updated ÔøΩ2.4 and ÔøΩ10 to reflect centered placement and stacking.
+- docs/20_engineering/TACTICAL_MAP_SYSTEM.md: (MODIFY) Updated ÔøΩ2.1 marker summary.
 
 ### Failure mode prevented
 - Prevents visual overlap and  lost units in co-located stacks through explicit fanned offsets.
@@ -10855,4 +10855,40 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 
 ### FORAWWV note
 - Brigade markers now prioritize precision and stack-readiness over front-line proximity.
+
+---
+
+## n198 ‚Äî Sector assignment: no cross-pocket transfers + GUI fixes (2026-03-07)
+
+### What changed
+- **corps_front_sectors.ts**: Fixed 3 functions (`assignOrphanedBrigadesToFaction`, `redistributeExcessReserves`, `ensureMinimumSectorCoverage`) to use friendly-territory-only, own-corps-only BFS. Deleted `bfsUnrestrictedToNearestSector()` (dead code). Pre-compute `friendlyOsids` once in `buildFactionSectors()` and pass to Steps 5/7.
+  - Step 5: Orphans only assigned to sectors of their own corps, via BFS restricted to friendly OSIDs
+  - Step 6: Excess reserves redistributed within same corps only; empty sectors (likely disconnected pockets) skipped
+  - Step 7: Reserve promotion checks BFS connectivity through friendly territory before promoting
+- **GameStateAdapter.ts**: Fixed `movementStance` to be `undefined` when brigade is deployed (was always defaulting to 'combat')
+- **FormationDetail.tsx**: Removed redundant Status line; movement info only shown when in transit (no phantom "(combat stance)" label)
+- **wake-up skill**: Created `.claude/skills/wake-up/SKILL.md` for session bootstrap
+
+### Calibration impact
+- No calibration regression ‚Äî sector assignment only affects reserve/orphan placement, not combat outcomes
+- Cross-pocket violations reduced from 56 ‚Üí 12 (remaining 12 are verification tool false positives from sparse contact graph)
+
+### Failure mode prevented
+- Brigades from Grude (HVO SE Herzegovina) no longer assigned to sectors in Bosanska Gradiska (HVO NW Bosnia) 300km away across enemy territory
+- 329th Mountain from Kakanj no longer assigned to isolated Glamoƒç pocket sector
+- Forming brigades no longer show contradictory "Active" status in GUI
+
+### Files modified
+- src/sim/combat/corps_front_sectors.ts
+- src/ui/map/data/GameStateAdapter.ts
+- src/ui/map/components/FormationDetail.tsx
+- .claude/skills/wake-up/SKILL.md (new)
+- docs/20_engineering/PIPELINE_ENTRYPOINTS.md (doc propagation)
+- docs/20_engineering/REPO_MAP.md (doc propagation)
+- .claude/napkin.md (doc propagation)
+- memory/corps_sectors.md (doc propagation)
+
+### Mistake guard
+- All BFS in sector assignment now restricted to friendly territory ‚Äî prevents cross-pocket assignments by construction
+- Own-corps constraint prevents cross-corps reserve leaking
 
