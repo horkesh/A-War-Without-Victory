@@ -54,11 +54,13 @@ const ELIGIBLE_POP_NORMALIZER = 50_000;
  * RBiH: 1.20→0.85→0.60→0.40→0.30→0.24→0.20→0.18. At 0.20: 120k. 0.18: 127k (n233).
  * RS: 1.00→0.70→0.55→0.45→0.40→0.35. At 0.40: 111k. 0.35: 113k (n233).
  * HRHB: 1.60 (unchanged). At 1.60: 42k end (target ~40k). On target.
- * Note: pool scale diminishing returns below 0.25 — troop growth driven by elective recruitment capital. */
+ * Note: pool scale diminishing returns below 0.25 — troop growth driven by elective recruitment capital.
+ * n179: HRHB 1.55→39.4k (target 40-45k). Historical note: 1.60→42k, 1.70→47k.
+ *   Restoring 1.60 to regain ~42k target. RS scale reduction (0.25→unchanged) irrelevant here. */
 const FACTION_POOL_SCALE: Record<string, number> = {
     RBiH: 0.18,
     RS: 0.25,
-    HRHB: 1.55    // n375: 1.70→47k. Target 42k; reducing to 1.55.
+    HRHB: 1.60    // n375: 1.70→47k; n179: 1.55→39k, 1.60 restores ~42k target.
 };
 const DEFAULT_FACTION_POOL_SCALE = 1.0;
 
@@ -106,8 +108,10 @@ const RBIH_CROSS_ETHNIC_CAP_PER_MUN = 500;
  * Includes JNA regulars (~10K), trained reservists (~15K), and TO cadres (~5K)
  * absorbed by VRS during May-June 1992 handover. Calibrated to historical RS start ~80K.
  * n369: 12k undershoot VRS to 79k; restored to 15k.
+ * n177: RS at 0.12 scale → 101.4k (1.4k over 100k cap). Reducing JNA 15k→12k
+ *   expected to trim ~3k from committed pool → ~98k target.
  */
-const RS_JNA_INHERITANCE_BONUS = 15_000;
+const RS_JNA_INHERITANCE_BONUS = 12_000;
 
 export interface RsJnaInheritanceReport {
     total_added: number;
