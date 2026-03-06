@@ -31,9 +31,11 @@ import { buildEnclaveGeoJSON } from './builders/buildEnclaveGeoJSON';
 import { buildBattleMarkersGeoJSON } from './builders/buildBattleMarkersGeoJSON';
 import { buildStrategicPointGeoJSON } from './builders/buildStrategicPointGeoJSON';
 import { rewritePmtilesUrls } from './rewritePmtilesUrls';
+import { addFrontLineIcons } from './frontLineIcons';
 import { useIPC } from '../desktop/useIPC';
 import { stageMoveOrderFromOsid } from '../desktop/orderActions';
 import styleJson from './awwv_map_style.json';
+import { rewritePmtilesUrlsForRuntime } from './pmtilesRoute';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
 const DEFAULT_ZOOM = 8;
@@ -105,6 +107,8 @@ export function MapContainer() {
   const setPendingAttackConfirmation = useGameStore((s) => s.setPendingAttackConfirmation);
   const setOrderModeForFormation = useGameStore((s) => s.setOrderModeForFormation);
   const orderModeForFormation = useGameStore((s) => s.orderModeForFormation);
+  const ipc = useIPC();
+  const setLoadError = useGameStore((s) => s.setLoadError);
   const setOsidDisplayNames = useGameStore((s) => s.setOsidDisplayNames);
   const setOsidPropertiesMap = useGameStore((s) => s.setOsidPropertiesMap);
   const selectedOsid = useGameStore((s) => s.selectedOsid);
@@ -277,7 +281,7 @@ export function MapContainer() {
       clearTimeout(t);
       if (cleanup) cleanup();
     };
-  }, [mapReady, loadedGameState, setSelectedOsid, setSelectedFormationId, setSelectedCorpsFrontSectorId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation]);
+  }, [mapReady, loadedGameState, setSelectedOsid, setSelectedFormationId, setSelectedCorpsFrontSectorId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation, ipc, setLoadError]);
 
   useEffect(() => {
     const map = mapRef.current;
