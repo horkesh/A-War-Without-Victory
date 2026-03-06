@@ -28,6 +28,7 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'assignable_front_segments',
     'front_pressure',
     'militia_pools',
+    'strategic_reserves',
     'production_facilities',
     'negotiation_status',
     'ceasefire',

@@ -62,6 +62,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 
 import { applyPhase3DCollapseResolution } from '../collapse/phase3d_collapse_resolution.js';
 import { evaluateEvents } from '../events/evaluate_events.js';
+import { collectStrategicReserves, reinforceFromStrategicReserves } from '../combat/strategic_reserve.js';
 import { reinforceBrigadesFromPools, applyWiaTrickleback } from '../formation_spawn.js';
 import { runFormationHqRelocation } from '../formation_hq_relocation.js';
 import { ensureRbihHrhbState, updateAllianceValue } from '../early_war/alliance_update.js';
@@ -1083,6 +1084,20 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             context.report.phase_ii_brigade_reinforcement = reinforceBrigadesFromPools(context.state);
+        }
+    },
+    {
+        name: 'phase-ii-strategic-reserve-collection',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            context.report.phase_ii_strategic_reserve_collection = collectStrategicReserves(context.state);
+        }
+    },
+    {
+        name: 'phase-ii-strategic-reserve-reinforcement',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            context.report.phase_ii_strategic_reserve_reinforcement = reinforceFromStrategicReserves(context.state);
         }
     },
     {

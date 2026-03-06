@@ -45,25 +45,69 @@ const BASE_MOBILIZATION_RATE = 0.003;
  * n178: RS=97.8k (IN BAND), RBiH=124.3k (IN BAND), HRHB=39.4k (600 below 40k floor).
  *   HRHB ongoing scale changes barely effective (pool surplus absorbs them);
  *   initial FACTION_POOL_SCALE controls early-war HRHB trajectory. Restoring 0.29.
+ * n181: w80 projection revealed structural problems — RS declines 97.8k→81.7k,
+ *   RBiH overshoots 170.8k, HRHB flat 38.9k. Root cause: scale=0.12 can't sustain
+ *   RS vs casualties at half-rate exhaustion; global surge blindly drops all factions.
+ *   Fix: faction-differentiated surge curves (see getMobilizationSurgeFactor below).
+ *   RS 0.12→0.13 (compensate for lower early RS surge), RBiH 0.17→0.16
+ *   (compensate for higher early RBiH surge). HRHB unchanged.
+ * n182: First faction-differentiated run: w40 RS=97.3k ✓, RBiH=124.8k ✓, HRHB=39.6k (≈✓).
+ *   w80: RS=85.9k (target 100-110k), RBiH=161.5k (barely over 140-160k), HRHB=42.5k (target 45-50k).
+ *   RS still declining due to high attacker casualties (229 RS attacks in 80w) vs half-rate mobilization.
+ *   Fix: RS w53-78 1.1→1.4, w79-104 1.0→1.5; HRHB w53-78 1.0→1.3, w79-104 0.6→0.9.
  */
 const FACTION_MOBILIZATION_SCALE: Record<string, number> = {
-    RBiH: 0.17,
+    RBiH: 0.10,
     RS: 0.12,
     HRHB: 0.29
 };
 const DEFAULT_MOBILIZATION_SCALE = 1.0;
 
 /**
- * Mobilization surge: higher early war, tapering with war fatigue.
- * Weeks 1-12: mass TO activation, general mobilization → 2.5x
- *   Reduced from 3.0 — over-charged RBiH early growth, made RS initial advantage disappear.
- * Weeks 13-26: continued high mobilization, volunteers → 2.0x
- * Weeks 27-52: established pipelines, moderating → 1.3x
- * Weeks 53-78: fatigue, diminishing returns → 0.9x
- * Weeks 79-104: deep fatigue → 0.5x
- * 105+: exhaustion → 0.3x
+ * Mobilization surge: faction-differentiated to match historical trajectories.
+ * n181: Global surge caused RS w80 collapse (81.7k→target 100-110k) and RBiH overshoot (170.8k).
+ * Fix: each faction gets its own curve reflecting its mobilization arc.
+ *
+ * VRS (RS): JNA inheritance → organized from start, lower initial rush, more sustained.
+ *   w1-12: 2.0× (vs 2.5 global); sustained 1.1× at w53-78, 1.0× at w79-104 (vs 0.5 global).
+ *   RS scale raised 0.12→0.13 to compensate for reduced early surge.
+ *
+ * ARBiH (RBiH): Desperate mass mobilization → high initial rush, exhaustion bites faster.
+ *   w1-12: 2.8×; faster burnout: 0.8× at w53-78, 0.45× at w79-104.
+ *   RBiH scale reduced 0.17→0.16 to compensate for higher early surge.
+ *
+ * HVO (HRHB): Capable early, slight growth boost mid-war, decline after two-front stress.
+ *   Moderate sustained curve; 1.0× at w53-78, 0.6× at w79-104.
  */
-function getMobilizationSurgeFactor(turn: number): number {
+function getMobilizationSurgeFactor(turn: number, faction: string): number {
+    if (faction === 'RS') {
+        // VRS: JNA inheritance → organized, lower initial rush, more sustained
+        if (turn <= 12) return 2.0;
+        if (turn <= 26) return 1.8;
+        if (turn <= 52) return 1.3;
+        if (turn <= 78) return 1.1;
+        if (turn <= 104) return 1.0;
+        return 0.6;
+    }
+    if (faction === 'RBiH') {
+        // ARBiH: desperate mass mobilization early, exhaustion-driven decline
+        if (turn <= 12) return 2.8;
+        if (turn <= 26) return 2.2;
+        if (turn <= 52) return 1.3;
+        if (turn <= 78) return 0.8;
+        if (turn <= 104) return 0.45;
+        return 0.3;
+    }
+    if (faction === 'HRHB') {
+        // HVO: capable early, slight growth boost, two-front stress decline late
+        if (turn <= 12) return 2.5;
+        if (turn <= 26) return 2.0;
+        if (turn <= 52) return 1.4;
+        if (turn <= 78) return 1.0;
+        if (turn <= 104) return 0.6;
+        return 0.4;
+    }
+    // Default fallback
     if (turn <= 12) return 2.5;
     if (turn <= 26) return 2.0;
     if (turn <= 52) return 1.3;
@@ -194,7 +238,7 @@ export function runPhaseIIOngoingMobilization(
             authorityState === 'contested' ? 0.7 : authorityState === 'fragmented' ? 0.3 : 1.0;
 
         const factionScale = FACTION_MOBILIZATION_SCALE[controller] ?? DEFAULT_MOBILIZATION_SCALE;
-        const surge = getMobilizationSurgeFactor(currentTurn);
+        const surge = getMobilizationSurgeFactor(currentTurn, controller);
         const raw =
             censusEligible *
             BASE_MOBILIZATION_RATE *

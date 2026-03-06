@@ -63,6 +63,7 @@ import type { EquipmentProgressionReport } from './combat/faction_progression.js
 import type { FrontlineAttritionReport } from './combat/frontline_attrition.js';
 import type { MoraleDriftReport } from './combat/morale_drift.js';
 import type { OngoingMobilizationReport } from './combat/ongoing_mobilization.js';
+import type { StrategicReserveCollectionReport, StrategicReserveReinforcementReport } from './combat/strategic_reserve.js';
 import type { ResolveAttackOrdersReport } from './combat/resolve_attack_orders.js';
 import type { OsidColumnMovementReport } from './combat/osid_column_movement.js';
 import type { OfficerQualityReport } from './combat/officer_quality_update.js';
@@ -170,6 +171,8 @@ export interface TurnReport {
     phase_ii_takeover_displacement?: PhaseIITakeoverDisplacementReport;
     phase_ii_ongoing_mobilization?: OngoingMobilizationReport;
     phase_ii_brigade_reinforcement?: ReinforceBrigadesReport;
+    phase_ii_strategic_reserve_collection?: StrategicReserveCollectionReport;
+    phase_ii_strategic_reserve_reinforcement?: StrategicReserveReinforcementReport;
     phase_ii_wia_trickleback?: WiaTricklebackReport;
     phase_f_displacement?: {
         trigger_report: {

@@ -111,7 +111,7 @@ const RBIH_CROSS_ETHNIC_CAP_PER_MUN = 500;
  * n177: RS at 0.12 scale → 101.4k (1.4k over 100k cap). Reducing JNA 15k→12k
  *   expected to trim ~3k from committed pool → ~98k target.
  */
-const RS_JNA_INHERITANCE_BONUS = 12_000;
+const RS_JNA_INHERITANCE_BONUS = 10_000;
 
 export interface RsJnaInheritanceReport {
     total_added: number;

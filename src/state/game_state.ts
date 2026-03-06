@@ -1205,6 +1205,9 @@ export interface GameState {
     front_pressure: Record<string, FrontPressureState>;
     /** Municipality-level militia pools. Key: MunicipalityId (legacy) or "mun_id:faction" (composite). Plan: militia_and_brigade_formation_system. */
     militia_pools: Record<string, MilitiaPoolState>;
+    /** Faction-level strategic manpower reserve. Excess pool.available from rear municipalities flows here;
+     *  under-strength front-line brigades draw from it at reduced rate. Key: FactionId → available manpower. */
+    strategic_reserves?: Record<string, number>;
     /** Phase II (Brigade AoR Redesign Phase B): Per-settlement militia garrison strength. Derived from militia_pools + org penetration; settlements with a brigade use brigade garrison instead. Recomputed each turn. */
     militia_garrison?: Record<SettlementId, number>;
     /** Phase II (Brigade AoR Redesign Phase C): Per-brigade movement state (packing / in_transit / unpacking). When in_transit, brigade has no AoR. */
