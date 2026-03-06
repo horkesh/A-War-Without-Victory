@@ -137,8 +137,8 @@
    Do instead: In `pre_planned_operations.ts`, filter brigade participation with `getFormationCorpsId(...)`, not `formation.corps_id`. Brigade corps membership is tag-derived in this repo.
 
 ## GUI / HoI Map
-1. **[2026-03-04] GUI Phase 5 COMPLETE. Only replay scrubber deferred.**
-   Do instead: Phase 5 done — battle markers (GameState.control_events + buildBattleMarkersGeoJSON), fog/battles/strategic-points layer toggles, buildStrategicPointGeoJSON (city/seat from `{mun}_2` slug), stageCorpsOperationOrder IPC backend, WarSummaryModal. Replay scrubber deferred (--video flag, 13.6 GB/run). Visual sign-off TBD.
+1. **[2026-03-06] Tactical fog contract is `fogOfWar`, not raw sector intel**
+   Do instead: Derive player-visible fog in `GameStateAdapter.ts` from `sector_intel` + sectors + friendly brigade positions, then render `LoadedGameState.fogOfWar`. Do not wire map layers directly to raw engine intel structures.
 2. **[2026-03-01] Map load: validate + defer parse + timeout**
    Do instead: Validate save (schema, meta.turn, formations/political_controllers shape). `parseGameState` unwraps `{ state }`/`{ gameState }`, treats `phase_ii` as war, accepts `formations` as object or array. Parse in requestIdleCallback (~150ms). 25s load timeout in toolbar. Show loadError on failure/timeout.
 3. **[2026-02-28] Map overlay poll: check sources first**
@@ -153,10 +153,10 @@
    Do instead: Keep `useKeyboardShortcuts` key mapping synchronized with `MapModeToolbar` mode badges (`1`-`5`: political/ethnic/supply/pressure/density).
 8. **[2026-03-05] Staged order arrowheads are fill polygons, not glyph text**
    Do instead: Pulse staged heads via `fill-opacity` (`attack-arrows-heads-staged`, `movement-arrows-heads-staged`) and avoid legacy `text-opacity` writes.
-9. **[2026-03-06] Tactical fog contract is `fogOfWar`, not raw sector intel**
-   Do instead: Derive player-visible fog in `GameStateAdapter.ts` from `sector_intel` + sectors + friendly brigade positions, then render `LoadedGameState.fogOfWar`. Do not wire map layers directly to raw engine intel structures.
+9. **[2026-03-06] Briefing panels: prefer stacked accordions over tabs**
+    Do instead: Use `AccordionHeader` for unified vertical briefing views in `CorpsFrontPanel` and `OOBSidebar` to maintain situational awareness. Review for unused `collapsed` state when refactoring.
 10. **[2026-03-06] Operation ownership overrides UI home-defense lockout**
-   Do instead: In `FormationDetail.tsx`, if a brigade appears in `operations[].participating_brigade_ids`, allow offensive posture controls even when `home_defense_active` is true.
+    Do instead: In `FormationDetail.tsx`, if a brigade appears in `operations[].participating_brigade_ids`, allow offensive posture controls even when `home_defense_active` is true.
 
 ## Desktop & Electron
 1. **[2026-03-02] One map app: desktop uses dev when running**

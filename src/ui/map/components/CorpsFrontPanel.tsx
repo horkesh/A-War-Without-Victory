@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { OperationView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
@@ -6,6 +6,7 @@ import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON'
 import { collectSectorFriendlyOsids } from '../utils/sectorUtils';
 import { getOperationId, getOperationPhaseBadgeClass } from '../utils/operations';
 import { DETAIL_PANEL_STYLE } from './panelRail';
+import { AccordionHeader } from './AccordionHeader';
 
 /** Density badge with color coding. */
 function DensityBadge({ density }: { density: number }) {
@@ -21,8 +22,7 @@ function ThreatBadge({ ratio }: { ratio: number }) {
   return <span className="text-green-400">{ratio.toFixed(2)}</span>;
 }
 
-const SECTOR_TABS = ['overview', 'forces', 'logistics', 'ops'] as const;
-type SectorTab = (typeof SECTOR_TABS)[number];
+
 
 function compareOperations(a: OperationView, b: OperationView): number {
   return (
@@ -45,12 +45,25 @@ export function CorpsFrontPanel() {
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setOpsPlanningModalOpen = useGameStore((s) => s.setOpsPlanningModalOpen);
-  const [activeTab, setActiveTab] = useState<SectorTab>('overview');
-  const tabButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    overview: true,
+    forces: false,
+    logistics: false,
+    ops: false,
+  });
+
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
 
   // All hooks must run unconditionally before any early return
   useEffect(() => {
-    setActiveTab('overview');
+    setExpandedSections({
+      overview: true,
+      forces: false,
+      logistics: false,
+      ops: false,
+    });
   }, [selectedSectorId]);
 
   const _sector = loadedGameState?.corpsFrontSectors?.find((s) => s.sector_id === selectedSectorId) ?? null;
@@ -102,19 +115,6 @@ export function CorpsFrontPanel() {
     ? relatedOperations.reduce((sum, op) => sum + (op.supply_readiness ?? 0), 0) / relatedOperations.length
     : null;
 
-  const handleTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
-    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft' && event.key !== 'Home' && event.key !== 'End') return;
-    event.preventDefault();
-    let nextIndex = index;
-    if (event.key === 'ArrowRight') nextIndex = (index + 1) % SECTOR_TABS.length;
-    if (event.key === 'ArrowLeft') nextIndex = (index - 1 + SECTOR_TABS.length) % SECTOR_TABS.length;
-    if (event.key === 'Home') nextIndex = 0;
-    if (event.key === 'End') nextIndex = SECTOR_TABS.length - 1;
-    const nextTab = SECTOR_TABS[nextIndex];
-    setActiveTab(nextTab);
-    tabButtonRefs.current[nextIndex]?.focus();
-  };
-
   return (
     <div
       className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
@@ -140,38 +140,9 @@ export function CorpsFrontPanel() {
         </button>
       </div>
 
-      <div className="p-4 overflow-auto text-[12px]">
-        <div className="mb-3 flex flex-wrap gap-1" role="tablist" aria-label="Sector intelligence tabs">
-          {SECTOR_TABS.map((tab, index) => {
-            const active = activeTab === tab;
-            const tabId = `sector-intel-tab-${tab}`;
-            const tabPanelId = `sector-intel-panel-${tab}`;
-            return (
-              <button
-                key={tab}
-                type="button"
-                role="tab"
-                id={tabId}
-                aria-controls={tabPanelId}
-                aria-selected={active}
-                ref={(el) => {
-                  tabButtonRefs.current[index] = el;
-                }}
-                onClick={() => setActiveTab(tab)}
-                onKeyDown={(event) => handleTabKeyDown(event, index)}
-                className={`kbd-focus px-2 py-1 rounded border text-[10px] uppercase tracking-wide transition-all duration-200 ${active
-                  ? 'border-accent-gold bg-panel-active text-accent-gold'
-                  : 'border-panel-border bg-panel-card text-text-secondary hover:bg-panel-hover'
-                  }`}
-              >
-                {tab}
-              </button>
-            );
-          })}
-        </div>
-
+      <div className="flex-1 overflow-auto text-[12px]">
         {/* Corps identity */}
-        <div className="mb-3">
+        <div className="p-4 pb-3">
           <div className="font-semibold text-text-primary text-[13px]">
             {sector.display_name}
           </div>
@@ -184,9 +155,14 @@ export function CorpsFrontPanel() {
           </div>
         </div>
 
-        {activeTab === 'overview' && (
-          <div role="tabpanel" id="sector-intel-panel-overview" aria-labelledby="sector-intel-tab-overview">
-            <div className="border-t border-panel-border pt-2 mb-3 space-y-1">
+        <AccordionHeader
+          label="Overview"
+          expanded={expandedSections.overview}
+          onToggle={() => toggleSection('overview')}
+        />
+        {expandedSections.overview && (
+          <div className="p-4">
+            <div className="space-y-1 mb-3">
               <div className="flex justify-between">
                 <span className="text-text-secondary">Front length</span>
                 <span className="text-text-primary tabular-nums">
@@ -213,7 +189,7 @@ export function CorpsFrontPanel() {
               </div>
             </div>
             {sector.opposing_factions.length > 0 && (
-              <div className="border-t border-panel-border pt-2 mb-3">
+              <div className="border-t border-panel-border pt-2 mb-1">
                 <span className="text-text-secondary">Opposing: </span>
                 {sector.opposing_factions.map((f, i) => (
                   <span key={f}>
@@ -226,10 +202,16 @@ export function CorpsFrontPanel() {
           </div>
         )}
 
-        {activeTab === 'forces' && (
-          <div role="tabpanel" id="sector-intel-panel-forces" aria-labelledby="sector-intel-tab-forces">
+        <AccordionHeader
+          label="Forces"
+          count={assignedFormations.length + reserveFormations.length}
+          expanded={expandedSections.forces}
+          onToggle={() => toggleSection('forces')}
+        />
+        {expandedSections.forces && (
+          <div className="p-4">
             {assignedFormations.length > 0 && (
-              <div className="border-t border-panel-border pt-2 mb-3">
+              <div className="mb-3">
                 <div className="text-text-secondary mb-1">
                   Assigned ({assignedFormations.length}):
                 </div>
@@ -281,13 +263,13 @@ export function CorpsFrontPanel() {
           </div>
         )}
 
-        {activeTab === 'logistics' && (
-          <div
-            role="tabpanel"
-            id="sector-intel-panel-logistics"
-            aria-labelledby="sector-intel-tab-logistics"
-            className="border-t border-panel-border pt-2 space-y-1"
-          >
+        <AccordionHeader
+          label="Logistics"
+          expanded={expandedSections.logistics}
+          onToggle={() => toggleSection('logistics')}
+        />
+        {expandedSections.logistics && (
+          <div className="p-4 space-y-1">
             <div className="flex justify-between">
               <span className="text-text-secondary">Assigned manpower</span>
               <span className="text-text-primary tabular-nums">{assignedPersonnel.toLocaleString()}</span>
@@ -313,13 +295,14 @@ export function CorpsFrontPanel() {
           </div>
         )}
 
-        {activeTab === 'ops' && (
-          <div
-            role="tabpanel"
-            id="sector-intel-panel-ops"
-            aria-labelledby="sector-intel-tab-ops"
-            className="border-t border-panel-border pt-2 space-y-1"
-          >
+        <AccordionHeader
+          label="Operations"
+          count={relatedOperations.length > 0 ? relatedOperations.length : undefined}
+          expanded={expandedSections.ops}
+          onToggle={() => toggleSection('ops')}
+        />
+        {expandedSections.ops && (
+          <div className="p-4 space-y-2">
             {relatedOperations.length === 0 ? (
               <div className="text-xs text-text-secondary italic">No linked operations for this sector.</div>
             ) : (
@@ -380,6 +363,6 @@ export function CorpsFrontPanel() {
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 }

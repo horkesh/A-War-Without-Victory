@@ -85,6 +85,31 @@ function getNoAttemptRecoveryReason(op: CorpsOperation): CorpsOperation['recover
     return (op.attack_attempt_count ?? 0) > 0 ? 'max_failures' : 'no_logged_attempt';
 }
 
+function resolveOperationSectorId(
+    state: GameState,
+    corpsId: FormationId,
+    objectives: string[],
+): string | null {
+    if (!state.corps_front_sectors || objectives.length === 0) return null;
+    const objectiveSet = new Set(objectives);
+    let bestSectorId: string | null = null;
+    let bestOverlap = 0;
+    for (const sector of Object.values(state.corps_front_sectors)) {
+        if (sector.corps_id !== corpsId) continue;
+        let overlap = 0;
+        for (const ss of sector.sub_segments ?? []) {
+            for (const eo of ss.enemy_osids) {
+                if (objectiveSet.has(eo)) overlap += 1;
+            }
+        }
+        if (overlap > bestOverlap) {
+            bestOverlap = overlap;
+            bestSectorId = sector.sector_id;
+        }
+    }
+    return bestSectorId;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Supply readiness
 // ═══════════════════════════════════════════════════════════════════════════
@@ -147,27 +172,9 @@ export function advanceSectorOffensives(
         const corps = state.formations?.[corpsId];
         const faction = (corps?.faction ?? 'RS') as FactionId;
 
-        // Resolve missing sector_id: match operation objectives to sector enemy_osids
-        if (!op.sector_id && state.corps_front_sectors) {
-            const objectives = new Set(op.objectives ?? []);
-            let bestSectorId: string | null = null;
-            let bestOverlap = 0;
-            for (const sector of Object.values(state.corps_front_sectors)) {
-                if (sector.corps_id !== corpsId) continue;
-                let overlap = 0;
-                for (const ss of sector.sub_segments) {
-                    for (const eo of ss.enemy_osids) {
-                        if (objectives.has(eo)) overlap++;
-                    }
-                }
-                if (overlap > bestOverlap) {
-                    bestOverlap = overlap;
-                    bestSectorId = sector.sector_id;
-                }
-            }
-            if (bestSectorId) {
-                op.sector_id = bestSectorId;
-            }
+        const resolvedSectorId = resolveOperationSectorId(state, corpsId, op.objectives ?? []);
+        if (resolvedSectorId) {
+            op.sector_id = resolvedSectorId;
         }
 
         // Validate sector still exists

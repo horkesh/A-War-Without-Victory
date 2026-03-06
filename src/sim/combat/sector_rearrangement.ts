@@ -93,6 +93,27 @@ function mergeSectorInto(into: CorpsFrontSector, from: CorpsFrontSector): void {
         : 0;
 }
 
+function collectSectorEnemyOsids(sector: CorpsFrontSector): string[] {
+    const enemyOsids: string[] = [];
+    for (const ss of sector.sub_segments) {
+        for (const eo of ss.enemy_osids) {
+            if (!enemyOsids.includes(eo)) {
+                enemyOsids.push(eo);
+            }
+        }
+    }
+    enemyOsids.sort(strictCompare);
+    return enemyOsids;
+}
+
+function renumberSectors(sectors: CorpsFrontSector[], corpsId: string): CorpsFrontSector[] {
+    sectors.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+    for (let i = 0; i < sectors.length; i++) {
+        sectors[i]!.sector_id = `sector:${corpsId}:${i}`;
+    }
+    return sectors;
+}
+
 /** Trigger 1: Thin sector consolidation — merge 0-brigade sectors into adjacent neighbor. */
 function consolidateThinSectors(
     sectors: CorpsFrontSector[],
@@ -295,11 +316,88 @@ export function rearrangeSectorsForCorps(
 
     // 3. Operation concentration — deferred
 
-    // Renumber sector IDs deterministically
-    result.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
-    for (let i = 0; i < result.length; i++) {
-        result[i]!.sector_id = `sector:${corpsId}:${i}`;
+    return renumberSectors(result, corpsId);
+}
+
+/**
+ * Merge adjacent target-rich sectors until the corps regains a launchable offensive lane.
+ * This preserves live rearrangement while preventing late-war starvation from one-brigade
+ * sectors that all overlap valid offensive targets but never individually satisfy launch gates.
+ */
+export function concentrateSectorsForOffensive(
+    sectors: CorpsFrontSector[],
+    corpsId: string,
+    osidAdjacency: Map<Osid, Osid[]>,
+    offensiveTargets: string[],
+    minAssignedBrigades = 3,
+): CorpsFrontSector[] {
+    if (sectors.length <= 1 || offensiveTargets.length === 0) {
+        return sectors.map((sector) => structuredClone(sector));
     }
 
-    return result;
+    const targetSet = new Set(offensiveTargets);
+    const result = sectors.map((sector) => structuredClone(sector));
+    const hasLaunchableTargetSector = result.some((sector) => {
+        const overlap = collectSectorEnemyOsids(sector).filter((eo) => targetSet.has(eo)).length;
+        return sector.length_edges > 0 && overlap > 0 && sector.assigned_brigade_ids.length >= minAssignedBrigades;
+    });
+    if (hasLaunchableTargetSector) {
+        return result;
+    }
+
+    const anchorCandidates = result
+        .map((sector) => ({
+            sector,
+            overlap: collectSectorEnemyOsids(sector).filter((eo) => targetSet.has(eo)).length,
+        }))
+        .filter((entry) => entry.sector.length_edges > 0 && entry.overlap > 0)
+        .sort((a, b) => {
+            if (b.overlap !== a.overlap) return b.overlap - a.overlap;
+            if (b.sector.assigned_brigade_ids.length !== a.sector.assigned_brigade_ids.length) {
+                return b.sector.assigned_brigade_ids.length - a.sector.assigned_brigade_ids.length;
+            }
+            if (a.sector.length_edges !== b.sector.length_edges) {
+                return a.sector.length_edges - b.sector.length_edges;
+            }
+            return strictCompare(a.sector.sector_id, b.sector.sector_id);
+        });
+    const anchor = anchorCandidates[0]?.sector;
+    if (!anchor) {
+        return result;
+    }
+
+    while (anchor.assigned_brigade_ids.length < minAssignedBrigades) {
+        const donorCandidates = result
+            .filter((sector) =>
+                sector !== anchor &&
+                sector.length_edges > 0 &&
+                areSectorsAdjacent(anchor, sector, osidAdjacency) &&
+                anchor.length_edges + sector.length_edges <= MAX_SECTOR_EDGES
+            )
+            .map((sector) => ({
+                sector,
+                overlap: collectSectorEnemyOsids(sector).filter((eo) => targetSet.has(eo)).length,
+            }))
+            .sort((a, b) => {
+                if (b.overlap !== a.overlap) return b.overlap - a.overlap;
+                if (b.sector.assigned_brigade_ids.length !== a.sector.assigned_brigade_ids.length) {
+                    return b.sector.assigned_brigade_ids.length - a.sector.assigned_brigade_ids.length;
+                }
+                if (a.sector.length_edges !== b.sector.length_edges) {
+                    return a.sector.length_edges - b.sector.length_edges;
+                }
+                return strictCompare(a.sector.sector_id, b.sector.sector_id);
+            });
+        const donor = donorCandidates[0]?.sector;
+        if (!donor) {
+            break;
+        }
+        mergeSectorInto(anchor, donor);
+        const donorIndex = result.indexOf(donor);
+        if (donorIndex >= 0) {
+            result.splice(donorIndex, 1);
+        }
+    }
+
+    return renumberSectors(result, corpsId);
 }

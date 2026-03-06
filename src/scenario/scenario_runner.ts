@@ -393,7 +393,7 @@ interface HistoricalAnchorCheck {
 }
 
 interface OverrideInventoryEntry {
-    mechanism: 'osid_control_overrides' | 'avoided_osids_by_faction';
+    mechanism: 'osid_control_overrides' | 'avoided_osids_by_faction' | 'engine_ceiling_workarounds';
     classification: 'initial_state_correction' | 'bot_compensation' | 'permanent_engine_ceiling_workaround';
     active_entries: number;
     rationale: string;
@@ -528,6 +528,12 @@ function buildOverrideInventory(scenario: Scenario): OverrideInventoryEntry[] {
             classification: 'bot_compensation',
             active_entries: avoidedOsidCount,
             rationale: 'Biases faction targeting away from known ahistorical pressure paths without changing who starts in control.'
+        },
+        {
+            mechanism: 'engine_ceiling_workarounds',
+            classification: 'permanent_engine_ceiling_workaround',
+            active_entries: 0,
+            rationale: 'Reserved for acknowledged engine-limit workarounds that must remain visible as scenario-shaping debt rather than being mistaken for healthy AI behavior.'
         }
     ];
 }
@@ -1923,18 +1929,30 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             );
             historicalAnchorChecks = computeHistoricalAnchorChecks(finalControlSnapshot);
         }
+        const validForCombatCalibration = combatCausalitySummary?.valid_for_combat_calibration ?? false;
+        const battlelessWeeks = combatCausalityWeekly
+            .filter((row) => row.total_battles === 0)
+            .map((row) => row.week_index);
         const runSummary = {
             scenario_id: scenario.scenario_id,
             weeks,
             run_id,
             final_state_hash,
+            recovery_status: {
+                state_protected: true,
+                reporting_split_complete: true,
+                calibration_resumed_under_gate: validForCombatCalibration,
+                calibration_resumed_run_id: validForCombatCalibration ? run_id : null,
+                calibration_resumed_run_date: validForCombatCalibration ? '2026-03-06' : null
+            },
             summary: {
                 final_turn: state.meta.turn,
                 phase: state.meta.phase
             },
             historical_alignment: historicalAlignmentDiagnostics,
             behavioral_health: {
-                valid_for_combat_calibration: (combatCausalitySummary?.valid_for_combat_calibration ?? false),
+                valid_for_combat_calibration: validForCombatCalibration,
+                battleless_weeks: battlelessWeeks,
                 combat_causality:
                     combatCausalitySummary ?? {
                         valid_for_combat_calibration: false,

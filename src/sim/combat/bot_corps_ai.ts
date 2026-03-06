@@ -63,7 +63,7 @@ import { evaluateSectorOffensiveLaunch } from './sector_offensive.js';
 import { CONFIDENCE_ROUGH_STRENGTH } from './sector_intel_constants.js';
 import { getTruceBreakAggressionBonus, getTrucePartner, isViennaDeclarationActive, isTruceException } from '../local_truces.js';
 import { getCorpsCommander, getEffectiveCompetence } from './officer_system.js';
-import { rearrangeSectorsForCorps } from './sector_rearrangement.js';
+import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
@@ -1122,6 +1122,47 @@ function deriveCorpsFrontMapping(
     return result;
 }
 
+function collectSectorFriendlyOsids(sector: import('../../state/game_state.js').CorpsFrontSector): string[] {
+    const friendlyOsids: string[] = [];
+    for (const ss of sector.sub_segments) {
+        for (const osid of ss.friendly_osids) {
+            if (!friendlyOsids.includes(osid)) {
+                friendlyOsids.push(osid);
+            }
+        }
+    }
+    friendlyOsids.sort(strictCompare);
+    return friendlyOsids;
+}
+
+function collectSectorEnemyOsids(sector: import('../../state/game_state.js').CorpsFrontSector): string[] {
+    const enemyOsids: string[] = [];
+    for (const ss of sector.sub_segments) {
+        for (const osid of ss.enemy_osids) {
+            if (!enemyOsids.includes(osid)) {
+                enemyOsids.push(osid);
+            }
+        }
+    }
+    enemyOsids.sort(strictCompare);
+    return enemyOsids;
+}
+
+function areDirectiveSectorsAdjacent(
+    a: import('../../state/game_state.js').CorpsFrontSector,
+    b: import('../../state/game_state.js').CorpsFrontSector,
+    adjacency: Map<Osid, Osid[]>,
+): boolean {
+    const bFriendly = new Set(collectSectorFriendlyOsids(b));
+    for (const osid of collectSectorFriendlyOsids(a)) {
+        if (bFriendly.has(osid)) return true;
+        for (const neighbor of adjacency.get(osid) ?? []) {
+            if (bFriendly.has(neighbor)) return true;
+        }
+    }
+    return false;
+}
+
 /**
  * Find OSIDs matching municipality patterns that are enemy-controlled and adjacent to friendly territory.
  * These become offensive targets in the corps directive.
@@ -1242,23 +1283,14 @@ export function generateCorpsDirectives(
             .filter(s => s.corps_id === corps.id)
             .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
 
-        // Rearrange sectors: consolidate thin, pocket containment
         const pc = state.political_controllers ?? {};
-        const corpsSectors = rearrangeSectorsForCorps(
+        let corpsSectors = rearrangeSectorsForCorps(
             rawCorpsSectors, corps.id, adjacency,
             {
                 politicalControllers: pc as Record<string, string>,
                 faction,
             }
         );
-
-        // Write rearranged sectors back to state
-        for (const oldSec of rawCorpsSectors) {
-            delete sectorLookup[oldSec.sector_id];
-        }
-        for (const newSec of corpsSectors) {
-            sectorLookup[newSec.sector_id] = newSec;
-        }
         const assignedFrontIds = corpsFrontMapping.get(corps.id) ?? [];
 
         // Army-level priorities for this corps
@@ -1417,6 +1449,20 @@ export function generateCorpsDirectives(
 
         // Convert to array for filtering/sorting phase
         const offensiveTargets: Osid[] = [...offensiveTargetSet].sort(strictCompare);
+
+        corpsSectors = concentrateSectorsForOffensive(
+            corpsSectors,
+            corps.id,
+            adjacency,
+            offensiveTargets,
+        );
+        for (const oldSec of rawCorpsSectors) {
+            delete sectorLookup[oldSec.sector_id];
+        }
+        for (const newSec of corpsSectors) {
+            sectorLookup[newSec.sector_id] = newSec;
+        }
+        const directiveEligibleSectors = corpsSectors.filter((sec) => sec.length_edges > 0);
 
         // Hold OSIDs: chokepoints + friendly OSIDs in defensive priority municipalities
         const holdOsids: Osid[] = [];
@@ -1642,15 +1688,15 @@ export function generateCorpsDirectives(
         // Target density = total assigned brigades / total front edges for this corps.
         // Sectors below 50% of target density get flagged for reinforcement.
         const reinforceSectorIds: string[] = [];
-        if (corpsSectors.length > 1) {
+        if (directiveEligibleSectors.length > 1) {
             let totalAssigned = 0;
             let totalEdges = 0;
-            for (const sec of corpsSectors) {
+            for (const sec of directiveEligibleSectors) {
                 totalAssigned += sec.assigned_brigade_ids.length;
                 totalEdges += sec.length_edges;
             }
             const targetDensity = totalEdges > 0 ? totalAssigned / totalEdges : 0;
-            for (const sec of corpsSectors) {
+            for (const sec of directiveEligibleSectors) {
                 const actualDensity = sec.length_edges > 0 ? sec.assigned_brigade_ids.length / sec.length_edges : 0;
                 if (targetDensity > 0 && actualDensity < targetDensity * 0.5) {
                     reinforceSectorIds.push(sec.sector_id);
@@ -1663,10 +1709,10 @@ export function generateCorpsDirectives(
         // offensive targets in its enemy_osids. Brigades will concentrate there.
         let prioritySectorId: string | undefined;
         if ((cmd.stance === 'offensive' || cmd.stance === 'balanced') &&
-            corpsSectors.length > 0 && offensiveTargets.length > 0) {
+            directiveEligibleSectors.length > 0 && offensiveTargets.length > 0) {
             const targetSet = new Set(offensiveTargets);
             let bestOverlap = 0;
-            for (const sec of corpsSectors) {
+            for (const sec of directiveEligibleSectors) {
                 let overlap = 0;
                 for (const ss of sec.sub_segments) {
                     for (const eo of ss.enemy_osids) {
@@ -1705,9 +1751,9 @@ export function generateCorpsDirectives(
             || existingOp.phase === 'recovery';
         if (canLaunchSectorOp &&
             (cmd.stance === 'offensive' || cmd.stance === 'balanced') &&
-            corpsSectors.length > 0 && offensiveTargets.length > 0) {
+            directiveEligibleSectors.length > 0 && offensiveTargets.length > 0) {
 
-            for (const sec of corpsSectors) {
+            for (const sec of directiveEligibleSectors) {
                 const secEnemyOsids: string[] = [];
                 for (const ss of sec.sub_segments) {
                     for (const eo of ss.enemy_osids) {

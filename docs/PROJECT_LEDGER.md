@@ -10560,3 +10560,38 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 - `3781442` test: add failing tests for sector rearrangement
 - `6eb706d` feat(sim): corps AI sector rearrangement — thin consolidation + pocket containment
 - `fef9649` feat(sim): wire sector rearrangement into corps directive generation
+
+---
+
+## 2026-03-06 - GUI Polish: Panel Rework — Tabs to Accordions
+
+### Summary
+- Refactored `CorpsFrontPanel.tsx` from a tab-based horizontal interface to a unified vertical layout using stacked, collapsible `AccordionHeader` elements.
+- Extracted and standardized the `AccordionHeader` into a shared component used by both `OOBSidebar` and `CorpsFrontPanel`.
+- Removed dead code (`collapsed` state) from `OOBSidebar.tsx`.
+
+### Changes
+- `src/ui/map/components/AccordionHeader.tsx` (NEW): Shared header component for accordions.
+- `src/ui/map/components/OOBSidebar.tsx`: (MODIFY) Integrated shared `AccordionHeader` and removed dead `collapsed` state.
+- `src/ui/map/components/CorpsFrontPanel.tsx`: (MODIFY) Refactored to use `expandedSections` and `AccordionHeader` components vertically stacked.
+- `docs/40_reports/implemented/20260306_GUI_PANEL_REWORK_TABS_TO_ACCORDIONS.md`: (NEW) Full implementation report.
+
+### Failure mode prevented
+- Prevents "tab-climbing" and fragmentation of situational awareness by providing a unified vertical briefing view as recommended by the external UX expert.
+- Prevents UI inconsistency between Sidebar and Front Panel through standardized header components.
+
+### Files modified
+- `src/ui/map/components/AccordionHeader.tsx`
+- `src/ui/map/components/OOBSidebar.tsx`
+- `src/ui/map/components/CorpsFrontPanel.tsx`
+- `.claude/napkin.md`
+- `docs/10_canon/context.md`
+- `docs/PROJECT_LEDGER.md`
+
+### Mistake guard
+- Checked for unused `collapsed` state in `OOBSidebar` and removed it.
+- Verified that `Overview` remains open by default in `CorpsFrontPanel`.
+
+### FORAWWV note
+- None. UI polish only; no core simulation changes.
+

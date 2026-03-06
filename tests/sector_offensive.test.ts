@@ -250,6 +250,51 @@ describe('Sector Offensive — Lifecycle', () => {
         assert.equal(op.momentum, 0);
     });
 
+    it('rebinds an active operation to the current matching sector after sector renumbering', () => {
+        const state = makeMinimalState(11, {
+            'b1': { corps_id: 'corps_1' as any, location_osid: 'op:a:1' },
+            'b2': { corps_id: 'corps_1' as any, location_osid: 'op:a:2' },
+        });
+        state.corps_command = {
+            'corps_1': {
+                stance: 'offensive' as any,
+                active_operation: {
+                    name: 'Operacija Test',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: 8,
+                    phase_started_turn: 10,
+                    participating_brigades: ['b1', 'b2'],
+                    sector_id: 'sector:corps_1:legacy',
+                    objectives: ['op:e:1', 'op:e:2'],
+                    planning_duration: 2,
+                    supply_readiness: 1.0,
+                    current_objective_index: 0,
+                    momentum: 0,
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                },
+            } as any,
+        };
+        state.corps_front_sectors = {
+            'sector:corps_1:0': {
+                sector_id: 'sector:corps_1:0',
+                corps_id: 'corps_1',
+                sub_segments: [{ enemy_osids: ['op:e:1', 'op:e:2'] }],
+            } as any,
+            'sector:corps_1:1': {
+                sector_id: 'sector:corps_1:1',
+                corps_id: 'corps_1',
+                sub_segments: [{ enemy_osids: ['op:other:1'] }],
+            } as any,
+        };
+
+        advanceSectorOffensives(state, null);
+        const op = state.corps_command!['corps_1']!.active_operation!;
+        assert.equal(op.phase, 'execution', 'operation should remain active after sector remap');
+        assert.equal(op.sector_id, 'sector:corps_1:0', 'operation should bind to the current best-matching sector');
+    });
+
     it('planning transitions early once all participants have reached the staging OSID', () => {
         const state = makeMinimalState(12, {
             'b1': { corps_id: 'corps_1' as any, location_osid: 'op:stage:1' },
