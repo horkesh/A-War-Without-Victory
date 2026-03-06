@@ -17,9 +17,11 @@
    Do instead: After each implementation phase or between plan checkpoints, run /refactor-pass (dead code, duplication, over-engineered stubs, simplify conditionals; then tsc + vitest) and /code-simplifier on recently modified code. Plans (e.g. officers-phase-e-implementation) must instruct this between tasks.
 6. **[2026-02-13] Verify edits + close handoffs with evidence**
    Do instead: After edits, verify with file reads + `git diff`. After roadmap or handoff, close with run evidence + decision memo + cross-link.
-7. **[2026-02-24] Scenario checkpoint lengths**
+7. **[2026-03-06] Preserve fractional run-summary metrics**
+   Do instead: In scenario summary normalization, never round fields ending in `share`, `ratio`, `rate`, `tolerance`, or `deviation`. Benchmark fractions are historical-fit evidence, not counts.
+8. **[2026-02-24] Scenario checkpoint lengths**
    Do instead: Use 20w/30w checkpoint runs for iteration; reserve 52w for acceptance only.
-8. **[2026-02-11] Preserve shared type exports during refactor**
+9. **[2026-02-11] Preserve shared type exports during refactor**
    Do instead: Keep `export type { ... }` statements; removing them breaks downstream consumers silently.
 
 ## Shell & Platform
@@ -113,8 +115,8 @@
    Do instead: Let `src/sim/combat/sector_offensive.ts` advance `sector_attack` phases. `src/sim/combat/corps_command.ts:advanceOperations()` must skip them, or named ops will enter/leave `execution` on the wrong schedule.
 3. **[2026-03-05] Execution-phase no-progress must spend failure budget**
    Do instead: If a `sector_attack` stays in `execution` and produces no objective attempt, treat that as failure/stalemate in `updateSectorOffensiveResults()` so the op can skip or end instead of hanging indefinitely.
-4. **[2026-03-05] Generic corps named ops are currently shadowable**
-   Do instead: Treat `sector_attack` as the canonical live operation path until `generateAllCorpsOrders()` stops allowing `generateCorpsDirectives()` to replace a fresh non-sector `active_operation` later in the same pass.
+4. **[2026-03-06] Sector rearrangement is LIVE in corps AI**
+   Do instead: `rearrangeSectorsForCorps()` runs in `generateCorpsDirectives()` after sector collection — thin consolidation (0-brigade ≤3-edge merge) + pocket containment. Previous n135 battleless regression was from `codex/combat-causality-hardening` merge, not rearrangement (confirmed by bypass test n132 + pre-merge rollback n134).
 5. **[2026-03-06] Maneuver-only execution turns are not invalid**
    Do instead: In combat-causality diagnostics, an execution-phase operation with `brigade_movement_orders` but zero attack orders is still maneuvering. Count only true inert turns as `execution_without_attack_orders`.
 6. **[2026-03-06] End planning early when the force is already staged**
@@ -123,14 +125,16 @@
    Do instead: Use `getFormationCorpsId(f)` from `corps_sector_partition.ts`. Brigade corps stored in tags (`corps:vrs_1st_krajina`), not `f.corps_id`.
 8. **[2026-03-01] Sector exempt corps**
    Do instead: arbih_general_staff, vrs_main_staff, hvo_general_staff (army reserves) + hvo_central_bosnia (Bosniak-Croat conflict) — don't assign their brigades to front sectors.
-9. **[2026-03-05] Sector pipeline (updated — contiguity fix + min coverage + balancing)**
-   Do instead: `buildMultiSectorsForCorps()`: findSubSegments (friendly-OSID adjacency only — fix for non-contiguous sectors) → splitOversizedSubSegments (MAX_SECTOR_EDGES=25) → buildSectors → Phase 1E split (MAX_SECTOR_BRIGADES=8) → assignInteriorBrigades → redistributeExcessReserves → ensureMinimumSectorCoverage (promotes reserve or transfers from surplus). CorpsDirective now has `reinforce_sector_ids` (under-density sectors, <50% target density) + `priority_sector_id` (sector with most offensive targets). Bot: Rule 5c marches overstocked brigades to reinforce sectors; Rule 7 marches interior brigades to priority sector first.
+9. **[2026-03-06] Sector pipeline (updated — contiguity split + rearrangement + min coverage)**
+   Do instead: `buildMultiSectorsForCorps()`: findSubSegments → mergeUndersized → splitOversized → buildSectors → Phase1E split → dedup → **splitNonContiguousSectors** (BFS friendly OSIDs, split disconnected components) → assignInterior → redistributeReserves → ensureMinimumSectorCoverage. Then in `generateCorpsDirectives()`: **rearrangeSectorsForCorps** (thin consolidation + pocket containment) → write back to state → generate directives. CorpsDirective: `reinforce_sector_ids` + `priority_sector_id`. Bot: Rule 5c redistribution + Rule 7 offensive concentration.
 7. **[2026-03-05] Sector intel replaces recon_intelligence (DELETED)**
    Do instead: Use `sector_intel.ts` / `sector_intel_constants.ts`. `derive-sector-intel` pipeline step. Confidence model, recon-by-force, bot target weighting. GUI fog-of-war (visible_brigade_ids) deferred to Phase 6. `recon_intelligence.ts` is DELETED — do not reference it.
 8. **[2026-03-05] Opening operations need explicit rosters, sectors, and launch OSIDs**
    Do instead: For April 1992 VRS opening ops, prefer explicit `participating_brigades`, `sector_id`, and `staging_osid` over broad corps-minus-reserve inference. Then verify each op can actually emit attack orders once it reaches `execution`.
 9. **[2026-03-05] Named operations own their brigades until the op ends**
    Do instead: If a brigade is listed in `active_operation.participating_brigades`, route it through operation planning/execution/recovery first. Do not let `home_defense_active`, reserve logic, or generic corps targeting retake control until `active_operation` is cleared.
+10. **[2026-03-06] Pre-planned ops: use tag-derived corps ownership**
+   Do instead: In `pre_planned_operations.ts`, filter brigade participation with `getFormationCorpsId(...)`, not `formation.corps_id`. Brigade corps membership is tag-derived in this repo.
 
 ## GUI / HoI Map
 1. **[2026-03-04] GUI Phase 5 COMPLETE. Only replay scrubber deferred.**
@@ -149,10 +153,10 @@
    Do instead: Keep `useKeyboardShortcuts` key mapping synchronized with `MapModeToolbar` mode badges (`1`-`5`: political/ethnic/supply/pressure/density).
 8. **[2026-03-05] Staged order arrowheads are fill polygons, not glyph text**
    Do instead: Pulse staged heads via `fill-opacity` (`attack-arrows-heads-staged`, `movement-arrows-heads-staged`) and avoid legacy `text-opacity` writes.
-9. **[2026-03-05] Tactical fog still uses legacy recon data**
-   Do instead: Until the UI is migrated, do not treat map fog as proof that `sector_intel`-driven visibility works. Current live path reads `recon_intelligence.confirmed_empty` in `GameStateAdapter.ts` and `buildFogOfWarGeoJSON.ts`.
-10. **[2026-03-05] UI posture blocking can disagree with operation ownership**
-   Do instead: Before trusting disabled attack/assault buttons in `FormationDetail.tsx`, check whether the brigade is in `active_operation.participating_brigades`. Engine operation ownership overrides `home_defense_active`, but the panel still blocks purely on the home-defense flag.
+9. **[2026-03-06] Tactical fog contract is `fogOfWar`, not raw sector intel**
+   Do instead: Derive player-visible fog in `GameStateAdapter.ts` from `sector_intel` + sectors + friendly brigade positions, then render `LoadedGameState.fogOfWar`. Do not wire map layers directly to raw engine intel structures.
+10. **[2026-03-06] Operation ownership overrides UI home-defense lockout**
+   Do instead: In `FormationDetail.tsx`, if a brigade appears in `operations[].participating_brigade_ids`, allow offensive posture controls even when `home_defense_active` is true.
 
 ## Desktop & Electron
 1. **[2026-03-02] One map app: desktop uses dev when running**
@@ -209,6 +213,8 @@
    Do instead: Use area-weighted match (km²) as primary. ATH 40w = 99.2% (n65, commit a689d83). 171 overrides (144 RS, 18 RBiH, 5 HRHB). 7 permanent mismatches (consolidation ceiling — do not chase). Pool exhaustion at 25% rate. All 6 bot benchmarks PASS.
 2. **[2026-03-05] Combat calibration needs causality, not just territory**
    Do instead: Before trusting control deltas, verify non-zero attack orders and non-zero battles in `weekly_report.jsonl`, then separate combat flips from consolidation, drift, and init overrides. Update `docs/40_reports/CALIBRATION_MASTER.md` during the session. Treat `n104` as partial recovery only: combat restored (`53` orders / `53` battles) but still invalid because `24` execution-phase operations emitted no attack orders.
+3. **[2026-03-06] Live attribution replaces Phase I flip logs**
+   Do instead: For current scenario runs, use `control_change_attribution` in `weekly_report.jsonl` / `run_summary.json`. `control_events.jsonl` was a leftover Phase I artifact and is no longer the live harness contract.
 3. **[2026-03-05] Pool exhaustion fix: avoided_osids DON'T prevent loss; control_overrides DO**
    Do instead: When sim=RBiH but painted=RS, adding RBiH avoided_osids is often ineffective (cells lost via counterattack or weakness, not direct attack). Add RS `osid_control_overrides` for systematic under-captures. avoideds work only when bot is actively targeting wrong cells.
 4. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**

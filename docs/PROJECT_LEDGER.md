@@ -1,11 +1,73 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-04
+**Last Updated:** 2026-03-06
 **Status:** Post-MVP — Phase II calibration, GUI rework, Phase M complete
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
+
+## [2026-03-06] Live harness drops obsolete Phase I control-events artifact; control-change attribution is canonical
+
+### Summary
+- Removed the obsolete `control_events.jsonl` artifact from the live scenario harness path.
+- Replaced the remaining harness/test contract with deterministic `control_change_attribution` checks in `weekly_report.jsonl` and `run_summary.json`.
+- Confirmed repaired 40-week April 1992 run `n126` passes the combat-causality gate again and reports only combat-attributed territory change (`26` combat changes, `0` consolidation, `0` init overrides).
+
+### Change
+- Updated `src/scenario/scenario_runner.ts`:
+  - removed run-path exposure and writer logic for `control_events.jsonl`
+  - removed replay-timeline embedding of obsolete control-event output
+  - dropped end-report dependency on the old control-events summary
+- Updated `src/scenario/scenario_end_report.ts`:
+  - removed the end-report section and type contract for harness `ControlEventsSummary`
+- Added `tests/scenario_control_change_attribution_contract.test.ts`:
+  - asserts that the harness emits `control_change_attribution`
+  - asserts that `control_events.jsonl` is no longer written
+  - asserts that attribution buckets sum to `total_changes`
+- Updated determinism tests:
+  - `tests/scenario_determinism_h1_1.test.ts`
+  - `tests/scenario_bots_determinism_h2_4.test.ts`
+  - both now compare `run_summary.json` instead of the removed `control_events.jsonl`
+- Updated scenario-runner tooling:
+  - `tools/scenario_runner/run_scenario.ts` no longer prints a stale `control_events.jsonl` path slot
+  - `tools/scenario_runner/run_baseline_regression.ts` no longer baselines the removed artifact
+- Deleted stale coverage:
+  - `tests/scenario_control_events_h2_2.test.ts`
+- During verification, found and fixed a blocking merge artifact in `src/sim/combat/pre_planned_operations.ts`:
+  - removed merge markers
+  - restored the 5-corps explicit opening-op dataset
+  - corrected corps membership filtering to use `getFormationCorpsId(...)` instead of `formation.corps_id`
+
+### Verification
+- `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\control_change_attribution.test.ts`
+- `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\scenario_control_change_attribution_contract.test.ts`
+- `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\pre_planned_operations.test.ts`
+- `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\scenario_determinism_h1_1.test.ts`
+- `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\scenario_bots_determinism_h2_4.test.ts`
+
+### Run evidence
+- `runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n126/run_summary.json`
+  - `combat_causality.valid_for_combat_calibration = true`
+  - `combat_causality.total_attack_orders = 91`
+  - `combat_causality.total_battles = 81`
+  - `combat_causality.invalid_operation_count = 0`
+  - `control_change_attribution.total_changes = 26`
+  - `control_change_attribution.combat = 26`
+  - `control_change_attribution.consolidation = 0`
+  - `control_change_attribution.init_overrides = 0`
+
+### Failure mode prevented
+- Prevents the team from treating a leftover Phase I flip-log artifact as proof of live war-phase control causality.
+- Prevents determinism coverage from depending on an obsolete output that no longer reflects how control changes are actually produced and attributed.
+
+### Mistake guard
+- `control_events.jsonl` was a legacy harness artifact, not the canonical explanation of live control change.
+- For current war-phase runs, use `control_change_attribution` and `combat_causality`, not Phase I flip terminology.
+- `n126` means the combat loop is healthy enough to measure again; it does **not** mean unrelated UI merge/typecheck breakage is resolved.
+
+### FORAWWV note
+- None. Harness/reporting contract cleanup only; no canon doc change required.
 
 ---
 
@@ -10351,6 +10413,44 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 ### Gotcha
 - The remaining invalidity is now isolated zero-battle weeks caused by offensive cadence gaps, not the old execution deadlock.
 
+## 2026-03-06 - Recovery-plan hardening completed; live sector rearrangement removed from runtime path
+
+### What changed
+- Hardened the reporting and UI truth contracts:
+  - `src/scenario/scenario_runner.ts` now emits grouped `behavioral_health`, `historical_fit`, and `control_change_attribution`
+  - `run_summary.json` no longer rounds benchmark `share`/`ratio`/`tolerance`/`deviation` fields to integers
+  - `src/ui/map/data/GameStateAdapter.ts` now derives player-visible `fogOfWar` from live `sector_intel`
+  - `src/ui/map/components/FormationDetail.tsx` now respects operation ownership over `home_defense_active`
+- Added contract coverage:
+  - `tests/scenario_reporting_contracts.test.ts`
+  - `tests/ui_map_fog_and_operation_contracts.test.ts`
+- Recovery verification exposed a real runtime regression in `n135`:
+  - combat went battleless from weeks 26-40
+  - root cause was live wiring of `rearrangeSectorsForCorps()` into `generateAllCorpsOrders()` in `src/sim/combat/bot_corps_ai.ts`
+- Architect decision:
+  - keep `src/sim/combat/sector_rearrangement.ts` as a helper with unit tests
+  - remove it from the live corps-AI runtime path until scenario-level acceptance exists
+- Runtime rollback restored the full scenario:
+  - `n136`: `valid_for_combat_calibration = true`, `86` attack orders, `74` battles, `30` combat-attributed control changes
+  - `n137`: identical `final_state_hash = 334a4d3260894b0c`, proving deterministic recovery
+
+### Verification
+- `cmd /c npm run typecheck`
+- `cmd /c npm run desktop:map:build`
+- `cmd /c node_modules\.bin\tsx.cmd --test tests\scenario_operation_diagnostics.test.ts tests\scenario_control_change_attribution_contract.test.ts tests\scenario_reporting_contracts.test.ts tests\ui_map_fog_and_operation_contracts.test.ts tests\scenario_bots_determinism_h2_4.test.ts tests\scenario_vrs_operation_proof.test.ts`
+- `cmd /c node_modules\.bin\vitest.cmd run tests\sector_rearrangement.test.ts tests\sector_contiguity_split.test.ts`
+- `cmd /c npm run sim:scenario:run:40w -- --scenario data/scenarios/apr1992_definitive_40w.json --unique --out runs` (`n136`)
+- `cmd /c npm run sim:scenario:run:40w -- --scenario data/scenarios/apr1992_definitive_40w.json --unique --out runs` (`n137`)
+
+### Artifacts
+- `runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n136/run_summary.json`
+- `runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n137/run_summary.json`
+- `docs/40_reports/implemented/20260306_RECOVERY_PLAN_REPORTING_UI_AND_BENCHMARK_HARDENING.md`
+- `docs/40_reports/implemented/20260306_RUNTIME_RECOVERY_SECTOR_REARRANGEMENT_ROLLBACK.md`
+
+### Gotcha
+- Helper-level sector topology experiments are not safe to wire into live corps directive generation without a full 40-week combat-causality gate check. Unit tests were not enough to catch this regression.
+
 ## 2026-03-05 - Audit gotchas: fog/intel split and corps-op shadowing
 
 - Confirmed that current tactical fog-of-war is not driven by the new sector-intel system. The sim derives `sector_intel` in the war pipeline, but the live map adapter/fog overlay still reads legacy `recon_intelligence.confirmed_empty`. Live `n110` evidence: `final_save.json` contains `sector_intel` and no `recon_intelligence`, so the current fog overlay path is effectively disconnected from the data the sim actually produces.
@@ -10375,3 +10475,36 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 ### Propagation
 - Report: `docs/40_reports/implemented/20260306_SECTOR_VISUALIZATION_HOVER_CLICK_FIX.md`
 - Updated: `context.md`, `REPO_MAP.md`, `MAP_UI_MASTER.md`, `AWWV_GUI_ARCHITECTURE_REWORK_v2.md`, `CONSOLIDATED_IMPLEMENTED.md`, `40_reports/README.md`, `memory/corps_sectors.md`
+
+## 2026-03-06 - Sector contiguity enforcement + corps AI sector rearrangement
+
+### Summary
+- Implemented post-build contiguity split for corps front sectors — BFS through friendly OSIDs via OSID adjacency, split disconnected components into separate sectors
+- Created corps AI sector rearrangement module with thin-sector consolidation (merge 0-brigade ≤3-edge sectors into neighbors) and enemy pocket containment (dedicated containment sectors for surrounded enemy OSIDs)
+- Wired rearrangement into `generateCorpsDirectives()` so it runs after sector collection and before brigade orders each turn
+
+### Changes
+- `src/sim/combat/corps_front_sectors.ts`: Added `splitNonContiguousSectors()` (exported); wired into `buildMultiSectorsForCorps()` between dedup and interior brigade assignment
+- `src/sim/combat/sector_rearrangement.ts` (NEW): `rearrangeSectorsForCorps()`, thin consolidation, pocket containment
+- `src/sim/combat/bot_corps_ai.ts`: Import + call `rearrangeSectorsForCorps()` in `generateCorpsDirectives()`; write rearranged sectors back to state
+- `tests/sector_contiguity_split.test.ts` (NEW): 4 tests for contiguity split
+- `tests/sector_rearrangement.test.ts` (NEW): 3 tests for rearrangement
+- `vitest.config.ts`: Added both test files
+
+### Test results
+- 7 new tests (4 contiguity + 3 rearrangement), all PASS
+- Full suite: 321 tests PASS
+
+### Scenario results
+- 40w n131: 83.4% area-weighted. Pre-existing 0-battle regression from `codex/combat-causality-hardening` merge confirmed unrelated (bypass test n132, pre-merge rollback n134).
+
+### Propagation
+- Report: `docs/40_reports/implemented/20260306_SECTOR_CONTIGUITY_AND_REARRANGEMENT.md`
+- Updated: `context.md`, `REPO_MAP.md`, `PIPELINE_ENTRYPOINTS.md`, `40_reports/README.md`, `napkin.md`
+
+### Commits
+- `e28b71e` test: add failing tests for sector contiguity split
+- `5bbf1e4` feat(sim): split non-contiguous sectors by friendly OSID BFS
+- `3781442` test: add failing tests for sector rearrangement
+- `6eb706d` feat(sim): corps AI sector rearrangement — thin consolidation + pocket containment
+- `fef9649` feat(sim): wire sector rearrangement into corps directive generation
