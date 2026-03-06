@@ -5,6 +5,7 @@
 **Canonical target run:** n65 (ATH 99.2% area-weighted, commit a689d83)
 **Latest calibration run:** n65 (99.2% area-weighted, 99.1% count — 171 overrides, all 6 bot benchmarks PASS, 7 permanent mismatches = engine ceiling)
 **ALL-TIME HIGH:** n65 (99.2% area-weighted — systematic OSID override strategy + pool exhaustion 25% fix, 2026-03-05)
+**Calibration validity gate (2026-03-05):** n77/n78/n79 later exposed that branch-level territory deltas can occur with **zero battles**. n65 remains the ATH reference, but from 2026-03-05 onward no combat-calibration claim is accepted without explicit combat-causality evidence (attack orders, battles, and flip attribution).
 **Previous ATH:** n466/n469 (92.0% area-weighted — pre-lockout code, Kalesija/Kupres dynamic)
 **Regression note (resolved):** commit `acdd4b9` dig_in movement lockout caused −6.4pp regression. Recovery via Tasks #13-18 + systematic override strategy achieved new ATH at n65.
 **Reverted:** n424 (Drina Sweep/Hold: add srebrenica, drop kalinovik/cajnice/rudo — DRINA 78→75.6, global 91.3→91.1%; reverted.)
@@ -13,6 +14,118 @@
 **Previous calibration run:** n392 (88.6% count-based ATH — comprehensive combat formula: officer quality, ethnic homeland defense, bombardment exposure attrition. Krajina 98.5%. ARBiH KIA 9,831 toward 11,500 target.)
 **Previous calibration run:** n374 (87.6%, ceiling removal + emergent growth via pool mechanics.)
 **Previous calibration run:** n364 (87.4%, verification run — combat summaries pipeline step added, zero behavioral change.)
+
+---
+
+## Combat-Causality Acceptance Gate (2026-03-05)
+
+**Primary report:** `docs/40_reports/convenes/20260305_CALIBRATION_P0_COMBAT_CAUSALITY_DEBUG_BRIEF.md`
+
+### Why this gate exists
+
+The n77/n78/n79 investigation showed that a branch can appear to improve while the combat loop is functionally inert:
+
+- `weekly_report.jsonl` recorded **0 battles**
+- pre-planned operations cycled without proven objective attacks
+- territory deltas came from non-combat effects rather than battle-driven progress
+
+Therefore count-based or area-weighted improvements alone are **insufficient** evidence of healthy combat behavior.
+
+### Invalid run for combat calibration
+
+Treat a run as **invalid for combat calibration** if any of the following is true:
+
+1. `weekly_report.jsonl` contains zero battles for the full run.
+2. The evaluated faction shows zero attack orders for the relevant offensive window.
+3. Territory changes are discussed without separating combat flips from consolidation, demographic drift, or init-override effects.
+
+### Minimum evidence for future calibration claims
+
+No future branch/run should be written up as a combat-calibration success unless it includes:
+
+1. Non-zero attack orders for the faction being evaluated.
+2. Non-zero battles in `weekly_report.jsonl`.
+3. A short attribution summary for territory change:
+   - combat-caused flips
+   - consolidation flips
+   - demographic drift / displacement-driven flips
+   - init override effects
+
+### Practical rule
+
+`CALIBRATION_MASTER.md` remains the single source of truth for calibration status.
+
+When working a calibration session:
+- read this file first
+- record causality status while the session is active
+- treat a run as non-calibratable if the harness marks `combat_causality.valid_for_combat_calibration = false`
+
+### Harness artifact contract (implemented 2026-03-05)
+
+Combat causality is now emitted directly by the scenario harness:
+
+- `weekly_report.jsonl`
+  - `combat_causality.valid_for_combat_calibration`
+  - `combat_causality.total_attack_orders`
+  - `combat_causality.total_objective_attempts`
+  - `combat_causality.total_objective_captures`
+  - `combat_causality.total_battles`
+  - `combat_causality.invalid_operation_count`
+  - `combat_causality.zero_eligible_attacker_operation_count`
+  - `combat_causality.invalidation_reasons`
+- `run_summary.json`
+  - `combat_causality`
+  - `combat_causality_weekly`
+
+Current invalidation reasons:
+
+- `zero_battles`
+- `operation_execution_without_attack_orders`
+- `operation_execution_without_eligible_attackers`
+- `operation_attack_orders_without_battles`
+- `operation_recovery_without_logged_attempt`
+- do not label a run "improved" unless it passes the gate above
+
+### Proof scenario lane update (2026-03-06)
+
+- Dedicated deterministic proof fixture now exists at `data/scenarios/apr1992_vrs_operation_proof_4w.json`.
+- Acceptance test: `tests/scenario_vrs_operation_proof.test.ts` runs the fixture twice and requires:
+  - non-zero RS attack orders
+  - non-zero processed attack orders
+  - at least one VRS operation with `attack_attempt_count > 0`, `objective_capture_count > 0`, and `current_objective_index > 0`
+  - byte-identical `final_save.json` across both runs
+- Current proof artifact: `.tmp_proof_report/apr1992_vrs_operation_proof_4w__1142cedd3e0e4d62__w4_n0/run_summary.json`
+  - `RS attack orders = 17`
+  - `total battles = 12`
+  - `total objective attempts = 6`
+  - `total objective captures = 4`
+  - `zero_eligible_attacker_operation_count = 2`
+  - proof scenario passes the existence-of-combat/progress gate but still correctly fails full combat calibration because not all VRS opening ops are healthy yet
+
+### Opening-operation debug lane updates (2026-03-05)
+
+The VRS opening-operation repair lane produced several reusable constraints that now govern further debugging:
+
+1. The real April 1992 startup path is `recruitment_mode: "player_choice"`, not just the legacy OOB entry helper. Any brigade-placement fix must therefore hold in both:
+   - `src/scenario/oob_early_war_entry.ts`
+   - `src/sim/recruitment_engine.ts`
+2. Explicit brigade `home_osid` placement is valid in this lane, but it only sticks if the chosen start OSID is already friendly-controlled at scenario start. If the start OSID is enemy-controlled, spread/re-homing logic will displace the brigade.
+3. Political-control overrides are banned in this lane. Do not "fix" VRS opening operations by changing starting controller from `RBiH` to `RS`; only brigade placement, operation roster, sector, staging, and target selection are in scope.
+4. Named VRS opening operations now generate real combat again (`n104`: `53` attack orders, `53` battles), but the run remains invalid for combat calibration because execution-phase operations still exist with zero emitted attack orders (`invalid_operation_count = 24`).
+5. Operation ownership must override corps logic while the operation is live. Brigades assigned to a named operation should follow the operation's planning/execution/recovery flow and ignore corps-chain behaviors such as `home_defense_active`, reserve assignment, and generic corps targeting until the operation is explicitly ended/cleared.
+6. `n109` exposed an engine-wide phase-conflict: `sector_attack` operations were being advanced both by `advanceOperations()` in `src/sim/combat/corps_command.ts` and by `advanceSectorOffensives()` in `src/sim/combat/sector_offensive.ts`. That double ownership forced some operations into `execution` early and kept them there under the wrong timing model.
+7. `n110` restored the single-owner rule and added no-progress failure budgeting for execution-phase sector attacks. Result: invalid-operation count dropped from `60` (`n109`) to `4` (`n110`), while preserving live VRS combat (`61` RS attack orders / `55` battles). The run still fails the gate because some weeks remain battleless and a small number of execution windows still emit zero attack orders.
+8. `n112` proved that the remaining `execution_without_attack_orders` windows in `n110/n111` were mostly diagnostic false positives, not live deadlocks. Execution-phase operation participants can spend a turn maneuvering with `brigade_movement_orders` and zero attack orders; that is still healthy operation progress and must not be counted as an invalid execution window.
+9. `n113` exposed a second cadence bug: sector offensives could sit in `planning` for the full fixed duration even after every assigned brigade had already reached `staging_osid`. Engine fix: once at least one real planning turn has elapsed, `advanceSectorOffensives()` may transition early to `execution` when all active participants are staged. Result: `Operacija Lukavac` now enters execution on turn 12 instead of idling until turn 16, and run totals improved to `59` RS attack orders / `51` battles with `invalid_operation_count = 0`.
+10. After the `n112`/`n113` fixes, the remaining combat-causality failure mode is isolated zero-battle weeks, not operation deadlock. Current lane priority is therefore offensive cadence overlap and planning/recovery downtime, not more brigade-order debugging.
+
+Practical rule for this lane:
+- choose only friendly-held staging/home OSIDs
+- treat brigade placement and political control as separate systems
+- record whether each named operation reached `execution`, emitted attack orders, and produced battles before discussing territorial improvement
+- when an operation owns a brigade, debug it through the operation path first; do not assume corps directives are authoritative
+- if a `sector_attack` is live, only `sector_offensive.ts` should advance its phase timing
+- if an operation spends repeated execution turns with no objective attempt, spend failure budget and let it skip or end instead of hanging indefinitely
 
 ---
 
@@ -1208,3 +1321,7 @@ Two-part fix per L23:
 ### Verification Target
 ~~After P1–P5: expect 85–88% match rate. After P6–P7: expect 88–90%+.~~
 **Updated (n295):** P6 done. Current 85.1%. After P1–P5 + P7: expect 87–90%+. Drina gap (71.9%) remains the ceiling constraint — structural OOB/initial-control fix needed for >88%.
+## 2026-03-05 Ongoing engine audit gotchas
+
+- Tactical fog-of-war is only partially active in the current live path. The engine derives `sector_intel` every war turn, but [`src/ui/map/data/GameStateAdapter.ts`](F:\A-War-Without-Victory\src\ui\map\data\GameStateAdapter.ts) and [`src/ui/map/map/builders/buildFogOfWarGeoJSON.ts`](F:\A-War-Without-Victory\src\ui\map\map\builders\buildFogOfWarGeoJSON.ts) still consume legacy `recon_intelligence.confirmed_empty`. Live evidence: [`runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n110/final_save.json`](F:\A-War-Without-Victory\runs\apr1992_definitive_40w__7c821fa7d934716d__w40_n110\final_save.json) has `sector_intel` and no `recon_intelligence`. Treat current map fog as a UI-layer legacy overlay, not proof that sector-intel-driven FoW is functioning end-to-end.
+- Autonomous corps operation planning exists, but the path is internally split. [`src/sim/combat/bot_corps_ai.ts`](F:\A-War-Without-Victory\src\sim\combat\bot_corps_ai.ts) still creates generic named operations in `generateCorpsOperationOrders()`, then later in the same `generateAllCorpsOrders()` pass allows `generateCorpsDirectives()` to replace any non-`sector_attack` active operation with a new sector offensive. Treat generic named-op behavior as partially shadowed until this ownership is unified.

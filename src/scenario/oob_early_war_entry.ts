@@ -25,6 +25,27 @@ import { strictCompare } from '../state/validateGameState.js';
 import type { BrigadeDecoration } from '../state/decoration_types.js';
 import type { OobBrigade, OobCorps } from './oob_loader.js';
 
+const FIXED_HOME_OSID_TAG = 'placement:fixed_home_osid';
+
+function hasFixedHomeOsidPlacement(formation: FormationState | undefined): boolean {
+    return Boolean(formation?.tags?.includes(FIXED_HOME_OSID_TAG));
+}
+
+function popMovableBrigadeId(
+    brigadeIds: FormationId[],
+    movedBrigades: Set<FormationId>,
+    formations: Record<string, FormationState>
+): FormationId | null {
+    for (let i = brigadeIds.length - 1; i >= 0; i -= 1) {
+        const brigadeId = brigadeIds[i]!;
+        if (movedBrigades.has(brigadeId)) continue;
+        if (hasFixedHomeOsidPlacement(formations[brigadeId])) continue;
+        brigadeIds.splice(i, 1);
+        return brigadeId;
+    }
+    return null;
+}
+
 /**
  * Returns true if faction F has presence in municipality M: at least one settlement
  * in M has political_controllers[sid] === F. Returns false if M is fragmented (no spawn).
@@ -181,6 +202,7 @@ export function createOobFormationsAtPhaseIEntry(
         const tags = [`mun:${b.home_mun}`];
         if (b.corps) tags.push(`corps:${b.corps}`);
         if (b.tags) tags.push(...b.tags);
+        if (b.home_osid) tags.push(FIXED_HOME_OSID_TAG);
         tags.sort((x, y) => x.localeCompare(y));
         const eligiblePop = getEligiblePopulationCount(population1991ByMun, b.home_mun, b.faction);
         const ordinal = (brigadeCountByFactionMun.get(`${b.faction}:${b.home_mun}`) ?? 0) + 1;
@@ -330,13 +352,14 @@ export function spreadBrigadesToFrontOsids(
         for (const targetOsid of targetFrontOsids) {
             // BFS from target toward sources
             const source = findNearestOverstackedOsid(
-                targetOsid, adjacency, brigadesByOsid, movedBrigades, faction, analysis, state
+                targetOsid, adjacency, brigadesByOsid, movedBrigades, faction, analysis, state, formations
             );
             if (!source) continue;
 
             // Pop one brigade from source
             const sourceList = brigadesByOsid.get(source.osid)!;
-            const brigadeId = sourceList.pop()!;
+            const brigadeId = popMovableBrigadeId(sourceList, movedBrigades, formations);
+            if (!brigadeId) continue;
             movedBrigades.add(brigadeId);
 
             // Move brigade to target
@@ -385,7 +408,8 @@ function findNearestOverstackedOsid(
     movedBrigades: Set<FormationId>,
     faction: FactionId,
     analysis: ReturnType<typeof analyzeFactionGraph>,
-    state: GameState
+    state: GameState,
+    formations: Record<string, FormationState>
 ): { osid: Osid } | null {
     const visited = new Set<Osid>();
     const queue: Osid[] = [targetOsid];
@@ -402,8 +426,11 @@ function findNearestOverstackedOsid(
         // Check if this OSID is over-stacked (2+ brigades remaining)
         const brigades = brigadesByOsid.get(current);
         if (brigades) {
-            const available = brigades.filter(b => !movedBrigades.has(b));
-            if (available.length >= 2) {
+            const movable = brigades.filter((brigadeId) => (
+                !movedBrigades.has(brigadeId) &&
+                !hasFixedHomeOsidPlacement(formations[brigadeId])
+            ));
+            if (brigades.length >= 2 && movable.length >= 1) {
                 return { osid: current };
             }
         }

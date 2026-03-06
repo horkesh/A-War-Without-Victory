@@ -78,6 +78,11 @@ import {
 } from './oob_early_war_entry.js';
 import { buildOpsCompareConclusion, formatOpsCompareMarkdown } from './ops_compare.js';
 import {
+    buildCombatCausalitySummary,
+    buildOperationCombatDiagnostics,
+    type CombatCausalitySummary
+} from './combat_causality.js';
+import {
     computeActivitySummary,
     computeArmyStrengthsSummary,
     computeControlDelta,
@@ -104,7 +109,12 @@ import {
     formatProbeCompareMarkdown,
     type CompareResult
 } from './scenario_probe_compare.js';
-import type { WeeklyActivityCounts, WeeklyCorpsSummaryEntry, WeeklyReportRow } from './scenario_reporting.js';
+import type {
+    WeeklyActivityCounts,
+    WeeklyCombatCausalitySummary,
+    WeeklyCorpsSummaryEntry,
+    WeeklyReportRow
+} from './scenario_reporting.js';
 import { buildWeeklyReport } from './scenario_reporting.js';
 import type { Scenario, ScenarioAction } from './scenario_types.js';
 import { evaluateVictoryConditions } from './victory_conditions.js';
@@ -1255,6 +1265,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             orders_by_faction: {}
         };
         const phaseIIAttackResolutionWeekly: PhaseIIAttackResolutionWeekRollup[] = [];
+        const combatCausalityWeekly: Array<WeeklyCombatCausalitySummary & { week_index: number; turn: number }> = [];
+        let combatCausalitySummary: CombatCausalitySummary | null = null;
         const phaseIITakeoverDisplacementSummary = {
             weeks_with_phase_ii: 0,
             weeks_with_activity: 0,
@@ -1449,9 +1461,86 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 }
             }
 
+            let weeklyCombatCausalityForReport: WeeklyCombatCausalitySummary | undefined;
             if (state.meta.phase === 'war') {
                 phaseIIAttackResolutionSummary.weeks_with_phase_ii += 1;
                 phaseIITakeoverDisplacementSummary.weeks_with_phase_ii += 1;
+                const operationDiagnostics = buildOperationCombatDiagnostics(
+                    state,
+                    turnReport.phase_ii_bot_order_diagnostics,
+                    turnReport.phase_ii_attack_resolution_osid
+                );
+                const weeklyCombatCausality = buildCombatCausalitySummary(
+                    operationDiagnostics,
+                    turnReport.phase_ii_bot_order_diagnostics,
+                    turnReport.phase_ii_attack_resolution_osid
+                );
+                if (combatCausalitySummary === null) {
+                    combatCausalitySummary = weeklyCombatCausality;
+                } else {
+                    const previousCombatCausality = combatCausalitySummary as CombatCausalitySummary;
+                    combatCausalitySummary = {
+                        valid_for_combat_calibration:
+                            previousCombatCausality.valid_for_combat_calibration &&
+                            weeklyCombatCausality.valid_for_combat_calibration,
+                        invalidation_reasons: Array.from(new Set([
+                            ...previousCombatCausality.invalidation_reasons,
+                            ...weeklyCombatCausality.invalidation_reasons
+                        ])).sort(strictCompare),
+                        total_attack_orders:
+                            previousCombatCausality.total_attack_orders + weeklyCombatCausality.total_attack_orders,
+                        total_objective_attempts:
+                            previousCombatCausality.total_objective_attempts + weeklyCombatCausality.total_objective_attempts,
+                        total_objective_captures:
+                            previousCombatCausality.total_objective_captures + weeklyCombatCausality.total_objective_captures,
+                        movement_only_execution_turns:
+                            previousCombatCausality.movement_only_execution_turns + weeklyCombatCausality.movement_only_execution_turns,
+                        total_battles: previousCombatCausality.total_battles + weeklyCombatCausality.total_battles,
+                        total_orders_by_faction: Object.keys({
+                            ...previousCombatCausality.total_orders_by_faction,
+                            ...weeklyCombatCausality.total_orders_by_faction
+                        }).sort(strictCompare).reduce<Record<string, number>>((acc, factionId) => {
+                            acc[factionId] =
+                                (previousCombatCausality.total_orders_by_faction[factionId] ?? 0) +
+                                (weeklyCombatCausality.total_orders_by_faction[factionId] ?? 0);
+                            return acc;
+                        }, {}),
+                        invalid_operation_count:
+                            previousCombatCausality.invalid_operation_count + weeklyCombatCausality.invalid_operation_count,
+                        zero_eligible_attacker_operation_count:
+                            previousCombatCausality.zero_eligible_attacker_operation_count +
+                            weeklyCombatCausality.zero_eligible_attacker_operation_count,
+                        recovery_without_logged_attempt_count:
+                            previousCombatCausality.recovery_without_logged_attempt_count +
+                            weeklyCombatCausality.recovery_without_logged_attempt_count
+                    };
+                }
+                combatCausalityWeekly.push({
+                    week_index,
+                    turn: state.meta.turn,
+                    valid_for_combat_calibration: weeklyCombatCausality.valid_for_combat_calibration,
+                    total_attack_orders: weeklyCombatCausality.total_attack_orders,
+                    total_objective_attempts: weeklyCombatCausality.total_objective_attempts,
+                    total_objective_captures: weeklyCombatCausality.total_objective_captures,
+                    movement_only_execution_turns: weeklyCombatCausality.movement_only_execution_turns,
+                    total_battles: weeklyCombatCausality.total_battles,
+                    invalid_operation_count: weeklyCombatCausality.invalid_operation_count,
+                    zero_eligible_attacker_operation_count: weeklyCombatCausality.zero_eligible_attacker_operation_count,
+                    recovery_without_logged_attempt_count: weeklyCombatCausality.recovery_without_logged_attempt_count,
+                    invalidation_reasons: weeklyCombatCausality.invalidation_reasons
+                });
+                weeklyCombatCausalityForReport = {
+                    valid_for_combat_calibration: weeklyCombatCausality.valid_for_combat_calibration,
+                    total_attack_orders: weeklyCombatCausality.total_attack_orders,
+                    total_objective_attempts: weeklyCombatCausality.total_objective_attempts,
+                    total_objective_captures: weeklyCombatCausality.total_objective_captures,
+                    movement_only_execution_turns: weeklyCombatCausality.movement_only_execution_turns,
+                    total_battles: weeklyCombatCausality.total_battles,
+                    invalid_operation_count: weeklyCombatCausality.invalid_operation_count,
+                    zero_eligible_attacker_operation_count: weeklyCombatCausality.zero_eligible_attacker_operation_count,
+                    recovery_without_logged_attempt_count: weeklyCombatCausality.recovery_without_logged_attempt_count,
+                    invalidation_reasons: weeklyCombatCausality.invalidation_reasons
+                };
                 const phaseIIResolution = turnReport.phase_ii_resolve_attack_orders;
                 // OSID attack resolution writes to a different report key
                 const osidResolution = (turnReport as unknown as Record<string, unknown>).phase_ii_attack_resolution_osid as {
@@ -1665,7 +1754,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     }));
             }
 
-            const reportRow = buildWeeklyReport(state, activity, ops, corpsSummary);
+            const reportRow = buildWeeklyReport(
+                state,
+                activity,
+                ops,
+                corpsSummary,
+                weeklyCombatCausalityForReport
+            );
             if (week_index === 0) firstReportRow = reportRow;
             lastReportRow = reportRow;
             reportStream.write(stableStringify(reportRow) + '\n');
@@ -1780,7 +1875,22 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             ...(phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0
                 ? {
                     phase_ii_attack_resolution: phaseIIAttackResolutionSummary,
-                    phase_ii_attack_resolution_weekly: phaseIIAttackResolutionWeekly
+                    phase_ii_attack_resolution_weekly: phaseIIAttackResolutionWeekly,
+                    combat_causality:
+                        combatCausalitySummary ?? {
+                            valid_for_combat_calibration: false,
+                            invalidation_reasons: ['zero_battles'],
+                            total_attack_orders: 0,
+                            total_objective_attempts: 0,
+                            total_objective_captures: 0,
+                            movement_only_execution_turns: 0,
+                            total_battles: 0,
+                            total_orders_by_faction: {},
+                            invalid_operation_count: 0,
+                            zero_eligible_attacker_operation_count: 0,
+                            recovery_without_logged_attempt_count: 0
+                        },
+                    combat_causality_weekly: combatCausalityWeekly
                 }
                 : {}),
             ...(phaseIITakeoverDisplacementSummary.weeks_with_phase_ii > 0
@@ -2105,4 +2215,3 @@ export async function createStateFromScenario(
     const content = await readFile(result.paths.initial_save, 'utf8');
     return deserializeState(content);
 }
-

@@ -125,6 +125,7 @@ import { updateSupplyReserves, updateSiegeTurnCounters, applyUnAirdrops } from '
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
+import { createBotOrderDiagnosticsSnapshot } from '../../scenario/combat_causality.js';
 
 // --- Pipeline infrastructure imports ---
 import type { NamedPhase, TurnContext, TurnReport } from '../turn_pipeline_types.js';
@@ -552,7 +553,8 @@ export const warPhases: NamedPhase[] = [
                     ethnicCompositionByOsid,
                     osidPopulationMap
                 };
-                generateAllBotOrdersOsid(context.state, factions, osidCtx);
+                const botOrderDiagnostics = generateAllBotOrdersOsid(context.state, factions, osidCtx);
+                context.report.phase_ii_bot_order_diagnostics = createBotOrderDiagnosticsSnapshot(context.state, botOrderDiagnostics);
             }
             // When operational data unavailable: no bot brigade orders (AoR path removed).
         }

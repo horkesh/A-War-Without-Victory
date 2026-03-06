@@ -22,6 +22,19 @@ export interface WeeklyCorpsSummaryEntry {
     stances: Record<string, number>;
 }
 
+export interface WeeklyCombatCausalitySummary {
+    valid_for_combat_calibration: boolean;
+    total_attack_orders: number;
+    total_objective_attempts: number;
+    total_objective_captures: number;
+    movement_only_execution_turns: number;
+    total_battles: number;
+    invalid_operation_count: number;
+    zero_eligible_attacker_operation_count: number;
+    recovery_without_logged_attempt_count: number;
+    invalidation_reasons: string[];
+}
+
 export interface WeeklyReportRow {
     week_index: number;
     phase: string | undefined;
@@ -37,6 +50,8 @@ export interface WeeklyReportRow {
     ops?: { enabled: boolean; level: number };
     /** Per-faction corps AI summary (war phase only). */
     corps_summary?: WeeklyCorpsSummaryEntry[];
+    /** Combat-causality gate summary for this turn. */
+    combat_causality?: WeeklyCombatCausalitySummary;
 }
 
 function sortedKeys(obj: Record<string, unknown>): string[] {
@@ -51,7 +66,8 @@ export function buildWeeklyReport(
     state: GameState,
     activity?: WeeklyActivityCounts,
     ops?: { enabled: boolean; level: number },
-    corpsSummary?: WeeklyCorpsSummaryEntry[]
+    corpsSummary?: WeeklyCorpsSummaryEntry[],
+    combatCausality?: WeeklyCombatCausalitySummary
 ): WeeklyReportRow {
     const week_index = state.meta.turn;
     const phase = state.meta.phase;
@@ -153,6 +169,8 @@ export function buildWeeklyReport(
     if (corpsSummary !== undefined && corpsSummary.length > 0) {
         row.corps_summary = corpsSummary;
     }
+    if (combatCausality !== undefined) {
+        row.combat_causality = combatCausality;
+    }
     return row;
 }
-

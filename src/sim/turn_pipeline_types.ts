@@ -54,6 +54,7 @@ import type { PoolPopulationReport } from './early_war/pool_population.js';
 import type { WashingtonCheckReport } from './early_war/washington_agreement.js';
 import type { OperationStormCheckReport } from './combat/operation_storm.js';
 import type { AttackResolutionOsidReport } from './combat/attack_resolution_osid.js';
+import type { BotOrderDiagnosticsSnapshot } from '../scenario/combat_causality.js';
 import type { CorpsAiReportEntry } from './combat/bot_corps_ai.js';
 import type { CohesionDriftReport } from './combat/cohesion_drift.js';
 import type { ConsolidationFlipsReport } from './combat/consolidation_flips.js';
@@ -159,6 +160,7 @@ export interface TurnReport {
     };
     phase_e_pressure_update?: PhaseEPressureDiffusionReport;
     phase_ii_front_emergence?: PhaseIIFrontDescriptor[];
+    phase_ii_bot_order_diagnostics?: BotOrderDiagnosticsSnapshot;
     phase_ii_resolve_attack_orders?: ResolveAttackOrdersReport;
     phase_ii_attack_resolution_osid?: AttackResolutionOsidReport;
     phase_ii_cohesion_drift?: CohesionDriftReport;

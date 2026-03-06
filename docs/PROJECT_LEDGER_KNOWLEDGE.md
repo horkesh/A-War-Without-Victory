@@ -78,6 +78,13 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 | 2026-01-24 | Always emit GeoJSON with zero features | Downstream tools expect consistent structure | Empty GeoJSON valid; pipeline consistency | implementation |
 | 2026-01-24 | Filter aggregate rows (∑) from settlement data | Aggregate rows are validation-only | Prevents totals becoming entities | implementation |
 | 2026-01-24 | Render-valid primary gate, GIS-valid diagnostic | GIS too strict, drops usable geometry | More geometry preserved | architecture |
+
+## 10. Sectors & Operations
+
+1. **[2026-03-06] Maneuver-only execution turns are not dead execution**
+   Do instead: In combat-causality diagnostics, do not flag `execution_without_attack_orders` when execution-phase operation participants emitted movement orders. Operation-owned brigades can be healthy while still closing on the current objective.
+2. **[2026-03-06] Fixed-duration planning creates dead weeks after staging**
+   Do instead: Let `sector_attack` transition from `planning` to `execution` once at least one full planning turn has elapsed and all active participants have reached `staging_osid`. Do not keep an operation in planning just because the nominal duration has not expired.
 | 2026-01-24 | Municipality outlines can be single polygons | Union must handle single and multi | No rejection of valid single-polygon munis | architecture |
 | 2026-01-24 | Convex hull fallback when union fails | Union unreliable for some geometries | Deterministic fallback + inflation reporting | architecture |
 | 2026-01-24 | Measure hull inflation when using hull salvage | Convex hull can distort shapes | High-inflation flagged in metadata | architecture |
@@ -118,6 +125,19 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 *(See PROJECT_LEDGER.md §Geometry Contract (Path A).)*
 
 ### Path A Contract Evolution
+
+### Sector Operations & Combat-Causality Rules (2026-03-05)
+
+- `sector_attack` lifecycle has a single owner: `src/sim/combat/sector_offensive.ts`. The generic corps-layer timer in `src/sim/combat/corps_command.ts` must not advance `sector_attack`, or operations will enter/leave `execution` on the wrong schedule.
+- When debugging opening operations, distinguish:
+  - phase-timing bugs
+  - staging/path bugs
+  - execution-without-orders bugs
+  - attack-without-battle bugs
+- Repeated execution turns with no objective attempt are not harmless idle time. They are operation failure and should consume the same failure budget as a failed assault so the AI can skip/end bad ops instead of hanging forever.
+- Calibration interpretation rule:
+  - `n109` demonstrated that restoring full-run combat volume alone is not enough if invalid execution windows explode.
+  - `n110` showed the better shape: keep live combat, but also collapse hanging execution windows back down before discussing scenario quality.
 
 - **2026-01-24:** Path A adopted; outline modes (mid / mun_code / national) clarified; drzava.js chosen for municipality borders to avoid union failures.
 - **2026-01-25:** Inferred municipality borders permitted from settlement-derived outlines; determinism + invariants audit; municipality boundaries from polygon fabric adjacency (no union).
@@ -538,6 +558,19 @@ Each new override block can redirect bot force allocation in non-obvious ways. E
 - 7 permanent mismatches (engine ceiling — consolidation/recapture)
 - RS sim=412 vs painted=411, RBiH sim=241, HRHB sim=91
 
+#### Combat-causality acceptance gate
+
+- **Combat-causality gate (2026-03-05):** The n77/n78/n79 zero-battle investigation showed that branch-level territory deltas can improve without functioning combat, via demographic drift, consolidation, or init effects. From this date forward, no combat-calibration claim is valid unless the run shows non-zero attack orders, non-zero battles in `weekly_report.jsonl`, and a short attribution split between combat flips and non-combat flips. Use `docs/40_reports/CALIBRATION_MASTER.md` as the single source of truth and update it during the session, not after. See ledger entry `[2026-03-05] Calibration governance: combat-causality debug brief + master calibration gate` and report `docs/40_reports/convenes/20260305_CALIBRATION_P0_COMBAT_CAUSALITY_DEBUG_BRIEF.md`.
+
+#### Opening-operation placement discipline
+
+- **Real startup path is `player_choice` recruitment (2026-03-05):** A brigade-placement fix in `src/scenario/oob_early_war_entry.ts` is insufficient for April 1992 scenario runs. The actual scenario startup flows through `src/sim/recruitment_engine.ts`, so fixed-home placement tags and placement preservation must exist in both paths.
+- **Brigade placement and political control are separate levers (2026-03-05):** It is valid to move brigade `home_osid` and redesign pre-planned operation rosters/sectors/staging, but do not change starting controller from `RBiH` to `RS` to make an opening attack possible. If a selected `home_osid` is enemy-held at init, the brigade will be re-homed; choose friendly-held launch OSIDs instead.
+- **Interpret partial recovery correctly (2026-03-05):** `n104` restored actual RS combat (`53` attack orders, `53` battles) but still recorded `24` execution-phase invalid operations. That outcome means "combat loop partly restored, named-operation emission still broken", not "calibration improving".
+- **Operation ownership beats corps logic (2026-03-05):** Once a brigade is assigned to a live named operation, the operation owns its behavior until the operation object is cleared. Corps-level controls such as `home_defense_active`, reserve assignment, and generic target selection must not short-circuit operation planning/execution/recovery.
+- **Proof scenario before full calibration (2026-03-06):** Use `data/scenarios/apr1992_vrs_operation_proof_4w.json` and `tests/scenario_vrs_operation_proof.test.ts` as the deterministic opening-op proof lane. It proves that at least one VRS opening operation can emit attack orders, resolve battles, and advance objectives before spending 40-week runs on wider cadence debugging.
+- **Zero eligible attackers is its own failure boundary (2026-03-06):** Distinguish `execution_without_attack_orders` from `execution_without_eligible_attackers`. The first means an execution-phase op produced no attack/movement orders; the second means the current objective had no eligible direct attackers at all. Debug them differently.
+
 ---
 
 ## Cross-references
@@ -547,3 +580,8 @@ Each new override block can redirect bot force allocation in non-obvious ways. E
 - **Reorganization plan:** `docs/PROJECT_LEDGER_REORGANIZATION_PLAN.md`.
 - **Implementation guide:** `docs/PROJECT_LEDGER_IMPLEMENTATION_GUIDE.md`.
 - **Napkin:** `.agent/napkin.md` (corrections, patterns, domain notes).
+## 2026-03-05 - Engine audit knowledge
+
+- `sector_intel` is the live engine-side intelligence model, but the tactical-map fog overlay still depends on legacy `recon_intelligence`. Live saves can contain `sector_intel` with no `recon_intelligence` at all. Do not claim that FoW is fully wired end-to-end until the UI consumes the same intelligence source the sim derives.
+- Corps can plan operations on their own, but generic named-op planning is currently load-bearingly ambiguous because sector-op launch later in the same corps-AI pass may replace a fresh non-sector active operation. Treat corps operation ownership as split until one path is canonical.
+- Engine/UI ownership mismatch: operation participants are exempt from `home_defense_active` in `bot_brigade_ai_osid.ts`, but the formation detail panel still disables offensive posture buttons purely on `home_defense_active`. Do not assume the tactical UI currently reflects operation ownership rules.

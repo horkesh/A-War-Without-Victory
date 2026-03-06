@@ -176,18 +176,21 @@ function buildEdgeFactionToCorps(
 }
 
 /**
- * Generate corps-colored front lines GeoJSON. Same geometric approach as
- * generateFactionBorders but annotates each feature with corps_id.
+ * Generate corps-colored front lines GeoJSON.
  *
- * When corps sector data is available, glow features get corps_id for
- * per-corps coloring. Front features get corps_id for potential styling.
+ * Uses the authoritative front edge set (from the operational contact graph)
+ * to determine which OSID pairs form fronts. Polygon geometry is used only
+ * to obtain the visual coordinates for those edges — NOT for adjacency
+ * detection. This ensures every rendered front line belongs to a corps sector,
+ * matching the HoI theatre model (no orphaned/grey front edges).
  */
 export function buildCorpsFrontLinesGeoJSON(
     osidGeoJson: FeatureCollection,
     corpsFrontSectors: CorpsFrontSectorView[],
     rbihHrhbAllied?: boolean,
     osidCentroids?: Map<string, [number, number]>,
-    frontPressureByEdge?: Record<string, { value: number; max_abs: number }>
+    frontPressureByEdge?: Record<string, { value: number; max_abs: number }>,
+    frontEdgesOsid?: { edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }[]
 ): FeatureCollection<LineString> {
     const features = osidGeoJson.features as Feature<Polygon | MultiPolygon, OsidProperties>[];
 
@@ -198,6 +201,15 @@ export function buildCorpsFrontLinesGeoJSON(
 
     // Build (edgeId + faction) → corps_id lookup
     const edgeFactionToCorps = buildEdgeFactionToCorps(corpsFrontSectors);
+
+    // Build authoritative OSID-pair set from the operational contact graph front edges.
+    // Only these pairs will be rendered; geometric-only adjacencies are suppressed.
+    const authoritativePairs = new Set<string>();
+    if (frontEdgesOsid) {
+        for (const edge of frontEdgesOsid) {
+            authoritativePairs.add(edge.edge_id);
+        }
+    }
 
     // Build edgeMap: geometric edge key → set of OSIDs sharing that edge
     const coordKey = (c: number[]) => `${c[0].toFixed(6)},${c[1].toFixed(6)}`;
@@ -236,13 +248,18 @@ export function buildCorpsFrontLinesGeoJSON(
         if (!ctrlA || !ctrlB || ctrlA === ctrlB) continue;
         if (rbihHrhbAllied && ((ctrlA === 'RBiH' && ctrlB === 'HRHB') || (ctrlA === 'HRHB' && ctrlB === 'RBiH'))) continue;
 
+        // Only render edges that exist in the authoritative contact graph.
+        // Geometric-only adjacencies (polygon boundary sharing without contact
+        // graph entry) are phantom edges — not in any sector, render as grey.
+        const pairKey = osidA < osidB ? `${osidA}__${osidB}` : `${osidB}__${osidA}`;
+        if (authoritativePairs.size > 0 && !authoritativePairs.has(pairKey)) continue;
+
         const [partA, partB] = edgeKey.split('|');
         const [ax, ay] = partA.split(',').map(Number);
         const [bx, by] = partB.split(',').map(Number);
         const coords: [number, number][] = [[ax, ay], [bx, by]];
 
         // Look up which corps owns each side of this edge
-        const pairKey = osidA < osidB ? `${osidA}__${osidB}` : `${osidB}__${osidA}`;
         const corpsA = edgeFactionToCorps.get(`${pairKey}\0${ctrlA}`) ?? 'unknown';
         const corpsB = edgeFactionToCorps.get(`${pairKey}\0${ctrlB}`) ?? 'unknown';
 
@@ -300,6 +317,12 @@ export function buildCorpsFrontLinesGeoJSON(
             geometry: { type: 'LineString', coordinates: coords },
         });
     }
+
+    // NOTE: Contact-graph edges without shared polygon boundaries (93 edges) are
+    // intentionally NOT rendered as centroid-to-centroid lines — those create ugly
+    // straight-line artifacts across the map. These edges still exist in sectors
+    // and are tracked by the engine; they just don't produce visible front lines.
+    // The hover/click layer and sector territory fill handle them correctly.
 
     // Merge front segments per corps group for smoother lines
     const mergedFront: Feature<LineString, CorpsFrontProperties>[] = [];

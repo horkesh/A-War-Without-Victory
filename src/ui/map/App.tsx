@@ -33,7 +33,7 @@ import {
 } from './desktop/campaignRecruitmentActions';
 
 function App() {
-  // Phase C3: single key handler (Enter, 1–4, Escape)
+  // Phase C3: single key handler (Enter, 1–5, Escape)
   useKeyboardShortcuts();
   useDesktopSession();
   const ipc = useIPC();

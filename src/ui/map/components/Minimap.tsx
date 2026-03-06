@@ -162,12 +162,9 @@ export function Minimap() {
       // We access the base GeoJSON from the loaded state's controlBySettlement
       // For minimap we just need simple polygons — re-fetch from window or compute
       // Actually we import the builders inline to avoid circular deps
-      import('../data/DataLoader').then(async ({ loadOperationalSettlements, loadOperationalPoliticalControl }) => {
+      import('../data/DataLoader').then(async ({ loadOperationalSettlements }) => {
         try {
-          const [geojson] = await Promise.all([
-            loadOperationalSettlements(),
-            loadOperationalPoliticalControl(),
-          ]);
+          const geojson = await loadOperationalSettlements();
           const { buildControlGeoJSON } = await import('../map/builders/buildControlGeoJSON');
           const { buildFrontLinesGeoJSON } = await import('../map/builders/buildFrontLinesGeoJSON');
 

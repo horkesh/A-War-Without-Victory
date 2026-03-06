@@ -9,6 +9,7 @@
 - `src/scenario/scenario_runner.ts`
   - Outputs: `runs/<run_id>/` artifacts (see harness docs and tests).
   - Used by: `tools/scenario_runner/` scripts (baseline regression, sweeps).
+  - Combat causality: emits `combat_causality` to `weekly_report.jsonl` and `run_summary.json` using `src/scenario/combat_causality.ts`. Execution-phase operation movement orders count as maneuver, not invalid stalled combat.
   - **War timeline loading:** When `scenario.war_timeline` is set (e.g. `"apr1992"`), loads `data/scenarios/timelines/{id}.json`, validates via `validateWarTimeline()`, stores on `state.war_timeline`. All consumer functions read from timeline first, fall back to hardcoded. Type definitions and resolvers in `src/state/war_timeline.ts`.
 
 ### Scenario CLI (Scripted)

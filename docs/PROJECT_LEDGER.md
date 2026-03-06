@@ -118,6 +118,28 @@ This is the single authoritative project ledger. All context, decisions, and sta
 | 6 | 2026-02-28 | React+MapLibre as canonical player-facing GUI (replaces tactical_map.html) |
 | 7 | 2026-02-28 | Peace/War lifecycle replaces phase_i/phase_ii |
 | 8 | 2026-03-01 | Morale retreat resistance: MORALE_RESIST_FLOOR = 70 |
+
+---
+
+## Changelog
+
+### 2026-03-05 - Sector-attack lifecycle deconflicted; no-progress ops now spend failure budget
+
+- Root cause isolated in the combat-causality lane: `sector_attack` operations were being phase-advanced in two places at once. `src/sim/combat/corps_command.ts:advanceOperations()` was still applying the generic `planning -> execution -> recovery` timer to every `active_operation`, while `src/sim/combat/sector_offensive.ts` was also owning `sector_attack` lifecycle and objective progression. This created false execution windows and distorted opening-op timing.
+- Fix: `advanceOperations()` now skips `sector_attack`, leaving phase timing to `advanceSectorOffensives()` only. Added regression coverage in `tests/corps_command.test.ts`.
+- Second engine fix: `updateSectorOffensiveResults()` now treats repeated execution turns with no objective attempt as real no-progress, consuming the same failure budget used for failed attacks. This lets the AI skip/end bad operations instead of hanging forever in `execution`. Added regression coverage in `tests/sector_offensive.test.ts`.
+- Verification:
+  - `cmd /c node_modules\\.bin\\vitest.cmd run tests\\corps_command.test.ts`
+  - `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\sector_offensive.test.ts`
+  - `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\bot_operation_objective_focus.test.ts`
+  - `cmd /c npm run typecheck`
+- Scenario evidence:
+  - `n109` (`runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n109`) proved the double-advance removal was real but overexposed lingering execution hangs: `109` RS attack orders / `106` battles, but `invalid_operation_count=60`.
+  - `n110` (`runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n110`) combined both fixes and brought the lane back under control: `61` RS attack orders / `55` battles / `invalid_operation_count=4` / `flips_applied=35`.
+- Status:
+  - better than `n108` (`invalid_operation_count=6`, many zero-battle weeks)
+  - far healthier than `n109` (`invalid_operation_count=60`)
+  - still not combat-calibration valid because `n110` retains some zero-battle weeks and a few execution-without-orders windows
 | 9 | 2026-03-01 | Local front density modifier: thin fronts penalized, dense fronts rewarded |
 | 10 | 2026-03-01 | ~~Displacement tuning deferred~~ → Displacement system complete (n319, per-OSID census depth) |
 | 11 | 2026-03-01 | Per-OSID census data for displacement depth; hostile share cap 0.95 per-OSID, 0.80 mun fallback |
@@ -9978,3 +10000,359 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 | Empty sectors | 99 | 27 |
 | Brigade duplicates | 18 | 0 |
 
+---
+[2026-03-05] feat(gui): Orchestrated GUI polish execution (pressure mode + ops planning integration)
+
+**Type:** Feature / UI Integration
+**Phase:** Tactical map GUI (Orchestrator-led)
+
+### Summary
+- Implemented the GUI polish execution plan with dedicated pressure-mode visualization, full operations planning modal staging, arrow animation compatibility fixes, and HUD/polish improvements.
+
+### Change
+- Added dedicated combat/front pressure overlay builder and layer wiring:
+  - `src/ui/map/map/builders/buildPressureGeoJSON.ts`
+  - `src/ui/map/map/MapContainer.tsx` (`osid-pressure` source + `osid-pressure-fill` visibility contract)
+- Reworked operations planning from scaffold to interactive staging:
+  - `src/ui/map/components/OpsPlanningModal.tsx` now supports objective selection on map, brigade selection, advance arrows, and `stageCorpsOperationOrder` submission.
+- Fixed staged arrow pulse compatibility with fill-based arrowheads/glow:
+  - `src/ui/map/map/MapContainer.tsx`
+- Completed polish pass:
+  - `src/ui/map/hooks/useKeyboardShortcuts.ts` (`1–5` modes), `src/ui/map/App.tsx` comment sync
+  - `src/ui/map/components/BottomStatusStrip.tsx` territory/ops/casualty aggregates
+  - `src/ui/map/components/Minimap.tsx` loader cleanup
+  - `src/ui/map/styles/globals.css` (`panel-slide-in-right` 200ms ease-out + `panel-shimmer`)
+- Implementation report added:
+  - `docs/40_reports/implemented/20260305_GUI_POLISH_ORCHESTRATED_EXECUTION.md`
+
+### Failure mode prevented
+- Prevents pressure mode from silently falling back to political fill.
+- Prevents operations planning from appearing interactive while producing no persisted operation orders.
+
+### Verification evidence
+- `npx tsc --noEmit` → PASS
+- `npm run --prefix src/ui/map build` → PASS
+- `npx vitest run` → FAIL (pre-existing supply suite failures in `tests/supply_reserves.test.ts` and `tests/supply_phase_e1.test.ts`; no new GUI test regressions observed)
+
+### Mistake guard
+- Enforced active-path edits (`src/ui/map/components/*`, `src/ui/map/map/*`, `src/ui/map/hooks/*`, `src/ui/map/styles/*`), no edits to `src/ui/map/saved/*`.
+
+
+---
+
+## [2026-03-05] Refactor pass — GUI polish session + report and canon propagation
+
+**Phase:** Tactical map GUI (documentation and code hygiene)
+
+### Summary
+- Ran refactor pass on files modified in the GUI polish session: removed duplication, simplified conditionals, extracted shared PMTiles URL rewriter. Created implementation report and propagated changes to canon and technical docs.
+
+### Change
+- **Code refactor (no behavior change):**
+  - `src/ui/map/components/OpsPlanningModal.tsx`: merged `buildObjectiveFeatures` and `buildSectorOverlayFeatures` into single `buildOsidFilteredFeatures(controlGeo, osids)`; typed `controlGeoRef` as `FeatureCollection<Polygon | MultiPolygon> | null`.
+  - `src/ui/map/hooks/useKeyboardShortcuts.ts`: replaced long ternary chain for keys 1–5 with `Number(event.key)` and range check.
+  - **New:** `src/ui/map/map/rewritePmtilesUrls.ts` — shared `rewritePmtilesUrls(style, origin)`; removed duplicate from `MapContainer.tsx` and `OpsPlanningModal.tsx`.
+- **Report and propagation:**
+  - Added `docs/40_reports/implemented/20260305_REFACTOR_PASS_GUI_POLISH.md`.
+  - Updated `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md` (new report row; last-updated 2026-03-05).
+  - Updated `docs/20_engineering/MAP_UI_MASTER.md`: directory layout + `rewritePmtilesUrls.ts`; MapModeToolbar table key 5 for Density and osid-pressure fill description; useKeyboardShortcuts 1–5 and hooks description.
+
+### Determinism / scope
+- No simulation or pipeline changes; UI-only refactor. No determinism impact.
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260305_REFACTOR_PASS_GUI_POLISH.md`
+- Verification: `npx tsc --noEmit` PASS; `npx vitest run` unchanged (7 pre-existing supply failures).
+
+
+---
+
+## [2026-03-05] GUI polish — Consolidated Phase List propagated to canon and technical docs
+
+**Phase:** Documentation / canon sync
+
+### Summary
+- Propagated the **Consolidated Phase List (A–F)** from [20260305_GUI_POLISH_ORCHESTRATED_EXECUTION.md](40_reports/implemented/20260305_GUI_POLISH_ORCHESTRATED_EXECUTION.md) across canon and relevant technical documentation so the authoritative checklist (Arrow overhaul, Ops Planning modal, Map mode toolbar, Battle marker pulse, Bottom status strip, General polish) is discoverable from context, REPO_MAP, GUI spec, and MAP_UI_MASTER.
+
+### Change
+- **docs/10_canon/context.md:** Added sentence under canonical GUI paragraph: GUI polish orchestrated execution (2026-03-05) with authoritative phase checklist A–F and link to report.
+- **docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md:** In §0 Phase 5 (Polish) row, added "Orchestrated GUI polish (2026-03-05)" with Consolidated Phase List A–F and link to report.
+- **docs/20_engineering/REPO_MAP.md:** In React+MapLibre bullet, added "GUI polish orchestrated (2026-03-05)" with link to report and "authoritative Consolidated Phase List A–F".
+- **docs/20_engineering/MAP_UI_MASTER.md:** Added "See also" note after document purpose: GUI polish phases (2026-03-05) authoritative checklist A–F in report §Consolidated Phase List; bumped Last updated to 2026-03-05.
+
+### Determinism / scope
+- Docs-only. No code or simulation impact.
+
+### Artifacts
+- Report section: `docs/40_reports/implemented/20260305_GUI_POLISH_ORCHESTRATED_EXECUTION.md` §Consolidated Phase List.
+
+
+---
+
+## [2026-03-05] Calibration governance: combat-causality debug brief + master calibration gate
+
+### Summary
+- Documented a new calibration validity rule after the zero-battle VRS investigation: territory deltas alone are no longer sufficient evidence of combat health. Added a P0 debugging brief, updated the master calibration file, and synced report indexing and thematic knowledge.
+
+### Change
+- Added `docs/40_reports/convenes/20260305_CALIBRATION_P0_COMBAT_CAUSALITY_DEBUG_BRIEF.md` with:
+  - single priority = identify the first failing boundary in the operation -> brigade-order -> attack-resolution chain
+  - owner/handoff model for Gameplay Programmer, Systems Programmer, QA, Technical Architect, and PM
+  - invalidation rules (`battles == 0` => not a valid combat-calibration run)
+  - future acceptance rubric requiring non-zero orders, non-zero battles, and territory-flip attribution
+- Updated `docs/40_reports/CALIBRATION_MASTER.md`:
+  - added top-level calibration validity gate note
+  - added `Combat-Causality Acceptance Gate (2026-03-05)` section so the master file now records when a run is invalid for combat calibration
+- Updated `docs/40_reports/README.md`:
+  - added the new convene report to the `convenes/` index
+  - corrected the root `CALIBRATION_MASTER.md` summary from stale `n392 88.6%` to current `n65 99.2% area-weighted`, with the new combat-causality gate note
+- Updated `docs/PROJECT_LEDGER_KNOWLEDGE.md` with the reusable calibration pattern and master-file discipline.
+
+### Failure mode prevented
+- Prevents branch wins from being accepted when the combat loop is inert and territory changes come from non-combat effects.
+
+### Files modified
+- `docs/40_reports/convenes/20260305_CALIBRATION_P0_COMBAT_CAUSALITY_DEBUG_BRIEF.md`
+- `docs/40_reports/CALIBRATION_MASTER.md`
+- `docs/40_reports/README.md`
+- `docs/PROJECT_LEDGER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Mistake guard
+- Distinguish combat-caused flips from consolidation, demographic drift, and init overrides before judging calibration quality.
+
+### FORAWWV note
+- None. This is process, observability, and calibration governance only.
+
+---
+
+## [2026-03-05] Combat-causality diagnostics wired into scenario harness
+
+### Summary
+- Added deterministic combat-causality diagnostics to the war pipeline and scenario harness so calibration runs now surface whether operations in execution actually generated attack orders and battles.
+
+### Change
+- Added `src/scenario/combat_causality.ts`:
+  - snapshots brigade attack orders after bot order generation
+  - derives per-operation invalid states for execution-phase operations
+  - builds a run-level combat-calibration gate summary
+- Updated `src/sim/turn_phases/war_phases.ts` and `src/sim/turn_pipeline_types.ts`:
+  - capture `phase_ii_bot_order_diagnostics` into `TurnReport`
+- Updated `src/scenario/scenario_runner.ts` and `src/scenario/scenario_reporting.ts`:
+  - write weekly `combat_causality` summaries into `weekly_report.jsonl`
+  - write aggregate `combat_causality` and `combat_causality_weekly` into `run_summary.json`
+- Added `tests/scenario_operation_diagnostics.test.ts` and registered it in `vitest.config.ts`.
+- Updated `docs/40_reports/CALIBRATION_MASTER.md` with the concrete artifact contract and invalidation reason set.
+
+### Failure mode prevented
+- Prevents future calibration claims from treating territory drift or silent operation cycling as evidence of healthy combat behavior when execution-phase operations produced no attack orders or no battles.
+
+### Verification
+- `cmd /c npx vitest run tests/scenario_operation_diagnostics.test.ts`
+- `cmd /c npm run typecheck`
+
+### Files modified
+- `src/scenario/combat_causality.ts`
+- `src/sim/turn_pipeline_types.ts`
+- `src/sim/turn_phases/war_phases.ts`
+- `src/scenario/scenario_reporting.ts`
+- `src/scenario/scenario_runner.ts`
+- `tests/scenario_operation_diagnostics.test.ts`
+- `vitest.config.ts`
+- `docs/40_reports/CALIBRATION_MASTER.md`
+
+### Mistake guard
+- Calibration review must now check harness-emitted causality fields before interpreting ATH deltas or territorial improvements.
+
+### FORAWWV note
+- None. This change adds diagnostics and reporting gates; it does not alter combat resolution or scenario truth.
+
+
+---
+
+## [2026-03-05] VRS opening operations: explicit brigade rosters + placement-path repair
+
+**Phase:** Phase II opening-operations debugging / scenario behavior
+
+### Summary
+- Repaired the VRS opening-operation lane without changing starting political control. Restored actual RS combat by loading real OOB brigades correctly, redefining the five named opening operations with explicit brigade rosters/sectors/staging OSIDs, and making explicit brigade `home_osid` placement survive the real April 1992 startup path.
+
+### Change
+- **OOB loading fix:**
+  - `src/scenario/oob_loader.ts` now accepts the canonical top-level brigade array in `data/source/oob_brigades.json`, restoring real VRS brigade startup data.
+- **Opening operation redesign:**
+  - `src/sim/combat/pre_planned_operations.ts` now defines the five VRS opening operations with explicit `sector_id`, `participating_brigades`, `staging_osid`, and tighter target lists instead of loose corps-wide inference.
+  - `src/sim/combat/bot_brigade_ai_osid.ts` keeps execution-phase brigades focused on the current named-operation objective rather than generic corps sprawl.
+  - `src/sim/combat/sector_offensive.ts` preserves a real planning turn for turn-0 injected operations (`elapsed > planDuration` transition).
+- **Placement-path repair:**
+  - `src/scenario/oob_early_war_entry.ts` tags brigades with explicit `home_osid` as fixed placement.
+  - `src/sim/recruitment_engine.ts` mirrors that fixed-home placement tagging for the actual `player_choice` recruitment path.
+  - Spread/re-homing now leaves those fixed-placement brigades in place when the chosen start OSID is already friendly-controlled.
+- **Scenario data changes:**
+  - `data/source/oob_brigades.json` updated brigade `home_osid` values for selected VRS opening-operation brigades only. No starting controller overrides were added.
+
+### Determinism / scope
+- Deterministic simulation behavior changed. No randomness or time-based output added.
+- Scope intentionally excludes political-controller overrides; brigade placement and opening-operation design only.
+
+### Artifacts
+- Scenario runs:
+  - `runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n95`
+  - `runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n100`
+  - `runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n102`
+  - `runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n104`
+- Verification:
+  - `cmd /c npx tsx --test tests/oob_loader.test.ts tests/oob_early_war_entry.test.ts tests/pre_planned_operations.test.ts tests/bot_operation_objective_focus.test.ts`
+  - `cmd /c npm run typecheck`
+
+### Outcome and current status
+- `n104` confirms partial recovery:
+  - `combat_causality.total_attack_orders = 53`
+  - `combat_causality.total_battles = 53`
+  - `combat_causality.total_orders_by_faction.RS = 52`
+  - `combat_causality.invalid_operation_count = 24`
+- This lane is therefore no longer "zero-attacks VRS", but it is still not healthy enough for combat calibration. Named operations can still reach `execution` without emitting attack orders.
+
+### Failure mode prevented
+- Prevents false fixes where opening-op brigades look correctly placed in a legacy helper path but are displaced in the real scenario startup path.
+- Prevents political-control cheating as a substitute for repairing VRS opening operations.
+
+### Mistake guard
+- Do not change starting controller from `RBiH` to `RS` in this lane.
+- When changing brigade start OSIDs, choose only friendly-held launch positions or the placement will be invalidated by spread/re-homing.
+- Interpret `n104` as "combat restored, named-op emission still broken", not as a calibration win.
+- When a brigade is assigned to a live operation, debug the operation path before corps directives; operation ownership now overrides home-defense and other corps-chain controls until the op ends.
+
+### FORAWWV note
+- None. This change repairs startup/operation behavior and preserves the user's no-controller-override constraint.
+
+
+---
+
+## [2026-03-06] Add deterministic VRS operation proof scenario and eligible-attacker invariant
+
+**Phase:** Phase II combat-causality hardening / proof lane
+
+### Summary
+- Added a dedicated proof scenario for VRS opening operations and extended combat-causality diagnostics to surface execution windows where an operation still owns brigades but has zero eligible direct attackers on its current objective.
+
+### Change
+- Added `data/scenarios/apr1992_vrs_operation_proof_4w.json` as a dedicated 4-week proof fixture built from the already-verified April 1992 Phase II startup path.
+- Added `tests/scenario_vrs_operation_proof.test.ts`:
+  - runs the proof fixture twice
+  - requires non-zero RS attack orders and processed attack orders
+  - requires at least one VRS operation with attack attempts, objective captures, and objective-index progress
+  - requires byte-identical `final_save.json` across both runs
+- Updated `src/sim/combat/bot_brigade_ai_osid.ts` so bot-order generation emits `eligible_attackers_by_corps` diagnostics for execution-phase sector operations.
+- Updated `src/scenario/combat_causality.ts`, `src/scenario/scenario_reporting.ts`, `src/scenario/scenario_runner.ts`, and `src/sim/turn_phases/war_phases.ts` to propagate:
+  - `eligible_attacker_count`
+  - `zero_eligible_attacker_operation_count`
+  - invalidation reason `operation_execution_without_eligible_attackers`
+- Updated `tests/scenario_operation_diagnostics.test.ts` to cover the new invariant.
+
+### Determinism / scope
+- Deterministic only. No controller overrides or new gameplay randomness.
+- The proof fixture is scenario data plus diagnostics; it does not change combat rules or historical init control.
+
+### Verification
+- `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\scenario_operation_diagnostics.test.ts`
+- `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\scenario_vrs_operation_proof.test.ts`
+- `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\bot_operation_objective_focus.test.ts`
+- scoped type-safety check on touched files via `npm run typecheck` + `Select-String`
+- `cmd /c npm run sim:scenario:run:40w -- --scenario data/scenarios/apr1992_vrs_operation_proof_4w.json --out .tmp_proof_report`
+
+### Artifacts
+- `.tmp_proof_report/apr1992_vrs_operation_proof_4w__1142cedd3e0e4d62__w4_n0/run_summary.json`
+  - `combat_causality.total_attack_orders = 18`
+  - `combat_causality.total_battles = 12`
+  - `combat_causality.total_objective_attempts = 6`
+  - `combat_causality.total_objective_captures = 4`
+  - `combat_causality.zero_eligible_attacker_operation_count = 2`
+  - `phase_ii_attack_resolution.orders_by_faction.RS = 17`
+
+### Failure mode prevented
+- Prevents a named operation with assigned brigades from being treated as merely “not attacking” when the deeper problem is that it has no eligible direct attackers at all for its current objective.
+- Prevents future operation regressions from re-breaking the opening-op path without a deterministic proof fixture catching it immediately.
+
+### Mistake guard
+- A proof scenario passing means “combat and operation progress are demonstrably possible,” not “all opening operations are healthy.”
+- `execution_without_attack_orders` and `execution_without_eligible_attackers` are different boundaries; do not collapse them in future debugging.
+
+### FORAWWV note
+- None. This adds diagnostics and a proof fixture only.
+
+---
+
+## [2026-03-05] Named operations own participating brigades until the op ends
+
+**Phase:** Phase II opening-operations debugging / brigade AI
+
+### Summary
+- Changed brigade AI so a live named operation fully owns its participating brigades until the operation is cleared. Operation participants now bypass corps-chain behaviors such as `home_defense_active`, reserve assignment, and generic corps targeting while following operation planning, execution, and recovery.
+
+### Change
+- Updated `src/sim/combat/bot_brigade_ai_osid.ts`:
+  - brigades in `active_operation.participating_brigades` are exempt from the `home_defense_active` short-circuit
+  - operation participants now follow a dedicated path:
+    - `planning`: move to `staging_osid`
+    - `execution`: attack the current objective if adjacent and viable, otherwise move toward a friendly approach OSID adjacent to that objective
+    - `recovery`: remain under operation control and defend until the operation object is cleared
+  - generic corps-chain behaviors no longer retake control while the operation is still active
+- Updated `tests/bot_operation_objective_focus.test.ts`:
+  - added regression coverage for operation participants that are also `home_defense_active`
+  - verified both direct objective attack and approach movement behavior
+
+### Determinism / scope
+- Deterministic AI behavior change. No randomness or time-based behavior added.
+- Scope limited to named-operation brigade control; no political-control overrides.
+
+### Verification
+- `cmd /c node_modules\\.bin\\tsx.cmd --test tests/bot_operation_objective_focus.test.ts tests/pre_planned_operations.test.ts`
+- `cmd /c npm run typecheck`
+
+### Artifacts
+- Early-turn trace against `runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n104/initial_save.json` now shows:
+  - `rs_1st_bratunac -> op:bratunac:bratunac_2`
+  - `rs_2nd_posavina_light_infantry -> op:bosanski_samac:samac_2`
+  - `rs_ajnie_brigade` and `rs_foa_brigade` moving toward the next Foca objective approach
+
+### Failure mode prevented
+- Prevents named operations from going inert because a participating brigade is still treated as homeland garrison or generic corps reserve instead of as an operation asset.
+
+### Mistake guard
+- While `active_operation` still exists, do not assume corps-level logic is allowed to override the brigade's operation behavior.
+- If user/bot ends the operation early by clearing the operation object, the brigade may return to corps control even if objectives remain unfinished.
+
+### FORAWWV note
+- None. This change tightens operation execution ownership only.
+
+## 2026-03-06 - Combat-causality narrowed to real stalls; staged operations enter execution early
+
+### What changed
+- Updated `src/scenario/combat_causality.ts` so execution-phase operations with movement orders are treated as maneuvering rather than falsely flagged as `execution_without_attack_orders`.
+- Updated `src/sim/combat/sector_offensive.ts` so a `sector_attack` may leave `planning` early once at least one full planning turn has elapsed and all active participating brigades have reached `staging_osid`.
+
+### Tests
+- Added maneuver-turn regression coverage in `tests/scenario_operation_diagnostics.test.ts`.
+- Added early-staged transition coverage in `tests/sector_offensive.test.ts`.
+
+### Verification
+- `cmd /c node_modules\\.bin\\vitest.cmd run tests\\scenario_operation_diagnostics.test.ts`
+- `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\sector_offensive.test.ts`
+- `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\bot_operation_objective_focus.test.ts`
+- `cmd /c npm run typecheck`
+- `cmd /c npm run sim:scenario:run:40w -- --scenario data/scenarios/apr1992_definitive_40w.json --unique --out runs`
+
+### Run evidence
+- `n112`: `invalid_operation_count = 0`, `55` total attack orders, `47` battles; combat-causality now fails only on `zero_battles`.
+- `n113`: `invalid_operation_count = 0`, `60` total attack orders, `51` battles, `final_state_hash = f3a7087d09696061`.
+- `Operacija Lukavac` now leaves planning on turn 12 after both brigades reach the staging OSID, instead of idling until turn 16.
+
+### Gotcha
+- The remaining invalidity is now isolated zero-battle weeks caused by offensive cadence gaps, not the old execution deadlock.
+
+## 2026-03-05 - Audit gotchas: fog/intel split and corps-op shadowing
+
+- Confirmed that current tactical fog-of-war is not driven by the new sector-intel system. The sim derives `sector_intel` in the war pipeline, but the live map adapter/fog overlay still reads legacy `recon_intelligence.confirmed_empty`. Live `n110` evidence: `final_save.json` contains `sector_intel` and no `recon_intelligence`, so the current fog overlay path is effectively disconnected from the data the sim actually produces.
+- Confirmed that autonomous corps op planning is implemented but internally conflicted: generic named operations can be created earlier in `generateAllCorpsOrders()`, then overwritten later in the same pass by sector-offensive launch logic because non-`sector_attack` active ops are considered replaceable.
+- No code change in this checkpoint; this is a control-doc update during the ongoing engine audit so the next fix can target a verified architecture gap instead of re-discovering it.

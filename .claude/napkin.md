@@ -1,6 +1,6 @@
 # Napkin Runbook
 
-**Location:** `.claude/napkin.md` — single runbook for this repo. Read and curate at session start. Update during work.
+**Location:** `.claude/napkin.md` - single runbook for this repo. Read and curate at session start. Update during work.
 
 **Rules:** Max 10 items per category. Re-prioritize on every read (highest first). Merge duplicates, remove stale. Each entry: date + short title + "Do instead".
 
@@ -16,24 +16,24 @@
 5. **[2026-02-21] Refactor-pass and code-simplifier between phases/checkpoints**
    Do instead: After each implementation phase or between plan checkpoints, run /refactor-pass (dead code, duplication, over-engineered stubs, simplify conditionals; then tsc + vitest) and /code-simplifier on recently modified code. Plans (e.g. officers-phase-e-implementation) must instruct this between tasks.
 6. **[2026-02-13] Verify edits + close handoffs with evidence**
-   Do instead: After edits, verify with `ReadFile` + `git diff`. After roadmap or handoff, close with run evidence + decision memo + cross-link.
+   Do instead: After edits, verify with file reads + `git diff`. After roadmap or handoff, close with run evidence + decision memo + cross-link.
 7. **[2026-02-24] Scenario checkpoint lengths**
    Do instead: Use 20w/30w checkpoint runs for iteration; reserve 52w for acceptance only.
 8. **[2026-02-11] Preserve shared type exports during refactor**
    Do instead: Keep `export type { ... }` statements; removing them breaks downstream consumers silently.
 
 ## Shell & Platform
-1. **[2026-03-05] Write tool EEXIST on existing dirs — use Python**
-   Do instead: Write/Edit tools fail with `EEXIST: file already exists, mkdir` on `src/sim/combat`, `src/state`, etc. Use `python3 sector_gen.py` (write via Write tool to project root, then `python3 script.py`). Heredocs with single-quote TypeScript also fail in bash -c; use Python triple-quoted strings in a file.
-2. **[2026-02-28] Use built-in Grep tool, not shell rg**
-   Do instead: Shell `rg` unavailable in PowerShell; use the Grep tool for content scans.
-2. **[2026-02-07] Windows shell separator**
+1. **[2026-03-05] Existing-dir file generation: prefer `apply_patch` or script files**
+   Do instead: Use `apply_patch` for manual edits. For bulk/generated content, write a short script file and run it. Avoid helper workflows that recreate existing directories or rely on fragile heredocs.
+2. **[2026-03-05] `rg.exe` may be blocked in PowerShell**
+   Do instead: Try `rg` first for fast scans. If PowerShell returns access denied, fall back to `Get-ChildItem` + `Select-String` instead of burning time on shell debugging.
+3. **[2026-02-07] Windows shell separator**
    Do instead: On Windows PowerShell, use `;` not `&&` to chain commands.
-3. **[2026-02-07] tsx can hang on Windows**
+4. **[2026-02-07] tsx can hang on Windows**
    Do instead: Use `node_modules/.bin/tsx` directly (not `npx tsx`). Prefer `npm run test:vitest` over `npx tsx --test`.
-4. **[2026-02-28] Root tsc vs nested UI package**
+5. **[2026-02-28] Root tsc vs nested UI package**
    Do instead: When `npx tsc --noEmit` at root fails on JSX config, verify changed UI package with its own build (`src/ui/map: npm run build`). Report root failures as pre-existing unless introduced by your edits.
-5. **[2026-02-13] Validate paths with glob before use**
+6. **[2026-02-13] Validate paths with glob before use**
    Do instead: Stale paths break silently. Skills at `.claude/skills/*` — validate with glob.
 
 ## Imports & Build
@@ -101,16 +101,42 @@
    Do instead: After rework: RBiH 126, RS 80, HRHB 41. Removed 13 dupes, added 16 new. HVO Guard brigades at w80-88. `historical_decorations` on 46+ brigades. `is_elite` on guards + 65th.
 7. **[2026-03-02] War stories (end-of-game narrative)**
    Do instead: `generateWarStories(state)` in `war_stories.ts`. 6 arcs: veteran/bloodied/shattered/risen/destroyed/garrison. Deterministic templates, no randomness. Not yet wired into final save JSON.
+8. **[2026-03-05] April 1992 startup path uses `player_choice` recruitment**
+   Do instead: When fixing opening brigade placement, patch both `src/scenario/oob_early_war_entry.ts` and `src/sim/recruitment_engine.ts`. A fix in the legacy OOB path alone will not survive real scenario startup.
+9. **[2026-03-05] `home_osid` only sticks on friendly-held starts**
+   Do instead: Choose brigade starting OSIDs that are already friendly-controlled at init. If the selected `home_osid` is enemy-held, spread/re-homing logic will relocate the brigade and the intended opening operation will not launch from there.
 
 ## Sectors & Operations
-1. **[2026-03-01] corps_id from tags, not field**
+1. **[2026-03-06] Proof lane + eligible-attacker boundary**
+   Do instead: Before wide calibration work, run `tests/scenario_vrs_operation_proof.test.ts` / `data/scenarios/apr1992_vrs_operation_proof_4w.json` to prove one VRS opening op can attack, battle, and advance. In combat-causality, treat `execution_without_eligible_attackers` as a separate root-cause boundary from `execution_without_attack_orders`.
+1. **[2026-03-05] `sector_attack` phase timing has one owner**
+   Do instead: Let `src/sim/combat/sector_offensive.ts` advance `sector_attack` phases. `src/sim/combat/corps_command.ts:advanceOperations()` must skip them, or named ops will enter/leave `execution` on the wrong schedule.
+2. **[2026-03-05] Execution-phase no-progress must spend failure budget**
+   Do instead: If a `sector_attack` stays in `execution` and produces no objective attempt, treat that as failure/stalemate in `updateSectorOffensiveResults()` so the op can skip or end instead of hanging indefinitely.
+3. **[2026-03-05] Generic corps named ops are currently shadowable**
+   Do instead: Treat `sector_attack` as the canonical live operation path until `generateAllCorpsOrders()` stops allowing `generateCorpsDirectives()` to replace a fresh non-sector `active_operation` later in the same pass.
+4. **[2026-03-06] Maneuver-only execution turns are not invalid**
+   Do instead: In combat-causality diagnostics, an execution-phase operation with `brigade_movement_orders` but zero attack orders is still maneuvering. Count only true inert turns as `execution_without_attack_orders`.
+5. **[2026-03-06] End planning early when the force is already staged**
+   Do instead: If all active operation participants have reached `staging_osid` and at least one full planning turn has elapsed, transition the `sector_attack` to execution instead of waiting out the full nominal planning duration.
+4. **[2026-03-01] corps_id from tags, not field**
    Do instead: Use `getFormationCorpsId(f)` from `corps_sector_partition.ts`. Brigade corps stored in tags (`corps:vrs_1st_krajina`), not `f.corps_id`.
-2. **[2026-03-01] Sector exempt corps**
+5. **[2026-03-01] Sector exempt corps**
    Do instead: arbih_general_staff, vrs_main_staff, hvo_general_staff (army reserves) + hvo_central_bosnia (Bosniak-Croat conflict) — don't assign their brigades to front sectors.
-3. **[2026-03-05] Sector pipeline (updated — contiguity fix + min coverage + balancing)**
+6. **[2026-03-05] Sector pipeline (updated — contiguity fix + min coverage + balancing)**
    Do instead: `buildMultiSectorsForCorps()`: findSubSegments (friendly-OSID adjacency only — fix for non-contiguous sectors) → splitOversizedSubSegments (MAX_SECTOR_EDGES=25) → buildSectors → Phase 1E split (MAX_SECTOR_BRIGADES=8) → assignInteriorBrigades → redistributeExcessReserves → ensureMinimumSectorCoverage (promotes reserve or transfers from surplus). CorpsDirective now has `reinforce_sector_ids` (under-density sectors, <50% target density) + `priority_sector_id` (sector with most offensive targets). Bot: Rule 5c marches overstocked brigades to reinforce sectors; Rule 7 marches interior brigades to priority sector first.
-4. **[2026-03-05] Sector intel replaces recon_intelligence (DELETED)**
+7. **[2026-03-05] Sector intel replaces recon_intelligence (DELETED)**
    Do instead: Use `sector_intel.ts` / `sector_intel_constants.ts`. `derive-sector-intel` pipeline step. Confidence model, recon-by-force, bot target weighting. GUI fog-of-war (visible_brigade_ids) deferred to Phase 6. `recon_intelligence.ts` is DELETED — do not reference it.
+8. **[2026-03-05] Opening operations need explicit rosters, sectors, and launch OSIDs**
+   Do instead: For April 1992 VRS opening ops, prefer explicit `participating_brigades`, `sector_id`, and `staging_osid` over broad corps-minus-reserve inference. Then verify each op can actually emit attack orders once it reaches `execution`.
+9. **[2026-03-05] Named operations own their brigades until the op ends**
+   Do instead: If a brigade is listed in `active_operation.participating_brigades`, route it through operation planning/execution/recovery first. Do not let `home_defense_active`, reserve logic, or generic corps targeting retake control until `active_operation` is cleared.
+
+## GUI / HoI Map
+1. **[2026-03-05] Tactical fog still uses legacy recon data**
+   Do instead: Until the UI is migrated, do not treat map fog as proof that `sector_intel`-driven visibility works. Current live path reads `recon_intelligence.confirmed_empty` in `GameStateAdapter.ts` and `buildFogOfWarGeoJSON.ts`.
+2. **[2026-03-05] UI posture blocking can disagree with operation ownership**
+   Do instead: Before trusting disabled attack/assault buttons in `FormationDetail.tsx`, check whether the brigade is in `active_operation.participating_brigades`. Engine operation ownership overrides `home_defense_active`, but the panel still blocks purely on the home-defense flag.
 
 ## GUI / HoI Map
 1. **[2026-03-04] GUI Phase 5 COMPLETE. Only replay scrubber deferred.**
@@ -123,6 +149,12 @@
    Do instead: Run ensureFormationIcons and setData in requestIdleCallback (~400ms), not in overlay rAF chain. Cancel in cleanup.
 5. **[2026-02-28] Selection panel: inline styles for positioning**
    Do instead: Use inline styles (position, right, top, zIndex, direction: ltr) so Tailwind/purge/RTL cannot override. `?showPanel=1` for dev layout verification.
+6. **[2026-03-05] Active GUI path only — avoid saved mirror files**
+   Do instead: Edit `src/ui/map/components/*` and `src/ui/map/map/*` for live behavior. Treat `src/ui/map/saved/*` as legacy snapshots unless explicitly migrating.
+7. **[2026-03-05] Map mode shortcuts must match toolbar labels**
+   Do instead: Keep `useKeyboardShortcuts` key mapping synchronized with `MapModeToolbar` mode badges (`1`-`5`: political/ethnic/supply/pressure/density).
+8. **[2026-03-05] Staged order arrowheads are fill polygons, not glyph text**
+   Do instead: Pulse staged heads via `fill-opacity` (`attack-arrows-heads-staged`, `movement-arrows-heads-staged`) and avoid legacy `text-opacity` writes.
 
 ## Desktop & Electron
 1. **[2026-03-02] One map app: desktop uses dev when running**
@@ -177,24 +209,24 @@
 ## Calibration
 1. **[2026-03-05] ATH n65=99.2% area-weighted (40w); systematic OSID override strategy**
    Do instead: Use area-weighted match (km²) as primary. ATH 40w = 99.2% (n65, commit a689d83). 171 overrides (144 RS, 18 RBiH, 5 HRHB). 7 permanent mismatches (consolidation ceiling — do not chase). Pool exhaustion at 25% rate. All 6 bot benchmarks PASS.
-2. **[2026-03-05] Pool exhaustion fix: avoided_osids DON'T prevent loss; control_overrides DO**
+2. **[2026-03-05] Combat calibration needs causality, not just territory**
+   Do instead: Before trusting control deltas, verify non-zero attack orders and non-zero battles in `weekly_report.jsonl`, then separate combat flips from consolidation, drift, and init overrides. Update `docs/40_reports/CALIBRATION_MASTER.md` during the session. Treat `n104` as partial recovery only: combat restored (`53` orders / `53` battles) but still invalid because `24` execution-phase operations emitted no attack orders.
+3. **[2026-03-05] Pool exhaustion fix: avoided_osids DON'T prevent loss; control_overrides DO**
    Do instead: When sim=RBiH but painted=RS, adding RBiH avoided_osids is often ineffective (cells lost via counterattack or weakness, not direct attack). Add RS `osid_control_overrides` for systematic under-captures. avoideds work only when bot is actively targeting wrong cells.
-3. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
+4. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
    Do instead: RS `avoided_osids` = fix RS OVER-captures (painted=RBiH/HRHB, sim=RS — prevent VRS from attacking there). RS `osid_control_overrides` = fix RS UNDER-captures (painted=RS, sim=RBiH — force-start RS control). Adding under-captures to avoided_osids makes RS even less likely to capture them.
-4. **[2026-03-04] HRHB Krajina/Posavina mismatches are INIT-based (ethnic Croat composition)**
+5. **[2026-03-04] HRHB Krajina/Posavina mismatches are INIT-based (ethnic Croat composition)**
    Do instead: Cells banja_luka:dragocaj, banja_luka:potkozarje_3, bosanska_gradiska:mackovac, prijedor:raljas, odzak:bosanski_samac, orasje:ostra_luka start as HRHB in initial_save due to Croat ethnic majority in those cells. Not a runtime regression. Do NOT chase these as calibration mismatches caused by bot changes — they are data-driven init artifacts.
-5. **[2026-03-04] Consolidation captures CANNOT be fixed by bot config — ~8 persistent mismatches**
+6. **[2026-03-04] Consolidation captures CANNOT be fixed by bot config — ~8 persistent mismatches**
    Do instead: Cells surrounded by same-faction neighbors auto-flip regardless of avoided_osids or overrides. Confirmed: kakanj:biljesevo, zavidovici:cardak_2, olovo:olovo_2, and all 4 HRHB over-captures (jablanica, kiseljak outskirts, rat_2, prozor area) are consolidation-captured. Only engine-level consolidation rule changes could fix these.
-6. **[2026-03-04] Load-bearing wrong captures: turbe_2 RS over-capture enables Donji Vakuf cascade**
+7. **[2026-03-04] Load-bearing wrong captures: turbe_2 RS over-capture enables Donji Vakuf cascade**
    Do instead: turbe_2 is an RS over-capture BUT it is a stepping stone enabling Donji Vakuf consolidation cascade (3 correct cells). Adding turbe_2 to RS avoided_osids breaks Donji Vakuf → net -3pp loss (n463 confirmed). Do NOT add turbe_2 to RS avoided_osids.
-7. **[2026-03-04] Fragile VRS force allocation: Kalesija→Kupres dependency**
+8. **[2026-03-04] Fragile VRS force allocation: Kalesija→Kupres dependency**
    Do instead: Kalesija seher_2/gojcin_2 RS overrides redirect VRS pressure → bonus kupres:kupres_2 fix (n466). Adding Kladanj overrides on top disrupts this allocation → kupres:kupres_2 reverts (n467). Test each override block in isolation; never stack two override groups without verifying the underlying force dynamics.
-8. **[2026-03-03] Timeline knobs drive 40w behavior first & prove efficacy**
+9. **[2026-03-03] Timeline knobs drive 40w behavior first & prove efficacy**
    Do instead: Tune `apr1992.json` before `bot_strategy.ts`. Prove efficacy immediately by running one 40w test and comparing `final_state_hash` and `compare_painted_vs_sim.cjs`; revert if inert.
-9. **[2026-03-04] apr1992.json ↔ FACTION_DOCTRINE_PHASES must stay synced**
+10. **[2026-03-04] apr1992.json ↔ FACTION_DOCTRINE_PHASES must stay synced**
    Do instead: After editing EITHER `data/scenarios/timelines/apr1992.json` doctrine values OR `bot_strategy.ts` `FACTION_DOCTRINE_PHASES`, immediately run `npx vitest run tests/war_timeline.test.ts` to confirm round-trip parity. Drift causes silent calibration regression.
-10. **[2026-03-03] Municipality target sets are the strongest live lever**
-    Do instead: Prioritize small `target_municipalities` edits for affected corps (e.g., EBK `brcko`/`lopare` trimming yielded +8.3pp POSAVINA_NE) before weight/min_outcome tuning.
 ## Engine Runtime Patterns
 1. **[2026-03-05] Takeover displacement off-by-one FIXED**
    Do instead: `processPhaseIIDisplacementTakeover` Section 0 uses `currentTurn === warStartTurn + 1` (not warStartTurn). `runTurn()` increments turn BEFORE phases — first war turn = warStartTurn+1. Fixed in `displacement_takeover.ts`.

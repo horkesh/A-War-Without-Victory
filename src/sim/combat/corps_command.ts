@@ -241,6 +241,7 @@ export function advanceOperations(state: GameState): void {
         const cmd = state.corps_command[cid];
         const op = cmd.active_operation;
         if (!op) continue;
+        if (op.type === 'sector_attack') continue;
 
         const turnsInPhase = state.meta.turn - op.phase_started_turn;
 

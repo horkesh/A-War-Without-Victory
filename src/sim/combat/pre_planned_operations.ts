@@ -1,104 +1,123 @@
 /**
  * Pre-planned VRS operations injected at scenario start.
  *
- * Historical context: VRS inherited JNA operational plans and executed
- * coordinated corps-level offensives from Day 1 of the war. These were
- * not ad-hoc — they were pre-positioned, pre-supplied, and launched
- * immediately upon JNA withdrawal.
- *
- * Six named operations, one per VRS corps:
- * - Operation Koridor (East Bosnian Corps): Brčko corridor link
- * - Operation Drina (Drina Corps): Zvornik → Novo Selo → Bratunac
- * - Operation Prsten (SRK): Ilidža → Rakovica → Svrake → Hotonj
- * - Operation Foča (Herzegovina Corps): Brusna → Mazoče → Tjentište → Miljevina → Izbišno → Patkovina
- * - Operation Prijedor (1st Krajina Corps): Sweep Prijedor/Sanski Most/Ključ
- * - Operation Kupres (2nd Krajina Corps): Seize Kupres from HVO (April 1992)
- *
- * Operations inject in 'planning' phase with planning_duration: 1.
- * Bot/player orders trigger execution next turn.
- *
- * Deterministic: sorted iteration, no randomness, no timestamps.
+ * These opening operations are explicit scenario-shaping data. They should
+ * use named brigades, concrete launch sectors, and short opening objective
+ * chains instead of broad corps-wide participation.
  */
 
 import type {
     CorpsOperation,
-    FactionId,
     FormationId,
     GameState,
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Operation Definitions
-// ═══════════════════════════════════════════════════════════════════════════
-
 interface PrePlannedOp {
     corps: string;
     name: string;
+    sector_id: string;
+    participating_brigades: FormationId[];
     target_osids: string[];
     staging_osid: string;
 }
 
 const VRS_PRE_PLANNED: PrePlannedOp[] = [
-    { corps: 'vrs_east_bosnian', name: 'Operation Koridor',
-      staging_osid: 'op:brcko:brcko',
-      target_osids: ['op:modrica:garevac_2'] },
-    { corps: 'vrs_drina', name: 'Operation Drina',
-      staging_osid: 'op:zvornik:kozluk_2',
-      target_osids: [
-          'op:zvornik:zvornik',      // Zvornik
-          'op:zvornik:novo_selo',    // Novo Selo
-          'op:bratunac:bratunac_2',  // Bratunac (march south through friendly RS territory)
-      ] },
-    { corps: 'vrs_sarajevo_romanija', name: 'Operation Prsten',
-      staging_osid: 'op:ilidza:kasindo',
-      target_osids: [
-          'op:ilidza:sarajevo_dio_ilidza_2',  // Sarajevo Dio - Ilidža
-          'op:ilidza:rakovica_2',              // Rakovica
-          'op:vogosca:svrake',                 // Svrake
-          'op:vogosca:hotonj',                 // Hotonj (expected stalemate — bloody battle)
-      ] },
-    { corps: 'vrs_herzegovina', name: 'Operation Foča',
-      staging_osid: 'op:foca:foca_3',
-      target_osids: [
-          'op:foca:brusna_2',       // Brusna
-          'op:foca:kosman',         // Mazoče (OSID slug is 'kosman')
-          'op:foca:tjentiste_2',    // Tjentište
-          'op:foca:miljevina_2',    // Miljevina
-          'op:foca:izbisno',        // Izbišno
-          'op:foca:patkovina',      // Patkovina
-      ] },
-    { corps: 'vrs_1st_krajina', name: 'Operation Prijedor',
-      staging_osid: 'op:prijedor:prijedor_2',
-      target_osids: [
-          // Prijedor municipality (11 OSIDs)
-          'op:prijedor:prijedor_2', 'op:prijedor:kozarac_2', 'op:prijedor:kamicani',
-          'op:prijedor:cejreci', 'op:prijedor:raljas', 'op:prijedor:ljubija_2',
-          'op:prijedor:brezicani', 'op:prijedor:maricka_2', 'op:prijedor:omarska_2',
-          'op:prijedor:rasavci_2', 'op:prijedor:alisici',
-          // Sanski Most municipality (10 OSIDs)
-          'op:sanski_most:sanski_most_2', 'op:sanski_most:skucani_vakuf_2',
-          'op:sanski_most:stari_majdan', 'op:sanski_most:ilidza_2',
-          'op:sanski_most:donja_kozica', 'op:sanski_most:ostra_luka',
-          'op:sanski_most:budimlic_japra_2', 'op:sanski_most:lusci_palanka_2',
-          'op:sanski_most:jelasinovci', 'op:sanski_most:kljevci',
-          // Ključ municipality (7 OSIDs)
-          'op:kljuc:kljuc_2', 'op:kljuc:hadzici', 'op:kljuc:krasulje_2',
-          'op:kljuc:sanica_2', 'op:kljuc:donje_ratkovo_2',
-          'op:kljuc:donji_vrbljani_2', 'op:kljuc:cadjavica',
-      ] },
+    {
+        corps: 'vrs_east_bosnian',
+        name: 'Operation Koridor',
+        sector_id: 'sector:vrs_east_bosnian:0',
+        participating_brigades: [
+            'rs_1st_posavina_infantry',
+            'rs_2nd_posavina_light_infantry',
+        ],
+        staging_osid: 'op:bosanski_samac:crkvina_2',
+        target_osids: [
+            'op:modrica:garevac_2',
+            'op:bosanski_samac:samac_2',
+        ],
+    },
+    {
+        corps: 'vrs_drina',
+        name: 'Operation Drina',
+        sector_id: 'sector:vrs_drina:6',
+        participating_brigades: [
+            'rs_1st_birac',
+            'rs_1st_bratunac',
+            'rs_1st_zvornik',
+        ],
+        staging_osid: 'op:zvornik:kozluk_2',
+        target_osids: [
+            'op:bratunac:bratunac_2',
+            'op:zvornik:zvornik',
+            'op:zvornik:novo_selo',
+        ],
+    },
+    {
+        corps: 'vrs_sarajevo_romanija',
+        name: 'Operation Prsten',
+        sector_id: 'sector:vrs_sarajevo_romanija:0',
+        participating_brigades: [
+            'rs_1st_sarajevo_mechanized',
+            'rs_2nd_sarajevo_light_infantry',
+            'rs_3rd_sarajevo_infantry',
+        ],
+        staging_osid: 'op:ilidza:kasindo',
+        target_osids: [
+            'op:ilidza:sarajevo_dio_ilidza_2',
+            'op:ilidza:rakovica_2',
+            'op:vogosca:svrake',
+            'op:vogosca:hotonj',
+        ],
+    },
+    {
+        corps: 'vrs_herzegovina',
+        name: 'Operation Foca',
+        sector_id: 'sector:vrs_herzegovina:3',
+        participating_brigades: [
+            'rs_ajnie_brigade',
+            'rs_foa_brigade',
+            'rs_kalinovik_brigade',
+        ],
+        staging_osid: 'op:foca:foca_3',
+        target_osids: [
+            'op:foca:brusna_2',
+            'op:foca:kosman',
+            'op:foca:tjentiste_2',
+            'op:foca:miljevina_2',
+            'op:foca:izbisno',
+            'op:foca:patkovina',
+        ],
+    },
+    {
+        corps: 'vrs_1st_krajina',
+        name: 'Operation Prijedor',
+        sector_id: 'sector:vrs_1st_krajina:18',
+        participating_brigades: [
+            'rs_1st_armored',
+            'rs_16th_krajina_motorized',
+            'rs_11th_dubica_infantry',
+            'rs_1st_gradika_light_infantry',
+            'rs_43rd_prijedor_motorized',
+            'rs_5th_kozara_light_infantry',
+            'rs_6th_sanske_infantry',
+        ],
+        staging_osid: 'op:prijedor:prijedor_2',
+        target_osids: [
+            'op:prijedor:ljubija_2',
+            'op:prijedor:kozarac_2',
+            'op:prijedor:kamicani',
+            'op:prijedor:raljas',
+            'op:sanski_most:stari_majdan',
+            'op:sanski_most:sanski_most_2',
+        ],
+    },
 ];
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Main Entry Point
-// ═══════════════════════════════════════════════════════════════════════════
 
 /**
  * Inject pre-planned VRS operations into corps_command at scenario start.
- * Each operation starts in 'planning' phase with planning_duration: 1.
- * Bot/player orders execution begins next turn.
- * Also sets the 5 corps' stances to 'offensive'.
+ * Each operation starts in planning phase with planning_duration: 1.
  */
 export function injectPrePlannedOperations(state: GameState): void {
     const corpsCommand = state.corps_command;
@@ -109,37 +128,23 @@ export function injectPrePlannedOperations(state: GameState): void {
 
     for (const def of VRS_PRE_PLANNED) {
         const cmd = corpsCommand[def.corps];
-        if (!cmd) continue;
+        if (!cmd || cmd.active_operation) continue;
 
-        // Skip if corps already has an active operation
-        if (cmd.active_operation) continue;
+        const participating = def.participating_brigades.filter((fid) => {
+            const formation = formations[fid];
+            if (!formation || formation.corps_id !== def.corps) return false;
+            if (formation.status !== 'active') return false;
+            return formation.kind === 'brigade' || formation.kind === 'og' || formation.kind === 'operational_group';
+        }).sort(strictCompare);
 
-        // Find active brigades under this corps
-        const corpsBrigades: FormationId[] = [];
-        for (const fid of Object.keys(formations).sort(strictCompare)) {
-            const f = formations[fid];
-            if (!f || f.corps_id !== def.corps) continue;
-            if (f.status !== 'active') continue;
-            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-            corpsBrigades.push(fid);
-        }
+        if (participating.length === 0) continue;
 
-        if (corpsBrigades.length === 0) continue;
-
-        // Validate target OSIDs: only include those not already RS-controlled
-        const objectives: string[] = [];
-        for (const osid of def.target_osids) {
+        const objectives = def.target_osids.filter((osid) => {
             const controller = getPoliticalControllerOSID(state, osid, undefined);
-            if (controller === 'RS') continue; // Already ours
-            if (controller === null) continue;
-            objectives.push(osid);
-        }
+            return controller !== null && controller !== 'RS';
+        });
 
-        if (objectives.length < 1) continue;
-
-        // Participating brigades: all corps brigades minus 1 reserve
-        const reserveCount = Math.max(1, Math.floor(corpsBrigades.length * 0.15));
-        const participating = corpsBrigades.slice(0, corpsBrigades.length - reserveCount);
+        if (objectives.length === 0) continue;
 
         const op: CorpsOperation = {
             name: def.name,
@@ -147,15 +152,16 @@ export function injectPrePlannedOperations(state: GameState): void {
             phase: 'planning',
             started_turn: turn,
             phase_started_turn: turn,
-            planning_duration: 1,
-            staging_osid: def.staging_osid,
-            participating_brigades: participating.sort(strictCompare),
+            participating_brigades: participating,
+            sector_id: def.sector_id,
             objectives,
             current_objective_index: 0,
+            planning_duration: 1,
+            supply_readiness: 1.0,
             momentum: 0,
             failure_count: 0,
             consecutive_failures_on_current: 0,
-            supply_readiness: 1.0,
+            staging_osid: def.staging_osid,
         };
 
         cmd.active_operation = op;
@@ -163,5 +169,4 @@ export function injectPrePlannedOperations(state: GameState): void {
     }
 }
 
-/** Exported for testing. */
 export const _VRS_PRE_PLANNED = VRS_PRE_PLANNED;
