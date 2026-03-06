@@ -425,4 +425,62 @@ describe('combat causality diagnostics', () => {
         assert.equal(row.operation_diagnostics?.[0]?.corps_id, 'corps_1');
         assert.ok(row.operation_diagnostics?.[0]?.invalidation_reasons.includes('execution_without_eligible_attackers'));
     });
+
+    it('groups behavioral health into a stable weekly reporting family', () => {
+        const state = makeState();
+        const orderSnapshot = makeOrderSnapshot({ b1: 'op:enemy:obj1' }, {}, { corps_1: 1 });
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
+            orderSnapshot,
+            makeOsidReport([{
+                attacker_brigade: 'b1' as any,
+                attacker_faction: 'RS',
+                defender_faction: 'RBiH',
+                target_osid: 'op:enemy:obj1' as any,
+                outcome: 'victory' as any,
+                power_ratio: 1.2,
+                attacker_won: true,
+                defender_brigade: null,
+                snap_events: []
+            }])
+        );
+        const summary = buildCombatCausalitySummary(
+            diagnostics,
+            orderSnapshot,
+            makeOsidReport([{
+                attacker_brigade: 'b1' as any,
+                attacker_faction: 'RS',
+                defender_faction: 'RBiH',
+                target_osid: 'op:enemy:obj1' as any,
+                outcome: 'victory' as any,
+                power_ratio: 1.2,
+                attacker_won: true,
+                defender_brigade: null,
+                snap_events: []
+            }])
+        );
+        const attribution = {
+            total_changes: 3,
+            combat: 1,
+            consolidation: 1,
+            abandoned: 0,
+            init_overrides: 1,
+            other: 0,
+        };
+
+        const row = buildWeeklyReport(
+            state,
+            undefined,
+            undefined,
+            undefined,
+            summary,
+            attribution,
+            diagnostics
+        );
+
+        assert.ok(row.behavioral_health, 'weekly report should expose behavioral_health');
+        assert.equal(row.behavioral_health?.combat_causality.total_battles, 1);
+        assert.equal(row.behavioral_health?.control_change_attribution.combat, 1);
+        assert.equal(row.behavioral_health?.valid_for_combat_calibration, true);
+    });
 });

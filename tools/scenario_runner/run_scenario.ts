@@ -84,7 +84,6 @@ async function main(): Promise<void> {
   process.stdout.write(`       ${result.paths.control_delta}\n`);
   process.stdout.write(`       ${result.paths.end_report}\n`);
   process.stdout.write(`       ${result.paths.activity_summary}\n`);
-  process.stdout.write(`       ${result.paths.control_events}\n`);
   process.stdout.write(`       ${result.paths.formation_delta}\n`);
   if (result.paths.replay_timeline) {
     process.stdout.write(`       ${result.paths.replay_timeline}\n`);

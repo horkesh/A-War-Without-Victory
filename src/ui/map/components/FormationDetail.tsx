@@ -50,6 +50,10 @@ export function FormationDetail() {
   if (operationsPanelOpen || !selectedFormationId) return null;
 
   const formation = loadedGameState?.formations.find((f) => f.id === selectedFormationId) ?? null;
+  const operationOwningFormation = loadedGameState?.operations?.find(
+    (operation) => operation.participating_brigade_ids?.includes(selectedFormationId)
+  );
+  const operationOwnershipOverridesHomeDefense = !!operationOwningFormation;
   // Per-formation casualty data is not available in LoadedGameState (ledger is per-faction).
   const attackOrder = loadedGameState?.attackOrders?.find(
     (o) => o.brigadeId === selectedFormationId
@@ -342,7 +346,9 @@ export function FormationDetail() {
               <div className="flex flex-wrap gap-1">
                 {(['hold', 'defend', 'defend_at_all_costs', 'elastic_defense', 'counterattack', 'dig_in', 'attack', 'assault'] as const).map((posture) => {
                   const isOffensive = posture === 'attack' || posture === 'assault';
-                  const blocked = isOffensive && (formation.home_defense_active ?? false);
+                  const blocked = isOffensive
+                    && (formation.home_defense_active ?? false)
+                    && !operationOwnershipOverridesHomeDefense;
                   return (
                     <button
                       key={posture}
@@ -357,7 +363,7 @@ export function FormationDetail() {
                         formation.id,
                         posture
                       )}
-                      title={blocked ? 'Blocked: home defense active' : undefined}
+                      title={blocked ? 'Blocked: home defense active' : operationOwnershipOverridesHomeDefense ? `Operation-owned: ${operationOwningFormation?.name}` : undefined}
                       className={`text-[11px] font-sans px-2 py-1 rounded border border-panel-border ${blocked ? 'opacity-40 cursor-not-allowed text-text-secondary' : 'text-interactive hover:bg-panel-hover'}`}
                     >
                       {posture.replace(/_/g, ' ')}

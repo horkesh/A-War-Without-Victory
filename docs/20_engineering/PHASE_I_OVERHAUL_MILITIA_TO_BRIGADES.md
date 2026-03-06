@@ -212,7 +212,7 @@ VRS brigades do **not** follow the TO detachment → battalion → brigade pathw
 - `initial_personnel` from OOB (800-1,500 per brigade)
 - `initial_cohesion` from OOB (62-75)
 - Equipment class from OOB (mechanized, motorized, etc.)
-- Corps assignment from OOB (`subordinate_to`)
+- Corps assignment from OOB (`corps`)
 - Pre-existing entrenchment (4 turns, unchanged)
 
 ### 4.2 VRS Late-War Formations
@@ -310,7 +310,7 @@ On promotion, the formation also inherits from the matched OOB entry:
 - `id` remains the runtime-generated ID (F_RBiH_0042) — no ID change
 - `name` updates to historical name
 - `tags` get `oob:arbih_305th_mountain` (linking to OOB entry)
-- `subordinate_to` / corps tag updated if OOB specifies corps assignment
+- `corps` tag updated if OOB specifies corps assignment
 - Equipment class from OOB entry (if different from militia default)
 
 ### 5.4 Displaced-Origin Names
@@ -610,7 +610,7 @@ This overhaul supersedes several of the targeted structural changes proposed in 
 
 14. Implement battalion → brigade promotion logic in `promote_formations` step: personnel ≥ 1,500 AND cohesion ≥ 40 AND turns_active ≥ 4 AND faction corps exist; `kind` → `'brigade'`, cohesion +10 bonus, readiness → `'active'`
 15. Implement historical name matching (`matchHistoricalName`) from OOB catalog — lookup by (faction, home_mun, ordinal); fallback to `"[Ordinal] [Municipality] Brigade"` (Section 5.1–5.2)
-16. *(parallel with 17)* Add OOB tag propagation on promotion: set `matched_oob_id`, inherit `subordinate_to` and equipment class from OOB entry (Section 5.3)
+16. *(parallel with 17)* Add OOB tag propagation on promotion: set `matched_oob_id`, inherit `corps` and equipment class from OOB entry (Section 5.3)
 17. *(parallel with 16)* Implement displaced-origin naming: if `origin_mun ≠ home_mun` and OOB catalog entry specifies displaced origin, use displaced name (Section 5.4)
 
 **→ Refactor Pass D** (`code-simplifier` + `qa-engineer`): add unit tests for `matchHistoricalName` covering exact match, ordinal overflow, and displaced-origin cases; verify no duplicate name assignment across formations; smoke-test triad green.

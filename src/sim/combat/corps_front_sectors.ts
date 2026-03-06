@@ -145,10 +145,19 @@ function mapOsidsToCorps(
 ): Map<Osid, FormationId> {
     const result = new Map<Osid, FormationId>();
 
-    // Pre-compute friendly OSIDs for fast membership checks
+    // Pre-compute friendly OSIDs for fast membership checks.
+    // Include BOTH edge-graph OSIDs and political_controllers entries so that
+    // corps/brigades at deep-interior locations can seed BFS.
     const friendlyOsids = new Set<Osid>();
     for (const osid of adjacency.keys()) {
         const ctrl = getPoliticalControllerOSID(state, osid, reverseMap ?? undefined);
+        if (ctrl === faction) friendlyOsids.add(osid);
+    }
+    // Also add all OSIDs from political_controllers that belong to this faction.
+    // These may not appear in the adjacency graph (interior OSIDs with no edges)
+    // but are needed for BFS seeding from corps HQ / subordinate locations.
+    const pc = state.political_controllers ?? {};
+    for (const [osid, ctrl] of Object.entries(pc)) {
         if (ctrl === faction) friendlyOsids.add(osid);
     }
 
@@ -438,10 +447,24 @@ function consolidateCrossCorpsFronts(
         }
         if (!majorityCorps) continue;
 
+        // Identify which minority corps can safely lose their edges in this
+        // component. Protect a corps if losing this component's edges would
+        // leave it with zero remaining edges (sector-less). Uses current
+        // remaining count (not initial) to catch cumulative losses.
+        const protectedCorps = new Set<FormationId>();
+        for (const [cid, countInComponent] of corpsCounts) {
+            if (cid === majorityCorps) continue;
+            const remainingForCorps = corpsEdges.get(cid)?.length ?? 0;
+            if (remainingForCorps <= countInComponent) {
+                protectedCorps.add(cid);
+            }
+        }
+
         // Reassign minority edges to the majority corps
         for (const eid of component) {
             const currentCorps = edgeToCorps.get(eid);
             if (!currentCorps || currentCorps === majorityCorps) continue;
+            if (protectedCorps.has(currentCorps)) continue;
 
             // Remove from current corps
             const currentList = corpsEdges.get(currentCorps);

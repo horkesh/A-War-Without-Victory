@@ -116,7 +116,7 @@
 3. **[2026-03-05] Execution-phase no-progress must spend failure budget**
    Do instead: If a `sector_attack` stays in `execution` and produces no objective attempt, treat that as failure/stalemate in `updateSectorOffensiveResults()` so the op can skip or end instead of hanging indefinitely.
 4. **[2026-03-06] Sector rearrangement is LIVE in corps AI**
-   Do instead: `rearrangeSectorsForCorps()` runs in `generateCorpsDirectives()` after sector collection — thin consolidation (0-brigade ≤3-edge merge) + pocket containment. Previous n135 battleless regression was from `codex/combat-causality-hardening` merge, not rearrangement (confirmed by bypass test n132 + pre-merge rollback n134).
+   Do instead: `rearrangeSectorsForCorps()` runs in `generateCorpsDirectives()` after sector collection — thin consolidation (any 0-brigade sector, MAX_SECTOR_EDGES cap on merge target, unmergeable tracking) + pocket containment. Previous n135 battleless regression was from `codex/combat-causality-hardening` merge, not rearrangement (confirmed by bypass test n132 + pre-merge rollback n134).
 5. **[2026-03-06] Maneuver-only execution turns are not invalid**
    Do instead: In combat-causality diagnostics, an execution-phase operation with `brigade_movement_orders` but zero attack orders is still maneuvering. Count only true inert turns as `execution_without_attack_orders`.
 6. **[2026-03-06] End planning early when the force is already staged**

@@ -585,3 +585,40 @@ Each new override block can redirect bot force allocation in non-obvious ways. E
 - `sector_intel` is the live engine-side intelligence model, but the tactical-map fog overlay still depends on legacy `recon_intelligence`. Live saves can contain `sector_intel` with no `recon_intelligence` at all. Do not claim that FoW is fully wired end-to-end until the UI consumes the same intelligence source the sim derives.
 - Corps can plan operations on their own, but generic named-op planning is currently load-bearingly ambiguous because sector-op launch later in the same corps-AI pass may replace a fresh non-sector active operation. Treat corps operation ownership as split until one path is canonical.
 - Engine/UI ownership mismatch: operation participants are exempt from `home_defense_active` in `bot_brigade_ai_osid.ts`, but the formation detail panel still disables offensive posture buttons purely on `home_defense_active`. Do not assume the tactical UI currently reflects operation ownership rules.
+
+## 2026-03-06 - Combat-causality recovery knowledge
+
+- `n126` is the current April 1992 40w recovery milestone. It passed the live combat-causality gate with `91` attack orders, `81` battles, and `invalid_operation_count = 0`. Use it as the current evidence point for "combat restored," not as proof that all repo integration issues are solved.
+- Live control-change attribution is now the canonical reporting path. Use `control_change_attribution` from `weekly_report.jsonl` and `run_summary.json` when discussing why territory changed.
+- `control_events.jsonl` was a leftover Phase I / flip-era harness artifact. It is no longer a valid live-contract artifact for war-phase scenario reasoning.
+- If a scenario/debug test still depends on `control_events.jsonl`, treat that as stale test debt rather than as evidence that flips remain a core live mechanic.
+- `pre_planned_operations.ts` is load-bearing for opening-op recovery and easy to break with merges. Two concrete guards:
+  - no merge markers may remain in that file
+  - brigade corps membership must be resolved with `getFormationCorpsId(...)`, not `formation.corps_id`
+
+## 2026-03-06 - Runtime sector rearrangement knowledge
+
+- `sector_rearrangement.ts` is live in the corps AI runtime (wired into `generateCorpsDirectives()`).
+- **Previous regression (n135)** from wiring into `generateAllCorpsOrders()` was caused by the `codex/combat-causality-hardening` merge, not rearrangement itself. Confirmed by bypass test n132 + pre-merge rollback n134.
+- Thin consolidation: any 0-brigade sector merged into adjacent neighbor (no edge-count limit). MAX_SECTOR_EDGES cap prevents mega-sectors. `unmergeable` tracking (break→continue fix) ensures all eligible sectors are tried.
+- Pocket containment: enemy OSIDs fully surrounded by corps territory → dedicated containment sectors.
+- Architect rule: sector rearrangement now passes the combat-causality gate (n142 green). Any future topology changes still need scenario-level acceptance.
+
+## 2026-03-06 - Sector fix: all 15 corps get front sectors
+
+- **5 corps had zero front sectors**: vrs_2nd_krajina, vrs_east_bosnian, vrs_herzegovina, hvo_southeast_herzegovina, hvo_northwest_bosnia.
+- **Root cause 1: BFS seeding** — `friendlyOsids` built only from edge-graph adjacency keys, excluding deep-interior OSIDs. Fix: include all `political_controllers` entries for the faction.
+- **Root cause 2: consolidateCrossCorpsFronts** — over-stripped minority corps edges with no protection. Fix: `protectedCorps` set prevents any corps from losing ALL its edges.
+- **Root cause 3: OOB tag mismatches** — 15 brigade tags used legacy corps IDs (e.g. `rs_drina_corps` instead of `vrs_drina`). Fixed in `oob_brigades.json`.
+- **Root cause 4: HVO SE Herzegovina HQ** — was at Mostar (RBiH-controlled). Moved to Čitluk.
+- **Design decision: Corps HQs are abstractions** — not physical map entities. BFS seeding uses `political_controllers`, not HQ OSID positions. HQ locations exist for GUI display only.
+- **Result (n142):** All 15 corps have sectors. 25 misassigned brigades (was 50). 0 empty non-pocket sectors. Area-weighted 81.5% (expected regression from corrected corps assignments).
+- **OOB tag canonical mapping** (for reference):
+  - `rs_sarajevo_romanija_corps` → `vrs_sarajevo_romanija`
+  - `rs_drina_corps` → `vrs_drina`
+  - `rs_herzegovina_corps` → `vrs_herzegovina`
+  - `hvo_oz_nw_herzegovina` → `hvo_tomislavgrad`
+  - `hvo_oz_se_herzegovina` → `hvo_southeast_herzegovina`
+  - `hvo_oz_posavina` → `hvo_northwest_bosnia`
+  - `hvo_oz_central_bosnia` → `hvo_central_bosnia`
+  - `hvo_oz_nw_bosnia` → `hvo_northwest_bosnia`

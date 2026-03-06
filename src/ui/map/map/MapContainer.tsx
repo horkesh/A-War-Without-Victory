@@ -495,7 +495,7 @@ export function MapContainer() {
                     (m.getSource('formations') as GeoJSONSource)?.setData(formationsGeoJson);
                     (m.getSource('order-arrows') as GeoJSONSource)?.setData(orderArrowsGeoJson);
                     // Fog of war: cover enemy OSIDs not confirmed empty by player recon
-                    const fogGeoJson = buildFogOfWarGeoJSON(base, state.controlBySettlement, state.player_faction, state.reconIntelligence);
+                    const fogGeoJson = buildFogOfWarGeoJSON(base, state.controlBySettlement, state.player_faction, state.fogOfWar);
                     if (!safeHasLayer(m, FOG_FILL_LAYER_ID)) {
                       try {
                         m.addLayer(
@@ -1326,9 +1326,9 @@ export function MapContainer() {
   useEffect(() => {
     const map = mapRef.current;
     if (!mapReady || !map) return;
-    const { player_faction, reconIntelligence } = useGameStore.getState().loadedGameState ?? {};
+    const { player_faction, fogOfWar } = useGameStore.getState().loadedGameState ?? {};
     if (safeHasLayer(map, FOG_FILL_LAYER_ID)) {
-      safeSetLayoutVisibility(map, FOG_FILL_LAYER_ID, fogVisible && !!player_faction && !!reconIntelligence);
+      safeSetLayoutVisibility(map, FOG_FILL_LAYER_ID, fogVisible && !!player_faction && !!fogOfWar);
     }
     if (safeHasLayer(map, BATTLE_MARKERS_LAYER_ID)) {
       safeSetLayoutVisibility(map, BATTLE_MARKERS_LAYER_ID, battlesVisible);

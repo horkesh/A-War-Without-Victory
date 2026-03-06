@@ -2,7 +2,7 @@
  * Corps AI sector rearrangement.
  *
  * Three triggers:
- *   1. Thin sector consolidation — merge 0-brigade ≤3-edge sectors into adjacent neighbor
+ *   1. Thin sector consolidation — merge 0-brigade sectors into adjacent neighbor (capped at MAX_SECTOR_EDGES)
  *   2. Enemy pocket containment — create dedicated sector around enemy pockets in corps interior
  *   3. Operation concentration — merge op target sector with adjacent small sectors
  *
@@ -17,8 +17,9 @@ import type {
 import type { Osid } from './osid_adjacency.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { findConnectedComponents } from '../../utils/graph.js';
+import { MAX_SECTOR_EDGES } from './corps_front_sectors.js';
 
-const THIN_SECTOR_MAX_EDGES = 3;
+// Thin sector consolidation: any 0-brigade sector is eligible for merge.
 
 export interface RearrangeContext {
     politicalControllers?: Record<string, string>;
@@ -92,7 +93,7 @@ function mergeSectorInto(into: CorpsFrontSector, from: CorpsFrontSector): void {
         : 0;
 }
 
-/** Trigger 1: Thin sector consolidation — merge 0-brigade ≤3-edge sectors into adjacent neighbor. */
+/** Trigger 1: Thin sector consolidation — merge 0-brigade sectors into adjacent neighbor. */
 function consolidateThinSectors(
     sectors: CorpsFrontSector[],
     osidAdjacency: Map<Osid, Osid[]>,
@@ -100,16 +101,19 @@ function consolidateThinSectors(
     const pool = sectors.map(s => structuredClone(s));
     let changed = true;
 
+    // Track sectors that have no adjacent neighbor and can't be merged
+    const unmergeable = new Set<string>();
+
     while (changed) {
         changed = false;
         pool.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
 
-        // Find the thinnest eligible sector (0 brigades, ≤ THIN_SECTOR_MAX_EDGES edges)
+        // Find the thinnest eligible sector (0 brigades, not already marked unmergeable)
         let thinIdx = -1;
         let thinSize = Infinity;
         for (let i = 0; i < pool.length; i++) {
             const s = pool[i]!;
-            if (s.assigned_brigade_ids.length === 0 && s.length_edges <= THIN_SECTOR_MAX_EDGES) {
+            if (s.assigned_brigade_ids.length === 0 && !unmergeable.has(s.sector_id)) {
                 if (
                     s.length_edges < thinSize ||
                     (s.length_edges === thinSize &&
@@ -125,13 +129,15 @@ function consolidateThinSectors(
 
         const thin = pool[thinIdx]!;
 
-        // Find the best adjacent neighbor to merge into (smallest first, then alphabetical)
+        // Find the best adjacent neighbor to merge into (smallest first, then alphabetical).
+        // Skip neighbors that would exceed MAX_SECTOR_EDGES after merge.
         let bestIdx = -1;
         let bestSize = Infinity;
         for (let i = 0; i < pool.length; i++) {
             if (i === thinIdx) continue;
             if (areSectorsAdjacent(thin, pool[i]!, osidAdjacency)) {
                 const size = pool[i]!.length_edges;
+                if (size + thin.length_edges > MAX_SECTOR_EDGES) continue;
                 if (
                     size < bestSize ||
                     (size === bestSize &&
@@ -144,7 +150,12 @@ function consolidateThinSectors(
             }
         }
 
-        if (bestIdx === -1) break; // no adjacent neighbor — stop
+        if (bestIdx === -1) {
+            // No adjacent neighbor for this sector — mark it and try others
+            unmergeable.add(thin.sector_id);
+            changed = true; // re-enter loop to find next thinnest
+            continue;
+        }
 
         mergeSectorInto(pool[bestIdx]!, thin);
         pool.splice(thinIdx, 1);

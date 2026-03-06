@@ -2,27 +2,29 @@
 
 **Date:** 2026-03-02
 **Author:** Orchestrator (Paradox Team Synthesis)
-**Status:** PROPOSAL — Awaiting approval
+**Status:** IMPLEMENTED (Phases 1–6 complete; OOB cleanup 2026-03-06 unified all fields)
 **Participants:** Historian, Formation Expert, Game Designer, Tech Architect, OSID Mapper
 
 ---
 
 ## Executive Summary
 
-Complete overhaul of the Order of Battle system across three armies (ARBiH/VRS/HVO). Adds brigade histories, earned decorations, army elite loan mechanic, late-game recruitment, lifecycle events, and deterministic troop balancing. Total: ~243 brigades (126 ARBiH, 80 VRS, 37 HVO) with corrected spawn timings, home municipality OSID mapping, and per-brigade combat profiles.
+Complete overhaul of the Order of Battle system across three armies (ARBiH/VRS/HVO). Adds brigade histories, earned decorations, army elite loan mechanic, late-game recruitment, lifecycle events, and deterministic troop balancing. Total: 247 brigades (127 RBiH, 80 VRS, 40 HRHB) with corrected spawn timings, universal `home_osid` mapping, and per-brigade combat profiles. OOB cleanup (2026-03-06) removed dead fields (`source`, `name_1992`), unified `subordinate_to` → `corps`, added `home_osid` to all 247 brigades, standardized field order, and corrected cross-faction brigades (6 HVO-numbered units under ARBiH command modeled as faction RBiH with `recruit_pool_faction: "HRHB"`).
 
 ---
 
 ## 1. Definitive Brigade Count
 
-### 1.1 Changes from Current OOB (244 brigades → 243 brigades)
+### 1.1 Changes from Current OOB (244 brigades → 247 brigades)
 
-| Faction | Current | Remove | Add | Final |
-|---------|---------|--------|-----|-------|
-| ARBiH   | 125     | 0      | 1   | 126   |
-| VRS     | 80      | 5      | 5   | 80    |
-| HVO     | 39      | 8      | 6   | 37    |
-| **Total** | **244** | **13** | **12** | **243** |
+| Faction | Current (post-rework) | Notes |
+|---------|----------------------|-------|
+| RBiH    | 127                  | Includes 6 cross-faction HVO-numbered brigades |
+| VRS     | 80                   | |
+| HRHB    | 40                   | |
+| **Total** | **247**            | |
+
+> **Post-cleanup note (2026-03-06):** `source` and `name_1992` fields removed (dead — never consumed by code). `subordinate_to` unified to `corps`. All 247 brigades now have explicit `home_osid`. Zero enemy-territory placements.
 
 ### 1.2 VRS Changes (80 → 80)
 
@@ -103,9 +105,8 @@ interface OobBrigade {
   faction: FactionId;
   name: string;
   home_mun: string;                    // municipality key (1990 names)
-  home_settlement?: string;            // display name
-  home_osid?: string;                  // explicit OSID override (enclaves only)
-  subordinate_to: string;
+  home_osid: string;                   // explicit OSID for initial placement (universal since 2026-03-06)
+  corps?: string;                      // corps assignment (unified from subordinate_to)
   kind: 'brigade';
   default_equipment_class: string;
   available_from: number;
@@ -335,7 +336,7 @@ Scripted events in `oob_brigades.json` or a separate `formation_lifecycle_events
 Brigade OOB → home_osid (if explicit) → OR → home_mun → municipality_hq_settlement.json → canonical SID → canonical_to_operational_map.json → OSID
 ```
 
-**Only 16 of 244 brigades** have explicit `home_osid` (enclaves: Goražde 7, Srebrenica 5, Žepa 1, Han Pijesak 2, Zvornik 1).
+**All 247 brigades** now have explicit `home_osid` (universal since 2026-03-06 cleanup). Previously only 41 had explicit overrides (enclaves, pre-planned ops, stacking conflicts).
 
 ### 5.2 Known Gaps
 

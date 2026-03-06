@@ -93,6 +93,7 @@ import {
     computeControlDelta,
     computeFormationDelta,
     evaluateBotBenchmarks,
+    validateBotBenchmarkSummary,
     extractSettlementControlSnapshot,
     formatEndReportMarkdown,
     type BaselineOpsSummary,
@@ -339,17 +340,25 @@ function computeHistoricalAlignmentDiagnostics(
 }
 
 /** Round numeric fields in run_summary for stable regression (no floats in casualty/personnel totals). */
+function shouldPreserveFractionalRunSummaryField(key: string): boolean {
+    return /(?:^|_)(share|ratio|rate|tolerance|deviation)$/.test(key);
+}
+
 function integerizeRunSummaryCounts(obj: Record<string, unknown>): Record<string, unknown> {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(obj)) {
         if (typeof v === 'number' && Number.isFinite(v)) {
-            out[k] = Math.round(v);
+            out[k] = shouldPreserveFractionalRunSummaryField(k)
+                ? Math.round(v * 1e6) / 1e6
+                : Math.round(v);
         } else if (Array.isArray(v)) {
             out[k] = v.map((item) =>
                 item !== null && typeof item === 'object' && !Array.isArray(item)
                     ? integerizeRunSummaryCounts(item as Record<string, unknown>)
                     : typeof item === 'number' && Number.isFinite(item)
-                        ? Math.round(item)
+                        ? (shouldPreserveFractionalRunSummaryField(k)
+                            ? Math.round(item * 1e6) / 1e6
+                            : Math.round(item))
                         : item
             );
         } else if (v !== null && typeof v === 'object' && !Array.isArray(v)) {
@@ -381,6 +390,13 @@ interface HistoricalAnchorCheck {
     expected_controller: string;
     actual_controller: string | null;
     passed: boolean;
+}
+
+interface OverrideInventoryEntry {
+    mechanism: 'osid_control_overrides' | 'avoided_osids_by_faction';
+    classification: 'initial_state_correction' | 'bot_compensation' | 'permanent_engine_ceiling_workaround';
+    active_entries: number;
+    rationale: string;
 }
 
 const HISTORICAL_ANCHORS_APR1992_TO_DEC1992: Array<{ municipality_id: string; expected_controller: string }> = [
@@ -494,6 +510,26 @@ function computeHistoricalAnchorChecks(final: ControlKey[]): HistoricalAnchorChe
         };
     });
     return [...municipalityChecks, ...settlementChecks, ...osidChecks];
+}
+
+function buildOverrideInventory(scenario: Scenario): OverrideInventoryEntry[] {
+    const osidOverrideCount = Object.keys(scenario.osid_control_overrides ?? {}).length;
+    const avoidedOsidCount = Object.values(scenario.avoided_osids_by_faction ?? {})
+        .reduce((sum, values) => sum + values.length, 0);
+    return [
+        {
+            mechanism: 'osid_control_overrides',
+            classification: 'initial_state_correction',
+            active_entries: osidOverrideCount,
+            rationale: 'Pins historically required starting control where OSID reality differs from the broader initialization substrate.'
+        },
+        {
+            mechanism: 'avoided_osids_by_faction',
+            classification: 'bot_compensation',
+            active_entries: avoidedOsidCount,
+            rationale: 'Biases faction targeting away from known ahistorical pressure paths without changing who starts in control.'
+        }
+    ];
 }
 
 /**
@@ -1843,6 +1879,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             breachDiagnostic = { max_abs_pressure: maxAbs, breach_count_last_turn: lastTurnBreaches.length };
         }
         let botBenchmarkSummary: ReturnType<typeof evaluateBotBenchmarks> | undefined;
+        let botBenchmarkContractStatus:
+            | ReturnType<typeof validateBotBenchmarkSummary>
+            | undefined;
         if (botManager) {
             const benchmarks: BotBenchmarkDefinition[] = [];
             const factions = [...(state.factions ?? [])].map((f) => f.id).sort((a, b) => a.localeCompare(b));
@@ -1859,6 +1898,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 }
             }
             botBenchmarkSummary = evaluateBotBenchmarks(botControlTimeline, benchmarks);
+            botBenchmarkContractStatus = validateBotBenchmarkSummary(botBenchmarkSummary);
         }
         const victoryEvaluation = evaluateVictoryConditions(state, scenario.victory_conditions);
         const historicalMetricsFinal = captureHistoricalFactionMetrics(state);
@@ -1866,6 +1906,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             historicalMetricsInitial,
             historicalMetricsFinal
         );
+        const overrideInventory = buildOverrideInventory(scenario);
         const finalControlSnapshot = extractSettlementControlSnapshot(state, graph);
         let historicalControlAlignment: HistoricalControlAlignmentDiagnostics | undefined;
         let historicalAnchorChecks: HistoricalAnchorCheck[] | undefined;
@@ -1892,6 +1933,44 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 phase: state.meta.phase
             },
             historical_alignment: historicalAlignmentDiagnostics,
+            behavioral_health: {
+                valid_for_combat_calibration: (combatCausalitySummary?.valid_for_combat_calibration ?? false),
+                combat_causality:
+                    combatCausalitySummary ?? {
+                        valid_for_combat_calibration: false,
+                        invalidation_reasons: ['zero_battles'],
+                        total_attack_orders: 0,
+                        total_objective_attempts: 0,
+                        total_objective_captures: 0,
+                        movement_only_execution_turns: 0,
+                        total_battles: 0,
+                        total_orders_by_faction: {},
+                        invalid_operation_count: 0,
+                        zero_eligible_attacker_operation_count: 0,
+                        recovery_without_logged_attempt_count: 0
+                    },
+                control_change_attribution:
+                    controlChangeAttributionSummary ?? summarizeControlChangeAttribution([], initOverrideChangeCount)
+            },
+            historical_fit: {
+                historical_alignment: historicalAlignmentDiagnostics,
+                ...(historicalControlAlignment
+                    ? {
+                        control_alignment: historicalControlAlignment,
+                        anchor_checks: historicalAnchorChecks
+                    }
+                    : {}),
+                ...(botBenchmarkSummary
+                    ? {
+                        bot_benchmark_evaluation: botBenchmarkSummary,
+                        bot_benchmark_status: botBenchmarkContractStatus ?? { contract_valid: true, contract_issues: [] }
+                    }
+                    : {
+                        bot_benchmark_status: { contract_valid: true, contract_issues: [] }
+                    }),
+                override_inventory: overrideInventory,
+                ...(victoryEvaluation ? { victory: victoryEvaluation } : {})
+            },
             ...(historicalControlAlignment
                 ? {
                     vs_historical: historicalControlAlignment,

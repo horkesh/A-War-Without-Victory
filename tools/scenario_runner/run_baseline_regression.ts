@@ -20,7 +20,6 @@ import { stableStringify } from '../../src/utils/stable_json.js';
 const ARTIFACTS = [
     'activity_summary.json',
     'control_delta.json',
-    'control_events.jsonl',
     'end_report.md',
     'formation_delta.json',
     'final_save.json',

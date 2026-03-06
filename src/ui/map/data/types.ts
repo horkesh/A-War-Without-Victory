@@ -153,6 +153,11 @@ export interface ReconIntelligenceView {
     confirmed_empty: string[];
 }
 
+export interface FogOfWarView {
+    visibleEnemyOsids: string[];
+    visibleEnemySectorIds: string[];
+}
+
 export interface EnclaveResilienceView {
     resilience: number;
     isolation_turns: number;
@@ -244,6 +249,7 @@ export interface OperationView {
     current_objective_index?: number;
     momentum?: number;
     participating_brigade_count: number;
+    participating_brigade_ids?: string[];
     started_turn: number;
     supply_readiness?: number;
 }
@@ -289,6 +295,7 @@ export interface LoadedGameState {
     /** Per-OSID per-faction departed counts (from displacement_event_log). */
     departedByOsid?: Record<string, Partial<Record<string, number>>>;
     reconIntelligence?: ReconIntelligenceView;
+    fogOfWar?: FogOfWarView;
     movementOrdersSettlement?: MovementOrderSettlementView[];
     repositionOrders?: RepositionOrderView[];
     corpsFrontSectors?: CorpsFrontSectorView[];

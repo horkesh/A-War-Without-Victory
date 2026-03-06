@@ -7,7 +7,7 @@
  */
 
 import type {
-    AoROrderView, AttackOrderView, CorpsFrontSectorView, EnclaveResilienceView, FormationView, LoadedGameState,
+    AoROrderView, AttackOrderView, CorpsFrontSectorView, EnclaveResilienceView, FogOfWarView, FormationView, LoadedGameState,
     MilitiaPoolView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
     OperationView, ReconIntelligenceView, RepositionOrderView, RecruitmentView,
 } from './types';
@@ -355,6 +355,9 @@ export function parseGameState(json: unknown): LoadedGameState {
                     current_objective_index: typeof op.current_objective_index === 'number' ? op.current_objective_index : undefined,
                     momentum: typeof op.momentum === 'number' ? op.momentum : undefined,
                     participating_brigade_count: Array.isArray(op.participating_brigades) ? (op.participating_brigades as string[]).length : 0,
+                    participating_brigade_ids: Array.isArray(op.participating_brigades)
+                        ? (op.participating_brigades as string[]).filter((id): id is string => typeof id === 'string').sort(strictCompare)
+                        : undefined,
                     started_turn: typeof op.started_turn === 'number' ? op.started_turn : turn,
                     supply_readiness: typeof op.supply_readiness === 'number' ? op.supply_readiness : undefined,
                 });
@@ -633,6 +636,46 @@ export function parseGameState(json: unknown): LoadedGameState {
         reconIntelligence = { detected_brigades: detected, confirmed_empty: Array.isArray(r.confirmed_empty) ? [...r.confirmed_empty].sort() : [] };
     }
 
+    let fogOfWar: FogOfWarView | undefined;
+    const rawSectorIntel = state.sector_intel as Record<string, Array<Record<string, unknown>>> | undefined;
+    const rawCorpsFrontSectors = state.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
+    if (playerFaction && rawSectorIntel && rawCorpsFrontSectors) {
+        const visibleEnemySectorIds = new Set<string>();
+        const visibleEnemyOsids = new Set<string>();
+        for (const [friendlySectorId, records] of Object.entries(rawSectorIntel).sort((a, b) => a[0].localeCompare(b[0]))) {
+            const friendlySector = rawCorpsFrontSectors[friendlySectorId];
+            if (!friendlySector || friendlySector.faction !== playerFaction || !Array.isArray(records)) continue;
+            for (const rec of records) {
+                const enemySectorId = typeof rec.enemy_sector_id === 'string' ? rec.enemy_sector_id : '';
+                if (!enemySectorId) continue;
+                visibleEnemySectorIds.add(enemySectorId);
+                const enemySector = rawCorpsFrontSectors[enemySectorId];
+                const subSegments = Array.isArray(enemySector?.sub_segments)
+                    ? enemySector.sub_segments as Array<Record<string, unknown>>
+                    : [];
+                for (const sub of subSegments) {
+                    const friendlyOsids = Array.isArray(sub.friendly_osids) ? sub.friendly_osids : [];
+                    for (const osid of friendlyOsids) {
+                        if (typeof osid === 'string' && osid.length > 0) visibleEnemyOsids.add(osid);
+                    }
+                }
+                const visibleBrigadeIds = Array.isArray(rec.visible_brigade_ids) ? rec.visible_brigade_ids : [];
+                for (const brigadeId of visibleBrigadeIds) {
+                    if (typeof brigadeId !== 'string' || brigadeId.length === 0) continue;
+                    const brigade = formationsRecord[brigadeId];
+                    const locationOsid = typeof brigade?.location_osid === 'string' ? brigade.location_osid : '';
+                    if (locationOsid) visibleEnemyOsids.add(locationOsid);
+                }
+            }
+        }
+        if (visibleEnemySectorIds.size > 0 || visibleEnemyOsids.size > 0) {
+            fogOfWar = {
+                visibleEnemyOsids: Array.from(visibleEnemyOsids).sort(strictCompare),
+                visibleEnemySectorIds: Array.from(visibleEnemySectorIds).sort(strictCompare),
+            };
+        }
+    }
+
     const displacementByMun: LoadedGameState['displacementByMun'] = {};
     const rawDisplacement = state.displacement_state as Record<string, Record<string, unknown>> | undefined;
     if (rawDisplacement && typeof rawDisplacement === 'object' && !Array.isArray(rawDisplacement)) {
@@ -831,6 +874,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         displacementByMun: Object.keys(displacementByMun).length > 0 ? displacementByMun : undefined,
         departedByOsid: departedByOsid && Object.keys(departedByOsid).length > 0 ? departedByOsid : undefined,
         reconIntelligence,
+        fogOfWar,
         movementOrdersSettlement: movementOrdersSettlement.length > 0 ? movementOrdersSettlement : undefined,
         repositionOrders: repositionOrders.length > 0 ? repositionOrders : undefined,
         corpsFrontSectors,

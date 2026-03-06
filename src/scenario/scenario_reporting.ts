@@ -45,6 +45,12 @@ export interface WeeklyControlChangeAttributionSummary {
     other: number;
 }
 
+export interface WeeklyBehavioralHealthSummary {
+    valid_for_combat_calibration: boolean;
+    combat_causality: WeeklyCombatCausalitySummary;
+    control_change_attribution: WeeklyControlChangeAttributionSummary;
+}
+
 export interface WeeklyReportRow {
     week_index: number;
     phase: string | undefined;
@@ -64,6 +70,8 @@ export interface WeeklyReportRow {
     combat_causality?: WeeklyCombatCausalitySummary;
     /** Live control-change attribution for this turn. */
     control_change_attribution?: WeeklyControlChangeAttributionSummary;
+    /** Grouped reporting family for combat and attribution health. */
+    behavioral_health?: WeeklyBehavioralHealthSummary;
     /** Per-operation diagnostics for invalid-causality debugging. */
     operation_diagnostics?: OperationCombatDiagnostic[];
 }
@@ -190,6 +198,13 @@ export function buildWeeklyReport(
     }
     if (controlChangeAttribution !== undefined) {
         row.control_change_attribution = controlChangeAttribution;
+    }
+    if (combatCausality !== undefined && controlChangeAttribution !== undefined) {
+        row.behavioral_health = {
+            valid_for_combat_calibration: combatCausality.valid_for_combat_calibration,
+            combat_causality: combatCausality,
+            control_change_attribution: controlChangeAttribution
+        };
     }
     if (operationDiagnostics !== undefined && operationDiagnostics.length > 0) {
         row.operation_diagnostics = operationDiagnostics;

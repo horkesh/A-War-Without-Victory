@@ -43,6 +43,23 @@ test('scenario harness emits control-change attribution and no longer writes con
 
     const summaryRaw = await readFile(join(outDir, 'run_summary.json'), 'utf8');
     const summary = JSON.parse(summaryRaw) as {
+        behavioral_health?: {
+            valid_for_combat_calibration: boolean;
+            combat_causality?: {
+                valid_for_combat_calibration: boolean;
+                total_battles: number;
+            };
+        };
+        historical_fit?: {
+            bot_benchmark_status?: {
+                contract_valid: boolean;
+            };
+            override_inventory?: Array<{
+                mechanism: string;
+                classification: string;
+                active_entries: number;
+            }>;
+        };
         control_change_attribution?: {
             total_changes: number;
             combat: number;
@@ -53,6 +70,19 @@ test('scenario harness emits control-change attribution and no longer writes con
         };
     };
     assert.ok(summary.control_change_attribution, 'run_summary.json must include control_change_attribution');
+    assert.ok(summary.behavioral_health, 'run_summary.json must include behavioral_health');
+    assert.equal(
+        summary.behavioral_health.valid_for_combat_calibration,
+        summary.behavioral_health.combat_causality?.valid_for_combat_calibration,
+        'behavioral_health should mirror the combat-causality gate'
+    );
+    assert.ok(summary.historical_fit, 'run_summary.json must include historical_fit');
+    assert.equal(
+        summary.historical_fit.bot_benchmark_status?.contract_valid,
+        true,
+        'historical_fit should surface benchmark contract validity'
+    );
+    assert.ok(Array.isArray(summary.historical_fit.override_inventory), 'historical_fit should surface override inventory');
     assert.equal(
         summary.control_change_attribution.total_changes,
         summary.control_change_attribution.combat +
@@ -65,9 +95,18 @@ test('scenario harness emits control-change attribution and no longer writes con
 
     const weeklyRaw = await readFile(join(outDir, 'weekly_report.jsonl'), 'utf8');
     const rows = weeklyRaw.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line) as {
+        behavioral_health?: {
+            valid_for_combat_calibration: boolean;
+            control_change_attribution?: { total_changes: number };
+        };
         control_change_attribution?: { total_changes: number };
     });
     assert.ok(rows.some((row) => row.control_change_attribution !== undefined), 'weekly_report.jsonl must carry control_change_attribution rows');
+    assert.ok(rows.some((row) => row.behavioral_health !== undefined), 'weekly_report.jsonl must carry behavioral_health rows');
+    assert.ok(
+        rows.some((row) => row.behavioral_health?.control_change_attribution?.total_changes === row.control_change_attribution?.total_changes),
+        'weekly behavioral_health should expose the same attribution totals as the legacy top-level field'
+    );
 
     await ensureRemoved(BASE_OUT);
 });

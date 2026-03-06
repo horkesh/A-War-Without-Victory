@@ -74,12 +74,12 @@ describe('splitNonContiguousSectors', () => {
         expect(result.length).toBeGreaterThan(1);
         // Each result sector must have contiguous friendly OSIDs
         for (const s of result) {
-            const friendly = s.sub_segments.flatMap(ss => ss.friendly_osids);
+            const friendly = s.sub_segments.flatMap((ss: CorpsFrontSubSegment) => ss.friendly_osids);
             expect(friendly.length).toBeGreaterThan(0);
         }
         // All original brigades and reserves must be preserved across splits
-        const allAssigned = result.flatMap(s => s.assigned_brigade_ids).sort();
-        const allReserves = result.flatMap(s => s.reserve_brigade_ids).sort();
+        const allAssigned = result.flatMap((s: CorpsFrontSector) => s.assigned_brigade_ids).sort();
+        const allReserves = result.flatMap((s: CorpsFrontSector) => s.reserve_brigade_ids).sort();
         expect([...allAssigned, ...allReserves].sort()).toEqual(['brig1', 'brig2', 'res1']);
     });
 

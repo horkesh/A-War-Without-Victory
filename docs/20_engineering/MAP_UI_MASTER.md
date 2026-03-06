@@ -50,7 +50,7 @@ src/ui/map/
 │       ├── geojsonLookup.ts                    buildOsidCentroidLookup() helper
 │       ├── resolveFormationLocationOsid.ts     location_osid or first AoR fallback
 │       ├── generateFactionBorders.ts           Shared-edge faction boundary computation
-│       ├── buildFogOfWarGeoJSON.ts             Enemy-territory fog-of-war polygon fill (observer-mode-safe)
+│       ├── buildFogOfWarGeoJSON.ts             Enemy-territory fog-of-war polygon fill from `LoadedGameState.fogOfWar`
 │       ├── buildBattleMarkersGeoJSON.ts        Combat flip events → Point features (last 3 turns, age-based opacity)
 │       └── buildStrategicPointGeoJSON.ts       City/seat classification from OSID `{mun}_2` slug → Point features
 │
@@ -385,6 +385,8 @@ loadSave(jsonOrText): Promise<void>               // deferred parse (requestIdle
 
 ### LoadedGameState (key fields)
 
+`LoadedGameState` is a player-facing adapter contract. As of 2026-03-06, fog-of-war should be consumed from `loadedGameState.fogOfWar`, projected by `GameStateAdapter.ts` from live `sector_intel`, rather than from any legacy recon structure.
+
 ```ts
 interface LoadedGameState {
   label: string;                                      // "Turn N (phase)"
@@ -401,6 +403,10 @@ interface LoadedGameState {
   phaseIiExhaustion?: Record<string, number>;         // faction → exhaustion
   corpsFrontSectors?: CorpsFrontSectorView[];
   operations?: OperationView[];
+  fogOfWar?: {
+    visibleEnemyOsids: string[];
+    visibleEnemySectorIds: string[];
+  };
   namedOfficerData?: NamedOfficerView[];
   namedOfficerStateById?: Record<string, NamedOfficerStateView>;
   factionReserves?: Record<string, { generalSupply: number; heavyMunitions: number }>;
@@ -462,6 +468,8 @@ interface CorpsFrontSectorView {
 
 ### OperationView
 
+`OperationView` is also a UI-truth contract. If a brigade appears in `participating_brigade_ids`, panel logic should treat operation ownership as stronger than `home_defense_active`.
+
 ```ts
 interface OperationView {
   corps_id: string;
@@ -476,6 +484,7 @@ interface OperationView {
   current_objective_index?: number;
   momentum?: number;              // 0–3
   participating_brigade_count: number;
+  participating_brigade_ids?: string[];
   started_turn: number;
   supply_readiness?: number;      // 0–1
 }

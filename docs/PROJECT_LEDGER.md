@@ -7,6 +7,58 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-06] OOB cleanup: unified fields, universal home_osid, dead field removal, cross-faction correction
+
+### Summary
+- Removed dead fields from all 247 brigades: `source` (231 entries), `name_1992` (5 entries) — never consumed by code.
+- Unified `subordinate_to` → `corps` across all 231 entries that used the old name. Loader simplified (removed fallback).
+- Added `home_osid` to all 206 brigades that lacked it (41 already had explicit overrides). Resolution: home_mun → SID → OSID, with conflict resolution for stacking and enemy-territory.
+- Fixed `rs_1st_novigrad_infantry` home_osid from RBiH-controlled `suhaca_4` to RS-controlled `blatna`.
+- Corrected cross-faction brigades: `hvo_101st_bihac` moved HRHB→RBiH (faction), corps→arbih_5th_corps. Added `recruit_pool_faction: "HRHB"` to `arbih_hvo_kralj_tvrtko`. Total 6 cross-faction brigades: 107th Gradačac, 108th Brčko, 101st Bihać, 110th Usora, 115th Zrinski, HVO Kralj Tvrtko.
+- Standardized field order across all 247 entries.
+- Removed dead `initialEdgeCounts` from `corps_front_sectors.ts`.
+- Propagated to docs: PHASE_I_OVERHAUL (3 subordinate_to→corps), OOB_REWORK_MASTER_PLAN (counts, schema, coverage).
+
+### Change
+- `data/source/oob_brigades.json`: field removal, unification, universal home_osid, cross-faction fixes
+- `src/scenario/oob_loader.ts`: removed `subordinate_to` fallback
+- `src/sim/combat/corps_front_sectors.ts`: removed dead `initialEdgeCounts`
+- `docs/20_engineering/PHASE_I_OVERHAUL_MILITIA_TO_BRIGADES.md`: 3 refs updated
+- `docs/30_planning/OOB_REWORK_MASTER_PLAN.md`: counts, schema, coverage updated
+
+### Metrics
+- **Brigade counts**: RBiH 127, RS 80, HRHB 40 = 247 total
+- **home_osid coverage**: 247/247 (100%, was 41/247)
+- **Enemy-territory placements**: 0 (was 1: rs_1st_novigrad at suhaca_4)
+- **Cross-faction brigades**: 6 (RBiH faction with recruit_pool_faction HRHB)
+
+---
+
+## [2026-03-06] Sector fix: all 15 corps get front sectors, OOB tag mismatches fixed, thin consolidation repaired
+
+### Summary
+- Fixed 5 corps that had zero front sectors (vrs_2nd_krajina, vrs_east_bosnian, vrs_herzegovina, hvo_southeast_herzegovina, hvo_northwest_bosnia).
+- Fixed 15 OOB tag mismatches in `oob_brigades.json` (legacy corps IDs → canonical formation IDs).
+- Repaired thin sector consolidation: removed ≤3-edge limit, fixed break→continue bug, added MAX_SECTOR_EDGES cap.
+- Expanded BFS seeding to include all `political_controllers` entries (not just edge-graph OSIDs).
+- Added `protectedCorps` set in `consolidateCrossCorpsFronts` to prevent total edge stripping.
+- Moved HVO SE Herzegovina HQ from Mostar (RBiH-controlled) to Čitluk (HRHB-controlled).
+- **Design decision:** Corps HQs are abstractions, not physical map entities. BFS seeding uses political_controllers, not HQ positions.
+
+### Change
+- `src/sim/combat/corps_front_sectors.ts`: friendlyOsids expansion + consolidation protection
+- `src/sim/combat/sector_rearrangement.ts`: removed THIN_SECTOR_MAX_EDGES, break→continue fix, MAX_SECTOR_EDGES cap
+- `data/source/oob_brigades.json`: 15 tag fixes (8 legacy→canonical mappings)
+- `data/source/oob_corps.json`: hvo_southeast_herzegovina HQ → citluk
+- Docs: CALIBRATION_MASTER.md (n142 entry), REPO_MAP.md, napkin.md, MEMORY.md
+
+### Metrics
+- **n142:** All 15 corps with sectors, 25 misassigned brigades (was 50), 0 empty non-pocket sectors
+- **Area-weighted match:** 81.5% (expected regression from 83.4% — previous calibration with broken sectors)
+- **Combat-causality gate:** green
+
+---
+
 ## [2026-03-06] Live harness drops obsolete Phase I control-events artifact; control-change attribution is canonical
 
 ### Summary

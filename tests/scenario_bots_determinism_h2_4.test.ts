@@ -92,6 +92,10 @@ test('scenario bots run summary includes deterministic benchmark evaluation cont
     const evalBlock = summary.bot_benchmark_evaluation;
     assert.ok(evalBlock, 'run_summary.json must include bot_benchmark_evaluation');
     assert.ok(Array.isArray(evalBlock.results), 'bot benchmark results must be an array');
+    assert.ok(
+        evalBlock.results.some((row) => Math.abs((row as any).expected_control_share - Math.round((row as any).expected_control_share)) > 0),
+        'bot benchmark expected_control_share must preserve fractional values in run_summary.json'
+    );
     for (let i = 1; i < evalBlock.results.length; i += 1) {
         const a = evalBlock.results[i - 1]!;
         const b = evalBlock.results[i]!;

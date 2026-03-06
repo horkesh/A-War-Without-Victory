@@ -318,6 +318,11 @@ export interface BotBenchmarkSummary {
     results: BotBenchmarkResult[];
 }
 
+export interface BotBenchmarkContractStatus {
+    contract_valid: boolean;
+    contract_issues: string[];
+}
+
 export interface BotWeeklyDiagnosticsRow {
     week_index: number;
     turn: number;
@@ -512,6 +517,34 @@ export function evaluateBotBenchmarks(
     }
 
     return { evaluated, passed, failed, not_reached, results };
+}
+
+export function validateBotBenchmarkSummary(summary: BotBenchmarkSummary): BotBenchmarkContractStatus {
+    const issues = new Set<string>();
+    const evaluated = summary.results.filter((r) => r.status === 'evaluated');
+    const notReached = summary.results.filter((r) => r.status === 'not_reached');
+
+    if (summary.evaluated !== evaluated.length) issues.add('evaluated_count_mismatch');
+    if (summary.not_reached !== notReached.length) issues.add('not_reached_count_mismatch');
+    if (summary.passed !== evaluated.filter((r) => r.passed === true).length) issues.add('passed_count_mismatch');
+    if (summary.failed !== evaluated.filter((r) => r.passed === false).length) issues.add('failed_count_mismatch');
+
+    for (const result of summary.results) {
+        if (result.status === 'evaluated') {
+            if (result.actual_control_share === null) issues.add('evaluated_result_missing_actual_control_share');
+            if (result.deviation === null) issues.add('evaluated_result_missing_deviation');
+            if (result.passed === null) issues.add('evaluated_result_missing_pass_fail');
+        } else {
+            if (result.actual_control_share !== null) issues.add('not_reached_result_has_actual_control_share');
+            if (result.deviation !== null) issues.add('not_reached_result_has_deviation');
+            if (result.passed !== null) issues.add('not_reached_result_has_pass_fail');
+        }
+    }
+
+    return {
+        contract_valid: issues.size === 0,
+        contract_issues: Array.from(issues).sort(strictCompare)
+    };
 }
 
 export interface FormatEndReportParams {
