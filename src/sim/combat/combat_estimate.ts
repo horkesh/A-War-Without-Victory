@@ -18,6 +18,7 @@ import type {
 } from '../../state/game_state.js';
 import { computeEquipmentMultiplier } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
+import { clamp } from '../../utils/math.js';
 
 // --- Constants (mirrored from battle_resolution.ts) ---
 
@@ -35,10 +36,6 @@ const EXPERIENCE_MULT_SCALE = 0.8;
 const ATTACKER_VICTORY_THRESHOLD = 1.3;
 const BASE_CASUALTY_PER_INTENSITY = 20;
 const MIN_CASUALTIES_PER_BATTLE = 5;
-
-function clamp(val: number, min: number, max: number): number {
-    return Math.max(min, Math.min(max, val));
-}
 
 export interface AttackEstimate {
     /** Expected attacker casualties as fraction of brigade personnel. */

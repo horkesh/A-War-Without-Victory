@@ -623,8 +623,7 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             if (!context.state.og_orders?.length) return;
-            const { edges } = await getGraphAndEdges(context);
-            activateOGs(context.state, edges);
+            activateOGs(context.state);
         }
     },
     {

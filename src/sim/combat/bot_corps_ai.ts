@@ -1246,7 +1246,6 @@ export function generateCorpsDirectives(
         const pc = state.political_controllers ?? {};
         const corpsSectors = rearrangeSectorsForCorps(
             rawCorpsSectors, corps.id, adjacency,
-            state.formations ?? {},
             {
                 politicalControllers: pc as Record<string, string>,
                 faction,
@@ -1266,7 +1265,7 @@ export function generateCorpsDirectives(
         const armyPriorities = getCorpsArmyPriorities(faction, corps.id, turn);
 
         // Collect offensive targets from army priorities
-        const offensiveTargets: Osid[] = [];
+        const offensiveTargetSet = new Set<Osid>();
         let bestMinOutcome: CorpsDirective['min_attack_outcome'] = 'stalemate';
         const avoidOsids: Osid[] = [...(state.meta.avoided_osids_by_faction?.[faction] ?? [])];
 
@@ -1275,8 +1274,8 @@ export function generateCorpsDirectives(
             if (priority.target_osids && priority.target_osids.length > 0) {
                 for (const osid of priority.target_osids) {
                     const ctrl = getPoliticalControllerOSID(state, osid, reverseMap);
-                    if (ctrl !== faction && ctrl !== null && !offensiveTargets.includes(osid)) {
-                        offensiveTargets.push(osid);
+                    if (ctrl !== faction && ctrl !== null && !offensiveTargetSet.has(osid)) {
+                        offensiveTargetSet.add(osid);
                     }
                 }
             }
@@ -1285,7 +1284,7 @@ export function generateCorpsDirectives(
                 state, faction, priority.target_municipalities, reverseMap
             );
             for (const t of targets) {
-                if (!offensiveTargets.includes(t)) offensiveTargets.push(t);
+                if (!offensiveTargetSet.has(t)) offensiveTargetSet.add(t);
             }
             // Use the most permissive min_outcome from active priorities
             const outcomeRank: Record<string, number> = { decisive_victory: 5, victory: 4, costly_victory: 3, stalemate: 2, repulsed: 1 };
@@ -1296,7 +1295,7 @@ export function generateCorpsDirectives(
         }
         // Track how many targets came from army priorities (before opportunistic targets are added).
         // Used by general_defensive to keep priority-derived counterattack targets.
-        const priorityTargetCount = offensiveTargets.length;
+        const priorityTargetCount = offensiveTargetSet.size;
 
         // P3: Collect priority municipality slugs for opportunistic target filtering.
         // Opportunistic targets outside these municipalities are filtered to prevent
@@ -1319,7 +1318,7 @@ export function generateCorpsDirectives(
                     const controller = pc[neighborOsid];
                     if (controller !== faction) continue; // Must be own-controlled
                     // Skip if already a target
-                    if (offensiveTargets.includes(neighborOsid)) continue;
+                    if (offensiveTargetSet.has(neighborOsid)) continue;
                     // Must have no enemy neighbors (behind front)
                     const neighborNeighbors = adjacency.get(neighborOsid) ?? [];
                     const hasEnemyNeighbor = neighborNeighbors.some(nn => {
@@ -1332,7 +1331,7 @@ export function generateCorpsDirectives(
                         f && f.status === 'active' && f.faction !== faction && f.location_osid === neighborOsid
                     );
                     if (!hasEnemyFormation) continue;
-                    offensiveTargets.push(neighborOsid);
+                    offensiveTargetSet.add(neighborOsid);
                 }
             }
         }
@@ -1341,8 +1340,8 @@ export function generateCorpsDirectives(
         if (cmd.active_operation?.phase === 'execution' && cmd.active_operation.target_settlements) {
             for (const sid of cmd.active_operation.target_settlements) {
                 const pc = state.political_controllers ?? {};
-                if (pc[sid] !== faction && !offensiveTargets.includes(sid)) {
-                    offensiveTargets.push(sid);
+                if (pc[sid] !== faction && !offensiveTargetSet.has(sid)) {
+                    offensiveTargetSet.add(sid);
                 }
             }
         }
@@ -1354,10 +1353,10 @@ export function generateCorpsDirectives(
         // Bipolar co-ethnic scoring naturally deters non-coethnic targets at brigade level.
         const addOpportunistic = armyStance === 'general_offensive'
             || cmd.stance === 'offensive'
-            || (offensiveTargets.length === 0);
+            || (offensiveTargetSet.size === 0);
         if (addOpportunistic && graphAnalysis) {
             for (const osid of graphAnalysis.undefended_front) {
-                if (offensiveTargets.includes(osid)) continue;
+                if (offensiveTargetSet.has(osid)) continue;
                 // P3: Filter opportunistic targets to priority municipalities
                 if (priorityMunicipalities.size > 0) {
                     const osidMun = osid.split(':')[1];
@@ -1367,10 +1366,10 @@ export function generateCorpsDirectives(
                 const hasAdjacentBrigade = subordinates.some(b =>
                     b.location_osid && neighbors.includes(b.location_osid)
                 );
-                if (hasAdjacentBrigade) offensiveTargets.push(osid);
+                if (hasAdjacentBrigade) offensiveTargetSet.add(osid);
             }
             for (const entry of graphAnalysis.weak_enemy_osids) {
-                if (offensiveTargets.includes(entry.osid)) continue;
+                if (offensiveTargetSet.has(entry.osid)) continue;
                 // P3: Filter opportunistic targets to priority municipalities
                 if (priorityMunicipalities.size > 0) {
                     const osidMun = entry.osid.split(':')[1];
@@ -1380,7 +1379,7 @@ export function generateCorpsDirectives(
                 const hasAdjacentBrigade = subordinates.some(b =>
                     b.location_osid && neighbors.includes(b.location_osid)
                 );
-                if (hasAdjacentBrigade) offensiveTargets.push(entry.osid);
+                if (hasAdjacentBrigade) offensiveTargetSet.add(entry.osid);
             }
         }
 
@@ -1396,7 +1395,7 @@ export function generateCorpsDirectives(
             );
             const pc = state.political_controllers ?? {};
             for (const pocketOsid of graphAnalysis.enemy_pockets) {
-                if (offensiveTargets.includes(pocketOsid)) continue;
+                if (offensiveTargetSet.has(pocketOsid)) continue;
                 const pocketMun = pocketOsid.split(':')[1];
                 if (!pocketMun || !corpsMunSet.has(pocketMun)) continue; // out of operational area
                 const neighbors = adjacency.get(pocketOsid) ?? [];
@@ -1404,17 +1403,20 @@ export function generateCorpsDirectives(
                     (pc[n] ?? '') === faction
                 );
                 if (isRearPocket) {
-                    offensiveTargets.push(pocketOsid);
+                    offensiveTargetSet.add(pocketOsid);
                 } else {
                     const hasAdjacentBrigade = subordinates.some(b =>
                         b.location_osid && neighbors.includes(b.location_osid)
                     );
                     if (hasAdjacentBrigade) {
-                        offensiveTargets.push(pocketOsid);
+                        offensiveTargetSet.add(pocketOsid);
                     }
                 }
             }
         }
+
+        // Convert to array for filtering/sorting phase
+        const offensiveTargets: Osid[] = [...offensiveTargetSet].sort(strictCompare);
 
         // Hold OSIDs: chokepoints + friendly OSIDs in defensive priority municipalities
         const holdOsids: Osid[] = [];

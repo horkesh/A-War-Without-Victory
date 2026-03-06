@@ -1,10 +1,5 @@
 import type { GameState, MaintenanceCapacity } from './game_state.js';
-
-function clamp01(value: number): number {
-    if (value < 0) return 0;
-    if (value > 1) return 1;
-    return value;
-}
+import { clamp01 } from '../utils/math.js';
 
 function defaultMaintenanceCapacity(embargoMaintenance: number): MaintenanceCapacity {
     const base = clamp01(0.6 + embargoMaintenance * 0.2);

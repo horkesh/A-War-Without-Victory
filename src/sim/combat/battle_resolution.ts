@@ -34,6 +34,7 @@ import type {
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import type { WarTimeline } from '../../state/war_timeline.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { clamp } from '../../utils/math.js';
 import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import { captureEquipment, computeEquipmentMultiplier, ensureBrigadeComposition } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
@@ -275,10 +276,6 @@ function buildAdjacency(edges: EdgeRecord[]): Map<SettlementId, SettlementId[]> 
     }
     for (const list of adj.values()) list.sort(strictCompare);
     return adj;
-}
-
-function clamp(val: number, min: number, max: number): number {
-    return Math.max(min, Math.min(max, val));
 }
 
 function getExperienceMult(formation: FormationState): number {

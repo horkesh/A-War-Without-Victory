@@ -11,6 +11,7 @@
  */
 
 import type { GameState, FactionId } from './game_state.js';
+import { clamp01 } from '../utils/math.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from './supply_state_derivation.js';
 import {
     MAINTENANCE_DRAIN_PER_FORMATION,
@@ -219,10 +220,6 @@ export function updateSiegeTurnCounters(
 
 // ── Core: Per-Turn Reserve Update ────────────────────────────────────────────
 
-/** Clamp to [0, 1]. */
-function clamp01(v: number): number {
-    return Math.max(0, Math.min(1, v));
-}
 
 /**
  * Update supply reserves for all factions.

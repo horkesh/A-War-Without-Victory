@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { buildAdjacencyMap } from '../map/adjacency_map.js';
 import type { EdgeRecord, LoadedSettlementGraph } from '../map/settlements.js';
+import { clamp01 } from '../utils/math.js';
 import type { EnclaveState, FactionId, GameState, MunicipalityId, SettlementId } from './game_state.js';
 import type { SupplyStateDerivationReport, SupplyStateLevel } from './supply_state_derivation.js';
 
@@ -25,12 +26,6 @@ export const SARAJEVO_MUN_IDS: MunicipalityId[] = [
 export const SARAJEVO_INTEGRITY_FLOOR = 0.15;
 export const SARAJEVO_DEGRADATION_RATE = 0.5;
 export const SARAJEVO_PRESSURE_MULTIPLIER = 3.0;
-
-function clamp01(value: number): number {
-    if (value < 0) return 0;
-    if (value > 1) return 1;
-    return value;
-}
 
 function hashEnclaveId(factionId: FactionId, settlementIds: SettlementId[]): string {
     const raw = `${factionId}:${settlementIds.join('|')}`;

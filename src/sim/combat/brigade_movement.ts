@@ -9,6 +9,7 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import { getTerrainScalarsForSid, type TerrainScalarsData } from '../../map/terrain_scalars.js';
 import type { FactionId, FormationId, GameState, SettlementId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { clamp } from '../../utils/math.js';
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
 
 /** Settlements per turn (infantry march rate). Study: 3 settlements per turn. */
@@ -20,10 +21,6 @@ export const COLUMN_MAX_MOVEMENT_RATE = 14;
 function getHoldSid(state: GameState, formationId: FormationId): SettlementId | null {
     const formation = state.formations?.[formationId];
     return formation?.hq_sid ?? null;
-}
-
-function clamp(value: number, min: number, max: number): number {
-    return Math.max(min, Math.min(max, value));
 }
 
 /**

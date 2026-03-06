@@ -16,13 +16,13 @@ import type {
 } from '../../state/game_state.js';
 import type { Osid } from './osid_adjacency.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { findConnectedComponents } from '../../utils/graph.js';
 
 const THIN_SECTOR_MAX_EDGES = 3;
 
 export interface RearrangeContext {
     politicalControllers?: Record<string, string>;
     faction?: FactionId;
-    activeOps?: Record<string, { type?: string; sector_id?: string }>;
 }
 
 /** Check if two sectors are OSID-adjacent (any friendly OSID in one is adjacent to any friendly OSID in the other). */
@@ -38,7 +38,7 @@ function areSectorsAdjacent(
     for (const ss of a.sub_segments) {
         for (const o of ss.friendly_osids) {
             if (bFriendly.has(o)) return true;
-            for (const nb of osidAdjacency.get(o as Osid) ?? []) {
+            for (const nb of osidAdjacency.get(o) ?? []) {
                 if (bFriendly.has(nb)) return true;
             }
         }
@@ -182,14 +182,14 @@ function createPocketContainmentSectors(
     // where ALL adjacency neighbors are in corpsFriendlyOsids
     const pocketOsids = new Set<string>();
     for (const friendlyOsid of [...corpsFriendlyOsids].sort(strictCompare)) {
-        for (const nb of osidAdjacency.get(friendlyOsid as Osid) ?? []) {
+        for (const nb of osidAdjacency.get(friendlyOsid) ?? []) {
             if (corpsFriendlyOsids.has(nb)) continue;
             if (existingEnemyOsids.has(nb)) continue;
             if (pocketOsids.has(nb)) continue;
             const ctrl = politicalControllers[nb];
             if (ctrl === faction) continue;
 
-            const nbNeighbors = osidAdjacency.get(nb as Osid) ?? [];
+            const nbNeighbors = osidAdjacency.get(nb) ?? [];
             if (nbNeighbors.length > 0 && nbNeighbors.every(n => corpsFriendlyOsids.has(n))) {
                 pocketOsids.add(nb);
             }
@@ -199,28 +199,10 @@ function createPocketContainmentSectors(
     if (pocketOsids.size === 0) return sectors;
 
     // Group pocket OSIDs into connected components
-    const sortedPockets = [...pocketOsids].sort(strictCompare);
-    const visited = new Set<string>();
-    const pocketGroups: Set<string>[] = [];
-
-    for (const seed of sortedPockets) {
-        if (visited.has(seed)) continue;
-        const group = new Set<string>();
-        const queue = [seed];
-        visited.add(seed);
-        let head = 0;
-        while (head < queue.length) {
-            const osid = queue[head++]!;
-            group.add(osid);
-            for (const nb of osidAdjacency.get(osid as Osid) ?? []) {
-                if (!visited.has(nb) && pocketOsids.has(nb)) {
-                    visited.add(nb);
-                    queue.push(nb);
-                }
-            }
-        }
-        pocketGroups.push(group);
-    }
+    const pocketGroups = findConnectedComponents(
+        pocketOsids,
+        (osid) => osidAdjacency.get(osid) ?? [],
+    );
 
     const result = sectors.map(s => structuredClone(s));
 
@@ -230,7 +212,7 @@ function createPocketContainmentSectors(
         // Friendly OSIDs adjacent to the pocket
         const containmentFriendly = new Set<string>();
         for (const enemyOsid of [...pocket].sort(strictCompare)) {
-            for (const nb of osidAdjacency.get(enemyOsid as Osid) ?? []) {
+            for (const nb of osidAdjacency.get(enemyOsid) ?? []) {
                 if (corpsFriendlyOsids.has(nb)) containmentFriendly.add(nb);
             }
         }
@@ -275,15 +257,13 @@ function createPocketContainmentSectors(
  * @param sectors     Current sectors for this corps
  * @param corpsId     Corps formation ID
  * @param osidAdjacency  OSID adjacency graph
- * @param formations  Formation location map (for future operation concentration)
- * @param context     Optional context with political controllers, faction, active ops
+ * @param context     Optional context with political controllers and faction
  * @returns           Rearranged sectors with renumbered IDs
  */
 export function rearrangeSectorsForCorps(
     sectors: CorpsFrontSector[],
     corpsId: string,
     osidAdjacency: Map<Osid, Osid[]>,
-    formations: Record<string, { location_osid?: string }>,
     context?: RearrangeContext,
 ): CorpsFrontSector[] {
     if (sectors.length === 0) return [];

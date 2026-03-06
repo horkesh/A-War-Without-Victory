@@ -1,5 +1,6 @@
 import { getEffectiveHeavyEquipmentAccess } from './embargo.js';
 import type { FactionId, FormationState, GameState, PostureLevel } from './game_state.js';
+import { clamp01 } from '../utils/math.js';
 
 export const BASE_DEGRADATION_RATE = 0.02;
 export const OPERATIONAL_TEMPO_OFFENSIVE = 1.5;
@@ -7,12 +8,6 @@ export const OPERATIONAL_TEMPO_REFIT = 0.3;
 export const DEGRADED_EFFECTIVENESS = 0.5;
 export const REPAIR_COST_DEGRADED = 3.0;
 export const REPAIR_COST_NON_OPERATIONAL = 10.0;
-
-function clamp01(value: number): number {
-    if (value < 0) return 0;
-    if (value > 1) return 1;
-    return value;
-}
 
 function postureTempo(posture: PostureLevel | undefined): number {
     switch (posture) {

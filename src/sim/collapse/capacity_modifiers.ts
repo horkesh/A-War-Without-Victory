@@ -7,6 +7,7 @@
  */
 
 import type { GameState } from '../../state/game_state.js';
+import { clamp01 as _clamp01 } from '../../utils/math.js';
 
 
 export type CapacityModifierKey = 'authority_mult' | 'cohesion_mult' | 'supply_mult' | 'pressure_cap_mult';
@@ -25,11 +26,10 @@ const DEFAULT_MODIFIERS: SidCapacityModifiers = {
     pressure_cap_mult: 1
 };
 
+/** Clamp to [0, 1], returning 1 for non-finite inputs (NaN, Infinity). */
 function clamp01(x: number): number {
     if (!Number.isFinite(x)) return 1;
-    if (x < 0) return 0;
-    if (x > 1) return 1;
-    return x;
+    return _clamp01(x);
 }
 
 /**

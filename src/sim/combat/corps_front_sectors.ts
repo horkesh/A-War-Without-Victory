@@ -23,6 +23,7 @@ import { getFormationCorpsId } from './corps_sector_partition.js';
 import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { findConnectedComponents } from '../../utils/graph.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Main Entry Point
@@ -1328,28 +1329,11 @@ export function splitNonContiguousSectors(
             for (const o of ss.friendly_osids) allFriendly.add(o);
         }
 
-        // BFS to find connected components of friendly OSIDs
-        const visited = new Set<string>();
-        const components: Set<string>[] = [];
-        const sortedFriendly = [...allFriendly].sort(strictCompare);
-
-        for (const seed of sortedFriendly) {
-            if (visited.has(seed)) continue;
-            const component = new Set<string>();
-            const queue = [seed];
-            visited.add(seed);
-            let head = 0;
-            while (head < queue.length) {
-                const osid = queue[head++]!;
-                component.add(osid);
-                for (const nb of osidAdjacency.get(osid) ?? []) {
-                    if (visited.has(nb) || !allFriendly.has(nb)) continue;
-                    visited.add(nb);
-                    queue.push(nb);
-                }
-            }
-            components.push(component);
-        }
+        // Find connected components of friendly OSIDs
+        const components = findConnectedComponents(
+            allFriendly,
+            (osid) => osidAdjacency.get(osid) ?? [],
+        );
 
         // Single component — sector is already contiguous
         if (components.length <= 1) {

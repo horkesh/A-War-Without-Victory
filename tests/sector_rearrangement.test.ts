@@ -60,7 +60,7 @@ describe('rearrangeSectorsForCorps — thin sector consolidation', () => {
             ['op:y:y'], ['e6'],
             []);
 
-        const result = rearrangeSectorsForCorps([big, tiny], 'test_corps', adj, {});
+        const result = rearrangeSectorsForCorps([big, tiny], 'test_corps', adj);
         expect(result).toHaveLength(1);
         expect(result[0].sub_segments.flatMap(ss => ss.friendly_osids)).toContain('op:c:c');
     });
@@ -72,7 +72,7 @@ describe('rearrangeSectorsForCorps — thin sector consolidation', () => {
         const isolated = makeSector('sector:test:1', 'test_corps',
             ['op:i:i'], ['op:y:y'], ['e2'], []);
 
-        const result = rearrangeSectorsForCorps([big, isolated], 'test_corps', adj, {});
+        const result = rearrangeSectorsForCorps([big, isolated], 'test_corps', adj);
         expect(result).toHaveLength(2);
     });
 });
@@ -92,7 +92,7 @@ describe('rearrangeSectorsForCorps — enemy pocket containment', () => {
         };
 
         const result = rearrangeSectorsForCorps(
-            [sector], 'test_corps', adj, {},
+            [sector], 'test_corps', adj,
             { politicalControllers, faction: 'RS' as any }
         );
         const containment = result.find(s =>

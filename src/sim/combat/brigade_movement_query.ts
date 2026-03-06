@@ -10,6 +10,7 @@ import {
     shortestPathThroughFriendly,
     transitTurnsForPath,
 } from './brigade_movement.js';
+import { clamp } from '../../utils/math.js';
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
 
 export interface MovementRangeQuery {
@@ -22,10 +23,6 @@ export interface MovementPathQuery {
     path: SettlementId[];
     eta_turns: number;
     terrain_costs: number[];
-}
-
-function clamp(value: number, min: number, max: number): number {
-    return Math.max(min, Math.min(max, value));
 }
 
 function getStartSid(state: GameState, brigadeId: FormationId): SettlementId | null {

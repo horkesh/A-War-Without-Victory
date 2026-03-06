@@ -1,10 +1,5 @@
 import type { CapabilityProfile, FactionId, GameState } from './game_state.js';
-
-function getYearForTurn(turn: number): number {
-    if (turn < 0 || !Number.isFinite(turn)) return 1992;
-    const yearOffset = Math.floor(turn / 52);
-    return Math.min(1995, 1992 + yearOffset);
-}
+import { getYearForTurn } from '../utils/time.js';
 
 function getHrhbPhase(turn: number): '1994_pre' | '1994_post' {
     const yearOffset = Math.floor(turn / 52);

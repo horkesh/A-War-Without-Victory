@@ -1,15 +1,10 @@
 import type { LoadedSettlementGraph } from '../map/settlements.js';
+import { clamp01 } from '../utils/math.js';
 import { SARAJEVO_MUN_IDS, SARAJEVO_PRESSURE_MULTIPLIER } from './enclave_integrity.js';
 import type { GameState, SarajevoState, SettlementId } from './game_state.js';
 import type { SupplyStateDerivationReport, SupplyStateLevel } from './supply_state_derivation.js';
 
 const BASE_IMPORTANCE = 1.0;
-
-function clamp01(value: number): number {
-    if (value < 0) return 0;
-    if (value > 1) return 1;
-    return value;
-}
 
 function supplyStateToScore(state: SupplyStateLevel): number {
     if (state === 'adequate') return 1;

@@ -8,6 +8,7 @@ import { ensureProductionFacilities } from '../state/production_facilities.js';
 import type { SetupPhaseRecruitmentReport } from '../state/recruitment_types.js';
 import type { LocalProductionCapacityReport } from '../state/supply_state_derivation.js';
 import { strictCompare } from '../state/validateGameState.js';
+import { clamp01 } from '../utils/math.js';
 import { runBotRecruitment } from './recruitment_engine.js';
 
 export interface RecruitmentAccrualFactionDelta {
@@ -31,12 +32,6 @@ const EQUIPMENT_TYPE_WEIGHT: Readonly<Record<string, number>> = {
  * Prevents historical RS brigades from stalling permanently below mandatory spawn floor.
  */
 const RS_MANDATORY_MOBILIZATION_PER_TURN = 120;
-
-function clamp01(value: number): number {
-    if (value < 0) return 0;
-    if (value > 1) return 1;
-    return value;
-}
 
 function sortedFactionIds(state: GameState): FactionId[] {
     return (state.factions ?? []).map((f) => f.id).sort(strictCompare);

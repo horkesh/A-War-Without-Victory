@@ -13,7 +13,6 @@ import {
 } from '../src/sim/combat/corps_command.js';
 import {
     activateOGs,
-    computeOGPressureBonus,
     updateOGLifecycle,
     validateOGOrder
 } from '../src/sim/combat/operational_groups.js';
@@ -338,41 +337,5 @@ describe('operational groups - updateOGLifecycle', () => {
 
         expect(dissolved).toContain(ogId);
         expect(state.formations[ogId].status).toBe('inactive');
-    });
-});
-
-describe('operational groups - computeOGPressureBonus', () => {
-    it('returns 1.0 (brigade_aor removed, OG bonus no longer computed)', () => {
-        const state = makeCorpsState();
-        initializeCorpsCommand(state);
-
-        // Create OG assigned to S3
-        const ogId = 'og-rs-corps-1-t20';
-        state.formations[ogId] = {
-            id: ogId,
-            faction: 'RS',
-            name: 'OG test',
-            created_turn: 20,
-            status: 'active',
-            assignment: null,
-            kind: 'og',
-            personnel: 600,
-            cohesion: 70,
-            hq_sid: 'S3',
-            tags: ['corps:rs-corps-1', 'og_max_dur:5'],
-            posture: 'attack',
-            corps_id: 'rs-corps-1'
-        };
-
-        // brigade_aor removed: computeOGPressureBonus always returns 1.0
-        const bonus = computeOGPressureBonus(state, 'S3:S4');
-        expect(bonus).toBe(1.0);
-    });
-
-    it('returns 1.0 when no OG covers the edge', () => {
-        const state = makeCorpsState();
-
-        const bonus = computeOGPressureBonus(state, 'S1:S2');
-        expect(bonus).toBe(1.0);
     });
 });

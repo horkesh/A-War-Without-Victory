@@ -6,7 +6,6 @@
  * Deterministic: no randomness, no timestamps.
  */
 
-import type { EdgeRecord } from '../../map/settlements.js';
 import type {
     FormationId,
     FormationState,
@@ -53,8 +52,6 @@ const OG_DISSOLVE_COHESION = 15;
 /** Default max duration if tag is missing or unparseable. */
 const DEFAULT_MAX_DURATION = 6;
 
-/** Coordination pressure multiplier when an OG covers an edge. */
-const OG_COORDINATION_BONUS = 1.3;
 
 // ---------------------------------------------------------------------------
 // Validation
@@ -147,7 +144,7 @@ export function validateOGOrder(state: GameState, order: OGActivationOrder): str
  * Activate OGs from pending orders.
  * Processes orders in deterministic order (sorted by corps_id).
  */
-export function activateOGs(state: GameState, _edges?: EdgeRecord[]): OGActivationReport {
+export function activateOGs(state: GameState): OGActivationReport {
     const report: OGActivationReport = { activated: [], rejected: [] };
     const orders = state.og_orders;
     if (!orders || orders.length === 0) return report;
@@ -301,16 +298,4 @@ export function updateOGLifecycle(state: GameState): FormationId[] {
     }
 
     return dissolved;
-}
-
-// ---------------------------------------------------------------------------
-// Pressure bonus
-// ---------------------------------------------------------------------------
-
-/**
- * Compute OG pressure bonus on a front edge.
- * brigade_aor is never populated; always returns 1.0.
- */
-export function computeOGPressureBonus(_state: GameState, _edgeId: string): number {
-    return 1.0;
 }

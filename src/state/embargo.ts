@@ -1,12 +1,7 @@
 import type { EmbargoProfile, FactionId, GameState } from './game_state.js';
+import { clamp01 } from '../utils/math.js';
 
 export const SMUGGLING_EFFICIENCY_GROWTH = 0.0015;
-
-function clamp01(value: number): number {
-    if (value < 0) return 0;
-    if (value > 1) return 1;
-    return value;
-}
 
 function defaultEmbargoProfile(factionId: FactionId): EmbargoProfile {
     if (factionId === 'RS') {

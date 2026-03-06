@@ -312,9 +312,10 @@ export function resolveAttackOrdersOsid(
 
     const orders = state.brigade_attack_orders;
     const adjacency = buildOsidAdjacency(edges);
+    const allFormations = Object.values(state.formations ?? {});
     if (!orders || typeof orders !== 'object') {
         // No orders this turn — still run displacement pass so formations left in enemy territory from a previous turn are fixed
-        for (const f of Object.values(state.formations ?? {})) {
+        for (const f of allFormations) {
             if (!f || f.status !== 'active') continue;
             const loc = (f as { location_osid?: string }).location_osid;
             if (!loc) continue;
@@ -378,7 +379,7 @@ export function resolveAttackOrdersOsid(
         const neighbors = adjacency.get(attackerLoc) ?? [];
         if (!neighbors.includes(targetOsid)) continue;
 
-        const defenderFormations = (Object.values(state.formations ?? {}) as FormationState[])
+        const defenderFormations = (allFormations as FormationState[])
             .filter(f => f.status === 'active' && (f as { location_osid?: string }).location_osid === targetOsid && f.faction !== attackerFaction)
             .sort((a, b) => strictCompare(a.id, b.id));
         const controller = getPoliticalControllerOSID(state, targetOsid, reverseMap);

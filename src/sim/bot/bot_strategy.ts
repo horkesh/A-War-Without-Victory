@@ -1,4 +1,5 @@
 import type { FactionId, GameState, PhaseName } from '../../state/game_state.js';
+import { clamp01 } from '../../utils/math.js';
 
 export type BotDifficulty = 'easy' | 'medium' | 'hard';
 
@@ -118,10 +119,6 @@ export function resolveAggressionForPhase(profile: BotStrategyProfile, phase: Ph
 
 const AGGRESSION_TAPER_START_WEEK = 0;
 const AGGRESSION_TAPER_END_WEEK = 156;
-
-function clamp01(value: number): number {
-    return Math.max(0, Math.min(1, value));
-}
 
 function lerp(a: number, b: number, t: number): number {
     return a + (b - a) * t;

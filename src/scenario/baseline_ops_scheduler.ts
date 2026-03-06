@@ -7,6 +7,7 @@
 
 import type { FactionId, GameState, SettlementId } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
+import { clamp01 } from '../utils/math.js';
 import type { EngagementSignal } from './baseline_ops_types.js';
 import {
     BASELINE_OPS_DISPLACEMENT_RATE,
@@ -16,10 +17,6 @@ import {
     FRONT_ACTIVE_NORM,
     PRESSURE_EDGES_NORM
 } from './baseline_ops_types.js';
-
-function clamp01(x: number): number {
-    return Math.max(0, Math.min(1, x));
-}
 
 /**
  * Compute normalized engagement level in [0, 1] from signal.

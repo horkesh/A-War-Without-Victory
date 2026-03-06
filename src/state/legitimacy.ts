@@ -2,6 +2,7 @@ import { getFactionDemographicFraction, loadMunicipalityPopulation1991 } from '.
 import type { LoadedSettlementGraph } from '../map/settlements.js';
 import type { FactionId, GameState, LegitimacyState, MunicipalityId, SettlementId } from './game_state.js';
 import { loadInitialMunicipalityControllers1990 } from './political_control_init.js';
+import { clamp01 } from '../utils/math.js';
 
 // Re-export browser-safe utilities from legitimacy_utils so existing consumers
 // that import from this module continue to work without changes.
@@ -18,12 +19,6 @@ import {
     STABILITY_BONUS_CAP,
     STABILITY_BONUS_RATE,
 } from './legitimacy_utils.js';
-
-function clamp01(value: number): number {
-    if (value < 0) return 0;
-    if (value > 1) return 1;
-    return value;
-}
 
 function getMunicipalityIdForSettlement(
     settlements: LoadedSettlementGraph,

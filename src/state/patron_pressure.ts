@@ -1,4 +1,6 @@
 import type { FactionId, GameState, InternationalVisibilityPressure, PatronState, SarajevoState } from './game_state.js';
+import { clamp01 } from '../utils/math.js';
+import { getYearForTurn } from '../utils/time.js';
 
 export const EXHAUSTION_DIPLOMATIC_MULTIPLIER = 0.1;
 export const NEGOTIATION_MOMENTUM_MULTIPLIER = 0.05;
@@ -6,18 +8,6 @@ export const PATRON_COMMITMENT_RESISTANCE = 0.05;
 export const SARAJEVO_VISIBILITY_RATE = 0.5;
 export const ENCLAVE_PRESSURE_WEIGHT = 1.0;
 export const SARAJEVO_ISOLATION_RATE = 0.05;
-
-function clamp01(value: number): number {
-    if (value < 0) return 0;
-    if (value > 1) return 1;
-    return value;
-}
-
-function getYearForTurn(turn: number): number {
-    if (turn < 0 || !Number.isFinite(turn)) return 1992;
-    const yearOffset = Math.floor(turn / 52);
-    return Math.min(1995, 1992 + yearOffset);
-}
 
 function patronCommitmentBase(factionId: FactionId, year: number): number {
     switch (factionId) {

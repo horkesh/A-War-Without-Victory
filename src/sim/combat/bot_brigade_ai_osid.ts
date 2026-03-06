@@ -116,11 +116,7 @@ function getSectorOffensiveCurrentObjective(
 // Shared helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
-function getCorpsStance(state: GameState, formation: FormationState): CorpsStance | null {
-    if (!formation.corps_id || !state.corps_command) return null;
-    const corps = state.corps_command[formation.corps_id];
-    return corps?.stance ?? null;
-}
+import { getCorpsStance } from './combat_math.js';
 
 function getFactionBrigades(state: GameState, faction: FactionId): FormationState[] {
     const formations = state.formations ?? {};
@@ -784,18 +780,22 @@ function scoreTargetFromDirective(
     directive: import('../../state/game_state.js').CorpsDirective,
     faction: FactionId,
     ethnicMap?: OsidEthnicComposition,
-    hasDirectiveTargetAdjacent?: boolean
+    hasDirectiveTargetAdjacent?: boolean,
+    offensiveTargetSet?: Set<Osid>,
+    avoidOsidSet?: Set<Osid>
 ): number {
+    const _offensiveTargetSet = offensiveTargetSet ?? new Set(directive.offensive_targets);
+    const _avoidOsidSet = avoidOsidSet ?? new Set(directive.avoid_osids);
     let score = OUTCOME_SCORE[prediction.predicted_outcome] ?? 0;
 
     // Directive-driven: is this an offensive target?
-    if (directive.offensive_targets.includes(osid)) {
+    if (_offensiveTargetSet.has(osid)) {
         score += 200; // Corps wants this attacked
     }
 
     // Brigade conservatism: without corps offensive targets, default to territorial defense.
     // Historical brigades were territorial — only attacked when ordered by corps.
-    if (directive.offensive_targets.length === 0) {
+    if (_offensiveTargetSet.size === 0) {
         score -= 200; // No orders — hold position
     }
 
@@ -804,13 +804,13 @@ function scoreTargetFromDirective(
     // undefended territory; defensive corps (-250) lock brigades to directive targets only.
     // RS early war (aggression 0.35): -145 → undefended non-priority barely viable.
     // ARBiH defensive (aggression -0.20): -310 → non-priority fully blocked.
-    if (directive.offensive_targets.length > 0 && !directive.offensive_targets.includes(osid)) {
+    if (_offensiveTargetSet.size > 0 && !_offensiveTargetSet.has(osid)) {
         const nonPriorityPenalty = Math.floor(-250 + directive.aggression_modifier * 300);
         score += Math.min(-100, nonPriorityPenalty); // Floor at -100 (never free)
     }
 
     // Directive-driven: avoid zone (legacy — avoid_municipalities removed, but keep for future use)
-    if (directive.avoid_osids.includes(osid)) {
+    if (_avoidOsidSet.has(osid)) {
         score -= 500;
     }
 
@@ -823,7 +823,7 @@ function scoreTargetFromDirective(
 
     // Tactical penalties — heavily reduced for directive targets (corps accepted the risk).
     // Overextension: avoid pushing into salients or positions that could be cut off.
-    const isDirectiveTarget = directive.offensive_targets.includes(osid);
+    const isDirectiveTarget = _offensiveTargetSet.has(osid);
     const overextPenaltyScale = isDirectiveTarget ? 0.25 : 1.0;
     if (prediction.overextension_risk >= 3) score -= Math.floor(220 * overextPenaltyScale);
     if (prediction.overextension_risk >= 2) score -= Math.floor(120 * overextPenaltyScale);
@@ -1169,6 +1169,7 @@ function executeFactionDirectives(
             }
             // Directive offensive target (rare during defensive but possible if corps has specific targets)
             if (adjEnemy.length > 0 && directive && directive.offensive_targets.length > 0) {
+                const defOffTargetSet = new Set(directive.offensive_targets);
                 const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
                 const maxAtt = directive.max_attackers_per_target;
                 const viable = targets.find(t => {
@@ -1181,7 +1182,7 @@ function executeFactionDirectives(
                         const ctrl = getPoliticalControllerOSID(state, t.osid, reverseMap);
                         if (ctrl === 'HRHB') return false;
                     }
-                    return directive.offensive_targets.includes(t.osid) &&
+                    return defOffTargetSet.has(t.osid) &&
                         isOutcomeSufficientForAttack(t.prediction.predicted_outcome, directive.min_attack_outcome);
                 });
                 if (viable) {
@@ -1265,6 +1266,11 @@ function executeFactionDirectives(
                 }
             }
         }
+        // Cache directive arrays as Sets for O(1) lookups in hot scoring loops
+        const _offensiveTargetSet = new Set(effectiveDirective.offensive_targets);
+        const _holdOsidSet = new Set(effectiveDirective.hold_osids);
+        const _avoidOsidSet = new Set(effectiveDirective.avoid_osids);
+
         if (adjEnemy.length > 0) {
             // Alliance filter: don't attack allied faction's territory
             let filteredEnemy = adjEnemy;
@@ -1295,7 +1301,7 @@ function executeFactionDirectives(
                     const defenderFaction = getPoliticalControllerOSID(state, t.osid, reverseMap);
                     return {
                         ...t,
-                        finalScore: scoreTargetFromDirective(t.osid, t.prediction, effectiveDirective, faction, ethnicMap)
+                        finalScore: scoreTargetFromDirective(t.osid, t.prediction, effectiveDirective, faction, ethnicMap, undefined, _offensiveTargetSet, _avoidOsidSet)
                             + supplyPenalty
                             + (counterAttackTarget === t.osid ? 180 : 0) // Retreat-based counter-attack bonus
                             + getRsVsHrhbPenalty(t.osid, faction, defenderFaction)
@@ -1318,7 +1324,7 @@ function executeFactionDirectives(
                     // Strained supply: pioneer only at 'victory' bar (need decent odds).
                     // Critical supply: blocked entirely by outer gate (brigade already skipped).
                     if (existing === 0 && (corpsStance === 'offensive' || corpsStance === 'balanced') &&
-                        effectiveDirective.offensive_targets.includes(s.osid)) {
+                        _offensiveTargetSet.has(s.osid)) {
                         const pioneerBar = isSupplyStrained ? 'victory' : 'repulsed';
                         // Standard pioneer: individual prediction sufficient
                         if (isOutcomeSufficientForAttack(s.prediction.predicted_outcome, pioneerBar)) {
@@ -1403,11 +1409,12 @@ function executeFactionDirectives(
         // Move along front toward the nearest offensive_target through friendly territory.
         if (adjEnemy.length > 0 && directive && directive.offensive_targets.length > 0 &&
             (corpsStance === 'offensive' || corpsStance === 'balanced')) {
-            const hasAdjacentTarget = adjEnemy.some(o => directive.offensive_targets.includes(o));
+            const redeployTargetSet = new Set(directive.offensive_targets);
+            const hasAdjacentTarget = adjEnemy.some(o => redeployTargetSet.has(o));
             const factionHere = countFactionBrigadesAtOsid(state, faction, loc);
             if (!hasAdjacentTarget && factionHere >= 2) {
                 // BFS through friendly territory toward nearest offensive_target neighbor
-                const targetSet = new Set(directive.offensive_targets);
+                const targetSet = redeployTargetSet;
                 const visited = new Set<Osid>([loc]);
                 const queue: Array<{ osid: Osid; firstStep: Osid }> = [];
                 for (const n of (adjacency.get(loc) ?? [])) {
