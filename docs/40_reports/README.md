@@ -11,6 +11,7 @@
 | Need | Go to |
 |------|--------|
 | **What’s already implemented** | [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md) → [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) (single doc; originals archived to docs/_old/40_reports/implemented_2026_02_15/) |
+| **Latest sector visualization fix** | [20260306_SECTOR_VISUALIZATION_HOVER_CLICK_FIX.md](implemented/20260306_SECTOR_VISUALIZATION_HOVER_CLICK_FIX.md) — per-segment hover, sector-based highlight, hostile-side adjacency consolidation, authoritative pair filtering. |
 | **Latest combat-causality hardening report** | [20260306_COMBAT_CAUSALITY_HARDENING_AND_OPERATION_CADENCE.md](implemented/20260306_COMBAT_CAUSALITY_HARDENING_AND_OPERATION_CADENCE.md) — movement-aware combat-causality diagnostics, early staged planning exit, `n112`/`n113` run evidence. |
 | **React map app — comprehensive status (for external expert review)** | [20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md](20260228_REACT_MAP_APP_COMPREHENSIVE_STATUS.md) — full done/remaining vs AWWV_GUI_ARCHITECTURE_REWORK_v2.md; file inventory; verification checklist. |
 | **What’s not yet implemented (backlog)** | [CONSOLIDATED_BACKLOG.md](CONSOLIDATED_BACKLOG.md) |

@@ -10356,3 +10356,22 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 - Confirmed that current tactical fog-of-war is not driven by the new sector-intel system. The sim derives `sector_intel` in the war pipeline, but the live map adapter/fog overlay still reads legacy `recon_intelligence.confirmed_empty`. Live `n110` evidence: `final_save.json` contains `sector_intel` and no `recon_intelligence`, so the current fog overlay path is effectively disconnected from the data the sim actually produces.
 - Confirmed that autonomous corps op planning is implemented but internally conflicted: generic named operations can be created earlier in `generateAllCorpsOrders()`, then overwritten later in the same pass by sector-offensive launch logic because non-`sector_attack` active ops are considered replaceable.
 - No code change in this checkpoint; this is a control-doc update during the ongoing engine audit so the next fix can target a verified architecture gap instead of re-discovering it.
+
+## 2026-03-06 - Sector visualization: per-segment hover, hostile adjacency consolidation
+
+### Changes
+- **Hostile-side OSID adjacency** in `consolidateCrossCorpsFronts()` (`corps_front_sectors.ts`): edges facing the same hostile OSID are now adjacent for consolidation, fixing cross-corps splits (e.g., Bosanska Gradiska where orahova and gradiska_3 connect through RS-held kruskik_2)
+- **Per-segment hover features** (`buildFrontEdgesHoverGeoJSON.ts`): each polygon boundary segment gets its own feature with per-segment offset (centroid cross product), replacing grouped/merged approach that caused mid-chain offset inversions
+- **Sector-based hover highlight** (`useMapInteractions.ts`): replaced `setFeatureState`-based hover (per-edge) with `setFilter`-based hover (per-sector_id), so entire sector highlights on hover instead of single segment
+- **Highlight layers** (`MapContainer.tsx`): changed from feature-state opacity to filter-based visibility (sector_id filter)
+- **Authoritative pair filtering** (`buildCorpsFrontLinesGeoJSON.ts`): front lines filtered by contact-graph edge set; 1,504 phantom polygon-only adjacencies suppressed; centroid-to-centroid fallback removed
+- Removed `promoteId: 'edge_id'` from hover source, removed `safeSetFeatureState` helper
+
+### Offset convention (reference)
+- MapLibre: positive line-offset = RIGHT of line direction
+- Cross product `dx*(centY-ay) - dy*(centX-ax)`: positive = centroid LEFT of segment
+- Convention: `cross > 0 → offset_side = -1` (push LEFT toward centroid)
+
+### Propagation
+- Report: `docs/40_reports/implemented/20260306_SECTOR_VISUALIZATION_HOVER_CLICK_FIX.md`
+- Updated: `context.md`, `REPO_MAP.md`, `MAP_UI_MASTER.md`, `AWWV_GUI_ARCHITECTURE_REWORK_v2.md`, `CONSOLIDATED_IMPLEMENTED.md`, `40_reports/README.md`, `memory/corps_sectors.md`

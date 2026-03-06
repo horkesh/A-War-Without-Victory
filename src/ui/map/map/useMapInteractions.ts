@@ -16,9 +16,10 @@ const HOVER_DELAY_MS = 300;
 let hoverTimeout: number | undefined;
 let formationHoverTimeout: number | undefined;
 let frontHoverTimeout: number | undefined;
-let hoveredFrontEdgeId: string | null = null;
+let hoveredSectorId: string | null = null;
 
-const FRONT_EDGES_SOURCE = 'front-edges-hover';
+const HIGHLIGHT_POS_LAYER = 'front-edges-highlight-pos';
+const HIGHLIGHT_NEG_LAYER = 'front-edges-highlight-neg';
 
 export function useMapInteractions(
   map: MapLibreMap | null,
@@ -44,15 +45,6 @@ export function useMapInteractions(
       console.error('[useMapInteractions] map.off failed', { event, layerId, error: e });
       return false;
     }
-  };
-
-  const safeSetFeatureState = (
-    target: { source: string; id: string },
-    state: Record<string, unknown>
-  ) => {
-    try {
-      map.setFeatureState(target, state);
-    } catch (_) { /* source may be removed during teardown */ }
   };
 
   const onOsidClick = typeof callbacks === 'function' ? callbacks : callbacks.onOsidClick;
@@ -141,20 +133,30 @@ export function useMapInteractions(
     onMapMouseLeave?.();
   };
 
+  const setHoverHighlight = (sectorId: string | null) => {
+    if (sectorId === hoveredSectorId) return;
+    hoveredSectorId = sectorId;
+    const noMatch = '__none__';
+    const sid = sectorId ?? noMatch;
+    try {
+      if (map.getLayer(HIGHLIGHT_POS_LAYER)) {
+        map.setFilter(HIGHLIGHT_POS_LAYER, ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], sid]]);
+      }
+      if (map.getLayer(HIGHLIGHT_NEG_LAYER)) {
+        map.setFilter(HIGHLIGHT_NEG_LAYER, ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], sid]]);
+      }
+    } catch (_) { /* layers may not exist yet */ }
+  };
+
   const handleFrontEdgeMouseMove = (e: MapLayerMouseEvent) => {
     map.getCanvas().style.cursor = 'pointer';
     const feature = e.features?.[0];
     const edgeId = feature?.properties?.edge_id as string | undefined;
+    const sectorId = feature?.properties?.sector_id as string | undefined;
     const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
 
-    // Update feature-state highlight
-    if (edgeId && edgeId !== hoveredFrontEdgeId) {
-      if (hoveredFrontEdgeId) {
-        safeSetFeatureState({ source: FRONT_EDGES_SOURCE, id: hoveredFrontEdgeId }, { hover: false });
-      }
-      hoveredFrontEdgeId = edgeId;
-      safeSetFeatureState({ source: FRONT_EDGES_SOURCE, id: edgeId }, { hover: true });
-    }
+    // Highlight entire sector on hover
+    if (sectorId) setHoverHighlight(sectorId);
 
     if (onFrontEdgeHover) {
       if (edgeId) {
@@ -173,10 +175,7 @@ export function useMapInteractions(
 
   const handleFrontEdgeMouseLeave = () => {
     map.getCanvas().style.cursor = '';
-    if (hoveredFrontEdgeId) {
-      safeSetFeatureState({ source: FRONT_EDGES_SOURCE, id: hoveredFrontEdgeId }, { hover: false });
-      hoveredFrontEdgeId = null;
-    }
+    setHoverHighlight(null);
     if (frontHoverTimeout) {
       clearTimeout(frontHoverTimeout);
       frontHoverTimeout = undefined;
@@ -257,10 +256,7 @@ export function useMapInteractions(
       safeOff('mousemove', layerId, handleFrontEdgeMouseMove);
       safeOff('mouseleave', layerId, handleFrontEdgeMouseLeave);
     }
-    if (hoveredFrontEdgeId) {
-      safeSetFeatureState({ source: FRONT_EDGES_SOURCE, id: hoveredFrontEdgeId }, { hover: false });
-      hoveredFrontEdgeId = null;
-    }
+    setHoverHighlight(null);
     if (frontHoverTimeout) clearTimeout(frontHoverTimeout);
   };
 }

@@ -368,7 +368,7 @@ export function MapContainer() {
               const centroidsForHover = osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined;
               const frontEdgesHoverData = buildFrontEdgesHoverGeoJSON(controlledGeoJson, frontEdgesOsid, state.corpsFrontSectors, centroidsForHover);
               if (!m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
-                m2.addSource(FRONT_EDGES_HOVER_SOURCE_ID, { type: 'geojson', data: frontEdgesHoverData, promoteId: 'edge_id' });
+                m2.addSource(FRONT_EDGES_HOVER_SOURCE_ID, { type: 'geojson', data: frontEdgesHoverData });
                 // Hitbox + highlight for positive-offset side (offset_side == 1)
                 m2.addLayer(
                   {
@@ -390,16 +390,11 @@ export function MapContainer() {
                     id: FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID,
                     type: 'line',
                     source: FRONT_EDGES_HOVER_SOURCE_ID,
-                    filter: ['==', ['get', 'offset_side'], 1],
+                    filter: ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
                     paint: {
                       'line-width': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
                       'line-offset': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
-                      'line-opacity': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        0.8,
-                        0,
-                      ],
+                      'line-opacity': 0.8,
                       'line-color': '#ffffff',
                     },
                     layout: { 'line-cap': 'round', 'line-join': 'round' },
@@ -427,16 +422,11 @@ export function MapContainer() {
                     id: FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID,
                     type: 'line',
                     source: FRONT_EDGES_HOVER_SOURCE_ID,
-                    filter: ['==', ['get', 'offset_side'], -1],
+                    filter: ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
                     paint: {
                       'line-width': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
                       'line-offset': ['interpolate', ['linear'], ['zoom'], 6, -4, 10, -8, 14, -12],
-                      'line-opacity': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        0.8,
-                        0,
-                      ],
+                      'line-opacity': 0.8,
                       'line-color': '#ffffff',
                     },
                     layout: { 'line-cap': 'round', 'line-join': 'round' },

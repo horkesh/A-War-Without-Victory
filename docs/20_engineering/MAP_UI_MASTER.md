@@ -44,7 +44,7 @@ src/ui/map/
 │       ├── buildOrderArrowsGeoJSON.ts          Attack/move arrow LineStrings
 │       ├── buildCorpsFrontLinesGeoJSON.ts      Corps-colored front lines (glow + tooth edge)
 │       ├── buildSectorDemarcationGeoJSON.ts    Lateral boundaries between same-faction sectors
-│       ├── buildFrontEdgesHoverGeoJSON.ts      Two offset features per edge for asymmetric clicks
+│       ├── buildFrontEdgesHoverGeoJSON.ts      Per-segment offset features for asymmetric hover/click
 │       ├── buildOperationTargetIconsGeoJSON.ts Op objective markers: points + crosshairs
 │       ├── formationIconId.ts                  Icon ID string from kind + faction
 │       ├── geojsonLookup.ts                    buildOsidCentroidLookup() helper
@@ -507,7 +507,7 @@ interface MilitiaPoolView {
 | `buildOrderArrowsGeoJSON` | state, controlledGeoJson | LineString arrows | Attack/move orders |
 | `buildCorpsFrontLinesGeoJSON` | sectors, frontEdgesOsid | LineString front lines | Corps-colored front display |
 | `buildSectorDemarcationGeoJSON` | controlledGeoJson, sectors, frontEdgesOsid | LineString boundaries | Sector lateral boundaries |
-| `buildFrontEdgesHoverGeoJSON` | controlledGeoJson, frontEdgesOsid, sectors, centroids | 2× LineString per edge | Asymmetric click hitboxes |
+| `buildFrontEdgesHoverGeoJSON` | controlledGeoJson, frontEdgesOsid, sectors, centroids | 2× LineString per polygon boundary segment (per-segment offset) | Asymmetric click/hover hitboxes; each feature carries sector_id for filter-based highlighting |
 | `buildOperationTargetPointsGeoJSON` | centroidLookup, osids | Point features at OSID centroids | Op target ring + dot layers |
 | `buildOperationTargetCrosshairsGeoJSON` | centroidLookup, osids | LineString ± pairs per OSID | Op target crosshair layer |
 
@@ -587,7 +587,7 @@ Style: black-white alternating stripe. **No chevrons** (standing directive — d
 | Layer ID | Purpose |
 |----------|---------|
 | `front-edges-hover-pos` / `front-edges-hover-neg` | Invisible click hitboxes (offset per side) |
-| `front-edges-highlight-pos` / `front-edges-highlight-neg` | Highlight on hover |
+| `front-edges-highlight-pos` / `front-edges-highlight-neg` | Sector highlight on hover (filter by sector_id, not feature-state) |
 
 ### Sidebar Hover Layer
 
