@@ -109,21 +109,21 @@
 ## Sectors & Operations
 1. **[2026-03-06] Proof lane + eligible-attacker boundary**
    Do instead: Before wide calibration work, run `tests/scenario_vrs_operation_proof.test.ts` / `data/scenarios/apr1992_vrs_operation_proof_4w.json` to prove one VRS opening op can attack, battle, and advance. In combat-causality, treat `execution_without_eligible_attackers` as a separate root-cause boundary from `execution_without_attack_orders`.
-1. **[2026-03-05] `sector_attack` phase timing has one owner**
+2. **[2026-03-05] `sector_attack` phase timing has one owner**
    Do instead: Let `src/sim/combat/sector_offensive.ts` advance `sector_attack` phases. `src/sim/combat/corps_command.ts:advanceOperations()` must skip them, or named ops will enter/leave `execution` on the wrong schedule.
-2. **[2026-03-05] Execution-phase no-progress must spend failure budget**
+3. **[2026-03-05] Execution-phase no-progress must spend failure budget**
    Do instead: If a `sector_attack` stays in `execution` and produces no objective attempt, treat that as failure/stalemate in `updateSectorOffensiveResults()` so the op can skip or end instead of hanging indefinitely.
-3. **[2026-03-05] Generic corps named ops are currently shadowable**
+4. **[2026-03-05] Generic corps named ops are currently shadowable**
    Do instead: Treat `sector_attack` as the canonical live operation path until `generateAllCorpsOrders()` stops allowing `generateCorpsDirectives()` to replace a fresh non-sector `active_operation` later in the same pass.
-4. **[2026-03-06] Maneuver-only execution turns are not invalid**
+5. **[2026-03-06] Maneuver-only execution turns are not invalid**
    Do instead: In combat-causality diagnostics, an execution-phase operation with `brigade_movement_orders` but zero attack orders is still maneuvering. Count only true inert turns as `execution_without_attack_orders`.
-5. **[2026-03-06] End planning early when the force is already staged**
+6. **[2026-03-06] End planning early when the force is already staged**
    Do instead: If all active operation participants have reached `staging_osid` and at least one full planning turn has elapsed, transition the `sector_attack` to execution instead of waiting out the full nominal planning duration.
-4. **[2026-03-01] corps_id from tags, not field**
+7. **[2026-03-01] corps_id from tags, not field**
    Do instead: Use `getFormationCorpsId(f)` from `corps_sector_partition.ts`. Brigade corps stored in tags (`corps:vrs_1st_krajina`), not `f.corps_id`.
-5. **[2026-03-01] Sector exempt corps**
+8. **[2026-03-01] Sector exempt corps**
    Do instead: arbih_general_staff, vrs_main_staff, hvo_general_staff (army reserves) + hvo_central_bosnia (Bosniak-Croat conflict) — don't assign their brigades to front sectors.
-6. **[2026-03-05] Sector pipeline (updated — contiguity fix + min coverage + balancing)**
+9. **[2026-03-05] Sector pipeline (updated — contiguity fix + min coverage + balancing)**
    Do instead: `buildMultiSectorsForCorps()`: findSubSegments (friendly-OSID adjacency only — fix for non-contiguous sectors) → splitOversizedSubSegments (MAX_SECTOR_EDGES=25) → buildSectors → Phase 1E split (MAX_SECTOR_BRIGADES=8) → assignInteriorBrigades → redistributeExcessReserves → ensureMinimumSectorCoverage (promotes reserve or transfers from surplus). CorpsDirective now has `reinforce_sector_ids` (under-density sectors, <50% target density) + `priority_sector_id` (sector with most offensive targets). Bot: Rule 5c marches overstocked brigades to reinforce sectors; Rule 7 marches interior brigades to priority sector first.
 7. **[2026-03-05] Sector intel replaces recon_intelligence (DELETED)**
    Do instead: Use `sector_intel.ts` / `sector_intel_constants.ts`. `derive-sector-intel` pipeline step. Confidence model, recon-by-force, bot target weighting. GUI fog-of-war (visible_brigade_ids) deferred to Phase 6. `recon_intelligence.ts` is DELETED — do not reference it.
@@ -131,12 +131,6 @@
    Do instead: For April 1992 VRS opening ops, prefer explicit `participating_brigades`, `sector_id`, and `staging_osid` over broad corps-minus-reserve inference. Then verify each op can actually emit attack orders once it reaches `execution`.
 9. **[2026-03-05] Named operations own their brigades until the op ends**
    Do instead: If a brigade is listed in `active_operation.participating_brigades`, route it through operation planning/execution/recovery first. Do not let `home_defense_active`, reserve logic, or generic corps targeting retake control until `active_operation` is cleared.
-
-## GUI / HoI Map
-1. **[2026-03-05] Tactical fog still uses legacy recon data**
-   Do instead: Until the UI is migrated, do not treat map fog as proof that `sector_intel`-driven visibility works. Current live path reads `recon_intelligence.confirmed_empty` in `GameStateAdapter.ts` and `buildFogOfWarGeoJSON.ts`.
-2. **[2026-03-05] UI posture blocking can disagree with operation ownership**
-   Do instead: Before trusting disabled attack/assault buttons in `FormationDetail.tsx`, check whether the brigade is in `active_operation.participating_brigades`. Engine operation ownership overrides `home_defense_active`, but the panel still blocks purely on the home-defense flag.
 
 ## GUI / HoI Map
 1. **[2026-03-04] GUI Phase 5 COMPLETE. Only replay scrubber deferred.**
@@ -155,6 +149,10 @@
    Do instead: Keep `useKeyboardShortcuts` key mapping synchronized with `MapModeToolbar` mode badges (`1`-`5`: political/ethnic/supply/pressure/density).
 8. **[2026-03-05] Staged order arrowheads are fill polygons, not glyph text**
    Do instead: Pulse staged heads via `fill-opacity` (`attack-arrows-heads-staged`, `movement-arrows-heads-staged`) and avoid legacy `text-opacity` writes.
+9. **[2026-03-05] Tactical fog still uses legacy recon data**
+   Do instead: Until the UI is migrated, do not treat map fog as proof that `sector_intel`-driven visibility works. Current live path reads `recon_intelligence.confirmed_empty` in `GameStateAdapter.ts` and `buildFogOfWarGeoJSON.ts`.
+10. **[2026-03-05] UI posture blocking can disagree with operation ownership**
+   Do instead: Before trusting disabled attack/assault buttons in `FormationDetail.tsx`, check whether the brigade is in `active_operation.participating_brigades`. Engine operation ownership overrides `home_defense_active`, but the panel still blocks purely on the home-defense flag.
 
 ## Desktop & Electron
 1. **[2026-03-02] One map app: desktop uses dev when running**
