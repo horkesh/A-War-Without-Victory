@@ -151,7 +151,7 @@ describe('Sector Offensive — Launch Evaluation', () => {
         assert.equal(op, null, 'Should not launch with < 2 enemy OSIDs');
     });
 
-    it('rejects when supply is critical', () => {
+    it('still launches under critical supply so the force can stage and reposition', () => {
         const state = makeMinimalState(5, {
             'b1': { corps_id: 'corps_1' as any, location_osid: 'op:a:1' },
             'b2': { corps_id: 'corps_1' as any, location_osid: 'op:a:2' },
@@ -173,7 +173,9 @@ describe('Sector Offensive — Launch Evaluation', () => {
             ['b1', 'b2', 'b3'], ['op:e:1', 'op:e:2', 'op:e:3'],
             ['op:e:1', 'op:e:2', 'op:e:3'], supplyReport
         );
-        assert.equal(op, null, 'Should not launch with critical supply');
+        assert.ok(op, 'Operation should still launch under critical supply');
+        assert.equal(op!.phase, 'planning');
+        assert.equal(op!.supply_readiness, 0);
     });
 });
 
@@ -331,6 +333,52 @@ describe('Sector Offensive — Lifecycle', () => {
         assert.equal(op.phase, 'execution', 'Should not keep waiting once the assigned brigades are staged');
     });
 
+    it('planning transitions early once participants are already on objective approach positions', () => {
+        const state = makeMinimalState(12, {
+            'b1': { corps_id: 'corps_1' as any, location_osid: 'op:approach:1' },
+            'b2': { corps_id: 'corps_1' as any, location_osid: 'op:approach:2' },
+        });
+        state.corps_command = {
+            'corps_1': {
+                stance: 'offensive' as any,
+                active_operation: {
+                    name: 'Operacija Test',
+                    type: 'sector_attack',
+                    phase: 'planning',
+                    started_turn: 10,
+                    phase_started_turn: 10,
+                    participating_brigades: ['b1', 'b2'],
+                    sector_id: 'sector:corps_1:0',
+                    objectives: ['op:e:1'],
+                    planning_duration: 5,
+                    staging_osid: 'op:stage:1',
+                    supply_readiness: 1.0,
+                    current_objective_index: 0,
+                    momentum: 0,
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                },
+            } as any,
+        };
+        state.corps_front_sectors = {
+            'sector:corps_1:0': {
+                sector_id: 'sector:corps_1:0',
+                corps_id: 'corps_1',
+                sub_segments: [{
+                    sub_segment_id: 'subseg:sector:corps_1:0:0',
+                    edge_ids: [],
+                    friendly_osids: ['op:approach:1', 'op:approach:2'],
+                    enemy_osids: ['op:e:1'],
+                    length_edges: 2,
+                }],
+            } as any,
+        };
+
+        advanceSectorOffensives(state, null);
+        const op = state.corps_command!['corps_1']!.active_operation!;
+        assert.equal(op.phase, 'execution', 'Should not keep waiting once the assigned brigades are already on approach positions');
+    });
+
     it('recovery completes and removes operation', () => {
         const state = makeMinimalState(15, {});
         state.corps_command = {
@@ -353,6 +401,29 @@ describe('Sector Offensive — Lifecycle', () => {
         // Recovery duration = max(2, objectives.length) = max(2, 2) = 2
         // Elapsed = 15 - 12 = 3 >= 2 → removed
         assert.equal(op, null, 'Operation should be removed after recovery');
+    });
+
+    it('no_logged_attempt recovery clears after one turn so the corps can relaunch', () => {
+        const state = makeMinimalState(11, {});
+        state.corps_command = {
+            'corps_1': {
+                stance: 'offensive' as any,
+                active_operation: {
+                    name: 'Operacija Test',
+                    type: 'sector_attack',
+                    phase: 'recovery',
+                    started_turn: 8,
+                    phase_started_turn: 10,
+                    participating_brigades: [],
+                    objectives: ['op:e:1', 'op:e:2', 'op:e:3', 'op:e:4'],
+                    recovery_reason: 'no_logged_attempt',
+                },
+            } as any,
+        };
+
+        advanceSectorOffensives(state, null);
+        const op = state.corps_command!['corps_1']!.active_operation;
+        assert.equal(op, null, 'No-attempt recovery should clear after one turn');
     });
 
     it('orphaned sector aborts to recovery', () => {

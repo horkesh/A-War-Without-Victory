@@ -150,6 +150,8 @@ export function buildOperationCombatDiagnostics(
         const recoveryReason = typeof operation.recovery_reason === 'string'
             ? operation.recovery_reason
             : null;
+        const hadResolvedAttackThisTurn =
+            operation.last_result === 'captured' || operation.last_result === 'failed';
         let attackAttemptCount = 0;
         let movementOrderCount = 0;
         let currentObjectiveAttackCount = 0;
@@ -172,11 +174,17 @@ export function buildOperationCombatDiagnostics(
             ? (battleCountsByTarget.get(currentObjective) ?? 0)
             : 0;
         const invalidationReasons: OperationCombatInvalidationReason[] = [];
-        if (operation.phase === 'execution' && attackAttemptCount === 0 && movementOrderCount === 0) {
+        if (
+            operation.phase === 'execution' &&
+            !hadResolvedAttackThisTurn &&
+            attackAttemptCount === 0 &&
+            movementOrderCount === 0
+        ) {
             invalidationReasons.push('execution_without_attack_orders');
         }
         if (
             operation.phase === 'execution' &&
+            !hadResolvedAttackThisTurn &&
             brigades.length > 0 &&
             eligibleAttackerCount === 0 &&
             movementOrderCount === 0
@@ -234,7 +242,8 @@ export function buildCombatCausalitySummary(
 ): CombatCausalitySummary {
     const invalidationReasons = new Set<CombatCausalityInvalidationReason>();
     const totalBattles = osidResolution?.battles?.length ?? 0;
-    if (totalBattles === 0) {
+    const totalAttackOrders = Object.keys(orderSnapshot?.attack_orders_by_brigade ?? {}).length;
+    if (totalBattles === 0 && totalAttackOrders > 0) {
         invalidationReasons.add('zero_battles');
     }
     let invalidOperationCount = 0;
@@ -273,7 +282,7 @@ export function buildCombatCausalitySummary(
     return {
         valid_for_combat_calibration: invalidationReasons.size === 0,
         invalidation_reasons: Array.from(invalidationReasons).sort(strictCompare),
-        total_attack_orders: Object.keys(orderSnapshot?.attack_orders_by_brigade ?? {}).length,
+        total_attack_orders: totalAttackOrders,
         total_objective_attempts: totalObjectiveAttempts,
         total_objective_captures: totalObjectiveCaptures,
         movement_only_execution_turns: totalMovementOnlyExecutionTurns,

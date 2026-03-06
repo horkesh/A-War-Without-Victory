@@ -1,4 +1,4 @@
-# Implementation Report: GUI Panel Rework (Tabs to Accordions)
+# Implementation Report: GUI Panel Rework and General Polish
 
 ## Summary
 The `CorpsFrontPanel.tsx` component was refactored from a 4-tab horizontal interface to a unified vertical layout using stacked, collapsible `AccordionHeader` elements. This change aligns with the external UX expert's recommendation against tabs for situational briefing components.
@@ -22,6 +22,13 @@ The `CorpsFrontPanel.tsx` component was refactored from a 4-tab horizontal inter
 - Updated to use the shared `AccordionHeader` component.
 - Removed dead code: the unused `collapsed` state and its `toggle` function.
 - Verified that `expandedSections` correctly handles faction-level accordion toggles in the sidebar.
+- Standardized container padding to `p-3` for all sidebar accordion content to match `SituationTab`.
+
+### 4. General GUI Polish
+- **Numeric Shortcuts:** Updated `MapModeToolbar.tsx` to include numeric labels (1: Political, 2: Ethnic, etc.) on the map mode buttons, aligning visually with the `useKeyboardShortcuts` implementation.
+- **Shimmer Skeletons:** Implemented `panel-shimmer` loading states in `CorpsDetail`, `FormationDetail`, `OperationsPanel`, `SelectionPanel`, and `RecruitmentModal`. This replaces "null" or "Loading..." text with anatomical skeletons during data transitions or catalog fetching.
+- **TopToolbar Hover:** Added interactive `hover:shadow` and `transition-all` properties to the TopToolbar buttons for a more premium, responsive feel.
+- **Consistency:** Standardized `SelectionPanel` (right side) positioning to `bottom: 2rem` to match the left-side entity detail panels.
 
 ## Verification Results
 - **Type Safety:** `tsc --noEmit` passed for all modified files.

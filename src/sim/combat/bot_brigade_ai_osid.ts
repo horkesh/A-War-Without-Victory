@@ -112,6 +112,35 @@ function getSectorOffensiveCurrentObjective(
         : null;
 }
 
+function getSectorOffensiveApproachOsids(
+    state: GameState,
+    activeOp: import('../../state/game_state.js').CorpsOperation,
+    faction: FactionId,
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+): Set<Osid> {
+    const objectives = activeOp.objectives ?? [];
+    const currentIdx = activeOp.current_objective_index ?? 0;
+    const approachOsids = new Set<Osid>();
+    for (const objective of objectives.slice(currentIdx)) {
+        for (const neighbor of adjacency.get(objective as Osid) ?? []) {
+            if (getPoliticalControllerOSID(state, neighbor, reverseMap) === faction) {
+                approachOsids.add(neighbor);
+            }
+        }
+        if (approachOsids.size > 0) {
+            break;
+        }
+    }
+    return approachOsids;
+}
+
+function getSectorOffensiveProbeThreshold(
+    activeOp: import('../../state/game_state.js').CorpsOperation
+): PredictedOutcome {
+    return (activeOp.momentum ?? 0) >= 2 ? 'stalemate' : 'costly_victory';
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Shared helpers
 // ═══════════════════════════════════════════════════════════════════════════
@@ -992,7 +1021,26 @@ function executeFactionDirectives(
         const activeOp15 = activeOp;
         if (isActiveSectorOperationParticipant && activeOp15?.type === 'sector_attack') {
             if (activeOp15.phase === 'planning') {
-                if (activeOp15.staging_osid && loc !== activeOp15.staging_osid) {
+                const planningApproachOsids = getSectorOffensiveApproachOsids(
+                    state,
+                    activeOp15,
+                    faction,
+                    adjacency,
+                    reverseMap,
+                );
+                if (planningApproachOsids.size > 0 && !planningApproachOsids.has(loc)) {
+                    const nearestApproach = findNearestFriendlyOsidInSet(
+                        state,
+                        faction,
+                        loc,
+                        adjacency,
+                        reverseMap,
+                        planningApproachOsids
+                    );
+                    if (nearestApproach) {
+                        result.column_march_orders[brigade.id] = nearestApproach;
+                    }
+                } else if (activeOp15.staging_osid && loc !== activeOp15.staging_osid) {
                     const nearestStaging = findNearestFriendlyOsidInSet(
                         state,
                         faction,
@@ -1036,6 +1084,7 @@ function executeFactionDirectives(
                 const directObjectiveAttack = targets.find((t) => t.osid === currentObjective);
                 const alreadyAssigned = chosenTargets.get(currentObjective) ?? 0;
                 if (directObjectiveAttack) {
+                    const probeThreshold = getSectorOffensiveProbeThreshold(activeOp15);
                     const predictedOutcome = directObjectiveAttack.prediction.predicted_outcome;
                     const adjacentOperationParticipants = (activeOp15.participating_brigades ?? []).filter((brigadeId) => {
                         const participant = state.formations?.[brigadeId];
@@ -1049,9 +1098,9 @@ function executeFactionDirectives(
                         )
                         : null;
                     const canDirectAttackObjective =
-                        isOutcomeSufficientForAttack(predictedOutcome, 'costly_victory') ||
+                        isOutcomeSufficientForAttack(predictedOutcome, probeThreshold) ||
                         (concentratedOutcome != null &&
-                            isOutcomeSufficientForAttack(concentratedOutcome, 'costly_victory'));
+                            isOutcomeSufficientForAttack(concentratedOutcome, probeThreshold));
                     if (canDirectAttackObjective && brigade.corps_id) {
                         result.eligible_attackers_by_corps[brigade.corps_id] =
                             (result.eligible_attackers_by_corps[brigade.corps_id] ?? 0) + 1;
@@ -1066,28 +1115,15 @@ function executeFactionDirectives(
                     }
                 }
 
-                const objectiveApproachOsids = new Set<Osid>();
-                for (const neighbor of adjacency.get(currentObjective) ?? []) {
-                    if (neighbor === loc) continue;
-                    if (getPoliticalControllerOSID(state, neighbor, reverseMap) === faction) {
-                        objectiveApproachOsids.add(neighbor);
-                    }
-                }
-                if (objectiveApproachOsids.size === 0) {
-                    const remainingObjectives = (activeOp15.objectives ?? []).slice((activeOp15.current_objective_index ?? 0) + 1);
-                    for (const objective of remainingObjectives) {
-                        for (const neighbor of adjacency.get(objective) ?? []) {
-                            if (neighbor === loc) continue;
-                            if (getPoliticalControllerOSID(state, neighbor, reverseMap) === faction) {
-                                objectiveApproachOsids.add(neighbor);
-                            }
-                        }
-                        if (objectiveApproachOsids.size > 0) {
-                            break;
-                        }
-                    }
-                }
-                if (objectiveApproachOsids.size > 0 && !objectiveApproachOsids.has(loc)) {
+                const objectiveApproachOsids = getSectorOffensiveApproachOsids(
+                    state,
+                    activeOp15,
+                    faction,
+                    adjacency,
+                    reverseMap,
+                );
+                objectiveApproachOsids.delete(loc);
+                if (objectiveApproachOsids.size > 0) {
                     const approachStep = findNearestFriendlyOsidInSet(
                         state,
                         faction,

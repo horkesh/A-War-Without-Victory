@@ -79,6 +79,7 @@ import { buildOpsCompareConclusion, formatOpsCompareMarkdown } from './ops_compa
 import {
     buildCombatCausalitySummary,
     buildOperationCombatDiagnostics,
+    type CombatCausalityInvalidationReason,
     type CombatCausalitySummary
 } from './combat_causality.js';
 import {
@@ -1929,7 +1930,16 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             );
             historicalAnchorChecks = computeHistoricalAnchorChecks(finalControlSnapshot);
         }
-        const validForCombatCalibration = combatCausalitySummary?.valid_for_combat_calibration ?? false;
+        const runHasAnyBattles = (combatCausalitySummary?.total_battles ?? 0) > 0;
+        if (combatCausalitySummary && !runHasAnyBattles) {
+            combatCausalitySummary.valid_for_combat_calibration = false;
+            combatCausalitySummary.invalidation_reasons = Array.from(new Set<CombatCausalityInvalidationReason>([
+                ...combatCausalitySummary.invalidation_reasons,
+                'zero_battles'
+            ])).sort(strictCompare);
+        }
+        const validForCombatCalibration =
+            (combatCausalitySummary?.valid_for_combat_calibration ?? false) && runHasAnyBattles;
         const battlelessWeeks = combatCausalityWeekly
             .filter((row) => row.total_battles === 0)
             .map((row) => row.week_index);

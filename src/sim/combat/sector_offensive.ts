@@ -32,12 +32,6 @@ import type { OperationalToCanonicalReverseMap } from '../../data/operational_da
 /** Minimum brigades in sector to launch an offensive. */
 const MIN_BRIGADES_FOR_OFFENSIVE = 3;
 
-/** Minimum supply readiness to launch (fraction adequate). */
-const SUPPLY_READINESS_LAUNCH = 0.6;
-
-/** Minimum supply readiness to continue (abort below). */
-const SUPPLY_READINESS_ABORT = 0.4;
-
 /** Maximum objectives per offensive. */
 const MAX_OBJECTIVES = 6;
 
@@ -75,10 +69,68 @@ function areParticipantsStaged(state: GameState, participatingBrigades: Formatio
     return activeParticipantCount > 0;
 }
 
+function collectObjectiveApproachOsids(
+    state: GameState,
+    corpsId: FormationId,
+    objectives: string[]
+): Set<string> {
+    const approachOsids = new Set<string>();
+    if (!state.corps_front_sectors || objectives.length === 0) return approachOsids;
+    const objectiveSet = new Set(objectives);
+    for (const sector of Object.values(state.corps_front_sectors)) {
+        if (sector.corps_id !== corpsId) continue;
+        for (const subSegment of sector.sub_segments ?? []) {
+            const touchesObjective = subSegment.enemy_osids.some((osid) => objectiveSet.has(osid));
+            if (!touchesObjective) continue;
+            for (const osid of subSegment.friendly_osids) {
+                approachOsids.add(osid);
+            }
+        }
+    }
+    return approachOsids;
+}
+
+function areParticipantsReadyForExecution(
+    state: GameState,
+    corpsId: FormationId,
+    participatingBrigades: FormationId[],
+    stagingOsid: string | undefined,
+    objectives: string[]
+): boolean {
+    const objectiveApproachOsids = collectObjectiveApproachOsids(state, corpsId, objectives);
+    let activeParticipantCount = 0;
+    for (const brigadeId of participatingBrigades) {
+        const brigade = state.formations?.[brigadeId];
+        if (!brigade || brigade.status !== 'active') continue;
+        const location = brigade.location_osid;
+        if (typeof location !== 'string' || location.length === 0) return false;
+        activeParticipantCount += 1;
+        if (location === stagingOsid) continue;
+        if (objectiveApproachOsids.has(location)) continue;
+        return false;
+    }
+    return activeParticipantCount > 0;
+}
+
 function beginRecovery(op: CorpsOperation, turn: number, reason: CorpsOperation['recovery_reason']): void {
     op.phase = 'recovery';
     op.phase_started_turn = turn;
     op.recovery_reason = reason;
+}
+
+function getRecoveryDuration(op: CorpsOperation): number {
+    const objectiveCount = op.objectives?.length ?? 2;
+    switch (op.recovery_reason) {
+        case 'no_logged_attempt':
+        case 'manual_termination':
+            return 1;
+        case 'completed':
+            return Math.max(1, Math.ceil(objectiveCount / 2));
+        case 'max_failures':
+        case 'orphaned_sector':
+        default:
+            return Math.max(2, Math.ceil(objectiveCount / 2));
+    }
 }
 
 function getNoAttemptRecoveryReason(op: CorpsOperation): CorpsOperation['recovery_reason'] {
@@ -198,7 +250,13 @@ export function advanceSectorOffensives(
         if (op.phase === 'planning') {
             const elapsed = turn - op.phase_started_turn;
             const planDuration = op.planning_duration ?? 1;
-            const stagedEarly = elapsed >= 1 && areParticipantsStaged(state, op.participating_brigades, op.staging_osid);
+            const stagedEarly = elapsed >= 1 && areParticipantsReadyForExecution(
+                state,
+                corpsId,
+                op.participating_brigades,
+                op.staging_osid,
+                op.objectives ?? []
+            );
 
             // Transition to execution only after completing the configured number of
             // full planning turns. This preserves one real staging turn for
@@ -238,7 +296,7 @@ export function advanceSectorOffensives(
             }
         } else if (op.phase === 'recovery') {
             const elapsed = turn - op.phase_started_turn;
-            const recoveryDuration = Math.max(2, (op.objectives?.length ?? 2));
+            const recoveryDuration = getRecoveryDuration(op);
             if (elapsed >= recoveryDuration) {
                 // Apply exhaustion from completed operation
                 cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + 15);
@@ -372,7 +430,7 @@ export function updateSectorOffensiveResults(
  * - Corps stance is offensive or balanced
  * - No active operation for this corps
  * - >= MIN_BRIGADES_FOR_OFFENSIVE brigades in sector
- * - Supply readiness >= SUPPLY_READINESS_LAUNCH
+ * - Supply readiness is recorded on the operation but does not block launch
  * - >= 2 enemy OSIDs adjacent to sector
  *
  * Returns the operation to launch, or null.
@@ -395,9 +453,11 @@ export function evaluateSectorOffensiveLaunch(
     // Must have enough enemy targets
     if (sectorEnemyOsids.length < 2) return null;
 
-    // Compute supply readiness
+    // Record supply readiness for diagnostics and downstream brigade-level attack gating.
+    // Launch itself is allowed even under poor sector-wide supply so the force can stage and
+    // reposition toward the next objective. Individual brigades still remain supply-gated when
+    // bot_brigade_ai_osid decides whether an attack order is actually eligible.
     const supplyReadiness = computeSupplyReadiness(state, sectorBrigadeIds, faction, supplyByOsid);
-    if (supplyReadiness < SUPPLY_READINESS_LAUNCH) return null;
 
     // Select objectives: offensive targets that are in this sector's enemy OSIDs
     const sectorTargetSet = new Set(sectorEnemyOsids);

@@ -50,6 +50,26 @@ export function FormationDetail() {
   if (operationsPanelOpen || !selectedFormationId) return null;
 
   const formation = loadedGameState?.formations.find((f) => f.id === selectedFormationId) ?? null;
+
+  if (!loadedGameState || !formation) {
+    return (
+      <div
+        className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
+        style={DETAIL_PANEL_STYLE}
+      >
+        <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
+        <div className="p-4 space-y-4">
+          <div className="h-4 w-1/2 bg-panel-card rounded panel-shimmer" />
+          <div className="h-6 w-3/4 bg-panel-card rounded panel-shimmer" />
+          <div className="space-y-2">
+            <div className="h-3 w-full bg-panel-card rounded panel-shimmer" />
+            <div className="h-3 w-full bg-panel-card rounded panel-shimmer" />
+          </div>
+          <div className="h-24 w-full bg-panel-card rounded panel-shimmer" />
+        </div>
+      </div>
+    );
+  }
   const operationOwningFormation = loadedGameState?.operations?.find(
     (operation) => operation.participating_brigade_ids?.includes(selectedFormationId)
   );

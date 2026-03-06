@@ -4,7 +4,7 @@
 **Source tree:** `src/ui/map/`
 **Dev server:** `npm run dev:map` (Vite, port 3002)
 **Build:** `npm run build` → `dist/tactical-map/`
-**Last updated:** 2026-03-05
+**Last updated:** 2026-03-06
 
 > **See also:** [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) — original engineering reference.
 > This document is the **component-level master reference** covering current panel layout,

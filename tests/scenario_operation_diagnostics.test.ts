@@ -222,9 +222,53 @@ describe('combat causality diagnostics', () => {
         assert.deepEqual(summary.total_orders_by_faction, { RS: 1 });
     });
 
-    it('invalidates summary when total battles are zero', () => {
+    it('does not flag execution stall when the operation already resolved a capture this turn', () => {
+        const state = makeState();
+        state.corps_command!['corps_1']!.active_operation = {
+            ...state.corps_command!['corps_1']!.active_operation!,
+            current_objective_index: 1,
+            objectives: ['op:enemy:obj0', 'op:enemy:obj1'],
+            objective_capture_count: 1,
+            attack_attempt_count: 1,
+            last_result: 'captured',
+        } as any;
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({}, {}, { corps_1: 0 }),
+            makeOsidReport([])
+        );
+
+        assert.equal(diagnostics.length, 1);
+        assert.deepEqual(diagnostics[0]!.invalidation_reasons, []);
+        assert.equal(diagnostics[0]!.invalid_for_combat_calibration, false);
+    });
+
+    it('invalidates summary when attack orders resolve to zero battles', () => {
         const diagnostics = buildOperationCombatDiagnostics(
             makeState(),
+            makeOrderSnapshot({ b1: 'op:enemy:obj1' }, {}, { corps_1: 1 }),
+            makeOsidReport([])
+        );
+        const summary = buildCombatCausalitySummary(
+            diagnostics,
+            makeOrderSnapshot({ b1: 'op:enemy:obj1' }, {}, { corps_1: 1 }),
+            makeOsidReport([])
+        );
+
+        assert.equal(summary.valid_for_combat_calibration, false);
+        assert.ok(summary.invalidation_reasons.includes('zero_battles'));
+    });
+
+    it('does not invalidate a quiet week with no attacks and no invalid operations', () => {
+        const state = makeState();
+        state.corps_command!['corps_1']!.active_operation = {
+            ...state.corps_command!['corps_1']!.active_operation!,
+            phase: 'planning',
+        } as any;
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
             makeOrderSnapshot({}),
             makeOsidReport([])
         );
@@ -234,8 +278,8 @@ describe('combat causality diagnostics', () => {
             makeOsidReport([])
         );
 
-        assert.equal(summary.valid_for_combat_calibration, false);
-        assert.ok(summary.invalidation_reasons.includes('zero_battles'));
+        assert.equal(summary.valid_for_combat_calibration, true);
+        assert.deepEqual(summary.invalidation_reasons, []);
     });
 
     it('flags recovery-phase operation that never logged an objective attempt', () => {

@@ -14,6 +14,34 @@ export function SelectionPanel() {
   // Lowest-priority panel: hide when any higher-priority selection is active.
   if (!selectedOsid || selectedFormationId || selectedSectorId) return null;
 
+  if (!loadedGameState || !osidPropertiesMap?.[selectedOsid]) {
+    return (
+      <div
+        className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
+        style={{
+          position: 'absolute',
+          left: 'auto',
+          right: '1rem',
+          top: '3.5rem',
+          bottom: '2rem',
+          width: '20rem',
+          zIndex: 50,
+          direction: 'ltr',
+        }}
+      >
+        <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
+        <div className="p-4 space-y-4">
+          <div className="h-6 w-3/4 bg-panel-card rounded panel-shimmer" />
+          <div className="space-y-2">
+            <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
+            <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
+          </div>
+          <div className="h-40 w-full bg-panel-card rounded panel-shimmer" />
+        </div>
+      </div>
+    );
+  }
+
   const formations = getFormationsAtOsid(loadedGameState?.formations, selectedOsid);
   const formationsForDetail = formations.map((f) => ({
     id: f.id,
@@ -31,7 +59,7 @@ export function SelectionPanel() {
         left: 'auto',
         right: '1rem',
         top: '3.5rem',
-        bottom: '1rem',
+        bottom: '2rem',
         width: '20rem',
         zIndex: 50,
         direction: 'ltr',

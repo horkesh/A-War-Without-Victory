@@ -1754,22 +1754,49 @@ export function generateCorpsDirectives(
             directiveEligibleSectors.length > 0 && offensiveTargets.length > 0) {
 
             for (const sec of directiveEligibleSectors) {
-                const secEnemyOsids: string[] = [];
-                for (const ss of sec.sub_segments) {
-                    for (const eo of ss.enemy_osids) {
-                        if (!secEnemyOsids.includes(eo)) secEnemyOsids.push(eo);
-                    }
-                }
-                secEnemyOsids.sort(strictCompare);
-
-                // Brigades in this sector
-                const secBrigadeIds = subordinates
-                    .filter(b => {
-                        if (!b.location_osid) return false;
-                        return sec.sub_segments.some(ss => ss.friendly_osids.includes(b.location_osid!));
-                    })
-                    .map(b => b.id)
+                const clusterSectors = [sec];
+                const clusterFriendlyOsids = new Set(collectSectorFriendlyOsids(sec));
+                const clusterEnemyOsids = new Set(collectSectorEnemyOsids(sec));
+                let secBrigadeIds = subordinates
+                    .filter((b) => b.location_osid && clusterFriendlyOsids.has(b.location_osid))
+                    .map((b) => b.id)
                     .sort(strictCompare);
+
+                while (secBrigadeIds.length < 3) {
+                    const donorCandidates = directiveEligibleSectors
+                        .filter((candidate) =>
+                            !clusterSectors.includes(candidate) &&
+                            clusterSectors.some((clusterSector) => areDirectiveSectorsAdjacent(clusterSector, candidate, adjacency))
+                        )
+                        .map((candidate) => {
+                            const candidateEnemyOsids = collectSectorEnemyOsids(candidate);
+                            const overlap = candidateEnemyOsids.filter((osid) => offensiveTargets.includes(osid)).length;
+                            const candidateFriendlyOsids = new Set(collectSectorFriendlyOsids(candidate));
+                            const brigadeCount = subordinates.filter((b) => b.location_osid && candidateFriendlyOsids.has(b.location_osid)).length;
+                            return { candidate, overlap, brigadeCount, candidateEnemyOsids, candidateFriendlyOsids };
+                        })
+                        .sort((a, b) => {
+                            if (b.overlap !== a.overlap) return b.overlap - a.overlap;
+                            if (b.brigadeCount !== a.brigadeCount) return b.brigadeCount - a.brigadeCount;
+                            if (a.candidate.length_edges !== b.candidate.length_edges) {
+                                return a.candidate.length_edges - b.candidate.length_edges;
+                            }
+                            return strictCompare(a.candidate.sector_id, b.candidate.sector_id);
+                        });
+                    const donor = donorCandidates[0];
+                    if (!donor) {
+                        break;
+                    }
+                    clusterSectors.push(donor.candidate);
+                    for (const osid of donor.candidateFriendlyOsids) clusterFriendlyOsids.add(osid);
+                    for (const osid of donor.candidateEnemyOsids) clusterEnemyOsids.add(osid);
+                    secBrigadeIds = subordinates
+                        .filter((b) => b.location_osid && clusterFriendlyOsids.has(b.location_osid))
+                        .map((b) => b.id)
+                        .sort(strictCompare);
+                }
+
+                const secEnemyOsids = [...clusterEnemyOsids].sort(strictCompare);
 
                 const op = evaluateSectorOffensiveLaunch(
                     state, corps.id, sec.sector_id, faction,

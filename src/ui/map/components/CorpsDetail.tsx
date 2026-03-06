@@ -81,8 +81,27 @@ export function CorpsDetail() {
   }, [corpsFormation, corpsSectors, secondWordOptions]);
 
   // Hide when formation or sector panel would show (priority: Formation > Sector > Corps)
-  if (operationsPanelOpen || selectedFormationId || selectedSectorId || !selectedCorpsId || !loadedGameState) return null;
-  if (!corpsFormation) return null;
+  if (operationsPanelOpen || selectedFormationId || selectedSectorId || !selectedCorpsId) return null;
+
+  if (!loadedGameState || !corpsFormation) {
+    return (
+      <div
+        className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
+        style={DETAIL_PANEL_STYLE}
+      >
+        <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
+        <div className="p-4 space-y-4">
+          <div className="h-6 w-3/4 bg-panel-card rounded panel-shimmer" />
+          <div className="space-y-2">
+            <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
+            <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
+            <div className="h-4 w-2/3 bg-panel-card rounded panel-shimmer" />
+          </div>
+          <div className="h-32 w-full bg-panel-card rounded panel-shimmer" />
+        </div>
+      </div>
+    );
+  }
 
   const corpsColorMap = loadedGameState.corpsFrontSectors
     ? buildCorpsColorMap(loadedGameState.corpsFrontSectors)

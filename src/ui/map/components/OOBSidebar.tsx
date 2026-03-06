@@ -312,7 +312,7 @@ export function OOBSidebar() {
           onToggle={() => toggleSection('army')}
         />
         {expandedSections.army && (
-          <div className="p-2 space-y-3">
+          <div className="p-3 space-y-3">
             {!armyByFaction || armyByFaction.size === 0 ? (
               <div className="text-xs text-text-secondary italic">No formations.</div>
             ) : (
@@ -432,7 +432,7 @@ export function OOBSidebar() {
           onToggle={() => toggleSection('operations')}
         />
         {expandedSections.operations && (
-          <div className="p-2 space-y-2 text-xs">
+          <div className="p-3 space-y-2 text-xs">
             {!operationsByFaction ? (
               <div className="text-text-secondary italic px-1">No active operations.</div>
             ) : (
@@ -493,7 +493,7 @@ export function OOBSidebar() {
           onToggle={() => toggleSection('sectors')}
         />
         {expandedSections.sectors && (
-          <div className="p-2 space-y-2 text-xs">
+          <div className="p-3 space-y-2 text-xs">
             {!sectorsByFaction ? (
               <div className="text-text-secondary italic px-1">No sector data.</div>
             ) : (

@@ -83,8 +83,14 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 
 1. **[2026-03-06] Maneuver-only execution turns are not dead execution**
    Do instead: In combat-causality diagnostics, do not flag `execution_without_attack_orders` when execution-phase operation participants emitted movement orders. Operation-owned brigades can be healthy while still closing on the current objective.
-2. **[2026-03-06] Fixed-duration planning creates dead weeks after staging**
-   Do instead: Let `sector_attack` transition from `planning` to `execution` once at least one full planning turn has elapsed and all active participants have reached `staging_osid`. Do not keep an operation in planning just because the nominal duration has not expired.
+2. **[2026-03-06] Planning phase must include movement into position**
+   Do instead: Treat planning as the period where operation-owned brigades move toward staging and first-objective approach positions. Do not model planning as a passive timer detached from maneuver.
+3. **[2026-03-06] Fixed-duration planning creates dead weeks after staging**
+   Do instead: Let `sector_attack` transition from `planning` to `execution` once at least one full planning turn has elapsed and all active participants have reached `staging_osid` or friendly objective-approach positions. Do not keep an operation in planning just because the nominal duration has not expired.
+4. **[2026-03-06] Live sector rearrangement is allowed when scenario-gated**
+   Do instead: Keep sector rearrangement in live corps AI only when full-run combat-causality evidence stays green. Unit tests alone are not enough; use 40-week scenario acceptance as the runtime gate.
+5. **[2026-03-06] Quiet weeks are not the same as broken combat causality**
+   Do instead: Weekly `zero_battles` should invalidate only when attack orders were issued and still produced no battles. Quiet weeks with no attacks and no invalid operations remain warnings, visible under `battleless_weeks`.
 | 2026-01-24 | Municipality outlines can be single polygons | Union must handle single and multi | No rejection of valid single-polygon munis | architecture |
 | 2026-01-24 | Convex hull fallback when union fails | Union unreliable for some geometries | Deterministic fallback + inflation reporting | architecture |
 | 2026-01-24 | Measure hull inflation when using hull salvage | Convex hull can distort shapes | High-inflation flagged in metadata | architecture |

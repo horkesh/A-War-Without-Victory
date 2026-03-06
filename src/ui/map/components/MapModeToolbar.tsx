@@ -6,11 +6,11 @@
 import { useGameStore, type MapMode } from '../store/gameStore';
 
 const MAP_MODES: { id: MapMode; label: string; key: string }[] = [
-  { id: 'political', label: 'Political', key: '1' },
-  { id: 'ethnic', label: 'Ethnic', key: '2' },
-  { id: 'supply', label: 'Supply', key: '3' },
-  { id: 'pressure', label: 'Pressure', key: '4' },
-  { id: 'density', label: 'Density', key: '5' },
+  { id: 'political', label: '1: Political', key: '1' },
+  { id: 'ethnic', label: '2: Ethnic', key: '2' },
+  { id: 'supply', label: '3: Supply', key: '3' },
+  { id: 'pressure', label: '4: Pressure', key: '4' },
+  { id: 'density', label: '5: Density', key: '5' },
 ];
 
 const LAYER_TOGGLES = [

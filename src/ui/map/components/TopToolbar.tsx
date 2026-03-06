@@ -10,7 +10,7 @@ const FACTION_BANNER_TINT: Record<string, string> = {
   RS: 'rgba(194, 64, 64, 0.35)',
   RBiH: 'rgba(74, 154, 85, 0.35)',
   HRHB: 'rgba(64, 128, 184, 0.35)',
-};    
+};
 
 function formatTurnLabel(label: string): string {
   const match = label.match(/Turn\s+(\d+)/i);
@@ -146,7 +146,7 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary 
       <button
         onClick={handleLoadClick}
         disabled={loading}
-        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-all disabled:opacity-50 hover:border-interactive/50 hover:shadow-[0_0_10px_rgba(180,160,130,0.15)]"
       >
         {loading ? 'Loading...' : 'Load Save'}
       </button>
@@ -154,7 +154,7 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary 
       <button
         onClick={handleLoadLatest}
         disabled={loading}
-        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-all disabled:opacity-50 hover:border-interactive/50 hover:shadow-[0_0_10px_rgba(180,160,130,0.15)]"
       >
         {loading ? 'Loading...' : 'Load Latest'}
       </button>
@@ -165,41 +165,41 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary 
         value={runIdInput}
         onChange={(e) => setRunIdInput(e.target.value)}
         placeholder="e.g. apr1992_definitive_40w__…"
-        className="w-48 px-2 py-1 text-xs font-mono bg-panel-card border border-panel-border rounded text-text-primary placeholder:text-text-muted"
+        className="w-48 px-2 py-1 text-xs font-mono bg-panel-card border border-panel-border rounded text-text-primary placeholder:text-text-muted transition-colors focus:border-interactive/50 focus:outline-none focus:ring-1 focus:ring-interactive/20"
         onKeyDown={(e) => e.key === 'Enter' && handleLoadRun()}
       />
       <button
         onClick={handleLoadRun}
         disabled={loading || !runIdInput.trim()}
-        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-all disabled:opacity-50 hover:border-interactive/50 hover:shadow-[0_0_10px_rgba(180,160,130,0.15)]"
       >
         Load run
       </button>
       <button
         onClick={handleAdvanceTurn}
         disabled={advancing || loading || !loadedGameState || !ipc.isAvailable}
-        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-all disabled:opacity-50 hover:border-interactive/50 hover:shadow-[0_0_10px_rgba(180,160,130,0.15)]"
       >
         {advancing ? 'Advancing...' : 'Advance turn'}
       </button>
       <button
         onClick={() => onOpenSidePicker?.()}
         disabled={loading || advancing || !ipc.isAvailable}
-        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-all disabled:opacity-50 hover:border-interactive/50 hover:shadow-[0_0_10px_rgba(180,160,130,0.15)]"
       >
         New campaign
       </button>
       <button
         onClick={() => onOpenRecruitment?.()}
         disabled={loading || advancing || !loadedGameState || !ipc.isAvailable}
-        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-all disabled:opacity-50 hover:border-interactive/50 hover:shadow-[0_0_10px_rgba(180,160,130,0.15)]"
       >
         Recruitment
       </button>
       <button
         onClick={() => onOpenSummary?.()}
         disabled={!loadedGameState}
-        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-colors disabled:opacity-50"
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-all disabled:opacity-50 hover:border-interactive/50 hover:shadow-[0_0_10px_rgba(180,160,130,0.15)]"
       >
         Summary
       </button>

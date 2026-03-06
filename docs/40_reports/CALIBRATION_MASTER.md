@@ -4,6 +4,7 @@
 **Updated:** 2026-03-06
 **Canonical target run:** n65 (ATH 99.2% area-weighted, commit a689d83)
 **Latest calibration run:** n142 (sector-fix session: all 15 corps now have front sectors, 25 misassigned brigades (down from 50), 0 empty non-pocket sectors; area-weighted 81.5% — expected regression from corrected corps assignments; combat-causality gate green)
+**Latest recovery-gated run:** n158 (live sector-rearrangement + planning-movement recovery: combat-causality gate green, behavioral-health gate green, planning now includes movement into approach positions, live sector concentration restored)
 **Previous calibration run:** n137 (combat-causality gate green again after runtime rollback: valid_for_combat_calibration=true, 86 attack orders, 74 battles, 30 combat-attributed control changes; deterministic rerun of n136 after removing live sector rearrangement from corps-AI runtime)
 **ALL-TIME HIGH:** n65 (99.2% area-weighted — systematic OSID override strategy + pool exhaustion 25% fix, 2026-03-05)
 **Calibration validity gate (2026-03-05):** n77/n78/n79 later exposed that branch-level territory deltas can occur with **zero battles**. n65 remains the ATH reference, but from 2026-03-05 onward no combat-calibration claim is accepted without explicit combat-causality evidence (attack orders, battles, and flip attribution).
@@ -185,6 +186,30 @@ Current invalidation reasons:
   - `n137`: same `final_state_hash = 334a4d3260894b0c` as `n136`
 - Practical rule:
   - do not wire sector-topology experimentation directly into live corps directive generation unless it passes the same 40-week combat-causality gate as any other combat-path change
+
+### Live sector rearrangement and planning-phase maneuver recovery (2026-03-06, runs n152→n158)
+
+- Final verified recovery baseline for this slice is `n158`:
+  - `final_state_hash = 3bfada3e56322112`
+  - `behavioral_health.valid_for_combat_calibration = true`
+  - `combat_causality.valid_for_combat_calibration = true`
+  - `total_attack_orders = 124`
+  - `total_battles = 103`
+  - `invalid_operation_count = 0`
+  - `zero_eligible_attacker_operation_count = 0`
+  - `battleless_weeks = [27, 39]`
+- Engine changes behind `n158`:
+  - planning-phase `sector_attack` brigades now move into first-objective approach positions during planning, not only toward `staging_osid`
+  - `advanceSectorOffensives()` may end planning once brigades are either staged or already on friendly approach positions after at least one real planning turn
+  - live corps AI keeps sector rearrangement and now also uses offensive concentration to cluster adjacent thin sectors into launchable attack windows
+  - combat-causality no longer flags post-capture objective advancement as inert execution
+- Gate refinement:
+  - weekly `zero_battles` is now an invalidation only when attack orders existed but resolved to no battles
+  - quiet weeks with no attack orders and no invalid operations remain visible under `behavioral_health.battleless_weeks`, but do not by themselves invalidate an otherwise healthy run
+- Practical rule:
+  - treat planning as operational maneuver/preparation, not just a timer
+  - keep sector rearrangement live, but verify it through full-run combat-causality evidence rather than unit tests alone
+  - full-run zero combat still hard-fails calibration eligibility
 
 ### Sector fix session (2026-03-06, runs n138→n142)
 

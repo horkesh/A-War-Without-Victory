@@ -94,7 +94,33 @@ export function OperationsPanel() {
     lastAutoFocusOperationKeyRef.current = operationKey;
   }, [isOpen, selectedOperation, panToOsid]);
 
-  if (!isOpen || !loadedGameState) return null;
+  if (!isOpen) return null;
+
+  if (!loadedGameState) {
+    return (
+      <div
+        className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
+        style={{ ...DETAIL_PANEL_STYLE, width: '24rem' }}
+      >
+        <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
+        <div className="flex-1 grid grid-cols-12">
+          <div className="col-span-5 border-r border-panel-border p-2 space-y-2">
+            <div className="h-12 w-full bg-panel-card rounded panel-shimmer" />
+            <div className="h-12 w-full bg-panel-card rounded panel-shimmer" />
+            <div className="h-12 w-full bg-panel-card rounded panel-shimmer" />
+          </div>
+          <div className="col-span-7 p-3 space-y-4">
+            <div className="h-6 w-3/4 bg-panel-card rounded panel-shimmer" />
+            <div className="space-y-2">
+              <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
+              <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
+            </div>
+            <div className="h-32 w-full bg-panel-card rounded panel-shimmer" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const selectedObjectiveCount = selectedOperation?.objectives?.length ?? 0;
   const selectedObjectiveIndex = selectedOperation?.current_objective_index ?? 0;
@@ -197,11 +223,10 @@ export function OperationsPanel() {
                     }}
                     onClick={() => setSelectedOperationKey(id)}
                     onKeyDown={(event) => handleOperationCardKeyDown(event, index)}
-                    className={`kbd-focus w-full text-left rounded border px-2 py-1.5 transition-all duration-200 ease-out hover:-translate-y-[1px] ${
-                      selected
+                    className={`kbd-focus w-full text-left rounded border px-2 py-1.5 transition-all duration-200 ease-out hover:-translate-y-[1px] ${selected
                         ? 'border-accent-gold bg-panel-active shadow-[0_0_0_1px_rgba(212,175,55,0.22)]'
                         : 'border-panel-border bg-panel-card hover:bg-panel-hover'
-                    }`}
+                      }`}
                   >
                     <div className={`text-[11px] font-semibold truncate ${FACTION_COLORS[op.faction] ?? 'text-text-primary'} transition-colors`}>
                       {op.name}
@@ -337,13 +362,12 @@ export function OperationsPanel() {
                             onFocus={() => setObjectiveHoverOsid(obj)}
                             onBlur={() => setObjectiveHoverOsid(null)}
                             onKeyDown={(event) => handleObjectiveKeyDown(event, index, obj)}
-                            className={`kbd-focus w-full text-left rounded border px-2 py-1 transition-colors ${
-                              isCurrent
+                            className={`kbd-focus w-full text-left rounded border px-2 py-1 transition-colors ${isCurrent
                                 ? 'border-accent-gold/70 bg-panel-active/60'
                                 : isDone
                                   ? 'border-panel-border bg-panel-bg/40 opacity-60'
                                   : 'border-panel-border bg-panel-card hover:bg-panel-hover'
-                            }`}
+                              }`}
                           >
                             <div className="flex items-start gap-1.5">
                               <span className="shrink-0 text-[10px] mt-0.5 w-3 text-center text-text-secondary">

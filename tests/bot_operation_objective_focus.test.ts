@@ -356,6 +356,76 @@ test('execution-phase operation concentrates adjacent brigades on the current ob
     );
 });
 
+test('execution-phase operation with momentum can probe the next objective from an adjacent approach', () => {
+    const state = {
+        meta: { turn: 14, phase: 'war', seed: 'test-seed' },
+        formations: {
+            rs_1st_doboj_light_infantry: {
+                id: 'rs_1st_doboj_light_infantry',
+                kind: 'brigade',
+                faction: 'RS',
+                status: 'active',
+                corps_id: 'vrs_1st_krajina',
+                home_defense_active: false,
+                posture: 'defend',
+                cohesion: 70,
+                morale: 70,
+                personnel: 250,
+                equipment: { infantry: 250, tanks: 0, artillery: 0, air_defense: 0 },
+                location_osid: 'op:test:approach',
+            },
+            arbih_defender: {
+                id: 'arbih_defender',
+                kind: 'brigade',
+                faction: 'RBiH',
+                status: 'active',
+                corps_id: 'arbih_test',
+                posture: 'defend',
+                cohesion: 70,
+                morale: 70,
+                personnel: 600,
+                equipment: { infantry: 600, tanks: 0, artillery: 0, air_defense: 0 },
+                location_osid: 'op:test:objective',
+            },
+        },
+        corps_command: {
+            vrs_1st_krajina: {
+                stance: 'offensive',
+                active_operation: {
+                    name: 'Operacija Lukavac',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: 10,
+                    phase_started_turn: 13,
+                    participating_brigades: ['rs_1st_doboj_light_infantry'],
+                    objectives: ['op:test:objective'],
+                    current_objective_index: 0,
+                    momentum: 2,
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                },
+            },
+        },
+        corps_front_directives: {},
+        political_controllers: {
+            'op:test:approach': 'RS',
+            'op:test:objective': 'RBiH',
+        },
+        brigade_posture_orders: [],
+    } as unknown as GameState;
+
+    generateAllBotOrdersOsid(state, ['RS'], {
+        edges: [
+            { a: 'op:test:approach', b: 'op:test:objective' },
+        ] as any,
+        reverseMap: new Map(),
+        supplyStateByOsid: {} as any,
+        osidPopulationMap: new Map(),
+    });
+
+    assert.equal(state.brigade_attack_orders?.rs_1st_doboj_light_infantry, 'op:test:objective');
+});
+
 test('execution-phase operation still moves assigned brigades when their current OSID is critical supply', () => {
     const state = {
         meta: { turn: 14, phase: 'war', seed: 'test-seed' },
@@ -580,4 +650,69 @@ test('planning-phase operation emits the first hop toward a distant staging OSID
         state.brigade_movement_orders?.rs_1st_doboj_light_infantry?.destination_sids?.[0],
         'op:test:mid'
     );
+});
+
+test('planning-phase operation keeps moving from staging into first-objective approach positions', () => {
+    const state = {
+        meta: { turn: 11, phase: 'war', seed: 'test-seed' },
+        formations: {
+            rs_1st_doboj_light_infantry: {
+                id: 'rs_1st_doboj_light_infantry',
+                kind: 'brigade',
+                faction: 'RS',
+                status: 'active',
+                corps_id: 'vrs_1st_krajina',
+                home_defense_active: true,
+                posture: 'defend',
+                cohesion: 70,
+                morale: 70,
+                personnel: 600,
+                equipment: { infantry: 600, tanks: 0, artillery: 0, air_defense: 0 },
+                location_osid: 'op:test:staging',
+            },
+        },
+        corps_command: {
+            vrs_1st_krajina: {
+                stance: 'offensive',
+                active_operation: {
+                    name: 'Operacija Lukavac',
+                    type: 'sector_attack',
+                    phase: 'planning',
+                    started_turn: 10,
+                    phase_started_turn: 10,
+                    participating_brigades: ['rs_1st_doboj_light_infantry'],
+                    objectives: ['op:test:objective'],
+                    current_objective_index: 0,
+                    momentum: 0,
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                    planning_duration: 5,
+                    staging_osid: 'op:test:staging',
+                },
+            },
+        },
+        corps_front_directives: {},
+        political_controllers: {
+            'op:test:staging': 'RS',
+            'op:test:approach': 'RS',
+            'op:test:objective': 'RBiH',
+        },
+        brigade_posture_orders: [],
+    } as unknown as GameState;
+
+    generateAllBotOrdersOsid(state, ['RS'], {
+        edges: [
+            { a: 'op:test:staging', b: 'op:test:approach' },
+            { a: 'op:test:approach', b: 'op:test:objective' },
+        ] as any,
+        reverseMap: new Map(),
+        supplyStateByOsid: {} as any,
+        osidPopulationMap: new Map(),
+    });
+
+    assert.equal(
+        state.brigade_movement_orders?.rs_1st_doboj_light_infantry?.destination_sids?.[0],
+        'op:test:approach'
+    );
+    assert.equal(state.brigade_attack_orders?.rs_1st_doboj_light_infantry, undefined);
 });

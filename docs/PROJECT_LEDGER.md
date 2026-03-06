@@ -59,6 +59,67 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 ---
 
+## [2026-03-06] Live sector rearrangement restored; planning-phase operations now maneuver into position
+
+### Summary
+- Restored live sector rearrangement in corps AI and extended it with offensive concentration so adjacent thin sectors can become launchable attack windows.
+- Planning-phase `sector_attack` operations now include brigade movement toward first-objective approach positions instead of waiting passively on a staging timer.
+- Refined combat-causality so post-capture objective advancement is not mislabeled as inert execution, and quiet weeks without attacks no longer invalidate otherwise healthy runs.
+- Verified the repaired runtime with full recovery gate evidence in `n158`.
+
+### Change
+- `src/sim/combat/sector_rearrangement.ts`
+  - added offensive concentration helpers for live use
+- `src/sim/combat/bot_corps_ai.ts`
+  - keeps sector rearrangement in live directive generation
+  - forms launchable offensive clusters from adjacent thin sectors using live brigade positions
+- `src/sim/combat/sector_offensive.ts`
+  - planning may complete once participants are staged or already on friendly objective-approach positions
+  - low supply no longer blocks launch-time staging/repositioning in this path
+  - recovery timing is reason-aware
+- `src/sim/combat/bot_brigade_ai_osid.ts`
+  - planning-phase operation logic now moves brigades into objective approach positions
+- `src/scenario/combat_causality.ts`
+  - suppresses false stall invalidations after same-turn capture/failure resolution
+  - treats quiet weeks as warnings unless attack orders resolved to zero battles
+- `src/scenario/scenario_runner.ts`
+  - still hard-fails whole-run zero-battle cases
+- Tests:
+  - `tests/bot_corps_ai_sector_contract.test.ts`
+  - `tests/bot_operation_objective_focus.test.ts`
+  - `tests/sector_offensive.test.ts`
+  - `tests/scenario_operation_diagnostics.test.ts`
+
+### Verification
+- `cmd /c node_modules\.bin\tsx.cmd --test tests\bot_operation_objective_focus.test.ts`
+- `cmd /c node_modules\.bin\tsx.cmd --test tests\sector_offensive.test.ts`
+- `cmd /c node_modules\.bin\tsx.cmd --test tests\bot_corps_ai_sector_contract.test.ts`
+- `cmd /c node_modules\.bin\tsx.cmd --test tests\scenario_operation_diagnostics.test.ts`
+- `cmd /c npm run typecheck`
+- `cmd /c npm run recovery:check`
+
+### Run evidence
+- `runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n158/run_summary.json`
+  - `final_state_hash = 3bfada3e56322112`
+  - `behavioral_health.valid_for_combat_calibration = true`
+  - `combat_causality.valid_for_combat_calibration = true`
+  - `total_attack_orders = 124`
+  - `total_battles = 103`
+  - `invalid_operation_count = 0`
+  - `zero_eligible_attacker_operation_count = 0`
+  - `battleless_weeks = [27, 39]`
+
+### Architect decision for later review
+- Quiet weeks with no attack orders and no invalid operations are warnings, not combat-causality failures.
+- Full-run zero battles and attack-orders-without-battles remain hard invalidations.
+
+### Failure mode prevented
+- Prevents operations from wasting planning turns after brigades are already in viable approach positions.
+- Prevents corps AI from leaving thin adjacent sectors too fragmented to launch offensives.
+- Prevents false combat-causality failures caused by post-capture objective advancement or ordinary operational lulls.
+
+---
+
 ## [2026-03-06] Live harness drops obsolete Phase I control-events artifact; control-change attribution is canonical
 
 ### Summary
@@ -10569,29 +10630,51 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 - Refactored `CorpsFrontPanel.tsx` from a tab-based horizontal interface to a unified vertical layout using stacked, collapsible `AccordionHeader` elements.
 - Extracted and standardized the `AccordionHeader` into a shared component used by both `OOBSidebar` and `CorpsFrontPanel`.
 - Removed dead code (`collapsed` state) from `OOBSidebar.tsx`.
+- (NEW) Added **Numeric Strategy Shortcuts** (1-5) to `MapModeToolbar` for keyboard mapping visibility.
+- (NEW) Implemented **Panel Shimmer Skeletons** across `CorpsDetail`, `FormationDetail`, `OperationsPanel`, `SelectionPanel`, and `RecruitmentModal` for premium state transitions.
+- (NEW) Added interactive **Hover Glow Transitions** to `TopToolbar` buttons.
+- (NEW) Standardized **Sidebar Padding** (p-3) and **SelectionPanel height** (bottom 2rem) for UI consistency.
 
 ### Changes
 - `src/ui/map/components/AccordionHeader.tsx` (NEW): Shared header component for accordions.
-- `src/ui/map/components/OOBSidebar.tsx`: (MODIFY) Integrated shared `AccordionHeader` and removed dead `collapsed` state.
-- `src/ui/map/components/CorpsFrontPanel.tsx`: (MODIFY) Refactored to use `expandedSections` and `AccordionHeader` components vertically stacked.
-- `docs/40_reports/implemented/20260306_GUI_PANEL_REWORK_TABS_TO_ACCORDIONS.md`: (NEW) Full implementation report.
+- `src/ui/map/components/OOBSidebar.tsx`: (MODIFY) Integrated shared `AccordionHeader`, removed dead `collapsed` state, and standardized container padding to `p-3`.
+- `src/ui/map/components/CorpsFrontPanel.tsx`: (MODIFY) Refactored to use vertical `AccordionHeader` components.
+- `src/ui/map/components/MapModeToolbar.tsx`: (MODIFY) Added numeric (1-5) button labels.
+- `src/ui/map/components/TopToolbar.tsx`: (MODIFY) Added transition-all and interactive hover-glow styles to buttons.
+- `src/ui/map/components/SelectionPanel.tsx`: (MODIFY) Integrated shimmer and standardized bottom positioning.
+- `src/ui/map/components/CorpsDetail.tsx`, `FormationDetail.tsx`, `OperationsPanel.tsx`: (MODIFY) Added loading shimmers.
+- `src/ui/map/components/RecruitmentModal.tsx`: (MODIFY) Added shimmer for the recruitment catalog loading state.
+- `docs/40_reports/implemented/20260306_GUI_PANEL_REWORK_AND_GENERAL_POLISH.md`: (NEW) Full implementation report.
 
 ### Failure mode prevented
 - Prevents "tab-climbing" and fragmentation of situational awareness by providing a unified vertical briefing view as recommended by the external UX expert.
 - Prevents UI inconsistency between Sidebar and Front Panel through standardized header components.
+- (NEW) Prevents "flickering" or empty panel states during data transitions through shimmer skeletons.
 
 ### Files modified
 - `src/ui/map/components/AccordionHeader.tsx`
 - `src/ui/map/components/OOBSidebar.tsx`
 - `src/ui/map/components/CorpsFrontPanel.tsx`
+- `src/ui/map/components/MapModeToolbar.tsx`
+- `src/ui/map/components/TopToolbar.tsx`
+- `src/ui/map/components/SelectionPanel.tsx`
+- `src/ui/map/components/CorpsDetail.tsx`
+- `src/ui/map/components/FormationDetail.tsx`
+- `src/ui/map/components/OperationsPanel.tsx`
+- `src/ui/map/components/RecruitmentModal.tsx`
 - `.claude/napkin.md`
 - `docs/10_canon/context.md`
 - `docs/PROJECT_LEDGER.md`
+- `docs/20_engineering/MAP_UI_MASTER.md`
 
 ### Mistake guard
 - Checked for unused `collapsed` state in `OOBSidebar` and removed it.
 - Verified that `Overview` remains open by default in `CorpsFrontPanel`.
+- (NEW) Applied standardized `bottom: 2rem` to `SelectionPanel` (right) to align with left detail panels.
+- (NEW) Verified 1:1 mapping of MapModeToolbar numeric labels to `useKeyboardShortcuts` implementation.
 
 ### FORAWWV note
 - None. UI polish only; no core simulation changes.
+- Final visual sweep confirms all panels now share the same vertical information hierarchy and loading aesthetic.
+
 

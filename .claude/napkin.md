@@ -116,11 +116,11 @@
 3. **[2026-03-05] Execution-phase no-progress must spend failure budget**
    Do instead: If a `sector_attack` stays in `execution` and produces no objective attempt, treat that as failure/stalemate in `updateSectorOffensiveResults()` so the op can skip or end instead of hanging indefinitely.
 4. **[2026-03-06] Sector rearrangement is LIVE in corps AI**
-   Do instead: `rearrangeSectorsForCorps()` runs in `generateCorpsDirectives()` after sector collection — thin consolidation (any 0-brigade sector, MAX_SECTOR_EDGES cap on merge target, unmergeable tracking) + pocket containment. Previous n135 battleless regression was from `codex/combat-causality-hardening` merge, not rearrangement (confirmed by bypass test n132 + pre-merge rollback n134).
+   Do instead: Keep `rearrangeSectorsForCorps()` in `generateCorpsDirectives()`. Live runtime now also uses offensive concentration via `concentrateSectorsForOffensive()` to cluster adjacent thin sectors into launchable attack windows. Scenario-level acceptance for this lane is `n158`, not the earlier rollback runs.
 5. **[2026-03-06] Maneuver-only execution turns are not invalid**
    Do instead: In combat-causality diagnostics, an execution-phase operation with `brigade_movement_orders` but zero attack orders is still maneuvering. Count only true inert turns as `execution_without_attack_orders`.
-6. **[2026-03-06] End planning early when the force is already staged**
-   Do instead: If all active operation participants have reached `staging_osid` and at least one full planning turn has elapsed, transition the `sector_attack` to execution instead of waiting out the full nominal planning duration.
+6. **[2026-03-06] Planning phase includes movement into position**
+   Do instead: During `sector_attack` planning, route operation-owned brigades toward first-objective approach OSIDs, not just `staging_osid`. End planning once at least one real planning turn elapsed and participants are either staged or already occupying friendly approach positions.
 7. **[2026-03-01] corps_id from tags, not field**
    Do instead: Use `getFormationCorpsId(f)` from `corps_sector_partition.ts`. Brigade corps stored in tags (`corps:vrs_1st_krajina`), not `f.corps_id`.
 8. **[2026-03-01] Sector exempt corps**
@@ -215,22 +215,20 @@
    Do instead: Before trusting control deltas, verify non-zero attack orders and non-zero battles in `weekly_report.jsonl`, then separate combat flips from consolidation, drift, and init overrides. Update `docs/40_reports/CALIBRATION_MASTER.md` during the session. Treat `n104` as partial recovery only: combat restored (`53` orders / `53` battles) but still invalid because `24` execution-phase operations emitted no attack orders.
 3. **[2026-03-06] Live attribution replaces Phase I flip logs**
    Do instead: For current scenario runs, use `control_change_attribution` in `weekly_report.jsonl` / `run_summary.json`. `control_events.jsonl` was a leftover Phase I artifact and is no longer the live harness contract.
-3. **[2026-03-05] Pool exhaustion fix: avoided_osids DON'T prevent loss; control_overrides DO**
+4. **[2026-03-06] Quiet weeks are warnings, not automatic causality failures**
+   Do instead: In weekly combat-causality, invalidate `zero_battles` only when attack orders existed but resolved to no battles, or when the whole run totals zero battles. Keep battleless weeks visible under `behavioral_health.battleless_weeks`, but do not fail a healthy run just because of an operational lull.
+5. **[2026-03-05] Pool exhaustion fix: avoided_osids DON'T prevent loss; control_overrides DO**
    Do instead: When sim=RBiH but painted=RS, adding RBiH avoided_osids is often ineffective (cells lost via counterattack or weakness, not direct attack). Add RS `osid_control_overrides` for systematic under-captures. avoideds work only when bot is actively targeting wrong cells.
-4. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
+6. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
    Do instead: RS `avoided_osids` = fix RS OVER-captures (painted=RBiH/HRHB, sim=RS — prevent VRS from attacking there). RS `osid_control_overrides` = fix RS UNDER-captures (painted=RS, sim=RBiH — force-start RS control). Adding under-captures to avoided_osids makes RS even less likely to capture them.
-5. **[2026-03-04] HRHB Krajina/Posavina mismatches are INIT-based (ethnic Croat composition)**
+7. **[2026-03-04] HRHB Krajina/Posavina mismatches are INIT-based (ethnic Croat composition)**
    Do instead: Cells banja_luka:dragocaj, banja_luka:potkozarje_3, bosanska_gradiska:mackovac, prijedor:raljas, odzak:bosanski_samac, orasje:ostra_luka start as HRHB in initial_save due to Croat ethnic majority in those cells. Not a runtime regression. Do NOT chase these as calibration mismatches caused by bot changes — they are data-driven init artifacts.
-6. **[2026-03-04] Consolidation captures CANNOT be fixed by bot config — ~8 persistent mismatches**
+8. **[2026-03-04] Consolidation captures CANNOT be fixed by bot config — ~8 persistent mismatches**
    Do instead: Cells surrounded by same-faction neighbors auto-flip regardless of avoided_osids or overrides. Confirmed: kakanj:biljesevo, zavidovici:cardak_2, olovo:olovo_2, and all 4 HRHB over-captures (jablanica, kiseljak outskirts, rat_2, prozor area) are consolidation-captured. Only engine-level consolidation rule changes could fix these.
-7. **[2026-03-04] Load-bearing wrong captures: turbe_2 RS over-capture enables Donji Vakuf cascade**
+9. **[2026-03-04] Load-bearing wrong captures: turbe_2 RS over-capture enables Donji Vakuf cascade**
    Do instead: turbe_2 is an RS over-capture BUT it is a stepping stone enabling Donji Vakuf consolidation cascade (3 correct cells). Adding turbe_2 to RS avoided_osids breaks Donji Vakuf → net -3pp loss (n463 confirmed). Do NOT add turbe_2 to RS avoided_osids.
-8. **[2026-03-04] Fragile VRS force allocation: Kalesija→Kupres dependency**
+10. **[2026-03-04] Fragile VRS force allocation: Kalesija→Kupres dependency**
    Do instead: Kalesija seher_2/gojcin_2 RS overrides redirect VRS pressure → bonus kupres:kupres_2 fix (n466). Adding Kladanj overrides on top disrupts this allocation → kupres:kupres_2 reverts (n467). Test each override block in isolation; never stack two override groups without verifying the underlying force dynamics.
-9. **[2026-03-03] Timeline knobs drive 40w behavior first & prove efficacy**
-   Do instead: Tune `apr1992.json` before `bot_strategy.ts`. Prove efficacy immediately by running one 40w test and comparing `final_state_hash` and `compare_painted_vs_sim.cjs`; revert if inert.
-10. **[2026-03-04] apr1992.json ↔ FACTION_DOCTRINE_PHASES must stay synced**
-   Do instead: After editing EITHER `data/scenarios/timelines/apr1992.json` doctrine values OR `bot_strategy.ts` `FACTION_DOCTRINE_PHASES`, immediately run `npx vitest run tests/war_timeline.test.ts` to confirm round-trip parity. Drift causes silent calibration regression.
 ## Engine Runtime Patterns
 1. **[2026-03-05] Takeover displacement off-by-one FIXED**
    Do instead: `processPhaseIIDisplacementTakeover` Section 0 uses `currentTurn === warStartTurn + 1` (not warStartTurn). `runTurn()` increments turn BEFORE phases — first war turn = warStartTurn+1. Fixed in `displacement_takeover.ts`.

@@ -63,7 +63,10 @@ export function RecruitmentModal({
         </div>
         <div className="p-4 space-y-3">
           {loading ? (
-            <p className="text-xs text-text-secondary">Loading catalog...</p>
+            <div className="space-y-4">
+              <div className="h-10 w-full bg-panel-card border border-panel-border rounded panel-shimmer" />
+              <div className="h-10 w-full bg-panel-card border border-panel-border rounded panel-shimmer" />
+            </div>
           ) : available.length === 0 ? (
             <p className="text-xs text-text-secondary">No brigades available for recruitment.</p>
           ) : (
