@@ -13,6 +13,7 @@ import type {
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { getFormationCorpsId } from './corps_sector_partition.js';
 
 interface PrePlannedOp {
     corps: string;
@@ -129,7 +130,7 @@ export function injectPrePlannedOperations(state: GameState): void {
 
         const participating = def.participating_brigades.filter((fid) => {
             const formation = formations[fid];
-            if (!formation || formation.corps_id !== def.corps) return false;
+            if (!formation || getFormationCorpsId(formation) !== def.corps) return false;
             if (formation.status !== 'active') return false;
             return formation.kind === 'brigade' || formation.kind === 'og' || formation.kind === 'operational_group';
         }).sort(strictCompare);

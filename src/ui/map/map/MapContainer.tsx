@@ -130,8 +130,6 @@ export function MapContainer() {
   const strategicVisible = useGameStore((s) => s.strategicVisible);
   const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
-  const setLoadError = useGameStore((s) => s.setLoadError);
-  const ipc = useIPC();
 
   useEffect(() => {
     if (!containerRef.current) return;

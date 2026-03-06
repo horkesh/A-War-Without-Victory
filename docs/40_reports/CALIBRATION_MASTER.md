@@ -1,9 +1,9 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for Phase II 40w calibration (April 1992 → January 1993).
-**Updated:** 2026-03-05
+**Updated:** 2026-03-06
 **Canonical target run:** n65 (ATH 99.2% area-weighted, commit a689d83)
-**Latest calibration run:** n65 (99.2% area-weighted, 99.1% count — 171 overrides, all 6 bot benchmarks PASS, 7 permanent mismatches = engine ceiling)
+**Latest calibration run:** n126 (combat-causality gate restored: valid_for_combat_calibration=true, 91 attack orders, 81 battles, 26 combat-attributed control changes; historical tuning still paused pending broader integration hardening)
 **ALL-TIME HIGH:** n65 (99.2% area-weighted — systematic OSID override strategy + pool exhaustion 25% fix, 2026-03-05)
 **Calibration validity gate (2026-03-05):** n77/n78/n79 later exposed that branch-level territory deltas can occur with **zero battles**. n65 remains the ATH reference, but from 2026-03-05 onward no combat-calibration claim is accepted without explicit combat-causality evidence (attack orders, battles, and flip attribution).
 **Previous ATH:** n466/n469 (92.0% area-weighted — pre-lockout code, Kalesija/Kupres dynamic)
@@ -101,6 +101,45 @@ Current invalidation reasons:
   - `total objective captures = 4`
   - `zero_eligible_attacker_operation_count = 2`
   - proof scenario passes the existence-of-combat/progress gate but still correctly fails full combat calibration because not all VRS opening ops are healthy yet
+
+### Combat-causality recovery result (2026-03-06)
+
+- `n126` is the first repaired April 1992 40-week run in this lane to pass the combat-causality gate again:
+  - `combat_causality.valid_for_combat_calibration = true`
+  - `total_attack_orders = 91`
+  - `total_battles = 81`
+  - `total_objective_attempts = 66`
+  - `total_objective_captures = 66`
+  - `invalid_operation_count = 0`
+  - `zero_eligible_attacker_operation_count = 0`
+  - `recovery_without_logged_attempt_count = 0`
+- `n126` also reports live control-change attribution:
+  - `combat = 26`
+  - `consolidation = 0`
+  - `abandoned = 0`
+  - `init_overrides = 0`
+  - `other = 0`
+  - `total_changes = 26`
+- Interpretation rule:
+  - this is sufficient evidence that the combat loop and operation pipeline are healthy again for this scenario
+  - it is not a blanket claim that repo-wide merge/integration issues are resolved
+
+### Live harness attribution contract (2026-03-06)
+
+- The live scenario harness no longer uses `control_events.jsonl` as its control-change contract.
+- `control_events.jsonl` was a leftover Phase I / flip-era artifact and has been removed from the active harness path.
+- The live reporting contract is now:
+  - `weekly_report.jsonl -> control_change_attribution`
+  - `run_summary.json -> control_change_attribution`
+- Attribution buckets currently tracked:
+  - `combat`
+  - `consolidation`
+  - `abandoned`
+  - `init_overrides`
+  - `other`
+- Practical rule:
+  - do not use legacy flip-log artifacts as evidence for war-phase control behavior
+  - use the attribution fields above when discussing why territory changed
 
 ### Opening-operation debug lane updates (2026-03-05)
 
