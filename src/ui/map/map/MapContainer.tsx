@@ -506,7 +506,7 @@ export function MapContainer() {
                     }
                     (m.getSource(FOG_OVERLAY_SOURCE_ID) as GeoJSONSource | undefined)?.setData(fogGeoJson);
                     const { fogVisible: fogVis } = useGameStore.getState();
-                    safeSetLayoutVisibility(m, FOG_FILL_LAYER_ID, fogVis && !!state.player_faction && !!state.reconIntelligence);
+                    safeSetLayoutVisibility(m, FOG_FILL_LAYER_ID, fogVis && !!state.player_faction && !!state.fogOfWar);
 
                     // Enclave visualization: dashed faction-colored outline + faint fill + text label
                     const { polygons: enclavePolygons, labels: enclaveLabels } = buildEnclaveGeoJSON(

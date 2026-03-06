@@ -10892,3 +10892,29 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 - All BFS in sector assignment now restricted to friendly territory — prevents cross-pocket assignments by construction
 - Own-corps constraint prevents cross-corps reserve leaking
 
+---
+
+## n199 — Fog-of-war layer wired live + dead recon cleanup (2026-03-07)
+
+### What changed
+- **MapContainer.tsx**: Fixed fog visibility gate — was checking deleted `state.reconIntelligence` (always falsy), now checks `state.fogOfWar`. Fog layer renders when `fogVisible && player_faction && fogOfWar`.
+- **GameStateAdapter.ts**: Removed 15-line `reconIntelligence` derivation block (parsed deleted `state.recon_intelligence` every load for zero consumers). Removed `reconIntelligence` from return object and import.
+- **types.ts**: Removed `ReconIntelligenceView` interface and `reconIntelligence` property from `LoadedGameState`.
+
+### Doc propagation
+- `MAP_UI_MASTER.md`: fog toggle table `reconIntelligence` → `fogOfWar`
+- `context.md`: sector intel entry updated — "deferred to Phase 6" → "LIVE"
+- `napkin.md`: sector intel item updated — fog LIVE, ReconIntelligenceView removed
+- `MEMORY.md`: sector intel entry updated
+
+### Failure mode prevented
+- Fog-of-war layer was permanently hidden despite all data being computed correctly (dead gate on deleted recon system)
+- Dead `reconIntelligence` derivation ran on every save load for no benefit
+
+### Files modified
+- src/ui/map/map/MapContainer.tsx
+- src/ui/map/data/GameStateAdapter.ts
+- src/ui/map/data/types.ts
+- docs/20_engineering/MAP_UI_MASTER.md
+- docs/10_canon/context.md
+- .claude/napkin.md

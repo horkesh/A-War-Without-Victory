@@ -9,7 +9,7 @@
 import type {
     AoROrderView, AttackOrderView, CorpsFrontSectorView, EnclaveResilienceView, FogOfWarView, FormationView, LoadedGameState,
     MilitiaPoolView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
-    OperationView, ReconIntelligenceView, RepositionOrderView, RecruitmentView,
+    OperationView, RepositionOrderView, RecruitmentView,
 } from './types';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
 import { strictCompare } from '../../../state/validateGameState.js';
@@ -237,6 +237,7 @@ export function parseGameState(json: unknown): LoadedGameState {
 
             // Brigade recent engagements: last 8 from brigade_history.engagements
             let recent_engagements: FormationView['recent_engagements'];
+            let parsed_brigade_history: FormationView['brigade_history'];
             if ((f.kind === 'brigade' || f.kind === 'operational_group') && brigadeHistoryRecord) {
                 const bh = brigadeHistoryRecord[id];
                 if (bh && Array.isArray(bh.engagements) && bh.engagements.length > 0) {
@@ -249,6 +250,14 @@ export function parseGameState(json: unknown): LoadedGameState {
                         casualties_taken: typeof e.casualties_taken === 'number' ? e.casualties_taken : 0,
                         territory_flipped: e.territory_flipped === true,
                     }));
+                }
+                if (bh) {
+                    parsed_brigade_history = {
+                        longest_victory_streak: finiteNumber(bh.longest_victory_streak, 0),
+                        turns_under_siege: finiteNumber(bh.turns_under_siege, 0),
+                        total_equipment_destroyed: finiteNumber(bh.total_equipment_destroyed, 0),
+                        total_equipment_captured: finiteNumber(bh.total_equipment_captured, 0),
+                    };
                 }
             }
 
@@ -300,6 +309,17 @@ export function parseGameState(json: unknown): LoadedGameState {
                 firstBattleOsid,
                 combatSummary,
                 recent_engagements,
+                morale: typeof f.morale === 'number' ? f.morale : undefined,
+                entrenchment_turns: typeof f.entrenchment_turns === 'number' ? f.entrenchment_turns : undefined,
+                dig_in_progress: typeof f.dig_in_progress === 'number' ? f.dig_in_progress : undefined,
+                disrupted_turns: typeof f.disrupted_turns === 'number' ? f.disrupted_turns : undefined,
+                equipment_decay: typeof f.equipment_decay === 'number' ? f.equipment_decay : undefined,
+                honor: typeof f.honor === 'string' ? f.honor : undefined,
+                composition: f.composition as FormationView['composition'] ?? undefined,
+                decorations: Array.isArray(f.decorations) ? f.decorations as NonNullable<FormationView['decorations']> : undefined,
+                last_repulsed_from: f.last_repulsed_from as NonNullable<FormationView['last_repulsed_from']> ?? undefined,
+                last_retreat_from: f.last_retreat_from as NonNullable<FormationView['last_retreat_from']> ?? undefined,
+                brigade_history: parsed_brigade_history,
             });
         }
     }
@@ -622,22 +642,6 @@ export function parseGameState(json: unknown): LoadedGameState {
             ? Object.fromEntries(Object.entries(rawDesiredCap).filter(([, v]) => typeof v === 'number' && v >= 1 && v <= 4).sort((a, b) => a[0].localeCompare(b[0])))
             : undefined;
 
-    let reconIntelligence: ReconIntelligenceView | undefined;
-    const rawRecon = state.recon_intelligence as Record<string, { detected_brigades?: Record<string, { strength_category?: string; detected_via?: string }>; confirmed_empty?: string[] }> | undefined;
-    if (playerFaction && rawRecon?.[playerFaction]) {
-        const r = rawRecon[playerFaction];
-        const detected: ReconIntelligenceView['detected_brigades'] = {};
-        if (r.detected_brigades && typeof r.detected_brigades === 'object') {
-            for (const [sid, info] of Object.entries(r.detected_brigades).sort((a, b) => a[0].localeCompare(b[0]))) {
-                detected[sid] = {
-                    strength_category: typeof info?.strength_category === 'string' ? info.strength_category : 'moderate',
-                    detected_via: typeof info?.detected_via === 'string' ? info.detected_via : 'recon',
-                };
-            }
-        }
-        reconIntelligence = { detected_brigades: detected, confirmed_empty: Array.isArray(r.confirmed_empty) ? [...r.confirmed_empty].sort() : [] };
-    }
-
     let fogOfWar: FogOfWarView | undefined;
     const rawSectorIntel = state.sector_intel as Record<string, Array<Record<string, unknown>>> | undefined;
     const rawCorpsFrontSectors = state.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
@@ -875,7 +879,6 @@ export function parseGameState(json: unknown): LoadedGameState {
         assignableFrontSegments, frontPressureByEdge,
         displacementByMun: Object.keys(displacementByMun).length > 0 ? displacementByMun : undefined,
         departedByOsid: departedByOsid && Object.keys(departedByOsid).length > 0 ? departedByOsid : undefined,
-        reconIntelligence,
         fogOfWar,
         movementOrdersSettlement: movementOrdersSettlement.length > 0 ? movementOrdersSettlement : undefined,
         repositionOrders: repositionOrders.length > 0 ? repositionOrders : undefined,

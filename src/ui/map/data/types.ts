@@ -137,6 +137,29 @@ export interface FormationView {
         most_casualties_brigade_id: string | null;
         most_victories_brigade_id: string | null;
     };
+    morale?: number;
+    entrenchment_turns?: number;
+    dig_in_progress?: number;
+    disrupted_turns?: number;
+    equipment_decay?: number;
+    honor?: string;
+    composition?: {
+        infantry: number;
+        tanks: number;
+        artillery: number;
+        aa_systems: number;
+        tank_condition: { operational: number; degraded: number; non_operational: number };
+        artillery_condition: { operational: number; degraded: number; non_operational: number };
+    };
+    decorations?: Array<{ tier: string; type: string; notes?: string }>;
+    last_repulsed_from?: { osid: string; turn: number };
+    last_retreat_from?: { osid: string; turn: number };
+    brigade_history?: {
+        longest_victory_streak: number;
+        turns_under_siege: number;
+        total_equipment_destroyed?: number;
+        total_equipment_captured?: number;
+    };
 }
 
 export interface MilitiaPoolView {
@@ -146,11 +169,6 @@ export interface MilitiaPoolView {
     committed: number;
     exhausted: number;
     fatigue: number;
-}
-
-export interface ReconIntelligenceView {
-    detected_brigades: Record<string, { strength_category: string; detected_via: string }>;
-    confirmed_empty: string[];
 }
 
 export interface FogOfWarView {
@@ -294,7 +312,6 @@ export interface LoadedGameState {
     }>;
     /** Per-OSID per-faction departed counts (from displacement_event_log). */
     departedByOsid?: Record<string, Partial<Record<string, number>>>;
-    reconIntelligence?: ReconIntelligenceView;
     fogOfWar?: FogOfWarView;
     movementOrdersSettlement?: MovementOrderSettlementView[];
     repositionOrders?: RepositionOrderView[];

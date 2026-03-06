@@ -279,7 +279,7 @@ Layer toggles (no keys):
 | Labels | `labelsVisible` | formation-labels (requires formationsVisible) |
 | Sectors | `sectorsVisible` | sector-fill, sector-demarcation, sector-glow-pos/neg, brigade-rings |
 | Minimap | `minimapVisible` | Minimap component visibility |
-| Fog | `fogVisible` | fog-fill (AND-gated with player_faction + reconIntelligence; no-op in observer mode) |
+| Fog | `fogVisible` | fog-fill (AND-gated with player_faction + fogOfWar; no-op in observer mode) |
 | Battles | `battlesVisible` | battle-markers-pulse (white circles at recent combat flip OSIDs; opacity by age) |
 | Points | `strategicVisible` | strategic-points-circles (gold circles — tier city r8, seat r5; derived from `_2` OSID slug) |
 
