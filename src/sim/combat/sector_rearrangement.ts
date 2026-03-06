@@ -1,0 +1,315 @@
+/**
+ * Corps AI sector rearrangement.
+ *
+ * Three triggers:
+ *   1. Thin sector consolidation — merge 0-brigade ≤3-edge sectors into adjacent neighbor
+ *   2. Enemy pocket containment — create dedicated sector around enemy pockets in corps interior
+ *   3. Operation concentration — merge op target sector with adjacent small sectors
+ *
+ * Deterministic: sorted iteration via strictCompare, no randomness.
+ */
+
+import type {
+    CorpsFrontSector,
+    CorpsFrontSubSegment,
+    FactionId,
+    FormationId,
+} from '../../state/game_state.js';
+import type { Osid } from './osid_adjacency.js';
+import { strictCompare } from '../../state/validateGameState.js';
+
+const THIN_SECTOR_MAX_EDGES = 3;
+
+export interface RearrangeContext {
+    politicalControllers?: Record<string, string>;
+    faction?: FactionId;
+    activeOps?: Record<string, { type?: string; sector_id?: string }>;
+}
+
+/** Check if two sectors are OSID-adjacent (any friendly OSID in one is adjacent to any friendly OSID in the other). */
+function areSectorsAdjacent(
+    a: CorpsFrontSector,
+    b: CorpsFrontSector,
+    osidAdjacency: Map<Osid, Osid[]>,
+): boolean {
+    const bFriendly = new Set<string>();
+    for (const ss of b.sub_segments) {
+        for (const o of ss.friendly_osids) bFriendly.add(o);
+    }
+    for (const ss of a.sub_segments) {
+        for (const o of ss.friendly_osids) {
+            if (bFriendly.has(o)) return true;
+            for (const nb of osidAdjacency.get(o as Osid) ?? []) {
+                if (bFriendly.has(nb)) return true;
+            }
+        }
+    }
+    return false;
+}
+
+/** Merge sector `from` into sector `into`. Mutates `into`. */
+function mergeSectorInto(into: CorpsFrontSector, from: CorpsFrontSector): void {
+    const edgeSet = new Set(into.edge_ids);
+    for (const eid of from.edge_ids) {
+        if (!edgeSet.has(eid)) {
+            into.edge_ids.push(eid);
+            edgeSet.add(eid);
+        }
+    }
+    into.edge_ids.sort(strictCompare);
+    into.length_edges = into.edge_ids.length;
+
+    into.sub_segments.push(...from.sub_segments);
+
+    const assignedSet = new Set(into.assigned_brigade_ids);
+    for (const bid of from.assigned_brigade_ids) {
+        if (!assignedSet.has(bid)) {
+            into.assigned_brigade_ids.push(bid);
+            assignedSet.add(bid);
+        }
+    }
+    into.assigned_brigade_ids.sort(strictCompare);
+
+    const reserveSet = new Set(into.reserve_brigade_ids);
+    for (const bid of from.reserve_brigade_ids) {
+        if (!reserveSet.has(bid) && !assignedSet.has(bid)) {
+            into.reserve_brigade_ids.push(bid);
+            reserveSet.add(bid);
+        }
+    }
+    into.reserve_brigade_ids.sort(strictCompare);
+
+    const opSet = new Set(into.opposing_factions);
+    for (const f of from.opposing_factions) {
+        if (!opSet.has(f)) {
+            into.opposing_factions.push(f);
+            opSet.add(f);
+        }
+    }
+    into.opposing_factions.sort(strictCompare);
+
+    into.density = into.length_edges > 0
+        ? into.assigned_brigade_ids.length / into.length_edges
+        : 0;
+}
+
+/** Trigger 1: Thin sector consolidation — merge 0-brigade ≤3-edge sectors into adjacent neighbor. */
+function consolidateThinSectors(
+    sectors: CorpsFrontSector[],
+    osidAdjacency: Map<Osid, Osid[]>,
+): CorpsFrontSector[] {
+    const pool = sectors.map(s => structuredClone(s));
+    let changed = true;
+
+    while (changed) {
+        changed = false;
+        pool.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+
+        // Find the thinnest eligible sector (0 brigades, ≤ THIN_SECTOR_MAX_EDGES edges)
+        let thinIdx = -1;
+        let thinSize = Infinity;
+        for (let i = 0; i < pool.length; i++) {
+            const s = pool[i]!;
+            if (s.assigned_brigade_ids.length === 0 && s.length_edges <= THIN_SECTOR_MAX_EDGES) {
+                if (
+                    s.length_edges < thinSize ||
+                    (s.length_edges === thinSize &&
+                        thinIdx >= 0 &&
+                        strictCompare(s.sector_id, pool[thinIdx]!.sector_id) < 0)
+                ) {
+                    thinSize = s.length_edges;
+                    thinIdx = i;
+                }
+            }
+        }
+        if (thinIdx === -1) break;
+
+        const thin = pool[thinIdx]!;
+
+        // Find the best adjacent neighbor to merge into (smallest first, then alphabetical)
+        let bestIdx = -1;
+        let bestSize = Infinity;
+        for (let i = 0; i < pool.length; i++) {
+            if (i === thinIdx) continue;
+            if (areSectorsAdjacent(thin, pool[i]!, osidAdjacency)) {
+                const size = pool[i]!.length_edges;
+                if (
+                    size < bestSize ||
+                    (size === bestSize &&
+                        bestIdx >= 0 &&
+                        strictCompare(pool[i]!.sector_id, pool[bestIdx]!.sector_id) < 0)
+                ) {
+                    bestSize = size;
+                    bestIdx = i;
+                }
+            }
+        }
+
+        if (bestIdx === -1) break; // no adjacent neighbor — stop
+
+        mergeSectorInto(pool[bestIdx]!, thin);
+        pool.splice(thinIdx, 1);
+        changed = true;
+    }
+
+    return pool;
+}
+
+/** Trigger 2: Enemy pocket containment — detect enemy OSIDs fully surrounded by corps territory. */
+function createPocketContainmentSectors(
+    sectors: CorpsFrontSector[],
+    corpsId: string,
+    osidAdjacency: Map<Osid, Osid[]>,
+    politicalControllers: Record<string, string>,
+    faction: FactionId,
+): CorpsFrontSector[] {
+    // Collect all friendly OSIDs across all sectors
+    const corpsFriendlyOsids = new Set<string>();
+    for (const s of sectors) {
+        for (const ss of s.sub_segments) {
+            for (const o of ss.friendly_osids) corpsFriendlyOsids.add(o);
+        }
+    }
+
+    // Collect OSIDs already tracked as enemy in existing sectors
+    const existingEnemyOsids = new Set<string>();
+    for (const s of sectors) {
+        for (const ss of s.sub_segments) {
+            for (const o of ss.enemy_osids) existingEnemyOsids.add(o);
+        }
+    }
+
+    // Find pocket OSIDs: non-friendly, non-already-enemy, controlled by non-faction,
+    // where ALL adjacency neighbors are in corpsFriendlyOsids
+    const pocketOsids = new Set<string>();
+    for (const friendlyOsid of [...corpsFriendlyOsids].sort(strictCompare)) {
+        for (const nb of osidAdjacency.get(friendlyOsid as Osid) ?? []) {
+            if (corpsFriendlyOsids.has(nb)) continue;
+            if (existingEnemyOsids.has(nb)) continue;
+            if (pocketOsids.has(nb)) continue;
+            const ctrl = politicalControllers[nb];
+            if (ctrl === faction) continue;
+
+            const nbNeighbors = osidAdjacency.get(nb as Osid) ?? [];
+            if (nbNeighbors.length > 0 && nbNeighbors.every(n => corpsFriendlyOsids.has(n))) {
+                pocketOsids.add(nb);
+            }
+        }
+    }
+
+    if (pocketOsids.size === 0) return sectors;
+
+    // Group pocket OSIDs into connected components
+    const sortedPockets = [...pocketOsids].sort(strictCompare);
+    const visited = new Set<string>();
+    const pocketGroups: Set<string>[] = [];
+
+    for (const seed of sortedPockets) {
+        if (visited.has(seed)) continue;
+        const group = new Set<string>();
+        const queue = [seed];
+        visited.add(seed);
+        let head = 0;
+        while (head < queue.length) {
+            const osid = queue[head++]!;
+            group.add(osid);
+            for (const nb of osidAdjacency.get(osid as Osid) ?? []) {
+                if (!visited.has(nb) && pocketOsids.has(nb)) {
+                    visited.add(nb);
+                    queue.push(nb);
+                }
+            }
+        }
+        pocketGroups.push(group);
+    }
+
+    const result = sectors.map(s => structuredClone(s));
+
+    for (let gi = 0; gi < pocketGroups.length; gi++) {
+        const pocket = pocketGroups[gi]!;
+
+        // Friendly OSIDs adjacent to the pocket
+        const containmentFriendly = new Set<string>();
+        for (const enemyOsid of [...pocket].sort(strictCompare)) {
+            for (const nb of osidAdjacency.get(enemyOsid as Osid) ?? []) {
+                if (corpsFriendlyOsids.has(nb)) containmentFriendly.add(nb);
+            }
+        }
+
+        // Determine opposing factions from pocket controllers
+        const opposingFactions = new Set<string>();
+        for (const osid of pocket) {
+            const ctrl = politicalControllers[osid];
+            if (ctrl && ctrl !== faction) opposingFactions.add(ctrl);
+        }
+
+        const subSeg: CorpsFrontSubSegment = {
+            sub_segment_id: `subseg:${corpsId}:pocket${gi}`,
+            edge_ids: [],
+            friendly_osids: [...containmentFriendly].sort(strictCompare),
+            enemy_osids: [...pocket].sort(strictCompare),
+            length_edges: 0,
+        };
+
+        result.push({
+            sector_id: `sector:${corpsId}:pocket${gi}`,
+            corps_id: corpsId,
+            faction,
+            opposing_factions: [...opposingFactions].sort(strictCompare) as FactionId[],
+            edge_ids: [],
+            sub_segments: [subSeg],
+            length_edges: 0,
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            density: 0,
+            threat_ratio: 0,
+            defensive_power: 0,
+        });
+    }
+
+    return result;
+}
+
+/**
+ * Rearrange corps front sectors for better operational coherence.
+ *
+ * @param sectors     Current sectors for this corps
+ * @param corpsId     Corps formation ID
+ * @param osidAdjacency  OSID adjacency graph
+ * @param formations  Formation location map (for future operation concentration)
+ * @param context     Optional context with political controllers, faction, active ops
+ * @returns           Rearranged sectors with renumbered IDs
+ */
+export function rearrangeSectorsForCorps(
+    sectors: CorpsFrontSector[],
+    corpsId: string,
+    osidAdjacency: Map<Osid, Osid[]>,
+    formations: Record<string, { location_osid?: string }>,
+    context?: RearrangeContext,
+): CorpsFrontSector[] {
+    if (sectors.length === 0) return [];
+
+    // 1. Thin sector consolidation
+    let result = consolidateThinSectors(sectors, osidAdjacency);
+
+    // 2. Enemy pocket containment
+    if (context?.politicalControllers && context?.faction) {
+        result = createPocketContainmentSectors(
+            result,
+            corpsId,
+            osidAdjacency,
+            context.politicalControllers,
+            context.faction,
+        );
+    }
+
+    // 3. Operation concentration — deferred
+
+    // Renumber sector IDs deterministically
+    result.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+    for (let i = 0; i < result.length; i++) {
+        result[i]!.sector_id = `sector:${corpsId}:${i}`;
+    }
+
+    return result;
+}
