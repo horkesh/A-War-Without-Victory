@@ -13,7 +13,7 @@
  */
 
 import type { SettlementRecord } from '../map/settlements.js';
-import { DISPLACEMENT_KILLED_FRACTION, getFactionFleeAbroadFraction } from './displacement_loss_constants.js';
+import { getDisplacementKillFraction, getFactionFleeAbroadFraction } from './displacement_loss_constants.js';
 import { getMunicipalityIdFromRecord, getOrInitDisplacementState, recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
 import type {
     DisplacementCampState,
@@ -293,7 +293,7 @@ export function processMinorityFlight(
         report.settlements_displaced += 1;
         report.displaced_total += phasedDelta;
 
-        const killed = Math.floor(phasedDelta * DISPLACEMENT_KILLED_FRACTION);
+        const killed = Math.floor(phasedDelta * getDisplacementKillFraction(targetFaction, controller));
         const survivors = Math.max(0, phasedDelta - killed);
         const denomDelta = phasedDelta > 0 ? phasedDelta : 1;
         const toRBiH = deltaRBiH > 0 ? Math.floor(deltaRBiH * (phasedDelta / delta)) : (targetFaction === 'RBiH' ? phasedDelta : 0);

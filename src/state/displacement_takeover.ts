@@ -2,6 +2,7 @@ import type { SettlementRecord } from '../map/settlements.js';
 import type { DisplacementRoutingRecord } from './displacement.js';
 import {
     DISPLACEMENT_KILLED_FRACTION,
+    getDisplacementKillFraction,
     getFactionFleeAbroadFraction
 } from './displacement_loss_constants.js';
 import {
@@ -531,7 +532,7 @@ export function processPhaseIIDisplacementTakeover(
             if (displacementAmount > 0) {
                 const killFraction = isEnclaveOverrun(munId, timer.from_faction, timer.to_faction)
                     ? ENCLAVE_OVERRUN_KILL_FRACTION
-                    : DISPLACEMENT_KILLED_FRACTION;
+                    : getDisplacementKillFraction(timer.from_faction, timer.to_faction);
                 const killed = Math.floor(displacementAmount * killFraction);
                 const survivors = Math.max(0, displacementAmount - killed);
                 const fledAbroad = Math.floor(survivors * getFleeAbroadFraction(munId, timer.from_faction));
@@ -685,7 +686,7 @@ export function processPhaseIIDisplacementTakeover(
 
             const killFraction = isEnclaveOverrun(munId, timer.from_faction, timer.to_faction)
                 ? ENCLAVE_OVERRUN_KILL_FRACTION
-                : DISPLACEMENT_KILLED_FRACTION;
+                : getDisplacementKillFraction(timer.from_faction, timer.to_faction);
             const killed = Math.floor(sustainedAmount * killFraction);
             const survivors = Math.max(0, sustainedAmount - killed);
             const fledAbroad = Math.floor(survivors * getFleeAbroadFraction(munId, timer.from_faction));

@@ -12,7 +12,7 @@ import { buildAdjacencyMap, type AdjacencyMap } from '../map/adjacency_map.js';
 import { computeFrontEdges } from '../map/front_edges.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import { getReceivingCapacityFraction } from './displacement_routing_data.js';
-import { DISPLACEMENT_KILLED_FRACTION } from './displacement_loss_constants.js';
+import { DISPLACEMENT_KILLED_FRACTION, getDisplacementKillFraction } from './displacement_loss_constants.js';
 import { computeFrontBreaches, type FrontBreach } from './front_breaches.js';
 import { LARGE_URBAN_MUN_IDS } from './large_urban_mun_data.js';
 import {
@@ -432,14 +432,15 @@ export function applyPhaseIDisplacementFromFlips(
 
         if (population1991ByMun) {
             const byFaction = splitDisplacedByEthnicity(munId, displacementAmount, population1991ByMun);
+            const toFaction = flip.to_faction;
             const rRBiH = Math.floor(
-                byFaction.RBiH * (1 - DISPLACEMENT_KILLED_FRACTION) * (1 - FLEE_ABROAD_FRACTION_RBIH)
+                byFaction.RBiH * (1 - getDisplacementKillFraction('RBiH', toFaction)) * (1 - FLEE_ABROAD_FRACTION_RBIH)
             );
             const rRS = Math.floor(
-                byFaction.RS * (1 - DISPLACEMENT_KILLED_FRACTION) * (1 - FLEE_ABROAD_FRACTION_RS)
+                byFaction.RS * (1 - getDisplacementKillFraction('RS', toFaction)) * (1 - FLEE_ABROAD_FRACTION_RS)
             );
             const rHRHB = Math.floor(
-                byFaction.HRHB * (1 - DISPLACEMENT_KILLED_FRACTION) * (1 - FLEE_ABROAD_FRACTION_HRHB)
+                byFaction.HRHB * (1 - getDisplacementKillFraction('HRHB', toFaction)) * (1 - FLEE_ABROAD_FRACTION_HRHB)
             );
             routableByFaction = { RBiH: rRBiH, RS: rRS, HRHB: rHRHB };
             routedAmount = rRBiH + rRS + rHRHB;
@@ -701,13 +702,13 @@ export function updateDisplacement(
             if (population1991ByMun) {
                 const byFaction = splitDisplacedByEthnicity(munId, displacementAmount, population1991ByMun);
                 const rRBiH = Math.floor(
-                    byFaction.RBiH * (1 - DISPLACEMENT_KILLED_FRACTION) * (1 - FLEE_ABROAD_FRACTION_RBIH)
+                    byFaction.RBiH * (1 - getDisplacementKillFraction('RBiH', factionId as FactionId)) * (1 - FLEE_ABROAD_FRACTION_RBIH)
                 );
                 const rRS = Math.floor(
-                    byFaction.RS * (1 - DISPLACEMENT_KILLED_FRACTION) * (1 - FLEE_ABROAD_FRACTION_RS)
+                    byFaction.RS * (1 - getDisplacementKillFraction('RS', factionId as FactionId)) * (1 - FLEE_ABROAD_FRACTION_RS)
                 );
                 const rHRHB = Math.floor(
-                    byFaction.HRHB * (1 - DISPLACEMENT_KILLED_FRACTION) * (1 - FLEE_ABROAD_FRACTION_HRHB)
+                    byFaction.HRHB * (1 - getDisplacementKillFraction('HRHB', factionId as FactionId)) * (1 - FLEE_ABROAD_FRACTION_HRHB)
                 );
                 routableByFaction = { RBiH: rRBiH, RS: rRS, HRHB: rHRHB };
                 routedAmount = rRBiH + rRS + rHRHB;
