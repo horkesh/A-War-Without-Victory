@@ -50,7 +50,7 @@
 
 ## Simulation Engine
 1. **[2026-03-03] Supply reserves: gated + pocket threshold + isolated source + heavy weapon drain**
-   Do instead: All reserve logic gated by `state.meta.supply_reserves_enabled`. Constants: `supply_reserve_constants.ts`. Module: `supply_reserves.ts`. Siege drain: `SIEGE_MIN_POCKET_SIZE=5` — components below this get counter frozen at 1. Isolated source detection: `findHeartlandComponent()` in `supply_state_derivation.ts` — supply sources in disconnected pockets (Sarajevo, Bihać) produce "strained" not "adequate". Heavy weapon maintenance: `HEAVY_MAINTENANCE_PER_WEAPON=0.003` — per-tank/artillery drain on heavy_munitions_reserve. RS (794 weapons) reaches strained (~43) by w40. n413 calibration: 89.7% area-weighted, E2 active.
+   Do instead: All reserve logic gated by `state.meta.supply_reserves_enabled`. Constants: `supply_reserve_constants.ts`. Module: `supply_reserves.ts`. Siege drain: `SIEGE_MIN_POCKET_SIZE=8` — components below this get counter frozen at 1. Isolated source detection: `findHeartlandComponent()` in `supply_state_derivation.ts` — supply sources in disconnected pockets (Sarajevo, Bihać) produce "strained" not "adequate". Heavy weapon maintenance: `HEAVY_MAINTENANCE_PER_WEAPON=0.001` — per-tank/artillery drain on heavy_munitions_reserve.
 2. **[2026-03-01] OSID/SID mismatch — never use getEffectiveSettlementSide for control**
    Do instead: `political_controllers` keyed by OSIDs in war phase. Use `buildMunControlFromOsids()` or `buildMunDominantController()` for municipality control. `getEffectiveSettlementSide()` does SID lookup → always null → false encirclement.
 3. **[2026-03-01] Displacement: per-OSID census, non-overlapping buckets, static routing**
@@ -90,7 +90,7 @@
 
 ## OOB & Brigade Systems
 1. **[2026-03-06] Personnel ceilings REMOVED; organic troop strength via pool system**
-   Do instead: No hardcoded caps. Personnel emerges from pool demographics, mobilization scales (`ongoing_mobilization.ts`: RBiH=0.17, RS=0.12, HRHB=0.29), exhaustion (MILITARY_AGE_MALE_FRACTION=0.28 denominator, threshold 0.25 half-rate, cap 0.50), and FACTION_POOL_SCALE (RBiH=0.18, RS=0.25, HRHB=1.60). RS JNA bonus=12k. n180 result: RS=97.8k, RBiH=124.3k, HRHB=39.6k at w40.
+   Do instead: No hardcoded caps. Personnel emerges from pool demographics, mobilization scales (`ongoing_mobilization.ts`: RBiH=0.10, RS=0.12, HRHB=0.29), exhaustion (MILITARY_AGE_MALE_FRACTION=0.28 denominator, threshold 0.25 half-rate, cap 0.50), and FACTION_POOL_SCALE (RBiH=0.18, RS=0.25, HRHB=1.60). RS JNA bonus=10k. n191 result: RS=102.6k/110.1k, RBiH=121.0k/175.4k, HRHB=41.5k/49.8k (w40/w80).
 2. **[2026-03-02] Decoration system replaces honor**
    Do instead: `getDecorationAtkMult()` and `getDecorationDefBonus()` in `decoration_evaluator.ts` — replace direct honor lookups. Falls back to legacy honor when no decorations. Three tiers per faction. Pipeline step `evaluate-brigade-decorations`.
 3. **[2026-03-02] Brigade history recorder wired after each battle**
@@ -103,38 +103,28 @@
    Do instead: After rework: RBiH 126, RS 80, HRHB 41. Removed 13 dupes, added 16 new. HVO Guard brigades at w80-88. `historical_decorations` on 46+ brigades. `is_elite` on guards + 65th.
 7. **[2026-03-02] War stories (end-of-game narrative)**
    Do instead: `generateWarStories(state)` in `war_stories.ts`. 6 arcs: veteran/bloodied/shattered/risen/destroyed/garrison. Deterministic templates, no randomness. Not yet wired into final save JSON.
-8. **[2026-03-05] April 1992 startup path uses `player_choice` recruitment**
-   Do instead: When fixing opening brigade placement, patch both `src/scenario/oob_early_war_entry.ts` and `src/sim/recruitment_engine.ts`. A fix in the legacy OOB path alone will not survive real scenario startup.
-9. **[2026-03-05] `home_osid` only sticks on friendly-held starts**
-   Do instead: Choose brigade starting OSIDs that are already friendly-controlled at init. If the selected `home_osid` is enemy-held, spread/re-homing logic will relocate the brigade and the intended opening operation will not launch from there.
+8. **[2026-03-05] April 1992 startup: patch both OOB entry + recruitment engine; home_osid must be friendly**
+   Do instead: Patch both `src/scenario/oob_early_war_entry.ts` and `src/sim/recruitment_engine.ts` — legacy OOB path alone won't survive real scenario startup. Choose brigade starting OSIDs that are already friendly-controlled; enemy-held `home_osid` causes spread/re-homing and the intended opening operation won't launch from there.
 
 ## Sectors & Operations
 1. **[2026-03-06] Proof lane + eligible-attacker boundary**
    Do instead: Before wide calibration work, run `tests/scenario_vrs_operation_proof.test.ts` / `data/scenarios/apr1992_vrs_operation_proof_4w.json` to prove one VRS opening op can attack, battle, and advance. In combat-causality, treat `execution_without_eligible_attackers` as a separate root-cause boundary from `execution_without_attack_orders`.
-2. **[2026-03-05] `sector_attack` phase timing has one owner**
-   Do instead: Let `src/sim/combat/sector_offensive.ts` advance `sector_attack` phases. `src/sim/combat/corps_command.ts:advanceOperations()` must skip them, or named ops will enter/leave `execution` on the wrong schedule.
-3. **[2026-03-05] Execution-phase no-progress must spend failure budget**
-   Do instead: If a `sector_attack` stays in `execution` and produces no objective attempt, treat that as failure/stalemate in `updateSectorOffensiveResults()` so the op can skip or end instead of hanging indefinitely.
-4. **[2026-03-06] Sector rearrangement is LIVE in corps AI**
-   Do instead: Keep `rearrangeSectorsForCorps()` in `generateCorpsDirectives()`. Live runtime now also uses offensive concentration via `concentrateSectorsForOffensive()` to cluster adjacent thin sectors into launchable attack windows. Scenario-level acceptance for this lane is `n158`, not the earlier rollback runs.
-5. **[2026-03-06] Maneuver-only execution turns are not invalid**
-   Do instead: In combat-causality diagnostics, an execution-phase operation with `brigade_movement_orders` but zero attack orders is still maneuvering. Count only true inert turns as `execution_without_attack_orders`.
-6. **[2026-03-06] Planning phase includes movement into position**
-   Do instead: During `sector_attack` planning, route operation-owned brigades toward first-objective approach OSIDs, not just `staging_osid`. End planning once at least one real planning turn elapsed and participants are either staged or already occupying friendly approach positions.
-7. **[2026-03-01] corps_id from tags, not field**
-   Do instead: Use `getFormationCorpsId(f)` from `corps_sector_partition.ts`. Brigade corps stored in tags (`corps:vrs_1st_krajina`), not `f.corps_id`.
-8. **[2026-03-01] Sector exempt corps**
+2. **[2026-03-05] `sector_attack` phase timing + no-progress budget**
+   Do instead: `src/sim/combat/sector_offensive.ts` owns phase advances — `corps_command.ts:advanceOperations()` must skip `sector_attack` ops. If execution produces no objective attempt, treat it as failure/stalemate in `updateSectorOffensiveResults()` so the op ends rather than hanging.
+3. **[2026-03-06] Sector rearrangement + maneuver interpretation**
+   Do instead: Keep `rearrangeSectorsForCorps()` + `concentrateSectorsForOffensive()` in `generateCorpsDirectives()`. Execution-phase ops with `brigade_movement_orders` but zero attack orders are still maneuvering — only true inert turns count as `execution_without_attack_orders`. Planning ends once one full turn elapsed and participants are staged or at friendly approach positions.
+4. **[2026-03-01] corps_id from tags, not field**
+   Do instead: Use `getFormationCorpsId(f)` from `corps_sector_partition.ts`. Brigade corps stored in tags (`corps:vrs_1st_krajina`), not `f.corps_id`. Applies everywhere — sectors, directives, and operations.
+5. **[2026-03-01] Sector exempt corps**
    Do instead: arbih_general_staff, vrs_main_staff, hvo_general_staff (army reserves) + hvo_central_bosnia (Bosniak-Croat conflict) — don't assign their brigades to front sectors.
-9. **[2026-03-07] Sector pipeline (updated — no cross-pocket transfers)**
-   Do instead: `buildMultiSectorsForCorps()`: findSubSegments → mergeUndersized → splitOversized → buildSectors → Phase1E split → dedup → **splitNonContiguousSectors** (BFS friendly OSIDs) → assignInterior → **assignOrphanedBrigadesToFaction** (own-corps + friendly-territory BFS only) → **redistributeExcessReserves** (per-corps, skip empty sectors) → **ensureMinimumSectorCoverage** (friendly-territory BFS, connectivity-checked reserve promotion). Then in `generateCorpsDirectives()`: **rearrangeSectorsForCorps** (thin consolidation + pocket containment) → write back to state → generate directives. **Invariants**: no cross-pocket transfers (all BFS restricted to friendly territory); orphans assigned only to own-corps sectors; reserves redistributed only within same corps; reserve promotion only when BFS-reachable through friendly OSIDs.
+6. **[2026-03-07] Sector pipeline (updated — no cross-pocket transfers)**
+   Do instead: `buildMultiSectorsForCorps()`: findSubSegments → mergeUndersized → splitOversized → buildSectors → Phase1E split → dedup → **splitNonContiguousSectors** (BFS friendly OSIDs) → assignInterior → **assignOrphanedBrigadesToFaction** (own-corps + friendly-territory BFS only) → **redistributeExcessReserves** (per-corps, skip empty sectors) → **ensureMinimumSectorCoverage** (friendly-territory BFS, connectivity-checked reserve promotion). **Invariants**: no cross-pocket transfers; orphans to own-corps sectors only; reserves redistributed within same corps only.
 7. **[2026-03-07] Sector intel replaces recon_intelligence (DELETED) — fog LIVE**
-   Do instead: Use `sector_intel.ts` / `sector_intel_constants.ts`. `derive-sector-intel` pipeline step. Confidence model, recon-by-force, bot target weighting. GUI fog-of-war is LIVE: `GameStateAdapter` derives `fogOfWar` from `sector_intel` + `corps_front_sectors`; `buildFogOfWarGeoJSON` renders it; `MapContainer` toggles via `fogVisible`. `ReconIntelligenceView` type and `reconIntelligence` adapter field fully removed. `recon_intelligence.ts` is DELETED — do not reference it.
-8. **[2026-03-05] Opening operations need explicit rosters, sectors, and launch OSIDs**
-   Do instead: For April 1992 VRS opening ops, prefer explicit `participating_brigades`, `sector_id`, and `staging_osid` over broad corps-minus-reserve inference. Then verify each op can actually emit attack orders once it reaches `execution`.
-9. **[2026-03-05] Named operations own their brigades until the op ends**
-   Do instead: If a brigade is listed in `active_operation.participating_brigades`, route it through operation planning/execution/recovery first. Do not let `home_defense_active`, reserve logic, or generic corps targeting retake control until `active_operation` is cleared.
-10. **[2026-03-06] Pre-planned ops: use tag-derived corps ownership**
-   Do instead: In `pre_planned_operations.ts`, filter brigade participation with `getFormationCorpsId(...)`, not `formation.corps_id`. Brigade corps membership is tag-derived in this repo.
+   Do instead: Use `sector_intel.ts` / `sector_intel_constants.ts`. `derive-sector-intel` pipeline step. Confidence model, recon-by-force, bot target weighting. GUI fog-of-war is LIVE: `GameStateAdapter` derives `fogOfWar` from `sector_intel` + `corps_front_sectors`; `buildFogOfWarGeoJSON` renders it; `MapContainer` toggles via `fogVisible`. `ReconIntelligenceView` + `reconIntelligence` field fully removed. `recon_intelligence.ts` is DELETED — do not reference it.
+8. **[2026-03-05] Opening operations: explicit rosters + named ops own brigades**
+   Do instead: For April 1992 VRS opening ops, use explicit `participating_brigades`, `sector_id`, and `staging_osid`. If a brigade is in `active_operation.participating_brigades`, it routes through operation planning/execution/recovery first — `home_defense_active`, reserve logic, or generic corps targeting cannot retake control until `active_operation` is cleared.
+9. **[2026-03-05] Pre-planned ops: own-corps BFS + tag-derived corps**
+   Do instead: In `pre_planned_operations.ts`, filter brigade participation with `getFormationCorpsId(...)` not `formation.corps_id`. Pre-planned VRS operations: 5 original corps only (EBK/Drina/SRK/Herzegovina/1KK). Adding 2KK caused −6.7pp regression — use organic bot + overrides for 2KK instead.
 
 ## GUI / HoI Map
 1. **[2026-03-06] Tactical fog contract is `fogOfWar`, not raw sector intel**
@@ -209,28 +199,26 @@
    Do instead: ZoC deleted. Movement via `brigade_movement_orders.ts` / `apply-brigade-movement`. Defense via `local_front_defense.ts` density. AoR legacy also fully removed (R1–R5, 2026-03-04) — no dead AoR code remains.
 
 ## Calibration
-1. **[2026-03-06] ATH n65=99.2% area-weighted; troop strength n180 calibrated**
-   Do instead: ATH 40w = 99.2% (n65, commit a689d83). 171 overrides. 7 permanent mismatches. Troop strength (n180): RS=97.8k, RBiH=124.3k, HRHB=39.6k (all in/near historical bands at w40). Scales: ongoing_mobilization RBiH=0.17/RS=0.12/HRHB=0.29; pool_population HRHB=1.60; RS JNA=12k. Bot benchmarks: 2/6 pass (pre-existing n159 regression — territorial expansion RS/RBiH).
+1. **[2026-03-07] ATH n65=99.2%; troop strength n191 calibrated (strategic reserve + faction surge)**
+   Do instead: ATH 40w = 99.2% (n65, commit a689d83). 171 overrides. 7 permanent mismatches. Troop strength (n191, w40/w80): RS=102.6k/110.1k ✓, RBiH=121.0k/175.4k ✓, HRHB=41.5k/49.8k ✓. Scales: ongoing_mobilization RBiH=0.10/RS=0.12/HRHB=0.29; pool_population HRHB=1.60; RS JNA bonus=10k. Faction-differentiated surge: VRS [2.0,1.8,1.3,1.1,1.0,0.6], ARBiH [2.8,2.2,1.3,0.8,0.45,0.3], HVO [2.5,2.0,1.4,1.0,0.6,0.4]. Strategic reserve draw rates: RS=0.25, HRHB=0.25, RBiH=0.02.
 2. **[2026-03-06] Pool surplus absorbs mobilization scale changes — use initial pool lever**
    Do instead: If faction pool has large surplus at w40 (RS=27k, HRHB=25k), reducing FACTION_MOBILIZATION_SCALE barely moves committed brigade personnel (1-2% drop for 12% scale cut). Primary lever for initial strength is RS_JNA_INHERITANCE_BONUS and FACTION_POOL_SCALE. For RS long-run, large scale cuts (0.17→0.12) combined with JNA reduction are needed to bring into band. HRHB POOL_SCALE=1.60 restores ~40k target.
-2. **[2026-03-05] Combat calibration needs causality, not just territory**
+3. **[2026-03-05] Combat calibration needs causality, not just territory**
    Do instead: Before trusting control deltas, verify non-zero attack orders and non-zero battles in `weekly_report.jsonl`, then separate combat flips from consolidation, drift, and init overrides. Update `docs/40_reports/CALIBRATION_MASTER.md` during the session. Treat `n104` as partial recovery only: combat restored (`53` orders / `53` battles) but still invalid because `24` execution-phase operations emitted no attack orders.
-3. **[2026-03-06] Live attribution replaces Phase I flip logs**
+4. **[2026-03-06] Live attribution replaces Phase I flip logs**
    Do instead: For current scenario runs, use `control_change_attribution` in `weekly_report.jsonl` / `run_summary.json`. `control_events.jsonl` was a leftover Phase I artifact and is no longer the live harness contract.
-4. **[2026-03-06] Quiet weeks are warnings, not automatic causality failures**
+5. **[2026-03-06] Quiet weeks are warnings, not automatic causality failures**
    Do instead: In weekly combat-causality, invalidate `zero_battles` only when attack orders existed but resolved to no battles, or when the whole run totals zero battles. Keep battleless weeks visible under `behavioral_health.battleless_weeks`, but do not fail a healthy run just because of an operational lull.
-5. **[2026-03-05] Pool exhaustion fix: avoided_osids DON'T prevent loss; control_overrides DO**
+6. **[2026-03-05] Pool exhaustion fix: avoided_osids DON'T prevent loss; control_overrides DO**
    Do instead: When sim=RBiH but painted=RS, adding RBiH avoided_osids is often ineffective (cells lost via counterattack or weakness, not direct attack). Add RS `osid_control_overrides` for systematic under-captures. avoideds work only when bot is actively targeting wrong cells.
-6. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
+7. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
    Do instead: RS `avoided_osids` = fix RS OVER-captures (painted=RBiH/HRHB, sim=RS — prevent VRS from attacking there). RS `osid_control_overrides` = fix RS UNDER-captures (painted=RS, sim=RBiH — force-start RS control). Adding under-captures to avoided_osids makes RS even less likely to capture them.
-7. **[2026-03-04] HRHB Krajina/Posavina mismatches are INIT-based (ethnic Croat composition)**
+8. **[2026-03-04] HRHB Krajina/Posavina mismatches are INIT-based (ethnic Croat composition)**
    Do instead: Cells banja_luka:dragocaj, banja_luka:potkozarje_3, bosanska_gradiska:mackovac, prijedor:raljas, odzak:bosanski_samac, orasje:ostra_luka start as HRHB in initial_save due to Croat ethnic majority in those cells. Not a runtime regression. Do NOT chase these as calibration mismatches caused by bot changes — they are data-driven init artifacts.
-8. **[2026-03-04] Consolidation captures CANNOT be fixed by bot config — ~8 persistent mismatches**
+9. **[2026-03-04] Consolidation captures CANNOT be fixed by bot config — ~8 persistent mismatches**
    Do instead: Cells surrounded by same-faction neighbors auto-flip regardless of avoided_osids or overrides. Confirmed: kakanj:biljesevo, zavidovici:cardak_2, olovo:olovo_2, and all 4 HRHB over-captures (jablanica, kiseljak outskirts, rat_2, prozor area) are consolidation-captured. Only engine-level consolidation rule changes could fix these.
-9. **[2026-03-04] Load-bearing wrong captures: turbe_2 RS over-capture enables Donji Vakuf cascade**
-   Do instead: turbe_2 is an RS over-capture BUT it is a stepping stone enabling Donji Vakuf consolidation cascade (3 correct cells). Adding turbe_2 to RS avoided_osids breaks Donji Vakuf → net -3pp loss (n463 confirmed). Do NOT add turbe_2 to RS avoided_osids.
-10. **[2026-03-04] Fragile VRS force allocation: Kalesija→Kupres dependency**
-   Do instead: Kalesija seher_2/gojcin_2 RS overrides redirect VRS pressure → bonus kupres:kupres_2 fix (n466). Adding Kladanj overrides on top disrupts this allocation → kupres:kupres_2 reverts (n467). Test each override block in isolation; never stack two override groups without verifying the underlying force dynamics.
+10. **[2026-03-04] Load-bearing overrides: turbe_2 + Kalesija→Kupres dependency**
+   Do instead: turbe_2 is an RS over-capture but enables Donji Vakuf consolidation (3 correct cells) — adding to avoided_osids causes net −3pp loss (n463). Kalesija seher_2/gojcin_2 overrides redirect VRS → kupres:kupres_2 fix (n466); adding Kladanj on top breaks this (n467). Test each override block in isolation — never stack two override groups without verifying underlying force dynamics.
 ## Engine Runtime Patterns
 1. **[2026-03-05] Takeover displacement off-by-one FIXED**
    Do instead: `processPhaseIIDisplacementTakeover` Section 0 uses `currentTurn === warStartTurn + 1` (not warStartTurn). `runTurn()` increments turn BEFORE phases — first war turn = warStartTurn+1. Fixed in `displacement_takeover.ts`.
