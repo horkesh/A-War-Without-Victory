@@ -67,6 +67,7 @@
 | N159 deep audit | Entrenchment sqrt curve creates interesting dynamics: early digging matters more (rewards ARBiH homeland defense), later turns plateau (penalizes late-arriving RS attackers less). |
 | N159 deep audit | HRHB supply is inherently fragile: 59 siege counters from central Bosnia pockets drain faction reserves. Need higher initial supply + patron commitment to keep them strained (not collapsed). |
 | N159 deep audit | Displacement kill fraction (4%) should not be uniform across all contexts. RS civilian departure from RBiH/HRHB was mostly voluntary flight (~1% lethality). Sim: 10,860 RS civ killed vs ~4k historical. |
+| Bot AI target filtering (n192) | P3 priority municipality filter blocked capture of undefended territory in areas like Krajina. Never filter undefended territory through strategic gates — taking empty land costs nothing. Only apply priority filters to targets requiring actual combat. |
 
 ---
 

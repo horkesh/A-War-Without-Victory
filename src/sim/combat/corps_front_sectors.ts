@@ -1297,44 +1297,6 @@ function assignOrphanedBrigadesToFaction(
     }
 }
 
-/**
- * BFS from startOsid through ALL adjacency (not restricted to friendly territory)
- * to find the nearest OSID belonging to any sector.
- */
-function bfsUnrestrictedToNearestSector(
-    startOsid: string,
-    osidToSectorIdx: Map<string, number>,
-    adjacency: Map<Osid, Osid[]>
-): number | null {
-    const direct = osidToSectorIdx.get(startOsid);
-    if (direct !== undefined) return direct;
-
-    const visited = new Set<string>();
-    visited.add(startOsid);
-    const queue: string[] = [startOsid];
-    let head = 0;
-
-    while (head < queue.length) {
-        const osid = queue[head++]!;
-        const neighbors = (adjacency.get(osid) ?? []).slice().sort(strictCompare);
-        for (const n of neighbors) {
-            if (visited.has(n)) continue;
-            visited.add(n);
-
-            const sIdx = osidToSectorIdx.get(n);
-            if (sIdx !== undefined) return sIdx;
-
-            queue.push(n);
-        }
-    }
-
-    return null;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Helpers
-// ═══════════════════════════════════════════════════════════════════════════
-
 // ═══════════════════════════════════════════════════════════════════════════
 // Brigade Deduplication
 // ═══════════════════════════════════════════════════════════════════════════
