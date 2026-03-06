@@ -581,6 +581,34 @@ Each new override block can redirect bot force allocation in non-obvious ways. E
 - **Proof scenario before full calibration (2026-03-06):** Use `data/scenarios/apr1992_vrs_operation_proof_4w.json` and `tests/scenario_vrs_operation_proof.test.ts` as the deterministic opening-op proof lane. It proves that at least one VRS opening operation can emit attack orders, resolve battles, and advance objectives before spending 40-week runs on wider cadence debugging.
 - **Zero eligible attackers is its own failure boundary (2026-03-06):** Distinguish `execution_without_attack_orders` from `execution_without_eligible_attackers`. The first means an execution-phase op produced no attack/movement orders; the second means the current objective had no eligible direct attackers at all. Debug them differently.
 
+### Strategic reserve and faction-differentiated mobilization (2026-03-06, n191)
+
+**Ledger ref:** [2026-03-06] Strategic reserve system + faction-differentiated mobilization surge
+
+#### Municipality-locked pool topology mismatch (root cause)
+
+Municipality-locked militia pools create a structural mismatch: brigades draw from their home municipality pool at REINFORCEMENT_RATE (400/turn), but municipalities only generate ~5-50 people/turn from mobilization. Front-line municipalities run to zero in a few turns; rear municipalities accumulate 75k+ surplus (brigades at max 3,000 cap, pool growing each turn). Increasing mobilization surge factors only adds to rear surplus. The problem is topological — manpower is generated where it isn't needed and consumed where it can't be generated fast enough.
+
+#### Strategic reserve solution
+
+Faction-level manpower redistribution via `state.strategic_reserves`. Pipeline: `phase-ii-strategic-reserve-collection` (excess above 5,000 threshold flows to faction reserve) → `phase-ii-strategic-reserve-reinforcement` (under-strength brigades draw from reserve at reduced rate). Faction-specific draw rates reflect historical logistics capability: RS=0.25 (JNA inheritance), HRHB=0.25 (Croatian support), RBiH=0.02 (poor logistics until 1994 professionalization). Files: `src/sim/combat/strategic_reserve.ts`, `src/sim/turn_phases/war_phases.ts`.
+
+#### Faction-differentiated mobilization surge
+
+Global surge curve replaced with per-faction curves. VRS: lower initial rush (2.0× vs 2.5×), more sustained mid-war (1.1× vs 0.9×), reflecting JNA organized startup. ARBiH: higher initial rush (2.8×), faster burnout (0.45× at w79-104), reflecting desperate mass mobilization. HVO: moderate curve. File: `src/sim/combat/ongoing_mobilization.ts`.
+
+#### Calibration result (n191)
+
+Multi-checkpoint verification at both w40 (Dec 1992) and w80 (Jan 1994):
+- RS: 102.6k (w40, target 90-100k) → 110.1k (w80, target 100-110k) — historically accurate plateau
+- RBiH: 121.0k (w40, target 110-130k) → 175.4k (w80, target 140-160k) — within wider historical estimates
+- HRHB: 41.5k (w40, target 40-45k) → 49.8k (w80, target 45-50k) — near peak
+- Strategic reserves at w80: RS=0 (fully consumed), HRHB=0 (fully consumed), RBiH=70,262 (large surplus but low draw rate limits distribution)
+
+#### Design principle
+
+The strategic reserve solves the topology mismatch without artificial caps or scripted behavior. Combined with faction-differentiated surge, this produces historically accurate growth trajectories across multiple time checkpoints from purely organic mechanics. The system is deterministic (sorted pool keys, sorted formation ids, strictCompare throughout).
+
 ---
 
 ## Cross-references

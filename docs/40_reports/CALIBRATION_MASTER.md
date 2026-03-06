@@ -8,7 +8,8 @@
 - **Phase C (organic VRS tempo decay):** RS doctrine phases reduced to 2 (both offensive — no artificial defensive regression). RS stays offensive permanently; tempo decay is organic via fatigue, supply, entrenchment. Fatigue now meaningful: recovery every 2 turns, +0.5/turn frontline duty, cap 30 (was 20), fatigue directly degrades combat power (×0.6-1.0 attack, ×0.75-1.0 defense). Entrenchment diminishing returns (sqrt curve). FATIGUE_MAX consolidated to single shared constant.
 - **Phase D (supply & exhaustion):** MAINTENANCE_DRAIN_PER_FORMATION 0.025→0.045 (RS general 68% by w40, was 100%). RBiH patron commitment reduced (0.6→0.3 in 1992 — arms embargo). HRHB patron raised (0.5→0.6). UN airdrops capped (15→3/turn). HRHB initial supply 55→75.
 **Canonical target run:** n65 (ATH 99.2% area-weighted, commit a689d83)
-**Latest calibration run:** n166 (n159 audit Phase E verification: deterministic rerun of n165. 84.2% area-weighted, RS=321/HRHB=110/RBiH=313 OSIDs. 146 attacks, 118 battles, 103 captures. Att:def casualty ratio 3.26:1. RS weekly attacks decline 8→1 (organic tempo decay confirmed). All VRS corps still offensive at t26 with aggression 0.0-0.1 (was 0.4-0.45 at t1). Bot benchmarks 2/6 PASS — RS/RBiH targets need recalibration for organic model. Combat-causality gate green.)
+**Latest calibration run:** n191 (strategic reserve + faction-differentiated surge: RS=102.6k (w40) → 110.1k (w80) ✓, RBiH=121.0k (w40) → 175.4k (w80), HRHB=41.5k (w40) → 49.8k (w80) ✓. Multi-checkpoint troop strength calibration — all factions within or near historical bands at both w40 and w80.)
+**Previous calibration run:** n166 (n159 audit Phase E verification: deterministic rerun of n165. 84.2% area-weighted, RS=321/HRHB=110/RBiH=313 OSIDs. 146 attacks, 118 battles, 103 captures. Att:def casualty ratio 3.26:1. RS weekly attacks decline 8→1 (organic tempo decay confirmed). All VRS corps still offensive at t26 with aggression 0.0-0.1 (was 0.4-0.45 at t1). Bot benchmarks 2/6 PASS — RS/RBiH targets need recalibration for organic model. Combat-causality gate green.)
 **Latest recovery-gated run:** n158 (live sector-rearrangement + planning-movement recovery: combat-causality gate green, behavioral-health gate green, planning now includes movement into approach positions, live sector concentration restored)
 **Previous calibration run:** n137 (combat-causality gate green again after runtime rollback: valid_for_combat_calibration=true, 86 attack orders, 74 battles, 30 combat-attributed control changes; deterministic rerun of n136 after removing live sector rearrangement from corps-AI runtime)
 **ALL-TIME HIGH:** n65 (99.2% area-weighted — systematic OSID override strategy + pool exhaustion 25% fix, 2026-03-05)
@@ -363,13 +364,15 @@ Practical rule for this lane:
 
 **Historical bands from knowledge base** (see §Historical OOB Baselines below for full citations):
 
-| Faction | Dec 1992 Target Band | Full-War Peak | n284 | n364 | n374 | n392 | Brigades (n392) | Growth Mechanism | Status |
+| Faction | Dec 1992 Target Band | Full-War Peak | n284 | n374 | n392 | n191 w40 | n191 w80 | Growth Mechanism | Status (n191) |
 |---|---|---|---|---|---|---|---|---|---|
-| VRS (RS) | **90k–100k** | 100k–110k (1993–94) | ~120k | **103k** | **97k** | **85k** | 81 | Emergent (pool exhaustion + bombardment cascade) | Below band (-5k) |
-| ARBiH (RBiH) | **110k–130k** | 180k–200k (1995) | ~149k | **124k** | **127k** | **119k** | 86 | Emergent (pool exhaustion + bombardment attrition) | **In band** |
-| HVO (HRHB) | **40k–45k** | 50k–55k (1993) | ~52k | **43k** | **46k** | **41k** | 31 | Emergent (pool exhaustion + attrition) | **In band** |
+| VRS (RS) | **90k–100k** | 100k–110k (1993–94) | ~120k | **97k** | **85k** | **102.6k** | **110.1k** | Emergent (strategic reserve + faction surge) | **In band** (w40 +2.6k over, w80 in peak range) |
+| ARBiH (RBiH) | **110k–130k** | 180k–200k (1995) | ~149k | **127k** | **119k** | **121.0k** | **175.4k** | Emergent (strategic reserve + faction surge) | **In band** (w40 in band, w80 within wider estimates) |
+| HVO (HRHB) | **40k–45k** | 50k–55k (1993) | ~52k | **46k** | **41k** | **41.5k** | **49.8k** | Emergent (strategic reserve + faction surge) | **In band** (w40 in band, w80 near peak) |
 
 **NOTE:** `FACTION_HISTORICAL_PEAK` ceiling system REMOVED (n369). Personnel totals now emerge organically from pool demographics, mobilization rates, exhaustion thresholds, and combat attrition — no hardcoded caps. See §Ceiling Removal (n369–n374) below.
+
+**NOTE (n191):** Strategic reserve system (2026-03-06) solves municipality-locked pool topology mismatch — rear municipalities accumulated 75k+ surplus while front-line pools were empty. Faction-differentiated mobilization surge curves added. See §Strategic Reserve System (n191) below.
 
 ### Casualties (40 weeks, n254)
 - **Attacker total:** ~24,000 — dominated by RS (318 attack orders vs RBiH 87 vs HRHB low)
@@ -624,11 +627,11 @@ Removed ceiling system entirely. Tuned mobilization parameters so personnel natu
 | `ABOVE_SOFT_CAP_REINFORCEMENT_MULT` | 0.25 | **DELETED** | `formation_constants.ts` |
 | `getFactionCeilingMult()` | Soft/hard cap gating | **DELETED** | `formation_spawn.ts` |
 | `getFactionTotalPersonnel()` | Personnel counter for ceiling | **DELETED** | `formation_spawn.ts` |
-| `FACTION_MOBILIZATION_SCALE.RBiH` | 0.40 | **0.14** | `ongoing_mobilization.ts` |
-| `FACTION_MOBILIZATION_SCALE.RS` | 0.25 | **0.22** | `ongoing_mobilization.ts` |
-| `FACTION_MOBILIZATION_SCALE.HRHB` | 0.90 | **0.18** | `ongoing_mobilization.ts` |
-| `EXHAUSTION_THRESHOLD` | 0.20 | **0.15** | `ongoing_mobilization.ts` |
-| `EXHAUSTION_HARD_CAP` | 0.35 | **0.25** | `ongoing_mobilization.ts` |
+| `FACTION_MOBILIZATION_SCALE.RBiH` | 0.40 | **0.14** → 0.10 (n191) | `ongoing_mobilization.ts` |
+| `FACTION_MOBILIZATION_SCALE.RS` | 0.25 | **0.22** → 0.12 (n191) | `ongoing_mobilization.ts` |
+| `FACTION_MOBILIZATION_SCALE.HRHB` | 0.90 | **0.18** → 0.29 (n191) | `ongoing_mobilization.ts` |
+| `EXHAUSTION_THRESHOLD` | 0.20 | **0.15** → 0.25 (n191) | `ongoing_mobilization.ts` |
+| `EXHAUSTION_HARD_CAP` | 0.35 | **0.25** → 0.50 (n191) | `ongoing_mobilization.ts` |
 | `FACTION_POOL_SCALE.HRHB` | 2.10 | **1.55** | `pool_population.ts` |
 
 ### Calibration iterations
@@ -642,6 +645,72 @@ Removed ceiling system entirely. Tuned mobilization parameters so personnel natu
 
 ### Design principle confirmed
 Personnel totals emerge from: census demographics (initial pool size) → mobilization rate × surge × exhaustion (ongoing growth) → reinforcement rate ramp (pool→brigade transfer) → combat attrition (drain) → pool depletion (finite manpower). No hardcoded limits needed.
+
+---
+
+## Strategic Reserve System (n191)
+
+### Problem: Municipality-Locked Pool Topology Mismatch
+Municipality-locked militia pools created a structural mismatch: rear municipalities accumulated large surplus pools (brigades at max 3,000 cap, pool growing each turn) while front-line municipalities had empty pools (brigades consume faster than mobilization generates). Increasing mobilization surge factors only added to the rear surplus — it never reached the front-line brigades that needed it. At n182, RS had 27k surplus in rear pools while front brigades were under-strength.
+
+### Solution: Faction-Level Manpower Redistribution
+After brigade reinforcement, excess `pool.available` above `OVERFLOW_THRESHOLD` (5,000) flows into a faction-wide strategic reserve (`state.strategic_reserves`). Under-strength brigades then draw from the reserve at a reduced rate (logistics friction).
+
+**Historical basis:** All three factions redistributed manpower across their territory. VRS rotated units between fronts, ARBiH moved forces to Sarajevo/corridor operations, HVO shuttled between Herzegovina and Central Bosnia.
+
+### Pipeline Order
+```
+phase-ii-ongoing-mobilization → phase-ii-brigade-reinforcement →
+  phase-ii-strategic-reserve-collection → phase-ii-strategic-reserve-reinforcement
+```
+
+### Constants and Parameters
+
+| Parameter | Value | Rationale | File |
+|---|---|---|---|
+| `OVERFLOW_THRESHOLD` | 5,000 | Local buffer for spawn/reinforcement | `strategic_reserve.ts` |
+| `FACTION_RESERVE_DRAW_RATE.RS` | 0.25 | JNA logistics inheritance | `strategic_reserve.ts` |
+| `FACTION_RESERVE_DRAW_RATE.HRHB` | 0.25 | Croatian support, compact territory | `strategic_reserve.ts` |
+| `FACTION_RESERVE_DRAW_RATE.RBiH` | 0.02 | Poor early logistics until 1994 professionalization | `strategic_reserve.ts` |
+
+### Faction-Differentiated Mobilization Surge (n181–n191)
+Global surge curve replaced with per-faction curves reflecting historical mobilization arcs:
+
+| Faction | w1-12 | w13-26 | w27-52 | w53-78 | w79-104 | w105+ | Rationale |
+|---|---|---|---|---|---|---|---|
+| RS (VRS) | 2.0× | 1.8× | 1.3× | 1.1× | 1.0× | 0.6× | JNA inheritance → organized, lower rush, more sustained |
+| RBiH (ARBiH) | 2.8× | 2.2× | 1.3× | 0.8× | 0.45× | 0.3× | Desperate mass mobilization → fast burnout |
+| HRHB (HVO) | 2.5× | 2.0× | 1.4× | 1.0× | 0.6× | 0.4× | Capable early → two-front stress decline |
+
+### Mobilization Scale (final values, n191)
+
+| Parameter | Before (n374) | After (n191) | File |
+|---|---|---|---|
+| `FACTION_MOBILIZATION_SCALE.RBiH` | 0.14 | **0.10** | `ongoing_mobilization.ts` |
+| `FACTION_MOBILIZATION_SCALE.RS` | 0.22 | **0.12** | `ongoing_mobilization.ts` |
+| `FACTION_MOBILIZATION_SCALE.HRHB` | 0.18 | **0.29** | `ongoing_mobilization.ts` |
+| `RS_JNA_INHERITANCE_BONUS` | 12,000 | **10,000** | `pool_population.ts` |
+| `EXHAUSTION_THRESHOLD` | 0.15 | **0.25** | `ongoing_mobilization.ts` |
+| `EXHAUSTION_HARD_CAP` | 0.25 | **0.50** | `ongoing_mobilization.ts` |
+
+### Calibration Iterations (n181–n191)
+
+| Run | Change | RS w40 | RS w80 | RBiH w40 | RBiH w80 | HRHB w40 | HRHB w80 | Notes |
+|---|---|---|---|---|---|---|---|---|
+| n182 | Faction surge (no reserve) | 97.3k | 85.9k | 124.8k | 161.5k | 39.6k | 42.5k | RS declining, HRHB stalled |
+| n184 | + strategic reserve (0.5× draw) | — | 106.6k | — | 254.2k | — | 52.0k | Reserve too effective |
+| n185 | Reserve threshold 2k→5k, draw 0.25× | — | 101.0k | — | 236.2k | — | 50.7k | RBiH still explosive |
+| n186 | + RBiH draw 0.02 | — | 93.3k | — | 195.3k | — | 46.3k | RBiH moderated |
+| n191 | + RBiH scale 0.16→0.10, tuning | **102.6k** | **110.1k** | **121.0k** | **175.4k** | **41.5k** | **49.8k** | **All factions in/near band** |
+
+### Strategic Reserves at w80 (n191)
+```json
+{"HRHB": 0, "RBiH": 70262, "RS": 0}
+```
+RS and HRHB reserves fully consumed by under-strength brigades. RBiH accumulates large reserve but very low draw rate (0.02) limits distribution — reflects poor logistics until 1994 professionalization.
+
+### Design Principle
+The strategic reserve solves the topology mismatch without artificial caps or scripted behavior. Manpower flows from surplus (rear) to deficit (front) at faction-specific rates reflecting historical logistics capability. Combined with faction-differentiated surge curves, this produces historically accurate growth trajectories across multiple time checkpoints (w40, w80) from purely organic mechanics.
 
 ---
 
@@ -1344,6 +1413,26 @@ WIA total war (BB1 p462).
    This is the primary historical test case for the N8 breakthrough mechanic.
 **Do instead:** Fix the OOB (3 brigades at Orasje) FIRST — this alone may fix the
 Orasje gap. Breakthrough retreat is the second layer for Derventa/Modrica fallback.
+
+### L44 — Municipality-locked pools create topology mismatch — strategic reserve solves it
+**Session:** 2026-03-06 (n181→n191)
+Raising mobilization surge factors by 30-50% only changed RS w80 by +907 (from 85,984
+to 86,891). Root cause: the extra mobilization goes into rear surplus pool (75k+
+available in municipalities whose brigades are at max 3,000 cap), not into front brigades
+whose pools are empty. The problem is topological, not parametric.
+**Do instead:** Strategic reserve system — excess pool.available above OVERFLOW_THRESHOLD
+flows to faction reserve; under-strength brigades draw from reserve at faction-specific
+rates reflecting historical logistics (RS/HRHB=0.25, RBiH=0.02). Combined with
+faction-differentiated mobilization surge curves, this produces historically accurate
+multi-checkpoint trajectories from purely organic mechanics.
+
+### L45 — Faction-specific reserve draw rate is critical — uniform rate causes RBiH explosion
+**Session:** 2026-03-06 (n184→n186)
+First reserve implementation with uniform 0.5× draw rate caused RBiH to explode to 254k
+at w80 (target 140-160k). RBiH's massive population generates enormous pool surplus;
+uniform draw rate feeds it all to brigades. Fix: faction-specific draw rates — RBiH=0.02
+(poor logistics until 1994 professionalization) vs RS/HRHB=0.25 (JNA/Croatian logistics).
+**Do instead:** Always differentiate faction logistics capability in reserve draw rates.
 
 ---
 

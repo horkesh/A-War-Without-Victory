@@ -58,6 +58,7 @@
 | Municipality supra-layer | `brigade_municipality_assignment` as deployment layer; derive `brigade_aor` each validation/init turn; process brigade_mun_orders before pressure/attack; sync after reshape. |
 | Combat-causality recovery | Good map fit is not proof of healthy combat. Read `behavioral_health` before `historical_fit`, then explain `control_change_attribution`. |
 | Combat-causality recovery | Planning is a maneuver phase, not a timer. Operation-owned brigades should move into staging and approach positions during planning, and planning may end early once the force is actually ready. |
+| Troop strength calibration (n191) | Municipality-locked pools create a topology mismatch: raising surge factors only adds to rear surplus, not front brigades. Fix is structural (strategic reserve) not parametric (higher scale). Faction-specific reserve draw rates are critical — uniform rate causes RBiH explosion from massive population surplus. |
 | Combat-causality recovery | Quiet weeks are not the same as broken combat causality. Fail on attack-orders-without-battles and whole-run zero battles; keep battleless weeks visible as warnings. |
 | Combat-causality recovery | Sector rearrangement is a scenario-scale acceptance problem, not just a helper-test problem. Keep live only when 40-week combat-causality stays green. |
 | N159 deep audit | Fatigue-as-combat-power-modifier is the cleanest organic slowdown mechanism. Simpler than overstretch distance calculations; naturally penalizes continuous fighting (VRS operational pattern). |

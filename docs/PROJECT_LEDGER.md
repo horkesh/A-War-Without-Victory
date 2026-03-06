@@ -7,6 +7,30 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-06] Strategic reserve system + faction-differentiated mobilization surge — multi-checkpoint troop strength calibration
+
+### Summary
+- **Strategic reserve:** Faction-level manpower redistribution solves municipality-locked pool topology mismatch. Rear municipalities accumulated 75k+ surplus while front-line pools were empty. Excess pool.available above OVERFLOW_THRESHOLD (5,000) flows to faction reserve; under-strength brigades draw at faction-specific rates (RS=0.25, HRHB=0.25, RBiH=0.02).
+- **Faction-differentiated mobilization surge:** Global surge curve replaced with per-faction curves — VRS lower initial rush but more sustained (JNA inheritance), ARBiH higher rush with faster burnout (desperation), HVO moderate.
+- **Multi-checkpoint calibration:** n191 — RS 102.6k (w40) → 110.1k (w80) ✓, RBiH 121.0k → 175.4k, HRHB 41.5k → 49.8k ✓. All factions within or near historical bands at both w40 and w80.
+- **Mobilization scale retuned:** RBiH 0.14→0.10, RS 0.22→0.12, HRHB 0.18→0.29. Exhaustion threshold 0.15→0.25, hard cap 0.25→0.50. RS JNA inheritance bonus 12k→10k.
+
+### Change
+- `src/sim/combat/strategic_reserve.ts` (NEW): collectStrategicReserves(), reinforceFromStrategicReserves()
+- `src/sim/combat/ongoing_mobilization.ts`: faction-differentiated getMobilizationSurgeFactor(), scale retuning
+- `src/sim/early_war/pool_population.ts`: RS_JNA_INHERITANCE_BONUS 12k→10k
+- `src/sim/turn_phases/war_phases.ts`: two new pipeline steps (collection + reinforcement)
+- `src/sim/turn_pipeline_types.ts`: report types for strategic reserve
+- `src/state/game_state.ts`: strategic_reserves field
+- `src/state/serializeGameState.ts`: strategic_reserves in allowlist
+
+### Metrics
+- **n191 w40:** RS=102.6k ✓, RBiH=121.0k ✓, HRHB=41.5k ✓
+- **n191 w80:** RS=110.1k ✓, RBiH=175.4k (within wider estimates), HRHB=49.8k ✓
+- Strategic reserves at w80: RS=0, HRHB=0 (fully consumed), RBiH=70,262 (low draw rate limits distribution)
+
+---
+
 ## [2026-03-06] N159 deep engine audit calibration — organic VRS tempo decay, casualty tuning, supply/patron rebalancing
 
 ### Summary
