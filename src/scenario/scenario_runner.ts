@@ -19,7 +19,6 @@ import { getFrontActiveSettlements } from '../sim/emergence/aor_instantiation.js
 import { getEligiblePressureEdges } from '../sim/emergence/pressure_eligibility.js';
 import { aggregateSettlementDisplacementToMunicipalities } from '../sim/displacement_pipeline/displacement_municipality_aggregation.js';
 import { ensureRbihHrhbState } from '../sim/early_war/alliance_update.js';
-import type { ControlEvent } from '../sim/early_war/control_flip.js';
 import { buildSettlementsByMun } from '../sim/early_war/control_strain.js';
 import { updateMilitiaEmergence } from '../sim/early_war/militia_emergence.js';
 import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../sim/early_war/pool_population.js';
@@ -83,6 +82,12 @@ import {
     type CombatCausalitySummary
 } from './combat_causality.js';
 import {
+    countInitOverrideChanges,
+    mergeControlChangeAttributionSummaries,
+    summarizeControlChangeAttribution,
+    type ControlChangeAttributionSummary
+} from './control_change_attribution.js';
+import {
     computeActivitySummary,
     computeArmyStrengthsSummary,
     computeControlDelta,
@@ -94,7 +99,6 @@ import {
     type BotBenchmarkDefinition,
     type BotControlShareRow,
     type BotWeeklyDiagnosticsRow,
-    type ControlEventsSummary,
     type ControlKey,
     type FormationFatigueSummary,
     type HistoricalAlignmentDiagnostics,
@@ -112,6 +116,7 @@ import {
 import type {
     WeeklyActivityCounts,
     WeeklyCombatCausalitySummary,
+    WeeklyControlChangeAttributionSummary,
     WeeklyCorpsSummaryEntry,
     WeeklyReportRow
 } from './scenario_reporting.js';
@@ -237,8 +242,6 @@ export interface RunScenarioResult {
         end_report: string;
         /** Phase H1.7: activity diagnostics (machine-readable). */
         activity_summary: string;
-        /** Phase H2.2: control events log (one JSON line per event). */
-        control_events: string;
         /** Phase H2.2: formation delta (initial vs final). */
         formation_delta: string;
         /** Optional list of deterministic weekly save paths (save_w1..save_wN). */
@@ -851,6 +854,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 }
                 : undefined;
         let sidToMun = buildSidToMunFromSettlements(graph.settlements);
+        let initOverrideChangeCount = 0;
         const canonicalSidToMun = sidToMun; // Preserve original canonical SID→mun map for later rebuilds
         const warStartTurnForOrgPenSeeding =
             scenario.start_lifecycle_phase === 'peace'
@@ -944,7 +948,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // Historical accuracy: some OSIDs need different controllers than ethnic majority.
         // E.g. Brčko city held by VRS despite Bosniak municipality majority.
         if (scenario.osid_control_overrides && Object.keys(scenario.osid_control_overrides).length > 0) {
+            const beforeOverrideControllers = { ...(state.political_controllers ?? {}) };
             applyOsidControlOverrides(state, scenario.osid_control_overrides);
+            initOverrideChangeCount = countInitOverrideChanges(
+                beforeOverrideControllers,
+                state.political_controllers ?? {},
+                scenario.osid_control_overrides
+            );
             // Rebuild sidToMun after overrides so factionHasPresenceInMun sees updated controllers
             // (control overrides don't change mun mapping, but rebuild ensures consistency)
             if (operationalData?.operationalToCanonical) {
@@ -1203,7 +1213,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     control_delta: join(outDir, 'control_delta.json'),
                     end_report: join(outDir, 'end_report.md'),
                     activity_summary: join(outDir, 'activity_summary.json'),
-                    control_events: join(outDir, 'control_events.jsonl'),
                     formation_delta: join(outDir, 'formation_delta.json')
                 }
             };
@@ -1243,8 +1252,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         let baseline_ops_intensity = 1;
         const engagementLevelsPerWeek: number[] = [];
         const settlementsByMun = buildSettlementsByMun(graph.settlements);
-        /** Phase H2.2: collect control events from each turn for control_events.jsonl. */
-        const events_all: ControlEvent[] = [];
         const shouldApplyBreaches = postureAllPushAndApplyBreaches || scenario.use_smart_bots === true;
         const adjacencyMap = shouldApplyBreaches ? buildAdjacencyMap(graph.edges) : null;
         const enableBotDiagnostics = bot_diagnostics || scenario.bot_diagnostics === true;
@@ -1267,6 +1274,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         const phaseIIAttackResolutionWeekly: PhaseIIAttackResolutionWeekRollup[] = [];
         const combatCausalityWeekly: Array<WeeklyCombatCausalitySummary & { week_index: number; turn: number }> = [];
         let combatCausalitySummary: CombatCausalitySummary | null = null;
+        const controlChangeAttributionWeekly: Array<WeeklyControlChangeAttributionSummary & { week_index: number; turn: number }> = [];
+        let controlChangeAttributionSummary: ControlChangeAttributionSummary | null = null;
         const phaseIITakeoverDisplacementSummary = {
             weeks_with_phase_ii: 0,
             weeks_with_activity: 0,
@@ -1454,14 +1463,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     );
                     oobCreated = true;
                 }
-
-                const evs = turnReport.phase_i_control_flip?.control_events;
-                if (evs?.length) {
-                    events_all.push(...evs);
-                }
             }
 
             let weeklyCombatCausalityForReport: WeeklyCombatCausalitySummary | undefined;
+            let weeklyControlChangeAttributionForReport: WeeklyControlChangeAttributionSummary | undefined;
+            let operationDiagnosticsForReport: ReturnType<typeof buildOperationCombatDiagnostics> | undefined;
             if (state.meta.phase === 'war') {
                 phaseIIAttackResolutionSummary.weeks_with_phase_ii += 1;
                 phaseIITakeoverDisplacementSummary.weeks_with_phase_ii += 1;
@@ -1470,6 +1476,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     turnReport.phase_ii_bot_order_diagnostics,
                     turnReport.phase_ii_attack_resolution_osid
                 );
+                operationDiagnosticsForReport = operationDiagnostics;
                 const weeklyCombatCausality = buildCombatCausalitySummary(
                     operationDiagnostics,
                     turnReport.phase_ii_bot_order_diagnostics,
@@ -1632,6 +1639,23 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                         source_municipalities: [...(takeoverReport.source_municipalities ?? [])].sort(strictCompare)
                     });
                 }
+
+                const currentTurnControlEvents = (state.control_events ?? [])
+                    .filter((event) => event.turn === state.meta.turn)
+                    .map((event) => ({ mechanism: event.mechanism }));
+                const weeklyControlChangeAttribution = summarizeControlChangeAttribution(currentTurnControlEvents);
+                controlChangeAttributionSummary = controlChangeAttributionSummary === null
+                    ? summarizeControlChangeAttribution(currentTurnControlEvents, initOverrideChangeCount)
+                    : mergeControlChangeAttributionSummaries(
+                        controlChangeAttributionSummary,
+                        weeklyControlChangeAttribution
+                    );
+                controlChangeAttributionWeekly.push({
+                    week_index,
+                    turn: state.meta.turn,
+                    ...weeklyControlChangeAttribution
+                });
+                weeklyControlChangeAttributionForReport = weeklyControlChangeAttribution;
             }
 
             if (shouldApplyBreaches && adjacencyMap && state.meta.phase === 'war') {
@@ -1759,7 +1783,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 activity,
                 ops,
                 corpsSummary,
-                weeklyCombatCausalityForReport
+                weeklyCombatCausalityForReport,
+                weeklyControlChangeAttributionForReport,
+                operationDiagnosticsForReport
             );
             if (week_index === 0) firstReportRow = reportRow;
             lastReportRow = reportRow;
@@ -1893,6 +1919,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     combat_causality_weekly: combatCausalityWeekly
                 }
                 : {}),
+            ...(phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0
+                ? {
+                    control_change_attribution:
+                        controlChangeAttributionSummary ?? summarizeControlChangeAttribution([], initOverrideChangeCount),
+                    control_change_attribution_weekly: controlChangeAttributionWeekly
+                }
+                : {}),
             ...(phaseIITakeoverDisplacementSummary.weeks_with_phase_ii > 0
                 ? {
                     phase_ii_takeover_displacement: phaseIITakeoverDisplacementSummary,
@@ -1941,24 +1974,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             await writeFile(botDiagnosticsPath, stableStringify(botWeeklyDiagnostics, 2), 'utf8');
         }
 
-        // Phase H2.2: sort and write control_events.jsonl (turn asc, mechanism asc, settlement_id asc).
-        events_all.sort((a, b) => {
-            if (a.turn !== b.turn) return a.turn - b.turn;
-            const mech = (a.mechanism ?? '').localeCompare(b.mechanism ?? '');
-            if (mech !== 0) return mech;
-            return (a.settlement_id ?? '').localeCompare(b.settlement_id ?? '');
-        });
-        const controlEventsPath = join(outDir, 'control_events.jsonl');
-        const controlEventsStream = createWriteStream(controlEventsPath, { flags: 'w' });
-        for (const ev of events_all) {
-            controlEventsStream.write(stableStringify(ev) + '\n');
-        }
-        controlEventsStream.end();
-        await new Promise<void>((resolve, reject) => {
-            controlEventsStream.on('finish', resolve).on('error', reject);
-        });
         if (emitWeeklySavesForVideo && replayTimelineStream) {
-            replayTimelineStream.write('],"control_events":' + stableStringify(events_all) + '}');
+            replayTimelineStream.write(']}');
             replayTimelineStream.end();
             await new Promise<void>((resolve, reject) => {
                 replayTimelineStream!.on('finish', resolve).on('error', reject);
@@ -1996,18 +2013,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             formationFatigueSummary = { by_formation, total_fatigue_initial, total_fatigue_final };
         }
 
-        const byMechanism = new Map<string, number>();
-        for (const e of events_all) {
-            const m = e.mechanism ?? 'unknown';
-            byMechanism.set(m, (byMechanism.get(m) ?? 0) + 1);
-        }
-        const controlEventsSummary: ControlEventsSummary = {
-            total: events_all.length,
-            by_mechanism: Array.from(byMechanism.entries())
-                .map(([mechanism, count]) => ({ mechanism, count }))
-                .sort((a, b) => (a.mechanism < b.mechanism ? -1 : a.mechanism > b.mechanism ? 1 : 0))
-        };
-
         let baselineOpsSummary: BaselineOpsSummary | null = null;
         if (baseline_ops_enabled && firstReportRow && lastReportRow) {
             const n = engagementLevelsPerWeek.length;
@@ -2042,7 +2047,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             endWeeklyReport: lastReportRow,
             activitySummary,
             baselineOpsSummary,
-            controlEventsSummary,
             formationDelta,
             formationFatigueSummary,
             armyStrengthsSummary,
@@ -2072,10 +2076,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 control_delta: controlDeltaPath,
                 end_report: endReportPath,
                 activity_summary: activitySummaryPath,
-                control_events: controlEventsPath,
-                formation_delta: formationDeltaPath,
-                ...(weeklySavePaths.length > 0 ? { weekly_saves: weeklySavePaths } : {}),
-                ...(replayTimelinePath ? { replay_timeline: replayTimelinePath } : {}),
+            formation_delta: formationDeltaPath,
+            ...(weeklySavePaths.length > 0 ? { weekly_saves: weeklySavePaths } : {}),
+            ...(replayTimelinePath ? { replay_timeline: replayTimelinePath } : {}),
                 ...(botDiagnosticsPath ? { bot_diagnostics: botDiagnosticsPath } : {})
             }
         };

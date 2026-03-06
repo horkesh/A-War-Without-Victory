@@ -17,7 +17,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 interface PrePlannedOp {
     corps: string;
     name: string;
-    sector_id: string;
+    sector_id?: string;
     participating_brigades: FormationId[];
     target_osids: string[];
     staging_osid: string;
@@ -27,10 +27,10 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     {
         corps: 'vrs_east_bosnian',
         name: 'Operation Koridor',
-        sector_id: 'sector:vrs_east_bosnian:0',
         participating_brigades: [
             'rs_1st_posavina_infantry',
             'rs_2nd_posavina_light_infantry',
+            'rs_3rd_posavina_light_infantry',
         ],
         staging_osid: 'op:bosanski_samac:crkvina_2',
         target_osids: [
@@ -41,7 +41,6 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     {
         corps: 'vrs_drina',
         name: 'Operation Drina',
-        sector_id: 'sector:vrs_drina:6',
         participating_brigades: [
             'rs_1st_birac',
             'rs_1st_bratunac',
@@ -57,11 +56,11 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     {
         corps: 'vrs_sarajevo_romanija',
         name: 'Operation Prsten',
-        sector_id: 'sector:vrs_sarajevo_romanija:0',
         participating_brigades: [
             'rs_1st_sarajevo_mechanized',
             'rs_2nd_sarajevo_light_infantry',
             'rs_3rd_sarajevo_infantry',
+            'rs_4th_sarajevo_light_infantry',
         ],
         staging_osid: 'op:ilidza:kasindo',
         target_osids: [
@@ -74,11 +73,10 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     {
         corps: 'vrs_herzegovina',
         name: 'Operation Foca',
-        sector_id: 'sector:vrs_herzegovina:3',
         participating_brigades: [
             'rs_ajnie_brigade',
             'rs_foa_brigade',
-            'rs_kalinovik_brigade',
+            'rs_bilea_brigade',
         ],
         staging_osid: 'op:foca:foca_3',
         target_osids: [
@@ -93,7 +91,6 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     {
         corps: 'vrs_1st_krajina',
         name: 'Operation Prijedor',
-        sector_id: 'sector:vrs_1st_krajina:18',
         participating_brigades: [
             'rs_1st_armored',
             'rs_16th_krajina_motorized',

@@ -66,13 +66,13 @@ test('scenario determinism: same scenario run twice yields identical final_save.
     const reportB = await readFile(join(OUT_B, run_id, 'weekly_report.jsonl'), 'utf8');
     assert.strictEqual(reportA, reportB, 'weekly_report.jsonl must be byte-identical across two runs');
 
-    const controlEventsA = await readFile(join(OUT_A, run_id, 'control_events.jsonl'), 'utf8');
-    const controlEventsB = await readFile(join(OUT_B, run_id, 'control_events.jsonl'), 'utf8');
-    assert.strictEqual(controlEventsA, controlEventsB, 'control_events.jsonl must be byte-identical across two runs');
-
     const formationDeltaA = await readFile(join(OUT_A, run_id, 'formation_delta.json'), 'utf8');
     const formationDeltaB = await readFile(join(OUT_B, run_id, 'formation_delta.json'), 'utf8');
     assert.strictEqual(formationDeltaA, formationDeltaB, 'formation_delta.json must be byte-identical across two runs');
+
+    const runSummaryA = await readFile(join(OUT_A, run_id, 'run_summary.json'), 'utf8');
+    const runSummaryB = await readFile(join(OUT_B, run_id, 'run_summary.json'), 'utf8');
+    assert.strictEqual(runSummaryA, runSummaryB, 'run_summary.json must be byte-identical across two runs');
 
     await ensureRemoved(OUT_A);
     await ensureRemoved(OUT_B);

@@ -1073,6 +1073,20 @@ function executeFactionDirectives(
                         objectiveApproachOsids.add(neighbor);
                     }
                 }
+                if (objectiveApproachOsids.size === 0) {
+                    const remainingObjectives = (activeOp15.objectives ?? []).slice((activeOp15.current_objective_index ?? 0) + 1);
+                    for (const objective of remainingObjectives) {
+                        for (const neighbor of adjacency.get(objective) ?? []) {
+                            if (neighbor === loc) continue;
+                            if (getPoliticalControllerOSID(state, neighbor, reverseMap) === faction) {
+                                objectiveApproachOsids.add(neighbor);
+                            }
+                        }
+                        if (objectiveApproachOsids.size > 0) {
+                            break;
+                        }
+                    }
+                }
                 if (objectiveApproachOsids.size > 0 && !objectiveApproachOsids.has(loc)) {
                     const approachStep = findNearestFriendlyOsidInSet(
                         state,

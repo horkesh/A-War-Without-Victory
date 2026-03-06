@@ -55,7 +55,7 @@ test('scenario bots determinism: noop_4w_bots run twice yields identical key art
 
     if (!ranA || !ranB) return;
 
-    const artifacts = ['final_save.json', 'weekly_report.jsonl', 'control_events.jsonl', 'formation_delta.json', 'activity_summary.json', 'control_delta.json', 'bot_diagnostics.json'];
+    const artifacts = ['final_save.json', 'weekly_report.jsonl', 'run_summary.json', 'formation_delta.json', 'activity_summary.json', 'control_delta.json', 'bot_diagnostics.json'];
     for (const name of artifacts) {
         const bytesA = await readFile(join(OUT_A, run_id, name), 'utf8');
         const bytesB = await readFile(join(OUT_B, run_id, name), 'utf8');

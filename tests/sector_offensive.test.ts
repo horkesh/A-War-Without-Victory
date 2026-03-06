@@ -334,6 +334,36 @@ describe('Sector Offensive — Lifecycle', () => {
         assert.equal(op.phase, 'recovery', 'Should abort to recovery on orphaned sector');
     });
 
+    it('recovery-phase orphaned sector does not reset the recovery timer', () => {
+        const state = makeMinimalState(15, {});
+        state.corps_command = {
+            'corps_1': {
+                stance: 'offensive' as any,
+                corps_exhaustion: 0,
+                active_operation: {
+                    name: 'Operacija Test',
+                    type: 'sector_attack',
+                    phase: 'recovery',
+                    started_turn: 10,
+                    phase_started_turn: 12,
+                    participating_brigades: [],
+                    sector_id: 'sector:corps_1:missing',
+                    objectives: ['op:e:1', 'op:e:2'],
+                    recovery_reason: 'no_logged_attempt',
+                },
+            } as any,
+        };
+        state.corps_front_sectors = {};
+
+        advanceSectorOffensives(state, null);
+
+        assert.equal(
+            state.corps_command!['corps_1']!.active_operation,
+            null,
+            'Recovery-phase orphan should be allowed to complete recovery and clear'
+        );
+    });
+
     it('execution no-progress turns consume failure budget and can end the operation early', () => {
         const state = makeMinimalState(15, {
             'b1': { corps_id: 'corps_1' as any, location_osid: 'op:a:1', posture: 'defend' },

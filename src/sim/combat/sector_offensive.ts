@@ -173,13 +173,15 @@ export function advanceSectorOffensives(
         // Validate sector still exists
         if (op.sector_id && state.corps_front_sectors) {
             if (!state.corps_front_sectors[op.sector_id]) {
-                // Sector orphaned — abort to recovery
-                beginRecovery(
-                    op,
-                    turn,
-                    (op.attack_attempt_count ?? 0) > 0 ? 'orphaned_sector' : 'no_logged_attempt'
-                );
-                continue;
+                // Sector orphaned — abort once, but do not keep resetting recovery timers.
+                if (op.phase !== 'recovery') {
+                    beginRecovery(
+                        op,
+                        turn,
+                        (op.attack_attempt_count ?? 0) > 0 ? 'orphaned_sector' : 'no_logged_attempt'
+                    );
+                    continue;
+                }
             }
         }
 

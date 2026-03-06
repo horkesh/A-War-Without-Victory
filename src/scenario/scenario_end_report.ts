@@ -271,12 +271,6 @@ export function computeFormationDelta(
     };
 }
 
-/** Phase H2.2: Control events summary (for end report section). */
-export interface ControlEventsSummary {
-    total: number;
-    by_mechanism: Array<{ mechanism: string; count: number }>;
-}
-
 /** Brigade casualties proxy: formation fatigue (initial vs final). */
 export interface FormationFatigueSummary {
     by_formation: Array<{ id: string; faction: string; name?: string; fatigue_initial: number; fatigue_final: number }>;
@@ -531,8 +525,6 @@ export interface FormatEndReportParams {
     activitySummary?: ActivitySummary | null;
     /** Phase H1.9: optional baseline ops summary. */
     baselineOpsSummary?: BaselineOpsSummary | null;
-    /** Phase H2.2: optional control events summary. */
-    controlEventsSummary?: ControlEventsSummary | null;
     /** Phase H2.2: optional formation delta. */
     formationDelta?: FormationDeltaResult | null;
     /** Optional formation fatigue (brigade casualties proxy). */
@@ -771,18 +763,6 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
         lines.push(
             `- Produced nonzero exhaustion: ${b.nonzero_exhaustion ? 'yes' : 'no'}, nonzero displacement: ${b.nonzero_displacement ? 'yes' : 'no'}`
         );
-        lines.push('');
-    }
-    if (params.controlEventsSummary) {
-        const c = params.controlEventsSummary;
-        lines.push('## War Control-Flip Events (harness log)');
-        lines.push('');
-        lines.push('*Control events below are war control-flip events from harness logs. War attack-resolution flips are reported in the War section below.*');
-        lines.push('');
-        lines.push(`- Total war control events: ${c.total}`);
-        for (const { mechanism, count } of c.by_mechanism) {
-            lines.push(`  - ${mechanism}: ${count}`);
-        }
         lines.push('');
     }
     if (params.formationDelta) {

@@ -5,6 +5,7 @@
 
 import type { GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
+import type { OperationCombatDiagnostic } from './combat_causality.js';
 
 /** Phase H1.7: Per-week activity diagnostics (counts only; derived reporting). */
 export interface WeeklyActivityCounts {
@@ -35,6 +36,15 @@ export interface WeeklyCombatCausalitySummary {
     invalidation_reasons: string[];
 }
 
+export interface WeeklyControlChangeAttributionSummary {
+    total_changes: number;
+    combat: number;
+    consolidation: number;
+    abandoned: number;
+    init_overrides: number;
+    other: number;
+}
+
 export interface WeeklyReportRow {
     week_index: number;
     phase: string | undefined;
@@ -52,6 +62,10 @@ export interface WeeklyReportRow {
     corps_summary?: WeeklyCorpsSummaryEntry[];
     /** Combat-causality gate summary for this turn. */
     combat_causality?: WeeklyCombatCausalitySummary;
+    /** Live control-change attribution for this turn. */
+    control_change_attribution?: WeeklyControlChangeAttributionSummary;
+    /** Per-operation diagnostics for invalid-causality debugging. */
+    operation_diagnostics?: OperationCombatDiagnostic[];
 }
 
 function sortedKeys(obj: Record<string, unknown>): string[] {
@@ -67,7 +81,9 @@ export function buildWeeklyReport(
     activity?: WeeklyActivityCounts,
     ops?: { enabled: boolean; level: number },
     corpsSummary?: WeeklyCorpsSummaryEntry[],
-    combatCausality?: WeeklyCombatCausalitySummary
+    combatCausality?: WeeklyCombatCausalitySummary,
+    controlChangeAttribution?: WeeklyControlChangeAttributionSummary,
+    operationDiagnostics?: OperationCombatDiagnostic[]
 ): WeeklyReportRow {
     const week_index = state.meta.turn;
     const phase = state.meta.phase;
@@ -171,6 +187,12 @@ export function buildWeeklyReport(
     }
     if (combatCausality !== undefined) {
         row.combat_causality = combatCausality;
+    }
+    if (controlChangeAttribution !== undefined) {
+        row.control_change_attribution = controlChangeAttribution;
+    }
+    if (operationDiagnostics !== undefined && operationDiagnostics.length > 0) {
+        row.operation_diagnostics = operationDiagnostics;
     }
     return row;
 }

@@ -8,6 +8,7 @@ import {
     buildOperationCombatDiagnostics,
     type BotOrderDiagnosticsSnapshot
 } from '../src/scenario/combat_causality.js';
+import { buildWeeklyReport } from '../src/scenario/scenario_reporting.js';
 
 function makeState(): GameState {
     const formations: Record<string, FormationState> = {
@@ -139,6 +140,19 @@ describe('combat causality diagnostics', () => {
         assert.ok(summary.invalidation_reasons.includes('operation_execution_without_eligible_attackers'));
     });
 
+    it('does not flag zero eligible attackers when the operation is still maneuvering', () => {
+        const diagnostics = buildOperationCombatDiagnostics(
+            makeState(),
+            makeOrderSnapshot({}, { b1: 'op:rs:approach' }, { corps_1: 0 }),
+            makeOsidReport([])
+        );
+
+        assert.equal(diagnostics.length, 1);
+        assert.equal(diagnostics[0]!.eligible_attacker_count, 0);
+        assert.equal(diagnostics[0]!.movement_order_count, 1);
+        assert.ok(!diagnostics[0]!.invalidation_reasons.includes('execution_without_eligible_attackers'));
+    });
+
     it('flags execution-phase operation with attack orders but zero battles', () => {
         const diagnostics = buildOperationCombatDiagnostics(
             makeState(),
@@ -226,9 +240,11 @@ describe('combat causality diagnostics', () => {
 
     it('flags recovery-phase operation that never logged an objective attempt', () => {
         const state = makeState();
+        state.meta.turn = 5 as any;
         state.corps_command!['corps_1']!.active_operation = {
             ...state.corps_command!['corps_1']!.active_operation!,
             phase: 'recovery',
+            phase_started_turn: 5,
             attack_attempt_count: 0,
             objective_capture_count: 0,
             movement_only_execution_turns: 0,
@@ -253,6 +269,88 @@ describe('combat causality diagnostics', () => {
 
         assert.ok(summary.invalidation_reasons.includes('operation_recovery_without_logged_attempt'));
         assert.equal(summary.recovery_without_logged_attempt_count, 1);
+    });
+
+    it('does not keep re-flagging recovery without logged attempt after the recovery entry turn', () => {
+        const state = makeState();
+        state.meta.turn = 8 as any;
+        state.corps_command!['corps_1']!.active_operation = {
+            ...state.corps_command!['corps_1']!.active_operation!,
+            phase: 'recovery',
+            phase_started_turn: 5,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+            recovery_reason: 'no_logged_attempt',
+        } as any;
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({}),
+            makeOsidReport([])
+        );
+
+        assert.equal(diagnostics.length, 1);
+        assert.deepEqual(diagnostics[0]!.invalidation_reasons, []);
+    });
+
+    it('does not flag recovery without logged attempt when the operation recorded maneuver progress', () => {
+        const state = makeState();
+        state.meta.turn = 5 as any;
+        state.corps_command!['corps_1']!.active_operation = {
+            ...state.corps_command!['corps_1']!.active_operation!,
+            phase: 'recovery',
+            phase_started_turn: 5,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 2,
+            idle_execution_turn_streak: 0,
+            recovery_reason: 'no_logged_attempt',
+        } as any;
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({}, { b1: 'op:rs:approach' }),
+            makeOsidReport([])
+        );
+
+        assert.equal(diagnostics.length, 1);
+        assert.ok(!diagnostics[0]!.invalidation_reasons.includes('recovery_without_logged_attempt'));
+    });
+
+    it('does not flag recovery without logged attempt when attacks and battles happened', () => {
+        const state = makeState();
+        state.meta.turn = 5 as any;
+        state.corps_command!['corps_1']!.active_operation = {
+            ...state.corps_command!['corps_1']!.active_operation!,
+            phase: 'recovery',
+            phase_started_turn: 5,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+            recovery_reason: 'no_logged_attempt',
+        } as any;
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({ b1: 'op:enemy:obj1' }, {}, { corps_1: 1 }),
+            makeOsidReport([{
+                attacker_brigade: 'b1' as any,
+                attacker_faction: 'RS',
+                defender_faction: 'RBiH',
+                target_osid: 'op:enemy:obj1' as any,
+                outcome: 'victory' as any,
+                power_ratio: 1.2,
+                attacker_won: true,
+                defender_brigade: null,
+                snap_events: []
+            }])
+        );
+
+        assert.equal(diagnostics.length, 1);
+        assert.ok(!diagnostics[0]!.invalidation_reasons.includes('recovery_without_logged_attempt'));
     });
 
     it('surfaces persisted operation counters in diagnostics and summary', () => {
@@ -304,5 +402,27 @@ describe('combat causality diagnostics', () => {
         assert.equal(summary.total_objective_attempts, 2);
         assert.equal(summary.total_objective_captures, 1);
         assert.equal(summary.movement_only_execution_turns, 3);
+    });
+
+    it('persists operation diagnostics into the weekly report row when provided', () => {
+        const diagnostics = buildOperationCombatDiagnostics(
+            makeState(),
+            makeOrderSnapshot({}, {}, { corps_1: 0 }),
+            makeOsidReport([])
+        );
+
+        const row = buildWeeklyReport(
+            makeState(),
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            diagnostics
+        );
+
+        assert.equal(row.operation_diagnostics?.length, 1);
+        assert.equal(row.operation_diagnostics?.[0]?.corps_id, 'corps_1');
+        assert.ok(row.operation_diagnostics?.[0]?.invalidation_reasons.includes('execution_without_eligible_attackers'));
     });
 });

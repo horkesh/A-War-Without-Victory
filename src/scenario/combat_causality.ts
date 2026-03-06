@@ -175,13 +175,30 @@ export function buildOperationCombatDiagnostics(
         if (operation.phase === 'execution' && attackAttemptCount === 0 && movementOrderCount === 0) {
             invalidationReasons.push('execution_without_attack_orders');
         }
-        if (operation.phase === 'execution' && brigades.length > 0 && eligibleAttackerCount === 0) {
+        if (
+            operation.phase === 'execution' &&
+            brigades.length > 0 &&
+            eligibleAttackerCount === 0 &&
+            movementOrderCount === 0
+        ) {
             invalidationReasons.push('execution_without_eligible_attackers');
         }
         if (operation.phase === 'execution' && attackAttemptCount > 0 && battleCount === 0) {
             invalidationReasons.push('attack_orders_without_battles');
         }
-        if (operation.phase === 'recovery' && objectiveAttemptCount === 0) {
+        const currentTurn = state.meta?.turn ?? 0;
+        const enteredRecoveryThisTurn =
+            operation.phase === 'recovery' &&
+            typeof operation.phase_started_turn === 'number' &&
+            operation.phase_started_turn === currentTurn;
+        if (
+            enteredRecoveryThisTurn &&
+            objectiveAttemptCount === 0 &&
+            attackAttemptCount === 0 &&
+            battleCount === 0 &&
+            movementOnlyExecutionTurns === 0 &&
+            movementOrderCount === 0
+        ) {
             invalidationReasons.push('recovery_without_logged_attempt');
         }
         diagnostics.push({

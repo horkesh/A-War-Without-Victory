@@ -191,6 +191,72 @@ test('execution-phase operation moves brigade toward an approach OSID for the cu
     assert.equal(state.brigade_attack_orders?.rs_1st_posavina_infantry, undefined);
 });
 
+test('execution-phase operation falls back to maneuver toward a later reachable objective when the current objective has no friendly approach', () => {
+    const state = {
+        meta: { turn: 4, phase: 'war', seed: 'test-seed' },
+        formations: {
+            rs_1st_posavina_infantry: {
+                id: 'rs_1st_posavina_infantry',
+                kind: 'brigade',
+                faction: 'RS',
+                status: 'active',
+                corps_id: 'vrs_east_bosnian',
+                home_defense_active: true,
+                posture: 'defend',
+                cohesion: 70,
+                morale: 70,
+                personnel: 1000,
+                equipment: { infantry: 1000, tanks: 0, artillery: 0, air_defense: 0 },
+                location_osid: 'op:test:start',
+            },
+        },
+        corps_command: {
+            vrs_east_bosnian: {
+                stance: 'offensive',
+                active_operation: {
+                    name: 'Operation Koridor',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: 0,
+                    phase_started_turn: 1,
+                    participating_brigades: ['rs_1st_posavina_infantry'],
+                    objectives: ['op:test:blocked_objective', 'op:test:reachable_objective'],
+                    current_objective_index: 0,
+                    momentum: 0,
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                },
+            },
+        },
+        corps_front_directives: {},
+        political_controllers: {
+            'op:test:start': 'RS',
+            'op:test:approach': 'RS',
+            'op:test:blocked_objective': 'RBiH',
+            'op:test:reachable_objective': 'RBiH',
+            'op:test:enemy_buffer': 'RBiH',
+        },
+        brigade_posture_orders: [],
+    } as unknown as GameState;
+
+    generateAllBotOrdersOsid(state, ['RS'], {
+        edges: [
+            { a: 'op:test:start', b: 'op:test:approach' },
+            { a: 'op:test:approach', b: 'op:test:reachable_objective' },
+            { a: 'op:test:enemy_buffer', b: 'op:test:blocked_objective' },
+        ] as any,
+        reverseMap: new Map(),
+        supplyStateByOsid: {} as any,
+        osidPopulationMap: new Map(),
+    });
+
+    assert.equal(
+        state.brigade_movement_orders?.rs_1st_posavina_infantry?.destination_sids?.[0],
+        'op:test:approach'
+    );
+    assert.equal(state.brigade_attack_orders?.rs_1st_posavina_infantry, undefined);
+});
+
 test('execution-phase operation concentrates adjacent brigades on the current objective', () => {
     const state = {
         meta: { turn: 13, phase: 'war', seed: 'test-seed' },

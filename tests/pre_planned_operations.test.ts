@@ -66,12 +66,14 @@ describe('pre-planned VRS operations', () => {
     it('defines five explicit opening operations', () => {
         assert.equal(_VRS_PRE_PLANNED.length, 5);
         for (const def of _VRS_PRE_PLANNED) {
-            assert.ok(def.sector_id.startsWith('sector:'), `${def.corps} should have explicit sector_id`);
+            if (def.sector_id !== undefined) {
+                assert.ok(def.sector_id.startsWith('sector:'), `${def.corps} sector_id must stay in sector namespace`);
+            }
             assert.ok(def.participating_brigades.length >= 2, `${def.corps} should have explicit brigade roster`);
         }
     });
 
-    it('injects explicit rosters, sectors, and staging OSIDs', () => {
+    it('injects explicit rosters and staging OSIDs, allowing sector resolution at runtime', () => {
         const state = makeMinimalState();
         injectPrePlannedOperations(state);
 
