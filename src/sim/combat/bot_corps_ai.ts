@@ -63,6 +63,7 @@ import { evaluateSectorOffensiveLaunch } from './sector_offensive.js';
 import { CONFIDENCE_ROUGH_STRENGTH } from './sector_intel_constants.js';
 import { getTruceBreakAggressionBonus, getTrucePartner, isViennaDeclarationActive, isTruceException } from '../local_truces.js';
 import { getCorpsCommander, getEffectiveCompetence } from './officer_system.js';
+import { rearrangeSectorsForCorps } from './sector_rearrangement.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
@@ -1237,9 +1238,28 @@ export function generateCorpsDirectives(
         // Front segments this corps covers — always use front_id-based mapping so downstream
         // consumers (front_assignment.ts, brigade AI) can match against assignable_front_segments.
         // Sector sub_segment IDs are a separate organizational layer for target filtering only.
-        const corpsSectors = Object.values(sectorLookup)
+        const rawCorpsSectors = Object.values(sectorLookup)
             .filter(s => s.corps_id === corps.id)
             .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+
+        // Rearrange sectors: consolidate thin, pocket containment
+        const pc = state.political_controllers ?? {};
+        const corpsSectors = rearrangeSectorsForCorps(
+            rawCorpsSectors, corps.id, adjacency,
+            state.formations ?? {},
+            {
+                politicalControllers: pc as Record<string, string>,
+                faction,
+            }
+        );
+
+        // Write rearranged sectors back to state
+        for (const oldSec of rawCorpsSectors) {
+            delete sectorLookup[oldSec.sector_id];
+        }
+        for (const newSec of corpsSectors) {
+            sectorLookup[newSec.sector_id] = newSec;
+        }
         const assignedFrontIds = corpsFrontMapping.get(corps.id) ?? [];
 
         // Army-level priorities for this corps
@@ -1291,7 +1311,6 @@ export function generateCorpsDirectives(
         // historically secured their rear before pushing forward (BB1 pp496-501).
         // No time gate — rear pockets should be cleared throughout the war.
         if (graphAnalysis) {
-            const pc = state.political_controllers ?? {};
             for (const sub of subordinates) {
                 const subOsid = sub.location_osid;
                 if (!subOsid) continue;

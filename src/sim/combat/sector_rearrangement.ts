@@ -13,7 +13,6 @@ import type {
     CorpsFrontSector,
     CorpsFrontSubSegment,
     FactionId,
-    FormationId,
 } from '../../state/game_state.js';
 import type { Osid } from './osid_adjacency.js';
 import { strictCompare } from '../../state/validateGameState.js';
