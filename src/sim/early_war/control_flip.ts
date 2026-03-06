@@ -12,6 +12,7 @@ import type { FactionId, GameState, MunicipalityId, SettlementId } from '../../s
 import { isMunicipalityAlignedToRbih } from '../../state/rbih_aligned_municipalities.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { areRbihHrhbAllied } from './alliance_update.js';
+import { buildSettlementsByMun } from './control_strain.js';
 import { computeAlliedDefense } from './mixed_municipality.js';
 import type { HoldoutScalingContext, SettlementFlipEvent } from './settlement_control.js';
 import { applyWaveFlip, processHoldoutCleanup } from './settlement_control.js';
@@ -112,23 +113,6 @@ function buildSidToDegree(edges: EdgeRecord[]): Map<string, number> {
         deg.set(e.b, (deg.get(e.b) ?? 0) + 1);
     }
     return deg;
-}
-
-/**
- * Build municipality id -> settlement ids from graph. Uses mun1990_id ?? mun_code as MunicipalityId.
- */
-function buildSettlementsByMun(settlements: Map<string, SettlementRecord>): Map<MunicipalityId, SettlementId[]> {
-    const byMun = new Map<MunicipalityId, SettlementId[]>();
-    for (const [sid, rec] of settlements.entries()) {
-        const munId = (rec.mun1990_id ?? rec.mun_code) as MunicipalityId;
-        const list = byMun.get(munId) ?? [];
-        list.push(sid);
-        byMun.set(munId, list);
-    }
-    for (const list of byMun.values()) {
-        list.sort(strictCompare);
-    }
-    return byMun;
 }
 
 /**

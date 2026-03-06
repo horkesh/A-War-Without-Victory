@@ -24,6 +24,8 @@
 import {
     COMBAT_REINFORCEMENT_RATE,
     getFactionReinforcementMult,
+    isEligibleForReinforcement,
+    isInCombat,
     MAX_BRIGADE_PERSONNEL,
     MIN_BRIGADE_SPAWN,
     REINFORCEMENT_RATE
@@ -132,10 +134,7 @@ export function reinforceFromStrategicReserves(state: GameState): StrategicReser
 
         // Only brigades (not militia detachments/battalions — those are local by nature)
         if (f.kind !== 'brigade') continue;
-
-        // Same gates as normal reinforcement
-        if (f.readiness === 'degraded' || f.readiness === 'forming') continue;
-        if (Array.isArray(f.tags) && f.tags.includes('enclave')) continue;
+        if (!isEligibleForReinforcement(f)) continue;
 
         const faction = f.faction;
         if (!faction) continue;
@@ -149,7 +148,7 @@ export function reinforceFromStrategicReserves(state: GameState): StrategicReser
         if (reserveAvail <= 0) continue;
 
         // Rate limit: reduced rate for reserve draws (logistics friction)
-        const inCombat = f.posture === 'attack' || f.disrupted === true;
+        const inCombat = isInCombat(f);
         const factionMult = getFactionReinforcementMult(faction, currentTurn, state.war_timeline);
         const drawMult = FACTION_RESERVE_DRAW_RATE[poolFaction] ?? RESERVE_DRAW_RATE_MULT_DEFAULT;
         const baseRate = inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;

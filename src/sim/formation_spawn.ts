@@ -11,6 +11,8 @@ import {
     getBatchSizeForFaction,
     getFactionReinforcementMult,
     getMaxBrigadesPerMun,
+    isEligibleForReinforcement,
+    isInCombat,
     MAX_BRIGADE_PERSONNEL,
     MAX_TO_PER_MUN,
     MILITIA_COHESION,
@@ -212,11 +214,7 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             let tierCap: number;
             if (kind === 'brigade') {
                 tierCap = MAX_BRIGADE_PERSONNEL;
-                // Enclave gate: besieged brigades cannot receive reinforcements (L26)
-                if (Array.isArray(f.tags) && f.tags.includes('enclave')) continue;
-                // Readiness gate only for brigades
-                if (f.readiness === 'degraded') continue;
-                if (f.readiness === 'forming') continue;
+                if (!isEligibleForReinforcement(f)) continue;
             } else {
                 // militia-kind: detachment or battalion — derive tier from personnel
                 if (current >= MIN_BATTALION_THRESHOLD) {
@@ -234,9 +232,8 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             if (!pool || pool.available <= 0) continue;
 
             // Rate limit: combat formations get half rate; faction-specific multiplier
-            const inCombat = f.posture === 'attack' || f.disrupted === true;
             const factionMult = getFactionReinforcementMult(faction, currentTurn, state.war_timeline);
-            const baseRate = inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
+            const baseRate = isInCombat(f) ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
             const rate = Math.max(1, Math.floor(baseRate * factionMult));
 
             const need = Math.min(tierCap - current, rate);
@@ -287,13 +284,7 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         const faction = f.faction;
         if (!mun_id || !faction) continue;
 
-        // Enclave gate: besieged brigades cannot receive reinforcements (L26)
-        if (Array.isArray(f.tags) && f.tags.includes('enclave')) continue;
-
-        // Readiness gate: degraded brigades do not reinforce
-        if (f.readiness === 'degraded') continue;
-        // Forming brigades also skip reinforcement (must reach 'active' first)
-        if (f.readiness === 'forming') continue;
+        if (!isEligibleForReinforcement(f)) continue;
 
         const current = f.personnel ?? MIN_BRIGADE_SPAWN;
         if (current >= MAX_BRIGADE_PERSONNEL) continue;
@@ -304,10 +295,10 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         if (!pool || pool.available <= 0) continue;
 
         // Rate limit: combat brigades get half rate; faction-specific mobilization multiplier
-        const inCombat = f.posture === 'attack' || f.disrupted === true;
         const currentTurnNum = state.meta?.turn ?? 0;
         const factionMult = getFactionReinforcementMult(faction, currentTurnNum, state.war_timeline);
-        const rate = Math.max(1, Math.floor((inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE) * factionMult));
+        const baseRate = isInCombat(f) ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
+        const rate = Math.max(1, Math.floor(baseRate * factionMult));
 
         const need = Math.min(MAX_BRIGADE_PERSONNEL - current, rate);
         const reserveForSpawn = reservedSpawnManpowerForReinforcement(state, mun_id, faction, spawnDirectiveActive);

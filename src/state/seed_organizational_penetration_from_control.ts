@@ -6,6 +6,7 @@
  */
 
 import type { SettlementRecord } from '../map/settlements.js';
+import { buildSettlementsByMun } from '../sim/early_war/control_strain.js';
 import type { FactionId, GameState, MunicipalityId } from './game_state.js';
 import {
     deriveOrganizationalPenetrationFromFormula
@@ -47,22 +48,6 @@ function getLookupValue<T>(source: Record<string, T> | undefined, normalized: Ma
     return normalized.get(normalizeMunKey(munId));
 }
 
-/**
- * Build mun_id -> sorted list of sids. Deterministic.
- */
-function buildSettlementsByMun(settlements: Map<string, SettlementRecord>): Map<MunicipalityId, string[]> {
-    const byMun = new Map<MunicipalityId, string[]>();
-    for (const [sid, rec] of settlements.entries()) {
-        const munId = (rec.mun1990_id ?? rec.mun_code) as MunicipalityId;
-        const list = byMun.get(munId) ?? [];
-        list.push(sid);
-        byMun.set(munId, list);
-    }
-    for (const list of byMun.values()) {
-        list.sort(strictCompare);
-    }
-    return byMun;
-}
 
 /**
  * Return majority political controller for a municipality, or null if no majority.

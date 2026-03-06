@@ -26,6 +26,20 @@ export function canonicalizePoliticalSideId(id: string): PoliticalSideId | strin
  * - RS -> VRS
  * - HRHB -> HVO
  */
+/**
+ * Normalizes any faction string variant to a canonical PoliticalSideId.
+ * Handles: canonical (RS, RBiH, HRHB), army labels (VRS, ARBiH, HVO),
+ * uppercase (RBIH, ARBIH), and lowercase (rs, rbih, hrhb, vrs, arbih, hvo).
+ * Returns the input unchanged if no mapping is found.
+ */
+export function normalizeFactionId(id: string): PoliticalSideId | string {
+    const upper = id.toUpperCase();
+    if (upper === 'RS' || upper === 'VRS') return 'RS';
+    if (upper === 'RBIH' || upper === 'ARBIH') return 'RBiH';
+    if (upper === 'HRHB' || upper === 'HVO') return 'HRHB';
+    return id;
+}
+
 export function defaultArmyLabelForSide(side: PoliticalSideId): ArmyLabel {
     if (side === "RBiH") return "ARBiH";
     if (side === "RS") return "VRS";

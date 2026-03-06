@@ -7,25 +7,13 @@
 import type { EdgeRecord, SettlementRecord } from '../map/settlements.js';
 import type { FactionId, FormationId, GameState, MunicipalityId, SettlementId } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
+import { buildSettlementsByMun } from './early_war/control_strain.js';
 
 export interface FormationHqRelocationReport {
     relocated: number;
     formation_ids: FormationId[];
 }
 
-function buildSettlementsByMun(settlements: Map<string, SettlementRecord>): Map<MunicipalityId, SettlementId[]> {
-    const byMun = new Map<MunicipalityId, SettlementId[]>();
-    for (const [sid, rec] of settlements.entries()) {
-        const munId = (rec.mun1990_id ?? rec.mun_code) as MunicipalityId;
-        const list = byMun.get(munId) ?? [];
-        list.push(sid);
-        byMun.set(munId, list);
-    }
-    for (const list of byMun.values()) {
-        list.sort(strictCompare);
-    }
-    return byMun;
-}
 
 function buildSidToMun(byMun: Map<MunicipalityId, SettlementId[]>): Map<SettlementId, MunicipalityId> {
     const sidToMun = new Map<SettlementId, MunicipalityId>();

@@ -1387,16 +1387,21 @@ export function generateCorpsDirectives(
             || cmd.stance === 'offensive'
             || (offensiveTargetSet.size === 0);
         if (addOpportunistic && graphAnalysis) {
+            // Pre-index subordinate locations for O(1) adjacency checks
+            const subLocations = new Set(subordinates.map(b => b.location_osid).filter(Boolean));
+            const hasAdjacentBrigade = (osid: Osid): boolean => {
+                for (const n of adjacency.get(osid) ?? []) {
+                    if (subLocations.has(n)) return true;
+                }
+                return false;
+            };
+
             // Undefended enemy OSIDs: always allow regardless of priority municipalities.
             // Taking undefended territory costs nothing — all factions historically
             // consolidated undefended areas without needing explicit orders.
             for (const osid of graphAnalysis.undefended_front) {
                 if (offensiveTargetSet.has(osid)) continue;
-                const neighbors = adjacency.get(osid) ?? [];
-                const hasAdjacentBrigade = subordinates.some(b =>
-                    b.location_osid && neighbors.includes(b.location_osid)
-                );
-                if (hasAdjacentBrigade) offensiveTargetSet.add(osid);
+                if (hasAdjacentBrigade(osid)) offensiveTargetSet.add(osid);
             }
             for (const entry of graphAnalysis.weak_enemy_osids) {
                 if (offensiveTargetSet.has(entry.osid)) continue;
@@ -1407,11 +1412,7 @@ export function generateCorpsDirectives(
                     const osidMun = entry.osid.split(':')[1];
                     if (!priorityMunicipalities.has(osidMun)) continue;
                 }
-                const neighbors = adjacency.get(entry.osid) ?? [];
-                const hasAdjacentBrigade = subordinates.some(b =>
-                    b.location_osid && neighbors.includes(b.location_osid)
-                );
-                if (hasAdjacentBrigade) offensiveTargetSet.add(entry.osid);
+                if (hasAdjacentBrigade(entry.osid)) offensiveTargetSet.add(entry.osid);
             }
         }
 
@@ -1426,6 +1427,7 @@ export function generateCorpsDirectives(
                 armyPriorities.flatMap(p => p.target_municipalities ?? [])
             );
             const pc = state.political_controllers ?? {};
+            const pocketSubLocations = new Set(subordinates.map(b => b.location_osid).filter(Boolean));
             for (const pocketOsid of graphAnalysis.enemy_pockets) {
                 if (offensiveTargetSet.has(pocketOsid)) continue;
                 const pocketMun = pocketOsid.split(':')[1];
@@ -1436,13 +1438,8 @@ export function generateCorpsDirectives(
                 );
                 if (isRearPocket) {
                     offensiveTargetSet.add(pocketOsid);
-                } else {
-                    const hasAdjacentBrigade = subordinates.some(b =>
-                        b.location_osid && neighbors.includes(b.location_osid)
-                    );
-                    if (hasAdjacentBrigade) {
-                        offensiveTargetSet.add(pocketOsid);
-                    }
+                } else if (neighbors.some(n => pocketSubLocations.has(n))) {
+                    offensiveTargetSet.add(pocketOsid);
                 }
             }
         }

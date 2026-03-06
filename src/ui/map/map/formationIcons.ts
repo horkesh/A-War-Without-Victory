@@ -1,4 +1,5 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
+import { normalizeFactionId } from '../../../state/identity.js';
 
 // Spec §2.4: rectangular HoI-style counters — faction-colored fill, white abbreviation.
 // Canvas is 160×80 at pixelRatio 2 → displayed as 80×40 CSS px per icon-size unit.
@@ -8,28 +9,15 @@ const PIXEL_RATIO = 2;
 const CORNER_RADIUS = 8; // 4 CSS px at pixelRatio 2
 
 const FACTION_FILL: Record<string, string> = {
-  // Standard keys from store
   RS: 'rgba(178, 60, 60, 0.92)',
-  VRS: 'rgba(178, 60, 60, 0.92)',
   RBiH: 'rgba(55, 135, 70, 0.92)',
-  ARBiH: 'rgba(55, 135, 70, 0.92)',
   HRHB: 'rgba(50, 108, 168, 0.92)',
-  HVO: 'rgba(50, 108, 168, 0.92)',
-  // Normalized keys from formationIconId (UPPERCASE)
-  RBIH: 'rgba(55, 135, 70, 0.92)',
-  ARBIH: 'rgba(55, 135, 70, 0.92)',
 };
 
 const FACTION_BORDER: Record<string, string> = {
   RS: 'rgba(120, 30, 30, 0.95)',
-  VRS: 'rgba(120, 30, 30, 0.95)',
   RBiH: 'rgba(30, 90, 45, 0.95)',
-  ARBiH: 'rgba(30, 90, 45, 0.95)',
   HRHB: 'rgba(25, 65, 115, 0.95)',
-  HVO: 'rgba(25, 65, 115, 0.95)',
-  // Normalized
-  RBIH: 'rgba(30, 90, 45, 0.95)',
-  ARBIH: 'rgba(30, 90, 45, 0.95)',
 };
 
 function drawTacticalSymbol(ctx: CanvasRenderingContext2D, kind: string, w: number, h: number): void {
@@ -123,8 +111,9 @@ function createFormationIcon(iconId: string): ImageData {
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Failed to create 2D canvas context');
 
-  const fill = FACTION_FILL[faction] ?? 'rgba(90, 90, 100, 0.92)';
-  const border = FACTION_BORDER[faction] ?? 'rgba(50, 50, 60, 0.95)';
+  const canonicalFaction = normalizeFactionId(faction);
+  const fill = FACTION_FILL[canonicalFaction] ?? 'rgba(90, 90, 100, 0.92)';
+  const border = FACTION_BORDER[canonicalFaction] ?? 'rgba(50, 50, 60, 0.95)';
 
   ctx.clearRect(0, 0, W, H);
 

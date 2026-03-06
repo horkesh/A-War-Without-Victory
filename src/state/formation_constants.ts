@@ -78,6 +78,18 @@ export const FATIGUE_MAX = 30;
 /** Minimum 1991 population (faction-eligible) in a municipality to assign historical brigade name or allow emergent spawn (demographic gating). Below this: OOB brigades get generic name; emergent spawn is skipped. */
 export const MIN_ELIGIBLE_POPULATION_FOR_BRIGADE = 500;
 
+/** Whether a formation is in active combat (attack posture or disrupted). */
+export function isInCombat(f: { posture?: string; disrupted?: boolean }): boolean {
+    return f.posture === 'attack' || f.disrupted === true;
+}
+
+/** Whether a brigade is eligible for reinforcement (not degraded, not forming, not enclave). */
+export function isEligibleForReinforcement(f: { kind?: string; readiness?: string; tags?: string[] }): boolean {
+    if (f.readiness === 'degraded' || f.readiness === 'forming') return false;
+    if (Array.isArray(f.tags) && f.tags.includes('enclave')) return false;
+    return true;
+}
+
 /** Brigade can grow from pool up to this size; only then do we form a second brigade (if pool still has ≥ MIN_BRIGADE_SPAWN). Tuned for historical personnel band (~3k per brigade at full strength). */
 export const MAX_BRIGADE_PERSONNEL = 3_000;
 

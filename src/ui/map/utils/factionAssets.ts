@@ -12,6 +12,7 @@ import armyCrestHVO from '../assets/crests/army_crest_HVO.png';
 
 import stampSecret from '../assets/crests/stamp_secret.png';
 import paperclip from '../assets/crests/paperclip.png';
+import { defaultArmyLabelForSide, normalizeFactionId, type PoliticalSideId } from '../../../state/identity.js';
 
 export const ASSETS = {
     stampSecret,
@@ -36,28 +37,29 @@ export const ARMY_CRESTS: Record<string, string> = {
     HRHB: armyCrestHVO,
 };
 
-export const ARMY_NAMES: Record<string, string> = {
-    RS: 'VRS',
-    RBiH: 'ARBiH',
-    HRHB: 'HVO',
-};
+/** Look up a faction asset, normalizing any variant (VRS→RS, HVO→HRHB, etc.). */
+function lookupFaction<T>(map: Record<string, T>, faction: string | undefined | null): T | undefined {
+    if (!faction) return undefined;
+    return map[normalizeFactionId(faction)];
+}
 
 export function getFactionFlag(faction: string | undefined | null): string | undefined {
-    if (!faction) return undefined;
-    return FACTION_FLAGS[faction];
+    return lookupFaction(FACTION_FLAGS, faction);
 }
 
 export function getFactionCrest(faction: string | undefined | null): string | undefined {
-    if (!faction) return undefined;
-    return FACTION_CRESTS[faction];
+    return lookupFaction(FACTION_CRESTS, faction);
 }
 
 export function getArmyCrest(faction: string | undefined | null): string | undefined {
-    if (!faction) return undefined;
-    return ARMY_CRESTS[faction];
+    return lookupFaction(ARMY_CRESTS, faction);
 }
 
 export function getArmyName(faction: string | undefined | null): string | undefined {
     if (!faction) return undefined;
-    return ARMY_NAMES[faction];
+    const canonical = normalizeFactionId(faction) as PoliticalSideId;
+    if (canonical === 'RS' || canonical === 'RBiH' || canonical === 'HRHB') {
+        return defaultArmyLabelForSide(canonical);
+    }
+    return undefined;
 }
