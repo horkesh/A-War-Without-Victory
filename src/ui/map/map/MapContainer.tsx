@@ -14,6 +14,7 @@ import { loadOperationalPoliticalControl, loadOperationalSettlements } from '../
 import { buildControlGeoJSON } from './builders/buildControlGeoJSON';
 import { buildDensityGeoJSON } from './builders/buildDensityGeoJSON';
 import { buildEthnicGeoJSON } from './builders/buildEthnicGeoJSON';
+import { buildPressureGeoJSON } from './builders/buildPressureGeoJSON';
 import { buildSupplyGeoJSON } from './builders/buildSupplyGeoJSON';
 import { buildFrontLinesGeoJSON } from './builders/buildFrontLinesGeoJSON';
 import { buildFrontEdgesHoverGeoJSON } from './builders/buildFrontEdgesHoverGeoJSON';
@@ -29,6 +30,7 @@ import { buildFogOfWarGeoJSON } from './builders/buildFogOfWarGeoJSON';
 import { buildEnclaveGeoJSON } from './builders/buildEnclaveGeoJSON';
 import { buildBattleMarkersGeoJSON } from './builders/buildBattleMarkersGeoJSON';
 import { buildStrategicPointGeoJSON } from './builders/buildStrategicPointGeoJSON';
+import { rewritePmtilesUrls } from './rewritePmtilesUrls';
 import { useIPC } from '../desktop/useIPC';
 import { stageMoveOrderFromOsid } from '../desktop/orderActions';
 import styleJson from './awwv_map_style.json';
@@ -44,6 +46,8 @@ const OSID_ETHNIC_FILL_LAYER_ID = 'osid-ethnic-fill';
 const OSID_ETHNIC_SOURCE_ID = 'osid-ethnic';
 const OSID_DENSITY_FILL_LAYER_ID = 'osid-density-fill';
 const OSID_DENSITY_SOURCE_ID = 'osid-density';
+const OSID_PRESSURE_FILL_LAYER_ID = 'osid-pressure-fill';
+const OSID_PRESSURE_SOURCE_ID = 'osid-pressure';
 const OSID_SUPPLY_FILL_LAYER_ID = 'osid-supply-fill';
 const OSID_SUPPLY_SOURCE_ID = 'osid-supply';
 /** Layer ID for formation markers (formationsVisible). */
@@ -82,17 +86,6 @@ const ENCLAVE_LABEL_SOURCE_ID = 'enclave-labels';
 const ENCLAVE_OUTLINE_LAYER_ID = 'enclave-outline';
 const ENCLAVE_FILL_LAYER_ID = 'enclave-fill';
 const ENCLAVE_LABEL_LAYER_ID = 'enclave-label';
-
-/**
- * Rewrite pmtiles:/// URLs in the style for the current environment.
- * pmtiles:///path → pmtiles://http://host:port/path (or https, file, etc.)
- */
-function rewritePmtilesUrls(style: Record<string, unknown>, origin: string): Record<string, unknown> {
-  const str = JSON.stringify(style);
-  const base = `pmtiles://${origin}/`;
-  const rewritten = str.replace(/pmtiles:\/\/\//g, base);
-  return JSON.parse(rewritten) as Record<string, unknown>;
-}
 
 export function MapContainer() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -354,7 +347,8 @@ export function MapContainer() {
               frontLinesGeoJson = buildCorpsFrontLinesGeoJSON(
                 controlledGeoJson, state.corpsFrontSectors, rbihHrhbAllied,
                 osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined,
-                state.frontPressureByEdge
+                state.frontPressureByEdge,
+                state.frontEdgesOsid
               );
               // Corps colors on glow layers only; front-line-base/stripe stay black-white stripe.
               try {
@@ -1131,13 +1125,16 @@ export function MapContainer() {
       } else {
         (m.getSource(OSID_ETHNIC_SOURCE_ID) as GeoJSONSource).setData(ethnicGeoJson);
       }
-      const showPolitical = mapMode === 'political' || mapMode === 'pressure';
+      const showPolitical = mapMode === 'political';
       safeSetLayoutVisibility(m, 'osid-control-fill', showPolitical);
       if (safeHasLayer(m, OSID_ETHNIC_FILL_LAYER_ID)) {
         safeSetLayoutVisibility(m, OSID_ETHNIC_FILL_LAYER_ID, mapMode === 'ethnic');
       }
       if (safeHasLayer(m, OSID_DENSITY_FILL_LAYER_ID)) {
         safeSetLayoutVisibility(m, OSID_DENSITY_FILL_LAYER_ID, mapMode === 'density');
+      }
+      if (safeHasLayer(m, OSID_PRESSURE_FILL_LAYER_ID)) {
+        safeSetLayoutVisibility(m, OSID_PRESSURE_FILL_LAYER_ID, mapMode === 'pressure');
       }
       if (safeHasLayer(m, OSID_SUPPLY_FILL_LAYER_ID)) {
         safeSetLayoutVisibility(m, OSID_SUPPLY_FILL_LAYER_ID, mapMode === 'supply');
@@ -1186,6 +1183,56 @@ export function MapContainer() {
         (m.getSource(OSID_DENSITY_SOURCE_ID) as GeoJSONSource).setData(densityGeoJson);
       }
       safeSetLayoutVisibility(m, OSID_DENSITY_FILL_LAYER_ID, mapMode === 'density');
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+    };
+  }, [mapReady, mapMode, loadedGameState]);
+
+  // Pressure map mode — color front-adjacent OSIDs by combat pressure intensity.
+  useEffect(() => {
+    const map = mapRef.current;
+    const baseGeoJson = osidBaseRef.current;
+    if (!mapReady || !map || !baseGeoJson || !loadedGameState?.frontEdgesOsid) return;
+
+    let cancelled = false;
+    const rafId = requestAnimationFrame(() => {
+      if (cancelled || !mapRef.current || !loadedGameState) return;
+      const controlGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
+      const pressureGeoJson = buildPressureGeoJSON(
+        controlGeoJson,
+        loadedGameState.frontEdgesOsid!,
+        loadedGameState.frontPressureByEdge,
+        loadedGameState.controlBySettlement
+      );
+      if (cancelled || !mapRef.current) return;
+      const m = mapRef.current;
+      if (!m.getSource(OSID_PRESSURE_SOURCE_ID)) {
+        m.addSource(OSID_PRESSURE_SOURCE_ID, { type: 'geojson', data: pressureGeoJson });
+        m.addLayer(
+          {
+            id: OSID_PRESSURE_FILL_LAYER_ID,
+            type: 'fill',
+            source: OSID_PRESSURE_SOURCE_ID,
+            paint: {
+              'fill-color': [
+                'match',
+                ['get', 'pressure_class'],
+                'low', 'rgba(100, 180, 100, 0.30)',
+                'medium', 'rgba(220, 180, 40, 0.40)',
+                'high', 'rgba(220, 60, 60, 0.50)',
+                'rgba(80, 80, 80, 0.15)',
+              ],
+              'fill-opacity': 1,
+            },
+          },
+          'faction-border-glow-pos'
+        );
+      } else {
+        (m.getSource(OSID_PRESSURE_SOURCE_ID) as GeoJSONSource).setData(pressureGeoJson);
+      }
+      safeSetLayoutVisibility(m, OSID_PRESSURE_FILL_LAYER_ID, mapMode === 'pressure');
     });
     return () => {
       cancelled = true;
@@ -1255,11 +1302,13 @@ export function MapContainer() {
       });
       if (!safeSetLayoutVisibility(map, FORMATION_MARKERS_LAYER_ID, formationsVisible)) allExist = false;
       if (!safeSetLayoutVisibility(map, FORMATION_LABELS_LAYER_ID, labelsVisible)) allExist = false;
-      // Map mode visibility: political/supply/pressure show control fill; ethnic and density get own layers
-      const showPolitical = mapMode === 'political' || mapMode === 'supply' || mapMode === 'pressure';
+      // Map mode visibility: dedicated overlay per mode.
+      const showPolitical = mapMode === 'political';
       if (!safeSetLayoutVisibility(map, 'osid-control-fill', showPolitical)) allExist = false;
       if (safeHasLayer(map, OSID_ETHNIC_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_ETHNIC_FILL_LAYER_ID, mapMode === 'ethnic')) allExist = false;
       if (safeHasLayer(map, OSID_DENSITY_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_DENSITY_FILL_LAYER_ID, mapMode === 'density')) allExist = false;
+      if (safeHasLayer(map, OSID_PRESSURE_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_PRESSURE_FILL_LAYER_ID, mapMode === 'pressure')) allExist = false;
+      if (safeHasLayer(map, OSID_SUPPLY_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_SUPPLY_FILL_LAYER_ID, mapMode === 'supply')) allExist = false;
       return allExist;
     };
 
@@ -1296,9 +1345,6 @@ export function MapContainer() {
       safeSetLayoutVisibility(map, STRATEGIC_POINTS_LAYER_ID, strategicVisible);
     }
   }, [mapReady, fogVisible, battlesVisible, strategicVisible]);
-
-  // Phase C2: mapMode (political | ethnic | supply | pressure) — ethnic/supply/pressure
-  // currently show same as political; add mode-specific layers/sources when data is ready.
 
   useEffect(() => {
     const map = mapRef.current;
@@ -1346,11 +1392,33 @@ export function MapContainer() {
         try {
           if (map.getLayer('attack-arrows-staged')) {
             map.setPaintProperty('attack-arrows-staged', 'line-opacity', opacity);
-            map.setPaintProperty('attack-arrows-heads-staged', 'text-opacity', opacity);
+            if (map.getLayer('attack-arrows-glow-staged')) {
+              map.setPaintProperty('attack-arrows-glow-staged', 'line-opacity', opacity * 0.6);
+            }
+            if (map.getLayer('attack-arrows-heads-staged')) {
+              map.setPaintProperty('attack-arrows-heads-staged', 'fill-opacity', opacity);
+            }
           }
           if (map.getLayer('movement-arrows-staged')) {
             map.setPaintProperty('movement-arrows-staged', 'line-opacity', opacity);
-            map.setPaintProperty('movement-arrows-heads-staged', 'text-opacity', opacity);
+            if (map.getLayer('movement-arrows-heads-staged')) {
+              map.setPaintProperty('movement-arrows-heads-staged', 'fill-opacity', opacity);
+            }
+          }
+          if (map.getLayer(BATTLE_MARKERS_LAYER_ID)) {
+            const pulse = Math.sin(time / 300) * 0.15 + 0.85;
+            map.setPaintProperty(
+              BATTLE_MARKERS_LAYER_ID,
+              'circle-opacity',
+              [
+                'interpolate',
+                ['linear'],
+                ['get', 'age'],
+                0, pulse,
+                1, pulse * 0.7,
+                2, pulse * 0.4,
+              ]
+            );
           }
         } catch (e) {
           // ignore if style not loaded yet

@@ -104,7 +104,11 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
     const raw = JSON.parse(await readFile(path, 'utf8')) as unknown;
     const registry = await loadRegistryMunIds(baseDir);
 
-    const rows = isRecord(raw) && Array.isArray(raw.brigades) ? raw.brigades : [];
+    const rows = Array.isArray(raw)
+        ? raw
+        : isRecord(raw) && Array.isArray(raw.brigades)
+            ? raw.brigades
+            : [];
     const result: OobBrigade[] = [];
     const seenIds = new Set<string>();
 

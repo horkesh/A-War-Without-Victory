@@ -387,4 +387,109 @@ describe('Sector Offensive — Lifecycle', () => {
         assert.equal(op.failure_count, 2);
         assert.equal(op.current_objective_index, 1);
     });
+
+    it('tracks maneuver-only execution turns without incrementing idle streak', () => {
+        const state = makeMinimalState(20, {
+            'b1': { corps_id: 'corps_1' as any, location_osid: 'op:a:1', posture: 'defend' },
+            'b2': { corps_id: 'corps_1' as any, location_osid: 'op:a:2', posture: 'defend' },
+            'b3': { corps_id: 'corps_1' as any, location_osid: 'op:a:3', posture: 'defend' },
+        });
+        state.political_controllers = { 'op:e:1': 'RBiH' } as any;
+        state.corps_command = {
+            'corps_1': {
+                stance: 'offensive' as any,
+                active_operation: {
+                    name: 'Operacija Test',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: 18,
+                    phase_started_turn: 19,
+                    participating_brigades: ['b1', 'b2', 'b3'],
+                    sector_id: 'sector:corps_1:0',
+                    objectives: ['op:e:1'],
+                    current_objective_index: 0,
+                    attack_attempt_count: 0,
+                    objective_capture_count: 0,
+                    movement_only_execution_turns: 0,
+                    idle_execution_turn_streak: 0,
+                    supply_readiness: 1.0,
+                    momentum: 0,
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                },
+            } as any,
+        };
+        state.corps_front_sectors = {
+            'sector:corps_1:0': {
+                sector_id: 'sector:corps_1:0',
+                corps_id: 'corps_1',
+                sub_segments: [
+                    {
+                        friendly_osids: ['op:a:1', 'op:a:2'],
+                        enemy_osids: ['op:e:1'],
+                    },
+                ],
+            } as any,
+        };
+        state.brigade_movement_orders = {
+            b1: { destination_sids: ['op:a:2'] },
+            b2: { destination_sids: ['op:a:3'] },
+        } as any;
+
+        updateSectorOffensiveResults(state);
+        const op = state.corps_command!['corps_1']!.active_operation!;
+        assert.equal(op.movement_only_execution_turns, 1);
+        assert.equal(op.idle_execution_turn_streak, 0);
+    });
+
+    it('marks recovery without logged attempts when an execution-phase operation stalls out', () => {
+        const state = makeMinimalState(21, {
+            'b1': { corps_id: 'corps_1' as any, location_osid: 'op:a:1', posture: 'defend' },
+            'b2': { corps_id: 'corps_1' as any, location_osid: 'op:a:2', posture: 'defend' },
+            'b3': { corps_id: 'corps_1' as any, location_osid: 'op:a:3', posture: 'defend' },
+        });
+        state.political_controllers = { 'op:e:1': 'RBiH' } as any;
+        state.corps_command = {
+            'corps_1': {
+                stance: 'offensive' as any,
+                active_operation: {
+                    name: 'Operacija Test',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: 18,
+                    phase_started_turn: 19,
+                    participating_brigades: ['b1', 'b2', 'b3'],
+                    sector_id: 'sector:corps_1:0',
+                    objectives: ['op:e:1'],
+                    current_objective_index: 0,
+                    attack_attempt_count: 0,
+                    objective_capture_count: 0,
+                    movement_only_execution_turns: 0,
+                    idle_execution_turn_streak: 1,
+                    supply_readiness: 1.0,
+                    momentum: 0,
+                    failure_count: 2,
+                    consecutive_failures_on_current: 1,
+                },
+            } as any,
+        };
+        state.corps_front_sectors = {
+            'sector:corps_1:0': {
+                sector_id: 'sector:corps_1:0',
+                corps_id: 'corps_1',
+                sub_segments: [
+                    {
+                        friendly_osids: ['op:a:1', 'op:a:2'],
+                        enemy_osids: ['op:e:1'],
+                    },
+                ],
+            } as any,
+        };
+
+        updateSectorOffensiveResults(state);
+        const op = state.corps_command!['corps_1']!.active_operation!;
+        assert.equal(op.phase, 'recovery');
+        assert.equal(op.recovery_reason, 'no_logged_attempt');
+        assert.equal(op.idle_execution_turn_streak, 2);
+    });
 });

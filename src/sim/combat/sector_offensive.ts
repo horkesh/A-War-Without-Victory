@@ -75,6 +75,16 @@ function areParticipantsStaged(state: GameState, participatingBrigades: Formatio
     return activeParticipantCount > 0;
 }
 
+function beginRecovery(op: CorpsOperation, turn: number, reason: CorpsOperation['recovery_reason']): void {
+    op.phase = 'recovery';
+    op.phase_started_turn = turn;
+    op.recovery_reason = reason;
+}
+
+function getNoAttemptRecoveryReason(op: CorpsOperation): CorpsOperation['recovery_reason'] {
+    return (op.attack_attempt_count ?? 0) > 0 ? 'max_failures' : 'no_logged_attempt';
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Supply readiness
 // ═══════════════════════════════════════════════════════════════════════════
@@ -164,8 +174,11 @@ export function advanceSectorOffensives(
         if (op.sector_id && state.corps_front_sectors) {
             if (!state.corps_front_sectors[op.sector_id]) {
                 // Sector orphaned — abort to recovery
-                op.phase = 'recovery';
-                op.phase_started_turn = turn;
+                beginRecovery(
+                    op,
+                    turn,
+                    (op.attack_attempt_count ?? 0) > 0 ? 'orphaned_sector' : 'no_logged_attempt'
+                );
                 continue;
             }
         }
@@ -192,6 +205,11 @@ export function advanceSectorOffensives(
                 op.momentum = 0;
                 op.failure_count = 0;
                 op.consecutive_failures_on_current = 0;
+                op.attack_attempt_count = 0;
+                op.objective_capture_count = 0;
+                op.movement_only_execution_turns = 0;
+                op.idle_execution_turn_streak = 0;
+                op.recovery_reason = undefined;
             }
         } else if (op.phase === 'execution') {
             // No supply-based abort during execution — per-brigade gates handle attack eligibility.
@@ -200,15 +218,13 @@ export function advanceSectorOffensives(
             // Check if all objectives completed
             const objectives = op.objectives ?? [];
             if ((op.current_objective_index ?? 0) >= objectives.length) {
-                op.phase = 'recovery';
-                op.phase_started_turn = turn;
+                beginRecovery(op, turn, 'completed');
                 continue;
             }
 
             // Check total failure abort
             if ((op.failure_count ?? 0) >= MAX_TOTAL_FAILURES) {
-                op.phase = 'recovery';
-                op.phase_started_turn = turn;
+                beginRecovery(op, turn, getNoAttemptRecoveryReason(op));
                 continue;
             }
         } else if (op.phase === 'recovery') {
@@ -259,6 +275,9 @@ export function updateSectorOffensiveResults(
 
         if (controller === faction) {
             // Captured!
+            op.attack_attempt_count = (op.attack_attempt_count ?? 0) + 1;
+            op.objective_capture_count = (op.objective_capture_count ?? 0) + 1;
+            op.idle_execution_turn_streak = 0;
             op.last_result = 'captured';
             op.momentum = Math.min(MOMENTUM_CAP, (op.momentum ?? 0) + 1);
             op.current_objective_index = currentIdx + 1;
@@ -284,9 +303,15 @@ export function updateSectorOffensiveResults(
                 // Brigade is adjacent to this specific objective and was attacking
                 return b.location_osid ? adjacentFriendlyOsids.has(b.location_osid) : false;
             });
+            const anyMoved = op.participating_brigades.some(bid => {
+                const movement = state.brigade_movement_orders?.[bid];
+                return Array.isArray(movement?.destination_sids) && movement.destination_sids.length > 0;
+            });
 
             if (anyAttacked) {
                 // Failed to capture
+                op.attack_attempt_count = (op.attack_attempt_count ?? 0) + 1;
+                op.idle_execution_turn_streak = 0;
                 op.last_result = 'failed';
                 op.momentum = 0;
                 op.failure_count = (op.failure_count ?? 0) + 1;
@@ -298,6 +323,12 @@ export function updateSectorOffensiveResults(
                     op.consecutive_failures_on_current = 0;
                 }
             } else {
+                if (anyMoved) {
+                    op.movement_only_execution_turns = (op.movement_only_execution_turns ?? 0) + 1;
+                    op.idle_execution_turn_streak = 0;
+                } else {
+                    op.idle_execution_turn_streak = (op.idle_execution_turn_streak ?? 0) + 1;
+                }
                 op.last_result = 'stalemate';
                 op.momentum = 0;
                 op.failure_count = (op.failure_count ?? 0) + 1;
@@ -312,12 +343,10 @@ export function updateSectorOffensiveResults(
 
         // Check if all objectives done or abort
         if ((op.current_objective_index ?? 0) >= objectives.length) {
-            op.phase = 'recovery';
-            op.phase_started_turn = turn;
+            beginRecovery(op, turn, 'completed');
         }
         if ((op.failure_count ?? 0) >= MAX_TOTAL_FAILURES) {
-            op.phase = 'recovery';
-            op.phase_started_turn = turn;
+            beginRecovery(op, turn, getNoAttemptRecoveryReason(op));
         }
     }
 }
@@ -404,6 +433,10 @@ export function evaluateSectorOffensiveLaunch(
         momentum: 0,
         failure_count: 0,
         consecutive_failures_on_current: 0,
+        attack_attempt_count: 0,
+        objective_capture_count: 0,
+        movement_only_execution_turns: 0,
+        idle_execution_turn_streak: 0,
         ...(stagingOsid && { staging_osid: stagingOsid }),
     };
 }

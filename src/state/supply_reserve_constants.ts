@@ -147,3 +147,21 @@ export const JNA_INHERITANCE_HEAVY_BONUS = 40;
 export const INIT_GENERAL_SUPPLY_RESERVE = 80;
 /** Default starting heavy munitions reserve per faction. */
 export const INIT_HEAVY_MUNITIONS_RESERVE = 60;
+
+/**
+ * Per-faction overrides for initial supply reserves.
+ * Historical basis:
+ *   RS  = inherits JNA stocks → 80 general / 100 heavy (60 + JNA_INHERITANCE_HEAVY_BONUS)
+ *   HRHB = Croatian backing, some HV weaponry → adequate but not flush
+ *   RBiH = territorial defense units, almost no logistics in April 1992 → critical
+ */
+export const INIT_GENERAL_SUPPLY_RESERVE_BY_FACTION: Partial<Record<string, number>> = {
+    RS: 80,
+    HRHB: 55,
+    RBiH: 10,   // critical (< RESERVE_STRAINED_THRESHOLD=20) → brigades forced to defend
+};
+export const INIT_HEAVY_MUNITIONS_RESERVE_BY_FACTION: Partial<Record<string, number>> = {
+    RS: 60,     // +40 more from JNA_INHERITANCE_HEAVY_BONUS applied separately
+    HRHB: 25,
+    RBiH: 5,    // essentially no heavy munitions stocks
+};

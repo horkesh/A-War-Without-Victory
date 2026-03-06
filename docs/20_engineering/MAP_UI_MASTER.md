@@ -4,11 +4,12 @@
 **Source tree:** `src/ui/map/`
 **Dev server:** `npm run dev:map` (Vite, port 3002)
 **Build:** `npm run build` → `dist/tactical-map/`
-**Last updated:** 2026-03-04
+**Last updated:** 2026-03-05
 
 > **See also:** [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) — original engineering reference.
 > This document is the **component-level master reference** covering current panel layout,
 > store contract, layer system, builders, data types, and interaction model.
+> **GUI polish phases (2026-03-05):** Authoritative checklist **A–F** (Arrow overhaul, Ops Planning modal, Map mode toolbar/pressure, Battle marker pulse, Bottom status strip, General polish) is in [20260305_GUI_POLISH_ORCHESTRATED_EXECUTION.md](../40_reports/implemented/20260305_GUI_POLISH_ORCHESTRATED_EXECUTION.md) §Consolidated Phase List.
 
 ---
 
@@ -31,6 +32,7 @@ src/ui/map/
 │   ├── formationIcons.ts          HoI-style rectangular brigade counters (160×80 canvas, pixelRatio 2 → 80×40 CSS px/unit; faction-colored fill; white kind abbreviation)
 │   ├── frontLineIcons.ts          Front-line SVG icon helpers (stub)
 │   ├── pmtilesRoute.ts            PMTiles URL routing helper (stub)
+│   ├── rewritePmtilesUrls.ts      Shared PMTiles style URL rewriter (pmtiles:/// → pmtiles://origin/); used by MapContainer and OpsPlanningModal
 │   ├── awwv_map_style.json        MapLibre base style (terrain, glyphs, base layers)
 │   └── builders/
 │       ├── buildControlGeoJSON.ts              OSID polygons + faction controller property
@@ -90,7 +92,7 @@ src/ui/map/
 │   └── ControlLookup.ts           Control/status lookup builders
 │
 ├── hooks/
-│   ├── useKeyboardShortcuts.ts    Enter/Escape/1–4 global key handler
+│   ├── useKeyboardShortcuts.ts    Enter/Escape/1–5 global key handler (map modes 1–5)
 │   └── useDesktopSession.ts       Bootstrap + game-state-updated/turn-report-updated IPC subscriptions (Phase 4)
 │
 ├── saved/                         Phase 4 staging area — promoted to live files; kept for reference (excluded from tsconfig)
@@ -264,8 +266,8 @@ Five map modes (bottom bar, centered):
 | Political | 1 | `'political'` | osid-control fill |
 | Ethnic | 2 | `'ethnic'` | osid-ethnic fill |
 | Supply | 3 | `'supply'` | osid-supply fill + SupplyPanel |
-| Pressure | 4 | `'pressure'` | frontPressureByEdge visualization |
-| Density | — | `'density'` | osid-density fill |
+| Pressure | 4 | `'pressure'` | osid-pressure fill (front pressure heatmap) |
+| Density | 5 | `'density'` | osid-density fill |
 
 Layer toggles (no keys):
 
@@ -651,6 +653,7 @@ Pressure mode reuses the political fill with a separate coloring pass.
 | `2` | setMapMode('ethnic') |
 | `3` | setMapMode('supply') |
 | `4` | setMapMode('pressure') |
+| `5` | setMapMode('density') |
 
 (Keys skipped when focus is in INPUT/TEXTAREA.)
 

@@ -107,6 +107,8 @@
    Do instead: Choose brigade starting OSIDs that are already friendly-controlled at init. If the selected `home_osid` is enemy-held, spread/re-homing logic will relocate the brigade and the intended opening operation will not launch from there.
 
 ## Sectors & Operations
+1. **[2026-03-06] Proof lane + eligible-attacker boundary**
+   Do instead: Before wide calibration work, run `tests/scenario_vrs_operation_proof.test.ts` / `data/scenarios/apr1992_vrs_operation_proof_4w.json` to prove one VRS opening op can attack, battle, and advance. In combat-causality, treat `execution_without_eligible_attackers` as a separate root-cause boundary from `execution_without_attack_orders`.
 1. **[2026-03-05] `sector_attack` phase timing has one owner**
    Do instead: Let `src/sim/combat/sector_offensive.ts` advance `sector_attack` phases. `src/sim/combat/corps_command.ts:advanceOperations()` must skip them, or named ops will enter/leave `execution` on the wrong schedule.
 2. **[2026-03-05] Execution-phase no-progress must spend failure budget**

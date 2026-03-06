@@ -10229,6 +10229,60 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 
 ---
 
+## [2026-03-06] Add deterministic VRS operation proof scenario and eligible-attacker invariant
+
+**Phase:** Phase II combat-causality hardening / proof lane
+
+### Summary
+- Added a dedicated proof scenario for VRS opening operations and extended combat-causality diagnostics to surface execution windows where an operation still owns brigades but has zero eligible direct attackers on its current objective.
+
+### Change
+- Added `data/scenarios/apr1992_vrs_operation_proof_4w.json` as a dedicated 4-week proof fixture built from the already-verified April 1992 Phase II startup path.
+- Added `tests/scenario_vrs_operation_proof.test.ts`:
+  - runs the proof fixture twice
+  - requires non-zero RS attack orders and processed attack orders
+  - requires at least one VRS operation with attack attempts, objective captures, and objective-index progress
+  - requires byte-identical `final_save.json` across both runs
+- Updated `src/sim/combat/bot_brigade_ai_osid.ts` so bot-order generation emits `eligible_attackers_by_corps` diagnostics for execution-phase sector operations.
+- Updated `src/scenario/combat_causality.ts`, `src/scenario/scenario_reporting.ts`, `src/scenario/scenario_runner.ts`, and `src/sim/turn_phases/war_phases.ts` to propagate:
+  - `eligible_attacker_count`
+  - `zero_eligible_attacker_operation_count`
+  - invalidation reason `operation_execution_without_eligible_attackers`
+- Updated `tests/scenario_operation_diagnostics.test.ts` to cover the new invariant.
+
+### Determinism / scope
+- Deterministic only. No controller overrides or new gameplay randomness.
+- The proof fixture is scenario data plus diagnostics; it does not change combat rules or historical init control.
+
+### Verification
+- `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\scenario_operation_diagnostics.test.ts`
+- `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\scenario_vrs_operation_proof.test.ts`
+- `cmd /c node_modules\\.bin\\tsx.cmd --test tests\\bot_operation_objective_focus.test.ts`
+- scoped type-safety check on touched files via `npm run typecheck` + `Select-String`
+- `cmd /c npm run sim:scenario:run:40w -- --scenario data/scenarios/apr1992_vrs_operation_proof_4w.json --out .tmp_proof_report`
+
+### Artifacts
+- `.tmp_proof_report/apr1992_vrs_operation_proof_4w__1142cedd3e0e4d62__w4_n0/run_summary.json`
+  - `combat_causality.total_attack_orders = 18`
+  - `combat_causality.total_battles = 12`
+  - `combat_causality.total_objective_attempts = 6`
+  - `combat_causality.total_objective_captures = 4`
+  - `combat_causality.zero_eligible_attacker_operation_count = 2`
+  - `phase_ii_attack_resolution.orders_by_faction.RS = 17`
+
+### Failure mode prevented
+- Prevents a named operation with assigned brigades from being treated as merely “not attacking” when the deeper problem is that it has no eligible direct attackers at all for its current objective.
+- Prevents future operation regressions from re-breaking the opening-op path without a deterministic proof fixture catching it immediately.
+
+### Mistake guard
+- A proof scenario passing means “combat and operation progress are demonstrably possible,” not “all opening operations are healthy.”
+- `execution_without_attack_orders` and `execution_without_eligible_attackers` are different boundaries; do not collapse them in future debugging.
+
+### FORAWWV note
+- None. This adds diagnostics and a proof fixture only.
+
+---
+
 ## [2026-03-05] Named operations own participating brigades until the op ends
 
 **Phase:** Phase II opening-operations debugging / brigade AI

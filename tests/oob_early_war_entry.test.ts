@@ -148,3 +148,38 @@ test('createOobFormationsAtPhaseIEntry uses faction-specific initial personnel d
     assert.strictEqual((state.formations!['arbih_7th'] as { personnel?: number }).personnel, 500, 'RBiH brigade starts at 500');
     assert.strictEqual((state.formations!['hvo_1st'] as { personnel?: number }).personnel, 800, 'HRHB brigade starts at 800');
 });
+
+test('createOobFormationsAtPhaseIEntry tags brigades with explicit home_osid as fixed placement', () => {
+    const state: GameState = {
+        schema_version: CURRENT_SCHEMA_VERSION,
+        meta: { turn: 1, seed: 's' },
+        factions: [],
+        formations: {},
+        front_segments: {},
+        front_posture: {},
+        front_posture_regions: {},
+        front_pressure: {},
+        militia_pools: {},
+        political_controllers: { s_rs: 'RS' },
+        municipalities: { prijedor: { control: 'consolidated' } }
+    };
+    const sidToMun = new Map([['s_rs', 'prijedor']]);
+    const hq: Record<string, string> = { prijedor: 's_rs' };
+    const brigades: OobBrigade[] = [
+        makeBrigade({
+            id: 'vrs_fixed',
+            faction: 'RS',
+            name: 'Fixed Brigade',
+            home_mun: 'prijedor',
+            kind: 'brigade',
+            home_osid: 'op:prijedor:prijedor_2'
+        })
+    ];
+
+    createOobFormationsAtPhaseIEntry(state, [], brigades, hq, sidToMun);
+    assert.deepStrictEqual(
+        state.formations?.vrs_fixed?.tags?.includes('placement:fixed_home_osid'),
+        true,
+    );
+    assert.strictEqual(state.formations?.vrs_fixed?.location_osid, 'op:prijedor:prijedor_2');
+});

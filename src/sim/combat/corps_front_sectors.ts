@@ -87,6 +87,12 @@ function buildFactionSectors(
     const corpsEdges = partitionFrontEdges(
         osidFrontEdges, faction, osidToCorps, state, reverseMap, corpsIds, adjacency
     );
+    // Step 3b: Consolidate cross-corps front splits.
+    // When a contiguous front (connected component of edges via friendly-OSID
+    // adjacency) is split across multiple corps by the BFS Voronoi boundary,
+    // reassign the minority edges to the majority corps. Prevents pockets and
+    // border settlements from being split between distant corps.
+    consolidateCrossCorpsFronts(corpsEdges, osidFrontEdges, faction, adjacency);
 
     // Step 4: Build multi-sectors (sub-segments promoted to independent sectors)
     const sectors: CorpsFrontSector[] = [];
@@ -308,6 +314,151 @@ function bfsNearestClaimedCorps(
         }
     }
     return null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Step 3b: Consolidate Cross-Corps Front Splits
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * After partitioning front edges to corps via BFS Voronoi, contiguous fronts
+ * can be split across multiple corps at the boundary. This detects connected
+ * components of edges (via friendly-OSID adjacency, ignoring corps assignment)
+ * and reassigns minority edges to the majority corps in each component.
+ *
+ * Example: Bosanska Gradiška has two RBiH OSIDs (orahova → 5th Corps,
+ * gradiska_3 → 3rd Corps). Their edges form one contiguous front but are
+ * split by the BFS boundary. This merges them under whichever corps owns
+ * the majority of edges in that front.
+ *
+ * Mutates corpsEdges in place.
+ */
+function consolidateCrossCorpsFronts(
+    corpsEdges: Map<FormationId, string[]>,
+    osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
+    faction: FactionId,
+    adjacency: Map<Osid, Osid[]>
+): void {
+    // Collect all edge_ids across all corps for this faction
+    const allEdgeIds: string[] = [];
+    for (const edges of corpsEdges.values()) {
+        allEdgeIds.push(...edges);
+    }
+    if (allEdgeIds.length === 0) return;
+
+    // Build edge metadata lookup
+    const edgeMeta = new Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>();
+    for (const e of osidFrontEdges) {
+        edgeMeta.set(e.edge_id, e);
+    }
+
+    // Build edge-to-corps reverse lookup
+    const edgeToCorps = new Map<string, FormationId>();
+    for (const [corpsId, edges] of corpsEdges) {
+        for (const eid of edges) {
+            edgeToCorps.set(eid, corpsId);
+        }
+    }
+
+    // Build adjacency across ALL faction edges (ignoring corps boundaries)
+    const edgeAdj = buildEdgeAdjacency(allEdgeIds, edgeMeta, faction, adjacency);
+
+    // Also connect edges sharing a hostile-side OSID. Two edges facing the same
+    // enemy OSID are part of the same front even if their friendly OSIDs aren't
+    // adjacent (e.g. orahova<>kruskik_2 and gradiska_3<>kruskik_2 share hostile
+    // kruskik_2 but orahova and gradiska_3 aren't directly adjacent).
+    const hostileToEdges = new Map<string, string[]>();
+    for (const eid of allEdgeIds) {
+        const meta = edgeMeta.get(eid);
+        if (!meta) continue;
+        const addHostile = (osid: string, side: string | null) => {
+            if (side === faction) return; // skip friendly side
+            let list = hostileToEdges.get(osid);
+            if (!list) { list = []; hostileToEdges.set(osid, list); }
+            list.push(eid);
+        };
+        addHostile(meta.a, meta.side_a);
+        addHostile(meta.b, meta.side_b);
+    }
+    for (const edgesAtHostile of hostileToEdges.values()) {
+        if (edgesAtHostile.length < 2) continue;
+        edgesAtHostile.sort(strictCompare);
+        for (let i = 0; i < edgesAtHostile.length; i++) {
+            for (let j = i + 1; j < edgesAtHostile.length; j++) {
+                const a = edgesAtHostile[i]!;
+                const b = edgesAtHostile[j]!;
+                let listA = edgeAdj.get(a);
+                if (!listA) { listA = []; edgeAdj.set(a, listA); }
+                if (!listA.includes(b)) listA.push(b);
+                let listB = edgeAdj.get(b);
+                if (!listB) { listB = []; edgeAdj.set(b, listB); }
+                if (!listB.includes(a)) listB.push(a);
+            }
+        }
+    }
+
+    // Find connected components via BFS
+    const visited = new Set<string>();
+    const sortedAll = [...allEdgeIds].sort(strictCompare);
+
+    for (const seed of sortedAll) {
+        if (visited.has(seed)) continue;
+
+        // BFS to find connected component
+        const component: string[] = [];
+        const queue = [seed];
+        visited.add(seed);
+        while (queue.length > 0) {
+            const eid = queue.shift()!;
+            component.push(eid);
+            for (const next of edgeAdj.get(eid) ?? []) {
+                if (visited.has(next)) continue;
+                visited.add(next);
+                queue.push(next);
+            }
+        }
+
+        // Count edges per corps in this component
+        const corpsCounts = new Map<FormationId, number>();
+        for (const eid of component) {
+            const c = edgeToCorps.get(eid);
+            if (c) corpsCounts.set(c, (corpsCounts.get(c) ?? 0) + 1);
+        }
+        if (corpsCounts.size <= 1) continue; // No split — single corps owns all
+
+        // Find majority corps (deterministic: highest count, then lexicographic tiebreak)
+        let majorityCorps: FormationId | null = null;
+        let majorityCount = 0;
+        for (const [cid, count] of [...corpsCounts.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+            if (count > majorityCount || (count === majorityCount && majorityCorps !== null && strictCompare(cid, majorityCorps) < 0)) {
+                majorityCorps = cid;
+                majorityCount = count;
+            }
+        }
+        if (!majorityCorps) continue;
+
+        // Reassign minority edges to the majority corps
+        for (const eid of component) {
+            const currentCorps = edgeToCorps.get(eid);
+            if (!currentCorps || currentCorps === majorityCorps) continue;
+
+            // Remove from current corps
+            const currentList = corpsEdges.get(currentCorps);
+            if (currentList) {
+                const idx = currentList.indexOf(eid);
+                if (idx >= 0) currentList.splice(idx, 1);
+            }
+
+            // Add to majority corps
+            let majorityList = corpsEdges.get(majorityCorps);
+            if (!majorityList) {
+                majorityList = [];
+                corpsEdges.set(majorityCorps, majorityList);
+            }
+            majorityList.push(eid);
+            edgeToCorps.set(eid, majorityCorps);
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

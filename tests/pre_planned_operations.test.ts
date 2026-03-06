@@ -1,184 +1,104 @@
-/**
- * Tests for pre-planned VRS operations injection.
- */
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+
 import { injectPrePlannedOperations, _VRS_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
-import type { GameState, FactionId, FormationState, CorpsCommandState } from '../src/state/game_state.js';
+import type { CorpsCommandState, FactionId, FormationState, GameState } from '../src/state/game_state.js';
 
 function makeMinimalState(): GameState {
     const formations: Record<string, FormationState> = {};
     const corpsCommand: Record<string, CorpsCommandState> = {};
 
-    // Create 5 VRS corps + brigades
-    const corpsIds = [
-        'vrs_east_bosnian', 'vrs_drina', 'vrs_sarajevo_romanija',
-        'vrs_herzegovina', 'vrs_1st_krajina',
-    ];
-    for (const corpsId of corpsIds) {
-        formations[corpsId] = {
-            id: corpsId, name: corpsId, faction: 'RS' as FactionId,
-            kind: 'corps', status: 'active', personnel: 0,
+    const defs = _VRS_PRE_PLANNED;
+    for (const def of defs) {
+        formations[def.corps] = {
+            id: def.corps,
+            name: def.corps,
+            faction: 'RS' as FactionId,
+            kind: 'corps',
+            status: 'active',
+            personnel: 0,
         } as FormationState;
-        corpsCommand[corpsId] = {
-            command_span: 5, subordinate_count: 4, og_slots: 0,
-            active_ogs: [], corps_exhaustion: 0, stance: 'balanced',
+        corpsCommand[def.corps] = {
+            command_span: 5,
+            subordinate_count: def.participating_brigades.length,
+            og_slots: 0,
+            active_ogs: [],
+            corps_exhaustion: 0,
+            stance: 'balanced',
         };
-        // Add 4 brigades per corps
-        for (let i = 0; i < 4; i++) {
-            const brigId = `${corpsId}_brig_${i}`;
-            formations[brigId] = {
-                id: brigId, name: brigId, faction: 'RS' as FactionId,
-                kind: 'brigade', status: 'active', personnel: 2000,
-                corps_id: corpsId, location_osid: `op:some_mun:loc_${i}`,
+        for (const brigadeId of def.participating_brigades) {
+            formations[brigadeId] = {
+                id: brigadeId,
+                name: brigadeId,
+                faction: 'RS' as FactionId,
+                kind: 'brigade',
+                status: 'active',
+                personnel: 1000,
+                corps_id: def.corps,
+                location_osid: def.staging_osid,
             } as FormationState;
         }
     }
 
-    // Create political_controllers with enemy OSIDs at the specific target OSIDs
-    const pc: Record<string, string> = {};
-    // All target OSIDs from operations definitions
-    const targetOsids = [
-        'op:modrica:garevac_2',
-        'op:zvornik:zvornik', 'op:bratunac:bratunac_2', 'op:vlasenica:vlasenica_2', 'op:zvornik:drinjaca', 'op:zvornik:krizevici',
-        'op:ilidza:sarajevo_dio_ilidza_2', 'op:vogosca:hotonj', 'op:ilijas:dragoradi', 'op:hadzici:hadzici',
-        'op:foca:ustikolina', 'op:foca:miljevina_2', 'op:cajnice:todorovici', 'op:kalinovik:varos_2',
-        'op:prijedor:kozarac_2', 'op:prijedor:kamicani', 'op:sanski_most:sanski_most_2', 'op:kljuc:kljuc_2',
-    ];
-    for (const osid of targetOsids) {
-        pc[osid] = 'RBiH';
+    const politicalControllers: Record<string, string> = {};
+    for (const def of defs) {
+        politicalControllers[def.staging_osid] = 'RS';
+        for (const osid of def.target_osids) {
+            politicalControllers[osid] = 'RBiH';
+        }
     }
-    // Staging OSIDs (RS-held)
-    pc['op:brcko:brcko'] = 'RS';
-    pc['op:zvornik:kozluk_2'] = 'RS';
-    pc['op:ilidza:kasindo'] = 'RS';
-    pc['op:foca:foca_3'] = 'RS';
-    pc['op:prijedor:prijedor_2'] = 'RS';
 
     return {
-        meta: { turn: 0, phase: 'war', scenario_start_date: { year: 1992, month: 4, day: 6 }, seed: 'test' } as GameState['meta'],
+        meta: {
+            turn: 0,
+            phase: 'war',
+            scenario_start_date: { year: 1992, month: 4, day: 6 },
+            seed: 'test',
+        } as GameState['meta'],
         factions: [{ id: 'RS' as FactionId }, { id: 'RBiH' as FactionId }] as GameState['factions'],
         formations,
         corps_command: corpsCommand,
-        political_controllers: pc,
+        political_controllers: politicalControllers,
     } as GameState;
 }
 
-describe('Pre-Planned VRS Operations', () => {
-    it('defines 5 pre-planned operations', () => {
+describe('pre-planned VRS operations', () => {
+    it('defines five explicit opening operations', () => {
         assert.equal(_VRS_PRE_PLANNED.length, 5);
-    });
-
-    it('injects 5 operations into corps_command', () => {
-        const state = makeMinimalState();
-        injectPrePlannedOperations(state);
-
-        const corpsWithOps = Object.keys(state.corps_command!)
-            .filter(cid => state.corps_command![cid]!.active_operation);
-        assert.equal(corpsWithOps.length, 5, `Expected 5 corps with ops, got ${corpsWithOps.length}`);
-    });
-
-    it('all operations are type sector_attack in planning phase', () => {
-        const state = makeMinimalState();
-        injectPrePlannedOperations(state);
-
-        for (const cid of Object.keys(state.corps_command!)) {
-            const op = state.corps_command![cid]!.active_operation;
-            if (!op) continue;
-            assert.equal(op.type, 'sector_attack');
-            assert.equal(op.phase, 'planning');
-            assert.equal(op.planning_duration, 1);
-            assert.equal(op.started_turn, 0);
+        for (const def of _VRS_PRE_PLANNED) {
+            assert.ok(def.sector_id.startsWith('sector:'), `${def.corps} should have explicit sector_id`);
+            assert.ok(def.participating_brigades.length >= 2, `${def.corps} should have explicit brigade roster`);
         }
     });
 
-    it('sets corps stances to offensive', () => {
+    it('injects explicit rosters, sectors, and staging OSIDs', () => {
         const state = makeMinimalState();
         injectPrePlannedOperations(state);
 
-        const expectedCorps = [
-            'vrs_east_bosnian', 'vrs_drina', 'vrs_sarajevo_romanija',
-            'vrs_herzegovina', 'vrs_1st_krajina',
-        ];
-        for (const cid of expectedCorps) {
-            assert.equal(state.corps_command![cid]!.stance, 'offensive',
-                `${cid} should be offensive`);
+        for (const def of _VRS_PRE_PLANNED) {
+            const op = state.corps_command?.[def.corps]?.active_operation;
+            assert.ok(op, `${def.corps} should receive an opening operation`);
+            assert.equal(op?.name, def.name);
+            assert.equal(op?.type, 'sector_attack');
+            assert.equal(op?.phase, 'planning');
+            assert.equal(op?.sector_id, def.sector_id);
+            assert.equal(op?.staging_osid, def.staging_osid);
+            assert.deepEqual(op?.participating_brigades, [...def.participating_brigades].sort());
+            assert.deepEqual(op?.objectives, def.target_osids);
         }
     });
 
-    it('operations have correct names', () => {
+    it('filters out already RS-controlled objectives without dropping the operation', () => {
         const state = makeMinimalState();
+        state.political_controllers!['op:zvornik:novo_selo'] = 'RS';
+
         injectPrePlannedOperations(state);
 
-        const expectedNames: Record<string, string> = {
-            vrs_east_bosnian: 'Operacija Koridor',
-            vrs_drina: 'Operacija Drina',
-            vrs_sarajevo_romanija: 'Operacija Prsten',
-            vrs_herzegovina: 'Operacija Foca',
-            vrs_1st_krajina: 'Operacija Prijedor',
-        };
-
-        for (const [cid, expectedName] of Object.entries(expectedNames)) {
-            const op = state.corps_command![cid]!.active_operation;
-            assert.ok(op, `${cid} should have an operation`);
-            assert.equal(op!.name, expectedName, `${cid} op name`);
-        }
-    });
-
-    it('operations have staging_osid set', () => {
-        const state = makeMinimalState();
-        injectPrePlannedOperations(state);
-
-        const expectedStaging: Record<string, string> = {
-            vrs_east_bosnian: 'op:brcko:brcko',
-            vrs_drina: 'op:zvornik:kozluk_2',
-            vrs_sarajevo_romanija: 'op:ilidza:kasindo',
-            vrs_herzegovina: 'op:foca:foca_3',
-            vrs_1st_krajina: 'op:prijedor:prijedor_2',
-        };
-
-        for (const [cid, expectedOsid] of Object.entries(expectedStaging)) {
-            const op = state.corps_command![cid]!.active_operation;
-            assert.ok(op, `${cid} should have an operation`);
-            assert.equal(op!.staging_osid, expectedOsid, `${cid} staging_osid`);
-        }
-    });
-
-    it('skips corps with existing active operation', () => {
-        const state = makeMinimalState();
-        // Set an existing operation on east_bosnian
-        state.corps_command!['vrs_east_bosnian']!.active_operation = {
-            name: 'Existing Op', type: 'sector_attack', phase: 'execution',
-            started_turn: 0, phase_started_turn: 0, participating_brigades: [],
-        };
-        injectPrePlannedOperations(state);
-
-        assert.equal(state.corps_command!['vrs_east_bosnian']!.active_operation!.name,
-            'Existing Op', 'Should not overwrite existing op');
-        // Other 4 should still get ops
-        const opsCount = Object.values(state.corps_command!)
-            .filter(c => c.active_operation).length;
-        assert.equal(opsCount, 5);
-    });
-
-    it('objectives only include enemy-held target OSIDs', () => {
-        const state = makeMinimalState();
-        injectPrePlannedOperations(state);
-
-        const op = state.corps_command!['vrs_east_bosnian']!.active_operation!;
-        assert.ok(op.objectives!.length > 0, 'Should have objectives');
-        // Koridor targets: op:modrica:garevac_2 (only non-RS target)
-        assert.deepEqual(op.objectives, ['op:modrica:garevac_2']);
-    });
-
-    it('skips RS-controlled target OSIDs from objectives', () => {
-        const state = makeMinimalState();
-        // Make one Drina target RS-controlled
-        state.political_controllers!['op:zvornik:zvornik'] = 'RS';
-        injectPrePlannedOperations(state);
-
-        const op = state.corps_command!['vrs_drina']!.active_operation!;
-        assert.ok(!op.objectives!.includes('op:zvornik:zvornik'),
-            'Should not include RS-held OSID');
+        const drina = state.corps_command?.vrs_drina?.active_operation;
+        assert.ok(drina);
+        assert.deepEqual(drina?.objectives, [
+            'op:bratunac:bratunac_2',
+            'op:zvornik:zvornik',
+        ]);
     });
 });

@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
 import type { AttackResolutionOsidReport } from '../src/sim/combat/attack_resolution_osid.js';
 import type { FactionId, FormationState, GameState } from '../src/state/game_state.js';
@@ -76,13 +77,15 @@ function makeState(): GameState {
 
 function makeOrderSnapshot(
     attackOrdersByBrigade: Record<string, string>,
-    movementOrdersByBrigade: Record<string, string> = {}
+    movementOrdersByBrigade: Record<string, string> = {},
+    eligibleAttackersByCorps: Record<string, number> = {}
 ): BotOrderDiagnosticsSnapshot {
     return {
         attack_orders_by_brigade: attackOrdersByBrigade,
         movement_orders_by_brigade: movementOrdersByBrigade,
         attack_orders_by_corps: { corps_1: Object.keys(attackOrdersByBrigade).length },
-        attack_orders_by_faction: { RS: Object.keys(attackOrdersByBrigade).length }
+        attack_orders_by_faction: { RS: Object.keys(attackOrdersByBrigade).length },
+        eligible_attackers_by_corps: eligibleAttackersByCorps
     };
 }
 
@@ -111,42 +114,62 @@ describe('combat causality diagnostics', () => {
             makeOsidReport([])
         );
 
-        expect(diagnostics.length).toBe(1);
-        expect(diagnostics[0]!.invalid_for_combat_calibration).toBe(true);
-        expect(diagnostics[0]!.invalidation_reasons).toContain('execution_without_attack_orders');
+        assert.equal(diagnostics.length, 1);
+        assert.equal(diagnostics[0]!.invalid_for_combat_calibration, true);
+        assert.ok(diagnostics[0]!.invalidation_reasons.includes('execution_without_attack_orders'));
+    });
+
+    it('flags execution-phase operation with participants but zero eligible attackers', () => {
+        const diagnostics = buildOperationCombatDiagnostics(
+            makeState(),
+            makeOrderSnapshot({}, {}, { corps_1: 0 }),
+            makeOsidReport([])
+        );
+
+        assert.equal(diagnostics.length, 1);
+        assert.equal(diagnostics[0]!.eligible_attacker_count, 0);
+        assert.ok(diagnostics[0]!.invalidation_reasons.includes('execution_without_eligible_attackers'));
+
+        const summary = buildCombatCausalitySummary(
+            diagnostics,
+            makeOrderSnapshot({}, {}, { corps_1: 0 }),
+            makeOsidReport([])
+        );
+
+        assert.ok(summary.invalidation_reasons.includes('operation_execution_without_eligible_attackers'));
     });
 
     it('flags execution-phase operation with attack orders but zero battles', () => {
         const diagnostics = buildOperationCombatDiagnostics(
             makeState(),
-            makeOrderSnapshot({ b1: 'op:enemy:obj1' }),
+            makeOrderSnapshot({ b1: 'op:enemy:obj1' }, {}, { corps_1: 1 }),
             makeOsidReport([])
         );
 
-        expect(diagnostics.length).toBe(1);
-        expect(diagnostics[0]!.attack_attempt_count).toBe(1);
-        expect(diagnostics[0]!.battle_count).toBe(0);
-        expect(diagnostics[0]!.invalidation_reasons).toContain('attack_orders_without_battles');
+        assert.equal(diagnostics.length, 1);
+        assert.equal(diagnostics[0]!.attack_attempt_count, 1);
+        assert.equal(diagnostics[0]!.battle_count, 0);
+        assert.ok(diagnostics[0]!.invalidation_reasons.includes('attack_orders_without_battles'));
     });
 
     it('does not flag execution-phase operation that is still maneuvering into position', () => {
         const diagnostics = buildOperationCombatDiagnostics(
             makeState(),
-            makeOrderSnapshot({}, { b1: 'op:rs:approach' }),
+            makeOrderSnapshot({}, { b1: 'op:rs:approach' }, { corps_1: 1 }),
             makeOsidReport([])
         );
 
-        expect(diagnostics.length).toBe(1);
-        expect(diagnostics[0]!.movement_order_count).toBe(1);
-        expect(diagnostics[0]!.invalid_for_combat_calibration).toBe(false);
-        expect(diagnostics[0]!.invalidation_reasons).toEqual([]);
+        assert.equal(diagnostics.length, 1);
+        assert.equal(diagnostics[0]!.movement_order_count, 1);
+        assert.equal(diagnostics[0]!.invalid_for_combat_calibration, false);
+        assert.deepEqual(diagnostics[0]!.invalidation_reasons, []);
     });
 
     it('treats operation as valid when attack orders and battles exist', () => {
         const state = makeState();
         const diagnostics = buildOperationCombatDiagnostics(
             state,
-            makeOrderSnapshot({ b1: 'op:enemy:obj1' }),
+            makeOrderSnapshot({ b1: 'op:enemy:obj1' }, {}, { corps_1: 1 }),
             makeOsidReport([{
                 attacker_brigade: 'b1' as any,
                 attacker_faction: 'RS',
@@ -160,13 +183,13 @@ describe('combat causality diagnostics', () => {
             }])
         );
 
-        expect(diagnostics[0]!.invalid_for_combat_calibration).toBe(false);
-        expect(diagnostics[0]!.current_objective_attack_count).toBe(1);
-        expect(diagnostics[0]!.current_objective_battle_count).toBe(1);
+        assert.equal(diagnostics[0]!.invalid_for_combat_calibration, false);
+        assert.equal(diagnostics[0]!.current_objective_attack_count, 1);
+        assert.equal(diagnostics[0]!.current_objective_battle_count, 1);
 
         const summary = buildCombatCausalitySummary(
             diagnostics,
-            makeOrderSnapshot({ b1: 'op:enemy:obj1' }),
+            makeOrderSnapshot({ b1: 'op:enemy:obj1' }, {}, { corps_1: 1 }),
             makeOsidReport([{
                 attacker_brigade: 'b1' as any,
                 attacker_faction: 'RS',
@@ -180,9 +203,9 @@ describe('combat causality diagnostics', () => {
             }])
         );
 
-        expect(summary.valid_for_combat_calibration).toBe(true);
-        expect(summary.total_battles).toBe(1);
-        expect(summary.total_orders_by_faction).toEqual({ RS: 1 });
+        assert.equal(summary.valid_for_combat_calibration, true);
+        assert.equal(summary.total_battles, 1);
+        assert.deepEqual(summary.total_orders_by_faction, { RS: 1 });
     });
 
     it('invalidates summary when total battles are zero', () => {
@@ -197,7 +220,89 @@ describe('combat causality diagnostics', () => {
             makeOsidReport([])
         );
 
-        expect(summary.valid_for_combat_calibration).toBe(false);
-        expect(summary.invalidation_reasons).toContain('zero_battles');
+        assert.equal(summary.valid_for_combat_calibration, false);
+        assert.ok(summary.invalidation_reasons.includes('zero_battles'));
+    });
+
+    it('flags recovery-phase operation that never logged an objective attempt', () => {
+        const state = makeState();
+        state.corps_command!['corps_1']!.active_operation = {
+            ...state.corps_command!['corps_1']!.active_operation!,
+            phase: 'recovery',
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+            recovery_reason: 'no_logged_attempt',
+        } as any;
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({}),
+            makeOsidReport([])
+        );
+
+        assert.equal(diagnostics.length, 1);
+        assert.ok(diagnostics[0]!.invalidation_reasons.includes('recovery_without_logged_attempt'));
+
+        const summary = buildCombatCausalitySummary(
+            diagnostics,
+            makeOrderSnapshot({}),
+            makeOsidReport([])
+        );
+
+        assert.ok(summary.invalidation_reasons.includes('operation_recovery_without_logged_attempt'));
+        assert.equal(summary.recovery_without_logged_attempt_count, 1);
+    });
+
+    it('surfaces persisted operation counters in diagnostics and summary', () => {
+        const state = makeState();
+        state.corps_command!['corps_1']!.active_operation = {
+            ...state.corps_command!['corps_1']!.active_operation!,
+            attack_attempt_count: 2,
+            objective_capture_count: 1,
+            movement_only_execution_turns: 3,
+            idle_execution_turn_streak: 0,
+        } as any;
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({ b1: 'op:enemy:obj1' }, {}, { corps_1: 1 }),
+            makeOsidReport([{
+                attacker_brigade: 'b1' as any,
+                attacker_faction: 'RS',
+                defender_faction: 'RBiH',
+                target_osid: 'op:enemy:obj1' as any,
+                outcome: 'victory' as any,
+                power_ratio: 1.2,
+                attacker_won: true,
+                defender_brigade: null,
+                snap_events: []
+            }])
+        );
+
+        assert.equal(diagnostics[0]!.objective_attempt_count, 2);
+        assert.equal(diagnostics[0]!.objective_capture_count, 1);
+        assert.equal(diagnostics[0]!.movement_only_execution_turns, 3);
+
+        const summary = buildCombatCausalitySummary(
+            diagnostics,
+            makeOrderSnapshot({ b1: 'op:enemy:obj1' }, {}, { corps_1: 1 }),
+            makeOsidReport([{
+                attacker_brigade: 'b1' as any,
+                attacker_faction: 'RS',
+                defender_faction: 'RBiH',
+                target_osid: 'op:enemy:obj1' as any,
+                outcome: 'victory' as any,
+                power_ratio: 1.2,
+                attacker_won: true,
+                defender_brigade: null,
+                snap_events: []
+            }])
+        );
+
+        assert.equal(summary.total_objective_attempts, 2);
+        assert.equal(summary.total_objective_captures, 1);
+        assert.equal(summary.movement_only_execution_turns, 3);
     });
 });

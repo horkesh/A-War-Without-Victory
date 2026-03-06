@@ -315,7 +315,9 @@ export function MapContainer() {
                 ? state.war_alliance_rbih_hrhb > 0.2 : undefined;
               frontLinesGeoJson = buildCorpsFrontLinesGeoJSON(
                 controlledGeoJson, state.corpsFrontSectors, rbihHrhbAllied,
-                osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined
+                osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined,
+                undefined,
+                state.frontEdgesOsid
               );
               // Dynamic corps colors on glow + front-line layers
               try {

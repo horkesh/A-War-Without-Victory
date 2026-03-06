@@ -7,11 +7,14 @@ export interface BotOrderDiagnosticsSnapshot {
     movement_orders_by_brigade: Record<FormationId, string>;
     attack_orders_by_corps: Record<FormationId, number>;
     attack_orders_by_faction: Record<FactionId, number>;
+    eligible_attackers_by_corps: Record<FormationId, number>;
 }
 
 export type OperationCombatInvalidationReason =
     | 'execution_without_attack_orders'
-    | 'attack_orders_without_battles';
+    | 'attack_orders_without_battles'
+    | 'execution_without_eligible_attackers'
+    | 'recovery_without_logged_attempt';
 
 export interface OperationCombatDiagnostic {
     corps_id: FormationId;
@@ -21,11 +24,17 @@ export interface OperationCombatDiagnostic {
     operation_phase: CorpsOperation['phase'];
     current_objective: string | null;
     participating_brigades: FormationId[];
+    eligible_attacker_count: number;
     attack_attempt_count: number;
+    objective_attempt_count: number;
+    objective_capture_count: number;
     movement_order_count: number;
+    movement_only_execution_turns: number;
+    idle_execution_turn_streak: number;
     battle_count: number;
     current_objective_attack_count: number;
     current_objective_battle_count: number;
+    recovery_reason: string | null;
     invalid_for_combat_calibration: boolean;
     invalidation_reasons: OperationCombatInvalidationReason[];
 }
@@ -33,15 +42,22 @@ export interface OperationCombatDiagnostic {
 export type CombatCausalityInvalidationReason =
     | 'zero_battles'
     | 'operation_execution_without_attack_orders'
-    | 'operation_attack_orders_without_battles';
+    | 'operation_attack_orders_without_battles'
+    | 'operation_execution_without_eligible_attackers'
+    | 'operation_recovery_without_logged_attempt';
 
 export interface CombatCausalitySummary {
     valid_for_combat_calibration: boolean;
     invalidation_reasons: CombatCausalityInvalidationReason[];
     total_attack_orders: number;
+    total_objective_attempts: number;
+    total_objective_captures: number;
+    movement_only_execution_turns: number;
     total_battles: number;
     total_orders_by_faction: Record<FactionId, number>;
     invalid_operation_count: number;
+    zero_eligible_attacker_operation_count: number;
+    recovery_without_logged_attempt_count: number;
 }
 
 function sortedFormationIds(ids: Iterable<string>): string[] {
@@ -60,7 +76,10 @@ function getCurrentObjective(operation: CorpsOperation): string | null {
     return typeof objective === 'string' && objective.length > 0 ? objective : null;
 }
 
-export function createBotOrderDiagnosticsSnapshot(state: GameState): BotOrderDiagnosticsSnapshot {
+export function createBotOrderDiagnosticsSnapshot(
+    state: GameState,
+    extras?: { eligible_attackers_by_corps?: Record<FormationId, number> }
+): BotOrderDiagnosticsSnapshot {
     const attackOrdersByBrigade: Record<FormationId, string> = {};
     const movementOrdersByBrigade: Record<FormationId, string> = {};
     const attackOrdersByCorps: Record<FormationId, number> = {};
@@ -93,7 +112,8 @@ export function createBotOrderDiagnosticsSnapshot(state: GameState): BotOrderDia
         attack_orders_by_brigade: attackOrdersByBrigade,
         movement_orders_by_brigade: movementOrdersByBrigade,
         attack_orders_by_corps: attackOrdersByCorps,
-        attack_orders_by_faction: attackOrdersByFaction
+        attack_orders_by_faction: attackOrdersByFaction,
+        eligible_attackers_by_corps: { ...(extras?.eligible_attackers_by_corps ?? {}) }
     };
 }
 
@@ -122,6 +142,14 @@ export function buildOperationCombatDiagnostics(
         const factionId = (corpsFormation?.faction ?? 'unknown') as FactionId;
         const brigades = sortedFormationIds(operation.participating_brigades ?? []);
         const currentObjective = getCurrentObjective(operation);
+        const eligibleAttackerCount = orderSnapshot?.eligible_attackers_by_corps?.[corpsId] ?? 0;
+        const objectiveAttemptCount = operation.attack_attempt_count ?? 0;
+        const objectiveCaptureCount = operation.objective_capture_count ?? 0;
+        const movementOnlyExecutionTurns = operation.movement_only_execution_turns ?? 0;
+        const idleExecutionTurnStreak = operation.idle_execution_turn_streak ?? 0;
+        const recoveryReason = typeof operation.recovery_reason === 'string'
+            ? operation.recovery_reason
+            : null;
         let attackAttemptCount = 0;
         let movementOrderCount = 0;
         let currentObjectiveAttackCount = 0;
@@ -147,8 +175,14 @@ export function buildOperationCombatDiagnostics(
         if (operation.phase === 'execution' && attackAttemptCount === 0 && movementOrderCount === 0) {
             invalidationReasons.push('execution_without_attack_orders');
         }
+        if (operation.phase === 'execution' && brigades.length > 0 && eligibleAttackerCount === 0) {
+            invalidationReasons.push('execution_without_eligible_attackers');
+        }
         if (operation.phase === 'execution' && attackAttemptCount > 0 && battleCount === 0) {
             invalidationReasons.push('attack_orders_without_battles');
+        }
+        if (operation.phase === 'recovery' && objectiveAttemptCount === 0) {
+            invalidationReasons.push('recovery_without_logged_attempt');
         }
         diagnostics.push({
             corps_id: corpsId,
@@ -158,11 +192,17 @@ export function buildOperationCombatDiagnostics(
             operation_phase: operation.phase,
             current_objective: currentObjective,
             participating_brigades: brigades,
+            eligible_attacker_count: eligibleAttackerCount,
             attack_attempt_count: attackAttemptCount,
+            objective_attempt_count: objectiveAttemptCount,
+            objective_capture_count: objectiveCaptureCount,
             movement_order_count: movementOrderCount,
+            movement_only_execution_turns: movementOnlyExecutionTurns,
+            idle_execution_turn_streak: idleExecutionTurnStreak,
             battle_count: battleCount,
             current_objective_attack_count: currentObjectiveAttackCount,
             current_objective_battle_count: currentObjectiveBattleCount,
+            recovery_reason: recoveryReason,
             invalid_for_combat_calibration: invalidationReasons.length > 0,
             invalidation_reasons: invalidationReasons
         });
@@ -181,7 +221,15 @@ export function buildCombatCausalitySummary(
         invalidationReasons.add('zero_battles');
     }
     let invalidOperationCount = 0;
+    let totalObjectiveAttempts = 0;
+    let totalObjectiveCaptures = 0;
+    let totalMovementOnlyExecutionTurns = 0;
+    let zeroEligibleAttackerOperationCount = 0;
+    let recoveryWithoutLoggedAttemptCount = 0;
     for (const diagnostic of operationDiagnostics) {
+        totalObjectiveAttempts += diagnostic.objective_attempt_count;
+        totalObjectiveCaptures += diagnostic.objective_capture_count;
+        totalMovementOnlyExecutionTurns += diagnostic.movement_only_execution_turns;
         if (!diagnostic.invalid_for_combat_calibration) continue;
         invalidOperationCount += 1;
         if (diagnostic.invalidation_reasons.includes('execution_without_attack_orders')) {
@@ -189,6 +237,14 @@ export function buildCombatCausalitySummary(
         }
         if (diagnostic.invalidation_reasons.includes('attack_orders_without_battles')) {
             invalidationReasons.add('operation_attack_orders_without_battles');
+        }
+        if (diagnostic.invalidation_reasons.includes('execution_without_eligible_attackers')) {
+            invalidationReasons.add('operation_execution_without_eligible_attackers');
+            zeroEligibleAttackerOperationCount += 1;
+        }
+        if (diagnostic.invalidation_reasons.includes('recovery_without_logged_attempt')) {
+            invalidationReasons.add('operation_recovery_without_logged_attempt');
+            recoveryWithoutLoggedAttemptCount += 1;
         }
     }
 
@@ -201,8 +257,13 @@ export function buildCombatCausalitySummary(
         valid_for_combat_calibration: invalidationReasons.size === 0,
         invalidation_reasons: Array.from(invalidationReasons).sort(strictCompare),
         total_attack_orders: Object.keys(orderSnapshot?.attack_orders_by_brigade ?? {}).length,
+        total_objective_attempts: totalObjectiveAttempts,
+        total_objective_captures: totalObjectiveCaptures,
+        movement_only_execution_turns: totalMovementOnlyExecutionTurns,
         total_battles: totalBattles,
         total_orders_by_faction: totalOrdersByFaction,
-        invalid_operation_count: invalidOperationCount
+        invalid_operation_count: invalidOperationCount,
+        zero_eligible_attacker_operation_count: zeroEligibleAttackerOperationCount,
+        recovery_without_logged_attempt_count: recoveryWithoutLoggedAttemptCount
     };
 }

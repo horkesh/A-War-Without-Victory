@@ -1489,6 +1489,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                         ])).sort(strictCompare),
                         total_attack_orders:
                             previousCombatCausality.total_attack_orders + weeklyCombatCausality.total_attack_orders,
+                        total_objective_attempts:
+                            previousCombatCausality.total_objective_attempts + weeklyCombatCausality.total_objective_attempts,
+                        total_objective_captures:
+                            previousCombatCausality.total_objective_captures + weeklyCombatCausality.total_objective_captures,
+                        movement_only_execution_turns:
+                            previousCombatCausality.movement_only_execution_turns + weeklyCombatCausality.movement_only_execution_turns,
                         total_battles: previousCombatCausality.total_battles + weeklyCombatCausality.total_battles,
                         total_orders_by_faction: Object.keys({
                             ...previousCombatCausality.total_orders_by_faction,
@@ -1500,7 +1506,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                             return acc;
                         }, {}),
                         invalid_operation_count:
-                            previousCombatCausality.invalid_operation_count + weeklyCombatCausality.invalid_operation_count
+                            previousCombatCausality.invalid_operation_count + weeklyCombatCausality.invalid_operation_count,
+                        zero_eligible_attacker_operation_count:
+                            previousCombatCausality.zero_eligible_attacker_operation_count +
+                            weeklyCombatCausality.zero_eligible_attacker_operation_count,
+                        recovery_without_logged_attempt_count:
+                            previousCombatCausality.recovery_without_logged_attempt_count +
+                            weeklyCombatCausality.recovery_without_logged_attempt_count
                     };
                 }
                 combatCausalityWeekly.push({
@@ -1508,15 +1520,25 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     turn: state.meta.turn,
                     valid_for_combat_calibration: weeklyCombatCausality.valid_for_combat_calibration,
                     total_attack_orders: weeklyCombatCausality.total_attack_orders,
+                    total_objective_attempts: weeklyCombatCausality.total_objective_attempts,
+                    total_objective_captures: weeklyCombatCausality.total_objective_captures,
+                    movement_only_execution_turns: weeklyCombatCausality.movement_only_execution_turns,
                     total_battles: weeklyCombatCausality.total_battles,
                     invalid_operation_count: weeklyCombatCausality.invalid_operation_count,
+                    zero_eligible_attacker_operation_count: weeklyCombatCausality.zero_eligible_attacker_operation_count,
+                    recovery_without_logged_attempt_count: weeklyCombatCausality.recovery_without_logged_attempt_count,
                     invalidation_reasons: weeklyCombatCausality.invalidation_reasons
                 });
                 weeklyCombatCausalityForReport = {
                     valid_for_combat_calibration: weeklyCombatCausality.valid_for_combat_calibration,
                     total_attack_orders: weeklyCombatCausality.total_attack_orders,
+                    total_objective_attempts: weeklyCombatCausality.total_objective_attempts,
+                    total_objective_captures: weeklyCombatCausality.total_objective_captures,
+                    movement_only_execution_turns: weeklyCombatCausality.movement_only_execution_turns,
                     total_battles: weeklyCombatCausality.total_battles,
                     invalid_operation_count: weeklyCombatCausality.invalid_operation_count,
+                    zero_eligible_attacker_operation_count: weeklyCombatCausality.zero_eligible_attacker_operation_count,
+                    recovery_without_logged_attempt_count: weeklyCombatCausality.recovery_without_logged_attempt_count,
                     invalidation_reasons: weeklyCombatCausality.invalidation_reasons
                 };
                 const phaseIIResolution = turnReport.phase_ii_resolve_attack_orders;
@@ -1859,9 +1881,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                             valid_for_combat_calibration: false,
                             invalidation_reasons: ['zero_battles'],
                             total_attack_orders: 0,
+                            total_objective_attempts: 0,
+                            total_objective_captures: 0,
+                            movement_only_execution_turns: 0,
                             total_battles: 0,
                             total_orders_by_faction: {},
-                            invalid_operation_count: 0
+                            invalid_operation_count: 0,
+                            zero_eligible_attacker_operation_count: 0,
+                            recovery_without_logged_attempt_count: 0
                         },
                     combat_causality_weekly: combatCausalityWeekly
                 }

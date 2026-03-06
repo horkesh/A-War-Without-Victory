@@ -43,6 +43,8 @@ import {
 import { getRsJnaHeavyComposition } from './combat/equipment_effects.js';
 import { getFactionDefaultOfficerQuality } from './combat/combat_math.js';
 
+const FIXED_HOME_OSID_TAG = 'placement:fixed_home_osid';
+
 // ---------------------------------------------------------------------------
 // Strategic area scoring for bot AI
 // ---------------------------------------------------------------------------
@@ -173,11 +175,18 @@ function buildBrigadeComposition(
 }
 
 /** Build tags array for a recruited brigade. */
-function buildRecruitmentTags(homeMun: string, corps: string | undefined, equipClass: EquipmentClass, oobTags?: string[]): string[] {
+function buildRecruitmentTags(
+    homeMun: string,
+    corps: string | undefined,
+    equipClass: EquipmentClass,
+    oobTags?: string[],
+    fixedHomeOsid?: string
+): string[] {
     const tags = [`mun:${homeMun}`];
     if (corps) tags.push(`corps:${corps}`);
     tags.push(`equip:${equipClass}`);
     if (oobTags) tags.push(...oobTags);
+    if (fixedHomeOsid) tags.push(FIXED_HOME_OSID_TAG);
     tags.sort((a, b) => a.localeCompare(b));
     return tags;
 }
@@ -205,7 +214,7 @@ function buildRecruitedFormation(
         created_turn: currentTurn,
         status: 'active',
         assignment: null,
-        tags: buildRecruitmentTags(brigade.home_mun, brigade.corps, equipClass, brigade.tags),
+        tags: buildRecruitmentTags(brigade.home_mun, brigade.corps, equipClass, brigade.tags, brigade.home_osid),
         kind: brigade.kind,
         personnel: effectivePersonnel,
         readiness: isMandatory ? 'active' : 'forming',

@@ -25,8 +25,13 @@ export interface WeeklyCorpsSummaryEntry {
 export interface WeeklyCombatCausalitySummary {
     valid_for_combat_calibration: boolean;
     total_attack_orders: number;
+    total_objective_attempts: number;
+    total_objective_captures: number;
+    movement_only_execution_turns: number;
     total_battles: number;
     invalid_operation_count: number;
+    zero_eligible_attacker_operation_count: number;
+    recovery_without_logged_attempt_count: number;
     invalidation_reasons: string[];
 }
 

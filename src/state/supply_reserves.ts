@@ -21,6 +21,8 @@ import {
     PRODUCTION_HEAVY_FRACTION,
     INIT_GENERAL_SUPPLY_RESERVE,
     INIT_HEAVY_MUNITIONS_RESERVE,
+    INIT_GENERAL_SUPPLY_RESERVE_BY_FACTION,
+    INIT_HEAVY_MUNITIONS_RESERVE_BY_FACTION,
     RESERVE_ADEQUATE_THRESHOLD,
     RESERVE_STRAINED_THRESHOLD,
     SIEGE_BASE_RATE,
@@ -50,13 +52,15 @@ export function ensureSupplyReserves(state: GameState): void {
     if (!state.general_supply_reserve) {
         state.general_supply_reserve = {};
         for (const fid of factionIds) {
-            state.general_supply_reserve[fid as FactionId] = INIT_GENERAL_SUPPLY_RESERVE;
+            state.general_supply_reserve[fid as FactionId] =
+                INIT_GENERAL_SUPPLY_RESERVE_BY_FACTION[fid] ?? INIT_GENERAL_SUPPLY_RESERVE;
         }
     }
     if (!state.heavy_munitions_reserve) {
         state.heavy_munitions_reserve = {};
         for (const fid of factionIds) {
-            state.heavy_munitions_reserve[fid as FactionId] = INIT_HEAVY_MUNITIONS_RESERVE;
+            state.heavy_munitions_reserve[fid as FactionId] =
+                INIT_HEAVY_MUNITIONS_RESERVE_BY_FACTION[fid] ?? INIT_HEAVY_MUNITIONS_RESERVE;
         }
     }
 }
@@ -403,10 +407,17 @@ export function getEffectiveSupplyState(
     reachabilityState: SupplyStateLevel,
     reserveLevel: number
 ): SupplyStateLevel {
-    // Critical reachability always → critical regardless of reserves
-    if (reachabilityState === 'critical') return 'critical';
+    // Critical reachability: normally critical, but high reserves compensate partially.
+    // Historically: a well-stocked faction can supply isolated brigades via convoys/depots.
+    // High reserves (≥ RESERVE_ADEQUATE_THRESHOLD) upgrade critical → strained.
+    // This allows RS (general=80) to attack from fragmented positions while blocking
+    // RBiH (general=10) and HRHB (general=55, marginally above threshold).
+    if (reachabilityState === 'critical') {
+        return reserveLevel >= RESERVE_ADEQUATE_THRESHOLD ? 'strained' : 'critical';
+    }
 
-    // Strained reachability: can't improve beyond strained even with reserves
+    // Strained reachability: logistics fragmentation caps effective state at strained.
+    // Even high reserves can't compensate for inadequate supply routes.
     if (reachabilityState === 'strained') {
         return reserveLevel < RESERVE_STRAINED_THRESHOLD ? 'critical' : 'strained';
     }

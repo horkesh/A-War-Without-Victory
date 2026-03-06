@@ -67,8 +67,11 @@ Combat causality is now emitted directly by the scenario harness:
 - `weekly_report.jsonl`
   - `combat_causality.valid_for_combat_calibration`
   - `combat_causality.total_attack_orders`
+  - `combat_causality.total_objective_attempts`
+  - `combat_causality.total_objective_captures`
   - `combat_causality.total_battles`
   - `combat_causality.invalid_operation_count`
+  - `combat_causality.zero_eligible_attacker_operation_count`
   - `combat_causality.invalidation_reasons`
 - `run_summary.json`
   - `combat_causality`
@@ -78,8 +81,26 @@ Current invalidation reasons:
 
 - `zero_battles`
 - `operation_execution_without_attack_orders`
+- `operation_execution_without_eligible_attackers`
 - `operation_attack_orders_without_battles`
+- `operation_recovery_without_logged_attempt`
 - do not label a run "improved" unless it passes the gate above
+
+### Proof scenario lane update (2026-03-06)
+
+- Dedicated deterministic proof fixture now exists at `data/scenarios/apr1992_vrs_operation_proof_4w.json`.
+- Acceptance test: `tests/scenario_vrs_operation_proof.test.ts` runs the fixture twice and requires:
+  - non-zero RS attack orders
+  - non-zero processed attack orders
+  - at least one VRS operation with `attack_attempt_count > 0`, `objective_capture_count > 0`, and `current_objective_index > 0`
+  - byte-identical `final_save.json` across both runs
+- Current proof artifact: `.tmp_proof_report/apr1992_vrs_operation_proof_4w__1142cedd3e0e4d62__w4_n0/run_summary.json`
+  - `RS attack orders = 17`
+  - `total battles = 12`
+  - `total objective attempts = 6`
+  - `total objective captures = 4`
+  - `zero_eligible_attacker_operation_count = 2`
+  - proof scenario passes the existence-of-combat/progress gate but still correctly fails full combat calibration because not all VRS opening ops are healthy yet
 
 ### Opening-operation debug lane updates (2026-03-05)
 

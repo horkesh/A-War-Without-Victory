@@ -65,6 +65,12 @@ export interface OsidBotOrdersResult {
     movement_orders: Record<FormationId, Osid>;
     /** Column march orders: brigade → distant destination OSID (multi-turn transit). */
     column_march_orders: Record<FormationId, Osid>;
+    /** Diagnostics: operation participants that could directly attack the current objective this turn. */
+    eligible_attackers_by_corps: Record<FormationId, number>;
+}
+
+export interface BotOrderGenerationDiagnostics {
+    eligible_attackers_by_corps: Record<FormationId, number>;
 }
 
 interface BrigadeContext {
@@ -871,7 +877,14 @@ function executeFactionDirectives(
     ethnicMap?: OsidEthnicComposition,
     osidPopulationMap?: OsidPopulationMap
 ): OsidBotOrdersResult {
-    const result: OsidBotOrdersResult = { posture_orders: [], attack_orders: {}, attack_scores: {}, movement_orders: {}, column_march_orders: {} };
+    const result: OsidBotOrdersResult = {
+        posture_orders: [],
+        attack_orders: {},
+        attack_scores: {},
+        movement_orders: {},
+        column_march_orders: {},
+        eligible_attackers_by_corps: {}
+    };
     const chosenTargets = new Map<Osid, number>();
     const columnAssignments = new Map<Osid, number>();
 
@@ -1022,7 +1035,7 @@ function executeFactionDirectives(
                 );
                 const directObjectiveAttack = targets.find((t) => t.osid === currentObjective);
                 const alreadyAssigned = chosenTargets.get(currentObjective) ?? 0;
-                if (directObjectiveAttack && alreadyAssigned < MAX_ATTACKERS_PER_TARGET) {
+                if (directObjectiveAttack) {
                     const predictedOutcome = directObjectiveAttack.prediction.predicted_outcome;
                     const adjacentOperationParticipants = (activeOp15.participating_brigades ?? []).filter((brigadeId) => {
                         const participant = state.formations?.[brigadeId];
@@ -1035,11 +1048,15 @@ function executeFactionDirectives(
                             Math.max(alreadyAssigned + 1, adjacentOperationParticipants) - 1
                         )
                         : null;
-                    if (
+                    const canDirectAttackObjective =
                         isOutcomeSufficientForAttack(predictedOutcome, 'costly_victory') ||
                         (concentratedOutcome != null &&
-                            isOutcomeSufficientForAttack(concentratedOutcome, 'costly_victory'))
-                    ) {
+                            isOutcomeSufficientForAttack(concentratedOutcome, 'costly_victory'));
+                    if (canDirectAttackObjective && brigade.corps_id) {
+                        result.eligible_attackers_by_corps[brigade.corps_id] =
+                            (result.eligible_attackers_by_corps[brigade.corps_id] ?? 0) + 1;
+                    }
+                    if (canDirectAttackObjective && alreadyAssigned < MAX_ATTACKERS_PER_TARGET) {
                         const attackPosture: BrigadePosture = (brigade.cohesion ?? 0) >= 60 ? 'assault' : 'attack';
                         result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });
                         result.attack_orders[brigade.id] = currentObjective;
@@ -1553,7 +1570,7 @@ export function generateAllBotOrdersOsid(
     state: GameState,
     botFactions: FactionId[],
     ctx: OsidBotContext
-): void {
+): BotOrderGenerationDiagnostics {
     const adjacency = buildOsidAdjacency(ctx.edges);
     const terrainCache = buildTerrainCache(ctx.reverseMap);
     const sortedFactions = [...botFactions].sort(strictCompare);
@@ -1562,6 +1579,7 @@ export function generateAllBotOrdersOsid(
     const allPostureOrders: Array<{ brigade_id: FormationId; posture: BrigadePosture }> = [];
     const allMovementOrders: Record<FormationId, Osid> = {};
     const allColumnMarchOrders: Record<FormationId, Osid> = {};
+    const allEligibleAttackersByCorps: Record<FormationId, number> = {};
 
     for (const faction of sortedFactions) {
         const brigades = Object.values(state.formations ?? {})
@@ -1583,6 +1601,10 @@ export function generateAllBotOrdersOsid(
             terrainCache, graphAnalysis,
             ctx.supplyStateByOsid, ctx.ethnicCompositionByOsid, ctx.osidPopulationMap
         );
+        for (const corpsId of Object.keys(result.eligible_attackers_by_corps).sort(strictCompare)) {
+            allEligibleAttackersByCorps[corpsId] =
+                (allEligibleAttackersByCorps[corpsId] ?? 0) + result.eligible_attackers_by_corps[corpsId]!;
+        }
 
         // Per-corps attack share cap: each corps gets attack slots proportional to its size.
         // This prevents large corps (1KK with 28 brigades) from monopolizing all attack slots
@@ -1686,4 +1708,8 @@ export function generateAllBotOrdersOsid(
     if (Object.keys(mergedMovement).length > 0) {
         state.brigade_movement_orders = mergedMovement as Record<FormationId, { destination_sids: string[] }>;
     }
+
+    return {
+        eligible_attackers_by_corps: allEligibleAttackersByCorps
+    };
 }

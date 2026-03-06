@@ -193,6 +193,16 @@ export interface CorpsOperation {
     consecutive_failures_on_current?: number;
     /** Friendly OSID where brigades stage during planning phase. */
     staging_osid?: string;
+    /** Cumulative objective attack attempts logged while this operation is active. */
+    attack_attempt_count?: number;
+    /** Cumulative objectives captured while this operation is active. */
+    objective_capture_count?: number;
+    /** Execution turns spent maneuvering without an attack attempt. */
+    movement_only_execution_turns?: number;
+    /** Consecutive execution turns with neither attack attempts nor movement progress. */
+    idle_execution_turn_streak?: number;
+    /** Reason the operation entered recovery. */
+    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination';
 }
 
 /**

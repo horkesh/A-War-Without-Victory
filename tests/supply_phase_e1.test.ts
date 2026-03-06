@@ -52,8 +52,9 @@ describe('Phase E1 — JNA Inheritance Bonus', () => {
         const state = makeState();
         ensureSupplyReserves(state);
         applyJnaInheritanceBonus(state);
-        expect(state.heavy_munitions_reserve!['RBiH']).toBe(INIT_HEAVY_MUNITIONS_RESERVE);
-        expect(state.heavy_munitions_reserve!['HRHB']).toBe(INIT_HEAVY_MUNITIONS_RESERVE);
+        // RBiH and HRHB use per-faction overrides (5 and 25 respectively), not the global default
+        expect(state.heavy_munitions_reserve!['RBiH']).toBe(5);
+        expect(state.heavy_munitions_reserve!['HRHB']).toBe(25);
     });
 
     it('is idempotent — second call stays at 100 if already maxed', () => {
