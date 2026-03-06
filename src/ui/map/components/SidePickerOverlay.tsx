@@ -1,4 +1,5 @@
 import type { StartNewCampaignPayload } from '../desktop/types';
+import { getFactionFlag, getArmyName } from '../utils/factionAssets';
 
 interface SidePickerOverlayProps {
   isOpen: boolean;
@@ -38,9 +39,17 @@ export function SidePickerOverlay({
               type="button"
               disabled={starting}
               onClick={() => onSelectFaction(faction)}
-              className="w-full text-left px-3 py-2 rounded border border-panel-border bg-panel-bg hover:bg-panel-hover text-text-primary disabled:opacity-50"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded border border-panel-border bg-panel-bg hover:bg-panel-hover text-text-primary disabled:opacity-50 group transition-all"
             >
-              {faction}
+              {getFactionFlag(faction) && (
+                <img src={getFactionFlag(faction)} alt="" className="w-10 h-7 object-cover rounded border border-white/5 opacity-80 group-hover:opacity-100 transition-opacity shadow-sm" />
+              )}
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold tracking-wide">{faction}</span>
+                {getArmyName(faction) && (
+                  <span className="text-[10px] text-text-secondary uppercase">{getArmyName(faction)} Forces</span>
+                )}
+              </div>
             </button>
           ))}
         </div>

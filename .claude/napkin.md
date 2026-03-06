@@ -89,8 +89,8 @@
     Do instead: `src/sim/local_truces.ts` — fires at week 4; sets `state.vienna_declaration_turn`. Bot filters RS↔HRHB truce-partner OSIDs from `offensive_targets`, except {brod, derventa, odzak, bosanski_samac, orasje, jajce}. Player truce-break: `check-truce-break` step; sets `state.truce_broken_turn[faction]`, opponent gets +0.25 aggression for 6 turns.
 
 ## OOB & Brigade Systems
-1. **[2026-03-03] Personnel ceilings REMOVED + combat formula (n392 = 88.6% ATH)**
-   Do instead: No hardcoded caps. Personnel emerges from pool demographics, mobilization scales (`ongoing_mobilization.ts`: RBiH 0.14, RS 0.22, HRHB 0.18), exhaustion thresholds (0.15/0.25), and FACTION_POOL_SCALE (RBiH 0.18, RS 0.25, HRHB **1.55**). Four combat mechanics: officer quality, ethnic defense, bombardment casualty mult, bombardment exposure attrition.
+1. **[2026-03-06] Personnel ceilings REMOVED; organic troop strength via pool system**
+   Do instead: No hardcoded caps. Personnel emerges from pool demographics, mobilization scales (`ongoing_mobilization.ts`: RBiH=0.17, RS=0.12, HRHB=0.29), exhaustion (MILITARY_AGE_MALE_FRACTION=0.28 denominator, threshold 0.25 half-rate, cap 0.50), and FACTION_POOL_SCALE (RBiH=0.18, RS=0.25, HRHB=1.60). RS JNA bonus=12k. n180 result: RS=97.8k, RBiH=124.3k, HRHB=39.6k at w40.
 2. **[2026-03-02] Decoration system replaces honor**
    Do instead: `getDecorationAtkMult()` and `getDecorationDefBonus()` in `decoration_evaluator.ts` — replace direct honor lookups. Falls back to legacy honor when no decorations. Three tiers per faction. Pipeline step `evaluate-brigade-decorations`.
 3. **[2026-03-02] Brigade history recorder wired after each battle**
@@ -209,8 +209,10 @@
    Do instead: ZoC deleted. Movement via `brigade_movement_orders.ts` / `apply-brigade-movement`. Defense via `local_front_defense.ts` density. AoR legacy also fully removed (R1–R5, 2026-03-04) — no dead AoR code remains.
 
 ## Calibration
-1. **[2026-03-05] ATH n65=99.2% area-weighted (40w); systematic OSID override strategy**
-   Do instead: Use area-weighted match (km²) as primary. ATH 40w = 99.2% (n65, commit a689d83). 171 overrides (144 RS, 18 RBiH, 5 HRHB). 7 permanent mismatches (consolidation ceiling — do not chase). Pool exhaustion at 25% rate. All 6 bot benchmarks PASS.
+1. **[2026-03-06] ATH n65=99.2% area-weighted; troop strength n180 calibrated**
+   Do instead: ATH 40w = 99.2% (n65, commit a689d83). 171 overrides. 7 permanent mismatches. Troop strength (n180): RS=97.8k, RBiH=124.3k, HRHB=39.6k (all in/near historical bands at w40). Scales: ongoing_mobilization RBiH=0.17/RS=0.12/HRHB=0.29; pool_population HRHB=1.60; RS JNA=12k. Bot benchmarks: 2/6 pass (pre-existing n159 regression — territorial expansion RS/RBiH).
+2. **[2026-03-06] Pool surplus absorbs mobilization scale changes — use initial pool lever**
+   Do instead: If faction pool has large surplus at w40 (RS=27k, HRHB=25k), reducing FACTION_MOBILIZATION_SCALE barely moves committed brigade personnel (1-2% drop for 12% scale cut). Primary lever for initial strength is RS_JNA_INHERITANCE_BONUS and FACTION_POOL_SCALE. For RS long-run, large scale cuts (0.17→0.12) combined with JNA reduction are needed to bring into band. HRHB POOL_SCALE=1.60 restores ~40k target.
 2. **[2026-03-05] Combat calibration needs causality, not just territory**
    Do instead: Before trusting control deltas, verify non-zero attack orders and non-zero battles in `weekly_report.jsonl`, then separate combat flips from consolidation, drift, and init overrides. Update `docs/40_reports/CALIBRATION_MASTER.md` during the session. Treat `n104` as partial recovery only: combat restored (`53` orders / `53` battles) but still invalid because `24` execution-phase operations emitted no attack orders.
 3. **[2026-03-06] Live attribution replaces Phase I flip logs**

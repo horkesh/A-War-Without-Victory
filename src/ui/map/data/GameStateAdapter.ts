@@ -189,7 +189,9 @@ export function parseGameState(json: unknown): LoadedGameState {
             const movementStatus = (movementState?.status === 'packing' || movementState?.status === 'in_transit' || movementState?.status === 'unpacking')
                 ? (movementState.status as 'packing' | 'in_transit' | 'unpacking')
                 : 'deployed';
-            const movementStance = movementState?.stance === 'column' ? 'column' : 'combat';
+            const movementStance = movementStatus !== 'deployed'
+                ? (movementState?.stance === 'column' ? 'column' : 'combat')
+                : undefined;
 
             // Extract war story if present
             const warStory = f.war_story as { arc?: string; narrative?: string; notable_moments?: Array<{ turn: number; description: string }> } | undefined;

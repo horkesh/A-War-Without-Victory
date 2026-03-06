@@ -5,6 +5,7 @@
 import osidAreas from '../../../../data/derived/operational/osid_areas.json';
 import { useGameStore } from '../store/gameStore';
 import { formatTurnLabel } from '../utils/formatters';
+import { getFactionFlag } from '../utils/factionAssets';
 
 const FACTION_LABEL: Record<string, string> = {
     RS: 'RS',
@@ -135,7 +136,14 @@ export function WarSummaryModal({ isOpen, onClose }: WarSummaryModalProps) {
                             <tr>
                                 <th style={thStyle}>Faction</th>
                                 {FACTIONS.map((f) => (
-                                    <th key={f} style={{ ...thStyle, color: FACTION_COLOR[f] }}>{FACTION_LABEL[f]}</th>
+                                    <th key={f} style={{ ...thStyle, color: FACTION_COLOR[f] }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+                                            {getFactionFlag(f) && (
+                                                <img src={getFactionFlag(f)} alt="" style={{ width: 14, height: 10, objectFit: 'cover', borderRadius: 1 }} />
+                                            )}
+                                            {FACTION_LABEL[f]}
+                                        </div>
+                                    </th>
                                 ))}
                             </tr>
                         </thead>
@@ -157,7 +165,14 @@ export function WarSummaryModal({ isOpen, onClose }: WarSummaryModalProps) {
                             <tr>
                                 <th style={thStyle} />
                                 {FACTIONS.map((f) => (
-                                    <th key={f} style={{ ...thStyle, color: FACTION_COLOR[f] }}>{FACTION_LABEL[f]}</th>
+                                    <th key={f} style={{ ...thStyle, color: FACTION_COLOR[f] }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+                                            {getFactionFlag(f) && (
+                                                <img src={getFactionFlag(f)} alt="" style={{ width: 14, height: 10, objectFit: 'cover', borderRadius: 1 }} />
+                                            )}
+                                            {FACTION_LABEL[f]}
+                                        </div>
+                                    </th>
                                 ))}
                             </tr>
                         </thead>
@@ -195,7 +210,10 @@ export function WarSummaryModal({ isOpen, onClose }: WarSummaryModalProps) {
                             const n = displacedByFaction[f] ?? 0;
                             if (n === 0) return null;
                             return (
-                                <div key={f}>
+                                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                    {getFactionFlag(f) && (
+                                        <img src={getFactionFlag(f)} alt="" style={{ width: 12, height: 8, objectFit: 'cover', borderRadius: 1 }} />
+                                    )}
                                     <span style={{ color: FACTION_COLOR[f] }}>{FACTION_LABEL[f]}: </span>
                                     <span style={{ color: '#d5c9bc', fontVariantNumeric: 'tabular-nums' }}>{fmtK(n)}</span>
                                 </div>

@@ -110,17 +110,18 @@ function buildFactionSectors(
         }
     }
 
-    // Step 5: Faction-wide fallback for orphaned brigades
-    // Brigades in corps without sectors or BFS-unreachable pockets get assigned
-    // to the nearest faction sector via unrestricted BFS (through any territory).
+    // Step 5: Own-corps fallback for orphaned brigades
+    // Brigades in corps without sectors or not at front OSIDs get assigned
+    // to the nearest sector of their own corps via friendly-territory BFS.
     // General staff units are exempt — they're army-level reserves.
-    assignOrphanedBrigadesToFaction(sectors, faction, formations, adjacency);
+    assignOrphanedBrigadesToFaction(sectors, faction, formations, adjacency, state, reverseMap);
 
     // Step 6: Redistribute excess reserves across faction sectors
     redistributeExcessReserves(sectors);
 
     // Step 7: Ensure every sector has at least one assigned brigade
-    ensureMinimumSectorCoverage(sectors, formations, adjacency);
+    // Only transfer brigades reachable through friendly territory (no cross-pocket transfers).
+    ensureMinimumSectorCoverage(sectors, formations, adjacency, faction, state, reverseMap);
 
     sectors.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
     return sectors;
@@ -1116,8 +1117,18 @@ function redistributeExcessReserves(sectors: CorpsFrontSector[]): void {
 function ensureMinimumSectorCoverage(
     allSectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
-    adjacency: Map<Osid, Osid[]>
+    adjacency: Map<Osid, Osid[]>,
+    faction: FactionId,
+    state: GameState,
+    reverseMap: Map<string, string[]> | null
 ): void {
+    // Pre-compute friendly OSIDs for BFS boundary (no cross-pocket transfers)
+    const friendlyOsids = new Set<string>();
+    for (const osid of adjacency.keys()) {
+        const ctrl = getPoliticalControllerOSID(state, osid, reverseMap ?? undefined);
+        if (ctrl === faction) friendlyOsids.add(osid);
+    }
+
     // Group by corps — only transfer within the same corps
     const sectorsByCorps = new Map<FormationId, CorpsFrontSector[]>();
     for (const s of allSectors) {
@@ -1137,8 +1148,9 @@ function ensureMinimumSectorCoverage(
                 continue;
             }
 
-            // Step 2: BFS from sector friendly OSIDs to find nearest brigade
-            // in a surplus sector (>1 assigned) within the same corps
+            // Step 2: BFS from sector friendly OSIDs through friendly territory
+            // to find nearest brigade in a surplus sector (>1 assigned) within the same corps.
+            // Restricted to friendly territory — isolated pockets stay empty if no brigade is inside.
             const sectorOsids = new Set<string>();
             for (const ss of sector.sub_segments) {
                 for (const o of ss.friendly_osids) sectorOsids.add(o);
@@ -1158,7 +1170,7 @@ function ensureMinimumSectorCoverage(
             }
             if (donorByOsid.size === 0) continue;
 
-            // BFS through all adjacency from sector friendly OSIDs
+            // BFS through friendly territory only from sector friendly OSIDs
             const queue: Osid[] = [...sectorOsids].sort(strictCompare);
             const visited = new Set(queue);
             let head = 0;
@@ -1168,6 +1180,7 @@ function ensureMinimumSectorCoverage(
                 const osid = queue[head++]!;
                 for (const n of [...(adjacency.get(osid) ?? [])].sort(strictCompare)) {
                     if (visited.has(n)) continue;
+                    if (!friendlyOsids.has(n)) continue; // Only traverse friendly territory
                     visited.add(n);
                     const bid = donorByOsid.get(n);
                     if (bid) { donorBid = bid; break outer; }
@@ -1194,7 +1207,7 @@ function ensureMinimumSectorCoverage(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Faction-Wide Orphan Assignment
+// Own-Corps Orphan Assignment
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Corps IDs exempt from sector assignment (army staff, future-conflict reserves). */
@@ -1205,16 +1218,29 @@ const EXEMPT_CORPS_IDS = new Set([
 
 /**
  * Assign brigades orphaned from corps-level assignment (corps without sectors,
- * BFS-unreachable pockets) to the nearest sector of their faction via
- * unrestricted BFS through any OSID adjacency. General staff units are exempt.
+ * BFS-unreachable pockets) to the nearest sector of their OWN corps via
+ * friendly-territory BFS. General staff units are exempt.
+ *
+ * Brigades whose corps has no sectors, or that cannot reach any own-corps sector
+ * through friendly territory, remain unassigned — they are genuine rear-area
+ * reserves. They still participate in local defense via local_front_defense.ts.
  */
 function assignOrphanedBrigadesToFaction(
     sectors: CorpsFrontSector[],
     faction: FactionId,
     formations: Record<FormationId, FormationState>,
-    adjacency: Map<Osid, Osid[]>
+    adjacency: Map<Osid, Osid[]>,
+    state: GameState,
+    reverseMap: Map<string, string[]> | null
 ): void {
     if (sectors.length === 0) return;
+
+    // Pre-compute friendly OSIDs for BFS boundary
+    const friendlyOsids = new Set<string>();
+    for (const osid of adjacency.keys()) {
+        const ctrl = getPoliticalControllerOSID(state, osid, reverseMap ?? undefined);
+        if (ctrl === faction) friendlyOsids.add(osid);
+    }
 
     // Collect all assigned brigades
     const assigned = new Set<FormationId>();
@@ -1223,13 +1249,18 @@ function assignOrphanedBrigadesToFaction(
         for (const bid of s.reserve_brigade_ids) assigned.add(bid);
     }
 
-    // Build reverse map: OSID → sector index (across all faction sectors)
-    const osidToSectorIdx = new Map<string, number>();
+    // Build per-corps reverse maps: OSID → sector index
+    const corpsOsidMaps = new Map<string, Map<string, number>>();
     for (let i = 0; i < sectors.length; i++) {
         const s = sectors[i]!;
+        let map = corpsOsidMaps.get(s.corps_id);
+        if (!map) {
+            map = new Map<string, number>();
+            corpsOsidMaps.set(s.corps_id, map);
+        }
         for (const ss of s.sub_segments) {
             for (const osid of ss.friendly_osids) {
-                if (!osidToSectorIdx.has(osid)) osidToSectorIdx.set(osid, i);
+                if (!map.has(osid)) map.set(osid, i);
             }
         }
     }
@@ -1246,9 +1277,13 @@ function assignOrphanedBrigadesToFaction(
         const fCorpsId = getFormationCorpsId(f);
         if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId)) continue; // Exempt
 
-        // Unrestricted BFS (through any territory) to nearest sector
-        const sectorIdx = bfsUnrestrictedToNearestSector(
-            f.location_osid, osidToSectorIdx, adjacency
+        // Only search for sectors belonging to this brigade's own corps
+        const ownCorpsMap = fCorpsId ? corpsOsidMaps.get(fCorpsId) : undefined;
+        if (!ownCorpsMap || ownCorpsMap.size === 0) continue; // Corps has no sectors — stay unassigned
+
+        // Friendly-territory BFS to nearest own-corps sector
+        const sectorIdx = bfsToNearestSector(
+            f.location_osid, ownCorpsMap, adjacency, friendlyOsids
         );
         if (sectorIdx !== null) {
             sectors[sectorIdx]!.reserve_brigade_ids.push(fid);

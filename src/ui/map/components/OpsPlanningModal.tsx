@@ -12,6 +12,7 @@ import { buildOsidCentroidLookup } from '../map/builders/geojsonLookup';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import styleJson from '../map/awwv_map_style.json';
 import { rewritePmtilesUrls } from '../map/rewritePmtilesUrls';
+import { buildCorpsFrontLinesGeoJSON } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 
 export function OpsPlanningModal() {
     const isOpen = useGameStore((s) => s.opsPlanningModalOpen);
@@ -101,7 +102,9 @@ export function OpsPlanningModal() {
             const midY = from[1] + dy * 0.5;
             const nx = -dy / len;
             const ny = dx / len;
-            const control: [number, number] = [midX + nx * Math.min(0.02, len * 0.08), midY + ny * Math.min(0.02, len * 0.08)];
+            // More "curvy/random" control point for scribble look
+            const scribbleOffset = (Math.random() - 0.5) * 0.005;
+            const control: [number, number] = [midX + nx * (Math.min(0.02, len * 0.08) + scribbleOffset), midY + ny * Math.min(0.02, len * 0.08)];
 
             const curve: [number, number][] = [];
             for (let i = 0; i <= 20; i++) {
@@ -139,6 +142,24 @@ export function OpsPlanningModal() {
                 type: 'Feature',
                 geometry: { type: 'Polygon', coordinates: [[tip, left, right, tip]] },
                 properties: { type: 'advance-head', osid },
+            });
+
+            // Tactical "Pencil Circle" scratch around objective
+            const circlePoints: [number, number][] = [];
+            const steps = 12;
+            const radius = 0.004;
+            for (let i = 0; i <= steps; i++) {
+                const angle = (i / steps) * Math.PI * 2;
+                const r = radius * (0.9 + Math.random() * 0.2); // Jitter for hand-draw look
+                circlePoints.push([
+                    to[0] + Math.cos(angle) * r,
+                    to[1] + Math.sin(angle) * r
+                ]);
+            }
+            features.push({
+                type: 'Feature',
+                geometry: { type: 'LineString', coordinates: circlePoints },
+                properties: { type: 'pencil-scratch', osid }
             });
         }
         return { type: 'FeatureCollection', features };
@@ -262,24 +283,72 @@ export function OpsPlanningModal() {
                 centroidLookupRef.current = centroidLookup;
 
                 if (sector && sectorFriendlyOsids.length > 0) {
-                        let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
-                        for (const osid of sectorFriendlyOsids) {
-                            const pt = centroidLookup.get(osid);
-                            if (pt) {
-                                if (pt[0] < minLng) minLng = pt[0];
-                                if (pt[1] < minLat) minLat = pt[1];
-                                if (pt[0] > maxLng) maxLng = pt[0];
-                                if (pt[1] > maxLat) maxLat = pt[1];
-                            }
+                    let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
+                    for (const osid of sectorFriendlyOsids) {
+                        const pt = centroidLookup.get(osid);
+                        if (pt) {
+                            if (pt[0] < minLng) minLng = pt[0];
+                            if (pt[1] < minLat) minLat = pt[1];
+                            if (pt[0] > maxLng) maxLng = pt[0];
+                            if (pt[1] > maxLat) maxLat = pt[1];
                         }
-                        if (minLng !== Infinity) {
-                            map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 40, animate: false });
-                        }
+                    }
+                    if (minLng !== Infinity) {
+                        map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 40, animate: false });
+                    }
                 }
 
                 const controlledGeoJson = buildControlGeoJSON(geojson, byOsid);
                 controlGeoRef.current = controlledGeoJson as FeatureCollection<Polygon | MultiPolygon>;
+
+                // NATO tactical look: Turn off area control coloring, use lines only
                 (map.getSource('osid-control') as maplibregl.GeoJSONSource | undefined)?.setData(controlledGeoJson);
+                if (map.getLayer('osid-control-fill')) {
+                    map.setPaintProperty('osid-control-fill', 'fill-opacity', 0);
+                }
+
+                // Add Front Lines
+                const frontLineGeo = buildCorpsFrontLinesGeoJSON(
+                    geojson as FeatureCollection,
+                    loadedGameState?.corpsFrontSectors ?? [],
+                    false, // allied logic
+                    centroidLookup,
+                    undefined,
+                    loadedGameState?.frontEdgesOsid
+                );
+
+                map.addSource('ops-front-lines', { type: 'geojson', data: frontLineGeo });
+
+                // Pressure / Glow
+                map.addLayer({
+                    id: 'ops-front-glow',
+                    type: 'line',
+                    source: 'ops-front-lines',
+                    filter: ['==', ['get', 'lineType'], 'glow'],
+                    paint: {
+                        'line-color': [
+                            'match', ['get', 'faction'],
+                            'RS', 'rgba(255, 100, 100, 0.4)',
+                            'RBiH', 'rgba(100, 255, 100, 0.4)',
+                            'HRHB', 'rgba(100, 100, 255, 0.4)',
+                            'rgba(200, 200, 200, 0.2)'
+                        ],
+                        'line-width': 12,
+                        'line-blur': 15,
+                    }
+                });
+
+                // Solid NATO line
+                map.addLayer({
+                    id: 'ops-front-line',
+                    type: 'line',
+                    source: 'ops-front-lines',
+                    filter: ['==', ['get', 'lineType'], 'front'],
+                    paint: {
+                        'line-color': 'rgba(0, 0, 0, 0.65)',
+                        'line-width': 1.5,
+                    }
+                });
 
                 map.addSource('ops-sector-overlay', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
                 map.addLayer({
@@ -340,9 +409,22 @@ export function OpsPlanningModal() {
                     source: 'ops-advance-arrows',
                     filter: ['==', ['get', 'type'], 'advance-head'],
                     paint: {
-                        'fill-color': 'rgba(255,255,255,0.95)',
+                        'fill-color': 'rgba(0, 0, 0, 0.75)',
                         'fill-opacity': 1,
                     },
+                });
+
+                // Pencil Scratches (Objectives)
+                map.addLayer({
+                    id: 'ops-pencil-scratches',
+                    type: 'line',
+                    source: 'ops-advance-arrows',
+                    filter: ['==', ['get', 'type'], 'pencil-scratch'],
+                    paint: {
+                        'line-color': 'rgba(180, 50, 50, 0.7)',
+                        'line-width': 2,
+                        'line-blur': 0.5
+                    }
                 });
 
                 map.on('click', 'osid-control-fill', (event) => {
@@ -384,12 +466,12 @@ export function OpsPlanningModal() {
     if (!isOpen || !sector) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-md">
-            <div className="bg-panel-bg w-[80vw] h-[80vh] rounded-lg shadow-2xl flex flex-col border border-panel-border overflow-hidden ring-1 ring-white/10">
-                <div className="flex bg-panel-card p-4 border-b border-panel-border shrink-0 justify-between items-center">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm crt-overlay">
+            <div className="panel-power-on weathered-panel w-[85vw] h-[85vh] rounded-lg shadow-2xl flex flex-col overflow-hidden ring-1 ring-white/10 relative paper-grain">
+                <div className="flex bg-panel-card p-4 border-b border-panel-border shrink-0 justify-between items-center relative z-10">
                     <div>
-                        <h2 className="text-xl font-bold text-text-primary tracking-wide">OPERATIONAL PLANNING</h2>
-                        <p className="text-sm text-text-secondary">Sector: {sector.display_name} • Corps: {sector.corps_id} • Click map OSIDs to add objectives</p>
+                        <h2 className="text-xl font-bold text-accent-gold tracking-widest glow-text">OPERATIONAL PLANNING</h2>
+                        <p className="text-sm text-text-secondary">Sector: {sector.display_name} • Corps: {sector.corps_id}</p>
                     </div>
                     <button
                         type="button"
@@ -491,13 +573,14 @@ export function OpsPlanningModal() {
                     </div>
 
                     {/* Right panel: Staff Map */}
-                    <div className="flex-1 relative bg-[#e2d8c4]">
+                    <div className="flex-1 relative bg-[#d6ccb7]">
                         <div ref={mapContainerRef} className="absolute inset-0" />
 
-                        <div className="absolute top-4 right-4 bg-panel-card border border-panel-border rounded p-2 text-xs font-semibold tracking-wider text-text-secondary flex flex-col gap-1 z-10 shadow-lg">
-                            <span className="uppercase text-accent-gold border-b border-panel-border/50 pb-1 mb-1">Staff Map Controls</span>
+                        <div className="absolute top-4 right-4 bg-panel-card border border-panel-border rounded p-3 text-[10px] font-semibold tracking-wider text-text-secondary flex flex-col gap-1 z-10 shadow-lg weathered-panel">
+                            <span className="uppercase text-accent-gold border-b border-panel-border/50 pb-1 mb-1 glow-text">Staff Map Controls</span>
                             <span>• Click OSID to toggle objective</span>
-                            <span>• White zone = sector frontage</span>
+                            <span>• Red circles = target priorities</span>
+                            <span>• Unit coloring active on frontlines</span>
                         </div>
                     </div>
                 </div>

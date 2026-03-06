@@ -1,6 +1,7 @@
 import { useGameStore } from '../store/gameStore';
 import { getFormationsAtOsid } from '../utils/formationAtOsid';
 import { SettlementDetailContent } from './SettlementDetailContent';
+import { getFactionFlag } from '../utils/factionAssets';
 
 export function SelectionPanel() {
   const selectedOsid = useGameStore((s) => s.selectedOsid);
@@ -17,7 +18,7 @@ export function SelectionPanel() {
   if (!loadedGameState || !osidPropertiesMap?.[selectedOsid]) {
     return (
       <div
-        className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
+        className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl overflow-hidden"
         style={{
           position: 'absolute',
           left: 'auto',
@@ -53,7 +54,7 @@ export function SelectionPanel() {
 
   return (
     <div
-      className="flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
+      className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl"
       style={{
         position: 'absolute',
         left: 'auto',
@@ -66,9 +67,18 @@ export function SelectionPanel() {
       }}
     >
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
-        <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-          Settlement Info
-        </span>
+        <div className="flex items-center gap-2">
+          {loadedGameState?.controlBySettlement?.[selectedOsid] && getFactionFlag(loadedGameState.controlBySettlement[selectedOsid]) && (
+            <img
+              src={getFactionFlag(loadedGameState.controlBySettlement[selectedOsid])}
+              alt="Faction Flag"
+              className="w-5 h-3.5 object-cover rounded-sm drop-shadow-sm border border-black/20"
+            />
+          )}
+          <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
+            Settlement Info
+          </span>
+        </div>
         <button
           onClick={() => setSelectedOsid(null)}
           className="text-text-secondary hover:text-interactive text-sm leading-none"

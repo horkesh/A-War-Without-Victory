@@ -8,23 +8,80 @@ const PIXEL_RATIO = 2;
 const CORNER_RADIUS = 8; // 4 CSS px at pixelRatio 2
 
 const FACTION_FILL: Record<string, string> = {
+  // Standard keys from store
   RS: 'rgba(178, 60, 60, 0.92)',
+  VRS: 'rgba(178, 60, 60, 0.92)',
   RBiH: 'rgba(55, 135, 70, 0.92)',
+  ARBiH: 'rgba(55, 135, 70, 0.92)',
   HRHB: 'rgba(50, 108, 168, 0.92)',
+  HVO: 'rgba(50, 108, 168, 0.92)',
+  // Normalized keys from formationIconId (UPPERCASE)
+  RBIH: 'rgba(55, 135, 70, 0.92)',
+  ARBIH: 'rgba(55, 135, 70, 0.92)',
 };
 
 const FACTION_BORDER: Record<string, string> = {
   RS: 'rgba(120, 30, 30, 0.95)',
+  VRS: 'rgba(120, 30, 30, 0.95)',
   RBiH: 'rgba(30, 90, 45, 0.95)',
+  ARBiH: 'rgba(30, 90, 45, 0.95)',
   HRHB: 'rgba(25, 65, 115, 0.95)',
+  HVO: 'rgba(25, 65, 115, 0.95)',
+  // Normalized
+  RBIH: 'rgba(30, 90, 45, 0.95)',
+  ARBIH: 'rgba(30, 90, 45, 0.95)',
 };
 
-function kindAbbrev(kind: string): string {
+function drawTacticalSymbol(ctx: CanvasRenderingContext2D, kind: string, w: number, h: number): void {
   const normalized = kind.toLowerCase();
-  if (normalized === 'brigade') return 'B';
-  if (normalized === 'corps_asset') return 'CA';
-  // Fallback for any future kinds
-  return normalized.slice(0, 2).toUpperCase() || 'U';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.97)';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.97)';
+  ctx.lineWidth = 2.0 * PIXEL_RATIO;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  const centerX = w / 2;
+  const centerY = h / 2;
+  const symW = w * 0.25;
+  const symH = h * 0.35;
+
+  // NATO infantry X (base for many units)
+  const drawX = () => {
+    ctx.beginPath();
+    ctx.moveTo(centerX - symW / 2, centerY - symH / 2);
+    ctx.lineTo(centerX + symW / 2, centerY + symH / 2);
+    ctx.moveTo(centerX + symW / 2, centerY - symH / 2);
+    ctx.lineTo(centerX - symW / 2, centerY + symH / 2);
+    ctx.stroke();
+  };
+
+  if (normalized === 'brigade' || normalized === 'infantry') {
+    drawX();
+  } else if (normalized === 'mountain') {
+    // Triangle (per asset icon_mountain.svg)
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY - symH * 0.4);
+    ctx.lineTo(centerX - symW * 0.4, centerY + symH * 0.4);
+    ctx.lineTo(centerX + symW * 0.4, centerY + symH * 0.4);
+    ctx.closePath();
+    ctx.fill();
+  } else if (normalized === 'motorized' || normalized === 'mechanized') {
+    // Oval (per asset icon_mechanized.svg)
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY, symW * 0.45, symH * 0.35, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (normalized === 'artillery') {
+    // Dot (per asset icon_artillery.svg)
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, symH * 0.35, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    // Fallback: abbreviated text
+    ctx.font = `bold ${h * 0.42}px "IBM Plex Mono", monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(normalized.slice(0, 2).toUpperCase(), centerX, centerY);
+  }
 }
 
 /** Left-edge stripe colors per posture value (8-posture system). */
@@ -93,12 +150,8 @@ function createFormationIcon(iconId: string): ImageData {
   ctx.lineWidth = 4;
   ctx.stroke();
 
-  // Kind abbreviation — white, centered, bold
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.97)';
-  ctx.font = `bold ${H * 0.42}px "IBM Plex Mono", monospace`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(kindAbbrev(kind), W / 2, H / 2);
+  // Draw Tactical Symbol
+  drawTacticalSymbol(ctx, kind, W, H);
 
   return ctx.getImageData(0, 0, W, H);
 }

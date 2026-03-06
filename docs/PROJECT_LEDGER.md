@@ -7,6 +7,23 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-06] P3 priority municipality bypass for undefended targets (n192)
+
+### Summary
+- **Problem:** VRS brigades sat idle in Krajina despite adjacent undefended territory. P3 priority municipality filter in `bot_corps_ai.ts` filtered opportunistic targets to only `army_priorities` municipalities. Krajina municipalities (`prijedor`, `banja_luka`, `prnjavor`) appeared only in `defensive_priorities`, not in any offensive priority entry â€” so undefended OSIDs there were always excluded.
+- **Fix:** Bypass P3 filter for truly undefended targets (`graphAnalysis.undefended_front` and `weak_enemy_osids` with `reason === 'undefended'`). Weak-but-defended targets still respect P3 to prevent corps sprawl. Added adjacency check â€” only targets with an adjacent friendly brigade are added.
+- **Result (n192):** RS=331 OSIDs (44.5%), RBiH=303, HRHB=110. 83.2% area-weighted. 151 attack orders, 124 battles, 53 combat-attributed captures. Krajina 85.5%. 1KK targets jumped from ~15 to 66 at Turn 1. Combat-causality GREEN, 0 invalid operations.
+
+### Change
+- `src/sim/combat/bot_corps_ai.ts`: Undefended front targets bypass P3 priority municipality filter; weak_enemy_osids with reason 'undefended' also bypass; weak-but-defended still filtered. Adjacency check ensures only reachable targets added.
+
+### Metrics
+- **n192 w40:** RS=331 (44.5%), RBiH=303, HRHB=110. 83.2% area-weighted.
+- **Personnel:** RS=105,568, RBiH=120,704, HRHB=42,767
+- **Combat:** 151 attack orders, 124 battles, 78 captures (53 combat-attributed)
+- **Krajina:** 112/131 (85.5%)
+- **Bot benchmarks:** All 6 PASS
+
 ## [2026-03-06] Strategic reserve system + faction-differentiated mobilization surge â€” multi-checkpoint troop strength calibration
 
 ### Summary
@@ -10802,3 +10819,40 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 ### FORAWWV note
 - Time presentation is now calendar-first in all UI contexts to align with the "1990s War Room" design philosophy.
 - Metric conversion for front length: `1 front edge â‰ˆ 1.0 km` estimate used for player-facing tactical scale.
+
+## 2026-03-06 - Tactical Map: Icon Refining and Stacking
+
+### Summary
+- Refined the visual representation of formation markers on the map for better clarity and organization in dense areas.
+- Implemented scaled NATO tactical symbols (infantry X, mountain triangle, mechanized oval, artillery dot) within formation icons, replacing text-only abbreviations for improved situational awareness.
+- Reduced overall icon size and tactical symbol line weights across all zoom levels to minimize map clutter.
+- Corrected brigade positioning: removed front-line drift (FRONT_LERP) to ensure icons are centered exactly at their assigned settlement (OSID) centroid.
+- Implemented visual stacking for co-located units: multiple brigades in the same settlement are now offset slightly (fanned stack effect), ensuring all units are individually visible and clickable.
+- Documented these changes in the HOI Visual & GUI Overhaul Specification and Tactical Map System engineering reference.
+
+### Changes
+- src/ui/map/map/awwv_map_style.json: (MODIFY) Reduced icon-size values for formation markers.
+- src/ui/map/map/formationIcons.ts: (MODIFY) Implemented drawTacticalSymbol with scaled shapes and reduced line widths; adjusted faction color logic.
+- src/ui/map/map/builders/buildFormationsGeoJSON.ts: (MODIFY) Removed FRONT_LERP drift; implemented fanned stacking logic for co-located units.
+- docs/30_planning/20260221_settlement remapping and GUI rework/HOI_VISUAL_GUI_OVERHAUL_SPEC.md: (MODIFY) Updated §2.4 and §10 to reflect centered placement and stacking.
+- docs/20_engineering/TACTICAL_MAP_SYSTEM.md: (MODIFY) Updated §2.1 marker summary.
+
+### Failure mode prevented
+- Prevents visual overlap and  lost units in co-located stacks through explicit fanned offsets.
+- Prevents misinterpretation of unit types at strategic zooms through standardized NATO symbolism.
+- Prevents positioning ambiguity by using exact settlement centroids rather than floating approximations.
+
+### Files modified
+- src/ui/map/map/awwv_map_style.json
+- src/ui/map/map/formationIcons.ts
+- src/ui/map/map/builders/buildFormationsGeoJSON.ts
+- docs/30_planning/20260221_settlement remapping and GUI rework/HOI_VISUAL_GUI_OVERHAUL_SPEC.md
+- docs/20_engineering/TACTICAL_MAP_SYSTEM.md
+
+### Mistake guard
+- Verified that stacked units remain within the hit-box range for selection.
+- Confirmed that tactical symbols scale correctly down to Z6 without becoming illegible.
+
+### FORAWWV note
+- Brigade markers now prioritize precision and stack-readiness over front-line proximity.
+

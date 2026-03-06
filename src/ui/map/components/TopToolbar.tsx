@@ -4,6 +4,7 @@ import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoa
 import { useIPC } from '../desktop/useIPC';
 import { advanceTurnAndSync } from '../desktop/orderActions';
 import { formatTurnLabel } from '../utils/formatters';
+import { getFactionFlag, getFactionCrest } from '../utils/factionAssets';
 
 const LOAD_TIMEOUT_MS = 25000;
 
@@ -31,6 +32,8 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary 
   const [advancing, setAdvancing] = useState(false);
   const [runIdInput, setRunIdInput] = useState('');
   const playerFaction = loadedGameState?.player_faction ?? '';
+  const flagUrl = getFactionFlag(playerFaction);
+  const crestUrl = getFactionCrest(playerFaction);
   const leftTint = FACTION_BANNER_TINT[playerFaction] ?? 'rgba(196, 163, 90, 0.2)';
   const toolbarBackground = `linear-gradient(90deg, ${leftTint} 0%, rgba(28, 26, 23, 0.95) 42%, rgba(28, 26, 23, 0.95) 100%)`;
 
@@ -127,12 +130,30 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary 
 
   return (
     <div
-      className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-4 py-2.5 backdrop-blur-sm border-b border-panel-border"
+      className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-4 py-2.5 backdrop-blur-sm border-b border-panel-border overflow-hidden"
       style={{ background: toolbarBackground }}
     >
-      <span className="font-sans text-sm text-accent-gold tracking-wider uppercase font-semibold">
-        A War Without Victory
-      </span>
+      {flagUrl && (
+        <div
+          className="absolute inset-0 opacity-15 pointer-events-none"
+          style={{
+            backgroundImage: `url(${flagUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'left center',
+            maskImage: 'linear-gradient(to right, black 0%, transparent 50%)',
+            WebkitMaskImage: 'linear-gradient(to right, black 0%, transparent 50%)',
+            mixBlendMode: 'overlay',
+          }}
+        />
+      )}
+      <div className="flex items-center gap-2 shrink-0">
+        {crestUrl && (
+          <img src={crestUrl} alt="" className="w-6 h-6 object-contain drop-shadow-[0_0_3px_rgba(0,0,0,0.5)]" />
+        )}
+        <span className="font-sans text-sm text-accent-gold tracking-wider uppercase font-semibold glow-text">
+          A War Without Victory
+        </span>
+      </div>
 
       <button
         onClick={handleLoadClick}
@@ -196,7 +217,7 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary 
       </button>
 
       {loadedGameState && (
-        <span className="text-xs font-mono text-text-secondary">
+        <span className="text-xs font-mono text-text-secondary glow-text">
           {formatTurnLabel(loadedGameState.label)} &mdash; {loadedGameState.formations.length} formations &mdash; {loadedGameState.phase.toUpperCase()}
         </span>
       )}

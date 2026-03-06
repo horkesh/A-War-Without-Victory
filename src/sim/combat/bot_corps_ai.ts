@@ -1387,13 +1387,11 @@ export function generateCorpsDirectives(
             || cmd.stance === 'offensive'
             || (offensiveTargetSet.size === 0);
         if (addOpportunistic && graphAnalysis) {
+            // Undefended enemy OSIDs: always allow regardless of priority municipalities.
+            // Taking undefended territory costs nothing — all factions historically
+            // consolidated undefended areas without needing explicit orders.
             for (const osid of graphAnalysis.undefended_front) {
                 if (offensiveTargetSet.has(osid)) continue;
-                // P3: Filter opportunistic targets to priority municipalities
-                if (priorityMunicipalities.size > 0) {
-                    const osidMun = osid.split(':')[1];
-                    if (!priorityMunicipalities.has(osidMun)) continue;
-                }
                 const neighbors = adjacency.get(osid) ?? [];
                 const hasAdjacentBrigade = subordinates.some(b =>
                     b.location_osid && neighbors.includes(b.location_osid)
@@ -1402,8 +1400,10 @@ export function generateCorpsDirectives(
             }
             for (const entry of graphAnalysis.weak_enemy_osids) {
                 if (offensiveTargetSet.has(entry.osid)) continue;
-                // P3: Filter opportunistic targets to priority municipalities
-                if (priorityMunicipalities.size > 0) {
+                // Truly undefended (no brigade present): bypass P3 municipality filter.
+                // Weak-but-defended targets: still filter to priority municipalities
+                // to prevent corps from bleeding against non-strategic positions.
+                if (entry.reason !== 'undefended' && priorityMunicipalities.size > 0) {
                     const osidMun = entry.osid.split(':')[1];
                     if (!priorityMunicipalities.has(osidMun)) continue;
                 }

@@ -100,16 +100,21 @@ The front is rendered as a **thick semi-transparent band** along the faction bou
 
 **Current:** Single NATO marker per formation at HQ/centroid location.
 
-**New:** Brigade markers are positioned along their AoR's front edge, not at a centroid.
+**New:** Brigade markers are positioned at the centroid of their assigned settlement (OSID). When multiple brigades occupy the same settlement, they are visually stacked to remain individually visible and clickable.
 
-**Implementation (2026-03-04):** Formation markers are **MapLibre symbol layers** with programmatically generated sprites in `formationIcons.ts`. **Front-distributed placement is now IMPLEMENTED** in `buildFormationsGeoJSON.ts`: brigade markers are offset 35% (`FRONT_LERP=0.35`) from OSID centroid toward the average centroid of adjacent enemy OSIDs (using `state.frontEdgesOsid`). Rear brigades (no front adjacency) remain at OSID centroid. Corps and army HQs are **filtered out** — they are command abstractions represented by sector fills and OOB sidebar, not map pins. Counter canvas: 160×80 at pixelRatio 2 → 80×40 CSS px per icon-size unit; faction-colored fill (RS crimson / RBiH green / HRHB blue); white kind abbreviation; `icon-allow-overlap: true`. Zoom stops: z6→40×20px, z9→56×28px, z12→72×36px, z14→80×40px.
+**Implementation (2026-03-05):** Formation markers are **MapLibre symbol layers** with programmatically generated sprites in `formationIcons.ts`.
+- **Centering:** Brigade markers are positioned exactly at the OSID centroid (front-line drift removed for precision).
+- **Tactical Symbols:** Icons now feature scaled NATO tactical symbols (infantry X, mountain triangle, etc.) with refined line weights for clarity at small sizes.
+- **Visual Stacking:** Implemented in `buildFormationsGeoJSON.ts`. Subsequent units in the same OSID are slightly offset (fanned stack effect) to ensure all units are distinguishable and clickable.
+- **Filtering:** Corps and army HQs are filtered out (represented as command abstractions).
+- **Scale:** Counter canvas 160×80 (pixelRatio 2), scaling across zoom levels.
 
 **Marker placement algorithm:**
 
-1. For each active brigade, identify all front-active operational settlements in its AoR (settlements with at least one opposing-control adjacency edge)
-2. Compute the centroid of only the front-active settlements (not the entire AoR)
-3. Place the marker at this front centroid
-4. If a brigade has no front-active settlements (fully rear), place at AoR geographic centroid (as now)
+1. For each active brigade, resolve its location OSID.
+2. If multiple formations share an OSID, apply a small cumulative offset (approx 30m east, 20m south per unit).
+3. This creates a "fanned" stack where each marker's top-left corner is visible for selection.
+4. If a brigade has no OSID (invalid state), it is skipped.
 
 **Marker design (HoI-inspired):**
 
@@ -127,7 +132,7 @@ The front is rendered as a **thick semi-transparent band** along the faction bou
 - Shows at strategic zoom only; individual brigade markers hidden
 - Click to expand subordinate list
 
-**Formation spacing:** When multiple brigade markers would overlap (adjacent AoRs on the same front), offset them vertically by 15px each, stacked perpendicular to the front line. HoI does this elegantly — a stack of counters along a front segment communicates density at a glance.
+**Formation spacing:** Handled via visual stacking logic in `buildFormationsGeoJSON.ts`. Stacks are fanned out so that subsequent units are offset slightly, maintaining clickability for the entire group.
 
 ### 2.5 Order Arrows: Bold and Directional
 
@@ -639,7 +644,7 @@ Phase B baseline now exists in `src/ui/map/`: Army/Situation tabs, Situation sum
 19. Tune faction fill opacity for best terrain visibility
 20. Strategic point markers (diamonds/stars at municipal seats and major cities)
 21. Enclave visualization (dashed border, integrity label, pulse at critical)
-22. Front-distributed formation marker placement (§2.4 algorithm)
+22. Precise OSID centering and visual stacking for formation markers (§2.4) (COMPLETE)
 23. Bézier order arrows
 24. Settlement labels from OSM places layer
 25. Selectable front line styles (dashed, glow, chevron)

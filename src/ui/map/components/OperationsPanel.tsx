@@ -100,9 +100,10 @@ export function OperationsPanel() {
   if (!loadedGameState) {
     return (
       <div
-        className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
+        className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl overflow-hidden paper-grain"
         style={{ ...DETAIL_PANEL_STYLE, width: '24rem' }}
       >
+        <div className="absolute top-0 left-0 w-full h-full crt-overlay pointer-events-none z-50 opacity-40"></div>
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
         <div className="flex-1 grid grid-cols-12">
           <div className="col-span-5 border-r border-panel-border p-2 space-y-2">
@@ -177,13 +178,13 @@ export function OperationsPanel() {
 
   return (
     <div
-      className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
+      className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl overflow-hidden paper-grain relative"
       style={{ ...DETAIL_PANEL_STYLE, width: '24rem' }}
     >
-      <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
-        <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-          Operations
-        </span>
+      <div className="absolute top-0 left-0 w-full h-full crt-overlay pointer-events-none z-50 opacity-40"></div>
+
+      <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0 relative z-10 glow-text text-accent-gold uppercase text-xs font-semibold">
+        Operations Center
         <button
           onClick={close}
           aria-label="Close operations panel"

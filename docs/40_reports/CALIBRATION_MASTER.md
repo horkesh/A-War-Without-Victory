@@ -8,7 +8,8 @@
 - **Phase C (organic VRS tempo decay):** RS doctrine phases reduced to 2 (both offensive — no artificial defensive regression). RS stays offensive permanently; tempo decay is organic via fatigue, supply, entrenchment. Fatigue now meaningful: recovery every 2 turns, +0.5/turn frontline duty, cap 30 (was 20), fatigue directly degrades combat power (×0.6-1.0 attack, ×0.75-1.0 defense). Entrenchment diminishing returns (sqrt curve). FATIGUE_MAX consolidated to single shared constant.
 - **Phase D (supply & exhaustion):** MAINTENANCE_DRAIN_PER_FORMATION 0.025→0.045 (RS general 68% by w40, was 100%). RBiH patron commitment reduced (0.6→0.3 in 1992 — arms embargo). HRHB patron raised (0.5→0.6). UN airdrops capped (15→3/turn). HRHB initial supply 55→75.
 **Canonical target run:** n65 (ATH 99.2% area-weighted, commit a689d83)
-**Latest calibration run:** n191 (strategic reserve + faction-differentiated surge: RS=102.6k (w40) → 110.1k (w80) ✓, RBiH=121.0k (w40) → 175.4k (w80), HRHB=41.5k (w40) → 49.8k (w80) ✓. Multi-checkpoint troop strength calibration — all factions within or near historical bands at both w40 and w80.)
+**Latest calibration run:** n192 (P3 priority municipality bypass for undefended targets: RS=331 OSIDs (44.5%), RBiH=303, HRHB=110. 83.2% area-weighted. 151 attack orders, 124 battles, 53 combat-attributed control changes. Krajina 85.5%. Combat-causality GREEN.)
+**Previous calibration run:** n191 (strategic reserve + faction-differentiated surge: RS=102.6k (w40) → 110.1k (w80) ✓, RBiH=121.0k (w40) → 175.4k (w80), HRHB=41.5k (w40) → 49.8k (w80) ✓. Multi-checkpoint troop strength calibration — all factions within or near historical bands at both w40 and w80.)
 **Previous calibration run:** n166 (n159 audit Phase E verification: deterministic rerun of n165. 84.2% area-weighted, RS=321/HRHB=110/RBiH=313 OSIDs. 146 attacks, 118 battles, 103 captures. Att:def casualty ratio 3.26:1. RS weekly attacks decline 8→1 (organic tempo decay confirmed). All VRS corps still offensive at t26 with aggression 0.0-0.1 (was 0.4-0.45 at t1). Bot benchmarks 2/6 PASS — RS/RBiH targets need recalibration for organic model. Combat-causality gate green.)
 **Latest recovery-gated run:** n158 (live sector-rearrangement + planning-movement recovery: combat-causality gate green, behavioral-health gate green, planning now includes movement into approach positions, live sector concentration restored)
 **Previous calibration run:** n137 (combat-causality gate green again after runtime rollback: valid_for_combat_calibration=true, 86 attack orders, 74 battles, 30 combat-attributed control changes; deterministic rerun of n136 after removing live sector rearrangement from corps-AI runtime)
@@ -1433,6 +1434,19 @@ at w80 (target 140-160k). RBiH's massive population generates enormous pool surp
 uniform draw rate feeds it all to brigades. Fix: faction-specific draw rates — RBiH=0.02
 (poor logistics until 1994 professionalization) vs RS/HRHB=0.25 (JNA/Croatian logistics).
 **Do instead:** Always differentiate faction logistics capability in reserve draw rates.
+
+**L46: P3 priority municipality filter blocks undefended territory capture**
+**Session:** 2026-03-06 (n192)
+VRS had brigades sitting idle in Krajina despite adjacent undefended territory because the P3
+priority municipality filter in bot_corps_ai.ts filtered opportunistic targets to only
+`army_priorities` municipalities. Krajina municipalities (`prijedor`, `banja_luka`, `prnjavor`)
+appeared only in `defensive_priorities`, never in offensive priority entries. Fix: bypass P3 for
+truly undefended targets (`graphAnalysis.undefended_front` + `weak_enemy_osids` with
+`reason === 'undefended'`). Weak-but-defended targets still respect P3 to prevent corps sprawl.
+Result: 1KK targets jumped from ~15 to 66 at Turn 1; Krajina match 85.5%.
+**Do instead:** Never filter undefended territory through priority municipality gates — taking
+empty land costs nothing and all factions historically consolidated undefended areas without
+needing explicit orders. Only apply strategic filters to targets requiring actual combat.
 
 ---
 

@@ -6,6 +6,7 @@ import { useIPC } from '../desktop/useIPC';
 import { stagePostureOrderAction } from '../desktop/orderActions';
 import { DETAIL_PANEL_STYLE, SECONDARY_PANEL_STYLE } from './panelRail';
 import { turnToDateString, formatCombatOutcome, formatPosture, toTitleCase } from '../utils/formatters';
+import { getArmyCrest } from '../utils/factionAssets';
 
 
 /**
@@ -63,13 +64,18 @@ export function FormationDetail() {
 
   return (
     <div
-      className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
-      style={DETAIL_PANEL_STYLE}
+      className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl overflow-hidden"
+      style={{ ...DETAIL_PANEL_STYLE, width: '24rem' }}
     >
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
-        <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-          Formation
-        </span>
+        <div className="flex items-center gap-2">
+          {getArmyCrest(formation.faction) && (
+            <img src={getArmyCrest(formation.faction)} alt="" className="w-4 h-4 object-contain" />
+          )}
+          <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
+            Formation
+          </span>
+        </div>
         <button
           onClick={() => setSelectedFormationId(null)}
           className="text-text-secondary hover:text-interactive text-sm leading-none"
@@ -78,7 +84,20 @@ export function FormationDetail() {
         </button>
       </div>
 
-      <div className="p-4 space-y-3 overflow-auto min-w-0">
+      <div className="p-4 flex-1 space-y-3 overflow-auto min-h-0 min-w-0 relative">
+        {getArmyCrest(formation.faction) && (
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none"
+            style={{
+              backgroundImage: `url(${getArmyCrest(formation.faction)})`,
+              backgroundSize: 'contain',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              width: '180px',
+              height: '180px',
+            }}
+          />
+        )}
         {!formation ? (
           <p className="text-xs text-text-secondary italic">Formation not found.</p>
         ) : (
@@ -87,21 +106,48 @@ export function FormationDetail() {
               {formation.name}
             </div>
 
-            <div className="text-xs min-w-0">
-              <span className="text-text-secondary">ID: </span>
-              <span className="font-mono text-text-primary break-all" title={formation.id}>
-                {formation.id}
-              </span>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs px-2 py-1 bg-black/20 rounded border border-panel-border/30">
+              <span className="text-text-secondary">Posture:</span>
+              <span className="text-text-primary font-semibold">{formatPosture(formation.posture ?? 'hold')}</span>
+              <span className="text-text-secondary ml-1">Readiness:</span>
+              <span className="text-text-primary">{toTitleCase(formation.readiness)}</span>
             </div>
 
-            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
-              <span className="text-text-secondary">Kind:</span>
-              <span className="text-text-primary">{toTitleCase(formation.kind)}</span>
-              <span className="text-text-secondary">Faction:</span>
-              <span className={FACTION_COLORS_SUBTLE[formation.faction] ?? 'text-text-primary'}>{formation.faction}</span>
-            </div>
+            {/* Officer info */}
+            {(() => {
+              if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
+                const commander = loadedGameState.namedOfficerData?.find(o => o.assigned_corps_id === formation.id && o.acting_commander);
+                if (commander) {
+                  return (
+                    <div className="pt-2 border-t border-panel-border flex items-start gap-3">
+                      <div className="w-10 h-10 bg-panel-card rounded border border-panel-border flex items-center justify-center text-accent-gold text-lg font-bold">
+                        HQ
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[10px] uppercase text-text-secondary tracking-wider font-semibold">Commanding Officer</div>
+                        <div className="text-sm font-bold text-accent-gold truncate">{commander.rank} {commander.name}</div>
+                        <div className="flex gap-3 text-[10px]">
+                          <span className="text-text-secondary">Competence: <span className="text-text-primary px-1 bg-black/30 rounded">{Math.round(commander.competence * 100)}</span></span>
+                          <span className="text-text-secondary">Aggression: <span className="text-text-primary px-1 bg-black/30 rounded">{Math.round(commander.aggressiveness * 100)}</span></span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+              } else if (formation.kind === 'brigade' && formation.officer_quality != null) {
+                return (
+                  <div className="pt-2 border-t border-panel-border flex items-center justify-between text-xs">
+                    <span className="text-text-secondary">Officer Cadre Quality</span>
+                    <span className="text-text-primary font-mono bg-black/30 px-1.5 py-0.5 rounded border border-panel-border/50">
+                      {Math.round(formation.officer_quality * 100)}%
+                    </span>
+                  </div>
+                );
+              }
+              return null;
+            })()}
 
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs px-2 py-1 bg-black/10 rounded">
               <span className="text-text-secondary">Cohesion</span>
               <span className="text-text-primary tabular-nums flex items-center gap-1">
                 {(() => {
@@ -127,14 +173,29 @@ export function FormationDetail() {
                   <span className="text-text-primary tabular-nums">{formation.personnel.toLocaleString()} men</span>
                 </>
               )}
+              {formation.kind === 'corps' && formation.corpsExhaustion != null && (
+                <>
+                  <span className="text-text-secondary">Exhaustion</span>
+                  <span className="text-text-primary tabular-nums">{Math.round(formation.corpsExhaustion * 100)}%</span>
+                </>
+              )}
+              {formation.kind === 'corps' && formation.corpsCommandSpan != null && (
+                <>
+                  <span className="text-text-secondary">Command Span</span>
+                  <span className="text-text-primary tabular-nums">{formation.corpsCommandSpan.toFixed(1)}x</span>
+                </>
+              )}
             </div>
 
-            <div className="flex flex-wrap gap-x-2 text-xs">
-              <span className="text-text-secondary">Status:</span>
-              <span className="text-text-primary">{toTitleCase(formation.status)}</span>
-              <span className="text-text-secondary">Readiness:</span>
-              <span className="text-text-primary">{toTitleCase(formation.readiness)}</span>
-            </div>
+            {(formation.movementStatus && formation.movementStatus !== 'deployed') && (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                <span className="text-text-secondary">Movement:</span>
+                <span className="text-interactive px-1.5 py-0.5 bg-interactive/10 rounded border border-interactive/30">{toTitleCase(formation.movementStatus)}</span>
+                {formation.movementStance && (
+                  <span className="text-text-secondary lowercase italic">({formation.movementStance} march)</span>
+                )}
+              </div>
+            )}
 
             {formation.location_osid && (
               <div className="text-xs min-w-0">
@@ -212,16 +273,16 @@ export function FormationDetail() {
             )}
 
             {formation.narrativeArc && (
-              <div className="pt-2 border-t border-panel-border space-y-1">
+              <div className="pt-2 border-t border-panel-border space-y-1 min-w-0">
                 <div className="text-xs text-text-secondary">War story</div>
-                <div className="text-xs font-semibold text-accent-gold capitalize">{formation.narrativeArc}</div>
+                <div className="text-xs font-semibold text-accent-gold capitalize break-words">{formation.narrativeArc}</div>
                 {formation.warNarrative && (
-                  <div className="text-[11px] text-text-primary leading-4 italic">{formation.warNarrative}</div>
+                  <div className="text-[11px] text-text-primary leading-4 italic whitespace-pre-wrap break-words">{formation.warNarrative}</div>
                 )}
                 {formation.notableMoments && formation.notableMoments.length > 0 && (
-                  <div className="space-y-0.5 pt-1">
+                  <div className="space-y-0.5 pt-1 min-w-0">
                     {formation.notableMoments.map((m, i) => (
-                      <div key={i} className="text-[11px] text-text-secondary">
+                      <div key={i} className="text-[11px] text-text-secondary break-words">
                         <span className="text-text-primary">{turnToDateString(m.turn)}:</span> {m.description.replace(/op:[a-z0-9_]+:[a-z0-9_]+/gi, (match) => getOsidDisplayName(match, osidDisplayNames))}
                       </div>
                     ))}
@@ -309,8 +370,8 @@ export function FormationDetail() {
       </div>
       {formation?.kind === 'brigade' && ordersPanelOpen && (
         <div
-          className="panel-slide-in-right flex flex-col bg-panel-bg/96 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
-          style={SECONDARY_PANEL_STYLE}
+          className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl overflow-hidden"
+          style={{ ...SECONDARY_PANEL_STYLE, width: '22rem' }}
         >
           <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
             <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">

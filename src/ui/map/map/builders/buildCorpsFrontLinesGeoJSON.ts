@@ -35,7 +35,7 @@ const FACTION_CORPS_PALETTES: Record<string, string[]> = {
     HRHB: ['#4080b8', '#5070a0', '#3090d0', '#6060c0'],
 };
 
-const FACTION_GLOW_COLORS: Record<string, string> = {
+export const FACTION_GLOW_COLORS: Record<string, string> = {
     RS: 'rgba(180, 50, 50, 0.6)',
     RBiH: 'rgba(55, 140, 75, 0.6)',
     HRHB: 'rgba(50, 110, 170, 0.6)',
