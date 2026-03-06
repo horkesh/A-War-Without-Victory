@@ -631,15 +631,18 @@ function buildMultiSectorsForCorps(
     // a junction OSID has edges on both sides of a midpoint split.
     deduplicateBrigadesAcrossSectors(finalSectors);
 
+    // Step 4b: Split non-contiguous sectors (friendly OSIDs must form connected components via OSID adjacency)
+    const contiguousSectors = splitNonContiguousSectors(finalSectors, adjacency);
+
     // Step 5 (Phase 1B + 1C): Assign interior brigades as reserves
     assignInteriorBrigadesToSectors(
-        finalSectors, corpsId, faction, formations, adjacency, reverseMap, state
+        contiguousSectors, corpsId, faction, formations, adjacency, reverseMap, state
     );
 
     // Step 6: Redistribute excess reserves (proportional cap per sector)
-    redistributeExcessReserves(finalSectors);
+    redistributeExcessReserves(contiguousSectors);
 
-    return finalSectors;
+    return contiguousSectors;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1302,6 +1305,148 @@ function deduplicateBrigadesAcrossSectors(sectors: CorpsFrontSector[]): void {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Split Non-Contiguous Sectors
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Split sectors whose friendly OSIDs are not contiguous through OSID adjacency.
+ * BFS through each sector's friendly OSIDs; if disconnected components exist,
+ * split into one sector per component. Edges are partitioned by which component
+ * their friendly-side OSID belongs to. Brigades distributed to the largest component.
+ *
+ * Deterministic: sorted iteration via strictCompare.
+ */
+export function splitNonContiguousSectors(
+    sectors: CorpsFrontSector[],
+    osidAdjacency: Map<Osid, Osid[]>,
+): CorpsFrontSector[] {
+    const result: CorpsFrontSector[] = [];
+
+    for (const sector of sectors) {
+        const allFriendly = new Set<string>();
+        for (const ss of sector.sub_segments) {
+            for (const o of ss.friendly_osids) allFriendly.add(o);
+        }
+
+        // BFS to find connected components of friendly OSIDs
+        const visited = new Set<string>();
+        const components: Set<string>[] = [];
+        const sortedFriendly = [...allFriendly].sort(strictCompare);
+
+        for (const seed of sortedFriendly) {
+            if (visited.has(seed)) continue;
+            const component = new Set<string>();
+            const queue = [seed];
+            visited.add(seed);
+            let head = 0;
+            while (head < queue.length) {
+                const osid = queue[head++]!;
+                component.add(osid);
+                for (const nb of osidAdjacency.get(osid) ?? []) {
+                    if (visited.has(nb) || !allFriendly.has(nb)) continue;
+                    visited.add(nb);
+                    queue.push(nb);
+                }
+            }
+            components.push(component);
+        }
+
+        // Single component — sector is already contiguous
+        if (components.length <= 1) {
+            result.push(sector);
+            continue;
+        }
+
+        // Multiple components — split sector
+        // Map each edge to a friendly OSID from its sub-segment
+        const edgeToFriendlyOsid = new Map<string, string>();
+        for (const ss of sector.sub_segments) {
+            for (const eid of ss.edge_ids) {
+                if (!edgeToFriendlyOsid.has(eid)) {
+                    for (const fo of ss.friendly_osids) {
+                        edgeToFriendlyOsid.set(eid, fo);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Find the largest component (for brigade fallback assignment)
+        let largestCompIdx = 0;
+        let largestCompSize = 0;
+        for (let ci = 0; ci < components.length; ci++) {
+            if (components[ci]!.size > largestCompSize) {
+                largestCompSize = components[ci]!.size;
+                largestCompIdx = ci;
+            }
+        }
+
+        // Build per-component sectors
+        for (let ci = 0; ci < components.length; ci++) {
+            const comp = components[ci]!;
+            const compEdgeIds: string[] = [];
+            const compFriendly = new Set<string>();
+            const compEnemy = new Set<string>();
+
+            for (const ss of sector.sub_segments) {
+                const hasInComp = ss.friendly_osids.some(fo => comp.has(fo));
+                for (const eid of ss.edge_ids) {
+                    const friendlyOsid = edgeToFriendlyOsid.get(eid);
+                    if (friendlyOsid && comp.has(friendlyOsid)) {
+                        compEdgeIds.push(eid);
+                    }
+                }
+                for (const fo of ss.friendly_osids) {
+                    if (comp.has(fo)) compFriendly.add(fo);
+                }
+                if (hasInComp) {
+                    for (const eo of ss.enemy_osids) compEnemy.add(eo);
+                }
+            }
+
+            if (compEdgeIds.length === 0 && compFriendly.size === 0) continue;
+
+            compEdgeIds.sort(strictCompare);
+            const subSeg: CorpsFrontSubSegment = {
+                sub_segment_id: `subseg:${sector.corps_id}:split${ci}`,
+                edge_ids: compEdgeIds,
+                friendly_osids: [...compFriendly].sort(strictCompare),
+                enemy_osids: [...compEnemy].sort(strictCompare),
+                length_edges: compEdgeIds.length,
+            };
+
+            // Brigades: all go to the largest component; others get empty lists
+            // (caller re-runs assignInteriorBrigadesToSectors which will re-populate)
+            const isLargest = ci === largestCompIdx;
+            const newSector: CorpsFrontSector = {
+                sector_id: `sector:${sector.corps_id}:${result.length}`,
+                corps_id: sector.corps_id,
+                faction: sector.faction,
+                opposing_factions: [...sector.opposing_factions],
+                edge_ids: compEdgeIds,
+                sub_segments: [subSeg],
+                length_edges: compEdgeIds.length,
+                assigned_brigade_ids: isLargest ? [...sector.assigned_brigade_ids] : [],
+                reserve_brigade_ids: isLargest ? [...sector.reserve_brigade_ids] : [],
+                density: 0,
+                threat_ratio: 0,
+                defensive_power: 0,
+            };
+
+            result.push(newSector);
+        }
+    }
+
+    // Renumber sector IDs deterministically
+    result.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+    for (let i = 0; i < result.length; i++) {
+        result[i]!.sector_id = `sector:${result[i]!.corps_id}:${i}`;
+    }
+
+    return result;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Proposal B: Merge Undersized Sub-Segments
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1491,6 +1636,7 @@ function buildEdgeAdjacency(
     for (const list of adj.values()) list.sort(strictCompare);
     return adj;
 }
+
 
 /**
  * Get sorted list of active corps formation IDs for a faction.
