@@ -777,6 +777,21 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'consolidate-rear-pockets',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+            const { consolidateRearPockets } = await import('../combat/consolidate_rear_pockets.js');
+            const report = consolidateRearPockets(
+                context.state, od.edges, od.opData.operationalToCanonical
+            );
+            if (report.flipped.length > 0) {
+                context.report.rear_pocket_consolidation = report;
+            }
+        }
+    },
+    {
         name: 'update-officer-quality',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;

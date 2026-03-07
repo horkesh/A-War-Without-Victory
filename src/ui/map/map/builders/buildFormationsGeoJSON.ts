@@ -26,6 +26,10 @@ function getBrigadeType(name: string): string {
   return 'brigade'; // default
 }
 
+// Tiny offset in degrees (approx 30m east, 20m south per unit) to create a 'fanned' stack effect
+const STACK_OFFSET_LNG = 0.00045;
+const STACK_OFFSET_LAT = 0.0003;
+
 export function buildFormationsGeoJSON(
   state: LoadedGameState,
   controlledOsidGeoJson: FeatureCollection,
@@ -37,8 +41,8 @@ export function buildFormationsGeoJSON(
   const features: Array<Feature<Point, FormationMarkerProperties>> = [];
 
   for (const formation of orderedFormations) {
-    // Corps and army HQs are command abstractions — they have no physical map position.
-    if (formation.kind === 'corps' || formation.kind === 'army_hq') continue;
+    // Determine if this is a command abstraction or a physical combat unit.
+    const isHQ = formation.kind === 'corps' || formation.kind === 'corps_asset' || formation.kind === 'army_hq';
 
     const osid = resolveFormationLocationOsid(formation, centroidLookup);
     if (!osid) continue;
@@ -49,13 +53,9 @@ export function buildFormationsGeoJSON(
     const stackIndex = unitsPerOsid.get(osid) || 0;
     unitsPerOsid.set(osid, stackIndex + 1);
 
-    // Tiny offset in degrees (approx 30m east, 20m south per unit) to create a 'fanned' stack effect
-    const stackOffsetLng = 0.00045;
-    const stackOffsetLat = 0.0003;
-
     const point: [number, number] = [
-      osidCenter[0] + stackIndex * stackOffsetLng,
-      osidCenter[1] - stackIndex * stackOffsetLat,
+      osidCenter[0] + stackIndex * STACK_OFFSET_LNG,
+      osidCenter[1] - stackIndex * STACK_OFFSET_LAT,
     ];
 
     features.push({
@@ -66,7 +66,7 @@ export function buildFormationsGeoJSON(
         name: formation.name,
         kind: formation.kind,
         faction: formation.faction,
-        icon_id: formationIconId(getBrigadeType(formation.name), formation.faction, formation.posture),
+        icon_id: formationIconId(isHQ ? formation.kind : getBrigadeType(formation.name), formation.faction, formation.posture),
         status: formation.status,
         readiness: formation.readiness,
         cohesion: formation.cohesion,

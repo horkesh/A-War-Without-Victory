@@ -157,8 +157,8 @@ export interface FormationView {
     brigade_history?: {
         longest_victory_streak: number;
         turns_under_siege: number;
-        total_equipment_destroyed?: number;
-        total_equipment_captured?: number;
+        total_equipment_destroyed?: { tanks: number; artillery: number; aa_systems: number };
+        total_equipment_captured?: { tanks: number; artillery: number; aa_systems: number };
     };
 }
 
@@ -252,6 +252,8 @@ export interface CorpsFrontSectorView {
     density: number;
     threat_ratio: number;
     defensive_power: number;
+    intel_confidence: number;
+    offensive_signs: boolean;
 }
 
 export interface OperationView {
@@ -276,6 +278,7 @@ export interface LoadedGameState {
     label: string;
     turn: number;
     phase: string;
+    metadata?: { turn: number; date: string };
     formations: FormationView[];
     militiaPools: MilitiaPoolView[];
     controlBySettlement: Record<string, string | null>;

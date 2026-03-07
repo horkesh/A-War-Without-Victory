@@ -10,6 +10,7 @@ import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON'
 import { AccordionHeader } from './AccordionHeader';
 import { toTitleCase } from '../utils/formatters';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
+import { getFactionArmyCommander } from '../utils/officerUtils';
 
 const FACTION_ORDER = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -343,25 +344,40 @@ export function OOBSidebar() {
                         onKeyDown={(e) => e.key === 'Enter' && toggle(faction)}
                         className="w-full flex items-center justify-between px-2 py-1.5 rounded font-mono text-xs font-medium bg-panel-card border border-panel-border text-left hover:bg-panel-hover transition-colors cursor-pointer group/faction"
                       >
-                        <div className="flex items-center gap-2">
-                          {getArmyCrest(faction) && (
-                            <img src={getArmyCrest(faction)} alt="" className="w-5 h-5 object-contain" />
-                          )}
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); setSelectedArmyId(faction); }}
-                            className={`${FACTION_COLORS[faction] ?? 'text-text-primary'} hover:underline`}
-                            title={`View ${faction} army summary`}
-                          >
-                            {getArmyName(faction) ? `${getArmyName(faction)} · ${faction}` : faction}
-                          </button>
+                        <div className="flex flex-col gap-0.5 min-w-0">
+                          <div className="flex items-center gap-2">
+                            {getArmyCrest(faction) && (
+                              <img src={getArmyCrest(faction)} alt="" className="w-5 h-5 object-contain" />
+                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setSelectedArmyId(faction); }}
+                              className={`${FACTION_COLORS[faction] ?? 'text-text-primary'} hover:underline truncate`}
+                              title={`View ${faction} army summary`}
+                            >
+                              {getArmyName(faction) ? `${getArmyName(faction)} · ${faction}` : faction}
+                            </button>
+                          </div>
+                          {(() => {
+                            const commander = getFactionArmyCommander(faction, loadedGameState);
+                            if (commander) {
+                              return (
+                                <div className="text-[10px] text-text-secondary pl-7 truncate">
+                                  CO: <span className="text-accent-gold font-semibold">{commander.name}</span>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
                         </div>
-                        <span className="text-text-secondary tabular-nums">{formations.length + reserves.length} formations</span>
-                        <span
-                          className="text-text-secondary group-hover/faction:text-text-primary transition-colors ml-2"
-                        >
-                          {isCollapsed ? '\u25B6' : '\u25BC'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-text-secondary tabular-nums text-[10px]">{formations.length + reserves.length} formations</span>
+                          <span
+                            className="text-text-secondary group-hover/faction:text-text-primary transition-colors"
+                          >
+                            {isCollapsed ? '\u25B6' : '\u25BC'}
+                          </span>
+                        </div>
                       </div>
                       {!isCollapsed && (
                         <>

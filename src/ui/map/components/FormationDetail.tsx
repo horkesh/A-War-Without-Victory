@@ -7,6 +7,8 @@ import { stagePostureOrderAction } from '../desktop/orderActions';
 import { DETAIL_PANEL_STYLE, SECONDARY_PANEL_STYLE } from './panelRail';
 import { turnToDateString, formatCombatOutcome, formatPosture, toTitleCase } from '../utils/formatters';
 import { getArmyCrest } from '../utils/factionAssets';
+import { getFormationCommander } from '../utils/officerUtils';
+// import { CombatSummaryPanel } from './CombatSummaryPanel';
 
 
 /**
@@ -115,26 +117,32 @@ export function FormationDetail() {
 
             {/* Officer info */}
             {(() => {
-              if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
-                const commander = loadedGameState.namedOfficerData?.find(o => o.assigned_corps_id === formation.id && o.acting_commander);
-                if (commander) {
-                  return (
-                    <div className="pt-2 border-t border-panel-border flex items-start gap-3">
-                      <div className="w-10 h-10 bg-panel-card rounded border border-panel-border flex items-center justify-center text-accent-gold text-lg font-bold">
-                        HQ
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[10px] uppercase text-text-secondary tracking-wider font-semibold">Commanding Officer</div>
-                        <div className="text-sm font-bold text-accent-gold truncate">{commander.rank} {commander.name}</div>
-                        <div className="flex gap-3 text-[10px]">
-                          <span className="text-text-secondary">Competence: <span className="text-text-primary px-1 bg-black/30 rounded">{Math.round(commander.competence * 100)}</span></span>
-                          <span className="text-text-secondary">Aggression: <span className="text-text-primary px-1 bg-black/30 rounded">{Math.round(commander.aggressiveness * 100)}</span></span>
-                        </div>
+              const commander = getFormationCommander(formation, loadedGameState);
+              if (commander) {
+                const isArmy = formation.kind === 'army_hq' || formation.kind === 'army';
+                const label = isArmy ? 'Army Commander' : 'Corps Commander';
+                const badge = isArmy ? 'ARMY' : 'HQ';
+                const stat2Label = isArmy ? 'Def' : 'Aggression';
+                const stat2Value = isArmy ? commander.defensive_skill : commander.aggressiveness;
+
+                return (
+                  <div className="pt-2 border-t border-panel-border flex items-start gap-3">
+                    <div className="w-10 h-10 bg-panel-card rounded border border-panel-border flex items-center justify-center text-accent-gold text-lg font-bold">
+                      {badge}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[10px] uppercase text-text-secondary tracking-wider font-semibold">{label}</div>
+                      <div className="text-sm font-bold text-accent-gold truncate">{commander.rank} {commander.name}</div>
+                      <div className="flex gap-3 text-[10px]">
+                        <span className="text-text-secondary">Competence: <span className="text-text-primary px-1 bg-black/30 rounded">{Math.round(commander.competence * 100)}</span></span>
+                        <span className="text-text-secondary">{stat2Label}: <span className="text-text-primary px-1 bg-black/30 rounded">{Math.round(stat2Value * 100)}</span></span>
                       </div>
                     </div>
-                  );
-                }
-              } else if (formation.kind === 'brigade' && formation.officer_quality != null) {
+                  </div>
+                );
+              }
+
+              if (formation.kind === 'brigade' && formation.officer_quality != null) {
                 return (
                   <div className="pt-2 border-t border-panel-border flex items-center justify-between text-xs">
                     <span className="text-text-secondary">Officer Cadre Quality</span>
@@ -146,6 +154,80 @@ export function FormationDetail() {
               }
               return null;
             })()}
+
+            {formation.decorations && formation.decorations.length > 0 && (
+              <div className="pt-2 border-t border-panel-border space-y-1">
+                <div className="text-xs text-text-secondary">Unit Honors & Decorations</div>
+                <div className="flex flex-wrap gap-1">
+                  {formation.decorations.map((dec, i) => (
+                    <span key={i} className="px-1.5 py-0.5 bg-accent-gold/20 text-accent-gold text-[10px] font-semibold uppercase tracking-wider rounded border border-accent-gold/30" title={dec.notes}>
+                      {dec.tier} / {dec.type}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {formation.honor && (
+              <div className="pt-1 flex items-center justify-between text-xs">
+                <span className="text-text-secondary">Historical Honor</span>
+                <span className="px-1.5 py-0.5 bg-accent-gold/20 text-accent-gold text-[10px] font-semibold uppercase tracking-wider rounded border border-accent-gold/30">
+                  {formation.honor}
+                </span>
+              </div>
+            )}
+
+            {/* TO&E (Table of Organization and Equipment) */}
+            {formation.composition && (
+              <div className="pt-2 border-t border-panel-border space-y-2">
+                <div className="text-xs text-text-secondary">TO&E (Equipment)</div>
+                <div className="space-y-1.5 text-xs">
+                  {formation.composition.tanks > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-text-secondary w-16">Tanks</span>
+                      <div className="flex-1 flex items-center gap-2">
+                        <div className="flex-1 h-1.5 bg-black/40 rounded flex overflow-hidden">
+                          <div style={{ width: `${formation.composition.tank_condition.operational * 100}%` }} className="bg-[#55d48a]" title={`${Math.round(formation.composition.tank_condition.operational * 100)}% Operational`} />
+                          <div style={{ width: `${formation.composition.tank_condition.degraded * 100}%` }} className="bg-[#d4d455]" title={`${Math.round(formation.composition.tank_condition.degraded * 100)}% Degraded`} />
+                          <div style={{ width: `${formation.composition.tank_condition.non_operational * 100}%` }} className="bg-[#d45555]" title={`${Math.round(formation.composition.tank_condition.non_operational * 100)}% Non-Operational`} />
+                        </div>
+                        <span className="text-text-primary tabular-nums w-6 text-right font-mono">{formation.composition.tanks}</span>
+                      </div>
+                    </div>
+                  )}
+                  {formation.composition.artillery > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-text-secondary w-16">Artillery</span>
+                      <div className="flex-1 flex items-center gap-2">
+                        <div className="flex-1 h-1.5 bg-black/40 rounded flex overflow-hidden">
+                          <div style={{ width: `${formation.composition.artillery_condition.operational * 100}%` }} className="bg-[#55d48a]" title={`${Math.round(formation.composition.artillery_condition.operational * 100)}% Operational`} />
+                          <div style={{ width: `${formation.composition.artillery_condition.degraded * 100}%` }} className="bg-[#d4d455]" title={`${Math.round(formation.composition.artillery_condition.degraded * 100)}% Degraded`} />
+                          <div style={{ width: `${formation.composition.artillery_condition.non_operational * 100}%` }} className="bg-[#d45555]" title={`${Math.round(formation.composition.artillery_condition.non_operational * 100)}% Non-Operational`} />
+                        </div>
+                        <span className="text-text-primary tabular-nums w-6 text-right font-mono">{formation.composition.artillery}</span>
+                      </div>
+                    </div>
+                  )}
+                  {formation.composition.aa_systems > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-text-secondary w-16">AA Sys</span>
+                      <div className="flex-1 flex items-center gap-2">
+                        <div className="flex-1 h-1.5 bg-black/40 rounded flex overflow-hidden">
+                          <div style={{ width: '100%' }} className="bg-[#55d48a]" title="100% Operational (Abstracted)" />
+                        </div>
+                        <span className="text-text-primary tabular-nums w-6 text-right font-mono">{formation.composition.aa_systems}</span>
+                      </div>
+                    </div>
+                  )}
+                  {formation.equipment_decay != null && (
+                    <div className="flex justify-between items-center text-[11px] pt-1">
+                      <span className="text-text-secondary">Overall VRS Supply Effectiveness</span>
+                      <span className="text-text-primary font-mono">{Math.round(formation.equipment_decay * 100)}%</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs px-2 py-1 bg-black/10 rounded">
               <span className="text-text-secondary">Cohesion</span>
@@ -165,12 +247,53 @@ export function FormationDetail() {
                   );
                 })()}
               </span>
+              {formation.morale != null && (
+                <>
+                  <span className="text-text-secondary">Morale</span>
+                  <span className="text-text-primary tabular-nums flex items-center gap-1">
+                    {(() => {
+                      const m = formation.morale!;
+                      const blocks = 10;
+                      const filled = Math.round((m / 100) * blocks);
+                      const color = m >= 70 ? '#55d48a' : m >= 40 ? '#d4d455' : '#d45555';
+                      return (
+                        <>
+                          <span style={{ color, letterSpacing: '1px', fontSize: '10px' }}>
+                            {'■'.repeat(filled)}<span style={{ opacity: 0.2 }}>{'■'.repeat(blocks - filled)}</span>
+                          </span>
+                          <span className="text-text-secondary text-[10px]">{m}</span>
+                        </>
+                      );
+                    })()}
+                  </span>
+                </>
+              )}
               <span className="text-text-secondary">Fatigue</span>
               <span className="text-text-primary tabular-nums">{formation.fatigue}</span>
               {formation.personnel != null && (
                 <>
                   <span className="text-text-secondary">Personnel</span>
                   <span className="text-text-primary tabular-nums">{formation.personnel.toLocaleString()} men</span>
+                </>
+              )}
+              {formation.entrenchment_turns != null && formation.entrenchment_turns > 0 && (
+                <>
+                  <span className="text-text-secondary">Entrenchment</span>
+                  <span className="text-text-primary tabular-nums">{formation.entrenchment_turns} turns</span>
+                </>
+              )}
+              {formation.dig_in_progress != null && formation.dig_in_progress > 0 && (
+                <>
+                  <span className="text-text-secondary">Dig-in Progress</span>
+                  <span className="text-text-primary tabular-nums">{Math.round(formation.dig_in_progress * 100)}%</span>
+                </>
+              )}
+              {formation.disrupted_turns != null && formation.disrupted_turns > 0 && (
+                <>
+                  <span className="text-text-secondary">Disrupted</span>
+                  <span className="text-text-primary tabular-nums" style={{ color: '#d45555' }}>
+                    {formation.disrupted_turns} turns
+                  </span>
                 </>
               )}
               {formation.kind === 'corps' && formation.corpsExhaustion != null && (
@@ -218,47 +341,117 @@ export function FormationDetail() {
               </div>
             )}
 
+            {formation.last_repulsed_from && (
+              <div className="text-[11px] text-text-secondary min-w-0">
+                <span>Last repulsed from: </span>
+                <span className="font-mono text-text-primary break-all" title={formation.last_repulsed_from.osid}>
+                  {getOsidDisplayName(formation.last_repulsed_from.osid, osidDisplayNames)}
+                </span>
+                <span> (wk {formation.last_repulsed_from.turn})</span>
+              </div>
+            )}
+            {formation.last_retreat_from && (
+              <div className="text-[11px] text-text-secondary min-w-0">
+                <span>Retreated from: </span>
+                <span className="font-mono text-text-primary break-all" title={formation.last_retreat_from.osid}>
+                  {getOsidDisplayName(formation.last_retreat_from.osid, osidDisplayNames)}
+                </span>
+                <span> (wk {formation.last_retreat_from.turn})</span>
+              </div>
+            )}
+
 
             {formation.kind === 'brigade' && formation.combatSummary && (
-              <div className="pt-2 border-t border-panel-border space-y-1">
-                <div className="text-xs text-text-secondary">Brigade history</div>
-                {formation.firstBattleTurn != null && (
-                  <div className="text-[11px]">
-                    <span className="text-text-secondary">First engagement: </span>
-                    <span className="text-text-primary">{turnToDateString(formation.firstBattleTurn)}</span>
-                    {formation.firstBattleOsid && (
-                      <span className="text-text-secondary"> @ <span className="font-mono text-text-primary">{getOsidDisplayName(formation.firstBattleOsid, osidDisplayNames)}</span></span>
-                    )}
+              <div className="pt-2 border-t border-panel-border space-y-2 pb-1">
+                <div className="text-xs text-text-secondary">Service Record</div>
+
+                {/* Win Rate & K/D Header */}
+                <div className="flex gap-4 p-2 bg-black/20 rounded border border-panel-border/30">
+                  <div className="flex-1 flex flex-col items-center justify-center border-r border-panel-border/30 pr-4">
+                    <span className="text-[10px] text-text-secondary uppercase tracking-wider mb-1">Win Rate</span>
+                    <div className="relative w-10 h-10 rounded-full border border-panel-border/50 flex items-center justify-center font-bold font-mono text-xs text-text-primary"
+                      style={{
+                        background: `conic-gradient(#d4a055 ${Math.round(formation.combatSummary.win_rate * 100)}%, transparent 0)`
+                      }}>
+                      {Math.round(formation.combatSummary.win_rate * 100)}%
+                    </div>
                   </div>
-                )}
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                  <span className="text-text-secondary">Total losses</span>
-                  <span className="text-text-primary tabular-nums">{formation.combatSummary.total_casualties_taken.toLocaleString()}</span>
-                  <span className="text-text-secondary">KIA (est.)</span>
-                  <span className="text-text-primary tabular-nums">{Math.round(formation.combatSummary.total_casualties_taken * 0.30).toLocaleString()}</span>
-                  <span className="text-text-secondary">WIA (est.)</span>
-                  <span className="text-text-primary tabular-nums">{Math.round(formation.combatSummary.total_casualties_taken * 0.55).toLocaleString()}</span>
-                  <span className="text-text-secondary">Enemy losses</span>
-                  <span className="text-text-primary tabular-nums">{formation.combatSummary.total_casualties_inflicted.toLocaleString()}</span>
-                  <span className="text-text-secondary">Battles</span>
-                  <span className="text-text-primary tabular-nums">{formation.combatSummary.battles_fought.toLocaleString()}</span>
-                  <span className="text-text-secondary">Victories</span>
-                  <span className="text-text-primary tabular-nums">{formation.combatSummary.victories.toLocaleString()}</span>
-                  <span className="text-text-secondary">Defeats</span>
-                  <span className="text-text-primary tabular-nums">{formation.combatSummary.defeats.toLocaleString()}</span>
-                  <span className="text-text-secondary">Stalemates</span>
-                  <span className="text-text-primary tabular-nums">{formation.combatSummary.stalemates.toLocaleString()}</span>
-                  <span className="text-text-secondary">OSIDs captured</span>
-                  <span className="text-text-primary tabular-nums">{formation.combatSummary.total_osids_captured.toLocaleString()}</span>
-                  <span className="text-text-secondary">OSIDs lost</span>
-                  <span className="text-text-primary tabular-nums">{formation.combatSummary.total_osids_lost.toLocaleString()}</span>
+                  <div className="flex-1 flex flex-col items-center justify-center">
+                    <span className="text-[10px] text-text-secondary uppercase tracking-wider mb-1">K/D Ratio</span>
+                    <span className="text-lg font-mono text-accent-goldtabular-nums">
+                      {formation.combatSummary.casualty_exchange_ratio.toFixed(2)}
+                    </span>
+                    <span className="text-[9px] text-text-secondary italic mt-0.5">Inflicted / Taken</span>
+                  </div>
                 </div>
+
+                {/* Stat Grid */}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs px-1">
+                  <span className="text-text-secondary">Battles Fought</span>
+                  <span className="text-text-primary tabular-nums">{formation.combatSummary.battles_fought.toLocaleString()}</span>
+
+                  <span className="text-text-secondary">Casualties Taken</span>
+                  <span className="text-text-primary tabular-nums">{formation.combatSummary.total_casualties_taken.toLocaleString()}</span>
+
+                  <span className="text-text-secondary">Casualties Inflicted</span>
+                  <span className="text-text-primary tabular-nums">{formation.combatSummary.total_casualties_inflicted.toLocaleString()}</span>
+
+                  <span className="text-text-secondary text-[10px] pl-2">— KIA (est.)</span>
+                  <span className="text-[#d45555] tabular-nums text-[10px]">{Math.round(formation.combatSummary.total_casualties_taken * 0.30).toLocaleString()}</span>
+
+                  <span className="text-text-secondary text-[10px] pl-2">— WIA (est.)</span>
+                  <span className="text-[#d4d455] tabular-nums text-[10px]">{Math.round(formation.combatSummary.total_casualties_taken * 0.55).toLocaleString()}</span>
+
+                  <span className="text-text-secondary">OSIDs Captured</span>
+                  <span className="text-[#55d48a] tabular-nums font-semibold">{formation.combatSummary.total_osids_captured.toLocaleString()}</span>
+
+                  <span className="text-text-secondary">OSIDs Lost</span>
+                  <span className="text-[#d45555] tabular-nums">{formation.combatSummary.total_osids_lost.toLocaleString()}</span>
+
+                  {formation.brigade_history && (
+                    <>
+                      {formation.brigade_history.longest_victory_streak > 0 && (
+                        <>
+                          <span className="text-text-secondary">Highest Win-Streak</span>
+                          <span className="text-accent-gold tabular-nums font-semibold">{formation.brigade_history.longest_victory_streak}</span>
+                        </>
+                      )}
+                      {formation.brigade_history.turns_under_siege > 0 && (
+                        <>
+                          <span className="text-text-secondary">Turns Under Siege</span>
+                          <span className="text-text-primary tabular-nums">{formation.brigade_history.turns_under_siege}</span>
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Equipment Brag Board */}
+                {formation.brigade_history?.total_equipment_destroyed &&
+                  (formation.brigade_history.total_equipment_destroyed.tanks > 0 ||
+                    formation.brigade_history.total_equipment_destroyed.artillery > 0) && (
+                    <div className="mt-2 p-1.5 border border-dashed border-[#55d48a]/30 bg-[#55d48a]/5 rounded flex justify-between items-center">
+                      <span className="text-[10px] text-[#55d48a] uppercase font-semibold">Equipment Destroyed</span>
+                      <div className="flex gap-2 text-xs font-mono">
+                        {formation.brigade_history.total_equipment_destroyed.tanks > 0 && (
+                          <span title="Tanks/APCs Knocked Out">🛻 {formation.brigade_history.total_equipment_destroyed.tanks}</span>
+                        )}
+                        {formation.brigade_history.total_equipment_destroyed.artillery > 0 && (
+                          <span title="Artillery Destroyed">💥 {formation.brigade_history.total_equipment_destroyed.artillery}</span>
+                        )}
+                        {formation.brigade_history.total_equipment_destroyed.aa_systems > 0 && (
+                          <span title="AA Systems Destroyed">🎯 {formation.brigade_history.total_equipment_destroyed.aa_systems}</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                 {formation.recent_engagements && formation.recent_engagements.length > 0 && (
-                  <div className="pt-1">
+                  <div className="pt-2">
                     <div className="text-xs text-text-secondary mb-1">Recent engagements</div>
                     <div className="space-y-1">
                       {[...formation.recent_engagements].reverse().map((engagement, idx) => (
-                        <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-[11px] leading-4">
+                        <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-[11px] leading-4 border-l-2 pl-1.5 border-panel-border/30">
                           <span className="text-text-secondary">{turnToDateString(engagement.turn)} </span>
                           <span className="text-text-primary">{formatCombatOutcome(engagement.outcome)}</span>
                           <span className="text-text-secondary"> as {engagement.role} @ </span>

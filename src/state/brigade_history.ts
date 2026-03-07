@@ -57,6 +57,8 @@ export interface BrigadeHistory {
     total_casualties_inflicted: number;
     total_osids_captured: number;
     total_osids_lost: number;
+    total_equipment_destroyed: { tanks: number; artillery: number; aa_systems: number };
+    total_equipment_captured: { tanks: number; artillery: number; aa_systems: number };
 
     // --- Streaks ---
     current_victory_streak: number;
@@ -105,6 +107,8 @@ export function createEmptyBrigadeHistory(initialPersonnel: number): BrigadeHist
         total_casualties_inflicted: 0,
         total_osids_captured: 0,
         total_osids_lost: 0,
+        total_equipment_destroyed: { tanks: 0, artillery: 0, aa_systems: 0 },
+        total_equipment_captured: { tanks: 0, artillery: 0, aa_systems: 0 },
         current_victory_streak: 0,
         longest_victory_streak: 0,
         current_defense_streak: 0,

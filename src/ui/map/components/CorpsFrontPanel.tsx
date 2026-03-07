@@ -38,8 +38,6 @@ export function CorpsFrontPanel() {
   const setSelectedSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
-  const setIsOperationsPanelOpen = useGameStore((s) => s.setIsOperationsPanelOpen);
-  const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const panToOsid = useGameStore((s) => s.panToOsid);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
@@ -140,95 +138,131 @@ export function CorpsFrontPanel() {
         </button>
       </div>
 
-      <div className="flex-1 overflow-auto text-[12px]">
-        {/* Corps identity */}
-        <div className="p-4 pb-3">
-          <div className="font-semibold text-text-primary text-[13px]">
-            {sector.display_name}
+      <div className="flex-1 overflow-auto bg-[#faf9f6]/95 text-neutral-800 font-mono text-[11px] shadow-inner relative">
+        {/* Background watermark */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center -rotate-12 select-none">
+          <span className="text-8xl font-black tracking-widest uppercase">SECRET</span>
+        </div>
+
+        {/* Threat Warning Banner */}
+        {sector.offensive_signs && (
+          <div className="bg-red-600 text-white font-bold p-2 text-center text-[10px] sm:text-xs uppercase tracking-widest animate-pulse shadow-md relative z-10 border-y border-red-800">
+            ⚠️ IMMINENT ENEMY OFFENSIVE DETECTED ⚠️
           </div>
-          <div className="text-text-secondary mt-0.5">
-            <span className={FACTION_COLORS[sector.faction] ?? 'text-text-primary'}>
-              {sector.faction}
-            </span>
-            {' · '}
-            <span className="capitalize">{corpsStance}</span>
+        )}
+
+        {/* Dossier Header */}
+        <div className="p-4 pb-3 border-b-2 border-neutral-300 relative z-10">
+          <div className="flex justify-between items-start mb-2">
+            <div className="flex flex-col">
+              <span className="text-[9px] uppercase tracking-wider text-neutral-500 font-bold mb-0.5">Subject</span>
+              <span className="font-bold text-[14px] uppercase tracking-wide">
+                {sector.display_name}
+              </span>
+            </div>
+            <div className="flex flex-col items-end text-[9px] text-neutral-500">
+              <div className="uppercase"><span className="font-bold">Date:</span> {loadedGameState.metadata?.date ?? 'UNKNOWN'}</div>
+              <div className="uppercase"><span className="font-bold">Turn:</span> {loadedGameState.metadata?.turn ?? 'UNKNOWN'}</div>
+            </div>
+          </div>
+          <div className="text-neutral-600 mt-2 text-[10px] space-y-0.5 uppercase">
+            <div><span className="font-bold text-neutral-800">FACTION:</span> <span className={FACTION_COLORS[sector.faction] ?? 'text-neutral-800'}>{sector.faction}</span></div>
+            <div><span className="font-bold text-neutral-800">STANCE:</span> {corpsStance}</div>
+            <div className="mt-1 pt-1 border-t border-neutral-300/50 flex items-center justify-between">
+              <span><span className="font-bold text-neutral-800">CONFIDENCE:</span> {(sector.intel_confidence * 100).toFixed(0)}%</span>
+              {sector.intel_confidence < 0.3 && <span className="text-red-700 font-bold bg-red-100 px-1 rounded">LOW</span>}
+              {sector.intel_confidence >= 0.3 && sector.intel_confidence < 0.7 && <span className="text-amber-700 font-bold bg-amber-100 px-1 rounded">MED</span>}
+              {sector.intel_confidence >= 0.7 && <span className="text-green-700 font-bold bg-green-100 px-1 rounded">HIGH</span>}
+            </div>
           </div>
         </div>
 
         <AccordionHeader
-          label="Overview"
+          label="1. STRATEGIC OVERVIEW"
           expanded={expandedSections.overview}
           onToggle={() => toggleSection('overview')}
         />
         {expandedSections.overview && (
-          <div className="p-4">
-            <div className="space-y-1 mb-3">
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Front length</span>
-                <span className="text-text-primary tabular-nums">
-                  ~{sector.length_edges} km · {sector.sub_segment_count === 1 ? 'Contiguous' : `${sector.sub_segment_count} Disconnected Fronts`}
+          <div className="p-4 relative z-10 space-y-3">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <div className="flex flex-col">
+                <span className="text-[9px] uppercase font-bold text-neutral-500">Front Length</span>
+                <span className="font-medium">
+                  {sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">REDACTED</span> : `~${sector.length_edges} km`}
+                </span>
+                <span className="text-[9px] text-neutral-500">[{sector.sub_segment_count === 1 ? 'Contiguous' : `${sector.sub_segment_count} Segments`}]</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[9px] uppercase font-bold text-neutral-500">Density</span>
+                <span className="font-medium">
+                  {sector.intel_confidence < 0.25 ? <span className="bg-black text-black select-none">REDACTED</span> : (
+                    <>
+                      {sector.density.toFixed(2)} <DensityBadge density={sector.density} />
+                    </>
+                  )}
+                </span>
+                <span className="text-[9px] text-neutral-500">[{sector.assigned_brigade_ids.length} Frontline]</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[9px] uppercase font-bold text-neutral-500">Risk Ratio</span>
+                <span className="font-medium">
+                  {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">REDACTED</span> : <ThreatBadge ratio={sector.threat_ratio} />}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Density</span>
-                <span className="text-text-primary tabular-nums">
-                  {sector.density.toFixed(2)} <DensityBadge density={sector.density} /> <span className="text-text-secondary">({sector.assigned_brigade_ids.length} Frontline / {sector.length_edges} km)</span>
+              <div className="flex flex-col">
+                <span className="text-[9px] uppercase font-bold text-neutral-500">Defensive Power</span>
+                <span className="font-medium">
+                  {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACTED</span> : Math.round(sector.defensive_power).toLocaleString()}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Risk ratio</span>
-                <span className="tabular-nums"><ThreatBadge ratio={sector.threat_ratio} /></span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Def. power</span>
-                <span className="text-text-primary tabular-nums">{Math.round(sector.defensive_power).toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Linked settlements</span>
-                <span className="text-text-primary tabular-nums">{sectorFriendlyOsids.length}</span>
+              <div className="flex flex-col col-span-2">
+                <span className="text-[9px] uppercase font-bold text-neutral-500">Linked Settlements</span>
+                <span className="font-medium">{sectorFriendlyOsids.length}</span>
               </div>
             </div>
+
             {sector.opposing_factions.length > 0 && (
-              <div className="border-t border-panel-border pt-2 mb-1">
-                <span className="text-text-secondary">Opposing: </span>
-                {sector.opposing_factions.map((f, i) => (
-                  <span key={f}>
-                    {i > 0 && ', '}
-                    <span className={FACTION_COLORS[f] ?? 'text-text-primary'}>{f}</span>
-                  </span>
-                ))}
+              <div className="pt-2 border-t border-dashed border-neutral-300">
+                <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Identified Hostiles</span>
+                <div className="flex flex-wrap gap-2">
+                  {sector.opposing_factions.map((f) => (
+                    <span key={f} className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${FACTION_COLORS[f]?.replace('text-', 'bg-').replace('-400', '-900') ?? 'bg-neutral-800'} text-white`}>
+                      {f}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
           </div>
         )}
 
         <AccordionHeader
-          label="Forces"
+          label="2. ORBAT SUMMARY"
           count={assignedFormations.length + reserveFormations.length}
           expanded={expandedSections.forces}
           onToggle={() => toggleSection('forces')}
         />
         {expandedSections.forces && (
-          <div className="p-4">
+          <div className="p-4 relative z-10">
             {assignedFormations.length > 0 && (
-              <div className="mb-3">
-                <div className="text-text-secondary mb-1">
-                  Assigned ({assignedFormations.length}):
+              <div className="mb-4">
+                <div className="text-[9px] uppercase font-bold text-neutral-500 mb-2 border-b border-neutral-300 pb-1">
+                  Active Frontline Elements ({assignedFormations.length})
                 </div>
-                <div className="space-y-0.5 max-h-[200px] overflow-auto">
+                <div className="space-y-[1px] max-h-[200px] overflow-auto">
                   {assignedFormations.map((f) => (
                     <button
                       key={f.id}
                       type="button"
                       aria-label={`Assigned brigade ${f.name}${f.personnel != null ? `, personnel ${f.personnel.toLocaleString()}` : ''}`}
-                      className="kbd-focus w-full flex justify-between text-text-primary hover:text-interactive transition-colors text-left rounded"
+                      className="kbd-focus w-full flex justify-between items-center bg-white/50 hover:bg-neutral-200 transition-colors text-left px-1 py-0.5 rounded"
                       onClick={() => setSelectedFormationId(f.id)}
                       onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
                       onMouseLeave={() => setHoveredOsids([])}
                     >
-                      <span className="truncate mr-2">{f.name}</span>
-                      <span className="text-text-secondary tabular-nums shrink-0">
-                        {f.personnel != null ? f.personnel.toLocaleString() : '—'}
+                      <span className="truncate mr-2 font-medium">{f.name}</span>
+                      <span className="text-neutral-500 text-[10px] tabular-nums shrink-0">
+                        {sector.intel_confidence < 0.5 ? <span className="bg-black text-black select-none px-1">RED</span> : (f.personnel != null ? `${f.personnel.toLocaleString()} PAX` : '—')}
                       </span>
                     </button>
                   ))}
@@ -236,24 +270,24 @@ export function CorpsFrontPanel() {
               </div>
             )}
             {reserveFormations.length > 0 && (
-              <div className="border-t border-panel-border pt-2">
-                <div className="text-text-secondary mb-1">
-                  Reserve ({reserveFormations.length}):
+              <div className="pt-2">
+                <div className="text-[9px] uppercase font-bold text-neutral-500 mb-2 border-b border-neutral-300 pb-1">
+                  Deployed Reserves ({reserveFormations.length})
                 </div>
-                <div className="space-y-0.5 max-h-[120px] overflow-auto">
+                <div className="space-y-[1px] max-h-[120px] overflow-auto opacity-80 hover:opacity-100 transition-opacity">
                   {reserveFormations.map((f) => (
                     <button
                       key={f.id}
                       type="button"
                       aria-label={`Reserve brigade ${f.name}${f.personnel != null ? `, personnel ${f.personnel.toLocaleString()}` : ''}`}
-                      className="kbd-focus w-full flex justify-between text-text-primary/70 hover:text-interactive transition-colors text-left rounded"
+                      className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-200 transition-colors text-left px-1 py-0.5 rounded"
                       onClick={() => setSelectedFormationId(f.id)}
                       onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
                       onMouseLeave={() => setHoveredOsids([])}
                     >
-                      <span className="truncate mr-2">{f.name}</span>
-                      <span className="text-text-secondary tabular-nums shrink-0">
-                        {f.personnel != null ? f.personnel.toLocaleString() : '—'}
+                      <span className="truncate mr-2 text-neutral-600 italic leading-none">{f.name}</span>
+                      <span className="text-neutral-400 text-[9px] tabular-nums shrink-0 leading-none">
+                        {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none px-1">RED</span> : (f.personnel != null ? `${f.personnel.toLocaleString()} PAX` : '—')}
                       </span>
                     </button>
                   ))}
@@ -264,100 +298,93 @@ export function CorpsFrontPanel() {
         )}
 
         <AccordionHeader
-          label="Logistics"
+          label="3. LOGISTICS STATUS"
           expanded={expandedSections.logistics}
           onToggle={() => toggleSection('logistics')}
         />
         {expandedSections.logistics && (
-          <div className="p-4 space-y-1">
-            <div className="flex justify-between">
-              <span className="text-text-secondary">Assigned manpower</span>
-              <span className="text-text-primary tabular-nums">{assignedPersonnel.toLocaleString()}</span>
+          <div className="p-4 relative z-10 space-y-1">
+            <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
+              <span className="text-[10px] uppercase font-bold text-neutral-500">Total Manpower</span>
+              <span className="font-medium">
+                {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">REDACTED</span> : totalSectorPersonnel.toLocaleString()}
+              </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-text-secondary">Reserve manpower</span>
-              <span className="text-text-primary tabular-nums">{reservePersonnel.toLocaleString()}</span>
+            <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
+              <span className="text-[10px] uppercase font-bold text-neutral-500">Reserve Ratio</span>
+              <span className="font-medium">
+                {sector.intel_confidence < 0.5 ? <span className="bg-black text-black select-none">REDACTED</span> : `${Math.round(reserveRatio * 100)}%`}
+              </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-text-secondary">Reserve ratio</span>
-              <span className="text-text-primary tabular-nums">{Math.round(reserveRatio * 100)}%</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-text-secondary">Frontline coverage</span>
-              <span className="text-text-primary tabular-nums">{Math.round(frontlineCoverage * 100)}%</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-text-secondary">Ops supply readiness</span>
-              <span className="text-text-primary tabular-nums">
-                {avgOperationSupply != null ? `${Math.round(avgOperationSupply * 100)}%` : '—'}
+            <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
+              <span className="text-[10px] uppercase font-bold text-neutral-500">Ops Supply Readiness</span>
+              <span className="font-medium">
+                {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none">REDACTED</span> : (avgOperationSupply != null ? `${Math.round(avgOperationSupply * 100)}%` : '—')}
               </span>
             </div>
           </div>
         )}
 
         <AccordionHeader
-          label="Operations"
+          label="4. KNOWN OPERATIONS"
           count={relatedOperations.length > 0 ? relatedOperations.length : undefined}
           expanded={expandedSections.ops}
           onToggle={() => toggleSection('ops')}
         />
         {expandedSections.ops && (
-          <div className="p-4 space-y-2">
+          <div className="p-4 relative z-10 space-y-3">
             {relatedOperations.length === 0 ? (
-              <div className="text-xs text-text-secondary italic">No linked operations for this sector.</div>
+              <div className="text-[10px] text-neutral-500 italic uppercase">/// NO ACTIVE DIRECTIVES IDENTIFIED ///</div>
             ) : (
               relatedOperations.map((op) => {
                 const phaseBg = getOperationPhaseBadgeClass(op.phase);
                 const operationId = getOperationId(op);
                 const objective = op.objectives?.[op.current_objective_index ?? 0] ?? op.objectives?.[0];
                 return (
-                  <div key={operationId} className="rounded border border-panel-border bg-panel-card p-2 space-y-1 transition-all duration-200 hover:bg-panel-hover/70">
-                    <div className={`text-[11px] font-semibold ${FACTION_COLORS[op.faction] ?? 'text-text-primary'}`}>
-                      {op.name}
+                  <div key={operationId} className="bg-white border-2 border-neutral-300 p-2 relative shadow-sm">
+                    {/* Stamp effect */}
+                    <div className={`absolute top-1 right-2 opacity-20 font-black text-xl -rotate-12 select-none uppercase ${op.phase === 'execution' ? 'text-red-600' : 'text-amber-600'}`}>
+                      {op.phase}
                     </div>
-                    <div className="flex items-center gap-2 text-[10px]">
-                      <span className={`px-1 py-0.5 rounded text-white uppercase font-semibold ${phaseBg}`}>
-                        {op.phase}
-                      </span>
-                      <span className="text-text-secondary">{op.participating_brigade_count} brigades</span>
-                      {op.supply_readiness != null && (
-                        <span className="text-text-secondary tabular-nums">
-                          supply {Math.round(op.supply_readiness * 100)}%
-                        </span>
-                      )}
+
+                    <div className="font-bold text-[12px] uppercase tracking-wide mb-1 flex items-center gap-2">
+                      <span>{sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">OP. REDACTED</span> : op.name}</span>
+                      <span className={`px-1 rounded text-[8px] text-white ${phaseBg}`}>{op.phase}</span>
                     </div>
-                    {objective && (
-                      <button
-                        type="button"
-                        aria-label={`Focus map on objective ${osidDisplayNames?.[objective] ?? objective}`}
-                        onClick={() => panToOsid?.(objective)}
-                        className="kbd-focus text-[10px] text-interactive hover:underline rounded px-1 py-0.5"
-                      >
-                        Focus: {osidDisplayNames?.[objective] ?? objective}
-                      </button>
+
+                    <div className="text-[9px] uppercase font-bold text-neutral-500 mb-0.5 mt-2">Forces Committed</div>
+                    <div className="text-[10px]">{sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">REDACTED</span> : `${op.participating_brigade_count} Brigades`}</div>
+
+                    {op.supply_readiness != null && (
+                      <>
+                        <div className="text-[9px] uppercase font-bold text-neutral-500 mt-2 mb-0.5">Supply Status</div>
+                        <div className="text-[10px]">{sector.intel_confidence < 0.7 ? <span className="bg-black text-black select-none">REDACTED</span> : `${Math.round(op.supply_readiness * 100)}% Readiness`}</div>
+                      </>
                     )}
-                    <button
-                      type="button"
-                      aria-label={`Open operation ${op.name} in operations panel`}
-                      onClick={() => {
-                        setSelectedOperationKey(operationId);
-                        setIsOperationsPanelOpen(true);
-                      }}
-                      className="kbd-focus w-full text-[11px] px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover"
-                    >
-                      Open in Operations Panel
-                    </button>
+
+                    {objective && (
+                      <div className="mt-3 pt-2 border-t border-neutral-300 border-dashed">
+                        <button
+                          type="button"
+                          aria-label={`Focus map on objective ${osidDisplayNames?.[objective] ?? objective}`}
+                          onClick={() => panToOsid?.(objective)}
+                          className="kbd-focus text-[9px] uppercase font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1"
+                        >
+                          <span className="text-[11px]">⌖</span> Focus Obj: {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACT</span> : (osidDisplayNames?.[objective] ?? objective)}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })
             )}
-            <div className="pt-2 border-t border-panel-border">
+            <div className="pt-3">
               <button
                 type="button"
                 onClick={() => setOpsPlanningModalOpen(true)}
-                className="kbd-focus w-full text-xs font-sans px-2 py-2 rounded border border-panel-border text-interactive hover:bg-panel-hover"
+                className="kbd-focus w-full text-[10px] uppercase font-bold bg-neutral-200 hover:bg-neutral-300 text-neutral-800 py-2 border border-neutral-400 transition-colors"
               >
-                Open Ops Planning
+                Draft New Directive (Ops Planning)
               </button>
             </div>
           </div>

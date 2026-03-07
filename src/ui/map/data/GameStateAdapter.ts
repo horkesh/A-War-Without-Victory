@@ -224,40 +224,56 @@ export function parseGameState(json: unknown): LoadedGameState {
                 most_victories_brigade_id: typeof rawCS.most_victories_brigade_id === 'string' ? rawCS.most_victories_brigade_id : null,
             } : undefined;
 
-            // Brigade first battle milestone
-            let firstBattleTurn: number | null | undefined;
-            let firstBattleOsid: string | null | undefined;
-            if ((f.kind === 'brigade' || f.kind === 'operational_group') && brigadeHistoryRecord) {
-                const bh = brigadeHistoryRecord[id];
-                if (bh) {
-                    firstBattleTurn = typeof bh.first_battle_turn === 'number' ? bh.first_battle_turn : null;
-                    firstBattleOsid = typeof bh.first_battle_osid === 'string' ? bh.first_battle_osid : null;
-                }
-            }
+            const fv: FormationView = {
+                id, faction: (f.faction as string) ?? '', name: (f.name as string) ?? id,
+                kind: (f.kind as string) ?? 'brigade', readiness: (f.readiness as string) ?? 'active',
+                cohesion: (f.cohesion as number) ?? 100, fatigue: (ops?.fatigue as number) ?? 0,
+                status: (f.status as string) ?? 'active', createdTurn: (f.created_turn as number) ?? 0,
+                tags, municipalityId, hq_sid, location_osid, aorSettlementIds,
+                personnel, posture, home_defense_active, corps_id, movementStatus, movementStance,
+                narrativeArc,
+                warNarrative: typeof warStory?.narrative === 'string' ? warStory.narrative : undefined,
+                notableMoments: Array.isArray(warStory?.notable_moments) ? warStory.notable_moments : undefined,
+                officer_quality: typeof f.officer_quality === 'number' && Number.isFinite(f.officer_quality) ? f.officer_quality : undefined,
+                combatSummary,
+                morale: typeof f.morale === 'number' ? f.morale : undefined,
+                entrenchment_turns: typeof f.entrenchment_turns === 'number' ? f.entrenchment_turns : undefined,
+                dig_in_progress: typeof f.dig_in_progress === 'number' ? f.dig_in_progress : undefined,
+                disrupted_turns: typeof f.disrupted_turns === 'number' ? f.disrupted_turns : undefined,
+                equipment_decay: typeof f.equipment_decay === 'number' ? f.equipment_decay : undefined,
+                honor: typeof f.honor === 'string' ? f.honor : undefined,
+                composition: f.composition as FormationView['composition'] ?? undefined,
+                decorations: Array.isArray(f.decorations) ? f.decorations as NonNullable<FormationView['decorations']> : undefined,
+                last_repulsed_from: f.last_repulsed_from as NonNullable<FormationView['last_repulsed_from']> ?? undefined,
+                last_retreat_from: f.last_retreat_from as NonNullable<FormationView['last_retreat_from']> ?? undefined,
+            };
 
-            // Brigade recent engagements: last 8 from brigade_history.engagements
-            let recent_engagements: FormationView['recent_engagements'];
-            let parsed_brigade_history: FormationView['brigade_history'];
+            // Brigade first battle milestone
             if ((f.kind === 'brigade' || f.kind === 'operational_group') && brigadeHistoryRecord) {
                 const bh = brigadeHistoryRecord[id];
-                if (bh && Array.isArray(bh.engagements) && bh.engagements.length > 0) {
-                    const last8 = (bh.engagements as Array<Record<string, unknown>>).slice(-8);
-                    recent_engagements = last8.map((e) => ({
-                        turn: typeof e.turn === 'number' ? e.turn : 0,
-                        osid: typeof e.osid === 'string' ? e.osid : '',
-                        role: (e.role === 'attacker' || e.role === 'defender') ? e.role : 'defender',
-                        outcome: typeof e.outcome === 'string' ? e.outcome : '',
-                        casualties_taken: typeof e.casualties_taken === 'number' ? e.casualties_taken : 0,
-                        territory_flipped: e.territory_flipped === true,
-                    }));
-                }
-                if (bh) {
-                    parsed_brigade_history = {
+                if (bh && typeof bh === 'object') {
+                    fv.firstBattleTurn = typeof bh.first_battle_turn === 'number' ? bh.first_battle_turn : null;
+                    fv.firstBattleOsid = typeof bh.first_battle_osid === 'string' ? bh.first_battle_osid : null;
+
+                    fv.brigade_history = {
                         longest_victory_streak: finiteNumber(bh.longest_victory_streak, 0),
                         turns_under_siege: finiteNumber(bh.turns_under_siege, 0),
-                        total_equipment_destroyed: finiteNumber(bh.total_equipment_destroyed, 0),
-                        total_equipment_captured: finiteNumber(bh.total_equipment_captured, 0),
+                        total_equipment_destroyed: typeof bh.total_equipment_destroyed === 'object' ? bh.total_equipment_destroyed as any : undefined,
+                        total_equipment_captured: typeof bh.total_equipment_captured === 'object' ? bh.total_equipment_captured as any : undefined,
                     };
+
+                    const engs = bh.engagements;
+                    if (Array.isArray(engs) && engs.length > 0) {
+                        const last8 = (engs as Array<Record<string, unknown>>).slice(-8);
+                        fv.recent_engagements = last8.map((e) => ({
+                            turn: typeof e.turn === 'number' ? e.turn : 0,
+                            osid: typeof e.osid === 'string' ? e.osid : '',
+                            role: (e.role === 'attacker' || e.role === 'defender') ? e.role : 'defender',
+                            outcome: typeof e.outcome === 'string' ? e.outcome : '',
+                            casualties_taken: typeof e.casualties_taken === 'number' ? e.casualties_taken : 0,
+                            territory_flipped: e.territory_flipped === true,
+                        }));
+                    }
                 }
             }
 
@@ -293,34 +309,8 @@ export function parseGameState(json: unknown): LoadedGameState {
                     };
                 }
             }
-
-            formations.push({
-                id, faction: (f.faction as string) ?? '', name: (f.name as string) ?? id,
-                kind: (f.kind as string) ?? 'brigade', readiness: (f.readiness as string) ?? 'active',
-                cohesion: (f.cohesion as number) ?? 100, fatigue: (ops?.fatigue as number) ?? 0,
-                status: (f.status as string) ?? 'active', createdTurn: (f.created_turn as number) ?? 0,
-                tags, municipalityId, hq_sid, location_osid, aorSettlementIds,
-                personnel, posture, home_defense_active, corps_id, movementStatus, movementStance,
-                narrativeArc,
-                warNarrative: typeof warStory?.narrative === 'string' ? warStory.narrative : undefined,
-                notableMoments: Array.isArray(warStory?.notable_moments) ? warStory.notable_moments : undefined,
-                officer_quality: typeof f.officer_quality === 'number' && Number.isFinite(f.officer_quality) ? f.officer_quality : undefined,
-                firstBattleTurn,
-                firstBattleOsid,
-                combatSummary,
-                recent_engagements,
-                morale: typeof f.morale === 'number' ? f.morale : undefined,
-                entrenchment_turns: typeof f.entrenchment_turns === 'number' ? f.entrenchment_turns : undefined,
-                dig_in_progress: typeof f.dig_in_progress === 'number' ? f.dig_in_progress : undefined,
-                disrupted_turns: typeof f.disrupted_turns === 'number' ? f.disrupted_turns : undefined,
-                equipment_decay: typeof f.equipment_decay === 'number' ? f.equipment_decay : undefined,
-                honor: typeof f.honor === 'string' ? f.honor : undefined,
-                composition: f.composition as FormationView['composition'] ?? undefined,
-                decorations: Array.isArray(f.decorations) ? f.decorations as NonNullable<FormationView['decorations']> : undefined,
-                last_repulsed_from: f.last_repulsed_from as NonNullable<FormationView['last_repulsed_from']> ?? undefined,
-                last_retreat_from: f.last_retreat_from as NonNullable<FormationView['last_retreat_from']> ?? undefined,
-                brigade_history: parsed_brigade_history,
-            });
+            fv.combatSummary = combatSummary; // Assign the potentially synthesized combatSummary
+            formations.push(fv);
         }
     }
 
@@ -840,6 +830,9 @@ export function parseGameState(json: unknown): LoadedGameState {
                 density: typeof s.density === 'number' ? s.density : 0,
                 threat_ratio: typeof s.threat_ratio === 'number' ? s.threat_ratio : 0,
                 defensive_power: typeof s.defensive_power === 'number' ? s.defensive_power : 0,
+                // New intel fields defaulting for backwards compatibility:
+                intel_confidence: typeof s.intel_confidence === 'number' ? s.intel_confidence : 1.0,
+                offensive_signs: Boolean(s.offensive_signs),
             });
         }
         if (out.length > 0) corpsFrontSectors = out;
@@ -866,7 +859,12 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     return {
-        label, turn, phase, formations, militiaPools, controlBySettlement, statusBySettlement,
+        label, turn, phase,
+        metadata: {
+            turn: meta?.turn ?? turn,
+            date: meta?.date ?? 'UNKNOWN',
+        },
+        formations, militiaPools, controlBySettlement, statusBySettlement,
         brigadeAorByFormationId, brigadeFrontAssignment, theatres, armyTheatreAssignment,
         attackOrders, aorOrders, recentControlEvents, recruitment,
         armyStance, casualtyLedger, civilianCasualties, internationalVisibilityPressure, phaseIiSupplyPressure, phaseIiExhaustion,

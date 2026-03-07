@@ -958,10 +958,35 @@ function executeFactionDirectives(
 
         // --- Home-ground brigades: defend or counterattack only, never attack ---
         // home_defense_active is set by the compute-home-defense-active pipeline step.
+        // Exception: truly undefended directive targets (no sector coverage = no brigade
+        // present) adjacent to the brigade. These are consolidation opportunities.
+        // Rear pocket cleanup is also handled by consolidate-rear-pockets pipeline step.
         if (brigade.home_defense_active === true && !isActiveSectorOperationParticipant) {
             if ((brigade.counterattack_window_turns ?? 0) > 0) {
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'counterattack' });
             } else {
+                const homeDirective = cmd?.directive ?? null;
+                if (homeDirective && homeDirective.offensive_targets.length > 0) {
+                    const homeTargetSet = new Set(homeDirective.offensive_targets);
+                    const homeAdjEnemy = getAdjacentEnemyOsids(loc, faction, adjacency, state, reverseMap);
+                    const homeTargets = homeAdjEnemy.filter(o => homeTargetSet.has(o));
+                    if (homeTargets.length > 0) {
+                        const predictions = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
+                        const freeTarget = predictions.find(t =>
+                            homeTargets.includes(t.osid) &&
+                            t.prediction.predicted_outcome === 'decisive_victory' &&
+                            !t.prediction.defender_has_brigade &&
+                            (chosenTargets.get(t.osid) ?? 0) < (homeDirective.max_attackers_per_target)
+                        );
+                        if (freeTarget) {
+                            result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
+                            result.attack_orders[brigade.id] = freeTarget.osid;
+                            result.attack_scores[brigade.id] = 800;
+                            chosenTargets.set(freeTarget.osid, (chosenTargets.get(freeTarget.osid) ?? 0) + 1);
+                            continue;
+                        }
+                    }
+                }
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
             }
             continue;

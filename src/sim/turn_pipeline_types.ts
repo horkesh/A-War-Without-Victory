@@ -58,6 +58,7 @@ import type { BotOrderDiagnosticsSnapshot } from '../scenario/combat_causality.j
 import type { CorpsAiReportEntry } from './combat/bot_corps_ai.js';
 import type { CohesionDriftReport } from './combat/cohesion_drift.js';
 import type { ConsolidationFlipsReport } from './combat/consolidation_flips.js';
+import type { RearPocketConsolidationReport } from './combat/consolidate_rear_pockets.js';
 import type { EnclaveResilienceReport } from './combat/enclave_resilience.js';
 import type { EquipmentProgressionReport } from './combat/faction_progression.js';
 import type { FrontlineAttritionReport } from './combat/frontline_attrition.js';
@@ -168,6 +169,7 @@ export interface TurnReport {
     phase_ii_morale_drift?: MoraleDriftReport;
     frontline_attrition?: FrontlineAttritionReport;
     phase_ii_consolidation_flips?: ConsolidationFlipsReport;
+    rear_pocket_consolidation?: RearPocketConsolidationReport;
     phase_ii_takeover_displacement?: PhaseIITakeoverDisplacementReport;
     phase_ii_ongoing_mobilization?: OngoingMobilizationReport;
     phase_ii_brigade_reinforcement?: ReinforceBrigadesReport;

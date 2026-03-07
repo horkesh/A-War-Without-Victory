@@ -11,6 +11,7 @@ import { Minimap } from './components/Minimap';
 import { BottomStatusStrip } from './components/BottomStatusStrip';
 import { OOBSidebar } from './components/OOBSidebar';
 import { OperationsPanel } from './components/OperationsPanel';
+import { OperationDetail } from './components/OperationDetail';
 import { OrderQueue } from './components/OrderQueue';
 import { Tooltip } from './components/Tooltip';
 import { AttackConfirmation } from './components/AttackConfirmation';
@@ -213,6 +214,7 @@ function App() {
       <CorpsDetail />
       <ArmyDetail />
       <FormationDetail />
+      <OperationDetail />
       <Tooltip />
       {pendingAttackConfirmation && attackerFormation && (
         <AttackConfirmation

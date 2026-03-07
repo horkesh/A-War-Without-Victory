@@ -1,11 +1,26 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-06
+**Last Updated:** 2026-03-07
 **Status:** Post-MVP — Phase II calibration, GUI rework, Phase M complete
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
+
+## [2026-03-07] Rear pocket consolidation and corps AI pocket targeting (n214)
+
+### Summary
+- **Problem:** 26 rear pockets — enemy OSIDs completely surrounded by one faction — persisted because (1) the corps AI municipality + sector filters excluded them from offensive_targets, and (2) the combat predictor's sector-pooled defense made them look defended.
+- **Solution:** Three-part fix: (a) Pipeline step `consolidate-rear-pockets` auto-flips surrounded undefended OSIDs (MAX_FLIPS_PER_TURN=8), (b) Corps AI rear pocket bypass for municipality and sector filters, (c) Home-defense exception for truly undefended targets (decisive_victory + !defender_has_brigade).
+- **Key finding:** Pipeline consolidation (n214: 84.2%, 12 pockets) is strictly superior to brigade-based attacks (n208–n213: 82.5–83.6%, 22–30 pockets) because it doesn't create butterfly effects from changed attack decisions.
+- **Result (n214):** 84.2% area-weighted (42,914/51,337 km²), 609/744 count. RS=330, RBiH=302, HRHB=112. 12 rear pockets (all transient).
+
+### Changes
+- `src/sim/combat/consolidate_rear_pockets.ts` (NEW): pipeline step auto-flips surrounded OSIDs
+- `src/sim/combat/bot_corps_ai.ts`: rear pocket municipality + sector filter bypass
+- `src/sim/combat/bot_brigade_ai_osid.ts`: home-defense exception for truly undefended targets
+- `src/sim/turn_phases/war_phases.ts`: added `consolidate-rear-pockets` step
+- `src/sim/turn_pipeline_types.ts`: RearPocketConsolidationReport type + report field
 
 ## [2026-03-06] P3 priority municipality bypass for undefended targets (n192)
 

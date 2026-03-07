@@ -21,7 +21,8 @@ import {
     recordBattleCasualties,
     recordEquipmentLoss
 } from '../../state/casualty_ledger.js';
-import { isLargeUrbanSettlementMun, LARGE_SETTLEMENT_MUN_IDS, MILITIA_COHESION, MIN_BRIGADE_SPAWN, MIN_COMBAT_PERSONNEL } from '../../state/formation_constants.js';
+import { recordFormationFatigue } from '../../state/formation_fatigue.js';
+import { FATIGUE_MAX, isLargeUrbanSettlementMun, LARGE_SETTLEMENT_MUN_IDS, MILITIA_COHESION, MIN_BRIGADE_SPAWN, MIN_COMBAT_PERSONNEL } from '../../state/formation_constants.js';
 import type {
     BrigadePosture,
     CorpsStance,
@@ -1059,6 +1060,8 @@ export function resolveBattleOrders(
                 missing_captured: Math.floor(casualties.attacker.missing_captured * share)
             });
             recordEquipmentLoss(ledger, attackerFaction, { tanks: Math.floor(casualties.attacker.tanks_lost * tankShare), artillery: Math.floor(casualties.attacker.artillery_lost * tankShare) });
+
+            recordFormationFatigue(af, 2);
         }
 
         if (defenderFormation) {
@@ -1067,6 +1070,8 @@ export function resolveBattleOrders(
             applyPersonnelLoss(defenderFormation, Math.min(totalPersonnelLoss(casualties.defender), defenderApplicable));
             addWoundedPending(defenderFormation, casualties.defender.wounded);
             applyEquipmentBattleLoss(defenderFormation, casualties.defender.tanks_lost, casualties.defender.artillery_lost);
+
+            recordFormationFatigue(defenderFormation, 1);
         } else if (defGarrison > 0) {
             const mun = settlementToMun.get(targetSid);
             if (mun && state.militia_pools) {

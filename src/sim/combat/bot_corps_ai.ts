@@ -1419,9 +1419,9 @@ export function generateCorpsDirectives(
         // Pocket targets: enemy OSIDs completely surrounded by faction territory — always attack these.
         // Rear pockets (all neighbors faction-controlled) are targeted even without an adjacent brigade,
         // so reserves will move toward them. Front pockets still require an adjacent brigade.
-        // Constraint: only target pockets in municipalities within this corps' operational area
-        // (derived from armyPriorities target_municipalities). This prevents VRS corps from cleaning
-        // up pockets deep in enemy heartland just because they happen to be "surrounded".
+        // Rear pockets bypass the municipality constraint — they're free territory that should always
+        // be consolidated. Front pockets still require operational-area membership to prevent adventurism.
+        const rearPocketOsids = new Set<string>();
         if (graphAnalysis?.enemy_pockets.length) {
             const corpsMunSet = new Set<string>(
                 armyPriorities.flatMap(p => p.target_municipalities ?? [])
@@ -1430,16 +1430,20 @@ export function generateCorpsDirectives(
             const pocketSubLocations = new Set(subordinates.map(b => b.location_osid).filter(Boolean));
             for (const pocketOsid of graphAnalysis.enemy_pockets) {
                 if (offensiveTargetSet.has(pocketOsid)) continue;
-                const pocketMun = pocketOsid.split(':')[1];
-                if (!pocketMun || !corpsMunSet.has(pocketMun)) continue; // out of operational area
                 const neighbors = adjacency.get(pocketOsid) ?? [];
                 const isRearPocket = neighbors.length > 0 && neighbors.every(n =>
                     (pc[n] ?? '') === faction
                 );
                 if (isRearPocket) {
                     offensiveTargetSet.add(pocketOsid);
-                } else if (neighbors.some(n => pocketSubLocations.has(n))) {
-                    offensiveTargetSet.add(pocketOsid);
+                    rearPocketOsids.add(pocketOsid);
+                } else {
+                    // Front pockets: still require operational-area membership
+                    const pocketMun = pocketOsid.split(':')[1];
+                    if (!pocketMun || !corpsMunSet.has(pocketMun)) continue;
+                    if (neighbors.some(n => pocketSubLocations.has(n))) {
+                        offensiveTargetSet.add(pocketOsid);
+                    }
                 }
             }
         }
@@ -1587,7 +1591,9 @@ export function generateCorpsDirectives(
             }
         }
 
-        // Sector-aware target filtering: restrict to OSIDs adjacent to corps' sectors
+        // Sector-aware target filtering: restrict to OSIDs adjacent to corps' sectors.
+        // Rear pockets are exempt — they're behind the front and won't appear in any
+        // sector's enemy_osids, but should always be consolidated.
         if (corpsSectors.length > 0 && offensiveTargets.length > 0) {
             const allSectorEnemyOsids = new Set<string>();
             for (const sec of corpsSectors) {
@@ -1595,7 +1601,9 @@ export function generateCorpsDirectives(
                     for (const eo of ss.enemy_osids) allSectorEnemyOsids.add(eo);
                 }
             }
-            const filtered = offensiveTargets.filter(t => allSectorEnemyOsids.has(t));
+            const filtered = offensiveTargets.filter(t =>
+                allSectorEnemyOsids.has(t) || rearPocketOsids.has(t)
+            );
             // Keep all if filter removes everything (corps needs SOMETHING to aim at)
             if (filtered.length > 0) {
                 offensiveTargets.length = 0;

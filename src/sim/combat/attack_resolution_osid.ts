@@ -18,6 +18,7 @@ import {
     initializeCasualtyLedger,
     recordBattleCasualties
 } from '../../state/casualty_ledger.js';
+import { recordFormationFatigue } from '../../state/formation_fatigue.js';
 import { FATIGUE_MAX, MIN_COMBAT_PERSONNEL } from '../../state/formation_constants.js';
 import type {
     ControlEvent,
@@ -506,6 +507,9 @@ export function resolveAttackOrdersOsid(
             const cas = Math.round(finalAttackerCas * frac);
             applyPersonnelLoss(a, cas);
             a.cohesion = Math.max(0, Math.min(100, (a.cohesion ?? 60) + (COHESION_ATTACKER[outcome] ?? 0)));
+
+            recordFormationFatigue(a, 2);
+
             if (outcome === 'costly_victory') (a as { disrupted_turns?: number }).disrupted_turns = 1;
             if (outcome === 'repulsed' || outcome === 'catastrophic') {
                 (a as { disrupted_turns?: number }).disrupted_turns = 1;
@@ -522,6 +526,9 @@ export function resolveAttackOrdersOsid(
         if (defenderFormation) {
             applyPersonnelLoss(defenderFormation, finalDefenderCas);
             defenderFormation.cohesion = Math.max(0, Math.min(100, (defenderFormation.cohesion ?? 60) + (COHESION_DEFENDER[outcome] ?? 0)));
+
+            recordFormationFatigue(defenderFormation, 1);
+
             (defenderFormation as { defense_streak?: number }).defense_streak = (outcome === 'stalemate' || outcome === 'repulsed' || outcome === 'catastrophic')
                 ? Math.min(MAX_RESILIENCE_STREAK, ((defenderFormation as { defense_streak?: number }).defense_streak ?? 0) + 1)
                 : 0;
@@ -786,11 +793,11 @@ export function resolveAttackOrdersOsid(
             if (a.morale === undefined) continue;
             switch (outcome) {
                 case 'decisive_victory': a.morale = Math.min(100, a.morale + 3); break;
-                case 'victory':          a.morale = Math.min(100, a.morale + 1); break;
-                case 'costly_victory':   break;
-                case 'stalemate':        a.morale = Math.max(0, a.morale - 2); break;
-                case 'repulsed':         a.morale = Math.max(0, a.morale - 5); break;
-                case 'catastrophic':     a.morale = Math.max(0, a.morale - 10); break;
+                case 'victory': a.morale = Math.min(100, a.morale + 1); break;
+                case 'costly_victory': break;
+                case 'stalemate': a.morale = Math.max(0, a.morale - 2); break;
+                case 'repulsed': a.morale = Math.max(0, a.morale - 5); break;
+                case 'catastrophic': a.morale = Math.max(0, a.morale - 10); break;
             }
         }
         if (defenderFormation?.morale !== undefined) {

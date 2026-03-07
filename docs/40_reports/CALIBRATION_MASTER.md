@@ -8,7 +8,8 @@
 - **Phase C (organic VRS tempo decay):** RS doctrine phases reduced to 2 (both offensive — no artificial defensive regression). RS stays offensive permanently; tempo decay is organic via fatigue, supply, entrenchment. Fatigue now meaningful: recovery every 2 turns, +0.5/turn frontline duty, cap 30 (was 20), fatigue directly degrades combat power (×0.6-1.0 attack, ×0.75-1.0 defense). Entrenchment diminishing returns (sqrt curve). FATIGUE_MAX consolidated to single shared constant.
 - **Phase D (supply & exhaustion):** MAINTENANCE_DRAIN_PER_FORMATION 0.025→0.045 (RS general 68% by w40, was 100%). RBiH patron commitment reduced (0.6→0.3 in 1992 — arms embargo). HRHB patron raised (0.5→0.6). UN airdrops capped (15→3/turn). HRHB initial supply 55→75.
 **Canonical target run:** n65 (ATH 99.2% area-weighted, commit a689d83)
-**Latest calibration run:** n192 (P3 priority municipality bypass for undefended targets: RS=331 OSIDs (44.5%), RBiH=303, HRHB=110. 83.2% area-weighted. 151 attack orders, 124 battles, 53 combat-attributed control changes. Krajina 85.5%. Combat-causality GREEN.)
+**Latest calibration run:** n214 (rear pocket consolidation + corps AI pocket targeting: RS=330 OSIDs (44.4%), RBiH=302, HRHB=112. 84.2% area-weighted. Rear pockets 26→12 via `consolidate-rear-pockets` pipeline step (auto-flip surrounded enemy OSIDs without combat). Corps AI rear pocket bypass for municipality + sector filters. Home-defense exception for truly undefended targets.)
+**Previous calibration run:** n192 (P3 priority municipality bypass for undefended targets: RS=331 OSIDs (44.5%), RBiH=303, HRHB=110. 83.2% area-weighted. 151 attack orders, 124 battles, 53 combat-attributed control changes. Krajina 85.5%. Combat-causality GREEN.)
 **Previous calibration run:** n191 (strategic reserve + faction-differentiated surge: RS=102.6k (w40) → 110.1k (w80) ✓, RBiH=121.0k (w40) → 175.4k (w80), HRHB=41.5k (w40) → 49.8k (w80) ✓. Multi-checkpoint troop strength calibration — all factions within or near historical bands at both w40 and w80.)
 **Previous calibration run:** n166 (n159 audit Phase E verification: deterministic rerun of n165. 84.2% area-weighted, RS=321/HRHB=110/RBiH=313 OSIDs. 146 attacks, 118 battles, 103 captures. Att:def casualty ratio 3.26:1. RS weekly attacks decline 8→1 (organic tempo decay confirmed). All VRS corps still offensive at t26 with aggression 0.0-0.1 (was 0.4-0.45 at t1). Bot benchmarks 2/6 PASS — RS/RBiH targets need recalibration for organic model. Combat-causality gate green.)
 **Latest recovery-gated run:** n158 (live sector-rearrangement + planning-movement recovery: combat-causality gate green, behavioral-health gate green, planning now includes movement into approach positions, live sector concentration restored)
@@ -1645,6 +1646,16 @@ Two-part fix per L23:
 ### Verification Target
 ~~After P1–P5: expect 85–88% match rate. After P6–P7: expect 88–90%+.~~
 **Updated (n295):** P6 done. Current 85.1%. After P1–P5 + P7: expect 87–90%+. Drina gap (71.9%) remains the ceiling constraint — structural OOB/initial-control fix needed for >88%.
+### Rear pocket consolidation pipeline step (2026-03-07)
+
+- New pipeline step `consolidate-rear-pockets` after `phase-ii-displace-enemy-territory`
+- Auto-flips enemy OSIDs where ALL neighbors are controlled by one faction and no defending brigade is present
+- MAX_FLIPS_PER_TURN = 8 to prevent cascade chain reactions
+- n214 result: 26→12 rear pockets, 84.2% area-weighted (−1.2pp from n207 baseline of 85.4%)
+- Corps AI: rear pockets bypass municipality + sector filters in `generateCorpsDirectives()`
+- Home-defense brigades: exception for truly undefended adjacent targets (decisive_victory + !defender_has_brigade)
+- Key finding: pipeline consolidation is strictly superior to brigade-based pocket attacks for pocket cleanup (no butterfly effects from changed attack decisions)
+
 ## 2026-03-05 Ongoing engine audit gotchas
 
 - Tactical fog-of-war is only partially active in the current live path. The engine derives `sector_intel` every war turn, but [`src/ui/map/data/GameStateAdapter.ts`](F:\A-War-Without-Victory\src\ui\map\data\GameStateAdapter.ts) and [`src/ui/map/map/builders/buildFogOfWarGeoJSON.ts`](F:\A-War-Without-Victory\src\ui\map\map\builders\buildFogOfWarGeoJSON.ts) still consume legacy `recon_intelligence.confirmed_empty`. Live evidence: [`runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n110/final_save.json`](F:\A-War-Without-Victory\runs\apr1992_definitive_40w__7c821fa7d934716d__w40_n110\final_save.json) has `sector_intel` and no `recon_intelligence`. Treat current map fog as a UI-layer legacy overlay, not proof that sector-intel-driven FoW is functioning end-to-end.

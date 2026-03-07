@@ -298,6 +298,18 @@ export function applyFatigueRecovery(state: GameState): void {
 }
 
 /**
+ * Increment formation fatigue (combat/attrition).
+ * Ensures ops field exists and clamps to FATIGUE_MAX.
+ */
+export function recordFormationFatigue(formation: any, delta: number): void {
+    if (!formation.ops || typeof formation.ops !== 'object') {
+        formation.ops = { fatigue: 0, last_supplied_turn: null };
+    }
+    const current = formation.ops.fatigue ?? 0;
+    formation.ops.fatigue = Math.min(FATIGUE_MAX, Math.max(0, current + delta));
+}
+
+/**
  * Update formation fatigue based on supply status.
  *
  * Rules:

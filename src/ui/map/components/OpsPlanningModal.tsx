@@ -259,7 +259,11 @@ export function OpsPlanningModal() {
 
         const pmtilesProtocol = new Protocol();
         const origin = window.location.origin;
-        maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile);
+        try {
+            maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile);
+        } catch (e) {
+            // Already registered, ignore
+        }
         const style = rewritePmtilesUrls(styleJson as Record<string, unknown>, origin) as maplibregl.StyleSpecification;
 
         const map = new maplibregl.Map({
@@ -398,8 +402,8 @@ export function OpsPlanningModal() {
                     source: 'ops-advance-arrows',
                     filter: ['==', ['get', 'type'], 'advance-line'],
                     paint: {
-                        'line-color': 'rgba(255,255,255,0.95)',
-                        'line-width': 3,
+                        'line-color': '#2a4d69', // Deep tactical blue
+                        'line-width': 3.5,
                     },
                     layout: { 'line-cap': 'round', 'line-join': 'round' },
                 });
@@ -409,7 +413,7 @@ export function OpsPlanningModal() {
                     source: 'ops-advance-arrows',
                     filter: ['==', ['get', 'type'], 'advance-head'],
                     paint: {
-                        'fill-color': 'rgba(0, 0, 0, 0.75)',
+                        'fill-color': '#112d42', // Darker blue for head
                         'fill-opacity': 1,
                     },
                 });
@@ -421,8 +425,8 @@ export function OpsPlanningModal() {
                     source: 'ops-advance-arrows',
                     filter: ['==', ['get', 'type'], 'pencil-scratch'],
                     paint: {
-                        'line-color': 'rgba(180, 50, 50, 0.7)',
-                        'line-width': 2,
+                        'line-color': '#8b0000', // Deep red for target focus
+                        'line-width': 2.5,
                         'line-blur': 0.5
                     }
                 });

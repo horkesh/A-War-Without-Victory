@@ -5,6 +5,7 @@
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
+import { getFactionArmyCommander } from '../utils/officerUtils';
 
 const FACTION_DISPLAY: Record<string, string> = {
   RS: 'Republika Srpska (VRS)',
@@ -104,6 +105,27 @@ export function ArmyDetail() {
           </div>
         </div>
 
+        {/* Army Commander */}
+        {(() => {
+          const commander = getFactionArmyCommander(faction, loadedGameState);
+          if (!commander) return null;
+          return (
+            <div className="mb-4 p-2 bg-black/20 rounded border border-panel-border/30 flex items-center gap-3">
+              <div className="w-10 h-10 bg-panel-card rounded border border-panel-border flex items-center justify-center text-accent-gold text-lg font-bold shrink-0">
+                HQ
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[9px] uppercase text-text-secondary tracking-wider font-semibold">Army Commander</div>
+                <div className="text-xs font-bold text-accent-gold truncate">{commander.rank} {commander.name}</div>
+                <div className="flex gap-2 text-[9px] mt-0.5">
+                  <span className="text-text-secondary">Comp: <span className="text-text-primary">{Math.round(commander.competence * 100)}</span></span>
+                  <span className="text-text-secondary">Def: <span className="text-text-primary">{Math.round(commander.defensive_skill * 100)}</span></span>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Metrics */}
         <div className="border-t border-panel-border pt-2 mb-3 space-y-1">
           <div className="flex justify-between">
@@ -169,22 +191,84 @@ export function ArmyDetail() {
           />
         )}
 
-        {/* Corps list (clickable) */}
+        {/* Subordinate Leaderboards */}
+        {armyCombatSummary && (armyCombatSummary.most_victories_brigade_id || armyCombatSummary.most_casualties_brigade_id) && (
+          <div className="border-t border-panel-border pt-2 mb-3 space-y-2">
+            <div className="text-xs text-text-secondary">Subordinate Leaderboards</div>
+
+            {armyCombatSummary.most_victories_brigade_id && (
+              <div className="flex justify-between items-center text-xs p-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-accent-gold" title="Most Victorious Brigade">⭐</span>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] uppercase tracking-wide text-text-secondary">Wall of Valor</span>
+                    <button
+                      className="text-text-primary hover:text-interactive text-left font-semibold truncate max-w-[120px]"
+                      onClick={() => setSelectedFormationId(armyCombatSummary!.most_victories_brigade_id!)}
+                    >
+                      {loadedGameState.formations.find(f => f.id === armyCombatSummary!.most_victories_brigade_id)?.name || armyCombatSummary.most_victories_brigade_id}
+                    </button>
+                  </div>
+                </div>
+                <span className="text-accent-gold font-mono text-xs">
+                  MVP
+                </span>
+              </div>
+            )}
+
+            {armyCombatSummary.most_casualties_brigade_id && (
+              <div className="flex justify-between items-center text-xs p-1.5 bg-[#d45555]/5 border border-[#d45555]/20 rounded">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[#d45555]" title="Highest Casualties Brigade">🩸</span>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] uppercase tracking-wide text-text-secondary">Bleeding Edge</span>
+                    <button
+                      className="text-text-primary hover:text-interactive text-left font-semibold truncate max-w-[120px]"
+                      onClick={() => setSelectedFormationId(armyCombatSummary!.most_casualties_brigade_id!)}
+                    >
+                      {loadedGameState.formations.find(f => f.id === armyCombatSummary!.most_casualties_brigade_id)?.name || armyCombatSummary.most_casualties_brigade_id}
+                    </button>
+                  </div>
+                </div>
+                <span className="text-[#d45555] font-mono text-xs">
+                  HEAVIEST LOSSES
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Corps list (clickable OOB) */}
         {corpsFormations.length > 0 && (
           <div className="border-t border-panel-border pt-2">
-            <div className="text-text-secondary mb-1">Corps ({corpsFormations.length}):</div>
-            <div className="space-y-0.5 max-h-[250px] overflow-auto">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-text-secondary text-xs">Order of Battle (Corps)</span>
+              <span className="text-[10px] bg-black/30 px-1.5 py-0.5 rounded text-text-primary flex items-center gap-1">
+                <span>{corpsFormations.length} HQ</span>
+              </span>
+            </div>
+
+            <div className="space-y-[1px] max-h-[250px] overflow-auto border-l border-panel-border/50 ml-1.5 pl-2 mt-2">
               {corpsFormations
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .map((f) => {
                   const corpsSubordinates = brigades.filter((b) => b.corps_id === f.id);
                   const corpsPersonnel = corpsSubordinates.reduce((sum, b) => sum + (b.personnel ?? 0), 0);
                   const cs = f.combatSummary;
+
+                  // Simple corps readiness check based on subordinate exhaustion
+                  let lightColor = '#55d48a'; // Green
+                  if (f.corpsExhaustion != null && f.corpsExhaustion > 0.6) {
+                    lightColor = '#d45555'; // Red
+                  } else if (f.corpsExhaustion != null && f.corpsExhaustion > 0.3) {
+                    lightColor = '#d4d455'; // Yellow
+                  }
+
                   return (
                     <button
                       key={f.id}
                       type="button"
-                      className="w-full flex flex-col text-text-primary hover:text-interactive transition-colors text-left"
+                      className="w-full relative flex flex-col py-1.5 px-1.5 hover:bg-panel-hover rounded group text-left transition-colors"
                       onClick={() => setSelectedCorpsId(f.id)}
                       onMouseEnter={() => {
                         const osids = corpsSubordinates
@@ -194,15 +278,26 @@ export function ArmyDetail() {
                       }}
                       onMouseLeave={() => setHoveredOsids([])}
                     >
-                      <div className="flex justify-between w-full">
-                        <span className="truncate mr-2">{f.name}</span>
-                        <span className="text-text-secondary tabular-nums shrink-0">
+                      {/* Tree visual connector */}
+                      <div className="absolute -left-2 top-3 w-2 h-[1px] bg-panel-border/50 group-hover:bg-panel-border transition-colors" />
+
+                      <div className="flex justify-between w-full items-center">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <div
+                            className="w-2 h-2 rounded-full shrink-0 border border-black/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]"
+                            style={{ backgroundColor: lightColor }}
+                          />
+                          <span className="truncate text-text-primary text-[11px] font-medium group-hover:text-interactive transition-colors">{f.name}</span>
+                        </div>
+                        <span className="text-text-secondary tabular-nums text-[10px] shrink-0 font-mono">
                           {corpsSubordinates.length}b &middot; {corpsPersonnel.toLocaleString()}
                         </span>
                       </div>
+
                       {cs && cs.battles_fought > 0 && (
-                        <div className="text-[10px] text-text-secondary tabular-nums">
-                          WR:{(cs.win_rate * 100).toFixed(0)}% C:{(cs.total_casualties_taken / 1000).toFixed(1)}k
+                        <div className="text-[9px] text-text-secondary tabular-nums ml-4 mt-1 flex gap-2">
+                          <span>WR: {(cs.win_rate * 100).toFixed(0)}%</span>
+                          <span>C: {(cs.total_casualties_taken / 1000).toFixed(1)}k</span>
                         </div>
                       )}
                     </button>
