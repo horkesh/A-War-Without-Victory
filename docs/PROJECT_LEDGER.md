@@ -7,6 +7,22 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-07] Intelligence Dossier implementation and Sector Visualization suggestions
+
+### Summary
+- **Intelligence Dossier:** Refactored the `CorpsFrontPanel` into an "Intelligence Dossier" aesthetic. Features include monospaced typewriter font, "SECRET" watermark, confidence-based data redaction (blacked-out values), and high-visibility threat warning banners for imminent enemy offensives.
+- **Data Integration:** Extended `types.ts` and `GameStateAdapter.ts` to support `intel_confidence` and `offensive_signs` fields parsed from the simulation.
+- **Sector Visualization:** Proposed five follow-up improvements to address the current low visibility of sectors during regular map viewing.
+
+### Changes
+- `src/ui/map/components/CorpsFrontPanel.tsx`: Full UI rework to dossier style.
+- `src/ui/map/data/types.ts`: Added `intel_confidence`, `offensive_signs`, and `metadata` to view types.
+- `src/ui/map/data/GameStateAdapter.ts`: Implemented parsing for new intelligence and metadata fields.
+- `docs/30_planning/20260307_SECTOR_VISUALIZATION_SUGGESTIONS.md` (NEW): Documented improvement suggestions.
+
+### Follow-up
+- Implement one or more sector visualization improvements documented in `docs/30_planning/20260307_SECTOR_VISUALIZATION_SUGGESTIONS.md`.
+
 ## [2026-03-07] Rear pocket consolidation and corps AI pocket targeting (n214)
 
 ### Summary
