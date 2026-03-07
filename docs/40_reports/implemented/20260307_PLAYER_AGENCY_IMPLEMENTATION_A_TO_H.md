@@ -1,14 +1,15 @@
 # Player Agency Implementation A-H
 
 **Date:** 2026-03-07
-**Primary Runs:** `n226`, `n242`, `n245`, `n248`, `n249`
+**Primary Runs:** `n226`, `n242`, `n245`, `n248`, `n249`, `n252`, `n254`
 **Baseline:** Pre-plan war map and war pipeline before `docs/30_planning/PLAYER_AGENCY_IMPLEMENTATION_PLAN.md`
-**Result:** Phases `A` through `H` implemented and verified; `Phase E` remains deferred by plan
+**Result:** Phases `A` through `H` implemented; Phase `E` subsequently implemented as a calibrated asymmetric municipality-support layer
 
 ## Summary
-- Executed the player-agency implementation plan across defensive surfacing, offensive levers, sector-level defensive orders, supply-agency decisions, intelligence warfare, and the H-phase calibration closure.
+- Executed the player-agency implementation plan across defensive surfacing, offensive levers, sector-level defensive orders, supply-agency decisions, intelligence warfare, the H-phase calibration closure, and the deferred Phase E municipality-support layer.
 - Added the missing player-facing desktop/UI plumbing and the engine-side state/pipeline behavior so the new controls are not cosmetic.
-- Closed the 40-week combat-calibration gate again at run `n248`/`n249`; the remaining misses are territorial-anchor calibration issues, not engine-integrity failures.
+- Closed the 40-week combat-calibration gate again at run `n248`/`n249`; the later Phase E 40w verification run `n252` stayed combat-calibration-valid.
+- Informational 52w run `n254` still shows the branch's long-horizon drift, but the new Phase E mechanic is dormant unless a player explicitly stages support orders.
 
 ## Changes Made
 
@@ -41,6 +42,14 @@
 - Added sector-level `opsec_sectors` behavior in [`sector_intel.ts`](/F:/A-War-Without-Victory/src/sim/combat/sector_intel.ts) and sector controls in [`CorpsFrontPanel.tsx`](/F:/A-War-Without-Victory/src/ui/map/components/CorpsFrontPanel.tsx).
 - Closed the H acceptance gate with harness-boundary artifact repair in [`scenario_runner.ts`](/F:/A-War-Without-Victory/src/scenario/scenario_runner.ts) and immediate idle-execution recovery in [`sector_offensive.ts`](/F:/A-War-Without-Victory/src/sim/combat/sector_offensive.ts).
 
+### Phase E: Advanced Mobilization Agency
+- Added `municipality_support_orders` to [`game_state.ts`](/F:/A-War-Without-Victory/src/state/game_state.ts) and shared helpers in [`municipality_support.ts`](/F:/A-War-Without-Victory/src/sim/combat/municipality_support.ts).
+- Implemented asymmetric faction support actions instead of a one-size-fits-all shipment mechanic:
+  - `RBiH`: `weapons_shipment` adds a small one-turn local mobilization bonus in [`ongoing_mobilization.ts`](/F:/A-War-Without-Victory/src/sim/combat/ongoing_mobilization.ts).
+  - `RS`: `staff_priority` boosts local reinforcement rate from the existing pool in [`formation_spawn.ts`](/F:/A-War-Without-Victory/src/sim/formation_spawn.ts).
+  - `HRHB`: `croatian_support_package` adds a small cohesion bonus when local brigades reinforce in [`formation_spawn.ts`](/F:/A-War-Without-Victory/src/sim/formation_spawn.ts).
+- Wired staging through [`electron-main.cjs`](/F:/A-War-Without-Victory/src/desktop/electron-main.cjs), [`preload.cjs`](/F:/A-War-Without-Victory/src/desktop/preload.cjs), and [`useIPC.ts`](/F:/A-War-Without-Victory/src/ui/map/desktop/useIPC.ts), then surfaced current-turn support in [`SelectionPanel.tsx`](/F:/A-War-Without-Victory/src/ui/map/components/SelectionPanel.tsx), [`SituationTab.tsx`](/F:/A-War-Without-Victory/src/ui/map/components/SituationTab.tsx), [`GameStateAdapter.ts`](/F:/A-War-Without-Victory/src/ui/map/data/GameStateAdapter.ts), and [`types.ts`](/F:/A-War-Without-Victory/src/ui/map/data/types.ts).
+
 ### Refactor Passes
 - Performed multiple simplify/refactor passes across the implementation footprint, including UI adapter cleanup, dead-code removal, helper extraction in Electron IPC, duplicated operation-message cleanup, harness fallback deduplication, and probe-intel reveal extraction.
 - Final cleanup-only verification preserved the same post-H final hash between `n248` and `n249`.
@@ -58,6 +67,8 @@
 - `n245`: Phase C mechanics live; still `invalid_operation_count = 6`.
 - `n248`: H gate restored. `invalid_operation_count = 0`, `valid_for_combat_calibration = true`, benchmark suite `6/6`.
 - `n249`: post-refactor verification. Same final state hash as `n248` (`f5e0e48c6d2538ab`), same green combat-calibration status.
+- `n252`: Phase E 40w verification. Final hash `79a01c403c82038c`, combat-calibration still valid, benchmark suite still passed `6/6`.
+- `n254`: informational 52w verification. Combat-calibration still valid (`invalid_operation_count = 0`), but historical fit remained weak (`2/6` benchmarks, failed anchors at `bihac`, `op:zvornik:vitinica_2`, and `op:ugljevik:teocak_krstac_2`).
 
 ## Final State
 
@@ -65,15 +76,14 @@
 - Phase `A`
 - Phase `B`
 - Phase `C`
+- Phase `E`
 - Phase `F`
 - Phase `G`
 - Phase `H`
 
-### Deferred by Plan
-- Phase `E` (`Advanced Mobilization Agency`)
-
 ## Remaining Follow-Up
-- Territorial anchor drift still remains at municipality `srebrenica` and OSID `op:brcko:brka_2`.
+- Territorial anchor drift still remains at municipality `srebrenica` and OSID `op:brcko:brka_2` on the 40w lane.
+- Informational 52w drift remains broader and predates active Phase E usage because the mechanic is dormant without staged support orders.
 - Those are calibration/scenario-anchor issues, not player-agency feature failures.
 - Session process discipline was not completed as originally sequenced in the plan because the worktree already contained broad in-flight changes, so no clean per-phase commit sequence was produced during execution.
 
@@ -81,12 +91,12 @@
 
 | Area | Key Files |
 |------|-----------|
-| State/schema | `src/state/game_state.ts`, `src/state/patron_pressure.ts`, `src/state/supply_reserves.ts`, `src/state/serializeGameState.ts` |
-| War pipeline and combat | `src/sim/turn_phases/war_phases.ts`, `src/sim/combat/sector_stance_orders.ts`, `src/sim/combat/sector_offensive.ts`, `src/sim/combat/sector_intel.ts`, `src/sim/combat/bot_brigade_ai_osid.ts`, `src/sim/combat/bot_corps_ai.ts` |
+| State/schema | `src/state/game_state.ts`, `src/state/patron_pressure.ts`, `src/state/supply_reserves.ts`, `src/state/serializeGameState.ts`, `src/sim/combat/municipality_support.ts` |
+| War pipeline and combat | `src/sim/turn_phases/war_phases.ts`, `src/sim/combat/sector_stance_orders.ts`, `src/sim/combat/sector_offensive.ts`, `src/sim/combat/sector_intel.ts`, `src/sim/combat/bot_brigade_ai_osid.ts`, `src/sim/combat/bot_corps_ai.ts`, `src/sim/combat/ongoing_mobilization.ts`, `src/sim/formation_spawn.ts` |
 | Scenario harness/reporting | `src/scenario/scenario_runner.ts`, `tests/scenario_runner_artifact_repair.test.ts`, `tests/sector_offensive_idle_recovery.test.ts`, `tests/h_phase_intelligence_warfare.test.ts` |
 | Desktop bridge | `src/desktop/electron-main.cjs`, `src/desktop/preload.cjs`, `src/ui/map/desktop/useIPC.ts` |
-| UI and adapter | `src/ui/map/components/CorpsFrontPanel.tsx`, `src/ui/map/components/EnclaveDashboard.tsx`, `src/ui/map/components/OperationsPanel.tsx`, `src/ui/map/components/OpsPlanningModal.tsx`, `src/ui/map/components/SituationTab.tsx`, `src/ui/map/components/TopToolbar.tsx`, `src/ui/map/components/MapModeToolbar.tsx`, `src/ui/map/hooks/useKeyboardShortcuts.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/data/types.ts`, `src/ui/map/map/builders/buildOperationalWeightGeoJSON.ts` |
-| Verification | `tests/sector_stance_orders.test.ts`, `tests/operation_tempo.test.ts`, `tests/phase_c_supply_agency.test.ts`, `tests/supply_airdrop.test.ts`, `tests/ui_map_front_lines_phase_a.test.ts`, `tests/ui_map_operations_mode.test.ts`, `vitest.config.ts` |
+| UI and adapter | `src/ui/map/components/CorpsFrontPanel.tsx`, `src/ui/map/components/EnclaveDashboard.tsx`, `src/ui/map/components/OperationsPanel.tsx`, `src/ui/map/components/OpsPlanningModal.tsx`, `src/ui/map/components/SelectionPanel.tsx`, `src/ui/map/components/SituationTab.tsx`, `src/ui/map/components/TopToolbar.tsx`, `src/ui/map/components/MapModeToolbar.tsx`, `src/ui/map/hooks/useKeyboardShortcuts.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/data/types.ts`, `src/ui/map/map/builders/buildOperationalWeightGeoJSON.ts` |
+| Verification | `tests/sector_stance_orders.test.ts`, `tests/operation_tempo.test.ts`, `tests/phase_c_supply_agency.test.ts`, `tests/phase_e_municipality_support.test.ts`, `tests/ongoing_mobilization.test.ts`, `tests/supply_airdrop.test.ts`, `tests/ui_map_front_lines_phase_a.test.ts`, `tests/ui_map_game_state_adapter.test.ts`, `tests/ui_map_operations_mode.test.ts`, `vitest.config.ts` |
 
 ## Lessons Learned
 - The “UI-only” classification in the plan was misleading for parts of Phase F; schema, IPC, and lifecycle changes made it engine-touching from the start.

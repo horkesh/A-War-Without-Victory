@@ -14,11 +14,6 @@ export interface MapInteractionCallbacks {
 
 const HOVER_DELAY_MS = 300;
 
-let hoverTimeout: number | undefined;
-let formationHoverTimeout: number | undefined;
-let frontHoverTimeout: number | undefined;
-let hoveredSectorId: string | null = null;
-
 const HIGHLIGHT_POS_LAYER = 'front-edges-highlight-pos';
 const HIGHLIGHT_NEG_LAYER = 'front-edges-highlight-neg';
 
@@ -26,6 +21,9 @@ export function useMapInteractions(
   map: MapLibreMap | null,
   callbacks: MapInteractionCallbacks | ((osid: string) => void)
 ) {
+  let hoverTimeout: number | undefined;
+  let hoveredSectorId: string | null = null;
+
   if (!map) return;
 
   const safeOn = (event: string, layerId: string, handler: (e: MapLayerMouseEvent) => void) => {
@@ -112,23 +110,23 @@ export function useMapInteractions(
     const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
     if (onFormationHover) {
       if (id) {
-        if (formationHoverTimeout) clearTimeout(formationHoverTimeout);
-        formationHoverTimeout = window.setTimeout(() => {
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+        hoverTimeout = window.setTimeout(() => {
           onFormationHover!(id, point);
-          formationHoverTimeout = undefined;
+          hoverTimeout = undefined;
         }, HOVER_DELAY_MS);
       } else {
-        if (formationHoverTimeout) clearTimeout(formationHoverTimeout);
-        formationHoverTimeout = undefined;
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+        hoverTimeout = undefined;
         onFormationHover(null, null);
       }
     }
   };
 
   const handleFormationMouseLeave = () => {
-    if (formationHoverTimeout) {
-      clearTimeout(formationHoverTimeout);
-      formationHoverTimeout = undefined;
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      hoverTimeout = undefined;
     }
     onFormationHover?.(null, null);
     onMapMouseLeave?.();
@@ -166,14 +164,14 @@ export function useMapInteractions(
 
     if (onFrontEdgeHover) {
       if (edgeId) {
-        if (frontHoverTimeout) clearTimeout(frontHoverTimeout);
-        frontHoverTimeout = window.setTimeout(() => {
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+        hoverTimeout = window.setTimeout(() => {
           onFrontEdgeHover!(edgeId, point);
-          frontHoverTimeout = undefined;
+          hoverTimeout = undefined;
         }, HOVER_DELAY_MS);
       } else {
-        if (frontHoverTimeout) clearTimeout(frontHoverTimeout);
-        frontHoverTimeout = undefined;
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+        hoverTimeout = undefined;
         onFrontEdgeHover(null, null);
       }
     }
@@ -182,9 +180,9 @@ export function useMapInteractions(
   const handleFrontEdgeMouseLeave = () => {
     map.getCanvas().style.cursor = '';
     setHoverHighlight(null, null);
-    if (frontHoverTimeout) {
-      clearTimeout(frontHoverTimeout);
-      frontHoverTimeout = undefined;
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      hoverTimeout = undefined;
     }
     onFrontEdgeHover?.(null, null);
     onMapMouseLeave?.();
@@ -254,7 +252,7 @@ export function useMapInteractions(
       safeOff('mousemove', 'formation-labels', handleFormationMouseMove);
       safeOff('mouseleave', 'formation-labels', handleFormationMouseLeave);
     }
-    if (formationHoverTimeout) clearTimeout(formationHoverTimeout);
+    if (hoverTimeout) clearTimeout(hoverTimeout);
     for (const layerId of frontEdgeLayers) {
       if (onFrontEdgeClick) {
         safeOff('click', layerId, handleFrontEdgeClick);
@@ -263,6 +261,5 @@ export function useMapInteractions(
       safeOff('mouseleave', layerId, handleFrontEdgeMouseLeave);
     }
     setHoverHighlight(null, null);
-    if (frontHoverTimeout) clearTimeout(frontHoverTimeout);
   };
 }

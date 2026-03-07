@@ -43,6 +43,8 @@ interface SectorView {
   sector_id: string;
   faction: string;
   edge_ids: string[];
+  assigned_brigade_ids: string[];
+  reserve_brigade_ids: string[];
 }
 
 /**
@@ -85,3 +87,16 @@ export function buildOsidToSectorMap(
   return osidToSector;
 }
 
+/**
+ * Find the sector_id assigned to a given formation (corps-front sector).
+ */
+export function getSectorIdForFormation(
+  formationId: string,
+  corpsFrontSectors: SectorView[] | undefined
+): string | null {
+  if (!corpsFrontSectors) return null;
+  const sector = corpsFrontSectors.find(
+    s => s.assigned_brigade_ids.includes(formationId) || s.reserve_brigade_ids.includes(formationId)
+  );
+  return sector?.sector_id ?? null;
+}

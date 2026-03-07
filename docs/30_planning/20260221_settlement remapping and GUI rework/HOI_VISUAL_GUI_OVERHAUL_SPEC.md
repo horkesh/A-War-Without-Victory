@@ -639,15 +639,18 @@ Phase B baseline now exists in `src/ui/map/`: Army/Situation tabs, Situation sum
 17. Attack confirmation modal
 18. Order queue panel
 
-**Phase D: Map visual polish**
+**Phase D: Map visual polish (COMPLETE — 2026-03-07)**
 
 19. Tune faction fill opacity for best terrain visibility
 20. Strategic point markers (diamonds/stars at municipal seats and major cities)
 21. Enclave visualization (dashed border, integrity label, pulse at critical)
 22. Precise OSID centering and visual stacking for formation markers (§2.4) (COMPLETE)
-23. Bézier order arrows
-24. Settlement labels from OSM places layer
-25. Selectable front line styles (dashed, glow, chevron)
+23. Subtle always-on sector boundaries (COMPLETE — 2026-03-07)
+24. Sector hover previews (Map + Sidebar) (COMPLETE — 2026-03-07)
+25. Surfaced institutional constraints (fatigue/supply) in ORBAT (COMPLETE — 2026-03-07)
+26. Bézier order arrows
+27. Settlement labels from OSM places layer
+28. Selectable front line styles (dashed, glow, chevron)
 
 **Phase E: Full modals**
 

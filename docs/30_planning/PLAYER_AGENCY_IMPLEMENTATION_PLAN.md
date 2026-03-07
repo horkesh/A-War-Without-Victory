@@ -1,7 +1,7 @@
 # Player Agency Implementation Plan
 
 **Date:** 2026-03-07
-**Source:** Paradox team convene — Defender's Agency + Offensive Agency + Supply Agency proposals
+**Source:** Paradox team convene Ã¢â‚¬â€ Defender's Agency + Offensive Agency + Supply Agency proposals
 **Owner:** Orchestrator (plan); PM for sequencing; delegated roles per task
 
 ---
@@ -20,7 +20,7 @@ Eight implementation phases delivering player agency across defensive, offensive
 
 ---
 
-## Phase A — Surface Defensive Systems (UI Only)
+## Phase A Ã¢â‚¬â€ Surface Defensive Systems (UI Only)
 
 **Goal:** Give the player visibility into defensive systems that already work but are invisible.
 **Risk:** Zero to engine. Zero calibration risk.
@@ -32,13 +32,13 @@ Eight implementation phases delivering player agency across defensive, offensive
 
 **What:** New component `EnclaveDashboard.tsx` in `src/ui/map/components/`. Displays per-enclave:
 - Enclave name and faction
-- Resilience bar (0–30, with hardening threshold marker at 8)
+- Resilience bar (0Ã¢â‚¬â€œ30, with hardening threshold marker at 8)
 - Isolation turns counter
 - Hardening status (active/inactive badge)
 - Effective supply state (adequate/strained/critical indicator)
 - Airdrop status (receiving / not eligible / not isolated long enough)
 
-**Data source:** `LoadedGameState.enclaveResilience` — already derived in `GameStateAdapter.ts` as `Record<string, EnclaveResilienceView>`. Type already defined in `types.ts`:
+**Data source:** `LoadedGameState.enclaveResilience` Ã¢â‚¬â€ already derived in `GameStateAdapter.ts` as `Record<string, EnclaveResilienceView>`. Type already defined in `types.ts`:
 ```typescript
 interface EnclaveResilienceView {
     resilience: number;
@@ -102,44 +102,44 @@ interface MobilizationSummaryView {
 **Delegation:** Graphics Programmer
 
 **What:** Encode average entrenchment per front segment in `buildCorpsFrontLinesGeoJSON.ts`. Vary front line rendering based on defensive depth:
-- Entrenchment 0–1: thin dashed line (fluid front)
-- Entrenchment 2–3: medium solid line (forming front)
+- Entrenchment 0Ã¢â‚¬â€œ1: thin dashed line (fluid front)
+- Entrenchment 2Ã¢â‚¬â€œ3: medium solid line (forming front)
 - Entrenchment 4+: thick solid line (hardened front)
 
 **Data source:** Front segments already have associated brigade assignments. For each segment, compute average `entrenchment_turns` of assigned brigades. Add `avg_entrenchment` property to front line GeoJSON features.
 
-**Style changes:** In `awwv_map_style.json` or MapContainer layer setup, use data-driven styling: `line-width` driven by `avg_entrenchment` property. Keep existing black-white stripe pattern — only vary width.
+**Style changes:** In `awwv_map_style.json` or MapContainer layer setup, use data-driven styling: `line-width` driven by `avg_entrenchment` property. Keep existing black-white stripe pattern Ã¢â‚¬â€ only vary width.
 
-**Constraint:** Do NOT change to chevron/barbed-wire style (napkin: "Front line style: black-white stripe — no chevrons").
+**Constraint:** Do NOT change to chevron/barbed-wire style (napkin: "Front line style: black-white stripe Ã¢â‚¬â€ no chevrons").
 
-**Acceptance:** Front lines visibly thicken over time as brigades entrench. Moving brigades reset their contribution. Visual difference clear at zoom levels 7–9.
+**Acceptance:** Front lines visibly thicken over time as brigades entrench. Moving brigades reset their contribution. Visual difference clear at zoom levels 7Ã¢â‚¬â€œ9.
 
 ### A5: Posture Impact Tooltips
 
 **Delegation:** UI/UX Developer
 
-**What:** In FormationDetail.tsx posture selector (lines 601–629), add tooltip text to each posture button explaining:
+**What:** In FormationDetail.tsx posture selector (lines 601Ã¢â‚¬â€œ629), add tooltip text to each posture button explaining:
 - Defense multiplier (e.g., "1.60x defense")
 - Cohesion cost per turn (e.g., "-4.0/turn")
 - Key trade-off (e.g., "Never auto-downgrades. Brigade fights to destruction.")
 
-**Data source:** Constants from `brigade_posture.ts` and `combat_math.ts`. Hardcode tooltip strings — these are stable constants.
+**Data source:** Constants from `brigade_posture.ts` and `combat_math.ts`. Hardcode tooltip strings Ã¢â‚¬â€ these are stable constants.
 
-**Acceptance:** Hovering or long-pressing each posture button shows mechanical impact. Text is concise (1–2 lines max).
+**Acceptance:** Hovering or long-pressing each posture button shows mechanical impact. Text is concise (1Ã¢â‚¬â€œ2 lines max).
 
 ### Phase A Process
 
-1. Implement A1–A5
+1. Implement A1Ã¢â‚¬â€œA5
 2. Run `/simplify` on all changed files
 3. Run `npx tsc --noEmit` and `npm run test:vitest`
-4. Append ledger entry (n-next): "Phase A — Surface defensive systems (enclave dashboard, entrenchment summary, mobilization pools, front hardening, posture tooltips)"
+4. Append ledger entry (n-next): "Phase A Ã¢â‚¬â€ Surface defensive systems (enclave dashboard, entrenchment summary, mobilization pools, front hardening, posture tooltips)"
 5. Update napkin: GUI/HoI Map category with new items for enclave dashboard and front hardening
-6. Commit: `feat: Phase A — surface defensive systems (enclave dashboard, pools, front hardening)`
+6. Commit: `feat: Phase A Ã¢â‚¬â€ surface defensive systems (enclave dashboard, pools, front hardening)`
 7. Push
 
 ---
 
-## Phase F — Expose Offensive Levers (UI Only)
+## Phase F Ã¢â‚¬â€ Expose Offensive Levers (UI Only)
 
 **Goal:** Give the player control over offensive levers that already exist in the engine.
 **Risk:** Zero to engine. Zero calibration risk.
@@ -150,10 +150,10 @@ interface MobilizationSummaryView {
 **Delegation:** UI/UX Developer
 
 **What:** In OpsPlanningModal.tsx, add a slider for `min_attack_outcome` when creating/editing an operation. Labels:
-- "Decisive Only" → `decisive_victory`
-- "Victory Required" → `victory`
-- "Accept Costly" → `costly_victory`
-- "Attack Regardless" → `repulsed`
+- "Decisive Only" Ã¢â€ â€™ `decisive_victory`
+- "Victory Required" Ã¢â€ â€™ `victory`
+- "Accept Costly" Ã¢â€ â€™ `costly_victory`
+- "Attack Regardless" Ã¢â€ â€™ `repulsed`
 
 Store on CorpsOperation. Participating brigades use operation's `min_attack_outcome` instead of corps directive default when the operation has one set.
 
@@ -208,7 +208,7 @@ Display as three horizontal bars (green/amber/red thresholds) or a combined traf
 
 **What:** 6th map mode (keyboard shortcut `6`) showing offensive weight distribution:
 - Heat-map sectors by concentration: `(brigades_in_sector / total_corps_brigades) * (1 + aggression_modifier)`
-- Color scale: blue (holding force, low weight) → red (main effort, high weight)
+- Color scale: blue (holding force, low weight) Ã¢â€ â€™ red (main effort, high weight)
 - Overlay: active operation objective arrows (thicker for schwerpunkt/primary objective)
 
 **Data source:** `corps_front_sectors` (brigade counts per sector), `corps_command` (directive aggression_modifier per corps). Already in adapter.
@@ -224,12 +224,12 @@ Display as three horizontal bars (green/amber/red thresholds) or a combined traf
 **Delegation:** UI/UX Developer
 
 **What:** In OperationsPanel.tsx, enhance active operation display:
-- Momentum indicator: 0–3 pips (filled = momentum level)
+- Momentum indicator: 0Ã¢â‚¬â€œ3 pips (filled = momentum level)
 - Consecutive failures counter with warning color at 2+
 - Supply readiness percentage with color
 - Current objective name and index (e.g., "Objective 2/4: op:jajce:jajce_2")
 - Participating brigade count and average health (personnel %, cohesion)
-- Phase badge with turn count (e.g., "Execution — Turn 3")
+- Phase badge with turn count (e.g., "Execution Ã¢â‚¬â€ Turn 3")
 
 **Data source:** All fields already on CorpsOperation. Brigade health from formations.
 
@@ -237,20 +237,20 @@ Display as three horizontal bars (green/amber/red thresholds) or a combined traf
 
 ### Phase F Process
 
-1. Implement F1–F5
+1. Implement F1Ã¢â‚¬â€œF5
 2. Run `/simplify` on all changed files
 3. Run `npx tsc --noEmit` and `npm run test:vitest`
-4. Append ledger entry: "Phase F — Expose offensive levers (casualty slider, halt button, Go/No-Go gauge, weight-of-effort mode, operation info)"
+4. Append ledger entry: "Phase F Ã¢â‚¬â€ Expose offensive levers (casualty slider, halt button, Go/No-Go gauge, weight-of-effort mode, operation info)"
 5. Update napkin: GUI/HoI Map category and Sectors & Operations category
-6. Commit: `feat: Phase F — expose offensive levers (casualty slider, halt, Go/No-Go, ops heatmap)`
+6. Commit: `feat: Phase F Ã¢â‚¬â€ expose offensive levers (casualty slider, halt, Go/No-Go, ops heatmap)`
 7. Push
 
 ---
 
-## Phase B — Sector-Level Defensive Orders (Small Engine + UI)
+## Phase B Ã¢â‚¬â€ Sector-Level Defensive Orders (Small Engine + UI)
 
 **Goal:** Let the player issue orders at sector granularity instead of per-brigade.
-**Risk:** Low — translates sector intent to existing per-brigade postures.
+**Risk:** Low Ã¢â‚¬â€ translates sector intent to existing per-brigade postures.
 **Prerequisite:** Phase A complete (sector display exists).
 
 ### B1: Sector Stance Order
@@ -265,7 +265,7 @@ interface SectorStanceOrder {
 }
 ```
 
-New pipeline step `apply-sector-stance-orders` (after `apply-posture-orders`): for each sector stance order, set all brigades assigned to that sector to the specified posture (respecting `canAdoptPosture()` constraints — skip brigades that can't adopt).
+New pipeline step `apply-sector-stance-orders` (after `apply-posture-orders`): for each sector stance order, set all brigades assigned to that sector to the specified posture (respecting `canAdoptPosture()` constraints Ã¢â‚¬â€ skip brigades that can't adopt).
 
 **State:** Add optional `sector_stance_orders?: SectorStanceOrder[]` to GameState. Consumed and cleared each turn.
 
@@ -279,7 +279,7 @@ New pipeline step `apply-sector-stance-orders` (after `apply-posture-orders`): f
 
 **What:** Wire `logistics_priority` (already on GameState) to the UI. Player sets a priority weight (0.5 = deprioritized, 1.0 = normal, 2.0 = reinforced) per sector.
 
-**Engine:** `logistics_priority` already consumed by `formation_fatigue.ts` as a multiplicative supply weight. Map sector_id → constituent edge_ids when writing priority. No new engine logic.
+**Engine:** `logistics_priority` already consumed by `formation_fatigue.ts` as a multiplicative supply weight. Map sector_id Ã¢â€ â€™ constituent edge_ids when writing priority. No new engine logic.
 
 **UI:** In sector panel, add priority slider (0.5 / 1.0 / 2.0). Visual indicator on sector: faded = deprioritized, normal = standard, highlighted = reinforced.
 
@@ -300,20 +300,20 @@ New pipeline step `apply-sector-stance-orders` (after `apply-posture-orders`): f
 
 ### Phase B Process
 
-1. Implement B1–B3
+1. Implement B1Ã¢â‚¬â€œB3
 2. Run `/simplify` on all changed files
-3. Run `npx tsc --noEmit`, `npm run test:vitest`, and `npm run sim:scenario:run:40w` (verify no calibration regression — sector stance orders should be no-op for bot since bot doesn't issue them)
-4. Append ledger entry: "Phase B — Sector-level defensive orders (sector stance, reinforcement priority)"
+3. Run `npx tsc --noEmit`, `npm run test:vitest`, and `npm run sim:scenario:run:40w` (verify no calibration regression Ã¢â‚¬â€ sector stance orders should be no-op for bot since bot doesn't issue them)
+4. Append ledger entry: "Phase B Ã¢â‚¬â€ Sector-level defensive orders (sector stance, reinforcement priority)"
 5. Update napkin: Sectors & Operations category, GUI/HoI Map category
-6. Commit: `feat: Phase B — sector-level defensive orders (stance, reinforcement priority)`
+6. Commit: `feat: Phase B Ã¢â‚¬â€ sector-level defensive orders (stance, reinforcement priority)`
 7. Push
 
 ---
 
-## Phase G — Shaping the Fight (Small Engine + UI)
+## Phase G Ã¢â‚¬â€ Shaping the Fight (Small Engine + UI)
 
 **Goal:** Give the player control over how operations are executed.
-**Risk:** Low-medium — per-operation parameter overrides. Bot uses defaults.
+**Risk:** Low-medium Ã¢â‚¬â€ per-operation parameter overrides. Bot uses defaults.
 **Prerequisite:** Phase F complete (operation UI enhanced).
 
 ### G1: Schwerpunkt OSID
@@ -376,7 +376,7 @@ New pipeline step `apply-sector-stance-orders` (after `apply-posture-orders`): f
 
 **Delegation:** Gameplay Programmer + UI/UX Developer
 
-**What:** "Launch Now" button in OpsPlanningModal during planning phase (after ≥1 planning turn elapsed).
+**What:** "Launch Now" button in OpsPlanningModal during planning phase (after Ã¢â€°Â¥1 planning turn elapsed).
 
 **Effect:** Force immediate transition from planning to execution. All participating brigades take -15 cohesion (rushed preparation).
 
@@ -408,35 +408,35 @@ New pipeline step `apply-sector-stance-orders` (after `apply-posture-orders`): f
 
 ### Phase G Process
 
-1. Implement G1–G5
+1. Implement G1Ã¢â‚¬â€œG5
 2. Run `/simplify` on all changed files
-3. Run `npx tsc --noEmit`, `npm run test:vitest`, and `npm run sim:scenario:run:40w` (bot uses `standard` tempo, no schwerpunkt, no pre-bombardment, no early launch, no reserve commitment — all features are player-only by default, so bot baseline should be unchanged)
-4. Append ledger entry: "Phase G — Shaping the fight (schwerpunkt, tempo, pre-bombardment, early launch, reserve commitment)"
+3. Run `npx tsc --noEmit`, `npm run test:vitest`, and `npm run sim:scenario:run:40w` (bot uses `standard` tempo, no schwerpunkt, no pre-bombardment, no early launch, no reserve commitment Ã¢â‚¬â€ all features are player-only by default, so bot baseline should be unchanged)
+4. Append ledger entry: "Phase G Ã¢â‚¬â€ Shaping the fight (schwerpunkt, tempo, pre-bombardment, early launch, reserve commitment)"
 5. Update napkin: Bot AI & Combat, Sectors & Operations categories
-6. Commit: `feat: Phase G — shaping the fight (schwerpunkt, tempo, pre-bombardment, reserves)`
+6. Commit: `feat: Phase G Ã¢â‚¬â€ shaping the fight (schwerpunkt, tempo, pre-bombardment, reserves)`
 7. Push
 
 ---
 
-## Phase C — Supply as Player Agency (New Mechanics)
+## Phase C Ã¢â‚¬â€ Supply as Player Agency (New Mechanics)
 
 **Goal:** Transform supply from a background system into a source of asymmetric player decisions with political consequences.
-**Risk:** Medium — new IVP system, small engine changes to airdrop/convoy/smuggling.
+**Risk:** Medium Ã¢â‚¬â€ new IVP system, small engine changes to airdrop/convoy/smuggling.
 **Prerequisite:** Phase A complete (enclave dashboard exists for C1/C2 UI). Phase B recommended (sector reinforcement priority for logistics integration).
 
 ### C0: IVP Foundation
 
 **Delegation:** Gameplay Programmer
 
-**What:** Implement `international_visibility_pressure` on GameState per canon (Systems Manual §16.1).
+**What:** Implement `international_visibility_pressure` on GameState per canon (Systems Manual Ã‚Â§16.1).
 
 **State fields:**
 ```typescript
 interface InternationalVisibilityPressure {
     sarajevo_siege_visibility: number;       // 0-100
     enclave_humanitarian_pressure: number;   // 0-100
-    atrocity_visibility: number;             // 0-100 (placeholder — driven by displacement events)
-    negotiation_momentum: number;            // 0-100 (placeholder — driven by future negotiation system)
+    atrocity_visibility: number;             // 0-100 (placeholder Ã¢â‚¬â€ driven by displacement events)
+    negotiation_momentum: number;            // 0-100 (placeholder Ã¢â‚¬â€ driven by future negotiation system)
     composite_ivp: number;                   // weighted sum
     last_major_shift: number;                // turn of last significant IVP change
 }
@@ -445,7 +445,7 @@ interface InternationalVisibilityPressure {
 **Pipeline step:** `update-ivp` after `phase-ii-enclave-resilience`. Derives:
 - `sarajevo_siege_visibility`: if Sarajevo enclave `isolation_turns > 0`, increment by 0.5/turn (cap 100). Decay -0.2/turn when siege lifted.
 - `enclave_humanitarian_pressure`: sum of `(isolation_turns * 0.3)` across all active enclaves (cap 100). Scaled by enclave population weight.
-- `atrocity_visibility`: driven by displacement rate — `sum(displaced_out this turn) / 1000` (cap 100). Decays -1.0/turn.
+- `atrocity_visibility`: driven by displacement rate Ã¢â‚¬â€ `sum(displaced_out this turn) / 1000` (cap 100). Decays -1.0/turn.
 - `composite_ivp`: `sarajevo * 0.4 + enclave * 0.3 + atrocity * 0.2 + negotiation * 0.1`
 
 **Gating:** Behind `supply_reserves_enabled` flag (same gate as supply system).
@@ -457,8 +457,8 @@ interface InternationalVisibilityPressure {
 **Delegation:** Gameplay Programmer
 
 **What:** Modify patron commitment calculation in `supply_reserves.ts` (patron aid income):
-- RS: `patron_commitment *= (1.0 - composite_ivp * 0.003)` — high IVP reduces RS patron support (Serbia distancing under international pressure)
-- RBiH: `patron_commitment *= (1.0 + composite_ivp * 0.002)` — high IVP increases RBiH support (international sympathy)
+- RS: `patron_commitment *= (1.0 - composite_ivp * 0.003)` Ã¢â‚¬â€ high IVP reduces RS patron support (Serbia distancing under international pressure)
+- RBiH: `patron_commitment *= (1.0 + composite_ivp * 0.002)` Ã¢â‚¬â€ high IVP increases RBiH support (international sympathy)
 - HRHB: unmodified (Croatia's commitment driven by separate dynamics)
 
 **Constraints:** Patron commitment clamped to [0.1, 1.0]. Effect is gradual, not binary.
@@ -468,10 +468,10 @@ interface InternationalVisibilityPressure {
 **Delegation:** UI/UX Developer
 
 **What:** IVP gauge in TopToolbar (small) or dedicated panel (expanded). Shows:
-- Composite IVP bar (0–100)
+- Composite IVP bar (0Ã¢â‚¬â€œ100)
 - Breakdown: Sarajevo siege | Enclave pressure | Atrocity visibility
 - Per-faction patron commitment level with trend arrow
-- Active consequences (if any — see C4)
+- Active consequences (if any Ã¢â‚¬â€ see C4)
 
 ### C1: Player-Allocated Airdrops
 
@@ -480,8 +480,8 @@ interface InternationalVisibilityPressure {
 **What:** Replace automatic `applyUnAirdrops()` with player-allocated model.
 
 **Engine change in `supply_reserves.ts`:**
-- Compute total budget: count eligible enclaves (isolation_turns >= `AIRDROP_ISOLATION_THRESHOLD`) × `AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE`, capped at `AIRDROP_MAX_SUPPLY_PER_TURN` (3.0)
-- If player faction set: read `state.airdrop_allocation` (new field) — `Record<string, number>` mapping enclave_id to allocation amount. Sum must equal budget. Unallocated budget distributed evenly.
+- Compute total budget: count eligible enclaves (isolation_turns >= `AIRDROP_ISOLATION_THRESHOLD`) Ãƒâ€” `AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE`, capped at `AIRDROP_MAX_SUPPLY_PER_TURN` (3.0)
+- If player faction set: read `state.airdrop_allocation` (new field) Ã¢â‚¬â€ `Record<string, number>` mapping enclave_id to allocation amount. Sum must equal budget. Unallocated budget distributed evenly.
 - If no player faction (bot): distribute proportional to `isolation_turns` (current behavior, effectively)
 
 **State:** Add `airdrop_allocation?: Record<string, number>` to GameState. Cleared and re-set each turn by player.
@@ -490,7 +490,7 @@ interface InternationalVisibilityPressure {
 
 **UI:** In Enclave Dashboard (A1), add airdrop allocation section. Sliders per eligible enclave. Budget indicator showing remaining allocation. Impact preview: "+X general supply" per enclave.
 
-**C1.3 — Airdrop IVP feedback:** Enclaves receiving airdrops get -0.1 IVP contribution modifier (world sees relief effort). Enclaves NOT receiving airdrops when eligible get +0.1 IVP modifier (neglected suffering visible). Net: player can slightly reduce total IVP by distributing airdrops wisely, or generate more IVP by concentrating on fewer enclaves.
+**C1.3 Ã¢â‚¬â€ Airdrop IVP feedback:** Enclaves receiving airdrops get -0.1 IVP contribution modifier (world sees relief effort). Enclaves NOT receiving airdrops when eligible get +0.1 IVP modifier (neglected suffering visible). Net: player can slightly reduce total IVP by distributing airdrops wisely, or generate more IVP by concentrating on fewer enclaves.
 
 ### C2: Convoy Interdiction (RS/HRHB Agency)
 
@@ -498,9 +498,9 @@ interface InternationalVisibilityPressure {
 
 **What:** Humanitarian convoy event system.
 
-**Engine — convoy generation (`evaluate-humanitarian-convoys` pipeline step, after `update-ivp`):**
-- Each turn, for each besieged enclave (isolation_turns >= 4), roll a deterministic convoy check: `convoy_fires = (isolation_turns * 2 + composite_ivp * 0.5) >= CONVOY_THRESHOLD` (threshold calibrated so 1–2 convoys/turn at typical siege conditions). Use turn number as seed for deterministic selection.
-- Each convoy has: `target_enclave`, `route_faction` (faction controlling the corridor), `supply_amount` (0.3–0.8 general supply).
+**Engine Ã¢â‚¬â€ convoy generation (`evaluate-humanitarian-convoys` pipeline step, after `update-ivp`):**
+- Each turn, for each besieged enclave (isolation_turns >= 4), roll a deterministic convoy check: `convoy_fires = (isolation_turns * 2 + composite_ivp * 0.5) >= CONVOY_THRESHOLD` (threshold calibrated so 1Ã¢â‚¬â€œ2 convoys/turn at typical siege conditions). Use turn number as seed for deterministic selection.
+- Each convoy has: `target_enclave`, `route_faction` (faction controlling the corridor), `supply_amount` (0.3Ã¢â‚¬â€œ0.8 general supply).
 
 **Player decision (when player faction controls the corridor):**
 - **Allow passage:** Convoy delivers full `supply_amount` to enclave faction. No IVP change.
@@ -515,9 +515,9 @@ interface InternationalVisibilityPressure {
 
 **UI:** Modal popup when convoy fires through player-controlled territory. Shows: target enclave, supply amount, projected IVP impact for each option. Three buttons: Allow / Block / Divert.
 
-**HRHB variant:** Same mechanic when HVO controls chokepoints to RBiH areas (1993 central Bosnia blockade). Lower IVP impact (×0.6 modifier on all IVP consequences).
+**HRHB variant:** Same mechanic when HVO controls chokepoints to RBiH areas (1993 central Bosnia blockade). Lower IVP impact (Ãƒâ€”0.6 modifier on all IVP consequences).
 
-**Canon note:** Systems Manual §16.1 says patron behavior is "no reactive player control." This proposal gives the player *indirect* control via IVP, not direct patron manipulation. Recommend canon amendment: "Player military and humanitarian decisions generate IVP; IVP modifies patron commitment curves. The player does not directly control patron behavior." Flag for Game Designer + Architect sign-off.
+**Canon note:** Systems Manual Ã‚Â§16.1 says patron behavior is "no reactive player control." This proposal gives the player *indirect* control via IVP, not direct patron manipulation. Recommend canon amendment: "Player military and humanitarian decisions generate IVP; IVP modifies patron commitment curves. The player does not directly control patron behavior." Flag for Game Designer + Architect sign-off.
 
 ### C3: Smuggling and Tunnel Agency (RBiH)
 
@@ -525,27 +525,27 @@ interface InternationalVisibilityPressure {
 
 **What:** Smuggling efficiency curve and tunnel construction event.
 
-**C3.1 — Smuggling efficiency:**
+**C3.1 Ã¢â‚¬â€ Smuggling efficiency:**
 - Add `smuggling_efficiency` to faction state (start 0.0 for RBiH, N/A for RS/HRHB)
 - Growth: +0.0015/turn (per canon), cap 0.3
 - Effect: each turn, RBiH receives `smuggling_efficiency * SMUGGLING_HEAVY_MUNITIONS_SCALE` (e.g., 0.5) added to heavy_munitions_reserve. This is the ONLY way ARBiH gets ammo besides battlefield capture.
 - Pipeline step: `apply-smuggling-income` after `compute-supply-reserves`.
 
-**C3.2 — Tunnel construction event:**
+**C3.2 Ã¢â‚¬â€ Tunnel construction event:**
 - At turn = `warStartTurn + 60` (~mid-1993), if Sarajevo enclave still RBiH-controlled AND `isolation_turns >= 20`:
 - Fire one-time event: "Sarajevo Tunnel operational"
-- Effect: Sarajevo enclave supply state permanently upgraded by one tier (critical→strained)
+- Effect: Sarajevo enclave supply state permanently upgraded by one tier (criticalÃ¢â€ â€™strained)
 - Reduce Sarajevo's IVP contribution by 30% (siege partially broken by tunnel)
 - State: `sarajevo_tunnel_operational?: boolean` on GameState
 
-**C3.3 — Player smuggling allocation:**
-- Small pool of "smuggling points" per turn: `smuggling_efficiency * SMUGGLING_POOL_SCALE` (e.g., 2.0 at max efficiency → 0.6 points)
+**C3.3 Ã¢â‚¬â€ Player smuggling allocation:**
+- Small pool of "smuggling points" per turn: `smuggling_efficiency * SMUGGLING_POOL_SCALE` (e.g., 2.0 at max efficiency Ã¢â€ â€™ 0.6 points)
 - Player allocates across eligible enclaves (isolation_turns > 0): choose ammo (heavy_munitions) or food (general_supply) per enclave
 - Trade-off: ammo improves combat but doesn't reduce IVP; food reduces IVP but doesn't help fighting
 - State: `smuggling_allocation?: Record<string, { type: 'ammo' | 'food'; amount: number }>` on GameState
 - Bot: allocate proportional to military need (lowest supply reserves get ammo)
 
-**C3.4 — Smuggling UI:**
+**C3.4 Ã¢â‚¬â€ Smuggling UI:**
 - Section in Enclave Dashboard. Sliders per eligible enclave with ammo/food toggle. Budget indicator. Impact preview.
 
 ### C4: Patron Pressure Consequences
@@ -558,7 +558,7 @@ interface InternationalVisibilityPressure {
 
 | IVP Threshold | Event | Effect |
 |---|---|---|
-| composite_ivp >= 30 | "Drina Blockade" — Serbia reduces support | RS `patron_commitment *= 0.85`. RS production income -15%. |
+| composite_ivp >= 30 | "Drina Blockade" Ã¢â‚¬â€ Serbia reduces support | RS `patron_commitment *= 0.85`. RS production income -15%. |
 | composite_ivp >= 60 | "International Sanctions" | RS production income -30% total. RS `embargo_profile` smuggling reduced. |
 | composite_ivp >= 80 | "NATO Intervention Threat" | RS aggression_modifier -0.15 globally (bot cautious near safe zones). Any RS attack on enclave OSID generates +5 IVP spike. |
 
@@ -573,28 +573,28 @@ interface InternationalVisibilityPressure {
 - Trend arrows for all metrics
 
 **Calibration (C4.4):** Run 40w scenario. Verify:
-- IVP reaches ~30–40 by week 40 (Sarajevo siege + enclave pressure)
-- RS patron commitment begins declining by week 30–35
+- IVP reaches ~30Ã¢â‚¬â€œ40 by week 40 (Sarajevo siege + enclave pressure)
+- RS patron commitment begins declining by week 30Ã¢â‚¬â€œ35
 - Troop strength and territorial control remain in historical bands
 - Smuggling income doesn't cause RBiH heavy_munitions explosion
 
 ### Phase C Process
 
-1. Implement C0 (IVP foundation) first — prerequisite for all other C tasks
+1. Implement C0 (IVP foundation) first Ã¢â‚¬â€ prerequisite for all other C tasks
 2. Implement C1, C2, C3, C4 (can partially parallelize C1+C3 as they're independent)
 3. Run `/simplify` on all changed files
 4. Run `npx tsc --noEmit`, `npm run test:vitest`, and `npm run sim:scenario:run:40w`
-5. Append ledger entry: "Phase C — Supply as player agency (IVP, airdrops, convoys, smuggling, patron consequences)"
+5. Append ledger entry: "Phase C Ã¢â‚¬â€ Supply as player agency (IVP, airdrops, convoys, smuggling, patron consequences)"
 6. Update napkin: Simulation Engine category (IVP, smuggling), GUI/HoI Map category (enclave dashboard expansion, convoy decisions, IVP panel)
-7. Commit: `feat: Phase C — supply as player agency (IVP, airdrops, convoys, smuggling, patron pressure)`
+7. Commit: `feat: Phase C Ã¢â‚¬â€ supply as player agency (IVP, airdrops, convoys, smuggling, patron pressure)`
 8. Push
 
 ---
 
-## Phase H — Intelligence Warfare (New Mechanics)
+## Phase H Ã¢â‚¬â€ Intelligence Warfare (New Mechanics)
 
 **Goal:** Let the player weaponize the intelligence system.
-**Risk:** Medium — new operation types, confidence modifiers. Needs calibration.
+**Risk:** Medium Ã¢â‚¬â€ new operation types, confidence modifiers. Needs calibration.
 **Prerequisite:** Phase F complete (operation UI), Phase G recommended (tempo presets show pattern for operation-type variants).
 
 ### H1: Feint Operation Type
@@ -606,7 +606,7 @@ interface InternationalVisibilityPressure {
 **Lifecycle:**
 - Planning: normal (brigades stage, create visible buildup)
 - Creates genuine `offensive_signs` in enemy sector intel (it IS an operation)
-- Never transitions to execution — auto-enters recovery after 2 planning turns
+- Never transitions to execution Ã¢â‚¬â€ auto-enters recovery after 2 planning turns
 - Recovery: 1 turn (minimal exhaustion)
 
 **Cost:**
@@ -614,11 +614,11 @@ interface InternationalVisibilityPressure {
 - Supply: 0.5 general_supply (fuel, ammo expenditure for demonstration)
 - Corps exhaustion: +5 (vs +15 for real operation)
 
-**Bot reaction:** Bot's existing intel consumption reacts naturally. When bot sees `offensive_signs=true`, it weights that sector as threatened and may shift reserves. No special "fooled" code — the feint works because the bot trusts its intel.
+**Bot reaction:** Bot's existing intel consumption reacts naturally. When bot sees `offensive_signs=true`, it weights that sector as threatened and may shift reserves. No special "fooled" code Ã¢â‚¬â€ the feint works because the bot trusts its intel.
 
 **Player UI:** In OpsPlanningModal, "Feint" as 5th operation type option. Tooltip: "Create false buildup to divert enemy reserves. Costs cohesion but never executes."
 
-**Balance:** Feints must be costly enough to prevent spam. The -5 cohesion + supply cost + corps exhaustion means you can't feint more than 2–3 times before your corps needs real recovery.
+**Balance:** Feints must be costly enough to prevent spam. The -5 cohesion + supply cost + corps exhaustion means you can't feint more than 2Ã¢â‚¬â€œ3 times before your corps needs real recovery.
 
 ### H2: Operational Security Toggle
 
@@ -627,7 +627,7 @@ interface InternationalVisibilityPressure {
 **What:** Per-sector toggle: "OPSEC Active".
 
 **Effect:**
-- Enemy confidence buildup for this sector halved (passive_buildup_per_turn × 0.5)
+- Enemy confidence buildup for this sector halved (passive_buildup_per_turn Ãƒâ€” 0.5)
 - Friendly cohesion recovery halved in sector (communication discipline is stressful)
 - Duration: until toggled off or an operation in that sector enters execution (OPSEC breaks when the shooting starts)
 
@@ -658,7 +658,7 @@ interface InternationalVisibilityPressure {
 
 **Player UI:** In OpsPlanningModal, "Probe" as 6th operation type option. Tooltip: "Limited attack to reveal enemy strength. Max 2 brigades. Intel guaranteed regardless of outcome."
 
-**Balance:** Probes trade ~200–400 casualties for perfect sector intel. Worth it before a major offensive to avoid nasty surprises. But you can't probe everywhere — the 2-brigade limit and corps exhaustion throttle usage.
+**Balance:** Probes trade ~200Ã¢â‚¬â€œ400 casualties for perfect sector intel. Worth it before a major offensive to avoid nasty surprises. But you can't probe everywhere Ã¢â‚¬â€ the 2-brigade limit and corps exhaustion throttle usage.
 
 ### H4: Calibration Gate
 
@@ -676,21 +676,28 @@ All new mechanics are player-only by default, so bot baseline should be unchange
 
 ### Phase H Process
 
-1. Implement H1–H3
+1. Implement H1Ã¢â‚¬â€œH3
 2. Run `/simplify` on all changed files
 3. Run `npx tsc --noEmit`, `npm run test:vitest`, and `npm run sim:scenario:run:40w`
-4. Append ledger entry: "Phase H — Intelligence warfare (feint operations, OPSEC toggle, probe operations)"
+4. Append ledger entry: "Phase H Ã¢â‚¬â€ Intelligence warfare (feint operations, OPSEC toggle, probe operations)"
 5. Update napkin: Bot AI & Combat category, Sectors & Operations category
-6. Commit: `feat: Phase H — intelligence warfare (feint, OPSEC, probe operations)`
+6. Commit: `feat: Phase H Ã¢â‚¬â€ intelligence warfare (feint, OPSEC, probe operations)`
 7. Push
 
 ---
 
-## Phase E — Advanced Mobilization Agency (Deferred)
+## Phase E - Advanced Mobilization Agency
 
 **Goal:** Let the player allocate weapons to specific municipalities.
-**Risk:** HIGH — directly conflicts with calibrated mobilization scales. Defer until Phases A–H stable.
+**Risk:** HIGH - directly conflicts with calibrated mobilization scales.
 **Prerequisite:** All previous phases stable and calibrated.
+
+**Implementation note (2026-03-07):** Phase E was implemented after the A/B/C/F/G/H closure gate went green. The shipped mechanic kept the original intent but made it faction-differentiated under one shared state/UI surface:
+- `RBiH`: `weapons_shipment` - one-turn local mobilization boost in the targeted municipality.
+- `RS`: `staff_priority` - one-turn local reinforcement-rate boost from the existing pool.
+- `HRHB`: `croatian_support_package` - one-turn local cohesion bonus on local reinforcement.
+
+All three variants are deliberately local, one-turn, and pool-constrained so they add placement agency without rewriting global manpower calibration.
 
 ### E1: Design Weapons Allocation Mechanic
 
@@ -708,25 +715,25 @@ All new mechanics are player-only by default, so bot baseline should be unchange
 
 ### Phase E Process
 
-Deferred. Will be planned when Phases A–H are stable.
+Originally deferred. Implemented on 2026-03-07 after the Phase H acceptance gate was restored (`n248`/`n249`).
 
 ---
 
 ## Execution Order Summary
 
 ```
-Sprint 1 (Parallel — UI Only, Zero Risk):
+Sprint 1 (Parallel Ã¢â‚¬â€ UI Only, Zero Risk):
   Phase A: Surface Defensive Systems
   Phase F: Expose Offensive Levers
   -> /simplify -> ledger + napkin -> commit -> push
 
-Sprint 2 (Sequential — Small Engine):
+Sprint 2 (Sequential Ã¢â‚¬â€ Small Engine):
   Phase B: Sector-Level Defensive Orders
   -> /simplify -> ledger + napkin -> 40w regression -> commit -> push
   Phase G: Shaping the Fight
   -> /simplify -> ledger + napkin -> 40w regression -> commit -> push
 
-Sprint 3 (Sequential — New Mechanics, Calibration-Sensitive):
+Sprint 3 (Sequential Ã¢â‚¬â€ New Mechanics, Calibration-Sensitive):
   Phase C: Supply as Player Agency (C0 first, then C1-C4)
   -> /simplify -> ledger + napkin -> 40w regression -> commit -> push
   Phase H: Intelligence Warfare
@@ -748,20 +755,20 @@ Deferred:
 - `src/sim/smuggling.ts` (C3)
 
 ### Modified Files (major)
-- `src/state/game_state.ts` — Schema additions per phase
-- `src/ui/map/data/GameStateAdapter.ts` — Adapter derivations per phase
-- `src/ui/map/data/types.ts` — UI type additions per phase
-- `src/ui/map/components/OpsPlanningModal.tsx` — F1, G1-G4, H1, H3
-- `src/ui/map/components/OperationsPanel.tsx` — F2, F5
-- `src/ui/map/components/OOBSidebar.tsx` — A3
-- `src/ui/map/components/FormationDetail.tsx` — A5
-- `src/sim/combat/sector_offensive.ts` — F2, G4, H1, H3
-- `src/sim/combat/bot_brigade_ai_osid.ts` — F1, G1, G2
-- `src/sim/combat/bot_corps_ai.ts` — G5
-- `src/sim/combat/sector_intel.ts` — H2
-- `src/state/supply_reserves.ts` — C1, C3
-- `src/sim/turn_phases/war_phases.ts` — Pipeline steps for B1, C0, C2, C3
-- `src/ui/map/map/builders/buildCorpsFrontLinesGeoJSON.ts` — A4
+- `src/state/game_state.ts` Ã¢â‚¬â€ Schema additions per phase
+- `src/ui/map/data/GameStateAdapter.ts` Ã¢â‚¬â€ Adapter derivations per phase
+- `src/ui/map/data/types.ts` Ã¢â‚¬â€ UI type additions per phase
+- `src/ui/map/components/OpsPlanningModal.tsx` Ã¢â‚¬â€ F1, G1-G4, H1, H3
+- `src/ui/map/components/OperationsPanel.tsx` Ã¢â‚¬â€ F2, F5
+- `src/ui/map/components/OOBSidebar.tsx` Ã¢â‚¬â€ A3
+- `src/ui/map/components/FormationDetail.tsx` Ã¢â‚¬â€ A5
+- `src/sim/combat/sector_offensive.ts` Ã¢â‚¬â€ F2, G4, H1, H3
+- `src/sim/combat/bot_brigade_ai_osid.ts` Ã¢â‚¬â€ F1, G1, G2
+- `src/sim/combat/bot_corps_ai.ts` Ã¢â‚¬â€ G5
+- `src/sim/combat/sector_intel.ts` Ã¢â‚¬â€ H2
+- `src/state/supply_reserves.ts` Ã¢â‚¬â€ C1, C3
+- `src/sim/turn_phases/war_phases.ts` Ã¢â‚¬â€ Pipeline steps for B1, C0, C2, C3
+- `src/ui/map/map/builders/buildCorpsFrontLinesGeoJSON.ts` Ã¢â‚¬â€ A4
 
 ### Test Files (new)
 - `tests/ivp.test.ts` (C0)

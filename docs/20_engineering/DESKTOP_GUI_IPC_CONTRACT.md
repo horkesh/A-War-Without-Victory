@@ -116,6 +116,11 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: resolves one pending convoy choice in `state.pending_convoy_decisions`, reserializes, and broadcasts the updated state.
 
+- `stage-municipality-support-order` (invoke)
+  - Payload: `{ faction: 'RS' | 'RBiH' | 'HRHB', munId: string, type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: validates the selected municipality against the faction's militia pools, stages or replaces `state.municipality_support_orders[faction]`, reserializes, and broadcasts the updated state. When `meta.player_faction` is present, only that faction may stage support.
+
 - `stage-opsec-toggle` (invoke)
   - Payload: `{ sectorId: string, enabled: boolean }`
   - Returns: `{ ok: boolean, error?: string }`

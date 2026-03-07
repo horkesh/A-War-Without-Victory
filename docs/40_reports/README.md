@@ -10,7 +10,7 @@
 
 | Need | Go to |
 |------|--------|
-| **Player agency implementation A-H** | [20260307_PLAYER_AGENCY_IMPLEMENTATION_A_TO_H.md](implemented/20260307_PLAYER_AGENCY_IMPLEMENTATION_A_TO_H.md) - full implementation report for Phases A/B/C/F/G/H, verification timeline (`n226` -> `n249`), final combat-calibration recovery, and remaining anchor drift notes. |
+| **Player agency implementation A-H** | [20260307_PLAYER_AGENCY_IMPLEMENTATION_A_TO_H.md](implemented/20260307_PLAYER_AGENCY_IMPLEMENTATION_A_TO_H.md) - full implementation report for Phases A/B/C/E/F/G/H, verification timeline (`n226` -> `n254`), final combat-calibration recovery, asymmetric municipality-support Phase E, and remaining 40w/52w drift notes. |
 | **What’s already implemented** | [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md) → [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) (single doc; originals archived to docs/_old/40_reports/implemented_2026_02_15/) |
 | **Structural changes for calibration ceiling (TO FOLLOW UP)** | [20260307_STRUCTURAL_CHANGES_FOR_CALIBRATION_CEILING.md](convenes/20260307_STRUCTURAL_CHANGES_FOR_CALIBRATION_CEILING.md) — 6 engine-level fixes to break past 93.6% ATH: early-war takeover quality, enclave/holdout, VRS operational reach, Jajce transition, bot sector stability, override migration. |
 | **Recovery-plan closure report** | [20260306_COMBAT_CAUSALITY_RECOVERY_AND_CONTROLLED_CALIBRATION_RESUMPTION.md](implemented/20260306_COMBAT_CAUSALITY_RECOVERY_AND_CONTROLLED_CALIBRATION_RESUMPTION.md) — end-to-end account of the combat-causality recovery lane, lessons learned, must-have assumptions, and controlled calibration resumption rules. |

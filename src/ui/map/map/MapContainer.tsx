@@ -7,7 +7,7 @@ import type { FeatureCollection } from 'geojson';
 import type { LoadedGameState } from '../data/types';
 import { useMapInteractions } from './useMapInteractions';
 import { useGameStore } from '../store/gameStore';
-import { collectSectorFriendlyOsids, buildOsidToSectorMap } from '../utils/sectorUtils';
+import { collectSectorFriendlyOsids, buildOsidToSectorMap, getSectorIdForFormation } from '../utils/sectorUtils';
 import { buildCorpsColorMap } from './builders/buildCorpsFrontLinesGeoJSON';
 import { buildOsidDisplayNameMap } from '../utils/osidDisplayName';
 import { loadOperationalPoliticalControl, loadOperationalSettlements } from '../data/DataLoader';
@@ -271,9 +271,7 @@ export function MapContainer() {
         onOsidHover: (osid, point) => {
           if (osid) {
             setTooltipTargetWithPosition({ type: 'osid', id: osid }, point ?? undefined);
-            const sectorId = osidToSector.get(osid);
-            if (sectorId) setHoveredSectorId(sectorId);
-            else setHoveredSectorId(null);
+            setHoveredSectorId(osidToSector.get(osid) ?? null);
           } else {
             clearTooltipTarget();
             setHoveredSectorId(null);
@@ -282,14 +280,7 @@ export function MapContainer() {
         onFormationHover: (id, point) => {
           if (id) {
             setTooltipTargetWithPosition({ type: 'formation', id }, point ?? undefined);
-            const formation = loadedGameState?.formations.find(f => f.id === id);
-            if (formation) {
-              const sectorId = loadedGameState?.corpsFrontSectors?.find(
-                s => s.assigned_brigade_ids.includes(id) || s.reserve_brigade_ids.includes(id)
-              )?.sector_id;
-              if (sectorId) setHoveredSectorId(sectorId);
-              else setHoveredSectorId(null);
-            }
+            setHoveredSectorId(getSectorIdForFormation(id, loadedGameState?.corpsFrontSectors));
           } else {
             clearTooltipTarget();
             setHoveredSectorId(null);

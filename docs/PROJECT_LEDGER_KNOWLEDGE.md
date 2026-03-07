@@ -720,3 +720,9 @@ The strategic reserve solves the topology mismatch without artificial caps or sc
 - The player-agency implementation plan is now documented as complete for Phases A/B/C/F/G/H, with Phase E still intentionally deferred by the plan itself.
 - Canon and engineering docs should reference the live state surfaces, not the older plan sketches: `sector_stance_orders`, `opsec_sectors`, operation shaping levers, `airdrop_allocation`, `pending_convoy_decisions`, `smuggling_allocation`, `sarajevo_tunnel_operational`, and `composite_ivp`.
 - The authoritative closure evidence for this documentation state is the `n248`/`n249` lane: combat-calibration valid, `invalid_operation_count = 0`, benchmark suite `6/6`, and only anchor-level drift remaining.
+
+## 2026-03-07 - Phase E municipality support is asymmetric and intentionally local
+
+- The safe Phase E shape is one shared municipality-support surface with faction-specific fiction and effects: `RBiH` gets `weapons_shipment`, `RS` gets `staff_priority`, `HRHB` gets `croatian_support_package`.
+- Keep Phase E pool-constrained and one-turn scoped. It should redirect scarce help locally, not rewrite total mobilization ceilings or global manpower curves.
+- In unattended scenario runs, Phase E is effectively dormant unless a player stages orders. Do not attribute headless regression drift to the mechanic unless support orders were actually present in state.

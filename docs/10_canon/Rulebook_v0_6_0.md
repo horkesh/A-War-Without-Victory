@@ -315,7 +315,7 @@ In practice, this means the player can:
 - set sector-level defensive intent for corps sectors
 - shape corps operations with tempo, artillery preparation, launch discipline, and target focus
 - use information-warfare tools such as OPSEC, feints, and probes
-- make constrained supply-agency decisions such as enclave airdrops, convoy approvals, and smuggling allocation
+- make constrained supply-agency decisions such as enclave airdrops, convoy approvals, smuggling allocation, and municipality support
 
 These tools expand agency without overriding command friction, logistics, exhaustion, or international consequences.
 
@@ -350,7 +350,7 @@ Each turn the player:
 1. **Reviews** reports: front status, exhaustion, supply pressure, corps operations, recent battles
 2. **Sets brigade postures**, **sector defensive intent**, and **issues attack orders**
 3. **Manages corps operations**: front assignments, operational groups, attack axes, tempo, launch timing, and deception tools such as feints or probes
-4. **Allocates constrained supply agency**: enclave airdrops, convoy decisions, smuggling focus, and related relief choices where available
+4. **Allocates constrained supply agency**: enclave airdrops, convoy decisions, smuggling focus, municipality support, and related relief choices where available
 5. **Monitors** exhaustion, recruitment, equipment degradation, alliance dynamics, and international visibility pressure consequences
 6. **Responds** to events: ceasefire conditions, Washington Agreement preconditions, enclave integrity (implementation-note: enclave protection for Srebrenica/Goražde/Cazin is not yet implemented; see CALIBRATION_REPORT_BOT_AI_FEB_2026.md §7)
 7. **Ends turn** — brigade movement resolves (brigade_movement_orders.ts); attacks resolve; supply/exhaustion update; recruitment accrues. *(ZoC-constrained movement removed 2026-03-02.)*

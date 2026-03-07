@@ -44,10 +44,18 @@ export function BrigadeRow({ formation, compact, highlighted = false, onClick, o
   const rowClass = onClick ? 'cursor-pointer' : '';
   const fat = formation.fatigue;
   const fatClass = fat >= 50 ? 'text-faction-rs font-bold' : fat >= 30 ? 'text-accent-gold' : 'text-text-secondary';
+  const supplyColor = SUPPLY_DOT_CLASS[supplyState];
+
+  const containerClasses = [
+    'flex items-center gap-2 font-mono text-xs border-b border-panel-border/50 last:border-b-0 px-2',
+    compact ? 'py-1' : 'py-1.5',
+    rowClass,
+    highlighted ? 'bg-panel-active/70' : 'hover:bg-panel-hover/80'
+  ].join(' ');
 
   return (
     <div
-      className={`flex items-center gap-2 font-mono text-xs border-b border-panel-border/50 last:border-b-0 px-2 ${compact ? 'py-1' : 'py-1.5'} ${rowClass} ${highlighted ? 'bg-panel-active/70' : 'hover:bg-panel-hover/80'}`}
+      className={containerClasses}
       onClick={onClick}
       onMouseEnter={(e) => onHoverChange?.(true, e)}
       onMouseLeave={(e) => onHoverChange?.(false, e)}
@@ -55,7 +63,7 @@ export function BrigadeRow({ formation, compact, highlighted = false, onClick, o
       data-highlighted={highlighted ? 'true' : 'false'}
       title={`Supply: ${supplyState.toUpperCase()} | Fatigue: ${fat} | Cohesion: ${cohesion}%`}
     >
-      <span className={`shrink-0 text-[14px] leading-none ${SUPPLY_DOT_CLASS[supplyState]}`} aria-label={supplyState}>●</span>
+      <span className={`shrink-0 text-[14px] leading-none ${supplyColor}`} aria-label={supplyState}>●</span>
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${bgFaction}`} />
       <span className={`truncate min-w-0 flex-1 ${factionText}`}>{formation.name}</span>
       <div className="flex items-center gap-0.5 shrink-0" aria-label={`cohesion ${cohesion}`}>
