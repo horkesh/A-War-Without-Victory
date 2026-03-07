@@ -7,6 +7,19 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-07] GUI master file and living reference docs
+
+### Summary
+- **GUI_MASTER.md** (`docs/40_reports/GUI_MASTER.md`) is the single living reference for GUI work (map + warroom). Read it first when starting any GUI work; update it during the session — same discipline as CALIBRATION_MASTER for calibration.
+- **Master files in docs/40_reports:** Calibration → `CALIBRATION_MASTER.md`; GUI → `GUI_MASTER.md`; Warroom → `WARROOM_MASTER.md`. All are "read first, update during session" control files for their domains.
+
+### Changes
+- `docs/40_reports/README.md` (already lists GUI_MASTER in table and Root)
+- This ledger entry and PROJECT_LEDGER_KNOWLEDGE.md + napkin + context.md + REPO_MAP references added so everyone working on the repo sees the master file.
+
+### Scope / safeguards
+- Docs-only; no code or behavior change.
+
 ## [2026-03-07] Settlement panel rich content, tabs, nation labels, current ethnic structure
 
 ### Summary
@@ -11583,3 +11596,41 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 ### Notes
 - Documentation-only pass; no code or asset files were changed.
 - No `FORAWWV` update required.
+
+---
+
+## [2026-03-07] Paramilitary rear pocket cleanup system
+
+### What changed
+- **New formation kind:** `'paramilitary'` added to `FormationKind` in `game_state.ts`
+- **New module:** `src/sim/combat/paramilitary_sweep.ts` (~350 lines) — `detectParamilitaryTargets()`, `advanceParamilitaries()`, `resolvePlayerParamilitaryDecisions()`
+- **10 constants** in `formation_constants.ts`: PARAMILITARY_UNIT_SIZE (150), PARAMILITARY_MARCH_TURNS (2), PARAMILITARY_FADE_WEEK (20), PARAMILITARY_SPAWN_RATE (RS=0.85, HRHB=0.55, RBiH=0.30), PARAMILITARY_CASUALTY_RATE (0.08), PARAMILITARY_CIVILIAN_CASUALTY_RATE (0.02), PARAMILITARY_COHESION (20), PARAMILITARY_INITIAL_MORALE (80), PARAMILITARY_TARGET_AVG_POPULATION (5000)
+- **Pipeline:** 2 new steps (`paramilitary-detect`, `paramilitary-advance`) in `war_phases.ts` after `partition-corps-front-sectors`
+- **State schema:** `ParamilitaryRequest` interface, `pending_paramilitary_requests`, `paramilitary_policy`, `paramilitary_deployment_count` on GameState; `paramilitary_target`, `paramilitary_eta` on FormationState
+- **Serialization:** 3 keys added to `GAMESTATE_TOP_LEVEL_KEYS`
+- **TurnReport:** `paramilitary_sweep` field added
+- **Exclusions:** `isEligibleForReinforcement()` returns false for paramilitary; bot AI skips (no corps_id); formation spawn ignores
+- **Tests:** 14 new tests in `tests/paramilitary_sweep.test.ts`
+- **Simplify pass:** Pre-built defender set, shared casualty split, standardized ratios, extracted constants, defense-in-depth fade check
+
+### 40w scenario results
+- 20 formations spawned (14 RS, 6 RBiH)
+- RS paramilitary casualties: 156; RBiH: 72
+- Civilian casualties recorded against captured OSID populations
+- Calibration stable at 84.9%/87.7% (count/area-weighted)
+
+### Verification
+- `npx tsc --noEmit` — clean
+- `npm run test:vitest` — 365 passed (36 suites)
+- 40w scenario: paramilitary behavior confirmed, no regression
+
+### Canon propagation
+- Systems Manual §13: implementation-note for paramilitary FormationKind
+- Engine Invariants §14.8a: paramilitary formation lifecycle invariants
+- CALIBRATION_MASTER: paramilitary subsystem note
+- CONSOLIDATED_BACKLOG §3: updated to reflect implementation
+- CONSOLIDATED_IMPLEMENTED: entry added
+- REPO_MAP: paramilitary sweep entry
+- MILITIA_BRIGADE_FORMATION_DESIGN: §9a paramilitary section
+- README (40_reports): entry in §1 need table
+- Full report: `docs/40_reports/implemented/20260307_PARAMILITARY_SWEEP_FEATURE.md`

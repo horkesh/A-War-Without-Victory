@@ -137,6 +137,7 @@ import {
 } from '../../state/supply_reserves.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 import { detectParamilitaryTargets, advanceParamilitaries } from '../combat/paramilitary_sweep.js';
+import { PARAMILITARY_FADE_WEEK } from '../../state/formation_constants.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
 import { createBotOrderDiagnosticsSnapshot } from '../../scenario/combat_causality.js';
@@ -472,6 +473,7 @@ export const warPhases: NamedPhase[] = [
         name: 'paramilitary-detect',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
+            if ((context.state.meta?.turn ?? 0) > PARAMILITARY_FADE_WEEK) return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
             const report = detectParamilitaryTargets(

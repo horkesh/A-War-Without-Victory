@@ -286,6 +286,10 @@ At Operational Group activation, personnel are deducted from donors; at dissolut
 
 Brigade operations pipeline steps run only when meta.phase === "war".
 
+### 14.8a Paramilitary formation lifecycle
+
+**Implementation-note (2026-03-07):** Paramilitary formations (`kind: 'paramilitary'`) are autonomous short-lived units for rear pocket cleanup. Lifecycle: spawn → march (ETA countdown) → capture/dissolve. Invariants: (1) Paramilitary formations are excluded from reinforcement (`isEligibleForReinforcement` returns false), bot AI targeting, and formation spawn. (2) They do not contribute to defended OSID checks (irregular forces cannot hold positions). (3) Spawning is gated by PARAMILITARY_FADE_WEEK (week 20); no new paramilitaries after war professionalizes. (4) All iteration is deterministic (sorted by formation ID via `strictCompare`; spawn probability via deterministic hash, not randomness). (5) Casualties use standard KIA/WIA/MIA fractions (0.30/0.55/0.15) via `recordBattleCasualties()`. (6) Control changes from paramilitary capture emit `control_events` with `mechanism: 'combat'`. (7) `paramilitary_deployment_count` per faction tracks cumulative deployments for consequence scaling.
+
 ### 14.9 War movement pipeline order
 
 *(ZoC removed 2026-03-02 — zoc-constrained-movement step deleted; replaced by apply-brigade-movement using brigade_movement_orders.ts.)* **osid-column-movement** must run **before** **apply-brigade-movement**. Column movement consumes orders with stance 'column' and must process them first. Violation causes column march orders to be dropped.

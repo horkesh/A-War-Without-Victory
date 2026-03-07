@@ -117,6 +117,38 @@
 
 ---
 
+## 9a. Paramilitary formations (implementation-note 2026-03-07)
+
+Paramilitary formations (`kind: 'paramilitary'`) are a separate formation kind from brigades and militia pools. They model autonomous rear pocket cleanup by irregular forces.
+
+**Key differences from brigades:**
+- **Not pool-sourced:** Spawned directly by graph analysis when rear enemy pockets detected, not from militia pools
+- **Not reinforceable:** `isEligibleForReinforcement()` returns false
+- **Not bot-AI-controlled:** No `corps_id`; bot corps/brigade AI skips them
+- **Short lifecycle:** Spawn → march (2 turns) → capture/dissolve (set to `inactive` + `disbanded`)
+- **Low combat value:** Cohesion 20 (vs brigade 45-72); cannot hold positions or provide garrison defense
+- **Faction-differentiated:** RS 0.85, HRHB 0.55, RBiH 0.30 spawn probability (organizational penetration)
+
+**Constants (formation_constants.ts):**
+
+| Constant | Value | Purpose |
+|----------|-------|---------|
+| PARAMILITARY_UNIT_SIZE | 150 | Personnel per unit |
+| PARAMILITARY_MARCH_TURNS | 2 | Turns to reach target |
+| PARAMILITARY_FADE_WEEK | 20 | Cutoff week (war professionalizes) |
+| PARAMILITARY_SPAWN_RATE | RS=0.85, HRHB=0.55, RBiH=0.30 | Per-faction spawn probability |
+| PARAMILITARY_CASUALTY_RATE | 0.08 | Military casualty fraction per sweep |
+| PARAMILITARY_CIVILIAN_CASUALTY_RATE | 0.02 | Civilian casualty fraction (war crimes) |
+| PARAMILITARY_COHESION | 20 | Very low — irregular forces |
+| PARAMILITARY_INITIAL_MORALE | 80 | Starting morale |
+| PARAMILITARY_TARGET_AVG_POPULATION | 5000 | Avg civilian pop at target OSID |
+
+**Player agency:** `paramilitary_policy` ('ask'/'always_allow'/'always_deny') + per-request decisions. Bot factions auto-approve. `paramilitary_deployment_count` tracks cumulative deployments.
+
+**Code:** `src/sim/combat/paramilitary_sweep.ts`. Pipeline: `paramilitary-detect` + `paramilitary-advance` after `partition-corps-front-sectors`.
+
+---
+
 ## 10. Historical OOB
 
 - **Purpose:** Premade formation slots from Balkan Battlegrounds OOB (brigades, corps), filled from militia pools each turn. **Ahistorical path:** If a faction gains control/pool in a mun where it has no OOB slot (e.g. RBiH in Prijedor after the peace phase), the existing **emergent spawn** creates a new brigade there. OOB slots are created **only when** the faction has presence in the home mun at **war entry** (no ghost formations).

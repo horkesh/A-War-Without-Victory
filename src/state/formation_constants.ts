@@ -235,6 +235,10 @@ export const PARAMILITARY_CASUALTY_RATE = 0.08;
 export const PARAMILITARY_CIVILIAN_CASUALTY_RATE = 0.02;
 /** Paramilitary cohesion — very low, irregular forces. */
 export const PARAMILITARY_COHESION = 20;
+/** Paramilitary initial morale — moderate; low cohesion already reflects irregular nature. */
+export const PARAMILITARY_INITIAL_MORALE = 80;
+/** Average civilian population at a target OSID for civilian casualty calculation. */
+export const PARAMILITARY_TARGET_AVG_POPULATION = 5000;
 
 /**
  * Single nominal brigade size (troops per formation) for all factions.

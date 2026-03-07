@@ -18,7 +18,6 @@ import type {
     FormationId,
     FormationState,
     GameState,
-    ParamilitaryRequest
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { recordBattleCasualties } from '../../state/casualty_ledger.js';
@@ -26,16 +25,22 @@ import { strictCompare } from '../../state/validateGameState.js';
 import {
     PARAMILITARY_UNIT_SIZE,
     PARAMILITARY_MARCH_TURNS,
-    PARAMILITARY_FADE_WEEK,
     PARAMILITARY_SPAWN_RATE,
     PARAMILITARY_CASUALTY_RATE,
     PARAMILITARY_CIVILIAN_CASUALTY_RATE,
-    PARAMILITARY_COHESION
+    PARAMILITARY_COHESION,
+    PARAMILITARY_INITIAL_MORALE,
+    PARAMILITARY_TARGET_AVG_POPULATION,
+    PARAMILITARY_FADE_WEEK,
 } from '../../state/formation_constants.js';
 import { analyzeFactionGraph } from './osid_graph_analysis.js';
 import { buildOsidAdjacency } from './osid_adjacency.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { EdgeRecord } from '../../map/settlements.js';
+
+// Casualty split ratios — consistent with attack_resolution_osid.ts / frontline_attrition.ts
+const KIA_FRACTION = 0.30;
+const WIA_FRACTION = 0.55;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -48,19 +53,35 @@ export interface ParamilitarySweepReport {
     pending_player_requests: number;
 }
 
+function emptyReport(): ParamilitarySweepReport {
+    return { spawned: [], captured: [], dissolved: [], pending_player_requests: 0 };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Check if an OSID has a defending formation (any faction). */
-function hasDefender(state: GameState, osid: string, excludeFaction: FactionId): boolean {
+/** Build a set of OSIDs that have an enemy defender, for O(1) lookup. */
+function buildDefendedOsids(state: GameState): Set<string> {
+    const defended = new Set<string>();
     const formations = state.formations ?? {};
-    for (const fid of Object.keys(formations).sort(strictCompare)) {
+    for (const fid of Object.keys(formations)) {
         const f = formations[fid];
-        if (!f || f.status !== 'active') continue;
-        if (f.faction === excludeFaction) continue;
-        if (f.kind === 'paramilitary') continue;
-        if (f.location_osid === osid) return true;
+        if (!f || f.status !== 'active' || f.kind === 'paramilitary') continue;
+        if (f.location_osid) defended.add(f.location_osid);
+    }
+    return defended;
+}
+
+/** Check if an OSID is defended by a formation from a different faction. */
+function isDefendedAgainst(defendedOsids: Set<string>, state: GameState, osid: string, attackerFaction: FactionId): boolean {
+    if (!defendedOsids.has(osid)) return false;
+    // Confirm at least one non-attacker active formation is there
+    const formations = state.formations ?? {};
+    for (const fid of Object.keys(formations)) {
+        const f = formations[fid];
+        if (!f || f.status !== 'active' || f.kind === 'paramilitary') continue;
+        if (f.faction !== attackerFaction && f.location_osid === osid) return true;
     }
     return false;
 }
@@ -70,6 +91,12 @@ function makeParamilitaryId(faction: FactionId, turn: number, index: number): Fo
     return `para_${faction.toLowerCase()}_t${turn}_${index}`;
 }
 
+/** Split total casualties into KIA/WIA/MIA using standard fractions. */
+function splitCasualties(total: number): { killed: number; wounded: number; missing_captured: number } {
+    const killed = Math.floor(total * KIA_FRACTION);
+    const wounded = Math.floor(total * WIA_FRACTION);
+    return { killed, wounded, missing_captured: Math.max(0, total - killed - wounded) };
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Core: Detect pockets and create requests
@@ -86,31 +113,24 @@ export function detectParamilitaryTargets(
     edges: EdgeRecord[],
     reverseMap: OperationalToCanonicalReverseMap
 ): ParamilitarySweepReport {
-    const report: ParamilitarySweepReport = {
-        spawned: [],
-        captured: [],
-        dissolved: [],
-        pending_player_requests: 0
-    };
-
+    const report = emptyReport();
     const turn = state.meta?.turn ?? 0;
-
-    // No paramilitaries after fade week
     if (turn > PARAMILITARY_FADE_WEEK) return report;
 
     const adjacency = buildOsidAdjacency(edges);
     const playerFaction = state.meta?.player_faction ?? null;
     const factions = (state.factions ?? []).map(f => f.id).sort(strictCompare);
+    const defendedOsids = buildDefendedOsids(state);
 
-    // Check for existing paramilitary targets to avoid duplicates
+    // Existing paramilitary targets — avoid duplicates
     const existingTargets = new Set<string>();
-    for (const fid of Object.keys(state.formations ?? {}).sort(strictCompare)) {
-        const f = (state.formations ?? {})[fid];
+    const formations = state.formations ?? {};
+    for (const fid of Object.keys(formations)) {
+        const f = formations[fid];
         if (f?.kind === 'paramilitary' && f.paramilitary_target) {
             existingTargets.add(`${f.faction}:${f.paramilitary_target}`);
         }
     }
-    // Also track pending requests
     for (const req of state.pending_paramilitary_requests ?? []) {
         existingTargets.add(`${req.faction}:${req.target_osid}`);
     }
@@ -121,42 +141,27 @@ export function detectParamilitaryTargets(
         if (pockets.length === 0) continue;
 
         const baseRate = PARAMILITARY_SPAWN_RATE[faction] ?? 0.3;
-
         let spawnIndex = 0;
+
         for (const pocketOsid of pockets) {
-            // Skip if already targeted
             if (existingTargets.has(`${faction}:${pocketOsid}`)) continue;
+            if (isDefendedAgainst(defendedOsids, state, pocketOsid, faction)) continue;
 
-            // Skip if defended by a formation
-            if (hasDefender(state, pocketOsid, faction)) continue;
-
-            // Effective spawn rate is the faction base rate directly.
-            // Organizational penetration already determined which factions have
-            // paramilitary networks — the base rates encode that difference.
-            const effectiveRate = baseRate;
-
-            // Deterministic threshold: use turn + osid hash to create stable yes/no
-            // Simple deterministic hash: sum of char codes mod 100 / 100
             const hashVal = deterministicHash(pocketOsid, turn) / 100;
-            if (hashVal > effectiveRate) continue;
+            if (hashVal > baseRate) continue;
 
             // Player faction: create request instead of auto-spawning
             if (faction === playerFaction) {
                 const policy = state.paramilitary_policy ?? 'ask';
                 if (policy === 'always_deny') continue;
                 if (policy === 'always_allow') {
-                    // Auto-approve
                     spawnParamilitary(state, faction, pocketOsid, turn, spawnIndex, report);
                     spawnIndex++;
                     continue;
                 }
                 // 'ask' — add to pending
                 const requests = state.pending_paramilitary_requests ??= [];
-                requests.push({
-                    target_osid: pocketOsid,
-                    faction,
-                    strength: PARAMILITARY_UNIT_SIZE
-                });
+                requests.push({ target_osid: pocketOsid, faction, strength: PARAMILITARY_UNIT_SIZE });
                 report.pending_player_requests++;
                 continue;
             }
@@ -182,9 +187,7 @@ function deterministicHash(osid: string, turn: number): number {
     return ((hash < 0 ? -hash : hash) % 100);
 }
 
-/**
- * Spawn a paramilitary formation targeting a pocket OSID.
- */
+/** Spawn a paramilitary formation targeting a pocket OSID. */
 function spawnParamilitary(
     state: GameState,
     faction: FactionId,
@@ -196,7 +199,7 @@ function spawnParamilitary(
     const fid = makeParamilitaryId(faction, turn, index);
     const formations = state.formations ??= {};
 
-    const formation: FormationState = {
+    formations[fid] = {
         id: fid,
         faction,
         name: `Paramilitary Unit (${faction})`,
@@ -206,14 +209,11 @@ function spawnParamilitary(
         kind: 'paramilitary',
         personnel: PARAMILITARY_UNIT_SIZE,
         cohesion: PARAMILITARY_COHESION,
-        morale: 80,
+        morale: PARAMILITARY_INITIAL_MORALE,
         paramilitary_target: targetOsid,
         paramilitary_eta: PARAMILITARY_MARCH_TURNS
-    };
+    } satisfies FormationState;
 
-    formations[fid] = formation;
-
-    // Track deployment count for consequences
     const counts = state.paramilitary_deployment_count ??= {};
     counts[faction] = (counts[faction] ?? 0) + 1;
 
@@ -235,17 +235,11 @@ export function advanceParamilitaries(
     state: GameState,
     reverseMap: OperationalToCanonicalReverseMap
 ): ParamilitarySweepReport {
-    const report: ParamilitarySweepReport = {
-        spawned: [],
-        captured: [],
-        dissolved: [],
-        pending_player_requests: 0
-    };
-
+    const report = emptyReport();
     const formations = state.formations ?? {};
     const turn = state.meta?.turn ?? 0;
+    const defendedOsids = buildDefendedOsids(state);
 
-    // Collect paramilitary IDs sorted for determinism
     const paraIds = Object.keys(formations)
         .filter(fid => formations[fid]?.kind === 'paramilitary' && formations[fid]?.status === 'active')
         .sort(strictCompare);
@@ -254,32 +248,24 @@ export function advanceParamilitaries(
         const f = formations[fid];
         if (!f || !f.paramilitary_target) continue;
 
-        // Decrement ETA
         const eta = (f.paramilitary_eta ?? 0) - 1;
         f.paramilitary_eta = eta;
-
         if (eta > 0) continue;
 
-        // ETA reached: attempt capture
         const targetOsid = f.paramilitary_target;
         const currentController = getPoliticalControllerOSID(state, targetOsid, reverseMap);
 
-        // If target is already faction-controlled (someone else captured it), just dissolve
+        // Already faction-controlled — just dissolve
         if (currentController === f.faction) {
             dissolveParamilitary(state, fid, report);
             continue;
         }
 
-        // Check if still undefended
-        if (hasDefender(state, targetOsid, f.faction)) {
-            // Defended now — paramilitary takes casualties and retreats (dissolves)
+        // Defended — paramilitary takes heavy casualties and retreats
+        if (isDefendedAgainst(defendedOsids, state, targetOsid, f.faction)) {
             const casualties = Math.ceil(f.personnel! * PARAMILITARY_CASUALTY_RATE * 3);
             if (state.casualty_ledger) {
-                recordBattleCasualties(state.casualty_ledger, f.faction, fid, {
-                    killed: Math.ceil(casualties * 0.5),
-                    wounded: Math.ceil(casualties * 0.3),
-                    missing_captured: Math.max(0, casualties - Math.ceil(casualties * 0.5) - Math.ceil(casualties * 0.3))
-                });
+                recordBattleCasualties(state.casualty_ledger, f.faction, fid, splitCasualties(casualties));
             }
             dissolveParamilitary(state, fid, report);
             continue;
@@ -289,7 +275,6 @@ export function advanceParamilitaries(
         const pc = state.political_controllers ??= {};
         pc[targetOsid] = f.faction;
 
-        // Record control event for GUI
         (state.control_events ??= []).push({
             turn,
             settlement_id: targetOsid,
@@ -301,16 +286,11 @@ export function advanceParamilitaries(
         // Paramilitary casualties (suffered)
         const selfCas = Math.ceil((f.personnel ?? PARAMILITARY_UNIT_SIZE) * PARAMILITARY_CASUALTY_RATE);
         if (state.casualty_ledger) {
-            recordBattleCasualties(state.casualty_ledger, f.faction, fid, {
-                killed: Math.ceil(selfCas * 0.3),
-                wounded: Math.ceil(selfCas * 0.4),
-                missing_captured: Math.max(0, selfCas - Math.ceil(selfCas * 0.3) - Math.ceil(selfCas * 0.4))
-            });
+            recordBattleCasualties(state.casualty_ledger, f.faction, fid, splitCasualties(selfCas));
         }
 
-        // Civilian casualties inflicted (war crimes — recorded against the target's civilian population)
-        // This uses the civilian_casualties system on state
-        const civCas = Math.ceil(5000 * PARAMILITARY_CIVILIAN_CASUALTY_RATE); // ~100 per sweep
+        // Civilian casualties inflicted (war crimes)
+        const civCas = Math.ceil(PARAMILITARY_TARGET_AVG_POPULATION * PARAMILITARY_CIVILIAN_CASUALTY_RATE);
         if (state.civilian_casualties && currentController) {
             const civFaction = state.civilian_casualties[currentController];
             if (civFaction) {
@@ -326,7 +306,6 @@ export function advanceParamilitaries(
             casualties_suffered: selfCas
         });
 
-        // Dissolve after capture
         dissolveParamilitary(state, fid, report);
     }
 
@@ -335,8 +314,7 @@ export function advanceParamilitaries(
 
 /** Remove a paramilitary formation from state. */
 function dissolveParamilitary(state: GameState, fid: FormationId, report: ParamilitarySweepReport): void {
-    const formations = state.formations ?? {};
-    const f = formations[fid];
+    const f = (state.formations ?? {})[fid];
     if (f) {
         f.status = 'inactive';
         f.lifecycle_status = 'disbanded';
@@ -353,13 +331,7 @@ function dissolveParamilitary(state: GameState, fid: FormationId, report: Parami
  * Called after player UI submits choices.
  */
 export function resolvePlayerParamilitaryDecisions(state: GameState): ParamilitarySweepReport {
-    const report: ParamilitarySweepReport = {
-        spawned: [],
-        captured: [],
-        dissolved: [],
-        pending_player_requests: 0
-    };
-
+    const report = emptyReport();
     const requests = state.pending_paramilitary_requests ?? [];
     if (requests.length === 0) return report;
 
@@ -371,12 +343,8 @@ export function resolvePlayerParamilitaryDecisions(state: GameState): Paramilita
             spawnParamilitary(state, req.faction, req.target_osid, turn, spawnIndex, report);
             spawnIndex++;
         }
-        // 'deny' and 'regular' — no paramilitary spawned
-        // 'regular' could flag for corps priority (future enhancement)
     }
 
-    // Clear pending
     state.pending_paramilitary_requests = [];
-
     return report;
 }

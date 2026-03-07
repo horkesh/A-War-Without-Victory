@@ -31,8 +31,8 @@
 |--------|---------|-------------------|
 | [BACKLOG_BRIGADE_MILITIA_MILITARY.md](backlog/BACKLOG_BRIGADE_MILITIA_MILITARY.md) | Brigade realism/military fronts, militia/brigade rework plan, formation vs OOB comparison, RBiH–HRHB alliance redesign (core implemented). Originals (4) → _old/40_reports/backlog/. | Post-MVP / research / design. |
 | [RBIH_HRHB_ALLIANCE_BREAKDOWN_AND_WAR_PLAN.md](../30_planning/RBIH_HRHB_ALLIANCE_BREAKDOWN_AND_WAR_PLAN.md) | RBiH–HRHB war-within-a-war: alliance-aware targeting, endogenous degradation, Phase 0 handoff. Phase A complete; Phases B/C not started. | Planning; Gameplay Programmer / Game Designer. |
-| **Paramilitary / rear-cleanup units** | Convene: [PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18.md](convenes/PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18.md). | Design: Game Designer; Formation-expert. |
-| **Per-army flavor** | Same convene as above. | Design: Game Designer; Formation-expert for OOB/stats. |
+| **Paramilitary / rear-cleanup units** | **Implemented 2026-03-07.** Core system live: autonomous pocket detection, faction-differentiated spawn, 2-turn march, capture + dissolve, casualty recording, player policy. See [20260307_PARAMILITARY_SWEEP_FEATURE.md](implemented/20260307_PARAMILITARY_SWEEP_FEATURE.md). Remaining: consequence scaling (IVP/legitimacy), player UI batch panel, per-army named units. Original convene: [PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18.md](convenes/PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18.md). | Done (core); Design for flavor/consequences. |
+| **Per-army flavor** | Same convene as above. Paramilitary core implemented; named units (Arkan's Tigers, HOS, etc.) remain backlog. | Design: Game Designer; Formation-expert for OOB/stats. |
 
 ---
 
