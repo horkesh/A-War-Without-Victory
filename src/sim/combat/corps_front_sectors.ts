@@ -110,28 +110,187 @@ function buildFactionSectors(
         }
     }
 
-    // Pre-compute friendly OSIDs once for Steps 5 and 7 (no cross-pocket transfers)
+    // Pre-compute friendly OSIDs once for territory and brigade assignment.
     const friendlyOsids = new Set<string>();
     for (const osid of adjacency.keys()) {
         const ctrl = getPoliticalControllerOSID(state, osid, reverseMap ?? undefined);
         if (ctrl === faction) friendlyOsids.add(osid);
     }
+    // Also include political_controllers entries not in adjacency graph (interior OSIDs).
+    const pc = state.political_controllers ?? {};
+    for (const [osid, ctrl] of Object.entries(pc)) {
+        if (ctrl === faction) friendlyOsids.add(osid);
+    }
 
-    // Step 5: Own-corps fallback for orphaned brigades
-    // Brigades in corps without sectors or not at front OSIDs get assigned
-    // to the nearest sector of their own corps via friendly-territory BFS.
-    // General staff units are exempt — they're army-level reserves.
-    assignOrphanedBrigadesToFaction(sectors, faction, formations, adjacency, friendlyOsids);
+    // Step 5: Territory Voronoi — BFS from each sector's front-edge OSIDs
+    // backward through friendly territory. Each friendly OSID is assigned to
+    // the nearest sector (by hop count). Creates contiguous sector territories.
+    assignTerritoryVoronoi(sectors, adjacency, friendlyOsids);
 
-    // Step 6: Redistribute excess reserves across faction sectors
-    redistributeExcessReserves(sectors);
+    // Step 6: Classify brigades by territory membership.
+    // Brigades in a sector's territory_osids → assigned.
+    // Brigades in friendly territory but not in any sector → reserve of nearest sector.
+    // General staff units are exempt.
+    classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids);
 
-    // Step 7: Ensure every sector has at least one assigned brigade
-    // Only transfer brigades reachable through friendly territory (no cross-pocket transfers).
+    // Step 7: Ensure every sector with front edges has at least one assigned brigade.
+    // Transfer from adjacent surplus sectors only (geographic contiguity enforced).
     ensureMinimumSectorCoverage(sectors, formations, adjacency, friendlyOsids);
 
     sectors.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
     return sectors;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Step 5: Territory Voronoi — BFS from Front Edges into Depth
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Multi-source BFS from each sector's front-edge friendly_osids backward
+ * through friendly territory. Each friendly OSID is assigned to the nearest
+ * sector (by hop count). First-claim wins; sectors processed in sorted order.
+ *
+ * Sets each sector's `territory_osids` to the sorted list of claimed OSIDs.
+ * Deterministic: sorted sector order, sorted neighbor iteration.
+ */
+function assignTerritoryVoronoi(
+    sectors: CorpsFrontSector[],
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>
+): void {
+    if (sectors.length === 0) return;
+
+    // Map from OSID → sector index (first-claim wins)
+    const claimed = new Map<string, number>();
+
+    // Collect seeds: each sector's front-edge friendly OSIDs
+    type BfsEntry = { osid: string; sectorIdx: number };
+    const queue: BfsEntry[] = [];
+
+    // Sort sectors deterministically for seed order
+    const sortedIndices = sectors.map((_, i) => i);
+    sortedIndices.sort((a, b) => strictCompare(sectors[a]!.sector_id, sectors[b]!.sector_id));
+
+    for (const si of sortedIndices) {
+        const sector = sectors[si]!;
+        // Seed from all friendly_osids across sub-segments (front-edge OSIDs)
+        const seedOsids = new Set<string>();
+        for (const ss of sector.sub_segments) {
+            for (const o of ss.friendly_osids) seedOsids.add(o);
+        }
+        const sortedSeeds = [...seedOsids].sort(strictCompare);
+        for (const osid of sortedSeeds) {
+            if (claimed.has(osid)) continue; // Another sector already claimed it
+            if (!friendlyOsids.has(osid)) continue;
+            claimed.set(osid, si);
+            queue.push({ osid, sectorIdx: si });
+        }
+    }
+
+    // Multi-source BFS through friendly territory
+    let head = 0;
+    while (head < queue.length) {
+        const { osid, sectorIdx } = queue[head++]!;
+        const neighbors = (adjacency.get(osid) ?? []).slice().sort(strictCompare);
+        for (const n of neighbors) {
+            if (claimed.has(n)) continue;
+            if (!friendlyOsids.has(n)) continue;
+            claimed.set(n, sectorIdx);
+            queue.push({ osid: n, sectorIdx });
+        }
+    }
+
+    // Assign territory_osids to each sector
+    const perSector: string[][] = sectors.map(() => []);
+    for (const [osid, sectorIdx] of claimed) {
+        perSector[sectorIdx]!.push(osid);
+    }
+    for (let i = 0; i < sectors.length; i++) {
+        sectors[i]!.territory_osids = perSector[i]!.sort(strictCompare);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Step 6: Classify Brigades by Territory Membership
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Classify brigades into sectors based on territory membership.
+ *
+ * - Brigade at an OSID in a sector's territory_osids → assigned to that sector.
+ * - Brigade in friendly territory but not in any sector's territory → reserve
+ *   of the nearest sector (BFS through friendly territory).
+ * - General staff units are exempt.
+ *
+ * Clears existing assigned/reserve lists and rebuilds from scratch.
+ * Deterministic: sorted iteration via strictCompare.
+ */
+function classifyBrigadesByTerritory(
+    sectors: CorpsFrontSector[],
+    faction: FactionId,
+    formations: Record<FormationId, FormationState>,
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>
+): void {
+    if (sectors.length === 0) return;
+
+    // Clear existing assignments (will be rebuilt)
+    for (const s of sectors) {
+        s.assigned_brigade_ids = [];
+        s.reserve_brigade_ids = [];
+    }
+
+    // Build reverse map: OSID → sector index (from territory_osids)
+    const osidToSectorIdx = new Map<string, number>();
+    for (let i = 0; i < sectors.length; i++) {
+        for (const osid of sectors[i]!.territory_osids) {
+            if (!osidToSectorIdx.has(osid)) osidToSectorIdx.set(osid, i);
+        }
+    }
+
+    // Classify each brigade
+    const sortedFormIds = Object.keys(formations).sort(strictCompare);
+    for (const fid of sortedFormIds) {
+        const f = formations[fid];
+        if (!f || f.faction !== faction || f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!f.location_osid) continue;
+
+        const fCorpsId = getFormationCorpsId(f);
+        if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId)) continue;
+
+        // Check if brigade is in any sector's territory
+        const sectorIdx = osidToSectorIdx.get(f.location_osid);
+        if (sectorIdx !== undefined) {
+            sectors[sectorIdx]!.assigned_brigade_ids.push(fid);
+            continue;
+        }
+
+        // Not in any territory — find nearest sector via BFS
+        if (friendlyOsids.has(f.location_osid)) {
+            const nearestIdx = bfsToNearestSector(
+                f.location_osid, osidToSectorIdx, adjacency, friendlyOsids
+            );
+            if (nearestIdx !== null) {
+                sectors[nearestIdx]!.reserve_brigade_ids.push(fid);
+            }
+        }
+    }
+
+    // Sort for determinism
+    for (const s of sectors) {
+        s.assigned_brigade_ids.sort(strictCompare);
+        s.reserve_brigade_ids.sort(strictCompare);
+    }
+
+    // Update density and defensive power
+    for (const s of sectors) {
+        s.density = s.length_edges > 0
+            ? s.assigned_brigade_ids.length / s.length_edges : 0;
+        s.defensive_power = computeLocalFrontDefensivePower(
+            formations, s.assigned_brigade_ids, s.length_edges
+        );
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -666,13 +825,9 @@ function buildMultiSectorsForCorps(
     // Step 4b: Split non-contiguous sectors (friendly OSIDs must form connected components via OSID adjacency)
     const contiguousSectors = splitNonContiguousSectors(finalSectors, adjacency);
 
-    // Step 5 (Phase 1B + 1C): Assign interior brigades as reserves
-    assignInteriorBrigadesToSectors(
-        contiguousSectors, corpsId, faction, formations, adjacency, reverseMap, state
-    );
-
-    // Step 6: Redistribute excess reserves (proportional cap per sector)
-    redistributeExcessReserves(contiguousSectors);
+    // Brigade assignment (territory_osids, assigned/reserve classification) is now
+    // handled faction-wide by assignTerritoryVoronoi + classifyBrigadesByTerritory
+    // in buildFactionSectors Steps 5-6.
 
     return contiguousSectors;
 }
@@ -936,80 +1091,13 @@ function buildSectorFromSubSegments(
         edge_ids: sortedEdgeIds,
         sub_segments: subSegments,
         length_edges: totalEdges,
+        territory_osids: [],
         assigned_brigade_ids: assignedBrigadeIds,
         reserve_brigade_ids: [],
         density,
         threat_ratio: threatRatio,
         defensive_power: defensivePower,
     };
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Phase 1B + 1C: Interior Brigade Assignment → Reserves
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Assign brigades not at front-adjacent OSIDs to their nearest sector as reserves.
- * BFS from each unassigned brigade's location_osid through friendly territory
- * toward the nearest sector friendly_osid.
- */
-function assignInteriorBrigadesToSectors(
-    sectors: CorpsFrontSector[],
-    corpsId: FormationId,
-    faction: FactionId,
-    formations: Record<FormationId, FormationState>,
-    adjacency: Map<Osid, Osid[]>,
-    reverseMap: Map<string, string[]> | null,
-    state: GameState
-): void {
-    if (sectors.length === 0) return;
-
-    // Collect all already-assigned brigades
-    const assigned = new Set<FormationId>();
-    for (const s of sectors) {
-        for (const bid of s.assigned_brigade_ids) assigned.add(bid);
-    }
-
-    // Build reverse map: friendly_osid → sector index
-    const osidToSectorIdx = new Map<string, number>();
-    for (let i = 0; i < sectors.length; i++) {
-        const s = sectors[i]!;
-        for (const ss of s.sub_segments) {
-            for (const osid of ss.friendly_osids) {
-                if (!osidToSectorIdx.has(osid)) osidToSectorIdx.set(osid, i);
-            }
-        }
-    }
-
-    // Pre-compute friendly OSIDs for BFS boundary
-    const friendlyOsids = new Set<string>();
-    for (const osid of adjacency.keys()) {
-        const ctrl = getPoliticalControllerOSID(state, osid, reverseMap ?? undefined);
-        if (ctrl === faction) friendlyOsids.add(osid);
-    }
-
-    // Find unassigned brigades in this corps and BFS-assign to nearest sector
-    const sortedFormIds = Object.keys(formations).sort(strictCompare);
-    for (const fid of sortedFormIds) {
-        const f = formations[fid];
-        if (!f || f.faction !== faction || f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-        if (getFormationCorpsId(f) !== corpsId || !f.location_osid) continue;
-        if (assigned.has(fid)) continue;
-
-        const sectorIdx = bfsToNearestSector(
-            f.location_osid, osidToSectorIdx, adjacency, friendlyOsids
-        );
-        if (sectorIdx !== null) {
-            sectors[sectorIdx]!.reserve_brigade_ids.push(fid);
-            assigned.add(fid);
-        }
-    }
-
-    // Sort reserve lists for determinism
-    for (const s of sectors) {
-        s.reserve_brigade_ids.sort(strictCompare);
-    }
 }
 
 /**
@@ -1048,73 +1136,6 @@ function bfsToNearestSector(
     }
 
     return null; // Unreachable (enclave with no front edges)
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Reserve Redistribution (Proportional Cap)
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Redistribute excess reserves from overfilled sectors to underfilled ones.
- * Each sector's reserve cap = max(1, ceil(length_edges × RESERVE_PER_EDGE_CAP)).
- * Overflow brigades move to the least-filled sector. If all sectors are full,
- * the brigade stays in its original sector (never dropped).
- */
-function redistributeExcessReserves(sectors: CorpsFrontSector[]): void {
-    if (sectors.length <= 1) return;
-
-    // Group by corps — only redistribute within the same corps
-    const sectorsByCorps = new Map<string, { sector: CorpsFrontSector; idx: number; cap: number }[]>();
-    for (let i = 0; i < sectors.length; i++) {
-        const s = sectors[i]!;
-        const cap = Math.max(1, Math.ceil(s.length_edges * RESERVE_PER_EDGE_CAP));
-        const list = sectorsByCorps.get(s.corps_id) ?? [];
-        list.push({ sector: s, idx: i, cap });
-        sectorsByCorps.set(s.corps_id, list);
-    }
-
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
-        if (corpsSectors.length <= 1) continue;
-
-        // Collect overflow brigades within this corps
-        const overflow: FormationId[] = [];
-        for (const { sector, cap } of corpsSectors) {
-            if (sector.reserve_brigade_ids.length > cap) {
-                const excess = sector.reserve_brigade_ids.splice(cap);
-                overflow.push(...excess);
-            }
-        }
-        if (overflow.length === 0) continue;
-
-        overflow.sort(strictCompare);
-
-        // Assign each overflow to the least-filled sector within the same corps.
-        // Only target sectors that already have brigades (assigned or reserve) —
-        // empty sectors are likely disconnected pockets with no local forces.
-        for (const bid of overflow) {
-            let bestEntry: typeof corpsSectors[0] | null = null;
-            let bestRatio = Infinity;
-            for (const entry of corpsSectors) {
-                const hasForces = entry.sector.assigned_brigade_ids.length > 0 || entry.sector.reserve_brigade_ids.length > 0;
-                if (!hasForces) continue; // Skip empty (likely disconnected) sectors
-                const ratio = entry.sector.reserve_brigade_ids.length / entry.cap;
-                if (ratio < bestRatio) {
-                    bestRatio = ratio;
-                    bestEntry = entry;
-                }
-            }
-            if (bestEntry) {
-                bestEntry.sector.reserve_brigade_ids.push(bid);
-            }
-            // If no eligible sector found, brigade is dropped from sector assignment
-            // (stays unassigned — rear-area reserve with no front responsibility)
-        }
-    }
-
-    // Re-sort reserve lists for determinism
-    for (const s of sectors) {
-        s.reserve_brigade_ids.sort(strictCompare);
-    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1248,79 +1269,6 @@ const EXEMPT_CORPS_IDS = new Set([
     'hvo_central_bosnia', // Reserved for Bosniak-Croat conflict
 ]);
 
-/**
- * Assign brigades orphaned from corps-level assignment (corps without sectors,
- * BFS-unreachable pockets) to the nearest sector of their OWN corps via
- * friendly-territory BFS. General staff units are exempt.
- *
- * Brigades whose corps has no sectors, or that cannot reach any own-corps sector
- * through friendly territory, remain unassigned — they are genuine rear-area
- * reserves. They still participate in local defense via local_front_defense.ts.
- */
-function assignOrphanedBrigadesToFaction(
-    sectors: CorpsFrontSector[],
-    faction: FactionId,
-    formations: Record<FormationId, FormationState>,
-    adjacency: Map<Osid, Osid[]>,
-    friendlyOsids: Set<string>
-): void {
-    if (sectors.length === 0) return;
-
-    // Collect all assigned brigades
-    const assigned = new Set<FormationId>();
-    for (const s of sectors) {
-        for (const bid of s.assigned_brigade_ids) assigned.add(bid);
-        for (const bid of s.reserve_brigade_ids) assigned.add(bid);
-    }
-
-    // Build per-corps reverse maps: OSID → sector index
-    const corpsOsidMaps = new Map<string, Map<string, number>>();
-    for (let i = 0; i < sectors.length; i++) {
-        const s = sectors[i]!;
-        let map = corpsOsidMaps.get(s.corps_id);
-        if (!map) {
-            map = new Map<string, number>();
-            corpsOsidMaps.set(s.corps_id, map);
-        }
-        for (const ss of s.sub_segments) {
-            for (const osid of ss.friendly_osids) {
-                if (!map.has(osid)) map.set(osid, i);
-            }
-        }
-    }
-
-    // Find orphaned brigades (excluding general staff units)
-    const sortedFormIds = Object.keys(formations).sort(strictCompare);
-    for (const fid of sortedFormIds) {
-        const f = formations[fid];
-        if (!f || f.faction !== faction || f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-        if (!f.location_osid) continue;
-        if (assigned.has(fid)) continue;
-
-        const fCorpsId = getFormationCorpsId(f);
-        if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId)) continue; // Exempt
-
-        // Only search for sectors belonging to this brigade's own corps
-        const ownCorpsMap = fCorpsId ? corpsOsidMaps.get(fCorpsId) : undefined;
-        if (!ownCorpsMap || ownCorpsMap.size === 0) continue; // Corps has no sectors — stay unassigned
-
-        // Friendly-territory BFS to nearest own-corps sector
-        const sectorIdx = bfsToNearestSector(
-            f.location_osid, ownCorpsMap, adjacency, friendlyOsids
-        );
-        if (sectorIdx !== null) {
-            sectors[sectorIdx]!.reserve_brigade_ids.push(fid);
-            assigned.add(fid);
-        }
-    }
-
-    // Re-sort reserve lists for determinism
-    for (const s of sectors) {
-        s.reserve_brigade_ids.sort(strictCompare);
-    }
-}
-
 // ═══════════════════════════════════════════════════════════════════════════
 // Brigade Deduplication
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1444,8 +1392,11 @@ export function splitNonContiguousSectors(
             };
 
             // Brigades: all go to the largest component; others get empty lists
-            // (caller re-runs assignInteriorBrigadesToSectors which will re-populate)
+            // (classifyBrigadesByTerritory will re-populate after territory Voronoi)
             const isLargest = ci === largestCompIdx;
+            // Split territory_osids by component membership
+            const compTerritoryOsids = sector.territory_osids.filter(o => comp.has(o));
+
             const newSector: CorpsFrontSector = {
                 sector_id: `sector:${sector.corps_id}:${result.length}`,
                 corps_id: sector.corps_id,
@@ -1454,6 +1405,7 @@ export function splitNonContiguousSectors(
                 edge_ids: compEdgeIds,
                 sub_segments: [subSeg],
                 length_edges: compEdgeIds.length,
+                territory_osids: compTerritoryOsids.sort(strictCompare),
                 assigned_brigade_ids: isLargest ? [...sector.assigned_brigade_ids] : [],
                 reserve_brigade_ids: isLargest ? [...sector.reserve_brigade_ids] : [],
                 density: 0,

@@ -90,7 +90,7 @@
 8. **[2026-02-25] sidToMun map preservation**
    Do instead: Preserve `canonicalSidToMun` in scenario_runner.ts. Corruption prevented ALL 217 mandatory brigades from spawning.
 9. **[2026-03-06] Brigade discipline: hard block + combat fatigue (n159 audit rewrite)**
-   Do instead: `bot_brigade_ai_osid.ts` hard block — brigades ONLY attack `effectiveDirective.offensive_targets`, sole exception: counter-attacks. Frontier pressure mechanic REMOVED. `RESERVE_PER_EDGE_CAP=0.07` (was 0.5) → ~1 reserve per sector. Combat fatigue: attacker +2, defender +1 per battle (cap `FATIGUE_MAX=30` from `formation_constants.ts`); recovery -1 every 2 turns, +0.5/turn frontline duty via `applyFatigueRecovery()`. Fatigue degrades combat power: `getFatigueMult()` in `combat_math.ts` — attackers ×0.6-1.0, defenders ×0.75-1.0 at max fatigue.
+   Do instead: `bot_brigade_ai_osid.ts` hard block — brigades ONLY attack `effectiveDirective.offensive_targets`, sole exception: counter-attacks. Frontier pressure mechanic REMOVED. Combat fatigue: attacker +2, defender +1 per battle (cap `FATIGUE_MAX=30` from `formation_constants.ts`); recovery -1 every 2 turns, +0.5/turn frontline duty via `applyFatigueRecovery()`. Fatigue degrades combat power: `getFatigueMult()` in `combat_math.ts` — attackers ×0.6-1.0, defenders ×0.75-1.0 at max fatigue.
 10. **[2026-03-04] Vienna Declaration / Local Truces (RS-HRHB non-aggression)**
     Do instead: `src/sim/local_truces.ts` — fires at week 4; sets `state.vienna_declaration_turn`. Bot filters RS↔HRHB truce-partner OSIDs from `offensive_targets`, except {brod, derventa, odzak, bosanski_samac, orasje, jajce}. Player truce-break: `check-truce-break` step; sets `state.truce_broken_turn[faction]`, opponent gets +0.25 aggression for 6 turns.
 
@@ -112,6 +112,9 @@
 8. **[2026-03-05] April 1992 startup: patch both OOB entry + recruitment engine; home_osid must be friendly**
    Do instead: Patch both `src/scenario/oob_early_war_entry.ts` and `src/sim/recruitment_engine.ts` — legacy OOB path alone won't survive real scenario startup. Choose brigade starting OSIDs that are already friendly-controlled; enemy-held `home_osid` causes spread/re-homing and the intended opening operation won't launch from there.
 
+9. **[2026-03-07] Phase E municipality support stays asymmetric and pool-constrained**
+   Do instead: Use municipality_support_orders as one shared state surface, but keep faction effects distinct: RBiH local mobilization (weapons_shipment), RS reinforcement-rate boost (staff_priority), HRHB reinforcement cohesion bonus (croatian_support_package). One target, one turn, no global manpower rewrite.
+
 ## Sectors & Operations
 1. **[2026-03-06] Proof lane + eligible-attacker boundary**
    Do instead: Before wide calibration work, run `tests/scenario_vrs_operation_proof.test.ts` / `data/scenarios/apr1992_vrs_operation_proof_4w.json` to prove one VRS opening op can attack, battle, and advance. In combat-causality, treat `execution_without_eligible_attackers` as a separate root-cause boundary from `execution_without_attack_orders`.
@@ -123,8 +126,8 @@
    Do instead: Use `getFormationCorpsId(f)` from `corps_sector_partition.ts`. Brigade corps stored in tags (`corps:vrs_1st_krajina`), not `f.corps_id`. Applies everywhere — sectors, directives, and operations.
 5. **[2026-03-01] Sector exempt corps**
    Do instead: arbih_general_staff, vrs_main_staff, hvo_general_staff (army reserves) + hvo_central_bosnia (Bosniak-Croat conflict) — don't assign their brigades to front sectors.
-6. **[2026-03-07] Sector pipeline (updated — no cross-pocket transfers)**
-   Do instead: `buildMultiSectorsForCorps()`: findSubSegments → mergeUndersized → splitOversized → buildSectors → Phase1E split → dedup → **splitNonContiguousSectors** (BFS friendly OSIDs) → assignInterior → **assignOrphanedBrigadesToFaction** (own-corps + friendly-territory BFS only) → **redistributeExcessReserves** (per-corps, skip empty sectors) → **ensureMinimumSectorCoverage** (friendly-territory BFS, connectivity-checked reserve promotion). **Invariants**: no cross-pocket transfers; orphans to own-corps sectors only; reserves redistributed within same corps only.
+6. **[2026-03-07] Sector pipeline — Territory Voronoi (REWRITTEN)**
+   Do instead: `buildMultiSectorsForCorps()`: findSubSegments → mergeUndersized → splitOversized → buildSectors → Phase1E split → dedup → **splitNonContiguousSectors**. Then faction-wide in `buildFactionSectors()`: Step 5 **assignTerritoryVoronoi** (multi-source BFS from front-edge friendly OSIDs backward through friendly territory → contiguous `territory_osids` per sector) → Step 6 **classifyBrigadesByTerritory** (in territory → assigned; in friendly but outside all sectors → reserve of nearest) → Step 7 **ensureMinimumSectorCoverage** (friendly-territory BFS, connectivity-checked). Old functions REMOVED: `assignInteriorBrigadesToSectors`, `redistributeExcessReserves`, `assignOrphanedBrigadesToFaction`. `RESERVE_PER_EDGE_CAP` constant kept but unused at runtime.
 7. **[2026-03-07] Sector intel replaces recon_intelligence (DELETED) — fog LIVE**
    Do instead: Use `sector_intel.ts` / `sector_intel_constants.ts`. `derive-sector-intel` pipeline step. Confidence model, recon-by-force, bot target weighting. GUI fog-of-war is LIVE: `GameStateAdapter` derives `fogOfWar` from `sector_intel` + `corps_front_sectors`; `buildFogOfWarGeoJSON` renders it; `MapContainer` toggles via `fogVisible`. `ReconIntelligenceView` + `reconIntelligence` field fully removed. `recon_intelligence.ts` is DELETED — do not reference it.
 8. **[2026-03-05] Opening operations: explicit rosters + named ops own brigades**

@@ -65,6 +65,7 @@ function makeSector(
             }
         ],
         length_edges: lengthEdges,
+        territory_osids: friendlyOsids,
         assigned_brigade_ids: assignedBrigadeIds,
         reserve_brigade_ids: [],
         density: lengthEdges > 0 ? assignedBrigadeIds.length / lengthEdges : 0,

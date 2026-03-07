@@ -525,6 +525,18 @@ export interface PendingConvoyDecision {
     decision?: 'allow' | 'block' | 'divert';
 }
 
+export type MunicipalitySupportType =
+    | 'weapons_shipment'
+    | 'staff_priority'
+    | 'croatian_support_package';
+
+export interface MunicipalitySupportOrder {
+    faction: FactionId;
+    mun_id: MunicipalityId;
+    type: MunicipalitySupportType;
+    staged_turn: number;
+}
+
 export interface EmbargoProfile {
     heavy_equipment_access: number; // 0..1
     ammunition_resupply_rate: number; // 0..1
@@ -1462,6 +1474,8 @@ export interface GameState {
     pending_convoy_decisions?: PendingConvoyDecision[];
     /** Player-entered smuggling split by enclave id. */
     smuggling_allocation?: Record<string, { type: 'ammo' | 'food'; amount: number }>;
+    /** One-turn municipality-targeted local support orders for asymmetric Phase E player agency. */
+    municipality_support_orders?: Partial<Record<FactionId, MunicipalitySupportOrder>>;
     /** One-time Sarajevo tunnel unlock. */
     sarajevo_tunnel_operational?: boolean;
     /** Sector ids with OPSEC active. */
@@ -1518,9 +1532,11 @@ export interface CorpsFrontSector {
     sub_segments: CorpsFrontSubSegment[];
     /** Total edge count (proxy for front width). */
     length_edges: number;
-    /** Brigade IDs assigned to this sector. */
+    /** All friendly OSIDs in this sector's territory (front edges + depth via Voronoi BFS). */
+    territory_osids: string[];
+    /** Brigade IDs assigned to this sector (located in territory_osids). */
     assigned_brigade_ids: FormationId[];
-    /** Brigade IDs designated reserve for this sector. */
+    /** Brigade IDs designated reserve for this sector (deep interior, not in any sector territory). */
     reserve_brigade_ids: FormationId[];
     /** Density: assigned_brigades / length_edges. */
     density: number;

@@ -23,6 +23,7 @@ function makeSector(
         edge_ids: edges,
         sub_segments: [ss],
         length_edges: edges.length,
+        territory_osids: friendly,
         assigned_brigade_ids: assigned,
         reserve_brigade_ids: reserves,
         density: edges.length > 0 ? assigned.length / edges.length : 0,

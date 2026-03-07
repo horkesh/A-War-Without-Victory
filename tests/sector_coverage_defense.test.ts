@@ -98,6 +98,7 @@ function makeSector(
         edge_ids: subSegments.flatMap(s => s.edge_ids),
         sub_segments: subSegments,
         length_edges: lengthEdges,
+        territory_osids: subSegments.flatMap(s => s.friendly_osids),
         assigned_brigade_ids: brigadeIds as any[],
         reserve_brigade_ids: [],
         density: brigadeIds.length / Math.max(1, lengthEdges),

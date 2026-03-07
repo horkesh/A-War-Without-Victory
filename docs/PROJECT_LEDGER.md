@@ -7,7 +7,38 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-07] Territory Voronoi — Sector System Rewrite
+
+### Summary
+- **Problem:** Sectors had zero geographic depth — only front-edge OSIDs. Brigades behind the front were classified as "reserves" even when inside sector territory, causing pathological 1-active-9-reserve ratios. Old `RESERVE_PER_EDGE_CAP=0.07` was a band-aid that capped reserves per sector but didn't fix the root cause.
+- **Solution:** Territory Voronoi (`assignTerritoryVoronoi`) — multi-source BFS from each sector's front-edge friendly OSIDs backward through friendly territory creates contiguous `territory_osids` per sector. `classifyBrigadesByTerritory` then assigns brigades: in territory → assigned, in friendly territory but outside all sectors → reserve of nearest.
+- **Results (n253):** 745 territory OSIDs claimed. 176 assigned brigades (was 153). Zero pathological reserve ratios (was 9:1). 97-98% brigade coverage per faction.
+
+### Changes
+- `src/state/game_state.ts`: Added `territory_osids: string[]` to `CorpsFrontSector` interface
+- `src/sim/combat/corps_front_sectors.ts`: New `assignTerritoryVoronoi()` + `classifyBrigadesByTerritory()`. Removed dead code: `assignInteriorBrigadesToSectors()`, `redistributeExcessReserves()`, `assignOrphanedBrigadesToFaction()` (~130 lines)
+- `src/sim/combat/sector_rearrangement.ts`: `mergeSectorInto()` merges `territory_osids`; pocket containment sectors get territory
+- 8 test files + `tests/test_factories.ts` updated with `territory_osids` field
+- Canon propagated: context.md, Systems_Manual, War_Specification, PIPELINE_ENTRYPOINTS, REPO_MAP, napkin, MEMORY.md, corps_sectors.md
+
+## [2026-03-07] GUI Polish: Expert Recommendations Implemented
+
+### Summary
+- **Subtle Always-On Sector Boundaries**: Implemented thin, dashed demarcation lines (`rgba(0,0,0,0.4)`, 1px, `[4, 2]` dash) that provide persistent organizational context without visual clutter.
+- **Sector Hover Previews**: 
+    - Added `hoveredSectorId` to `GameStore`.
+    - Implemented `onSectorHover` callback in `useMapInteractions.ts`.
+    - Map-hovering any OSID within a sector triggers a whole-sector highlight/glow.
+    - Sidebar-hovering a brigade row triggers the same sector highlight on the map.
+- **Institutional Constraints (ORBAT)**:
+    - `BrigadeRow.tsx` now surfaces **Supply** (larger colored dots) and **Fatigue** (color-coded digits: yellow >= 30, red >= 50) more prominently.
+    - Added contextual tooltips to ORBAT rows for exact metrics.
+- **Stabilized Map Interactions**: Fixed a critical interaction-engine bug in `useMapInteractions.ts` caused by faulty edit logic.
+
+---
+
 ## [2026-03-07] Phase I/II terminology purge + consolidation flip deletion
+
 
 ### Summary
 - **Removed all Phase I/Phase II terminology** from entire codebase (src/ + tests/) — canon v0.6 has only Peace and War phases
@@ -11245,3 +11276,32 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 ### Notes
 - Phase E remains deferred exactly as the source implementation plan specifies.
 - Documentation now reflects the verified closure state from runs `n248` and `n249`: `invalid_operation_count = 0`, `valid_for_combat_calibration = true`, benchmark suite `6/6`, remaining drift limited to `srebrenica` and `op:brcko:brka_2`.
+
+## [2026-03-07] Phase E implementation: asymmetric municipality support
+
+### Summary
+- Implemented the deferred Phase E player-agency mechanic after the A-H closure gate was already green.
+- Kept the mechanic asymmetric and local so it adds placement agency without changing global manpower ceilings or introducing a shared ahistorical resource fiction across all factions.
+- Verified the new slice with targeted tests, a green 40w regression (`n252`), and an informational 52w regression (`n254`).
+
+### Changes
+- Added `municipality_support_orders` to `src/state/game_state.ts` and helper logic in `src/sim/combat/municipality_support.ts`.
+- Implemented faction-specific effects:
+  - `RBiH` `weapons_shipment` -> one-turn local mobilization bonus in `src/sim/combat/ongoing_mobilization.ts`
+  - `RS` `staff_priority` -> one-turn local reinforcement-rate bonus in `src/sim/formation_spawn.ts`
+  - `HRHB` `croatian_support_package` -> one-turn local reinforcement cohesion bonus in `src/sim/formation_spawn.ts`
+- Added staging IPC in `src/desktop/electron-main.cjs`, `src/desktop/preload.cjs`, and `src/ui/map/desktop/useIPC.ts`.
+- Surfaced current-turn support state in `src/ui/map/components/SelectionPanel.tsx`, `src/ui/map/components/SituationTab.tsx`, `src/ui/map/data/GameStateAdapter.ts`, and `src/ui/map/data/types.ts`.
+- Added regression coverage in `tests/ongoing_mobilization.test.ts`, `tests/phase_e_municipality_support.test.ts`, `tests/ui_map_game_state_adapter.test.ts`, and `vitest.config.ts`.
+
+### Verification
+- `npm run test:vitest -- tests/ongoing_mobilization.test.ts tests/phase_e_municipality_support.test.ts`
+- `npx tsx --test tests/ui_map_game_state_adapter.test.ts`
+- `npm run sim:scenario:run:40w`
+- `npm run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_52w.json --unique --map --out runs`
+
+### Regression note
+- 40w run [`apr1992_definitive_40w__024b4776f64c7a22__w40_n252`](/F:/A-War-Without-Victory/runs/apr1992_definitive_40w__024b4776f64c7a22__w40_n252) finished with final hash `79a01c403c82038c`, `valid_for_combat_calibration = true`, `invalid_operation_count = 0`, and benchmark suite `6/6`.
+- Informational 52w run [`apr1992_definitive_52w__63ff6bc6328b5629__w52_n254`](/F:/A-War-Without-Victory/runs/apr1992_definitive_52w__63ff6bc6328b5629__w52_n254) also preserved `valid_for_combat_calibration = true` with `invalid_operation_count = 0`, but historical-fit remained weak (`2/6` benchmarks, failed anchors at `bihac`, `op:zvornik:vitinica_2`, and `op:ugljevik:teocak_krstac_2`).
+- Interpretation: the Phase E mechanic is dormant without staged player orders, so the 52w drift should be treated as branch-level long-horizon state, not a direct Phase E behavior change.
+- Final branch verification after doc propagation is green: `npm run typecheck`, `npm run desktop:map:build`, and full `npm run test:vitest` all pass.

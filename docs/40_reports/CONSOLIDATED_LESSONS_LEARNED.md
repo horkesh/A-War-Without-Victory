@@ -69,6 +69,7 @@
 | N159 deep audit | Displacement kill fraction (4%) should not be uniform across all contexts. RS civilian departure from RBiH/HRHB was mostly voluntary flight (~1% lethality). Sim: 10,860 RS civ killed vs ~4k historical. |
 | Bot AI target filtering (n192) | P3 priority municipality filter blocked capture of undefended territory in areas like Krajina. Never filter undefended territory through strategic gates — taking empty land costs nothing. Only apply priority filters to targets requiring actual combat. |
 | Rear pocket cleanup (n214) | Pipeline consolidation (auto-flip surrounded territory) is strictly superior to changing brigade attack decisions for pocket cleanup. Even constrained home-defense attacks create butterfly effects that destabilize fronts (n208–n213: 82.5–83.6%). Pipeline approach: 84.2%, no side effects. Rule: when a problem can be solved without changing attack decisions, prefer the non-combat path. |
+| Territory Voronoi (n253) | Sectors without geographic depth cause pathological reserve ratios (1 active, 9 reserve). Band-aid caps (RESERVE_PER_EDGE_CAP) don't fix the root cause. Solution: multi-source BFS from front edges backward through friendly territory creates contiguous territory_osids per sector; brigades classified by territory membership, not front-edge proximity. Result: zero pathological ratios, 97-98% brigade coverage. |
 
 ---
 

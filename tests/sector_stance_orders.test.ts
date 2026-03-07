@@ -52,6 +52,7 @@ function makeState(): GameState {
                 edge_ids: ['e1'],
                 sub_segments: [],
                 length_edges: 1,
+                territory_osids: [],
                 assigned_brigade_ids: ['rs-brig-1', 'rs-brig-2'],
                 reserve_brigade_ids: [],
                 density: 1,

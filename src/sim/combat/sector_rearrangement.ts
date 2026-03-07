@@ -61,6 +61,16 @@ function mergeSectorInto(into: CorpsFrontSector, from: CorpsFrontSector): void {
 
     into.sub_segments.push(...from.sub_segments);
 
+    // Merge territory_osids
+    const territorySet = new Set(into.territory_osids);
+    for (const o of from.territory_osids) {
+        if (!territorySet.has(o)) {
+            into.territory_osids.push(o);
+            territorySet.add(o);
+        }
+    }
+    into.territory_osids.sort(strictCompare);
+
     const assignedSet = new Set(into.assigned_brigade_ids);
     for (const bid of from.assigned_brigade_ids) {
         if (!assignedSet.has(bid)) {
@@ -272,6 +282,7 @@ function createPocketContainmentSectors(
             edge_ids: [],
             sub_segments: [subSeg],
             length_edges: 0,
+            territory_osids: [...containmentFriendly].sort(strictCompare),
             assigned_brigade_ids: [],
             reserve_brigade_ids: [],
             density: 0,

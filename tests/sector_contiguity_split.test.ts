@@ -21,6 +21,7 @@ function makeSector(
         edge_ids: allEdges,
         sub_segments: subSegments,
         length_edges: allEdges.length,
+        territory_osids: allFriendly,
         assigned_brigade_ids: assignedBrigades,
         reserve_brigade_ids: reserveBrigades,
         density: 0,

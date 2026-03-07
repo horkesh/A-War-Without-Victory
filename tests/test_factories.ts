@@ -96,6 +96,7 @@ export function makeSector(opts: {
     sub_segments?: CorpsFrontSubSegment[];
     friendly_osids?: string[];
     enemy_osids?: string[];
+    territory_osids?: string[];
     assigned_brigade_ids?: string[];
     reserve_brigade_ids?: string[];
     density?: number;
@@ -129,6 +130,7 @@ export function makeSector(opts: {
         edge_ids: edgeIds,
         sub_segments: subSegments,
         length_edges: lengthEdges,
+        territory_osids: opts.territory_osids ?? friendlyOsids,
         assigned_brigade_ids: assignedBrigadeIds,
         reserve_brigade_ids: reserveBrigadeIds,
         density: opts.density ?? (lengthEdges > 0 ? assignedBrigadeIds.length / lengthEdges : 0),
