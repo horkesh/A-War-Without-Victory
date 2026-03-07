@@ -28,15 +28,21 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     {
         corps: 'vrs_east_bosnian',
         name: 'Operation Koridor',
+        // Historically: EBK secured the Brcko corridor crossing to link Semberija with
+        // western RS. Semberija brigades (near Bijeljina) were better positioned than
+        // the Posavina brigades. 1st Krajina Corps handled broader Posavina from July 1992.
         participating_brigades: [
-            'rs_1st_posavina_infantry',
-            'rs_2nd_posavina_light_infantry',
-            'rs_3rd_posavina_light_infantry',
+            'rs_1st_semberija_light_infantry',
+            'rs_2nd_semberija_light_infantry',
+            'rs_1st_bijeljina_light_infantry_panthers',
         ],
-        staging_osid: 'op:bosanski_samac:crkvina_2',
+        staging_osid: 'op:bijeljina:dvorovi_2',
         target_osids: [
-            'op:modrica:garevac_2',
-            'op:bosanski_samac:samac_2',
+            'op:brcko:brezovo_polje_selo_2',
+            'op:brcko:donji_rahic',
+            'op:brcko:krepsic',
+            'op:brcko:potocari_2',
+            'op:brcko:skakava_donja',
         ],
     },
     {

@@ -401,7 +401,6 @@ interface OverrideInventoryEntry {
 }
 
 const HISTORICAL_ANCHORS_APR1992_TO_DEC1992: Array<{ municipality_id: string; expected_controller: string }> = [
-    { municipality_id: 'zvornik', expected_controller: 'RS' },
     { municipality_id: 'bijeljina', expected_controller: 'RS' },
     { municipality_id: 'srebrenica', expected_controller: 'RBiH' },
     { municipality_id: 'bihac', expected_controller: 'RBiH' },
@@ -412,7 +411,8 @@ const HISTORICAL_ANCHORS_APR1992_TO_DEC1992: Array<{ municipality_id: string; ex
 const HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992: Array<{ settlement_id: string; expected_controller: string }> = [
 ];
 const HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992: Array<{ osid: string; expected_controller: string }> = [
-    { osid: 'op:zvornik:vitinica_2', expected_controller: 'RBiH' },        // Sapna — ARBiH stronghold
+    { osid: 'op:zvornik:zvornik', expected_controller: 'RS' },             // Zvornik city — VRS captured by May 1992
+    { osid: 'op:zvornik:vitinica_2', expected_controller: 'RBiH' },        // Sapna — ARBiH stronghold (Sapna brigade)
     { osid: 'op:ugljevik:teocak_krstac_2', expected_controller: 'RBiH' },  // Teocak — ARBiH stronghold
     { osid: 'op:orasje:orasje', expected_controller: 'HRHB' },              // Orasje pocket — HVO held throughout
     { osid: 'op:brcko:brka_2', expected_controller: 'RBiH' },              // South Brcko (Brka) — ARBiH held

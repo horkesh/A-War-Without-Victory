@@ -43,6 +43,22 @@ export function getRsJnaHeavyComposition(): BrigadeComposition {
         artillery_condition: { ...FULL_CONDITION }
     };
 }
+
+/**
+ * Return RS mountain composition: JNA artillery inheritance (~15 artillery pieces per brigade —
+ * reflecting mortar companies and howitzers from JNA TO units) even for mountain class.
+ * Historical: VRS mountain brigades had ~8-15× more artillery than ARBiH equivalents.
+ */
+export function getRsMountainComposition(): BrigadeComposition {
+    return {
+        infantry: 800,
+        tanks: 0,
+        artillery: 15,
+        aa_systems: 2,
+        tank_condition: { ...FULL_CONDITION },
+        artillery_condition: { ...FULL_CONDITION }
+    };
+}
 const ARBIH_CONDITION: EquipmentCondition = { operational: 0.6, degraded: 0.25, non_operational: 0.15 };
 
 /** Ensure formation has a composition; initialize from defaults if missing. */
@@ -76,14 +92,18 @@ export function computeEquipmentMultiplier(
     const tankEff = comp.tanks * comp.tank_condition.operational;
     const artilleryEff = comp.artillery * comp.artillery_condition.operational;
 
-    // Tanks primarily amplify attack; reduced effect on defense
+    // Tanks primarily amplify attack; reduced effect on defense.
+    // Per-weapon coefficients (no infantry divisor):
+    //   RS mechanized (40 tanks, 30 art, 0.9 cond, offensive) → ~25% bonus.
+    //   RS mountain (15 art, 1.0 cond) → ~4.5% bonus.
+    //   ARBiH light (1 tank, 3 art, 0.6 cond) → ~0.8% bonus.
+    // Reflects historical VRS armor/artillery superiority.
     const isOffensive = posture === 'attack' || posture === 'assault' || posture === 'counterattack';
-    const tankBonus = tankEff * (isOffensive ? 0.5 : 0.2);
+    const tankBonus = tankEff * (isOffensive ? 0.005 : 0.002);
     // Artillery amplifies both offense and defense
-    const artilleryBonus = artilleryEff * 0.8;
+    const artilleryBonus = artilleryEff * 0.003;
 
-    const infantry = Math.max(1, comp.infantry);
-    return 1.0 + (tankBonus + artilleryBonus) / infantry;
+    return 1.0 + tankBonus + artilleryBonus;
 }
 
 /**

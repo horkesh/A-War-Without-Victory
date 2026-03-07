@@ -40,7 +40,7 @@ import {
     EQUIPMENT_CLASS_TEMPLATES,
     getEquipmentCost
 } from '../state/recruitment_types.js';
-import { getRsJnaHeavyComposition } from './combat/equipment_effects.js';
+import { getRsJnaHeavyComposition, getRsMountainComposition } from './combat/equipment_effects.js';
 import { getFactionDefaultOfficerQuality } from './combat/combat_math.js';
 
 const FIXED_HOME_OSID_TAG = 'placement:fixed_home_osid';
@@ -155,12 +155,13 @@ function buildBrigadeComposition(
     faction: FactionId,
     applyRsJnaOverride: boolean
 ): BrigadeComposition {
-    if (
-        applyRsJnaOverride &&
-        faction === 'RS' &&
-        (equipmentClass === 'mechanized' || equipmentClass === 'motorized')
-    ) {
-        return getRsJnaHeavyComposition();
+    if (applyRsJnaOverride && faction === 'RS') {
+        if (equipmentClass === 'mechanized' || equipmentClass === 'motorized') {
+            return getRsJnaHeavyComposition();
+        }
+        if (equipmentClass === 'mountain' || equipmentClass === 'light_infantry') {
+            return getRsMountainComposition();
+        }
     }
     const template = EQUIPMENT_CLASS_TEMPLATES[equipmentClass];
     const fullCondition: EquipmentCondition = { operational: 1, degraded: 0, non_operational: 0 };

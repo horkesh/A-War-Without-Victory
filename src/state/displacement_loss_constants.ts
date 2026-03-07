@@ -13,10 +13,17 @@ export const DISPLACEMENT_KILLED_FRACTION = 0.04;
  * Historical: sim was producing ~10,860 RS civ killed vs ~4k actual (n159 audit B2). */
 export const DISPLACEMENT_KILLED_FRACTION_RS_FROM_NON_RS = 0.01;
 
+/** RBiH civilians displaced by RS forces. 4% uniform was producing ~13,766 Bosniak civilian
+ * deaths per 40w — roughly 2× historical ~30-38k for the full 3.5-year war. Routine mass
+ * displacement at 2% better matches the historical record; acute events (Srebrenica-type)
+ * are not yet modeled separately (n218 audit). */
+export const DISPLACEMENT_KILLED_FRACTION_RBIH_FROM_RS = 0.02;
+
 /** Per-context kill fraction: RS civilians displaced by non-RS controllers get 1%,
- * all other combinations keep the default 4%. */
+ * RBiH civilians displaced by RS get 2%, all other combinations keep the default 4%. */
 export function getDisplacementKillFraction(displacedFaction: FactionId, controllerFaction: FactionId): number {
     if (displacedFaction === 'RS' && controllerFaction !== 'RS') return DISPLACEMENT_KILLED_FRACTION_RS_FROM_NON_RS;
+    if (displacedFaction === 'RBiH' && controllerFaction === 'RS') return DISPLACEMENT_KILLED_FRACTION_RBIH_FROM_RS;
     return DISPLACEMENT_KILLED_FRACTION;
 }
 

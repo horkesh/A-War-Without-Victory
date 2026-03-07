@@ -1803,9 +1803,23 @@ export function generateCorpsDirectives(
 
                 const secEnemyOsids = [...clusterEnemyOsids].sort(strictCompare);
 
+                // If the cluster still lacks enough front-adjacent brigades, supplement
+                // with rear-area corps subordinates. Brigade AI will march them forward
+                // during the planning phase. This prevents corps from going dormant when
+                // all brigades are in home positions (not on the front line).
+                let finalBrigadeIds = secBrigadeIds;
+                if (finalBrigadeIds.length < 3) {
+                    const frontSet = new Set(finalBrigadeIds);
+                    const rear = subordinates
+                        .filter(b => b.status === 'active' && !frontSet.has(b.id))
+                        .map(b => b.id)
+                        .sort(strictCompare);
+                    finalBrigadeIds = [...finalBrigadeIds, ...rear].sort(strictCompare);
+                }
+
                 const op = evaluateSectorOffensiveLaunch(
                     state, corps.id, sec.sector_id, faction,
-                    secBrigadeIds, secEnemyOsids, offensiveTargets, supplyByOsid
+                    finalBrigadeIds, secEnemyOsids, offensiveTargets, supplyByOsid
                 );
                 if (op) {
                     // Apply exhaustion from replaced recovery-phase op

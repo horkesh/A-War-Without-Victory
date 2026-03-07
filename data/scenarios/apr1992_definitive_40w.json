@@ -59,7 +59,9 @@
     "teslic": 0.55,
     "srebrenica": 0.55
   },
-  "osid_control_overrides": {},
+  "osid_control_overrides": {
+    "op:brcko:brcko": "RS"
+  },
   "war_timeline": "apr1992",
   "init_officers": "apr1992"
 }
