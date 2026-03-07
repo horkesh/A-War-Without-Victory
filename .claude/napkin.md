@@ -15,13 +15,15 @@
    Do instead: Keep failing baselines pending canon/data authority review. Refresh only after user/PM sign-off per `TEST_BASELINE_STRATEGY.md`.
 5. **[2026-02-21] Refactor-pass and code-simplifier between phases/checkpoints**
    Do instead: After each implementation phase or between plan checkpoints, run /refactor-pass (dead code, duplication, over-engineered stubs, simplify conditionals; then tsc + vitest) and /code-simplifier on recently modified code. Plans (e.g. officers-phase-e-implementation) must instruct this between tasks.
-6. **[2026-02-13] Verify edits + close handoffs with evidence**
+6. **[2026-03-07] Classify phases by real code impact, not plan labels**
+   Do instead: Before parallelizing or skipping regression, audit the task list. If a phase touches schema, IPC, bot logic, pipeline, or serialization, treat it as engine-touching even if the plan calls it UI-only; split the task or add the regression gate and separate commit.
+7. **[2026-02-13] Verify edits + close handoffs with evidence**
    Do instead: After edits, verify with file reads + `git diff`. After roadmap or handoff, close with run evidence + decision memo + cross-link.
-7. **[2026-03-06] Preserve fractional run-summary metrics**
+8. **[2026-03-06] Preserve fractional run-summary metrics**
    Do instead: In scenario summary normalization, never round fields ending in `share`, `ratio`, `rate`, `tolerance`, or `deviation`. Benchmark fractions are historical-fit evidence, not counts.
-8. **[2026-02-24] Scenario checkpoint lengths**
+9. **[2026-02-24] Scenario checkpoint lengths**
    Do instead: Use 20w/30w checkpoint runs for iteration; reserve 52w for acceptance only.
-9. **[2026-02-11] Preserve shared type exports during refactor**
+10. **[2026-02-11] Preserve shared type exports during refactor**
    Do instead: Keep `export type { ... }` statements; removing them breaks downstream consumers silently.
 
 ## Shell & Platform
@@ -65,6 +67,8 @@
    Do instead: When operational data unavailable, log and skip OSID steps safely rather than crashing.
 8. **[2026-03-01] Corps sector sub_segment IDs ≠ front segment IDs**
    Do instead: `assigned_front_ids` in CorpsDirective MUST use front_id format, NOT `subseg:*`. Sectors for target filtering only. Using subseg IDs breaks front_assignment.ts matching.
+9. **[2026-03-07] Composite IVP extends the existing patron-pressure system**
+   Do instead: Add new international-pressure behavior by extending `patron_pressure.ts` and `international_visibility_pressure`, not by creating a parallel IVP subsystem. `composite_ivp` is the UI/patron-facing summary value.
 
 ## Bot AI & Combat
 1. **[2026-02-25] RBiH general_defensive through week 56**
@@ -125,6 +129,8 @@
    Do instead: For April 1992 VRS opening ops, use explicit `participating_brigades`, `sector_id`, and `staging_osid`. If a brigade is in `active_operation.participating_brigades`, it routes through operation planning/execution/recovery first — `home_defense_active`, reserve logic, or generic corps targeting cannot retake control until `active_operation` is cleared.
 9. **[2026-03-05] Pre-planned ops: own-corps BFS + tag-derived corps**
    Do instead: In `pre_planned_operations.ts`, filter brigade participation with `getFormationCorpsId(...)` not `formation.corps_id`. Pre-planned VRS operations: 5 original corps only (EBK/Drina/SRK/Herzegovina/1KK). Adding 2KK caused −6.7pp regression — use organic bot + overrides for 2KK instead.
+10. **[2026-03-07] Sector orders piggyback on brigade posture machinery**
+   Do instead: Stage sector intent in `sector_stance_orders`, then translate it through `applySectorStanceOrders()` into ordinary `brigade_posture_orders`. Keep reserve brigades out of that translation unless design explicitly changes; assigned brigades only is the current invariant.
 
 ## GUI / HoI Map
 1. **[2026-03-06] Tactical fog contract is `fogOfWar`, not raw sector intel**
@@ -139,8 +145,8 @@
    Do instead: Use inline styles (position, right, top, zIndex, direction: ltr) so Tailwind/purge/RTL cannot override. `?showPanel=1` for dev layout verification.
 6. **[2026-03-05] Active GUI path only — avoid saved mirror files**
    Do instead: Edit `src/ui/map/components/*` and `src/ui/map/map/*` for live behavior. Treat `src/ui/map/saved/*` as legacy snapshots unless explicitly migrating.
-7. **[2026-03-05] Map mode shortcuts must match toolbar labels**
-   Do instead: Keep `useKeyboardShortcuts` key mapping synchronized with `MapModeToolbar` mode badges (`1`-`5`: political/ethnic/supply/pressure/density).
+7. **[2026-03-07] Map mode shortcuts must match toolbar labels**
+   Do instead: Keep `useKeyboardShortcuts` key mapping synchronized with `MapModeToolbar` mode badges (`1`-`6`: political/ethnic/supply/pressure/density/operations).
 8. **[2026-03-05] Staged order arrowheads are fill polygons, not glyph text**
    Do instead: Pulse staged heads via `fill-opacity` (`attack-arrows-heads-staged`, `movement-arrows-heads-staged`) and avoid legacy `text-opacity` writes.
 9. **[2026-03-06] Briefing panels: prefer stacked accordions over tabs**
@@ -199,8 +205,8 @@
    Do instead: ZoC deleted. Movement via `brigade_movement_orders.ts` / `apply-brigade-movement`. Defense via `local_front_defense.ts` density. AoR legacy also fully removed (R1–R5, 2026-03-04) — no dead AoR code remains.
 
 ## Calibration
-1. **[2026-03-07] ATH n65=99.2%; troop strength n191 calibrated (strategic reserve + faction surge)**
-   Do instead: ATH 40w = 99.2% (n65, commit a689d83). 171 overrides. 7 permanent mismatches. Troop strength (n191, w40/w80): RS=102.6k/110.1k ✓, RBiH=121.0k/175.4k ✓, HRHB=41.5k/49.8k ✓. Scales: ongoing_mobilization RBiH=0.10/RS=0.12/HRHB=0.29; pool_population HRHB=1.60; RS JNA bonus=10k. Faction-differentiated surge: VRS [2.0,1.8,1.3,1.1,1.0,0.6], ARBiH [2.8,2.2,1.3,0.8,0.45,0.3], HVO [2.5,2.0,1.4,1.0,0.6,0.4]. Strategic reserve draw rates: RS=0.25, HRHB=0.25, RBiH=0.02.
+1. **[2026-03-07] ATH n65=99.2% (max overrides); organic sim ATH n241=93.6% (98 overrides)**
+   Do instead: n65 ATH (99.2%) used 171 overrides — near-complete anchoring. n241 (93.6%) is the organic simulation ATH with 98 selective RS overrides. Troop strength (n191, w40/w80): RS=102.6k/110.1k ✓, RBiH=121.0k/175.4k ✓, HRHB=41.5k/49.8k ✓. Scales: ongoing_mobilization RBiH=0.10/RS=0.12/HRHB=0.29; pool_population HRHB=1.60; RS JNA bonus=10k. Faction-differentiated surge: VRS [2.0,1.8,1.3,1.1,1.0,0.6], ARBiH [2.8,2.2,1.3,0.8,0.45,0.3], HVO [2.5,2.0,1.4,1.0,0.6,0.4]. Strategic reserve draw rates: RS=0.25, HRHB=0.25, RBiH=0.02.
 2. **[2026-03-06] Pool surplus absorbs mobilization scale changes — use initial pool lever**
    Do instead: If faction pool has large surplus at w40 (RS=27k, HRHB=25k), reducing FACTION_MOBILIZATION_SCALE barely moves committed brigade personnel (1-2% drop for 12% scale cut). Primary lever for initial strength is RS_JNA_INHERITANCE_BONUS and FACTION_POOL_SCALE. For RS long-run, large scale cuts (0.17→0.12) combined with JNA reduction are needed to bring into band. HRHB POOL_SCALE=1.60 restores ~40k target.
 3. **[2026-03-05] Combat calibration needs causality, not just territory**
@@ -213,12 +219,16 @@
    Do instead: When sim=RBiH but painted=RS, adding RBiH avoided_osids is often ineffective (cells lost via counterattack or weakness, not direct attack). Add RS `osid_control_overrides` for systematic under-captures. avoideds work only when bot is actively targeting wrong cells.
 7. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
    Do instead: RS `avoided_osids` = fix RS OVER-captures (painted=RBiH/HRHB, sim=RS — prevent VRS from attacking there). RS `osid_control_overrides` = fix RS UNDER-captures (painted=RS, sim=RBiH — force-start RS control). Adding under-captures to avoided_osids makes RS even less likely to capture them.
-8. **[2026-03-04] HRHB Krajina/Posavina mismatches are INIT-based (ethnic Croat composition)**
-   Do instead: Cells banja_luka:dragocaj, banja_luka:potkozarje_3, bosanska_gradiska:mackovac, prijedor:raljas, odzak:bosanski_samac, orasje:ostra_luka start as HRHB in initial_save due to Croat ethnic majority in those cells. Not a runtime regression. Do NOT chase these as calibration mismatches caused by bot changes — they are data-driven init artifacts.
-9. **[2026-03-04] Consolidation captures CANNOT be fixed by bot config — ~8 persistent mismatches**
-   Do instead: Cells surrounded by same-faction neighbors auto-flip regardless of avoided_osids or overrides. Confirmed: kakanj:biljesevo, zavidovici:cardak_2, olovo:olovo_2, and all 4 HRHB over-captures (jablanica, kiseljak outskirts, rat_2, prozor area) are consolidation-captured. Only engine-level consolidation rule changes could fix these.
-10. **[2026-03-04] Load-bearing overrides: turbe_2 + Kalesija→Kupres dependency**
-   Do instead: turbe_2 is an RS over-capture but enables Donji Vakuf consolidation (3 correct cells) — adding to avoided_osids causes net −3pp loss (n463). Kalesija seher_2/gojcin_2 overrides redirect VRS → kupres:kupres_2 fix (n466); adding Kladanj on top breaks this (n467). Test each override block in isolation — never stack two override groups without verifying underlying force dynamics.
+8. **[2026-03-07] HRHB-init cells CAN be fixed by RS overrides — add in isolated clusters only**
+   Do instead: Cells like banja_luka:dragocaj, kotor_varos x4, mrkonjic_grad:baljvine_2, skender_vakuf:donji_koricani start HRHB but painting=RS. Adding RS overrides for these IS effective (n238: KRAJINA 89.4%→97.8%). RULE: add HRHB cells by isolated geographic cluster (KRAJINA only, then POSAVINA_NE only, etc.) — adding 10+ HRHB cells across multiple regions at once (n237) caused POSAVINA_NE −9.9pp and SARAJEVO −9.3pp cascade.
+9. **[2026-03-07] avoided_osids cannot stop consolidation; it only redirects combat effort**
+   Do instead: Consolidation captures (surrounded enemy cells auto-flip) bypass avoided_osids entirely — confirmed by n240 where tuzla:simin_han_2 and zvornik:rastosnica_2 remained sim=RS despite being in avoided_osids. Adding 7 avoided targets caused POSAVINA_NE −12.2pp as VRS redirected to gracanica/lopare/lukavac. Only architecture-level enclave mechanic can prevent consolidation captures.
+10. **[2026-03-07] Pre-planned operation target chains drive regional match rate (n218)**
+   Do instead: 84.2% plateau caused by Operation Drina missing djulici/drinjaca/krizevici/paljevici/donja_kamenica (Zvornik) and Operation Koridor missing Brcko corridor (brcko:brcko/donji_rahic/krepsic/skakava_donja). Fix is data change to `src/sim/combat/pre_planned_operations.ts` + scenario anchor — not engine code. Municipality-level anchors for pockets (bihac) give false failures; use OSID-level anchor `op:bihac:bihac_2` instead.
+   Load-bearing overrides: turbe_2 is RS over-capture but enables Donji Vakuf consolidation (3 correct cells) — adding to avoided_osids causes net −3pp loss (n463). Kalesija seher_2/gojcin_2 overrides redirect VRS → kupres:kupres_2 fix (n466). Test each override block in isolation.
+10. **[2026-03-07] Pre-planned operation target chains drive regional match rate (n218)**
+   Do instead: 84.2% plateau caused by Operation Drina missing djulici/drinjaca/krizevici/paljevici/donja_kamenica (Zvornik) and Operation Koridor missing Brcko corridor (brcko:brcko/donji_rahic/krepsic/skakava_donja). Fix is data change to `src/sim/combat/pre_planned_operations.ts` + scenario anchor — not engine code. Municipality-level anchors for pockets (bihac) give false failures; use OSID-level anchor `op:bihac:bihac_2` instead.
+   Load-bearing overrides: turbe_2 is RS over-capture but enables Donji Vakuf consolidation (3 correct cells) — adding to avoided_osids causes net −3pp loss (n463). Kalesija seher_2/gojcin_2 overrides redirect VRS → kupres:kupres_2 fix (n466). Test each override block in isolation.
 ## Engine Runtime Patterns
 1. **[2026-03-05] Takeover displacement off-by-one FIXED**
    Do instead: `processPhaseIIDisplacementTakeover` Section 0 uses `currentTurn === warStartTurn + 1` (not warStartTurn). `runTurn()` increments turn BEFORE phases — first war turn = warStartTurn+1. Fixed in `displacement_takeover.ts`.

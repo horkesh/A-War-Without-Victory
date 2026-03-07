@@ -7,6 +7,56 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-07] n235→n241 calibration: 89.2%→93.6% area-weighted ATH
+
+### Summary
+- **Run:** n241 — `apr1992_definitive_40w__024b4776f64c7a22__w40_n241` (deterministic match with n239)
+- **Result:** 93.6% area-weighted, 684/744 count (91.9%) — new organic simulation ATH
+- **Previous baseline:** n235 — 89.2% area-weighted, 647/744 count (87.0%)
+- **Net gain:** +4.4pp area-weighted, +4.9pp count
+- **Method:** 52 new RS `osid_control_overrides` (total 98), 7 iterations with rollback discipline
+
+### Regional gains
+| Region | Before | After | Delta |
+|--------|--------|-------|-------|
+| KRAJINA | 89.4% | 97.8% | +8.4pp |
+| CENTRAL_BOSNIA | 83.5% | 90.7% | +7.2pp |
+| CENTRAL_CORRIDOR | 87.4% | 92.1% | +4.7pp |
+| POSAVINA_NE | 92.7% | 94.0% | +1.3pp |
+| DRINA | 91.9% | 92.7% | +0.8pp |
+| SARAJEVO | 78.1% | 80.3% | +2.2pp |
+| HERZEGOVINA | 91.7% | 93.9% | +2.2pp |
+
+### Cascade lessons (for future calibration)
+1. **HRHB-cell overrides must be added by isolated geographic cluster** — n237 added HRHB cells across all regions simultaneously and caused POSAVINA_NE −9.9pp / SARAJEVO −9.3pp
+2. **avoided_osids cannot stop consolidation-captured cells** — n240 confirmed: tuzla:simin_han_2 and zvornik:rastosnica_2 remained sim=RS despite being in avoided_osids (they're surrounded). Adding 7 avoided targets caused POSAVINA_NE −12.2pp as VRS redirected elsewhere.
+3. **Ceiling at ~93.6% with current mechanics** — Remaining 60 mismatches require engine changes: enclave mechanic for Goražde/Srebrenica/Žepa, HRHB-to-VRS Jajce transition, VRS Tuzla-basin aggression cap.
+
+### Files changed
+- `data/scenarios/apr1992_definitive_40w.json` — 98 RS control overrides, 3 RS avoided_osids
+- `docs/40_reports/implemented/20260307_CALIBRATION_N235_N241_AREA_WEIGHTED_93PCT.md` (NEW)
+- `docs/40_reports/CALIBRATION_MASTER.md` — updated n241 entry
+- `.claude/napkin.md` — updated calibration lessons
+
+### Priority
+Next: Engine-level fixes for persistent over-captures (enclave mechanics, HRHB-VRS Jajce transition). Scenario-level calibration ceiling reached.
+
+## [2026-03-07] n218 40w calibration deep analysis
+
+### Summary
+- **Run:** n218 — `apr1992_definitive_40w__7c821fa7d934716d__w40_n218` (state hash `6cbc6ef614883584`)
+- **Result:** 84.2% area-weighted (unchanged from n214 baseline; no regression). 168 attack orders, 141 battles, 44 combat-attributed flips. Troop strengths: RS=109.5k ✓, RBiH=121.7k ✓, HRHB=40.5k ✓. VRS organic tempo decay confirmed (8→1 attacks/week).
+- **Root cause of 84.2% plateau (REVISED):** Engine bug — Drina corps and East Bosnian corps go dormant after their first pre-planned operation (3–4 weeks), generating ZERO new operations for the remaining 36 weeks. Brigades frozen in home municipalities. Brcko regressed (-2 RS OSIDs). Fix required in `generateCorpsDirectives()` / sector offensive lifecycle. Secondary: 504th ARBiH never spawns → orasac_2 undefended → 2nd Krajina captures opportunistically, tipping bihac anchor (false alarm at city level — bihac_2 correctly RBiH).
+- **Additional calibration issues:** RBiH civilian killed 13,766 → 2× historical (~30–38k full-war); recommend DISPLACEMENT_KILLED_FRACTION_RBIH_FROM_RS=0.02. Att:def 3.4:1 (slightly high; reduce BASE_ATTACKER_LOSS_RATE 0.04→0.035).
+- **Parallel work:** Player agency plan (`docs/30_planning/PLAYER_AGENCY_IMPLEMENTATION_PLAN.md`) proceeding in parallel. Phase A/F are UI-only, calibration-safe.
+
+### Priority
+P0: Fix corps operation relaunch — investigate `generateCorpsDirectives()` and sector offensive recovery path. Expected impact: Drina 69%→85%+, Posavina/NE 72%→82%+, overall 84.2%→92–95%.
+
+### Files
+- `docs/40_reports/convenes/20260307_N218_40W_CALIBRATION_DEEP_ANALYSIS.md` — full analysis report
+- `docs/40_reports/CALIBRATION_MASTER.md` — updated with n218 findings
+
 ## [2026-03-07] Intelligence Dossier implementation and Sector Visualization suggestions
 
 ### Summary
@@ -22,6 +72,26 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 ### Follow-up
 - Implement one or more sector visualization improvements documented in `docs/30_planning/20260307_SECTOR_VISUALIZATION_SUGGESTIONS.md`.
+
+## [2026-03-07] Player agency implementation kickoff and phase-classification correction
+
+### Summary
+- Reviewed `docs/30_planning/PLAYER_AGENCY_IMPLEMENTATION_PLAN.md` before implementation kickoff under Orchestrator/PM process.
+- Confirmed the repo is in a clean git state and documented the execution rule for this program of work: classify phases by actual code impact, not by plan labels.
+- Identified one concrete sequencing correction: `Phase F` is not fully UI-only because `F1` changes `CorpsOperation` schema, IPC payloads, and brigade attack approval in `bot_brigade_ai_osid.ts`.
+
+### Change
+- Updated `.claude/napkin.md` with a reusable execution/validation rule: any phase touching schema, IPC, bot logic, pipeline, or serialization is engine-touching even if labeled UI-only.
+- Updated `docs/PROJECT_LEDGER_KNOWLEDGE.md` Process & Team Knowledge with the player-agency kickoff decision and commit/regression discipline for this plan.
+- No code or canon files changed.
+
+### Determinism / Scope
+- Determinism unchanged. Documentation/process-only update.
+- Scope limited to execution planning and workflow guardrails before implementation.
+
+### Follow-up
+- Execute `Phase A` first.
+- Either split `F1` out of `Phase F` into its own engine-touching commit with regression, or treat all of `Phase F` as regression-gated.
 
 ## [2026-03-07] Rear pocket consolidation and corps AI pocket targeting (n214)
 
@@ -10949,3 +11019,78 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 - docs/20_engineering/MAP_UI_MASTER.md
 - docs/10_canon/context.md
 - .claude/napkin.md
+
+---
+
+## n200 - Defensive surfacing complete; offensive readiness and operations map groundwork added (2026-03-07)
+
+### What changed
+- Phase A surfaced in UI: enclave dashboard, mobilization summary, sector entrenchment summary, front-line entrenchment visualization, and posture impact tooltips are live in the React map UI.
+- Map adapter expanded: `LoadedGameState` now derives enclave supply/airdrop state, mobilization rollups, sector entrenchment summaries, and richer operation metadata including readiness bars, average cohesion, health, tempo, schwerpunkt, and casualty threshold fields when present in state.
+- Operations map mode added: map mode `6: Operations` overlays sector frontage by operational weight (`holding` / `supporting` / `main`) using current brigade concentration and operation tempo.
+- Operations panel upgraded: active operations now show turn-in-phase, failure count, average cohesion/health, objective indexing, readiness gauges, and halt-action buttons wired to new preload channels.
+- Desktop/test hygiene: fixed Vitest collection break by converting `tests/scenario_operation_diagnostics.test.ts` from `node:test` imports to `vitest` imports.
+
+### Architect decisions to review
+- Operation health proxy: average personnel percentage is approximated as `personnel / 2500` per participating brigade because the adapter has no explicit peak-strength field in the UI contract.
+- Operations map weighting: operational weight currently uses assigned-vs-total sector brigades with a small tempo modifier. This is intentionally simple and deterministic, but may need refinement if corps-total brigade counts become directly available in the adapter.
+
+### Files modified
+- src/ui/map/data/types.ts
+- src/ui/map/data/GameStateAdapter.ts
+- src/ui/map/components/EnclaveDashboard.tsx
+- src/ui/map/components/TopToolbar.tsx
+- src/ui/map/components/OOBSidebar.tsx
+- src/ui/map/components/CorpsFrontPanel.tsx
+- src/ui/map/components/FormationDetail.tsx
+- src/ui/map/components/OperationsPanel.tsx
+- src/ui/map/components/OpsPlanningModal.tsx
+- src/ui/map/components/MapModeToolbar.tsx
+- src/ui/map/hooks/useKeyboardShortcuts.ts
+- src/ui/map/map/MapContainer.tsx
+- src/ui/map/map/builders/buildCorpsFrontLinesGeoJSON.ts
+- src/ui/map/map/builders/buildOperationalWeightGeoJSON.ts
+- src/ui/map/map/awwv_map_style.json
+- src/ui/map/desktop/useIPC.ts
+- src/desktop/preload.cjs
+- tests/ui_map_game_state_adapter.test.ts
+- tests/ui_map_front_lines_phase_a.test.ts
+- tests/ui_map_operations_mode.test.ts
+- tests/scenario_operation_diagnostics.test.ts
+
+---
+
+## n201 - Sector orders and operation execution levers wired into engine (2026-03-07)
+
+### What changed
+- Phase B core is now live end-to-end: `GameState` gained `sector_stance_orders`, the war pipeline applies them after brigade posture processing, desktop IPC can now stage sector stance and sector logistics priority, and the sector intelligence panel exposes both controls.
+- Offensive levers now affect execution behavior instead of only surfacing in UI: `CorpsOperation` stores casualty threshold, tempo, schwerpunkt, artillery preparation, force-launch, and halt/dig-in flags; IPC/main-process handlers persist them; brigade attack approval and target scoring now honor operation-level min-outcome, tempo shifts, and schwerpunkt weighting.
+- Operation lifecycle expanded: manual halt transitions operations to recovery, early launch cuts planning short with a cohesion penalty, artillery preparation strips defender dig-in and cohesion on first execution turn, all-out tempo adds extra cohesion burn, and feint/probe operation types are accepted in schema/lifecycle.
+- IVP substrate refined for C-phase follow-on: `international_visibility_pressure` now computes/stores `composite_ivp`, patron commitment reacts asymmetrically for RS vs RBiH, and the UI reads that composite score in Situation/TopToolbar.
+- Verification coverage expanded: new Vitest tests cover sector-stance translation and operation force-launch/tempo/artillery behavior, and the Vitest config now includes those files by default.
+
+### Architect decisions to review
+- Sector stance orders currently queue brigade posture orders for assigned brigades only; reserves are intentionally excluded so sector intent does not silently consume corps reserve posture flexibility.
+- Artillery preparation is implemented as a direct first-objective defender shock (`dig_in_progress = 0`, `-10 cohesion`) and reserve deduction, but it does not yet model a separate bombardment resolution phase or frontage-limited target selection.
+- Probe/feint support is schema-complete and lifecycle-aware, but the surrounding UI flow and calibration-sensitive player-decision surfaces are still partial.
+
+### Files modified
+- src/state/game_state.ts
+- src/state/serializeGameState.ts
+- src/state/patron_pressure.ts
+- src/sim/combat/sector_stance_orders.ts
+- src/sim/turn_phases/war_phases.ts
+- src/sim/combat/sector_offensive.ts
+- src/sim/combat/bot_brigade_ai_osid.ts
+- src/desktop/electron-main.cjs
+- src/desktop/preload.cjs
+- src/ui/map/desktop/useIPC.ts
+- src/ui/map/data/types.ts
+- src/ui/map/data/GameStateAdapter.ts
+- src/ui/map/components/CorpsFrontPanel.tsx
+- src/ui/map/components/OperationsPanel.tsx
+- src/ui/map/components/SituationTab.tsx
+- src/ui/map/components/TopToolbar.tsx
+- tests/sector_stance_orders.test.ts
+- tests/operation_tempo.test.ts
+- vitest.config.ts
