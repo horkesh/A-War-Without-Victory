@@ -1748,9 +1748,11 @@ export function generateCorpsDirectives(
         // Launch if offensive/balanced, no active SECTOR operation, and multi-sector corps.
         // Sector offensives replace general_offensive/strategic_defense with targeted multi-OSID push.
         const existingOp = cmd.active_operation;
-        const canLaunchSectorOp = !existingOp
+        // If corps has queued operations, don't launch auto-ops — let queued injection handle it
+        const hasQueuedOps = cmd.queued_operations && cmd.queued_operations.length > 0;
+        const canLaunchSectorOp = !hasQueuedOps && (!existingOp
             || existingOp.type !== 'sector_attack'
-            || existingOp.phase === 'recovery';
+            || existingOp.phase === 'recovery');
         if (canLaunchSectorOp &&
             (cmd.stance === 'offensive' || cmd.stance === 'balanced') &&
             directiveEligibleSectors.length > 0 && offensiveTargets.length > 0) {
