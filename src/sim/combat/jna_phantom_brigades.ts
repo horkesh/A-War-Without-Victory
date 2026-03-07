@@ -52,6 +52,10 @@ interface PhantomDef {
     tanks: number;
     artillery: number;
     apcs: number;
+    /** Ghost phantoms capture OSIDs at spawn and dissolve without equipment handoff. */
+    capture_osids?: string[];
+    /** If true, equipment disappears on withdrawal (not distributed to corps). */
+    no_equipment_handoff?: boolean;
 }
 
 const JNA_PHANTOM_DEFS: PhantomDef[] = [
@@ -94,6 +98,16 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         location_osid: 'op:prijedor:prijedor_2',
         withdrawal_turn: 7,
         tanks: 35, artillery: 20, apcs: 12,
+    },
+    {
+        id: 'jna_9th_corps_tg' as FormationId,
+        name: 'JNA 9th Corps Task Group',
+        corps_id: 'vrs_2nd_krajina' as FormationId,
+        location_osid: 'op:kupres:bucovaca',
+        withdrawal_turn: 4,
+        tanks: 20, artillery: 15, apcs: 6,
+        capture_osids: ['op:kupres:goravci', 'op:kupres:kupres_2'],
+        no_equipment_handoff: true,
     },
 ];
 
@@ -141,6 +155,14 @@ export function spawnJnaPhantomBrigades(state: GameState): void {
         } as FormationState;
 
         state.formations[def.id] = formation;
+
+        // Ghost phantoms flip political control of target OSIDs at spawn
+        if (def.capture_osids) {
+            if (!state.political_controllers) state.political_controllers = {};
+            for (const osid of def.capture_osids) {
+                state.political_controllers[osid] = 'RS';
+            }
+        }
     }
 }
 
@@ -180,13 +202,42 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
 
         // This phantom withdraws now
         const corpsId = phantom.corps_id;
+        const phantomDef = JNA_PHANTOM_DEFS.find(d => d.id === phantomId);
+
+        // Ghost phantoms dissolve without equipment handoff
+        if (phantomDef?.no_equipment_handoff) {
+            events.push({
+                phantom_id: phantomId as FormationId,
+                phantom_name: phantom.name,
+                corps_id: corpsId as FormationId,
+                tanks_distributed: 0,
+                artillery_distributed: 0,
+                apcs_distributed: 0,
+                tanks_to_reserve: 0,
+                artillery_to_reserve: 0,
+                apcs_to_reserve: 0,
+            });
+
+            // Remove from any active operations
+            if (corpsId && state.corps_command?.[corpsId]?.active_operation) {
+                const op = state.corps_command[corpsId].active_operation!;
+                op.participating_brigades = op.participating_brigades.filter(id => id !== phantomId);
+                if (Array.isArray(op.axes)) {
+                    for (const axis of op.axes) {
+                        axis.assigned_brigades = axis.assigned_brigades.filter(id => id !== phantomId);
+                    }
+                }
+            }
+
+            phantom.status = 'inactive';
+            phantom.lifecycle_status = 'withdrawn';
+            delete state.formations[phantomId];
+            continue;
+        }
+
         const comp = phantom.composition;
         let tanksToGive = comp?.tanks ?? 0;
         let artilleryToGive = comp?.artillery ?? 0;
-        // APCs: use a portion of tank count as proxy (BrigadeComposition has tanks which includes APCs)
-        // The plan specifies APCs separately, but BrigadeComposition lumps them into tanks.
-        // We'll track APCs separately via the PhantomDef but distribute as tanks in the composition.
-        const phantomDef = JNA_PHANTOM_DEFS.find(d => d.id === phantomId);
         let apcsToGive = phantomDef?.apcs ?? 0;
 
         let tanksDistributed = 0;

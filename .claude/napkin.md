@@ -4,6 +4,8 @@
 
 **Rules:** Max 10 items per category. Re-prioritize on every read (highest first). Merge duplicates, remove stale. Each entry: date + short title + "Do instead".
 
+**Master files:** Calibration → `docs/40_reports/CALIBRATION_MASTER.md`; GUI (map + warroom) → `docs/40_reports/GUI_MASTER.md`; Warroom → `docs/40_reports/WARROOM_MASTER.md`. Do instead: When doing calibration, GUI, or warroom work, read the relevant master first and update it during the session.
+
 ## Execution & Validation
 1. **[2026-03-07] Classify phases by real code impact, not plan labels**
    Do instead: Before parallelizing or skipping regression, audit the task list. If a phase touches schema, IPC, bot logic, pipeline, or serialization, treat it as engine-touching even if the plan calls it UI-only; split the task or add the regression gate and separate commit.
@@ -81,8 +83,8 @@
    Do instead: `getMoraleResistFloor()`: RBiH=**50**, RS=70, HRHB=**60**. Morale ≥ floor + costly_victory → absorb. Decisive always retreats. ARBiH homeland last stand (≥50% Bosniak co-ethnic) also absorbs 'victory' outcomes regardless of morale. Added in n439 session.
 4. **[2026-03-04] Vienna Declaration / Local Truces (RS-HRHB non-aggression)**
    Do instead: `src/sim/local_truces.ts` — fires at week 4; sets `state.vienna_declaration_turn`. Bot filters RS↔HRHB truce-partner OSIDs from `offensive_targets`, except {brod, derventa, odzak, bosanski_samac, orasje, jajce}. Player truce-break: `check-truce-break` step; sets `state.truce_broken_turn[faction]`, opponent gets +0.25 aggression for 6 turns.
-5. **[2026-03-05] Pre-planned VRS operations (5 corps only — 2KK deferred)**
-   Do instead: `injectPrePlannedOperations(state)` sets corps to `offensive` PERMANENTLY. Only the original 5 corps (EBK/Drina/SRK/Herzegovina/1KK). Adding 2KK (Operation Kupres) causes −6.7pp regression — 2KK offensive stance disrupts Krajina/POSAVINA_NE force allocation. Kupres captured organically via Kalesija redirect (n466). Use organic bot + overrides for 2KK.
+5. **[2026-03-07] Pre-planned VRS operations (5 corps only) + JNA ghost Kupres**
+   Do instead: `injectPrePlannedOperations(state)` sets corps to `offensive` PERMANENTLY. Only the original 5 corps (EBK/Drina/SRK/Herzegovina/1KK). 2KK has NO pre-planned op (−6.7pp regression). Kupres captured by JNA ghost phantom (`jna_9th_corps_tg`): `capture_osids` flips control at spawn, `no_equipment_handoff` dissolves without equipment distribution. No post_op_stance/stance_cap mechanism.
 6. **[2026-02-25] RBiH general_defensive through week 56**
    Do instead: ARBiH must remain `general_defensive` through week 56. "Balanced" before w56 allows premature counterattacking.
 7. **[2026-02-25] Aggression scoring: additive + multiplicative**
@@ -134,12 +136,12 @@
    Do instead: arbih_general_staff, vrs_main_staff, hvo_general_staff (army reserves) + hvo_central_bosnia (Bosniak-Croat conflict) — don't assign their brigades to front sectors.
 9. **[2026-03-05] Opening operations: explicit rosters + named ops own brigades**
    Do instead: For April 1992 VRS opening ops, use explicit `participating_brigades`, `sector_id`, and `staging_osid`. If a brigade is in `active_operation.participating_brigades`, it routes through operation planning/execution/recovery first — `home_defense_active`, reserve logic, or generic corps targeting cannot retake control until `active_operation` is cleared.
-10. **[2026-03-05] Pre-planned ops: own-corps BFS + tag-derived corps**
-    Do instead: In `pre_planned_operations.ts`, filter brigade participation with `getFormationCorpsId(...)` not `formation.corps_id`. Pre-planned VRS operations: 5 original corps only (EBK/Drina/SRK/Herzegovina/1KK). Adding 2KK caused −6.7pp regression — use organic bot + overrides for 2KK instead.
+10. **[2026-03-07] Sector-only operation creation — no catalog ops, no rear dump**
+    Do instead: Operations launch ONLY from `generateCorpsDirectives` sector offensive path. Old `generateCorpsOperationOrders` (catalog-based, picks 5 from whole corps) is disabled. Rear-area brigade supplementing removed — only sector-assigned brigades participate. `MAX_PARTICIPATING_BRIGADES=12` cap in `sector_offensive.ts`. If sector lacks brigades, no launch; density balancing reinforces first.
 
 ## GUI / HoI Map
 1. **[2026-03-07] Settlement panel: 3 horizontal tabs, nation labels, current ethnic**
-   Do instead: Settlement (right) panel has Overview | Military | Orders & events (same style as sector/operations). “Fled from this settlement” uses nation labels (Bosniaks, Serbs, Croats, Others) via `ethnicityOrFactionToNationLabel`. Current ethnic structure shown when computable via `getCurrentEthnicForOsid`. Control tab removed; controller/status live in Overview. For future settlement-panel work, keep tabs and data sources per TACTICAL_MAP_SYSTEM §13.2 and [20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md](docs/40_reports/implemented/20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md).
+   Do instead: Settlement (right) panel has Overview | Military | Orders & events (same style as sector/operations). “Fled from this settlement” uses nation labels (Bosniaks, Serbs, Croats, Others) via `ethnicityOrFactionToNationLabel`. Current ethnic structure shown when computable via `getCurrentEthnicForOsid`. Control tab removed; controller/status live in Overview. For future settlement-panel work, keep tabs and data sources per TACTICAL_MAP_SYSTEM §13.2 and [20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md](docs/40_reports/implemented/20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md). For any GUI work, read docs/40_reports/GUI_MASTER.md first and update it during the session (same discipline as CALIBRATION_MASTER for calibration).
 2. **[2026-03-07] Command briefing and summary routing live in `App`, not the toolbar**
    Do instead: Mount the high-level command briefing as a thin overlay in `App.tsx`, fed by `GameStateAdapter.commandBriefing`, and route it into existing panels/modals plus focused summary sections (`ivp`, `convoys`, `support`, `opsec`, etc.). Keep `TopToolbar.tsx` to compact command signals plus utility controls.
 3. **[2026-03-07] Selection, army, corps, sector, formation, and operation detail share one rail**

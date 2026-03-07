@@ -7,6 +7,28 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-07] Sector-only operations, JNA ghost Kupres, operation participation cap
+
+### Summary
+- **Bot operations must be sector-sourced**: Disabled legacy `generateCorpsOperationOrders` (catalog-based, non-sector-aware) that pulled brigades from entire corps pool. Sector offensive path in `generateCorpsDirectives` now handles all auto-generated operations.
+- **Rear-area brigade dump removed**: When sector clusters had <3 front-line brigades, code dumped ALL remaining corps subordinates into operations. 1KK (36 brigades) was creating 31-brigade ops for 3 objectives. Now only sector-assigned brigades participate.
+- **MAX_PARTICIPATING_BRIGADES=12**: Cap added in `sector_offensive.ts` to prevent bloated sector offensives.
+- **JNA ghost phantom for Kupres**: `jna_9th_corps_tg` captures `op:kupres:goravci` + `op:kupres:kupres_2` at spawn via `capture_osids`, dissolves at turn 4 without equipment handoff. No 2KK pre-planned operation (caused −6.7pp regression).
+- **post_op_stance/stance_cap reverted**: Mechanism removed from game_state.ts, sector_offensive.ts, bot_corps_ai.ts, pre_planned_operations.ts.
+
+### Changes
+- `src/sim/combat/bot_corps_ai.ts` — rear-area dump removed, catalog ops disabled
+- `src/sim/combat/sector_offensive.ts` — MAX_PARTICIPATING_BRIGADES=12 cap, post_op_stance/stance_cap removed
+- `src/sim/combat/jna_phantom_brigades.ts` — ghost phantom support (capture_osids, no_equipment_handoff)
+- `src/sim/combat/pre_planned_operations.ts` — Operation Kupres removed, post_op_stance removed
+- `src/state/game_state.ts` — post_op_stance removed from CorpsOperation, stance_cap removed from CorpsCommandState
+
+### Calibration
+- n290: 88.1% area-weighted (+0.4pp over n278 baseline). KRAJINA 96.9% (was 90.1%). RS count delta −23 (was −68).
+
+### Scope / safeguards
+- Engine behavior change: operations now sector-constrained. All 365 vitest tests pass. TypeCheck clean (pre-existing OperationsPanel error only).
+
 ## [2026-03-07] GUI master file and living reference docs
 
 ### Summary
@@ -16,6 +38,18 @@ This is the single authoritative project ledger. All context, decisions, and sta
 ### Changes
 - `docs/40_reports/README.md` (already lists GUI_MASTER in table and Root)
 - This ledger entry and PROJECT_LEDGER_KNOWLEDGE.md + napkin + context.md + REPO_MAP references added so everyone working on the repo sees the master file.
+
+### Scope / safeguards
+- Docs-only; no code or behavior change.
+
+## [2026-03-07] Warroom master file (WARROOM_MASTER.md)
+
+### Summary
+- Created **WARROOM_MASTER.md** (`docs/40_reports/WARROOM_MASTER.md`) as the single living reference for warroom work: scene plate, modals (implemented vs proposed), hotspots, commander assignment. Read first when starting warroom work; update during session. Links to nano banana brief, GUI_MASTER, and proposed-modals table.
+
+### Changes
+- `docs/40_reports/WARROOM_MASTER.md` (new)
+- `docs/40_reports/README.md`, `docs/40_reports/GUI_MASTER.md`, `.claude/napkin.md`, `docs/10_canon/context.md`, `docs/20_engineering/REPO_MAP.md` — references added.
 
 ### Scope / safeguards
 - Docs-only; no code or behavior change.

@@ -7,6 +7,8 @@
 
 **GUI master (2026-03-07):** `docs/40_reports/GUI_MASTER.md` is the living GUI reference (map + warroom). Read it first when starting GUI work and update during the session — same discipline as CALIBRATION_MASTER for calibration.
 
+**Warroom master (2026-03-07):** `docs/40_reports/WARROOM_MASTER.md` is the living warroom reference (scene plate, modals implemented vs proposed, hotspots, commander assignment). Read first for warroom work; update during session. Links to nano banana brief.
+
 Use this doc to find decisions, patterns, and rationale by topic. For full changelog and artifact lists, see PROJECT_LEDGER.md.
 
 ---
@@ -97,6 +99,8 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
    Do instead: Read `behavioral_health` before `historical_fit`, then explain `control_change_attribution`. A better-looking map is not a valid success signal if the combat-health layer regressed.
 7. **[2026-03-06] `CALIBRATION_MASTER.md` is the control file for resumed tuning**
    Do instead: Treat calibration changes as gated work. Read the master file first, update it during the session, and do not resume historical shaping unless the combat-causality gate is green.
+8. **[2026-03-07] Operations must be sector-sourced — no corps-wide brigade pulls**
+   Do instead: Operations launch only from `generateCorpsDirectives` sector offensive path. Only sector-assigned brigades participate. `MAX_PARTICIPATING_BRIGADES=12`. Old catalog-based `generateCorpsOperationOrders` disabled. If sector lacks brigades, density balancing reinforces first — no rear-area dump.
 | 2026-01-24 | Municipality outlines can be single polygons | Union must handle single and multi | No rejection of valid single-polygon munis | architecture |
 | 2026-01-24 | Convex hull fallback when union fails | Union unreliable for some geometries | Deterministic fallback + inflation reporting | architecture |
 | 2026-01-24 | Measure hull inflation when using hull salvage | Convex hull can distort shapes | High-inflation flagged in metadata | architecture |
@@ -740,6 +744,17 @@ The strategic reserve solves the topology mismatch without artificial caps or sc
 - **Defended pocket handling:** 3x casualty rate (24% of unit), dissolve without capturing. Paramilitary forces are not equipped to take defended positions.
 - **Pipeline placement:** After `partition-corps-front-sectors` so pocket detection has accurate territory data. Before `process-brigade-movement` so captures are visible to subsequent steps.
 - **Key lesson:** The original design convene recommended tag/class over new FormationKind. In practice, a separate kind proved cleaner because it allows exclusion from all formation lifecycle systems (reinforcement, bot AI, spawn) without adding conditional checks everywhere — the kind filter naturally excludes them.
+
+## 2026-03-07 - N290 Sector-only operations: three structural fixes
+
+- **Root cause:** Bot corps AI had two operation creation paths. The old `generateCorpsOperationOrders` (catalog-based) picked 5 brigades from the entire corps pool using hardcoded municipality templates — no sector awareness. The sector offensive path in `generateCorpsDirectives` was sector-aware but had a rear-area brigade dump: when a sector cluster had <3 front-line brigades, it pulled ALL remaining corps subordinates into the operation. For 1KK (36 brigades), this created 31-brigade ops for 3 objectives.
+- **Fix 1 — Rear-area dump removed:** Only sector-assigned brigades participate in operations. If a sector lacks brigades, no launch — corps density balancing should reinforce the sector first through normal redistribution.
+- **Fix 2 — MAX_PARTICIPATING_BRIGADES=12:** Hard cap in `sector_offensive.ts` prevents bloated sector offensives even with large sectors. Pre-planned ops and triggered ops are exempt (they have explicit rosters).
+- **Fix 3 — Catalog ops disabled:** `generateCorpsOperationOrders` removed from the pipeline (step 3 in `generateAllCorpsOrders`). Sector offensive path in step 6 now handles all auto-generated operations.
+- **Key lesson: Operations must be sector-sourced.** Pulling brigades from the entire corps pool creates bloated ops that disrupt force balance across the front. The 31-brigade operation left most of 1KK's front undefended while concentrating on 3 objectives. Sector-constrained ops naturally limit participation to what's locally available.
+- **JNA ghost phantom for Kupres:** `capture_osids` on PhantomDef flips political control at spawn. `no_equipment_handoff` dissolves without distributing equipment to corps. Used for `jna_9th_corps_tg` → captures goravci + kupres_2 at turn 0, dissolves at turn 4. No 2KK pre-planned op (−6.7pp regression from any approach involving 2KK brigades).
+- **Reverted post_op_stance/stance_cap:** Mechanism added to prevent bot AI from overriding post-operation stance was unnecessary once 2KK pre-planned op was removed. Clean removal from CorpsOperation, CorpsCommandState, sector_offensive, bot_corps_ai, pre_planned_operations.
+- **Calibration result:** n290 = 88.1% area-weighted (+0.4pp over n278 baseline). KRAJINA 96.9% (was 90.1%). RS count delta −23 (was −68).
 
 ## 2026-03-07 - Phase E municipality support is asymmetric and intentionally local
 

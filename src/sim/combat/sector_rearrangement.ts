@@ -17,7 +17,7 @@ import type {
 import type { Osid } from './osid_adjacency.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { findConnectedComponents } from '../../utils/graph.js';
-import { MAX_SECTOR_EDGES } from './corps_front_sectors.js';
+import { MAX_SECTOR_EDGES, splitNonContiguousSectors } from './corps_front_sectors.js';
 
 // Thin sector consolidation: any 0-brigade sector is eligible for merge.
 
@@ -313,6 +313,9 @@ export function rearrangeSectorsForCorps(
 
     // 1. Thin sector consolidation
     let result = consolidateThinSectors(sectors, osidAdjacency);
+
+    // 1b. Re-split non-contiguous sectors that consolidation may have created
+    result = splitNonContiguousSectors(result, osidAdjacency);
 
     // 2. Enemy pocket containment
     if (context?.politicalControllers && context?.faction) {

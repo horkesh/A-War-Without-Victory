@@ -36,6 +36,9 @@ const MIN_BRIGADES_FOR_OFFENSIVE = 3;
 /** Maximum objectives per offensive. */
 const MAX_OBJECTIVES = 6;
 
+/** Maximum brigades participating in a single sector offensive. */
+const MAX_PARTICIPATING_BRIGADES = 12;
+
 /** Momentum cap. */
 const MOMENTUM_CAP = 3;
 
@@ -866,9 +869,11 @@ export function evaluateSectorOffensiveLaunch(
     const planningDuration = computePlanningDuration(objectives.length);
     const name = pickOperationName(corpsId, turn, faction, state);
 
-    // Reserve fraction: keep 1 brigade in reserve, rest participate
+    // Reserve fraction: keep 1 brigade in reserve, rest participate (capped)
     const reserveCount = Math.max(1, Math.floor(sectorBrigadeIds.length * 0.15));
-    const participating = sectorBrigadeIds.slice(0, sectorBrigadeIds.length - reserveCount);
+    const participating = sectorBrigadeIds
+        .slice(0, sectorBrigadeIds.length - reserveCount)
+        .slice(0, MAX_PARTICIPATING_BRIGADES);
 
     // Pick staging OSID: first friendly OSID in the sector (deterministic, sorted)
     let stagingOsid: string | undefined;

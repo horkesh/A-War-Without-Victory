@@ -1700,20 +1700,23 @@ export function generateCorpsDirectives(
         avoidOsids.sort(strictCompare);
 
         // Sector density balancing: find under-density sectors needing reinforcement.
-        // Target density = total assigned brigades / total front edges for this corps.
-        // Sectors below 50% of target density get flagged for reinforcement.
+        // Threat-weighted: sectors facing more enemy forces get proportionally more brigades.
+        // Minimum weight of 0.25 per edge ensures undefended fronts still get some coverage.
         const reinforceSectorIds: string[] = [];
         if (directiveEligibleSectors.length > 1) {
             let totalAssigned = 0;
-            let totalEdges = 0;
+            let totalThreatWeight = 0;
             for (const sec of directiveEligibleSectors) {
                 totalAssigned += sec.assigned_brigade_ids.length;
-                totalEdges += sec.length_edges;
+                const threatWeight = sec.length_edges * Math.max(0.25, sec.threat_ratio);
+                totalThreatWeight += threatWeight;
             }
-            const targetDensity = totalEdges > 0 ? totalAssigned / totalEdges : 0;
             for (const sec of directiveEligibleSectors) {
-                const actualDensity = sec.length_edges > 0 ? sec.assigned_brigade_ids.length / sec.length_edges : 0;
-                if (targetDensity > 0 && actualDensity < targetDensity * 0.5) {
+                const sectorThreatWeight = sec.length_edges * Math.max(0.25, sec.threat_ratio);
+                const desiredShare = totalThreatWeight > 0 ? sectorThreatWeight / totalThreatWeight : 0;
+                const desiredBrigades = totalAssigned * desiredShare;
+                const actual = sec.assigned_brigade_ids.length;
+                if (desiredBrigades > 0 && actual < desiredBrigades * 0.5) {
                     reinforceSectorIds.push(sec.sector_id);
                 }
             }
@@ -1814,20 +1817,10 @@ export function generateCorpsDirectives(
 
                 const secEnemyOsids = [...clusterEnemyOsids].sort(strictCompare);
 
-                // If the cluster still lacks enough front-adjacent brigades, supplement
-                // with rear-area corps subordinates. Brigade AI will march them forward
-                // during the planning phase. This prevents corps from going dormant when
-                // all brigades are in home positions (not on the front line).
-                let finalBrigadeIds = secBrigadeIds;
-                if (finalBrigadeIds.length < 3) {
-                    const frontSet = new Set(finalBrigadeIds);
-                    const rear = subordinates
-                        .filter(b => b.status === 'active' && !frontSet.has(b.id))
-                        .map(b => b.id)
-                        .sort(strictCompare);
-                    finalBrigadeIds = [...finalBrigadeIds, ...rear].sort(strictCompare);
-                }
-
+                // Only brigades already in the sector cluster participate.
+                // If the cluster lacks enough brigades, skip — corps density
+                // balancing should reinforce the sector first.
+                const finalBrigadeIds = secBrigadeIds;
 
                 // Filter targets to only those adjacent to at least one friendly-held OSID.
                 // Removes unreachable deep-enemy targets from operation objectives, preventing
@@ -1954,8 +1947,9 @@ export function generateAllCorpsOrders(
     // 2. Corps stance selection
     generateCorpsStanceOrders(state, faction, edges, sidToMun);
 
-    // 3. Launch new named operations
-    generateCorpsOperationOrders(state, faction, edges, sidToMun);
+    // 3. Named operations now launch from sectors inside generateCorpsDirectives (step 6).
+    // The old catalog-based generateCorpsOperationOrders is disabled — it pulled brigades
+    // from the entire corps pool without sector assignment, creating bloated non-sector ops.
 
     // 3b. Emergency defensive operations for high-threat defensive corps
     generateEmergencyDefensiveOperations(state, faction, edges, sidToMun);
