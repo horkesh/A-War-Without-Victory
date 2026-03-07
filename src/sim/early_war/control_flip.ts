@@ -65,7 +65,7 @@ export interface ControlEvent {
     settlement_id: string;
     from: FactionId | null;
     to: FactionId | null;
-    mechanism: 'phase_i_control_flip';
+    mechanism: 'control_flip';
     mun_id: string | null;
 }
 
@@ -611,7 +611,7 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
                     settlement_id: evt.settlement_id,
                     from: fromFaction,
                     to: toFaction,
-                    mechanism: 'phase_i_control_flip',
+                    mechanism: 'control_flip',
                     mun_id: munId
                 });
             }
@@ -628,7 +628,7 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
                 settlement_id: evt.settlement_id,
                 from: evt.from,
                 to: evt.to,
-                mechanism: 'phase_i_control_flip',
+                mechanism: 'control_flip',
                 mun_id: evt.mun_id
             });
         }

@@ -63,3 +63,25 @@ export function collectSectorFriendlyOsids(
   }
   return [...osids].sort();
 }
+
+/**
+ * Build a lookup map from OSID to sector_id.
+ * Used for hover previews where hovering an OSID highlights the entire sector.
+ */
+export function buildOsidToSectorMap(
+  corpsFrontSectors: SectorView[],
+  frontEdgesOsid: FrontEdgeView[]
+): Map<string, string> {
+  const osidToSector = new Map<string, string>();
+  for (const sector of corpsFrontSectors) {
+    const friendlyOsids = collectSectorFriendlyOsids(sector, frontEdgesOsid);
+    for (const osid of friendlyOsids) {
+      // If an OSID belongs to multiple sectors (rare/overlap), first one wins for hover.
+      if (!osidToSector.has(osid)) {
+        osidToSector.set(osid, sector.sector_id);
+      }
+    }
+  }
+  return osidToSector;
+}
+

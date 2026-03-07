@@ -4,13 +4,17 @@ import type { StartNewCampaignPayload } from './types';
 export interface CorpsOperationOrderPayload {
     corpsId: string;
     name: string;
-    type: 'general_offensive' | 'sector_attack' | 'strategic_defense' | 'reorganization';
+    type: 'general_offensive' | 'sector_attack' | 'strategic_defense' | 'reorganization' | 'feint' | 'probe';
     targetSettlements: string[];
     participatingBrigades: string[];
     sectorId?: string;
     objectives?: string[];
     planningDuration?: number;
     stagingOsid?: string;
+    minAttackOutcome?: 'decisive_victory' | 'victory' | 'costly_victory' | 'stalemate' | 'repulsed';
+    tempo?: 'methodical' | 'standard' | 'all_out';
+    schwerpunktOsid?: string;
+    artilleryPreparation?: boolean;
 }
 
 /** Shape of window.awwv as exposed by preload.cjs. */
@@ -34,7 +38,14 @@ interface WindowAwwv {
     stageCorpsAttackAxisOrder: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     stageOgSubfrontOrder: (ogId: string, corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsStanceOrder: (corpsId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
+    stageSectorStanceOrder: (sectorId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
+    stageLogisticsPriority: (faction: string, sectorId: string, priority: number) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsOperationOrder: (payload: CorpsOperationOrderPayload) => Promise<{ ok: boolean; error?: string }>;
+    stageOperationHalt: (payload: { corpsId: string; operationName: string; digInOnHalt: boolean }) => Promise<{ ok: boolean; error?: string }>;
+    stageOperationForceLaunch: (payload: { corpsId: string; operationName: string }) => Promise<{ ok: boolean; error?: string }>;
+    stageAirdropAllocation: (allocations: Record<string, number>) => Promise<{ ok: boolean; error?: string }>;
+    stageConvoyDecision: (convoyId: string, decision: 'allow' | 'block' | 'divert') => Promise<{ ok: boolean; error?: string }>;
+    stageOpsecToggle: (sectorId: string, active: boolean) => Promise<{ ok: boolean; error?: string }>;
     clearOrders: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     assignBrigadeToFront: (brigadeId: string, frontId: string) => Promise<{ ok: boolean; error?: string }>;
     renameFrontSegment: (frontId: string, name: string) => Promise<{ ok: boolean; error?: string }>;
@@ -151,6 +162,34 @@ export function useIPC() {
             stageCorpsStanceOrder: awwv
                 ? (corpsId: string, stance: string) => awwv.stageCorpsStanceOrder(corpsId, stance)
                 : makeNoop<{ ok: boolean; error?: string }>(),
+
+            stageSectorStanceOrder: awwv
+                ? (sectorId: string, stance: string) => awwv.stageSectorStanceOrder(sectorId, stance)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            stageLogisticsPriority: awwv
+                ? (faction: string, sectorId: string, priority: number) => awwv.stageLogisticsPriority(faction, sectorId, priority)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            stageOperationHalt: awwv
+                ? (payload: { corpsId: string; operationName: string; digInOnHalt: boolean }) => awwv.stageOperationHalt(payload)
+                : (_payload: { corpsId: string; operationName: string; digInOnHalt: boolean }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
+
+            stageOperationForceLaunch: awwv
+                ? (payload: { corpsId: string; operationName: string }) => awwv.stageOperationForceLaunch(payload)
+                : (_payload: { corpsId: string; operationName: string }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
+
+            stageAirdropAllocation: awwv
+                ? (allocations: Record<string, number>) => awwv.stageAirdropAllocation(allocations)
+                : (_allocations: Record<string, number>) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
+
+            stageConvoyDecision: awwv
+                ? (convoyId: string, decision: 'allow' | 'block' | 'divert') => awwv.stageConvoyDecision(convoyId, decision)
+                : (_convoyId: string, _decision: 'allow' | 'block' | 'divert') => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
+
+            stageOpsecToggle: awwv
+                ? (sectorId: string, active: boolean) => awwv.stageOpsecToggle(sectorId, active)
+                : (_sectorId: string, _active: boolean) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
 
             clearOrders: awwv
                 ? (brigadeId: string) => awwv.clearOrders(brigadeId)

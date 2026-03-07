@@ -1,5 +1,5 @@
 /**
- * Phase II: Ambient cohesion drift by faction/turn (Part 7b) and manpower exhaustion penalty (Part 7c).
+ * War-phase ambient cohesion drift by faction/turn (Part 7b) and manpower exhaustion penalty (Part 7c).
  * RS decays over time; RBiH improves; HRHB stable. Exhaustion penalty when pool ratio exceeds threshold.
  * Skipped for formations engaged in combat this turn (use engaged_formation_ids from attack resolution report).
  * Deterministic: formations and pool keys in sorted order.
@@ -32,6 +32,22 @@ function getFactionExhaustionRatio(state: GameState, faction: FactionId): number
     }
     const total = committed + available;
     return total <= 0 ? 0 : committed / total;
+}
+
+function isFormationInOpsecSector(state: GameState, formation: FormationState): boolean {
+    const opsecSectors = state.opsec_sectors ?? [];
+    if (opsecSectors.length === 0 || !formation.location_osid || !state.corps_front_sectors) return false;
+    const activeOpsec = new Set(opsecSectors);
+    for (const sectorId of activeOpsec) {
+        const sector = state.corps_front_sectors[sectorId];
+        if (!sector || sector.faction !== formation.faction) continue;
+        for (const subSegment of sector.sub_segments ?? []) {
+            if (subSegment.friendly_osids.includes(formation.location_osid)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /**
@@ -89,7 +105,7 @@ export interface CohesionDriftReport {
  * Apply ambient cohesion drift and exhaustion penalty to brigades not engaged in combat this turn.
  * Mutates state.formations. Deterministic.
  */
-export function runPhaseIICohesionDrift(
+export function runCohesionDrift(
     state: GameState,
     engagedFormationIds: FormationId[] | Set<string>
 ): CohesionDriftReport {
@@ -121,6 +137,9 @@ export function runPhaseIICohesionDrift(
         // B4: Enclave cohesion recovery — besieged formations adapt over time
         const enclaveRecovery = getEnclaveCohesionRecovery(state, f.location_osid);
         drift += enclaveRecovery;
+        if (drift > 0 && isFormationInOpsecSector(state, f)) {
+            drift *= 0.5;
+        }
         const prev = Math.max(0, Math.min(100, f.cohesion ?? 60));
         // Apply drift
         let next = Math.max(0, Math.min(100, prev + drift));
@@ -136,3 +155,5 @@ export function runPhaseIICohesionDrift(
     }
     return report;
 }
+
+export const runPhaseIICohesionDrift = runCohesionDrift;

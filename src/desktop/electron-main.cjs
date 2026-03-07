@@ -58,6 +58,22 @@ function sendTurnReportToRenderer(report) {
   }
 }
 
+function ensureCorpsCommandEntry(state, corpsId, stance = 'balanced') {
+  if (!state.corps_command) state.corps_command = {};
+  if (!state.corps_command[corpsId]) {
+    state.corps_command[corpsId] = {
+      command_span: 5,
+      subordinate_count: 0,
+      og_slots: 1,
+      active_ogs: [],
+      corps_exhaustion: 0,
+      stance,
+      active_operation: null,
+    };
+  }
+  return state.corps_command[corpsId];
+}
+
 // Must run before app.whenReady()
 if (protocol && protocol.registerSchemesAsPrivileged) {
   protocol.registerSchemesAsPrivileged([{ scheme: 'awwv', privileges: { standard: true, supportFetchAPI: true } }]);
@@ -1016,20 +1032,8 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      if (!state.corps_command) state.corps_command = {};
-      if (!state.corps_command[corpsId]) {
-        state.corps_command[corpsId] = {
-          command_span: 5,
-          subordinate_count: 0,
-          og_slots: 1,
-          active_ogs: [],
-          corps_exhaustion: 0,
-          stance: stance,
-          active_operation: null,
-        };
-      } else {
-        state.corps_command[corpsId].stance = stance;
-      }
+      const corpsCommand = ensureCorpsCommandEntry(state, corpsId, stance);
+      corpsCommand.stance = stance;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };
@@ -1039,31 +1043,34 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle('stage-corps-operation-order', async (_event, payload) => {
-    const { corpsId, name, type, targetSettlements, participatingBrigades, sectorId, objectives, planningDuration, stagingOsid } = payload || {};
+    const {
+      corpsId,
+      name,
+      type,
+      targetSettlements,
+      participatingBrigades,
+      sectorId,
+      objectives,
+      planningDuration,
+      stagingOsid,
+      minAttackOutcome,
+      tempo,
+      schwerpunktOsid,
+      artilleryPreparation
+    } = payload || {};
     if (!currentGameStateJson || typeof corpsId !== 'string' || typeof name !== 'string' || typeof type !== 'string') {
       return { ok: false, error: 'No game loaded or invalid payload' };
     }
-    const validTypes = ['general_offensive', 'sector_attack', 'strategic_defense', 'reorganization'];
+    const validTypes = ['general_offensive', 'sector_attack', 'strategic_defense', 'reorganization', 'feint', 'probe'];
     if (!validTypes.includes(type)) {
       return { ok: false, error: `Invalid operation type: ${type}` };
     }
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      if (!state.corps_command) state.corps_command = {};
-      if (!state.corps_command[corpsId]) {
-        state.corps_command[corpsId] = {
-          command_span: 5,
-          subordinate_count: 0,
-          og_slots: 1,
-          active_ogs: [],
-          corps_exhaustion: 0,
-          stance: 'balanced',
-          active_operation: null,
-        };
-      }
+      const corpsCommand = ensureCorpsCommandEntry(state, corpsId);
       const turn = state.meta?.turn ?? 0;
-      state.corps_command[corpsId].active_operation = {
+      corpsCommand.active_operation = {
         name,
         type,
         phase: 'planning',
@@ -1077,7 +1084,176 @@ app.whenReady().then(() => {
         staging_osid: typeof stagingOsid === 'string' ? stagingOsid : undefined,
         momentum: 0,
         current_objective_index: 0,
+        min_attack_outcome: typeof minAttackOutcome === 'string' ? minAttackOutcome : undefined,
+        tempo: typeof tempo === 'string' ? tempo : undefined,
+        schwerpunkt_osid: typeof schwerpunktOsid === 'string' ? schwerpunktOsid : undefined,
+        artillery_preparation: artilleryPreparation === true,
       };
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-sector-stance-order', async (_event, payload) => {
+    const { sectorId, stance } = payload || {};
+    if (!currentGameStateJson || typeof sectorId !== 'string' || typeof stance !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    const validStances = ['dig_in', 'elastic_defense', 'defend_at_all_costs', 'hold'];
+    if (!validStances.includes(stance)) {
+      return { ok: false, error: `Invalid sector stance: ${stance}` };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const nextOrders = Array.isArray(state.sector_stance_orders) ? [...state.sector_stance_orders] : [];
+      const filtered = nextOrders.filter((order) => order?.sector_id !== sectorId);
+      filtered.push({ sector_id: sectorId, stance });
+      state.sector_stance_orders = filtered;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-logistics-priority', async (_event, payload) => {
+    const { faction, sectorId, priority } = payload || {};
+    if (!currentGameStateJson || typeof faction !== 'string' || typeof sectorId !== 'string' || typeof priority !== 'number') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const sector = state.corps_front_sectors?.[sectorId];
+      if (!sector) {
+        return { ok: false, error: `Unknown sector: ${sectorId}` };
+      }
+      if (!state.logistics_priority) state.logistics_priority = {};
+      if (!state.logistics_priority[faction]) state.logistics_priority[faction] = {};
+      for (const edgeId of sector.edge_ids ?? []) {
+        state.logistics_priority[faction][edgeId] = priority;
+      }
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-operation-halt', async (_event, payload) => {
+    const { corpsId, operationName, digInOnHalt } = payload || {};
+    if (!currentGameStateJson || typeof corpsId !== 'string' || typeof operationName !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const op = state.corps_command?.[corpsId]?.active_operation;
+      if (!op || op.name !== operationName) {
+        return { ok: false, error: 'Operation not found' };
+      }
+      op.recovery_reason = 'manual_termination';
+      op.dig_in_on_halt = digInOnHalt === true;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-operation-force-launch', async (_event, payload) => {
+    const { corpsId, operationName } = payload || {};
+    if (!currentGameStateJson || typeof corpsId !== 'string' || typeof operationName !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const op = state.corps_command?.[corpsId]?.active_operation;
+      if (!op || op.name !== operationName) {
+        return { ok: false, error: 'Operation not found' };
+      }
+      op.force_launch = true;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-airdrop-allocation', async (_event, payload) => {
+    const allocations = payload?.allocations;
+    if (!currentGameStateJson || !allocations || typeof allocations !== 'object' || Array.isArray(allocations)) {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const nextAllocations = {};
+      for (const enclaveId of Object.keys(allocations).sort()) {
+        const rawValue = allocations[enclaveId];
+        if (typeof rawValue !== 'number' || !Number.isFinite(rawValue) || rawValue < 0) continue;
+        nextAllocations[enclaveId] = rawValue;
+      }
+      state.airdrop_allocation = nextAllocations;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-convoy-decision', async (_event, payload) => {
+    const { convoyId, decision } = payload || {};
+    if (!currentGameStateJson || typeof convoyId !== 'string' || typeof decision !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    if (!['allow', 'block', 'divert'].includes(decision)) {
+      return { ok: false, error: `Invalid convoy decision: ${decision}` };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const pending = Array.isArray(state.pending_convoy_decisions) ? [...state.pending_convoy_decisions] : [];
+      let found = false;
+      state.pending_convoy_decisions = pending.map((convoy) => {
+        if (convoy?.id !== convoyId) return convoy;
+        found = true;
+        return { ...convoy, decision };
+      });
+      if (!found) {
+        return { ok: false, error: 'Convoy not found' };
+      }
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-opsec-toggle', async (_event, payload) => {
+    const { sectorId, active } = payload || {};
+    if (!currentGameStateJson || typeof sectorId !== 'string' || typeof active !== 'boolean') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const current = Array.isArray(state.opsec_sectors) ? [...state.opsec_sectors] : [];
+      const next = active
+        ? Array.from(new Set([...current, sectorId])).sort()
+        : current.filter((id) => id !== sectorId).sort();
+      state.opsec_sectors = next;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };

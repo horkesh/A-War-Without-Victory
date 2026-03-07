@@ -25,7 +25,7 @@ export {
 } from './declaration_pressure.js';
 
 export {
-    OUTCOME_NON_WAR_TERMINAL, REFERENDUM_DEADLINE_TURNS_DEFAULT, REFERENDUM_WAR_DELAY_TURNS, applyPhase0ToPhaseITransition, applyScheduledReferendum, checkReferendumDeadline, holdReferendum, isReferendumEligible, isWarStartTurn, updateReferendumEligibility, type ReferendumEligibilityOptions
+    OUTCOME_NON_WAR_TERMINAL, REFERENDUM_DEADLINE_TURNS_DEFAULT, REFERENDUM_WAR_DELAY_TURNS, applyWarTransition, applyScheduledReferendum, checkReferendumDeadline, holdReferendum, isReferendumEligible, isWarStartTurn, updateReferendumEligibility, type ReferendumEligibilityOptions
 } from './referendum.js';
 
 export { runPhase0Turn, type Phase0TurnOptions } from './turn.js';

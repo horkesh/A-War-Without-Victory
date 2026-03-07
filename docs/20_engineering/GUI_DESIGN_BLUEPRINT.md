@@ -144,7 +144,7 @@ A single 48px strip across the top. Dark background (#1a1a2e). Divided into zone
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ [⚙] │ WEEK 23 │ APR 1992 + 23w │ ▶ ADVANCE │ █████ │ MAP LAYERS ▼ │ 🔍 │
-│     │ Phase II │ Sat 15 Sep '92 │  [AUTO▶]  │ Zoom  │              │    │
+│     │ War      │ Sat 15 Sep '92 │  [AUTO▶]  │ Zoom  │              │    │
 └──────────────────────────────────────────────────────────────────────────┘
   ↑        ↑            ↑              ↑          ↑          ↑          ↑
  Menu   Turn/Phase  Calendar Date  Turn Controls  Zoom    Layer Menu  Search
@@ -155,7 +155,7 @@ A single 48px strip across the top. Dark background (#1a1a2e). Divided into zone
 | Element | Description | Data Binding |
 |---------|-------------|--------------|
 | **Menu gear** | Opens dropdown: New, Load, Save, Settings, Quit | — |
-| **Turn indicator** | `WEEK 23` in large monospace, `Phase II` below in smaller text | `state.meta.turn`, `state.meta.phase` |
+| **Turn indicator** | `WEEK 23` in large monospace, phase name (`War`/`Peace`) below in smaller text | `state.meta.turn`, `state.meta.phase` |
 | **Calendar date** | Derived from scenario start date + turn weeks. "Sat 15 Sep '92" format. Display-only, never in state. | Derived from scenario `start_date` + `meta.turn × 7` |
 | **ADVANCE button** | Primary action button. Green background, white text. Prominent. Pulses faintly when it's the player's turn. Text: `▶ ADVANCE WEEK` | Triggers turn pipeline |
 | **Auto-advance** | `[AUTO ▶]` toggle. When on, advances every N seconds (configurable 1-10s). Shows progress: `Week 23/52`. For "run to end" mode. | — |
@@ -223,7 +223,7 @@ Always visible at the top. Shows the strategic picture at a glance.
 - Population: sum `militia_pools[].available + committed + exhausted` per faction, or derived from settlement population data
 - Personnel: sum `formations[].personnel` per faction, with delta from last turn
 - Casualties: `casualty_ledger[faction].killed`, `.wounded`, `.missing_captured`
-- Exhaustion: `phase_ii_exhaustion[faction]` — bar visualization, 0-100 scale
+- Exhaustion: `war_exhaustion[faction]` — bar visualization, 0-100 scale
 
 ### 5.2 Section: ORDER OF BATTLE (OOB)
 
@@ -1035,7 +1035,7 @@ Accessed via `F5` or menu. Shows the "Pentagon briefing slide" — the strategic
 ║                                                                        ║
 ║  ┌─ KEY EVENTS ──────────────────────────────────────────────────────┐ ║
 ║  │ W4:  War begins (referendum + 4 weeks)                             │ ║
-║  │ W8:  Phase I → Phase II transition                                 │ ║
+║  │ W8:  Peace → War transition                                        │ ║
 ║  │ W12: Sarajevo siege begins (status: BESIEGED)                      │ ║
 ║  │ W18: First named operation: OP CORRIDOR '92                        │ ║
 ║  │ W21: RBiH-HRHB alliance strained (value dropped to 0.15)          │ ║
@@ -1157,9 +1157,9 @@ Shows available scenario files from `data/scenarios/` when the user chooses "Loa
 ║  │   Three-way conflict. Ethnic 1991 init. Full OOB.             │  ║
 ║  │   File: historical_mvp_apr1992_52w.json                        │  ║
 ║  ├────────────────────────────────────────────────────────────────┤  ║
-║  │ ○ April 1992 — Phase II Quick Start (4 weeks)                 │  ║
-║  │   Skip Phase I, start in Phase II. Test combat.                │  ║
-║  │   File: apr1992_phase_ii_4w.json                               │  ║
+║  │ ○ April 1992 — War Quick Start (4 weeks)                       │  ║
+║  │   Start directly in war phase. Test combat.                    │  ║
+║  │   File: apr1992_war_4w.json                                    │  ║
 ║  ├────────────────────────────────────────────────────────────────┤  ║
 ║  │ ○ April 1992 — Bot vs Bot (50 weeks)                          │  ║
 ║  │   All factions bot-controlled. Observation mode.               │  ║
@@ -1336,7 +1336,7 @@ Quick reference for engineers — where each UI element gets its data.
 | Territory % per faction | count of `political_controllers` values per faction / total | derived |
 | Personnel per faction | sum `formations[fid].personnel` where `formations[fid].faction === faction` | derived |
 | Casualties per faction | `casualty_ledger[faction]` | CasualtyLedger |
-| Exhaustion per faction | `phase_ii_exhaustion[faction]` | number |
+| Exhaustion per faction | `war_exhaustion[faction]` | number |
 | Brigade list | `Object.values(formations).filter(f => f.kind === 'brigade')` | FormationState[] |
 | Brigade posture | `formations[fid].posture` | BrigadePosture |
 | Brigade personnel | `formations[fid].personnel` | number |
@@ -1350,11 +1350,11 @@ Quick reference for engineers — where each UI element gets its data.
 | Settlement controller | `political_controllers[sid]` | FactionId \| null |
 | Settlement AoR brigade | `brigade_aor[sid]` | FormationId \| null |
 | Front segments | `front_segments[edge_id]` | FrontSegmentState |
-| Supply pressure | `phase_ii_supply_pressure[faction]` | number |
+| Supply pressure | `supply_pressure[faction]` | number |
 | IVP | `international_visibility_pressure` | IVP interface |
 | Patron state | `factions[i].patron_state` | PatronState |
 | Embargo | `factions[i].embargo_profile` | EmbargoProfile |
-| Alliance RBiH-HRHB | `phase_i_alliance_rbih_hrhb` | number |
+| Alliance RBiH-HRHB | `war_alliance_rbih_hrhb` | number |
 | Displacement | `displacement_state[mun_id]` | DisplacementState |
 | Recruitment resources | `recruitment_state` | RecruitmentResourceState |
 | Militia pools | `militia_pools` | Record |
@@ -1386,7 +1386,7 @@ All symbols rendered in faction color on dark background with white border.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ [⚙] WEEK 23 │ Phase II │ 15 Sep '92 │ ▶ ADVANCE WEEK │ [AUTO▶] │ ZOOM ●●○ │ 🔍      │
+│ [⚙] WEEK 23 │ War      │ 15 Sep '92 │ ▶ ADVANCE WEEK │ [AUTO▶] │ ZOOM ●●○ │ 🔍      │
 ├──────────┬─────────────────────────────────────────────────────────────┬───────────────┤
 │          │                                                             │               │
 │ WAR      │                                                             │  [ INTEL ]    │

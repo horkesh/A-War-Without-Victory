@@ -1,7 +1,8 @@
-# AoR / ZoC / Phase-I·II Legacy Audit
+# AoR / ZoC / Peace·War Legacy Audit
 
 **Created:** 2026-03-02
-**Expanded:** 2026-03-04 — corrected ZoC status (deleted, not active), added Phase I/II section, confirmed AoR consumer list
+**Expanded:** 2026-03-04 — corrected ZoC status (deleted, not active), added Peace/War naming section, confirmed AoR consumer list
+**Updated:** 2026-03-07 — Phase I/II terminology purged from codebase; pipeline step names renamed (`militia-emergence`, `cohesion-drift`, etc.); type/function renames complete (`JNATransitionState`, `FrontDescriptor`, `createOobFormations`, `applyWarTransition`, `isEarlyWarAllowed`, `processDisplacementTakeover`, `runCohesionDrift`, `runMoraleDrift`)
 **R1-R3 completed:** 2026-03-04 — dead AoR files deleted, all consumers migrated, ZoC + AoR doc tombstones applied
 **Purpose:** Exhaustive inventory of all legacy references across codebase with phased removal plan.
 
@@ -13,7 +14,7 @@
 |--------|-------------|------------|-----------------|
 | **AoR** | ✅ R1-R3 complete — dead files deleted, consumers migrated to OSID/hq_sid. `brigade_aor_legacy.ts` + `aor_instantiation.ts` remain (still compile, no active callers outside legacy tests) | Stale refs in 3 canon + 3 eng docs | R4: update canon peace/war framing; R5: cosmetic type renames (optional) |
 | **ZoC** | ✅ Fully deleted (2026-03-02) | ✅ R2 complete — 12 docs updated with tombstone notes | Done |
-| **Phase I/II naming** | Pipeline step names load-bearing (keep); minor type names are cosmetic | ✅ R4 partial — peace/war framing updated in 4 canon docs | R5: optional type renames (not blocking) |
+| **Peace/War naming** | ✅ Pipeline step names renamed (e.g. `militia-emergence`, `cohesion-drift`); type/function renames complete | ✅ R4+R5 complete — peace/war framing in canon + eng docs; codebase purged | Done |
 
 ---
 
@@ -117,7 +118,7 @@ These files have no active pipeline callers. Deletion = zero behavioral change.
 
 **Update when code is removed:**
 - `docs/10_canon/Systems_Manual_v0_6_0.md` — §8 mentions AoR removal; update to reflect complete removal
-- `docs/10_canon/context.md` — "Phase II spatial model (OSID/ZoC/Corps Sectors; AoR removed)" — update ZoC part too
+- `docs/10_canon/context.md` — war-phase spatial model framing — update to current terminology
 - `docs/20_engineering/REPO_MAP.md` — remove deleted file entries from file list
 - `docs/20_engineering/PIPELINE_ENTRYPOINTS.md` — remove any AoR pipeline refs
 - `docs/20_engineering/GUI_DESIGN_BLUEPRINT.md` — remove "AREA OF RESPONSIBILITY" display mockup
@@ -165,7 +166,7 @@ These files still describe ZoC as present and active. They need targeted updates
 | `docs/10_canon/Systems_Manual_v0_6_0.md` | §8 "OSID/ZoC/Corps Sectors" | Remove ZoC from §8; update to "OSID/Corps Sectors/Frontage" |
 | `docs/10_canon/Phase_Specifications_v0_6_0.md` | "War phase includes ZoC" | Remove ZoC from war phase description |
 | `docs/10_canon/War_Specification_v0_6_0.md` | "ZoC-constrained movement" | Replace with movement order mechanics |
-| `docs/10_canon/context.md` | "Phase II spatial model (OSID/ZoC/Corps Sectors)" | Remove ZoC; add frontage cap + local_front_defense |
+| `docs/10_canon/context.md` | "War-phase spatial model (OSID/Corps Sectors/Frontage)" | ✅ Updated — ZoC removed, frontage cap + local_front_defense added |
 
 **Engineering (5 files — must update):**
 
@@ -186,55 +187,36 @@ These files still describe ZoC as present and active. They need targeted updates
 
 ---
 
-## Part 3: Phase I / Phase II Naming
+## Part 3: Peace / War Naming (formerly Phase I / Phase II)
 
-### 3A. Load-Bearing Pipeline Step Names (DO NOT RENAME)
+### 3A. Pipeline Step Names — ✅ RENAMED (2026-03-07)
 
-These `phase-i-*` and `phase-ii-*` strings are embedded in serialized `TurnReport` objects and save files. Renaming them would break save compatibility.
+Pipeline step names have been renamed to remove Phase I/II prefixes:
+- `militia-emergence` (was `phase-i-militia-emergence`), `pool-population`, `minority-militia-decay`, `brigade-reinforcement`, `formation-spawn`, `control-flip`, `displacement-hooks`, `control-strain`, `authority-update`, `jna-transition`
+- `cohesion-drift` (was `phase-ii-cohesion-drift`), `morale-drift`, `supply-osid`, `enclave-resilience`, `resolve-attack-orders`, etc.
 
-**Keep exactly as-is:**
-- `peace_phases.ts`: `phase-i-militia-emergence`, `phase-i-pool-population`, `phase-i-minority-militia-decay`, `phase-i-brigade-reinforcement`, `phase-i-formation-spawn`, `phase-i-control-flip`, `phase-i-displacement-hooks`, `phase-i-control-strain`, `phase-i-authority-update`, `phase-i-jna-transition`
-- `war_phases.ts`: `phase-ii-supply-osid`, `phase-ii-enclave-resilience`, `phase-ii-resolve-attack-orders`, `phase-ii-brigade-reinforcement`, etc.
-- `run_early_war_browser.ts`, `run_combat_browser.ts`: Browser-side step name lists
+### 3B. Run Summary Fields — ✅ RENAMED (2026-03-07)
 
-### 3B. Run Summary Fields (keep — historical naming convention)
+Run summary fields updated to remove Phase I/II prefixes.
 
-In `scenario_runner.ts` and `scenario_end_report.ts`:
-- `weeks_with_phase_ii`, `phaseIIAttackResolutionSummary`, `phaseIITakeoverDisplacementSummary`
+### 3C. Type Names and Function Names — ✅ RENAMED (2026-03-07)
 
-These appear in final_save.json outputs read by external tools. Renaming risks breaking tooling. Mark as "historical naming" in comments if confusion arises, but do not rename.
+All internal type/function renames completed:
 
-### 3C. Type Names and Function Names (low-priority rename candidates)
+| Old Name | New Name |
+|---|---|
+| `PhaseIJNAState` | `JNATransitionState` |
+| `PhaseIIFrontDescriptor` | `FrontDescriptor` |
+| `createOobFormationsAtPhaseIEntry` | `createOobFormations` |
+| `applyPhase0ToPhaseITransition` | `applyWarTransition` |
+| `isPhaseIAllowed` | `isEarlyWarAllowed` |
+| `processPhaseIIDisplacementTakeover` | `processDisplacementTakeover` |
+| `runPhaseIICohesionDrift` | `runCohesionDrift` |
+| `runPhaseIIMoraleDrift` | `runMoraleDrift` |
 
-These are internal and can be renamed with a small-scope refactor. None are in public API or save format.
+### 3D. Canon and Engineering Documentation — ✅ UPDATED (2026-03-07)
 
-| Current Name | Suggested Rename | Files | Effort |
-|---|---|---|---|
-| `PhaseIJNAState` | `EarlyWarJNAState` | `game_state.ts`, `referendum.ts` | 1h |
-| `applyPhase0ToPhaseITransition` | `applyPeaceToWarTransition` | `referendum.ts`, callers | 2h |
-| `phase_i_militia_strength` (GameState field) | `early_war_militia_strength` | `game_state.ts`, `militia_emergence.ts`, `scenario_runner.ts` | 2h + save migration |
-| `PHASE_I_DISPLACEMENT_FRACTION_NO_CENSUS` | `EARLY_WAR_DISPLACEMENT_FRACTION_NO_CENSUS` | `displacement.ts` | 30m |
-| `PhaseIDisplacementFlipInfo` | `EarlyWarDisplacementFlipInfo` | `displacement.ts` | 30m |
-| `assertNoAoRInPhaseI` | `assertNoAoRInEarlyWar` | `peace_phases.ts`, `run_early_war_browser.ts` | 30m |
-
-**Note on `phase_i_militia_strength`:** This is a GameState field that appears in serialized saves. Renaming requires a migration function in `normalizeScenario` / `loadState`, similar to past migrations. Non-trivial but doable.
-
-### 3D. Canon Documentation (stale architecture description)
-
-The canon docs still describe the system in terms of "Phase 0 / Phase I / Phase II" when the correct framing is now "peace / war". These need targeted edits — not full rewrites.
-
-**Files to update:**
-| File | What to Change |
-|------|---------------|
-| `docs/10_canon/context.md` | "Phase II spatial model" → "war phase spatial model (OSID/Corps Sectors/Frontage)" |
-| `docs/10_canon/Systems_Manual_v0_6_0.md` | §1 architecture overview — replace Phase I/II framing with peace/war framing |
-| `docs/10_canon/Phase_Specifications_v0_6_0.md` | Update cross-references to use peace/war terminology |
-| `docs/10_canon/War_Specification_v0_6_0.md` | Remove "supersedes Phase_I/II" header note (move to historical footnote) |
-
-**Leave as-is (historical):**
-- `docs/20_engineering/PHASE_I_OVERHAUL_MILITIA_TO_BRIGADES.md` — historical design doc
-- `docs/30_planning/PHASE_I_II_EDGE_CASES.md` — historical spec
-- All `docs/40_reports/` mentions — historical record
+All canon and engineering docs updated to use Peace/War terminology. Historical planning docs (`PHASE_I_OVERHAUL_MILITIA_TO_BRIGADES.md`, `PHASEI_NOFLIP_SCENARIO_AUTHOR_CHECKLIST.md`) retain legacy terminology with deprecation notes.
 
 ---
 
@@ -256,14 +238,13 @@ The canon docs still describe the system in terms of "Phase 0 / Phase I / Phase 
 **Note:** `brigade_aor_legacy.ts` + `aor_instantiation.ts` + `LegacyBrigadeAoRState` deliberately retained (still compile, used by legacy test stubs). Full deletion deferred to R3-final when legacy tests are updated.
 **Commit:** `23a39fa`
 
-### ✅ Phase R4: AoR + Phase I/II Doc Cleanup — COMPLETE (2026-03-04)
-**Scope:** peace/war terminology updated in 4 canon docs. ZoC tombstone already done by R2.
-**Pattern:** Replaced "Phase I / Phase II" with "peace phase / war phase" where architectural. Pipeline step names (phase-i-*, phase-ii-*) left unchanged.
+### ✅ Phase R4: AoR + Peace/War Doc Cleanup — COMPLETE (2026-03-04)
+**Scope:** Peace/War terminology updated in 4 canon docs. ZoC tombstone already done by R2.
+**Pattern:** Replaced "Phase I / Phase II" with "peace phase / war phase" where architectural.
 
-### Phase R5: Phase I/II Type Renames (Optional, Low Priority)
-**Scope:** ~7 type/function/constant renames. `phase_i_militia_strength` GameState field rename requires save migration.
-**Recommendation:** Only do this if actively working in those files. Not worth a dedicated session.
-**Candidates:** `PhaseIJNAState` → `EarlyWarJNAState`; `applyPhase0ToPhaseITransition` → `applyPeaceToWarTransition`; `PHASE_I_DISPLACEMENT_FRACTION_NO_CENSUS` → `EARLY_WAR_DISPLACEMENT_FRACTION_NO_CENSUS`; `PhaseIDisplacementFlipInfo` → `EarlyWarDisplacementFlipInfo`; `assertNoAoRInPhaseI` → `assertNoAoRInEarlyWar`
+### ✅ Phase R5: Peace/War Type + Pipeline Renames — COMPLETE (2026-03-07)
+**Scope:** All type/function/constant/pipeline-step renames completed. Phase I/II terminology fully purged from codebase.
+**Completed:** `PhaseIJNAState` → `JNATransitionState`; `PhaseIIFrontDescriptor` → `FrontDescriptor`; `createOobFormationsAtPhaseIEntry` → `createOobFormations`; `applyPhase0ToPhaseITransition` → `applyWarTransition`; `isPhaseIAllowed` → `isEarlyWarAllowed`; `processPhaseIIDisplacementTakeover` → `processDisplacementTakeover`; `runPhaseIICohesionDrift` → `runCohesionDrift`; `runPhaseIIMoraleDrift` → `runMoraleDrift`; pipeline steps: `phase-i-militia-emergence` → `militia-emergence`, `phase-ii-cohesion-drift` → `cohesion-drift`, etc.
 
 ---
 
@@ -273,15 +254,15 @@ The canon docs still describe the system in terms of "Phase 0 / Phase I / Phase 
 |----------|-----------|-----------------|------------|-------------|
 | AoR | 10 files | 25 files | 6 docs | 41 |
 | ZoC | 0 (deleted) | 0 | 12 docs | 12 |
-| Phase I/II naming | 0 | ~20 (load-bearing, keep) | 4 canon docs | ~24 |
+| Peace/War naming | 0 (fully renamed) | 0 | 0 (all updated) | Done |
 | **Total** | **10** | **25** | **22** | **~77** |
 
 ---
 
 ## What NOT to Do
 
-- **Do not rename pipeline step names** (`phase-i-*`, `phase-ii-*`) — save compat
+- ~~**Do not rename pipeline step names**~~ — ✅ Renamed 2026-03-07 (save migration handled)
 - **Do not delete `osid_adjacency.ts`** — still actively used (was extracted from ZoC, serves adjacency queries)
 - **Do not remove AoR consumers before migrating them** — will break battle resolution, movement, garrison
 - **Do not touch `docs/40_reports/` or `docs/_old/`** — historical record, leave as-is
-- **Do not rename `phase_i_militia_strength` without a save migration function**
+- ~~**Do not rename `phase_i_militia_strength` without a save migration function**~~ — ✅ Renamed 2026-03-07

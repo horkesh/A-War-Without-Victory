@@ -76,7 +76,7 @@ test('Pipeline: Phase E reports are populated when phase_ii', async () => {
 
     // Phase E reports should exist (even if empty/no-op)
     assert.ok('phase_e_pressure_update' in result.report, 'phase_e_pressure_update report exists');
-    assert.ok('phase_ii_front_emergence' in result.report, 'phase_ii_front_emergence report exists');
+    assert.ok('front_emergence_report' in result.report, 'front_emergence_report report exists');
     assert.ok('phase_e_aor_derivation' in result.report, 'phase_e_aor_derivation report exists');
     assert.ok('phase_e_rear_zone_derivation' in result.report, 'phase_e_rear_zone_derivation report exists');
 });
@@ -109,8 +109,8 @@ test('Pipeline: Phase E derivation is deterministic (same state + edges → same
 
     // Phase E reports should be identical for same inputs
     assert.deepStrictEqual(
-        result1.report.phase_ii_front_emergence,
-        result2.report.phase_ii_front_emergence,
-        'phase_ii_front_emergence is deterministic'
+        result1.report.front_emergence_report,
+        result2.report.front_emergence_report,
+        'front_emergence_report is deterministic'
     );
 });

@@ -3,7 +3,7 @@
  *
  * In bottom_up recruitment mode, corps are NOT all created at Phase I entry.
  * Instead they activate at their historical `available_from` turn:
- *   - RS (VRS): available_from 0 — created at Phase I entry by createOobFormationsAtPhaseIEntry
+ *   - RS (VRS): available_from 0 — created at Phase I entry by createOobFormations
  *   - HRHB (HVO OZs): available_from 10 — activated by this step at turn 10
  *   - RBiH (ARBiH corps): available_from 24 — activated by this step at turn 24
  *

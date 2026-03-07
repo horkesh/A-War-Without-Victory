@@ -28,7 +28,11 @@ export function OpsPlanningModal() {
     const controlGeoRef = useRef<FeatureCollection<Polygon | MultiPolygon> | null>(null);
     const centroidLookupRef = useRef<Map<string, [number, number]>>(new Map());
     const [opName, setOpName] = useState('');
-    const [operationType, setOperationType] = useState<'sector_attack' | 'general_offensive' | 'strategic_defense' | 'reorganization'>('sector_attack');
+    const [operationType, setOperationType] = useState<'sector_attack' | 'general_offensive' | 'strategic_defense' | 'reorganization' | 'feint' | 'probe'>('sector_attack');
+    const [minAttackOutcome, setMinAttackOutcome] = useState<'decisive_victory' | 'victory' | 'costly_victory' | 'stalemate' | 'repulsed'>('victory');
+    const [tempo, setTempo] = useState<'methodical' | 'standard' | 'all_out'>('standard');
+    const [artilleryPreparation, setArtilleryPreparation] = useState(false);
+    const [schwerpunktOsid, setSchwerpunktOsid] = useState<string>('');
     const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
     const [selectedBrigades, setSelectedBrigades] = useState<Set<string>>(new Set());
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,6 +62,10 @@ export function OpsPlanningModal() {
         setSelectedObjectives([]);
         setSelectedBrigades(new Set(sector.assigned_brigade_ids));
         setOperationType('sector_attack');
+        setMinAttackOutcome('victory');
+        setTempo('standard');
+        setArtilleryPreparation(false);
+        setSchwerpunktOsid('');
         setStatusMessage(null);
         setOpName(`Operation ${sector.display_name}`);
     }, [sector]);
@@ -237,10 +245,14 @@ export function OpsPlanningModal() {
             type: operationType,
             targetSettlements,
             participatingBrigades,
-            sectorId: operationType === 'sector_attack' ? sector.sector_id : undefined,
-            objectives: operationType === 'sector_attack' ? targetSettlements : undefined,
-            planningDuration: operationType === 'sector_attack' ? 1 : undefined,
+            sectorId: operationType === 'sector_attack' || operationType === 'feint' || operationType === 'probe' ? sector.sector_id : undefined,
+            objectives: operationType === 'sector_attack' || operationType === 'feint' || operationType === 'probe' ? targetSettlements : undefined,
+            planningDuration: operationType === 'probe' ? 1 : operationType === 'sector_attack' || operationType === 'feint' ? 1 : undefined,
             stagingOsid: sectorFriendlyOsids[0],
+            minAttackOutcome,
+            tempo,
+            schwerpunktOsid: schwerpunktOsid || undefined,
+            artilleryPreparation,
         });
         setIsSubmitting(false);
 
@@ -506,11 +518,66 @@ export function OpsPlanningModal() {
                                 onChange={(e) => setOperationType(e.target.value as typeof operationType)}
                                 className="w-full bg-black/30 border border-panel-border rounded p-2 text-white focus:border-accent-gold focus:outline-none transition-colors"
                             >
-                                <option value="sector_attack">Sector Attack</option>
-                                <option value="general_offensive">General Offensive</option>
-                                <option value="strategic_defense">Strategic Defense</option>
-                                <option value="reorganization">Reorganization</option>
-                            </select>
+                            <option value="sector_attack">Sector Attack</option>
+                            <option value="general_offensive">General Offensive</option>
+                            <option value="strategic_defense">Strategic Defense</option>
+                            <option value="reorganization">Reorganization</option>
+                            <option value="feint">Feint</option>
+                            <option value="probe">Probe</option>
+                        </select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-accent-gold uppercase tracking-widest">Casualty Tolerance</label>
+                                <select
+                                    value={minAttackOutcome}
+                                    onChange={(e) => setMinAttackOutcome(e.target.value as typeof minAttackOutcome)}
+                                    className="w-full bg-black/30 border border-panel-border rounded p-2 text-white focus:border-accent-gold focus:outline-none transition-colors"
+                                >
+                                    <option value="decisive_victory">Decisive Only</option>
+                                    <option value="victory">Victory Required</option>
+                                    <option value="costly_victory">Accept Costly</option>
+                                    <option value="repulsed">Attack Regardless</option>
+                                </select>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-accent-gold uppercase tracking-widest">Tempo</label>
+                                <select
+                                    value={tempo}
+                                    onChange={(e) => setTempo(e.target.value as typeof tempo)}
+                                    className="w-full bg-black/30 border border-panel-border rounded p-2 text-white focus:border-accent-gold focus:outline-none transition-colors"
+                                >
+                                    <option value="methodical">Methodical</option>
+                                    <option value="standard">Standard</option>
+                                    <option value="all_out">All-Out</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-accent-gold uppercase tracking-widest">Schwerpunkt</label>
+                                <select
+                                    value={schwerpunktOsid}
+                                    onChange={(e) => setSchwerpunktOsid(e.target.value)}
+                                    className="w-full bg-black/30 border border-panel-border rounded p-2 text-white focus:border-accent-gold focus:outline-none transition-colors"
+                                >
+                                    <option value="">Auto-select</option>
+                                    {selectedObjectives.map((osid) => (
+                                        <option key={osid} value={osid}>{getOsidDisplayName(osid, osidDisplayNames)}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <label className="flex items-end gap-2 text-sm text-text-primary p-2 bg-panel-card rounded border border-panel-border cursor-pointer hover:border-interactive transition-colors">
+                                <input
+                                    type="checkbox"
+                                    className="accent-interactive"
+                                    checked={artilleryPreparation}
+                                    onChange={(e) => setArtilleryPreparation(e.target.checked)}
+                                />
+                                Artillery Preparation
+                            </label>
                         </div>
 
                         <div className="flex flex-col gap-2">

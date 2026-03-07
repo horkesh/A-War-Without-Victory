@@ -72,7 +72,7 @@ import {
 import {
     buildOsidToMunFromReverseMap,
     buildSidToMunFromSettlements,
-    createOobFormationsAtPhaseIEntry,
+    createOobFormations as createOobFormationsAtPhaseIEntry,
     spreadBrigadesToFrontOsids
 } from './oob_early_war_entry.js';
 import { buildOpsCompareConclusion, formatOpsCompareMarkdown } from './ops_compare.js';
@@ -105,8 +105,8 @@ import {
     type FormationFatigueSummary,
     type HistoricalAlignmentDiagnostics,
     type HistoricalFactionMetrics,
-    type PhaseIIAttackResolutionSummary,
-    type PhaseIIAttackResolutionWeekRollup,
+    type AttackResolutionSummary,
+    type AttackResolutionWeekRollup,
     type CorpsAiSnapshot
 } from './scenario_end_report.js';
 import { computeRunId, loadScenario, normalizeActions, resolveInitControlPath, resolveInitFormationsPath } from './scenario_loader.js';
@@ -129,6 +129,33 @@ import { evaluateVictoryConditions } from './victory_conditions.js';
 /** Apply scenario actions to state. Noop/note do nothing to state. */
 export function applyActionsToState(_state: GameState, _actions: ScenarioAction[]): void {
     // No-op and note do not mutate state. Future action types will mutate here.
+}
+
+export function repairScenarioArtifactState(
+    state: GameState,
+    edges: import('../map/settlements.js').EdgeRecord[] | undefined,
+    operationalToCanonical?: import('../data/operational_data.js').OperationalToCanonicalReverseMap | null
+): void {
+    if (state.meta.phase !== 'war' || !edges?.length || !operationalToCanonical) {
+        return;
+    }
+    displaceFormationsInEnemyTerritory(state, edges, operationalToCanonical);
+}
+
+function buildZeroBattleCombatCausalitySummary(): CombatCausalitySummary {
+    return {
+        valid_for_combat_calibration: false,
+        invalidation_reasons: ['zero_battles'],
+        total_attack_orders: 0,
+        total_objective_attempts: 0,
+        total_objective_captures: 0,
+        movement_only_execution_turns: 0,
+        total_battles: 0,
+        total_orders_by_faction: {},
+        invalid_operation_count: 0,
+        zero_eligible_attacker_operation_count: 0,
+        recovery_without_logged_attempt_count: 0
+    };
 }
 
 /**
@@ -1302,8 +1329,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         const corpsAiSnapshots: CorpsAiSnapshot[] = [];
         const CORPS_AI_SNAPSHOT_TURNS = new Set([1, 13, 26, 52]);
         const botControlTimeline: BotControlShareRow[] = [];
-        const phaseIIAttackResolutionSummary: PhaseIIAttackResolutionSummary = {
-            weeks_with_phase_ii: 0,
+        const attackResolutionSummary: AttackResolutionSummary = {
+            weeks_at_war: 0,
             weeks_with_orders: 0,
             orders_processed: 0,
             unique_attack_targets: 0,
@@ -1314,13 +1341,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             defender_absent_battles: 0,
             orders_by_faction: {}
         };
-        const phaseIIAttackResolutionWeekly: PhaseIIAttackResolutionWeekRollup[] = [];
+        const attackResolutionWeekly: AttackResolutionWeekRollup[] = [];
         const combatCausalityWeekly: Array<WeeklyCombatCausalitySummary & { week_index: number; turn: number }> = [];
         let combatCausalitySummary: CombatCausalitySummary | null = null;
         const controlChangeAttributionWeekly: Array<WeeklyControlChangeAttributionSummary & { week_index: number; turn: number }> = [];
         let controlChangeAttributionSummary: ControlChangeAttributionSummary | null = null;
-        const phaseIITakeoverDisplacementSummary = {
-            weeks_with_phase_ii: 0,
+        const takeoverDisplacementSummary = {
+            weeks_at_war: 0,
             weeks_with_activity: 0,
             timers_started: 0,
             timers_matured: 0,
@@ -1333,7 +1360,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             sustained_fires: 0,
             sustained_displaced_total: 0
         };
-        const phaseIITakeoverDisplacementWeekly: Array<{
+        const takeoverDisplacementWeekly: Array<{
             week_index: number;
             turn: number;
             timers_started: number;
@@ -1457,9 +1484,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 turnReport = {
                     seed: state.meta.seed,
                     phases: result.phasesExecuted.map((name) => ({ name })),
-                    phase_i_control_flip: { flips: [], municipalities_evaluated: 0, control_events: [] },
+                    control_flip: { flips: [], municipalities_evaluated: 0, control_events: [] },
                     phase_f_displacement: undefined,
-                    phase_ii_front_emergence: []
+                    front_emergence_report: []
                 } as Awaited<ReturnType<typeof runTurn>>['report'];
                 if (!oobCreated && state.meta.phase === 'war') {
                     await createOobFormations(
@@ -1512,18 +1539,18 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             let weeklyControlChangeAttributionForReport: WeeklyControlChangeAttributionSummary | undefined;
             let operationDiagnosticsForReport: ReturnType<typeof buildOperationCombatDiagnostics> | undefined;
             if (state.meta.phase === 'war') {
-                phaseIIAttackResolutionSummary.weeks_with_phase_ii += 1;
-                phaseIITakeoverDisplacementSummary.weeks_with_phase_ii += 1;
+                attackResolutionSummary.weeks_at_war += 1;
+                takeoverDisplacementSummary.weeks_at_war += 1;
                 const operationDiagnostics = buildOperationCombatDiagnostics(
                     state,
-                    turnReport.phase_ii_bot_order_diagnostics,
-                    turnReport.phase_ii_attack_resolution_osid
+                    turnReport.bot_order_diagnostics,
+                    turnReport.attack_resolution_osid
                 );
                 operationDiagnosticsForReport = operationDiagnostics;
                 const weeklyCombatCausality = buildCombatCausalitySummary(
                     operationDiagnostics,
-                    turnReport.phase_ii_bot_order_diagnostics,
-                    turnReport.phase_ii_attack_resolution_osid
+                    turnReport.bot_order_diagnostics,
+                    turnReport.attack_resolution_osid
                 );
                 if (combatCausalitySummary === null) {
                     combatCausalitySummary = weeklyCombatCausality;
@@ -1591,38 +1618,38 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     recovery_without_logged_attempt_count: weeklyCombatCausality.recovery_without_logged_attempt_count,
                     invalidation_reasons: weeklyCombatCausality.invalidation_reasons
                 };
-                const phaseIIResolution = turnReport.phase_ii_resolve_attack_orders;
+                const attackResolution = turnReport.resolve_attack_orders;
                 // OSID attack resolution writes to a different report key
-                const osidResolution = (turnReport as unknown as Record<string, unknown>).phase_ii_attack_resolution_osid as {
+                const osidResolution = (turnReport as unknown as Record<string, unknown>).attack_resolution_osid as {
                     orders_processed?: number; unique_attack_targets?: number; flips_applied?: number;
                     casualty_attacker?: number; casualty_defender?: number; orders_by_faction?: Record<string, number>;
                     battles?: Array<{ defender_brigade?: string | null }>;
                 } | undefined;
                 // Use whichever report is available (legacy or OSID)
-                const res = phaseIIResolution ?? osidResolution;
+                const res = attackResolution ?? osidResolution;
                 let weeklyDefenderPresentBattles = 0;
                 let weeklyDefenderAbsentBattles = 0;
                 // Count defender-present battles from either format
-                const battleList = phaseIIResolution?.battle_report?.battles ?? osidResolution?.battles ?? [];
+                const battleList = attackResolution?.battle_report?.battles ?? osidResolution?.battles ?? [];
                 for (const battle of battleList) {
                     if (battle.defender_brigade != null) weeklyDefenderPresentBattles += 1;
                     else weeklyDefenderAbsentBattles += 1;
                 }
                 if (res) {
-                    phaseIIAttackResolutionSummary.orders_processed += res.orders_processed ?? 0;
-                    phaseIIAttackResolutionSummary.unique_attack_targets += res.unique_attack_targets ?? 0;
-                    phaseIIAttackResolutionSummary.flips_applied += res.flips_applied ?? 0;
-                    phaseIIAttackResolutionSummary.casualty_attacker += res.casualty_attacker ?? 0;
-                    phaseIIAttackResolutionSummary.casualty_defender += res.casualty_defender ?? 0;
-                    phaseIIAttackResolutionSummary.defender_present_battles += weeklyDefenderPresentBattles;
-                    phaseIIAttackResolutionSummary.defender_absent_battles += weeklyDefenderAbsentBattles;
+                    attackResolutionSummary.orders_processed += res.orders_processed ?? 0;
+                    attackResolutionSummary.unique_attack_targets += res.unique_attack_targets ?? 0;
+                    attackResolutionSummary.flips_applied += res.flips_applied ?? 0;
+                    attackResolutionSummary.casualty_attacker += res.casualty_attacker ?? 0;
+                    attackResolutionSummary.casualty_defender += res.casualty_defender ?? 0;
+                    attackResolutionSummary.defender_present_battles += weeklyDefenderPresentBattles;
+                    attackResolutionSummary.defender_absent_battles += weeklyDefenderAbsentBattles;
                     const obf = res.orders_by_faction ?? {};
                     for (const fid of Object.keys(obf).sort()) {
-                        phaseIIAttackResolutionSummary.orders_by_faction[fid] =
-                            (phaseIIAttackResolutionSummary.orders_by_faction[fid] ?? 0) + (obf[fid] ?? 0);
+                        attackResolutionSummary.orders_by_faction[fid] =
+                            (attackResolutionSummary.orders_by_faction[fid] ?? 0) + (obf[fid] ?? 0);
                     }
                     if ((res.orders_processed ?? 0) > 0) {
-                        phaseIIAttackResolutionSummary.weeks_with_orders += 1;
+                        attackResolutionSummary.weeks_with_orders += 1;
                     }
                 }
                 const weeklyObf = res?.orders_by_faction ?? {};
@@ -1630,7 +1657,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 for (const fid of Object.keys(weeklyObf).sort()) {
                     weeklyOrdersByFaction[fid] = weeklyObf[fid] ?? 0;
                 }
-                phaseIIAttackResolutionWeekly.push({
+                attackResolutionWeekly.push({
                     week_index,
                     turn: state.meta.turn,
                     orders_processed: res?.orders_processed ?? 0,
@@ -1642,7 +1669,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     defender_absent_battles: weeklyDefenderAbsentBattles,
                     orders_by_faction: weeklyOrdersByFaction
                 });
-                const takeoverReport = turnReport.phase_ii_takeover_displacement;
+                const takeoverReport = turnReport.takeover_displacement;
                 if (takeoverReport) {
                     const hasActivity =
                         takeoverReport.timers_started > 0 ||
@@ -1654,19 +1681,19 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                         takeoverReport.fled_abroad_total > 0 ||
                         takeoverReport.routed_total > 0;
                     if (hasActivity) {
-                        phaseIITakeoverDisplacementSummary.weeks_with_activity += 1;
+                        takeoverDisplacementSummary.weeks_with_activity += 1;
                     }
-                    phaseIITakeoverDisplacementSummary.timers_started += takeoverReport.timers_started ?? 0;
-                    phaseIITakeoverDisplacementSummary.timers_matured += takeoverReport.timers_matured ?? 0;
-                    phaseIITakeoverDisplacementSummary.camps_created += takeoverReport.camps_created ?? 0;
-                    phaseIITakeoverDisplacementSummary.camps_routed += takeoverReport.camps_routed ?? 0;
-                    phaseIITakeoverDisplacementSummary.displaced_total += takeoverReport.displaced_total ?? 0;
-                    phaseIITakeoverDisplacementSummary.killed_total += takeoverReport.killed_total ?? 0;
-                    phaseIITakeoverDisplacementSummary.fled_abroad_total += takeoverReport.fled_abroad_total ?? 0;
-                    phaseIITakeoverDisplacementSummary.routed_total += takeoverReport.routed_total ?? 0;
-                    phaseIITakeoverDisplacementSummary.sustained_fires += takeoverReport.sustained_fires ?? 0;
-                    phaseIITakeoverDisplacementSummary.sustained_displaced_total += takeoverReport.sustained_displaced_total ?? 0;
-                    phaseIITakeoverDisplacementWeekly.push({
+                    takeoverDisplacementSummary.timers_started += takeoverReport.timers_started ?? 0;
+                    takeoverDisplacementSummary.timers_matured += takeoverReport.timers_matured ?? 0;
+                    takeoverDisplacementSummary.camps_created += takeoverReport.camps_created ?? 0;
+                    takeoverDisplacementSummary.camps_routed += takeoverReport.camps_routed ?? 0;
+                    takeoverDisplacementSummary.displaced_total += takeoverReport.displaced_total ?? 0;
+                    takeoverDisplacementSummary.killed_total += takeoverReport.killed_total ?? 0;
+                    takeoverDisplacementSummary.fled_abroad_total += takeoverReport.fled_abroad_total ?? 0;
+                    takeoverDisplacementSummary.routed_total += takeoverReport.routed_total ?? 0;
+                    takeoverDisplacementSummary.sustained_fires += takeoverReport.sustained_fires ?? 0;
+                    takeoverDisplacementSummary.sustained_displaced_total += takeoverReport.sustained_displaced_total ?? 0;
+                    takeoverDisplacementWeekly.push({
                         week_index,
                         turn: state.meta.turn,
                         timers_started: takeoverReport.timers_started ?? 0,
@@ -1777,7 +1804,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 applyBaselineOpsExhaustion(state, level, scalar);
                 let frontActiveIds: string[];
                 if (scopeMode === 'static_front_only' || scopeMode === 'fluid_front_only') {
-                    const descriptors = turnReport.phase_ii_front_emergence;
+                    const descriptors = turnReport.front_emergence_report;
                     const stabilityFilter = scopeMode === 'static_front_only' ? 'static' : 'fluid';
                     frontActiveIds = settlementIdsFromFrontDescriptors(descriptors, stabilityFilter);
                 } else {
@@ -1788,6 +1815,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 aggregateSettlementDisplacementToMunicipalities(state, settlementsByMun);
                 ops = { enabled: true, level };
             }
+
+            repairScenarioArtifactState(state, graph.edges, operationalData?.operationalToCanonical ?? null);
 
             // Capture corps AI snapshots at key turns for the end report
             const currentTurn = state.meta.turn;
@@ -1940,6 +1969,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
         const validForCombatCalibration =
             (combatCausalitySummary?.valid_for_combat_calibration ?? false) && runHasAnyBattles;
+        const combatCausalityForSummary =
+            combatCausalitySummary ?? buildZeroBattleCombatCausalitySummary();
         const battlelessWeeks = combatCausalityWeekly
             .filter((row) => row.total_battles === 0)
             .map((row) => row.week_index);
@@ -1963,20 +1994,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             behavioral_health: {
                 valid_for_combat_calibration: validForCombatCalibration,
                 battleless_weeks: battlelessWeeks,
-                combat_causality:
-                    combatCausalitySummary ?? {
-                        valid_for_combat_calibration: false,
-                        invalidation_reasons: ['zero_battles'],
-                        total_attack_orders: 0,
-                        total_objective_attempts: 0,
-                        total_objective_captures: 0,
-                        movement_only_execution_turns: 0,
-                        total_battles: 0,
-                        total_orders_by_faction: {},
-                        invalid_operation_count: 0,
-                        zero_eligible_attacker_operation_count: 0,
-                        recovery_without_logged_attempt_count: 0
-                    },
+                combat_causality: combatCausalityForSummary,
                 control_change_attribution:
                     controlChangeAttributionSummary ?? summarizeControlChangeAttribution([], initOverrideChangeCount)
             },
@@ -2005,44 +2023,31 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     anchor_checks: historicalAnchorChecks
                 }
                 : {}),
-            ...(phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0
+            ...(attackResolutionSummary.weeks_at_war > 0
                 ? {
-                    phase_ii_attack_resolution: phaseIIAttackResolutionSummary,
-                    phase_ii_attack_resolution_weekly: phaseIIAttackResolutionWeekly,
-                    combat_causality:
-                        combatCausalitySummary ?? {
-                            valid_for_combat_calibration: false,
-                            invalidation_reasons: ['zero_battles'],
-                            total_attack_orders: 0,
-                            total_objective_attempts: 0,
-                            total_objective_captures: 0,
-                            movement_only_execution_turns: 0,
-                            total_battles: 0,
-                            total_orders_by_faction: {},
-                            invalid_operation_count: 0,
-                            zero_eligible_attacker_operation_count: 0,
-                            recovery_without_logged_attempt_count: 0
-                        },
+                    attack_resolution: attackResolutionSummary,
+                    attack_resolution_weekly: attackResolutionWeekly,
+                    combat_causality: combatCausalityForSummary,
                     combat_causality_weekly: combatCausalityWeekly
                 }
                 : {}),
-            ...(phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0
+            ...(attackResolutionSummary.weeks_at_war > 0
                 ? {
                     control_change_attribution:
                         controlChangeAttributionSummary ?? summarizeControlChangeAttribution([], initOverrideChangeCount),
                     control_change_attribution_weekly: controlChangeAttributionWeekly
                 }
                 : {}),
-            ...(phaseIITakeoverDisplacementSummary.weeks_with_phase_ii > 0
+            ...(takeoverDisplacementSummary.weeks_at_war > 0
                 ? {
-                    phase_ii_takeover_displacement: phaseIITakeoverDisplacementSummary,
-                    phase_ii_takeover_displacement_weekly: phaseIITakeoverDisplacementWeekly
+                    takeover_displacement: takeoverDisplacementSummary,
+                    takeover_displacement_weekly: takeoverDisplacementWeekly
                 }
                 : {}),
-            ...(phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0 && state.civilian_casualties
+            ...(attackResolutionSummary.weeks_at_war > 0 && state.civilian_casualties
                 ? { civilian_casualties: state.civilian_casualties }
                 : {}),
-            ...(phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0
+            ...(attackResolutionSummary.weeks_at_war > 0
                 ? {
                     front_corps_tracking: {
                         corps_front_edges_present: !!(state.corps_front_edges && Object.keys(state.corps_front_edges).length > 0),
@@ -2055,7 +2060,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             ...(breachDiagnostic ? { breach_diagnostic: breachDiagnostic } : {}),
             ...(state.meta.phase === 'war'
                 ? {
-                      phase_i_note: {
+                      early_war_note: {
                           message:
                               'Opposing control edges have not yet persisted long enough',
                           streak: state.meta.war_opposing_edges_streak ?? 0,
@@ -2160,10 +2165,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             victoryEvaluation,
             botBenchmarkSummary: botBenchmarkSummary ?? null,
             botWeeklyDiagnostics: enableBotDiagnostics ? botWeeklyDiagnostics : null,
-            phaseIIAttackResolutionSummary:
-                phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0 ? phaseIIAttackResolutionSummary : null,
-            phaseIIAttackResolutionWeekly:
-                phaseIIAttackResolutionSummary.weeks_with_phase_ii > 0 ? phaseIIAttackResolutionWeekly : null,
+            attackResolutionSummary:
+                attackResolutionSummary.weeks_at_war > 0 ? attackResolutionSummary : null,
+            attackResolutionWeekly:
+                attackResolutionSummary.weeks_at_war > 0 ? attackResolutionWeekly : null,
             historicalAlignmentDiagnostics,
             corpsAiSnapshots: corpsAiSnapshots.length > 0 ? corpsAiSnapshots : null
         });

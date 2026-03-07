@@ -1,11 +1,46 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-07
-**Status:** Post-MVP — Phase II calibration, GUI rework, Phase M complete
+**Status:** Post-MVP — War calibration, GUI rework, Phase M complete
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
+
+## [2026-03-07] Phase I/II terminology purge + consolidation flip deletion
+
+### Summary
+- **Removed all Phase I/Phase II terminology** from entire codebase (src/ + tests/) — canon v0.6 has only Peace and War phases
+- **Deleted consolidation auto-flip mechanics** (`consolidate_rear_pockets.ts`, `consolidation_flips.ts`) — root cause of Goražde/Srebrenica/Žepa being swallowed by auto-flipping surrounded OSIDs
+- **Renamed 50+ identifiers**: pipeline step names, TurnReport keys, type names, function exports, scenario output keys, variable names
+- **34 source files + 13 test files** modified; 2 source files deleted
+- **Zero TypeScript errors, 348/348 tests pass** after full rename
+- **Behavioral change**: Surrounded enemy cells no longer auto-flip — they must be taken through combat. This should break the 93.6% calibration ceiling.
+
+### Key renames
+- `PhaseIJNAState` → `JNATransitionState`, `PhaseIIFrontDescriptor` → `FrontDescriptor`
+- `createOobFormationsAtPhaseIEntry` → `createOobFormations`, `applyPhase0ToPhaseITransition` → `applyWarTransition`
+- `runPhaseIICohesionDrift` → `runCohesionDrift`, `runPhaseIIMoraleDrift` → `runMoraleDrift`, etc.
+- All `phase-ii-*` step names → clean names (e.g., `cohesion-drift`, `morale-drift`)
+- All `phase_ii_*` report keys → clean names (e.g., `attack_resolution`, `takeover_displacement`)
+
+---
+
+## [2026-03-07] Structural changes to break calibration ceiling — TO FOLLOW UP
+
+### Summary
+- **Report:** `docs/40_reports/convenes/20260307_STRUCTURAL_CHANGES_FOR_CALIBRATION_CEILING.md`
+- **Context:** n241 locked at 93.6% with 98 overrides. Remaining 60 mismatches require engine-level fixes.
+- **6 structural changes identified:**
+  1. Phase I takeover quality (eliminate ~40-50 overrides) — HIGH
+  2. Enclave/holdout mechanic for Gorazde/Srebrenica/Zepa (fix ~10-12 consolidation captures) — HIGH
+  3. VRS operational reach / supply distance (fix ~10-15 Tuzla over-captures) — MEDIUM
+  4. Jajce / HVO-to-VRS faction transition (fix ~5-8 HRHB-held cells) — MEDIUM
+  5. Bot sector assignment stability (reduce butterfly sensitivity) — LOW-MEDIUM
+  6. Override-to-organic migration path (tag + batch-remove overrides as fixes land) — Process
+- **Status:** TO BE FOLLOWED UP — no code changes yet
+
+---
 
 ## [2026-03-07] n235→n241 calibration: 89.2%→93.6% area-weighted ATH
 
@@ -11094,3 +11129,119 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 - tests/sector_stance_orders.test.ts
 - tests/operation_tempo.test.ts
 - vitest.config.ts
+
+---
+
+## n202 - Supply-agency UI wiring and OPSEC surfaced; regression fit improved but combat causality regressed (2026-03-07)
+
+### What changed
+- Phase C supply-agency surface moved forward: `airdrop_allocation` is now stageable through desktop IPC, carried through serialization, exposed in the adapter, and editable from the enclave dashboard with a live budget bar.
+- Smuggling growth now follows the intended Phase C profile more closely: RBiH-only incremental `smuggling_efficiency` growth capped at `0.3`, replacing the old accelerating all-faction placeholder.
+- Phase H OPSEC is now live at sector level: `opsec_sectors` can be toggled from the sector panel, desktop IPC persists it, sector-intel passive confidence buildup is halved against OPSEC-marked sectors, and OPSEC clears automatically when an operation in that sector enters execution.
+- Ops planning UI now exposes `feint` and `probe` as operation types so the schema/lifecycle support is reachable from the player flow.
+
+### Verification
+- `npm run typecheck`
+- `npm run test:vitest`
+- `npm run sim:scenario:run:40w`
+
+### Regression note
+- 40w run [`apr1992_definitive_40w__024b4776f64c7a22__w40_n242`](/F:/A-War-Without-Victory/runs/apr1992_definitive_40w__024b4776f64c7a22__w40_n242) passed all 6 benchmark checks, but remains invalid for combat calibration because `invalid_operation_count = 6` with `operation_execution_without_attack_orders` and `operation_execution_without_eligible_attackers`.
+
+### Files modified
+- src/state/supply_reserves.ts
+- src/state/embargo.ts
+- src/sim/combat/sector_intel.ts
+- src/ui/map/components/EnclaveDashboard.tsx
+- src/ui/map/components/CorpsFrontPanel.tsx
+- src/ui/map/components/OpsPlanningModal.tsx
+- src/ui/map/data/GameStateAdapter.ts
+- src/ui/map/data/types.ts
+- src/ui/map/desktop/useIPC.ts
+- src/desktop/preload.cjs
+- src/desktop/electron-main.cjs
+- tests/supply_airdrop.test.ts
+
+## [2026-03-07] Phase C slice: IVP consequences, convoy decisions, smuggling allocation, Sarajevo tunnel
+
+### Summary
+- Implemented the missing Phase C state mechanics that were already scaffolded in schema but not yet live: IVP consequence activation with hysteresis, humanitarian convoy generation/decision processing, player-smuggling allocation effects, and Sarajevo tunnel activation.
+- Wired the new mechanics into the war-phase pipeline and desktop bridge so they are not just passive save fields. Player-facing readouts now surface active IVP consequences, pending convoy decisions, and Sarajevo tunnel status in the map UI.
+- The new 40w regression changed the final hash and remains benchmark-fit positive, but it did not resolve the pre-existing combat-causality invalidations. This slice should therefore be treated as functional Phase C progress, not full acceptance closure.
+
+### Changes
+- `src/state/patron_pressure.ts`: added atrocity-derived IVP updates, Sarajevo tunnel visibility reduction, and IVP consequence activation with hysteresis.
+- `src/state/supply_reserves.ts`: added convoy generation/processing, smuggling allocation application, and Sarajevo tunnel unlock logic.
+- `src/sim/turn_phases/war_phases.ts`: integrated smuggling, tunnel activation, IVP consequences, and convoy evaluation into the war pipeline.
+- `src/desktop/electron-main.cjs`, `src/desktop/preload.cjs`, `src/ui/map/desktop/useIPC.ts`: added staged convoy decision IPC.
+- `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/data/types.ts`, `src/ui/map/components/SituationTab.tsx`, `src/ui/map/components/TopToolbar.tsx`: surfaced IVP consequences, convoy decisions, and tunnel status in the UI.
+- `tests/phase_c_supply_agency.test.ts`, `vitest.config.ts`: added targeted regression coverage for the new Phase C mechanics.
+
+### Verification
+- `npm run typecheck`
+- `npm run test:vitest`
+- `npm run sim:scenario:run:40w`
+
+### Regression note
+- 40w run [`apr1992_definitive_40w__024b4776f64c7a22__w40_n245`](/F:/A-War-Without-Victory/runs/apr1992_definitive_40w__024b4776f64c7a22__w40_n245) finished successfully with final hash `7a3d3775aa27b992`.
+- Historical-fit benchmarks still passed 6/6, but combat-causality remains invalid with `invalid_operation_count = 6` and the same root causes as the pre-slice baseline: `operation_execution_without_attack_orders` and `operation_execution_without_eligible_attackers`.
+
+## [2026-03-07] Phase H closure slice: harness artifact repair + idle execution recovery
+
+### Summary
+- Closed the two remaining technical blockers on the H-phase calibration gate.
+- The scenario harness now repairs enemy-territory formation placement after post-turn artifact mutations, so 40w runs no longer fail serialization on active brigades stranded in newly flipped enemy OSIDs.
+- Sector offensives that enter execution with zero attackers, zero movement, and zero eligible participants now collapse into recovery immediately instead of lingering as invalid execution shells. This restores combat-causality validity on the 40w run.
+
+### Changes
+- `src/scenario/scenario_runner.ts`: added `repairScenarioArtifactState(...)` and invoked it after post-turn harness mutations, before report/save artifact generation.
+- `src/sim/combat/sector_offensive.ts`: added immediate no-attempt recovery for fully idle execution turns with no logged attack attempts.
+- `src/sim/combat/cohesion_drift.ts`: restored the legacy-compatible `runPhaseIICohesionDrift` export alias used by tests/pipeline callers.
+- Added targeted regression coverage:
+  - `tests/h_phase_intelligence_warfare.test.ts`
+  - `tests/scenario_runner_artifact_repair.test.ts`
+  - `tests/sector_offensive_idle_recovery.test.ts`
+  - `vitest.config.ts`
+
+### Verification
+- `npm run typecheck`
+- `npm run test:vitest`
+- `npm run sim:scenario:run:40w`
+
+### Regression note
+- 40w run [`apr1992_definitive_40w__024b4776f64c7a22__w40_n248`](/F:/A-War-Without-Victory/runs/apr1992_definitive_40w__024b4776f64c7a22__w40_n248) finished successfully with final hash `f5e0e48c6d2538ab`.
+- Combat causality is valid again: `invalid_operation_count = 0`, `zero_eligible_attacker_operation_count = 0`, `valid_for_combat_calibration = true`.
+- Benchmark suite passed `6/6`.
+- Remaining calibration drift is now territorial-anchor level, not engine-integrity level:
+  - municipality anchor `srebrenica` still resolves `RS` instead of expected `RBiH`
+  - OSID anchor `op:brcko:brka_2` still resolves `RS` instead of expected `RBiH`
+- Treat those anchor misses as calibration/design follow-up, not a Phase H mechanics failure.
+
+## [2026-03-07] Player-agency implementation reporting and canon propagation
+
+### Summary
+- Added a full implementation report covering the player-agency plan from the beginning through the final H-phase closure and refactor passes.
+- Propagated the resulting mechanics and verification state into canon and engineering references so the docs match the live runtime surfaces.
+- No `FORAWWV` update was required for this pass; the work was report/canon/engineering synchronization only.
+
+### Changes
+- Added `docs/40_reports/implemented/20260307_PLAYER_AGENCY_IMPLEMENTATION_A_TO_H.md`.
+- Updated report indices and calibration reference:
+  - `docs/40_reports/README.md`
+  - `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`
+  - `docs/40_reports/CALIBRATION_MASTER.md`
+- Updated canon/engineering references:
+  - `docs/10_canon/context.md`
+  - `docs/10_canon/Rulebook_v0_6_0.md`
+  - `docs/10_canon/Systems_Manual_v0_6_0.md`
+  - `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`
+  - `docs/20_engineering/REPO_MAP.md`
+  - `docs/20_engineering/MAP_UI_MASTER.md`
+  - `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Verification
+- Spot-checked the updated report, canon, and engineering docs after patching.
+
+### Notes
+- Phase E remains deferred exactly as the source implementation plan specifies.
+- Documentation now reflects the verified closure state from runs `n248` and `n249`: `invalid_operation_count = 0`, `valid_for_combat_calibration = true`, benchmark suite `6/6`, remaining drift limited to `srebrenica` and `op:brcko:brka_2`.

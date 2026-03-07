@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Protocol } from 'pmtiles';
@@ -7,7 +7,7 @@ import type { FeatureCollection } from 'geojson';
 import type { LoadedGameState } from '../data/types';
 import { useMapInteractions } from './useMapInteractions';
 import { useGameStore } from '../store/gameStore';
-import { collectSectorFriendlyOsids } from '../utils/sectorUtils';
+import { collectSectorFriendlyOsids, buildOsidToSectorMap } from '../utils/sectorUtils';
 import { buildCorpsColorMap } from './builders/buildCorpsFrontLinesGeoJSON';
 import { buildOsidDisplayNameMap } from '../utils/osidDisplayName';
 import { loadOperationalPoliticalControl, loadOperationalSettlements } from '../data/DataLoader';
@@ -16,6 +16,7 @@ import { buildDensityGeoJSON } from './builders/buildDensityGeoJSON';
 import { buildEthnicGeoJSON } from './builders/buildEthnicGeoJSON';
 import { buildPressureGeoJSON } from './builders/buildPressureGeoJSON';
 import { buildSupplyGeoJSON } from './builders/buildSupplyGeoJSON';
+import { buildOperationalWeightGeoJSON } from './builders/buildOperationalWeightGeoJSON';
 import { buildFrontLinesGeoJSON } from './builders/buildFrontLinesGeoJSON';
 import { buildFrontEdgesHoverGeoJSON } from './builders/buildFrontEdgesHoverGeoJSON';
 import { buildCorpsFrontLinesGeoJSON, buildCorpsColorExpression } from './builders/buildCorpsFrontLinesGeoJSON';
@@ -50,6 +51,8 @@ const OSID_PRESSURE_FILL_LAYER_ID = 'osid-pressure-fill';
 const OSID_PRESSURE_SOURCE_ID = 'osid-pressure';
 const OSID_SUPPLY_FILL_LAYER_ID = 'osid-supply-fill';
 const OSID_SUPPLY_SOURCE_ID = 'osid-supply';
+const OSID_OPERATIONS_FILL_LAYER_ID = 'osid-operations-fill';
+const OSID_OPERATIONS_SOURCE_ID = 'osid-operations';
 /** Layer ID for formation markers (formationsVisible). */
 const FORMATION_MARKERS_LAYER_ID = 'formation-markers';
 /** Layer ID for formation labels (labelsVisible). */
@@ -127,7 +130,14 @@ export function MapContainer() {
   const battlesVisible = useGameStore((s) => s.battlesVisible);
   const strategicVisible = useGameStore((s) => s.strategicVisible);
   const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
+  const hoveredSectorId = useGameStore((s) => s.hoveredSectorId);
+  const setHoveredSectorId = useGameStore((s) => s.setHoveredSectorId);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
+
+  const osidToSector = useMemo(() => {
+    if (!loadedGameState?.corpsFrontSectors || !loadedGameState?.frontEdgesOsid) return new Map<string, string>();
+    return buildOsidToSectorMap(loadedGameState.corpsFrontSectors, loadedGameState.frontEdgesOsid);
+  }, [loadedGameState?.corpsFrontSectors, loadedGameState?.frontEdgesOsid]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -259,18 +269,46 @@ export function MapContainer() {
           if (sectorId) setSelectedCorpsFrontSectorId(sectorId);
         },
         onOsidHover: (osid, point) => {
-          if (osid) setTooltipTargetWithPosition({ type: 'osid', id: osid }, point ?? undefined);
-          else clearTooltipTarget();
+          if (osid) {
+            setTooltipTargetWithPosition({ type: 'osid', id: osid }, point ?? undefined);
+            const sectorId = osidToSector.get(osid);
+            if (sectorId) setHoveredSectorId(sectorId);
+            else setHoveredSectorId(null);
+          } else {
+            clearTooltipTarget();
+            setHoveredSectorId(null);
+          }
         },
         onFormationHover: (id, point) => {
-          if (id) setTooltipTargetWithPosition({ type: 'formation', id }, point ?? undefined);
-          else clearTooltipTarget();
+          if (id) {
+            setTooltipTargetWithPosition({ type: 'formation', id }, point ?? undefined);
+            const formation = loadedGameState?.formations.find(f => f.id === id);
+            if (formation) {
+              const sectorId = loadedGameState?.corpsFrontSectors?.find(
+                s => s.assigned_brigade_ids.includes(id) || s.reserve_brigade_ids.includes(id)
+              )?.sector_id;
+              if (sectorId) setHoveredSectorId(sectorId);
+              else setHoveredSectorId(null);
+            }
+          } else {
+            clearTooltipTarget();
+            setHoveredSectorId(null);
+          }
         },
         onFrontEdgeHover: (edgeId, point) => {
-          if (edgeId) setTooltipTargetWithPosition({ type: 'front', id: edgeId }, point ?? undefined);
-          else clearTooltipTarget();
+          if (edgeId) {
+            setTooltipTargetWithPosition({ type: 'front', id: edgeId }, point ?? undefined);
+          } else {
+            clearTooltipTarget();
+          }
         },
-        onMapMouseLeave: clearTooltipTarget,
+        onSectorHover: (id) => {
+          setHoveredSectorId(id);
+        },
+        onMapMouseLeave: () => {
+          clearTooltipTarget();
+          setHoveredSectorId(null);
+        },
       });
     }, 400);
     return () => {
@@ -348,7 +386,8 @@ export function MapContainer() {
                 controlledGeoJson, state.corpsFrontSectors, rbihHrhbAllied,
                 osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined,
                 state.frontPressureByEdge,
-                state.frontEdgesOsid
+                state.frontEdgesOsid,
+                Object.fromEntries(state.formations.map((formation) => [formation.id, { entrenchment_turns: formation.entrenchment_turns }]))
               );
               // Corps colors on glow layers only; front-line-base/stripe stay black-white stripe.
               try {
@@ -455,9 +494,9 @@ export function MapContainer() {
                           'HRHB', 'rgba(50,  100, 160, 0.5)',
                           'rgba(80, 80, 90, 0.35)',
                         ],
-                        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.6, 10, 1.0, 14, 1.5],
-                        'line-dasharray': [5, 3],
-                        'line-opacity': 0.65,
+                        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.4, 10, 0.7, 14, 1.0],
+                        'line-dasharray': [2, 2],
+                        'line-opacity': 0.4,
                       },
                       layout: { 'line-cap': 'butt', 'line-join': 'round' },
                     },
@@ -935,7 +974,9 @@ export function MapContainer() {
     const applySectorHighlight = () => {
       if (!ensureSectorLayers()) return false;
 
-      if (!selectedCorpsFrontSectorId || !sectorsVisible) {
+      const activeSectorId = selectedCorpsFrontSectorId || hoveredSectorId;
+
+      if (!activeSectorId || !sectorsVisible) {
         // Clear: hide sector fill + edge glow + brigade rings
         try {
           map.setFilter(SECTOR_FILL_LAYER_ID, ['==', ['get', 'osid'], '__none__'] as maplibregl.FilterSpecification);
@@ -955,7 +996,7 @@ export function MapContainer() {
       }
 
       const state = loadedGameState;
-      const sector = state?.corpsFrontSectors?.find((s) => s.sector_id === selectedCorpsFrontSectorId);
+      const sector = state?.corpsFrontSectors?.find((s) => s.sector_id === activeSectorId);
       if (!sector || !state?.frontEdgesOsid) return true;
 
       // Sector fill: filter osid-control polygons to this sector's friendly-side OSIDs
@@ -974,10 +1015,10 @@ export function MapContainer() {
       // Sector edge glow: filter front-edges-hover features by sector_id
       try {
         if (safeHasLayer(map, SECTOR_EDGE_GLOW_POS_LAYER_ID)) {
-          map.setFilter(SECTOR_EDGE_GLOW_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], selectedCorpsFrontSectorId]] as maplibregl.FilterSpecification);
+          map.setFilter(SECTOR_EDGE_GLOW_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], activeSectorId]] as maplibregl.FilterSpecification);
         }
         if (safeHasLayer(map, SECTOR_EDGE_GLOW_NEG_LAYER_ID)) {
-          map.setFilter(SECTOR_EDGE_GLOW_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], selectedCorpsFrontSectorId]] as maplibregl.FilterSpecification);
+          map.setFilter(SECTOR_EDGE_GLOW_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], activeSectorId]] as maplibregl.FilterSpecification);
         }
       } catch (e) {
         console.warn('[MapContainer] sector edge glow filter failed:', e);
@@ -1129,6 +1170,9 @@ export function MapContainer() {
       if (safeHasLayer(m, OSID_SUPPLY_FILL_LAYER_ID)) {
         safeSetLayoutVisibility(m, OSID_SUPPLY_FILL_LAYER_ID, mapMode === 'supply');
       }
+      if (safeHasLayer(m, OSID_OPERATIONS_FILL_LAYER_ID)) {
+        safeSetLayoutVisibility(m, OSID_OPERATIONS_FILL_LAYER_ID, mapMode === 'operations');
+      }
     });
     return () => {
       cancelled = true;
@@ -1173,6 +1217,56 @@ export function MapContainer() {
         (m.getSource(OSID_DENSITY_SOURCE_ID) as GeoJSONSource).setData(densityGeoJson);
       }
       safeSetLayoutVisibility(m, OSID_DENSITY_FILL_LAYER_ID, mapMode === 'density');
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+    };
+  }, [mapReady, mapMode, loadedGameState]);
+
+  // Operations map mode - show current weight of effort by sector frontage.
+  useEffect(() => {
+    const map = mapRef.current;
+    const baseGeoJson = osidBaseRef.current;
+    if (!mapReady || !map || !baseGeoJson || !loadedGameState?.corpsFrontSectors || !loadedGameState?.frontEdgesOsid) return;
+
+    let cancelled = false;
+    const rafId = requestAnimationFrame(() => {
+      if (cancelled || !mapRef.current || !loadedGameState) return;
+      const controlGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
+      const operationsGeoJson = buildOperationalWeightGeoJSON(
+        controlGeoJson,
+        loadedGameState.corpsFrontSectors ?? [],
+        loadedGameState.frontEdgesOsid ?? [],
+        loadedGameState.operations
+      );
+      if (cancelled || !mapRef.current) return;
+      const m = mapRef.current;
+      if (!m.getSource(OSID_OPERATIONS_SOURCE_ID)) {
+        m.addSource(OSID_OPERATIONS_SOURCE_ID, { type: 'geojson', data: operationsGeoJson });
+        m.addLayer(
+          {
+            id: OSID_OPERATIONS_FILL_LAYER_ID,
+            type: 'fill',
+            source: OSID_OPERATIONS_SOURCE_ID,
+            paint: {
+              'fill-color': [
+                'match',
+                ['get', 'effort_class'],
+                'holding', 'rgba(80, 124, 173, 0.30)',
+                'supporting', 'rgba(209, 139, 53, 0.34)',
+                'main', 'rgba(191, 57, 43, 0.40)',
+                'rgba(80, 80, 80, 0.10)',
+              ],
+              'fill-opacity': 1,
+            },
+          },
+          'faction-border-glow-pos'
+        );
+      } else {
+        (m.getSource(OSID_OPERATIONS_SOURCE_ID) as GeoJSONSource).setData(operationsGeoJson);
+      }
+      safeSetLayoutVisibility(m, OSID_OPERATIONS_FILL_LAYER_ID, mapMode === 'operations');
     });
     return () => {
       cancelled = true;
@@ -1299,6 +1393,7 @@ export function MapContainer() {
       if (safeHasLayer(map, OSID_DENSITY_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_DENSITY_FILL_LAYER_ID, mapMode === 'density')) allExist = false;
       if (safeHasLayer(map, OSID_PRESSURE_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_PRESSURE_FILL_LAYER_ID, mapMode === 'pressure')) allExist = false;
       if (safeHasLayer(map, OSID_SUPPLY_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_SUPPLY_FILL_LAYER_ID, mapMode === 'supply')) allExist = false;
+      if (safeHasLayer(map, OSID_OPERATIONS_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_OPERATIONS_FILL_LAYER_ID, mapMode === 'operations')) allExist = false;
       return allExist;
     };
 

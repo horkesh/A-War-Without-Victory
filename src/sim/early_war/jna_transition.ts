@@ -3,7 +3,7 @@
  * Withdrawal progress and asset transfer to RS (VRS); JNA does not start the war (referendum-gated).
  */
 
-import type { GameState, PhaseIJNAState } from '../../state/game_state.js';
+import type { GameState, JNATransitionState } from '../../state/game_state.js';
 
 /** Phase I §4.6.1: withdrawal progress per turn. */
 const WITHDRAWAL_PER_TURN = 0.05;
@@ -36,7 +36,7 @@ export function runJNATransition(state: GameState): JNATransitionReport {
     let started = false;
 
     if (!state.war_jna) {
-        (state as GameState & { war_jna: PhaseIJNAState }).war_jna = {
+        (state as GameState & { war_jna: JNATransitionState }).war_jna = {
             transition_begun: false,
             withdrawal_progress: 0,
             asset_transfer_rs: 0

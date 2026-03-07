@@ -8,7 +8,7 @@
 
 import type {
     AoROrderView, AttackOrderView, CorpsFrontSectorView, EnclaveResilienceView, FogOfWarView, FormationView, LoadedGameState,
-    MilitiaPoolView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
+    MilitiaPoolView, MobilizationSummaryView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
     OperationView, RepositionOrderView, RecruitmentView,
 } from './types';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
@@ -32,6 +32,56 @@ function humanizeMunicipalitySlug(slug: string): string {
         .split('-')
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ');
+}
+
+function getAirdropAllocationValue(state: Record<string, unknown>, enclaveId: string): number {
+    return finiteNumber((state.airdrop_allocation as Record<string, number> | undefined)?.[enclaveId]);
+}
+
+const ENCLAVE_UI_DEFINITIONS: Array<{
+    id: string;
+    display_name: string;
+    faction: 'RBiH';
+    osid_prefixes: string[];
+}> = [
+    { id: 'bihac_pocket', display_name: 'Bihac Pocket', faction: 'RBiH', osid_prefixes: ['op:bihac:', 'op:cazin:', 'op:velika_kladusa:', 'op:bosanska_krupa:'] },
+    { id: 'gorazde', display_name: 'Gorazde', faction: 'RBiH', osid_prefixes: ['op:gorazde:'] },
+    { id: 'sarajevo', display_name: 'Sarajevo', faction: 'RBiH', osid_prefixes: ['op:centar_sarajevo:', 'op:novo_sarajevo:', 'op:stari_grad_sarajevo:', 'op:novi_grad_sarajevo:'] },
+    { id: 'srebrenica', display_name: 'Srebrenica', faction: 'RBiH', osid_prefixes: ['op:srebrenica:'] },
+    { id: 'zepa', display_name: 'Zepa', faction: 'RBiH', osid_prefixes: ['op:rogatica:zepa'] },
+];
+
+function deriveEnclaveSupplyState(
+    enclaveId: string,
+    rawSupplyStateByOsid: Record<string, unknown> | undefined,
+    fallbackIsolationTurns: number,
+    fallbackHardening: boolean,
+    fallbackResilience: number,
+): 'adequate' | 'strained' | 'critical' {
+    const enclave = ENCLAVE_UI_DEFINITIONS.find((entry) => entry.id === enclaveId);
+    const factions = Array.isArray(rawSupplyStateByOsid?.factions) ? rawSupplyStateByOsid.factions as Array<Record<string, unknown>> : [];
+    const factionEntry = enclave ? factions.find((entry) => entry.faction_id === enclave.faction) : undefined;
+    const byOsid = Array.isArray(factionEntry?.by_osid) ? factionEntry.by_osid as Array<Record<string, unknown>> : [];
+    let adequate = 0;
+    let strained = 0;
+    let critical = 0;
+    if (enclave) {
+        for (const entry of byOsid) {
+            const osid = typeof entry.osid === 'string' ? entry.osid : '';
+            if (!enclave.osid_prefixes.some((prefix) => osid.startsWith(prefix))) continue;
+            if (entry.state === 'critical') critical++;
+            else if (entry.state === 'strained') strained++;
+            else if (entry.state === 'adequate') adequate++;
+        }
+    }
+    if (critical + strained + adequate > 0) {
+        if (critical >= strained && critical >= adequate) return 'critical';
+        if (strained >= critical && strained >= adequate) return 'strained';
+        return 'adequate';
+    }
+    if (fallbackIsolationTurns <= 0) return 'adequate';
+    if (fallbackHardening || fallbackResilience >= 8) return 'critical';
+    return 'strained';
 }
 
 /**
@@ -62,7 +112,8 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     const turn = turnVal;
-    const phase = (meta.phase as string) ?? 'unknown';
+    const phase = typeof meta.phase === 'string' ? meta.phase : 'unknown';
+    const metadataDate = typeof meta.date === 'string' && meta.date.length > 0 ? meta.date : 'UNKNOWN';
     const label = `Turn ${turn} (${phase})`;
 
     const rawMovementState = state.brigade_movement_state as Record<string, { status?: string; stance?: string }> | undefined;
@@ -354,6 +405,32 @@ export function parseGameState(json: unknown): LoadedGameState {
             const cc = rawCorpsCommand[fv.id];
             const op = cc?.active_operation as Record<string, unknown> | undefined;
             if (op && typeof op === 'object' && op.name) {
+                const participatingBrigadeIds = Array.isArray(op.participating_brigades)
+                    ? (op.participating_brigades as string[]).filter((id): id is string => typeof id === 'string').sort(strictCompare)
+                    : undefined;
+                const participatingFormations = participatingBrigadeIds
+                    ? formations.filter((formation) => participatingBrigadeIds.includes(formation.id))
+                    : [];
+                const avgCohesion = participatingFormations.length > 0
+                    ? participatingFormations.reduce((sum, formation) => sum + finiteNumber(formation.cohesion, 0), 0) / participatingFormations.length
+                    : undefined;
+                const avgPersonnelPct = participatingFormations.length > 0
+                    ? participatingFormations.reduce((sum, formation) => {
+                        const personnel = finiteNumber(formation.personnel, 0);
+                        const baseline = personnel > 0 ? Math.min(1, personnel / 2500) : 0;
+                        return sum + baseline;
+                    }, 0) / participatingFormations.length
+                    : undefined;
+                const sectorIntelRecords = typeof op.sector_id === 'string'
+                    ? (state.sector_intel as Record<string, Array<Record<string, unknown>>> | undefined)?.[op.sector_id]
+                    : undefined;
+                const intelReadiness = Array.isArray(sectorIntelRecords) && sectorIntelRecords.length > 0
+                    ? sectorIntelRecords.reduce((best, record) => {
+                        const confidence = finiteNumber(record.confidence, 0);
+                        return confidence > best ? confidence : best;
+                    }, 0)
+                    : undefined;
+                const supplyReadiness = typeof op.supply_readiness === 'number' ? op.supply_readiness : undefined;
                 operations.push({
                     corps_id: fv.id,
                     corps_name: fv.name,
@@ -366,12 +443,28 @@ export function parseGameState(json: unknown): LoadedGameState {
                     objectives: Array.isArray(op.objectives) ? (op.objectives as string[]).filter(o => typeof o === 'string') : undefined,
                     current_objective_index: typeof op.current_objective_index === 'number' ? op.current_objective_index : undefined,
                     momentum: typeof op.momentum === 'number' ? op.momentum : undefined,
-                    participating_brigade_count: Array.isArray(op.participating_brigades) ? (op.participating_brigades as string[]).length : 0,
-                    participating_brigade_ids: Array.isArray(op.participating_brigades)
-                        ? (op.participating_brigades as string[]).filter((id): id is string => typeof id === 'string').sort(strictCompare)
-                        : undefined,
+                    failure_count: typeof op.failure_count === 'number' ? op.failure_count : undefined,
+                    consecutive_failures_on_current: typeof op.consecutive_failures_on_current === 'number' ? op.consecutive_failures_on_current : undefined,
+                    phase_started_turn: typeof op.phase_started_turn === 'number' ? op.phase_started_turn : undefined,
+                    participating_brigade_count: participatingBrigadeIds?.length ?? 0,
+                    participating_brigade_ids: participatingBrigadeIds,
                     started_turn: typeof op.started_turn === 'number' ? op.started_turn : turn,
-                    supply_readiness: typeof op.supply_readiness === 'number' ? op.supply_readiness : undefined,
+                    supply_readiness: supplyReadiness,
+                    avg_cohesion: avgCohesion,
+                    avg_personnel_pct: avgPersonnelPct,
+                    readiness: supplyReadiness != null || avgCohesion != null || intelReadiness != null
+                        ? {
+                            supply: supplyReadiness ?? 0,
+                            cohesion: avgCohesion != null ? Math.max(0, Math.min(1, avgCohesion / 100)) : 0,
+                            intel: intelReadiness ?? 0,
+                        }
+                        : undefined,
+                    min_attack_outcome: typeof op.min_attack_outcome === 'string' ? op.min_attack_outcome as OperationView['min_attack_outcome'] : undefined,
+                    tempo: typeof op.tempo === 'string' ? op.tempo as OperationView['tempo'] : undefined,
+                    schwerpunkt_osid: typeof op.schwerpunkt_osid === 'string' ? op.schwerpunkt_osid : undefined,
+                    artillery_preparation: op.artillery_preparation === true ? true : undefined,
+                    force_launch: op.force_launch === true ? true : undefined,
+                    recovery_reason: typeof op.recovery_reason === 'string' ? op.recovery_reason as OperationView['recovery_reason'] : undefined,
                 });
             }
         }
@@ -537,9 +630,38 @@ export function parseGameState(json: unknown): LoadedGameState {
             enclave_humanitarian_pressure: finiteNumber(rawIvp.enclave_humanitarian_pressure),
             sarajevo_siege_visibility: finiteNumber(rawIvp.sarajevo_siege_visibility),
             negotiation_momentum: finiteNumber(rawIvp.negotiation_momentum),
+            composite_ivp: finiteNumber(rawIvp.composite_ivp),
             last_major_shift: finiteNumber(rawIvp.last_major_shift, turn),
         };
     }
+    const ivpConsequencesActive = Array.isArray(state.ivp_consequences_active)
+        ? (state.ivp_consequences_active as unknown[])
+            .filter((value): value is string => typeof value === 'string' && value.length > 0)
+            .sort(strictCompare)
+        : undefined;
+    const pendingConvoyDecisions = Array.isArray(state.pending_convoy_decisions)
+        ? (state.pending_convoy_decisions as Array<Record<string, unknown>>)
+            .map((convoy) => {
+                const id = typeof convoy.id === 'string' ? convoy.id : '';
+                const targetEnclave = typeof convoy.target_enclave === 'string' ? convoy.target_enclave : '';
+                const routeFaction = convoy.route_faction === 'RS' || convoy.route_faction === 'RBiH' || convoy.route_faction === 'HRHB'
+                    ? convoy.route_faction
+                    : null;
+                if (!id || !targetEnclave || !routeFaction) return null;
+                const decision = convoy.decision === 'allow' || convoy.decision === 'block' || convoy.decision === 'divert'
+                    ? convoy.decision
+                    : undefined;
+                return {
+                    id,
+                    target_enclave: targetEnclave,
+                    route_faction: routeFaction as 'RS' | 'RBiH' | 'HRHB',
+                    supply_amount: finiteNumber(convoy.supply_amount),
+                    ...(decision ? { decision: decision as 'allow' | 'block' | 'divert' } : {}),
+                };
+            })
+            .filter((value): value is NonNullable<typeof value> => value !== null)
+            .sort((a, b) => a.id.localeCompare(b.id))
+        : undefined;
 
     let phaseIiSupplyPressure: LoadedGameState['phaseIiSupplyPressure'] | undefined;
     const rawSupply = state.war_supply_pressure as Record<string, unknown> | undefined;
@@ -563,6 +685,55 @@ export function parseGameState(json: unknown): LoadedGameState {
             };
         }
         if (Object.keys(out).length > 0) factionReserves = out;
+    }
+
+    let mobilizationSummary: LoadedGameState['mobilizationSummary'] | undefined;
+    const rawMilitiaPoolsForSummary = state.militia_pools as Record<string, Record<string, unknown>> | undefined;
+    const rawStrategicReserves = state.strategic_reserves as Record<string, unknown> | undefined;
+    if (rawMilitiaPoolsForSummary && typeof rawMilitiaPoolsForSummary === 'object' && !Array.isArray(rawMilitiaPoolsForSummary)) {
+        const byFaction: Record<string, MobilizationSummaryView & { _poolByMun: Map<string, number> }> = {};
+        for (const poolKey of Object.keys(rawMilitiaPoolsForSummary).sort(strictCompare)) {
+            const pool = rawMilitiaPoolsForSummary[poolKey] ?? {};
+            const faction = typeof pool.faction === 'string' ? pool.faction : '';
+            if (!faction) continue;
+            const munId = poolKey.includes(':') ? poolKey.split(':', 2)[0] : poolKey;
+            if (!byFaction[faction]) {
+                byFaction[faction] = {
+                    faction: faction as MobilizationSummaryView['faction'],
+                    total_available: 0,
+                    total_committed: 0,
+                    total_exhausted: 0,
+                    exhaustion_pct: 0,
+                    strategic_reserve: finiteNumber(rawStrategicReserves?.[faction], 0),
+                    top_pools: [],
+                    _poolByMun: new Map<string, number>(),
+                };
+            }
+            byFaction[faction].total_available += finiteNumber(pool.available);
+            byFaction[faction].total_committed += finiteNumber(pool.committed);
+            byFaction[faction].total_exhausted += finiteNumber(pool.exhausted);
+            byFaction[faction]._poolByMun.set(munId, (byFaction[faction]._poolByMun.get(munId) ?? 0) + finiteNumber(pool.available));
+        }
+        const out: NonNullable<LoadedGameState['mobilizationSummary']> = {};
+        for (const faction of Object.keys(byFaction).sort(strictCompare)) {
+            const entry = byFaction[faction];
+            const denominator = entry.total_available + entry.total_committed + entry.total_exhausted;
+            entry.exhaustion_pct = denominator > 0 ? (entry.total_exhausted / denominator) * 100 : 0;
+            entry.top_pools = Array.from(entry._poolByMun.entries())
+                .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+                .slice(0, 5)
+                .map(([mun_id, available]) => ({ mun_id, available }));
+            out[faction] = {
+                faction: entry.faction,
+                total_available: entry.total_available,
+                total_committed: entry.total_committed,
+                total_exhausted: entry.total_exhausted,
+                exhaustion_pct: entry.exhaustion_pct,
+                strategic_reserve: entry.strategic_reserve,
+                top_pools: entry.top_pools,
+            };
+        }
+        if (Object.keys(out).length > 0) mobilizationSummary = out;
     }
 
     let phaseIiExhaustion: LoadedGameState['phaseIiExhaustion'] | undefined;
@@ -780,6 +951,11 @@ export function parseGameState(json: unknown): LoadedGameState {
 
     let corpsFrontSectors: CorpsFrontSectorView[] | undefined;
     const rawSectors = state.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
+    const opsecSectorSet = new Set(
+        Array.isArray((state as Record<string, unknown>).opsec_sectors)
+            ? ((state as Record<string, unknown>).opsec_sectors as string[]).filter((value): value is string => typeof value === 'string')
+            : []
+    );
     if (rawSectors && typeof rawSectors === 'object' && !Array.isArray(rawSectors)) {
         const out: CorpsFrontSectorView[] = [];
         for (const sectorId of Object.keys(rawSectors).sort((a, b) => a.localeCompare(b))) {
@@ -833,25 +1009,77 @@ export function parseGameState(json: unknown): LoadedGameState {
                 // New intel fields defaulting for backwards compatibility:
                 intel_confidence: typeof s.intel_confidence === 'number' ? s.intel_confidence : 1.0,
                 offensive_signs: Boolean(s.offensive_signs),
+                logistics_priority: edgeIds.length > 0
+                    ? edgeIds.reduce((sum, edgeId) => {
+                        const factionPriorities = (state.logistics_priority as Record<string, Record<string, number>> | undefined)?.[faction];
+                        const value = factionPriorities?.[edgeId];
+                        return sum + (typeof value === 'number' ? value : 1);
+                    }, 0) / edgeIds.length
+                    : 1,
+                opsec_active: opsecSectorSet.has(sectorId),
             });
         }
         if (out.length > 0) corpsFrontSectors = out;
     }
 
+    let sectorEntrenchmentSummary: LoadedGameState['sectorEntrenchmentSummary'] | undefined;
+    if (corpsFrontSectors && corpsFrontSectors.length > 0) {
+        const formationsById = new Map(formations.map((formation) => [formation.id, formation]));
+        const out: NonNullable<LoadedGameState['sectorEntrenchmentSummary']> = {};
+        for (const sector of corpsFrontSectors) {
+            const assigned = sector.assigned_brigade_ids
+                .map((formationId) => formationsById.get(formationId))
+                .filter((formation): formation is FormationView => Boolean(formation));
+            if (assigned.length === 0) continue;
+            out[sector.sector_id] = {
+                avgEntrenchment: assigned.reduce((sum, formation) => sum + finiteNumber(formation.entrenchment_turns), 0) / assigned.length,
+                avgDigIn: assigned.reduce((sum, formation) => sum + finiteNumber(formation.dig_in_progress), 0) / assigned.length,
+                digInCount: assigned.filter((formation) => formation.posture === 'dig_in').length,
+                totalCount: assigned.length,
+            };
+        }
+        if (Object.keys(out).length > 0) sectorEntrenchmentSummary = out;
+    }
+
     let enclaveResilience: LoadedGameState['enclaveResilience'] | undefined;
     const rawEnclave = state.enclave_resilience as Record<string, unknown> | undefined;
+    const rawSupplyStateByOsid = state.supply_state_by_osid as Record<string, unknown> | undefined;
     if (rawEnclave && typeof rawEnclave === 'object' && !Array.isArray(rawEnclave)) {
         const out: Record<string, EnclaveResilienceView> = {};
         for (const key of Object.keys(rawEnclave).sort()) {
             const entry = rawEnclave[key];
+            const enclaveDef = ENCLAVE_UI_DEFINITIONS.find((enclave) => enclave.id === key);
             if (typeof entry === 'number') {
-                out[key] = { resilience: entry, isolation_turns: 0, hardening_active: false };
+                out[key] = {
+                    resilience: entry,
+                    isolation_turns: 0,
+                    hardening_active: false,
+                    supply_state: deriveEnclaveSupplyState(key, rawSupplyStateByOsid, 0, false, entry),
+                    airdrop_status: enclaveDef?.faction === 'RBiH' ? 'not_isolated_long_enough' : 'not_eligible',
+                    airdrop_allocation: getAirdropAllocationValue(state as Record<string, unknown>, key),
+                    faction: enclaveDef?.faction ?? null,
+                    display_name: enclaveDef?.display_name ?? humanizeMunicipalitySlug(key.replace(/_/g, '-')),
+                };
             } else if (entry && typeof entry === 'object' && !Array.isArray(entry)) {
                 const e = entry as Record<string, unknown>;
+                const resilienceValue = finiteNumber(e.resilience);
+                const isolationTurns = finiteNumber(e.isolation_turns);
+                const hardeningActive = Boolean(e.hardening_active);
                 out[key] = {
-                    resilience: finiteNumber(e.resilience),
-                    isolation_turns: finiteNumber(e.isolation_turns),
-                    hardening_active: Boolean(e.hardening_active),
+                    resilience: resilienceValue,
+                    isolation_turns: isolationTurns,
+                    hardening_active: hardeningActive,
+                    supply_state: deriveEnclaveSupplyState(key, rawSupplyStateByOsid, isolationTurns, hardeningActive, resilienceValue),
+                    airdrop_status: enclaveDef?.faction !== 'RBiH'
+                        ? 'not_eligible'
+                        : isolationTurns >= 4
+                            ? 'receiving'
+                        : isolationTurns > 0
+                            ? 'not_isolated_long_enough'
+                            : 'not_eligible',
+                    airdrop_allocation: getAirdropAllocationValue(state as Record<string, unknown>, key),
+                    faction: enclaveDef?.faction ?? null,
+                    display_name: enclaveDef?.display_name ?? humanizeMunicipalitySlug(key.replace(/_/g, '-')),
                 };
             }
         }
@@ -861,13 +1089,14 @@ export function parseGameState(json: unknown): LoadedGameState {
     return {
         label, turn, phase,
         metadata: {
-            turn: meta?.turn ?? turn,
-            date: meta?.date ?? 'UNKNOWN',
+            turn,
+            date: metadataDate,
         },
         formations, militiaPools, controlBySettlement, statusBySettlement,
         brigadeAorByFormationId, brigadeFrontAssignment, theatres, armyTheatreAssignment,
         attackOrders, aorOrders, recentControlEvents, recruitment,
-        armyStance, casualtyLedger, civilianCasualties, internationalVisibilityPressure, phaseIiSupplyPressure, phaseIiExhaustion,
+        armyStance, casualtyLedger, civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions,
+        sarajevoTunnelOperational: Boolean(state.sarajevo_tunnel_operational), phaseIiSupplyPressure, phaseIiExhaustion,
         player_faction: playerFaction ?? undefined,
         rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
         war_alliance_rbih_hrhb: war_alliance_rbih_hrhb ?? null,
@@ -886,6 +1115,8 @@ export function parseGameState(json: unknown): LoadedGameState {
         namedOfficerStateById,
         factionReserves,
         enclaveResilience,
+        sectorEntrenchmentSummary,
+        mobilizationSummary,
     };
 }
 

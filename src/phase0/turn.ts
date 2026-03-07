@@ -11,7 +11,7 @@ import type { FactionId, GameState, MunicipalityId } from '../state/game_state.j
 import { applyPrewarCapitalTrickle } from './capital.js';
 import { accumulateDeclarationPressure, type DeclarationPressureOptions } from './declaration_pressure.js';
 import {
-    applyPhase0ToPhaseITransition,
+    applyWarTransition,
     applyScheduledReferendum,
     checkReferendumDeadline,
     updateReferendumEligibility,
@@ -71,7 +71,7 @@ export function runPhase0Turn(state: GameState, options: Phase0TurnOptions = {})
 
     updateAllStabilityScores(state, options.stability);
 
-    applyPhase0ToPhaseITransition(state);
+    applyWarTransition(state);
 
     checkReferendumDeadline(state, turn);
 }

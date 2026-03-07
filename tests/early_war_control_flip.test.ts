@@ -114,7 +114,7 @@ test('runControlFlip with consolidation set skips that municipality', () => {
 test('war runTurn default path omits phase_i control-flip report', async () => {
     const state = stateWithTwoAdjacentMuns();
     const { report } = await runTurn(state, { seed: state.meta.seed });
-    assert.strictEqual(report.phase_i_control_flip, undefined);
+    assert.strictEqual(report.control_flip, undefined);
     assert.strictEqual(report.phases.some((p) => p.name === 'phase-i-control-flip'), false);
 });
 

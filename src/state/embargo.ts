@@ -40,13 +40,12 @@ export function ensureEmbargoProfiles(state: GameState): void {
 }
 
 export function updateEmbargoProfiles(state: GameState): void {
-    const turn = state.meta.turn;
     ensureEmbargoProfiles(state);
     for (const faction of state.factions) {
         const embargo = faction.embargo_profile!;
         const base = embargo.smuggling_efficiency ?? 0;
-        const growth = (turn / 200) * 0.3;
-        embargo.smuggling_efficiency = clamp01(base + growth);
+        const growth = faction.id === 'RBiH' ? SMUGGLING_EFFICIENCY_GROWTH : 0;
+        embargo.smuggling_efficiency = Math.min(0.3, clamp01(base + growth));
         embargo.heavy_equipment_access = clamp01(embargo.heavy_equipment_access);
         embargo.ammunition_resupply_rate = clamp01(embargo.ammunition_resupply_rate);
         embargo.maintenance_capacity = clamp01(embargo.maintenance_capacity);

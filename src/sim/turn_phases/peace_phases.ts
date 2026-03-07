@@ -1,11 +1,11 @@
-/** Peace-phase (Phase I) pipeline steps. Extracted from turn_pipeline.ts (R7). */
+/** Pre-war (Peace phase) and early-war pipeline steps. Extracted from turn_pipeline.ts (R7). */
 
 import { buildAdjacencyMap } from '../../map/adjacency_map.js';
 import { computeFrontEdges } from '../../map/front_edges.js';
 import { loadSettlementGraph } from '../../map/settlements.js';
 import { buildSidToMunFromSettlements, buildOsidToMunFromReverseMap } from '../../scenario/oob_early_war_entry.js';
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
-import { applyPhaseIDisplacementFromFlips } from '../../state/displacement.js';
+import { applyDisplacementFromFlips } from '../../state/displacement.js';
 import { GameState, type FactionId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { loadOperationalData, loadOperationalEdges } from '../../data/operational_data.js';
@@ -34,7 +34,7 @@ import { checkAndApplyWashington } from '../early_war/washington_agreement.js';
 import { activateCorpsForTurn } from '../early_war/activate_corps.js';
 import { computeSiegeState } from '../early_war/compute_siege_state.js';
 import { promoteFormations } from '../early_war/promote_formations.js';
-import { runPhaseIBotPosture } from '../early_war/bot_phase_i.js';
+import { runEarlyWarBotPosture } from '../early_war/bot_phase_i.js';
 import type { NamedPhase, TurnContext } from '../turn_pipeline_types.js';
 import { getSiegeStateCache, setSiegeStateCache, loadRecruitmentCatalog } from '../turn_pipeline_types.js';
 
@@ -43,7 +43,7 @@ import { getSiegeStateCache, setSiegeStateCache, loadRecruitmentCatalog } from '
  * Phase I execution occurs only when referendum_held and current_turn >= war_start_turn.
  * Phase 0 must remain the only runner before war_start_turn; use state pipeline for phase_0.
  */
-export function isPhaseIAllowed(state: GameState): boolean {
+export function isEarlyWarAllowed(state: GameState): boolean {
     const meta = state.meta;
     if (!meta.referendum_held) return false;
     const warStart = meta.war_start_turn;
@@ -60,7 +60,7 @@ export function assertNoAoRInEarlyWar(state: GameState): void {
     }
 }
 
-/** Phase I turn phases (order per Phase_I_Spec §5; Steps 3–9 add remaining). */
+/** Pre-war and early-war turn steps. */
 export const peacePhases: NamedPhase[] = [
     {
         name: 'evaluate-events',
@@ -71,9 +71,9 @@ export const peacePhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-i-militia-emergence',
+        name: 'militia-emergence',
         run: (context) => {
-            context.report.phase_i_militia_emergence = updateMilitiaEmergence(context.state);
+            context.report.militia_emergence = updateMilitiaEmergence(context.state);
         }
     },
     {
@@ -105,10 +105,10 @@ export const peacePhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-i-pool-population',
+        name: 'pool-population',
         run: async (context) => {
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-            context.report.phase_i_pool_population = runPoolPopulation(
+            context.report.pool_population = runPoolPopulation(
                 context.state,
                 graph.settlements,
                 context.input.municipalityPopulation1991,
@@ -117,10 +117,10 @@ export const peacePhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-i-minority-militia-decay',
+        name: 'minority-militia-decay',
         run: async (context) => {
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-            context.report.phase_i_minority_militia_decay = runMinorityMilitiaDecay(
+            context.report.minority_militia_decay = runMinorityMilitiaDecay(
                 context.state,
                 graph.settlements,
                 context.input.municipalityPopulation1991
@@ -128,14 +128,14 @@ export const peacePhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-i-brigade-reinforcement',
+        name: 'early-brigade-reinforcement',
         run: (context) => {
             if (!isFormationSpawnDirectiveActive(context.state)) return;
-            context.report.phase_i_brigade_reinforcement = reinforceBrigadesFromPools(context.state);
+            context.report.early_brigade_reinforcement = reinforceBrigadesFromPools(context.state);
         }
     },
     {
-        name: 'phase-i-formation-spawn',
+        name: 'formation-spawn',
         run: async (context) => {
             if (!isFormationSpawnDirectiveActive(context.state)) return;
             const directive = context.state.formation_spawn_directive!;
@@ -150,7 +150,7 @@ export const peacePhases: NamedPhase[] = [
             } catch {
                 // Operational data missing; spawn without location_osid (legacy)
             }
-            context.report.phase_i_formation_spawn = spawnFormationsFromPools(context.state, {
+            context.report.formation_spawn = spawnFormationsFromPools(context.state, {
                 factionFilter: null,
                 munFilter: null,
                 maxPerMun: null,
@@ -195,7 +195,7 @@ export const peacePhases: NamedPhase[] = [
         },
     },
     {
-        name: 'phase-i-bot-posture',
+        name: 'early-war-bot-posture',
         run: async (context) => {
             // Phase I bot: assign posture (hold/probe/push) to front edges for bot-controlled factions
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
@@ -209,11 +209,11 @@ export const peacePhases: NamedPhase[] = [
                 .map(f => f.id)
                 .filter(fid => playerFaction == null || fid !== playerFaction)
                 .sort(strictCompare) as FactionId[];
-            runPhaseIBotPosture(context.state, frontEdges, botFactions);
+            runEarlyWarBotPosture(context.state, frontEdges, botFactions);
         }
     },
     {
-        name: 'phase-i-alliance-update',
+        name: 'early-alliance-update',
         run: (context) => {
             // Phase I §4.8: Initialize rbih_hrhb_state if not present (backward compatible)
             ensureRbihHrhbState(context.state);
@@ -221,38 +221,38 @@ export const peacePhases: NamedPhase[] = [
             updateMixedMunicipalitiesList(context.state);
             // Per-turn alliance value update (skip when scenario set enable_rbih_hrhb_dynamics: false)
             if (context.state.meta.enable_rbih_hrhb_dynamics !== false) {
-                context.report.phase_i_alliance_update = updateAllianceValue(context.state);
+                context.report.alliance_update = updateAllianceValue(context.state);
             }
         }
     },
     {
-        name: 'phase-i-ceasefire-check',
+        name: 'early-ceasefire-check',
         run: (context) => {
             // Phase I §4.8: Evaluate bilateral ceasefire preconditions
-            context.report.phase_i_ceasefire_check = checkAndApplyCeasefire(context.state);
+            context.report.ceasefire_check = checkAndApplyCeasefire(context.state);
         }
     },
     {
-        name: 'phase-i-washington-check',
+        name: 'early-washington-check',
         run: (context) => {
             // Phase I §4.8: Evaluate Washington Agreement preconditions (requires ceasefire state)
-            context.report.phase_i_washington_check = checkAndApplyWashington(context.state);
+            context.report.washington_check = checkAndApplyWashington(context.state);
         }
     },
     {
-        name: 'phase-i-capability-update',
+        name: 'capability-update',
         run: (context) => {
             // System 10: Update capability profiles by year so control flip can use capability-weighted effectiveness
             updateCapabilityProfiles(context.state);
         }
     },
     {
-        name: 'phase-i-control-flip',
+        name: 'early-control-flip',
         run: (context) => {
             // Canonical path: Phase I no longer performs control flips.
             // Political control changes are resolved in Phase II attack resolution only.
             if (context.state.meta.phase !== 'war') return;
-            context.report.phase_i_control_flip = {
+            context.report.control_flip = {
                 flips: [],
                 municipalities_evaluated: 0,
                 control_events: []
@@ -260,22 +260,22 @@ export const peacePhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-i-bilateral-flip-count',
+        name: 'bilateral-flip-count',
         run: (context) => {
             // Phase I §4.8: Count bilateral RBiH–HRHB flips (feeds next turn's alliance update)
-            const flips = context.report.phase_i_control_flip?.flips ?? [];
-            context.report.phase_i_bilateral_flip_count = countBilateralFlips(context.state, flips);
+            const flips = context.report.control_flip?.flips ?? [];
+            context.report.bilateral_flip_count = countBilateralFlips(context.state, flips);
         }
     },
     {
-        name: 'phase-i-displacement-hooks',
+        name: 'displacement-hooks',
         run: (context) => {
-            const controlFlipReport = context.report.phase_i_control_flip ?? {
+            const controlFlipReport = context.report.control_flip ?? {
                 flips: [],
                 municipalities_evaluated: 0,
                 control_events: []
             };
-            context.report.phase_i_displacement_hooks = runDisplacementHooks(
+            context.report.displacement_hooks = runDisplacementHooks(
                 context.state,
                 context.state.meta.turn,
                 controlFlipReport,
@@ -284,16 +284,16 @@ export const peacePhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-i-displacement-apply',
+        name: 'displacement-apply',
         run: async (context) => {
-            const hooksReport = context.report.phase_i_displacement_hooks;
-            const controlFlipReport = context.report.phase_i_control_flip;
+            const hooksReport = context.report.displacement_hooks;
+            const controlFlipReport = context.report.control_flip;
             if (!hooksReport?.by_mun?.length || !controlFlipReport?.flips?.length) return;
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             const edges = context.input.settlementEdges ?? graph.edges;
             if (!edges?.length) return;
             const adjacencyMap = buildAdjacencyMap(edges);
-            context.report.phase_i_displacement_apply = applyPhaseIDisplacementFromFlips(
+            context.report.displacement_apply = applyDisplacementFromFlips(
                 context.state,
                 context.state.meta.turn,
                 controlFlipReport.flips,
@@ -305,7 +305,7 @@ export const peacePhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-i-control-strain',
+        name: 'control-strain',
         run: async (context) => {
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             const byMun = buildSettlementsByMun(graph.settlements);
@@ -313,24 +313,24 @@ export const peacePhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-i-authority-update',
+        name: 'authority-update',
         run: (context) => {
-            context.report.phase_i_authority = runAuthorityDegradation(context.state);
+            context.report.authority_degradation = runAuthorityDegradation(context.state);
         }
     },
     {
-        name: 'phase-i-jna-transition',
+        name: 'jna-transition',
         run: (context) => {
             context.report.war_jna_transition = runJNATransition(context.state);
         }
     },
     {
-        name: 'phase-i-minority-erosion',
+        name: 'minority-erosion',
         run: async (context) => {
             // Phase I §4.8: Minority militia erosion in mixed municipalities
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             const byMun = buildSettlementsByMun(graph.settlements);
-            context.report.phase_i_minority_erosion_report = runMinorityErosion(context.state, byMun);
+            context.report.minority_erosion_report = runMinorityErosion(context.state, byMun);
         }
     }
 ];

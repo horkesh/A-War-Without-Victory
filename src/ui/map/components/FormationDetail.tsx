@@ -8,7 +8,17 @@ import { DETAIL_PANEL_STYLE, SECONDARY_PANEL_STYLE } from './panelRail';
 import { turnToDateString, formatCombatOutcome, formatPosture, toTitleCase } from '../utils/formatters';
 import { getArmyCrest } from '../utils/factionAssets';
 import { getFormationCommander } from '../utils/officerUtils';
-// import { CombatSummaryPanel } from './CombatSummaryPanel';
+
+const POSTURE_TOOLTIPS: Record<string, string> = {
+  hold: '1.00x defense. No extra cohesion cost. Baseline holding posture.',
+  defend: '1.25x defense. Moderate cohesion cost. Standard defensive stance.',
+  defend_at_all_costs: '1.60x defense. High cohesion cost. Brigade fights to destruction.',
+  elastic_defense: '1.10x defense. Preserves cohesion by yielding ground when needed.',
+  counterattack: 'Defensive stance with local offensive bias after enemy contact.',
+  dig_in: '1.35x defense when prepared. Builds fortifications over time.',
+  attack: 'Offensive stance. Lower defense, higher attack willingness.',
+  assault: 'Maximum offensive commitment. Highest casualties and cohesion burn.',
+};
 
 
 /**
@@ -619,7 +629,11 @@ export function FormationDetail() {
                         formation.id,
                         posture
                       )}
-                      title={blocked ? 'Blocked: home defense active' : operationOwnershipOverridesHomeDefense ? `Operation-owned: ${operationOwningFormation?.name}` : undefined}
+                      title={blocked
+                        ? 'Blocked: home defense active'
+                        : operationOwnershipOverridesHomeDefense
+                          ? `Operation-owned: ${operationOwningFormation?.name}. ${POSTURE_TOOLTIPS[posture]}`
+                          : POSTURE_TOOLTIPS[posture]}
                       className={`text-[11px] font-sans px-2 py-1 rounded border border-panel-border ${blocked ? 'opacity-40 cursor-not-allowed text-text-secondary' : 'text-interactive hover:bg-panel-hover'}`}
                     >
                       {formatPosture(posture)}

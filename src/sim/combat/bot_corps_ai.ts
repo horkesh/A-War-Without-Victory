@@ -1817,9 +1817,18 @@ export function generateCorpsDirectives(
                     finalBrigadeIds = [...finalBrigadeIds, ...rear].sort(strictCompare);
                 }
 
+
+                // Filter targets to only those adjacent to at least one friendly-held OSID.
+                // Removes unreachable deep-enemy targets from operation objectives, preventing
+                // operations from launching into cells that have no adjacent RS position to attack from.
+                const reachableTargets = offensiveTargets.filter((target) => {
+                    const neighbors = adjacency.get(target) ?? [];
+                    return neighbors.some((n) => getPoliticalControllerOSID(state, n, reverseMap) === faction);
+                });
+
                 const op = evaluateSectorOffensiveLaunch(
                     state, corps.id, sec.sector_id, faction,
-                    finalBrigadeIds, secEnemyOsids, offensiveTargets, supplyByOsid
+                    finalBrigadeIds, secEnemyOsids, reachableTargets, supplyByOsid
                 );
                 if (op) {
                     // Apply exhaustion from replaced recovery-phase op

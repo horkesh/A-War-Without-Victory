@@ -29,12 +29,14 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         corps: 'vrs_east_bosnian',
         name: 'Operation Koridor',
         // Historically: EBK secured the Brcko corridor crossing to link Semberija with
-        // western RS. Semberija brigades (near Bijeljina) were better positioned than
-        // the Posavina brigades. 1st Krajina Corps handled broader Posavina from July 1992.
+        // western RS. Semberija brigades (near Bijeljina) push from the east;
+        // 3rd Posavina (at Pelagicevo) is adjacent to Krepsic/Skakava Donja and provides
+        // the southern pincer. 1st Krajina Corps handled broader Posavina from July 1992.
         participating_brigades: [
             'rs_1st_semberija_light_infantry',
             'rs_2nd_semberija_light_infantry',
             'rs_1st_bijeljina_light_infantry_panthers',
+            'rs_3rd_posavina_light_infantry',
         ],
         staging_osid: 'op:bijeljina:dvorovi_2',
         target_osids: [
@@ -54,10 +56,13 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
             'rs_1st_zvornik',
         ],
         staging_osid: 'op:zvornik:kozluk_2',
+        // Zvornik city first — 1st Zvornik at kozluk_2 is adjacent and can attack immediately.
+        // djulici/krizevici continue the Drina valley sweep; bratunac_2 is 1st Bratunac's target.
         target_osids: [
-            'op:bratunac:bratunac_2',
             'op:zvornik:zvornik',
-            'op:zvornik:novo_selo',
+            'op:zvornik:djulici',
+            'op:zvornik:krizevici',
+            'op:bratunac:bratunac_2',
         ],
     },
     {

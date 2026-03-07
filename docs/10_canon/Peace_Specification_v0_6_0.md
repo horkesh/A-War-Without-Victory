@@ -95,7 +95,7 @@ Alliance state [-1, +1]; initial +0.6. Coordinated vs unilateral investment; all
 
 ### 4.4 Declaration Pressure Accumulation
 
-RS and HRHB declarations emerge when conditions are met (not player buttons). RS: organizational threshold, JNA coordination, relationship ≤ -0.5, FRY support; pressure +10/turn, declare at ≥100. HRHB: organizational threshold, Croatian support, alliance ≤ +0.2, and RS declared or war started. Effects on legitimacy, authority, and war escalation as in deprecated Phase 0 spec §4.4.
+RS and HRHB declarations emerge when conditions are met (not player buttons). RS: organizational threshold, JNA coordination, relationship ≤ -0.5, FRY support; pressure +10/turn, declare at ≥100. HRHB: organizational threshold, Croatian support, alliance ≤ +0.2, and RS declared or war started. Effects on legitimacy, authority, and war escalation as in deprecated Peace (Phase 0) spec §4.4.
 
 ### 4.5 Stability Score Initialization
 
@@ -127,7 +127,7 @@ Hand-off data: Stability Scores, Organizational Factors, Alliance State, Declara
 
 ## 8. Output Contract
 
-Peace phase MUST produce per-municipality outputs (political_control, stability_score, authority_state, organizational_factors), faction-level outputs (capital_remaining, declaration_state), alliance rbih_hrhb_relationship, transition info (phase_0_end_turn, phase_1_start_turn, escalation_reason), and JNA_status. Implementation uses state.meta and state.phase_i_jna (or war-era equivalents) as defined in runtime.
+Peace phase MUST produce per-municipality outputs (political_control, stability_score, authority_state, organizational_factors), faction-level outputs (capital_remaining, declaration_state), alliance rbih_hrhb_relationship, transition info (war_start_turn, escalation_reason), and JNA_status. Implementation uses state.meta and state.jna_transition (or war-era equivalents) as defined in runtime.
 
 ---
 

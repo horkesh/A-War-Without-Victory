@@ -10,7 +10,7 @@ import {
     OUTCOME_NON_WAR_TERMINAL,
     REFERENDUM_DEADLINE_TURNS_DEFAULT,
     REFERENDUM_WAR_DELAY_TURNS,
-    applyPhase0ToPhaseITransition,
+    applyWarTransition,
     checkReferendumDeadline,
     holdReferendum,
     isReferendumEligible,
@@ -207,36 +207,36 @@ test('isWarStartTurn: true when referendum held and turn === war_start_turn', ()
     assert.strictEqual(isWarStartTurn(state), true);
 });
 
-test('applyPhase0ToPhaseITransition: no transition when phase is not phase_0', () => {
+test('applyWarTransition: no transition when phase is not phase_0', () => {
     const state = minimalPhase0State();
     state.meta.phase = 'war';
     state.meta.referendum_held = true;
     state.meta.war_start_turn = 14;
     state.meta.turn = 14;
-    const result = applyPhase0ToPhaseITransition(state);
+    const result = applyWarTransition(state);
     assert.strictEqual(result, false);
     assert.strictEqual(state.meta.phase, 'war');
 });
 
-test('applyPhase0ToPhaseITransition: no transition when not war_start_turn', () => {
+test('applyWarTransition: no transition when not war_start_turn', () => {
     const state = minimalPhase0State();
     state.meta.phase = 'peace';
     state.meta.referendum_held = true;
     state.meta.war_start_turn = 14;
     state.meta.turn = 13;
-    const result = applyPhase0ToPhaseITransition(state);
+    const result = applyWarTransition(state);
     assert.strictEqual(result, false);
     assert.strictEqual(state.meta.phase, 'peace');
 });
 
-test('applyPhase0ToPhaseITransition: transitions to phase_i only when phase_0 and war_start_turn', () => {
+test('applyWarTransition: transitions to phase_i only when phase_0 and war_start_turn', () => {
     const state = minimalPhase0State();
     state.meta.phase = 'peace';
     state.meta.referendum_held = true;
     state.meta.referendum_turn = 10;
     state.meta.war_start_turn = 14;
     state.meta.turn = 14;
-    const result = applyPhase0ToPhaseITransition(state);
+    const result = applyWarTransition(state);
     assert.strictEqual(result, true);
     assert.strictEqual(state.meta.phase, 'war');
 });

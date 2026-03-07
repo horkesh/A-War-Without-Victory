@@ -24,7 +24,7 @@ const MAX_MULTIPLIER = 10;
  * Only meaningful when meta.phase === 'war'; returns 1 otherwise.
  * Deterministic: same state + factionId → same result.
  */
-export function getPhaseIICommandFrictionMultiplier(
+export function getCommandFrictionMultiplier(
     state: GameState,
     factionId: FactionId,
     settlementEdges: EdgeRecord[]
@@ -48,14 +48,14 @@ export function getPhaseIICommandFrictionMultiplier(
  * Compute command friction multipliers for all factions (deterministic order).
  * All returned values are >= 1; higher = more friction.
  */
-export function getPhaseIICommandFrictionMultipliers(
+export function getCommandFrictionMultipliers(
     state: GameState,
     settlementEdges: EdgeRecord[]
 ): Record<FactionId, number> {
     const out: Record<FactionId, number> = {};
     const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
     for (const fid of factionIds) {
-        out[fid] = getPhaseIICommandFrictionMultiplier(state, fid, settlementEdges);
+        out[fid] = getCommandFrictionMultiplier(state, fid, settlementEdges);
     }
     return out;
 }

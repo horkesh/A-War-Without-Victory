@@ -7,7 +7,7 @@
 
 import { computeFrontEdges } from '../../map/front_edges.js';
 import type { EdgeRecord } from '../../map/settlements.js';
-import type { GameState, PhaseIIFrontDescriptor, PhaseIIFrontStability } from '../../state/game_state.js';
+import type { GameState, FrontDescriptor, PhaseIIFrontStability } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 /** Turns of sustained opposing control before a front segment is considered static (Engine Invariants §6). */
@@ -45,10 +45,10 @@ export function deriveFrontStability(
  * - No geometry created; returns descriptors with edge_ids only.
  * - Deterministic: stable sort by edge_id and side-pair.
  */
-export function detectPhaseIIFronts(
+export function detectFronts(
     state: GameState,
     settlementEdges: EdgeRecord[]
-): PhaseIIFrontDescriptor[] {
+): FrontDescriptor[] {
     if (state.meta.phase !== 'war') {
         return [];
     }
@@ -72,7 +72,7 @@ export function detectPhaseIIFronts(
 
     const turn = state.meta.turn;
     const segments = state.front_segments ?? {};
-    const descriptors: PhaseIIFrontDescriptor[] = [];
+    const descriptors: FrontDescriptor[] = [];
 
     const pairKeys = Array.from(byPair.keys()).sort(strictCompare);
     for (const pairKey of pairKeys) {

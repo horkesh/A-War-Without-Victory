@@ -42,6 +42,8 @@ export function BrigadeRow({ formation, compact, highlighted = false, onClick, o
   const factionText = FACTION_COLORS[formation.faction] ?? 'text-text-primary';
   const supplyState = getSupplyState(formation);
   const rowClass = onClick ? 'cursor-pointer' : '';
+  const fat = formation.fatigue;
+  const fatClass = fat >= 50 ? 'text-faction-rs font-bold' : fat >= 30 ? 'text-accent-gold' : 'text-text-secondary';
 
   return (
     <div
@@ -51,8 +53,9 @@ export function BrigadeRow({ formation, compact, highlighted = false, onClick, o
       onMouseLeave={(e) => onHoverChange?.(false, e)}
       data-formation-id={formation.id}
       data-highlighted={highlighted ? 'true' : 'false'}
+      title={`Supply: ${supplyState.toUpperCase()} | Fatigue: ${fat} | Cohesion: ${cohesion}%`}
     >
-      <span className={`shrink-0 text-[11px] ${SUPPLY_DOT_CLASS[supplyState]}`}>●</span>
+      <span className={`shrink-0 text-[14px] leading-none ${SUPPLY_DOT_CLASS[supplyState]}`} aria-label={supplyState}>●</span>
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${bgFaction}`} />
       <span className={`truncate min-w-0 flex-1 ${factionText}`}>{formation.name}</span>
       <div className="flex items-center gap-0.5 shrink-0" aria-label={`cohesion ${cohesion}`}>
@@ -63,7 +66,9 @@ export function BrigadeRow({ formation, compact, highlighted = false, onClick, o
           />
         ))}
       </div>
-      <span className="text-text-secondary shrink-0 tabular-nums">{formation.fatigue}</span>
+      <div className={`w-6 text-right shrink-0 tabular-nums ${fatClass}`} aria-label={`fatigue ${fat}`}>
+        {fat}
+      </div>
       <span className={`shrink-0 text-[10px] uppercase px-1 rounded ${statusClass}`}>
         {toTitleCase(formation.status)}
       </span>

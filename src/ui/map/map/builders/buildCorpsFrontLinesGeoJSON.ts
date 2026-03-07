@@ -20,6 +20,7 @@ interface CorpsFrontProperties {
     factionA: string;
     factionB: string;
     corps_id: string;
+    avg_entrenchment?: number;
     tooth_rotation?: number;
 }
 
@@ -190,7 +191,8 @@ export function buildCorpsFrontLinesGeoJSON(
     rbihHrhbAllied?: boolean,
     osidCentroids?: Map<string, [number, number]>,
     frontPressureByEdge?: Record<string, { value: number; max_abs: number }>,
-    frontEdgesOsid?: { edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }[]
+    frontEdgesOsid?: { edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }[],
+    formationsById?: Record<string, { entrenchment_turns?: number }>
 ): FeatureCollection<LineString> {
     const features = osidGeoJson.features as Feature<Polygon | MultiPolygon, OsidProperties>[];
 
@@ -201,6 +203,12 @@ export function buildCorpsFrontLinesGeoJSON(
 
     // Build (edgeId + faction) → corps_id lookup
     const edgeFactionToCorps = buildEdgeFactionToCorps(corpsFrontSectors);
+    const sectorByEdgeAndFaction = new Map<string, CorpsFrontSectorView>();
+    for (const sector of corpsFrontSectors) {
+        for (const edgeId of sector.edge_ids) {
+            sectorByEdgeAndFaction.set(`${edgeId}\0${sector.faction}`, sector);
+        }
+    }
 
     // Build authoritative OSID-pair set from the operational contact graph front edges.
     // Only these pairs will be rendered; geometric-only adjacencies are suppressed.
@@ -262,6 +270,18 @@ export function buildCorpsFrontLinesGeoJSON(
         // Look up which corps owns each side of this edge
         const corpsA = edgeFactionToCorps.get(`${pairKey}\0${ctrlA}`) ?? 'unknown';
         const corpsB = edgeFactionToCorps.get(`${pairKey}\0${ctrlB}`) ?? 'unknown';
+        const sectorA = sectorByEdgeAndFaction.get(`${pairKey}\0${ctrlA}`);
+        const avgEntrenchment = sectorA && formationsById
+            ? (() => {
+                const ids = sectorA.assigned_brigade_ids;
+                if (ids.length === 0) return 0;
+                const total = ids.reduce((sum, brigadeId) => {
+                    const formation = formationsById[brigadeId];
+                    return sum + (typeof formation?.entrenchment_turns === 'number' ? formation.entrenchment_turns : 0);
+                }, 0);
+                return total / ids.length;
+            })()
+            : 0;
 
         // Compute offset_side + tooth_rotation from OSID centroids
         let offsetA: 1 | -1 | undefined;
@@ -309,7 +329,7 @@ export function buildCorpsFrontLinesGeoJSON(
         const pairFactionKey = [ctrlA, ctrlB].sort().join('-');
         const groupKey = `${corpsA}:${pairFactionKey}`;
         if (!frontSegmentsByGroup.has(groupKey)) frontSegmentsByGroup.set(groupKey, []);
-        const frontProps: CorpsFrontProperties = { lineType: 'front', factionA: ctrlA, factionB: ctrlB, corps_id: corpsA };
+        const frontProps: CorpsFrontProperties = { lineType: 'front', factionA: ctrlA, factionB: ctrlB, corps_id: corpsA, avg_entrenchment: avgEntrenchment };
         if (toothRotation != null) frontProps.tooth_rotation = toothRotation;
         frontSegmentsByGroup.get(groupKey)!.push({
             type: 'Feature',

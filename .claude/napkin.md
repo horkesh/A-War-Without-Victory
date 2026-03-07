@@ -53,21 +53,23 @@
 ## Simulation Engine
 1. **[2026-03-03] Supply reserves: gated + pocket threshold + isolated source + heavy weapon drain**
    Do instead: All reserve logic gated by `state.meta.supply_reserves_enabled`. Constants: `supply_reserve_constants.ts`. Module: `supply_reserves.ts`. Siege drain: `SIEGE_MIN_POCKET_SIZE=8` — components below this get counter frozen at 1. Isolated source detection: `findHeartlandComponent()` in `supply_state_derivation.ts` — supply sources in disconnected pockets (Sarajevo, Bihać) produce "strained" not "adequate". Heavy weapon maintenance: `HEAVY_MAINTENANCE_PER_WEAPON=0.001` — per-tank/artillery drain on heavy_munitions_reserve.
-2. **[2026-03-01] OSID/SID mismatch — never use getEffectiveSettlementSide for control**
+2. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
+   Do instead: Keep IVP consequence hysteresis in `patron_pressure.ts`; keep convoy generation/processing, smuggling allocation, and Sarajevo tunnel hooks in `supply_reserves.ts`; surface pending convoy decisions through state + desktop IPC rather than ad-hoc UI-only modals.
+3. **[2026-03-01] OSID/SID mismatch — never use getEffectiveSettlementSide for control**
    Do instead: `political_controllers` keyed by OSIDs in war phase. Use `buildMunControlFromOsids()` or `buildMunDominantController()` for municipality control. `getEffectiveSettlementSide()` does SID lookup → always null → false encirclement.
-3. **[2026-03-01] Displacement: per-OSID census, non-overlapping buckets, static routing**
+4. **[2026-03-01] Displacement: per-OSID census, non-overlapping buckets, static routing**
    Do instead: Use `getOsidCensusPopulation(osidRec)` and `getOsidCensusHostileShare(osidRec, faction)`, not mun averages. `displaced_out` = routed amount. `lost_population` = killed + fled_abroad + unrouted overflow. Set `cumulative_displaced = displacementAmount` after initial fire (prevents double-counting). Routing tables in `displacement_routing_data.ts` are static (47 sub-regions × 3 ethnicities). Don't add `state` param to route lookup.
-4. **[2026-02-24] OSID-keyed political_controllers init + load migration**
+5. **[2026-02-24] OSID-keyed political_controllers init + load migration**
    Do instead: When init fills by OSID, do NOT call `promotePoliticalControllersToOsid`. Check `isPoliticalControllersAlreadyOsidKeyed()` first. On load: `migratePoliticalControllersToOsidIfNeeded` only for canonical SIDs (skip test fixtures S1/S2).
-5. **[2026-02-28] Operational control: majority then plurality**
+6. **[2026-02-28] Operational control: majority then plurality**
    Do instead: Assign faction by ethnic majority (>50%), else plurality. Not "first ≥40%" — that made Vozuća RBiH despite 54.5% Serb.
-6. **[2026-03-01] Test fixtures: phase + referendum required**
-   Do instead: Test fixtures flowing through `runTurn` or scenario runners must set `meta.phase` (`peace`/`war`) + referendum fields. Missing phase hard-fails. `applyConsolidationFlips` returns 0 flips when `meta.phase !== 'war'`.
-7. **[2026-02-22] Pipeline step no-ops for missing data**
+7. **[2026-03-01] Test fixtures: phase + referendum required**
+   Do instead: Test fixtures flowing through `runTurn` or scenario runners must set `meta.phase` (`peace`/`war`) + referendum fields. Missing phase hard-fails.
+8. **[2026-02-22] Pipeline step no-ops for missing data**
    Do instead: When operational data unavailable, log and skip OSID steps safely rather than crashing.
-8. **[2026-03-01] Corps sector sub_segment IDs ≠ front segment IDs**
+9. **[2026-03-01] Corps sector sub_segment IDs ≠ front segment IDs**
    Do instead: `assigned_front_ids` in CorpsDirective MUST use front_id format, NOT `subseg:*`. Sectors for target filtering only. Using subseg IDs breaks front_assignment.ts matching.
-9. **[2026-03-07] Composite IVP extends the existing patron-pressure system**
+10. **[2026-03-07] Composite IVP extends the existing patron-pressure system**
    Do instead: Add new international-pressure behavior by extending `patron_pressure.ts` and `international_visibility_pressure`, not by creating a parallel IVP subsystem. `composite_ivp` is the UI/patron-facing summary value.
 
 ## Bot AI & Combat
@@ -129,8 +131,8 @@
    Do instead: For April 1992 VRS opening ops, use explicit `participating_brigades`, `sector_id`, and `staging_osid`. If a brigade is in `active_operation.participating_brigades`, it routes through operation planning/execution/recovery first — `home_defense_active`, reserve logic, or generic corps targeting cannot retake control until `active_operation` is cleared.
 9. **[2026-03-05] Pre-planned ops: own-corps BFS + tag-derived corps**
    Do instead: In `pre_planned_operations.ts`, filter brigade participation with `getFormationCorpsId(...)` not `formation.corps_id`. Pre-planned VRS operations: 5 original corps only (EBK/Drina/SRK/Herzegovina/1KK). Adding 2KK caused −6.7pp regression — use organic bot + overrides for 2KK instead.
-10. **[2026-03-07] Sector orders piggyback on brigade posture machinery**
-   Do instead: Stage sector intent in `sector_stance_orders`, then translate it through `applySectorStanceOrders()` into ordinary `brigade_posture_orders`. Keep reserve brigades out of that translation unless design explicitly changes; assigned brigades only is the current invariant.
+10. **[2026-03-07] Sector orders + OPSEC are sector-state, not brigade hacks**
+   Do instead: Stage defensive intent in `sector_stance_orders`, then translate it through `applySectorStanceOrders()` into ordinary `brigade_posture_orders`. Keep reserve brigades out of that translation unless design explicitly changes. Store OPSEC in `state.opsec_sectors`, halve passive intel buildup against those sectors, and auto-clear OPSEC when the sector's operation enters execution.
 
 ## GUI / HoI Map
 1. **[2026-03-06] Tactical fog contract is `fogOfWar`, not raw sector intel**
@@ -151,8 +153,8 @@
    Do instead: Pulse staged heads via `fill-opacity` (`attack-arrows-heads-staged`, `movement-arrows-heads-staged`) and avoid legacy `text-opacity` writes.
 9. **[2026-03-06] Briefing panels: prefer stacked accordions over tabs**
     Do instead: Use `AccordionHeader` for unified vertical briefing views in `CorpsFrontPanel` and `OOBSidebar` to maintain situational awareness. Review for unused `collapsed` state when refactoring.
-10. **[2026-03-06] Operation ownership overrides UI home-defense lockout**
-    Do instead: In `FormationDetail.tsx`, if a brigade appears in `operations[].participating_brigade_ids`, allow offensive posture controls even when `home_defense_active` is true.
+10. **[2026-03-07] Enclave dashboard owns airdrop staging; operation ownership still overrides home-defense lockout**
+    Do instead: Keep airdrop-allocation inputs in `EnclaveDashboard.tsx` with a single budget strip and per-enclave allocations staged through desktop IPC. Separately, in `FormationDetail.tsx`, if a brigade appears in `operations[].participating_brigade_ids`, allow offensive posture controls even when `home_defense_active` is true.
 
 ## Desktop & Electron
 1. **[2026-03-02] One map app: desktop uses dev when running**
@@ -210,7 +212,7 @@
 2. **[2026-03-06] Pool surplus absorbs mobilization scale changes — use initial pool lever**
    Do instead: If faction pool has large surplus at w40 (RS=27k, HRHB=25k), reducing FACTION_MOBILIZATION_SCALE barely moves committed brigade personnel (1-2% drop for 12% scale cut). Primary lever for initial strength is RS_JNA_INHERITANCE_BONUS and FACTION_POOL_SCALE. For RS long-run, large scale cuts (0.17→0.12) combined with JNA reduction are needed to bring into band. HRHB POOL_SCALE=1.60 restores ~40k target.
 3. **[2026-03-05] Combat calibration needs causality, not just territory**
-   Do instead: Before trusting control deltas, verify non-zero attack orders and non-zero battles in `weekly_report.jsonl`, then separate combat flips from consolidation, drift, and init overrides. Update `docs/40_reports/CALIBRATION_MASTER.md` during the session. Treat `n104` as partial recovery only: combat restored (`53` orders / `53` battles) but still invalid because `24` execution-phase operations emitted no attack orders.
+   Do instead: Before trusting control deltas, verify non-zero attack orders and non-zero battles in `weekly_report.jsonl`, then separate combat flips from consolidation, drift, and init overrides. Update `docs/40_reports/CALIBRATION_MASTER.md` during the session. Current clean engine-valid baseline is `n248`: combat restored with `invalid_operation_count=0`, but territorial anchor drift remains a separate calibration problem.
 4. **[2026-03-06] Live attribution replaces Phase I flip logs**
    Do instead: For current scenario runs, use `control_change_attribution` in `weekly_report.jsonl` / `run_summary.json`. `control_events.jsonl` was a leftover Phase I artifact and is no longer the live harness contract.
 5. **[2026-03-06] Quiet weeks are warnings, not automatic causality failures**
@@ -221,14 +223,13 @@
    Do instead: RS `avoided_osids` = fix RS OVER-captures (painted=RBiH/HRHB, sim=RS — prevent VRS from attacking there). RS `osid_control_overrides` = fix RS UNDER-captures (painted=RS, sim=RBiH — force-start RS control). Adding under-captures to avoided_osids makes RS even less likely to capture them.
 8. **[2026-03-07] HRHB-init cells CAN be fixed by RS overrides — add in isolated clusters only**
    Do instead: Cells like banja_luka:dragocaj, kotor_varos x4, mrkonjic_grad:baljvine_2, skender_vakuf:donji_koricani start HRHB but painting=RS. Adding RS overrides for these IS effective (n238: KRAJINA 89.4%→97.8%). RULE: add HRHB cells by isolated geographic cluster (KRAJINA only, then POSAVINA_NE only, etc.) — adding 10+ HRHB cells across multiple regions at once (n237) caused POSAVINA_NE −9.9pp and SARAJEVO −9.3pp cascade.
-9. **[2026-03-07] avoided_osids cannot stop consolidation; it only redirects combat effort**
-   Do instead: Consolidation captures (surrounded enemy cells auto-flip) bypass avoided_osids entirely — confirmed by n240 where tuzla:simin_han_2 and zvornik:rastosnica_2 remained sim=RS despite being in avoided_osids. Adding 7 avoided targets caused POSAVINA_NE −12.2pp as VRS redirected to gracanica/lopare/lukavac. Only architecture-level enclave mechanic can prevent consolidation captures.
+9. **[2026-03-07] Consolidation auto-flip DELETED; avoided_osids only redirects combat**
+   Do instead: `consolidate_rear_pockets.ts` and `consolidation_flips.ts` fully deleted. Surrounded cells no longer auto-flip — they must be taken by combat. This was the root cause of Goražde/Srebrenica/Žepa being swallowed. avoided_osids only redirects bot targeting, not consolidation. Remaining mismatches must be solved by combat balance and enclave mechanics.
 10. **[2026-03-07] Pre-planned operation target chains drive regional match rate (n218)**
-   Do instead: 84.2% plateau caused by Operation Drina missing djulici/drinjaca/krizevici/paljevici/donja_kamenica (Zvornik) and Operation Koridor missing Brcko corridor (brcko:brcko/donji_rahic/krepsic/skakava_donja). Fix is data change to `src/sim/combat/pre_planned_operations.ts` + scenario anchor — not engine code. Municipality-level anchors for pockets (bihac) give false failures; use OSID-level anchor `op:bihac:bihac_2` instead.
-   Load-bearing overrides: turbe_2 is RS over-capture but enables Donji Vakuf consolidation (3 correct cells) — adding to avoided_osids causes net −3pp loss (n463). Kalesija seher_2/gojcin_2 overrides redirect VRS → kupres:kupres_2 fix (n466). Test each override block in isolation.
-10. **[2026-03-07] Pre-planned operation target chains drive regional match rate (n218)**
-   Do instead: 84.2% plateau caused by Operation Drina missing djulici/drinjaca/krizevici/paljevici/donja_kamenica (Zvornik) and Operation Koridor missing Brcko corridor (brcko:brcko/donji_rahic/krepsic/skakava_donja). Fix is data change to `src/sim/combat/pre_planned_operations.ts` + scenario anchor — not engine code. Municipality-level anchors for pockets (bihac) give false failures; use OSID-level anchor `op:bihac:bihac_2` instead.
+   Do instead: 84.2% plateau caused by Operation Drina missing djulici/drinjaca/krizevici/paljevici/donja_kamenica (Zvornik) and Operation Koridor missing Brcko corridor (brcko:brcko/donji_rahic/krepsic/skakava_donja). Fix is data change to `src/sim/combat/pre_planned_operations.ts` + scenario anchor — not engine code. Municipality-level anchors for pockets (bihac) give false failures; use OSID-level anchor `op:bihac:bihac_2` instead. Post-H clean run `n248` confirms the remaining notable misses are still `srebrenica` municipality and `op:brcko:brka_2`, which fits this same pre-planned-op/scenario-anchor bucket rather than a combat-loop bug.
    Load-bearing overrides: turbe_2 is RS over-capture but enables Donji Vakuf consolidation (3 correct cells) — adding to avoided_osids causes net −3pp loss (n463). Kalesija seher_2/gojcin_2 overrides redirect VRS → kupres:kupres_2 fix (n466). Test each override block in isolation.
 ## Engine Runtime Patterns
 1. **[2026-03-05] Takeover displacement off-by-one FIXED**
-   Do instead: `processPhaseIIDisplacementTakeover` Section 0 uses `currentTurn === warStartTurn + 1` (not warStartTurn). `runTurn()` increments turn BEFORE phases — first war turn = warStartTurn+1. Fixed in `displacement_takeover.ts`.
+   Do instead: `processDisplacementTakeover` Section 0 uses `currentTurn === warStartTurn + 1` (not warStartTurn). `runTurn()` increments turn BEFORE phases — first war turn = warStartTurn+1. Fixed in `displacement_takeover.ts`.
+2. **[2026-03-07] Phase I/II terminology fully removed — Peace/War only**
+   Do instead: No `PhaseI`, `PhaseII`, `phase_i_`, `phase_ii_` identifiers anywhere. Consolidation flips deleted (`consolidation_flips.ts`, `consolidate_rear_pockets.ts`). Pipeline steps use clean names. Report keys use clean names. Canon v0.6: Peace and War phases only.

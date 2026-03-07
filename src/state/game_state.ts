@@ -166,7 +166,7 @@ export interface SectorIntelRecord {
 /** Named corps operation (multi-turn: planning → execution → recovery). */
 export interface CorpsOperation {
     name: string;
-    type: 'general_offensive' | 'sector_attack' | 'strategic_defense' | 'reorganization';
+    type: 'general_offensive' | 'sector_attack' | 'strategic_defense' | 'reorganization' | 'feint' | 'probe';
     phase: 'planning' | 'execution' | 'recovery';
     started_turn: number;
     phase_started_turn: number;
@@ -201,8 +201,27 @@ export interface CorpsOperation {
     movement_only_execution_turns?: number;
     /** Consecutive execution turns with neither attack attempts nor movement progress. */
     idle_execution_turn_streak?: number;
+    /** Operation-specific attack approval override. */
+    min_attack_outcome?: CorpsDirective['min_attack_outcome'];
+    /** Operation tempo preset. */
+    tempo?: 'methodical' | 'standard' | 'all_out';
+    /** Main effort objective. */
+    schwerpunkt_osid?: string;
+    /** First-turn artillery preparation toggle. */
+    artillery_preparation?: boolean;
+    /** Launch immediately from planning when set. */
+    force_launch?: boolean;
+    /** Internal consumption flag for artillery preparation. */
+    artillery_preparation_consumed?: boolean;
+    /** Dig in participating brigades when manually halted. */
+    dig_in_on_halt?: boolean;
     /** Reason the operation entered recovery. */
     recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination';
+}
+
+export interface SectorStanceOrder {
+    sector_id: string;
+    stance: 'dig_in' | 'elastic_defense' | 'defend_at_all_costs' | 'hold';
 }
 
 /**
@@ -246,6 +265,7 @@ export interface CorpsCommandState {
     corps_exhaustion: number;
     stance: CorpsStance;
     active_operation?: CorpsOperation | null;
+    reserves_committed_until_turn?: number;
     /** Corps directive for subordinate brigades (generated each turn by corps AI). */
     directive?: CorpsDirective | null;
 }
@@ -493,7 +513,16 @@ export interface InternationalVisibilityPressure {
     enclave_humanitarian_pressure: number; // 0..1
     atrocity_visibility: number; // 0..1
     negotiation_momentum: number; // 0..1
+    composite_ivp?: number; // 0..1
     last_major_shift: number | null; // turn index
+}
+
+export interface PendingConvoyDecision {
+    id: string;
+    target_enclave: string;
+    route_faction: FactionId;
+    supply_amount: number;
+    decision?: 'allow' | 'block' | 'divert';
 }
 
 export interface EmbargoProfile {
@@ -694,7 +723,7 @@ export interface SustainabilityState {
  * Phase I (Early War): JNA withdrawal and asset transfer state (Phase_I_Spec §4.6).
  * War start remains referendum-gated; JNA transition does not start the war.
  */
-export interface PhaseIJNAState {
+export interface JNATransitionState {
     /** True when RS has declared and JNA withdrawal has begun. */
     transition_begun: boolean;
     /** Withdrawal progress [0, 1]; 0.05 per turn per spec. */
@@ -1137,7 +1166,7 @@ export interface LossOfControlTrendExposureState {
  */
 export type PhaseIIFrontStability = 'fluid' | 'static' | 'oscillating';
 
-export interface PhaseIIFrontDescriptor {
+export interface FrontDescriptor {
     /** Stable identifier for this front (e.g. "F_<edge_id_0>_<turn>"). */
     id: string;
     /** Edge IDs that constitute this front (settlement contact edges). */
@@ -1266,6 +1295,8 @@ export interface GameState {
     // Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
     // Target ID format: edge_id for edge assignments, region_id for region assignments
     logistics_priority?: Record<FactionId, Record<string, number>>; // target_id -> priority (default 1.0, > 0)
+    /** Sector-level defensive intent translated into brigade posture orders each turn. */
+    sector_stance_orders?: SectorStanceOrder[];
     // Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
     loss_of_control_trends?: LossOfControlTrendExposureState;
     /**
@@ -1286,6 +1317,8 @@ export interface GameState {
     settlements?: Record<SettlementId, SettlementState>;
     /** System 1: International Visibility Pressure (IVP). */
     international_visibility_pressure?: InternationalVisibilityPressure;
+    /** Active IVP threshold consequences. */
+    ivp_consequences_active?: string[];
     /** System 5: Enclave integrity tracking. */
     enclaves?: EnclaveState[];
     /** System 6: Sarajevo exception state. */
@@ -1299,7 +1332,7 @@ export interface GameState {
     /** Control strain accumulated per municipality; Phase I §4.5. */
     war_control_strain?: Record<MunicipalityId, number>;
     /** JNA withdrawal and asset transfer; Phase I §4.6. Does not start war. */
-    war_jna?: PhaseIJNAState;
+    war_jna?: JNATransitionState;
     /** RBiH–HRHB alliance relationship [-1, 1]; Phase I §4.8. */
     war_alliance_rbih_hrhb?: number;
     /** Phase I §4.8: RBiH–HRHB bilateral state (war tracking, ceasefire, Washington Agreement). */
@@ -1418,11 +1451,21 @@ export interface GameState {
     // --- Control change events (Phase 5 GUI: battle markers) ---
     /**
      * Per-turn log of OSID control changes. Cleared at the start of each attack-resolution step,
-     * then populated by combat flips (mechanism='combat') and consolidation flips (mechanism='consolidation').
+     * then populated by combat flips (mechanism='combat').
      * Kept for last 3 turns. Sorted by (turn, settlement_id) for determinism.
      * Used by the GUI battle-markers layer — does not affect simulation logic.
      */
     control_events?: ControlEvent[];
+    /** Player-entered humanitarian airdrop split by enclave id. */
+    airdrop_allocation?: Record<string, number>;
+    /** Pending convoy choices generated by IVP/enclave state. */
+    pending_convoy_decisions?: PendingConvoyDecision[];
+    /** Player-entered smuggling split by enclave id. */
+    smuggling_allocation?: Record<string, { type: 'ammo' | 'food'; amount: number }>;
+    /** One-time Sarajevo tunnel unlock. */
+    sarajevo_tunnel_operational?: boolean;
+    /** Sector ids with OPSEC active. */
+    opsec_sectors?: string[];
 
     // --- Local Truces (Vienna Declaration, May 1992) ---
     /**

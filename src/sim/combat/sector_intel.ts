@@ -73,7 +73,10 @@ export function deriveSectorIntel(state: GameState, turn: number): void {
             const prev = prevByEnemySector.get(enemySectorId);
             const prevConfidence = prev?.confidence ?? 0;
             const prevTurnsInContact = prev?.turns_in_contact ?? 0;
-            const newConfidence = Math.min(1.0, prevConfidence + profile.passive_buildup_per_turn);
+            const passiveBuildup = (state.opsec_sectors ?? []).includes(enemySectorId)
+                ? profile.passive_buildup_per_turn * 0.5
+                : profile.passive_buildup_per_turn;
+            const newConfidence = Math.min(1.0, prevConfidence + passiveBuildup);
             const turnsInContact = prevTurnsInContact + 1;
             newRecords.push(buildRecord(
                 enemySectorId, enemySector, edgeCount,
@@ -186,7 +189,9 @@ function computeStrengthCategory(sector: CorpsFrontSector, confidence: number): 
 function computePosture(sector: CorpsFrontSector, state: GameState, confidence: number): SectorPostureObserved {
     if (confidence < CONFIDENCE_FULL_STRENGTH) return 'unknown';
     const corpsCommand = state.corps_command?.[sector.corps_id];
-    if (corpsCommand?.active_operation?.type === 'sector_attack') return 'offensive_prep';
+    if (corpsCommand?.active_operation?.type === 'sector_attack' || corpsCommand?.active_operation?.type === 'feint' || corpsCommand?.active_operation?.type === 'probe') {
+        return 'offensive_prep';
+    }
     if (sector.density >= 1.5) return 'entrenched';
     return 'defensive';
 }
@@ -194,7 +199,9 @@ function computePosture(sector: CorpsFrontSector, state: GameState, confidence: 
 function computeOffensiveSigns(sector: CorpsFrontSector, state: GameState, confidence: number, reconRange: number): boolean {
     if (confidence < CONFIDENCE_DEEP_INTEL || reconRange < 2) return false;
     const corpsCommand = state.corps_command?.[sector.corps_id];
-    return corpsCommand?.active_operation?.type === 'sector_attack';
+    return corpsCommand?.active_operation?.type === 'sector_attack' ||
+        corpsCommand?.active_operation?.type === 'feint' ||
+        corpsCommand?.active_operation?.type === 'probe';
 }
 
 function computeVisibleBrigades(sector: CorpsFrontSector, confidence: number, reconRange: number): FormationId[] {

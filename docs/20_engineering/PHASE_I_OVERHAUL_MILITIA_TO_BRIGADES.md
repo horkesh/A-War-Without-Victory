@@ -1,3 +1,5 @@
+> **NOTE (2026-03-07):** This document uses legacy "Phase I" terminology. The codebase now uses Peace/War phases. Phase I = Peace phase (early-war period). All `phase_i_*` references in code have been renamed. This is a historical design spec; the concepts remain valid.
+
 # Phase I Overhaul: Militia Pools to Proto-Brigades
 
 **Status:** Design Spec (proposed)

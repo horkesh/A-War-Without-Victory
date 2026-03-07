@@ -89,7 +89,7 @@ There are no external map libraries (no Leaflet, Mapbox, Pixi.js). All rendering
 - **HoI label LOD (Phase 4):** When zoom is closer than DEFAULT_ZOOM/1.4 (zoom &lt; LABEL_LOD_ZOOM_THRESHOLD), label sprites use higher-res texture (256×64, 18px font); otherwise 128×32, 14px. Labels rebuild when zoom crosses threshold. Single zoom-band vs texture path; faction-overlay LOD deferred.
 - **HoI front line (Phase 5):** Front = **full hostile boundary** (frontEdgesOsid / front_edges); no adapter or renderer filter by "where we have units." Style: single neutral band rgba(80,60,40,0.6), dark center line rgba(40,30,20,0.8), zoom-scaled width; asymmetric band (wider on player-faction side). Unit assignment to fronts is a later iteration.
 - **HoI label resolution (Phase 4):** Settlement labels use a single higher-res texture (city 384×60 / 32px font, town 288×48 / 26px font) so they stay crisp when zoomed in; no LOD switch.
-- **HoI front line style (Phase 5):** Fronts drawn as HoI4-style neutral band (rgba(80,60,40,0.6)), dark center line (rgba(40,30,20,0.8)), zoom-scaled width, asymmetric (wider on player-faction side). **Front = full hostile boundary** (phase_ii_front_edges_osid / front_edges); no filter by "where we have units" so user/bot can assign units to fronts in later iterations.
+- **HoI front line style (Phase 5):** Fronts drawn as HoI4-style neutral band (rgba(80,60,40,0.6)), dark center line (rgba(40,30,20,0.8)), zoom-scaled width, asymmetric (wider on player-faction side). **Front = full hostile boundary** (war_front_edges_osid / front_edges); no filter by "where we have units" so user/bot can assign units to fronts in later iterations.
 
 ---
 
@@ -397,13 +397,13 @@ During `drawFrontLines()` (visible at all zoom levels):
 
 ### 10.3 RBiH–HRHB: no front when allied
 
-Phase I §4.8: there is no front between RBiH and HRHB until they are at war. The map does not draw RBiH–HRHB front segments when:
+There is no front between RBiH and HRHB until they are at war. The map does not draw RBiH–HRHB front segments when:
 
 - No game state is loaded (baseline control), or
 - Loaded game state has `turn < rbih_hrhb_war_earliest_turn` (default 26), or
-- `phase_i_alliance_rbih_hrhb > 0.2` (allied threshold; same as backend).
+- `war_alliance_rbih_hrhb > 0.2` (allied threshold; same as backend).
 
-`LoadedGameState` includes `rbih_hrhb_war_earliest_turn` and `phase_i_alliance_rbih_hrhb` (from `GameStateAdapter`); `shouldDrawFrontSegment(ca, cb)` uses them so the canvas matches sim front logic.
+`LoadedGameState` includes `rbih_hrhb_war_earliest_turn` and `war_alliance_rbih_hrhb` (from `GameStateAdapter`); `shouldDrawFrontSegment(ca, cb)` uses them so the canvas matches sim front logic.
 
 ### 10.4 Front assignment and 2D/3D single source
 
@@ -517,7 +517,7 @@ The `SpatialIndex` is a 50x50 uniform grid over the data bounds. For ~6,000 sett
 
 **Replay scrubber** — Slider + week label for jumping to a specific week in a loaded replay timeline. Visible when a replay is loaded; keyboard shortcut `R` focuses it (desktop).
 
-**Toolbar date** — Top-right label shows deterministic campaign date derived from `(meta.phase, meta.turn)` anchors (Phase 0 = Sep 1991 anchor; Phase I/II = Apr 1992 anchor). This replaces turn/capital/army summary text in the toolbar.
+**Toolbar date** — Top-right label shows deterministic campaign date derived from `(meta.phase, meta.turn)` anchors (peace = Sep 1991 anchor; war = Apr 1992 anchor). This replaces turn/capital/army summary text in the toolbar.
 
 ### 13.1 Layer toolbar (bottom floating)
 
@@ -811,7 +811,7 @@ The entire UI uses a dark wargame theme (316 lines). Key decisions:
 | Issue | Description | Location |
 |-------|-------------|----------|
 | ADMIN tab municipality names | Some municipalities show as numeric IDs instead of display names due to key format mismatch between `municipality_id` (numeric) and `mun1990_names.by_municipality_id` (string keys) | `MapApp.renderAdminTab()` |
-| Stability score placeholder | The CTRL tab shows "Stability score and control strain available in Phase I+" — not yet wired to data | `MapApp.renderControlTab()` |
+| Stability score placeholder | The CTRL tab shows "Stability score and control strain available in early-war+" — not yet wired to data | `MapApp.renderControlTab()` |
 | Municipality-level status | `GameStateAdapter` reads `state.municipalities` control_status but doesn't propagate it to settlement-level status | `GameStateAdapter.ts:98-107` |
 | Synchronous file serving | The Vite plugin uses `readFileSync` which blocks the event loop on the 17MB A1_BASE_MAP.geojson | `vite.config.ts` |
 | No production build script | `npm run dev:map` only starts dev server; no dedicated `build:map` script exists | `package.json` |
@@ -823,7 +823,7 @@ The entire UI uses a dark wargame theme (316 lines). Key decisions:
 
 ## 21. Desktop (Electron) and IPC
 
-When desktop mode runs in Electron (`npm run desktop`), the app now launches into the **warroom renderer first** (`awwv://warroom/index.html`) with a New Campaign launcher flow: choose side (RBiH/RS/HRHB) and scenario (`sep_1991` or `apr_1992`), then receive canonical state from main via `game-state-updated`. The **IPC contract** is in [DESKTOP_GUI_IPC_CONTRACT.md](DESKTOP_GUI_IPC_CONTRACT.md): `start-new-campaign` (side + scenarioKey), `advance-turn` (optional `phase0Directives` payload), `get-current-game-state`, recruitment channels, and order staging channels (`stage-attack-order`, `stage-posture-order`, `stage-move-order`, `stage-deploy-order`, `stage-undeploy-order`, `stage-brigade-movement-order`, `stage-brigade-reposition-order`, `assign-brigade-to-front`, `rename-front-segment`, `rename-theatre`, `clear-orders`, `stage-corps-stance-order`). Main process owns canonical state and turn advancement for all phases (`phase_0`, `phase_i`, `phase_ii`); renderer state updates are driven by IPC broadcasts.
+When desktop mode runs in Electron (`npm run desktop`), the app now launches into the **warroom renderer first** (`awwv://warroom/index.html`) with a New Campaign launcher flow: choose side (RBiH/RS/HRHB) and scenario (`sep_1991` or `apr_1992`), then receive canonical state from main via `game-state-updated`. The **IPC contract** is in [DESKTOP_GUI_IPC_CONTRACT.md](DESKTOP_GUI_IPC_CONTRACT.md): `start-new-campaign` (side + scenarioKey), `advance-turn` (optional `phase0Directives` payload), `get-current-game-state`, recruitment channels, and order staging channels (`stage-attack-order`, `stage-posture-order`, `stage-move-order`, `stage-deploy-order`, `stage-undeploy-order`, `stage-brigade-movement-order`, `stage-brigade-reposition-order`, `assign-brigade-to-front`, `rename-front-segment`, `rename-theatre`, `clear-orders`, `stage-corps-stance-order`). Main process owns canonical state and turn advancement for all phases (`peace`, `war`); renderer state updates are driven by IPC broadcasts.
 
 ### 21.1. Embedded mode (iframe in warroom)
 
@@ -841,7 +841,7 @@ As of 2026-02-20, the tactical map opens as a **full-screen iframe layer inside 
 
 ### 21.3 Verification (test plan)
 
-- **Front assignment:** Load a Phase II save that has `assignable_front_segments`. In the brigade panel, use "Front Assignment" to assign a brigade to a front or Reserve; confirm state updates and persists after advance turn. Reserve brigades do not apply pressure or receive attack orders (engine and bot respect `hasValidFrontAssignment`).
+- **Front assignment:** Load a war-phase save that has `assignable_front_segments`. In the brigade panel, use "Front Assignment" to assign a brigade to a front or Reserve; confirm state updates and persists after advance turn. Reserve brigades do not apply pressure or receive attack orders (engine and bot respect `hasValidFrontAssignment`).
 - **2D/3D parity:** Load the same save in desktop (2D tactical map and 3D operational map). Confirm both show the same front line (same segments and extent); OOB shows Reserve vs front name per brigade; assignable segments list matches in both.
 - **Day default (3D):** Open the 3D operational map; confirm it starts in day mode (no night toggle required for normal use).
 

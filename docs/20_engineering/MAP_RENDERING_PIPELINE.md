@@ -36,7 +36,7 @@
 - Settlement polygons filled with faction-colored hatching patterns
 - Opacity determined by authority state (consolidated 85%, contested 60%, fragmented 40%)
 
-**Layer 2: Frontlines** (dynamic, Phase II only)
+**Layer 2: Frontlines** (dynamic, War phase only)
 - Thick black dashed lines between opposing faction zones
 - Calculated from settlement adjacency graph
 
@@ -45,7 +45,7 @@
 - City names in stencil capitals (12pt black)
 - Only cities with population >50,000
 
-**Layer 4: Unit Symbols** (dynamic, Phase II only)
+**Layer 4: Unit Symbols** (dynamic, War phase only)
 - NATO APP-6 rectangles showing brigade/corps positions
 - Positioned at corps headquarters settlements
 
@@ -616,8 +616,8 @@ class TacticalMapRenderer {
     const controlZones = this.controlZoneGenerator.generateControlZones(gameState);
     new ControlZoneRenderer().renderControlZones(ctx, controlZones);
 
-    // Layer 2: Frontlines (Phase II only)
-    if (gameState.phase >= 2) {
+    // Layer 2: Frontlines (War phase only)
+    if (gameState.phase === 'war') {
       const frontlines = this.frontlineGenerator.generateFrontlines(controlZones);
       this.frontlineGenerator.renderFrontlines(ctx, frontlines);
     }
@@ -625,8 +625,8 @@ class TacticalMapRenderer {
     // Layer 3: City markers
     this.cityMarkerRenderer.renderCityMarkers(ctx, gameState.settlements);
 
-    // Layer 4: Unit symbols (Phase II only)
-    if (gameState.phase >= 2) {
+    // Layer 4: Unit symbols (War phase only)
+    if (gameState.phase === 'war') {
       const units = this.extractUnitSymbols(gameState);
       this.unitSymbolRenderer.renderUnitSymbols(ctx, units);
     }

@@ -52,12 +52,14 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'capacity_modifiers',
     'effective_posture_exposure',
     'logistics_priority',
+    'sector_stance_orders',
     'loss_of_control_trends',
     'political_controllers',
     'contested_control',
     'municipalities',
     'settlements',
     'international_visibility_pressure',
+    'ivp_consequences_active',
     'enclaves',
     'sarajevo_state',
     // Phase I (Early War) state (Phase_I_Specification_v0_3_0.md)
@@ -126,6 +128,11 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'truce_broken_turn',
     // Control change event log (GUI battle markers, last 3 turns)
     'control_events',
+    'airdrop_allocation',
+    'pending_convoy_decisions',
+    'smuggling_allocation',
+    'sarajevo_tunnel_operational',
+    'opsec_sectors',
 ]);
 
 /**

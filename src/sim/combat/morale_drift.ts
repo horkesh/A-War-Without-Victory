@@ -60,7 +60,7 @@ export interface MoraleDriftReport {
  * 2. Encirclement reversal: +3 when encircled defending own population (>50%), -3 otherwise.
  * 3. Exhaustion penalty: -0.5 at 80%+ ops fatigue, -1.5 at 95%+.
  */
-export function runPhaseIIMoraleDrift(
+export function runMoraleDrift(
     state: GameState,
     engagedFormationIds: FormationId[] | Set<string>,
     munPopulation?: MunicipalityPopulation1991Map,

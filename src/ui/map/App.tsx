@@ -20,6 +20,7 @@ import { RecruitmentModal } from './components/RecruitmentModal';
 import { WarSummaryModal } from './components/WarSummaryModal';
 import { OpsPlanningModal } from './components/OpsPlanningModal';
 import { SupplyPanel } from './components/SupplyPanel';
+import { EnclaveDashboard } from './components/EnclaveDashboard';
 import { useGameStore } from './store/gameStore';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
@@ -55,6 +56,7 @@ function App() {
   const [campaignStarting, setCampaignStarting] = useState(false);
   const [recruitmentOpen, setRecruitmentOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [enclaveDashboardOpen, setEnclaveDashboardOpen] = useState(false);
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
@@ -205,6 +207,7 @@ function App() {
           setSidePickerOpen(true);
         }}
         onOpenSummary={() => setSummaryOpen(true)}
+        onOpenEnclaves={() => setEnclaveDashboardOpen((current) => !current)}
       />
       <OOBSidebar />
       <OperationsPanel />
@@ -249,6 +252,13 @@ function App() {
       />
       <WarSummaryModal isOpen={summaryOpen} onClose={() => setSummaryOpen(false)} />
       <OpsPlanningModal />
+      {loadedGameState && (
+        <EnclaveDashboard
+          state={loadedGameState}
+          open={enclaveDashboardOpen}
+          onClose={() => setEnclaveDashboardOpen(false)}
+        />
+      )}
       {mapMode === 'supply' && loadedGameState && (
         <SupplyPanel state={loadedGameState} />
       )}

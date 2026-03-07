@@ -90,8 +90,8 @@ This allows behavior such as:
 
 AI prioritizes **municipality consolidation**: cleaning hostile settlements inside owned municipalities and pushing toward isolated hostile clusters. Behavior is deterministic and produces tracked military action (casualties) rather than administrative flips.
 
-- **Phase I (legacy):** Edge scoring includes a consolidation bonus when the scenario runner supplies graph context (`consolidationContext`). Strategy profiles have `consolidation_priority_weight` (RS 0.8, RBiH 0.5, HRHB 0.4). Control-flip candidate order prefers municipalities with more attacker-controlled adjacent muns (consolidation pressure first).
-- **Phase II (8-posture system, 2026-03-04):** Brigades on a **soft front** (adjacent enemy settlements with no or weak garrison) adopt **hold** posture and issue attack orders; cleanup is resolved via battle resolution with casualty ledger updates. **Real fronts** = brigade-vs-brigade contact; soft fronts = rear pockets and undefended settlements. The legacy 'consolidation' and 'probe' postures have been removed; saves with those values normalize to 'hold' on load.
+- **Early-war period:** Edge scoring includes a consolidation bonus when the scenario runner supplies graph context (`consolidationContext`). Strategy profiles have `consolidation_priority_weight` (RS 0.8, RBiH 0.5, HRHB 0.4). Control-flip candidate order prefers municipalities with more attacker-controlled adjacent muns (consolidation pressure first).
+- **War phase (8-posture system, 2026-03-04):** Brigades on a **soft front** (adjacent enemy settlements with no or weak garrison) adopt **hold** posture and issue attack orders; cleanup is resolved via battle resolution with casualty ledger updates. **Real fronts** = brigade-vs-brigade contact; soft fronts = rear pockets and undefended settlements. The legacy 'consolidation' and 'probe' postures have been removed; saves with those values normalize to 'hold' on load.
 - **Exception data:** Connected strongholds (e.g. Sapna S163520, Teočak S123749) and isolated holdouts (e.g. Petrovo S120154, Vozuća S162094) receive scoring penalties so they persist as in history. Fast rear-cleanup municipalities (Prijedor, Banja Luka) receive a priority bonus; baseline calibration targets completion within ~4 turns.
 - **Garrison/casualties:** Cleanup engagements remain attack-order driven; undefended or weakly defended settlements still incur defender casualties (militia/rear security) so all flips produce tracked casualties.
 
@@ -101,9 +101,9 @@ Integration: `src/sim/consolidation_scoring.ts`, `src/sim/bot/simple_general_bot
 
 At most **one brigade per faction per turn** may be assigned to attack a given settlement. When assigning attack orders, already-chosen targets are treated as unavailable. The only exception: a brigade may be assigned to a settlement that is already chosen **if** (1) that brigade is part of an active operational group (OG) conducting an operation toward that settlement, **and** (2) the target has **heavy resistance** (defender brigade present at the settlement or garrison at or above a defined threshold, e.g. 250). Until operation targeting exists (e.g. corps/OG orders with target_sid), the OG+operation check is a stub (no duplicate targets). Run summaries report `unique_attack_targets` (distinct SIDs targeted per turn) alongside `orders_processed` and `flips_applied` for diagnostics.
 
-## Phase II bot architecture (three-sided)
+## War-phase bot architecture (three-sided)
 
-Phase II bot decisions are organized in three layers, run in pipeline order:
+War-phase bot decisions are organized in three layers, run in pipeline order:
 
 1. **Army standing orders** — historical army-level directives set `state.army_stance` per faction (e.g. RS Territorial Seizure 0–12, RBiH Survival Defense 0–12, HRHB Lasva Offensive 12–26 when at war with RBiH). Data: `FACTION_STANDING_ORDERS` in `bot_strategy.ts`.
 2. **Corps AI** — stance selection, named operations, OG activation, corridor breach. Sets corps stance and active operations before brigade AI runs.
@@ -125,7 +125,7 @@ Pipeline steps: `generate-bot-corps-orders` (before) → `generate-bot-brigade-o
 - `src/sim/combat/phase_ii_adjacency.ts` (shared adjacency and faction brigades)
 - `src/sim/combat/bot_corps_ai.ts` (corps stance, operations, OGs, corridor breach, standing orders)
 - `src/sim/combat/bot_brigade_ai_osid.ts` (posture, target scoring, attack orders)
-- `src/sim/combat/bot_strategy.ts` (Phase II faction profiles, doctrine phases, standing orders)
+- `src/sim/combat/bot_strategy.ts` (war-phase faction profiles, doctrine phases, standing orders)
 - `src/sim/combat/combat_estimate.ts` (read-only attack cost for casualty-aversion)
 - `src/scenario/scenario_types.ts` (`bot_difficulty`)
 - `src/scenario/scenario_loader.ts`

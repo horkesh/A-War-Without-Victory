@@ -7,7 +7,7 @@
 
 import assert from 'node:assert';
 import { test } from 'node:test';
-import type { GameState, PhaseIJNAState } from '../src/state/game_state.js';
+import type { GameState, JNATransitionState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 import { serializeGameState } from '../src/state/serializeGameState.js';
@@ -92,7 +92,7 @@ function phaseIGameStateFixture(): GameState {
             transition_begun: true,
             withdrawal_progress: 0.25,
             asset_transfer_rs: 0.2
-        } as PhaseIJNAState,
+        } as JNATransitionState,
         war_alliance_rbih_hrhb: 0.5,
         war_displacement_initiated: {}
     };

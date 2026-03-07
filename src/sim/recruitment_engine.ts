@@ -1,7 +1,7 @@
 /**
  * Recruitment engine: setup-phase brigade activation from OOB catalog.
  *
- * Replaces `createOobFormationsAtPhaseIEntry()` when recruitment_mode = "player_choice".
+ * Replaces `createOobFormations()` when recruitment_mode = "player_choice".
  * Three-resource model: manpower (militia pools), recruitment capital, equipment points.
  *
  * Bot AI: deterministic priority-ordered greedy spending algorithm with strategic area scoring.

@@ -38,17 +38,17 @@ export interface PhaseITurnInput {
 export interface PhaseITurnReport {
     seed: string;
     phases: { name: string }[];
-    phase_i_militia_emergence?: MilitiaEmergenceReport;
-    phase_i_pool_population?: PoolPopulationReport;
-    phase_i_formation_spawn?: SpawnFormationsReport;
-    phase_i_control_flip?: ControlFlipReport;
-    phase_i_displacement_hooks?: DisplacementHooksReport;
+    militia_emergence?: MilitiaEmergenceReport;
+    pool_population?: PoolPopulationReport;
+    formation_spawn?: SpawnFormationsReport;
+    control_flip?: ControlFlipReport;
+    displacement_hooks?: DisplacementHooksReport;
     war_control_strain?: ControlStrainReport;
-    phase_i_authority?: AuthorityDegradationReport;
+    authority_degradation?: AuthorityDegradationReport;
     war_jna_transition?: JNATransitionReport;
 }
 
-function isPhaseIAllowed(state: GameState): boolean {
+function isEarlyWarAllowed(state: GameState): boolean {
     const meta = state.meta;
     if (!meta.referendum_held) return false;
     const warStart = meta.war_start_turn;
@@ -77,7 +77,7 @@ export async function runPhaseITurn(
     if (working.meta.phase !== 'war') {
         throw new Error('runPhaseITurn: state must be in war phase');
     }
-    if (!isPhaseIAllowed(working)) {
+    if (!isEarlyWarAllowed(working)) {
         throw new Error('runPhaseITurn: Phase I requires referendum_held and current_turn >= war_start_turn');
     }
     assertNoAoRInEarlyWar(working);
@@ -99,14 +99,14 @@ export async function runPhaseITurn(
 
     working.meta = { ...working.meta, seed: input.seed, turn: working.meta.turn + 1 };
 
-    report.phase_i_militia_emergence = updateMilitiaEmergence(working);
+    report.militia_emergence = updateMilitiaEmergence(working);
 
-    report.phase_i_pool_population = runPoolPopulation(working, graph.settlements);
+    report.pool_population = runPoolPopulation(working, graph.settlements);
 
     if (isFormationSpawnDirectiveActive(working)) {
         const directive = working.formation_spawn_directive!;
         const kind = directive.kind === 'both' || directive.kind === 'militia' ? 'brigade' : (directive.kind ?? 'brigade');
-        report.phase_i_formation_spawn = spawnFormationsFromPools(working, {
+        report.formation_spawn = spawnFormationsFromPools(working, {
             factionFilter: null,
             munFilter: null,
             maxPerMun: null,
@@ -117,16 +117,16 @@ export async function runPhaseITurn(
         });
     }
 
-    report.phase_i_control_flip = {
+    report.control_flip = {
         flips: [],
         municipalities_evaluated: 0,
         control_events: []
     };
 
-    report.phase_i_displacement_hooks = runDisplacementHooks(
+    report.displacement_hooks = runDisplacementHooks(
         working,
         working.meta.turn,
-        report.phase_i_control_flip ?? {
+        report.control_flip ?? {
             flips: [],
             municipalities_evaluated: 0,
             control_events: []
@@ -137,7 +137,7 @@ export async function runPhaseITurn(
     const byMun = buildSettlementsByMun(graph.settlements);
     report.war_control_strain = runControlStrain(working, working.meta.turn, byMun);
 
-    report.phase_i_authority = runAuthorityDegradation(working);
+    report.authority_degradation = runAuthorityDegradation(working);
 
     report.war_jna_transition = runJNATransition(working);
 

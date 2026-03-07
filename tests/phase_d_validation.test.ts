@@ -9,8 +9,8 @@
 import assert from 'node:assert';
 import { test } from 'node:test';
 import type { EdgeRecord } from '../src/map/settlements.js';
-import { updatePhaseIIExhaustion } from '../src/sim/combat/exhaustion.js';
-import { detectPhaseIIFronts } from '../src/sim/combat/front_emergence.js';
+import { updateExhaustion } from '../src/sim/combat/exhaustion.js';
+import { detectFronts } from '../src/sim/combat/front_emergence.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
@@ -43,14 +43,14 @@ function minimalState(phase: 'peace' | 'war', controllers?: Record<string, strin
 test('Phase D: fronts are emergent (no fronts when peace)', () => {
     const state = minimalState('peace', { S1: 'RBiH', S2: 'RS' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
-    const fronts = detectPhaseIIFronts(state, edges);
+    const fronts = detectFronts(state, edges);
     assert.strictEqual(fronts.length, 0);
 });
 
 test('Phase D: fronts are emergent (fronts when phase_ii and opposing control)', () => {
     const state = minimalState('war', { S1: 'RBiH', S2: 'RS' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
-    const fronts = detectPhaseIIFronts(state, edges);
+    const fronts = detectFronts(state, edges);
     assert.ok(fronts.length >= 1);
     assert.ok(fronts[0].edge_ids.length >= 1);
 });
@@ -59,7 +59,7 @@ test('Phase D: exhaustion accumulates (never decreases)', () => {
     const state = minimalState('war');
     state.war_exhaustion = { RBiH: 30, RS: 40, HRHB: 20 };
     const before = { ...state.war_exhaustion! };
-    updatePhaseIIExhaustion(state, []);
+    updateExhaustion(state, []);
     assert.ok(state.war_exhaustion!['RBiH']! >= before['RBiH']!);
     assert.ok(state.war_exhaustion!['RS']! >= before['RS']!);
     assert.ok(state.war_exhaustion!['HRHB']! >= before['HRHB']!);
@@ -68,7 +68,7 @@ test('Phase D: exhaustion accumulates (never decreases)', () => {
 test('Phase D: no total victory reachable (front descriptors have no victory/decisive)', () => {
     const state = minimalState('war', { S1: 'RBiH', S2: 'RS' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
-    const fronts = detectPhaseIIFronts(state, edges);
+    const fronts = detectFronts(state, edges);
     for (const f of fronts) {
         assert.ok(!('victory' in f));
         assert.ok(!('decisive' in f));

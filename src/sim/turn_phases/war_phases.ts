@@ -12,7 +12,7 @@ import { loadSettlementEthnicityData } from '../../data/settlement_ethnicity.js'
 import { buildSidToMunFromSettlements, buildOsidToMunFromReverseMap } from '../../scenario/oob_early_war_entry.js';
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
 import { updateDisplacement } from '../../state/displacement.js';
-import { processPhaseIIDisplacementTakeover } from '../../state/displacement_takeover.js';
+import { processDisplacementTakeover } from '../../state/displacement_takeover.js';
 import { getDoctrineTempoMultiplier, updateDoctrineState } from '../../state/doctrine.js';
 import { updateEmbargoProfiles } from '../../state/embargo.js';
 import { updateEnclaveIntegrity } from '../../state/enclave_integrity.js';
@@ -40,6 +40,7 @@ import {
 } from '../../state/negotiation_offers.js';
 import { updateNegotiationPressure } from '../../state/negotiation_pressure.js';
 import {
+    applyIvpConsequences,
     ensureInternationalVisibilityPressure,
     updateInternationalVisibilityPressure,
     updatePatronState
@@ -77,9 +78,9 @@ import {
     applyCorpsFrontAutoDistribution,
     ensureDerivedCorpsFrontEdges
 } from '../combat/corps_front_assign.js';
-import { runPhaseIICohesionDrift } from '../combat/cohesion_drift.js';
-import { runPhaseIIMoraleDrift } from '../combat/morale_drift.js';
-import { runPhaseIIOngoingMobilization } from '../combat/ongoing_mobilization.js';
+import { runCohesionDrift } from '../combat/cohesion_drift.js';
+import { runMoraleDrift } from '../combat/morale_drift.js';
+import { runOngoingMobilization } from '../combat/ongoing_mobilization.js';
 import { getEnablePhase3ADiffusion, runPhase3APressureDiffusion } from '../pressure/phase3a_pressure_diffusion.js';
 import {
     buildPressureEligibilityPhase3A,
@@ -89,7 +90,7 @@ import {
 } from '../pressure/phase3a_pressure_eligibility.js';
 import { applyPhase3BPressureExhaustion } from '../pressure/phase3b_pressure_exhaustion.js';
 import { applyPhase3CExhaustionCollapseGating } from '../pressure/phase3c_exhaustion_collapse_gating.js';
-import { derivePhaseIIFrontsFromPressureEligible } from '../emergence/front_emergence.js';
+import { deriveFrontsFromPressureEligible } from '../emergence/front_emergence.js';
 import { diffusePressure } from '../emergence/pressure_diffusion.js';
 import { applySettlementDisplacementDeltas } from '../displacement_pipeline/displacement_accumulation.js';
 import { buildDisplacementCapacityReport } from '../displacement_pipeline/displacement_capacity_hooks.js';
@@ -101,14 +102,14 @@ import { generateAllCorpsOrders, extractCorpsAiReport, type CorpsAiReportEntry }
 import { checkAndFireViennaDeclaration, recordTruceBroken } from '../local_truces.js';
 import { processBrigadeMovement } from '../combat/brigade_movement.js';
 import { applyPostureCosts, applyPostureOrders } from '../combat/brigade_posture.js';
-import { getPhaseIICommandFrictionMultipliers } from '../combat/command_friction.js';
-import { applyConsolidationFlips } from '../combat/consolidation_flips.js';
+import { applySectorStanceOrders } from '../combat/sector_stance_orders.js';
+import { getCommandFrictionMultipliers } from '../combat/command_friction.js';
 import { advanceOperations, applyCorpsEffects, initializeCorpsCommand } from '../combat/corps_command.js';
 import { degradeEquipment, ensureBrigadeComposition } from '../combat/equipment_effects.js';
 import { getRSMaintenanceCapacityMult, runEquipmentProgression } from '../combat/faction_progression.js';
 import { updateEnclaveResilience } from '../combat/enclave_resilience.js';
-import { updatePhaseIIExhaustion } from '../combat/exhaustion.js';
-import { detectPhaseIIFronts } from '../combat/front_emergence.js';
+import { updateExhaustion } from '../combat/exhaustion.js';
+import { detectFronts } from '../combat/front_emergence.js';
 import { buildLocalFronts } from '../combat/local_front_defense.js';
 import { buildCorpsFrontSectors } from '../combat/corps_front_sectors.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
@@ -121,8 +122,16 @@ import { resolveAttackOrders } from '../combat/resolve_attack_orders.js';
 import { resolveAttackOrdersOsid, displaceFormationsInEnemyTerritory } from '../combat/attack_resolution_osid.js';
 import { applyBrigadeMovementOrders } from '../combat/brigade_movement_orders.js';
 import { processOsidColumnMovement, type OsidColumnMovementReport } from '../combat/osid_column_movement.js';
-import { updatePhaseIISupplyPressure } from '../combat/supply_pressure.js';
-import { updateSupplyReserves, updateSiegeTurnCounters, applyUnAirdrops } from '../../state/supply_reserves.js';
+import { updateSupplyPressure } from '../combat/supply_pressure.js';
+import {
+    applyHumanitarianConvoyDecisions,
+    applySmugglingAllocation,
+    applyUnAirdrops,
+    evaluateHumanitarianConvoys,
+    maybeActivateSarajevoTunnel,
+    updateSiegeTurnCounters,
+    updateSupplyReserves
+} from '../../state/supply_reserves.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
@@ -297,7 +306,7 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-location-osid-backfill',
+        name: 'location-osid-backfill',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             try {
@@ -341,7 +350,7 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-supply-osid',
+        name: 'supply-osid',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
@@ -380,11 +389,11 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-enclave-resilience',
+        name: 'enclave-resilience',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-            context.report.phase_ii_enclave_resilience = updateEnclaveResilience(context.state, supplyByOsid);
+            context.report.enclave_resilience = updateEnclaveResilience(context.state, supplyByOsid);
             applyUnAirdrops(context.state);
         }
     },
@@ -413,7 +422,7 @@ export const warPhases: NamedPhase[] = [
                 od.opData.operationalToCanonical,
                 terrainData
             );
-            (context.report as TurnReport & { phase_ii_column_movement?: OsidColumnMovementReport }).phase_ii_column_movement = report;
+            (context.report as TurnReport & { column_movement?: OsidColumnMovementReport }).column_movement = report;
         }
     },
     {
@@ -423,7 +432,7 @@ export const warPhases: NamedPhase[] = [
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
             const report = applyBrigadeMovementOrders(context.state, od.edges, od.opData.operationalToCanonical);
-            (context.report as TurnReport & { phase_ii_movement?: typeof report }).phase_ii_movement = report;
+            (context.report as TurnReport & { movement_report?: typeof report }).movement_report = report;
         }
     },
     {
@@ -555,7 +564,7 @@ export const warPhases: NamedPhase[] = [
                     osidPopulationMap
                 };
                 const botOrderDiagnostics = generateAllBotOrdersOsid(context.state, factions, osidCtx);
-                context.report.phase_ii_bot_order_diagnostics = createBotOrderDiagnosticsSnapshot(context.state, botOrderDiagnostics);
+                context.report.bot_order_diagnostics = createBotOrderDiagnosticsSnapshot(context.state, botOrderDiagnostics);
             }
             // When operational data unavailable: no bot brigade orders (AoR path removed).
         }
@@ -604,6 +613,13 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'apply-sector-stance-orders',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            applySectorStanceOrders(context.state);
+        }
+    },
+    {
         name: 'update-corps-effects',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -648,13 +664,13 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-equipment-progression',
+        name: 'equipment-progression',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const turn = context.state.meta.turn ?? 0;
             // Run every 4 turns to model gradual acquisition
             if (turn === 0 || turn % 4 !== 0) return;
-            context.report.phase_ii_equipment_progression = runEquipmentProgression(context.state);
+            context.report.equipment_progression = runEquipmentProgression(context.state);
         }
     },
     {
@@ -687,7 +703,7 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-resolve-attack-orders',
+        name: 'resolve-attack-orders',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
@@ -716,7 +732,7 @@ export const warPhases: NamedPhase[] = [
                         (e) => e.turn >= currentTurn - 2
                     );
                 }
-                context.report.phase_ii_attack_resolution_osid = resolveAttackOrdersOsid(
+                context.report.attack_resolution_osid = resolveAttackOrdersOsid(
                     context.state,
                     od.edges,
                     od.opData.operationalToCanonical,
@@ -753,7 +769,7 @@ export const warPhases: NamedPhase[] = [
                 terrainData = { by_sid: {} };
             }
 
-            context.report.phase_ii_resolve_attack_orders = resolveAttackOrders(
+            context.report.resolve_attack_orders = resolveAttackOrders(
                 context.state, edges, terrainData, settlementToMun
             );
         }
@@ -768,7 +784,7 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-displace-enemy-territory',
+        name: 'displace-enemy-territory',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
@@ -777,27 +793,12 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'consolidate-rear-pockets',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const od = getOperationalData(context);
-            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
-            const { consolidateRearPockets } = await import('../combat/consolidate_rear_pockets.js');
-            const report = consolidateRearPockets(
-                context.state, od.edges, od.opData.operationalToCanonical
-            );
-            if (report.flipped.length > 0) {
-                context.report.rear_pocket_consolidation = report;
-            }
-        }
-    },
-    {
         name: 'update-officer-quality',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const { updateBrigadeOfficerQuality } = await import('../combat/officer_quality_update.js');
             // Collect engaged formation IDs from OSID attack resolution report
-            const osidReport = context.report.phase_ii_attack_resolution_osid;
+            const osidReport = context.report.attack_resolution_osid;
             const engagedIds = new Set<string>(osidReport?.engaged_formation_ids ?? []);
             const report = updateBrigadeOfficerQuality(context.state, engagedIds);
             context.report.officer_quality_update = report;
@@ -815,7 +816,7 @@ export const warPhases: NamedPhase[] = [
         name: 'apply-casualty-pool-exhaustion',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const osidReport = context.report.phase_ii_attack_resolution_osid;
+            const osidReport = context.report.attack_resolution_osid;
             if (!osidReport?.battles?.length) return;
             // Approximate per-formation battle casualties from the report.
             // Uses the same loss rates and outcome modifiers as attack_resolution_osid.
@@ -863,19 +864,19 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-cohesion-drift',
+        name: 'cohesion-drift',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const engagedIds = context.report.phase_ii_attack_resolution_osid?.engaged_formation_ids ?? [];
-            context.report.phase_ii_cohesion_drift = runPhaseIICohesionDrift(context.state, engagedIds);
+            const engagedIds = context.report.attack_resolution_osid?.engaged_formation_ids ?? [];
+            context.report.cohesion_drift_report = runCohesionDrift(context.state, engagedIds);
         }
     },
     {
-        name: 'phase-ii-morale-drift',
+        name: 'morale-drift',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const engagedIds = context.report.phase_ii_attack_resolution_osid?.engaged_formation_ids ?? [];
-            context.report.phase_ii_morale_drift = runPhaseIIMoraleDrift(
+            const engagedIds = context.report.attack_resolution_osid?.engaged_formation_ids ?? [];
+            context.report.morale_drift_report = runMoraleDrift(
                 context.state, engagedIds, context.input.municipalityPopulation1991,
                 context.report.supply_resolution?.supply_state_by_osid
             );
@@ -892,21 +893,7 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-consolidation-flips',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-            const sidToMun: Record<string, string> = {};
-            for (const [sid, rec] of graph.settlements.entries()) {
-                const munId = rec.mun1990_id ?? rec.mun_code;
-                if (munId) sidToMun[sid] = munId;
-            }
-            const report = applyConsolidationFlips(context.state, graph.settlements, sidToMun);
-            if (report.flips_applied > 0) context.report.phase_ii_consolidation_flips = report;
-        }
-    },
-    {
-        name: 'phase-ii-hostile-takeover-displacement',
+        name: 'hostile-takeover-displacement',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
@@ -915,9 +902,9 @@ export const warPhases: NamedPhase[] = [
             // The displacement system needs settlement-level records; we synthesize them from OSID flips
             // by finding one settlement per municipality. This connects OSID-level combat to the
             // existing displacement routing (e.g. East Bosnia displaced → Srebrenica/Gorazde).
-            const legacyBattles = context.report.phase_ii_resolve_attack_orders?.battle_report?.battles ?? [];
+            const legacyBattles = context.report.resolve_attack_orders?.battle_report?.battles ?? [];
             const osidBattles: Array<{ settlement_flipped: boolean; location: string; osid?: string; attacker_faction: FactionId; defender_faction: FactionId }> = [];
-            const osidReport = context.report.phase_ii_attack_resolution_osid;
+            const osidReport = context.report.attack_resolution_osid;
             if (osidReport?.battles?.length) {
                 const munToSid = new Map<string, string>();
                 for (const [sid, rec] of graph.settlements.entries()) {
@@ -953,7 +940,7 @@ export const warPhases: NamedPhase[] = [
                 }
             } catch { /* fallback: no OSID census data */ }
 
-            context.report.phase_ii_takeover_displacement = processPhaseIIDisplacementTakeover(
+            context.report.takeover_displacement = processDisplacementTakeover(
                 context.state,
                 graph.settlements,
                 combinedReport,
@@ -963,7 +950,7 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-alliance-update',
+        name: 'alliance-update',
         run: (context) => {
             // RBiH–HRHB alliance dynamics: must run in Phase II too, or alliance never
             // degrades and HVO never enters bilateral war with RBiH.
@@ -971,29 +958,29 @@ export const warPhases: NamedPhase[] = [
             ensureRbihHrhbState(context.state);
             updateMixedMunicipalitiesList(context.state);
             if (context.state.meta.enable_rbih_hrhb_dynamics !== false) {
-                context.report.phase_i_alliance_update = updateAllianceValue(context.state);
+                context.report.alliance_update = updateAllianceValue(context.state);
             }
         }
     },
     {
-        name: 'phase-ii-ceasefire-check',
+        name: 'ceasefire-check',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.report.phase_i_ceasefire_check = checkAndApplyCeasefire(context.state);
+            context.report.ceasefire_check = checkAndApplyCeasefire(context.state);
         }
     },
     {
-        name: 'phase-ii-washington-check',
+        name: 'washington-check',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.report.phase_i_washington_check = checkAndApplyWashington(context.state);
+            context.report.washington_check = checkAndApplyWashington(context.state);
         }
     },
     {
-        name: 'phase-ii-operation-storm-check',
+        name: 'operation-storm-check',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.report.phase_ii_operation_storm_check = checkAndApplyOperationStorm(context.state);
+            context.report.operation_storm_check = checkAndApplyOperationStorm(context.state);
         }
     },
     {
@@ -1006,7 +993,7 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-recruitment',
+        name: 'recruitment',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             if (!context.state.recruitment_state) return;
@@ -1073,7 +1060,7 @@ export const warPhases: NamedPhase[] = [
                 remaining_equipment[factionId] = context.state.recruitment_state.equipment_pools[factionId]?.points ?? 0;
             }
 
-            context.report.phase_ii_recruitment = {
+            context.report.recruitment_report = {
                 accrual_by_faction,
                 recruited_actions,
                 recruited_by_faction,
@@ -1083,11 +1070,11 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-ongoing-mobilization',
+        name: 'ongoing-mobilization',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-            context.report.phase_ii_ongoing_mobilization = runPhaseIIOngoingMobilization(
+            context.report.ongoing_mobilization = runOngoingMobilization(
                 context.state,
                 graph.settlements,
                 context.input.municipalityPopulation1991 ?? undefined
@@ -1095,24 +1082,24 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-brigade-reinforcement',
+        name: 'brigade-reinforcement',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.report.phase_ii_brigade_reinforcement = reinforceBrigadesFromPools(context.state);
+            context.report.brigade_reinforcement = reinforceBrigadesFromPools(context.state);
         }
     },
     {
-        name: 'phase-ii-strategic-reserve-collection',
+        name: 'strategic-reserve-collection',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.report.phase_ii_strategic_reserve_collection = collectStrategicReserves(context.state);
+            context.report.strategic_reserve_collection = collectStrategicReserves(context.state);
         }
     },
     {
-        name: 'phase-ii-strategic-reserve-reinforcement',
+        name: 'strategic-reserve-reinforcement',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.report.phase_ii_strategic_reserve_reinforcement = reinforceFromStrategicReserves(context.state);
+            context.report.strategic_reserve_reinforcement = reinforceFromStrategicReserves(context.state);
         }
     },
     {
@@ -1150,7 +1137,7 @@ export const warPhases: NamedPhase[] = [
             const { processOfficerSuccession } = await import('../combat/officer_system.js');
             // Collect corps IDs that had combat this turn from the OSID attack report
             const engagedCorpsIds = new Set<string>();
-            const osidReport = context.report.phase_ii_attack_resolution_osid;
+            const osidReport = context.report.attack_resolution_osid;
             if (osidReport?.battles) {
                 for (const battle of osidReport.battles) {
                     if (battle.attacker_brigade) {
@@ -1189,10 +1176,10 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-wia-trickleback',
+        name: 'wia-trickleback',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.report.phase_ii_wia_trickleback = applyWiaTrickleback(context.state);
+            context.report.wia_trickleback = applyWiaTrickleback(context.state);
         }
     },
     {
@@ -1204,14 +1191,14 @@ export const warPhases: NamedPhase[] = [
     },
     // --- End Brigade Operations Pipeline ---
     {
-        name: 'phase-ii-consolidation',
+        name: 'supply-pressure-exhaustion',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const edges = context.input.settlementEdges;
             if (!edges) return;
-            const fronts = detectPhaseIIFronts(context.state, edges);
-            const frictionMultipliers = getPhaseIICommandFrictionMultipliers(context.state, edges);
-            updatePhaseIISupplyPressure(
+            const fronts = detectFronts(context.state, edges);
+            const frictionMultipliers = getCommandFrictionMultipliers(context.state, edges);
+            updateSupplyPressure(
                 context.state,
                 edges,
                 context.report.supply_resolution?.supply_state,
@@ -1219,7 +1206,7 @@ export const warPhases: NamedPhase[] = [
                 context.report.supply_resolution?.production_bonus_by_faction,
                 context.report.supply_resolution?.supply_state_by_osid
             );
-            updatePhaseIIExhaustion(context.state, fronts, frictionMultipliers);
+            updateExhaustion(context.state, fronts, frictionMultipliers);
         }
     },
     {
@@ -1237,7 +1224,7 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'phase-ii-front-emergence',
+        name: 'front-emergence',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             let edges = context.input.settlementEdges;
@@ -1246,7 +1233,7 @@ export const warPhases: NamedPhase[] = [
                 edges = graph.edges;
             }
             if (!edges || edges.length === 0) return;
-            context.report.phase_ii_front_emergence = derivePhaseIIFrontsFromPressureEligible(context.state, edges);
+            context.report.front_emergence_report = deriveFrontsFromPressureEligible(context.state, edges);
         }
     },
     {
@@ -1297,6 +1284,7 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             updateEmbargoProfiles(context.state);
+            applySmugglingAllocation(context.state);
             ensureMaintenanceCapacity(context.state);
             context.report.embargo_update = { factions: context.state.factions.length };
         }
@@ -1330,6 +1318,7 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const graph = await loadSettlementGraph();
             const sarajevo = updateSarajevoState(context.state, graph, context.report.supply_resolution?.supply_state);
+            maybeActivateSarajevoTunnel(context.state);
             context.report.sarajevo_exception = {
                 siege_status: sarajevo.siege_status,
                 siege_intensity: sarajevo.siege_intensity,
@@ -1348,11 +1337,27 @@ export const warPhases: NamedPhase[] = [
                 context.state.sarajevo_state,
                 enclavePressure
             );
+            const consequences = applyIvpConsequences(context.state, ivp);
             updatePatronState(context.state, context.state.sarajevo_state, ivp);
             context.report.patron_ivp = {
                 sarajevo_visibility: ivp.sarajevo_siege_visibility,
                 enclave_pressure: ivp.enclave_humanitarian_pressure,
                 negotiation_momentum: ivp.negotiation_momentum
+            };
+            (context.report as TurnReport & { patron_ivp_active_consequences?: string[] }).patron_ivp_active_consequences = consequences;
+        }
+    },
+    {
+        name: 'evaluate-humanitarian-convoys',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const edges = context.input.settlementEdges;
+            if (!edges?.length) return;
+            const created = evaluateHumanitarianConvoys(context.state, edges);
+            applyHumanitarianConvoyDecisions(context.state);
+            (context.report as TurnReport & { humanitarian_convoys?: { created: number; pending: number } }).humanitarian_convoys = {
+                created: created.length,
+                pending: context.state.pending_convoy_decisions?.length ?? 0,
             };
         }
     },

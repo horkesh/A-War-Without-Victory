@@ -4,7 +4,7 @@
 **Source tree:** `src/ui/map/`
 **Dev server:** `npm run dev:map` (Vite, port 3002)
 **Build:** `npm run build` → `dist/tactical-map/`
-**Last updated:** 2026-03-06
+**Last updated:** 2026-03-07
 
 > **See also:** [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) — original engineering reference.
 > This document is the **component-level master reference** covering current panel layout,
@@ -401,7 +401,7 @@ interface LoadedGameState {
   recentControlEvents: RecentControlEventView[];
   armyStance?: Record<string, string>;                // faction → stance
   casualtyLedger?: Record<string, CasualtyLedgerEntryView>;
-  phaseIiExhaustion?: Record<string, number>;         // faction → exhaustion
+  warExhaustion?: Record<string, number>;              // faction → exhaustion
   corpsFrontSectors?: CorpsFrontSectorView[];
   operations?: OperationView[];
   fogOfWar?: {
@@ -492,6 +492,17 @@ interface OperationView {
 ```
 
 ### MilitiaPoolView
+
+### Player Agency Integration
+
+The map UI now carries the live player-agency A-H surface through these components:
+
+- `CorpsFrontPanel.tsx` - sector defensive intent, logistics priority, and OPSEC toggles
+- `OpsPlanningModal.tsx` - operation shaping fields including tempo, artillery preparation, launch gating, casualty tolerance, schwerpunkt, feint, and probe
+- `OperationsPanel.tsx` - operation list/detail, readiness surfacing, and objective focus
+- `EnclaveDashboard.tsx` - enclave status plus player airdrop allocation
+- `SituationTab.tsx` and `TopToolbar.tsx` - convoy decisions, IVP/consequence surfacing, and tunnel status
+- `GameStateAdapter.ts` - adapter contract for `fogOfWar`, `composite_ivp`, operation readiness, airdrop state, convoy state, and OPSEC-visible sectors
 
 ```ts
 interface MilitiaPoolView {
@@ -786,7 +797,7 @@ Supply reserves (Phase A–E) are present in `LoadedGameState.factionReserves` w
 | `heavyMunitions` | 0–100 | adequate ≥50, strained 20–49, critical <20 |
 
 `buildSupplyGeoJSON` colors OSIDs by the controlling faction's supply state.
-Legacy fallback: `phaseIiSupplyPressure` (0–1 scale) when reserves unavailable.
+Legacy fallback: `warSupplyPressure` (0–1 scale) when reserves unavailable.
 
 `SupplyPanel` shows reserve bars per faction (appears only when `mapMode === 'supply'`).
 
@@ -841,6 +852,7 @@ Officer state lookup: `namedOfficerStateById[officer.id].status === 'active'`
 
 | Constraint | Rule |
 |-----------|------|
+| Operations mode sync | Keyboard shortcuts and toolbar map-mode count must stay in sync at 1â€“6; the sixth mode is `operations`, rendered via `buildOperationalWeightGeoJSON.ts`. |
 | Front line style | Black-white stripe only. No chevrons, no HoI4 barbed-wire. |
 | Sector density modifiers | Use faction-level aggregation only. Never per-corps density for THIN/DENSE modifier. |
 | AoR legacy | AoR/ZoC cleanup R1–R5 complete (2026-03-04). `getLegacyAoR()` + all consumer dead branches removed. ZoC fully removed (2026-03-02). See `AOR_ZOC_LEGACY_AUDIT.md`. |

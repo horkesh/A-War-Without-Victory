@@ -336,8 +336,8 @@ export interface BotWeeklyDiagnosticsRow {
 }
 
 /** Phase H2.3: Aggregate Phase II attack-resolution metrics from pipeline reports. */
-export interface PhaseIIAttackResolutionSummary {
-    weeks_with_phase_ii: number;
+export interface AttackResolutionSummary {
+    weeks_at_war: number;
     weeks_with_orders: number;
     orders_processed: number;
     /** Sum of unique_attack_targets across weeks (distinct SIDs targeted per turn). */
@@ -351,7 +351,7 @@ export interface PhaseIIAttackResolutionSummary {
     orders_by_faction: Record<string, number>;
 }
 
-export interface PhaseIIAttackResolutionWeekRollup {
+export interface AttackResolutionWeekRollup {
     week_index: number;
     turn: number;
     orders_processed: number;
@@ -570,10 +570,10 @@ export interface FormatEndReportParams {
     botBenchmarkSummary?: BotBenchmarkSummary | null;
     /** Optional per-turn bot diagnostics. */
     botWeeklyDiagnostics?: BotWeeklyDiagnosticsRow[] | null;
-    /** Optional aggregate summary of phase_ii_resolve_attack_orders across run weeks. */
-    phaseIIAttackResolutionSummary?: PhaseIIAttackResolutionSummary | null;
-    /** Optional per-week rollup of phase_ii_resolve_attack_orders diagnostics. */
-    phaseIIAttackResolutionWeekly?: PhaseIIAttackResolutionWeekRollup[] | null;
+    /** Optional aggregate summary of resolve_attack_orders across run weeks. */
+    attackResolutionSummary?: AttackResolutionSummary | null;
+    /** Optional per-week rollup of resolve_attack_orders diagnostics. */
+    attackResolutionWeekly?: AttackResolutionWeekRollup[] | null;
     /** Optional initial/final/delta historical-alignment diagnostics by faction. */
     historicalAlignmentDiagnostics?: HistoricalAlignmentDiagnostics | null;
     /** Optional corps AI directive snapshots at key turns (1, 13, 26, 52). */
@@ -924,11 +924,11 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
         }
         lines.push('');
     }
-    if (params.phaseIIAttackResolutionSummary) {
-        const a = params.phaseIIAttackResolutionSummary;
+    if (params.attackResolutionSummary) {
+        const a = params.attackResolutionSummary;
         lines.push('## War Attack Resolution (pipeline)');
         lines.push('');
-        lines.push(`- Weeks in war phase: ${a.weeks_with_phase_ii}`);
+        lines.push(`- Weeks in war phase: ${a.weeks_at_war}`);
         lines.push(`- Weeks with nonzero orders processed: ${a.weeks_with_orders}`);
         lines.push(`- Orders processed: ${a.orders_processed}`);
         if (a.orders_by_faction && Object.keys(a.orders_by_faction).length > 0) {
@@ -942,10 +942,10 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
         lines.push(`- Settlement flips applied: ${a.flips_applied} *(War flip events applied this run.)*`);
         lines.push(`- Casualties (attacker / defender): ${a.casualty_attacker} / ${a.casualty_defender}`);
         lines.push(`- Battles with defender present / absent: ${a.defender_present_battles} / ${a.defender_absent_battles}`);
-        if (params.phaseIIAttackResolutionWeekly && params.phaseIIAttackResolutionWeekly.length > 0) {
+        if (params.attackResolutionWeekly && params.attackResolutionWeekly.length > 0) {
             lines.push('');
             lines.push('Weekly rollup (week: orders, unique_targets, flips, casualties A/D, defender present/absent):');
-            for (const row of params.phaseIIAttackResolutionWeekly) {
+            for (const row of params.attackResolutionWeekly) {
                 lines.push(
                     `  - w${row.week_index + 1}: ${row.orders_processed}, ${row.unique_attack_targets}, ${row.flips_applied}, ` +
                     `${row.casualty_attacker}/${row.casualty_defender}, ${row.defender_present_battles}/${row.defender_absent_battles}`

@@ -13,13 +13,13 @@ import {
     type OobCorps
 } from '../scenario/oob_loader.js';
 import type { DisplacementStepReport } from '../state/displacement.js';
-import type { PhaseIITakeoverDisplacementReport } from '../state/displacement_takeover.js';
+import type { TakeoverDisplacementReport } from '../state/displacement_takeover.js';
 import type { ExhaustionStats } from '../state/exhaustion.js';
 import type { FormationFatigueStepReport } from '../state/formation_fatigue.js';
 import type { FormationLifecycleStepReport } from '../state/formation_lifecycle.js';
 import type { CommitmentStepReport } from '../state/front_posture_commitment.js';
 import type { FrontPressureStepReport } from '../state/front_pressure.js';
-import { GameState, type FactionId, type PhaseIIFrontDescriptor } from '../state/game_state.js';
+import { GameState, type FactionId, type FrontDescriptor } from '../state/game_state.js';
 import type { MilitiaFatigueStepReport } from '../state/militia_fatigue.js';
 import type { NegotiationCapitalStepReport } from '../state/negotiation_capital.js';
 import type {
@@ -57,8 +57,6 @@ import type { AttackResolutionOsidReport } from './combat/attack_resolution_osid
 import type { BotOrderDiagnosticsSnapshot } from '../scenario/combat_causality.js';
 import type { CorpsAiReportEntry } from './combat/bot_corps_ai.js';
 import type { CohesionDriftReport } from './combat/cohesion_drift.js';
-import type { ConsolidationFlipsReport } from './combat/consolidation_flips.js';
-import type { RearPocketConsolidationReport } from './combat/consolidate_rear_pockets.js';
 import type { EnclaveResilienceReport } from './combat/enclave_resilience.js';
 import type { EquipmentProgressionReport } from './combat/faction_progression.js';
 import type { FrontlineAttritionReport } from './combat/frontline_attrition.js';
@@ -127,24 +125,24 @@ export interface TurnReport {
     phase3b_pressure_exhaustion?: Phase3BExhaustionResult;
     phase3c_exhaustion_collapse_gating?: Phase3CEligibilityResult;
     phase3d_collapse_resolution?: Phase3DCollapseResolutionResult;
-    phase_i_militia_emergence?: MilitiaEmergenceReport;
-    phase_i_pool_population?: PoolPopulationReport;
-    phase_i_minority_militia_decay?: MinorityDecayReport;
-    phase_i_brigade_reinforcement?: ReinforceBrigadesReport;
-    phase_i_formation_spawn?: SpawnFormationsReport;
-    phase_i_control_flip?: ControlFlipReport;
+    militia_emergence?: MilitiaEmergenceReport;
+    pool_population?: PoolPopulationReport;
+    minority_militia_decay?: MinorityDecayReport;
+    early_brigade_reinforcement?: ReinforceBrigadesReport;
+    formation_spawn?: SpawnFormationsReport;
+    control_flip?: ControlFlipReport;
     formation_hq_relocation?: FormationHqRelocationReport;
-    phase_i_authority?: AuthorityDegradationReport;
+    authority_degradation?: AuthorityDegradationReport;
     war_control_strain?: ControlStrainReport;
-    phase_i_displacement_hooks?: DisplacementHooksReport;
-    phase_i_displacement_apply?: DisplacementStepReport;
+    displacement_hooks?: DisplacementHooksReport;
+    displacement_apply?: DisplacementStepReport;
     war_jna_transition?: JNATransitionReport;
-    phase_i_alliance_update?: AllianceUpdateReport;
-    phase_i_ceasefire_check?: CeasefireCheckReport;
-    phase_i_washington_check?: WashingtonCheckReport;
-    phase_ii_operation_storm_check?: OperationStormCheckReport;
-    phase_i_bilateral_flip_count?: number;
-    phase_i_minority_erosion_report?: MinorityErosionReport;
+    alliance_update?: AllianceUpdateReport;
+    ceasefire_check?: CeasefireCheckReport;
+    washington_check?: WashingtonCheckReport;
+    operation_storm_check?: OperationStormCheckReport;
+    bilateral_flip_count?: number;
+    minority_erosion_report?: MinorityErosionReport;
     end_state_active?: boolean;
     end_state_info?: {
         kind: string;
@@ -161,21 +159,19 @@ export interface TurnReport {
         supply_state_by_osid?: SupplyStateByOsidReport;
     };
     phase_e_pressure_update?: PhaseEPressureDiffusionReport;
-    phase_ii_front_emergence?: PhaseIIFrontDescriptor[];
-    phase_ii_bot_order_diagnostics?: BotOrderDiagnosticsSnapshot;
-    phase_ii_resolve_attack_orders?: ResolveAttackOrdersReport;
-    phase_ii_attack_resolution_osid?: AttackResolutionOsidReport;
-    phase_ii_cohesion_drift?: CohesionDriftReport;
-    phase_ii_morale_drift?: MoraleDriftReport;
+    front_emergence_report?: FrontDescriptor[];
+    bot_order_diagnostics?: BotOrderDiagnosticsSnapshot;
+    resolve_attack_orders?: ResolveAttackOrdersReport;
+    attack_resolution_osid?: AttackResolutionOsidReport;
+    cohesion_drift_report?: CohesionDriftReport;
+    morale_drift_report?: MoraleDriftReport;
     frontline_attrition?: FrontlineAttritionReport;
-    phase_ii_consolidation_flips?: ConsolidationFlipsReport;
-    rear_pocket_consolidation?: RearPocketConsolidationReport;
-    phase_ii_takeover_displacement?: PhaseIITakeoverDisplacementReport;
-    phase_ii_ongoing_mobilization?: OngoingMobilizationReport;
-    phase_ii_brigade_reinforcement?: ReinforceBrigadesReport;
-    phase_ii_strategic_reserve_collection?: StrategicReserveCollectionReport;
-    phase_ii_strategic_reserve_reinforcement?: StrategicReserveReinforcementReport;
-    phase_ii_wia_trickleback?: WiaTricklebackReport;
+    takeover_displacement?: TakeoverDisplacementReport;
+    ongoing_mobilization?: OngoingMobilizationReport;
+    brigade_reinforcement?: ReinforceBrigadesReport;
+    strategic_reserve_collection?: StrategicReserveCollectionReport;
+    strategic_reserve_reinforcement?: StrategicReserveReinforcementReport;
+    wia_trickleback?: WiaTricklebackReport;
     phase_f_displacement?: {
         trigger_report: {
             triggered_settlements: string[];
@@ -194,12 +190,12 @@ export interface TurnReport {
     capability_update?: { factions: number };
     doctrine_update?: { formations: number };
     equipment_update?: { formations: number };
-    phase_ii_equipment_progression?: EquipmentProgressionReport;
-    phase_ii_enclave_resilience?: EnclaveResilienceReport;
+    equipment_progression?: EquipmentProgressionReport;
+    enclave_resilience?: EnclaveResilienceReport;
     supply_reserves?: SupplyReservesReport;
     siege_turn_counters?: SiegeTurnCounterReport;
     corps_ai_report?: CorpsAiReportEntry[];
-    phase_ii_recruitment?: {
+    recruitment_report?: {
         accrual_by_faction: Record<FactionId, { capital_delta: number; equipment_delta: number }>;
         recruited_actions: number;
         recruited_by_faction: Record<FactionId, number>;

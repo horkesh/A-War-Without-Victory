@@ -180,6 +180,28 @@ export interface EnclaveResilienceView {
     resilience: number;
     isolation_turns: number;
     hardening_active: boolean;
+    supply_state?: 'adequate' | 'strained' | 'critical';
+    airdrop_status?: 'receiving' | 'not_eligible' | 'not_isolated_long_enough';
+    airdrop_allocation?: number;
+    faction?: FactionId;
+    display_name?: string;
+}
+
+export interface SectorEntrenchmentSummaryView {
+    avgEntrenchment: number;
+    avgDigIn: number;
+    digInCount: number;
+    totalCount: number;
+}
+
+export interface MobilizationSummaryView {
+    faction: Exclude<FactionId, null>;
+    total_available: number;
+    total_committed: number;
+    total_exhausted: number;
+    exhaustion_pct: number;
+    strategic_reserve: number;
+    top_pools: Array<{ mun_id: string; available: number }>;
 }
 
 export interface RecruitmentView {
@@ -204,7 +226,16 @@ export interface InternationalVisibilityPressureView {
     enclave_humanitarian_pressure: number;
     sarajevo_siege_visibility: number;
     negotiation_momentum: number;
+    composite_ivp?: number;
     last_major_shift: number;
+}
+
+export interface PendingConvoyDecisionView {
+    id: string;
+    target_enclave: string;
+    route_faction: Exclude<FactionId, null>;
+    supply_amount: number;
+    decision?: 'allow' | 'block' | 'divert';
 }
 
 export interface AttackOrderView {
@@ -254,6 +285,8 @@ export interface CorpsFrontSectorView {
     defensive_power: number;
     intel_confidence: number;
     offensive_signs: boolean;
+    logistics_priority?: number;
+    opsec_active?: boolean;
 }
 
 export interface OperationView {
@@ -268,10 +301,26 @@ export interface OperationView {
     objectives?: string[];
     current_objective_index?: number;
     momentum?: number;
+    failure_count?: number;
+    consecutive_failures_on_current?: number;
+    phase_started_turn?: number;
     participating_brigade_count: number;
     participating_brigade_ids?: string[];
     started_turn: number;
     supply_readiness?: number;
+    avg_cohesion?: number;
+    avg_personnel_pct?: number;
+    readiness?: {
+        supply: number;
+        cohesion: number;
+        intel: number;
+    };
+    min_attack_outcome?: 'decisive_victory' | 'victory' | 'costly_victory' | 'stalemate' | 'repulsed';
+    tempo?: 'methodical' | 'standard' | 'all_out';
+    schwerpunkt_osid?: string;
+    artillery_preparation?: boolean;
+    force_launch?: boolean;
+    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination';
 }
 
 export interface LoadedGameState {
@@ -300,6 +349,9 @@ export interface LoadedGameState {
     casualtyLedger?: Record<string, CasualtyLedgerEntryView>;
     civilianCasualties?: Record<string, CivilianCasualtyView>;
     internationalVisibilityPressure?: InternationalVisibilityPressureView;
+    ivpConsequencesActive?: string[];
+    pendingConvoyDecisions?: PendingConvoyDecisionView[];
+    sarajevoTunnelOperational?: boolean;
     phaseIiSupplyPressure?: Record<string, number>;
     phaseIiExhaustion?: Record<string, number>;
     player_faction?: string | null;
@@ -328,5 +380,9 @@ export interface LoadedGameState {
     factionReserves?: Record<string, { generalSupply: number; heavyMunitions: number }>;
     /** Enclave resilience state per enclave id. Present when enclave_resilience exists in game state. */
     enclaveResilience?: Record<string, EnclaveResilienceView>;
+    /** Per-sector summary of brigade entrenchment state. */
+    sectorEntrenchmentSummary?: Record<string, SectorEntrenchmentSummaryView>;
+    /** Per-faction summary of manpower pools and strategic reserves. */
+    mobilizationSummary?: Record<string, MobilizationSummaryView>;
 }
 

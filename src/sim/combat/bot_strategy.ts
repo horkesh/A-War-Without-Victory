@@ -417,7 +417,7 @@ const VRS_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     // Posavina Corridor — ABSOLUTE HIGHEST PRIORITY for RS (existential: links Banja Luka to Belgrade)
     // Brčko is the lynchpin — must be secured before anything else. Two-corps operation.
     { name: 'Corridor 92 (1KK)', corps_id: 'vrs_1st_krajina', target_municipalities: ['brcko', 'odzak', 'derventa', 'bosanski_brod', 'bosanski_samac', 'modrica', 'doboj'], start_week: 0, end_week: 25, weight: 100, min_outcome: 'repulsed' },
-    { name: 'Corridor 92 (EBK)', corps_id: 'vrs_east_bosnian', target_municipalities: ['bijeljina', 'bosanski_samac'], start_week: 0, end_week: 25, weight: 100, min_outcome: 'repulsed' },
+    { name: 'Corridor 92 (EBK)', corps_id: 'vrs_east_bosnian', target_municipalities: ['brcko', 'bijeljina', 'bosanski_samac'], start_week: 0, end_week: 25, weight: 100, min_outcome: 'repulsed' },
     // 1st Krajina: Krajina operations (mid-1992) — aggressive: push through entrenchment
     { name: 'Krajina Sweep', corps_id: 'vrs_1st_krajina', target_municipalities: ['kljuc', 'bosanski_petrovac', 'jajce', 'donji_vakuf', 'sipovo', 'sanski_most'], start_week: 12, end_week: 30, weight: 45, min_outcome: 'repulsed' },
     // 2nd Krajina: western operations + Bihac edges

@@ -93,6 +93,7 @@ export function OOBSidebar() {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     situation: false,
     army: true,
+    mobilization: false,
     operations: false,
     sectors: false,
   });
@@ -268,6 +269,7 @@ export function OOBSidebar() {
   }, [armyByFaction, reserveByFaction]);
   const totalOperations = loadedGameState?.operations?.length ?? 0;
   const totalSectors = loadedGameState?.corpsFrontSectors?.length ?? 0;
+  const mobilizationSummary = loadedGameState?.mobilizationSummary;
 
   if (!loadedGameState) {
     return (
@@ -459,6 +461,56 @@ export function OOBSidebar() {
           )}
 
           {/* ── Operations ── */}
+          <AccordionHeader
+            label="Mobilization"
+            count={mobilizationSummary ? Object.keys(mobilizationSummary).length : undefined}
+            expanded={expandedSections.mobilization}
+            onToggle={() => toggleSection('mobilization')}
+          />
+          {expandedSections.mobilization && (
+            <div className="p-3 space-y-2 text-xs">
+              {!mobilizationSummary ? (
+                <div className="text-text-secondary italic px-1">No mobilization data.</div>
+              ) : (
+                FACTION_ORDER.filter((faction) => Boolean(mobilizationSummary[faction])).map((faction) => {
+                  const summary = mobilizationSummary[faction]!;
+                  return (
+                    <div key={faction} className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
+                      <div className={`font-mono text-[11px] font-medium ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
+                        {faction}
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+                        <span className="text-text-secondary">Available</span>
+                        <span className="text-text-primary tabular-nums">{summary.total_available.toLocaleString()}</span>
+                        <span className="text-text-secondary">Committed</span>
+                        <span className="text-text-primary tabular-nums">{summary.total_committed.toLocaleString()}</span>
+                        <span className="text-text-secondary">Exhausted</span>
+                        <span className="text-text-primary tabular-nums">{summary.total_exhausted.toLocaleString()}</span>
+                        <span className="text-text-secondary">Exhaustion</span>
+                        <span className="text-text-primary tabular-nums">{summary.exhaustion_pct.toFixed(1)}%</span>
+                        <span className="text-text-secondary">Strategic reserve</span>
+                        <span className="text-text-primary tabular-nums">{summary.strategic_reserve.toLocaleString()}</span>
+                      </div>
+                      {summary.top_pools.length > 0 && (
+                        <div className="pt-1 border-t border-panel-border/50">
+                          <div className="text-[10px] uppercase tracking-wide text-text-secondary mb-1">Top pools</div>
+                          <div className="space-y-1">
+                            {summary.top_pools.map((pool) => (
+                              <div key={`${faction}-${pool.mun_id}`} className="flex items-center justify-between text-[11px]">
+                                <span className="text-text-secondary">{toTitleCase(pool.mun_id)}</span>
+                                <span className="text-text-primary tabular-nums">{pool.available.toLocaleString()}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+
           <AccordionHeader
             label="Operations"
             count={totalOperations > 0 ? totalOperations : undefined}

@@ -23,14 +23,14 @@
 
 ## 2. Patterns that work (selected; full list in napkin)
 
-- **Brigade AoR:** Phase II start — initialize `brigade_aor` explicitly for `start_phase: "phase_ii"`; same-HQ fix via `findAlternativeSeed` + `rebalanceZeroAoRSharedHq`; missing-HQ — deterministic fallback seed from front-envelope. MAX_MUNICIPALITIES_PER_BRIGADE (8); ensure step only for home muns.
-- **Control / init:** Scenario with `init_control` but no `init_control_mode` → default `hybrid_1992`. Phase II scenario init must set `meta.rbih_hrhb_war_earliest_turn` and call `ensureRbihHrhbState(...)`.
-- **Phase I no-flip:** `disable_phase_i_control_flip` = military-action-only (militia-pressure off; brigade-led flips still possible). Scenario names with `no_flip` do not imply strict zero control changes.
-- **Scenario harness:** `run_summary.json` includes `phase_ii_attack_resolution` rollup to explain 0-flip or low-flip outcomes. Handoff closure: open questions in handoff report + separate decision memo, cross-linked.
-- **Canon reflection:** When behavior changes are implemented, add or extend canon (Phase I/II specs, Systems Manual §5/§6.5/§7, context implementation refs) and ledger entry.
+- **Brigade AoR:** *(AoR fully removed 2026-03-04)* Historical reference only — AoR initialization patterns no longer apply.
+- **Control / init:** Scenario with `init_control` but no `init_control_mode` → default `hybrid_1992`. War-phase scenario init must set `meta.rbih_hrhb_war_earliest_turn` and call `ensureRbihHrhbState(...)`.
+- **Early-war no-flip:** `disable_early_war_control_flip` = military-action-only (militia-pressure off; brigade-led flips still possible). Scenario names with `no_flip` do not imply strict zero control changes.
+- **Scenario harness:** `run_summary.json` includes `attack_resolution` rollup to explain 0-flip or low-flip outcomes. Handoff closure: open questions in handoff report + separate decision memo, cross-linked.
+- **Canon reflection:** When behavior changes are implemented, add or extend canon (Peace/War specs, Systems Manual §5/§6.5/§7, context implementation refs) and ledger entry.
 - **Determinism:** Seeded RNG in BotManager; no `Math.random()` in bot logic; sort edge/formation traversal before selection. Recruitment: sort faction/facility/municipality/pool/brigade IDs; enforce `available_from`; cap elective recruits per faction per turn.
 - **Tactical map:** Null-control fixed at init/source (prepareNewGameState, deterministic null coercion). Single `FACTION_DISPLAY_ORDER` for OOB and army strength. Dataset failure → reset lookups and clear game state.
-- **Testing:** Node vs Vitest separate; `npm test` = node:test only. Alliance tests use turn >= `rbih_hrhb_war_earliest_turn`; Phase I pipeline tests assert specific steps, not just `phase-i-` prefix.
+- **Testing:** Node vs Vitest separate; `npm test` = node:test only. Alliance tests use turn >= `rbih_hrhb_war_earliest_turn`; early-war pipeline tests assert specific steps by name.
 - **Windows / scripts:** Use `;` not `&&` in PowerShell. Avoid spawning npx from Node wrappers; use `node_modules/tsx/dist/cli.mjs` via process.execPath for stable `npm test`/canon:check.
 - **Replay / long runs:** Stream-write `replay_timeline.json` to avoid RangeError on 40+ week runs.
 
@@ -50,7 +50,7 @@
 
 | Report / area | Lesson |
 |----------------|--------|
-| Battle resolution | Phase II attack orders resolved as discrete battles (combat power, casualty_ledger, snap events); pressure remains substrate. Canon: Phase II §5, §12; Systems Manual §7. |
+| Battle resolution | War-phase attack orders resolved as discrete battles (combat power, casualty_ledger, snap events); pressure remains substrate. Canon: War Spec §5, §12; Systems Manual §7. |
 | Brigade strength / 803rd | Casualties are applied; “full strength” often means wrong dataset (e.g. initial vs 20w final). Large AoR from ensure step → cap municipalities per brigade and restrict ensure to home muns. |
 | Bot AI (BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13) | Zero attack orders from pipeline ordering (lifecycle after bot AI), posture-attack same-pass stale read, supply-gate deadlock. Fix: pipeline order, fresh read of posture, supply gate before attack gate. Strategic objectives and scoring improved; remaining issues (AoR imbalance, RS underperformance, defender casualties, HRHB passive) in backlog. |
 | Scenario handoffs (ORCHESTRATOR_SCENARIO_HANDOFF_DECISIONS) | 0 flips from `orders_processed: 0` (not defender-favored); formation count change from OOB/recruitment path. Close with decision memo + run evidence. |

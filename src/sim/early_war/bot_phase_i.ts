@@ -76,7 +76,7 @@ function edgeHash(edgeId: string, faction: FactionId): number {
  *
  * Alliance-aware: RBiH and HRHB skip each other's edges when allied.
  */
-export function runPhaseIBotPosture(
+export function runEarlyWarBotPosture(
     state: GameState,
     frontEdges: FrontEdge[],
     botFactions: FactionId[]

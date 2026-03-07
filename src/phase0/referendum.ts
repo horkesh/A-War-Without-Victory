@@ -6,7 +6,7 @@
  * both RS and HRHB having declared.
  */
 
-import type { GameState, PhaseIJNAState } from '../state/game_state.js';
+import type { GameState, JNATransitionState } from '../state/game_state.js';
 
 /** Turns from referendum to war start (Phase_0_Spec §4.5: approximately one month = 4 weeks). */
 export const REFERENDUM_WAR_DELAY_TURNS = 4;
@@ -129,7 +129,7 @@ export function isWarStartTurn(state: GameState): boolean {
  * state.war_jna (Phase_0_Spec §7.7 / §8 JNA_status), and returns true.
  * Otherwise returns false and does not mutate state.
  */
-export function applyPhase0ToPhaseITransition(state: GameState): boolean {
+export function applyWarTransition(state: GameState): boolean {
     const meta = state.meta;
     if (meta.phase !== 'peace') return false;
     if (!isWarStartTurn(state)) return false;
@@ -140,7 +140,7 @@ export function applyPhase0ToPhaseITransition(state: GameState): boolean {
         transition_begun: rsDeclared,
         withdrawal_progress: 0,
         asset_transfer_rs: 0
-    } satisfies PhaseIJNAState;
+    } satisfies JNATransitionState;
     meta.peace_end_turn = meta.turn;
     meta.war_start_lifecycle_phase_turn = meta.turn;
     meta.escalation_reason = 'war_start_turn';

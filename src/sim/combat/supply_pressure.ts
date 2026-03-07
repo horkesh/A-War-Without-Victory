@@ -29,7 +29,7 @@ const PRESSURE_CAP = 100;
  * When frictionMultipliers is provided (Phase D0.9), supply pressure increment is scaled by multiplier
  * so that higher command friction (higher multiplier) increases effective pressure growth.
  */
-export function updatePhaseIISupplyPressure(
+export function updateSupplyPressure(
     state: GameState,
     settlementEdges: EdgeRecord[],
     supplyReport?: SupplyStateDerivationReport,

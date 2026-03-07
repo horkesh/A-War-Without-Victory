@@ -8,6 +8,7 @@ export interface MapInteractionCallbacks {
   onOsidHover?: (osid: string | null, point: { x: number; y: number } | null) => void;
   onFormationHover?: (formationId: string | null, point: { x: number; y: number } | null) => void;
   onFrontEdgeHover?: (edgeId: string | null, point: { x: number; y: number } | null) => void;
+  onSectorHover?: (sectorId: string | null, point: { x: number; y: number } | null) => void;
   onMapMouseLeave?: () => void;
 }
 
@@ -133,7 +134,7 @@ export function useMapInteractions(
     onMapMouseLeave?.();
   };
 
-  const setHoverHighlight = (sectorId: string | null) => {
+  const setHoverHighlight = (sectorId: string | null, point: { x: number; y: number } | null) => {
     if (sectorId === hoveredSectorId) return;
     hoveredSectorId = sectorId;
     const noMatch = '__none__';
@@ -146,7 +147,12 @@ export function useMapInteractions(
         map.setFilter(HIGHLIGHT_NEG_LAYER, ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], sid]]);
       }
     } catch (_) { /* layers may not exist yet */ }
+
+    if (typeof callbacks !== 'function' && callbacks.onSectorHover) {
+      callbacks.onSectorHover(sectorId, point);
+    }
   };
+
 
   const handleFrontEdgeMouseMove = (e: MapLayerMouseEvent) => {
     map.getCanvas().style.cursor = 'pointer';
@@ -156,7 +162,7 @@ export function useMapInteractions(
     const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
 
     // Highlight entire sector on hover
-    if (sectorId) setHoverHighlight(sectorId);
+    if (sectorId) setHoverHighlight(sectorId, point);
 
     if (onFrontEdgeHover) {
       if (edgeId) {
@@ -175,7 +181,7 @@ export function useMapInteractions(
 
   const handleFrontEdgeMouseLeave = () => {
     map.getCanvas().style.cursor = '';
-    setHoverHighlight(null);
+    setHoverHighlight(null, null);
     if (frontHoverTimeout) {
       clearTimeout(frontHoverTimeout);
       frontHoverTimeout = undefined;
@@ -256,7 +262,7 @@ export function useMapInteractions(
       safeOff('mousemove', layerId, handleFrontEdgeMouseMove);
       safeOff('mouseleave', layerId, handleFrontEdgeMouseLeave);
     }
-    setHoverHighlight(null);
+    setHoverHighlight(null, null);
     if (frontHoverTimeout) clearTimeout(frontHoverTimeout);
   };
 }

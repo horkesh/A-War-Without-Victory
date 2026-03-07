@@ -1,7 +1,8 @@
 # AWWV Calibration Master Reference
 
-**Purpose:** Persistent lessons-learned record for Phase II 40w calibration (April 1992 → January 1993).
-**Updated:** 2026-03-07 (n241 — 93.6% area-weighted ATH via 98-override scenario expansion)
+**Purpose:** Persistent lessons-learned record for war-phase 40w calibration (April 1992 → January 1993).
+**Updated:** 2026-03-07 (n249 - player-agency implementation docs propagated after restored combat-calibration validity)
+**N249 Player-Agency Closure (2026-03-07):** Documentation closure after Phases A/B/C/F/G/H implementation and final refactor pass. Latest verified run remains the player-agency closure lane: final hash `f5e0e48c6d2538ab`, `invalid_operation_count = 0`, `valid_for_combat_calibration = true`, benchmark suite `6/6`. The branch is now combat-calibration-valid again after `n248`, with `n249` preserving the same final state hash through cleanup-only changes. Remaining drift is anchor-level, not engine-integrity-level: municipality `srebrenica` and OSID `op:brcko:brka_2`. Full implementation report: `docs/40_reports/implemented/20260307_PLAYER_AGENCY_IMPLEMENTATION_A_TO_H.md`.
 **N241 Calibration (2026-03-07):** Systematic override expansion n235→n241. Area-weighted: 89.2%→93.6% (+4.4pp). 98 RS control overrides; 3 RS avoided_osids. Gains: KRAJINA 89.4%→97.8% (HRHB-held cells forced RS); CENTRAL_BOSNIA 83.5%→90.7% (donji_vakuf/jajce/kladanj/konjic/travnik anchors); CENTRAL_CORRIDOR 87.4%→92.1% (ilijas cells); POSAVINA_NE 92.7%→94.0% (bijeljina/zvornik); DRINA 91.9%→92.7% (zapolje_2, miljevina_2, gacko); HERZEGOINA 91.7%→93.9%; SARAJEVO 78.1%→80.3%. CASCADE LESSONS: (1) HRHB-cell overrides must be isolated by region — adding all at once (n237) caused POSAVINA_NE −9.9pp and SARAJEVO −9.3pp cascade; (2) avoided_osids cannot stop consolidation-captured cells — VRS redirects combat effort elsewhere (n240: POSAVINA_NE −12.2pp); (3) bijeljina cells redirect Bijeljina corps into Tuzla basin. CEILING: ~93.6% with current mechanics. Remaining mismatches require enclave mechanics (gorazde/srebrenica/žepa consolidation cascade), HRHB-to-VRS Jajce transition mechanic, VRS aggression cap for Tuzla basin, and Sarajevo siege model. Report: docs/40_reports/implemented/20260307_CALIBRATION_N235_N241_AREA_WEIGHTED_93PCT.md
 **N218 Deep Analysis (2026-03-07):** Full Paradox team 40w analysis. 84.2% area-weighted stable (same as n214). **Root cause of plateau:** Drina corps and East Bosnian corps go dormant after their pre-planned operation (3–4 weeks) and generate NO further operations for remaining 36 weeks — brigades frozen in home municipalities. Brcko regressed (RS lost 2 OSIDs it started with). This is an engine bug in corps operation relaunch path, not a data/scenario problem. Secondary issues: 504th ARBiH brigade not spawning (leaves Bihać:orasac_2 undefended → 2nd Krajina opportunistically captures, tipping bihac anchor); RBiH civilian killed 13,766 (~2× historical → DISPLACEMENT_KILLED_FRACTION_RBIH_FROM_RS=0.02 recommended); att:def 3.4:1 slightly high. Bihac municipality anchor is FALSE ALARM — fix to OSID-level `op:bihac:bihac_2`. Expected impact of fix: Drina 69%→85%+, Posavina/NE 72%→82%+, overall 84.2%→92–95%.
 **N159 Deep Audit (2026-03-06):** 5-phase calibration addressing 14 issues from the full Paradox 40w engine audit.
@@ -60,7 +61,6 @@ No future branch/run should be written up as a combat-calibration success unless
 2. Non-zero battles in `weekly_report.jsonl`.
 3. A short attribution summary for territory change:
    - combat-caused flips
-   - consolidation flips
    - demographic drift / displacement-driven flips
    - init override effects
 
@@ -140,7 +140,7 @@ Current invalidation reasons:
 ### Live harness attribution contract (2026-03-06)
 
 - The live scenario harness no longer uses `control_events.jsonl` as its control-change contract.
-- `control_events.jsonl` was a leftover Phase I / flip-era artifact and has been removed from the active harness path.
+- `control_events.jsonl` was a leftover early-war flip-era artifact and has been removed from the active harness path.
 - The live reporting contract is now:
   - `weekly_report.jsonl -> control_change_attribution`
   - `run_summary.json -> control_change_attribution`
@@ -325,7 +325,7 @@ Do:
 Don’t:
 
 - call a run “better” because area-weighted fit improved while behavioral health regressed
-- use legacy Phase I flip-log thinking for current war-phase analysis
+- use legacy early-war flip-log thinking for current war-phase analysis
 - hide engine failures behind scenario overrides
 - treat planning dead time as acceptable operational behavior
 
@@ -891,13 +891,13 @@ These arcs must emerge **organically** from game mechanics (experience gain, att
 ## Displacement System Reference
 
 ### Implementation Files
-- `src/sim/early_war/displacement_hooks.ts` — Phase I (one-time flip trigger)
-- `src/state/displacement.ts` — Phase II continuous pressure triggers
+- `src/sim/early_war/displacement_hooks.ts` — early-war (one-time flip trigger)
+- `src/state/displacement.ts` — war-phase continuous pressure triggers
 - `src/state/displacement_takeover.ts` — 4-week timer + camp maturation
 - `src/state/displacement_routing_data.ts` — Routing tables by faction/region
 - `src/state/displacement_state_utils.ts` — Brigade presence check for routing gate
 
-### Timer System (Phase II Takeover)
+### Timer System (War-Phase Takeover)
 - `TAKEOVER_DISPLACEMENT_DELAY_TURNS = 4` — settlement flip → displacement initiation
 - `CAMP_REROUTE_DELAY_TURNS = 4` — camp creation → population routed to receiving municipality
 - Total: **8 turns** from settlement flip to displaced population visible at destination
@@ -920,17 +920,17 @@ These arcs must emerge **organically** from game mechanics (experience gain, att
 
 **Routing gate:** Displaced can only route to municipalities where the **receiving faction has a brigade present**. If no brigade: population stays in camp awaiting future brigade deployment. This is critical for enclave supply simulation.
 
-### Phase II Continuous Pressure Triggers
+### War-Phase Continuous Pressure Triggers
 - Unsupplied 3+ consecutive turns: 5% per turn
 - Encirclement (no friendly adjacency path): 10% per turn
 - 2+ concurrent front breaches: 3% per turn
 - Max per turn: 5% remaining population (PHASE_F_MAX_DELTA_PER_TURN)
 
 ### Calibration Context
-- n254: ~43k routed + ~5.7k fled + ~5.7k killed for Phase II displacement only
-- Phase I displacement (historical: ~1M+ by Jan 1993) is baked into `init_control` snapshot
+- n254: ~43k routed + ~5.7k fled + ~5.7k killed for war-phase displacement only
+- Early-war displacement (historical: ~1M+ by Jan 1993) is baked into `init_control` snapshot
 - Minority flight disabled (`enable_rbih_hrhb_dynamics: false`)
-- **The engine is correct**. The discrepancy vs historical 1M+ is by design — Phase I chaos is not re-simulated.
+- **The engine is correct**. The discrepancy vs historical 1M+ is by design — early-war chaos is not re-simulated.
 
 ---
 
@@ -1091,11 +1091,11 @@ continuous corridor Tešanj-Maglaj-Zavidovići-Žepče throughout 1992–1993.
 Sarajevo faction counts perfect (RS=21/21, RBiH=10/10). But specific OSIDs wrong —
 Trnovo extra RS, Ilidža/Vogošća RS deficit. Positional issue, not quantity. Harder to fix.
 
-### L9 — Phase I bypassed: init_control is a snapshot
+### L9 — Early-war bypassed: init_control is a snapshot
 **Session:** 2026-02-28
-The canonical 40w scenario starts in phase_ii with init_control: "apr1992". April chaos
-is not simulated. Casualties and displacement in run summaries do NOT include Phase I.
-This is deliberate — calibrating Phase I is harder than starting from known snapshot.
+The canonical 40w scenario starts in war phase with init_control: "apr1992". April chaos
+is not simulated. Casualties and displacement in run summaries do NOT include the early-war period.
+This is deliberate — calibrating early-war is harder than starting from known snapshot.
 
 ### L10 — "Last stand" mechanic exists but triggers too rarely
 **Session:** 2026-02-28 (engine research)
@@ -1228,8 +1228,8 @@ not on faction-specific "HRHB won't attack" assumptions.
 The engine has a full displacement system: 4-turn takeover timer + 4-turn camp maturation,
 kill fractions by ethnicity (10% normal, 35% enclave overrun), flee-abroad fractions
 (RS=30%, HRHB=25%, RBiH=0%, Posavina Croats=70%), and brigade-gated routing.
-The n254 displacement numbers are not wrong — they reflect Phase II only.
-Phase I (~1M+ historical) is captured in the init_control snapshot, not re-simulated.
+The n254 displacement numbers are not wrong — they reflect war-phase only.
+Early-war (~1M+ historical) is captured in the init_control snapshot, not re-simulated.
 
 ### L26 — Enclave morale drift nullifies initial_morale reduction
 **Session:** 2026-03-01 (n275 analysis)
@@ -1649,15 +1649,13 @@ Two-part fix per L23:
 ### Verification Target
 ~~After P1–P5: expect 85–88% match rate. After P6–P7: expect 88–90%+.~~
 **Updated (n295):** P6 done. Current 85.1%. After P1–P5 + P7: expect 87–90%+. Drina gap (71.9%) remains the ceiling constraint — structural OOB/initial-control fix needed for >88%.
-### Rear pocket consolidation pipeline step (2026-03-07)
+### Rear pocket consolidation (2026-03-07) — DELETED
 
-- New pipeline step `consolidate-rear-pockets` after `phase-ii-displace-enemy-territory`
-- Auto-flips enemy OSIDs where ALL neighbors are controlled by one faction and no defending brigade is present
-- MAX_FLIPS_PER_TURN = 8 to prevent cascade chain reactions
-- n214 result: 26→12 rear pockets, 84.2% area-weighted (−1.2pp from n207 baseline of 85.4%)
-- Corps AI: rear pockets bypass municipality + sector filters in `generateCorpsDirectives()`
+- ~~Pipeline step `consolidate-rear-pockets` auto-flipped surrounded enemy OSIDs (MAX_FLIPS_PER_TURN=8)~~
+- **DELETED 2026-03-07:** `consolidate_rear_pockets.ts` and `consolidation_flips.ts` removed. This was the root cause of Goražde/Srebrenica/Žepa being swallowed — surrounded cells auto-flipped without combat.
+- Territory now changes hands ONLY through combat.
+- Corps AI pocket targeting retained: rear pockets bypass municipality + sector filters in `generateCorpsDirectives()`
 - Home-defense brigades: exception for truly undefended adjacent targets (decisive_victory + !defender_has_brigade)
-- Key finding: pipeline consolidation is strictly superior to brigade-based pocket attacks for pocket cleanup (no butterfly effects from changed attack decisions)
 
 ## 2026-03-05 Ongoing engine audit gotchas
 

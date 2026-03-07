@@ -15,7 +15,6 @@ import type {
     CorpsOperation,
     FactionId,
     FormationId,
-    FormationState,
     GameState
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -43,6 +42,10 @@ const MAX_TOTAL_FAILURES = 3;
 
 /** Consecutive failures on same objective before skip. */
 const MAX_CONSECUTIVE_FAILURES_ON_CURRENT = 2;
+const EARLY_LAUNCH_COHESION_PENALTY = 15;
+const ALL_OUT_EXTRA_COHESION_COST = 1;
+const BOMBARDMENT_PREP_COST = 2;
+const FEINT_PLANNING_TURNS = 2;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Planning duration
@@ -53,20 +56,6 @@ export function computePlanningDuration(objectiveCount: number): number {
     if (objectiveCount <= 2) return 1;
     if (objectiveCount <= 5) return Math.ceil(objectiveCount * 0.6);
     return Math.min(5, Math.ceil(objectiveCount * 0.8));
-}
-
-function areParticipantsStaged(state: GameState, participatingBrigades: FormationId[], stagingOsid: string | undefined): boolean {
-    if (typeof stagingOsid !== 'string' || stagingOsid.length === 0) return false;
-    let activeParticipantCount = 0;
-    for (const brigadeId of participatingBrigades) {
-        const brigade = state.formations?.[brigadeId];
-        if (!brigade || brigade.status !== 'active') continue;
-        activeParticipantCount += 1;
-        if (brigade.location_osid !== stagingOsid) {
-            return false;
-        }
-    }
-    return activeParticipantCount > 0;
 }
 
 function collectObjectiveApproachOsids(
@@ -116,6 +105,7 @@ function beginRecovery(op: CorpsOperation, turn: number, reason: CorpsOperation[
     op.phase = 'recovery';
     op.phase_started_turn = turn;
     op.recovery_reason = reason;
+    op.force_launch = false;
 }
 
 function getRecoveryDuration(op: CorpsOperation): number {
@@ -135,6 +125,52 @@ function getRecoveryDuration(op: CorpsOperation): number {
 
 function getNoAttemptRecoveryReason(op: CorpsOperation): CorpsOperation['recovery_reason'] {
     return (op.attack_attempt_count ?? 0) > 0 ? 'max_failures' : 'no_logged_attempt';
+}
+
+function applyCohesionDelta(state: GameState, brigadeIds: FormationId[], delta: number): void {
+    for (const brigadeId of [...brigadeIds].sort(strictCompare)) {
+        const brigade = state.formations?.[brigadeId];
+        if (!brigade || brigade.status !== 'active') continue;
+        const next = Math.max(0, Math.min(100, (brigade.cohesion ?? 100) + delta));
+        brigade.cohesion = Math.round(next * 10) / 10;
+    }
+}
+
+function applyDigInOnHalt(state: GameState, brigadeIds: FormationId[]): void {
+    for (const brigadeId of [...brigadeIds].sort(strictCompare)) {
+        const brigade = state.formations?.[brigadeId];
+        if (!brigade || brigade.status !== 'active') continue;
+        brigade.posture = 'dig_in';
+    }
+}
+
+function applyArtilleryPreparation(
+    state: GameState,
+    faction: FactionId,
+    operation: CorpsOperation
+): void {
+    if (!operation.artillery_preparation || operation.artillery_preparation_consumed) return;
+    const currentObjective = operation.objectives?.[operation.current_objective_index ?? 0];
+    if (typeof currentObjective !== 'string' || currentObjective.length === 0) return;
+    if (!state.heavy_munitions_reserve) state.heavy_munitions_reserve = {};
+    const currentReserve = state.heavy_munitions_reserve[faction] ?? 0;
+    if (currentReserve < BOMBARDMENT_PREP_COST) return;
+    state.heavy_munitions_reserve[faction] = Math.max(0, currentReserve - BOMBARDMENT_PREP_COST);
+    for (const formationId of Object.keys(state.formations ?? {}).sort(strictCompare)) {
+        const formation = state.formations?.[formationId];
+        if (!formation || formation.status !== 'active') continue;
+        if (formation.location_osid !== currentObjective || formation.faction === faction) continue;
+        formation.dig_in_progress = 0;
+        formation.cohesion = Math.max(0, (formation.cohesion ?? 100) - 10);
+    }
+    operation.artillery_preparation_consumed = true;
+}
+
+function fullyRevealProbeSectorIntel(state: GameState, operation: CorpsOperation): void {
+    if (operation.type !== 'probe' || !operation.sector_id || !state.sector_intel?.[operation.sector_id]) return;
+    for (const record of state.sector_intel[operation.sector_id]) {
+        record.confidence = 1;
+    }
 }
 
 function resolveOperationSectorId(
@@ -218,7 +254,7 @@ export function advanceSectorOffensives(
         const cmd = corpsCommand[corpsId];
         if (!cmd?.active_operation) continue;
         const op = cmd.active_operation;
-        if (op.type !== 'sector_attack') continue;
+        if (op.type !== 'sector_attack' && op.type !== 'feint' && op.type !== 'probe') continue;
 
         const turn = state.meta?.turn ?? 0;
         const corps = state.formations?.[corpsId];
@@ -247,7 +283,19 @@ export function advanceSectorOffensives(
         // Recompute supply readiness
         op.supply_readiness = computeSupplyReadiness(state, op.participating_brigades, faction, supplyByOsid);
 
+        if (op.recovery_reason === 'manual_termination' && op.phase !== 'recovery') {
+            if (op.dig_in_on_halt) {
+                applyDigInOnHalt(state, op.participating_brigades);
+            }
+            beginRecovery(op, turn, 'manual_termination');
+            continue;
+        }
+
         if (op.phase === 'planning') {
+            if (op.type === 'probe') {
+                op.planning_duration = 1;
+                op.participating_brigades = [...(op.participating_brigades ?? [])].sort(strictCompare).slice(0, 2);
+            }
             const elapsed = turn - op.phase_started_turn;
             const planDuration = op.planning_duration ?? 1;
             const stagedEarly = elapsed >= 1 && areParticipantsReadyForExecution(
@@ -257,6 +305,7 @@ export function advanceSectorOffensives(
                 op.staging_osid,
                 op.objectives ?? []
             );
+            const forcedLaunch = op.force_launch === true && elapsed >= 1;
 
             // Transition to execution only after completing the configured number of
             // full planning turns. This preserves one real staging turn for
@@ -265,7 +314,14 @@ export function advanceSectorOffensives(
             // handles individual attack eligibility. Sector-level supply gating caused pre-planned
             // VRS operations to never execute (critical-reachability brigades at game start don't
             // have supply routes yet, making readiness < 0.6 indefinitely).
-            if (elapsed > planDuration || stagedEarly) {
+            if (op.type === 'feint' && elapsed >= FEINT_PLANNING_TURNS) {
+                applyCohesionDelta(state, op.participating_brigades, -5);
+                if (!state.general_supply_reserve) state.general_supply_reserve = {};
+                state.general_supply_reserve[faction] = Math.max(0, (state.general_supply_reserve[faction] ?? 0) - 0.5);
+                beginRecovery(op, turn, 'manual_termination');
+                continue;
+            }
+            if (elapsed > planDuration || stagedEarly || forcedLaunch) {
                 op.phase = 'execution';
                 op.phase_started_turn = turn;
                 op.current_objective_index = 0;
@@ -277,8 +333,19 @@ export function advanceSectorOffensives(
                 op.movement_only_execution_turns = 0;
                 op.idle_execution_turn_streak = 0;
                 op.recovery_reason = undefined;
+                if (op.sector_id && Array.isArray(state.opsec_sectors)) {
+                    state.opsec_sectors = state.opsec_sectors.filter((sectorId) => sectorId !== op.sector_id);
+                }
+                if (forcedLaunch) {
+                    applyCohesionDelta(state, op.participating_brigades, -EARLY_LAUNCH_COHESION_PENALTY);
+                    op.force_launch = false;
+                }
+                applyArtilleryPreparation(state, faction, op);
             }
         } else if (op.phase === 'execution') {
+            if (op.tempo === 'all_out') {
+                applyCohesionDelta(state, op.participating_brigades, -ALL_OUT_EXTRA_COHESION_COST);
+            }
             // No supply-based abort during execution — per-brigade gates handle attack eligibility.
             // (Removed: if supply_readiness < SUPPLY_READINESS_ABORT → recovery)
 
@@ -294,12 +361,18 @@ export function advanceSectorOffensives(
                 beginRecovery(op, turn, getNoAttemptRecoveryReason(op));
                 continue;
             }
+
+            if (op.type === 'probe' && (op.attack_attempt_count ?? 0) > 0) {
+                beginRecovery(op, turn, op.last_result === 'captured' ? 'completed' : 'manual_termination');
+                continue;
+            }
         } else if (op.phase === 'recovery') {
             const elapsed = turn - op.phase_started_turn;
             const recoveryDuration = getRecoveryDuration(op);
             if (elapsed >= recoveryDuration) {
                 // Apply exhaustion from completed operation
-                cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + 15);
+                const exhaustionCost = op.type === 'feint' || op.type === 'probe' ? 5 : 15;
+                cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + exhaustionCost);
                 cmd.active_operation = null;
             }
         }
@@ -326,7 +399,7 @@ export function updateSectorOffensiveResults(
         const cmd = corpsCommand[corpsId];
         if (!cmd?.active_operation) continue;
         const op = cmd.active_operation;
-        if (op.type !== 'sector_attack' || op.phase !== 'execution') continue;
+        if ((op.type !== 'sector_attack' && op.type !== 'probe') || op.phase !== 'execution') continue;
 
         const objectives = op.objectives ?? [];
         const currentIdx = op.current_objective_index ?? 0;
@@ -349,6 +422,7 @@ export function updateSectorOffensiveResults(
             op.momentum = Math.min(MOMENTUM_CAP, (op.momentum ?? 0) + 1);
             op.current_objective_index = currentIdx + 1;
             op.consecutive_failures_on_current = 0;
+            fullyRevealProbeSectorIntel(state, op);
         } else {
             // Check if any participating brigade actually attacked this specific objective this turn.
             // Use corps_front_sectors adjacency to determine which brigades are adjacent to the
@@ -383,6 +457,7 @@ export function updateSectorOffensiveResults(
                 op.momentum = 0;
                 op.failure_count = (op.failure_count ?? 0) + 1;
                 op.consecutive_failures_on_current = (op.consecutive_failures_on_current ?? 0) + 1;
+                fullyRevealProbeSectorIntel(state, op);
 
                 // Skip current objective after too many consecutive failures
                 if ((op.consecutive_failures_on_current ?? 0) >= MAX_CONSECUTIVE_FAILURES_ON_CURRENT) {
@@ -400,6 +475,12 @@ export function updateSectorOffensiveResults(
                 op.momentum = 0;
                 op.failure_count = (op.failure_count ?? 0) + 1;
                 op.consecutive_failures_on_current = (op.consecutive_failures_on_current ?? 0) + 1;
+
+                if (!anyMoved && !anyAttacked && (op.attack_attempt_count ?? 0) === 0 && (op.idle_execution_turn_streak ?? 0) >= 1) {
+                    op.movement_only_execution_turns = Math.max(1, op.movement_only_execution_turns ?? 0);
+                    beginRecovery(op, turn, 'no_logged_attempt');
+                    continue;
+                }
 
                 if ((op.consecutive_failures_on_current ?? 0) >= MAX_CONSECUTIVE_FAILURES_ON_CURRENT) {
                     op.current_objective_index = currentIdx + 1;

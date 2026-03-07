@@ -112,4 +112,21 @@ describe('applyUnAirdrops', () => {
         applyUnAirdrops(state);
         expect(state.general_supply_reserve!['RBiH']).toBe(100);
     });
+
+    it('normalizes staged airdrop allocations across eligible enclaves', () => {
+        const state = makeState({
+            enclave_resilience: {
+                gorazde: { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 2, hardening_active: false },
+                srebrenica: { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 2, hardening_active: false },
+            },
+            airdrop_allocation: {
+                gorazde: 0.5,
+            }
+        });
+
+        applyUnAirdrops(state);
+
+        expect(state.airdrop_allocation?.gorazde).toBeCloseTo(0.75);
+        expect(state.airdrop_allocation?.srebrenica).toBeCloseTo(0.25);
+    });
 });

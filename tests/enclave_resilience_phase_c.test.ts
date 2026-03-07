@@ -6,7 +6,7 @@ import {
     getMaxEnclaveResilienceForFaction,
     readResilience,
 } from '../src/sim/combat/enclave_resilience.js';
-import { updatePhaseIIExhaustion } from '../src/sim/combat/exhaustion.js';
+import { updateExhaustion } from '../src/sim/combat/exhaustion.js';
 import type { EnclaveResilienceEntry, GameState } from '../src/state/game_state.js';
 import {
     HARDENING_THRESHOLD,
@@ -227,7 +227,7 @@ describe('exhaustion — enclave reduction', () => {
             war_supply_pressure: { RBiH: 50, RS: 50, HRHB: 0 } as any,
         });
         // No enclave resilience → baseline exhaustion
-        updatePhaseIIExhaustion(stateBase, []);
+        updateExhaustion(stateBase, []);
         const baseExhaustion = stateBase.war_exhaustion!['RBiH'] ?? 0;
 
         const stateWithEnclave = makeMinimalState({
@@ -236,7 +236,7 @@ describe('exhaustion — enclave reduction', () => {
                 srebrenica: { resilience: 20, isolation_turns: 10, hardening_active: true }
             }
         });
-        updatePhaseIIExhaustion(stateWithEnclave, []);
+        updateExhaustion(stateWithEnclave, []);
         const enclaveExhaustion = stateWithEnclave.war_exhaustion!['RBiH'] ?? 0;
 
         // With 20 resilience × 0.01 = 20% reduction
@@ -248,7 +248,7 @@ describe('exhaustion — enclave reduction', () => {
         const state1 = makeMinimalState({
             war_supply_pressure: { RBiH: 50, RS: 50, HRHB: 0 } as any,
         });
-        updatePhaseIIExhaustion(state1, []);
+        updateExhaustion(state1, []);
         const rsBase = state1.war_exhaustion!['RS'] ?? 0;
 
         const state2 = makeMinimalState({
@@ -257,7 +257,7 @@ describe('exhaustion — enclave reduction', () => {
                 srebrenica: { resilience: 30, isolation_turns: 15, hardening_active: true }
             }
         });
-        updatePhaseIIExhaustion(state2, []);
+        updateExhaustion(state2, []);
         const rsWithEnclave = state2.war_exhaustion!['RS'] ?? 0;
 
         expect(rsWithEnclave).toBeCloseTo(rsBase, 5); // No change for RS

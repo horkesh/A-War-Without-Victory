@@ -1,3 +1,5 @@
+> **NOTE (2026-03-07):** This document uses legacy "Phase I" terminology. The codebase now uses Peace/War phases. Phase I = Peace phase (early-war period). All `phase_i_*` references in code have been renamed. The checklist content remains valid for the early-war control flip system.
+
 # Phase I No-Flip Scenario Author Checklist
 
 Use this checklist when deciding whether to enable `disable_phase_i_control_flip` for a scenario.

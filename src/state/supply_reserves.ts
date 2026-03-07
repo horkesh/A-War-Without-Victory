@@ -10,7 +10,8 @@
  * All iteration is deterministic (sorted faction IDs, sorted formation IDs).
  */
 
-import type { GameState, FactionId } from './game_state.js';
+import type { EnclaveResilienceEntry, EnclaveState, FactionId, GameState, PendingConvoyDecision } from './game_state.js';
+import type { EdgeRecord } from '../map/settlements.js';
 import { clamp01 } from '../utils/math.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from './supply_state_derivation.js';
 import {
@@ -43,7 +44,7 @@ import {
     JNA_INHERITANCE_HEAVY_BONUS,
     HEAVY_MAINTENANCE_PER_WEAPON,
 } from './supply_reserve_constants.js';
-import type { EnclaveResilienceEntry } from './game_state.js';
+import { ensureInternationalVisibilityPressure, ensurePatronState } from './patron_pressure.js';
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 
@@ -439,7 +440,7 @@ export function applyUnAirdrops(state: GameState): void {
     if (!state.meta?.supply_reserves_enabled) return;
 
     const enclaveResilience = state.enclave_resilience ?? {};
-    let totalDrop = 0;
+    const eligibleEnclaves: string[] = [];
 
     // Sorted iteration for determinism
     for (const key of Object.keys(enclaveResilience).sort((a, b) => a.localeCompare(b))) {
@@ -447,15 +448,174 @@ export function applyUnAirdrops(state: GameState): void {
         if (typeof entry !== 'object' || entry === null) continue;
         const typedEntry = entry as EnclaveResilienceEntry;
         if (typedEntry.isolation_turns < AIRDROP_ISOLATION_THRESHOLD) continue;
-        totalDrop += AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE;
+        eligibleEnclaves.push(key);
     }
 
+    let totalDrop = eligibleEnclaves.length * AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE;
     const drop = Math.min(totalDrop, AIRDROP_MAX_SUPPLY_PER_TURN);
     if (drop <= 0) return;
+
+    const stagedAllocations = state.airdrop_allocation ?? {};
+    const normalizedAllocations: Record<string, number> = {};
+    let allocated = 0;
+    for (const enclaveId of eligibleEnclaves) {
+        const requested = stagedAllocations[enclaveId];
+        if (typeof requested !== 'number' || !Number.isFinite(requested) || requested <= 0) continue;
+        const grant = Math.min(requested, drop - allocated);
+        if (grant <= 0) break;
+        normalizedAllocations[enclaveId] = grant;
+        allocated += grant;
+    }
+    const remaining = Math.max(0, drop - allocated);
+    if (remaining > 0 && eligibleEnclaves.length > 0) {
+        const perEnclave = remaining / eligibleEnclaves.length;
+        for (const enclaveId of eligibleEnclaves) {
+            normalizedAllocations[enclaveId] = (normalizedAllocations[enclaveId] ?? 0) + perEnclave;
+        }
+    }
+    state.airdrop_allocation = normalizedAllocations;
 
     if (!state.general_supply_reserve) state.general_supply_reserve = {};
     const current = state.general_supply_reserve[AIRDROP_ELIGIBLE_FACTION] ?? 0;
     state.general_supply_reserve[AIRDROP_ELIGIBLE_FACTION] = Math.min(100, current + drop);
+}
+
+function getPlayerFaction(state: GameState): FactionId | undefined {
+    const rootPlayerFaction = (state as GameState & { player_faction?: FactionId }).player_faction;
+    return state.meta?.player_faction ?? rootPlayerFaction ?? undefined;
+}
+
+function determineConvoyRouteFaction(enclave: EnclaveState, state: GameState, edges: EdgeRecord[]): FactionId | null {
+    const enclaveSet = new Set(enclave.settlement_ids);
+    const hostileCounts = new Map<FactionId, number>();
+    for (const edge of edges) {
+        let externalSid: string | null = null;
+        if (enclaveSet.has(edge.a) && !enclaveSet.has(edge.b)) externalSid = edge.b;
+        if (enclaveSet.has(edge.b) && !enclaveSet.has(edge.a)) externalSid = edge.a;
+        if (!externalSid) continue;
+        const controller = state.political_controllers?.[externalSid] as FactionId | undefined;
+        if (!controller || controller === enclave.faction_id) continue;
+        hostileCounts.set(controller, (hostileCounts.get(controller) ?? 0) + 1);
+    }
+    return [...hostileCounts.entries()]
+        .sort((a, b) => (b[1] - a[1]) || String(a[0]).localeCompare(String(b[0]), 'en'))
+        .map(([faction]) => faction)[0] ?? null;
+}
+
+export function evaluateHumanitarianConvoys(state: GameState, edges: EdgeRecord[]): PendingConvoyDecision[] {
+    if (!state.meta?.supply_reserves_enabled) return [];
+    const ivp = ensureInternationalVisibilityPressure(state);
+    const pending = Array.isArray(state.pending_convoy_decisions) ? [...state.pending_convoy_decisions] : [];
+    const pendingIds = new Set(pending.map((convoy) => convoy.id));
+    const created: PendingConvoyDecision[] = [];
+
+    for (const enclave of [...(state.enclaves ?? [])].sort((a, b) => a.id.localeCompare(b.id))) {
+        if (enclave.siege_duration < 4 || enclave.collapsed) continue;
+        const routeFaction = determineConvoyRouteFaction(enclave, state, edges);
+        if (!routeFaction) continue;
+        const convoyScore = enclave.siege_duration * 0.1 + enclave.humanitarian_pressure + (ivp.composite_ivp ?? 0) * 0.5;
+        if (convoyScore < 1) continue;
+        const convoy: PendingConvoyDecision = {
+            id: `convoy:${state.meta.turn}:${enclave.id}:${routeFaction}`,
+            target_enclave: enclave.id,
+            route_faction: routeFaction,
+            supply_amount: Math.max(0.3, Math.min(0.8, 0.3 + enclave.humanitarian_pressure * 0.5)),
+        };
+        if (pendingIds.has(convoy.id)) continue;
+        created.push(convoy);
+        pending.push(convoy);
+        pendingIds.add(convoy.id);
+    }
+
+    state.pending_convoy_decisions = pending.sort((a, b) => a.id.localeCompare(b.id));
+    return created;
+}
+
+export function applyHumanitarianConvoyDecisions(state: GameState): void {
+    const pending = Array.isArray(state.pending_convoy_decisions) ? [...state.pending_convoy_decisions] : [];
+    if (pending.length === 0) return;
+
+    const ivp = ensureInternationalVisibilityPressure(state);
+    if (!state.general_supply_reserve) state.general_supply_reserve = {};
+    const playerFaction = getPlayerFaction(state);
+    const remaining: PendingConvoyDecision[] = [];
+
+    for (const convoy of pending.sort((a, b) => a.id.localeCompare(b.id))) {
+        let decision = convoy.decision;
+        if (!decision) {
+            if (playerFaction && convoy.route_faction === playerFaction) {
+                remaining.push(convoy);
+                continue;
+            }
+            const composite = ivp.composite_ivp ?? 0;
+            decision = composite > 0.5 ? 'allow' : composite < 0.3 ? 'block' : 'divert';
+        }
+
+        const targetFaction = state.enclaves?.find((enclave) => enclave.id === convoy.target_enclave)?.faction_id ?? 'RBiH';
+        const ivpMult = convoy.route_faction === 'HRHB' ? 0.6 : 1.0;
+        const routePatron = ensurePatronState(state, convoy.route_faction);
+
+        if (decision === 'allow') {
+            state.general_supply_reserve[targetFaction] = Math.min(100, (state.general_supply_reserve[targetFaction] ?? 0) + convoy.supply_amount);
+            continue;
+        }
+        if (decision === 'block') {
+            ivp.enclave_humanitarian_pressure = Math.min(1, ivp.enclave_humanitarian_pressure + 0.03 * ivpMult);
+            routePatron.diplomatic_isolation = Math.min(1, routePatron.diplomatic_isolation + 0.05 * ivpMult);
+            continue;
+        }
+        state.general_supply_reserve[targetFaction] = Math.min(100, (state.general_supply_reserve[targetFaction] ?? 0) + convoy.supply_amount * 0.5);
+        state.general_supply_reserve[convoy.route_faction] = Math.min(100, (state.general_supply_reserve[convoy.route_faction] ?? 0) + convoy.supply_amount * 0.5);
+        ivp.enclave_humanitarian_pressure = Math.min(1, ivp.enclave_humanitarian_pressure + 0.01 * ivpMult);
+        routePatron.diplomatic_isolation = Math.min(1, routePatron.diplomatic_isolation + 0.02 * ivpMult);
+    }
+
+    state.pending_convoy_decisions = remaining;
+}
+
+export function applySmugglingAllocation(state: GameState): void {
+    const rbih = state.factions.find((faction) => faction.id === 'RBiH');
+    const budget = Math.max(0, (rbih?.embargo_profile?.smuggling_efficiency ?? 0) * 2);
+    if (budget <= 0) return;
+    const entries = Object.entries(state.smuggling_allocation ?? {})
+        .filter(([, allocation]) => allocation && typeof allocation.amount === 'number' && allocation.amount > 0)
+        .sort(([a], [b]) => a.localeCompare(b));
+    if (entries.length === 0) return;
+
+    const totalRequested = entries.reduce((sum, [, allocation]) => sum + allocation.amount, 0);
+    const scale = totalRequested > budget ? budget / totalRequested : 1;
+    const normalized: NonNullable<GameState['smuggling_allocation']> = {};
+
+    if (!state.heavy_munitions_reserve) state.heavy_munitions_reserve = {};
+    const ivp = ensureInternationalVisibilityPressure(state);
+    for (const [enclaveId, allocation] of entries) {
+        const amount = allocation.amount * scale;
+        normalized[enclaveId] = { type: allocation.type, amount };
+        if (allocation.type === 'ammo') {
+            state.heavy_munitions_reserve.RBiH = Math.min(100, (state.heavy_munitions_reserve.RBiH ?? 0) + amount * 0.5);
+        } else {
+            ivp.enclave_humanitarian_pressure = Math.max(0, ivp.enclave_humanitarian_pressure - amount * 0.2);
+        }
+    }
+    state.smuggling_allocation = normalized;
+}
+
+export function maybeActivateSarajevoTunnel(state: GameState): boolean {
+    if (state.sarajevo_tunnel_operational) return false;
+    if ((state.meta?.turn ?? 0) < 60) return false;
+    const sarajevoEnclave = (state.enclaves ?? []).find((enclave) =>
+        enclave.faction_id === 'RBiH' &&
+        enclave.settlement_ids.some((sid) => state.sarajevo_state?.settlement_ids?.includes(sid))
+    );
+    const sarajevoResilience = state.enclave_resilience?.sarajevo;
+    const sarajevoIsolation = typeof sarajevoResilience === 'object' && sarajevoResilience
+        ? (sarajevoResilience as EnclaveResilienceEntry).isolation_turns
+        : 0;
+    if (!sarajevoEnclave || sarajevoEnclave.siege_duration < 20 || sarajevoIsolation < 20) return false;
+    state.sarajevo_tunnel_operational = true;
+    if (!state.general_supply_reserve) state.general_supply_reserve = {};
+    state.general_supply_reserve.RBiH = Math.min(100, (state.general_supply_reserve.RBiH ?? 0) + 0.5);
+    return true;
 }
 
 // ── JNA Inheritance Bonus (Phase E1) ─────────────────────────────────────────

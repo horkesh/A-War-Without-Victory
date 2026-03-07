@@ -4,7 +4,7 @@
 > Covers all pipeline steps, trigger types, routing, loss fractions, state machines, and feedback loops.
 >
 > **Canon:** v0.6.0 two-phase model (Peace / War). There is no separate "Phase I" or "Phase II".
-> Implementation may still use legacy `phase_ii_*` step IDs during migration.
+> As of 2026-03-07, codebase fully uses Peace/War terminology (legacy `phase_ii_*` step IDs renamed).
 >
 > **Architecture (2026-03-01):** Displacement is **OSID-based**, not municipality-based.
 > Each OSID triggers its own displacement independently. Municipalities only serve as
@@ -49,7 +49,7 @@ Displacement runs at three points in the **War turn pipeline** (canon: War_Speci
 
 ### 2.1 `war-hostile-takeover-displacement` (step 14) — **PRIMARY DRIVER**
 
-**File:** `src/state/displacement_takeover.ts` → `processPhaseIIDisplacementTakeover()`
+**File:** `src/state/displacement_takeover.ts` → `processDisplacementTakeover()`
 
 Runs every turn after attack resolution. The **only active displacement trigger** as of 2026-03-01.
 
@@ -73,7 +73,7 @@ Runs every turn after attack resolution. The **only active displacement trigger*
 
 **Also handles re-displacement pass-through:** When a municipality with `displaced_in > 0` has a timer mature, displaced people already sheltering there are re-routed to new friendly municipalities with **zero casualties and zero flee-abroad**. This prevents double-counting — a person displaced twice counts as 1 displaced person.
 
-**Minority flight** (`processMinorityFlight()`) is **active** in the pipeline (`phase-ii-minority-flight` step). Confirmed running: ~493k displaced in 52w (378k spike at w4, ~9.4k/4-week cycle after). It runs independently of takeover displacement.
+**Minority flight** (`processMinorityFlight()`) is **active** in the pipeline (`minority-flight` step). Confirmed running: ~493k displaced in 52w (378k spike at w4, ~9.4k/4-week cycle after). It runs independently of takeover displacement.
 
 ### 2.2 `war-displacement-triggers` (settlement-level)
 

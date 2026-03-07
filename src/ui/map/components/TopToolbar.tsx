@@ -18,9 +18,10 @@ interface TopToolbarProps {
   onOpenRecruitment?: () => void;
   onOpenSidePicker?: () => void;
   onOpenSummary?: () => void;
+  onOpenEnclaves?: () => void;
 }
 
-export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary }: TopToolbarProps) {
+export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary, onOpenEnclaves }: TopToolbarProps) {
   const ipc = useIPC();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const loadSave = useGameStore((s) => s.loadSave);
@@ -32,8 +33,17 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary 
   const [advancing, setAdvancing] = useState(false);
   const [runIdInput, setRunIdInput] = useState('');
   const playerFaction = loadedGameState?.player_faction ?? '';
+  const hasVisibleEnclaveDashboard = Boolean(
+    loadedGameState?.factionReserves &&
+    loadedGameState?.enclaveResilience &&
+    Object.values(loadedGameState.enclaveResilience).some((entry) => entry.isolation_turns > 0)
+  );
   const flagUrl = getFactionFlag(playerFaction);
   const crestUrl = getFactionCrest(playerFaction);
+  const ivpPct = loadedGameState?.internationalVisibilityPressure?.composite_ivp != null
+    ? Math.round(loadedGameState.internationalVisibilityPressure.composite_ivp * 100)
+    : null;
+  const pendingConvoyCount = loadedGameState?.pendingConvoyDecisions?.length ?? 0;
   const leftTint = FACTION_BANNER_TINT[playerFaction] ?? 'rgba(196, 163, 90, 0.2)';
   const toolbarBackground = `linear-gradient(90deg, ${leftTint} 0%, rgba(28, 26, 23, 0.95) 42%, rgba(28, 26, 23, 0.95) 100%)`;
 
@@ -208,6 +218,16 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary 
       >
         Recruitment
       </button>
+      {ivpPct != null && (
+        <div className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card text-text-primary border border-panel-border rounded">
+          IVP {ivpPct}%
+        </div>
+      )}
+      {pendingConvoyCount > 0 && (
+        <div className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card text-text-primary border border-panel-border rounded">
+          Convoys {pendingConvoyCount}
+        </div>
+      )}
       <button
         onClick={() => onOpenSummary?.()}
         disabled={!loadedGameState}
@@ -215,10 +235,17 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary 
       >
         Summary
       </button>
+      <button
+        onClick={() => onOpenEnclaves?.()}
+        disabled={!hasVisibleEnclaveDashboard}
+        className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-card hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-all disabled:opacity-50 hover:border-interactive/50 hover:shadow-[0_0_10px_rgba(180,160,130,0.15)]"
+      >
+        Enclaves
+      </button>
 
       {loadedGameState && (
         <span className="text-xs font-mono text-text-secondary glow-text">
-          {formatTurnLabel(loadedGameState.label)} &mdash; {loadedGameState.formations.length} formations &mdash; {loadedGameState.phase.toUpperCase()}
+          {formatTurnLabel(loadedGameState.label)} - {loadedGameState.formations.length} formations - {loadedGameState.phase.toUpperCase()}
         </span>
       )}
 

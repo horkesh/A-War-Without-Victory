@@ -7,6 +7,7 @@ import { collectSectorFriendlyOsids } from '../utils/sectorUtils';
 import { getOperationId, getOperationPhaseBadgeClass } from '../utils/operations';
 import { DETAIL_PANEL_STYLE } from './panelRail';
 import { AccordionHeader } from './AccordionHeader';
+import { useIPC } from '../desktop/useIPC';
 
 /** Density badge with color coding. */
 function DensityBadge({ density }: { density: number }) {
@@ -33,6 +34,7 @@ function compareOperations(a: OperationView, b: OperationView): number {
 }
 
 export function CorpsFrontPanel() {
+  const ipc = useIPC();
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const setSelectedSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
@@ -49,6 +51,7 @@ export function CorpsFrontPanel() {
     logistics: false,
     ops: false,
   });
+  const [sectorActionMessage, setSectorActionMessage] = useState<string | null>(null);
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -112,6 +115,31 @@ export function CorpsFrontPanel() {
   const avgOperationSupply = relatedOperations.length > 0
     ? relatedOperations.reduce((sum, op) => sum + (op.supply_readiness ?? 0), 0) / relatedOperations.length
     : null;
+  const entrenchmentSummary = loadedGameState.sectorEntrenchmentSummary?.[sector.sector_id];
+  const postureCounts = assignedFormations.reduce<Record<string, number>>((acc, formation) => {
+    const posture = formation.posture ?? 'hold';
+    acc[posture] = (acc[posture] ?? 0) + 1;
+    return acc;
+  }, {});
+  const effectiveSectorStance = Object.entries(postureCounts)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ?? 'hold';
+
+  const issueSectorStance = async (stance: 'dig_in' | 'elastic_defense' | 'defend_at_all_costs' | 'hold') => {
+    const result = await ipc.stageSectorStanceOrder(sector.sector_id, stance);
+    setSectorActionMessage(result.ok ? `Sector stance staged: ${stance}` : (result.error ?? 'Failed to stage sector stance'));
+  };
+
+  const issueLogisticsPriority = async (priority: number) => {
+    const result = await ipc.stageLogisticsPriority(sector.faction, sector.sector_id, priority);
+    setSectorActionMessage(result.ok ? `Priority staged: ${priority.toFixed(1)}x` : (result.error ?? 'Failed to stage logistics priority'));
+  };
+
+  const toggleOpsec = async () => {
+    const result = await ipc.stageOpsecToggle(sector.sector_id, !(sector.opsec_active ?? false));
+    setSectorActionMessage(result.ok
+      ? `OPSEC ${(sector.opsec_active ?? false) ? 'disabled' : 'enabled'}.`
+      : (result.error ?? 'Failed to toggle OPSEC'));
+  };
 
   return (
     <div
@@ -219,6 +247,66 @@ export function CorpsFrontPanel() {
                 <span className="text-[9px] uppercase font-bold text-neutral-500">Linked Settlements</span>
                 <span className="font-medium">{sectorFriendlyOsids.length}</span>
               </div>
+              <div className="flex flex-col">
+                <span className="text-[9px] uppercase font-bold text-neutral-500">Sector Stance</span>
+                <span className="font-medium uppercase">{effectiveSectorStance.replaceAll('_', ' ')}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[9px] uppercase font-bold text-neutral-500">Supply Priority</span>
+                <span className="font-medium">{(sector.logistics_priority ?? 1).toFixed(1)}x</span>
+              </div>
+              <div className="flex flex-col col-span-2">
+                <span className="text-[9px] uppercase font-bold text-neutral-500">OPSEC</span>
+                <span className="font-medium uppercase">{sector.opsec_active ? 'Active' : 'Inactive'}</span>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-dashed border-neutral-300 space-y-2">
+              <div>
+                <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Sector Orders</span>
+                <div className="grid grid-cols-2 gap-1">
+                  {([
+                    ['dig_in', 'Dig In'],
+                    ['elastic_defense', 'Elastic'],
+                    ['defend_at_all_costs', 'At All Costs'],
+                    ['hold', 'Hold'],
+                  ] as const).map(([stance, label]) => (
+                    <button
+                      key={stance}
+                      type="button"
+                      onClick={() => void issueSectorStance(stance)}
+                      className="kbd-focus px-2 py-1 rounded border border-neutral-400 bg-white/80 hover:bg-neutral-200 text-[10px] font-bold uppercase"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Reinforcement Priority</span>
+                <div className="flex gap-1">
+                  {[0.5, 1, 2].map((priority) => (
+                    <button
+                      key={priority}
+                      type="button"
+                      onClick={() => void issueLogisticsPriority(priority)}
+                      className="kbd-focus flex-1 px-2 py-1 rounded border border-neutral-400 bg-white/80 hover:bg-neutral-200 text-[10px] font-bold"
+                    >
+                      {priority.toFixed(1)}x
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => void toggleOpsec()}
+                className="kbd-focus w-full rounded border border-neutral-400 bg-white/80 hover:bg-neutral-200 px-2 py-1 text-[10px] font-bold uppercase"
+              >
+                {sector.opsec_active ? 'Disable OPSEC' : 'Enable OPSEC'}
+              </button>
+              {sectorActionMessage && (
+                <div className="text-[10px] text-neutral-600 italic">{sectorActionMessage}</div>
+              )}
             </div>
 
             {sector.opposing_factions.length > 0 && (
@@ -322,6 +410,22 @@ export function CorpsFrontPanel() {
                 {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none">REDACTED</span> : (avgOperationSupply != null ? `${Math.round(avgOperationSupply * 100)}%` : '—')}
               </span>
             </div>
+            {entrenchmentSummary && (
+              <>
+                <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
+                  <span className="text-[10px] uppercase font-bold text-neutral-500">Avg Entrenchment</span>
+                  <span className="font-medium">{entrenchmentSummary.avgEntrenchment.toFixed(1)} turns</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
+                  <span className="text-[10px] uppercase font-bold text-neutral-500">Avg Dig-in</span>
+                  <span className="font-medium">{Math.round(entrenchmentSummary.avgDigIn * 100)}%</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
+                  <span className="text-[10px] uppercase font-bold text-neutral-500">Dig-in Posture</span>
+                  <span className="font-medium">{entrenchmentSummary.digInCount}/{entrenchmentSummary.totalCount}</span>
+                </div>
+              </>
+            )}
           </div>
         )}
 

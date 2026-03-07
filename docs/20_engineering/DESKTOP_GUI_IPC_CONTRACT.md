@@ -29,7 +29,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `advance-turn` (invoke)
   - Payload (optional): `{ phase0Directives?: Array<{ id, factionId, investmentType, scope, targetMunIds }> }`
   - Returns: `{ ok: boolean, error?: string, stateJson?: string, report?: { phase: string, turn: number, details?: unknown } | null }`
-  - Behavior: advances exactly one turn on current in-memory state using phase-aware desktop sim (`phase_0` -> runPhase0TurnAndAdvance, `phase_i` -> runPhaseITurn, `phase_ii` -> runTurn). If `phase0Directives` are provided, they are applied deterministically before Phase 0 advance. Returns updated serialized state plus phase report metadata.
+  - Behavior: advances exactly one turn on current in-memory state using phase-aware desktop sim (`peace` -> runPeaceTurn, `war` -> runTurn). If `phase0Directives` are provided, they are applied deterministically before peace-phase advance. Returns updated serialized state plus phase report metadata.
 
 - `stage-attack-order` (invoke)
   - Payload: `{ brigadeId: string, targetSettlementId: string }`
@@ -95,6 +95,31 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Payload: `{ corpsId: string, stance: string }`
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: sets or updates corps stance (e.g. defensive/balanced/offensive/reorganize) in state (corps_command), reserializes, sends state via `game-state-updated`.
+
+- `stage-sector-stance-order` (invoke)
+  - Payload: `{ corpsId: string, sectorId: string, stance: 'hold' | 'defend' | 'defend_at_all_costs' | 'elastic_defense' | 'counterattack' | 'dig_in' }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: stages sector-level defensive intent in `state.sector_stance_orders`; the live sim translates that intent into brigade posture orders during the war pipeline rather than mutating brigades directly in IPC.
+
+- `stage-logistics-priority` (invoke)
+  - Payload: `{ corpsId: string, priority: 'balanced' | 'sustain_operations' | 'frontline_reserve' | 'emergency_recovery' }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: stages corps logistics priority in `state.corps_command[corpsId]`, reserializes, and broadcasts the updated state.
+
+- `stage-airdrop-allocation` (invoke)
+  - Payload: `{ enclaveId: string, allocation: number }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: writes deterministic enclave airdrop allocation into `state.airdrop_allocation`, reserializes, and broadcasts the updated state for enclave/supply UI surfaces.
+
+- `stage-convoy-decision` (invoke)
+  - Payload: `{ convoyId: string, decision: 'allow' | 'block' | 'divert' }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: resolves one pending convoy choice in `state.pending_convoy_decisions`, reserializes, and broadcasts the updated state.
+
+- `stage-opsec-toggle` (invoke)
+  - Payload: `{ sectorId: string, enabled: boolean }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: adds or removes the sector from `state.opsec_sectors`, reserializes, and broadcasts the updated state. OPSEC affects sector-intel buildup; it is not a direct combat modifier.
 
 - `stage-corps-front-order` (invoke)
   - Payload: `{ corpsId: string, edgeIds: string[] }`
@@ -190,5 +215,5 @@ The `awwv` custom protocol is registered as standard+privileged with `supportFet
 ## Determinism Notes
 
 - UI does not mutate canonical sim ordering.
-- Turn execution remains in deterministic phase runners (`run_phase_0`, `run_phase_i_browser`, `run_phase_ii_browser`).
+- Turn execution remains in deterministic phase runners (`run_peace_browser`, `run_combat_browser`).
 - IPC reports are metadata only and do not affect game-state evolution.

@@ -152,7 +152,7 @@ Each brigade has a posture selected by the player. Posture affects attack power,
 
 Reserve rule: brigades in reserve (no front assignment) do not issue attack/posture/movement orders until assigned to a front segment.
 
-**Postures (summary):** Defend, Hold, Probe, Attack, Assault (per Attack Resolution Formula Spec). Posture multipliers apply to attacker and defender combat power.
+**Postures (summary):** Hold, Defend, Defend At All Costs, Elastic Defense, Counterattack, Dig In, Attack, Assault. `Probe` is now an operation type at corps level rather than a brigade posture. Posture multipliers still apply to attacker and defender combat power.
 
 ### 5.6 Operational Groups
 
@@ -184,7 +184,7 @@ Fronts harden over time (e.g. entrenchment on current OSID); prolonged static co
 
 ### 6.4 Phase 3A: Pressure eligibility and diffusion
 
-Phase 3A allows pressure to propagate across settlement contacts using deterministic eligibility weights derived only from Phase 2 contact metrics. Each turn, eligible pressure diffuses conservatively across those contacts. Diffusion is a structural substrate only: it does not itself cause control change, exhaustion, collapse, or negotiation effects. *Control change in War War phases only via attack resolution or corps ops.*
+Phase 3A allows pressure to propagate across settlement contacts using deterministic eligibility weights derived only from Phase 2 contact metrics. Each turn, eligible pressure diffuses conservatively across those contacts. Diffusion is a structural substrate only: it does not itself cause control change, exhaustion, collapse, or negotiation effects. *Control change in War phase only via attack resolution or corps ops.*
 
 *The formal frozen specification is defined in the Systems & Mechanics Manual under "Phase 3A --- Pressure Eligibility and Diffusion (Design Freeze)".*
 
@@ -306,6 +306,19 @@ Players do not have absolute control. Orders may be delayed, partially executed,
 
 Some actions are possible but carry severe long-term consequences.
 
+### 14.3 War-phase player agency
+
+War-phase player control is real but bounded. The player does not micromanage battles; the player shapes intent, commitment, and risk.
+
+In practice, this means the player can:
+- set brigade postures and attack orders on the line
+- set sector-level defensive intent for corps sectors
+- shape corps operations with tempo, artillery preparation, launch discipline, and target focus
+- use information-warfare tools such as OPSEC, feints, and probes
+- make constrained supply-agency decisions such as enclave airdrops, convoy approvals, and smuggling allocation
+
+These tools expand agency without overriding command friction, logistics, exhaustion, or international consequences.
+
 ## 15. Player's Turn Guide
 
 A phase-by-phase summary of player actions each turn. For system details, see the relevant sections above. *Implementation-note: This section satisfies pipeline backlog item 1.2 (Player's Turn Guide); confirmed 2026-02-24.*
@@ -326,7 +339,7 @@ Each turn the player:
 1. **Reviews** the situation: control map, militia emergence, authority states, alliance status
 2. **Sets brigade postures** (when formations exist): hold, defend, defend_at_all_costs, elastic_defense, counterattack, dig_in, attack, assault
 3. **Issues attack orders** against adjacent enemy-controlled settlements
-4. **Monitors** JNA withdrawal, alliance strain, and War phase→II transition conditions
+4. **Monitors** JNA withdrawal, alliance strain, and early-war transition conditions
 5. **Ends turn** — postures apply; battles resolve; control may flip; displacement triggers
 
 The player commands through posture and targeting, not direct unit movement. Command friction may degrade order execution.
@@ -335,11 +348,12 @@ The player commands through posture and targeting, not direct unit movement. Com
 
 Each turn the player:
 1. **Reviews** reports: front status, exhaustion, supply pressure, corps operations, recent battles
-2. **Sets brigade postures** and **issues attack orders**
-3. **Manages corps operations**: front assignments, operational groups, attack axes
-4. **Monitors** exhaustion, recruitment, equipment degradation, alliance dynamics
-5. **Responds** to events: ceasefire conditions, Washington Agreement preconditions, enclave integrity (implementation-note: enclave protection for Srebrenica/Goražde/Cazin is not yet implemented; see CALIBRATION_REPORT_BOT_AI_FEB_2026.md §7)
-6. **Ends turn** — brigade movement resolves (brigade_movement_orders.ts); attacks resolve; supply/exhaustion update; recruitment accrues. *(ZoC-constrained movement removed 2026-03-02.)*
+2. **Sets brigade postures**, **sector defensive intent**, and **issues attack orders**
+3. **Manages corps operations**: front assignments, operational groups, attack axes, tempo, launch timing, and deception tools such as feints or probes
+4. **Allocates constrained supply agency**: enclave airdrops, convoy decisions, smuggling focus, and related relief choices where available
+5. **Monitors** exhaustion, recruitment, equipment degradation, alliance dynamics, and international visibility pressure consequences
+6. **Responds** to events: ceasefire conditions, Washington Agreement preconditions, enclave integrity (implementation-note: enclave protection for Srebrenica/Goražde/Cazin is not yet implemented; see CALIBRATION_REPORT_BOT_AI_FEB_2026.md §7)
+7. **Ends turn** — brigade movement resolves (brigade_movement_orders.ts); attacks resolve; supply/exhaustion update; recruitment accrues. *(ZoC-constrained movement removed 2026-03-02.)*
 
 War phase adds operational depth (corps, fronts, supply) but reduces tactical flexibility (frontage cap, exhaustion, friction).
 

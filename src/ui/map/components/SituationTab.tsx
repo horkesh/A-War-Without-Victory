@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { LoadedGameState } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
+import { useIPC } from '../desktop/useIPC';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -97,11 +98,15 @@ function computeSupplySummary(state: LoadedGameState): { open: number; strained:
 function computeIvpScore(state: LoadedGameState): number {
   const ivp = state.internationalVisibilityPressure;
   if (!ivp) return 0;
+  if (typeof ivp.composite_ivp === 'number') {
+    return Math.max(0, Math.min(100, ivp.composite_ivp * 100));
+  }
   const raw = ivp.atrocity_visibility + ivp.enclave_humanitarian_pressure + ivp.sarajevo_siege_visibility;
   return Math.max(0, Math.min(100, raw * 20));
 }
 
 export function SituationTab({ state }: { state: LoadedGameState }) {
+  const ipc = useIPC();
   const osidAreas = useOsidAreas();
   const territoryPct = computeTerritoryPercentages(state.controlBySettlement, osidAreas ?? undefined);
   const front = computeFrontSummary(state);
@@ -110,10 +115,16 @@ export function SituationTab({ state }: { state: LoadedGameState }) {
   const alliance = state.war_alliance_rbih_hrhb ?? 0;
   const alliancePct = Math.max(0, Math.min(100, ((alliance + 1) / 2) * 100));
   const alerts: string[] = [];
+  const [convoyMessage, setConvoyMessage] = useState<string | null>(null);
 
   if (supply.cut > 0) alerts.push(`${supply.cut} supply channel(s) cut`);
   if (alliance < -0.25) alerts.push('RBiH-HRHB alliance under strain');
   if (ivpScore >= 60) alerts.push('International visibility pressure elevated');
+
+  const handleConvoyDecision = async (convoyId: string, decision: 'allow' | 'block' | 'divert') => {
+    const result = await ipc.stageConvoyDecision(convoyId, decision);
+    setConvoyMessage(result.ok ? `Convoy order staged: ${decision}.` : (result.error ?? 'Failed to stage convoy decision.'));
+  };
 
   return (
     <div className="p-3 space-y-3 text-xs">
@@ -157,6 +168,60 @@ export function SituationTab({ state }: { state: LoadedGameState }) {
       </section>
 
       <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
+        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">International Pressure</div>
+        <div className="h-2 rounded bg-panel-bg overflow-hidden">
+          <div className="h-full bg-accent-gold/80" style={{ width: `${ivpScore}%` }} />
+        </div>
+        <div className="text-text-secondary">Composite IVP: {ivpScore.toFixed(0)}</div>
+        <div className="text-text-secondary">
+          Breakdown: Sarajevo {Math.round((state.internationalVisibilityPressure?.sarajevo_siege_visibility ?? 0) * 100)} / Enclaves {Math.round((state.internationalVisibilityPressure?.enclave_humanitarian_pressure ?? 0) * 100)} / Atrocities {Math.round((state.internationalVisibilityPressure?.atrocity_visibility ?? 0) * 100)}
+        </div>
+        <div className="text-text-secondary">
+          Consequences: {state.ivpConsequencesActive && state.ivpConsequencesActive.length > 0 ? state.ivpConsequencesActive.join(', ') : 'none'}
+        </div>
+        {state.sarajevoTunnelOperational && (
+          <div className="text-text-secondary">Sarajevo tunnel operational.</div>
+        )}
+      </section>
+
+      {state.pendingConvoyDecisions && state.pendingConvoyDecisions.length > 0 && (
+        <section className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
+          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Humanitarian Convoys</div>
+          {state.pendingConvoyDecisions.map((convoy) => (
+            <div key={convoy.id} className="rounded border border-panel-border bg-panel-bg/60 p-2 space-y-1">
+              <div className="text-text-secondary">
+                {convoy.target_enclave} via {convoy.route_faction} corridor, {convoy.supply_amount.toFixed(2)} supply
+              </div>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => void handleConvoyDecision(convoy.id, 'allow')}
+                  className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
+                >
+                  Allow
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleConvoyDecision(convoy.id, 'block')}
+                  className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
+                >
+                  Block
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleConvoyDecision(convoy.id, 'divert')}
+                  className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
+                >
+                  Divert
+                </button>
+              </div>
+            </div>
+          ))}
+          {convoyMessage && <div className="text-text-secondary">{convoyMessage}</div>}
+        </section>
+      )}
+
+      <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Alerts</div>
         {alerts.length === 0 ? (
           <div className="text-text-secondary">No critical alerts.</div>
@@ -169,4 +234,3 @@ export function SituationTab({ state }: { state: LoadedGameState }) {
     </div>
   );
 }
-

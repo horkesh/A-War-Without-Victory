@@ -112,7 +112,7 @@ export interface PhaseIIBattleResolutionLike {
     battles: TakeoverBattleRecord[];
 }
 
-export interface PhaseIITakeoverDisplacementReport {
+export interface TakeoverDisplacementReport {
     timers_started: number;
     timers_matured: number;
     camps_created: number;
@@ -313,14 +313,14 @@ function getInitialDisplacementFraction(
     return INITIAL_DISPLACEMENT_FRACTION;
 }
 
-export function processPhaseIIDisplacementTakeover(
+export function processDisplacementTakeover(
     state: GameState,
     settlements: Map<string, SettlementRecord>,
     battleReport?: PhaseIIBattleResolutionLike,
     population1991ByMun?: MunicipalityPopulation1991Map,
     /** Optional OSID-keyed settlements with per-OSID census data (population_total, population_bosniaks, etc.). */
     osidSettlements?: Map<string, SettlementRecord>
-): PhaseIITakeoverDisplacementReport {
+): TakeoverDisplacementReport {
     if (state.meta.phase !== 'war') {
         return {
             timers_started: 0,
@@ -342,7 +342,7 @@ export function processPhaseIIDisplacementTakeover(
     if (!state.displacement_camp_state) state.displacement_camp_state = {};
     if (!state.displacement_event_log) state.displacement_event_log = [];
 
-    const report: PhaseIITakeoverDisplacementReport = {
+    const report: TakeoverDisplacementReport = {
         timers_started: 0,
         timers_matured: 0,
         camps_created: 0,

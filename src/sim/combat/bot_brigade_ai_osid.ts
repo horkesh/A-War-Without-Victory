@@ -81,6 +81,28 @@ interface BrigadeContext {
     adjacentEnemyOsids: Osid[];
 }
 
+type DirectiveOutcome = 'decisive_victory' | 'victory' | 'costly_victory' | 'stalemate' | 'repulsed';
+
+function outcomeRank(outcome: string): number {
+    switch (outcome) {
+        case 'decisive_victory': return 5;
+        case 'victory': return 4;
+        case 'costly_victory': return 3;
+        case 'stalemate': return 2;
+        case 'repulsed':
+        default:
+            return 1;
+    }
+}
+
+function outcomeFromRank(rank: number): DirectiveOutcome {
+    if (rank >= 5) return 'decisive_victory';
+    if (rank === 4) return 'victory';
+    if (rank === 3) return 'costly_victory';
+    if (rank === 2) return 'stalemate';
+    return 'repulsed';
+}
+
 export function applySectorOffensiveDirectiveOverride(
     directive: import('../../state/game_state.js').CorpsDirective,
     activeOp: import('../../state/game_state.js').CorpsOperation
@@ -960,7 +982,7 @@ function executeFactionDirectives(
         // home_defense_active is set by the compute-home-defense-active pipeline step.
         // Exception: truly undefended directive targets (no sector coverage = no brigade
         // present) adjacent to the brigade. These are consolidation opportunities.
-        // Rear pocket cleanup is also handled by consolidate-rear-pockets pipeline step.
+        // Undefended adjacent targets are consolidation opportunities (taken via combat).
         if (brigade.home_defense_active === true && !isActiveSectorOperationParticipant) {
             if ((brigade.counterattack_window_turns ?? 0) > 0) {
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'counterattack' });
@@ -1308,6 +1330,27 @@ function executeFactionDirectives(
                 // Named operations are sequential: participating brigades should focus on the
                 // current objective, not opportunistically attack unrelated corps targets.
                 effectiveDirective = applySectorOffensiveDirectiveOverride(effectiveDirective, activeOpLater);
+                if (activeOpLater.min_attack_outcome) {
+                    effectiveDirective = {
+                        ...effectiveDirective,
+                        min_attack_outcome: activeOpLater.min_attack_outcome,
+                    };
+                }
+                if (activeOpLater.tempo === 'methodical') {
+                    effectiveDirective = {
+                        ...effectiveDirective,
+                        aggression_modifier: effectiveDirective.aggression_modifier - 0.05,
+                        reserve_fraction: Math.min(0.5, effectiveDirective.reserve_fraction + 0.10),
+                        min_attack_outcome: outcomeFromRank(Math.min(5, outcomeRank(effectiveDirective.min_attack_outcome) + 1)),
+                    };
+                } else if (activeOpLater.tempo === 'all_out') {
+                    effectiveDirective = {
+                        ...effectiveDirective,
+                        aggression_modifier: effectiveDirective.aggression_modifier + 0.10,
+                        reserve_fraction: Math.max(0, effectiveDirective.reserve_fraction - 0.10),
+                        min_attack_outcome: outcomeFromRank(Math.max(1, outcomeRank(effectiveDirective.min_attack_outcome) - 1)),
+                    };
+                }
                 // Apply momentum bonuses
                 const momentum = activeOpLater.momentum ?? 0;
                 if (momentum > 0) {
@@ -1360,11 +1403,13 @@ function executeFactionDirectives(
 
                 const scored = validTargets.map(t => {
                     const defenderFaction = getPoliticalControllerOSID(state, t.osid, reverseMap);
+                    const schwerpunktBonus = activeOpLater?.schwerpunkt_osid === t.osid ? 200 : 0;
                     return {
                         ...t,
                         finalScore: scoreTargetFromDirective(t.osid, t.prediction, effectiveDirective, faction, ethnicMap, undefined, _offensiveTargetSet, _avoidOsidSet)
                             + supplyPenalty
                             + (counterAttackTarget === t.osid ? 180 : 0) // Retreat-based counter-attack bonus
+                            + schwerpunktBonus
                             + getRsVsHrhbPenalty(t.osid, faction, defenderFaction)
                     };
                 }).sort((a, b) => {
@@ -1410,7 +1455,8 @@ function executeFactionDirectives(
                     // existing attackers — subsequent brigades will also join this turn.
                     if (existing > 0 && effectiveDirective.offensive_targets.includes(s.osid)) {
                         const adjAllies = targetAdjacentCount.get(s.osid) ?? 0;
-                        const potentialTotal = Math.max(existing + 1, adjAllies);
+                        const thresholdRelax = activeOpLater?.schwerpunkt_osid === s.osid ? 1 : 0;
+                        const potentialTotal = Math.max(existing + 1 + thresholdRelax, adjAllies);
                         const combined = estimateConcentratedOutcome(s.prediction.power_ratio, potentialTotal - 1);
                         if (combined && isOutcomeSufficientForAttack(combined, effectiveDirective.min_attack_outcome)) {
                             bestTarget = s;

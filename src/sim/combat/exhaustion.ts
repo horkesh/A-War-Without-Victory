@@ -4,7 +4,7 @@
  */
 
 import { EXHAUSTION_LEGITIMACY_MULTIPLIER } from '../../state/exhaustion.js';
-import type { FactionId, GameState, PhaseIIFrontDescriptor } from '../../state/game_state.js';
+import type { FactionId, GameState, FrontDescriptor } from '../../state/game_state.js';
 import { getFactionLegitimacyAverages } from '../../state/legitimacy.js';
 import { getExhaustionExternalModifier } from '../../state/patron_pressure.js';
 import { RESILIENCE_EFFECT_SCALE } from '../../state/supply_reserve_constants.js';
@@ -28,9 +28,9 @@ const MAX_DELTA_PER_TURN = 10;
  * When frictionMultipliers is provided (Phase D0.9), exhaustion delta is scaled by multiplier
  * so that higher command friction (higher multiplier) increases effective exhaustion growth.
  */
-export function updatePhaseIIExhaustion(
+export function updateExhaustion(
     state: GameState,
-    fronts: PhaseIIFrontDescriptor[] = [],
+    fronts: FrontDescriptor[] = [],
     frictionMultipliers?: Record<FactionId, number>
 ): void {
     if (state.meta.phase !== 'war') {

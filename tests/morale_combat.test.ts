@@ -10,7 +10,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import { getFactionAlignedPopulationShare, type MunicipalityPopulation1991Map } from '../src/state/population_share.js';
-import { runPhaseIIMoraleDrift, type MoraleDriftReport } from '../src/sim/combat/morale_drift.js';
+import { runMoraleDrift, type MoraleDriftReport } from '../src/sim/combat/morale_drift.js';
 import type { FormationState, GameState } from '../src/state/game_state.js';
 
 /** Test census data — simplified for testing. */
@@ -86,7 +86,7 @@ describe('Morale Drift', () => {
     it('high affinity OSID increases morale', () => {
         const f = makeFormation({ id: 'bde1', faction: 'RBiH', morale: 50, location_osid: 'op:srebrenica:srebrenica_2' });
         const state = makeState({ bde1: f });
-        const report = runPhaseIIMoraleDrift(state, [], TEST_CENSUS);
+        const report = runMoraleDrift(state, [], TEST_CENSUS);
         assert.ok(f.morale! > 50, `Expected morale > 50, got ${f.morale}`);
         assert.strictEqual(report.formations_updated, 1);
     });
@@ -94,14 +94,14 @@ describe('Morale Drift', () => {
     it('low affinity OSID decreases morale', () => {
         const f = makeFormation({ id: 'bde1', faction: 'RS', morale: 50, location_osid: 'op:tuzla:tuzla_2' });
         const state = makeState({ bde1: f });
-        runPhaseIIMoraleDrift(state, [], TEST_CENSUS);
+        runMoraleDrift(state, [], TEST_CENSUS);
         assert.ok(f.morale! < 50, `Expected morale < 50, got ${f.morale}`);
     });
 
     it('neutral affinity does not drift', () => {
         const f = makeFormation({ id: 'bde1', faction: 'RS', morale: 50, location_osid: 'op:prijedor:prijedor_2' });
         const state = makeState({ bde1: f });
-        const report = runPhaseIIMoraleDrift(state, [], TEST_CENSUS);
+        const report = runMoraleDrift(state, [], TEST_CENSUS);
         assert.strictEqual(f.morale, 50);
         assert.strictEqual(report.formations_updated, 0);
     });
@@ -109,7 +109,7 @@ describe('Morale Drift', () => {
     it('encircled + own pop → morale UP', () => {
         const f = makeFormation({ id: 'bde1', faction: 'RBiH', morale: 50, location_osid: 'op:srebrenica:srebrenica_2' });
         const state = makeState({ bde1: f }, { brigade_encircled: { bde1: true } } as any);
-        runPhaseIIMoraleDrift(state, [], TEST_CENSUS);
+        runMoraleDrift(state, [], TEST_CENSUS);
         // High affinity (+2) + encirclement own pop (+3) = +5
         assert.strictEqual(f.morale, 55);
     });
@@ -117,7 +117,7 @@ describe('Morale Drift', () => {
     it('encircled + enemy pop → morale DOWN', () => {
         const f = makeFormation({ id: 'bde1', faction: 'RS', morale: 50, location_osid: 'op:tuzla:tuzla_2' });
         const state = makeState({ bde1: f }, { brigade_encircled: { bde1: true } } as any);
-        runPhaseIIMoraleDrift(state, [], TEST_CENSUS);
+        runMoraleDrift(state, [], TEST_CENSUS);
         // Low affinity (-2) + encirclement enemy pop (-3) = -5
         assert.strictEqual(f.morale, 45);
     });
@@ -126,7 +126,7 @@ describe('Morale Drift', () => {
         const f = makeFormation({ id: 'bde1', faction: 'RBiH', morale: 50, location_osid: 'op:srebrenica:srebrenica_2' });
         const state = makeState({ bde1: f });
         const engaged = new Set(['bde1']);
-        const report = runPhaseIIMoraleDrift(state, engaged, TEST_CENSUS);
+        const report = runMoraleDrift(state, engaged, TEST_CENSUS);
         assert.strictEqual(f.morale, 50); // unchanged
         assert.strictEqual(report.formations_updated, 0);
     });
@@ -134,14 +134,14 @@ describe('Morale Drift', () => {
     it('morale never exceeds 100', () => {
         const f = makeFormation({ id: 'bde1', faction: 'RBiH', morale: 99, location_osid: 'op:srebrenica:srebrenica_2' });
         const state = makeState({ bde1: f });
-        runPhaseIIMoraleDrift(state, [], TEST_CENSUS);
+        runMoraleDrift(state, [], TEST_CENSUS);
         assert.ok(f.morale! <= 100, `Expected <= 100, got ${f.morale}`);
     });
 
     it('morale never drops below 0', () => {
         const f = makeFormation({ id: 'bde1', faction: 'RS', morale: 1, location_osid: 'op:tuzla:tuzla_2' });
         const state = makeState({ bde1: f }, { brigade_encircled: { bde1: true } } as any);
-        runPhaseIIMoraleDrift(state, [], TEST_CENSUS);
+        runMoraleDrift(state, [], TEST_CENSUS);
         assert.ok(f.morale! >= 0, `Expected >= 0, got ${f.morale}`);
     });
 
@@ -149,7 +149,7 @@ describe('Morale Drift', () => {
         const f = makeFormation({ id: 'bde1', faction: 'RBiH', location_osid: 'op:srebrenica:srebrenica_2' });
         delete (f as any).morale;
         const state = makeState({ bde1: f });
-        runPhaseIIMoraleDrift(state, [], TEST_CENSUS);
+        runMoraleDrift(state, [], TEST_CENSUS);
         assert.ok(f.morale !== undefined, 'morale should be initialized');
         assert.ok(f.morale! > 60, 'morale should increase from 60 in high-affinity');
     });
@@ -163,7 +163,7 @@ describe('Morale Drift — Exhaustion', () => {
             ops: { fatigue: 85, last_supplied_turn: null },
         });
         const state = makeState({ bde1: f });
-        runPhaseIIMoraleDrift(state, [], TEST_CENSUS);
+        runMoraleDrift(state, [], TEST_CENSUS);
         // RS in Banja Luka: 54% Serb → neutral affinity (0.30-0.70 range), no drift from affinity
         // But fatigue 85 > 80 threshold → -0.5 morale penalty
         assert.ok(f.morale! < 50, `Expected morale < 50, got ${f.morale}`);
@@ -176,7 +176,7 @@ describe('Morale Drift — Exhaustion', () => {
             ops: { fatigue: 96, last_supplied_turn: null },
         });
         const state = makeState({ bde1: f });
-        runPhaseIIMoraleDrift(state, [], TEST_CENSUS);
+        runMoraleDrift(state, [], TEST_CENSUS);
         assert.ok(f.morale! < 49, `Expected morale < 49, got ${f.morale}`);
     });
 });
@@ -187,8 +187,8 @@ describe('Morale Drift — Determinism', () => {
         const f2 = makeFormation({ id: 'bde1', faction: 'RBiH', morale: 50, location_osid: 'op:srebrenica:srebrenica_2' });
         const state1 = makeState({ bde1: f1 });
         const state2 = makeState({ bde1: f2 });
-        runPhaseIIMoraleDrift(state1, [], TEST_CENSUS);
-        runPhaseIIMoraleDrift(state2, [], TEST_CENSUS);
+        runMoraleDrift(state1, [], TEST_CENSUS);
+        runMoraleDrift(state2, [], TEST_CENSUS);
         assert.strictEqual(f1.morale, f2.morale);
     });
 });

@@ -86,7 +86,7 @@ test('phase ii run_summary includes phase_ii_attack_resolution diagnostics block
     const runSummaryRaw = await readFile(runSummaryPath, 'utf8');
     const runSummary = JSON.parse(runSummaryRaw) as {
         phase_ii_attack_resolution?: {
-            weeks_with_phase_ii: number;
+            weeks_at_war: number;
             weeks_with_orders: number;
             orders_processed: number;
             flips_applied: number;
@@ -97,13 +97,13 @@ test('phase ii run_summary includes phase_ii_attack_resolution diagnostics block
 
     assert(runSummary.phase_ii_attack_resolution != null, 'phase_ii_attack_resolution should exist for phase_ii scenario runs');
     const diag = runSummary.phase_ii_attack_resolution!;
-    assert(typeof diag.weeks_with_phase_ii === 'number', 'weeks_with_phase_ii should be a number');
+    assert(typeof diag.weeks_at_war === 'number', 'weeks_at_war should be a number');
     assert(typeof diag.weeks_with_orders === 'number', 'weeks_with_orders should be a number');
     assert(typeof diag.orders_processed === 'number', 'orders_processed should be a number');
     assert(typeof diag.flips_applied === 'number', 'flips_applied should be a number');
     assert(typeof diag.casualty_attacker === 'number', 'casualty_attacker should be a number');
     assert(typeof diag.casualty_defender === 'number', 'casualty_defender should be a number');
-    assert(diag.weeks_with_phase_ii >= 1, 'weeks_with_phase_ii should be >= 1');
+    assert(diag.weeks_at_war >= 1, 'weeks_at_war should be >= 1');
 
     await ensureRemoved(BASE_OUT);
 });

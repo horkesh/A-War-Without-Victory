@@ -108,6 +108,6 @@ test('Authority can degrade while control unchanged (political_controllers not t
 test('war runTurn default path omits phase_i authority report', async () => {
     const state = stateWithDeclarations();
     const { report } = await runTurn(state, { seed: state.meta.seed });
-    assert.strictEqual(report.phase_i_authority, undefined);
+    assert.strictEqual(report.authority_degradation, undefined);
     assert.strictEqual(report.phases.some((p) => p.name === 'phase-i-authority-update'), false);
 });

@@ -144,7 +144,7 @@ function convertOobDecorations(b: OobBrigade): BrigadeDecoration[] {
  * When population1991ByMun is provided, brigades in muns where faction's 1991 population is
  * below MIN_ELIGIBLE_POPULATION_FOR_BRIGADE get a generic name (demographic gating).
  */
-export function createOobFormationsAtPhaseIEntry(
+export function createOobFormations(
     state: GameState,
     oobCorps: OobCorps[],
     oobBrigades: OobBrigade[],
@@ -275,7 +275,7 @@ export interface SpreadBrigadesReport {
 /**
  * Spread brigades from stacked HQ OSIDs to unoccupied front-line positions.
  *
- * After createOobFormationsAtPhaseIEntry() all brigades from the same municipality
+ * After createOobFormations() all brigades from the same municipality
  * are on the same OSID. This function redistributes them to cover the front.
  *
  * Algorithm:

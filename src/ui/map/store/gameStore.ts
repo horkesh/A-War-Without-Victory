@@ -25,7 +25,7 @@ function buildStateFingerprint(jsonOrText: unknown | string): string | null {
 }
 
 /** Map overlay mode (HOI §3.1, §6). */
-export type MapMode = 'political' | 'ethnic' | 'supply' | 'pressure' | 'density';
+export type MapMode = 'political' | 'ethnic' | 'supply' | 'pressure' | 'density' | 'operations';
 
 /** Single staged order for the current turn (Phase C5). */
 export interface StagedOrder {
@@ -97,6 +97,10 @@ export interface GameStore {
   /** Selected corps front sector (click on front line). Mutual exclusion with selectedOsid/selectedFormationId. */
   selectedCorpsFrontSectorId: string | null;
   setSelectedCorpsFrontSectorId: (id: string | null) => void;
+
+  /** Hovered corps front sector (mouse over territory). */
+  hoveredSectorId: string | null;
+  setHoveredSectorId: (id: string | null) => void;
 
   /** Selected corps (click on corps header in sidebar). */
   selectedCorpsId: string | null;
@@ -210,6 +214,9 @@ export const useGameStore = create<GameStore>((set) => ({
 
   selectedCorpsFrontSectorId: null,
   setSelectedCorpsFrontSectorId: (id) => set({ selectedCorpsFrontSectorId: id, selectedOsid: null, selectedFormationId: null, selectedOperationKey: null }),
+
+  hoveredSectorId: null,
+  setHoveredSectorId: (id) => set({ hoveredSectorId: id }),
 
   selectedCorpsId: null,
   setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedArmyId: null, selectedOsid: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null }),

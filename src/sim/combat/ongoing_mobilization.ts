@@ -164,7 +164,7 @@ export interface OngoingMobilizationReport {
  * Run Phase II ongoing mobilization: conscription then shared displaced + cross-ethnic.
  * Mutates state.militia_pools. Deterministic iteration order.
  */
-export function runPhaseIIOngoingMobilization(
+export function runOngoingMobilization(
     state: GameState,
     settlements: Map<string, SettlementRecord>,
     population1991ByMun?: MunicipalityPopulation1991Map

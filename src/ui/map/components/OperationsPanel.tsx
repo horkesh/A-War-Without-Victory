@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { OperationView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import { DETAIL_PANEL_STYLE } from './panelRail';
+import { useIPC } from '../desktop/useIPC';
 import {
   getOperationId,
   getOperationPhaseBadgeClass,
@@ -21,6 +22,7 @@ function compareOperations(a: OperationView, b: OperationView): number {
 }
 
 export function OperationsPanel() {
+  const ipc = useIPC();
   const isOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const setIsOpen = useGameStore((s) => s.setIsOperationsPanelOpen);
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
@@ -35,6 +37,7 @@ export function OperationsPanel() {
   const operationCardRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const objectiveButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [objectiveHoverOsid, setObjectiveHoverOsid] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const operations = useMemo(
     () => [...(loadedGameState?.operations ?? [])].sort(compareOperations),
@@ -79,6 +82,7 @@ export function OperationsPanel() {
   // Clear objective hover when selection changes
   useEffect(() => {
     setObjectiveHoverOsid(null);
+    setActionMessage(null);
   }, [selectedOperationKey]);
 
   // Auto-pan to primary objective / staging OSID on selection change
@@ -140,6 +144,23 @@ export function OperationsPanel() {
   const supplyPct = selectedOperation?.supply_readiness != null
     ? Math.round(selectedOperation.supply_readiness * 100)
     : null;
+  const phaseTurnCount = selectedOperation
+    ? Math.max(1, loadedGameState.turn - (selectedOperation.phase_started_turn ?? selectedOperation.started_turn) + 1)
+    : null;
+  const readiness = selectedOperation?.readiness;
+  const cohesionPct = selectedOperation?.avg_cohesion != null ? Math.round(selectedOperation.avg_cohesion) : null;
+  const avgPersonnelPct = selectedOperation?.avg_personnel_pct != null ? Math.round(selectedOperation.avg_personnel_pct * 100) : null;
+
+  const readinessTone = (value: number) =>
+    value >= 0.7 ? 'bg-green-500/80' : value >= 0.4 ? 'bg-amber-400/80' : 'bg-red-500/80';
+
+  const setActionMessageFromResult = (
+    result: { ok: boolean; error?: string },
+    successMessage: string,
+    failureMessage: string
+  ) => {
+    setActionMessage(result.ok ? successMessage : (result.error ?? failureMessage));
+  };
 
   const handleOperationCardKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
     if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && event.key !== 'Home' && event.key !== 'End') return;
@@ -174,6 +195,25 @@ export function OperationsPanel() {
     setIsOpen(false);
     setHoveredOsids([]);
     setOperationTargetOsids([]);
+  };
+
+  const haltOperation = async (digInOnHalt: boolean) => {
+    if (!selectedOperation) return;
+    const result = await ipc.stageOperationHalt({
+      corpsId: selectedOperation.corps_id,
+      operationName: selectedOperation.name,
+      digInOnHalt,
+    });
+    setActionMessageFromResult(result, 'Halt order staged.', 'Failed to stage halt order.');
+  };
+
+  const forceLaunch = async () => {
+    if (!selectedOperation) return;
+    const result = await ipc.stageOperationForceLaunch({
+      corpsId: selectedOperation.corps_id,
+      operationName: selectedOperation.name,
+    });
+    setActionMessageFromResult(result, 'Early launch staged.', 'Failed to stage early launch.');
   };
 
   return (
@@ -256,6 +296,12 @@ export function OperationsPanel() {
                   {selectedOperation.corps_name} · {selectedOperation.faction}
                 </div>
 
+                {actionMessage && (
+                  <div className="text-[10px] text-accent-gold border border-panel-border rounded px-2 py-1 bg-panel-card/70">
+                    {actionMessage}
+                  </div>
+                )}
+
                 {/* Phase timeline */}
                 <div className="flex flex-wrap gap-1 pt-1 border-t border-panel-border">
                   {OPERATION_PHASE_TIMELINE.map((phase) => {
@@ -280,7 +326,9 @@ export function OperationsPanel() {
                   </div>
                   <div>
                     <span className="text-text-secondary">Phase: </span>
-                    <span className="text-text-primary">{toTitleCase(selectedOperation.phase)}</span>
+                    <span className="text-text-primary">
+                      {toTitleCase(selectedOperation.phase)}{phaseTurnCount != null ? ` - Turn ${phaseTurnCount}` : ''}
+                    </span>
                   </div>
                   <div>
                     <span className="text-text-secondary">Brigades: </span>
@@ -300,6 +348,26 @@ export function OperationsPanel() {
                     <div>
                       <span className="text-text-secondary">Supply: </span>
                       <span className="text-text-primary tabular-nums">{supplyPct}%</span>
+                    </div>
+                  )}
+                  {selectedOperation.consecutive_failures_on_current != null && (
+                    <div>
+                      <span className="text-text-secondary">Failures: </span>
+                      <span className={selectedOperation.consecutive_failures_on_current >= 2 ? 'text-red-300 tabular-nums' : 'text-text-primary tabular-nums'}>
+                        {selectedOperation.consecutive_failures_on_current}
+                      </span>
+                    </div>
+                  )}
+                  {cohesionPct != null && (
+                    <div>
+                      <span className="text-text-secondary">Avg cohesion: </span>
+                      <span className="text-text-primary tabular-nums">{cohesionPct}%</span>
+                    </div>
+                  )}
+                  {avgPersonnelPct != null && (
+                    <div>
+                      <span className="text-text-secondary">Avg health: </span>
+                      <span className="text-text-primary tabular-nums">{avgPersonnelPct}%</span>
                     </div>
                   )}
                 </div>
@@ -332,6 +400,25 @@ export function OperationsPanel() {
                         <span className="text-text-primary tabular-nums">{supplyPct != null ? `${supplyPct}%` : '—'}</span>
                       </div>
                     </div>
+                    {readiness && (
+                      <div className="space-y-1">
+                        {([
+                          ['Supply', readiness.supply],
+                          ['Cohesion', readiness.cohesion],
+                          ['Intel', readiness.intel],
+                        ] as Array<[string, number]>).map(([label, value]) => (
+                          <div key={label} className="space-y-0.5">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-text-secondary">{label}</span>
+                              <span className="text-text-primary tabular-nums">{Math.round(value * 100)}%</span>
+                            </div>
+                            <div className="h-1.5 rounded bg-panel-bg overflow-hidden">
+                              <div className={`h-full ${readinessTone(value)}`} style={{ width: `${Math.round(value * 100)}%` }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -377,6 +464,9 @@ export function OperationsPanel() {
                               </span>
                               <div className="min-w-0">
                                 <div className="text-[11px] text-text-primary truncate">{objectiveName}</div>
+                                <div className="text-[10px] text-text-secondary truncate">
+                                  Objective {index + 1}/{selectedOperation.objectives?.length ?? 0}{selectedOperation.schwerpunkt_osid === obj ? ' - Schwerpunkt' : ''}
+                                </div>
                                 <div className="text-[10px] font-mono text-text-secondary break-all">{obj}</div>
                               </div>
                             </div>
@@ -391,6 +481,35 @@ export function OperationsPanel() {
 
                 {/* Open Corps Orders */}
                 <div className="pt-1 border-t border-panel-border">
+                  {selectedOperation.phase === 'execution' && (
+                    <div className="mb-2 grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void haltOperation(false)}
+                        className="kbd-focus text-xs font-sans px-2 py-2 rounded border border-panel-border text-text-primary hover:bg-panel-hover"
+                      >
+                        Halt
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void haltOperation(true)}
+                        className="kbd-focus text-xs font-sans px-2 py-2 rounded border border-panel-border text-text-primary hover:bg-panel-hover"
+                      >
+                        Halt + Dig In
+                      </button>
+                    </div>
+                  )}
+                  {selectedOperation.phase === 'planning' && phaseTurnCount != null && phaseTurnCount >= 2 && (
+                    <div className="mb-2">
+                      <button
+                        type="button"
+                        onClick={() => void forceLaunch()}
+                        className="kbd-focus w-full text-xs font-sans px-2 py-2 rounded border border-panel-border text-text-primary hover:bg-panel-hover"
+                      >
+                        Launch Now
+                      </button>
+                    </div>
+                  )}
                   <button
                     type="button"
                     onClick={() => {

@@ -9,7 +9,7 @@
 import assert from 'node:assert';
 import { test } from 'node:test';
 import type { EdgeRecord } from '../src/map/settlements.js';
-import { derivePhaseIIFrontsFromPressureEligible } from '../src/sim/emergence/front_emergence.js';
+import { deriveFrontsFromPressureEligible } from '../src/sim/emergence/front_emergence.js';
 import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
@@ -85,20 +85,20 @@ test('phase_ii runTurn includes phase-ii-front-emergence and runs exactly once p
     const phaseNames = report.phases.map((p) => p.name);
     const count = phaseNames.filter((n) => n === 'phase-ii-front-emergence').length;
     assert.strictEqual(count, 1, 'phase-ii-front-emergence must run exactly once per turn in phase_ii path');
-    assert.ok(Array.isArray(report.phase_ii_front_emergence), 'phase_ii_front_emergence report should be an array');
+    assert.ok(Array.isArray(report.front_emergence_report), 'front_emergence_report report should be an array');
 });
 
-test('derivePhaseIIFrontsFromPressureEligible: peace returns empty array', () => {
+test('deriveFrontsFromPressureEligible: peace returns empty array', () => {
     const state = minimalPeaceState();
     const edges: EdgeRecord[] = [{ a: 's1', b: 's2' }];
-    const fronts = derivePhaseIIFrontsFromPressureEligible(state, edges);
+    const fronts = deriveFrontsFromPressureEligible(state, edges);
     assert.deepStrictEqual(fronts, []);
 });
 
-test('derivePhaseIIFrontsFromPressureEligible: phase_ii + opposing control + eligible edge yields front with that edge', () => {
+test('deriveFrontsFromPressureEligible: phase_ii + opposing control + eligible edge yields front with that edge', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
-    const fronts = derivePhaseIIFrontsFromPressureEligible(state, edges);
+    const fronts = deriveFrontsFromPressureEligible(state, edges);
     assert.ok(fronts.length >= 1, 'at least one front when opposing control on edge');
     const edgeIds = fronts.flatMap((f) => f.edge_ids);
     assert.ok(edgeIds.includes('S1__S2'), 'front must include edge S1__S2');
@@ -109,14 +109,14 @@ test('derivePhaseIIFrontsFromPressureEligible: phase_ii + opposing control + eli
     }
 });
 
-test('derivePhaseIIFrontsFromPressureEligible: phase_ii + same control on both ends yields no front-active edges', () => {
+test('deriveFrontsFromPressureEligible: phase_ii + same control on both ends yields no front-active edges', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RBiH' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
-    const fronts = derivePhaseIIFrontsFromPressureEligible(state, edges);
+    const fronts = deriveFrontsFromPressureEligible(state, edges);
     assert.strictEqual(fronts.length, 0, 'no front when same control on both settlements');
 });
 
-test('phase_ii_front_emergence: stable ordering and deterministic replay (same state + edges → same descriptor ids)', async () => {
+test('front_emergence_report: stable ordering and deterministic replay (same state + edges → same descriptor ids)', async () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS', S3: 'RS', S4: 'RBiH' });
     const edges: EdgeRecord[] = [
         { a: 'S1', b: 'S2' },
@@ -124,11 +124,11 @@ test('phase_ii_front_emergence: stable ordering and deterministic replay (same s
     ];
     const { report: r1 } = await runTurn(state, { seed: 'det-fe', settlementEdges: edges });
     const { report: r2 } = await runTurn(state, { seed: 'det-fe', settlementEdges: edges });
-    assert.ok(Array.isArray(r1.phase_ii_front_emergence) && Array.isArray(r2.phase_ii_front_emergence));
-    const ids1 = (r1.phase_ii_front_emergence ?? []).map((f) => f.id).sort();
-    const ids2 = (r2.phase_ii_front_emergence ?? []).map((f) => f.id).sort();
+    assert.ok(Array.isArray(r1.front_emergence_report) && Array.isArray(r2.front_emergence_report));
+    const ids1 = (r1.front_emergence_report ?? []).map((f) => f.id).sort();
+    const ids2 = (r2.front_emergence_report ?? []).map((f) => f.id).sort();
     assert.deepStrictEqual(ids1, ids2, 'same inputs must produce same descriptor ids');
-    const edgeIds1 = (r1.phase_ii_front_emergence ?? []).flatMap((f) => f.edge_ids).sort();
-    const edgeIds2 = (r2.phase_ii_front_emergence ?? []).flatMap((f) => f.edge_ids).sort();
+    const edgeIds1 = (r1.front_emergence_report ?? []).flatMap((f) => f.edge_ids).sort();
+    const edgeIds2 = (r2.front_emergence_report ?? []).flatMap((f) => f.edge_ids).sort();
     assert.deepStrictEqual(edgeIds1, edgeIds2, 'same inputs must produce same edge_ids');
 });

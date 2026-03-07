@@ -7,13 +7,13 @@
  * 3. bottom_up, turn 24: RBiH corps appear (available_from: 24).
  * 4. Idempotency: calling twice at same turn does not create duplicate corps.
  * 5. auto_oob (no bottom_up): function still works when called directly — creates corps per available_from.
- * 6. createOobFormationsAtPhaseIEntry skips RBiH/HRHB corps and brigades in bottom_up mode.
- * 7. createOobFormationsAtPhaseIEntry keeps RS corps and brigades in bottom_up mode.
+ * 6. createOobFormations skips RBiH/HRHB corps and brigades in bottom_up mode.
+ * 7. createOobFormations keeps RS corps and brigades in bottom_up mode.
  */
 
 import { describe, expect, it } from 'vitest';
 import type { OobCorps, OobBrigade } from '../src/scenario/oob_loader.js';
-import { createOobFormationsAtPhaseIEntry } from '../src/scenario/oob_early_war_entry.js';
+import { createOobFormations } from '../src/scenario/oob_early_war_entry.js';
 import { activateCorpsForTurn } from '../src/sim/early_war/activate_corps.js';
 import { CURRENT_SCHEMA_VERSION, type FormationState, type GameState } from '../src/state/game_state.js';
 
@@ -115,7 +115,7 @@ function formationIds(state: GameState): string[] {
 describe('activateCorpsForTurn — bottom_up mode', () => {
     it('turn 0: no corps activated (all RS corps exist already from entry, HRHB/RBiH not yet due)', () => {
         const state = makeBottomUpState(0);
-        // Pre-seed RS corps (as createOobFormationsAtPhaseIEntry would do)
+        // Pre-seed RS corps (as createOobFormations would do)
         for (const c of RS_CORPS_OOB) {
             state.formations![c.id] = {
                 id: c.id as import('../src/state/game_state.js').FormationId,
@@ -205,7 +205,7 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
 
     it('idempotency: calling twice at turn 24 does not create duplicate corps', () => {
         const state = makeBottomUpState(24);
-        // Pre-seed RS corps as createOobFormationsAtPhaseIEntry would at Phase I entry
+        // Pre-seed RS corps as createOobFormations would at Phase I entry
         for (const c of RS_CORPS_OOB) {
             state.formations![c.id] = {
                 id: c.id as import('../src/state/game_state.js').FormationId,
@@ -280,10 +280,10 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: createOobFormationsAtPhaseIEntry — bottom_up mode guards
+// Tests: createOobFormations — bottom_up mode guards
 // ---------------------------------------------------------------------------
 
-describe('createOobFormationsAtPhaseIEntry — bottom_up mode skipping', () => {
+describe('createOobFormations — bottom_up mode skipping', () => {
     /**
      * Build sidToMun + political_controllers where each mun has one SID per faction.
      * SID format: "SID_<mun>_<faction>" → mun, with pc[SID] = faction.
@@ -317,7 +317,7 @@ describe('createOobFormationsAtPhaseIEntry — bottom_up mode skipping', () => {
         const { sidToMun, pc } = buildPresence(ALL_MUNS, ['RS', 'RBiH', 'HRHB']);
         state.political_controllers = pc;
 
-        createOobFormationsAtPhaseIEntry(
+        createOobFormations(
             state,
             ALL_CORPS_OOB,
             SAMPLE_BRIGADES,
@@ -340,7 +340,7 @@ describe('createOobFormationsAtPhaseIEntry — bottom_up mode skipping', () => {
         const { sidToMun, pc } = buildPresence(ALL_MUNS, ['RS', 'RBiH', 'HRHB']);
         state.political_controllers = pc;
 
-        createOobFormationsAtPhaseIEntry(
+        createOobFormations(
             state,
             ALL_CORPS_OOB,
             SAMPLE_BRIGADES,
@@ -361,7 +361,7 @@ describe('createOobFormationsAtPhaseIEntry — bottom_up mode skipping', () => {
         const { sidToMun, pc } = buildPresence(ALL_MUNS, ['RS', 'RBiH', 'HRHB']);
         state.political_controllers = pc;
 
-        const report = createOobFormationsAtPhaseIEntry(
+        const report = createOobFormations(
             state,
             ALL_CORPS_OOB,
             SAMPLE_BRIGADES,
@@ -380,7 +380,7 @@ describe('createOobFormationsAtPhaseIEntry — bottom_up mode skipping', () => {
         const { sidToMun, pc } = buildPresence(ALL_MUNS, ['RS', 'RBiH', 'HRHB']);
         state.political_controllers = pc;
 
-        const report = createOobFormationsAtPhaseIEntry(
+        const report = createOobFormations(
             state,
             ALL_CORPS_OOB,
             SAMPLE_BRIGADES,

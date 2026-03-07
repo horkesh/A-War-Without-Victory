@@ -12,7 +12,7 @@
 
 import { computeFrontEdges } from '../../map/front_edges.js';
 import type { EdgeRecord } from '../../map/settlements.js';
-import type { GameState, PhaseIIFrontDescriptor } from '../../state/game_state.js';
+import type { GameState, FrontDescriptor } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { deriveFrontStability } from '../combat/front_emergence.js';
 import { isPressureEligible } from './pressure_eligibility.js';
@@ -23,10 +23,10 @@ import { isPressureEligible } from './pressure_eligibility.js';
  * Runs only when meta.phase === 'war'. Returns [] otherwise.
  * Deterministic: stable sort by edge_id and faction pair.
  */
-export function derivePhaseIIFrontsFromPressureEligible(
+export function deriveFrontsFromPressureEligible(
     state: GameState,
     settlementEdges: EdgeRecord[]
-): PhaseIIFrontDescriptor[] {
+): FrontDescriptor[] {
     if (state.meta.phase !== 'war') {
         return [];
     }
@@ -54,7 +54,7 @@ export function derivePhaseIIFrontsFromPressureEligible(
 
     const turn = state.meta.turn;
     const segments = state.front_segments ?? {};
-    const descriptors: PhaseIIFrontDescriptor[] = [];
+    const descriptors: FrontDescriptor[] = [];
 
     const pairKeys = Array.from(byPair.keys()).sort(strictCompare);
     for (const pairKey of pairKeys) {

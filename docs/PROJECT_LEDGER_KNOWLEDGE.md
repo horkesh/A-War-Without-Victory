@@ -377,6 +377,7 @@ Identified via Orchestrator comprehensive review convene ([ORCHESTRATOR_COMPREHE
 - **Order target selection UX (2026-02-15):** Implemented report [ORDER_TARGET_SELECTION_SYSTEM_2026_02_15.md](40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) — full targeting mode (visual overlay, enriched tooltips, Escape cancel, cursor feedback, attack two-step confirmation, preview arrow). Pure UI in MapApp; no engine/IPC changes. Canon: TACTICAL_MAP_SYSTEM §2, §8, §12.4, §13.3, §21. See PROJECT_LEDGER.md 2026-02-15 Canon propagation: Order target selection.
 - **Corps AoR contiguity (2026-02-15):** Implemented report [CORPS_AOR_CONTIGUITY_ENFORCEMENT_2026_02_15.md](40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) — corps-level contiguity (checkCorpsContiguity, repairCorpsContiguity, enforceCorpsLevelContiguity); enclave exception; Step 9 in assignCorpsDirectedAoR; pipeline step `enforce-corps-aor-contiguity` after `rebalance-brigade-aor`; brigade repair prefers same-corps. Canon: Phase II §5, §7.1; Systems Manual §2.1. See PROJECT_LEDGER.md 2026-02-15 Canon propagation: Corps AoR contiguity.
 - **Scenario init six fixes (2026-02-15):** Implemented report (see [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) §3, §4, §6; originals archived to _old/40_reports/implemented_2026_02_15/) — formation marker stacking (buildFormationPositionGroups, hit-test), corps-to-brigade command lines (drawCorpsSubordinateLines), settlement panel vertical tabs; Velika Kladuša RBiH-aligned (nine muns); VRS brigade HQ resolution (resolveValidHqSid in recruitment_engine); brigade AoR contiguity at init (scenario_runner: corps before AoR, safety net in initializeBrigadeAoR). Canon: TACTICAL_MAP_SYSTEM §8, §13.2; Phase II §7.1; Systems Manual §2.1, §13. See PROJECT_LEDGER.md 2026-02-15 Canon propagation: Scenario init six fixes.
+- **Player agency plan kickoff (2026-03-07):** Execute `docs/30_planning/PLAYER_AGENCY_IMPLEMENTATION_PLAN.md` by actual file impact, not phase labels. `Phase A` can stay parallel/UI-only; `Phase F` is not fully UI-only because `F1` changes `CorpsOperation` schema, IPC payloads, and brigade attack approval in `bot_brigade_ai_osid.ts`. Either split `F1` into an engine-touching commit with regression or treat all of `Phase F` as regression-gated. Between phases: simplify, update ledger + napkin, verify, then single-phase commit. See PROJECT_LEDGER.md 2026-03-07 kickoff entry.
 - **Tactical map seven UI/sim fixes (2026-02-15):** Implemented report (see [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) §6) — 4th Corps OOB (7 core brigades available_from: 0, mandatory: true); War Summary modal (per-faction counts, BATTLES THIS TURN, control gained/lost); white corps command lines (60%, 2px); AoR fill pulsing (0.08–0.22); corps panel ACTIONS (stance + bulk posture via stage-corps-stance-order); army_hq FormationKind (NATO xxx, panel, command lines, AoR merge); larger markers + vertical stacking (44×30/54×38/66×46, hit 36px). initializeCorpsCommand includes corps_asset. Canon: TACTICAL_MAP_SYSTEM §2, §8, §13, §20, §21; DESKTOP_GUI_IPC_CONTRACT; Systems Manual §6.4. See PROJECT_LEDGER.md 2026-02-15 Canon propagation: Tactical map seven UI/sim fixes.
 - **Warroom restyle, scenario fix, embedded map, fog-of-war (2026-02-16):** Implemented report [WARROOM_RESTYLE_SCENARIO_FIX_EMBEDDED_MAP_FOG_OF_WAR_2026_02_16.md](40_reports/implemented/WARROOM_RESTYLE_SCENARIO_FIX_EMBEDDED_MAP_FOG_OF_WAR_2026_02_16.md); IMPLEMENTED_WORK_CONSOLIDATED §11. Four items: (1) Warroom UI unified to NATO ops-center CSS (modals.css, ticker, all modals/panels). (2) All April 1992 scenarios use init_control_mode hybrid_1992 and init_control apr1992 (curated municipal file); Systems Manual implementation-note updated. (3) Tactical map opens as full-screen iframe in warroom (awwv://warroom/tactical-map/*, same-origin, bridge inheritance, postMessage back-to-HQ). (4) Faction fog-of-war: buildFormationPositionGroups and drawOrderArrows filter by player_faction; enemy formations hidden on canvas; defender info still visible in attack panel/tooltips. Canon: TACTICAL_MAP_SYSTEM §21.1, §22; context.md; CONSOLIDATED_IMPLEMENTED.
 - **Tactical map UX (2026-02-19):** Accessibility (ARIA live region, keyboard settlement navigation, focus-visible), larger click targets and 12px typography, desaturated accent #00d470, toolbar grouping, panel tabs 90px/10px, hover/selection glow and formation glow, tooltips with shortcuts, loading/error/empty states, optional quick tour. TACTICAL_MAP_SYSTEM §2; docs/plans/2026-02-19-warmap-figma-spec.md implementation note.
@@ -665,6 +666,42 @@ The strategic reserve solves the topology mismatch without artificial caps or sc
   - `hvo_oz_central_bosnia` → `hvo_central_bosnia`
   - `hvo_oz_nw_bosnia` → `hvo_northwest_bosnia`
 
+## 2026-03-07 - N200 UI operations surfacing
+
+- Operation-readiness UI now derives from existing state rather than bespoke API: supply uses `active_operation.supply_readiness`, cohesion uses average participating brigade cohesion, and intel uses max `sector_intel` confidence for the operation's `sector_id`.
+- The new operations map mode is intentionally deterministic and lightweight: effort is computed from sector assigned-vs-reserve brigade share plus a small tempo modifier. It is a visualization layer, not a simulation input.
+- Current operation health percentage in the adapter is a proxy (`personnel / 2500` per brigade). If engine later exposes brigade peak strength, migrate the UI to that explicit field rather than tuning the proxy in place.
+
+## 2026-03-07 - N201 sector intent + operation execution wiring
+
+- `sector_stance_orders` is now the canonical sector-level defensive intent surface. It does not mutate brigades directly; instead `applySectorStanceOrders()` translates sector intent into standard `brigade_posture_orders` after the normal posture-order phase, preserving existing posture constraints and determinism.
+- Operation-level player levers now belong on `CorpsOperation`, not ad hoc UI state: `min_attack_outcome`, `tempo`, `schwerpunkt_osid`, `artillery_preparation`, and `force_launch` are all persisted and consumed by the combat/lifecycle code.
+- `composite_ivp` should be treated as the UI-facing summary gauge for international pressure. It is derived from the existing Sarajevo/enclave/atrocity/negotiation components rather than standing up a second IVP system.
+
+## 2026-03-07 - N202 supply-agency + OPSEC follow-on
+
+- `airdrop_allocation` is now a legitimate staged state surface. Even with faction-level reserve accounting still global, the allocation record is now deterministic, persisted, and visible to the UI, which unblocks later enclave-specific consequence work.
+- OPSEC is modeled as a sector-level confidence modifier, not a hidden attack buff. It halves passive enemy intel buildup against marked sectors and automatically drops once the sector's operation goes hot.
+- The latest 40w regression (`n242`) is a split verdict: benchmark-fit passed 6/6, but combat-causality validity regressed because multiple operations entered execution without eligible attackers. Future work on H/C should preserve the fit improvement while restoring causality validity.
+
+## 2026-03-07 - N245 Phase C live mechanics are stateful, but calibration-neutrality is not yet proven
+
+- The Phase C schema stubs are now live mechanics: `ivp_consequences_active`, `pending_convoy_decisions`, `smuggling_allocation`, and `sarajevo_tunnel_operational` are no longer just serialized fields.
+- Convoys are deterministic and corridor-owned. If the route faction is the player, undecided convoy entries persist in state until the player stages `allow` / `block` / `divert` through desktop IPC; bots auto-resolve by IVP pressure band.
+- IVP consequences use hysteresis (`30/60/80`, off at `20/50/70`) to avoid threshold flapping. RS patron/material support now reads those active consequences directly.
+- The Sarajevo tunnel currently enters the model as a pressure/supply relief event, not a full enclave-local supply-network rewrite. If later calibration needs stronger Sarajevo-specific logistics effects, extend from this hook rather than inventing a second tunnel subsystem.
+- `n245` preserved 6/6 benchmark checks but changed the final hash and left combat-causality invalid at the same 6-operation boundary. Treat Phase C as functional progress with unresolved calibration acceptance, not a finished acceptance gate.
+
+## 2026-03-07 - N248 H gate closed at engine level; remaining drift is anchor calibration
+
+- `repairScenarioArtifactState(...)` belongs at the scenario-harness boundary, not inside the war turn pipeline. The pipeline already displaces formations after combat; the harness also mutates state afterward (artifact-oriented control mutations), so it needs its own final invariant repair before serialization.
+- Idle execution operations with zero movement, zero attack orders, and zero eligible attackers are not useful combat samples. Converting that first fully idle execution turn directly into `recovery` with `no_logged_attempt` preserves causality validity better than leaving the operation in an empty execution shell.
+- The H-phase 40w gate is now clean on combat integrity terms: run `n248` restored `invalid_operation_count = 0` and kept benchmark-fit at `6/6`.
+- The remaining misses after `n248` are territorial calibration anchors, not simulation-health failures:
+  - municipality `srebrenica` still trends too RS-strong by week 40
+  - OSID `op:brcko:brka_2` still flips/stays RS instead of the expected RBiH hold
+- Those two anchor misses align with the existing napkin warning that Srebrenica/Brčko drift is primarily a pre-planned-operation / scenario-anchor problem rather than a generic H-mechanics defect.
+
 ## 2026-03-06 - N159 deep engine audit: organic VRS tempo decay
 
 - **Core design decision:** VRS tempo decay must emerge organically — not from hardcoded stance transitions. RS stays offensive permanently; slowdown comes from fatigue, supply consumption, entrenchment wall, and ARBiH resistance.
@@ -678,3 +715,8 @@ The strategic reserve solves the topology mismatch without artificial caps or sc
 - **HRHB supply fragility:** 59 siege counters from central Bosnia pockets drain faction reserves. Need higher initial supply (75) + patron commitment to stay strained (19.3%), not collapsed (0%).
 - **Displacement kill fraction issue (deferred):** 4% DISPLACEMENT_KILLED_FRACTION uniform for all contexts. RS civilian departure from RBiH/HRHB was mostly voluntary flight (~1% lethality). Sim produces 10,860 RS civ killed vs ~4k historical. Fix: per-context kill fractions in `displacement_loss_constants.ts`.
 - **Calibration result:** n166 = 84.2% area-weighted (up from 81.5%). 146 attacks, 118 battles, 103 captures. RS weekly attacks decline 8→1 (organic tempo confirmed). All VRS corps still offensive at t26.
+## 2026-03-07 - Player-agency docs synchronized after A-H closure
+
+- The player-agency implementation plan is now documented as complete for Phases A/B/C/F/G/H, with Phase E still intentionally deferred by the plan itself.
+- Canon and engineering docs should reference the live state surfaces, not the older plan sketches: `sector_stance_orders`, `opsec_sectors`, operation shaping levers, `airdrop_allocation`, `pending_convoy_decisions`, `smuggling_allocation`, `sarajevo_tunnel_operational`, and `composite_ivp`.
+- The authoritative closure evidence for this documentation state is the `n248`/`n249` lane: combat-calibration valid, `invalid_operation_count = 0`, benchmark suite `6/6`, and only anchor-level drift remaining.

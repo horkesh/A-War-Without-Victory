@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { test } from 'node:test';
 
 import type { EdgeRecord, SettlementRecord } from '../src/map/settlements.js';
-import { updatePhaseIISupplyPressure } from '../src/sim/combat/supply_pressure.js';
+import { updateSupplyPressure } from '../src/sim/combat/supply_pressure.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { calculateFactionProductionBonus, ensureProductionFacilities } from '../src/state/production_facilities.js';
@@ -59,7 +59,7 @@ test('production bonus reduces supply-pressure growth without decreasing current
     // Alliance must be broken so the RBiH–HRHB edge counts as a front edge
     state.war_alliance_rbih_hrhb = -1;
     const edges: EdgeRecord[] = [{ a: 'SZ1', b: 'SV1' }];
-    updatePhaseIISupplyPressure(
+    updateSupplyPressure(
         state,
         edges,
         {
