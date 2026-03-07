@@ -237,6 +237,8 @@ export function createOobFormations(
         // Convert OOB historical decorations + legacy honor into decorations[]
         const decorations = convertOobDecorations(b);
         if (decorations.length > 0) formation.decorations = decorations;
+        // OOB garrison flag
+        if (b.garrison) formation.garrison = true;
         // OOB elite status
         if (b.is_elite) formation.elite_loan_state = { on_loan: false, loaned_to_corps: null, loan_start_turn: null, last_recall_turn: null, loan_start_personnel: null, permanently_degraded: false };
         // OOB composition override (e.g. enclave brigades: infantry-only)

@@ -73,6 +73,17 @@ function getRSCohesionFloor(turn: number): number {
 }
 
 /**
+ * HRHB cohesion floor: starts at 40 (Croatian cadre baseline),
+ * drops to 30 after week 52 (two-front war pressure from 1993).
+ * Historical: HVO suffered severe cohesion collapse when fighting
+ * both VRS and ARBiH simultaneously.
+ */
+function getHRHBCohesionFloor(turn: number): number {
+    if (turn <= 52) return 40;
+    return 30;
+}
+
+/**
  * RS cohesion ceiling: no formation rises above this.
  * Models organizational decay — JNA professionalism eroding.
  *
@@ -101,16 +112,16 @@ function getRSCohesionCeiling(turn: number): number {
  * Returns the cohesion floor for a faction at a given turn.
  * When timeline is provided, uses its cohesion_floor; falls back to hardcoded values.
  * ARBiH: rising floor (professionalization).
- * HRHB: constant 50 (Croatian cadres, stable).
- * RS: no floor (only ceiling applies).
+ * HRHB: time-varying (40 early war → 30 after w52, two-front pressure).
+ * RS: declining floor (JNA inheritance decays).
  */
 export function getFactionCohesionFloor(faction: string, turn: number, timeline?: WarTimeline): number {
     if (timeline?.cohesion_floor?.[faction] !== undefined) {
-        const hardcodedDefault = faction === 'RBiH' ? getRBiHCohesionFloor(turn) : faction === 'HRHB' ? 50 : getRSCohesionFloor(turn);
+        const hardcodedDefault = faction === 'RBiH' ? getRBiHCohesionFloor(turn) : faction === 'HRHB' ? getHRHBCohesionFloor(turn) : getRSCohesionFloor(turn);
         return resolveCohesionBound(timeline.cohesion_floor[faction], turn, hardcodedDefault);
     }
     if (faction === 'RBiH') return getRBiHCohesionFloor(turn);
-    if (faction === 'HRHB') return 50;
+    if (faction === 'HRHB') return getHRHBCohesionFloor(turn);
     return getRSCohesionFloor(turn);
 }
 

@@ -74,6 +74,21 @@ const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
     }
 ] as const;
 
+/**
+ * Per-enclave max resilience and growth rate modifiers.
+ * Differentiates enclaves based on historical factors:
+ *   - Size, terrain, UN presence, supply corridors, internal organization.
+ * Zepa was most vulnerable (smallest, most isolated).
+ * Sarajevo was most resilient (largest, tunnel, international attention).
+ */
+const ENCLAVE_CONFIG: Record<string, { max_resilience: number; growth_mult: number }> = {
+    bihac_pocket: { max_resilience: 40, growth_mult: 1.2 },
+    srebrenica: { max_resilience: 25, growth_mult: 0.8 },
+    zepa: { max_resilience: 20, growth_mult: 0.7 },
+    gorazde: { max_resilience: 35, growth_mult: 1.0 },
+    sarajevo: { max_resilience: 45, growth_mult: 1.3 },
+};
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 /** Extract resilience number from a bare number or structured EnclaveResilienceEntry. */
@@ -179,7 +194,11 @@ export function updateEnclaveResilience(
                 break;
         }
 
-        const nextResilience = Math.max(0, Math.min(MAX_ENCLAVE_RESILIENCE, current.resilience + delta));
+        const config = ENCLAVE_CONFIG[enclave.id];
+        const maxResilience = config?.max_resilience ?? MAX_ENCLAVE_RESILIENCE;
+        const growthMult = config?.growth_mult ?? 1.0;
+        const scaledDelta = delta > 0 ? delta * growthMult : delta;  // Only scale growth, not decay
+        const nextResilience = Math.max(0, Math.min(maxResilience, current.resilience + scaledDelta));
         const nextIsolation = isolated ? current.isolation_turns + 1 : 0;
         const nextHardening = nextIsolation >= HARDENING_THRESHOLD;
 
@@ -215,7 +234,7 @@ export function getEnclaveDefenseBonus(state: GameState, osid: string): number {
     for (const enclave of ENCLAVE_DEFINITIONS) {
         if (osidBelongsToEnclave(osid, enclave)) {
             const entry = readEntry(resilience[enclave.id]);
-            const base = 1.0 + entry.resilience * 0.005; // Max: 1.0 + 30 * 0.005 = 1.15
+            const base = 1.0 + entry.resilience * 0.005; // Per-enclave max: Sarajevo 1.225, Bihac 1.20, Gorazde 1.175
             return entry.hardening_active ? base * (1.0 + HARDENING_DEFENSE_BONUS) : base;
         }
     }
@@ -224,7 +243,7 @@ export function getEnclaveDefenseBonus(state: GameState, osid: string): number {
 
 /**
  * Get cohesion recovery bonus for a formation at an OSID based on enclave resilience.
- * Returns +1 per 10 resilience (max +3/turn at resilience 30).
+ * Returns +1 per 10 resilience (per-enclave max: +4/turn for Sarajevo at resilience 45).
  * Used in cohesion_drift.ts to boost enclave formation recovery.
  */
 export function getEnclaveCohesionRecovery(state: GameState, osid: string | undefined): number {

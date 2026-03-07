@@ -93,7 +93,7 @@ describe('updateEnclaveResilience — isolation tracking', () => {
         }
         const entry = state.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(entry.isolation_turns).toBe(5);
-        expect(entry.resilience).toBe(10); // 5 turns × +2 per critical turn
+        expect(entry.resilience).toBeCloseTo(8, 5); // 5 turns × +2 × 0.8 growth_mult per critical turn
     });
 
     it('resets isolation_turns on adequate supply', () => {
@@ -273,7 +273,7 @@ describe('migration from bare number', () => {
         updateEnclaveResilience(state, supply);
         const entry = state.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(typeof entry).toBe('object');
-        expect(entry.resilience).toBe(17); // 15 + 2 growth
+        expect(entry.resilience).toBeCloseTo(16.6, 5); // 15 + 2 * 0.8 growth (srebrenica growth_mult)
         expect(entry.isolation_turns).toBe(1);
         expect(entry.hardening_active).toBe(false);
     });

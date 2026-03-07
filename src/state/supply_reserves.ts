@@ -34,6 +34,8 @@ import {
     MAX_SIEGE_DRAIN_HEAVY_PER_FACTION,
     SIEGE_MIN_POCKET_SIZE,
     PATRON_AID_SCALE,
+    PATRON_AID_FACTION_EFFICIENCY,
+    EMBARGO_SUPPLY_CAP,
     PATRON_AID_GENERAL_FRACTION,
     PATRON_AID_HEAVY_FRACTION,
     AIRDROP_ISOLATION_THRESHOLD,
@@ -307,7 +309,8 @@ export function updateSupplyReserves(
 
         // Phase B: Patron aid income
         const materialSupport = faction?.patron_state?.material_support_level ?? 0;
-        const rawPatronAid = materialSupport * PATRON_AID_SCALE;
+        const factionEfficiency = PATRON_AID_FACTION_EFFICIENCY[fid] ?? 1.0;
+        const rawPatronAid = materialSupport * PATRON_AID_SCALE * factionEfficiency;
         const patronAidGeneral = rawPatronAid * PATRON_AID_GENERAL_FRACTION;
         const patronAidHeavy = rawPatronAid * PATRON_AID_HEAVY_FRACTION;
 
@@ -329,7 +332,8 @@ export function updateSupplyReserves(
         const prevGeneral = state.general_supply_reserve![factionKey] ?? INIT_GENERAL_SUPPLY_RESERVE;
         const prevHeavy = state.heavy_munitions_reserve![factionKey] ?? INIT_HEAVY_MUNITIONS_RESERVE;
 
-        state.general_supply_reserve![factionKey] = Math.max(0, Math.min(100,
+        const embargoCap = EMBARGO_SUPPLY_CAP[fid] ?? 100;
+        state.general_supply_reserve![factionKey] = Math.max(0, Math.min(embargoCap,
             prevGeneral - maintenanceDrain - siegeDrain.general + totalIncomeGeneral
         ));
         state.heavy_munitions_reserve![factionKey] = Math.max(0, Math.min(100,

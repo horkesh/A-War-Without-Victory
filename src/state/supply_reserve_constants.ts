@@ -79,7 +79,31 @@ export const SIEGE_MIN_POCKET_SIZE = 8;
 /** Global multiplier for production facility income. */
 export const PRODUCTION_SCALE = 1.0;
 /** Global multiplier for patron aid income. */
-export const PATRON_AID_SCALE = 12;
+export const PATRON_AID_SCALE = 6;
+
+/**
+ * Faction-specific patron aid efficiency.
+ * RBiH: embargo blocks most external supply; only smuggling/black market.
+ * RS: direct land border with Serbia; most efficient pipeline.
+ * HRHB: Croatia has corridor constraints but active support.
+ */
+export const PATRON_AID_FACTION_EFFICIENCY: Record<string, number> = {
+    RBiH: 0.3,
+    RS: 0.8,
+    HRHB: 0.6
+};
+
+/**
+ * Maximum general supply reserve achievable under embargo conditions.
+ * RBiH: never had adequate supply — always strained/critical under arms embargo.
+ * RS: Serbia provided steady resupply with slight logistical friction.
+ * HRHB: Croatia provided material but limited by corridor access.
+ */
+export const EMBARGO_SUPPLY_CAP: Record<string, number> = {
+    RBiH: 45,
+    RS: 90,
+    HRHB: 70
+};
 
 // ── Reserve → Effective Supply State Thresholds ──────────────────────────────
 /** Reserve level at or above which faction supply is considered adequate (if OSID reachable). */

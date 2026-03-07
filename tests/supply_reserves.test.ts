@@ -60,8 +60,8 @@ describe('updateSupplyReserves', () => {
         expect(state.general_supply_reserve!['RBiH']).toBeCloseTo(10 - 2 * MAINTENANCE_DRAIN_PER_FORMATION, 5);
         // RS: 80 - 1*DRAIN
         expect(state.general_supply_reserve!['RS']).toBeCloseTo(80 - 1 * MAINTENANCE_DRAIN_PER_FORMATION, 5);
-        // HRHB: 75 - 0*DRAIN = 75
-        expect(state.general_supply_reserve!['HRHB']).toBe(75);
+        // HRHB: 75 - 0*DRAIN = 75, but capped by EMBARGO_SUPPLY_CAP['HRHB'] = 70
+        expect(state.general_supply_reserve!['HRHB']).toBe(70);
 
         // Heavy munitions unchanged (no combat expenditure in per-turn update)
         // RBiH starts at 5 (per-faction override)
@@ -124,8 +124,8 @@ describe('updateSupplyReserves', () => {
 
         // RBiH: 1 - 50*0.025 = 1-1.25 = -0.25 → clamped to 0
         expect(state.general_supply_reserve!['RBiH']).toBe(0);
-        // RS: 99 + 50*0.6 = 129 → clamped to 100
-        expect(state.general_supply_reserve!['RS']).toBe(100);
+        // RS: 99 + 50*0.6 = 129 → clamped to EMBARGO_SUPPLY_CAP['RS'] = 90
+        expect(state.general_supply_reserve!['RS']).toBe(90);
     });
 });
 

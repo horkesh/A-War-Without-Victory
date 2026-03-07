@@ -56,6 +56,8 @@ export interface OobBrigade {
     merged_into_id?: string;
     /** Army-level elite unit, eligible for elite loan system. */
     is_elite?: boolean;
+    /** Garrison unit — only defends, never attacks. */
+    garrison?: boolean;
     /** Pre-assigned historical decorations (loaded from OOB data). */
     historical_decorations?: HistoricalDecoration[];
     /** Initial brigade officer quality [0,1]. When set, overrides faction default. Elite units get higher values. */
@@ -155,6 +157,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         const available_until = typeof r.available_until === 'number' && Number.isFinite(r.available_until) ? r.available_until : undefined;
         const merged_into_id = typeof r.merged_into_id === 'string' && r.merged_into_id.trim() ? r.merged_into_id.trim() : undefined;
         const is_elite = r.is_elite === true ? true : undefined;
+        const garrison = r.garrison === true ? true : undefined;
         const historical_decorations: HistoricalDecoration[] | undefined = Array.isArray(r.historical_decorations)
             ? (r.historical_decorations as unknown[]).filter((d): d is Record<string, unknown> =>
                 isRecord(d) && typeof d.tier === 'string' && typeof d.name === 'string'
@@ -189,6 +192,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             ...(available_until != null && { available_until }),
             ...(merged_into_id && { merged_into_id }),
             ...(is_elite && { is_elite }),
+            ...(garrison && { garrison }),
             ...(historical_decorations && historical_decorations.length > 0 && { historical_decorations }),
             ...(initial_officer_quality != null && { initial_officer_quality }),
         });

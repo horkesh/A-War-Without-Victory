@@ -7,6 +7,25 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] Combat Mechanics Fix Plan — 6 phases, 8 issues
+
+### Summary
+- **Comprehensive phased plan** to fix all 8 issues from n292 combat audit.
+- **6 implementation phases** + 1 validation run (n293): (1) Equipment attrition — wire existing `degradeEquipment()` + battle losses; (2) Brigade dissolution — auto-dissolve combat-ineffective units; (3) Supply rebalance — RBiH embargo cap + patron efficiency; (4) Fatigue rebalance — increase accumulation, gate recovery on rotation; (5) Siege bombardment attrition — passive casualties from artillery; (6) Cohesion floor + enclave differentiation + OOB fixes.
+- **Execution**: Batch A (Phase 1+3 parallel) → Batch B (Phase 2+4) → Batch C (Phase 5+6) → Validation. Each batch: implement → test → /simplify → docs → commit.
+- **Key discovery**: Much infrastructure already exists — `degradeEquipment()` implemented but never wired, `TANK_LOSS_RATE`/`ARTILLERY_LOSS_RATE` defined but unused, `recordEquipmentLoss()` stub ready, lifecycle events have `personnel_collapse` trigger.
+- Full plan: `docs/40_reports/convenes/20260308_COMBAT_MECHANICS_FIX_PLAN.md`
+
+## [2026-03-07] N292 Combat Mechanics Audit — 6 critical failures identified
+
+### Summary
+- **40w scenario run** (n292, hash `185c8e3e1ac266d4`): 190 attacks, 168 battles, 74 territory flips, 84,565 total casualties. Valid for combat calibration: **No**.
+- **6 critical mechanical failures**: (1) Fatigue effectively inert — 98% of brigades at zero; (2) Equipment loss completely missing — 0 destroyed across 168 battles; (3) Zombie brigades — units at 0 cohesion/morale still active, no dissolution mechanic; (4) HRHB cohesion floor too high at 50; (5) Enclave resilience static after init; (6) RBiH supply at 100% under arms embargo (historically impossible).
+- **Casualty ratio inverted**: RS KIA > RBiH KIA (1.22:1) — opposite of history. Missing siege/bombardment casualty mechanic.
+- **What works well**: Combat tempo decline (A), territorial pattern (B+), displacement (B-), defense terrain bonus (B+), Vienna Declaration truce (A-).
+- **Priority fixes**: P0 = equipment attrition + brigade dissolution + RBiH supply constraint. P1 = fatigue rebalance + siege casualties.
+- Full report: `docs/40_reports/convenes/20260307_N292_COMBAT_MECHANICS_REPORT.md`
+
 ## [2026-03-07] Officer profile redesign — character-rich display across all panels
 
 ### Summary

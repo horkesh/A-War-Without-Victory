@@ -5,6 +5,7 @@ import {
     JNA_INHERITANCE_FACTION,
     JNA_INHERITANCE_HEAVY_BONUS,
     PATRON_AID_SCALE,
+    PATRON_AID_FACTION_EFFICIENCY,
     PATRON_AID_GENERAL_FRACTION,
     INIT_HEAVY_MUNITIONS_RESERVE,
 } from '../src/state/supply_reserve_constants.js';
@@ -67,17 +68,20 @@ describe('Phase E1 — JNA Inheritance Bonus', () => {
 });
 
 describe('Phase E1 — PATRON_AID_SCALE value check', () => {
-    it('PATRON_AID_SCALE is 12 (not old value 1)', () => {
-        expect(PATRON_AID_SCALE).toBe(12);
+    it('PATRON_AID_SCALE is 6 with faction efficiency multipliers', () => {
+        expect(PATRON_AID_SCALE).toBe(6);
+        expect(PATRON_AID_FACTION_EFFICIENCY['RS']).toBe(0.8);
+        expect(PATRON_AID_FACTION_EFFICIENCY['RBiH']).toBe(0.3);
+        expect(PATRON_AID_FACTION_EFFICIENCY['HRHB']).toBe(0.6);
     });
 
-    it('RS patron income at scale 12 substantially offsets maintenance drain', () => {
-        // RS material_support_level ~0.78, embargo general factor ~0.9
+    it('RS patron income with faction efficiency substantially offsets maintenance drain', () => {
+        // RS material_support_level ~0.78, embargo general factor ~0.9, faction efficiency 0.8
         const materialSupport = 0.78;
         const embargoFactor = 0.9;
-        const income = materialSupport * PATRON_AID_SCALE * PATRON_AID_GENERAL_FRACTION * embargoFactor;
-        // At old scale 1.0: income ~0.35 (negligible vs 5.2/turn drain)
-        // At scale 12: income ~4.2 (covers ~80% of RS maintenance drain)
-        expect(income).toBeGreaterThan(3.5);
+        const factionEff = PATRON_AID_FACTION_EFFICIENCY['RS'] ?? 1.0;
+        const income = materialSupport * PATRON_AID_SCALE * factionEff * PATRON_AID_GENERAL_FRACTION * embargoFactor;
+        // At scale 6 × efficiency 0.8: income ~1.68 (meaningful offset vs RS maintenance drain)
+        expect(income).toBeGreaterThan(1.5);
     });
 });

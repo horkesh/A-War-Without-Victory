@@ -999,6 +999,12 @@ function executeFactionDirectives(
             activeOp?.type === 'sector_attack' &&
             isOperationParticipant(activeOp, brigade.id);
 
+        // Garrison units (e.g. VRS 65th Protection) only defend home — never attack.
+        if (brigade.garrison === true) {
+            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+            continue;
+        }
+
         // Detachments (militia kind, < 500 personnel) only garrison — never attack.
         if (brigade.kind === 'militia' && getFormationTier(brigade) === 'detachment') {
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });

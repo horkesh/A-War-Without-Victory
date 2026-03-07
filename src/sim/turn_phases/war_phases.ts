@@ -298,6 +298,18 @@ export const warPhases: NamedPhase[] = [
             );
         }
     },
+    // --- Brigade dissolution (dissolve combat-ineffective units) ---
+    {
+        name: 'check-brigade-dissolution',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { dissolveCombatIneffectiveBrigades } = await import('../combat/brigade_dissolution.js');
+            const dissolutionReport = dissolveCombatIneffectiveBrigades(context.state);
+            if (dissolutionReport.dissolved_count > 0) {
+                context.report.brigade_dissolution = dissolutionReport;
+            }
+        }
+    },
     // --- Brigade Operations Pipeline (Phase II only) ---
     {
         name: 'formation-hq-relocation',
@@ -962,6 +974,15 @@ export const warPhases: NamedPhase[] = [
                 context.state,
                 context.report.supply_resolution?.supply_state_by_osid
             );
+        }
+    },
+    {
+        name: 'apply-siege-bombardment-attrition',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (!context.state.meta.supply_reserves_enabled) return;
+            const { applySiegeBombardmentAttrition } = await import('../combat/siege_attrition.js');
+            context.report.siege_bombardment_attrition = applySiegeBombardmentAttrition(context.state);
         }
     },
     {

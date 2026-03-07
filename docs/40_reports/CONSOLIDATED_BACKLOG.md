@@ -143,7 +143,24 @@ Orchestrator convened Technical Architect and Product Manager to synthesize find
 
 ---
 
-## 12. Backlog archive index (2026-02-24 themed merge)
+## 13. Combat mechanics failures (n292 audit, 2026-03-07)
+
+**Source report:** [20260307_N292_COMBAT_MECHANICS_REPORT.md](convenes/20260307_N292_COMBAT_MECHANICS_REPORT.md)
+
+| Issue | Priority | Complexity | Owner |
+|-------|----------|------------|-------|
+| Equipment attrition mechanic (0 lost in 168 battles) | **P0** | Medium | Gameplay Programmer |
+| Brigade dissolution at combat-ineffective threshold | **P0** | Low | Gameplay Programmer |
+| RBiH supply constraint (100% under arms embargo) | **P0** | Medium | Gameplay Programmer / Game Designer |
+| Fatigue accumulation/recovery rebalance (98% at zero) | **P1** | Low | Gameplay Programmer |
+| Siege/bombardment casualty mechanic (inverted KIA ratio) | **P1** | Medium | Game Designer / Gameplay Programmer |
+| HRHB cohesion floor reduction (50 → 25-30) | **P2** | Trivial | Gameplay Programmer |
+| Enclave resilience dynamism (static after init) | **P2** | Medium | Game Designer / Gameplay Programmer |
+| 65th Protection Regt garrison flag | **P3** | Trivial | OOB data |
+
+---
+
+## 14. Backlog archive index (2026-02-24 themed merge)
 
 All former single-topic backlog docs are archived to **docs/_old/40_reports/backlog/**; full content preserved. Each themed doc in backlog/ (§1–§6) lists its archived source filenames and a short summary. **Standalone (not merged):** [20260223_PIPELINE_NEXT_WHILE_BOT_REWRITE.md](backlog/20260223_PIPELINE_NEXT_WHILE_BOT_REWRITE.md). Master archive index: [docs/_old/README.md](../_old/README.md) §40_reports/backlog. No planned work dropped.
 

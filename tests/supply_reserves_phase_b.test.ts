@@ -11,6 +11,7 @@ import {
     MAX_SIEGE_PRESSURE_RATE,
     SIEGE_MIN_POCKET_SIZE,
     PATRON_AID_SCALE,
+    PATRON_AID_FACTION_EFFICIENCY,
     PATRON_AID_GENERAL_FRACTION,
     PATRON_AID_HEAVY_FRACTION,
     FACILITY_COMBAT_DAMAGE_RATE,
@@ -242,7 +243,8 @@ describe('updateSupplyReserves — patron aid', () => {
         ensureSupplyReserves(state);
         const report = updateSupplyReserves(state, { RBiH: 0, RS: 0, HRHB: 0 });
         const rbihEntry = report.factions.find(f => f.faction_id === 'RBiH')!;
-        const expectedAid = 0.8 * PATRON_AID_SCALE;
+        const factionEff = PATRON_AID_FACTION_EFFICIENCY['RBiH'] ?? 1.0;
+        const expectedAid = 0.8 * PATRON_AID_SCALE * factionEff;
         expect(rbihEntry.patron_aid_general).toBeCloseTo(expectedAid * PATRON_AID_GENERAL_FRACTION, 5);
         expect(rbihEntry.patron_aid_heavy).toBeCloseTo(expectedAid * PATRON_AID_HEAVY_FRACTION, 5);
     });

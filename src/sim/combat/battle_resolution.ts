@@ -102,8 +102,8 @@ const URBAN_ATTACKER_CASUALTY_MULT = 1.5;
 const SARAJEVO_ATTACKER_CASUALTY_MULT = 2.0;
 
 // --- Equipment loss rates per unit of intensity ---
-const TANK_LOSS_RATE = 0.02;
-const ARTILLERY_LOSS_RATE = 0.01;
+const TANK_LOSS_RATE = 0.08;
+const ARTILLERY_LOSS_RATE = 0.04;
 
 // --- Pyrrhic victory ---
 const PYRRHIC_THRESHOLD = 0.20;
@@ -636,16 +636,16 @@ function computeBattleCasualties(
 
     const attackerComp = attackerFormation.composition ?? ensureBrigadeComposition(attackerFormation);
     const attackPostureMult = (attackerFormation.posture === 'attack') ? 1.5 : 1.0;
-    const aTanksLost = Math.min(attackerComp.tanks, Math.floor(attackerComp.tanks * TANK_LOSS_RATE * intensityFactor * attackPostureMult));
-    const aArtLost = Math.min(attackerComp.artillery, Math.floor(attackerComp.artillery * ARTILLERY_LOSS_RATE * intensityFactor));
+    const aTanksLost = Math.min(attackerComp.tanks, Math.round(attackerComp.tanks * TANK_LOSS_RATE * intensityFactor * attackPostureMult));
+    const aArtLost = Math.min(attackerComp.artillery, Math.round(attackerComp.artillery * ARTILLERY_LOSS_RATE * intensityFactor));
 
     let dTanksLost = 0;
     let dArtLost = 0;
     if (defenderFormation) {
         const defenderComp = defenderFormation.composition ?? ensureBrigadeComposition(defenderFormation);
         const terrainProtection = 1 / Math.max(0.8, terrainComposite);
-        dTanksLost = Math.min(defenderComp.tanks, Math.floor(defenderComp.tanks * TANK_LOSS_RATE * intensityFactor * terrainProtection));
-        dArtLost = Math.min(defenderComp.artillery, Math.floor(defenderComp.artillery * ARTILLERY_LOSS_RATE * intensityFactor * terrainProtection));
+        dTanksLost = Math.min(defenderComp.tanks, Math.round(defenderComp.tanks * TANK_LOSS_RATE * intensityFactor * terrainProtection));
+        dArtLost = Math.min(defenderComp.artillery, Math.round(defenderComp.artillery * ARTILLERY_LOSS_RATE * intensityFactor * terrainProtection));
     }
 
     return {

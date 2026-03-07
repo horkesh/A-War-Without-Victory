@@ -420,6 +420,8 @@ export interface FormationState {
     recruit_pool_faction?: FactionId;
     /** Fallback OSID where brigade reforms if stranded with no retreat path. Set from OOB. */
     fallback_osid?: string;
+    /** Garrison unit — only defends, never attacks. Set from OOB (e.g. VRS 65th Protection Regiment). */
+    garrison?: boolean;
     /** Target OSID for paramilitary sweep. When set, this paramilitary unit marches to and captures this OSID, then dissolves. */
     paramilitary_target?: string;
     /** Turns remaining until paramilitary unit reaches target and captures it. */

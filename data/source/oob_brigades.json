@@ -3103,6 +3103,7 @@
     "initial_cohesion": 72,
     "initial_officer_quality": 0.85,
     "is_elite": true,
+    "garrison": true,
     "historical_decorations": [
       {
         "tier": "tier_3",
