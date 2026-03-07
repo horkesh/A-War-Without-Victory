@@ -270,6 +270,23 @@ export function getThreeTierOfficerMod(
             }
         }
 
+        // Operation commander: brigades in named ops answer to ops commander
+        const corpsCmd = state.corps_command?.[corpsId];
+        const activeOp = corpsCmd?.active_operation;
+        if (activeOp?.commander_officer_id && activeOp.phase === 'execution' &&
+            activeOp.participating_brigades.includes(formation.id)) {
+            const opsOs = state.named_officers[activeOp.commander_officer_id];
+            const opsData = opsOs ? state.named_officer_data.find(o => o.id === activeOp.commander_officer_id) : null;
+            if (opsOs && opsData && opsOs.status === 'active') {
+                const penalty = opsOs.penalty_turns_remaining > 0 ? opsOs.effective_competence_penalty : 0;
+                const comp = Math.max(1, Math.min(5, opsData.competence - penalty));
+                const opsMod = role === 'attack'
+                    ? 0.90 + comp * 0.03 + opsData.aggressiveness * 0.01
+                    : 0.90 + comp * 0.03 + opsData.defensive_skill * 0.01;
+                return brigMod * opsMod;
+            }
+        }
+
         // Find corps commander
         const officerIds = Object.keys(state.named_officers).sort(strictCompare);
         for (const id of officerIds) {

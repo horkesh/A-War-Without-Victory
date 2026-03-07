@@ -7,6 +7,17 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-07] Operations System: Commander + Faction Name Pools
+
+### Summary
+- **Operations Commander:** Named officers from the reserve pool command operations. During execution, participating brigades use the operation commander's modifier instead of corps commander (chain-of-command isolation). Selection: regional match (home_corps_id), then compatible_corps_ids, then any reserve — sorted by competence, aggressiveness, ID. Assigned at all creation points; released on completion.
+- **Faction Name Pools:** Complete rewrite of `operation_names.ts`. Per-faction historically researched pools: VRS JNA bureaucratic style (40 names), ARBiH aspirational/Islamic (40 names), HVO Croatian weather/force (36 names). Sequential consumption via `state.used_operation_names` — no repeats per game. Pre-planned/triggered names (Koridor, Drina, etc.) excluded from pools.
+- **Simplify pass:** Removed 65 lines dead code (unused `getOfficerCombatModWithOps` + 3 helpers). Fixed `selectOperationCommander` write-then-overwrite mutation. Extracted `markUsed` helper.
+- **Bug fix:** `apr1992_definitive_52w.json` was missing `init_officers: "apr1992"` — officers never loaded in 52w runs.
+- **State:** `CorpsOperation.commander_officer_id`, `NamedOfficerState.assigned_operation`, `GameState.used_operation_names`.
+- **Verification:** n265 (40w), n267 (52w). ATH 84.4% unchanged. 351 tests pass.
+- **Canon:** Systems Manual §7.5, §6.4 updated. Report: [20260307_OPERATIONS_SYSTEM_COMPREHENSIVE.md](docs/40_reports/implemented/20260307_OPERATIONS_SYSTEM_COMPREHENSIVE.md).
+
 ## [2026-03-07] Territory Voronoi — Sector System Rewrite
 
 ### Summary
@@ -11305,3 +11316,53 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 - Informational 52w run [`apr1992_definitive_52w__63ff6bc6328b5629__w52_n254`](/F:/A-War-Without-Victory/runs/apr1992_definitive_52w__63ff6bc6328b5629__w52_n254) also preserved `valid_for_combat_calibration = true` with `invalid_operation_count = 0`, but historical-fit remained weak (`2/6` benchmarks, failed anchors at `bihac`, `op:zvornik:vitinica_2`, and `op:ugljevik:teocak_krstac_2`).
 - Interpretation: the Phase E mechanic is dormant without staged player orders, so the 52w drift should be treated as branch-level long-horizon state, not a direct Phase E behavior change.
 - Final branch verification after doc propagation is green: `npm run typecheck`, `npm run desktop:map:build`, and full `npm run test:vitest` all pass.
+
+## [2026-03-07] Comprehensive GUI review report and documentation routing
+
+### Summary
+- Added an orchestrator-led comprehensive GUI review covering both the warroom and the canonical tactical map from the player's perspective.
+- Synthesized prior expert advice, direct code/doc evidence, and specialist review input into a single research document focused on clarity, hidden systems, faction pride, map touch-ups, and panel choreography.
+- Routed the report into the reports index, backlog consolidation, docs index, thematic knowledge base, and napkin so the next planning session can pick it up cleanly.
+
+### Changes
+- Added `docs/40_reports/convenes/20260307_GUI_COMPREHENSIVE_REVIEW_PLAYER_PERSPECTIVE.md`.
+- Updated report/documentation indices:
+  - `docs/40_reports/README.md`
+  - `docs/40_reports/CONSOLIDATED_BACKLOG.md`
+  - `docs/00_start_here/docs_index.md`
+- Updated continuity/process references:
+  - `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+  - `.claude/napkin.md`
+
+### Key findings recorded
+- The GUI already contains more real systems than it clearly communicates; the main gap is surfacing and hierarchy, not missing mechanics.
+- Highest-priority GUI direction:
+  - establish a command-briefing hierarchy above existing panels
+  - separate player-facing command info from load/debug utilities
+  - adopt right-drill sliding detail panels instead of stacked competing overlays
+  - strengthen faction identity through briefing tone, honors, record, and command ritual
+- Important under-surfaced systems called out in the review include IVP causes/consequences, convoy decisions, municipality support, officers, honors/war stories, OPSEC, operation health, enclave risk, displacement, casualties, and strategic reserves.
+
+### Verification
+- Spot-checked all updated docs after patching:
+  - report body
+  - reports index
+  - backlog consolidation
+  - docs index
+  - knowledge base
+  - napkin
+
+### Notes
+- This was a documentation/research pass only; no gameplay or GUI code was changed.
+- Runtime browser inspection was limited by unstable browser automation during the session, but the findings are backed by direct inspection of current UI code and engineering/docs surfaces.
+
+### Failure mode prevented
+- Prevented the GUI review from becoming an isolated one-off artifact by routing it into the backlog, reports index, docs index, knowledge base, and napkin.
+- Prevented the panel-behavior directive from being lost between sessions by recording the right-drill rule in both `PROJECT_LEDGER_KNOWLEDGE` and `.claude/napkin.md`.
+
+### Mistake guard
+- Treat this report as advisory input for planning, not as implementation authority.
+- If future GUI work follows from this report, create a separate phased plan and keep command-info hierarchy distinct from development/debug tooling.
+
+### FORAWWV note
+- No `FORAWWV` update was required because this pass did not add or validate new canon-level design doctrine; it produced a research/handoff artifact only.

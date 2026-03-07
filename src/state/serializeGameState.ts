@@ -140,6 +140,7 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'smuggling_allocation',
     'sarajevo_tunnel_operational',
     'opsec_sectors',
+    'used_operation_names',
 ]);
 
 /**

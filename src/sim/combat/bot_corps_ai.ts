@@ -62,7 +62,7 @@ import { getSeasonalModifiers } from './seasonal_effects.js';
 import { evaluateSectorOffensiveLaunch } from './sector_offensive.js';
 import { CONFIDENCE_ROUGH_STRENGTH } from './sector_intel_constants.js';
 import { getTruceBreakAggressionBonus, shouldGrazBlockAttack, isGrazAccordsActive } from '../local_truces.js';
-import { getCorpsCommander, getEffectiveCompetence } from './officer_system.js';
+import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander, releaseOperationCommander } from './officer_system.js';
 import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -580,6 +580,7 @@ export function generateCorpsOperationOrders(
         };
 
         cmd.active_operation = operation;
+        assignOperationCommander(state, operation, corps.id, faction);
     }
 }
 
@@ -672,6 +673,7 @@ export function evaluateOperationProgress(
         } else if (op.phase === 'recovery') {
             // Clear operation after recovery duration
             if (turnsInPhase >= RECOVERY_DURATION) {
+                releaseOperationCommander(state, op);
                 cmd.active_operation = null;
                 // Add exhaustion from the operation
                 cmd.corps_exhaustion = Math.min(100, cmd.corps_exhaustion + 15);
@@ -876,6 +878,7 @@ export function attemptCorridorBreach(
             };
 
             cmd.active_operation = operation;
+            assignOperationCommander(state, operation, corps.id, faction);
             // Force offensive stance for this corps during breach
             cmd.stance = 'offensive';
             return; // Only one breach operation at a time
@@ -1001,6 +1004,7 @@ export function generateEmergencyDefensiveOperations(
         };
 
         cmd.active_operation = operation;
+        assignOperationCommander(state, operation, corps.id, faction);
     }
 }
 
@@ -1830,6 +1834,7 @@ export function generateCorpsDirectives(
                 );
                 if (op) {
                     cmd.active_operation = op;
+                    assignOperationCommander(state, op, corps.id, faction);
                     break; // One offensive at a time per corps
                 }
             }

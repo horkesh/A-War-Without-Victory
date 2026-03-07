@@ -19,6 +19,7 @@ import { createSingleAxis } from './sector_offensive.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
+import { assignOperationCommander } from './officer_system.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Pre-planned operation definitions
@@ -398,6 +399,7 @@ export function injectPrePlannedOperations(state: GameState): void {
         };
 
         cmd.active_operation = op;
+        assignOperationCommander(state, op, def.corps, 'RS');
         cmd.stance = 'offensive';
         injectedCorps.add(def.corps);
     }
@@ -470,7 +472,7 @@ export function injectQueuedOperation(state: GameState, corpsId: string): boolea
 
     const allObjectives = builtAxes.flatMap(a => a.objectives);
 
-    cmd.active_operation = {
+    const op: import('../../state/game_state.js').CorpsOperation = {
         name: def.name,
         type: 'sector_attack',
         phase: 'planning',
@@ -487,6 +489,8 @@ export function injectQueuedOperation(state: GameState, corpsId: string): boolea
         consecutive_failures_on_current: 0,
         staging_osid: def.staging_osid,
     };
+    cmd.active_operation = op;
+    assignOperationCommander(state, op, corpsId, 'RS');
     cmd.stance = 'offensive';
     return true;
 }

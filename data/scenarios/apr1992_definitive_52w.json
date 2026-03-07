@@ -61,5 +61,6 @@
   "osid_control_overrides": {
     "op:brcko:brcko": "RS"
   },
-  "avoided_osids_by_faction": {}
+  "avoided_osids_by_faction": {},
+  "init_officers": "apr1992"
 }

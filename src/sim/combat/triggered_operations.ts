@@ -21,6 +21,7 @@ import { createSingleAxis } from './sector_offensive.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
+import { assignOperationCommander } from './officer_system.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -347,6 +348,7 @@ export function checkTriggeredOperations(state: GameState): string[] {
         // For single-corps ops: inject directly
         // For joint ops: inject into primary corps (all axes), set participating brigades
         primaryCmd.active_operation = result.op;
+        assignOperationCommander(state, result.op, def.primary_corps, 'RS');
         primaryCmd.stance = 'offensive';
 
         // Track acceptance

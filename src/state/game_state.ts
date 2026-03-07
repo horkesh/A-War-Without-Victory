@@ -244,6 +244,8 @@ export interface CorpsOperation {
     dig_in_on_halt?: boolean;
     /** Reason the operation entered recovery. */
     recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination';
+    /** Named officer commanding this operation (if any). */
+    commander_officer_id?: string;
 }
 
 export interface SectorStanceOrder {
@@ -1517,6 +1519,8 @@ export interface GameState {
     sarajevo_tunnel_operational?: boolean;
     /** Sector ids with OPSEC active. */
     opsec_sectors?: string[];
+    /** Tracks which operation names have been used (name → turn used). Sequential consumption, no repeats. */
+    used_operation_names?: Record<string, number>;
 
     // --- Local Truces (Graz Accords, 6 May 1992) ---
     /**

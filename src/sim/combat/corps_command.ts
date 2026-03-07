@@ -15,6 +15,7 @@ import type {
     GameState,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { releaseOperationCommander } from './officer_system.js';
 
 // ---------------------------------------------------------------------------
 // Stance modifiers
@@ -253,6 +254,7 @@ export function advanceOperations(state: GameState): void {
             op.phase_started_turn = state.meta.turn;
         } else if (op.phase === 'recovery' && turnsInPhase >= OP_PHASE_DURATION.recovery) {
             // Operation complete
+            releaseOperationCommander(state, op);
             cmd.active_operation = null;
         }
     }

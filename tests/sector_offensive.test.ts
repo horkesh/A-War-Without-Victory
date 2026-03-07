@@ -81,6 +81,18 @@ describe('Sector Offensive — Operation Names', () => {
         assert.ok(OPERATION_NAMES['RS']!.includes(rsName));
         assert.ok(OPERATION_NAMES['RBiH']!.includes(rbihName));
     });
+
+    it('sequential consumption — no repeats when state tracked', () => {
+        const state = { used_operation_names: {} } as any;
+        const names = new Set<string>();
+        for (let i = 0; i < 10; i++) {
+            const name = pickOperationName(`corps_${i}`, i, 'RS', state);
+            assert.ok(!names.has(name), `duplicate name: ${name}`);
+            names.add(name);
+        }
+        assert.equal(names.size, 10);
+        assert.equal(Object.keys(state.used_operation_names).length, 10);
+    });
 });
 
 describe('Sector Offensive — Momentum', () => {

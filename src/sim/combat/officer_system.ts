@@ -186,6 +186,103 @@ export function getOfficerCombatMod(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Operation commander
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Select an available officer to command an operation.
+ *
+ * Selection priority:
+ *   1. Reserve officers with matching home_corps_id (regional match)
+ *   2. Reserve officers with compatible_corps_ids containing the corps
+ *   3. Any reserve officer of the same faction
+ *
+ * Within each tier: sort by competence (desc), aggressiveness (desc), then id.
+ * Returns null if no officer is available.
+ */
+export function selectOperationCommander(
+    state: GameState,
+    corpsId: string,
+    faction: FactionId,
+): string | null {
+    const officers = state.named_officers;
+    const officerData = state.named_officer_data;
+    if (!officers || !officerData) return null;
+
+    const candidates: NamedOfficer[] = [];
+
+    for (const data of officerData) {
+        if (data.faction !== faction) continue;
+        // Only corps_commander rank can command ops (not army/deputy)
+        if (data.rank !== 'corps_commander') continue;
+
+        const os = officers[data.id];
+        if (!os || os.status !== 'reserve') continue;
+        // Already commanding another operation
+        if (os.assigned_operation) continue;
+
+        candidates.push(data);
+    }
+
+    if (candidates.length === 0) return null;
+
+    // Sort: home corps match > compatible > other, then competence, then aggressiveness, then id
+    candidates.sort((a, b) => {
+        const aHome = a.home_corps_id === corpsId ? 0 : 1;
+        const bHome = b.home_corps_id === corpsId ? 0 : 1;
+        if (aHome !== bHome) return aHome - bHome;
+
+        const aCompat = a.compatible_corps_ids?.includes(corpsId) ? 0 : 1;
+        const bCompat = b.compatible_corps_ids?.includes(corpsId) ? 0 : 1;
+        if (aCompat !== bCompat) return aCompat - bCompat;
+
+        if (a.competence !== b.competence) return b.competence - a.competence;
+        if (a.aggressiveness !== b.aggressiveness) return b.aggressiveness - a.aggressiveness;
+        return strictCompare(a.id, b.id);
+    });
+
+    return candidates[0]!.id;
+}
+
+/**
+ * Assign a selected commander to an operation and update officer state.
+ */
+export function assignOperationCommander(
+    state: GameState,
+    op: import('../../state/game_state.js').CorpsOperation,
+    corpsId: string,
+    faction: FactionId,
+): void {
+    const commanderId = selectOperationCommander(state, corpsId, faction);
+    if (!commanderId) return;
+
+    op.commander_officer_id = commanderId;
+    const os = state.named_officers?.[commanderId];
+    if (os) {
+        os.status = 'active';
+        os.assigned_operation = op.name;
+    }
+}
+
+/**
+ * Release an operation commander back to reserve when the operation ends.
+ */
+export function releaseOperationCommander(
+    state: GameState,
+    op: import('../../state/game_state.js').CorpsOperation,
+): void {
+    if (!op.commander_officer_id) return;
+    const officers = state.named_officers;
+    if (!officers) return;
+
+    const os = officers[op.commander_officer_id];
+    if (os && os.assigned_operation) {
+        os.status = 'reserve';
+        os.assigned_operation = undefined;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Initialization
 // ═══════════════════════════════════════════════════════════════════════════
 

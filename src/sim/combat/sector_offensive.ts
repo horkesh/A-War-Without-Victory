@@ -24,6 +24,7 @@ import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { pickOperationName } from './operation_names.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import { releaseOperationCommander } from './officer_system.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -549,6 +550,7 @@ export function advanceSectorOffensives(
             if (elapsed >= recoveryDuration) {
                 const exhaustionCost = op.type === 'feint' || op.type === 'probe' ? 5 : 15;
                 cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + exhaustionCost);
+                releaseOperationCommander(state, op);
                 cmd.active_operation = null;
             }
         }
@@ -852,7 +854,7 @@ export function evaluateSectorOffensiveLaunch(
     if (objectives.length < 1) return null;
 
     const planningDuration = computePlanningDuration(objectives.length);
-    const name = pickOperationName(corpsId, turn, faction);
+    const name = pickOperationName(corpsId, turn, faction, state);
 
     // Reserve fraction: keep 1 brigade in reserve, rest participate
     const reserveCount = Math.max(1, Math.floor(sectorBrigadeIds.length * 0.15));

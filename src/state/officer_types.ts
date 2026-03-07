@@ -76,6 +76,8 @@ export interface NamedOfficerState {
     penalty_turns_remaining: number;
     /** True if serving as acting commander (lower modifier). */
     acting_commander: boolean;
+    /** Operation name if currently commanding a named operation. */
+    assigned_operation?: string;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
