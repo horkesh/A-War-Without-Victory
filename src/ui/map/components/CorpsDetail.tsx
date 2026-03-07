@@ -8,7 +8,7 @@ import { FACTION_COLORS } from '../utils/theme';
 import { getOperationId } from '../utils/operations';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { useIPC } from '../desktop/useIPC';
-import { DETAIL_PANEL_STYLE, SECONDARY_PANEL_STYLE } from './panelRail';
+import { getPanelRailStyle, SECONDARY_PANEL_STYLE } from './panelRail';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
 import { getFormationCommander } from '../utils/officerUtils';
 
@@ -26,8 +26,7 @@ export function CorpsDetail() {
   const [ordersPanelOpen, setOrdersPanelOpen] = useState(false);
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
-  const selectedFormationId = useGameStore((s) => s.selectedFormationId);
-  const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
+  const selectedArmyId = useGameStore((s) => s.selectedArmyId);
   const setSelectedCorpsId = useGameStore((s) => s.setSelectedCorpsId);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
@@ -51,14 +50,15 @@ export function CorpsDetail() {
     setOrdersPanelOpen(false);
   }, [selectedCorpsId]);
 
-  // Hide when formation or sector panel would show (priority: Formation > Sector > Corps)
-  if (operationsPanelOpen || selectedFormationId || selectedSectorId || !selectedCorpsId) return null;
+  if (operationsPanelOpen || !selectedCorpsId) return null;
+
+  const railSlot = selectedArmyId ? 'secondary' : 'primary';
 
   if (!loadedGameState || !corpsFormation) {
     return (
       <div
         className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
-        style={DETAIL_PANEL_STYLE}
+        style={getPanelRailStyle(railSlot, '24rem')}
       >
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
         <div className="p-4 space-y-4">
@@ -113,7 +113,7 @@ export function CorpsDetail() {
   return (
     <div
       className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
-      style={DETAIL_PANEL_STYLE}
+      style={getPanelRailStyle(railSlot, '24rem')}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
@@ -135,7 +135,12 @@ export function CorpsDetail() {
             {ordersPanelOpen ? 'Hide orders' : 'Orders'}
           </button>
           <button
-            onClick={() => setSelectedCorpsId(null)}
+            onClick={() => useGameStore.setState({
+              selectedCorpsId: null,
+              selectedCorpsFrontSectorId: null,
+              selectedFormationId: null,
+              selectedOperationKey: null,
+            })}
             className="text-text-secondary hover:text-interactive text-sm leading-none"
           >
             ✕
@@ -272,7 +277,14 @@ export function CorpsDetail() {
                 <button
                   key={s.sector_id}
                   type="button"
-                  onClick={() => setSelectedCorpsFrontSectorId(s.sector_id)}
+                  onClick={() => useGameStore.setState({
+                    selectedArmyId,
+                    selectedCorpsId,
+                    selectedCorpsFrontSectorId: s.sector_id,
+                    selectedFormationId: null,
+                    selectedOperationKey: null,
+                    selectedOsid: null,
+                  })}
                   className="w-full flex justify-between text-interactive hover:underline text-left"
                 >
                   <span className="truncate mr-2">{s.display_name}</span>
@@ -304,7 +316,14 @@ export function CorpsDetail() {
                   <button
                     key={opKey}
                     type="button"
-                    onClick={() => setSelectedOperationKey(opKey)}
+                    onClick={() => useGameStore.setState({
+                      selectedArmyId,
+                      selectedCorpsId,
+                      selectedCorpsFrontSectorId: null,
+                      selectedFormationId: null,
+                      selectedOperationKey: opKey,
+                      selectedOsid: null,
+                    })}
                     className={`w-full text-left rounded border p-2 transition-colors ${isSelected ? 'border-accent-gold bg-panel-active shadow-[inset_0_0_10px_rgba(212,160,85,0.1)]' : 'border-panel-border bg-panel-card hover:bg-panel-hover'
                       }`}
                   >

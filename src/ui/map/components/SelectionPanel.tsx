@@ -5,35 +5,24 @@ import { getFactionFlag } from '../utils/factionAssets';
 import { useIPC } from '../desktop/useIPC';
 import { useState } from 'react';
 import { getMunicipalitySupportLabel, getMunicipalitySupportTypeForFaction } from '../../../sim/combat/municipality_support.js';
+import { getPanelRailStyle } from './panelRail';
 
 export function SelectionPanel() {
   const ipc = useIPC();
   const selectedOsid = useGameStore((s) => s.selectedOsid);
-  const selectedFormationId = useGameStore((s) => s.selectedFormationId);
-  const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
   const [supportMessage, setSupportMessage] = useState<string | null>(null);
 
-  // Lowest-priority panel: hide when any higher-priority selection is active.
-  if (!selectedOsid || selectedFormationId || selectedSectorId) return null;
+  if (!selectedOsid) return null;
 
   if (!loadedGameState || !osidPropertiesMap?.[selectedOsid]) {
     return (
       <div
-        className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl overflow-hidden"
-        style={{
-          position: 'absolute',
-          left: 'auto',
-          right: '1rem',
-          top: '3.5rem',
-          bottom: '2rem',
-          width: '20rem',
-          zIndex: 50,
-          direction: 'ltr',
-        }}
+        className="panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl overflow-hidden"
+        style={{ ...getPanelRailStyle('primary', '20rem'), direction: 'ltr' }}
       >
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
         <div className="p-4 space-y-4">
@@ -79,17 +68,8 @@ export function SelectionPanel() {
 
   return (
     <div
-      className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl"
-      style={{
-        position: 'absolute',
-        left: 'auto',
-        right: '1rem',
-        top: '3.5rem',
-        bottom: '2rem',
-        width: '20rem',
-        zIndex: 50,
-        direction: 'ltr',
-      }}
+      className="panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl"
+      style={{ ...getPanelRailStyle('primary', '20rem'), direction: 'ltr' }}
     >
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
         <div className="flex items-center gap-2">

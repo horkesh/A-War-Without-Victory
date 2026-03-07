@@ -6,6 +6,7 @@ import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
 import { getFactionArmyCommander } from '../utils/officerUtils';
+import { getPanelRailStyle } from './panelRail';
 
 const FACTION_DISPLAY: Record<string, string> = {
   RS: 'Republika Srpska (VRS)',
@@ -15,17 +16,12 @@ const FACTION_DISPLAY: Record<string, string> = {
 
 export function ArmyDetail() {
   const selectedArmyId = useGameStore((s) => s.selectedArmyId);
-  const selectedFormationId = useGameStore((s) => s.selectedFormationId);
-  const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
-  const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const setSelectedArmyId = useGameStore((s) => s.setSelectedArmyId);
-  const setSelectedCorpsId = useGameStore((s) => s.setSelectedCorpsId);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
 
-  // Priority: Formation > Sector > Corps > Army
-  if (selectedFormationId || selectedSectorId || selectedCorpsId || !selectedArmyId || !loadedGameState) return null;
+  if (!selectedArmyId || !loadedGameState) return null;
 
   const faction = selectedArmyId;
   const formations = loadedGameState.formations.filter((f) => f.faction === faction);
@@ -65,15 +61,8 @@ export function ArmyDetail() {
 
   return (
     <div
-      className="flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
-      style={{
-        position: 'absolute',
-        left: '19rem',
-        top: '3.5rem',
-        bottom: '2rem',
-        width: '20rem',
-        zIndex: 50,
-      }}
+      className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
+      style={getPanelRailStyle('primary', '20rem')}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
@@ -269,7 +258,14 @@ export function ArmyDetail() {
                       key={f.id}
                       type="button"
                       className="w-full relative flex flex-col py-1.5 px-1.5 hover:bg-panel-hover rounded group text-left transition-colors"
-                      onClick={() => setSelectedCorpsId(f.id)}
+                      onClick={() => useGameStore.setState({
+                        selectedArmyId,
+                        selectedCorpsId: f.id,
+                        selectedCorpsFrontSectorId: null,
+                        selectedFormationId: null,
+                        selectedOperationKey: null,
+                        selectedOsid: null,
+                      })}
                       onMouseEnter={() => {
                         const osids = corpsSubordinates
                           .map((b) => b.location_osid)

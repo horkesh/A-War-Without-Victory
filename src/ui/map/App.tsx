@@ -21,6 +21,8 @@ import { WarSummaryModal } from './components/WarSummaryModal';
 import { OpsPlanningModal } from './components/OpsPlanningModal';
 import { SupplyPanel } from './components/SupplyPanel';
 import { EnclaveDashboard } from './components/EnclaveDashboard';
+import { CommandBriefingLayer } from './components/CommandBriefingLayer';
+import { derivePanelRailState } from './components/panelRail';
 import { useGameStore } from './store/gameStore';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
@@ -28,6 +30,7 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useDesktopSession } from './hooks/useDesktopSession';
 import { useIPC } from './desktop/useIPC';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
+import type { SummaryFocusSection } from './data/types';
 import {
   applyRecruitmentAndSync,
   fetchRecruitmentCatalog,
@@ -43,6 +46,12 @@ function App() {
   const pendingAttackConfirmation = useGameStore((s) => s.pendingAttackConfirmation);
   const setPendingAttackConfirmation = useGameStore((s) => s.setPendingAttackConfirmation);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
+  const selectedOsid = useGameStore((s) => s.selectedOsid);
+  const selectedArmyId = useGameStore((s) => s.selectedArmyId);
+  const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
+  const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
+  const selectedFormationId = useGameStore((s) => s.selectedFormationId);
+  const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const setConfirmPrimaryAction = useGameStore((s) => s.setConfirmPrimaryAction);
@@ -50,12 +59,21 @@ function App() {
   const setLoadError = useGameStore((s) => s.setLoadError);
   const playerFaction = loadedGameState?.player_faction ?? null;
   const mapMode = useGameStore((s) => s.mapMode);
+  const railState = derivePanelRailState({
+    selectedOsid,
+    selectedArmyId,
+    selectedCorpsId,
+    selectedCorpsFrontSectorId,
+    selectedFormationId,
+    selectedOperationKey,
+  });
 
   const [sidePickerOpen, setSidePickerOpen] = useState(false);
   const [sidePickerDismissed, setSidePickerDismissed] = useState(false);
   const [campaignStarting, setCampaignStarting] = useState(false);
   const [recruitmentOpen, setRecruitmentOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [summaryFocus, setSummaryFocus] = useState<SummaryFocusSection>('overview');
   const [enclaveDashboardOpen, setEnclaveDashboardOpen] = useState(false);
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
@@ -196,6 +214,11 @@ function App() {
     }
   };
 
+  const openSummary = (focus: SummaryFocusSection = 'overview') => {
+    setSummaryFocus(focus);
+    setSummaryOpen(true);
+  };
+
   return (
     <div className="h-screen w-screen relative">
       <MapContainer />
@@ -206,18 +229,26 @@ function App() {
           setSidePickerDismissed(false);
           setSidePickerOpen(true);
         }}
-        onOpenSummary={() => setSummaryOpen(true)}
+        onOpenSummary={openSummary}
         onOpenEnclaves={() => setEnclaveDashboardOpen((current) => !current)}
+      />
+      <CommandBriefingLayer
+        onOpenSummary={openSummary}
+        onOpenEnclaves={() => setEnclaveDashboardOpen(true)}
       />
       <OOBSidebar />
       <OperationsPanel />
       <OrderQueue />
-      <SelectionPanel />
-      <CorpsFrontPanel />
-      <CorpsDetail />
-      <ArmyDetail />
-      <FormationDetail />
-      <OperationDetail />
+      {railState.primary === 'settlement' && <SelectionPanel />}
+      {railState.primary === 'sector' && <CorpsFrontPanel />}
+      {railState.primary === 'corps' && <CorpsDetail />}
+      {railState.primary === 'army' && <ArmyDetail />}
+      {railState.primary === 'formation' && <FormationDetail />}
+      {railState.primary === 'operation' && <OperationDetail />}
+      {railState.secondary === 'sector' && <CorpsFrontPanel />}
+      {railState.secondary === 'corps' && <CorpsDetail />}
+      {railState.secondary === 'formation' && <FormationDetail />}
+      {railState.secondary === 'operation' && <OperationDetail />}
       <Tooltip />
       {pendingAttackConfirmation && attackerFormation && (
         <AttackConfirmation
@@ -250,7 +281,11 @@ function App() {
         onApply={(brigadeId, equipmentClass) => void handleApplyRecruitment(brigadeId, equipmentClass)}
         onClose={() => setRecruitmentOpen(false)}
       />
-      <WarSummaryModal isOpen={summaryOpen} onClose={() => setSummaryOpen(false)} />
+      <WarSummaryModal
+        isOpen={summaryOpen}
+        focusSection={summaryFocus}
+        onClose={() => setSummaryOpen(false)}
+      />
       <OpsPlanningModal />
       {loadedGameState && (
         <EnclaveDashboard

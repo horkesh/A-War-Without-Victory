@@ -1,12 +1,12 @@
 {
-  "schema_version": "2.0",
+  "schema_version": "2.1",
   "image_dimensions": {
     "width": 2752,
     "height": 1536
   },
   "regions": [
     {
-      "id": "red_telephone",
+      "id": "diplomatic_telephone",
       "type": "baked_prop",
       "bounds": {
         "x": 435,
@@ -96,15 +96,15 @@
           1100
         ]
       ],
-      "action": "open_diplomacy",
+      "action": "open_diplomatic_telephone",
       "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Diplomacy",
+      "tooltip": "Diplomatic Telephone",
       "layer": "desk"
     },
     {
-      "id": "faction_flag",
-      "type": "baked_prop",
+      "id": "wall_flag_area",
+      "type": "runtime_overlay",
       "bounds": {
         "x": 1090,
         "y": 274,
@@ -129,15 +129,15 @@
           274
         ]
       ],
-      "action": "open_faction_overview",
+      "action": "open_faction_archive",
       "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Faction Overview",
+      "tooltip": "Faction Flag",
       "layer": "wall"
     },
     {
-      "id": "wall_calendar",
-      "type": "baked_prop",
+      "id": "wall_calendar_area",
+      "type": "runtime_overlay",
       "bounds": {
         "x": 2075,
         "y": 332,
@@ -165,11 +165,11 @@
       "action": "advance_turn",
       "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Calendar",
+      "tooltip": "Wall Calendar",
       "layer": "wall"
     },
     {
-      "id": "military_hat",
+      "id": "intelligence_journal",
       "type": "baked_prop",
       "bounds": {
         "x": 325,
@@ -243,10 +243,10 @@
           269
         ]
       ],
-      "action": "open_magazine_modal",
+      "action": "open_intelligence_journal",
       "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Military Intelligence",
+      "tooltip": "Intelligence Journal",
       "layer": "wall"
     },
     {
@@ -276,14 +276,14 @@
           1106
         ]
       ],
-      "action": "map_zoom_in",
+      "action": "open_operational_map",
       "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "War Map",
+      "tooltip": "Operational Map",
       "layer": "desk"
     },
     {
-      "id": "newspaper_current",
+      "id": "newspaper_stack",
       "type": "baked_prop",
       "bounds": {
         "x": 195,
@@ -409,14 +409,14 @@
           1166
         ]
       ],
-      "action": "open_newspaper_modal",
+      "action": "open_press_briefing",
       "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Newspapers",
+      "tooltip": "Press Briefing",
       "layer": "desk"
     },
     {
-      "id": "report_stack",
+      "id": "command_briefing_folio",
       "type": "baked_prop",
       "bounds": {
         "x": 1799,
@@ -494,14 +494,14 @@
           1215
         ]
       ],
-      "action": "open_reports_modal",
+      "action": "open_command_briefing",
       "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Reports",
+      "tooltip": "Command Briefing",
       "layer": "desk"
     },
     {
-      "id": "transistor_radio",
+      "id": "desk_radio",
       "type": "baked_prop",
       "bounds": {
         "x": 2008,
@@ -551,10 +551,10 @@
           912
         ]
       ],
-      "action": "transistor_radio",
+      "action": "open_radio_net",
       "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Radio",
+      "tooltip": "Radio Net",
       "layer": "desk"
     }
   ]

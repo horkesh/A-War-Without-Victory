@@ -307,3 +307,118 @@ test('parseGameState exposes municipality support orders for the player faction 
     assert.equal(parsed.municipalitySupportOrders?.RBiH?.type, 'weapons_shipment');
     assert.equal(parsed.municipalitySupportOrders?.RBiH?.label, 'Weapons shipment');
 });
+
+test('parseGameState derives command briefing items in deterministic priority order', () => {
+    const parsed = parseGameState({
+        meta: { turn: 24, phase: 'war', player_faction: 'RBiH' },
+        formations: {
+            rbih_corps: { id: 'rbih_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps', tags: [] },
+            b1: { id: 'b1', faction: 'RBiH', corps_id: 'rbih_corps', name: '1st Brigade', kind: 'brigade', cohesion: 68, personnel: 1800, tags: [] },
+            b2: { id: 'b2', faction: 'RBiH', corps_id: 'rbih_corps', name: '2nd Brigade', kind: 'brigade', cohesion: 62, personnel: 1400, tags: [] },
+        },
+        political_controllers: {
+            'op:gorazde:gorazde_2': 'RBiH',
+            'op:gorazde:gorazde_3': 'RBiH',
+        },
+        corps_front_sectors: {
+            rbih_sector_1: {
+                sector_id: 'rbih_sector_1',
+                corps_id: 'rbih_corps',
+                faction: 'RBiH',
+                opposing_factions: ['RS'],
+                edge_ids: ['edge-1'],
+                sub_segments: [{ friendly_osids: ['op:gorazde:gorazde_2'], enemy_osids: ['op:rs:foe_1'] }],
+                assigned_brigade_ids: ['b1', 'b2'],
+                reserve_brigade_ids: [],
+                density: 1.1,
+                threat_ratio: 1.32,
+                defensive_power: 400,
+                intel_confidence: 0.42,
+                offensive_signs: true,
+                opsec_active: true,
+            },
+        },
+        opsec_sectors: ['rbih_sector_1'],
+        sector_intel: {
+            rbih_sector_1: [
+                { enemy_sector_id: 'rs_sector_1', confidence: 0.42, offensive_signs: true, visible_brigade_ids: [] },
+            ],
+        },
+        corps_command: {
+            rbih_corps: {
+                active_operation: {
+                    name: 'Operation Drina',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    sector_id: 'rbih_sector_1',
+                    objectives: ['op:rs:foe_1'],
+                    participating_brigades: ['b1', 'b2'],
+                    supply_readiness: 0.35,
+                    consecutive_failures_on_current: 2,
+                    failure_count: 2,
+                    started_turn: 22,
+                    phase_started_turn: 23,
+                },
+            },
+        },
+        international_visibility_pressure: {
+            atrocity_visibility: 0.4,
+            enclave_humanitarian_pressure: 0.8,
+            sarajevo_siege_visibility: 0.7,
+            negotiation_momentum: 0.2,
+            composite_ivp: 0.72,
+            last_major_shift: 24,
+        },
+        ivp_consequences_active: ['sanctions'],
+        pending_convoy_decisions: [
+            { id: 'convoy_gorazde', target_enclave: 'gorazde', route_faction: 'RS', supply_amount: 15 },
+        ],
+        municipality_support_orders: {
+            RBiH: { mun_id: 'gorazde', type: 'weapons_shipment', staged_turn: 24 },
+        },
+        enclave_resilience: {
+            gorazde: { resilience: 7, isolation_turns: 5, hardening_active: false },
+        },
+        supply_state_by_osid: {
+            factions: [
+                {
+                    faction_id: 'RBiH',
+                    by_osid: [
+                        { osid: 'op:gorazde:gorazde_2', state: 'critical' },
+                        { osid: 'op:gorazde:gorazde_3', state: 'critical' },
+                    ],
+                },
+            ],
+        },
+    });
+
+    const briefing = (parsed as typeof parsed & {
+        commandBriefing?: {
+            headline: string;
+            criticalCount: number;
+            pendingCount: number;
+            items: Array<{
+                id: string;
+                severity: string;
+                target: { type: string; summaryFocus?: string };
+            }>;
+        };
+    }).commandBriefing;
+
+    assert.ok(briefing);
+    assert.equal(briefing?.criticalCount, 3);
+    assert.equal(briefing?.pendingCount, 7);
+    assert.equal(briefing?.headline, '3 critical command matters require attention');
+    assert.deepStrictEqual(
+        briefing?.items.map((item) => `${item.id}:${item.severity}:${item.target.type}:${item.target.summaryFocus ?? '-'}`),
+        [
+            'convoy:convoy_gorazde:critical:summary:convoys',
+            'enclave:gorazde:critical:enclaves:-',
+            'operation:rbih_corps|Operation Drina:critical:operation:-',
+            'ivp:composite:warning:summary:ivp',
+            'sector:rbih_sector_1:warning:sector:-',
+            'opsec:rbih_sector_1:warning:summary:opsec',
+            'support:RBiH:info:summary:support',
+        ]
+    );
+});

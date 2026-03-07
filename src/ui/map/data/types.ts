@@ -246,6 +246,35 @@ export interface MunicipalitySupportOrderView {
     label: string;
 }
 
+export type CommandBriefingSeverity = 'critical' | 'warning' | 'info';
+export type SummaryFocusSection = 'overview' | 'ivp' | 'convoys' | 'casualties' | 'support' | 'opsec';
+
+export interface CommandBriefingTargetView {
+    type: 'summary' | 'enclaves' | 'operation' | 'sector' | 'settlement';
+    summaryFocus?: SummaryFocusSection;
+    operationKey?: string;
+    sectorId?: string;
+    osid?: string;
+    enclaveId?: string;
+}
+
+export interface CommandBriefingItemView {
+    id: string;
+    kind: 'convoy' | 'enclave' | 'operation' | 'ivp' | 'sector' | 'support' | 'opsec';
+    severity: CommandBriefingSeverity;
+    title: string;
+    detail: string;
+    actionLabel: string;
+    target: CommandBriefingTargetView;
+}
+
+export interface CommandBriefingView {
+    headline: string;
+    criticalCount: number;
+    pendingCount: number;
+    items: CommandBriefingItemView[];
+}
+
 export interface AttackOrderView {
     brigadeId: string;
     targetSettlementId: string;
@@ -403,5 +432,7 @@ export interface LoadedGameState {
     sectorEntrenchmentSummary?: Record<string, SectorEntrenchmentSummaryView>;
     /** Per-faction summary of manpower pools and strategic reserves. */
     mobilizationSummary?: Record<string, MobilizationSummaryView>;
+    /** Top-level command-routing summary for urgent player-facing matters. */
+    commandBriefing?: CommandBriefingView;
 }
 

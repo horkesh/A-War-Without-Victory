@@ -19,10 +19,17 @@ export function useKeyboardShortcuts(): void {
       if (isFocusInInput()) return;
 
       if (event.key === 'Escape') {
-        const { setSelectedOsid, setSelectedFormationId, setHoveredOsids, clearTooltipTarget, setPendingAttackConfirmation, setOrderModeForFormation } = useGameStore.getState();
-        setSelectedOsid(null);
-        setSelectedFormationId(null);
+        const { setHoveredOsids, clearTooltipTarget, setPendingAttackConfirmation, setOrderModeForFormation, setOperationTargetOsids } = useGameStore.getState();
+        useGameStore.setState({
+          selectedOsid: null,
+          selectedFormationId: null,
+          selectedCorpsFrontSectorId: null,
+          selectedCorpsId: null,
+          selectedArmyId: null,
+          selectedOperationKey: null,
+        });
         setHoveredOsids([]);
+        setOperationTargetOsids([]);
         clearTooltipTarget();
         setPendingAttackConfirmation(null);
         setOrderModeForFormation(null);

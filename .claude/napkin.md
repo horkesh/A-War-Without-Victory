@@ -144,20 +144,20 @@
    Do instead: Validate save (schema, meta.turn, formations/political_controllers shape). `parseGameState` unwraps `{ state }`/`{ gameState }`, treats `phase_ii` as war, accepts `formations` as object or array. Parse in requestIdleCallback (~150ms). 25s load timeout in toolbar. Show loadError on failure/timeout.
 3. **[2026-02-28] Map overlay poll: check sources first**
    Do instead: Call getSource() before buildControlGeoJSON/buildFrontLinesGeoJSON. Otherwise 500ms poll freezes app.
-4. **[2026-03-01] Formation icon + setData: defer to idle**
-   Do instead: Run ensureFormationIcons and setData in requestIdleCallback (~400ms), not in overlay rAF chain. Cancel in cleanup.
-5. **[2026-02-28] Selection panel: inline styles for positioning**
-   Do instead: Use inline styles (position, right, top, zIndex, direction: ltr) so Tailwind/purge/RTL cannot override. `?showPanel=1` for dev layout verification.
+4. **[2026-03-07] Command briefing and summary routing live in `App`, not the toolbar**
+   Do instead: Mount the high-level command briefing as a thin overlay in `App.tsx`, fed by `GameStateAdapter.commandBriefing`, and route it into existing panels/modals plus focused summary sections (`ivp`, `convoys`, `support`, `opsec`, etc.). Keep `TopToolbar.tsx` to compact command signals plus utility controls.
+5. **[2026-03-07] Selection, army, corps, sector, formation, and operation detail share one rail**
+   Do instead: Keep these panels on the same App-owned rail semantics via `panelRail.ts`. Do not let `SelectionPanel` drift back to its own far-right overlay rules.
 6. **[2026-03-05] Active GUI path only — avoid saved mirror files**
    Do instead: Edit `src/ui/map/components/*` and `src/ui/map/map/*` for live behavior. Treat `src/ui/map/saved/*` as legacy snapshots unless explicitly migrating.
-7. **[2026-03-07] Map mode shortcuts must match toolbar labels**
-   Do instead: Keep `useKeyboardShortcuts` key mapping synchronized with `MapModeToolbar` mode badges (`1`-`6`: political/ethnic/supply/pressure/density/operations).
-8. **[2026-03-05] Staged order arrowheads are fill polygons, not glyph text**
+7. **[2026-03-05] Staged order arrowheads are fill polygons, not glyph text**
    Do instead: Pulse staged heads via `fill-opacity` (`attack-arrows-heads-staged`, `movement-arrows-heads-staged`) and avoid legacy `text-opacity` writes.
-9. **[2026-03-06] Briefing panels: prefer stacked accordions over tabs**
+8. **[2026-03-06] Briefing panels: prefer stacked accordions over tabs**
     Do instead: Use `AccordionHeader` for unified vertical briefing views in `CorpsFrontPanel` and `OOBSidebar` to maintain situational awareness. Review for unused `collapsed` state when refactoring.
-10. **[2026-03-07] Enclave dashboard owns airdrop staging; operation ownership still overrides home-defense lockout**
-    Do instead: Keep airdrop-allocation inputs in `EnclaveDashboard.tsx` with a single budget strip and per-enclave allocations staged through desktop IPC. Separately, in `FormationDetail.tsx`, if a brigade appears in `operations[].participating_brigade_ids`, allow offensive posture controls even when `home_defense_active` is true.
+9. **[2026-03-07] Detail panels drill right; App owns precedence**
+    Do instead: Keep map detail flow on a right-side panel rail: overview -> primary detail -> secondary detail sliding further right. Preserve parent context, animate horizontal drill-downs, and let `App.tsx` mount panels from one deterministic selector instead of per-component hide/show guesses.
+10. **[2026-03-07] Warroom art and hotspots: one scene plate, physical anchors**
+    Do instead: For warroom image generation, create a single full-scene background per faction with stable camera/layout and outline hotspots afterward. Keep only flag, calendar, and ticker separate at runtime; do not rely on detachable room props. Route interactions from physical anchor ids like `command_briefing_folio` and `desk_radio`, not arbitrary legacy action names.
 
 ## Desktop & Electron
 1. **[2026-03-02] One map app: desktop uses dev when running**

@@ -25,6 +25,7 @@ import {
     trendArrow,
     turnToWeekString
 } from './warroom_utils.js';
+import { getWarroomFactionIdentity } from './warroom_identity.js';
 
 interface Phase0Snapshot {
     factionId: FactionId;
@@ -193,6 +194,7 @@ export class FactionOverviewPanel {
      */
     private renderPhase0(): HTMLElement {
         const snap = this.generatePhase0Snapshot();
+        const identity = getWarroomFactionIdentity(snap.factionId);
 
         const panel = document.createElement('div');
         panel.className = `panel-power-on weathered-panel faction-overview-panel faction-${factionCssClass(snap.factionId as FactionId)}`;
@@ -206,6 +208,7 @@ export class FactionOverviewPanel {
             <div class="fo-faction-badge text-accent-gold" style="color:${fc.primary}">${snap.factionId}</div>
             <h2 class="text-accent-gold">${snap.factionName}</h2>
             <div class="meta">${turnToWeekString(snap.turn)} \u2014 PRE-WAR PHASE</div>
+            <div class="meta">${identity.ceremonialLine}</div>
         `;
         panel.appendChild(header);
 
@@ -306,7 +309,7 @@ export class FactionOverviewPanel {
         const warningsSection = document.createElement('div');
         warningsSection.className = 'faction-overview-warnings';
         warningsSection.innerHTML = `
-            <h3>STRATEGIC WARNINGS</h3>
+            <h3>${identity.archiveLabel.toUpperCase()} WARNINGS</h3>
             <ul>${snap.warnings.map(w => `<li>${w}</li>`).join('')}</ul>
         `;
         panel.appendChild(warningsSection);
@@ -320,6 +323,7 @@ export class FactionOverviewPanel {
      */
     private renderPhaseIPlus(): HTMLElement {
         const pf = getPlayerFaction(this.gameState);
+        const identity = getWarroomFactionIdentity(pf);
         const snap = extractWarData(this.gameState, pf);
         const fc = FACTION_COLORS[pf] ?? FACTION_COLORS['RBiH'];
 
@@ -334,6 +338,7 @@ export class FactionOverviewPanel {
             <div class="fo-faction-badge text-accent-gold" style="color:${fc.primary}">${pf}</div>
             <h2 class="text-accent-gold">${this.getFactionDisplayName(pf)}</h2>
             <div class="meta">${turnToWeekString(snap.turn)}</div>
+            <div class="meta">${identity.ceremonialLine}</div>
         `;
         panel.appendChild(header);
 
@@ -402,7 +407,7 @@ export class FactionOverviewPanel {
         const warningsDiv = document.createElement('div');
         warningsDiv.className = 'faction-overview-warnings';
         warningsDiv.innerHTML = `
-            <h3>STRATEGIC WARNINGS</h3>
+            <h3>${identity.archiveLabel.toUpperCase()} WARNINGS</h3>
             <ul>${warnings.map(w => `<li>${w}</li>`).join('')}</ul>
         `;
         panel.appendChild(warningsDiv);

@@ -13,6 +13,7 @@ import { fallbackWarHeadline, pickBestWarHeadline } from '../content/war_headlin
 import { generateTurnEvents } from '../data/turn_event_generator.js';
 import { getPreviousSnapshot, getLastTurnReport } from '../data/warroom_state.js';
 import { FACTION_COLORS, factionCssClass, getPlayerFaction, toTickerTurn, turnToDateString } from './warroom_utils.js';
+import { getWarroomFactionIdentity } from './warroom_identity.js';
 
 interface NewspaperContent {
     factionId: string;
@@ -274,6 +275,7 @@ export class NewspaperModal {
      */
     render(): HTMLElement {
         const content = this.generateContent();
+        const identity = getWarroomFactionIdentity(content.factionId as FactionId);
 
         const newspaper = document.createElement('div');
         const fCss = factionCssClass(content.factionId as any);
@@ -294,6 +296,11 @@ export class NewspaperModal {
         date.textContent = content.date;
         newspaper.appendChild(date);
 
+        const pressLine = document.createElement('div');
+        pressLine.className = 'newspaper-date';
+        pressLine.textContent = identity.pressLabel;
+        newspaper.appendChild(pressLine);
+
         // Headline
         const headline = document.createElement('div');
         headline.className = 'newspaper-headline';
@@ -309,7 +316,7 @@ export class NewspaperModal {
         // Photo placeholder
         const photo = document.createElement('div');
         photo.className = 'newspaper-photo';
-        photo.textContent = '[Photo Area]';
+        photo.textContent = `[${identity.photoPlaceholder}]`;
         newspaper.appendChild(photo);
 
         // Photo caption

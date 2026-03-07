@@ -16,6 +16,7 @@ import type { FactionId, GameState, MunicipalityId } from '../../../state/game_s
 import { strictCompare } from '../../../state/validateGameState.js';
 import { extractWarData, type WarDataSnapshot } from '../data/war_data_extractor.js';
 import { controlStatusLabel, FACTION_COLORS, factionCssClass, getFactionPartyPen, getPlayerFaction, hasFactionParamilitary, turnToDateString } from './warroom_utils.js';
+import { getWarroomFactionIdentity } from './warroom_identity.js';
 
 interface ReportContent {
     factionId: string;
@@ -338,6 +339,7 @@ export class ReportsModal {
     private createShell(factionId: FactionId, classification: string): HTMLElement {
         const report = document.createElement('div');
         const fCss = factionCssClass(factionId);
+        const identity = getWarroomFactionIdentity(factionId);
         report.className = `reports-modal weathered-panel faction-${fCss}`;
 
         const fc = FACTION_COLORS[factionId] ?? FACTION_COLORS['RBiH'];
@@ -354,6 +356,11 @@ export class ReportsModal {
         classBottom.textContent = classification;
         report.appendChild(classBottom);
 
+        const ceremonialStrip = document.createElement('div');
+        ceremonialStrip.className = 'report-field';
+        ceremonialStrip.innerHTML = `<span class="report-field-label">DIRECTIVE:</span> ${identity.ceremonialLine}`;
+        report.appendChild(ceremonialStrip);
+
         return report;
     }
 
@@ -362,6 +369,7 @@ export class ReportsModal {
      */
     private renderPhase0(): HTMLElement {
         const content = this.generateContent();
+        const identity = getWarroomFactionIdentity(content.factionId as FactionId);
         const report = this.createShell(content.factionId as FactionId, content.classification);
 
         // Header
@@ -378,7 +386,7 @@ export class ReportsModal {
                 <span class="report-field-label">DATE:</span> ${content.date}
             </div>
             <div class="report-field">
-                <span class="report-field-label text-accent-gold">SUBJECT:</span> ${content.subject}
+                <span class="report-field-label text-accent-gold">SUBJECT:</span> ${identity.commandBriefLabel} - ${content.subject}
             </div>
         `;
         report.appendChild(header);
@@ -408,6 +416,7 @@ export class ReportsModal {
         const snap = extractWarData(this.gameState, factionId);
 
         const headers = WAR_REPORT_HEADERS[factionId] ?? WAR_REPORT_HEADERS['RBiH'];
+        const identity = getWarroomFactionIdentity(factionId);
         const reportBody = this.generateWarReportBody(snap, reportTurn);
 
         const report = this.createShell(factionId, 'CONFIDENTIAL');
@@ -426,7 +435,7 @@ export class ReportsModal {
                 <span class="report-field-label">DATE:</span> ${turnToDateString(reportTurn)}
             </div>
             <div class="report-field">
-                <span class="report-field-label text-accent-gold">SUBJECT:</span> Operational Intelligence Brief - Week ${reportTurn}
+                <span class="report-field-label text-accent-gold">SUBJECT:</span> ${identity.commandBriefLabel} - Operational Intelligence Brief - Week ${reportTurn}
             </div>
         `;
         report.appendChild(header);

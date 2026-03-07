@@ -2,7 +2,7 @@ export type RegionBounds = { x: number; y: number; width: number; height: number
 
 export type Region = {
     id: string;
-    type: 'baked_prop' | 'sprite_overlay' | 'dynamic_render';
+    type: 'baked_prop' | 'sprite_overlay' | 'dynamic_render' | 'runtime_overlay';
     bounds: RegionBounds;
     polygon?: [number, number][];
     action: string;
@@ -51,6 +51,16 @@ type DesktopBridge = {
     advanceTurn?: (payload?: { phase0Directives?: StagedInvestment[] }) => Promise<{ ok: boolean; error?: string; stateJson?: string; report?: unknown }>;
     openTacticalMapWindow?: () => Promise<unknown>;
 };
+
+type WarroomAnchorId =
+    | 'desk_map'
+    | 'command_briefing_folio'
+    | 'newspaper_stack'
+    | 'intelligence_journal'
+    | 'diplomatic_telephone'
+    | 'desk_radio'
+    | 'wall_flag_area'
+    | 'wall_calendar_area';
 
 export class ClickableRegionManager {
     private regionsMap: RegionsMap | null = null;
@@ -159,7 +169,7 @@ export class ClickableRegionManager {
     onClick(canvasX: number, canvasY: number, gameState: unknown): void {
         const match = this.getRegionAtPoint(canvasX, canvasY);
         if (match && !match.region.disabled) {
-            this.executeAction(match.region.action, gameState);
+            this.executeRegion(match.region.id, match.region.action, gameState);
         }
     }
 
@@ -218,31 +228,69 @@ export class ClickableRegionManager {
         return inside;
     }
 
-    private executeAction(action: string, gameState: unknown): void {
+    private executeRegion(regionId: string, action: string, gameState: unknown): void {
+        switch (regionId as WarroomAnchorId) {
+            case 'wall_flag_area':
+                this.openFactionOverview(gameState);
+                return;
+            case 'wall_calendar_area':
+                this.advanceTurn(gameState);
+                return;
+            case 'desk_map':
+                this.openPrimaryMap(gameState);
+                return;
+            case 'command_briefing_folio':
+                this.openReportsModal(gameState);
+                return;
+            case 'newspaper_stack':
+                this.openNewspaperModal(gameState);
+                return;
+            case 'intelligence_journal':
+                this.openMagazineModal(gameState);
+                return;
+            case 'diplomatic_telephone':
+                this.openDiplomacy(gameState);
+                return;
+            case 'desk_radio':
+                this.toggleNewsTicker(gameState);
+                return;
+            default:
+                this.executeLegacyAction(action, gameState);
+        }
+    }
+
+    private executeLegacyAction(action: string, gameState: unknown): void {
         switch (action) {
             case 'open_faction_overview':
+            case 'open_faction_archive':
                 this.openFactionOverview(gameState);
                 break;
             case 'map_zoom_in':
+            case 'open_operational_map':
                 this.openPrimaryMap(gameState);
                 break;
             case 'advance_turn':
                 this.advanceTurn(gameState);
                 break;
             case 'open_newspaper_modal':
+            case 'open_press_briefing':
                 this.openNewspaperModal(gameState);
                 break;
             case 'open_magazine_modal':
+            case 'open_intelligence_journal':
                 this.openMagazineModal(gameState);
                 break;
             case 'open_reports_modal':
+            case 'open_command_briefing':
                 this.openReportsModal(gameState);
                 break;
             case 'toggle_news_ticker':
             case 'transistor_radio':
+            case 'open_radio_net':
                 this.toggleNewsTicker(gameState);
                 break;
             case 'open_diplomacy':
+            case 'open_diplomatic_telephone':
                 this.openDiplomacy(gameState);
                 break;
             default:

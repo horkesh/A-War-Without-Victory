@@ -14,6 +14,7 @@ import { generateTickerWarEvents } from '../content/ticker_war_events.js';
 import { generateTurnEvents } from '../data/turn_event_generator.js';
 import { getPreviousSnapshot } from '../data/warroom_state.js';
 import { toTickerTurn } from './warroom_utils.js';
+import { getWarroomFactionIdentity } from './warroom_identity.js';
 
 /** Separator used between headlines in the scrolling ticker. */
 const HEADLINE_SEP = '  \u2022  ';
@@ -171,6 +172,12 @@ export class NewsTicker {
      */
     show(gameState: GameState) {
         if (!this.container) return;
+        const playerFaction: FactionId =
+            gameState.meta.player_faction ?? (gameState.factions[0]?.id as FactionId) ?? 'RBiH';
+        const label = this.container.querySelector('.news-ticker-label');
+        if (label) {
+            label.textContent = getWarroomFactionIdentity(playerFaction).tickerLabel;
+        }
 
         const content = document.getElementById('news-ticker-content');
         if (content) {

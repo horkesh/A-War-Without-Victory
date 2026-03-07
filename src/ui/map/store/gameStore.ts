@@ -225,15 +225,19 @@ export const useGameStore = create<GameStore>((set) => ({
   setSelectedArmyId: (id) => set({ selectedArmyId: id, selectedCorpsId: null, selectedOsid: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null }),
 
   selectedOperationKey: null,
-  setSelectedOperationKey: (key) => set((state) => ({
-    selectedOperationKey: key,
-    isOperationsPanelOpen: key != null ? true : state.isOperationsPanelOpen,
-    selectedCorpsId: null,
-    selectedArmyId: null,
-    selectedCorpsFrontSectorId: null,
-    selectedFormationId: null,
-    selectedOsid: null,
-  })),
+  setSelectedOperationKey: (key) => set((state) => (
+    key == null
+      ? { selectedOperationKey: null }
+      : {
+        selectedOperationKey: key,
+        isOperationsPanelOpen: state.isOperationsPanelOpen,
+        selectedCorpsId: null,
+        selectedArmyId: null,
+        selectedCorpsFrontSectorId: null,
+        selectedFormationId: null,
+        selectedOsid: null,
+      }
+  )),
 
   isOperationsPanelOpen: false,
   setIsOperationsPanelOpen: (v) => set({ isOperationsPanelOpen: v }),

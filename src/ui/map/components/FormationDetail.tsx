@@ -4,7 +4,7 @@ import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 import { stagePostureOrderAction } from '../desktop/orderActions';
-import { DETAIL_PANEL_STYLE, SECONDARY_PANEL_STYLE } from './panelRail';
+import { getPanelRailStyle, SECONDARY_PANEL_STYLE } from './panelRail';
 import { turnToDateString, formatCombatOutcome, formatPosture, toTitleCase } from '../utils/formatters';
 import { getArmyCrest } from '../utils/factionAssets';
 import { getFormationCommander } from '../utils/officerUtils';
@@ -29,6 +29,9 @@ export function FormationDetail() {
   const [ordersPanelOpen, setOrdersPanelOpen] = useState(false);
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
+  const selectedArmyId = useGameStore((s) => s.selectedArmyId);
+  const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
+  const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
@@ -44,13 +47,15 @@ export function FormationDetail() {
 
   if (operationsPanelOpen || !selectedFormationId) return null;
 
+  const railSlot = selectedSectorId || selectedCorpsId || selectedArmyId ? 'secondary' : 'primary';
+
   const formation = loadedGameState?.formations.find((f) => f.id === selectedFormationId) ?? null;
 
   if (!loadedGameState || !formation) {
     return (
       <div
         className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
-        style={DETAIL_PANEL_STYLE}
+        style={getPanelRailStyle(railSlot, '24rem')}
       >
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
         <div className="p-4 space-y-4">
@@ -76,8 +81,8 @@ export function FormationDetail() {
 
   return (
     <div
-      className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl overflow-hidden"
-      style={{ ...DETAIL_PANEL_STYLE, width: '24rem' }}
+      className="panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl overflow-hidden"
+      style={getPanelRailStyle(railSlot, '24rem')}
     >
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
         <div className="flex items-center gap-2">
@@ -510,7 +515,14 @@ export function FormationDetail() {
                         <button
                           key={s.sector_id}
                           type="button"
-                          onClick={() => setSelectedCorpsFrontSectorId(s.sector_id)}
+                          onClick={() => useGameStore.setState({
+                            selectedArmyId,
+                            selectedCorpsId: selectedCorpsId ?? formation.id,
+                            selectedCorpsFrontSectorId: s.sector_id,
+                            selectedFormationId,
+                            selectedOperationKey: null,
+                            selectedOsid: null,
+                          })}
                           className="block w-full text-left text-interactive hover:underline truncate"
                           title={s.sector_id}
                         >
@@ -537,7 +549,14 @@ export function FormationDetail() {
                   <span className="text-text-secondary">Sector: </span>
                   <button
                     type="button"
-                    onClick={() => setSelectedCorpsFrontSectorId(sector.sector_id)}
+                    onClick={() => useGameStore.setState({
+                      selectedArmyId,
+                      selectedCorpsId: selectedCorpsId ?? formation.corps_id ?? null,
+                      selectedCorpsFrontSectorId: sector.sector_id,
+                      selectedFormationId,
+                      selectedOperationKey: null,
+                      selectedOsid: null,
+                    })}
                     className="text-interactive hover:underline"
                     title={sector.sector_id}
                   >

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { LoadedGameState } from '../data/types';
+import type { LoadedGameState, SummaryFocusSection } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 
@@ -105,7 +105,7 @@ function computeIvpScore(state: LoadedGameState): number {
   return Math.max(0, Math.min(100, raw * 20));
 }
 
-export function SituationTab({ state }: { state: LoadedGameState }) {
+export function SituationTab({ state, focusSection }: { state: LoadedGameState; focusSection?: SummaryFocusSection }) {
   const ipc = useIPC();
   const osidAreas = useOsidAreas();
   const territoryPct = computeTerritoryPercentages(state.controlBySettlement, osidAreas ?? undefined);
@@ -123,10 +123,30 @@ export function SituationTab({ state }: { state: LoadedGameState }) {
   const alliancePct = Math.max(0, Math.min(100, ((alliance + 1) / 2) * 100));
   const alerts: string[] = [];
   const [convoyMessage, setConvoyMessage] = useState<string | null>(null);
+  const playerOperations = [...(state.operations ?? [])]
+    .filter((operation) => operation.faction === playerFaction)
+    .sort((a, b) => a.name.localeCompare(b.name) || a.corps_id.localeCompare(b.corps_id));
+  const fragileOperations = playerOperations
+    .filter((operation) => (
+      (operation.supply_readiness ?? 1) < 0.6
+      || (operation.avg_cohesion ?? 100) < 70
+      || (operation.failure_count ?? 0) > 0
+      || (operation.consecutive_failures_on_current ?? 0) > 0
+    ))
+    .slice(0, 3);
+  const activeOpsecSectors = [...(state.corpsFrontSectors ?? [])]
+    .filter((sector) => sector.faction === playerFaction && sector.opsec_active)
+    .sort((a, b) => b.threat_ratio - a.threat_ratio || a.display_name.localeCompare(b.display_name));
 
   if (supply.cut > 0) alerts.push(`${supply.cut} supply channel(s) cut`);
   if (alliance < -0.25) alerts.push('RBiH-HRHB alliance under strain');
   if (ivpScore >= 60) alerts.push('International visibility pressure elevated');
+
+  useEffect(() => {
+    if (!focusSection || focusSection === 'overview') return;
+    const section = document.querySelector<HTMLElement>(`[data-summary-section="${focusSection}"]`);
+    section?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }, [focusSection]);
 
   const handleConvoyDecision = async (convoyId: string, decision: 'allow' | 'block' | 'divert') => {
     const result = await ipc.stageConvoyDecision(convoyId, decision);
@@ -135,7 +155,7 @@ export function SituationTab({ state }: { state: LoadedGameState }) {
 
   return (
     <div className="p-3 space-y-3 text-xs">
-      <section className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
+      <section data-summary-section="overview" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Territory</div>
         {FACTIONS.map((faction) => (
           <div key={faction} className="flex items-center justify-between">
@@ -152,7 +172,7 @@ export function SituationTab({ state }: { state: LoadedGameState }) {
         <div className="text-text-secondary">IVP: {ivpScore.toFixed(0)}</div>
       </section>
 
-      <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
+      <section data-summary-section="casualties" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Casualties</div>
         {FACTIONS.map((faction) => {
           const row = state.casualtyLedger?.[faction];
@@ -166,7 +186,7 @@ export function SituationTab({ state }: { state: LoadedGameState }) {
         })}
       </section>
 
-      <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
+      <section data-summary-section="ivp" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Alliance Gauge (RBiH-HRHB)</div>
         <div className="h-2 rounded bg-panel-bg overflow-hidden">
           <div className="h-full bg-interactive" style={{ width: `${alliancePct}%` }} />
@@ -191,8 +211,8 @@ export function SituationTab({ state }: { state: LoadedGameState }) {
         )}
       </section>
 
-      {state.pendingConvoyDecisions && state.pendingConvoyDecisions.length > 0 && (
-        <section className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
+      {(state.pendingConvoyDecisions && state.pendingConvoyDecisions.length > 0) && (
+        <section data-summary-section="convoys" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
           <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Humanitarian Convoys</div>
           {state.pendingConvoyDecisions.map((convoy) => (
             <div key={convoy.id} className="rounded border border-panel-border bg-panel-bg/60 p-2 space-y-1">
@@ -229,12 +249,47 @@ export function SituationTab({ state }: { state: LoadedGameState }) {
       )}
 
       {activeMunicipalitySupport && activeMunicipalitySupport.staged_turn === state.turn && (
-        <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
+        <section data-summary-section="support" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
           <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Phase E Local Support</div>
           <div className="text-text-secondary">{activeMunicipalitySupport.label}</div>
           <div className="text-text-secondary">Target municipality: {activeMunicipalitySupport.mun_id}</div>
         </section>
       )}
+
+      <section data-summary-section="opsec" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
+        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Operational Posture</div>
+        {activeOpsecSectors.length > 0 ? (
+          <div className="space-y-1.5">
+            {activeOpsecSectors.map((sector) => (
+              <div key={sector.sector_id} className="rounded border border-panel-border bg-panel-bg/60 p-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-text-primary">{sector.display_name}</span>
+                  <span className="text-[10px] uppercase tracking-wide text-accent-gold">OPSEC active</span>
+                </div>
+                <div className="text-text-secondary">
+                  Threat {sector.threat_ratio.toFixed(2)} · Intel {(sector.intel_confidence * 100).toFixed(0)}%
+                  {sector.offensive_signs ? ' · Offensive signs detected' : ''}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-text-secondary">No sectors are currently running OPSEC.</div>
+        )}
+        {fragileOperations.length > 0 && (
+          <div className="space-y-1.5 pt-1 border-t border-panel-border">
+            <div className="text-[10px] uppercase tracking-wide text-text-secondary">Operation health</div>
+            {fragileOperations.map((operation) => (
+              <div key={`${operation.corps_id}|${operation.name}`} className="flex items-center justify-between gap-2 text-text-secondary">
+                <span>{operation.name}</span>
+                <span className="text-right">
+                  Supply {Math.round((operation.supply_readiness ?? 0) * 100)}% · Failures {operation.failure_count ?? 0}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
       <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Alerts</div>

@@ -5,7 +5,7 @@ import { FACTION_COLORS } from '../utils/theme';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { collectSectorFriendlyOsids } from '../utils/sectorUtils';
 import { getOperationId, getOperationPhaseBadgeClass } from '../utils/operations';
-import { DETAIL_PANEL_STYLE } from './panelRail';
+import { getPanelRailStyle } from './panelRail';
 import { AccordionHeader } from './AccordionHeader';
 import { useIPC } from '../desktop/useIPC';
 
@@ -37,8 +37,8 @@ export function CorpsFrontPanel() {
   const ipc = useIPC();
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
+  const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const setSelectedSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
-  const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const panToOsid = useGameStore((s) => s.panToOsid);
@@ -88,8 +88,9 @@ export function CorpsFrontPanel() {
     [loadedGameState?.operations, _sector, sectorFriendlySet]
   );
 
-  // Formation detail takes priority — hide sector panel when a formation is selected
-  if (operationsPanelOpen || selectedFormationId || !selectedSectorId || !loadedGameState?.corpsFrontSectors) return null;
+  if (operationsPanelOpen || !selectedSectorId || !loadedGameState?.corpsFrontSectors) return null;
+
+  const railSlot = selectedCorpsId ? 'secondary' : 'primary';
 
   const sector = _sector;
   if (!sector) return null;
@@ -144,7 +145,7 @@ export function CorpsFrontPanel() {
   return (
     <div
       className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
-      style={DETAIL_PANEL_STYLE}
+      style={getPanelRailStyle(railSlot, '24rem')}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
@@ -196,6 +197,12 @@ export function CorpsFrontPanel() {
           <div className="text-neutral-600 mt-2 text-[10px] space-y-0.5 uppercase">
             <div><span className="font-bold text-neutral-800">FACTION:</span> <span className={FACTION_COLORS[sector.faction] ?? 'text-neutral-800'}>{sector.faction}</span></div>
             <div><span className="font-bold text-neutral-800">STANCE:</span> {corpsStance}</div>
+            <div>
+              <span className="font-bold text-neutral-800">OPSEC:</span>{' '}
+              <span className={sector.opsec_active ? 'text-amber-700 font-bold' : 'text-neutral-700'}>
+                {sector.opsec_active ? 'Active' : 'Inactive'}
+              </span>
+            </div>
             <div className="mt-1 pt-1 border-t border-neutral-300/50 flex items-center justify-between">
               <span><span className="font-bold text-neutral-800">CONFIDENCE:</span> {(sector.intel_confidence * 100).toFixed(0)}%</span>
               {sector.intel_confidence < 0.3 && <span className="text-red-700 font-bold bg-red-100 px-1 rounded">LOW</span>}
@@ -344,7 +351,13 @@ export function CorpsFrontPanel() {
                       type="button"
                       aria-label={`Assigned brigade ${f.name}${f.personnel != null ? `, personnel ${f.personnel.toLocaleString()}` : ''}`}
                       className="kbd-focus w-full flex justify-between items-center bg-white/50 hover:bg-neutral-200 transition-colors text-left px-1 py-0.5 rounded"
-                      onClick={() => setSelectedFormationId(f.id)}
+                      onClick={() => useGameStore.setState({
+                        selectedCorpsId,
+                        selectedCorpsFrontSectorId: selectedSectorId,
+                        selectedFormationId: f.id,
+                        selectedOperationKey: null,
+                        selectedOsid: null,
+                      })}
                       onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
                       onMouseLeave={() => setHoveredOsids([])}
                     >
@@ -369,7 +382,13 @@ export function CorpsFrontPanel() {
                       type="button"
                       aria-label={`Reserve brigade ${f.name}${f.personnel != null ? `, personnel ${f.personnel.toLocaleString()}` : ''}`}
                       className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-200 transition-colors text-left px-1 py-0.5 rounded"
-                      onClick={() => setSelectedFormationId(f.id)}
+                      onClick={() => useGameStore.setState({
+                        selectedCorpsId,
+                        selectedCorpsFrontSectorId: selectedSectorId,
+                        selectedFormationId: f.id,
+                        selectedOperationKey: null,
+                        selectedOsid: null,
+                      })}
                       onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
                       onMouseLeave={() => setHoveredOsids([])}
                     >

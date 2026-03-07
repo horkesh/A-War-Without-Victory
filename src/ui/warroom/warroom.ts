@@ -23,6 +23,16 @@ import gameStartBgUrl from './assets/game start.png?url';
 
 type CampaignScenarioKey = 'sep_1991' | 'apr_1992';
 
+const WARROOM_SCENE_WIDTH = 2752;
+const WARROOM_SCENE_HEIGHT = 1536;
+const WARROOM_FLAG_REGION_IDS = ['wall_flag_area', 'faction_flag'] as const;
+const WARROOM_CALENDAR_REGION_IDS = ['wall_calendar_area', 'wall_calendar'] as const;
+const WARROOM_SCENE_PLATE_URLS: Record<FactionId, string> = {
+    RBiH: bgUrl,
+    RS: bgUrl,
+    HRHB: bgUrl
+};
+
 interface DesktopBridge {
     startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
     setGameStateUpdatedCallback?: (cb: (stateJson: string) => void) => void;
@@ -45,7 +55,7 @@ class WarroomApp {
     private hoverRenderer = new HoverRenderer();
     private modalManager = new ModalManager();
 
-    private bgImage: HTMLImageElement | null = null;
+    private scenePlateImages: Map<FactionId, HTMLImageElement> = new Map();
     private flagImages: Map<string, HTMLImageElement> = new Map();
     private desktopBridge: DesktopBridge | null = null;
     /** Faction chosen in step 2, used when step 3 fires. */
@@ -63,9 +73,9 @@ class WarroomApp {
 
     constructor() {
         this.canvas = document.getElementById('warroom-canvas') as HTMLCanvasElement;
-        // Match the background's native resolution (hq_background_v3.png)
-        this.canvas.width = 2752;
-        this.canvas.height = 1536;
+        // Match the canonical warroom scene-plate resolution.
+        this.canvas.width = WARROOM_SCENE_WIDTH;
+        this.canvas.height = WARROOM_SCENE_HEIGHT;
         this.ctx = this.canvas.getContext('2d')!;
 
         this.init();
@@ -80,11 +90,9 @@ class WarroomApp {
             mainMenuEl.style.backgroundPosition = 'center, center';
         }
 
-        // Load background
-        this.bgImage = await this.loadImage(bgUrl);
-
-        // Load component assets and flag images in parallel
+        // Load scene-plate, component assets, and runtime overlays in parallel.
         await Promise.all([
+            this.loadScenePlateAssets(),
             this.calendar.loadAssets(),
             this.map.loadAssets(),
             this.loadFlagAssets()
@@ -169,6 +177,14 @@ class WarroomApp {
         }
 
         this.renderLoop();
+    }
+
+    private async loadScenePlateAssets() {
+        const entries = Object.entries(WARROOM_SCENE_PLATE_URLS) as Array<[FactionId, string]>;
+        const loaded = await Promise.all(entries.map(async ([factionId, src]) => [factionId, await this.loadImage(src)] as const));
+        for (const [factionId, image] of loaded) {
+            this.scenePlateImages.set(factionId, image);
+        }
     }
 
     private loadImage(src: string): Promise<HTMLImageElement> {
@@ -549,12 +565,14 @@ class WarroomApp {
         if (!this.gameState) return;
         const W = this.canvas.width;
         const H = this.canvas.height;
+        const playerFaction = (this.gameState.meta.player_faction ?? this.gameState.factions[0]?.id ?? 'RBiH') as FactionId;
+        const scenePlate = this.scenePlateImages.get(playerFaction) ?? this.scenePlateImages.get('RBiH') ?? null;
 
         this.ctx.clearRect(0, 0, W, H);
 
         // 1. Background (all props baked in)
-        if (this.bgImage) {
-            this.ctx.drawImage(this.bgImage, 0, 0, W, H);
+        if (scenePlate) {
+            this.ctx.drawImage(scenePlate, 0, 0, W, H);
         }
 
         // 2. Dynamic overlays: flag + calendar content
@@ -567,7 +585,9 @@ class WarroomApp {
             currentTurn: this.gameState.meta.turn,
             startTurn: 0
         });
-        const calendarBounds = this.regionManager.getScaledRegionById('wall_calendar');
+        const calendarBounds = WARROOM_CALENDAR_REGION_IDS
+            .map((regionId) => this.regionManager.getScaledRegionById(regionId))
+            .find((region) => region != null);
         if (calendarBounds) {
             this.ctx.drawImage(
                 calCanvas,
@@ -598,7 +618,9 @@ class WarroomApp {
     }
 
     private renderFlag(state: GameState) {
-        const flagRegion = this.regionManager.getScaledRegionById('faction_flag');
+        const flagRegion = WARROOM_FLAG_REGION_IDS
+            .map((regionId) => this.regionManager.getScaledRegionById(regionId))
+            .find((region) => region != null);
         if (!flagRegion) return;
         const factionId = state.meta.player_faction ?? state.factions[0]?.id;
         if (!factionId) return;

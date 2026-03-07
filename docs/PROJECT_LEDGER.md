@@ -7,6 +7,165 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-07] GUI Command Experience — Phase 4 visibility and polish
+
+### Summary
+- Turned the map summary flow into a focused command hub with explicit destinations for `ivp`, `convoys`, `casualties`, `support`, and `opsec`.
+- Extended the command-briefing routing contract so focused summary sections can be opened directly instead of always dropping the player into a generic overview.
+- Surfaced active OPSEC posture in the command briefing, summary shell, and sector dossier header using existing state only.
+- Made operation and enclave surfaces read more clearly in terms of command health/risk without adding new mechanics or analytics subsystems.
+
+### Architect decisions for later user review
+- **Accepted for this cut:** keep Phase 4 inside the canonical React map app (`App.tsx`, `WarSummaryModal.tsx`, `SituationTab.tsx`) instead of creating a parallel warroom-side command architecture.
+- **Accepted for this cut:** treat casualty pressure, OPSEC, and operation health as presentation/routing of existing state rather than new engine fields.
+- **Deferred:** supply-lines / corridor overlay remains a later dedicated slice; this pass only deep-links and summarizes corridor-related pressure textually.
+
+### Changes
+- `src/ui/map/data/types.ts`
+- `src/ui/map/data/GameStateAdapter.ts`
+- `src/ui/map/App.tsx`
+- `src/ui/map/components/TopToolbar.tsx`
+- `src/ui/map/components/CommandBriefingLayer.tsx`
+- `src/ui/map/components/WarSummaryModal.tsx`
+- `src/ui/map/components/SituationTab.tsx`
+- `src/ui/map/components/OperationsPanel.tsx`
+- `src/ui/map/components/EnclaveDashboard.tsx`
+- `src/ui/map/components/CorpsFrontPanel.tsx`
+- `tests/ui_map_game_state_adapter.test.ts`
+- `docs/40_reports/convenes/20260307_GUI_COMPREHENSIVE_REVIEW_PLAYER_PERSPECTIVE.md`
+- `docs/40_reports/implemented/20260307_GUI_COMMAND_EXPERIENCE_EXECUTION.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+- `.claude/napkin.md`
+
+### Verification
+- `node "F:\\A-War-Without-Victory\\node_modules\\tsx\\dist\\cli.mjs" --test "tests\\ui_map_game_state_adapter.test.ts"`
+- `npx tsc --noEmit`
+- `npx vitest run` -> 35 files passed, 351 tests passed, 1 skipped
+- `npm run desktop:map:build`
+
+### Scope / safeguards
+- No gameplay, canon, or persistence behavior changed.
+- No new overlay layer or new simulation mechanic was introduced.
+
+## [2026-03-07] GUI Command Experience — Warroom scene-plate contract, hotspot anchors, and faction identity
+
+### Summary
+- Locked the warroom as a scene-plate workflow in code: fixed `2752x1536` plate, faction-keyed plate lookup, and runtime exceptions limited to `flag`, `calendar`, and `ticker`.
+- Reframed hotspot routing around physical room anchors instead of legacy prop/action strings, while keeping legacy action compatibility during transition.
+- Renamed the canonical hotspot contract to room-object ids (`command_briefing_folio`, `newspaper_stack`, `intelligence_journal`, `diplomatic_telephone`, `desk_radio`, `wall_flag_area`, `wall_calendar_area`) and corrected flag/calendar to `runtime_overlay`.
+- Removed stale `DeskInstruments.ts` sprite-prop scaffolding that conflicted with the single-plate warroom art pipeline.
+- Added faction-specific ceremonial voice across warroom reports, newspaper, magazine, faction overview, and ticker surfaces.
+
+### Architect decisions for later user review
+- **Accepted for this cut:** `src/ui/warroom/warroom.ts` remains the sole scene composition root; no new sprite lane or secondary renderer.
+- **Accepted for this cut:** one shared hotspot geometry contract remains the default across faction variants; revisit only if art paint-overs materially change silhouettes.
+- **Accepted for this cut:** physical anchor ids drive behavior; old `action` strings are compatibility fallback, not the primary contract.
+- **Deferred:** whether faction overview should eventually migrate fully from `wall_flag_area` to a dedicated dossier/binder object once the next art pass adds that physical anchor.
+
+### Changes
+- `src/ui/warroom/warroom.ts`
+- `src/ui/warroom/ClickableRegionManager.ts`
+- `src/ui/warroom/components/warroom_identity.ts` (new)
+- `src/ui/warroom/components/ReportsModal.ts`
+- `src/ui/warroom/components/NewspaperModal.ts`
+- `src/ui/warroom/components/MagazineModal.ts`
+- `src/ui/warroom/components/FactionOverviewPanel.ts`
+- `src/ui/warroom/components/NewsTicker.ts`
+- `src/ui/warroom/public/data/ui/hq_clickable_regions.json`
+- `data/ui/hq_clickable_regions.json`
+- `src/ui/warroom/components/DeskInstruments.ts` (deleted)
+- `src/ui/warroom/data/ui/hq_clickable_regions.json` (deleted duplicate)
+- `docs/40_reports/convenes/20260307_GUI_COMPREHENSIVE_REVIEW_PLAYER_PERSPECTIVE.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+- `.claude/napkin.md`
+
+### Verification
+- `npx tsc --noEmit`
+- `npm run warroom:build`
+- `npx vitest run` -> 35 files passed, 351 tests passed, 1 skipped
+- `npm run desktop:map:build`
+
+### Scope / safeguards
+- No gameplay or scenario rules changed.
+- No new persistence schema added.
+- Warroom implementation now matches the scene-plate constraint instead of fighting it with detachable prop concepts.
+
+## [2026-03-07] GUI Command Experience — Phase 2 panel rail and right-drill flow
+
+### Summary
+- Implemented the second execution slice of the GUI command plan on the canonical map UI.
+- Added a deterministic panel-rail selector in `src/ui/map/components/panelRail.ts` and made `src/ui/map/App.tsx` the single composition root for primary/secondary detail panels.
+- Normalized settlement, army, corps, sector, formation, and operation detail surfaces onto the same slide-right rail semantics.
+- Rewired drill-down flows so parent context survives when opening child detail from army -> corps, corps -> sector / operation, and sector -> formation.
+- Normalized close / escape behavior so the detail rail clears predictably instead of leaving partial stale selections behind.
+
+### Architect decision for later user review
+- **Accepted for Phase 2:** keep panel precedence in a pure rail selector plus App-level mounting, not in scattered component-local hide logic.
+- **Accepted for Phase 2:** keep existing detail content mostly intact; this phase changes choreography and ownership, not panel substance.
+- **Deferred:** collapse or redesign the separate `OperationsPanel` browser surface during a later polish pass; for now `OperationDetail` is the canonical rail-mounted operation detail path.
+
+### Changes
+- `src/ui/map/components/panelRail.ts`
+- `src/ui/map/App.tsx`
+- `src/ui/map/store/gameStore.ts`
+- `src/ui/map/hooks/useKeyboardShortcuts.ts`
+- `src/ui/map/components/SelectionPanel.tsx`
+- `src/ui/map/components/ArmyDetail.tsx`
+- `src/ui/map/components/CorpsDetail.tsx`
+- `src/ui/map/components/CorpsFrontPanel.tsx`
+- `src/ui/map/components/FormationDetail.tsx`
+- `src/ui/map/components/OperationDetail.tsx`
+- `tests/ui_map_panel_rail.test.ts` (new)
+- `docs/40_reports/convenes/20260307_GUI_COMPREHENSIVE_REVIEW_PLAYER_PERSPECTIVE.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+- `.claude/napkin.md`
+
+### Verification
+- `node "F:\\A-War-Without-Victory\\node_modules\\tsx\\dist\\cli.mjs" --test "tests\\ui_map_panel_rail.test.ts"`
+- `node "F:\\A-War-Without-Victory\\node_modules\\tsx\\dist\\cli.mjs" --test "tests\\ui_map_game_state_adapter.test.ts"`
+- `npx tsc --noEmit`
+- `npx vitest run` -> 35 files passed, 351 tests passed, 1 skipped
+- `npm run desktop:map:build`
+
+### Scope / safeguards
+- No gameplay mechanics changed.
+- No persistence schema changed.
+- Rail precedence is deterministic and covered by focused tests.
+
+## [2026-03-07] GUI Command Experience — Phase 1 information hierarchy
+
+### Summary
+- Implemented the first execution slice of the GUI command plan on the canonical map UI.
+- Added a new `CommandBriefingLayer` mounted by `src/ui/map/App.tsx` and fed by a deterministic `commandBriefing` view-model derived in `src/ui/map/data/GameStateAdapter.ts`.
+- Reorganized `src/ui/map/components/TopToolbar.tsx` so player-facing command signals are separated from load/debug utility controls.
+- Kept routing intentionally thin: briefing items open existing surfaces (`OperationsPanel`, sector detail flow, summary modal, enclave dashboard) instead of creating a new panel system ahead of the panel-rail phase.
+
+### Architect decision for later user review
+- **Accepted for Phase 1:** keep the briefing as an App-mounted orchestrator, not a `TopToolbar` feature and not a `SituationTab`-only surface.
+- **Accepted for Phase 1:** keep urgency synthesis in `GameStateAdapter` via a derived view-model, not duplicated across React components.
+- **Deferred:** any coupling to the right-drill panel rail stays in the next phase.
+
+### Changes
+- `src/ui/map/data/types.ts`
+- `src/ui/map/data/GameStateAdapter.ts`
+- `src/ui/map/components/CommandBriefingLayer.tsx` (new)
+- `src/ui/map/components/TopToolbar.tsx`
+- `src/ui/map/App.tsx`
+- `tests/ui_map_game_state_adapter.test.ts`
+- `docs/40_reports/convenes/20260307_GUI_COMPREHENSIVE_REVIEW_PLAYER_PERSPECTIVE.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+- `.claude/napkin.md`
+
+### Verification
+- `npx tsc --noEmit`
+- `npx vitest run` -> 35 files passed, 351 tests passed, 1 skipped
+- `npm run desktop:map:build`
+
+### Scope / safeguards
+- No gameplay mechanics changed.
+- No new persistence or IPC contract added.
+- Deterministic ordering enforced in briefing derivation and tests.
+
 ## [2026-03-07] Operations System: Commander + Faction Name Pools
 
 ### Summary
@@ -11366,3 +11525,38 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 
 ### FORAWWV note
 - No `FORAWWV` update was required because this pass did not add or validate new canon-level design doctrine; it produced a research/handoff artifact only.
+
+## [2026-03-07] Warroom `nano banana` image and modal brief
+
+### Summary
+- Added a single detailed handover report for generating the warroom as a complete scene image rather than a modular prop/sprite kit.
+- Consolidated the art-direction guidance, `nano banana` prompts, faction variants, hotspot logic, and recommended warroom modal anchors into one report.
+- Recorded the pipeline constraint that only flag, calendar, and ticker remain separate runtime-rendered elements for the warroom.
+
+### Changes
+- Added `docs/40_reports/handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_BRIEF.md`.
+- Updated routing docs:
+  - `docs/40_reports/README.md`
+  - `docs/40_reports/CONSOLIDATED_BACKLOG.md`
+  - `docs/00_start_here/docs_index.md`
+- Updated continuity references:
+  - `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+  - `.claude/napkin.md`
+
+### Key findings recorded
+- The warroom image pipeline should use one stable scene plate per faction with post-generation hotspot outlining, not detached room props.
+- Shared composition should stay stable across faction variants so hotspot regions remain reusable.
+- Recommended warroom modal anchors are physical room objects: desk map, briefing folio, newspaper stack, telephone, radio, and archive binder/dossier.
+
+### Verification
+- Spot-checked:
+  - new handover report
+  - reports index
+  - backlog consolidation
+  - docs index
+  - ledger knowledge
+  - napkin
+
+### Notes
+- Documentation-only pass; no code or asset files were changed.
+- No `FORAWWV` update required.

@@ -2,6 +2,7 @@ import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { formatOperationType, turnToDateString, toTitleCase } from '../utils/formatters';
+import { getPanelRailStyle } from './panelRail';
 
 function PhaseBadge({ phase }: { phase: string }) {
   const cls =
@@ -35,6 +36,8 @@ function MomentumBar({ momentum }: { momentum: number }) {
  * Positioned at left: 19rem (second column, next to OOBSidebar).
  */
 export function OperationDetail() {
+  const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
+  const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
   const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -51,18 +54,12 @@ export function OperationDetail() {
 
   const objectives = op.objectives ?? [];
   const currentIdx = op.current_objective_index ?? 0;
+  const railSlot = selectedSectorId || selectedCorpsId ? 'secondary' : 'primary';
 
   return (
     <div
-      className="flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
-      style={{
-        position: 'absolute',
-        left: '19rem',
-        top: '3.5rem',
-        bottom: '2rem',
-        width: '20rem',
-        zIndex: 50,
-      }}
+      className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
+      style={getPanelRailStyle(railSlot, '20rem')}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">

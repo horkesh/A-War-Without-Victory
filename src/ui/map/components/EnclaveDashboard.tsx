@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { LoadedGameState } from '../data/types';
+import type { EnclaveResilienceView, LoadedGameState } from '../data/types';
 import { AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE, AIRDROP_MAX_SUPPLY_PER_TURN } from '../../../state/supply_reserve_constants';
 import { useIPC } from '../desktop/useIPC';
 
@@ -20,6 +20,28 @@ const AIRDROP_LABELS: Record<'receiving' | 'not_eligible' | 'not_isolated_long_e
   not_eligible: 'Not eligible',
   not_isolated_long_enough: 'Not isolated long enough',
 };
+
+function getEnclaveRisk(enclave: EnclaveResilienceView) {
+  if (enclave.supply_state === 'critical' || enclave.resilience <= 8) {
+    return {
+      label: 'Critical risk',
+      detail: `Resilience ${enclave.resilience.toFixed(1)} with ${enclave.isolation_turns} isolated turn(s).`,
+      className: 'text-red-400',
+    };
+  }
+  if (enclave.supply_state === 'strained' || enclave.isolation_turns >= 4) {
+    return {
+      label: 'Heightened risk',
+      detail: `Supply is strained after ${enclave.isolation_turns} isolated turn(s).`,
+      className: 'text-amber-300',
+    };
+  }
+  return {
+    label: 'Holding',
+    detail: 'Current resilience and supply posture remain manageable.',
+    className: 'text-green-400',
+  };
+}
 
 export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps) {
   const ipc = useIPC();
@@ -101,6 +123,7 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
             const hardeningMarkerPct = (8 / 30) * 100;
             const supplyState = enclave.supply_state ?? 'adequate';
             const airdropStatus = enclave.airdrop_status ?? 'not_eligible';
+            const risk = getEnclaveRisk(enclave);
             return (
               <div key={enclaveId} className="rounded border border-panel-border bg-panel-card/70 p-3 space-y-2">
                 <div className="flex items-center justify-between gap-2">
@@ -115,6 +138,13 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                   <div className={`text-[11px] font-mono ${enclave.hardening_active ? 'text-accent-gold' : 'text-text-secondary'}`}>
                     {enclave.hardening_active ? 'Hardening active' : 'Hardening inactive'}
                   </div>
+                </div>
+
+                <div className={`text-[11px] font-semibold uppercase tracking-wide ${risk.className}`}>
+                  {risk.label}
+                </div>
+                <div className="text-[11px] text-text-secondary">
+                  {risk.detail}
                 </div>
 
                 <div className="space-y-1">

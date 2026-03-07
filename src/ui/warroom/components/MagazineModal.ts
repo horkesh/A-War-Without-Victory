@@ -25,6 +25,7 @@ import {
     turnToMonthYear,
     turnToWeekString,
 } from './warroom_utils.js';
+import { getWarroomFactionIdentity } from './warroom_identity.js';
 
 interface MagazineContent {
     factionId: string;
@@ -203,6 +204,7 @@ export class MagazineModal {
     private createShell(factionId: FactionId): HTMLElement {
         const magazine = document.createElement('div');
         const fCss = factionCssClass(factionId);
+        const identity = getWarroomFactionIdentity(factionId);
         magazine.className = `magazine-modal weathered-panel faction-${fCss}`;
 
         const fc = FACTION_COLORS[factionId] ?? FACTION_COLORS['RBiH'];
@@ -214,6 +216,11 @@ export class MagazineModal {
         title.style.color = fc.primary;
         title.textContent = MAGAZINE_TITLES[factionId] ?? 'OPERATIONAL REVIEW';
         magazine.appendChild(title);
+
+        const subtitle = document.createElement('div');
+        subtitle.className = 'magazine-month-year';
+        subtitle.textContent = identity.ceremonialLine;
+        magazine.appendChild(subtitle);
 
         return magazine;
     }

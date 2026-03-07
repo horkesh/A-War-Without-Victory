@@ -21,6 +21,16 @@ function compareOperations(a: OperationView, b: OperationView): number {
   );
 }
 
+function getOperationHealthSummary(operation: OperationView): { label: string; className: string } {
+  if ((operation.supply_readiness ?? 1) < 0.4 || (operation.consecutive_failures_on_current ?? 0) >= 2) {
+    return { label: 'Fragile', className: 'text-red-300' };
+  }
+  if ((operation.supply_readiness ?? 1) < 0.6 || (operation.failure_count ?? 0) > 0) {
+    return { label: 'Strained', className: 'text-amber-300' };
+  }
+  return { label: 'Stable', className: 'text-green-300' };
+}
+
 export function OperationsPanel() {
   const ipc = useIPC();
   const isOpen = useGameStore((s) => s.isOperationsPanelOpen);
@@ -253,6 +263,7 @@ export function OperationsPanel() {
                   selectedOperation != null &&
                   id === getOperationId(selectedOperation);
                 const phaseBadgeClass = getOperationPhaseBadgeClass(op.phase);
+                const health = getOperationHealthSummary(op);
                 return (
                   <button
                     key={id}
@@ -274,9 +285,12 @@ export function OperationsPanel() {
                       {op.name}
                     </div>
                     <div className="text-[10px] text-text-secondary truncate">{op.corps_name}</div>
-                    <div className="mt-0.5">
+                    <div className="mt-0.5 flex items-center justify-between gap-2">
                       <span className={`px-1 py-0.5 rounded text-white text-[10px] uppercase font-semibold ${phaseBadgeClass}`}>
                         {toTitleCase(op.phase)}
+                      </span>
+                      <span className={`text-[10px] uppercase tracking-wide ${health.className}`}>
+                        {health.label}
                       </span>
                     </div>
                   </button>
