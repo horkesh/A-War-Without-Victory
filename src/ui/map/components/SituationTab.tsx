@@ -112,6 +112,13 @@ export function SituationTab({ state }: { state: LoadedGameState }) {
   const front = computeFrontSummary(state);
   const supply = computeSupplySummary(state);
   const ivpScore = computeIvpScore(state);
+  const playerFaction =
+    state.player_faction === 'RBiH' || state.player_faction === 'RS' || state.player_faction === 'HRHB'
+      ? state.player_faction
+      : null;
+  const activeMunicipalitySupport = playerFaction
+    ? state.municipalitySupportOrders?.[playerFaction]
+    : undefined;
   const alliance = state.war_alliance_rbih_hrhb ?? 0;
   const alliancePct = Math.max(0, Math.min(100, ((alliance + 1) / 2) * 100));
   const alerts: string[] = [];
@@ -218,6 +225,14 @@ export function SituationTab({ state }: { state: LoadedGameState }) {
             </div>
           ))}
           {convoyMessage && <div className="text-text-secondary">{convoyMessage}</div>}
+        </section>
+      )}
+
+      {activeMunicipalitySupport && activeMunicipalitySupport.staged_turn === state.turn && (
+        <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
+          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Phase E Local Support</div>
+          <div className="text-text-secondary">{activeMunicipalitySupport.label}</div>
+          <div className="text-text-secondary">Target municipality: {activeMunicipalitySupport.mun_id}</div>
         </section>
       )}
 

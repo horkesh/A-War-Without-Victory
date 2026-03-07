@@ -238,6 +238,14 @@ export interface PendingConvoyDecisionView {
     decision?: 'allow' | 'block' | 'divert';
 }
 
+export interface MunicipalitySupportOrderView {
+    faction: Exclude<FactionId, null>;
+    mun_id: string;
+    type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package';
+    staged_turn: number;
+    label: string;
+}
+
 export interface AttackOrderView {
     brigadeId: string;
     targetSettlementId: string;
@@ -351,6 +359,7 @@ export interface LoadedGameState {
     internationalVisibilityPressure?: InternationalVisibilityPressureView;
     ivpConsequencesActive?: string[];
     pendingConvoyDecisions?: PendingConvoyDecisionView[];
+    municipalitySupportOrders?: Partial<Record<'RS' | 'RBiH' | 'HRHB', MunicipalitySupportOrderView>>;
     sarajevoTunnelOperational?: boolean;
     phaseIiSupplyPressure?: Record<string, number>;
     phaseIiExhaustion?: Record<string, number>;

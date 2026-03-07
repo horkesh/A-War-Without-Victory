@@ -12,6 +12,7 @@ import type {
     OperationView, RepositionOrderView, RecruitmentView,
 } from './types';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
+import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_support.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
@@ -663,6 +664,23 @@ export function parseGameState(json: unknown): LoadedGameState {
             .sort((a, b) => a.id.localeCompare(b.id))
         : undefined;
 
+    const municipalitySupportOrders = state.municipality_support_orders && typeof state.municipality_support_orders === 'object'
+        ? Object.fromEntries(
+            Object.entries(state.municipality_support_orders as Record<string, Record<string, unknown>>)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .flatMap(([faction, order]) => {
+                    if ((faction !== 'RS' && faction !== 'RBiH' && faction !== 'HRHB') || !order || typeof order !== 'object') return [];
+                    const mun_id = typeof order.mun_id === 'string' ? order.mun_id : '';
+                    const type = order.type === 'weapons_shipment' || order.type === 'staff_priority' || order.type === 'croatian_support_package'
+                        ? order.type
+                        : null;
+                    const staged_turn = finiteNumber(order.staged_turn, -1);
+                    if (!mun_id || !type || staged_turn < 0) return [];
+                    return [[faction, { faction, mun_id, type, staged_turn, label: getMunicipalitySupportLabel(faction) }]];
+                })
+        ) as LoadedGameState['municipalitySupportOrders']
+        : undefined;
+
     let phaseIiSupplyPressure: LoadedGameState['phaseIiSupplyPressure'] | undefined;
     const rawSupply = state.war_supply_pressure as Record<string, unknown> | undefined;
     if (rawSupply && typeof rawSupply === 'object' && !Array.isArray(rawSupply)) {
@@ -1095,7 +1113,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         formations, militiaPools, controlBySettlement, statusBySettlement,
         brigadeAorByFormationId, brigadeFrontAssignment, theatres, armyTheatreAssignment,
         attackOrders, aorOrders, recentControlEvents, recruitment,
-        armyStance, casualtyLedger, civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions,
+        armyStance, casualtyLedger, civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
         sarajevoTunnelOperational: Boolean(state.sarajevo_tunnel_operational), phaseIiSupplyPressure, phaseIiExhaustion,
         player_faction: playerFaction ?? undefined,
         rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,

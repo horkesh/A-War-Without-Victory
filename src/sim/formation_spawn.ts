@@ -36,6 +36,11 @@ import { getEligiblePopulationCount } from './early_war/pool_population.js';
 import { type SiegeRatioByMunFaction, getSiegeRatio } from './early_war/compute_siege_state.js';
 import { isEmergentFormationSuppressed } from './recruitment_engine.js';
 import { getFactionDefaultOfficerQuality } from './combat/combat_math.js';
+import {
+    getActiveMunicipalitySupport,
+    HRHB_SUPPORT_PACKAGE_COHESION_BONUS,
+    RS_STAFF_PRIORITY_RATE_BONUS
+} from './combat/municipality_support.js';
 
 export interface SpawnFormationsOptions {
     /** If set, used for all factions; if omitted, per-faction nominal size from OOB is used (RBiH 1000, RS 2500, HRHB 1500). */
@@ -298,7 +303,12 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         const currentTurnNum = state.meta?.turn ?? 0;
         const factionMult = getFactionReinforcementMult(faction, currentTurnNum, state.war_timeline);
         const baseRate = isInCombat(f) ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
-        const rate = Math.max(1, Math.floor(baseRate * factionMult));
+        const localSupport = getActiveMunicipalitySupport(state, faction, mun_id, currentTurnNum);
+        const supportRateBonus =
+            localSupport?.type === 'staff_priority' && faction === 'RS'
+                ? RS_STAFF_PRIORITY_RATE_BONUS
+                : 0;
+        const rate = Math.max(1, Math.floor(baseRate * factionMult) + supportRateBonus);
 
         const need = Math.min(MAX_BRIGADE_PERSONNEL - current, rate);
         const reserveForSpawn = reservedSpawnManpowerForReinforcement(state, mun_id, faction, spawnDirectiveActive);
@@ -311,6 +321,10 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         pool.available -= transfer;
         pool.committed += transfer;
         pool.updated_turn = currentTurn;
+        if (localSupport?.type === 'croatian_support_package' && faction === 'HRHB') {
+            const cohesion = typeof f.cohesion === 'number' ? f.cohesion : 0;
+            f.cohesion = Math.min(100, cohesion + HRHB_SUPPORT_PACKAGE_COHESION_BONUS);
+        }
 
         report.formations_reinforced += 1;
         report.manpower_added += transfer;

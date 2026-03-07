@@ -46,6 +46,7 @@ interface WindowAwwv {
     stageAirdropAllocation: (allocations: Record<string, number>) => Promise<{ ok: boolean; error?: string }>;
     stageConvoyDecision: (convoyId: string, decision: 'allow' | 'block' | 'divert') => Promise<{ ok: boolean; error?: string }>;
     stageOpsecToggle: (sectorId: string, active: boolean) => Promise<{ ok: boolean; error?: string }>;
+    stageMunicipalitySupportOrder: (payload: { faction: 'RS' | 'RBiH' | 'HRHB'; munId: string; type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }) => Promise<{ ok: boolean; error?: string }>;
     clearOrders: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     assignBrigadeToFront: (brigadeId: string, frontId: string) => Promise<{ ok: boolean; error?: string }>;
     renameFrontSegment: (frontId: string, name: string) => Promise<{ ok: boolean; error?: string }>;
@@ -190,6 +191,10 @@ export function useIPC() {
             stageOpsecToggle: awwv
                 ? (sectorId: string, active: boolean) => awwv.stageOpsecToggle(sectorId, active)
                 : (_sectorId: string, _active: boolean) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
+
+            stageMunicipalitySupportOrder: awwv
+                ? (payload: { faction: 'RS' | 'RBiH' | 'HRHB'; munId: string; type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }) => awwv.stageMunicipalitySupportOrder(payload)
+                : (_payload: { faction: 'RS' | 'RBiH' | 'HRHB'; munId: string; type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
 
             clearOrders: awwv
                 ? (brigadeId: string) => awwv.clearOrders(brigadeId)

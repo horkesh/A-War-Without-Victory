@@ -287,3 +287,23 @@ test('parseGameState derives operation readiness and offensive metadata', () => 
     assert.equal(operation?.avg_cohesion, 70);
     assert.equal(operation?.avg_personnel_pct, 0.7);
 });
+
+test('parseGameState exposes municipality support orders for the player faction UI', () => {
+    const parsed = parseGameState({
+        meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },
+        formations: {},
+        political_controllers: {},
+        municipality_support_orders: {
+            RBiH: {
+                faction: 'RBiH',
+                mun_id: 'gorazde',
+                type: 'weapons_shipment',
+                staged_turn: 9,
+            }
+        }
+    });
+
+    assert.equal(parsed.municipalitySupportOrders?.RBiH?.mun_id, 'gorazde');
+    assert.equal(parsed.municipalitySupportOrders?.RBiH?.type, 'weapons_shipment');
+    assert.equal(parsed.municipalitySupportOrders?.RBiH?.label, 'Weapons shipment');
+});

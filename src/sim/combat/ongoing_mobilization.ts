@@ -15,6 +15,10 @@ import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { buildSettlementsByMun } from '../early_war/control_strain.js';
 import {
+    getActiveMunicipalitySupport,
+    RBIH_WEAPONS_SHIPMENT_BONUS
+} from './municipality_support.js';
+import {
     getEligiblePopulationCount,
     getMunicipalityController,
     runDisplacedAndCrossEthnicContributions
@@ -251,12 +255,17 @@ export function runOngoingMobilization(
             Math.floor(raw),
             MAX_MOBILIZATION_PER_MUN_PER_TURN
         );
-        if (mobilized <= 0) continue;
+        const localSupport = getActiveMunicipalitySupport(state, controller, munId, currentTurn);
+        const shipmentBonus =
+            localSupport?.type === 'weapons_shipment' && controller === 'RBiH'
+                ? RBIH_WEAPONS_SHIPMENT_BONUS
+                : 0;
+        if (mobilized + shipmentBonus <= 0) continue;
 
-        pool.available += mobilized;
+        pool.available += mobilized + shipmentBonus;
         pool.updated_turn = currentTurn;
-        report.total_mobilized += mobilized;
-        report.by_faction[controller] = (report.by_faction[controller] ?? 0) + mobilized;
+        report.total_mobilized += mobilized + shipmentBonus;
+        report.by_faction[controller] = (report.by_faction[controller] ?? 0) + mobilized + shipmentBonus;
         report.municipalities_contributing += 1;
         if (isPocket) report.pocket_municipalities = (report.pocket_municipalities ?? 0) + 1;
     }

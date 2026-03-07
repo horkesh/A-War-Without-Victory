@@ -110,4 +110,51 @@ describe('runOngoingMobilization', () => {
         expect(r1.total_mobilized).toBe(r2.total_mobilized);
         expect(r1.municipalities_contributing).toBe(r2.municipalities_contributing);
     });
+
+    it('applies an RBiH weapons shipment as a small local manpower boost without changing other municipalities', () => {
+        const rbihSettlements = new Map<string, SettlementRecord>([
+            ['S1', { sid: 'S1', source_id: 's1', mun_code: 'MUN_X', mun: 'MUN_X', mun1990_id: 'MUN_X' }],
+            ['S2', { sid: 'S2', source_id: 's2', mun_code: 'MUN_Y', mun: 'MUN_Y', mun1990_id: 'MUN_Y' }],
+        ]);
+        const rbihPop = {
+            MUN_X: { total: 10000, bosniak: 7000, serb: 1500, croat: 1000, other: 500 },
+            MUN_Y: { total: 10000, bosniak: 7000, serb: 1500, croat: 1000, other: 500 },
+        };
+        const basePools = {
+            [militiaPoolKey('MUN_X', 'RBiH')]: { mun_id: 'MUN_X', faction: 'RBiH', available: 100, committed: 0, exhausted: 0, updated_turn: 4 },
+            [militiaPoolKey('MUN_Y', 'RBiH')]: { mun_id: 'MUN_Y', faction: 'RBiH', available: 100, committed: 0, exhausted: 0, updated_turn: 4 },
+        };
+        const baseline = {
+            ...minimalPhaseIIState({ militia_pools: structuredClone(basePools) }),
+            political_controllers: { S1: 'RBiH', S2: 'RBiH' },
+            municipalities: {
+                MUN_X: { stability_score: 50, control: 'consolidated' as const },
+                MUN_Y: { stability_score: 50, control: 'consolidated' as const },
+            },
+        } as GameState;
+        const boosted = {
+            ...minimalPhaseIIState({ militia_pools: structuredClone(basePools) }),
+            political_controllers: { S1: 'RBiH', S2: 'RBiH' },
+            municipalities: {
+                MUN_X: { stability_score: 50, control: 'consolidated' as const },
+                MUN_Y: { stability_score: 50, control: 'consolidated' as const },
+            },
+            municipality_support_orders: {
+                RBiH: {
+                    faction: 'RBiH',
+                    mun_id: 'MUN_X',
+                    type: 'weapons_shipment',
+                    staged_turn: 5,
+                }
+            }
+        } as GameState;
+
+        runOngoingMobilization(baseline, rbihSettlements, rbihPop);
+        runOngoingMobilization(boosted, rbihSettlements, rbihPop);
+
+        expect(boosted.militia_pools![militiaPoolKey('MUN_X', 'RBiH')].available)
+            .toBeGreaterThan(baseline.militia_pools![militiaPoolKey('MUN_X', 'RBiH')].available);
+        expect(boosted.militia_pools![militiaPoolKey('MUN_Y', 'RBiH')].available)
+            .toBe(baseline.militia_pools![militiaPoolKey('MUN_Y', 'RBiH')].available);
+    });
 });

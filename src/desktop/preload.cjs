@@ -57,6 +57,7 @@ contextBridge.exposeInMainWorld('awwv', {
   stageAirdropAllocation: (allocations) => ipcRenderer.invoke('stage-airdrop-allocation', { allocations }),
   stageConvoyDecision: (convoyId, decision) => ipcRenderer.invoke('stage-convoy-decision', { convoyId, decision }),
   stageOpsecToggle: (sectorId, active) => ipcRenderer.invoke('stage-opsec-toggle', { sectorId, active }),
+  stageMunicipalitySupportOrder: (payload) => ipcRenderer.invoke('stage-municipality-support-order', payload),
   focusWarroom: () => ipcRenderer.invoke('focus-warroom'),
   getMapServerUrl: () => ipcRenderer.invoke('get-map-server-url'),
 });
