@@ -256,7 +256,7 @@ export class ClickableRegionManager {
             return;
         }
 
-        const panel = new FactionOverviewPanel(gameState as GameState);
+        const panel = new FactionOverviewPanel(gameState as GameState, this.modalManager);
         this.modalManager.showModal(panel.render());
     }
 

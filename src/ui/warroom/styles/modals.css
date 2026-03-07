@@ -1298,3 +1298,139 @@
     color: #8899aa;
     font-style: italic;
 }
+
+/* ─── Settlement Info Panel (Warroom) ──────────── */
+.settlement-info-panel {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 320px;
+    height: 100%;
+    background: #0d0d1a;
+    border-left: 2px solid #252540;
+    display: flex;
+    flex-direction: column;
+    z-index: 1500;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.settlement-info-header-row {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid #252540;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.settlement-info-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #e0e6ef;
+}
+
+.settlement-tag {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 2px;
+    letter-spacing: 0.5px;
+}
+.settlement-tag.strategic {
+    background: rgba(196, 163, 90, 0.15);
+    color: #c4a35a;
+    border: 1px solid rgba(196, 163, 90, 0.3);
+}
+.settlement-tag.hub {
+    background: rgba(0, 232, 120, 0.1);
+    color: #00e878;
+    border: 1px solid rgba(0, 232, 120, 0.3);
+}
+
+.settlement-info-tabs {
+    display: flex;
+    background: #0a0a1a;
+    border-bottom: 1px solid #252540;
+}
+
+.settlement-info-tab {
+    flex: 1;
+    padding: 10px 4px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #555570;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.settlement-info-tab:hover {
+    color: #8888a0;
+    background: rgba(255, 255, 255, 0.02);
+}
+.settlement-info-tab.active {
+    color: #c4a35a;
+    border-bottom-color: #c4a35a;
+    background: rgba(196, 163, 90, 0.05);
+}
+
+.settlement-info-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.settlement-info-section {
+    margin-bottom: 20px;
+}
+
+.settlement-info-section-header {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #555570;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #1a1a30;
+    padding-bottom: 4px;
+}
+
+.settlement-info-field-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 11px;
+}
+.settlement-info-field-row .label {
+    color: #8888a0;
+}
+.settlement-info-field-row .value {
+    color: #d8d8e0;
+}
+
+.demographic-bar-container {
+    flex: 1;
+    height: 4px;
+    background: #1a1a30;
+    margin: 0 10px;
+    border-radius: 2px;
+    overflow: hidden;
+}
+.demographic-bar {
+    height: 100%;
+    background: rgba(180, 160, 130, 0.4);
+}
+
+.settlement-info-provenance {
+    font-size: 9px;
+    color: #444460;
+    font-style: italic;
+    margin-top: 8px;
+    text-align: right;
+}

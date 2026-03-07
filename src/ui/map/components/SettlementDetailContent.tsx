@@ -59,14 +59,19 @@ export function SettlementDetailContent({
   const municipality = str(props.mun1990_name || props.mun1990_id);
   const controller = getByOsid(controlBySettlement, osid);
   const popOriginal = num(props.population_total) || (num(props.population_bosniaks) + num(props.population_serbs) + num(props.population_croats) + num(props.population_others));
+
+  const terrain = toTitleCase(str(props.terrain || props.zone_type));
+  const isStrategic = props.municipal_seat === true || props.strategic === true || popOriginal > 5000;
+  const isHub = props.transit_hub === true || props.junction === true;
+
+  const terrainModifier = terrain === 'Urban' ? '+25% Def' : terrain === 'Mountain' ? '+40% Def' : terrain === 'Forest' ? '+15% Def' : null;
+
   const ethnic = [
     { label: 'Bosniak', pct: popOriginal ? (num(props.population_bosniaks) / popOriginal) * 100 : 0 },
     { label: 'Serb', pct: popOriginal ? (num(props.population_serbs) / popOriginal) * 100 : 0 },
     { label: 'Croat', pct: popOriginal ? (num(props.population_croats) / popOriginal) * 100 : 0 },
     { label: 'Other', pct: popOriginal ? (num(props.population_others) / popOriginal) * 100 : 0 },
   ];
-  const terrain = toTitleCase(str(props.terrain || props.zone_type));
-  const strategic = props.municipal_seat === true || props.strategic === true;
 
   const munId = getMunIdForDisplacement(props);
   const disp = munId && displacementByMun?.[munId];
@@ -76,115 +81,133 @@ export function SettlementDetailContent({
       : null;
   const popDelta = currentPop != null && popOriginal > 0 ? currentPop - popOriginal : null;
 
-  const maxShow = variant === 'tooltip' ? 3 : 8;
+  const maxShow = variant === 'tooltip' ? 3 : 12;
   const showFormations = formationsAtOsid.slice(0, maxShow);
   const restCount = formationsAtOsid.length - maxShow;
 
   const isPanel = variant === 'panel';
-  const titleClass = isPanel ? 'font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold border-b border-panel-border pb-2 mb-3' : 'font-sans text-xs font-semibold text-accent-gold uppercase tracking-wide border-b border-panel-border pb-1 mb-2';
-  const rowClass = isPanel ? 'text-xs text-text-secondary mb-2' : 'text-[11px] text-text-secondary mb-1';
-  const rowClassLast = isPanel ? 'text-xs text-text-secondary mb-0' : 'text-[11px] text-text-secondary mt-1';
 
   return (
-    <div className={isPanel ? 'min-w-0' : 'min-w-[200px] max-w-[280px]'}>
-      <div className={titleClass}>{name}</div>
-      {municipality && (
-        <div className={rowClass}>Municipality: {municipality}</div>
-      )}
-      {controller && (
-        <div className={rowClass}>
-          <span className="text-text-secondary">Controller: </span>
-          <span className={FACTION_COLORS_SUBTLE[controller] ?? 'text-text-primary'}>{controller}</span>
-        </div>
-      )}
+    <div className={isPanel ? 'min-w-0' : 'min-w-[240px] max-w-[320px]'}>
+      {/* Strategic Tags */}
+      <div className="flex flex-wrap gap-1 mb-2">
+        {isStrategic && (
+          <span className="px-1.5 py-0.5 bg-accent-gold/20 text-accent-gold text-[9px] font-bold uppercase tracking-tighter rounded border border-accent-gold/30">
+            Strategic Center
+          </span>
+        )}
+        {isHub && (
+          <span className="px-1.5 py-0.5 bg-interactive/20 text-interactive text-[9px] font-bold uppercase tracking-tighter rounded border border-interactive/30">
+            Transit Hub
+          </span>
+        )}
+        {terrainModifier && (
+          <span className="px-1.5 py-0.5 bg-white/5 text-text-secondary text-[9px] font-bold uppercase tracking-tighter rounded border border-white/10">
+            {terrain}: {terrainModifier}
+          </span>
+        )}
+      </div>
 
-      {/* Population: original and (when loaded) current + change */}
-      {(popOriginal > 0 || currentPop != null) && (
-        <div className="space-y-1.5 mb-3">
-          <div className={rowClass}>
-            {currentPop != null ? (
-              <>
-                <span className="text-text-secondary">Pop (1991): </span>
-                <span className="text-text-primary">{popOriginal.toLocaleString()}</span>
-                <span className="text-text-secondary mx-2">→</span>
-                <span className="text-text-primary font-medium">{currentPop.toLocaleString()}</span>
+      <div className={isPanel ? 'font-sans text-sm text-accent-gold uppercase tracking-wide font-bold border-b border-panel-border pb-2 mb-3' : 'font-sans text-xs font-semibold text-accent-gold uppercase tracking-wide border-b border-panel-border pb-1 mb-2'}>
+        {name}
+      </div>
+
+      <div className="space-y-2.5">
+        {municipality && (
+          <div className="flex justify-between items-center text-[11px]">
+            <span className="text-text-secondary">Municipality</span>
+            <span className="text-text-primary font-medium">{municipality}</span>
+          </div>
+        )}
+
+        {controller && (
+          <div className="flex justify-between items-center text-[11px]">
+            <span className="text-text-secondary">Political Control</span>
+            <span className={`${FACTION_COLORS_SUBTLE[controller] ?? 'text-text-primary'} font-bold`}>{controller}</span>
+          </div>
+        )}
+
+        {/* Population Visualization */}
+        {(popOriginal > 0 || currentPop != null) && (
+          <div className="pt-2 border-t border-panel-border/30">
+            <div className="flex justify-between items-end mb-1">
+              <span className="text-[10px] text-text-secondary uppercase font-semibold">Population</span>
+              <div className="text-right">
+                <span className="text-xs font-mono text-text-primary">{(currentPop ?? popOriginal).toLocaleString()}</span>
                 {popDelta != null && popDelta !== 0 && (
-                  <span className={`ml-2 ${popDelta < 0 ? 'text-alert' : 'text-success'}`}>
+                  <span className={`ml-1.5 text-[10px] font-mono ${popDelta < 0 ? 'text-alert' : 'text-success'}`}>
                     {popDelta > 0 ? '+' : ''}{popDelta.toLocaleString()}
                   </span>
                 )}
-              </>
-            ) : (
-              <>
-                <span className="text-text-secondary">Pop: </span>
-                <span className="text-text-primary">{popOriginal.toLocaleString()}</span>
-              </>
+              </div>
+            </div>
+            {currentPop != null && popOriginal > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-1.5 bg-black/40 rounded overflow-hidden flex">
+                  <div
+                    className="h-full bg-accent-gold/60"
+                    style={{ width: `${Math.min(100, (currentPop / popOriginal) * 100)}%` }}
+                  />
+                </div>
+                <span className="text-[10px] text-text-secondary font-mono w-7 text-right">
+                  {Math.round((currentPop / popOriginal) * 100)}%
+                </span>
+              </div>
             )}
           </div>
-          {currentPop != null && popOriginal > 0 && (
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-2 bg-panel-card rounded overflow-hidden flex">
-                <div
-                  className="h-full bg-panel-active rounded-l"
-                  style={{ width: `${Math.min(100, (currentPop / popOriginal) * 100)}%` }}
-                  title="Current vs original"
-                />
-                <div
-                  className="h-full bg-panel-border"
-                  style={{ width: `${Math.max(0, 100 - (currentPop / popOriginal) * 100)}%` }}
-                />
-              </div>
-              <span className="text-[11px] text-text-secondary tabular-nums shrink-0">
-                {popOriginal > 0 ? Math.round((currentPop / popOriginal) * 100) : 0}%
-              </span>
-            </div>
-          )}
-        </div>
-      )}
+        )}
 
-      {ethnic.some((e) => e.pct > 0) && (
-        <div className="space-y-0.5 mb-3">
-          {ethnic.filter((e) => e.pct > 0).map((e) => (
-            <div key={e.label} className="flex items-center gap-2 text-[11px]">
-              <span className="text-text-secondary w-14 shrink-0">{e.label}</span>
-              <div className="flex-1 h-1.5 bg-panel-card rounded overflow-hidden">
-                <div
-                  className="h-full bg-panel-active rounded"
-                  style={{ width: `${Math.min(100, e.pct)}%` }}
-                />
+        {/* Demographics Bars */}
+        {ethnic.some((e) => e.pct > 0) && (
+          <div className="pt-1 space-y-1">
+            {ethnic.filter((e) => e.pct > 2).map((e) => (
+              <div key={e.label} className="grid grid-cols-[50px_1fr_30px] items-center gap-2 text-[10px]">
+                <span className="text-text-secondary truncate">{e.label}</span>
+                <div className="h-1 bg-black/30 rounded overflow-hidden">
+                  <div
+                    className="h-full bg-panel-active/40"
+                    style={{ width: `${e.pct}%` }}
+                  />
+                </div>
+                <span className="text-text-secondary font-mono text-right">{e.pct.toFixed(0)}%</span>
               </div>
-              <span className="tabular-nums w-8 text-right">{e.pct.toFixed(0)}%</span>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
-      {showFormations.length > 0 && (
-        <div className={`text-[11px] text-text-secondary ${isPanel ? 'border-t border-panel-border pt-2' : 'border-t border-panel-border pt-1'}`}>
-          <span className="text-text-secondary">
-            Brigade{formationsAtOsid.length !== 1 ? 's' : ''} ({formationsAtOsid.length}):
-          </span>
-          {showFormations.map((f) => (
-            <div key={f.id} className="flex items-center gap-2 py-0.5">
-              <span className={FACTION_COLORS_SUBTLE[f.faction] ?? 'text-text-primary'}>●</span>
-              <span className="text-text-primary truncate">{f.name}</span>
-              {f.kind && <span className="text-text-secondary shrink-0">{f.kind}</span>}
-              {f.personnel != null && (
-                <span className="text-text-secondary ml-auto tabular-nums">{f.personnel.toLocaleString()}</span>
+        {/* Stationed Units - Enhanced Rendering */}
+        {formationsAtOsid.length > 0 && (
+          <div className="pt-2 border-t border-panel-border/50">
+            <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1.5 flex justify-between">
+              <span>Stationed Units</span>
+              <span className="text-accent-gold">{formationsAtOsid.length}</span>
+            </div>
+            <div className="space-y-1">
+              {showFormations.map((f) => (
+                <div key={f.id} className="flex items-center gap-2 py-1 px-1.5 bg-black/10 rounded border border-white/5 hover:border-white/10 transition-colors">
+                  <span className={`w-1.5 h-1.5 rounded-full ${f.faction === 'RBiH' ? 'bg-green-600' : f.faction === 'RS' ? 'bg-red-600' : 'bg-blue-600'}`} />
+                  <span className="text-[10px] text-text-primary font-medium truncate flex-1">{f.name}</span>
+                  {f.personnel != null && (
+                    <span className="text-[9px] text-text-secondary font-mono tabular-nums">
+                      {f.personnel > 1000 ? `${(f.personnel / 1000).toFixed(1)}k` : f.personnel}
+                    </span>
+                  )}
+                </div>
+              ))}
+              {restCount > 0 && (
+                <div className="text-[9px] text-text-secondary text-right italic pt-0.5">+{restCount} additional units</div>
               )}
             </div>
-          ))}
-          {restCount > 0 && (
-            <div className="text-text-secondary pt-0.5">+{restCount} more</div>
-          )}
-        </div>
-      )}
-      {terrain && (
-        <div className={rowClass}>Terrain: {terrain}</div>
-      )}
-      {strategic && (
-        <div className={`${rowClassLast} text-accent-gold`}>◆ Municipal Seat</div>
-      )}
+          </div>
+        )}
+
+        {terrain && !terrainModifier && (
+          <div className="pt-1 flex justify-between text-[10px] text-text-secondary italic">
+            <span>Terrain Context</span>
+            <span>{terrain}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

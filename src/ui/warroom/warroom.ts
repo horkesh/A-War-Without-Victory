@@ -28,6 +28,7 @@ interface DesktopBridge {
     setGameStateUpdatedCallback?: (cb: (stateJson: string) => void) => void;
     getCurrentGameState?: () => Promise<string | null>;
     openTacticalMapWindow?: (payload?: { mode?: 'operational' | 'sandbox' }) => Promise<unknown>;
+    assignCommander?: (officerId: string, corpsId: string) => Promise<{ ok: boolean; error?: string }>;
     [key: string]: unknown;
 }
 
@@ -272,7 +273,7 @@ class WarroomApp {
                 const isViewingTacticalMap = tacticalScene && !tacticalScene.classList.contains('tactical-map-scene-hidden');
                 const isViewingWarPlanningMap = mapScene && !mapScene.classList.contains('map-scene-hidden');
                 if (!isViewingTacticalMap && !isViewingWarPlanningMap) {
-                    this.hideAllOverlays();
+                    this.showScreen('none');
                 }
             }, 0);
         } catch (error) {
@@ -291,24 +292,30 @@ class WarroomApp {
 
     // ── 3-step campaign flow: Main Menu → Side Picker → Scenario Picker ──
 
-    /** Hide all overlay screens. When andShowWarroom is true (default), also show the warroom scene so the first paint is the main menu, not the toolbar. */
-    private hideAllOverlays(andShowWarroom = true): void {
-        for (const id of ['main-menu', 'side-picker', 'scenario-picker']) {
-            document.getElementById(id)?.classList.add('mm-hidden');
+    /** Show a specific overlay screen and hide others. */
+    private showScreen(screenId: 'main-menu' | 'side-picker' | 'scenario-picker' | 'none'): void {
+        const screens = ['main-menu', 'side-picker', 'scenario-picker'];
+        for (const id of screens) {
+            const el = document.getElementById(id);
+            if (!el) continue;
+            if (id === screenId) el.classList.remove('mm-hidden');
+            else el.classList.add('mm-hidden');
         }
-        if (andShowWarroom) {
-            this.showWarroomScene();
+
+        const warroomScene = document.getElementById('warroom-scene');
+        if (warroomScene) {
+            // Hide warroom scene if showing main menu (Step 1)
+            if (screenId === 'main-menu') warroomScene.classList.add('warroom-scene-hidden');
+            else if (screenId === 'none') {
+                warroomScene.classList.remove('warroom-scene-hidden');
+                this.showWarroomScene();
+            }
         }
     }
 
-    /** STEP 1: Show the main menu title screen. Keeps warroom scene hidden so the central title/art is visible first. */
+    /** STEP 1: Show the main menu title screen. */
     private showMainMenu(): void {
-        const warroomScene = document.getElementById('warroom-scene');
-        if (warroomScene) warroomScene.classList.add('warroom-scene-hidden');
-        this.hideAllOverlays(false);
-        const menu = document.getElementById('main-menu');
-        if (menu) menu.classList.remove('mm-hidden');
-
+        this.showScreen('main-menu');
         // Enable "Continue" only if a game is already loaded
         const continueBtn = document.getElementById('mm-continue') as HTMLButtonElement | null;
         if (continueBtn) continueBtn.disabled = !this.gameState;
@@ -317,16 +324,10 @@ class WarroomApp {
     /** STEP 2: Show the side picker (faction selection). */
     private showSidePicker(): void {
         this.userNavigatedFromMenu = true;
-        this.hideAllOverlays(false);
-        const picker = document.getElementById('side-picker');
-        if (picker) picker.classList.remove('mm-hidden');
+        this.showScreen('side-picker');
 
-        // Defer flag image loads so the overlay appears immediately and clicks feel responsive
-        const flagMap: Record<string, string> = {
-            RBiH: flagRbihUrl,
-            RS: flagRsUrl,
-            HRHB: flagHrhbUrl,
-        };
+        // Defer flag image loads
+        const flagMap: Record<string, string> = { RBiH: flagRbihUrl, RS: flagRsUrl, HRHB: flagHrhbUrl };
         setTimeout(() => {
             for (const [fid, url] of Object.entries(flagMap)) {
                 const img = document.getElementById(`sp-flag-${fid}`) as HTMLImageElement | null;
@@ -341,15 +342,10 @@ class WarroomApp {
 
     /** STEP 3: Show the scenario picker. */
     private showScenarioPicker(): void {
-        this.hideAllOverlays(false);
-        const picker = document.getElementById('scenario-picker');
-        if (picker) picker.classList.remove('mm-hidden');
+        this.showScreen('scenario-picker');
 
-        // Defer scenario image loads so the overlay appears immediately
-        const scenarioImages: Record<string, string> = {
-            apr1992: scnApr1992Url,
-            sep1991: scnSep1991Url,
-        };
+        // Defer scenario image loads
+        const scenarioImages: Record<string, string> = { apr1992: scnApr1992Url, sep1991: scnSep1991Url };
         setTimeout(() => {
             for (const [key, src] of Object.entries(scenarioImages)) {
                 const img = document.getElementById(`scn-img-${key}`) as HTMLImageElement | null;
@@ -373,7 +369,7 @@ class WarroomApp {
         }
         if (continueBtn) {
             continueBtn.onclick = () => {
-                if (this.gameState) this.hideAllOverlays();
+                if (this.gameState) this.showScreen('none');
             };
         }
         // Load Save / Load Replay — placeholder for now

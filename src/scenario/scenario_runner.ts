@@ -24,6 +24,7 @@ import { updateMilitiaEmergence } from '../sim/early_war/militia_emergence.js';
 import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../sim/early_war/pool_population.js';
 import { initializeCorpsCommand } from '../sim/combat/corps_command.js';
 import { injectPrePlannedOperations } from '../sim/combat/pre_planned_operations.js';
+import { spawnJnaPhantomBrigades } from '../sim/combat/jna_phantom_brigades.js';
 import {
     initializeRecruitmentResources,
     runBotRecruitment
@@ -1245,6 +1246,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // Phase II entry: initialize corps command; location_osid via backfill (AoR phase-out).
         if (scenario.start_lifecycle_phase === 'war') {
             initializeCorpsCommand(state);
+            spawnJnaPhantomBrigades(state);
             injectPrePlannedOperations(state);
         }
         if (operationalData?.canonicalToOperational) {

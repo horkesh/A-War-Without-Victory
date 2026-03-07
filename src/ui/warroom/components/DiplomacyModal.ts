@@ -100,7 +100,7 @@ export class DiplomacyModal {
 
     private createModalShell(pf: FactionId): HTMLElement {
         const modal = document.createElement('div');
-        modal.className = `diplomacy-modal faction-${factionCssClass(pf)}`;
+        modal.className = `diplomacy-modal weathered-panel faction-${factionCssClass(pf)}`;
         const fc = FACTION_COLORS[pf] ?? FACTION_COLORS['RBiH'];
         modal.style.borderTop = `3px solid ${fc.primary}`;
         modal.style.width = '700px';
@@ -117,7 +117,7 @@ export class DiplomacyModal {
         const header = document.createElement('div');
         header.className = 'faction-overview-header';
         header.innerHTML = `
-            <h2>${title}</h2>
+            <h2 class="text-accent-gold">${title}</h2>
             <div class="meta">${turnToWeekString(turn)}</div>
         `;
         modal.appendChild(header);
@@ -126,7 +126,7 @@ export class DiplomacyModal {
     private createSection(title: string, contentHtml: string): HTMLElement {
         const section = document.createElement('div');
         section.className = 'faction-overview-section';
-        section.innerHTML = `<h3>${title}</h3>${contentHtml}`;
+        section.innerHTML = `<h3 class="text-accent-gold">${title}</h3>${contentHtml}`;
         return section;
     }
 

@@ -208,6 +208,18 @@ export interface TurnReport {
     officer_quality_update?: OfficerQualityReport;
     /** Named officer succession report */
     officer_succession?: OfficerSuccessionReport;
+    /** JNA phantom withdrawal events this turn */
+    jna_withdrawal_events?: Array<{
+        phantom_id: string;
+        phantom_name: string;
+        corps_id: string;
+        tanks_distributed: number;
+        artillery_distributed: number;
+        apcs_distributed: number;
+        tanks_to_reserve: number;
+        artillery_to_reserve: number;
+        apcs_to_reserve: number;
+    }>;
 }
 
 export interface TurnContext {

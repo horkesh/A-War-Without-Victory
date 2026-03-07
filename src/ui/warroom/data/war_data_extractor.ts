@@ -137,6 +137,7 @@ export interface OfficerListEntry {
     status: string;
     assigned_corps_id: string | null;
     acting_commander: boolean;
+    competence: number;
 }
 
 // Faction-specific diplomacy snapshots
@@ -701,6 +702,7 @@ function extractOfficersByFaction(
             status: typeof os?.status === 'string' ? os.status : 'active',
             assigned_corps_id: typeof os?.assigned_corps_id === 'string' ? os.assigned_corps_id : null,
             acting_commander: Boolean(os?.acting_commander),
+            competence: typeof (d as { competence?: number }).competence === 'number' ? (d as { competence: number }).competence : 3,
         });
     }
     list.sort((a, b) => sc(a.id, b.id));

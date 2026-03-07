@@ -163,6 +163,30 @@ export interface SectorIntelRecord {
     last_updated_turn: number;
 }
 
+/**
+ * Independent axis of advance within a multi-axis operation.
+ * Each axis has its own contiguous objective chain and assigned brigades.
+ * Multiple axes can converge on a shared terminal objective.
+ */
+export interface OperationAxis {
+    axis_id: string;
+    name: string;
+    assigned_brigades: FormationId[];
+    objectives: string[];
+    current_objective_index: number;
+    status: 'executing' | 'stalled' | 'complete';
+    failure_count: number;
+    consecutive_failures_on_current: number;
+    momentum: number;
+    last_result?: 'captured' | 'failed' | 'stalemate';
+    attack_attempt_count: number;
+    objective_capture_count: number;
+    movement_only_execution_turns: number;
+    idle_execution_turn_streak: number;
+    /** Friendly OSID where this axis's brigades stage during planning. */
+    staging_osid?: string;
+}
+
 /** Named corps operation (multi-turn: planning → execution → recovery). */
 export interface CorpsOperation {
     name: string;
@@ -172,34 +196,37 @@ export interface CorpsOperation {
     phase_started_turn: number;
     target_settlements?: SettlementId[];
     participating_brigades: FormationId[];
+    // --- Multi-axis structure (standard for all operations) ---
+    /** Independent axes of advance. When present, per-axis fields drive execution. */
+    axes?: OperationAxis[];
     // --- Sector offensive fields (type === 'sector_attack') ---
     /** Which sector this launches from. */
     sector_id?: string;
-    /** Ordered OSID targets (multi-OSID push). */
+    /** Ordered OSID targets (legacy flat list — used when axes is absent). */
     objectives?: string[];
-    /** Next OSID to attack (index into objectives). */
+    /** Next OSID to attack (legacy — used when axes is absent). */
     current_objective_index?: number;
     /** Turns of preparation required (from scope). */
     planning_duration?: number;
     /** Fraction of participating brigades with adequate supply (0-1). */
     supply_readiness?: number;
-    /** Consecutive objective captures (0-3, cap). */
+    /** Consecutive objective captures (legacy — used when axes is absent). */
     momentum?: number;
-    /** Result of last objective attack. */
+    /** Result of last objective attack (legacy — used when axes is absent). */
     last_result?: 'captured' | 'failed' | 'stalemate';
-    /** Total failures across all objectives. */
+    /** Total failures across all objectives (legacy — used when axes is absent). */
     failure_count?: number;
-    /** Consecutive failures on current objective. */
+    /** Consecutive failures on current objective (legacy — used when axes is absent). */
     consecutive_failures_on_current?: number;
     /** Friendly OSID where brigades stage during planning phase. */
     staging_osid?: string;
-    /** Cumulative objective attack attempts logged while this operation is active. */
+    /** Cumulative objective attack attempts (legacy — used when axes is absent). */
     attack_attempt_count?: number;
-    /** Cumulative objectives captured while this operation is active. */
+    /** Cumulative objectives captured (legacy — used when axes is absent). */
     objective_capture_count?: number;
-    /** Execution turns spent maneuvering without an attack attempt. */
+    /** Execution turns spent maneuvering (legacy — used when axes is absent). */
     movement_only_execution_turns?: number;
-    /** Consecutive execution turns with neither attack attempts nor movement progress. */
+    /** Consecutive idle execution turns (legacy — used when axes is absent). */
     idle_execution_turn_streak?: number;
     /** Operation-specific attack approval override. */
     min_attack_outcome?: CorpsDirective['min_attack_outcome'];
@@ -268,6 +295,8 @@ export interface CorpsCommandState {
     reserves_committed_until_turn?: number;
     /** Corps directive for subordinate brigades (generated each turn by corps AI). */
     directive?: CorpsDirective | null;
+    /** Queue of operation names to inject when current op completes. */
+    queued_operations?: string[];
 }
 
 /** Operational group activation order. */
@@ -312,7 +341,7 @@ export interface FormationOpsState {
 export type FormationReadinessState = 'forming' | 'active' | 'overextended' | 'degraded';
 
 // Phase I.0: Formation types (Systems Manual §4)
-export type FormationKind = 'militia' | 'brigade' | 'operational_group' | 'corps_asset' | 'corps' | 'og' | 'army_hq';
+export type FormationKind = 'militia' | 'brigade' | 'operational_group' | 'corps_asset' | 'corps' | 'og' | 'army_hq' | 'jna_phantom';
 
 export interface FormationState {
     id: FormationId;
@@ -399,6 +428,8 @@ export interface FormationState {
     elite_loan_state?: EliteLoanState;
     /** Formation lifecycle status. Default 'active'. Set by lifecycle event processing. */
     lifecycle_status?: 'active' | 'forming' | 'disbanded' | 'merged' | 'destroyed' | 'withdrawn';
+    /** Turn at which a JNA phantom brigade withdraws (equipment handed off, formation removed). */
+    withdrawal_turn?: number;
     /** VRS equipment decay factor [0,1]. Applied as multiplier to equipment ratio. 1.0 = full effectiveness, 0.6 = floor. */
     equipment_decay?: number;
     /** Brigade officer quality [0,1]. Abstracted command competence at brigade level. Grows with combat experience, decays with casualties. Faction defaults: VRS starts high (~0.55), ARBiH starts low (~0.05), HVO stable (~0.225). */
@@ -1414,6 +1445,12 @@ export interface GameState {
     corps_attack_axis_orders?: Record<FormationId, { edge_ids: string[]; created_turn?: number }>;
     /** Corps command state. Key: corps FormationId. */
     corps_command?: Record<FormationId, CorpsCommandState>;
+    /** Equipment reserve per corps: excess from JNA phantom withdrawals. Drawn during brigade reinforcement. */
+    corps_equipment_reserve?: Record<FormationId, { tanks: number; artillery: number; apcs: number }>;
+    /** Triggered operations that have been offered and accepted (operation name → turn accepted). */
+    triggered_operations_accepted?: Record<string, number>;
+    /** Triggered operations that have been declined (operation name → { declined_turn, decline_count }). */
+    declined_operations?: Record<string, { declined_turn: number; decline_count: number }>;
     /** Army-level stance per faction. */
     army_stance?: Record<FactionId, ArmyStance>;
     /** OG activation orders (consumed once per turn). */
@@ -1481,19 +1518,26 @@ export interface GameState {
     /** Sector ids with OPSEC active. */
     opsec_sectors?: string[];
 
-    // --- Local Truces (Vienna Declaration, May 1992) ---
+    // --- Local Truces (Graz Accords, 6 May 1992) ---
     /**
-     * Turn at which the Vienna Declaration fired (RS-HRHB non-aggression).
-     * Once set, bot RS and HRHB corps filter each other's OSIDs from offensive_targets,
-     * except municipalities in the Posavina corridor and Jajce.
+     * Turn at which the Graz Accords fired (RS-HRHB non-aggression).
+     * Corps-pair truces (Herzegovina, 2KK/Tomislavgrad) + OSID-level Kiseljak exclusion.
+     * Posavina NOT covered — VRS attacks freely.
+     * Field name kept as vienna_declaration_turn for save compatibility.
      */
     vienna_declaration_turn?: number;
     /**
-     * Turn at which each faction broke the Vienna Declaration truce.
+     * Turn at which each faction broke the Graz Accords truce.
      * Key: FactionId ('RS' or 'HRHB'). Value: turn number.
      * When set, the opponent bot receives an aggression modifier spike for 6 turns.
      */
     truce_broken_turn?: Record<FactionId, number>;
+    /** Per-faction acceptance of the Graz Accords. True = accepted. */
+    vienna_accepted?: Record<FactionId, boolean>;
+    /** True when the Kiseljak OSID-level exclusion has been broken by either side. */
+    vienna_kiseljak_broken?: boolean;
+    /** Which faction broke the Herzegovina corps-pair truce. null = unbroken. */
+    vienna_herzegovina_broken_by?: FactionId;
 }
 
 /**

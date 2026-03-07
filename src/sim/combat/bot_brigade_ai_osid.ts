@@ -20,11 +20,13 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import { getFormationTier } from '../../state/formation_constants.js';
 import type {
     BrigadePosture,
+    CorpsOperation,
     CorpsStance,
     FactionId,
     FormationId,
     FormationState,
-    GameState
+    GameState,
+    OperationAxis,
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -52,6 +54,7 @@ import type { SupplyStateByOsidReport } from '../../state/supply_state_derivatio
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import type { SettlementEthnicityData } from '../../data/settlement_ethnicity.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
+import { isMultiAxis, getAllAxisBrigades } from './sector_offensive.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -103,15 +106,32 @@ function outcomeFromRank(rank: number): DirectiveOutcome {
     return 'repulsed';
 }
 
+/** Find the axis a brigade belongs to, or null if flat/not found. */
+function getBrigadeAxis(op: CorpsOperation, brigadeId: FormationId): OperationAxis | null {
+    if (!isMultiAxis(op)) return null;
+    return op.axes!.find(a => a.assigned_brigades.includes(brigadeId)) ?? null;
+}
+
+/** Check if a brigade participates in the operation (axis-aware). */
+function isOperationParticipant(op: CorpsOperation, brigadeId: FormationId): boolean {
+    if (isMultiAxis(op)) {
+        return op.axes!.some(a => a.assigned_brigades.includes(brigadeId));
+    }
+    return op.participating_brigades.includes(brigadeId);
+}
+
 export function applySectorOffensiveDirectiveOverride(
     directive: import('../../state/game_state.js').CorpsDirective,
-    activeOp: import('../../state/game_state.js').CorpsOperation
+    activeOp: import('../../state/game_state.js').CorpsOperation,
+    brigadeId?: FormationId,
 ): import('../../state/game_state.js').CorpsDirective {
     if (activeOp.phase !== 'execution') {
         return directive;
     }
-    const objectives = activeOp.objectives ?? [];
-    const currentIdx = activeOp.current_objective_index ?? 0;
+    // Multi-axis: use the brigade's axis objectives
+    const axis = brigadeId ? getBrigadeAxis(activeOp, brigadeId) : null;
+    const objectives = axis ? axis.objectives : (activeOp.objectives ?? []);
+    const currentIdx = axis ? axis.current_objective_index : (activeOp.current_objective_index ?? 0);
     const currentObjective = objectives[currentIdx];
     if (typeof currentObjective !== 'string' || currentObjective.length === 0) {
         return directive;
@@ -123,11 +143,13 @@ export function applySectorOffensiveDirectiveOverride(
 }
 
 function getSectorOffensiveCurrentObjective(
-    activeOp: import('../../state/game_state.js').CorpsOperation | null | undefined
+    activeOp: import('../../state/game_state.js').CorpsOperation | null | undefined,
+    brigadeId?: FormationId,
 ): Osid | null {
     if (!activeOp) return null;
-    const objectives = activeOp.objectives ?? [];
-    const currentIdx = activeOp.current_objective_index ?? 0;
+    const axis = brigadeId ? getBrigadeAxis(activeOp, brigadeId) : null;
+    const objectives = axis ? axis.objectives : (activeOp.objectives ?? []);
+    const currentIdx = axis ? axis.current_objective_index : (activeOp.current_objective_index ?? 0);
     const currentObjective = objectives[currentIdx];
     return typeof currentObjective === 'string' && currentObjective.length > 0
         ? currentObjective as Osid
@@ -140,9 +162,11 @@ function getSectorOffensiveApproachOsids(
     faction: FactionId,
     adjacency: Map<Osid, Osid[]>,
     reverseMap: OperationalToCanonicalReverseMap,
+    brigadeId?: FormationId,
 ): Set<Osid> {
-    const objectives = activeOp.objectives ?? [];
-    const currentIdx = activeOp.current_objective_index ?? 0;
+    const axis = brigadeId ? getBrigadeAxis(activeOp, brigadeId) : null;
+    const objectives = axis ? axis.objectives : (activeOp.objectives ?? []);
+    const currentIdx = axis ? axis.current_objective_index : (activeOp.current_objective_index ?? 0);
     const approachOsids = new Set<Osid>();
     for (const objective of objectives.slice(currentIdx)) {
         for (const neighbor of adjacency.get(objective as Osid) ?? []) {
@@ -158,9 +182,12 @@ function getSectorOffensiveApproachOsids(
 }
 
 function getSectorOffensiveProbeThreshold(
-    activeOp: import('../../state/game_state.js').CorpsOperation
+    activeOp: import('../../state/game_state.js').CorpsOperation,
+    brigadeId?: FormationId,
 ): PredictedOutcome {
-    return (activeOp.momentum ?? 0) >= 2 ? 'stalemate' : 'costly_victory';
+    const axis = brigadeId ? getBrigadeAxis(activeOp, brigadeId) : null;
+    const momentum = axis ? (axis.momentum ?? 0) : (activeOp.momentum ?? 0);
+    return momentum >= 2 ? 'stalemate' : 'costly_victory';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -687,7 +714,7 @@ function isPartOfNamedOperation(state: GameState, formation: FormationState): bo
     if (!formation.corps_id || !state.corps_command) return false;
     const op = state.corps_command[formation.corps_id]?.active_operation;
     if (!op) return false;
-    return op.phase === 'execution' && op.participating_brigades.includes(formation.id);
+    return op.phase === 'execution' && isOperationParticipant(op, formation.id);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -970,7 +997,7 @@ function executeFactionDirectives(
         const activeOp = cmd?.active_operation;
         const isActiveSectorOperationParticipant =
             activeOp?.type === 'sector_attack' &&
-            activeOp.participating_brigades?.includes(brigade.id);
+            isOperationParticipant(activeOp, brigade.id);
 
         // Detachments (militia kind, < 500 personnel) only garrison — never attack.
         if (brigade.kind === 'militia' && getFormationTier(brigade) === 'detachment') {
@@ -1074,6 +1101,7 @@ function executeFactionDirectives(
                     faction,
                     adjacency,
                     reverseMap,
+                    brigade.id,
                 );
                 if (planningApproachOsids.size > 0 && !planningApproachOsids.has(loc)) {
                     const nearestApproach = findNearestFriendlyOsidInSet(
@@ -1087,17 +1115,20 @@ function executeFactionDirectives(
                     if (nearestApproach) {
                         result.column_march_orders[brigade.id] = nearestApproach;
                     }
-                } else if (activeOp15.staging_osid && loc !== activeOp15.staging_osid) {
-                    const nearestStaging = findNearestFriendlyOsidInSet(
-                        state,
-                        faction,
-                        loc,
-                        adjacency,
-                        reverseMap,
-                        new Set([activeOp15.staging_osid])
-                    );
-                    if (nearestStaging) {
-                        result.column_march_orders[brigade.id] = nearestStaging;
+                } else {
+                    const axisStaging = getBrigadeAxis(activeOp15, brigade.id)?.staging_osid ?? activeOp15.staging_osid;
+                    if (axisStaging && loc !== axisStaging) {
+                        const nearestStaging = findNearestFriendlyOsidInSet(
+                            state,
+                            faction,
+                            loc,
+                            adjacency,
+                            reverseMap,
+                            new Set([axisStaging])
+                        );
+                        if (nearestStaging) {
+                            result.column_march_orders[brigade.id] = nearestStaging;
+                        }
                     }
                 }
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
@@ -1110,7 +1141,7 @@ function executeFactionDirectives(
             }
 
             if (activeOp15.phase === 'execution') {
-                const currentObjective = getSectorOffensiveCurrentObjective(activeOp15);
+                const currentObjective = getSectorOffensiveCurrentObjective(activeOp15, brigade.id);
                 if (!currentObjective || getPoliticalControllerOSID(state, currentObjective, reverseMap) === faction) {
                     result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                     continue;
@@ -1131,9 +1162,11 @@ function executeFactionDirectives(
                 const directObjectiveAttack = targets.find((t) => t.osid === currentObjective);
                 const alreadyAssigned = chosenTargets.get(currentObjective) ?? 0;
                 if (directObjectiveAttack) {
-                    const probeThreshold = getSectorOffensiveProbeThreshold(activeOp15);
+                    const probeThreshold = getSectorOffensiveProbeThreshold(activeOp15, brigade.id);
                     const predictedOutcome = directObjectiveAttack.prediction.predicted_outcome;
-                    const adjacentOperationParticipants = (activeOp15.participating_brigades ?? []).filter((brigadeId) => {
+                    const axisBrigades = getBrigadeAxis(activeOp15, brigade.id)?.assigned_brigades
+                        ?? activeOp15.participating_brigades ?? [];
+                    const adjacentOperationParticipants = axisBrigades.filter((brigadeId) => {
                         const participant = state.formations?.[brigadeId];
                         if (!participant?.location_osid || participant.status !== 'active') return false;
                         return (adjacency.get(participant.location_osid) ?? []).includes(currentObjective);
@@ -1168,6 +1201,7 @@ function executeFactionDirectives(
                     faction,
                     adjacency,
                     reverseMap,
+                    brigade.id,
                 );
                 objectiveApproachOsids.delete(loc);
                 if (objectiveApproachOsids.size > 0) {
@@ -1319,7 +1353,7 @@ function executeFactionDirectives(
         // Sector offensive participation: override targets and thresholds
         const activeOpLater = corpsId ? state.corps_command?.[corpsId]?.active_operation : null;
         const isInSectorOffensive = activeOpLater?.type === 'sector_attack' &&
-            activeOpLater.participating_brigades?.includes(brigade.id);
+            isOperationParticipant(activeOpLater, brigade.id);
         if (isInSectorOffensive && activeOpLater) {
             if (activeOpLater.phase === 'recovery') {
                 // Recovery: forced defend
@@ -1329,7 +1363,7 @@ function executeFactionDirectives(
             if (activeOpLater.phase === 'execution') {
                 // Named operations are sequential: participating brigades should focus on the
                 // current objective, not opportunistically attack unrelated corps targets.
-                effectiveDirective = applySectorOffensiveDirectiveOverride(effectiveDirective, activeOpLater);
+                effectiveDirective = applySectorOffensiveDirectiveOverride(effectiveDirective, activeOpLater, brigade.id);
                 if (activeOpLater.min_attack_outcome) {
                     effectiveDirective = {
                         ...effectiveDirective,
@@ -1351,8 +1385,9 @@ function executeFactionDirectives(
                         min_attack_outcome: outcomeFromRank(Math.max(1, outcomeRank(effectiveDirective.min_attack_outcome) - 1)),
                     };
                 }
-                // Apply momentum bonuses
-                const momentum = activeOpLater.momentum ?? 0;
+                // Apply momentum bonuses (per-axis when multi-axis)
+                const brigadeAxis = getBrigadeAxis(activeOpLater, brigade.id);
+                const momentum = brigadeAxis ? (brigadeAxis.momentum ?? 0) : (activeOpLater.momentum ?? 0);
                 if (momentum > 0) {
                     const momentumAggression = momentum >= 3 ? 0.15 : momentum >= 2 ? 0.10 : 0.05;
                     effectiveDirective = {
@@ -1715,7 +1750,7 @@ export function generateAllBotOrdersOsid(
                 f != null &&
                 f.faction === faction &&
                 f.status === 'active' &&
-                (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'militia') &&
+                (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'militia' || f.kind === 'jna_phantom') &&
                 f.location_osid != null
             )
             .sort((a, b) => strictCompare(a.id, b.id));

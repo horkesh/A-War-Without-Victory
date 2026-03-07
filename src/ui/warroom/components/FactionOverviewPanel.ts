@@ -50,9 +50,11 @@ interface Phase0Snapshot {
 
 export class FactionOverviewPanel {
     private gameState: GameState;
+    private modalManager: any; // Using any for simplicity or import ModalManager if possible
 
-    constructor(gameState: GameState) {
+    constructor(gameState: GameState, modalManager: any) {
         this.gameState = gameState;
+        this.modalManager = modalManager;
     }
 
     /**
@@ -193,7 +195,7 @@ export class FactionOverviewPanel {
         const snap = this.generatePhase0Snapshot();
 
         const panel = document.createElement('div');
-        panel.className = `faction-overview-panel faction-${factionCssClass(snap.factionId as FactionId)}`;
+        panel.className = `panel-power-on weathered-panel faction-overview-panel faction-${factionCssClass(snap.factionId as FactionId)}`;
         const fc = FACTION_COLORS[snap.factionId] ?? FACTION_COLORS['RBiH'];
         panel.style.borderTop = `3px solid ${fc.primary}`;
 
@@ -201,8 +203,8 @@ export class FactionOverviewPanel {
         const header = document.createElement('div');
         header.className = 'faction-overview-header';
         header.innerHTML = `
-            <div class="fo-faction-badge" style="color:${fc.primary}">${snap.factionId}</div>
-            <h2>${snap.factionName}</h2>
+            <div class="fo-faction-badge text-accent-gold" style="color:${fc.primary}">${snap.factionId}</div>
+            <h2 class="text-accent-gold">${snap.factionName}</h2>
             <div class="meta">${turnToWeekString(snap.turn)} \u2014 PRE-WAR PHASE</div>
         `;
         panel.appendChild(header);
@@ -322,15 +324,15 @@ export class FactionOverviewPanel {
         const fc = FACTION_COLORS[pf] ?? FACTION_COLORS['RBiH'];
 
         const panel = document.createElement('div');
-        panel.className = `faction-overview-panel faction-${factionCssClass(pf)}`;
+        panel.className = `panel-power-on weathered-panel faction-overview-panel faction-${factionCssClass(pf)}`;
         panel.style.borderTop = `3px solid ${fc.primary}`;
 
         // Header
         const header = document.createElement('div');
         header.className = 'faction-overview-header';
         header.innerHTML = `
-            <div class="fo-faction-badge" style="color:${fc.primary}">${pf}</div>
-            <h2>${this.getFactionDisplayName(pf)}</h2>
+            <div class="fo-faction-badge text-accent-gold" style="color:${fc.primary}">${pf}</div>
+            <h2 class="text-accent-gold">${this.getFactionDisplayName(pf)}</h2>
             <div class="meta">${turnToWeekString(snap.turn)}</div>
         `;
         panel.appendChild(header);
@@ -469,13 +471,101 @@ export class FactionOverviewPanel {
         };
         for (const o of list) {
             const li = document.createElement('li');
+            li.style.display = 'flex';
+            li.style.justifyContent = 'space-between';
+            li.style.alignItems = 'center';
+            li.style.marginBottom = '4px';
+
+            const info = document.createElement('span');
             const corpsLabel = o.assigned_corps_id ? ` \u2014 ${o.assigned_corps_id}` : ' \u2014 \u2014';
             const actingLabel = o.acting_commander ? ' (Acting)' : '';
-            li.textContent = `${o.name} [${o.rank}] ${statusLabel(o.status)}${actingLabel}${corpsLabel}`;
+            info.textContent = `${o.name} [${o.rank}] ${statusLabel(o.status)}${actingLabel}${corpsLabel}`;
+            li.appendChild(info);
+
+            if (o.status === 'active' && o.assigned_corps_id) {
+                const changeBtn = document.createElement('button');
+                changeBtn.className = 'commander-change-btn';
+                changeBtn.textContent = 'CHANGE';
+                changeBtn.style.fontSize = '10px';
+                changeBtn.style.padding = '2px 6px';
+                changeBtn.style.marginLeft = '8px';
+                changeBtn.onclick = () => {
+                    this.showOfficerSelectionDialog(o.assigned_corps_id!, snap);
+                };
+                li.appendChild(changeBtn);
+            }
+
             ul.appendChild(li);
         }
         section.appendChild(ul);
         return section;
+    }
+
+    /**
+     * Show a sub-dialog to select a new commander from the reserve pool.
+     */
+    private showOfficerSelectionDialog(corpsId: string, snap: WarDataSnapshot): void {
+        const pf = snap.playerFaction;
+        const allOfficers = snap.officersByFaction?.[pf] || [];
+        const reserves = allOfficers.filter(o => o.status === 'reserve');
+
+        const dialog = document.createElement('div');
+        dialog.className = 'wr-dialog weathered-panel';
+        dialog.style.maxWidth = '400px';
+
+        let reservesHtml = '';
+        if (reserves.length === 0) {
+            reservesHtml = '<div class="wr-dialog-notice">No officers currently in reserve pool.</div>';
+        } else {
+            reservesHtml = `
+                <div class="officer-selection-list" style="max-height: 300px; overflow-y: auto; margin-top: 10px;">
+                    ${reserves.map(o => `
+                        <div class="officer-option" style="display: flex; justify-content: space-between; align-items: center; padding: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer;" 
+                             onclick="this.dispatchEvent(new CustomEvent('select-officer', { detail: { id: '${o.id}' }, bubbles: true }))">
+                            <span>${o.name} [${o.rank}]</span>
+                            <span style="font-size: 10px; color: #aaa;">Comp: ${o.competence}/5</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        dialog.innerHTML = `
+            <h2 class="text-accent-gold">ASSIGN COMMANDER</h2>
+            <div class="wr-dialog-body">
+                <div style="margin-bottom: 10px; font-size: 12px; color: #ccc;">Select a new commander for <strong>${corpsId}</strong></div>
+                ${reservesHtml}
+            </div>
+            <div class="wr-dialog-actions" style="margin-top: 15px;">
+                <button id="assign-cancel-btn" class="wr-btn wr-btn-secondary">CANCEL</button>
+            </div>
+        `;
+
+        this.modalManager.showModal(dialog);
+
+        // Handle selection
+        dialog.addEventListener('select-officer', async (e: any) => {
+            const officerId = e.detail.id;
+            const bridge = (window as any).awwv;
+            if (bridge?.assignCommander) {
+                try {
+                    const res = await bridge.assignCommander(officerId, corpsId);
+                    if (res.ok) {
+                        this.modalManager.hideModal();
+                        // The bridge will trigger a game-state-updated which will refresh the UI
+                    } else {
+                        alert(`Assignment failed: ${res.error}`);
+                    }
+                } catch (err) {
+                    console.error('Failed to assign commander:', err);
+                }
+            }
+        });
+
+        document.getElementById('assign-cancel-btn')!.onclick = () => {
+            // Re-show the faction overview panel
+            this.modalManager.showModal(this.render());
+        };
     }
 
     /**

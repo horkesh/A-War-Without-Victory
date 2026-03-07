@@ -61,7 +61,7 @@ import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supp
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { evaluateSectorOffensiveLaunch } from './sector_offensive.js';
 import { CONFIDENCE_ROUGH_STRENGTH } from './sector_intel_constants.js';
-import { getTruceBreakAggressionBonus, getTrucePartner, isViennaDeclarationActive, isTruceException } from '../local_truces.js';
+import { getTruceBreakAggressionBonus, shouldGrazBlockAttack, isGrazAccordsActive } from '../local_truces.js';
 import { getCorpsCommander, getEffectiveCompetence } from './officer_system.js';
 import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
 
@@ -1564,17 +1564,14 @@ export function generateCorpsDirectives(
             }
         }
 
-        // Vienna Declaration truce: RS and HRHB do not attack each other's OSIDs,
-        // except in the Posavina corridor and Jajce (truce exceptions).
-        if (isViennaDeclarationActive(state)) {
-            const trucePartner = getTrucePartner(faction);
-            if (trucePartner) {
-                const pc = state.political_controllers ?? {};
-                for (let i = offensiveTargets.length - 1; i >= 0; i--) {
-                    const osid = offensiveTargets[i]!;
-                    if (pc[osid] === trucePartner && !isTruceException(osid)) {
-                        offensiveTargets.splice(i, 1);
-                    }
+        // Graz Accords truce: corps-pair truce (Herzegovina) + OSID-level Kiseljak exclusion.
+        // Posavina and Krajina HRHB cells are NOT protected — VRS attacks freely.
+        if (isGrazAccordsActive(state)) {
+            const pc = state.political_controllers ?? {};
+            for (let i = offensiveTargets.length - 1; i >= 0; i--) {
+                const osid = offensiveTargets[i]!;
+                if (shouldGrazBlockAttack(state, corps.id, faction, osid, pc[osid] ?? '')) {
+                    offensiveTargets.splice(i, 1);
                 }
             }
         }

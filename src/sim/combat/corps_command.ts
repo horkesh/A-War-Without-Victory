@@ -131,7 +131,7 @@ export function initializeCorpsCommand(state: GameState): void {
         let subordinateCount = 0;
         for (const fid of formationIds) {
             const f = state.formations[fid];
-            if (f.corps_id === cid && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group') && f.status === 'active') {
+            if (f.corps_id === cid && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom') && f.status === 'active') {
                 subordinateCount++;
             }
         }

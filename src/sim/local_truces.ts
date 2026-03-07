@@ -1,22 +1,19 @@
 /**
- * Local Truces — Vienna Declaration (RS-HRHB Non-Aggression).
+ * Local Truces — Graz Accords (RS-HRHB Non-Aggression).
  *
- * Historical context: In May 1992 (~week 4), Bosnian Serb and Bosnian Croat
- * leaders met in Vienna and declared their war over. A de facto non-aggression
- * pact held across most of Bosnia. Fighting continued only in the Posavina
- * corridor and around Jajce, where RS and HRHB forces were entangled with each
- * other indirectly via RBiH presence.
+ * Historical context: On 6 May 1992 (~week 4), Bosnian Serb and Bosnian Croat
+ * leaders met in Graz, Austria, and agreed to divide Bosnia between them.
+ * A de facto non-aggression pact held in Herzegovina and around Kiseljak.
+ * Fighting continued in the Posavina corridor, Jajce, and central Bosnia
+ * where RS/HRHB forces were entangled with each other via RBiH presence.
  *
- * Mechanic:
- * - At VIENNA_DECLARATION_TURN, fire a narrative event and set
- *   state.vienna_declaration_turn.
- * - After that turn, bot AI (RS and HRHB corps) removes the other faction's
- *   controlled OSIDs from offensive_targets, except municipalities in
- *   TRUCE_EXCEPTION_MUNICIPALITIES.
- * - Player CAN still attack across the truce; this is recorded in
- *   state.truce_broken_turn (per-faction) and yields a warning notification.
- * - When a faction breaks the truce, the opponent bot gets an aggression
- *   modifier spike for TRUCE_BREAK_SPIKE_TURNS turns.
+ * Design (v2): Corps-pair truces + OSID-level Kiseljak exclusion.
+ * - Herzegovina: vrs_herzegovina ↔ hvo_southeast_herzegovina
+ *                vrs_2nd_krajina ↔ hvo_tomislavgrad
+ * - Kiseljak: 9 HRHB-held OSIDs (VRS cannot target) + 7 VRS-held OSIDs (HRHB cannot target)
+ * - NOT covered: Posavina, central Bosnia outside Kiseljak, Krajina HRHB cells
+ *
+ * Player agency: Accept/decline at w4. Break Herzegovina or Kiseljak independently.
  *
  * Deterministic: no randomness, no timestamps.
  */
@@ -27,28 +24,51 @@ import type { FactionId, GameState } from '../state/game_state.js';
 // Constants
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Week at which the Vienna Declaration fires (May 1992 ≈ week 4 of the scenario). */
-export const VIENNA_DECLARATION_TURN = 4;
+/** Week at which the Graz Accords fire (6 May 1992 ≈ week 4 of the scenario). */
+export const GRAZ_ACCORDS_TURN = 4;
+
+/** @deprecated Use GRAZ_ACCORDS_TURN. Alias kept for backward compatibility during migration. */
+export const VIENNA_DECLARATION_TURN = GRAZ_ACCORDS_TURN;
 
 /**
- * Municipalities where RS-HRHB fighting continued despite the declaration.
- * OSIDs in these municipalities are NOT covered by the truce.
- * Posavina corridor (historically contested RS/HRHB/RBiH zone) + Jajce.
+ * Corps pairs bound by the Herzegovina truce.
+ * When active, these corps do not generate attack orders against each other's territory.
  */
-export const TRUCE_EXCEPTION_MUNICIPALITIES = new Set([
-    // Posavina corridor
-    'brod',
-    'derventa',
-    'odzak',
-    'bosanski_samac',
-    'orasje',
-    // Jajce (RS-HRHB friction point through 1992)
-    'jajce',
+export const GRAZ_CORPS_PAIRS: readonly [string, string][] = [
+    ['vrs_herzegovina', 'hvo_southeast_herzegovina'],
+    ['vrs_2nd_krajina', 'hvo_tomislavgrad'],
+];
+
+/**
+ * Kiseljak OSID-level exclusion: VRS cannot target these HRHB-held OSIDs.
+ */
+export const GRAZ_KISELJAK_VRS_EXCLUSION = new Set([
+    'op:kiseljak:azapovici_2',
+    'op:kiseljak:bilalovac_2',
+    'op:kiseljak:borina',
+    'op:kiseljak:brnjaci_2',
+    'op:kiseljak:bukovica',
+    'op:kiseljak:drazevici',
+    'op:kiseljak:gromiljak_2',
+    'op:kiseljak:hercezi',
+    'op:kiseljak:kiseljak_2',
+]);
+
+/**
+ * Kiseljak OSID-level exclusion: HRHB cannot target these VRS-held OSIDs bordering Kiseljak.
+ */
+export const GRAZ_KISELJAK_HRHB_EXCLUSION = new Set([
+    'op:hadzici:misevici_2',
+    'op:hadzici:tarcin_2',
+    'op:ilidza:rudnik_2',
+    'op:visoko:bradve_2',
+    'op:visoko:buzic_mahala_2',
+    'op:visoko:rajcici_2',
+    'op:visoko:stuparici_2',
 ]);
 
 /**
  * Number of turns an aggression spike lasts after the opponent breaks the truce.
- * Represents the reactive military mobilization after a truce violation.
  */
 const TRUCE_BREAK_SPIKE_TURNS = 6;
 
@@ -59,23 +79,49 @@ const TRUCE_BREAK_AGGRESSION_SPIKE = 0.25;
 // Core queries
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Return true if the Vienna Declaration is currently active (fired and not permanently broken). */
-export function isViennaDeclarationActive(state: GameState): boolean {
-    return state.vienna_declaration_turn != null
-        && (state.meta?.turn ?? 0) >= state.vienna_declaration_turn;
+/** Return true if the Graz Accords are currently active (fired and accepted by both). */
+export function isGrazAccordsActive(state: GameState): boolean {
+    if (state.vienna_declaration_turn == null) return false;
+    if ((state.meta?.turn ?? 0) < state.vienna_declaration_turn) return false;
+    const accepted = state.vienna_accepted;
+    if (!accepted) return false;
+    return accepted['RS' as FactionId] === true && accepted['HRHB' as FactionId] === true;
+}
+
+/** @deprecated Use isGrazAccordsActive. */
+export const isViennaDeclarationActive = isGrazAccordsActive;
+
+/** Return true if the Herzegovina corps-pair truce is active (not broken). */
+export function isHerzegovinaTruceActive(state: GameState): boolean {
+    return isGrazAccordsActive(state) && state.vienna_herzegovina_broken_by == null;
+}
+
+/** Return true if the Kiseljak OSID exclusion is active (not broken). */
+export function isKiseljakExclusionActive(state: GameState): boolean {
+    return isGrazAccordsActive(state) && state.vienna_kiseljak_broken !== true;
 }
 
 /**
- * Return true if this OSID is in a municipality exempt from the truce.
- * OSIDs in Posavina corridor or Jajce can still be attacked across faction lines.
+ * Return the truce partner corps for a given corps under Herzegovina truce.
+ * Returns null if the corps is not in a Graz corps pair.
  */
-export function isTruceException(osid: string): boolean {
-    const mun = osid.split(':')[1];
-    return mun != null && TRUCE_EXCEPTION_MUNICIPALITIES.has(mun);
+export function getCorpsTrucePartner(corpsId: string): string | null {
+    for (const [a, b] of GRAZ_CORPS_PAIRS) {
+        if (corpsId === a) return b;
+        if (corpsId === b) return a;
+    }
+    return null;
 }
 
 /**
- * Return the truce partner for a given faction under the Vienna Declaration.
+ * Return true if this corps is part of a Graz corps pair.
+ */
+export function isCorpsInGrazPair(corpsId: string): boolean {
+    return getCorpsTrucePartner(corpsId) !== null;
+}
+
+/**
+ * Return the truce partner for a given faction under the Graz Accords.
  * RS ↔ HRHB. RBiH has no truce partner.
  */
 export function getTrucePartner(faction: FactionId): FactionId | null {
@@ -85,12 +131,56 @@ export function getTrucePartner(faction: FactionId): FactionId | null {
 }
 
 /**
+ * Check if an OSID is protected from a faction by the Kiseljak exclusion.
+ * Returns true if the faction should NOT attack this OSID.
+ */
+export function isKiseljakExcluded(osid: string, faction: FactionId): boolean {
+    if (faction === 'RS') return GRAZ_KISELJAK_VRS_EXCLUSION.has(osid);
+    if (faction === 'HRHB') return GRAZ_KISELJAK_HRHB_EXCLUSION.has(osid);
+    return false;
+}
+
+/**
+ * Should this corps skip offensive targeting against the given OSID's controller?
+ * Combines corps-pair truce check + Kiseljak exclusion.
+ * Used by bot_corps_ai directive generation.
+ */
+export function shouldGrazBlockAttack(
+    state: GameState,
+    corpsId: string,
+    faction: FactionId,
+    targetOsid: string,
+    targetController: FactionId | string,
+): boolean {
+    if (!isGrazAccordsActive(state)) return false;
+
+    const trucePartnerFaction = getTrucePartner(faction);
+    if (!trucePartnerFaction) return false;
+    if (targetController !== trucePartnerFaction) return false;
+
+    // Herzegovina corps-pair truce: block if corps is in a pair and truce is unbroken
+    if (isHerzegovinaTruceActive(state) && isCorpsInGrazPair(corpsId)) {
+        return true;
+    }
+
+    // Kiseljak OSID exclusion: block specific OSIDs regardless of corps
+    if (isKiseljakExclusionActive(state) && isKiseljakExcluded(targetOsid, faction)) {
+        return true;
+    }
+
+    return false;
+}
+
+/** @deprecated Use shouldGrazBlockAttack. */
+export const shouldViennaBlockAttack = shouldGrazBlockAttack;
+
+/**
  * Return extra aggression modifier for `faction` because the opponent broke the truce.
  * Returns TRUCE_BREAK_AGGRESSION_SPIKE for TRUCE_BREAK_SPIKE_TURNS turns after the break.
  * Returns 0 otherwise.
  */
 export function getTruceBreakAggressionBonus(faction: FactionId, state: GameState): number {
-    if (!isViennaDeclarationActive(state)) return 0;
+    if (!isGrazAccordsActive(state)) return 0;
     const partner = getTrucePartner(faction);
     if (!partner) return 0;
 
@@ -109,44 +199,69 @@ export function getTruceBreakAggressionBonus(faction: FactionId, state: GameStat
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Fire the Vienna Declaration event if it hasn't fired yet and the current
- * turn is >= VIENNA_DECLARATION_TURN.
+ * Fire the Graz Accords event if it hasn't fired yet and the current
+ * turn is >= GRAZ_ACCORDS_TURN.
  *
- * Sets state.vienna_declaration_turn and returns the narrative text if fired,
- * or null if already fired or not yet time.
+ * Sets state.vienna_declaration_turn and auto-accepts for bot factions.
+ * Returns the narrative text if fired, or null if already fired or not yet time.
  */
-export function checkAndFireViennaDeclaration(state: GameState): string | null {
+export function checkAndFireGrazAccords(state: GameState): string | null {
     if (state.vienna_declaration_turn != null) return null; // already fired
     if (state.meta?.phase !== 'war') return null;
     const turn = state.meta?.turn ?? 0;
-    if (turn < VIENNA_DECLARATION_TURN) return null;
+    if (turn < GRAZ_ACCORDS_TURN) return null;
 
     state.vienna_declaration_turn = turn;
-    return 'May 1992 — Serb and Croat leaders meet in Vienna and declare their war at an end. '
-        + 'A de facto truce takes hold across most of Bosnia — '
-        + 'though fighting continues in the Posavina corridor and around Jajce.';
+
+    // Auto-accept for both factions (bot behavior).
+    // Player-controlled factions get accept/decline via IPC (future).
+    if (!state.vienna_accepted) state.vienna_accepted = {};
+    state.vienna_accepted['RS' as FactionId] = true;
+    state.vienna_accepted['HRHB' as FactionId] = true;
+
+    return '6 May 1992 — Karadžić and Boban meet in Graz, Austria, and agree to divide Bosnia between them. '
+        + 'Herzegovina Corps and HVO Southeast Herzegovina observe a ceasefire. '
+        + 'Kiseljak pocket forces hold positions. '
+        + 'Posavina corridor fighting continues unabated.';
 }
+
+/** @deprecated Use checkAndFireGrazAccords. */
+export const checkAndFireViennaDeclaration = checkAndFireGrazAccords;
 
 /**
  * Record that `faction` broke the RS-HRHB truce by attacking the partner's territory.
- * Only records if truce is active and the OSID is not a truce exception.
- * Returns the warning text if newly recorded, or null if already broken or not applicable.
+ * Determines which sub-truce was broken (Herzegovina corps-pair or Kiseljak exclusion).
+ * Returns the warning text if newly recorded, or null if not applicable.
  */
 export function recordTruceBroken(faction: FactionId, targetOsid: string, state: GameState): string | null {
-    if (!isViennaDeclarationActive(state)) return null;
+    if (!isGrazAccordsActive(state)) return null;
     const partner = getTrucePartner(faction);
     if (!partner) return null;
-    if (isTruceException(targetOsid)) return null;
-
-    // Only record the first break (don't reset the timer on repeated attacks)
-    if (state.truce_broken_turn?.[faction] != null) return null;
-
-    if (!state.truce_broken_turn) state.truce_broken_turn = {};
-    state.truce_broken_turn[faction] = state.meta?.turn ?? 0;
 
     const factionName = faction === 'RS' ? 'Serb forces' : 'Croat forces';
     const partnerName = partner === 'HRHB' ? 'Croat' : 'Serb';
-    return `Warning: ${factionName} are attacking ${partnerName}-held territory, `
-        + `breaking the informal Vienna Declaration truce. `
-        + `${partnerName} forces will respond aggressively.`;
+
+    // Check if this is a Kiseljak exclusion break
+    if (isKiseljakExclusionActive(state) && isKiseljakExcluded(targetOsid, faction)) {
+        state.vienna_kiseljak_broken = true;
+        if (!state.truce_broken_turn) state.truce_broken_turn = {};
+        if (state.truce_broken_turn[faction] == null) {
+            state.truce_broken_turn[faction] = state.meta?.turn ?? 0;
+        }
+        return `Warning: ${factionName} are attacking ${partnerName}-held territory near Kiseljak, `
+            + `breaking the Kiseljak exclusion zone. ${partnerName} forces will respond aggressively.`;
+    }
+
+    // Check if this is a Herzegovina corps-pair break
+    if (isHerzegovinaTruceActive(state)) {
+        state.vienna_herzegovina_broken_by = faction;
+        if (!state.truce_broken_turn) state.truce_broken_turn = {};
+        if (state.truce_broken_turn[faction] == null) {
+            state.truce_broken_turn[faction] = state.meta?.turn ?? 0;
+        }
+        return `Warning: ${factionName} are attacking ${partnerName}-held territory in Herzegovina, `
+            + `breaking the Graz Accords ceasefire. ${partnerName} forces will respond aggressively.`;
+    }
+
+    return null;
 }

@@ -87,7 +87,7 @@ Political control may change only through defined mechanisms:
 3. **Internal authority collapse or fragmentation** as defined in fragmentation and exhaustion systems
 4. **Negotiated transfer** through end-state or interim agreements
 
-There is no passive pressure flip; control does not change from sustained pressure alone. No other mechanism may alter political control.
+No other mechanism may alter political control.
 
 ### 4.4 Relationship to military operations
 
@@ -314,6 +314,7 @@ In practice, this means the player can:
 - set brigade postures and attack orders on the line
 - set sector-level defensive intent for corps sectors
 - shape corps operations with tempo, artillery preparation, launch discipline, and target focus
+- manually assign corps commanders from the reserve pool (subject to alignment and reassignment delays)
 - use information-warfare tools such as OPSEC, feints, and probes
 - make constrained supply-agency decisions such as enclave airdrops, convoy approvals, smuggling allocation, and municipality support
 

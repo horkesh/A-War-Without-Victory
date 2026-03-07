@@ -60,4 +60,5 @@ contextBridge.exposeInMainWorld('awwv', {
   stageMunicipalitySupportOrder: (payload) => ipcRenderer.invoke('stage-municipality-support-order', payload),
   focusWarroom: () => ipcRenderer.invoke('focus-warroom'),
   getMapServerUrl: () => ipcRenderer.invoke('get-map-server-url'),
+  assignCommander: (officerId, corpsId) => ipcRenderer.invoke('assign-commander', { officerId, corpsId }),
 });

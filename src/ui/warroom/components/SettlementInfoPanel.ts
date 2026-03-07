@@ -7,7 +7,22 @@
 import type { GameState } from '../../../state/game_state.js';
 
 type GeoFeature = {
-    properties?: { sid?: string; municipality_id?: number; nato_class?: string };
+    properties?: {
+        sid?: string;
+        municipality_id?: number;
+        nato_class?: string;
+        population_total?: number;
+        population_bosniaks?: number;
+        population_serbs?: number;
+        population_croats?: number;
+        municipal_seat?: boolean;
+        strategic?: boolean;
+        transit_hub?: boolean;
+        junction?: boolean;
+        terrain?: string;
+        zone_type?: string;
+        [key: string]: any;
+    };
     geometry: unknown;
 };
 
@@ -113,18 +128,13 @@ export class SettlementInfoPanel {
         this.render();
     }
 
-    private render(): void {
-        const { selectedSettlement, controlData, polygons, settlementNames, mun1990Names, ethnicityData, settlementToMidMap, municipalitiesMap, onClose } = this.props;
-        this.container.innerHTML = '';
-
-        if (!selectedSettlement) {
-            return;
-        }
+    private resolveData(): any {
+        const { selectedSettlement, controlData, settlementNames, mun1990Names, ethnicityData, settlementToMidMap, municipalitiesMap } = this.props;
+        if (!selectedSettlement) return null;
 
         const sid = selectedSettlement.properties?.sid ?? '';
         let munId = selectedSettlement.properties?.municipality_id;
 
-        // Resolve munId if missing
         if ((munId == null || typeof munId !== 'number') && settlementToMidMap) {
             const mapped = settlementToMidMap.get(sid);
             if (mapped) munId = parseInt(mapped, 10);
@@ -140,14 +150,11 @@ export class SettlementInfoPanel {
 
         const settlementName = settlementNames?.by_census_id?.[censusId]?.name ?? sid;
 
-        // Resolve Municipality Name
         let munName = '—';
         let mun1990Id = '—';
-
         if (munId != null) {
             const midStr = String(munId);
             mun1990Id = midStr;
-            // Try explicit map first, then 1990 names
             if (municipalitiesMap?.has(midStr)) {
                 munName = municipalitiesMap.get(midStr)!;
             } else if (mun1990Names?.by_municipality_id?.[midStr]) {
@@ -157,18 +164,67 @@ export class SettlementInfoPanel {
             }
         }
 
-        const ethnicity = sid ? (ethnicityData?.by_settlement_id?.[sid] ?? null) : null;
+        const popValue = selectedSettlement.properties?.population_total ||
+            (selectedSettlement.properties?.population_bosniaks || 0) +
+            (selectedSettlement.properties?.population_serbs || 0) +
+            (selectedSettlement.properties?.population_croats || 0);
 
-        this.container.style.borderLeftColor = factionColor;
+        return {
+            sid,
+            munId,
+            masterSid,
+            censusId,
+            controller,
+            controlStatus,
+            factionColor,
+            factionLabel,
+            settlementName,
+            munName,
+            mun1990Id,
+            popValue,
+            isStrategic: selectedSettlement.properties?.municipal_seat || selectedSettlement.properties?.strategic || popValue > 5000,
+            isHub: selectedSettlement.properties?.transit_hub || selectedSettlement.properties?.junction,
+            natoClass: selectedSettlement.properties?.nato_class,
+            terrain: selectedSettlement.properties?.terrain || selectedSettlement.properties?.zone_type,
+            ethnicity: sid ? (ethnicityData?.by_settlement_id?.[sid] ?? null) : null
+        };
+    }
 
-        // Header with Close Button
+    private renderHeader(data: any): void {
+        const { onClose } = this.props;
         const headerRow = document.createElement('div');
         headerRow.className = 'settlement-info-header-row';
 
+        const titleGroup = document.createElement('div');
+        titleGroup.style.display = 'flex';
+        titleGroup.style.flexDirection = 'column';
+
+        const tagsRow = document.createElement('div');
+        tagsRow.className = 'settlement-info-tags';
+        tagsRow.style.display = 'flex';
+        tagsRow.style.gap = '4px';
+        tagsRow.style.marginBottom = '4px';
+
+        if (data.isStrategic) {
+            const tag = document.createElement('span');
+            tag.className = 'settlement-tag strategic';
+            tag.textContent = 'Strategic Center';
+            tagsRow.appendChild(tag);
+        }
+        if (data.isHub) {
+            const tag = document.createElement('span');
+            tag.className = 'settlement-tag hub';
+            tag.textContent = 'Transit Hub';
+            tagsRow.appendChild(tag);
+        }
+        titleGroup.appendChild(tagsRow);
+
         const title = document.createElement('div');
         title.className = 'settlement-info-title';
-        title.textContent = settlementName;
-        headerRow.appendChild(title);
+        title.textContent = data.settlementName;
+        titleGroup.appendChild(title);
+
+        headerRow.appendChild(titleGroup);
 
         const closeBtn = document.createElement('button');
         closeBtn.className = 'settlement-info-panel-close';
@@ -179,8 +235,9 @@ export class SettlementInfoPanel {
         headerRow.appendChild(closeBtn);
 
         this.container.appendChild(headerRow);
+    }
 
-        // Tabs
+    private renderTabs(): void {
         const tabsContainer = document.createElement('div');
         tabsContainer.className = 'settlement-info-tabs';
 
@@ -200,102 +257,181 @@ export class SettlementInfoPanel {
         });
 
         this.container.appendChild(tabsContainer);
+    }
 
-        // Content Area
+    private renderContent(data: any): void {
         const contentArea = document.createElement('div');
         contentArea.className = 'settlement-info-content';
 
-        if (this.activeTab === 'overview') {
-            contentArea.innerHTML = `
-                <div class="settlement-info-section">
-                    <div class="settlement-info-section-header">Summary</div>
-                    <div class="settlement-info-section-body">
-                        <div class="settlement-info-field">SID: ${escapeHtml(sid)}</div>
-                         <div class="settlement-info-field">Municipality: ${escapeHtml(munName)}</div>
-                         <div class="settlement-info-field">Controller: ${escapeHtml(factionLabel)}</div>
-                    </div>
-                </div>
-                <div class="settlement-info-section">
-                    <div class="settlement-info-section-header">Demographics</div>
-                    <div class="settlement-info-section-body">
-                        ${ethnicity ? this.renderEthnicity(ethnicity) : '<div class="settlement-info-field">No data</div>'}
-                    </div>
-                </div>
-            `;
-        } else if (this.activeTab === 'admin') {
-            let munSettlementCount = 0;
-            if (munId != null) {
-                for (const f of polygons.values()) {
-                    // Check logic for count - complicated if we don't have munId in properties
-                    // We can accept 0 or approximate if data is missing, or use metadata map if we had full list
-                    if (f.properties?.municipality_id === munId) munSettlementCount++;
-                    else if (settlementToMidMap && f.properties?.sid && settlementToMidMap.get(f.properties.sid) === String(munId)) munSettlementCount++;
-                }
-            }
-
-            contentArea.innerHTML = `
-                <div class="settlement-info-section">
-                    <div class="settlement-info-section-header">Municipality Details</div>
-                    <div class="settlement-info-section-body">
-                        <div class="settlement-info-field">Name: ${escapeHtml(munName)}</div>
-                        <div class="settlement-info-field">ID: ${escapeHtml(mun1990Id)}</div>
-                        <div class="settlement-info-field">Total Settlements: ${munSettlementCount} (visible)</div>
-                    </div>
-                </div>
-                <div class="settlement-info-section">
-                    <div class="settlement-info-section-header">Designation</div>
-                    <div class="settlement-info-section-body">
-                         <div class="settlement-info-field">Urban Center: ${selectedSettlement.properties?.nato_class === 'TOWN' ? 'Yes' : 'No'}</div>
-                    </div>
-                </div>
-            `;
-        } else if (this.activeTab === 'control') {
-            contentArea.innerHTML = `
-                <div class="settlement-info-section">
-                    <div class="settlement-info-section-header">Political Status</div>
-                    <div class="settlement-info-section-body">
-                        <div class="settlement-info-field">
-                            <span class="settlement-info-swatch" style="background:${factionColor}" title="${escapeHtml(factionLabel)}" aria-hidden="true"></span>
-                            ${escapeHtml(factionLabel)}
-                        </div>
-                        <div class="settlement-info-field">State: ${escapeHtml(controlStatus)}</div>
-                    </div>
-                </div>
-            `;
-        } else if (this.activeTab === 'intel') {
-            contentArea.innerHTML = `
-                <div class="settlement-info-section">
-                    <div class="settlement-info-section-header">Military Intel [PHASE II]</div>
-                    <div class="settlement-info-section-body">
-                        <div class="settlement-info-placeholder">No active units reported.</div>
-                    </div>
-                </div>
-                <div class="settlement-info-section">
-                    <div class="settlement-info-section-header">Orders</div>
-                    <div class="settlement-info-section-body">
-                        <button class="settlement-info-order-btn" type="button" disabled title="Available in Phase II">Issue Order</button>
-                    </div>
-                </div>
-            `;
+        switch (this.activeTab) {
+            case 'overview':
+                this.renderOverviewTab(contentArea, data);
+                break;
+            case 'admin':
+                this.renderAdminTab(contentArea, data);
+                break;
+            case 'control':
+                this.renderControlTab(contentArea, data);
+                break;
+            case 'intel':
+                this.renderIntelTab(contentArea, data);
+                break;
         }
 
         this.container.appendChild(contentArea);
-        this.container.setAttribute('aria-live', 'polite');
+    }
+
+    private renderOverviewTab(container: HTMLElement, data: any): void {
+        container.innerHTML = `
+            <div class="settlement-info-section">
+                <div class="settlement-info-section-header">Operational Summary</div>
+                <div class="settlement-info-section-body">
+                     <div class="settlement-info-field-row">
+                        <span class="label">Municipality</span>
+                        <span class="value">${escapeHtml(data.munName)}</span>
+                     </div>
+                     <div class="settlement-info-field-row">
+                        <span class="label">Controller</span>
+                        <span class="value" style="color:${data.factionColor}; font-weight:bold;">${escapeHtml(data.factionLabel)}</span>
+                     </div>
+                     ${data.terrain ? `
+                     <div class="settlement-info-field-row">
+                        <span class="label">Terrain</span>
+                        <span class="value">${escapeHtml(String(data.terrain))}</span>
+                     </div>` : ''}
+                </div>
+            </div>
+            <div class="settlement-info-section">
+                <div class="settlement-info-section-header">Demographics & Population</div>
+                <div class="settlement-info-section-body">
+                    <div class="settlement-info-field-row" style="margin-bottom: 8px;">
+                        <span class="label">Total (1991)</span>
+                        <span class="value font-mono">${data.popValue.toLocaleString()}</span>
+                    </div>
+                    ${data.ethnicity ? this.renderEthnicity(data.ethnicity) : '<div class="settlement-info-field">No census record available</div>'}
+                </div>
+            </div>
+        `;
+    }
+
+    private renderAdminTab(container: HTMLElement, data: any): void {
+        container.innerHTML = `
+            <div class="settlement-info-section">
+                <div class="settlement-info-section-header">Administrative Status</div>
+                <div class="settlement-info-section-body">
+                    <div class="settlement-info-field-row">
+                        <span class="label">Seat Classification</span>
+                        <span class="value">${this.props.selectedSettlement?.properties?.municipal_seat ? 'MUNICIPAL SEAT' : 'SUBORDINATE'}</span>
+                    </div>
+                    <div class="settlement-info-field-row">
+                        <span class="label">Settlement ID</span>
+                        <span class="value font-mono">${escapeHtml(data.sid)}</span>
+                    </div>
+                    <div class="settlement-info-field-row">
+                        <span class="label">Municipality ID</span>
+                        <span class="value font-mono">${escapeHtml(data.mun1990Id)}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="settlement-info-section">
+                <div class="settlement-info-section-header">Infrastructure</div>
+                <div class="settlement-info-section-body">
+                     <div class="settlement-info-field-row">
+                        <span class="label">Urban Center</span>
+                        <span class="value">${data.natoClass === 'TOWN' || data.natoClass === 'CITY' ? 'YES' : 'NO'}</span>
+                     </div>
+                     <div class="settlement-info-field-row">
+                        <span class="label">Strategic Hub</span>
+                        <span class="value">${data.isHub ? 'YES' : 'NO'}</span>
+                     </div>
+                </div>
+            </div>
+        `;
+    }
+
+    private renderControlTab(container: HTMLElement, data: any): void {
+        container.innerHTML = `
+            <div class="settlement-info-section">
+                <div class="settlement-info-section-header">Political Control</div>
+                <div class="settlement-info-section-body">
+                    <div class="settlement-info-field-row">
+                        <span class="label">Active Authority</span>
+                        <span class="value" style="color:${data.factionColor}; font-weight:bold;">${escapeHtml(data.factionLabel)}</span>
+                    </div>
+                    <div class="settlement-info-field-row">
+                        <span class="label">Consolidation</span>
+                        <span class="value">${escapeHtml(data.controlStatus)}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="settlement-info-section">
+                <div class="settlement-info-section-header">Recent Timeline [PHASE II]</div>
+                <div class="settlement-info-section-body">
+                    <div class="settlement-info-placeholder italic text-muted">No recent authority changes recorded.</div>
+                </div>
+            </div>
+        `;
+    }
+
+    private renderIntelTab(container: HTMLElement, data: any): void {
+        container.innerHTML = `
+            <div class="settlement-info-section">
+                <div class="settlement-info-section-header">Garrison Intel [PHASE II]</div>
+                <div class="settlement-info-section-body">
+                    <div class="settlement-info-placeholder">No active units reported in immediate vicinity.</div>
+                </div>
+            </div>
+            <div class="settlement-info-section">
+                <div class="settlement-info-section-header">Local Directives</div>
+                <div class="settlement-info-section-body">
+                    <button class="settlement-info-order-btn" type="button" disabled title="Available in Phase II">Modify Garrison</button>
+                </div>
+            </div>
+        `;
+    }
+
+    private render(): void {
+        const data = this.resolveData();
+        this.container.innerHTML = '';
+        if (!data) return;
+
+        this.container.style.borderLeftColor = data.factionColor;
+        if (this.activeTab === 'overview') {
+            this.container.classList.add('weathered-panel');
+        } else {
+            this.container.classList.remove('weathered-panel');
+        }
+
+        this.renderHeader(data);
+        this.renderTabs();
+        this.renderContent(data);
     }
 
     private renderEthnicity(ethnicity: EthnicityEntry): string {
+        const composition = ethnicity.composition ?? {};
+        const entries = ['bosniak', 'serb', 'croat', 'other']
+            .filter((k) => (composition[k] ?? 0) > 0.02) // Only show if >2%
+            .map((k) => {
+                const val = composition[k] ?? 0;
+                const pct = (val * 100).toFixed(0);
+                const label = k.charAt(0).toUpperCase() + k.slice(1);
+                return `
+                    <div class="settlement-info-field-row demographic">
+                        <span class="label">${label}</span>
+                        <div class="demographic-bar-container">
+                            <div class="demographic-bar" style="width: ${pct}%"></div>
+                        </div>
+                        <span class="value font-mono">${pct}%</span>
+                    </div>
+                `;
+            })
+            .join('');
+
         return `
-            <div class="settlement-info-ethnicity">
-                ${['bosniak', 'serb', 'croat', 'other']
-                .filter((k) => ((ethnicity.composition ?? {})[k] ?? 0) > 0)
-                .map((k) => {
-                    const pct = (((ethnicity.composition ?? {})[k] ?? 0) * 100).toFixed(1);
-                    const label = k.charAt(0).toUpperCase() + k.slice(1);
-                    return `<div class="settlement-info-field">${label}: ${pct}%</div>`;
-                })
-                .join('')}
+            <div class="settlement-info-ethnicity-list">
+                ${entries}
             </div>
-            <div class="settlement-info-field settlement-info-provenance">Src: ${escapeHtml(ethnicity.provenance ?? '—')}</div>
+            <div class="settlement-info-provenance">Source: ${escapeHtml(ethnicity.provenance || '1991 Census')}</div>
         `;
     }
 }

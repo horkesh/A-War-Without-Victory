@@ -56,7 +56,8 @@ The interface should feel like a **1990s NATO Combined Operations Center** — t
 3. **NATO symbology** — All military units use APP-6 style symbols (rectangle for infantry, crossed diagonals for HQ, etc.) with faction colors. This is not negotiable.
 4. **No hidden state** — If the simulation tracks it, the player should be able to see it. Cohesion, fatigue, supply, equipment condition, exhaustion — all inspectable.
 5. **Orders are visible** — Every order the player gives (or the bot gives, in replay) should have a visible artifact on the map: arrows, markers, posture icons.
-6. **CRT glow** — Subtle scanline/phosphor effects on key elements. Not overdone. A faint green or amber tint on status displays. The feeling that this data is being rendered on military-grade equipment from 1993.
+6. **"Operational Record" Aesthetic** — The UI mimics a physical military record or intelligence folder. Use the `weathered-panel` class for backgrounds, gold accents (`text-accent-gold`) for headers, and IBM Plex Mono for tactical data.
+7. **CRT glow** — Subtle scanline/phosphor effects on key elements. Not overdone. A faint green or amber tint on status displays. The feeling that this data is being rendered on military-grade equipment from 1993.
 7. **Red-on-black for warnings** — Critical alerts (low cohesion, supply cut, enclave falling) pulse in amber/red with military-style flash codes.
 
 ### 1.3 The "Plot Twist" Features
@@ -267,6 +268,7 @@ Collapsed by default. Shows selected faction's detailed stats:
 - Embargo profile (heavy equipment access, ammo resupply, maintenance)
 - Capability profile (training quality, organizational maturity)
 - Alliance status (RBiH-HRHB relationship value and phase name)
+- **COMMAND Subsection**: Lists active corps commanders. Includes a **[CHANGE]** button to manually reassign officers from the reserve pool (triggers 2-turn reassignment penalty).
 
 ### 5.4 Section: ACTIVE OPERATIONS
 
@@ -443,7 +445,7 @@ When a brigade is selected or AoR overlay is active:
 
 ## 7. Right Intelligence Panel
 
-Width: 320px. Context-sensitive: shows different content based on what's selected.
+Width: 320px. Context-sensitive: shows different content based on what's selected. Elements use a **tabbed interface** (Overview, Admin, Control, Intel) to organize dense settlement data.
 
 ### 7.1 Settlement Intelligence View
 

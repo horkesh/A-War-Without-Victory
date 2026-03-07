@@ -329,6 +329,16 @@ export interface OperationView {
     artillery_preparation?: boolean;
     force_launch?: boolean;
     recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination';
+    axes?: Array<{
+        axis_id: string;
+        name: string;
+        assigned_brigades: string[];
+        objectives: string[];
+        current_objective_index: number;
+        status: 'executing' | 'stalled' | 'complete';
+        momentum: number;
+        staging_osid?: string;
+    }>;
 }
 
 export interface LoadedGameState {

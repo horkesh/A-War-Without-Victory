@@ -221,6 +221,8 @@ When War phase runs, attack orders are resolved as **discrete attacks** per targ
 
 **War timeline integration:** Per-faction `officer_config` in `war_timeline` JSON: learning rates, brain drain parameters, pool regeneration intervals, Zagreb cadre timing, warlord friction end week, generic replacement competence. All constants read from timeline with hardcoded fallback.
 
+**Manual assignment:** Players may manually reassign officers from the reserve pool to active Corps via the Warroom Faction Overview. Reassignment triggers a 2-turn penalty (Acting commander status), modeling transition friction. This uses the `assign-commander` IPC channel.
+
 **Determinism:** `officerHash(turn, officerId)` uses FNV-1a (no Math.random). Sorted iteration via `strictCompare`. Growth/loss rates are pure arithmetic. Assignment penalties are lookup-based. Warlord friction uses `turn % brigadeCount`.
 
 **Phase E GUI (2026-03-03):** Tactical map FormationDetail panel shows **Command** (brigade officer quality bar, corps/army commander name and Acting status) and **Recent command changes** for corps when the last turn report includes `officer_succession`. Warroom FactionOverviewPanel lists officers in a COMMAND subsection; NewspaperModal appends officer succession lines (replacements, casualties, departures) to AAR body. Main process sends `turn-report-updated` to both renderers after advance-turn; see DESKTOP_GUI_IPC_CONTRACT.

@@ -237,11 +237,15 @@ export class ReportsModal {
             const exposed = frontEdges.filter(e => e.tier === 'exposed');
             const nonExposed = frontEdges.filter(e => e.tier !== 'exposed');
 
+            if (exposed.length > 0) {
+                lines.push(`  [!! URGENT: EXPOSED FRONT !!]`);
+            }
+
             // Combine: exposed first, then rest, take top 5
             const ordered = [...exposed, ...nonExposed].slice(0, 5);
             for (const e of ordered) {
                 const tierLabel = e.tier.toUpperCase();
-                const prefix = e.tier === 'exposed' ? '  !! ' : '  ';
+                const prefix = e.tier === 'exposed' ? '  ' : '  ';
                 lines.push(`${prefix}${e.settlementA} \u2194 ${e.settlementB}`);
                 lines.push(`${prefix}Pressure: ${e.pressure} | Friction: ${e.friction} | ${tierLabel}`);
             }
@@ -286,9 +290,11 @@ export class ReportsModal {
         // 4. DISPLACEMENT ALERTS
         lines.push('DISPLACEMENT ALERTS');
         lines.push(divider);
+        if (snap.brigadeMovement.encircled.length > 0) {
+            lines.push(`  [!! URGENT: ${snap.brigadeMovement.encircled.length} BRIGADE(S) ENCIRCLED !!]`);
+        }
         lines.push(`  Active hostile takeover timers: ${snap.ownDisplacement.activeHostileTakeoverTimers}`);
         lines.push(`  Active displacement camps: ${snap.ownDisplacement.activeCamps}`);
-        lines.push(`  Encircled formations: ${snap.brigadeMovement.encircled.length}`);
 
         lines.push('');
 
@@ -326,25 +332,37 @@ export class ReportsModal {
     /**
      * Render Phase 0 reports modal (pre-war municipality intelligence).
      */
-    private renderPhase0(): HTMLElement {
-        const content = this.generateContent();
-
+    /**
+     * Create the root report shell with consistent styling, classification stamps, and faction accents.
+     */
+    private createShell(factionId: FactionId, classification: string): HTMLElement {
         const report = document.createElement('div');
-        const fCss = factionCssClass(content.factionId as any);
-        report.className = `reports-modal faction-${fCss}`;
-        const fc = FACTION_COLORS[content.factionId] ?? FACTION_COLORS['RBiH'];
+        const fCss = factionCssClass(factionId);
+        report.className = `reports-modal weathered-panel faction-${fCss}`;
+
+        const fc = FACTION_COLORS[factionId] ?? FACTION_COLORS['RBiH'];
         report.style.borderTop = `3px solid ${fc.primary}`;
 
         // Classification stamps
         const classTop = document.createElement('div');
         classTop.className = 'report-classification-top';
-        classTop.textContent = content.classification;
+        classTop.textContent = classification;
         report.appendChild(classTop);
 
         const classBottom = document.createElement('div');
         classBottom.className = 'report-classification-bottom';
-        classBottom.textContent = 'CONFIDENTIAL';
+        classBottom.textContent = classification;
         report.appendChild(classBottom);
+
+        return report;
+    }
+
+    /**
+     * Render Phase 0 reports modal (pre-war municipality intelligence).
+     */
+    private renderPhase0(): HTMLElement {
+        const content = this.generateContent();
+        const report = this.createShell(content.factionId as FactionId, content.classification);
 
         // Header
         const header = document.createElement('div');
@@ -360,7 +378,7 @@ export class ReportsModal {
                 <span class="report-field-label">DATE:</span> ${content.date}
             </div>
             <div class="report-field">
-                <span class="report-field-label">SUBJECT:</span> ${content.subject}
+                <span class="report-field-label text-accent-gold">SUBJECT:</span> ${content.subject}
             </div>
         `;
         report.appendChild(header);
@@ -392,22 +410,7 @@ export class ReportsModal {
         const headers = WAR_REPORT_HEADERS[factionId] ?? WAR_REPORT_HEADERS['RBiH'];
         const reportBody = this.generateWarReportBody(snap, reportTurn);
 
-        const report = document.createElement('div');
-        const fCss = factionCssClass(factionId);
-        report.className = `reports-modal faction-${fCss}`;
-        const fc = FACTION_COLORS[factionId] ?? FACTION_COLORS['RBiH'];
-        report.style.borderTop = `3px solid ${fc.primary}`;
-
-        // Classification stamps
-        const classTop = document.createElement('div');
-        classTop.className = 'report-classification-top';
-        classTop.textContent = 'CONFIDENTIAL';
-        report.appendChild(classTop);
-
-        const classBottom = document.createElement('div');
-        classBottom.className = 'report-classification-bottom';
-        classBottom.textContent = 'CONFIDENTIAL';
-        report.appendChild(classBottom);
+        const report = this.createShell(factionId, 'CONFIDENTIAL');
 
         // Header
         const header = document.createElement('div');
@@ -423,7 +426,7 @@ export class ReportsModal {
                 <span class="report-field-label">DATE:</span> ${turnToDateString(reportTurn)}
             </div>
             <div class="report-field">
-                <span class="report-field-label">SUBJECT:</span> Operational Intelligence Brief - Week ${reportTurn}
+                <span class="report-field-label text-accent-gold">SUBJECT:</span> Operational Intelligence Brief - Week ${reportTurn}
             </div>
         `;
         report.appendChild(header);

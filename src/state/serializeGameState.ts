@@ -90,6 +90,7 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'brigade_attack_orders',
     'corps_attack_axis_orders',
     'corps_command',
+    'corps_equipment_reserve',
     'army_stance',
     'og_orders',
     'og_subfront_edges',
@@ -123,9 +124,15 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     // Named officers system (Tier 1)
     'named_officer_data',
     'named_officers',
-    // Vienna Declaration / local truces (2026-03-04)
+    // Graz Accords / local truces (2026-03-04)
     'vienna_declaration_turn',
     'truce_broken_turn',
+    'vienna_accepted',
+    'vienna_kiseljak_broken',
+    'vienna_herzegovina_broken_by',
+    // Triggered operations state
+    'triggered_operations_accepted',
+    'declined_operations',
     // Control change event log (GUI battle markers, last 3 turns)
     'control_events',
     'airdrop_allocation',

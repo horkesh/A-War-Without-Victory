@@ -466,6 +466,16 @@ export function parseGameState(json: unknown): LoadedGameState {
                     artillery_preparation: op.artillery_preparation === true ? true : undefined,
                     force_launch: op.force_launch === true ? true : undefined,
                     recovery_reason: typeof op.recovery_reason === 'string' ? op.recovery_reason as OperationView['recovery_reason'] : undefined,
+                    axes: Array.isArray(op.axes) ? (op.axes as Array<Record<string, unknown>>).map(a => ({
+                        axis_id: String(a.axis_id ?? ''),
+                        name: String(a.name ?? ''),
+                        assigned_brigades: Array.isArray(a.assigned_brigades) ? (a.assigned_brigades as string[]).filter(s => typeof s === 'string') : [],
+                        objectives: Array.isArray(a.objectives) ? (a.objectives as string[]).filter(s => typeof s === 'string') : [],
+                        current_objective_index: typeof a.current_objective_index === 'number' ? a.current_objective_index : 0,
+                        status: (a.status as 'executing' | 'stalled' | 'complete') ?? 'executing',
+                        momentum: typeof a.momentum === 'number' ? a.momentum : 0,
+                        staging_osid: typeof a.staging_osid === 'string' ? a.staging_osid : undefined,
+                    })) : undefined,
                 });
             }
         }

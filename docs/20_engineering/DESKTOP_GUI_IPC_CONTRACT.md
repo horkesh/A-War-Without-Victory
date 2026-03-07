@@ -127,19 +127,24 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Behavior: adds or removes the sector from `state.opsec_sectors`, reserializes, and broadcasts the updated state. OPSEC affects sector-intel buildup; it is not a direct combat modifier.
 
 - `stage-corps-front-order` (invoke)
-  - Payload: `{ corpsId: string, edgeIds: string[] }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: validates and normalizes front edge IDs for the corps (`A__B` sorted), writes `state.corps_front_edges[corpsId] = sortedUnique(edgeIds)`, reserializes, sends state via `game-state-updated`.
+    - Payload: `{ corpsId: string, edgeIds: string[] }`
+    - Returns: `{ ok: boolean, error?: string }`
+    - Behavior: validates and normalizes front edge IDs for the corps (`A__B` sorted), writes `state.corps_front_edges[corpsId] = sortedUnique(edgeIds)`, reserializes, sends state via `game-state-updated`.
 
 - `stage-corps-attack-axis-order` (invoke)
-  - Payload: `{ corpsId: string, edgeIds: string[] }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: validates and normalizes edge IDs, writes `state.corps_attack_axis_orders[corpsId] = { edge_ids: sortedUnique(edgeIds), created_turn }`, reserializes, sends state via `game-state-updated`.
+    - Payload: `{ corpsId: string, edgeIds: string[] }`
+    - Returns: `{ ok: boolean, error?: string }`
+    - Behavior: validates and normalizes edge IDs, writes `state.corps_attack_axis_orders[corpsId] = { edge_ids: sortedUnique(edgeIds), created_turn }`, reserializes, sends state via `game-state-updated`.
 
 - `stage-og-subfront-order` (invoke)
-  - Payload: `{ ogId: string, corpsId: string, edgeIds: string[] }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: validates OG/corps linkage and edge subset intent, writes `state.og_subfront_edges[ogId] = sortedUnique(edgeIds)` (derived against corps front in main), reserializes, sends state via `game-state-updated`.
+    - Payload: `{ ogId: string, corpsId: string, edgeIds: string[] }`
+    - Returns: `{ ok: boolean, error?: string }`
+    - Behavior: validates OG/corps linkage and edge subset intent, writes `state.og_subfront_edges[ogId] = sortedUnique(edgeIds)` (derived against corps front in main), reserializes, sends state via `game-state-updated`.
+
+- `assign-commander` (invoke)
+    - Payload: `{ officerId: string, corpsId: string }`
+    - Returns: `{ ok: boolean, error?: string, stateJson?: string }`
+    - Behavior: validates officer exists in pool and corps exists. Sets `officer.assignment = corpsId`, `officer.status = "active"`. If a previous commander existed, they return to the pool. Reserializes, sends update.
 
 ### Read-only query channels (no state mutation)
 
@@ -179,7 +184,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 
 - `turn-report-updated` (event)
   - Payload: `report: { phase: string, turn: number, details?: { officer_succession?: ... } | unknown }`
-  - Behavior: sent from main process after each successful advance-turn (same report object returned by advance-turn). Both warroom and tactical-map renderers receive it so they can show officer succession (FormationDetail “Recent command changes”, NewspaperModal AAR lines). Used for Officers Phase E GUI.
+  - Behavior: sent from main process after each successful advance-turn (same report object returned by advance-turn). Both warroom and tactical-map renderers receive it; used for officer succession UI (FormationDetail, FactionOverviewPanel).
 
 - `get-current-game-state` (invoke)
   - Returns: `string | null`

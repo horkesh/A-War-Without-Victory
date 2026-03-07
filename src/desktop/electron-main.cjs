@@ -1056,7 +1056,8 @@ app.whenReady().then(() => {
       minAttackOutcome,
       tempo,
       schwerpunktOsid,
-      artilleryPreparation
+      artilleryPreparation,
+      axes,
     } = payload || {};
     if (!currentGameStateJson || typeof corpsId !== 'string' || typeof name !== 'string' || typeof type !== 'string') {
       return { ok: false, error: 'No game loaded or invalid payload' };
@@ -1088,6 +1089,7 @@ app.whenReady().then(() => {
         tempo: typeof tempo === 'string' ? tempo : undefined,
         schwerpunkt_osid: typeof schwerpunktOsid === 'string' ? schwerpunktOsid : undefined,
         artillery_preparation: artilleryPreparation === true,
+        axes: Array.isArray(axes) ? axes : undefined,
       };
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
@@ -1294,6 +1296,42 @@ app.whenReady().then(() => {
         type,
         staged_turn: state?.meta?.turn ?? 0,
       };
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('assign-commander', async (_event, payload) => {
+    const { officerId, corpsId } = payload || {};
+    if (!currentGameStateJson || typeof officerId !== 'string' || typeof corpsId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+
+      // 1. Validate officer exists
+      const officer = state.named_officers?.[officerId];
+      if (!officer) return { ok: false, error: `Officer ${officerId} not found` };
+
+      // 2. Clear previous assignments for this corps (if any)
+      for (const oid in state.named_officers) {
+        if (state.named_officers[oid].assigned_corps_id === corpsId) {
+          state.named_officers[oid].assigned_corps_id = null;
+          // If they were active only because they were leading this corps, maybe set back to reserve?
+          // For now, let's just clear the assignment.
+        }
+      }
+
+      // 3. Assign new officer to this corps
+      officer.assigned_corps_id = corpsId;
+      officer.status = 'active';
+      officer.acting_commander = false; // Manual assignment makes them the official commander
+      officer.penalty_turns_remaining = 2; // Standard "settling in" penalty for manual re-assignment
+
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };

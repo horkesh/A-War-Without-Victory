@@ -16,7 +16,7 @@ function activeBrigades(state: GameState): FormationState[] {
         .filter((f): f is FormationState =>
             f != null &&
             f.status === 'active' &&
-            (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group') &&
+            (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom') &&
             f.location_osid != null
         )
         .sort((a, b) => strictCompare(a.id, b.id));

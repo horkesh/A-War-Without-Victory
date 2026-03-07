@@ -99,7 +99,7 @@ import { evaluateDisplacementTriggers } from '../displacement_pipeline/displacem
 import { applyBrigadeRepositionOrders } from '../combat/apply_brigade_reposition.js';
 import { generateAllBotOrdersOsid, computeOsidEthnicComposition, type OsidBotContext } from '../combat/bot_brigade_ai_osid.js';
 import { generateAllCorpsOrders, extractCorpsAiReport, type CorpsAiReportEntry } from '../combat/bot_corps_ai.js';
-import { checkAndFireViennaDeclaration, recordTruceBroken } from '../local_truces.js';
+import { checkAndFireGrazAccords, recordTruceBroken } from '../local_truces.js';
 import { processBrigadeMovement } from '../combat/brigade_movement.js';
 import { applyPostureCosts, applyPostureOrders } from '../combat/brigade_posture.js';
 import { applySectorStanceOrders } from '../combat/sector_stance_orders.js';
@@ -114,6 +114,9 @@ import { buildLocalFronts } from '../combat/local_front_defense.js';
 import { buildCorpsFrontSectors } from '../combat/corps_front_sectors.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults } from '../combat/sector_offensive.js';
+import { processJnaWithdrawals } from '../combat/jna_phantom_brigades.js';
+import { injectQueuedOperation } from '../combat/pre_planned_operations.js';
+import { checkTriggeredOperations } from '../combat/triggered_operations.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from '../combat/operational_groups.js';
 import { deriveSectorIntel } from '../combat/sector_intel.js';
@@ -179,10 +182,10 @@ export const warPhases: NamedPhase[] = [
             const turn = context.state.meta.turn;
             const result = evaluateEvents(context.state, context.rng, turn);
             context.report.events_fired = result.fired;
-            // Vienna Declaration: fires at week 4 (May 1992), sets state.vienna_declaration_turn
-            const viennaText = checkAndFireViennaDeclaration(context.state);
-            if (viennaText) {
-                context.report.events_fired!.push({ id: 'vienna_declaration', text: viennaText });
+            // Graz Accords: fires at week 4 (6 May 1992), sets state.vienna_declaration_turn
+            const grazText = checkAndFireGrazAccords(context.state);
+            if (grazText) {
+                context.report.events_fired!.push({ id: 'graz_accords', text: grazText });
             }
         }
     },
@@ -515,11 +518,43 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'jna-phantom-withdrawals',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const events = processJnaWithdrawals(context.state);
+            if (events.length > 0) {
+                if (!context.report.jna_withdrawal_events) context.report.jna_withdrawal_events = [];
+                (context.report.jna_withdrawal_events as typeof events).push(...events);
+            }
+        }
+    },
+    {
         name: 'advance-sector-offensives',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
             advanceSectorOffensives(context.state, supplyByOsid);
+        }
+    },
+    {
+        name: 'inject-queued-operations',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const cc = context.state.corps_command;
+            if (!cc) return;
+            for (const corpsId of Object.keys(cc).sort()) {
+                const cmd = cc[corpsId];
+                if (!cmd?.active_operation && cmd?.queued_operations?.length) {
+                    injectQueuedOperation(context.state, corpsId);
+                }
+            }
+        }
+    },
+    {
+        name: 'check-triggered-operations',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            checkTriggeredOperations(context.state);
         }
     },
     {

@@ -198,26 +198,34 @@ export class MagazineModal {
     }
 
     /**
-     * Render the Phase 0 magazine modal (pre-war organizational review).
-     * This is the original render() body, preserved unchanged.
+     * Create the root modal shell with consistent styling and faction accents.
      */
-    private renderPhase0(): HTMLElement {
-        const content = this.generateContent();
-
+    private createShell(factionId: FactionId): HTMLElement {
         const magazine = document.createElement('div');
-        const fCss = factionCssClass(content.factionId as any);
-        magazine.className = `magazine-modal faction-${fCss}`;
-        const fc = FACTION_COLORS[content.factionId] ?? FACTION_COLORS['RBiH'];
+        const fCss = factionCssClass(factionId);
+        magazine.className = `magazine-modal weathered-panel faction-${fCss}`;
+
+        const fc = FACTION_COLORS[factionId] ?? FACTION_COLORS['RBiH'];
         magazine.style.borderTop = `3px solid ${fc.primary}`;
 
         // Title
         const title = document.createElement('div');
-        title.className = 'magazine-title';
+        title.className = 'magazine-title text-accent-gold';
         title.style.color = fc.primary;
-        title.textContent = content.title;
+        title.textContent = MAGAZINE_TITLES[factionId] ?? 'OPERATIONAL REVIEW';
         magazine.appendChild(title);
 
-        // Month/Year
+        return magazine;
+    }
+
+    /**
+     * Render the Phase 0 magazine modal (pre-war organizational review).
+     */
+    private renderPhase0(): HTMLElement {
+        const content = this.generateContent();
+        const magazine = this.createShell(content.factionId as FactionId);
+
+        // Subtitle (Month/Year)
         const monthYear = document.createElement('div');
         monthYear.className = 'magazine-month-year';
         monthYear.textContent = content.monthYear;
@@ -304,20 +312,7 @@ export class MagazineModal {
         const snap = extractWarData(this.gameState, factionId);
         const isNewIssue = turn % 4 === 0;
 
-        const fc = FACTION_COLORS[factionId] ?? FACTION_COLORS['RBiH'];
-        const fCss = factionCssClass(factionId);
-
-        // Root container
-        const magazine = document.createElement('div');
-        magazine.className = `magazine-modal faction-${fCss}`;
-        magazine.style.borderTop = `3px solid ${fc.primary}`;
-
-        // Title
-        const title = document.createElement('div');
-        title.className = 'magazine-title';
-        title.style.color = fc.primary;
-        title.textContent = MAGAZINE_TITLES[factionId] ?? 'OPERATIONAL REVIEW';
-        magazine.appendChild(title);
+        const magazine = this.createShell(factionId);
 
         // Month/Year + week string
         const monthYear = document.createElement('div');
@@ -388,7 +383,7 @@ export class MagazineModal {
         section.className = 'magazine-toc';
 
         const header = document.createElement('h3');
-        header.className = 'magazine-section-header';
+        header.className = 'magazine-section-header text-accent-gold';
         header.textContent = headerText;
         section.appendChild(header);
 

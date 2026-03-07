@@ -131,4 +131,7 @@ Calibration tests are located in `tests/calibration.test.ts` and validate:
 
 **Recommendation**: Constants are stable. Ready to freeze parameters. No tuning required at this time.
 
-**Status**: ✅ **FROZEN** at v0.2.6 (see `docs/ENGINE_FREEZE_v0_2_6.md` for freeze contract)
+**Status**: ✅ **ACTIVE** at v1.0.0 (UI & Command Layer)
+
+### Phase 24: Warroom UI Overhaul & Commander Management (2026-03-07)
+Comprehensive refactoring and visual polish of the Warroom HQ interface. Unified modal shell logic across `MagazineModal.ts` and `ReportsModal.ts` to reduce redundancy. Decomposed the monolithic `SettlementInfoPanel.ts` into specialized sub-renderers for better maintainability. Implemented **Manual Commander Assignment** via a new `assign-commander` IPC channel, allowing players to reassign officers from the reserve pool to active corps with a 2-turn friction penalty. Unified campaign flow orchestration in `warroom.ts` and resolved several TypeScript lint errors.
