@@ -761,3 +761,12 @@ The strategic reserve solves the topology mismatch without artificial caps or sc
 - The safe Phase E shape is one shared municipality-support surface with faction-specific fiction and effects: `RBiH` gets `weapons_shipment`, `RS` gets `staff_priority`, `HRHB` gets `croatian_support_package`.
 - Keep Phase E pool-constrained and one-turn scoped. It should redirect scarce help locally, not rewrite total mobilization ceilings or global manpower curves.
 - In unattended scenario runs, Phase E is effectively dormant unless a player stages orders. Do not attribute headless regression drift to the mechanic unless support orders were actually present in state.
+
+## 2026-03-07 - Officer display: character-rich profiles via shared OfficerProfile component
+
+- **Never show raw officer stat numbers** (1-5 integers or `Math.round(x * 100)`). All officer displays use `OfficerProfile` component.
+- **OfficerProfile** (`src/ui/map/components/OfficerProfile.tsx`): shared card showing archetype, origin badge, pip ratings (●●●○○), descriptive stat labels, combat record, tenure. Props: officer, label, compact?, emphasis?, className?.
+- **officerCharacter.ts** (`src/ui/map/utils/officerCharacter.ts`): pure utility functions. `getArchetype()` derives 15 archetypes from stat profile (Master Strategist, Reckless Attacker, Paper Commander, etc.). Stat labels: Inept→Exceptional, Passive→Relentless, Exposed→Ironclad. `formatPips()`, `getRatingColor()`, `getOriginDisplay()` (origin→{label,color}), `formatRank()`, `formatCombatRecord()`, `formatTenure()`.
+- **NamedOfficerView** extended with `origin` (string, from OfficerOrigin) and `political_reliability` (number, 1-5). Mapped in `GameStateAdapter`.
+- **6 consumers** use OfficerProfile: CorpsDetail, OperationDetail, FormationDetail (compact), OrbatPanel, OperationsPanel, ArmyDetail. OOBSidebar uses `formatRank` for abbreviated sidebar display.
+- **Design rule:** `compact` mode shows competence + one emphasis stat; full mode shows all 3. `emphasis` prop only matters when `compact=true` — do not pass it without compact (dead parameter).

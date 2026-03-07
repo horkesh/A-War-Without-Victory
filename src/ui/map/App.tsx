@@ -12,6 +12,7 @@ import { BottomStatusStrip } from './components/BottomStatusStrip';
 import { OOBSidebar } from './components/OOBSidebar';
 import { OperationsPanel } from './components/OperationsPanel';
 import { OperationDetail } from './components/OperationDetail';
+import { OrbatPanel } from './components/OrbatPanel';
 import { OrderQueue } from './components/OrderQueue';
 import { Tooltip } from './components/Tooltip';
 import { AttackConfirmation } from './components/AttackConfirmation';
@@ -52,6 +53,7 @@ function App() {
   const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
+  const selectedOrbatCorpsId = useGameStore((s) => s.selectedOrbatCorpsId);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const setConfirmPrimaryAction = useGameStore((s) => s.setConfirmPrimaryAction);
@@ -66,6 +68,7 @@ function App() {
     selectedCorpsFrontSectorId,
     selectedFormationId,
     selectedOperationKey,
+    selectedOrbatCorpsId,
   });
 
   const [sidePickerOpen, setSidePickerOpen] = useState(false);
@@ -246,6 +249,7 @@ function App() {
       {railState.primary === 'army' && <ArmyDetail railSlot="primary" />}
       {railState.primary === 'formation' && <FormationDetail railSlot="primary" />}
       {railState.primary === 'operation' && <OperationDetail railSlot="primary" />}
+      {railState.primary === 'orbat' && <OrbatPanel />}
 
       {railState.secondary === 'settlement' && <SelectionPanel railSlot="secondary" />}
       {railState.secondary === 'sector' && <CorpsFrontPanel railSlot="secondary" />}

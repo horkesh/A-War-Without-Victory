@@ -126,11 +126,11 @@ Beyond the standard wargame UI, AWWV should include:
 | Top Command Bar | 100% | 48px | Fixed top |
 | Strategic Sidebar | 280px | calc(100% - 48px - 32px) | Fixed left |
 | Tactical Map | remaining | remaining | Center fill |
-| Intelligence Panel | 320px | same as sidebar | Fixed right, collapsible |
+| Intelligence Panel | 320px | same as sidebar | Fixed right, collapsible, right-anchored "Nested Rail" stacking |
 | Bottom Ticker | 100% | 32px | Fixed bottom |
 | Minimap | 200×150px | — | Bottom-left of map area |
 
-All panels are **collapsible** via toggle buttons or hotkeys. When collapsed, the map expands to fill. Double-click the panel edge to collapse/expand.
+All panels are **collapsible** via toggle buttons or hotkeys. When collapsed, the map expands to fill. Double-click the panel edge to collapse/expand. The right Intelligence Panel uses a **Nested Rail** system (anchored at `right: 1rem`) where child detail panels slide out to the left of the parent panel.
 
 ### 3.2 Panel State Persistence
 

@@ -149,6 +149,15 @@ export function SettlementDetailContent({
       ? Math.round(popOriginal * (disp.currentPopulation / disp.originalPopulation))
       : null;
   const popDelta = currentPop != null && popOriginal > 0 ? currentPop - popOriginal : null;
+  /** Settlement-level flows: this settlement's share of municipality displacement so "Pre-war + In − Out − Lost = Now" holds. */
+  const settlementShare =
+    disp && disp.originalPopulation > 0 && popOriginal > 0 ? popOriginal / disp.originalPopulation : 0;
+  const outSettlement = disp && settlementShare > 0 ? Math.round(disp.displacedOut * settlementShare) : 0;
+  const lostSettlement = disp && settlementShare > 0 ? Math.round(disp.lostPopulation * settlementShare) : 0;
+  const inSettlement =
+    currentPop != null && popOriginal > 0 && disp
+      ? Math.max(0, currentPop - popOriginal + outSettlement + lostSettlement)
+      : 0;
 
   const maxShow = variant === 'tooltip' ? 3 : 12;
   const showFormations = formationsAtOsid.slice(0, maxShow);
@@ -313,42 +322,49 @@ export function SettlementDetailContent({
                 <div className="flex items-baseline justify-between gap-3 mb-2">
                   <div className="flex items-baseline gap-2">
                     <span className="text-text-secondary text-[10px]">Pre-war</span>
-                    <span className="text-sm font-mono text-text-primary">{disp.originalPopulation.toLocaleString()}</span>
+                    <span className="text-sm font-mono text-text-primary">{popOriginal.toLocaleString()}</span>
                   </div>
                   <span className="text-text-secondary">→</span>
                   <div className="flex items-baseline gap-2 text-right">
                     <span className="text-text-secondary text-[10px]">Now</span>
                     <span className="text-sm font-mono font-semibold text-text-primary">
-                      {(disp.currentPopulation ?? currentPop ?? popOriginal).toLocaleString()}
+                      {(currentPop ?? popOriginal).toLocaleString()}
                     </span>
-                    {popDelta != null && popDelta !== 0 && (
-                      <span className={`text-xs font-mono font-bold ${popDelta < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                        {popDelta > 0 ? '+' : ''}{popDelta.toLocaleString()}
-                      </span>
-                    )}
+                    {(() => {
+                      const delta = popDelta;
+                      if (delta == null || delta === 0) return null;
+                      return (
+                        <span className={`text-xs font-mono font-bold ${delta < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                          {delta > 0 ? '+' : ''}{delta.toLocaleString()}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
+                <div className="text-[10px] text-text-secondary/80 mb-1.5" aria-label="Population formula">
+                  Pre-war + In − Out − Lost = Now
+                </div>
                 <div className="grid grid-cols-3 gap-2 text-[10px] mb-1.5">
-                  {disp.displacedOut > 0 && (
+                  {outSettlement > 0 && (
                     <div className="bg-black/20 rounded px-2 py-1 text-center">
                       <span className="text-amber-400/90">Out</span>
-                      <div className="font-mono font-semibold text-amber-300">−{disp.displacedOut.toLocaleString()}</div>
+                      <div className="font-mono font-semibold text-amber-300">−{outSettlement.toLocaleString()}</div>
                     </div>
                   )}
-                  {disp.displacedIn > 0 && (
+                  {inSettlement > 0 && (
                     <div className="bg-black/20 rounded px-2 py-1 text-center">
                       <span className="text-emerald-500/90">In</span>
-                      <div className="font-mono font-semibold text-emerald-400">+{disp.displacedIn.toLocaleString()}</div>
+                      <div className="font-mono font-semibold text-emerald-400">+{inSettlement.toLocaleString()}</div>
                     </div>
                   )}
-                  {disp.lostPopulation > 0 && (
+                  {lostSettlement > 0 && (
                     <div className="bg-black/20 rounded px-2 py-1 text-center">
                       <span className="text-red-400/90">Lost</span>
-                      <div className="font-mono font-semibold text-red-300">−{disp.lostPopulation.toLocaleString()}</div>
+                      <div className="font-mono font-semibold text-red-300">−{lostSettlement.toLocaleString()}</div>
                     </div>
                   )}
                 </div>
-                {disp.arrivedByFaction && Object.keys(disp.arrivedByFaction).length > 0 && (
+                {disp.arrivedByFaction && Object.keys(disp.arrivedByFaction).length > 0 && settlementShare > 0 && (
                   <div className="text-[10px] mb-1">
                     <span className="text-text-secondary">Arrived: </span>
                     {Object.entries(disp.arrivedByFaction)
@@ -356,7 +372,7 @@ export function SettlementDetailContent({
                       .sort(([a], [b]) => a.localeCompare(b))
                       .map(([faction, n]) => (
                         <span key={faction} className={FACTION_COLORS_SUBTLE[faction] ?? 'text-text-primary'}>
-                          {faction} +{(n ?? 0).toLocaleString()}{' '}
+                          {faction} +{Math.round((n ?? 0) * settlementShare).toLocaleString()}{' '}
                         </span>
                       ))}
                   </div>

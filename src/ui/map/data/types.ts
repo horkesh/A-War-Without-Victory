@@ -58,7 +58,9 @@ export interface NamedOfficerView {
     competence: number;
     aggressiveness: number;
     defensive_skill: number;
+    political_reliability: number;
     home_corps_id?: string;
+    origin: string;
     status: string;
     assigned_corps_id: string | null;
     acting_commander: boolean;

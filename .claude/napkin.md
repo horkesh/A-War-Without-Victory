@@ -154,10 +154,10 @@
    Do instead: Derive player-visible fog in `GameStateAdapter.ts` from `sector_intel` + sectors + friendly brigade positions, then render `LoadedGameState.fogOfWar`. Do not wire map layers directly to raw engine intel structures.
 7. **[2026-03-06] Briefing panels: prefer stacked accordions over tabs**
    Do instead: Use `AccordionHeader` for unified vertical briefing views in `CorpsFrontPanel` and `OOBSidebar` to maintain situational awareness. Review for unused `collapsed` state when refactoring.
-8. **[2026-03-01] Map load: validate + defer parse + timeout**
+8. **[2026-03-07] Officer display: use OfficerProfile component, never raw stat numbers**
+   Do instead: All officer displays use `OfficerProfile` component (archetype, pips, origin badge, combat record). Never show raw 1-5 values or `Math.round(x * 100)`. Character utilities in `officerCharacter.ts`. See MAP_UI_MASTER §12, §13.4.
+9. **[2026-03-01] Map load: validate + defer parse + timeout**
    Do instead: Validate save (schema, meta.turn, formations/political_controllers shape). `parseGameState` unwraps `{ state }`/`{ gameState }`, treats `phase_ii` as war, accepts `formations` as object or array. Parse in requestIdleCallback (~150ms). 25s load timeout in toolbar. Show loadError on failure/timeout.
-9. **[2026-02-28] Map overlay poll: check sources first**
-   Do instead: Call getSource() before buildControlGeoJSON/buildFrontLinesGeoJSON. Otherwise 500ms poll freezes app.
 10. **[2026-03-05] Active GUI path only — avoid saved mirror files**
     Do instead: Edit `src/ui/map/components/*` and `src/ui/map/map/*` for live behavior. Treat `src/ui/map/saved/*` as legacy snapshots unless explicitly migrating.
 

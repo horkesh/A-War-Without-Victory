@@ -72,7 +72,8 @@ src/ui/map/
 │   ├── SupplyPanel.tsx            Reserve bars when supply map mode active
 │   ├── OrderQueue.tsx             Phase C5 staged order queue
 │   ├── AttackConfirmation.tsx     Attack confirmation modal
-│   ├── CombatSummaryPanel.tsx     Reusable combat record display (battles/casualties/territory)
+│   ├── OfficerProfile.tsx         Shared officer profile card (archetype, origin badge, pip ratings, combat record, tenure)
+    │   ├── CombatSummaryPanel.tsx     Reusable combat record display (battles/casualties/territory)
 │   ├── SituationTab.tsx           Situation accordion content in OOBSidebar
 │   ├── BrigadeRow.tsx             Compact brigade list item in OOBSidebar
 │   ├── CorpsCard.tsx              Corps card in OOBSidebar accordion
@@ -104,6 +105,8 @@ src/ui/map/
     ├── formationAtOsid.ts         getFormationsAtOsid(formations, osid)
     ├── sectorUtils.ts             stripFactionSuffix, extractFactionFromEdgeId, collectSectorFriendlyOsids
     ├── operations.ts              getOperationId, getOperationPhaseBadgeClass/Tone, OPERATION_PHASE_TIMELINE
+    ├── officerUtils.ts            getFormationCommander, getFactionArmyCommander — officer lookup from formation/faction
+    ├── officerCharacter.ts        Officer character display: archetype, pip ratings, stat labels, origin badge, combat record, tenure, rank formatting
     └── formatters.ts              turnToDateString, formatTurnLabel, formatOperationType, formatCombatOutcome, formatPosture
 ```
 
@@ -115,70 +118,73 @@ src/ui/map/
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                         TopToolbar (z:50, top:0, full width)                │
 │             Load file / Load latest / Load run ID | faction gradient        │
-├─────────────┬───────────────────────────────────────────┬────────────────────┤
-│             │                                           │                    │
-│ OOBSidebar  │            MapContainer                   │  Entity panels     │
-│ (z:40,      │         MapLibre GL, z:30                 │  (DETAIL_PANEL_STYLE):
-│  left:0,    │                                           │                    │
-│  position:  │                                           │  FormationDetail   │
-│  fixed)     │                                           │  CorpsFrontPanel   │
-│             │                                           │  CorpsDetail       │
-│  Accordion: │                                           │  ArmyDetail        │
-│  Situation  │                                           │  OperationsPanel   │
-│  Army       │                                           │  (left:19rem,      │
-│  Operations │                                           │   top:3.5rem,      │
-│  Sectors    │                                           │   bottom:2rem,     │
-│             │                                           │   z:50)            │
-│             │                                           │                    │
-│             │                                           │  SelectionPanel    │
-│             │                                           │  (OSID info only,  │
-│             │                                           │   right:1rem,      │
-│             │                                           │   top:3.5rem,      │
-│             │                                           │   bottom:1rem,     │
-│             │                                           │   width:20rem)     │
-│             ├───────────────────────────────────────────┘                    │
+├─────────────┬──────────────────────────────────────────────────┬─────────────┤
+│             │                                                  │             │
+│ OOBSidebar  │            MapContainer                          │ Entity Rail │
+│ (z:40,      │         MapLibre GL, z:30                        │ (z:100-90)  │
+│  left:0,    │                                                  │             │
+│  position:  │                                                  │ Primary Slot│
+│  fixed)     │                                                  │ (right:1rem)│
+│             │                                                  │             │
+│  Accordion: │                                                  │ Secondary   │
+│  Situation  │                                                  │ Slot        │
+│  Army       │                                                  │ (right:     │
+│  Operations │                                                  │  25.5rem)   │
+│  Sectors    │                                                  │             │
+│             │                                                  │             │
+│             ├──────────────────────────────────────────────────┘             │
 │             │  MapModeToolbar (bottom:32px, centered)                        │
-│ Minimap     ├─────────────────────────────────────────────────────────────── │
+│ Minimap     ├────────────────────────────────────────────────────────────────┤
 │ (250×180,   │  BottomStatusStrip (bottom:0, left:0, right:0)                 │
 │  bottom-left│  selected OSID name · controller · N formations                │
-│  z:40)      │                                                                 │
-└─────────────┴─────────────────────────────────────────────────────────────── ┘
+│  z:40)      │                                                                │
+└─────────────┴────────────────────────────────────────────────────────────────┘
 ```
 
 **SupplyPanel:** bottom:36px, left:12px, z:20 — appears only when `mapMode === 'supply'`
 **Tooltip:** z:100+, pointer-events:none, follows mouse
 **AttackConfirmation modal:** z:60, centered, appears when `pendingAttackConfirmation` set
 
-### Entity Panel Priority (only one shows at a time)
+### Entity Rail & Slot Priority (Nested Rail)
 
-| Priority | Panel | Condition |
-|----------|-------|-----------|
-| 1 (highest) | FormationDetail | `selectedFormationId` set |
-| 2 | CorpsFrontPanel | `selectedCorpsFrontSectorId` set, no formation |
-| 3 | CorpsDetail | `selectedCorpsId` set, no formation/sector |
-| 4 | ArmyDetail | `selectedArmyId` set, no formation/sector/corps |
-| 5 (lowest) | OperationsPanel | `isOperationsPanelOpen` true, nothing else selected |
+ AWVV uses a **Nested Rail** system anchored to the **right** edge. 
+ Parents (e.g. Army, Corps) take precedence in the **Primary** slot. 
+ Children (e.g. Formation, Sector) slide out to the **Secondary** slot.
 
-SelectionPanel (OSID) is independent and on the right edge; it is suppressed when a sector or
-formation is selected (since those panels overlap the same screen area).
+| Priority | Entity | Slot Assignment |
+|----------|--------|-----------------|
+| 1 | **Parent** (Army > Corps > Sector) | Primary (right: 1rem) |
+| 2 | **Child** (Formation) | Secondary (right: 25.5rem) |
+| 3 | **Standalone** (OSID / Settlement) | Primary (right: 1rem) |
+
+SelectionPanel (OSID) is shared on the Primary rail and is suppressed when a tactical entity (Formation/Sector) and its parent are both visible.
 
 ### panelRail.ts
 
-All entity panels share positioning via `DETAIL_PANEL_STYLE` from `components/panelRail.ts`:
+All entity panels share positioning via `DETAIL_PANEL_STYLE` from `components/panelRail.ts`. 
+Anchoring is to the **right edge**:
 
 ```ts
 export const DETAIL_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
-  left: '19rem',
+  right: '1rem',
   top: '3.5rem',
   bottom: '2rem',
-  zIndex: 50,
+  zIndex: 100,
+  overflow: 'hidden',
+};
+
+export const SECONDARY_PANEL_STYLE: CSSProperties = {
+  position: 'absolute',
+  right: '25.5rem', // Offset by Primary width + gap
+  top: '3.5rem',
+  bottom: '2rem',
+  zIndex: 90,
   overflow: 'hidden',
 };
 ```
 
-Usage: `style={{ ...DETAIL_PANEL_STYLE, width: '24rem' }}`. Width is panel-specific.
-`SECONDARY_PANEL_STYLE` offsets to `left: '43rem'` for nested/detail-within-detail panels.
+Usage: `style={getPanelRailStyle(railSlot, '24rem')}`.
 
 ---
 
@@ -808,15 +814,35 @@ Legacy fallback: `warSupplyPressure` (0–1 scale) when reserves unavailable.
 
 When `loadedGameState.namedOfficerData` is present:
 
+- **Shared component:** `OfficerProfile.tsx` renders all officer displays consistently across 6+ panels. Props: `officer` (NamedOfficerView), `label` (context string), optional `compact` (show 2 stats instead of 3), `emphasis` (which stat in compact mode), `className`.
+- **Character utilities:** `utils/officerCharacter.ts` provides:
+  - `getArchetype(officer)` — derived character label from stat profile (e.g., "Master Strategist", "Reckless Attacker", "Paper Commander")
+  - `getCompetenceLabel/getAggressionLabel/getDefenseLabel(1-5)` — descriptive stat labels (Inept → Exceptional, Passive → Relentless, Exposed → Ironclad)
+  - `getOriginDisplay(origin)` — origin badge with faction-appropriate color (JNA=blue, Militia=orange, etc.)
+  - `formatRank(rank)` — abbreviation (army_commander → "Gen.", deputy → "Dep.")
+  - `formatPips(value, max)` — visual pip display (●●●●○)
+  - `getRatingColor(value)` — color class by rating (red→orange→white→green→gold)
+  - `formatCombatRecord(battles, victories)` — "3W/1L (75%)"
+  - `formatTenure(turnsInCommand)` — "6mo in command" or "Newly assigned"
+- **Officer lookup:** `utils/officerUtils.ts` — `getFormationCommander()`, `getFactionArmyCommander()`
+- **Consumers:** CorpsDetail, OperationDetail, FormationDetail, OrbatPanel, OperationsPanel, ArmyDetail, OOBSidebar (name-only with formatRank)
+- **NamedOfficerView fields:** id, name, faction, rank, competence, aggressiveness, defensive_skill, political_reliability, origin, home_corps_id, status, assigned_corps_id, acting_commander, turns_in_command, battles, victories
 - `FormationDetail` shows **Command** section:
   - Officer quality bar (for brigades) — officer_quality × 100%
-  - Corps commander name (from `namedOfficerStateById`, assigned_corps_id match)
+  - OfficerProfile card (for corps/army_hq) — compact with context-appropriate emphasis
+  - Army commander name (for army_hq formations)
+  - Acting commander badge `(Acting)`
+- `FormationDetail` shows **Recent command changes** for corps:
+  - Reads `lastTurnReport.details.officer_succession.replacements`
+  - Filters to current corps, shows new officer name
+
+Officer state lookup: `namedOfficerStateById[officer.id].status === 'active'`
 
 ---
 
 ## 13. Data Humanization Standards
 
-To improve immersion and readability, all raw simulation data must be processed through `utils/formatters.ts` before rendering.
+To improve immersion and readability, all raw simulation data must be processed through `utils/formatters.ts` and `utils/officerCharacter.ts` before rendering.
 
 ### 13.1 Time and Dates
 - **Policy:** Never show raw turn numbers (e.g., "T32") as the primary identifier.
@@ -839,28 +865,25 @@ To improve immersion and readability, all raw simulation data must be processed 
   - "d=" → "Density: ".
   - "Threat ratio" → "Risk ratio".
 
-  - Army commander name (for army_hq formations)
-  - Acting commander badge `(Acting)`
-- `FormationDetail` shows **Recent command changes** for corps:
-  - Reads `lastTurnReport.details.officer_succession.replacements`
-  - Filters to current corps, shows new officer name
-
-Officer state lookup: `namedOfficerStateById[officer.id].status === 'active'`
+### 13.4 Officer Stats
+- **Policy:** Never show raw 1-5 integers or multiplied values (e.g., "300", "500") for officer attributes.
+- **Display:** Use `OfficerProfile` component which renders pip ratings (●●●○○), descriptive labels ("Skilled", "Relentless"), archetype ("Assault Commander"), and origin badge ("JNA").
+- **Formatters:** `officerCharacter.ts` — `getCompetenceLabel`, `getAggressionLabel`, `getDefenseLabel`, `getArchetype`, `formatPips`, `getRatingColor`, `getOriginDisplay`, `formatRank`, `formatCombatRecord`, `formatTenure`.
 
 ---
 
-## 13. Known Constraints & Standing Directives
+---
 
-| Constraint | Rule |
-|-----------|------|
-| Operations mode sync | Keyboard shortcuts and toolbar map-mode count must stay in sync at 1â€“6; the sixth mode is `operations`, rendered via `buildOperationalWeightGeoJSON.ts`. |
-| Front line style | Black-white stripe only. No chevrons, no HoI4 barbed-wire. |
-| Sector density modifiers | Use faction-level aggregation only. Never per-corps density for THIN/DENSE modifier. |
-| AoR legacy | AoR/ZoC cleanup R1–R5 complete (2026-03-04). `getLegacyAoR()` + all consumer dead branches removed. ZoC fully removed (2026-03-02). See `AOR_ZOC_LEGACY_AUDIT.md`. |
-| OSID vs SID | `political_controllers` keyed by OSID. Never use getEffectiveSettlementSide() for control. |
-| Supply gating | Only gate on supply when `supply_reserves_enabled=true`. OSID reachability runs regardless. |
-| MapLibre blob workers | Map assets served over HTTP (`http://127.0.0.1:<port>`). Blob workers fail under `awwv://`. |
-| Panel positioning | Use `panelRail.ts` DETAIL_PANEL_STYLE + inline styles (not Tailwind position classes). |
-| saved/ directory | Excluded from tsconfig compilation. Reference snapshots from old codebase only — do not import from `saved/`. |
-| Operations modal | OperationsPanel = slide-out (left:19rem). Ops planning = separate centered modal (future). |
-| Two highlight systems | `hoveredOsids` → `sidebar-hover-outline` (gold border). `operationTargetOsids` → op-target crosshair/ring/fill layers. Set together in OperationsPanel. |
+## 14. Paradox Team & Protocol Roles
+
+The Map UI is maintained according to the **Paradox Team Protocols**.
+
+| Role | Agent | Primary Responsibility |
+|------|-------|------------------------|
+| **Orchestrator** | `orchestrator.md` | Big-picture lead, delegation, "State of the Game". |
+| **UI/UX Developer** | `ui-ux-developer.md` | Component implementation, theme adherence, Nested Rail logic. |
+| **Technical Architect** | `technical-architect.md` | ADR, IPC bridge stability, store contract. |
+| **Product Manager** | `product-manager.md` | Scope, priority, roadmap tracking. |
+| **QA Engineer** | `qa-engineer.md` | Browser verification, layout regression testing. |
+
+**Current Protocol:** Orchestrator-First. Documentation changes must be reviewed by the UI Expert (UI/UX Developer) for alignment with established visual patterns.

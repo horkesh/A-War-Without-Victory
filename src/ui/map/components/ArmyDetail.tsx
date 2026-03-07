@@ -6,6 +6,7 @@ import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
 import { getFactionArmyCommander } from '../utils/officerUtils';
+import { OfficerProfile } from './OfficerProfile';
 import { getPanelRailStyle } from './panelRail';
 
 const FACTION_DISPLAY: Record<string, string> = {
@@ -14,7 +15,11 @@ const FACTION_DISPLAY: Record<string, string> = {
   HRHB: 'Croatian Republic of Herzeg-Bosnia (HVO)',
 };
 
-export function ArmyDetail() {
+interface ArmyDetailProps {
+  railSlot: 'primary' | 'secondary';
+}
+
+export function ArmyDetail({ railSlot }: ArmyDetailProps) {
   const selectedArmyId = useGameStore((s) => s.selectedArmyId);
   const setSelectedArmyId = useGameStore((s) => s.setSelectedArmyId);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
@@ -62,7 +67,7 @@ export function ArmyDetail() {
   return (
     <div
       className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
-      style={getPanelRailStyle('primary', '20rem')}
+      style={getPanelRailStyle(railSlot, '20rem')}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
@@ -98,21 +103,7 @@ export function ArmyDetail() {
         {(() => {
           const commander = getFactionArmyCommander(faction, loadedGameState);
           if (!commander) return null;
-          return (
-            <div className="mb-4 p-2 bg-black/20 rounded border border-panel-border/30 flex items-center gap-3">
-              <div className="w-10 h-10 bg-panel-card rounded border border-panel-border flex items-center justify-center text-accent-gold text-lg font-bold shrink-0">
-                HQ
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[9px] uppercase text-text-secondary tracking-wider font-semibold">Army Commander</div>
-                <div className="text-xs font-bold text-accent-gold truncate">{commander.rank} {commander.name}</div>
-                <div className="flex gap-2 text-[9px] mt-0.5">
-                  <span className="text-text-secondary">Comp: <span className="text-text-primary">{Math.round(commander.competence * 100)}</span></span>
-                  <span className="text-text-secondary">Def: <span className="text-text-primary">{Math.round(commander.defensive_skill * 100)}</span></span>
-                </div>
-              </div>
-            </div>
-          );
+          return <OfficerProfile officer={commander} label="Army Commander" className="mb-4" />;
         })()}
 
         {/* Metrics */}

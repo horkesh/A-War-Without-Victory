@@ -12,6 +12,8 @@ import {
 import { FACTION_COLORS } from '../utils/theme';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { turnToDateString, formatOperationType, toTitleCase } from '../utils/formatters';
+import { getFormationCommander } from '../utils/officerUtils';
+import { OfficerProfile } from './OfficerProfile';
 
 function compareOperations(a: OperationView, b: OperationView): number {
   return (
@@ -43,6 +45,7 @@ export function OperationsPanel() {
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const panToOsid = useGameStore((s) => s.panToOsid);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
+  const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const lastAutoFocusOperationKeyRef = useRef<string | null>(null);
   const operationCardRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const objectiveButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -387,6 +390,42 @@ export function OperationsPanel() {
                   )}
                 </div>
 
+                {/* Commander */}
+                {(() => {
+                  const corpsFormation = loadedGameState.formations.find(f => f.id === selectedOperation.corps_id);
+                  const commander = corpsFormation ? getFormationCommander(corpsFormation, loadedGameState) : null;
+                  if (!commander) return null;
+                  return (
+                    <div className="pt-2 border-t border-panel-border">
+                      <OfficerProfile officer={commander} label="Operation Commander" />
+                    </div>
+                  );
+                })()}
+
+                {/* Participating Brigades */}
+                {selectedOperation.participating_brigade_ids && selectedOperation.participating_brigade_ids.length > 0 && (
+                  <div className="pt-2 border-t border-panel-border">
+                    <div className="text-[11px] text-text-secondary mb-1 uppercase tracking-wide">Allocated Assets</div>
+                    <div className="flex flex-wrap gap-1">
+                      {selectedOperation.participating_brigade_ids.map(bId => {
+                        const bName = loadedGameState.formations.find(f => f.id === bId)?.name ?? bId;
+                        return (
+                          <button
+                            key={bId}
+                            onClick={() => {
+                              setSelectedOperationKey(null);
+                              setSelectedFormationId(bId);
+                            }}
+                            className="px-1.5 py-0.5 bg-panel-card hover:bg-panel-hover border border-panel-border rounded text-[10px] text-text-primary transition-colors"
+                          >
+                            {bName}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* AAR Strip */}
                 <div className="pt-1 border-t border-panel-border">
                   <div className="text-[11px] text-accent-gold mb-1 uppercase tracking-wide font-semibold">AAR Strip</div>
@@ -477,12 +516,18 @@ export function OperationsPanel() {
                               <span className="shrink-0 text-[10px] mt-0.5 w-3 text-center text-text-secondary">
                                 {isDone ? '✓' : isCurrent ? '▶' : '○'}
                               </span>
-                              <div className="min-w-0">
-                                <div className="text-[11px] text-text-primary truncate">{objectiveName}</div>
-                                <div className="text-[10px] text-text-secondary truncate">
-                                  Objective {index + 1}/{selectedOperation.objectives?.length ?? 0}{selectedOperation.schwerpunkt_osid === obj ? ' - Schwerpunkt' : ''}
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center justify-between">
+                                  <div className="text-[11px] text-text-primary truncate">{objectiveName}</div>
+                                  {isCurrent && (
+                                    <span className="text-[9px] text-accent-gold font-bold uppercase tracking-tighter animate-pulse shadow-sm px-1 bg-accent-gold/10 rounded border border-accent-gold/30">
+                                      Schwerpunkt
+                                    </span>
+                                  )}
                                 </div>
-                                <div className="text-[10px] font-mono text-text-secondary break-all">{obj}</div>
+                                <div className="text-[10px] text-text-secondary truncate">
+                                  Objective {index + 1}/{selectedOperation.objectives?.length ?? 0}{selectedOperation.schwerpunkt_osid === obj ? ' - Main Axis' : ''}
+                                </div>
                               </div>
                             </div>
                           </button>

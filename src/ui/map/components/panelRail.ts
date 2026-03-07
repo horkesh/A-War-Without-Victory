@@ -6,7 +6,8 @@ export type PanelRailPanel =
   | 'corps'
   | 'army'
   | 'sector'
-  | 'operation';
+  | 'operation'
+  | 'orbat';
 
 export interface PanelRailSelectionState {
   selectedOsid: string | null;
@@ -15,6 +16,7 @@ export interface PanelRailSelectionState {
   selectedCorpsFrontSectorId: string | null;
   selectedFormationId: string | null;
   selectedOperationKey: string | null;
+  selectedOrbatCorpsId: string | null;
 }
 
 export interface PanelRailState {
@@ -28,22 +30,35 @@ export interface PanelRailState {
  */
 export const DETAIL_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
-  left: '19rem',
+  right: '1rem',
   top: '3.5rem',
   bottom: '2rem',
-  zIndex: 50,
+  zIndex: 100,
   overflow: 'hidden',
 };
 
 /**
- * Secondary panel — further right, for nested panels or detail-within-detail.
+ * Nested panel anchored to the LEFT sidebar (width 18rem/w-72).
+ * Slides out immediately to the right of the Command sidebar.
+ */
+export const LEFT_DETAIL_PANEL_STYLE: CSSProperties = {
+  position: 'absolute',
+  left: '18rem', // Width of OOBSidebar (w-72 = 18rem)
+  top: '3.5rem',
+  bottom: '2rem',
+  zIndex: 100,
+  overflow: 'hidden',
+};
+
+/**
+ * Secondary panel — slides out to the LEFT of the primary panel.
  */
 export const SECONDARY_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
-  left: '43rem',
+  right: '25.5rem', // Offset by primary panel width (24rem + 1rem padding + 0.5rem gap)
   top: '3.5rem',
   bottom: '2rem',
-  zIndex: 50,
+  zIndex: 90, // Slightly behind primary
   overflow: 'hidden',
 };
 
@@ -60,6 +75,8 @@ export const RIGHT_PANEL_STYLE: CSSProperties = {
 };
 
 export function derivePanelRailState(state: PanelRailSelectionState): PanelRailState {
+  if (state.selectedOrbatCorpsId) return { primary: 'orbat', secondary: null };
+
   // Priority 1: Selection with Parent context (Drill-down)
   if (state.selectedFormationId) {
     if (state.selectedCorpsFrontSectorId) return { primary: 'sector', secondary: 'formation' };

@@ -3,6 +3,8 @@ import { FACTION_COLORS } from '../utils/theme';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { formatOperationType, turnToDateString, toTitleCase } from '../utils/formatters';
 import { getPanelRailStyle } from './panelRail';
+import { getFormationCommander } from '../utils/officerUtils';
+import { OfficerProfile } from './OfficerProfile';
 
 function PhaseBadge({ phase }: { phase: string }) {
   const cls =
@@ -35,9 +37,11 @@ function MomentumBar({ momentum }: { momentum: number }) {
  * Operation detail panel: shows when an operation card is clicked in OOBSidebar.
  * Positioned at left: 19rem (second column, next to OOBSidebar).
  */
-export function OperationDetail() {
-  const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
-  const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
+interface OperationDetailProps {
+  railSlot: 'primary' | 'secondary';
+}
+
+export function OperationDetail({ railSlot }: OperationDetailProps) {
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
   const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -54,7 +58,6 @@ export function OperationDetail() {
 
   const objectives = op.objectives ?? [];
   const currentIdx = op.current_objective_index ?? 0;
-  const railSlot = selectedSectorId || selectedCorpsId ? 'secondary' : 'primary';
 
   return (
     <div
@@ -88,6 +91,14 @@ export function OperationDetail() {
             <span className="text-text-secondary">{formatOperationType(op.type)}</span>
           </div>
         </div>
+
+        {/* Commander */}
+        {(() => {
+          const corpsFormation = loadedGameState.formations.find(f => f.id === op.corps_id);
+          const commander = corpsFormation ? getFormationCommander(corpsFormation, loadedGameState) : null;
+          if (!commander) return null;
+          return <OfficerProfile officer={commander} label="Operation Commander" className="mb-4" />;
+        })()}
 
         {/* Metrics */}
         <div className="border-t border-panel-border pt-2 mb-3 space-y-1">
@@ -143,9 +154,16 @@ export function OperationDetail() {
                     <span className="shrink-0">
                       {isDone ? '✓' : isCurrent ? '▶' : '○'}
                     </span>
-                    <span className="font-mono">
-                      {getOsidDisplayName(osid, osidDisplayNames)}
-                    </span>
+                    <div className="flex-1 flex items-center justify-between min-w-0">
+                      <span className="font-mono truncate">
+                        {getOsidDisplayName(osid, osidDisplayNames)}
+                      </span>
+                      {isCurrent && (
+                        <span className="text-[9px] text-accent-gold font-bold uppercase tracking-tighter px-1 bg-accent-gold/10 rounded border border-accent-gold/30 ml-2 shrink-0">
+                          Schwerpunkt
+                        </span>
+                      )}
+                    </div>
                   </div>
                 );
               })}

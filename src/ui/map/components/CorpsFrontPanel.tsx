@@ -32,13 +32,16 @@ function compareOperations(a: OperationView, b: OperationView): number {
   );
 }
 
-export function CorpsFrontPanel() {
+interface CorpsFrontPanelProps {
+  railSlot: 'primary' | 'secondary';
+}
+
+export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const ipc = useIPC();
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const setSelectedSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
-  const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const panToOsid = useGameStore((s) => s.panToOsid);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
@@ -74,8 +77,6 @@ export function CorpsFrontPanel() {
   );
 
   if (operationsPanelOpen || !selectedSectorId || !loadedGameState?.corpsFrontSectors) return null;
-
-  const railSlot = selectedCorpsId ? 'secondary' : 'primary';
 
   const sector = _sector;
   if (!sector) return null;
@@ -213,11 +214,10 @@ export function CorpsFrontPanel() {
               aria-controls={`sector-intel-panel-${tabId}`}
               id={`sector-intel-tab-${tabId}`}
               onClick={() => setActiveTab(tabId)}
-              className={`kbd-focus px-3 py-2 text-[10px] font-bold uppercase border-b-2 transition-colors ${
-                activeTab === tabId
-                  ? 'border-accent-gold text-neutral-900 bg-white'
-                  : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:bg-white/50'
-              }`}
+              className={`kbd-focus px-3 py-2 text-[10px] font-bold uppercase border-b-2 transition-colors ${activeTab === tabId
+                ? 'border-accent-gold text-neutral-900 bg-white'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:bg-white/50'
+                }`}
             >
               {label}
             </button>
@@ -227,292 +227,292 @@ export function CorpsFrontPanel() {
         {/* Single visible panel (no stacking) */}
         <div className="flex-1 overflow-auto min-h-0 relative z-10">
           <div role="tabpanel" id="sector-intel-panel-overview" aria-labelledby="sector-intel-tab-overview" hidden={activeTab !== 'overview'} className="p-4 relative z-10">
-        {activeTab === 'overview' && (
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-              <div className="flex flex-col">
-                <span className="text-[9px] uppercase font-bold text-neutral-500">Front Length</span>
-                <span className="font-medium">
-                  {sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">REDACTED</span> : `~${sector.length_edges} km`}
-                </span>
-                <span className="text-[9px] text-neutral-500">[{sector.sub_segment_count === 1 ? 'Contiguous' : `${sector.sub_segment_count} Segments`}]</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[9px] uppercase font-bold text-neutral-500">Density</span>
-                <span className="font-medium">
-                  {sector.intel_confidence < 0.25 ? <span className="bg-black text-black select-none">REDACTED</span> : (
-                    <>
-                      {sector.density.toFixed(2)} <DensityBadge density={sector.density} />
-                    </>
-                  )}
-                </span>
-                <span className="text-[9px] text-neutral-500">[{sector.assigned_brigade_ids.length} Frontline]</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[9px] uppercase font-bold text-neutral-500">Risk Ratio</span>
-                <span className="font-medium">
-                  {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">REDACTED</span> : <ThreatBadge ratio={sector.threat_ratio} />}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[9px] uppercase font-bold text-neutral-500">Defensive Power</span>
-                <span className="font-medium">
-                  {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACTED</span> : Math.round(sector.defensive_power).toLocaleString()}
-                </span>
-              </div>
-              <div className="flex flex-col col-span-2">
-                <span className="text-[9px] uppercase font-bold text-neutral-500">Linked Settlements</span>
-                <span className="font-medium">{sectorFriendlyOsids.length}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[9px] uppercase font-bold text-neutral-500">Sector Stance</span>
-                <span className="font-medium uppercase">{effectiveSectorStance.replace(/_/g, ' ')}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[9px] uppercase font-bold text-neutral-500">Supply Priority</span>
-                <span className="font-medium">{(sector.logistics_priority ?? 1).toFixed(1)}x</span>
-              </div>
-              <div className="flex flex-col col-span-2">
-                <span className="text-[9px] uppercase font-bold text-neutral-500">OPSEC</span>
-                <span className="font-medium uppercase">{sector.opsec_active ? 'Active' : 'Inactive'}</span>
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-dashed border-neutral-300 space-y-2">
-              <div>
-                <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Sector Orders</span>
-                <div className="grid grid-cols-2 gap-1">
-                  {([
-                    ['dig_in', 'Dig In'],
-                    ['elastic_defense', 'Elastic'],
-                    ['defend_at_all_costs', 'At All Costs'],
-                    ['hold', 'Hold'],
-                  ] as const).map(([stance, label]) => (
-                    <button
-                      key={stance}
-                      type="button"
-                      onClick={() => void issueSectorStance(stance)}
-                      className="kbd-focus px-2 py-1 rounded border border-neutral-400 bg-white/80 hover:bg-neutral-200 text-[10px] font-bold uppercase"
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Reinforcement Priority</span>
-                <div className="flex gap-1">
-                  {[0.5, 1, 2].map((priority) => (
-                    <button
-                      key={priority}
-                      type="button"
-                      onClick={() => void issueLogisticsPriority(priority)}
-                      className="kbd-focus flex-1 px-2 py-1 rounded border border-neutral-400 bg-white/80 hover:bg-neutral-200 text-[10px] font-bold"
-                    >
-                      {priority.toFixed(1)}x
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => void toggleOpsec()}
-                className="kbd-focus w-full rounded border border-neutral-400 bg-white/80 hover:bg-neutral-200 px-2 py-1 text-[10px] font-bold uppercase"
-              >
-                {sector.opsec_active ? 'Disable OPSEC' : 'Enable OPSEC'}
-              </button>
-              {sectorActionMessage && (
-                <div className="text-[10px] text-neutral-600 italic">{sectorActionMessage}</div>
-              )}
-            </div>
-
-            {sector.opposing_factions.length > 0 && (
-              <div className="pt-2 border-t border-dashed border-neutral-300">
-                <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Identified Hostiles</span>
-                <div className="flex flex-wrap gap-2">
-                  {sector.opposing_factions.map((f) => (
-                    <span key={f} className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${FACTION_COLORS[f]?.replace('text-', 'bg-').replace('-400', '-900') ?? 'bg-neutral-800'} text-white`}>
-                      {f}
+            {activeTab === 'overview' && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                  <div className="flex flex-col">
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">Front Length</span>
+                    <span className="font-medium">
+                      {sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">REDACTED</span> : `~${sector.length_edges} km`}
                     </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-        </div>
-
-        <div role="tabpanel" id="sector-intel-panel-forces" aria-labelledby="sector-intel-tab-forces" hidden={activeTab !== 'forces'} className="p-4 relative z-10">
-        {activeTab === 'forces' && (
-          <div className="p-4 relative z-10">
-            {assignedFormations.length > 0 && (
-              <div className="mb-4">
-                <div className="text-[9px] uppercase font-bold text-neutral-500 mb-2 border-b border-neutral-300 pb-1">
-                  Active Frontline Elements ({assignedFormations.length})
-                </div>
-                <div className="space-y-[1px] max-h-[200px] overflow-auto">
-                  {assignedFormations.map((f) => (
-                    <button
-                      key={f.id}
-                      type="button"
-                      aria-label={`Assigned brigade ${f.name}${f.personnel != null ? `, personnel ${f.personnel.toLocaleString()}` : ''}`}
-                      className="kbd-focus w-full flex justify-between items-center bg-white/50 hover:bg-neutral-200 transition-colors text-left px-1 py-0.5 rounded"
-                      onClick={() => useGameStore.setState({
-                        selectedCorpsId,
-                        selectedCorpsFrontSectorId: selectedSectorId,
-                        selectedFormationId: f.id,
-                        selectedOperationKey: null,
-                        selectedOsid: null,
-                      })}
-                      onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
-                      onMouseLeave={() => setHoveredOsids([])}
-                    >
-                      <span className="truncate mr-2 font-medium">{f.name}</span>
-                      <span className="text-neutral-500 text-[10px] tabular-nums shrink-0">
-                        {sector.intel_confidence < 0.5 ? <span className="bg-black text-black select-none px-1">RED</span> : (f.personnel != null ? `${f.personnel.toLocaleString()} PAX` : '—')}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {reserveFormations.length > 0 && (
-              <div className="pt-2">
-                <div className="text-[9px] uppercase font-bold text-neutral-500 mb-2 border-b border-neutral-300 pb-1">
-                  Deployed Reserves ({reserveFormations.length})
-                </div>
-                <div className="space-y-[1px] max-h-[120px] overflow-auto opacity-80 hover:opacity-100 transition-opacity">
-                  {reserveFormations.map((f) => (
-                    <button
-                      key={f.id}
-                      type="button"
-                      aria-label={`Reserve brigade ${f.name}${f.personnel != null ? `, personnel ${f.personnel.toLocaleString()}` : ''}`}
-                      className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-200 transition-colors text-left px-1 py-0.5 rounded"
-                      onClick={() => useGameStore.setState({
-                        selectedCorpsId,
-                        selectedCorpsFrontSectorId: selectedSectorId,
-                        selectedFormationId: f.id,
-                        selectedOperationKey: null,
-                        selectedOsid: null,
-                      })}
-                      onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
-                      onMouseLeave={() => setHoveredOsids([])}
-                    >
-                      <span className="truncate mr-2 text-neutral-600 italic leading-none">{f.name}</span>
-                      <span className="text-neutral-400 text-[9px] tabular-nums shrink-0 leading-none">
-                        {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none px-1">RED</span> : (f.personnel != null ? `${f.personnel.toLocaleString()} PAX` : '—')}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-        </div>
-
-        <div role="tabpanel" id="sector-intel-panel-logistics" aria-labelledby="sector-intel-tab-logistics" hidden={activeTab !== 'logistics'} className="p-4 relative z-10">
-        {activeTab === 'logistics' && (
-          <div className="p-4 relative z-10 space-y-1">
-            <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
-              <span className="text-[10px] uppercase font-bold text-neutral-500">Total Manpower</span>
-              <span className="font-medium">
-                {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">REDACTED</span> : totalSectorPersonnel.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
-              <span className="text-[10px] uppercase font-bold text-neutral-500">Reserve Ratio</span>
-              <span className="font-medium">
-                {sector.intel_confidence < 0.5 ? <span className="bg-black text-black select-none">REDACTED</span> : `${Math.round(reserveRatio * 100)}%`}
-              </span>
-            </div>
-            <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
-              <span className="text-[10px] uppercase font-bold text-neutral-500">Ops Supply Readiness</span>
-              <span className="font-medium">
-                {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none">REDACTED</span> : (avgOperationSupply != null ? `${Math.round(avgOperationSupply * 100)}%` : '—')}
-              </span>
-            </div>
-            {entrenchmentSummary && (
-              <>
-                <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
-                  <span className="text-[10px] uppercase font-bold text-neutral-500">Avg Entrenchment</span>
-                  <span className="font-medium">{entrenchmentSummary.avgEntrenchment.toFixed(1)} turns</span>
-                </div>
-                <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
-                  <span className="text-[10px] uppercase font-bold text-neutral-500">Avg Dig-in</span>
-                  <span className="font-medium">{Math.round(entrenchmentSummary.avgDigIn * 100)}%</span>
-                </div>
-                <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
-                  <span className="text-[10px] uppercase font-bold text-neutral-500">Dig-in Posture</span>
-                  <span className="font-medium">{entrenchmentSummary.digInCount}/{entrenchmentSummary.totalCount}</span>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-        </div>
-
-        <div role="tabpanel" id="sector-intel-panel-ops" aria-labelledby="sector-intel-tab-ops" hidden={activeTab !== 'ops'} className="p-4 relative z-10">
-        {activeTab === 'ops' && (
-          <div className="p-4 relative z-10 space-y-3">
-            {relatedOperations.length === 0 ? (
-              <div className="text-[10px] text-neutral-500 italic uppercase">/// NO ACTIVE DIRECTIVES IDENTIFIED ///</div>
-            ) : (
-              relatedOperations.map((op) => {
-                const phaseBg = getOperationPhaseBadgeClass(op.phase);
-                const operationId = getOperationId(op);
-                const objective = op.objectives?.[op.current_objective_index ?? 0] ?? op.objectives?.[0];
-                return (
-                  <div key={operationId} className="bg-white border-2 border-neutral-300 p-2 relative shadow-sm">
-                    {/* Stamp effect */}
-                    <div className={`absolute top-1 right-2 opacity-20 font-black text-xl -rotate-12 select-none uppercase ${op.phase === 'execution' ? 'text-red-600' : 'text-amber-600'}`}>
-                      {op.phase}
-                    </div>
-
-                    <div className="font-bold text-[12px] uppercase tracking-wide mb-1 flex items-center gap-2">
-                      <span>{sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">OP. REDACTED</span> : op.name}</span>
-                      <span className={`px-1 rounded text-[8px] text-white ${phaseBg}`}>{op.phase}</span>
-                    </div>
-
-                    <div className="text-[9px] uppercase font-bold text-neutral-500 mb-0.5 mt-2">Forces Committed</div>
-                    <div className="text-[10px]">{sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">REDACTED</span> : `${op.participating_brigade_count} Brigades`}</div>
-
-                    {op.supply_readiness != null && (
-                      <>
-                        <div className="text-[9px] uppercase font-bold text-neutral-500 mt-2 mb-0.5">Supply Status</div>
-                        <div className="text-[10px]">{sector.intel_confidence < 0.7 ? <span className="bg-black text-black select-none">REDACTED</span> : `${Math.round(op.supply_readiness * 100)}% Readiness`}</div>
-                      </>
-                    )}
-
-                    {objective && (
-                      <div className="mt-3 pt-2 border-t border-neutral-300 border-dashed">
-                        <button
-                          type="button"
-                          aria-label={`Focus map on objective ${osidDisplayNames?.[objective] ?? objective}`}
-                          onClick={() => panToOsid?.(objective)}
-                          className="kbd-focus text-[9px] uppercase font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1"
-                        >
-                          <span className="text-[11px]">⌖</span> Focus Obj: {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACT</span> : (osidDisplayNames?.[objective] ?? objective)}
-                        </button>
-                      </div>
-                    )}
+                    <span className="text-[9px] text-neutral-500">[{sector.sub_segment_count === 1 ? 'Contiguous' : `${sector.sub_segment_count} Segments`}]</span>
                   </div>
-                );
-              })
+                  <div className="flex flex-col">
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">Density</span>
+                    <span className="font-medium">
+                      {sector.intel_confidence < 0.25 ? <span className="bg-black text-black select-none">REDACTED</span> : (
+                        <>
+                          {sector.density.toFixed(2)} <DensityBadge density={sector.density} />
+                        </>
+                      )}
+                    </span>
+                    <span className="text-[9px] text-neutral-500">[{sector.assigned_brigade_ids.length} Frontline]</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">Risk Ratio</span>
+                    <span className="font-medium">
+                      {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">REDACTED</span> : <ThreatBadge ratio={sector.threat_ratio} />}
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">Defensive Power</span>
+                    <span className="font-medium">
+                      {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACTED</span> : Math.round(sector.defensive_power).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex flex-col col-span-2">
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">Linked Settlements</span>
+                    <span className="font-medium">{sectorFriendlyOsids.length}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">Sector Stance</span>
+                    <span className="font-medium uppercase">{effectiveSectorStance.replace(/_/g, ' ')}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">Supply Priority</span>
+                    <span className="font-medium">{(sector.logistics_priority ?? 1).toFixed(1)}x</span>
+                  </div>
+                  <div className="flex flex-col col-span-2">
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">OPSEC</span>
+                    <span className="font-medium uppercase">{sector.opsec_active ? 'Active' : 'Inactive'}</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-dashed border-neutral-300 space-y-2">
+                  <div>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Sector Orders</span>
+                    <div className="grid grid-cols-2 gap-1">
+                      {([
+                        ['dig_in', 'Dig In'],
+                        ['elastic_defense', 'Elastic'],
+                        ['defend_at_all_costs', 'At All Costs'],
+                        ['hold', 'Hold'],
+                      ] as const).map(([stance, label]) => (
+                        <button
+                          key={stance}
+                          type="button"
+                          onClick={() => void issueSectorStance(stance)}
+                          className="kbd-focus px-2 py-1 rounded border border-neutral-400 bg-white/80 hover:bg-neutral-200 text-[10px] font-bold uppercase"
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Reinforcement Priority</span>
+                    <div className="flex gap-1">
+                      {[0.5, 1, 2].map((priority) => (
+                        <button
+                          key={priority}
+                          type="button"
+                          onClick={() => void issueLogisticsPriority(priority)}
+                          className="kbd-focus flex-1 px-2 py-1 rounded border border-neutral-400 bg-white/80 hover:bg-neutral-200 text-[10px] font-bold"
+                        >
+                          {priority.toFixed(1)}x
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void toggleOpsec()}
+                    className="kbd-focus w-full rounded border border-neutral-400 bg-white/80 hover:bg-neutral-200 px-2 py-1 text-[10px] font-bold uppercase"
+                  >
+                    {sector.opsec_active ? 'Disable OPSEC' : 'Enable OPSEC'}
+                  </button>
+                  {sectorActionMessage && (
+                    <div className="text-[10px] text-neutral-600 italic">{sectorActionMessage}</div>
+                  )}
+                </div>
+
+                {sector.opposing_factions.length > 0 && (
+                  <div className="pt-2 border-t border-dashed border-neutral-300">
+                    <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Identified Hostiles</span>
+                    <div className="flex flex-wrap gap-2">
+                      {sector.opposing_factions.map((f) => (
+                        <span key={f} className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${FACTION_COLORS[f]?.replace('text-', 'bg-').replace('-400', '-900') ?? 'bg-neutral-800'} text-white`}>
+                          {f}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
-            <div className="pt-3">
-              <button
-                type="button"
-                onClick={() => setOpsPlanningModalOpen(true)}
-                className="kbd-focus w-full text-[10px] uppercase font-bold bg-neutral-200 hover:bg-neutral-300 text-neutral-800 py-2 border border-neutral-400 transition-colors"
-              >
-                Draft New Directive (Ops Planning)
-              </button>
-            </div>
           </div>
-        )}
+
+          <div role="tabpanel" id="sector-intel-panel-forces" aria-labelledby="sector-intel-tab-forces" hidden={activeTab !== 'forces'} className="p-4 relative z-10">
+            {activeTab === 'forces' && (
+              <div className="p-4 relative z-10">
+                {assignedFormations.length > 0 && (
+                  <div className="mb-4">
+                    <div className="text-[9px] uppercase font-bold text-neutral-500 mb-2 border-b border-neutral-300 pb-1">
+                      Active Frontline Elements ({assignedFormations.length})
+                    </div>
+                    <div className="space-y-[1px] max-h-[200px] overflow-auto">
+                      {assignedFormations.map((f) => (
+                        <button
+                          key={f.id}
+                          type="button"
+                          aria-label={`Assigned brigade ${f.name}${f.personnel != null ? `, personnel ${f.personnel.toLocaleString()}` : ''}`}
+                          className="kbd-focus w-full flex justify-between items-center bg-white/50 hover:bg-neutral-200 transition-colors text-left px-1 py-0.5 rounded"
+                          onClick={() => useGameStore.setState({
+                            selectedCorpsId,
+                            selectedCorpsFrontSectorId: selectedSectorId,
+                            selectedFormationId: f.id,
+                            selectedOperationKey: null,
+                            selectedOsid: null,
+                          })}
+                          onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
+                          onMouseLeave={() => setHoveredOsids([])}
+                        >
+                          <span className="truncate mr-2 font-medium">{f.name}</span>
+                          <span className="text-neutral-500 text-[10px] tabular-nums shrink-0">
+                            {sector.intel_confidence < 0.5 ? <span className="bg-black text-black select-none px-1">RED</span> : (f.personnel != null ? `${f.personnel.toLocaleString()} PAX` : '—')}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {reserveFormations.length > 0 && (
+                  <div className="pt-2">
+                    <div className="text-[9px] uppercase font-bold text-neutral-500 mb-2 border-b border-neutral-300 pb-1">
+                      Deployed Reserves ({reserveFormations.length})
+                    </div>
+                    <div className="space-y-[1px] max-h-[120px] overflow-auto opacity-80 hover:opacity-100 transition-opacity">
+                      {reserveFormations.map((f) => (
+                        <button
+                          key={f.id}
+                          type="button"
+                          aria-label={`Reserve brigade ${f.name}${f.personnel != null ? `, personnel ${f.personnel.toLocaleString()}` : ''}`}
+                          className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-200 transition-colors text-left px-1 py-0.5 rounded"
+                          onClick={() => useGameStore.setState({
+                            selectedCorpsId,
+                            selectedCorpsFrontSectorId: selectedSectorId,
+                            selectedFormationId: f.id,
+                            selectedOperationKey: null,
+                            selectedOsid: null,
+                          })}
+                          onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
+                          onMouseLeave={() => setHoveredOsids([])}
+                        >
+                          <span className="truncate mr-2 text-neutral-600 italic leading-none">{f.name}</span>
+                          <span className="text-neutral-400 text-[9px] tabular-nums shrink-0 leading-none">
+                            {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none px-1">RED</span> : (f.personnel != null ? `${f.personnel.toLocaleString()} PAX` : '—')}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div role="tabpanel" id="sector-intel-panel-logistics" aria-labelledby="sector-intel-tab-logistics" hidden={activeTab !== 'logistics'} className="p-4 relative z-10">
+            {activeTab === 'logistics' && (
+              <div className="p-4 relative z-10 space-y-1">
+                <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
+                  <span className="text-[10px] uppercase font-bold text-neutral-500">Total Manpower</span>
+                  <span className="font-medium">
+                    {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">REDACTED</span> : totalSectorPersonnel.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
+                  <span className="text-[10px] uppercase font-bold text-neutral-500">Reserve Ratio</span>
+                  <span className="font-medium">
+                    {sector.intel_confidence < 0.5 ? <span className="bg-black text-black select-none">REDACTED</span> : `${Math.round(reserveRatio * 100)}%`}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
+                  <span className="text-[10px] uppercase font-bold text-neutral-500">Ops Supply Readiness</span>
+                  <span className="font-medium">
+                    {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none">REDACTED</span> : (avgOperationSupply != null ? `${Math.round(avgOperationSupply * 100)}%` : '—')}
+                  </span>
+                </div>
+                {entrenchmentSummary && (
+                  <>
+                    <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
+                      <span className="text-[10px] uppercase font-bold text-neutral-500">Avg Entrenchment</span>
+                      <span className="font-medium">{entrenchmentSummary.avgEntrenchment.toFixed(1)} turns</span>
+                    </div>
+                    <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
+                      <span className="text-[10px] uppercase font-bold text-neutral-500">Avg Dig-in</span>
+                      <span className="font-medium">{Math.round(entrenchmentSummary.avgDigIn * 100)}%</span>
+                    </div>
+                    <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
+                      <span className="text-[10px] uppercase font-bold text-neutral-500">Dig-in Posture</span>
+                      <span className="font-medium">{entrenchmentSummary.digInCount}/{entrenchmentSummary.totalCount}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div role="tabpanel" id="sector-intel-panel-ops" aria-labelledby="sector-intel-tab-ops" hidden={activeTab !== 'ops'} className="p-4 relative z-10">
+            {activeTab === 'ops' && (
+              <div className="p-4 relative z-10 space-y-3">
+                {relatedOperations.length === 0 ? (
+                  <div className="text-[10px] text-neutral-500 italic uppercase">/// NO ACTIVE DIRECTIVES IDENTIFIED ///</div>
+                ) : (
+                  relatedOperations.map((op) => {
+                    const phaseBg = getOperationPhaseBadgeClass(op.phase);
+                    const operationId = getOperationId(op);
+                    const objective = op.objectives?.[op.current_objective_index ?? 0] ?? op.objectives?.[0];
+                    return (
+                      <div key={operationId} className="bg-white border-2 border-neutral-300 p-2 relative shadow-sm">
+                        {/* Stamp effect */}
+                        <div className={`absolute top-1 right-2 opacity-20 font-black text-xl -rotate-12 select-none uppercase ${op.phase === 'execution' ? 'text-red-600' : 'text-amber-600'}`}>
+                          {op.phase}
+                        </div>
+
+                        <div className="font-bold text-[12px] uppercase tracking-wide mb-1 flex items-center gap-2">
+                          <span>{sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">OP. REDACTED</span> : op.name}</span>
+                          <span className={`px-1 rounded text-[8px] text-white ${phaseBg}`}>{op.phase}</span>
+                        </div>
+
+                        <div className="text-[9px] uppercase font-bold text-neutral-500 mb-0.5 mt-2">Forces Committed</div>
+                        <div className="text-[10px]">{sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">REDACTED</span> : `${op.participating_brigade_count} Brigades`}</div>
+
+                        {op.supply_readiness != null && (
+                          <>
+                            <div className="text-[9px] uppercase font-bold text-neutral-500 mt-2 mb-0.5">Supply Status</div>
+                            <div className="text-[10px]">{sector.intel_confidence < 0.7 ? <span className="bg-black text-black select-none">REDACTED</span> : `${Math.round(op.supply_readiness * 100)}% Readiness`}</div>
+                          </>
+                        )}
+
+                        {objective && (
+                          <div className="mt-3 pt-2 border-t border-neutral-300 border-dashed">
+                            <button
+                              type="button"
+                              aria-label={`Focus map on objective ${osidDisplayNames?.[objective] ?? objective}`}
+                              onClick={() => panToOsid?.(objective)}
+                              className="kbd-focus text-[9px] uppercase font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1"
+                            >
+                              <span className="text-[11px]">⌖</span> Focus Obj: {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACT</span> : (osidDisplayNames?.[objective] ?? objective)}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+                <div className="pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setOpsPlanningModalOpen(true)}
+                    className="kbd-focus w-full text-[10px] uppercase font-bold bg-neutral-200 hover:bg-neutral-300 text-neutral-800 py-2 border border-neutral-400 transition-colors"
+                  >
+                    Draft New Directive (Ops Planning)
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
       </div>
     </div>
   );

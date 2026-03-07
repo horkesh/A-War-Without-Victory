@@ -5,11 +5,15 @@ import { getFactionFlag } from '../utils/factionAssets';
 import { useIPC } from '../desktop/useIPC';
 import { useState } from 'react';
 import { getMunicipalitySupportLabel, getMunicipalitySupportTypeForFaction } from '../../../sim/combat/municipality_support.js';
-import { getRightPanelStyle } from './panelRail';
+import { getRightPanelStyle, getPanelRailStyle } from './panelRail';
 import { buildOsidToSectorMap } from '../utils/sectorUtils';
 import { getCurrentEthnicForOsid } from '../map/builders/buildEthnicGeoJSON';
 
-export function SelectionPanel() {
+interface SelectionPanelProps {
+  railSlot?: 'primary' | 'secondary';
+}
+
+export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) {
   const ipc = useIPC();
   const selectedOsid = useGameStore((s) => s.selectedOsid);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
@@ -25,7 +29,7 @@ export function SelectionPanel() {
     return (
       <div
         className="panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl overflow-hidden"
-        style={{ ...getRightPanelStyle('20rem'), direction: 'ltr' }}
+        style={{ ...getPanelRailStyle(railSlot, '20rem'), direction: 'ltr' }}
       >
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
         <div className="p-4 space-y-4">
@@ -125,27 +129,27 @@ export function SelectionPanel() {
   const militiaPoolsForMun =
     selectedMunId && loadedGameState?.militiaPools?.length
       ? loadedGameState.militiaPools.filter(
-          (p) => String(p.munId).toLowerCase().trim() === String(selectedMunId).toLowerCase().trim()
-        )
+        (p) => String(p.munId).toLowerCase().trim() === String(selectedMunId).toLowerCase().trim()
+      )
       : [];
   const militiaPoolsProp =
     militiaPoolsForMun.length > 0
       ? militiaPoolsForMun.map((p) => ({
-          faction: p.faction,
-          available: p.available,
-          committed: p.committed,
-          exhausted: p.exhausted,
-        }))
+        faction: p.faction,
+        available: p.available,
+        committed: p.committed,
+        exhausted: p.exhausted,
+      }))
       : undefined;
 
   const currentEthnic =
     selectedOsid && osidPropertiesMap
       ? getCurrentEthnicForOsid(
-          selectedOsid,
-          osidPropertiesMap,
-          loadedGameState?.displacementByMun ?? undefined,
-          loadedGameState?.departedByOsid ?? undefined
-        )
+        selectedOsid,
+        osidPropertiesMap,
+        loadedGameState?.displacementByMun ?? undefined,
+        loadedGameState?.departedByOsid ?? undefined
+      )
       : null;
 
   const handleStageSupport = async () => {

@@ -8,6 +8,7 @@ import { getPanelRailStyle, SECONDARY_PANEL_STYLE } from './panelRail';
 import { turnToDateString, formatCombatOutcome, formatPosture, toTitleCase } from '../utils/formatters';
 import { getArmyCrest } from '../utils/factionAssets';
 import { getFormationCommander } from '../utils/officerUtils';
+import { OfficerProfile } from './OfficerProfile';
 
 const POSTURE_TOOLTIPS: Record<string, string> = {
   hold: '1.00x defense. No extra cohesion cost. Baseline holding posture.',
@@ -24,20 +25,22 @@ const POSTURE_TOOLTIPS: Record<string, string> = {
 /**
  * Right panel when a formation marker is clicked: name, kind, faction, strength, fatigue, orders.
  */
-export function FormationDetail() {
+interface FormationDetailProps {
+  railSlot: 'primary' | 'secondary';
+}
+
+export function FormationDetail({ railSlot }: FormationDetailProps) {
   const ipc = useIPC();
   const [ordersPanelOpen, setOrdersPanelOpen] = useState(false);
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
-  const selectedArmyId = useGameStore((s) => s.selectedArmyId);
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
-  const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
+  const selectedArmyId = useGameStore((s) => s.selectedArmyId);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setOrderModeForFormation = useGameStore((s) => s.setOrderModeForFormation);
   const orderModeForFormation = useGameStore((s) => s.orderModeForFormation);
-  const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const addStagedOrder = useGameStore((s) => s.addStagedOrder);
   const setLoadError = useGameStore((s) => s.setLoadError);
 
@@ -46,8 +49,6 @@ export function FormationDetail() {
   }, [selectedFormationId]);
 
   if (operationsPanelOpen || !selectedFormationId) return null;
-
-  const railSlot = selectedSectorId || selectedCorpsId || selectedArmyId ? 'secondary' : 'primary';
 
   const formation = loadedGameState?.formations.find((f) => f.id === selectedFormationId) ?? null;
 
@@ -136,23 +137,9 @@ export function FormationDetail() {
               if (commander) {
                 const isArmy = formation.kind === 'army_hq' || formation.kind === 'army';
                 const label = isArmy ? 'Army Commander' : 'Corps Commander';
-                const badge = isArmy ? 'ARMY' : 'HQ';
-                const stat2Label = isArmy ? 'Def' : 'Aggression';
-                const stat2Value = isArmy ? commander.defensive_skill : commander.aggressiveness;
-
                 return (
-                  <div className="pt-2 border-t border-panel-border flex items-start gap-3">
-                    <div className="w-10 h-10 bg-panel-card rounded border border-panel-border flex items-center justify-center text-accent-gold text-lg font-bold">
-                      {badge}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[10px] uppercase text-text-secondary tracking-wider font-semibold">{label}</div>
-                      <div className="text-sm font-bold text-accent-gold truncate">{commander.rank} {commander.name}</div>
-                      <div className="flex gap-3 text-[10px]">
-                        <span className="text-text-secondary">Competence: <span className="text-text-primary px-1 bg-black/30 rounded">{Math.round(commander.competence * 100)}</span></span>
-                        <span className="text-text-secondary">{stat2Label}: <span className="text-text-primary px-1 bg-black/30 rounded">{Math.round(stat2Value * 100)}</span></span>
-                      </div>
-                    </div>
+                  <div className="pt-2 border-t border-panel-border">
+                    <OfficerProfile officer={commander} label={label} compact emphasis={isArmy ? 'defense' : 'aggression'} />
                   </div>
                 );
               }

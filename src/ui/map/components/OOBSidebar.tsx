@@ -1,33 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CorpsCard } from './CorpsCard';
-import { BrigadeRow } from './BrigadeRow';
 import { FACTION_COLORS } from '../utils/theme';
-import type { FormationView, LoadedGameState, OperationView } from '../data/types';
+import type { FormationView, OperationView } from '../data/types';
 import { SituationTab } from './SituationTab';
-import { getFormationsAtOsid } from '../utils/formationAtOsid';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { AccordionHeader } from './AccordionHeader';
 import { toTitleCase } from '../utils/formatters';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { getFactionArmyCommander } from '../utils/officerUtils';
+import { formatRank } from '../utils/officerCharacter';
 
 const FACTION_ORDER = ['RS', 'RBiH', 'HRHB'] as const;
-
-
-function formatFrontId(id: string): string {
-  if (!id) return '';
-  return id
-    .replace(/^.*__op:/, '')
-    .split(':')
-    .map(w => toTitleCase(w))
-    .join(' \u2014 ');
-}
-
-function getFormationOsids(formation: FormationView): string[] {
-  const values = formation.aorSettlementIds ?? (formation.location_osid ? [formation.location_osid] : []);
-  return [...new Set(values)].filter((osid) => typeof osid === 'string' && osid.length > 0).sort((a, b) => a.localeCompare(b));
-}
 
 function groupFormationsByCorps(formations: FormationView[]): Map<string, FormationView[]> {
   const byCorps = new Map<string, FormationView[]>();
@@ -43,32 +27,7 @@ function groupFormationsByCorps(formations: FormationView[]): Map<string, Format
   return byCorps;
 }
 
-function frontNameLookup(state: LoadedGameState): Map<string, string> {
-  const out = new Map<string, string>();
-  for (const segment of state.assignableFrontSegments ?? []) {
-    out.set(segment.front_id, segment.name ?? segment.front_id);
-  }
-  return out;
-}
 
-function getCorpsFrontAssignment(
-  brigades: FormationView[],
-  state: LoadedGameState,
-  namesByFrontId: Map<string, string>
-): string | null {
-  const assignment = state.brigadeFrontAssignment;
-  if (!assignment) return null;
-  const counts = new Map<string, number>();
-  for (const brigade of brigades) {
-    const frontId = assignment[brigade.id];
-    if (!frontId) continue;
-    counts.set(frontId, (counts.get(frontId) ?? 0) + 1);
-  }
-  if (counts.size === 0) return null;
-  const [bestFrontId] = Array.from(counts.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
-  const rawId = namesByFrontId.get(bestFrontId) ?? bestFrontId;
-  return rawId === bestFrontId ? formatFrontId(rawId) : rawId;
-}
 
 
 
@@ -86,9 +45,8 @@ export function OOBSidebar() {
   const setSelectedArmyId = useGameStore((s) => s.setSelectedArmyId);
   const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
+  const setSelectedOrbatCorpsId = useGameStore((s) => s.setSelectedOrbatCorpsId);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
-  const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
-  const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     situation: false,
@@ -104,10 +62,8 @@ export function OOBSidebar() {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const namesByFrontId = useMemo(
-    () => (loadedGameState ? frontNameLookup(loadedGameState) : new Map<string, string>()),
-    [loadedGameState]
-  );
+
+
   const corpsFormationById = useMemo(() => {
     const map = new Map<string, FormationView>();
     if (!loadedGameState?.formations) return map;
@@ -154,16 +110,6 @@ export function OOBSidebar() {
     }
     return map;
   }, [loadedGameState, reserveByFaction]);
-
-  const highlightedFormationIds = useMemo(() => {
-    const ids = new Set<string>();
-    if (!loadedGameState) return ids;
-    if (selectedFormationId) ids.add(selectedFormationId);
-    if (!selectedOsid) return ids;
-    const formations = getFormationsAtOsid(loadedGameState.formations, selectedOsid);
-    for (const formation of formations) ids.add(formation.id);
-    return ids;
-  }, [loadedGameState, selectedFormationId, selectedOsid]);
 
   const corpsColorMap = useMemo(
     () => (loadedGameState?.corpsFrontSectors ? buildCorpsColorMap(loadedGameState.corpsFrontSectors) : {}),
@@ -229,32 +175,6 @@ export function OOBSidebar() {
     if (corpsStanceOverrides[corpsId]) return corpsStanceOverrides[corpsId];
     const corpsFormation = corpsFormationById.get(corpsId);
     return corpsFormation?.corpsStance ?? loadedGameState?.armyStance?.[faction] ?? 'balanced';
-  };
-
-  /** Select brigade + its sector atomically (C.1: brigade click → sector on map). */
-  const selectBrigadeWithSector = (brigadeId: string) => {
-    const sectors = loadedGameState?.corpsFrontSectors;
-    const sectorId = sectors?.find(
-      (s) => s.assigned_brigade_ids.includes(brigadeId) || s.reserve_brigade_ids.includes(brigadeId)
-    )?.sector_id ?? null;
-    // Atomic: set both without mutual-exclusion clearing
-    useGameStore.setState({
-      selectedFormationId: brigadeId,
-      selectedCorpsFrontSectorId: sectorId,
-      selectedOsid: null,
-    });
-  };
-
-  const hoverBrigade = (formation: FormationView, hovered: boolean, e?: React.MouseEvent) => {
-    setHoveredOsids(hovered ? getFormationOsids(formation) : []);
-    if (hovered) {
-      setTooltipTargetWithPosition(
-        { type: 'formation', id: formation.id },
-        e ? { x: e.clientX, y: e.clientY } : undefined
-      );
-    } else {
-      clearTooltipTarget();
-    }
   };
 
   const totalFormations = useMemo(() => {
@@ -365,7 +285,7 @@ export function OOBSidebar() {
                             if (commander) {
                               return (
                                 <div className="text-[10px] text-text-secondary pl-7 truncate">
-                                  CO: <span className="text-accent-gold font-semibold">{commander.name}</span>
+                                  CO: <span className="text-accent-gold font-semibold">{formatRank(commander.rank)} {commander.name}</span>
                                 </div>
                               );
                             }
@@ -393,7 +313,6 @@ export function OOBSidebar() {
                               })()}
                               brigades={brigades}
                               faction={faction}
-                              frontAssignment={getCorpsFrontAssignment(brigades, loadedGameState, namesByFrontId)}
                               stance={getCorpsStance(corpsId, faction)}
                               onStanceChange={(next) => setCorpsStance(corpsId, next)}
                               onHeaderClick={() => {
@@ -405,9 +324,7 @@ export function OOBSidebar() {
                                 }
                               }}
                               onHoverOsidsChange={(osids) => setHoveredOsids(osids)}
-                              onBrigadeSelect={(formationId) => selectBrigadeWithSector(formationId)}
-                              highlightedFormationIds={highlightedFormationIds}
-                              onBrigadeHoverOsids={hoverBrigade}
+                              onOrbatClick={() => setSelectedOrbatCorpsId(corpsId)}
                               commanderName={(() => {
                                 if (!loadedGameState?.namedOfficerData || !loadedGameState?.namedOfficerStateById) return undefined;
                                 for (const entry of loadedGameState.namedOfficerData) {
@@ -426,31 +343,6 @@ export function OOBSidebar() {
                               })()}
                             />
                           ))}
-                          {reserves.length > 0 && (
-                            <div className="rounded-lg border border-panel-border bg-panel-card/90 overflow-hidden">
-                              <div className="px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2">
-                                <span className="font-sans text-xs font-semibold uppercase tracking-wide text-accent-gold">Reserve</span>
-                                <button
-                                  type="button"
-                                  className="text-[10px] font-mono uppercase bg-panel-card hover:bg-panel-hover text-text-secondary px-1.5 py-0.5 rounded border border-panel-border"
-                                >
-                                  Assign To Front
-                                </button>
-                              </div>
-                              <div className="divide-y divide-panel-border/50">
-                                {reserves.map((brigade) => (
-                                  <BrigadeRow
-                                    key={`reserve-${brigade.id}`}
-                                    formation={brigade}
-                                    compact
-                                    highlighted={highlightedFormationIds.has(brigade.id)}
-                                    onClick={() => selectBrigadeWithSector(brigade.id)}
-                                    onHoverChange={(hovered, e) => hoverBrigade(brigade, hovered, e)}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                          )}
                         </>
                       )}
                     </div>

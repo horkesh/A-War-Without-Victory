@@ -11,6 +11,7 @@ import { useIPC } from '../desktop/useIPC';
 import { getPanelRailStyle, SECONDARY_PANEL_STYLE } from './panelRail';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
 import { getFormationCommander } from '../utils/officerUtils';
+import { OfficerProfile } from './OfficerProfile';
 
 function formatRawId(id: string): string {
   if (!id) return '';
@@ -21,20 +22,22 @@ function formatRawId(id: string): string {
     .join(' ');
 }
 
-export function CorpsDetail() {
+interface CorpsDetailProps {
+  railSlot: 'primary' | 'secondary';
+}
+
+export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   const ipc = useIPC();
   const [ordersPanelOpen, setOrdersPanelOpen] = useState(false);
-  const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const selectedArmyId = useGameStore((s) => s.selectedArmyId);
-  const setSelectedCorpsId = useGameStore((s) => s.setSelectedCorpsId);
+  const loadedGameState = useGameStore((s) => s.loadedGameState);
+  const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
-  const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
   const setOpsPlanningModalOpen = useGameStore((s) => s.setOpsPlanningModalOpen);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const setLoadError = useGameStore((s) => s.setLoadError);
-  const loadedGameState = useGameStore((s) => s.loadedGameState);
 
   // Derived values needed by hooks — computed unconditionally so hooks are always called in the same order
   const corpsFormation = loadedGameState?.formations.find(
@@ -51,8 +54,6 @@ export function CorpsDetail() {
   }, [selectedCorpsId]);
 
   if (operationsPanelOpen || !selectedCorpsId) return null;
-
-  const railSlot = selectedArmyId ? 'secondary' : 'primary';
 
   if (!loadedGameState || !corpsFormation) {
     return (
@@ -170,22 +171,7 @@ export function CorpsDetail() {
         {(() => {
           const commander = getFormationCommander(corpsFormation, loadedGameState);
           if (!commander) return null;
-          return (
-            <div className="mb-4 p-2 bg-black/20 rounded border border-panel-border/30 flex items-center gap-3">
-              <div className="w-10 h-10 bg-panel-card rounded border border-panel-border flex items-center justify-center text-accent-gold text-lg font-bold shrink-0">
-                HQ
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[9px] uppercase text-text-secondary tracking-wider font-semibold">Corps Commander</div>
-                <div className="text-xs font-bold text-accent-gold truncate">{commander.rank} {commander.name}</div>
-                <div className="flex gap-2 text-[9px] mt-0.5">
-                  <span className="text-text-secondary">Comp: <span className="text-text-primary">{Math.round(commander.competence * 100)}</span></span>
-                  <span className="text-text-secondary">Agg: <span className="text-text-primary">{Math.round(commander.aggressiveness * 100)}</span></span>
-                  <span className="text-text-secondary">Def: <span className="text-text-primary">{Math.round(commander.defensive_skill * 100)}</span></span>
-                </div>
-              </div>
-            </div>
-          );
+          return <OfficerProfile officer={commander} label="Corps Commander" className="mb-4" />;
         })()}
 
         {/* Metrics */}

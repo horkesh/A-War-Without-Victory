@@ -133,6 +133,19 @@ These are the only separate runtime-rendered warroom elements that should remain
 
 Everything else should be baked into the scene image.
 
+**Overlay alignment:** The engine draws the flag and calendar as **flat 2D rectangles** (no perspective transform). So the wall areas reserved for the flag and for the calendar must be **flat and frontal**: a rectangular zone **facing the camera** (perpendicular to the viewer), like a notice board or picture frame, **with no perspective tilt**. If those zones are drawn in perspective (e.g. receding wall), the 2D overlay will not align and will look pasted on.
+
+### 4.5 Symbolism (period-accurate, per-faction)
+
+The game period is **1992–1998**. All in-scene documents, binders, folders, and stamps must use **period-appropriate symbolism** per faction:
+
+- **RBiH:** White shield with golden fleur-de-lis and blue vertical stripes (the 1992–1998 Republic of Bosnia and Herzegovina crest).
+- **Do not** use the **post-1998 BiH** coat of arms (yellow triangle on blue field) in RBiH rooms. That is anachronistic and wrong for faction identity.
+- **RS:** Use **wartime RS symbolism only (1992–1995)** — e.g. Serbian tricolor, wartime RS insignia. **Do not** use the post-Dayton or post-1995 Republika Srpska coat of arms (post-war RS state symbols).
+- **HRHB:** Use period-appropriate HRHB-era symbolism only.
+
+**Desk map (RS warroom only):** The desk map in the RS room must show **RS territory, Serb-held areas, or the RS operational/administrative area only**. **Do not** show a map of the whole of Bosnia and Herzegovina as a single state; that is wrong for the RS faction perspective.
+
 ---
 
 ## 5. Art direction
@@ -218,8 +231,8 @@ These should be physically distinct and consistently positioned:
 - **Telephone**: strong side silhouette, easy to isolate
 - **Radio**: visually distinct from phone and not too small
 - **Faction dossier / record object**: prominent but not competing with desk map
-- **Calendar zone**: upper wall, clean visibility
-- **Flag zone**: upper wall, separate from calendar zone
+- **Calendar zone**: upper wall, clean visibility; **flat and frontal** (facing the camera, no perspective tilt) so the 2D calendar overlay aligns.
+- **Flag zone**: upper wall, separate from calendar zone; **flat and frontal** (facing the camera, no perspective tilt) so the 2D flag overlay aligns.
 
 ## 6.3 Overlay-safe spaces
 
@@ -546,7 +559,7 @@ This room should communicate:
 - institutional hardness without cartoon villainy
 
 Keep the same stable UI scene composition and object layout:
-- large desk map at center
+- large desk map at center — RS only: map must show RS territory, Serb-held areas, or RS administrative/operational area only; do NOT show a map of the whole of Bosnia and Herzegovina
 - command briefing folio
 - newspaper stack
 - magazine or journal
@@ -555,6 +568,8 @@ Keep the same stable UI scene composition and object layout:
 - faction dossier or archive binder
 - reserved wall space for separate flag
 - reserved wall space for separate calendar
+
+RS symbolism: use wartime RS only (1992–1995) on documents, binders, stamps — e.g. Serbian tricolor, wartime RS insignia; do NOT use post-Dayton or post-1995 Republika Srpska coat of arms.
 
 Faction-specific art direction:
 - more militarized and rigid than the other variants
@@ -582,6 +597,8 @@ Avoid:
 - Strongest apparatus room
 - Should feel organized, weighty, and deliberate
 - Should remain grounded and believable
+- **Map:** Desk map must be of RS territory / Serb-held areas / RS administrative area only; never a map of the whole of Bosnia and Herzegovina
+- **Crest:** Wartime RS (1992–1995) only; no post-Dayton or post-1995 RS coat of arms on documents, binders, or stamps
 
 ## 11.3 HRHB warroom prompt
 

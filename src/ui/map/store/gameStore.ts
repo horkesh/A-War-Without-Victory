@@ -114,6 +114,10 @@ export interface GameStore {
   selectedOperationKey: string | null;
   setSelectedOperationKey: (key: string | null) => void;
 
+  /** Selected corps for ORBAT view (secondary pullout). */
+  selectedOrbatCorpsId: string | null;
+  setSelectedOrbatCorpsId: (id: string | null) => void;
+
   /** Whether the Operations Panel modal is open. */
   isOperationsPanelOpen: boolean;
   setIsOperationsPanelOpen: (v: boolean) => void;
@@ -165,10 +169,10 @@ export interface GameStore {
 
 export const useGameStore = create<GameStore>((set) => ({
   selectedOsid: null,
-  setSelectedOsid: (osid) => set({ selectedOsid: osid, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedCorpsId: null, selectedArmyId: null }),
+  setSelectedOsid: (osid) => set({ selectedOsid: osid, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedCorpsId: null, selectedArmyId: null, selectedOrbatCorpsId: null }),
 
   selectedFormationId: null,
-  setSelectedFormationId: (id) => set({ selectedFormationId: id, selectedOperationKey: null }),
+  setSelectedFormationId: (id) => set({ selectedFormationId: id, selectedOperationKey: null, selectedOrbatCorpsId: null }),
 
   hoveredOsids: [],
   setHoveredOsids: (osids) => set({ hoveredOsids: [...new Set(osids)].sort((a, b) => a.localeCompare(b)) }),
@@ -213,16 +217,16 @@ export const useGameStore = create<GameStore>((set) => ({
   setPendingAttackConfirmation: (v) => set({ pendingAttackConfirmation: v }),
 
   selectedCorpsFrontSectorId: null,
-  setSelectedCorpsFrontSectorId: (id) => set({ selectedCorpsFrontSectorId: id, selectedFormationId: null, selectedOperationKey: null }),
+  setSelectedCorpsFrontSectorId: (id) => set({ selectedCorpsFrontSectorId: id, selectedFormationId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
 
   hoveredSectorId: null,
   setHoveredSectorId: (id) => set({ hoveredSectorId: id }),
 
   selectedCorpsId: null,
-  setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedArmyId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null }),
+  setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedArmyId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
 
   selectedArmyId: null,
-  setSelectedArmyId: (id) => set({ selectedArmyId: id, selectedCorpsId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null }),
+  setSelectedArmyId: (id) => set({ selectedArmyId: id, selectedCorpsId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
 
   selectedOperationKey: null,
   setSelectedOperationKey: (key) => set((state) => (
@@ -235,8 +239,20 @@ export const useGameStore = create<GameStore>((set) => ({
         selectedArmyId: null,
         selectedCorpsFrontSectorId: null,
         selectedFormationId: null,
+        selectedOrbatCorpsId: null,
       }
   )),
+
+  selectedOrbatCorpsId: null,
+  setSelectedOrbatCorpsId: (id) => set({
+    selectedOrbatCorpsId: id,
+    selectedFormationId: null,
+    selectedOsid: null,
+    selectedCorpsId: null,
+    selectedArmyId: null,
+    selectedOperationKey: null,
+    selectedCorpsFrontSectorId: null
+  }),
 
   isOperationsPanelOpen: false,
   setIsOperationsPanelOpen: (v) => set({ isOperationsPanelOpen: v }),

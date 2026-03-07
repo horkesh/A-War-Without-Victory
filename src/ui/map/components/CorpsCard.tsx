@@ -1,20 +1,16 @@
 import type { FormationView } from '../data/types';
-import { BrigadeRow } from './BrigadeRow';
 import { FACTION_COLORS } from '../utils/theme';
 
 export interface CorpsCardProps {
   corpsId: string;
   corpsName?: string;
   brigades: FormationView[];
-  frontAssignment?: string | null;
   faction: string;
   stance?: string;
   onStanceChange?: (stance: string) => void;
   onHeaderClick?: () => void;
   onHoverOsidsChange?: (osids: string[]) => void;
-  onBrigadeSelect?: (formationId: string) => void;
-  highlightedFormationIds?: Set<string>;
-  onBrigadeHoverOsids?: (formation: FormationView, hovered: boolean, e?: React.MouseEvent) => void;
+  onOrbatClick?: () => void;
   commanderName?: string;
   commanderActing?: boolean;
 }
@@ -26,15 +22,12 @@ export function CorpsCard({
   corpsId,
   corpsName,
   brigades,
-  frontAssignment,
   faction,
   stance,
   onStanceChange,
   onHeaderClick,
   onHoverOsidsChange,
-  onBrigadeSelect,
-  highlightedFormationIds,
-  onBrigadeHoverOsids,
+  onOrbatClick,
   commanderName,
   commanderActing,
 }: CorpsCardProps) {
@@ -73,37 +66,30 @@ export function CorpsCard({
         </div>
       )}
       {onStanceChange && (
-        <div className="px-3 py-1.5 border-b border-panel-border/70 flex items-center justify-between gap-2">
-          <span className="text-[10px] uppercase text-accent-gold font-sans tracking-wide font-semibold">Stance</span>
-          <select
-            value={stance ?? 'balanced'}
-            onChange={(event) => onStanceChange(event.target.value)}
-            className="bg-panel-bg border border-panel-border rounded px-1.5 py-0.5 text-[10px] font-mono text-text-primary focus:outline-none"
+        <div className="px-3 py-1.5 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase text-accent-gold font-sans tracking-wide font-semibold">Stance</span>
+            <select
+              value={stance ?? 'balanced'}
+              onChange={(event) => onStanceChange(event.target.value)}
+              className="bg-panel-bg border border-panel-border rounded px-1.5 py-0.5 text-[10px] font-mono text-text-primary focus:outline-none"
+            >
+              <option value="defensive">Defensive</option>
+              <option value="balanced">Balanced</option>
+              <option value="offensive">Offensive</option>
+              <option value="reorganize">Reorganize</option>
+            </select>
+          </div>
+
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onOrbatClick?.(); }}
+            className="px-2 py-0.5 bg-accent-gold/10 hover:bg-accent-gold/20 border border-accent-gold/50 rounded text-[10px] text-accent-gold font-bold uppercase tracking-wider transition-colors"
           >
-            <option value="defensive">Defensive</option>
-            <option value="balanced">Balanced</option>
-            <option value="offensive">Offensive</option>
-            <option value="reorganize">Reorganize</option>
-          </select>
+            Orbat
+          </button>
         </div>
       )}
-      {frontAssignment && (
-        <div className="px-3 py-1 text-[10px] text-text-secondary uppercase border-b border-panel-border/50">
-          Front: <span className="text-accent-gold">{frontAssignment}</span>
-        </div>
-      )}
-      <div className="divide-y divide-panel-border/50">
-        {brigades.map((b) => (
-          <BrigadeRow
-            key={b.id}
-            formation={b}
-            compact
-            highlighted={highlightedFormationIds?.has(b.id) ?? false}
-            onClick={() => onBrigadeSelect?.(b.id)}
-            onHoverChange={(hovered, e) => onBrigadeHoverOsids?.(b, hovered, e)}
-          />
-        ))}
-      </div>
     </div>
   );
 }

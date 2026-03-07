@@ -7,6 +7,41 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-07] Officer profile redesign — character-rich display across all panels
+
+### Summary
+- **Shared `OfficerProfile` component** replaces 6 inline officer display blocks that showed raw numeric stats ("Comp: 300, Agg: 500") with character-rich profiles: archetype label (e.g., "Assault Commander"), origin badge (JNA/Militia/TO), pip ratings (●●●●○) with color coding, descriptive stat labels ("Skilled", "Relentless", "Ironclad"), combat record ("3W/1L (75%)"), and tenure ("6mo in command").
+- **`officerCharacter.ts` utility** provides all character derivation: `getArchetype()` (15 archetypes from stat profile), stat labels (1-5 scale → descriptive), `formatPips()`, `getRatingColor()`, `getOriginDisplay()`, `formatRank()`, `formatCombatRecord()`, `formatTenure()`.
+- **`NamedOfficerView` extended** with `origin` and `political_reliability` fields, mapped in `GameStateAdapter`.
+- **OOBSidebar** now shows `formatRank` before commander name (e.g., "Gen. Mladić" instead of "Mladić").
+- **Pre-existing bug fixed**: `OperationsPanel` was missing `setSelectedFormationId` store selector (brigade click-through in "Allocated Assets" was broken).
+
+### Changes
+- `src/ui/map/components/OfficerProfile.tsx` (new) — shared officer profile card
+- `src/ui/map/utils/officerCharacter.ts` (new) — officer character display utilities
+- `src/ui/map/components/CorpsDetail.tsx` — uses OfficerProfile
+- `src/ui/map/components/OperationDetail.tsx` — uses OfficerProfile
+- `src/ui/map/components/FormationDetail.tsx` — uses OfficerProfile (compact mode)
+- `src/ui/map/components/OrbatPanel.tsx` — uses OfficerProfile, removed dead `commanderState`
+- `src/ui/map/components/OperationsPanel.tsx` — uses OfficerProfile, fixed missing `setSelectedFormationId`, removed unused `getArmyCrest` import
+- `src/ui/map/components/ArmyDetail.tsx` — uses OfficerProfile
+- `src/ui/map/components/OOBSidebar.tsx` — added `formatRank` to commander name display
+- `src/ui/map/data/types.ts` — added `origin`, `political_reliability` to NamedOfficerView
+- `src/ui/map/data/GameStateAdapter.ts` — maps `origin`, `political_reliability`
+
+### Docs updated
+- `docs/20_engineering/MAP_UI_MASTER.md` §12 (Officers Phase E), §13.4 (Officer Stats humanization), component/utils directory listing
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` §0 (FormationDetail and Officers)
+- `docs/20_engineering/REPO_MAP.md` (Officers Phase E GUI section)
+- `docs/40_reports/GUI_MASTER.md` (Recent GUI changes table)
+
+### Verification
+- `npx tsc --noEmit` — clean (pre-existing CorpsFrontPanel/stories only)
+- `/simplify` review: no duplication, no efficiency issues, 3 quality improvements applied (className prop, dead emphasis removal, OOBSidebar formatRank)
+
+### Scope / safeguards
+- UI-only. No engine, persistence, or simulation behavior changed. Officer data already present in GameState; this change only affects how it is displayed.
+
 ## [2026-03-07] Sector-only operations, JNA ghost Kupres, operation participation cap
 
 ### Summary
