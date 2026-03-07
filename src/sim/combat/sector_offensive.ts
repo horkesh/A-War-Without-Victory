@@ -641,7 +641,7 @@ function updateMultiAxisResults(
             const adjacentFriendlyOsids = collectAdjacentFriendlyOsids(state, corpsId, currentObjective);
             const anyAttacked = axis.assigned_brigades.some(bid => {
                 const b = state.formations?.[bid];
-                if (!b || b.posture !== 'attack') return false;
+                if (!b || (b.posture !== 'attack' && b.posture !== 'assault')) return false;
                 return b.location_osid ? adjacentFriendlyOsids.has(b.location_osid) : false;
             });
             const anyMoved = axis.assigned_brigades.some(bid => {
@@ -747,7 +747,7 @@ function updateLegacyFlatResults(
         const adjacentFriendlyOsids = collectAdjacentFriendlyOsids(state, corpsId, currentObjective);
         const anyAttacked = op.participating_brigades.some(bid => {
             const b = state.formations?.[bid];
-            if (!b || b.posture !== 'attack') return false;
+            if (!b || (b.posture !== 'attack' && b.posture !== 'assault')) return false;
             return b.location_osid ? adjacentFriendlyOsids.has(b.location_osid) : false;
         });
         const anyMoved = op.participating_brigades.some(bid => {

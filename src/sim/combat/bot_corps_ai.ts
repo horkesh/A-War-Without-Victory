@@ -1748,11 +1748,10 @@ export function generateCorpsDirectives(
         // Launch if offensive/balanced, no active SECTOR operation, and multi-sector corps.
         // Sector offensives replace general_offensive/strategic_defense with targeted multi-OSID push.
         const existingOp = cmd.active_operation;
-        // If corps has queued operations, don't launch auto-ops — let queued injection handle it
+        // If corps has queued operations, don't launch auto-ops — let queued injection handle it.
+        // Don't replace recovery-phase ops — they must complete to accumulate exhaustion.
         const hasQueuedOps = cmd.queued_operations && cmd.queued_operations.length > 0;
-        const canLaunchSectorOp = !hasQueuedOps && (!existingOp
-            || existingOp.type !== 'sector_attack'
-            || existingOp.phase === 'recovery');
+        const canLaunchSectorOp = !hasQueuedOps && !existingOp;
         if (canLaunchSectorOp &&
             (cmd.stance === 'offensive' || cmd.stance === 'balanced') &&
             directiveEligibleSectors.length > 0 && offensiveTargets.length > 0) {
@@ -1830,10 +1829,6 @@ export function generateCorpsDirectives(
                     finalBrigadeIds, secEnemyOsids, reachableTargets, supplyByOsid
                 );
                 if (op) {
-                    // Apply exhaustion from replaced recovery-phase op
-                    if (existingOp?.type === 'sector_attack' && existingOp.phase === 'recovery') {
-                        cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + 15);
-                    }
                     cmd.active_operation = op;
                     break; // One offensive at a time per corps
                 }

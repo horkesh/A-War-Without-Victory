@@ -483,41 +483,6 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'generate-bot-corps-orders',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            // Ensure corps_command is initialized (handles brigades created by per-turn recruitment)
-            initializeCorpsCommand(context.state);
-            if (!context.state.corps_command || Object.keys(context.state.corps_command).length === 0) return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-            const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
-                ? context.input.settlementEdges
-                : graph.edges;
-            const sidToMun = new Map<string, string>();
-            for (const [sid, rec] of graph.settlements.entries()) {
-                const munId = rec.mun1990_id ?? rec.mun_code;
-                if (munId) sidToMun.set(sid, munId);
-            }
-            const playerFaction = context.state.meta.player_faction ?? null;
-            const factions = (context.state.factions ?? []).map(f => f.id)
-                .filter(fid => playerFaction == null || fid !== playerFaction)
-                .sort(strictCompare);
-            // Pass operational reverse map + OSID edges for corps directive generation
-            const od = getOperationalData(context);
-            const reverseMap = od?.opData?.operationalToCanonical ?? null;
-            const osidEdges = od?.edges ?? undefined;
-            const corpsReport: CorpsAiReportEntry[] = [];
-            for (const faction of factions) {
-                const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid);
-                corpsReport.push(...extractCorpsAiReport(context.state, faction as FactionId));
-            }
-            if (corpsReport.length > 0) {
-                context.report.corps_ai_report = corpsReport;
-            }
-        }
-    },
-    {
         name: 'jna-phantom-withdrawals',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -555,6 +520,41 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             checkTriggeredOperations(context.state);
+        }
+    },
+    {
+        name: 'generate-bot-corps-orders',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            // Ensure corps_command is initialized (handles brigades created by per-turn recruitment)
+            initializeCorpsCommand(context.state);
+            if (!context.state.corps_command || Object.keys(context.state.corps_command).length === 0) return;
+            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+            const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
+                ? context.input.settlementEdges
+                : graph.edges;
+            const sidToMun = new Map<string, string>();
+            for (const [sid, rec] of graph.settlements.entries()) {
+                const munId = rec.mun1990_id ?? rec.mun_code;
+                if (munId) sidToMun.set(sid, munId);
+            }
+            const playerFaction = context.state.meta.player_faction ?? null;
+            const factions = (context.state.factions ?? []).map(f => f.id)
+                .filter(fid => playerFaction == null || fid !== playerFaction)
+                .sort(strictCompare);
+            // Pass operational reverse map + OSID edges for corps directive generation
+            const od = getOperationalData(context);
+            const reverseMap = od?.opData?.operationalToCanonical ?? null;
+            const osidEdges = od?.edges ?? undefined;
+            const corpsReport: CorpsAiReportEntry[] = [];
+            for (const faction of factions) {
+                const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
+                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid);
+                corpsReport.push(...extractCorpsAiReport(context.state, faction as FactionId));
+            }
+            if (corpsReport.length > 0) {
+                context.report.corps_ai_report = corpsReport;
+            }
         }
     },
     {
