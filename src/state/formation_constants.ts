@@ -85,6 +85,7 @@ export function isInCombat(f: { posture?: string; disrupted?: boolean }): boolea
 
 /** Whether a brigade is eligible for reinforcement (not degraded, not forming, not enclave). */
 export function isEligibleForReinforcement(f: { kind?: string; readiness?: string; tags?: string[] }): boolean {
+    if (f.kind === 'paramilitary') return false;
     if (f.readiness === 'degraded' || f.readiness === 'forming') return false;
     if (Array.isArray(f.tags) && f.tags.includes('enclave')) return false;
     return true;
@@ -211,6 +212,29 @@ export const VRS_EQUIPMENT_DECAY_START_WEEK = 26;
 export const VRS_EQUIPMENT_DECAY_RATE = 0.005;
 /** Floor: VRS equipment never degrades below this fraction. */
 export const VRS_EQUIPMENT_DECAY_FLOOR = 0.60;
+
+// --- Paramilitary rear pocket cleanup ---
+/** Base paramilitary unit size (personnel). Small autonomous units. */
+export const PARAMILITARY_UNIT_SIZE = 150;
+/** Turns to reach target and capture. Represents march + mop-up. */
+export const PARAMILITARY_MARCH_TURNS = 2;
+/** Week after which paramilitaries stop spawning (war professionalizes). */
+export const PARAMILITARY_FADE_WEEK = 20;
+/** Paramilitary spawn probability by faction (keyed on OrganizationalPenetration field).
+ *  RS had Arkan's Tigers, White Eagles, etc. — highest paramilitary activity.
+ *  HRHB had HOS and some Croatian paramilitaries.
+ *  RBiH had Patriotska Liga but lower paramilitary capability. */
+export const PARAMILITARY_SPAWN_RATE: Record<string, number> = {
+    RS: 0.85,    // High — SDS/JNA paramilitary networks
+    HRHB: 0.55,  // Moderate — HOS, Croatian volunteers
+    RBiH: 0.30   // Low — Patriotska Liga, Green Berets (mostly integrated early)
+};
+/** Paramilitary casualty rate: fraction of unit killed in action during sweep. */
+export const PARAMILITARY_CASUALTY_RATE = 0.08;
+/** Civilian casualties inflicted by paramilitary sweep (as fraction of OSID population). War crimes implicit. */
+export const PARAMILITARY_CIVILIAN_CASUALTY_RATE = 0.02;
+/** Paramilitary cohesion — very low, irregular forces. */
+export const PARAMILITARY_COHESION = 20;
 
 /**
  * Single nominal brigade size (troops per formation) for all factions.

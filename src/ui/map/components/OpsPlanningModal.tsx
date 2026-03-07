@@ -224,11 +224,15 @@ export function OpsPlanningModal() {
     async function submitDraft() {
         if (!ipc.isAvailable) {
             setLoadError('Ops planning order staging is available in desktop mode only.');
+            setStatusMessage('Ops planning is available in desktop mode only. Run the game from the desktop app.');
             return;
         }
-        if (!sector) return;
+        if (!sector) {
+            setStatusMessage('No sector context. Close and open Ops Planning from Sector Intelligence.');
+            return;
+        }
         if (selectedObjectives.length === 0 && operationType !== 'reorganization') {
-            setStatusMessage('Select at least one objective OSID.');
+            setStatusMessage('Select at least one objective: click settlements on the map.');
             return;
         }
         if (selectedBrigades.size === 0) {
@@ -258,6 +262,7 @@ export function OpsPlanningModal() {
 
         if (!result.ok) {
             setLoadError(result.error ?? 'Failed to stage operation order.');
+            setStatusMessage(result.error ?? 'Failed to stage operation order.');
             return;
         }
 
@@ -449,10 +454,34 @@ export function OpsPlanningModal() {
                         toggleObjective(osid);
                     }
                 });
+                map.on('click', 'ops-sector-overlay-fill', (event) => {
+                    const osid = event.features?.[0]?.properties?.osid;
+                    if (typeof osid === 'string' && osid.length > 0) {
+                        toggleObjective(osid);
+                    }
+                });
+                map.on('click', 'ops-objectives-fill', (event) => {
+                    const osid = event.features?.[0]?.properties?.osid;
+                    if (typeof osid === 'string' && osid.length > 0) {
+                        toggleObjective(osid);
+                    }
+                });
                 map.on('mouseenter', 'osid-control-fill', () => {
                     map.getCanvas().style.cursor = 'pointer';
                 });
                 map.on('mouseleave', 'osid-control-fill', () => {
+                    map.getCanvas().style.cursor = '';
+                });
+                map.on('mouseenter', 'ops-sector-overlay-fill', () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+                map.on('mouseleave', 'ops-sector-overlay-fill', () => {
+                    map.getCanvas().style.cursor = '';
+                });
+                map.on('mouseenter', 'ops-objectives-fill', () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+                map.on('mouseleave', 'ops-objectives-fill', () => {
                     map.getCanvas().style.cursor = '';
                 });
                 refreshOverlaySources([], sectorFriendlyOsids);

@@ -178,7 +178,7 @@ export interface OperationAxis {
     failure_count: number;
     consecutive_failures_on_current: number;
     momentum: number;
-    last_result?: 'captured' | 'failed' | 'stalemate';
+    last_result?: 'captured' | 'failed' | 'stalemate' | 'approach';
     attack_attempt_count: number;
     objective_capture_count: number;
     movement_only_execution_turns: number;
@@ -213,7 +213,7 @@ export interface CorpsOperation {
     /** Consecutive objective captures (legacy — used when axes is absent). */
     momentum?: number;
     /** Result of last objective attack (legacy — used when axes is absent). */
-    last_result?: 'captured' | 'failed' | 'stalemate';
+    last_result?: 'captured' | 'failed' | 'stalemate' | 'approach';
     /** Total failures across all objectives (legacy — used when axes is absent). */
     failure_count?: number;
     /** Consecutive failures on current objective (legacy — used when axes is absent). */
@@ -343,7 +343,7 @@ export interface FormationOpsState {
 export type FormationReadinessState = 'forming' | 'active' | 'overextended' | 'degraded';
 
 // Phase I.0: Formation types (Systems Manual §4)
-export type FormationKind = 'militia' | 'brigade' | 'operational_group' | 'corps_asset' | 'corps' | 'og' | 'army_hq' | 'jna_phantom';
+export type FormationKind = 'militia' | 'brigade' | 'operational_group' | 'corps_asset' | 'corps' | 'og' | 'army_hq' | 'jna_phantom' | 'paramilitary';
 
 export interface FormationState {
     id: FormationId;
@@ -420,6 +420,10 @@ export interface FormationState {
     recruit_pool_faction?: FactionId;
     /** Fallback OSID where brigade reforms if stranded with no retreat path. Set from OOB. */
     fallback_osid?: string;
+    /** Target OSID for paramilitary sweep. When set, this paramilitary unit marches to and captures this OSID, then dissolves. */
+    paramilitary_target?: string;
+    /** Turns remaining until paramilitary unit reaches target and captures it. */
+    paramilitary_eta?: number;
 
     // --- OOB Rework: Brigade history, decorations, elite loan, lifecycle ---
     /** Brigade combat history (engagement log + running tallies). Initialized on first battle or at creation. */
@@ -556,6 +560,18 @@ export interface PendingConvoyDecision {
     route_faction: FactionId;
     supply_amount: number;
     decision?: 'allow' | 'block' | 'divert';
+}
+
+/** Paramilitary deployment request for a rear enemy pocket. */
+export interface ParamilitaryRequest {
+    /** Target OSID to capture. */
+    target_osid: string;
+    /** Faction requesting deployment. */
+    faction: FactionId;
+    /** Estimated paramilitary strength (personnel). */
+    strength: number;
+    /** Player decision: 'allow' deploys paramilitary, 'deny' skips, 'regular' flags for corps priority. */
+    decision?: 'allow' | 'deny' | 'regular';
 }
 
 export type MunicipalitySupportType =
@@ -1542,6 +1558,21 @@ export interface GameState {
     vienna_kiseljak_broken?: boolean;
     /** Which faction broke the Herzegovina corps-pair truce. null = unbroken. */
     vienna_herzegovina_broken_by?: FactionId;
+
+    // --- Paramilitary rear pocket cleanup ---
+    /**
+     * Pending paramilitary deployment requests for the player faction.
+     * Populated each turn when rear enemy pockets are detected.
+     * Bot factions auto-approve; player gets batch decision panel.
+     */
+    pending_paramilitary_requests?: ParamilitaryRequest[];
+    /**
+     * Player standing policy for paramilitary deployments.
+     * 'always_allow' | 'always_deny' | 'ask' (default: 'ask').
+     */
+    paramilitary_policy?: 'always_allow' | 'always_deny' | 'ask';
+    /** Cumulative count of paramilitary deployments per faction (for consequence scaling). */
+    paramilitary_deployment_count?: Record<FactionId, number>;
 }
 
 /**

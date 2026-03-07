@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Settlement panel rich content and tabs** | [20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md](implemented/20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md) — Right-panel settlement detail: 3 horizontal tabs (Overview | Military | Orders & events), nation labels for “fled”, current ethnic structure, formation click-through; Control tab removed. |
 | **Player agency implementation A-H** | [20260307_PLAYER_AGENCY_IMPLEMENTATION_A_TO_H.md](implemented/20260307_PLAYER_AGENCY_IMPLEMENTATION_A_TO_H.md) - full implementation report for Phases A/B/C/E/F/G/H, verification timeline (`n226` -> `n254`), final combat-calibration recovery, asymmetric municipality-support Phase E, and remaining 40w/52w drift notes. |
 | **Operations system (commander + name pools)** | [20260307_OPERATIONS_SYSTEM_COMPREHENSIVE.md](implemented/20260307_OPERATIONS_SYSTEM_COMPREHENSIVE.md) — Named officers command operations (chain-of-command isolation); faction-specific name pools (VRS/ARBiH/HVO, ~40 each, sequential consumption, no repeats). Supersedes OPERATIONS_COMMANDER_FEATURE. n265/n267 verified, ATH 84.4% unchanged. |
 | **What’s already implemented** | [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md) → [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) (single doc; originals archived to docs/_old/40_reports/implemented_2026_02_15/) |

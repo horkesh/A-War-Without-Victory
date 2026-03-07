@@ -410,6 +410,12 @@ export interface ArmyOperationPriority {
  * - Herzegovina: hold existing gains
  */
 const VRS_ARMY_PRIORITIES: ArmyOperationPriority[] = [
+    // 1st Krajina: secure rear areas — RS heartland municipalities that may start non-RS due to init model.
+    // Historically VRS/paramilitaries secured Prijedor, Banja Luka outskirts within first weeks.
+    // Low weight: cleanup priority, must not pull brigades from main fronts.
+    { name: '1KK Rear Security', corps_id: 'vrs_1st_krajina', target_municipalities: ['prijedor', 'banja_luka', 'bosanska_dubica', 'bosanska_gradiska', 'mrkonjic_grad', 'skender_vakuf', 'kotor_varos', 'prnjavor', 'laktasi', 'celinac'], start_week: 0, end_week: 30, weight: 20, min_outcome: 'repulsed' },
+    // 2nd Krajina: secure western rear — Drvar, Petrovac, Sipovo rear areas
+    { name: '2KK Rear Security', corps_id: 'vrs_2nd_krajina', target_municipalities: ['sipovo', 'mrkonjic_grad', 'skender_vakuf', 'glamoc', 'titov_drvar'], start_week: 0, end_week: 30, weight: 20, min_outcome: 'repulsed' },
     // Drina Corps: clear Drina valley (DAY ONE — highest priority first 12 weeks)
     { name: 'Drina Sweep', corps_id: 'vrs_drina', target_municipalities: ['zvornik', 'bratunac', 'visegrad', 'foca', 'vlasenica', 'rogatica', 'sekovici', 'han_pijesak', 'milici', 'kalinovik', 'cajnice', 'rudo'], start_week: 0, end_week: 30, weight: 130, min_outcome: 'stalemate' },
     // Drina Corps: maintain after initial sweep

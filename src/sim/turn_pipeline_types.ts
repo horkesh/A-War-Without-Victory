@@ -220,6 +220,8 @@ export interface TurnReport {
         artillery_to_reserve: number;
         apcs_to_reserve: number;
     }>;
+    /** Paramilitary rear pocket cleanup report */
+    paramilitary_sweep?: import('./combat/paramilitary_sweep.js').ParamilitarySweepReport;
 }
 
 export interface TurnContext {

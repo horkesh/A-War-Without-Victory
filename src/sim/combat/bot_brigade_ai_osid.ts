@@ -1260,8 +1260,26 @@ function executeFactionDirectives(
             }
         }
 
-        // --- Rule 3: Corps stance reorganize → rest ---
+        // --- Rule 3: Corps stance reorganize → rest, but grab adjacent undefended targets ---
         if (corpsStance === 'reorganize') {
+            if (adjEnemy.length > 0 && directive) {
+                const undefendedReorg = adjEnemy.filter(eo => {
+                    if (!directive.offensive_targets.includes(eo)) return false;
+                    const defenders = Object.values(state.formations ?? {}).filter(
+                        (f): f is FormationState => f != null && f.status === 'active' &&
+                            f.location_osid === eo && f.faction !== faction
+                    );
+                    return defenders.length === 0;
+                });
+                if (undefendedReorg.length > 0) {
+                    const target = undefendedReorg[0]!;
+                    result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
+                    result.attack_orders[brigade.id] = target;
+                    result.attack_scores[brigade.id] = 600;
+                    chosenTargets.set(target, (chosenTargets.get(target) ?? 0) + 1);
+                    continue;
+                }
+            }
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
             continue;
         }
@@ -1356,7 +1374,24 @@ function executeFactionDirectives(
             isOperationParticipant(activeOpLater, brigade.id);
         if (isInSectorOffensive && activeOpLater) {
             if (activeOpLater.phase === 'recovery') {
-                // Recovery: forced defend
+                // Recovery: defend by default, but still grab adjacent undefended targets.
+                // A recovering brigade shouldn't ignore free territory right next door.
+                const undefendedAdj = adjEnemy.filter(eo => {
+                    if (!directive?.offensive_targets.includes(eo)) return false;
+                    const defenders = Object.values(state.formations ?? {}).filter(
+                        (f): f is FormationState => f != null && f.status === 'active' &&
+                            f.location_osid === eo && f.faction !== faction
+                    );
+                    return defenders.length === 0;
+                });
+                if (undefendedAdj.length > 0) {
+                    const target = undefendedAdj[0]!;
+                    result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
+                    result.attack_orders[brigade.id] = target;
+                    result.attack_scores[brigade.id] = 800;
+                    chosenTargets.set(target, (chosenTargets.get(target) ?? 0) + 1);
+                    continue;
+                }
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                 continue;
             }

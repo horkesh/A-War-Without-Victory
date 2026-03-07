@@ -5,7 +5,9 @@ import { getFactionFlag } from '../utils/factionAssets';
 import { useIPC } from '../desktop/useIPC';
 import { useState } from 'react';
 import { getMunicipalitySupportLabel, getMunicipalitySupportTypeForFaction } from '../../../sim/combat/municipality_support.js';
-import { getPanelRailStyle } from './panelRail';
+import { getRightPanelStyle } from './panelRail';
+import { buildOsidToSectorMap } from '../utils/sectorUtils';
+import { getCurrentEthnicForOsid } from '../map/builders/buildEthnicGeoJSON';
 
 export function SelectionPanel() {
   const ipc = useIPC();
@@ -14,6 +16,7 @@ export function SelectionPanel() {
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
+  const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const [supportMessage, setSupportMessage] = useState<string | null>(null);
 
   if (!selectedOsid) return null;
@@ -22,7 +25,7 @@ export function SelectionPanel() {
     return (
       <div
         className="panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl overflow-hidden"
-        style={{ ...getPanelRailStyle('primary', '20rem'), direction: 'ltr' }}
+        style={{ ...getRightPanelStyle('20rem'), direction: 'ltr' }}
       >
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
         <div className="p-4 space-y-4">
@@ -54,7 +57,96 @@ export function SelectionPanel() {
     faction: f.faction,
     personnel: f.personnel,
     kind: f.kind,
+    readiness: f.readiness,
+    cohesion: f.cohesion,
   }));
+
+  const operationsTargetingOsid =
+    loadedGameState?.operations
+      ?.filter((op) => op.objectives?.includes(selectedOsid))
+      .map((op) => ({ name: op.name, faction: op.faction, phase: op.phase }))
+    ?? [];
+  const recentControlEventsForOsid =
+    loadedGameState?.recentControlEvents
+      ?.filter((e) => e.settlementId === selectedOsid)
+      .slice(-8)
+      .reverse()
+      .map((e) => ({ turn: e.turn, from: e.from, to: e.to, mechanism: e.mechanism }))
+    ?? [];
+  const statusLabel = loadedGameState?.statusBySettlement?.[selectedOsid] ?? null;
+
+  const sectorInfo = (() => {
+    const sectors = loadedGameState?.corpsFrontSectors;
+    const edgesOsid = loadedGameState?.frontEdgesOsid;
+    if (!sectors?.length || !edgesOsid?.length) return { sectorName: null as string | null, sectorFaction: null as string | null };
+    const osidToSector = buildOsidToSectorMap(sectors, edgesOsid);
+    const sectorId = osidToSector.get(selectedOsid);
+    if (!sectorId) return { sectorName: null, sectorFaction: null };
+    const sector = sectors.find((s) => s.sector_id === sectorId);
+    return { sectorName: sector?.display_name ?? null, sectorFaction: sector?.faction ?? null };
+  })();
+
+  const departedByEthnicity = (() => {
+    const raw = loadedGameState?.departedByOsid?.[selectedOsid];
+    if (!raw) return undefined;
+    const out: Record<string, number> = {};
+    for (const [k, v] of Object.entries(raw)) {
+      if (typeof v === 'number' && v > 0) out[k] = v;
+    }
+    return Object.keys(out).length > 0 ? out : undefined;
+  })();
+
+  const brigadeCountByFaction: Record<string, number> = {};
+  for (const f of formationsForDetail) {
+    brigadeCountByFaction[f.faction] = (brigadeCountByFaction[f.faction] ?? 0) + 1;
+  }
+
+  const pendingOrders = (() => {
+    if (!loadedGameState) return undefined;
+    const attack =
+      loadedGameState.attackOrders?.filter((o) => o.targetSettlementId === selectedOsid).map((o) => ({
+        brigadeId: o.brigadeId,
+        brigadeName: loadedGameState.formations?.find((fr) => fr.id === o.brigadeId)?.name,
+      })) ?? [];
+    const move =
+      loadedGameState.movementOrdersSettlement?.filter((o) => o.targetSettlementIds?.includes(selectedOsid)).map((o) => ({
+        brigadeId: o.brigadeId,
+        brigadeName: loadedGameState.formations?.find((fr) => fr.id === o.brigadeId)?.name,
+      })) ?? [];
+    const reposition =
+      loadedGameState.repositionOrders?.filter((o) => o.settlementIds?.includes(selectedOsid)).map((o) => ({
+        brigadeId: o.brigadeId,
+        brigadeName: loadedGameState.formations?.find((fr) => fr.id === o.brigadeId)?.name,
+      })) ?? [];
+    if (attack.length === 0 && move.length === 0 && reposition.length === 0) return undefined;
+    return { attack, move, reposition };
+  })();
+
+  const militiaPoolsForMun =
+    selectedMunId && loadedGameState?.militiaPools?.length
+      ? loadedGameState.militiaPools.filter(
+          (p) => String(p.munId).toLowerCase().trim() === String(selectedMunId).toLowerCase().trim()
+        )
+      : [];
+  const militiaPoolsProp =
+    militiaPoolsForMun.length > 0
+      ? militiaPoolsForMun.map((p) => ({
+          faction: p.faction,
+          available: p.available,
+          committed: p.committed,
+          exhausted: p.exhausted,
+        }))
+      : undefined;
+
+  const currentEthnic =
+    selectedOsid && osidPropertiesMap
+      ? getCurrentEthnicForOsid(
+          selectedOsid,
+          osidPropertiesMap,
+          loadedGameState?.displacementByMun ?? undefined,
+          loadedGameState?.departedByOsid ?? undefined
+        )
+      : null;
 
   const handleStageSupport = async () => {
     if (!playerFaction || !selectedMunId || !supportType) return;
@@ -69,7 +161,7 @@ export function SelectionPanel() {
   return (
     <div
       className="panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl"
-      style={{ ...getPanelRailStyle('primary', '20rem'), direction: 'ltr' }}
+      style={{ ...getRightPanelStyle('20rem'), direction: 'ltr' }}
     >
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
         <div className="flex items-center gap-2">
@@ -101,6 +193,17 @@ export function SelectionPanel() {
           formationsAtOsid={formationsForDetail}
           displacementByMun={loadedGameState?.displacementByMun ?? undefined}
           variant="panel"
+          statusLabel={statusLabel ?? undefined}
+          operationsTargetingOsid={operationsTargetingOsid.length > 0 ? operationsTargetingOsid : undefined}
+          recentControlEvents={recentControlEventsForOsid.length > 0 ? recentControlEventsForOsid : undefined}
+          departedByEthnicity={departedByEthnicity && Object.keys(departedByEthnicity).length > 0 ? departedByEthnicity : undefined}
+          sectorName={sectorInfo.sectorName}
+          sectorFaction={sectorInfo.sectorFaction}
+          brigadeCountByFaction={Object.keys(brigadeCountByFaction).length > 0 ? brigadeCountByFaction : undefined}
+          pendingOrders={pendingOrders}
+          militiaPools={militiaPoolsProp}
+          onFormationClick={setSelectedFormationId}
+          currentEthnic={currentEthnic ?? undefined}
         />
         {playerFaction && selectedMunId && (
           <div className="mt-4 rounded border border-panel-border bg-panel-card p-3 space-y-2">

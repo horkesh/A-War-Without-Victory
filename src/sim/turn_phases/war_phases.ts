@@ -136,6 +136,7 @@ import {
     updateSupplyReserves
 } from '../../state/supply_reserves.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
+import { detectParamilitaryTargets, advanceParamilitaries } from '../combat/paramilitary_sweep.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
 import { createBotOrderDiagnosticsSnapshot } from '../../scenario/combat_causality.js';
@@ -467,6 +468,40 @@ export const warPhases: NamedPhase[] = [
     // The density modifier continues to use the existing local_fronts (faction-level aggregation)
     // because per-sector density would over-penalize overextended factions (VRS historically thin).
 
+    {
+        name: 'paramilitary-detect',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+            const report = detectParamilitaryTargets(
+                context.state, od.edges, od.opData.operationalToCanonical
+            );
+            if (report.spawned.length > 0 || report.pending_player_requests > 0) {
+                context.report.paramilitary_sweep = report;
+            }
+        }
+    },
+    {
+        name: 'paramilitary-advance',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.opData?.operationalToCanonical) return;
+            const report = advanceParamilitaries(
+                context.state, od.opData.operationalToCanonical
+            );
+            if (report.captured.length > 0 || report.dissolved.length > 0) {
+                const existing = context.report.paramilitary_sweep as import('../combat/paramilitary_sweep.js').ParamilitarySweepReport | undefined;
+                if (existing) {
+                    existing.captured.push(...report.captured);
+                    existing.dissolved.push(...report.dissolved);
+                } else {
+                    context.report.paramilitary_sweep = report;
+                }
+            }
+        }
+    },
     {
         name: 'process-brigade-movement',
         run: async (context) => {

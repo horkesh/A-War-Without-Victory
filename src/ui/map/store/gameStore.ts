@@ -168,7 +168,7 @@ export const useGameStore = create<GameStore>((set) => ({
   setSelectedOsid: (osid) => set({ selectedOsid: osid, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedCorpsId: null, selectedArmyId: null }),
 
   selectedFormationId: null,
-  setSelectedFormationId: (id) => set({ selectedFormationId: id, selectedOsid: null, selectedOperationKey: null }),
+  setSelectedFormationId: (id) => set({ selectedFormationId: id, selectedOperationKey: null }),
 
   hoveredOsids: [],
   setHoveredOsids: (osids) => set({ hoveredOsids: [...new Set(osids)].sort((a, b) => a.localeCompare(b)) }),
@@ -213,16 +213,16 @@ export const useGameStore = create<GameStore>((set) => ({
   setPendingAttackConfirmation: (v) => set({ pendingAttackConfirmation: v }),
 
   selectedCorpsFrontSectorId: null,
-  setSelectedCorpsFrontSectorId: (id) => set({ selectedCorpsFrontSectorId: id, selectedOsid: null, selectedFormationId: null, selectedOperationKey: null }),
+  setSelectedCorpsFrontSectorId: (id) => set({ selectedCorpsFrontSectorId: id, selectedFormationId: null, selectedOperationKey: null }),
 
   hoveredSectorId: null,
   setHoveredSectorId: (id) => set({ hoveredSectorId: id }),
 
   selectedCorpsId: null,
-  setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedArmyId: null, selectedOsid: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null }),
+  setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedArmyId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null }),
 
   selectedArmyId: null,
-  setSelectedArmyId: (id) => set({ selectedArmyId: id, selectedCorpsId: null, selectedOsid: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null }),
+  setSelectedArmyId: (id) => set({ selectedArmyId: id, selectedCorpsId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null }),
 
   selectedOperationKey: null,
   setSelectedOperationKey: (key) => set((state) => (
@@ -235,7 +235,6 @@ export const useGameStore = create<GameStore>((set) => ({
         selectedArmyId: null,
         selectedCorpsFrontSectorId: null,
         selectedFormationId: null,
-        selectedOsid: null,
       }
   )),
 

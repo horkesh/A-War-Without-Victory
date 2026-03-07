@@ -72,14 +72,15 @@ export function OperationsPanel() {
     setSelectedOperationKey(getOperationId(first));
   }, [isOpen, operations, selectedOperationKey, setSelectedOperationKey]);
 
-  // Sync hoveredOsids + operationTargetOsids with current selection / objective hover
+  // Sync hoveredOsids + operationTargetOsids with current selection / objective hover.
+  // Show operation targets (military crosshairs) whenever an operation is selected, even when the panel is closed.
   useEffect(() => {
-    if (!isOpen || !selectedOperation) {
+    if (!selectedOperation) {
       setHoveredOsids([]);
       setOperationTargetOsids([]);
       return;
     }
-    if (objectiveHoverOsid) {
+    if (isOpen && objectiveHoverOsid) {
       setHoveredOsids([objectiveHoverOsid]);
       setOperationTargetOsids([objectiveHoverOsid]);
       return;
@@ -95,9 +96,9 @@ export function OperationsPanel() {
     setActionMessage(null);
   }, [selectedOperationKey]);
 
-  // Auto-pan to primary objective / staging OSID on selection change
+  // Pan map to operation area whenever an operation is selected (from sidebar, command briefing, or operations list)
   useEffect(() => {
-    if (!isOpen || !selectedOperation || !panToOsid) return;
+    if (!selectedOperation || !panToOsid) return;
     const operationKey = getOperationId(selectedOperation);
     if (lastAutoFocusOperationKeyRef.current === operationKey) return;
     const primaryFocus =
@@ -107,7 +108,7 @@ export function OperationsPanel() {
     if (!primaryFocus) return;
     panToOsid(primaryFocus);
     lastAutoFocusOperationKeyRef.current = operationKey;
-  }, [isOpen, selectedOperation, panToOsid]);
+  }, [selectedOperation, panToOsid]);
 
   if (!isOpen) return null;
 

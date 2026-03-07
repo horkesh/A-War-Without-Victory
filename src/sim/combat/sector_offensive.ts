@@ -666,15 +666,20 @@ function updateMultiAxisResults(
                 }
             } else {
                 if (anyMoved) {
+                    // Approach movement: brigade is marching toward objective.
+                    // This is not a combat failure — don't increment failure counts.
                     axis.movement_only_execution_turns += 1;
                     axis.idle_execution_turn_streak = 0;
+                    axis.last_result = 'approach';
+                    axis.momentum = 0;
                 } else {
+                    // Truly idle: no movement, no attack.
                     axis.idle_execution_turn_streak += 1;
+                    axis.last_result = 'stalemate';
+                    axis.momentum = 0;
+                    axis.failure_count += 1;
+                    axis.consecutive_failures_on_current += 1;
                 }
-                axis.last_result = 'stalemate';
-                axis.momentum = 0;
-                axis.failure_count += 1;
-                axis.consecutive_failures_on_current += 1;
 
                 if (!anyMoved && !anyAttacked && axis.attack_attempt_count === 0 && axis.idle_execution_turn_streak >= 1) {
                     axis.movement_only_execution_turns = Math.max(1, axis.movement_only_execution_turns);
@@ -772,15 +777,20 @@ function updateLegacyFlatResults(
             }
         } else {
             if (anyMoved) {
+                // Approach movement: brigade is marching toward objective.
+                // Not a combat failure — don't increment failure counts.
                 op.movement_only_execution_turns = (op.movement_only_execution_turns ?? 0) + 1;
                 op.idle_execution_turn_streak = 0;
+                op.last_result = 'approach';
+                op.momentum = 0;
             } else {
+                // Truly idle: no movement, no attack.
                 op.idle_execution_turn_streak = (op.idle_execution_turn_streak ?? 0) + 1;
+                op.last_result = 'stalemate';
+                op.momentum = 0;
+                op.failure_count = (op.failure_count ?? 0) + 1;
+                op.consecutive_failures_on_current = (op.consecutive_failures_on_current ?? 0) + 1;
             }
-            op.last_result = 'stalemate';
-            op.momentum = 0;
-            op.failure_count = (op.failure_count ?? 0) + 1;
-            op.consecutive_failures_on_current = (op.consecutive_failures_on_current ?? 0) + 1;
 
             if (!anyMoved && !anyAttacked && (op.attack_attempt_count ?? 0) === 0 && (op.idle_execution_turn_streak ?? 0) >= 1) {
                 op.movement_only_execution_turns = Math.max(1, op.movement_only_execution_turns ?? 0);

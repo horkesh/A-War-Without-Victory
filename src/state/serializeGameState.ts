@@ -141,6 +141,10 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'sarajevo_tunnel_operational',
     'opsec_sectors',
     'used_operation_names',
+    // Paramilitary rear pocket cleanup
+    'pending_paramilitary_requests',
+    'paramilitary_policy',
+    'paramilitary_deployment_count',
 ]);
 
 /**

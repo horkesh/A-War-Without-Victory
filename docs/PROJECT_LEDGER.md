@@ -7,6 +7,29 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-07] Settlement panel rich content, tabs, nation labels, current ethnic structure
+
+### Summary
+- Settlement (right) panel brought in line with TACTICAL_MAP_SYSTEM §13.2 and GUI comprehensive review: richer engine-backed content, 3 horizontal tabs (Overview | Military | Orders & events), “Fled from this settlement” by nation (Bosniaks/Serbs/Croats/Others), and a **current ethnic structure** block below pre-war ethnic structure.
+- Control tab removed; political control and status moved into Overview.
+- Formation rows in Military tab show readiness badge and cohesion bar; rows are clickable to open Formation detail without clearing selected settlement.
+
+### Changes
+- `src/ui/map/components/SettlementDetailContent.tsx` — tabs, nation labels, current ethnic block, pending orders, militia pool, formation click-through
+- `src/ui/map/components/SelectionPanel.tsx` — currentEthnic via getCurrentEthnicForOsid, pendingOrders, militiaPoolsForMun, onFormationClick
+- `src/ui/map/map/builders/buildEthnicGeoJSON.ts` — getCurrentEthnicForOsid(), type guard for displacement entry
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` §13.2
+- `docs/40_reports/implemented/20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md`
+- `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`
+- `.claude/napkin.md`
+
+### Verification
+- `npx tsc --noEmit` (src/ui/map clean; pre-existing failures in tests/paramilitary_sweep.test.ts)
+- `npx vitest run` — 35 files passed, 351 tests passed, 1 skipped
+
+### Scope / safeguards
+- No engine, canon, or persistence behavior changed. UI-only; no new overlay layer or simulation mechanic.
+
 ## [2026-03-07] GUI Command Experience — Phase 4 visibility and polish
 
 ### Summary

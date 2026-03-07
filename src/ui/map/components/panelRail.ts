@@ -1,6 +1,12 @@
 import type { CSSProperties } from 'react';
 
-export type PanelRailPanel = 'settlement' | 'army' | 'corps' | 'sector' | 'formation' | 'operation';
+export type PanelRailPanel =
+  | 'settlement'
+  | 'formation'
+  | 'corps'
+  | 'army'
+  | 'sector'
+  | 'operation';
 
 export interface PanelRailSelectionState {
   selectedOsid: string | null;
@@ -41,32 +47,64 @@ export const SECONDARY_PANEL_STYLE: CSSProperties = {
   overflow: 'hidden',
 };
 
+/**
+ * Right-edge panel — flush to the right side of the screen (e.g. settlement info).
+ */
+export const RIGHT_PANEL_STYLE: CSSProperties = {
+  position: 'absolute',
+  right: 0,
+  top: '3.5rem',
+  bottom: '2rem',
+  zIndex: 50,
+  overflow: 'hidden',
+};
+
 export function derivePanelRailState(state: PanelRailSelectionState): PanelRailState {
+  // Priority 1: Selection with Parent context (Drill-down)
   if (state.selectedFormationId) {
     if (state.selectedCorpsFrontSectorId) return { primary: 'sector', secondary: 'formation' };
     if (state.selectedCorpsId) return { primary: 'corps', secondary: 'formation' };
     if (state.selectedArmyId) return { primary: 'army', secondary: 'formation' };
+
+    // Formation + Settlement
+    if (state.selectedOsid) return { primary: 'formation', secondary: 'settlement' };
     return { primary: 'formation', secondary: null };
   }
 
   if (state.selectedOperationKey) {
     if (state.selectedCorpsFrontSectorId) return { primary: 'sector', secondary: 'operation' };
     if (state.selectedCorpsId) return { primary: 'corps', secondary: 'operation' };
+
+    // Operation + Settlement
+    if (state.selectedOsid) return { primary: 'operation', secondary: 'settlement' };
     return { primary: 'operation', secondary: null };
   }
 
   if (state.selectedCorpsFrontSectorId) {
     if (state.selectedCorpsId) return { primary: 'corps', secondary: 'sector' };
+
+    // Sector + Settlement
+    if (state.selectedOsid) return { primary: 'sector', secondary: 'settlement' };
     return { primary: 'sector', secondary: null };
   }
 
   if (state.selectedCorpsId) {
     if (state.selectedArmyId) return { primary: 'army', secondary: 'corps' };
+
+    // Corps + Settlement
+    if (state.selectedOsid) return { primary: 'corps', secondary: 'settlement' };
     return { primary: 'corps', secondary: null };
   }
 
-  if (state.selectedArmyId) return { primary: 'army', secondary: null };
+  if (state.selectedArmyId) {
+    if (state.selectedOsid) return { primary: 'army', secondary: 'settlement' };
+    return { primary: 'army', secondary: null };
+  }
+
+  // Priority 2: Pure Settlement Selection (No parent context)
+  // FIX: Assign to primary instead of secondary to avoid starting with a gap
   if (state.selectedOsid) return { primary: 'settlement', secondary: null };
+
   return { primary: null, secondary: null };
 }
 
@@ -75,4 +113,9 @@ export function getPanelRailStyle(slot: 'primary' | 'secondary', width: string):
     ...(slot === 'secondary' ? SECONDARY_PANEL_STYLE : DETAIL_PANEL_STYLE),
     width,
   };
+}
+
+/** Style for the settlement panel anchored to the right edge of the viewport. */
+export function getRightPanelStyle(width: string): CSSProperties {
+  return { ...RIGHT_PANEL_STYLE, width };
 }

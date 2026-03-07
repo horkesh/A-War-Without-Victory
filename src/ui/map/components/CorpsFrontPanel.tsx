@@ -6,7 +6,6 @@ import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON'
 import { collectSectorFriendlyOsids } from '../utils/sectorUtils';
 import { getOperationId, getOperationPhaseBadgeClass } from '../utils/operations';
 import { getPanelRailStyle } from './panelRail';
-import { AccordionHeader } from './AccordionHeader';
 import { useIPC } from '../desktop/useIPC';
 
 /** Density badge with color coding. */
@@ -45,26 +44,12 @@ export function CorpsFrontPanel() {
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setOpsPlanningModalOpen = useGameStore((s) => s.setOpsPlanningModalOpen);
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    overview: true,
-    forces: false,
-    logistics: false,
-    ops: false,
-  });
+  const [activeTab, setActiveTab] = useState<'overview' | 'forces' | 'logistics' | 'ops'>('overview');
   const [sectorActionMessage, setSectorActionMessage] = useState<string | null>(null);
 
-  const toggleSection = (section: string) => {
-    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
-
-  // All hooks must run unconditionally before any early return
+  // When sector changes, show Overview tab (one section visible, no stacking)
   useEffect(() => {
-    setExpandedSections({
-      overview: true,
-      forces: false,
-      logistics: false,
-      ops: false,
-    });
+    setActiveTab('overview');
   }, [selectedSectorId]);
 
   const _sector = loadedGameState?.corpsFrontSectors?.find((s) => s.sector_id === selectedSectorId) ?? null;
@@ -167,7 +152,7 @@ export function CorpsFrontPanel() {
         </button>
       </div>
 
-      <div className="flex-1 overflow-auto bg-[#faf9f6]/95 text-neutral-800 font-mono text-[11px] shadow-inner relative">
+      <div className="flex-1 overflow-auto bg-[#faf9f6]/95 text-neutral-800 font-mono text-[11px] shadow-inner relative flex flex-col">
         {/* Background watermark */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center -rotate-12 select-none">
           <span className="text-8xl font-black tracking-widest uppercase">SECRET</span>
@@ -181,7 +166,7 @@ export function CorpsFrontPanel() {
         )}
 
         {/* Dossier Header */}
-        <div className="p-4 pb-3 border-b-2 border-neutral-300 relative z-10">
+        <div className="p-4 pb-3 border-b-2 border-neutral-300 relative z-10 shrink-0">
           <div className="flex justify-between items-start mb-2">
             <div className="flex flex-col">
               <span className="text-[9px] uppercase tracking-wider text-neutral-500 font-bold mb-0.5">Subject</span>
@@ -212,13 +197,38 @@ export function CorpsFrontPanel() {
           </div>
         </div>
 
-        <AccordionHeader
-          label="1. STRATEGIC OVERVIEW"
-          expanded={expandedSections.overview}
-          onToggle={() => toggleSection('overview')}
-        />
-        {expandedSections.overview && (
-          <div className="p-4 relative z-10 space-y-3">
+        {/* Tabs: one section visible at a time (no stacking) */}
+        <div className="shrink-0 border-b border-neutral-300 bg-neutral-100/80 relative z-10 flex flex-wrap gap-0" role="tablist" aria-label="Sector intelligence sections">
+          {([
+            ['overview', 'Overview'],
+            ['forces', 'ORBAT'],
+            ['logistics', 'Logistics'],
+            ['ops', 'Operations'],
+          ] as const).map(([tabId, label]) => (
+            <button
+              key={tabId}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tabId}
+              aria-controls={`sector-intel-panel-${tabId}`}
+              id={`sector-intel-tab-${tabId}`}
+              onClick={() => setActiveTab(tabId)}
+              className={`kbd-focus px-3 py-2 text-[10px] font-bold uppercase border-b-2 transition-colors ${
+                activeTab === tabId
+                  ? 'border-accent-gold text-neutral-900 bg-white'
+                  : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:bg-white/50'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Single visible panel (no stacking) */}
+        <div className="flex-1 overflow-auto min-h-0 relative z-10">
+          <div role="tabpanel" id="sector-intel-panel-overview" aria-labelledby="sector-intel-tab-overview" hidden={activeTab !== 'overview'} className="p-4 relative z-10">
+        {activeTab === 'overview' && (
+          <div className="space-y-3">
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               <div className="flex flex-col">
                 <span className="text-[9px] uppercase font-bold text-neutral-500">Front Length</span>
@@ -256,7 +266,7 @@ export function CorpsFrontPanel() {
               </div>
               <div className="flex flex-col">
                 <span className="text-[9px] uppercase font-bold text-neutral-500">Sector Stance</span>
-                <span className="font-medium uppercase">{effectiveSectorStance.replaceAll('_', ' ')}</span>
+                <span className="font-medium uppercase">{effectiveSectorStance.replace(/_/g, ' ')}</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-[9px] uppercase font-bold text-neutral-500">Supply Priority</span>
@@ -330,14 +340,10 @@ export function CorpsFrontPanel() {
             )}
           </div>
         )}
+        </div>
 
-        <AccordionHeader
-          label="2. ORBAT SUMMARY"
-          count={assignedFormations.length + reserveFormations.length}
-          expanded={expandedSections.forces}
-          onToggle={() => toggleSection('forces')}
-        />
-        {expandedSections.forces && (
+        <div role="tabpanel" id="sector-intel-panel-forces" aria-labelledby="sector-intel-tab-forces" hidden={activeTab !== 'forces'} className="p-4 relative z-10">
+        {activeTab === 'forces' && (
           <div className="p-4 relative z-10">
             {assignedFormations.length > 0 && (
               <div className="mb-4">
@@ -403,13 +409,10 @@ export function CorpsFrontPanel() {
             )}
           </div>
         )}
+        </div>
 
-        <AccordionHeader
-          label="3. LOGISTICS STATUS"
-          expanded={expandedSections.logistics}
-          onToggle={() => toggleSection('logistics')}
-        />
-        {expandedSections.logistics && (
+        <div role="tabpanel" id="sector-intel-panel-logistics" aria-labelledby="sector-intel-tab-logistics" hidden={activeTab !== 'logistics'} className="p-4 relative z-10">
+        {activeTab === 'logistics' && (
           <div className="p-4 relative z-10 space-y-1">
             <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
               <span className="text-[10px] uppercase font-bold text-neutral-500">Total Manpower</span>
@@ -447,14 +450,10 @@ export function CorpsFrontPanel() {
             )}
           </div>
         )}
+        </div>
 
-        <AccordionHeader
-          label="4. KNOWN OPERATIONS"
-          count={relatedOperations.length > 0 ? relatedOperations.length : undefined}
-          expanded={expandedSections.ops}
-          onToggle={() => toggleSection('ops')}
-        />
-        {expandedSections.ops && (
+        <div role="tabpanel" id="sector-intel-panel-ops" aria-labelledby="sector-intel-tab-ops" hidden={activeTab !== 'ops'} className="p-4 relative z-10">
+        {activeTab === 'ops' && (
           <div className="p-4 relative z-10 space-y-3">
             {relatedOperations.length === 0 ? (
               <div className="text-[10px] text-neutral-500 italic uppercase">/// NO ACTIVE DIRECTIVES IDENTIFIED ///</div>
@@ -512,7 +511,9 @@ export function CorpsFrontPanel() {
             </div>
           </div>
         )}
+        </div>
       </div>
-    </div >
+      </div>
+    </div>
   );
 }

@@ -31,6 +31,66 @@ export interface DisplacementByMunEntry {
 export type DepartedByOsid = Record<string, Partial<Record<string, number>>>;
 
 /**
+ * Current ethnic composition (counts) for a single OSID.
+ * Uses same logic as buildEthnicGeoJSON: base - departures + proportional arrivals.
+ */
+export function getCurrentEthnicForOsid(
+  osid: string,
+  osidPropertiesMap: Record<string, Record<string, unknown>> | null,
+  displacementByMun?: Record<string, { originalPopulation: number; currentPopulation: number; arrivedByFaction?: Partial<Record<string, number>> }> | null,
+  departedByOsid?: DepartedByOsid | null
+): { Bosniak: number; Serb: number; Croat: number; Other: number } | null {
+  if (!osidPropertiesMap?.[osid]) return null;
+  const base = osidPropertiesMap[osid] ?? {};
+  const initB = num(base.population_bosniaks);
+  const initS = num(base.population_serbs);
+  const initC = num(base.population_croats);
+  const initO = num(base.population_others);
+  const munId = getMunIdForDisplacement(base);
+  const dep = departedByOsid?.[osid] ?? {};
+  const dispRaw = munId && displacementByMun ? displacementByMun[munId] : undefined;
+  const disp = dispRaw && typeof dispRaw === 'object' && 'currentPopulation' in dispRaw ? dispRaw : undefined;
+  const arr = disp && 'arrivedByFaction' in disp ? (disp.arrivedByFaction ?? {}) : {};
+
+  const depB = num(dep['RBiH']);
+  const depS = num(dep['RS']);
+  const depC = num(dep['HRHB']);
+
+  let arrB = 0, arrS = 0, arrC = 0;
+  if (munId && disp && Object.keys(arr).length > 0) {
+    let munB = 0, munS = 0, munC = 0;
+    for (const props of Object.values(osidPropertiesMap)) {
+      const m = getMunIdForDisplacement(props as Record<string, unknown>);
+      if (m !== munId) continue;
+      munB += num((props as Record<string, unknown>).population_bosniaks);
+      munS += num((props as Record<string, unknown>).population_serbs);
+      munC += num((props as Record<string, unknown>).population_croats);
+    }
+    const fracB = munB > 0 ? initB / munB : 0;
+    const fracS = munS > 0 ? initS / munS : 0;
+    const fracC = munC > 0 ? initC / munC : 0;
+    arrB = Math.round(num(arr['RBiH']) * fracB);
+    arrS = Math.round(num(arr['RS']) * fracS);
+    arrC = Math.round(num(arr['HRHB']) * fracC);
+  }
+
+  const curB = Math.max(0, initB - depB + arrB);
+  const curS = Math.max(0, initS - depS + arrS);
+  const curC = Math.max(0, initC - depC + arrC);
+  const initTotal = initB + initS + initC + initO;
+  const curMainGroups = curB + curS + curC;
+  const initMainGroups = initB + initS + initC;
+  const othersRatio = initMainGroups > 0 && initTotal > 0
+    ? curMainGroups / initMainGroups
+    : (disp && typeof disp === 'object' && 'originalPopulation' in disp && (disp as { originalPopulation: number; currentPopulation: number }).originalPopulation > 0
+      ? Math.max(0, (disp as { originalPopulation: number; currentPopulation: number }).currentPopulation / (disp as { originalPopulation: number; currentPopulation: number }).originalPopulation)
+      : 1);
+  const curO = Math.max(0, Math.round(initO * othersRatio));
+
+  return { Bosniak: curB, Serb: curS, Croat: curC, Other: curO };
+}
+
+/**
  * Resolve municipality id for displacement lookup (lowercase, from mun1990_id or mun_id).
  */
 function getMunIdForDisplacement(props: Record<string, unknown>): string | null {

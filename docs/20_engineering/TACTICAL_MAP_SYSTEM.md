@@ -532,19 +532,19 @@ Note: Rivers, roads, and boundary are **not** in the layer toolbar — they are 
 
 ### 13.2 Settlement Panel
 
-340px right-side sliding panel. Opens on settlement click, closes on Escape or close button. Has a faction-colored left border accent. The 5 tabs are arranged in a **vertical stack** (`.tm-panel-tabs` as a column, min-width 72px; active tab indicated by `border-left`). See [SCENARIO_INIT_SIX_FIXES_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md).
+Right-side sliding panel (e.g. 20rem width) opened on settlement click; closes on Escape or close button. Uses the same horizontal tab style as sector/operations panels (border-b, active tab border-accent-gold). See [20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md](../40_reports/implemented/20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md).
 
-**Header:** Settlement name, subtitle (NATO class, population, controller).
+**Header:** Settlement name; strategic/hub/terrain tags when applicable.
 
-**5 Tabs:**
+**3 Tabs:**
 
-| Tab | ID | Content |
-|-----|----|---------|
-| OVERVIEW | `overview` | Name, type (sentence case), `Population (1991)` and `Population (Current)` (current inferred from displacement state: original - displaced_out - lost + displaced_in). Ethnicity bar chart (Bosniak/Croat/Serb/Other with colored bars and percentages). Includes municipality/admin details (municipality name, settlement count, NATO class, urban center). No SID/ID/provenance rows. |
-| CONTROL | `control` | Controller with faction swatch and control status (CONSOLIDATED/CONTESTED/HIGHLY_CONTESTED). No STABILITY placeholder section. |
-| MILITARY | `intel` | Formations in this municipality (name, kind, readiness badge, cohesion bar); rows are clickable and open the selected formation panel. Militia pool (available/committed/exhausted stacked bar). Requires loaded game state. |
-| ORDERS / EVENTS | `orders_events` | Combined activity tab: pending attack/movement orders affecting this settlement plus recent settlement/municipality events from `loadedGameState.recentControlEvents`. |
-| HISTORY | `aar` | Control-change history for the settlement (after-action context). |
+| Tab | Content |
+|-----|--------|
+| **Overview** | Municipality, political control, status (CONSOLIDATED/CONTESTED/HIGHLY_CONTESTED). Population (1991) and Population (Current) with dramatic change (Out/In/Lost, arrived by faction). “Fled from this settlement” by **nation** (Bosniaks, Serbs, Croats, Others) not faction code. Pre-war ethnic structure (bar chart). **Current ethnic structure** (bar chart when displacement/departures allow computation). Terrain context. |
+| **Military** | Front sector (name + faction when OSID is in a corps front sector). Stationed units: formation rows with readiness badge, cohesion bar, personnel; rows clickable to open Formation detail. Militia pool for the municipality (available/committed/exhausted stacked bar per faction). |
+| **Orders & events** | Operations targeting this OSID. Pending attack/move/reposition orders affecting this settlement (with brigade names when available). Recent control events from `loadedGameState.recentControlEvents`. |
+
+Tooltip variant (hover) shows a single scroll of key fields without tabs.
 
 ### 13.3 Formation Panel (Corps and Brigade)
 

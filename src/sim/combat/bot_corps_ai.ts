@@ -1400,13 +1400,14 @@ export function generateCorpsDirectives(
                 return false;
             };
 
-            // Undefended enemy OSIDs: always allow regardless of priority municipalities.
-            // Taking undefended territory costs nothing — all factions historically
-            // consolidated undefended areas without needing explicit orders.
-            for (const osid of graphAnalysis.undefended_front) {
-                if (offensiveTargetSet.has(osid)) continue;
-                if (hasAdjacentBrigade(osid)) offensiveTargetSet.add(osid);
-            }
+            // Opportunistic targets: weak/undefended enemy OSIDs that a brigade
+            // can immediately exploit. Requires adjacent brigade to prevent force
+            // dilution — strategic objectives without adjacency come from army
+            // priority municipalities via findTargetOsidsFromMunicipalities (no
+            // adjacency gate there; corps plans operations to reach them).
+            // TODO: This does not account for sector-line coverage. An OSID without a
+            // brigade can still be covered by a sector defensive line. A future pass
+            // should check sector coverage before classifying as "undefended".
             for (const entry of graphAnalysis.weak_enemy_osids) {
                 if (offensiveTargetSet.has(entry.osid)) continue;
                 // Truly undefended (no brigade present): bypass P3 municipality filter.
@@ -1593,8 +1594,16 @@ export function generateCorpsDirectives(
         }
 
         // Sector-aware target filtering: restrict to OSIDs adjacent to corps' sectors.
-        // Rear pockets are exempt — they're behind the front and won't appear in any
-        // sector's enemy_osids, but should always be consolidated.
+        // Exempt: rear pockets (behind front, always consolidate) and targets adjacent
+        // to a subordinate brigade (brigade is right there — don't filter just because
+        // the sector assignment doesn't cover that part of the map).
+        const subLocsForFilter = new Set(subordinates.map(b => b.location_osid).filter(Boolean));
+        const hasAdjacentSubordinate = (osid: Osid): boolean => {
+            for (const n of adjacency.get(osid) ?? []) {
+                if (subLocsForFilter.has(n)) return true;
+            }
+            return false;
+        };
         if (corpsSectors.length > 0 && offensiveTargets.length > 0) {
             const allSectorEnemyOsids = new Set<string>();
             for (const sec of corpsSectors) {
@@ -1603,7 +1612,7 @@ export function generateCorpsDirectives(
                 }
             }
             const filtered = offensiveTargets.filter(t =>
-                allSectorEnemyOsids.has(t) || rearPocketOsids.has(t)
+                allSectorEnemyOsids.has(t) || rearPocketOsids.has(t) || hasAdjacentSubordinate(t)
             );
             // Keep all if filter removes everything (corps needs SOMETHING to aim at)
             if (filtered.length > 0) {

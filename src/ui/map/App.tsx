@@ -239,16 +239,19 @@ function App() {
       <OOBSidebar />
       <OperationsPanel />
       <OrderQueue />
-      {railState.primary === 'settlement' && <SelectionPanel />}
-      {railState.primary === 'sector' && <CorpsFrontPanel />}
-      {railState.primary === 'corps' && <CorpsDetail />}
-      {railState.primary === 'army' && <ArmyDetail />}
-      {railState.primary === 'formation' && <FormationDetail />}
-      {railState.primary === 'operation' && <OperationDetail />}
-      {railState.secondary === 'sector' && <CorpsFrontPanel />}
-      {railState.secondary === 'corps' && <CorpsDetail />}
-      {railState.secondary === 'formation' && <FormationDetail />}
-      {railState.secondary === 'operation' && <OperationDetail />}
+      {/* Tactical Detail Panels (Nested Rail Architecture) */}
+      {railState.primary === 'settlement' && <SelectionPanel railSlot="primary" />}
+      {railState.primary === 'sector' && <CorpsFrontPanel railSlot="primary" />}
+      {railState.primary === 'corps' && <CorpsDetail railSlot="primary" />}
+      {railState.primary === 'army' && <ArmyDetail railSlot="primary" />}
+      {railState.primary === 'formation' && <FormationDetail railSlot="primary" />}
+      {railState.primary === 'operation' && <OperationDetail railSlot="primary" />}
+
+      {railState.secondary === 'settlement' && <SelectionPanel railSlot="secondary" />}
+      {railState.secondary === 'sector' && <CorpsFrontPanel railSlot="secondary" />}
+      {railState.secondary === 'corps' && <CorpsDetail railSlot="secondary" />}
+      {railState.secondary === 'formation' && <FormationDetail railSlot="secondary" />}
+      {railState.secondary === 'operation' && <OperationDetail railSlot="secondary" />}
       <Tooltip />
       {pendingAttackConfirmation && attackerFormation && (
         <AttackConfirmation
