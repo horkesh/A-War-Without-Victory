@@ -11,6 +11,7 @@ import { WarPlanningMap } from './components/WarPlanningMap.js';
 import { setScenarioStartDate, turnToCalendarMonthYear, turnToShortLabel } from './components/warroom_utils.js';
 // Asset URLs via Vite so dev server serves them from the module graph
 import bgUrl from './assets/hq_background_v3.png?url';
+import hqRbih1991Url from './assets/hq_rbih_1991.png?url';
 // Flag assets — drawn dynamically on the wall per player faction
 import flagHrhbUrl from './assets/flag_HRHB.png?url';
 import flagRbihUrl from './assets/flag_RBiH.png?url';
@@ -25,10 +26,16 @@ type CampaignScenarioKey = 'sep_1991' | 'apr_1992';
 
 const WARROOM_SCENE_WIDTH = 2752;
 const WARROOM_SCENE_HEIGHT = 1536;
-const WARROOM_FLAG_REGION_IDS = ['wall_flag_area', 'faction_flag'] as const;
 const WARROOM_CALENDAR_REGION_IDS = ['wall_calendar_area', 'wall_calendar'] as const;
+
+const DEFAULT_REGIONS_URL = '/data/ui/hq_clickable_regions.json';
+
+function getRegionsUrl(): string {
+    const w = typeof window !== 'undefined' ? (window as unknown as { __awwvWarroomRegionsUrl?: string }) : undefined;
+    return w?.__awwvWarroomRegionsUrl ?? DEFAULT_REGIONS_URL;
+}
 const WARROOM_SCENE_PLATE_URLS: Record<FactionId, string> = {
-    RBiH: bgUrl,
+    RBiH: hqRbih1991Url,
     RS: bgUrl,
     HRHB: bgUrl
 };
@@ -90,6 +97,11 @@ class WarroomApp {
             mainMenuEl.style.backgroundPosition = 'center, center';
         }
 
+        // Wire overlay buttons immediately so "New Campaign" etc. work before assets finish loading
+        this.wireMainMenuButtons();
+        this.wireSidePickerButtons();
+        this.wireScenarioPickerButtons();
+
         // Load scene-plate, component assets, and runtime overlays in parallel.
         await Promise.all([
             this.loadScenePlateAssets(),
@@ -98,7 +110,7 @@ class WarroomApp {
             this.loadFlagAssets()
         ]);
 
-        await this.regionManager.loadRegions('/data/ui/hq_clickable_regions.json');
+        await this.regionManager.loadRegions(getRegionsUrl());
         this.regionManager.setCanvasScale(this.canvas.width, this.canvas.height);
         this.regionManager.setModalManager(this.modalManager);
         this.regionManager.setTacticalMap(this.map);
@@ -119,10 +131,6 @@ class WarroomApp {
             mapScene.appendChild(this.phase0PreparationMap.getContainer());
             this.phase0PreparationMap.setCloseCallback(() => this.showWarroomScene());
         }
-        // Wire the 3-step campaign flow immediately for responsiveness
-        this.wireMainMenuButtons();
-        this.wireSidePickerButtons();
-        this.wireScenarioPickerButtons();
         this.wireToolbar();
         this.canvas.addEventListener('mousemove', (e) => this.onMouseMove(e));
         this.canvas.addEventListener('click', (e) => this.onClick(e));
@@ -575,8 +583,7 @@ class WarroomApp {
             this.ctx.drawImage(scenePlate, 0, 0, W, H);
         }
 
-        // 2. Dynamic overlays: flag + calendar content
-        this.renderFlag(this.gameState);
+        // 2. Runtime overlays: calendar only (flag is baked into room art per WARROOM_MASTER / clean-room handover)
 
         const calMY = turnToCalendarMonthYear(this.gameState.meta.turn);
         const calCanvas = this.calendar.render({
@@ -588,7 +595,7 @@ class WarroomApp {
         const calendarBounds = WARROOM_CALENDAR_REGION_IDS
             .map((regionId) => this.regionManager.getScaledRegionById(regionId))
             .find((region) => region != null);
-        if (calendarBounds) {
+        if (calendarBounds && !this.regionManager.isCalendarBakedInArt()) {
             this.ctx.drawImage(
                 calCanvas,
                 calendarBounds.bounds.x,
@@ -615,24 +622,6 @@ class WarroomApp {
         for (const [id, img] of loaded) {
             this.flagImages.set(id, img);
         }
-    }
-
-    private renderFlag(state: GameState) {
-        const flagRegion = WARROOM_FLAG_REGION_IDS
-            .map((regionId) => this.regionManager.getScaledRegionById(regionId))
-            .find((region) => region != null);
-        if (!flagRegion) return;
-        const factionId = state.meta.player_faction ?? state.factions[0]?.id;
-        if (!factionId) return;
-        const flag = this.flagImages.get(factionId);
-        if (!flag) return;
-        this.ctx.drawImage(
-            flag,
-            flagRegion.bounds.x,
-            flagRegion.bounds.y,
-            flagRegion.bounds.width,
-            flagRegion.bounds.height
-        );
     }
 
     /** Scene swap: show map scene (full-screen), hide warroom. */

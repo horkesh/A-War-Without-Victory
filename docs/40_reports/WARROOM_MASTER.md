@@ -61,6 +61,7 @@
 
 - **Scene:** Fixed plate **2752×1536**; faction-keyed background image. Current direction: **15 room images total** (`prewar/year1/year2/year3/year4` × 3 factions), **flag baked into room art**, **desk map projected as runtime overlay**, **date / next-turn board projected as runtime overlay**. Ticker/UI chrome remains engine-side as needed.
 - **Hotspots:** Physical anchors drive routing: `wall_flag_area`, `command_briefing_folio`, `newspaper_stack`, `intelligence_journal`, `diplomatic_telephone`, `desk_radio`, `wall_calendar_area`. Legacy action strings kept for compatibility.
+- **Region data:** Click/hover geometry is in `public/data/ui/hq_clickable_regions.json`. Region bounds must match the scene plate; default JSON has `options.calendar_baked_in_art: true` so the runtime does not draw a second calendar when the room art already shows one. For a different room layout, use a custom region file (see § Region data and new room layout).
 - **Modals (implemented):** Newspaper, Magazine, Reports, Diplomacy, Faction Overview (COMMAND + commander assignment), Advance turn confirmation, Declaration event, War begins, Settings (placeholder), Help (warroom controls), “Line dead” (diplomacy in peace).
 - **Commander assignment:** **Warroom only** — Faction Overview (wall flag) → COMMAND section → CHANGE → ASSIGN COMMANDER modal. Map UI displays only; no assignment there. IPC: `assign-commander`.
 
@@ -112,6 +113,8 @@ From [nano banana brief](handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_
 
 | Date | Change | Report / reference |
 |------|--------|--------------------|
+| 2026-03-08 | **Region file config + calendar overlay:** (1) Region URL is configurable via `window.__awwvWarroomRegionsUrl` so new room art can use a custom region JSON with measured quads. (2) Region JSON supports `options.calendar_baked_in_art: true`; when set, runtime does not draw the calendar overlay (avoids duplicate/mismatch when art has calendar baked). Default `hq_clickable_regions.json` now has this option set. (3) WARROOM_MASTER § Region data and new room layout added. | warroom.ts, ClickableRegionManager.ts, WARROOM_MASTER |
+| 2026-03-08 | **Flag no longer drawn as sprite:** Removed runtime flag overlay so room art is not obscured. Per clean-room handover and WARROOM_MASTER, flag is baked into room art; only calendar (and future desk map / date board) are runtime overlays. `renderFlag()` removed; `wall_flag_area` remains for click/tooltip (Faction Overview). | warroom.ts, this file |
 | 2026-03-08 | **Faction yearly rooms + overlay surfaces:** Current direction. Generate one stable room per faction, then derive `prewar/year1/year2/year3/year4` with yearly aging while preserving geometry; bake the flag into room art; keep the desk-map zone empty for projection; use a flat date / next-turn board for overlay; target archival/documentary photorealism. | [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) |
 | 2026-03-08 | **Unified room direction:** Guidance/reference doc updated to support the hybrid model rather than “everything painted except calendar.” Same room per faction, war follow-up preserves geometry, military-feel guidance retained. | [handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md](handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md) |
 | 2026-03-07 | **Six nano banana prompts:** 6 detailed prompts (prewar+war × RBiH/RS/HRHB), 2752×1536, modal placeholders, copy-paste blocks | [handovers/20260307_WARROOM_SIX_NANO_BANANA_PROMPTS.md](handovers/20260307_WARROOM_SIX_NANO_BANANA_PROMPTS.md) |
@@ -122,10 +125,21 @@ From [nano banana brief](handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_
 
 ---
 
+## Region data and new room layout
+
+Overlays (e.g. calendar) and click/hover hotspots use **region geometry** from a JSON file. If the scene plate changes (new room art with different positions for corkboard, whiteboard, flag, desk props), that geometry will be wrong until the region data is updated.
+
+- **Default region file:** `public/data/ui/hq_clickable_regions.json`. It includes `options.calendar_baked_in_art: true` so the runtime does **not** draw a calendar overlay when the room art already has a calendar baked in (avoids duplicate/mismatched calendar).
+- **Custom region file for a new room:** Measure the wall map (cork board) and date/next-turn board quads using the Gemini prompts in [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) §11. Create a new JSON with the same schema, updated `regions` (and optional `options`). Serve it (e.g. as `/data/ui/hq_clickable_regions_newroom.json`) and set **before** the warroom script runs:
+  - **Browser:** `window.__awwvWarroomRegionsUrl = '/data/ui/hq_clickable_regions_newroom.json';` (e.g. in a script tag in `index.html` before the main bundle).
+  - **Electron:** In preload or before loading the warroom window, inject the same so the warroom loads your region file. Then overlays and click areas will align with the new room.
+
+---
+
 ## Gates / discipline
 
 - **Single scene plate:** Warroom remains one scene plate per faction/phase for room art, but current direction allows **projected information surfaces** inside that plate: desk map and date / next-turn board. See [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md).
-- **Overlay alignment:** Current direction is **desk map projected into the desk quad** and **date / next-turn board projected into the wall-board quad**. The **flag is baked into the art**. Keep overlay surfaces flat/frontal where required and preserve measured quad geometry.
+- **Overlay alignment:** Current direction is **desk map projected into the desk quad** and **date / next-turn board projected into the wall-board quad**. The **flag is baked into the art** and is **no longer drawn as a runtime sprite** (code updated 2026-03-08 so overlays do not obscure corkboard/whiteboard regions). Keep overlay surfaces flat/frontal where required and preserve measured quad geometry.
 - **Symbolism:** In-scene documents, binders, stamps must use **RBiH-era (1992–1998)** only; no post-1998 BiH crest. See same handover.
 - **Peace vs war:** Modal logic remains split between **prewar** and **war**, but current art direction expands war visuals into yearly states: `prewar` + `year1/year2/year3/year4` per faction. War modals stay the same from April 1992 onward; only the room art ages by year.
 - **Hotspot contract:** Use physical anchor ids for new behavior; legacy action strings are compatibility only.

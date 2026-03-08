@@ -86,7 +86,7 @@ export default defineConfig({
     server: {
         port: 3000,
         open: false,
-        strictPort: true,
+        strictPort: false,
         host: true // listen on all interfaces so localhost (IPv6 ::1) and 127.0.0.1 both reach the server
     },
     build: {

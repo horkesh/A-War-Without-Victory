@@ -17,6 +17,8 @@ export type RegionsMap = {
     schema_version: string;
     image_dimensions: { width: number; height: number };
     regions: Region[];
+    /** Optional: when true, room art has calendar baked in; skip drawing calendar overlay. */
+    options?: { calendar_baked_in_art?: boolean };
 };
 
 export type HoverRegion = {
@@ -87,6 +89,11 @@ export class ClickableRegionManager {
             throw new Error(`Failed to load regions map: ${jsonPath}`);
         }
         this.regionsMap = await response.json();
+    }
+
+    /** True if the loaded region set has calendar baked into room art (do not draw calendar overlay). */
+    isCalendarBakedInArt(): boolean {
+        return Boolean(this.regionsMap?.options?.calendar_baked_in_art);
     }
 
     setModalManager(modalManager: ModalManager): void {
