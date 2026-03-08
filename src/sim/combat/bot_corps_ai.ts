@@ -2148,5 +2148,12 @@ export function generateAllCorpsOrders(
         graphAnalysis = analyzeFactionGraph(state, faction, adjacency, reverseMap);
     }
     generateCorpsDirectives(state, faction, effectiveOsidEdges, reverseMap ?? null, graphAnalysis, supplyByOsid, ethnicMap);
+
+    // Final cleanup: prune any 0-edge ghost sectors (pocket containment artifacts)
+    if (state.corps_front_sectors) {
+        for (const [sid, sec] of Object.entries(state.corps_front_sectors)) {
+            if (sec.length_edges === 0) delete state.corps_front_sectors[sid];
+        }
+    }
 }
 

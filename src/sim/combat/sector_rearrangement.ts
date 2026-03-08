@@ -330,7 +330,18 @@ export function rearrangeSectorsForCorps(
 
     // 3. Operation concentration — deferred
 
-    return renumberSectors(result, corpsId);
+    // Final prune: remove 0-edge ghost sectors (e.g. pocket containment with no front).
+    const pruned = result.filter(s => s.length_edges > 0);
+
+    // Cap reserves: 1 for ≤10 edges, 2 for >10 (consolidation may merge reserve lists).
+    for (const s of pruned) {
+        const maxReserves = s.length_edges > 10 ? 2 : 1;
+        if (s.reserve_brigade_ids.length > maxReserves) {
+            s.reserve_brigade_ids.length = maxReserves;
+        }
+    }
+
+    return renumberSectors(pruned, corpsId);
 }
 
 /**

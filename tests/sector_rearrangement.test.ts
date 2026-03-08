@@ -79,7 +79,7 @@ describe('rearrangeSectorsForCorps — thin sector consolidation', () => {
 });
 
 describe('rearrangeSectorsForCorps — enemy pocket containment', () => {
-    it('creates a containment sector around an enemy pocket inside corps territory', () => {
+    it('prunes 0-edge pocket containment sectors (no front = no sector)', () => {
         const adj = buildGridAdjacency();
         const sector = makeSector('sector:test:0', 'test_corps',
             ['op:a:a', 'op:b:b', 'op:c:c', 'op:d:d', 'op:f:f', 'op:g:g', 'op:h:h', 'op:i:i'],
@@ -96,9 +96,8 @@ describe('rearrangeSectorsForCorps — enemy pocket containment', () => {
             [sector], 'test_corps', adj,
             { politicalControllers, faction: 'RS' as any }
         );
-        const containment = result.find(s =>
-            s.sub_segments.some(ss => ss.enemy_osids.includes('op:e:e'))
-        );
-        expect(containment).toBeDefined();
+        // Pocket containment sector has 0 edges → pruned. Only the original sector remains.
+        expect(result).toHaveLength(1);
+        expect(result[0].edge_ids).toHaveLength(6);
     });
 });
