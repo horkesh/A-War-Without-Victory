@@ -7,6 +7,15 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] N297 Supply Calibration — ATH 87.0% restored
+
+### Summary
+- **Supply tuning**: PATRON_AID_SCALE 6→10, RS efficiency 0.8→1.0, HRHB 0.6→0.8. RS supply recovered from 0 to 6.7 (strained). HRHB still at 0 (needs further tuning).
+- **Equipment intensity floor**: Defended-path battles use `equipIntensityFactor = max(0.5, intensityFactor)` — mechanized formations lose equipment even in low-intensity battles. Undefended path remains 0 (× 1.0 caused zero-battle regression — needs investigation).
+- **ATH trajectory**: n290=88.1% → n293=85.0% (overhaul regression) → n297=87.0% (recovered). 2 brigades dissolved.
+- **Key finding**: Undefended-path equipment loss at full rate (× 1.0) causes total combat shutdown (0 battles). Root cause unknown — filed for investigation.
+- Full validation: `docs/40_reports/convenes/20260308_N293_VALIDATION_REPORT.md`
+
 ## [2026-03-08] N293 Validation Run — Combat Mechanics Overhaul
 
 ### Summary

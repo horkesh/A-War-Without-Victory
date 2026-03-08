@@ -212,8 +212,8 @@
    Do instead: ZoC deleted. Movement via `brigade_movement_orders.ts` / `apply-brigade-movement`. Defense via `local_front_defense.ts` density. AoR legacy also fully removed (R1–R5, 2026-03-04) — no dead AoR code remains.
 
 ## Calibration
-1. **[2026-03-08] n293 ATH=85.0% after combat overhaul (down from n290=88.1%)**
-   Do instead: Combat mechanics overhaul (commit 777d7f3) regressed ATH 3.1pp. Root cause: supply embargo too aggressive (RS/HRHB supply=0). DRINA worst at 66.7%. Bihac anchor failed. Troop strength: RS=102.8k, RBiH=104.8k, HRHB=31.8k. Supply: RBiH=47.5 (embargo cap working), RS=0, HRHB=0. 104 battles, 102k total casualties. Equipment/dissolution/fatigue systems structurally correct but don't bite at 40w (undefended-path returns 0 equip loss; no brigade hits triple threshold; no front assignment). **Next: tune supply caps, wire front assignment in bot AI.** Previous baselines: n65=99.2% (171 overrides), n290=88.1% (organic).
+1. **[2026-03-08] n297 ATH=87.0% after supply calibration (recovered from n293=85.0%)**
+   Do instead: Supply tuned: PATRON_AID_SCALE=10, RS eff=1.0, HRHB=0.8, RBiH=0.3. Embargo caps: RBiH=45, RS=90, HRHB=70. RS supply 6.7 (strained), HRHB=0 (still needs tuning), RBiH=47.5. Equipment intensity floor 0.5 for defended battles (equipIntensityFactor). **WARNING**: undefended-path equipment loss at × 1.0 rate causes zero-battle regression (n296) — investigate before retrying. 2 brigades dissolved. No front assignment → no fatigue. Previous: n290=88.1%, n65=99.2% (171 overrides).
 2. **[2026-03-07] HRHB-init cells CAN be fixed by RS overrides — add in isolated clusters only**
    Do instead: Cells like banja_luka:dragocaj, kotor_varos x4, mrkonjic_grad:baljvine_2, skender_vakuf:donji_koricani start HRHB but painting=RS. Adding RS overrides for these IS effective (n238: KRAJINA 89.4%→97.8%). RULE: add HRHB cells by isolated geographic cluster (KRAJINA only, then POSAVINA_NE only, etc.) — adding 10+ HRHB cells across multiple regions at once (n237) caused POSAVINA_NE −9.9pp and SARAJEVO −9.3pp cascade.
 3. **[2026-03-07] Consolidation auto-flip DELETED; avoided_osids only redirects combat**
