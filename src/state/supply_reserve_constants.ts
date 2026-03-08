@@ -79,7 +79,7 @@ export const SIEGE_MIN_POCKET_SIZE = 8;
 /** Global multiplier for production facility income. */
 export const PRODUCTION_SCALE = 1.0;
 /** Global multiplier for patron aid income. */
-export const PATRON_AID_SCALE = 6;
+export const PATRON_AID_SCALE = 10;
 
 /**
  * Faction-specific patron aid efficiency.
@@ -89,8 +89,8 @@ export const PATRON_AID_SCALE = 6;
  */
 export const PATRON_AID_FACTION_EFFICIENCY: Record<string, number> = {
     RBiH: 0.3,
-    RS: 0.8,
-    HRHB: 0.6
+    RS: 1.0,
+    HRHB: 0.8
 };
 
 /**

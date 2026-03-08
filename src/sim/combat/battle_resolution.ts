@@ -636,16 +636,20 @@ function computeBattleCasualties(
 
     const attackerComp = attackerFormation.composition ?? ensureBrigadeComposition(attackerFormation);
     const attackPostureMult = (attackerFormation.posture === 'attack') ? 1.5 : 1.0;
-    const aTanksLost = Math.min(attackerComp.tanks, Math.round(attackerComp.tanks * TANK_LOSS_RATE * intensityFactor * attackPostureMult));
-    const aArtLost = Math.min(attackerComp.artillery, Math.round(attackerComp.artillery * ARTILLERY_LOSS_RATE * intensityFactor));
+    // Equipment uses a higher intensity floor — mechanized operations cause losses
+    // even in low-intensity battles (mines, mechanical failure, terrain damage).
+    // Personnel intensityFactor floor is 0.1; equipment floor is 0.5.
+    const equipIntensityFactor = Math.max(0.5, intensityFactor);
+    const aTanksLost = Math.min(attackerComp.tanks, Math.round(attackerComp.tanks * TANK_LOSS_RATE * equipIntensityFactor * attackPostureMult));
+    const aArtLost = Math.min(attackerComp.artillery, Math.round(attackerComp.artillery * ARTILLERY_LOSS_RATE * equipIntensityFactor));
 
     let dTanksLost = 0;
     let dArtLost = 0;
     if (defenderFormation) {
         const defenderComp = defenderFormation.composition ?? ensureBrigadeComposition(defenderFormation);
         const terrainProtection = 1 / Math.max(0.8, terrainComposite);
-        dTanksLost = Math.min(defenderComp.tanks, Math.round(defenderComp.tanks * TANK_LOSS_RATE * intensityFactor * terrainProtection));
-        dArtLost = Math.min(defenderComp.artillery, Math.round(defenderComp.artillery * ARTILLERY_LOSS_RATE * intensityFactor * terrainProtection));
+        dTanksLost = Math.min(defenderComp.tanks, Math.round(defenderComp.tanks * TANK_LOSS_RATE * equipIntensityFactor * terrainProtection));
+        dArtLost = Math.min(defenderComp.artillery, Math.round(defenderComp.artillery * ARTILLERY_LOSS_RATE * equipIntensityFactor * terrainProtection));
     }
 
     return {
