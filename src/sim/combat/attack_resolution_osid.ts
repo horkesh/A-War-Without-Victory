@@ -57,12 +57,14 @@ import {
     COORDINATION_PENALTY_2,
     COORDINATION_PENALTY_3PLUS,
     STACKING_DEFENDER_SUPPORT,
+    ENTRENCHMENT_DEGRADATION_PER_BATTLE,
     OUTCOME_ATTACKER_MOD,
     OUTCOME_DEFENDER_MOD,
     COHESION_ATTACKER,
     COHESION_DEFENDER,
     // Functions
     getMoraleResistFloor,
+    getConcentrationBonus,
     getArtillerySuppression,
     getBombardmentCasualtyMult,
     getSupplyMult,
@@ -454,8 +456,9 @@ export function resolveAttackOrdersOsid(
         const targetSlope = slopeByOsid[targetOsid] ?? 0;
         const seasonal = getSeasonalModifiers(currentTurn, startDate, targetSlope);
         const targetTerrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
+        const concentrationBonus = getConcentrationBonus(attackerFormations.length);
         const attackerPower = attackerFormations.reduce((s, a) => s + computeAttackerPower(state, a, supplyStateByOsid, undefined, targetTerrainMult), 0)
-            * coordPenalty * seasonal.attack_mult;
+            * coordPenalty * seasonal.attack_mult * concentrationBonus;
         defenderPower *= seasonal.defense_mult;
 
         const powerRatio = defenderPower <= 0 ? 10 : attackerPower / defenderPower;
@@ -554,6 +557,8 @@ export function resolveAttackOrdersOsid(
             (defenderFormation as { defense_streak?: number }).defense_streak = (outcome === 'stalemate' || outcome === 'repulsed' || outcome === 'catastrophic')
                 ? Math.min(MAX_RESILIENCE_STREAK, ((defenderFormation as { defense_streak?: number }).defense_streak ?? 0) + 1)
                 : 0;
+            const prevEntrenchment = (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns ?? 0;
+            (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = Math.max(0, prevEntrenchment - ENTRENCHMENT_DEGRADATION_PER_BATTLE);
             recordBattleCasualties(state.casualty_ledger!, defenderFormation.faction, defenderFormation.id, { killed: dKia, wounded: dWia, missing_captured: dMia });
             // Defender equipment losses
             const dComp = defenderFormation.composition ?? ensureBrigadeComposition(defenderFormation);

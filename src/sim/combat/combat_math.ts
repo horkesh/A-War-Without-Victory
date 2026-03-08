@@ -81,6 +81,13 @@ export const COORDINATION_PENALTY_2 = 0.9;
 export const COORDINATION_PENALTY_3PLUS = 0.8;
 export const STACKING_DEFENDER_SUPPORT = 0.3;
 
+/** Offensive concentration bonus — multi-brigade attacks coordinate for extra effectiveness. */
+export const CONCENTRATION_BONUS_PER_BRIGADE = 0.10;
+export const CONCENTRATION_BONUS_CAP = 0.30;
+
+/** Entrenchment degradation per battle — sustained offensives erode defensive positions. */
+export const ENTRENCHMENT_DEGRADATION_PER_BATTLE = 0.5;
+
 /** Base experience multiplier — even green troops have some combat effectiveness. */
 export const EXPERIENCE_BASE = 0.6;
 export const EXPERIENCE_SCALE = 0.4;
@@ -531,6 +538,11 @@ export function getFatigueMult(formation: FormationState, mode: 'attack' | 'defe
     const ratio = Math.min(1.0, fatigue / FATIGUE_MAX);
     const floor = mode === 'attack' ? FATIGUE_ATTACK_FLOOR : FATIGUE_DEFEND_FLOOR;
     return 1.0 - ratio * (1.0 - floor);
+}
+
+export function getConcentrationBonus(attackerCount: number): number {
+    if (attackerCount <= 1) return 1.0;
+    return 1.0 + Math.min(CONCENTRATION_BONUS_CAP, (attackerCount - 1) * CONCENTRATION_BONUS_PER_BRIGADE);
 }
 
 /** Urban defense multiplier: Sarajevo OSIDs get 1.5×. */

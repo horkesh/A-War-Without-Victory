@@ -68,6 +68,13 @@ import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander, re
 import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
 import { splitNonContiguousSectors } from './corps_front_sectors.js';
 
+const AGGRESSION_FLOOR: Record<string, number> = {
+    'offensive': 0.0,
+    'balanced': -0.10,
+    'defensive': -0.30,
+    'reorganize': -0.50,
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1376,20 +1383,36 @@ export function generateCorpsDirectives(
         }
 
         // Opportunistic targets: enemy sectors with zero assigned brigades are
-        // undefended — add all their enemy OSIDs (our front-edge hostile OSIDs)
-        // as targets. This is sector-level assessment, not OSID-level.
-        // Brigades adjacent to these empty sectors can walk in.
+        // undefended — add their OSIDs as targets, but only if the enemy sector
+        // is adjacent to one of this corps's own sectors. Without this filter,
+        // corps accumulate 60+ targets from distant undefended sectors they
+        // cannot actually reach.
         {
             const allSectors = state.corps_front_sectors ?? {};
-            // Collect enemy OSIDs from undefended enemy sectors
+            const corpsEnemyOsids = new Set<string>();
+            for (const sec of corpsSectors) {
+                for (const sub of sec.sub_segments) {
+                    for (const osid of sub.enemy_osids) corpsEnemyOsids.add(osid);
+                }
+            }
             for (const [_sId, enemySector] of Object.entries(allSectors).sort((a, b) => strictCompare(a[0], b[0]))) {
-                if (enemySector.faction === faction) continue; // skip own sectors
-                // Undefended: no assigned brigades in the sector
+                if (enemySector.faction === faction) continue;
                 if (enemySector.assigned_brigade_ids.length > 0) continue;
-                // Add all enemy OSIDs from this sector's sub-segments as targets
+                // Only target undefended sectors adjacent to this corps — check if
+                // any of the enemy sector's friendly OSIDs appear in our enemy OSIDs
+                let isAdjacent = false;
                 for (const ss of enemySector.sub_segments) {
                     for (const osid of ss.friendly_osids) {
-                        // The enemy sector's "friendly" OSIDs are our targets
+                        if (corpsEnemyOsids.has(osid)) {
+                            isAdjacent = true;
+                            break;
+                        }
+                    }
+                    if (isAdjacent) break;
+                }
+                if (!isAdjacent) continue;
+                for (const ss of enemySector.sub_segments) {
+                    for (const osid of ss.friendly_osids) {
                         if (!offensiveTargetSet.has(osid)) {
                             offensiveTargetSet.add(osid);
                         }
@@ -1478,9 +1501,16 @@ export function generateCorpsDirectives(
         // non-offensive corps. Offensive corps should be free to attack from defensive-priority
         // positions, not locked into defending. Chokepoints (above) still hold for all stances.
         if (cmd.stance !== 'offensive') {
+            const corpsTerritory = new Set<string>();
+            for (const sec of corpsSectors) {
+                for (const osid of sec.territory_osids) corpsTerritory.add(osid);
+                for (const sub of sec.sub_segments) {
+                    for (const osid of sub.friendly_osids) corpsTerritory.add(osid);
+                }
+            }
             const defPriorityOsids = findFriendlyOsidsFromMunicipalities(state, faction, strategy.defensive_priorities, reverseMap);
             for (const osid of defPriorityOsids) {
-                // Only relevant if on the front (has enemy neighbors)
+                if (!corpsTerritory.has(osid)) continue;
                 if (graphAnalysis) {
                     const analysis = graphAnalysis.osid_analysis.get(osid);
                     if (analysis && analysis.enemy_neighbors.length > 0 && !holdOsids.includes(osid)) {
@@ -1606,6 +1636,11 @@ export function generateCorpsDirectives(
                 }
             }
         }
+
+        aggressionModifier = Math.max(
+            AGGRESSION_FLOOR[cmd.stance] ?? -0.30,
+            aggressionModifier
+        );
 
         // Min attack outcome comes from doctrine phase + officer competence.
         // No artificial stance-based overrides.
