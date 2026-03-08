@@ -7,6 +7,19 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] Frozen Front Cascade — Phase 2 of Audit Remediation (n414)
+
+Five fixes to break the w40 stasis cycle. Calibration: 87.4% area-weighted (+0.5pp from n403 86.9%).
+
+**Concentration bonus** (combat_math.ts): Multi-brigade attacks get coordination bonus (2=1.15×, 3=1.25×, 4+=1.30×). Applied in attack_resolution_osid.ts.
+**Entrenchment degradation** (attack_resolution_osid.ts): Defenders lose 0.5 entrenchment_turns per battle. Sustained offensives erode positions.
+**Hold OSID corps scoping** (bot_corps_ai.ts): Filtered to corps sector territory only. Was returning faction-wide OSIDs.
+**Target adjacency filter** (bot_corps_ai.ts): Undefended enemy sectors only added if adjacent to corps. Was adding all undefended sectors (60+ targets).
+**Aggression floor** (bot_corps_ai.ts): Offensive=0.0, balanced=-0.10, defensive=-0.30, reorganize=-0.50. Prevents offensive corps from going negative.
+
+**Results n414**: 711 attacks (RS=375, up significantly), 539 battles, 44 flips. KRAJINA 94.9%, POSAVINA 93.6%, CORRIDOR 90.8%, HERZEGOVINA 90.3%. DRINA 70.0% (known weak). 11 invalid operations (8 zero-eligible-attacker — pre-existing sector op bug).
+**Files**: `combat_math.ts`, `attack_resolution_osid.ts`, `bot_corps_ai.ts`
+
 ## [2026-03-08] Determinism Audit — Phase 1 of Audit Remediation
 
 Systematic determinism audit across combat subsystem. 24 locations in 9 files where `Object.values()`/`Object.keys()` iteration could produce different results across JS engines.
