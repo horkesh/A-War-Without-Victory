@@ -771,6 +771,15 @@ Three critical bugs discovered and fixed, each with systemic lessons:
 - **Pipeline placement:** After `partition-corps-front-sectors` so pocket detection has accurate territory data. Before `process-brigade-movement` so captures are visible to subsequent steps.
 - **Key lesson:** The original design convene recommended tag/class over new FormationKind. In practice, a separate kind proved cleaner because it allows exclusion from all formation lifecycle systems (reinforcement, bot AI, spawn) without adding conditional checks everywhere — the kind filter naturally excludes them.
 
+### 2026-03-08 update: cluster detection + instant capture + civilian cas fix
+
+- **Cluster pocket detection (BFS):** Upgraded from single-OSID to clusters of 1-3 connected same-controller enemy OSIDs where ALL external neighbors are faction-controlled. BFS expansion through same-controller enemies, capped at MAX_POCKET_CLUSTER=3. Fixes multi-OSID pockets like Banja Luka dragocaj+potkozarje_3.
+- **`op:` prefix filtering:** `operational_contact_graph.json` has 315 canonical SID nodes (`S:`-prefixed) with no `political_controllers` entry. Must filter to `op:` nodes in BFS expansion and external neighbor checks — otherwise `allSurrounded` is always false.
+- **Interior scanning:** Pockets deep in rear territory aren't adjacent to any front OSID. Must scan ALL controlled OSIDs, not just `front_osids`.
+- **Instant capture (MARCH_TURNS=0):** Bot brigade AI opportunistically grabs undefended adjacent targets before paramilitaries can march (at MARCH_TURNS=2). Fix: instant capture since pockets are already surrounded. Bot corps AI also excludes active paramilitary targets from opportunistic targeting.
+- **Civilian casualty initialization:** `state.civilian_casualties` was optional and not always present. Paramilitary code silently dropped civilian casualties. Fix: `??=` operator to initialize the object.
+- **Rear pocket consolidation re-added:** Cluster-aware `rear_pocket_consolidation.ts` for post-week-20 auto-flip. Paramilitaries handle w0-20; rear pocket consolidation handles w20+. Original `consolidation_flips.ts` remains deleted.
+
 ## 2026-03-07 - N290 Sector-only operations: three structural fixes
 
 - **Root cause:** Bot corps AI had two operation creation paths. The old `generateCorpsOperationOrders` (catalog-based) picked 5 brigades from the entire corps pool using hardcoded municipality templates — no sector awareness. The sector offensive path in `generateCorpsDirectives` was sector-aware but had a rear-area brigade dump: when a sector cluster had <3 front-line brigades, it pulled ALL remaining corps subordinates into the operation. For 1KK (36 brigades), this created 31-brigade ops for 3 objectives.

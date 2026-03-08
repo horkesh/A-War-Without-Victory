@@ -365,6 +365,76 @@ function routeDisplacedPopulation(
 /** One-time displacement fraction for control flip when no 1991 census. */
 export const EARLY_WAR_DISPLACEMENT_FRACTION_NO_CENSUS = 0.15;
 
+/**
+ * Push municipal displacement to displacement_event_log so UI can show exact per-OSID out/lost/in.
+ * Distributes by population share (from settlement properties). byFaction = total displaced per faction; lostAmount = total lost (killed+fled); routed = total - lost.
+ */
+function pushDisplacementEventLogFromMun(
+    state: GameState,
+    munId: MunicipalityId,
+    settlements: Map<string, SettlementRecord>,
+    byFaction: Record<FactionId, number>,
+    turn: number,
+    lostAmount: number = 0
+): void {
+    const entries = Array.from(settlements.entries())
+        .filter(([, rec]) => (rec.mun1990_id ?? rec.mun_code) === munId)
+        .map(([sid, rec]) => {
+            const pop = typeof (rec.properties as { population_total?: number } | undefined)?.population_total === 'number'
+                ? Math.max(0, (rec.properties as { population_total: number }).population_total)
+                : 1;
+            return { osid: sid, pop };
+        })
+        .sort((a, b) => a.osid.localeCompare(b.osid));
+    if (entries.length === 0) return;
+
+    const totalPop = entries.reduce((s, e) => s + e.pop, 0) || 1;
+    const totalDisplaced = (byFaction.RBiH ?? 0) + (byFaction.RS ?? 0) + (byFaction.HRHB ?? 0);
+    if (!state.displacement_event_log) state.displacement_event_log = [];
+    if (totalDisplaced <= 0) return;
+
+    const factions: FactionId[] = ['RBiH', 'RS', 'HRHB'];
+    const lostByFaction: Record<FactionId, number> = { RBiH: 0, RS: 0, HRHB: 0 };
+    let lostRem = lostAmount;
+    for (let i = 0; i < factions.length; i++) {
+        const f = factions[i];
+        const total = byFaction[f] ?? 0;
+        lostByFaction[f] = i < factions.length - 1
+            ? Math.floor((lostAmount * total) / totalDisplaced)
+            : Math.max(0, lostRem);
+        lostRem -= lostByFaction[f];
+    }
+
+    for (const fid of factions) {
+        const total = byFaction[fid] ?? 0;
+        const lostF = lostByFaction[fid] ?? 0;
+        const routedF = Math.max(0, total - lostF);
+        if (total <= 0 && lostF <= 0) continue;
+        let routedRem = routedF;
+        let lostRemF = lostF;
+        for (let i = 0; i < entries.length; i++) {
+            const { osid, pop } = entries[i];
+            const share = pop / totalPop;
+            const routedHere = i < entries.length - 1 ? Math.floor(routedF * share) : routedRem;
+            const lostHere = i < entries.length - 1 ? Math.floor(lostF * share) : lostRemF;
+            routedRem -= routedHere;
+            lostRemF -= lostHere;
+            if (routedHere <= 0 && lostHere <= 0) continue;
+            state.displacement_event_log.push({
+                turn,
+                origin_mun: munId,
+                origin_osid: osid,
+                dest_mun: munId,
+                ethnicity: fid,
+                displaced: routedHere,
+                killed: lostHere,
+                fled_abroad: 0,
+                settled: 0,
+            });
+        }
+    }
+}
+
 /** Minimal shape for control-flip displacement apply. */
 export interface EarlyWarDisplacementFlipInfo {
     mun_id: MunicipalityId;
@@ -426,6 +496,9 @@ export function applyDisplacementFromFlips(
         );
         if (displacementAmount <= 0) continue;
 
+        const byFactionForLog = population1991ByMun
+            ? splitDisplacedByEthnicity(munId, displacementAmount, population1991ByMun)
+            : { RBiH: displacementAmount, RS: 0, HRHB: 0 };
         let lostAmount: number;
         let routedAmount: number;
         let routableByFaction: { RBiH: number; RS: number; HRHB: number } | undefined;
@@ -445,9 +518,11 @@ export function applyDisplacementFromFlips(
             routableByFaction = { RBiH: rRBiH, RS: rRS, HRHB: rHRHB };
             routedAmount = rRBiH + rRS + rHRHB;
             lostAmount = displacementAmount - routedAmount;
+            pushDisplacementEventLogFromMun(state, munId, _settlements, byFactionForLog, turn, lostAmount);
         } else {
             lostAmount = Math.floor(displacementAmount * LOST_POPULATION_FRACTION);
             routedAmount = displacementAmount - lostAmount;
+            pushDisplacementEventLogFromMun(state, munId, _settlements, byFactionForLog, turn, lostAmount);
         }
 
         const beforeOut = dispState.displaced_out;
@@ -713,9 +788,11 @@ export function updateDisplacement(
                 routableByFaction = { RBiH: rRBiH, RS: rRS, HRHB: rHRHB };
                 routedAmount = rRBiH + rRS + rHRHB;
                 lostAmount = displacementAmount - routedAmount;
+                pushDisplacementEventLogFromMun(state, munId, settlements, byFaction, currentTurn, lostAmount);
             } else {
                 lostAmount = Math.floor(displacementAmount * LOST_POPULATION_FRACTION);
                 routedAmount = displacementAmount - lostAmount;
+                pushDisplacementEventLogFromMun(state, munId, settlements, { RBiH: displacementAmount, RS: 0, HRHB: 0 }, currentTurn, lostAmount);
             }
 
             // Update displacement state

@@ -18,8 +18,8 @@
 | **Orientation** | Landscape. |
 | **Usage** | Fixed UI scene plate; same image is used as full background for the warroom canvas. No cropping or letterboxing in engine. |
 | **Pipeline** | Single complete image per prompt. Hotspots will be outlined afterward in a separate step. No separate sprites or props. |
-| **Runtime exceptions** | These elements are **not** painted into the image; leave **clean, uncluttered wall space** for them so the game can draw them on top: (1) **faction flag**, (2) **wall calendar**, (3) **ticker/radio strip**. |
-| **Overlay alignment** | The engine draws flag and calendar as **flat 2D rectangles** (no perspective). So the **flag zone** and **calendar zone** in the scene must be **flat and frontal**: a rectangular area **facing the camera** (perpendicular to viewer), like a notice board or picture frame, **no perspective tilt**. Otherwise the 2D overlay will not align with the room. |
+| **Runtime exception** | Only the **wall calendar** is NOT painted into the image; leave **clean, uncluttered wall space** for it so the game can draw it on top. |
+| **Overlay alignment** | The engine draws the calendar as a **flat 2D rectangle** (no perspective). So the **calendar zone** in the scene must be **flat and frontal**: a rectangular area **facing the camera** (perpendicular to viewer), like a notice board or picture frame, **no perspective tilt**. The **faction flag** and **news ticker** are now baked into the image and can be at any artistic angle or perspective. |
 | **Symbolism** | **Per-faction, period-accurate (1992–1998 war period):** **RBiH rooms:** White shield with golden fleur-de-lis and blue vertical stripes only. **Do not** use the post-1998 BiH coat of arms (yellow triangle on blue field). **RS rooms:** Use **wartime RS symbolism only (1992–1995)** on all documents, binders, stamps — e.g. Serbian tricolor, wartime RS insignia. **Do not** use the post-Dayton/post-1995 Republika Srpska coat of arms. **HRHB rooms:** Use period-appropriate HRHB-era symbolism only. **Desk map (RS only):** The RS warroom desk map must show **RS territory, Serb-held areas, or the RS operational/administrative area only**. **Do not** show a map of the whole of Bosnia and Herzegovina as a single state; that is wrong for the RS faction perspective. |
 
 ---
@@ -45,9 +45,9 @@ The scene must include **clearly outlineable** physical objects or zones for the
 | **Newspaper stack** | Newspaper (Phase 0 events) | Newspaper (war headlines) / Press narrative |
 | **Magazine / intelligence journal** | Magazine (pre-war org review), Reports (mun intel) | Magazine (war operational review), Reports (operational briefs) |
 | **Telephone** | “Line dead” (diplomacy inactive) | Diplomacy / IVP breakdown, Sarajevo visibility, enclave pressure |
-| **Radio** | Ticker (pre-war headlines) | Ticker (war events) |
-| **Faction dossier / archive binder / record ledger** | Faction Overview (capital, org, declaration pressure) | Faction Overview (territory, military, COMMAND, commander assignment) |
-| **Wall space — flag** | Reserved for runtime flag | Reserved for runtime flag |
+| **Radio / Ticker** (now baked in) | Ticker (pre-war headlines) | Ticker (war events) |
+| **Faction dossier / record ledger** | Faction Overview (capital, org, declaration pressure) | Faction Overview (territory, military, COMMAND, commander assignment) |
+| **Faction flag** (now baked in) | — | — |
 | **Wall space — calendar** | Reserved for runtime calendar | Reserved for runtime calendar |
 | **Typed report packet** (optional distinct object) | — | Turn-End Intelligence Packet (front changes, enemy intent, attention points) |
 | **Emergency dispatch folder** (optional) | — | Enclave Crisis (resilience, airdrop, humanitarian risk) |
@@ -68,20 +68,20 @@ Keep **object silhouettes strong**, **edges readable**, and **no key anchor buri
 
 **Composition:** One complete room; fixed camera angle; slightly elevated frontal perspective; wide and stable composition. No fisheye, no Dutch angle, no dramatic tilt. No perspective exaggeration that makes one hotspot huge and another tiny. Do not crop out desk interaction zones.
 
-**UI-plate rules:** The image must function as a hotspot-outline source and modal-anchor background. Use strong object silhouettes, readable edges, enough empty space for modal overlays, no key objects buried under clutter, no overlapping piles crossing multiple future modal regions. All props (desk, map, folders, phone, radio, papers, lamp, etc.) must be painted into this single coherent scene; do not assume any separate sprites.
+**UI-plate rules:** The image must function as a hotspot-outline source and modal-anchor background. Use strong object silhouettes, readable edges, enough empty space for modal overlays, no key objects buried under clutter, no overlapping piles crossing multiple future modal regions. All props (desk, map, folders, phone, radio, papers, lamp, flag, etc.) must be painted into this single coherent scene; do not assume any separate sprites.
 
-**Do not paint into the image (leave clean wall space for runtime overlay):** faction flag; wall calendar; ticker strip.
+**Do not paint into the image (leave clean wall space for runtime overlay):** wall calendar.
 
-**Required anchors (same relative placement across all six prompts):**
+**Required anchors:**
 - **Desk map area** — center or lower-center, largest anchor. Prewar: administrative or political map, municipality/organization focus; no frontline or military overlay.
 - **Command briefing folio** — official thick folder or report with tabs/seals; one clear side of desk, not buried.
 - **Newspaper stack** — opposite side of desk from briefing folio; clearly separate.
 - **Magazine or intelligence journal** — separate enough from newspaper to be outlined independently.
-- **Telephone** — strong side silhouette, easy to isolate (in prewar, will show “Line dead” when clicked).
-- **Radio** — visually distinct from phone, not too small.
+- **Telephone** — strong side silhouette, easy to isolate.
+- **Radio / News Ticker** — visually distinct; radio can be a desk instrument, ticker can be an integrated wall display or ticker tape machine at any artistic angle.
 - **Faction dossier / archive binder / record object** — prominent; not competing with desk map.
-- **Wall zone for flag** — upper wall, clean, uncluttered; must be a **flat, frontal** rectangular area (facing the camera, no perspective tilt) so the 2D overlay aligns.
-- **Wall zone for calendar** — upper wall, separate from flag zone; must be **flat and frontal** (facing the camera, no perspective tilt).
+- **Faction Flag** — a prominent flag, banner, or framed heraldry baked into the scene; can be at any artistic angle or draped in perspective.
+- **Wall zone for calendar** — upper wall, clean, uncluttered; must be a **flat, frontal** rectangular area (facing the camera, no perspective tilt) so the 2D overlay aligns.
 
 **Overlay-safe space:** Leave breathing room in upper-left wall, upper-right wall, center-back desk, lower-center desk, and at least one side for wider modal overlays. Do not fill these with high-noise clutter.
 

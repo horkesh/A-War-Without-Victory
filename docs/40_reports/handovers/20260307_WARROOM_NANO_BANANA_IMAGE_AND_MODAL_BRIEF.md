@@ -17,12 +17,10 @@ It is specifically written for the user's stated workflow:
 - the **warroom should be generated as one complete image**
 - modal regions will be **outlined afterward** using a separate tool
 - separate perspective props/sprites **must not** be relied on for the warroom scene
-- only these remain separate runtime-rendered elements:
-  - **flag**
+- only this remains a separate runtime-rendered element:
   - **calendar**
-  - **ticker**
 
-This means the warroom should be treated as a **fixed scene plate**, not as a modular kit.
+This means the warroom should be treated as a **fixed scene plate**, not as a modular kit. Faction flags and news tickers are now baked into the image.
 
 ---
 
@@ -36,9 +34,7 @@ Current code already supports the correct direction for a single-image warroom:
 - That file currently sets the warroom canvas to:
   - **width:** `2752`
   - **height:** `1536`
-- The same file already treats some elements as dynamic overlays:
-  - faction **flag**
-  - **calendar**
+- The same file already treats the **calendar** as a dynamic overlay.
 - Existing interactive logic is already routed through clickable regions loaded by:
   - [`src/ui/warroom/ClickableRegionManager.ts`](f:\A-War-Without-Victory\src\ui\warroom\ClickableRegionManager.ts)
 
@@ -125,15 +121,11 @@ All of those should already exist in the single painted plate.
 
 ### 4.4 Runtime exception list
 
-These are the only separate runtime-rendered warroom elements that should remain external:
+The only separate runtime-rendered warroom element is the **calendar**.
 
-- **flag**
-- **calendar**
-- **ticker**
+Everything else, including the **faction flag** and **news ticker**, should be baked into the scene image.
 
-Everything else should be baked into the scene image.
-
-**Overlay alignment:** The engine draws the flag and calendar as **flat 2D rectangles** (no perspective transform). So the wall areas reserved for the flag and for the calendar must be **flat and frontal**: a rectangular zone **facing the camera** (perpendicular to the viewer), like a notice board or picture frame, **with no perspective tilt**. If those zones are drawn in perspective (e.g. receding wall), the 2D overlay will not align and will look pasted on.
+**Overlay alignment:** The engine draws the calendar as a **flat 2D rectangle** (no perspective transform). So the wall area reserved for the calendar must be **flat and frontal**: a rectangular zone **facing the camera** (perpendicular to the viewer), like a notice board or picture frame, **with no perspective tilt**. Other areas of the room, including those for the baked-in flag and ticker, can be at angled or receding perspectives to enhance the artistic quality.
 
 ### 4.5 Symbolism (period-accurate, per-faction)
 
@@ -229,10 +221,10 @@ These should be physically distinct and consistently positioned:
 - **Newspaper stack**: opposite side of desk from briefing folio
 - **Magazine / journal**: separate enough from newspaper to be outlined independently
 - **Telephone**: strong side silhouette, easy to isolate
-- **Radio**: visually distinct from phone and not too small
+- **Radio / Ticker**: visually distinct from phone; can be integrated into the desk or wall at an angle
 - **Faction dossier / record object**: prominent but not competing with desk map
 - **Calendar zone**: upper wall, clean visibility; **flat and frontal** (facing the camera, no perspective tilt) so the 2D calendar overlay aligns.
-- **Flag zone**: upper wall, separate from calendar zone; **flat and frontal** (facing the camera, no perspective tilt) so the 2D flag overlay aligns.
+- **Flag**: can be a draped banner, framed cloth, or hanging flag; can be at any artistic angle or receding perspective.
 
 ## 6.3 Overlay-safe spaces
 
@@ -426,12 +418,12 @@ Requirements:
 - all props painted into one coherent scene
 - no separate sprite assumptions
 
-Separate runtime-rendered elements that must NOT be painted into the background:
-- faction flag
+Separate runtime-rendered element that must NOT be painted into the background:
 - wall calendar
-- ticker / ticker strip
 
-Must include:
+Must include (painted into the image):
+- faction flag
+- news ticker
 - central desk map
 - command briefing folio or official folder
 - newspaper stack
@@ -439,7 +431,6 @@ Must include:
 - telephone
 - radio
 - faction dossier or archive binder
-- clean wall space for a separate flag
 - clean wall space for a separate calendar
 
 Style:
@@ -782,7 +773,7 @@ The best warroom art direction for AWWV is:
 - **three faction variants sharing the same layout**
 - **modals anchored to physical objects in the room**
 - **no perspective-dependent prop sprites**
-- **only flag, calendar, and ticker remaining external runtime elements**
+- **only the calendar remaining an external runtime element; flag and ticker are baked in**
 
 This approach best supports:
 

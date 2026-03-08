@@ -5,6 +5,7 @@
  * Panel variant uses horizontal tabs (Overview | Military | Orders & events) like sector/operations panels.
  */
 import { useState } from 'react';
+import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getByOsid } from '../utils/osidLookup';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
@@ -35,6 +36,14 @@ function ethnicityOrFactionToNationLabel(key: string): string {
   if (k === 'HRHB' || k === 'Croat') return 'Croats';
   if (k === 'Other') return 'Others';
   return k;
+}
+
+/** Bar fill color for ethnic structure charts: green Bosniaks, red Serbs, blue Croats, neutral Other. */
+function ethnicBarColor(label: string): string {
+  if (label === 'Bosniak' || label === 'Bosniaks') return 'bg-faction-rbih';
+  if (label === 'Serb' || label === 'Serbs') return 'bg-faction-rs';
+  if (label === 'Croat' || label === 'Croats') return 'bg-faction-hrhb';
+  return 'bg-panel-active/40';
 }
 
 export interface DisplacementByMunEntry {
@@ -73,6 +82,8 @@ export interface SettlementDetailContentProps {
   }[];
   /** When provided (e.g. in SelectionPanel), show current population and change. */
   displacementByMun?: Record<string, DisplacementByMunEntry> | null;
+  /** When provided, use exact per-OSID out/lost/in from event log (numbers add up). */
+  displacementByOsid?: Record<string, { out: number; lost: number; in: number }> | null;
   /** If true, show compact tooltip-style layout; if false, show full panel with population change. */
   variant?: 'tooltip' | 'panel';
   /** Pending orders affecting this settlement (attack target, move/reposition destination). Panel only. */
@@ -85,14 +96,16 @@ export interface SettlementDetailContentProps {
   militiaPools?: { faction: string; available: number; committed: number; exhausted: number }[];
   /** Status label e.g. CONTESTED (from statusBySettlement). Only shown in panel variant. */
   statusLabel?: string | null;
-  /** Operations that have this OSID as an objective. Only shown in panel variant. */
-  operationsTargetingOsid?: { name: string; faction: string; phase: string }[];
+  /** Operations that have this OSID as an objective. Only shown in panel variant. operationKey used for click-through. */
+  operationsTargetingOsid?: { name: string; faction: string; phase: string; operationKey?: string }[];
   /** Recent control events at this settlement (turn, from, to, mechanism). Only shown in panel variant. */
   recentControlEvents?: RecentControlEventForSettlement[];
   /** Per-ethnicity departed counts from this OSID (fled). Only shown in panel variant. */
   departedByEthnicity?: Record<string, number>;
   /** Current ethnic composition (counts) for this OSID when available. Shows bar below pre-war structure. */
   currentEthnic?: { Bosniak: number; Serb: number; Croat: number; Other: number } | null;
+  /** Front sector ID (for click-through to sector panel). Only shown in panel variant. */
+  sectorId?: string | null;
   /** Front sector name if this OSID is in a corps front sector. Only shown in panel variant. */
   sectorName?: string | null;
   /** Faction that holds the sector (for coloring). */
@@ -110,12 +123,14 @@ export function SettlementDetailContent({
   controlBySettlement,
   formationsAtOsid,
   displacementByMun,
+  displacementByOsid,
   variant = 'tooltip',
   statusLabel,
   operationsTargetingOsid,
   recentControlEvents,
   departedByEthnicity,
   currentEthnic,
+  sectorId,
   sectorName,
   sectorFaction,
   brigadeCountByFaction,
@@ -144,26 +159,34 @@ export function SettlementDetailContent({
 
   const munId = getMunIdForDisplacement(props);
   const disp = munId && displacementByMun?.[munId];
+  const osidDisp = displacementByOsid?.[osid];
   const currentPop =
-    disp && disp.originalPopulation > 0 && Number.isFinite(disp.currentPopulation)
-      ? Math.round(popOriginal * (disp.currentPopulation / disp.originalPopulation))
-      : null;
+    osidDisp != null
+      ? Math.max(0, popOriginal - osidDisp.out - osidDisp.lost + osidDisp.in)
+      : disp && disp.originalPopulation > 0 && Number.isFinite(disp.currentPopulation)
+        ? Math.round(popOriginal * (disp.currentPopulation / disp.originalPopulation))
+        : null;
   const popDelta = currentPop != null && popOriginal > 0 ? currentPop - popOriginal : null;
-  /** Settlement-level flows: this settlement's share of municipality displacement so "Pre-war + In − Out − Lost = Now" holds. */
+  /** Settlement-level flows: exact per-OSID when available, else municipality share. */
   const settlementShare =
     disp && disp.originalPopulation > 0 && popOriginal > 0 ? popOriginal / disp.originalPopulation : 0;
-  const outSettlement = disp && settlementShare > 0 ? Math.round(disp.displacedOut * settlementShare) : 0;
-  const lostSettlement = disp && settlementShare > 0 ? Math.round(disp.lostPopulation * settlementShare) : 0;
+  const outSettlement =
+    osidDisp != null ? osidDisp.out : (disp && settlementShare > 0 ? Math.round(disp.displacedOut * settlementShare) : 0);
+  const lostSettlement =
+    osidDisp != null ? osidDisp.lost : (disp && settlementShare > 0 ? Math.round(disp.lostPopulation * settlementShare) : 0);
   const inSettlement =
-    currentPop != null && popOriginal > 0 && disp
+    osidDisp != null ? osidDisp.in : (currentPop != null && popOriginal > 0 && disp
       ? Math.max(0, currentPop - popOriginal + outSettlement + lostSettlement)
-      : 0;
+      : 0);
 
   const maxShow = variant === 'tooltip' ? 3 : 12;
   const showFormations = formationsAtOsid.slice(0, maxShow);
   const restCount = formationsAtOsid.length - maxShow;
 
   const isPanel = variant === 'panel';
+
+  const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
+  const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
 
   type SettlementTabId = 'overview' | 'military' | 'orders';
   const [activeTab, setActiveTab] = useState<SettlementTabId>('overview');
@@ -247,10 +270,21 @@ export function SettlementDetailContent({
         {(!isPanel || activeTab === 'military') && isPanel && sectorName && (
           <div className="flex justify-between items-center text-[11px]">
             <span className="text-text-secondary">Front sector</span>
-            <span className={`font-semibold ${sectorFaction ? (FACTION_COLORS_SUBTLE[sectorFaction] ?? 'text-text-primary') : 'text-text-primary'}`}>
-              {sectorName}
-              {sectorFaction ? ` (${sectorFaction})` : ''}
-            </span>
+            {sectorId ? (
+              <button
+                type="button"
+                onClick={() => setSelectedCorpsFrontSectorId(sectorId)}
+                className={`font-semibold text-left hover:underline focus:outline-none focus:ring-1 focus:ring-accent-gold/50 rounded kbd-focus ${sectorFaction ? (FACTION_COLORS_SUBTLE[sectorFaction] ?? 'text-text-primary') : 'text-text-primary'}`}
+              >
+                {sectorName}
+                {sectorFaction ? ` (${sectorFaction})` : ''}
+              </button>
+            ) : (
+              <span className={`font-semibold ${sectorFaction ? (FACTION_COLORS_SUBTLE[sectorFaction] ?? 'text-text-primary') : 'text-text-primary'}`}>
+                {sectorName}
+                {sectorFaction ? ` (${sectorFaction})` : ''}
+              </span>
+            )}
           </div>
         )}
 
@@ -258,13 +292,31 @@ export function SettlementDetailContent({
           <div className="pt-2 border-t border-panel-border/30">
             <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1">Operation target</div>
             <ul className="space-y-1">
-              {operationsTargetingOsid.map((op, i) => (
-                <li key={i} className="text-[11px] flex items-center gap-2">
-                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${op.faction === 'RBiH' ? 'bg-green-600' : op.faction === 'RS' ? 'bg-red-600' : 'bg-blue-600'}`} />
-                  <span className="text-text-primary font-medium truncate">{op.name}</span>
-                  <span className="text-[9px] text-text-secondary">({op.phase})</span>
-                </li>
-              ))}
+              {operationsTargetingOsid.map((op, i) => {
+                const isClickable = Boolean(op.operationKey);
+                const content = (
+                  <>
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${op.faction === 'RBiH' ? 'bg-green-600' : op.faction === 'RS' ? 'bg-red-600' : 'bg-blue-600'}`} />
+                    <span className="text-text-primary font-medium truncate">{op.name}</span>
+                    <span className="text-[9px] text-text-secondary">({op.phase})</span>
+                  </>
+                );
+                return (
+                  <li key={i} className="text-[11px] flex items-center gap-2">
+                    {isClickable ? (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOperationKey(op.operationKey!)}
+                        className="w-full flex items-center gap-2 text-left hover:underline focus:outline-none focus:ring-1 focus:ring-accent-gold/50 rounded px-0.5 -mx-0.5 py-0.5 kbd-focus"
+                      >
+                        {content}
+                      </button>
+                    ) : (
+                      content
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}
@@ -364,30 +416,66 @@ export function SettlementDetailContent({
                     </div>
                   )}
                 </div>
-                {disp.arrivedByFaction && Object.keys(disp.arrivedByFaction).length > 0 && settlementShare > 0 && (
-                  <div className="text-[10px] mb-1">
-                    <span className="text-text-secondary">Arrived: </span>
-                    {Object.entries(disp.arrivedByFaction)
-                      .filter(([, n]) => (n ?? 0) > 0)
-                      .sort(([a], [b]) => a.localeCompare(b))
-                      .map(([faction, n]) => (
+                {disp.arrivedByFaction && Object.keys(disp.arrivedByFaction).length > 0 && (() => {
+                  const entries = Object.entries(disp.arrivedByFaction)
+                    .filter(([, n]) => (n ?? 0) > 0)
+                    .sort(([a], [b]) => a.localeCompare(b));
+                  if (entries.length === 0) return null;
+                  const scale = settlementShare > 0 ? settlementShare : 1;
+                  return (
+                    <div className="text-[10px] mb-1">
+                      <span className="text-text-secondary">Arrived at this settlement: </span>
+                      {entries.map(([faction, n]) => (
                         <span key={faction} className={FACTION_COLORS_SUBTLE[faction] ?? 'text-text-primary'}>
-                          {faction} +{Math.round((n ?? 0) * settlementShare).toLocaleString()}{' '}
+                          {ethnicityOrFactionToNationLabel(faction)} +{Math.round((n ?? 0) * scale).toLocaleString()}{' '}
                         </span>
                       ))}
-                  </div>
-                )}
+                    </div>
+                  );
+                })()}
                 {departedByEthnicity && Object.keys(departedByEthnicity).length > 0 && (
                   <div className="text-[10px] pt-1 border-t border-panel-border/20">
                     <span className="text-text-secondary">Fled from this settlement: </span>
-                    {Object.entries(departedByEthnicity)
-                      .filter(([, n]) => (n ?? 0) > 0)
-                      .sort(([a], [b]) => a.localeCompare(b))
-                      .map(([eth, n]) => (
+                    {(() => {
+                      const totalFled = Object.values(departedByEthnicity).reduce((a, n) => a + (n ?? 0), 0);
+                      const totalOutPlusLost = outSettlement + lostSettlement;
+                      const shouldScale = totalFled > 0 && totalOutPlusLost > 0 && totalOutPlusLost !== totalFled;
+                      if (!shouldScale) {
+                        return Object.entries(departedByEthnicity)
+                          .filter(([, n]) => (n ?? 0) > 0)
+                          .sort(([a], [b]) => a.localeCompare(b))
+                          .map(([eth, n]) => (
+                            <span key={eth} className="text-amber-300/90">
+                              {ethnicityOrFactionToNationLabel(eth)} {(n ?? 0).toLocaleString()}{' '}
+                            </span>
+                          ));
+                      }
+                      const entries = Object.entries(departedByEthnicity)
+                        .filter(([, n]) => (n ?? 0) > 0)
+                        .sort(([a], [b]) => a.localeCompare(b));
+                      const scale = totalOutPlusLost / totalFled;
+                      const scaled = entries.map(([eth, n]) => ({ eth, v: Math.round((n ?? 0) * scale) }));
+                      const sum = scaled.reduce((a, { v }) => a + v, 0);
+                      const diff = totalOutPlusLost - sum;
+                      if (diff !== 0 && scaled.length > 0) {
+                        const idx = diff > 0
+                          ? scaled.reduce((best, cur, i) => (cur.v > (scaled[best]?.v ?? 0) ? i : best), 0)
+                          : scaled.reduce((best, cur, i) => (cur.v > (scaled[best]?.v ?? 0) ? i : best), 0);
+                        scaled[idx].v = Math.max(0, scaled[idx].v + diff);
+                      }
+                      return scaled.map(({ eth, v }) => (
                         <span key={eth} className="text-amber-300/90">
-                          {ethnicityOrFactionToNationLabel(eth)} {(n ?? 0).toLocaleString()}{' '}
+                          {ethnicityOrFactionToNationLabel(eth)} {v.toLocaleString()}{' '}
                         </span>
-                      ))}
+                      ));
+                    })()}
+                  </div>
+                )}
+                {!(departedByEthnicity && Object.keys(departedByEthnicity).length > 0) && (outSettlement + lostSettlement) > 0 && (
+                  <div className="text-[10px] pt-1 border-t border-panel-border/20">
+                    <span className="text-text-secondary">Left this settlement: </span>
+                    <span className="text-amber-300/90">{(outSettlement + lostSettlement).toLocaleString()}</span>
+                    <span className="text-text-secondary/80"> (breakdown by nation not recorded)</span>
                   </div>
                 )}
               </>
@@ -431,7 +519,7 @@ export function SettlementDetailContent({
                 <span className="text-text-secondary truncate">{e.label}</span>
                 <div className="h-1 bg-black/30 rounded overflow-hidden">
                   <div
-                    className="h-full bg-panel-active/40"
+                    className={`h-full ${ethnicBarColor(e.label)}`}
                     style={{ width: `${e.pct}%` }}
                   />
                 </div>
@@ -460,7 +548,7 @@ export function SettlementDetailContent({
                   <span className="text-text-secondary truncate">{e.label}</span>
                   <div className="h-1 bg-black/30 rounded overflow-hidden">
                     <div
-                      className="h-full bg-accent-gold/50"
+                      className={`h-full ${ethnicBarColor(e.label)}`}
                       style={{ width: `${e.pct}%` }}
                     />
                   </div>

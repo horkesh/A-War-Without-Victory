@@ -129,6 +129,7 @@
     "home_mun": "ilidza",
     "home_settlement": "Sarajevo Dio - Ilidža",
     "home_osid": "op:ilidza:rakovica_2",
+    "fallback_osid": "op:hadzici:hadzici",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
     "available_from": 0,

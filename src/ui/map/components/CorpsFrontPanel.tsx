@@ -98,7 +98,6 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const reservePersonnel = reserveFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
   const totalSectorPersonnel = assignedPersonnel + reservePersonnel;
   const reserveRatio = totalSectorPersonnel > 0 ? reservePersonnel / totalSectorPersonnel : 0;
-  const frontlineCoverage = sector.length_edges > 0 ? sector.assigned_brigade_ids.length / sector.length_edges : 0;
   const avgOperationSupply = relatedOperations.length > 0
     ? relatedOperations.reduce((sum, op) => sum + (op.supply_readiness ?? 0), 0) / relatedOperations.length
     : null;
@@ -131,7 +130,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   return (
     <div
       className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
-      style={getPanelRailStyle(railSlot, '24rem')}
+      style={getPanelRailStyle(railSlot, '24rem', 'left')}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">

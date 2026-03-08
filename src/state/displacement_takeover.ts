@@ -291,11 +291,13 @@ function addOneTurnPoolContribution(
 
 /**
  * Returns the initial-wave displacement fraction for a controller/displaced-faction pair.
- * Returns null to skip seeding entirely (deep-rear RBiH->RS OSIDs not touching the front).
+ * Returns null to skip seeding entirely (e.g. deep-rear Serbs in RBiH territory).
  *
  * Canon rules (displacement redesign 2026-03-05):
- *  - HRHB->RS:  1.00 exodus — every HRHB OSID, no front gating
- *  - RBiH->RS:  0.10 in Sarajevo urban; 0.50 front-adjacent only; null for deep rear
+ *  - Serbs in HRHB territory: 1.00 exodus — no front gating.
+ *  - Serbs in RBiH territory: 0.10 in Sarajevo urban; 0.50 front-adjacent only; null for deep rear.
+ *    (Front-adjacency gating applies only to this case — RS is not immune for minorities.)
+ *  - Bosniaks or Croats in RS territory: always INITIAL_DISPLACEMENT_FRACTION (0.70), no front gating.
  *  - All other: INITIAL_DISPLACEMENT_FRACTION (0.70)
  */
 function getInitialDisplacementFraction(
@@ -310,6 +312,7 @@ function getInitialDisplacementFraction(
         if (!isFrontAdjacent) return null;
         return RBIH_SERB_DISPLACEMENT_FRACTION;
     }
+    if (toFaction === 'RS' && (fromFaction === 'RBiH' || fromFaction === 'HRHB')) return INITIAL_DISPLACEMENT_FRACTION;
     return INITIAL_DISPLACEMENT_FRACTION;
 }
 

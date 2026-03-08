@@ -245,7 +245,9 @@ export const warPhases: NamedPhase[] = [
         name: 'update-formation-fatigue',
         run: (context) => {
             // Apply per-turn recovery first (combat fatigue accumulated during attack resolution).
-            applyFatigueRecovery(context.state);
+            // Pass engaged formation IDs so recovery is blocked for brigades that fought this turn.
+            const engagedIds = new Set<string>(context.report.attack_resolution_osid?.engaged_formation_ids ?? []);
+            applyFatigueRecovery(context.state, engagedIds);
             const edges = context.input.settlementEdges;
             if (!edges) return;
             const derivedFrontEdges = computeFrontEdges(context.state, edges);

@@ -63,6 +63,19 @@ export const SECONDARY_PANEL_STYLE: CSSProperties = {
 };
 
 /**
+ * Secondary nested panel anchored to the LEFT.
+ * Appears to the right of LEFT_DETAIL_PANEL_STYLE.
+ */
+export const LEFT_SECONDARY_PANEL_STYLE: CSSProperties = {
+  position: 'absolute',
+  left: '42.5rem', // 18rem (sidebar) + 24rem (primary) + 0.5rem (gap)
+  top: '3.5rem',
+  bottom: '2rem',
+  zIndex: 90,
+  overflow: 'hidden',
+};
+
+/**
  * Right-edge panel — flush to the right side of the screen (e.g. settlement info).
  */
 export const RIGHT_PANEL_STYLE: CSSProperties = {
@@ -125,7 +138,17 @@ export function derivePanelRailState(state: PanelRailSelectionState): PanelRailS
   return { primary: null, secondary: null };
 }
 
-export function getPanelRailStyle(slot: 'primary' | 'secondary', width: string): CSSProperties {
+export function getPanelRailStyle(
+  slot: 'primary' | 'secondary',
+  width: string,
+  anchor: 'left' | 'right' = 'right'
+): CSSProperties {
+  if (anchor === 'left') {
+    return {
+      ...(slot === 'secondary' ? LEFT_SECONDARY_PANEL_STYLE : LEFT_DETAIL_PANEL_STYLE),
+      width,
+    };
+  }
   return {
     ...(slot === 'secondary' ? SECONDARY_PANEL_STYLE : DETAIL_PANEL_STYLE),
     width,

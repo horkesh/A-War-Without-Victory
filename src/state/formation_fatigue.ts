@@ -250,29 +250,34 @@ function getFormationSupplyMultiplier(
 }
 
 /**
- * Fatigue recovery: 1 point every 3 turns (turn % 3 === 0).
- * Recovery is gated on NOT being front-assigned — brigades must rotate off
- * the frontline to recover. This creates strategic tension around rotation.
+ * Fatigue recovery: 1 point every 2 turns (turn % 2 === 0).
+ * Recovery is gated on NOT having been engaged in combat recently.
+ * Front-assigned brigades that are not fighting still recover (garrison duty).
+ * Only brigades that attacked or were attacked this turn are blocked from recovery.
  */
-const FATIGUE_RECOVERY_INTERVAL = 3;
+const FATIGUE_RECOVERY_INTERVAL = 2;
 
-/** Frontline duty fatigue: brigades assigned to fronts accumulate 1.5 fatigue/turn.
- *  At this rate, a permanently frontline brigade hits FATIGUE_MAX (30) in ~20 weeks. */
-const FRONTLINE_FATIGUE_PER_TURN = 1.5;
+/** Frontline duty fatigue: brigades assigned to fronts accumulate 0.5 fatigue/turn.
+ *  Sustained frontline duty is tiring but manageable. Combat fatigue (+2 attacker,
+ *  +1 defender per battle) is the primary fatigue driver, not garrison duty.
+ *  At 0.5/turn with recovery -1 every 2 turns, a non-fighting frontline brigade
+ *  stabilizes around fatigue ~5-10 (manageable). A fighting brigade accumulates
+ *  faster from combat bonuses. */
+const FRONTLINE_FATIGUE_PER_TURN = 0.5;
 
 /**
  * Apply per-turn fatigue recovery and frontline duty fatigue to all active formations.
  * Called once per turn from the war pipeline, regardless of combat activity.
  *
- * Recovery: -1 fatigue every 3 turns, ONLY if not front-assigned (must rotate to recover).
- * Frontline duty: +1.5 fatigue/turn for front-assigned brigades.
+ * Recovery: -1 fatigue every 2 turns, UNLESS the brigade was engaged in combat this turn.
+ * Frontline duty: +0.5 fatigue/turn for front-assigned brigades (garrison tension).
  * Combat fatigue: accumulates separately in attack_resolution_osid.ts (+2 attacker, +1 defender).
  *
- * A permanently frontline brigade accumulates ~1.5/turn with no recovery → hits FATIGUE_MAX
- * (~30) in ~20 weeks. A rotated brigade recovers -1 every 3 turns off the line.
- * This creates strategic tension: rotate exhausted units or lose combat power.
+ * The primary fatigue driver is combat, not frontline assignment. Brigades on the front
+ * that are not fighting slowly accumulate garrison fatigue but also recover, reaching
+ * an equilibrium. Brigades in active combat accumulate faster and need rotation.
  */
-export function applyFatigueRecovery(state: GameState): void {
+export function applyFatigueRecovery(state: GameState, engagedFormationIds?: Set<string>): void {
     const formations = (state as any).formations as Record<string, any> | undefined;
     if (!formations) return;
     const currentTurn = state.meta?.turn ?? 0;
@@ -286,13 +291,14 @@ export function applyFatigueRecovery(state: GameState): void {
         }
         let current = formation.ops.fatigue ?? 0;
         const isFrontAssigned = !!(assignments && assignments[fid]);
+        const wasEngaged = engagedFormationIds ? engagedFormationIds.has(fid) : false;
 
-        // Recovery: -1 every 3 turns, ONLY if not on frontline (must rotate to recover)
-        if (isRecoveryTurn && current > 0 && !isFrontAssigned) {
+        // Recovery: -1 every 2 turns, UNLESS engaged in combat this turn
+        if (isRecoveryTurn && current > 0 && !wasEngaged) {
             current = Math.max(0, current - 1);
         }
 
-        // Frontline duty fatigue: +1.5/turn for front-assigned brigades
+        // Frontline duty fatigue: +0.5/turn for front-assigned brigades
         if (isFrontAssigned) {
             current = Math.min(FATIGUE_MAX, current + FRONTLINE_FATIGUE_PER_TURN);
         }

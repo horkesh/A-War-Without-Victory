@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for warroom status (scene, modals, hotspots, assets). Read first when starting warroom work; update during the session when completing warroom changes.
 
-**Updated:** 2026-03-07
+**Updated:** 2026-03-08
 
 **Relationship:** Warroom is part of the canonical GUI. For overall GUI status use [GUI_MASTER.md](GUI_MASTER.md). This document is the warroom-specific control file — one place to see what exists, what’s proposed, and where to record changes.
 
@@ -46,6 +46,8 @@
 | Need | Go to |
 |------|--------|
 | **Scene plate + asset-generation brief** | [handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_BRIEF.md](handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_BRIEF.md) — single-image warroom, hotspot mapping, modal anchors, generation rules |
+| **Unified room prompt (same room, details change; military feel)** | [handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md](handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md) — everything painted except calendar; prewar/war = same layout, only details differ; map = **geography only (no entity lines)**; **all text in Bosnian**; §6 military-feel ideas |
+| **Alternative: clean room + one sprite** | [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) — generate clean warroom (empty map zone) then one desk-map sprite; composite at runtime; asset names `warroom_clean`, `warroom_sprite_map` (TBD) |
 | **Six nano banana prompts (6 assets)** | [handovers/20260307_WARROOM_SIX_NANO_BANANA_PROMPTS.md](handovers/20260307_WARROOM_SIX_NANO_BANANA_PROMPTS.md) — 2752×1536, prewar+war × RBiH/RS/HRHB, copy-paste blocks and modal placeholders |
 | **Overlay alignment + RBiH symbolism** | [handovers/20260307_WARROOM_OVERLAY_ALIGNMENT_AND_CREST.md](handovers/20260307_WARROOM_OVERLAY_ALIGNMENT_AND_CREST.md) — flat/frontal flag & calendar zones, RBiH-era only on documents |
 | **Warroom implementation (scene, hotspots, identity)** | [implemented/20260307_GUI_COMMAND_EXPERIENCE_EXECUTION.md](implemented/20260307_GUI_COMMAND_EXPERIENCE_EXECUTION.md) — scene-plate contract, physical anchors, faction voice |
@@ -110,6 +112,8 @@ From [nano banana brief](handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_
 
 | Date | Change | Report / reference |
 |------|--------|--------------------|
+| 2026-03-08 | **Clean room + one sprite (alternative):** Pipeline to generate clean warroom (empty map zone) then one desk-map sprite; nano banana workflow; composite at runtime | [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) |
+| 2026-03-08 | **Unified room prompt:** Same room for prewar and war; only details change. Everything painted except calendar (flat surface for engine). §6 military-feel ideas and suggestions for war variant. | [handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md](handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md) |
 | 2026-03-07 | **Six nano banana prompts:** 6 detailed prompts (prewar+war × RBiH/RS/HRHB), 2752×1536, modal placeholders, copy-paste blocks | [handovers/20260307_WARROOM_SIX_NANO_BANANA_PROMPTS.md](handovers/20260307_WARROOM_SIX_NANO_BANANA_PROMPTS.md) |
 | 2026-03-07 | **Overlay alignment + RBiH symbolism:** Flat/frontal flag & calendar zones; RBiH-era only on documents; prompts and brief updated | [handovers/20260307_WARROOM_OVERLAY_ALIGNMENT_AND_CREST.md](handovers/20260307_WARROOM_OVERLAY_ALIGNMENT_AND_CREST.md) |
 | 2026-03-07 | **Peace vs war:** Separate room (6 assets) and modal systems; design decision and gates | This file § Peace vs war |
@@ -120,7 +124,7 @@ From [nano banana brief](handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_
 
 ## Gates / discipline
 
-- **Single scene plate:** Warroom is one image (or one plate per faction); modal regions outlined afterward. No separate desk/wall props, folders, lamps, radios in the scene. See nano banana brief §4.
+- **Single scene plate:** Warroom is one image (or one plate per faction); modal regions outlined afterward. No separate desk/wall props, folders, lamps, radios in the scene. See nano banana brief §4. **Alternative:** Clean room + one composited sprite (e.g. desk map) is documented in [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md); base plate + sprite(s) then allowed.
 - **Overlay alignment:** Flag and calendar are drawn by the engine as flat 2D rectangles. Scene plates must show the flag zone and calendar zone as **flat and frontal** (facing the camera, no perspective tilt) so overlays align. See handovers/20260307_WARROOM_OVERLAY_ALIGNMENT_AND_CREST.md.
 - **Symbolism:** In-scene documents, binders, stamps must use **RBiH-era (1992–1998)** only; no post-1998 BiH crest. See same handover.
 - **Peace vs war:** Separate **room** (6 assets: prewar + war × RBiH, RS, HRHB) and separate **modal systems** (peace set vs war set). Scene plate selection = f(phase, faction); modal routing and content = f(phase). See “Peace vs war: separate systems” above.

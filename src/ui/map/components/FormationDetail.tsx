@@ -4,7 +4,7 @@ import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 import { stagePostureOrderAction } from '../desktop/orderActions';
-import { getPanelRailStyle, SECONDARY_PANEL_STYLE } from './panelRail';
+import { getPanelRailStyle } from './panelRail';
 import { turnToDateString, formatCombatOutcome, formatPosture, toTitleCase } from '../utils/formatters';
 import { getArmyCrest } from '../utils/factionAssets';
 import { getFormationCommander } from '../utils/officerUtils';
@@ -56,7 +56,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
     return (
       <div
         className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
-        style={getPanelRailStyle(railSlot, '24rem')}
+        style={getPanelRailStyle(railSlot, '24rem', 'left')}
       >
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
         <div className="p-4 space-y-4">
@@ -83,7 +83,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
   return (
     <div
       className="panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl overflow-hidden"
-      style={getPanelRailStyle(railSlot, '24rem')}
+      style={getPanelRailStyle(railSlot, '24rem', 'left')}
     >
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
         <div className="flex items-center gap-2">
@@ -580,7 +580,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
       {formation?.kind === 'brigade' && ordersPanelOpen && (
         <div
           className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl overflow-hidden"
-          style={{ ...SECONDARY_PANEL_STYLE, width: '22rem' }}
+          style={getPanelRailStyle('secondary', '22rem', 'left')}
         >
           <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
             <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">

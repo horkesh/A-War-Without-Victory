@@ -8,7 +8,9 @@
 
 ## 1. Summary
 
-Small autonomous paramilitary formations spawn when rear enemy pockets are detected, march to them over 2 turns, capture undefended territory, and dissolve. Casualties inflicted and suffered count toward faction totals. Civilian casualties are recorded as war crimes against the civilian population of the captured OSID.
+Small autonomous paramilitary formations spawn when rear enemy pockets are detected, capture undefended territory instantly (MARCH_TURNS=0 — pockets are already surrounded), and dissolve. Casualties inflicted and suffered count toward faction totals. Civilian casualties are recorded as war crimes against the civilian population of the captured OSID.
+
+**2026-03-08 update:** Pocket detection upgraded to cluster BFS (1-3 connected same-controller enemy OSIDs where ALL external neighbors are faction-controlled). March time changed from 2 turns to instant capture. Civilian casualty initialization bug fixed (`civilian_casualties` object was optional, silently dropped). Bot corps AI now defers to paramilitary targets.
 
 Active mainly weeks 0-20, fading out as the war professionalizes. Faction-differentiated spawn rates reflect historical organizational penetration: RS (Arkan's Tigers, White Eagles) >> HRHB (HOS, Croatian volunteers) >> RBiH (Patriotska Liga, Green Berets).
 
@@ -23,9 +25,9 @@ Player choice: bot factions auto-approve; player faction gets a batch decision p
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
 | Formation kind vs tag/class | New `'paramilitary'` FormationKind | Clean exclusion from reinforcement, bot AI, and formation spawn; lifecycle fully separate from brigades |
-| Spawn mechanism | Graph analysis detects enemy pockets (OSIDs where ALL neighbors are faction-controlled) | Deterministic, no randomness; uses existing OSID adjacency graph |
+| Spawn mechanism | Graph analysis detects enemy pocket clusters (1-3 connected same-controller OSIDs where ALL external neighbors are faction-controlled) via BFS | Deterministic, no randomness; uses existing OSID adjacency graph; cluster detection catches multi-OSID pockets like Banja Luka dragocaj+potkozarje_3 |
 | Spawn probability | Deterministic hash (char code sum) against faction-specific rate | Stable across reruns; faction-differentiated |
-| March time | 2 turns (PARAMILITARY_MARCH_TURNS) | Represents march + mop-up; gives player/opponent time to react |
+| March time | 0 turns — instant capture (PARAMILITARY_MARCH_TURNS=0) | Rear pockets are already surrounded; instant capture prevents bot brigade AI from racing paramilitaries to the target |
 | Casualty model | Standard KIA/WIA/MIA split (0.30/0.55/0.15) matching combat system | Consistent with attack_resolution_osid.ts and frontline_attrition.ts |
 | Civilian casualties | 2% of avg OSID population (5000) = 100 per capture | War crimes model; recorded against the losing faction's civilian ledger |
 | Defended pocket handling | 3x casualty rate, then dissolve (no capture) | Paramilitary forces cannot take defended positions |
@@ -42,7 +44,7 @@ All constants in `src/state/formation_constants.ts`:
 | Constant | Value | Purpose |
 |----------|-------|---------|
 | PARAMILITARY_UNIT_SIZE | 150 | Personnel per paramilitary unit |
-| PARAMILITARY_MARCH_TURNS | 2 | Turns to reach target |
+| PARAMILITARY_MARCH_TURNS | 0 | Instant capture (rear pockets already surrounded) |
 | PARAMILITARY_FADE_WEEK | 20 | Week after which no new paramilitaries spawn |
 | PARAMILITARY_SPAWN_RATE (RS) | 0.85 | High — SDS/JNA paramilitary networks |
 | PARAMILITARY_SPAWN_RATE (HRHB) | 0.55 | Moderate — HOS, Croatian volunteers |
@@ -105,14 +107,17 @@ In `src/state/game_state.ts`:
 ## 5. Pocket detection algorithm
 
 1. Build OSID adjacency graph from edge records
-2. For each faction, call `analyzeFactionGraph()` which returns `enemy_pockets`: enemy-controlled OSIDs where ALL adjacent OSIDs are faction-controlled
-3. For each pocket OSID:
+2. For each faction, call `analyzeFactionGraph()` which returns `enemy_pockets`: enemy-controlled OSID clusters (1-3 connected same-controller OSIDs where ALL external neighbors are faction-controlled)
+3. Cluster detection uses BFS: starting from each enemy neighbor of a controlled OSID, expand through same-controller enemies up to MAX_POCKET_CLUSTER=3. Only `op:`-prefixed nodes are considered (filtering out canonical `S:`-prefixed nodes that have no `political_controllers` entry). Scans ALL controlled OSIDs (not just front OSIDs) because pockets are typically deep in the interior.
+4. For each pocket OSID in the cluster:
    - Skip if already targeted by an existing paramilitary or pending request
    - Skip if defended by a non-paramilitary formation from a different faction
    - Apply deterministic hash: `deterministicHash(osid, turn) / 100` against faction spawn rate
    - If below threshold: spawn (bot) or add to pending requests (player)
 
 The deterministic hash uses char code sum of the OSID string mixed with the turn number (`turn * 31`, then `hash * 37 + charCode` per character, mod 100). This produces stable, reproducible spawn decisions across reruns.
+
+**Bot corps AI deference:** When a paramilitary unit is dispatched to a pocket OSID, the bot corps AI excludes that OSID from opportunistic brigade targeting (via `paramilitaryTargets` set built from active paramilitary formations). This prevents regular brigades from racing paramilitaries to undefended targets.
 
 ---
 

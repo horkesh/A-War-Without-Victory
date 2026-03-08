@@ -71,8 +71,8 @@
    Do instead: Test fixtures flowing through `runTurn` or scenario runners must set `meta.phase` (`peace`/`war`) + referendum fields. Missing phase hard-fails.
 9. **[2026-02-22] Pipeline step no-ops for missing data**
    Do instead: When operational data unavailable, log and skip OSID steps safely rather than crashing.
-10. **[2026-03-07] Paramilitary rear pocket cleanup: `paramilitary_sweep.ts`**
-    Do instead: Autonomous paramilitary units spawn when rear enemy pockets detected (w0-20), march 2 turns, capture undefended OSIDs, dissolve. Faction rates: RS=0.85, HRHB=0.55, RBiH=0.30. Casualties (inflicted+suffered) count in casualty_ledger. Pipeline: `paramilitary-detect` + `paramilitary-advance` after `partition-corps-front-sectors`. Player gets batch decision panel via `pending_paramilitary_requests`; bot auto-approves. `FormationKind='paramilitary'` excluded from reinforcement/bot AI.
+10. **[2026-03-08] Paramilitary rear pocket cleanup: `paramilitary_sweep.ts`**
+    Do instead: Autonomous paramilitary units spawn when rear enemy pocket clusters detected (1-3 connected same-controller OSIDs, ALL external neighbors faction-controlled, BFS cluster detection, `op:` prefix filtering). Instant capture (MARCH_TURNS=0). Active w0-20. Faction rates: RS=0.85, HRHB=0.55, RBiH=0.30. Casualties (inflicted+suffered) count in casualty_ledger; civilian casualties init via `??=`. Bot corps AI defers (excludes paramilitary targets from opportunistic targeting). Pipeline: `paramilitary-detect` + `paramilitary-advance` after `partition-corps-front-sectors`. Player: `pending_paramilitary_requests`; bot auto-approves. `FormationKind='paramilitary'` excluded from reinforcement/bot AI.
 
 ## Bot AI & Combat
 1. **[2026-03-06] RS stays offensive permanently — organic tempo decay (n159 audit)**
@@ -212,12 +212,12 @@
    Do instead: ZoC deleted. Movement via `brigade_movement_orders.ts` / `apply-brigade-movement`. Defense via `local_front_defense.ts` density. AoR legacy also fully removed (R1–R5, 2026-03-04) — no dead AoR code remains.
 
 ## Calibration
-1. **[2026-03-08] n304 ATH=93.8% — fatigue+equipment fix (up from n290=88.1%)**
-   Do instead: Three critical fixes: (1) Fatigue `Number.isInteger` check was resetting fractional fatigue (1.5/turn) to 0 — replaced with `typeof` check. (2) Equipment losses added to OSID attack resolution path (was completely missing — only dead legacy SID path had it). (3) Frontline attrition BASE_ATTRITION_RATE raised 0.003→0.005. Results: 121.8k total casualties (31.4k KIA), RS lost 165 tanks + 230 artillery. RS delta=+1 (near-perfect). Equipment attrition naturally limits RS offensives → doctrinal arcs emerge. Troop strength: RBiH=103k (target 120k), RS=95k (target 103k), HRHB=30k (target 42k — needs attention).
+1. **[2026-03-08] n326 = 85.8% — cluster pockets + paramilitary fixes (down from n304=93.8%)**
+   Do instead: Cluster BFS pocket detection (1-3 enemy OSIDs), instant paramilitary capture (MARCH_TURNS=0), civilian casualty `??=` fix, bot AI paramilitary deference. RS delta −60 — RS aggression recalibration needed. Previous ATH: n304=93.8% (fatigue+equipment fix). Key: rear pocket consolidation re-added (cluster-aware, post-w20). Paramilitaries handle w0-20.
 2. **[2026-03-07] HRHB-init cells CAN be fixed by RS overrides — add in isolated clusters only**
    Do instead: Cells like banja_luka:dragocaj, kotor_varos x4, mrkonjic_grad:baljvine_2, skender_vakuf:donji_koricani start HRHB but painting=RS. Adding RS overrides for these IS effective (n238: KRAJINA 89.4%→97.8%). RULE: add HRHB cells by isolated geographic cluster (KRAJINA only, then POSAVINA_NE only, etc.) — adding 10+ HRHB cells across multiple regions at once (n237) caused POSAVINA_NE −9.9pp and SARAJEVO −9.3pp cascade.
-3. **[2026-03-07] Consolidation auto-flip DELETED; avoided_osids only redirects combat**
-   Do instead: `consolidate_rear_pockets.ts` and `consolidation_flips.ts` fully deleted. Surrounded cells no longer auto-flip — they must be taken by combat. This was the root cause of Goražde/Srebrenica/Žepa being swallowed. avoided_osids only redirects bot targeting, not consolidation. Remaining mismatches must be solved by combat balance and enclave mechanics.
+3. **[2026-03-08] Rear pocket consolidation: cluster-aware version RE-ADDED**
+   Do instead: `rear_pocket_consolidation.ts` re-added with cluster-aware BFS detection (1-3 connected same-controller enemy OSIDs, ALL external neighbors faction-controlled). Post-week-20 auto-flip for surrounded enemy clusters without defending brigades. Original `consolidation_flips.ts` remains deleted — the new version is structural replacement. Paramilitary sweep handles w0-20; rear pocket consolidation handles w20+.
 4. **[2026-03-07] Pre-planned operation target chains drive regional match rate (n218)**
    Do instead: 84.2% plateau caused by Operation Drina missing djulici/drinjaca/krizevici/paljevici/donja_kamenica (Zvornik) and Operation Koridor missing Brcko corridor (brcko:brcko/donji_rahic/krepsic/skakava_donja). Fix is data change to `src/sim/combat/pre_planned_operations.ts` + scenario anchor — not engine code. Municipality-level anchors for pockets (bihac) give false failures; use OSID-level anchor `op:bihac:bihac_2` instead. Post-H clean run `n248` confirms the remaining notable misses are still `srebrenica` municipality and `op:brcko:brka_2`, which fits this same pre-planned-op/scenario-anchor bucket rather than a combat-loop bug.
    Load-bearing overrides: turbe_2 is RS over-capture but enables Donji Vakuf consolidation (3 correct cells) — adding to avoided_osids causes net −3pp loss (n463). Kalesija seher_2/gojcin_2 overrides redirect VRS → kupres:kupres_2 fix (n466). Test each override block in isolation.
@@ -236,5 +236,5 @@
 ## Engine Runtime Patterns
 1. **[2026-03-05] Takeover displacement off-by-one FIXED**
    Do instead: `processDisplacementTakeover` Section 0 uses `currentTurn === warStartTurn + 1` (not warStartTurn). `runTurn()` increments turn BEFORE phases — first war turn = warStartTurn+1. Fixed in `displacement_takeover.ts`.
-2. **[2026-03-07] Phase I/II terminology fully removed — Peace/War only**
-   Do instead: No `PhaseI`, `PhaseII`, `phase_i_`, `phase_ii_` identifiers anywhere. Consolidation flips deleted (`consolidation_flips.ts`, `consolidate_rear_pockets.ts`). Pipeline steps use clean names. Report keys use clean names. Canon v0.6: Peace and War phases only.
+2. **[2026-03-08] Phase I/II terminology fully removed — Peace/War only**
+   Do instead: No `PhaseI`, `PhaseII`, `phase_i_`, `phase_ii_` identifiers anywhere. Original `consolidation_flips.ts` deleted; replaced by cluster-aware `rear_pocket_consolidation.ts` (post-w20 auto-flip of surrounded 1-3 OSID clusters without defenders). Pipeline steps use clean names. Report keys use clean names. Canon v0.6: Peace and War phases only.

@@ -53,14 +53,14 @@ function getRBiHCohesionFloor(turn: number): number {
  * Models VRS professional JNA cadre sustaining unit cohesion under attrition.
  *
  * Turn 0:  35 (JNA inherited professionalism — trained NCO/officer corps)
- * Turn 20: 30 (first-year attrition, officer losses start)
- * Turn 40: 25 (war fatigue, partial mobilization strain)
- * Turn 60: 20 (deep fatigue, reorganization)
+ * Turn 40: 35 (sustained professionalism through first year)
+ * Turn 60: 25 (war fatigue, partial mobilization strain)
+ * Turn 80: 20 (deep fatigue, reorganization)
  */
 function getRSCohesionFloor(turn: number): number {
     if (turn <= 0) return 35;
-    if (turn >= 60) return 20;
-    const keyframes: [number, number][] = [[0, 35], [20, 30], [40, 25], [60, 20]];
+    if (turn >= 80) return 20;
+    const keyframes: [number, number][] = [[0, 35], [40, 35], [60, 25], [80, 20]];
     for (let i = 0; i < keyframes.length - 1; i++) {
         const [t0, v0] = keyframes[i]!;
         const [t1, v1] = keyframes[i + 1]!;

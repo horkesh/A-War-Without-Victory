@@ -417,6 +417,10 @@ export interface LoadedGameState {
     }>;
     /** Per-OSID per-faction departed counts (from displacement_event_log). */
     departedByOsid?: Record<string, Partial<Record<string, number>>>;
+    /** Per-mun per-faction departed totals (for settlement fallback when OSID has no events). */
+    departedByMun?: Record<string, Record<string, number>>;
+    /** Per-OSID displacement totals from event log (exact out/lost/in so numbers add up). */
+    displacementByOsid?: Record<string, { out: number; lost: number; in: number }>;
     fogOfWar?: FogOfWarView;
     movementOrdersSettlement?: MovementOrderSettlementView[];
     repositionOrders?: RepositionOrderView[];

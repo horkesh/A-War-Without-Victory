@@ -93,19 +93,49 @@ test('RS-controlled settlement with Bosniaks/Croats displaces 100% immediately',
     assert.ok(report.displaced_total >= 700, 'Tuzla has 750+30+40 Bosniaks/Croats/other; should displace ~100%');
 });
 
-test('skips settlements in municipalities with active takeover timer', () => {
+test('skips settlements that have an active takeover timer (per-OSID)', () => {
     const singleSettlement = new Map<string, SettlementRecord>([
         ['op:tuzla:1', { sid: 'op:tuzla:1', source_id: '1', mun_code: 'tuzla', mun: 'Tuzla', mun1990_id: 'tuzla' }]
     ]);
     const state = baseState();
     state.political_controllers = { 'op:tuzla:1': 'RBiH' };
     state.factions.find((f) => f.id === 'RBiH')!.areasOfResponsibility.push('op:tuzla:1');
+    // Timer key format: osid|from_faction. Only this OSID is skipped, not the whole mun.
     state.hostile_takeover_timers = {
-        tuzla: { mun_id: 'tuzla', from_faction: 'RS', to_faction: 'RBiH', started_turn: 3 }
+        'op:tuzla:1|RS': { mun_id: 'tuzla', from_faction: 'RS', to_faction: 'RBiH', started_turn: 3 }
     };
 
     const report = processMinorityFlight(state, singleSettlement, pop1991, popBySid);
-    assert.strictEqual(report.settlements_displaced, 0, 'should skip muns with active timer');
+    assert.strictEqual(report.settlements_displaced, 0, 'should skip OSIDs with active timer');
+});
+
+test('RS-from-start settlement in same mun as timer still gets minority flight (e.g. Kozarska Dubica)', () => {
+    const dubicaSettlements = new Map<string, SettlementRecord>([
+        ['op:bosanska_dubica:kozarska_dubica', { sid: 'op:bosanska_dubica:kozarska_dubica', source_id: '1', mun_code: 'bosanska_dubica', mun: 'Kozarska Dubica', mun1990_id: 'bosanska_dubica' }],
+        ['op:bosanska_dubica:aginci', { sid: 'op:bosanska_dubica:aginci', source_id: '2', mun_code: 'bosanska_dubica', mun: 'Aginci', mun1990_id: 'bosanska_dubica' }]
+    ]);
+    const pop1991Dubica: MunicipalityPopulation1991Map = {
+        ...pop1991,
+        bosanska_dubica: { total: 31606, bosniak: 6440, serb: 21728, croat: 2000, other: 1438 }
+    };
+    const popBySidDubica: Record<string, number> = {
+        'op:bosanska_dubica:kozarska_dubica': 15000,
+        'op:bosanska_dubica:aginci': 8000
+    };
+    const state = baseState();
+    state.political_controllers = { 'op:bosanska_dubica:kozarska_dubica': 'RS', 'op:bosanska_dubica:aginci': 'RS' };
+    state.factions.find((f) => f.id === 'RS')!.areasOfResponsibility.push('op:bosanska_dubica:kozarska_dubica', 'op:bosanska_dubica:aginci');
+    state.displacement_state = {
+        bosanska_dubica: { mun_id: 'bosanska_dubica', original_population: 31606, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
+    };
+    // Only aginci has a timer (flipped); kozarska_dubica was RS from start — must still get minority flight.
+    state.hostile_takeover_timers = {
+        'op:bosanska_dubica:aginci|RBiH': { mun_id: 'bosanska_dubica', from_faction: 'RBiH', to_faction: 'RS', started_turn: 2 }
+    };
+
+    const report = processMinorityFlight(state, dubicaSettlements, pop1991Dubica, popBySidDubica);
+    assert.ok(report.settlements_displaced >= 1, 'Kozarska Dubica (no timer) should get minority flight');
+    assert.ok(report.displaced_total > 0, 'Bosniaks in RS-controlled Kozarska Dubica should be displaced');
 });
 
 test('records civilian_casualties by faction (ethnicity)', () => {

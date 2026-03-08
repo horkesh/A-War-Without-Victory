@@ -12,9 +12,16 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { getEnclaveCohesionRecovery } from './enclave_resilience.js';
 import { getFactionCohesionCeiling, getFactionCohesionFloor } from './faction_progression.js';
 
-const EXHAUSTION_COHESION_THRESHOLD = 0.8;
+/** Faction-specific exhaustion thresholds. RS had JNA logistics infrastructure —
+ *  organizational strain sets in later (higher threshold). RBiH and HRHB are ad-hoc
+ *  forces that feel exhaustion earlier. */
+const EXHAUSTION_COHESION_THRESHOLD: Record<string, number> = {
+    RS: 0.92,    // JNA logistics: cohesion strain only at very high commitment
+    RBiH: 0.80,  // Ad-hoc militia: strain earlier
+    HRHB: 0.85   // Croatian cadre support: moderate resilience
+};
 const EXHAUSTION_COHESION_PENALTY = -0.5;
-const CRITICAL_EXHAUSTION_THRESHOLD = 0.95;
+const CRITICAL_EXHAUSTION_THRESHOLD = 0.97;
 const CRITICAL_EXHAUSTION_PENALTY = -1.5;
 
 /** Compute faction exhaustion ratio: committed / (committed + available). Deterministic. */
@@ -119,8 +126,9 @@ export function runCohesionDrift(
     const exhaustionPenaltyByFaction: Record<string, number> = {};
     for (const fid of factionIds) {
         const ratio = getFactionExhaustionRatio(state, fid);
+        const threshold = EXHAUSTION_COHESION_THRESHOLD[fid] ?? 0.80;
         if (ratio >= CRITICAL_EXHAUSTION_THRESHOLD) exhaustionPenaltyByFaction[fid] = CRITICAL_EXHAUSTION_PENALTY;
-        else if (ratio >= EXHAUSTION_COHESION_THRESHOLD) exhaustionPenaltyByFaction[fid] = EXHAUSTION_COHESION_PENALTY;
+        else if (ratio >= threshold) exhaustionPenaltyByFaction[fid] = EXHAUSTION_COHESION_PENALTY;
     }
     if (Object.keys(exhaustionPenaltyByFaction).length > 0) report.exhaustion_penalties_applied = exhaustionPenaltyByFaction;
 

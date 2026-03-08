@@ -179,15 +179,15 @@ export function processMinorityFlight(
                 : 1;
 
     const timerMap = state.hostile_takeover_timers ?? {};
-    const campMap = state.displacement_camp_state ?? {};
-    // Timer keys are now OSIDs (op:mun:slug); extract municipality from each.
-    const munsInTakeoverOrCamp = new Set<MunicipalityId>();
+    // Skip minority flight only for settlements that have their own takeover timer.
+    // (Takeover runs per-OSID for flipped settlements; RS-from-start settlements like Kozarska Dubica
+    // never get a timer, so they must be handled by minority flight.)
+    const osidsWithTakeoverTimer = new Set<string>();
     for (const key of Object.keys(timerMap)) {
-        const timer = timerMap[key];
-        if (timer?.mun_id) munsInTakeoverOrCamp.add(timer.mun_id);
-    }
-    for (const key of Object.keys(campMap)) {
-        munsInTakeoverOrCamp.add(key as MunicipalityId);
+        if (!timerMap[key]) continue;
+        const pipeIdx = key.indexOf('|');
+        const osid = pipeIdx >= 0 ? key.substring(0, pipeIdx) : key;
+        if (osid.startsWith('op:')) osidsWithTakeoverTimer.add(osid);
     }
 
     if (!state.minority_flight_state) state.minority_flight_state = {};
@@ -220,7 +220,7 @@ export function processMinorityFlight(
 
         report.settlements_evaluated += 1;
 
-        if (munsInTakeoverOrCamp.has(munId)) continue;
+        if (osidsWithTakeoverTimer.has(sid)) continue;
 
         const controller = munDominantController.get(munId) ?? null;
         if (!controller || (controller !== 'RBiH' && controller !== 'HRHB' && controller !== 'RS')) continue;
@@ -353,6 +353,50 @@ export function processMinorityFlight(
         if (routedRBiH > 0) addToCamp(state, munId, 'RBiH', routedRBiH, report);
         if (routedHRHB > 0) addToCamp(state, munId, 'HRHB', routedHRHB, report);
         if (routedRS > 0) addToCamp(state, munId, 'RS', routedRS, report);
+
+        if (!state.displacement_event_log) state.displacement_event_log = [];
+        const displacedRBiH = routedRBiH + killedRBiH + fleeRBiH;
+        const displacedHRHB = routedHRHB + killedHRHB + fleeHRHB;
+        const displacedRS = routedRS + killedRS + fleeRS;
+        if (displacedRBiH > 0) {
+            state.displacement_event_log.push({
+                turn: currentTurn,
+                origin_mun: munId,
+                origin_osid: sid,
+                dest_mun: munId,
+                ethnicity: 'RBiH',
+                displaced: displacedRBiH,
+                killed: killedRBiH,
+                fled_abroad: fleeRBiH,
+                settled: routedRBiH,
+            });
+        }
+        if (displacedHRHB > 0) {
+            state.displacement_event_log.push({
+                turn: currentTurn,
+                origin_mun: munId,
+                origin_osid: sid,
+                dest_mun: munId,
+                ethnicity: 'HRHB',
+                displaced: displacedHRHB,
+                killed: killedHRHB,
+                fled_abroad: fleeHRHB,
+                settled: routedHRHB,
+            });
+        }
+        if (displacedRS > 0) {
+            state.displacement_event_log.push({
+                turn: currentTurn,
+                origin_mun: munId,
+                origin_osid: sid,
+                dest_mun: munId,
+                ethnicity: 'RS',
+                displaced: displacedRS,
+                killed: killedRS,
+                fled_abroad: fleeRS,
+                settled: routedRS,
+            });
+        }
     }
 
     return report;

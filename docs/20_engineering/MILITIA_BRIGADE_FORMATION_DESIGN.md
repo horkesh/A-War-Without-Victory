@@ -125,7 +125,7 @@ Paramilitary formations (`kind: 'paramilitary'`) are a separate formation kind f
 - **Not pool-sourced:** Spawned directly by graph analysis when rear enemy pockets detected, not from militia pools
 - **Not reinforceable:** `isEligibleForReinforcement()` returns false
 - **Not bot-AI-controlled:** No `corps_id`; bot corps/brigade AI skips them
-- **Short lifecycle:** Spawn → march (2 turns) → capture/dissolve (set to `inactive` + `disbanded`)
+- **Short lifecycle:** Spawn → instant capture (MARCH_TURNS=0, rear pockets already surrounded) → dissolve (set to `inactive` + `disbanded`)
 - **Low combat value:** Cohesion 20 (vs brigade 45-72); cannot hold positions or provide garrison defense
 - **Faction-differentiated:** RS 0.85, HRHB 0.55, RBiH 0.30 spawn probability (organizational penetration)
 
@@ -134,7 +134,7 @@ Paramilitary formations (`kind: 'paramilitary'`) are a separate formation kind f
 | Constant | Value | Purpose |
 |----------|-------|---------|
 | PARAMILITARY_UNIT_SIZE | 150 | Personnel per unit |
-| PARAMILITARY_MARCH_TURNS | 2 | Turns to reach target |
+| PARAMILITARY_MARCH_TURNS | 0 | Instant capture (rear pockets already surrounded) |
 | PARAMILITARY_FADE_WEEK | 20 | Cutoff week (war professionalizes) |
 | PARAMILITARY_SPAWN_RATE | RS=0.85, HRHB=0.55, RBiH=0.30 | Per-faction spawn probability |
 | PARAMILITARY_CASUALTY_RATE | 0.08 | Military casualty fraction per sweep |

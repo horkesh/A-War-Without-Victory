@@ -62,7 +62,7 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
   return (
     <div
       className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
-      style={getPanelRailStyle(railSlot, '20rem')}
+      style={getPanelRailStyle(railSlot, '20rem', 'left')}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">

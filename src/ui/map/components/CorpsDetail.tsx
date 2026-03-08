@@ -8,7 +8,7 @@ import { FACTION_COLORS } from '../utils/theme';
 import { getOperationId } from '../utils/operations';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { useIPC } from '../desktop/useIPC';
-import { getPanelRailStyle, SECONDARY_PANEL_STYLE } from './panelRail';
+import { getPanelRailStyle } from './panelRail';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
 import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
@@ -59,7 +59,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
     return (
       <div
         className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
-        style={getPanelRailStyle(railSlot, '24rem')}
+        style={getPanelRailStyle(railSlot, '24rem', 'left')}
       >
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
         <div className="p-4 space-y-4">
@@ -114,7 +114,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   return (
     <div
       className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
-      style={getPanelRailStyle(railSlot, '24rem')}
+      style={getPanelRailStyle(railSlot, '24rem', 'left')}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
@@ -417,7 +417,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
       {ordersPanelOpen && (
         <div
           className="panel-slide-in-right flex flex-col bg-panel-bg/96 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
-          style={SECONDARY_PANEL_STYLE}
+          style={getPanelRailStyle('secondary', 'w-64', 'left')}
         >
           <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
             <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">

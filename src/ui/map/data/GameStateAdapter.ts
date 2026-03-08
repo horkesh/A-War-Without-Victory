@@ -1113,18 +1113,42 @@ export function parseGameState(json: unknown): LoadedGameState {
         }
     }
 
-    // Scan displacement_event_log for per-OSID per-faction departures
+    // Scan displacement_event_log for per-OSID per-faction departures and per-mun totals (for fallback when OSID has no events)
     const departedByOsid: LoadedGameState['departedByOsid'] = {};
+    const departedByMun: LoadedGameState['departedByMun'] = {};
+    const displacementByOsid: LoadedGameState['displacementByOsid'] = {};
     const rawEventLog = (state as Record<string, unknown>).displacement_event_log;
     if (Array.isArray(rawEventLog)) {
         for (const evt of rawEventLog as Array<Record<string, unknown>>) {
             const displaced = finiteNumber(evt.displaced);
+            const killed = finiteNumber(evt.killed);
+            const fledAbroad = finiteNumber(evt.fled_abroad);
+            const settled = finiteNumber(evt.settled);
             const originOsid = typeof evt.origin_osid === 'string' ? evt.origin_osid : '';
+            const destOsid = typeof evt.dest_osid === 'string' ? evt.dest_osid : '';
+            const originMun = typeof evt.origin_mun === 'string' ? evt.origin_mun : '';
             const ethnicity = typeof evt.ethnicity === 'string' ? evt.ethnicity : '';
-            if (displaced > 0 && originOsid && ethnicity) {
-                if (!departedByOsid[originOsid]) departedByOsid[originOsid] = {};
-                departedByOsid[originOsid][ethnicity] =
-                    (departedByOsid[originOsid][ethnicity] ?? 0) + displaced;
+            if (originOsid) {
+                if (!displacementByOsid[originOsid]) displacementByOsid[originOsid] = { out: 0, lost: 0, in: 0 };
+                const outDelta = displaced + killed + fledAbroad;
+                displacementByOsid[originOsid].out += outDelta;
+                displacementByOsid[originOsid].lost += killed + fledAbroad;
+            }
+            if (destOsid) {
+                if (!displacementByOsid[destOsid]) displacementByOsid[destOsid] = { out: 0, lost: 0, in: 0 };
+                displacementByOsid[destOsid].in += settled;
+            }
+            if (displaced > 0 && ethnicity) {
+                if (originOsid) {
+                    if (!departedByOsid[originOsid]) departedByOsid[originOsid] = {};
+                    departedByOsid[originOsid][ethnicity] =
+                        (departedByOsid[originOsid][ethnicity] ?? 0) + displaced;
+                }
+                if (originMun) {
+                    if (!departedByMun[originMun]) departedByMun[originMun] = {};
+                    departedByMun[originMun][ethnicity] =
+                        (departedByMun[originMun][ethnicity] ?? 0) + displaced;
+                }
             }
         }
     }
@@ -1365,6 +1389,8 @@ export function parseGameState(json: unknown): LoadedGameState {
         assignableFrontSegments, frontPressureByEdge,
         displacementByMun: Object.keys(displacementByMun).length > 0 ? displacementByMun : undefined,
         departedByOsid: departedByOsid && Object.keys(departedByOsid).length > 0 ? departedByOsid : undefined,
+        departedByMun: departedByMun && Object.keys(departedByMun).length > 0 ? departedByMun : undefined,
+        displacementByOsid: Object.keys(displacementByOsid).length > 0 ? displacementByOsid : undefined,
         fogOfWar,
         movementOrdersSettlement: movementOrdersSettlement.length > 0 ? movementOrdersSettlement : undefined,
         repositionOrders: repositionOrders.length > 0 ? repositionOrders : undefined,

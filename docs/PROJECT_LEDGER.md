@@ -1,11 +1,30 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-07
+**Last Updated:** 2026-03-08
 **Status:** Post-MVP — War calibration, GUI rework, Phase M complete
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
+
+## [2026-03-08] N326 Cluster Pocket Detection + Paramilitary Fixes — 85.8%
+
+### Summary
+- **Cluster pocket detection**: Upgraded pocket detection from single-OSID to BFS cluster detection (1-3 connected same-controller enemy OSIDs where ALL external neighbors are faction-controlled). Fixes: Banja Luka HRHB cluster (dragocaj + potkozarje_3) now correctly detected and swept by RS paramilitaries.
+- **Three cascading paramilitary bugs fixed**:
+  1. **S: nodes breaking detection**: `operational_contact_graph.json` has 315 canonical SID nodes (`S:`-prefixed) with no `political_controllers` entry — caused `allSurrounded` to always be false. Fix: filter to `op:` nodes in BFS and neighbor checks.
+  2. **Front-only scanning missing interior pockets**: Original code iterated `front_osids` enemy neighbors only. Pockets deep in rear territory aren't adjacent to any front OSID. Fix: iterate ALL controlled OSIDs.
+  3. **Bot brigade racing paramilitaries**: Brigade AI opportunistically grabbed undefended adjacent targets before paramilitaries could march (MARCH_TURNS=2). Fix: set `PARAMILITARY_MARCH_TURNS=0` (instant capture) + bot corps AI excludes paramilitary target OSIDs.
+- **Civilian casualty initialization fix**: `state.civilian_casualties` was optional — paramilitary code silently dropped civilian casualties when object didn't exist. Fix: `??=` initialization. Now properly tracked: RBiH +1,800 killed, HRHB +500, RS +500.
+- **Rear pocket consolidation re-added**: Cluster-aware `rear_pocket_consolidation.ts` for post-week-20 auto-flip of surrounded enemy clusters without defending brigades.
+- **ATH**: 85.8% area-weighted (down from n304's 93.8% — RS aggression recalibration needed, RS delta −60).
+
+### Changes
+- `src/sim/combat/osid_graph_analysis.ts` — Cluster BFS pocket detection, `op:` filtering, all-OSID scanning
+- `src/sim/combat/paramilitary_sweep.ts` — Civilian casualty `??=` fix
+- `src/sim/combat/bot_corps_ai.ts` — Paramilitary target exclusion set, cluster-aware rear pocket detection
+- `src/sim/combat/rear_pocket_consolidation.ts` — Complete rewrite with cluster BFS detection
+- `src/state/formation_constants.ts` — PARAMILITARY_MARCH_TURNS 2→0
 
 ## [2026-03-08] N304 Fatigue + Equipment Fix — ATH 93.8%
 
@@ -18,6 +37,19 @@ This is the single authoritative project ledger. All context, decisions, and sta
 - **Casualties**: 121.8k total, 31.4k KIA (historical first year ~25-30k KIA). Equipment losses now tracked: RS 165T/230A.
 - **Troop strength**: RBiH=102.8k (target 120k), RS=95.4k (target 102.6k), HRHB=30.4k (target 41.5k). HRHB needs attention (supply at 0, lower troop replenishment).
 - **Root cause analysis**: The legacy `resolveBattleOrders()` had `defenderFormation = undefined` and `defenderBrigadeId = undefined` hardcoded (comment: "legacy SID path: militia-only, no brigade_aor lookup"). This meant ALL battles in that path treated every target as undefended militia, producing zero equipment losses and trivial attacker casualties (2 wounded per battle). The real OSID resolution path had proper defender brigade lookup but no equipment tracking.
+
+## [2026-03-08] Kozarska Dubica minority flight — per-OSID skip
+
+### Summary
+- **Bug**: Bosniaks in Kozarska Dubica (op:bosanska_dubica:kozarska_dubica) were not being expelled under RS control. Displacement events in saves showed origin_osid from other settlements in the same municipality (aginci, hadzibajir_2, etc.) but never kozarska_dubica.
+- **Cause**: Minority flight skipped **entire municipalities** when any OSID in that municipality had a hostile takeover timer (`munsInTakeoverOrCamp`). Takeover displacement runs only for OSIDs that **flipped** (timer created per flipped OSID). Settlements that were RS-controlled from scenario start (e.g. Kozarska Dubica town) never get a timer, so they were never handled by takeover — and they were incorrectly skipped by minority flight because another settlement in the same mun had a timer.
+- **Fix**: In `minority_flight.ts`, skip a settlement only if **that settlement's OSID** has an active takeover timer (`osidsWithTakeoverTimer`), not if any settlement in the municipality has one. RS-from-start settlements in a mun where other OSIDs flipped now correctly receive minority flight (RS + Bosniaks/Croats → 100% immediate).
+- **Determinism**: No change to ordering or randomness; same inputs produce same displacement outcomes. Per-OSID skip set is built from existing timer keys (osid|from_faction).
+- **Tests**: `tests/minority_flight.test.ts` — timer-skip test updated to use OSID|faction key format; new test "RS-from-start settlement in same mun as timer still gets minority flight (e.g. Kozarska Dubica)" added. All 6 minority_flight tests pass.
+
+### Changes
+- `src/state/minority_flight.ts` — build `osidsWithTakeoverTimer` from timer keys, skip settlement when `sid` in set (remove mun-level skip and camp-based skip for minority flight).
+- `tests/minority_flight.test.ts` — timer test key format; new Kozarska Dubica regression test.
 
 ## [2026-03-08] N297 Supply Calibration — ATH 87.0% restored
 

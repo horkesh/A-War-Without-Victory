@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { getMunicipalitySupportLabel, getMunicipalitySupportTypeForFaction } from '../../../sim/combat/municipality_support.js';
 import { getRightPanelStyle, getPanelRailStyle } from './panelRail';
 import { buildOsidToSectorMap } from '../utils/sectorUtils';
+import { getOperationId } from '../utils/operations';
 import { getCurrentEthnicForOsid } from '../map/builders/buildEthnicGeoJSON';
 
 interface SelectionPanelProps {
@@ -68,7 +69,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const operationsTargetingOsid =
     loadedGameState?.operations
       ?.filter((op) => op.objectives?.includes(selectedOsid))
-      .map((op) => ({ name: op.name, faction: op.faction, phase: op.phase }))
+      .map((op) => ({ name: op.name, faction: op.faction, phase: op.phase, operationKey: getOperationId(op) }))
     ?? [];
   const recentControlEventsForOsid =
     loadedGameState?.recentControlEvents
@@ -82,20 +83,55 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const sectorInfo = (() => {
     const sectors = loadedGameState?.corpsFrontSectors;
     const edgesOsid = loadedGameState?.frontEdgesOsid;
-    if (!sectors?.length || !edgesOsid?.length) return { sectorName: null as string | null, sectorFaction: null as string | null };
+    if (!sectors?.length || !edgesOsid?.length) return { sectorName: null as string | null, sectorFaction: null as string | null, sectorId: null as string | null };
     const osidToSector = buildOsidToSectorMap(sectors, edgesOsid);
     const sectorId = osidToSector.get(selectedOsid);
-    if (!sectorId) return { sectorName: null, sectorFaction: null };
+    if (!sectorId) return { sectorName: null, sectorFaction: null, sectorId: null };
     const sector = sectors.find((s) => s.sector_id === sectorId);
-    return { sectorName: sector?.display_name ?? null, sectorFaction: sector?.faction ?? null };
+    return { sectorName: sector?.display_name ?? null, sectorFaction: sector?.faction ?? null, sectorId };
   })();
 
   const departedByEthnicity = (() => {
     const raw = loadedGameState?.departedByOsid?.[selectedOsid];
-    if (!raw) return undefined;
+    if (raw && Object.keys(raw).length > 0) {
+      const out: Record<string, number> = {};
+      for (const [k, v] of Object.entries(raw)) {
+        if (typeof v === 'number' && v > 0) out[k] = v;
+      }
+      return Object.keys(out).length > 0 ? out : undefined;
+    }
+    // Fallback: no per-OSID events (e.g. Kamičani); use mun-level breakdown scaled to this settlement's out+lost
+    const osidDisp = loadedGameState?.displacementByOsid?.[selectedOsid];
+    const munBreakdown = selectedMunId ? loadedGameState?.departedByMun?.[selectedMunId] : undefined;
+    const disp = selectedMunId ? loadedGameState?.displacementByMun?.[selectedMunId] : undefined;
+    const targetTotal = osidDisp != null
+      ? osidDisp.out + osidDisp.lost
+      : disp && disp.originalPopulation > 0
+        ? (() => {
+            const popOriginal = Number(osidPropertiesMap?.[selectedOsid]?.population_total) || 0;
+            if (popOriginal <= 0) return 0;
+            const share = popOriginal / disp.originalPopulation;
+            return Math.round(disp.displacedOut * share) + Math.round(disp.lostPopulation * share);
+          })()
+        : 0;
+    if (targetTotal <= 0 || !munBreakdown) return undefined;
+    const munTotal = Object.values(munBreakdown).reduce((a, n) => a + (typeof n === 'number' ? n : 0), 0);
+    if (munTotal <= 0) return undefined;
+    const popOriginal = Number(osidPropertiesMap?.[selectedOsid]?.population_total) || 0;
+    if (popOriginal <= 0 && osidDisp == null) return undefined;
+    const scale = targetTotal / munTotal;
     const out: Record<string, number> = {};
-    for (const [k, v] of Object.entries(raw)) {
-      if (typeof v === 'number' && v > 0) out[k] = v;
+    const entries = Object.entries(munBreakdown)
+      .filter(([, n]) => typeof n === 'number' && n > 0)
+      .sort(([a], [b]) => a.localeCompare(b));
+    let sum = 0;
+    for (let i = 0; i < entries.length; i++) {
+      const [eth, n] = entries[i];
+      const v = i < entries.length - 1
+        ? Math.floor((n as number) * scale)
+        : Math.max(0, targetTotal - sum);
+      if (v > 0) out[eth] = v;
+      sum += v;
     }
     return Object.keys(out).length > 0 ? out : undefined;
   })();
@@ -196,6 +232,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           controlBySettlement={loadedGameState?.controlBySettlement}
           formationsAtOsid={formationsForDetail}
           displacementByMun={loadedGameState?.displacementByMun ?? undefined}
+          displacementByOsid={loadedGameState?.displacementByOsid ?? undefined}
           variant="panel"
           statusLabel={statusLabel ?? undefined}
           operationsTargetingOsid={operationsTargetingOsid.length > 0 ? operationsTargetingOsid : undefined}
@@ -203,6 +240,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           departedByEthnicity={departedByEthnicity && Object.keys(departedByEthnicity).length > 0 ? departedByEthnicity : undefined}
           sectorName={sectorInfo.sectorName}
           sectorFaction={sectorInfo.sectorFaction}
+          sectorId={sectorInfo.sectorId}
           brigadeCountByFaction={Object.keys(brigadeCountByFaction).length > 0 ? brigadeCountByFaction : undefined}
           pendingOrders={pendingOrders}
           militiaPools={militiaPoolsProp}
