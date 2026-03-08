@@ -147,7 +147,15 @@ Use these labels internally in prompts and docs:
 
 These are **April-to-April** states, but the room itself must not display a printed year.
 
-**Time of day:** Prewar can be **daytime** (natural light from window, clear archival feel). Later years (year1–year4) may vary — e.g. more evening or night for mood — so long as geometry and overlay zones stay consistent. Document the chosen time of day per image when measuring quads.
+**Time of day — lights dim across the war:** Use a fixed progression so the room slowly moves from day to night across the years, culminating in full night in Year4 (1995).
+
+- **Prewar:** **Daytime** — natural light from the window, clear archival feel.
+- **Year1 (1992):** **Daytime or soft afternoon** — room still busy in daylight.
+- **Year2 (1993):** **Late afternoon / early evening** — light beginning to go, more reliance on desk lamp.
+- **Year3 (1994):** **Evening** — dimmer, window darker, room lit mainly by lamp(s).
+- **Year4 (1995):** **Full night** — window dark or very dim, room lit by desk lamp and practicals only; strong late-war feel.
+
+Geometry and overlay zones must stay consistent across all times of day. Document the chosen time of day per image when measuring quads.
 
 ### Modals and anchors by time
 
@@ -223,6 +231,8 @@ Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year1 of wartime use: more urgency, more side paperwork, slightly more smoke residue, more visible use of ashtray, more radio-use feeling, stronger sense of operational activation. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
 
+**Lighting: daytime or soft afternoon** — room still busy in daylight.
+
 RBiH tone: improvised state command adapting under pressure, but still energetic rather than exhausted. Keep the thermos or mug, mixed folders, and practical field-office feel.
 
 Do not add visible year markings. Do not change the interaction anchors.
@@ -236,6 +246,8 @@ Do not add visible year markings. Do not change the interaction anchors.
 Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year2 of wartime use: entrenched command routine, denser paperwork, more worn surfaces, more cigarette traces, more used lamp and desk surfaces, stronger logistical and administrative burden. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
+
+**Lighting: late afternoon or early evening** — light beginning to go, more reliance on desk lamp.
 
 RBiH tone: still improvised and dignified, but increasingly burdened and resource-stretched. Keep the recurring practical props and let them look more used, not replaced.
 
@@ -251,6 +263,8 @@ Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year3 of wartime use: accumulated fatigue, darker wear patterns, more persistent smoke staining, more paperwork density at the sides, more visibly overused furniture and desk surfaces. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
 
+**Lighting: evening** — dimmer, window darker, room lit mainly by lamp(s).
+
 RBiH tone: survivalist bureaucracy under prolonged strain. The room should feel held together through necessity and discipline, not theatrical destruction.
 
 Do not add visible year markings. Do not change the interaction anchors.
@@ -264,6 +278,8 @@ Do not add visible year markings. Do not change the interaction anchors.
 Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year4 of wartime use: hardened exhaustion, deep wear, tired surfaces, more severe signs of long duration, but the room is still functioning as a command space. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
+
+**Lighting: full night** — window dark or very dim, room lit by desk lamp and practicals only; strong late-war feel.
 
 RBiH tone: heavily burdened but still dignified and operational. No theatrical ruin. No collapse. Just the visible cost of long war use.
 
@@ -295,6 +311,8 @@ Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year1 of wartime use: stronger command pressure, slightly denser paperwork at the sides, more tobacco use, more severe atmosphere, more active communications feel. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
 
+**Lighting: daytime or soft afternoon.**
+
 RS tone: bureaucratic and forceful, newly operationalized, not yet exhausted. Keep the heavier phone, rigid binders, and hard administrative atmosphere.
 
 Do not add visible year markings. Do not change the interaction anchors.
@@ -308,6 +326,8 @@ Do not add visible year markings. Do not change the interaction anchors.
 Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year2 of wartime use: entrenched bureaucratic war routine, denser side paperwork, more stamped and handled binders, more smoke traces, slightly harsher institutional wear. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
+
+**Lighting: late afternoon or early evening.**
 
 RS tone: colder, more rigid, more administrative, more settled into wartime hierarchy. Props should feel used, not rearranged into a different room.
 
@@ -323,6 +343,8 @@ Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year3 of wartime use: accumulated harsh wear, more severe smoke and stain traces, more paperwork density at the edges, stronger sense of command fatigue without disorder. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
 
+**Lighting: evening.**
+
 RS tone: stern, overused, and increasingly burdened by duration. Avoid caricature. Avoid theatrical villain aesthetics.
 
 Do not add visible year markings. Do not change the interaction anchors.
@@ -336,6 +358,8 @@ Do not add visible year markings. Do not change the interaction anchors.
 Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year4 of wartime use: hardened institutional exhaustion, visibly overused materials, tired but functional command atmosphere, stronger signs of long-duration strain. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
+
+**Lighting: full night.**
 
 RS tone: bureaucratic severity under late-war fatigue. No ruin, no melodrama, no visible year markings, no change to interaction anchors.
 
@@ -365,6 +389,8 @@ Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year1 of wartime use: somewhat denser paperwork, slightly stronger command-post atmosphere, a little more smoke and use, but still relatively organized. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
 
+**Lighting: daytime or soft afternoon.**
+
 HRHB tone: compact regional wartime administration, more pressured but still controlled. Keep the clipped folders and tidier desk logic.
 
 Do not add visible year markings. Do not change the interaction anchors.
@@ -378,6 +404,8 @@ Do not add visible year markings. Do not change the interaction anchors.
 Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year2 of wartime use: mature wartime routine, denser side paperwork, more visible use of ashtray and lamp, more administrative pressure, but still more orderly than RBiH and less monolithic than RS. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
+
+**Lighting: late afternoon or early evening.**
 
 HRHB tone: disciplined, regional, increasingly burdened but still relatively composed.
 
@@ -393,6 +421,8 @@ Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year3 of wartime use: accumulated wear, denser paper handling, more smoke and long-hours fatigue, slightly darker strain, but retain the faction's more orderly visual discipline. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
 
+**Lighting: evening.**
+
 Do not add visible year markings. Do not change the interaction anchors.
 
 [append shared prompt core]
@@ -404,6 +434,8 @@ Do not add visible year markings. Do not change the interaction anchors.
 Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year4 of wartime use: visibly tired, worn, and prolonged by duration, but still functioning and still more ordered than total chaos. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
+
+**Lighting: full night.**
 
 HRHB tone: late-war exhaustion in a compact regional HQ, no melodrama, no visible year markings, no change to interaction anchors.
 

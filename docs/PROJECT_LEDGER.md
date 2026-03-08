@@ -7,7 +7,9 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
-## [2026-03-08] Entrenchment-Based Passive Attrition Reduction + Ops Modal Cosmetic Fixes
+## [2026-03-08] Frontline Attrition Sector Port + Entrenchment Reduction + Ops Modal Cosmetic Fixes
+
+**Frontline attrition ported to corps_front_sectors** (`frontline_attrition.ts`): Replaced legacy `brigade_front_assignment` + `local_fronts` iteration with `corps_front_sectors` `assigned_brigade_ids` lookup. Brigades take passive attrition if physically in any sector's territory (verified by `classifyBrigadesByTerritory()` each turn); reserves exempt. Density modifier uses `sector.assigned_brigade_ids.length / sector.length_edges`. `isColdFront()` rewritten to use structured `CorpsFrontSector` data (`faction`, `opposing_factions`, `sub_segments`) instead of parsing legacy front_id strings. n366 = 88.2% area-weighted. Report: `docs/40_reports/implemented/20260308_FRONTLINE_ATTRITION_SECTOR_PORT.md`.
 
 **Entrenchment attrition reduction** (`frontline_attrition.ts`): Well-entrenched brigades now take less passive frontline attrition from both sniping/disease and bombardment exposure. Uses sqrt diminishing returns matching combat_math.ts entrenchment model: `mult = max(0.40, 1.0 - sqrt(turns) * 0.10)`. At 6 turns: 24.5% reduction. At 20 turns: 44.7% reduction. At 52 turns: 60% reduction (floor). Applied to both `BASE_ATTRITION_RATE` and `BOMBARDMENT_EXPOSURE_RATE` casualties.
 
