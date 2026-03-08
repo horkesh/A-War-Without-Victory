@@ -11,13 +11,15 @@
 // ── Consumption: Maintenance ─────────────────────────────────────────────────
 /**
  * Per-formation per-turn general supply drain.
- * History: 0.04 (RS hit 0 by w40) → 0.025 (RS/RBiH sat at 100 — no drain).
- * At 0.045: RS (70 fmns) = 3.15/turn drain vs ~5.3/turn patron → net +2.15,
- * but combat drain (~1.3/turn) brings net to +0.85 → gradual decline from 100.
- * RBiH (127 fmns) = 5.7/turn drain vs ~4/turn patron → net -1.7 → genuine pressure.
- * n159 audit: RS/RBiH at 100% after 40w is unrealistic. Active armies consume supplies.
+ * History: 0.04 (RS hit 0 by w40) → 0.025 (RS/RBiH sat at 100 — no drain)
+ *   → 0.045 (tuned for ~70 RS fmns) → 0.035 (RS grew to ~112 fmns via OOB expansion).
+ * At 0.045 + 112 fmns: RS drain=5.04/turn vs ~4.0 patron income → hit 0 by w40.
+ * At 0.035: RS (112 fmns) = 3.92/turn drain vs ~4.0/turn patron → net ~+0.08,
+ * combat+siege drain brings RS to ~20-40 range by w40 (strained, not collapsed).
+ * RBiH (105 fmns) = 3.68/turn drain; still under genuine embargo pressure.
+ * RS lighter drain justified: JNA inheritance included pre-positioned supply depots.
  */
-export const MAINTENANCE_DRAIN_PER_FORMATION = 0.045;
+export const MAINTENANCE_DRAIN_PER_FORMATION = 0.035;
 /**
  * Per-heavy-weapon per-turn heavy munitions drain (tanks + artillery).
  * Represents ammunition expenditure for training/readiness, barrel wear,

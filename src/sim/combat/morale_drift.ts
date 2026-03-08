@@ -10,7 +10,7 @@ import type { MunicipalityPopulation1991Map } from '../../state/population_share
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getFactionAlignedPopulationShare } from '../../state/population_share.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { HOME_GROUND_MORALE_FLOOR } from './combat_math.js';
+import { CRITICAL_MORALE_THRESHOLD, HOME_GROUND_MORALE_FLOOR } from './combat_math.js';
 
 /** Extract municipality ID from OSID (format: op:municipality:slug). */
 function munFromOsid(osid: string): string | undefined {
@@ -144,6 +144,13 @@ export function runMoraleDrift(
         // (e.g. Goražde defenders). Applied AFTER drift, as a hard minimum on the morale value.
         if (f.home_defense_active === true) {
             f.morale = Math.max(f.morale, HOME_GROUND_MORALE_FLOOR);
+        }
+
+        // Critically demoralized formations lose cohesion — organic path to surrender.
+        // Morale collapse cascade: morale drops → combat ineffective → cohesion erodes →
+        // surrender triggers (existing mechanic at cohesion<10 + power ratio > 2.5).
+        if ((f.morale ?? 50) < CRITICAL_MORALE_THRESHOLD) {
+            f.cohesion = Math.max(0, (f.cohesion ?? 60) - 2);
         }
 
         if (f.morale !== prev) {

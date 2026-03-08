@@ -51,6 +51,11 @@ export const ENTRENCHMENT_PER_TURN = 0.035;
 export const MAX_RESILIENCE_STREAK = 4;
 export const RESILIENCE_PER_DEFENSE = 0.025;
 
+/** Critical morale threshold: below this, combat effectiveness drops sharply. */
+export const CRITICAL_MORALE_THRESHOLD = 15;
+/** Minimum combat effectiveness at morale=0 (30% of normal). */
+export const CRITICAL_MORALE_FLOOR = 0.3;
+
 /** Minimum morale to resist retreat on costly_victory. */
 const MORALE_RESIST_FLOOR = 70;
 
@@ -540,6 +545,17 @@ export function getFatigueMult(formation: FormationState, mode: 'attack' | 'defe
     return 1.0 - ratio * (1.0 - floor);
 }
 
+/**
+ * Critical morale penalty: below CRITICAL_MORALE_THRESHOLD (15), combat effectiveness
+ * drops sharply — 0.3× at morale=0, scaling linearly to 1.0× at morale=15.
+ * Models organic collapse: critically demoralized troops cannot fight effectively.
+ */
+export function getCriticalMoralePenalty(formation: FormationState): number {
+    const morale = formation.morale ?? 50;
+    if (morale >= CRITICAL_MORALE_THRESHOLD) return 1.0;
+    return Math.max(CRITICAL_MORALE_FLOOR, morale / CRITICAL_MORALE_THRESHOLD);
+}
+
 export function getConcentrationBonus(attackerCount: number): number {
     if (attackerCount <= 1) return 1.0;
     return 1.0 + Math.min(CONCENTRATION_BONUS_CAP, (attackerCount - 1) * CONCENTRATION_BONUS_PER_BRIGADE);
@@ -625,7 +641,8 @@ export function computeAttackerPower(
     const officerMult = getThreeTierOfficerMod(formation, state, 'attack');
     const fatigueMult = getFatigueMult(formation, 'attack');
     const homeMult = getHomeDistanceMultFromCache(state, formation);
-    return base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult * heavyMult * officerMult * fatigueMult * homeMult;
+    const moralePenalty = getCriticalMoralePenalty(formation);
+    return base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult * heavyMult * officerMult * fatigueMult * homeMult * moralePenalty;
 }
 
 export function computeDefenderPower(
@@ -664,7 +681,8 @@ export function computeDefenderPower(
     const ethnicMult = 1.0 + (ethnicDefenseBonus ?? 0);
     const fatigueMult = getFatigueMult(formation, 'defend');
     const homeMult = getHomeDistanceMultFromCache(state, formation);
-    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult * toTerrainMult * perBrigadeTerrainBonus * frontDensityMult * officerMult * ethnicMult * fatigueMult * homeMult;
+    const moralePenalty = getCriticalMoralePenalty(formation);
+    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult * toTerrainMult * perBrigadeTerrainBonus * frontDensityMult * officerMult * ethnicMult * fatigueMult * homeMult * moralePenalty;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
