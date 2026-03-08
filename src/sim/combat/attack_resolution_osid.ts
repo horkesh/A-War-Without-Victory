@@ -16,8 +16,10 @@ import {
 import { updateSectorIntelFromCombat } from './sector_intel.js';
 import {
     initializeCasualtyLedger,
-    recordBattleCasualties
+    recordBattleCasualties,
+    recordEquipmentLoss
 } from '../../state/casualty_ledger.js';
+import { ensureBrigadeComposition } from './equipment_effects.js';
 import { recordFormationFatigue } from '../../state/formation_fatigue.js';
 import { FATIGUE_MAX, MIN_COMBAT_PERSONNEL } from '../../state/formation_constants.js';
 import type {
@@ -112,6 +114,10 @@ const SECTOR_ROUT_PERSONNEL_RETAIN = 0.7;
 const KIA_FRACTION = 0.30;
 const WIA_FRACTION = 0.55;
 const MIA_FRACTION = 0.15;
+
+// Equipment loss rates per battle (same as legacy path in battle_resolution.ts)
+const TANK_LOSS_RATE = 0.08;
+const ARTILLERY_LOSS_RATE = 0.04;
 
 // Part 7a: Experience gain from combat (Mobilization & Force Growth)
 const BASE_EXPERIENCE_GAIN = 0.03;
@@ -522,6 +528,15 @@ export function resolveAttackOrdersOsid(
                 wounded: Math.floor(cas * WIA_FRACTION),
                 missing_captured: Math.max(0, cas - Math.floor(cas * KIA_FRACTION) - Math.floor(cas * WIA_FRACTION))
             });
+            // Equipment losses: minimum 1 per piece type if formation has them
+            const aComp = a.composition ?? ensureBrigadeComposition(a);
+            const aTanksLost = aComp.tanks > 0 ? Math.max(1, Math.round(aComp.tanks * TANK_LOSS_RATE)) : 0;
+            const aArtLost = aComp.artillery > 0 ? Math.max(1, Math.round(aComp.artillery * ARTILLERY_LOSS_RATE)) : 0;
+            if (aTanksLost > 0 || aArtLost > 0) {
+                aComp.tanks = Math.max(0, aComp.tanks - aTanksLost);
+                aComp.artillery = Math.max(0, aComp.artillery - aArtLost);
+                recordEquipmentLoss(state.casualty_ledger!, a.faction, { tanks: aTanksLost, artillery: aArtLost });
+            }
         }
         if (defenderFormation) {
             applyPersonnelLoss(defenderFormation, finalDefenderCas);
@@ -533,6 +548,15 @@ export function resolveAttackOrdersOsid(
                 ? Math.min(MAX_RESILIENCE_STREAK, ((defenderFormation as { defense_streak?: number }).defense_streak ?? 0) + 1)
                 : 0;
             recordBattleCasualties(state.casualty_ledger!, defenderFormation.faction, defenderFormation.id, { killed: dKia, wounded: dWia, missing_captured: dMia });
+            // Defender equipment losses
+            const dComp = defenderFormation.composition ?? ensureBrigadeComposition(defenderFormation);
+            const dTanksLost = dComp.tanks > 0 ? Math.max(1, Math.round(dComp.tanks * TANK_LOSS_RATE * 0.5)) : 0;
+            const dArtLost = dComp.artillery > 0 ? Math.max(1, Math.round(dComp.artillery * ARTILLERY_LOSS_RATE * 0.5)) : 0;
+            if (dTanksLost > 0 || dArtLost > 0) {
+                dComp.tanks = Math.max(0, dComp.tanks - dTanksLost);
+                dComp.artillery = Math.max(0, dComp.artillery - dArtLost);
+                recordEquipmentLoss(state.casualty_ledger!, defenderFormation.faction, { tanks: dTanksLost, artillery: dArtLost });
+            }
             // Snap: Commander Casualty
             if (defenderFormation.cohesion < 20) {
                 defenderFormation.cohesion = Math.max(0, defenderFormation.cohesion - 8);

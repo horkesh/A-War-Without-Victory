@@ -33,9 +33,11 @@ import { ensureBrigadeComposition } from './equipment_effects.js';
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Base weekly attrition rate for frontline brigades.
- * Reduced from 0.005 to 0.003 (n159 audit: RS/HRHB KIA running 2-3× historical pace).
+ * n159→0.003 (RS/HRHB running 2-3× historical). n303→0.005 (total casualties
+ * too low at 97k/40w; first year was bloodiest with ~30k KIA target).
+ * At 0.005: +67% frontline attrition → targets ~130k total casualties.
  */
-const BASE_ATTRITION_RATE = 0.003;
+const BASE_ATTRITION_RATE = 0.005;
 
 /**
  * Bombardment exposure: additional attrition for brigades facing superior

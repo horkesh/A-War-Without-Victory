@@ -355,7 +355,7 @@ export function updateFormationFatigue(
         if (!formation.ops || typeof formation.ops !== 'object') {
             formation.ops = { fatigue: 0, last_supplied_turn: null };
         }
-        if (!Number.isInteger(formation.ops.fatigue) || formation.ops.fatigue < 0) {
+        if (typeof formation.ops.fatigue !== 'number' || isNaN(formation.ops.fatigue) || formation.ops.fatigue < 0) {
             formation.ops.fatigue = 0;
         }
 

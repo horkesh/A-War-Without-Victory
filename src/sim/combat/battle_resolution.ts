@@ -640,16 +640,16 @@ function computeBattleCasualties(
     // even in low-intensity battles (mines, mechanical failure, terrain damage).
     // Personnel intensityFactor floor is 0.1; equipment floor is 0.5.
     const equipIntensityFactor = Math.max(0.5, intensityFactor);
-    const aTanksLost = Math.min(attackerComp.tanks, Math.round(attackerComp.tanks * TANK_LOSS_RATE * equipIntensityFactor * attackPostureMult));
-    const aArtLost = Math.min(attackerComp.artillery, Math.round(attackerComp.artillery * ARTILLERY_LOSS_RATE * equipIntensityFactor));
+    const aTanksLost = Math.min(attackerComp.tanks, Math.max(attackerComp.tanks > 0 ? 1 : 0, Math.round(attackerComp.tanks * TANK_LOSS_RATE * equipIntensityFactor * attackPostureMult)));
+    const aArtLost = Math.min(attackerComp.artillery, Math.max(attackerComp.artillery > 0 ? 1 : 0, Math.round(attackerComp.artillery * ARTILLERY_LOSS_RATE * equipIntensityFactor)));
 
     let dTanksLost = 0;
     let dArtLost = 0;
     if (defenderFormation) {
         const defenderComp = defenderFormation.composition ?? ensureBrigadeComposition(defenderFormation);
         const terrainProtection = 1 / Math.max(0.8, terrainComposite);
-        dTanksLost = Math.min(defenderComp.tanks, Math.round(defenderComp.tanks * TANK_LOSS_RATE * equipIntensityFactor * terrainProtection));
-        dArtLost = Math.min(defenderComp.artillery, Math.round(defenderComp.artillery * ARTILLERY_LOSS_RATE * equipIntensityFactor * terrainProtection));
+        dTanksLost = Math.min(defenderComp.tanks, Math.max(defenderComp.tanks > 0 ? 1 : 0, Math.round(defenderComp.tanks * TANK_LOSS_RATE * equipIntensityFactor * terrainProtection)));
+        dArtLost = Math.min(defenderComp.artillery, Math.max(defenderComp.artillery > 0 ? 1 : 0, Math.round(defenderComp.artillery * ARTILLERY_LOSS_RATE * equipIntensityFactor * terrainProtection)));
     }
 
     return {
@@ -989,7 +989,7 @@ export function resolveBattleOrders(
         const battleDamage = Math.min(1, state.battle_damage?.[targetSid] ?? 0);
         const aPower = attackerPower.total_combat_power * (1 - BATTLE_DAMAGE_ATTACKER_PENALTY * battleDamage);
         const dPower = (defenderPower?.total_combat_power ?? 0) * (1 + BATTLE_DAMAGE_DEFENDER_BONUS * battleDamage);
-        const powerRatio = dPower <= 0 ? (aPower > 0 ? 999 : 0) : aPower / dPower;
+const powerRatio = dPower <= 0 ? (aPower > 0 ? 999 : 0) : aPower / dPower;
 
         let outcome: BattleOutcome;
         if (dPower <= 0 && aPower > 0) {
@@ -1047,6 +1047,9 @@ export function resolveBattleOrders(
 
         const totalAttackerLoss = totalPersonnelLoss(casualties.attacker);
         const totalAttackerPersonnel = attackerIds.reduce((s, id) => s + (formations[id]?.personnel ?? 0), 0);
+        // Distribute equipment losses via round-robin to avoid Math.floor(small * share) = 0
+        let remainingTankLoss = casualties.attacker.tanks_lost;
+        let remainingArtLoss = casualties.attacker.artillery_lost;
         for (let i = 0; i < attackerIds.length; i++) {
             const aid = attackerIds[i];
             const af = formations[aid];
@@ -1055,18 +1058,27 @@ export function resolveBattleOrders(
             const loss = Math.round(totalAttackerLoss * share);
             applyPersonnelLoss(af, loss);
             addWoundedPending(af, Math.round(casualties.attacker.wounded * share));
-            const tankShare = attackerIds.length === 1 ? 1 : share;
-            applyEquipmentBattleLoss(af, Math.floor(casualties.attacker.tanks_lost * tankShare), Math.floor(casualties.attacker.artillery_lost * tankShare));
+            // Round-robin: assign 1 equipment loss at a time to formations that have them
+            const afComp = af.composition;
+            const thisTankLoss = (remainingTankLoss > 0 && afComp && afComp.tanks > 0) ? 1 : 0;
+            const thisArtLoss = (remainingArtLoss > 0 && afComp && afComp.artillery > 0) ? 1 : 0;
+            remainingTankLoss -= thisTankLoss;
+            remainingArtLoss -= thisArtLoss;
+            applyEquipmentBattleLoss(af, thisTankLoss, thisArtLoss);
             const ledger = state.casualty_ledger!;
             recordBattleCasualties(ledger, attackerFaction, aid, {
                 killed: Math.floor(casualties.attacker.killed * share),
                 wounded: Math.floor(casualties.attacker.wounded * share),
                 missing_captured: Math.floor(casualties.attacker.missing_captured * share)
             });
-            recordEquipmentLoss(ledger, attackerFaction, { tanks: Math.floor(casualties.attacker.tanks_lost * tankShare), artillery: Math.floor(casualties.attacker.artillery_lost * tankShare) });
 
             recordFormationFatigue(af, 2);
         }
+        // Record total attacker equipment loss once for the faction
+        recordEquipmentLoss(state.casualty_ledger!, attackerFaction, {
+            tanks: casualties.attacker.tanks_lost,
+            artillery: casualties.attacker.artillery_lost
+        });
 
         if (defenderFormation) {
             const defenderPersonnel = defenderFormation.personnel ?? 0;

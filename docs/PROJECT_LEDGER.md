@@ -7,6 +7,18 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] N304 Fatigue + Equipment Fix — ATH 93.8%
+
+### Summary
+- **Three critical bugs fixed**:
+  1. **Fatigue reset**: `Number.isInteger(1.5)=false` in `updateFormationFatigue` reset all frontline fatigue to 0 every turn. Fixed to `typeof !== 'number'` check. Now 189/190 front-assigned brigades accumulate fatigue correctly (avg 29.6, max 30).
+  2. **Equipment losses in OSID path**: `attack_resolution_osid.ts` had NO equipment loss logic — only the dead legacy SID path had it. Added per-battle equipment attrition: TANK_LOSS_RATE=0.08, ARTILLERY_LOSS_RATE=0.04, min 1 per type per battle. Defender rates at 0.5×. RS lost 165 tanks + 230 artillery in 40w.
+  3. **Frontline attrition rate**: BASE_ATTRITION_RATE 0.003→0.005 to match historical first-year casualty volume.
+- **ATH**: 93.8% area-weighted (up from 87.0%). KRAJINA 99.0%, DRINA 95.4%, CORRIDOR 98.8%. RS delta=+1 (near-perfect). Fatigue and equipment attrition naturally prevent RS from sustaining indefinite offensives — doctrinal arcs emerge organically.
+- **Casualties**: 121.8k total, 31.4k KIA (historical first year ~25-30k KIA). Equipment losses now tracked: RS 165T/230A.
+- **Troop strength**: RBiH=102.8k (target 120k), RS=95.4k (target 102.6k), HRHB=30.4k (target 41.5k). HRHB needs attention (supply at 0, lower troop replenishment).
+- **Root cause analysis**: The legacy `resolveBattleOrders()` had `defenderFormation = undefined` and `defenderBrigadeId = undefined` hardcoded (comment: "legacy SID path: militia-only, no brigade_aor lookup"). This meant ALL battles in that path treated every target as undefended militia, producing zero equipment losses and trivial attacker casualties (2 wounded per battle). The real OSID resolution path had proper defender brigade lookup but no equipment tracking.
+
 ## [2026-03-08] N297 Supply Calibration — ATH 87.0% restored
 
 ### Summary
