@@ -9,6 +9,7 @@
  */
 
 import type { EdgeRecord } from '../../map/settlements.js';
+import type { OsidEthnicComposition } from './ethnic_defense.js';
 import { MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
 import type {
     CorpsOperation,
@@ -54,6 +55,7 @@ import {
 import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
 import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import { analyzeFactionGraph, type FactionGraphAnalysis } from './osid_graph_analysis.js';
+import { analyzeFrontGeometry, type FrontGeometryAssessment } from './front_geometry_analysis.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { CorpsDirective } from '../../state/game_state.js';
@@ -1241,7 +1243,8 @@ export function generateCorpsDirectives(
     edges: EdgeRecord[],
     reverseMap: OperationalToCanonicalReverseMap | null,
     graphAnalysis: FactionGraphAnalysis | null,
-    supplyByOsid?: SupplyStateByOsidReport | null
+    supplyByOsid?: SupplyStateByOsidReport | null,
+    ethnicMap?: OsidEthnicComposition | null
 ): void {
     const corpsCommand = state.corps_command;
     if (!corpsCommand) return;
@@ -1449,13 +1452,7 @@ export function generateCorpsDirectives(
             offensiveTargets,
         );
         // Re-split any non-contiguous sectors created by concentration merges
-        // Build friendly OSID set for territory-aware contiguity checking
-        const friendlyOsidsForSplit = new Set<string>();
-        const pcForSplit = state.political_controllers ?? {};
-        for (const [osid, ctrl] of Object.entries(pcForSplit)) {
-            if (ctrl === faction) friendlyOsidsForSplit.add(osid);
-        }
-        corpsSectors = splitNonContiguousSectors(corpsSectors, adjacency, friendlyOsidsForSplit);
+        corpsSectors = splitNonContiguousSectors(corpsSectors, adjacency);
         for (const oldSec of rawCorpsSectors) {
             delete sectorLookup[oldSec.sector_id];
         }
@@ -1490,6 +1487,69 @@ export function generateCorpsDirectives(
             }
         }
 
+        // ── Front Geometry Analysis ──────────────────────────────────────
+        const allSectorFriendlyOsids: string[] = [];
+        const allSectorEnemyOsids: string[] = [];
+        for (const sec of corpsSectors) {
+            for (const sub of sec.sub_segments ?? []) {
+                for (const osid of sub.friendly_osids) allSectorFriendlyOsids.push(osid);
+                for (const osid of sub.enemy_osids) allSectorEnemyOsids.push(osid);
+            }
+            if (sec.territory_osids) {
+                for (const osid of sec.territory_osids) {
+                    if (!allSectorFriendlyOsids.includes(osid)) allSectorFriendlyOsids.push(osid);
+                }
+            }
+        }
+
+        let geometry: FrontGeometryAssessment | null = null;
+        if (allSectorFriendlyOsids.length > 0 && allSectorEnemyOsids.length > 0) {
+            let ethnicNeckThreshold = 0.40;
+            if (state.named_officers && state.named_officer_data) {
+                const cmdr = getCorpsCommander(corps.id, state);
+                if (cmdr) {
+                    ethnicNeckThreshold = 0.40 + (3 - cmdr.data.political_reliability) * 0.05;
+                }
+            }
+            geometry = analyzeFrontGeometry(
+                faction,
+                allSectorFriendlyOsids,
+                allSectorEnemyOsids,
+                offensiveTargets,
+                adjacency,
+                ethnicMap,
+                ethnicNeckThreshold,
+            );
+        }
+
+        if (geometry) {
+            const cmdr2 = state.named_officers && state.named_officer_data
+                ? getCorpsCommander(corps.id, state)
+                : null;
+            const salientPriorityBoost = cmdr2 ? cmdr2.data.aggressiveness >= 4 : false;
+
+            for (const salient of geometry.enemy_salients) {
+                for (const neckOsid of salient.neck_osids) {
+                    if (!offensiveTargets.includes(neckOsid) && !avoidOsids.includes(neckOsid)) {
+                        if (salientPriorityBoost) {
+                            offensiveTargets.unshift(neckOsid);
+                        } else {
+                            offensiveTargets.push(neckOsid);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Inject geometry-derived critical holds (unconditional)
+        if (geometry) {
+            for (const hold of geometry.critical_holds) {
+                if (!holdOsids.includes(hold.osid)) {
+                    holdOsids.push(hold.osid);
+                }
+            }
+        }
+
         // Reserve fraction: corps stance base + army stance modifier
         let reserveFraction: number;
         switch (cmd.stance) {
@@ -1502,7 +1562,7 @@ export function generateCorpsDirectives(
         reserveFraction = Math.max(0, Math.min(0.5, reserveFraction + armyReserveModifier));
 
         // Max attackers: offensive/balanced allow concentration, defensive is more cautious
-        const maxAttackersPerTarget = cmd.stance === 'defensive' || cmd.stance === 'reorganize' ? 2 : 3;
+        let maxAttackersPerTarget = cmd.stance === 'defensive' || cmd.stance === 'reorganize' ? 2 : 3;
 
         // Aggression modifier: doctrine phase + army stance bonus + seasonal adjustment + officer aggressiveness
         const seasonalAdj = getSeasonalModifiers(
@@ -1516,13 +1576,30 @@ export function generateCorpsDirectives(
         if (state.named_officers && state.named_officer_data) {
             const commander = getCorpsCommander(corps.id, state);
             if (commander) {
-                // Shift aggression by (aggressiveness - 3) × 0.05
-                const officerAggressionShift = (commander.data.aggressiveness - 3) * 0.05;
+                // Shift aggression by (aggressiveness - 3) × 0.08
+                const officerAggressionShift = (commander.data.aggressiveness - 3) * 0.08;
                 aggressionModifier += officerAggressionShift;
+                // Aggressive commanders concentrate more force per target
+                if (commander.data.aggressiveness >= 4) {
+                    maxAttackersPerTarget = Math.min(maxAttackersPerTarget + 1, 5);
+                }
+                // Defensive skill modulates reserve fraction
+                const defSkillAdj = (commander.data.defensive_skill - 3) * 0.03;
+                reserveFraction = Math.max(0.05, Math.min(0.40, reserveFraction + defSkillAdj));
                 // High-competence commanders (≥4) accept riskier attacks
                 const effComp = getEffectiveCompetence(commander.state, commander.data);
-                if (effComp >= 4 && bestMinOutcome === 'victory') {
-                    bestMinOutcome = 'costly_victory';
+                if (effComp >= 5) {
+                    if (bestMinOutcome === 'victory' || bestMinOutcome === 'decisive_victory') {
+                        bestMinOutcome = 'costly_victory';
+                    }
+                } else if (effComp >= 4) {
+                    if (bestMinOutcome === 'victory') {
+                        bestMinOutcome = 'costly_victory';
+                    }
+                } else if (effComp <= 2) {
+                    if (bestMinOutcome === 'costly_victory') {
+                        bestMinOutcome = 'victory';
+                    }
                 }
             }
         }
@@ -1663,16 +1740,19 @@ export function generateCorpsDirectives(
                 if (osidEntry.state === 'strained') return 1;
                 return 2;
             };
-            const getConsolidationScore = (osid: string): number => {
+            const getTargetShapeScore = (osid: string): number => {
+                if (geometry?.line_shortening_scores.has(osid)) {
+                    return geometry.line_shortening_scores.get(osid)!;
+                }
                 const neighbors = adjacency.get(osid) ?? [];
-                return neighbors.filter(n => getPoliticalControllerOSID(state, n, reverseMap) === faction).length;
+                return -(neighbors.filter(n => getPoliticalControllerOSID(state, n, reverseMap) === faction).length);
             };
             const supplyDiff = getSupplyPriority(a) - getSupplyPriority(b);
             if (supplyDiff !== 0) return supplyDiff;
             const intelDiff = (intelScoreByOsid.get(a) ?? 0) - (intelScoreByOsid.get(b) ?? 0);
             if (intelDiff !== 0) return intelDiff;
-            const consolidationDiff = getConsolidationScore(b) - getConsolidationScore(a);
-            if (consolidationDiff !== 0) return consolidationDiff;
+            const shapeDiff = getTargetShapeScore(a) - getTargetShapeScore(b);
+            if (shapeDiff !== 0) return shapeDiff;
             return strictCompare(a, b);
         });
         holdOsids.sort(strictCompare);
@@ -1700,6 +1780,27 @@ export function generateCorpsDirectives(
                 }
             }
             reinforceSectorIds.sort(strictCompare);
+        }
+
+        // High defensive_skill commanders prioritize reinforcing sectors with own salients
+        if (geometry && geometry.own_salients.length > 0) {
+            const cmdr3 = state.named_officers && state.named_officer_data
+                ? getCorpsCommander(corps.id, state)
+                : null;
+            if (cmdr3 && cmdr3.data.defensive_skill >= 4) {
+                for (const salient of geometry.own_salients) {
+                    for (const sec of corpsSectors) {
+                        const secFriendly = new Set<string>();
+                        for (const sub of sec.sub_segments ?? []) {
+                            for (const osid of sub.friendly_osids) secFriendly.add(osid);
+                        }
+                        const neckInSector = salient.neck_osids.some(n => secFriendly.has(n));
+                        if (neckInSector && reinforceSectorIds.indexOf(sec.sector_id) === -1) {
+                            reinforceSectorIds.push(sec.sector_id);
+                        }
+                    }
+                }
+            }
         }
 
         // Priority sector: for offensive/balanced corps, pick the sector with the most
@@ -2010,7 +2111,8 @@ export function generateAllCorpsOrders(
     sidToMun: Map<SettlementId, string>,
     reverseMap?: OperationalToCanonicalReverseMap | null,
     osidEdges?: EdgeRecord[],
-    supplyByOsid?: SupplyStateByOsidReport | null
+    supplyByOsid?: SupplyStateByOsidReport | null,
+    ethnicMap?: OsidEthnicComposition | null
 ): void {
     // 0. Set army stance from standing orders
     setArmyStandingOrder(state, faction);
@@ -2045,6 +2147,6 @@ export function generateAllCorpsOrders(
         const adjacency = buildOsidAdjacency(effectiveOsidEdges);
         graphAnalysis = analyzeFactionGraph(state, faction, adjacency, reverseMap);
     }
-    generateCorpsDirectives(state, faction, effectiveOsidEdges, reverseMap ?? null, graphAnalysis, supplyByOsid);
+    generateCorpsDirectives(state, faction, effectiveOsidEdges, reverseMap ?? null, graphAnalysis, supplyByOsid, ethnicMap);
 }
 

@@ -634,10 +634,20 @@ export const warPhases: NamedPhase[] = [
             const od = getOperationalData(context);
             const reverseMap = od?.opData?.operationalToCanonical ?? null;
             const osidEdges = od?.edges ?? undefined;
+            // Load ethnic composition data for corps-level targeting intelligence
+            let corpsEthnicMap;
+            if (od?.opData?.operationalToCanonical) {
+                try {
+                    const ethnicityData = await loadSettlementEthnicityData();
+                    corpsEthnicMap = computeOsidEthnicComposition(od.opData.operationalToCanonical, ethnicityData);
+                } catch {
+                    // Non-fatal: ethnic intelligence is a bonus, not a requirement
+                }
+            }
             const corpsReport: CorpsAiReportEntry[] = [];
             for (const faction of factions) {
                 const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid);
+                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap);
                 corpsReport.push(...extractCorpsAiReport(context.state, faction as FactionId));
             }
             if (corpsReport.length > 0) {
