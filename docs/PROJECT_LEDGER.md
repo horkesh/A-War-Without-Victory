@@ -7,6 +7,14 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] Audit Remediation Complete — Full 5-Phase Report + outcomeRank Unification
+
+Full implementation report created: `docs/40_reports/implemented/20260308_AUDIT_REMEDIATION_FULL_5_PHASES.md`. Covers all 5 phases (determinism, frozen front cascade, supply/morale, code health, terminology+splitting+simplify). Propagated to: context.md, REPO_MAP (bot AI module map), CONSOLIDATED_IMPLEMENTED, README.md, CALIBRATION_MASTER, PROJECT_LEDGER_KNOWLEDGE.
+
+**Simplify fix (Phase 5C)**: Unified 3 inline `outcomeRank` dicts (5-scale) to imported `OUTCOME_RANK` constant (6-scale). Fixed scale mismatch: `Math.min(5,...)` → `Math.min(6,...)`, supply isolation threshold `< 3` → `< 4`. Files: `bot_brigade_targeting.ts`, `bot_brigade_ai_osid.ts`, `bot_corps_directives.ts`.
+
+**Verification**: tsc clean, 389/389 vitest passing.
+
 ## [2026-03-08] Phase I/II Terminology Sweep + Mega-File Splitting — Phase 5 of Audit Remediation
 
 **Phase I/II sweep**: 400 references across 154 files. Comments/docstrings: "Phase I"→"Peace phase", "Phase II"→"War phase". Internal variable renames: `phaseIiSupplyPressure`→`warPhaseSupplyPressure`, `phaseIiExhaustion`→`warPhaseExhaustion`. Preserved ~50 serialized values, exported function names, import paths, runtime discriminators.

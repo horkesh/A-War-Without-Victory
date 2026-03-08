@@ -1,4 +1,8 @@
-# Audit Remediation — Phases 1-4
+# Audit Remediation — Phases 1-4 (Superseded)
+
+> **Note:** This report covers Phases 1-4 only. For the complete 5-phase report including terminology sweep, mega-file splitting, and simplify pass, see [20260308_AUDIT_REMEDIATION_FULL_5_PHASES.md](20260308_AUDIT_REMEDIATION_FULL_5_PHASES.md).
+
+---
 
 **Date:** 2026-03-08
 **Run IDs:** n414 (Phase 2), n415 (Phase 3)
