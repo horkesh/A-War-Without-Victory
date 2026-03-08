@@ -11907,3 +11907,28 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
   - `docs/40_reports/WARROOM_MASTER.md`
   - `docs/40_reports/GUI_MASTER.md`
 - No code or canon files changed
+
+---
+
+## [2026-03-08] Distinction Potential: OOB decoration overhaul + army HQ seeding
+
+### What changed
+- Stripped `historical_decorations` and `honor` fields from all 46 decorated brigades in `oob_brigades.json` — these were war-earned titles pre-awarded at April 1992 start
+- Added `distinction_potential: 'tier_1'|'tier_2'|'tier_3'` to each stripped brigade — threshold modifier for decoration earning
+- Added `initial_officer_quality` seeds to distinguished brigades (ARBiH Slavna=0.10, Viteška=0.15; RS tier_1=0.60, tier_2=0.62; RS 65th keeps 0.85; HRHB Guards no seed — mid-war spawns)
+- Added `initial_officer_quality`/`initial_cohesion`/`initial_morale` to 3 army HQs in `oob_corps.json`
+- Engine: `decoration_evaluator.ts` `getDistinctionMult()` reduces tier_1 threshold 30%, tier_2/3 threshold 35%
+- Schema: `distinction_potential` field added to FormationState
+- Loader: `OobBrigade` + `OobCorps` interfaces extended; spawn paths apply new fields
+
+### Why
+Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts as rabble). Units with `distinction_potential` have the character to earn glory but must fight for it. Army HQs needed to reflect historical general staff competence differences (VRS professional, ARBiH barely organized).
+
+### Verification
+- `npx tsc --noEmit` clean
+- `npm run test:vitest` — 378 passed, 37 suites
+
+### Canon propagation
+- Systems Manual §7.5: implementation-note on OOB seeding and `distinction_potential` in FormationState
+- CONSOLIDATED_IMPLEMENTED: entry added
+- Full report: `docs/40_reports/implemented/20260308_DISTINCTION_POTENTIAL_OOB_DECORATION_OVERHAUL.md`

@@ -96,6 +96,14 @@
 10. **[2026-02-25] sidToMun map preservation**
     Do instead: Preserve `canonicalSidToMun` in scenario_runner.ts. Corruption prevented ALL 217 mandatory brigades from spawning.
 
+## Officer Architecture
+1. **[2026-03-08] Named officers = corps and above only; brigades use abstracted officer_quality**
+   Do instead: Named officers (`officer_system.ts`) command corps and operations. Brigades have `officer_quality` [0,1] field → `getBrigadeOfficerMod()` in `combat_math.ts`. Army HQs feed into army_commander modifier for VRS general_offensive ops. Never suggest named officer assignment for brigades.
+2. **[2026-03-08] distinction_potential replaces pre-awarded historical_decorations**
+   Do instead: Units that historically earned decorations start with `distinction_potential: 'tier_1'|'tier_2'|'tier_3'` + modest officer_quality seed. `decoration_evaluator.ts` reduces earning thresholds by 30–35%. Decorations are EARNED during the run, not given at war start. `historical_decorations` and `honor` fields stripped from OOB (46 brigades).
+3. **[2026-03-08] Army HQs seeded with initial_officer_quality + cohesion**
+   Do instead: `vrs_main_staff` oq=0.75 coh=72, `hvo_main_staff` oq=0.50 coh=65, `arbih_general_staff` oq=0.12 coh=38 morale=45. Fields flow via `OobCorps` → `oob_early_war_entry.ts` → FormationState. ARBiH General Staff available_from=24; VRS/HVO from turn 0/10.
+
 ## OOB & Brigade Systems
 1. **[2026-03-06] Personnel ceilings REMOVED; organic troop strength via pool system**
    Do instead: No hardcoded caps. Personnel emerges from pool demographics, mobilization scales (`ongoing_mobilization.ts`: RBiH=0.10, RS=0.12, HRHB=0.29), exhaustion (MILITARY_AGE_MALE_FRACTION=0.28 denominator, threshold 0.25 half-rate, cap 0.50), and FACTION_POOL_SCALE (RBiH=0.25, RS=0.25, HRHB=1.05). RS JNA bonus=10k. n345 result: RBiH=119.2k (target 120k), RS=103.3k (target 102.6k), HRHB=43.4k (target 41.5k). Note: HRHB scale reduced from 1.60→1.05 after cold-front fix eliminated phantom attrition; RBiH raised from 0.18→0.25 to compensate cascade (healthier HRHB → changed territorial dynamics → less RBiH mobilization).
@@ -155,8 +163,10 @@
    Do instead: Keep these panels on the same App-owned rail semantics via `panelRail.ts`. Do not let `SelectionPanel` drift back to its own far-right overlay rules.
 4. **[2026-03-07] Detail panels drill right; App owns precedence**
    Do instead: Keep map detail flow on a right-side panel rail: overview -> primary detail -> secondary detail sliding further right. Preserve parent context, animate horizontal drill-downs, and let `App.tsx` mount panels from one deterministic selector instead of per-component hide/show guesses.
-5. **[2026-03-07] Warroom art and hotspots: one scene plate, physical anchors**
-   Do instead: For warroom image generation, create a single full-scene background per faction with stable camera/layout and outline hotspots afterward. Keep only flag, calendar, and ticker separate at runtime; do not rely on detachable room props. Route interactions from physical anchor ids like `command_briefing_folio` and `desk_radio`, not arbitrary legacy action names.
+5. **[2026-03-08] Warroom init races: bind Electron bridge before long async loads**
+   Do instead: In `src/ui/warroom/warroom.ts`, assign `window.awwv` / `this.desktopBridge` before asset or map-loading awaits. UI buttons are wired early, so bridge-dependent actions like `startNewCampaign()` must have the preload bridge available immediately, not after later async init work.
+6. **[2026-03-08] Warroom region loading: missing shared file must not abort init**
+   Do instead: Treat region JSON loading as optional during startup. If `hq_clickable_regions.json` is intentionally removed in favor of `hq_<faction>_clickable_regions.json`, try multiple candidates and continue booting even if the shared file is absent.
 6. **[2026-03-08] Warroom image target: archival photograph, not AI concept art**
    Do instead: In warroom prompt packs, make documentary / archival photo realism the top invariant. Say "real photographed room, not AI art, not concept art, not 3D render" explicitly. Keep visible year out of baked art; only the runtime calendar shows the year. Re-measure overlay quads per approved room image.
 6. **[2026-03-06] Tactical fog contract is `fogOfWar`, not raw sector intel**
